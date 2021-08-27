@@ -2,15 +2,14 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>cdb27acc-a0b6-4f14-8a10-c77f6b1d9520</ProjectGuid>
+    <ProjectGuid>4963623d-8a4c-49b5-a402-4d2727a6df95</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>MetaAutoML_Controller.py</StartupFile>
-    <SearchPath>
-    </SearchPath>
+    <StartupFile>Controller.py</StartupFile>
+    <SearchPath>managers\structureddata;managers;sessions;interfaces</SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
-    <Name>MetaAutoML-Controller</Name>
-    <RootNamespace>MetaAutoML-Controller</RootNamespace>
+    <Name>Controller</Name>
+    <RootNamespace>Controller</RootNamespace>
     <InterpreterId>MSBuild|env|$(MSBuildProjectFullPath)</InterpreterId>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
@@ -22,12 +21,30 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="MetaAutoML_Controller.py" />
-    <Compile Include="Rpc\gen-py\automl\constants.py" />
-    <Compile Include="Rpc\gen-py\automl\HelloWorldService.py" />
-    <Compile Include="Rpc\gen-py\automl\ttypes.py" />
-    <Compile Include="Rpc\gen-py\automl\__init__.py" />
-    <Compile Include="Rpc\gen-py\__init__.py" />
+    <Compile Include="Adapter_pb2.py" />
+    <Compile Include="Adapter_pb2_grpc.py" />
+    <Compile Include="Controller.py" />
+    <Compile Include="interfaces\IAutoMLManager.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="managers\ControllerManager.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Controller_pb2.py" />
+    <Compile Include="Controller_pb2_grpc.py" />
+    <Compile Include="managers\CsvManager.py" />
+    <Compile Include="managers\structureddata\AutoKerasManager.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="managers\structureddata\MljarManager.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="managers\structureddata\StructuredDataManager.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="sessions\AutoMLSession.py">
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Interpreter Include="env\">
@@ -41,18 +58,18 @@
     </Interpreter>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="requirements.txt" />
-    <Content Include="Rpc\gen-py\automl\HelloWorldService-remote" />
-    <Content Include="Rpc\GenerateThrift.cmd">
-      <SubType>Code</SubType>
-    </Content>
-    <Content Include="Rpc\MetaAutoML.thrift" />
-    <Content Include="Rpc\thrift.exe" />
+    <Folder Include="datasets\" />
+    <Folder Include="certificate\" />
+    <Folder Include="managers\" />
+    <Folder Include="managers\structureddata\" />
+    <Folder Include="interfaces\" />
+    <Folder Include="sessions\" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Rpc\" />
-    <Folder Include="Rpc\gen-py\" />
-    <Folder Include="Rpc\gen-py\automl\" />
+    <Content Include="certificate\server.crt" />
+    <Content Include="certificate\server.key" />
+    <Content Include="Dockerfile" />
+    <Content Include="requirements.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in
