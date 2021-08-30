@@ -1,0 +1,50 @@
+{
+    "mode": "Explain",
+    "ml_task": "binary_classification",
+    "results_path": "AutoML_2",
+    "total_time_limit": 100,
+    "model_time_limit": null,
+    "algorithms": [
+        "Baseline",
+        "Linear",
+        "Decision Tree",
+        "Random Forest",
+        "Xgboost",
+        "Neural Network"
+    ],
+    "train_ensemble": true,
+    "stack_models": false,
+    "eval_metric": "logloss",
+    "validation_strategy": {
+        "validation_type": "split",
+        "train_ratio": 0.75,
+        "shuffle": true,
+        "stratify": true,
+        "X_path": "AutoML_2\\X.data",
+        "y_path": "AutoML_2\\y.data",
+        "results_path": "AutoML_2"
+    },
+    "verbose": 1,
+    "explain_level": 2,
+    "golden_features": false,
+    "features_selection": false,
+    "start_random_models": 1,
+    "hill_climbing_steps": 0,
+    "top_models_to_improve": 0,
+    "boost_on_errors": false,
+    "kmeans_features": false,
+    "mix_encoding": false,
+    "max_single_prediction_time": null,
+    "n_jobs": -1,
+    "random_state": 1234,
+    "saved": [
+        "1_Baseline",
+        "2_DecisionTree",
+        "Ensemble"
+    ],
+    "fit_level": "finished",
+    "best_model": "2_DecisionTree",
+    "load_on_predict": [
+        "2_DecisionTree"
+    ]
+}

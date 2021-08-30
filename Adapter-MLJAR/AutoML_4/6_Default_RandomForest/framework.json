@@ -1,0 +1,355 @@
+{
+    "uid": "5ae54cf6-228b-47e9-bd25-8ede6cf009fb",
+    "name": "6_Default_RandomForest",
+    "preprocessing": [
+        {
+            "remove_columns": [
+                "Z_P_FAMILIE_NEU",
+                "CH000694",
+                "Z_P_ANZ_STROMKR",
+                "Z_P_USA",
+                "Z_P_ELEKTRISCHE_SPANNUNG_DC",
+                "Z_P_LEISTUNGSREDUZIERER",
+                "Z_P_BEMESSUNGSSPANNUNG",
+                "Z_P_BEMESSUNGSFREQUENZ",
+                "Z_P_LEISTUNGSR_PROZENT",
+                "Z_P_ALZ_SCHALTER"
+            ],
+            "missing_values": [
+                {
+                    "fill_method": "na_fill_median",
+                    "fill_params": {
+                        "Z_P_FUNKTION": "07",
+                        "Z_P_LEDSYSTEM_1": 1.0,
+                        "Z_P_LEDSYSTEM_2": "YY",
+                        "Z_P_LEDSYSTEM_3": "YY",
+                        "Z_P_LMS": "YY",
+                        "Z_P_SCHUTZKLASSE": 1.0
+                    },
+                    "datetime_columns": []
+                }
+            ],
+            "categorical": [
+                {
+                    "convert_method": "categorical_to_int",
+                    "convert_params": {
+                        "Bezeichnung": {
+                            "Creavo D LW19-03 30-830 ET 01": 0,
+                            "Creavo D LW19-03 42-830 ET 01": 1,
+                            "Creavo D LW19-03 42-840 ETDD X3 01": 2,
+                            "Creavo D2-L LW19-03 30-830 ET 01": 3,
+                            "Creavo D2-L LW19-03 42-830 ET 01": 4,
+                            "Creavo D2-L LW19-03 42-840 ETDD 01": 5,
+                            "Creavo D3-L LW19-03 53-840 ETDD X3 01": 6,
+                            "Creavo D3-L LW19-03 53-840 ETDD X7 01": 7,
+                            "Creavo D4 LW19-03 50-840 ET 01": 8,
+                            "Creavo D4 LW19-03 50-840 ETDD X3 01": 9,
+                            "Creavo D5 LW19-03 62-840 ETDD X3 01": 10,
+                            "Creavo D5 LW19-03 78-840 ET 01": 11,
+                            "Creavo H2-L LW16-03 71-840 ET 01": 12,
+                            "Creavo H2-L LW19-03 46-830 ET 01": 13,
+                            "Creavo H2-L LW19-03 46-840 ET 01": 14,
+                            "Creavo H2-L LW19-03 46-840 ETDD X3 01": 15,
+                            "Creavo H2-L LW19-03 71-840 ETDD X3 01": 16,
+                            "Creavo H3-L LW19-03 58-830 ET 01": 17,
+                            "Creavo H3-L LW19-03 58-840 ETDD X3 01": 18,
+                            "Creavo H3-L LW19-03 89-830 ET 01": 19,
+                            "Creavo H3-L LW19-03 89-840 ETDD 01": 20,
+                            "Creavo H3-L LW19-03 89-840 ETDD X3 01": 21,
+                            "Creavo M37 LW16-03 30-840 ET 01": 22,
+                            "Creavo M37 LW19-03 42-830 ET 01": 23,
+                            "Creavo M37 LW19-03 42-840 ET 01": 24,
+                            "Creavo M37 LW19-03 42-840 ETDD X3 01": 25,
+                            "Creavo M37 LW19-03 50-840 ETDD 01": 26,
+                            "Creavo M39 LW16-03 38-840 ET 01": 27,
+                            "Creavo M39 LW19-03 53-840 ETDD X3 01": 28,
+                            "Creavo M39 LW19-03 53-840 ETDD X7 01": 29,
+                            "Creavo M39 LW19-03 62-840 ETDD 01": 30,
+                            "Creavo M46-TS LW19-03 42-840 ETDD X3 01": 31,
+                            "Creavo M46-TS LW19-03 50-830 ETDD 01": 32,
+                            "Creavo M46-TS LWW-03 42-840 ETDD 01": 33,
+                            "Creavo M48-TS LW19-03 53-840 ETDD X3 01": 34,
+                            "Creavo M57 LW16-03 42-840 ET 01": 35,
+                            "Creavo M57 LW19-03 42-830 ET 01": 36,
+                            "Creavo M57-TS LW19-03 42-840 ETDD X3 01": 37,
+                            "Creavo M57-TS LW19-03 42-930 ETDD 01": 38,
+                            "Creavo M59 LW16-03 53-840 ET 01": 39,
+                            "Creavo M59 LW19-03 53-840 ETDD X3 01": 40,
+                            "Creavo M59 LW19-03 53-840 ETDD X7 01": 41,
+                            "Creavo M59 LW19-03 62-830 ET 01": 42,
+                            "Creavo M59-TS LW19-03 53-840 ETDD EB3 01": 43,
+                            "Creavo M59-TS LW19-03 53-840 ETDD X3 01": 44,
+                            "Creavo M73-TS LW19-03 30-830 ETDD 01": 45,
+                            "Creavo M73-TS LW19-03 42-840 ETDD X3 01": 46,
+                            "Creavo M84 LW16-03 42-840 ET 01": 47,
+                            "Creavo M84 LW19-03 30-840 ET 01": 48,
+                            "Creavo M84 LW19-03 42-830 ET 01": 49,
+                            "Creavo M84 LW19-03 42-840 ET 01": 50,
+                            "Creavo M84 LW19-03 42-840 ETDD EB3 01": 51,
+                            "Creavo M84 LW19-03 42-840 ETDD X3 01": 52,
+                            "Creavo M84 LW19-03 42-840 ETDD X7 01": 53,
+                            "Creavo M84 LW19-03 50-840 ETDD 01": 54,
+                            "Creavo M84-TS LW19-03 42-840 ETDD 01": 55,
+                            "Creavo M84-TS LW19-03 42-840 ETDD X3 01": 56,
+                            "CreavoAct D LW19-03 42-8 ETDD8 01": 57,
+                            "CreavoAct D2-L LW19-03 42-8 ETDD8 01": 58,
+                            "CreavoAct D4 LW19-03 50-8 ETDD8 01": 59,
+                            "CreavoAct D5 LW19-03 62-8 ETDD8 01": 60,
+                            "CreavoAct H2-L LW19-03 46-8 ETDD8 01": 61,
+                            "CreavoAct H3-L LW19-03 58-8 ETDD8 01": 62,
+                            "CreavoAct H3-L LW19-03 83-8 ETDD8 01": 63,
+                            "CreavoAct M17 LW19-03 38-8 ETDD8 01": 64,
+                            "CreavoAct M19 LW19-03 48-8 ETDD8 01": 65,
+                            "CreavoAct M37 LW19-03 42-8 ETDD8 01": 66,
+                            "CreavoAct M39 LW19-03 53-8 ETDD8 01": 67,
+                            "CreavoAct M46-TS LW19-03 42-8 ETDD8 01": 68,
+                            "CreavoAct M46-TS LWW-03 42-8 ETDD8 01": 69,
+                            "CreavoAct M48-TS LW19-03 53-8 ETDD8 01": 70,
+                            "CreavoAct M48-TS LWW-03 53-8 ETDD8 01": 71,
+                            "CreavoAct M57 LW19-03 42-8 ETDD8 01": 72,
+                            "CreavoAct M57-TS LW19-03 42-8 ETDD8 01": 73,
+                            "CreavoAct M59-TS LW19-03 53-8 ETDD8 01": 74,
+                            "CreavoAct M59-TS LWW-03 53-8 ETDD8 01": 75,
+                            "CreavoAct M73-TS LW19-03 42-8 ETDD8 01": 76,
+                            "CreavoAct M84 LW19-03 42-8 ETDD8 01": 77,
+                            "CreavoAct M84 LW19-05 42-8 ETDD8 01": 78,
+                            "CreavoAct M84-TS LW19-03 42-8 ETDD8 01": 79
+                        },
+                        "Z_P_FUNKTION": {
+                            "07": 0,
+                            "YY": 1
+                        },
+                        "Z_P_LEDSYSTEM_2": {
+                            "03": 0,
+                            "YY": 1
+                        },
+                        "Z_P_LEDSYSTEM_3": {
+                            "04": 0,
+                            "YY": 1
+                        },
+                        "Z_P_LMS": {
+                            "31": 0,
+                            "YY": 1
+                        }
+                    },
+                    "columns": [
+                        "Bezeichnung",
+                        "Z_P_FUNKTION",
+                        "Z_P_LEDSYSTEM_2",
+                        "Z_P_LEDSYSTEM_3",
+                        "Z_P_LMS"
+                    ]
+                }
+            ],
+            "categorical_y": {
+                "60000002-01 XPE 1ET": 0,
+                "60000027-01 XPE 1ETDD": 1,
+                "60000031-01 XPE 1ETDD-DT8": 2,
+                "60000032-01 XPE 1ETDD-DT8 XPE": 3,
+                "60000035-01 XPE 1ETDD-LiveLink": 4,
+                "60000289-01 XPE 1ETDD-LiLi XPE": 5
+            },
+            "ml_task": "multiclass_classification",
+            "params": {
+                "columns_preprocessing": {
+                    "Bezeichnung": [
+                        "categorical_to_int"
+                    ],
+                    "Z_P_FAMILIE_NEU": [
+                        "remove_column"
+                    ],
+                    "Z_P_FUNKTION": [
+                        "na_fill_median",
+                        "categorical_to_int"
+                    ],
+                    "CH000694": [
+                        "remove_column"
+                    ],
+                    "Z_P_LEDSYSTEM_1": [
+                        "na_fill_median"
+                    ],
+                    "Z_P_LEDSYSTEM_2": [
+                        "na_fill_median",
+                        "categorical_to_int"
+                    ],
+                    "Z_P_LEDSYSTEM_3": [
+                        "na_fill_median",
+                        "categorical_to_int"
+                    ],
+                    "Z_P_ANZ_STROMKR": [
+                        "remove_column"
+                    ],
+                    "Z_P_LMS": [
+                        "na_fill_median",
+                        "categorical_to_int"
+                    ],
+                    "Z_P_USA": [
+                        "remove_column"
+                    ],
+                    "Z_P_SCHUTZKLASSE": [
+                        "na_fill_median"
+                    ],
+                    "Z_P_ELEKTRISCHE_SPANNUNG_DC": [
+                        "remove_column"
+                    ],
+                    "Z_P_LEISTUNGSREDUZIERER": [
+                        "remove_column"
+                    ],
+                    "Z_P_BEMESSUNGSSPANNUNG": [
+                        "remove_column"
+                    ],
+                    "Z_P_BEMESSUNGSFREQUENZ": [
+                        "remove_column"
+                    ],
+                    "Z_P_LEISTUNGSR_PROZENT": [
+                        "remove_column"
+                    ],
+                    "Z_P_ALZ_SCHALTER": [
+                        "remove_column"
+                    ]
+                },
+                "target_preprocessing": [
+                    "na_exclude",
+                    "categorical_to_int"
+                ],
+                "ml_task": "multiclass_classification"
+            }
+        }
+    ],
+    "learners": [
+        {
+            "library_version": "0.24.2",
+            "algorithm_name": "Random Forest",
+            "algorithm_short_name": "Random Forest",
+            "uid": "d93f82f9-b4e6-4449-88ec-287adb4886ef",
+            "params": {
+                "model_type": "Random Forest",
+                "ml_task": "multiclass_classification",
+                "n_jobs": -1,
+                "criterion": "gini",
+                "max_features": 0.9,
+                "min_samples_split": 30,
+                "max_depth": 4,
+                "seed": 6,
+                "eval_metric_name": "logloss",
+                "num_class": 6,
+                "explain_level": 2
+            },
+            "name": "learner_fold_0"
+        }
+    ],
+    "params": {
+        "additional": {
+            "trees_in_step": 100,
+            "train_cant_improve_limit": 1,
+            "min_steps": 1,
+            "max_steps": 50,
+            "early_stopping_rounds": 50,
+            "max_rows_limit": null,
+            "max_cols_limit": null
+        },
+        "preprocessing": {
+            "columns_preprocessing": {
+                "Bezeichnung": [
+                    "categorical_to_int"
+                ],
+                "Z_P_FAMILIE_NEU": [
+                    "remove_column"
+                ],
+                "Z_P_FUNKTION": [
+                    "na_fill_median",
+                    "categorical_to_int"
+                ],
+                "CH000694": [
+                    "remove_column"
+                ],
+                "Z_P_LEDSYSTEM_1": [
+                    "na_fill_median"
+                ],
+                "Z_P_LEDSYSTEM_2": [
+                    "na_fill_median",
+                    "categorical_to_int"
+                ],
+                "Z_P_LEDSYSTEM_3": [
+                    "na_fill_median",
+                    "categorical_to_int"
+                ],
+                "Z_P_ANZ_STROMKR": [
+                    "remove_column"
+                ],
+                "Z_P_LMS": [
+                    "na_fill_median",
+                    "categorical_to_int"
+                ],
+                "Z_P_USA": [
+                    "remove_column"
+                ],
+                "Z_P_SCHUTZKLASSE": [
+                    "na_fill_median"
+                ],
+                "Z_P_ELEKTRISCHE_SPANNUNG_DC": [
+                    "remove_column"
+                ],
+                "Z_P_LEISTUNGSREDUZIERER": [
+                    "remove_column"
+                ],
+                "Z_P_BEMESSUNGSSPANNUNG": [
+                    "remove_column"
+                ],
+                "Z_P_BEMESSUNGSFREQUENZ": [
+                    "remove_column"
+                ],
+                "Z_P_LEISTUNGSR_PROZENT": [
+                    "remove_column"
+                ],
+                "Z_P_ALZ_SCHALTER": [
+                    "remove_column"
+                ]
+            },
+            "target_preprocessing": [
+                "na_exclude",
+                "categorical_to_int"
+            ],
+            "ml_task": "multiclass_classification"
+        },
+        "validation_strategy": {
+            "validation_type": "split",
+            "train_ratio": 0.75,
+            "shuffle": true,
+            "stratify": true,
+            "X_path": "AutoML_4\\X.data",
+            "y_path": "AutoML_4\\y.data",
+            "results_path": "AutoML_4"
+        },
+        "learner": {
+            "model_type": "Random Forest",
+            "ml_task": "multiclass_classification",
+            "n_jobs": -1,
+            "criterion": "gini",
+            "max_features": 0.9,
+            "min_samples_split": 30,
+            "max_depth": 4,
+            "seed": 6,
+            "eval_metric_name": "logloss",
+            "num_class": 6,
+            "explain_level": 2
+        },
+        "automl_random_state": 1234,
+        "ml_task": "multiclass_classification",
+        "explain_level": 2,
+        "name": "6_Default_RandomForest",
+        "status": "initialized",
+        "final_loss": null,
+        "train_time": null,
+        "data_type": "original",
+        "max_time_for_learner": 60
+    },
+    "saved": [
+        "6_Default_RandomForest\\learner_fold_0.random_forest"
+    ],
+    "predictions_fname": "6_Default_RandomForest\\predictions_validation.csv",
+    "metric_name": "logloss",
+    "final_loss": 0.8850398836363732,
+    "train_time": 14.393654108047485,
+    "is_stacked": false
+}

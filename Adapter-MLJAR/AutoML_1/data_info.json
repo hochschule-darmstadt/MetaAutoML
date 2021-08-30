@@ -1,0 +1,77 @@
+{
+    "columns": [
+        "passenger_id",
+        "pclass",
+        "name",
+        "sex",
+        "age",
+        "sibsp",
+        "parch",
+        "ticket",
+        "fare",
+        "cabin",
+        "embarked",
+        "boat",
+        "body",
+        "home.dest"
+    ],
+    "rows": 850,
+    "cols": 14,
+    "target_is_numeric": true,
+    "columns_info": {
+        "passenger_id": [
+            "scale"
+        ],
+        "pclass": [
+            "scale"
+        ],
+        "name": [
+            "text_transform"
+        ],
+        "sex": [
+            "categorical",
+            "few_categories"
+        ],
+        "age": [
+            "missing_values",
+            "scale"
+        ],
+        "sibsp": [
+            "scale"
+        ],
+        "parch": [],
+        "ticket": [
+            "text_transform"
+        ],
+        "fare": [
+            "missing_values",
+            "scale"
+        ],
+        "cabin": [
+            "missing_values",
+            "categorical",
+            "many_categories"
+        ],
+        "embarked": [
+            "missing_values",
+            "categorical",
+            "few_categories"
+        ],
+        "boat": [
+            "missing_values",
+            "categorical",
+            "many_categories"
+        ],
+        "body": [
+            "missing_values",
+            "scale"
+        ],
+        "home.dest": [
+            "text_transform"
+        ]
+    },
+    "target_info": [],
+    "n_features": 14,
+    "is_sample_weighted": false,
+    "n_classes": 2
+}

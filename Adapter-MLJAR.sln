@@ -1,0 +1,23 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31515.178
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "Adapter-MLJAR", "Adapter-MLJAR\Adapter-MLJAR.pyproj", "{F31305B2-FBFF-4A5A-A3E3-364126551233}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F31305B2-FBFF-4A5A-A3E3-364126551233}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F31305B2-FBFF-4A5A-A3E3-364126551233}.Release|Any CPU.ActiveCfg = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {60C3BC4C-CBBD-4AC2-8E97-6580B0D27ABF}
+	EndGlobalSection
+EndGlobal

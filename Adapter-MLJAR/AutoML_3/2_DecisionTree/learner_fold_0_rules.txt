@@ -1,0 +1,14 @@
+if (boat > 11.5) and (boat <= 12.5) and (name_mr > 0.077) then class: 0 (proba: 99.36%) | based on 311 samples
+
+if (boat <= 11.5) and (name_peter <= 0.39) and (name_william <= 0.866) then class: 1 (proba: 100.0%) | based on 115 samples
+
+if (boat > 11.5) and (boat <= 12.5) and (name_mr <= 0.077) then class: 0 (proba: 76.32%) | based on 114 samples
+
+if (boat > 11.5) and (boat > 12.5) and (home.dest_ruotsinphytaa <= 0.319) then class: 1 (proba: 96.77%) | based on 93 samples
+
+if (boat <= 11.5) and (name_peter <= 0.39) and (name_william > 0.866) then class: 0 (proba: 50.0%) | based on 2 samples
+
+if (boat > 11.5) and (boat > 12.5) and (home.dest_ruotsinphytaa > 0.319) then class: 0 (proba: 100.0%) | based on 1 samples
+
+if (boat <= 11.5) and (name_peter > 0.39) then class: 0 (proba: 100.0%) | based on 1 samples
+

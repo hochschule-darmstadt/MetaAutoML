@@ -1,0 +1,701 @@
+{
+    "fit_level": "finished",
+    "time_controller": {
+        "total_time_limit": 200,
+        "model_time_limit": null,
+        "steps": [
+            "simple_algorithms",
+            "default_algorithms",
+            "ensemble"
+        ],
+        "algorithms": [
+            "Baseline",
+            "Linear",
+            "Decision Tree",
+            "Random Forest",
+            "Xgboost",
+            "Neural Network"
+        ],
+        "spend": [
+            {
+                "model_name": "prepare_data",
+                "model_type": "prepare_data",
+                "fit_level": "prepare_data",
+                "train_time": 20.933461666107178
+            },
+            {
+                "model_name": "1_Baseline",
+                "model_type": "Baseline",
+                "fit_level": "simple_algorithms",
+                "train_time": 1.0963315963745117
+            },
+            {
+                "model_name": "2_DecisionTree",
+                "model_type": "Decision Tree",
+                "fit_level": "simple_algorithms",
+                "train_time": 27.045891761779785
+            },
+            {
+                "model_name": "3_Linear",
+                "model_type": "Linear",
+                "fit_level": "simple_algorithms",
+                "train_time": 12.504335403442383
+            },
+            {
+                "model_name": "4_Default_Xgboost",
+                "model_type": "Xgboost",
+                "fit_level": "default_algorithms",
+                "train_time": 13.69404149055481
+            },
+            {
+                "model_name": "5_Default_NeuralNetwork",
+                "model_type": "Neural Network",
+                "fit_level": "default_algorithms",
+                "train_time": 1.7972877025604248
+            },
+            {
+                "model_name": "6_Default_RandomForest",
+                "model_type": "Random Forest",
+                "fit_level": "default_algorithms",
+                "train_time": 14.393654108047485
+            },
+            {
+                "model_name": "Ensemble",
+                "model_type": "Ensemble",
+                "fit_level": "ensemble",
+                "train_time": 1.529723882675171
+            }
+        ],
+        "is_hill_climbing": false,
+        "is_stacking": false
+    },
+    "all_params": {
+        "simple_algorithms": [
+            {
+                "additional": {
+                    "max_steps": 1,
+                    "max_rows_limit": null,
+                    "max_cols_limit": null
+                },
+                "preprocessing": {
+                    "columns_preprocessing": {
+                        "Z_P_FAMILIE_NEU": [
+                            "remove_column"
+                        ],
+                        "CH000694": [
+                            "remove_column"
+                        ],
+                        "Z_P_ANZ_STROMKR": [
+                            "remove_column"
+                        ],
+                        "Z_P_USA": [
+                            "remove_column"
+                        ],
+                        "Z_P_ELEKTRISCHE_SPANNUNG_DC": [
+                            "remove_column"
+                        ],
+                        "Z_P_LEISTUNGSREDUZIERER": [
+                            "remove_column"
+                        ],
+                        "Z_P_BEMESSUNGSSPANNUNG": [
+                            "remove_column"
+                        ],
+                        "Z_P_BEMESSUNGSFREQUENZ": [
+                            "remove_column"
+                        ],
+                        "Z_P_LEISTUNGSR_PROZENT": [
+                            "remove_column"
+                        ],
+                        "Z_P_ALZ_SCHALTER": [
+                            "remove_column"
+                        ]
+                    },
+                    "target_preprocessing": [
+                        "na_exclude",
+                        "categorical_to_int"
+                    ],
+                    "ml_task": "multiclass_classification"
+                },
+                "validation_strategy": {
+                    "validation_type": "split",
+                    "train_ratio": 0.75,
+                    "shuffle": true,
+                    "stratify": true,
+                    "X_path": "AutoML_4\\X.data",
+                    "y_path": "AutoML_4\\y.data",
+                    "results_path": "AutoML_4"
+                },
+                "learner": {
+                    "model_type": "Baseline",
+                    "ml_task": "multiclass_classification",
+                    "n_jobs": -1,
+                    "seed": 1235,
+                    "num_class": 6,
+                    "explain_level": 2
+                },
+                "automl_random_state": 1234,
+                "ml_task": "multiclass_classification",
+                "explain_level": 2,
+                "name": "1_Baseline",
+                "status": "trained",
+                "final_loss": 1.7846654299228644,
+                "train_time": 2.0704474449157715,
+                "data_type": "original",
+                "max_time_for_learner": 60
+            },
+            {
+                "additional": {
+                    "trees_in_step": 1,
+                    "train_cant_improve_limit": 0,
+                    "max_steps": 1,
+                    "max_rows_limit": null,
+                    "max_cols_limit": null
+                },
+                "preprocessing": {
+                    "columns_preprocessing": {
+                        "Bezeichnung": [
+                            "categorical_to_int"
+                        ],
+                        "Z_P_FAMILIE_NEU": [
+                            "remove_column"
+                        ],
+                        "Z_P_FUNKTION": [
+                            "na_fill_median",
+                            "categorical_to_int"
+                        ],
+                        "CH000694": [
+                            "remove_column"
+                        ],
+                        "Z_P_LEDSYSTEM_1": [
+                            "na_fill_median"
+                        ],
+                        "Z_P_LEDSYSTEM_2": [
+                            "na_fill_median",
+                            "categorical_to_int"
+                        ],
+                        "Z_P_LEDSYSTEM_3": [
+                            "na_fill_median",
+                            "categorical_to_int"
+                        ],
+                        "Z_P_ANZ_STROMKR": [
+                            "remove_column"
+                        ],
+                        "Z_P_LMS": [
+                            "na_fill_median",
+                            "categorical_to_int"
+                        ],
+                        "Z_P_USA": [
+                            "remove_column"
+                        ],
+                        "Z_P_SCHUTZKLASSE": [
+                            "na_fill_median"
+                        ],
+                        "Z_P_ELEKTRISCHE_SPANNUNG_DC": [
+                            "remove_column"
+                        ],
+                        "Z_P_LEISTUNGSREDUZIERER": [
+                            "remove_column"
+                        ],
+                        "Z_P_BEMESSUNGSSPANNUNG": [
+                            "remove_column"
+                        ],
+                        "Z_P_BEMESSUNGSFREQUENZ": [
+                            "remove_column"
+                        ],
+                        "Z_P_LEISTUNGSR_PROZENT": [
+                            "remove_column"
+                        ],
+                        "Z_P_ALZ_SCHALTER": [
+                            "remove_column"
+                        ]
+                    },
+                    "target_preprocessing": [
+                        "na_exclude",
+                        "categorical_to_int"
+                    ],
+                    "ml_task": "multiclass_classification"
+                },
+                "validation_strategy": {
+                    "validation_type": "split",
+                    "train_ratio": 0.75,
+                    "shuffle": true,
+                    "stratify": true,
+                    "X_path": "AutoML_4\\X.data",
+                    "y_path": "AutoML_4\\y.data",
+                    "results_path": "AutoML_4"
+                },
+                "learner": {
+                    "model_type": "Decision Tree",
+                    "ml_task": "multiclass_classification",
+                    "n_jobs": -1,
+                    "seed": 1235,
+                    "criterion": "gini",
+                    "max_depth": 3,
+                    "num_class": 6,
+                    "explain_level": 2
+                },
+                "automl_random_state": 1234,
+                "ml_task": "multiclass_classification",
+                "explain_level": 2,
+                "name": "2_DecisionTree",
+                "status": "trained",
+                "final_loss": 3.48244129155752,
+                "train_time": 28.534664154052734,
+                "data_type": "original",
+                "max_time_for_learner": 60
+            },
+            {
+                "additional": {
+                    "max_steps": 1,
+                    "max_rows_limit": null,
+                    "max_cols_limit": null
+                },
+                "preprocessing": {
+                    "columns_preprocessing": {
+                        "Objekt": [
+                            "scale_normal"
+                        ],
+                        "Bezeichnung": [
+                            "categorical_to_int",
+                            "scale_normal"
+                        ],
+                        "Z_P_FAMILIE_NEU": [
+                            "remove_column"
+                        ],
+                        "Z_P_BAUREIHE_NEU": [
+                            "scale_normal"
+                        ],
+                        "Z_P_FUNKTION": [
+                            "na_fill_median",
+                            "categorical_to_int",
+                            "scale_normal"
+                        ],
+                        "CH000694": [
+                            "remove_column"
+                        ],
+                        "Z_P_SCHALTUNG": [
+                            "scale_normal"
+                        ],
+                        "Z_P_LEDSYSTEM_1": [
+                            "na_fill_median",
+                            "scale_normal"
+                        ],
+                        "Z_P_LEDSYSTEM_2": [
+                            "na_fill_median",
+                            "categorical_to_int",
+                            "scale_normal"
+                        ],
+                        "Z_P_LEDSYSTEM_3": [
+                            "na_fill_median",
+                            "categorical_to_int",
+                            "scale_normal"
+                        ],
+                        "Z_P_ANZ_STROMKR": [
+                            "remove_column"
+                        ],
+                        "Z_P_LMS": [
+                            "na_fill_median",
+                            "categorical_to_int",
+                            "scale_normal"
+                        ],
+                        "Z_P_USA": [
+                            "remove_column"
+                        ],
+                        "Z_P_SCHUTZKLASSE": [
+                            "na_fill_median",
+                            "scale_normal"
+                        ],
+                        "Z_P_ELEKTRISCHE_SPANNUNG_DC": [
+                            "remove_column"
+                        ],
+                        "Z_P_LEISTUNGSREDUZIERER": [
+                            "remove_column"
+                        ],
+                        "Z_P_BEMESSUNGSSPANNUNG": [
+                            "remove_column"
+                        ],
+                        "Z_P_BEMESSUNGSFREQUENZ": [
+                            "remove_column"
+                        ],
+                        "Z_P_LEISTUNGSR_PROZENT": [
+                            "remove_column"
+                        ],
+                        "Z_P_ALZ_SCHALTER": [
+                            "remove_column"
+                        ]
+                    },
+                    "target_preprocessing": [
+                        "na_exclude",
+                        "categorical_to_int"
+                    ],
+                    "ml_task": "multiclass_classification"
+                },
+                "validation_strategy": {
+                    "validation_type": "split",
+                    "train_ratio": 0.75,
+                    "shuffle": true,
+                    "stratify": true,
+                    "X_path": "AutoML_4\\X.data",
+                    "y_path": "AutoML_4\\y.data",
+                    "results_path": "AutoML_4"
+                },
+                "learner": {
+                    "model_type": "Linear",
+                    "ml_task": "multiclass_classification",
+                    "n_jobs": -1,
+                    "seed": 1235,
+                    "num_class": 6,
+                    "explain_level": 2
+                },
+                "automl_random_state": 1234,
+                "ml_task": "multiclass_classification",
+                "explain_level": 2,
+                "name": "3_Linear",
+                "status": "trained",
+                "final_loss": 0.8135052083876896,
+                "train_time": 13.975281476974487,
+                "data_type": "original",
+                "max_time_for_learner": 60
+            }
+        ],
+        "default_algorithms": [
+            {
+                "additional": {
+                    "max_rounds": 10000,
+                    "early_stopping_rounds": 50,
+                    "max_rows_limit": null,
+                    "max_cols_limit": null
+                },
+                "preprocessing": {
+                    "columns_preprocessing": {
+                        "Bezeichnung": [
+                            "categorical_to_int"
+                        ],
+                        "Z_P_FAMILIE_NEU": [
+                            "remove_column"
+                        ],
+                        "Z_P_FUNKTION": [
+                            "na_fill_median",
+                            "categorical_to_int"
+                        ],
+                        "CH000694": [
+                            "remove_column"
+                        ],
+                        "Z_P_LEDSYSTEM_1": [
+                            "na_fill_median"
+                        ],
+                        "Z_P_LEDSYSTEM_2": [
+                            "na_fill_median",
+                            "categorical_to_int"
+                        ],
+                        "Z_P_LEDSYSTEM_3": [
+                            "na_fill_median",
+                            "categorical_to_int"
+                        ],
+                        "Z_P_ANZ_STROMKR": [
+                            "remove_column"
+                        ],
+                        "Z_P_LMS": [
+                            "na_fill_median",
+                            "categorical_to_int"
+                        ],
+                        "Z_P_USA": [
+                            "remove_column"
+                        ],
+                        "Z_P_SCHUTZKLASSE": [
+                            "na_fill_median"
+                        ],
+                        "Z_P_ELEKTRISCHE_SPANNUNG_DC": [
+                            "remove_column"
+                        ],
+                        "Z_P_LEISTUNGSREDUZIERER": [
+                            "remove_column"
+                        ],
+                        "Z_P_BEMESSUNGSSPANNUNG": [
+                            "remove_column"
+                        ],
+                        "Z_P_BEMESSUNGSFREQUENZ": [
+                            "remove_column"
+                        ],
+                        "Z_P_LEISTUNGSR_PROZENT": [
+                            "remove_column"
+                        ],
+                        "Z_P_ALZ_SCHALTER": [
+                            "remove_column"
+                        ]
+                    },
+                    "target_preprocessing": [
+                        "na_exclude",
+                        "categorical_to_int"
+                    ],
+                    "ml_task": "multiclass_classification"
+                },
+                "validation_strategy": {
+                    "validation_type": "split",
+                    "train_ratio": 0.75,
+                    "shuffle": true,
+                    "stratify": true,
+                    "X_path": "AutoML_4\\X.data",
+                    "y_path": "AutoML_4\\y.data",
+                    "results_path": "AutoML_4"
+                },
+                "learner": {
+                    "model_type": "Xgboost",
+                    "ml_task": "multiclass_classification",
+                    "n_jobs": -1,
+                    "objective": "multi:softprob",
+                    "eta": 0.075,
+                    "max_depth": 6,
+                    "min_child_weight": 1,
+                    "subsample": 1.0,
+                    "colsample_bytree": 1.0,
+                    "seed": 4,
+                    "eval_metric": "mlogloss",
+                    "num_class": 6,
+                    "explain_level": 2
+                },
+                "automl_random_state": 1234,
+                "ml_task": "multiclass_classification",
+                "explain_level": 2,
+                "name": "4_Default_Xgboost",
+                "status": "trained",
+                "final_loss": 1.1224331909959966,
+                "train_time": 14.93856954574585,
+                "data_type": "original",
+                "max_time_for_learner": 60
+            },
+            {
+                "additional": {
+                    "max_rows_limit": null,
+                    "max_cols_limit": null
+                },
+                "preprocessing": {
+                    "columns_preprocessing": {
+                        "Objekt": [
+                            "scale_normal"
+                        ],
+                        "Bezeichnung": [
+                            "categorical_to_int",
+                            "scale_normal"
+                        ],
+                        "Z_P_FAMILIE_NEU": [
+                            "remove_column"
+                        ],
+                        "Z_P_BAUREIHE_NEU": [
+                            "scale_normal"
+                        ],
+                        "Z_P_FUNKTION": [
+                            "na_fill_median",
+                            "categorical_to_int",
+                            "scale_normal"
+                        ],
+                        "CH000694": [
+                            "remove_column"
+                        ],
+                        "Z_P_SCHALTUNG": [
+                            "scale_normal"
+                        ],
+                        "Z_P_LEDSYSTEM_1": [
+                            "na_fill_median",
+                            "scale_normal"
+                        ],
+                        "Z_P_LEDSYSTEM_2": [
+                            "na_fill_median",
+                            "categorical_to_int",
+                            "scale_normal"
+                        ],
+                        "Z_P_LEDSYSTEM_3": [
+                            "na_fill_median",
+                            "categorical_to_int",
+                            "scale_normal"
+                        ],
+                        "Z_P_ANZ_STROMKR": [
+                            "remove_column"
+                        ],
+                        "Z_P_LMS": [
+                            "na_fill_median",
+                            "categorical_to_int",
+                            "scale_normal"
+                        ],
+                        "Z_P_USA": [
+                            "remove_column"
+                        ],
+                        "Z_P_SCHUTZKLASSE": [
+                            "na_fill_median",
+                            "scale_normal"
+                        ],
+                        "Z_P_ELEKTRISCHE_SPANNUNG_DC": [
+                            "remove_column"
+                        ],
+                        "Z_P_LEISTUNGSREDUZIERER": [
+                            "remove_column"
+                        ],
+                        "Z_P_BEMESSUNGSSPANNUNG": [
+                            "remove_column"
+                        ],
+                        "Z_P_BEMESSUNGSFREQUENZ": [
+                            "remove_column"
+                        ],
+                        "Z_P_LEISTUNGSR_PROZENT": [
+                            "remove_column"
+                        ],
+                        "Z_P_ALZ_SCHALTER": [
+                            "remove_column"
+                        ]
+                    },
+                    "target_preprocessing": [
+                        "na_exclude",
+                        "categorical_to_int"
+                    ],
+                    "ml_task": "multiclass_classification"
+                },
+                "validation_strategy": {
+                    "validation_type": "split",
+                    "train_ratio": 0.75,
+                    "shuffle": true,
+                    "stratify": true,
+                    "X_path": "AutoML_4\\X.data",
+                    "y_path": "AutoML_4\\y.data",
+                    "results_path": "AutoML_4"
+                },
+                "learner": {
+                    "model_type": "Neural Network",
+                    "ml_task": "multiclass_classification",
+                    "n_jobs": -1,
+                    "dense_1_size": 32,
+                    "dense_2_size": 16,
+                    "learning_rate": 0.05,
+                    "seed": 5,
+                    "num_class": 6,
+                    "explain_level": 2
+                },
+                "automl_random_state": 1234,
+                "ml_task": "multiclass_classification",
+                "explain_level": 2,
+                "name": "5_Default_NeuralNetwork",
+                "status": "trained",
+                "final_loss": 1.1584847385011705,
+                "train_time": 2.9249608516693115,
+                "data_type": "original",
+                "max_time_for_learner": 60
+            },
+            {
+                "additional": {
+                    "trees_in_step": 100,
+                    "train_cant_improve_limit": 1,
+                    "min_steps": 1,
+                    "max_steps": 50,
+                    "early_stopping_rounds": 50,
+                    "max_rows_limit": null,
+                    "max_cols_limit": null
+                },
+                "preprocessing": {
+                    "columns_preprocessing": {
+                        "Bezeichnung": [
+                            "categorical_to_int"
+                        ],
+                        "Z_P_FAMILIE_NEU": [
+                            "remove_column"
+                        ],
+                        "Z_P_FUNKTION": [
+                            "na_fill_median",
+                            "categorical_to_int"
+                        ],
+                        "CH000694": [
+                            "remove_column"
+                        ],
+                        "Z_P_LEDSYSTEM_1": [
+                            "na_fill_median"
+                        ],
+                        "Z_P_LEDSYSTEM_2": [
+                            "na_fill_median",
+                            "categorical_to_int"
+                        ],
+                        "Z_P_LEDSYSTEM_3": [
+                            "na_fill_median",
+                            "categorical_to_int"
+                        ],
+                        "Z_P_ANZ_STROMKR": [
+                            "remove_column"
+                        ],
+                        "Z_P_LMS": [
+                            "na_fill_median",
+                            "categorical_to_int"
+                        ],
+                        "Z_P_USA": [
+                            "remove_column"
+                        ],
+                        "Z_P_SCHUTZKLASSE": [
+                            "na_fill_median"
+                        ],
+                        "Z_P_ELEKTRISCHE_SPANNUNG_DC": [
+                            "remove_column"
+                        ],
+                        "Z_P_LEISTUNGSREDUZIERER": [
+                            "remove_column"
+                        ],
+                        "Z_P_BEMESSUNGSSPANNUNG": [
+                            "remove_column"
+                        ],
+                        "Z_P_BEMESSUNGSFREQUENZ": [
+                            "remove_column"
+                        ],
+                        "Z_P_LEISTUNGSR_PROZENT": [
+                            "remove_column"
+                        ],
+                        "Z_P_ALZ_SCHALTER": [
+                            "remove_column"
+                        ]
+                    },
+                    "target_preprocessing": [
+                        "na_exclude",
+                        "categorical_to_int"
+                    ],
+                    "ml_task": "multiclass_classification"
+                },
+                "validation_strategy": {
+                    "validation_type": "split",
+                    "train_ratio": 0.75,
+                    "shuffle": true,
+                    "stratify": true,
+                    "X_path": "AutoML_4\\X.data",
+                    "y_path": "AutoML_4\\y.data",
+                    "results_path": "AutoML_4"
+                },
+                "learner": {
+                    "model_type": "Random Forest",
+                    "ml_task": "multiclass_classification",
+                    "n_jobs": -1,
+                    "criterion": "gini",
+                    "max_features": 0.9,
+                    "min_samples_split": 30,
+                    "max_depth": 4,
+                    "seed": 6,
+                    "eval_metric_name": "logloss",
+                    "num_class": 6,
+                    "explain_level": 2
+                },
+                "automl_random_state": 1234,
+                "ml_task": "multiclass_classification",
+                "explain_level": 2,
+                "name": "6_Default_RandomForest",
+                "status": "trained",
+                "final_loss": 0.8850398836363732,
+                "train_time": 16.96572995185852,
+                "data_type": "original",
+                "max_time_for_learner": 60
+            }
+        ],
+        "ensemble": [
+            {
+                "model_type": "ensemble",
+                "is_stacked": false,
+                "name": "Ensemble",
+                "status": "trained",
+                "final_loss": 0.7984715539252015,
+                "train_time": 1.529723882675171
+            }
+        ]
+    },
+    "adjust_validation": false
+}
