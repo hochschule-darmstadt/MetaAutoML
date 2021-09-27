@@ -9,6 +9,9 @@ __pycache__/
 #AutoMLs
 AutoML_*
 
+#VS 
+*.suo
+
 # Distribution / packaging
 .Python
 build/
