@@ -28,8 +28,11 @@ share/python-wheels/
 MANIFEST
 
 # AutoML models
-env/
 structured_data_classifier/
+
+#VS 
+*.suo
+
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
