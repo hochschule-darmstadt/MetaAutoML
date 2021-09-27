@@ -29,6 +29,7 @@ MANIFEST
 
 # AutoML models
 structured_data_classifier/
+model_autokeras/
 
 #VS 
 *.suo
