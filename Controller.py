@@ -30,7 +30,7 @@ def _load_credential_from_file(filepath):
         return f.read()
 
 ROOT_PATH = os.path.dirname(os.path.abspath(__file__))
-DATASET_FOLDER = os.path.join(ROOT_PATH, 'app-data/datasets')
+DATASET_FOLDER = os.path.join(ROOT_PATH, 'omaml/datasets')
 
 SERVER_CERTIFICATE = _load_credential_from_file('certificate/server.crt')
 SERVER_CERTIFICATE_KEY = _load_credential_from_file('certificate/server.key')

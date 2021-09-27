@@ -32,6 +32,8 @@ class AutoKerasManager(Thread):
         self.__result_json = ""
         self.__is_completed = False
         self.__status_messages = []
+        self.__last_status = Controller_pb2.SESSION_STATUS_BUSY
+
         return
     
     def GetAutoMlModel(self) -> Controller_pb2.GetSessionStatusResponse:
@@ -54,10 +56,7 @@ class AutoKerasManager(Thread):
         """
         status = Controller_pb2.AutoMLStatus()
         status.name = AutoKerasManager.name
-        if self.__is_completed == True:
-            status.status = Controller_pb2.SESSION_STATUS_COMPLETED
-        else:
-            status.status = Controller_pb2.SESSION_STATUS_BUSY
+        status.status = self.__last_status
         status.messages[:] = self.__status_messages
         return status
 
@@ -77,6 +76,7 @@ class AutoKerasManager(Thread):
         #with grpc.insecure_channel('localhost:50052') as channel:
         autokerasIp = os.environ['AUTOKERAS_SERVICE_HOST']
         autokerasPort = os.environ['AUTOKERAS_SERVICE_PORT']
+        print(f"connecting to autokeras: {autokerasIp}:{autokerasPort}")
         with grpc.insecure_channel(f"{autokerasIp}:{autokerasPort}") as channel:
             stub = Adapter_pb2_grpc.AdapterServiceStub(channel)
             datasetToSend = Adapter_pb2.StartAutoMLRequest()
@@ -85,13 +85,20 @@ class AutoKerasManager(Thread):
             processJson.update({"task": self.__configuration.task})
             processJson.update({"configuration": { "target": self.__configuration.tabularConfig.target } })
             datasetToSend.processJson = json.dumps(processJson)
-            for response in stub.StartAutoML(datasetToSend):
-                if response.returnCode == Adapter_pb2.ADAPTER_RETURN_CODE_STATUS_UPDATE:
-                    self.__status_messages.append(response.statusUpdate)
-                elif response.returnCode == Adapter_pb2.ADAPTER_RETURN_CODE_SUCCESS:
-                    self.__result_json = json.loads(response.outputJson)
-                    self.__is_completed = True
-                    return
+            try:
+                for response in stub.StartAutoML(datasetToSend):
+                    if response.returnCode == Adapter_pb2.ADAPTER_RETURN_CODE_STATUS_UPDATE:
+                        self.__status_messages.append(response.statusUpdate)
+                    elif response.returnCode == Adapter_pb2.ADAPTER_RETURN_CODE_SUCCESS:
+                        self.__result_json = json.loads(response.outputJson)
+                        self.__is_completed = True
+                        self.__last_status = Controller_pb2.SESSION_STATUS_COMPLETED
+                        return
+            except grpc.RpcError as rpc_error:
+                print(f"Received unknown RPC error: code={rpc_error.code()} message={rpc_error.details()}")
+                self.__is_completed = True
+                self.__last_status = Controller_pb2.SESSION_STATUS_FAILED
+                return
 
     def GetResult(self):
         controllerResult = Controller_pb2.UploadDatasetFileResponse()

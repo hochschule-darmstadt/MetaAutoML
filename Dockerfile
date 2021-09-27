@@ -8,7 +8,6 @@ RUN pip install -r requirements.txt
 COPY . /
 WORKDIR /
 
-VOLUME ["/app-data"]
-ENV PYTHONUNBUFFERED=0
+ENV PYTHONUNBUFFERED=1
 ENV PYTHONPATH "/interfaces:/managers:/managers/structureddata:/sessions"
 ENTRYPOINT ["python", "Controller.py"]
