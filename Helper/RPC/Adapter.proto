@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+service AdapterService {
+	rpc StartAutoML(StartAutoMLRequest) returns (stream StartAutoMLResponse) {}
+}
+
+message StartAutoMLRequest {
+	string processJson = 1;
+}
+
+message StartAutoMLResponse {
+	AdapterReturnCode returnCode = 1;
+	string statusUpdate = 2;
+	string outputJson = 3;
+}
+
+enum AdapterReturnCode {
+	ADAPTER_RETURN_CODE_UNKNOWN = 0;
+	ADAPTER_RETURN_CODE_SUCCESS = 1;
+	ADAPTER_RETURN_CODE_STATUS_UPDATE = 2;
+	ADAPTER_RETURN_CODE_ERROR = 100;
+}
