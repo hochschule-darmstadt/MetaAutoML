@@ -72,7 +72,7 @@ class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
                 zip_content_path = os.path.join(BASE_DIR, "Adapter-AutoKeras/templates/output")
                 shutil.make_archive("keras-export", 'zip', zip_content_path)
                 outputJson = {"file_name": "keras-export.zip"} 
-                outputJson.update({"file_location": BASE_DIR})
+                outputJson.update({"file_location": os.path.join(BASE_DIR, "Adapter-AutoKeras")})
         
             response = Adapter_pb2.StartAutoMLResponse()
             response.returnCode = Adapter_pb2.ADAPTER_RETURN_CODE_SUCCESS
@@ -90,7 +90,7 @@ def serve():
     """
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     Adapter_pb2_grpc.add_AdapterServiceServicer_to_server(AdapterServiceServicer(), server)
-    server.add_insecure_port('0.0.0.0:5002')
+    server.add_insecure_port('0.0.0.0:50052')
     server.start()
     server.wait_for_termination()
 
