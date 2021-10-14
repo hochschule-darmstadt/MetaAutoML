@@ -15,23 +15,30 @@ from concurrent import futures
 from TemplateGenerator import TemplateGenerator
 
 class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
-    """Missing associated documentation comment in .proto file."""
+    """ AutoML Adapter Service implementation. Service provide functionality to execute and interact with the current AutoML process. """
 
     def __init__(self):
         self = self
 
     def StartAutoML(self, request, context):
-        """Missing associated documentation comment in .proto file."""
-        #print(request.dataset_path)
+        """ 
+        Execute a new AutoML run. 
+        """
         try:
+            #saving AutoML configuration JSON
             with open('keras-job.json',"w+") as f:
                 json.dump(request.processJson, f)
-
-            #process = subprocess.Popen([".\env\Scripts\python.exe", "AutoML.py", "TESTETSTA"], stdout=subprocess.PIPE, universal_newlines=True)
-            process = subprocess.Popen(["python", "AutoML.py", "TESTETSTA"], stdout=subprocess.PIPE, universal_newlines=True)
+            
+            #Start AutoML process
+            try:
+                if os.environ["RUNTIME"]: #Only available in Cluster
+                    process = subprocess.Popen(["python", "AutoML.py", ""], stdout=subprocess.PIPE, universal_newlines=True)
+            except KeyError: # Raise error if the variable is not set, only for local run
+                process = subprocess.Popen([".\env\Scripts\python.exe", "AutoML.py", ""], stdout=subprocess.PIPE, universal_newlines=True)
             capture = ""
             s = process.stdout.read(1)
             capture += s
+            #Run until no more output is produced by the subprocess
             while len(s) > 0:
                 if capture[len(capture)-1] is '\n':
                     processUpdate = Adapter_pb2.StartAutoMLResponse()
@@ -47,21 +54,33 @@ class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
             #Generate python script
             generator = TemplateGenerator()
             generator.GenerateScript()
-
             #Zip content
             BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-            zip_content_path = os.path.join(BASE_DIR, "Adapter-AutoKeras\\templates\\output")
+            outputJson = {}
+            try:
+                if os.environ["RUNTIME"]: #Only available in Cluster
+                    print("RUNNING DOCKER")
+                    if not os.path.exists("omaml/output"): #ensure output folder exists
+                        os.makedirs("omaml/output")
+                    zip_content_path = os.path.join(BASE_DIR, "templates/output")
+                    shutil.make_archive("keras-export", 'zip', zip_content_path)
+                    shutil.move("keras-export.zip","omaml/output/keras-export.zip")
+                    outputJson = {"file_name": "keras-export.zip"} 
+                    outputJson.update({"file_location": "omaml/output/"})
+            except KeyError:  # Raise error if the variable is not set, only for local run
+                print("RUNNING LOCAL")
+                zip_content_path = os.path.join(BASE_DIR, "Adapter-AutoKeras/templates/output")
+                shutil.make_archive("keras-export", 'zip', zip_content_path)
+                outputJson = {"file_name": "keras-export.zip"} 
+                outputJson.update({"file_location": BASE_DIR})
         
-            shutil.make_archive("keras-export", 'zip', zip_content_path)
-       
             response = Adapter_pb2.StartAutoMLResponse()
             response.returnCode = Adapter_pb2.ADAPTER_RETURN_CODE_SUCCESS
-            outputJson = {"file_name": "keras-export.zip"} 
-            outputJson.update({"file_location": os.path.join(BASE_DIR, "Adapter-AutoKeras")})
             response.outputJson = json.dumps(outputJson)
             yield response
         except Exception as e:
-            context.set_details("Error while executing AutoKeras")
+            print(e.message)
+            context.set_details(f"Error while executing AutoKeras: {e.message}")
             context.set_code(grpc.StatusCode.UNAVAILABLE)
             return Adapter_pb2.StartAutoMLResponse()
 

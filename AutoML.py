@@ -4,6 +4,9 @@ import os
 from AutoMLs.StructuredDataAutoML import StructuredDataAutoML
 
 if __name__ == '__main__':
+	"""
+	Entry point for the AutoML subprocess, read configuration json and execute the correct AutoML task
+	"""
 	json_file = open('keras-job.json')
 	processJson = json.load(json_file)
 	processJson = json.loads(processJson)

@@ -1,6 +1,6 @@
 absl-py==0.13.0
 astunparse==1.6.3
-autokeras==1.0.15
+autokeras==1.0.16
 backcall==0.2.0
 cached-property==1.5.2
 cachetools==4.2.2

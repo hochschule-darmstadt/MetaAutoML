@@ -1,6 +1,4 @@
 import os
-import numpy as np
-import pandas as pd
 import autokeras as ak
 from tensorflow.keras.models import load_model
 
