@@ -1,7 +1,6 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  creationTimestamp: null
   labels:
     io.kompose.service: controller
   name: controller
@@ -18,15 +17,8 @@ spec:
       labels:
         io.kompose.service: controller
     spec:
-      volumes:
-      - name: omamldata-pvc
-        persistentVolumeClaim:
-          claimName: omamldata-claim
       containers:
       - env:
-        volumeMounts:
-        - name: omamldata-pvc
-          mountPath: /omaml
         image: alexhda/omaml-controller
         imagePullPolicy: ""
         name: controller
@@ -36,6 +28,12 @@ spec:
           limits:
             cpu: "2"
             memory: "2097152e3"
+        volumeMounts:
+        - name: omaml
+          mountPath: /omaml
       restartPolicy: Always
       serviceAccountName: ""
-status: {}
+      volumes:
+      - name: omaml
+        persistentVolumeClaim:
+          claimName: omamldata-claim

@@ -11,6 +11,7 @@ __pycache__/
 
 #AutoMLs
 structured_data_classifier/
+Experiment/env*/
 
 # Distribution / packaging
 .Python

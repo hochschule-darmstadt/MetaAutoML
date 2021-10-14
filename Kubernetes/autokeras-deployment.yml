@@ -1,7 +1,6 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  creationTimestamp: null
   labels:
     io.kompose.service: autokeras
   name: autokeras
@@ -18,15 +17,10 @@ spec:
       labels:
         io.kompose.service: autokeras
     spec:
-      volumes:
-      - name: omamldata-pvc
-        persistentVolumeClaim:
-          claimName: omamldata-claim
       containers:
       - env:
-        volumeMounts:
-        - name: omamldata-pvc
-          mountPath: /omaml
+        - name: RUNTIME
+          value: "DOCKER"
         image: alexhda/omaml-autokeras
         imagePullPolicy: ""
         name: autokeras
@@ -36,6 +30,12 @@ spec:
           limits:
             cpu: "2"
             memory: "2097152e3"
+        volumeMounts:
+        - name: omaml
+          mountPath: /omaml
       restartPolicy: Always
       serviceAccountName: ""
-status: {}
+      volumes:
+      - name: omaml
+        persistentVolumeClaim:
+          claimName: omamldata-claim

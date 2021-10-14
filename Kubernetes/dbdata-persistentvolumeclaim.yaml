@@ -1,11 +1,12 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  creationTimestamp: null
+  namespace: omaml
   labels:
-    io.kompose.service: dbdata
-  name: dbdata
+    io.kompose.service: dbdata-pvc
+  name: dbdata-pvc
 spec:
+  storageClassName: local
   accessModes:
   - ReadWriteMany
   resources:

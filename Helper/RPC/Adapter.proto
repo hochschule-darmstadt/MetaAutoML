@@ -1,6 +1,12 @@
 syntax = "proto3";
 
+/* 
+AutoML Adapter Service implementation. Service provide functionality to execute and interact with the current AutoML process.
+*/
 service AdapterService {
+/* 
+Execute a new AutoML run. 
+*/
 	rpc StartAutoML(StartAutoMLRequest) returns (stream StartAutoMLResponse) {}
 }
 
