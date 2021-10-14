@@ -73,11 +73,17 @@ class AutoKerasManager(Thread):
         AutoML task for the current run
         """
         #Open
-        #with grpc.insecure_channel('localhost:50052') as channel:
-        autokerasIp = os.environ['AUTOKERAS_SERVICE_HOST']
-        autokerasPort = os.environ['AUTOKERAS_SERVICE_PORT']
+        autokerasIp = ""
+        autokerasPort = ""
+        try: #Set correct Ip address
+          if os.environ["RUNTIME"]: #Only available in Cluster
+            autokerasIp = os.environ['AUTOKERAS_SERVICE_HOST']
+            autokerasPort = os.environ['AUTOKERAS_SERVICE_PORT']
+        except KeyError: # Raise error if the variable is not set, only for local run
+            autokerasIp = "localhost"
+            autokerasPort = "50052"
         print(f"connecting to autokeras: {autokerasIp}:{autokerasPort}")
-        with grpc.insecure_channel(f"{autokerasIp}:{autokerasPort}") as channel:
+        with grpc.insecure_channel(f"{autokerasIp}:{autokerasPort}") as channel: #Connect to Adapter
             stub = Adapter_pb2_grpc.AdapterServiceStub(channel)
             datasetToSend = Adapter_pb2.StartAutoMLRequest()
             processJson = {"file_name": self.__configuration.dataset}
@@ -85,7 +91,7 @@ class AutoKerasManager(Thread):
             processJson.update({"task": self.__configuration.task})
             processJson.update({"configuration": { "target": self.__configuration.tabularConfig.target } })
             datasetToSend.processJson = json.dumps(processJson)
-            try:
+            try:    #Run until server closes connection
                 for response in stub.StartAutoML(datasetToSend):
                     if response.returnCode == Adapter_pb2.ADAPTER_RETURN_CODE_STATUS_UPDATE:
                         self.__status_messages.append(response.statusUpdate)

@@ -30,63 +30,69 @@ def _load_credential_from_file(filepath):
         return f.read()
 
 ROOT_PATH = os.path.dirname(os.path.abspath(__file__))
-DATASET_FOLDER = os.path.join(ROOT_PATH, 'omaml/datasets')
 
 SERVER_CERTIFICATE = _load_credential_from_file('certificate/server.crt')
 SERVER_CERTIFICATE_KEY = _load_credential_from_file('certificate/server.key')
 #ROOT_CERTIFICATE = _load_credential_from_file('certificate/root.crt')
 
-controllerManager = ControllerManager(DATASET_FOLDER)
 
 class ControllerServiceServicer(Controller_pb2_grpc.ControllerServiceServicer):
-    """Missing associated documentation comment in .proto file."""
+    """includes all gRPC functions available for the client frontend"""
     
     def __init__(self):
         self = self
-
+        try:
+          if os.environ["RUNTIME"]: #Only available in Cluster
+            DATASET_FOLDER = os.path.join(ROOT_PATH, 'omaml/datasets')
+            self._controllerManager = ControllerManager(DATASET_FOLDER)
+        except KeyError: # Raise error if the variable is not set, only for local run
+            DATASET_FOLDER = os.path.join(ROOT_PATH, 'omaml/datasets')
+            self._controllerManager = ControllerManager(DATASET_FOLDER)
+            
     def GetAutoMlModel(self, request, context):
-        """Missing associated documentation comment in .proto file."""
-        response = controllerManager.GetAutoMlModel(request)
+        """ return the generated model as a .zip for one AutoML by its session id."""
+        response = self._controllerManager.GetAutoMlModel(request)
         return response
             
     def GetDatasets(self, request, context):
-        """Missing associated documentation comment in .proto file."""
-        datasets = controllerManager.GetDatasets()
+        """return all datasets of a specific type."""
+        datasets = self._controllerManager.GetDatasets()
         return datasets
 
     def GetDataset(self, request, context):
-        """Missing associated documentation comment in .proto file."""
-        response = controllerManager.GetDataset(request)
+        """return the content of a specific dataset. The result is a collection of TableColumns containing the datatype of a column, its name, and the first entries of the column."""
+        response = self._controllerManager.GetDataset(request)
         return response
 
     def GetSessions(self, request, context):
-        response = controllerManager.GetSessions(request)
+        """return a list of all sessions the controller has knowledge of. """
+        response = self._controllerManager.GetSessions(request)
         return response
 
     def GetSessionStatus(self, request, context):
-        """Missing associated documentation comment in .proto file."""
-        response = controllerManager.GetSessionStatus(request)
+        """return the status of a specific session. The result is a session status and a list of the automl output and its status."""
+        response = self._controllerManager.GetSessionStatus(request)
         return response
 
 
     def GetTabularDatasetColumnNames(self, request, context):
-        """Missing associated documentation comment in .proto file."""
-        response = controllerManager.GetTabularDatasetColumnNames(request)
+        """return all the column names of a tabular dataset."""
+        response = self._controllerManager.GetTabularDatasetColumnNames(request)
         return response
 
     def GetTasks(self, request, context):
-        """Missing associated documentation comment in .proto file."""
-        response = controllerManager.GetTasks(request)
+        """return all supported AutoML tasks."""
+        response = self._controllerManager.GetTasks(request)
         return response
 
     def UploadDatasetFile(self, request, context):
-        """Missing associated documentation comment in .proto file."""
-        response = controllerManager.UploadNewDataset(request)
+        """upload a new dataset file as bytes to the controller repository."""
+        response = self._controllerManager.UploadNewDataset(request)
         return response
 
     def StartAutoMLprocess(self, request, context):
-        """Missing associated documentation comment in .proto file."""
-        response = controllerManager.StartAutoMLProcess(request)
+        """start a new AutoML run, using the provided configuration."""
+        response = self._controllerManager.StartAutoMLProcess(request)
         return response
 
 def serve():
