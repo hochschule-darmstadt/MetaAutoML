@@ -5,6 +5,7 @@ metadata:
     io.kompose.service: blazorboilerplate
   name: blazorboilerplate
 spec:
+  progressDeadlineSeconds: 600
   replicas: 1
   selector:
     matchLabels:
@@ -47,7 +48,7 @@ spec:
         - name: BlazorBoilerplate__UseSqlServer
           value: "true"
         - name: ConnectionStrings__DefaultConnection
-          value: "Server=10.1.242.72;Database=blazor_boilerplate;Trusted_Connection=True;MultipleActiveResultSets=true;User=sa;Password=yourVeryStrong(!)Password;Integrated Security=false"
+          value: "Server=10.1.98.214;Database=blazor_boilerplate;Trusted_Connection=True;MultipleActiveResultSets=true;User=sa;Password=yourVeryStrong(!)Password;Integrated Security=false"
         - name: Serilog__MinimumLevel__Default
           value: Debug
         image: alexhda/omaml-frontend:latest
