@@ -37,6 +37,9 @@ AUTOKERAS_SERVICE_PORT=5002</Environment>
     <Compile Include="Controller_pb2.py" />
     <Compile Include="Controller_pb2_grpc.py" />
     <Compile Include="managers\CsvManager.py" />
+    <Compile Include="managers\RdfManager.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="managers\structureddata\AutoKerasManager.py">
       <SubType>Code</SubType>
     </Compile>

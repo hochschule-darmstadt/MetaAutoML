@@ -84,15 +84,19 @@ class AutoKerasManager(Thread):
             autokerasPort = "50052"
         print(f"connecting to autokeras: {autokerasIp}:{autokerasPort}")
         with grpc.insecure_channel(f"{autokerasIp}:{autokerasPort}") as channel: #Connect to Adapter
-            stub = Adapter_pb2_grpc.AdapterServiceStub(channel)
-            datasetToSend = Adapter_pb2.StartAutoMLRequest()
+            stub = Adapter_pb2_grpc.AdapterServiceStub(channel)                     ## Create Interface Stub
+
+            datasetToSend = Adapter_pb2.StartAutoMLRequest()                        ## Request Object
             processJson = {"file_name": self.__configuration.dataset}
             processJson.update({"file_location": self.__file_dest})
             processJson.update({"task": self.__configuration.task})
             processJson.update({"configuration": { "target": self.__configuration.tabularConfig.target } })
             datasetToSend.processJson = json.dumps(processJson)
+
+
+
             try:    #Run until server closes connection
-                for response in stub.StartAutoML(datasetToSend):
+                for response in stub.StartAutoML(datasetToSend):                    ## Send request         WATCH OUT THIS IS A LOOP REQUEST Check out for normal request https://grpc.io/docs/languages/python/quickstart/#update-the-client
                     if response.returnCode == Adapter_pb2.ADAPTER_RETURN_CODE_STATUS_UPDATE:
                         self.__status_messages.append(response.statusUpdate)
                     elif response.returnCode == Adapter_pb2.ADAPTER_RETURN_CODE_SUCCESS:
