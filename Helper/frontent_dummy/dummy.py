@@ -19,11 +19,18 @@ def wait_for_commands(stub):
             printCLOptions()
         elif command == "exit":
             break
+        elif command.startswith("start-automl"):
+            tabularConfig = Controller_pb2.AutoMLConfigurationTabularData(target="Survived")
+            request = Controller_pb2.StartAutoMLprocessRequest(dataset="titanic_train_1.csv",task=Controller_pb2.MACHINE_LEARNING_TASK_TABULAR_CLASSIFICATION,tabularConfig=tabularConfig)
+            response = stub.StartAutoMLprocess(request) # return (StartAutoMLprocessResponse {ControllerReturnCode result = 1;string sessionId = 2;})
+            print(f"{response}")
+
         elif command.startswith("get-session-status"):
             # TODO: the stub can contact the controller grpc server.
             #   But the program then crashes. Probably the wrong parameters are passed to GetSessionStatusRequest
-            if command[-1].isdigit():
-                id = str.encode(command[-1])
+            cmd = command.split(" ")
+            if len(cmd) == 2:
+                id = cmd[1]
                 request = Controller_pb2.GetSessionStatusRequest(id=id)
                 response = stub.GetSessionStatus(request)
                 print(f"{response}")
