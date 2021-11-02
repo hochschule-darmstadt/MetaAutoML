@@ -8,7 +8,7 @@ def printCLOptions():
     print("""
     help                        print all commands
     get-session-status <id>     get the status of the session with the specified id
-    start-autml                 starts the automl with the titanic_train_1.csv dataset
+    start-automl                 starts the automl with the titanic_train_1.csv dataset
     get-columns <dataset name>  returns all columns of a given dataset, e.g. for the dataset train.csv
     ...
     """)
@@ -55,7 +55,6 @@ def process_command(command: str, argv: list, stub: Controller_pb2_grpc.Controll
         printCLOptions()
     elif command == "start-automl":
         start_automl(stub)
-
     elif command == "get-session-status":
         get_session_status(argv, stub)
     elif command == "get-columns":
