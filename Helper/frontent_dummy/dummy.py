@@ -1,49 +1,62 @@
 import grpc
 import Controller_pb2
 import Controller_pb2_grpc
+import sys
+
 
 def printCLOptions():
     print("""
     help                        print all commands
-    exit                        exit program
     get-session-status <id>     get the status of the session with the specified id
+    start-autml                 starts the automl with the titanic_train_1.csv dataset
     ...
     """)
 
 
-# loop and allow user to execute commands
-def wait_for_commands(stub):
-    while 1:
-        command = input("").strip()
-        if command == "help":
-            printCLOptions()
-        elif command == "exit":
-            break
-        elif command.startswith("start-automl"):
-            tabularConfig = Controller_pb2.AutoMLConfigurationTabularData(target="Survived")
-            request = Controller_pb2.StartAutoMLprocessRequest(dataset="titanic_train_1.csv",task=Controller_pb2.MACHINE_LEARNING_TASK_TABULAR_CLASSIFICATION,tabularConfig=tabularConfig)
-            response = stub.StartAutoMLprocess(request) # return (StartAutoMLprocessResponse {ControllerReturnCode result = 1;string sessionId = 2;})
-            print(f"{response}")
+def get_session_status(argv: list, stub: Controller_pb2_grpc.ControllerServiceStub):
+    if len(argv) == 1:
+        id = argv[0]
+        request = Controller_pb2.GetSessionStatusRequest(id=id)
+        response = stub.GetSessionStatus(request)
+        print(f"{response}")
+    else:
+        print("invalid session id")
 
-        elif command.startswith("get-session-status"):
-            # TODO: the stub can contact the controller grpc server.
-            #   But the program then crashes. Probably the wrong parameters are passed to GetSessionStatusRequest
-            cmd = command.split(" ")
-            if len(cmd) == 2:
-                id = cmd[1]
-                request = Controller_pb2.GetSessionStatusRequest(id=id)
-                response = stub.GetSessionStatus(request)
-                print(f"{response}")
-            else:
-                print("invalid session id")
-                continue
-        else:
-            print("invalid input")
+
+def start_automl(stub: Controller_pb2_grpc.ControllerServiceStub):
+    tabular_config = Controller_pb2.AutoMLConfigurationTabularData(target="Survived")
+    request = Controller_pb2.StartAutoMLprocessRequest(dataset="titanic_train_1.csv",
+                                                       task=Controller_pb2.MACHINE_LEARNING_TASK_TABULAR_CLASSIFICATION,
+                                                       tabularConfig=tabular_config)
+    response = stub.StartAutoMLprocess(
+        request)  # return (StartAutoMLprocessResponse {ControllerReturnCode result = 1;string sessionId = 2;})
+    print(f"{response}")
+
+
+def process_command(command: str, argv: list, stub: Controller_pb2_grpc.ControllerServiceStub):
+    """
+    @param command: the command like help, start-automl etc. that is telling the script what to do
+    @param argv: the list of arguments passed along with that. e.g. get-session-status takes one argument <id>. But for instance help takes no arguments
+    @param stub: the grpc-client stub which is used to process the commands
+    @return: void
+    """
+    if command == "help":
+        printCLOptions()
+    elif command == "start-automl":
+        start_automl(stub)
+
+    elif command == "get-session-status":
+        get_session_status(argv, stub)
+    else:
+        print("invalid arguments")
+
 
 def run():
-    channel = grpc.insecure_channel('localhost:50051') # this requires the server in the controller to also start an insecure channel (not a secure one)
+    # TODO: change this to a secure channel
+    channel = grpc.insecure_channel(
+        'localhost:50051')  # this requires the server in the controller to also start an insecure channel (not a secure one)
     stub = Controller_pb2_grpc.ControllerServiceStub(channel)
+    process_command(sys.argv[1], sys.argv[2:], stub)
 
-    wait_for_commands(stub)
 
-run() # run script
+run()  # run script

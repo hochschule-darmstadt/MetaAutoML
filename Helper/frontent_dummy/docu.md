@@ -2,16 +2,16 @@
 - PYTHONPATH needs to be specified "/interfaces:/managers:/managers/structureddata:/sessions"
 - python Controller.py
 - --> server start 
-- --> Controller.py --> wait for client line 112f
+- --> `Controller.py` --> wait for client line 112f
 
 # 2) Start MetaAutoML-Adapter-AutoKeras
 - Precondition: Download titanic_train_1.csv from here: https://www.kaggle.com/c/titanic/data?select=train.csv --> Store it in MetaAutoML-Controller/omaml/datasets
 - PYTHONPATH needs to be specified "/AutoMLs:/templates:/templates/output"
-- python Adapter_AutoKeras.py
+- `python Adapter_AutoKeras.py`
 
-# 3) Start Dummy
-- python dummy.py
---> input: "start-automl"
+# 3) Start Dummy and request session status
+- `python dummy.py start-automl`
+- `python dummy.py get-session-status 1`
 
 
 
