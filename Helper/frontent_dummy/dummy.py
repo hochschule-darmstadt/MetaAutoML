@@ -9,6 +9,7 @@ def printCLOptions():
     help                        print all commands
     get-session-status <id>     get the status of the session with the specified id
     start-autml                 starts the automl with the titanic_train_1.csv dataset
+    get-columns <dataset name>  returns all columns of a given dataset, e.g. for the dataset train.csv
     ...
     """)
 
@@ -21,6 +22,16 @@ def get_session_status(argv: list, stub: Controller_pb2_grpc.ControllerServiceSt
         print(f"{response}")
     else:
         print("invalid session id")
+
+
+def get_columns(argv, stub):
+    if len(argv) == 1:
+        dataset_name = argv[0]
+        request = Controller_pb2.GetTabularDatasetColumnNamesRequest(datasetName=dataset_name)
+        response = stub.GetTabularDatasetColumnNames(request)
+        print(f"{response}")
+    else:
+        print("get-columns requires exactly one argument <column names>")
 
 
 def start_automl(stub: Controller_pb2_grpc.ControllerServiceStub):
@@ -47,6 +58,8 @@ def process_command(command: str, argv: list, stub: Controller_pb2_grpc.Controll
 
     elif command == "get-session-status":
         get_session_status(argv, stub)
+    elif command == "get-columns":
+        get_columns(argv, stub)
     else:
         print("invalid arguments")
 
