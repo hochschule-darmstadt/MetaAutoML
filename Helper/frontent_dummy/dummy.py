@@ -9,8 +9,12 @@ def printCLOptions():
     help                        print all commands
     get-session-status <id>     get the status of the session with the specified id
     start-automl                 starts the automl with the titanic_train_1.csv dataset
-    get-columns <dataset name>  returns all columns of a given dataset, e.g. for the dataset train.csv
-    ...
+    get-columns <dataset name>  returns all columns of a given dataset,
+                                e.g. if you want to get the column names of the dataset train.csv, then call
+                                get-columns train.csv
+    get-columns <dataset name>  returns all tasks for a given dataset,
+                                e.g. if you want to the tasks for the dataset train.csv, then call
+                                get-tasks train.csv
     """)
 
 
@@ -31,7 +35,17 @@ def get_columns(argv, stub):
         response = stub.GetTabularDatasetColumnNames(request)
         print(f"{response}")
     else:
-        print("get-columns requires exactly one argument <column names>")
+        print("get-columns requires exactly one argument <dataset names>")
+
+
+def get_tasks(argv, stub):
+    if len(argv) == 1:
+        dataset_name = argv[0]
+        request = Controller_pb2.GetTasksRequest(datasetName=dataset_name)
+        response = stub.GetTasks(request)
+        print(f"{response}")
+    else:
+        print("get-tasks requires exactly one argument <dataset names>")
 
 
 def start_automl(stub: Controller_pb2_grpc.ControllerServiceStub):
@@ -59,6 +73,8 @@ def process_command(command: str, argv: list, stub: Controller_pb2_grpc.Controll
         get_session_status(argv, stub)
     elif command == "get-columns":
         get_columns(argv, stub)
+    elif command == "get-tasks":
+        get_tasks(argv, stub)
     else:
         print("invalid arguments")
 
