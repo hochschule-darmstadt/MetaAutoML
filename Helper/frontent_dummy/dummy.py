@@ -15,6 +15,7 @@ def printCLOptions():
     get-columns <dataset name>  returns all tasks for a given dataset,
                                 e.g. if you want to the tasks for the dataset train.csv, then call
                                 get-tasks train.csv
+    get-datasets                returns all datasets as json                                
     """)
 
 
@@ -48,6 +49,13 @@ def get_tasks(argv, stub):
         print("get-tasks requires exactly one argument <dataset names>")
 
 
+def get_datasets(stub):
+    # GetDatasetsRequest actually has a parameter called 'type'. But this parameter is not yet used in the controller.
+    request = Controller_pb2.GetDatasetsRequest()
+    response = stub.GetDatasets(request)
+    print(f"{response}")
+
+
 def start_automl(stub: Controller_pb2_grpc.ControllerServiceStub):
     tabular_config = Controller_pb2.AutoMLConfigurationTabularData(target="Survived")
     request = Controller_pb2.StartAutoMLprocessRequest(dataset="titanic_train_1.csv",
@@ -75,6 +83,8 @@ def process_command(command: str, argv: list, stub: Controller_pb2_grpc.Controll
         get_columns(argv, stub)
     elif command == "get-tasks":
         get_tasks(argv, stub)
+    elif command == "get-datasets":
+        get_datasets(stub)
     else:
         print("invalid arguments")
 
