@@ -1,4 +1,7 @@
 import os
+import pandas as pd
+import pickle
+from flaml import AutoML
 
 class StructuredDataAutoML(object):
     """
@@ -17,9 +20,10 @@ class StructuredDataAutoML(object):
     def __read_training_data(self):
         """
         Read the training dataset from disk
-		In case of AutoKeras only provide the training file path
         """
-        self.__training_data_path = os.path.join(self.__json["file_location"], self.__json["file_name"])
+        df = pd.read_csv(os.path.join(self.__json["file_location"], self.__json["file_name"]))
+        self.__X = df.drop(self.__json["configuration"]["target"], axis=1)
+        self.__y = df[self.__json["configuration"]["target"]]
         return
 
     def __export_model(self, model):
@@ -29,6 +33,8 @@ class StructuredDataAutoML(object):
         Parameter:
         1. generate ML model
         """
+        with open('templates/output/flaml-model', 'wb') as file:
+            pickle.dump(model, file)
         return
 
     def classification(self):
@@ -36,6 +42,15 @@ class StructuredDataAutoML(object):
         Execute the classification task
         """
         self.__read_training_data()
+        automl = AutoML()
+        automl_settings = {
+            "time_budget": 10,
+            "metric": 'accuracy',
+            "task": 'classification',
+            "log_file_name": 'flaml.log',
+        }
+
+        automl.fit(X_train=self.__X, y_train=self.__y, **automl_settings)
         return
 
     def regression(self):
@@ -43,4 +58,13 @@ class StructuredDataAutoML(object):
         Execute the regression task
         """
         self.__read_training_data()
+        automl = AutoML()
+        automl_settings = {
+            "time_budget": 10,
+            "metric": 'rmse',
+            "task": 'regression',
+            "log_file_name": 'flaml.log',
+        }
+
+        automl.fit(X_train=self.__X, y_train=self.__y, **automl_settings)
         return

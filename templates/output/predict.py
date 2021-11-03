@@ -1,16 +1,12 @@
-import tensorflow as tf
-import numpy as np
+import pickle
 import pandas as pd
 
-import autokeras as ak
-from tensorflow.keras.models import load_model
+from flaml import AutoML
 
 if __name__ == '__main__':
-	x_to_predict = pd.read_csv(#REPLAVE WITH PATH TO PREDICTION CSV, quotechar='"', skipinitialspace=True)
-	x_to_predict_numpy = x_to_predict.to_numpy()
-	loaded_model = load_model("model_autokeras", custom_objects=ak.CUSTOM_OBJECTS)
+	X = pd.read_csv(#REPLAVE WITH PATH TO PREDICTION CSV, quotechar='"', skipinitialspace=True)
+	with open('flaml-model', 'rb') as file:
+		automl2 = pickle.load(file)
 
-	predicted_y = loaded_model.predict(tf.expand_dims(x_to_predict_numpy.astype(np.unicode), -1))
-	predicted_y[predicted_y < 0.5] = 0
-	predicted_y[predicted_y > 0.5] = 1
+	predicted_y = automl2.predict(X)
 	print(predicted_y)

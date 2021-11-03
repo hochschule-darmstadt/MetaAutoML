@@ -24,13 +24,13 @@ class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
         """
         try:
             #saving AutoML configuration JSON
-            with open('keras-job.json',"w+") as f:
+            with open('flaml-job.json',"w+") as f:
                 json.dump(request.processJson, f)
             
             #Start AutoML process
             try:
-                if os.environ["RUNTIME"]: #Only available in Cluster
-                    process = subprocess.Popen(["python", "AutoML.py", ""], stdout=subprocess.PIPE, universal_newlines=True)
+                #if os.environ["RUNTIME"]: #Only available in Cluster
+                process = subprocess.Popen(["python", "AutoML.py", ""], stdout=subprocess.PIPE, universal_newlines=True)
             except KeyError: # Raise error if the variable is not set, only for local run
                 process = subprocess.Popen([".\env\Scripts\python.exe", "AutoML.py", ""], stdout=subprocess.PIPE, universal_newlines=True)
             capture = ""
@@ -61,16 +61,16 @@ class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
                     if not os.path.exists("omaml/output"): #ensure output folder exists
                         os.makedirs("omaml/output")
                     zip_content_path = os.path.join(BASE_DIR, "templates/output")
-                    shutil.make_archive("keras-export", 'zip', zip_content_path)
-                    shutil.move("keras-export.zip","omaml/output/keras-export.zip")
-                    outputJson = {"file_name": "keras-export.zip"} 
+                    shutil.make_archive("flaml-export", 'zip', zip_content_path)
+                    shutil.move("flaml-export.zip","omaml/output/flaml-export.zip")
+                    outputJson = {"file_name": "flaml-export.zip"}
                     outputJson.update({"file_location": "omaml/output/"})
             except KeyError:  # Raise error if the variable is not set, only for local run
                 print("RUNNING LOCAL")
-                zip_content_path = os.path.join(BASE_DIR, "Adapter-AutoKeras/templates/output")
-                shutil.make_archive("keras-export", 'zip', zip_content_path)
-                outputJson = {"file_name": "keras-export.zip"} 
-                outputJson.update({"file_location": os.path.join(BASE_DIR, "Adapter-AutoKeras")})
+                zip_content_path = os.path.join(BASE_DIR, "MetaAutoML-Adapter-FLAML/templates/output")
+                shutil.make_archive("flaml-export", 'zip', zip_content_path)
+                outputJson = {"file_name": "flaml-export.zip"}
+                outputJson.update({"file_location": os.path.join(BASE_DIR, "Adapter-AutoFLAML")})
         
             response = Adapter_pb2.StartAutoMLResponse()
             response.returnCode = Adapter_pb2.ADAPTER_RETURN_CODE_SUCCESS
@@ -78,7 +78,7 @@ class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
             yield response
         except Exception as e:
             print(e.message)
-            context.set_details(f"Error while executing AutoKeras: {e.message}")
+            context.set_details(f"Error while executing AutoFLAML: {e.message}")
             context.set_code(grpc.StatusCode.UNAVAILABLE)
             return Adapter_pb2.StartAutoMLResponse()
 
@@ -88,7 +88,7 @@ def serve():
     """
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     Adapter_pb2_grpc.add_AdapterServiceServicer_to_server(AdapterServiceServicer(), server)
-    server.add_insecure_port('0.0.0.0:5002')
+    server.add_insecure_port('0.0.0.0:50056')
     server.start()
     server.wait_for_termination()
 
