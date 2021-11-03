@@ -26,11 +26,6 @@ def print_cl_options():
     get-sessions                returns all active sessions
     """)
 
-    tabular_config = Controller_pb2.AutoMLConfigurationTabularData(target="Survived")
-    request = Controller_pb2.StartAutoMLprocessRequest(dataset="titanic_train_1.csv",
-                                                       task=Controller_pb2.MACHINE_LEARNING_TASK_TABULAR_CLASSIFICATION,
-                                                       tabularConfig=tabular_config)
-
 
 def get_session_status(argv: list, stub: Controller_pb2_grpc.ControllerServiceStub):
     if len(argv) == 1:
