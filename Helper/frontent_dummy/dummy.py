@@ -15,7 +15,8 @@ def printCLOptions():
     get-columns <dataset name>  returns all tasks for a given dataset,
                                 e.g. if you want to the tasks for the dataset train.csv, then call
                                 get-tasks train.csv
-    get-datasets                returns all datasets as json                                
+    get-datasets                returns all datasets as json
+    get-sessions                returns all active sessions                                
     """)
 
 
@@ -28,12 +29,14 @@ def get_session_status(argv: list, stub: Controller_pb2_grpc.ControllerServiceSt
     else:
         print("invalid session id")
 
+
 def get_sessions(argv: list, stub: Controller_pb2_grpc.ControllerServiceStub):
     if len(argv) > 0:
         print("No args necessary for sessions request. Args will be ignored.")
     request = Controller_pb2.GetSessionsRequest()
     response = stub.GetSessions(request)
     print(f"{response}")
+
 
 def get_columns(argv, stub):
     if len(argv) == 1:
