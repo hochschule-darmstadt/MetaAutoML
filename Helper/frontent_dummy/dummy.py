@@ -8,7 +8,12 @@ def printCLOptions():
     print("""
     help                        print all commands
     get-session-status <id>     get the status of the session with the specified id
-    start-automl                 starts the automl with the titanic_train_1.csv dataset
+    start-automl <dataset name> <target>
+            
+                                starts the automl with the task=MACHINE_LEARNING_TASK_TABULAR_CLASSIFICATION
+                                the parameters have the following defaults for a quick test:
+                                <dataset>="titanic_train_1.csv"
+                                <target>="Survived"
     get-columns <dataset name>  returns all columns of a given dataset,
                                 e.g. if you want to get the column names of the dataset train.csv, then call
                                 get-columns train.csv
@@ -20,6 +25,11 @@ def printCLOptions():
                                 e.g. call get-dataset train.csv to receive information about the train.csv dataset
     get-sessions                returns all active sessions
     """)
+
+    tabular_config = Controller_pb2.AutoMLConfigurationTabularData(target="Survived")
+    request = Controller_pb2.StartAutoMLprocessRequest(dataset="titanic_train_1.csv",
+                                                       task=Controller_pb2.MACHINE_LEARNING_TASK_TABULAR_CLASSIFICATION,
+                                                       tabularConfig=tabular_config)
 
 
 def get_session_status(argv: list, stub: Controller_pb2_grpc.ControllerServiceStub):
@@ -67,9 +77,29 @@ def get_datasets(stub):
     print(f"{response}")
 
 
-def start_automl(stub: Controller_pb2_grpc.ControllerServiceStub):
-    tabular_config = Controller_pb2.AutoMLConfigurationTabularData(target="Survived")
-    request = Controller_pb2.StartAutoMLprocessRequest(dataset="titanic_train_1.csv",
+def start_automl(stub: Controller_pb2_grpc.ControllerServiceStub, argv: list):
+    """"
+    @param stub: the grpc-client stub which is used to process the commands
+    @param argv: parameter list as follows:
+        argv[0] = <dataset name>        default = "titanic_train_1.csv"
+        argv[1] = <target column>       default = "Survived"
+    """
+
+    if len(argv) < 0 or len(argv) > 2:
+        print("start_automl requires 0 to 2 arguments: <dataset name>='titanic_train_1.csv' <target column>='Survived'")
+        return
+
+    dataset_name = "titanic_train_1.csv"
+    target_column = "Survived"
+
+    if len(argv) > 0:
+        dataset_name = argv[0]
+    if len(argv) == 2:
+        target_column = argv[1]
+
+    tabular_config = Controller_pb2.AutoMLConfigurationTabularData(target=target_column)
+
+    request = Controller_pb2.StartAutoMLprocessRequest(dataset=dataset_name,
                                                        task=Controller_pb2.MACHINE_LEARNING_TASK_TABULAR_CLASSIFICATION,
                                                        tabularConfig=tabular_config)
     response = stub.StartAutoMLprocess(
@@ -85,6 +115,7 @@ def get_dataset(argv, stub):
     else:
         print("get-dataset requires exactly one argument <dataset name>")
 
+
 def process_command(command: str, argv: list, stub: Controller_pb2_grpc.ControllerServiceStub):
     """
     @param command: the command like help, start-automl etc. that is telling the script what to do
@@ -95,7 +126,7 @@ def process_command(command: str, argv: list, stub: Controller_pb2_grpc.Controll
     if command == "help":
         printCLOptions()
     elif command == "start-automl":
-        start_automl(stub)
+        start_automl(stub, argv)
     elif command == "get-session-status":
         get_session_status(argv, stub)
     elif command == "get-sessions":
@@ -110,8 +141,6 @@ def process_command(command: str, argv: list, stub: Controller_pb2_grpc.Controll
         get_dataset(argv, stub)
     else:
         print("invalid arguments")
-
-
 
 
 def run():
