@@ -16,7 +16,9 @@ def printCLOptions():
                                 e.g. if you want to the tasks for the dataset train.csv, then call
                                 get-tasks train.csv
     get-datasets                returns all datasets as json
-    get-sessions                returns all active sessions                                
+    get-dataset                 returns the information about the specified dataset as json,
+                                e.g. call get-dataset train.csv to receive information about the train.csv dataset
+    get-sessions                returns all active sessions
     """)
 
 
@@ -75,6 +77,14 @@ def start_automl(stub: Controller_pb2_grpc.ControllerServiceStub):
     print(f"{response}")
 
 
+def get_dataset(argv, stub):
+    if len(argv) == 1:
+        request = Controller_pb2.GetDatasetRequest(name=argv[0])
+        response = stub.GetDatasets(request)
+        print(f"{response}")
+    else:
+        print("get-dataset requires exactly one argument <dataset name>")
+
 def process_command(command: str, argv: list, stub: Controller_pb2_grpc.ControllerServiceStub):
     """
     @param command: the command like help, start-automl etc. that is telling the script what to do
@@ -96,8 +106,12 @@ def process_command(command: str, argv: list, stub: Controller_pb2_grpc.Controll
         get_tasks(argv, stub)
     elif command == "get-datasets":
         get_datasets(stub)
+    elif command == "get-dataset":
+        get_dataset(argv, stub)
     else:
         print("invalid arguments")
+
+
 
 
 def run():
