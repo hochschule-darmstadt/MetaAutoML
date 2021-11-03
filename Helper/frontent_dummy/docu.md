@@ -1,4 +1,6 @@
 # 1) Start MetaAutoML-Controller
+**!! IMPORTANT !!**  
+Temporary you have to change the connection mode from secure to insecure to get the frontend-dummy working. Therefore you can uncomment the line 109 (`server.add_insecure_port('[::]:50051')`) and comment line 110 (`server.add_secure_port('0.0.0.0:5001', server_credentials)`) in Controller.py source.
 - PYTHONPATH needs to be specified "/interfaces:/managers:/managers/structureddata:/sessions"
 - python Controller.py
 - --> server start 
@@ -10,6 +12,7 @@
 - `python Adapter_AutoKeras.py`
 
 # 3) Start Dummy and request session status
+- Precondition: Install `python-grpcio` and `python-protobuf`
 - `python dummy.py start-automl`
 - `python dummy.py get-session-status 1`
 
