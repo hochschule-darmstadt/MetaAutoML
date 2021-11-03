@@ -4,7 +4,7 @@ import Controller_pb2_grpc
 import sys
 
 
-def printCLOptions():
+def print_cl_options():
     print("""
     help                        print all commands
     get-session-status <id>     get the status of the session with the specified id
@@ -124,7 +124,7 @@ def process_command(command: str, argv: list, stub: Controller_pb2_grpc.Controll
     @return: void
     """
     if command == "help":
-        printCLOptions()
+        print_cl_options()
     elif command == "start-automl":
         start_automl(stub, argv)
     elif command == "get-session-status":
