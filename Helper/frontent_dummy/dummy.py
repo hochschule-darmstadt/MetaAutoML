@@ -28,6 +28,12 @@ def get_session_status(argv: list, stub: Controller_pb2_grpc.ControllerServiceSt
     else:
         print("invalid session id")
 
+def get_sessions(argv: list, stub: Controller_pb2_grpc.ControllerServiceStub):
+    if len(argv) > 0:
+        print("No args necessary for sessions request. Args will be ignored.")
+    request = Controller_pb2.GetSessionsRequest()
+    response = stub.GetSessions(request)
+    print(f"{response}")
 
 def get_columns(argv, stub):
     if len(argv) == 1:
@@ -79,6 +85,8 @@ def process_command(command: str, argv: list, stub: Controller_pb2_grpc.Controll
         start_automl(stub)
     elif command == "get-session-status":
         get_session_status(argv, stub)
+    elif command == "get-sessions":
+        get_sessions(argv, stub)
     elif command == "get-columns":
         get_columns(argv, stub)
     elif command == "get-tasks":
