@@ -36,14 +36,13 @@ class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
             except KeyError: # Raise error if the variable is not set, only for local run
                 # Check os platform
                 if sys.platform == "linux" or sys.platform == "linux2":
-                    # Pythonpath in Linux systems
+                    # Pythonpath on Linux systems
                     pypath = "python"
                 elif sys.platform == "darwin":
-                    # Pythonpath in Mac OS X systems
-                    print("Don't know what to do if OS X. Figure out by your own.")
-                    return
+                    # Pythonpath on Mac OS X systems
+                    pypath = "python3"
                 elif sys.platform == "win32":
-                    # Pythonpath in Windows systems
+                    # Pythonpath on Windows systems
                     pypath = ".\env\Scripts\python.exe"
                 else:
                     print("Error: Could not detect os platform")
