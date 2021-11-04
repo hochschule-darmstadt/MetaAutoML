@@ -8,6 +8,7 @@ __pycache__/
 
 #VS 
 *.suo
+*.pyproj
 
 #AutoMLs
 structured_data_classifier/
