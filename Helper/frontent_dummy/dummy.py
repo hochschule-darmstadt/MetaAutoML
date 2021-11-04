@@ -2,14 +2,13 @@ import grpc
 import Controller_pb2
 import Controller_pb2_grpc
 import sys
-
+import pickle
 
 def print_cl_options():
     print("""
     help                        print all commands
     get-session-status <id>     get the status of the session with the specified id
     start-automl <dataset name> <target>
-            
                                 starts the automl with the task=MACHINE_LEARNING_TASK_TABULAR_CLASSIFICATION
                                 the parameters have the following defaults for a quick test:
                                 <dataset>="titanic_train_1.csv"
@@ -17,15 +16,40 @@ def print_cl_options():
     get-columns <dataset name>  returns all columns of a given dataset,
                                 e.g. if you want to get the column names of the dataset train.csv, then call
                                 get-columns train.csv
-    get-columns <dataset name>  returns all tasks for a given dataset,
+    get-tasks <dataset name>    returns all tasks for a given dataset,
                                 e.g. if you want to the tasks for the dataset train.csv, then call
                                 get-tasks train.csv
     get-datasets                returns all datasets as json
     get-dataset                 returns the information about the specified dataset as json,
                                 e.g. call get-dataset train.csv to receive information about the train.csv dataset
     get-sessions                returns all active sessions
+    get-automl-model <id> <automl name>       
+                                returns the generated model of the specified sessionId as a .zip file
+    upload-dataset <file name>  uploads the specified file as a dataset
     """)
 
+def get_automl_model(argv: list, stub: Controller_pb2_grpc.ControllerServiceStub):
+    if len(argv) == 2:
+        session_id = argv[0]
+        name = argv[1]
+        request = Controller_pb2.GetAutoMlModelRequest(sessionId=session_id, autoMl=name)
+        response = stub.GetAutoMlModel(request)
+        print(f"saving file {response.name}")
+        with open(response.name, 'wb') as file:
+            pickle.dump(response.file, file)
+    else:
+        print("get_automl_model requires exactly one argument <session id>")
+
+def upload_dataset(argv: list, stub: Controller_pb2_grpc.ControllerServiceStub):
+    if len(argv) == 1:
+        filename = argv[0]
+        request = Controller_pb2.UploadDatasetFileRequest(name=filename)
+        with open(filename, "rb") as file:
+            request.content = file.read()
+        response = stub.UploadDatasetFile(request)
+        print(f"{response}")
+    else:
+        print("upload_dataset requires exactly one argument <file name>")
 
 def get_session_status(argv: list, stub: Controller_pb2_grpc.ControllerServiceStub):
     if len(argv) == 1:
@@ -72,7 +96,7 @@ def get_datasets(stub):
     print(f"{response}")
 
 
-def start_automl(stub: Controller_pb2_grpc.ControllerServiceStub, argv: list):
+def start_automl(argv: list, stub: Controller_pb2_grpc.ControllerServiceStub):
     """"
     @param stub: the grpc-client stub which is used to process the commands
     @param argv: parameter list as follows:
@@ -121,7 +145,7 @@ def process_command(command: str, argv: list, stub: Controller_pb2_grpc.Controll
     if command == "help":
         print_cl_options()
     elif command == "start-automl":
-        start_automl(stub, argv)
+        start_automl(argv, stub)
     elif command == "get-session-status":
         get_session_status(argv, stub)
     elif command == "get-sessions":
@@ -134,6 +158,10 @@ def process_command(command: str, argv: list, stub: Controller_pb2_grpc.Controll
         get_datasets(stub)
     elif command == "get-dataset":
         get_dataset(argv, stub)
+    elif command == "get-automl-model":
+        get_automl_model(argv, stub)
+    elif command == "upload-dataset":
+        upload_dataset(argv, stub)
     else:
         print("invalid arguments")
 
