@@ -70,8 +70,8 @@ class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
                 zip_content_path = os.path.join(BASE_DIR, "MetaAutoML-Adapter-FLAML/templates/output")
                 shutil.make_archive("flaml-export", 'zip', zip_content_path)
                 outputJson = {"file_name": "flaml-export.zip"}
-                outputJson.update({"file_location": os.path.join(BASE_DIR, "Adapter-AutoFLAML")})
-        
+                outputJson.update({"file_location": os.path.join(BASE_DIR, "MetaAutoML-Adapter-FLAML")})
+
             response = Adapter_pb2.StartAutoMLResponse()
             response.returnCode = Adapter_pb2.ADAPTER_RETURN_CODE_SUCCESS
             response.outputJson = json.dumps(outputJson)
