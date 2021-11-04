@@ -51,6 +51,7 @@ class StructuredDataAutoML(object):
         }
 
         automl.fit(X_train=self.__X, y_train=self.__y, **automl_settings)
+        self.__export_model(automl)
         return
 
     def regression(self):
@@ -67,4 +68,5 @@ class StructuredDataAutoML(object):
         }
 
         automl.fit(X_train=self.__X, y_train=self.__y, **automl_settings)
+        self.__export_model(automl)
         return
