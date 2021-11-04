@@ -29,8 +29,8 @@ class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
             
             #Start AutoML process
             try:
-                #if os.environ["RUNTIME"]: #Only available in Cluster
-                process = subprocess.Popen(["python", "AutoML.py", ""], stdout=subprocess.PIPE, universal_newlines=True)
+                if os.environ["RUNTIME"]: #Only available in Cluster
+                    process = subprocess.Popen(["python", "AutoML.py", ""], stdout=subprocess.PIPE, universal_newlines=True)
             except KeyError: # Raise error if the variable is not set, only for local run
                 process = subprocess.Popen([".\env\Scripts\python.exe", "AutoML.py", ""], stdout=subprocess.PIPE, universal_newlines=True)
             capture = ""

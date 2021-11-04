@@ -33,7 +33,7 @@ class StructuredDataAutoML(object):
         Parameter:
         1. generate ML model
         """
-        with open('templates/output/flaml-model', 'wb') as file:
+        with open('templates/output/flaml-model.p', 'wb') as file:
             pickle.dump(model, file)
         return
 
