@@ -6,15 +6,18 @@ import sys
 from AutoMLs.StructuredDataAutoML import StructuredDataAutoML
 
 if __name__ == '__main__':
-	FORMAT = '%(asctime)s %(message)s'
-	logging.basicConfig(stream=sys.stdout, level=logging.DEBUG, format=FORMAT)
+    FORMAT = '%(asctime)s %(message)s'
+    logging.basicConfig(stream=sys.stdout, level=logging.DEBUG, format=FORMAT)
 
-	json_file = open('flaml-job.json')
-	processJson = json.load(json_file)
-	processJson = json.loads(processJson)
-	
+    json_file = open('flaml-job.json')
+    processJson = json.load(json_file)
+    processJson = json.loads(processJson)
 
-	if processJson["task"] == 1:
-	    #Classification
-		classificationTask = StructuredDataAutoML(processJson)
-		classificationTask.classification()
+    structuredDataAutoML = StructuredDataAutoML(processJson)
+    if processJson["task"] == 1:
+        #Classification
+        structuredDataAutoML.classification()
+
+    if processJson["task"] == 2:
+        #Regression
+        structuredDataAutoML.regression()
