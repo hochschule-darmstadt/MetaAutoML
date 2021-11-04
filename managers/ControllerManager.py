@@ -73,11 +73,9 @@ class ControllerManager(object):
 
     def StartAutoMLProcess(self, configuration) -> Controller_pb2.StartAutoMLprocessResponse:
         response = Controller_pb2.StartAutoMLprocessResponse()
-        newSession = ""
-        if configuration.task == 1:
-             newSession = self.__structuredDataManager.StartAutoML(configuration, self.__datasetFolder, self.__sessionCounter)
-             self.__sessions[str(self.__sessionCounter)] = newSession
-             self.__sessionCounter += 1
+        newSession = self.__structuredDataManager.StartAutoML(configuration, self.__datasetFolder, self.__sessionCounter)
+        self.__sessions[str(self.__sessionCounter)] = newSession
+        self.__sessionCounter += 1
         response.result = 1
         response.sessionId = newSession.GetId()
         return response
