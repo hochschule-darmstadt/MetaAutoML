@@ -178,9 +178,10 @@ def process_command(command: str, argv: list, stub: Controller_pb2_grpc.Controll
 
 
 def run():
-    # TODO: change this to a secure channel
-    channel = grpc.insecure_channel(
-        'localhost:50051')  # this requires the server in the controller to also start an insecure channel (not a secure one)
+    with open('root.crt', 'rb') as f:
+        creds = grpc.ssl_channel_credentials(f.read())
+    channel = grpc.secure_channel('localhost:5001', creds)
+    #channel = grpc.insecure_channel('localhost:50051')
     stub = Controller_pb2_grpc.ControllerServiceStub(channel)
     process_command(sys.argv[1], sys.argv[2:], stub)
 
