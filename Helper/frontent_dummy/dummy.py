@@ -8,11 +8,12 @@ def print_cl_options():
     print("""
     help                        print all commands
     get-session-status <id>     get the status of the session with the specified id
-    start-automl <dataset name> <target>
-                                starts the automl with the task=MACHINE_LEARNING_TASK_TABULAR_CLASSIFICATION
+    start-automl <dataset name> <target> <task>
+                                starts the automl
                                 the parameters have the following defaults for a quick test:
                                 <dataset>="titanic_train_1.csv"
                                 <target>="Survived"
+                                <task>="classification"
     get-columns <dataset name>  returns all columns of a given dataset,
                                 e.g. if you want to get the column names of the dataset train.csv, then call
                                 get-columns train.csv
@@ -104,22 +105,32 @@ def start_automl(argv: list, stub: Controller_pb2_grpc.ControllerServiceStub):
         argv[1] = <target column>       default = "Survived"
     """
 
-    if len(argv) < 0 or len(argv) > 2:
-        print("start_automl requires 0 to 2 arguments: <dataset name>='titanic_train_1.csv' <target column>='Survived'")
+    if len(argv) < 0 or len(argv) > 3:
+        print("start_automl requires 0 to 3 arguments: <dataset name>='titanic_train_1.csv' "
+              "<target column>='Survived' <task>='classification'")
         return
 
     dataset_name = "titanic_train_1.csv"
     target_column = "Survived"
+    task = Controller_pb2.MACHINE_LEARNING_TASK_TABULAR_CLASSIFICATION
 
     if len(argv) > 0:
         dataset_name = argv[0]
-    if len(argv) == 2:
+    if len(argv) > 1:
         target_column = argv[1]
+    if len(argv) > 2:
+        if argv[2] == "regression":
+            task = Controller_pb2.MACHINE_LEARNING_TASK_TABULAR_REGRESSION
+        elif argv[2] == "classification":
+            task = Controller_pb2.MACHINE_LEARNING_TASK_TABULAR_CLASSIFICATION
+        else:
+            print("task has to be 'regression' or 'classification'")
+            return
 
     tabular_config = Controller_pb2.AutoMLConfigurationTabularData(target=target_column)
 
     request = Controller_pb2.StartAutoMLprocessRequest(dataset=dataset_name,
-                                                       task=Controller_pb2.MACHINE_LEARNING_TASK_TABULAR_CLASSIFICATION,
+                                                       task=task,
                                                        tabularConfig=tabular_config)
     response = stub.StartAutoMLprocess(
         request)  # return (StartAutoMLprocessResponse {ControllerReturnCode result = 1;string sessionId = 2;})
