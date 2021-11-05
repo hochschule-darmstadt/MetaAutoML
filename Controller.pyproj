@@ -4,8 +4,8 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>4963623d-8a4c-49b5-a402-4d2727a6df95</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>Controller.py</StartupFile>
-    <SearchPath>managers\structureddata;managers;sessions;interfaces</SearchPath>
+    <StartupFile>tests\test_RdfManager.py</StartupFile>
+    <SearchPath>managers\structureddata;managers;sessions;interfaces;utils;tests</SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
     <Name>Controller</Name>
@@ -15,6 +15,9 @@
     <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
     <Environment>AUTOKERAS_SERVICE_HOST=localhost
 AUTOKERAS_SERVICE_PORT=5002</Environment>
+    <TestFramework>unittest</TestFramework>
+    <UnitTestPattern>test_*.py</UnitTestPattern>
+    <UnitTestRootDirectory>tests</UnitTestRootDirectory>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
@@ -52,6 +55,12 @@ AUTOKERAS_SERVICE_PORT=5002</Environment>
     <Compile Include="sessions\AutoMLSession.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="tests\test_RdfManager.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="utils\Queries.py">
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Interpreter Include="env\">
@@ -70,12 +79,18 @@ AUTOKERAS_SERVICE_PORT=5002</Environment>
     <Folder Include="managers\" />
     <Folder Include="managers\structureddata\" />
     <Folder Include="interfaces\" />
+    <Folder Include="managers\ontology\" />
+    <Folder Include="Local Settings\" />
+    <Folder Include="tests\" />
+    <Folder Include="utils\" />
     <Folder Include="sessions\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="certificate\server.crt" />
     <Content Include="certificate\server.key" />
     <Content Include="Dockerfile" />
+    <Content Include="Local Settings\PythonSettings.json" />
+    <Content Include="managers\ontology\ML_Ontology.ttl" />
     <Content Include="requirements.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />

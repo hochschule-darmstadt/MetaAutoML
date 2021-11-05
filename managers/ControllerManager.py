@@ -5,13 +5,14 @@ import Controller_pb2_grpc
 from StructuredDataManager import StructuredDataManager
 from AutoMLSession import AutoMLSession
 from CsvManager import CsvManager
-
+from RdfManager import RdfManager
 
 
 class ControllerManager(object):
     """description of class"""
 
     def __init__(self, datasetFolder):
+        self.__rdfManager = RdfManager()
         self.__structuredDataManager = StructuredDataManager()
         self.__sessions = {}
         self.__sessionCounter = 1
@@ -23,6 +24,9 @@ class ControllerManager(object):
 
     def GetAutoMlModel(self, request) -> Controller_pb2.GetAutoMlModelResponse:
         return self.__sessions[request.sessionId].GetAutoMlModel(request)
+
+    def GetCompatibleAUtoMlSolutions(self, request) -> Controller_pb2.GetCompatibleAutoMlSolutionsResponse:
+        return self.__rdfManager.get
 
     def GetDatasets(self):
         datasets = Controller_pb2.GetDatasetsResponse()

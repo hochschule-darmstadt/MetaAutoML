@@ -53,6 +53,12 @@ class ControllerServiceServicer(Controller_pb2_grpc.ControllerServiceServicer):
         """ return the generated model as a .zip for one AutoML by its session id."""
         response = self._controllerManager.GetAutoMlModel(request)
         return response
+
+    def GetCompatibleAutoMlSolutions(self, request, context):
+        """return a list of AutoML solutions compatible with the current configuration
+        """
+        response = self._controllerManager.GetAutoMlModel(request)
+        return response
             
     def GetDatasets(self, request, context):
         """return all datasets of a specific type."""
