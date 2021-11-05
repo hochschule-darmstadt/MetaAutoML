@@ -6,7 +6,8 @@ import Controller_pb2 as Controller__pb2
 
 
 class ControllerServiceStub(object):
-    """Missing associated documentation comment in .proto file."""
+    """includes all gRPC functions available for the client frontend
+    """
 
     def __init__(self, channel):
         """Constructor.
@@ -18,6 +19,11 @@ class ControllerServiceStub(object):
                 '/ControllerService/GetAutoMlModel',
                 request_serializer=Controller__pb2.GetAutoMlModelRequest.SerializeToString,
                 response_deserializer=Controller__pb2.GetAutoMlModelResponse.FromString,
+                )
+        self.GetCompatibleAutoMlSolutions = channel.unary_unary(
+                '/ControllerService/GetCompatibleAutoMlSolutions',
+                request_serializer=Controller__pb2.GetCompatibleAutoMlSolutionsRequest.SerializeToString,
+                response_deserializer=Controller__pb2.GetCompatibleAutoMlSolutionsResponse.FromString,
                 )
         self.GetDatasets = channel.unary_unary(
                 '/ControllerService/GetDatasets',
@@ -44,10 +50,10 @@ class ControllerServiceStub(object):
                 request_serializer=Controller__pb2.GetTabularDatasetColumnNamesRequest.SerializeToString,
                 response_deserializer=Controller__pb2.GetTabularDatasetColumnNamesResponse.FromString,
                 )
-        self.GetTasks = channel.unary_unary(
-                '/ControllerService/GetTasks',
-                request_serializer=Controller__pb2.GetTasksRequest.SerializeToString,
-                response_deserializer=Controller__pb2.GetTasksResponse.FromString,
+        self.GetDatasetCompatibleTasks = channel.unary_unary(
+                '/ControllerService/GetDatasetCompatibleTasks',
+                request_serializer=Controller__pb2.GetDatasetCompatibleTasksRequest.SerializeToString,
+                response_deserializer=Controller__pb2.GetDatasetCompatibleTasksResponse.FromString,
                 )
         self.UploadDatasetFile = channel.unary_unary(
                 '/ControllerService/UploadDatasetFile',
@@ -62,58 +68,75 @@ class ControllerServiceStub(object):
 
 
 class ControllerServiceServicer(object):
-    """Missing associated documentation comment in .proto file."""
+    """includes all gRPC functions available for the client frontend
+    """
 
     def GetAutoMlModel(self, request, context):
-        """Missing associated documentation comment in .proto file."""
+        """return the generated model as a .zip for one AutoML by its session id
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def GetCompatibleAutoMlSolutions(self, request, context):
+        """return a list of AutoML solutions compatible with the current configuration
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
     def GetDatasets(self, request, context):
-        """Missing associated documentation comment in .proto file."""
+        """return all datasets of a specific type
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
     def GetDataset(self, request, context):
-        """Missing associated documentation comment in .proto file."""
+        """return the content of a specific dataset. The result is a collection of TableColumns containing the datatype of a column, its name, and the first entries of the column
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
     def GetSessions(self, request, context):
-        """Missing associated documentation comment in .proto file."""
+        """return a list of all sessions the controller has knowledge of
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
     def GetSessionStatus(self, request, context):
-        """Missing associated documentation comment in .proto file."""
+        """return the status of a specific session. The result is a session status and a list of the automl output and its status
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
     def GetTabularDatasetColumnNames(self, request, context):
-        """Missing associated documentation comment in .proto file."""
+        """return all the column names of a tabular dataset
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def GetTasks(self, request, context):
-        """Missing associated documentation comment in .proto file."""
+    def GetDatasetCompatibleTasks(self, request, context):
+        """return all supported AutoML tasks
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
     def UploadDatasetFile(self, request, context):
-        """Missing associated documentation comment in .proto file."""
+        """upload a new dataset file as bytes to the controller repository
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
     def StartAutoMLprocess(self, request, context):
-        """Missing associated documentation comment in .proto file."""
+        """start a new AutoML run, using the provided configuration
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
@@ -125,6 +148,11 @@ def add_ControllerServiceServicer_to_server(servicer, server):
                     servicer.GetAutoMlModel,
                     request_deserializer=Controller__pb2.GetAutoMlModelRequest.FromString,
                     response_serializer=Controller__pb2.GetAutoMlModelResponse.SerializeToString,
+            ),
+            'GetCompatibleAutoMlSolutions': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetCompatibleAutoMlSolutions,
+                    request_deserializer=Controller__pb2.GetCompatibleAutoMlSolutionsRequest.FromString,
+                    response_serializer=Controller__pb2.GetCompatibleAutoMlSolutionsResponse.SerializeToString,
             ),
             'GetDatasets': grpc.unary_unary_rpc_method_handler(
                     servicer.GetDatasets,
@@ -151,10 +179,10 @@ def add_ControllerServiceServicer_to_server(servicer, server):
                     request_deserializer=Controller__pb2.GetTabularDatasetColumnNamesRequest.FromString,
                     response_serializer=Controller__pb2.GetTabularDatasetColumnNamesResponse.SerializeToString,
             ),
-            'GetTasks': grpc.unary_unary_rpc_method_handler(
-                    servicer.GetTasks,
-                    request_deserializer=Controller__pb2.GetTasksRequest.FromString,
-                    response_serializer=Controller__pb2.GetTasksResponse.SerializeToString,
+            'GetDatasetCompatibleTasks': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetDatasetCompatibleTasks,
+                    request_deserializer=Controller__pb2.GetDatasetCompatibleTasksRequest.FromString,
+                    response_serializer=Controller__pb2.GetDatasetCompatibleTasksResponse.SerializeToString,
             ),
             'UploadDatasetFile': grpc.unary_unary_rpc_method_handler(
                     servicer.UploadDatasetFile,
@@ -174,7 +202,8 @@ def add_ControllerServiceServicer_to_server(servicer, server):
 
  # This class is part of an EXPERIMENTAL API.
 class ControllerService(object):
-    """Missing associated documentation comment in .proto file."""
+    """includes all gRPC functions available for the client frontend
+    """
 
     @staticmethod
     def GetAutoMlModel(request,
@@ -190,6 +219,23 @@ class ControllerService(object):
         return grpc.experimental.unary_unary(request, target, '/ControllerService/GetAutoMlModel',
             Controller__pb2.GetAutoMlModelRequest.SerializeToString,
             Controller__pb2.GetAutoMlModelResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def GetCompatibleAutoMlSolutions(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/ControllerService/GetCompatibleAutoMlSolutions',
+            Controller__pb2.GetCompatibleAutoMlSolutionsRequest.SerializeToString,
+            Controller__pb2.GetCompatibleAutoMlSolutionsResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
@@ -279,7 +325,7 @@ class ControllerService(object):
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
-    def GetTasks(request,
+    def GetDatasetCompatibleTasks(request,
             target,
             options=(),
             channel_credentials=None,
@@ -289,9 +335,9 @@ class ControllerService(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/ControllerService/GetTasks',
-            Controller__pb2.GetTasksRequest.SerializeToString,
-            Controller__pb2.GetTasksResponse.FromString,
+        return grpc.experimental.unary_unary(request, target, '/ControllerService/GetDatasetCompatibleTasks',
+            Controller__pb2.GetDatasetCompatibleTasksRequest.SerializeToString,
+            Controller__pb2.GetDatasetCompatibleTasksResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
