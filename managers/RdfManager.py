@@ -90,7 +90,7 @@ class RdfManager(object):
             result.tasks.append("Dataset name parameter empty")
             return result
 
-        dataset = rdflib.Literal('tabular data')
+        dataset = rdflib.Literal(u"tabular data")
         q = prepareQuery(Queries.ONTOLOGY_QUERY_GET_TASK_FOR_DATASET,
             initNs={"skos": SKOS})
 

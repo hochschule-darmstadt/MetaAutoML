@@ -26,7 +26,7 @@ class ControllerManager(object):
         return self.__sessions[request.sessionId].GetAutoMlModel(request)
 
     def GetCompatibleAUtoMlSolutions(self, request) -> Controller_pb2.GetCompatibleAutoMlSolutionsResponse:
-        return self.__rdfManager.get
+        return self.__rdfManager.GetCompatibleAutoMlSolutions(request)
 
     def GetDatasets(self):
         datasets = Controller_pb2.GetDatasetsResponse()
@@ -57,12 +57,8 @@ class ControllerManager(object):
         columnNames = CsvManager.ReadColumnNames(os.path.join(self.__datasetFolder, request.datasetName))
         return columnNames
 
-    def GetTasks(self, request) -> Controller_pb2.GetTasksResponse:
-        #TODO ONTOLOGY MAGIC, CURRENTLY ONLY CLASSIFICATION AND REGRESION ALLOWED
-        result = Controller_pb2.GetTasksResponse()
-        result.tasks.append("classification")
-        result.tasks.append("regression")
-        return result
+    def GetDatasetCompatibleTasks(self, request) -> Controller_pb2.GetTasksResponse:
+        return self.__rdfManager.GetDatasetCompatibleTasks(request)
 
 
     def UploadNewDataset(self, dataset) -> Controller_pb2.UploadDatasetFileResponse:

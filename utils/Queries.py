@@ -16,11 +16,12 @@ ONTOLOGY_QUERY_GET_TASK_FOR_DATASET = """
             PREFIX : <http://h-da.de/ml-ontology/>
             SELECT ?task
             WHERE {
-            ?dataset a :ML_dataset ;
-                       skos:prefLabel "tabular data" ;
+            ?set a :ML_dataset ;
+                       skos:prefLabel ?dataset;
                        :used_for ?t .
             ?t a :ML_task ;
                        skos:prefLabel ?task .
 
             }
             """
+
