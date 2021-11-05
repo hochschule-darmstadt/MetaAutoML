@@ -1,4 +1,5 @@
 from AutoKerasManager import AutoKerasManager
+from FLAMLManager import FLAMLManager
 from MljarManager import MljarManager
 from AutoMLSession import AutoMLSession
 
@@ -26,10 +27,13 @@ class StructuredDataManager(object):
         """
         #FUTURE ADD CONDITION TO ONLY START REQUIRED AUTOML
         autoKeras = AutoKerasManager(configuration, folder_location)
+        flaml = FLAMLManager(configuration, folder_location)
         #mljar = MljarManager(configuration, folder_location)
         newSession = AutoMLSession(sessionId, configuration.task)
         autoKeras.start()
+        flaml.start()
         #mljar.start()
         newSession.AddAutoMLToSession(autoKeras)
+        newSession.AddAutoMLToSession(flaml)
         #newSession.AddAutoMLToSession(mljar)
         return newSession
