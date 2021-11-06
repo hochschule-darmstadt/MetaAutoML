@@ -3,6 +3,7 @@ import Controller_pb2
 import Controller_pb2_grpc
 import sys
 import pickle
+import json
 
 def print_cl_options():
     print("""
@@ -17,7 +18,8 @@ def print_cl_options():
     get-columns <dataset name>  returns all columns of a given dataset,
                                 e.g. if you want to get the column names of the dataset train.csv, then call
                                 get-columns train.csv
-    get-tasks <dataset name>    returns all tasks for a given dataset,
+    get-dataset-compatible-tasks <dataset name>    
+                                returns all tasks for a given dataset,
                                 e.g. if you want to the tasks for the dataset train.csv, then call
                                 get-tasks train.csv
     get-datasets                returns all datasets as json
@@ -80,14 +82,14 @@ def get_columns(argv, stub):
         print("get-columns requires exactly one argument <dataset names>")
 
 
-def get_tasks(argv, stub):
+def get_dataset_compatible_tasks(argv, stub):
     if len(argv) == 1:
         dataset_name = argv[0]
-        request = Controller_pb2.GetTasksRequest(datasetName=dataset_name)
-        response = stub.GetTasks(request)
+        request = Controller_pb2.GetDatasetCompatibleTasksRequest(datasetName=dataset_name)
+        response = stub.GetDatasetCompatibleTasks(request)
         print(f"{response}")
     else:
-        print("get-tasks requires exactly one argument <dataset names>")
+        print("get-dataset-compatible-tasks requires exactly one argument <dataset names>")
 
 
 def get_datasets(stub):
@@ -163,8 +165,8 @@ def process_command(command: str, argv: list, stub: Controller_pb2_grpc.Controll
         get_sessions(argv, stub)
     elif command == "get-columns":
         get_columns(argv, stub)
-    elif command == "get-tasks":
-        get_tasks(argv, stub)
+    elif command == "get-dataset-compatible-tasks":
+        get_dataset_compatible_tasks(argv, stub)
     elif command == "get-datasets":
         get_datasets(stub)
     elif command == "get-dataset":
