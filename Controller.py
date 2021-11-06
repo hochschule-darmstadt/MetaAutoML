@@ -80,15 +80,14 @@ class ControllerServiceServicer(Controller_pb2_grpc.ControllerServiceServicer):
         response = self._controllerManager.GetSessionStatus(request)
         return response
 
-
     def GetTabularDatasetColumnNames(self, request, context):
         """return all the column names of a tabular dataset."""
         response = self._controllerManager.GetTabularDatasetColumnNames(request)
         return response
 
-    def GetTasks(self, request, context):
+    def GetDatasetCompatibleTasks(self, request, context):
         """return all supported AutoML tasks."""
-        response = self._controllerManager.GetTasks(request)
+        response = self._controllerManager.GetDatasetCompatibleTasks(request)
         return response
 
     def UploadDatasetFile(self, request, context):

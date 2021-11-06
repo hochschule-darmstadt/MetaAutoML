@@ -57,7 +57,7 @@ class ControllerManager(object):
         columnNames = CsvManager.ReadColumnNames(os.path.join(self.__datasetFolder, request.datasetName))
         return columnNames
 
-    def GetDatasetCompatibleTasks(self, request) -> Controller_pb2.GetTasksResponse:
+    def GetDatasetCompatibleTasks(self, request) -> Controller_pb2.GetDatasetCompatibleTasksResponse:
         return self.__rdfManager.GetDatasetCompatibleTasks(request)
 
 
