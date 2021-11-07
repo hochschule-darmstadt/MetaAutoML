@@ -57,7 +57,7 @@ class ControllerServiceServicer(Controller_pb2_grpc.ControllerServiceServicer):
     def GetCompatibleAutoMlSolutions(self, request, context):
         """return a list of AutoML solutions compatible with the current configuration
         """
-        response = self._controllerManager.GetAutoMlModel(request)
+        response = self._controllerManager.GetCompatibleAUtoMlSolutions(request)
         return response
             
     def GetDatasets(self, request, context):
