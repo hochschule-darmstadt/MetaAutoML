@@ -8,6 +8,7 @@ __pycache__/
 
 #VS 
 *.suo
+*.pyproj
 
 #AutoMLs
 structured_data_classifier/
@@ -134,3 +135,6 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Jetbrains IDEAs
+.idea/
