@@ -81,6 +81,18 @@ def get_columns(argv, stub):
     else:
         print("get-columns requires exactly one argument <dataset names>")
 
+def get_compatible_automls(argv, stub):
+    if len(argv) == 1:
+        filename = argv[0]
+        with open(filename, 'r') as json_file:
+            config = json.load(json_file)
+        config = json.loads(config)
+        config_str = {str(key): str(value) for key, value in config.items()}
+        request = Controller_pb2.GetCompatibleAutoMlSolutionsRequest(configuration=config_str)
+        response = stub.GetCompatibleAutoMlSolutions(request)
+        print(f"{response}")
+    else:
+        print("get-compatible-automls requires exactly one argument <filename>")
 
 def get_dataset_compatible_tasks(argv, stub):
     if len(argv) == 1:
@@ -175,6 +187,8 @@ def process_command(command: str, argv: list, stub: Controller_pb2_grpc.Controll
         get_automl_model(argv, stub)
     elif command == "upload-dataset":
         upload_dataset(argv, stub)
+    elif command == "get-compatible-automls":
+        get_compatible_automls(argv, stub)
     else:
         print("invalid arguments")
 
