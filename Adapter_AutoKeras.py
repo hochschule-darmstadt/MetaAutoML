@@ -34,7 +34,20 @@ class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
                 if os.environ["RUNTIME"]: #Only available in Cluster
                     process = subprocess.Popen(["python", "AutoML.py", ""], stdout=subprocess.PIPE, universal_newlines=True)
             except KeyError: # Raise error if the variable is not set, only for local run
-                process = subprocess.Popen([".\env\Scripts\python.exe", "AutoML.py", ""], stdout=subprocess.PIPE, universal_newlines=True)
+                # Check os platform
+                if sys.platform == "linux" or sys.platform == "linux2":
+                    # Pythonpath on Linux systems
+                    pypath = "python"
+                elif sys.platform == "darwin":
+                    # Pythonpath on Mac OS X systems
+                    pypath = "python3"
+                elif sys.platform == "win32":
+                    # Pythonpath on Windows systems
+                    pypath = ".\env\Scripts\python.exe"
+                else:
+                    print("Error: Could not detect os platform")
+                    return
+                process = subprocess.Popen([pypath, "AutoML.py", ""], stdout=subprocess.PIPE, universal_newlines=True)
             capture = ""
             s = process.stdout.read(1)
             capture += s
