@@ -7,14 +7,17 @@ import Queries
 
 from rdflib.plugins.sparql import prepareQuery
 from rdflib.namespace import SKOS
+
 ML_ONTOLOGY_NAMESPACE = "http://h-da.de/ml-ontology/"
+
 
 class RdfManager(object):
     """
     RDF Manager to interact with the remote ML Ontology
     """
+
     def __init__(self):
-        ontologyPath = os.path.join( os.path.dirname(__file__), 'ontology\\ML_Ontology.ttl')
+        ontologyPath = os.path.join(os.path.dirname(__file__), 'ontology', 'ML_Ontology.ttl')
         self.__ontologyGraph = rdflib.Graph()
         self.__ontologyGraph.parse(ontologyPath, format='turtle')
         self.__log = logging.getLogger()
@@ -33,12 +36,11 @@ class RdfManager(object):
         self.__log.info(f"Executing SPARQL query: {query}")
         queryResult = self.__ontologyGraph.query(query, initBindings=binding)
         self.__log.info(f"Received {len(queryResult)} results")
-        
-        #for row in queryResult: #Remove default namespace name from any result
-         #   resultList.append(row.automl.replace(ML_ONTOLOGY_NAMESPACE, ""))
+
+        # for row in queryResult: #Remove default namespace name from any result
+        # resultList.append(row.automl.replace(ML_ONTOLOGY_NAMESPACE, ""))
 
         return queryResult
-        
 
     def GetCompatibleAutoMlSolutions(self, request) -> Controller_pb2.GetCompatibleAutoMlSolutionsResponse:
         """
@@ -51,22 +53,22 @@ class RdfManager(object):
         """
         result = Controller_pb2.GetCompatibleAutoMlSolutionsResponse()
 
-        if "task" not in request.configuration: #Check if task parameter is contained, we require it for a successful query
+        if "task" not in request.configuration:  # Check if task parameter is contained, we require it for a successful query
             self.__log.exception("Configuration dictonary does not contain the key task")
             result.AutoMlSolutions.append("Task parameter missing")
             return result
 
-        if  len(request.configuration["task"]) == 0: #Check if task parameter has value, we require it for a successful query
+        if len(request.configuration[
+                   "task"]) == 0:  # Check if task parameter has value, we require it for a successful query
             self.__log.exception("task key in configuration dictonary has no value")
             result.AutoMlSolutions.append("Task parameter value missing")
             return result
 
-
-        #TODO add more parameter to query
-        #task = rdflib.Literal(u'binary classification')
+        # TODO add more parameter to query
+        # task = rdflib.Literal(u'binary classification')
         task = rdflib.Literal(request.configuration["task"])
         q = prepareQuery(Queries.ONTOLOGY_QUERY_GET_ACTIVE_AUTOML_FOR_TASK,
-            initNs={"skos": SKOS})
+                         initNs={"skos": SKOS})
 
         queryResult = self.__executeQuery(q, {"task": task})
         for row in queryResult:
@@ -85,14 +87,14 @@ class RdfManager(object):
         result = Controller_pb2.GetDatasetCompatibleTasksResponse()
 
         ###TODO change approach, we want to log on upload what a dataset is, now we need to somehow guess it. ATM only tabular data is supported 
-        if len(request.datasetName) == 0: #Check if dataset name is present, we require it for a successful query
+        if len(request.datasetName) == 0:  # Check if dataset name is present, we require it for a successful query
             self.__log.exception("Dataset name is empty")
             result.tasks.append("Dataset name parameter empty")
             return result
 
         dataset = rdflib.Literal(u"tabular data")
         q = prepareQuery(Queries.ONTOLOGY_QUERY_GET_TASK_FOR_DATASET,
-            initNs={"skos": SKOS})
+                         initNs={"skos": SKOS})
 
         queryResult = self.__executeQuery(q, {"dataset": dataset})
         for row in queryResult:
