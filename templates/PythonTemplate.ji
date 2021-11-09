@@ -1,11 +1,13 @@
 import pickle
 import pandas as pd
 import numpy as np
+import sys
 
 from flaml import AutoML
 
 if __name__ == '__main__':
-	X = pd.read_csv(#REPLAVE WITH PATH TO PREDICTION CSV, quotechar='"', skipinitialspace=True)
+    filepath = sys.argv[1]
+    X = pd.read_csv(filepath, quotechar='"', skipinitialspace=True)
 	with open('flaml-model.p', 'rb') as file:
 		automl2 = pickle.load(file)
 

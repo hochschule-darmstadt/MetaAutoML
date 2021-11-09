@@ -14,10 +14,4 @@ if __name__ == '__main__':
     processJson = json.loads(processJson)
 
     structuredDataAutoML = StructuredDataAutoML(processJson)
-    if processJson["task"] == 1:
-        #Classification
-        structuredDataAutoML.classification()
-
-    if processJson["task"] == 2:
-        #Regression
-        structuredDataAutoML.regression()
+    structuredDataAutoML.execute_task()

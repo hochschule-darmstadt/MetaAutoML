@@ -7,24 +7,22 @@ class StructuredDataAutoML(object):
     """
     Implementation of the AutoML functionality fo structured data a.k.a. tabular data
     """
-    def __init__(self, json: dict):
+    def __init__(self, configuration: dict):
         """
         Init a new instance of StructuredDataAutoML
         ---
         Parameter:
         1. Configuration JSON of type dictionary
         """
-        self.__json = json
-        return
+        self.__configuration = configuration
 
     def __read_training_data(self):
         """
         Read the training dataset from disk
         """
-        df = pd.read_csv(os.path.join(self.__json["file_location"], self.__json["file_name"]))
-        self.__X = df.drop(self.__json["configuration"]["target"], axis=1)
-        self.__y = df[self.__json["configuration"]["target"]]
-        return
+        df = pd.read_csv(os.path.join(self.__configuration["file_location"], self.__configuration["file_name"]))
+        self.__X = df.drop(self.__configuration["configuration"]["target"], axis=1)
+        self.__y = df[self.__configuration["configuration"]["target"]]
 
     def __export_model(self, model):
         """
@@ -35,9 +33,17 @@ class StructuredDataAutoML(object):
         """
         with open('templates/output/flaml-model.p', 'wb') as file:
             pickle.dump(model, file)
-        return
 
-    def classification(self):
+    def execute_task(self):
+        """
+        Execute the ML task
+        """
+        if self.__configuration["task"] == 1:
+            self.__classification()
+        elif self.__configuration["task"] == 2:
+            self.__regression()
+
+    def __classification(self):
         """
         Execute the classification task
         """
@@ -52,9 +58,8 @@ class StructuredDataAutoML(object):
 
         automl.fit(X_train=self.__X, y_train=self.__y, **automl_settings)
         self.__export_model(automl)
-        return
 
-    def regression(self):
+    def __regression(self):
         """
         Execute the regression task
         """
@@ -69,4 +74,3 @@ class StructuredDataAutoML(object):
 
         automl.fit(X_train=self.__X, y_train=self.__y, **automl_settings)
         self.__export_model(automl)
-        return
