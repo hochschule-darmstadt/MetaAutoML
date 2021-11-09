@@ -3,6 +3,7 @@ from FLAMLManager import FLAMLManager
 from MljarManager import MljarManager
 from AutoMLSession import AutoMLSession
 
+
 class StructuredDataManager(object):
     """
     Implementation of a Structured data manager responsible for executing structured data AutoML sessions
@@ -14,7 +15,7 @@ class StructuredDataManager(object):
         """
         return
 
-    def StartAutoML(self, configuration, folder_location, sessionId) -> AutoMLSession:
+    def start_automl(self, configuration, folder_location, session_id) -> AutoMLSession:
         """
         Start a new AutoML session
         ---
@@ -25,15 +26,15 @@ class StructuredDataManager(object):
         ---
         Return a new AutoMLSession object
         """
-        #FUTURE ADD CONDITION TO ONLY START REQUIRED AUTOML
-        autoKeras = AutoKerasManager(configuration, folder_location)
+        # FUTURE ADD CONDITION TO ONLY START REQUIRED AUTOML
+        auto_keras = AutoKerasManager(configuration, folder_location)
         flaml = FLAMLManager(configuration, folder_location)
-        #mljar = MljarManager(configuration, folder_location)
-        newSession = AutoMLSession(sessionId, configuration.task)
-        autoKeras.start()
+        # mljar = MljarManager(configuration, folder_location)
+        new_session = AutoMLSession(session_id, configuration.task)
+        auto_keras.start()
         flaml.start()
-        #mljar.start()
-        newSession.AddAutoMLToSession(autoKeras)
-        newSession.AddAutoMLToSession(flaml)
-        #newSession.AddAutoMLToSession(mljar)
-        return newSession
+        # mljar.start()
+        new_session.AddAutoMLToSession(auto_keras)
+        new_session.AddAutoMLToSession(flaml)
+        # new_session.AddAutoMLToSession(mljar)
+        return new_session

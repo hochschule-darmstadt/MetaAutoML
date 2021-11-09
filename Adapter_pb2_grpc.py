@@ -34,7 +34,7 @@ class AdapterServiceServicer(object):
 def add_AdapterServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
             'StartAutoML': grpc.unary_stream_rpc_method_handler(
-                    servicer.StartAutoML,
+                    servicer.start_automl,
                     request_deserializer=Adapter__pb2.StartAutoMLRequest.FromString,
                     response_serializer=Adapter__pb2.StartAutoMLResponse.SerializeToString,
             ),

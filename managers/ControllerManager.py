@@ -17,10 +17,10 @@ class ControllerManager(object):
         self.__sessions = {}
         self.__sessionCounter = 1
         self.__datasetFolder = datasetFolder
-        #ensure dataset folder exists
+        # ensure dataset folder exists
         if not os.path.exists(self.__datasetFolder):
             os.makedirs(self.__datasetFolder)
-        return 
+        return
 
     def GetAutoMlModel(self, request) -> Controller_pb2.GetAutoMlModelResponse:
         return self.__sessions[request.sessionId].GetAutoMlModel(request)
@@ -30,20 +30,20 @@ class ControllerManager(object):
 
     def GetDatasets(self):
         datasets = Controller_pb2.GetDatasetsResponse()
-        #TODO: ADD DATASET MANAGEMENT OVER DATABASE
+        # TODO: ADD DATASET MANAGEMENT OVER DATABASE
         with os.scandir(self.__datasetFolder) as dirs:
             for entry in dirs:
                 dataset = Controller_pb2.Dataset()
                 dataset.fileName = entry.name
-                dataset.type = "TABULAR" 
+                dataset.type = "TABULAR"
                 datasets.dataset.append(dataset)
         return datasets
 
     def GetDataset(self, request) -> Controller_pb2.GetDatasetResponse:
-        #TODO WHEN USER MANAGEMENT IS ADDED; CORRECT FILTERING
+        # TODO WHEN USER MANAGEMENT IS ADDED; CORRECT FILTERING
         dataset = CsvManager.ReadDataset(os.path.join(self.__datasetFolder, request.name))
         return dataset
-    
+
     def GetSessions(self, request) -> Controller_pb2.GetSessionsResponse:
         response = Controller_pb2.GetSessionsResponse()
         for i in self.__sessions:
@@ -60,10 +60,9 @@ class ControllerManager(object):
     def GetDatasetCompatibleTasks(self, request) -> Controller_pb2.GetDatasetCompatibleTasksResponse:
         return self.__rdfManager.GetDatasetCompatibleTasks(request)
 
-
     def UploadNewDataset(self, dataset) -> Controller_pb2.UploadDatasetFileResponse:
-        #script_dir = os.path.dirname(os.path.abspath(__file__))
-        #file_dest = os.path.join(script_dir, 'datasets')
+        # script_dir = os.path.dirname(os.path.abspath(__file__))
+        # file_dest = os.path.join(script_dir, 'datasets')
         response = Controller_pb2.UploadDatasetFileResponse()
         response.returnCode = 0
         filename_dest = os.path.join(os.path.normpath(self.__datasetFolder), dataset.name)
@@ -73,7 +72,8 @@ class ControllerManager(object):
 
     def StartAutoMLProcess(self, configuration) -> Controller_pb2.StartAutoMLprocessResponse:
         response = Controller_pb2.StartAutoMLprocessResponse()
-        newSession = self.__structuredDataManager.StartAutoML(configuration, self.__datasetFolder, self.__sessionCounter)
+        newSession = self.__structuredDataManager.start_automl(configuration, self.__datasetFolder,
+                                                               self.__sessionCounter)
         self.__sessions[str(self.__sessionCounter)] = newSession
         self.__sessionCounter += 1
         response.result = 1
