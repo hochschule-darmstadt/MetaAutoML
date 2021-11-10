@@ -1,5 +1,5 @@
 ### Ontology file generated from ML_Ontology.xlsx.
-### 2021-11-05 11:00:34.733804
+### 2021-11-10 15:36:48.606048
 
 
 # PREFIXES
@@ -86,7 +86,7 @@
 :tabular_data a :ML_dataset ;
     skos:prefLabel "tabular data" ;
     rdfs:comment "A dataset presented in a tabulary form (CSV file)" ;
-    :used_for :binary_classification , :multiclass_classification , :tabular_regression; .
+    :used_for :tabular_classification , :tabular_regression; .
 
 
 # ML_area
@@ -124,7 +124,8 @@
     :belongs_to :supervised_learning .
 :tabular_classification a :ML_task ;
     skos:prefLabel "tabular classification" ;
-    skos:broader ":classification" .
+    skos:broader ":classification" ;
+    :belongs_to :supervised_learning .
 :image_classification a :ML_task ;
     skos:prefLabel "image classification" ;
     skos:broader ":classification" ;
@@ -180,6 +181,9 @@
     :belongs_to :supervised_learning , :unsupervised_learning .
 :time_series_analysis a :ML_task ;
     skos:prefLabel "time series analysis" .
+:ranking a :ML_task ;
+    skos:prefLabel "ranking" ;
+    :belongs_to :supervised_learning .
 
 
 # ML_approach
@@ -206,6 +210,10 @@
     skos:altLabel "AE" ;
     skos:broader :artificial_neural_network ;
     :used_for :anomaly_detection .
+:Autoregressive_intefrated_moving_average a :ML_approach ;
+    skos:prefLabel "Autoregressive intefrated moving average" ;
+    skos:altLabel "ARIMA" ;
+    :used_for :time_series_analysis .
 :bayesian_linear_regression a :ML_approach ;
     skos:prefLabel "bayesian linear regression" ;
     skos:broader :linear_regression ;
@@ -298,7 +306,7 @@
 :gradient_boosting_tree a :ML_approach ;
     skos:prefLabel "gradient boosting tree" ;
     skos:broader :boosted_decision_tree ;
-    :used_for :classification , :regression ;
+    :used_for :classification , :regression , :ranking ;
     :performance :accurate , :explainable .
 :hidden_Markov_model a :ML_approach ;
     skos:prefLabel "hidden Markov model" ;
@@ -362,7 +370,7 @@
     :used_for :feature_reduction .
 :logistic_regression a :ML_approach ;
     skos:prefLabel "logistic regression" ;
-    :used_for :classification , :regression ;
+    :used_for :classification , :regression , :ranking ;
     :performance :fast_training .
 :long_short_term_memory a :ML_approach ;
     skos:prefLabel "long short term memory" ;
@@ -405,6 +413,9 @@
     :used_for :feature_reduction , :anomaly_detection ;
     :possible_if :numerical_features ;
     :performance :fast_training .
+:Prophet a :ML_approach ;
+    skos:prefLabel "Prophet" ;
+    :used_for :time_series_analysis .
 :random_forest a :ML_approach ;
     skos:prefLabel "random forest" ;
     skos:broader :decision_tree ;
@@ -419,6 +430,10 @@
     skos:prefLabel "ridge regression" ;
     skos:broader :linear_regression ;
     :used_for :classification , :regression .
+:Seasonal_autoregressive_intefrated_moving_average_exogenous a :ML_approach ;
+    skos:prefLabel "Seasonal autoregressive intefrated moving average exogenous" ;
+    skos:altLabel "SARIMAX" ;
+    :used_for :time_series_analysis .
 :self_organizing_maps a :ML_approach ;
     skos:prefLabel "self-organizing maps" ;
     skos:altLabel "SOM" ;
@@ -516,13 +531,28 @@
 
 # ML_library
 
+:Catboost a :ML_library ;
+    skos:prefLabel "Catboost" .
+:Keras a :ML_library ;
+    skos:prefLabel "Keras" ;
+    skos:broader :Tensorflow .
+:LightGBM a :ML_library ;
+    skos:prefLabel "LightGBM" .
+:Prophet a :ML_library ;
+    skos:prefLabel "Prophet" .
+:pytorch a :ML_library ;
+    skos:prefLabel "pytorch" .
 :scikit_learn a :ML_library ;
     skos:prefLabel "scikit-learn" ;
     skos:altLabel "sklearn" .
+:Statsmodel a :ML_library ;
+    skos:prefLabel "Statsmodel" .
 :Tensorflow a :ML_library ;
     skos:prefLabel "Tensorflow" .
-:Keras a :ML_library ;
-    skos:prefLabel "Keras" .
+:XgBoost a :ML_library ;
+    skos:prefLabel "XgBoost" .
+:fastai a :ML_library ;
+    skos:prefLabel "fastai" .
 
 
 # Metric
@@ -533,6 +563,14 @@
     :recommended_if :balanced_dataset ;
     :not_recommended_if :unbalanced_dataset ;
     rdfs:seeAlso <https://en.wikipedia.org/wiki/Confusion_matrix> .
+:Average_precision_score a :ML_prediction_performance_measure ;
+    skos:prefLabel "Average precision score" ;
+    skos:altLabel "AP" ;
+    :used_for :classification .
+:Coefficient_of_determination a :ML_prediction_performance_measure ;
+    skos:prefLabel "Coefficient of determination" ;
+    skos:altLabel "R2" ;
+    :used_for :regression .
 :precision a :ML_prediction_performance_measure ;
     skos:prefLabel "precision" ;
     skos:altLabel "positive predictive value" , "PPV" ;
@@ -549,6 +587,14 @@
     :used_for :classification ;
     :recommended_if :unbalanced_dataset ;
     rdfs:seeAlso <https://en.wikipedia.org/wiki/Confusion_matrix> .
+:F_measure_micro a :ML_prediction_performance_measure ;
+    skos:prefLabel "F-measure micro" ;
+    skos:altLabel "F1 micro" ;
+    :used_for :classification .
+:F_measure_macro a :ML_prediction_performance_measure ;
+    skos:prefLabel "F-measure macro" ;
+    skos:altLabel "F1 macro" ;
+    :used_for :classification .
 :mean_squared_error a :ML_prediction_performance_measure ;
     skos:prefLabel "mean squared error" ;
     skos:altLabel "MSE" ;
@@ -559,11 +605,31 @@
     skos:altLabel "RMSE" ;
     :used_for :regression ;
     rdfs:seeAlso <https://en.wikipedia.org/wiki/Confusion_matrix> .
+:Log_loss a :ML_prediction_performance_measure ;
+    skos:prefLabel "Log loss" ;
+    skos:altLabel "Log loss" ;
+    :used_for :classification .
 :mean_absolute_error a :ML_prediction_performance_measure ;
     skos:prefLabel "mean absolute error" ;
     skos:altLabel "MAE" ;
     :used_for :regression ;
     rdfs:seeAlso <https://en.wikipedia.org/wiki/Confusion_matrix> .
+:mean_absolute_percentage_error a :ML_prediction_performance_measure ;
+    skos:prefLabel "mean absolute percentage error" ;
+    skos:altLabel "MAPE" ;
+    :used_for :regression , :time_series_forecasting .
+:Receiver_Operating_Characteristic_Curve a :ML_prediction_performance_measure ;
+    skos:prefLabel "Receiver Operating Characteristic Curve" ;
+    skos:altLabel "ROC AUC" ;
+    :used_for :classification , :regression .
+:Receiver_Operating_Characteristic_Curve_one_vs_rest a :ML_prediction_performance_measure ;
+    skos:prefLabel "Receiver Operating Characteristic Curve one vs rest" ;
+    skos:altLabel "ROC AUC OVR" ;
+    :used_for :classification , :regression .
+:Receiver_Operating_Characteristic_Curve_one_vs_one a :ML_prediction_performance_measure ;
+    skos:prefLabel "Receiver Operating Characteristic Curve one vs one" ;
+    skos:altLabel "ROC AUC OVO" ;
+    :used_for :classification , :regression .
 :specificity a :ML_prediction_performance_measure ;
     skos:prefLabel "specificity" ;
     skos:altLabel "selectivity" , "true negative rate" , "TNR" ;
@@ -612,6 +678,10 @@
     skos:prefLabel "markedness" ;
     skos:altLabel "MK" , "deltaP" ;
     rdfs:seeAlso <https://en.wikipedia.org/wiki/Confusion_matrix> .
+:Normalized_Discounted_Cumulative_Gain a :ML_prediction_performance_measure ;
+    skos:prefLabel "Normalized Discounted Cumulative Gain" ;
+    skos:altLabel "NDCG" ;
+    :used_for :ranking .
 :area_under_ROC_curve a :ML_prediction_performance_measure ;
     skos:prefLabel "area under ROC curve" ;
     skos:altLabel "AUC" ;
@@ -623,20 +693,36 @@
 
 # AutoML_solution
 
+:AutoGluon a :AutoML_solution ;
+    skos:prefLabel "AutoGluon" ;
+    :used_for :scikit_learn , :Catboost , :LightGBM , :XgBoost , :fastai , :pytorch ;
+    :is_active "no" ;
+    :can_perform :tabular_classification , :tabular_regression .
 :Autosklearn a :AutoML_solution ;
     skos:prefLabel "Autosklearn" ;
     :used_for :scikit_learn ;
-    :is_active "no" ;
-    :can_perform :binary_classification , :multiclass_classification , :tabular_regression; .
+    :is_active "yes" ;
+    :can_perform :tabular_classification , :tabular_regression .
 :Auto_Keras a :AutoML_solution ;
     skos:prefLabel "Auto-Keras" ;
     :used_for :Keras ;
     :is_active "yes" ;
-    :can_perform :binary_classification , :multiclass_classification , :tabular_regression; .
+    :can_perform :tabular_classification , :tabular_regression .
+:Auto_PyTorch a :AutoML_solution ;
+    skos:prefLabel "Auto-PyTorch" ;
+    :used_for :pytorch ;
+    :is_active "no" ;
+    :can_perform :tabular_classification , :tabular_regression , :image_classification .
 :Google_AutoML a :AutoML_solution ;
     skos:prefLabel "Google AutoML" ;
     :used_for :Tensorflow ;
-    :is_active "no" .
+    :is_active "no" ;
+    :can_perform :tabular_classification , :tabular_regression .
+:FLAML a :AutoML_solution ;
+    skos:prefLabel "FLAML" ;
+    :used_for :scikit_learn , :Catboost , :LightGBM ;
+    :is_active "yes" ;
+    :can_perform :tabular_classification , :tabular_regression , :ranking , :time_series_analysis .
 
 
 # Configuration_item
@@ -665,6 +751,30 @@
     :autoML_solution ":Auto_Keras" ;
     :ml_task :tabular_regression ;
     :parameter_value :mertric_autokeras_regression .
+:tabular_classification_in_FLAML a :Configuration_Item ;
+    skos:prefLabel "tabular classification in FLAML" ;
+    :category :task_configuration ;
+    :autoML_solution ":FLAML" ;
+    :ml_task :tabular_classification ;
+    :parameter_value :use_approach_FLAML_classification , :metric_FLAML_classification .
+:tabular_regression_in_FLAML a :Configuration_Item ;
+    skos:prefLabel "tabular regression in FLAML" ;
+    :category :task_configuration ;
+    :autoML_solution ":FLAML" ;
+    :ml_task :tabular_regression ;
+    :parameter_value :use_approach_FLAML_regression , :metric_FLAML_regression .
+:ranking_in_FLAML a :Configuration_Item ;
+    skos:prefLabel "ranking in FLAML" ;
+    :category :task_configuration ;
+    :autoML_solution ":FLAML" ;
+    :ml_task :ranking ;
+    :parameter_value :use_approach_FLAML_ranking , :metric_FLAML_ranking .
+:time_series_analysis_in_FLAML a :Configuration_Item ;
+    skos:prefLabel "time series analysis in FLAML" ;
+    :category :task_configuration ;
+    :autoML_solution ":FLAML" ;
+    :ml_task :time_series_analysis ;
+    :parameter_value :use_approach_FLAML_time_series_analysis , :metric_FLAML_time_series_analysis .
 :ensemble_nbest a :Configuration_Item ;
     skos:prefLabel "ensemble_nbest" ;
     :category :parameter ;
@@ -675,23 +785,62 @@
     :category :parameter ;
     :autoML_solution ":Autosklearn" ;
     :datatype :integer .
-:exclude_approach a :Configuration_Item ;
-    skos:prefLabel "exclude approach" ;
+:use_approach a :Configuration_Item ;
+    skos:prefLabel "use approach" ;
     :category :parameter .
-:exclude_approach_Autosklearn_classification a :Configuration_Item ;
-    skos:prefLabel "exclude approach Autosklearn classification" ;
+:use_approach_Autosklearn_classification a :Configuration_Item ;
+    skos:prefLabel "use approach Autosklearn classification" ;
     :category :parameter ;
-    skos:broader :exclude_approach ;
+    skos:broader :use_approach ;
     :autoML_solution ":Autosklearn" ;
     :datatype :list ;
     :parameter_value :adaboost , :decision_tree , :extra_tree , :gradient_boosting_tree , :k_nearest_neigbors , :linear_SVM , :multilayer_perceptor , :random_forest , :gaussian_naives_bayes .
-:exclude_approach_Autosklearn_regression a :Configuration_Item ;
-    skos:prefLabel "exclude approach Autosklearn regression" ;
+:use_approach_AutoKeras_classification a :Configuration_Item ;
+    skos:prefLabel "use approach AutoKeras classification" ;
     :category :parameter ;
-    skos:broader :exclude_approach ;
+    skos:broader :use_approach ;
+    :autoML_solution ":Auto_Keras" ;
+    :datatype :list .
+:use_approach_FLAML_classification a :Configuration_Item ;
+    skos:prefLabel "use approach FLAML classification" ;
+    :category :parameter ;
+    skos:broader :use_approach ;
+    :autoML_solution ":FLAML" ;
+    :datatype :list ;
+    :parameter_value :gradient_boosting_tree , :random_forest , :extra_tree , :logistic_regression , :k_nearest_neighbors .
+:use_approach_Autosklearn_regression a :Configuration_Item ;
+    skos:prefLabel "use approach Autosklearn regression" ;
+    :category :parameter ;
+    skos:broader :use_approach ;
     :autoML_solution ":Autosklearn" ;
     :datatype :list ;
     :parameter_value :adaboost , :bayesian_linear_regression , :decision_tree , :extra_tree , :gaussian_processes , :gradient_boosting_tree , :k_nearest_neigbors , :linear_SVM , :multilayer_perceptor , :random_forest .
+:use_approach_AutoKeras_regression a :Configuration_Item ;
+    skos:prefLabel "use approach AutoKeras regression" ;
+    :category :parameter ;
+    skos:broader :use_approach ;
+    :autoML_solution ":Auto_Keras" ;
+    :datatype :list .
+:use_approach_FLAML_regression a :Configuration_Item ;
+    skos:prefLabel "use approach FLAML regression" ;
+    :category :parameter ;
+    skos:broader :use_approach ;
+    :autoML_solution ":FLAML" ;
+    :datatype :list ;
+    :parameter_value :gradient_boosting_tree , :random_forest , :extra_tree , :k_nearest_neighbors .
+:use_approach_FLAML_time_series_analysis a :Configuration_Item ;
+    skos:prefLabel "use approach FLAML time series analysis" ;
+    :category :parameter ;
+    skos:broader :use_approach ;
+    :autoML_solution ":FLAML" ;
+    :datatype :list ;
+    :parameter_value :Prophet , :auto_regressive_integrated_moving_average , :Autoregressive_intefrated_moving_average .
+:use_approach_FLAML_ranking a :Configuration_Item ;
+    skos:prefLabel "use approach FLAML ranking" ;
+    :category :parameter ;
+    skos:broader :use_approach ;
+    :autoML_solution ":FLAML" ;
+    :parameter_value :logistic_regression , :gradient_boosting_tree .
 :exclude_preprocessor a :Configuration_Item ;
     skos:prefLabel "exclude preprocessor" ;
     :category :parameter .
@@ -706,40 +855,6 @@
     skos:prefLabel "exclude preprocessor Autosklearn regression" ;
     :category :parameter ;
     skos:broader :exclude_preprocessor ;
-    :autoML_solution ":Autosklearn" ;
-    :datatype :list ;
-    :parameter_value :kernal_principal_component_analysis , :radial_basis_function_kernel , :nystroem_kernel_approximation .
-:include_approach a :Configuration_Item ;
-    skos:prefLabel "include approach" ;
-    :category :parameter .
-:include_approach_Autosklearn_classification a :Configuration_Item ;
-    skos:prefLabel "include approach Autosklearn classification" ;
-    :category :parameter ;
-    skos:broader :include_approach ;
-    :autoML_solution ":Autosklearn" ;
-    :datatype :list ;
-    :parameter_value :adaboost , :decision_tree , :extra_tree , :gradient_boosting_tree , :k_nearest_neigbors , :linear_SVM , :multilayer_perceptor , :random_forest , :gaussian_naives_bayes .
-:include_approach_Autosklearn_regression a :Configuration_Item ;
-    skos:prefLabel "include approach Autosklearn regression" ;
-    :category :parameter ;
-    skos:broader :include_approach ;
-    :autoML_solution ":Autosklearn" ;
-    :datatype :list ;
-    :parameter_value :adaboost , :bayesian_linear_regression , :decision_tree , :extra_tree , :gaussian_processes , :gradient_boosting_tree , :k_nearest_neigbors , :linear_SVM , :multilayer_perceptor , :random_forest .
-:include_preprocessor a :Configuration_Item ;
-    skos:prefLabel "include preprocessor" ;
-    :category :parameter .
-:include_proprocessor_Autosklearn_classification a :Configuration_Item ;
-    skos:prefLabel "include proprocessor Autosklearn classification" ;
-    :category :parameter ;
-    skos:broader :include_preprocessor ;
-    :autoML_solution ":Autosklearn" ;
-    :datatype :list ;
-    :parameter_value :kernal_principal_component_analysis , :radial_basis_function_kernel , :nystroem_kernel_approximation .
-:include_proprocessor_Autosklearn_regression a :Configuration_Item ;
-    skos:prefLabel "include proprocessor Autosklearn regression" ;
-    :category :parameter ;
-    skos:broader :include_preprocessor ;
     :autoML_solution ":Autosklearn" ;
     :datatype :list ;
     :parameter_value :kernal_principal_component_analysis , :radial_basis_function_kernel , :nystroem_kernel_approximation .
@@ -758,7 +873,7 @@
     :autoML_solution ":Autosklearn" ;
     :ml_task :tabular_classification ;
     :datatype :single_value ;
-    :parameter_value :accuracy , :balanced_accuracy , :f1 , :f1_macro .
+    :parameter_value :accuracy , :balanced_accuracy , :F_measure , :F_measure_macro .
 :metric_autokeras_classification a :Configuration_Item ;
     skos:prefLabel "metric autokeras classification" ;
     :category :parameter ;
@@ -766,6 +881,14 @@
     :autoML_solution ":Auto_Keras" ;
     :ml_task :tabular_classification ;
     :datatype :list .
+:metric_FLAML_classification a :Configuration_Item ;
+    skos:prefLabel "metric FLAML classification" ;
+    :category :parameter ;
+    skos:broader :metric ;
+    :autoML_solution ":FLAML" ;
+    :ml_task :tabular_classification ;
+    :datatype :single_value ;
+    :parameter_value :accuracy , :Receiver_Operating_Characteristic_Curve , :Receiver_Operating_Characteristic_Curve_one_vs_rest , :Log_loss , :Receiver_Operating_Characteristic_Curve_one_vs_one , :Average_precision_score , :F_measure , :F_measure_micro , :F_measure_macro .
 :metric_Autosklearn_regression a :Configuration_Item ;
     skos:prefLabel "metric Autosklearn regression" ;
     :category :parameter ;
@@ -781,6 +904,30 @@
     :autoML_solution ":Auto_Keras" ;
     :ml_task :tabular_regression ;
     :datatype :list .
+:metric_FLAML_regression a :Configuration_Item ;
+    skos:prefLabel "metric FLAML regression" ;
+    :category :parameter ;
+    skos:broader :metric ;
+    :autoML_solution ":FLAML" ;
+    :ml_task :tabular_regression ;
+    :datatype :single_value ;
+    :parameter_value :Coefficient_of_determination , :mean_squared_error , :rooted_mean_squared_error , :mean_absolute_error , :Receiver_Operating_Characteristic_Curve_one_vs_rest , :Receiver_Operating_Characteristic_Curve_one_vs_one , :Receiver_Operating_Characteristic_Curve , :mean_absolute_percentage_error .
+:metric_FLAML_ranking a :Configuration_Item ;
+    skos:prefLabel "metric FLAML ranking" ;
+    :category :parameter ;
+    skos:broader :metric ;
+    :autoML_solution ":FLAML" ;
+    :ml_task :ranking ;
+    :datatype :single_value ;
+    :parameter_value :Normalized_Discounted_Cumulative_Gain .
+:metric_FLAML_time_series_analysis a :Configuration_Item ;
+    skos:prefLabel "metric FLAML time series analysis" ;
+    :category :parameter ;
+    skos:broader :metric ;
+    :autoML_solution ":FLAML" ;
+    :ml_task :time_series_analysis ;
+    :datatype :single_value ;
+    :parameter_value :mean_absolute_percentage_error .
 :time_limit a :Configuration_Item ;
     skos:prefLabel "time limit" ;
     :category :parameter ;

@@ -22,7 +22,7 @@ class TestRdfManager(unittest.TestCase):
 
     def test_GetCompatibleAutoMlSolutions_Success(self):
         request = Controller_pb2.GetCompatibleAutoMlSolutionsRequest()
-        request.configuration["task"] = "binary classification"
+        request.configuration["task"] = "tabular classification"
         result = self.__rdfManager.GetCompatibleAutoMlSolutions(request)
         self.assertTrue(len(result.AutoMlSolutions) > 0)
         
@@ -38,6 +38,25 @@ class TestRdfManager(unittest.TestCase):
         request.datasetName = "Titanic.csv"
         result = self.__rdfManager.GetDatasetCompatibleTasks(request)
         self.assertTrue(len(result.tasks) > 0)
+        
+    ###GetSupportedMlLibraries unit test
+    def test_GetSupportedMlLibraries_emptyDatasetNameParameterValue(self):
+        request = Controller_pb2.GetSupportedMlLibrariesRequest()
+        request.task = ""
+        result = self.__rdfManager.GetSupportedMlLibraries(request)
+        self.assertEqual(result.MlLibraries[0], "Task parameter value missing")
+
+    def test_GetSupportedMlLibraries_notSupportedTask(self):
+        request = Controller_pb2.GetSupportedMlLibrariesRequest()
+        request.task = "imaginary classification"
+        result = self.__rdfManager.GetSupportedMlLibraries(request)
+        self.assertTrue(len(result.MlLibraries) == 0)
+
+    def test_GetSupportedMlLibraries_Success(self):
+        request = Controller_pb2.GetSupportedMlLibrariesRequest()
+        request.task = "tabular classification"
+        result = self.__rdfManager.GetSupportedMlLibraries(request)
+        self.assertTrue(len(result.MlLibraries) > 0)
 
 if __name__ =='__main__':
     unittest.main()

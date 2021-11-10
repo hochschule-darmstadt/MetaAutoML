@@ -56,6 +56,9 @@ class ControllerManager(object):
     def GetTabularDatasetColumnNames(self, request) -> Controller_pb2.GetTabularDatasetColumnNamesResponse:
         columnNames = CsvManager.ReadColumnNames(os.path.join(self.__datasetFolder, request.datasetName))
         return columnNames
+    
+    def GetSupportedMlLibraries(self, request) -> Controller_pb2.GetSupportedMlLibrariesResponse:
+        return self.__rdfManager.GetSupportedMlLibraries(request)
 
     def GetDatasetCompatibleTasks(self, request) -> Controller_pb2.GetDatasetCompatibleTasksResponse:
         return self.__rdfManager.GetDatasetCompatibleTasks(request)

@@ -80,6 +80,12 @@ class ControllerServiceServicer(Controller_pb2_grpc.ControllerServiceServicer):
         response = self._controllerManager.GetSessionStatus(request)
         return response
 
+    def GetSupportedMlLibraries(self, request, context):
+        """return all supported machine learning libraries for a specific task (by searching supported AutoML)
+        """
+        response = self._controllerManager.GetSupportedMlLibraries(request)
+        return response
+
     def GetTabularDatasetColumnNames(self, request, context):
         """return all the column names of a tabular dataset."""
         response = self._controllerManager.GetTabularDatasetColumnNames(request)

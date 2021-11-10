@@ -25,3 +25,17 @@ ONTOLOGY_QUERY_GET_TASK_FOR_DATASET = """
             }
             """
 
+ONTOLOGY_QUERY_GET_SUPPORTED_MACHINE_LEARNING_LIBRARY = """
+            PREFIX : <http://h-da.de/ml-ontology/>
+            SELECT DISTINCT ?library
+            WHERE {
+            ?automl a :AutoML_solution ;
+                       :can_perform ?task ;
+                       :is_active "yes" ;
+                       :used_for ?lib .
+            ?task a :ML_task ;
+                       skos:prefLabel ?taskName .
+            ?lib a :ML_library ;
+                        skos:prefLabel ?library .
+            }
+            """
