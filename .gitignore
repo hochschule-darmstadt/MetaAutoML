@@ -127,3 +127,17 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# jetbrains ideas project config files
+.idea/
+
+# temporary files
+tmp/
+
+# by adapter generated files
+*-model.p
+*-export.zip
+*-job.json
+templates/output/*.py
+templates/output/*.p
+templates/output/*.txt

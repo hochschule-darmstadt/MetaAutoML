@@ -11,4 +11,4 @@ WORKDIR /
 VOLUME ["/app-data"]
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONPATH "/AutoMLs:/templates:/templates/output"
-ENTRYPOINT ["python", "Adapter_*.py"] //EDIT
+ENTRYPOINT ["python", "Adapter_Autosklearn.py"]
