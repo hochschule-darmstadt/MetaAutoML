@@ -14,22 +14,23 @@ import Adapter_pb2_grpc
 from concurrent import futures
 from TemplateGenerator import TemplateGenerator
 
-class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
-    """ AutoML Adapter Service implementation. Service provide functionality to execute and interact with the current AutoML process. """
 
-    def __init__(self):
-        self = self
+class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
+    """
+    AutoML Adapter Service implementation.
+    Service provide functionality to execute and interact with the current AutoML process.
+    """
 
     def StartAutoML(self, request, context):
         """ 
         Execute a new AutoML run. 
         """
         try:
-            #saving AutoML configuration JSON
-            with open('keras-job.json',"w+") as f:
+            # saving AutoML configuration JSON
+            with open('keras-job.json', "w+") as f:
                 json.dump(request.processJson, f)
-            
-            #Start AutoML process
+            config_json = json.loads(request.processJson)
+            # Start AutoML process
             try:
                 if os.environ["RUNTIME"]: #Only available in Cluster
                     process = subprocess.Popen(["python", "AutoML.py", ""], stdout=subprocess.PIPE, universal_newlines=True)
@@ -51,9 +52,9 @@ class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
             capture = ""
             s = process.stdout.read(1)
             capture += s
-            #Run until no more output is produced by the subprocess
+            # Run until no more output is produced by the subprocess
             while len(s) > 0:
-                if capture[len(capture)-1] is '\n':
+                if capture[len(capture) - 1] is '\n':
                     processUpdate = Adapter_pb2.StartAutoMLResponse()
                     processUpdate.returnCode = Adapter_pb2.ADAPTER_RETURN_CODE_STATUS_UPDATE
                     processUpdate.statusUpdate = capture
@@ -64,38 +65,39 @@ class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
                     capture = ""
                 capture += s
                 s = process.stdout.read(1)
-            #Generate python script
+            # Generate python script
             generator = TemplateGenerator()
-            generator.GenerateScript()
-            #Zip content
+            generator.generate_script(config_json['task'])
+            # Zip content
             BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-            outputJson = {}
+            output_json = {}
             try:
-                if os.environ["RUNTIME"]: #Only available in Cluster
+                if os.environ["RUNTIME"]:  # Only available in Cluster
                     print("RUNNING DOCKER")
-                    if not os.path.exists("omaml/output"): #ensure output folder exists
+                    if not os.path.exists("omaml/output"):  # ensure output folder exists
                         os.makedirs("omaml/output")
                     zip_content_path = os.path.join(BASE_DIR, "templates/output")
                     shutil.make_archive("keras-export", 'zip', zip_content_path)
-                    shutil.move("keras-export.zip","omaml/output/keras-export.zip")
-                    outputJson = {"file_name": "keras-export.zip"} 
-                    outputJson.update({"file_location": "omaml/output/"})
+                    shutil.move("keras-export.zip", "omaml/output/keras-export.zip")
+                    output_json = {"file_name": "keras-export.zip"}
+                    output_json.update({"file_location": "omaml/output/"})
             except KeyError:  # Raise error if the variable is not set, only for local run
                 print("RUNNING LOCAL")
-                zip_content_path = os.path.join(BASE_DIR, "Adapter-AutoKeras/templates/output")
+                zip_content_path = os.path.join(BASE_DIR, "MetaAutoML-Adapter-AutoKeras/templates/output")
                 shutil.make_archive("keras-export", 'zip', zip_content_path)
-                outputJson = {"file_name": "keras-export.zip"} 
-                outputJson.update({"file_location": os.path.join(BASE_DIR, "Adapter-AutoKeras")})
-        
+                output_json = {"file_name": "keras-export.zip"}
+                output_json.update({"file_location": os.path.join(BASE_DIR, "MetaAutoML-Adapter-AutoKeras")})
+
             response = Adapter_pb2.StartAutoMLResponse()
             response.returnCode = Adapter_pb2.ADAPTER_RETURN_CODE_SUCCESS
-            response.outputJson = json.dumps(outputJson)
+            response.outputJson = json.dumps(output_json)
             yield response
         except Exception as e:
-            print(e.message)
-            context.set_details(f"Error while executing AutoKeras: {e.message}")
+            print(e)
+            context.set_details(f"Error while executing AutoKeras: {e}")
             context.set_code(grpc.StatusCode.UNAVAILABLE)
             return Adapter_pb2.StartAutoMLResponse()
+
 
 def serve():
     """
