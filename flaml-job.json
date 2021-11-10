@@ -1,1 +1,1 @@
-"{\"file_name\": \"titanic_train_1.csv\", \"file_location\": \"/home/alex/PycharmProjects/MetaAutoML-Controller/omaml/datasets\", \"task\": 1, \"configuration\": {\"target\": \"Survived\"}}"
+"{\"file_name\": \"titanic_train_1.csv\", \"file_location\": \"/home/alex/PycharmProjects/MetaAutoML-Controller/omaml/datasets\", \"task\": 1, \"configuration\": {\"target\": \"Survived\", \"features\": {\"Pclass\": 2, \"Age\": 3, \"Cabin\": 1, \"PassengerId\": 7, \"Parch\": 2, \"Fare\": 3, \"Ticket\": 7, \"SibSp\": 2, \"Embarked\": 4, \"Name\": 7, \"Sex\": 4}}, \"time_budget\": 15}"
