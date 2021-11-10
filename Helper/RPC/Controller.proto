@@ -16,6 +16,8 @@ service ControllerService {
 	rpc GetSessions(GetSessionsRequest) returns (GetSessionsResponse) {}
 	/*return the status of a specific session. The result is a session status and a list of the automl output and its status*/
 	rpc GetSessionStatus(GetSessionStatusRequest) returns (GetSessionStatusResponse) {}
+	/*return all supported machine learning libraries for a specific task (by searching supported AutoML)*/
+	rpc GetSupportedMlLibraries(GetSupportedMlLibrariesRequest) returns (GetSupportedMlLibrariesResponse) {}
 	/*return all the column names of a tabular dataset*/
 	rpc GetTabularDatasetColumnNames(GetTabularDatasetColumnNamesRequest) returns (GetTabularDatasetColumnNamesResponse) {}
 	/*return all supported AutoML tasks*/
@@ -114,6 +116,14 @@ message GetSessionStatusRequest {
 message GetSessionStatusResponse {
 	SessionStatus status = 1;
 	repeated AutoMLStatus automls = 2;
+}
+
+message GetSupportedMlLibrariesRequest {
+	string task = 1;
+}
+
+message GetSupportedMlLibrariesResponse {
+	repeated string MlLibraries = 1;
 }
 
 message AutoMLStatus {

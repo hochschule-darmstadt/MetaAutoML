@@ -45,6 +45,11 @@ class ControllerServiceStub(object):
                 request_serializer=Controller__pb2.GetSessionStatusRequest.SerializeToString,
                 response_deserializer=Controller__pb2.GetSessionStatusResponse.FromString,
                 )
+        self.GetSupportedMlLibraries = channel.unary_unary(
+                '/ControllerService/GetSupportedMlLibraries',
+                request_serializer=Controller__pb2.GetSupportedMlLibrariesRequest.SerializeToString,
+                response_deserializer=Controller__pb2.GetSupportedMlLibrariesResponse.FromString,
+                )
         self.GetTabularDatasetColumnNames = channel.unary_unary(
                 '/ControllerService/GetTabularDatasetColumnNames',
                 request_serializer=Controller__pb2.GetTabularDatasetColumnNamesRequest.SerializeToString,
@@ -113,6 +118,13 @@ class ControllerServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def GetSupportedMlLibraries(self, request, context):
+        """return all supported machine learning libraries for a specific task (by searching supported AutoML)
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
     def GetTabularDatasetColumnNames(self, request, context):
         """return all the column names of a tabular dataset
         """
@@ -173,6 +185,11 @@ def add_ControllerServiceServicer_to_server(servicer, server):
                     servicer.GetSessionStatus,
                     request_deserializer=Controller__pb2.GetSessionStatusRequest.FromString,
                     response_serializer=Controller__pb2.GetSessionStatusResponse.SerializeToString,
+            ),
+            'GetSupportedMlLibraries': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetSupportedMlLibraries,
+                    request_deserializer=Controller__pb2.GetSupportedMlLibrariesRequest.FromString,
+                    response_serializer=Controller__pb2.GetSupportedMlLibrariesResponse.SerializeToString,
             ),
             'GetTabularDatasetColumnNames': grpc.unary_unary_rpc_method_handler(
                     servicer.GetTabularDatasetColumnNames,
@@ -304,6 +321,23 @@ class ControllerService(object):
         return grpc.experimental.unary_unary(request, target, '/ControllerService/GetSessionStatus',
             Controller__pb2.GetSessionStatusRequest.SerializeToString,
             Controller__pb2.GetSessionStatusResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def GetSupportedMlLibraries(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/ControllerService/GetSupportedMlLibraries',
+            Controller__pb2.GetSupportedMlLibrariesRequest.SerializeToString,
+            Controller__pb2.GetSupportedMlLibrariesResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
