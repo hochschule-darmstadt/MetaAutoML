@@ -6,12 +6,14 @@ import Controller_pb2_grpc
 
 FIRST_ROW_AMOUNT = 50
 
+
 class CsvManager:
     """
     Static CSV Manager class to interact with the local file system
     """
+
     @staticmethod
-    def ReadDataset(path) -> Controller_pb2.GetDatasetResponse:
+    def read_dataset(path) -> Controller_pb2.GetDatasetResponse:
         """
         Read a dataset from the disk
         ---
@@ -25,16 +27,14 @@ class CsvManager:
         for col in dataset.columns:
             column_information = Controller_pb2.TableColumn()
             column_information.name = col
-            print(np.dtype(np.int64).type)
-            print(np.dtype(np.int64))
-            column_information.type = CsvManager.__GetDatatype(dataset[col].dtype)
+            column_information.type = CsvManager.__get_datatype(dataset[col].dtype)
             for item in dataset[col].head(FIRST_ROW_AMOUNT).tolist():
                 column_information.fistEntries.append(str(item))
             response.columns.append(column_information)
         return response
 
     @staticmethod
-    def __GetDatatype(value):
+    def __get_datatype(value):
         """
         Identify the np datatype and mark correct OMAML datatype
         ---
@@ -59,7 +59,7 @@ class CsvManager:
             return Controller_pb2.DATATYPE_UNKNOW
 
     @staticmethod
-    def ReadColumnNames(path) -> Controller_pb2.GetTabularDatasetColumnNamesResponse:
+    def read_column_names(path) -> Controller_pb2.GetTabularDatasetColumnNamesResponse:
         """
         Read only the column names of a dataset
         ---

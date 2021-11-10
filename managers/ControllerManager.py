@@ -41,7 +41,7 @@ class ControllerManager(object):
 
     def GetDataset(self, request) -> Controller_pb2.GetDatasetResponse:
         # TODO WHEN USER MANAGEMENT IS ADDED; CORRECT FILTERING
-        dataset = CsvManager.ReadDataset(os.path.join(self.__datasetFolder, request.name))
+        dataset = CsvManager.read_dataset(os.path.join(self.__datasetFolder, request.name))
         return dataset
 
     def GetSessions(self, request) -> Controller_pb2.GetSessionsResponse:
@@ -54,7 +54,7 @@ class ControllerManager(object):
         return self.__sessions[request.id].GetSessionStatus()
 
     def GetTabularDatasetColumnNames(self, request) -> Controller_pb2.GetTabularDatasetColumnNamesResponse:
-        columnNames = CsvManager.ReadColumnNames(os.path.join(self.__datasetFolder, request.datasetName))
+        columnNames = CsvManager.read_column_names(os.path.join(self.__datasetFolder, request.datasetName))
         return columnNames
     
     def GetSupportedMlLibraries(self, request) -> Controller_pb2.GetSupportedMlLibrariesResponse:

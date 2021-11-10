@@ -29,7 +29,7 @@ class AutoMLManager(ABC, Thread):
         2. folder location of the training dataset
         """
         super(AutoMLManager, self).__init__()
-        self.__configuration = configuration
+        self._configuration = configuration
         self.__file_dest = folder_location
         self.__result_json = ""
         self.__is_completed = False
@@ -93,7 +93,7 @@ class AutoMLManager(ABC, Thread):
             stub = Adapter_pb2_grpc.AdapterServiceStub(channel)  ## Create Interface Stub
 
             datasetToSend = Adapter_pb2.StartAutoMLRequest()  ## Request Object
-            processJson = self.__generate_process_json()
+            processJson = self._generate_process_json()
             datasetToSend.processJson = json.dumps(processJson)
 
             try:  # Run until server closes connection
@@ -112,11 +112,12 @@ class AutoMLManager(ABC, Thread):
                 self.__last_status = Controller_pb2.SESSION_STATUS_FAILED
                 return
 
-    def __generate_process_json(self):
-        process_json = {"file_name": self.__configuration.dataset}
+    def _generate_process_json(self):
+        process_json = {"file_name": self._configuration.dataset}
         process_json.update({"file_location": self.__file_dest})
-        process_json.update({"task": self.__configuration.task})
-        process_json.update({"configuration": {"target": self.__configuration.tabularConfig.target}})
+        process_json.update({"task": self._configuration.task})
+        process_json.update({"configuration": {"target": self._configuration.tabularConfig.target,
+                                               "features": dict(self._configuration.tabularConfig.features)}})
         return process_json
 
     def GetResult(self):
