@@ -1,0 +1,36 @@
+[submodule "util/MetaAutoML-Diverse"]
+	path = util/MetaAutoML-Diverse
+	url = git@github.com:hochschule-darmstadt/MetaAutoML-Diverse.git
+	branch = main
+[submodule "adapters/MetaAutoML-Adapter-AutoKeras"]
+	path = adapters/MetaAutoML-Adapter-AutoKeras
+	url = git@github.com:hochschule-darmstadt/MetaAutoML-Adapter-AutoKeras.git
+	branch = main
+[submodule "adapters/MetaAutoML-Adapter-FLAML"]
+	path = adapters/MetaAutoML-Adapter-FLAML
+	url = git@github.com:hochschule-darmstadt/MetaAutoML-Adapter-FLAML.git
+	branch = main
+[submodule "adapters/MetaAutoML-Adapter-AutoPytorch"]
+	path = adapters/MetaAutoML-Adapter-AutoPytorch
+	url = git@github.com:hochschule-darmstadt/MetaAutoML-Adapter-AutoPytorch.git
+	branch = main
+[submodule "adapters/MetaAutoML-Adapter-Autosklearn"]
+	path = adapters/MetaAutoML-Adapter-Autosklearn
+	url = git@github.com:hochschule-darmstadt/MetaAutoML-Adapter-Autosklearn.git
+	branch = main
+[submodule "adapters/MetaAutoML-Adapter-MLJAR"]
+	path = adapters/MetaAutoML-Adapter-MLJAR
+	url = git@github.com:hochschule-darmstadt/MetaAutoML-Adapter-MLJAR.git
+	branch = main
+[submodule "adapters/MetaAutoML-Adapter-AutoGluon"]
+	path = adapters/MetaAutoML-Adapter-AutoGluon
+	url = git@github.com:hochschule-darmstadt/MetaAutoML-Adapter-AutoGluon.git
+	branch = main
+[submodule "MetaAutoML-Frontend"]
+	path = MetaAutoML-Frontend
+	url = git@github.com:hochschule-darmstadt/MetaAutoML-Frontend.git
+	branch = main
+[submodule "MetaAutoML-Controller"]
+	path = MetaAutoML-Controller
+	url = git@github.com:hochschule-darmstadt/MetaAutoML-Controller.git
+	branch = main
