@@ -61,7 +61,7 @@ class AutoMLManager(ABC, Thread):
         Return the current AutoML status
         """
         status = Controller_pb2.AutoMLStatus()
-        status.name = AutoMLManager.name
+        status.name = self.name
         status.status = self.__last_status
         status.messages[:] = self.__status_messages
         return status
