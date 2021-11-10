@@ -5,6 +5,7 @@ import sys
 import pickle
 import json
 
+
 def print_cl_options():
     print("""
     help                        print all commands
@@ -31,6 +32,7 @@ def print_cl_options():
     upload-dataset <file name>  uploads the specified file as a dataset
     """)
 
+
 def get_automl_model(argv: list, stub: Controller_pb2_grpc.ControllerServiceStub):
     if len(argv) == 2:
         session_id = argv[0]
@@ -43,6 +45,7 @@ def get_automl_model(argv: list, stub: Controller_pb2_grpc.ControllerServiceStub
     else:
         print("get_automl_model requires exactly one argument <session id>")
 
+
 def upload_dataset(argv: list, stub: Controller_pb2_grpc.ControllerServiceStub):
     if len(argv) == 1:
         filename = argv[0]
@@ -53,6 +56,7 @@ def upload_dataset(argv: list, stub: Controller_pb2_grpc.ControllerServiceStub):
         print(f"{response}")
     else:
         print("upload_dataset requires exactly one argument <file name>")
+
 
 def get_session_status(argv: list, stub: Controller_pb2_grpc.ControllerServiceStub):
     if len(argv) == 1:
@@ -81,6 +85,7 @@ def get_columns(argv, stub):
     else:
         print("get-columns requires exactly one argument <dataset names>")
 
+
 def get_compatible_automls(argv, stub):
     if len(argv) == 1:
         filename = argv[0]
@@ -93,6 +98,7 @@ def get_compatible_automls(argv, stub):
         print(f"{response}")
     else:
         print("get-compatible-automls requires exactly one argument <filename>")
+
 
 def get_dataset_compatible_tasks(argv, stub):
     if len(argv) == 1:
@@ -141,6 +147,10 @@ def start_automl(argv: list, stub: Controller_pb2_grpc.ControllerServiceStub):
             print("task has to be 'regression' or 'classification'")
             return
 
+    filename = 'features_config.json'
+    with open(filename, 'r') as json_file:
+        features_config = json.load(json_file)
+
     tabular_config = Controller_pb2.AutoMLConfigurationTabularData(target=target_column)
 
     request = Controller_pb2.StartAutoMLprocessRequest(dataset=dataset_name,
@@ -154,7 +164,7 @@ def start_automl(argv: list, stub: Controller_pb2_grpc.ControllerServiceStub):
 def get_dataset(argv, stub):
     if len(argv) == 1:
         request = Controller_pb2.GetDatasetRequest(name=argv[0])
-        response = stub.GetDatasets(request)
+        response = stub.GetDataset(request)
         print(f"{response}")
     else:
         print("get-dataset requires exactly one argument <dataset name>")
@@ -197,7 +207,7 @@ def run():
     with open('root.crt', 'rb') as f:
         creds = grpc.ssl_channel_credentials(f.read())
     channel = grpc.secure_channel('localhost:5001', creds)
-    #channel = grpc.insecure_channel('localhost:50051')
+    # channel = grpc.insecure_channel('localhost:50051')
     stub = Controller_pb2_grpc.ControllerServiceStub(channel)
     process_command(sys.argv[1], sys.argv[2:], stub)
 
