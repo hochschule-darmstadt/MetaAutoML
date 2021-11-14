@@ -1,0 +1,13 @@
+{
+  "PassengerId": 7,
+  "Pclass": 2,
+  "Name": 7,
+  "Sex": 4,
+  "Age": 3,
+  "SibSp": 2,
+  "Parch": 2,
+  "Ticket": 7,
+  "Fare": 3,
+  "Cabin": 1,
+  "Embarked": 4
+}
