@@ -44,9 +44,11 @@ class StructuredDataAutoML(object):
         self.__y = df[self.__configuration["configuration"]["target"]]
 
     def __feature_selection(self):
-        for column, type in self.__configuration["configuration"]["features"].items():
-            if DataType(type) is DataType.DATATYPE_IGNORE:
+        for column, dt in self.__configuration["configuration"]["features"].items():
+            if DataType(dt) is DataType.DATATYPE_IGNORE:
                 self.__X = self.__X.drop(column, axis=1)
+            elif DataType(dt) is DataType.DATATYPE_CATEGORY:
+                self.__X[column] = self.__X[column].astype('category')
 
     def __export_model(self, model):
         """
