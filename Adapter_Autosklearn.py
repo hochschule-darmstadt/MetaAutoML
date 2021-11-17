@@ -55,24 +55,29 @@ def get_response(output_json):
 
 def zip_script():
     BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    export_zip_file_name = get_config_property("export-zip-file-name")
+    EXPORT_ZIP_FILE_NAME = get_config_property("export-zip-file-name")
+    TEMPLATES_OUTPUT_PATH = get_config_property("templates-output-path")
     if in_cluster():
         print("RUNNING DOCKER")
-        if not os.path.exists("omaml/output"):  # ensure output folder exists
-            os.makedirs("omaml/output")
-        zip_content_path = os.path.join(BASE_DIR, "templates/output")
-        shutil.make_archive(export_zip_file_name, 'zip', zip_content_path)
-        shutil.move(f"{export_zip_file_name}.zip", "omaml/output/keras-export.zip")
-        outputJson = {"file_name": f"{export_zip_file_name}.zip"}
-        outputJson.update({"file_location": "omaml/output/"})
+        OUTPUT_PATH = get_config_property("output-path-docker")
+        if not os.path.exists(OUTPUT_PATH):  # ensure output folder exists
+            os.makedirs(OUTPUT_PATH)
+
+        ZIP_CONTENTS_PATH = os.path.join(BASE_DIR, TEMPLATES_OUTPUT_PATH)
+        shutil.make_archive(EXPORT_ZIP_FILE_NAME, 'zip', ZIP_CONTENTS_PATH)
+        shutil.move(f"{EXPORT_ZIP_FILE_NAME}.zip", f"{OUTPUT_PATH}/{EXPORT_ZIP_FILE_NAME}.zip")
+        output_json = {"file_name": f"{EXPORT_ZIP_FILE_NAME}.zip"}
+        output_json.update({"file_location": f"{OUTPUT_PATH}/"})
 
     else:
         print("RUNNING LOCAL")
-        zip_content_path = os.path.join(BASE_DIR, get_config_property("output-path"))
-        shutil.make_archive(export_zip_file_name, 'zip', zip_content_path)
-        outputJson = {"file_name": f"templates/output/{export_zip_file_name}.zip"}
-        outputJson.update({"file_location": os.path.join(BASE_DIR, "Adapter-AutoKeras")})
-    return outputJson
+        REPOSITORY_DIR_NAME = get_config_property("repository-dir-name")
+        ZIP_CONTENTS_PATH = os.path.join(BASE_DIR, REPOSITORY_DIR_NAME, TEMPLATES_OUTPUT_PATH)
+        shutil.make_archive(EXPORT_ZIP_FILE_NAME, 'zip', ZIP_CONTENTS_PATH)
+        output_json = {"file_name": f"{EXPORT_ZIP_FILE_NAME}.zip"}
+        output_json.update({"file_location": os.path.join(BASE_DIR, REPOSITORY_DIR_NAME)})
+
+    return output_json
 
 
 def start_automl_process():

@@ -4,8 +4,11 @@
   "temp-path-classification": "./.tmp/autosklearn_classification_temp",
   "env-varname-cluster": "RUNTIME",
   "env-varname-unix": "UNIX",
-  "export-zip-file-name": "sklearn-export",
   "grpc-server-address": "0.0.0.0:50055",
   "python-environment": "venv/bin/python3",
-  "output-path": "MetaAutoML-Adapter-Autosklearn/templates/output"
+  "export-zip-file-name": "sklearn-export",
+  "templates-output-path": "templates/output",
+  "output-path-docker": "omaml/output",
+  "output-path-local": "MetaAutoML-Adapter-Autosklearn/templates/output",
+  "repository-dir-name": "MetaAutoML-Adapter-Autosklearn"
 }
