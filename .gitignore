@@ -132,3 +132,6 @@ dmypy.json
 
 # output folder
 templates/output
+
+# Jetbrains IDEAs
+.idea/
