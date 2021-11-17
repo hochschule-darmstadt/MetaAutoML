@@ -1,6 +1,5 @@
 {
   "job-file-name": "autosklearn-job.json",
-  "temp-path-classification": "./.tmp/autosklearn_classification_temp",
   "env-varname-cluster": "RUNTIME",
   "env-varname-unix": "UNIX",
   "grpc-server-address": "0.0.0.0:50055",
