@@ -1,0 +1,11 @@
+{
+  "job-file-name": "flaml-job.json",
+  "env-varname-cluster": "RUNTIME",
+  "env-varname-unix": "UNIX",
+  "grpc-server-address": "0.0.0.0:50056",
+  "python-env-docker": "python",
+  "export-zip-file-name": "flaml-export",
+  "templates-output-path": "templates/output",
+  "output-path-docker": "omaml/output",
+  "repository-dir-name": "MetaAutoML-Adapter-FLAML"
+}
