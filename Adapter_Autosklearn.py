@@ -89,6 +89,7 @@ def start_automl_process():
     if in_cluster():
         python_env = get_config_property("python-env-docker")
     else:
+        # Requires env var to be set to desired python environment on local execution
         python_env = os.getenv("PYTHON_ENV", default=None)
 
     return subprocess.Popen([python_env, "AutoML.py", ""],
