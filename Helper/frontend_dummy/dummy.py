@@ -39,7 +39,8 @@ def get_automl_model(argv: list, stub: Controller_pb2_grpc.ControllerServiceStub
     if len(argv) == 2:
         session_id = argv[0]
         name = argv[1]
-        request = Controller_pb2.GetAutoMlModelRequest(sessionId=session_id, autoMl=name)
+        request = Controller_pb2.GetAutoMlModelRequest(
+            sessionId=session_id, autoMl=name)
         response = stub.GetAutoMlModel(request)
         print(f"saving file {response.name}")
         with open(response.name, 'wb') as file:
@@ -81,7 +82,8 @@ def get_sessions(argv: list, stub: Controller_pb2_grpc.ControllerServiceStub):
 def get_columns(argv, stub):
     if len(argv) == 1:
         dataset_name = argv[0]
-        request = Controller_pb2.GetTabularDatasetColumnNamesRequest(datasetName=dataset_name)
+        request = Controller_pb2.GetTabularDatasetColumnNamesRequest(
+            datasetName=dataset_name)
         response = stub.GetTabularDatasetColumnNames(request)
         print(f"{response}")
     else:
@@ -95,7 +97,8 @@ def get_compatible_automls(argv, stub):
             config = json.load(json_file)
         config = json.loads(config)
         config_str = {str(key): str(value) for key, value in config.items()}
-        request = Controller_pb2.GetCompatibleAutoMlSolutionsRequest(configuration=config_str)
+        request = Controller_pb2.GetCompatibleAutoMlSolutionsRequest(
+            configuration=config_str)
         response = stub.GetCompatibleAutoMlSolutions(request)
         print(f"{response}")
     else:
@@ -105,7 +108,8 @@ def get_compatible_automls(argv, stub):
 def get_dataset_compatible_tasks(argv, stub):
     if len(argv) == 1:
         dataset_name = argv[0]
-        request = Controller_pb2.GetDatasetCompatibleTasksRequest(datasetName=dataset_name)
+        request = Controller_pb2.GetDatasetCompatibleTasksRequest(
+            datasetName=dataset_name)
         response = stub.GetDatasetCompatibleTasks(request)
         print(f"{response}")
     else:
@@ -153,7 +157,8 @@ def start_automl(argv: list, stub: Controller_pb2_grpc.ControllerServiceStub):
     with open(filename, 'r') as json_file:
         features_config = json.load(json_file)
 
-    tabular_config = Controller_pb2.AutoMLConfigurationTabularData(target=target_column, features=features_config)
+    tabular_config = Controller_pb2.AutoMLConfigurationTabularData(
+        target=target_column, features=features_config)
 
     request = Controller_pb2.StartAutoMLprocessRequest(dataset=dataset_name,
                                                        task=task,
@@ -212,7 +217,10 @@ def run():
     channel = grpc.secure_channel('localhost:5001', creds)
     # channel = grpc.insecure_channel('localhost:50051')
     stub = Controller_pb2_grpc.ControllerServiceStub(channel)
-    process_command(sys.argv[1], sys.argv[2:], stub)
+    if len(sys.argv) >= 2:  # we need at least one argument, but the first one will be the script name
+        process_command(sys.argv[1], sys.argv[2:], stub)
+    else:
+        print("no arguments specified. run help to see all options.")
 
 
 run()  # run script
