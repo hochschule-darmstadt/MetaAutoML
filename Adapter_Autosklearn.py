@@ -85,7 +85,6 @@ def start_automl_process():
     starts the automl process with respect to the operating system
     @:return started automl process
     """
-    python_env = None
     if in_cluster():
         python_env = get_config_property("python-env-docker")
     else:
