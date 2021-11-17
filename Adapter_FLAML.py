@@ -11,6 +11,38 @@ import Adapter_pb2_grpc
 
 from concurrent import futures
 from TemplateGenerator import TemplateGenerator
+from OsSpecific import in_cluster
+
+
+def get_except_response(context, e):
+    print(e)
+    context.set_details(f"Error while executing AutoFLAML: {e}")
+    context.set_code(grpc.StatusCode.UNAVAILABLE)
+    return Adapter_pb2.StartAutoMLResponse()
+
+
+def generate_script():
+    generator = TemplateGenerator()
+    generator.GenerateScript()
+
+
+def capture_process_output(process):
+    capture = ""
+    s = process.stdout.read(1)
+    capture += s
+    # Run until no more output is produced by the subprocess
+    while len(s) > 0:
+        if capture[len(capture) - 1] == '\n':
+            processUpdate = Adapter_pb2.StartAutoMLResponse()
+            processUpdate.returnCode = Adapter_pb2.ADAPTER_RETURN_CODE_STATUS_UPDATE
+            processUpdate.statusUpdate = capture
+            processUpdate.outputJson = ""
+            yield processUpdate
+            sys.stdout.write(capture)
+            sys.stdout.flush()
+            capture = ""
+        capture += s
+        s = process.stdout.read(1)
 
 
 def get_response(output_json):
@@ -52,37 +84,6 @@ def start_automl_process():
         process = subprocess.Popen([".\env\Scripts\python.exe", "AutoML.py", ""], stdout=subprocess.PIPE,
                                    universal_newlines=True)
     return process
-
-
-def capture_process_output(process):
-    capture = ""
-    s = process.stdout.read(1)
-    capture += s
-    # Run until no more output is produced by the subprocess
-    while len(s) > 0:
-        if capture[len(capture) - 1] == '\n':
-            processUpdate = Adapter_pb2.StartAutoMLResponse()
-            processUpdate.returnCode = Adapter_pb2.ADAPTER_RETURN_CODE_STATUS_UPDATE
-            processUpdate.statusUpdate = capture
-            processUpdate.outputJson = ""
-            yield processUpdate
-            sys.stdout.write(capture)
-            sys.stdout.flush()
-            capture = ""
-        capture += s
-        s = process.stdout.read(1)
-
-
-def get_except_response(context, e):
-    print(e)
-    context.set_details(f"Error while executing AutoFLAML: {e}")
-    context.set_code(grpc.StatusCode.UNAVAILABLE)
-    return Adapter_pb2.StartAutoMLResponse()
-
-
-def generate_script():
-    generator = TemplateGenerator()
-    generator.GenerateScript()
 
 
 class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
