@@ -138,3 +138,8 @@ dmypy.json
 
 # Jetbrains IDEAs
 .idea/
+
+# datasets that might be loaded here for testing:
+*.csv
+# model that might be loaded here for testing:
+*.zip

@@ -30,6 +30,7 @@ def print_cl_options():
     get-sessions                returns all active sessions
     get-automl-model <id> <automl name>       
                                 returns the generated model of the specified sessionId as a .zip file
+                                example: "get-automl-model 1 flaml" retrieves the model of the session with id=1 and auoml-library=flaml
     upload-dataset <file name>  uploads the specified file as a dataset
     """)
 
@@ -44,7 +45,7 @@ def get_automl_model(argv: list, stub: Controller_pb2_grpc.ControllerServiceStub
         with open(response.name, 'wb') as file:
             pickle.dump(response.file, file)
     else:
-        print("get_automl_model requires exactly one argument <session id>")
+        print("get_automl_model requires exactly two argument <session id> <automl name>")
 
 
 def upload_dataset(argv: list, stub: Controller_pb2_grpc.ControllerServiceStub):
