@@ -70,11 +70,11 @@ def zip_script():
 
     else:
         print("RUNNING LOCAL")
-        REPOSITORY_DIR_NAME = get_config_property("repository-dir-name")
-        zip_contents_path = os.path.join(base_dir, REPOSITORY_DIR_NAME, templates_output_path)
+        repository_dir_name = get_config_property("repository-dir-name")
+        zip_contents_path = os.path.join(base_dir, repository_dir_name, templates_output_path)
         shutil.make_archive(export_zip_file_name, 'zip', zip_contents_path)
         output_json = {"file_name": f"{export_zip_file_name}.zip"}
-        output_json.update({"file_location": os.path.join(base_dir, REPOSITORY_DIR_NAME)})
+        output_json.update({"file_location": os.path.join(base_dir, repository_dir_name)})
 
     return output_json
 
