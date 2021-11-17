@@ -115,9 +115,9 @@ class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
             process = start_automl_process()
             yield from capture_process_output(process)
             generate_script()
-            outputJson = zip_script()
+            output_json = zip_script()
 
-            yield from get_response(outputJson)
+            yield from get_response(output_json)
 
         except Exception as e:
             return get_except_response(context, e)
