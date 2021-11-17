@@ -8,3 +8,6 @@
 
 ### UNIX
 - should be set, if running on a unix system. Things like file paths will be set accordingly
+
+### PYTHON_ENV
+- must be set to the desired python environment
