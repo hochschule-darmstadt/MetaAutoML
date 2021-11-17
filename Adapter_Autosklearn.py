@@ -81,7 +81,6 @@ def zip_script():
 
 def start_automl_process():
     """"
-    starts the automl process with respect to the operating system
     @:return started automl process
     """
     python_env = os.getenv("PYTHON_ENV", default="PYTHON_ENV_UNSET")
