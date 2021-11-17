@@ -135,3 +135,11 @@ templates/output
 
 # Jetbrains IDEAs
 .idea/
+
+# by adapter generated files
+*-model.p
+*-export.zip
+*-job.json
+templates/output/*.py
+templates/output/*.p
+templates/output/*.txt
