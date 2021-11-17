@@ -12,4 +12,4 @@ This repository implements the MetaAutoML-Adapter for the AutoML library FLAML (
 - should be set, if running on a unix system. Things like file paths will be set accordingly
 
 ### PYTHON_ENV
-- must be set to the desired python environment if not running in a d
+- must be set to the desired python environment

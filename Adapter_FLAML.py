@@ -5,6 +5,7 @@ import logging
 import shutil
 import subprocess
 import json
+from Utils.JsonUtil import get_config_property
 
 import Adapter_pb2
 import Adapter_pb2_grpc
@@ -13,12 +14,9 @@ from concurrent import futures
 from TemplateGenerator import TemplateGenerator
 from OsSpecific import in_cluster
 
-from Utils.JsonUtil import get_config_property
-
-
 def get_except_response(context, e):
     print(e)
-    context.set_details(f"Error while executing AutoFLAML: {e}")
+    context.set_details(f"Error while executing AutoKeras: {e}")
     context.set_code(grpc.StatusCode.UNAVAILABLE)
     return Adapter_pb2.StartAutoMLResponse()
 
@@ -55,42 +53,37 @@ def get_response(output_json):
 
 
 def zip_script():
-    BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    EXPORT_ZIP_FILE_NAME = get_config_property("export-zip-file-name")
-    TEMPLATES_OUTPUT_PATH = get_config_property("templates-output-path")
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    export_zip_file_name = get_config_property("export-zip-file-name")
+    templates_output_path = get_config_property("templates-output-path")
     if in_cluster():
         print("RUNNING DOCKER")
-        OUTPUT_PATH = get_config_property("output-path-docker")
-        if not os.path.exists(OUTPUT_PATH):  # ensure output folder exists
-            os.makedirs(OUTPUT_PATH)
+        output_path = get_config_property("output-path-docker")
+        if not os.path.exists(output_path):  # ensure output folder exists
+            os.makedirs(output_path)
 
-        ZIP_CONTENTS_PATH = os.path.join(BASE_DIR, TEMPLATES_OUTPUT_PATH)
-        shutil.make_archive(EXPORT_ZIP_FILE_NAME, 'zip', ZIP_CONTENTS_PATH)
-        shutil.move(f"{EXPORT_ZIP_FILE_NAME}.zip", f"{OUTPUT_PATH}/{EXPORT_ZIP_FILE_NAME}.zip")
-        output_json = {"file_name": f"{EXPORT_ZIP_FILE_NAME}.zip"}
-        output_json.update({"file_location": f"{OUTPUT_PATH}/"})
+        zip_contents_path = os.path.join(base_dir, templates_output_path)
+        shutil.make_archive(export_zip_file_name, 'zip', zip_contents_path)
+        shutil.move(f"{export_zip_file_name}.zip", f"{output_path}/{export_zip_file_name}.zip")
+        output_json = {"file_name": f"{export_zip_file_name}.zip"}
+        output_json.update({"file_location": f"{output_path}/"})
 
     else:
         print("RUNNING LOCAL")
-        REPOSITORY_DIR_NAME = get_config_property("repository-dir-name")
-        ZIP_CONTENTS_PATH = os.path.join(BASE_DIR, REPOSITORY_DIR_NAME, TEMPLATES_OUTPUT_PATH)
-        shutil.make_archive(EXPORT_ZIP_FILE_NAME, 'zip', ZIP_CONTENTS_PATH)
-        output_json = {"file_name": f"{EXPORT_ZIP_FILE_NAME}.zip"}
-        output_json.update({"file_location": os.path.join(BASE_DIR, REPOSITORY_DIR_NAME)})
+        repository_dir_name = get_config_property("repository-dir-name")
+        zip_contents_path = os.path.join(base_dir, repository_dir_name, templates_output_path)
+        shutil.make_archive(export_zip_file_name, 'zip', zip_contents_path)
+        output_json = {"file_name": f"{export_zip_file_name}.zip"}
+        output_json.update({"file_location": os.path.join(base_dir, repository_dir_name)})
 
     return output_json
 
 
 def start_automl_process():
     """"
-        starts the automl process with respect to the operating system
-        @:return started automl process
-        """
-    if in_cluster():
-        python_env = get_config_property("python-env-docker")
-    else:
-        # Requires env var to be set to desired python environment on local execution
-        python_env = os.getenv("PYTHON_ENV", "PYTHON_ENV_UNSET")
+    @:return started automl process
+    """
+    python_env = os.getenv("PYTHON_ENV", default="PYTHON_ENV_UNSET")
 
     return subprocess.Popen([python_env, "AutoML.py", ""],
                             stdout=subprocess.PIPE,
@@ -98,10 +91,10 @@ def start_automl_process():
 
 
 class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
-    """
-    AutoML Adapter Service implementation.
-    Service provide functionality to execute and interact with the current AutoML process.
-    """
+    """ AutoML Adapter Service implementation. Service provide functionality to execute and interact with the current AutoML process. """
+
+    def __init__(self):
+        pass
 
     def StartAutoML(self, request, context):
         """
@@ -129,7 +122,7 @@ def serve():
     """
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     Adapter_pb2_grpc.add_AdapterServiceServicer_to_server(AdapterServiceServicer(), server)
-    server.add_insecure_port('0.0.0.0:50056')
+    server.add_insecure_port(get_config_property("grpc-server-address"))
     server.start()
     server.wait_for_termination()
 
