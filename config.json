@@ -1,5 +1,4 @@
 {
-  "automl-name": "autosklearn",
   "job-file-name": "autosklearn-job.json",
   "temp-path-classification": "./.tmp/autosklearn_classification_temp",
   "env-varname-cluster": "RUNTIME",
