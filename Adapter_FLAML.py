@@ -13,6 +13,8 @@ from concurrent import futures
 from TemplateGenerator import TemplateGenerator
 from OsSpecific import in_cluster
 
+from Utils.JsonUtil import get_config_property
+
 
 def get_except_response(context, e):
     print(e)
@@ -54,36 +56,45 @@ def get_response(output_json):
 
 def zip_script():
     BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    output_json = {}
-    try:
-        if os.environ["RUNTIME"]:  # Only available in Cluster
-            print("RUNNING DOCKER")
-            if not os.path.exists("omaml/output"):  # ensure output folder exists
-                os.makedirs("omaml/output")
-            zip_content_path = os.path.join(BASE_DIR, "templates/output")
-            shutil.make_archive("flaml-export", 'zip', zip_content_path)
-            shutil.move("flaml-export.zip", "omaml/output/flaml-export.zip")
-            output_json = {"file_name": "flaml-export.zip"}
-            output_json.update({"file_location": "omaml/output/"})
-    except KeyError:  # Raise error if the variable is not set, only for local run
+    EXPORT_ZIP_FILE_NAME = get_config_property("export-zip-file-name")
+    TEMPLATES_OUTPUT_PATH = get_config_property("templates-output-path")
+    if in_cluster():
+        print("RUNNING DOCKER")
+        OUTPUT_PATH = get_config_property("output-path-docker")
+        if not os.path.exists(OUTPUT_PATH):  # ensure output folder exists
+            os.makedirs(OUTPUT_PATH)
+
+        ZIP_CONTENTS_PATH = os.path.join(BASE_DIR, TEMPLATES_OUTPUT_PATH)
+        shutil.make_archive(EXPORT_ZIP_FILE_NAME, 'zip', ZIP_CONTENTS_PATH)
+        shutil.move(f"{EXPORT_ZIP_FILE_NAME}.zip", f"{OUTPUT_PATH}/{EXPORT_ZIP_FILE_NAME}.zip")
+        output_json = {"file_name": f"{EXPORT_ZIP_FILE_NAME}.zip"}
+        output_json.update({"file_location": f"{OUTPUT_PATH}/"})
+
+    else:
         print("RUNNING LOCAL")
-        zip_content_path = os.path.join(BASE_DIR, "MetaAutoML-Adapter-FLAML/templates/output")
-        shutil.make_archive("flaml-export", 'zip', zip_content_path)
-        output_json = {"file_name": "flaml-export.zip"}
-        output_json.update({"file_location": os.path.join(BASE_DIR, "MetaAutoML-Adapter-FLAML")})
+        REPOSITORY_DIR_NAME = get_config_property("repository-dir-name")
+        ZIP_CONTENTS_PATH = os.path.join(BASE_DIR, REPOSITORY_DIR_NAME, TEMPLATES_OUTPUT_PATH)
+        shutil.make_archive(EXPORT_ZIP_FILE_NAME, 'zip', ZIP_CONTENTS_PATH)
+        output_json = {"file_name": f"{EXPORT_ZIP_FILE_NAME}.zip"}
+        output_json.update({"file_location": os.path.join(BASE_DIR, REPOSITORY_DIR_NAME)})
+
     return output_json
 
 
 def start_automl_process():
-    # Start AutoML process
-    try:
-        if os.environ["RUNTIME"]:  # Only available in Cluster
-            process = subprocess.Popen(["python", "AutoML.py", ""], stdout=subprocess.PIPE,
-                                       universal_newlines=True)
-    except KeyError:  # Raise error if the variable is not set, only for local run
-        process = subprocess.Popen([".\env\Scripts\python.exe", "AutoML.py", ""], stdout=subprocess.PIPE,
-                                   universal_newlines=True)
-    return process
+    """"
+        starts the automl process with respect to the operating system
+        @:return started automl process
+        """
+    if in_cluster():
+        python_env = get_config_property("python-env-docker")
+    else:
+        # Requires env var to be set to desired python environment on local execution
+        python_env = os.getenv("PYTHON_ENV", default=None)
+
+    return subprocess.Popen([python_env, "AutoML.py", ""],
+                            stdout=subprocess.PIPE,
+                            universal_newlines=True)
 
 
 class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
@@ -93,12 +104,12 @@ class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
     """
 
     def StartAutoML(self, request, context):
-        """ 
-        Execute a new AutoML run. 
+        """
+        Execute a new AutoML run.
         """
         try:
             # saving AutoML configuration JSON
-            with open('flaml-job.json', "w+") as f:
+            with open(get_config_property("job-file-name"), "w+") as f:
                 json.dump(request.processJson, f)
 
             process = start_automl_process()
@@ -107,6 +118,7 @@ class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
             output_json = zip_script()
 
             yield from get_response(output_json)
+
         except Exception as e:
             return get_except_response(context, e)
 
