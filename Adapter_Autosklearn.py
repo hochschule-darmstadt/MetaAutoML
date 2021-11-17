@@ -85,7 +85,13 @@ def start_automl_process():
     starts the automl process with respect to the operating system
     @:return started automl process
     """
-    return subprocess.Popen([get_config_property("python-environment"), "AutoML.py", ""],
+    python_env = None
+    if in_cluster():
+        python_env = get_config_property("python-env-docker")
+    else:
+        python_env = os.getenv("PYTHON_ENV", default=None)
+
+    return subprocess.Popen([python_env, "AutoML.py", ""],
                             stdout=subprocess.PIPE,
                             universal_newlines=True)
 
