@@ -1,0 +1,1 @@
+"{\"file_name\": \"titanic_train_1.csv\", \"file_location\": \"D:\\\\Studium\\\\Semester5\\\\PSE\\\\MetaAutoML-Controller\\\\omaml/datasets\", \"task\": 1, \"configuration\": {\"target\": \"Survived\", \"features\": {\"SibSp\": 2, \"Cabin\": 1, \"Sex\": 4, \"PassengerId\": 7, \"Name\": 7, \"Parch\": 2, \"Fare\": 3, \"Pclass\": 2, \"Ticket\": 7, \"Age\": 3, \"Embarked\": 4}}}"
