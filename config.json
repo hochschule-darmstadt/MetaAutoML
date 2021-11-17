@@ -9,6 +9,5 @@
   "export-zip-file-name": "sklearn-export",
   "templates-output-path": "templates/output",
   "output-path-docker": "omaml/output",
-  "output-path-local": "MetaAutoML-Adapter-Autosklearn/templates/output",
   "repository-dir-name": "MetaAutoML-Adapter-Autosklearn"
 }
