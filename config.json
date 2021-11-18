@@ -1,4 +1,5 @@
 {
+  "adapter-name": "AutoFLAML",
   "job-file-name": "flaml-job.json",
   "env-varname-cluster": "RUNTIME",
   "env-varname-unix": "UNIX",

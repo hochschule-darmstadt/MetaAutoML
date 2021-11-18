@@ -32,7 +32,7 @@ class StructuredDataAutoML(object):
         """
         self.__configuration = configuration
         # set default values
-        if "time_budget" not in self.__configuration or self.__configuration["time_budget"] == 0:
+        if self.__configuration["time_budget"] == 0:
             self.__configuration["time_budget"] = 20
 
     def __read_training_data(self):
