@@ -16,7 +16,8 @@ from OsSpecific import in_cluster
 
 def get_except_response(context, e):
     print(e)
-    context.set_details(f"Error while executing AutoKeras: {e}")
+    adapter_name = get_config_property("adapter-name")
+    context.set_details(f"Error while executing {adapter_name}: {e}")
     context.set_code(grpc.StatusCode.UNAVAILABLE)
     return Adapter_pb2.StartAutoMLResponse()
 
@@ -92,9 +93,6 @@ def start_automl_process():
 
 class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
     """ AutoML Adapter Service implementation. Service provide functionality to execute and interact with the current AutoML process. """
-
-    def __init__(self):
-        pass
 
     def StartAutoML(self, request, context):
         """ 
