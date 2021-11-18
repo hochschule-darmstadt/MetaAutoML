@@ -10,5 +10,6 @@ WORKDIR /
 
 VOLUME ["/app-data"]
 ENV PYTHONUNBUFFERED=1
-ENV PYTHONPATH "/AutoMLs:/templates:/templates/output"
-ENTRYPOINT ["python", "Adapter_*.py"] //EDIT
+ENV PYTHONPATH "/AutoMLs:/templates:/templates/output:/Utils"
+ENV PYTHON_ENV "python"
+ENTRYPOINT ["python", "Adapter_FLAML.py"]
