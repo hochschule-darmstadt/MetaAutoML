@@ -1,10 +1,22 @@
 import os
 import pandas as pd
+import pickle
 import autosklearn.classification
 import autosklearn.regression
-from sklearn.preprocessing import OrdinalEncoder
-import pickle
-from Utils.JsonUtil import get_config_property
+
+from enum import Enum, unique
+
+
+@unique
+class DataType(Enum):
+    DATATYPE_UNKNOW = 0
+    DATATYPE_STRING = 1
+    DATATYPE_INT = 2
+    DATATYPE_FLOAT = 3
+    DATATYPE_CATEGORY = 4
+    DATATYPE_BOOLEAN = 5
+    DATATYPE_DATETIME = 6
+    DATATYPE_IGNORE = 7
 
 
 class StructuredDataAutoML(object):
@@ -12,34 +24,27 @@ class StructuredDataAutoML(object):
     Implementation of the AutoML functionality fo structured data a.k.a. tabular data
     """
 
-    def __init__(self, json: dict):
+    def __init__(self, configuration: dict):
         """
         Init a new instance of StructuredDataAutoML
         ---
         Parameter:
         1. Configuration JSON of type dictionary
         """
-        self.__time_limit = 30
-        self.__json = json
-        return
+        self.__configuration = configuration
+        # set default values
+        if self.__configuration.get("time_budget") == 0:
+            self.__configuration["time_budget"] = 30
 
     def __read_training_data(self):
         """
         Read the training dataset from disk
         """
-        self.__training_data_path = os.path \
-            .join(self.__json["file_location"]
-                  , self.__json["file_name"])
-        df = pd.read_csv(self.__training_data_path)
-
-        # convert all object columns to categories, because autosklearn only supports numerical, bool and categorical features
-        df[df.select_dtypes(['object']).columns] = df.select_dtypes(['object']) \
-            .apply(lambda x: x.astype('category'))
-
+        df = pd.read_csv(os.path.join(self.__configuration["file_location"], self.__configuration["file_name"]))
         # __X is the entire data without the target column
-        self.__X = df.drop(self.__json["configuration"]["target"], axis=1)
+        self.__X = df.drop(self.__configuration["configuration"]["target"], axis=1)
         # __y is only the target column
-        self.__y = df[self.__json["configuration"]["target"]]
+        self.__y = df[self.__configuration["configuration"]["target"]]
 
         return
 
@@ -53,39 +58,51 @@ class StructuredDataAutoML(object):
         with open("templates/output/autosklearn-model.p", "wb") as file:
             pickle.dump(model, file)
 
-        return
+    def __feature_selection(self):
+        for column, dt in self.__configuration["configuration"]["features"].items():
+            if DataType(dt) is DataType.DATATYPE_IGNORE:
+                self.__X = self.__X.drop(column, axis=1)
+            elif DataType(dt) in (DataType.DATATYPE_CATEGORY, DataType.DATATYPE_UNKNOW):
+                self.__X[column] = self.__X[column].astype('category')
 
-    def classification(self):
+    def execute_task(self):
+        """
+        Execute the ML task
+        """
+        if self.__configuration["task"] == 1:
+            self.__classification()
+        elif self.__configuration["task"] == 2:
+            self.__regression()
+
+    def __classification(self):
         """
         Execute the classification task
         """
         self.__read_training_data()
+        self.__feature_selection()
 
         auto_cls = autosklearn.classification.AutoSklearnClassifier(
-            time_left_for_this_task=self.__time_limit,
+            time_left_for_this_task=self.__configuration.get("time_budget"),
             logging_config=self.get_logging_config()
         )
         auto_cls.fit(self.__X, self.__y)
 
         self.__export_model(auto_cls)
 
-        return
-
-    def regression(self):
+    def __regression(self):
         """
         Execute the regression task
         """
         self.__read_training_data()
+        self.__feature_selection()
 
         auto_reg = autosklearn.regression.AutoSklearnRegressor(
-            time_left_for_this_task=self.__time_limit,
+            time_left_for_this_task=self.__configuration.get("time_budget"),
             logging_config=self.get_logging_config()
         )
         auto_reg.fit(self.__X, self.__y, )
 
         self.__export_model(auto_reg)
-
-        return
 
     def get_logging_config(self) -> dict:
         return {

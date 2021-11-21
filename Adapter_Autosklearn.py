@@ -14,6 +14,7 @@ from concurrent import futures
 from TemplateGenerator import TemplateGenerator
 from OsSpecific import in_cluster
 
+
 def get_except_response(context, e):
     print(e)
     adapter_name = get_config_property("adapter-name")
@@ -34,11 +35,11 @@ def capture_process_output(process):
     # Run until no more output is produced by the subprocess
     while len(s) > 0:
         if capture[len(capture) - 1] == '\n':
-            processUpdate = Adapter_pb2.StartAutoMLResponse()
-            processUpdate.returnCode = Adapter_pb2.ADAPTER_RETURN_CODE_STATUS_UPDATE
-            processUpdate.statusUpdate = capture
-            processUpdate.outputJson = ""
-            yield processUpdate
+            process_update = Adapter_pb2.StartAutoMLResponse()
+            process_update.returnCode = Adapter_pb2.ADAPTER_RETURN_CODE_STATUS_UPDATE
+            process_update.statusUpdate = capture
+            process_update.outputJson = ""
+            yield process_update
             sys.stdout.write(capture)
             sys.stdout.flush()
             capture = ""
@@ -92,7 +93,10 @@ def start_automl_process():
 
 
 class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
-    """ AutoML Adapter Service implementation. Service provide functionality to execute and interact with the current AutoML process. """
+    """
+    AutoML Adapter Service implementation.
+    Service provide functionality to execute and interact with the current AutoML process.
+    """
 
     def StartAutoML(self, request, context):
         """ 
@@ -101,7 +105,7 @@ class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
         try:
             # saving AutoML configuration JSON
             with open(get_config_property("job-file-name"), "w+") as f:
-                json.dump(request.processJson, f)
+                json.dump(json.loads(request.processJson), f)
 
             process = start_automl_process()
             yield from capture_process_output(process)
