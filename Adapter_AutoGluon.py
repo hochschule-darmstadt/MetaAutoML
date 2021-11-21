@@ -81,10 +81,10 @@ class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
                     outputJson.update({"file_location": "omaml/output/"})
             except KeyError:  # Raise error if the variable is not set, only for local run
                 print("RUNNING LOCAL")
-                zip_content_path = os.path.join(BASE_DIR, "Adapter-AutoGluon/templates/output")
+                zip_content_path = os.path.join(BASE_DIR, "MetaAutoML-Adapter-AutoGluon/templates/output")
                 shutil.make_archive("gluon-export", 'zip', zip_content_path)
                 outputJson = {"file_name": "gluon-export.zip"}
-                outputJson.update({"file_location": os.path.join(BASE_DIR, "Adapter-AutoGluon")})
+                outputJson.update({"file_location": os.path.join(BASE_DIR, "MetaAutoML-Adapter-AutoGluon")})
         
             response = Adapter_pb2.StartAutoMLResponse()
             response.returnCode = Adapter_pb2.ADAPTER_RETURN_CODE_SUCCESS

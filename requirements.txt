@@ -20,3 +20,4 @@ psutil>=5.0.0
 scikit-learn>=0.20.0
 mxnet
 mxnet_cu101
+grpcio==1.34.1

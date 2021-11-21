@@ -131,5 +131,8 @@ dmypy.json
 # Jetbrains
 .idea/
 
-# ignore generated output files
+# generated output files
 *.pkl
+*-job.json
+*-export.zip
+templates/output
