@@ -31,7 +31,7 @@ class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
             # Start AutoML process
             try:
                 if os.environ["RUNTIME"]:  # Only available in Cluster
-                    process = subprocess.Popen(["python", "AutoML.py", ""], stdout=subprocess.PIPE,
+                    process = subprocess.Popen(["python", "AutoML.py", ""], stderr=subprocess.PIPE,
                                                universal_newlines=True)
             except KeyError:  # Raise error if the variable is not set, only for local run
                 # Check os platform
@@ -48,9 +48,9 @@ class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
                 else:
                     print("Error: Could not detect os platform")
                     return
-                process = subprocess.Popen([pypath, "AutoML.py", ""], stdout=subprocess.PIPE, universal_newlines=True)
+                process = subprocess.Popen([pypath, "AutoML.py", ""], stderr=subprocess.PIPE, universal_newlines=True)
             capture = ""
-            s = process.stdout.read(1)
+            s = process.stderr.read(1)
             capture += s
             # Run until no more output is produced by the subprocess
             while len(s) > 0:
@@ -60,11 +60,11 @@ class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
                     processUpdate.statusUpdate = capture
                     processUpdate.outputJson = ""
                     yield processUpdate
-                    sys.stdout.write(capture)
-                    sys.stdout.flush()
+                    sys.stderr.write(capture)
+                    sys.stderr.flush()
                     capture = ""
                 capture += s
-                s = process.stdout.read(1)
+                s = process.stderr.read(1)
             # Generate python script
             generator = TemplateGenerator()
             generator.GenerateScript()

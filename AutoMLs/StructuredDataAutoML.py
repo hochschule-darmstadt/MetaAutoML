@@ -67,18 +67,10 @@ class StructuredDataAutoML(object):
         """
         Execute the ML task
         """
-        # autogluon writes to stderr which seems not to be configurable however we want to write to stdout,
-        # because we want to send the content of this stream via grpc to the controller.
-        # So we temporarily redirect the streams
-        original_std_err = sys.stderr
-        sys.stderr = sys.stdout
-
         if self.__configuration["task"] == 1:
             self.__classification()
         elif self.__configuration["task"] == 2:
             self.__regression()
-
-        sys.stderr = original_std_err
 
     def __classification(self):
         """
