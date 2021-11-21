@@ -10,6 +10,7 @@ import Controller_pb2
 import Controller_pb2_grpc
 import Adapter_pb2
 import Adapter_pb2_grpc
+from JsonUtil import get_config_property
 
 import logging
 import json
@@ -117,7 +118,7 @@ def serve():
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     Controller_pb2_grpc.add_ControllerServiceServicer_to_server(ControllerServiceServicer(), server)
     # server.add_insecure_port('[::]:50051')
-    server.add_secure_port('0.0.0.0:5001', server_credentials)
+    server.add_secure_port(get_config_property("controller-server-port"), server_credentials)
 
     server.start()
     server.wait_for_termination()
