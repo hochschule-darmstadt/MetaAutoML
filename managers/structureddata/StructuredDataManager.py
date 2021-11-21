@@ -3,6 +3,7 @@ from FLAMLManager import FLAMLManager
 from MljarManager import MljarManager
 from AutoMLSession import AutoMLSession
 from SklearnManager import SklearnManager
+from managers.structureddata.AutoGluonManager import AutoGluonManager
 
 
 class StructuredDataManager(object):
@@ -31,17 +32,20 @@ class StructuredDataManager(object):
         auto_keras = AutoKerasManager(configuration, folder_location)
         flaml = FLAMLManager(configuration, folder_location)
         auto_sklearn = SklearnManager(configuration, folder_location)
-
+        auto_gluon = AutoGluonManager(configuration, folder_location)
         # mljar = MljarManager(configuration, folder_location)
+
         new_session = AutoMLSession(session_id, configuration.task)
         auto_keras.start()
         flaml.start()
         auto_sklearn.start()
+        auto_gluon.start()
         # mljar.start()
 
         new_session.AddAutoMLToSession(auto_keras)
         new_session.AddAutoMLToSession(flaml)
         new_session.AddAutoMLToSession(auto_sklearn)
+        new_session.AddAutoMLToSession(auto_gluon)
         # new_session.AddAutoMLToSession(mljar)
 
         return new_session
