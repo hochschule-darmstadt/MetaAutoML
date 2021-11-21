@@ -129,6 +129,7 @@ def start_automl(argv: list, stub: Controller_pb2_grpc.ControllerServiceStub):
     @param argv: parameter list as follows:
         argv[0] = <dataset name>        default = "titanic_train_1.csv"
         argv[1] = <target column>       default = "Survived"
+        argv[2] = <task>                default = "classification"
     """
 
     if len(argv) < 0 or len(argv) > 3:
