@@ -4,7 +4,6 @@
   "env-varname-cluster": "RUNTIME",
   "env-varname-unix": "UNIX",
   "grpc-server-address": "0.0.0.0:50055",
-  "python-env-docker": "python",
   "export-zip-file-name": "sklearn-export",
   "templates-output-path": "templates/output",
   "output-path-docker": "omaml/output",
