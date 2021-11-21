@@ -138,3 +138,8 @@ dmypy.json
 
 # Jetbrains
 .idea/
+
+# by adapter generated files
+templates/output/
+*-export.zip
+*-job.json
