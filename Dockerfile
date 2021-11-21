@@ -9,5 +9,5 @@ COPY . /
 WORKDIR /
 
 ENV PYTHONUNBUFFERED=1
-ENV PYTHONPATH "/interfaces:/managers:/managers/structureddata:/sessions"
+ENV PYTHONPATH "/interfaces:/managers:/managers/structureddata:/sessions:/utils"
 ENTRYPOINT ["python", "Controller.py"]
