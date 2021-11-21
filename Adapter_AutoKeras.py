@@ -54,7 +54,7 @@ class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
             capture += s
             # Run until no more output is produced by the subprocess
             while len(s) > 0:
-                if capture[len(capture) - 1] is '\n':
+                if capture[len(capture) - 1] == '\n':
                     processUpdate = Adapter_pb2.StartAutoMLResponse()
                     processUpdate.returnCode = Adapter_pb2.ADAPTER_RETURN_CODE_STATUS_UPDATE
                     processUpdate.statusUpdate = capture
