@@ -1,0 +1,11 @@
+{
+  "adapter-name": "AutoGluon",
+  "job-file-name": "gluon-job.json",
+  "env-varname-cluster": "RUNTIME",
+  "env-varname-unix": "UNIX",
+  "grpc-server-address": "0.0.0.0:50057",
+  "export-zip-file-name": "gluon-export",
+  "templates-output-path": "templates/output",
+  "output-path-docker": "omaml/output",
+  "repository-dir-name": "MetaAutoML-Adapter-AutoGluon"
+}
