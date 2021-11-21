@@ -1,0 +1,11 @@
+{
+  "adapter-name": "AutoKeras",
+  "job-file-name": "keras-job.json",
+  "env-varname-cluster": "RUNTIME",
+  "env-varname-unix": "UNIX",
+  "grpc-server-address": "0.0.0.0:50052",
+  "export-zip-file-name": "keras-export",
+  "templates-output-path": "templates/output",
+  "output-path-docker": "omaml/output",
+  "repository-dir-name": "MetaAutoML-Adapter-AutoKeras"
+}
