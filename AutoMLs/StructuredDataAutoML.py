@@ -1,5 +1,6 @@
 import os
 import pandas as pd
+import numpy as np
 from AUTOCVE.AUTOCVE import AUTOCVEClassifier
 from sklearn.metrics import f1_score
 import pickle
@@ -18,7 +19,7 @@ class StructuredDataAutoML(object):
         Parameter:
         1. Configuration JSON of type dictionary
         """
-        self.__time_limit = 30
+        self.__time_limit = 60
         self.__json = json
         return
 
@@ -30,9 +31,6 @@ class StructuredDataAutoML(object):
             .join(self.__json["file_location"]
                   , self.__json["file_name"])
         df = pd.read_csv(self.__training_data_path)
-
-        # convert all object columns to categories, because autosklearn only supports numerical, bool and categorical features
-        df[df.columns] = df[df.columns].apply(lambda col:pd.Categorical(col).codes)
 
         # __X is the entire data without the target column
         self.__X = df.drop(self.__json["configuration"]["target"], axis=1).to_numpy()
@@ -66,9 +64,14 @@ class StructuredDataAutoML(object):
             verbose=1
         )
         auto_cls.optimize(self.__X, self.__y, subsample_data=1.0)
-        best_voting_ensemble = autocve.get_best_voting_ensemble()
+        best_voting_ensemble = auto_cls.get_best_voting_ensemble()
         best_voting_ensemble.fit(self.__X, self.__y)
 
-        self.__export_model(auto_cls)
+        print("Best voting ensemble found:")
+        print(best_voting_ensemble.estimators)
+        print("Ensemble size: " + str(len(best_voting_ensemble.estimators)))
+        print("Train Score: {}".format(best_voting_ensemble.score(self.__X, self.__y)))
+
+        self.__export_model(best_voting_ensemble)
 
         return
