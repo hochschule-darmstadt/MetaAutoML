@@ -1,0 +1,11 @@
+{
+  "automl-name": "autocve",
+  "job-file-name": "autocve-job.json",
+  "temp-path-classification": "./.tmp/autocve_classification_temp",
+  "env-varname-cluster": "RUNTIME",
+  "env-varname-unix": "UNIX",
+  "export-zip-file-name": "sklearn-export",
+  "grpc-server-address": "0.0.0.0:50057",
+  "python-environment": "python",
+  "output-path": "MetaAutoML-Adapter-AutoCVE/templates/output"
+}
