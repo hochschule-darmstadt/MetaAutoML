@@ -10,6 +10,7 @@ import Adapter_pb2_grpc
 from IAutoMLManager import IAutoMLManager
 from threading import *
 from abc import ABC
+from OsSpecific import in_cluster
 
 
 @zope.interface.implementer(IAutoMLManager)
@@ -76,39 +77,23 @@ class AutoMLManager(ABC, Thread):
         """
         AutoML task for the current run
         """
-        # Open
-        automl_ip = ""
-        automl_port = ""
-        try:  # Set correct Ip address
-            if os.environ["RUNTIME"]:  # Only available in Cluster
-                automl_ip = os.environ[self.__AUTOML_SERVICE_HOST]
-                automl_port = os.environ[self.__AUTOML_SERVICE_PORT]
-        except KeyError:  # Raise error if the variable is not set, only for local run
+        if in_cluster():
+            automl_ip = os.environ[self.__AUTOML_SERVICE_HOST]
+            automl_port = os.environ[self.__AUTOML_SERVICE_PORT]
+        else:
             automl_ip = "localhost"
             automl_port = self.__AUTOML_DEFAULT_PORT
-        print(f"connecting to {self.name}: {automl_ip}:{automl_port}")
-        with grpc.insecure_channel(f"{automl_ip}:{automl_port}") as channel:  # Connect to Adapter
-            stub = Adapter_pb2_grpc.AdapterServiceStub(channel)  # Create Interface Stub
 
-            dataset_to_send = Adapter_pb2.StartAutoMLRequest()  # Request Object
+        print(f"connecting to {self.name}: {automl_ip}:{automl_port}")
+
+        with grpc.insecure_channel(f"{automl_ip}:{automl_port}") as channel:  # Connect to Adapter
+            stub = Adapter_pb2_grpc.AdapterServiceStub(channel)  ## Create Interface Stub
+
+            dataset_to_send = Adapter_pb2.StartAutoMLRequest()  ## Request Object
             process_json = self._generate_process_json()
             dataset_to_send.processJson = json.dumps(process_json)
 
-            try:  # Run until server closes connection
-                for response in stub.StartAutoML(
-                        dataset_to_send):  # Send request WATCH OUT THIS IS A LOOP REQUEST Check out for normal request https://grpc.io/docs/languages/python/quickstart/#update-the-client
-                    if response.returnCode == Adapter_pb2.ADAPTER_RETURN_CODE_STATUS_UPDATE:
-                        self.__status_messages.append(response.statusUpdate)
-                    elif response.returnCode == Adapter_pb2.ADAPTER_RETURN_CODE_SUCCESS:
-                        self.__result_json = json.loads(response.outputJson)
-                        self.__is_completed = True
-                        self.__last_status = Controller_pb2.SESSION_STATUS_COMPLETED
-                        return
-            except grpc.RpcError as rpc_error:
-                print(f"Received unknown RPC error: code={rpc_error.code()} message={rpc_error.details()}")
-                self.__is_completed = True
-                self.__last_status = Controller_pb2.SESSION_STATUS_FAILED
-                return
+            self._run_server_until_connection_closed(stub, dataset_to_send)
 
     def _generate_process_json(self):
         process_json = {"file_name": self._configuration.dataset}
@@ -123,3 +108,19 @@ class AutoMLManager(ABC, Thread):
                                  {"runtime_limit": self._configuration.runtimeConstraints.runtime_limit,
                                   "max_iter": self._configuration.runtimeConstraints.max_iter}})
         return process_json
+
+    def _run_server_until_connection_closed(self, stub, dataset_to_send):
+        try:  # Run until server closes connection
+            for response in stub.StartAutoML(
+                    dataset_to_send):  # Send request WATCH OUT THIS IS A LOOP REQUEST Check out for normal request https://grpc.io/docs/languages/python/quickstart/#update-the-client
+                if response.returnCode == Adapter_pb2.ADAPTER_RETURN_CODE_STATUS_UPDATE:
+                    self.__status_messages.append(response.statusUpdate)
+                elif response.returnCode == Adapter_pb2.ADAPTER_RETURN_CODE_SUCCESS:
+                    self.__result_json = json.loads(response.outputJson)
+                    self.__is_completed = True
+                    self.__last_status = Controller_pb2.SESSION_STATUS_COMPLETED
+                    return
+        except grpc.RpcError as rpc_error:
+            print(f"Received unknown RPC error: code={rpc_error.code()} message={rpc_error.details()}")
+            self.__is_completed = True
+            self.__last_status = Controller_pb2.SESSION_STATUS_FAILED
