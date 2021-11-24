@@ -2,7 +2,7 @@ from AutoMLManager import AutoMLManager
 
 
 class SklearnManager(AutoMLManager):
-    name = "sklearn"
+    name = "autosklearn"
 
     def __init__(self, configuration, folder_location):
         automl_service_host = 'SKLEARN_SERVICE_HOST'

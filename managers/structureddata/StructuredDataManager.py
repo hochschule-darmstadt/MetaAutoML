@@ -1,9 +1,9 @@
+from AutoGluonManager import AutoGluonManager
 from AutoKerasManager import AutoKerasManager
 from FLAMLManager import FLAMLManager
 from MljarManager import MljarManager
 from AutoMLSession import AutoMLSession
 from SklearnManager import SklearnManager
-from managers.structureddata.AutoGluonManager import AutoGluonManager
 
 
 class StructuredDataManager(object):
@@ -28,24 +28,25 @@ class StructuredDataManager(object):
         ---
         Return a new AutoMLSession object
         """
-        # FUTURE ADD CONDITION TO ONLY START REQUIRED AUTOML
-        auto_keras = AutoKerasManager(configuration, folder_location)
-        flaml = FLAMLManager(configuration, folder_location)
-        auto_sklearn = SklearnManager(configuration, folder_location)
-        auto_gluon = AutoGluonManager(configuration, folder_location)
-        # mljar = MljarManager(configuration, folder_location)
+        if len(list(configuration.requiredAutoMLs)) == 0:
+            print('No AutoMLs specified in the request. Running all available AutoMLs.')
+            required_automl_names = ('flaml', 'autokeras', 'autosklearn', 'autogluon')
+        else:
+            required_automl_names = [name for name in configuration.requiredAutoMLs]
+
+        required_automls = []
+        for automl_name in required_automl_names:
+            if automl_name == AutoKerasManager.name:
+                required_automls.append(AutoKerasManager(configuration, folder_location))
+            elif automl_name == FLAMLManager.name:
+                required_automls.append(FLAMLManager(configuration, folder_location))
+            elif automl_name == SklearnManager.name:
+                required_automls.append(SklearnManager(configuration, folder_location))
+            elif automl_name == AutoGluonManager.name:
+                required_automls.append(SklearnManager(configuration, folder_location))
 
         new_session = AutoMLSession(session_id, configuration.task)
-        auto_keras.start()
-        flaml.start()
-        auto_sklearn.start()
-        auto_gluon.start()
-        # mljar.start()
-
-        new_session.AddAutoMLToSession(auto_keras)
-        new_session.AddAutoMLToSession(flaml)
-        new_session.AddAutoMLToSession(auto_sklearn)
-        new_session.AddAutoMLToSession(auto_gluon)
-        # new_session.AddAutoMLToSession(mljar)
-
+        for automl in required_automls:
+            automl.start()
+            new_session.AddAutoMLToSession(automl)
         return new_session

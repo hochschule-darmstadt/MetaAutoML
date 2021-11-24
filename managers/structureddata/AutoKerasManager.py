@@ -2,7 +2,7 @@ from AutoMLManager import AutoMLManager
 
 
 class AutoKerasManager(AutoMLManager):
-    name = "AutoKeras"
+    name = "autokeras"
 
     def __init__(self, configuration, folder_location):
         automl_service_host = 'AUTOKERAS_SERVICE_HOST'

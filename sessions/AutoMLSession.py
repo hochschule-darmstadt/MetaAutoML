@@ -58,7 +58,7 @@ class AutoMLSession(object):
         response = Controller_pb2.GetSessionStatusResponse()
         response.status = Controller_pb2.SESSION_STATUS_COMPLETED
         for automl in self.__automls:
-            response.automls.append(automl.GetStatus())
-            if automl.IsRunning() == True:
+            response.automls.append(automl.get_status())
+            if automl.is_running() == True:
                 response.status = Controller_pb2.SESSION_STATUS_BUSY
         return response
