@@ -5,7 +5,7 @@ from AutoMLSession import AutoMLSession
 from SklearnManager import SklearnManager
 from AutoCVEManager import AutoCVEManager
 from managers.structureddata.AutoGluonManager import AutoGluonManager
-
+from AutoPyTorchManager import AutoPyTorchManager
 
 class StructuredDataManager(object):
     """
@@ -35,6 +35,7 @@ class StructuredDataManager(object):
         auto_sklearn = SklearnManager(configuration, folder_location)
         auto_cve = AutoCVEManager(configuration, folder_location)
         auto_gluon = AutoGluonManager(configuration, folder_location)
+        auto_pytorch = AutoPyTorchManager(configuration, folder_location)
         # mljar = MljarManager(configuration, folder_location)
 
         new_session = AutoMLSession(session_id, configuration.task)
@@ -43,6 +44,7 @@ class StructuredDataManager(object):
         auto_sklearn.start()
         auto_cve.start()
         auto_gluon.start()
+        auto_pytorch.start()
         # mljar.start()
 
         new_session.AddAutoMLToSession(auto_keras)
@@ -50,6 +52,7 @@ class StructuredDataManager(object):
         new_session.AddAutoMLToSession(auto_sklearn)
         new_session.AddAutoMLToSession(auto_cve)
         new_session.AddAutoMLToSession(auto_gluon)
+        new_session.AddAutoMLToSession(auto_pytorch)
         # new_session.AddAutoMLToSession(mljar)
 
         return new_session
