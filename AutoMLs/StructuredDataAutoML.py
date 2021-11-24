@@ -31,24 +31,31 @@ class StructuredDataAutoML(object):
         1. Configuration JSON of type dictionary
         """
         self.__configuration = configuration
-        # set default values
-        if self.__configuration["time_budget"] == 0:
-            self.__configuration["time_budget"] = 20
 
     def __read_training_data(self):
         """
         Read the training dataset from disk
         """
-        df = pd.read_csv(os.path.join(self.__configuration["file_location"], self.__configuration["file_name"]))
-        self.__X = df.drop(self.__configuration["configuration"]["target"], axis=1)
-        self.__y = df[self.__configuration["configuration"]["target"]]
+        df = pd.read_csv(os.path.join(self.__configuration["file_location"], self.__configuration["file_name"]),
+                         **self.__configuration["file_configuration"])
+        self.__X = df.drop(self.__configuration["tabular_configuration"]["target"]["target"], axis=1)
+        self.__y = df[self.__configuration["tabular_configuration"]["target"]["target"]]
 
-    def __feature_selection(self):
-        for column, dt in self.__configuration["configuration"]["features"].items():
+    def __dataset_preparation(self):
+        for column, dt in self.__configuration["tabular_configuration"]["features"].items():
             if DataType(dt) is DataType.DATATYPE_IGNORE:
                 self.__X = self.__X.drop(column, axis=1)
             elif DataType(dt) is DataType.DATATYPE_CATEGORY:
                 self.__X[column] = self.__X[column].astype('category')
+        # cast target to a different datatype if necessary
+        self.__cast_target()
+
+    def __cast_target(self):
+        target_dt = self.__configuration["tabular_configuration"]["target"]["type"]
+        if DataType(target_dt) is DataType.DATATYPE_CATEGORY:
+            self.__y = self.__y.astype('category')
+        elif DataType(target_dt) is DataType.DATATYPE_BOOLEAN:
+            self.__y = self.__y.astype('bool')
 
     def __export_model(self, model):
         """
@@ -69,19 +76,26 @@ class StructuredDataAutoML(object):
         elif self.__configuration["task"] == 2:
             self.__regression()
 
+    def __generate_settings(self):
+        automl_settings = {"log_file_name": 'flaml.log'}
+        if self.__configuration["runtime_constraints"]["runtime_limit"] != 0:
+            automl_settings.update({"time_budget": self.__configuration["runtime_constraints"]["runtime_limit"]})
+        if self.__configuration["runtime_constraints"]["max_iter"] != 0:
+            automl_settings.update({"max_iter": self.__configuration["runtime_constraints"]["max_iter"]})
+        return automl_settings
+
     def __classification(self):
         """
         Execute the classification task
         """
         self.__read_training_data()
-        self.__feature_selection()
+        self.__dataset_preparation()
         automl = AutoML()
-        automl_settings = {
-            "time_budget": self.__configuration["time_budget"],
+        automl_settings = self.__generate_settings()
+        automl_settings.update({
             "metric": 'accuracy',
             "task": 'classification',
-            "log_file_name": 'flaml.log',
-        }
+        })
 
         automl.fit(X_train=self.__X, y_train=self.__y, **automl_settings)
         self.__export_model(automl)
@@ -91,14 +105,13 @@ class StructuredDataAutoML(object):
         Execute the regression task
         """
         self.__read_training_data()
-        self.__feature_selection()
+        self.__dataset_preparation()
         automl = AutoML()
-        automl_settings = {
-            "time_budget": self.__configuration["time_budget"],
+        automl_settings = self.__generate_settings()
+        automl_settings.update({
             "metric": 'rmse',
             "task": 'regression',
-            "log_file_name": 'flaml.log',
-        }
+        })
 
         automl.fit(X_train=self.__X, y_train=self.__y, **automl_settings)
         self.__export_model(automl)
