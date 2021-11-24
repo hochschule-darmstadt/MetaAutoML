@@ -1,0 +1,11 @@
+{
+  "automl-name": "autopytorch",
+  "job-file-name": "autopytorch-job.json",
+  "temp-path-classification": "./.tmp/autopytorch_classification_temp",
+  "env-varname-cluster": "RUNTIME",
+  "env-varname-unix": "UNIX",
+  "export-zip-file-name": "pytorch-export",
+  "grpc-server-address": "0.0.0.0:50059",
+  "python-environment": "python",
+  "output-path": "MetaAutoML-Adapter-AutoPytorch/templates/output"
+}

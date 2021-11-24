@@ -1,6 +1,7 @@
 import os
+
 from autoPyTorch import AutoNetClassification
-from autoPyTorch.data_management.data_manager import DataManager
+
 
 class StructuredDataAutoML(object):
     """

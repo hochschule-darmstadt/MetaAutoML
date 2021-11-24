@@ -1,7 +1,7 @@
-from jinja2 import Template
-
 import os
 import sys
+from jinja2 import Template
+
 
 class TemplateGenerator(object):
     """
