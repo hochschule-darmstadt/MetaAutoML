@@ -10,6 +10,5 @@ if __name__ == '__main__':
     json_file = open('gluon-job.json')
     processJson = json.load(json_file)
 
-    if processJson["task"] == 1:
-        classificationTask = StructuredDataAutoML(processJson)
-        classificationTask.execute_task()
+    classificationTask = StructuredDataAutoML(processJson)
+    classificationTask.execute_task()
