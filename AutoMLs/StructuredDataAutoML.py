@@ -40,13 +40,27 @@ class StructuredDataAutoML(object):
         """
         Read the training dataset from disk
         """
-        df = pd.read_csv(os.path.join(self.__configuration["file_location"], self.__configuration["file_name"]))
-        # __X is the entire data without the target column
-        self.__X = df.drop(self.__configuration["configuration"]["target"], axis=1)
-        # __y is only the target column
-        self.__y = df[self.__configuration["configuration"]["target"]]
+        df = pd.read_csv(os.path.join(self.__configuration["file_location"], self.__configuration["file_name"]),
+                         **self.__configuration["file_configuration"])
+        target = self.__configuration["tabular_configuration"]["target"]["target"]
+        self.__X = df.drop(target, axis=1)
+        self.__y = df[target]
 
-        return
+    def __dataset_preparation(self):
+        for column, dt in self.__configuration["tabular_configuration"]["features"].items():
+            if DataType(dt) is DataType.DATATYPE_IGNORE:
+                self.__X = self.__X.drop(column, axis=1)
+            elif DataType(dt) is DataType.DATATYPE_CATEGORY:
+                self.__X[column] = self.__X[column].astype('category')
+        # cast target to a different datatype if necessary
+        self.__cast_target()
+
+    def __cast_target(self):
+        target_dt = self.__configuration["tabular_configuration"]["target"]["type"]
+        if DataType(target_dt) is DataType.DATATYPE_CATEGORY:
+            self.__y = self.__y.astype('category')
+        elif DataType(target_dt) is DataType.DATATYPE_BOOLEAN:
+            self.__y = self.__y.astype('bool')
 
     def __export_model(self, model):
         """
@@ -58,13 +72,6 @@ class StructuredDataAutoML(object):
         with open("templates/output/autosklearn-model.p", "wb") as file:
             pickle.dump(model, file)
 
-    def __feature_selection(self):
-        for column, dt in self.__configuration["configuration"]["features"].items():
-            if DataType(dt) is DataType.DATATYPE_IGNORE:
-                self.__X = self.__X.drop(column, axis=1)
-            elif DataType(dt) in (DataType.DATATYPE_CATEGORY, DataType.DATATYPE_UNKNOW):
-                self.__X[column] = self.__X[column].astype('category')
-
     def execute_task(self):
         """
         Execute the ML task
@@ -74,17 +81,23 @@ class StructuredDataAutoML(object):
         elif self.__configuration["task"] == 2:
             self.__regression()
 
+    def __generate_settings(self):
+        automl_settings = {"logging_config": self.get_logging_config()}
+        if self.__configuration["runtime_constraints"]["runtime_limit"] != 0:
+            automl_settings.update({"time_left_for_this_task": self.__configuration["runtime_constraints"]["runtime_limit"]})
+        if self.__configuration["runtime_constraints"]["max_iter"] != 0:
+            automl_settings.update({"max_iter": self.__configuration["runtime_constraints"]["max_iter"]})
+        return automl_settings
+
     def __classification(self):
         """
         Execute the classification task
         """
         self.__read_training_data()
-        self.__feature_selection()
+        self.__dataset_preparation()
 
-        auto_cls = autosklearn.classification.AutoSklearnClassifier(
-            time_left_for_this_task=self.__configuration.get("time_budget"),
-            logging_config=self.get_logging_config()
-        )
+        automl_settings = self.__generate_settings()
+        auto_cls = autosklearn.classification.AutoSklearnClassifier(**automl_settings)
         auto_cls.fit(self.__X, self.__y)
 
         self.__export_model(auto_cls)
@@ -94,12 +107,10 @@ class StructuredDataAutoML(object):
         Execute the regression task
         """
         self.__read_training_data()
-        self.__feature_selection()
+        self.__dataset_preparation()
 
-        auto_reg = autosklearn.regression.AutoSklearnRegressor(
-            time_left_for_this_task=self.__configuration.get("time_budget"),
-            logging_config=self.get_logging_config()
-        )
+        automl_settings = self.__generate_settings()
+        auto_reg = autosklearn.regression.AutoSklearnRegressor(**automl_settings)
         auto_reg.fit(self.__X, self.__y, )
 
         self.__export_model(auto_reg)
