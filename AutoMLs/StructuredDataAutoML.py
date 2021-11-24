@@ -47,6 +47,7 @@ class StructuredDataAutoML(object):
         self.__y = df[target]
 
     def __dataset_preparation(self):
+        # Valid types for autosklearn are numerical, categorical or boolean
         for column, dt in self.__configuration["tabular_configuration"]["features"].items():
             if DataType(dt) is DataType.DATATYPE_IGNORE:
                 self.__X = self.__X.drop(column, axis=1)
@@ -59,8 +60,6 @@ class StructuredDataAutoML(object):
         target_dt = self.__configuration["tabular_configuration"]["target"]["type"]
         if DataType(target_dt) is DataType.DATATYPE_CATEGORY:
             self.__y = self.__y.astype('category')
-        elif DataType(target_dt) is DataType.DATATYPE_BOOLEAN:
-            self.__y = self.__y.astype('bool')
 
     def __export_model(self, model):
         """
