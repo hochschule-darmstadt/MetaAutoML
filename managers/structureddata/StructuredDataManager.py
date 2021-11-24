@@ -1,3 +1,4 @@
+from AutoCVEManager import AutoCVEManager
 from AutoGluonManager import AutoGluonManager
 from AutoKerasManager import AutoKerasManager
 from FLAMLManager import FLAMLManager
@@ -24,7 +25,7 @@ class StructuredDataManager(object):
         """
         if len(list(configuration.requiredAutoMLs)) == 0:
             print('No AutoMLs specified in the request. Running all available AutoMLs.')
-            required_automl_names = ('flaml', 'autokeras', 'autosklearn', 'autogluon')
+            required_automl_names = ('flaml', 'autokeras', 'autosklearn', 'autogluon', 'autocve')
         else:
             required_automl_names = [name for name in configuration.requiredAutoMLs]
 
@@ -38,6 +39,8 @@ class StructuredDataManager(object):
                 required_automls.append(SklearnManager(configuration, folder_location))
             elif automl_name == AutoGluonManager.name:
                 required_automls.append(AutoGluonManager(configuration, folder_location))
+            elif automl_name == AutoCVEManager.name:
+                required_automls.append(AutoCVEManager(configuration, folder_location))
 
         new_session = AutoMLSession(session_id, configuration.task)
         for automl in required_automls:
