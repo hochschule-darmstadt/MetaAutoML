@@ -38,8 +38,9 @@ class StructuredDataAutoML(object):
         """
         df = pd.read_csv(os.path.join(self.__configuration["file_location"], self.__configuration["file_name"]),
                          **self.__configuration["file_configuration"])
-        self.__X = df.drop(self.__configuration["tabular_configuration"]["target"]["target"], axis=1)
-        self.__y = df[self.__configuration["tabular_configuration"]["target"]["target"]]
+        target = self.__configuration["tabular_configuration"]["target"]["target"]
+        self.__X = df.drop(target, axis=1)
+        self.__y = df[target]
 
     def __dataset_preparation(self):
         for column, dt in self.__configuration["tabular_configuration"]["features"].items():
