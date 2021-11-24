@@ -11,12 +11,6 @@ class StructuredDataManager(object):
     Implementation of a Structured data manager responsible for executing structured data AutoML sessions
     """
 
-    def __init__(self):
-        """
-        Init a new instance of the StructuredDataManager
-        """
-        return
-
     def start_automl(self, configuration, folder_location, session_id) -> AutoMLSession:
         """
         Start a new AutoML session
