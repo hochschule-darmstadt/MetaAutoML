@@ -5,6 +5,7 @@ from FLAMLManager import FLAMLManager
 from MljarManager import MljarManager
 from AutoMLSession import AutoMLSession
 from SklearnManager import SklearnManager
+from AutoPyTorchManager import AutoPyTorchManager
 
 
 class StructuredDataManager(object):
@@ -25,7 +26,7 @@ class StructuredDataManager(object):
         """
         if len(list(configuration.requiredAutoMLs)) == 0:
             print('No AutoMLs specified in the request. Running all available AutoMLs.')
-            required_automl_names = ('flaml', 'autokeras', 'autosklearn', 'autogluon', 'autocve')
+            required_automl_names = ('flaml', 'autokeras', 'autosklearn', 'autogluon', 'autocve', 'autopytorch')
         else:
             required_automl_names = [name for name in configuration.requiredAutoMLs]
 
@@ -41,6 +42,8 @@ class StructuredDataManager(object):
                 required_automls.append(AutoGluonManager(configuration, folder_location))
             elif automl_name == AutoCVEManager.name:
                 required_automls.append(AutoCVEManager(configuration, folder_location))
+            elif automl_name == AutoPyTorchManager.name:
+                required_automls.append(AutoPyTorchManager(configuration, folder_location))
 
         new_session = AutoMLSession(session_id, configuration.task)
         for automl in required_automls:

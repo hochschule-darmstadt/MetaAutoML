@@ -2,7 +2,7 @@ from AutoMLManager import AutoMLManager
 
 
 class AutoPyTorchManager(AutoMLManager):
-    name = "AutoPyTorch"
+    name = "autopytorch"
 
     def __init__(self, configuration, folder_location):
         automl_service_host = 'AUTOPYTORCH_SERVICE_HOST'
