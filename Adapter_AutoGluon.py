@@ -94,7 +94,10 @@ def start_automl_process():
 
 
 class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
-    """ AutoML Adapter Service implementation. Service provide functionality to execute and interact with the current AutoML process. """
+    """
+    AutoML Adapter Service implementation.
+    Service provide functionality to execute and interact with the current AutoML process.
+    """
 
     def StartAutoML(self, request, context):
         """
@@ -103,7 +106,7 @@ class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
         try:
             # saving AutoML configuration JSON
             with open(get_config_property("job-file-name"), "w+") as f:
-                json.dump(request.processJson, f)
+                json.dump(json.loads(request.processJson), f)
 
             process = start_automl_process()
             yield from capture_process_output(process)
