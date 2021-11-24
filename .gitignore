@@ -143,3 +143,7 @@ dmypy.json
 templates/output/
 *-export.zip
 *-job.json
+
+# by adapter generated files
+*-export.zip
+*-job.json

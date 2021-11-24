@@ -1,6 +1,20 @@
 import os
+import pandas as pd
 import autokeras as ak
-from tensorflow.keras.models import load_model
+
+from enum import Enum, unique
+
+
+@unique
+class DataType(Enum):
+    DATATYPE_UNKNOW = 0
+    DATATYPE_STRING = 1
+    DATATYPE_INT = 2
+    DATATYPE_FLOAT = 3
+    DATATYPE_CATEGORY = 4
+    DATATYPE_BOOLEAN = 5
+    DATATYPE_DATETIME = 6
+    DATATYPE_IGNORE = 7
 
 
 class StructuredDataAutoML(object):
@@ -16,16 +30,35 @@ class StructuredDataAutoML(object):
         1. Configuration JSON of type dictionary
         """
         self.__configuration = configuration
-        return
+        if self.__configuration["runtime_constraints"]["max_iter"] == 0:
+            self.__configuration["runtime_constraints"]["max_iter"] = 3
 
     def __read_training_data(self):
         """
         Read the training dataset from disk
         In case of AutoKeras only provide the training file path
         """
-        self.__training_data_path = os.path.join(self.__configuration["file_location"],
-                                                 self.__configuration["file_name"])
-        return
+        df = pd.read_csv(os.path.join(self.__configuration["file_location"], self.__configuration["file_name"]),
+                         **self.__configuration["file_configuration"])
+        target = self.__configuration["tabular_configuration"]["target"]["target"]
+        self.__X = df.drop(target, axis=1)
+        self.__y = df[target]
+
+    def __dataset_preparation(self):
+        for column, dt in self.__configuration["tabular_configuration"]["features"].items():
+            if DataType(dt) is DataType.DATATYPE_IGNORE:
+                self.__X = self.__X.drop(column, axis=1)
+            elif DataType(dt) is DataType.DATATYPE_CATEGORY:
+                self.__X[column] = self.__X[column].astype('category')
+        # cast target to a different datatype if necessary
+        self.__cast_target()
+
+    def __cast_target(self):
+        target_dt = self.__configuration["tabular_configuration"]["target"]["type"]
+        if DataType(target_dt) is DataType.DATATYPE_CATEGORY:
+            self.__y = self.__y.astype('category')
+        elif DataType(target_dt) is DataType.DATATYPE_BOOLEAN:
+            self.__y = self.__y.astype('bool')
 
     def __export_model(self, model):
         """
@@ -37,7 +70,6 @@ class StructuredDataAutoML(object):
         model = model.export_model()
         model.summary()
         model.save("templates/output/model_autokeras", save_format="tf")
-        return
 
     def execute_task(self):
         """Execute the ML task"""
@@ -49,13 +81,19 @@ class StructuredDataAutoML(object):
     def __classification(self):
         """Execute the classification task"""
         self.__read_training_data()
-        clf = ak.StructuredDataClassifier(overwrite=True, max_trials=3, seed=42)
-        clf.fit(self.__training_data_path, self.__configuration["configuration"]["target"], epochs=10)
+        self.__dataset_preparation()
+        clf = ak.StructuredDataClassifier(overwrite=True,
+                                          max_trials=self.__configuration["runtime_constraints"]["max_iter"],
+                                          seed=42)
+        clf.fit(x=self.__X, y=self.__y)
         self.__export_model(clf)
 
     def __regression(self):
         """Execute the regression task"""
         self.__read_training_data()
-        reg = ak.StructuredDataRegressor(overwrite=True, max_trials=3, seed=42)
-        reg.fit(self.__training_data_path, self.__configuration["configuration"]["target"], epochs=10)
+        self.__dataset_preparation()
+        reg = ak.StructuredDataRegressor(overwrite=True,
+                                         max_trials=self.__configuration["runtime_constraints"]["max_iter"],
+                                         seed=42)
+        reg.fit(x=self.__X, y=self.__y)
         self.__export_model(reg)

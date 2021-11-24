@@ -9,7 +9,6 @@ if __name__ == '__main__':
 	"""
 	json_file = open('keras-job.json')
 	processJson = json.load(json_file)
-	processJson = json.loads(processJson)
 
 	structuredDataAutoML = StructuredDataAutoML(processJson)
 	structuredDataAutoML.execute_task()

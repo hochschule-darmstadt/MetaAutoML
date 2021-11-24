@@ -104,9 +104,9 @@ class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
         """
         try:
             # saving AutoML configuration JSON
-            with open(get_config_property("job-file-name"), "w+") as f:
-                json.dump(request.processJson, f)
             config_json = json.loads(request.processJson)
+            with open(get_config_property("job-file-name"), "w+") as f:
+                json.dump(config_json, f)
 
             process = start_automl_process()
             yield from capture_process_output(process)
