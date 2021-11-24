@@ -158,13 +158,20 @@ def start_automl(argv: list, stub: Controller_pb2_grpc.ControllerServiceStub):
     with open(filename, 'r') as json_file:
         features_config = json.load(json_file)
 
-    tabular_config = Controller_pb2.AutoMLConfigurationTabularData(
-        target=target_column, features=features_config)
+    target_config = Controller_pb2.AutoMLTarget(target=target_column, type=5)
 
+    tabular_config = Controller_pb2.AutoMLConfigurationTabularData(
+        target=target_config, features=features_config)
+
+    runtime_constraints = Controller_pb2.AutoMLRuntimeConstraints(
+        runtime_limit=30, max_iter=0)
+    automls = ['flaml']
     request = Controller_pb2.StartAutoMLprocessRequest(dataset=dataset_name,
                                                        task=task,
                                                        tabularConfig=tabular_config,
-                                                       timeBudget=15)
+                                                       requiredAutoMLs=automls,
+                                                       runtimeConstraints=runtime_constraints,
+                                                       fileConfiguration={"sep": ','})
     response = stub.StartAutoMLprocess(
         request)  # return (StartAutoMLprocessResponse {ControllerReturnCode result = 1;string sessionId = 2;})
     print(f"{response}")

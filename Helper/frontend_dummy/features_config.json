@@ -1,6 +1,6 @@
 {
   "PassengerId": 7,
-  "Pclass": 2,
+  "Pclass": 4,
   "Name": 7,
   "Sex": 4,
   "Age": 3,
@@ -8,6 +8,6 @@
   "Parch": 2,
   "Ticket": 7,
   "Fare": 3,
-  "Cabin": 1,
+  "Cabin": 7,
   "Embarked": 4
 }
