@@ -34,3 +34,6 @@
 	path = MetaAutoML-Controller
 	url = git@github.com:hochschule-darmstadt/MetaAutoML-Controller.git
 	branch = main
+[submodule "adapters/MetaAutoML-Adapter-AutoCVE"]
+	path = adapters/MetaAutoML-Adapter-AutoCVE
+	url = git@github.com:hochschule-darmstadt/MetaAutoML-Adapter-AutoCVE.git
