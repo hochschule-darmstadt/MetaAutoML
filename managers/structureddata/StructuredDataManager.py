@@ -37,7 +37,7 @@ class StructuredDataManager(object):
             elif automl_name == SklearnManager.name:
                 required_automls.append(SklearnManager(configuration, folder_location))
             elif automl_name == AutoGluonManager.name:
-                required_automls.append(SklearnManager(configuration, folder_location))
+                required_automls.append(AutoGluonManager(configuration, folder_location))
 
         new_session = AutoMLSession(session_id, configuration.task)
         for automl in required_automls:
