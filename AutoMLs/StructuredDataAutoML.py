@@ -33,18 +33,37 @@ class StructuredDataAutoML(object):
         1. Configuration JSON of type dictionary
         """
         self.__configuration = configuration
+        self.target = self.__configuration["tabular_configuration"]["target"]["target"]
+
         # set default values
-        if self.__configuration["time_budget"] == 0:
-            self.__configuration["time_budget"] = 20
-        return
+        if self.__configuration["runtime_constraints"]["runtime_limit"] == 0:
+            self.__configuration["runtime_constraints"]["runtime_limit"] = 20
 
     def __read_training_data(self):
         """
         Read the training dataset from disk
-		In case of AutoGluon only provide the training file path
+        In case of AutoGluon only provide the training file path
         """
-        self.__training_data = pd.read_csv(
-            os.path.join(self.__configuration["file_location"], self.__configuration["file_name"]))
+        df = pd.read_csv(os.path.join(self.__configuration["file_location"], self.__configuration["file_name"]),
+                         **self.__configuration["file_configuration"])
+        self.__X = df.drop(self.target, axis=1)
+        self.__y = df[self.target]
+
+    def __dataset_preparation(self):
+        for column, dt in self.__configuration["tabular_configuration"]["features"].items():
+            if DataType(dt) is DataType.DATATYPE_IGNORE:
+                self.__X = self.__X.drop(column, axis=1)
+            elif DataType(dt) is DataType.DATATYPE_CATEGORY:
+                self.__X[column] = self.__X[column].astype('category')
+        # cast target to a different datatype if necessary
+        self.__cast_target()
+
+    def __cast_target(self):
+        target_dt = self.__configuration["tabular_configuration"]["target"]["type"]
+        if DataType(target_dt) is DataType.DATATYPE_CATEGORY:
+            self.__y = self.__y.astype('category')
+        elif DataType(target_dt) is DataType.DATATYPE_BOOLEAN:
+            self.__y = self.__y.astype('bool')
 
     def __export_model(self, model):
         """
@@ -55,13 +74,6 @@ class StructuredDataAutoML(object):
         """
         with open('templates/output/gluon-model.p', 'wb') as file:
             pickle.dump(model, file)
-
-    def __feature_selection(self):
-        for column, dt in self.__configuration["configuration"]["features"].items():
-            if DataType(dt) is DataType.DATATYPE_IGNORE:
-                self.__training_data = self.__training_data.drop(column, axis=1)
-            elif DataType(dt) is DataType.DATATYPE_CATEGORY:
-                self.__training_data[column] = self.__training_data[column].astype('category')
 
     def execute_task(self):
         """
@@ -77,12 +89,14 @@ class StructuredDataAutoML(object):
         Execute the classification task
         """
         self.__read_training_data()
-        target = self.__configuration["configuration"]["target"]
-        model = TabularPredictor(label=target, problem_type="multiclass", path="templates/output/model_autogluon").fit(
-            self.__training_data,
-            time_limit=
-            self.__configuration[
-                "time_budget"])
+        self.__dataset_preparation()
+        data = self.__X
+        data[self.target] = self.__y
+        model = TabularPredictor(label=self.target,
+                                 problem_type="multiclass",
+                                 path="templates/output/model_autogluon").fit(
+            data,
+            time_limit=self.__configuration["runtime_constraints"]["runtime_limit"])
         self.__export_model(model)
 
     def __regression(self):
@@ -90,10 +104,12 @@ class StructuredDataAutoML(object):
         Execute the regression task
         """
         self.__read_training_data()
-        target = self.__configuration["configuration"]["target"]
-        model = TabularPredictor(label=target, problem_type="regression", path="templates/output/model_autogluon").fit(
-            self.__training_data,
-            time_limit=
-            self.__configuration[
-                "time_budget"])
+        self.__dataset_preparation()
+        data = self.__X
+        data[self.target] = self.__y
+        model = TabularPredictor(label=self.target,
+                                 problem_type="regression",
+                                 path="templates/output/model_autogluon").fit(
+            data,
+            time_limit=self.__configuration["runtime_constraints"]["runtime_limit"])
         self.__export_model(model)
