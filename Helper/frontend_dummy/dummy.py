@@ -10,7 +10,7 @@ def print_cl_options():
     print("""
     help                        print all commands
     get-session-status <id>     get the status of the session with the specified id
-    start-automl <dataset name> <target> <task>
+    start-automl <dataset name> <target> <task> <config filename>
                                 starts the automl
                                 features configuration can be done via a features_config.json file.
                                 the parameters have the following defaults for a quick test:
@@ -132,8 +132,8 @@ def start_automl(argv: list, stub: Controller_pb2_grpc.ControllerServiceStub):
         argv[2] = <task>                default = "classification"
     """
 
-    if len(argv) < 0 or len(argv) > 3:
-        print("start_automl requires 0 to 3 arguments: <dataset name>='titanic_train_1.csv' "
+    if len(argv) < 0 or len(argv) > 4:
+        print("start_automl requires 0 to 4 arguments: <dataset name>='titanic_train_1.csv' "
               "<target column>='Survived' <task>='classification'")
         return
 
@@ -155,6 +155,9 @@ def start_automl(argv: list, stub: Controller_pb2_grpc.ControllerServiceStub):
             return
 
     filename = 'features_config.json'
+    if len(argv) > 3:
+        filename = argv[3]
+
     with open(filename, 'r') as json_file:
         features_config = json.load(json_file)
 
