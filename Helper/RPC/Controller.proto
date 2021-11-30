@@ -12,8 +12,9 @@ service ControllerService {
   rpc GetDatasets(GetDatasetsRequest) returns (GetDatasetsResponse) {}
   /*
     returns details of a specified dataset.
-    name: the name of the dataset
+
     The result is a list of TableColumns containing:
+    name: the name of the dataset
     datatype: the datatype of the column
     firstEntries: the first couple of rows of the dataset
    */

@@ -100,8 +100,9 @@ class ControllerServiceServicer(object):
     def GetDataset(self, request, context):
         """
         returns details of a specified dataset.
-        name: the name of the dataset
+
         The result is a list of TableColumns containing:
+        name: the name of the dataset
         datatype: the datatype of the column
         firstEntries: the first couple of rows of the dataset
         """
