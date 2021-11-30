@@ -1,9 +1,7 @@
 import os
 import Controller_pb2
-import Controller_pb2_grpc
 
 from StructuredDataManager import StructuredDataManager
-from AutoMLSession import AutoMLSession
 from CsvManager import CsvManager
 from RdfManager import RdfManager
 
