@@ -98,7 +98,12 @@ class ControllerServiceServicer(object):
         raise NotImplementedError('Method not implemented!')
 
     def GetDataset(self, request, context):
-        """return the content of a specific dataset. The result is a collection of TableColumns containing the datatype of a column, its name, and the first entries of the column
+        """
+        returns details of a specified dataset.
+        name: the name of the dataset
+        The result is a list of TableColumns containing:
+        datatype: the datatype of the column
+        firstEntries: the first couple of rows of the dataset
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
