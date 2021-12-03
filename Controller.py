@@ -65,7 +65,14 @@ class ControllerServiceServicer(Controller_pb2_grpc.ControllerServiceServicer):
         return datasets
 
     def GetDataset(self, request, context):
-        """return the content of a specific dataset. The result is a collection of TableColumns containing the datatype of a column, its name, and the first entries of the column."""
+        """
+        returns details of a specified dataset.
+
+        The result is a list of TableColumns containing:
+        name: the name of the dataset
+        datatype: the datatype of the column
+        firstEntries: the first couple of rows of the dataset
+        """
         response = self._controllerManager.GetDataset(request)
         return response
 

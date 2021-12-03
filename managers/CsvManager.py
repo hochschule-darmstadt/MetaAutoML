@@ -1,8 +1,8 @@
 import pandas as pd
 import numpy as np
+from typing import List
 
 import Controller_pb2
-import Controller_pb2_grpc
 
 FIRST_ROW_AMOUNT = 50
 
@@ -24,17 +24,25 @@ class CsvManager:
         """
         response = Controller_pb2.GetDatasetResponse()
         dataset = pd.read_csv(path)
+
         for col in dataset.columns:
-            column_information = Controller_pb2.TableColumn()
-            column_information.name = col
-            column_information.type = CsvManager.__get_datatype(dataset[col].dtype)
+            table_column = Controller_pb2.TableColumn()
+            table_column.name = col
+            numpy_datatype = dataset[col].dtype.name
+            table_column.type = CsvManager.__get_datatype(numpy_datatype)
+
+            for type in CsvManager.__get_convertible_types(numpy_datatype):
+                table_column.convertibleTypes.append(type)
+
             for item in dataset[col].head(FIRST_ROW_AMOUNT).tolist():
-                column_information.fistEntries.append(str(item))
-            response.columns.append(column_information)
+                table_column.firstEntries.append(str(item))
+
+            response.columns.append(table_column)
+
         return response
 
     @staticmethod
-    def __get_datatype(value):
+    def __get_datatype(numpy_datatype) -> Controller_pb2.DataType:
         """
         Identify the np datatype and mark correct OMAML datatype
         ---
@@ -43,17 +51,17 @@ class CsvManager:
         ---
         Return Controller_pb2.DATATYPE of the passed value
         """
-        if value.name == np.dtype(np.object):
+        if numpy_datatype == np.dtype(np.object):
             return Controller_pb2.DATATYPE_UNKNOW
-        elif value.name == np.dtype(np.unicode_):
+        elif numpy_datatype == np.dtype(np.unicode_):
             return Controller_pb2.DATATYPE_STRING
-        elif value.name == np.dtype(np.int64):
+        elif numpy_datatype == np.dtype(np.int64):
             return Controller_pb2.DATATYPE_INT
-        elif value.name == np.dtype(np.float_):
+        elif numpy_datatype == np.dtype(np.float_):
             return Controller_pb2.DATATYPE_FLOAT
-        elif value.name == np.dtype(np.bool_):
+        elif numpy_datatype == np.dtype(np.bool_):
             return Controller_pb2.DATATYPE_BOOLEAN
-        elif value.name == np.dtype(np.datetime64):
+        elif numpy_datatype == np.dtype(np.datetime64):
             return Controller_pb2.DATATYPE_DATETIME
         else:
             return Controller_pb2.DATATYPE_UNKNOW
@@ -73,3 +81,19 @@ class CsvManager:
         for col in dataset.columns:
             response.columnNames.append(col)
         return response
+
+    @staticmethod
+    def __get_convertible_types(pandas_datatype: np.dtype) -> list:
+        """
+        figures out all types that a column can be converted to.
+        We keep a simple placeholder algorithm here.
+        However, later this might be enhanced to querying the ontology, using a more sophisticated algorithm or using some imported 3rd party module.
+        """
+        basic_conversions = [Controller_pb2.DATATYPE_UNKNOW, Controller_pb2.DATATYPE_IGNORE, Controller_pb2.DATATYPE_STRING]
+
+        if pandas_datatype == np.dtype(np.int64):
+            return basic_conversions + [Controller_pb2.DATATYPE_FLOAT]
+        if pandas_datatype == np.dtype(np.bool_):
+            return basic_conversions + [Controller_pb2.DATATYPE_CATEGORY, Controller_pb2.DATATYPE_INT, Controller_pb2.DATATYPE_FLOAT]
+        else:
+            return basic_conversions
