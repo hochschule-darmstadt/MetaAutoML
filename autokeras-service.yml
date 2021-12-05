@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: autokeras
+spec:
+  type: ClusterIP
+  ports:
+  - name: "50101"
+    port: 50101
+    protocol: TCP
+    targetPort: 5002
+  selector:
+    io.kompose.service: autokeras
+status:
+  loadBalancer: {}
