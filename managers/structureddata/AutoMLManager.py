@@ -19,7 +19,7 @@ class AutoMLManager(ABC, Thread):
     Base implementation of the  AutoML functionality
     """
 
-    def __init__(self, configuration, folder_location, automl_service_host, automl_service_port, automl_default_port):
+    def __init__(self, configuration, folder_location, automl_service_host, automl_service_port):
         """
         Init a new instance of the abstract class AutoMLManager
         ---
@@ -37,7 +37,6 @@ class AutoMLManager(ABC, Thread):
 
         self.__AUTOML_SERVICE_HOST = automl_service_host
         self.__AUTOML_SERVICE_PORT = automl_service_port
-        self.__AUTOML_DEFAULT_PORT = automl_default_port
 
         return
 
