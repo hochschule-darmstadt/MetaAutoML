@@ -1,0 +1,16 @@
+version: "3.8"
+services:
+  controller:
+    build: ./MetaAutoML-Controller
+    container_name: controller
+    ports:
+      - "5001:5001"
+    environment:
+      - AUTOKERAS_SERVICE_HOST=autokeras
+      - AUTOKERAS_SERVICE_PORT=50052
+      - SKLEARN_SERVICE_HOST=sklearn
+      - SKLEARN_SERVICE_PORT=50055
+      - FLAML_SERVICE_HOST=flaml
+      - FLAML_SERVICE_PORT=50056
+      - AUTOGLUON_SERVICE_HOST=autogluon
+      - AUTOGLUON_SERVICE_PORT=50057
