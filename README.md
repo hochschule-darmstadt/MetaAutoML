@@ -6,9 +6,16 @@ This repository contains the controller segment of OMA-ML:
 
 ## Installation
 
-Clone the repository and setup a local project using the requirements.txt for an local python enviromnent.
+Clone the repository and set up a local project using the requirements.txt for an local python enviromnent.
 
 ## Project Overview
 
 - `Controller_pb2_grpc.py` is the RPC interface for the RPC server running in the controller, which is accessible for the frontend.
 - `Adapter_pb2_grpc.py` is the RPC interface running in the adapters, which is then called by the controller.
+
+## ENV Variables:
+- `PYTHONPATH` must be set to all directories that contain python source files (separated by a colon on unix)
+- `RUNTIME` must be set to 1 if running in docker
+- `PYTHONUNBUFFERED=1` should always be set
+- `<AUTOML_NAME>_SERVICE_HOST` should be set to the ip address of the respective Adapter
+- `<AUTOML_NAME>_SERVICE_PORT` should be set to the port on which the respective Adapter is listening to connections from the controller

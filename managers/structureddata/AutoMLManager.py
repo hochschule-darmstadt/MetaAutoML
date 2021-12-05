@@ -77,12 +77,8 @@ class AutoMLManager(ABC, Thread):
         """
         AutoML task for the current run
         """
-        if in_cluster():
-            automl_ip = os.environ[self.__AUTOML_SERVICE_HOST]
-            automl_port = os.environ[self.__AUTOML_SERVICE_PORT]
-        else:
-            automl_ip = "localhost"
-            automl_port = self.__AUTOML_DEFAULT_PORT
+        automl_ip = os.getenv(self.__AUTOML_SERVICE_HOST)
+        automl_port = os.getenv(self.__AUTOML_SERVICE_PORT)
 
         print(f"connecting to {self.name}: {automl_ip}:{automl_port}")
 
