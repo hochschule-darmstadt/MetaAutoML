@@ -5,7 +5,7 @@
   "env-varname-cluster": "RUNTIME",
   "env-varname-unix": "UNIX",
   "export-zip-file-name": "sklearn-export",
-  "grpc-server-address": "0.0.0.0:50057",
+  "grpc-server-address": "0.0.0.0:50058",
   "python-environment": "python",
   "output-path": "MetaAutoML-Adapter-AutoCVE/templates/output"
 }
