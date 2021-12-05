@@ -17,3 +17,6 @@ In order to persist this update of references in the meta repo you would obvious
 
 If you like to commit on the submodules you will need to check out a branch there, because the submodules are initially in detached state:  
 `git checkout <some branch>`
+
+You then have to commit and push you changes in the submodule. The meta repository will then update its reference to the submodule.
+This update can than be committed in the meta repository.
