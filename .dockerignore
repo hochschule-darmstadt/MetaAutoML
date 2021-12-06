@@ -1,0 +1,15 @@
+env
+.git
+.vs/
+__pycache__
+.gitignore
+
+*.md
+.idea/
+*.sln
+output/
+docs/
+
+# files needed only outside the container to configure it when starting
+*-deployment.yaml
+*-service.yaml

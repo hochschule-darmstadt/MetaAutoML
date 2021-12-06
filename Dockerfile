@@ -5,12 +5,14 @@ EXPOSE 5001
 COPY requirements.txt .
 # Install dependencies
 RUN pip install -r requirements.txt
-COPY . /
-WORKDIR /
+# put all files in a directory called app
+WORKDIR /app
+COPY . .
 
 # set all environment variables that are valid for docker-compose and kubernetes
 # all specific enviraonment variables shall then be set by docker or cubernetes when starting the container
 ENV PYTHONUNBUFFERED=1
-ENV PYTHONPATH "/interfaces:/managers:/managers/structureddata:/sessions:/utils"
-ENV RUNTIME=1
+ENV PYTHONPATH "interfaces:managers:managers/structureddata:sessions:utils"
+ENV RUNTIME=DOCKER
+ENV PYTHON_ENV "python"
 ENTRYPOINT ["python", "Controller.py"]
