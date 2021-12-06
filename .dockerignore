@@ -11,4 +11,10 @@ __pycache__
 *-deployment.yaml
 *-service.yaml
 
-app-data/*/*
+.gitkeep
+
+# files created at runtime
+
+app-data/output/*
+app-data/datasets/*
+app-data/jobs/*

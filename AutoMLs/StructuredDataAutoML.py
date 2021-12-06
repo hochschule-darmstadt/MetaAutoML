@@ -3,6 +3,7 @@ import pandas as pd
 import autokeras as ak
 
 from enum import Enum, unique
+from JsonUtil import get_config_property
 
 
 @unique
@@ -69,7 +70,7 @@ class StructuredDataAutoML(object):
         """
         model = model.export_model()
         model.summary()
-        model.save("templates/output/model_autokeras", save_format="tf")
+        model.save(f"{get_config_property('output-path')}model_autokeras", save_format="tf")
 
     def execute_task(self):
         """Execute the ML task"""

@@ -5,7 +5,8 @@
   "env-varname-unix": "UNIX",
   "grpc-server-address": "0.0.0.0:50052",
   "export-zip-file-name": "keras-export",
-  "templates-output-path": "templates/output",
-  "output-path-docker": "omaml/output",
+  "output-path": "app-data/output",
+  "job-file-path": "app-data/jobs",
+  "templates-path": "app-data/templates",
   "repository-dir-name": "MetaAutoML-Adapter-AutoKeras"
 }

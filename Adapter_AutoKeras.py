@@ -55,30 +55,18 @@ def get_response(output_json):
 
 
 def zip_script():
-    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    export_zip_file_name = get_config_property("export-zip-file-name")
-    templates_output_path = get_config_property("templates-output-path")
-    if in_cluster():
-        print("RUNNING DOCKER")
-        output_path = get_config_property("output-path-docker")
-        if not os.path.exists(output_path):  # ensure output folder exists
-            os.makedirs(output_path)
+    zip_file_name = get_config_property("export-zip-file-name")
+    output_path = get_config_property("output-path")
 
-        zip_contents_path = os.path.join(base_dir, templates_output_path)
-        shutil.make_archive(export_zip_file_name, 'zip', zip_contents_path)
-        shutil.move(f"{export_zip_file_name}.zip", f"{output_path}/{export_zip_file_name}.zip")
-        output_json = {"file_name": f"{export_zip_file_name}.zip"}
-        output_json.update({"file_location": f"{output_path}/"})
+    print(f"saving model zip file for {get_config_property('adapter-name')}")
 
-    else:
-        print("RUNNING LOCAL")
-        repository_dir_name = get_config_property("repository-dir-name")
-        zip_contents_path = os.path.join(base_dir, repository_dir_name, templates_output_path)
-        shutil.make_archive(export_zip_file_name, 'zip', zip_contents_path)
-        output_json = {"file_name": f"{export_zip_file_name}.zip"}
-        output_json.update({"file_location": os.path.join(base_dir, repository_dir_name)})
+    shutil.make_archive(zip_file_name,
+                        'zip',
+                        output_path)
+    shutil.move(f'{zip_file_name}.zip', output_path)
 
-    return output_json
+    return {"file_name": f'{zip_file_name}.zip',
+            "file_location": output_path}
 
 
 def start_automl_process():
@@ -105,7 +93,9 @@ class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
         try:
             # saving AutoML configuration JSON
             config_json = json.loads(request.processJson)
-            with open(get_config_property("job-file-name"), "w+") as f:
+            job_file_location = os.path.join(get_config_property("job-file-path"),
+                                             get_config_property("job-file-name"))
+            with open(job_file_location, "w+") as f:
                 json.dump(config_json, f)
 
             process = start_automl_process()
@@ -113,7 +103,9 @@ class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
             generate_script(config_json)
             output_json = zip_script()
 
-            yield from get_response(output_json)
+            response = yield from get_response(output_json)
+            print(f'{get_config_property("adapter-name")} job finished')
+            return response
 
         except Exception as e:
             return get_except_response(context, e)
