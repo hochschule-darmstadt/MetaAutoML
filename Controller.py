@@ -45,7 +45,8 @@ class ControllerServiceServicer(Controller_pb2_grpc.ControllerServiceServicer):
     """includes all gRPC functions available for the client frontend"""
 
     def __init__(self):
-        DATASET_FOLDER = os.path.join(ROOT_PATH, 'omaml/datasets')
+        DATASET_FOLDER = os.path.join(ROOT_PATH,
+                                      get_config_property("datasets-path"))
         self._controllerManager = ControllerManager(DATASET_FOLDER)
 
     def GetAutoMlModel(self, request, context):

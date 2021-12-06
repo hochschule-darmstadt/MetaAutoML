@@ -84,11 +84,11 @@ class AutoMLManager(ABC, Thread):
         with grpc.insecure_channel(f"{automl_ip}:{automl_port}") as channel:  # Connect to Adapter
             stub = Adapter_pb2_grpc.AdapterServiceStub(channel)  ## Create Interface Stub
 
-            dataset_to_send = Adapter_pb2.StartAutoMLRequest()  ## Request Object
+            request = Adapter_pb2.StartAutoMLRequest()  ## Request Object
             process_json = self._generate_process_json()
-            dataset_to_send.processJson = json.dumps(process_json)
+            request.processJson = json.dumps(process_json)
 
-            self._run_server_until_connection_closed(stub, dataset_to_send)
+            self._run_server_until_connection_closed(stub, request)
 
     def _generate_process_json(self):
         process_json = {"file_name": self._configuration.dataset}

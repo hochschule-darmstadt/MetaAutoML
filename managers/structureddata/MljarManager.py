@@ -82,7 +82,7 @@ class MljarManager(Thread):
             processJson.update({"file_location": self.__file_dest})
             processJson.update({"task": self.__configuration.task})
             processJson.update({"configuration": { "target": self.__configuration.tabularConfig.target } })
-            datasetToSend.processJson = json.dumps(processJson)
+            datasetToSend.process_json = json.dumps(processJson)
             for response in stub.StartAutoML(datasetToSend):
                 if response.returnCode == Adapter_pb2.ADAPTER_RETURN_CODE_STATUS_UPDATE:
                     self.__status_messages.append(response.statusUpdate)
