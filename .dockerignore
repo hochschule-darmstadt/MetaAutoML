@@ -1,5 +1,14 @@
-
 env
 .git
 .vs
 __pycache__
+.gitignore
+
+*.md
+.idea/
+*.sln
+
+*-deployment.yaml
+*-service.yaml
+
+app-data/*/*

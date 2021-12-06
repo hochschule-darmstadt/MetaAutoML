@@ -5,11 +5,12 @@ EXPOSE 5002
 COPY requirements.txt .
 # Install dependencies
 RUN pip install -r requirements.txt
-COPY . /
-WORKDIR /
+# put all files in a directory called app
+WORKDIR /app
+COPY . .
 
-VOLUME ["/app-data"]
+ENV RUNTIME=DOCKER
 ENV PYTHONUNBUFFERED=1
-ENV PYTHONPATH "/AutoMLs:/templates:/templates/output:/Utils"
+ENV PYTHONPATH "AutoMLs:Utils"
 ENV PYTHON_ENV "python"
 ENTRYPOINT ["python", "Adapter_AutoKeras.py"]
