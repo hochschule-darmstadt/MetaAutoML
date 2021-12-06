@@ -18,3 +18,4 @@ __pycache__
 app-data/output/*
 app-data/datasets/*
 app-data/jobs/*
+app-data/outputmodel*

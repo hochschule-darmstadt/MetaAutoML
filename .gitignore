@@ -141,7 +141,9 @@ dmypy.json
 .idea/
 
 # by adapter generated files
-templates/output/
 *-export.zip
 *-job.json
+app-data/output/predict.py
+app-data/output/requirements.txt
+outputmodel*
 
