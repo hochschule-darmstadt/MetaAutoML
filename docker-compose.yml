@@ -18,3 +18,18 @@ services:
       - AUTOPYTORCH_SERVICE_PORT=50059
       - AUTOCVE_SERVICE_HOST=autocve
       - AUTOCVE_SERVICE_PORT=50058
+    volumes:
+      - datasets:/app/app-data/datasets
+      - output:/app/app-data/output
+
+
+    # adapters do not need to be available from the host machine -> no port mappings
+  autokeras:
+    build: ./adapters/MetaAutoML-Adapter-AutoKeras
+    container_name: autokeras
+    volumes:
+      - datasets:/app/app-data/datasets
+      - output:/app/app-data/output
+volumes:
+  datasets: # shared volume between controller and adapters to transfer datasets
+  output: # shared volume between controller and adapters to transfer output files e.g. .zip file
