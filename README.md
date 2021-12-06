@@ -19,3 +19,5 @@ Clone the repository and set up a local project using the requirements.txt for a
 - `PYTHONUNBUFFERED=1` should always be set
 - `<AUTOML_NAME>_SERVICE_HOST` should be set to the ip address of the respective Adapter
 - `<AUTOML_NAME>_SERVICE_PORT` should be set to the port on which the respective Adapter is listening to connections from the controller
+
+it is recommended to start the whole project using the docker-compose.yml file in the meta repository, because there all environment variables are preconfigured
