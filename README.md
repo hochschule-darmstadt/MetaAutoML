@@ -8,3 +8,6 @@
 
 ### PYTHON_ENV
 - must be set to the desired python environment
+
+### GRPC_SERVER_PORT
+- must be set to the port where the adapter is listening for calls from the controller

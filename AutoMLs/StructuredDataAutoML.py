@@ -70,7 +70,8 @@ class StructuredDataAutoML(object):
         """
         model = model.export_model()
         model.summary()
-        model.save(f"{get_config_property('output-path')}model_autokeras", save_format="tf")
+        output_file = os.path.join(get_config_property('output-path'), "model_autokeras.p")
+        model.save(output_file, save_format="tf")
 
     def execute_task(self):
         """Execute the ML task"""

@@ -117,7 +117,7 @@ def serve():
     """
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     Adapter_pb2_grpc.add_AdapterServiceServicer_to_server(AdapterServiceServicer(), server)
-    server.add_insecure_port(get_config_property("grpc-server-address"))
+    server.add_insecure_port(f'{get_config_property("grpc-server-address")}:{os.getenv("GRPC_SERVER_PORT")}')
     server.start()
     print(get_config_property("adapter-name") + " started")
     server.wait_for_termination()

@@ -13,9 +13,9 @@ __pycache__
 
 .gitkeep
 
-# files created at runtime
-
-app-data/output/*
+# datasets are mapped into the volume by controller, not by automl adapter, so ignore files if they are present
 app-data/datasets/*
-app-data/jobs/*
-app-data/outputmodel*
+
+# all generated files in the folder of the specific automl
+app-data/output/*/*
+app-data/jobs/*/*

@@ -1,6 +1,5 @@
 FROM python:3.7.11-slim-buster AS base
-WORKDIR /
-EXPOSE 5002
+EXPOSE 50052
 
 COPY requirements.txt .
 # Install dependencies
