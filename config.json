@@ -1,11 +1,10 @@
 {
-  "automl-name": "autosklearn",
-  "job-file-name": "autosklearn-job.json",
-  "temp-path-classification": "./.tmp/autosklearn_classification_temp",
+  "adapter-name": "sklearn",
+  "job-file-name": "sklearn-job.json",
   "env-varname-cluster": "RUNTIME",
-  "env-varname-unix": "UNIX",
+  "grpc-server-address": "0.0.0.0",
   "export-zip-file-name": "sklearn-export",
-  "grpc-server-address": "0.0.0.0:50055",
-  "python-environment": "venv/bin/python3",
-  "output-path": "MetaAutoML-Adapter-Autosklearn/templates/output"
+  "output-path": "app-data/output",
+  "job-file-path": "app-data/jobs",
+  "templates-path": "app-data/templates"
 }

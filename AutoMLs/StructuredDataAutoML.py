@@ -12,7 +12,7 @@ class StructuredDataAutoML(object):
     Implementation of the AutoML functionality fo structured data a.k.a. tabular data
     """
 
-    def __init__(self, json: dict):
+    def __init__(self, configuration: dict):
         """
         Init a new instance of StructuredDataAutoML
         ---
@@ -20,26 +20,25 @@ class StructuredDataAutoML(object):
         1. Configuration JSON of type dictionary
         """
         self.__time_limit = 30
-        self.__json = json
+        self.__configuration = configuration
         return
 
     def __read_training_data(self):
         """
         Read the training dataset from disk
         """
-        self.__training_data_path = os.path \
-            .join(self.__json["file_location"]
-                  , self.__json["file_name"])
-        df = pd.read_csv(self.__training_data_path)
+        df = pd.read_csv(os.path.join(self.__configuration["file_location"], self.__configuration["file_name"]),
+                         **self.__configuration["file_configuration"])
 
-        # convert all object columns to categories, because autosklearn only supports numerical, bool and categorical features
+        # convert all object columns to categories, because autosklearn only supports numerical,
+        # bool and categorical features
         df[df.select_dtypes(['object']).columns] = df.select_dtypes(['object']) \
             .apply(lambda x: x.astype('category'))
 
-        # __X is the entire data without the target column
-        self.__X = df.drop(self.__json["configuration"]["target"], axis=1)
-        # __y is only the target column
-        self.__y = df[self.__json["configuration"]["target"]]
+        target = self.__configuration["tabular_configuration"]["target"]["target"]
+
+        self.__X = df.drop(target, axis=1)
+        self.__y = df[target]
 
         return
 
@@ -50,7 +49,8 @@ class StructuredDataAutoML(object):
         Parameter:
         1. generate ML model
         """
-        with open("templates/output/autosklearn-model.p", "wb") as file:
+        output_file = os.path.join(get_config_property('output-path'), "model_sklearn.p")
+        with open(output_file, "wb") as file:
             pickle.dump(model, file)
 
         return

@@ -1,14 +1,15 @@
 FROM python:3.7.11-slim-buster AS base
-WORKDIR /
-EXPOSE 5002
+EXPOSE 50055
 
 COPY requirements.txt .
 # Install dependencies
 RUN pip install -r requirements.txt
-COPY . /
-WORKDIR /
+# put all files in a directory called app
+WORKDIR /app
+COPY . .
 
-VOLUME ["/app-data"]
+ENV RUNTIME=DOCKER
 ENV PYTHONUNBUFFERED=1
-ENV PYTHONPATH "/AutoMLs:/templates:/templates/output"
+ENV PYTHONPATH "AutoMLs:Utils"
+ENV PYTHON_ENV "python"
 ENTRYPOINT ["python", "Adapter_Autosklearn.py"]
