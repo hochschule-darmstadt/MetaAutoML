@@ -231,14 +231,8 @@ def run():
 
     address = os.getenv("CONTROLLER_ADDRESS", "localhost:5001")
 
-    if address.startswith("controller:"):
-        # there is some issue that could not be resolved yet with secure channel inside docker-compose
-        channel = grpc.insecure_channel(address)
-    else:
-        channel = grpc.secure_channel(address, creds)
-
-    print(f"Dummy connecting on : {address}")
-
+    # channel = grpc.secure_channel(address, creds)
+    channel = grpc.insecure_channel(address)
     stub = Controller_pb2_grpc.ControllerServiceStub(channel)
     if len(sys.argv) >= 2:  # we need at least one argument, but the first one will be the script name
         process_command(sys.argv[1], sys.argv[2:], stub)
