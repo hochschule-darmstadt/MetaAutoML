@@ -8,6 +8,6 @@ services:
       - datasets:/app/app-data/datasets
       - output:/app/app-data/output
     environment:
-      - CONTROLLER_ADDRESS=docker.host.internal:5001
+      - CONTROLLER_ADDRESS=controller:5002
     extra_hosts:
       - "docker.host.internal:host-gateway"
