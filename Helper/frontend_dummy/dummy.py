@@ -1,3 +1,5 @@
+import os
+
 import grpc
 import Controller_pb2
 import Controller_pb2_grpc
@@ -226,8 +228,11 @@ def process_command(command: str, argv: list, stub: Controller_pb2_grpc.Controll
 def run():
     with open('root.crt', 'rb') as f:
         creds = grpc.ssl_channel_credentials(f.read())
-    channel = grpc.secure_channel('localhost:5001', creds)
-    # channel = grpc.insecure_channel('localhost:50051')
+
+    address = os.getenv("CONTROLLER_ADDRESS", "localhost:5001")
+
+    # channel = grpc.secure_channel(address, creds)
+    channel = grpc.insecure_channel(address)
     stub = Controller_pb2_grpc.ControllerServiceStub(channel)
     if len(sys.argv) >= 2:  # we need at least one argument, but the first one will be the script name
         process_command(sys.argv[1], sys.argv[2:], stub)
