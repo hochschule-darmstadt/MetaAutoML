@@ -137,3 +137,7 @@ dmypy.json
 
 # Jetbrains IDEAs
 .idea/
+
+# ignore all output files, but keep the directories with the .gitkeep file
+app-data/output/*/*
+!app-data/output/*/.gitkeep
