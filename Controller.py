@@ -125,8 +125,8 @@ def serve():
 
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     Controller_pb2_grpc.add_ControllerServiceServicer_to_server(ControllerServiceServicer(), server)
-    # server.add_insecure_port(f"0.0.0.0:{get_config_property('controller-server-port')}")
-    server.add_secure_port(f"0.0.0.0:{get_config_property('controller-server-port')}", server_credentials)
+    server.add_insecure_port(f"0.0.0.0:{get_config_property('controller-server-port')}")
+    # server.add_secure_port(f"0.0.0.0:{get_config_property('controller-server-port')}", server_credentials)
 
     server.start()
     server.wait_for_termination()
