@@ -1,4 +1,3 @@
-VOLUMES=metaautoml_datasets metaautoml_output-autokeras metaautoml_output-sklearn
 CONTAINER=controller autokeras sklearn flaml autogluon pytorch autocve
 DUMMY_ARGS=-f docker-compose.yml -f docker-compose-dummy.yml
 
@@ -19,5 +18,5 @@ compose-up:
 	docker-compose up
 
 clean:
-	docker container rm $(CONTAINER) ; \
-	docker volume rm $(VOLUMES)
+	# remove containers and their volumes
+	docker container rm -v $(CONTAINER) ; \
