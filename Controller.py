@@ -125,8 +125,13 @@ def serve():
 
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     Controller_pb2_grpc.add_ControllerServiceServicer_to_server(ControllerServiceServicer(), server)
-    server.add_insecure_port(f"0.0.0.0:{get_config_property('controller-server-port')}")
-    # server.add_secure_port(f"0.0.0.0:{get_config_property('controller-server-port')}", server_credentials)
+    # the insecure port shall NOT be mapped to the host or exposed anywhere
+    # it is only meant to be open for the dummy inside the docker-compose setup.
+    # This is due to issues with the secure channel when the client is also in the docker-compose setup.
+    # With this setup we now listen for secure connections from outside the docker-compose network
+    # and insecure connections coming from the docker-network itself
+    server.add_insecure_port(f"0.0.0.0:{get_config_property('controller-server-port-insecure')}")
+    server.add_secure_port(f"0.0.0.0:{get_config_property('controller-server-port')}", server_credentials)
 
     server.start()
     server.wait_for_termination()
