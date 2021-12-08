@@ -29,6 +29,7 @@ MANIFEST
 
 # AutoML models
 structured_data_classifier/
+structured_data_regressor/
 model_autokeras/
 
 #VS 
