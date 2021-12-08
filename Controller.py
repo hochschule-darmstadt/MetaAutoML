@@ -133,6 +133,7 @@ def serve():
     server.add_insecure_port(f"0.0.0.0:{get_config_property('controller-server-port-insecure')}")
     server.add_secure_port(f"0.0.0.0:{get_config_property('controller-server-port')}", server_credentials)
 
+    print("controller started")
     server.start()
     server.wait_for_termination()
 
