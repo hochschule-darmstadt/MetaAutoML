@@ -21,30 +21,38 @@ class StructuredDataAutoML(object):
     Implementation of the AutoML functionality fo structured data a.k.a. tabular data
     """
 
-    def __init__(self, json: dict):
+    def __init__(self, configuration: dict):
         """
         Init a new instance of StructuredDataAutoML
         ---
         Parameter:
         1. Configuration JSON of type dictionary
         """
-        self.__time_limit = 60
-        self.__json = json
+        # set either a runtime limit or an iter limit, preferring runtime over iterations.
+        if configuration["runtime_constraints"]["runtime_limit"] > 0:
+            self.__time_limit = configuration["runtime_constraints"]["runtime_limit"]
+            self.__iter_limit = None
+        elif configuration["runtime_constraints"]["max_iter"] > 0:
+            self.__time_limit = None
+            self.__iter_limit = configuration["runtime_constraints"]["max_iter"]
+        else:
+            self.__time_limit = 30
+            self.__iter_limit = None
+
+        self.__configuration = configuration
         return
 
     def __read_training_data(self):
         """
         Read the training dataset from disk
         """
-        self.__training_data_path = os.path \
-            .join(self.__json["file_location"]
-                  , self.__json["file_name"])
-        df = pd.read_csv(self.__training_data_path, dtype=object, quotechar='\"')
+        self.__training_data_path = os.path.join(self.__configuration["file_location"], self.__configuration["file_name"])
+        df = pd.read_csv(self.__training_data_path, dtype=object, sep=self.__configuration["file_configuration"]["sep"])
 
         # __X is the entire data without the target column
-        self.__X = df.drop(self.__json["configuration"]["target"], axis=1)
+        self.__X = df.drop(self.__configuration["tabular_configuration"]["target"]["target"], axis=1)
         # __y is only the target column
-        self.__y = df[self.__json["configuration"]["target"]]
+        self.__y = df[self.__configuration["tabular_configuration"]["target"]["target"]]
 
         return
 
@@ -67,13 +75,21 @@ class StructuredDataAutoML(object):
         self.__read_training_data()
 
         auto_cls = TabularClassificationTask()
-        auto_cls.search(
-            X_train=self.__X,
-            y_train=self.__y,
-            optimize_metric='accuracy',
-            total_walltime_limit=self.__time_limit,
-            func_eval_time_limit_secs=50
-        )
+        if self.__time_limit is not None:
+            auto_cls.search(
+                X_train=self.__X,
+                y_train=self.__y,
+                optimize_metric='accuracy',
+                total_walltime_limit=self.__time_limit
+            )
+        else:
+            auto_cls.search(
+                X_train=self.__X,
+                y_train=self.__y,
+                optimize_metric='accuracy',
+                budget_type='epochs',
+                max_budget=self.__iter_limit
+            )
 
         ############################################################################
         # Print the final ensemble performance
@@ -105,13 +121,21 @@ class StructuredDataAutoML(object):
         ############################################################################
         # Search for an ensemble of machine learning algorithms
         # =====================================================
-        auto_reg.search(
-            X_train=self.__X,
-            y_train=self.__y,
-            optimize_metric='r2',
-            total_walltime_limit=self.__time_limit,
-            func_eval_time_limit_secs=50,
-        )
+        if self.__time_limit is not None:
+            auto_reg.search(
+                X_train=self.__X,
+                y_train=self.__y,
+                optimize_metric='r2',
+                total_walltime_limit=self.__time_limit
+            )
+        else:
+            auto_reg.search(
+                X_train=self.__X,
+                y_train=self.__y,
+                optimize_metric='accuracy',
+                budget_type='epochs',
+                max_budget=self.__iter_limit
+            )
 
         ############################################################################
         # Print the final ensemble performance
@@ -131,3 +155,12 @@ class StructuredDataAutoML(object):
         self.__export_model(auto_reg)
 
         return
+
+    def execute_task(self):
+        """
+        Execute the ML task
+        """
+        if self.__configuration["task"] == 1:
+            self.classification()
+        elif self.__configuration["task"] == 2:
+            self.regression()
