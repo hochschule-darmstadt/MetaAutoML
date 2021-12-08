@@ -1,5 +1,8 @@
 version: "3.8"
 services:
+  # sometimes when building the controller it does not copy the contents of the datasets folder.
+  # This is probably a caching docker caching issue, which can be fixed with:
+  # 'make clean-hard'
   controller:
     build: ./MetaAutoML-Controller
     container_name: controller
@@ -26,6 +29,7 @@ services:
       - output:/app/app-data/output
       - output-autokeras:/app/app-data/output/autokeras
       - output-sklearn:/app/app-data/output/sklearn
+      - output-flaml:/app/app-data/output/flaml
 
 
     # adapters do not need to be available from the host machine -> no port mappings
@@ -46,16 +50,16 @@ services:
     volumes:
       - datasets:/app/app-data/datasets
       - output-sklearn:/app/app-data/output
-#
-#  flaml:
-#    build: ./adapters/MetaAutoML-Adapter-FLAML
-#    container_name: flaml
-#    environment:
-#      - GRPC_SERVER_PORT=50056
-#    volumes:
-#      - datasets:/app/app-data/datasets
-#      - output:/app/app-data/output
-#
+
+  flaml:
+    build: ./adapters/MetaAutoML-Adapter-FLAML
+    container_name: flaml
+    environment:
+      - GRPC_SERVER_PORT=50056
+    volumes:
+      - datasets:/app/app-data/datasets
+      - output-flaml:/app/app-data/output
+
 #  autogluon:
 #    build: ./adapters/MetaAutoML-Adapter-AutoGluon
 #    container_name: autogluon
@@ -88,5 +92,6 @@ volumes:
    # shared volume between controller and adapters to transfer output files e.g. *.zip file
   output-autokeras:
   output-sklearn:
+  output-flaml:
   # shared volume between controller and frontend / dummy
   output:
