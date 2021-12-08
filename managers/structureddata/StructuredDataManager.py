@@ -32,7 +32,6 @@ class StructuredDataManager(object):
 
         required_automls = []
         for automl_name in required_automl_names:
-            automl_name = automl_name.lower()
             if automl_name == AutoKerasManager.name:
                 required_automls.append(AutoKerasManager(configuration, folder_location))
             elif automl_name == FLAMLManager.name:
