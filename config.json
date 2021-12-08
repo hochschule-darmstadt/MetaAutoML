@@ -1,12 +1,10 @@
 {
-  "adapter-name": "AutoFLAML",
+  "adapter-name": "flaml",
   "job-file-name": "flaml-job.json",
   "env-varname-cluster": "RUNTIME",
-  "env-varname-unix": "UNIX",
-  "grpc-server-address": "0.0.0.0:50056",
-  "python-env-docker": "python",
+  "grpc-server-address": "0.0.0.0",
   "export-zip-file-name": "flaml-export",
-  "templates-output-path": "templates/output",
-  "output-path-docker": "omaml/output",
-  "repository-dir-name": "MetaAutoML-Adapter-FLAML"
+  "output-path": "app-data/output",
+  "job-file-path": "app-data/jobs",
+  "templates-path": "app-data/templates"
 }

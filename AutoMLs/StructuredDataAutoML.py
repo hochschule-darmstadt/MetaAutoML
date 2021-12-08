@@ -5,6 +5,7 @@ from flaml import AutoML
 
 from enum import Enum, unique
 
+from JsonUtil import get_config_property
 
 @unique
 class DataType(Enum):
@@ -65,7 +66,7 @@ class StructuredDataAutoML(object):
         Parameter:
         1. generate ML model
         """
-        with open('templates/output/flaml-model.p', 'wb') as file:
+        with open(os.path.join(get_config_property('output-path'), 'model_flaml.p'), 'wb') as file:
             pickle.dump(model, file)
 
     def execute_task(self):
