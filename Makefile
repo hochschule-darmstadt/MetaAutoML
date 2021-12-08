@@ -3,26 +3,26 @@ DUMMY_ARGS=-f docker-compose.yml -f docker-compose-dummy.yml
 VOLUMES=metaautoml_datasets metaautoml_output metaautoml_output-autokeras metaautoml_output-sklearn metaautoml_output-flaml
 FRONTEND_ARGS=-f docker-compose.yml -f docker-compose-frontend.yml
 
-# runs everything in the foreground
+# runs the backend in the foreground
 compose-up-rebuild-backend:
 	# remove volumes from previous runs
 	make clean-backend ; \
 	docker-compose up --build
 
-# runs everything in the background with dummy
+# runs the backend in the background with dummy
 compose-up-rebuild-with-dummy:
 	make clean-backend ; \
 	docker-compose $(DUMMY_ARGS) up --build -d ; \
 	docker exec -it dummy bash ; \
 	docker-compose $(DUMMY_ARGS) down
 
-# runs everything in the foreground with frontend
+# runs the backend in in the foreground with frontend
 compose-up-rebuild-with-frontend:
 	make clean-backend ; \
 	docker-compose $(FRONTEND_ARGS) up --build
 
+# removes containers and their volumes
 clean-backend:
-	# remove containers and their volumes
 	docker container rm $(BACKEND_CONTAINER) ; \
 	docker volume rm --force $(VOLUMES)
 
