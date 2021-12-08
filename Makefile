@@ -1,30 +1,36 @@
-CONTAINER=controller autokeras sklearn flaml autogluon pytorch autocve
+BACKEND_CONTAINER=controller autokeras sklearn flaml autogluon pytorch autocve
 DUMMY_ARGS=-f docker-compose.yml -f docker-compose-dummy.yml
 VOLUMES=metaautoml_datasets metaautoml_output metaautoml_output-autokeras metaautoml_output-sklearn metaautoml_output-flaml
+FRONTEND_ARGS=-f docker-compose.yml -f docker-compose-frontend.yml
 
-compose-up-rebuild-dummy:
-	make clean ; \
+# runs everything in the foreground
+compose-up-rebuild-backend:
+	# remove volumes from previous runs
+	make clean-backend ; \
+	docker-compose up --build
+
+# runs everything in the background with dummy
+compose-up-rebuild-with-dummy:
+	make clean-backend ; \
 	docker-compose $(DUMMY_ARGS) up --build -d ; \
 	docker exec -it dummy bash ; \
 	docker-compose $(DUMMY_ARGS) down
 
-# runs everything in the foreground without dummy
-compose-up-rebuild:
-	# remove volumes from previous runs
-	make clean ; \
-	docker-compose up --build
+# runs everything in the foreground with frontend
+compose-up-rebuild-with-frontend:
+	make clean-backend ; \
+	docker-compose $(FRONTEND_ARGS) up --build
 
-compose-up:
-	make clean ; \
-	docker-compose up
-
-clean:
+clean-backend:
 	# remove containers and their volumes
-	docker container rm $(CONTAINER) ; \
+	docker container rm $(BACKEND_CONTAINER) ; \
 	docker volume rm --force $(VOLUMES)
 
 # remove controller image, because there are sometimes bugs that the datasets are not copied to docker, which is probably a caching issue
 clean-controller-hard:
-	make clean && \
+	docker container rm $(BACKEND_CONTAINER) ; \
+	docker container prune ; \
+	docker volume rm --force $(VOLUMES)
+
 	docker image rm metaautoml_controller && \
 	docker image prune
