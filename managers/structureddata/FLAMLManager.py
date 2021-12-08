@@ -2,7 +2,7 @@ from AutoMLManager import AutoMLManager
 
 
 class FLAMLManager(AutoMLManager):
-    name = "flaml"
+    name = "FLAML"
 
     def __init__(self, configuration, folder_location):
         automl_service_host = 'FLAML_SERVICE_HOST'

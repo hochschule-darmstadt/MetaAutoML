@@ -2,7 +2,7 @@ from AutoMLManager import AutoMLManager
 
 
 class AutoGluonManager(AutoMLManager):
-    name = "autogluon"
+    name = "AutoGluon"
 
     def __init__(self, configuration, folder_location):
         automl_service_host = 'AUTOGLUON_SERVICE_HOST'

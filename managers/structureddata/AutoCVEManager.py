@@ -2,7 +2,7 @@ from AutoMLManager import AutoMLManager
 
 
 class AutoCVEManager(AutoMLManager):
-    name = "autocve"
+    name = "AutoCVE"
 
     def __init__(self, configuration, folder_location):
         automl_service_host = 'AUTOCVE_SERVICE_HOST'
