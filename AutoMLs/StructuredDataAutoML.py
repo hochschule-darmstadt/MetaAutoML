@@ -1,11 +1,8 @@
 import os
-import warnings
-
 import pandas as pd
-import numpy as np
-from AUTOCVE.AUTOCVE import AUTOCVEClassifier
-from sklearn.metrics import f1_score
 import pickle
+
+from AUTOCVE.AUTOCVE import AUTOCVEClassifier
 
 
 class StructuredDataAutoML(object):
@@ -20,7 +17,11 @@ class StructuredDataAutoML(object):
         Parameter:
         1. Configuration configuration of type dictionary
         """
-        self.__time_limit = configuration["runtime_constraints"]["max_iter"]
+        # set runtime limit from configuration, if it isn't specified its set to 30s
+        if configuration["runtime_constraints"]["runtime_limit"] > 0:
+            self.__time_limit = configuration["runtime_constraints"]["runtime_limit"]
+        else:
+            self.__time_limit = 30
         self.__configuration = configuration
         return
 
@@ -28,9 +29,7 @@ class StructuredDataAutoML(object):
         """
         Read the training dataset from disk
         """
-        self.__training_data_path = os.path \
-            .join(self.__configuration["file_location"]
-                  , self.__configuration["file_name"])
+        self.__training_data_path = os.path.join(self.__configuration["file_location"], self.__configuration["file_name"])
         df = pd.read_csv(self.__training_data_path)
 
         # __X is the entire data without the target column

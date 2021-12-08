@@ -11,7 +11,7 @@ import Adapter_pb2
 import Adapter_pb2_grpc
 
 from concurrent import futures
-from TemplateGenerator import TemplateGenerator
+from templates.TemplateGenerator import TemplateGenerator
 from Utils.OsSpecific import in_cluster, on_unix
 
 
@@ -48,7 +48,7 @@ class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
 
     def generate_script(self):
         generator = TemplateGenerator()
-        generator.GenerateScript()
+        generator.generate_script()
 
     def capture_process_output(self, process):
         capture = ""
@@ -83,7 +83,7 @@ class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
                 os.makedirs("omaml/output")
             zip_content_path = os.path.join(BASE_DIR, "templates/output")
             shutil.make_archive(export_zip_file_name, 'zip', zip_content_path)
-            shutil.move(f"{export_zip_file_name}.zip", "omaml/output/keras-export.zip")
+            shutil.move(f"{export_zip_file_name}.zip", "omaml/output/autocve-export.zip")
             outputJson = {"file_name": f"{export_zip_file_name}.zip"}
             outputJson.update({"file_location": "omaml/output/"})
 
