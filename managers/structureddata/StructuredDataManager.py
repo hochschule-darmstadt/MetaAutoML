@@ -26,7 +26,7 @@ class StructuredDataManager(object):
         """
         if len(list(configuration.requiredAutoMLs)) == 0:
             print('No AutoMLs specified in the request. Running all available AutoMLs.')
-            required_automl_names = ('flaml', 'autokeras', 'autosklearn', 'autogluon', 'autocve', 'autopytorch')
+            required_automl_names = ('FLAML', 'Auto_Keras', 'Autosklearn', 'AutoGluon', 'AutoCVE', 'Auto_PyTorch')
         else:
             required_automl_names = [name for name in configuration.requiredAutoMLs]
 
