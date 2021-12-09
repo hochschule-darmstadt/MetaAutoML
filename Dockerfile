@@ -1,15 +1,19 @@
 FROM python:3.7.11-slim-buster AS base
-WORKDIR /
-EXPOSE 5002
+EXPOSE 50057
+
+RUN apt-get update && apt-get install -y \
+    libgomp1 \
+    libquadmath0
 
 COPY requirements.txt .
 # Install dependencies
 RUN pip install -r requirements.txt
-COPY . /
-WORKDIR /
+# put all files in a directory called app
+WORKDIR /app
+COPY . .
 
-VOLUME ["/app-data"]
+ENV RUNTIME=DOCKER
 ENV PYTHONUNBUFFERED=1
-ENV PYTHONPATH "/AutoMLs:/templates:/templates/output:/Utils"
+ENV PYTHONPATH "AutoMLs:Utils"
 ENV PYTHON_ENV "python"
 ENTRYPOINT ["python", "Adapter_AutoGluon.py"]

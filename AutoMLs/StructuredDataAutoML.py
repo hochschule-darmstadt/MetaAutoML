@@ -4,8 +4,9 @@ import sys
 
 import pandas as pd
 from autogluon.tabular import TabularDataset, TabularPredictor
-
 from enum import Enum, unique
+
+from JsonUtil import get_config_property
 
 
 @unique
@@ -72,7 +73,9 @@ class StructuredDataAutoML(object):
         Parameter:
         1. generate ML +model
         """
-        with open('templates/output/gluon-model.p', 'wb') as file:
+        output_path = os.path.join(get_config_property('output-path'),
+                                   'model_gluon.p')
+        with open(output_path, 'wb') as file:
             pickle.dump(model, file)
 
     def execute_task(self):
