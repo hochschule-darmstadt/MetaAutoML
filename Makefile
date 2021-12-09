@@ -1,6 +1,6 @@
-BACKEND_CONTAINER=controller autokeras sklearn flaml autogluon pytorch autocve
+BACKEND_CONTAINER=controller autokeras sklearn flaml gluon pytorch autocve
 DUMMY_ARGS=-f docker-compose.yml -f docker-compose-dummy.yml
-VOLUMES=metaautoml_datasets metaautoml_output metaautoml_output-autokeras metaautoml_output-sklearn metaautoml_output-flaml
+VOLUMES=metaautoml_datasets metaautoml_output metaautoml_output-autokeras metaautoml_output-sklearn metaautoml_output-flaml metaautoml_output-autocve metaautoml_output-gluon metaautoml_output-pytorch
 FRONTEND_ARGS=-f docker-compose.yml -f docker-compose-frontend.yml
 
 # runs the backend in the foreground
