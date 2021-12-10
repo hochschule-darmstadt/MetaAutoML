@@ -35,7 +35,7 @@ services:
       - output-autocve:/app/app-data/output/autocve
 
 
-     adapters do not need to be available from the host machine -> no port mappings
+#     adapters do not need to be available from the host machine -> no port mappings
   autokeras:
     build: ./adapters/MetaAutoML-Adapter-AutoKeras
     container_name: autokeras
