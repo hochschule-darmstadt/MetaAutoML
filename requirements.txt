@@ -1,4 +1,3 @@
-git+git://github.com/celiolarcher/AUTOCVE@e87985d#egg=autocve
 numpy==1.19.5
 grpcio==1.42.0
 protobuf==3.19.1
