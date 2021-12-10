@@ -35,7 +35,7 @@ services:
       - output-autocve:/app/app-data/output/autocve
 
 
-    # adapters do not need to be available from the host machine -> no port mappings
+     adapters do not need to be available from the host machine -> no port mappings
   autokeras:
     build: ./adapters/MetaAutoML-Adapter-AutoKeras
     container_name: autokeras
@@ -72,15 +72,15 @@ services:
       - datasets:/app/app-data/datasets
       - output-gluon:/app/app-data/output
 
-#  pytorch:
-#    build: ./adapters/MetaAutoML-Adapter-AutoPytorch
-#    container_name: pytorch
-#    environment:
-#      - GRPC_SERVER_PORT=50059
-#    volumes:
-#      - datasets:/app/app-data/datasets
-#      - output:/app/app-data/output
-#
+  pytorch:
+    build: ./adapters/MetaAutoML-Adapter-AutoPytorch
+    container_name: pytorch
+    environment:
+      - GRPC_SERVER_PORT=50059
+    volumes:
+      - datasets:/app/app-data/datasets
+      - output-pytorch:/app/app-data/output
+
 #  autocve:
 #    build: ./adapters/MetaAutoML-Adapter-AutoCVE
 #    container_name: autocve
@@ -88,7 +88,7 @@ services:
 #      - GRPC_SERVER_PORT=50058
 #    volumes:
 #      - datasets:/app/app-data/datasets
-#      - output:/app/app-data/output
+#      - output-autocve:/app/app-data/output
 
 volumes:
   datasets: # shared volume between controller, adapters and frontend/dummy to transfer datasets
