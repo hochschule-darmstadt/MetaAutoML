@@ -19,8 +19,8 @@ spec:
     spec:
       containers:
       - env:
-        - name: RUNTIME
-          value: "DOCKER"
+        - name: GRPC_SERVER_PORT
+          value: "50052"
         image: alexhda/omaml-autokeras
         imagePullPolicy: ""
         name: autokeras
@@ -31,11 +31,16 @@ spec:
             cpu: "2"
             memory: "2097152e3"
         volumeMounts:
-        - name: omaml
-          mountPath: /omaml
+        - name: datasets
+          mountPath: /app/app-data/datasets
+        - name: output-autokeras
+          mountPath: /app/app-data/output
       restartPolicy: Always
       serviceAccountName: ""
       volumes:
-      - name: omaml
+      - name: datasets
+        persistentVolumeClaim:
+          claimName: omamldata-claim
+      - name: output-autokeras
         persistentVolumeClaim:
           claimName: omamldata-claim

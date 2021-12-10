@@ -5,10 +5,10 @@ metadata:
 spec:
   type: ClusterIP
   ports:
-  - name: "50101"
-    port: 50101
+  - name: "50052"
+    port: 50052
     protocol: TCP
-    targetPort: 5002
+    targetPort: 50052
   selector:
     io.kompose.service: autokeras
 status:
