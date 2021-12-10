@@ -3,10 +3,13 @@
   "job-file-name": "autopytorch-job.json",
   "env-varname-cluster": "RUNTIME",
   "env-varname-unix": "UNIX",
-  "grpc-server-address": "0.0.0.0:50059",
+  "grpc-server-address": "0.0.0.0",
   "python-env-docker": "python",
   "export-zip-file-name": "pytorch-export",
   "templates-output-path": "templates/output",
   "output-path-docker": "omaml/output",
-  "repository-dir-name": "MetaAutoML-Adapter-AutoPytorch"
+  "repository-dir-name": "MetaAutoML-Adapter-AutoPytorch",
+  "output-path": "app-data/output",
+  "job-file-path": "app-data/jobs",
+  "templates-path": "app-data/templates"
 }

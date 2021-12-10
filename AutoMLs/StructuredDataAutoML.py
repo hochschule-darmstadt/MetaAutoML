@@ -15,6 +15,8 @@ from autoPyTorch.api.tabular_classification import TabularClassificationTask
 from autoPyTorch.api.tabular_regression import TabularRegressionTask
 import pickle
 
+from JsonUtil import get_config_property
+
 
 class StructuredDataAutoML(object):
     """
@@ -47,6 +49,7 @@ class StructuredDataAutoML(object):
         Read the training dataset from disk
         """
         self.__training_data_path = os.path.join(self.__configuration["file_location"], self.__configuration["file_name"])
+        print(f"loading file from path {self.__training_data_path}")
         df = pd.read_csv(self.__training_data_path, dtype=object, sep=self.__configuration["file_configuration"]["sep"])
 
         # __X is the entire data without the target column
