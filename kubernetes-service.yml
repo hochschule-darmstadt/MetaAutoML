@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: autocve
+spec:
+  type: ClusterIP
+  ports:
+  - name: "50058"
+    port: 50058
+    protocol: TCP
+    targetPort: 50058
+  selector:
+    io.kompose.service: autocve
+status:
+  loadBalancer: {}
