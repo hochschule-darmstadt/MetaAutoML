@@ -1,14 +1,26 @@
 FROM python:3.7.11-slim-buster AS base
-WORKDIR /
-EXPOSE 5002
+EXPOSE 50059
+
+RUN python -m pip install --upgrade pip
 
 COPY requirements.txt .
 # Install dependencies
 RUN pip install -r requirements.txt
-COPY . /
-WORKDIR /
+# put all files in a directory called app
 
-VOLUME ["/app-data"]
+# libs required by the automl
+RUN apt-get update && apt-get install -y \
+    libgl1-mesa-glx \
+    libglib2.0-0 \
+    libsm6 \
+    libxrender1 \
+    libxext6
+
+WORKDIR /app
+COPY . .
+
+ENV RUNTIME=DOCKER
 ENV PYTHONUNBUFFERED=1
-ENV PYTHONPATH "/AutoMLs:/templates:/templates/output"
-ENTRYPOINT ["python", "Adapter_AutoPytorch.py"]
+ENV PYTHONPATH "AutoMLs:Utils"
+ENV PYTHON_ENV "python"
+ENTRYPOINT ["python", "Adapter_AutoPyTorch.py"]

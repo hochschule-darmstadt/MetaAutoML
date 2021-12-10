@@ -29,24 +29,18 @@ class StructuredDataAutoML(object):
         1. Configuration JSON of type dictionary
         """
         self.__time_limit = 60
-        self.__json = json
+        self.__configuration = json
         return
 
     def __read_training_data(self):
         """
         Read the training dataset from disk
         """
-        self.__training_data_path = os.path \
-            .join(self.__json["file_location"]
-                  , self.__json["file_name"])
-        df = pd.read_csv(self.__training_data_path, dtype=object, quotechar='\"')
-
-        # __X is the entire data without the target column
-        self.__X = df.drop(self.__json["configuration"]["target"], axis=1)
-        # __y is only the target column
-        self.__y = df[self.__json["configuration"]["target"]]
-
-        return
+        df = pd.read_csv(os.path.join(self.__configuration["file_location"], self.__configuration["file_name"]),
+                         **self.__configuration["file_configuration"])
+        target = self.__configuration["tabular_configuration"]["target"]["target"]
+        self.__X = df.drop(target, axis=1)
+        self.__y = df[target]
 
     def __export_model(self, model):
         """
