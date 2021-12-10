@@ -14,5 +14,5 @@ if __name__ == '__main__':
     with open(file_path) as file:
         process_json = json.load(file)
 
-    structuredDataAutoML = StructuredDataAutoML(process_json)
-    structuredDataAutoML.execute_task()
+    structured_data_automl = StructuredDataAutoML(process_json)
+    structured_data_automl.execute_task()
