@@ -1,30 +1,31 @@
 from concurrent import futures
 
 import grpc
-import json
-import logging
 import os
+import sys
+import logging
 import shutil
 import subprocess
-import sys
+import json
+from Utils.JsonUtil import get_config_property
 
 import Adapter_pb2
 import Adapter_pb2_grpc
-from TemplateGenerator import TemplateGenerator
-from Utils.JsonUtil import get_config_property
-from Utils.OsSpecific import in_cluster
 
+from concurrent import futures
+from TemplateGenerator import TemplateGenerator
 
 def get_except_response(context, e):
     print(e)
-    context.set_details(f"Error while executing AutoPytorch: {e}")
+    adapter_name = get_config_property("adapter-name")
+    context.set_details(f"Error while executing {adapter_name}: {e}")
     context.set_code(grpc.StatusCode.UNAVAILABLE)
     return Adapter_pb2.StartAutoMLResponse()
 
 
-def generate_script():
+def generate_script(config_json):
     generator = TemplateGenerator()
-    generator.GenerateScript()
+    generator.generate_script(config_json)
 
 
 def capture_process_output(process):
@@ -34,11 +35,11 @@ def capture_process_output(process):
     # Run until no more output is produced by the subprocess
     while len(s) > 0:
         if capture[len(capture) - 1] == '\n':
-            processUpdate = Adapter_pb2.StartAutoMLResponse()
-            processUpdate.returnCode = Adapter_pb2.ADAPTER_RETURN_CODE_STATUS_UPDATE
-            processUpdate.statusUpdate = capture
-            processUpdate.outputJson = ""
-            yield processUpdate
+            process_update = Adapter_pb2.StartAutoMLResponse()
+            process_update.returnCode = Adapter_pb2.ADAPTER_RETURN_CODE_STATUS_UPDATE
+            process_update.statusUpdate = capture
+            process_update.outputJson = ""
+            yield process_update
             sys.stdout.write(capture)
             sys.stdout.flush()
             capture = ""
@@ -46,49 +47,33 @@ def capture_process_output(process):
         s = process.stdout.read(1)
 
 
-def get_response(outputJson):
+def get_response(output_json):
     response = Adapter_pb2.StartAutoMLResponse()
     response.returnCode = Adapter_pb2.ADAPTER_RETURN_CODE_SUCCESS
-    response.outputJson = json.dumps(outputJson)
+    response.outputJson = json.dumps(output_json)
     yield response
 
 
 def zip_script():
-    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    export_zip_file_name = get_config_property("export-zip-file-name")
-    templates_output_path = get_config_property("templates-output-path")
-    if in_cluster():
-        print("RUNNING DOCKER")
-        output_path = get_config_property("output-path-docker")
-        if not os.path.exists(output_path):  # ensure output folder exists
-            os.makedirs(output_path)
+    zip_file_name = get_config_property("export-zip-file-name")
+    output_path = get_config_property("output-path")
 
-        zip_contents_path = os.path.join(base_dir, templates_output_path)
-        shutil.make_archive(export_zip_file_name, 'zip', zip_contents_path)
-        shutil.move(f"{export_zip_file_name}.zip", f"{output_path}/{export_zip_file_name}.zip")
-        output_json = {"file_name": f"{export_zip_file_name}.zip"}
-        output_json.update({"file_location": f"{output_path}/"})
+    print(f"saving model zip file for {get_config_property('adapter-name')}")
 
-    else:
-        print("RUNNING LOCAL")
-        repository_dir_name = get_config_property("repository-dir-name")
-        zip_contents_path = os.path.join(base_dir, repository_dir_name, templates_output_path)
-        shutil.make_archive(export_zip_file_name, 'zip', zip_contents_path)
-        output_json = {"file_name": f"{export_zip_file_name}.zip"}
-        output_json.update({"file_location": os.path.join(base_dir, repository_dir_name)})
+    shutil.make_archive(zip_file_name,
+                        'zip',
+                        output_path)
+    shutil.move(f'{zip_file_name}.zip', output_path)
 
-    return output_json
+    return {"file_name": f'{zip_file_name}.zip',
+            "file_location": output_path}
 
 
 def start_automl_process():
     """"
-    starts the automl process with respect to the operating system
     @:return started automl process
     """
-    python_env = os.getenv("PYTHON_ENV")
-    # fallback for local testing
-    if python_env is None:
-        python_env = "python"
+    python_env = os.getenv("PYTHON_ENV", default="PYTHON_ENV_UNSET")
 
     return subprocess.Popen([python_env, "AutoML.py", ""],
                             stdout=subprocess.PIPE,
@@ -96,8 +81,10 @@ def start_automl_process():
 
 
 class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
-    """ AutoML Adapter Service implementation.
-    Service provide functionality to execute and interact with the current AutoML process. """
+    """
+    AutoML Adapter Service implementation.
+    Service provide functionality to execute and interact with the current AutoML process.
+    """
 
     def StartAutoML(self, request, context):
         """
@@ -105,15 +92,20 @@ class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
         """
         try:
             # saving AutoML configuration JSON
-            with open(get_config_property("job-file-name"), "w+") as f:
-                json.dump(json.loads(request.processJson), f)
+            config_json = json.loads(request.processJson)
+            job_file_location = os.path.join(get_config_property("job-file-path"),
+                                             get_config_property("job-file-name"))
+            with open(job_file_location, "w+") as f:
+                json.dump(config_json, f)
 
             process = start_automl_process()
             yield from capture_process_output(process)
-            generate_script()
+            generate_script(config_json)
             output_json = zip_script()
 
-            yield from get_response(output_json)
+            response = yield from get_response(output_json)
+            print(f'{get_config_property("adapter-name")} job finished')
+            return response
 
         except Exception as e:
             return get_except_response(context, e)
@@ -125,8 +117,9 @@ def serve():
     """
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     Adapter_pb2_grpc.add_AdapterServiceServicer_to_server(AdapterServiceServicer(), server)
-    server.add_insecure_port(get_config_property("grpc-server-address"))
+    server.add_insecure_port(f'{get_config_property("grpc-server-address")}:{os.getenv("GRPC_SERVER_PORT")}')
     server.start()
+    print(get_config_property("adapter-name") + " started")
     server.wait_for_termination()
 
 
