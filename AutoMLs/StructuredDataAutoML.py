@@ -5,6 +5,19 @@ import autosklearn.regression
 from sklearn.preprocessing import OrdinalEncoder
 import pickle
 from Utils.JsonUtil import get_config_property
+from enum import Enum, unique
+
+
+@unique
+class DataType(Enum):
+    DATATYPE_UNKNOW = 0
+    DATATYPE_STRING = 1
+    DATATYPE_INT = 2
+    DATATYPE_FLOAT = 3
+    DATATYPE_CATEGORY = 4
+    DATATYPE_BOOLEAN = 5
+    DATATYPE_DATETIME = 6
+    DATATYPE_IGNORE = 7
 
 
 class StructuredDataAutoML(object):
@@ -53,23 +66,36 @@ class StructuredDataAutoML(object):
         with open(output_file, "wb") as file:
             pickle.dump(model, file)
 
-        return
+    def execute_task(self):
+        """
+        Execute the ML task
+        """
+        if self.__configuration["task"] == 1:
+            self.__classification()
+        elif self.__configuration["task"] == 2:
+            self.__regression()
+
+    def __generate_settings(self):
+        automl_settings = {"logging_config": self.get_logging_config()}
+        if self.__configuration["runtime_constraints"]["runtime_limit"] != 0:
+            automl_settings.update(
+                {"time_left_for_this_task": self.__configuration["runtime_constraints"]["runtime_limit"]})
+        if self.__configuration["runtime_constraints"]["max_iter"] != 0:
+            automl_settings.update({"max_iter": self.__configuration["runtime_constraints"]["max_iter"]})
+        return automl_settings
 
     def classification(self):
         """
         Execute the classification task
         """
         self.__read_training_data()
+        self.__dataset_preparation()
 
-        auto_cls = autosklearn.classification.AutoSklearnClassifier(
-            time_left_for_this_task=self.__time_limit,
-            logging_config=self.get_logging_config()
-        )
+        automl_settings = self.__generate_settings()
+        auto_cls = autosklearn.classification.AutoSklearnClassifier(**automl_settings)
         auto_cls.fit(self.__X, self.__y)
 
         self.__export_model(auto_cls)
-
-        return
 
     def regression(self):
         """
@@ -77,15 +103,13 @@ class StructuredDataAutoML(object):
         """
         self.__read_training_data()
 
-        auto_reg = autosklearn.regression.AutoSklearnRegressor(
-            time_left_for_this_task=self.__time_limit,
-            logging_config=self.get_logging_config()
-        )
+        self.__dataset_preparation()
+
+        automl_settings = self.__generate_settings()
+        auto_reg = autosklearn.regression.AutoSklearnRegressor(**automl_settings)
         auto_reg.fit(self.__X, self.__y, )
 
         self.__export_model(auto_reg)
-
-        return
 
     def get_logging_config(self) -> dict:
         return {
