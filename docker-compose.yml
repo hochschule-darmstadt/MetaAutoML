@@ -22,10 +22,10 @@ services:
       - FLAML_SERVICE_PORT=50056
       - AUTOGLUON_SERVICE_HOST=gluon
       - AUTOGLUON_SERVICE_PORT=50057
-      - AUTOPYTORCH_SERVICE_HOST=pytorch
-      - AUTOPYTORCH_SERVICE_PORT=50059
       - AUTOCVE_SERVICE_HOST=autocve
       - AUTOCVE_SERVICE_PORT=50058
+      - AUTOPYTORCH_SERVICE_HOST=pytorch
+      - AUTOPYTORCH_SERVICE_PORT=50059
     volumes:
       - datasets:/app/app-data/datasets
       - output:/app/app-data/output
@@ -34,8 +34,8 @@ services:
       - output-sklearn:/app/app-data/output/sklearn
       - output-flaml:/app/app-data/output/flaml
       - output-gluon:/app/app-data/output/gluon
-      - output-pytorch:/app/app-data/output/pytorch
       - output-autocve:/app/app-data/output/autocve
+      - output-pytorch:/app/app-data/output/pytorch
 
 
 #     adapters do not need to be available from the host machine -> no port mappings
@@ -85,6 +85,15 @@ services:
       - datasets:/app/app-data/datasets
       - output-gluon:/app/app-data/output
 
+  autocve:
+    build: ./adapters/MetaAutoML-Adapter-AutoCVE
+    container_name: autocve
+    environment:
+      - GRPC_SERVER_PORT=50058
+    volumes:
+      - datasets:/app/app-data/datasets
+      - output-autocve:/app/app-data/output
+
   pytorch:
     build: ./adapters/MetaAutoML-Adapter-AutoPytorch
     container_name: pytorch
@@ -93,15 +102,6 @@ services:
     volumes:
       - datasets:/app/app-data/datasets
       - output-pytorch:/app/app-data/output
-
-#  autocve:
-#    build: ./adapters/MetaAutoML-Adapter-AutoCVE
-#    container_name: autocve
-#    environment:
-#      - GRPC_SERVER_PORT=50058
-#    volumes:
-#      - datasets:/app/app-data/datasets
-#      - output-autocve:/app/app-data/output
 
 volumes:
   datasets: # shared volume between controller, adapters and frontend/dummy to transfer datasets
