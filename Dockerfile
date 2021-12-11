@@ -8,8 +8,6 @@ RUN apt-get update && \
 #
 
 RUN python -m pip install --upgrade pip
-    #&& \
-    #apt-get install -y g++
 
 # numpy has to be installed before the requirements because for the remote source from git (for AutoCVE) to work it has
 # to be installed already. Apperantly pip does not install requrements.txt files in order.
@@ -18,12 +16,6 @@ RUN pip install numpy==1.19.5
 COPY requirements.txt .
 # Install dependencies
 RUN pip install -r requirements.txt
-
-# install autocve from source
-#RUN git clone https://github.com/celiolarcher/AUTOCVE.git && \
-#    cd AUTOCVE && \
-#    pip install -r requirements.txt && \
-#    pip install .
 
 WORKDIR /app
 COPY . .
