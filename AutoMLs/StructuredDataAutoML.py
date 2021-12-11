@@ -40,6 +40,9 @@ class StructuredDataAutoML(object):
         if self.__configuration["runtime_constraints"]["runtime_limit"] == 0:
             self.__configuration["runtime_constraints"]["runtime_limit"] = 20
 
+        self.__output_path = os.path.join(get_config_property('output-path'),
+                                   'model_gluon.p')
+
     def __read_training_data(self):
         """
         Read the training dataset from disk
@@ -67,16 +70,8 @@ class StructuredDataAutoML(object):
             self.__y = self.__y.astype('bool')
 
     def __export_model(self, model):
-        """
-        Export the generated ML model to disk
-        ---
-        Parameter:
-        1. generate ML +model
-        """
-        output_path = os.path.join(get_config_property('output-path'),
-                                   'model_gluon.p')
-        with open(output_path, 'wb') as file:
-            pickle.dump(model, file)
+        #  autogluon saves models by default
+        pass
 
     def execute_task(self):
         """
@@ -97,7 +92,7 @@ class StructuredDataAutoML(object):
         data[self.target] = self.__y
         model = TabularPredictor(label=self.target,
                                  problem_type="multiclass",
-                                 path="templates/output/model_autogluon").fit(
+                                 path=self.__output_path).fit(
             data,
             time_limit=self.__configuration["runtime_constraints"]["runtime_limit"])
         self.__export_model(model)
@@ -112,7 +107,7 @@ class StructuredDataAutoML(object):
         data[self.target] = self.__y
         model = TabularPredictor(label=self.target,
                                  problem_type="regression",
-                                 path="templates/output/model_autogluon").fit(
+                                 path=self.__output_path).fit(
             data,
             time_limit=self.__configuration["runtime_constraints"]["runtime_limit"])
         self.__export_model(model)
