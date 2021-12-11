@@ -10,4 +10,4 @@
 - must be set to the desired python environment
 
 ### GRPC_SERVER_PORT
-- must be se
+- must be set to the automl listens on to connections from controller
