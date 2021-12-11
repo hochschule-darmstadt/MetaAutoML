@@ -10,7 +10,6 @@ import Adapter_pb2_grpc
 from IAutoMLManager import IAutoMLManager
 from threading import *
 from abc import ABC
-from OsSpecific import in_cluster
 
 
 @zope.interface.implementer(IAutoMLManager)
