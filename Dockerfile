@@ -1,19 +1,29 @@
-FROM python:3.7.11-slim-buster AS base
+FROM python:3.6-slim-buster AS base
 EXPOSE 50058
 
+RUN apt-get update && \
+    apt-get install -y gcc && \
+    apt-get install -y g++ && \
+    apt-get install -y git
+#
+
 RUN python -m pip install --upgrade pip
-RUN apt update && \
-    apt install -y git
+    #&& \
+    #apt-get install -y g++
+
+# numpy has to be installed before the requirements because for the remote source from git (for AutoCVE) to work it has
+# to be installed already. Apperantly pip does not install requrements.txt files in order.
+RUN pip install numpy==1.19.5
 
 COPY requirements.txt .
 # Install dependencies
 RUN pip install -r requirements.txt
 
 # install autocve from source
-RUN git clone https://github.com/celiolarcher/AUTOCVE.git && \
-    cd AUTOCVE && \
-    pip install -r requirements.txt && \
-    pip install .
+#RUN git clone https://github.com/celiolarcher/AUTOCVE.git && \
+#    cd AUTOCVE && \
+#    pip install -r requirements.txt && \
+#    pip install .
 
 WORKDIR /app
 COPY . .

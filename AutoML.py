@@ -1,4 +1,5 @@
 import json
+import os
 from Utils.JsonUtil import get_config_property
 
 from AutoMLs.StructuredDataAutoML import StructuredDataAutoML
@@ -10,8 +11,5 @@ if __name__ == '__main__':
         process_json = json.load(file)
 
     structured_data_automl = StructuredDataAutoML(process_json)
-
-    if processJson["task"] == 1:
-        # Classification
-        structured_data_automl.classification()
+    structured_data_automl.execute_task()
 

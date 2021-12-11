@@ -87,3 +87,10 @@ class StructuredDataAutoML(object):
             print(e)
 
         return
+
+    def execute_task(self):
+        """
+        Execute the ML task
+        """
+        if self.__configuration["task"] == 1:
+            self.classification()

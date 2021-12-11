@@ -4,21 +4,20 @@ import os
 import sys
 from JsonUtil import get_config_property
 
-
 class TemplateGenerator(object):
     """
     Template generator to generate the custom AutoML output
     """
-    self.__TEMPLATES_PATH = get_config_property("templates-path")
-    self.__OUTPUT_PATH = get_config_property("output-path")
 
     def __init__(self):
         """
         Init a new instance of TemplateGenerator
         """
+        self.__TEMPLATES_PATH = get_config_property("templates-path")
+        self.__OUTPUT_PATH = get_config_property("output-path")
         return
 
-    def generate_script(self):
+    def generate_script(self, task):
         """
         Generate the AutoML specific scripts to execute the generated model
         """
