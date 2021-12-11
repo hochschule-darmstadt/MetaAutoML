@@ -75,6 +75,21 @@ class StructuredDataAutoML(object):
         elif self.__configuration["task"] == 2:
             self.__regression()
 
+    def __dataset_preparation(self):
+        # Valid types for autosklearn are numerical, categorical or boolean
+        for column, dt in self.__configuration["tabular_configuration"]["features"].items():
+            if DataType(dt) is DataType.DATATYPE_IGNORE:
+                self.__X = self.__X.drop(column, axis=1)
+            elif DataType(dt) is DataType.DATATYPE_CATEGORY:
+                self.__X[column] = self.__X[column].astype('category')
+        # cast target to a different datatype if necessary
+        self.__cast_target()
+
+    def __cast_target(self):
+        target_dt = self.__configuration["tabular_configuration"]["target"]["type"]
+        if DataType(target_dt) is DataType.DATATYPE_CATEGORY:
+            self.__y = self.__y.astype('category')
+
     def __generate_settings(self):
         automl_settings = {"logging_config": self.get_logging_config()}
         if self.__configuration["runtime_constraints"]["runtime_limit"] != 0:
@@ -84,7 +99,7 @@ class StructuredDataAutoML(object):
             automl_settings.update({"max_iter": self.__configuration["runtime_constraints"]["max_iter"]})
         return automl_settings
 
-    def classification(self):
+    def __classification(self):
         """
         Execute the classification task
         """
@@ -97,7 +112,7 @@ class StructuredDataAutoML(object):
 
         self.__export_model(auto_cls)
 
-    def regression(self):
+    def __regression(self):
         """
         Execute the regression task
         """
