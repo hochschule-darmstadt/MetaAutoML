@@ -31,7 +31,8 @@ class StructuredDataAutoML(object):
         """
         Read the training dataset from disk
         """
-        self.__training_data_path = os.path.join(self.__configuration["file_location"], self.__configuration["file_name"])
+        self.__training_data_path = os.path.join(self.__configuration["file_location"],
+                                                 self.__configuration["file_name"])
         df = pd.read_csv(self.__training_data_path)
 
         # __X is the entire data without the target column
@@ -81,8 +82,8 @@ class StructuredDataAutoML(object):
 
         except Exception as e:
             print(f"Critical error running autoCVE on {self.__configuration['file_name']}. The AutoCVE "
-                  f"classifier encountered an exception during the optimisation process. This happens when the "
-                  f"input dataset isn't in the correct format. AutoCVE can only process classification "
+                  f"classifier encountered an exception during the optimisation process. This might have happened "
+                  f"because input dataset isn't in the correct format. AutoCVE can only process classification "
                   f"datasets with numerical values.")
             print(e)
 
@@ -94,3 +95,6 @@ class StructuredDataAutoML(object):
         """
         if self.__configuration["task"] == 1:
             self.classification()
+        else:
+            raise ValueError(
+                f'{get_config_property("adapter-name")} was called with an invalid task: task=={self.__configuration["task"]}. The only valid task is task==1')
