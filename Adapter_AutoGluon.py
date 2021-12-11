@@ -12,7 +12,6 @@ import Adapter_pb2_grpc
 
 from concurrent import futures
 from TemplateGenerator import TemplateGenerator
-from OsSpecific import in_cluster
 
 
 def get_except_response(context, e):
