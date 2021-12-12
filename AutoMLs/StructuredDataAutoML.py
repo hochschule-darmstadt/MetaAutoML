@@ -33,7 +33,7 @@ class StructuredDataAutoML(object):
         """
         self.__training_data_path = os.path.join(self.__configuration["file_location"],
                                                  self.__configuration["file_name"])
-        df = pd.read_csv(self.__training_data_path)
+        df = pd.read_csv(self.__training_data_path, **self.__configuration["file_configuration"])
 
         # __X is the entire data without the target column
         self.__X = df.drop(self.__configuration["tabular_configuration"]["target"]["target"], axis=1).to_numpy()
