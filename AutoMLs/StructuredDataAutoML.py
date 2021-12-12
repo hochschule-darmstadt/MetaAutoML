@@ -69,10 +69,6 @@ class StructuredDataAutoML(object):
         elif DataType(target_dt) is DataType.DATATYPE_BOOLEAN:
             self.__y = self.__y.astype('bool')
 
-    def __export_model(self, model):
-        #  autogluon saves models by default
-        pass
-
     def execute_task(self):
         """
         Execute the ML task
@@ -95,7 +91,6 @@ class StructuredDataAutoML(object):
                                  path=self.__output_path).fit(
             data,
             time_limit=self.__configuration["runtime_constraints"]["runtime_limit"])
-        self.__export_model(model)
 
     def __regression(self):
         """
@@ -110,4 +105,3 @@ class StructuredDataAutoML(object):
                                  path=self.__output_path).fit(
             data,
             time_limit=self.__configuration["runtime_constraints"]["runtime_limit"])
-        self.__export_model(model)
