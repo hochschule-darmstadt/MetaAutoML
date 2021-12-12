@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: sklearn
+spec:
+  type: ClusterIP
+  ports:
+  - name: "50055"
+    port: 50055
+    protocol: TCP
+    targetPort: 50055
+  selector:
+    io.kompose.service: sklearn
+status:
+  loadBalancer: {}

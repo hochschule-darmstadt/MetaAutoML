@@ -134,9 +134,18 @@ dmypy.json
 # temporary files
 tmp/
 
-# output folder
-templates/output
+# Jetbrains
+.idea/
 
-# by adapter generated files
-*-export.zip
-*-job.json
+# by adapter generated files, but keep the directories
+app-data/output/*
+!app-data/output/.gitkeep
+
+app-data/jobs/*
+!app-data/jobs/.gitkeep
+
+# ignore datasets, because they are mapped into the datasets directory via shared volume by the controller
+
+app-data/datasets/*
+!app-data/datasets/.gitkeep
+

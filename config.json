@@ -1,11 +1,10 @@
 {
-  "adapter-name": "AutoSklearn",
-  "job-file-name": "autosklearn-job.json",
+  "adapter-name": "sklearn",
+  "job-file-name": "sklearn-job.json",
   "env-varname-cluster": "RUNTIME",
-  "env-varname-unix": "UNIX",
-  "grpc-server-address": "0.0.0.0:50055",
+  "grpc-server-address": "0.0.0.0",
   "export-zip-file-name": "sklearn-export",
-  "templates-output-path": "templates/output",
-  "output-path-docker": "omaml/output",
-  "repository-dir-name": "MetaAutoML-Adapter-Autosklearn"
+  "output-path": "app-data/output",
+  "job-file-path": "app-data/jobs",
+  "templates-path": "app-data/templates"
 }

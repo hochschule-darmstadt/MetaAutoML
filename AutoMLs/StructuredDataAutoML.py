@@ -1,9 +1,10 @@
 import os
 import pandas as pd
-import pickle
 import autosklearn.classification
 import autosklearn.regression
-
+from sklearn.preprocessing import OrdinalEncoder
+import pickle
+from Utils.JsonUtil import get_config_property
 from enum import Enum, unique
 
 
@@ -31,10 +32,9 @@ class StructuredDataAutoML(object):
         Parameter:
         1. Configuration JSON of type dictionary
         """
+        self.__time_limit = 30
         self.__configuration = configuration
-        # set default values
-        if self.__configuration.get("time_budget") == 0:
-            self.__configuration["time_budget"] = 30
+        return
 
     def __read_training_data(self):
         """
@@ -42,9 +42,38 @@ class StructuredDataAutoML(object):
         """
         df = pd.read_csv(os.path.join(self.__configuration["file_location"], self.__configuration["file_name"]),
                          **self.__configuration["file_configuration"])
+
+        # convert all object columns to categories, because autosklearn only supports numerical,
+        # bool and categorical features
+        df[df.select_dtypes(['object']).columns] = df.select_dtypes(['object']) \
+            .apply(lambda x: x.astype('category'))
+
         target = self.__configuration["tabular_configuration"]["target"]["target"]
+
         self.__X = df.drop(target, axis=1)
         self.__y = df[target]
+
+        return
+
+    def __export_model(self, model):
+        """
+        Export the generated ML model to disk
+        ---
+        Parameter:
+        1. generate ML model
+        """
+        output_file = os.path.join(get_config_property('output-path'), "model_sklearn.p")
+        with open(output_file, "wb") as file:
+            pickle.dump(model, file)
+
+    def execute_task(self):
+        """
+        Execute the ML task
+        """
+        if self.__configuration["task"] == 1:
+            self.__classification()
+        elif self.__configuration["task"] == 2:
+            self.__regression()
 
     def __dataset_preparation(self):
         # Valid types for autosklearn are numerical, categorical or boolean
@@ -61,31 +90,11 @@ class StructuredDataAutoML(object):
         if DataType(target_dt) is DataType.DATATYPE_CATEGORY:
             self.__y = self.__y.astype('category')
 
-    def __export_model(self, model):
-        """
-        Export the generated ML model to disk
-        ---
-        Parameter:
-        1. generate ML model
-        """
-        with open("templates/output/autosklearn-model.p", "wb") as file:
-            pickle.dump(model, file)
-
-    def execute_task(self):
-        """
-        Execute the ML task
-        """
-        if self.__configuration["task"] == 1:
-            self.__classification()
-        elif self.__configuration["task"] == 2:
-            self.__regression()
-
     def __generate_settings(self):
         automl_settings = {"logging_config": self.get_logging_config()}
         if self.__configuration["runtime_constraints"]["runtime_limit"] != 0:
-            automl_settings.update({"time_left_for_this_task": self.__configuration["runtime_constraints"]["runtime_limit"]})
-        if self.__configuration["runtime_constraints"]["max_iter"] != 0:
-            automl_settings.update({"max_iter": self.__configuration["runtime_constraints"]["max_iter"]})
+            automl_settings.update(
+                {"time_left_for_this_task": self.__configuration["runtime_constraints"]["runtime_limit"]})
         return automl_settings
 
     def __classification(self):
@@ -106,6 +115,7 @@ class StructuredDataAutoML(object):
         Execute the regression task
         """
         self.__read_training_data()
+
         self.__dataset_preparation()
 
         automl_settings = self.__generate_settings()
