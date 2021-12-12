@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: pytorch
+spec:
+  type: ClusterIP
+  ports:
+  - name: "50059"
+    port: 50059
+    protocol: TCP
+    targetPort: 50059
+  selector:
+    io.kompose.service: pytorch
+status:
+  loadBalancer: {}
