@@ -1,11 +1,10 @@
 import os
-import warnings
-
 import pandas as pd
 import numpy as np
 from AUTOCVE.AUTOCVE import AUTOCVEClassifier
 from sklearn.metrics import f1_score
 import pickle
+from Utils.JsonUtil import get_config_property
 
 
 class StructuredDataAutoML(object):
@@ -18,9 +17,13 @@ class StructuredDataAutoML(object):
         Init a new instance of StructuredDataAutoML
         ---
         Parameter:
-        1. Configuration configuration of type dictionary
+        1. Configuration JSON of type dictionary
         """
-        self.__time_limit = configuration["runtime_constraints"]["max_iter"]
+        # set runtime limit from configuration, if it isn't specified its set to 30s
+        if configuration["runtime_constraints"]["runtime_limit"] > 0:
+            self.__time_limit = configuration["runtime_constraints"]["runtime_limit"]
+        else:
+            self.__time_limit = 30
         self.__configuration = configuration
         return
 
@@ -28,10 +31,9 @@ class StructuredDataAutoML(object):
         """
         Read the training dataset from disk
         """
-        self.__training_data_path = os.path \
-            .join(self.__configuration["file_location"]
-                  , self.__configuration["file_name"])
-        df = pd.read_csv(self.__training_data_path)
+        self.__training_data_path = os.path.join(self.__configuration["file_location"],
+                                                 self.__configuration["file_name"])
+        df = pd.read_csv(self.__training_data_path, **self.__configuration["file_configuration"])
 
         # __X is the entire data without the target column
         self.__X = df.drop(self.__configuration["tabular_configuration"]["target"]["target"], axis=1).to_numpy()
@@ -48,7 +50,8 @@ class StructuredDataAutoML(object):
         Parameter:
         1. generate ML model
         """
-        with open("templates/output/autocve-model.p", "wb") as file:
+        output_file = os.path.join(get_config_property('output-path'), "model_autocve.p")
+        with open(output_file, "wb") as file:
             pickle.dump(model, file)
 
         return
@@ -79,9 +82,19 @@ class StructuredDataAutoML(object):
 
         except Exception as e:
             print(f"Critical error running autoCVE on {self.__configuration['file_name']}. The AutoCVE "
-                  f"classifier encountered an exception during the optimisation process. This happens when the "
-                  f"input dataset isn't in the correct format. AutoCVE can only process classification "
+                  f"classifier encountered an exception during the optimisation process. This might have happened "
+                  f"because input dataset isn't in the correct format. AutoCVE can only process classification "
                   f"datasets with numerical values.")
             print(e)
 
         return
+
+    def execute_task(self):
+        """
+        Execute the ML task
+        """
+        if self.__configuration["task"] == 1:
+            self.classification()
+        else:
+            raise ValueError(
+                f'{get_config_property("adapter-name")} was called with an invalid task: task=={self.__configuration["task"]}. The only valid task is task==1')

@@ -15,7 +15,7 @@ class TemplateGenerator(object):
         """
         return
 
-    def GenerateScript(self):
+    def generate_script(self):
         """
         Generate the AutoML specific scripts to execute the generated model
         """
