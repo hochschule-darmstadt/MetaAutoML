@@ -1,0 +1,14 @@
+# supplementary docker file
+
+services:
+  dummy:
+    build: ./util/MetaAutoML-Diverse/Helper/frontend_dummy/
+    container_name: dummy
+    volumes:
+      # shared volumes between frontend and controller
+      - datasets:/app/app-data/datasets
+      - output:/app/app-data/output
+    environment:
+      - CONTROLLER_ADDRESS=controller:5002
+    extra_hosts:
+      - "docker.host.internal:host-gateway"

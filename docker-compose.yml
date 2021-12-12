@@ -1,0 +1,117 @@
+version: "3.8"
+services:
+  # sometimes when building the controller it does not copy the contents of the datasets folder.
+  # This is probably a caching docker caching issue, which can be fixed with:
+  # 'make clean-hard'
+  controller:
+    build: ./MetaAutoML-Controller
+    container_name: controller
+    # we map the port of the controller to the host.
+    # This way we can either connect locally with localhost:5001
+    # or from a docker container that accesses host.docker.internal:5001
+    ports:
+      - "5001:5001"
+    environment:
+      - AUTOKERAS_SERVICE_HOST=autokeras
+      - AUTOKERAS_SERVICE_PORT=50052
+      - MLJAR_SERVICE_HOST=mljar
+      - MLJAR_SERVICE_PORT=50053
+      - SKLEARN_SERVICE_HOST=sklearn
+      - SKLEARN_SERVICE_PORT=50055
+      - FLAML_SERVICE_HOST=flaml
+      - FLAML_SERVICE_PORT=50056
+      - AUTOGLUON_SERVICE_HOST=gluon
+      - AUTOGLUON_SERVICE_PORT=50057
+      - AUTOCVE_SERVICE_HOST=autocve
+      - AUTOCVE_SERVICE_PORT=50058
+      - AUTOPYTORCH_SERVICE_HOST=pytorch
+      - AUTOPYTORCH_SERVICE_PORT=50059
+    volumes:
+      - datasets:/app/app-data/datasets
+      - output:/app/app-data/output
+      - output-autokeras:/app/app-data/output/autokeras
+      - output-mljar:/app/app-data/output/mljar
+      - output-sklearn:/app/app-data/output/sklearn
+      - output-flaml:/app/app-data/output/flaml
+      - output-gluon:/app/app-data/output/gluon
+      - output-autocve:/app/app-data/output/autocve
+      - output-pytorch:/app/app-data/output/pytorch
+
+
+#     adapters do not need to be available from the host machine -> no port mappings
+
+  autokeras:
+    build: ./adapters/MetaAutoML-Adapter-AutoKeras
+    container_name: autokeras
+    environment:
+      - GRPC_SERVER_PORT=50052
+    volumes:
+      - datasets:/app/app-data/datasets
+      - output-autokeras:/app/app-data/output
+
+  mljar:
+    build: ./adapters/MetaAutoML-Adapter-MLJAR
+    container_name: mljar
+    environment:
+      - GRPC_SERVER_PORT=50053
+    volumes:
+      - datasets:/app/app-data/datasets
+      - output-mljar:/app/app-data/output
+
+  sklearn:
+    build: ./adapters/MetaAutoML-Adapter-Autosklearn
+    container_name: sklearn
+    environment:
+      - GRPC_SERVER_PORT=50055
+    volumes:
+      - datasets:/app/app-data/datasets
+      - output-sklearn:/app/app-data/output
+
+  flaml:
+    build: ./adapters/MetaAutoML-Adapter-FLAML
+    container_name: flaml
+    environment:
+      - GRPC_SERVER_PORT=50056
+    volumes:
+      - datasets:/app/app-data/datasets
+      - output-flaml:/app/app-data/output
+
+  gluon:
+    build: ./adapters/MetaAutoML-Adapter-AutoGluon
+    container_name: gluon
+    environment:
+      - GRPC_SERVER_PORT=50057
+    volumes:
+      - datasets:/app/app-data/datasets
+      - output-gluon:/app/app-data/output
+
+  autocve:
+    build: ./adapters/MetaAutoML-Adapter-AutoCVE
+    container_name: autocve
+    environment:
+      - GRPC_SERVER_PORT=50058
+    volumes:
+      - datasets:/app/app-data/datasets
+      - output-autocve:/app/app-data/output
+
+  pytorch:
+    build: ./adapters/MetaAutoML-Adapter-AutoPytorch
+    container_name: pytorch
+    environment:
+      - GRPC_SERVER_PORT=50059
+    volumes:
+      - datasets:/app/app-data/datasets
+      - output-pytorch:/app/app-data/output
+
+volumes:
+  datasets: # shared volume between controller, adapters and frontend/dummy to transfer datasets
+   # shared volumes between controller and adapters to transfer output files e.g. *.zip file
+  output-autokeras:
+  output-sklearn:
+  output-flaml:
+  output-gluon:
+  output-pytorch:
+  output-autocve:
+  output-mljar:
+  # shared volume between controller and frontend / dummy to transfer output
+  output:
