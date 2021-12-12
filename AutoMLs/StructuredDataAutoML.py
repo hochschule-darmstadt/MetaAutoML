@@ -95,8 +95,6 @@ class StructuredDataAutoML(object):
         if self.__configuration["runtime_constraints"]["runtime_limit"] != 0:
             automl_settings.update(
                 {"time_left_for_this_task": self.__configuration["runtime_constraints"]["runtime_limit"]})
-        if self.__configuration["runtime_constraints"]["max_iter"] != 0:
-            automl_settings.update({"max_iter": self.__configuration["runtime_constraints"]["max_iter"]})
         return automl_settings
 
     def __classification(self):
