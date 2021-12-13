@@ -21,7 +21,7 @@ spec:
       - env:
         - name: GRPC_SERVER_PORT
           value: "50056"
-        image: alexhda/flaml
+        image: alexhda/omaml-flaml
         imagePullPolicy: ""
         name: flaml
         resources:
