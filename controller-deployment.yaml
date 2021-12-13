@@ -22,8 +22,6 @@ spec:
         image: alexhda/omaml-controller
         imagePullPolicy: ""
         name: controller
-        ports:
-        - containerPort: 1433
         resources:
           limits:
             cpu: "1"
