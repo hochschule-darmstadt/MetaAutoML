@@ -21,7 +21,7 @@ spec:
       - env:
         - name: GRPC_SERVER_PORT
           value: "50058"
-        image: alexhda/autocve
+        image: alexhda/omaml-autocve
         imagePullPolicy: ""
         name: autocve
         resources:
