@@ -21,7 +21,7 @@ spec:
       - env:
         - name: GRPC_SERVER_PORT
           value: "50057"
-        image: alexhda/autogluon
+        image: alexhda/omaml-autogluon
         imagePullPolicy: ""
         name: autogluon
         resources:
