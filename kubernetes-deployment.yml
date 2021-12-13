@@ -21,15 +21,13 @@ spec:
       - env:
         - name: GRPC_SERVER_PORT
           value: "50059"
-        image: alexhda/<SPECIFY IMAGE PATH>
+        image: alexhda/omaml-autopytorch
         imagePullPolicy: ""
         name: pytorch
-        ports:
-        - containerPort: 1433
         resources:
           limits:
-            cpu: "2"
-            memory: "2097152e3"
+            cpu: "1"
+            memory: "1097152e3"
         volumeMounts:
         - name: datasets
           mountPath: /app/app-data/datasets
@@ -40,7 +38,7 @@ spec:
       volumes:
       - name: datasets
         persistentVolumeClaim:
-          claimName: omamldata-claim
+          claimName: datasets-claim
       - name: output-pytorch
         persistentVolumeClaim:
-          claimName: omamldata-claim
+          claimName: output-pytorch-claim
