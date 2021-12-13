@@ -42,31 +42,6 @@ class RdfManager(object):
 
         return queryResult
 
-    def GetSupportedMlLibraries(self, request) -> Controller_pb2.GetSupportedMlLibrariesResponse:
-        """
-        Retrive all Machine Learn Library for this task by supported AutoMLs
-        ---
-        Parameter
-        1. configuration dictonary
-        ---
-        Return a list of Machine Learning libraries
-        """
-        result = Controller_pb2.GetSupportedMlLibrariesResponse()
-
-        if len(request.task) == 0:  # Check if task parameter has value, we require it for a successful query
-            self.__log.exception("task parameter empty")
-            result.MlLibraries.append("Task parameter value missing")
-            return result
-
-        task = rdflib.Literal(request.task)
-        q = prepareQuery(Queries.ONTOLOGY_QUERY_GET_SUPPORTED_MACHINE_LEARNING_LIBRARY,
-                         initNs={"skos": SKOS})
-
-        queryResult = self.__executeQuery(q, {"taskName": task})
-        for row in queryResult:
-            result.MlLibraries.append(row.library.replace(ML_ONTOLOGY_NAMESPACE, ""))
-        return result
-
     def GetCompatibleAutoMlSolutions(self, request) -> Controller_pb2.GetCompatibleAutoMlSolutionsResponse:
         """
         Retrive all compatible AutoML solutions depending on the configuration
@@ -124,6 +99,31 @@ class RdfManager(object):
         queryResult = self.__executeQuery(q, {"dataset": dataset})
         for row in queryResult:
             result.tasks.append(row.task.replace(ML_ONTOLOGY_NAMESPACE, ""))
+        return result
+
+    def GetSupportedMlLibraries(self, request) -> Controller_pb2.GetSupportedMlLibrariesResponse:
+        """
+        Retrive all Machine Learn Library for this task by supported AutoMLs
+        ---
+        Parameter
+        1. configuration dictonary
+        ---
+        Return a list of Machine Learning libraries
+        """
+        result = Controller_pb2.GetSupportedMlLibrariesResponse()
+
+        if len(request.task) == 0:  # Check if task parameter has value, we require it for a successful query
+            self.__log.exception("task parameter empty")
+            result.MlLibraries.append("Task parameter value missing")
+            return result
+
+        task = rdflib.Literal(request.task)
+        q = prepareQuery(Queries.ONTOLOGY_QUERY_GET_SUPPORTED_MACHINE_LEARNING_LIBRARY,
+                         initNs={"skos": SKOS})
+
+        queryResult = self.__executeQuery(q, {"taskName": task})
+        for row in queryResult:
+            result.MlLibraries.append(row.library.replace(ML_ONTOLOGY_NAMESPACE, ""))
         return result
 
     def GetTasks(self, dataType):

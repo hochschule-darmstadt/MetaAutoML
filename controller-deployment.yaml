@@ -26,14 +26,19 @@ spec:
         - containerPort: 1433
         resources:
           limits:
-            cpu: "2"
-            memory: "2097152e3"
+            cpu: "1"
+            memory: "1097152e3"
         volumeMounts:
-        - name: omaml
-          mountPath: /omaml
+        - name: datasets
+          mountPath: /app/app-data/datasets
+        - name: autokeras-output
+          mountPath: /app/app-data/output/autokeras
       restartPolicy: Always
       serviceAccountName: ""
       volumes:
-      - name: omaml
+      - name: datasets
         persistentVolumeClaim:
-          claimName: omamldata-claim
+          claimName: datasets-claim
+      - name: autokeras-output
+        persistentVolumeClaim:
+          claimName: output-autokeras-claim
