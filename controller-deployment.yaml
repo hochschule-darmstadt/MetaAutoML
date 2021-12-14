@@ -31,6 +31,18 @@ spec:
           mountPath: /app/app-data/datasets
         - name: autokeras-output
           mountPath: /app/app-data/output/autokeras
+        - name: mljar-output
+          mountPath: /app/app-data/output/mljar
+        - name: autocve-output
+          mountPath: /app/app-data/output/autocve
+        - name: gluon-output
+          mountPath: /app/app-data/output/gluon
+        - name: pytorch-output
+          mountPath: /app/app-data/output/pytorch
+        - name: flaml-output
+          mountPath: /app/app-data/output/flaml
+        - name: sklearn-output
+          mountPath: /app/app-data/output/sklearn
       restartPolicy: Always
       serviceAccountName: ""
       volumes:
@@ -40,3 +52,21 @@ spec:
       - name: autokeras-output
         persistentVolumeClaim:
           claimName: output-autokeras-claim
+      - name: mljar-output
+        persistentVolumeClaim:
+          claimName: output-mljar-claim
+      - name: autocve-output
+        persistentVolumeClaim:
+          claimName: output-autocve-claim
+      - name: gluon-output
+        persistentVolumeClaim:
+          claimName: output-gluon-claim
+      - name: pytorch-output
+        persistentVolumeClaim:
+          claimName: output-pytorch-claim
+      - name: flaml-output
+        persistentVolumeClaim:
+          claimName: output-flaml-claim
+      - name: sklearn-output
+        persistentVolumeClaim:
+          claimName: output-sklearn-claim
