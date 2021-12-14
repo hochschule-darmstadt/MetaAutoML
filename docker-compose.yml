@@ -12,6 +12,9 @@ services:
     ports:
       - "5001:5001"
     environment:
+      # The environment variables are set manually here in docker-compose.
+      # But in kubernetes the environment variables are set as <SERVICE_NAME>_SERVICE_HOST and <SERVICE_NAME>_SERVICE_PORT
+      # Therefore the services must be named accordingly in the kubernetes files.
       - AUTOKERAS_SERVICE_HOST=autokeras
       - AUTOKERAS_SERVICE_PORT=50052
       - MLJAR_SERVICE_HOST=mljar
