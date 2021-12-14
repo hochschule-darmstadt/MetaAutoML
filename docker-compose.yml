@@ -24,8 +24,8 @@ services:
       - AUTOGLUON_SERVICE_PORT=50057
       - AUTOCVE_SERVICE_HOST=autocve
       - AUTOCVE_SERVICE_PORT=50058
-      - AUTOPYTORCH_SERVICE_HOST=pytorch
-      - AUTOPYTORCH_SERVICE_PORT=50059
+      - PYTORCH_SERVICE_HOST=pytorch
+      - PYTORCH_SERVICE_PORT=50059
     volumes:
       - datasets:/app/app-data/datasets
       - output:/app/app-data/output
