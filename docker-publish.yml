@@ -1,0 +1,61 @@
+name: ci
+
+on:
+  push:
+    branches:
+      - 'master'
+
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v2
+      -
+        name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+      -
+        name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+      -
+        name: Login to DockerHub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      -
+        name: Build and push Controller
+        uses: docker/build-push-action@v2
+        with:
+          context: ./MetaAutoML-Controller
+          push: true
+          tags: alexhda/omaml-controller:test
+      -
+        name: Build and push Frontend
+        uses: docker/build-push-action@v2
+        with:
+          context: ./MetaAutoML-Frontend
+          push: true
+          tags: alexhda/omaml-frontend:test
+      -
+        name: Build and push Adapter AutoCVE
+        uses: docker/build-push-action@v2
+        with:
+          context: ./adapters/MetaAutoML-Adapter-AutoCVE
+          push: true
+          tags: alexhda/omaml-autocve:test
+      -
+        name: Build and push Adapter AutoGluon
+        uses: docker/build-push-action@v2
+        with:
+          context: ./adapters/MetaAutoML-Adapter-AutoGluon
+          push: true
+          tags: alexhda/omaml-autogluon:test
+      -
+        name: Build and push Adapter AutoKeras
+        uses: docker/build-push-action@v2
+        with:
+          context: ./adapters/MetaAutoML-Adapter-AutoKeras
+          push: true
+          tags: alexhda/omaml-autokeras:test
