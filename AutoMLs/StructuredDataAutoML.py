@@ -6,6 +6,19 @@ from supervised.automl import AutoML
 from sklearn.metrics import accuracy_score
 
 from Utils.JsonUtil import get_config_property
+from enum import Enum, unique
+
+
+@unique
+class DataType(Enum):
+    DATATYPE_UNKNOW = 0
+    DATATYPE_STRING = 1
+    DATATYPE_INT = 2
+    DATATYPE_FLOAT = 3
+    DATATYPE_CATEGORY = 4
+    DATATYPE_BOOLEAN = 5
+    DATATYPE_DATETIME = 6
+    DATATYPE_IGNORE = 7
 
 
 class StructuredDataAutoML(object):
@@ -24,20 +37,33 @@ class StructuredDataAutoML(object):
         self.__X = df.drop(target, axis=1)
         self.__y = df[target]
 
+    def __dataset_preparation(self):
+        for column, dt in self.__configuration["tabular_configuration"]["features"].items():
+            if DataType(dt) is DataType.DATATYPE_IGNORE:
+                self.__X = self.__X.drop(column, axis=1)
+            elif DataType(dt) is DataType.DATATYPE_CATEGORY:
+                self.__X[column] = self.__X[column].astype('category')
+        # cast target to a different datatype if necessary
+        self.__cast_target()
+
+    def __cast_target(self):
+        target_dt = self.__configuration["tabular_configuration"]["target"]["type"]
+        if DataType(target_dt) is DataType.DATATYPE_CATEGORY:
+            self.__y = self.__y.astype('category')
+        elif DataType(target_dt) is DataType.DATATYPE_BOOLEAN:
+            self.__y = self.__y.astype('bool')
+
     def __export_model(self, model):
         output_file = os.path.join(get_config_property('output-path'), "model_autokeras.p")
         with open(output_file, 'wb') as f:
             pickle.dump(model, f)
-        return
 
     def classification(self):
         self.__read_training_data()
+        self.__dataset_preparation()
         automl = AutoML(total_time_limit=200)
         automl.fit(self.__X, self.__y)
         self.__export_model(automl)
-        return
 
     def regression(self):
-        self.__read_training_data()
         raise NotImplementedError()
-        return
