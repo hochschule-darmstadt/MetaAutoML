@@ -32,12 +32,13 @@ class AutoMLManager(ABC, Thread):
         self.__result_json = ""
         self.__is_completed = False
         self.__status_messages = []
+        self.__testScore = 0.0
+        self.__validationScore = 0.0
+        self.__runtime = 0
         self.__last_status = Controller_pb2.SESSION_STATUS_BUSY
 
         self.__AUTOML_SERVICE_HOST = automl_service_host
         self.__AUTOML_SERVICE_PORT = automl_service_port
-
-        return
 
     def GetAutoMlModel(self) -> Controller_pb2.GetSessionStatusResponse:
         """
@@ -61,6 +62,9 @@ class AutoMLManager(ABC, Thread):
         status.name = self.name
         status.status = self.__last_status
         status.messages[:] = self.__status_messages
+        status.testScore = self.__testScore
+        status.validationScore = self.__validationScore
+        status.runtime = self.__runtime
         return status
 
     def is_running(self) -> bool:
@@ -105,14 +109,20 @@ class AutoMLManager(ABC, Thread):
 
     def _run_server_until_connection_closed(self, stub, dataset_to_send):
         try:  # Run until server closes connection
-            for response in stub.StartAutoML(
-                    dataset_to_send):  # Send request WATCH OUT THIS IS A LOOP REQUEST Check out for normal request https://grpc.io/docs/languages/python/quickstart/#update-the-client
+            for response in stub.StartAutoML(dataset_to_send):
+                # Send request WATCH OUT THIS IS A LOOP REQUEST Check out for normal request
+                # https://grpc.io/docs/languages/python/quickstart/#update-the-client
+
                 if response.returnCode == Adapter_pb2.ADAPTER_RETURN_CODE_STATUS_UPDATE:
                     self.__status_messages.append(response.statusUpdate)
+                    self.__runtime = response.runtime
                 elif response.returnCode == Adapter_pb2.ADAPTER_RETURN_CODE_SUCCESS:
                     self.__result_json = json.loads(response.outputJson)
                     self.__is_completed = True
                     self.__last_status = Controller_pb2.SESSION_STATUS_COMPLETED
+                    self.__testScore = response.testScore
+                    self.__validationScore = response.validationScore
+                    self.__runtime = response.runtime
                     return
         except grpc.RpcError as rpc_error:
             print(f"Received unknown RPC error: code={rpc_error.code()} message={rpc_error.details()}")

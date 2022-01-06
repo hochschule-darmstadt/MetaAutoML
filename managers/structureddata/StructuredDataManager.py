@@ -47,7 +47,7 @@ class StructuredDataManager(object):
             elif automl_name == MljarManager.name:
                 required_automls.append(MljarManager(configuration, folder_location))
 
-        new_session = AutoMLSession(session_id, configuration.task)
+        new_session = AutoMLSession(session_id, configuration)
         for automl in required_automls:
             automl.start()
             new_session.AddAutoMLToSession(automl)
