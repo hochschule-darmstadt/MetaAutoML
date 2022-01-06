@@ -5,8 +5,21 @@ from AUTOCVE.AUTOCVE import AUTOCVEClassifier
 from sklearn.metrics import f1_score
 import pickle
 from Utils.JsonUtil import get_config_property
+from enum import Enum, unique
 
 
+@unique
+class DataType(Enum):
+    DATATYPE_UNKNOW = 0
+    DATATYPE_STRING = 1
+    DATATYPE_INT = 2
+    DATATYPE_FLOAT = 3
+    DATATYPE_CATEGORY = 4
+    DATATYPE_BOOLEAN = 5
+    DATATYPE_DATETIME = 6
+    DATATYPE_IGNORE = 7
+    
+    
 class StructuredDataAutoML(object):
     """
     Implementation of the AutoML functionality fo structured data a.k.a. tabular data
@@ -25,7 +38,6 @@ class StructuredDataAutoML(object):
         else:
             self.__time_limit = 30
         self.__configuration = configuration
-        return
 
     def __read_training_data(self):
         """
@@ -41,7 +53,21 @@ class StructuredDataAutoML(object):
         self.__y = df[self.__configuration["tabular_configuration"]["target"]["target"]].to_numpy()
         # both __X and __y get converted to numpy arrays since AutoCVE cannot understand it otherwise
 
-        return
+    def __dataset_preparation(self):
+        for column, dt in self.__configuration["tabular_configuration"]["features"].items():
+            if DataType(dt) is DataType.DATATYPE_IGNORE:
+                self.__X = self.__X.drop(column, axis=1)
+            elif DataType(dt) is DataType.DATATYPE_CATEGORY:
+                self.__X[column] = self.__X[column].astype('category')
+        # cast target to a different datatype if necessary
+        self.__cast_target()
+
+    def __cast_target(self):
+        target_dt = self.__configuration["tabular_configuration"]["target"]["type"]
+        if DataType(target_dt) is DataType.DATATYPE_CATEGORY:
+            self.__y = self.__y.astype('category')
+        elif DataType(target_dt) is DataType.DATATYPE_BOOLEAN:
+            self.__y = self.__y.astype('bool')
 
     def __export_model(self, model):
         """
@@ -54,13 +80,12 @@ class StructuredDataAutoML(object):
         with open(output_file, "wb") as file:
             pickle.dump(model, file)
 
-        return
-
     def classification(self):
         """
         Execute the classification task
         """
         self.__read_training_data()
+        self.__dataset_preparation()
 
         auto_cls = AUTOCVEClassifier(
             max_evolution_time_secs=self.__time_limit,
@@ -86,8 +111,6 @@ class StructuredDataAutoML(object):
                   f"because input dataset isn't in the correct format. AutoCVE can only process classification "
                   f"datasets with numerical values.")
             print(e)
-
-        return
 
     def execute_task(self):
         """
