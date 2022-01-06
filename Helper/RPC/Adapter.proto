@@ -18,6 +18,9 @@ message StartAutoMLResponse {
 	AdapterReturnCode returnCode = 1;
 	string statusUpdate = 2;
 	string outputJson = 3;
+	float testScore = 4;
+    float validationScore = 5;
+    int32 runtime = 6;
 }
 
 enum AdapterReturnCode {
