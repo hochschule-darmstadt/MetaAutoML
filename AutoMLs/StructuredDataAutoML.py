@@ -16,6 +16,19 @@ from autoPyTorch.api.tabular_regression import TabularRegressionTask
 import pickle
 
 from JsonUtil import get_config_property
+from enum import Enum, unique
+
+
+@unique
+class DataType(Enum):
+    DATATYPE_UNKNOW = 0
+    DATATYPE_STRING = 1
+    DATATYPE_INT = 2
+    DATATYPE_FLOAT = 3
+    DATATYPE_CATEGORY = 4
+    DATATYPE_BOOLEAN = 5
+    DATATYPE_DATETIME = 6
+    DATATYPE_IGNORE = 7
 
 
 class StructuredDataAutoML(object):
@@ -57,7 +70,21 @@ class StructuredDataAutoML(object):
         # __y is only the target column
         self.__y = df[self.__configuration["tabular_configuration"]["target"]["target"]]
 
-        return
+    def __dataset_preparation(self):
+        for column, dt in self.__configuration["tabular_configuration"]["features"].items():
+            if DataType(dt) is DataType.DATATYPE_IGNORE:
+                self.__X = self.__X.drop(column, axis=1)
+            elif DataType(dt) is DataType.DATATYPE_CATEGORY:
+                self.__X[column] = self.__X[column].astype('category')
+        # cast target to a different datatype if necessary
+        self.__cast_target()
+
+    def __cast_target(self):
+        target_dt = self.__configuration["tabular_configuration"]["target"]["type"]
+        if DataType(target_dt) is DataType.DATATYPE_CATEGORY:
+            self.__y = self.__y.astype('category')
+        elif DataType(target_dt) is DataType.DATATYPE_BOOLEAN:
+            self.__y = self.__y.astype('bool')
 
     def __export_model(self, model):
         """
@@ -77,6 +104,7 @@ class StructuredDataAutoML(object):
         Execute the classification task
         """
         self.__read_training_data()
+        self.__dataset_preparation()
 
         auto_cls = TabularClassificationTask()
         if self.__time_limit is not None:
@@ -116,7 +144,7 @@ class StructuredDataAutoML(object):
         Execute the regression task
         """
         self.__read_training_data()
-
+        self.__dataset_preparation()
         ############################################################################
         # Build and fit a regressor
         # ==========================
