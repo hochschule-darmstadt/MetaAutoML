@@ -5,6 +5,7 @@ import logging
 import shutil
 import subprocess
 import json
+import time
 from Utils.JsonUtil import get_config_property
 
 import Adapter_pb2
@@ -27,7 +28,7 @@ def generate_script(config_json):
     generator.generate_script(config_json)
 
 
-def capture_process_output(process):
+def capture_process_output(process, start_time):
     capture = ""
     # AutoGluon writes to stderr which seems to be not configurable
     s = process.stderr.read(1)
@@ -35,11 +36,15 @@ def capture_process_output(process):
     # Run until no more output is produced by the subprocess
     while len(s) > 0:
         if capture[len(capture) - 1] == '\n':
-            processUpdate = Adapter_pb2.StartAutoMLResponse()
-            processUpdate.returnCode = Adapter_pb2.ADAPTER_RETURN_CODE_STATUS_UPDATE
-            processUpdate.statusUpdate = capture
-            processUpdate.outputJson = ""
-            yield processUpdate
+            process_update = Adapter_pb2.StartAutoMLResponse()
+            process_update.returnCode = Adapter_pb2.ADAPTER_RETURN_CODE_STATUS_UPDATE
+            process_update.statusUpdate = capture
+            process_update.outputJson = ""
+            process_update.runtime = int(time.time() - start_time) or 0
+            # if return Code is ADAPTER_RETURN_CODE_STATUS_UPDATE we do not have score values yet
+            process_update.testScore = 0.0
+            process_update.validationScore = 0.0
+            yield process_update
             sys.stderr.write(capture)
             sys.stderr.flush()
             capture = ""
@@ -47,10 +52,14 @@ def capture_process_output(process):
         s = process.stderr.read(1)
 
 
-def get_response(output_json):
+def get_response(output_json, start_time):
     response = Adapter_pb2.StartAutoMLResponse()
     response.returnCode = Adapter_pb2.ADAPTER_RETURN_CODE_SUCCESS
     response.outputJson = json.dumps(output_json)
+    response.runtime = int(time.time() - start_time) or 0
+    # if return Code is ADAPTER_RETURN_CODE_STATUS_UPDATE we do not have score values yet
+    response.testScore = 0.0
+    response.validationScore = 0.0
     yield response
 
 
@@ -91,6 +100,7 @@ class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
         Execute a new AutoML run.
         """
         try:
+            start_time = time.time()
             # saving AutoML configuration JSON
             config_json = json.loads(request.processJson)
             job_file_location = os.path.join(get_config_property("job-file-path"),
@@ -99,11 +109,11 @@ class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
                 json.dump(config_json, f)
 
             process = start_automl_process()
-            yield from capture_process_output(process)
+            yield from capture_process_output(process, start_time)
             generate_script(config_json)
             output_json = zip_script()
 
-            response = yield from get_response(output_json)
+            response = yield from get_response(output_json, start_time)
             print(f'{get_config_property("adapter-name")} job finished')
             return response
 
