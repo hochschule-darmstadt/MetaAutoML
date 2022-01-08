@@ -164,7 +164,7 @@ class StructuredDataAutoML(object):
             auto_reg.search(
                 X_train=self.__X,
                 y_train=self.__y,
-                optimize_metric='accuracy',
+                optimize_metric='r2',
                 budget_type='epochs',
                 max_budget=self.__iter_limit
             )
