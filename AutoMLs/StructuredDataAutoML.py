@@ -41,6 +41,13 @@ class StructuredDataAutoML(object):
             self.__time_limit = 30
             self.__iter_limit = None
 
+        if configuration["metric"] == "" and configuration["task"] == 1:
+            # handle empty metric field, 'accuracy' should be the default metric parameter for AutoPytorch classification
+            configuration["metric"] = 'accuracy'
+        elif configuration["metric"] == "" and configuration["task"] == 2:
+            # handle empty metric field, 'r2' should be the default metric parameter for AutoPytorch regression
+            configuration["metric"] = 'r2'
+
         self.__configuration = configuration
         return
 
@@ -83,14 +90,14 @@ class StructuredDataAutoML(object):
             auto_cls.search(
                 X_train=self.__X,
                 y_train=self.__y,
-                optimize_metric='accuracy',
+                optimize_metric=self.__configuration["metric"],
                 total_walltime_limit=self.__time_limit
             )
         else:
             auto_cls.search(
                 X_train=self.__X,
                 y_train=self.__y,
-                optimize_metric='accuracy',
+                optimize_metric=self.__configuration["metric"],
                 budget_type='epochs',
                 max_budget=self.__iter_limit
             )
@@ -129,14 +136,14 @@ class StructuredDataAutoML(object):
             auto_reg.search(
                 X_train=self.__X,
                 y_train=self.__y,
-                optimize_metric='r2',
+                optimize_metric=self.__configuration["metric"],
                 total_walltime_limit=self.__time_limit
             )
         else:
             auto_reg.search(
                 X_train=self.__X,
                 y_train=self.__y,
-                optimize_metric='accuracy',
+                optimize_metric=self.__configuration["metric"],
                 budget_type='epochs',
                 max_budget=self.__iter_limit
             )
