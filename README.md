@@ -21,3 +21,5 @@ Clone the repository and set up a local project using the requirements.txt for a
 - `<AUTOML_NAME>_SERVICE_PORT` should be set to the port on which the respective Adapter is listening to connections from the controller
 
 it is recommended to start the whole project using the docker-compose.yml file in the meta repository, because there all environment variables are preconfigured
+
+PYTHON_ENV=python;MLJAR_SERVICE_HOST=localhost;MLJAR_SERVICE_PORT=50059;AUTOCVE_SERVICE_HOST=localhost;AUTOCVE_SERVICE_PORT=50060;FLAML_SERVICE_HOST=localhost;FLAML_SERVICE_PORT=50056;SKLEARN_SERVICE_HOST=localhost;SKLEARN_SERVICE_PORT=50058;PYTORCH_SERVICE_HOST=localhost;PYTORCH_SERVICE_PORT=50057;AUTOGLUON_SERVICE_HOST=localhost;AUTOGLUON_SERVICE_PORT=50054;AUTOKERAS_SERVICE_HOST=localhost;AUTOKERAS_SERVICE_PORT=50053
