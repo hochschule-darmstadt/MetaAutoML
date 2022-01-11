@@ -76,19 +76,29 @@ class StructuredDataAutoML(object):
             self.__regression()
 
     def __dataset_preparation(self):
-        # Valid types for autosklearn are numerical, categorical or boolean
         for column, dt in self.__configuration["tabular_configuration"]["features"].items():
             if DataType(dt) is DataType.DATATYPE_IGNORE:
                 self.__X = self.__X.drop(column, axis=1)
             elif DataType(dt) is DataType.DATATYPE_CATEGORY:
                 self.__X[column] = self.__X[column].astype('category')
-        # cast target to a different datatype if necessary
+            elif DataType(dt) is DataType.DATATYPE_BOOLEAN:
+                self.__X[column] = self.__X[column].astype('bool')
+            elif DataType(dt) is DataType.DATATYPE_INT:
+                self.__X[column] = self.__X[column].astype('int')
+            elif DataType(dt) is DataType.DATATYPE_FLOAT:
+                self.__X[column] = self.__X[column].astype('float')
         self.__cast_target()
 
     def __cast_target(self):
         target_dt = self.__configuration["tabular_configuration"]["target"]["type"]
         if DataType(target_dt) is DataType.DATATYPE_CATEGORY:
             self.__y = self.__y.astype('category')
+        elif DataType(target_dt) is DataType.DATATYPE_BOOLEAN:
+            self.__y = self.__y.astype('bool')
+        elif DataType(target_dt) is DataType.DATATYPE_INT:
+            self.__y = self.__y.astype('int')
+        elif DataType(target_dt) is DataType.DATATYPE_FLOAT:
+            self.__y = self.__y.astype('float')
 
     def __generate_settings(self):
         automl_settings = {"logging_config": self.get_logging_config()}
