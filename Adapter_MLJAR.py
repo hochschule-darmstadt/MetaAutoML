@@ -23,12 +23,12 @@ def get_except_response(context, e):
     return Adapter_pb2.StartAutoMLResponse()
 
 
-def generate_script(config_json, start_time):
+def generate_script(config_json):
     generator = TemplateGenerator()
     generator.generate_script(config_json)
 
 
-def capture_process_output(process):
+def capture_process_output(process, start_time):
     capture = ""
     s = process.stdout.read(1)
     capture += s
@@ -108,8 +108,8 @@ class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
                 json.dump(config_json, f)
 
             process = start_automl_process()
-            yield from capture_process_output(process)
-            generate_script(config_json, start_time)
+            yield from capture_process_output(process, start_time)
+            generate_script(config_json)
             output_json = zip_script()
 
             response = yield from get_response(output_json, start_time)
