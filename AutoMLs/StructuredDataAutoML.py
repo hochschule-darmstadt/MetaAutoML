@@ -48,26 +48,32 @@ class StructuredDataAutoML(object):
         df = pd.read_csv(self.__training_data_path, **self.__configuration["file_configuration"])
 
         # __X is the entire data without the target column
-        self.__X = df.drop(self.__configuration["tabular_configuration"]["target"]["target"], axis=1).to_numpy()
+        self.__X = df.drop(self.__configuration["tabular_configuration"]["target"]["target"], axis=1)
         # __y is only the target column
-        self.__y = df[self.__configuration["tabular_configuration"]["target"]["target"]].to_numpy()
+        self.__y = df[self.__configuration["tabular_configuration"]["target"]["target"]]
         # both __X and __y get converted to numpy arrays since AutoCVE cannot understand it otherwise
 
     def __dataset_preparation(self):
         for column, dt in self.__configuration["tabular_configuration"]["features"].items():
-            if DataType(dt) is DataType.DATATYPE_IGNORE:
+            if DataType(dt) is DataType.DATATYPE_IGNORE or \
+                    DataType(dt) is DataType.DATATYPE_CATEGORY or \
+                    DataType(dt) is DataType.DATATYPE_BOOLEAN or \
+                    DataType(dt) is DataType.DATATYPE_DATETIME:
                 self.__X = self.__X.drop(column, axis=1)
-            elif DataType(dt) is DataType.DATATYPE_CATEGORY:
-                self.__X[column] = self.__X[column].astype('category')
-        # cast target to a different datatype if necessary
+            elif DataType(dt) is DataType.DATATYPE_INT:
+                self.__X[column] = self.__X[column].astype('int')
+            elif DataType(dt) is DataType.DATATYPE_FLOAT:
+                self.__X[column] = self.__X[column].astype('float')
         self.__cast_target()
 
     def __cast_target(self):
         target_dt = self.__configuration["tabular_configuration"]["target"]["type"]
-        if DataType(target_dt) is DataType.DATATYPE_CATEGORY:
-            self.__y = self.__y.astype('category')
-        elif DataType(target_dt) is DataType.DATATYPE_BOOLEAN:
-            self.__y = self.__y.astype('bool')
+        if DataType(target_dt) is DataType.DATATYPE_INT or \
+                DataType(target_dt) is DataType.DATATYPE_CATEGORY or \
+                DataType(target_dt) is DataType.DATATYPE_BOOLEAN:
+            self.__y = self.__y.astype('int')
+        elif DataType(target_dt) is DataType.DATATYPE_FLOAT:
+            self.__y = self.__y.astype('float')
 
     def __export_model(self, model):
         """
@@ -80,12 +86,17 @@ class StructuredDataAutoML(object):
         with open(output_file, "wb") as file:
             pickle.dump(model, file)
 
+    def __convert_data_to_numpy(self):
+        self.__X = self.__X.to_numpy()
+        self.__y = self.__y.to_numpy()
+
     def classification(self):
         """
         Execute the classification task
         """
         self.__read_training_data()
         self.__dataset_preparation()
+        self.__convert_data_to_numpy()
 
         auto_cls = AUTOCVEClassifier(
             max_evolution_time_secs=self.__time_limit,
