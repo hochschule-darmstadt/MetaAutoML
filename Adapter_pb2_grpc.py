@@ -6,7 +6,9 @@ import Adapter_pb2 as Adapter__pb2
 
 
 class AdapterServiceStub(object):
-    """Missing associated documentation comment in .proto file."""
+    """
+    AutoML Adapter Service implementation. Service provide functionality to execute and interact with the current AutoML process.
+    """
 
     def __init__(self, channel):
         """Constructor.
@@ -22,10 +24,14 @@ class AdapterServiceStub(object):
 
 
 class AdapterServiceServicer(object):
-    """Missing associated documentation comment in .proto file."""
+    """
+    AutoML Adapter Service implementation. Service provide functionality to execute and interact with the current AutoML process.
+    """
 
     def StartAutoML(self, request, context):
-        """Missing associated documentation comment in .proto file."""
+        """
+        Execute a new AutoML run. 
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
@@ -46,7 +52,9 @@ def add_AdapterServiceServicer_to_server(servicer, server):
 
  # This class is part of an EXPERIMENTAL API.
 class AdapterService(object):
-    """Missing associated documentation comment in .proto file."""
+    """
+    AutoML Adapter Service implementation. Service provide functionality to execute and interact with the current AutoML process.
+    """
 
     @staticmethod
     def StartAutoML(request,
