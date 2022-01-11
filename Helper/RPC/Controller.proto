@@ -189,6 +189,7 @@ message StartAutoMLprocessRequest {
   AutoMLRuntimeConstraints runtimeConstraints = 5;
   map<string, string> fileConfiguration = 6;
   TestConfiguration testConfig = 7;
+  string metric = 8;
 }
 
 message TestConfiguration {
