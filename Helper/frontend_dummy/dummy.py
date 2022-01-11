@@ -174,7 +174,8 @@ def start_automl(argv: list, stub: Controller_pb2_grpc.ControllerServiceStub):
                                                        tabularConfig=tabular_config,
                                                        requiredAutoMLs=automls,
                                                        runtimeConstraints=runtime_constraints,
-                                                       fileConfiguration={"sep": ','})
+                                                       fileConfiguration={"sep": ','},
+                                                       metric="")
     response = stub.StartAutoMLprocess(
         request)  # return (StartAutoMLprocessResponse {ControllerReturnCode result = 1;string sessionId = 2;})
     print(f"{response}")
@@ -226,7 +227,7 @@ def run():
     with open('root.crt', 'rb') as f:
         creds = grpc.ssl_channel_credentials(f.read())
     channel = grpc.secure_channel('localhost:5001', creds)
-    # channel = grpc.insecure_channel('localhost:50051')
+    # channel = grpc.insecure_channel('host.docker.internal:50051')
     stub = Controller_pb2_grpc.ControllerServiceStub(channel)
     if len(sys.argv) >= 2:  # we need at least one argument, but the first one will be the script name
         process_command(sys.argv[1], sys.argv[2:], stub)

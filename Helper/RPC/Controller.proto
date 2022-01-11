@@ -157,6 +157,7 @@ message StartAutoMLprocessRequest {
   repeated string requiredAutoMLs = 4;
   AutoMLRuntimeConstraints runtimeConstraints = 5;
   map<string, string> fileConfiguration = 6;
+  string metric = 7;
 }
 
 message AutoMLRuntimeConstraints {
