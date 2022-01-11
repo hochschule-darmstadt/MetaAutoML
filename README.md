@@ -1,6 +1,7 @@
 # MetaAutoML-Adapter-AutoPytorch
 
 ## ENVIRONTMENT VARIABLES
+PYTHON_ENV=python;GRPC_SERVICE_PORT=50057
 ### PYTHONPATH
 - must be set to all directories that include .py files
 - is also set in the docker container, but there we prefix all paths with a "/", because inside the container the files are located in the root directory
