@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+from typing import Tuple, List
 
 import Controller_pb2
 
@@ -42,14 +43,16 @@ class CsvManager:
         return response
 
     @staticmethod
-    def __get_datatype(numpy_datatype: np.dtype, column: pd.Series) -> Controller_pb2.DataType:
+    def __get_datatype(numpy_datatype: np.dtype, column: pd.Series) -> Tuple[Controller_pb2.DataType,
+                                                                             List[Controller_pb2.DataType]]:
         """
         Identify the np datatype and mark correct OMAML datatype
         ---
         Parameter
         1. data type of the current column
+        2. current column
         ---
-        Return Controller_pb2.DATATYPE of the passed value
+        Return Controller_pb2.DATATYPE of the passed value + List of convertible datatypes
         """
         if numpy_datatype == np.dtype(np.object):
             if column.nunique() < column.size/10:
@@ -104,11 +107,3 @@ class CsvManager:
         for col in dataset.columns:
             response.columnNames.append(col)
         return response
-
-    @staticmethod
-    def __get_convertible_types(numpy_datatype: np.dtype, column: pd.Series) -> list:
-        """
-        figures out all types that a column can be converted to.
-        We keep a simple placeholder algorithm here.
-        However, later this might be enhanced to querying the ontology
-        """
