@@ -43,8 +43,7 @@ class CsvManager:
         return response
 
     @staticmethod
-    def __get_datatype(numpy_datatype: np.dtype, column: pd.Series) -> Tuple[Controller_pb2.DataType,
-                                                                             List[Controller_pb2.DataType]]:
+    def __get_datatype(numpy_datatype: np.dtype, column: pd.Series):
         """
         Identify the np datatype and mark correct OMAML datatype
         ---
