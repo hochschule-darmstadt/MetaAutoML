@@ -18,7 +18,7 @@ class AutoMLManager(ABC, Thread):
     Base implementation of the  AutoML functionality
     """
 
-    def __init__(self, configuration, folder_location, automl_service_host, automl_service_port):
+    def __init__(self, configuration, folder_location, automl_service_host, automl_service_port, session_id):
         """
         Init a new instance of the abstract class AutoMLManager
         ---
@@ -29,6 +29,7 @@ class AutoMLManager(ABC, Thread):
         super(AutoMLManager, self).__init__()
         self._configuration = configuration
         self.__file_dest = folder_location
+        self.__session_id = session_id
         self.__result_json = ""
         self.__is_completed = False
         self.__status_messages = []
@@ -40,7 +41,7 @@ class AutoMLManager(ABC, Thread):
         self.__AUTOML_SERVICE_HOST = automl_service_host
         self.__AUTOML_SERVICE_PORT = automl_service_port
 
-    def GetAutoMlModel(self) -> Controller_pb2.GetSessionStatusResponse:
+    def get_automl_model(self) -> Controller_pb2.GetSessionStatusResponse:
         """
         Get the generated AutoML model
         ---
@@ -85,9 +86,9 @@ class AutoMLManager(ABC, Thread):
         print(f"connecting to {self.name}: {automl_ip}:{automl_port}")
 
         with grpc.insecure_channel(f"{automl_ip}:{automl_port}") as channel:  # Connect to Adapter
-            stub = Adapter_pb2_grpc.AdapterServiceStub(channel)  ## Create Interface Stub
+            stub = Adapter_pb2_grpc.AdapterServiceStub(channel)  # Create Interface Stub
 
-            request = Adapter_pb2.StartAutoMLRequest()  ## Request Object
+            request = Adapter_pb2.StartAutoMLRequest()  # Request Object
             process_json = self._generate_process_json()
             request.processJson = json.dumps(process_json)
 
@@ -95,8 +96,17 @@ class AutoMLManager(ABC, Thread):
 
     def _generate_process_json(self):
         process_json = {"file_name": self._configuration.dataset}
+        process_json.update({"session_id": self.__session_id})
         process_json.update({"file_location": self.__file_dest})
         process_json.update({"task": self._configuration.task})
+        process_json.update({"task": self._configuration.task})
+        # TODO: remove when frontend implementation is done
+        if self._configuration.testConfig.split_ratio == 0:
+            self._configuration.testConfig.split_ratio = 0.8
+            self._configuration.testConfig.random_state = 42
+        process_json.update({"test_configuration": {"split_ratio": self._configuration.testConfig.split_ratio,
+                                                    "method": self._configuration.testConfig.method,
+                                                    "random_state": self._configuration.testConfig.random_state}})
         process_json.update(
             {"tabular_configuration": {"target": {"target": self._configuration.tabularConfig.target.target,
                                                   "type": self._configuration.tabularConfig.target.type},

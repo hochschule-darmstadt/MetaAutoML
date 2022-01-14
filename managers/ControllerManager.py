@@ -21,7 +21,7 @@ class ControllerManager(object):
         return
 
     def GetAutoMlModel(self, request) -> Controller_pb2.GetAutoMlModelResponse:
-        return self.__sessions[request.sessionId].GetAutoMlModel(request)
+        return self.__sessions[request.sessionId].get_automl_model(request)
 
     def GetCompatibleAUtoMlSolutions(self, request) -> Controller_pb2.GetCompatibleAutoMlSolutionsResponse:
         return self.__rdfManager.GetCompatibleAutoMlSolutions(request)
@@ -45,11 +45,11 @@ class ControllerManager(object):
     def GetSessions(self, request) -> Controller_pb2.GetSessionsResponse:
         response = Controller_pb2.GetSessionsResponse()
         for i in self.__sessions:
-            response.sessionIds.append(self.__sessions[i].GetId())
+            response.sessionIds.append(self.__sessions[i].get_id())
         return response
 
     def GetSessionStatus(self, request) -> Controller_pb2.GetSessionStatusResponse:
-        return self.__sessions[request.id].GetSessionStatus()
+        return self.__sessions[request.id].get_session_status()
 
     def GetTabularDatasetColumnNames(self, request) -> Controller_pb2.GetTabularDatasetColumnNamesResponse:
         columnNames = CsvManager.read_column_names(os.path.join(self.__datasetFolder, request.datasetName))
@@ -78,5 +78,5 @@ class ControllerManager(object):
         self.__sessions[str(self.__sessionCounter)] = newSession
         self.__sessionCounter += 1
         response.result = 1
-        response.sessionId = newSession.GetId()
+        response.sessionId = newSession.get_id()
         return response

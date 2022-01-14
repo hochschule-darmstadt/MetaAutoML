@@ -1,6 +1,10 @@
-from IAutoMLManager import IAutoMLManager
+import os
+from pathlib import Path
+import pandas as pd
+
 import Controller_pb2
-import Controller_pb2_grpc
+from JsonUtil import get_config_property
+from IAutoMLManager import IAutoMLManager
 
 
 class AutoMLSession(object):
@@ -8,7 +12,7 @@ class AutoMLSession(object):
     Implementation of an AutoML session object
     """
 
-    def __init__(self, id: int, configuration):
+    def __init__(self, session_id: int, configuration):
         """
         Init a new instance of AutoMLSession
         ---
@@ -16,11 +20,11 @@ class AutoMLSession(object):
         1. id: session id as an int
         2. configuration: session configuration
         """
-        self.__id = id
+        self.__id = session_id
         self.__configuration = configuration
         self.__automls = []
 
-    def AddAutoMLToSession(self, automl: IAutoMLManager):
+    def add_automl_to_session(self, automl: IAutoMLManager):
         """
         Add an AutoML to the current session
         ---
@@ -30,7 +34,7 @@ class AutoMLSession(object):
         self.__automls.append(automl)
         return
 
-    def GetId(self) -> str:
+    def get_id(self) -> str:
         """
         Get the session id
         ---
@@ -38,7 +42,7 @@ class AutoMLSession(object):
         """
         return str(self.__id)
 
-    def GetAutoMlModel(self, request) -> Controller_pb2.GetAutoMlModelResponse:
+    def get_automl_model(self, request) -> Controller_pb2.GetAutoMlModelResponse:
         """
         Get the AutoML model of requested AutoML
         ---
@@ -49,9 +53,9 @@ class AutoMLSession(object):
         """
         for automl in self.__automls:
             if automl.name == request.autoMl:
-                return automl.GetAutoMlModel()
+                return automl.get_automl_model()
 
-    def GetSessionStatus(self) -> Controller_pb2.GetSessionStatusResponse:
+    def get_session_status(self) -> Controller_pb2.GetSessionStatusResponse:
         """
         Get the session status
         ---
@@ -75,6 +79,6 @@ class AutoMLSession(object):
 
         for automl in self.__automls:
             response.automls.append(automl.get_status())
-            if automl.is_running() == True:
+            if automl.is_running():
                 response.status = Controller_pb2.SESSION_STATUS_BUSY
         return response

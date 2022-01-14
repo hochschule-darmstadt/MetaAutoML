@@ -33,22 +33,22 @@ class StructuredDataManager(object):
         required_automls = []
         for automl_name in required_automl_names:
             if automl_name == AutoKerasManager.name:
-                required_automls.append(AutoKerasManager(configuration, folder_location))
+                required_automls.append(AutoKerasManager(configuration, folder_location, session_id))
             elif automl_name == FLAMLManager.name:
-                required_automls.append(FLAMLManager(configuration, folder_location))
+                required_automls.append(FLAMLManager(configuration, folder_location, session_id))
             elif automl_name == SklearnManager.name:
-                required_automls.append(SklearnManager(configuration, folder_location))
+                required_automls.append(SklearnManager(configuration, folder_location, session_id))
             elif automl_name == AutoGluonManager.name:
-                required_automls.append(AutoGluonManager(configuration, folder_location))
+                required_automls.append(AutoGluonManager(configuration, folder_location, session_id))
             elif automl_name == AutoCVEManager.name:
-                required_automls.append(AutoCVEManager(configuration, folder_location))
+                required_automls.append(AutoCVEManager(configuration, folder_location, session_id))
             elif automl_name == AutoPyTorchManager.name:
-                required_automls.append(AutoPyTorchManager(configuration, folder_location))
+                required_automls.append(AutoPyTorchManager(configuration, folder_location, session_id))
             elif automl_name == MljarManager.name:
-                required_automls.append(MljarManager(configuration, folder_location))
+                required_automls.append(MljarManager(configuration, folder_location, session_id))
 
         new_session = AutoMLSession(session_id, configuration)
         for automl in required_automls:
             automl.start()
-            new_session.AddAutoMLToSession(automl)
+            new_session.add_automl_to_session(automl)
         return new_session
