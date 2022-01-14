@@ -6,13 +6,18 @@ import shutil
 import subprocess
 import json
 import time
-from Utils.JsonUtil import get_config_property
+from concurrent import futures
+
+import grpc
+import pandas as pd
+from sklearn.metrics import mean_squared_error, accuracy_score
 
 import Adapter_pb2
 import Adapter_pb2_grpc
 
-from concurrent import futures
 from TemplateGenerator import TemplateGenerator
+from Utils.JsonUtil import get_config_property
+from StructuredDataAutoML import SplitMethod
 
 
 def get_except_response(context, e):
@@ -51,30 +56,37 @@ def capture_process_output(process, start_time):
         s = process.stdout.read(1)
 
 
-def get_response(output_json, start_time):
+def get_response(output_json, start_time, test_score):
     response = Adapter_pb2.StartAutoMLResponse()
     response.returnCode = Adapter_pb2.ADAPTER_RETURN_CODE_SUCCESS
     response.outputJson = json.dumps(output_json)
     response.runtime = int(time.time() - start_time)
-    # TODO: will be filled with Issue #35
-    response.testScore = 0.0
+    response.testScore = test_score
     response.validationScore = 0.0
     yield response
 
 
-def zip_script():
+def zip_script(session_id):
     zip_file_name = get_config_property("export-zip-file-name")
     output_path = get_config_property("output-path")
+    session_path = os.path.join(output_path, str(session_id))
 
     print(f"saving model zip file for {get_config_property('adapter-name')}")
 
-    shutil.make_archive(zip_file_name,
-                        'zip',
-                        output_path)
-    shutil.move(f'{zip_file_name}.zip', output_path)
+    if os.path.exists(os.path.join(session_path, zip_file_name + '.zip')):
+        os.remove(os.path.join(session_path, zip_file_name + '.zip'))
 
-    return {"file_name": f'{zip_file_name}.zip',
-            "file_location": output_path}
+    shutil.make_archive(os.path.join(session_path, zip_file_name),
+                        'zip',
+                        os.path.join(output_path, 'tmp'))
+    for f in os.listdir(output_path):
+        if f not in ('.gitkeep', 'tmp', *(str(i) for i in range(1, session_id + 1))):
+            file_path = os.path.join(output_path, f)
+            if os.path.isdir(file_path):
+                shutil.rmtree(file_path)
+            else:
+                os.remove(file_path)
+    return {"file_name": f'{zip_file_name}.zip', "file_location": session_path}
 
 
 def start_automl_process():
@@ -86,6 +98,34 @@ def start_automl_process():
     return subprocess.Popen([python_env, "AutoML.py", ""],
                             stdout=subprocess.PIPE,
                             universal_newlines=True)
+
+
+def evaluate(config_json, config_path):
+    file_path = os.path.join(config_json["file_location"], config_json["file_name"])
+    working_dir = os.path.join(get_config_property("output-path"), "working_dir")
+    shutil.unpack_archive(os.path.join(get_config_property("output-path"),
+                                       str(config_json["session_id"]),
+                                       get_config_property("export-zip-file-name") + ".zip"),
+                          working_dir,
+                          "zip")
+    # predict
+    os.chmod(os.path.join(working_dir, "predict.py"), 0o777)
+    python_env = os.getenv("PYTHON_ENV", default="PYTHON_ENV_UNSET")
+    subprocess.call([python_env, os.path.join(working_dir, "predict.py"), file_path, config_path])
+
+    test = pd.read_csv(file_path)
+    if SplitMethod.SPLIT_METHOD_RANDOM == config_json["test_configuration"]["method"]:
+        test = test.sample(random_state=config_json["test_configuration"]["random_state"], frac=1)
+    test = test.iloc[int(test.shape[0] * config_json["test_configuration"]["split_ratio"]):]
+
+    predictions = pd.read_csv(os.path.join(working_dir, "predictions.csv"))
+    shutil.rmtree(working_dir)
+
+    target = config_json["tabular_configuration"]["target"]["target"]
+    if config_json["task"] == 1:
+        return accuracy_score(test[target], predictions["predicted"])
+    elif config_json["task"] == 2:
+        return mean_squared_error(test[target], predictions["predicted"], squared=False)
 
 
 class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
@@ -110,9 +150,11 @@ class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
             process = start_automl_process()
             yield from capture_process_output(process, start_time)
             generate_script(config_json)
-            output_json = zip_script()
+            output_json = zip_script(config_json["session_id"])
 
-            response = yield from get_response(output_json, start_time)
+            test_score = evaluate(config_json, job_file_location)
+
+            response = yield from get_response(output_json, start_time, test_score)
             print(f'{get_config_property("adapter-name")} job finished')
             return response
 

@@ -1,16 +1,65 @@
+import sys
 import pickle
+import json
+from enum import Enum, unique
+
 import pandas as pd
 import numpy as np
-import sys
-
 from flaml import AutoML
+
+
+@unique
+class SplitMethod(Enum):
+    SPLIT_METHOD_RANDOM = 0
+    SPLIT_METHOD_END = 1
+
+@unique
+class DataType(Enum):
+    DATATYPE_UNKNOW = 0
+    DATATYPE_STRING = 1
+    DATATYPE_INT = 2
+    DATATYPE_FLOAT = 3
+    DATATYPE_CATEGORY = 4
+    DATATYPE_BOOLEAN = 5
+    DATATYPE_DATETIME = 6
+    DATATYPE_IGNORE = 7
+
+def dataset_preparation(X, features, target):
+    X = X.drop(target, axis=1)
+    for column, dt in features:
+        if DataType(dt) is DataType.DATATYPE_IGNORE:
+            X = X.drop(column, axis=1)
+        elif DataType(dt) is DataType.DATATYPE_CATEGORY:
+            X[column] = X[column].astype('category')
+        elif DataType(dt) is DataType.DATATYPE_BOOLEAN:
+            X[column] = X[column].astype('bool')
+        elif DataType(dt) is DataType.DATATYPE_INT:
+            X[column] = X[column].astype('int')
+        elif DataType(dt) is DataType.DATATYPE_FLOAT:
+            X[column] = X[column].astype('float')
+    return X
+
 
 if __name__ == '__main__':
     filepath = sys.argv[1]
-    X = pd.read_csv(filepath, quotechar='"', skipinitialspace=True)
-    with open('flaml-model.p', 'rb') as file:
+    configpath = sys.argv[2]
+
+    with open(configpath) as file:
+        config_json = json.load(file)
+
+    X = pd.read_csv(filepath)
+
+    # split training set
+    if SplitMethod.SPLIT_METHOD_RANDOM == config_json["test_configuration"]["method"]:
+        X = X.sample(random_state=config_json["test_configuration"]["random_state"], frac=1)
+    X = X.iloc[int(X.shape[0] * config_json["test_configuration"]["split_ratio"]):]
+    X = dataset_preparation(X,
+                            config_json["tabular_configuration"]["features"].items(),
+                            config_json["tabular_configuration"]["target"]["target"])
+
+    with open(sys.path[0] + '/model_flaml.p', 'rb') as file:
         automl2 = pickle.load(file)
 
     predicted_y = automl2.predict(X)
-    predicted_y = np.reshape(predicted_y, (-1,1))
-    print(predicted_y)
+    predicted_y = np.reshape(predicted_y, (-1, 1))
+    pd.DataFrame(data=predicted_y, columns=["predicted"]).to_csv(sys.path[0] +"/predictions.csv")

@@ -18,6 +18,11 @@ class DataType(Enum):
     DATATYPE_DATETIME = 6
     DATATYPE_IGNORE = 7
 
+@unique
+class SplitMethod(Enum):
+    SPLIT_METHOD_RANDOM = 0
+    SPLIT_METHOD_END = 1
+
 
 class StructuredDataAutoML(object):
     """
@@ -39,6 +44,12 @@ class StructuredDataAutoML(object):
         """
         df = pd.read_csv(os.path.join(self.__configuration["file_location"], self.__configuration["file_name"]),
                          **self.__configuration["file_configuration"])
+
+        # split training set
+        if SplitMethod.SPLIT_METHOD_RANDOM == self.__configuration["test_configuration"]["method"]:
+            df = df.sample(random_state=self.__configuration["test_configuration"]["random_state"], frac=1)
+        df = df.iloc[:int(df.shape[0] * self.__configuration["test_configuration"]["split_ratio"])]
+
         target = self.__configuration["tabular_configuration"]["target"]["target"]
         self.__X = df.drop(target, axis=1)
         self.__y = df[target]
@@ -75,7 +86,7 @@ class StructuredDataAutoML(object):
         Parameter:
         1. generate ML model
         """
-        with open(os.path.join(get_config_property('output-path'), 'model_flaml.p'), 'wb') as file:
+        with open(os.path.join(get_config_property('output-path'), 'tmp', 'model_flaml.p'), 'wb') as file:
             pickle.dump(model, file)
 
     def execute_task(self):
