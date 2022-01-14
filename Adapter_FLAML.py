@@ -130,7 +130,8 @@ def evaluate(config_json, config_path):
     test = pd.read_csv(file_path)
     if SplitMethod.SPLIT_METHOD_RANDOM == config_json["test_configuration"]["method"]:
         test = test.sample(random_state=config_json["test_configuration"]["random_state"], frac=1)
-    test = test.iloc[int(test.shape[0] * config_json["test_configuration"]["split_ratio"]):]
+    else:
+        test = test.iloc[int(test.shape[0] * config_json["test_configuration"]["split_ratio"]):]
 
     predictions = pd.read_csv(os.path.join(working_dir, "predictions.csv"))
     shutil.rmtree(working_dir)
