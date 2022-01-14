@@ -30,7 +30,7 @@ class AutoMLManager(ABC, Thread):
         self._configuration = configuration
         self.__file_dest = folder_location
         self.__session_id = session_id
-        self.__result_json = ""
+        self.__result_json = {}
         self.__is_completed = False
         self.__status_messages = []
         self.__testScore = 0.0
