@@ -30,7 +30,8 @@ class StructuredDataAutoML(object):
         # split training set
         if SplitMethod.SPLIT_METHOD_RANDOM == self.__configuration["test_configuration"]["method"]:
             df = df.sample(random_state=self.__configuration["test_configuration"]["random_state"], frac=1)
-        df = df.iloc[:int(df.shape[0] * self.__configuration["test_configuration"]["split_ratio"])]
+        else:
+            df = df.iloc[:int(df.shape[0] * self.__configuration["test_configuration"]["split_ratio"])]
 
         target = self.__configuration["tabular_configuration"]["target"]["target"]
         self.__X = df.drop(target, axis=1)
