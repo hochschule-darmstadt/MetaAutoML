@@ -21,7 +21,9 @@ if __name__ == '__main__':
     # split training set
     if SplitMethod.SPLIT_METHOD_RANDOM == config_json["test_configuration"]["method"]:
         X = X.sample(random_state=config_json["test_configuration"]["random_state"], frac=1)
-    X = X.iloc[int(X.shape[0] * config_json["test_configuration"]["split_ratio"]):]
+    else:
+        X = X.iloc[int(X.shape[0] * config_json["test_configuration"]["split_ratio"]):]
+
     X = feature_preparation(X, features)
 
     with open(sys.path[0] + '/model_flaml.p', 'rb') as file:
