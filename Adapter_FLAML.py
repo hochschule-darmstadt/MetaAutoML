@@ -17,7 +17,7 @@ import Adapter_pb2_grpc
 
 from TemplateGenerator import TemplateGenerator
 from Utils.JsonUtil import get_config_property
-from StructuredDataAutoML import SplitMethod
+from predict_time_sources import SplitMethod
 
 
 def get_except_response(context, e):
@@ -67,18 +67,24 @@ def get_response(output_json, start_time, test_score):
 
 
 def zip_script(session_id):
+    print(f"saving model zip file for {get_config_property('adapter-name')}")
+
     zip_file_name = get_config_property("export-zip-file-name")
     output_path = get_config_property("output-path")
     session_path = os.path.join(output_path, str(session_id))
+    temp_path = os.path.join(output_path, 'tmp')
 
-    print(f"saving model zip file for {get_config_property('adapter-name')}")
-
+    # remove files from earlier runs
     if os.path.exists(os.path.join(session_path, zip_file_name + '.zip')):
         os.remove(os.path.join(session_path, zip_file_name + '.zip'))
 
+    # copy all files required for prediction into temp folder, so they will also be zipped
+    shutil.copy(get_config_property("predict-time-sources-path"),
+                temp_path)
+
     shutil.make_archive(os.path.join(session_path, zip_file_name),
                         'zip',
-                        os.path.join(output_path, 'tmp'))
+                        temp_path)
     for f in os.listdir(output_path):
         if f not in ('.gitkeep', 'tmp', *(str(i) for i in range(1, session_id + 1))):
             file_path = os.path.join(output_path, f)
@@ -86,7 +92,15 @@ def zip_script(session_id):
                 shutil.rmtree(file_path)
             else:
                 os.remove(file_path)
-    return {"file_name": f'{zip_file_name}.zip', "file_location": session_path}
+
+    file_loc_on_controller = os.path.join(output_path,
+                                          get_config_property('adapter-name'),
+                                          str(session_id))
+
+    return {
+        'file_name': f'{zip_file_name}.zip',
+        'file_location': file_loc_on_controller
+    }
 
 
 def start_automl_process():

@@ -3,26 +3,8 @@ import pandas as pd
 import pickle
 from flaml import AutoML
 
-from enum import Enum, unique
-
 from JsonUtil import get_config_property
-
-@unique
-class DataType(Enum):
-    DATATYPE_UNKNOW = 0
-    DATATYPE_STRING = 1
-    DATATYPE_INT = 2
-    DATATYPE_FLOAT = 3
-    DATATYPE_CATEGORY = 4
-    DATATYPE_BOOLEAN = 5
-    DATATYPE_DATETIME = 6
-    DATATYPE_IGNORE = 7
-
-@unique
-class SplitMethod(Enum):
-    SPLIT_METHOD_RANDOM = 0
-    SPLIT_METHOD_END = 1
-
+from predict_time_sources import feature_preparation, DataType, SplitMethod
 
 class StructuredDataAutoML(object):
     """
@@ -55,17 +37,7 @@ class StructuredDataAutoML(object):
         self.__y = df[target]
 
     def __dataset_preparation(self):
-        for column, dt in self.__configuration["tabular_configuration"]["features"].items():
-            if DataType(dt) is DataType.DATATYPE_IGNORE:
-                self.__X = self.__X.drop(column, axis=1)
-            elif DataType(dt) is DataType.DATATYPE_CATEGORY:
-                self.__X[column] = self.__X[column].astype('category')
-            elif DataType(dt) is DataType.DATATYPE_BOOLEAN:
-                self.__X[column] = self.__X[column].astype('bool')
-            elif DataType(dt) is DataType.DATATYPE_INT:
-                self.__X[column] = self.__X[column].astype('int')
-            elif DataType(dt) is DataType.DATATYPE_FLOAT:
-                self.__X[column] = self.__X[column].astype('float')
+        feature_preparation(self.__X, self.__configuration["tabular_configuration"]["features"].items())
         self.__cast_target()
 
     def __cast_target(self):
