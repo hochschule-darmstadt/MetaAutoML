@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from typing import List
+from typing import Tuple, List
 
 import Controller_pb2
 
@@ -29,10 +29,11 @@ class CsvManager:
             table_column = Controller_pb2.TableColumn()
             table_column.name = col
             numpy_datatype = dataset[col].dtype.name
-            table_column.type = CsvManager.__get_datatype(numpy_datatype)
+            datatype, convertible_types = CsvManager.__get_datatype(numpy_datatype, dataset[col])
 
-            for type in CsvManager.__get_convertible_types(numpy_datatype):
-                table_column.convertibleTypes.append(type)
+            table_column.type = datatype
+            for convertible_type in convertible_types:
+                table_column.convertibleTypes.append(convertible_type)
 
             for item in dataset[col].head(FIRST_ROW_AMOUNT).tolist():
                 table_column.firstEntries.append(str(item))
@@ -42,29 +43,53 @@ class CsvManager:
         return response
 
     @staticmethod
-    def __get_datatype(numpy_datatype) -> Controller_pb2.DataType:
+    def __get_datatype(numpy_datatype: np.dtype, column: pd.Series):
         """
         Identify the np datatype and mark correct OMAML datatype
         ---
         Parameter
         1. data type of the current column
+        2. current column
         ---
-        Return Controller_pb2.DATATYPE of the passed value
+        Return Controller_pb2.DATATYPE of the passed value + List of convertible datatypes
         """
         if numpy_datatype == np.dtype(np.object):
-            return Controller_pb2.DATATYPE_UNKNOW
+            if column.nunique() < column.size/10:
+                if column.nunique() <= 2:
+                    return Controller_pb2.DATATYPE_BOOLEAN, [Controller_pb2.DATATYPE_IGNORE,
+                                                             Controller_pb2.DATATYPE_CATEGORY]
+                return Controller_pb2.DATATYPE_CATEGORY, [Controller_pb2.DATATYPE_IGNORE]
+            return Controller_pb2.DATATYPE_IGNORE, [Controller_pb2.DATATYPE_CATEGORY]
         elif numpy_datatype == np.dtype(np.unicode_):
             return Controller_pb2.DATATYPE_STRING
         elif numpy_datatype == np.dtype(np.int64):
-            return Controller_pb2.DATATYPE_INT
+            if "id" in str.lower(str(column.name)) and column.nunique() == column.size:
+                return Controller_pb2.DATATYPE_IGNORE, []
+            elif column.nunique() <= 2:
+                return Controller_pb2.DATATYPE_BOOLEAN, [Controller_pb2.DATATYPE_IGNORE,
+                                                         Controller_pb2.DATATYPE_CATEGORY,
+                                                         Controller_pb2.DATATYPE_INT]
+            if column.nunique() < 10:
+                return Controller_pb2.DATATYPE_CATEGORY, [Controller_pb2.DATATYPE_IGNORE,
+                                                          Controller_pb2.DATATYPE_INT]
+            return Controller_pb2.DATATYPE_INT, [Controller_pb2.DATATYPE_IGNORE,
+                                                 Controller_pb2.DATATYPE_CATEGORY]
         elif numpy_datatype == np.dtype(np.float_):
-            return Controller_pb2.DATATYPE_FLOAT
+            return Controller_pb2.DATATYPE_FLOAT, [Controller_pb2.DATATYPE_IGNORE,
+                                                   Controller_pb2.DATATYPE_CATEGORY,
+                                                   Controller_pb2.DATATYPE_INT]
         elif numpy_datatype == np.dtype(np.bool_):
-            return Controller_pb2.DATATYPE_BOOLEAN
+            return Controller_pb2.DATATYPE_BOOLEAN, [Controller_pb2.DATATYPE_IGNORE,
+                                                     Controller_pb2.DATATYPE_CATEGORY,
+                                                     Controller_pb2.DATATYPE_INT,
+                                                     Controller_pb2.DATATYPE_FLOAT]
         elif numpy_datatype == np.dtype(np.datetime64):
-            return Controller_pb2.DATATYPE_DATETIME
+            return Controller_pb2.DATATYPE_DATETIME, [Controller_pb2.DATATYPE_IGNORE,
+                                                      Controller_pb2.DATATYPE_CATEGORY]
         else:
-            return Controller_pb2.DATATYPE_UNKNOW
+            return Controller_pb2.DATATYPE_UNKNOW, [Controller_pb2.DATATYPE_IGNORE,
+                                                    Controller_pb2.DATATYPE_CATEGORY,
+                                                    Controller_pb2.DATATYPE_BOOLEAN]
 
     @staticmethod
     def read_column_names(path) -> Controller_pb2.GetTabularDatasetColumnNamesResponse:
@@ -81,19 +106,3 @@ class CsvManager:
         for col in dataset.columns:
             response.columnNames.append(col)
         return response
-
-    @staticmethod
-    def __get_convertible_types(pandas_datatype: np.dtype) -> list:
-        """
-        figures out all types that a column can be converted to.
-        We keep a simple placeholder algorithm here.
-        However, later this might be enhanced to querying the ontology, using a more sophisticated algorithm or using some imported 3rd party module.
-        """
-        basic_conversions = [Controller_pb2.DATATYPE_UNKNOW, Controller_pb2.DATATYPE_IGNORE, Controller_pb2.DATATYPE_STRING]
-
-        if pandas_datatype == np.dtype(np.int64):
-            return basic_conversions + [Controller_pb2.DATATYPE_FLOAT]
-        if pandas_datatype == np.dtype(np.bool_):
-            return basic_conversions + [Controller_pb2.DATATYPE_CATEGORY, Controller_pb2.DATATYPE_INT, Controller_pb2.DATATYPE_FLOAT]
-        else:
-            return basic_conversions
