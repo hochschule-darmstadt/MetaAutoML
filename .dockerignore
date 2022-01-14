@@ -11,8 +11,6 @@ __pycache__
 *-deployment.yaml
 *-service.yaml
 
-.gitkeep
-
 # datasets are mapped into the volume by controller, not by automl adapter, so ignore files if they are present
 app-data/datasets/*
 
