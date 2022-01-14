@@ -2,22 +2,9 @@ import os
 import pandas as pd
 import autosklearn.classification
 import autosklearn.regression
-from sklearn.preprocessing import OrdinalEncoder
 import pickle
 from Utils.JsonUtil import get_config_property
-from enum import Enum, unique
-
-
-@unique
-class DataType(Enum):
-    DATATYPE_UNKNOW = 0
-    DATATYPE_STRING = 1
-    DATATYPE_INT = 2
-    DATATYPE_FLOAT = 3
-    DATATYPE_CATEGORY = 4
-    DATATYPE_BOOLEAN = 5
-    DATATYPE_DATETIME = 6
-    DATATYPE_IGNORE = 7
+from predict_time_sources import feature_preparation, DataType, SplitMethod
 
 
 class StructuredDataAutoML(object):
@@ -40,18 +27,24 @@ class StructuredDataAutoML(object):
         """
         Read the training dataset from disk
         """
-        df = pd.read_csv(os.path.join(self.__configuration["file_location"], self.__configuration["file_name"]),
+        train = pd.read_csv(os.path.join(self.__configuration["file_location"], self.__configuration["file_name"]),
                          **self.__configuration["file_configuration"])
 
         # convert all object columns to categories, because autosklearn only supports numerical,
         # bool and categorical features
-        df[df.select_dtypes(['object']).columns] = df.select_dtypes(['object']) \
+        train[train.select_dtypes(['object']).columns] = train.select_dtypes(['object']) \
             .apply(lambda x: x.astype('category'))
+
+        # split training set, only use the training portion
+        if SplitMethod.SPLIT_METHOD_RANDOM == self.__configuration["test_configuration"]["method"]:
+            train = train.sample(random_state=self.__configuration["test_configuration"]["random_state"], frac=1)
+        else:
+            train = train.iloc[:int(train.shape[0] * self.__configuration["test_configuration"]["split_ratio"])]
 
         target = self.__configuration["tabular_configuration"]["target"]["target"]
 
-        self.__X = df.drop(target, axis=1)
-        self.__y = df[target]
+        self.__X = train.drop(target, axis=1)
+        self.__y = train[target]
 
         return
 
@@ -62,7 +55,7 @@ class StructuredDataAutoML(object):
         Parameter:
         1. generate ML model
         """
-        output_file = os.path.join(get_config_property('output-path'), "model_sklearn.p")
+        output_file = os.path.join(get_config_property('output-path'), 'tmp', "model_sklearn.p")
         with open(output_file, "wb") as file:
             pickle.dump(model, file)
 
@@ -76,17 +69,7 @@ class StructuredDataAutoML(object):
             self.__regression()
 
     def __dataset_preparation(self):
-        for column, dt in self.__configuration["tabular_configuration"]["features"].items():
-            if DataType(dt) is DataType.DATATYPE_IGNORE:
-                self.__X = self.__X.drop(column, axis=1)
-            elif DataType(dt) is DataType.DATATYPE_CATEGORY:
-                self.__X[column] = self.__X[column].astype('category')
-            elif DataType(dt) is DataType.DATATYPE_BOOLEAN:
-                self.__X[column] = self.__X[column].astype('bool')
-            elif DataType(dt) is DataType.DATATYPE_INT:
-                self.__X[column] = self.__X[column].astype('int')
-            elif DataType(dt) is DataType.DATATYPE_FLOAT:
-                self.__X[column] = self.__X[column].astype('float')
+        feature_preparation(self.__X, self.__configuration["tabular_configuration"]["features"].items())
         self.__cast_target()
 
     def __cast_target(self):
