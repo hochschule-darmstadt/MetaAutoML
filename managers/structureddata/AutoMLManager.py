@@ -99,7 +99,6 @@ class AutoMLManager(ABC, Thread):
         process_json.update({"session_id": self.__session_id})
         process_json.update({"file_location": self.__file_dest})
         process_json.update({"task": self._configuration.task})
-        process_json.update({"task": self._configuration.task})
         # TODO: remove when frontend implementation is done
         if self._configuration.testConfig.split_ratio == 0:
             self._configuration.testConfig.split_ratio = 0.8
