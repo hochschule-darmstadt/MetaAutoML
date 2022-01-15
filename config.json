@@ -6,5 +6,6 @@
   "export-zip-file-name": "gluon-export",
   "output-path": "app-data/output",
   "job-file-path": "app-data/jobs",
-  "templates-path": "app-data/templates"
+  "templates-path": "app-data/templates",
+  "predict-time-sources-path": "AutoMLs/predict_time_sources.py"
 }
