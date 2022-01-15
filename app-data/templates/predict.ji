@@ -29,9 +29,9 @@ if __name__ == '__main__':
     X = feature_preparation(X, features)
 
     # load model and make predictions
-
+    print("starting to load model")
     automl = TabularPredictor.load(os.path.join(sys.path[0], 'model_gluon.gluon'))
 
-    predicted_y = automl.predict(X)
+    predicted_y = automl.predict(X, as_pandas=False)
     predicted_y = np.reshape(predicted_y, (-1, 1))
     pd.DataFrame(data=predicted_y, columns=["predicted"]).to_csv(sys.path[0] + "/predictions.csv")
