@@ -170,6 +170,7 @@ def start_automl(argv: list, stub: Controller_pb2_grpc.ControllerServiceStub):
 
     runtime_constraints = Controller_pb2.AutoMLRuntimeConstraints(
         runtime_limit=30, max_iter=0)
+    
     # automls = ['flaml', 'autosklearn', 'autogluon', 'autokeras']
     automls = [] # no automls specified will make Controller start all automls
     request = Controller_pb2.StartAutoMLprocessRequest(dataset=dataset_name,
