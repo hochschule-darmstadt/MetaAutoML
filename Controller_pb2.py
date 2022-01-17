@@ -12,6 +12,7 @@ from google.protobuf import symbol_database as _symbol_database
 _sym_db = _symbol_database.Default()
 
 
+from google.protobuf import timestamp_pb2 as google_dot_protobuf_dot_timestamp__pb2
 
 
 DESCRIPTOR = _descriptor.FileDescriptor(
@@ -20,8 +21,9 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=b'\252\002\030BlazorBoilerplate.Server',
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x10\x43ontroller.proto\":\n\x15GetAutoMlModelRequest\x12\x11\n\tsessionId\x18\x01 \x01(\t\x12\x0e\n\x06\x61utoMl\x18\x02 \x01(\t\"4\n\x16GetAutoMlModelResponse\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0c\n\x04\x66ile\x18\x02 \x01(\x0c\"\xab\x01\n#GetCompatibleAutoMlSolutionsRequest\x12N\n\rconfiguration\x18\x01 \x03(\x0b\x32\x37.GetCompatibleAutoMlSolutionsRequest.ConfigurationEntry\x1a\x34\n\x12\x43onfigurationEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"?\n$GetCompatibleAutoMlSolutionsResponse\x12\x17\n\x0f\x41utoMlSolutions\x18\x01 \x03(\t\"7\n GetDatasetCompatibleTasksRequest\x12\x13\n\x0b\x64\x61tasetName\x18\x01 \x01(\t\"2\n!GetDatasetCompatibleTasksResponse\x12\r\n\x05tasks\x18\x01 \x03(\t\"0\n\x12GetDatasetsRequest\x12\x1a\n\x04type\x18\x01 \x01(\x0e\x32\x0c.DatasetType\"0\n\x13GetDatasetsResponse\x12\x19\n\x07\x64\x61taset\x18\x01 \x03(\x0b\x32\x08.Dataset\")\n\x07\x44\x61taset\x12\x10\n\x08\x66ileName\x18\x01 \x01(\t\x12\x0c\n\x04type\x18\x02 \x01(\t\"!\n\x11GetDatasetRequest\x12\x0c\n\x04name\x18\x01 \x01(\t\"3\n\x12GetDatasetResponse\x12\x1d\n\x07\x63olumns\x18\x01 \x03(\x0b\x32\x0c.TableColumn\"o\n\x0bTableColumn\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x17\n\x04type\x18\x02 \x01(\x0e\x32\t.DataType\x12#\n\x10\x63onvertibleTypes\x18\x03 \x03(\x0e\x32\t.DataType\x12\x14\n\x0c\x66irstEntries\x18\x04 \x03(\t\":\n#GetTabularDatasetColumnNamesRequest\x12\x13\n\x0b\x64\x61tasetName\x18\x01 \x01(\t\";\n$GetTabularDatasetColumnNamesResponse\x12\x13\n\x0b\x63olumnNames\x18\x01 \x03(\t\"\"\n\x12GetSessionsRequest\x12\x0c\n\x04user\x18\x01 \x01(\t\")\n\x13GetSessionsResponse\x12\x12\n\nsessionIds\x18\x01 \x03(\t\"%\n\x17GetSessionStatusRequest\x12\n\n\x02id\x18\x01 \x01(\t\"\xb4\x02\n\x18GetSessionStatusResponse\x12\x1e\n\x06status\x18\x01 \x01(\x0e\x32\x0e.SessionStatus\x12\x1e\n\x07\x61utomls\x18\x02 \x03(\x0b\x32\r.AutoMLStatus\x12\x0f\n\x07\x64\x61taset\x18\x03 \x01(\t\x12\"\n\x04task\x18\x04 \x01(\x0e\x32\x14.MachineLearningTask\x12\x36\n\rtabularConfig\x18\x05 \x01(\x0b\x32\x1f.AutoMLConfigurationTabularData\x12\x1b\n\x13requiredMlLibraries\x18\x06 \x03(\t\x12\x17\n\x0frequiredAutoMLs\x18\x07 \x03(\t\x12\x35\n\x12runtimeConstraints\x18\x08 \x01(\x0b\x32\x19.AutoMLRuntimeConstraints\".\n\x1eGetSupportedMlLibrariesRequest\x12\x0c\n\x04task\x18\x01 \x01(\t\"6\n\x1fGetSupportedMlLibrariesResponse\x12\x13\n\x0bMlLibraries\x18\x01 \x03(\t\"\x8b\x01\n\x0c\x41utoMLStatus\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x1e\n\x06status\x18\x02 \x01(\x0e\x32\x0e.SessionStatus\x12\x10\n\x08messages\x18\x03 \x03(\t\x12\x11\n\ttestScore\x18\x04 \x01(\x02\x12\x17\n\x0fvalidationScore\x18\x05 \x01(\x02\x12\x0f\n\x07runtime\x18\x06 \x01(\x05\"9\n\x18UploadDatasetFileRequest\x12\x0f\n\x07\x63ontent\x18\x01 \x01(\x0c\x12\x0c\n\x04name\x18\x02 \x01(\t\"/\n\x19UploadDatasetFileResponse\x12\x12\n\nreturnCode\x18\x01 \x01(\x05\"\x88\x03\n\x19StartAutoMLprocessRequest\x12\x0f\n\x07\x64\x61taset\x18\x01 \x01(\t\x12\"\n\x04task\x18\x02 \x01(\x0e\x32\x14.MachineLearningTask\x12\x36\n\rtabularConfig\x18\x03 \x01(\x0b\x32\x1f.AutoMLConfigurationTabularData\x12\x17\n\x0frequiredAutoMLs\x18\x04 \x03(\t\x12\x35\n\x12runtimeConstraints\x18\x05 \x01(\x0b\x32\x19.AutoMLRuntimeConstraints\x12L\n\x11\x66ileConfiguration\x18\x06 \x03(\x0b\x32\x31.StartAutoMLprocessRequest.FileConfigurationEntry\x12&\n\ntestConfig\x18\x07 \x01(\x0b\x32\x12.TestConfiguration\x1a\x38\n\x16\x46ileConfigurationEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"\\\n\x11TestConfiguration\x12\x13\n\x0bsplit_ratio\x18\x01 \x01(\x02\x12\x1c\n\x06method\x18\x02 \x01(\x0e\x32\x0c.SplitMethod\x12\x14\n\x0crandom_state\x18\x03 \x01(\x05\"C\n\x18\x41utoMLRuntimeConstraints\x12\x15\n\rruntime_limit\x18\x01 \x01(\x05\x12\x10\n\x08max_iter\x18\x02 \x01(\x05\"\xbc\x01\n\x1e\x41utoMLConfigurationTabularData\x12\x1d\n\x06target\x18\x01 \x01(\x0b\x32\r.AutoMLTarget\x12?\n\x08\x66\x65\x61tures\x18\x02 \x03(\x0b\x32-.AutoMLConfigurationTabularData.FeaturesEntry\x1a:\n\rFeaturesEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\x18\n\x05value\x18\x02 \x01(\x0e\x32\t.DataType:\x02\x38\x01\"7\n\x0c\x41utoMLTarget\x12\x0e\n\x06target\x18\x01 \x01(\t\x12\x17\n\x04type\x18\x02 \x01(\x0e\x32\t.DataType\"V\n\x1aStartAutoMLprocessResponse\x12%\n\x06result\x18\x01 \x01(\x0e\x32\x15.ControllerReturnCode\x12\x11\n\tsessionId\x18\x02 \x01(\t*\xb3\x01\n\x08\x44\x61taType\x12\x13\n\x0f\x44\x41TATYPE_UNKNOW\x10\x00\x12\x13\n\x0f\x44\x41TATYPE_STRING\x10\x01\x12\x10\n\x0c\x44\x41TATYPE_INT\x10\x02\x12\x12\n\x0e\x44\x41TATYPE_FLOAT\x10\x03\x12\x15\n\x11\x44\x41TATYPE_CATEGORY\x10\x04\x12\x14\n\x10\x44\x41TATYPE_BOOLEAN\x10\x05\x12\x15\n\x11\x44\x41TATYPE_DATETIME\x10\x06\x12\x13\n\x0f\x44\x41TATYPE_IGNORE\x10\x07*F\n\x0b\x44\x61tasetType\x12\x18\n\x14\x44\x41TASET_TYPE_UNKNOWN\x10\x00\x12\x1d\n\x19\x44\x41TASET_TYPE_TABULAR_DATA\x10\x01*\xaa\x01\n\x14\x43ontrollerReturnCode\x12\"\n\x1e\x43ONTROLLER_RETURN_CODE_UNKNOWN\x10\x00\x12\"\n\x1e\x43ONTROLLER_RETURN_CODE_SUCCESS\x10\x01\x12(\n$CONTROLLER_RETURN_CODE_STATUS_UPDATE\x10\x02\x12 \n\x1c\x43ONTROLLER_RETURN_CODE_ERROR\x10\x64*\x98\x01\n\x13MachineLearningTask\x12!\n\x1dMACHINE_LEARNING_TASK_UNKNOWN\x10\x00\x12\x30\n,MACHINE_LEARNING_TASK_TABULAR_CLASSIFICATION\x10\x01\x12,\n(MACHINE_LEARNING_TASK_TABULAR_REGRESSION\x10\x02*}\n\rSessionStatus\x12\x1a\n\x16SESSION_STATUS_UNKNOWN\x10\x00\x12\x17\n\x13SESSION_STATUS_BUSY\x10\x01\x12\x1c\n\x18SESSION_STATUS_COMPLETED\x10\x02\x12\x19\n\x15SESSION_STATUS_FAILED\x10\x03*<\n\x0bSplitMethod\x12\x17\n\x13SPLIT_METHOD_RANDOM\x10\x00\x12\x14\n\x10SPLIT_METHOD_END\x10\x01\x32\x97\x07\n\x11\x43ontrollerService\x12\x43\n\x0eGetAutoMlModel\x12\x16.GetAutoMlModelRequest\x1a\x17.GetAutoMlModelResponse\"\x00\x12m\n\x1cGetCompatibleAutoMlSolutions\x12$.GetCompatibleAutoMlSolutionsRequest\x1a%.GetCompatibleAutoMlSolutionsResponse\"\x00\x12:\n\x0bGetDatasets\x12\x13.GetDatasetsRequest\x1a\x14.GetDatasetsResponse\"\x00\x12\x37\n\nGetDataset\x12\x12.GetDatasetRequest\x1a\x13.GetDatasetResponse\"\x00\x12:\n\x0bGetSessions\x12\x13.GetSessionsRequest\x1a\x14.GetSessionsResponse\"\x00\x12I\n\x10GetSessionStatus\x12\x18.GetSessionStatusRequest\x1a\x19.GetSessionStatusResponse\"\x00\x12^\n\x17GetSupportedMlLibraries\x12\x1f.GetSupportedMlLibrariesRequest\x1a .GetSupportedMlLibrariesResponse\"\x00\x12m\n\x1cGetTabularDatasetColumnNames\x12$.GetTabularDatasetColumnNamesRequest\x1a%.GetTabularDatasetColumnNamesResponse\"\x00\x12\x64\n\x19GetDatasetCompatibleTasks\x12!.GetDatasetCompatibleTasksRequest\x1a\".GetDatasetCompatibleTasksResponse\"\x00\x12L\n\x11UploadDatasetFile\x12\x19.UploadDatasetFileRequest\x1a\x1a.UploadDatasetFileResponse\"\x00\x12O\n\x12StartAutoMLprocess\x12\x1a.StartAutoMLprocessRequest\x1a\x1b.StartAutoMLprocessResponse\"\x00\x42\x1b\xaa\x02\x18\x42lazorBoilerplate.Serverb\x06proto3'
-)
+  serialized_pb=b'\n\x10\x43ontroller.proto\x1a\x1fgoogle/protobuf/timestamp.proto\":\n\x15GetAutoMlModelRequest\x12\x11\n\tsessionId\x18\x01 \x01(\t\x12\x0e\n\x06\x61utoMl\x18\x02 \x01(\t\"4\n\x16GetAutoMlModelResponse\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0c\n\x04\x66ile\x18\x02 \x01(\x0c\"\xab\x01\n#GetCompatibleAutoMlSolutionsRequest\x12N\n\rconfiguration\x18\x01 \x03(\x0b\x32\x37.GetCompatibleAutoMlSolutionsRequest.ConfigurationEntry\x1a\x34\n\x12\x43onfigurationEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"?\n$GetCompatibleAutoMlSolutionsResponse\x12\x17\n\x0f\x41utoMlSolutions\x18\x01 \x03(\t\"7\n GetDatasetCompatibleTasksRequest\x12\x13\n\x0b\x64\x61tasetName\x18\x01 \x01(\t\"2\n!GetDatasetCompatibleTasksResponse\x12\r\n\x05tasks\x18\x01 \x03(\t\"0\n\x12GetDatasetsRequest\x12\x1a\n\x04type\x18\x01 \x01(\x0e\x32\x0c.DatasetType\"0\n\x13GetDatasetsResponse\x12\x19\n\x07\x64\x61taset\x18\x01 \x03(\x0b\x32\x08.Dataset\"{\n\x07\x44\x61taset\x12\x10\n\x08\x66ileName\x18\x01 \x01(\t\x12\x0c\n\x04type\x18\x02 \x01(\t\x12\x0f\n\x07\x63olumns\x18\x03 \x01(\x05\x12\x0c\n\x04rows\x18\x04 \x01(\x05\x12\x31\n\rcreation_date\x18\x05 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\"!\n\x11GetDatasetRequest\x12\x0c\n\x04name\x18\x01 \x01(\t\"3\n\x12GetDatasetResponse\x12\x1d\n\x07\x63olumns\x18\x01 \x03(\x0b\x32\x0c.TableColumn\"o\n\x0bTableColumn\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x17\n\x04type\x18\x02 \x01(\x0e\x32\t.DataType\x12#\n\x10\x63onvertibleTypes\x18\x03 \x03(\x0e\x32\t.DataType\x12\x14\n\x0c\x66irstEntries\x18\x04 \x03(\t\":\n#GetTabularDatasetColumnNamesRequest\x12\x13\n\x0b\x64\x61tasetName\x18\x01 \x01(\t\";\n$GetTabularDatasetColumnNamesResponse\x12\x13\n\x0b\x63olumnNames\x18\x01 \x03(\t\"\"\n\x12GetSessionsRequest\x12\x0c\n\x04user\x18\x01 \x01(\t\")\n\x13GetSessionsResponse\x12\x12\n\nsessionIds\x18\x01 \x03(\t\"%\n\x17GetSessionStatusRequest\x12\n\n\x02id\x18\x01 \x01(\t\"\xb4\x02\n\x18GetSessionStatusResponse\x12\x1e\n\x06status\x18\x01 \x01(\x0e\x32\x0e.SessionStatus\x12\x1e\n\x07\x61utomls\x18\x02 \x03(\x0b\x32\r.AutoMLStatus\x12\x0f\n\x07\x64\x61taset\x18\x03 \x01(\t\x12\"\n\x04task\x18\x04 \x01(\x0e\x32\x14.MachineLearningTask\x12\x36\n\rtabularConfig\x18\x05 \x01(\x0b\x32\x1f.AutoMLConfigurationTabularData\x12\x1b\n\x13requiredMlLibraries\x18\x06 \x03(\t\x12\x17\n\x0frequiredAutoMLs\x18\x07 \x03(\t\x12\x35\n\x12runtimeConstraints\x18\x08 \x01(\x0b\x32\x19.AutoMLRuntimeConstraints\".\n\x1eGetSupportedMlLibrariesRequest\x12\x0c\n\x04task\x18\x01 \x01(\t\"6\n\x1fGetSupportedMlLibrariesResponse\x12\x13\n\x0bMlLibraries\x18\x01 \x03(\t\"\x8b\x01\n\x0c\x41utoMLStatus\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x1e\n\x06status\x18\x02 \x01(\x0e\x32\x0e.SessionStatus\x12\x10\n\x08messages\x18\x03 \x03(\t\x12\x11\n\ttestScore\x18\x04 \x01(\x02\x12\x17\n\x0fvalidationScore\x18\x05 \x01(\x02\x12\x0f\n\x07runtime\x18\x06 \x01(\x05\"9\n\x18UploadDatasetFileRequest\x12\x0f\n\x07\x63ontent\x18\x01 \x01(\x0c\x12\x0c\n\x04name\x18\x02 \x01(\t\"/\n\x19UploadDatasetFileResponse\x12\x12\n\nreturnCode\x18\x01 \x01(\x05\"\x88\x03\n\x19StartAutoMLprocessRequest\x12\x0f\n\x07\x64\x61taset\x18\x01 \x01(\t\x12\"\n\x04task\x18\x02 \x01(\x0e\x32\x14.MachineLearningTask\x12\x36\n\rtabularConfig\x18\x03 \x01(\x0b\x32\x1f.AutoMLConfigurationTabularData\x12\x17\n\x0frequiredAutoMLs\x18\x04 \x03(\t\x12\x35\n\x12runtimeConstraints\x18\x05 \x01(\x0b\x32\x19.AutoMLRuntimeConstraints\x12L\n\x11\x66ileConfiguration\x18\x06 \x03(\x0b\x32\x31.StartAutoMLprocessRequest.FileConfigurationEntry\x12&\n\ntestConfig\x18\x07 \x01(\x0b\x32\x12.TestConfiguration\x1a\x38\n\x16\x46ileConfigurationEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"\\\n\x11TestConfiguration\x12\x13\n\x0bsplit_ratio\x18\x01 \x01(\x02\x12\x1c\n\x06method\x18\x02 \x01(\x0e\x32\x0c.SplitMethod\x12\x14\n\x0crandom_state\x18\x03 \x01(\x05\"C\n\x18\x41utoMLRuntimeConstraints\x12\x15\n\rruntime_limit\x18\x01 \x01(\x05\x12\x10\n\x08max_iter\x18\x02 \x01(\x05\"\xbc\x01\n\x1e\x41utoMLConfigurationTabularData\x12\x1d\n\x06target\x18\x01 \x01(\x0b\x32\r.AutoMLTarget\x12?\n\x08\x66\x65\x61tures\x18\x02 \x03(\x0b\x32-.AutoMLConfigurationTabularData.FeaturesEntry\x1a:\n\rFeaturesEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\x18\n\x05value\x18\x02 \x01(\x0e\x32\t.DataType:\x02\x38\x01\"7\n\x0c\x41utoMLTarget\x12\x0e\n\x06target\x18\x01 \x01(\t\x12\x17\n\x04type\x18\x02 \x01(\x0e\x32\t.DataType\"V\n\x1aStartAutoMLprocessResponse\x12%\n\x06result\x18\x01 \x01(\x0e\x32\x15.ControllerReturnCode\x12\x11\n\tsessionId\x18\x02 \x01(\t*\xb3\x01\n\x08\x44\x61taType\x12\x13\n\x0f\x44\x41TATYPE_UNKNOW\x10\x00\x12\x13\n\x0f\x44\x41TATYPE_STRING\x10\x01\x12\x10\n\x0c\x44\x41TATYPE_INT\x10\x02\x12\x12\n\x0e\x44\x41TATYPE_FLOAT\x10\x03\x12\x15\n\x11\x44\x41TATYPE_CATEGORY\x10\x04\x12\x14\n\x10\x44\x41TATYPE_BOOLEAN\x10\x05\x12\x15\n\x11\x44\x41TATYPE_DATETIME\x10\x06\x12\x13\n\x0f\x44\x41TATYPE_IGNORE\x10\x07*F\n\x0b\x44\x61tasetType\x12\x18\n\x14\x44\x41TASET_TYPE_UNKNOWN\x10\x00\x12\x1d\n\x19\x44\x41TASET_TYPE_TABULAR_DATA\x10\x01*\xaa\x01\n\x14\x43ontrollerReturnCode\x12\"\n\x1e\x43ONTROLLER_RETURN_CODE_UNKNOWN\x10\x00\x12\"\n\x1e\x43ONTROLLER_RETURN_CODE_SUCCESS\x10\x01\x12(\n$CONTROLLER_RETURN_CODE_STATUS_UPDATE\x10\x02\x12 \n\x1c\x43ONTROLLER_RETURN_CODE_ERROR\x10\x64*\x98\x01\n\x13MachineLearningTask\x12!\n\x1dMACHINE_LEARNING_TASK_UNKNOWN\x10\x00\x12\x30\n,MACHINE_LEARNING_TASK_TABULAR_CLASSIFICATION\x10\x01\x12,\n(MACHINE_LEARNING_TASK_TABULAR_REGRESSION\x10\x02*}\n\rSessionStatus\x12\x1a\n\x16SESSION_STATUS_UNKNOWN\x10\x00\x12\x17\n\x13SESSION_STATUS_BUSY\x10\x01\x12\x1c\n\x18SESSION_STATUS_COMPLETED\x10\x02\x12\x19\n\x15SESSION_STATUS_FAILED\x10\x03*<\n\x0bSplitMethod\x12\x17\n\x13SPLIT_METHOD_RANDOM\x10\x00\x12\x14\n\x10SPLIT_METHOD_END\x10\x01\x32\x97\x07\n\x11\x43ontrollerService\x12\x43\n\x0eGetAutoMlModel\x12\x16.GetAutoMlModelRequest\x1a\x17.GetAutoMlModelResponse\"\x00\x12m\n\x1cGetCompatibleAutoMlSolutions\x12$.GetCompatibleAutoMlSolutionsRequest\x1a%.GetCompatibleAutoMlSolutionsResponse\"\x00\x12:\n\x0bGetDatasets\x12\x13.GetDatasetsRequest\x1a\x14.GetDatasetsResponse\"\x00\x12\x37\n\nGetDataset\x12\x12.GetDatasetRequest\x1a\x13.GetDatasetResponse\"\x00\x12:\n\x0bGetSessions\x12\x13.GetSessionsRequest\x1a\x14.GetSessionsResponse\"\x00\x12I\n\x10GetSessionStatus\x12\x18.GetSessionStatusRequest\x1a\x19.GetSessionStatusResponse\"\x00\x12^\n\x17GetSupportedMlLibraries\x12\x1f.GetSupportedMlLibrariesRequest\x1a .GetSupportedMlLibrariesResponse\"\x00\x12m\n\x1cGetTabularDatasetColumnNames\x12$.GetTabularDatasetColumnNamesRequest\x1a%.GetTabularDatasetColumnNamesResponse\"\x00\x12\x64\n\x19GetDatasetCompatibleTasks\x12!.GetDatasetCompatibleTasksRequest\x1a\".GetDatasetCompatibleTasksResponse\"\x00\x12L\n\x11UploadDatasetFile\x12\x19.UploadDatasetFileRequest\x1a\x1a.UploadDatasetFileResponse\"\x00\x12O\n\x12StartAutoMLprocess\x12\x1a.StartAutoMLprocessRequest\x1a\x1b.StartAutoMLprocessResponse\"\x00\x42\x1b\xaa\x02\x18\x42lazorBoilerplate.Serverb\x06proto3'
+  ,
+  dependencies=[google_dot_protobuf_dot_timestamp__pb2.DESCRIPTOR,])
 
 _DATATYPE = _descriptor.EnumDescriptor(
   name='DataType',
@@ -73,8 +75,8 @@ _DATATYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=2625,
-  serialized_end=2804,
+  serialized_start=2740,
+  serialized_end=2919,
 )
 _sym_db.RegisterEnumDescriptor(_DATATYPE)
 
@@ -99,8 +101,8 @@ _DATASETTYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=2806,
-  serialized_end=2876,
+  serialized_start=2921,
+  serialized_end=2991,
 )
 _sym_db.RegisterEnumDescriptor(_DATASETTYPE)
 
@@ -135,8 +137,8 @@ _CONTROLLERRETURNCODE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=2879,
-  serialized_end=3049,
+  serialized_start=2994,
+  serialized_end=3164,
 )
 _sym_db.RegisterEnumDescriptor(_CONTROLLERRETURNCODE)
 
@@ -166,8 +168,8 @@ _MACHINELEARNINGTASK = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=3052,
-  serialized_end=3204,
+  serialized_start=3167,
+  serialized_end=3319,
 )
 _sym_db.RegisterEnumDescriptor(_MACHINELEARNINGTASK)
 
@@ -202,8 +204,8 @@ _SESSIONSTATUS = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=3206,
-  serialized_end=3331,
+  serialized_start=3321,
+  serialized_end=3446,
 )
 _sym_db.RegisterEnumDescriptor(_SESSIONSTATUS)
 
@@ -228,8 +230,8 @@ _SPLITMETHOD = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=3333,
-  serialized_end=3393,
+  serialized_start=3448,
+  serialized_end=3508,
 )
 _sym_db.RegisterEnumDescriptor(_SPLITMETHOD)
 
@@ -294,8 +296,8 @@ _GETAUTOMLMODELREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=20,
-  serialized_end=78,
+  serialized_start=53,
+  serialized_end=111,
 )
 
 
@@ -333,8 +335,8 @@ _GETAUTOMLMODELRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=80,
-  serialized_end=132,
+  serialized_start=113,
+  serialized_end=165,
 )
 
 
@@ -372,8 +374,8 @@ _GETCOMPATIBLEAUTOMLSOLUTIONSREQUEST_CONFIGURATIONENTRY = _descriptor.Descriptor
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=254,
-  serialized_end=306,
+  serialized_start=287,
+  serialized_end=339,
 )
 
 _GETCOMPATIBLEAUTOMLSOLUTIONSREQUEST = _descriptor.Descriptor(
@@ -403,8 +405,8 @@ _GETCOMPATIBLEAUTOMLSOLUTIONSREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=135,
-  serialized_end=306,
+  serialized_start=168,
+  serialized_end=339,
 )
 
 
@@ -435,8 +437,8 @@ _GETCOMPATIBLEAUTOMLSOLUTIONSRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=308,
-  serialized_end=371,
+  serialized_start=341,
+  serialized_end=404,
 )
 
 
@@ -467,8 +469,8 @@ _GETDATASETCOMPATIBLETASKSREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=373,
-  serialized_end=428,
+  serialized_start=406,
+  serialized_end=461,
 )
 
 
@@ -499,8 +501,8 @@ _GETDATASETCOMPATIBLETASKSRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=430,
-  serialized_end=480,
+  serialized_start=463,
+  serialized_end=513,
 )
 
 
@@ -531,8 +533,8 @@ _GETDATASETSREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=482,
-  serialized_end=530,
+  serialized_start=515,
+  serialized_end=563,
 )
 
 
@@ -563,8 +565,8 @@ _GETDATASETSRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=532,
-  serialized_end=580,
+  serialized_start=565,
+  serialized_end=613,
 )
 
 
@@ -590,6 +592,27 @@ _DATASET = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='columns', full_name='Dataset.columns', index=2,
+      number=3, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='rows', full_name='Dataset.rows', index=3,
+      number=4, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='creation_date', full_name='Dataset.creation_date', index=4,
+      number=5, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -602,8 +625,8 @@ _DATASET = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=582,
-  serialized_end=623,
+  serialized_start=615,
+  serialized_end=738,
 )
 
 
@@ -634,8 +657,8 @@ _GETDATASETREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=625,
-  serialized_end=658,
+  serialized_start=740,
+  serialized_end=773,
 )
 
 
@@ -666,8 +689,8 @@ _GETDATASETRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=660,
-  serialized_end=711,
+  serialized_start=775,
+  serialized_end=826,
 )
 
 
@@ -719,8 +742,8 @@ _TABLECOLUMN = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=713,
-  serialized_end=824,
+  serialized_start=828,
+  serialized_end=939,
 )
 
 
@@ -751,8 +774,8 @@ _GETTABULARDATASETCOLUMNNAMESREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=826,
-  serialized_end=884,
+  serialized_start=941,
+  serialized_end=999,
 )
 
 
@@ -783,8 +806,8 @@ _GETTABULARDATASETCOLUMNNAMESRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=886,
-  serialized_end=945,
+  serialized_start=1001,
+  serialized_end=1060,
 )
 
 
@@ -815,8 +838,8 @@ _GETSESSIONSREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=947,
-  serialized_end=981,
+  serialized_start=1062,
+  serialized_end=1096,
 )
 
 
@@ -847,8 +870,8 @@ _GETSESSIONSRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=983,
-  serialized_end=1024,
+  serialized_start=1098,
+  serialized_end=1139,
 )
 
 
@@ -879,8 +902,8 @@ _GETSESSIONSTATUSREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1026,
-  serialized_end=1063,
+  serialized_start=1141,
+  serialized_end=1178,
 )
 
 
@@ -960,8 +983,8 @@ _GETSESSIONSTATUSRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1066,
-  serialized_end=1374,
+  serialized_start=1181,
+  serialized_end=1489,
 )
 
 
@@ -992,8 +1015,8 @@ _GETSUPPORTEDMLLIBRARIESREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1376,
-  serialized_end=1422,
+  serialized_start=1491,
+  serialized_end=1537,
 )
 
 
@@ -1024,8 +1047,8 @@ _GETSUPPORTEDMLLIBRARIESRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1424,
-  serialized_end=1478,
+  serialized_start=1539,
+  serialized_end=1593,
 )
 
 
@@ -1091,8 +1114,8 @@ _AUTOMLSTATUS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1481,
-  serialized_end=1620,
+  serialized_start=1596,
+  serialized_end=1735,
 )
 
 
@@ -1130,8 +1153,8 @@ _UPLOADDATASETFILEREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1622,
-  serialized_end=1679,
+  serialized_start=1737,
+  serialized_end=1794,
 )
 
 
@@ -1162,8 +1185,8 @@ _UPLOADDATASETFILERESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1681,
-  serialized_end=1728,
+  serialized_start=1796,
+  serialized_end=1843,
 )
 
 
@@ -1201,8 +1224,8 @@ _STARTAUTOMLPROCESSREQUEST_FILECONFIGURATIONENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2067,
-  serialized_end=2123,
+  serialized_start=2182,
+  serialized_end=2238,
 )
 
 _STARTAUTOMLPROCESSREQUEST = _descriptor.Descriptor(
@@ -1274,8 +1297,8 @@ _STARTAUTOMLPROCESSREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1731,
-  serialized_end=2123,
+  serialized_start=1846,
+  serialized_end=2238,
 )
 
 
@@ -1320,8 +1343,8 @@ _TESTCONFIGURATION = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2125,
-  serialized_end=2217,
+  serialized_start=2240,
+  serialized_end=2332,
 )
 
 
@@ -1359,8 +1382,8 @@ _AUTOMLRUNTIMECONSTRAINTS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2219,
-  serialized_end=2286,
+  serialized_start=2334,
+  serialized_end=2401,
 )
 
 
@@ -1398,8 +1421,8 @@ _AUTOMLCONFIGURATIONTABULARDATA_FEATURESENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2419,
-  serialized_end=2477,
+  serialized_start=2534,
+  serialized_end=2592,
 )
 
 _AUTOMLCONFIGURATIONTABULARDATA = _descriptor.Descriptor(
@@ -1436,8 +1459,8 @@ _AUTOMLCONFIGURATIONTABULARDATA = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2289,
-  serialized_end=2477,
+  serialized_start=2404,
+  serialized_end=2592,
 )
 
 
@@ -1475,8 +1498,8 @@ _AUTOMLTARGET = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2479,
-  serialized_end=2534,
+  serialized_start=2594,
+  serialized_end=2649,
 )
 
 
@@ -1514,14 +1537,15 @@ _STARTAUTOMLPROCESSRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2536,
-  serialized_end=2622,
+  serialized_start=2651,
+  serialized_end=2737,
 )
 
 _GETCOMPATIBLEAUTOMLSOLUTIONSREQUEST_CONFIGURATIONENTRY.containing_type = _GETCOMPATIBLEAUTOMLSOLUTIONSREQUEST
 _GETCOMPATIBLEAUTOMLSOLUTIONSREQUEST.fields_by_name['configuration'].message_type = _GETCOMPATIBLEAUTOMLSOLUTIONSREQUEST_CONFIGURATIONENTRY
 _GETDATASETSREQUEST.fields_by_name['type'].enum_type = _DATASETTYPE
 _GETDATASETSRESPONSE.fields_by_name['dataset'].message_type = _DATASET
+_DATASET.fields_by_name['creation_date'].message_type = google_dot_protobuf_dot_timestamp__pb2._TIMESTAMP
 _GETDATASETRESPONSE.fields_by_name['columns'].message_type = _TABLECOLUMN
 _TABLECOLUMN.fields_by_name['type'].enum_type = _DATATYPE
 _TABLECOLUMN.fields_by_name['convertibleTypes'].enum_type = _DATATYPE
@@ -1821,8 +1845,8 @@ _CONTROLLERSERVICE = _descriptor.ServiceDescriptor(
   index=0,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=3396,
-  serialized_end=4315,
+  serialized_start=3511,
+  serialized_end=4430,
   methods=[
   _descriptor.MethodDescriptor(
     name='GetAutoMlModel',
