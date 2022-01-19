@@ -1,21 +1,38 @@
 import sys
+import json
+import dill
 
 import numpy as np
 import pandas as pd
 
 import tensorflow as tf
 import autokeras as ak
-from tensorflow.keras.models import load_model
+
+from predict_time_sources import feature_preparation, DataType, SplitMethod
+
+
 
 if __name__ == '__main__':
     filepath = sys.argv[1]
-    x_to_predict = pd.read_csv(filepath, quotechar='"', skipinitialspace=True)
-    x_to_predict_numpy = x_to_predict.to_numpy()
-    loaded_model = load_model("model_autokeras", custom_objects=ak.CUSTOM_OBJECTS)
+    configpath = sys.argv[2]
 
-    predicted_y = loaded_model.predict(tf.expand_dims(x_to_predict_numpy.astype(np.unicode), -1))
-    {% if task == 1 %}
-    predicted_y[predicted_y < 0.5] = 0
-    predicted_y[predicted_y > 0.5] = 1
-    {% endif %}
-    print(predicted_y)
+    with open(configpath) as file:
+        config_json = json.load(file)
+
+    target = config_json["tabular_configuration"]["target"]["target"]
+    features = config_json["tabular_configuration"]["features"].items()
+    X = pd.read_csv(filepath).drop(target, axis=1)
+
+    # split training set
+    if SplitMethod.SPLIT_METHOD_RANDOM == config_json["test_configuration"]["method"]:
+        X = X.sample(random_state=config_json["test_configuration"]["random_state"], frac=1)
+    else:
+        X = X.iloc[int(X.shape[0] * config_json["test_configuration"]["split_ratio"]):]
+
+    X = feature_preparation(X, features)
+
+    with open(sys.path[0] + '/model_keras.p', 'rb') as file:
+        loaded_model = dill.load(file)
+    predicted_y = loaded_model.predict(X)
+
+    pd.DataFrame(data=predicted_y, columns=["predicted"]).to_csv(sys.path[0] +"/predictions.csv")
