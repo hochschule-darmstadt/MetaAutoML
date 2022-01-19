@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\rAdapter.proto\")\n\x12StartAutoMLRequest\x12\x13\n\x0bprocessJson\x18\x01 \x01(\t\"\xa4\x01\n\x13StartAutoMLResponse\x12&\n\nreturnCode\x18\x01 \x01(\x0e\x32\x12.AdapterReturnCode\x12\x14\n\x0cstatusUpdate\x18\x02 \x01(\t\x12\x12\n\noutputJson\x18\x03 \x01(\t\x12\x11\n\ttestScore\x18\x04 \x01(\x02\x12\x17\n\x0fvalidationScore\x18\x05 \x01(\x02\x12\x0f\n\x07runtime\x18\x06 \x01(\x05*\x9b\x01\n\x11\x41\x64\x61pterReturnCode\x12\x1f\n\x1b\x41\x44\x41PTER_RETURN_CODE_UNKNOWN\x10\x00\x12\x1f\n\x1b\x41\x44\x41PTER_RETURN_CODE_SUCCESS\x10\x01\x12%\n!ADAPTER_RETURN_CODE_STATUS_UPDATE\x10\x02\x12\x1d\n\x19\x41\x44\x41PTER_RETURN_CODE_ERROR\x10\x64\x32N\n\x0e\x41\x64\x61pterService\x12<\n\x0bStartAutoML\x12\x13.StartAutoMLRequest\x1a\x14.StartAutoMLResponse\"\x00\x30\x01\x62\x06proto3'
+  serialized_pb=b'\n\rAdapter.proto\")\n\x12StartAutoMLRequest\x12\x13\n\x0bprocessJson\x18\x01 \x01(\t\"\xdc\x01\n\x13StartAutoMLResponse\x12&\n\nreturnCode\x18\x01 \x01(\x0e\x32\x12.AdapterReturnCode\x12\x14\n\x0cstatusUpdate\x18\x02 \x01(\t\x12\x12\n\noutputJson\x18\x03 \x01(\t\x12\x11\n\ttestScore\x18\x04 \x01(\x02\x12\x17\n\x0fvalidationScore\x18\x05 \x01(\x02\x12\x0f\n\x07runtime\x18\x06 \x01(\x05\x12\x16\n\x0epredictiontime\x18\x07 \x01(\x02\x12\x0f\n\x07library\x18\x08 \x01(\t\x12\r\n\x05model\x18\t \x01(\t*\x9b\x01\n\x11\x41\x64\x61pterReturnCode\x12\x1f\n\x1b\x41\x44\x41PTER_RETURN_CODE_UNKNOWN\x10\x00\x12\x1f\n\x1b\x41\x44\x41PTER_RETURN_CODE_SUCCESS\x10\x01\x12%\n!ADAPTER_RETURN_CODE_STATUS_UPDATE\x10\x02\x12\x1d\n\x19\x41\x44\x41PTER_RETURN_CODE_ERROR\x10\x64\x32N\n\x0e\x41\x64\x61pterService\x12<\n\x0bStartAutoML\x12\x13.StartAutoMLRequest\x1a\x14.StartAutoMLResponse\"\x00\x30\x01\x62\x06proto3'
 )
 
 _ADAPTERRETURNCODE = _descriptor.EnumDescriptor(
@@ -53,8 +53,8 @@ _ADAPTERRETURNCODE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=228,
-  serialized_end=383,
+  serialized_start=284,
+  serialized_end=439,
 )
 _sym_db.RegisterEnumDescriptor(_ADAPTERRETURNCODE)
 
@@ -148,6 +148,27 @@ _STARTAUTOMLRESPONSE = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='predictiontime', full_name='StartAutoMLResponse.predictiontime', index=6,
+      number=7, type=2, cpp_type=6, label=1,
+      has_default_value=False, default_value=float(0),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='library', full_name='StartAutoMLResponse.library', index=7,
+      number=8, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='model', full_name='StartAutoMLResponse.model', index=8,
+      number=9, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -161,7 +182,7 @@ _STARTAUTOMLRESPONSE = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=61,
-  serialized_end=225,
+  serialized_end=281,
 )
 
 _STARTAUTOMLRESPONSE.fields_by_name['returnCode'].enum_type = _ADAPTERRETURNCODE
@@ -193,8 +214,8 @@ _ADAPTERSERVICE = _descriptor.ServiceDescriptor(
   index=0,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=385,
-  serialized_end=463,
+  serialized_start=441,
+  serialized_end=519,
   methods=[
   _descriptor.MethodDescriptor(
     name='StartAutoML',

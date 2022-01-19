@@ -153,6 +153,9 @@ message AutoMLStatus {
   float testScore = 4;
   float validationScore = 5;
   int32 runtime = 6;
+  float predictiontime = 7;
+  string library = 8;
+  string model = 9;
 }
 
 message UploadDatasetFileRequest {
