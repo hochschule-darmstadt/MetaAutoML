@@ -1,24 +1,9 @@
 import pickle
 import os
-import numpy as np
 import pandas as pd
 from supervised.automl import AutoML
-from sklearn.metrics import accuracy_score
-
 from Utils.JsonUtil import get_config_property
-from enum import Enum, unique
-
-
-@unique
-class DataType(Enum):
-    DATATYPE_UNKNOW = 0
-    DATATYPE_STRING = 1
-    DATATYPE_INT = 2
-    DATATYPE_FLOAT = 3
-    DATATYPE_CATEGORY = 4
-    DATATYPE_BOOLEAN = 5
-    DATATYPE_DATETIME = 6
-    DATATYPE_IGNORE = 7
+from predict_time_sources import feature_preparation, DataType, SplitMethod
 
 
 class StructuredDataAutoML(object):
@@ -30,9 +15,18 @@ class StructuredDataAutoML(object):
             self.__configuration["runtime_constraints"]["max_iter"] = 3
 
     def __read_training_data(self):
-        # In case of AutoKeras we only provide the training file path
+        """
+        Read the training dataset from disk
+        """
         df = pd.read_csv(os.path.join(self.__configuration["file_location"], self.__configuration["file_name"]),
                          **self.__configuration["file_configuration"])
+
+        # split training set
+        if SplitMethod.SPLIT_METHOD_RANDOM == self.__configuration["test_configuration"]["method"]:
+            df = df.sample(random_state=self.__configuration["test_configuration"]["random_state"], frac=1)
+        else:
+            df = df.iloc[:int(df.shape[0] * self.__configuration["test_configuration"]["split_ratio"])]
+
         target = self.__configuration["tabular_configuration"]["target"]["target"]
         self.__X = df.drop(target, axis=1)
         self.__y = df[target]
@@ -63,7 +57,7 @@ class StructuredDataAutoML(object):
             self.__y = self.__y.astype('float')
 
     def __export_model(self, model):
-        output_file = os.path.join(get_config_property('output-path'), "model_autokeras.p")
+        output_file = os.path.join(get_config_property('output-path'), 'tmp', "mljar-model.p")
         with open(output_file, 'wb') as f:
             pickle.dump(model, f)
 
