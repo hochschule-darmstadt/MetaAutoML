@@ -85,7 +85,7 @@ class StructuredDataAutoML(object):
         1. generate ML model
         """
         output_file = os.path.join(get_config_property('output-path'), 'tmp', "model_pytorch.p")
-        with open(output_file, "wb") as file:
+        with open(output_file, "wb+") as file:
             pickle.dump(model, file)
 
         return
