@@ -49,7 +49,7 @@ app {
     top: 0;
     bottom: 0;
     z-index: -1;
-    background-color: #5D2E8F;
+    background-color: #5474FC;
 }
 
 .triangles {
@@ -113,7 +113,7 @@ app {
 }
 
 .mdc-top-app-bar__section .mdc-icon-button i {
-    color: #5D2E8F;
+    color: #5474FC;
 }
 
 .logo-img {
@@ -277,7 +277,7 @@ app {
 }
 
 .mdc-drawer__content {
-    background-image: linear-gradient(180deg, rgb(5, 39, 103) 0%, #3a0647 70%);
+    background-image: linear-gradient(180deg, #5474fc 50%, #9fb1fd);
     color: #FFF;
 }
 
@@ -322,8 +322,9 @@ app {
 .drawer-logo {
     display: flex;
     align-items: center;
-    justify-content: center;
-    background-color: #5D2E8F;
+    justify-content: left;
+    padding-left: 1rem;
+    background-color: #5474FC;
     height: 64px;
     color: #fff;
 }
@@ -456,7 +457,7 @@ hr {
 
 .mdc-dialog__title {
     color: #fff !important;
-    background: #5D2E8F;
+    background: #5474fc;
 }
 
 .mdc-dialog__actions {
@@ -733,4 +734,9 @@ div.refresh-timer-interval-wrapper {
 
 #editashtmldialog .mdc-dialog__surface {
     overflow: visible;
+}
+
+.btn-primary {
+    background-color: #5474fc;
+    border-color: #5474fc;
 }
