@@ -8,6 +8,18 @@ service AdapterService {
 Execute a new AutoML run. 
 */
 	rpc StartAutoML(StartAutoMLRequest) returns (stream StartAutoMLResponse) {}
+	rpc TestAdapter(TestAdapterRequest) returns (TestAdapterResponse) {}
+}
+
+message TestAdapterRequest {
+    string testData = 1;
+    string processJson = 2;
+}
+
+message TestAdapterResponse {
+    repeated string predictions = 1;
+    float score = 2;
+    float predictiontime = 3;
 }
 
 message StartAutoMLRequest {
