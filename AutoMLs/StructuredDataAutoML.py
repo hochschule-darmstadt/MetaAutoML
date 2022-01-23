@@ -61,7 +61,7 @@ class StructuredDataAutoML(object):
         Parameter:
         1. generate ML model
         """
-        with open(os.path.join(get_config_property('output-path'), 'tmp', 'model_keras.p'), 'wb') as file:
+        with open(os.path.join(get_config_property('output-path'), 'tmp', 'model_keras.p'), 'wb+') as file:
             dill.dump(model, file)
 
     def execute_task(self):
