@@ -58,7 +58,7 @@ class StructuredDataAutoML(object):
 
     def __export_model(self, model):
         output_file = os.path.join(get_config_property('output-path'), 'tmp', "mljar-model.p")
-        with open(output_file, 'wb') as f:
+        with open(output_file, 'wb+') as f:
             pickle.dump(model, f)
 
     def classification(self):

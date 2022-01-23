@@ -12,6 +12,9 @@ RUN pip install -r requirements.txt
 WORKDIR /app
 COPY . .
 
+# this should already be created, but sometimes there is a bug in docker which causes that the directory is not copied
+RUN mkdir -p /app/app-data/output/tmp
+
 ENV RUNTIME=DOCKER
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONPATH "AutoMLs:Utils"
