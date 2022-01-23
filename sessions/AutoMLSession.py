@@ -22,7 +22,7 @@ class AutoMLSession(object):
         """
         self.__id = session_id
         self.__configuration = configuration
-        self.__automls = []
+        self.automls = []
 
     def add_automl_to_session(self, automl: IAutoMLManager):
         """
@@ -31,8 +31,7 @@ class AutoMLSession(object):
         Parameter
         1. automl the automl object implementing the IAutoMLManager
         """
-        self.__automls.append(automl)
-        return
+        self.automls.append(automl)
 
     def get_id(self) -> str:
         """
@@ -51,7 +50,7 @@ class AutoMLSession(object):
         ---
         Return AutoML model as Controller_pb2.GetAutoMlModelResponse
         """
-        for automl in self.__automls:
+        for automl in self.automls:
             if automl.name == request.autoMl:
                 return automl.get_automl_model()
 
@@ -77,7 +76,7 @@ class AutoMLSession(object):
         response.dataset = self.__configuration.dataset
         response.task = self.__configuration.task
 
-        for automl in self.__automls:
+        for automl in self.automls:
             response.automls.append(automl.get_status())
             if automl.is_running():
                 response.status = Controller_pb2.SESSION_STATUS_BUSY

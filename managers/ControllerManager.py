@@ -88,3 +88,19 @@ class ControllerManager(object):
         response.result = 1
         response.sessionId = newSession.get_id()
         return response
+
+    def TestAutoML(self, request) -> Controller_pb2.TestAutoMLResponse:
+        session = self.__sessions.get(request.sessionId)
+        automls = session.automls
+        test_auto_ml = None
+        for automl in automls:
+            if automl.name == request.autoMlName:
+                test_auto_ml = automl.testSolution(request.testData, request.sessionId)
+                break
+        if test_auto_ml:
+            response = Controller_pb2.TestAutoMLResponse(predictions=test_auto_ml.predictions)
+            response.score = test_auto_ml.score
+            response.predictiontime = test_auto_ml.predictiontime
+        else:
+            response = Controller_pb2.TestAutoMLResponse()
+        return response
