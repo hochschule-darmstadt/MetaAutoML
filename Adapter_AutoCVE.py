@@ -135,9 +135,16 @@ def evaluate(config_json, config_path):
     subprocess.call([python_env, os.path.join(working_dir, "predict.py"), file_path, config_path])
     predict_time = time.time() - predict_start
 
+    # TODO: extract real information
     # extract additional information from automl
-    with open(sys.path[0] + 'autocve-model.p', 'rb') as file:
+    with open(os.path.join(working_dir, 'autocve-model.p'), 'rb') as file:
         automl = pickle.load(file)
+        print(dir(automl))
+        print(automl.estimators)
+        print(automl._estimator_type)
+        print(automl.estimators_)
+        print(automl.named_estimators)
+        print(automl.named_estimators_)
         model = "model placeholder"
         library = "library placeholder"
 
@@ -152,10 +159,11 @@ def evaluate(config_json, config_path):
 
     target = config_json["tabular_configuration"]["target"]["target"]
     if config_json["task"] == 1:
-        return accuracy_score(test[target], predictions["predicted"]), (predict_time*1000)/test.shape[0], library, model
+        return accuracy_score(test[target], predictions["predicted"]), (predict_time * 1000) / test.shape[
+            0], library, model
     elif config_json["task"] == 2:
         return mean_squared_error(test[target], predictions["predicted"], squared=False), \
-               (predict_time*1000)/test.shape[0], library, model
+               (predict_time * 1000) / test.shape[0], library, model
 
 
 def predict(data, config_json, config_path):
@@ -229,7 +237,6 @@ class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
         except Exception as e:
             return get_except_response(context, e)
 
-
     def TestAdapter(self, request, context):
         try:
             # saving AutoML configuration JSON
@@ -247,6 +254,7 @@ class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
 
         except Exception as e:
             return get_except_response(context, e)
+
 
 def serve():
     """
