@@ -48,6 +48,9 @@ def capture_process_output(process, start_time):
             # if return Code is ADAPTER_RETURN_CODE_STATUS_UPDATE we do not have score values yet
             process_update.testScore = 0.0
             process_update.validationScore = 0.0
+            process_update.predictiontime = 0.0
+            process_update.library = ""
+            process_update.model = ""
             yield process_update
             sys.stderr.write(capture)
             sys.stderr.flush()
@@ -56,7 +59,7 @@ def capture_process_output(process, start_time):
         s = process.stderr.read(1)
 
 
-def get_response(output_json, start_time, test_score):
+def get_response(output_json, start_time, test_score, prediction_time, library, model):
     response = Adapter_pb2.StartAutoMLResponse()
     response.returnCode = Adapter_pb2.ADAPTER_RETURN_CODE_SUCCESS
     response.outputJson = json.dumps(output_json)
@@ -64,6 +67,9 @@ def get_response(output_json, start_time, test_score):
     # if return Code is ADAPTER_RETURN_CODE_STATUS_UPDATE we do not have score values yet
     response.testScore = test_score
     response.validationScore = 0.0
+    response.predictiontime = prediction_time
+    response.library = library
+    response.model = model
     yield response
 
 
@@ -125,7 +131,10 @@ def evaluate(config_json, config_path):
     # predict
     os.chmod(os.path.join(working_dir, "predict.py"), 0o777)
     python_env = os.getenv("PYTHON_ENV", default="PYTHON_ENV_UNSET")
+ 
+    predict_start = time.time()   
     subprocess.call([python_env, os.path.join(working_dir, "predict.py"), file_path, config_path])
+    predict_time = time.time() - predict_start
 
     # calculate the accuracy
     test = pd.read_csv(file_path)
@@ -139,10 +148,13 @@ def evaluate(config_json, config_path):
 
     target = config_json["tabular_configuration"]["target"]["target"]
     if config_json["task"] == 1:
-        return accuracy_score(test[target], predictions["predicted"])
+        return accuracy_score(test[target], predictions["predicted"]) #predict_time, library, model
     elif config_json["task"] == 2:
         return mean_squared_error(test[target], predictions["predicted"], squared=False)
 
+
+def predict(data, config_json, config_path):
+    pass
 
 class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
     """
@@ -168,15 +180,32 @@ class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
             generate_script(config_json)
             output_json = zip_script(config_json["session_id"])
 
-            test_score = evaluate(config_json, job_file_location)
+            test_score, prediction_time, library, model = evaluate(config_json, job_file_location)
+            response = yield from get_response(output_json, start_time, test_score, prediction_time, library, model)
 
-            response = yield from get_response(output_json, start_time, test_score)
             print(f'{get_config_property("adapter-name")} job finished')
             return response
 
         except Exception as e:
             return get_except_response(context, e)
+    
+    def TestAdapter(self, request, context):
+        try:
+            # saving AutoML configuration JSON
+            config_json = json.loads(request.processJson)
+            job_file_location = os.path.join(get_config_property("job-file-path"),
+                                             get_config_property("job-file-name"))
+            with open(job_file_location, "w+") as f:
+                json.dump(config_json, f)
 
+            test_score, prediction_time, predictions = predict(request.testData, config_json, job_file_location)
+            response = Adapter_pb2.TestAdapterResponse(predictions=predictions)
+            response.score = test_score
+            response.predictiontime = prediction_time
+            return response
+
+        except Exception as e:
+            return get_except_response(context, e)
 
 def serve():
     """
