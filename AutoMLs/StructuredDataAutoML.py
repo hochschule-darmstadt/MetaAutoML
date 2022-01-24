@@ -11,8 +11,6 @@ class StructuredDataAutoML(object):
 
     def __init__(self, configuration):
         self.__configuration = configuration
-        if self.__configuration["runtime_constraints"]["max_iter"] == 0:
-            self.__configuration["runtime_constraints"]["max_iter"] = 3
 
     def __read_training_data(self):
         """
@@ -64,7 +62,7 @@ class StructuredDataAutoML(object):
     def classification(self):
         self.__read_training_data()
         self.__dataset_preparation()
-        automl = AutoML(total_time_limit=200)
+        automl = AutoML(total_time_limit=self.__configuration["runtime_constraints"]["runtime_limit"], mode="Compete")
         automl.fit(self.__X, self.__y)
         self.__export_model(automl)
 
