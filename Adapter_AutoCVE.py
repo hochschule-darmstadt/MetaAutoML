@@ -139,14 +139,9 @@ def evaluate(config_json, config_path):
     # extract additional information from automl
     with open(os.path.join(working_dir, 'autocve-model.p'), 'rb') as file:
         automl = pickle.load(file)
-        print(dir(automl))
-        print(automl.estimators)
-        print(automl._estimator_type)
-        print(automl.estimators_)
-        print(automl.named_estimators)
-        print(automl.named_estimators_)
-        model = "model placeholder"
-        library = "library placeholder"
+        # autocve always uses sklearn and xgboost as we can see in the requirements.txt in their github repo
+        model = "xgboost"
+        library = "sklearn"
 
     test = pd.read_csv(file_path)
     if SplitMethod.SPLIT_METHOD_RANDOM == config_json["test_configuration"]["method"]:
