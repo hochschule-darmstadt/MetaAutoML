@@ -11,7 +11,7 @@
 @inject IViewNotifier viewNotifier
 
 <div style="display:flex; flex-direction:row; align-items:center">
-    <MatButton TrailingIcon="add" OnClick="@(e => { _isTabularUploadOpen = true; })">add Dataset</MatButton>
+    <MatButton Outlined="true" TrailingIcon="add" OnClick="@(e => { _isTabularUploadOpen = true; })">add Dataset</MatButton>
 </div>
 
 <DatasetTable DatasetResponse="_datasets"></DatasetTable>
