@@ -135,13 +135,14 @@ def evaluate(config_json, config_path):
     subprocess.call([python_env, os.path.join(working_dir, "predict.py"), file_path, config_path])
     predict_time = time.time() - predict_start
 
-    # TODO: extract real information
     # extract additional information from automl
     with open(os.path.join(working_dir, 'autocve-model.p'), 'rb') as file:
         automl = pickle.load(file)
-        # autocve always uses sklearn and xgboost as we can see in the requirements.txt in their github repo
-        model = "xgboost"
+        # check if xgb library is used as atleast one of the estimators
         library = "sklearn"
+        if "xgbclassifier" in str(automl.estimators):
+            library = "sklearn + xgboost"
+        model = "voting ensemble"
 
     test = pd.read_csv(file_path)
     if SplitMethod.SPLIT_METHOD_RANDOM == config_json["test_configuration"]["method"]:
