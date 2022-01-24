@@ -5,6 +5,7 @@
 @inject IApiClient apiClient
 @inject IViewNotifier viewNotifier
 @inject IJSRuntime JSRuntime
+@inject NavigationManager NavManager
 @inject BlazorBoilerplate.Shared.Services.SessionState SessionState
 
 <MatTabGroup>
@@ -13,22 +14,34 @@
             <div class="mat-layout-grid-inner">
                 <div class="mat-layout-grid-cell">
                     <p>AutoML:</p>
-                    <p>ML library:</p>
-                    <p>Model:</p>
+                    @if(SessionState.session.AutoMls[selectedAutoMLId].Library!= ""){
+                        <p>ML library:</p>
+                        <p>Model:</p>
                     <p>Score:</p>
                     <p>Prediction time[ms]:</p>
+                    }
                     <p>Runtime AutoML[s]:</p>
+                    <p>Dataset:</p>
+                    <p>Training:</p>
                 </div>
                 <div class="mat-layout-grid-cell">
                     <p>@ModelId</p>
-                    <p>@SessionState.session.AutoMls[selectedAutoMLId].Library</p>
-                    <p>@SessionState.session.AutoMls[selectedAutoMLId].Model</p>
-                    <p>@string.Format("{0:f3}", @SessionState.session.AutoMls[selectedAutoMLId].TestScore)</p>
-                    <p>@string.Format("{0:f3}", @SessionState.session.AutoMls[selectedAutoMLId].Predictiontime)</p>
+                    @if(SessionState.session.AutoMls[selectedAutoMLId].Library!= ""){
+                        <p>@SessionState.session.AutoMls[selectedAutoMLId].Library</p>
+                        <p>@SessionState.session.AutoMls[selectedAutoMLId].Model</p>
+                        <p>@string.Format("{0:f3}", @SessionState.session.AutoMls[selectedAutoMLId].TestScore)</p>
+                        <p>@string.Format("{0:f3}", @SessionState.session.AutoMls[selectedAutoMLId].Predictiontime)</p>
+                    }
                     <p>@SessionState.session.AutoMls[selectedAutoMLId].Runtime</p>
+                    <p>
+                        <a href="@NavManager.ToAbsoluteUri("datasets/" + DatasetId + "/1").AbsoluteUri" Style="cursor: pointer;">@DatasetId</a>
+                    </p>
+                    <p>
+                        <a href="@NavManager.ToAbsoluteUri("datasets/" + DatasetId + "/training/" + SessionId).AbsoluteUri" Style="cursor: pointer;">@SessionId</a>
+                    </p>
                 </div>
             </div>
-            <MatButton Outlined="true" Icon="@MatIconNames.Cloud_download" OnClick="@DownloadModel">Download model pipeline</MatButton>
+            <MatButton Outlined="true" @bind-Disabled="@disableButton" Icon="@MatIconNames.Cloud_download" OnClick="@DownloadModel">Download model pipeline</MatButton>
         </div>
     </MatTab>
     <MatTab Label="Configuration">
@@ -49,6 +62,7 @@
     <MatTab Label="Predict">
         <div>
             <div class="mat-layout-grid mat-layout-grid-align-left" style="max-width: 1000px;">
+                <h1>Select a File to predict:</h1>
                 <div class="mat-layout-grid-inner">
                     <div class="mat-layout-grid-cell">
                         <MatFileUpload OnChange="@FilesReady" Label="Choose File"></MatFileUpload>
