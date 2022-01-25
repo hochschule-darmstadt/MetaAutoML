@@ -140,9 +140,12 @@ def evaluate(config_json, config_path):
     # extract additional information from automl
     with open(os.path.join(working_dir, "mljar-model.p"), 'rb') as file:
         automl = pickle.load(file)
-        # TODO: extract real information
-        model = "model placeholder"
-        library = "lib placeholder"
+        librarylist = set()
+        for model in automl.ensemble.selected_models:
+            if hasattr(model['model'], 'learner_params'):
+                librarylist.add(model['model'].learner_params['model_type'])
+        model = automl.ensemble.algorithm_name
+        library = " + ".join(librarylist)
 
     test = pd.read_csv(file_path)
     if SplitMethod.SPLIT_METHOD_RANDOM == config_json["test_configuration"]["method"]:
