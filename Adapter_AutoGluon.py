@@ -8,16 +8,18 @@ import json
 import time
 import numpy as np
 import pickle
+
 import pandas as pd
 from sklearn.metrics import accuracy_score, mean_squared_error
-
-from Utils.JsonUtil import get_config_property
+from autogluon.tabular import TabularPredictor
 
 import Adapter_pb2
 import Adapter_pb2_grpc
+
 from concurrent import futures
 from TemplateGenerator import TemplateGenerator
 from predict_time_sources import SplitMethod
+from Utils.JsonUtil import get_config_property
 
 
 def get_except_response(context, e):
@@ -138,10 +140,24 @@ def evaluate(config_json, config_path):
     predict_time = time.time() - predict_start
 
     # extract additional information from automl
-    with open(os.path.join(working_dir, 'autogluon-model.p'), 'rb') as file:
-        automl = pickle.load(file)
-        library = ""
-        model = ""
+    automl = TabularPredictor.load(os.path.join(working_dir, 'model_gluon.gluon'))
+    automl_info = automl._learner.get_info(include_model_info=True)
+    librarylist = set()
+    model = automl_info['best_model']
+    for model_info in automl_info['model_info']:
+        if model_info == model:
+            pass
+        elif model_info in ('LightGBM', 'LightGBMXT'):
+            librarylist.add("lightgbm")
+        elif model_info == 'XGBoost':
+            librarylist.add("xgboost")
+        elif model_info == 'CatBoost':
+            librarylist.add("catboost")
+        elif model_info == 'NeuralNetFastAI':
+            librarylist.add("pytorch")
+        else:
+            librarylist.add("sklearn")
+    library = " + ".join(librarylist)
     # calculate the accuracy
     test = pd.read_csv(file_path)
     if SplitMethod.SPLIT_METHOD_RANDOM == config_json["test_configuration"]["method"]:
@@ -197,6 +213,7 @@ def predict(data, config_json, config_path):
                predictions["predicted"].astype(np.string).tolist()
     else:
         return 0, predict_time, predictions["predicted"].astype('string').tolist()
+
 
 class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
     """
