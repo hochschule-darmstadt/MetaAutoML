@@ -33,16 +33,19 @@ class ControllerManager(object):
         # TODO: ADD DATASET MANAGEMENT OVER DATABASE
         with os.scandir(self.__datasetFolder) as dirs:
             for entry in dirs:
-                rows, cols = pd.read_csv(os.path.join(self.__datasetFolder, entry.name)).shape
-                dataset = Controller_pb2.Dataset()
-                dataset.fileName = entry.name
-                dataset.type = "TABULAR"
-                dataset.rows = rows
-                dataset.columns = cols
-                mtime = os.path.getmtime(os.path.join(self.__datasetFolder, entry.name))
-                dataset.creation_date.seconds = int(mtime)
-                dataset.creation_date.nanos = int(mtime % 1 * 1e9)
-                datasets.dataset.append(dataset)
+                try:
+                    rows, cols = pd.read_csv(os.path.join(self.__datasetFolder, entry.name)).shape
+                    dataset = Controller_pb2.Dataset()
+                    dataset.fileName = entry.name
+                    dataset.type = "TABULAR"
+                    dataset.rows = rows
+                    dataset.columns = cols
+                    mtime = os.path.getmtime(os.path.join(self.__datasetFolder, entry.name))
+                    dataset.creation_date.seconds = int(mtime)
+                    dataset.creation_date.nanos = int(mtime % 1 * 1e9)
+                    datasets.dataset.append(dataset)
+                except Exception as e:
+                    print(e)
         return datasets
 
     def GetDataset(self, request) -> Controller_pb2.GetDatasetResponse:
