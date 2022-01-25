@@ -14,7 +14,7 @@ if __name__ == '__main__':
 
     target = config_json["tabular_configuration"]["target"]["target"]
     features = config_json["tabular_configuration"]["features"].items()
-    X = pd.read_csv(filepath).drop(target, axis=1)
+    X = pd.read_csv(filepath).drop(target, axis=1, errors='ignore')
 
     # convert all object columns to categories, because autosklearn only supports numerical, bool and categorical features
     X[X.select_dtypes(['object']).columns] = X.select_dtypes(['object']) \
