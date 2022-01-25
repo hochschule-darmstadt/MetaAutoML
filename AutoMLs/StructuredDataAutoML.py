@@ -24,6 +24,10 @@ class StructuredDataAutoML(object):
         if self.__configuration["runtime_constraints"]["max_iter"] == 0:
             self.__configuration["runtime_constraints"]["max_iter"] = 3
 
+        if self.__configuration["metric"] == "":
+            # handle empty metric field, None is the default metric parameter for AutoKeras
+            self.__configuration["metric"] = None
+
     def __read_training_data(self):
         """
         Read the training dataset from disk
@@ -77,6 +81,7 @@ class StructuredDataAutoML(object):
         self.__dataset_preparation()
         clf = ak.StructuredDataClassifier(overwrite=True,
                                           max_trials=self.__configuration["runtime_constraints"]["max_iter"],
+                                          metric=self.__configuration['metric'],
                                           seed=42)
         clf.fit(x=self.__X, y=self.__y)
         self.__export_model(clf)
@@ -87,6 +92,7 @@ class StructuredDataAutoML(object):
         self.__dataset_preparation()
         reg = ak.StructuredDataRegressor(overwrite=True,
                                          max_trials=self.__configuration["runtime_constraints"]["max_iter"],
+                                         metric=self.__configuration['metric'],
                                          seed=42)
         reg.fit(x=self.__X, y=self.__y)
         self.__export_model(reg)
