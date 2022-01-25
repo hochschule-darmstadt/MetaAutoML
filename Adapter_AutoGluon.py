@@ -6,7 +6,8 @@ import shutil
 import subprocess
 import json
 import time
-
+import numpy as np
+import pickle
 import pandas as pd
 from sklearn.metrics import accuracy_score, mean_squared_error
 
@@ -136,6 +137,11 @@ def evaluate(config_json, config_path):
     subprocess.call([python_env, os.path.join(working_dir, "predict.py"), file_path, config_path])
     predict_time = time.time() - predict_start
 
+    # extract additional information from automl
+    with open(os.path.join(working_dir, 'autogluon-model.p'), 'rb') as file:
+        automl = pickle.load(file)
+        library = ""
+        model = ""
     # calculate the accuracy
     test = pd.read_csv(file_path)
     if SplitMethod.SPLIT_METHOD_RANDOM == config_json["test_configuration"]["method"]:
@@ -148,13 +154,49 @@ def evaluate(config_json, config_path):
 
     target = config_json["tabular_configuration"]["target"]["target"]
     if config_json["task"] == 1:
-        return accuracy_score(test[target], predictions["predicted"]) #predict_time, library, model
+        return accuracy_score(test[target], predictions["predicted"]), \
+               (predict_time * 1000) / test.shape[0], library, model
     elif config_json["task"] == 2:
-        return mean_squared_error(test[target], predictions["predicted"], squared=False)
+        return mean_squared_error(test[target], predictions["predicted"], squared=False), \
+               (predict_time * 1000) / test.shape[0], library, model
 
 
 def predict(data, config_json, config_path):
-    pass
+    working_dir = os.path.join(get_config_property("output-path"), "working_dir")
+
+    shutil.unpack_archive(os.path.join(get_config_property("output-path"),
+                                       str(config_json["session_id"]),
+                                       get_config_property("export-zip-file-name") + ".zip"),
+                          working_dir,
+                          "zip")
+
+    file_path = os.path.join(working_dir, "test.csv")
+
+    with open(file_path, "w+") as f:
+        f.write(data)
+
+    # predict
+    os.chmod(os.path.join(working_dir, "predict.py"), 0o777)
+    python_env = os.getenv("PYTHON_ENV", default="PYTHON_ENV_UNSET")
+
+    predict_start = time.time()
+    subprocess.call([python_env, os.path.join(working_dir, "predict.py"), file_path, config_path])
+    predict_time = time.time() - predict_start
+
+    test = pd.read_csv(file_path)
+
+    predictions = pd.read_csv(os.path.join(working_dir, "predictions.csv"))
+    shutil.rmtree(working_dir)
+
+    target = config_json["tabular_configuration"]["target"]["target"]
+    if config_json["task"] == 1 and target in test:
+        return accuracy_score(test[target], predictions["predicted"]), predict_time, \
+               predictions["predicted"].astype('string').tolist()
+    elif config_json["task"] == 2 and target in test:
+        return mean_squared_error(test[target], predictions["predicted"], squared=False), predict_time, \
+               predictions["predicted"].astype(np.string).tolist()
+    else:
+        return 0, predict_time, predictions["predicted"].astype('string').tolist()
 
 class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
     """
