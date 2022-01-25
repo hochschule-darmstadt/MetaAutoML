@@ -29,7 +29,7 @@
             <div style="display: flex; align-items: center; padding-right: 1% ">Please select Target column:</div>
             @if (_columnNames != null)
             {
-                <MatSelectItem Items="@_columnNames.ColumnNames" TValue="string" ValueChanged="@OnTargetChanged"></MatSelectItem>
+                <MatSelectItem Items="@_columnNames" TValue="string" ValueChanged="@OnTargetChanged"></MatSelectItem>
             }
         </div>
 
@@ -78,7 +78,7 @@
 @code {
     private GetDatasetCompatibleTasksResponseDto _tasks;
     private GetCompatibleAutoMlSolutionsResponseDto _compatibleAutoMl;
-    private GetTabularDatasetColumnNamesResponseDto _columnNames;
+    private List<String> _columnNames;
     private MatChip[] selectedChips = null;
     private MatChip lastCheckedChip = new MatChip { Label = "testLabel" };
     private bool advancedOptionsSelected = false;
@@ -93,6 +93,14 @@
     {
         await LoadData();
 
+        _columnNames = new List<string>();
+        foreach (KeyValuePair<string, Server.DataType> pair in ((AutoMLTabularDataConfiguration)WizardState.automlRequest.Configuration).Features)
+        {
+            if((int)pair.Value != 7)
+            {
+                _columnNames.Add(pair.Key);
+            }
+        }
         ((AutoMLTabularDataConfiguration)WizardState.automlRequest.Configuration).Target = new AutoMLTarget();
         WizardState.automlRequest.RequiredAutoMLs = new List<string>();
         WizardState.automlRequest.RuntimeConstraints = new AutoMLRuntimeConstraints();
@@ -159,23 +167,9 @@
     {
         try
         {
-
-            GetTabularDatasetColumnNamesRequestDto columnRequest = new GetTabularDatasetColumnNamesRequestDto { DatasetName = WizardState.automlRequest.DatasetName };
-            ApiResponseDto apiResponse = await apiClient.GetTabularDatasetColumnNames(columnRequest);
-            if (apiResponse.IsSuccessStatusCode)
-            {
-                _columnNames = Newtonsoft.Json.JsonConvert.DeserializeObject<GetTabularDatasetColumnNamesResponseDto>(apiResponse.Result.ToString());
-                StateHasChanged();
-                viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
-            }
-            else
-            {
-                viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
-            }
-
             _tasks = new GetDatasetCompatibleTasksResponseDto();
             GetDatasetCompatibleTasksRequestDto taskRequest = new GetDatasetCompatibleTasksRequestDto { DatasetName = WizardState.automlRequest.DatasetName };
-            apiResponse = await apiClient.GetDatasetCompatibleTasks(taskRequest);
+            ApiResponseDto apiResponse = await apiClient.GetDatasetCompatibleTasks(taskRequest);
 
             if (apiResponse.IsSuccessStatusCode)
             {
