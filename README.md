@@ -24,6 +24,10 @@ in detached state:
 You then have to commit and push you changes in the submodule. The meta repository will then update its reference to the
 submodule. This update can than be committed in the meta repository.
 
+## Quick Start Guide
+
+Please refer to the [quick start guide](https://github.com/hochschule-darmstadt/MetaAutoML/wiki/Quick-start-guide) in the wiki.
+
 ## Docker Setup
 
 There is one main docker-compose file, which configures all backend modules to run in a local setup. Backend modules
