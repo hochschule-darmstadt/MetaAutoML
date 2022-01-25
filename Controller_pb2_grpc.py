@@ -70,6 +70,11 @@ class ControllerServiceStub(object):
                 request_serializer=Controller__pb2.StartAutoMLprocessRequest.SerializeToString,
                 response_deserializer=Controller__pb2.StartAutoMLprocessResponse.FromString,
                 )
+        self.TestAutoML = channel.unary_unary(
+                '/ControllerService/TestAutoML',
+                request_serializer=Controller__pb2.TestAutoMLRequest.SerializeToString,
+                response_deserializer=Controller__pb2.TestAutoMLResponse.FromString,
+                )
 
 
 class ControllerServiceServicer(object):
@@ -159,6 +164,13 @@ class ControllerServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def TestAutoML(self, request, context):
+        """test an existing AutoML
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_ControllerServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -216,6 +228,11 @@ def add_ControllerServiceServicer_to_server(servicer, server):
                     servicer.StartAutoMLprocess,
                     request_deserializer=Controller__pb2.StartAutoMLprocessRequest.FromString,
                     response_serializer=Controller__pb2.StartAutoMLprocessResponse.SerializeToString,
+            ),
+            'TestAutoML': grpc.unary_unary_rpc_method_handler(
+                    servicer.TestAutoML,
+                    request_deserializer=Controller__pb2.TestAutoMLRequest.FromString,
+                    response_serializer=Controller__pb2.TestAutoMLResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -412,5 +429,22 @@ class ControllerService(object):
         return grpc.experimental.unary_unary(request, target, '/ControllerService/StartAutoMLprocess',
             Controller__pb2.StartAutoMLprocessRequest.SerializeToString,
             Controller__pb2.StartAutoMLprocessResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def TestAutoML(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/ControllerService/TestAutoML',
+            Controller__pb2.TestAutoMLRequest.SerializeToString,
+            Controller__pb2.TestAutoMLResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

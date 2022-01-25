@@ -36,6 +36,9 @@ class AutoMLManager(ABC, Thread):
         self.__testScore = 0.0
         self.__validationScore = 0.0
         self.__runtime = 0
+        self.__predictiontime = 0
+        self.__model = ""
+        self.__library = ""
         self.__last_status = Controller_pb2.SESSION_STATUS_BUSY
 
         self.__AUTOML_SERVICE_HOST = automl_service_host
@@ -66,6 +69,9 @@ class AutoMLManager(ABC, Thread):
         status.testScore = self.__testScore
         status.validationScore = self.__validationScore
         status.runtime = self.__runtime
+        status.predictiontime = self.__predictiontime
+        status.model = self.__model
+        status.library = self.__library
         return status
 
     def is_running(self) -> bool:
@@ -94,12 +100,34 @@ class AutoMLManager(ABC, Thread):
 
             self._run_server_until_connection_closed(stub, request)
 
-    def _generate_process_json(self):
+    def testSolution(self, test_data, session_id):
+        automl_ip = os.getenv(self.__AUTOML_SERVICE_HOST)
+        automl_port = os.getenv(self.__AUTOML_SERVICE_PORT)
+
+        print(f"connecting to {self.name}: {automl_ip}:{automl_port}")
+
+        with grpc.insecure_channel(f"{automl_ip}:{automl_port}") as channel:  # Connect to Adapter
+            stub = Adapter_pb2_grpc.AdapterServiceStub(channel)  # Create Interface Stub
+
+            request = Adapter_pb2.TestAdapterRequest()  # Request Object
+            process_json = self._generate_process_json()
+            process_json["session_id"] = session_id
+            process_json["test_configuration"]["method"] = 1
+            process_json["test_configuration"]["split_ratio"] = 0
+            request.processJson = json.dumps(process_json)
+            request.testData = test_data
+
+            try:
+                return stub.TestAdapter(request)
+
+            except grpc.RpcError as rpc_error:
+                print(f"Received unknown RPC error: code={rpc_error.code()} message={rpc_error.details()}")
+
+    def _generate_process_json(self,):
         process_json = {"file_name": self._configuration.dataset}
         process_json.update({"session_id": self.__session_id})
         process_json.update({"file_location": self.__file_dest})
         process_json.update({"task": self._configuration.task})
-        # TODO: remove when frontend implementation is done
         if self._configuration.testConfig.split_ratio == 0:
             self._configuration.testConfig.split_ratio = 0.8
             self._configuration.testConfig.random_state = 42
@@ -132,6 +160,9 @@ class AutoMLManager(ABC, Thread):
                     self.__testScore = response.testScore
                     self.__validationScore = response.validationScore
                     self.__runtime = response.runtime
+                    self.__predictiontime = response.predictiontime
+                    self.__model = response.model
+                    self.__library = response.library
                     return
         except grpc.RpcError as rpc_error:
             print(f"Received unknown RPC error: code={rpc_error.code()} message={rpc_error.details()}")

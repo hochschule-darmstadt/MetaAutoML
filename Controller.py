@@ -104,6 +104,11 @@ class ControllerServiceServicer(Controller_pb2_grpc.ControllerServiceServicer):
         response = self._controllerManager.StartAutoMLProcess(request)
         return response
 
+    def TestAutoML(self, request, context):
+        """start a new AutoML run, using the provided configuration."""
+        response = self._controllerManager.TestAutoML(request)
+        return response
+
 
 def serve():
     """
