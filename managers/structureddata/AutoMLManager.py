@@ -142,6 +142,7 @@ class AutoMLManager(ABC, Thread):
         process_json.update({"runtime_constraints":
                                  {"runtime_limit": self._configuration.runtimeConstraints.runtime_limit,
                                   "max_iter": self._configuration.runtimeConstraints.max_iter}})
+        process_json.update({"metric": self._configuration.metric})
         return process_json
 
     def _run_server_until_connection_closed(self, stub, dataset_to_send):
