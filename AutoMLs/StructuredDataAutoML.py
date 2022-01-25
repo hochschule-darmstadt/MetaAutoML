@@ -21,6 +21,11 @@ class StructuredDataAutoML(object):
         """
         self.__time_limit = 30
         self.__configuration = configuration
+
+        if self.__configuration["metric"] == "":
+            # handle empty metric field, None is the default metric parameter for AutoSklearn
+            self.__configuration["metric"] = None
+
         return
 
     def __read_training_data(self):
@@ -88,6 +93,7 @@ class StructuredDataAutoML(object):
         if self.__configuration["runtime_constraints"]["runtime_limit"] != 0:
             automl_settings.update(
                 {"time_left_for_this_task": self.__configuration["runtime_constraints"]["runtime_limit"]})
+        automl_settings.update({"metric": self.__configuration["metric"]})
         return automl_settings
 
     def __classification(self):
