@@ -8,7 +8,7 @@
 <MatDialog @bind-IsOpen="IsOpen">
     <MatDialogTitle>Add Dataset</MatDialogTitle>
     <MatDialogContent>
-        <MatTextField @bind-Value="@FileName" Label="File Name" Disabled="true"></MatTextField>
+        <MatTextField @bind-Value="@FileName" Label="Dataset Name" Disabled="true"></MatTextField>
 
         <MatFileUpload OnChange="@FilesReady" Label="Choose File"></MatFileUpload>
 

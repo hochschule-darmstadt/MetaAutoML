@@ -25,7 +25,6 @@
                     <MatSortHeader SortId="model"><span style="width:162px">Model</span></MatSortHeader>
                     <MatSortHeader SortId="testscore">Score</MatSortHeader>
                     <MatSortHeader SortId="predictiontime">Prediction time[ms]</MatSortHeader>
-                    <MatSortHeader SortId="runtime">Runtime AutoML[s]</MatSortHeader>
                     <MatSortHeader SortId="status">Status</MatSortHeader>
                     <th></th>
                 </MatSortHeaderRow>
@@ -38,7 +37,6 @@
                 </td>
                 <td>@string.Format("{0:f3}", @context.TestScore)</td>
                 <td>@string.Format("{0:f3}", @context.Predictiontime)</td>
-                <td>@context.Runtime</td>
                 <td>@context.Status</td>
                 <td>
                     <ModelMenu OpenModel="OpenModel" HandleClick="@(() => HandleModelChanged(context))"></ModelMenu>
@@ -67,16 +65,14 @@
         public string Model { get; set; }
         public double TestScore { get; set; }
         public double Predictiontime { get; set; }
-        public int Runtime { get; set; }
         public string Status { get; set; }
 
-        public AutoML(string name, string library, string model, double testScore, double predictiontime, int runtime, string status){
+        public AutoML(string name, string library, string model, double testScore, double predictiontime, string status){
             Name = name;
             Library = library;
             Model = model;
             TestScore = testScore;
             Predictiontime = predictiontime;
-            Runtime = runtime;
             Status = status;
         }
     }
@@ -118,7 +114,7 @@
                 case 3: status = "Failed";
                         break;
             }
-            automls.Add(new AutoML(automl.Name, automl.Library, automl.Model, automl.TestScore, automl.Predictiontime, automl.Runtime, status));
+            automls.Add(new AutoML(automl.Name, automl.Library, automl.Model, automl.TestScore, automl.Predictiontime, status));
         }
         automls = automls.OrderByDescending(x => x.TestScore).ToList();
     }
@@ -145,9 +141,6 @@
                     break;
                 case "predictiontime":
                     comparison = (s1, s2) => s1.Predictiontime.CompareTo(s2.Predictiontime);
-                    break;
-                case "runtime":
-                    comparison = (s1, s2) => s1.Runtime.CompareTo(s2.Runtime);
                     break;
                 case "status":
                     comparison = (s1, s2) => string.Compare(s1.Status, s2.Status, StringComparison.InvariantCultureIgnoreCase);
