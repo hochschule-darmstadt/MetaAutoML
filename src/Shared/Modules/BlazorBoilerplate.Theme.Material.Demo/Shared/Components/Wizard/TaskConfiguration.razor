@@ -7,7 +7,7 @@
 
 <div id="required" style="display:flex; flex-direction:column; gap: 10px">
     <div style="display:flex; flex-direction:row; justify-content:left">
-        <div style="display: flex; align-items: center; padding-right: 1%">Please select the Machine Learning task AutoML should perform:</div>
+        <div style="display: flex; align-items: center; padding-right: 1%">Machine Learning Task:</div>
         <MatChipSet Choice="true" SelectedChipChanged="@OnChipChanged">
             @if (_tasks != null)
             {
@@ -26,7 +26,7 @@
     @if (lastCheckedChip.Label != "testLabel")
     {
         <div style="display:flex; flex-direction:row; justify-content:left">
-            <div style="display: flex; align-items: center; padding-right: 1% ">Please select Target column:</div>
+            <div style="display: flex; align-items: center; padding-right: 1% ">Target Column:</div>
             @if (_columnNames != null)
             {
                 <MatSelectItem Items="@_columnNames" TValue="string" ValueChanged="@OnTargetChanged"></MatSelectItem>
@@ -51,7 +51,7 @@
                     </MatChipSet>
 
                     <div style="display:flex; flex-direction:row; justify-content:left">
-                        <div style="display: flex; align-items: center; padding-right: 1% ">Time limit(in seconds):</div>
+                        <div style="display: flex; align-items: center; padding-right: 1% ">Time limit [minutes]:</div>
                         @if (WizardState.automlRequest.RuntimeConstraints != null)
                         {
                             <MatNumericUpDownField @bind-Value=@WizardState.automlRequest.RuntimeConstraints.Runtime_limit
@@ -59,6 +59,7 @@
                             </MatNumericUpDownField>
                         }
                     </div>
+                    @*
                     <div style="display:flex; flex-direction:row; justify-content:left">
                         <div style="display: flex; align-items: center; padding-right: 1% ">Number of iterations:</div>
                         @if (WizardState.automlRequest.RuntimeConstraints != null)
@@ -68,6 +69,7 @@
                             </MatNumericUpDownField>
                         }
                     </div>
+                    *@
                 </MatExpansionPanelDetails>
             </MatExpansionPanel>
 
@@ -104,7 +106,7 @@
         ((AutoMLTabularDataConfiguration)WizardState.automlRequest.Configuration).Target = new AutoMLTarget();
         WizardState.automlRequest.RequiredAutoMLs = new List<string>();
         WizardState.automlRequest.RuntimeConstraints = new AutoMLRuntimeConstraints();
-        WizardState.automlRequest.RuntimeConstraints.Runtime_limit = 30;
+        WizardState.automlRequest.RuntimeConstraints.Runtime_limit = 3;
         WizardState.automlRequest.RuntimeConstraints.Max_iter = 0;
     }
 

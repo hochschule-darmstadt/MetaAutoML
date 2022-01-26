@@ -20,7 +20,6 @@
                     <p>Score:</p>
                     <p>Prediction time[ms]:</p>
                     }
-                    <p>Runtime AutoML[s]:</p>
                     <p>Dataset:</p>
                     <p>Training:</p>
                 </div>
@@ -32,7 +31,6 @@
                         <p>@string.Format("{0:f3}", @SessionState.session.AutoMls[selectedAutoMLId].TestScore)</p>
                         <p>@string.Format("{0:f3}", @SessionState.session.AutoMls[selectedAutoMLId].Predictiontime)</p>
                     }
-                    <p>@SessionState.session.AutoMls[selectedAutoMLId].Runtime</p>
                     <p>
                         <a href="@NavManager.ToAbsoluteUri("datasets/" + DatasetId + "/1").AbsoluteUri" Style="cursor: pointer;">@DatasetId</a>
                     </p>
