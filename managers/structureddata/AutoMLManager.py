@@ -140,7 +140,7 @@ class AutoMLManager(ABC, Thread):
                                        "features": dict(self._configuration.tabularConfig.features)}})
         process_json.update({"file_configuration": dict(self._configuration.fileConfiguration)})
         process_json.update({"runtime_constraints":
-                                 {"runtime_limit": self._configuration.runtimeConstraints.runtime_limit,
+                                 {"runtime_limit": self._configuration.runtimeConstraints.runtime_limit * 60,
                                   "max_iter": self._configuration.runtimeConstraints.max_iter}})
         process_json.update({"metric": self._configuration.metric})
         return process_json
