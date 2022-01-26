@@ -50,7 +50,6 @@ class StructuredDataAutoML(object):
             configuration["metric"] = 'r2'
 
         self.__configuration = configuration
-        return
 
     def __read_training_data(self):
         """
@@ -95,8 +94,6 @@ class StructuredDataAutoML(object):
         with open(output_file, "wb+") as file:
             pickle.dump(model, file)
 
-        return
-
     def classification(self):
         """
         Execute the classification task
@@ -121,21 +118,7 @@ class StructuredDataAutoML(object):
                 max_budget=self.__iter_limit
             )
 
-        ############################################################################
-        # Print the final ensemble performance
-        # ====================================
-        y_pred = auto_cls.predict(self.__X)
-        score = auto_cls.score(y_pred, self.__y)
-        print(score)
-        # Print the final ensemble built by AutoPyTorch
-        print(auto_cls.show_models())
-
-        # Print statistics from search
-        print(auto_cls.sprint_statistics())
-
         self.__export_model(auto_cls)
-
-        return
 
     def regression(self):
         """
@@ -167,24 +150,7 @@ class StructuredDataAutoML(object):
                 max_budget=self.__iter_limit
             )
 
-        ############################################################################
-        # Print the final ensemble performance
-        # ====================================
-        y_pred = auto_reg.predict(self.__X)
-
-        # Rescale the Neural Network predictions into the original target range
-        score = auto_reg.score(y_pred, self.__y)
-
-        print(score)
-        # Print the final ensemble built by AutoPyTorch
-        print(auto_reg.show_models())
-
-        # Print statistics from search
-        print(auto_reg.sprint_statistics())
-
         self.__export_model(auto_reg)
-
-        return
 
     def execute_task(self):
         """
