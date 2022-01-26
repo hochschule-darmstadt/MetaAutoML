@@ -3,21 +3,8 @@ import pandas as pd
 import pickle
 from flaml import AutoML
 
-from enum import Enum, unique
-
 from JsonUtil import get_config_property
-
-@unique
-class DataType(Enum):
-    DATATYPE_UNKNOW = 0
-    DATATYPE_STRING = 1
-    DATATYPE_INT = 2
-    DATATYPE_FLOAT = 3
-    DATATYPE_CATEGORY = 4
-    DATATYPE_BOOLEAN = 5
-    DATATYPE_DATETIME = 6
-    DATATYPE_IGNORE = 7
-
+from predict_time_sources import feature_preparation, DataType, SplitMethod
 
 class StructuredDataAutoML(object):
     """
@@ -39,17 +26,19 @@ class StructuredDataAutoML(object):
         """
         df = pd.read_csv(os.path.join(self.__configuration["file_location"], self.__configuration["file_name"]),
                          **self.__configuration["file_configuration"])
+
+        # split training set
+        if SplitMethod.SPLIT_METHOD_RANDOM == self.__configuration["test_configuration"]["method"]:
+            df = df.sample(random_state=self.__configuration["test_configuration"]["random_state"], frac=1)
+        else:
+            df = df.iloc[:int(df.shape[0] * self.__configuration["test_configuration"]["split_ratio"])]
+
         target = self.__configuration["tabular_configuration"]["target"]["target"]
         self.__X = df.drop(target, axis=1)
         self.__y = df[target]
 
     def __dataset_preparation(self):
-        for column, dt in self.__configuration["tabular_configuration"]["features"].items():
-            if DataType(dt) is DataType.DATATYPE_IGNORE:
-                self.__X = self.__X.drop(column, axis=1)
-            elif DataType(dt) is DataType.DATATYPE_CATEGORY:
-                self.__X[column] = self.__X[column].astype('category')
-        # cast target to a different datatype if necessary
+        feature_preparation(self.__X, self.__configuration["tabular_configuration"]["features"].items())
         self.__cast_target()
 
     def __cast_target(self):
@@ -58,6 +47,10 @@ class StructuredDataAutoML(object):
             self.__y = self.__y.astype('category')
         elif DataType(target_dt) is DataType.DATATYPE_BOOLEAN:
             self.__y = self.__y.astype('bool')
+        elif DataType(target_dt) is DataType.DATATYPE_INT:
+            self.__y = self.__y.astype('int')
+        elif DataType(target_dt) is DataType.DATATYPE_FLOAT:
+            self.__y = self.__y.astype('float')
 
     def __export_model(self, model):
         """
@@ -66,7 +59,7 @@ class StructuredDataAutoML(object):
         Parameter:
         1. generate ML model
         """
-        with open(os.path.join(get_config_property('output-path'), 'model_flaml.p'), 'wb') as file:
+        with open(os.path.join(get_config_property('output-path'), 'tmp', 'model_flaml.p'), 'wb+') as file:
             pickle.dump(model, file)
 
     def execute_task(self):

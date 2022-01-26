@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\rAdapter.proto\")\n\x12StartAutoMLRequest\x12\x13\n\x0bprocessJson\x18\x01 \x01(\t\"g\n\x13StartAutoMLResponse\x12&\n\nreturnCode\x18\x01 \x01(\x0e\x32\x12.AdapterReturnCode\x12\x14\n\x0cstatusUpdate\x18\x02 \x01(\t\x12\x12\n\noutputJson\x18\x03 \x01(\t*\x9b\x01\n\x11\x41\x64\x61pterReturnCode\x12\x1f\n\x1b\x41\x44\x41PTER_RETURN_CODE_UNKNOWN\x10\x00\x12\x1f\n\x1b\x41\x44\x41PTER_RETURN_CODE_SUCCESS\x10\x01\x12%\n!ADAPTER_RETURN_CODE_STATUS_UPDATE\x10\x02\x12\x1d\n\x19\x41\x44\x41PTER_RETURN_CODE_ERROR\x10\x64\x32N\n\x0e\x41\x64\x61pterService\x12<\n\x0bStartAutoML\x12\x13.StartAutoMLRequest\x1a\x14.StartAutoMLResponse\"\x00\x30\x01\x62\x06proto3'
+  serialized_pb=b'\n\rAdapter.proto\";\n\x12TestAdapterRequest\x12\x10\n\x08testData\x18\x01 \x01(\t\x12\x13\n\x0bprocessJson\x18\x02 \x01(\t\"Q\n\x13TestAdapterResponse\x12\x13\n\x0bpredictions\x18\x01 \x03(\t\x12\r\n\x05score\x18\x02 \x01(\x02\x12\x16\n\x0epredictiontime\x18\x03 \x01(\x02\")\n\x12StartAutoMLRequest\x12\x13\n\x0bprocessJson\x18\x01 \x01(\t\"\xdc\x01\n\x13StartAutoMLResponse\x12&\n\nreturnCode\x18\x01 \x01(\x0e\x32\x12.AdapterReturnCode\x12\x14\n\x0cstatusUpdate\x18\x02 \x01(\t\x12\x12\n\noutputJson\x18\x03 \x01(\t\x12\x11\n\ttestScore\x18\x04 \x01(\x02\x12\x17\n\x0fvalidationScore\x18\x05 \x01(\x02\x12\x0f\n\x07runtime\x18\x06 \x01(\x05\x12\x16\n\x0epredictiontime\x18\x07 \x01(\x02\x12\x0f\n\x07library\x18\x08 \x01(\t\x12\r\n\x05model\x18\t \x01(\t*\x9b\x01\n\x11\x41\x64\x61pterReturnCode\x12\x1f\n\x1b\x41\x44\x41PTER_RETURN_CODE_UNKNOWN\x10\x00\x12\x1f\n\x1b\x41\x44\x41PTER_RETURN_CODE_SUCCESS\x10\x01\x12%\n!ADAPTER_RETURN_CODE_STATUS_UPDATE\x10\x02\x12\x1d\n\x19\x41\x44\x41PTER_RETURN_CODE_ERROR\x10\x64\x32\x8a\x01\n\x0e\x41\x64\x61pterService\x12<\n\x0bStartAutoML\x12\x13.StartAutoMLRequest\x1a\x14.StartAutoMLResponse\"\x00\x30\x01\x12:\n\x0bTestAdapter\x12\x13.TestAdapterRequest\x1a\x14.TestAdapterResponse\"\x00\x62\x06proto3'
 )
 
 _ADAPTERRETURNCODE = _descriptor.EnumDescriptor(
@@ -53,8 +53,8 @@ _ADAPTERRETURNCODE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=166,
-  serialized_end=321,
+  serialized_start=428,
+  serialized_end=583,
 )
 _sym_db.RegisterEnumDescriptor(_ADAPTERRETURNCODE)
 
@@ -64,6 +64,91 @@ ADAPTER_RETURN_CODE_SUCCESS = 1
 ADAPTER_RETURN_CODE_STATUS_UPDATE = 2
 ADAPTER_RETURN_CODE_ERROR = 100
 
+
+
+_TESTADAPTERREQUEST = _descriptor.Descriptor(
+  name='TestAdapterRequest',
+  full_name='TestAdapterRequest',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='testData', full_name='TestAdapterRequest.testData', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='processJson', full_name='TestAdapterRequest.processJson', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=17,
+  serialized_end=76,
+)
+
+
+_TESTADAPTERRESPONSE = _descriptor.Descriptor(
+  name='TestAdapterResponse',
+  full_name='TestAdapterResponse',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='predictions', full_name='TestAdapterResponse.predictions', index=0,
+      number=1, type=9, cpp_type=9, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='score', full_name='TestAdapterResponse.score', index=1,
+      number=2, type=2, cpp_type=6, label=1,
+      has_default_value=False, default_value=float(0),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='predictiontime', full_name='TestAdapterResponse.predictiontime', index=2,
+      number=3, type=2, cpp_type=6, label=1,
+      has_default_value=False, default_value=float(0),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=78,
+  serialized_end=159,
+)
 
 
 _STARTAUTOMLREQUEST = _descriptor.Descriptor(
@@ -93,8 +178,8 @@ _STARTAUTOMLREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=17,
-  serialized_end=58,
+  serialized_start=161,
+  serialized_end=202,
 )
 
 
@@ -127,6 +212,48 @@ _STARTAUTOMLRESPONSE = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='testScore', full_name='StartAutoMLResponse.testScore', index=3,
+      number=4, type=2, cpp_type=6, label=1,
+      has_default_value=False, default_value=float(0),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='validationScore', full_name='StartAutoMLResponse.validationScore', index=4,
+      number=5, type=2, cpp_type=6, label=1,
+      has_default_value=False, default_value=float(0),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='runtime', full_name='StartAutoMLResponse.runtime', index=5,
+      number=6, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='predictiontime', full_name='StartAutoMLResponse.predictiontime', index=6,
+      number=7, type=2, cpp_type=6, label=1,
+      has_default_value=False, default_value=float(0),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='library', full_name='StartAutoMLResponse.library', index=7,
+      number=8, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='model', full_name='StartAutoMLResponse.model', index=8,
+      number=9, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -139,15 +266,31 @@ _STARTAUTOMLRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=60,
-  serialized_end=163,
+  serialized_start=205,
+  serialized_end=425,
 )
 
 _STARTAUTOMLRESPONSE.fields_by_name['returnCode'].enum_type = _ADAPTERRETURNCODE
+DESCRIPTOR.message_types_by_name['TestAdapterRequest'] = _TESTADAPTERREQUEST
+DESCRIPTOR.message_types_by_name['TestAdapterResponse'] = _TESTADAPTERRESPONSE
 DESCRIPTOR.message_types_by_name['StartAutoMLRequest'] = _STARTAUTOMLREQUEST
 DESCRIPTOR.message_types_by_name['StartAutoMLResponse'] = _STARTAUTOMLRESPONSE
 DESCRIPTOR.enum_types_by_name['AdapterReturnCode'] = _ADAPTERRETURNCODE
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
+
+TestAdapterRequest = _reflection.GeneratedProtocolMessageType('TestAdapterRequest', (_message.Message,), {
+  'DESCRIPTOR' : _TESTADAPTERREQUEST,
+  '__module__' : 'Adapter_pb2'
+  # @@protoc_insertion_point(class_scope:TestAdapterRequest)
+  })
+_sym_db.RegisterMessage(TestAdapterRequest)
+
+TestAdapterResponse = _reflection.GeneratedProtocolMessageType('TestAdapterResponse', (_message.Message,), {
+  'DESCRIPTOR' : _TESTADAPTERRESPONSE,
+  '__module__' : 'Adapter_pb2'
+  # @@protoc_insertion_point(class_scope:TestAdapterResponse)
+  })
+_sym_db.RegisterMessage(TestAdapterResponse)
 
 StartAutoMLRequest = _reflection.GeneratedProtocolMessageType('StartAutoMLRequest', (_message.Message,), {
   'DESCRIPTOR' : _STARTAUTOMLREQUEST,
@@ -172,8 +315,8 @@ _ADAPTERSERVICE = _descriptor.ServiceDescriptor(
   index=0,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=323,
-  serialized_end=401,
+  serialized_start=586,
+  serialized_end=724,
   methods=[
   _descriptor.MethodDescriptor(
     name='StartAutoML',
@@ -182,6 +325,16 @@ _ADAPTERSERVICE = _descriptor.ServiceDescriptor(
     containing_service=None,
     input_type=_STARTAUTOMLREQUEST,
     output_type=_STARTAUTOMLRESPONSE,
+    serialized_options=None,
+    create_key=_descriptor._internal_create_key,
+  ),
+  _descriptor.MethodDescriptor(
+    name='TestAdapter',
+    full_name='AdapterService.TestAdapter',
+    index=1,
+    containing_service=None,
+    input_type=_TESTADAPTERREQUEST,
+    output_type=_TESTADAPTERRESPONSE,
     serialized_options=None,
     create_key=_descriptor._internal_create_key,
   ),
