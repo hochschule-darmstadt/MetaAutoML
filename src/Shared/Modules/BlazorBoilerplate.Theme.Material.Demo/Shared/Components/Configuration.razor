@@ -1,5 +1,6 @@
 @inject IStringLocalizer<Global> L
 @using System
+@using System.Linq
 
 @if (Session!=null){
     <div Style="padding: 10px;">
@@ -15,7 +16,7 @@
         <p Style="margin-top: 1em; margin-bottom: 0px;">Feature Configuration:</p>
         <div style="padding: 5px;">
             <MatList Style=" min-height: 2rem; max-height: 30rem; overflow-y: auto;">
-                @foreach (KeyValuePair<string, BlazorBoilerplate.Server.DataType> pair in Session.Configuration.Features)
+                @foreach (KeyValuePair<string, BlazorBoilerplate.Server.DataType> pair in Session.Configuration.Features.OrderBy(x => x.Key))
                 {
                     <MatListItem Style="height: 30px;">
                         @pair.Key : @pair.Value

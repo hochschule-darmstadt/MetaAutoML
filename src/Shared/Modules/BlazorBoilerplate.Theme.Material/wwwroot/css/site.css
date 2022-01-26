@@ -740,3 +740,7 @@ div.refresh-timer-interval-wrapper {
     background-color: #5474fc;
     border-color: #5474fc;
 }
+
+.mdc-chip-set{
+    align-items:center;
+}
