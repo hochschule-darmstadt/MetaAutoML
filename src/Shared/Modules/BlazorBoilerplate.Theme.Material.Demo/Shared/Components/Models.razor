@@ -8,17 +8,19 @@
 
 
 <div class="row">
-    <MatTable Items="@automls" PageSize="25" class="mat-elevation-z5" ShowPaging="false">
+    <MatTable Items="@sortedData" PageSize="10" class="mat-elevation-z5" ShowPaging="true" UseSortHeaderRow="true">
         <MatTableHeader>
-            <th>Training</th>
-            <th>AutoML</th>
-            <th>ML library</th>
-            <th>Model</th>
-            <th>Score</th>
-            <th>Prediction time[ms]</th>
-            <th>Runtime AutoML[s]</th>
-            <th>Status</th>
-            <th></th>
+            <MatSortHeaderRow SortChanged="@SortData">
+                <MatSortHeader SortId="training">Training</MatSortHeader>
+                <MatSortHeader SortId="name">AutoML</MatSortHeader>
+                <MatSortHeader SortId="library"><span style="width:220px">ML library</span></MatSortHeader>
+                <MatSortHeader SortId="model"><span style="width:162px">Model</span></MatSortHeader>
+                <MatSortHeader SortId="testscore">Score</MatSortHeader>
+                <MatSortHeader SortId="predictiontime">Prediction time[ms]</MatSortHeader>
+                <MatSortHeader SortId="runtime">Runtime AutoML[s]</MatSortHeader>
+                <MatSortHeader SortId="status">Status</MatSortHeader>
+                <th></th>
+            </MatSortHeaderRow>
         </MatTableHeader>
         <MatTableRow>
             <td>
@@ -74,6 +76,8 @@
         }
     }
     List<AutoML> automls = new List<AutoML>();
+    AutoML[] sortedData = null;
+
     Dictionary<string, GetSessionResponseDto> loadedSessions = new Dictionary<string, GetSessionResponseDto>();
 
     protected override void OnInitialized(){
@@ -139,6 +143,53 @@
         automls = automls.OrderByDescending(x => x.TestScore).ToList();
     }
 
+    void SortData(MatSortChangedEvent sort)
+    {
+        sortedData = automls.OrderByDescending(x => x.TestScore).ToArray();
+        if (!(sort == null || sort.Direction == MatSortDirection.None || string.IsNullOrEmpty(sort.SortId)))
+        {
+            Comparison<AutoML> comparison = null;
+            switch (sort.SortId)
+            {
+                case "training":
+                    comparison = (s1, s2) => string.Compare(s1.Id, s2.Id, StringComparison.InvariantCultureIgnoreCase);
+                    break;
+                case "name":
+                    comparison = (s1, s2) => string.Compare(s1.Name, s2.Name, StringComparison.InvariantCultureIgnoreCase);
+                    break;
+                case "library":
+                    comparison = (s1, s2) => string.Compare(s1.Library, s2.Library, StringComparison.InvariantCultureIgnoreCase);
+                    break;
+                case "model":
+                    comparison = (s1, s2) => string.Compare(s1.Model, s2.Model, StringComparison.InvariantCultureIgnoreCase);
+                    break;
+                case "testscore":
+                    comparison = (s1, s2) => s1.TestScore.CompareTo(s2.TestScore);
+                    break;
+                case "predictiontime":
+                    comparison = (s1, s2) => s1.Predictiontime.CompareTo(s2.Predictiontime);
+                    break;
+                case "runtime":
+                    comparison = (s1, s2) => s1.Runtime.CompareTo(s2.Runtime);
+                    break;
+                case "status":
+                    comparison = (s1, s2) => string.Compare(s1.Status, s2.Status, StringComparison.InvariantCultureIgnoreCase);
+                    break;
+            }
+            if (comparison != null)
+            {
+                if (sort.Direction == MatSortDirection.Desc)
+                {
+                    Array.Sort(sortedData, (s1, s2) => -1 * comparison(s1, s2));
+                }
+                else
+                {
+                    Array.Sort(sortedData, comparison);
+                }
+            }
+        }
+    }
+
     private async void LoadSession(string _sessionId)
     {
         await InvokeAsync(async () =>
@@ -152,6 +203,7 @@
                     GetSessionResponseDto session = Newtonsoft.Json.JsonConvert.DeserializeObject<GetSessionResponseDto>(apiResponse.Result.ToString());
                     PopulateTable(session, _sessionId);
                     loadedSessions.Add(_sessionId, session);
+                    SortData(null);
                     StateHasChanged();
                 }
                 else

@@ -42,7 +42,7 @@
                     <MatChipSet Filter="true" SelectedChipsChanged="OnChipAutoMLSolutionChanged">
                         @if (_compatibleAutoMl != null && _compatibleAutoMl.AutoMlSolutions.Count != 0)
                         {
-                            <p>AutoML Solution :</p>
+                            <p style="margin-bottom: 0px;">AutoML Solution :</p>
                             @foreach (var item in _compatibleAutoMl.AutoMlSolutions)
                             {
                                 <MatChip Label="@item" IsCheckable="true"></MatChip>
