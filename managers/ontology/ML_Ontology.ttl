@@ -1,5 +1,5 @@
 ### Ontology file generated from ML_Ontology.xlsx.
-### 2021-12-09 14:35:17.264614
+### 2022-01-25 23:23:43.632754
 
 
 # PREFIXES
@@ -79,14 +79,6 @@
 :can_perform a rdf:Property ;
     skos:prefLabel "can perform" ;
     rdfs:comment ":AutoML_solution -> :ML_task" .
-
-
-# ML_dataset
-
-:tabular_data a :ML_dataset ;
-    skos:prefLabel "tabular data" ;
-    rdfs:comment "A dataset presented in a tabulary form (CSV file)" ;
-    :used_for :tabular_classification , :tabular_regression; .
 
 
 # ML_area
@@ -204,7 +196,8 @@
 :auto_regressive_integrated_moving_average a :ML_approach ;
     skos:prefLabel "auto-regressive integrated moving average" ;
     skos:altLabel "ARIMA" ;
-    :used_for :time_series_analysis .
+    :used_for :time_series_analysis ;
+    :flaml_name "arima" .
 :Autoencoder a :ML_approach ;
     skos:prefLabel "Autoencoder" ;
     skos:altLabel "AE" ;
@@ -273,7 +266,8 @@
 :extra_tree a :ML_approach ;
     skos:prefLabel "extra tree" ;
     skos:broader :decision_tree ;
-    :used_for :classification .
+    :used_for :classification ;
+    :flaml_name "extra_tree" .
 :feed_forward_neural_network a :ML_approach ;
     skos:prefLabel "feed-forward neural network" ;
     skos:altLabel "FFN" ;
@@ -339,7 +333,8 @@
     skos:prefLabel "k-nearest neighbors" ;
     skos:altLabel "kNN" ;
     :used_for :classification , :regression ;
-    :performance :fast_training .
+    :performance :fast_training ;
+    :flaml_name "kneighbor" .
 :kernel_SVM a :ML_approach ;
     skos:prefLabel "kernel SVM" ;
     skos:broader :support_vector_machine ;
@@ -371,7 +366,8 @@
 :logistic_regression a :ML_approach ;
     skos:prefLabel "logistic regression" ;
     :used_for :classification , :regression , :ranking ;
-    :performance :fast_training .
+    :performance :fast_training ;
+    :flaml_name "lr1, lr2?" .
 :long_short_term_memory a :ML_approach ;
     skos:prefLabel "long short term memory" ;
     skos:altLabel "LSTM" ;
@@ -415,12 +411,14 @@
     :performance :fast_training .
 :Prophet a :ML_approach ;
     skos:prefLabel "Prophet" ;
-    :used_for :time_series_analysis .
+    :used_for :time_series_analysis ;
+    :flaml_name "prophet" .
 :random_forest a :ML_approach ;
     skos:prefLabel "random forest" ;
     skos:broader :decision_tree ;
     :used_for :classification , :regression ;
-    :performance :fast_training , :accurate .
+    :performance :fast_training , :accurate ;
+    :flaml_name "rf" .
 :recurrent_NN a :ML_approach ;
     skos:prefLabel "recurrent NN" ;
     skos:altLabel "RNN" ;
@@ -433,7 +431,8 @@
 :Seasonal_autoregressive_intefrated_moving_average_exogenous a :ML_approach ;
     skos:prefLabel "Seasonal autoregressive intefrated moving average exogenous" ;
     skos:altLabel "SARIMAX" ;
-    :used_for :time_series_analysis .
+    :used_for :time_series_analysis ;
+    :flaml_name "sarimax" .
 :self_organizing_maps a :ML_approach ;
     skos:prefLabel "self-organizing maps" ;
     skos:altLabel "SOM" ;
@@ -474,6 +473,24 @@
 :Word2Vector a :ML_approach ;
     skos:prefLabel "Word2Vector" ;
     :used_for :text_analytics .
+:xgboost a :ML_approach ;
+    skos:prefLabel "xgboost" ;
+    skos:broader :gradient_boosting_tree ;
+    :used_for :classification , :regression ;
+    :performance :accurate , :explainable ;
+    :flaml_name "xgboost" .
+:lgbm a :ML_approach ;
+    skos:prefLabel "lgbm" ;
+    skos:broader :gradient_boosting_tree ;
+    :used_for :classification , :regression ;
+    :performance :accurate , :explainable ;
+    :flaml_name "lgbm" .
+:catboost a :ML_approach ;
+    skos:prefLabel "catboost" ;
+    skos:broader :gradient_boosting_tree ;
+    :used_for :classification , :regression ;
+    :performance :accurate , :explainable ;
+    :flaml_name "catboost" .
 
 
 # Preprocessing_approach
@@ -559,194 +576,6 @@
     skos:prefLabel "fastai" .
 
 
-# Metric
-
-:accuracy a :ML_prediction_performance_measure ;
-    skos:prefLabel "accuracy" ;
-    :used_for :classification ;
-    :recommended_if :balanced_dataset ;
-    :not_recommended_if :unbalanced_dataset ;
-    rdfs:seeAlso <https://en.wikipedia.org/wiki/Confusion_matrix> .
-:Average_precision_score a :ML_prediction_performance_measure ;
-    skos:prefLabel "Average precision score" ;
-    skos:altLabel "AP" ;
-    :used_for :classification .
-:Coefficient_of_determination a :ML_prediction_performance_measure ;
-    skos:prefLabel "Coefficient of determination" ;
-    skos:altLabel "R2" ;
-    :used_for :regression .
-:precision a :ML_prediction_performance_measure ;
-    skos:prefLabel "precision" ;
-    skos:altLabel "positive predictive value" , "PPV" ;
-    :used_for :classification ;
-    rdfs:seeAlso <https://en.wikipedia.org/wiki/Confusion_matrix> .
-:recall a :ML_prediction_performance_measure ;
-    skos:prefLabel "recall" ;
-    skos:altLabel "sensitivity" , "hit rate" , "true positive rate" , "TPR" ;
-    :used_for :classification ;
-    rdfs:seeAlso <https://en.wikipedia.org/wiki/Confusion_matrix> .
-:F_measure a :ML_prediction_performance_measure ;
-    skos:prefLabel "F-measure" ;
-    skos:altLabel "F" , "F1" , "F1-score" ;
-    :used_for :classification ;
-    :recommended_if :unbalanced_dataset ;
-    rdfs:seeAlso <https://en.wikipedia.org/wiki/Confusion_matrix> .
-:F_measure_micro a :ML_prediction_performance_measure ;
-    skos:prefLabel "F-measure micro" ;
-    skos:altLabel "F1 micro" ;
-    :used_for :classification .
-:F_measure_macro a :ML_prediction_performance_measure ;
-    skos:prefLabel "F-measure macro" ;
-    skos:altLabel "F1 macro" ;
-    :used_for :classification .
-:mean_squared_error a :ML_prediction_performance_measure ;
-    skos:prefLabel "mean squared error" ;
-    skos:altLabel "MSE" ;
-    :used_for :regression ;
-    rdfs:seeAlso <https://en.wikipedia.org/wiki/Confusion_matrix> .
-:rooted_mean_squared_error a :ML_prediction_performance_measure ;
-    skos:prefLabel "rooted mean squared error" ;
-    skos:altLabel "RMSE" ;
-    :used_for :regression ;
-    rdfs:seeAlso <https://en.wikipedia.org/wiki/Confusion_matrix> .
-:Log_loss a :ML_prediction_performance_measure ;
-    skos:prefLabel "Log loss" ;
-    skos:altLabel "Log loss" ;
-    :used_for :classification .
-:mean_absolute_error a :ML_prediction_performance_measure ;
-    skos:prefLabel "mean absolute error" ;
-    skos:altLabel "MAE" ;
-    :used_for :regression ;
-    rdfs:seeAlso <https://en.wikipedia.org/wiki/Confusion_matrix> .
-:mean_absolute_percentage_error a :ML_prediction_performance_measure ;
-    skos:prefLabel "mean absolute percentage error" ;
-    skos:altLabel "MAPE" ;
-    :used_for :regression , :time_series_forecasting .
-:Receiver_Operating_Characteristic_Curve a :ML_prediction_performance_measure ;
-    skos:prefLabel "Receiver Operating Characteristic Curve" ;
-    skos:altLabel "ROC AUC" ;
-    :used_for :classification , :regression .
-:Receiver_Operating_Characteristic_Curve_one_vs_rest a :ML_prediction_performance_measure ;
-    skos:prefLabel "Receiver Operating Characteristic Curve one vs rest" ;
-    skos:altLabel "ROC AUC OVR" ;
-    :used_for :classification , :regression .
-:Receiver_Operating_Characteristic_Curve_one_vs_one a :ML_prediction_performance_measure ;
-    skos:prefLabel "Receiver Operating Characteristic Curve one vs one" ;
-    skos:altLabel "ROC AUC OVO" ;
-    :used_for :classification , :regression .
-:specificity a :ML_prediction_performance_measure ;
-    skos:prefLabel "specificity" ;
-    skos:altLabel "selectivity" , "true negative rate" , "TNR" ;
-    rdfs:seeAlso <https://en.wikipedia.org/wiki/Confusion_matrix> .
-:negative_predictive_value a :ML_prediction_performance_measure ;
-    skos:prefLabel "negative predictive value" ;
-    skos:altLabel "NPV" ;
-    rdfs:seeAlso <https://en.wikipedia.org/wiki/Confusion_matrix> .
-:false_negative_rate a :ML_prediction_performance_measure ;
-    skos:prefLabel "false negative rate" ;
-    skos:altLabel "FNR" , "miss rate" ;
-    rdfs:seeAlso <https://en.wikipedia.org/wiki/Confusion_matrix> .
-:false_positive_rate a :ML_prediction_performance_measure ;
-    skos:prefLabel "false positive rate" ;
-    skos:altLabel "FPR" , "fall-out" ;
-    rdfs:seeAlso <https://en.wikipedia.org/wiki/Confusion_matrix> .
-:false_discovery_rate a :ML_prediction_performance_measure ;
-    skos:prefLabel "false discovery rate" ;
-    skos:altLabel "FDR" ;
-    rdfs:seeAlso <https://en.wikipedia.org/wiki/Confusion_matrix> .
-:false_omission_rate a :ML_prediction_performance_measure ;
-    skos:prefLabel "false omission rate" ;
-    skos:altLabel "FOR" ;
-    rdfs:seeAlso <https://en.wikipedia.org/wiki/Confusion_matrix> .
-:Prevalence_Threshold a :ML_prediction_performance_measure ;
-    skos:prefLabel "Prevalence Threshold" ;
-    skos:altLabel "PT" ;
-    rdfs:seeAlso <https://en.wikipedia.org/wiki/Confusion_matrix> .
-:critical_success_index a :ML_prediction_performance_measure ;
-    skos:prefLabel "critical success index" ;
-    skos:altLabel "CSI" , "Threat score" , "TS" ;
-    rdfs:seeAlso <https://en.wikipedia.org/wiki/Confusion_matrix> .
-:Matthews_correlation_coefficient a :ML_prediction_performance_measure ;
-    skos:prefLabel "Matthews correlation coefficient" ;
-    skos:altLabel "MCC" ;
-    rdfs:seeAlso <https://en.wikipedia.org/wiki/Confusion_matrix> .
-:Fowlkes_Mallows_index a :ML_prediction_performance_measure ;
-    skos:prefLabel "Fowlkes Mallows index" ;
-    skos:altLabel "FM" ;
-    rdfs:seeAlso <https://en.wikipedia.org/wiki/Confusion_matrix> .
-:informedness a :ML_prediction_performance_measure ;
-    skos:prefLabel "informedness" ;
-    skos:altLabel "bookmaker informedness" , "BM" ;
-    rdfs:seeAlso <https://en.wikipedia.org/wiki/Confusion_matrix> .
-:markedness a :ML_prediction_performance_measure ;
-    skos:prefLabel "markedness" ;
-    skos:altLabel "MK" , "deltaP" ;
-    rdfs:seeAlso <https://en.wikipedia.org/wiki/Confusion_matrix> .
-:Normalized_Discounted_Cumulative_Gain a :ML_prediction_performance_measure ;
-    skos:prefLabel "Normalized Discounted Cumulative Gain" ;
-    skos:altLabel "NDCG" ;
-    :used_for :ranking .
-:area_under_ROC_curve a :ML_prediction_performance_measure ;
-    skos:prefLabel "area under ROC curve" ;
-    skos:altLabel "AUC" ;
-    rdfs:seeAlso <https://en.wikipedia.org/wiki/Confusion_matrix> .
-:Cohens_kappa a :ML_prediction_performance_measure ;
-    skos:prefLabel "Cohens kappa" ;
-    rdfs:seeAlso <https://en.wikipedia.org/wiki/Confusion_matrix> .
-:median_absolute_error a :ML_prediction_performance_measure ;
-    skos:prefLabel "median absolute error" ;
-    :used_for :regression .
-:balanced_accuracy a :ML_prediction_performance_measure ;
-    skos:prefLabel "balanced accuracy" ;
-    :used_for :classification .
-:F_measure_weighted a :ML_prediction_performance_measure ;
-    skos:prefLabel "F-measure weighted" ;
-    skos:altLabel "F1 weighted" ;
-    :used_for :classification .
-:precision_macro a :ML_prediction_performance_measure ;
-    skos:prefLabel "precision macro" ;
-    :used_for :classification .
-:precision_micro a :ML_prediction_performance_measure ;
-    skos:prefLabel "precision micro" ;
-    :used_for :classification .
-:precision_weighted a :ML_prediction_performance_measure ;
-    skos:prefLabel "precision weighted" ;
-    :used_for :classification .
-:recall_macro a :ML_prediction_performance_measure ;
-    skos:prefLabel "recall macro" ;
-    :used_for :classification .
-:recall_micro a :ML_prediction_performance_measure ;
-    skos:prefLabel "recall micro" ;
-    :used_for :classification .
-:recall_weighted a :ML_prediction_performance_measure ;
-    skos:prefLabel "recall weighted" ;
-    :used_for :classification .
-:pac_score a :ML_prediction_performance_measure ;
-    skos:prefLabel "pac score" ;
-    skos:altLabel "PAC-Bayesian AUC classification and scoring" ;
-    :used_for :classification .
-:spearman_rank_correlation_coefficient a :ML_prediction_performance_measure ;
-    skos:prefLabel "spearman rank correlation coefficient" ;
-    skos:altLabel "spearmanr" ;
-    :used_for :regression .
-:pearson_correlation_coefficient a :ML_prediction_performance_measure ;
-    skos:prefLabel "pearson correlation coefficient" ;
-    skos:altLabel "pearsonr" ;
-    :used_for :regression .
-:F_measure_samples a :ML_prediction_performance_measure ;
-    skos:prefLabel "F-measure samples" ;
-    :used_for :classification .
-:precision_samples a :ML_prediction_performance_measure ;
-    skos:prefLabel "precision samples" ;
-    :used_for :classification .
-:recall_samples a :ML_prediction_performance_measure ;
-    skos:prefLabel "recall samples" ;
-    :used_for :classification .
-:mean_squared_log_error a :ML_prediction_performance_measure ;
-    skos:prefLabel "mean squared log error" ;
-    :used_for :regression .
-
-
 # Configuration_item
 
 :tabular_classification_in_Autosklearn a :Configuration_Item ;
@@ -802,25 +631,25 @@
     :category :task_configuration ;
     :autoML_solution ":FLAML" ;
     :ml_task :text_classification ;
-    :parameter_value :use_approach_FLAML_text , :metric_FLAML_classification .
+    :parameter_value :use_approach_FLAML_text_classification , :metric_FLAML_classification .
 :text_regression_in_FLAML a :Configuration_Item ;
     skos:prefLabel "text regression in FLAML" ;
     :category :task_configuration ;
     :autoML_solution ":FLAML" ;
     :ml_task :text_regression ;
-    :parameter_value :use_approach_FLAML_text , :metric_FLAML_regression .
+    :parameter_value :use_approach_FLAML_text_regression , :metric_FLAML_regression .
 :tabular_classification_in_Auto_PyTorch a :Configuration_Item ;
     skos:prefLabel "tabular classification in Auto-PyTorch" ;
     :category :task_configuration ;
     :autoML_solution ":Auto_PyTorch" ;
     :ml_task :tabular_classification ;
-    :parameter_value :use_approach_Auto_Pytorch , :metric_Auto_Pytorch_classification .
+    :parameter_value :use_approach_Auto_Pytorch_classification , :metric_Auto_Pytorch_classification .
 :tabular_regression_in_Auto_PyTorch a :Configuration_Item ;
     skos:prefLabel "tabular regression in Auto-PyTorch" ;
     :category :task_configuration ;
     :autoML_solution ":Auto_PyTorch" ;
     :ml_task :tabular_regression ;
-    :parameter_value :use_approach_Auto_Pytorch , :metric_Auto_Pytorch_regression .
+    :parameter_value :use_approach_Auto_Pytorch_regression , :metric_Auto_Pytorch_regression .
 :tabular_classification_in_AutoGluon a :Configuration_Item ;
     skos:prefLabel "tabular classification in AutoGluon" ;
     :category :task_configuration ;
@@ -929,15 +758,29 @@
     skos:broader :use_approach ;
     :autoML_solution ":FLAML" ;
     :parameter_value :logistic_regression , :gradient_boosting_tree .
-:use_approach_FLAML_text a :Configuration_Item ;
-    skos:prefLabel "use approach FLAML text" ;
+:use_approach_FLAML_text_classification a :Configuration_Item ;
+    skos:prefLabel "use approach FLAML text classification" ;
     :category :parameter ;
     skos:broader :use_approach ;
     :autoML_solution ":FLAML" ;
     :datatype :list ;
     :parameter_value :transformer .
-:use_approach_Auto_Pytorch a :Configuration_Item ;
-    skos:prefLabel "use approach Auto-Pytorch" ;
+:use_approach_FLAML_text_regression a :Configuration_Item ;
+    skos:prefLabel "use approach FLAML text regression" ;
+    :category :parameter ;
+    skos:broader :use_approach ;
+    :autoML_solution ":FLAML" ;
+    :datatype :list ;
+    :parameter_value :transformer .
+:use_approach_Auto_Pytorch_classification a :Configuration_Item ;
+    skos:prefLabel "use approach Auto-Pytorch classification" ;
+    :category :parameter ;
+    skos:broader :use_approach ;
+    :autoML_solution ":Auto_PyTorch" ;
+    :datatype :list ;
+    :parameter_value :multilayer_perceptron .
+:use_approach_Auto_Pytorch_regression a :Configuration_Item ;
+    skos:prefLabel "use approach Auto-Pytorch regression" ;
     :category :parameter ;
     skos:broader :use_approach ;
     :autoML_solution ":Auto_PyTorch" ;
@@ -1024,7 +867,7 @@
     :autoML_solution ":Autosklearn" ;
     :ml_task :tabular_classification ;
     :datatype :single_value ;
-    :parameter_value :accuracy , :balanced_accuracy , :F_measure , :F_measure_macro .
+    :parameter_value :accuracy , :balanced_accuracy , :F_measure , :Receiver_Operating_Characteristic_Curve , :Average_precision_score , :Log_loss , :precision , :recall .
 :metric_autokeras_classification a :Configuration_Item ;
     skos:prefLabel "metric autokeras classification" ;
     :category :parameter ;
@@ -1048,7 +891,7 @@
     :autoML_solution ":Autosklearn" ;
     :ml_task :tabular_regression ;
     :datatype :single_value ;
-    :parameter_value :mean_squared_error .
+    :parameter_value :mean_squared_error , :mean_absolute_error , :median_absolute_error , :Coefficient_of_determination , :rooted_mean_squared_error , :mean_squared_log_error .
 :metric_autokeras_regression a :Configuration_Item ;
     skos:prefLabel "metric autokeras regression" ;
     :category :parameter ;
@@ -1335,7 +1178,7 @@
     :can_perform :tabular_classification , :tabular_regression .
 :FLAML a :AutoML_solution ;
     skos:prefLabel "FLAML" ;
-    :used_for :scikit_learn , :Catboost , :LightGBM ;
+    :used_for :scikit_learn , :Catboost , :LightGBM , :XgBoost ;
     :is_active "yes" ;
     :can_perform :tabular_classification , :tabular_regression , :ranking , :time_series_analysis .
 :AutoCVE a :AutoML_solution ;
@@ -1343,3 +1186,307 @@
     :used_for :XgBoost , :scikit_learn ;
     :is_active "yes" ;
     :can_perform :tabular_classification .
+:MLJAR a :AutoML_solution ;
+    skos:prefLabel "MLJAR" ;
+    :is_active "yes" ;
+    :can_perform :tabular_classification .
+
+
+# Metric
+
+:accuracy a :ML_prediction_performance_measure ;
+    skos:prefLabel "accuracy" ;
+    :used_for :classification ;
+    :recommended_if :balanced_dataset ;
+    :not_recommended_if :unbalanced_dataset ;
+    rdfs:seeAlso <https://en.wikipedia.org/wiki/Confusion_matrix> ;
+    :flaml_name "accuracy" ;
+    :autosklearn_name "accuracy" ;
+    :autopytorch_name "accuracy" ;
+    :autokeras_name "accuracy" ;
+    :autogluon_name "accuracy" .
+:Average_precision_score a :ML_prediction_performance_measure ;
+    skos:prefLabel "Average precision score" ;
+    skos:altLabel "AP" ;
+    :used_for :classification ;
+    :flaml_name "ap" ;
+    :autosklearn_name "average_precision" ;
+    :autopytorch_name "average_precision" ;
+    :autokeras_name "average_precision" ;
+    :autogluon_name "average_precision" .
+:Coefficient_of_determination a :ML_prediction_performance_measure ;
+    skos:prefLabel "Coefficient of determination" ;
+    skos:altLabel "R2" ;
+    :used_for :regression ;
+    :flaml_name "r2" ;
+    :autosklearn_name "r2" ;
+    :autopytorch_name "r2" ;
+    :autokeras_name "r2" ;
+    :autogluon_name "r2" .
+:precision a :ML_prediction_performance_measure ;
+    skos:prefLabel "precision" ;
+    skos:altLabel "positive predictive value" , "PPV" ;
+    :used_for :classification ;
+    rdfs:seeAlso <https://en.wikipedia.org/wiki/Confusion_matrix> ;
+    :autosklearn_name "precision" ;
+    :autopytorch_name "precision" ;
+    :autokeras_name "precision" ;
+    :autogluon_name "precision" .
+:recall a :ML_prediction_performance_measure ;
+    skos:prefLabel "recall" ;
+    skos:altLabel "sensitivity" , "hit rate" , "true positive rate" , "TPR" ;
+    :used_for :classification ;
+    rdfs:seeAlso <https://en.wikipedia.org/wiki/Confusion_matrix> ;
+    :autosklearn_name "recall" ;
+    :autopytorch_name "recall" ;
+    :autokeras_name "recall" ;
+    :autogluon_name "recall" .
+:F_measure a :ML_prediction_performance_measure ;
+    skos:prefLabel "F-measure" ;
+    skos:altLabel "F" , "F1" , "F1-score" ;
+    :used_for :classification ;
+    :recommended_if :unbalanced_dataset ;
+    rdfs:seeAlso <https://en.wikipedia.org/wiki/Confusion_matrix> ;
+    :flaml_name "f1" ;
+    :autosklearn_name "f1" ;
+    :autopytorch_name "f1" ;
+    :autokeras_name "f1" ;
+    :autogluon_name "f1" .
+:F_measure_micro a :ML_prediction_performance_measure ;
+    skos:prefLabel "F-measure micro" ;
+    skos:altLabel "F1 micro" ;
+    :used_for :classification ;
+    :flaml_name "micro_f1" ;
+    :autopytorch_name "f1_macro" ;
+    :autokeras_name "f1_macro" ;
+    :autogluon_name "f1_macro" .
+:F_measure_macro a :ML_prediction_performance_measure ;
+    skos:prefLabel "F-measure macro" ;
+    skos:altLabel "F1 macro" ;
+    :used_for :classification ;
+    :flaml_name "macro_f1" ;
+    :autopytorch_name "f1_micro" ;
+    :autokeras_name "f1_micro" ;
+    :autogluon_name "f1_micro" .
+:mean_squared_error a :ML_prediction_performance_measure ;
+    skos:prefLabel "mean squared error" ;
+    skos:altLabel "MSE" ;
+    :used_for :regression ;
+    rdfs:seeAlso <https://en.wikipedia.org/wiki/Confusion_matrix> ;
+    :flaml_name "mse" ;
+    :autosklearn_name "mean_squared_error" ;
+    :autopytorch_name "mean_squared_error" ;
+    :autokeras_name "mean_squared_error" ;
+    :autogluon_name "mean_squared_error" .
+:rooted_mean_squared_error a :ML_prediction_performance_measure ;
+    skos:prefLabel "rooted mean squared error" ;
+    skos:altLabel "RMSE" ;
+    :used_for :regression ;
+    rdfs:seeAlso <https://en.wikipedia.org/wiki/Confusion_matrix> ;
+    :flaml_name "rmse" ;
+    :autosklearn_name "root_mean_squared_error" ;
+    :autopytorch_name "root_mean_squared_error" ;
+    :autogluon_name "root_mean_squared_error" .
+:Log_loss a :ML_prediction_performance_measure ;
+    skos:prefLabel "Log loss" ;
+    skos:altLabel "Log loss" ;
+    :used_for :classification ;
+    :flaml_name "log_loss" ;
+    :autosklearn_name "log_loss" ;
+    :autopytorch_name "log_loss" ;
+    :autokeras_name "log_loss" ;
+    :autogluon_name "log_loss" .
+:mean_absolute_error a :ML_prediction_performance_measure ;
+    skos:prefLabel "mean absolute error" ;
+    skos:altLabel "MAE" ;
+    :used_for :regression ;
+    rdfs:seeAlso <https://en.wikipedia.org/wiki/Confusion_matrix> ;
+    :flaml_name "mae" ;
+    :autosklearn_name "mean_absolute_error" ;
+    :autopytorch_name "mean_absolute_error" ;
+    :autokeras_name "mean_absolute_error" ;
+    :autogluon_name "mean_absolute_error" .
+:mean_absolute_percentage_error a :ML_prediction_performance_measure ;
+    skos:prefLabel "mean absolute percentage error" ;
+    skos:altLabel "MAPE" ;
+    :used_for :regression , :time_series_forecasting ;
+    :flaml_name "mape" .
+:Receiver_Operating_Characteristic_Curve a :ML_prediction_performance_measure ;
+    skos:prefLabel "Receiver Operating Characteristic Curve" ;
+    skos:altLabel "ROC AUC" ;
+    :used_for :classification , :regression ;
+    :flaml_name "roc_auc" ;
+    :autosklearn_name "roc_auc" ;
+    :autopytorch_name "roc_auc" ;
+    :autokeras_name "roc_auc" ;
+    :autogluon_name "roc_auc" .
+:Receiver_Operating_Characteristic_Curve_one_vs_rest a :ML_prediction_performance_measure ;
+    skos:prefLabel "Receiver Operating Characteristic Curve one vs rest" ;
+    skos:altLabel "ROC AUC OVR" ;
+    :used_for :classification , :regression ;
+    :flaml_name "roc_auc_ovr" .
+:Receiver_Operating_Characteristic_Curve_one_vs_one a :ML_prediction_performance_measure ;
+    skos:prefLabel "Receiver Operating Characteristic Curve one vs one" ;
+    skos:altLabel "ROC AUC OVO" ;
+    :used_for :classification , :regression ;
+    :flaml_name "roc_auc_ovo" ;
+    :autogluon_name "roc_auc_ovo_macro" .
+:specificity a :ML_prediction_performance_measure ;
+    skos:prefLabel "specificity" ;
+    skos:altLabel "selectivity" , "true negative rate" , "TNR" ;
+    rdfs:seeAlso <https://en.wikipedia.org/wiki/Confusion_matrix> .
+:negative_predictive_value a :ML_prediction_performance_measure ;
+    skos:prefLabel "negative predictive value" ;
+    skos:altLabel "NPV" ;
+    rdfs:seeAlso <https://en.wikipedia.org/wiki/Confusion_matrix> .
+:false_negative_rate a :ML_prediction_performance_measure ;
+    skos:prefLabel "false negative rate" ;
+    skos:altLabel "FNR" , "miss rate" ;
+    rdfs:seeAlso <https://en.wikipedia.org/wiki/Confusion_matrix> .
+:false_positive_rate a :ML_prediction_performance_measure ;
+    skos:prefLabel "false positive rate" ;
+    skos:altLabel "FPR" , "fall-out" ;
+    rdfs:seeAlso <https://en.wikipedia.org/wiki/Confusion_matrix> .
+:false_discovery_rate a :ML_prediction_performance_measure ;
+    skos:prefLabel "false discovery rate" ;
+    skos:altLabel "FDR" ;
+    rdfs:seeAlso <https://en.wikipedia.org/wiki/Confusion_matrix> .
+:false_omission_rate a :ML_prediction_performance_measure ;
+    skos:prefLabel "false omission rate" ;
+    skos:altLabel "FOR" ;
+    rdfs:seeAlso <https://en.wikipedia.org/wiki/Confusion_matrix> .
+:Prevalence_Threshold a :ML_prediction_performance_measure ;
+    skos:prefLabel "Prevalence Threshold" ;
+    skos:altLabel "PT" ;
+    rdfs:seeAlso <https://en.wikipedia.org/wiki/Confusion_matrix> .
+:critical_success_index a :ML_prediction_performance_measure ;
+    skos:prefLabel "critical success index" ;
+    skos:altLabel "CSI" , "Threat score" , "TS" ;
+    rdfs:seeAlso <https://en.wikipedia.org/wiki/Confusion_matrix> .
+:Matthews_correlation_coefficient a :ML_prediction_performance_measure ;
+    skos:prefLabel "Matthews correlation coefficient" ;
+    skos:altLabel "MCC" ;
+    rdfs:seeAlso <https://en.wikipedia.org/wiki/Confusion_matrix> .
+:Fowlkes_Mallows_index a :ML_prediction_performance_measure ;
+    skos:prefLabel "Fowlkes Mallows index" ;
+    skos:altLabel "FM" ;
+    rdfs:seeAlso <https://en.wikipedia.org/wiki/Confusion_matrix> .
+:informedness a :ML_prediction_performance_measure ;
+    skos:prefLabel "informedness" ;
+    skos:altLabel "bookmaker informedness" , "BM" ;
+    rdfs:seeAlso <https://en.wikipedia.org/wiki/Confusion_matrix> .
+:markedness a :ML_prediction_performance_measure ;
+    skos:prefLabel "markedness" ;
+    skos:altLabel "MK" , "deltaP" ;
+    rdfs:seeAlso <https://en.wikipedia.org/wiki/Confusion_matrix> .
+:Normalized_Discounted_Cumulative_Gain a :ML_prediction_performance_measure ;
+    skos:prefLabel "Normalized Discounted Cumulative Gain" ;
+    skos:altLabel "NDCG" ;
+    :used_for :ranking ;
+    :flaml_name "ndcg" .
+:area_under_ROC_curve a :ML_prediction_performance_measure ;
+    skos:prefLabel "area under ROC curve" ;
+    skos:altLabel "AUC" ;
+    rdfs:seeAlso <https://en.wikipedia.org/wiki/Confusion_matrix> .
+:Cohens_kappa a :ML_prediction_performance_measure ;
+    skos:prefLabel "Cohens kappa" ;
+    rdfs:seeAlso <https://en.wikipedia.org/wiki/Confusion_matrix> .
+:median_absolute_error a :ML_prediction_performance_measure ;
+    skos:prefLabel "median absolute error" ;
+    :used_for :regression ;
+    :autosklearn_name "median_absolute_error" ;
+    :autopytorch_name "median_absolute_error" ;
+    :autokeras_name "median_absolute_error" ;
+    :autogluon_name "median_absolute_error" .
+:balanced_accuracy a :ML_prediction_performance_measure ;
+    skos:prefLabel "balanced accuracy" ;
+    :used_for :classification ;
+    :autosklearn_name "balanced_accuracy" ;
+    :autopytorch_name "balanced_accuracy" ;
+    :autokeras_name "balanced_accuracy" ;
+    :autogluon_name "balanced_accuracy" .
+:F_measure_weighted a :ML_prediction_performance_measure ;
+    skos:prefLabel "F-measure weighted" ;
+    skos:altLabel "F1 weighted" ;
+    :used_for :classification ;
+    :autopytorch_name "f1_weighted" ;
+    :autokeras_name "f1_weighted" ;
+    :autogluon_name "f1_weighted" .
+:precision_macro a :ML_prediction_performance_measure ;
+    skos:prefLabel "precision macro" ;
+    :used_for :classification ;
+    :autopytorch_name "precision_macro" ;
+    :autokeras_name "precision_macro" ;
+    :autogluon_name "precision_macro" .
+:precision_micro a :ML_prediction_performance_measure ;
+    skos:prefLabel "precision micro" ;
+    :used_for :classification ;
+    :autopytorch_name "precision_micro" ;
+    :autokeras_name "precision_micro" ;
+    :autogluon_name "precision_micro" .
+:precision_weighted a :ML_prediction_performance_measure ;
+    skos:prefLabel "precision weighted" ;
+    :used_for :classification ;
+    :autopytorch_name "precision_weighted" ;
+    :autokeras_name "precision_weighted" ;
+    :autogluon_name "precision_weighted" .
+:recall_macro a :ML_prediction_performance_measure ;
+    skos:prefLabel "recall macro" ;
+    :used_for :classification ;
+    :autopytorch_name "recall_macro" ;
+    :autokeras_name "recall_macro" ;
+    :autogluon_name "recall_macro" .
+:recall_micro a :ML_prediction_performance_measure ;
+    skos:prefLabel "recall micro" ;
+    :used_for :classification ;
+    :autopytorch_name "recall_micro" ;
+    :autokeras_name "recall_micro" ;
+    :autogluon_name "recall_micro" .
+:recall_weighted a :ML_prediction_performance_measure ;
+    skos:prefLabel "recall weighted" ;
+    :used_for :classification ;
+    :autopytorch_name "recall_weighted" ;
+    :autokeras_name "recall_weighted" ;
+    :autogluon_name "recall_weighted" .
+:pac_score a :ML_prediction_performance_measure ;
+    skos:prefLabel "pac score" ;
+    skos:altLabel "PAC-Bayesian AUC classification and scoring" ;
+    :used_for :classification .
+:spearman_rank_correlation_coefficient a :ML_prediction_performance_measure ;
+    skos:prefLabel "spearman rank correlation coefficient" ;
+    skos:altLabel "spearmanr" ;
+    :used_for :regression ;
+    :autogluon_name "spearmanr" .
+:pearson_correlation_coefficient a :ML_prediction_performance_measure ;
+    skos:prefLabel "pearson correlation coefficient" ;
+    skos:altLabel "pearsonr" ;
+    :used_for :regression ;
+    :autogluon_name "pearsonr" .
+:F_measure_samples a :ML_prediction_performance_measure ;
+    skos:prefLabel "F-measure samples" ;
+    :used_for :classification ;
+    :autopytorch_name "f1_samples" ;
+    :autokeras_name "f1_samples" .
+:precision_samples a :ML_prediction_performance_measure ;
+    skos:prefLabel "precision samples" ;
+    :used_for :classification ;
+    :autopytorch_name "precision_samples" ;
+    :autokeras_name "precision_samples" .
+:recall_samples a :ML_prediction_performance_measure ;
+    skos:prefLabel "recall samples" ;
+    :used_for :classification ;
+    :autopytorch_name "recall_samples" ;
+    :autokeras_name "recall_samples" .
+:mean_squared_log_error a :ML_prediction_performance_measure ;
+    skos:prefLabel "mean squared log error" ;
+    :used_for :regression ;
+    :autosklearn_name "mean_squared_log_error" ;
+    :autopytorch_name "mean_squared_log_error" .
+
+
+# ML_dataset_type
+
+:tabular_data a :ML_dataset ;
+    skos:prefLabel "tabular data" ;
+    rdfs:comment "A dataset presented in a tabulary form (CSV file)" ;
+    :used_for :tabular_classification , :tabular_regression; .

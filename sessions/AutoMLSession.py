@@ -70,7 +70,7 @@ class AutoMLSession(object):
             max_iter=self.__configuration.runtimeConstraints.max_iter)
 
         response = Controller_pb2.GetSessionStatusResponse(tabularConfig=tabular_config,
-                                                           requiredAutoMLs=list(self.__configuration.requiredAutoMLs),
+                                                           requiredAutoMLs=[automl.name for automl in self.automls],
                                                            runtimeConstraints=runtime_constraints,)
         response.status = Controller_pb2.SESSION_STATUS_COMPLETED
         response.dataset = self.__configuration.dataset
