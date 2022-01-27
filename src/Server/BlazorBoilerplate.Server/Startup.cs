@@ -87,11 +87,6 @@ namespace BlazorBoilerplate.Server
         }
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddGrpc(options =>
-            {
-                options.MaxReceiveMessageSize = 200 * 1024 * 1024; // 200 MB
-                options.MaxSendMessageSize = 200 * 1024 * 1024; // 200 MB
-            });
             services.AddSingleton<ILocalizationProvider, StorageLocalizationProvider>();
             services.AddTextLocalization(options =>
             {
@@ -142,13 +137,18 @@ namespace BlazorBoilerplate.Server
             {
                 o.Address = new Uri(grpcEndpoint);
             })
-                .ConfigurePrimaryHttpMessageHandler(() =>
-                {
-                    var httpHandler = new HttpClientHandler();
-                    httpHandler.ServerCertificateCustomValidationCallback =
-                        HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
-                    return httpHandler;
-                });
+            .ConfigureChannel(o =>
+            {
+                o.MaxReceiveMessageSize = 200 * 1024 * 1024; // 200 MB
+                o.MaxSendMessageSize = 200 * 1024 * 1024; // 200 MB
+            })
+            .ConfigurePrimaryHttpMessageHandler(() =>
+            {
+                var httpHandler = new HttpClientHandler();
+                httpHandler.ServerCertificateCustomValidationCallback =
+                    HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
+                return httpHandler;
+            });
 
 
             var authAuthority = Configuration[$"{projectName}:IS4ApplicationUrl"].TrimEnd('/');
