@@ -88,7 +88,7 @@ class StructuredDataAutoML(object):
         automl = AutoML()
         automl_settings = self.__generate_settings()
         automl_settings.update({
-            "metric": 'accuracy',
+            "metric": self.__configuration["metric"] if self.__configuration["metric"] != "" else 'accuracy',
             "task": 'classification',
         })
 
@@ -104,7 +104,7 @@ class StructuredDataAutoML(object):
         automl = AutoML()
         automl_settings = self.__generate_settings()
         automl_settings.update({
-            "metric": 'rmse',
+            "metric": self.__configuration["metric"] if self.__configuration["metric"] != "" else 'rmse',
             "task": 'regression',
         })
 
