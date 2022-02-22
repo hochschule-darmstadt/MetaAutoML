@@ -1,0 +1,3 @@
+[submodule "AUTOCVE"]
+	path = AUTOCVE
+	url = https://github.com/celiolarcher/AUTOCVE
