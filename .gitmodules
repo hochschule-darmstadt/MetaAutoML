@@ -1,7 +1,3 @@
-[submodule "util/MetaAutoML-Diverse"]
-	path = util/MetaAutoML-Diverse
-	url = git@github.com:hochschule-darmstadt/MetaAutoML-Diverse.git
-	branch = main
 [submodule "MetaAutoML-Frontend"]
 	path = MetaAutoML-Frontend
 	url = git@github.com:hochschule-darmstadt/MetaAutoML-Frontend.git
