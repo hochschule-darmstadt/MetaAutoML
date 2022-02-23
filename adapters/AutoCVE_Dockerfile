@@ -13,12 +13,15 @@ RUN python -m pip install --upgrade pip
 # to be installed already. Apperantly pip does not install requrements.txt files in order.
 RUN pip install numpy==1.19.5
 
-COPY requirements.txt .
+COPY ./AutoCVE/requirements.txt .
 # Install dependencies
 RUN pip install -r requirements.txt
 
 WORKDIR /app
-COPY . .
+COPY ./AutoCVE .
+COPY ./Utils/Utils ./Utils
+COPY ./Utils/AutoMLs ./AutoMLs
+COPY ./GRPC ./
 
 # this should already be created, but sometimes there is a bug in docker which causes that the directory is not copied
 RUN mkdir -p /app/app-data/output/tmp

@@ -4,7 +4,7 @@ import numpy as np
 from AUTOCVE.AUTOCVE import AUTOCVEClassifier
 import pickle
 from Utils.JsonUtil import get_config_property
-from predict_time_sources import feature_preparation, DataType, SplitMethod
+from AutoMLs.predict_time_sources import feature_preparation, DataType, SplitMethod
     
     
 class StructuredDataAutoML(object):
