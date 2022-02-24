@@ -1,6 +1,6 @@
 import json
 import os.path
-from JsonUtil import get_config_property
+from Utils.JsonUtil import get_config_property
 
 from AutoMLs.StructuredDataAutoML import StructuredDataAutoML
 

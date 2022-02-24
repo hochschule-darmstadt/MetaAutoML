@@ -5,12 +5,15 @@ RUN apt-get update && apt-get install -y \
     libgomp1 \
     libquadmath0
 
-COPY requirements.txt .
+COPY ./AutoGluon/requirements.txt .
 # Install dependencies
 RUN pip install -r requirements.txt
 # put all files in a directory called app
 WORKDIR /app
-COPY . .
+COPY ./AutoGluon .
+COPY ./Utils/Utils ./Utils
+COPY ./Utils/AutoMLs ./AutoMLs
+COPY ./GRPC ./
 
 # this should already be created, but sometimes there is a bug in docker which causes that the directory is not copied
 RUN mkdir -p /app/app-data/output/tmp

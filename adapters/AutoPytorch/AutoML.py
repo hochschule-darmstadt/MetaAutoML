@@ -4,7 +4,7 @@ import logging
 import sys
 
 from AutoMLs.StructuredDataAutoML import StructuredDataAutoML
-from JsonUtil import get_config_property
+from Utils.JsonUtil import get_config_property
 
 if __name__ == '__main__':
     FORMAT = '%(asctime)s %(message)s'

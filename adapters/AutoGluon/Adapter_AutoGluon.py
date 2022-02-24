@@ -18,7 +18,7 @@ import Adapter_pb2_grpc
 
 from concurrent import futures
 from TemplateGenerator import TemplateGenerator
-from predict_time_sources import SplitMethod
+from AutoMLs.predict_time_sources import SplitMethod
 from Utils.JsonUtil import get_config_property
 
 

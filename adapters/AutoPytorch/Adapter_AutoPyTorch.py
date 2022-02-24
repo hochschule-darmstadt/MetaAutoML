@@ -17,7 +17,7 @@ import Adapter_pb2_grpc
 
 from TemplateGenerator import TemplateGenerator
 from Utils.JsonUtil import get_config_property
-from predict_time_sources import SplitMethod
+from AutoMLs.predict_time_sources import SplitMethod
 
 
 def get_except_response(context, e):

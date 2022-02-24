@@ -2,7 +2,7 @@ from jinja2 import Template
 
 import os
 import sys
-from JsonUtil import get_config_property
+from Utils.JsonUtil import get_config_property
 
 class TemplateGenerator(object):
     """

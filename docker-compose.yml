@@ -46,7 +46,7 @@ services:
   autokeras:
     build: 
       context: ./adapters
-      dockerfile: AutoKeras_Dockerfile
+      dockerfile: ./AutoKeras/Dockerfile
     container_name: autokeras
     environment:
       - GRPC_SERVER_PORT=50052
@@ -55,7 +55,9 @@ services:
       - output-autokeras:/app/app-data/output
 
   mljar:
-    build: ./adapters/MLJAR
+    build: 
+      context: ./adapters
+      dockerfile: ./MLJAR/Dockerfile
     container_name: mljar
     environment:
       - GRPC_SERVER_PORT=50053
@@ -64,7 +66,9 @@ services:
       - output-mljar:/app/app-data/output
 
   sklearn:
-    build: ./adapters/AutoSklearn
+    build: 
+      context: ./adapters
+      dockerfile: ./AutoSklearn/Dockerfile
     container_name: sklearn
     environment:
       - GRPC_SERVER_PORT=50055
@@ -73,7 +77,9 @@ services:
       - output-sklearn:/app/app-data/output
 
   flaml:
-    build: ./adapters/FLAML
+    build: 
+      context: ./adapters
+      dockerfile: ./FLAML/Dockerfile
     container_name: flaml
     environment:
       - GRPC_SERVER_PORT=50056
@@ -82,7 +88,9 @@ services:
       - output-flaml:/app/app-data/output
 
   gluon:
-    build: ./adapters/AutoGluon
+    build: 
+      context: ./adapters
+      dockerfile: ./AutoGluon/Dockerfile
     container_name: gluon
     environment:
       - GRPC_SERVER_PORT=50057
@@ -93,7 +101,7 @@ services:
   autocve:
     build: 
       context: ./adapters
-      dockerfile: AutoCVE_Dockerfile
+      dockerfile: ./AutoCVE/Dockerfile
     container_name: autocve
     environment:
       - GRPC_SERVER_PORT=50058
@@ -102,7 +110,9 @@ services:
       - output-autocve:/app/app-data/output
 
   pytorch:
-    build: ./adapters/AutoPytorch
+    build: 
+      context: ./adapters
+      dockerfile: ./AutoPytorch/Dockerfile
     container_name: pytorch
     environment:
       - GRPC_SERVER_PORT=50059

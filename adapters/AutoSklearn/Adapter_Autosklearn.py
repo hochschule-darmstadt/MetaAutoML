@@ -21,7 +21,7 @@ import Adapter_pb2_grpc
 
 from concurrent import futures
 from TemplateGenerator import TemplateGenerator
-from predict_time_sources import SplitMethod, DataType, feature_preparation
+from AutoMLs.predict_time_sources import SplitMethod, DataType, feature_preparation
 
 
 def get_except_response(context, e):

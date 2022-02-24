@@ -1,8 +1,8 @@
 import os
 import pandas as pd
 from autogluon.tabular import TabularDataset, TabularPredictor
-from JsonUtil import get_config_property
-from predict_time_sources import feature_preparation, DataType, SplitMethod
+from Utils.JsonUtil import get_config_property
+from AutoMLs.predict_time_sources import feature_preparation, DataType, SplitMethod
 
 
 class StructuredDataAutoML(object):

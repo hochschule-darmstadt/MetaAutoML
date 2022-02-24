@@ -3,7 +3,7 @@ EXPOSE 50059
 
 RUN python -m pip install --upgrade pip
 
-COPY requirements.txt .
+COPY ./AutoPytorch/requirements.txt .
 # Install dependencies
 RUN pip install -r requirements.txt
 # put all files in a directory called app
@@ -17,7 +17,10 @@ RUN apt-get update && apt-get install -y \
     libxext6
 
 WORKDIR /app
-COPY . .
+COPY ./AutoPytorch .
+COPY ./Utils/Utils ./Utils
+COPY ./Utils/AutoMLs ./AutoMLs
+COPY ./GRPC ./
 
 # this should already be created, but sometimes there is a bug in docker which causes that the directory is not copied
 RUN mkdir -p /app/app-data/output/tmp

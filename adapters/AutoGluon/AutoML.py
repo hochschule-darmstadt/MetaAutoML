@@ -1,7 +1,7 @@
 import json
 import os
 
-from JsonUtil import get_config_property
+from Utils.JsonUtil import get_config_property
 from AutoMLs.StructuredDataAutoML import StructuredDataAutoML
 
 if __name__ == '__main__':
