@@ -48,7 +48,7 @@ spec:
         - name: BlazorBoilerplate__UseSqlServer
           value: "true"
         - name: ConnectionStrings__DefaultConnection
-          value: "Server=10.1.98.219;Database=blazor_boilerplate;Trusted_Connection=True;MultipleActiveResultSets=true;User=sa;Password=yourVeryStrong(!)Password;Integrated Security=false"
+          value: "Server=10.1.98.207;Database=blazor_boilerplate;Trusted_Connection=True;MultipleActiveResultSets=true;User=sa;Password=yourVeryStrong(!)Password;Integrated Security=false"
         - name: Serilog__MinimumLevel__Default
           value: Debug
         image: alexhda/omaml-frontend:latest
