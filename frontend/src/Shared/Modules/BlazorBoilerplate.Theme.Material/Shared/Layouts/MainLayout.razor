@@ -1,0 +1,63 @@
+﻿@inherits RootLayout
+@inject NavigationManager navigationManager
+@inject AppState appState
+@inject IStringLocalizer<Global> L
+
+<CascadingValue Value="this">
+    <MatDrawerContainer Style="width: 100vw; height: 100vh;" Class="full">
+        <MatDrawer Opened="true">
+            <header class="drawer-header">
+                <div class="drawer-logo">
+                    @*logo come here
+                    <img alt="@appState.AppName" class="logo-img" src="_content/BlazorBoilerplate.Theme.Material/images/logo-dark.svg" title="@appState.AppName">
+                    *@
+                    <p style="margin: 0px; color: #ffffff; font-size: xx-large; font-weight: bold;">OMA ML</p>
+                </div>
+            </header>
+            <NavMenu />
+            <DrawerFooter></DrawerFooter>
+        </MatDrawer>
+        <MatDrawerContent>
+            <MatAppBarContainer Style="display: flex; flex-direction: column; min-height: 100vh;">
+                <MatAppBar Fixed="true">
+                    <MatAppBarRow>
+                        <MatAppBarSection>
+                            <MatAppBarTitle Style="color:black">
+                                Effective Machine Learning made easy
+                            </MatAppBarTitle>
+                        </MatAppBarSection>
+                        <MatAppBarSection Align="@MatAppBarSectionAlign.End">
+                            <TopRightBarSection></TopRightBarSection>
+                        </MatAppBarSection>
+                    </MatAppBarRow>
+                </MatAppBar>
+                <MatAppBarContent Style="flex: 1; display: flex; flex-direction: column;">
+                    @TopSection
+                    <section class="container-fluid" style="flex: 1;">
+                        @Body
+                    </section>
+                    <Footer></Footer>
+                </MatAppBarContent>
+            </MatAppBarContainer>
+        </MatDrawerContent>
+    </MatDrawerContainer>
+</CascadingValue>
+
+@code {
+
+    [CascadingParameter]
+    Task<AuthenticationState> authenticationStateTask { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var user = (await authenticationStateTask).User;
+
+        if (user.Identity.IsAuthenticated)
+        {
+            var profile = await appState.GetUserProfile();
+
+        }
+    }
+
+
+}

@@ -1,0 +1,28 @@
+﻿@using BlazorBoilerplate.Shared.Models.Account
+@using Microsoft.AspNetCore.Components
+<div>
+    <MatIconButton Icon="menu" OnClick="@OnClick" @ref="Button"></MatIconButton>
+    <MatMenu @ref="Menu">
+        <MatList>
+            <MatListItem>
+                <MatButton Link="/help">About</MatButton>
+            </MatListItem>
+            <MatListItem>
+                <MatButton Link="/imprint">Imprint</MatButton>
+            </MatListItem>
+            <MatListItem>
+                <MatButton Link="/privacy">Privacy</MatButton>
+            </MatListItem>
+        </MatList>
+    </MatMenu>
+</div>
+
+@code {
+    MatIconButton Button;
+    BaseMatMenu Menu;
+
+    public void OnClick(MouseEventArgs e)
+    {
+        this.Menu.OpenAsync(Button.Ref);
+    }
+}
