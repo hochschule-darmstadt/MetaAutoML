@@ -1,4 +1,0 @@
-[submodule "MetaAutoML-Frontend"]
-	path = MetaAutoML-Frontend
-	url = git@github.com:hochschule-darmstadt/MetaAutoML-Frontend.git
-	branch = main
