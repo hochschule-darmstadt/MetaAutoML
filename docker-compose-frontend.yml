@@ -3,7 +3,7 @@
 services:
   blazorboilerplate:
     build:
-      context: MetaAutoML-Frontend
+      context: frontend
       # the below path is relative to the build context
       dockerfile: ./src/Utils/Docker/Dockerfile
     ports:
