@@ -2,7 +2,7 @@
 
 services:
   dummy:
-    build: ./util/MetaAutoML-Diverse/Helper/frontend_dummy/
+    build: ./util/Helper/frontend_dummy/
     container_name: dummy
     volumes:
       # shared volumes between frontend and controller

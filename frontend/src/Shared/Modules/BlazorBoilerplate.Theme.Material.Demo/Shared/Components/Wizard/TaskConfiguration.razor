@@ -1,0 +1,192 @@
+﻿@inject IStringLocalizer<Global> L
+@using System
+@inject IApiClient apiClient
+@inject IViewNotifier viewNotifier
+@inject BlazorBoilerplate.Shared.Services.WizardState WizardState
+
+
+<div id="required" style="display:flex; flex-direction:column; gap: 10px">
+    <div style="display:flex; flex-direction:row; justify-content:left">
+        <div style="display: flex; align-items: center; padding-right: 1%">Machine Learning Task:</div>
+        <MatChipSet Choice="true" SelectedChipChanged="@OnChipChanged">
+            @if (_tasks != null)
+            {
+                @if (_tasks.Tasks != null)
+                {
+                    @foreach (var item in _tasks.Tasks)
+                    {
+                        <MatChip Label="@item"></MatChip>
+                    }
+                }
+
+            }
+        </MatChipSet>
+    </div>
+    @* only show advanced option if a task was selected *@
+    @if (lastCheckedChip.Label != "testLabel")
+    {
+        <div style="display:flex; flex-direction:row; justify-content:left">
+            <div style="display: flex; align-items: center; padding-right: 1% ">Target Column:</div>
+            @if (_columnNames != null)
+            {
+                <MatSelectItem Items="@_columnNames" TValue="string" ValueChanged="@OnTargetChanged"></MatSelectItem>
+            }
+        </div>
+
+        <MatAccordion>
+            <MatExpansionPanel @bind-Expanded="@advancedOptionsSelected">
+                <MatExpansionPanelSummary>
+                    <MatExpansionPanelHeader>Advanced Settings</MatExpansionPanelHeader>
+                </MatExpansionPanelSummary>
+                <MatExpansionPanelDetails>
+                    <MatChipSet Filter="true" SelectedChipsChanged="OnChipAutoMLSolutionChanged">
+                        @if (_compatibleAutoMl != null && _compatibleAutoMl.AutoMlSolutions.Count != 0)
+                        {
+                            <p style="margin-bottom: 0px;">AutoML Solution :</p>
+                            @foreach (var item in _compatibleAutoMl.AutoMlSolutions)
+                            {
+                                <MatChip Label="@item" IsCheckable="true"></MatChip>
+                            }
+                        }
+                    </MatChipSet>
+
+                    <div style="display:flex; flex-direction:row; justify-content:left">
+                        <div style="display: flex; align-items: center; padding-right: 1% ">Time limit [minutes]:</div>
+                        @if (WizardState.automlRequest.RuntimeConstraints != null)
+                        {
+                            <MatNumericUpDownField @bind-Value=@WizardState.automlRequest.RuntimeConstraints.Runtime_limit
+                                                   DecimalPlaces=0>
+                            </MatNumericUpDownField>
+                        }
+                    </div>
+                    @*
+                    <div style="display:flex; flex-direction:row; justify-content:left">
+                        <div style="display: flex; align-items: center; padding-right: 1% ">Number of iterations:</div>
+                        @if (WizardState.automlRequest.RuntimeConstraints != null)
+                        {
+                            <MatNumericUpDownField @bind-Value=@WizardState.automlRequest.RuntimeConstraints.Max_iter
+                                                   DecimalPlaces=0>
+                            </MatNumericUpDownField>
+                        }
+                    </div>
+                    *@
+                </MatExpansionPanelDetails>
+            </MatExpansionPanel>
+
+        </MatAccordion>
+    }
+</div>
+
+@code {
+    private GetDatasetCompatibleTasksResponseDto _tasks;
+    private GetCompatibleAutoMlSolutionsResponseDto _compatibleAutoMl;
+    private List<String> _columnNames;
+    private MatChip[] selectedChips = null;
+    private MatChip lastCheckedChip = new MatChip { Label = "testLabel" };
+    private bool advancedOptionsSelected = false;
+
+    /// <summary>
+    /// Trigger to start examination for IsNextStepApproved in Parent
+    /// </summary>
+    [Parameter]
+    public EventCallback CheckForNextStepCallback { get; set; }
+
+    protected override async void OnInitialized()
+    {
+        await LoadData();
+
+        _columnNames = new List<string>();
+        foreach (KeyValuePair<string, Server.DataType> pair in ((AutoMLTabularDataConfiguration)WizardState.automlRequest.Configuration).Features)
+        {
+            if((int)pair.Value != 7)
+            {
+                _columnNames.Add(pair.Key);
+            }
+        }
+        ((AutoMLTabularDataConfiguration)WizardState.automlRequest.Configuration).Target = new AutoMLTarget();
+        WizardState.automlRequest.RequiredAutoMLs = new List<string>();
+        WizardState.automlRequest.RuntimeConstraints = new AutoMLRuntimeConstraints();
+        WizardState.automlRequest.RuntimeConstraints.Runtime_limit = 3;
+        WizardState.automlRequest.RuntimeConstraints.Max_iter = 0;
+    }
+
+    private async void OnChipAutoMLSolutionChanged(MatChip[] newChips)
+    {
+        WizardState.automlRequest.RequiredAutoMLs = new List<string>();
+        foreach (var chip in newChips)
+        {
+            WizardState.automlRequest.RequiredAutoMLs.Add(chip.Label);
+        }
+    }
+    private async void OnChipChanged(MatChip newChip)
+    {
+        // TODO fix 2 times called bug (it effects perfomance)
+        if (lastCheckedChip.Label == newChip.Label)
+        {
+            return;
+        }
+        lastCheckedChip = newChip;
+        WizardState.automlRequest.Task = newChip.Label;
+        try
+        {
+            Dictionary<string, string> dictionary = new Dictionary<string, string>();
+            dictionary.Add("task", WizardState.automlRequest.Task);
+            /** Configuration = dictionary is currently dummy */
+            GetCompatibleAutoMlSolutionsRequestDto compatibleAutoMlRequest = new GetCompatibleAutoMlSolutionsRequestDto { Configuration = dictionary };
+            ApiResponseDto apiResponse = await apiClient.GetCompatibleAutoMlSolutions(compatibleAutoMlRequest);
+
+            if (apiResponse.IsSuccessStatusCode)
+            {
+                _compatibleAutoMl = Newtonsoft.Json.JsonConvert.DeserializeObject<GetCompatibleAutoMlSolutionsResponseDto>(apiResponse.Result.ToString());
+                StateHasChanged();
+                viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
+            }
+            else
+            {
+                viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
+            }
+        }
+        catch (Exception ex)
+        {
+            viewNotifier.Show(ex.GetBaseException().Message, ViewNotifierType.Error, L["Operation Failed"]);
+        }
+    }
+
+    private async void OnTargetChanged(string value)
+    {
+        ((AutoMLTabularDataConfiguration)WizardState.automlRequest.Configuration).Target.Target = value;
+        foreach (KeyValuePair<string, Server.DataType> kvp in ((AutoMLTabularDataConfiguration)WizardState.automlRequest.Configuration).Features)
+        {
+            if (kvp.Key == value)
+            {
+                ((AutoMLTabularDataConfiguration)WizardState.automlRequest.Configuration).Target.Type = kvp.Value;
+                break;
+            }
+        }
+    }
+
+    private async Task LoadData()
+    {
+        try
+        {
+            _tasks = new GetDatasetCompatibleTasksResponseDto();
+            GetDatasetCompatibleTasksRequestDto taskRequest = new GetDatasetCompatibleTasksRequestDto { DatasetName = WizardState.automlRequest.DatasetName };
+            ApiResponseDto apiResponse = await apiClient.GetDatasetCompatibleTasks(taskRequest);
+
+            if (apiResponse.IsSuccessStatusCode)
+            {
+                _tasks = Newtonsoft.Json.JsonConvert.DeserializeObject<GetDatasetCompatibleTasksResponseDto>(apiResponse.Result.ToString());
+                StateHasChanged();
+                viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
+            }
+            else
+            {
+                viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
+            }
+        }
+        catch (Exception ex)
+        {
+            viewNotifier.Show(ex.GetBaseException().Message, ViewNotifierType.Error, L["Operation Failed"]);
+        }
+    }
+}

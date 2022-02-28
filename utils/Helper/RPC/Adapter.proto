@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+/* 
+AutoML Adapter Service implementation. Service provide functionality to execute and interact with the current AutoML process.
+*/
+service AdapterService {
+/* 
+Execute a new AutoML run. 
+*/
+	rpc StartAutoML(StartAutoMLRequest) returns (stream StartAutoMLResponse) {}
+	rpc TestAdapter(TestAdapterRequest) returns (TestAdapterResponse) {}
+}
+
+message TestAdapterRequest {
+    string testData = 1;
+    string processJson = 2;
+}
+
+message TestAdapterResponse {
+    repeated string predictions = 1;
+    float score = 2;
+    float predictiontime = 3;
+}
+
+message StartAutoMLRequest {
+	string processJson = 1;
+}
+
+message StartAutoMLResponse {
+	AdapterReturnCode returnCode = 1;
+	string statusUpdate = 2;
+	string outputJson = 3;
+	float testScore = 4;
+    float validationScore = 5;
+    int32 runtime = 6;
+    float predictiontime = 7;
+    string library = 8;
+    string model = 9;
+}
+
+enum AdapterReturnCode {
+	ADAPTER_RETURN_CODE_UNKNOWN = 0;
+	ADAPTER_RETURN_CODE_SUCCESS = 1;
+	ADAPTER_RETURN_CODE_STATUS_UPDATE = 2;
+	ADAPTER_RETURN_CODE_ERROR = 100;
+}
