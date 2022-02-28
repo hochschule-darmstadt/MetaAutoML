@@ -1,0 +1,43 @@
+﻿@using BlazorBoilerplate.Shared.Models.Account
+@using Microsoft.AspNetCore.Components
+@inject AuthenticationStateProvider authStateProvider
+
+<AuthorizeView>
+    <Authorized>
+        <div>
+            <MatIconButton Icon="account_circle" OnClick="@OnClick"  @ref="Button" Style="margin-right:20px"></MatIconButton>
+            <MatMenu @ref="Menu">
+                <MatList>
+                    <MatListItem>
+                        <MatButton Link="/account/profile">Profile</MatButton></MatListItem>
+                    <MatListItem> <Login/></MatListItem>
+                </MatList>
+            </MatMenu>
+        </div>
+    </Authorized>
+</AuthorizeView>
+
+@code {
+    public bool IsLoggedIn = false;
+    UserViewModel userViewModel = null;
+    [CascadingParameter]
+    Task<AuthenticationState> authenticationStateTask { get; set; }
+
+    MatIconButton Button;
+    BaseMatMenu Menu;
+
+    public void OnClick(MouseEventArgs e)
+    {
+        this.Menu.OpenAsync(Button.Ref);
+    }
+    protected override async Task OnParametersSetAsync()
+    {
+        userViewModel = null;
+        var user = (await authenticationStateTask).User;
+
+        if (user.Identity.IsAuthenticated)
+        {
+            userViewModel = await ((IdentityAuthenticationStateProvider)authStateProvider).GetUserViewModel();
+        }
+    }
+}

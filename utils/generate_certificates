@@ -1,0 +1,19 @@
+cert=server.crt
+certPk=server.key
+ca=root.crt
+caPk=root.key
+
+host=localhost
+certValidityDays=300
+
+# Create CA
+openssl req -newkey rsa:4096 -keyout "${caPk}" -x509 -new -nodes -out "${ca}" \
+  -subj "/OU=Unknown/O=Unknown/L=Unknown/ST=unknown/C=DE" -days "${certValidityDays}"
+
+# Create Cert Signing Request
+openssl req -new -newkey rsa:4096 -nodes -keyout "${certPk}" -out csr.pem \
+       -subj "/CN=${host}/OU=Unknown/O=Unknown/L=Unknown/ST=unknown/C=DE"
+
+# Sign Cert
+openssl x509 -req -in csr.pem -CA "${ca}" -CAkey "${caPk}" -CAcreateserial -out "${cert}" \
+       -days "${certValidityDays}"

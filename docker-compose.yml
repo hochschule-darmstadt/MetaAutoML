@@ -4,7 +4,7 @@ services:
   # This is probably a caching docker caching issue, which can be fixed with:
   # 'make clean-hard'
   controller:
-    build: ./MetaAutoML-Controller
+    build: ./controller
     container_name: controller
     # we map the port of the controller to the host.
     # This way we can either connect locally with localhost:5001
@@ -44,7 +44,9 @@ services:
 #     adapters do not need to be available from the host machine -> no port mappings
 
   autokeras:
-    build: ./adapters/MetaAutoML-Adapter-AutoKeras
+    build: 
+      context: ./adapters
+      dockerfile: ./AutoKeras/Dockerfile
     container_name: autokeras
     environment:
       - GRPC_SERVER_PORT=50052
@@ -53,7 +55,9 @@ services:
       - output-autokeras:/app/app-data/output
 
   mljar:
-    build: ./adapters/MetaAutoML-Adapter-MLJAR
+    build: 
+      context: ./adapters
+      dockerfile: ./MLJAR/Dockerfile
     container_name: mljar
     environment:
       - GRPC_SERVER_PORT=50053
@@ -62,7 +66,9 @@ services:
       - output-mljar:/app/app-data/output
 
   sklearn:
-    build: ./adapters/MetaAutoML-Adapter-Autosklearn
+    build: 
+      context: ./adapters
+      dockerfile: ./AutoSklearn/Dockerfile
     container_name: sklearn
     environment:
       - GRPC_SERVER_PORT=50055
@@ -71,7 +77,9 @@ services:
       - output-sklearn:/app/app-data/output
 
   flaml:
-    build: ./adapters/MetaAutoML-Adapter-FLAML
+    build: 
+      context: ./adapters
+      dockerfile: ./FLAML/Dockerfile
     container_name: flaml
     environment:
       - GRPC_SERVER_PORT=50056
@@ -80,7 +88,9 @@ services:
       - output-flaml:/app/app-data/output
 
   gluon:
-    build: ./adapters/MetaAutoML-Adapter-AutoGluon
+    build: 
+      context: ./adapters
+      dockerfile: ./AutoGluon/Dockerfile
     container_name: gluon
     environment:
       - GRPC_SERVER_PORT=50057
@@ -89,7 +99,9 @@ services:
       - output-gluon:/app/app-data/output
 
   autocve:
-    build: ./adapters/MetaAutoML-Adapter-AutoCVE
+    build: 
+      context: ./adapters
+      dockerfile: ./AutoCVE/Dockerfile
     container_name: autocve
     environment:
       - GRPC_SERVER_PORT=50058
@@ -98,7 +110,9 @@ services:
       - output-autocve:/app/app-data/output
 
   pytorch:
-    build: ./adapters/MetaAutoML-Adapter-AutoPytorch
+    build: 
+      context: ./adapters
+      dockerfile: ./AutoPytorch/Dockerfile
     container_name: pytorch
     environment:
       - GRPC_SERVER_PORT=50059
