@@ -5,7 +5,7 @@ ONTOLOGY_QUERY_GET_ACTIVE_AUTOML_FOR_TASK = """
             SELECT ?automl
             WHERE {
             ?automl a :AutoML_solution;
-                      :supported_by_oma_ml "True" ;
+                      :supported_by_oma_ml "true" ;
                       :can_perform ?p .
             ?p skos:prefLabel ?task .
 
@@ -17,7 +17,7 @@ ONTOLOGY_QUERY_GET_TASK_FOR_DATASET = """
             SELECT ?task
             WHERE {
             ?t a :ML_task ;
-                       :dataset_type ?set ;
+                       :has_dataset_type ?set ;
                        skos:prefLabel ?task .
             ?set a :Enum ;
                        skos:prefLabel "tabular" .
@@ -30,7 +30,7 @@ ONTOLOGY_QUERY_GET_SUPPORTED_MACHINE_LEARNING_LIBRARY = """
             WHERE {
             ?automl a :AutoML_solution ;
                        :can_perform ?task ;
-                       :supported_by_oma_ml "True" ;
+                       :supported_by_oma_ml "true" ;
                        :used_for ?lib .
             ?task a :ML_task ;
                        skos:prefLabel ?taskName .
