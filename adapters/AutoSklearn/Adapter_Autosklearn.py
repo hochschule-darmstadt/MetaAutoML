@@ -14,14 +14,14 @@ import time
 import pandas as pd
 from sklearn.metrics import accuracy_score, mean_squared_error
 
-from Utils.JsonUtil import get_config_property
+from JsonUtil import get_config_property
 
 import Adapter_pb2
 import Adapter_pb2_grpc
 
 from concurrent import futures
 from TemplateGenerator import TemplateGenerator
-from AutoMLs.predict_time_sources import SplitMethod, DataType, feature_preparation
+from predict_time_sources import SplitMethod, DataType, feature_preparation
 
 
 def get_except_response(context, e):

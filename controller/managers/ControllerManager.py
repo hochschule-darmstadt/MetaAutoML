@@ -3,7 +3,7 @@ import pandas as pd
 
 import Controller_pb2
 
-from StructuredDataManager import StructuredDataManager
+from AdapterManager import AdapterManager
 from CsvManager import CsvManager
 from RdfManager import RdfManager
 
@@ -13,7 +13,7 @@ class ControllerManager(object):
 
     def __init__(self, datasetFolder):
         self.__rdfManager = RdfManager()
-        self.__structuredDataManager = StructuredDataManager()
+        self.__adapterManager = AdapterManager()
         self.__sessions = {}
         self.__sessionCounter = 1
         self.__datasetFolder = datasetFolder
@@ -84,7 +84,7 @@ class ControllerManager(object):
 
     def StartAutoMLProcess(self, configuration) -> Controller_pb2.StartAutoMLprocessResponse:
         response = Controller_pb2.StartAutoMLprocessResponse()
-        newSession = self.__structuredDataManager.start_automl(configuration, self.__datasetFolder,
+        newSession = self.__adapterManager.start_automl(configuration, self.__datasetFolder,
                                                                self.__sessionCounter)
         self.__sessions[str(self.__sessionCounter)] = newSession
         self.__sessionCounter += 1

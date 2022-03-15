@@ -3,8 +3,8 @@ import os
 import logging
 import sys
 
-from AutoMLs.StructuredDataAutoML import StructuredDataAutoML
-from Utils.JsonUtil import get_config_property
+from TabularDataAutoML import TabularDataAutoML
+from JsonUtil import get_config_property
 
 if __name__ == '__main__':
     FORMAT = '%(asctime)s %(message)s'
@@ -15,5 +15,5 @@ if __name__ == '__main__':
     with open(file_path) as file:
         process_json = json.load(file)
 
-    structuredDataAutoML = StructuredDataAutoML(process_json)
-    structuredDataAutoML.execute_task()
+    tabularDataAutoML = TabularDataAutoML(process_json)
+    tabularDataAutoML.execute_task()

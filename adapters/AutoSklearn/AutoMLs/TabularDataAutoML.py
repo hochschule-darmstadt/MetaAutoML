@@ -3,37 +3,36 @@ import pandas as pd
 import autosklearn.classification
 import autosklearn.regression
 import pickle
-from Utils.JsonUtil import get_config_property
-from AutoMLs.predict_time_sources import feature_preparation, DataType, SplitMethod
+from JsonUtil import get_config_property
+from predict_time_sources import feature_preparation, DataType, SplitMethod
+from AbstractTabularDataAutoML import AbstractTabularDataAutoML
 
-
-class StructuredDataAutoML(object):
+class TabularDataAutoML(AbstractTabularDataAutoML):
     """
     Implementation of the AutoML functionality fo structured data a.k.a. tabular data
     """
 
     def __init__(self, configuration: dict):
         """
-        Init a new instance of StructuredDataAutoML
+        Init a new instance of TabularDataAutoML
         ---
         Parameter:
         1. Configuration JSON of type dictionary
         """
-        self.__time_limit = 30
-        self.__configuration = configuration
+        super().__init__(configuration)
 
-        if self.__configuration["metric"] == "":
+        if self._configuration["metric"] == "":
             # handle empty metric field, None is the default metric parameter for AutoSklearn
-            self.__configuration["metric"] = None
+            self._configuration["metric"] = None
 
         return
 
-    def __read_training_data(self):
+    def _read_training_data(self):
         """
         Read the training dataset from disk
         """
-        train = pd.read_csv(os.path.join(self.__configuration["file_location"], self.__configuration["file_name"]),
-                         **self.__configuration["file_configuration"])
+        train = pd.read_csv(os.path.join(self._configuration["file_location"], self._configuration["file_name"]),
+                         **self._configuration["file_configuration"])
 
         # convert all object columns to categories, because autosklearn only supports numerical,
         # bool and categorical features
@@ -41,15 +40,15 @@ class StructuredDataAutoML(object):
             .apply(lambda x: x.astype('category'))
 
         # split training set, only use the training portion
-        if SplitMethod.SPLIT_METHOD_RANDOM == self.__configuration["test_configuration"]["method"]:
-            train = train.sample(random_state=self.__configuration["test_configuration"]["random_state"], frac=1)
+        if SplitMethod.SPLIT_METHOD_RANDOM == self._configuration["test_configuration"]["method"]:
+            train = train.sample(random_state=self._configuration["test_configuration"]["random_state"], frac=1)
         else:
-            train = train.iloc[:int(train.shape[0] * self.__configuration["test_configuration"]["split_ratio"])]
+            train = train.iloc[:int(train.shape[0] * self._configuration["test_configuration"]["split_ratio"])]
 
-        target = self.__configuration["tabular_configuration"]["target"]["target"]
+        target = self._configuration["tabular_configuration"]["target"]["target"]
 
-        self.__X = train.drop(target, axis=1)
-        self.__y = train[target]
+        self._X = train.drop(target, axis=1)
+        self._y = train[target]
 
         return
 
@@ -68,44 +67,29 @@ class StructuredDataAutoML(object):
         """
         Execute the ML task
         """
-        if self.__configuration["task"] == 1:
+        if self._configuration["task"] == 1:
             self.__classification()
-        elif self.__configuration["task"] == 2:
+        elif self._configuration["task"] == 2:
             self.__regression()
-
-    def __dataset_preparation(self):
-        feature_preparation(self.__X, self.__configuration["tabular_configuration"]["features"].items())
-        self.__cast_target()
-
-    def __cast_target(self):
-        target_dt = self.__configuration["tabular_configuration"]["target"]["type"]
-        if DataType(target_dt) is DataType.DATATYPE_CATEGORY:
-            self.__y = self.__y.astype('category')
-        elif DataType(target_dt) is DataType.DATATYPE_BOOLEAN:
-            self.__y = self.__y.astype('bool')
-        elif DataType(target_dt) is DataType.DATATYPE_INT:
-            self.__y = self.__y.astype('int')
-        elif DataType(target_dt) is DataType.DATATYPE_FLOAT:
-            self.__y = self.__y.astype('float')
 
     def __generate_settings(self):
         automl_settings = {"logging_config": self.get_logging_config()}
-        if self.__configuration["runtime_constraints"]["runtime_limit"] != 0:
+        if self._configuration["runtime_constraints"]["runtime_limit"] != 0:
             automl_settings.update(
-                {"time_left_for_this_task": self.__configuration["runtime_constraints"]["runtime_limit"]})
-        automl_settings.update({"metric": self.__configuration["metric"]})
+                {"time_left_for_this_task": self._configuration["runtime_constraints"]["runtime_limit"]})
+        automl_settings.update({"metric": self._configuration["metric"]})
         return automl_settings
 
     def __classification(self):
         """
         Execute the classification task
         """
-        self.__read_training_data()
-        self.__dataset_preparation()
+        self._read_training_data()
+        self._dataset_preparation()
 
         automl_settings = self.__generate_settings()
         auto_cls = autosklearn.classification.AutoSklearnClassifier(**automl_settings)
-        auto_cls.fit(self.__X, self.__y)
+        auto_cls.fit(self._X, self._y)
 
         self.__export_model(auto_cls)
 
@@ -113,13 +97,13 @@ class StructuredDataAutoML(object):
         """
         Execute the regression task
         """
-        self.__read_training_data()
+        self._read_training_data()
 
-        self.__dataset_preparation()
+        self._dataset_preparation()
 
         automl_settings = self.__generate_settings()
         auto_reg = autosklearn.regression.AutoSklearnRegressor(**automl_settings)
-        auto_reg.fit(self.__X, self.__y, )
+        auto_reg.fit(self._X, self._y, )
 
         self.__export_model(auto_reg)
 

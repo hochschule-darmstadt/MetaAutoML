@@ -4,7 +4,9 @@ services:
   # This is probably a caching docker caching issue, which can be fixed with:
   # 'make clean-hard'
   controller:
-    build: ./controller
+    build: 
+      context: ./
+      dockerfile: ./controller/Dockerfile
     container_name: controller
     # we map the port of the controller to the host.
     # This way we can either connect locally with localhost:5001

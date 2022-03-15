@@ -21,7 +21,7 @@ WORKDIR /app
 COPY ./AutoCVE .
 COPY ./Utils/Utils ./Utils
 COPY ./Utils/AutoMLs ./AutoMLs
-COPY ./GRPC ./
+COPY ./GRPC/Adapter ./
 
 # this should already be created, but sometimes there is a bug in docker which causes that the directory is not copied
 RUN mkdir -p /app/app-data/output/tmp

@@ -8,7 +8,7 @@ from SklearnManager import SklearnManager
 from AutoPyTorchManager import AutoPyTorchManager
 
 
-class StructuredDataManager(object):
+class AdapterManager(object):
     """
     Implementation of a Structured data manager responsible for executing structured data AutoML sessions
     """

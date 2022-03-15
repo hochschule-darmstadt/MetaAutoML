@@ -1,8 +1,8 @@
 import json
 import os
 
-from Utils.JsonUtil import get_config_property
-from AutoMLs.StructuredDataAutoML import StructuredDataAutoML
+from JsonUtil import get_config_property
+from TabularDataAutoML import TabularDataAutoML
 
 if __name__ == '__main__':
     """
@@ -13,5 +13,5 @@ if __name__ == '__main__':
     with open(file_path) as file:
         process_json = json.load(file)
 
-    structuredDataAutoML = StructuredDataAutoML(process_json)
-    structuredDataAutoML.execute_task()
+    tabularDataAutoML = TabularDataAutoML(process_json)
+    tabularDataAutoML.execute_task()

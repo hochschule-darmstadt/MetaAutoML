@@ -137,3 +137,43 @@ dmypy.json
 
 # Jetbrains IDEAs
 .idea/
+
+#controller ignores
+# ignore all output files, but keep the directories with the .gitkeep file
+controller/app-data/output/*/*
+!controller/app-data/output/*/.gitkeep
+controller/.vs
+
+
+#all adapter ignores
+# by adapter generated files, but keep the directories
+*/app-data/output/*
+!*/app-data/output/.gitkeep
+*/app-data/jobs/*
+!*/app-data/jobs/.gitkeep
+# ignore datasets, because they are mapped into the datasets directory via shared volume by the controller
+*/app-data/datasets/*
+!*/app-data/datasets/.gitkeep
+
+#AutoCVE
+
+#AutoGluon
+
+#AutoKeras
+
+#Auto-Pytorch
+
+#Autosklearn
+# temporary files
+AutoSklearn/tmp/
+
+#FLAML
+# output folder
+FLAML/templates/output
+# by adapter generated files
+*-export.zip
+*-job.json
+
+#MLJAR ignores
+#AutoMLs
+MLJAR/AutoML_*
