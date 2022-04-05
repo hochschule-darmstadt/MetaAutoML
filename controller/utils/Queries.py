@@ -12,7 +12,7 @@ ONTOLOGY_QUERY_GET_ACTIVE_AUTOML_FOR_TASK = """
             }
             """
 
-ONTOLOGY_QUERY_GET_TASK_FOR_DATASET = """
+ONTOLOGY_QUERY_GET_TASKS_FOR_DATASET_TYPE = """
             PREFIX : <http://h-da.de/ml-ontology/>
             SELECT ?task
             WHERE {

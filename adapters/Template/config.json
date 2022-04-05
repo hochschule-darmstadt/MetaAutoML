@@ -1,0 +1,12 @@
+{
+  "adapter-name": "{NAME OF THE ADAPTER TO BE SHOWN ON CONSOLE}",
+  "job-file-name": "{ADAPTER_NAME}-job.json",
+  "env-varname-cluster": "RUNTIME",
+  "env-varname-unix": "UNIX",
+  "grpc-server-address": "0.0.0.0:{PORT THAT THE RPC SERVER RUNS ON}",
+  "python-env-docker": "python",
+  "export-zip-file-name": "{ADAPTER_NAME}-export",
+  "templates-output-path": "templates/output",
+  "output-path-docker": "omaml/output",
+  "repository-dir-name": "{NAME OF THE ROOT DIRECTORY OF THIS REPOSITORY eg. MetaAutoML-Adapter-Template}"
+}
