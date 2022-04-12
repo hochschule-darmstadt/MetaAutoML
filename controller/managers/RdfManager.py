@@ -93,7 +93,7 @@ class RdfManager(object):
             return result
 
         dataset = rdflib.Literal(u"tabular data")
-        q = prepareQuery(Queries.ONTOLOGY_QUERY_GET_TASK_FOR_DATASET,
+        q = prepareQuery(Queries.ONTOLOGY_QUERY_GET_TASKS_FOR_DATASET_TYPE,
                          initNs={"skos": SKOS})
 
         queryResult = self.__executeQuery(q, {"dataset": dataset})
