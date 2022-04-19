@@ -12,6 +12,7 @@ ONTOLOGY_QUERY_GET_ACTIVE_AUTOML_FOR_TASK = """
             }
             """
 
+###Retrieve all compatible tasks for a dataset type
 ONTOLOGY_QUERY_GET_TASKS_FOR_DATASET_TYPE = """
             PREFIX : <http://h-da.de/ml-ontology/>
             SELECT ?task
@@ -24,6 +25,7 @@ ONTOLOGY_QUERY_GET_TASKS_FOR_DATASET_TYPE = """
             }
             """
 
+###Retrieve all ML libraries compatible with a given task
 ONTOLOGY_QUERY_GET_SUPPORTED_MACHINE_LEARNING_LIBRARY = """
             PREFIX : <http://h-da.de/ml-ontology/>
             SELECT DISTINCT ?library

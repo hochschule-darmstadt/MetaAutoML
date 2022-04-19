@@ -12,6 +12,7 @@ spec:
     port: 53415
     protocol: TCP
     targetPort: 80
+    nodePort: 30778
   - name: "53443"
     port: 53443
     protocol: TCP

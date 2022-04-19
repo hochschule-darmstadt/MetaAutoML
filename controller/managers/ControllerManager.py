@@ -9,9 +9,18 @@ from RdfManager import RdfManager
 
 
 class ControllerManager(object):
-    """description of class"""
+    """
+    Implementation of the controller functionality
+    """
 
     def __init__(self, datasetFolder):
+        """
+        Controller Manager init function
+        ---
+        Parameter
+        1. local datasets folder path
+        ---
+        """
         self.__rdfManager = RdfManager()
         self.__adapterManager = AdapterManager()
         self.__sessions = {}
@@ -23,12 +32,36 @@ class ControllerManager(object):
         return
 
     def GetAutoMlModel(self, request) -> Controller_pb2.GetAutoMlModelResponse:
+        """
+        Get the generated model zip for one AutoML 
+        ---
+        Parameter
+        1. session id
+        ---
+        Return a .zip containing the model and executable script
+        """
         return self.__sessions[request.sessionId].get_automl_model(request)
 
     def GetCompatibleAUtoMlSolutions(self, request) -> Controller_pb2.GetCompatibleAutoMlSolutionsResponse:
+        """
+        Get list of comptatible AutoML solutions
+        ---
+        Parameter
+        1. current confiugration
+        ---
+        Return a list of compatible AutoML
+        """
         return self.__rdfManager.GetCompatibleAutoMlSolutions(request)
 
     def GetDatasets(self):
+        """
+        Get all datasets for a specific task
+        ---
+        Parameter
+        1. TODO add parameter for session object
+        ---
+        Return a list of compatible datasets
+        """
         datasets = Controller_pb2.GetDatasetsResponse()
         # TODO: ADD DATASET MANAGEMENT OVER DATABASE
         with os.scandir(self.__datasetFolder) as dirs:
@@ -49,30 +82,87 @@ class ControllerManager(object):
         return datasets
 
     def GetDataset(self, request) -> Controller_pb2.GetDatasetResponse:
+        """
+        Get dataset details for a specific dataset
+        ---
+        Parameter
+        1. dataset name
+        ---
+        Return dataset details
+        The result is a list of TableColumns containing:
+        name: the name of the dataset
+        datatype: the datatype of the column
+        firstEntries: the first couple of rows of the dataset
+        """
         # TODO WHEN USER MANAGEMENT IS ADDED; CORRECT FILTERING
         dataset = CsvManager.read_dataset(os.path.join(self.__datasetFolder, request.name))
         return dataset
 
     def GetSessions(self, request) -> Controller_pb2.GetSessionsResponse:
+        """
+        Get all sessions
+        ---
+        Return list of all sessions
+        """
         response = Controller_pb2.GetSessionsResponse()
         for i in self.__sessions:
             response.sessionIds.append(self.__sessions[i].get_id())
         return response
 
     def GetSessionStatus(self, request) -> Controller_pb2.GetSessionStatusResponse:
+        """
+        Get status of a specific session
+        ---
+        Parameter
+        1. session id
+        ---
+        Return the session status
+        """
         return self.__sessions[request.id].get_session_status()
 
     def GetTabularDatasetColumnNames(self, request) -> Controller_pb2.GetTabularDatasetColumnNamesResponse:
+        """
+        Get column names for a specific tabular dataset
+        ---
+        Parameter
+        1. dataset name
+        ---
+        Return list of column names
+        """
         columnNames = CsvManager.read_column_names(os.path.join(self.__datasetFolder, request.datasetName))
         return columnNames
     
     def GetSupportedMlLibraries(self, request) -> Controller_pb2.GetSupportedMlLibrariesResponse:
+        """
+        Get supported ML libraries for a task
+        ---
+        Parameter
+        1. task identifier
+        ---
+        Return list of ML libraries
+        """
         return self.__rdfManager.GetSupportedMlLibraries(request)
 
     def GetDatasetCompatibleTasks(self, request) -> Controller_pb2.GetDatasetCompatibleTasksResponse:
+        """
+        Get compatible tasks for a specific dataset
+        ---
+        Parameter
+        1. dataset name
+        ---
+        Return list of tasks
+        """
         return self.__rdfManager.GetDatasetCompatibleTasks(request)
 
     def UploadNewDataset(self, dataset) -> Controller_pb2.UploadDatasetFileResponse:
+        """
+        Upload a new dataset
+        ---
+        Parameter
+        1. dataset information
+        ---
+        Return upload status
+        """
         # script_dir = os.path.dirname(os.path.abspath(__file__))
         # file_dest = os.path.join(script_dir, 'datasets')
         response = Controller_pb2.UploadDatasetFileResponse()
@@ -83,6 +173,14 @@ class ControllerManager(object):
         return response
 
     def StartAutoMLProcess(self, configuration) -> Controller_pb2.StartAutoMLprocessResponse:
+        """
+        Start a new AutoML process
+        ---
+        Parameter
+        1. Run configuration
+        ---
+        Return start process status
+        """
         response = Controller_pb2.StartAutoMLprocessResponse()
         newSession = self.__adapterManager.start_automl(configuration, self.__datasetFolder,
                                                                self.__sessionCounter)
@@ -93,6 +191,14 @@ class ControllerManager(object):
         return response
 
     def TestAutoML(self, request) -> Controller_pb2.TestAutoMLResponse:
+        """
+        Start a new AutoML process as Test
+        ---
+        Parameter
+        1. Run configuration
+        ---
+        Return start process status
+        """ 
         session = self.__sessions.get(request.sessionId)
         automls = session.automls
         test_auto_ml = None

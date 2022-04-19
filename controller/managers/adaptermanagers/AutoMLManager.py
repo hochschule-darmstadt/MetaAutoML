@@ -101,6 +101,16 @@ class AutoMLManager(ABC, Thread):
             self._run_server_until_connection_closed(stub, request)
 
     def testSolution(self, test_data, session_id):
+        """
+        Init a new instance of the specific AutoMLManager
+        ---
+        Parameter
+        1. configuration dictionary
+        2. folder location of the dataset
+        3. session id to use
+        ---
+        Return a new specific AutoML Manager
+        """
         automl_ip = os.getenv(self.__AUTOML_SERVICE_HOST)
         automl_port = os.getenv(self.__AUTOML_SERVICE_PORT)
 
@@ -124,6 +134,11 @@ class AutoMLManager(ABC, Thread):
                 print(f"Received unknown RPC error: code={rpc_error.code()} message={rpc_error.details()}")
 
     def _generate_process_json(self,):
+        """
+        Generate AutoML configuration JSON
+        ---
+        Return configuration JSON
+        """
         process_json = {"file_name": self._configuration.dataset}
         process_json.update({"session_id": self.__session_id})
         process_json.update({"file_location": self.__file_dest})
@@ -146,6 +161,13 @@ class AutoMLManager(ABC, Thread):
         return process_json
 
     def _run_server_until_connection_closed(self, stub, dataset_to_send):
+        """
+        Listen to the started AutoML process until termination
+        ---
+        Parameter
+        1. connection stub
+        2. initial Start AutoML request
+        """
         try:  # Run until server closes connection
             for response in stub.StartAutoML(dataset_to_send):
                 # Send request WATCH OUT THIS IS A LOOP REQUEST Check out for normal request

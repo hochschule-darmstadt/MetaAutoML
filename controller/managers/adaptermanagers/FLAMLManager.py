@@ -2,6 +2,9 @@ from AutoMLManager import AutoMLManager
 
 
 class FLAMLManager(AutoMLManager):
+    """
+    Implementation of the specific AutoMLManager for FLAML
+    """
     name = "FLAML"
 
     def __init__(self, configuration, folder_location, session_id):
