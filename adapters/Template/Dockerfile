@@ -7,10 +7,16 @@ COPY requirements.txt .
 RUN pip install -r requirements.txt
 COPY . /
 WORKDIR /
+COPY ./Utils/Utils ./Utils
+COPY ./Utils/AutoMLs ./AutoMLs
+COPY ./GRPC/Adapter ./
 
-VOLUME ["/app-data"]
+
+RUN mkdir -p /app/app-data/output/tmp
+
+ENV RUNTIME=DOCKER
 ENV PYTHONUNBUFFERED=1
-ENV PYTHONPATH "/AutoMLs:/templates:/templates/output:/Utils"
+ENV PYTHONPATH "AutoMLs:Utils"
 ENV PYTHON_ENV "python"
 # TODO: edit the following line
 ENTRYPOINT ["python", "Adapter_*.py"]

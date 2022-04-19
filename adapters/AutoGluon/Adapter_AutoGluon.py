@@ -23,6 +23,14 @@ from JsonUtil import get_config_property
 
 
 def get_except_response(context, e):
+    """
+    Get exception message
+    ---
+    Parameter
+    1. exception
+    ---
+    Return exception GRPC message
+    """
     print(e)
     adapter_name = get_config_property("adapter-name")
     context.set_details(f"Error while executing {adapter_name}: {e}")
@@ -31,11 +39,24 @@ def get_except_response(context, e):
 
 
 def generate_script(config_json):
+    """
+    Generate the result python script
+    ---
+    Parameter
+    1. process configuration
+    """
     generator = TemplateGenerator()
     generator.generate_script(config_json)
 
 
 def capture_process_output(process, start_time):
+    """
+    Read console log from subprocess, and send it after each \n to the controller
+    ---
+    Parameter
+    1. system process representing the AutoML process
+    2. Process start time
+    """
     capture = ""
     # AutoGluon writes to stderr which seems to be not configurable
     s = process.stderr.read(1)
@@ -63,6 +84,19 @@ def capture_process_output(process, start_time):
 
 
 def get_response(output_json, start_time, test_score, prediction_time, library, model):
+    """
+    Get Start automl response object
+    ---
+    Parameter
+    1. output json
+    2. process start time
+    3. test score of the new model
+    4. prediction time
+    5. used ML library
+    6. model object
+    ---
+    Return the process result message
+    """
     response = Adapter_pb2.StartAutoMLResponse()
     response.returnCode = Adapter_pb2.ADAPTER_RETURN_CODE_SUCCESS
     response.outputJson = json.dumps(output_json)
@@ -77,6 +111,14 @@ def get_response(output_json, start_time, test_score, prediction_time, library, 
 
 
 def zip_script(session_id):
+    """
+    Zip the model and script from the current run
+    ---
+    Parameter
+    1. current run session id
+    ---
+    Return json with zip information
+    """
     print(f"saving model zip file for {get_config_property('adapter-name')}")
 
     zip_file_name = get_config_property("export-zip-file-name")
@@ -124,6 +166,16 @@ def start_automl_process():
                             universal_newlines=True)
 
 def evaluate(config_json, config_path):
+    """
+    Make a prediction on test data
+    ---
+    Parameter
+    1. prediction data
+    2. configuration json
+    3. configuration path
+    ---
+    Return prediction score 
+    """
     file_path = os.path.join(config_json["file_location"], config_json["file_name"])
     working_dir = os.path.join(get_config_property("output-path"), "working_dir")
     shutil.unpack_archive(os.path.join(get_config_property("output-path"),
@@ -178,6 +230,16 @@ def evaluate(config_json, config_path):
 
 
 def predict(data, config_json, config_path):
+    """
+    Make a prediction on test data
+    ---
+    Parameter
+    1. prediction data
+    2. configuration json
+    3. configuration path
+    ---
+    Return prediction score 
+    """
     working_dir = os.path.join(get_config_property("output-path"), "working_dir")
 
     shutil.unpack_archive(os.path.join(get_config_property("output-path"),

@@ -15,6 +15,14 @@ from TemplateGenerator import TemplateGenerator
 from OsSpecific import in_cluster
 
 def get_except_response(context, e):
+    """
+    Get exception message
+    ---
+    Parameter
+    1. exception
+    ---
+    Return exception GRPC message
+    """
     print(e)
     adapter_name = get_config_property("adapter-name")
     context.set_details(f"Error while executing {adapter_name}: {e}")
@@ -23,11 +31,24 @@ def get_except_response(context, e):
 
 
 def generate_script():
+    """
+    Generate the result python script
+    ---
+    Parameter
+    1. process configuration
+    """
     generator = TemplateGenerator()
     generator.GenerateScript()
 
 
 def capture_process_output(process):
+    """
+    Read console log from subprocess, and send it after each \n to the controller
+    ---
+    Parameter
+    1. system process representing the AutoML process
+    2. Process start time
+    """
     capture = ""
     s = process.stdout.read(1)
     capture += s
@@ -47,6 +68,19 @@ def capture_process_output(process):
 
 
 def get_response(output_json):
+    """
+    Get Start automl response object
+    ---
+    Parameter
+    1. output json
+    2. process start time
+    3. test score of the new model
+    4. prediction time
+    5. used ML library
+    6. model object
+    ---
+    Return the process result message
+    """
     response = Adapter_pb2.StartAutoMLResponse()
     response.returnCode = Adapter_pb2.ADAPTER_RETURN_CODE_SUCCESS
     response.outputJson = json.dumps(output_json)
@@ -54,6 +88,14 @@ def get_response(output_json):
 
 
 def zip_script():
+    """
+    Zip the model and script from the current run
+    ---
+    Parameter
+    1. current run session id
+    ---
+    Return json with zip information
+    """
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     export_zip_file_name = get_config_property("export-zip-file-name")
     templates_output_path = get_config_property("templates-output-path")

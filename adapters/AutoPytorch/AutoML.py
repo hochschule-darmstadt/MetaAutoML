@@ -7,6 +7,9 @@ from TabularDataAutoML import TabularDataAutoML
 from JsonUtil import get_config_property
 
 if __name__ == '__main__':
+    """
+    Entry point for the AutoML subprocess, read configuration json and execute the correct AutoML task
+    """
     FORMAT = '%(asctime)s %(message)s'
     logging.basicConfig(stream=sys.stdout, level=logging.DEBUG, format=FORMAT)
 

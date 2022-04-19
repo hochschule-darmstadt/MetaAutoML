@@ -20,6 +20,9 @@ class TemplateGenerator(object):
     def generate_script(self, config_json):
         """
         Generate the AutoML specific scripts to execute the generated model
+        ---
+        Parameter:
+        1. ML task
         """
 
         # Render Python script

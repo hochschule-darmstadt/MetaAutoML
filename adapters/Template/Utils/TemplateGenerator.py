@@ -13,9 +13,12 @@ class TemplateGenerator(object):
         """
         return
 
-    def GenerateScript(self):
+    def GenerateScript(self, task):
         """
         Generate the AutoML specific scripts to execute the generated model
+        ---
+        Parameter:
+        1. ML task
         """
         #Render Python script
         with open(os.path.join(os.path.dirname(sys.argv[0]), 'templates/PythonTemplate.ji')) as file:
