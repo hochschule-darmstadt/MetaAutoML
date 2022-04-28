@@ -31,6 +31,8 @@ services:
       - AUTOCVE_SERVICE_PORT=50058
       - PYTORCH_SERVICE_HOST=pytorch
       - PYTORCH_SERVICE_PORT=50059
+      - ALPHAD3M_SERVICE_HOST=alphad3m
+      - ALPHAD3M_SERVICE_PORT=50060
     volumes:
       - datasets:/app/app-data/datasets
       - output:/app/app-data/output
@@ -41,6 +43,7 @@ services:
       - output-gluon:/app/app-data/output/gluon
       - output-autocve:/app/app-data/output/autocve
       - output-pytorch:/app/app-data/output/pytorch
+      - output-alphad3m:/app/app-data/output/alphad3m
 
 
 #     adapters do not need to be available from the host machine -> no port mappings
@@ -121,6 +124,17 @@ services:
     volumes:
       - datasets:/app/app-data/datasets
       - output-pytorch:/app/app-data/output
+  
+  alphad3m:
+    build: 
+      context: ./adapters
+      dockerfile: ./AlphaD3M/Dockerfile
+    container_name: alphad3m
+    environment:
+      - GRPC_SERVER_PORT=50060
+    volumes:
+      - datasets:/app/app-data/datasets
+      - output-alphad3m:/app/app-data/output
 
 volumes:
   datasets: # shared volume between controller, adapters and frontend/dummy to transfer datasets
@@ -132,5 +146,6 @@ volumes:
   output-pytorch:
   output-autocve:
   output-mljar:
+  output-alphad3m:
   # shared volume between controller and frontend / dummy to transfer output
   output:
