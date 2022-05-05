@@ -1,6 +1,5 @@
 from AbstractTabularDataAutoML import AbstractTabularDataAutoML
 import os
-from alphad3m import AutoML
 
 
 class TabularDataAutoML(AbstractTabularDataAutoML):
