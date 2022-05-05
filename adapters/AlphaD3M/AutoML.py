@@ -1,18 +1,16 @@
 import json
-import os 
+import os
 
-from AutoMLs.StructuredDataAutoML import StructuredDataAutoML
+from adapters.AlphaD3M.AutoMLs.TabularDataAutoML import TabularDataAutoML
 
 if __name__ == '__main__':
     """
     Entry point for the AutoML subprocess, read configuration json and execute the correct AutoML task
     """
-	json_file = open('template-job.json')
-	processJson = json.load(json_file)
-	processJson = json.loads(processJson)
-	
+    file_path = os.path.join(get_config_property("job-file-path"),
+                             get_config_property("job-file-name"))
+    with open(file_path) as file:
+        process_json = json.load(file)
 
-	if processJson["task"] == 1:
-	    #Classification
-		classificationTask = StructuredDataAutoML(processJson)
-		classificationTask.classification()
+    tabular_data_automl = TabularDataAutoML(process_json)
+    tabular_data_automl.execute_task()

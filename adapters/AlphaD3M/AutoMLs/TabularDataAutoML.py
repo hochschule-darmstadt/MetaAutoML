@@ -1,9 +1,13 @@
+from AbstractTabularDataAutoML import AbstractTabularDataAutoML
 import os
+from alphad3m import AutoML
 
-class StructuredDataAutoML(object):
+
+class TabularDataAutoML(AbstractTabularDataAutoML):
     """
     Implementation of the AutoML functionality fo structured data a.k.a. tabular data
     """
+
     def __init__(self, json: dict):
         """
         Init a new instance of StructuredDataAutoML
@@ -17,9 +21,10 @@ class StructuredDataAutoML(object):
     def __read_training_data(self):
         """
         Read the training dataset from disk
-		In case of AutoKeras only provide the training file path
+                In case of AutoKeras only provide the training file path
         """
-        self.__training_data_path = os.path.join(self.__json["file_location"], self.__json["file_name"])
+        self.__training_data_path = os.path.join(
+            self.__json["file_location"], self.__json["file_name"])
         return
 
     def __export_model(self, model):
