@@ -1,7 +1,7 @@
 import json
 import os
 
-from adapters.AlphaD3M.AutoMLs.TabularDataAutoML import TabularDataAutoML
+from TabularDataAutoML import TabularDataAutoML
 
 if __name__ == '__main__':
     """
