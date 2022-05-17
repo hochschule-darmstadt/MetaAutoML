@@ -1,2 +1,5 @@
 absl-py==0.13.0
 astunparse==1.6.3
+grpcio==1.42.0
+protobuf==3.19.1
+jinja2==3.0.3

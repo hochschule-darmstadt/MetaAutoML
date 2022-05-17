@@ -34,7 +34,8 @@ class TabularDataAutoML(AbstractTabularDataAutoML):
         Parameter:
         1. generate ML model
         """
-        output_file = os.path.join(get_config_property('output-path'), 'tmp', "alphad3m-model.p")
+        output_file = os.path.join(get_config_property(
+            'output-path'), 'tmp', "alphad3m-model.p")
         with open(output_file, "wb+") as file:
             pickle.dump(model, file)
 
@@ -43,6 +44,10 @@ class TabularDataAutoML(AbstractTabularDataAutoML):
         Execute the classification task
         """
         self.__read_training_data()
+
+        print(self._X)
+        print(self._Y)
+
         return
 
     def __regression(self):
@@ -63,5 +68,9 @@ class TabularDataAutoML(AbstractTabularDataAutoML):
         else:
             raise ValueError(
                 f'{get_config_property("adapter-name")} was called with an invalid task: task=={self._configuration["task"]}. The only valid task is task==1 or task==2'
-                )
-        
+            )
+
+# TODO:
+#   - Get classification (def __classification(self):) from alphad3m up and running
+#   - Clear if the _cast_target() from the abstract class covers all Datatypes from alphad3m
+#       (according to the table at the link: https://alphad3m.readthedocs.io/en/latest/how-to.html)

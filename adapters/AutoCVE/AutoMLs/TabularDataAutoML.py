@@ -6,11 +6,13 @@ import pickle
 from JsonUtil import get_config_property
 from predict_time_sources import feature_preparation, DataType, SplitMethod
 from AbstractTabularDataAutoML import AbstractTabularDataAutoML
-    
+
+
 class TabularDataAutoML(AbstractTabularDataAutoML):
     """
     Implementation of the AutoML functionality fo structured data a.k.a. tabular data
     """
+
     def __init__(self, configuration: dict):
         """
         Init a new instance of TabularDataAutoML
@@ -36,7 +38,8 @@ class TabularDataAutoML(AbstractTabularDataAutoML):
         Parameter:
         1. generate ML model
         """
-        output_file = os.path.join(get_config_property('output-path'), 'tmp', "autocve-model.p")
+        output_file = os.path.join(get_config_property(
+            'output-path'), 'tmp', "autocve-model.p")
         with open(output_file, "wb+") as file:
             pickle.dump(model, file)
 
@@ -62,7 +65,8 @@ class TabularDataAutoML(AbstractTabularDataAutoML):
             print("Best voting ensemble found:")
             print(best_voting_ensemble.estimators)
             print("Ensemble size: " + str(len(best_voting_ensemble.estimators)))
-            print("Train Score: {}".format(best_voting_ensemble.score(self._X, self._y)))
+            print("Train Score: {}".format(
+                best_voting_ensemble.score(self._X, self._y)))
 
             self.__export_model(best_voting_ensemble)
 
@@ -81,4 +85,5 @@ class TabularDataAutoML(AbstractTabularDataAutoML):
             self.__classification()
         else:
             raise ValueError(
-                f'{get_config_property("adapter-name")} was called with an invalid task: task=={self._configuration["task"]}. The only valid task is task==1')
+                f'{get_config_property("adapter-name")} was called with an invalid task: task=={self._configuration["task"]}. The only valid task is task==1'
+            )

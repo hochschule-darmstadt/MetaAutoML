@@ -40,6 +40,8 @@ class AbstractTabularDataAutoML:
         df = pd.read_csv(os.path.join(self._configuration["file_location"], self._configuration["file_name"]),
                          **self._configuration["file_configuration"])
 
+        print(self._configuration)
+
         # split training set
         if SplitMethod.SPLIT_METHOD_RANDOM == self._configuration["test_configuration"]["method"]:
             df = df.sample(random_state=self._configuration["test_configuration"]["random_state"], frac=1)

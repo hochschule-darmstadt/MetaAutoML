@@ -12,7 +12,7 @@ import Adapter_pb2_grpc
 
 from concurrent import futures
 from TemplateGenerator import TemplateGenerator
-from OsSpecific import in_cluster
+from controller.utils import OsSpecific
 
 def get_except_response(context, e):
     """
