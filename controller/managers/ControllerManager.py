@@ -7,7 +7,6 @@ from AdapterManager import AdapterManager
 from CsvManager import CsvManager
 from RdfManager import RdfManager
 
-
 class ControllerManager(object):
     """
     Implementation of the controller functionality
@@ -165,6 +164,11 @@ class ControllerManager(object):
         """
         # script_dir = os.path.dirname(os.path.abspath(__file__))
         # file_dest = os.path.join(script_dir, 'datasets')
+
+        # P: save reference to file in database (eg path)
+        #    * actual file should remain on disk
+        # "Dataset" in Data Model
+        print(f"UploadNewDataset({str(dataset.__dict__)})")
         response = Controller_pb2.UploadDatasetFileResponse()
         response.returnCode = 0
         filename_dest = os.path.join(os.path.normpath(self.__datasetFolder), dataset.name)
@@ -184,6 +188,9 @@ class ControllerManager(object):
         response = Controller_pb2.StartAutoMLprocessResponse()
         newSession = self.__adapterManager.start_automl(configuration, self.__datasetFolder,
                                                                self.__sessionCounter)
+        # P: save session details
+        #    "Training" in Data Model
+        print(f"StartAutoMLProcess({str(newSession.__dict__)}")
         self.__sessions[str(self.__sessionCounter)] = newSession
         self.__sessionCounter += 1
         response.result = 1
