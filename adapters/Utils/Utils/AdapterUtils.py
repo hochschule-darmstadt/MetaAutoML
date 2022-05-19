@@ -12,11 +12,13 @@ import shutil
 import Adapter_pb2
 import Adapter_pb2_grpc
 from TemplateGenerator import TemplateGenerator
+from sklearn.metrics import mean_squared_error, accuracy_score
 
 ######################################################################
 ## GRPC HELPER FUNCTIONS
 ######################################################################
 
+#region
 
 def get_except_response(context, e):
     """
@@ -32,6 +34,7 @@ def get_except_response(context, e):
     context.set_details(f"Error while executing {adapter_name}: {e}")
     context.set_code(grpc.StatusCode.UNAVAILABLE)
     return Adapter_pb2.StartAutoMLResponse()
+
 
 def capture_process_output(process, start_time):
     """
@@ -55,6 +58,9 @@ def capture_process_output(process, start_time):
             # if return Code is ADAPTER_RETURN_CODE_STATUS_UPDATE we do not have score values yet
             process_update.testScore = 0.0
             process_update.validationScore = 0.0
+            process_update.predictiontime = 0.0
+            process_update.library = ""
+            process_update.model = ""
             yield process_update
             sys.stdout.write(capture)
             sys.stdout.flush()
@@ -89,10 +95,13 @@ def get_response(output_json, start_time, test_score, prediction_time, library, 
     yield response
 
 
+#endregion
+
 ######################################################################
 ## GENERAL HELPER FUNCTIONS
 ######################################################################
 
+#region
 
 def start_automl_process():
     """"
@@ -158,10 +167,105 @@ def zip_script(session_id):
         'file_location': file_loc_on_controller
     }
 
+def evaluate(config_json, config_path):
+    """
+    Evaluate the model by using the test set
+    ---
+    Parameter
+    1. configuration json
+    1. configuration path
+    ---
+    Return evaluation score
+    """
+    file_path = os.path.join(config_json["file_location"], config_json["file_name"])
+    working_dir = os.path.join(get_config_property("output-path"), "working_dir")
+    #Setup working directory
+    shutil.unpack_archive(os.path.join(get_config_property("output-path"),
+                                       str(config_json["session_id"]),
+                                       get_config_property("export-zip-file-name") + ".zip"),
+                          working_dir,
+                          "zip")
+    # predict
+    os.chmod(os.path.join(working_dir, "predict.py"), 0o777)
+    python_env = os.getenv("PYTHON_ENV", default="PYTHON_ENV_UNSET")
+
+    predict_start = time.time()
+    subprocess.call([python_env, os.path.join(working_dir, "predict.py"), file_path, config_path])
+    predict_time = time.time() - predict_start
+
+    test = pd.read_csv(file_path)
+    if SplitMethod.SPLIT_METHOD_RANDOM == config_json["test_configuration"]["method"]:
+        test = test.sample(random_state=config_json["test_configuration"]["random_state"], frac=1)
+    else:
+        test = test.iloc[int(test.shape[0] * config_json["test_configuration"]["split_ratio"]):]
+
+    predictions = pd.read_csv(os.path.join(working_dir, "predictions.csv"))
+    #Cleanup working directory
+    shutil.rmtree(working_dir)
+
+    target = config_json["tabular_configuration"]["target"]["target"]
+    if config_json["task"] == 1:
+        return accuracy_score(test[target], predictions["predicted"]), (predict_time * 1000) / test.shape[
+            0]
+    elif config_json["task"] == 2:
+        return mean_squared_error(test[target], predictions["predicted"], squared=False), \
+               (predict_time * 1000) / test.shape[0]
+
+
+def predict(data, config_json, config_path):
+    """
+    Make a prediction on test data
+    ---
+    Parameter
+    1. prediction data
+    2. configuration json
+    3. configuration path
+    ---
+    Return prediction score 
+    """
+    working_dir = os.path.join(get_config_property("output-path"), "working_dir")
+
+    shutil.unpack_archive(os.path.join(get_config_property("output-path"),
+                                       str(config_json["session_id"]),
+                                       get_config_property("export-zip-file-name") + ".zip"),
+                          working_dir,
+                          "zip")
+
+    file_path = os.path.join(working_dir, "test.csv")
+
+    with open(file_path, "w+") as f:
+        f.write(data)
+
+    # predict
+    os.chmod(os.path.join(working_dir, "predict.py"), 0o777)
+    python_env = os.getenv("PYTHON_ENV", default="PYTHON_ENV_UNSET")
+
+    predict_start = time.time()
+    subprocess.call([python_env, os.path.join(working_dir, "predict.py"), file_path, config_path])
+    predict_time = time.time() - predict_start
+
+    test = pd.read_csv(file_path)
+
+    predictions = pd.read_csv(os.path.join(working_dir, "predictions.csv"))
+    shutil.rmtree(working_dir)
+
+    target = config_json["tabular_configuration"]["target"]["target"]
+    if config_json["task"] == 1 and target in test:
+        return accuracy_score(test[target], predictions["predicted"]), predict_time, \
+               predictions["predicted"].astype('string').tolist()
+    elif config_json["task"] == 2 and target in test:
+        return mean_squared_error(test[target], predictions["predicted"], squared=False), predict_time, \
+               predictions["predicted"].astype(np.string).tolist()
+    else:
+        return 0, predict_time, predictions["predicted"].astype('string').tolist()
+
+#endregion
 
 ######################################################################
 ## TABULAR DATASET HELPER FUNCTIONS
 ######################################################################
+
+#region
 
 def cast_dataframe_column(dataframe, column_index, datatype):
     """
@@ -210,3 +314,5 @@ def convert_X_and_y_dataframe_to_numpy(X, y):
     X = np.nan_to_num(X, 0)
     y = y.to_numpy()
     return X, y
+
+#endregion

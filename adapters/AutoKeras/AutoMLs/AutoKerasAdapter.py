@@ -1,11 +1,6 @@
-import os
-import dill
-import pandas as pd
 import autokeras as ak
 
-from enum import Enum, unique
 from JsonUtil import get_config_property
-from predict_time_sources import feature_preparation, DataType, SplitMethod 
 from AbstractAdapter import AbstractAdapter
 from AdapterUtils import read_tabular_dataset_training_data, prepare_tabular_dataset
 
@@ -30,16 +25,6 @@ class AutoKerasAdapter(AbstractAdapter):
             elif self._configuration["task"] == 2:
                 self.__tabular_regression()
 
-    def __export_model(self, model):
-        """
-        Export the generated ML model to disk
-        ---
-        Parameter:
-        1. generate ML model
-        """
-        with open(os.path.join(get_config_property('output-path'), 'tmp', 'model_keras.p'), 'wb+') as file:
-            dill.dump(model, file)
-
     def __tabular_classification(self):
         """Execute the classification task"""
         self.df = read_tabular_dataset_training_data(self._configuration)
@@ -50,7 +35,7 @@ class AutoKerasAdapter(AbstractAdapter):
                                           seed=42)
                                           
         clf.fit(x=X, y=y)
-        self.__export_model(clf)
+        self.__export_model(clf, 'model_keras.p')
 
     def __tabular_regression(self):
         """Execute the regression task"""
@@ -61,4 +46,4 @@ class AutoKerasAdapter(AbstractAdapter):
                                          # metric=self._configuration['metric'],
                                          seed=42)
         reg.fit(x=self._X, y=self._y)
-        self.__export_model(reg)
+        self.__export_model(reg, 'model_keras.p')

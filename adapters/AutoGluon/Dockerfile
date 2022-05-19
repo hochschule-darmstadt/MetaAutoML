@@ -22,4 +22,4 @@ ENV RUNTIME=DOCKER
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONPATH "AutoMLs:Utils"
 ENV PYTHON_ENV "python"
-ENTRYPOINT ["python", "Adapter_AutoGluon.py"]
+ENTRYPOINT ["python", "AutoGluonServer.py"]

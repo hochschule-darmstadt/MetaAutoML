@@ -9,7 +9,8 @@ __pycache__/
 #AutoML exclude
 #AutoKeras
 adapters/AutoKeras/structured_data_classifier
-adapters/AutoKeras/app-data/output/tmp
+adapters/*/app-data/output/tmp
+
 #VS 
 *.suo
 *.proj
