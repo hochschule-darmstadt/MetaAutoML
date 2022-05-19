@@ -16,7 +16,9 @@
                 "AUTOKERAS_SERVICE_PORT": "50052",
                 "AUTOKERAS_SERVICE_HOST": "localhost",
                 "AUTOGLUON_SERVICE_PORT": "50057",
-                "AUTOGLUON_SERVICE_HOST": "localhost"
+                "AUTOGLUON_SERVICE_HOST": "localhost",
+                "AUTOCVE_SERVICE_HOST": "localhost",
+                "AUTOCVE_SERVICE_PORT": "50058"
             },
         }
     ]

@@ -173,7 +173,7 @@ def evaluate(config_json, config_path):
     ---
     Parameter
     1. configuration json
-    1. configuration path
+    2. configuration path
     ---
     Return evaluation score
     """
