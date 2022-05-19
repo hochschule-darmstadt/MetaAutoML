@@ -1,5 +1,14 @@
-absl-py==0.13.0
-astunparse==1.6.3
-grpcio==1.42.0
-protobuf==3.19.1
-jinja2==3.0.3
+alphad3m
+d3m-common-primitives
+d3m-sklearn-wrap
+dsbox-corex
+dsbox-primitives
+sri-d3m
+distil-primitives
+rpi-d3m-primitives
+kf-d3m-primitives
+autonbox
+fastlvm
+d3m-esrnn
+d3m-nbeats
+pmdarima --no-binary=pmdarima
