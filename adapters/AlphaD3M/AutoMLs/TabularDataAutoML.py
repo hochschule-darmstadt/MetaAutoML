@@ -18,15 +18,6 @@ class TabularDataAutoML(AbstractTabularDataAutoML):
         """
         super().__init__(configuration)
 
-    # def __read_training_data(self):
-    #     """
-    #     Read the training dataset from disk
-    #             In case of AutoKeras only provide the training file path
-    #     """
-    #     self.__training_data_path = os.path.join(
-    #         self.__configuration["file_location"], self.__configuration["file_name"])
-    #     return
-
     def __export_model(self, model):
         """
         Export the generated ML model to disk
@@ -43,7 +34,7 @@ class TabularDataAutoML(AbstractTabularDataAutoML):
         """
         Execute the classification task
         """
-        self.__read_training_data()
+        self._read_training_data()
 
         print(self._X)
         print(self._Y)
@@ -54,7 +45,7 @@ class TabularDataAutoML(AbstractTabularDataAutoML):
         """
         Execute the regression task
         """
-        self.__read_training_data()
+        self._read_training_data()
         return
 
     def execute_task(self):
@@ -69,8 +60,3 @@ class TabularDataAutoML(AbstractTabularDataAutoML):
             raise ValueError(
                 f'{get_config_property("adapter-name")} was called with an invalid task: task=={self._configuration["task"]}. The only valid task is task==1 or task==2'
             )
-
-# TODO:
-#   - Get classification (def __classification(self):) from alphad3m up and running
-#   - Clear if the _cast_target() from the abstract class covers all Datatypes from alphad3m
-#       (according to the table at the link: https://alphad3m.readthedocs.io/en/latest/how-to.html)
