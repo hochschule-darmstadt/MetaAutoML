@@ -1,0 +1,25 @@
+{
+    // Verwendet IntelliSense zum Ermitteln möglicher Attribute.
+    // Zeigen Sie auf vorhandene Attribute, um die zugehörigen Beschreibungen anzuzeigen.
+    // Weitere Informationen finden Sie unter https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Controller Debug",
+            "type": "python",
+            "request": "launch",
+            "program": "Controller.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "env": {
+                "PYTHONPATH": "interfaces;managers;managers/adaptermanagers;managers/ontology;interfaces;sessions;utils;../adapters/GRPC/Controller;../adapters/Utils/Utils;../adapters/GRPC/Adapter;",
+                "AUTOKERAS_SERVICE_PORT": "50052",
+                "AUTOKERAS_SERVICE_HOST": "localhost",
+                "AUTOGLUON_SERVICE_PORT": "50057",
+                "AUTOGLUON_SERVICE_HOST": "localhost",
+                "AUTOCVE_SERVICE_HOST": "localhost",
+                "AUTOCVE_SERVICE_PORT": "50058"
+            },
+        }
+    ]
+}

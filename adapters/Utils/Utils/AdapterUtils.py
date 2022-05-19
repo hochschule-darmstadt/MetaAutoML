@@ -1,26 +1,24 @@
-import grpc
-import os
-import sys
-import logging
-import shutil
-import subprocess
-import json
-import time
+from predict_time_sources import feature_preparation, DataType, SplitMethod
+from JsonUtil import get_config_property
 import numpy as np
-import pickle
-
 import pandas as pd
-from sklearn.metrics import accuracy_score, mean_squared_error
-from autogluon.tabular import TabularPredictor
-
+import os
+import grpc
+import subprocess
+import time
+import sys
+import json
+import shutil
 import Adapter_pb2
 import Adapter_pb2_grpc
-
-from concurrent import futures
 from TemplateGenerator import TemplateGenerator
-from predict_time_sources import SplitMethod
-from JsonUtil import get_config_property
+from sklearn.metrics import mean_squared_error, accuracy_score
 
+######################################################################
+## GRPC HELPER FUNCTIONS
+######################################################################
+
+#region
 
 def get_except_response(context, e):
     """
@@ -38,17 +36,6 @@ def get_except_response(context, e):
     return Adapter_pb2.StartAutoMLResponse()
 
 
-def generate_script(config_json):
-    """
-    Generate the result python script
-    ---
-    Parameter
-    1. process configuration
-    """
-    generator = TemplateGenerator()
-    generator.generate_script(config_json)
-
-
 def capture_process_output(process, start_time):
     """
     Read console log from subprocess, and send it after each \n to the controller
@@ -58,8 +45,7 @@ def capture_process_output(process, start_time):
     2. Process start time
     """
     capture = ""
-    # AutoGluon writes to stderr which seems to be not configurable
-    s = process.stderr.read(1)
+    s = process.stdout.read(1)
     capture += s
     # Run until no more output is produced by the subprocess
     while len(s) > 0:
@@ -76,11 +62,11 @@ def capture_process_output(process, start_time):
             process_update.library = ""
             process_update.model = ""
             yield process_update
-            sys.stderr.write(capture)
-            sys.stderr.flush()
+            sys.stdout.write(capture)
+            sys.stdout.flush()
             capture = ""
         capture += s
-        s = process.stderr.read(1)
+        s = process.stdout.read(1)
 
 
 def get_response(output_json, start_time, test_score, prediction_time, library, model):
@@ -100,8 +86,7 @@ def get_response(output_json, start_time, test_score, prediction_time, library, 
     response = Adapter_pb2.StartAutoMLResponse()
     response.returnCode = Adapter_pb2.ADAPTER_RETURN_CODE_SUCCESS
     response.outputJson = json.dumps(output_json)
-    response.runtime = int(time.time() - start_time) or 0
-    # if return Code is ADAPTER_RETURN_CODE_STATUS_UPDATE we do not have score values yet
+    response.runtime = int(time.time() - start_time)
     response.testScore = test_score
     response.validationScore = 0.0
     response.predictiontime = prediction_time
@@ -109,6 +94,34 @@ def get_response(output_json, start_time, test_score, prediction_time, library, 
     response.model = model
     yield response
 
+
+#endregion
+
+######################################################################
+## GENERAL HELPER FUNCTIONS
+######################################################################
+
+#region
+
+def start_automl_process():
+    """"
+    @:return started automl process
+    """
+    python_env = os.getenv("PYTHON_ENV", default="PYTHON_ENV_UNSET")
+
+    return subprocess.Popen([python_env, "AutoML.py", ""],
+                            stdout=subprocess.PIPE,
+                            universal_newlines=True)
+
+def generate_script(config_json):
+    """
+    Generate the result python script
+    ---
+    Parameter
+    1. process configuration
+    """
+    generator = TemplateGenerator()
+    generator.generate_script(config_json)
 
 def zip_script(session_id):
     """
@@ -154,30 +167,19 @@ def zip_script(session_id):
         'file_location': file_loc_on_controller
     }
 
-
-def start_automl_process():
-    """"
-    @:return started automl process
-    """
-    python_env = os.getenv("PYTHON_ENV", default="PYTHON_ENV_UNSET")
-
-    return subprocess.Popen([python_env, "AutoML.py", ""],
-                            stderr=subprocess.PIPE,
-                            universal_newlines=True)
-
 def evaluate(config_json, config_path):
     """
-    Make a prediction on test data
+    Evaluate the model by using the test set
     ---
     Parameter
-    1. prediction data
-    2. configuration json
-    3. configuration path
+    1. configuration json
+    2. configuration path
     ---
-    Return prediction score 
+    Return evaluation score
     """
     file_path = os.path.join(config_json["file_location"], config_json["file_name"])
     working_dir = os.path.join(get_config_property("output-path"), "working_dir")
+    #Setup working directory
     shutil.unpack_archive(os.path.join(get_config_property("output-path"),
                                        str(config_json["session_id"]),
                                        get_config_property("export-zip-file-name") + ".zip"),
@@ -186,31 +188,11 @@ def evaluate(config_json, config_path):
     # predict
     os.chmod(os.path.join(working_dir, "predict.py"), 0o777)
     python_env = os.getenv("PYTHON_ENV", default="PYTHON_ENV_UNSET")
- 
-    predict_start = time.time()   
+
+    predict_start = time.time()
     subprocess.call([python_env, os.path.join(working_dir, "predict.py"), file_path, config_path])
     predict_time = time.time() - predict_start
 
-    # extract additional information from automl
-    automl = TabularPredictor.load(os.path.join(working_dir, 'model_gluon.gluon'))
-    automl_info = automl._learner.get_info(include_model_info=True)
-    librarylist = set()
-    model = automl_info['best_model']
-    for model_info in automl_info['model_info']:
-        if model_info == model:
-            pass
-        elif model_info in ('LightGBM', 'LightGBMXT'):
-            librarylist.add("lightgbm")
-        elif model_info == 'XGBoost':
-            librarylist.add("xgboost")
-        elif model_info == 'CatBoost':
-            librarylist.add("catboost")
-        elif model_info == 'NeuralNetFastAI':
-            librarylist.add("pytorch")
-        else:
-            librarylist.add("sklearn")
-    library = " + ".join(librarylist)
-    # calculate the accuracy
     test = pd.read_csv(file_path)
     if SplitMethod.SPLIT_METHOD_RANDOM == config_json["test_configuration"]["method"]:
         test = test.sample(random_state=config_json["test_configuration"]["random_state"], frac=1)
@@ -218,15 +200,16 @@ def evaluate(config_json, config_path):
         test = test.iloc[int(test.shape[0] * config_json["test_configuration"]["split_ratio"]):]
 
     predictions = pd.read_csv(os.path.join(working_dir, "predictions.csv"))
+    #Cleanup working directory
     shutil.rmtree(working_dir)
 
     target = config_json["tabular_configuration"]["target"]["target"]
     if config_json["task"] == 1:
-        return accuracy_score(test[target], predictions["predicted"]), \
-               (predict_time * 1000) / test.shape[0], library, model
+        return accuracy_score(test[target], predictions["predicted"]), (predict_time * 1000) / test.shape[
+            0]
     elif config_json["task"] == 2:
         return mean_squared_error(test[target], predictions["predicted"], squared=False), \
-               (predict_time * 1000) / test.shape[0], library, model
+               (predict_time * 1000) / test.shape[0]
 
 
 def predict(data, config_json, config_path):
@@ -276,71 +259,60 @@ def predict(data, config_json, config_path):
     else:
         return 0, predict_time, predictions["predicted"].astype('string').tolist()
 
+#endregion
 
-class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
+######################################################################
+## TABULAR DATASET HELPER FUNCTIONS
+######################################################################
+
+#region
+
+def cast_dataframe_column(dataframe, column_index, datatype):
     """
-    AutoML Adapter Service implementation.
-    Service provide functionality to execute and interact with the current AutoML process.
+    Cast a specific column to a new data type
     """
+    if DataType(datatype) is DataType.DATATYPE_CATEGORY:
+        dataframe[column_index] = dataframe[column_index].astype('category')
+    elif DataType(datatype) is DataType.DATATYPE_BOOLEAN:
+        dataframe[column_index] = dataframe[column_index].astype('bool')
+    elif DataType(datatype) is DataType.DATATYPE_INT:
+        dataframe[column_index] = dataframe[column_index].astype('int')
+    elif DataType(datatype) is DataType.DATATYPE_FLOAT:
+        dataframe[column_index] = dataframe[column_index].astype('float')
+    return dataframe
 
-    def StartAutoML(self, request, context):
-        """
-        Execute a new AutoML run.
-        """
-        try:
-            start_time = time.time()
-            # saving AutoML configuration JSON
-            config_json = json.loads(request.processJson)
-            job_file_location = os.path.join(get_config_property("job-file-path"),
-                                             get_config_property("job-file-name"))
-            with open(job_file_location, "w+") as f:
-                json.dump(config_json, f)
-
-            process = start_automl_process()
-            yield from capture_process_output(process, start_time)
-            generate_script(config_json)
-            output_json = zip_script(config_json["session_id"])
-
-            test_score, prediction_time, library, model = evaluate(config_json, job_file_location)
-            response = yield from get_response(output_json, start_time, test_score, prediction_time, library, model)
-
-            print(f'{get_config_property("adapter-name")} job finished')
-            return response
-
-        except Exception as e:
-            return get_except_response(context, e)
-    
-    def TestAdapter(self, request, context):
-        try:
-            # saving AutoML configuration JSON
-            config_json = json.loads(request.processJson)
-            job_file_location = os.path.join(get_config_property("job-file-path"),
-                                             get_config_property("job-file-name"))
-            with open(job_file_location, "w+") as f:
-                json.dump(config_json, f)
-
-            test_score, prediction_time, predictions = predict(request.testData, config_json, job_file_location)
-            response = Adapter_pb2.TestAdapterResponse(predictions=predictions)
-            response.score = test_score
-            response.predictiontime = prediction_time
-            return response
-
-        except Exception as e:
-            return get_except_response(context, e)
-
-def serve():
+def read_tabular_dataset_training_data(json_configuration):
     """
-    Boot the gRPC server and wait for incoming connections
+    Read the training dataset from disk
     """
-    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-    Adapter_pb2_grpc.add_AdapterServiceServicer_to_server(AdapterServiceServicer(), server)
-    server.add_insecure_port(f'{get_config_property("grpc-server-address")}:{os.getenv("GRPC_SERVER_PORT")}')
-    server.start()
-    print(get_config_property("adapter-name") + " started")
-    server.wait_for_termination()
+    df = pd.read_csv(os.path.join(json_configuration["file_location"], json_configuration["file_name"]),
+                    **json_configuration["file_configuration"])
 
+    # split training set
+    if SplitMethod.SPLIT_METHOD_RANDOM == json_configuration["test_configuration"]["method"]:
+        df = df.sample(random_state=json_configuration["test_configuration"]["random_state"], frac=1)
+    else:
+        df = df.iloc[:int(df.shape[0] * json_configuration["test_configuration"]["split_ratio"])]
 
-if __name__ == '__main__':
-    logging.basicConfig()
-    serve()
-    print('done.')
+    return df
+
+def prepare_tabular_dataset(df, json_configuration):
+    """
+    Prepare tabular dataset, perform feature preparation and data type casting
+    """
+    df = feature_preparation(df, json_configuration["tabular_configuration"]["features"].items())
+    df = cast_dataframe_column(df, json_configuration["tabular_configuration"]["target"]["target"], json_configuration["tabular_configuration"]["target"]["type"])
+    X = df.drop(json_configuration["tabular_configuration"]["target"]["target"], axis=1)
+    y = df[json_configuration["tabular_configuration"]["target"]["target"]]
+    return X, y
+
+def convert_X_and_y_dataframe_to_numpy(X, y):
+    """
+    Convert the X and y dataframes to numpy datatypes and fill up nans
+    """
+    X = X.to_numpy()
+    X = np.nan_to_num(X, 0)
+    y = y.to_numpy()
+    return X, y
+
+#endregion
