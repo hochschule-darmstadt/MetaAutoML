@@ -1,3 +1,4 @@
 autogluon
 grpcio
 dill
+jinja2
