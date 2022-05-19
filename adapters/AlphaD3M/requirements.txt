@@ -1,14 +1,17 @@
 alphad3m
-d3m-common-primitives
-d3m-sklearn-wrap
-dsbox-corex
-dsbox-primitives
-sri-d3m
-distil-primitives
-rpi-d3m-primitives
-kf-d3m-primitives
 autonbox
-fastlvm
+d3m-common-primitives
 d3m-esrnn
 d3m-nbeats
+d3m-sklearn-wrap
+distil-primitives
+dsbox-corex
+dsbox-primitives
+fastlvm
+grpcio==1.42.0
+jinja2==3.0.3
+kf-d3m-primitives
 pmdarima --no-binary=pmdarima
+protobuf==3.19.1
+rpi-d3m-primitives
+sri-d3m
