@@ -5,18 +5,16 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Controller Debug",
+            "name": "Autogluon Adapter",
             "type": "python",
             "request": "launch",
-            "program": "Controller.py",
+            "program": "AutoGluonServer.py",
             "console": "integratedTerminal",
             "justMyCode": true,
             "env": {
-                "PYTHONPATH": "interfaces;managers;managers/adaptermanagers;managers/ontology;interfaces;sessions;utils;../adapters/GRPC/Controller;../adapters/Utils/Utils;../adapters/GRPC/Adapter;",
-                "AUTOKERAS_SERVICE_PORT": "50052",
-                "AUTOKERAS_SERVICE_HOST": "localhost",
-                "AUTOGLUON_SERVICE_PORT": "50057",
-                "AUTOGLUON_SERVICE_HOST": "localhost"
+                "PYTHONPATH": "AutoMLs;Utils;../Utils/Utils;../Utils/AutoMLs;../GRPC/Adapter;",
+                "GRPC_SERVER_PORT": "50057",
+                "PYTHON_ENV": ".venv/Scripts/python"
             },
         }
     ]

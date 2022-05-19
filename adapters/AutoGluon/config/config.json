@@ -2,7 +2,7 @@
   "adapter-name": "gluon",
   "job-file-name": "gluon-job.json",
   "env-varname-cluster": "RUNTIME",
-  "grpc-server-address": "0.0.0.0",
+  "grpc-server-address": "127.0.0.1",
   "export-zip-file-name": "gluon-export",
   "output-path": "app-data/output",
   "job-file-path": "app-data/jobs",
