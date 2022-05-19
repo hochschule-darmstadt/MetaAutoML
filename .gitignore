@@ -6,6 +6,12 @@ __pycache__/
 # C extensions
 *.so
 
+#AutoML exclude
+adapters/*/app-data/output/tmp
+#AutoKeras
+adapters/AutoKeras/structured_data_classifier
+
+
 #VS 
 *.suo
 *.proj

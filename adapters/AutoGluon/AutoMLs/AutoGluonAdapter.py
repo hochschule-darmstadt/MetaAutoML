@@ -1,11 +1,11 @@
 import os
-import pandas as pd
 from autogluon.tabular import TabularDataset, TabularPredictor
 from JsonUtil import get_config_property
-from predict_time_sources import feature_preparation, DataType, SplitMethod
-from AbstractTabularDataAutoML import AbstractTabularDataAutoML
+from AbstractAdapter import AbstractAdapter
+from AdapterUtils import read_tabular_dataset_training_data, prepare_tabular_dataset
 
-class TabularDataAutoML(AbstractTabularDataAutoML):
+
+class AutoGluonAdapter(AbstractAdapter):
     """
     Implementation of the AutoML functionality fo structured data a.k.a. tabular data
     """
@@ -22,32 +22,33 @@ class TabularDataAutoML(AbstractTabularDataAutoML):
                                           'tmp',
                                           'model_gluon.gluon')
 
-    def execute_task(self):
+    def start(self):
         """
         Execute the ML task
         NOTE: AutoGLUON automatically saves the model in a file
         Therefore we do not need to export it using pickle
         """
         if self._configuration["task"] == 1:
-            self.__classification()
+            self.__tabular_classification()
         elif self._configuration["task"] == 2:
-            self.__regression()
+            self.__tabular_regression()
 
-    def __classification(self):
+    def __tabular_classification(self):
         """
         Execute the classification task
         """
-        self._read_training_data()
-        self._dataset_preparation()
-        data = self._X
-        data[self._target] = self._y
+        self.df = read_tabular_dataset_training_data(self._configuration)
+        X, y = prepare_tabular_dataset(self.df, self._configuration)
+        data = X
+        data[self._target] = y
         model = TabularPredictor(label=self._target,
                                  problem_type="multiclass",
                                  path=self._output_path).fit(
             data,
             time_limit=self._time_limit)
+        #Fit methode already saves the model
 
-    def __regression(self):
+    def __tabular_regression(self):
         """
         Execute the regression task
         """
@@ -60,3 +61,4 @@ class TabularDataAutoML(AbstractTabularDataAutoML):
                                  path=self._output_path).fit(
             data,
             time_limit=self._time_limit)
+        #Fit methode already saves the model
