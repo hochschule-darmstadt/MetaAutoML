@@ -1,13 +1,9 @@
-import os
-import pandas as pd
-import pickle
 from flaml import AutoML
 
-from JsonUtil import get_config_property
-from predict_time_sources import feature_preparation, DataType, SplitMethod
-from AbstractTabularDataAutoML import AbstractTabularDataAutoML
+from AbstractAdapter import AbstractAdapter
+from AdapterUtils import read_tabular_dataset_training_data, prepare_tabular_dataset, export_model
 
-class TabularDataAutoML(AbstractTabularDataAutoML):
+class FLAMLAdapter(AbstractAdapter):
     """
     Implementation of the AutoML functionality fo structured data a.k.a. tabular data
     """
@@ -19,26 +15,16 @@ class TabularDataAutoML(AbstractTabularDataAutoML):
         Parameter:
         1. Configuration JSON of type dictionary
         """
-        super().__init__(configuration)
+        super(FLAMLAdapter, self).__init__(configuration)
 
-    def __export_model(self, model):
-        """
-        Export the generated ML model to disk
-        ---
-        Parameter:
-        1. generate ML model
-        """
-        with open(os.path.join(get_config_property('output-path'), 'tmp', 'model_flaml.p'), 'wb+') as file:
-            pickle.dump(model, file)
-
-    def execute_task(self):
+    def start(self):
         """
         Execute the ML task
         """
         if self._configuration["task"] == 1:
-            self.__classification()
+            self.__tabular_classification()
         elif self._configuration["task"] == 2:
-            self.__regression()
+            self.__tabular_regression()
 
     def __generate_settings(self):
         automl_settings = {"log_file_name": 'flaml.log'}
@@ -48,12 +34,12 @@ class TabularDataAutoML(AbstractTabularDataAutoML):
             automl_settings.update({"max_iter": self._configuration["runtime_constraints"]["max_iter"]})
         return automl_settings
 
-    def __classification(self):
+    def __tabular_classification(self):
         """
         Execute the classification task
         """
-        self._read_training_data()
-        self._dataset_preparation()
+        self.df = read_tabular_dataset_training_data(self._configuration)
+        X, y = prepare_tabular_dataset(self.df, self._configuration)
         automl = AutoML()
         automl_settings = self.__generate_settings()
         automl_settings.update({
@@ -61,15 +47,15 @@ class TabularDataAutoML(AbstractTabularDataAutoML):
             "task": 'classification',
         })
 
-        automl.fit(X_train=self._X, y_train=self._y, **automl_settings)
-        self.__export_model(automl)
+        automl.fit(X_train=X, y_train=y, **automl_settings)
+        export_model(automl, 'model_flaml.p')
 
-    def __regression(self):
+    def __tabular_regression(self):
         """
         Execute the regression task
         """
-        self._read_training_data()
-        self._dataset_preparation()
+        self.df = read_tabular_dataset_training_data(self._configuration)
+        X, y = prepare_tabular_dataset(self.df, self._configuration)
         automl = AutoML()
         automl_settings = self.__generate_settings()
         automl_settings.update({
@@ -77,5 +63,5 @@ class TabularDataAutoML(AbstractTabularDataAutoML):
             "task": 'regression',
         })
 
-        automl.fit(X_train=self._X, y_train=self._y, **automl_settings)
-        self.__export_model(automl)
+        automl.fit(X_train=X, y_train=y, **automl_settings)
+        export_model(automl, 'model_flaml.p')

@@ -3,7 +3,7 @@ import os
 import logging
 import sys
 
-from TabularDataAutoML import TabularDataAutoML
+from AutoPytorchAdapter import AutoPytorchAdapter
 from JsonUtil import get_config_property
 
 if __name__ == '__main__':
@@ -18,5 +18,5 @@ if __name__ == '__main__':
     with open(file_path) as file:
         process_json = json.load(file)
 
-    tabularDataAutoML = TabularDataAutoML(process_json)
-    tabularDataAutoML.execute_task()
+    autoMl = AutoPytorchAdapter(process_json)
+    autoMl.start()
