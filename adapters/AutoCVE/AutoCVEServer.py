@@ -106,6 +106,7 @@ def serve():
 
 
 if __name__ == '__main__':
+    os.mkdir('app-data/output/tmp')
     logging.basicConfig()
     serve()
     print('done.')

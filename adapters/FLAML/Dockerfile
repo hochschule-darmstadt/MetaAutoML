@@ -20,4 +20,4 @@ ENV RUNTIME=DOCKER
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONPATH "AutoMLs:Utils"
 ENV PYTHON_ENV "python"
-ENTRYPOINT ["python", "Adapter_FLAML.py"]
+ENTRYPOINT ["python", "FlamlServer.py"]

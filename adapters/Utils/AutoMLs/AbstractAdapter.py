@@ -27,13 +27,3 @@ class AbstractAdapter(ABC):
     def start(self):
         """Execute the ML task"""
         pass
-
-    def __export_model(self, model, file_name):
-        """
-        Export the generated ML model to disk
-        ---
-        Parameter:
-        1. generate ML model
-        """
-        with open(os.path.join(get_config_property('output-path'), 'tmp', file_name), 'wb+') as file:
-            dill.dump(model, file)
