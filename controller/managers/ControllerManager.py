@@ -6,13 +6,14 @@ import Controller_pb2
 from AdapterManager import AdapterManager
 from CsvManager import CsvManager
 from RdfManager import RdfManager
+from persistence import DataStorage, Dataset
 
 class ControllerManager(object):
     """
     Implementation of the controller functionality
     """
 
-    def __init__(self, datasetFolder):
+    def __init__(self, data_storage: DataStorage):
         """
         Controller Manager init function
         ---
@@ -24,10 +25,7 @@ class ControllerManager(object):
         self.__adapterManager = AdapterManager()
         self.__sessions = {}
         self.__sessionCounter = 1
-        self.__datasetFolder = datasetFolder
-        # ensure dataset folder exists
-        if not os.path.exists(self.__datasetFolder):
-            os.makedirs(self.__datasetFolder)
+        self.__data_storage = data_storage
         return
 
     def GetAutoMlModel(self, request) -> Controller_pb2.GetAutoMlModelResponse:
@@ -61,24 +59,25 @@ class ControllerManager(object):
         ---
         Return a list of compatible datasets
         """
-        datasets = Controller_pb2.GetDatasetsResponse()
-        # TODO: ADD DATASET MANAGEMENT OVER DATABASE
-        with os.scandir(self.__datasetFolder) as dirs:
-            for entry in dirs:
-                try:
-                    rows, cols = pd.read_csv(os.path.join(self.__datasetFolder, entry.name)).shape
-                    dataset = Controller_pb2.Dataset()
-                    dataset.fileName = entry.name
-                    dataset.type = "TABULAR"
-                    dataset.rows = rows
-                    dataset.columns = cols
-                    mtime = os.path.getmtime(os.path.join(self.__datasetFolder, entry.name))
-                    dataset.creation_date.seconds = int(mtime)
-                    dataset.creation_date.nanos = int(mtime % 1 * 1e9)
-                    datasets.dataset.append(dataset)
-                except Exception as e:
-                    print(e)
-        return datasets
+        response = Controller_pb2.GetDatasetsResponse()
+
+        all_datasets: list[Dataset] = self.__data_storage.get_datasets()
+        print(all_datasets)
+        for dataset in all_datasets:
+            try:
+                rows, cols = pd.read_csv(dataset.path).shape
+                response_dataset = Controller_pb2.Dataset()
+                response_dataset.fileName = dataset.path
+                response_dataset.type = "TABULAR"
+                response_dataset.rows = rows
+                response_dataset.columns = cols
+                response_dataset.creation_date.seconds = int(dataset.mtime)
+                response_dataset.creation_date.nanos = int(dataset.mtime % 1 * 1e9)
+                response.dataset.append(response_dataset)
+            except Exception as e:
+                print(f"exception: {e}")
+                
+        return response
 
     def GetDataset(self, request) -> Controller_pb2.GetDatasetResponse:
         """
@@ -94,7 +93,8 @@ class ControllerManager(object):
         firstEntries: the first couple of rows of the dataset
         """
         # TODO WHEN USER MANAGEMENT IS ADDED; CORRECT FILTERING
-        dataset = CsvManager.read_dataset(os.path.join(self.__datasetFolder, request.name))
+        dataset = self.__data_storage.get_dataset(request.name)
+        dataset = CsvManager.read_dataset(dataset.path)
         return dataset
 
     def GetSessions(self, request) -> Controller_pb2.GetSessionsResponse:
@@ -153,7 +153,7 @@ class ControllerManager(object):
         """
         return self.__rdfManager.GetDatasetCompatibleTasks(request)
 
-    def UploadNewDataset(self, dataset) -> Controller_pb2.UploadDatasetFileResponse:
+    def UploadNewDataset(self, dataset: 'dict[str, str]') -> Controller_pb2.UploadDatasetFileResponse:
         """
         Upload a new dataset
         ---
@@ -167,13 +167,10 @@ class ControllerManager(object):
 
         # P: save reference to file in database (eg path)
         #    * actual file should remain on disk
-        # "Dataset" in Data Model
-        print(f"UploadNewDataset({str(dataset)})")
+        # "Dataset" in Data Model        
+        self.__data_storage.save_dataset(dataset.name, dataset.content)
         response = Controller_pb2.UploadDatasetFileResponse()
         response.returnCode = 0
-        filename_dest = os.path.join(os.path.normpath(self.__datasetFolder), dataset.name)
-        save_file = open(filename_dest, 'wb')
-        save_file.write(dataset.content)
         return response
 
     def StartAutoMLProcess(self, configuration) -> Controller_pb2.StartAutoMLprocessResponse:
@@ -190,7 +187,6 @@ class ControllerManager(object):
                                                                self.__sessionCounter)
         # P: save session details
         #    "Training" in Data Model
-        print(f"StartAutoMLProcess({str(newSession.__dict__)}")
         self.__sessions[str(self.__sessionCounter)] = newSession
         self.__sessionCounter += 1
         response.result = 1
