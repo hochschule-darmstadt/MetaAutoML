@@ -11,7 +11,7 @@ class CsvManager:
     """
     Static CSV Manager class to interact with the local file system
     """
-
+    
     @staticmethod
     def read_dataset(path) -> Controller_pb2.GetDatasetResponse:
         """
@@ -24,7 +24,8 @@ class CsvManager:
         """
         response = Controller_pb2.GetDatasetResponse()
         dataset = pd.read_csv(path)
-
+        # P: Dataset Analysis happens here, will return small json with metadata
+        
         for col in dataset.columns:
             table_column = Controller_pb2.TableColumn()
             table_column.name = col

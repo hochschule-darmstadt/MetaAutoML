@@ -168,7 +168,7 @@ class ControllerManager(object):
         # P: save reference to file in database (eg path)
         #    * actual file should remain on disk
         # "Dataset" in Data Model
-        print(f"UploadNewDataset({str(dataset.__dict__)})")
+        print(f"UploadNewDataset({str(dataset)})")
         response = Controller_pb2.UploadDatasetFileResponse()
         response.returnCode = 0
         filename_dest = os.path.join(os.path.normpath(self.__datasetFolder), dataset.name)
