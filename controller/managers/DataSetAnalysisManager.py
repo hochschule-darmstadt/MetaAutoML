@@ -22,6 +22,8 @@ class DataSetAnalysisManager:
         jsonfile = DataSetAnalysisManager.__number_of_rows_and_columns(dataset, jsonfile)
         jsonfile = DataSetAnalysisManager.__missing_values(dataset, jsonfile)
         jsonfile = DataSetAnalysisManager.__detect_outliers(dataset, jsonfile)
+        #jsonfile = DataSetAnalysisManager.__detect_duplicate_columns(dataset, jsonfile)
+        jsonfile = DataSetAnalysisManager.__detect_duplicate_rows(dataset, jsonfile)
 
         # print(json.dumps(jsonfile))
 
@@ -78,7 +80,7 @@ class DataSetAnalysisManager:
     @staticmethod
     def __detect_outliers(dataset: pd.DataFrame, jsonfile: dict) -> dict:
         """
-        Detects outliers in all columns of the dataset containing floats and stores their indices in a JSON file
+        Detects outliers in all columns in a dataset containing floats and stores their indices in a JSON file
         ---
         Parameter
         1. dataset to be analyzed
@@ -119,7 +121,47 @@ class DataSetAnalysisManager:
         
         return jsonfile
 
+    @staticmethod
+    def __detect_duplicate_columns(dataset: pd.DataFrame, jsonfile: dict) -> dict:
+        """
+        Detects duplicate columns in a dataset and adds that information to a JSON file
+        ---
+        Parameter
+        1. dataset to be analyzed
+        2. JSON file to write to
+        ---
+        Return the JSON file with additional data
+        """
+        class DuplicateColumn(object):
+            pass
 
+        jsonfile["basic analysis"]["duplicate columns"] = {}
+
+        for x in range(dataset.shape[1]):
+            col = dataset.iloc[:, x]
+            
+            for y in range(x + 1, dataset.shape[1]):
+
+                other_col = dataset.iloc[:, y]
+                
+                if col.equals(other_col):
+                    dupl_column_obj = DuplicateColumn()
+
+        return jsonfile
+
+    @staticmethod
+    def __detect_duplicate_rows(dataset: pd.DataFrame, jsonfile: dict) -> dict:
+        """
+        Detects duplicate rows in a dataset and adds that information to a JSON file
+        ---
+        Parameter
+        1. dataset to be analyzed
+        2. JSON file to write to
+        ---
+        Return the JSON file with additional data
+        """
+        hash_column = pd.Series((hash(tuple(row)) for _, row in dataset.iterrows()))
+        return jsonfile
 
 
 
