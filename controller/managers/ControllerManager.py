@@ -61,8 +61,9 @@ class ControllerManager(object):
         """
         response = Controller_pb2.GetDatasetsResponse()
 
-        all_datasets: list[Dataset] = self.__data_storage.get_datasets()
-        print(all_datasets)
+        username = "autml_user"
+        all_datasets: list[Dataset] = self.__data_storage.get_datasets(username)
+        
         for dataset in all_datasets:
             try:
                 rows, cols = pd.read_csv(dataset.path).shape
@@ -93,7 +94,8 @@ class ControllerManager(object):
         firstEntries: the first couple of rows of the dataset
         """
         # TODO WHEN USER MANAGEMENT IS ADDED; CORRECT FILTERING
-        dataset = self.__data_storage.get_dataset(request.name)
+        username = "autml_user"
+        dataset = self.__data_storage.get_dataset(username, request.name)
         dataset = CsvManager.read_dataset(dataset.path)
         return dataset
 
@@ -167,8 +169,9 @@ class ControllerManager(object):
 
         # P: save reference to file in database (eg path)
         #    * actual file should remain on disk
-        # "Dataset" in Data Model        
-        self.__data_storage.save_dataset(dataset.name, dataset.content)
+        # "Dataset" in Data Model
+        username = "autml_user"
+        self.__data_storage.save_dataset(username, dataset.name, dataset.content)
         response = Controller_pb2.UploadDatasetFileResponse()
         response.returnCode = 0
         return response

@@ -1,6 +1,7 @@
 import os, os.path
 from typing import Iterator
-
+from persistence.mongo_client import Database
+from operator import itemgetter
 
 class Dataset:
     def __init__(self, name: str, path: str, mtime: float):
@@ -19,28 +20,43 @@ class DataStorage:
 
         self.__storage_dir = data_storage_dir
 
+        # assume that we run with docker-compose
+        self.__mongo: Database = Database("mongodb://root:example@mongo")
 
-    def save_dataset(self, name: str, content: bytes):
+
+    def save_dataset(self, username: str, name: str, content: bytes):
         filename_dest = os.path.join(self.__storage_dir, name)
         save_file = open(filename_dest, 'wb')
         save_file.write(content)
 
+        self.__mongo.insert_dataset(username, name, filename_dest)
+        print(f"inserted dataset '{name}'")
 
-    # TODO: what to do in case of error
-    def get_dataset(self, name: str) -> Dataset:
-        path = os.path.join(self.__storage_dir, name)
-        if not os.path.exists(path):
+
+    def get_dataset(self, username: str, name: str) -> Dataset:
+
+        dataset = self.__mongo.get_dataset(username, name)
+        filepath: str = dataset["path"]
+
+        if not os.path.exists(filepath):
             # dataset path does not exist
+            # TODO: what to do in case of error, database cleanup?
             raise FileNotFoundError
 
-        mtime = os.path.getmtime(os.path.join(self.__storage_dir, name))
+        mtime = os.path.getmtime(filepath)
 
-        return Dataset(name, path, mtime)
+        return Dataset(name, filepath, mtime)
 
 
-    def get_datasets(self) -> 'Iterator[Dataset]':
-        files = [f for f in os.listdir(self.__storage_dir)]
-        # ignore dotfiles, eg. ".gitkeep"
-        files = filter(lambda f: not f.startswith("."), files)
+    def get_datasets(self, username: str) -> 'Iterator[Dataset]':
+        
+        for result in self.__mongo.get_datasets(username):
+            name, filepath = itemgetter("name", "path")(result)
 
-        return [self.get_dataset(file) for file in files]
+            if not os.path.exists(filepath):
+                # dataset path does not exist
+                # TODO: what to do in case of error, database cleanup?
+                raise FileNotFoundError
+
+            mtime = os.path.getmtime(filepath)
+            yield Dataset(name, filepath, mtime)
