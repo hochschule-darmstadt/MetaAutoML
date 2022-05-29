@@ -30,5 +30,4 @@ typing-extensions==3.10.0.2
 urllib3==1.26.6
 zipp==3.6.0
 zope.interface==5.4.0
-neo4j==4.4.3
 pymongo==4.1.1
