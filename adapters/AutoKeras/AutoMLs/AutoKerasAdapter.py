@@ -1,8 +1,9 @@
 import autokeras as ak
-
-from JsonUtil import get_config_property
 from AbstractAdapter import AbstractAdapter
-from AdapterUtils import read_tabular_dataset_training_data, prepare_tabular_dataset
+from AdapterUtils import (prepare_tabular_dataset,
+                          read_tabular_dataset_training_data)
+from JsonUtil import get_config_property
+
 
 class AutoKerasAdapter(AbstractAdapter):
     """
@@ -24,6 +25,10 @@ class AutoKerasAdapter(AbstractAdapter):
                 self.__tabular_classification()
             elif self._configuration["task"] == 2:
                 self.__tabular_regression()
+            elif self._configuration["task"] == 3:
+                self.__image_classification()
+            elif self._configuration["task"] == 4:
+                self.__image_regression()
 
     def __tabular_classification(self):
         """Execute the classification task"""
@@ -47,3 +52,50 @@ class AutoKerasAdapter(AbstractAdapter):
                                          seed=42)
         reg.fit(x=self._X, y=self._y)
         self.__export_model(reg, 'model_keras.p')
+
+    # hard coded json for the job somewhere s
+
+    def __image_classification(self):
+        train_data, test_data = self.__image_dataset_loader(self)
+
+        clf = ak.ImageClassifier(overwrite=True, 
+                                max_trials=self._max_iter,
+                                seed=42)
+        clf.fit(train_data, epochs=1)
+
+    def __image_regression(self):
+        train_data = self.__image_dataset_loader(self)
+
+        clf = ak.ImageClassifier(overwrite=True, 
+                                max_trials=self._max_iter,
+                                seed=42)
+        clf.fit(train_data, epochs=1)
+
+    def __image_dataset_loader(self):
+        data_dir = ""
+
+        batch_size = 32
+        img_height = 180
+        img_width = 180
+
+        train_data = ak.image_dataset_from_directory(
+            data_dir,
+            # Use 20% data as testing data.
+            validation_split=0.2,
+            subset="training",
+            # Set seed to ensure the same split when loading testing data.
+            seed=123,
+            image_size=(img_height, img_width),
+            batch_size=batch_size,
+        )
+
+        test_data = ak.image_dataset_from_directory(
+            data_dir,
+            validation_split=0.2,
+            subset="validation",
+            seed=123,
+            image_size=(img_height, img_width),
+            batch_size=batch_size,
+        )
+
+        return train_data, test_data
