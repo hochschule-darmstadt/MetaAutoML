@@ -216,14 +216,17 @@ class ControllerManager(object):
         username = "automl_user"
         self.__data_storage.insert_session(username, config)
 
+        # will be called when any automl is done
+        def callback(session_id, automl_name, result):
+            print(f"automl is done: {automl_name}, session: {session_id}, result: {result}")
+
         # TODO: rework file access in AutoMLSession
         #       we do not want to make datastore paths public
         dataset: Dataset = self.__data_storage.get_dataset(username, configuration.dataset)
         dataset_folder = os.path.dirname(dataset.path)
+
         newSession: AutoMLSession = self.__adapterManager.start_automl(configuration, dataset_folder,
-                                                               self.__sessionCounter)
-        # P: save session details
-        #    "Training" in Data Model
+                                                               self.__sessionCounter, callback)
         self.__sessions[str(self.__sessionCounter)] = newSession
         self.__sessionCounter += 1
         response.result = 1

@@ -18,7 +18,7 @@ class AutoMLManager(ABC, Thread):
     Base implementation of the  AutoML functionality
     """
 
-    def __init__(self, configuration, folder_location, automl_service_host, automl_service_port, session_id):
+    def __init__(self, configuration, folder_location, automl_service_host, automl_service_port, session_id, callback=None):
         """
         Init a new instance of the abstract class AutoMLManager
         ---
@@ -43,6 +43,8 @@ class AutoMLManager(ABC, Thread):
 
         self.__AUTOML_SERVICE_HOST = automl_service_host
         self.__AUTOML_SERVICE_PORT = automl_service_port
+
+        self.__callback = callback
 
     def get_automl_model(self) -> Controller_pb2.GetSessionStatusResponse:
         """
@@ -189,6 +191,14 @@ class AutoMLManager(ABC, Thread):
                     # P: "Model" in Data Model
                     self.__model = response.model
                     self.__library = response.library
+
+                    # notify automl starter process that we finished
+                    if self.__callback is not None:
+                        # NOTE: this depends on subclass implementing the field "name"
+                        # TODO: implement better automl naming mechanism
+                        automl_name = self.name
+                        self.__callback(self.__session_id, automl_name, self.__result_json)
+
                     return
         except grpc.RpcError as rpc_error:
             print(f"Received unknown RPC error: code={rpc_error.code()} message={rpc_error.details()}")
