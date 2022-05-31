@@ -130,7 +130,9 @@ class ControllerManager(object):
         ---
         Return list of column names
         """
-        columnNames = CsvManager.read_column_names(os.path.join(self.__datasetFolder, request.datasetName))
+        username = "automl_user"
+        dataset: Dataset = self.__data_storage.get_dataset(username, request.datasetName)
+        columnNames = CsvManager.read_column_names(dataset.path)
         return columnNames
     
     def GetSupportedMlLibraries(self, request) -> Controller_pb2.GetSupportedMlLibrariesResponse:
@@ -170,7 +172,8 @@ class ControllerManager(object):
         # P: save reference to file in database (eg path)
         #    * actual file should remain on disk
         # "Dataset" in Data Model
-        username = "autml_user"
+
+        username = "automl_user"
         self.__data_storage.save_dataset(username, dataset.name, dataset.content)
         response = Controller_pb2.UploadDatasetFileResponse()
         response.returnCode = 0
