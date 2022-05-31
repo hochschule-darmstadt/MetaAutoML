@@ -2,7 +2,7 @@ import json
 import os
 from JsonUtil import get_config_property
 
-from TabularDataAutoML import TabularDataAutoML
+from AutoSklearnAdapter import AutoSklearnAdapter
 
 if __name__ == '__main__':
     """
@@ -13,6 +13,6 @@ if __name__ == '__main__':
     with open(file_path) as file:
         process_json = json.load(file)
 
-    tabularDataAutoML = TabularDataAutoML(process_json)
+    autoML = AutoSklearnAdapter(process_json)
 
-    tabularDataAutoML.execute_task()
+    autoML.start()

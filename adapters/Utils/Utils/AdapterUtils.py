@@ -13,6 +13,7 @@ import Adapter_pb2
 import Adapter_pb2_grpc
 from TemplateGenerator import TemplateGenerator
 from sklearn.metrics import mean_squared_error, accuracy_score
+import dill
 
 ######################################################################
 ## GRPC HELPER FUNCTIONS
@@ -102,6 +103,17 @@ def get_response(output_json, start_time, test_score, prediction_time, library, 
 ######################################################################
 
 #region
+
+
+def export_model(model, file_name):
+    """
+    Export the generated ML model to disk
+    ---
+    Parameter:
+    1. generate ML model
+    """
+    with open(os.path.join(get_config_property('output-path'), 'tmp', file_name), 'wb+') as file:
+        dill.dump(model, file)
 
 def start_automl_process():
     """"
@@ -287,6 +299,12 @@ def read_tabular_dataset_training_data(json_configuration):
     """
     df = pd.read_csv(os.path.join(json_configuration["file_location"], json_configuration["file_name"]),
                     **json_configuration["file_configuration"])
+
+    # convert all object columns to categories, because autosklearn only supports numerical,
+    # bool and categorical features
+    #TODO: change to ontology based preprocessing
+    df[df.select_dtypes(['object']).columns] = df.select_dtypes(['object']).apply(lambda x: x.astype('category'))
+
 
     # split training set
     if SplitMethod.SPLIT_METHOD_RANDOM == json_configuration["test_configuration"]["method"]:
