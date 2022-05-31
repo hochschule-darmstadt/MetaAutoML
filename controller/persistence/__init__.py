@@ -24,6 +24,12 @@ class DataStorage:
         self.__mongo: Database = Database("mongodb://root:example@mongo")
 
 
+    def insert_session(self, username: str, config: 'dict[str, str]'):
+        print(config)
+        self.__mongo.insert_session(username, config)
+        print(f"inserted session '{config['session_id']}'")
+
+
     def save_dataset(self, username: str, name: str, content: bytes):
         filename_dest = os.path.join(self.__storage_dir, name)
         save_file = open(filename_dest, 'wb')

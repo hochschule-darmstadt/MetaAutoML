@@ -29,4 +29,15 @@ class Database:
         database = self.mongo[username]
         datasets: Collection = database["datasets"]
         return datasets.insert_one({ "name": name, "path": file_path })
-            
+
+
+    def insert_session(self, username: str, session_config: 'dict[str, str]'):
+        database = self.mongo[username]
+        sessions: Collection = database["sessions"]
+        return sessions.insert_one(session_config)
+
+
+    def get_sessions(self, username: str):
+        database = self.mongo[username]
+        sessions: Collection = database["sessions"]
+        return sessions.find()

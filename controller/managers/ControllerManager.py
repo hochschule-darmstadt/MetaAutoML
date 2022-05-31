@@ -1,5 +1,6 @@
 import os
 import pandas as pd
+from AutoMLSession import AutoMLSession
 
 import Controller_pb2
 
@@ -23,7 +24,7 @@ class ControllerManager(object):
         """
         self.__rdfManager = RdfManager()
         self.__adapterManager = AdapterManager()
-        self.__sessions = {}
+        self.__sessions: dict[str, AutoMLSession] = {}
         self.__sessionCounter = 1
         self.__data_storage = data_storage
         return
@@ -61,7 +62,7 @@ class ControllerManager(object):
         """
         response = Controller_pb2.GetDatasetsResponse()
 
-        username = "autml_user"
+        username = "automl_user"
         all_datasets: list[Dataset] = self.__data_storage.get_datasets(username)
         
         for dataset in all_datasets:
@@ -94,7 +95,7 @@ class ControllerManager(object):
         firstEntries: the first couple of rows of the dataset
         """
         # TODO WHEN USER MANAGEMENT IS ADDED; CORRECT FILTERING
-        username = "autml_user"
+        username = "automl_user"
         dataset = self.__data_storage.get_dataset(username, request.name)
         dataset = CsvManager.read_dataset(dataset.path)
         return dataset
@@ -179,7 +180,7 @@ class ControllerManager(object):
         response.returnCode = 0
         return response
 
-    def StartAutoMLProcess(self, configuration) -> Controller_pb2.StartAutoMLprocessResponse:
+    def StartAutoMLProcess(self, configuration: Controller_pb2.StartAutoMLprocessRequest) -> Controller_pb2.StartAutoMLprocessResponse:
         """
         Start a new AutoML process
         ---
@@ -189,7 +190,37 @@ class ControllerManager(object):
         Return start process status
         """
         response = Controller_pb2.StartAutoMLprocessResponse()
-        newSession = self.__adapterManager.start_automl(configuration, self.__datasetFolder,
+
+        print(type(configuration.runtimeConstraints))
+                # restructure configuration inotpython dictionaries
+        config = {
+            "session_id": self.__sessionCounter,
+            "config": {
+                "dataset": configuration.dataset,
+                "task": configuration.task,
+                "tabularConfig": {
+                    "target": {
+                        "target": configuration.tabularConfig.target.target,
+                        "type": configuration.tabularConfig.target.type,
+                    },
+                    "features": dict(configuration.tabularConfig.features)
+                },
+                "fileConfiguration": dict(configuration.fileConfiguration),
+                "metric": configuration.metric
+
+                # does not work yet:
+                # "runtimeConstraints": dict(configuration.runtimeConstraints),
+                # "requiredAutomls": configuration.requiredAutoMLs,
+            }
+        }
+        username = "automl_user"
+        self.__data_storage.insert_session(username, config)
+
+        # TODO: rework file access in AutoMLSession
+        #       we do not want to make datastore paths public
+        dataset: Dataset = self.__data_storage.get_dataset(username, configuration.dataset)
+        dataset_folder = os.path.dirname(dataset.path)
+        newSession: AutoMLSession = self.__adapterManager.start_automl(configuration, dataset_folder,
                                                                self.__sessionCounter)
         # P: save session details
         #    "Training" in Data Model
