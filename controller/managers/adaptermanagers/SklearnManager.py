@@ -7,7 +7,7 @@ class SklearnManager(AutoMLManager):
     """
     name = "Autosklearn"
 
-    def __init__(self, configuration, folder_location, session_id):
+    def __init__(self, configuration, folder_location, session_id, callback):
         """
         Init a new instance of the specific AutoMLManager
         ---
@@ -21,4 +21,4 @@ class SklearnManager(AutoMLManager):
         automl_service_host = 'SKLEARN_SERVICE_HOST'
         automl_service_port = 'SKLEARN_SERVICE_PORT'
         super(SklearnManager, self).__init__(configuration, folder_location, automl_service_host, automl_service_port,
-                                             session_id)
+                                             session_id, callback)
