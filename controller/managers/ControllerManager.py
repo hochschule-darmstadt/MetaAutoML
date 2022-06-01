@@ -208,8 +208,9 @@ class ControllerManager(object):
                 "features": dict(configuration.tabularConfig.features)
             },
             "fileConfiguration": dict(configuration.fileConfiguration),
-            "metric": configuration.metric
-
+            "metric": configuration.metric,
+            "status": "running",
+            "models": []
             # TODO: does not work yet:
             # "runtimeConstraints": dict(configuration.runtimeConstraints),
             # "requiredAutomls": dict(configuration.requiredAutoMLs),
@@ -219,9 +220,15 @@ class ControllerManager(object):
 
         # will be called when any automl is done
         def callback(session_id, model_details):
-            # TODO: link model to session
             # TODO: mark session as successful/completed
-            self.__data_storage.insert_model(username, model_details)
+            _mdl_id = self.__data_storage.insert_model(username, model_details)
+
+            # TODO: race condition between get and update, lock db access
+            # append new model to session
+            _sess = self.__data_storage.get_session(username, session_id)
+            self.__data_storage.update_session(username, session_id, {
+                "models": _sess["models"] + [_mdl_id] 
+            })
 
         # TODO: rework file access in AutoMLSession
         #       we do not want to make datastore paths public

@@ -66,3 +66,10 @@ print(f"found dataset with configuration: {result['configuration']}")
 
 result = models.find_one({ "id": "model001" })
 print(f"found model with predictiontime: {result['predictiontime']}")
+
+# ---- update
+
+result = trainings.update_one({ "id": "training001" }, { "$set": { "status": "finished" }})
+
+result = trainings.find_one({ "id": "training001" })
+print(f"found dataset with configuration: {result}")

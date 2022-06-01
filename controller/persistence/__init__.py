@@ -32,10 +32,29 @@ class DataStorage:
 
         return str(result.inserted_id)
 
+    def get_session(self, username: str, id: str) -> 'dict[str, object]':
+        session: dict[str, object] = self.__mongo.get_session(username, id)
+
+        if session is None:
+            raise Exception(f"cannot find session: '{id}'")
+
+        return session
+
+    def update_session(self, username: str, id: str, new_values : 'dict[str, object]') -> bool:
+        """update single session with new values"""
+        result = self.__mongo.update_session(username, id, new_values)
+        if result.modified_count >= 1:
+            print(f"updated session: '{id}'")
+        
+        return result.modified_count >= 1
+        
+
     def save_dataset(self, username: str, name: str, content: bytes) -> str:
         """store dataset contents on disk and insert entry to database"""
         filename_dest = os.path.join(self.__storage_dir, username, name)
 
+        # make sure directory exists in case it's the first upload from this user
+        os.makedirs(os.path.dirname(filename_dest), exist_ok=True)
         with open(filename_dest, 'wb') as outfp:
             outfp.write(content)
 
