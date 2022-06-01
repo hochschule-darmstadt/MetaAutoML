@@ -1,7 +1,12 @@
-import autokeras as ak
+import os
 
+import autokeras as ak
+import tensorflow as tf
 from AbstractAdapter import AbstractAdapter
-from AdapterUtils import read_tabular_dataset_training_data, prepare_tabular_dataset, export_model
+from AdapterUtils import (export_model, prepare_tabular_dataset,
+                          read_tabular_dataset_training_data)
+from JsonUtil import get_config_property
+
 
 class AutoKerasAdapter(AbstractAdapter):
     """
@@ -23,6 +28,10 @@ class AutoKerasAdapter(AbstractAdapter):
                 self.__tabular_classification()
             elif self._configuration["task"] == 2:
                 self.__tabular_regression()
+            elif self._configuration["task"] == 3:
+                self.__image_classification()
+            elif self._configuration["task"] == 4:
+                self.__image_regression()
 
     def __tabular_classification(self):
         """Execute the classification task"""
@@ -46,3 +55,64 @@ class AutoKerasAdapter(AbstractAdapter):
                                          seed=42)
         reg.fit(x=X, y=y)
         self.__export_model(reg, 'model_keras.p')
+
+    
+    # hard coded json for the job somewhere s
+
+    def __image_classification(self):
+        """"Execute image classification task"""
+        train_data, test_data = self.__read_image_dataset(self._configuration)
+
+        clf = ak.ImageClassifier(overwrite=True, 
+                                max_trials=self._configuration["runtime_constraints"]["max_iter"],
+                                seed=42,
+                                directory=os.path.abspath(os.path.join(get_config_property("output-path"))))
+
+        clf.fit(train_data, epochs=1)
+        print(clf.evaluate(test_data))
+
+    def __image_regression(self):
+        """Execute image regression task"""
+        train_data, test_data = self.__image_dataset_loader(self._configuration)
+
+        reg = ak.ImageRegressor(overwrite=True, 
+                                max_trials=self._configuration["runtime_constraints"]["max_iter"],
+                                seed=42,
+                                directory=os.path.abspath(os.path.join(get_config_property("output-path"))))
+                                
+        reg.fit(train_data, epochs=1)
+        print(reg.evaluate(test_data))
+
+    def __read_image_dataset(self, json_configuration):
+        """Reads image data and creates AutoKeras specific structure/sets"""
+
+        # Read from URL if not in cache_dir. URL/Filename need to be specified
+        local_file_path = tf.keras.utils.get_file(
+            origin=json_configuration["file_location"], 
+            fname="image_data", 
+            cache_dir=os.path.abspath(os.path.join("app-data")), 
+            extract=True
+        )
+
+        local_dir_path = os.path.dirname(local_file_path)
+        data_dir = os.path.join(local_dir_path, json_configuration["file_name"])
+
+        train_data = ak.image_dataset_from_directory(
+            data_dir,
+            validation_split=json_configuration["test_configuration"]["split_ratio"],
+            subset="training",
+            seed=123,
+            image_size=(json_configuration["test_configuration"]["image_height"], json_configuration["test_configuration"]["image_width"]),
+            batch_size=json_configuration["test_configuration"]["batch_size"],
+        )
+
+        test_data = ak.image_dataset_from_directory(
+            data_dir,
+            validation_split=json_configuration["test_configuration"]["split_ratio"],
+            subset="validation",
+            seed=123,
+            image_size=(json_configuration["test_configuration"]["image_height"], json_configuration["test_configuration"]["image_width"]),
+            batch_size=json_configuration["test_configuration"]["batch_size"],
+        )
+
+        return train_data, test_data
