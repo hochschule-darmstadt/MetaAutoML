@@ -1,7 +1,9 @@
-import os, os.path
+import os
+import os.path
 from typing import Iterator
 from persistence.mongo_client import Database
 from operator import itemgetter
+
 
 class Dataset:
     def __init__(self, name: str, path: str, mtime: float):
@@ -14,7 +16,7 @@ class Dataset:
 
 
 class DataStorage:
-    def __init__(self, data_storage_dir):
+    def __init__(self, data_storage_dir: str):
         # ensure folder exists
         os.makedirs(data_storage_dir, exist_ok=True)
 
@@ -23,59 +25,65 @@ class DataStorage:
         # assume that we run with docker-compose
         self.__mongo: Database = Database("mongodb://root:example@mongo")
 
-
-    def insert_session(self, username: str, config: 'dict[str, str]') -> str:
-        result = self.__mongo.insert_session(username, config)
+    def insert_session(self, username: str, session: 'dict[str, object]') -> str:
+        """insert session to users collection"""
+        result = self.__mongo.insert_session(username, session)
         print(f"inserted session: '{result.inserted_id}'")
 
         return str(result.inserted_id)
 
+    def save_dataset(self, username: str, name: str, content: bytes) -> str:
+        """store dataset contents on disk and insert entry to database"""
+        filename_dest = os.path.join(self.__storage_dir, username, name)
 
-    def save_dataset(self, username: str, name: str, content: bytes):
-        filename_dest = os.path.join(self.__storage_dir, name)
-        save_file = open(filename_dest, 'wb')
-        save_file.write(content)
+        with open(filename_dest, 'wb') as outfp:
+            outfp.write(content)
 
-        self.__mongo.insert_dataset(username, name, filename_dest)
+        mtime = os.path.getmtime(filename_dest)
+
+        # TODO: can datasets be replaced?
+        # name is not primary key, so same dataset will be inserted twice
+        result = self.__mongo.insert_dataset(username, {
+            "name": name,
+            "path": filename_dest,
+            "mtime": mtime
+        })
         print(f"inserted dataset '{name}'")
 
+        return str(result)
 
     def get_dataset(self, username: str, name: str) -> Dataset:
+        """return dataset with specified name"""
+        dataset: dict[str, object] = self.__mongo.get_dataset(username, name)
 
-        dataset = self.__mongo.get_dataset(username, name)
-        if dataset is None: 
+        if dataset is None:
             # dataset path does not exist in database
             raise Exception(f"cannot find dataset: '{name}'")
 
+        return self.__upgrade_dataset(dataset)
 
-        filepath: str = dataset["path"]
+    def __upgrade_dataset(self, from_database: 'dict[str, object]') -> Dataset:
+        """convert raw database dictionary to Dataset"""
+        # get values from dict
+        name: str = from_database["name"]
+        filepath: str = from_database["path"]
+        mtime: float = from_database["mtime"]
 
         if not os.path.exists(filepath):
             # dataset path does not exist on disk
             # TODO: what to do in case of error, database cleanup?
             raise FileNotFoundError
 
-        mtime = os.path.getmtime(filepath)
-
         return Dataset(name, filepath, mtime)
 
-
     def get_datasets(self, username: str) -> 'Iterator[Dataset]':
-        
-        for result in self.__mongo.get_datasets(username):
-            name, filepath = itemgetter("name", "path")(result)
+        """return all datasets for this user"""
+        for raw_dict in self.__mongo.get_datasets(username):
+            yield self.__upgrade_dataset(raw_dict)
 
-            if not os.path.exists(filepath):
-                # dataset path does not exist
-                # TODO: what to do in case of error, database cleanup?
-                raise FileNotFoundError
-
-            mtime = os.path.getmtime(filepath)
-            yield Dataset(name, filepath, mtime)
-
-
-    def insert_model(self, username: str, model_details):
-        result = self.__mongo.insert_model(username, model_details)
+    def insert_model(self, username: str, model: 'dict[str, object]') -> str:
+        """insert model to users collection"""
+        result = self.__mongo.insert_model(username, model)
         print(f"inserted model '{result.inserted_id}'")
 
         return str(result.inserted_id)
