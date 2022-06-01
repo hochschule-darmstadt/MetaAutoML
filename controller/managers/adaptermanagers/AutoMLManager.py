@@ -196,8 +196,17 @@ class AutoMLManager(ABC, Thread):
                     if self.__callback is not None:
                         # NOTE: this depends on subclass implementing the field "name"
                         # TODO: implement better automl naming mechanism
-                        automl_name = self.name
-                        self.__callback(self.__session_id, automl_name, self.__result_json)
+                        model_details = {
+                            "automl_name": self.name,
+                            "session_id": self.__session_id,
+                            "path": os.path.join(self.__result_json["file_location"], self.__result_json["file_name"]),
+                            "test_score": response.testScore,
+                            "validation_score": response.validationScore,
+                            "runtime": response.runtime,
+                            "model": response.model,
+                            "library": response.library
+                        }
+                        self.__callback(self.__session_id, model_details)
 
                     return
         except grpc.RpcError as rpc_error:

@@ -25,7 +25,6 @@ class ControllerManager(object):
         self.__rdfManager = RdfManager()
         self.__adapterManager = AdapterManager()
         self.__sessions: dict[str, AutoMLSession] = {}
-        self.__sessionCounter = 1
         self.__data_storage = data_storage
         return
 
@@ -107,8 +106,14 @@ class ControllerManager(object):
         Return list of all sessions
         """
         response = Controller_pb2.GetSessionsResponse()
-        for i in self.__sessions:
-            response.sessionIds.append(self.__sessions[i].get_id())
+
+        # NOTE: should we return all known sessions, or only the ones from this runtime?
+                # username = "automl_user"
+                # all_sessions = self.__data_storage.get_sessions(username)
+                # response.sessionIds = [sess["_id"] for sess in all_sessions]
+        for id in self.__sessions.keys():
+            response.sessionIds.append(id)
+
         return response
 
     def GetSessionStatus(self, request) -> Controller_pb2.GetSessionStatusResponse:
@@ -191,34 +196,32 @@ class ControllerManager(object):
         """
         response = Controller_pb2.StartAutoMLprocessResponse()
 
-        print(type(configuration.runtimeConstraints))
-                # restructure configuration inotpython dictionaries
+        # restructure configuration into python dictionaries
         config = {
-            "session_id": self.__sessionCounter,
-            "config": {
-                "dataset": configuration.dataset,
-                "task": configuration.task,
-                "tabularConfig": {
-                    "target": {
-                        "target": configuration.tabularConfig.target.target,
-                        "type": configuration.tabularConfig.target.type,
-                    },
-                    "features": dict(configuration.tabularConfig.features)
+            "dataset": configuration.dataset,
+            "task": configuration.task,
+            "tabularConfig": {
+                "target": {
+                    "target": configuration.tabularConfig.target.target,
+                    "type": configuration.tabularConfig.target.type,
                 },
-                "fileConfiguration": dict(configuration.fileConfiguration),
-                "metric": configuration.metric
+                "features": dict(configuration.tabularConfig.features)
+            },
+            "fileConfiguration": dict(configuration.fileConfiguration),
+            "metric": configuration.metric
 
-                # does not work yet:
-                # "runtimeConstraints": dict(configuration.runtimeConstraints),
-                # "requiredAutomls": configuration.requiredAutoMLs,
-            }
+            # TODO: does not work yet:
+            # "runtimeConstraints": dict(configuration.runtimeConstraints),
+            # "requiredAutomls": dict(configuration.requiredAutoMLs),
         }
         username = "automl_user"
-        self.__data_storage.insert_session(username, config)
+        sess_id = self.__data_storage.insert_session(username, config)
 
         # will be called when any automl is done
-        def callback(session_id, automl_name, result):
-            print(f"automl is done: {automl_name}, session: {session_id}, result: {result}")
+        def callback(session_id, model_details):
+            # TODO: link model to session
+            # TODO: mark session as successful/completed
+            self.__data_storage.insert_model(username, model_details)
 
         # TODO: rework file access in AutoMLSession
         #       we do not want to make datastore paths public
@@ -226,9 +229,9 @@ class ControllerManager(object):
         dataset_folder = os.path.dirname(dataset.path)
 
         newSession: AutoMLSession = self.__adapterManager.start_automl(configuration, dataset_folder,
-                                                               self.__sessionCounter, callback)
-        self.__sessions[str(self.__sessionCounter)] = newSession
-        self.__sessionCounter += 1
+                                                               sess_id, callback)
+
+        self.__sessions[sess_id] = newSession
         response.result = 1
         response.sessionId = newSession.get_id()
         return response

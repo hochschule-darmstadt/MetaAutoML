@@ -162,13 +162,15 @@ def zip_script(session_id):
     shutil.make_archive(os.path.join(session_path, zip_file_name),
                         'zip',
                         temp_path)
-    for f in os.listdir(output_path):
-        if f not in ('.gitkeep', 'tmp', *(str(i) for i in range(1, session_id + 1))):
-            file_path = os.path.join(output_path, f)
-            if os.path.isdir(file_path):
-                shutil.rmtree(file_path)
-            else:
-                os.remove(file_path)
+
+    # NOTE: why are we cleaning up the ouput directory?
+            # for f in os.listdir(output_path):
+            #     if f not in ('.gitkeep', 'tmp', *(str(i) for i in range(1, session_id + 1))):
+            #         file_path = os.path.join(output_path, f)
+            #         if os.path.isdir(file_path):
+            #             shutil.rmtree(file_path)
+            #         else:
+            #             os.remove(file_path)
 
     file_loc_on_controller = os.path.join(output_path,
                                           get_config_property('adapter-name'),
