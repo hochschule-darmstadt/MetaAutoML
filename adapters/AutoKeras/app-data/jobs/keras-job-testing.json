@@ -1,0 +1,20 @@
+{
+    "task": 3,
+    "runtime_constraints": {
+        "runtime_limit": 300,
+        "max_iter": 1
+    },
+    "tabular_configuration": {
+        "target": {
+            "target": "Keras"
+        }
+    },
+    "file_location": "https://storage.googleapis.com/download.tensorflow.org/example_images/flower_photos.tgz",
+    "file_name": "flower_photos",
+    "test_configuration": {
+        "batch_size": 32,
+        "image_height": 180,
+        "image_width": 180,
+        "split_ratio": 0.2
+    }
+}
