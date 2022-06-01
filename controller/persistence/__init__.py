@@ -24,10 +24,11 @@ class DataStorage:
         self.__mongo: Database = Database("mongodb://root:example@mongo")
 
 
-    def insert_session(self, username: str, config: 'dict[str, str]'):
-        print(config)
-        self.__mongo.insert_session(username, config)
-        print(f"inserted session '{config['session_id']}'")
+    def insert_session(self, username: str, config: 'dict[str, str]') -> str:
+        result = self.__mongo.insert_session(username, config)
+        print(f"inserted session: '{result.inserted_id}'")
+
+        return str(result.inserted_id)
 
 
     def save_dataset(self, username: str, name: str, content: bytes):
@@ -42,10 +43,15 @@ class DataStorage:
     def get_dataset(self, username: str, name: str) -> Dataset:
 
         dataset = self.__mongo.get_dataset(username, name)
+        if dataset is None: 
+            # dataset path does not exist in database
+            raise Exception(f"cannot find dataset: '{name}'")
+
+
         filepath: str = dataset["path"]
 
         if not os.path.exists(filepath):
-            # dataset path does not exist
+            # dataset path does not exist on disk
             # TODO: what to do in case of error, database cleanup?
             raise FileNotFoundError
 
@@ -66,3 +72,10 @@ class DataStorage:
 
             mtime = os.path.getmtime(filepath)
             yield Dataset(name, filepath, mtime)
+
+
+    def insert_model(self, username: str, model_details):
+        result = self.__mongo.insert_model(username, model_details)
+        print(f"inserted model '{result.inserted_id}'")
+
+        return str(result.inserted_id)

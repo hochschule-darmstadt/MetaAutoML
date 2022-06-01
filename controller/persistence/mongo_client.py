@@ -41,3 +41,17 @@ class Database:
         database = self.mongo[username]
         sessions: Collection = database["sessions"]
         return sessions.find()
+
+    def insert_model(self, username: str, model_details):
+        database = self.mongo[username]
+        models: Collection = database["models"]
+        return models.insert_one(model_details)
+
+    def get_models(self, username: str):
+        database = self.mongo[username]
+        models: Collection = database["models"]
+        return models.find()
+
+
+    def drop_database(self, username: str):
+        self.mongo.drop_database(username)

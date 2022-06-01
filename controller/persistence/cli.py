@@ -6,15 +6,23 @@ username = "automl_user"
 mongo: Database = Database("mongodb://root:example@localhost")
 
 
-get_datasets = lambda: mongo.get_datasets(username)
-get_sessions = lambda: mongo.get_sessions(username)
+get_datasets = lambda: [ds for ds in mongo.get_datasets(username)]
+get_sessions = lambda: [sess for sess in mongo.get_sessions(username)]
+get_models = lambda: [mdl for mdl in mongo.get_models(username)]
+drop_database = lambda: mongo.drop_database(username)
 
-datasets = [(ds["name"], ds["path"]) for ds in get_datasets()]
+datasets = get_datasets()
 print(f"found {len(datasets)} datasets:")
-for name, path in datasets:
-    print(f"  {name}:\t'{path}'")
+for ds in datasets:
+    print(f"  {ds['name']}:\t'{ds['path']}'")
 
-sessions = [sess for sess in get_sessions()]
+sessions = get_sessions()
 print(f"found {len(sessions)} sessions:")
 for sess in sessions:
-    print(f"  {sess['session_id']}")
+    print(f"  {sess['_id']}")
+
+
+models = get_models()
+print(f"found {len(models)} models:")
+for model in models:
+    print(f"  {model['path']}")
