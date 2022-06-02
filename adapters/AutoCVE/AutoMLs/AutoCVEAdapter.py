@@ -1,7 +1,7 @@
 from AUTOCVE.AUTOCVE import AUTOCVEClassifier
 from JsonUtil import get_config_property
 from AbstractAdapter import AbstractAdapter
-from AdapterUtils import read_tabular_dataset_training_data, prepare_tabular_dataset, convert_X_and_y_dataframe_to_numpy
+from AdapterUtils import read_tabular_dataset_training_data, prepare_tabular_dataset, convert_X_and_y_dataframe_to_numpy, export_model
 
 class AutoCVEAdapter(AbstractAdapter):
     """
@@ -40,7 +40,7 @@ class AutoCVEAdapter(AbstractAdapter):
             print("Ensemble size: " + str(len(best_voting_ensemble.estimators)))
             print("Train Score: {}".format(best_voting_ensemble.score(X, y)))
 
-            self.__export_model(best_voting_ensemble, "autocve-model.p")
+            export_model(best_voting_ensemble, "autocve-model.p")
 
         except Exception as e:
             print(f"Critical error running autoCVE on {self._configuration['file_name']}. The AutoCVE "

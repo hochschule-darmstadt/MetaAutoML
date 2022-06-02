@@ -1,4 +1,5 @@
 grpcio
+protobuf==3.17.3
 dill
 jinja2
 git+https://github.com/celiolarcher/AUTOCVE@e87985d#egg=autocve

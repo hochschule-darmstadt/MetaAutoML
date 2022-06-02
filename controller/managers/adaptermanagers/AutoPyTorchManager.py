@@ -7,7 +7,7 @@ class AutoPyTorchManager(AutoMLManager):
     """
     name = "Auto_PyTorch"
 
-    def __init__(self, configuration, folder_location, session_id):
+    def __init__(self, configuration, folder_location, session_id, callback):
         """
         Init a new instance of the specific AutoMLManager
         ---
@@ -21,4 +21,4 @@ class AutoPyTorchManager(AutoMLManager):
         automl_service_host = 'PYTORCH_SERVICE_HOST'
         automl_service_port = 'PYTORCH_SERVICE_PORT'
         super(AutoPyTorchManager, self).__init__(configuration, folder_location, automl_service_host,
-                                                 automl_service_port, session_id)
+                                                 automl_service_port, session_id, callback)
