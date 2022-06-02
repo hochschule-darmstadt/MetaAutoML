@@ -160,7 +160,9 @@ class DataSetAnalysisManager:
         ---
         Return the JSON file with additional data
         """
-        hash_column = pd.Series((hash(tuple(row)) for _, row in dataset.iterrows()))
+        dataset_copy = dataset.copy()
+        dataset_copy['hash'] = pd.Series((hash(tuple(row)) for _, row in dataset.iterrows()))
+        print(dataset_copy.groupby(['hash']).count())
         return jsonfile
 
 
