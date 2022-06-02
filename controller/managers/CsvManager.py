@@ -26,7 +26,8 @@ class CsvManager:
         response = Controller_pb2.GetDatasetResponse()
         dataset = pd.read_csv(path)
 
-        DataSetAnalysisManager.startAnalysis(dataset)
+        analysisResult = DataSetAnalysisManager.startAnalysis(dataset)
+        DataSetAnalysisManager.persistAnalysisResult(analysisResult)
     
         for col in dataset.columns:
             table_column = Controller_pb2.TableColumn()

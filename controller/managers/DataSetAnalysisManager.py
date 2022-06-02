@@ -8,14 +8,14 @@ class DataSetAnalysisManager:
     Static DataSetAnalysisManager class to analyze the dataset
     """
     
-    def startAnalysis(dataset: pd.DataFrame):
+    def startAnalysis(dataset: pd.DataFrame) -> dict:
         """
         Initialization of the analysis, results are written to JSON file
         ---
         Parameter
         1. dataset to be analyzed
         ---
-        Return None
+        Return a python dictionary containing dataset analysis
         """
         jsonfile = {}
         jsonfile["basic analysis"] = {}
@@ -23,12 +23,24 @@ class DataSetAnalysisManager:
         jsonfile = DataSetAnalysisManager.__missing_values(dataset, jsonfile)
         jsonfile = DataSetAnalysisManager.__detect_outliers(dataset, jsonfile)
         #jsonfile = DataSetAnalysisManager.__detect_duplicate_columns(dataset, jsonfile)
-        jsonfile = DataSetAnalysisManager.__detect_duplicate_rows(dataset, jsonfile)
+        #jsonfile = DataSetAnalysisManager.__detect_duplicate_rows(dataset, jsonfile)
 
+        # for debugging purposes
         # print(json.dumps(jsonfile))
 
+    def persistAnalysisResult(jsonfile:dict):
+        """
+        Persists a python dictionary containing dataset analysis.
+        ---
+        Parameter
+        1. the pythondictionary to persist
+        ---
+        Return None
+        """
         with open('controller\app-data\analysis.json', 'w+') as target:
             json.dump(jsonfile, target)
+            target.close()
+
         
     @staticmethod
     def __number_of_rows_and_columns(dataset: pd.DataFrame, jsonfile: dict) -> dict:
