@@ -200,35 +200,38 @@ class ControllerManager(object):
         config = {
             "dataset": configuration.dataset,
             "task": configuration.task,
-            "tabularConfig": {
+            "tabular_config": {
                 "target": {
                     "target": configuration.tabularConfig.target.target,
                     "type": configuration.tabularConfig.target.type,
                 },
                 "features": dict(configuration.tabularConfig.features)
             },
-            "fileConfiguration": dict(configuration.fileConfiguration),
+            "file_configuration": dict(configuration.fileConfiguration),
             "metric": configuration.metric,
             "status": "running",
-            "models": []
-            # TODO: does not work yet:
-            # "runtimeConstraints": dict(configuration.runtimeConstraints),
-            # "requiredAutomls": dict(configuration.requiredAutoMLs),
+            "models": [],
+            "runtime_constraints": {
+                "runtime_limit": configuration.runtimeConstraints.runtime_limit,
+                "max_iter": configuration.runtimeConstraints.max_iter
+            },
+            "required_automls": list(configuration.requiredAutoMLs),
         }
         username = "automl_user"
         sess_id = self.__data_storage.insert_session(username, config)
 
         # will be called when any automl is done
-        def callback(session_id, model_details):
-            # TODO: mark session as successful/completed
-            _mdl_id = self.__data_storage.insert_model(username, model_details)
+        # NOTE: will run in parallel
+        def callback(session_id, model: 'dict[str, object]'):
+            _mdl_id = self.__data_storage.insert_model(username, model)
 
             # lock data storage to prevent race condition between get and update
             with self.__data_storage.lock():
                 # append new model to session
                 _sess = self.__data_storage.get_session(username, session_id)
                 self.__data_storage.update_session(username, session_id, {
-                    "models": _sess["models"] + [_mdl_id]
+                    "models": _sess["models"] + [_mdl_id],
+                    "status": "completed"
                 })
 
         # TODO: rework file access in AutoMLSession
