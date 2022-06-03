@@ -1,3 +1,4 @@
+from threading import Lock
 import os
 import os.path
 from typing import Iterator
@@ -16,6 +17,18 @@ class Dataset:
 
 
 class DataStorage:
+    class __DbLock():
+        """DataStore internal helper class"""
+        def __init__(self, inner: Lock):
+            self.__inner = inner
+            
+        def __enter__(self):
+            self.__inner.acquire()
+            
+        def __exit__(self, type, value, traceback):
+            self.__inner .release()
+
+
     def __init__(self, data_storage_dir: str):
         # ensure folder exists
         os.makedirs(data_storage_dir, exist_ok=True)
@@ -24,6 +37,19 @@ class DataStorage:
 
         # assume that we run with docker-compose
         self.__mongo: Database = Database("mongodb://root:example@mongo")
+        self.__lock = Lock()
+
+    def lock(self):
+        """lock access to the data storage to a single thread
+        >>> with datastore.lock():
+                # critical region
+                sess = data_storage.get_session(...)
+                data_storage.update_session(..., {
+                    "models": sess["models"] + [new_model]
+                })
+        >>> # code that can run parallel
+        """
+        return DataStorage.__DbLock(self.__lock)
 
     def insert_session(self, username: str, session: 'dict[str, object]') -> str:
         """insert session to users collection"""
