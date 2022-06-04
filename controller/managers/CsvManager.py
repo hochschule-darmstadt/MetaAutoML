@@ -11,7 +11,7 @@ class CsvManager:
     """
     Static CSV Manager class to interact with the local file system
     """
-    
+
     @staticmethod
     def read_dataset(path) -> Controller_pb2.GetDatasetResponse:
         """
