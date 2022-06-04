@@ -8,12 +8,13 @@ class DataStorage:
     """Centralized Access to File System and Database"""
 
 
-    def __init__(self, data_storage_dir: str):
+    def __init__(self, data_storage_dir: str, database = None):
         """
         Initialize new instance. This should be done already.
         Do _not_ use multiple instances of this class.
 
-        Will connect to a MongoDB database.
+        Will connect to the MongoDB database defined in docker-compose
+        unless `database` is provided.
 
         >>> data_storage = DataStorage("/tmp/")
         """
@@ -22,8 +23,12 @@ class DataStorage:
 
         self.__storage_dir = data_storage_dir
 
-        # assume that we run with docker-compose
-        self.__mongo: Database = Database("mongodb://root:example@mongo")
+        if database is None:
+            # assume that we run with docker-compose
+            self.__mongo: Database = Database("mongodb://root:example@mongo")
+        else:
+            self.__mongo: Database = database
+
         self.__lock = Lock()
 
 
