@@ -164,6 +164,7 @@ def zip_script(session_id):
                         temp_path)
 
     # NOTE: why are we cleaning up the ouput directory?
+    #     session_id is not an int anymore, so this block will raise    
             # for f in os.listdir(output_path):
             #     if f not in ('.gitkeep', 'tmp', *(str(i) for i in range(1, session_id + 1))):
             #         file_path = os.path.join(output_path, f)

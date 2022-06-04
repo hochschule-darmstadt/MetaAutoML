@@ -1,35 +1,22 @@
 from threading import Lock
 import os
 import os.path
-from typing import Iterator
 from persistence.mongo_client import Database
-from operator import itemgetter
-
-
-class Dataset:
-    def __init__(self, name: str, path: str, mtime: float):
-        self.name = name
-        self.path = path
-        self.mtime = mtime
-
-    def __repr__(self) -> str:
-        return f"Dataset: \"{self.name}\"  -->  \"{self.path}\")"
 
 
 class DataStorage:
-    class __DbLock():
-        """DataStore internal helper class"""
-        def __init__(self, inner: Lock):
-            self.__inner = inner
-            
-        def __enter__(self):
-            self.__inner.acquire()
-            
-        def __exit__(self, type, value, traceback):
-            self.__inner .release()
+    """Centralized Access to File System and Database"""
 
 
     def __init__(self, data_storage_dir: str):
+        """
+        Initialize new instance. This should be done already.
+        Do _not_ use multiple instances of this class.
+
+        Will connect to a MongoDB database.
+
+        >>> data_storage = DataStorage("/tmp/")
+        """
         # ensure folder exists
         os.makedirs(data_storage_dir, exist_ok=True)
 
@@ -39,96 +26,134 @@ class DataStorage:
         self.__mongo: Database = Database("mongodb://root:example@mongo")
         self.__lock = Lock()
 
+
     def lock(self):
-        """lock access to the data storage to a single thread
-        >>> with datastore.lock():
+        """
+        Lock access to the data storage to a single thread.
+
+        >>> with data_store.lock():
                 # critical region
                 sess = data_storage.get_session(...)
                 data_storage.update_session(..., {
                     "models": sess["models"] + [new_model]
                 })
-        >>> # code that can run parallel
         """
         return DataStorage.__DbLock(self.__lock)
 
-    def insert_session(self, username: str, session: 'dict[str, object]') -> str:
-        """insert session to users collection"""
-        result = self.__mongo.insert_session(username, session)
-        print(f"inserted session: '{result.inserted_id}'")
 
-        return str(result.inserted_id)
+    def insert_session(self, username: str, session: 'dict[str, object]') -> str:
+        """
+        Insert single session into the database. Returns session id.
+        
+        >>> id: str = ds.insert_session("automl_user", {
+                "dataset": ...,
+                ...
+            })
+        """
+        return self.__mongo.insert_session(username, session)
+
 
     def get_session(self, username: str, id: str) -> 'dict[str, object]':
-        session: dict[str, object] = self.__mongo.get_session(username, id)
+        """
+        Get single session by id. Returns session as `dict` or `None` if not found.
 
-        if session is None:
-            raise Exception(f"cannot find session: '{id}'")
+        >>> sess = data_storage.get_session("automl_user", sess_id)
+        >>> if sess is None:
+                throw Exception("cannot find session")
+        """
+        return self.__mongo.get_session(username, id)
 
-        return session
 
     def update_session(self, username: str, id: str, new_values : 'dict[str, object]') -> bool:
-        """update single session with new values"""
-        result = self.__mongo.update_session(username, id, new_values)
-        if result.modified_count >= 1:
-            print(f"updated session: '{id}'")
+        """
+        Update single session with new values. Returns `True` if successfully updated, otherwise `False`.
         
-        return result.modified_count >= 1
-        
+        >>> success: bool = data_storage.update_session("automl_user", sess_id, {
+                "status": "completed"
+            })
+        """
+        return self.__mongo.update_session(username, id, new_values)
+
 
     def save_dataset(self, username: str, name: str, content: bytes) -> str:
-        """store dataset contents on disk and insert entry to database"""
-        filename_dest = os.path.join(self.__storage_dir, username, name)
+        """
+        Store dataset contents on disk and insert entry to database.
 
+        >>> id: str = ds.save_dataset("automl_user", "my_dataset", ...)
+        """
+
+        # insert shell entry first to get id from database
+        dataset_id = self.__mongo.insert_dataset(username, {
+            "name": name,
+
+            # we need the dataset id from the database for these fields
+            "path": "",
+            "mtime": 0.0
+        })
+
+        filename_dest = os.path.join(self.__storage_dir, username, dataset_id)
         # make sure directory exists in case it's the first upload from this user
         os.makedirs(os.path.dirname(filename_dest), exist_ok=True)
         with open(filename_dest, 'wb') as outfp:
             outfp.write(content)
 
-        mtime = os.path.getmtime(filename_dest)
-
-        # TODO: can datasets be replaced?
-        # name is not primary key, so same dataset will be inserted twice
-        result = self.__mongo.insert_dataset(username, {
-            "name": name,
+        # fill in missing values
+        success = self.__mongo.update_dataset(username, dataset_id, {
             "path": filename_dest,
-            "mtime": mtime
+            "mtime": os.path.getmtime(filename_dest)
         })
-        print(f"inserted dataset '{name}'")
+        assert success, f"cannot update session with id {dataset_id}"
 
-        return str(result)
+        return dataset_id
 
-    def get_dataset(self, username: str, name: str) -> Dataset:
-        """return dataset with specified name"""
-        dataset: dict[str, object] = self.__mongo.get_dataset(username, name)
 
-        if dataset is None:
-            # dataset path does not exist in database
-            raise Exception(f"cannot find dataset: '{name}'")
+    def find_dataset(self, username: str, name: str) -> 'tuple[bool, dict[str, object]]':
+        """
+        Try to find the _first_ dataset with this name. Returns either `(True, Dataset)` or `(False, None)`.
 
-        return self.__upgrade_dataset(dataset)
+        >>> found, dataset = ds.find_dataset("automl_user", "my_dataset")
+        >>> if not found:
+                print("We have a problem")
+        """
+        result = self.__mongo.find_dataset(username, {
+            "name": name
+        })
 
-    def __upgrade_dataset(self, from_database: 'dict[str, object]') -> Dataset:
-        """convert raw database dictionary to Dataset"""
-        # get values from dict
-        name: str = from_database["name"]
-        filepath: str = from_database["path"]
-        mtime: float = from_database["mtime"]
+        return result != None, result
 
-        if not os.path.exists(filepath):
-            # dataset path does not exist on disk
-            # TODO: what to do in case of error, database cleanup?
-            raise FileNotFoundError
 
-        return Dataset(name, filepath, mtime)
+    def get_datasets(self, username: str) -> 'list[dict[str, object]]':
+        """
+        Get all datasets for a user. Returns `list` of all datasets.
+        
+        >>> for dataset in data_storage.get_datasets("automl_user"):
+                print(dataset["path"])
+        """
+        return [ds for ds in self.__mongo.get_datasets(username)]
 
-    def get_datasets(self, username: str) -> 'Iterator[Dataset]':
-        """return all datasets for this user"""
-        for raw_dict in self.__mongo.get_datasets(username):
-            yield self.__upgrade_dataset(raw_dict)
 
     def insert_model(self, username: str, model: 'dict[str, object]') -> str:
-        """insert model to users collection"""
-        result = self.__mongo.insert_model(username, model)
-        print(f"inserted model '{result.inserted_id}'")
+        """
+        Insert single model tinto the database. Returns id of new model.
+        
+        >>> mdl_id: str = data_storage.insert_model("automl_user", {
+                "automl_name": "MLJAR",
+                "session_id": session_id,
+                ...
+            })
+        """
+        return self.__mongo.insert_model(username, model)
 
-        return str(result.inserted_id)
+
+
+    class __DbLock():
+        """DataStore internal helper class. Use with `data_store.lock()`"""
+        def __init__(self, inner: Lock):
+            self.__inner = inner
+            
+        def __enter__(self):
+            self.__inner.acquire()
+            
+        def __exit__(self, type, value, traceback):
+            self.__inner .release()
+

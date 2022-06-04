@@ -179,8 +179,6 @@ class AutoMLManager(ABC, Thread):
                     self.__status_messages.append(response.statusUpdate)
                     self.__runtime = response.runtime
                 elif response.returnCode == Adapter_pb2.ADAPTER_RETURN_CODE_SUCCESS:
-                    # P: save training results and model
-                    print(f"Adapter_pb2.ADAPTER_RETURN_CODE_SUCCESS: {response.outputJson}")
                     self.__result_json = json.loads(response.outputJson)
                     self.__is_completed = True
                     self.__last_status = Controller_pb2.SESSION_STATUS_COMPLETED
@@ -188,7 +186,6 @@ class AutoMLManager(ABC, Thread):
                     self.__validationScore = response.validationScore
                     self.__runtime = response.runtime
                     self.__predictiontime = response.predictiontime
-                    # P: "Model" in Data Model
                     self.__model = response.model
                     self.__library = response.library
 

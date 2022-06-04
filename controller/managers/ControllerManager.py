@@ -7,7 +7,7 @@ import Controller_pb2
 from AdapterManager import AdapterManager
 from CsvManager import CsvManager
 from RdfManager import RdfManager
-from persistence import DataStorage, Dataset
+from persistence import DataStorage
 
 class ControllerManager(object):
     """
@@ -62,18 +62,18 @@ class ControllerManager(object):
         response = Controller_pb2.GetDatasetsResponse()
 
         username = "automl_user"
-        all_datasets: list[Dataset] = self.__data_storage.get_datasets(username)
+        all_datasets: list[dict[str, object]] = self.__data_storage.get_datasets(username)
         
         for dataset in all_datasets:
             try:
-                rows, cols = pd.read_csv(dataset.path).shape
+                rows, cols = pd.read_csv(dataset["path"]).shape
                 response_dataset = Controller_pb2.Dataset()
-                response_dataset.fileName = dataset.path
+                response_dataset.fileName = dataset["path"]
                 response_dataset.type = "TABULAR"
                 response_dataset.rows = rows
                 response_dataset.columns = cols
-                response_dataset.creation_date.seconds = int(dataset.mtime)
-                response_dataset.creation_date.nanos = int(dataset.mtime % 1 * 1e9)
+                response_dataset.creation_date.seconds = int(dataset["mtime"])
+                response_dataset.creation_date.nanos = int(dataset["mtime"] % 1 * 1e9)
                 response.dataset.append(response_dataset)
             except Exception as e:
                 print(f"exception: {e}")
@@ -107,10 +107,7 @@ class ControllerManager(object):
         """
         response = Controller_pb2.GetSessionsResponse()
 
-        # NOTE: should we return all known sessions, or only the ones from this runtime?
-                # username = "automl_user"
-                # all_sessions = self.__data_storage.get_sessions(username)
-                # response.sessionIds = [sess["_id"] for sess in all_sessions]
+        # only return sessions from this runtime
         for id in self.__sessions.keys():
             response.sessionIds.append(id)
 
@@ -172,15 +169,11 @@ class ControllerManager(object):
         ---
         Return upload status
         """
-        # script_dir = os.path.dirname(os.path.abspath(__file__))
-        # file_dest = os.path.join(script_dir, 'datasets')
-
-        # P: save reference to file in database (eg path)
-        #    * actual file should remain on disk
-        # "Dataset" in Data Model
 
         username = "automl_user"
-        self.__data_storage.save_dataset(username, dataset.name, dataset.content)
+        dataset_id: str = self.__data_storage.save_dataset(username, dataset.name, dataset.content)
+        print(f"saved new dataset: {dataset_id}")
+        
         response = Controller_pb2.UploadDatasetFileResponse()
         response.returnCode = 0
         return response
@@ -219,11 +212,13 @@ class ControllerManager(object):
         }
         username = "automl_user"
         sess_id = self.__data_storage.insert_session(username, config)
+        print(f"inserted new session: {sess_id}")
 
         # will be called when any automl is done
         # NOTE: will run in parallel
         def callback(session_id, model: 'dict[str, object]'):
             _mdl_id = self.__data_storage.insert_model(username, model)
+            print(f"inserted new model: {_mdl_id}")
 
             # lock data storage to prevent race condition between get and update
             with self.__data_storage.lock():
@@ -234,10 +229,14 @@ class ControllerManager(object):
                     "status": "completed"
                 })
 
+        # find requested dataset 
+        found, dataset = self.__data_storage.find_dataset(username, configuration.dataset)
+        if not found:
+            raise Exception(f"cannot find dataset with name: {configuration.dataset}")
+
         # TODO: rework file access in AutoMLSession
         #       we do not want to make datastore paths public
-        dataset: Dataset = self.__data_storage.get_dataset(username, configuration.dataset)
-        dataset_folder = os.path.dirname(dataset.path)
+        dataset_folder = os.path.dirname(dataset["path"])
 
         newSession: AutoMLSession = self.__adapterManager.start_automl(configuration, dataset_folder,
                                                                sess_id, callback)
