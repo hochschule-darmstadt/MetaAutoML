@@ -48,7 +48,7 @@ class DataSetAnalysisManager:
             target.close()
 
     @staticmethod
-    def __number_of_columns(dataset: pd.DataFrame) -> dict:
+    def __number_of_columns(dataset: pd.DataFrame) -> int:
         """
         Counts the number of columns in the dataset and adds that information to a JSON file
         ---
@@ -62,7 +62,7 @@ class DataSetAnalysisManager:
         return number_of_columns
 
     @staticmethod
-    def __number_of_rows(dataset: pd.DataFrame) -> dict:
+    def __number_of_rows(dataset: pd.DataFrame) -> int:
         """
         Counts the number of rows in the dataset and adds that information to a JSON file
         ---
@@ -83,7 +83,7 @@ class DataSetAnalysisManager:
         Parameter
         1. dataset to be analyzed
         ---
-        Return a dictionary containing information about the missing values in columns
+        Return a dictionary containing information about the missing values in each column
         """
         # map all columns with the number of missing values
         na_counts = dict(dataset.isna().sum().items())
@@ -91,14 +91,14 @@ class DataSetAnalysisManager:
         return na_counts
 
     @staticmethod
-    def __missing_values_rows(dataset: pd.DataFrame) -> dict:
+    def __missing_values_rows(dataset: pd.DataFrame) -> list(int):
         """
         Counts missing values of each row and adds the indices of rows with a lot of missing values to a list
         ---
         Parameter
         1. dataset to be analyzed
         ---
-        Return a dictionary containing information about the missing values in rows
+        Return a list of indices of rows containing a lot of missing values
         """
         dataset_missings_rows = dataset.isna().sum(axis=1)
 
@@ -113,14 +113,14 @@ class DataSetAnalysisManager:
         return missing_rows_indices
 
     @staticmethod
-    def __detect_outliers(dataset: pd.DataFrame) -> dict:
+    def __detect_outliers(dataset: pd.DataFrame) -> list(dict):
         """
-        Detects outliers in all columns in a dataset containing floats (for now)
+        Detects outliers in all columns in a dataset containing floats
         ---
         Parameter
         1. dataset to be analyzed
         ---
-        Return the JSON file with additional data
+        Return a list containing information about outliers on every column of the dataset
         """
 
         outlier_columns = []
@@ -138,7 +138,6 @@ class DataSetAnalysisManager:
             
             interquartile_range = Q3 - Q1
 
-            # calculation of boundaries is still a work in progress
             lower_boundary = Q1 - 2 * interquartile_range
             upper_boundary = Q3 + 2 * interquartile_range
 
@@ -151,57 +150,3 @@ class DataSetAnalysisManager:
             outlier_columns.append({column_name: outlier_indices})
         
         return outlier_columns
-
-    @staticmethod
-    def __detect_duplicate_columns(dataset: pd.DataFrame, jsonfile: dict) -> dict:
-        """
-        Detects duplicate columns in a dataset and adds that information to a JSON file
-        ---
-        Parameter
-        1. dataset to be analyzed
-        2. JSON file to write to
-        ---
-        Return the JSON file with additional data
-        """
-        class DuplicateColumn(object):
-            pass
-
-        jsonfile["basic analysis"]["duplicate columns"] = {}
-
-        for x in range(dataset.shape[1]):
-            col = dataset.iloc[:, x]
-            
-            for y in range(x + 1, dataset.shape[1]):
-
-                other_col = dataset.iloc[:, y]
-                
-                if col.equals(other_col):
-                    dupl_column_obj = DuplicateColumn()
-
-        return jsonfile
-
-    @staticmethod
-    def __detect_duplicate_rows(dataset: pd.DataFrame, jsonfile: dict) -> dict:
-        """
-        Detects duplicate rows in a dataset and adds that information to a JSON file
-        ---
-        Parameter
-        1. dataset to be analyzed
-        2. JSON file to write to
-        ---
-        Return the JSON file with additional data
-        """
-        dataset_copy = dataset.copy()
-        dataset_copy['hash'] = pd.Series((hash(tuple(row)) for _, row in dataset.iterrows()))
-        print(dataset_copy.groupby(['hash']).count())
-        return jsonfile
-
-
-
-
-    
-
-    
-
-
-    
