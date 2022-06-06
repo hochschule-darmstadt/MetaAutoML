@@ -134,9 +134,12 @@ class ControllerManager(object):
         Return list of column names
         """
         username = "automl_user"
-        dataset: Dataset = self.__data_storage.get_dataset(username, request.datasetName)
-        columnNames = CsvManager.read_column_names(dataset.path)
-        return columnNames
+        found, dataset = self.__data_storage.find_dataset(username, request.datasetName)
+        if found: 
+            return CsvManager.read_column_names(dataset["path"])
+        else:
+            # no dataset found -> return empty response
+            return Controller_pb2.GetTabularDatasetColumnNamesResponse()
     
     def GetSupportedMlLibraries(self, request) -> Controller_pb2.GetSupportedMlLibrariesResponse:
         """
