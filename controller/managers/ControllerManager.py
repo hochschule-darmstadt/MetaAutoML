@@ -189,9 +189,25 @@ class ControllerManager(object):
         """
         response = Controller_pb2.StartAutoMLprocessResponse()
 
+        username = "automl_user"
+        # find requested dataset 
+        found, dataset = self.__data_storage.find_dataset(username, configuration.dataset)
+        if not found:
+            raise Exception(f"cannot find dataset with name: {configuration.dataset}")
+        
+        # TODO: rework file access in AutoMLSession
+        #       we do not want to make datastore paths public
+        dataset_folder = os.path.dirname(dataset["path"])
+        dataset_filename = os.path.basename(dataset["path"])
+
+        # overwrite dataset name for further processing
+        #   frontend sends dataset name ("titanic_train_1.csv"), 
+        #   but datasets on disk are saved as dataset_id ("629e323a9290ff0cf5a5d4a9")
+        configuration.dataset = dataset_filename
+        
         # restructure configuration into python dictionaries
         config = {
-            "dataset": configuration.dataset,
+            "dataset": dataset_filename,
             "task": configuration.task,
             "tabular_config": {
                 "target": {
@@ -210,7 +226,6 @@ class ControllerManager(object):
             },
             "required_automls": list(configuration.requiredAutoMLs),
         }
-        username = "automl_user"
         sess_id = self.__data_storage.insert_session(username, config)
         print(f"inserted new session: {sess_id}")
 
@@ -229,14 +244,6 @@ class ControllerManager(object):
                     "status": "completed"
                 })
 
-        # find requested dataset 
-        found, dataset = self.__data_storage.find_dataset(username, configuration.dataset)
-        if not found:
-            raise Exception(f"cannot find dataset with name: {configuration.dataset}")
-
-        # TODO: rework file access in AutoMLSession
-        #       we do not want to make datastore paths public
-        dataset_folder = os.path.dirname(dataset["path"])
 
         newSession: AutoMLSession = self.__adapterManager.start_automl(configuration, dataset_folder,
                                                                sess_id, callback)
