@@ -64,7 +64,7 @@ class DataStorage:
 
         >>> sess = data_storage.get_session("automl_user", sess_id)
         >>> if sess is None:
-                throw Exception("cannot find session")
+                raise Exception("cannot find session")
         """
         return self.__mongo.get_session(username, id)
 
@@ -124,7 +124,7 @@ class DataStorage:
             "name": name
         })
 
-        return result != None, result
+        return result is not None, result
 
 
     def get_datasets(self, username: str) -> 'list[dict[str, object]]':
@@ -139,7 +139,7 @@ class DataStorage:
 
     def insert_model(self, username: str, model: 'dict[str, object]') -> str:
         """
-        Insert single model tinto the database. Returns id of new model.
+        Insert single model into the database. Returns id of new model.
         
         >>> mdl_id: str = data_storage.insert_model("automl_user", {
                 "automl_name": "MLJAR",
