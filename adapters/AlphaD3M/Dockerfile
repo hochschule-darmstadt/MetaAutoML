@@ -4,6 +4,12 @@ EXPOSE 50060
 
 # Install dependencies
 COPY ./AlphaD3M/requirements.txt .
+
+# Have to install these dependencies before the requirements.txt,
+#   because inside the requirements.txt the packages/modules are installed out of order.
+RUN pip install d3m
+RUN pip install numpy
+
 RUN pip install -r requirements.txt
 WORKDIR /app
 COPY ./AlphaD3M .
