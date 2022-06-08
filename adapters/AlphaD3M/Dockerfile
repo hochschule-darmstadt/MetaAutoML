@@ -24,5 +24,5 @@ ENV RUNTIME=DOCKER
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONPATH "AutoMLs:Utils"
 ENV PYTHON_ENV "python"
-# TODO: edit the following line
-ENTRYPOINT ["python", "Adapter_AlphaD3M.py"]
+
+ENTRYPOINT ["python", "AlphaD3MServer.py"]
