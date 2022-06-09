@@ -1,15 +1,15 @@
-FROM python:3.7.11-slim-buster AS base
+FROM python:3.8.13-slim-buster AS base
 WORKDIR /
 EXPOSE 50060
 
+# Install C/C++ Build environment
+RUN apt-get update && \
+    apt-get install -y gcc && \
+    apt-get install -y g++
+
 # Install dependencies
 COPY ./AlphaD3M/requirements.txt .
-
-# Have to install these dependencies before the requirements.txt,
-#   because inside the requirements.txt the packages/modules are installed out of order.
-RUN pip install d3m
-RUN pip install numpy
-
+RUN pip install d3m==2022.5.5 numpy==1.19.5
 RUN pip install -r requirements.txt
 WORKDIR /app
 COPY ./AlphaD3M .
