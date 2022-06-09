@@ -7,15 +7,19 @@ RUN apt-get update && \
     apt-get install -y gcc && \
     apt-get install -y g++
 
-# Install dependencies
-COPY ./AlphaD3M/requirements.txt .
-RUN pip install d3m==2022.5.5 numpy==1.19.5
-RUN pip install -r requirements.txt
+RUN python -m pip install --upgrade pip
+
+# Copy code
 WORKDIR /app
 COPY ./AlphaD3M .
 COPY ./Utils/Utils ./Utils
 COPY ./Utils/AutoMLs ./AutoMLs
 COPY ./GRPC/Adapter ./
+
+# Install dependencies
+RUN pip install -r requirements.alphad3m.txt
+RUN pip install -r requirements.primitives.txt
+RUN pip install -r requirements.txt
 
 
 RUN mkdir -p /app/app-data/output/tmp
