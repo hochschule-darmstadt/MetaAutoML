@@ -2,7 +2,7 @@ import json
 import os
 
 from JsonUtil import get_config_property
-from TabularDataAutoML import TabularDataAutoML
+from AutoGluonAdapter import AutoGluonAdapter
 
 if __name__ == '__main__':
     """
@@ -13,5 +13,5 @@ if __name__ == '__main__':
     with open(file_path) as file:
         process_json = json.load(file)
 
-    tabularDataAutoML = TabularDataAutoML(process_json)
-    tabularDataAutoML.execute_task()
+    tabularDataAutoML = AutoGluonAdapter(process_json)
+    tabularDataAutoML.start()

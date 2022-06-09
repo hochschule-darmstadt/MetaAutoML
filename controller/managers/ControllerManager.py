@@ -182,8 +182,13 @@ class ControllerManager(object):
         Return start process status
         """
         response = Controller_pb2.StartAutoMLprocessResponse()
+        
+        # will be called when any automl is done
+        def callback(session_id, automl_name, result):
+            print(f"automl is done: {automl_name}, session: {session_id}, result: {result}")
+
         newSession = self.__adapterManager.start_automl(configuration, self.__datasetFolder,
-                                                               self.__sessionCounter)
+                                                               self.__sessionCounter, callback)
         self.__sessions[str(self.__sessionCounter)] = newSession
         self.__sessionCounter += 1
         response.result = 1

@@ -14,12 +14,14 @@ import pandas as pd
 from autoPyTorch.api.tabular_classification import TabularClassificationTask
 from autoPyTorch.api.tabular_regression import TabularRegressionTask
 import pickle
+from AdapterUtils import read_tabular_dataset_training_data, prepare_tabular_dataset, export_model
+
 
 from JsonUtil import get_config_property
 from predict_time_sources import feature_preparation, DataType, SplitMethod
-from AbstractTabularDataAutoML import AbstractTabularDataAutoML
+from AbstractAdapter import AbstractAdapter
 
-class TabularDataAutoML(AbstractTabularDataAutoML):
+class AutoPytorchAdapter(AbstractAdapter):
     """
     Implementation of the AutoML functionality fo structured data a.k.a. tabular data
     """
@@ -52,50 +54,38 @@ class TabularDataAutoML(AbstractTabularDataAutoML):
             # handle empty metric field, 'r2' should be the default metric parameter for AutoPytorch regression
             self._configuration["metric"] = 'r2'
 
-
-    def __export_model(self, model):
-        """
-        Export the generated ML model to disk
-        ---
-        Parameter:
-        1. generate ML model
-        """
-        output_file = os.path.join(get_config_property('output-path'), 'tmp', "model_pytorch.p")
-        with open(output_file, "wb+") as file:
-            pickle.dump(model, file)
-
-    def __classification(self):
+    def __tabular_classification(self):
         """
         Execute the classification task
         """
-        self._read_training_data()
-        self._dataset_preparation()
+        self.df = read_tabular_dataset_training_data(self._configuration)
+        X, y = prepare_tabular_dataset(self.df, self._configuration)
 
         auto_cls = TabularClassificationTask()
         if self._time_limit is not None:
             auto_cls.search(
-                X_train=self._X,
-                y_train=self._y,
+                X_train=X,
+                y_train=y,
                 optimize_metric=self._configuration["metric"],
                 total_walltime_limit=self._time_limit
             )
         else:
             auto_cls.search(
-                X_train=self._X,
-                y_train=self._y,
+                X_train=X,
+                y_train=y,
                 optimize_metric=self._configuration["metric"],
                 budget_type='epochs',
                 max_budget=self._iter_limit
             )
 
-        self.__export_model(auto_cls)
+        export_model(auto_cls, "model_pytorch.p")
 
-    def regression(self):
+    def __tabular_regression(self):
         """
         Execute the regression task
         """
-        self._read_training_data()
-        self._dataset_preparation()
+        self.df = read_tabular_dataset_training_data(self._configuration)
+        X, y = prepare_tabular_dataset(self.df, self._configuration)
         ############################################################################
         # Build and fit a regressor
         # ==========================
@@ -106,27 +96,27 @@ class TabularDataAutoML(AbstractTabularDataAutoML):
         # =====================================================
         if self._time_limit is not None:
             auto_reg.search(
-                X_train=self._X,
-                y_train=self._y,
+                X_train=X,
+                y_train=y,
                 optimize_metric=self._configuration["metric"],
                 total_walltime_limit=self._time_limit
             )
         else:
             auto_reg.search(
-                X_train=self._X,
-                y_train=self._y,
+                X_train=X,
+                y_train=y,
                 optimize_metric=self._configuration["metric"],
                 budget_type='epochs',
                 max_budget=self._iter_limit
             )
 
-        self.__export_model(auto_reg)
+        export_model(auto_reg, "model_pytorch.p")
 
-    def execute_task(self):
+    def start(self):
         """
         Execute the ML task
         """
         if self._configuration["task"] == 1:
-            self.__classification()
+            self.__tabular_classification()
         elif self._configuration["task"] == 2:
-            self.regression()
+            self.__tabular_regression()
