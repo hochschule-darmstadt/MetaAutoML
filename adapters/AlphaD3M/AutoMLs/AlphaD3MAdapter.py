@@ -1,6 +1,4 @@
 import d3m_interface as d3mi
-import os
-import sys
 
 
 from AbstractAdapter import AbstractAdapter
