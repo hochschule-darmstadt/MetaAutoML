@@ -1,6 +1,5 @@
 
 # add parent folder tot system path so python will find persistence package
-from re import A
 import sys
 from pathlib import Path
 
@@ -18,7 +17,7 @@ import unittest
 from persistence import DataStorage
 from persistence.mongo_client import Database
 
-class TestRdfManager(unittest.TestCase):
+class TestDataStorage(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         database = Database(server_url=None)
@@ -45,7 +44,7 @@ class TestRdfManager(unittest.TestCase):
 
         # check single dataset
         found, from_db = self.data_storage.find_dataset("test_user", "test_dataset.csv")
-        assert found, "find failed"
+        assert found
         assert from_db["name"] == "test_dataset.csv"
         assert from_db["path"].endswith(f"test_user/{id}")
 
