@@ -1,5 +1,18 @@
 
-from mongo_client import Database
+#
+# Run the cli in Python REPL with `python3 -i cli.py`
+#
+
+# add parent folder to system path so python will find persistence package
+import sys
+import os
+from pathlib import Path
+
+# add controller directory to system path, so Python can find modules
+file = Path(__file__).resolve()
+sys.path.append(os.path.join(file.parents[2]))
+
+from persistence.mongo_client import Database
 
 username = "automl_user"
 # assume that we run outside of docker-compose
