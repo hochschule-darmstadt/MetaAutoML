@@ -120,7 +120,11 @@ def serve():
                                                           SERVER_CERTIFICATE,
                                                       ),))
 
-    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
+    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10),
+    options=[
+        ('grpc.max_send_message_length', -1),
+        ('grpc.max_receive_message_length', -1),
+    ])
     Controller_pb2_grpc.add_ControllerServiceServicer_to_server(ControllerServiceServicer(), server)
     # the insecure port shall NOT be mapped to the host or exposed anywhere
     # it is only meant to be open for the dummy inside the docker-compose setup.
