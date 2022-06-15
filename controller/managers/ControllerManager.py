@@ -61,6 +61,7 @@ class ControllerManager(object):
         """
         response = Controller_pb2.GetDatasetsResponse()
 
+        # TODO: extend gRPC message with username
         username = "automl_user"
         all_datasets: list[dict[str, object]] = self.__data_storage.get_datasets(username)
         
@@ -94,6 +95,7 @@ class ControllerManager(object):
         firstEntries: the first couple of rows of the dataset
         """
         # TODO WHEN USER MANAGEMENT IS ADDED; CORRECT FILTERING
+        # TODO: extend gRPC message with username
         username = "automl_user"
         dataset = self.__data_storage.get_dataset(username, request.name)
         dataset = CsvManager.read_dataset(dataset.path)
@@ -133,6 +135,8 @@ class ControllerManager(object):
         ---
         Return list of column names
         """
+
+        # TODO: extend gRPC message with username
         username = "automl_user"
         found, dataset = self.__data_storage.find_dataset(username, request.datasetName)
         if found: 
@@ -173,6 +177,7 @@ class ControllerManager(object):
         Return upload status
         """
 
+        # TODO: extend gRPC message with username
         username = "automl_user"
         dataset_id: str = self.__data_storage.save_dataset(username, dataset.name, dataset.content)
         print(f"saved new dataset: {dataset_id}")
@@ -192,6 +197,7 @@ class ControllerManager(object):
         """
         response = Controller_pb2.StartAutoMLprocessResponse()
 
+        # TODO: extend gRPC message with username 
         username = "automl_user"
         # find requested dataset 
         found, dataset = self.__data_storage.find_dataset(username, configuration.dataset)
