@@ -3,7 +3,7 @@ import os.path
 
 from JsonUtil import get_config_property
 
-from AlphaD3MAdapter import AlphaD3MAdapter
+from AutoMLs.AlphaD3MAdapter import AlphaD3MAdapter
 
 if __name__ == '__main__':
     """
