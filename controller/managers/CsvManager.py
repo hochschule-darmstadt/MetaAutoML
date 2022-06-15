@@ -3,6 +3,7 @@ import numpy as np
 from typing import Tuple, List
 
 import Controller_pb2
+from DataSetAnalysisManager import DataSetAnalysisManager
 
 FIRST_ROW_AMOUNT = 50
 
@@ -12,7 +13,7 @@ class CsvManager:
     Static CSV Manager class to interact with the local file system
     """
 
-    @staticmethod
+    
     def read_dataset(path) -> Controller_pb2.GetDatasetResponse:
         """
         Read a dataset from the disk
@@ -26,6 +27,10 @@ class CsvManager:
         dataset = pd.read_csv(path)
         # P: Dataset Analysis happens here, will return small json with metadata
         
+
+        analysisResult = DataSetAnalysisManager.startAnalysis(dataset)
+        DataSetAnalysisManager.persistAnalysisResult(analysisResult)
+    
         for col in dataset.columns:
             table_column = Controller_pb2.TableColumn()
             table_column.name = col
