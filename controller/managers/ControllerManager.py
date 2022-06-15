@@ -97,7 +97,11 @@ class ControllerManager(object):
         # TODO WHEN USER MANAGEMENT IS ADDED; CORRECT FILTERING
         # TODO: extend gRPC message with username
         username = "automl_user"
-        dataset = self.__data_storage.get_dataset(username, request.name)
+        # TODO: change gRPC message to dataset id instead of name
+        found, dataset = self.__data_storage.find_dataset(username, request.name)
+        if not found:
+            raise Exception(f"cannot find dataset with name: {request.dataset}")
+
         dataset = CsvManager.read_dataset(dataset.path)
         return dataset
 
@@ -138,6 +142,7 @@ class ControllerManager(object):
 
         # TODO: extend gRPC message with username
         username = "automl_user"
+        # TODO: change gRPC message to dataset id instead of name
         found, dataset = self.__data_storage.find_dataset(username, request.datasetName)
         if found: 
             return CsvManager.read_column_names(dataset["path"])
@@ -200,6 +205,7 @@ class ControllerManager(object):
         # TODO: extend gRPC message with username 
         username = "automl_user"
         # find requested dataset 
+        # TODO: change gRPC message to dataset id instead of name
         found, dataset = self.__data_storage.find_dataset(username, configuration.dataset)
         if not found:
             raise Exception(f"cannot find dataset with name: {configuration.dataset}")
