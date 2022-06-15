@@ -87,6 +87,20 @@ class DataStorage:
         """
         return self.__mongo.get_session(username, id)
 
+    def get_sessions(self, username: str) -> 'list[dict[str, object]]':
+        """
+        Get all sessions for a user. 
+        ---
+        >>> for sess in data_storage.get_sessions("automl_user"):
+                print(sess["dataset"])
+
+        ---
+        Parameter
+        1. username: name of the user
+        ---
+        Returns sessions as `list` of dictionaries.
+        """
+        return [sess for sess in self.__mongo.get_sessions(username)]
 
     def update_session(self, username: str, id: str, new_values: 'dict[str, object]') -> bool:
         """
