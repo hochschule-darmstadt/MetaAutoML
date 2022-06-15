@@ -2,14 +2,13 @@ import json
 import os
 
 import zope.interface
-import grpc
-import Controller_pb2
 import Adapter_pb2
 import Adapter_pb2_grpc
 
 from IAutoMLManager import IAutoMLManager
 from threading import *
 from abc import ABC
+from Controller_bgrpc import *
 
 
 @zope.interface.implementer(IAutoMLManager)
@@ -18,7 +17,7 @@ class AutoMLManager(ABC, Thread):
     Base implementation of the  AutoML functionality
     """
 
-    def __init__(self, configuration, folder_location, automl_service_host, automl_service_port, session_id, callback=None):
+    def __init__(self, configuration: "StartAutoMlProcessRequest", folder_location, automl_service_host, automl_service_port, session_id, callback=None):
         """
         Init a new instance of the abstract class AutoMLManager
         ---
@@ -39,32 +38,32 @@ class AutoMLManager(ABC, Thread):
         self.__predictiontime = 0
         self.__model = ""
         self.__library = ""
-        self.__last_status = Controller_pb2.SESSION_STATUS_BUSY
+        self.__last_status = SessionStatus.SESSION_STATUS_BUSY
 
         self.__AUTOML_SERVICE_HOST = automl_service_host
         self.__AUTOML_SERVICE_PORT = automl_service_port
 
         self.__callback = callback
 
-    def get_automl_model(self) -> Controller_pb2.GetSessionStatusResponse:
+    def get_automl_model(self) -> GetSessionStatusResponse:
         """
         Get the generated AutoML model
         ---
         Return the AutoML model if the run is concluded
         """
-        result = Controller_pb2.GetAutoMlModelResponse()
+        result = GetAutoMlModelResponse()
         result.name = self.__result_json["file_name"]
         with open(os.path.join(self.__result_json["file_location"], self.__result_json["file_name"]), "rb") as a:
             result.file = a.read()
         return result
 
-    def get_status(self) -> Controller_pb2.AutoMLStatus:
+    def get_status(self) -> "AutoMlStatus":
         """
         Get the execution status of the AutoML
         ---
         Return the current AutoML status
         """
-        status = Controller_pb2.AutoMLStatus()
+        status = AutoMlStatus()
         status.name = self.name
         status.status = self.__last_status
         status.messages[:] = self.__status_messages
@@ -142,9 +141,9 @@ class AutoMLManager(ABC, Thread):
         Return configuration JSON
         """
 
-        if self._configuration.testConfig.split_ratio == 0:
-            self._configuration.testConfig.split_ratio = 0.8
-            self._configuration.testConfig.random_state = 42
+        if self._configuration.test_config.split_ratio == 0:
+            self._configuration.test_config.split_ratio = 0.8
+            self._configuration.test_config.random_state = 42
 
         return {
             "session_id": self.__session_id,
@@ -152,21 +151,21 @@ class AutoMLManager(ABC, Thread):
             "file_location": self.__file_dest,
             "task": self._configuration.task,
             "test_configuration": {
-                "split_ratio": self._configuration.testConfig.split_ratio,
-                "method": self._configuration.testConfig.method,
-                "random_state": self._configuration.testConfig.random_state
+                "split_ratio": self._configuration.test_config.split_ratio,
+                "method": self._configuration.test_config.method,
+                "random_state": self._configuration.test_config.random_state
             },
             "tabular_configuration": {
                 "target": {
-                    "target": self._configuration.tabularConfig.target.target,
-                    "type": self._configuration.tabularConfig.target.type
+                    "target": self._configuration.tabular_config.target.target,
+                    "type": self._configuration.tabular_config.target.type
                 },
-                "features": dict(self._configuration.tabularConfig.features)
+                "features": dict(self._configuration.tabular_config.features)
             },
-            "file_configuration": dict(self._configuration.fileConfiguration),
+            "file_configuration": dict(self._configuration.file_configuration),
             "runtime_constraints": {
-                "runtime_limit": self._configuration.runtimeConstraints.runtime_limit * 60,
-                "max_iter": self._configuration.runtimeConstraints.max_iter
+                "runtime_limit": self._configuration.runtime_constraints.runtime_limit * 60,
+                "max_iter": self._configuration.runtime_constraints.max_iter
             },
             "metric": self._configuration.metric
         }
@@ -190,7 +189,7 @@ class AutoMLManager(ABC, Thread):
                 elif response.returnCode == Adapter_pb2.ADAPTER_RETURN_CODE_SUCCESS:
                     self.__result_json = json.loads(response.outputJson)
                     self.__is_completed = True
-                    self.__last_status = Controller_pb2.SESSION_STATUS_COMPLETED
+                    self.__last_status = SessionStatus.SESSION_STATUS_COMPLETED
                     self.__testScore = response.testScore
                     self.__validationScore = response.validationScore
                     self.__runtime = response.runtime
@@ -209,4 +208,4 @@ class AutoMLManager(ABC, Thread):
         except grpc.RpcError as rpc_error:
             print(f"Received unknown RPC error: code={rpc_error.code()} message={rpc_error.details()}")
             self.__is_completed = True
-            self.__last_status = Controller_pb2.SESSION_STATUS_FAILED
+            self.__last_status = SessionStatus.SESSION_STATUS_FAILED

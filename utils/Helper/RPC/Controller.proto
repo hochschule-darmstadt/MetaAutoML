@@ -34,18 +34,18 @@ service ControllerService {
   /*upload a new dataset file as bytes to the controller repository*/
   rpc UploadDatasetFile(UploadDatasetFileRequest) returns (UploadDatasetFileResponse) {}
   /*start a new AutoML run, using the provided configuration*/
-  rpc StartAutoMLprocess(StartAutoMLprocessRequest) returns (StartAutoMLprocessResponse) {}
+  rpc StartAutoMlProcess(StartAutoMlProcessRequest) returns (StartAutoMlProcessResponse) {}
   /*test an existing AutoML*/
-  rpc TestAutoML(TestAutoMLRequest) returns (TestAutoMLResponse) {}
+  rpc TestAutoML(TestAutoMlRequest) returns (TestAutoMlResponse) {}
 }
 
-message TestAutoMLRequest {
+message TestAutoMlRequest {
   string testData = 1;
   string sessionId = 2;
   string autoMlName = 3;
 }
 
-message TestAutoMLResponse {
+message TestAutoMlResponse {
   repeated string predictions = 1;
   float score = 2;
   float predictiontime = 3;
@@ -181,11 +181,11 @@ message UploadDatasetFileResponse {
   int32 returnCode = 1;
 }
 
-message StartAutoMLprocessRequest {
+message StartAutoMlProcessRequest {
   string dataset = 1;
   MachineLearningTask task = 2;
   AutoMLConfigurationTabularData tabularConfig = 3;
-  repeated string requiredAutoMLs = 4;
+  repeated string requiredAutoMls = 4;
   AutoMLRuntimeConstraints runtimeConstraints = 5;
   map<string, string> fileConfiguration = 6;
   TestConfiguration testConfig = 7;
@@ -212,7 +212,7 @@ message AutoMLTarget {
   DataType type = 2;
 }
 
-message StartAutoMLprocessResponse {
+message StartAutoMlProcessResponse {
   ControllerReturnCode result = 1;
   string sessionId = 2;
 }
