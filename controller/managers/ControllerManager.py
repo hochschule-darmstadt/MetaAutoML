@@ -6,6 +6,7 @@ import Controller_pb2
 from AdapterManager import AdapterManager
 from CsvManager import CsvManager
 from RdfManager import RdfManager
+from DataSetAnalysisManager import DataSetAnalysisManager
 
 
 class ControllerManager(object):
@@ -165,6 +166,8 @@ class ControllerManager(object):
         """
         # script_dir = os.path.dirname(os.path.abspath(__file__))
         # file_dest = os.path.join(script_dir, 'datasets')
+        analysisResult = DataSetAnalysisManager.startAnalysis(dataset)
+        DataSetAnalysisManager.persistAnalysisResult(analysisResult)
         response = Controller_pb2.UploadDatasetFileResponse()
         response.returnCode = 0
         filename_dest = os.path.join(os.path.normpath(self.__datasetFolder), dataset.name)

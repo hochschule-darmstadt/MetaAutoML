@@ -3,7 +3,6 @@ import numpy as np
 from typing import Tuple, List
 
 import Controller_pb2
-from DataSetAnalysisManager import DataSetAnalysisManager
 
 FIRST_ROW_AMOUNT = 50
 
@@ -25,9 +24,6 @@ class CsvManager:
         """
         response = Controller_pb2.GetDatasetResponse()
         dataset = pd.read_csv(path)
-
-        analysisResult = DataSetAnalysisManager.startAnalysis(dataset)
-        DataSetAnalysisManager.persistAnalysisResult(analysisResult)
     
         for col in dataset.columns:
             table_column = Controller_pb2.TableColumn()
