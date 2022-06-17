@@ -5,7 +5,9 @@ from persistence.mongo_client import Database
 
 
 class DataStorage:
-    """Centralized Access to File System and Database"""
+    """
+    Centralized Access to File System and Database
+    """
 
 
     def __init__(self, data_storage_dir: str, database = None):
