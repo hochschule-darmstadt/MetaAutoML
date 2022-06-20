@@ -58,24 +58,24 @@ namespace BlazorBoilerplate.Server.Managers
         public async Task<ApiResponse> Start(StartAutoMLRequestDto autoMl)
         {
             StartAutoMLResponseDto response = new StartAutoMLResponseDto();
-            StartAutoMLprocessRequest startAutoMLrequest = new StartAutoMLprocessRequest();
+            StartAutoMlProcessRequest startAutoMLrequest = new StartAutoMlProcessRequest();
             try
             {
                 startAutoMLrequest.Dataset = autoMl.DatasetName;
         
                 foreach (var i in autoMl.RequiredAutoMLs)
                 {
-                    startAutoMLrequest.RequiredAutoMLs.Add(i);
+                    startAutoMLrequest.RequiredAutoMls.Add(i);
                 }
                 startAutoMLrequest.Task = GetMachineLearningTask(autoMl);
                 startAutoMLrequest.TabularConfig = GetTabularDataConfiguration(autoMl);
                 // TODO consider to refactor
-                startAutoMLrequest.RuntimeConstraints = new AutoMLRuntimeConstraints
+                startAutoMLrequest.RuntimeConstraints = new AutoMlRuntimeConstraints
                 {
                     MaxIter = autoMl.RuntimeConstraints.Max_iter,
                     RuntimeLimit = autoMl.RuntimeConstraints.Runtime_limit
                 };
-                var reply = _client.StartAutoMLprocess(startAutoMLrequest);
+                var reply = _client.StartAutoMlProcess(startAutoMLrequest);
                 if (reply.Result == ControllerReturnCode.Success)
                 {
                     response.SessionId = reply.SessionId;
@@ -97,7 +97,7 @@ namespace BlazorBoilerplate.Server.Managers
         public async Task<ApiResponse> TestAutoML(TestAutoMLRequestDto testAutoML)
         {
             TestAutoMLResponseDto response = new TestAutoMLResponseDto();
-            TestAutoMLRequest testAutoMLrequest = new TestAutoMLRequest();
+            TestAutoMlRequest testAutoMLrequest = new TestAutoMlRequest();
             try
             {
                 testAutoMLrequest.TestData = testAutoML.TestData;
@@ -146,13 +146,13 @@ namespace BlazorBoilerplate.Server.Managers
         /// </summary>
         /// <param name="autoMl"></param>
         /// <returns></returns>
-        private AutoMLConfigurationTabularData GetTabularDataConfiguration(StartAutoMLRequestDto autoMl)
+        private AutoMlConfigurationTabularData GetTabularDataConfiguration(StartAutoMLRequestDto autoMl)
         {
             switch (autoMl.DatasetType)
             {
                 case "TABULAR":
-                    AutoMLConfigurationTabularData conf = new AutoMLConfigurationTabularData();
-                    conf.Target = new AutoMLTarget();
+                    AutoMlConfigurationTabularData conf = new AutoMlConfigurationTabularData();
+                    conf.Target = new AutoMlTarget();
                     conf.Target.Target = ((AutoMLTabularDataConfiguration)autoMl.Configuration).Target.Target;
                     conf.Target.Type = ((AutoMLTabularDataConfiguration)autoMl.Configuration).Target.Type;
                     // remove target from features

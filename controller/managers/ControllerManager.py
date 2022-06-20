@@ -2,7 +2,8 @@ import os
 import pandas as pd
 from AutoMLSession import AutoMLSession
 
-import Controller_pb2
+
+from Controller_bgrpc import *
 
 from AdapterManager import AdapterManager
 from CsvManager import CsvManager
@@ -28,7 +29,7 @@ class ControllerManager(object):
         self.__data_storage = data_storage
         return
 
-    def GetAutoMlModel(self, request) -> Controller_pb2.GetAutoMlModelResponse:
+    def GetAutoMlModel(self, request: "GetAutoMlModelRequest") -> "GetAutoMlModelResponse":
         """
         Get the generated model zip for one AutoML 
         ---
@@ -39,7 +40,7 @@ class ControllerManager(object):
         """
         return self.__sessions[request.sessionId].get_automl_model(request)
 
-    def GetCompatibleAUtoMlSolutions(self, request) -> Controller_pb2.GetCompatibleAutoMlSolutionsResponse:
+    def GetCompatibleAUtoMlSolutions(self, request: "GetCompatibleAutoMlSolutionsRequest") -> "GetCompatibleAutoMlSolutionsResponse":
         """
         Get list of comptatible AutoML solutions
         ---
@@ -50,7 +51,7 @@ class ControllerManager(object):
         """
         return self.__rdfManager.GetCompatibleAutoMlSolutions(request)
 
-    def GetDatasets(self):
+    def GetDatasets(self, request: "GetDatasetsRequest") -> "GetDatasetsResponse":
         """
         Get all datasets for a specific task
         ---
@@ -59,7 +60,7 @@ class ControllerManager(object):
         ---
         Return a list of compatible datasets
         """
-        response = Controller_pb2.GetDatasetsResponse()
+        response = GetDatasetsResponse()
 
         # TODO: extend gRPC message with username
         username = "automl_user"
@@ -69,19 +70,18 @@ class ControllerManager(object):
             try:
                 rows, cols = pd.read_csv(dataset["path"]).shape
                 response_dataset = Controller_pb2.Dataset()
-                response_dataset.fileName = dataset["path"]
+                response_dataset.file_name = dataset["path"]
                 response_dataset.type = "TABULAR"
                 response_dataset.rows = rows
                 response_dataset.columns = cols
-                response_dataset.creation_date.seconds = int(dataset["mtime"])
-                response_dataset.creation_date.nanos = int(dataset["mtime"] % 1 * 1e9)
+                response_dataset.creation_date = datetime.fromtimestamp(int(dataset["mtime"]))
                 response.dataset.append(response_dataset)
             except Exception as e:
                 print(f"exception: {e}")
                 
         return response
 
-    def GetDataset(self, request) -> Controller_pb2.GetDatasetResponse:
+    def GetDataset(self, request: "GetDatasetRequest") -> "GetDatasetResponse":
         """
         Get dataset details for a specific dataset
         ---
@@ -105,21 +105,21 @@ class ControllerManager(object):
         dataset = CsvManager.read_dataset(dataset.path)
         return dataset
 
-    def GetSessions(self, request) -> Controller_pb2.GetSessionsResponse:
+    def GetSessions(self, request: "GetSessionsRequest") -> "GetSessionsResponse":
         """
         Get all sessions
         ---
         Return list of all sessions
         """
-        response = Controller_pb2.GetSessionsResponse()
+        response = GetSessionsResponse()
 
         # only return sessions from this runtime
         for id in self.__sessions.keys():
-            response.sessionIds.append(id)
+            response.session_ids.append(id)
 
         return response
 
-    def GetSessionStatus(self, request) -> Controller_pb2.GetSessionStatusResponse:
+    def GetSessionStatus(self, request: "GetSessionStatusRequest") -> "GetSessionStatusResponse":
         """
         Get status of a specific session
         ---
@@ -129,8 +129,19 @@ class ControllerManager(object):
         Return the session status
         """
         return self.__sessions[request.id].get_session_status()
+    
+    def GetSupportedMlLibraries(self, request: "GetSupportedMlLibrariesRequest") -> "GetSupportedMlLibrariesResponse":
+        """
+        Get supported ML libraries for a task
+        ---
+        Parameter
+        1. task identifier
+        ---
+        Return list of ML libraries
+        """
+        return self.__rdfManager.GetSupportedMlLibraries(request)
 
-    def GetTabularDatasetColumnNames(self, request) -> Controller_pb2.GetTabularDatasetColumnNamesResponse:
+    def GetTabularDatasetColumnNames(self, request: "GetTabularDatasetColumnNamesRequest") -> "GetTabularDatasetColumnNamesResponse":
         """
         Get column names for a specific tabular dataset
         ---
@@ -161,7 +172,7 @@ class ControllerManager(object):
         """
         return self.__rdfManager.GetSupportedMlLibraries(request)
 
-    def GetDatasetCompatibleTasks(self, request) -> Controller_pb2.GetDatasetCompatibleTasksResponse:
+    def GetDatasetCompatibleTasks(self, request: "GetDatasetCompatibleTasksRequest") -> "GetDatasetCompatibleTasksResponse":
         """
         Get compatible tasks for a specific dataset
         ---
@@ -172,7 +183,7 @@ class ControllerManager(object):
         """
         return self.__rdfManager.GetDatasetCompatibleTasks(request)
 
-    def UploadNewDataset(self, dataset: 'dict[str, str]') -> Controller_pb2.UploadDatasetFileResponse:
+    def UploadNewDataset(self, dataset: "UploadDatasetFileRequest") -> "UploadDatasetFileResponse":
         """
         Upload a new dataset
         ---
@@ -181,17 +192,16 @@ class ControllerManager(object):
         ---
         Return upload status
         """
-
         # TODO: extend gRPC message with username
         username = "automl_user"
         dataset_id: str = self.__data_storage.save_dataset(username, dataset.name, dataset.content)
         print(f"saved new dataset: {dataset_id}")
         
-        response = Controller_pb2.UploadDatasetFileResponse()
+        response = UploadDatasetFileResponse()
         response.returnCode = 0
         return response
 
-    def StartAutoMLProcess(self, configuration: Controller_pb2.StartAutoMLprocessRequest) -> Controller_pb2.StartAutoMLprocessResponse:
+    def StartAutoMLProcess(self, configuration: "StartAutoMlProcessRequest") -> "StartAutoMlProcessResponse":
         """
         Start a new AutoML process
         ---
@@ -200,7 +210,7 @@ class ControllerManager(object):
         ---
         Return start process status
         """
-        response = Controller_pb2.StartAutoMLprocessResponse()
+        response = StartAutoMlProcessResponse()
 
         # TODO: extend gRPC message with username 
         username = "automl_user"
@@ -265,10 +275,10 @@ class ControllerManager(object):
 
         self.__sessions[sess_id] = newSession
         response.result = 1
-        response.sessionId = newSession.get_id()
+        response.session_id = newSession.get_id()
         return response
 
-    def TestAutoML(self, request) -> Controller_pb2.TestAutoMLResponse:
+    def TestAutoML(self, request: "TestAutoMlResponse") -> "TestAutoMlResponse":
         """
         Start a new AutoML process as Test
         ---
@@ -285,9 +295,9 @@ class ControllerManager(object):
                 test_auto_ml = automl.testSolution(request.testData, request.sessionId)
                 break
         if test_auto_ml:
-            response = Controller_pb2.TestAutoMLResponse(predictions=test_auto_ml.predictions)
+            response = TestAutoMlResponse(predictions=test_auto_ml.predictions)
             response.score = test_auto_ml.score
             response.predictiontime = test_auto_ml.predictiontime
         else:
-            response = Controller_pb2.TestAutoMLResponse()
+            response = TestAutoMlResponse()
         return response

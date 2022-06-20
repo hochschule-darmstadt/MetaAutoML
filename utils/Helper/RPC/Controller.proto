@@ -34,18 +34,18 @@ service ControllerService {
   /*upload a new dataset file as bytes to the controller repository*/
   rpc UploadDatasetFile(UploadDatasetFileRequest) returns (UploadDatasetFileResponse) {}
   /*start a new AutoML run, using the provided configuration*/
-  rpc StartAutoMLprocess(StartAutoMLprocessRequest) returns (StartAutoMLprocessResponse) {}
+  rpc StartAutoMlProcess(StartAutoMlProcessRequest) returns (StartAutoMlProcessResponse) {}
   /*test an existing AutoML*/
-  rpc TestAutoML(TestAutoMLRequest) returns (TestAutoMLResponse) {}
+  rpc TestAutoML(TestAutoMlRequest) returns (TestAutoMlResponse) {}
 }
 
-message TestAutoMLRequest {
+message TestAutoMlRequest {
   string testData = 1;
   string sessionId = 2;
   string autoMlName = 3;
 }
 
-message TestAutoMLResponse {
+message TestAutoMlResponse {
   repeated string predictions = 1;
   float score = 2;
   float predictiontime = 3;
@@ -143,13 +143,13 @@ message GetSessionStatusRequest {
 
 message GetSessionStatusResponse {
   SessionStatus status = 1;
-  repeated AutoMLStatus automls = 2;
+  repeated AutoMlStatus automls = 2;
   string dataset = 3;
   MachineLearningTask task = 4;
-  AutoMLConfigurationTabularData tabularConfig = 5;
+  AutoMlConfigurationTabularData tabularConfig = 5;
   repeated string requiredMlLibraries = 6;
-  repeated string requiredAutoMLs = 7;
-  AutoMLRuntimeConstraints runtimeConstraints = 8;
+  repeated string requiredAutoMls = 7;
+  AutoMlRuntimeConstraints runtimeConstraints = 8;
 }
 
 message GetSupportedMlLibrariesRequest {
@@ -160,7 +160,7 @@ message GetSupportedMlLibrariesResponse {
   repeated string MlLibraries = 1;
 }
 
-message AutoMLStatus {
+message AutoMlStatus {
   string name = 1;
   SessionStatus status = 2;
   repeated string messages = 3;
@@ -181,12 +181,12 @@ message UploadDatasetFileResponse {
   int32 returnCode = 1;
 }
 
-message StartAutoMLprocessRequest {
+message StartAutoMlProcessRequest {
   string dataset = 1;
   MachineLearningTask task = 2;
-  AutoMLConfigurationTabularData tabularConfig = 3;
-  repeated string requiredAutoMLs = 4;
-  AutoMLRuntimeConstraints runtimeConstraints = 5;
+  AutoMlConfigurationTabularData tabularConfig = 3;
+  repeated string requiredAutoMls = 4;
+  AutoMlRuntimeConstraints runtimeConstraints = 5;
   map<string, string> fileConfiguration = 6;
   TestConfiguration testConfig = 7;
   string metric = 8;
@@ -198,21 +198,21 @@ message TestConfiguration {
   int32 random_state = 3;
 }
 
-message AutoMLRuntimeConstraints {
+message AutoMlRuntimeConstraints {
   int32 runtime_limit = 1;
   int32 max_iter = 2;
 }
-message AutoMLConfigurationTabularData {
-  AutoMLTarget target = 1;
+message AutoMlConfigurationTabularData {
+  AutoMlTarget target = 1;
   map<string, DataType> features = 2;
 }
 
-message AutoMLTarget {
+message AutoMlTarget {
   string target = 1;
   DataType type = 2;
 }
 
-message StartAutoMLprocessResponse {
+message StartAutoMlProcessResponse {
   ControllerReturnCode result = 1;
   string sessionId = 2;
 }

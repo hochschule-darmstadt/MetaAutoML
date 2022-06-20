@@ -6,6 +6,7 @@ from MljarManager import MljarManager
 from AutoMLSession import AutoMLSession
 from SklearnManager import SklearnManager
 from AutoPyTorchManager import AutoPyTorchManager
+from Controller_bgrpc import *
 
 
 class AdapterManager(object):
@@ -13,7 +14,7 @@ class AdapterManager(object):
     Implementation of a Structured data manager responsible for executing structured data AutoML sessions
     """
 
-    def start_automl(self, configuration, folder_location, session_id, callback) -> AutoMLSession:
+    def start_automl(self, configuration: "StartAutoMlProcessRequest", folder_location, session_id, callback) -> AutoMLSession:
         """
         Start a new AutoML session
         ---
@@ -24,11 +25,11 @@ class AdapterManager(object):
         ---
         Return a new AutoMLSession object
         """
-        if len(list(configuration.requiredAutoMLs)) == 0:
+        if len(list(configuration.required_auto_mls)) == 0:
             print('No AutoMLs specified in the request. Running all available AutoMLs.')
-            required_automl_names = ('FLAML', 'Auto_Keras', 'Autosklearn', 'AutoGluon', 'AutoCVE', 'Auto_PyTorch', 'MLJAR')
+            required_automl_names = ('FLAML', 'autokeras', 'Autosklearn', 'AutoGluon', 'AutoCVE', 'Auto_PyTorch', 'MLJAR')
         else:
-            required_automl_names = [name for name in configuration.requiredAutoMLs]
+            required_automl_names = [name for name in configuration.required_auto_mls]
 
         required_automls = []
         for automl_name in required_automl_names:
