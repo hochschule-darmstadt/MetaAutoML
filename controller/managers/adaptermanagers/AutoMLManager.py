@@ -88,8 +88,8 @@ class AutoMLManager(ABC, Thread):
         """
         AutoML task for the current run
         """
-        automl_ip = self.__AUTOML_SERVICE_HOST
-        automl_port = self.__AUTOML_SERVICE_PORT
+        automl_ip = os.getenv(self.__AUTOML_SERVICE_HOST)
+        automl_port = os.getenv(self.__AUTOML_SERVICE_PORT)
 
         print(f"connecting to {self.name}: {automl_ip}:{automl_port}")
 
@@ -113,8 +113,8 @@ class AutoMLManager(ABC, Thread):
         ---
         Return a new specific AutoML Manager
         """
-        automl_ip = self.__AUTOML_SERVICE_HOST
-        automl_port = self.__AUTOML_SERVICE_PORT
+        automl_ip = os.getenv(self.__AUTOML_SERVICE_HOST)
+        automl_port = os.getenv(self.__AUTOML_SERVICE_PORT)
 
         print(f"connecting to {self.name}: {automl_ip}:{automl_port}")
 
