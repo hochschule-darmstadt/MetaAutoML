@@ -9,7 +9,6 @@ import grpc
 import Controller_pb2_grpc
 from JsonUtil import get_config_property
 from ControllerManager import ControllerManager
-from persistence.data_storage import DataStorage
 
 
 def _load_credential_from_file(filepath):
@@ -39,10 +38,8 @@ class ControllerServiceServicer(Controller_pb2_grpc.ControllerServiceServicer):
     """includes all gRPC functions available for the client frontend"""
 
     def __init__(self):
-        # init data storage
-        data_storage_dir = os.path.join(ROOT_PATH, get_config_property("datasets-path"))
-        data_storage = DataStorage(data_storage_dir)
-        self._controllerManager = ControllerManager(data_storage)
+        DATASET_FOLDER = os.path.join(ROOT_PATH, get_config_property("datasets-path"))
+        self._controllerManager = ControllerManager(DATASET_FOLDER)
 
     def GetAutoMlModel(self, request, context):
         """ return the generated model as a .zip for one AutoML by its session id."""

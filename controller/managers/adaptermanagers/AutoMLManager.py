@@ -88,8 +88,8 @@ class AutoMLManager(ABC, Thread):
         """
         AutoML task for the current run
         """
-        automl_ip = os.getenv(self.__AUTOML_SERVICE_HOST)
-        automl_port = os.getenv(self.__AUTOML_SERVICE_PORT)
+        automl_ip = self.__AUTOML_SERVICE_HOST
+        automl_port = self.__AUTOML_SERVICE_PORT
 
         print(f"connecting to {self.name}: {automl_ip}:{automl_port}")
 
@@ -113,8 +113,8 @@ class AutoMLManager(ABC, Thread):
         ---
         Return a new specific AutoML Manager
         """
-        automl_ip = os.getenv(self.__AUTOML_SERVICE_HOST)
-        automl_port = os.getenv(self.__AUTOML_SERVICE_PORT)
+        automl_ip = self.__AUTOML_SERVICE_HOST
+        automl_port = self.__AUTOML_SERVICE_PORT
 
         print(f"connecting to {self.name}: {automl_ip}:{automl_port}")
 
@@ -202,17 +202,8 @@ class AutoMLManager(ABC, Thread):
                     if self.__callback is not None:
                         # NOTE: this depends on subclass implementing the field "name"
                         # TODO: implement better automl naming mechanism
-                        model_details = {
-                            "automl_name": self.name,
-                            "session_id": self.__session_id,
-                            "path": os.path.join(self.__result_json["file_location"], self.__result_json["file_name"]),
-                            "test_score": response.testScore,
-                            "validation_score": response.validationScore,
-                            "runtime": response.runtime,
-                            "model": response.model,
-                            "library": response.library
-                        }
-                        self.__callback(self.__session_id, model_details)
+                        automl_name = self.name
+                        self.__callback(self.__session_id, automl_name, self.__result_json)
 
                     return
         except grpc.RpcError as rpc_error:
