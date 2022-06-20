@@ -5,7 +5,7 @@ class AutoKerasManager(AutoMLManager):
     """
     Implementation of the specific AutoMLManager for AutoKeras
     """
-    name = "Auto_Keras"
+    name = "autokeras"
 
     def __init__(self, configuration, folder_location, session_id, callback):
         """

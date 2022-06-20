@@ -43,7 +43,7 @@ class DataSetAnalysisManager:
         ---
         Return None
         """
-        with open('controller\app-data\analysis.json', 'w+') as target:
+        with open('.\\app-data\\analysis.json', 'w+') as target:
             json.dump(jsonfile, target)
             target.close()
 

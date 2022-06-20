@@ -106,7 +106,7 @@ class ControllerManager(object):
         """
         response = GetSessionsResponse()
         for i in self.__sessions:
-            response.sessionIds.append(self.__sessions[i].get_id())
+            response.session_ids.append(self.__sessions[i].get_id())
         return response
 
     def GetSessionStatus(self, request: "GetSessionStatusRequest") -> "GetSessionStatusResponse":
@@ -181,7 +181,7 @@ class ControllerManager(object):
         ---
         Return start process status
         """
-        response = Controller_pb2.StartAutoMLprocessResponse()
+        response = StartAutoMlProcessResponse()
         
         # will be called when any automl is done
         def callback(session_id, automl_name, result):
@@ -192,7 +192,7 @@ class ControllerManager(object):
         self.__sessions[str(self.__sessionCounter)] = newSession
         self.__sessionCounter += 1
         response.result = 1
-        response.sessionId = newSession.get_id()
+        response.session_id = newSession.get_id()
         return response
 
     def TestAutoML(self, request: "TestAutoMlResponse") -> "TestAutoMlResponse":
@@ -212,9 +212,9 @@ class ControllerManager(object):
                 test_auto_ml = automl.testSolution(request.testData, request.sessionId)
                 break
         if test_auto_ml:
-            response = Controller_pb2.TestAutoMLResponse(predictions=test_auto_ml.predictions)
+            response = TestAutoMlResponse(predictions=test_auto_ml.predictions)
             response.score = test_auto_ml.score
             response.predictiontime = test_auto_ml.predictiontime
         else:
-            response = Controller_pb2.TestAutoMLResponse()
+            response = TestAutoMlResponse()
         return response

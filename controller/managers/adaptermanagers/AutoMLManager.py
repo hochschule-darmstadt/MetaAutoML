@@ -1,6 +1,6 @@
 import json
 import os
-
+import grpc
 import zope.interface
 import Adapter_pb2
 import Adapter_pb2_grpc

@@ -179,7 +179,7 @@ class GetSessionStatusResponse(betterproto.Message):
     task: "MachineLearningTask" = betterproto.enum_field(4)
     tabular_config: "AutoMlConfigurationTabularData" = betterproto.message_field(5)
     required_ml_libraries: List[str] = betterproto.string_field(6)
-    required_auto_m_ls: List[str] = betterproto.string_field(7)
+    required_auto_mls: List[str] = betterproto.string_field(7)
     runtime_constraints: "AutoMlRuntimeConstraints" = betterproto.message_field(8)
 
 

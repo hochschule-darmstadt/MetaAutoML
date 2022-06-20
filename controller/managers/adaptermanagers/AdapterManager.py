@@ -27,7 +27,7 @@ class AdapterManager(object):
         """
         if len(list(configuration.required_auto_mls)) == 0:
             print('No AutoMLs specified in the request. Running all available AutoMLs.')
-            required_automl_names = ('FLAML', 'Auto_Keras', 'Autosklearn', 'AutoGluon', 'AutoCVE', 'Auto_PyTorch', 'MLJAR')
+            required_automl_names = ('FLAML', 'autokeras', 'Autosklearn', 'AutoGluon', 'AutoCVE', 'Auto_PyTorch', 'MLJAR')
         else:
             required_automl_names = [name for name in configuration.required_auto_mls]
 
