@@ -69,7 +69,7 @@ class ControllerManager(object):
         for dataset in all_datasets:
             try:
                 rows, cols = pd.read_csv(dataset["path"]).shape
-                response_dataset = Controller_pb2.Dataset()
+                response_dataset = Dataset()
                 response_dataset.file_name = dataset["path"]
                 response_dataset.type = "TABULAR"
                 response_dataset.rows = rows
@@ -159,9 +159,9 @@ class ControllerManager(object):
             return CsvManager.read_column_names(dataset["path"])
         else:
             # no dataset found -> return empty response
-            return Controller_pb2.GetTabularDatasetColumnNamesResponse()
+            return GetTabularDatasetColumnNamesResponse()
     
-    def GetSupportedMlLibraries(self, request) -> Controller_pb2.GetSupportedMlLibrariesResponse:
+    def GetSupportedMlLibraries(self, request) -> GetSupportedMlLibrariesResponse:
         """
         Get supported ML libraries for a task
         ---
@@ -198,7 +198,7 @@ class ControllerManager(object):
         print(f"saved new dataset: {dataset_id}")
         
         response = UploadDatasetFileResponse()
-        response.returnCode = 0
+        response.return_code = 0
         return response
 
     def StartAutoMLProcess(self, configuration: "StartAutoMlProcessRequest") -> "StartAutoMlProcessResponse":

@@ -34,7 +34,7 @@ class DataStorage:
             # assume that we run with docker-compose
             self.__mongo: Database = Database("mongodb://root:example@mongo")
         else:
-            self.__mongo: Database = database
+            self.__mongo: Database = Database(database)
 
         self.__lock = Lock()
 
