@@ -154,6 +154,10 @@ dmypy.json
 # Jetbrains IDEAs
 .idea/
 
+#VSCode ignores
+.devcontainer
+.vscode
+
 #controller ignores
 # ignore all output files, but keep the directories with the .gitkeep file
 controller/app-data/output/*/*
@@ -193,3 +197,5 @@ FLAML/templates/output
 #MLJAR ignores
 #AutoMLs
 MLJAR/AutoML_*
+frontend/src/Server/BlazorBoilerplate.Server/appsettings.json
+controller/app-data/analysis.json

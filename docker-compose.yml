@@ -42,6 +42,18 @@ services:
       - output-autocve:/app/app-data/output/autocve
       - output-pytorch:/app/app-data/output/pytorch
 
+  mongo:
+    image: mongo
+    container_name: mongo
+    ports:
+      - "27017:27017"
+
+    # limit log verbosity
+    command: --quiet --logpath /dev/null 
+
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
 
 #     adapters do not need to be available from the host machine -> no port mappings
 
