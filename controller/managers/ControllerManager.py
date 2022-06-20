@@ -7,7 +7,7 @@ import Controller_pb2
 from AdapterManager import AdapterManager
 from CsvManager import CsvManager
 from RdfManager import RdfManager
-from persistence import DataStorage
+from persistence.data_storage import DataStorage
 
 class ControllerManager(object):
     """

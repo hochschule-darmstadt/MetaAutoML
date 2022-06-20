@@ -17,7 +17,7 @@ except ValueError:
 
 
 import unittest
-from persistence import DataStorage
+from persistence.data_storage import DataStorage
 from persistence.mongo_client import Database
 import threading 
 

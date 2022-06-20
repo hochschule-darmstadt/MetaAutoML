@@ -9,7 +9,7 @@ import grpc
 import Controller_pb2_grpc
 from JsonUtil import get_config_property
 from ControllerManager import ControllerManager
-from persistence import DataStorage
+from persistence.data_storage import DataStorage
 
 
 def _load_credential_from_file(filepath):
