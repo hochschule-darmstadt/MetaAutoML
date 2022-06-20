@@ -9,6 +9,7 @@ import asyncio
 
 from JsonUtil import get_config_property
 from ControllerManager import ControllerManager
+from persistence.data_storage import DataStorage
 
 
 def _load_credential_from_file(filepath):
@@ -35,8 +36,10 @@ class ControllerService(ControllerServiceBase):
     """includes all gRPC functions available for the client frontend"""
 
     def __init__(self):
-        DATASET_FOLDER = os.path.join(ROOT_PATH, get_config_property("datasets-path"))
-        self._controllerManager = ControllerManager(DATASET_FOLDER)
+        # init data storage
+        data_storage_dir = os.path.join(ROOT_PATH, get_config_property("datasets-path"))
+        data_storage = DataStorage(data_storage_dir)
+        self._controllerManager = ControllerManager(data_storage)
 
     async def get_auto_ml_model(
         self, get_auto_ml_model_request: "GetAutoMlModelRequest"

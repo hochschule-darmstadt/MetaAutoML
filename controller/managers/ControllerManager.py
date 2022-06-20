@@ -1,5 +1,6 @@
 import os
 import pandas as pd
+from AutoMLSession import AutoMLSession
 
 
 from Controller_bgrpc import *
@@ -7,14 +8,14 @@ from Controller_bgrpc import *
 from AdapterManager import AdapterManager
 from CsvManager import CsvManager
 from RdfManager import RdfManager
-
+from persistence.data_storage import DataStorage
 
 class ControllerManager(object):
     """
     Implementation of the controller functionality
     """
 
-    def __init__(self, datasetFolder):
+    def __init__(self, data_storage: DataStorage):
         """
         Controller Manager init function
         ---
@@ -24,12 +25,8 @@ class ControllerManager(object):
         """
         self.__rdfManager = RdfManager()
         self.__adapterManager = AdapterManager()
-        self.__sessions = {}
-        self.__sessionCounter = 1
-        self.__datasetFolder = datasetFolder
-        # ensure dataset folder exists
-        if not os.path.exists(self.__datasetFolder):
-            os.makedirs(self.__datasetFolder)
+        self.__sessions: dict[str, AutoMLSession] = {}
+        self.__data_storage = data_storage
         return
 
     def GetAutoMlModel(self, request: "GetAutoMlModelRequest") -> "GetAutoMlModelResponse":
@@ -63,23 +60,26 @@ class ControllerManager(object):
         ---
         Return a list of compatible datasets
         """
-        datasets = GetDatasetsResponse()
-        # TODO: ADD DATASET MANAGEMENT OVER DATABASE
-        with os.scandir(self.__datasetFolder) as dirs:
-            for entry in dirs:
-                try:
-                    rows, cols = pd.read_csv(os.path.join(self.__datasetFolder, entry.name)).shape
-                    dataset = Dataset()
-                    dataset.file_name = entry.name
-                    dataset.type = "TABULAR"
-                    dataset.columns = cols
-                    dataset.rows = rows
-                    mtime = os.path.getmtime(os.path.join(self.__datasetFolder, entry.name))
-                    dataset.creation_date = datetime.fromtimestamp(mtime)
-                    datasets.dataset.append(dataset)
-                except Exception as e:
-                    print(e)
-        return datasets
+        response = GetDatasetsResponse()
+
+        # TODO: extend gRPC message with username
+        username = "automl_user"
+        all_datasets: list[dict[str, object]] = self.__data_storage.get_datasets(username)
+        
+        for dataset in all_datasets:
+            try:
+                rows, cols = pd.read_csv(dataset["path"]).shape
+                response_dataset = Controller_pb2.Dataset()
+                response_dataset.file_name = dataset["path"]
+                response_dataset.type = "TABULAR"
+                response_dataset.rows = rows
+                response_dataset.columns = cols
+                response_dataset.creation_date = datetime.fromtimestamp(int(dataset["mtime"]))
+                response.dataset.append(response_dataset)
+            except Exception as e:
+                print(f"exception: {e}")
+                
+        return response
 
     def GetDataset(self, request: "GetDatasetRequest") -> "GetDatasetResponse":
         """
@@ -95,7 +95,14 @@ class ControllerManager(object):
         firstEntries: the first couple of rows of the dataset
         """
         # TODO WHEN USER MANAGEMENT IS ADDED; CORRECT FILTERING
-        dataset = CsvManager.read_dataset(os.path.join(self.__datasetFolder, request.name))
+        # TODO: extend gRPC message with username
+        username = "automl_user"
+        # TODO: change gRPC message to dataset id instead of name
+        found, dataset = self.__data_storage.find_dataset(username, request.name)
+        if not found:
+            raise Exception(f"cannot find dataset with name: {request.dataset}")
+
+        dataset = CsvManager.read_dataset(dataset.path)
         return dataset
 
     def GetSessions(self, request: "GetSessionsRequest") -> "GetSessionsResponse":
@@ -105,8 +112,11 @@ class ControllerManager(object):
         Return list of all sessions
         """
         response = GetSessionsResponse()
-        for i in self.__sessions:
-            response.session_ids.append(self.__sessions[i].get_id())
+
+        # only return sessions from this runtime
+        for id in self.__sessions.keys():
+            response.session_ids.append(id)
+
         return response
 
     def GetSessionStatus(self, request: "GetSessionStatusRequest") -> "GetSessionStatusResponse":
@@ -140,8 +150,27 @@ class ControllerManager(object):
         ---
         Return list of column names
         """
-        columnNames = CsvManager.read_column_names(os.path.join(self.__datasetFolder, request.datasetName))
-        return columnNames
+
+        # TODO: extend gRPC message with username
+        username = "automl_user"
+        # TODO: change gRPC message to dataset id instead of name
+        found, dataset = self.__data_storage.find_dataset(username, request.datasetName)
+        if found: 
+            return CsvManager.read_column_names(dataset["path"])
+        else:
+            # no dataset found -> return empty response
+            return Controller_pb2.GetTabularDatasetColumnNamesResponse()
+    
+    def GetSupportedMlLibraries(self, request) -> Controller_pb2.GetSupportedMlLibrariesResponse:
+        """
+        Get supported ML libraries for a task
+        ---
+        Parameter
+        1. task identifier
+        ---
+        Return list of ML libraries
+        """
+        return self.__rdfManager.GetSupportedMlLibraries(request)
 
     def GetDatasetCompatibleTasks(self, request: "GetDatasetCompatibleTasksRequest") -> "GetDatasetCompatibleTasksResponse":
         """
@@ -163,13 +192,13 @@ class ControllerManager(object):
         ---
         Return upload status
         """
-        # script_dir = os.path.dirname(os.path.abspath(__file__))
-        # file_dest = os.path.join(script_dir, 'datasets')
+        # TODO: extend gRPC message with username
+        username = "automl_user"
+        dataset_id: str = self.__data_storage.save_dataset(username, dataset.name, dataset.content)
+        print(f"saved new dataset: {dataset_id}")
+        
         response = UploadDatasetFileResponse()
         response.returnCode = 0
-        filename_dest = os.path.join(os.path.normpath(self.__datasetFolder), dataset.name)
-        save_file = open(filename_dest, 'wb')
-        save_file.write(dataset.content)
         return response
 
     def StartAutoMLProcess(self, configuration: "StartAutoMlProcessRequest") -> "StartAutoMlProcessResponse":
@@ -182,15 +211,69 @@ class ControllerManager(object):
         Return start process status
         """
         response = StartAutoMlProcessResponse()
-        
-        # will be called when any automl is done
-        def callback(session_id, automl_name, result):
-            print(f"automl is done: {automl_name}, session: {session_id}, result: {result}")
 
-        newSession = self.__adapterManager.start_automl(configuration, self.__datasetFolder,
-                                                               self.__sessionCounter, callback)
-        self.__sessions[str(self.__sessionCounter)] = newSession
-        self.__sessionCounter += 1
+        # TODO: extend gRPC message with username 
+        username = "automl_user"
+        # find requested dataset 
+        # TODO: change gRPC message to dataset id instead of name
+        found, dataset = self.__data_storage.find_dataset(username, configuration.dataset)
+        if not found:
+            raise Exception(f"cannot find dataset with name: {configuration.dataset}")
+        
+        # TODO: rework file access in AutoMLSession
+        #       we do not want to make datastore paths public
+        dataset_folder = os.path.dirname(dataset["path"])
+        dataset_filename = os.path.basename(dataset["path"])
+
+        # overwrite dataset name for further processing
+        #   frontend sends dataset name ("titanic_train_1.csv"), 
+        #   but datasets on disk are saved as dataset_id ("629e323a9290ff0cf5a5d4a9")
+        configuration.dataset = dataset_filename
+        
+        # restructure configuration into python dictionaries
+        config = {
+            "dataset": dataset_filename,
+            "task": configuration.task,
+            "tabular_config": {
+                "target": {
+                    "target": configuration.tabularConfig.target.target,
+                    "type": configuration.tabularConfig.target.type,
+                },
+                "features": dict(configuration.tabularConfig.features)
+            },
+            "file_configuration": dict(configuration.fileConfiguration),
+            "metric": configuration.metric,
+            "status": "running",
+            "models": [],
+            "runtime_constraints": {
+                "runtime_limit": configuration.runtimeConstraints.runtime_limit,
+                "max_iter": configuration.runtimeConstraints.max_iter
+            },
+            "required_automls": list(configuration.requiredAutoMLs),
+        }
+        sess_id = self.__data_storage.insert_session(username, config)
+        print(f"inserted new session: {sess_id}")
+
+        # will be called when any automl is done
+        # NOTE: will run in parallel
+        def callback(session_id, model: 'dict[str, object]'):
+            _mdl_id = self.__data_storage.insert_model(username, model)
+            print(f"inserted new model: {_mdl_id}")
+
+            # lock data storage to prevent race condition between get and update
+            with self.__data_storage.lock():
+                # append new model to session
+                _sess = self.__data_storage.get_session(username, session_id)
+                self.__data_storage.update_session(username, session_id, {
+                    "models": _sess["models"] + [_mdl_id],
+                    "status": "completed"
+                })
+
+
+        newSession: AutoMLSession = self.__adapterManager.start_automl(configuration, dataset_folder,
+                                                               sess_id, callback)
+
+        self.__sessions[sess_id] = newSession
         response.result = 1
         response.session_id = newSession.get_id()
         return response
