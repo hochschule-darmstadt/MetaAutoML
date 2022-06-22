@@ -40,3 +40,17 @@ ONTOLOGY_QUERY_GET_SUPPORTED_MACHINE_LEARNING_LIBRARY = """
                         skos:prefLabel ?library .
             }
             """
+            
+#Retreive all dataset types          
+ONTOLOGY_QUERY_GET_DATASET_TYPES = """
+            PREFIX : <http://h-da.de/ml-ontology/> 
+            PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
+            PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> 
+            PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+            PREFIX skos: <http://www.w3.org/2004/02/skos/core#> 
+            SELECT ?t 
+            WHERE {
+                    ?t a :Enum;
+                :category :dataset_type .
+            } 
+            """
