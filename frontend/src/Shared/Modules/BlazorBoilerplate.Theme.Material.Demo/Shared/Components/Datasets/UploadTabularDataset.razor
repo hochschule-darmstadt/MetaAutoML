@@ -8,6 +8,13 @@
 <MatDialog @bind-IsOpen="IsOpen">
     <MatDialogTitle>Add Dataset</MatDialogTitle>
     <MatDialogContent>
+        <MatSelect Label="Pick a Dataset Type" @bind-Value="value1">
+            <MatOptionString Value="tabular">Tabular</MatOptionString>
+            <MatOptionString Value="text">Text</MatOptionString>
+            <MatOptionString Value="images">Images</MatOptionString>
+        </MatSelect>
+        <span>@value1</span>
+
         <MatTextField @bind-Value="@FileName" Label="Dataset Name" Disabled="true"></MatTextField>
 
         <MatFileUpload OnChange="@FilesReady" Label="Choose File"></MatFileUpload>
@@ -20,6 +27,8 @@
 </MatDialog>
 
 @code {
+    string value1;
+
     [Parameter]
     public bool IsOpen { get; set; }
 
