@@ -25,7 +25,7 @@ class DataSetAnalysisManager:
             "na_columns": DataSetAnalysisManager.__missing_values_columns(dataset),
             "high_na_rows": DataSetAnalysisManager.__missing_values_rows(dataset),
             "outlier": DataSetAnalysisManager.__detect_outliers(dataset),
-            #"duplicate_columns": DataSetAnalysisManager.__detect_duplicate_columns(dataset),
+            "duplicate_columns": DataSetAnalysisManager.__detect_duplicate_columns(dataset),
             #"duplicate_rows": DataSetAnalysisManager.__detect_duplicate_rows(dataset),
         }
 
@@ -91,7 +91,7 @@ class DataSetAnalysisManager:
         return na_counts
 
     @staticmethod
-    def __missing_values_rows(dataset: pd.DataFrame) -> list(int):
+    def __missing_values_rows(dataset: pd.DataFrame) -> 'list[int]':
         """
         Counts missing values of each row and adds the indices of rows with a lot of missing values to a list
         ---
@@ -113,7 +113,7 @@ class DataSetAnalysisManager:
         return missing_rows_indices
 
     @staticmethod
-    def __detect_outliers(dataset: pd.DataFrame) -> list(dict):
+    def __detect_outliers(dataset: pd.DataFrame) -> 'list[dict]':
         """
         Detects outliers in all columns in a dataset containing floats
         ---
@@ -150,3 +150,42 @@ class DataSetAnalysisManager:
             outlier_columns.append({column_name: outlier_indices})
         
         return outlier_columns
+
+    @staticmethod
+    def __detect_duplicate_columns(dataset: pd.DataFrame) -> 'list[tuple]':
+        """
+        Detects duplicate columns in a dataset and adds that information to a JSON file
+        ---
+        Parameter
+        1. dataset to be analyzed
+        ---
+        Return the JSON file with additional data
+        """
+
+        duplicate_column_list = []
+
+        for x in range(dataset.shape[1]):
+            col = dataset.iloc[:, x]
+            
+            for y in range(x + 1, dataset.shape[1]):
+
+                other_col = dataset.iloc[:, y]
+                
+                if col.equals(other_col):
+                    duplicate_column_pair = (x,y)
+                    duplicate_column_list.append(duplicate_column_pair)
+
+        return duplicate_column_list
+
+    @staticmethod
+    def __detect_duplicate_rows(dataset: pd.DataFrame) -> int:
+        """
+        Detects duplicate rows in a dataset and adds that information to a JSON file
+        ---
+        Parameter
+        1. dataset to be analyzed
+        ---
+        Return the JSON file with additional data
+        """
+        
+        return 0
