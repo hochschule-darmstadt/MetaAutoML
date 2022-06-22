@@ -1,0 +1,14 @@
+{
+    "python.analysis.extraPaths": [
+        "./managers",
+        "./interfaces",
+        "./managers/adaptermanagers",
+        "./managers/ontology",
+        "./sessions",
+        "./utils",
+        "../adapters/GRPC/Controller",
+        "../adapters/Utils/Utils",
+        "../adapters/GRPC/Adapter"
+
+    ]
+}
