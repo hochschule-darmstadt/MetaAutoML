@@ -33,6 +33,8 @@ namespace BlazorBoilerplate.Shared.Interfaces
         Task<ApiResponseDto> GetModel(GetAutoMlModelRequestDto automl);
         Task<ApiResponseDto> GetDatasets();
         Task<ApiResponseDto> GetDataset(GetDatasetRequestDto name);
+        Task<ApiResponseDto> GetDatasetTypes();
+        Task<ApiResponseDto> GetDatasetType(GetDatasetTypeRequestDto dataset_type);
       
         Task<ApiResponseDto> GetTabularDatasetColumnNames(GetTabularDatasetColumnNamesRequestDto dataset);
         Task<ApiResponseDto> StartAutoML(StartAutoMLRequestDto automl);
