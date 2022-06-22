@@ -1,4 +1,5 @@
 
+from xmlrpc.client import boolean
 from pymongo import MongoClient
 from pymongo.collection import Collection
 from bson.objectid import ObjectId
@@ -47,7 +48,19 @@ class Database:
         except:
             raise Exception("cannot find MongoDB!\n    Did you forget to launch it with `docker-compose up --build mongo`?")
         
-
+    def CheckIfUserExists(self, username: str) -> bool:
+        """
+        Check if user exists by checking if his database exists
+        ---
+        Parameter
+        1. username: name of the user
+        ---
+        Returns database existance status, TRUE == EXITS
+        """
+        if username in self.__mongo.list_databases() == True:
+            return True
+        else:
+            return False
 
     def insert_dataset(self, username: str, dataset: 'dict[str, str]') -> str:
         """

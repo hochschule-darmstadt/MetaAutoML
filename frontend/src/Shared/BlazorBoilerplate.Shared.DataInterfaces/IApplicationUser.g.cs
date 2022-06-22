@@ -28,6 +28,8 @@ namespace BlazorBoilerplate.Shared.DataInterfaces
 
         ICollection<IMessage> Messages { get; }
 
+        String OmaMlId { get; set; }
+
         Guid Id { get; set; }
 
         String UserName { get; set; }

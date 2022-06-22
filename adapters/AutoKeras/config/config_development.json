@@ -1,0 +1,11 @@
+{
+  "adapter-name": "autokeras",
+  "job-file-name": "keras-job.json",
+  "env-varname-cluster": "RUNTIME",
+  "grpc-server-address": "127.0.0.1",     
+  "export-zip-file-name": "keras-export",
+  "output-path": "app-data/output",
+  "job-file-path": "app-data/jobs",
+  "templates-path": "app-data/templates",
+  "predict-time-sources-path": "../Utils/AutoMLs/predict_time_sources.py"
+}

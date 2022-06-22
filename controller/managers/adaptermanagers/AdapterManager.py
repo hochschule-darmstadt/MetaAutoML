@@ -27,12 +27,12 @@ class AdapterManager(object):
             "autosklearn":  ["SKLEARN_SERVICE_HOST",   "SKLEARN_SERVICE_PORT"],
             "autogluon":    ["AUTOGLUON_SERVICE_HOST", "AUTOGLUON_SERVICE_PORT"],
             "autocve":      ["AUTOCVE_SERVICE_HOST",   "AUTOCVE_SERVICE_PORT"],
-            "auto_pytorch": ["PYTORCH_SERVICE_HOST",   "PYTORCH_SERVICE_PORT"],
+            "autopytorch": ["PYTORCH_SERVICE_HOST",   "PYTORCH_SERVICE_PORT"],
             "mljar":        ["MLJAR_SERVICE_HOST",     "MLJAR_SERVICE_PORT"],
         }
 
-        automl_names: list[str] = configuration.requiredAutoMLs
-        if not configuration.requiredAutoMLs:
+        automl_names: list[str] = configuration.required_auto_mls
+        if not configuration.required_auto_mls:
             print('No AutoMLs specified in the request. Running all available AutoMLs.')
             automl_names = list(automl_addresses.keys())
 

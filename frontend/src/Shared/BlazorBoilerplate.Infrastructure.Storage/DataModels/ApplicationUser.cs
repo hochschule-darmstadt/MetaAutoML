@@ -33,6 +33,9 @@ namespace BlazorBoilerplate.Infrastructure.Storage.DataModels
 
         public UserProfile Profile { get; set; }
 
-        public virtual ICollection<Message> Messages { get; set; }        
+        public virtual ICollection<Message> Messages { get; set; }
+
+        [JsonIgnore]
+        public string OmaMlId { get; set; }
     }
 }

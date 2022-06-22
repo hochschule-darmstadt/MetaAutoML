@@ -4,6 +4,8 @@ from Controller_bgrpc import *
 
 from DataSetAnalysisManager import DataSetAnalysisManager
 
+import os
+
 FIRST_ROW_AMOUNT = 50
 
 
@@ -111,3 +113,10 @@ class CsvManager:
         for col in dataset.columns:
             response.columnNames.append(col)
         return response
+
+    @staticmethod
+    def ReadDefaultDatasetAsBytes():
+        file = open(os.path.join( os.path.dirname( __file__ ), "../app-data/datasets/titanic_train.csv"))
+        data = file.read().encode()
+        file.close()
+        return data

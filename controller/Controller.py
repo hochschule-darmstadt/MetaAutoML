@@ -44,6 +44,13 @@ class ControllerService(ControllerServiceBase):
             data_storage = DataStorage(data_storage_dir)
         self._controllerManager = ControllerManager(data_storage)
 
+    async def create_new_user(
+        self, create_new_user_request: "CreateNewUserRequest"
+    ) -> "CreateNewUserResponse":
+        """ Return a new OMA-ML user id. """
+        response = self._controllerManager.CreateNewUser(create_new_user_request)
+        return response
+
     async def get_auto_ml_model(
         self, get_auto_ml_model_request: "GetAutoMlModelRequest"
     ) -> "GetAutoMlModelResponse":
