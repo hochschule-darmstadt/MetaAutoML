@@ -20,10 +20,10 @@ adapters/AutoKeras/structured_data_classifier
 *.pyproj
 
 #VS Code
-adapters/*/.vscode/
+#adapters/*/.vscode/
 adapters/*/.venv/
 controller/.venv/
-controller/.vscode/
+#controller/.vscode/
 *.log
 adapters/*/AutoMLs/predict_time_sources.py
 adapters/MLJAR/AutoML_*
