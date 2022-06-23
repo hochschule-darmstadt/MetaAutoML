@@ -2,7 +2,7 @@ import logging, time
 from durable.lang import post
 from durable.engine import MessageNotHandledException, MessageObservedException
 from threading import Thread
-from Blackboard import Blackboard
+from .Blackboard import Blackboard
 
 class StrategyController(object):
     """

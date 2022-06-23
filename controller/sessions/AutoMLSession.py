@@ -5,7 +5,9 @@ import pandas as pd
 import Controller_pb2
 from JsonUtil import get_config_property
 from IAutoMLManager import IAutoMLManager
-
+from blackboard.Blackboard import Blackboard
+from blackboard.Controller import StrategyController
+from blackboard.agents.AutoMLRunAgent import AutoMLRunAgent
 
 class AutoMLSession(object):
     """
@@ -24,6 +26,10 @@ class AutoMLSession(object):
         self.__configuration = configuration
         self.automls = []
 
+        self.blackboard = Blackboard()
+        self.controller = StrategyController(self.blackboard)
+        self.controller.StartLoop()
+
     def add_automl_to_session(self, automl: IAutoMLManager):
         """
         Add an AutoML to the current session
@@ -32,6 +38,7 @@ class AutoMLSession(object):
         1. automl the automl object implementing the IAutoMLManager
         """
         self.automls.append(automl)
+        automl_run_agent = AutoMLRunAgent(blackboard=self.blackboard, manager=automl)
 
     def get_id(self) -> str:
         """

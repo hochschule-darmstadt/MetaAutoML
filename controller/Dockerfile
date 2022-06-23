@@ -2,6 +2,8 @@ FROM python:3.7.11-slim-buster AS base
 WORKDIR /
 EXPOSE 5001
 
+RUN apt-get update && apt-get install gcc -y
+
 COPY ./controller/requirements.txt .
 # Install dependencies
 RUN pip install -r requirements.txt
