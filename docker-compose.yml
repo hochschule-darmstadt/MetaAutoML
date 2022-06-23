@@ -31,6 +31,7 @@ services:
       - AUTOCVE_SERVICE_PORT=50058
       - PYTORCH_SERVICE_HOST=pytorch
       - PYTORCH_SERVICE_PORT=50059
+      - MONGO_DB_DEBUG=NO
     volumes:
       - datasets:/app/app-data/datasets
       - output:/app/app-data/output

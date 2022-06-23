@@ -5,6 +5,22 @@ import "Enumerations.proto";
 import "Common.proto";
 import "google/protobuf/timestamp.proto";
 
+message GetDatasetTypesRequest {
+  string typeNames = 1;
+}
+
+message GetDatasetTypesResponse {
+  repeated DatasetTypes datasetTypes = 1;
+}
+
+message GetDatasetTypeRequest {
+  string typeName = 1;
+}
+
+message GetDatasetTypeResponse {
+  repeated DatasetType datasetType = 1;
+}
+
 message GetDatasetsRequest {
     string username = 1;
     DatasetType type = 2;
