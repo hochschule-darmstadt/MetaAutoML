@@ -1,0 +1,16 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\frontend",
+    "\\frontend\\src",
+    "\\frontend\\src\\Shared",
+    "\\frontend\\src\\Shared\\Modules",
+    "\\frontend\\src\\Shared\\Modules\\BlazorBoilerplate.Theme.Material.Demo",
+    "\\frontend\\src\\Shared\\Modules\\BlazorBoilerplate.Theme.Material.Demo\\Pages",
+    "\\frontend\\src\\Shared\\Modules\\BlazorBoilerplate.Theme.Material.Demo\\Shared",
+    "\\frontend\\src\\Shared\\Modules\\BlazorBoilerplate.Theme.Material.Demo\\Shared\\Components",
+    "\\frontend\\src\\Shared\\Modules\\BlazorBoilerplate.Theme.Material.Demo\\Shared\\Components\\Datasets"
+  ],
+  "SelectedNode": "\\frontend\\src\\Shared\\Modules\\BlazorBoilerplate.Theme.Material.Demo\\Shared\\Components\\Datasets\\UploadTabularDataset.razor",
+  "PreviewInSolutionExplorer": false
+}

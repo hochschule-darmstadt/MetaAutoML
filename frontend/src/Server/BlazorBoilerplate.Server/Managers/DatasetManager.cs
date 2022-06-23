@@ -39,7 +39,7 @@ namespace BlazorBoilerplate.Server.Managers
         public async Task<ApiResponse> GetDatasetTypes()
         {
             GetDatasetTypesResponseDto response = new GetDatasetTypesResponseDto();
-            GetDatasetTypesRequest getDatasetTypesRequest = new GetDatasetTypesRequest();
+            GetDatasetTypeRequestDto getDatasetTypesRequest = new GetDatasetTypeRequestDto();
             try 
             {
                 var reply = _client.GetDatasetTypes();
@@ -59,7 +59,7 @@ namespace BlazorBoilerplate.Server.Managers
         /// <returns></returns>
         public async Task<ApiResponse> GetDatasetType(GetDatasetTypeRequestDto dataset_type)    // probably worth renaming
         {
-            GetDatasetTypeRequest request = new GetDatasetTypeRequest();
+            GetDatasetTypeRequestDto request = new GetDatasetTypeRequestDto();
             request.TypeName = dataset_type.TypeName;
             try
             {
