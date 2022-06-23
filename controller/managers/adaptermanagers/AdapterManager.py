@@ -6,6 +6,7 @@ from MljarManager import MljarManager
 from AutoMLSession import AutoMLSession
 from SklearnManager import SklearnManager
 from AutoPyTorchManager import AutoPyTorchManager
+from AlphaD3MManager import AlphaD3MManager
 
 
 class AdapterManager(object):
@@ -26,7 +27,7 @@ class AdapterManager(object):
         """
         if len(list(configuration.requiredAutoMLs)) == 0:
             print('No AutoMLs specified in the request. Running all available AutoMLs.')
-            required_automl_names = ('FLAML', 'Auto_Keras', 'Autosklearn', 'AutoGluon', 'AutoCVE', 'Auto_PyTorch', 'MLJAR')
+            required_automl_names = ('AlphaD3M', 'FLAML', 'Auto_Keras', 'Autosklearn', 'AutoGluon', 'AutoCVE', 'Auto_PyTorch', 'MLJAR')
         else:
             required_automl_names = [name for name in configuration.requiredAutoMLs]
 
@@ -34,6 +35,8 @@ class AdapterManager(object):
         for automl_name in required_automl_names:
             if automl_name == AutoKerasManager.name:
                 required_automls.append(AutoKerasManager(configuration, folder_location, session_id, callback))
+            elif automl_name == AlphaD3MManager.name:
+                required_automls.append(AlphaD3MManager(configuration, folder_location, session_id, callback))
             elif automl_name == FLAMLManager.name:
                 required_automls.append(FLAMLManager(configuration, folder_location, session_id, callback))
             elif automl_name == SklearnManager.name:

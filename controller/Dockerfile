@@ -4,6 +4,8 @@ EXPOSE 5001
 
 COPY ./controller/requirements.txt .
 # Install dependencies
+RUN apt update
+RUN apt install -y git
 RUN pip install -r requirements.txt
 # put all files in a directory called app
 WORKDIR /app
