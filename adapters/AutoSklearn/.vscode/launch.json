@@ -1,0 +1,22 @@
+{
+    // Verwendet IntelliSense zum Ermitteln möglicher Attribute.
+    // Zeigen Sie auf vorhandene Attribute, um die zugehörigen Beschreibungen anzuzeigen.
+    // Weitere Informationen finden Sie unter https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "AutoSklearn Adapter",
+            "type": "python",
+            "request": "launch",
+            "program": "AutoSklearnServer.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "env": {
+                "PYTHONPATH": "AutoMLs;Utils;../Utils/Utils;../Utils/AutoMLs;../GRPC/Adapter;",
+                "GRPC_SERVER_PORT": "50055",
+                "PYTHON_ENV": ".venv/Scripts/python",
+                "USE_DEV_CONFIG": "YES"
+            },
+        }
+    ]
+}

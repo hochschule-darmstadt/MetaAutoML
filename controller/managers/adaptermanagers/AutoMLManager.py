@@ -87,12 +87,10 @@ class AutoMLManager(ABC, Thread):
         """
         AutoML task for the current run
         """
-        automl_ip = os.getenv(self.__AUTOML_SERVICE_HOST)
-        automl_port = os.getenv(self.__AUTOML_SERVICE_PORT)
 
-        print(f"connecting to {self.name}: {automl_ip}:{automl_port}")
+        print(f"connecting to {self.name}: {self.__AUTOML_SERVICE_HOST}:{self.__AUTOML_SERVICE_PORT}")
 
-        with grpc.insecure_channel(f"{automl_ip}:{automl_port}") as channel:  # Connect to Adapter
+        with grpc.insecure_channel(f"{self.__AUTOML_SERVICE_HOST}:{self.__AUTOML_SERVICE_PORT}") as channel:  # Connect to Adapter
             stub = Adapter_pb2_grpc.AdapterServiceStub(channel)  # Create Interface Stub
 
             request = Adapter_pb2.StartAutoMLRequest()  # Request Object
@@ -112,12 +110,10 @@ class AutoMLManager(ABC, Thread):
         ---
         Return a new specific AutoML Manager
         """
-        automl_ip = os.getenv(self.__AUTOML_SERVICE_HOST)
-        automl_port = os.getenv(self.__AUTOML_SERVICE_PORT)
 
-        print(f"connecting to {self.name}: {automl_ip}:{automl_port}")
+        print(f"connecting to {self.name}: {self.__AUTOML_SERVICE_HOST}:{self.__AUTOML_SERVICE_PORT}")
 
-        with grpc.insecure_channel(f"{automl_ip}:{automl_port}") as channel:  # Connect to Adapter
+        with grpc.insecure_channel(f"{self.__AUTOML_SERVICE_HOST}:{self.__AUTOML_SERVICE_PORT}") as channel:  # Connect to Adapter
             stub = Adapter_pb2_grpc.AdapterServiceStub(channel)  # Create Interface Stub
 
             request = Adapter_pb2.TestAdapterRequest()  # Request Object

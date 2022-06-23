@@ -1,0 +1,14 @@
+syntax = "proto3";
+option csharp_namespace = "BlazorBoilerplate.Server";
+
+import "Enumerations.proto";
+import "Common.proto";
+
+message CreateNewUserRequest {
+
+}
+
+message CreateNewUserResponse {
+    ResultCode Result = 1;
+    string OmaMlUserId = 2;
+}

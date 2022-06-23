@@ -170,7 +170,7 @@
         try
         {
             _tasks = new GetDatasetCompatibleTasksResponseDto();
-            GetDatasetCompatibleTasksRequestDto taskRequest = new GetDatasetCompatibleTasksRequestDto { DatasetName = WizardState.automlRequest.DatasetName };
+            GetDatasetCompatibleTasksRequestDto taskRequest = new GetDatasetCompatibleTasksRequestDto { DatasetName = WizardState.automlRequest.DatasetIdentifier };
             ApiResponseDto apiResponse = await apiClient.GetDatasetCompatibleTasks(taskRequest);
 
             if (apiResponse.IsSuccessStatusCode)

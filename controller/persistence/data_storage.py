@@ -2,7 +2,7 @@ from threading import Lock
 import os
 import os.path
 from persistence.mongo_client import Database
-
+from bson.objectid import ObjectId
 
 class DataStorage:
     """
@@ -52,6 +52,18 @@ class DataStorage:
         """
         return DataStorage.__DbLock(self.__lock)
 
+    def CheckIfUserExists(self, username: bool):
+        """
+        Check if user exists by checking if his database exists
+        ---
+        >>> id: str = ds.CheckIfUserExists("automl_user")
+        ---
+        Parameter
+        1. username: name of the user
+        ---
+        Returns database existance status, TRUE == EXITS
+        """
+        return self.__mongo.CheckIfUserExists(username)
 
     def insert_session(self, username: str, session: 'dict[str, object]') -> str:
         """
@@ -163,7 +175,7 @@ class DataStorage:
         return dataset_id
 
 
-    def find_dataset(self, username: str, name: str) -> 'tuple[bool, dict[str, object]]':
+    def find_dataset(self, username: str, identifier: str) -> 'tuple[bool, dict[str, object]]':
         """
         Try to find the _first_ dataset with this name. 
         ---
@@ -179,7 +191,7 @@ class DataStorage:
         Returns either `(True, Dataset)` or `(False, None)`.
         """
         result = self.__mongo.find_dataset(username, {
-            "name": name
+            "_id": ObjectId(identifier)
         })
 
         return result is not None, result
