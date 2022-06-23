@@ -2,7 +2,9 @@ from supervised.automl import AutoML
 from AbstractAdapter import AbstractAdapter
 from AdapterUtils import read_tabular_dataset_training_data, prepare_tabular_dataset, export_model
 
-
+import shutil
+from JsonUtil import get_config_property
+import os
 
 class MLJARAdapter(AbstractAdapter):
     """description of class"""
@@ -22,10 +24,11 @@ class MLJARAdapter(AbstractAdapter):
     def __tabular_classification(self):
         self.df = read_tabular_dataset_training_data(self._configuration)
         X, y = prepare_tabular_dataset(self.df, self._configuration)
-        automl = AutoML(total_time_limit=self._configuration["runtime_constraints"]["runtime_limit"], mode="Compete")
+        automl = AutoML(total_time_limit=self._configuration["runtime_constraints"]["runtime_limit"], mode="Compete", results_path=(os.path.join(get_config_property("output-path"), self._configuration["session_id"])))
         automl.fit(X, y)
         #TODO: Correct reimport, MLJAR automatically save every model
         #export_model(automl, "mljar-model.p")
+        print("zz")
 
     def __tabular_regression(self):
         raise NotImplementedError()
