@@ -6,12 +6,6 @@ import "google/protobuf/timestamp.proto";
 /*includes all gRPC functions available for the client frontend*/
 service ControllerService {
 
-  /*return all dataset types*/
-  rpc GetDatasetTypes(GetDatasetTypesRequest) returns (GetDatasetTypesResponse) {}
-
-  /*return selected dataset type*/
-  rpc GetDatasetType(GetDatasetTypeRequest) returns (GetDatasetTypeResponse) {}
-
   /*return the generated model as a .zip for one AutoML by its session id*/
   rpc GetAutoMlModel(GetAutoMlModelRequest) returns (GetAutoMlModelResponse) {}
   /*return a list of AutoML solutions compatible with the current configuration*/
@@ -43,22 +37,6 @@ service ControllerService {
   rpc StartAutoMLprocess(StartAutoMLprocessRequest) returns (StartAutoMLprocessResponse) {}
   /*test an existing AutoML*/
   rpc TestAutoML(TestAutoMLRequest) returns (TestAutoMLResponse) {}
-}
-
-message GetDatasetTypesRequest {
-  string typeNames = 1;
-}
-
-message GetDatasetTypesResponse {
-  repeated DatasetTypes datasetTypes = 1;
-}
-
-message GetDatasetTypeRequest {
-  string typeName = 1;
-}
-
-message GetDatasetTypeResponse {
-  repeated DatasetType datasetType = 1;
 }
 
 message TestAutoMLRequest {
