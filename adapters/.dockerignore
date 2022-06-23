@@ -1,2 +1,13 @@
-AutoKeras/.venv
-AutoKeras/.vscode
+**/.git
+**/.git/
+**/.env
+**/env
+**/.venv
+**/.venv/
+**/venv
+**/venv/
+**/.vscode
+**/.vscode/
+**/.vs
+**/.vs/
+**/__pycache__
