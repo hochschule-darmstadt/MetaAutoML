@@ -33,6 +33,47 @@ namespace BlazorBoilerplate.Server.Managers
             _client = client;
             _httpContextAccessor = httpContextAccessor;
         }
+
+        /// <summary>
+        /// Retrive all Dataset Types
+        /// </summary>
+        /// <returns></returns>
+        public async Task<ApiResponse> GetDatasetTypes()
+        {
+            GetDatasetTypesResponseDto response = new GetDatasetTypesResponseDto();
+            GetDatasetTypesRequest getDatasetTypesRequest = new GetDatasetTypesRequest();
+            try
+            {
+                var reply = _client.GetDatasetTypes();
+                response.DatasetTypes = reply.DatasetTypes.ToList();
+                return new ApiResponse(Status200OK, null, response);
+            }
+            catch (Exception ex)
+            {
+                return new ApiResponse(Status404NotFound, ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Retrive a selected Dataset Type
+        /// </summary>
+        /// <param name="dataset_type"></param>
+        /// <returns></returns>
+        public async Task<ApiResponse> GetDatasetType(GetDatasetTypeRequestDto dataset_type)    // probably worth renaming
+        {
+            GetDatasetTypeRequest request = new GetDatasetTypeRequest();
+            request.TypeName = dataset_type.TypeName;
+            try
+            {
+                var reply = _client.GetDatasetType(request);
+                return new ApiResponse(Status200OK, null, reply.ReturnCode);
+            }
+            catch (Exception ex)
+            {
+                return new ApiResponse(Status404NotFound, ex.Message);
+            }
+        }
+
         /// <summary>
         /// Retrive a concrete Dataset
         /// </summary>
