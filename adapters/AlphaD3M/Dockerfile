@@ -10,17 +10,18 @@ RUN apt-get update && \
 # Upgrade pip
 RUN python -m pip install --upgrade pip
 
-# Copy code
+# Install dependencies
 WORKDIR /app
+COPY ./AlphaD3M/requirements.alphad3m.txt ./AlphaD3M/requirements.primitives.txt ./AlphaD3M/requirements.txt ./
+RUN pip install -r requirements.alphad3m.txt
+RUN pip install -r requirements.primitives.txt
+RUN pip install -r requirements.txt
+
+# Copy code
 COPY ./AlphaD3M .
 COPY ./Utils/Utils ./Utils
 COPY ./Utils/AutoMLs ./AutoMLs
 COPY ./GRPC/Adapter ./
-
-# Install dependencies
-RUN pip install -r requirements.alphad3m.txt
-RUN pip install -r requirements.primitives.txt
-RUN pip install -r requirements.txt
 
 # Setup runtime
 RUN mkdir -p /app/app-data/output/tmp
