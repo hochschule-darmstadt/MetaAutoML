@@ -3,7 +3,6 @@ from durable.lang import post
 from durable.engine import MessageNotHandledException, MessageObservedException
 from threading import Thread
 from Blackboard import Blackboard
-from strategies.DataPreparationStrategy import DataPreparationStrategyController
 
 class StrategyController(object):
     """
@@ -11,31 +10,25 @@ class StrategyController(object):
     """
 
     def __init__(self, blackboard: Blackboard) -> None:
-        self.__log = logging.getLogger()
+        self.__log = logging.getLogger('strategy-controller')
         self.blackboard = blackboard
         self.__log.debug(f'Attached controller to the blackboard, current agents: {len(self.blackboard.agents)}')
 
         self.blackboard.common_state.update({
             'phase': 'initialization',
             'enabled_strategies': [
-                # TODO: Implement (via decorators on rules?)
-                # def check_enabled_strategy(strategy):
-                #   def inner(func):
-                #     # if(strategy == 'test'):
-                #     def wrapper(*args, **kwargs):
-                #         func(*args, **kwargs)
-                #     return wrapper
-                #   return inner
-                #
-                # @check_enabled_strategy('data_preparation.split_large_datasets')
-
                 'data_preparation.split_large_datasets',
                 'data_preparation.omit_empty_columns'
             ]
         })
 
         self.strategies = []
-        self.strategies.append(DataPreparationStrategyController())
+
+        from strategies.DataPreparationStrategy import DataPreparationStrategyController
+        self.strategies.append(DataPreparationStrategyController(self))
+
+    def GetPhase(self) -> str:
+        return self.blackboard.common_state.get('phase')
 
     def SetPhase(self, phase) -> None:
         self.blackboard.common_state.update({ 'phase': phase })
@@ -51,7 +44,7 @@ class StrategyController(object):
         while self.__is_running:
             time.sleep(2) # FIXME: Remove (for testing purposes)
             state_changed = False
-            for agent in self.blackboard.agents:
+            for agent in self.blackboard.agents.values():
                 if agent.CanContribute():
                     self.__log.debug(f'Executing contribution by agent: {agent.agent_id}')
                     contribution = agent.DoContribute()
