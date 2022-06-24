@@ -37,7 +37,7 @@ class Database:
             #       --> eg. "mongodb://root:example@mongo"
             mongo = MongoClient(server_url, 27017,
                 # timeout to find a database server
-                serverSelectionTimeoutMS=3000)
+                serverSelectionTimeoutMS=30000)
             
             # we want to fail as fast as possible when the database is not reachable.
             #   by default pymongo will lazy initialize and waits for the first 'real' database 

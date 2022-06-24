@@ -94,6 +94,26 @@ class AutoMlTarget(betterproto.Message):
 
 
 @dataclass(eq=False, repr=False)
+class GetDatasetTypesRequest(betterproto.Message):
+    type_names: str = betterproto.string_field(1)
+
+
+@dataclass(eq=False, repr=False)
+class GetDatasetTypesResponse(betterproto.Message):
+    dataset_types: List["DatasetType"] = betterproto.enum_field(1)
+
+
+@dataclass(eq=False, repr=False)
+class GetDatasetTypeRequest(betterproto.Message):
+    type_name: str = betterproto.string_field(1)
+
+
+@dataclass(eq=False, repr=False)
+class GetDatasetTypeResponse(betterproto.Message):
+    dataset_type: List["DatasetType"] = betterproto.enum_field(1)
+
+
+@dataclass(eq=False, repr=False)
 class GetDatasetsRequest(betterproto.Message):
     username: str = betterproto.string_field(1)
     type: "DatasetType" = betterproto.enum_field(2)
@@ -341,6 +361,38 @@ class ControllerServiceStub(betterproto.ServiceStub):
             metadata=metadata,
         )
 
+    async def get_dataset_types(
+        self,
+        get_dataset_types_request: "GetDatasetTypesRequest",
+        timeout: Optional[float] = None,
+        deadline: Optional["Deadline"] = None,
+        metadata: Optional["_MetadataLike"] = None,
+    ) -> "GetDatasetTypesResponse":
+        return await self._unary_unary(
+            "/ControllerService/GetDatasetTypes",
+            get_dataset_types_request,
+            GetDatasetTypesResponse,
+            timeout=timeout,
+            deadline=deadline,
+            metadata=metadata,
+        )
+
+    async def get_dataset_type(
+        self,
+        get_dataset_type_request: "GetDatasetTypeRequest",
+        timeout: Optional[float] = None,
+        deadline: Optional["Deadline"] = None,
+        metadata: Optional["_MetadataLike"] = None,
+    ) -> "GetDatasetTypeResponse":
+        return await self._unary_unary(
+            "/ControllerService/GetDatasetType",
+            get_dataset_type_request,
+            GetDatasetTypeResponse,
+            timeout=timeout,
+            deadline=deadline,
+            metadata=metadata,
+        )
+
     async def get_datasets(
         self,
         get_datasets_request: "GetDatasetsRequest",
@@ -519,6 +571,16 @@ class ControllerServiceBase(ServiceBase):
     ) -> "GetCompatibleAutoMlSolutionsResponse":
         raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
 
+    async def get_dataset_types(
+        self, get_dataset_types_request: "GetDatasetTypesRequest"
+    ) -> "GetDatasetTypesResponse":
+        raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
+
+    async def get_dataset_type(
+        self, get_dataset_type_request: "GetDatasetTypeRequest"
+    ) -> "GetDatasetTypeResponse":
+        raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
+
     async def get_datasets(
         self, get_datasets_request: "GetDatasetsRequest"
     ) -> "GetDatasetsResponse":
@@ -585,6 +647,16 @@ class ControllerServiceBase(ServiceBase):
     ) -> None:
         request = await stream.recv_message()
         response = await self.get_compatible_auto_ml_solutions(request)
+        await stream.send_message(response)
+
+    async def __rpc_get_dataset_types(self, stream: grpclib.server.Stream) -> None:
+        request = await stream.recv_message()
+        response = await self.get_dataset_types(request)
+        await stream.send_message(response)
+
+    async def __rpc_get_dataset_type(self, stream: grpclib.server.Stream) -> None:
+        request = await stream.recv_message()
+        response = await self.get_dataset_type(request)
         await stream.send_message(response)
 
     async def __rpc_get_datasets(self, stream: grpclib.server.Stream) -> None:
@@ -662,6 +734,18 @@ class ControllerServiceBase(ServiceBase):
                 grpclib.const.Cardinality.UNARY_UNARY,
                 GetCompatibleAutoMlSolutionsRequest,
                 GetCompatibleAutoMlSolutionsResponse,
+            ),
+            "/ControllerService/GetDatasetTypes": grpclib.const.Handler(
+                self.__rpc_get_dataset_types,
+                grpclib.const.Cardinality.UNARY_UNARY,
+                GetDatasetTypesRequest,
+                GetDatasetTypesResponse,
+            ),
+            "/ControllerService/GetDatasetType": grpclib.const.Handler(
+                self.__rpc_get_dataset_type,
+                grpclib.const.Cardinality.UNARY_UNARY,
+                GetDatasetTypeRequest,
+                GetDatasetTypeResponse,
             ),
             "/ControllerService/GetDatasets": grpclib.const.Handler(
                 self.__rpc_get_datasets,

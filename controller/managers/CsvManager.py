@@ -116,7 +116,7 @@ class CsvManager:
 
     @staticmethod
     def ReadDefaultDatasetAsBytes():
-        file = open(os.path.join( os.path.dirname( __file__ ), "../app-data/datasets/titanic_train.csv"))
+        file = open(os.path.join( os.path.dirname( __file__ ), "../config/defaults/titanic_train.csv"))
         data = file.read().encode()
         file.close()
         return data

@@ -8,6 +8,8 @@ services:
       context: ./
       dockerfile: ./controller/Dockerfile
     container_name: controller
+    depends_on:
+      - mongo
     # we map the port of the controller to the host.
     # This way we can either connect locally with localhost:5001
     # or from a docker container that accesses host.docker.internal:5001
@@ -31,7 +33,6 @@ services:
       - AUTOCVE_SERVICE_PORT=50058
       - PYTORCH_SERVICE_HOST=pytorch
       - PYTORCH_SERVICE_PORT=50059
-      - MONGO_DB_DEBUG=NO
     volumes:
       - datasets:/app/app-data/datasets
       - output:/app/app-data/output

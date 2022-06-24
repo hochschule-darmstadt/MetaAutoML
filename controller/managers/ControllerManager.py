@@ -71,6 +71,14 @@ class ControllerManager(object):
         """
         return self.__rdfManager.GetCompatibleAutoMlSolutions(request)
 
+    def GetDatasetTypes(self, request: "GetDatasetTypesRequest") -> "GetDatasetTypesResponse":
+        #TODO TRAINING WIZZARD
+        return
+
+    def GetDatasetType(self, request: "GetDatasetTypeRequest") -> "GetDatasetTypeResponse":
+        #TODO TRAINING WIZZARD
+        return
+
     def GetDatasets(self, request: "GetDatasetsRequest") -> "GetDatasetsResponse":
         """
         Get all datasets for a specific task

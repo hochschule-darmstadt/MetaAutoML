@@ -10,7 +10,7 @@ message GetDatasetTypesRequest {
 }
 
 message GetDatasetTypesResponse {
-  repeated DatasetTypes datasetTypes = 1;
+  repeated DatasetType datasetTypes = 1;
 }
 
 message GetDatasetTypeRequest {

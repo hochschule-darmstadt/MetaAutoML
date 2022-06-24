@@ -67,6 +67,17 @@ class ControllerService(ControllerServiceBase):
         response = self._controllerManager.GetCompatibleAUtoMlSolutions(get_compatible_auto_ml_solutions_request)
         return response
 
+
+    async def get_dataset_types(
+        self, get_dataset_types_request: "GetDatasetTypesRequest"
+    ) -> "GetDatasetTypesResponse":
+        raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
+
+    async def get_dataset_type(
+        self, get_dataset_type_request: "GetDatasetTypeRequest"
+    ) -> "GetDatasetTypeResponse":
+        raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
+        
     async def get_datasets(
         self, get_datasets_request: "GetDatasetsRequest"
     ) -> "GetDatasetsResponse":
@@ -170,7 +181,7 @@ async def main():
     server = Server([ControllerService()])
     context = SSLContext(protocol=ssl.PROTOCOL_TLSv1_2)
     context.load_cert_chain(certfile="certificate/server.crt", keyfile='certificate/server.key')
-    await server.start("127.0.0.1", get_config_property('controller-server-port'), ssl=create_secure_context())
+    await server.start(get_config_property('controller-server-adress'), get_config_property('controller-server-port'), ssl=create_secure_context())
     await server.wait_closed()
 
 
