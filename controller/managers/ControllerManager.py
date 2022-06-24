@@ -58,7 +58,7 @@ class ControllerManager(object):
         ---
         Return a .zip containing the model and executable script
         """
-        return self.__sessions[request.sessionId].get_automl_model(request)
+        return self.__sessions[request.session_id].get_automl_model(request)
 
     def GetCompatibleAUtoMlSolutions(self, request: "GetCompatibleAutoMlSolutionsRequest") -> "GetCompatibleAutoMlSolutionsResponse":
         """

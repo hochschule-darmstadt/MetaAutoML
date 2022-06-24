@@ -47,7 +47,7 @@ class AutoMLSession(object):
         Return AutoML model as Controller_pb2.GetAutoMlModelResponse
         """
         for automl in self.automls:
-            if automl.name == request.autoMl:
+            if automl.name == request.auto_ml:
                 return automl.get_automl_model()
 
     def get_session_status(self) -> GetSessionStatusResponse:
