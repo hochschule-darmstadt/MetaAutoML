@@ -56,6 +56,9 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: example
+    volumes:
+      - mongodata:/data/configdb
+      - mongodata:/data/db
 
 #     adapters do not need to be available from the host machine -> no port mappings
 
@@ -148,3 +151,4 @@ volumes:
   output-mljar:
   # shared volume between controller and frontend / dummy to transfer output
   output:
+  mongodata:
