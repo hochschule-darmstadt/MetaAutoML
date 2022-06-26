@@ -41,6 +41,22 @@ class RdfManager(object):
 
         return queryResult
 
+    def GetDatasetTypes(self, request: GetDatasetTypesRequest) -> GetDatasetTypesResponse:
+        """
+        Get all dataset types
+        ---
+        Return list of all dataset types
+        """
+        result = GetSupportedMlLibrariesResponse()
+
+        q = prepareQuery(Queries.ONTOLOGY_QUERY_GET_DATASET_TYPES,
+                         initNs={"skos": SKOS})
+        
+        queryResult = self.__executeQuery(q)
+        for row in queryResult:
+            result.DatasetTypes.append(row.t.replace(ML_ONTOLOGY_NAMESPACE, ""))
+        return result
+
     def GetCompatibleAutoMlSolutions(self, request: GetCompatibleAutoMlSolutionsRequest) -> GetCompatibleAutoMlSolutionsResponse:
         """
         Retrive all compatible AutoML solutions depending on the configuration

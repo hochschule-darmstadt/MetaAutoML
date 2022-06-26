@@ -65,7 +65,7 @@ class ControllerManager(object):
         Get list of comptatible AutoML solutions
         ---
         Parameter
-        1. current confiugration
+        1. current configuration
         ---
         Return a list of compatible AutoML
         """
@@ -97,6 +97,25 @@ class ControllerManager(object):
             except Exception as e:
                 print(f"exception: {e}")
                 
+        return response
+
+    def GetDatasetTypes(self, request: "GetDatasetTypesRequest") -> "GetDatasetTypesResponse":
+        """
+        Get all dataset types
+        ---
+        Return list of all dataset types
+        """
+        return self.__rdfManager.GetDatasetTypes(request)
+
+    def GetDatasetType(self, request: "GetDatasetTypeRequest") -> "GetDatasetTypeResponse":
+        """
+        Get a selected dataset type
+        ---
+        Return a name of a selected dataset type
+        """
+        # TODO: figure out what needs to be done
+        response = GetDatasetTypeResponse()
+        response.return_code = 0
         return response
 
     def GetDataset(self, request: "GetDatasetRequest") -> "GetDatasetResponse":

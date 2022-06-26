@@ -67,6 +67,20 @@ class ControllerService(ControllerServiceBase):
         response = self._controllerManager.GetCompatibleAUtoMlSolutions(get_compatible_auto_ml_solutions_request)
         return response
 
+    async def get_dataset_types(
+        self, get_dataset_types_request: "GetDatasetTypesRequest"
+    ) -> "GetDatasetTypesResponse":
+            """return all dataset types."""
+            response = self._controllerManager.GetDatasetTypes(get_dataset_types_request)
+            return response
+
+    async def get_dataset_type(
+        self, get_dataset_type_request: "GetDatasetTypeRequest"
+    ) -> "GetDatasetTypeResponse":
+            """return a selected dataset type."""
+            response = self._controllerManager.GetDatasetType(get_dataset_type_request)
+            return response
+
     async def get_datasets(
         self, get_datasets_request: "GetDatasetsRequest"
     ) -> "GetDatasetsResponse":
