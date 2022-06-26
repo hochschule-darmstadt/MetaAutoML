@@ -6,20 +6,22 @@ import "Common.proto";
 import "google/protobuf/timestamp.proto";
 
 message GetDatasetTypesRequest {
-  string typeNames = 1;
+  string username = 1;
 }
 
 message GetDatasetTypesResponse {
-  repeated DatasetTypes datasetTypes = 1;
+  repeated string datasetTypes = 1;
 }
 
 message GetDatasetTypeRequest {
-  string typeName = 1;
+  string username = 1;
+  string typeName = 2;
 }
 
 message GetDatasetTypeResponse {
-  repeated DatasetType datasetType = 1;
+  int32 returnCode = 1;
 }
+
 
 message GetDatasetsRequest {
     string username = 1;
