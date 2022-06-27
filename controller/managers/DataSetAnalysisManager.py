@@ -2,6 +2,7 @@ from typing import Dict
 import pandas as pd
 import numpy as np
 import json
+import os
 
 class DataSetAnalysisManager:
     """
@@ -17,6 +18,9 @@ class DataSetAnalysisManager:
         ---
         Return a python dictionary containing dataset analysis
         """
+       
+        dataset = pd.read_csv(dataset)
+
         jsonfile = {}
         jsonfile["basic analysis"] = {
 
@@ -57,6 +61,7 @@ class DataSetAnalysisManager:
         ---
         Return the number of columns in the dataset
         """
+       
         number_of_columns = dataset.shape[1]
         
         return number_of_columns
@@ -154,12 +159,12 @@ class DataSetAnalysisManager:
     @staticmethod
     def __detect_duplicate_columns(dataset: pd.DataFrame) -> 'list[tuple]':
         """
-        Detects duplicate columns in a dataset and adds that information to a JSON file
+        Detects duplicate columns in a dataset
         ---
         Parameter
         1. dataset to be analyzed
         ---
-        Return the JSON file with additional data
+        Return a list of tuples each containing a pair of duplicate column indices.
         """
 
         duplicate_column_list = []

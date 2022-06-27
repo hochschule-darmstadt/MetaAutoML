@@ -166,13 +166,13 @@ class ControllerManager(object):
         """
         # script_dir = os.path.dirname(os.path.abspath(__file__))
         # file_dest = os.path.join(script_dir, 'datasets')
-        analysisResult = DataSetAnalysisManager.startAnalysis(dataset)
-        DataSetAnalysisManager.persistAnalysisResult(analysisResult)
         response = Controller_pb2.UploadDatasetFileResponse()
         response.returnCode = 0
         filename_dest = os.path.join(os.path.normpath(self.__datasetFolder), dataset.name)
         save_file = open(filename_dest, 'wb')
         save_file.write(dataset.content)
+        analysisResult = DataSetAnalysisManager.startAnalysis(filename_dest)
+        DataSetAnalysisManager.persistAnalysisResult(analysisResult)
         return response
 
     def StartAutoMLProcess(self, configuration) -> Controller_pb2.StartAutoMLprocessResponse:
