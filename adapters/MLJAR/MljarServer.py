@@ -5,6 +5,7 @@ import json
 import time
 import pickle
 from concurrent import futures
+import pandas as pd
 
 import grpc
 
@@ -15,22 +16,11 @@ from JsonUtil import get_config_property
 from AdapterUtils import *
 
 def GetMetaInformation(config_json):
-    working_dir = os.path.join(get_config_property("output-path"), "working_dir")
-    shutil.unpack_archive(os.path.join(get_config_property("output-path"),
-                                       str(config_json["session_id"]),
-                                       get_config_property("export-zip-file-name") + ".zip"),
-                          working_dir,
-                          "zip")
-    # extract additional information from automl
-    with open(os.path.join(working_dir, "mljar-model.p"), 'rb') as file:
-        automl = pickle.load(file)
-        librarylist = set()
-        for model in automl.ensemble.selected_models:
-            if hasattr(model['model'], 'learner_params'):
-                librarylist.add(model['model'].learner_params['model_type'])
-        model = automl.ensemble.algorithm_name
-        library = " + ".join(librarylist)
-    shutil.rmtree(working_dir)
+    working_dir = os.path.join(get_config_property("output-path"), config_json["session_id"])
+    leaderboard = pd.read_csv(os.path.join(working_dir, "Models", "leaderboard.csv"))
+    #print(leaderboard[leaderboard["metric_value"].eq(leaderboard["metric_value"].min())])
+    model = leaderboard[leaderboard["metric_value"].eq(leaderboard["metric_value"].min())]["model_type"].values[0]
+    library = leaderboard[leaderboard["metric_value"].eq(leaderboard["metric_value"].min())]["model_type"].values[0]
     return library, model
 
 

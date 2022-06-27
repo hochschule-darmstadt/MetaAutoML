@@ -24,15 +24,14 @@ class TemplateGenerator(object):
         Parameter:
         1. ML task
         """
-
         # Render Python script
         with open(os.path.join(self.__TEMPLATES_PATH, 'predict.ji')) as file:
             template = Template(file.read())
-        script_file = open(os.path.join(self.__OUTPUT_PATH, 'tmp', 'predict.py'), "w")
-        script_file.write(template.render())
+        script_file = open(os.path.join(self.__OUTPUT_PATH, config_json["session_id"], 'predict.py'), "w")
+        script_file.write(template.render(task=config_json))
 
         # Render Requirement.txt
         with open(os.path.join(self.__TEMPLATES_PATH, 'requirements.ji')) as file:
             template = Template(file.read())
-        script_file = open(os.path.join(self.__OUTPUT_PATH, 'tmp', 'requirements.txt'), "w")
+        script_file = open(os.path.join(self.__OUTPUT_PATH, config_json["session_id"], 'requirements.txt'), "w")
         script_file.write(template.render())
