@@ -3,6 +3,7 @@ using BlazorBoilerplate.Infrastructure.AuthorizationDefinitions;
 using BlazorBoilerplate.Infrastructure.Storage;
 using BlazorBoilerplate.Infrastructure.Storage.DataModels;
 using BlazorBoilerplate.Infrastructure.Storage.Permissions;
+using BlazorBoilerplate.Server;
 using BlazorBoilerplate.Shared.Localizer;
 using Finbuckle.MultiTenant;
 using IdentityModel;
@@ -33,6 +34,7 @@ namespace BlazorBoilerplate.Storage
         private readonly EntityPermissions _entityPermissions;
         private readonly ILocalizationProvider _localizationProvider;
         private readonly ILogger _logger;
+        private readonly ControllerService.ControllerServiceClient _client;
 
         public DatabaseInitializer(
             TenantStoreDbContext tenantStoreDbContext,
@@ -44,7 +46,8 @@ namespace BlazorBoilerplate.Storage
             RoleManager<ApplicationRole> roleManager,
             EntityPermissions entityPermissions,
             ILocalizationProvider localizationProvider,
-            ILogger<DatabaseInitializer> logger)
+            ILogger<DatabaseInitializer> logger,
+            ControllerService.ControllerServiceClient client)
         {
             _tenantStoreDbContext = tenantStoreDbContext;
             _localizationDbContext = localizationDbContext;
@@ -56,6 +59,7 @@ namespace BlazorBoilerplate.Storage
             _entityPermissions = entityPermissions;
             _localizationProvider = localizationProvider;
             _logger = logger;
+            _client = client;
         }
 
         public virtual async Task SeedAsync()
@@ -274,6 +278,12 @@ namespace BlazorBoilerplate.Storage
 
             if (applicationUser == null)
             {
+                //Before creating a new user, request the new OMA-ML user id
+                CreateNewUserResponse response = _client.CreateNewUser(new CreateNewUserRequest());
+                if (response.Result != ResultCode.Okay)
+                {
+                    throw new Exception($"Error while creating new user, result code: {response.Result}");
+                }
                 applicationUser = new ApplicationUser
                 {
                     UserName = userName,
@@ -282,9 +292,9 @@ namespace BlazorBoilerplate.Storage
                     FullName = fullName,
                     FirstName = firstName,
                     LastName = lastName,
-                    EmailConfirmed = true
+                    EmailConfirmed = true,
+                    OmaMlId = response.OmaMlUserId
                 };
-
                 var result = _userManager.CreateAsync(applicationUser, password).Result;
                 if (!result.Succeeded)
                     throw new Exception(result.Errors.First().Description);
@@ -295,7 +305,8 @@ namespace BlazorBoilerplate.Storage
                         new Claim(JwtClaimTypes.FamilyName, lastName),
                         new Claim(JwtClaimTypes.Email, email),
                         new Claim(JwtClaimTypes.EmailVerified, ClaimValues.trueString, ClaimValueTypes.Boolean),
-                        new Claim(JwtClaimTypes.PhoneNumber, phoneNumber)
+                        new Claim(JwtClaimTypes.PhoneNumber, phoneNumber),
+                        new Claim("omaml", applicationUser.OmaMlId)
                     }).Result;
 
                 //add claims version of roles

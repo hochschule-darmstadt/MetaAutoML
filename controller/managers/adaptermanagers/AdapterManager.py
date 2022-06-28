@@ -1,11 +1,7 @@
-from AutoCVEManager import AutoCVEManager
-from AutoGluonManager import AutoGluonManager
-from AutoKerasManager import AutoKerasManager
-from FLAMLManager import FLAMLManager
-from MljarManager import MljarManager
 from AutoMLSession import AutoMLSession
-from SklearnManager import SklearnManager
-from AutoPyTorchManager import AutoPyTorchManager
+from Controller_bgrpc import *
+from AutoMLManager import AutoMLManager
+import os
 
 
 class AdapterManager(object):
@@ -13,7 +9,7 @@ class AdapterManager(object):
     Implementation of a Structured data manager responsible for executing structured data AutoML sessions
     """
 
-    def start_automl(self, configuration, folder_location, session_id) -> AutoMLSession:
+    def start_automl(self, configuration: "StartAutoMlProcessRequest", folder_location, session_id, callback) -> AutoMLSession:
         """
         Start a new AutoML session
         ---
@@ -24,31 +20,38 @@ class AdapterManager(object):
         ---
         Return a new AutoMLSession object
         """
-        if len(list(configuration.requiredAutoMLs)) == 0:
+        # map all automl names with their host names and port names
+        automl_addresses = {
+            "autokeras":   ["AUTOKERAS_SERVICE_HOST", "AUTOKERAS_SERVICE_PORT"],
+            "flaml":        ["FLAML_SERVICE_HOST",     "FLAML_SERVICE_PORT"],
+            "autosklearn":  ["SKLEARN_SERVICE_HOST",   "SKLEARN_SERVICE_PORT"],
+            "autogluon":    ["AUTOGLUON_SERVICE_HOST", "AUTOGLUON_SERVICE_PORT"],
+            "autocve":      ["AUTOCVE_SERVICE_HOST",   "AUTOCVE_SERVICE_PORT"],
+            "autopytorch": ["PYTORCH_SERVICE_HOST",   "PYTORCH_SERVICE_PORT"],
+            "mljar":        ["MLJAR_SERVICE_HOST",     "MLJAR_SERVICE_PORT"],
+        }
+
+        automl_names: list[str] = configuration.required_auto_mls
+        if not configuration.required_auto_mls:
             print('No AutoMLs specified in the request. Running all available AutoMLs.')
-            required_automl_names = ('FLAML', 'Auto_Keras', 'Autosklearn', 'AutoGluon', 'AutoCVE', 'Auto_PyTorch', 'MLJAR')
-        else:
-            required_automl_names = [name for name in configuration.requiredAutoMLs]
+            automl_names = list(automl_addresses.keys())
 
-        required_automls = []
-        for automl_name in required_automl_names:
-            if automl_name == AutoKerasManager.name:
-                required_automls.append(AutoKerasManager(configuration, folder_location, session_id))
-            elif automl_name == FLAMLManager.name:
-                required_automls.append(FLAMLManager(configuration, folder_location, session_id))
-            elif automl_name == SklearnManager.name:
-                required_automls.append(SklearnManager(configuration, folder_location, session_id))
-            elif automl_name == AutoGluonManager.name:
-                required_automls.append(AutoGluonManager(configuration, folder_location, session_id))
-            elif automl_name == AutoCVEManager.name:
-                required_automls.append(AutoCVEManager(configuration, folder_location, session_id))
-            elif automl_name == AutoPyTorchManager.name:
-                required_automls.append(AutoPyTorchManager(configuration, folder_location, session_id))
-            elif automl_name == MljarManager.name:
-                required_automls.append(MljarManager(configuration, folder_location, session_id))
+        # collect all AutoMLManager instances
+        automls: list[AutoMLManager] = []
+        for automl_name in automl_names:
+            # get host and port from environment variables
+            host, port = map(os.getenv, automl_addresses[automl_name.lower()])
+            port = int(port)
 
+            automl = AutoMLManager(configuration, folder_location, host, port, session_id, callback)
+            # NOTE: friendly name for the thread, also relevant for the callback
+            automl.name = automl_name
+
+            automls.append(automl)
+
+        # start session and all AutoMLManager threads
         new_session = AutoMLSession(session_id, configuration)
-        for automl in required_automls:
+        for automl in automls:
             automl.start()
             new_session.add_automl_to_session(automl)
         return new_session

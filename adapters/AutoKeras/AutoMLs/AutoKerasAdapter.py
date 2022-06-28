@@ -20,6 +20,7 @@ class AutoKerasAdapter(AbstractAdapter):
         1. Configuration JSON of type dictionary
         """
         super(AutoKerasAdapter, self).__init__(configuration)
+        self._result_path = os.path.join(get_config_property("output-path"), self._configuration["session_id"])
 
     def start(self):
         """Execute the ML task"""
@@ -40,10 +41,11 @@ class AutoKerasAdapter(AbstractAdapter):
         clf = ak.StructuredDataClassifier(overwrite=True,
                                           max_trials=self._max_iter,
                                           # metric=self._configuration['metric'],
+                                          directory=self._result_path,
                                           seed=42)
                                           
         clf.fit(x=X, y=y)
-        export_model(clf, 'model_keras.p')
+        export_model(clf, self._configuration["session_id"], 'model_keras.p')
 
     def __tabular_regression(self):
         """Execute the regression task"""
@@ -52,12 +54,13 @@ class AutoKerasAdapter(AbstractAdapter):
         reg = ak.StructuredDataRegressor(overwrite=True,
                                          max_trials=self._max_iter,
                                          # metric=self._configuration['metric'],
+                                         directory=self._result_path,
                                          seed=42)
         reg.fit(x=X, y=y)
-        self.__export_model(reg, 'model_keras.p')
+        self.__export_model(reg, self._configuration["session_id"], 'model_keras.p')
 
     
-    # hard coded json for the job somewhere s
+    # hard coded json for the job somewhere
 
     def __image_classification(self):
         """"Execute image classification task"""

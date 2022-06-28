@@ -1,9 +1,11 @@
 import pickle
 import json
 import sys
+from supervised.automl import AutoML
 
 import pandas as pd
 import numpy as np
+import os
 
 from predict_time_sources import feature_preparation, DataType, SplitMethod
 
@@ -27,9 +29,7 @@ if __name__ == '__main__':
 
     X = feature_preparation(X, features)
 
-
-    with open(sys.path[0] + '/mljar-model.p', 'rb') as file:
-        automl = pickle.load(file)
+    automl = AutoML(results_path=os.path.join(os.path.dirname(__file__), "Models"))
 
     predicted_y = automl.predict(X)
     predicted_y = np.reshape(predicted_y, (-1, 1))
