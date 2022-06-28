@@ -10,6 +10,10 @@
 @inject IApiClient apiClient
 @inject IViewNotifier viewNotifier
 
+    <Breadcrumbs>
+        <Breadcrumb Title="Datasets" />
+    </Breadcrumbs>
+
 <div style="display:flex; flex-direction:row; align-items:center">
     <MatButton Outlined="true" Icon="add" OnClick="@(e => { _isTabularUploadOpen = true; })">add Dataset</MatButton>
 </div>

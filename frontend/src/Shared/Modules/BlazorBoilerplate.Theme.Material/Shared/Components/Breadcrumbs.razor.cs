@@ -20,7 +20,8 @@ namespace BlazorBoilerplate.Theme.Material.Shared.Components
         protected override void OnInitialized()
         {
             if (IncludeRoot)
-                Items.Insert(0, new Breadcrumb("/", L["BreadCrumbHome"]));
+                //Items.Insert(0, new Breadcrumb("/", L["BreadCrumbHome"]));
+                Items.Insert(0, new Breadcrumb("/", "HOME"));
         }
     }
 }
