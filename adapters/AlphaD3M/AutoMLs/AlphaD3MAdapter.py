@@ -30,8 +30,6 @@ class AlphaD3MAdapter(AbstractAdapter):
         """Execute the classification task"""
         self.df = read_tabular_dataset_training_data(self._configuration)
         X, y = prepare_tabular_dataset(self.df, self._configuration)
-        # data contains .csv file data from upload as DataFrame, convert to csv for alphad3m
-        data = pandas.DataFrame.to_csv(X)
 
         # TODO: Implementation of classification by alphad3m here
         d3m_obj = d3mi.AutoML(os.path.join(sys.path[0], "d3mTmp"),
@@ -43,5 +41,7 @@ class AlphaD3MAdapter(AbstractAdapter):
                                 task_keywords=["classification", "multiClass", "tabular"],
                                 metric="accuracy")
         d3m_obj.plot_leaderboard()
+
+        # //app/app-data/datasets/titanic_train_data.csv
 
         print("----------\n"*10)
