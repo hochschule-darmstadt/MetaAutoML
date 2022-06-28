@@ -44,7 +44,7 @@ namespace BlazorBoilerplate.Server.Managers
             GetDatasetTypesRequest getDatasetTypesRequest = new GetDatasetTypesRequest();
             try
             {
-                var reply = _client.GetDatasetTypes();
+                var reply = _client.GetDatasetTypes(new GetDatasetTypesRequest());
                 response.DatasetTypes = reply.DatasetTypes.ToList();
                 return new ApiResponse(Status200OK, null, response);
             }
