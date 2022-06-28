@@ -58,7 +58,7 @@ class ControllerManager(object):
         ---
         Return a .zip containing the model and executable script
         """
-        return self.__sessions[request.sessionId].get_automl_model(request)
+        return self.__sessions[request.session_id].get_automl_model(request)
 
     def GetCompatibleAUtoMlSolutions(self, request: "GetCompatibleAutoMlSolutionsRequest") -> "GetCompatibleAutoMlSolutionsResponse":
         """
@@ -70,6 +70,14 @@ class ControllerManager(object):
         Return a list of compatible AutoML
         """
         return self.__rdfManager.GetCompatibleAutoMlSolutions(request)
+
+    def GetDatasetTypes(self, request: "GetDatasetTypesRequest") -> "GetDatasetTypesResponse":
+        #TODO TRAINING WIZZARD
+        return
+
+    def GetDatasetType(self, request: "GetDatasetTypeRequest") -> "GetDatasetTypeResponse":
+        #TODO TRAINING WIZZARD
+        return
 
     def GetDatasets(self, request: "GetDatasetsRequest") -> "GetDatasetsResponse":
         """

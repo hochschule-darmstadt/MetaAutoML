@@ -27,7 +27,8 @@
                 "MLJAR_SERVICE_PORT": "50053",
                 "PYTORCH_SERVICE_HOST": "localhost",
                 "PYTORCH_SERVICE_PORT": "50059",
-                "MONGO_DB_DEBUG": "YES"
+                "MONGO_DB_DEBUG": "YES",
+                "USE_DEV_CONFIG": "YES"
             },
         }
     ]
