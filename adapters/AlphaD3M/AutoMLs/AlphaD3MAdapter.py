@@ -42,6 +42,4 @@ class AlphaD3MAdapter(AbstractAdapter):
                                 metric="accuracy")
         d3m_obj.plot_leaderboard()
 
-        # //app/app-data/datasets/titanic_train_data.csv
-
         print("----------\n"*10)
