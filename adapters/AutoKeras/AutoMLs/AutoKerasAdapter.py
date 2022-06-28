@@ -97,22 +97,34 @@ class AutoKerasAdapter(AbstractAdapter):
         local_dir_path = os.path.dirname(local_file_path)
         data_dir = os.path.join(local_dir_path, json_configuration["file_name"])
 
-        train_data = ak.image_dataset_from_directory(
-            data_dir,
-            validation_split=json_configuration["test_configuration"]["split_ratio"],
-            subset="training",
-            seed=123,
-            image_size=(json_configuration["test_configuration"]["image_height"], json_configuration["test_configuration"]["image_width"]),
-            batch_size=json_configuration["test_configuration"]["batch_size"],
-        )
+        if(json_configuration["test_configuration"]["split_ratio"] > 0):
+            train_data = ak.image_dataset_from_directory(
+                data_dir,
+                validation_split=json_configuration["test_configuration"]["split_ratio"],
+                subset="training",
+                seed=123,
+                image_size=(json_configuration["test_configuration"]["image_height"], json_configuration["test_configuration"]["image_width"]),
+                batch_size=json_configuration["test_configuration"]["batch_size"],
+            )
 
-        test_data = ak.image_dataset_from_directory(
-            data_dir,
-            validation_split=json_configuration["test_configuration"]["split_ratio"],
-            subset="validation",
-            seed=123,
-            image_size=(json_configuration["test_configuration"]["image_height"], json_configuration["test_configuration"]["image_width"]),
-            batch_size=json_configuration["test_configuration"]["batch_size"],
-        )
+            test_data = ak.image_dataset_from_directory(
+                data_dir,
+                validation_split=json_configuration["test_configuration"]["split_ratio"],
+                subset="validation",
+                seed=123,
+                image_size=(json_configuration["test_configuration"]["image_height"], json_configuration["test_configuration"]["image_width"]),
+                batch_size=json_configuration["test_configuration"]["batch_size"],
+            )
+        else:
+            train_data = ak.image_dataset_from_directory(
+                os.path.join(data_dir, "train"),
+                json_configuration["test_configuration"]["batch_size"]
+            )
+
+            test_data = ak.image_dataset_from_directory(
+                os.path.join(data_dir, "test"), 
+                shuffle=False, 
+                batch_size=json_configuration["test_configuration"]["batch_size"]
+            )
 
         return train_data, test_data
