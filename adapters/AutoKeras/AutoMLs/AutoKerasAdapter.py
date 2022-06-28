@@ -69,7 +69,7 @@ class AutoKerasAdapter(AbstractAdapter):
         clf = ak.ImageClassifier(overwrite=True, 
                                 max_trials=self._configuration["runtime_constraints"]["max_iter"],
                                 seed=42,
-                                directory=os.path.abspath(os.path.join(get_config_property("output-path"))))
+                                directory=self._result_path)
 
         clf.fit(train_data, epochs=1)
         print(clf.evaluate(test_data))
@@ -81,7 +81,8 @@ class AutoKerasAdapter(AbstractAdapter):
         reg = ak.ImageRegressor(overwrite=True, 
                                 max_trials=self._configuration["runtime_constraints"]["max_iter"],
                                 seed=42,
-                                directory=os.path.abspath(os.path.join(get_config_property("output-path"))))
+                                directory=self._result_path)
+                                
                                 
         reg.fit(train_data, epochs=1)
         print(reg.evaluate(test_data))
