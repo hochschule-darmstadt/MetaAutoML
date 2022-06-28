@@ -744,3 +744,22 @@ div.refresh-timer-interval-wrapper {
 .mdc-chip-set{
     align-items:center;
 }
+
+.mdc-chip--selected{
+    background-color: #fef3e1;
+    color: #ff9800;
+    border: solid 2px #ff9800;
+    font-weight: bold;
+}
+
+.mdc-chip--selected:hover{
+    background-color: #fef3e1;
+    color: #ff9800;
+    border: solid 2px #ff9800;
+    font-weight: bold;
+}
+
+.mdc-chip--selected > span > svg > path {
+    stroke: #ff9800;
+    stroke-width: 3px;
+}
