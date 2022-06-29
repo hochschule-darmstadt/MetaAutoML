@@ -11,6 +11,52 @@ import os
 
 from predict_time_sources import feature_preparation, DataType, SplitMethod
 
+def read_image_dataset(self, json_configuration):
+
+    local_file_path = tf.keras.utils.get_file(
+        origin=json_configuration["file_location"], 
+        fname="image_data", 
+        cache_dir=os.path.abspath(os.path.join("app-data")), 
+        extract=True
+    )
+
+    local_dir_path = os.path.dirname(local_file_path)
+    data_dir = os.path.join(local_dir_path, json_configuration["file_name"])
+
+    train_data, test_data = None
+
+    if(json_configuration["test_configuration"]["split_ratio"] > 0):
+        train_data = ak.image_dataset_from_directory(
+            data_dir,
+            validation_split=json_configuration["test_configuration"]["split_ratio"],
+            subset="training",
+            seed=123,
+            image_size=(json_configuration["test_configuration"]["image_height"], json_configuration["test_configuration"]["image_width"]),
+            batch_size=json_configuration["test_configuration"]["batch_size"],
+        )
+
+        test_data = ak.image_dataset_from_directory(
+            data_dir,
+            validation_split=json_configuration["test_configuration"]["split_ratio"],
+            subset="validation",
+            seed=123,
+            image_size=(json_configuration["test_configuration"]["image_height"], json_configuration["test_configuration"]["image_width"]),
+            batch_size=json_configuration["test_configuration"]["batch_size"],
+        )
+
+    else:
+        train_data = ak.image_dataset_from_directory(
+            os.path.join(data_dir, "train"),
+            json_configuration["test_configuration"]["batch_size"]
+        )
+
+        test_data = ak.image_dataset_from_directory(
+            os.path.join(data_dir, "test"), 
+            shuffle=False, 
+            batch_size=json_configuration["test_configuration"]["batch_size"]
+        )
+    
+    return test_data.x
 
 
 if __name__ == '__main__':
@@ -22,15 +68,22 @@ if __name__ == '__main__':
 
     target = config_json["tabular_configuration"]["target"]["target"]
     features = config_json["tabular_configuration"]["features"].items()
-    X = pd.read_csv(filepath).drop(target, axis=1, errors='ignore')
 
-    # split training set
-    if SplitMethod.SPLIT_METHOD_RANDOM == config_json["test_configuration"]["method"]:
-        X = X.sample(random_state=config_json["test_configuration"]["random_state"], frac=1)
-    else:
-        X = X.iloc[int(X.shape[0] * config_json["test_configuration"]["split_ratio"]):]
+    X = None
 
-    X = feature_preparation(X, features)
+    if(config_json["task"] == 1 or config_json["task"] == 2):
+        X = pd.read_csv(filepath).drop(target, axis=1, errors='ignore')
+
+        # split training set
+        if SplitMethod.SPLIT_METHOD_RANDOM == config_json["test_configuration"]["method"]:
+            X = X.sample(random_state=config_json["test_configuration"]["random_state"], frac=1)
+        else:
+            X = X.iloc[int(X.shape[0] * config_json["test_configuration"]["split_ratio"]):]
+
+        X = feature_preparation(X, features)
+
+    elif(config_json["task"] == 3 or config_json["task"] == 4):
+        X = read_image_dataset(filepath, config_json)
 
     with open(sys.path[0] + '/model_keras.p', 'rb') as file:
         loaded_model = dill.load(file)

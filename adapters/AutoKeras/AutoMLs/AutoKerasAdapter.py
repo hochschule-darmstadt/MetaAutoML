@@ -101,6 +101,8 @@ class AutoKerasAdapter(AbstractAdapter):
         local_dir_path = os.path.dirname(local_file_path)
         data_dir = os.path.join(local_dir_path, json_configuration["file_name"])
 
+        train_data, test_data = None
+
         if(json_configuration["test_configuration"]["split_ratio"] > 0):
             train_data = ak.image_dataset_from_directory(
                 data_dir,
