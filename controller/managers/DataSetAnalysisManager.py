@@ -43,7 +43,7 @@ class DataSetAnalysisManager:
         ---
         Return None
         """
-        with open('controller\app-data\analysis.json', 'w+') as target:
+        with open('.\\app-data\\analysis.json', 'w+') as target:
             json.dump(jsonfile, target)
             target.close()
 
@@ -91,7 +91,7 @@ class DataSetAnalysisManager:
         return na_counts
 
     @staticmethod
-    def __missing_values_rows(dataset: pd.DataFrame) -> list(int):
+    def __missing_values_rows(dataset: pd.DataFrame) -> list[int]:
         """
         Counts missing values of each row and adds the indices of rows with a lot of missing values to a list
         ---
@@ -113,7 +113,7 @@ class DataSetAnalysisManager:
         return missing_rows_indices
 
     @staticmethod
-    def __detect_outliers(dataset: pd.DataFrame) -> list(dict):
+    def __detect_outliers(dataset: pd.DataFrame) -> list[dict]:
         """
         Detects outliers in all columns in a dataset containing floats
         ---

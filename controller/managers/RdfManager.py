@@ -1,9 +1,8 @@
 import logging
 import rdflib
 import os
-import Controller_pb2
-import Controller_pb2_grpc
 import Queries
+from Controller_bgrpc import *
 
 from rdflib.plugins.sparql import prepareQuery
 from rdflib.namespace import SKOS
@@ -42,7 +41,7 @@ class RdfManager(object):
 
         return queryResult
 
-    def GetCompatibleAutoMlSolutions(self, request) -> Controller_pb2.GetCompatibleAutoMlSolutionsResponse:
+    def GetCompatibleAutoMlSolutions(self, request: GetCompatibleAutoMlSolutionsRequest) -> GetCompatibleAutoMlSolutionsResponse:
         """
         Retrive all compatible AutoML solutions depending on the configuration
         ---
@@ -51,7 +50,7 @@ class RdfManager(object):
         ---
         Return a list of AutoML names
         """
-        result = Controller_pb2.GetCompatibleAutoMlSolutionsResponse()
+        result = GetCompatibleAutoMlSolutionsResponse()
 
         if "task" not in request.configuration:  # Check if task parameter is contained, we require it for a successful query
             self.__log.exception("Configuration dictonary does not contain the key task")
@@ -72,10 +71,10 @@ class RdfManager(object):
 
         queryResult = self.__executeQuery(q, {"task": task})
         for row in queryResult:
-            result.AutoMlSolutions.append(row.automl.replace(ML_ONTOLOGY_NAMESPACE, ""))
+            result.auto_ml_solutions.append(row.automl.replace(ML_ONTOLOGY_NAMESPACE, ""))
         return result
 
-    def GetDatasetCompatibleTasks(self, request) -> Controller_pb2.GetDatasetCompatibleTasksResponse:
+    def GetDatasetCompatibleTasks(self, request: GetDatasetCompatibleTasksRequest) -> GetDatasetCompatibleTasksResponse:
         """
         Retrive possible AutoML tasks for a given dataset
         ---
@@ -84,10 +83,10 @@ class RdfManager(object):
         ---
         Return a list of compatible AutoML tasks
         """
-        result = Controller_pb2.GetDatasetCompatibleTasksResponse()
+        result = GetDatasetCompatibleTasksResponse()
 
         ###TODO change approach, we want to log on upload what a dataset is, now we need to somehow guess it. ATM only tabular data is supported 
-        if len(request.datasetName) == 0:  # Check if dataset name is present, we require it for a successful query
+        if len(request.dataset_name) == 0:  # Check if dataset name is present, we require it for a successful query
             self.__log.exception("Dataset name is empty")
             result.tasks.append("Dataset name parameter empty")
             return result
@@ -101,7 +100,7 @@ class RdfManager(object):
             result.tasks.append(row.task.replace(ML_ONTOLOGY_NAMESPACE, ""))
         return result
 
-    def GetSupportedMlLibraries(self, request) -> Controller_pb2.GetSupportedMlLibrariesResponse:
+    def GetSupportedMlLibraries(self, request) -> GetSupportedMlLibrariesResponse:
         """
         Retrive all Machine Learn Library for this task by supported AutoMLs
         ---
@@ -110,7 +109,7 @@ class RdfManager(object):
         ---
         Return a list of Machine Learning libraries
         """
-        result = Controller_pb2.GetSupportedMlLibrariesResponse()
+        result = GetSupportedMlLibrariesResponse()
 
         if len(request.task) == 0:  # Check if task parameter has value, we require it for a successful query
             self.__log.exception("task parameter empty")

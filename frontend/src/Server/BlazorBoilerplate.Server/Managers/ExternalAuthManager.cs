@@ -23,16 +23,19 @@ namespace BlazorBoilerplate.Server.Managers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly ILogger<ExternalAuthManager> _logger;
+        private readonly ControllerService.ControllerServiceClient _client;
 
         public ExternalAuthManager(IAccountManager accountManager,
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
-            ILogger<ExternalAuthManager> logger)
+            ILogger<ExternalAuthManager> logger,
+            ControllerService.ControllerServiceClient client)
         {
             _accountManager = accountManager;
             _userManager = userManager;
             _signInManager = signInManager;
             _logger = logger;
+            _client = client;
         }
 
         public async Task<string> ExternalSignIn(HttpContext httpContext)
@@ -121,6 +124,11 @@ namespace BlazorBoilerplate.Server.Managers
                 {
                     //requireConfirmEmail = false because the external provider has just confirmed the user email.
                     //Some provider does not provide true email for privacy
+                    CreateNewUserResponse response = _client.CreateNewUser(new CreateNewUserRequest());
+                    if (response.Result != ResultCode.Okay)
+                    {
+                        throw new Exception($"Error while creating new user, result code: {response.Result}");
+                    }
 
                     var userName = userNameClaim.Value.Replace(" ", string.Empty);
 
@@ -129,7 +137,7 @@ namespace BlazorBoilerplate.Server.Managers
 
                     try
                     {
-                        user = await _accountManager.RegisterNewUserAsync(userName, userEmailClaim.Value, null, false);
+                        user = await _accountManager.RegisterNewUserAsync(userName, userEmailClaim.Value, null, false, response.OmaMlUserId);
                     }
                     catch (DomainException ex)
                     {

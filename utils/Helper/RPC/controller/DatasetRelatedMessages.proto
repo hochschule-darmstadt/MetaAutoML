@@ -1,0 +1,77 @@
+syntax = "proto3";
+option csharp_namespace = "BlazorBoilerplate.Server";
+
+import "Enumerations.proto";
+import "Common.proto";
+import "google/protobuf/timestamp.proto";
+
+message GetDatasetTypesRequest {
+  string typeNames = 1;
+}
+
+message GetDatasetTypesResponse {
+  repeated DatasetType datasetTypes = 1;
+}
+
+message GetDatasetTypeRequest {
+  string typeName = 1;
+}
+
+message GetDatasetTypeResponse {
+  repeated DatasetType datasetType = 1;
+}
+
+message GetDatasetsRequest {
+    string username = 1;
+    DatasetType type = 2;
+  }
+  
+message GetDatasetsResponse {
+    repeated Dataset dataset = 1;
+  }
+
+message Dataset {
+    string fileName = 1;
+    string type = 2;
+    int32 columns = 3;
+    int32 rows = 4;
+    google.protobuf.Timestamp creation_date = 5;
+    string identifier = 6;
+  }
+
+
+message GetDatasetRequest {
+    string username = 1;
+    string identifier = 2;
+  }
+  
+message GetDatasetResponse {
+    repeated TableColumn columns = 1;
+  }
+
+message TableColumn {
+    string name = 1;
+    DataType type = 2;
+    repeated DataType convertibleTypes = 3; // types that this column can be converted to
+    repeated string firstEntries = 4;
+  }
+  
+message GetTabularDatasetColumnNamesRequest {
+    string username = 1;
+    string datasetName = 2;
+  }
+  
+message GetTabularDatasetColumnNamesResponse {
+    repeated string columnNames = 1;
+  }
+
+
+message UploadDatasetFileRequest {
+    string username = 1;
+    bytes content = 2;
+    string name = 3;
+  }
+  
+message UploadDatasetFileResponse {
+    int32 returnCode = 1;
+  }

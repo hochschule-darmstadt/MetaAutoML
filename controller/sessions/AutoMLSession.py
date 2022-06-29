@@ -1,9 +1,5 @@
-import os
-from pathlib import Path
-import pandas as pd
 
-import Controller_pb2
-from JsonUtil import get_config_property
+from Controller_bgrpc import *
 from IAutoMLManager import IAutoMLManager
 from blackboard.Blackboard import Blackboard
 from blackboard.Controller import StrategyController
@@ -23,7 +19,7 @@ class AutoMLSession(object):
         2. configuration: session configuration
         """
         self.__id = session_id
-        self.__configuration = configuration
+        self.__configuration: StartAutoMlProcessRequest = configuration
         self.automls = []
 
         self.blackboard = Blackboard()
@@ -48,7 +44,7 @@ class AutoMLSession(object):
         """
         return str(self.__id)
 
-    def get_automl_model(self, request) -> Controller_pb2.GetAutoMlModelResponse:
+    def get_automl_model(self, request: GetAutoMlModelRequest) -> GetAutoMlModelResponse:
         """
         Get the AutoML model of requested AutoML
         ---
@@ -58,33 +54,33 @@ class AutoMLSession(object):
         Return AutoML model as Controller_pb2.GetAutoMlModelResponse
         """
         for automl in self.automls:
-            if automl.name == request.autoMl:
+            if automl.name == request.auto_ml:
                 return automl.get_automl_model()
 
-    def get_session_status(self) -> Controller_pb2.GetSessionStatusResponse:
+    def get_session_status(self) -> GetSessionStatusResponse:
         """
         Get the session status
         ---
         Return the session status as Controller_pb2.GetSessionStatusResponse
         """
-        target_config = Controller_pb2.AutoMLTarget(target=self.__configuration.tabularConfig.target.target,
-                                                    type=self.__configuration.tabularConfig.target.type)
-        tabular_config = Controller_pb2.AutoMLConfigurationTabularData(
-            target=target_config, features=dict(self.__configuration.tabularConfig.features))
+        target_config = AutoMlTarget(target=self.__configuration.tabular_config.target.target,
+                                                    type=self.__configuration.tabular_config.target.type)
+        tabular_config = AutoMlConfigurationTabularData(
+            target=target_config, features=dict(self.__configuration.tabular_config.features))
 
-        runtime_constraints = Controller_pb2.AutoMLRuntimeConstraints(
-            runtime_limit=self.__configuration.runtimeConstraints.runtime_limit,
-            max_iter=self.__configuration.runtimeConstraints.max_iter)
+        runtime_constraints = AutoMlRuntimeConstraints(
+            runtime_limit=self.__configuration.runtime_constraints.runtime_limit,
+            max_iter=self.__configuration.runtime_constraints.max_iter)
 
-        response = Controller_pb2.GetSessionStatusResponse(tabularConfig=tabular_config,
-                                                           requiredAutoMLs=[automl.name for automl in self.automls],
-                                                           runtimeConstraints=runtime_constraints,)
-        response.status = Controller_pb2.SESSION_STATUS_COMPLETED
+        response = GetSessionStatusResponse(tabular_config=tabular_config,
+                                                           required_auto_mls=[automl.name for automl in self.automls],
+                                                           runtime_constraints=runtime_constraints,)
+        response.status = SessionStatus.SESSION_STATUS_COMPLETED
         response.dataset = self.__configuration.dataset
         response.task = self.__configuration.task
 
         for automl in self.automls:
             response.automls.append(automl.get_status())
             if automl.is_running():
-                response.status = Controller_pb2.SESSION_STATUS_BUSY
+                response.status = SessionStatus.SESSION_STATUS_BUSY
         return response

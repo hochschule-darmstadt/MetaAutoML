@@ -117,6 +117,12 @@ namespace BlazorBoilerplate.Server
                 AdditionalUserClaimsPrincipalFactory>();
 
 
+            services.Configure<IISServerOptions>(options =>
+            {
+                options.AllowSynchronousIO = true;
+                //options.MaxRequestBodySize = null;
+                options.MaxRequestBodySize = int.MaxValue;
+            });
             ////////////////////////////////////////////////////////////////////////////////////////////////////////
             /////ENV VARIABLE
             ///////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -131,8 +137,10 @@ namespace BlazorBoilerplate.Server
                 port = Configuration["CONTROLLER_SERVICE_PORT"];
                 grpcEndpoint = "https://localhost:5001";
             }
-
+            
+            ////////////////////////////////////////////////////////////////////////////////////////////////////////
             //GRPC CONTROLLER FACTORY 
+            ///////////////////////////////////////////////////////////////////////////////////////////////////////
             services.AddGrpcClient<ControllerService.ControllerServiceClient>(o =>
             {
                 o.Address = new Uri(grpcEndpoint);

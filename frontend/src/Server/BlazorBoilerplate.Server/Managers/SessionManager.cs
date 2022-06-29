@@ -2,6 +2,7 @@
 using BlazorBoilerplate.Infrastructure.Server.Models;
 using BlazorBoilerplate.Shared.Dto.Session;
 using BlazorBoilerplate.Storage;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,10 +18,12 @@ namespace BlazorBoilerplate.Server.Managers
     {
         private readonly ApplicationDbContext _dbContext;
         private readonly ControllerService.ControllerServiceClient _client;
-        public SessionManager(ApplicationDbContext dbContext, ControllerService.ControllerServiceClient client)
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        public SessionManager(ApplicationDbContext dbContext, ControllerService.ControllerServiceClient client, IHttpContextAccessor httpContextAccessor)
         {
             _dbContext = dbContext;
             _client = client;
+            _httpContextAccessor = httpContextAccessor;
         }
         /// <summary>
         /// Get informations about a specific session
@@ -31,8 +34,10 @@ namespace BlazorBoilerplate.Server.Managers
         {
             GetSessionStatusRequest request = new GetSessionStatusRequest();
             GetSessionResponseDto response = new GetSessionResponseDto();
+            var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
             try
             {
+                request.Username = username;    
                 request.Id = session.SessionId;
                 var reply = _client.GetSessionStatus(request);
                 foreach (var automl in reply.Automls)
@@ -72,7 +77,7 @@ namespace BlazorBoilerplate.Server.Managers
                     response.RequiredMlLibraries.Add(mllibrarie);
                 }
 
-                foreach(var automl in reply.RequiredAutoMLs)
+                foreach(var automl in reply.RequiredAutoMls)
                 {
                     response.RequiredAutoMLs.Add(automl);
                 }
@@ -99,9 +104,11 @@ namespace BlazorBoilerplate.Server.Managers
         {
             GetSessionsRequest request = new GetSessionsRequest();
             GetSessionsResponseDto response = new GetSessionsResponseDto();
+            var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
             try
             {
-                request.User = ""; //TODO USER MANAGERMENT
+                request.Username = username;
+                request.Username = ""; //TODO USER MANAGERMENT
                 var reply = _client.GetSessions(request);
                 response.SessionIds = reply.SessionIds.ToList();
                 return new ApiResponse(Status200OK, null, response);
