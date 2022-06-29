@@ -45,15 +45,6 @@ namespace BlazorBoilerplate.Server.Controllers
         [ProducesResponseType(Status200OK)]
         [ProducesResponseType(Status400BadRequest)]
         [ProducesResponseType(Status404NotFound)]
-        public async Task<ApiResponse> GetDatasetType(GetDatasetTypeRequestDto dataset_type)
-            => ModelState.IsValid ?
-                await _datasetManager.GetDatasetType(dataset_type) :
-                new ApiResponse(Status400BadRequest, L["InvalidData"]);
-
-        [HttpPost]
-        [ProducesResponseType(Status200OK)]
-        [ProducesResponseType(Status400BadRequest)]
-        [ProducesResponseType(Status404NotFound)]
         public async Task<ApiResponse> GetDataset(GetDatasetRequestDto dataset)
             => ModelState.IsValid ?
                 await _datasetManager.GetDataset(dataset) :

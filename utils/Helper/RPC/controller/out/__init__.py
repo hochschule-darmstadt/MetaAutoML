@@ -94,23 +94,31 @@ class AutoMlTarget(betterproto.Message):
 
 
 @dataclass(eq=False, repr=False)
+class GetObjectsInformationRequest(betterproto.Message):
+    ids: List[str] = betterproto.string_field(1)
+
+
+@dataclass(eq=False, repr=False)
+class GetObjectsInformationResponse(betterproto.Message):
+    object_informations: List["ObjectInformation"] = betterproto.message_field(1)
+
+
+@dataclass(eq=False, repr=False)
+class ObjectInformation(betterproto.Message):
+    id: str = betterproto.string_field(1)
+    informations: Dict[str, str] = betterproto.map_field(
+        2, betterproto.TYPE_STRING, betterproto.TYPE_STRING
+    )
+
+
+@dataclass(eq=False, repr=False)
 class GetDatasetTypesRequest(betterproto.Message):
-    type_names: str = betterproto.string_field(1)
+    pass
 
 
 @dataclass(eq=False, repr=False)
 class GetDatasetTypesResponse(betterproto.Message):
-    dataset_types: List["DatasetType"] = betterproto.enum_field(1)
-
-
-@dataclass(eq=False, repr=False)
-class GetDatasetTypeRequest(betterproto.Message):
-    type_name: str = betterproto.string_field(1)
-
-
-@dataclass(eq=False, repr=False)
-class GetDatasetTypeResponse(betterproto.Message):
-    dataset_type: List["DatasetType"] = betterproto.enum_field(1)
+    dataset_types: List[str] = betterproto.string_field(1)
 
 
 @dataclass(eq=False, repr=False)
@@ -168,7 +176,9 @@ class GetTabularDatasetColumnNamesResponse(betterproto.Message):
 class UploadDatasetFileRequest(betterproto.Message):
     username: str = betterproto.string_field(1)
     content: bytes = betterproto.bytes_field(2)
-    name: str = betterproto.string_field(3)
+    file_name: str = betterproto.string_field(3)
+    dataset_name: str = betterproto.string_field(4)
+    type: str = betterproto.string_field(5)
 
 
 @dataclass(eq=False, repr=False)
@@ -377,22 +387,6 @@ class ControllerServiceStub(betterproto.ServiceStub):
             metadata=metadata,
         )
 
-    async def get_dataset_type(
-        self,
-        get_dataset_type_request: "GetDatasetTypeRequest",
-        timeout: Optional[float] = None,
-        deadline: Optional["Deadline"] = None,
-        metadata: Optional["_MetadataLike"] = None,
-    ) -> "GetDatasetTypeResponse":
-        return await self._unary_unary(
-            "/ControllerService/GetDatasetType",
-            get_dataset_type_request,
-            GetDatasetTypeResponse,
-            timeout=timeout,
-            deadline=deadline,
-            metadata=metadata,
-        )
-
     async def get_datasets(
         self,
         get_datasets_request: "GetDatasetsRequest",
@@ -505,6 +499,22 @@ class ControllerServiceStub(betterproto.ServiceStub):
             metadata=metadata,
         )
 
+    async def get_objects_information(
+        self,
+        get_objects_information_request: "GetObjectsInformationRequest",
+        timeout: Optional[float] = None,
+        deadline: Optional["Deadline"] = None,
+        metadata: Optional["_MetadataLike"] = None,
+    ) -> "GetObjectsInformationResponse":
+        return await self._unary_unary(
+            "/ControllerService/GetObjectsInformation",
+            get_objects_information_request,
+            GetObjectsInformationResponse,
+            timeout=timeout,
+            deadline=deadline,
+            metadata=metadata,
+        )
+
     async def upload_dataset_file(
         self,
         upload_dataset_file_request: "UploadDatasetFileRequest",
@@ -576,11 +586,6 @@ class ControllerServiceBase(ServiceBase):
     ) -> "GetDatasetTypesResponse":
         raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
 
-    async def get_dataset_type(
-        self, get_dataset_type_request: "GetDatasetTypeRequest"
-    ) -> "GetDatasetTypeResponse":
-        raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
-
     async def get_datasets(
         self, get_datasets_request: "GetDatasetsRequest"
     ) -> "GetDatasetsResponse":
@@ -615,6 +620,11 @@ class ControllerServiceBase(ServiceBase):
     async def get_dataset_compatible_tasks(
         self, get_dataset_compatible_tasks_request: "GetDatasetCompatibleTasksRequest"
     ) -> "GetDatasetCompatibleTasksResponse":
+        raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
+
+    async def get_objects_information(
+        self, get_objects_information_request: "GetObjectsInformationRequest"
+    ) -> "GetObjectsInformationResponse":
         raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
 
     async def upload_dataset_file(
@@ -652,11 +662,6 @@ class ControllerServiceBase(ServiceBase):
     async def __rpc_get_dataset_types(self, stream: grpclib.server.Stream) -> None:
         request = await stream.recv_message()
         response = await self.get_dataset_types(request)
-        await stream.send_message(response)
-
-    async def __rpc_get_dataset_type(self, stream: grpclib.server.Stream) -> None:
-        request = await stream.recv_message()
-        response = await self.get_dataset_type(request)
         await stream.send_message(response)
 
     async def __rpc_get_datasets(self, stream: grpclib.server.Stream) -> None:
@@ -700,6 +705,13 @@ class ControllerServiceBase(ServiceBase):
         response = await self.get_dataset_compatible_tasks(request)
         await stream.send_message(response)
 
+    async def __rpc_get_objects_information(
+        self, stream: grpclib.server.Stream
+    ) -> None:
+        request = await stream.recv_message()
+        response = await self.get_objects_information(request)
+        await stream.send_message(response)
+
     async def __rpc_upload_dataset_file(self, stream: grpclib.server.Stream) -> None:
         request = await stream.recv_message()
         response = await self.upload_dataset_file(request)
@@ -740,12 +752,6 @@ class ControllerServiceBase(ServiceBase):
                 grpclib.const.Cardinality.UNARY_UNARY,
                 GetDatasetTypesRequest,
                 GetDatasetTypesResponse,
-            ),
-            "/ControllerService/GetDatasetType": grpclib.const.Handler(
-                self.__rpc_get_dataset_type,
-                grpclib.const.Cardinality.UNARY_UNARY,
-                GetDatasetTypeRequest,
-                GetDatasetTypeResponse,
             ),
             "/ControllerService/GetDatasets": grpclib.const.Handler(
                 self.__rpc_get_datasets,
@@ -788,6 +794,12 @@ class ControllerServiceBase(ServiceBase):
                 grpclib.const.Cardinality.UNARY_UNARY,
                 GetDatasetCompatibleTasksRequest,
                 GetDatasetCompatibleTasksResponse,
+            ),
+            "/ControllerService/GetObjectsInformation": grpclib.const.Handler(
+                self.__rpc_get_objects_information,
+                grpclib.const.Cardinality.UNARY_UNARY,
+                GetObjectsInformationRequest,
+                GetObjectsInformationResponse,
             ),
             "/ControllerService/UploadDatasetFile": grpclib.const.Handler(
                 self.__rpc_upload_dataset_file,

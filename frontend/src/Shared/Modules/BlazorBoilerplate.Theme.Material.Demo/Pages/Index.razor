@@ -16,7 +16,7 @@
 
 <DatasetTable DatasetResponse="_datasets"></DatasetTable>
 
-<UploadTabularDataset @bind-IsOpen="_isTabularUploadOpen" OnUploadCompletedCallback="LoadDatasets"></UploadTabularDataset>
+<UploadDataset @bind-IsOpen="_isTabularUploadOpen" OnUploadCompletedCallback="LoadDatasets"></UploadDataset>
 
 @code {
     private List<GetDatasetsResponseDto> _datasets;

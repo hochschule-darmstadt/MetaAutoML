@@ -72,11 +72,6 @@ namespace BlazorBoilerplate.Shared.Services
             return await httpClient.GetJsonAsync<ApiResponseDto>("api/Dataset/GetDatasetTypes");
         }
 
-        public async Task<ApiResponseDto> GetDatasetType(GetDatasetTypeRequestDto dataset_type)
-        {
-            return await httpClient.PostJsonAsync<ApiResponseDto>("api/Dataset/GetDatasetType", dataset_type);
-        }
-
         public async Task<ApiResponseDto> GetDatasets()
         {
             return await httpClient.GetJsonAsync<ApiResponseDto>("api/Dataset/GetDatasets");

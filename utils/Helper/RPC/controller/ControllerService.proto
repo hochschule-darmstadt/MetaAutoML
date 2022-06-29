@@ -24,9 +24,6 @@ service ControllerService {
   rpc GetCompatibleAutoMlSolutions(GetCompatibleAutoMlSolutionsRequest) returns (GetCompatibleAutoMlSolutionsResponse) {}
   /*return all dataset types*/
   rpc GetDatasetTypes(GetDatasetTypesRequest) returns (GetDatasetTypesResponse) {}
-
-  /*return selected dataset type*/
-  rpc GetDatasetType(GetDatasetTypeRequest) returns (GetDatasetTypeResponse) {}  
   /*return all datasets of a specific type*/
   rpc GetDatasets(GetDatasetsRequest) returns (GetDatasetsResponse) {}
   /*
@@ -48,6 +45,8 @@ service ControllerService {
   rpc GetTabularDatasetColumnNames(GetTabularDatasetColumnNamesRequest) returns (GetTabularDatasetColumnNamesResponse) {}
   /*return all supported AutoML tasks*/
   rpc GetDatasetCompatibleTasks(GetDatasetCompatibleTasksRequest) returns (GetDatasetCompatibleTasksResponse) {}
+  /*return all information fields of an object*/
+  rpc GetObjectsInformation(GetObjectsInformationRequest) returns (GetObjectsInformationResponse) {}
   /*upload a new dataset file as bytes to the controller repository*/
   rpc UploadDatasetFile(UploadDatasetFileRequest) returns (UploadDatasetFileResponse) {}
   /*start a new AutoML run, using the provided configuration*/

@@ -26,12 +26,14 @@ namespace BlazorBoilerplate.Server.Managers
         private readonly ILogger<EmailManager> _logger;
         private readonly ControllerService.ControllerServiceClient _client;
         private readonly IHttpContextAccessor _httpContextAccessor;
-        public DatasetManager(ApplicationDbContext dbContext, ILogger<EmailManager> logger, ControllerService.ControllerServiceClient client, IHttpContextAccessor httpContextAccessor)
+        private readonly ICacheManager _cacheManager;
+        public DatasetManager(ApplicationDbContext dbContext, ILogger<EmailManager> logger, ControllerService.ControllerServiceClient client, IHttpContextAccessor httpContextAccessor, ICacheManager cacheManager)
         {
             _dbContext = dbContext;
             _logger = logger;
             _client = client;
             _httpContextAccessor = httpContextAccessor;
+            _cacheManager = cacheManager;
         }
 
         /// <summary>
@@ -41,32 +43,11 @@ namespace BlazorBoilerplate.Server.Managers
         public async Task<ApiResponse> GetDatasetTypes()
         {
             GetDatasetTypesResponseDto response = new GetDatasetTypesResponseDto();
-            GetDatasetTypesRequest getDatasetTypesRequest = new GetDatasetTypesRequest();
             try
             {
                 var reply = _client.GetDatasetTypes(new GetDatasetTypesRequest());
-                response.DatasetTypes = reply.DatasetTypes.ToList();
+                response.DatasetTypes = await _cacheManager.GetObjectInformationList(reply.DatasetTypes.ToList());
                 return new ApiResponse(Status200OK, null, response);
-            }
-            catch (Exception ex)
-            {
-                return new ApiResponse(Status404NotFound, ex.Message);
-            }
-        }
-
-        /// <summary>
-        /// Retrive a selected Dataset Type
-        /// </summary>
-        /// <param name="dataset_type"></param>
-        /// <returns></returns>
-        public async Task<ApiResponse> GetDatasetType(GetDatasetTypeRequestDto dataset_type)    // probably worth renaming
-        {
-            GetDatasetTypeRequest request = new GetDatasetTypeRequest();
-            request.TypeName = dataset_type.TypeName;
-            try
-            {
-                var reply = _client.GetDatasetType(request);
-                return new ApiResponse(Status200OK, null, reply.ReturnCode);
             }
             catch (Exception ex)
             {
@@ -171,7 +152,9 @@ namespace BlazorBoilerplate.Server.Managers
             UploadDatasetFileRequest request = new UploadDatasetFileRequest();
             var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
             request.Username = username;
-            request.Name = file.FileName;
+            request.FileName = file.FileName;
+            request.DatasetName = file.DatasetName;
+            request.Type = file.DatasetType;
             request.Content = Google.Protobuf.ByteString.CopyFromUtf8(file.Content);
             try
             {

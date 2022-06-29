@@ -45,7 +45,7 @@ class ControllerManager(object):
             return CreateNewUserResponse(ResultCode.RESULT_CODE_ERROR_CAN_NOT_CREATE_USER, "")
         else:
             dataset = CsvManager.ReadDefaultDatasetAsBytes()
-            self.__data_storage.save_dataset(username, "titanic_train.csv", dataset)
+            self.__data_storage.save_dataset(username, "titanic_train.csv", dataset, ":tabular", "Titanic")
             return CreateNewUserResponse(ResultCode.RESULT_CODE_OKAY, username)
             
 
@@ -72,12 +72,12 @@ class ControllerManager(object):
         return self.__rdfManager.GetCompatibleAutoMlSolutions(request)
 
     def GetDatasetTypes(self, request: "GetDatasetTypesRequest") -> "GetDatasetTypesResponse":
-        #TODO TRAINING WIZZARD
-        return
-
-    def GetDatasetType(self, request: "GetDatasetTypeRequest") -> "GetDatasetTypeResponse":
-        #TODO TRAINING WIZZARD
-        return
+        """
+        Get all dataset types
+        ---
+        Return list of all dataset types
+        """
+        return self.__rdfManager.GetDatasetTypes(request)
 
     def GetDatasets(self, request: "GetDatasetsRequest") -> "GetDatasetsResponse":
         """
@@ -223,6 +223,17 @@ class ControllerManager(object):
         """
         return self.__rdfManager.GetDatasetCompatibleTasks(request)
 
+    def GetObjectsInformation(self, request: "GetObjectsInformationRequest") -> "GetObjectsInformationResponse":
+        """
+        Get all information for a specific object
+        ---
+        Parameter
+        1. object id
+        ---
+        Return dictonary of object informations
+        """
+        return self.__rdfManager.GetObjectsInformation(request)
+
     def UploadNewDataset(self, dataset: "UploadDatasetFileRequest") -> "UploadDatasetFileResponse":
         """
         Upload a new dataset
@@ -232,7 +243,7 @@ class ControllerManager(object):
         ---
         Return upload status
         """
-        dataset_id: str = self.__data_storage.save_dataset(dataset.username, dataset.name, dataset.content)
+        dataset_id: str = self.__data_storage.save_dataset(dataset.username, dataset.file_name, dataset.content, dataset.type, dataset.dataset_name)
         print(f"saved new dataset: {dataset_id}")
         
         response = UploadDatasetFileResponse()

@@ -11,7 +11,6 @@ namespace BlazorBoilerplate.Infrastructure.Server
     public interface IDatasetManager
     {
         Task<ApiResponse> GetDatasetTypes();
-        Task<ApiResponse> GetDatasetType(GetDatasetTypeRequestDto dataset_type);
         Task<ApiResponse> GetDataset(GetDatasetRequestDto dataset);
         Task<ApiResponse> GetDatasets();
         Task<ApiResponse> GetTabularDatasetColumnNames(GetTabularDatasetColumnNamesRequestDto dataset);

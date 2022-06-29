@@ -638,7 +638,7 @@ namespace BlazorBoilerplate.Server
             services.AddTransient<IOntologyManager, OntologyManager>();
             services.AddTransient<ISessionManager, SessionManager>();
             services.AddTransient<IExternalAuthManager, ExternalAuthManager>();
-
+            services.AddTransient<ICacheManager, CacheManager>();
 
             #region Automapper
             //Automapper to map DTO to Models https://www.c-sharpcorner.com/UploadFile/1492b1/crud-operations-using-automapper-in-mvc-application/
