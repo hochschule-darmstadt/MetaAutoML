@@ -19,6 +19,8 @@ adapters/AutoKeras/structured_data_classifier
 *.csv
 *.pyproj
 
+!titanic_train.csv
+
 #VS Code
 #adapters/*/.vscode/
 adapters/*/.venv/
