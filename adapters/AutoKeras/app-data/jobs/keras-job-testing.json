@@ -15,6 +15,7 @@
         "batch_size": 32,
         "image_height": 180,
         "image_width": 180,
-        "split_ratio": 0.2
+        "split_ratio": 0.2,
+        "dataset_structure" : 1
     }
 }
