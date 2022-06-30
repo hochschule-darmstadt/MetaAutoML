@@ -135,7 +135,7 @@ namespace BlazorBoilerplate.Server.Managers
         {
             switch (autoMl.DatasetType)
             {
-                case "TABULAR":
+                case ":tabular":
                     switch (autoMl.Task)
                     {
                         case "tabular classification":
@@ -159,7 +159,7 @@ namespace BlazorBoilerplate.Server.Managers
         {
             switch (autoMl.DatasetType)
             {
-                case "TABULAR":
+                case ":tabular":
                     AutoMlConfigurationTabularData conf = new AutoMlConfigurationTabularData();
                     conf.Target = new AutoMlTarget();
                     conf.Target.Target = ((AutoMLTabularDataConfiguration)autoMl.Configuration).Target.Target;

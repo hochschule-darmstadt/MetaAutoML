@@ -10,11 +10,8 @@ namespace BlazorBoilerplate.Shared.Dto.Dataset
     public class FileUploadRequestDto
     {
         public string FileName { get; set; }
+        public string DatasetName { get; set; }
         public string Content { get; set; }
-        public FileUploadRequestDto(string filename, string content)
-        {
-            FileName = filename;
-            Content = content;
-        }
+        public string DatasetType { get; set; }
     }
 }

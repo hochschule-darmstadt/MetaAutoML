@@ -6,19 +6,10 @@ import "Common.proto";
 import "google/protobuf/timestamp.proto";
 
 message GetDatasetTypesRequest {
-  string typeNames = 1;
 }
 
 message GetDatasetTypesResponse {
-  repeated DatasetType datasetTypes = 1;
-}
-
-message GetDatasetTypeRequest {
-  string typeName = 1;
-}
-
-message GetDatasetTypeResponse {
-  repeated DatasetType datasetType = 1;
+  repeated string datasetTypes = 1;
 }
 
 message GetDatasetsRequest {
@@ -69,7 +60,9 @@ message GetTabularDatasetColumnNamesResponse {
 message UploadDatasetFileRequest {
     string username = 1;
     bytes content = 2;
-    string name = 3;
+    string fileName = 3;
+    string datasetName = 4;
+    string type = 5;
   }
   
 message UploadDatasetFileResponse {

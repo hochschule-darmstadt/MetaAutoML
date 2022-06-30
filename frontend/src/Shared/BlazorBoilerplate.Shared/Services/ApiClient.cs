@@ -67,6 +67,10 @@ namespace BlazorBoilerplate.Shared.Services
         {
             return await httpClient.PostJsonAsync<ApiResponseDto>("api/Email/SendTestEmail", email);
         }
+        public async Task<ApiResponseDto> GetDatasetTypes()
+        {
+            return await httpClient.GetJsonAsync<ApiResponseDto>("api/Dataset/GetDatasetTypes");
+        }
 
         public async Task<ApiResponseDto> GetDatasets()
         {
