@@ -28,8 +28,7 @@ class AlphaD3MAdapter(AbstractAdapter):
 
     def __tabular_classification(self):
         """Execute the classification task"""
-        self.df = read_tabular_dataset_training_data(self._configuration)
-        X, y = prepare_tabular_dataset(self.df, self._configuration)
+        
 
         # TODO: Implementation of classification by alphad3m here
         d3m_obj = d3mi.AutoML(os.path.join(sys.path[0], "d3mTmp"),
