@@ -175,6 +175,7 @@ adapters/*/app-data/output/*
 !*/app-data/jobs/.gitkeep
 # ignore datasets, because they are mapped into the datasets directory via shared volume by the controller
 */app-data/datasets/*
+*/*/app-data/datasets/*
 adapters/*/app-data/datasets/*
 !*/app-data/datasets/.gitkeep
 

@@ -36,7 +36,7 @@ class AutoKerasAdapter(AbstractAdapter):
 
     def __tabular_classification(self):
         """Execute the classification task"""
-        self.df = read_tabular_dataset_training_data(self._configuration)
+        self.df, test = self.__data_loader(self._configuration)
         X, y = prepare_tabular_dataset(self.df, self._configuration)
         clf = ak.StructuredDataClassifier(overwrite=True,
                                           max_trials=self._max_iter,
@@ -49,7 +49,7 @@ class AutoKerasAdapter(AbstractAdapter):
 
     def __tabular_regression(self):
         """Execute the regression task"""
-        self.df = read_tabular_dataset_training_data(self._configuration)
+        self.df, test = self.__data_loader(self._configuration)
         X, y = prepare_tabular_dataset(self.df, self._configuration)
         reg = ak.StructuredDataRegressor(overwrite=True,
                                          max_trials=self._max_iter,
@@ -132,5 +132,20 @@ class AutoKerasAdapter(AbstractAdapter):
                 shuffle=False, 
                 batch_size=json_configuration["test_configuration"]["batch_size"]
             )
+    @staticmethod
+    def __data_loader(config):
+        train_data = None
+        test_data = None
+
+        if config["task"] == 1:
+            train_data, test_data = read_tabular_dataset_training_data(config)
+        elif config["task"] == 2:
+            train_data, test_data = read_tabular_dataset_training_data(config)
+        elif config["task"] == 3:
+            train_data, test_data = None
+        elif config["task"] == 4:
+            train_data, test_data = None
+        elif config["task"] == 5:
+            train_data, test_data = None
 
         return train_data, test_data

@@ -1,22 +1,15 @@
-import os
-
-import logging
 import json
+import logging
+import os
 import time
 from concurrent import futures
 
-import grpc
-
 import Adapter_pb2
 import Adapter_pb2_grpc
-
-from JsonUtil import get_config_property
-
+import grpc
 from AdapterUtils import *
-
-
-
-
+from AutoKerasAdapter import AutoKerasAdapter
+from JsonUtil import get_config_property
 
 
 class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
@@ -44,7 +37,7 @@ class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
             output_json = zip_script(config_json["session_id"])
             library = "neural network"
             model = "keras"
-            test_score, prediction_time = evaluate(config_json, job_file_location)
+            test_score, prediction_time = evaluate(config_json, job_file_location, AutoKerasAdapter.__data_loader)
             response = yield from get_response(output_json, start_time, test_score, prediction_time, library, model)
             print(f'{get_config_property("adapter-name")} job finished')
             return response
