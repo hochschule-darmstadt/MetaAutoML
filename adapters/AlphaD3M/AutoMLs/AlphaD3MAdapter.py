@@ -1,10 +1,14 @@
 import d3m_interface as d3mi
-import pandas
+import json
 import os, sys
 
 from AbstractAdapter import AbstractAdapter
-from AdapterUtils import read_tabular_dataset_training_data, prepare_tabular_dataset
+from AdapterUtils import read_tabular_dataset_training_data, prepare_tabular_dataset, export_model
+from JsonUtil import get_config_property
 
+
+meta_filepath = 'model.meta.json'
+problem_config_filepath = "problem_config.json"
 
 class AlphaD3MAdapter(AbstractAdapter):
     """
@@ -20,11 +24,13 @@ class AlphaD3MAdapter(AbstractAdapter):
         """
         super(AlphaD3MAdapter, self).__init__(configuration)
 
+
     def start(self):
         """Execute the ML task"""
         if True:
             if self._configuration["task"] == 1:
                 self.__tabular_classification()
+
 
     def __tabular_classification(self):
         """Execute the classification task"""
@@ -39,4 +45,30 @@ class AlphaD3MAdapter(AbstractAdapter):
                                 task_keywords=["classification", "multiClass", "tabular"],
                                 metric="accuracy")
 
-        print("----------\n"*10)
+        pipeline_id = d3m_obj.get_best_pipeline_id();
+
+        # TODO train pipeline?
+
+        self.__export_pipeline(d3m_obj, os.path.join(get_config_property('output-path'), 'tmp', 'd3m'), pipeline_id)
+        d3m_obj.end_session()
+
+
+    def __export_pipeline(self, automl: d3mi.AutoML, export_dir, pipeline_id):
+        automl.save_pipeline(pipeline_id, export_dir)
+        with open(os.path.join(export_dir, pipeline_id, problem_config_filepath), 'w') as writer:
+            json.dump(automl.problem_config, writer)
+        with open(os.path.join(export_dir, meta_filepath), 'w') as writer:
+            json.dump({"id" : pipeline_id}, writer)
+        print('INFO: Pipeline exported.')
+
+    def __import_pipeline(self, automl: d3mi.AutoML, export_dir):
+        old_pipeline_id = ""
+        with open(os.path.join(export_dir, meta_filepath), 'r') as reader:
+            old_pipeline_id = json.load(reader)["id"]
+        with open(os.path.join(export_dir, old_pipeline_id, problem_config_filepath), 'r') as reader:
+            automl.problem_config = json.load(reader)
+        automl.load_pipeline(os.path.join(export_dir, old_pipeline_id))
+        pipeline_id = automl.get_best_pipeline_id()
+        automl.pipelines[pipeline_id]["fitted_id"] = old_pipeline_id
+        print("INFO: Pipeline imported.")
+        return pipeline_id
