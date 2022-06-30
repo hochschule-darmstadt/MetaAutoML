@@ -163,7 +163,7 @@ class DataStorage:
         filename_dest = os.path.join(self.__storage_dir, username, dataset_id, fileName)
         if os.getenv("MONGO_DB_DEBUG") != "YES":
             #Within docker we do not want to add the app section, as this leads to broken links
-            filename_dest = filename_dest.replace("/app", "")
+            filename_dest = filename_dest.replace("/app/", "")
         # make sure directory exists in case it's the first upload from this user
         os.makedirs(os.path.dirname(filename_dest), exist_ok=True)
         with open(filename_dest, 'wb') as outfp:
