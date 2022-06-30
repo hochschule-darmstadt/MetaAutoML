@@ -1,3 +1,5 @@
+# FIXME: Remove file! (for testing/debugging only)
+
 import logging, time, random
 from Blackboard import Blackboard
 from Controller import StrategyController

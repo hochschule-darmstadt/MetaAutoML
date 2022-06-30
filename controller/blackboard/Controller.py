@@ -24,7 +24,7 @@ class StrategyController(object):
 
         self.strategies = []
 
-        from strategies.DataPreparationStrategy import DataPreparationStrategyController
+        from blackboard.strategies.DataPreparationStrategy import DataPreparationStrategyController
         self.strategies.append(DataPreparationStrategyController(self))
 
     def GetPhase(self) -> str:
@@ -64,6 +64,7 @@ class StrategyController(object):
         self.__log.info(f'Evaluating strategy based on the new common state..')
 
         try:
+            # FIXME: The event names have to be unique (per session!) otherwise this does not work
             post('state_update', self.blackboard.common_state)
         except MessageObservedException as e:
             self.__log.debug('Blackboard state already observed in the previous run: ', e)

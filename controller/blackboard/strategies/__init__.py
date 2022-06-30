@@ -1,5 +1,5 @@
 import logging
-from Controller import StrategyController
+from ..Controller import StrategyController
 
 logger = logging.getLogger('strategy')
 

@@ -1,5 +1,5 @@
 from durable.lang import ruleset, when_all, m, item
-from Controller import StrategyController
+from ..Controller import StrategyController
 from . import logger, check_strategy_enabled
 
 class DataPreparationStrategyController(object):

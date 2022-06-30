@@ -1,9 +1,13 @@
 
+import atexit
 from Controller_bgrpc import *
 from IAutoMLManager import IAutoMLManager
 from blackboard.Blackboard import Blackboard
 from blackboard.Controller import StrategyController
 from blackboard.agents.AutoMLRunAgent import AutoMLRunAgent
+
+import logging
+logging.basicConfig(level=logging.DEBUG)
 
 class AutoMLSession(object):
     """
@@ -25,6 +29,10 @@ class AutoMLSession(object):
         self.blackboard = Blackboard()
         self.controller = StrategyController(self.blackboard)
         self.controller.StartLoop()
+        atexit.register(self.controller.StopLoop)
+
+        from blackboard.agents.AutoMLSessionAgent import AutoMLSessionAgent
+        session_agent = AutoMLSessionAgent(blackboard=self.blackboard, session=self)
 
     def add_automl_to_session(self, automl: IAutoMLManager):
         """
