@@ -1,4 +1,4 @@
-FROM python:3.8.13-slim-buster AS base
+FROM python:3.8.13 AS base
 WORKDIR /
 EXPOSE 50060
 
