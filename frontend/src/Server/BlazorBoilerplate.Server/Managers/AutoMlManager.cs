@@ -135,7 +135,7 @@ namespace BlazorBoilerplate.Server.Managers
         {
             switch (autoMl.DatasetType)
             {
-                case "TABULAR":
+                case ":tabular":
                     switch (autoMl.Task)
                     {
                         case "tabular classification":
