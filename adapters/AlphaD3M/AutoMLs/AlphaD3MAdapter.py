@@ -38,6 +38,5 @@ class AlphaD3MAdapter(AbstractAdapter):
                                 target=self._configuration["tabular_configuration"]["target"]["target"],
                                 task_keywords=["classification", "multiClass", "tabular"],
                                 metric="accuracy")
-        d3m_obj.plot_leaderboard()
 
         print("----------\n"*10)
