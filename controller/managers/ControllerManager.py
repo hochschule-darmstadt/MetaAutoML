@@ -45,7 +45,7 @@ class ControllerManager(object):
             return CreateNewUserResponse(ResultCode.RESULT_CODE_ERROR_CAN_NOT_CREATE_USER, "")
         else:
             dataset = CsvManager.ReadDefaultDatasetAsBytes()
-            self.__data_storage.save_dataset(username, "titanic_train.csv", dataset)
+            self.__data_storage.save_dataset(username, "titanic_train.csv", dataset, ":tabular", "Titanic")
             return CreateNewUserResponse(ResultCode.RESULT_CODE_OKAY, username)
             
 
@@ -65,19 +65,19 @@ class ControllerManager(object):
         Get list of comptatible AutoML solutions
         ---
         Parameter
-        1. current confiugration
+        1. current configuration
         ---
         Return a list of compatible AutoML
         """
         return self.__rdfManager.GetCompatibleAutoMlSolutions(request)
 
     def GetDatasetTypes(self, request: "GetDatasetTypesRequest") -> "GetDatasetTypesResponse":
-        #TODO TRAINING WIZZARD
-        return
-
-    def GetDatasetType(self, request: "GetDatasetTypeRequest") -> "GetDatasetTypeResponse":
-        #TODO TRAINING WIZZARD
-        return
+        """
+        Get all dataset types
+        ---
+        Return list of all dataset types
+        """
+        return self.__rdfManager.GetDatasetTypes(request)
 
     def GetDatasets(self, request: "GetDatasetsRequest") -> "GetDatasetsResponse":
         """
@@ -105,6 +105,25 @@ class ControllerManager(object):
             except Exception as e:
                 print(f"exception: {e}")
                 
+        return response
+
+    def GetDatasetTypes(self, request: "GetDatasetTypesRequest") -> "GetDatasetTypesResponse":
+        """
+        Get all dataset types
+        ---
+        Return list of all dataset types
+        """
+        return self.__rdfManager.GetDatasetTypes(request)
+
+    def GetDatasetType(self, request: "GetDatasetTypeRequest") -> "GetDatasetTypeResponse":
+        """
+        Get a selected dataset type
+        ---
+        Return a name of a selected dataset type
+        """
+        # TODO: figure out what needs to be done
+        response = GetDatasetTypeResponse()
+        response.return_code = 0
         return response
 
     def GetDataset(self, request: "GetDatasetRequest") -> "GetDatasetResponse":
@@ -204,6 +223,17 @@ class ControllerManager(object):
         """
         return self.__rdfManager.GetDatasetCompatibleTasks(request)
 
+    def GetObjectsInformation(self, request: "GetObjectsInformationRequest") -> "GetObjectsInformationResponse":
+        """
+        Get all information for a specific object
+        ---
+        Parameter
+        1. object id
+        ---
+        Return dictonary of object informations
+        """
+        return self.__rdfManager.GetObjectsInformation(request)
+
     def UploadNewDataset(self, dataset: "UploadDatasetFileRequest") -> "UploadDatasetFileResponse":
         """
         Upload a new dataset
@@ -213,7 +243,7 @@ class ControllerManager(object):
         ---
         Return upload status
         """
-        dataset_id: str = self.__data_storage.save_dataset(dataset.username, dataset.name, dataset.content)
+        dataset_id: str = self.__data_storage.save_dataset(dataset.username, dataset.file_name, dataset.content, dataset.type, dataset.dataset_name)
         print(f"saved new dataset: {dataset_id}")
         
         response = UploadDatasetFileResponse()
