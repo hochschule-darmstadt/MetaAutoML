@@ -1,19 +1,21 @@
-from predict_time_sources import feature_preparation, DataType, SplitMethod
-from JsonUtil import get_config_property
-import numpy as np
-import pandas as pd
-import os
-import grpc
-import subprocess
-import time
-import sys
 import json
+import os
 import shutil
+import subprocess
+import sys
+import time
+
 import Adapter_pb2
 import Adapter_pb2_grpc
-from TemplateGenerator import TemplateGenerator
-from sklearn.metrics import mean_squared_error, accuracy_score
 import dill
+import grpc
+import numpy as np
+import pandas as pd
+from predict_time_sources import DataType, SplitMethod, feature_preparation
+from sklearn.metrics import accuracy_score, mean_squared_error
+
+from JsonUtil import get_config_property
+from TemplateGenerator import TemplateGenerator
 
 ######################################################################
 ## GRPC HELPER FUNCTIONS
@@ -176,7 +178,7 @@ def zip_script(session_id):
         'file_location': file_loc_on_controller
     }
 
-def evaluate(config_json, config_path):
+def evaluate(config_json, config_path, dataloader):
     """
     Evaluate the model by using the test set
     ---
@@ -197,19 +199,20 @@ def evaluate(config_json, config_path):
     subprocess.call([python_env, os.path.join(session_path, "predict.py"), file_path, config_path])
     predict_time = time.time() - predict_start
 
-    test = pd.read_csv(file_path)
-    if SplitMethod.SPLIT_METHOD_RANDOM == config_json["test_configuration"]["method"]:
-        test = test.sample(random_state=config_json["test_configuration"]["random_state"], frac=1)
-    else:
-        test = test.iloc[int(test.shape[0] * config_json["test_configuration"]["split_ratio"]):]
+    train, test = dataloader(config_json)
 
     predictions = pd.read_csv(os.path.join(session_path, "predictions.csv"))
 
     target = config_json["tabular_configuration"]["target"]["target"]
+    
     if config_json["task"] == 1:
-        return accuracy_score(test[target], predictions["predicted"]), (predict_time * 1000) / test.shape[
-            0]
+        return accuracy_score(test[target], predictions["predicted"]), (predict_time * 1000) / test.shape[0]
     elif config_json["task"] == 2:
+        return mean_squared_error(test[target], predictions["predicted"], squared=False), \
+               (predict_time * 1000) / test.shape[0]
+    elif config_json["task"] == 3:
+        return accuracy_score(test.Y, predictions["predicted"]), (predict_time * 1000) / test.shape[0]
+    elif config_json["task"] == 4:
         return mean_squared_error(test[target], predictions["predicted"], squared=False), \
                (predict_time * 1000) / test.shape[0]
 
@@ -287,22 +290,24 @@ def read_tabular_dataset_training_data(json_configuration):
     """
     Read the training dataset from disk
     """
-    df = pd.read_csv(os.path.join(json_configuration["file_location"], json_configuration["file_name"]),
+    data = pd.read_csv(os.path.join(json_configuration["file_location"], json_configuration["file_name"]),
                     **json_configuration["file_configuration"])
 
     # convert all object columns to categories, because autosklearn only supports numerical,
     # bool and categorical features
     #TODO: change to ontology based preprocessing
-    df[df.select_dtypes(['object']).columns] = df.select_dtypes(['object']).apply(lambda x: x.astype('category'))
+    data[data.select_dtypes(['object']).columns] = data.select_dtypes(['object']).apply(lambda x: x.astype('category'))
 
 
     # split training set
     if SplitMethod.SPLIT_METHOD_RANDOM == json_configuration["test_configuration"]["method"]:
-        df = df.sample(random_state=json_configuration["test_configuration"]["random_state"], frac=1)
+        train = data.sample(random_state=json_configuration["test_configuration"]["random_state"], frac=1)
+        test = data.sample(random_state=json_configuration["test_configuration"]["random_state"], frac=1)
     else:
-        df = df.iloc[:int(df.shape[0] * json_configuration["test_configuration"]["split_ratio"])]
+        train = data.iloc[:int(train.shape[0] * json_configuration["test_configuration"]["split_ratio"])]
+        test = data.iloc[int(train.shape[0] * json_configuration["test_configuration"]["split_ratio"]):]
 
-    return df
+    return train, test
 
 def prepare_tabular_dataset(df, json_configuration):
     """
