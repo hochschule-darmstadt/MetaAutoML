@@ -204,16 +204,18 @@ def evaluate(config_json, config_path, dataloader):
     predictions = pd.read_csv(os.path.join(session_path, "predictions.csv"))
 
     target = config_json["tabular_configuration"]["target"]["target"]
-    
+
     if config_json["task"] == 1:
         return accuracy_score(test[target], predictions["predicted"]), (predict_time * 1000) / test.shape[0]
     elif config_json["task"] == 2:
         return mean_squared_error(test[target], predictions["predicted"], squared=False), \
                (predict_time * 1000) / test.shape[0]
     elif config_json["task"] == 3:
-        return accuracy_score(test.Y, predictions["predicted"]), (predict_time * 1000) / test.shape[0]
+        return 0, (predict_time * 1000) / test.shape[0]
     elif config_json["task"] == 4:
-        return mean_squared_error(test[target], predictions["predicted"], squared=False), \
+        return accuracy_score(test.Y, predictions["predicted"]), (predict_time * 1000) / test.shape[0]
+    elif config_json["task"] == 5:
+        return mean_squared_error(test.Y, predictions["predicted"], squared=False), \
                (predict_time * 1000) / test.shape[0]
 
 

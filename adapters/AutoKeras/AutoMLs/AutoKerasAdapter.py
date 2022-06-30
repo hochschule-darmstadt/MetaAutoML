@@ -54,6 +54,7 @@ class AutoKerasAdapter(AbstractAdapter):
         reg.fit(x=X, y=y)
         self.__export_model(reg, self._configuration["session_id"], 'model_keras.p')
 
+    @staticmethod
     def __data_loader(config):
         train_data = None
         test_data = None
