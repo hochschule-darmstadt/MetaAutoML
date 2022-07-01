@@ -65,17 +65,18 @@ namespace BlazorBoilerplate.Server.Managers
                 return new ApiResponse(Status404NotFound, ex.Message);
             }
         }
-        public async Task<ApiResponse> GetDatasetCompatibleTasks(GetDatasetCompatibleTasksRequestDto datasetName)
+        public async Task<ApiResponse> GetDatasetCompatibleTasks(GetDatasetCompatibleTasksRequestDto dataset)
         {
             // call grpc method
-            GetDatasetCompatibleTasksRequest requestGrpc = new GetDatasetCompatibleTasksRequest();
+            GetDatasetCompatibleTasksRequest request = new GetDatasetCompatibleTasksRequest();
             GetDatasetCompatibleTasksResponseDto response = new GetDatasetCompatibleTasksResponseDto();
             var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
             try
             {
-                requestGrpc.Username = username;
-                requestGrpc.DatasetName = datasetName.DatasetName;
-                var reply = _client.GetDatasetCompatibleTasks(requestGrpc);
+                request.Username = username;
+                request.DatasetName = dataset.DatasetName;
+                request.DatasetType = dataset.DatasetType;
+                var reply = _client.GetDatasetCompatibleTasks(request);
                 response.Tasks = reply.Tasks.ToList();
                 return new ApiResponse(Status200OK, null, response);
             }

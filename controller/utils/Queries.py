@@ -19,7 +19,7 @@ ONTOLOGY_QUERY_GET_TASKS_FOR_DATASET_TYPE = """
                        :has_dataset_type ?set ;
                        skos:prefLabel ?task .
             ?set a :Enum ;
-                       skos:prefLabel "tabular" .
+                       skos:prefLabel ?dataset_type .
             }
             """
 
@@ -49,6 +49,7 @@ ONTOLOGY_QUERY_GET_DATASET_TYPES = """
                             :supported_by_oma_ml "true" .
             } 
             """
+
 #Retrieve all object information by id
 ONTOLOGY_QUERY_GET_ALL_DETAILS_BY_ID = """
             PREFIX : <http://h-da.de/ml-ontology/>
