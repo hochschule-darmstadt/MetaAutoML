@@ -45,9 +45,9 @@ class AlphaD3MAdapter(AbstractAdapter):
                                 metric="accuracy")
 
         pipeline_id = d3m_obj.get_best_pipeline_id()
+        d3m_obj.train(pipeline_id)
 
         # TODO:
-        # train best pipeline?
         # how to export considering alphad3m specialties?
         # how to predict on frontend with alphad3m specialties?
 
