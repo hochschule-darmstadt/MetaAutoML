@@ -28,13 +28,13 @@
         <div style="display:flex; flex-direction:row; justify-content:left">
             <div style="display: flex; align-items: center; padding-right: 1%">Compatible Libraries:</div>
             <MatChipSet Filter="true">
-                @* @foreach (var item in _compatibleLibrary.Libraries)
+                @foreach (var item in _supportedMlLibraries.MlLibraries)
                 {
                     <MatChip Label="@item" IsCheckable="true"></MatChip>
-                } *@
-                <MatChip label="test1" IsCheckable="true">test1</MatChip>
+                }
+                @* <MatChip label="test1" IsCheckable="true">test1</MatChip>
                 <MatChip label="test2" IsCheckable="true">test2</MatChip>
-                <MatChip label="test3" IsCheckable="true">test3</MatChip>
+                <MatChip label="test3" IsCheckable="true">test3</MatChip> *@
             </MatChipSet>
         </div>
 
@@ -96,6 +96,7 @@
 @code {
     private GetDatasetCompatibleTasksResponseDto _tasks;
     private GetCompatibleAutoMlSolutionsResponseDto _compatibleAutoMl;
+    private GetSupportedMlLibrariesResponseDto _supportedMlLibraries;
     private List<String> _columnNames;
     private MatChip[] selectedChips = null;
     private string lastCheckedChip = "testLabel";
