@@ -67,6 +67,19 @@ class RdfManager(object):
             self.__log.exception("task key in configuration dictonary has no value")
             result.AutoMlSolutions.append("Task parameter value missing")
             return result
+        
+        
+        if "library" not in request.configuration:  # Check if task parameter is contained, we require it for a successful query
+            self.__log.exception("Configuration dictonary does not contain the key library")
+            result.AutoMlSolutions.append("Library parameter missing")
+            return result
+
+        if len(request.configuration[
+                   "library"]) == 0:  # Check if task parameter has value, we require it for a successful query
+            self.__log.exception("library key in configuration dictonary has no value")
+            result.AutoMlSolutions.append("Library parameter value missing")
+            return result
+        
 
         # TODO add more parameter to query
         # task = rdflib.Literal(u'binary classification')
@@ -77,6 +90,17 @@ class RdfManager(object):
         queryResult = self.__executeQuery(q, {"task": task})
         for row in queryResult:
             result.auto_ml_solutions.append(row.automl.replace(ML_ONTOLOGY_NAMESPACE, ""))
+            
+            
+        library = rdflib.Literal(request.configuration["library"])
+        q = prepareQuery(Queries.ONTOLOGY_QUERY_GET_ACTIVE_AUTOML_FOR_LIBRARY,
+                         initNs={"skos": SKOS})
+
+        queryResult = self.__executeQuery(q, {"library": library})
+        for row in queryResult:
+            result.auto_ml_solutions.append(row.automl.replace(ML_ONTOLOGY_NAMESPACE, ""))
+            
+            
         return result
 
     def GetDatasetCompatibleTasks(self, request: GetDatasetCompatibleTasksRequest) -> GetDatasetCompatibleTasksResponse:
