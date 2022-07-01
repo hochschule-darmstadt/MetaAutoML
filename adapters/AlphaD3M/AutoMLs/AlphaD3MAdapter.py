@@ -44,9 +44,11 @@ class AlphaD3MAdapter(AbstractAdapter):
                                 task_keywords=["classification", "multiClass", "tabular"],
                                 metric="accuracy")
 
-        pipeline_id = d3m_obj.get_best_pipeline_id();
+        pipeline_id = d3m_obj.get_best_pipeline_id()
 
-        # TODO train pipeline?
+        # TODO:
+        # train best pipeline?
+        # how to export and test considering alphad3m specialties, for the prediction on frontend
 
         self.__export_pipeline(d3m_obj, os.path.join(get_config_property('output-path'), 'tmp', 'd3m'), pipeline_id)
         d3m_obj.end_session()
