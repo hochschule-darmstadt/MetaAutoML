@@ -27,14 +27,14 @@
     {
         <div style="display:flex; flex-direction:row; justify-content:left">
             <div style="display: flex; align-items: center; padding-right: 1%">Compatible Libraries:</div>
-            <MatChipSet Filter="true" SelectedChipsChanged="OnChipLibraryChanged">
+            <MatChipSet Filter="true">
                 @* @foreach (var item in _compatibleLibrary.Libraries)
                 {
                     <MatChip Label="@item" IsCheckable="true"></MatChip>
                 } *@
-                <MatChip Label="@item" IsCheckable="true">test1</MatChip>
-                <MatChip Label="@item" IsCheckable="true">test2</MatChip>
-                <MatChip Label="@item" IsCheckable="true">test3</MatChip>
+                <MatChip IsCheckable="true">test1</MatChip>
+                <MatChip IsCheckable="true">test2</MatChip>
+                <MatChip IsCheckable="true">test3</MatChip>
             </MatChipSet>
 
             <div style="display: flex; align-items: center; padding-right: 1% ">Target Column:</div>
