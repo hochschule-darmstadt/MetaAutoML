@@ -35,7 +35,6 @@ class AlphaD3MAdapter(AbstractAdapter):
     def __tabular_classification(self):
         """Execute the classification task"""
 
-        # TODO: Implementation of classification by alphad3m here
         d3m_obj = d3mi.AutoML(os.path.join(sys.path[0], "d3mTmp"),
                                 "AlphaD3M", "pypi")
         d3m_obj.search_pipelines(self._configuration["file_location"]+"/"+self._configuration["file_name"],
