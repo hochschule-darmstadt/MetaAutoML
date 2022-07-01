@@ -48,13 +48,16 @@ class AlphaD3MAdapter(AbstractAdapter):
 
         # TODO:
         # train best pipeline?
-        # how to export and test considering alphad3m specialties, for the prediction on frontend
+        # how to export considering alphad3m specialties
+        # hot to for the prediction on frontend
 
         self.__export_pipeline(d3m_obj, os.path.join(get_config_property('output-path'), 'tmp', 'd3m'), pipeline_id)
         d3m_obj.end_session()
 
 
     def __export_pipeline(self, automl: d3mi.AutoML, export_dir, pipeline_id):
+        """Export alphad3m pipeline"""
+
         automl.save_pipeline(pipeline_id, export_dir)
         with open(os.path.join(export_dir, pipeline_id, problem_config_filepath), 'w') as writer:
             json.dump(automl.problem_config, writer)
@@ -63,6 +66,8 @@ class AlphaD3MAdapter(AbstractAdapter):
         print('INFO: Pipeline exported.')
 
     def __import_pipeline(self, automl: d3mi.AutoML, export_dir):
+        """Import alphad3m pipeline"""
+        
         old_pipeline_id = ""
         with open(os.path.join(export_dir, meta_filepath), 'r') as reader:
             old_pipeline_id = json.load(reader)["id"]
