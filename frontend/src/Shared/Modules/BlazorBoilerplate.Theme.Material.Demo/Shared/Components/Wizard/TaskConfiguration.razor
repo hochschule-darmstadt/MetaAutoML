@@ -22,11 +22,21 @@
             }
         </MatSelect>
     </div>
-    <div style="display: flex; align-items: center; padding-right: 1%">Compatible Libraries:</div>
     @* only show advanced option if a task was selected *@
     @if (lastCheckedChip != "testLabel")
     {
         <div style="display:flex; flex-direction:row; justify-content:left">
+            <div style="display: flex; align-items: center; padding-right: 1%">Compatible Libraries:</div>
+            <MatChipSet Filter="true" SelectedChipsChanged="OnChipLibraryChanged">
+                @* @foreach (var item in _compatibleLibrary.Libraries)
+                {
+                    <MatChip Label="@item" IsCheckable="true"></MatChip>
+                } *@
+                <MatChip Label="@item" IsCheckable="true">test1</MatChip>
+                <MatChip Label="@item" IsCheckable="true">test2</MatChip>
+                <MatChip Label="@item" IsCheckable="true">test3</MatChip>
+            </MatChipSet>
+
             <div style="display: flex; align-items: center; padding-right: 1% ">Target Column:</div>
             @if (_columnNames != null)
             {
@@ -43,7 +53,7 @@
                     <MatChipSet Filter="true" SelectedChipsChanged="OnChipAutoMLSolutionChanged">
                         @if (_compatibleAutoMl != null && _compatibleAutoMl.AutoMlSolutions.Count != 0)
                         {
-                            <p style="margin-bottom: 0px;">AutoML Solution :</p>
+                            <p style="margin-bottom: 0px;">AutoML Solution: </p>
                             @foreach (var item in _compatibleAutoMl.AutoMlSolutions)
                             {
                                 <MatChip Label="@item" IsCheckable="true"></MatChip>
