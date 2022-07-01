@@ -9,6 +9,18 @@ ONTOLOGY_QUERY_GET_ACTIVE_AUTOML_FOR_TASK = """
             ?p skos:prefLabel ?task .
             }
             """
+            
+###Retrive all active and with library compatible AutoMLs
+ONTOLOGY_QUERY_GET_ACTIVE_AUTOML_FOR_LIBRARY = """
+            PREFIX : <http://h-da.de/ml-ontology/>
+            SELECT ?automlTask
+            WHERE {
+            ?automlTask a :AutoML_solution;
+                      :supported_by_oma_ml "true" ;
+                      :can_perform ?l .
+            ?l skos:prefLabel ?library .
+            }
+            """
 
 ###Retrieve all compatible tasks for a dataset type
 ONTOLOGY_QUERY_GET_TASKS_FOR_DATASET_TYPE = """
