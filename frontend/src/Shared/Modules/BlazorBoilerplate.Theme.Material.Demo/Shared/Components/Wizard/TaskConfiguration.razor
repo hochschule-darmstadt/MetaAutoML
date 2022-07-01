@@ -32,11 +32,13 @@
                 {
                     <MatChip Label="@item" IsCheckable="true"></MatChip>
                 } *@
-                <MatChip IsCheckable="true">test1</MatChip>
-                <MatChip IsCheckable="true">test2</MatChip>
-                <MatChip IsCheckable="true">test3</MatChip>
+                <MatChip label="test1" IsCheckable="true">test1</MatChip>
+                <MatChip label="test2" IsCheckable="true">test2</MatChip>
+                <MatChip label="test3" IsCheckable="true">test3</MatChip>
             </MatChipSet>
+        </div>
 
+        <div style="display:flex; flex-direction:row; justify-content:left">
             <div style="display: flex; align-items: center; padding-right: 1% ">Target Column:</div>
             @if (_columnNames != null)
             {
