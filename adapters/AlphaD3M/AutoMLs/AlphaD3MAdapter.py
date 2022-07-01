@@ -49,14 +49,24 @@ class AlphaD3MAdapter(AbstractAdapter):
 
         # TODO:
         # how to export considering alphad3m specialties?
-        # how to predict on frontend with alphad3m specialties?
+        # how to predict on frontend considering alphad3m specialties?
 
         self.__export_pipeline(d3m_obj, os.path.join(get_config_property('output-path'), 'tmp', 'd3m'), pipeline_id)
         d3m_obj.end_session()
 
 
     def __export_pipeline(self, automl: d3mi.AutoML, export_dir, pipeline_id):
-        """Export alphad3m pipeline"""
+        """
+        Exports alphad3m pipeline, problem.json and pipeline-id
+        ---
+        Parameter:
+        1. Alphad3m d3mi.AutoML object to export from
+        2. Directory to where to export
+        3. Pipeline id of pipeline to export
+        ---
+        Return:
+        None
+        """
 
         automl.save_pipeline(pipeline_id, export_dir)
         with open(os.path.join(export_dir, pipeline_id, problem_config_filepath), 'w') as writer:
@@ -66,7 +76,17 @@ class AlphaD3MAdapter(AbstractAdapter):
         print('INFO: Pipeline exported.')
 
     def __import_pipeline(self, automl: d3mi.AutoML, export_dir):
-        """Import alphad3m pipeline"""
+        """
+        Import alphad3m pipeline into d3mi.AutoML object from parameters
+        ---
+        Parameter:
+        1. Alphad3m d3mi.AutoML object to import to
+        2. Export directory to which the pipeline has been exported
+        ---
+        Return
+        int
+            pipeline_id
+        """
 
         old_pipeline_id = ""
         with open(os.path.join(export_dir, meta_filepath), 'r') as reader:
