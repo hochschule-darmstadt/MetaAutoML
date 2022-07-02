@@ -28,9 +28,12 @@
         <div style="display:flex; flex-direction:row; justify-content:left">
             <div style="display: flex; align-items: center; padding-right: 1%">Compatible Libraries:</div>
             <MatChipSet Filter="true">
-                @foreach (var item in _supportedMlLibraries.MlLibraries)
+                @if (_supportedMlLibraries != null && _supportedMlLibraries.MlLibraries.Count != 0)
                 {
-                    <MatChip Label="@item" IsCheckable="true"></MatChip>
+                    @foreach (var item in _supportedMlLibraries.MlLibraries)
+                    {
+                        <MatChip Label="@item" IsCheckable="true"></MatChip>
+                    }
                 }
                 @* <MatChip label="test1" IsCheckable="true">test1</MatChip>
                 <MatChip label="test2" IsCheckable="true">test2</MatChip>
