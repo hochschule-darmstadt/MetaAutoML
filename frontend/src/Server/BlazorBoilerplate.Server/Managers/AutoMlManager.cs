@@ -70,13 +70,13 @@ namespace BlazorBoilerplate.Server.Managers
                 startAutoMLrequest.Username = username;
                 startAutoMLrequest.Dataset = autoMl.DatasetIdentifier;
         
-                foreach (var i in autoMl.RequiredAutoMLs)
-                {
-                    startAutoMLrequest.RequiredAutoMls.Add(i);
-                }
                 foreach (var i in autoMl.RequiredMlLibraries)
                 {
                     startAutoMLrequest.RequiredMlLibraries.Add(i);
+                }
+                foreach (var i in autoMl.RequiredAutoMLs)
+                {
+                    startAutoMLrequest.RequiredAutoMls.Add(i);
                 }
                 startAutoMLrequest.Task = GetMachineLearningTask(autoMl);
                 startAutoMLrequest.TabularConfig = GetTabularDataConfiguration(autoMl);

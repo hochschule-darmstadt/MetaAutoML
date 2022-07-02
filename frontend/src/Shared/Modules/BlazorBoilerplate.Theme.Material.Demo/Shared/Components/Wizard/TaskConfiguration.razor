@@ -123,8 +123,8 @@
             }
         }
         ((AutoMLTabularDataConfiguration)WizardState.automlRequest.Configuration).Target = new AutoMLTarget();
-        WizardState.automlRequest.RequiredAutoMLs = new List<string>();
         WizardState.automlRequest.RequiredMlLibraries = new List<string>();
+        WizardState.automlRequest.RequiredAutoMLs = new List<string>();
         WizardState.automlRequest.RuntimeConstraints = new AutoMLRuntimeConstraints();
         WizardState.automlRequest.RuntimeConstraints.Runtime_limit = 3;
         WizardState.automlRequest.RuntimeConstraints.Max_iter = 0;
