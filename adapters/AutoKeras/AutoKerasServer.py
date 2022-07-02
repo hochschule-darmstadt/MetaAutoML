@@ -9,6 +9,7 @@ import Adapter_pb2_grpc
 import grpc
 from AdapterUtils import *
 from AutoKerasAdapter import AutoKerasAdapter
+from DataLoader import data_loader
 from JsonUtil import get_config_property
 
 
@@ -26,8 +27,10 @@ class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
             start_time = time.time()
             # saving AutoML configuration JSON
             config_json = json.loads(request.processJson)
+
             job_file_location = os.path.join(get_config_property("job-file-path"),
                                              get_config_property("job-file-name"))
+
             with open(job_file_location, "w+") as f:
                 json.dump(config_json, f)
 
@@ -37,7 +40,7 @@ class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
             output_json = zip_script(config_json["session_id"])
             library = "neural network"
             model = "keras"
-            test_score, prediction_time = evaluate(config_json, job_file_location, AutoKerasAdapter.__data_loader)
+            test_score, prediction_time = evaluate(config_json, job_file_location, data_loader)
             response = yield from get_response(output_json, start_time, test_score, prediction_time, library, model)
             print(f'{get_config_property("adapter-name")} job finished')
             return response
