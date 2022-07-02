@@ -28,13 +28,14 @@
     {
         <div style="display:flex; flex-direction:row; justify-content:left">
             <div style="display: flex; align-items: center; padding-right: 1%">Potentially Compatible Libraries:</div>
-            <MatChipSet Filter="true">
+            <MatChipSet Filter="true" SelectedChipsChanged="OnChipAutoMlLibraryChanged">
                 @if (_supportedMlLibraries != null && _supportedMlLibraries.MlLibraries.Count != 0)
                 {
                     @foreach (var item in _supportedMlLibraries.MlLibraries)
                     {
                         <MatChip Label="@item" IsCheckable="true"></MatChip>
                     }
+                    <MatChip Label="testChip" IsCheckable="true"></MatChip>
                 }
                 @* <MatChip label="test1" IsCheckable="true">test1</MatChip>
                 <MatChip label="test2" IsCheckable="true">test2</MatChip>
@@ -123,9 +124,19 @@
         }
         ((AutoMLTabularDataConfiguration)WizardState.automlRequest.Configuration).Target = new AutoMLTarget();
         WizardState.automlRequest.RequiredAutoMLs = new List<string>();
+        WizardState.automlRequest.RequiredLibraries = new List<string>();
         WizardState.automlRequest.RuntimeConstraints = new AutoMLRuntimeConstraints();
         WizardState.automlRequest.RuntimeConstraints.Runtime_limit = 3;
         WizardState.automlRequest.RuntimeConstraints.Max_iter = 0;
+    }
+
+    private async void OnChipAutoMlLibraryChanged(MatChip[] newChips)
+    {
+        WizardState.automlRequest.RequiredLibraries = new List<string>();
+        foreach (var chip in newChips)
+        {
+            WizardState.automlRequest.RequiredLibraries.Add(chip.Label);
+        }
     }
 
     private async void OnChipAutoMLSolutionChanged(MatChip[] newChips)

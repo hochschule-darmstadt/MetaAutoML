@@ -74,6 +74,10 @@ namespace BlazorBoilerplate.Server.Managers
                 {
                     startAutoMLrequest.RequiredAutoMls.Add(i);
                 }
+                foreach (var i in autoMl.RequiredLibraries)
+                {
+                    startAutoMLrequest.RequiredLibraries.Add(i);
+                }
                 startAutoMLrequest.Task = GetMachineLearningTask(autoMl);
                 startAutoMLrequest.TabularConfig = GetTabularDataConfiguration(autoMl);
                 // TODO consider to refactor
