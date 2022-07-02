@@ -1,24 +1,16 @@
 ###Retrive all active and with task compatible AutoMLs
 ONTOLOGY_QUERY_GET_ACTIVE_AUTOML_FOR_TASK = """
             PREFIX : <http://h-da.de/ml-ontology/>
-            SELECT ?automl
+            SELECT DISTINCT ?automl
             WHERE {
-            ?automl a :AutoML_solution;
-                      :supported_by_oma_ml "true" ;
-                      :can_perform ?p .
-            ?p skos:prefLabel ?task .
-            }
-            """
-            
-###Retrive all active and with library compatible AutoMLs
-ONTOLOGY_QUERY_GET_ACTIVE_AUTOML_FOR_LIBRARY = """
-            PREFIX : <http://h-da.de/ml-ontology/>
-            SELECT ?automlTask
-            WHERE {
-            ?automlTask a :AutoML_solution;
-                      :supported_by_oma_ml "true" ;
-                      :can_perform ?l .
-            ?l skos:prefLabel ?library .
+            ?automl a :AutoML_solution ;
+                       :can_perform ?task ;
+                       :supported_by_oma_ml "true" ;
+                       :used_for ?lib .
+            ?task a :ML_task ;
+                       skos:prefLabel ?taskName .
+            ?lib a :ML_library ;
+                       skos:prefLabel ?library .
             }
             """
 
