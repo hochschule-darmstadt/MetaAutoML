@@ -23,8 +23,8 @@ ONTOLOGY_QUERY_GET_TASKS_FOR_DATASET_TYPE = """
             }
             """
 
-###Retrieve all active ML libraries compatible with a given task
-ONTOLOGY_QUERY_GET_SUPPORTED_ML_LIBRARIES_FOR_TASK = """
+###Retrieve all ML libraries compatible with a given task
+ONTOLOGY_QUERY_GET_SUPPORTED_MACHINE_LEARNING_LIBRARY = """
             PREFIX : <http://h-da.de/ml-ontology/>
             SELECT DISTINCT ?library
             WHERE {

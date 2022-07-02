@@ -174,7 +174,7 @@ class RdfManager(object):
             return result
 
         task = rdflib.Literal(request.task)
-        q = prepareQuery(Queries.ONTOLOGY_QUERY_GET_SUPPORTED_ML_LIBRARIES_FOR_TASK,
+        q = prepareQuery(Queries.ONTOLOGY_QUERY_GET_SUPPORTED_MACHINE_LEARNING_LIBRARY,
                          initNs={"skos": SKOS})
 
         queryResult = self.__executeQuery(q, {"taskName": task})
