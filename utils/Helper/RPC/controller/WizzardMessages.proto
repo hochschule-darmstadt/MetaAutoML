@@ -33,15 +33,16 @@ message GetSupportedMlLibrariesResponse {
 
 
 message StartAutoMlProcessRequest {
-    string username = 1;
+   string username = 1;
     string dataset = 2;
     MachineLearningTask task = 3;
     AutoMlConfigurationTabularData tabularConfig = 4;
-    repeated string requiredAutoMls = 5;
-    AutoMlRuntimeConstraints runtimeConstraints = 6;
-    map<string, string> fileConfiguration = 7;
-    TestConfiguration testConfig = 8;
-    string metric = 9;
+    repeated string requiredLibraries = 5;
+    repeated string requiredAutoMls = 6;
+    AutoMlRuntimeConstraints runtimeConstraints = 7;
+    map<string, string> fileConfiguration = 8;
+    TestConfiguration testConfig = 9;
+    string metric = 10;
   }
   
   

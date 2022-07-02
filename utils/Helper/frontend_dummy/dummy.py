@@ -172,9 +172,11 @@ def start_automl(argv: list, stub: Controller_pb2_grpc.ControllerServiceStub):
         runtime_limit=30, max_iter=0)
 
     automls = []  # no automls specified will make Controller start all automls
+    libraries = []
     request = Controller_pb2.StartAutoMLprocessRequest(dataset=dataset_name,
                                                        task=task,
                                                        tabularConfig=tabular_config,
+                                                       requiredLibraries=libraries
                                                        requiredAutoMLs=automls,
                                                        runtimeConstraints=runtime_constraints,
                                                        fileConfiguration={"sep": ','},
