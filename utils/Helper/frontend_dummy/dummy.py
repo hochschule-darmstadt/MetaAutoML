@@ -176,7 +176,7 @@ def start_automl(argv: list, stub: Controller_pb2_grpc.ControllerServiceStub):
     request = Controller_pb2.StartAutoMLprocessRequest(dataset=dataset_name,
                                                        task=task,
                                                        tabularConfig=tabular_config,
-                                                       requiredLibraries=libraries
+                                                       requiredMlLibraries=libraries
                                                        requiredAutoMLs=automls,
                                                        runtimeConstraints=runtime_constraints,
                                                        fileConfiguration={"sep": ','},

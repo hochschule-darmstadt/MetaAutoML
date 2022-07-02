@@ -37,7 +37,7 @@ message StartAutoMlProcessRequest {
     string dataset = 2;
     MachineLearningTask task = 3;
     AutoMlConfigurationTabularData tabularConfig = 4;
-    repeated string requiredLibraries = 5;
+    repeated string requiredMlLibraries = 5;
     repeated string requiredAutoMls = 6;
     AutoMlRuntimeConstraints runtimeConstraints = 7;
     map<string, string> fileConfiguration = 8;
