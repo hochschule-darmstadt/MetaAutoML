@@ -1,12 +1,32 @@
-###Retrive all active and with task compatible AutoMLs
-ONTOLOGY_QUERY_GET_ACTIVE_AUTOML_FOR_TASK = """
+###Retrieve all active ML libraries compatible with a given task
+ONTOLOGY_QUERY_GET_SUPPORTED_ML_LIBRARIES_FOR_TASK = """
             PREFIX : <http://h-da.de/ml-ontology/>
-            SELECT ?automl
+            SELECT DISTINCT ?library
             WHERE {
-            ?automl a :AutoML_solution;
-                      :supported_by_oma_ml "true" ;
-                      :can_perform ?p .
-            ?p skos:prefLabel ?task .
+            ?automl a :AutoML_solution ;
+                       :can_perform ?task ;
+                       :supported_by_oma_ml "true" ;
+                       :used_for ?lib .
+            ?task a :ML_task ;
+                       skos:prefLabel ?taskName .
+            ?lib a :ML_library ;
+                        skos:prefLabel ?library .
+            }
+            """
+
+###Retrive all ML solutions compatible with a given task and libraries
+ONTOLOGY_QUERY_GET_COMPATIBLE_AUTO_ML_SOLUTIONS_FOR_TASK_AND_LIBRARIES = """
+            PREFIX : <http://h-da.de/ml-ontology/>
+            SELECT DISTINCT ?automl
+            WHERE {
+            ?automl a :AutoML_solution ;
+                       :can_perform ?task ;
+                       :supported_by_oma_ml "true" ;
+                       :used_for ?lib .
+            ?task a :ML_task ;
+                       skos:prefLabel ?taskName .
+            ?lib a :ML_library ;
+                       skos:prefLabel ?library .
             }
             """
 
@@ -22,22 +42,6 @@ ONTOLOGY_QUERY_GET_TASKS_FOR_DATASET_TYPE = """
                        skos:prefLabel "tabular" .
             }
             """
-
-###Retrieve all ML libraries compatible with a given task
-ONTOLOGY_QUERY_GET_SUPPORTED_MACHINE_LEARNING_LIBRARY = """
-            PREFIX : <http://h-da.de/ml-ontology/>
-            SELECT DISTINCT ?library
-            WHERE {
-            ?automl a :AutoML_solution ;
-                       :can_perform ?task ;
-                       :supported_by_oma_ml "true" ;
-                       :used_for ?lib .
-            ?task a :ML_task ;
-                       skos:prefLabel ?taskName .
-            ?lib a :ML_library ;
-                        skos:prefLabel ?library .
-            }
-            """
             
 #Retreive all dataset types          
 ONTOLOGY_QUERY_GET_DATASET_TYPES = """
@@ -49,6 +53,7 @@ ONTOLOGY_QUERY_GET_DATASET_TYPES = """
                             :supported_by_oma_ml "true" .
             } 
             """
+
 #Retrieve all object information by id
 ONTOLOGY_QUERY_GET_ALL_DETAILS_BY_ID = """
             PREFIX : <http://h-da.de/ml-ontology/>
