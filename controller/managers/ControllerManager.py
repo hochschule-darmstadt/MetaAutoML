@@ -1,3 +1,4 @@
+import io
 import os
 import pandas as pd
 from requests import request
@@ -10,6 +11,7 @@ from Controller_bgrpc import *
 from AdapterManager import AdapterManager
 from CsvManager import CsvManager
 from RdfManager import RdfManager
+from managers.DataSetAnalysisManager import DataSetAnalysisManager
 from persistence.data_storage import DataStorage
 
 class ControllerManager(object):
@@ -243,7 +245,22 @@ class ControllerManager(object):
         ---
         Return upload status
         """
-        dataset_id: str = self.__data_storage.save_dataset(dataset.username, dataset.file_name, dataset.content, dataset.type, dataset.dataset_name)
+        dataset_for_analysis = pd.read_csv(io.BytesIO(dataset.content))
+        analysisResult = DataSetAnalysisManager.startAnalysis(dataset_for_analysis)
+
+        # NOTE: dataset fields mixed up (bug in dummy)
+        #dataset.file_name = dataset.content.decode("utf-8")
+        #dataset.content = bytes(dataset.username, "ascii")
+        #dataset.username = "User"
+
+        #build dictionary for database
+        database_content = {
+            "name": dataset.dataset_name,
+            "type": dataset.type,
+            "analysis": analysisResult
+        }
+
+        dataset_id: str = self.__data_storage.save_dataset(dataset.username, dataset.file_name, dataset.content, database_content)
         print(f"saved new dataset: {dataset_id}")
         
         response = UploadDatasetFileResponse()

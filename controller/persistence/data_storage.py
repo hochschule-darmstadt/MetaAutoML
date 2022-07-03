@@ -135,7 +135,7 @@ class DataStorage:
         return self.__mongo.update_session(username, id, new_values)
 
 
-    def save_dataset(self, username: str, fileName: str, content: bytes, type: str, name: str) -> str:
+    def save_dataset(self, username: str, fileName: str, content: bytes, database_content: dict) -> str:
         """
         Store dataset contents on disk and insert entry to database.
         ---
@@ -146,19 +146,12 @@ class DataStorage:
         1. username: name of the user
         2. name: name of dataset
         3. content: raw bytes for file on disk
+        4. database_content: dictionary for database
         ---
         Returns dataset id
         """
-
-        # insert shell entry first to get id from database
-        dataset_id = self.__mongo.insert_dataset(username, {
-            "name": name,
-            "type": type,
-            
-            # we need the dataset id from the database for these fields
-            "path": "",
-            "mtime": 0.0
-        })
+        
+        dataset_id = self.__mongo.insert_dataset(username, database_content)
 
         filename_dest = os.path.join(self.__storage_dir, username, dataset_id, fileName)
         if os.getenv("MONGO_DB_DEBUG") != "YES":
