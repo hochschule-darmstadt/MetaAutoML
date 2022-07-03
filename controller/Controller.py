@@ -1,15 +1,14 @@
+from concurrent import futures
+
 import os
 import logging
-from ssl import SSLContext
-import ssl
+import sys
 
-from Controller_bgrpc import *
-from grpclib.server import Server
-import asyncio
+import grpc
 
+import Controller_pb2_grpc
 from JsonUtil import get_config_property
 from ControllerManager import ControllerManager
-from persistence.data_storage import DataStorage
 
 
 def _load_credential_from_file(filepath):
@@ -32,58 +31,33 @@ SERVER_CERTIFICATE = _load_credential_from_file('certificate/server.crt')
 SERVER_CERTIFICATE_KEY = _load_credential_from_file('certificate/server.key')
 
 
-class ControllerService(ControllerServiceBase):
+# ROOT_CERTIFICATE = _load_credential_from_file('certificate/root.crt')
+
+
+class ControllerServiceServicer(Controller_pb2_grpc.ControllerServiceServicer):
     """includes all gRPC functions available for the client frontend"""
 
     def __init__(self):
-        # init data storage
-        data_storage_dir = os.path.join(ROOT_PATH, get_config_property("datasets-path"))
-        if os.getenv("MONGO_DB_DEBUG") == "YES":
-            data_storage = DataStorage(data_storage_dir, "mongodb://localhost:27017/")
-        else:
-            data_storage = DataStorage(data_storage_dir)
-        self._controllerManager = ControllerManager(data_storage)
+        DATASET_FOLDER = os.path.join(ROOT_PATH, get_config_property("datasets-path"))
+        self._controllerManager = ControllerManager(DATASET_FOLDER)
 
-    async def create_new_user(
-        self, create_new_user_request: "CreateNewUserRequest"
-    ) -> "CreateNewUserResponse":
-        """ Return a new OMA-ML user id. """
-        response = self._controllerManager.CreateNewUser(create_new_user_request)
-        return response
-
-    async def get_auto_ml_model(
-        self, get_auto_ml_model_request: "GetAutoMlModelRequest"
-    ) -> "GetAutoMlModelResponse":
+    def GetAutoMlModel(self, request, context):
         """ return the generated model as a .zip for one AutoML by its session id."""
-        response = self._controllerManager.GetAutoMlModel(get_auto_ml_model_request)
+        response = self._controllerManager.GetAutoMlModel(request)
         return response
 
-    async def get_compatible_auto_ml_solutions(
-        self,
-        get_compatible_auto_ml_solutions_request: "GetCompatibleAutoMlSolutionsRequest",
-    ) -> "GetCompatibleAutoMlSolutionsResponse":
+    def GetCompatibleAutoMlSolutions(self, request, context):
         """return a list of AutoML solutions compatible with the current configuration
         """
-        response = self._controllerManager.GetCompatibleAUtoMlSolutions(get_compatible_auto_ml_solutions_request)
+        response = self._controllerManager.GetCompatibleAUtoMlSolutions(request)
         return response
 
-    async def get_dataset_types(
-        self, get_dataset_types_request: "GetDatasetTypesRequest"
-    ) -> "GetDatasetTypesResponse":
-            """return all dataset types."""
-            response = self._controllerManager.GetDatasetTypes(get_dataset_types_request)
-            return response
-
-    async def get_datasets(
-        self, get_datasets_request: "GetDatasetsRequest"
-    ) -> "GetDatasetsResponse":
+    def GetDatasets(self, request, context):
         """return all datasets of a specific type."""
-        datasets = self._controllerManager.GetDatasets(get_datasets_request)
+        datasets = self._controllerManager.GetDatasets()
         return datasets
 
-    async def get_dataset(
-        self, get_dataset_request: "GetDatasetRequest"
-    ) -> "GetDatasetResponse":
+    def GetDataset(self, request, context):
         """
         returns details of a specified dataset.
 
@@ -92,105 +66,76 @@ class ControllerService(ControllerServiceBase):
         datatype: the datatype of the column
         firstEntries: the first couple of rows of the dataset
         """
-        response = self._controllerManager.GetDataset(get_dataset_request)
+        response = self._controllerManager.GetDataset(request)
         return response
 
-    async def get_sessions(
-        self, get_sessions_request: "GetSessionsRequest"
-    ) -> "GetSessionsResponse":
+    def GetSessions(self, request, context):
         """return a list of all sessions the controller has knowledge of. """
-        response = self._controllerManager.GetSessions(get_sessions_request)
+        response = self._controllerManager.GetSessions(request)
         return response
 
-    async def get_session_status(
-        self, get_session_status_request: "GetSessionStatusRequest"
-    ) -> "GetSessionStatusResponse":
+    def GetSessionStatus(self, request, context):
         """return the status of a specific session. The result is a session status and a list of the automl output and its status."""
-        response = self._controllerManager.GetSessionStatus(get_session_status_request)
+        response = self._controllerManager.GetSessionStatus(request)
         return response
 
-    async def get_supported_ml_libraries(
-        self, get_supported_ml_libraries_request: "GetSupportedMlLibrariesRequest"
-    ) -> "GetSupportedMlLibrariesResponse":
+    def GetSupportedMlLibraries(self, request, context):
         """return all supported machine learning libraries for a specific task (by searching supported AutoML)
         """
-        response = self._controllerManager.GetSupportedMlLibraries(get_supported_ml_libraries_request)
+        response = self._controllerManager.GetSupportedMlLibraries(request)
         return response
 
-    async def get_tabular_dataset_column_names(
-        self,
-        get_tabular_dataset_column_names_request: "GetTabularDatasetColumnNamesRequest",
-    ) -> "GetTabularDatasetColumnNamesResponse":
+    def GetTabularDatasetColumnNames(self, request, context):
         """return all the column names of a tabular dataset."""
-        response = self._controllerManager.GetTabularDatasetColumnNames(get_tabular_dataset_column_names_request)
+        response = self._controllerManager.GetTabularDatasetColumnNames(request)
         return response
 
-    async def get_dataset_compatible_tasks(
-        self, get_dataset_compatible_tasks_request: "GetDatasetCompatibleTasksRequest"
-    ) -> "GetDatasetCompatibleTasksResponse":
+    def GetDatasetCompatibleTasks(self, request, context):
         """return all supported AutoML tasks."""
-        response = self._controllerManager.GetDatasetCompatibleTasks(get_dataset_compatible_tasks_request)
+        response = self._controllerManager.GetDatasetCompatibleTasks(request)
         return response
 
-    async def get_objects_information(
-        self, get_object_information_request: "GetObjectsInformationRequest"
-    ) -> "GetObjectsInformationResponse":
-        """return all information fields of an object"""
-        response = self._controllerManager.GetObjectsInformation(get_object_information_request)
-        return response
-
-    async def upload_dataset_file(
-        self, upload_dataset_file_request: "UploadDatasetFileRequest"
-    ) -> "UploadDatasetFileResponse":
+    def UploadDatasetFile(self, request, context):
         """upload a new dataset file as bytes to the controller repository."""
-        response = self._controllerManager.UploadNewDataset(upload_dataset_file_request)
+        response = self._controllerManager.UploadNewDataset(request)
         return response
 
-    async def start_auto_ml_process(
-        self, start_auto_ml_process_request: "StartAutoMlProcessRequest"
-    ) -> "StartAutoMlProcessResponse":
+    def StartAutoMLprocess(self, request, context):
         """start a new AutoML run, using the provided configuration."""
-        response = self._controllerManager.StartAutoMLProcess(start_auto_ml_process_request)
+        response = self._controllerManager.StartAutoMLProcess(request)
         return response
 
-    async def test_auto_ml(
-        self, test_auto_ml_request: "TestAutoMlRequest"
-    ) -> "TestAutoMlResponse":
+    def TestAutoML(self, request, context):
         """start a new AutoML run, using the provided configuration."""
-        response = self._controllerManager.TestAutoML(test_auto_ml_request)
+        response = self._controllerManager.TestAutoML(request)
         return response
 
 
-def create_secure_context() -> SSLContext:
+def serve():
     """
-    Create the required SSL context for inbound Better GRPC connections
-    ---
-    Return the SSL Context for inbound connections
+    Boot the gRPC server and wait for incoming connections
     """
-    #Credit: https://github.com/vmagamedov/grpclib/blob/master/examples/mtls/server.py
-    ctx = ssl.SSLContext(ssl.PROTOCOL_TLS)
-    #ctx.verify_mode = ssl.CERT_REQUIRED
-    ctx.load_cert_chain(str("certificate/server.crt"), str('certificate/server.key'))
-    ctx.options |= ssl.OP_NO_TLSv1 | ssl.OP_NO_TLSv1_1
-    ctx.set_ciphers('ECDHE+AESGCM:ECDHE+CHACHA20:DHE+AESGCM:DHE+CHACHA20')
-    ctx.set_alpn_protocols(['h2'])
-    try:
-        ctx.set_npn_protocols(['h2'])
-    except NotImplementedError:
-        pass
-    return ctx
+    server_credentials = grpc.ssl_server_credentials(((
+                                                          SERVER_CERTIFICATE_KEY,
+                                                          SERVER_CERTIFICATE,
+                                                      ),))
 
-async def main():
-    server = Server([ControllerService()])
-    context = SSLContext(protocol=ssl.PROTOCOL_TLSv1_2)
-    context.load_cert_chain(certfile="certificate/server.crt", keyfile='certificate/server.key')
-    await server.start(get_config_property('controller-server-adress'), get_config_property('controller-server-port'), ssl=create_secure_context())
-    await server.wait_closed()
+    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
+    Controller_pb2_grpc.add_ControllerServiceServicer_to_server(ControllerServiceServicer(), server)
+    # the insecure port shall NOT be mapped to the host or exposed anywhere
+    # it is only meant to be open for the dummy inside the docker-compose setup.
+    # This is due to issues with the secure channel when the client is also in the docker-compose setup.
+    # With this setup we now listen for secure connections from outside the docker-compose network
+    # and insecure connections coming from the docker-network itself
+    server.add_insecure_port(f"0.0.0.0:{get_config_property('controller-server-port-insecure')}")
+    server.add_secure_port(f"0.0.0.0:{get_config_property('controller-server-port')}", server_credentials)
+
+    print("controller started")
+    server.start()
+    server.wait_for_termination()
 
 
 if __name__ == '__main__':
     logging.basicConfig()
-    #serve()
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(main())
+    serve()
     print('done.')

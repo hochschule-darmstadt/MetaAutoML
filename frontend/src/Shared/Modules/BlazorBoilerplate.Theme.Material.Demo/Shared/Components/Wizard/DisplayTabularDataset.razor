@@ -71,7 +71,7 @@
     {
         try
         {
-            ApiResponseDto apiResponse = await apiClient.GetDataset(new GetDatasetRequestDto { Name = WizardState.automlRequest.DatasetIdentifier });
+            ApiResponseDto apiResponse = await apiClient.GetDataset(new GetDatasetRequestDto { Name = WizardState.automlRequest.DatasetName });
 
             if (apiResponse.IsSuccessStatusCode)
             {

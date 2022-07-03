@@ -1,5 +1,5 @@
-﻿@page "/datasets/{id}/{name}"
-@page "/datasets/{id}/{name}/{tabIndex:int?}"
+﻿@page "/datasets/{id}"
+@page "/datasets/{id}/{tabIndex:int?}"
 @inject IStringLocalizer<Global> L
 @using System
 @inject IApiClient apiClient
@@ -8,7 +8,7 @@
 @inject BlazorBoilerplate.Shared.Services.WizardState WizardState
 @attribute [Authorize]
 
-<h1>@Name</h1>
+<h1>@Id</h1>
 
 <MatTabGroup @bind-ActiveIndex="@SelectedIndex">
     <MatTab Label="Train">
@@ -74,8 +74,6 @@
     [Parameter]
     public string? Id { get; set; }
     [Parameter]
-    public string? Name { get; set; }
-    [Parameter]
     public int? TabIndex { get; set; }
 
     public int SelectedIndex;
@@ -87,8 +85,8 @@
     protected override void OnInitialized()
     {
         WizardState.automlRequest = new StartAutoMLRequestDto();
-        WizardState.automlRequest.DatasetIdentifier = Id;
-        WizardState.automlRequest.DatasetType = ":tabular";
+        WizardState.automlRequest.DatasetName = Id;
+        WizardState.automlRequest.DatasetType = "TABULAR";
     }
 
     protected override void OnAfterRender(bool firstRender)

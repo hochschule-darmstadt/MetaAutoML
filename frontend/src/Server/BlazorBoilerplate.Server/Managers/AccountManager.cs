@@ -50,7 +50,6 @@ namespace BlazorBoilerplate.Server.Managers
         private readonly IEventService _events;
         private readonly IStringLocalizer<Global> L;
         private readonly string baseUrl;
-        private readonly ControllerService.ControllerServiceClient _client;
 
         private static readonly UserViewModel LoggedOutUser = new() { IsAuthenticated = false, Roles = new List<string>() };
 
@@ -67,8 +66,7 @@ namespace BlazorBoilerplate.Server.Managers
             IAuthenticationSchemeProvider schemeProvider,
             UrlEncoder urlEncoder,
             IEventService events,
-            IStringLocalizer<Global> l,
-            ControllerService.ControllerServiceClient client)
+            IStringLocalizer<Global> l)
         {
             _databaseInitializer = databaseInitializer;
             _userManager = userManager;
@@ -84,7 +82,6 @@ namespace BlazorBoilerplate.Server.Managers
             _events = events;
             L = l;
             baseUrl = configuration["Robot:ApplicationUrl"];
-            _client = client;   
         }
 
         public async Task<ApiResponse> ConfirmEmail(ConfirmEmailViewModel parameters)
@@ -431,13 +428,7 @@ namespace BlazorBoilerplate.Server.Managers
 
         public async Task<ApiResponse> Register(RegisterViewModel parameters)
         {
-            //Before creating a new user, request the new OMA-ML user id
-            CreateNewUserResponse result = _client.CreateNewUser(new CreateNewUserRequest());
-            if (result.Result != ResultCode.Okay)
-            {
-                return new ApiResponse(Status400BadRequest, $"Error while creating new user, result code: {result.Result}");
-            }
-            await RegisterNewUserAsync(parameters.UserName, parameters.Email, parameters.Password, _userManager.Options.SignIn.RequireConfirmedEmail, result.OmaMlUserId);
+            await RegisterNewUserAsync(parameters.UserName, parameters.Email, parameters.Password, _userManager.Options.SignIn.RequireConfirmedEmail);
 
             if (_userManager.Options.SignIn.RequireConfirmedEmail)
                 return new ApiResponse(Status200OK, L["Operation Successful"]);
@@ -853,13 +844,12 @@ namespace BlazorBoilerplate.Server.Managers
                 return new ApiResponse(Status400BadRequest, msg);
             }
         }
-        public async Task<ApplicationUser> RegisterNewUserAsync(string userName, string email, string password, bool requireConfirmEmail, string omaMlId)
+        public async Task<ApplicationUser> RegisterNewUserAsync(string userName, string email, string password, bool requireConfirmEmail)
         {
             var user = new ApplicationUser
             {
                 UserName = userName,
-                Email = email,
-                OmaMlId = omaMlId
+                Email = email
             };
 
             return await RegisterNewUserAsync(user, password, requireConfirmEmail);
@@ -878,8 +868,7 @@ namespace BlazorBoilerplate.Server.Managers
                     new Claim(Policies.IsUser, string.Empty),
                     new Claim(JwtClaimTypes.Name, user.UserName),
                     new Claim(JwtClaimTypes.Email, user.Email),
-                    new Claim(JwtClaimTypes.EmailVerified, ClaimValues.falseString, ClaimValueTypes.Boolean),
-                    new Claim("omaml", user.OmaMlId)
+                    new Claim(JwtClaimTypes.EmailVerified, ClaimValues.falseString, ClaimValueTypes.Boolean)
                 });
 
             if (await _roleManager.RoleExistsAsync(DefaultRoleNames.User))

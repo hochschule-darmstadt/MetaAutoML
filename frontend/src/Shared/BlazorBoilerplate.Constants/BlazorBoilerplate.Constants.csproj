@@ -5,27 +5,21 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Protos\Enumerations.proto" />
+    <None Remove="Protos\Controller.proto" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Google.Protobuf" Version="3.21.1" />
-    <PackageReference Include="Grpc.Net.Client" Version="2.46.0" />
-    <PackageReference Include="Grpc.Net.ClientFactory" Version="2.46.0" />
-    <PackageReference Include="Grpc.Tools" Version="2.46.3">
+    <PackageReference Include="Google.Protobuf" Version="3.19.1" />
+    <PackageReference Include="Grpc.Net.Client" Version="2.40.0" />
+    <PackageReference Include="Grpc.Net.ClientFactory" Version="2.40.0" />
+    <PackageReference Include="Grpc.Tools" Version="2.42.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
   </ItemGroup>
-	<ItemGroup>
-		<Protobuf Include="Protos/Common.proto" GrpcServices="Client" ProtoRoot="Protos\" />
-		<Protobuf Include="Protos/Enumerations.proto" GrpcServices="Client" ProtoRoot="Protos\" />
-		<Protobuf Include="Protos/ControllerService.proto" GrpcServices="Client" ProtoRoot="Protos\" />
-		<Protobuf Include="Protos/DatasetRelatedMessages.proto" GrpcServices="Client" ProtoRoot="Protos\" />
-		<Protobuf Include="Protos/ModelRelatedMessages.proto" GrpcServices="Client" ProtoRoot="Protos\" />
-		<Protobuf Include="Protos/SessionRelatedMessages.proto" GrpcServices="Client" ProtoRoot="Protos\" />
-		<Protobuf Include="Protos/TestingRelatedMessages.proto" GrpcServices="Client" ProtoRoot="Protos\" />
-		<Protobuf Include="Protos/UserRelatedMessages.proto" GrpcServices="Client" ProtoRoot="Protos\" />
-		<Protobuf Include="Protos/WizzardMessages.proto" GrpcServices="Client" ProtoRoot="Protos\" />
-	</ItemGroup>
+
+  <ItemGroup>
+    <Protobuf Include="Protos\Controller.proto" GrpcServices="Client" />
+  </ItemGroup>
+
 </Project>

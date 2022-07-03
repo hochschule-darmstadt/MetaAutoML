@@ -1,6 +1,4 @@
 from flaml import AutoML
-import os
-from JsonUtil import get_config_property
 
 from AbstractAdapter import AbstractAdapter
 from AdapterUtils import read_tabular_dataset_training_data, prepare_tabular_dataset, export_model
@@ -18,8 +16,6 @@ class FLAMLAdapter(AbstractAdapter):
         1. Configuration JSON of type dictionary
         """
         super(FLAMLAdapter, self).__init__(configuration)
-        self._result_path = os.path.join(get_config_property("output-path"), self._configuration["session_id"])
-        self._log_file_path = os.path.join(self._result_path, "flaml.log")
 
     def start(self):
         """
@@ -49,11 +45,10 @@ class FLAMLAdapter(AbstractAdapter):
         automl_settings.update({
             "metric": self._configuration["metric"] if self._configuration["metric"] != "" else 'accuracy',
             "task": 'classification',
-            "log_file_name": self._log_file_path,
         })
 
         automl.fit(X_train=X, y_train=y, **automl_settings)
-        export_model(automl, self._configuration["session_id"], 'model_flaml.p')
+        export_model(automl, 'model_flaml.p')
 
     def __tabular_regression(self):
         """
@@ -66,8 +61,7 @@ class FLAMLAdapter(AbstractAdapter):
         automl_settings.update({
             "metric": self._configuration["metric"] if self._configuration["metric"] != "" else 'rmse',
             "task": 'regression',
-            "log_file_name": self._log_file_path,
         })
 
         automl.fit(X_train=X, y_train=y, **automl_settings)
-        export_model(automl, self._configuration["session_id"], 'model_flaml.p')
+        export_model(automl, 'model_flaml.p')

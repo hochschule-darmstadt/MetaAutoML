@@ -1,12 +1,6 @@
-FROM python:3.9.13-slim-buster AS base
+FROM python:3.7.11-slim-buster AS base
 WORKDIR /
 EXPOSE 5001
-
-# git is required for installing pip requirements
-#  python-betterproto is cloned from github 
-RUN apt-get update && \
-    DEBIAN_FRONTEND=noninteractive apt-get -qq install \
-    git
 
 COPY ./controller/requirements.txt .
 # Install dependencies

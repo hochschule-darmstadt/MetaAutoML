@@ -3,8 +3,7 @@ import logging
 import shutil
 import json
 import time
-import dill
-
+import pickle
 from concurrent import futures
 
 import grpc
@@ -24,7 +23,7 @@ def GetMetaInformation(config_json):
                           "zip")
     # extract additional information from automl
     with open(os.path.join(working_dir, "model_flaml.p"), 'rb') as file:
-        automl = dill.load(file)
+        automl = pickle.load(file)
         model = automl.best_estimator
         library = automl.model.estimator.__module__.split(".")[0]
     shutil.rmtree(working_dir)

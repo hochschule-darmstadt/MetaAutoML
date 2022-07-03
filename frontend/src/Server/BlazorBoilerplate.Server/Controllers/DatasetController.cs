@@ -32,15 +32,6 @@ namespace BlazorBoilerplate.Server.Controllers
             _logger = logger;
         }
 
-        [HttpGet]
-        [ProducesResponseType(Status200OK)]
-        [ProducesResponseType(Status400BadRequest)]
-        [ProducesResponseType(Status404NotFound)]
-        public async Task<ApiResponse> GetDatasetTypes()
-            => ModelState.IsValid ?
-                await _datasetManager.GetDatasetTypes() :
-                new ApiResponse(Status400BadRequest, L["InvalidData"]);
-
         [HttpPost]
         [ProducesResponseType(Status200OK)]
         [ProducesResponseType(Status400BadRequest)]

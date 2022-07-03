@@ -8,8 +8,6 @@ services:
       context: ./
       dockerfile: ./controller/Dockerfile
     container_name: controller
-    depends_on:
-      - mongo
     # we map the port of the controller to the host.
     # This way we can either connect locally with localhost:5001
     # or from a docker container that accesses host.docker.internal:5001
@@ -47,21 +45,6 @@ services:
       - output-pytorch:/app/app-data/output/pytorch
       - output-alphad3m:/app/app-data/output/alphad3m
 
-  mongo:
-    image: mongo
-    container_name: mongo
-    ports:
-      - "27017:27017"
-
-    # limit log verbosity
-    command: --quiet --logpath /dev/null 
-
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: example
-    volumes:
-      - mongodata:/data/configdb
-      - mongodata:/data/db
 
 #     adapters do not need to be available from the host machine -> no port mappings
 
@@ -166,4 +149,3 @@ volumes:
   output-alphad3m:
   # shared volume between controller and frontend / dummy to transfer output
   output:
-  mongodata:
