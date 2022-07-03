@@ -48,8 +48,8 @@ class AlphaD3MAdapter(AbstractAdapter):
         d3m_obj.train(pipeline_id)
 
         # TODO:
-        # how to export considering alphad3m specialties?
-        # how to predict on frontend considering alphad3m specialties?
+        # Export working and runnable model considering alphad3m specialties
+        # Predicting on frontend considering alphad3m specialties
 
         self.__export_pipeline(d3m_obj, os.path.join(get_config_property('output-path'), 'tmp', 'd3m'), pipeline_id)
         d3m_obj.end_session()
