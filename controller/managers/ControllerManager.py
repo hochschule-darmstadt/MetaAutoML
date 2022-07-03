@@ -172,7 +172,7 @@ class ControllerManager(object):
         save_file = open(filename_dest, 'wb')
         save_file.write(dataset.content)
         analysisResult = DataSetAnalysisManager.startAnalysis(filename_dest)
-        DataSetAnalysisManager.persistAnalysisResult(analysisResult)
+
         return response
 
     def StartAutoMLProcess(self, configuration) -> Controller_pb2.StartAutoMLprocessResponse:

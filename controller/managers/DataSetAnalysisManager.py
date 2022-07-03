@@ -32,23 +32,7 @@ class DataSetAnalysisManager:
             "duplicate_rows": DataSetAnalysisManager.__detect_duplicate_rows(dataset),
         }
 
-        # for debugging purposes
-        print(json.dumps(jsonfile))
-
         return jsonfile
-
-    def persistAnalysisResult(jsonfile:dict):
-        """
-        Persists a python dictionary containing dataset analysis.
-        ---
-        Parameter
-        1. the pythondictionary to persist
-        ---
-        Return None
-        """
-        with open('controller\app-data\analysis.json', 'w+') as target:
-            json.dump(jsonfile, target)
-            target.close()
 
     @staticmethod
     def __number_of_columns(dataset: pd.DataFrame) -> int:
