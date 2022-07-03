@@ -2,7 +2,7 @@ import json
 import os.path
 from JsonUtil import get_config_property
 
-from TabularDataAutoML import TabularDataAutoML
+from MLJARAdapter import MLJARAdapter
 
 if __name__ == '__main__':
     """
@@ -13,8 +13,5 @@ if __name__ == '__main__':
     with open(file_path) as file:
         process_json = json.load(file)
 
-    tabular_data_automl = TabularDataAutoML(process_json)
-
-    if process_json["task"] == 1:
-        # Classification
-        tabular_data_automl.classification()
+    autoMl = MLJARAdapter(process_json)
+    autoMl.start()

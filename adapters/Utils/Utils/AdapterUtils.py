@@ -1,28 +1,25 @@
-import pickle
-
-import grpc
-import os
-
-import numpy as np
-import sys
-import logging
-import shutil
-import subprocess
-import json
-import time
-
-import pandas as pd
-from sklearn.metrics import accuracy_score, mean_squared_error
-
+from predict_time_sources import feature_preparation, DataType, SplitMethod
 from JsonUtil import get_config_property
-
+import numpy as np
+import pandas as pd
+import os
+import grpc
+import subprocess
+import time
+import sys
+import json
+import shutil
 import Adapter_pb2
 import Adapter_pb2_grpc
-
-from concurrent import futures
 from TemplateGenerator import TemplateGenerator
-from predict_time_sources import SplitMethod, DataType, feature_preparation
+from sklearn.metrics import mean_squared_error, accuracy_score
+import dill
 
+######################################################################
+## GRPC HELPER FUNCTIONS
+######################################################################
+
+#region
 
 def get_except_response(context, e):
     """
@@ -38,17 +35,6 @@ def get_except_response(context, e):
     context.set_details(f"Error while executing {adapter_name}: {e}")
     context.set_code(grpc.StatusCode.UNAVAILABLE)
     return Adapter_pb2.StartAutoMLResponse()
-
-
-def generate_script(config_json):
-    """
-    Generate the result python script
-    ---
-    Parameter
-    1. process configuration
-    """
-    generator = TemplateGenerator()
-    generator.generate_script(config_json)
 
 
 def capture_process_output(process, start_time):
@@ -73,13 +59,15 @@ def capture_process_output(process, start_time):
             # if return Code is ADAPTER_RETURN_CODE_STATUS_UPDATE we do not have score values yet
             process_update.testScore = 0.0
             process_update.validationScore = 0.0
+            process_update.predictiontime = 0.0
+            process_update.library = ""
+            process_update.model = ""
             yield process_update
             sys.stdout.write(capture)
             sys.stdout.flush()
             capture = ""
         capture += s
         s = process.stdout.read(1)
-
 
 
 def get_response(output_json, start_time, test_score, prediction_time, library, model):
@@ -108,7 +96,46 @@ def get_response(output_json, start_time, test_score, prediction_time, library, 
     yield response
 
 
-def zip_script(session_id) -> dict:
+#endregion
+
+######################################################################
+## GENERAL HELPER FUNCTIONS
+######################################################################
+
+#region
+
+
+def export_model(model, file_name):
+    """
+    Export the generated ML model to disk
+    ---
+    Parameter:
+    1. generate ML model
+    """
+    with open(os.path.join(get_config_property('output-path'), 'tmp', file_name), 'wb+') as file:
+        dill.dump(model, file)
+
+def start_automl_process():
+    """"
+    @:return started automl process
+    """
+    python_env = os.getenv("PYTHON_ENV", default="PYTHON_ENV_UNSET")
+
+    return subprocess.Popen([python_env, "AutoML.py", ""],
+                            stdout=subprocess.PIPE,
+                            universal_newlines=True)
+
+def generate_script(config_json):
+    """
+    Generate the result python script
+    ---
+    Parameter
+    1. process configuration
+    """
+    generator = TemplateGenerator()
+    generator.generate_script(config_json)
+
+def zip_script(session_id):
     """
     Zip the model and script from the current run
     ---
@@ -135,13 +162,16 @@ def zip_script(session_id) -> dict:
     shutil.make_archive(os.path.join(session_path, zip_file_name),
                         'zip',
                         temp_path)
-    for f in os.listdir(output_path):
-        if f not in ('.gitkeep', 'tmp', *(str(i) for i in range(1, session_id + 1))):
-            file_path = os.path.join(output_path, f)
-            if os.path.isdir(file_path):
-                shutil.rmtree(file_path)
-            else:
-                os.remove(file_path)
+
+    # NOTE: why are we cleaning up the ouput directory?
+    #     session_id is not an int anymore, so this block will raise    
+            # for f in os.listdir(output_path):
+            #     if f not in ('.gitkeep', 'tmp', *(str(i) for i in range(1, session_id + 1))):
+            #         file_path = os.path.join(output_path, f)
+            #         if os.path.isdir(file_path):
+            #             shutil.rmtree(file_path)
+            #         else:
+            #             os.remove(file_path)
 
     file_loc_on_controller = os.path.join(output_path,
                                           get_config_property('adapter-name'),
@@ -152,30 +182,19 @@ def zip_script(session_id) -> dict:
         'file_location': file_loc_on_controller
     }
 
-
-def start_automl_process():
-    """"
-    @:return started automl process
-    """
-    python_env = os.getenv("PYTHON_ENV", default="PYTHON_ENV_UNSET")
-
-    return subprocess.Popen([python_env, "AutoML.py", ""],
-                            stdout=subprocess.PIPE,
-                            universal_newlines=True)
-
-
 def evaluate(config_json, config_path):
     """
     Evaluate the model by using the test set
     ---
     Parameter
     1. configuration json
-    1. configuration path
+    2. configuration path
     ---
     Return evaluation score
     """
     file_path = os.path.join(config_json["file_location"], config_json["file_name"])
     working_dir = os.path.join(get_config_property("output-path"), "working_dir")
+    #Setup working directory
     shutil.unpack_archive(os.path.join(get_config_property("output-path"),
                                        str(config_json["session_id"]),
                                        get_config_property("export-zip-file-name") + ".zip"),
@@ -189,27 +208,23 @@ def evaluate(config_json, config_path):
     subprocess.call([python_env, os.path.join(working_dir, "predict.py"), file_path, config_path])
     predict_time = time.time() - predict_start
 
-    # AutoSklearn uses an ensemble of up to 50 different models we are not able to show them all in our current GUI
-    model = "ensemble selection"
-    # autosklearn always uses only sklearn
-    library = "sklearn"
-
     test = pd.read_csv(file_path)
     if SplitMethod.SPLIT_METHOD_RANDOM == config_json["test_configuration"]["method"]:
         test = test.sample(random_state=config_json["test_configuration"]["random_state"], frac=1)
-    test = test.iloc[int(test.shape[0] * config_json["test_configuration"]["split_ratio"]):]
+    else:
+        test = test.iloc[int(test.shape[0] * config_json["test_configuration"]["split_ratio"]):]
 
     predictions = pd.read_csv(os.path.join(working_dir, "predictions.csv"))
+    #Cleanup working directory
     shutil.rmtree(working_dir)
 
     target = config_json["tabular_configuration"]["target"]["target"]
     if config_json["task"] == 1:
-        return accuracy_score(test[target],
-                              predictions["predicted"]), \
-               (predict_time * 1000) / test.shape[0], library, model
+        return accuracy_score(test[target], predictions["predicted"]), (predict_time * 1000) / test.shape[
+            0]
     elif config_json["task"] == 2:
         return mean_squared_error(test[target], predictions["predicted"], squared=False), \
-               (predict_time * 1000) / test.shape[0], library, model
+               (predict_time * 1000) / test.shape[0]
 
 
 def predict(data, config_json, config_path):
@@ -259,72 +274,66 @@ def predict(data, config_json, config_path):
     else:
         return 0, predict_time, predictions["predicted"].astype('string').tolist()
 
+#endregion
 
-class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
+######################################################################
+## TABULAR DATASET HELPER FUNCTIONS
+######################################################################
+
+#region
+
+def cast_dataframe_column(dataframe, column_index, datatype):
     """
-    AutoML Adapter Service implementation.
-    Service provide functionality to execute and interact with the current AutoML process.
+    Cast a specific column to a new data type
     """
+    if DataType(datatype) is DataType.DATATYPE_CATEGORY:
+        dataframe[column_index] = dataframe[column_index].astype('category')
+    elif DataType(datatype) is DataType.DATATYPE_BOOLEAN:
+        dataframe[column_index] = dataframe[column_index].astype('bool')
+    elif DataType(datatype) is DataType.DATATYPE_INT:
+        dataframe[column_index] = dataframe[column_index].astype('int')
+    elif DataType(datatype) is DataType.DATATYPE_FLOAT:
+        dataframe[column_index] = dataframe[column_index].astype('float')
+    return dataframe
 
-    def StartAutoML(self, request, context):
-        """
-        Execute a new AutoML run.
-        """
-        try:
-            start_time = time.time()
-            # saving AutoML configuration JSON
-            config_json = json.loads(request.processJson)
-            job_file_location = os.path.join(get_config_property("job-file-path"),
-                                             get_config_property("job-file-name"))
-            with open(job_file_location, "w+") as f:
-                json.dump(config_json, f)
-
-            process = start_automl_process()
-            yield from capture_process_output(process, start_time)
-            generate_script(config_json)
-            output_json = zip_script(config_json["session_id"])
-
-            test_score, prediction_time, library, model = evaluate(config_json, job_file_location)
-
-            response = yield from get_response(output_json, start_time, test_score, prediction_time, library, model)
-            print(f'{get_config_property("adapter-name")} job finished')
-            return response
-
-        except Exception as e:
-            return get_except_response(context, e)
-
-    def TestAdapter(self, request, context):
-        try:
-            # saving AutoML configuration JSON
-            config_json = json.loads(request.processJson)
-            job_file_location = os.path.join(get_config_property("job-file-path"),
-                                             get_config_property("job-file-name"))
-            with open(job_file_location, "w+") as f:
-                json.dump(config_json, f)
-
-            test_score, prediction_time, predictions = predict(request.testData, config_json, job_file_location)
-            response = Adapter_pb2.TestAdapterResponse(predictions=predictions)
-            response.score = test_score
-            response.predictiontime = prediction_time
-            return response
-
-        except Exception as e:
-            return get_except_response(context, e)
-
-
-def serve():
+def read_tabular_dataset_training_data(json_configuration):
     """
-    Boot the gRPC server and wait for incoming connections
+    Read the training dataset from disk
     """
-    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-    Adapter_pb2_grpc.add_AdapterServiceServicer_to_server(AdapterServiceServicer(), server)
-    server.add_insecure_port(f'{get_config_property("grpc-server-address")}:{os.getenv("GRPC_SERVER_PORT")}')
-    server.start()
-    print(get_config_property("adapter-name") + " started")
-    server.wait_for_termination()
+    df = pd.read_csv(os.path.join(json_configuration["file_location"], json_configuration["file_name"]),
+                    **json_configuration["file_configuration"])
+
+    # convert all object columns to categories, because autosklearn only supports numerical,
+    # bool and categorical features
+    #TODO: change to ontology based preprocessing
+    df[df.select_dtypes(['object']).columns] = df.select_dtypes(['object']).apply(lambda x: x.astype('category'))
 
 
-if __name__ == '__main__':
-    logging.basicConfig()
-    serve()
-    print('done.')
+    # split training set
+    if SplitMethod.SPLIT_METHOD_RANDOM == json_configuration["test_configuration"]["method"]:
+        df = df.sample(random_state=json_configuration["test_configuration"]["random_state"], frac=1)
+    else:
+        df = df.iloc[:int(df.shape[0] * json_configuration["test_configuration"]["split_ratio"])]
+
+    return df
+
+def prepare_tabular_dataset(df, json_configuration):
+    """
+    Prepare tabular dataset, perform feature preparation and data type casting
+    """
+    df = feature_preparation(df, json_configuration["tabular_configuration"]["features"].items())
+    df = cast_dataframe_column(df, json_configuration["tabular_configuration"]["target"]["target"], json_configuration["tabular_configuration"]["target"]["type"])
+    X = df.drop(json_configuration["tabular_configuration"]["target"]["target"], axis=1)
+    y = df[json_configuration["tabular_configuration"]["target"]["target"]]
+    return X, y
+
+def convert_X_and_y_dataframe_to_numpy(X, y):
+    """
+    Convert the X and y dataframes to numpy datatypes and fill up nans
+    """
+    X = X.to_numpy()
+    X = np.nan_to_num(X, 0)
+    y = y.to_numpy()
+    return X, y
+
+#endregion

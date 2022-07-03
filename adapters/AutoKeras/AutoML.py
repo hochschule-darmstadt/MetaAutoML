@@ -3,7 +3,7 @@ import os.path
 
 from JsonUtil import get_config_property
 
-from TabularDataAutoML import TabularDataAutoML
+from AutoKerasAdapter import AutoKerasAdapter
 
 if __name__ == '__main__':
     """
@@ -14,5 +14,5 @@ if __name__ == '__main__':
     with open(file_path) as file:
         process_json = json.load(file)
 
-    tabular_data_automl = TabularDataAutoML(process_json)
-    tabular_data_automl.execute_task()
+    adapter = AutoKerasAdapter(process_json)
+    adapter.start()

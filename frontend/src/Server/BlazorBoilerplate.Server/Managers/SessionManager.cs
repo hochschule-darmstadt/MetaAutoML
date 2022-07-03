@@ -72,7 +72,7 @@ namespace BlazorBoilerplate.Server.Managers
                     response.RequiredMlLibraries.Add(mllibrarie);
                 }
 
-                foreach(var automl in reply.RequiredAutoMLs)
+                foreach(var automl in reply.RequiredAutoMls)
                 {
                     response.RequiredAutoMLs.Add(automl);
                 }

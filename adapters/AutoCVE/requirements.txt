@@ -1,5 +1,5 @@
-numpy==1.19.5
-grpcio==1.42.0
-protobuf==3.19.1
-jinja2==3.0.3
+grpcio
+protobuf==3.17.3
+dill
+jinja2
 git+https://github.com/celiolarcher/AUTOCVE@e87985d#egg=autocve

@@ -6,12 +6,28 @@ __pycache__/
 # C extensions
 *.so
 
+#AutoML exclude
+adapters/*/app-data/output/tmp
+#AutoKeras
+adapters/AutoKeras/structured_data_classifier
+
+
 #VS 
 *.suo
 *.proj
 *.sln
 *.csv
 *.pyproj
+
+#VS Code
+adapters/*/.vscode/
+adapters/*/.venv/
+controller/.venv/
+controller/.vscode/
+*.log
+adapters/*/AutoMLs/predict_time_sources.py
+adapters/MLJAR/AutoML_*
+adapters/AutoKeras/structured_data_classifier/
 
 # Distribution / packaging
 .Python
@@ -138,6 +154,10 @@ dmypy.json
 # Jetbrains IDEAs
 .idea/
 
+#VSCode ignores
+.devcontainer
+.vscode
+
 #controller ignores
 # ignore all output files, but keep the directories with the .gitkeep file
 controller/app-data/output/*/*
@@ -177,3 +197,5 @@ FLAML/templates/output
 #MLJAR ignores
 #AutoMLs
 MLJAR/AutoML_*
+frontend/src/Server/BlazorBoilerplate.Server/appsettings.json
+controller/app-data/analysis.json

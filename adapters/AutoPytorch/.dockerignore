@@ -3,6 +3,8 @@ env
 .vs
 __pycache__
 .gitignore
+.vscode/
+.venv/
 
 *.md
 .idea/
@@ -10,6 +12,7 @@ __pycache__
 
 *-deployment.yaml
 *-service.yaml
+adapters/*/AutoMLs/prediction_time_sources.py
 
 .gitkeep
 

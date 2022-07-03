@@ -117,6 +117,12 @@ namespace BlazorBoilerplate.Server
                 AdditionalUserClaimsPrincipalFactory>();
 
 
+            services.Configure<IISServerOptions>(options =>
+            {
+                options.AllowSynchronousIO = true;
+                //options.MaxRequestBodySize = null;
+                options.MaxRequestBodySize = int.MaxValue;
+            });
             ////////////////////////////////////////////////////////////////////////////////////////////////////////
             /////ENV VARIABLE
             ///////////////////////////////////////////////////////////////////////////////////////////////////////

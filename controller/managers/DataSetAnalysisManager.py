@@ -17,7 +17,6 @@ class DataSetAnalysisManager:
         ---
         Return a python dictionary containing dataset analysis
         """
-       
         dataset = pd.read_csv(dataset, delimiter=',')
 
         jsonfile = {}
@@ -44,7 +43,6 @@ class DataSetAnalysisManager:
         ---
         Return the number of columns in the dataset
         """
-       
         number_of_columns = dataset.shape[1]
         
         return number_of_columns
