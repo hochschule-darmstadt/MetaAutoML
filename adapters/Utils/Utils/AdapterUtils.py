@@ -308,8 +308,8 @@ def read_tabular_dataset_training_data(json_configuration):
         train = data.sample(random_state=json_configuration["test_configuration"]["random_state"], frac=1)
         test = data.sample(random_state=json_configuration["test_configuration"]["random_state"], frac=1)
     else:
-        train = data.iloc[:int(train.shape[0] * json_configuration["test_configuration"]["split_ratio"])]
-        test = data.iloc[int(train.shape[0] * json_configuration["test_configuration"]["split_ratio"]):]
+        train = data.iloc[:int(data.shape[0] * json_configuration["test_configuration"]["split_ratio"])]
+        test = data.iloc[int(data.shape[0] * json_configuration["test_configuration"]["split_ratio"]):]
 
     return train, test
 
