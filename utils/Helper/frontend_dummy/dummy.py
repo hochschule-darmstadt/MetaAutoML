@@ -92,6 +92,21 @@ def get_columns(argv, stub):
         print("get-columns requires exactly one argument <dataset names>")
 
 
+def get_compatible_libraries(argv, stub):
+    if len(argv) == 1:
+        filename = argv[0]
+        with open(filename, 'r') as json_file:
+            config = json.load(json_file)
+        config = json.loads(config)
+        config_str = {str(key): str(value) for key, value in config.items()}
+        request = Controller_pb2.GetSupportedMlLibrariesRequest(
+            configuration=config_str)
+        response = stub.GetSupportedMlLibrariesRequest(request)
+        print(f"{response}")
+    else:
+        print("get-supported-libraries requires exactly one argument <filename>")
+
+
 def get_compatible_automls(argv, stub):
     if len(argv) == 1:
         filename = argv[0]

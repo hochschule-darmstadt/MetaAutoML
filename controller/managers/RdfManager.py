@@ -157,7 +157,7 @@ class RdfManager(object):
         return result
 
 
-    def GetSupportedMlLibraries(self, request) -> GetSupportedMlLibrariesResponse:
+    def GetSupportedMlLibraries(self, request: GetSupportedMlLibrariesRequest) -> GetSupportedMlLibrariesResponse:
         """
         Retrive all Machine Learn Library for this task by supported AutoMLs
         ---

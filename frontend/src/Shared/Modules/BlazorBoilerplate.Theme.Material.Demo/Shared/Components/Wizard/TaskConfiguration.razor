@@ -162,32 +162,32 @@
             dictionary.Add("task", WizardState.automlRequest.Task);
             /** Configuration = dictionary is currently dummy */
             GetCompatibleAutoMlSolutionsRequestDto compatibleAutoMlRequest = new GetCompatibleAutoMlSolutionsRequestDto { Configuration = dictionary };
+
+            ApiResponseDto apiResponse = await apiClient.GetCompatibleAutoMlSolutions(compatibleAutoMlRequest);
+
+            if (apiResponse.IsSuccessStatusCode)
+            {
+                _compatibleAutoMl = Newtonsoft.Json.JsonConvert.DeserializeObject<GetCompatibleAutoMlSolutionsResponseDto>(apiResponse.Result.ToString());
+                StateHasChanged();
+                viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["AutoMlSolution Operation Successful"]);
+            }
+            else
+            {
+                viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["AutoMlSolution Operation Failed"]);
+            }
+
             GetSupportedMlLibrariesRequestDto supportedMlLibrariesRequest = new GetSupportedMlLibrariesRequestDto { Task = WizardState.automlRequest.Task };
+            apiResponse = await apiClient.GetSupportedMlLibraries(supportedMlLibrariesRequest);
 
-            ApiResponseDto apiResponseSolutions = await apiClient.GetCompatibleAutoMlSolutions(compatibleAutoMlRequest);
-
-            if (apiResponseSolutions.IsSuccessStatusCode)
+            if (apiResponse.IsSuccessStatusCode)
             {
-                _compatibleAutoMl = Newtonsoft.Json.JsonConvert.DeserializeObject<GetCompatibleAutoMlSolutionsResponseDto>(apiResponseSolutions.Result.ToString());
+                _supportedMlLibraries = Newtonsoft.Json.JsonConvert.DeserializeObject<GetSupportedMlLibrariesResponseDto>(apiResponse.Result.ToString());
                 StateHasChanged();
-                viewNotifier.Show(apiResponseSolutions.Message, ViewNotifierType.Success, L["Operation Successful"]);
+                viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["SupportedMlLibraries Operation Successful"]);
             }
             else
             {
-                viewNotifier.Show(apiResponseSolutions.Message + " : " + apiResponseSolutions.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
-            }
-
-            ApiResponseDto apiResponseLibraries = await apiClient.GetSupportedMlLibraries(supportedMlLibrariesRequest);
-
-            if (apiResponseLibraries.IsSuccessStatusCode)
-            {
-                _supportedMlLibraries = Newtonsoft.Json.JsonConvert.DeserializeObject<GetSupportedMlLibrariesResponseDto>(apiResponseLibraries.Result.ToString());
-                StateHasChanged();
-                viewNotifier.Show(apiResponseLibraries.Message, ViewNotifierType.Success, L["Operation Successful"]);
-            }
-            else
-            {
-                viewNotifier.Show(apiResponseLibraries.Message + " : " + apiResponseLibraries.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
+                viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["SupportedMlLibraries Operation Failed"]);
             }
         }
         catch (Exception ex)
