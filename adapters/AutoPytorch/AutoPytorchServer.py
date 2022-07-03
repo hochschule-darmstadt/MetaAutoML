@@ -1,17 +1,17 @@
-import os
-import logging
-import shutil
 import json
+import logging
+import os
+import pickle
+import shutil
 import time
 from concurrent import futures
-import pickle
-import grpc
 
 import Adapter_pb2
 import Adapter_pb2_grpc
-
-from JsonUtil import get_config_property
+import grpc
 from AdapterUtils import *
+from DataLoader import data_loader
+from JsonUtil import get_config_property
 
 
 def GetMetInformation(config_json):
@@ -65,7 +65,7 @@ class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
             generate_script(config_json)
             output_json = zip_script(config_json["session_id"])
             library, model = GetMetInformation(config_json)
-            test_score, prediction_time = evaluate(config_json, job_file_location)
+            test_score, prediction_time = evaluate(config_json, job_file_location, data_loader)
 
             response = yield from get_response(output_json, start_time, test_score, prediction_time, library, model)
             print(f'{get_config_property("adapter-name")} job finished')

@@ -10,16 +10,17 @@ os.environ['MKL_NUM_THREADS'] = '1'
 warnings.simplefilter(action='ignore', category=UserWarning)
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
+import pickle
+
 import pandas as pd
+from AbstractAdapter import AbstractAdapter
+from AdapterUtils import export_model, prepare_tabular_dataset
 from autoPyTorch.api.tabular_classification import TabularClassificationTask
 from autoPyTorch.api.tabular_regression import TabularRegressionTask
-import pickle
-from AdapterUtils import read_tabular_dataset_training_data, prepare_tabular_dataset, export_model
-
-
+from DataLoader import data_loader
 from JsonUtil import get_config_property
-from predict_time_sources import feature_preparation, DataType, SplitMethod
-from AbstractAdapter import AbstractAdapter
+from predict_time_sources import DataType, SplitMethod, feature_preparation
+
 
 class AutoPytorchAdapter(AbstractAdapter):
     """
@@ -59,7 +60,7 @@ class AutoPytorchAdapter(AbstractAdapter):
         """
         Execute the classification task
         """
-        self.df = read_tabular_dataset_training_data(self._configuration)
+        self.df, test = data_loader(self._configuration)
         X, y = prepare_tabular_dataset(self.df, self._configuration)
 
         auto_cls = TabularClassificationTask()
@@ -85,7 +86,7 @@ class AutoPytorchAdapter(AbstractAdapter):
         """
         Execute the regression task
         """
-        self.df = read_tabular_dataset_training_data(self._configuration)
+        self.df, test = data_loader(self._configuration)
         X, y = prepare_tabular_dataset(self.df, self._configuration)
         ############################################################################
         # Build and fit a regressor
