@@ -22,3 +22,17 @@ message AutoMlTarget {
     string target = 1;
     DataType type = 2;
   }
+
+message GetObjectsInformationRequest {
+  repeated string ids = 1;
+}
+
+message GetObjectsInformationResponse {
+  repeated ObjectInformation objectInformations = 1;
+}
+
+
+message ObjectInformation {
+  string id = 1;
+  map<string, string> informations = 2;
+}

@@ -67,17 +67,13 @@ class ControllerService(ControllerServiceBase):
         response = self._controllerManager.GetCompatibleAUtoMlSolutions(get_compatible_auto_ml_solutions_request)
         return response
 
-
     async def get_dataset_types(
         self, get_dataset_types_request: "GetDatasetTypesRequest"
     ) -> "GetDatasetTypesResponse":
-        raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
+            """return all dataset types."""
+            response = self._controllerManager.GetDatasetTypes(get_dataset_types_request)
+            return response
 
-    async def get_dataset_type(
-        self, get_dataset_type_request: "GetDatasetTypeRequest"
-    ) -> "GetDatasetTypeResponse":
-        raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
-        
     async def get_datasets(
         self, get_datasets_request: "GetDatasetsRequest"
     ) -> "GetDatasetsResponse":
@@ -134,6 +130,13 @@ class ControllerService(ControllerServiceBase):
     ) -> "GetDatasetCompatibleTasksResponse":
         """return all supported AutoML tasks."""
         response = self._controllerManager.GetDatasetCompatibleTasks(get_dataset_compatible_tasks_request)
+        return response
+
+    async def get_objects_information(
+        self, get_object_information_request: "GetObjectsInformationRequest"
+    ) -> "GetObjectsInformationResponse":
+        """return all information fields of an object"""
+        response = self._controllerManager.GetObjectsInformation(get_object_information_request)
         return response
 
     async def upload_dataset_file(

@@ -26,13 +26,35 @@ namespace BlazorBoilerplate.Server.Managers
         private readonly ILogger<EmailManager> _logger;
         private readonly ControllerService.ControllerServiceClient _client;
         private readonly IHttpContextAccessor _httpContextAccessor;
-        public DatasetManager(ApplicationDbContext dbContext, ILogger<EmailManager> logger, ControllerService.ControllerServiceClient client, IHttpContextAccessor httpContextAccessor)
+        private readonly ICacheManager _cacheManager;
+        public DatasetManager(ApplicationDbContext dbContext, ILogger<EmailManager> logger, ControllerService.ControllerServiceClient client, IHttpContextAccessor httpContextAccessor, ICacheManager cacheManager)
         {
             _dbContext = dbContext;
             _logger = logger;
             _client = client;
             _httpContextAccessor = httpContextAccessor;
+            _cacheManager = cacheManager;
         }
+
+        /// <summary>
+        /// Retrive all Dataset Types
+        /// </summary>
+        /// <returns></returns>
+        public async Task<ApiResponse> GetDatasetTypes()
+        {
+            GetDatasetTypesResponseDto response = new GetDatasetTypesResponseDto();
+            try
+            {
+                var reply = _client.GetDatasetTypes(new GetDatasetTypesRequest());
+                response.DatasetTypes = await _cacheManager.GetObjectInformationList(reply.DatasetTypes.ToList());
+                return new ApiResponse(Status200OK, null, response);
+            }
+            catch (Exception ex)
+            {
+                return new ApiResponse(Status404NotFound, ex.Message);
+            }
+        }
+
         /// <summary>
         /// Retrive a concrete Dataset
         /// </summary>
@@ -130,7 +152,9 @@ namespace BlazorBoilerplate.Server.Managers
             UploadDatasetFileRequest request = new UploadDatasetFileRequest();
             var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
             request.Username = username;
-            request.Name = file.FileName;
+            request.FileName = file.FileName;
+            request.DatasetName = file.DatasetName;
+            request.Type = file.DatasetType;
             request.Content = Google.Protobuf.ByteString.CopyFromUtf8(file.Content);
             try
             {
