@@ -11,8 +11,9 @@ from Controller_bgrpc import *
 from AdapterManager import AdapterManager
 from CsvManager import CsvManager
 from RdfManager import RdfManager
-from managers.DataSetAnalysisManager import DataSetAnalysisManager
+from DataSetAnalysisManager import DataSetAnalysisManager
 from persistence.data_storage import DataStorage
+
 
 class ControllerManager(object):
     """
