@@ -1,4 +1,5 @@
 
+from xmlrpc.client import boolean
 from pymongo import MongoClient
 from pymongo.collection import Collection
 from bson.objectid import ObjectId
@@ -36,7 +37,7 @@ class Database:
             #       --> eg. "mongodb://root:example@mongo"
             mongo = MongoClient(server_url, 27017,
                 # timeout to find a database server
-                serverSelectionTimeoutMS=1000)
+                serverSelectionTimeoutMS=30000)
             
             # we want to fail as fast as possible when the database is not reachable.
             #   by default pymongo will lazy initialize and waits for the first 'real' database 
@@ -47,7 +48,19 @@ class Database:
         except:
             raise Exception("cannot find MongoDB!\n    Did you forget to launch it with `docker-compose up --build mongo`?")
         
-
+    def CheckIfUserExists(self, username: str) -> bool:
+        """
+        Check if user exists by checking if his database exists
+        ---
+        Parameter
+        1. username: name of the user
+        ---
+        Returns database existance status, TRUE == EXITS
+        """
+        if username in self.__mongo.list_databases() == True:
+            return True
+        else:
+            return False
 
     def insert_dataset(self, username: str, dataset: 'dict[str, str]') -> str:
         """

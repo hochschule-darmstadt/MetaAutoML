@@ -1,7 +1,10 @@
+import io
 import os
 import pandas as pd
+from requests import request
 from AutoMLSession import AutoMLSession
 
+import uuid
 
 from Controller_bgrpc import *
 
@@ -31,6 +34,24 @@ class ControllerManager(object):
         self.__data_storage = data_storage
         return
 
+    def CreateNewUser(self, request: "CreateNewUserRequest") -> "CreateNewUserResponse":
+        """
+        Create a new OMA-ML managed user "account"
+        ---
+        Parameter
+        1. empty request object
+        ---
+        Return a new OMA-ML user id
+        """
+        username = str(uuid.uuid4())
+        if self.__data_storage.CheckIfUserExists(username) == True: #User already exists
+            return CreateNewUserResponse(ResultCode.RESULT_CODE_ERROR_CAN_NOT_CREATE_USER, "")
+        else:
+            dataset = CsvManager.ReadDefaultDatasetAsBytes()
+            self.__data_storage.save_dataset(username, "titanic_train.csv", dataset, ":tabular", "Titanic")
+            return CreateNewUserResponse(ResultCode.RESULT_CODE_OKAY, username)
+            
+
     def GetAutoMlModel(self, request: "GetAutoMlModelRequest") -> "GetAutoMlModelResponse":
         """
         Get the generated model zip for one AutoML 
@@ -40,18 +61,26 @@ class ControllerManager(object):
         ---
         Return a .zip containing the model and executable script
         """
-        return self.__sessions[request.sessionId].get_automl_model(request)
+        return self.__sessions[request.session_id].get_automl_model(request)
 
     def GetCompatibleAUtoMlSolutions(self, request: "GetCompatibleAutoMlSolutionsRequest") -> "GetCompatibleAutoMlSolutionsResponse":
         """
         Get list of comptatible AutoML solutions
         ---
         Parameter
-        1. current confiugration
+        1. current configuration
         ---
         Return a list of compatible AutoML
         """
         return self.__rdfManager.GetCompatibleAutoMlSolutions(request)
+
+    def GetDatasetTypes(self, request: "GetDatasetTypesRequest") -> "GetDatasetTypesResponse":
+        """
+        Get all dataset types
+        ---
+        Return list of all dataset types
+        """
+        return self.__rdfManager.GetDatasetTypes(request)
 
     def GetDatasets(self, request: "GetDatasetsRequest") -> "GetDatasetsResponse":
         """
@@ -63,16 +92,14 @@ class ControllerManager(object):
         Return a list of compatible datasets
         """
         response = GetDatasetsResponse()
-
-        # TODO: extend gRPC message with username
-        username = "automl_user"
-        all_datasets: list[dict[str, object]] = self.__data_storage.get_datasets(username)
+        all_datasets: list[dict[str, object]] = self.__data_storage.get_datasets(request.username)
         
         for dataset in all_datasets:
             try:
                 rows, cols = pd.read_csv(dataset["path"]).shape
                 response_dataset = Dataset()
-                response_dataset.file_name = dataset["path"]
+                response_dataset.identifier = str(dataset["_id"])
+                response_dataset.file_name = dataset["name"]
                 response_dataset.type = "TABULAR"
                 response_dataset.rows = rows
                 response_dataset.columns = cols
@@ -83,12 +110,31 @@ class ControllerManager(object):
                 
         return response
 
+    def GetDatasetTypes(self, request: "GetDatasetTypesRequest") -> "GetDatasetTypesResponse":
+        """
+        Get all dataset types
+        ---
+        Return list of all dataset types
+        """
+        return self.__rdfManager.GetDatasetTypes(request)
+
+    def GetDatasetType(self, request: "GetDatasetTypeRequest") -> "GetDatasetTypeResponse":
+        """
+        Get a selected dataset type
+        ---
+        Return a name of a selected dataset type
+        """
+        # TODO: figure out what needs to be done
+        response = GetDatasetTypeResponse()
+        response.return_code = 0
+        return response
+
     def GetDataset(self, request: "GetDatasetRequest") -> "GetDatasetResponse":
         """
         Get dataset details for a specific dataset
         ---
         Parameter
-        1. dataset name
+        1. dataset identifier
         ---
         Return dataset details
         The result is a list of TableColumns containing:
@@ -96,15 +142,12 @@ class ControllerManager(object):
         datatype: the datatype of the column
         firstEntries: the first couple of rows of the dataset
         """
-        # TODO WHEN USER MANAGEMENT IS ADDED; CORRECT FILTERING
-        # TODO: extend gRPC message with username
-        username = "automl_user"
         # TODO: change gRPC message to dataset id instead of name
-        found, dataset = self.__data_storage.find_dataset(username, request.name)
+        found, dataset = self.__data_storage.find_dataset(request.username, request.identifier)
         if not found:
             raise Exception(f"cannot find dataset with name: {request.dataset}")
 
-        dataset = CsvManager.read_dataset(dataset.path)
+        dataset = CsvManager.read_dataset(dataset["path"])
         return dataset
 
     def GetSessions(self, request: "GetSessionsRequest") -> "GetSessionsResponse":
@@ -153,10 +196,8 @@ class ControllerManager(object):
         Return list of column names
         """
 
-        # TODO: extend gRPC message with username
-        username = "automl_user"
         # TODO: change gRPC message to dataset id instead of name
-        found, dataset = self.__data_storage.find_dataset(username, request.datasetName)
+        found, dataset = self.__data_storage.find_dataset(request.username, request.datasetName)
         if found: 
             return CsvManager.read_column_names(dataset["path"])
         else:
@@ -185,6 +226,17 @@ class ControllerManager(object):
         """
         return self.__rdfManager.GetDatasetCompatibleTasks(request)
 
+    def GetObjectsInformation(self, request: "GetObjectsInformationRequest") -> "GetObjectsInformationResponse":
+        """
+        Get all information for a specific object
+        ---
+        Parameter
+        1. object id
+        ---
+        Return dictonary of object informations
+        """
+        return self.__rdfManager.GetObjectsInformation(request)
+
     def UploadNewDataset(self, dataset: "UploadDatasetFileRequest") -> "UploadDatasetFileResponse":
         """
         Upload a new dataset
@@ -194,9 +246,22 @@ class ControllerManager(object):
         ---
         Return upload status
         """
-        # TODO: extend gRPC message with username
-        username = "automl_user"
-        dataset_id: str = self.__data_storage.save_dataset(username, dataset.name, dataset.content)
+        dataset_for_analysis = pd.read_csv(io.BytesIO(dataset.content))
+        analysisResult = DataSetAnalysisManager.startAnalysis(dataset_for_analysis)
+
+        # NOTE: dataset fields mixed up (bug in dummy)
+        #dataset.file_name = dataset.content.decode("utf-8")
+        #dataset.content = bytes(dataset.username, "ascii")
+        #dataset.username = "User"
+
+        #build dictionary for database
+        database_content = {
+            "name": dataset.dataset_name,
+            "type": dataset.type,
+            "analysis": analysisResult
+        }
+
+        dataset_id: str = self.__data_storage.save_dataset(dataset.username, dataset.file_name, dataset.content, database_content)
         print(f"saved new dataset: {dataset_id}")
         
         response = UploadDatasetFileResponse()
@@ -213,12 +278,9 @@ class ControllerManager(object):
         Return start process status
         """
         response = StartAutoMlProcessResponse()
-
-        # TODO: extend gRPC message with username 
-        username = "automl_user"
         # find requested dataset 
         # TODO: change gRPC message to dataset id instead of name
-        found, dataset = self.__data_storage.find_dataset(username, configuration.dataset)
+        found, dataset = self.__data_storage.find_dataset(configuration.username, configuration.dataset)
         if not found:
             raise Exception(f"cannot find dataset with name: {configuration.dataset}")
         
@@ -238,35 +300,35 @@ class ControllerManager(object):
             "task": configuration.task,
             "tabular_config": {
                 "target": {
-                    "target": configuration.tabularConfig.target.target,
-                    "type": configuration.tabularConfig.target.type,
+                    "target": configuration.tabular_config.target.target,
+                    "type": configuration.tabular_config.target.type,
                 },
-                "features": dict(configuration.tabularConfig.features)
+                "features": dict(configuration.tabular_config.features)
             },
-            "file_configuration": dict(configuration.fileConfiguration),
+            "file_configuration": dict(configuration.file_configuration),
             "metric": configuration.metric,
             "status": "running",
             "models": [],
             "runtime_constraints": {
-                "runtime_limit": configuration.runtimeConstraints.runtime_limit,
-                "max_iter": configuration.runtimeConstraints.max_iter
+                "runtime_limit": configuration.runtime_constraints.runtime_limit,
+                "max_iter": configuration.runtime_constraints.max_iter
             },
-            "required_automls": list(configuration.requiredAutoMLs),
+            "required_automls": list(configuration.required_auto_mls),
         }
-        sess_id = self.__data_storage.insert_session(username, config)
+        sess_id = self.__data_storage.insert_session(configuration.username, config)
         print(f"inserted new session: {sess_id}")
 
         # will be called when any automl is done
         # NOTE: will run in parallel
         def callback(session_id, model: 'dict[str, object]'):
-            _mdl_id = self.__data_storage.insert_model(username, model)
+            _mdl_id = self.__data_storage.insert_model(configuration.username, model)
             print(f"inserted new model: {_mdl_id}")
 
             # lock data storage to prevent race condition between get and update
             with self.__data_storage.lock():
                 # append new model to session
-                _sess = self.__data_storage.get_session(username, session_id)
-                self.__data_storage.update_session(username, session_id, {
+                _sess = self.__data_storage.get_session(configuration.username, session_id)
+                self.__data_storage.update_session(configuration.username, session_id, {
                     "models": _sess["models"] + [_mdl_id],
                     "status": "completed"
                 })

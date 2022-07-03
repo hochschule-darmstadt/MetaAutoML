@@ -2,7 +2,7 @@ from threading import Lock
 import os
 import os.path
 from persistence.mongo_client import Database
-
+from bson.objectid import ObjectId
 
 class DataStorage:
     """
@@ -52,6 +52,18 @@ class DataStorage:
         """
         return DataStorage.__DbLock(self.__lock)
 
+    def CheckIfUserExists(self, username: bool):
+        """
+        Check if user exists by checking if his database exists
+        ---
+        >>> id: str = ds.CheckIfUserExists("automl_user")
+        ---
+        Parameter
+        1. username: name of the user
+        ---
+        Returns database existance status, TRUE == EXITS
+        """
+        return self.__mongo.CheckIfUserExists(username)
 
     def insert_session(self, username: str, session: 'dict[str, object]') -> str:
         """
@@ -123,7 +135,7 @@ class DataStorage:
         return self.__mongo.update_session(username, id, new_values)
 
 
-    def save_dataset(self, username: str, name: str, content: bytes) -> str:
+    def save_dataset(self, username: str, fileName: str, content: bytes, database_content: dict) -> str:
         """
         Store dataset contents on disk and insert entry to database.
         ---
@@ -134,20 +146,17 @@ class DataStorage:
         1. username: name of the user
         2. name: name of dataset
         3. content: raw bytes for file on disk
+        4. database_content: dictionary for database
         ---
         Returns dataset id
         """
+        
+        dataset_id = self.__mongo.insert_dataset(username, database_content)
 
-        # insert shell entry first to get id from database
-        dataset_id = self.__mongo.insert_dataset(username, {
-            "name": name,
-
-            # we need the dataset id from the database for these fields
-            "path": "",
-            "mtime": 0.0
-        })
-
-        filename_dest = os.path.join(self.__storage_dir, username, dataset_id)
+        filename_dest = os.path.join(self.__storage_dir, username, dataset_id, fileName)
+        if os.getenv("MONGO_DB_DEBUG") != "YES":
+            #Within docker we do not want to add the app section, as this leads to broken links
+            filename_dest = filename_dest.replace("/app/", "")
         # make sure directory exists in case it's the first upload from this user
         os.makedirs(os.path.dirname(filename_dest), exist_ok=True)
         with open(filename_dest, 'wb') as outfp:
@@ -163,7 +172,7 @@ class DataStorage:
         return dataset_id
 
 
-    def find_dataset(self, username: str, name: str) -> 'tuple[bool, dict[str, object]]':
+    def find_dataset(self, username: str, identifier: str) -> 'tuple[bool, dict[str, object]]':
         """
         Try to find the _first_ dataset with this name. 
         ---
@@ -179,7 +188,7 @@ class DataStorage:
         Returns either `(True, Dataset)` or `(False, None)`.
         """
         result = self.__mongo.find_dataset(username, {
-            "name": name
+            "_id": ObjectId(identifier)
         })
 
         return result is not None, result

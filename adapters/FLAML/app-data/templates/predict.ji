@@ -1,5 +1,5 @@
 import sys
-import pickle
+import dill
 import json
 from predict_time_sources import feature_preparation, DataType, SplitMethod
 
@@ -27,7 +27,7 @@ if __name__ == '__main__':
     X = feature_preparation(X, features)
 
     with open(sys.path[0] + '/model_flaml.p', 'rb') as file:
-        automl2 = pickle.load(file)
+        automl2 = dill.load(file)
 
     predicted_y = automl2.predict(X)
     predicted_y = np.reshape(predicted_y, (-1, 1))

@@ -105,14 +105,14 @@ def get_response(output_json, start_time, test_score, prediction_time, library, 
 #region
 
 
-def export_model(model, file_name):
+def export_model(model, sessionId, file_name):
     """
     Export the generated ML model to disk
     ---
     Parameter:
     1. generate ML model
     """
-    with open(os.path.join(get_config_property('output-path'), 'tmp', file_name), 'wb+') as file:
+    with open(os.path.join(get_config_property('output-path'), sessionId, file_name), 'wb+') as file:
         dill.dump(model, file)
 
 def start_automl_process():
@@ -149,29 +149,23 @@ def zip_script(session_id):
     zip_file_name = get_config_property("export-zip-file-name")
     output_path = get_config_property("output-path")
     session_path = os.path.join(output_path, str(session_id))
-    temp_path = os.path.join(output_path, 'tmp')
-
-    # remove files from earlier runs
-    if os.path.exists(os.path.join(session_path, zip_file_name + '.zip')):
-        os.remove(os.path.join(session_path, zip_file_name + '.zip'))
-
-    # copy all files required for prediction into temp folder, so they will also be zipped
+    tmp_base_folder = os.path.join(output_path, 'tmp')
+    tmp_session_folder = os.path.join(tmp_base_folder, str(session_id))
     shutil.copy(get_config_property("predict-time-sources-path"),
-                temp_path)
+                session_path)
 
-    shutil.make_archive(os.path.join(session_path, zip_file_name),
+    #create tmp if not already existing
+    if not os.path.isdir(tmp_base_folder):
+        os.mkdir(tmp_base_folder)
+
+    shutil.make_archive(os.path.join(tmp_session_folder, zip_file_name),
                         'zip',
-                        temp_path)
+                        session_path,
+                        base_dir=None)
 
-    # NOTE: why are we cleaning up the ouput directory?
-    #     session_id is not an int anymore, so this block will raise    
-            # for f in os.listdir(output_path):
-            #     if f not in ('.gitkeep', 'tmp', *(str(i) for i in range(1, session_id + 1))):
-            #         file_path = os.path.join(output_path, f)
-            #         if os.path.isdir(file_path):
-            #             shutil.rmtree(file_path)
-            #         else:
-            #             os.remove(file_path)
+    #copy zip from temp to session folder and delete tmp session zip
+    shutil.copyfile(os.path.join(tmp_session_folder,  zip_file_name + '.zip'), os.path.join(session_path, zip_file_name + '.zip'))
+    shutil.rmtree(tmp_session_folder)
 
     file_loc_on_controller = os.path.join(output_path,
                                           get_config_property('adapter-name'),
@@ -193,19 +187,14 @@ def evaluate(config_json, config_path):
     Return evaluation score
     """
     file_path = os.path.join(config_json["file_location"], config_json["file_name"])
-    working_dir = os.path.join(get_config_property("output-path"), "working_dir")
-    #Setup working directory
-    shutil.unpack_archive(os.path.join(get_config_property("output-path"),
-                                       str(config_json["session_id"]),
-                                       get_config_property("export-zip-file-name") + ".zip"),
-                          working_dir,
-                          "zip")
+    output_path = get_config_property("output-path")
+    session_path = os.path.join(output_path, str(config_json["session_id"]))
     # predict
-    os.chmod(os.path.join(working_dir, "predict.py"), 0o777)
+    os.chmod(os.path.join(session_path, "predict.py"), 0o777)
     python_env = os.getenv("PYTHON_ENV", default="PYTHON_ENV_UNSET")
 
     predict_start = time.time()
-    subprocess.call([python_env, os.path.join(working_dir, "predict.py"), file_path, config_path])
+    subprocess.call([python_env, os.path.join(session_path, "predict.py"), file_path, config_path])
     predict_time = time.time() - predict_start
 
     test = pd.read_csv(file_path)
@@ -214,9 +203,7 @@ def evaluate(config_json, config_path):
     else:
         test = test.iloc[int(test.shape[0] * config_json["test_configuration"]["split_ratio"]):]
 
-    predictions = pd.read_csv(os.path.join(working_dir, "predictions.csv"))
-    #Cleanup working directory
-    shutil.rmtree(working_dir)
+    predictions = pd.read_csv(os.path.join(session_path, "predictions.csv"))
 
     target = config_json["tabular_configuration"]["target"]["target"]
     if config_json["task"] == 1:

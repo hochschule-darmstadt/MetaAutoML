@@ -44,6 +44,13 @@ class ControllerService(ControllerServiceBase):
             data_storage = DataStorage(data_storage_dir)
         self._controllerManager = ControllerManager(data_storage)
 
+    async def create_new_user(
+        self, create_new_user_request: "CreateNewUserRequest"
+    ) -> "CreateNewUserResponse":
+        """ Return a new OMA-ML user id. """
+        response = self._controllerManager.CreateNewUser(create_new_user_request)
+        return response
+
     async def get_auto_ml_model(
         self, get_auto_ml_model_request: "GetAutoMlModelRequest"
     ) -> "GetAutoMlModelResponse":
@@ -59,6 +66,13 @@ class ControllerService(ControllerServiceBase):
         """
         response = self._controllerManager.GetCompatibleAUtoMlSolutions(get_compatible_auto_ml_solutions_request)
         return response
+
+    async def get_dataset_types(
+        self, get_dataset_types_request: "GetDatasetTypesRequest"
+    ) -> "GetDatasetTypesResponse":
+            """return all dataset types."""
+            response = self._controllerManager.GetDatasetTypes(get_dataset_types_request)
+            return response
 
     async def get_datasets(
         self, get_datasets_request: "GetDatasetsRequest"
@@ -118,6 +132,13 @@ class ControllerService(ControllerServiceBase):
         response = self._controllerManager.GetDatasetCompatibleTasks(get_dataset_compatible_tasks_request)
         return response
 
+    async def get_objects_information(
+        self, get_object_information_request: "GetObjectsInformationRequest"
+    ) -> "GetObjectsInformationResponse":
+        """return all information fields of an object"""
+        response = self._controllerManager.GetObjectsInformation(get_object_information_request)
+        return response
+
     async def upload_dataset_file(
         self, upload_dataset_file_request: "UploadDatasetFileRequest"
     ) -> "UploadDatasetFileResponse":
@@ -163,7 +184,7 @@ async def main():
     server = Server([ControllerService()])
     context = SSLContext(protocol=ssl.PROTOCOL_TLSv1_2)
     context.load_cert_chain(certfile="certificate/server.crt", keyfile='certificate/server.key')
-    await server.start("127.0.0.1", get_config_property('controller-server-port'), ssl=create_secure_context())
+    await server.start(get_config_property('controller-server-adress'), get_config_property('controller-server-port'), ssl=create_secure_context())
     await server.wait_closed()
 
 

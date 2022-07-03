@@ -8,22 +8,22 @@
 <div id="required" style="display:flex; flex-direction:column; gap: 10px">
     <div style="display:flex; flex-direction:row; justify-content:left">
         <div style="display: flex; align-items: center; padding-right: 1%">Machine Learning Task:</div>
-        <MatChipSet Choice="true" SelectedChipChanged="@OnChipChanged">
+        <MatSelect Label="Pick a task" TValue="string" ValueChanged="@OnTaskValueChanged">
             @if (_tasks != null)
             {
                 @if (_tasks.Tasks != null)
                 {
-                    @foreach (var item in _tasks.Tasks)
+                    @foreach (var task in _tasks.Tasks)
                     {
-                        <MatChip Label="@item"></MatChip>
+                    <MatOptionString Value="@task">@task</MatOptionString>
                     }
                 }
 
             }
-        </MatChipSet>
+        </MatSelect>
     </div>
     @* only show advanced option if a task was selected *@
-    @if (lastCheckedChip.Label != "testLabel")
+    @if (lastCheckedChip != "testLabel")
     {
         <div style="display:flex; flex-direction:row; justify-content:left">
             <div style="display: flex; align-items: center; padding-right: 1% ">Target Column:</div>
@@ -82,7 +82,7 @@
     private GetCompatibleAutoMlSolutionsResponseDto _compatibleAutoMl;
     private List<String> _columnNames;
     private MatChip[] selectedChips = null;
-    private MatChip lastCheckedChip = new MatChip { Label = "testLabel" };
+    private string lastCheckedChip = "testLabel";
     private bool advancedOptionsSelected = false;
 
     /// <summary>
@@ -118,15 +118,15 @@
             WizardState.automlRequest.RequiredAutoMLs.Add(chip.Label);
         }
     }
-    private async void OnChipChanged(MatChip newChip)
+    private async void OnTaskValueChanged(string newChip)
     {
         // TODO fix 2 times called bug (it effects perfomance)
-        if (lastCheckedChip.Label == newChip.Label)
+        if (string.IsNullOrEmpty(newChip))
         {
             return;
         }
         lastCheckedChip = newChip;
-        WizardState.automlRequest.Task = newChip.Label;
+        WizardState.automlRequest.Task = newChip;
         try
         {
             Dictionary<string, string> dictionary = new Dictionary<string, string>();
@@ -170,7 +170,7 @@
         try
         {
             _tasks = new GetDatasetCompatibleTasksResponseDto();
-            GetDatasetCompatibleTasksRequestDto taskRequest = new GetDatasetCompatibleTasksRequestDto { DatasetName = WizardState.automlRequest.DatasetName };
+            GetDatasetCompatibleTasksRequestDto taskRequest = new GetDatasetCompatibleTasksRequestDto { DatasetName = WizardState.automlRequest.DatasetIdentifier };
             ApiResponseDto apiResponse = await apiClient.GetDatasetCompatibleTasks(taskRequest);
 
             if (apiResponse.IsSuccessStatusCode)

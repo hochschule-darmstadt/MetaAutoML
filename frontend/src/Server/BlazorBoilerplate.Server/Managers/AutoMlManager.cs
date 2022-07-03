@@ -9,7 +9,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using static Microsoft.AspNetCore.Http.StatusCodes;
-using Google.Protobuf; 
+using Google.Protobuf;
+using Microsoft.AspNetCore.Http;
 
 namespace BlazorBoilerplate.Server.Managers
 {
@@ -20,10 +21,12 @@ namespace BlazorBoilerplate.Server.Managers
     {
         private readonly ApplicationDbContext _dbContext;
         private readonly ControllerService.ControllerServiceClient _client;
-        public AutoMlManager(ApplicationDbContext dbContext, ControllerService.ControllerServiceClient client)
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        public AutoMlManager(ApplicationDbContext dbContext, ControllerService.ControllerServiceClient client, IHttpContextAccessor httpContextAccessor)
         {
             _dbContext = dbContext;
             _client = client;
+            _httpContextAccessor = httpContextAccessor;
         }
         /// <summary>
         /// Get the result model from a specific AutoML
@@ -34,8 +37,10 @@ namespace BlazorBoilerplate.Server.Managers
         {
             GetAutoMlModelResponseDto response = new GetAutoMlModelResponseDto();
             GetAutoMlModelRequest getmodelRequest = new GetAutoMlModelRequest();
+            var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
             try
             {
+                getmodelRequest.Username = username;
                 getmodelRequest.SessionId = autoMl.SessionId;
                 getmodelRequest.AutoMl = autoMl.AutoMl;
                 var reply = _client.GetAutoMlModel(getmodelRequest);
@@ -59,9 +64,11 @@ namespace BlazorBoilerplate.Server.Managers
         {
             StartAutoMLResponseDto response = new StartAutoMLResponseDto();
             StartAutoMlProcessRequest startAutoMLrequest = new StartAutoMlProcessRequest();
+            var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
             try
             {
-                startAutoMLrequest.Dataset = autoMl.DatasetName;
+                startAutoMLrequest.Username = username;
+                startAutoMLrequest.Dataset = autoMl.DatasetIdentifier;
         
                 foreach (var i in autoMl.RequiredAutoMLs)
                 {
@@ -98,8 +105,10 @@ namespace BlazorBoilerplate.Server.Managers
         {
             TestAutoMLResponseDto response = new TestAutoMLResponseDto();
             TestAutoMlRequest testAutoMLrequest = new TestAutoMlRequest();
+            var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
             try
             {
+                testAutoMLrequest.Username = username;
                 testAutoMLrequest.TestData = testAutoML.TestData;
                 testAutoMLrequest.SessionId = testAutoML.SessionId;
                 testAutoMLrequest.AutoMlName = testAutoML.AutoMlName;
@@ -126,7 +135,7 @@ namespace BlazorBoilerplate.Server.Managers
         {
             switch (autoMl.DatasetType)
             {
-                case "TABULAR":
+                case ":tabular":
                     switch (autoMl.Task)
                     {
                         case "tabular classification":
@@ -150,7 +159,7 @@ namespace BlazorBoilerplate.Server.Managers
         {
             switch (autoMl.DatasetType)
             {
-                case "TABULAR":
+                case ":tabular":
                     AutoMlConfigurationTabularData conf = new AutoMlConfigurationTabularData();
                     conf.Target = new AutoMlTarget();
                     conf.Target.Target = ((AutoMLTabularDataConfiguration)autoMl.Configuration).Target.Target;
