@@ -2,6 +2,7 @@
 using BlazorBoilerplate.Infrastructure.Server.Models;
 using BlazorBoilerplate.Shared.Dto.Ontology;
 using BlazorBoilerplate.Storage;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,10 +18,12 @@ namespace BlazorBoilerplate.Server.Managers
     {
         private readonly ApplicationDbContext _dbContext;
         private readonly ControllerService.ControllerServiceClient _client;
-        public OntologyManager(ApplicationDbContext dbContext, ControllerService.ControllerServiceClient client)
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        public OntologyManager(ApplicationDbContext dbContext, ControllerService.ControllerServiceClient client, IHttpContextAccessor httpContextAccessor)
         {
             _dbContext = dbContext;
             _client = client;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public async Task<ApiResponse> GetCompatibleAutoMlSolutions(GetCompatibleAutoMlSolutionsRequestDto request)
@@ -28,8 +31,10 @@ namespace BlazorBoilerplate.Server.Managers
             // call grpc method
             GetCompatibleAutoMlSolutionsRequest requestGrpc = new GetCompatibleAutoMlSolutionsRequest();
             GetCompatibleAutoMlSolutionsResponseDto response = new GetCompatibleAutoMlSolutionsResponseDto();
+            var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
             try
             {
+                requestGrpc.Username = username;
                 requestGrpc.Configuration.Add(request.Configuration);
                 var reply = _client.GetCompatibleAutoMlSolutions(requestGrpc);
                 response.AutoMlSolutions = reply.AutoMlSolutions.ToList();
@@ -46,8 +51,10 @@ namespace BlazorBoilerplate.Server.Managers
             // call grpc method
             GetSupportedMlLibrariesRequest requestGrpc = new GetSupportedMlLibrariesRequest();
             GetSupportedMlLibrariesResponseDto response = new GetSupportedMlLibrariesResponseDto();
+            var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
             try
             {
+                requestGrpc.Username = username;
                 requestGrpc.Task = task.Task;
                 var reply = _client.GetSupportedMlLibraries(requestGrpc);
                 response.MlLibraries = reply.MlLibraries.ToList();
@@ -63,8 +70,10 @@ namespace BlazorBoilerplate.Server.Managers
             // call grpc method
             GetDatasetCompatibleTasksRequest requestGrpc = new GetDatasetCompatibleTasksRequest();
             GetDatasetCompatibleTasksResponseDto response = new GetDatasetCompatibleTasksResponseDto();
+            var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
             try
             {
+                requestGrpc.Username = username;
                 requestGrpc.DatasetName = datasetName.DatasetName;
                 var reply = _client.GetDatasetCompatibleTasks(requestGrpc);
                 response.Tasks = reply.Tasks.ToList();

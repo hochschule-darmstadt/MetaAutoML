@@ -1,0 +1,41 @@
+syntax = "proto3";
+option csharp_namespace = "BlazorBoilerplate.Server";
+
+import "Enumerations.proto";
+import "Common.proto";
+
+message GetSessionsRequest {
+    string username = 1;
+  }
+  
+message GetSessionsResponse {
+    repeated string sessionIds = 1;
+  }
+  
+message GetSessionStatusRequest {
+    string username = 1;
+    string id = 2;
+  }
+  
+message GetSessionStatusResponse {
+    SessionStatus status = 1;
+    repeated AutoMlStatus automls = 2;
+    string dataset = 3;
+    MachineLearningTask task = 4;
+    AutoMlConfigurationTabularData tabularConfig = 5;
+    repeated string requiredMlLibraries = 6;
+    repeated string requiredAutoMls = 7;
+    AutoMlRuntimeConstraints runtimeConstraints = 8;
+  }
+
+message AutoMlStatus {
+    string name = 1;
+    SessionStatus status = 2;
+    repeated string messages = 3;
+    float testScore = 4;
+    float validationScore = 5;
+    int32 runtime = 6;
+    float predictiontime = 7;
+    string library = 8;
+    string model = 9;
+  }

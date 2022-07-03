@@ -76,6 +76,12 @@ namespace BlazorBoilerplate.Shared.Dto.Db
             get { return GetValue<NavigationSet<Message>>(); }
         }
 
+        public String OmaMlId
+        {
+            get { return GetValue<String>(); }
+            set { SetValue(value); }
+        }
+
         public Guid Id
         {
             get { return GetValue<Guid>(); }

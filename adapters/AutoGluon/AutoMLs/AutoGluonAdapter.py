@@ -18,9 +18,7 @@ class AutoGluonAdapter(AbstractAdapter):
         1. Configuration JSON of type dictionary
         """
         super().__init__(configuration)
-        self._output_path = os.path.join(get_config_property('output-path'),
-                                          'tmp',
-                                          'model_gluon.gluon')
+        self._result_path = os.path.join(get_config_property("output-path"), configuration["session_id"], "model_gluon.gluon")
 
     def start(self):
         """
@@ -43,7 +41,7 @@ class AutoGluonAdapter(AbstractAdapter):
         data[self._target] = y
         model = TabularPredictor(label=self._target,
                                  problem_type="multiclass",
-                                 path=self._output_path).fit(
+                                 path=self._result_path).fit(
             data,
             time_limit=self._time_limit)
         #Fit methode already saves the model
@@ -58,7 +56,7 @@ class AutoGluonAdapter(AbstractAdapter):
         data[self._target] = self._y
         model = TabularPredictor(label=self._target,
                                  problem_type="regression",
-                                 path=self._output_path).fit(
+                                 path=self._result_path).fit(
             data,
             time_limit=self._time_limit)
         #Fit methode already saves the model

@@ -117,6 +117,12 @@ namespace BlazorBoilerplate.Server
                 AdditionalUserClaimsPrincipalFactory>();
 
 
+            services.Configure<IISServerOptions>(options =>
+            {
+                options.AllowSynchronousIO = true;
+                //options.MaxRequestBodySize = null;
+                options.MaxRequestBodySize = int.MaxValue;
+            });
             ////////////////////////////////////////////////////////////////////////////////////////////////////////
             /////ENV VARIABLE
             ///////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -131,8 +137,10 @@ namespace BlazorBoilerplate.Server
                 port = Configuration["CONTROLLER_SERVICE_PORT"];
                 grpcEndpoint = "https://localhost:5001";
             }
-
+            
+            ////////////////////////////////////////////////////////////////////////////////////////////////////////
             //GRPC CONTROLLER FACTORY 
+            ///////////////////////////////////////////////////////////////////////////////////////////////////////
             services.AddGrpcClient<ControllerService.ControllerServiceClient>(o =>
             {
                 o.Address = new Uri(grpcEndpoint);
@@ -630,7 +638,7 @@ namespace BlazorBoilerplate.Server
             services.AddTransient<IOntologyManager, OntologyManager>();
             services.AddTransient<ISessionManager, SessionManager>();
             services.AddTransient<IExternalAuthManager, ExternalAuthManager>();
-
+            services.AddTransient<ICacheManager, CacheManager>();
 
             #region Automapper
             //Automapper to map DTO to Models https://www.c-sharpcorner.com/UploadFile/1492b1/crud-operations-using-automapper-in-mvc-application/
