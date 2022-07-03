@@ -34,6 +34,10 @@ class AlphaD3MAdapter(AbstractAdapter):
 
     def __tabular_classification(self):
         """Execute the classification task"""
+        # TODO:
+        # Implement export of runnable model via frontend
+        # Implement prediction via frontend
+        # Implement correct response return in AlphaD3Mserver.py
 
         d3m_obj = d3mi.AutoML(os.path.join(sys.path[0], "d3mTmp"),
                                 "AlphaD3M", "pypi")
@@ -46,10 +50,6 @@ class AlphaD3MAdapter(AbstractAdapter):
 
         pipeline_id = d3m_obj.get_best_pipeline_id()
         d3m_obj.train(pipeline_id)
-
-        # TODO:
-        # Export working and runnable model considering alphad3m specialties
-        # Predicting on frontend considering alphad3m specialties
 
         self.__export_pipeline(d3m_obj, os.path.join(get_config_property('output-path'), 'tmp', 'd3m'), pipeline_id)
         d3m_obj.end_session()
