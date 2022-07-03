@@ -76,17 +76,21 @@ def serve():
     server.add_insecure_port(f'{get_config_property("grpc-server-address")}:{os.getenv("GRPC_SERVER_PORT")}')
     server.start()
 
+    # ToDo:
+    # - Make image tasks available in frontend 
+    # - Test image task application wide
+    # 
     # Local testing
-    channel = grpc.insecure_channel(f'{get_config_property("grpc-server-address")}:{os.getenv("GRPC_SERVER_PORT")}')
-    stub = Adapter_pb2_grpc.AdapterServiceStub(channel)
-    request = Adapter_pb2.StartAutoMLRequest() 
-
-    job_file_location = os.path.join(get_config_property("job-file-path"),
-                                    get_config_property("job-file-name"))
-    with open(job_file_location) as file:
-        request.processJson = json.dumps(json.load(file))
-
-    response = stub.StartAutoML(request)
+    # channel = grpc.insecure_channel(f'{get_config_property("grpc-server-address")}:{os.getenv("GRPC_SERVER_PORT")}')
+    # stub = Adapter_pb2_grpc.AdapterServiceStub(channel)
+    # request = Adapter_pb2.StartAutoMLRequest() 
+    # 
+    # job_file_location = os.path.join(get_config_property("job-file-path"),
+    #                                 get_config_property("job-file-name"))
+    # with open(job_file_location) as file:
+    #     request.processJson = json.dumps(json.load(file))
+    # 
+    # response = stub.StartAutoML(request)
 
     print(get_config_property("adapter-name") + " started")
     server.wait_for_termination()
