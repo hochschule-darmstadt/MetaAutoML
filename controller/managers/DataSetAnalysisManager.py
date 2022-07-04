@@ -17,7 +17,8 @@ class DataSetAnalysisManager:
         ---
         Return a python dictionary containing dataset analysis
         """
-        dataset = pd.read_csv(dataset, delimiter=',')
+        #Already a dataframe???
+        #dataset = pd.read_csv(dataset, delimiter=',')
 
         jsonfile = {}
         jsonfile["basic analysis"] = {

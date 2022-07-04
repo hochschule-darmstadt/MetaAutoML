@@ -1,8 +1,11 @@
+import io
 from threading import Lock
 import os
 import os.path
 from persistence.mongo_client import Database
 from bson.objectid import ObjectId
+from DataSetAnalysisManager import DataSetAnalysisManager
+import pandas as pd
 
 class DataStorage:
     """
@@ -135,7 +138,7 @@ class DataStorage:
         return self.__mongo.update_session(username, id, new_values)
 
 
-    def save_dataset(self, username: str, fileName: str, content: bytes, database_content: dict) -> str:
+    def save_dataset(self, username: str, fileName: str, content: bytes, type: str, name: str) -> str:
         """
         Store dataset contents on disk and insert entry to database.
         ---
@@ -150,6 +153,20 @@ class DataStorage:
         ---
         Returns dataset id
         """
+        analysisResult = {}
+
+        #Perform analysis for tabular data datasets
+        if type == ":tabular":
+            dataset_for_analysis = pd.read_csv(io.BytesIO(content))
+            analysisResult = DataSetAnalysisManager.startAnalysis(dataset_for_analysis)
+
+
+        #build dictionary for database
+        database_content = {
+            "name": name,
+            "type": type,
+            "analysis": analysisResult
+        }
         
         dataset_id = self.__mongo.insert_dataset(username, database_content)
 
