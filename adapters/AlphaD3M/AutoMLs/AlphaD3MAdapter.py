@@ -35,9 +35,7 @@ class AlphaD3MAdapter(AbstractAdapter):
     def __tabular_classification(self):
         """Execute the classification task"""
         # TODO:
-        # Implement export of runnable model via frontend
-        # Implement prediction via frontend
-        # Implement correct response return in AlphaD3Mserver.py
+        # Get predict.ji running, this will solve/provide alot of other problems/functions
 
         d3m_obj = d3mi.AutoML(os.path.join(sys.path[0], "d3mTmp"),
                                 "AlphaD3M", "pypi")
@@ -51,50 +49,6 @@ class AlphaD3MAdapter(AbstractAdapter):
         pipeline_id = d3m_obj.get_best_pipeline_id()
         d3m_obj.train(pipeline_id)
 
-        self.__export_pipeline(d3m_obj, os.path.join(get_config_property('output-path'), 'tmp', 'd3m'), pipeline_id)
+        export_model(d3m_obj, "model_alphad3m.p")
+
         d3m_obj.end_session()
-
-
-    def __export_pipeline(self, automl: d3mi.AutoML, export_dir, pipeline_id):
-        """
-        Exports alphad3m pipeline, problem.json and pipeline-id
-        ---
-        Parameter:
-        1. Alphad3m d3mi.AutoML object to export from
-        2. Directory to where to export
-        3. Pipeline id of pipeline to export
-        ---
-        Return:
-        None
-        """
-
-        automl.save_pipeline(pipeline_id, export_dir)
-        with open(os.path.join(export_dir, pipeline_id, problem_config_filepath), 'w') as writer:
-            json.dump(automl.problem_config, writer)
-        with open(os.path.join(export_dir, meta_filepath), 'w') as writer:
-            json.dump({"id" : pipeline_id}, writer)
-        print('INFO: Pipeline exported.')
-
-    def __import_pipeline(self, automl: d3mi.AutoML, export_dir):
-        """
-        Import alphad3m pipeline into d3mi.AutoML object from parameters
-        ---
-        Parameter:
-        1. Alphad3m d3mi.AutoML object to import to
-        2. Export directory to which the pipeline has been exported
-        ---
-        Return
-        int
-            pipeline_id
-        """
-
-        old_pipeline_id = ""
-        with open(os.path.join(export_dir, meta_filepath), 'r') as reader:
-            old_pipeline_id = json.load(reader)["id"]
-        with open(os.path.join(export_dir, old_pipeline_id, problem_config_filepath), 'r') as reader:
-            automl.problem_config = json.load(reader)
-        automl.load_pipeline(os.path.join(export_dir, old_pipeline_id))
-        pipeline_id = automl.get_best_pipeline_id()
-        automl.pipelines[pipeline_id]["fitted_id"] = old_pipeline_id
-        print("INFO: Pipeline imported.")
-        return pipeline_id
