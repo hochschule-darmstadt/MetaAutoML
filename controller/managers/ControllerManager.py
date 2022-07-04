@@ -12,6 +12,7 @@ from CsvManager import CsvManager
 from RdfManager import RdfManager
 from persistence.data_storage import DataStorage
 
+
 class ControllerManager(object):
     """
     Implementation of the controller functionality
@@ -243,6 +244,12 @@ class ControllerManager(object):
         ---
         Return upload status
         """
+        # NOTE: dataset fields mixed up (bug in dummy)
+        #dataset.file_name = dataset.content.decode("utf-8")
+        #dataset.content = bytes(dataset.username, "ascii")
+        #dataset.username = "User"
+
+
         dataset_id: str = self.__data_storage.save_dataset(dataset.username, dataset.file_name, dataset.content, dataset.type, dataset.dataset_name)
         print(f"saved new dataset: {dataset_id}")
         
