@@ -12,6 +12,7 @@ services:
     depends_on:
       - sqlserver
       - controller
+      - redis
     environment:
       - ASPNETCORE_ENVIRONMENT=Development #Consider changing this in Production
       - Serilog__MinimumLevel__Default=Debug #Consider changing this in Production
@@ -25,6 +26,8 @@ services:
       - ASPNETCORE_Kestrel__Certificates__Default__Path=aspnetapp.pfx
       - CONTROLLER_SERVICE_HOST=controller
       - CONTROLLER_SERVICE_PORT=5001
+      - REDIS_SERVICE_HOST=redis
+      - REDIS_SERVICE_PORT=6379
     restart: on-failure
     volumes:
       # shared volumes between frontend and controller
@@ -42,6 +45,15 @@ services:
       - ACCEPT_EULA=Y
     ports:
       - 1533:1433 #expose port, so can connect to it using host: 'localhost,1533' | user: sa, password: yourVeryStrong(!)Password
+
+  redis:
+    image: "redis:alpine"
+    volumes:
+      - dbdata:/data
+      - dbdata:/var/lib/redis
+      - dbdata:/usr/local/etc/redis/redis.conf
+    ports:
+      - "6379:6379"
 
 volumes:
   dbdata:

@@ -126,18 +126,14 @@ namespace BlazorBoilerplate.Server
             ////////////////////////////////////////////////////////////////////////////////////////////////////////
             /////ENV VARIABLE
             ///////////////////////////////////////////////////////////////////////////////////////////////////////
-            string endpoint = Environment.GetEnvironmentVariable("CONTROLLER_SERVICE_HOST");
-            string port = Environment.GetEnvironmentVariable("CONTROLLER_SERVICE_PORT");
-            string grpcEndpoint = $"https://{endpoint}:{port}";
-            if (endpoint == null || port == null)
-            {
-                // fix minor bug, frontend cannot debug locally
-                // throw new Exception("provide a grpc endpoint where to connect to the controller as an environment variable as CONTROLLER_SERVER_ADDRESS=<address>");
-                endpoint = Configuration["CONTROLLER_SERVICE_HOST"];
-                port = Configuration["CONTROLLER_SERVICE_PORT"];
-                grpcEndpoint = "https://localhost:5001";
-            }
-            
+            string grpcHost = Environment.GetEnvironmentVariable("CONTROLLER_SERVICE_HOST");
+            string grpcPort = Environment.GetEnvironmentVariable("CONTROLLER_SERVICE_PORT");
+            string grpcEndpoint = $"https://{grpcHost}:{grpcPort}";
+
+            string redisHost = Environment.GetEnvironmentVariable("REDIS_SERVICE_HOST");
+            string redisPort = Environment.GetEnvironmentVariable("REDIS_SERVICE_PORT");
+            string redisEndpoint = $"{redisHost}:{redisPort}";
+
             ////////////////////////////////////////////////////////////////////////////////////////////////////////
             //GRPC CONTROLLER FACTORY 
             ///////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -158,6 +154,15 @@ namespace BlazorBoilerplate.Server
                 return httpHandler;
             });
 
+
+            ////////////////////////////////////////////////////////////////////////////////////////////////////////
+            //REDIS CACHE 
+            ///////////////////////////////////////////////////////////////////////////////////////////////////////
+
+            services.AddStackExchangeRedisCache(options =>
+            {
+                options.Configuration = redisEndpoint;
+            });
 
             var authAuthority = Configuration[$"{projectName}:IS4ApplicationUrl"].TrimEnd('/');
 

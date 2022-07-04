@@ -232,6 +232,7 @@ class ControllerManager(object):
         ---
         Return dictonary of object informations
         """
+        print("GET OBJECT INFOS TRIGGERED")
         return self.__rdfManager.GetObjectsInformation(request)
 
     def UploadNewDataset(self, dataset: "UploadDatasetFileRequest") -> "UploadDatasetFileResponse":
