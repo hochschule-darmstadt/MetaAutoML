@@ -4,8 +4,7 @@ import autosklearn.classification
 import autosklearn.regression
 import pandas as pd
 from AbstractAdapter import AbstractAdapter
-from AdapterUtils import export_model, prepare_tabular_dataset
-from DataLoader import data_loader
+from AdapterUtils import export_model, prepare_tabular_dataset, data_loader
 from JsonUtil import get_config_property
 from predict_time_sources import SplitMethod
 
@@ -34,9 +33,9 @@ class AutoSklearnAdapter(AbstractAdapter):
         """
         Execute the ML task
         """
-        if self._configuration["task"] == 1:
+        if self._configuration["task"] == ":tabular_classification":
             self.__tabular_classification()
-        elif self._configuration["task"] == 2:
+        elif self._configuration["task"] == ":tabular_regression":
             self.__tabular_regression()
 
     def __generate_settings(self):
