@@ -222,6 +222,6 @@ class AutoMLManager(ABC, Thread):
                 "prediction_time": 0,
                 "status": self.__last_status
                 }
-            self.__data_storage.update_model(self.__username, _mdl_id, {"status": "Failed", "status_messages": self.__status_messages, "runtime": response.runtime})
+            self.__data_storage.update_model(self.__username, _mdl_id, {"status": "Failed"})
             self.__callback(self.__session_id, _mdl_id, model_details)
                         

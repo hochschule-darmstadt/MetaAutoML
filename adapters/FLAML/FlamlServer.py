@@ -10,7 +10,6 @@ import Adapter_pb2_grpc
 import dill
 import grpc
 from AdapterUtils import *
-from DataLoader import data_loader
 from JsonUtil import get_config_property
 
 
@@ -51,11 +50,11 @@ class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
                 json.dump(config_json, f)
 
             process = start_automl_process()
-            yield from capture_process_output(process, start_time, data_loader)
+            yield from capture_process_output(process, start_time)
             generate_script(config_json)
             output_json = zip_script(config_json["session_id"])
             library, model = GetMetaInformation(config_json)
-            test_score, prediction_time  = evaluate(config_json, job_file_location)
+            test_score, prediction_time  = evaluate(config_json, job_file_location, data_loader)
             response = yield from get_response(output_json, start_time, test_score, prediction_time, library, model)
             print(f'{get_config_property("adapter-name")} job finished')
             return response
