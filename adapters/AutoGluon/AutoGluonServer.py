@@ -10,7 +10,6 @@ import Adapter_pb2_grpc
 import grpc
 from AdapterUtils import *
 from autogluon.tabular import TabularPredictor
-from DataLoader import data_loader
 from JsonUtil import get_config_property
 
 
