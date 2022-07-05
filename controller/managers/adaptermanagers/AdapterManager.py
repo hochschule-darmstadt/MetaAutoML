@@ -8,8 +8,15 @@ class AdapterManager(object):
     """
     Implementation of a Structured data manager responsible for executing structured data AutoML sessions
     """
-
-    def start_automl(self, configuration: "StartAutoMlProcessRequest", folder_location, session_id, callback) -> AutoMLSession:
+    def __init__(self, data_storage):
+            """
+            Init a new instance of the abstract class AutoMLManager
+            ---
+            Parameter
+            1. data storage manager
+            """
+            self.__data_storage = data_storage
+    def start_automl(self, configuration: "StartAutoMlProcessRequest", folder_location, session_id, username, callback) -> AutoMLSession:
         """
         Start a new AutoML session
         ---
@@ -22,13 +29,13 @@ class AdapterManager(object):
         """
         # map all automl names with their host names and port names
         automl_addresses = {
-            "autokeras":   ["AUTOKERAS_SERVICE_HOST", "AUTOKERAS_SERVICE_PORT"],
-            "flaml":        ["FLAML_SERVICE_HOST",     "FLAML_SERVICE_PORT"],
-            "autosklearn":  ["SKLEARN_SERVICE_HOST",   "SKLEARN_SERVICE_PORT"],
-            "autogluon":    ["AUTOGLUON_SERVICE_HOST", "AUTOGLUON_SERVICE_PORT"],
-            "autocve":      ["AUTOCVE_SERVICE_HOST",   "AUTOCVE_SERVICE_PORT"],
-            "autopytorch": ["PYTORCH_SERVICE_HOST",   "PYTORCH_SERVICE_PORT"],
-            "mljar":        ["MLJAR_SERVICE_HOST",     "MLJAR_SERVICE_PORT"],
+            ":autokeras":   ["AUTOKERAS_SERVICE_HOST", "AUTOKERAS_SERVICE_PORT"],
+            ":flaml":        ["FLAML_SERVICE_HOST",     "FLAML_SERVICE_PORT"],
+            ":autosklearn":  ["SKLEARN_SERVICE_HOST",   "SKLEARN_SERVICE_PORT"],
+            ":autogluon":    ["AUTOGLUON_SERVICE_HOST", "AUTOGLUON_SERVICE_PORT"],
+            ":autocve":      ["AUTOCVE_SERVICE_HOST",   "AUTOCVE_SERVICE_PORT"],
+            ":autopytorch": ["PYTORCH_SERVICE_HOST",   "PYTORCH_SERVICE_PORT"],
+            ":mljar":        ["MLJAR_SERVICE_HOST",     "MLJAR_SERVICE_PORT"],
         }
 
         automl_names: list[str] = configuration.required_auto_mls
@@ -43,7 +50,7 @@ class AdapterManager(object):
             host, port = map(os.getenv, automl_addresses[automl_name.lower()])
             port = int(port)
 
-            automl = AutoMLManager(configuration, folder_location, host, port, session_id, callback)
+            automl = AutoMLManager(configuration, folder_location, host, port, session_id, username, self.__data_storage, callback)
             # NOTE: friendly name for the thread, also relevant for the callback
             automl.name = automl_name
 

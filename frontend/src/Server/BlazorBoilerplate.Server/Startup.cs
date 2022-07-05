@@ -143,8 +143,8 @@ namespace BlazorBoilerplate.Server
             })
             .ConfigureChannel(o =>
             {
-                o.MaxReceiveMessageSize = 200 * 1024 * 1024; // 200 MB
-                o.MaxSendMessageSize = 200 * 1024 * 1024; // 200 MB
+                o.MaxReceiveMessageSize = 2000 * 1024 * 1024; // 2000 MB
+                o.MaxSendMessageSize = 2000 * 1024 * 1024; // 2000 MB
             })
             .ConfigurePrimaryHttpMessageHandler(() =>
             {

@@ -74,14 +74,13 @@ namespace BlazorBoilerplate.Server.Managers
                 {
                     startAutoMLrequest.RequiredAutoMls.Add(i);
                 }
-                startAutoMLrequest.Task = GetMachineLearningTask(autoMl);
-                startAutoMLrequest.TabularConfig = GetTabularDataConfiguration(autoMl);
+                startAutoMLrequest.Task = autoMl.Task;
+                startAutoMLrequest.Configuration = JsonConvert.SerializeObject(autoMl.Configuration);// = GetTabularDataConfiguration(autoMl);
                 // TODO consider to refactor
-                startAutoMLrequest.RuntimeConstraints = new AutoMlRuntimeConstraints
-                {
-                    MaxIter = autoMl.RuntimeConstraints.Max_iter,
-                    RuntimeLimit = autoMl.RuntimeConstraints.Runtime_limit
-                };
+                startAutoMLrequest.RuntimeConstraints = JsonConvert.SerializeObject(autoMl.RuntimeConstraints);
+                startAutoMLrequest.DatasetConfiguration = JsonConvert.SerializeObject(autoMl.DatasetConfiguration);
+                startAutoMLrequest.TestConfiguration = JsonConvert.SerializeObject(autoMl.TestConfig);
+                startAutoMLrequest.FileConfiguration = JsonConvert.SerializeObject(autoMl.FileConfiguration);
                 var reply = _client.StartAutoMlProcess(startAutoMLrequest);
                 if (reply.Result == ControllerReturnCode.Success)
                 {
@@ -126,51 +125,6 @@ namespace BlazorBoilerplate.Server.Managers
                 return new ApiResponse(Status404NotFound, ex.Message);
             }
         }
-        /// <summary>
-        /// Convert AutoML task to enum equivalent
-        /// </summary>
-        /// <param name="autoMl"></param>
-        /// <returns></returns>
-        private MachineLearningTask GetMachineLearningTask(StartAutoMLRequestDto autoMl)
-        {
-            switch (autoMl.DatasetType)
-            {
-                case ":tabular":
-                    switch (autoMl.Task)
-                    {
-                        case "tabular classification":
-                            return MachineLearningTask.TabularClassification;
-                        case "tabular regression":
-                            return MachineLearningTask.TabularRegression;
-                        default:
-                            return MachineLearningTask.Unknown;
-                    }
-                default:
-                    return MachineLearningTask.Unknown;
-            }
-        }
-        /// <summary>
-        /// retrive the Tabular data configuration accordingly to correct template
-        /// Needed since a correct conversion requires explicit knowledge of the JSON structure
-        /// </summary>
-        /// <param name="autoMl"></param>
-        /// <returns></returns>
-        private AutoMlConfigurationTabularData GetTabularDataConfiguration(StartAutoMLRequestDto autoMl)
-        {
-            switch (autoMl.DatasetType)
-            {
-                case ":tabular":
-                    AutoMlConfigurationTabularData conf = new AutoMlConfigurationTabularData();
-                    conf.Target = new AutoMlTarget();
-                    conf.Target.Target = ((AutoMLTabularDataConfiguration)autoMl.Configuration).Target.Target;
-                    conf.Target.Type = ((AutoMLTabularDataConfiguration)autoMl.Configuration).Target.Type;
-                    // remove target from features
-                    ((AutoMLTabularDataConfiguration)autoMl.Configuration).Features.Remove(((AutoMLTabularDataConfiguration)autoMl.Configuration).Target.Target);
-                    conf.Features.Add(((AutoMLTabularDataConfiguration)autoMl.Configuration).Features);
-                    return conf;
-                default:
-                    return null;
-            }
-        }
+        
     }
 }

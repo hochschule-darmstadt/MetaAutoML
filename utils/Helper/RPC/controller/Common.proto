@@ -9,15 +9,7 @@ message TestConfiguration {
     int32 random_state = 3;
   }
   
-message AutoMlRuntimeConstraints {
-    int32 runtime_limit = 1;
-    int32 max_iter = 2;
-  }
-message AutoMlConfigurationTabularData {
-    AutoMlTarget target = 1;
-    map<string, DataType> features = 2;
-  }
-  
+
 message AutoMlTarget {
     string target = 1;
     DataType type = 2;

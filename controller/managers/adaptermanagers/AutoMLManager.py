@@ -17,7 +17,7 @@ class AutoMLManager(ABC, Thread):
     Base implementation of the  AutoML functionality
     """
 
-    def __init__(self, configuration: "StartAutoMlProcessRequest", folder_location, automl_service_host, automl_service_port, session_id, callback=None):
+    def __init__(self, configuration: "StartAutoMlProcessRequest", folder_location, automl_service_host, automl_service_port, session_id, username, data_storage, callback=None):
         """
         Init a new instance of the abstract class AutoMLManager
         ---
@@ -38,12 +38,15 @@ class AutoMLManager(ABC, Thread):
         self.__predictiontime = 0
         self.__model = ""
         self.__library = ""
-        self.__last_status = SessionStatus.SESSION_STATUS_BUSY
+        self.__last_status = "Busy"
 
         self.__AUTOML_SERVICE_HOST = automl_service_host
         self.__AUTOML_SERVICE_PORT = automl_service_port
 
         self.__callback = callback
+
+        self.__username = username
+        self.__data_storage = data_storage
 
     def get_automl_model(self) -> GetSessionStatusResponse:
         """
@@ -57,23 +60,6 @@ class AutoMLManager(ABC, Thread):
             result.file = a.read()
         return result
 
-    def get_status(self) -> "AutoMlStatus":
-        """
-        Get the execution status of the AutoML
-        ---
-        Return the current AutoML status
-        """
-        status = AutoMlStatus()
-        status.name = self.name
-        status.status = self.__last_status
-        status.messages[:] = self.__status_messages
-        status.testScore = self.__testScore
-        status.validationScore = self.__validationScore
-        status.runtime = self.__runtime
-        status.predictiontime = self.__predictiontime
-        status.model = self.__model
-        status.library = self.__library
-        return status
 
     def is_running(self) -> bool:
         """
@@ -137,32 +123,23 @@ class AutoMLManager(ABC, Thread):
         Return configuration JSON
         """
 
-        if self._configuration.test_config.split_ratio == 0:
-            self._configuration.test_config.split_ratio = 0.8
-            self._configuration.test_config.random_state = 42
+        test_config = json.loads(self._configuration.test_configuration)
+
+    
+        #if test_config.update("split_ratio": 0):
+        test_config.update({"split_ratio": 0.8})
+        test_config.update({"random_state": 42})
 
         return {
             "session_id": self.__session_id,
             "file_name": self._configuration.dataset,
             "file_location": self.__file_dest,
             "task": self._configuration.task,
-            "test_configuration": {
-                "split_ratio": self._configuration.test_config.split_ratio,
-                "method": self._configuration.test_config.method,
-                "random_state": self._configuration.test_config.random_state
-            },
-            "tabular_configuration": {
-                "target": {
-                    "target": self._configuration.tabular_config.target.target,
-                    "type": self._configuration.tabular_config.target.type
-                },
-                "features": dict(self._configuration.tabular_config.features)
-            },
-            "file_configuration": dict(self._configuration.file_configuration),
-            "runtime_constraints": {
-                "runtime_limit": self._configuration.runtime_constraints.runtime_limit * 60,
-                "max_iter": self._configuration.runtime_constraints.max_iter
-            },
+            "configuration": json.loads(self._configuration.configuration),
+            "dataset_configuration": json.loads(self._configuration.dataset_configuration),
+            "runtime_constraints": json.loads(self._configuration.runtime_constraints),
+            "test_configuration": test_config,
+            "file_configuration": json.loads(self._configuration.file_configuration),
             "metric": self._configuration.metric
         }
 
@@ -175,6 +152,21 @@ class AutoMLManager(ABC, Thread):
         2. initial Start AutoML request
         """
         try:  # Run until server closes connection
+            #create new model
+            model_details = {
+                "automl_name": self.name,
+                "session_id": self.__session_id,
+                "path": "",
+                "test_score": 0,
+                "validation_score": 0,
+                "runtime": 0,
+                "model": "",
+                "library": "", 
+                "status": "busy",
+                "status_messages": [],
+                "prediction_time": 0
+                }
+            _mdl_id = self.__data_storage.insert_model(self.__username, model_details)
             for response in stub.StartAutoML(dataset_to_send):
                 # Send request WATCH OUT THIS IS A LOOP REQUEST Check out for normal request
                 # https://grpc.io/docs/languages/python/quickstart/#update-the-client
@@ -182,10 +174,11 @@ class AutoMLManager(ABC, Thread):
                 if response.returnCode == Adapter_pb2.ADAPTER_RETURN_CODE_STATUS_UPDATE:
                     self.__status_messages.append(response.statusUpdate)
                     self.__runtime = response.runtime
+                    self.__data_storage.update_model(self.__username, _mdl_id, {"status": "busy", "status_messages": self.__status_messages, "runtime": response.runtime})
                 elif response.returnCode == Adapter_pb2.ADAPTER_RETURN_CODE_SUCCESS:
                     self.__result_json = json.loads(response.outputJson)
                     self.__is_completed = True
-                    self.__last_status = SessionStatus.SESSION_STATUS_COMPLETED
+                    self.__last_status = "completed"
                     self.__testScore = response.testScore
                     self.__validationScore = response.validationScore
                     self.__runtime = response.runtime
@@ -201,16 +194,34 @@ class AutoMLManager(ABC, Thread):
                             "automl_name": self.name,
                             "session_id": self.__session_id,
                             "path": os.path.join(self.__result_json["file_location"], self.__result_json["file_name"]),
-                            "test_score": response.testScore,
-                            "validation_score": response.validationScore,
-                            "runtime": response.runtime,
-                            "model": response.model,
-                            "library": response.library
+                            "test_score": self.__testScore,
+                            "validation_score": self.__validationScore,
+                            "runtime": self.__runtime,
+                            "model": self.__model,
+                            "library": self.__library,
+                            "prediction_time": self.__predictiontime,
+                            "status": self.__last_status
                         }
-                        self.__callback(self.__session_id, model_details)
+                        self.__callback(self.__session_id, _mdl_id, model_details)
 
                     return
         except grpc.RpcError as rpc_error:
             print(f"Received unknown RPC error: code={rpc_error.code()} message={rpc_error.details()}")
             self.__is_completed = True
-            self.__last_status = SessionStatus.SESSION_STATUS_FAILED
+            self.__last_status = "failed"
+            self.__data_storage.update_session(self.__username, self.__session_id, {"status": "Failed"})
+            model_details = {
+                "automl_name": self.name,
+                "session_id": self.__session_id,
+                "path": "",
+                "test_score": 0,
+                "validation_score": 0,
+                "runtime": 0,
+                "model": "",
+                "library": "",
+                "prediction_time": 0,
+                "status": self.__last_status
+                }
+            self.__data_storage.update_model(self.__username, _mdl_id, {"status": "Failed", "status_messages": self.__status_messages, "runtime": response.runtime})
+            self.__callback(self.__session_id, _mdl_id, model_details)
+                        

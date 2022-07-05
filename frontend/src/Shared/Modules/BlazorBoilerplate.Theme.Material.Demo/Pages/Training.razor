@@ -12,7 +12,7 @@
 <MatTabGroup>
     <MatTab Label="Leaderboard">
         @if (_session!=null){
-            @if (_session.Status == 1)
+            @if (_session.Status == "busy")
             {
                 <MatProgressBar Indeterminate="true"></MatProgressBar>
             }
@@ -105,13 +105,13 @@
         foreach (AutoMLStatusDto automl in _session.AutoMls){
             string status = "";
             switch(automl.Status){
-                case 0: status = "Unknown";
+                case "unknown": status = "Unknown";
                         break;
-                case 1: status = "Running";
+                case "busy": status = "Running";
                         break;
-                case 2: status = "Completed";
+                case "completed": status = "Completed";
                         break;
-                case 3: status = "Failed";
+                case "failed": status = "Failed";
                         break;
             }
             automls.Add(new AutoML(automl.Name, automl.Library, automl.Model, automl.TestScore, automl.Predictiontime, status));
@@ -171,7 +171,7 @@
                 if (apiResponse.IsSuccessStatusCode)
                 {
                     _session = Newtonsoft.Json.JsonConvert.DeserializeObject<GetSessionResponseDto>(apiResponse.Result.ToString());
-                    if (_session.Status != 1)
+                    if (_session.Status != "busy")
                     {
                         DisposeTimer();
                     }

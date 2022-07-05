@@ -121,15 +121,13 @@ def data_loader(config):
     train_data = None
     test_data = None
 
-    if config["task"] == 1:
+    if config["task"] == ":tabular_classification":
         train_data, test_data = read_tabular_dataset_training_data(config)
-    elif config["task"] == 2:
+    elif config["task"] == ":tabular_regression":
         train_data, test_data = read_tabular_dataset_training_data(config)
-    elif config["task"] == 3:
-        train_data, test_data = None
-    elif config["task"] == 4:
+    elif config["task"] == ":image_classification":
         train_data, test_data = read_image_dataset(config)
-    elif config["task"] == 5:
+    elif config["task"] == ":image_regression":
         train_data, test_data = read_image_dataset(config)
 
     return train_data, test_data
@@ -230,22 +228,19 @@ def evaluate(config_json, config_path, dataloader):
 
     train, test = dataloader(config_json)
     predictions = pd.read_csv(os.path.join(session_path, "predictions.csv"))
-    target = config_json["tabular_configuration"]["target"]["target"]
+    target = config_json["configuration"]["target"]["target"]
 
-    if config_json["task"] == 1:
+    if config_json["task"] == ":tabular_classification":
         return accuracy_score(test[target], predictions["predicted"]), (predict_time * 1000) / test.shape[0]
 
-    elif config_json["task"] == 2:
+    elif config_json["task"] == ":tabular_regression":
         return mean_squared_error(test[target], predictions["predicted"], squared=False), \
                (predict_time * 1000) / test.shape[0]
 
-    elif config_json["task"] == 3:
-        return 0, (predict_time * 1000) / test.shape[0]
-
-    elif config_json["task"] == 4:
+    elif config_json["task"] == ":image_classification":
         return accuracy_score(predictions["label"], predictions["predicted"]), (predict_time * 1000) / predictions.shape[0]
 
-    elif config_json["task"] == 5:
+    elif config_json["task"] == ":image_regression":
         return mean_squared_error(test.y, predictions["predicted"], squared=False), \
                (predict_time * 1000) / predictions.shape[0]
 
@@ -331,9 +326,8 @@ def read_tabular_dataset_training_data(json_configuration):
     #TODO: change to ontology based preprocessing
     data[data.select_dtypes(['object']).columns] = data.select_dtypes(['object']).apply(lambda x: x.astype('category'))
 
-
     # split training set
-    if SplitMethod.SPLIT_METHOD_RANDOM == json_configuration["test_configuration"]["method"]:
+    if SplitMethod.SPLIT_METHOD_RANDOM.value == json_configuration["test_configuration"]["method"]:
         train = data.sample(random_state=json_configuration["test_configuration"]["random_state"], frac=1)
         test = data.sample(random_state=json_configuration["test_configuration"]["random_state"], frac=1)
     else:
@@ -346,10 +340,10 @@ def prepare_tabular_dataset(df, json_configuration):
     """
     Prepare tabular dataset, perform feature preparation and data type casting
     """
-    df = feature_preparation(df, json_configuration["tabular_configuration"]["features"].items())
-    df = cast_dataframe_column(df, json_configuration["tabular_configuration"]["target"]["target"], json_configuration["tabular_configuration"]["target"]["type"])
-    X = df.drop(json_configuration["tabular_configuration"]["target"]["target"], axis=1)
-    y = df[json_configuration["tabular_configuration"]["target"]["target"]]
+    df = feature_preparation(df, json_configuration["dataset_configuration"]["features"].items())
+    df = cast_dataframe_column(df, json_configuration["configuration"]["target"]["target"], json_configuration["configuration"]["target"]["type"])
+    X = df.drop(json_configuration["configuration"]["target"]["target"], axis=1)
+    y = df[json_configuration["configuration"]["target"]["target"]]
     return X, y
 
 def convert_X_and_y_dataframe_to_numpy(X, y):

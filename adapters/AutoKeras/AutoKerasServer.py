@@ -9,7 +9,7 @@ import Adapter_pb2_grpc
 import grpc
 from AdapterUtils import *
 from AutoKerasAdapter import AutoKerasAdapter
-from DataLoader import data_loader
+from AdapterUtils import data_loader
 from JsonUtil import get_config_property
 
 

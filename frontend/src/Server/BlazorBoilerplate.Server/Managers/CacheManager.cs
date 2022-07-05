@@ -53,7 +53,7 @@ namespace BlazorBoilerplate.Server.Managers
                         //Copy cached label
                         result.Add(new ObjectInfomationDto()
                         {
-                            ID = value.ToString(),
+                            ID = retrievedRdfObject.Id,
                             Properties = new Dictionary<string, string>(retrievedRdfObject.Informations)
                         });
                     }

@@ -8,6 +8,6 @@ namespace BlazorBoilerplate.Shared.Dto.Ontology
 {
     public class GetCompatibleAutoMlSolutionsResponseDto
     {
-        public List<string> AutoMlSolutions { get; set; } // cause repeated
+        public List<ObjectInfomationDto> AutoMlSolutions { get; set; } // cause repeated
     }
 }
