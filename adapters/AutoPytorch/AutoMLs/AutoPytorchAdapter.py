@@ -14,10 +14,9 @@ import pickle
 
 import pandas as pd
 from AbstractAdapter import AbstractAdapter
-from AdapterUtils import export_model, prepare_tabular_dataset
+from AdapterUtils import export_model, prepare_tabular_dataset, data_loader
 from autoPyTorch.api.tabular_classification import TabularClassificationTask
 from autoPyTorch.api.tabular_regression import TabularRegressionTask
-from DataLoader import data_loader
 from JsonUtil import get_config_property
 from predict_time_sources import DataType, SplitMethod, feature_preparation
 
@@ -118,7 +117,7 @@ class AutoPytorchAdapter(AbstractAdapter):
         """
         Execute the ML task
         """
-        if self._configuration["task"] == 1:
+        if self._configuration["task"] == ":tabular_classification":
             self.__tabular_classification()
-        elif self._configuration["task"] == 2:
+        elif self._configuration["task"] == ":tabular_regression":
             self.__tabular_regression()
