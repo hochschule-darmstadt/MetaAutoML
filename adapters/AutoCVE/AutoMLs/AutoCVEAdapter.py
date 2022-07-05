@@ -2,9 +2,8 @@ import os
 
 from AbstractAdapter import AbstractAdapter
 from AdapterUtils import (convert_X_and_y_dataframe_to_numpy, export_model,
-                          prepare_tabular_dataset)
+                          prepare_tabular_dataset, data_loader)
 from AUTOCVE.AUTOCVE import AUTOCVEClassifier
-from DataLoader import data_loader
 from JsonUtil import get_config_property
 
 
@@ -59,7 +58,7 @@ class AutoCVEAdapter(AbstractAdapter):
         """
         Execute the ML task
         """
-        if self._configuration["task"] == 1:
+        if self._configuration["task"] == ":tabular_classification":
             self.__tabular_classification()
         else:
             raise ValueError(
