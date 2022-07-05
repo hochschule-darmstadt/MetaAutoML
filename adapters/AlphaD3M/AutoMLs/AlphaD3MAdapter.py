@@ -36,6 +36,8 @@ class AlphaD3MAdapter(AbstractAdapter):
         """Execute the classification task"""
         # TODO:
         # Get predict.ji running, this will solve/provide alot of other problems/functions
+        # Current Error:
+        # EOF Error: Ran out of input (while reading the alphad3m-object back into the application)
 
         d3m_obj = d3mi.AutoML(os.path.join(sys.path[0], "d3mTmp"),
                                 "AlphaD3M", "pypi")
