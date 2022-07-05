@@ -2,8 +2,7 @@ import os
 import shutil
 
 from AbstractAdapter import AbstractAdapter
-from AdapterUtils import export_model, prepare_tabular_dataset
-from DataLoader import data_loader
+from AdapterUtils import export_model, prepare_tabular_dataset, data_loader
 from JsonUtil import get_config_property
 from supervised.automl import AutoML
 
@@ -19,9 +18,9 @@ class MLJARAdapter(AbstractAdapter):
     def start(self):
         """Execute the ML task"""
         if True:
-            if self._configuration["task"] == 1:
+            if self._configuration["task"] == ":tabular_classification":
                 self.__tabular_classification()
-            elif self._configuration["task"] == 2:
+            elif self._configuration["task"] == ":tabular_regression":
                 self.__tabular_regression()
 
     def __tabular_classification(self):
