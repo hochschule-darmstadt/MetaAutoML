@@ -1,6 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  namespace: omaml
   labels:
     io.kompose.service: controller
   name: controller

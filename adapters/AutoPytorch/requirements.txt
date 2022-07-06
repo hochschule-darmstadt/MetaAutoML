@@ -2,3 +2,4 @@ autoPyTorch
 grpcio
 protobuf==3.17.3
 dill
+pillow

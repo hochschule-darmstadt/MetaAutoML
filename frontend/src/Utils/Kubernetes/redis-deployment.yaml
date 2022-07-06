@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: omaml
+  name: redisserver
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: redisserver
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        io.kompose.service: redisserver
+    spec:
+      containers:
+      - env:
+        image: redis:alpine
+        imagePullPolicy: ""
+        name: redisserver
+        resources:
+          limits:
+            cpu: "1"
+            memory: "2097152e3"
+        volumeMounts:
+        - mountPath: /data
+          name: redisdata-pvc
+        - mountPath: /var/lib/redis
+          name: redisdata-pvc
+        - mountPath: /usr/local/etc/redis/redis.conf
+          name: redisdata-pvc
+      restartPolicy: Always
+      serviceAccountName: ""
+      volumes:
+      - name: redisdata-pvc
+        persistentVolumeClaim:
+          claimName: redisdata-pvc

@@ -3,3 +3,4 @@ grpcio
 protobuf==3.17.3
 dill
 jinja2
+pillow
