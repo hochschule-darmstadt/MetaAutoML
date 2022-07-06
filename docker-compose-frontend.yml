@@ -49,11 +49,12 @@ services:
   redis:
     image: "redis:alpine"
     volumes:
-      - dbdata:/data
-      - dbdata:/var/lib/redis
-      - dbdata:/usr/local/etc/redis/redis.conf
+      - redisdata:/data
+      - redisdata:/var/lib/redis
+      - redisdata:/usr/local/etc/redis/redis.conf
     ports:
       - "6379:6379"
 
 volumes:
   dbdata:
+  redisdata:
