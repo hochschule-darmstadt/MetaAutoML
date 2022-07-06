@@ -28,7 +28,8 @@
                 "PYTORCH_SERVICE_HOST": "localhost",
                 "PYTORCH_SERVICE_PORT": "50059",
                 "MONGO_DB_DEBUG": "YES",
-                "USE_DEV_CONFIG": "YES"
+                "USE_DEV_CONFIG": "YES",
+                "MONGO_CLUSTER": "NO"
             },
         }
     ]

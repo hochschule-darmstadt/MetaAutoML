@@ -40,11 +40,11 @@ spec:
             cpu: "1"
             memory: "2097152e3"
         volumeMounts:
-        - mountPath: /var/opt/mssql/data
-          name: dbdata-pvc
+        - mountPath: /var/opt/mssql
+          name: dbdata
       restartPolicy: Always
       serviceAccountName: ""
       volumes:
-      - name: dbdata-pvc
+      - name: dbdata
         persistentVolumeClaim:
-          claimName: dbdata-pvc
+          claimName: dbdata-claim

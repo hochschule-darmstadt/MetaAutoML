@@ -6,13 +6,12 @@ metadata:
     io.kompose.service: mongodb
   name: mongodb
 spec:
-  externalTrafficPolicy: Cluster
-  type: NodePort
+  type: ClusterIP
   ports:
-  - name: "1533"
-    port: 1533
+  - name: "27017"
+    port: 27017
     protocol: TCP
-    targetPort: 1433
+    targetPort: 27017
   selector:
     io.kompose.service: mongodb
 status:

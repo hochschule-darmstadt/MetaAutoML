@@ -20,6 +20,10 @@ spec:
     spec:
       containers:
       - env:
+        - name: "MONGO_DB_DEBUG"
+          value: "NO"
+        - name: "MONGO_CLUSTER"
+          value: "YES"
         image: alexhda/omaml-controller
         imagePullPolicy: ""
         name: controller
