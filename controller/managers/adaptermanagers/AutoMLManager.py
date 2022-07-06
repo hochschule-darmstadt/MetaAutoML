@@ -209,7 +209,6 @@ class AutoMLManager(ABC, Thread):
             print(f"Received unknown RPC error: code={rpc_error.code()} message={rpc_error.details()}")
             self.__is_completed = True
             self.__last_status = "failed"
-            self.__data_storage.update_session(self.__username, self.__session_id, {"status": "Failed"})
             model_details = {
                 "automl_name": self.name,
                 "session_id": self.__session_id,

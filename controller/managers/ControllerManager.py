@@ -328,15 +328,20 @@ class ControllerManager(object):
         def callback(session_id, model_id, model: 'dict[str, object]'):
             _mdl_id = self.__data_storage.update_model(configuration.username, model_id, model)
             print(f"updated model: {_mdl_id}")
-
+            model_list = self.__data_storage.get_models(configuration.username, session_id)
             # lock data storage to prevent race condition between get and update
             with self.__data_storage.lock():
                 # append new model to session
                 _sess = self.__data_storage.get_session(configuration.username, session_id)
-                self.__data_storage.update_session(configuration.username, session_id, {
-                    "models": _sess["models"] + [_mdl_id],
-                    "status": "completed"
-                })
+                if len(_sess["models"]) == len(model_list)-1:
+                    self.__data_storage.update_session(configuration.username, session_id, {
+                        "models": _sess["models"] + [model_id],
+                        "status": "completed"
+                    })
+                else:
+                    self.__data_storage.update_session(configuration.username, session_id, {
+                        "models": _sess["models"] + [model_id]
+                    })
 
 
         newSession: AutoMLSession = self.__adapterManager.start_automl(configuration, dataset_folder,
