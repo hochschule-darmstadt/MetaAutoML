@@ -59,7 +59,7 @@ namespace BlazorBoilerplate.Server.Managers
                 requestGrpc.Username = username;
                 requestGrpc.Task = task.Task;
                 var reply = _client.GetSupportedMlLibraries(requestGrpc);
-                response.MlLibraries = reply.MlLibraries.ToList();
+                response.MlLibraries = await _cacheManager.GetObjectInformationList(reply.MlLibraries.ToList());
                 return new ApiResponse(Status200OK, null, response);
             }
             catch (Exception ex)
@@ -77,7 +77,6 @@ namespace BlazorBoilerplate.Server.Managers
             {
                 request.Username = username;
                 request.DatasetName = dataset.DatasetName;
-                request.DatasetType = dataset.DatasetType;
                 var reply = _client.GetDatasetCompatibleTasks(request);
                 response.Tasks = await _cacheManager.GetObjectInformationList(reply.Tasks.ToList());
                 return new ApiResponse(Status200OK, null, response);

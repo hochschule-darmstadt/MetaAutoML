@@ -295,6 +295,7 @@ class StartAutoMlProcessRequest(betterproto.Message):
     test_configuration: str = betterproto.string_field(8)
     file_configuration: str = betterproto.string_field(9)
     metric: str = betterproto.string_field(10)
+    required_libraries: List[str] = betterproto.string_field(11)
 
 
 @dataclass(eq=False, repr=False)

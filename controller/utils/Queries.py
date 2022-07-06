@@ -1,13 +1,12 @@
 ###Retrieve all active ML libraries compatible with a given task
 ONTOLOGY_QUERY_GET_SUPPORTED_ML_LIBRARIES_FOR_TASK = """
             PREFIX : <http://h-da.de/ml-ontology/>
-            SELECT DISTINCT ?library
+            SELECT DISTINCT ?lib
             WHERE {
-            ?t a :ML_task ;
-                       :has_dataset_type ?set ;
-                       skos:prefLabel ?task .
-            ?set a :Enum ;
-                       skos:prefLabel ?dataset_type .
+            ?automl a :AutoML_solution ;
+                       :can_perform ?task ;
+                       :supported_by_oma_ml "true" ;
+                       :used_for ?lib .
             }
             """
 
@@ -20,10 +19,16 @@ ONTOLOGY_QUERY_GET_COMPATIBLE_AUTO_ML_SOLUTIONS_FOR_TASK_AND_LIBRARIES = """
                        :can_perform ?task ;
                        :supported_by_oma_ml "true" ;
                        :used_for ?lib .
-            ?task a :ML_task ;
-                       skos:prefLabel ?taskName .
-            ?lib a :ML_library ;
-                       skos:prefLabel ?library .
+            }
+            """
+###Retrive all ML solutions compatible with a given task
+ONTOLOGY_QUERY_GET_COMPATIBLE_AUTO_ML_SOLUTIONS_FOR_TASK = """
+            PREFIX : <http://h-da.de/ml-ontology/>
+            SELECT DISTINCT ?automl
+            WHERE {
+            ?automl a :AutoML_solution ;
+                       :can_perform ?task ;
+                       :supported_by_oma_ml "true" .
             }
             """
 
@@ -33,10 +38,7 @@ ONTOLOGY_QUERY_GET_TASKS_FOR_DATASET_TYPE = """
             SELECT ?task
             WHERE {
             ?task a :ML_task ;
-                       :has_dataset_type ?set ;
-                       skos:prefLabel ?taskLabel .
-            ?set a :Enum ;
-                       skos:prefLabel "tabular" .
+                       :has_dataset_type ?dataset_type .
             }
             """
             
@@ -46,7 +48,7 @@ ONTOLOGY_QUERY_GET_DATASET_TYPES = """
             SELECT ?type
             WHERE {
                     ?type a :Enum ;
-                            :category :dataset_type ;
+                            :category ?dataset_type ;
                             :supported_by_oma_ml "true" .
             } 
             """

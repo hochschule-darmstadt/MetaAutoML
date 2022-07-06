@@ -1,13 +1,14 @@
 @inject IStringLocalizer<Global> L
 @using System
 @using System.Linq
+@using Newtonsoft.Json
 
 @if (Session!=null){
     <div Style="padding: 10px;">
         <p Style="margin-bottom: 2px;">Dataset: @Session.DatasetName</p>
         <p Style="margin-bottom: 2px;">Task: @Session.Task</p>
-        <p Style="margin-bottom: 2px;">Libraries: @Session.Libraries</p>
-        <p>Target: @Session.Configuration["Target"]["Target"] (@Session.Configuration["target"]["type"])</p>
+        <p Style="margin-bottom: 2px;">Libraries: @Session.RequiredMlLibraries</p>
+        <p>Target: @Session.Configuration["target"]["target"] (@Session.Configuration["target"]["type"])</p>
         <MatDivider></MatDivider>
         <p Style="margin-top: 1em;">Selected AutoMLs: @(String.Join(", ", Session.RequiredAutoMLs.ToArray()))</p>
         <p Style="margin-top: 1em; margin-bottom: 0px;">RuntimeConstraints:</p>
@@ -17,7 +18,7 @@
         <p Style="margin-top: 1em; margin-bottom: 0px;">Feature Configuration:</p>
         <div style="padding: 5px;">
             <MatList Style=" min-height: 2rem; max-height: 30rem; overflow-y: auto;">
-                @foreach (KeyValuePair<string, BlazorBoilerplate.Server.DataType> pair in Session.Configuration["features"])
+                @foreach (KeyValuePair<string, BlazorBoilerplate.Server.DataType> pair in JsonConvert.DeserializeObject<dynamic>((string)Session.DatasetConfiguration["features"]))
                 {
                     <MatListItem Style="height: 30px;">
                         @pair.Key : @pair.Value

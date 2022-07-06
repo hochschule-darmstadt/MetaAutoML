@@ -3,7 +3,7 @@
 @inject IApiClient apiClient
 @inject IViewNotifier viewNotifier
 @inject BlazorBoilerplate.Shared.Services.WizardState WizardState
-
+@using Newtonsoft.Json
 
 <div id="required" style="display:flex; flex-direction:column; gap: 10px">
     <div style="display:flex; flex-direction:row; justify-content:left">
@@ -31,15 +31,11 @@
             <MatChipSet Filter="true" SelectedChipsChanged="OnChipAutoMlLibraryChanged">
                 @if (_supportedMlLibraries != null && _supportedMlLibraries.MlLibraries.Count != 0)
                 {
-                    @foreach (var library in _supportedMlLibraries.MlLibraries)
+                    @foreach (var item in _supportedMlLibraries.MlLibraries)
                     {
-                        <MatChip Label="@library" IsCheckable="true"></MatChip>
+                        <MatChip Label="@item.Properties["skos:altLabel"]" Value="@item.ID" IsCheckable="true"></MatChip>
                     }
-                    <MatChip Label="testChip" IsCheckable="true">testChip</MatChip>
                 }
-                @* <MatChip label="test1" IsCheckable="true">test1</MatChip>
-                <MatChip label="test2" IsCheckable="true">test2</MatChip>
-                <MatChip label="test3" IsCheckable="true">test3</MatChip> *@
             </MatChipSet>
         </div>
 
@@ -50,7 +46,7 @@
                 {
                     @foreach (var item in _compatibleAutoMl.AutoMlSolutions)
                     {
-                        <MatChip Label="@item" IsCheckable="true"></MatChip>
+                        <MatChip Label="@item.Properties["skos:prefLabel"]" Value="@item.ID" IsCheckable="true"></MatChip>
                     }
                 }
             </MatChipSet>
@@ -130,10 +126,32 @@
 
     private async void OnChipAutoMlLibraryChanged(MatChip[] newChips)
     {
+        Dictionary<string, string> dictionary = new Dictionary<string, string>();
+        dictionary.Add("task", WizardState.automlRequest.Task);
+        List<string> libraries = new List<string>();
         WizardState.automlRequest.RequiredMlLibraries = new List<string>();
         foreach (var chip in newChips)
         {
-            WizardState.automlRequest.RequiredMlLibraries.Add(chip.Label);
+            WizardState.automlRequest.RequiredMlLibraries.Add((string)chip.Value);
+            libraries.Add((string)chip.Value);
+        }
+        if (libraries.Count != 0)
+        {
+            dictionary.Add("library", JsonConvert.SerializeObject(libraries));
+        }
+        GetCompatibleAutoMlSolutionsRequestDto compatibleAutoMlRequest = new GetCompatibleAutoMlSolutionsRequestDto { Configuration = dictionary };
+
+        ApiResponseDto apiResponse = await apiClient.GetCompatibleAutoMlSolutions(compatibleAutoMlRequest);
+
+        if (apiResponse.IsSuccessStatusCode)
+        {
+            _compatibleAutoMl = Newtonsoft.Json.JsonConvert.DeserializeObject<GetCompatibleAutoMlSolutionsResponseDto>(apiResponse.Result.ToString());
+            StateHasChanged();
+            viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["AutoMlSolution Operation Successful"]);
+        }
+        else
+        {
+            viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["AutoMlSolution Operation Failed"]);
         }
     }
 

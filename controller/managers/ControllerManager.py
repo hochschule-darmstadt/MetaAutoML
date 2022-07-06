@@ -237,7 +237,8 @@ class ControllerManager(object):
         ---
         Return list of tasks
         """
-        return self.__rdfManager.GetDatasetCompatibleTasks(request)
+        dataset = self.__data_storage.find_dataset(request.username, request.dataset_name)
+        return self.__rdfManager.GetDatasetCompatibleTasks(request, dataset[1]["type"])
 
     def GetObjectsInformation(self, request: "GetObjectsInformationRequest") -> "GetObjectsInformationResponse":
         """
