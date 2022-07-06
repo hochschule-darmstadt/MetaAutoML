@@ -226,17 +226,6 @@ class ControllerManager(object):
         else:
             # no dataset found -> return empty response
             return GetTabularDatasetColumnNamesResponse()
-    
-    def GetSupportedMlLibraries(self, request) -> GetSupportedMlLibrariesResponse:
-        """
-        Get supported ML libraries for a task
-        ---
-        Parameter
-        1. task identifier
-        ---
-        Return list of ML libraries
-        """
-        return self.__rdfManager.GetSupportedMlLibraries(request)
 
     def GetDatasetCompatibleTasks(self, request: "GetDatasetCompatibleTasksRequest") -> "GetDatasetCompatibleTasksResponse":
         """

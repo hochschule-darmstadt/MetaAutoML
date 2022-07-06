@@ -34,7 +34,7 @@ message GetSupportedMlLibrariesResponse {
 
 
 message StartAutoMlProcessRequest {
-    string username = 1;
+   string username = 1;
     string dataset = 2;
     string task = 3;
     string configuration = 4;

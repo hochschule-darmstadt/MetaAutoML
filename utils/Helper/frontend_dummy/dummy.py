@@ -92,6 +92,21 @@ def get_columns(argv, stub):
         print("get-columns requires exactly one argument <dataset names>")
 
 
+def get_compatible_libraries(argv, stub):
+    if len(argv) == 1:
+        filename = argv[0]
+        with open(filename, 'r') as json_file:
+            config = json.load(json_file)
+        config = json.loads(config)
+        config_str = {str(key): str(value) for key, value in config.items()}
+        request = Controller_pb2.GetSupportedMlLibrariesRequest(
+            configuration=config_str)
+        response = stub.GetSupportedMlLibrariesRequest(request)
+        print(f"{response}")
+    else:
+        print("get-supported-libraries requires exactly one argument <filename>")
+
+
 def get_compatible_automls(argv, stub):
     if len(argv) == 1:
         filename = argv[0]
@@ -172,9 +187,11 @@ def start_automl(argv: list, stub: Controller_pb2_grpc.ControllerServiceStub):
         runtime_limit=30, max_iter=0)
 
     automls = []  # no automls specified will make Controller start all automls
+    libraries = []
     request = Controller_pb2.StartAutoMLprocessRequest(dataset=dataset_name,
                                                        task=task,
                                                        tabularConfig=tabular_config,
+                                                       requiredMlLibraries=libraries
                                                        requiredAutoMLs=automls,
                                                        runtimeConstraints=runtime_constraints,
                                                        fileConfiguration={"sep": ','},

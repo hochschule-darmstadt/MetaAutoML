@@ -22,18 +22,20 @@
             }
         </MatSelect>
     </div>
+
     @* only show advanced option if a task was selected *@
     @if (lastCheckedChip != "testLabel")
     {
         <div style="display:flex; flex-direction:row; justify-content:left">
-            <div style="display: flex; align-items: center; padding-right: 1%">Compatible Libraries:</div>
-            <MatChipSet Filter="true">
+            <div style="display: flex; align-items: center; padding-right: 1%">Potentially Compatible Libraries:</div>
+            <MatChipSet Filter="true" SelectedChipsChanged="OnChipAutoMlLibraryChanged">
                 @if (_supportedMlLibraries != null && _supportedMlLibraries.MlLibraries.Count != 0)
                 {
-                    @foreach (var item in _supportedMlLibraries.MlLibraries)
+                    @foreach (var library in _supportedMlLibraries.MlLibraries)
                     {
-                        <MatChip Label="@item" IsCheckable="true"></MatChip>
+                        <MatChip Label="@library" IsCheckable="true"></MatChip>
                     }
+                    <MatChip Label="testChip" IsCheckable="true">testChip</MatChip>
                 }
                 @* <MatChip label="test1" IsCheckable="true">test1</MatChip>
                 <MatChip label="test2" IsCheckable="true">test2</MatChip>
@@ -126,6 +128,15 @@
         WizardState.automlRequest.RuntimeConstraints["runtime_limit"] = time;
     }
 
+    private async void OnChipAutoMlLibraryChanged(MatChip[] newChips)
+    {
+        WizardState.automlRequest.RequiredMlLibraries = new List<string>();
+        foreach (var chip in newChips)
+        {
+            WizardState.automlRequest.RequiredMlLibraries.Add(chip.Label);
+        }
+    }
+
     private async void OnChipAutoMLSolutionChanged(MatChip[] newChips)
     {
         WizardState.automlRequest.RequiredAutoMLs = new List<string>();
@@ -149,17 +160,32 @@
             dictionary.Add("task", WizardState.automlRequest.Task);
             /** Configuration = dictionary is currently dummy */
             GetCompatibleAutoMlSolutionsRequestDto compatibleAutoMlRequest = new GetCompatibleAutoMlSolutionsRequestDto { Configuration = dictionary };
+
             ApiResponseDto apiResponse = await apiClient.GetCompatibleAutoMlSolutions(compatibleAutoMlRequest);
 
             if (apiResponse.IsSuccessStatusCode)
             {
                 _compatibleAutoMl = Newtonsoft.Json.JsonConvert.DeserializeObject<GetCompatibleAutoMlSolutionsResponseDto>(apiResponse.Result.ToString());
                 StateHasChanged();
-                viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
+                viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["AutoMlSolution Operation Successful"]);
             }
             else
             {
-                viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
+                viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["AutoMlSolution Operation Failed"]);
+            }
+
+            GetSupportedMlLibrariesRequestDto supportedMlLibrariesRequest = new GetSupportedMlLibrariesRequestDto { Task = WizardState.automlRequest.Task };
+            apiResponse = await apiClient.GetSupportedMlLibraries(supportedMlLibrariesRequest);
+
+            if (apiResponse.IsSuccessStatusCode)
+            {
+                _supportedMlLibraries = Newtonsoft.Json.JsonConvert.DeserializeObject<GetSupportedMlLibrariesResponseDto>(apiResponse.Result.ToString());
+                StateHasChanged();
+                viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["SupportedMlLibraries Operation Successful"]);
+            }
+            else
+            {
+                viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["SupportedMlLibraries Operation Failed"]);
             }
         }
         catch (Exception ex)
