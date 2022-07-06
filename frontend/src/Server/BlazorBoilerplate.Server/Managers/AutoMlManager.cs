@@ -70,10 +70,6 @@ namespace BlazorBoilerplate.Server.Managers
                 startAutoMLrequest.Username = username;
                 startAutoMLrequest.Dataset = autoMl.DatasetIdentifier;
         
-                foreach (var i in autoMl.RequiredMlLibraries)
-                {
-                    startAutoMLrequest.RequiredLibraries.Add(i);
-                }
                 foreach (var i in autoMl.RequiredAutoMLs)
                 {
                     startAutoMLrequest.RequiredAutoMls.Add(i);

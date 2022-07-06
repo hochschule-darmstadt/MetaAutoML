@@ -12,12 +12,16 @@ namespace BlazorBoilerplate.Shared.Services
             switch (automlRequest.DatasetType)
             {
                 case ":tabular":
-                    var target = automlRequest.Configuration["target"]["target"];
-                    if (string.IsNullOrEmpty(automlRequest.Task) | string.IsNullOrEmpty((string)target))
+                    if (automlRequest.Configuration.ContainsKey("target"))
                     {
-                        return false;
+                        var target = automlRequest.Configuration["target"]["target"];
+                        if (string.IsNullOrEmpty(automlRequest.Task) | string.IsNullOrEmpty((string)target))
+                        {
+                            return false;
+                        }
+                        return true;
                     }
-                    return true;
+                    return false;
                 case ":image":
                     return false;
                 case ":panel":
