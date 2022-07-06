@@ -47,10 +47,10 @@ class AutoPytorchAdapter(AbstractAdapter):
             self._time_limit = 30
             self._iter_limit = None
 
-        if self._configuration["metric"] == "" and self._configuration["task"] == 1:
+        if self._configuration["metric"] == "" and self._configuration["task"] == ":tabular_classification":
             # handle empty metric field, 'accuracy' should be the default metric parameter for AutoPytorch classification
             self._configuration["metric"] = 'accuracy'
-        elif self._configuration["metric"] == "" and self._configuration["task"] == 2:
+        elif self._configuration["metric"] == "" and self._configuration["task"] == ":tabular_regression":
             # handle empty metric field, 'r2' should be the default metric parameter for AutoPytorch regression
             self._configuration["metric"] = 'r2'
         self._result_path = os.path.join(get_config_property("output-path"), self._configuration["session_id"])

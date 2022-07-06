@@ -42,7 +42,7 @@ class AutoSklearnAdapter(AbstractAdapter):
         automl_settings = {"logging_config": self.__get_logging_config()}
         if self._configuration["runtime_constraints"]["runtime_limit"] != 0:
             automl_settings.update(
-                {"time_left_for_this_task": self._configuration["runtime_constraints"]["runtime_limit"]})
+                {"time_left_for_this_task": (self._configuration["runtime_constraints"]["runtime_limit"] * 60)}) #convert into seconds
         automl_settings.update({"metric": self._configuration["metric"]})
         return automl_settings
 
