@@ -60,7 +60,12 @@ class ControllerManager(object):
         ---
         Return a .zip containing the model and executable script
         """
-        return self.__sessions[request.session_id].get_automl_model(request)
+        models = self.__data_storage.get_models(request.username, request.session_id)
+        result = GetAutoMlModelResponse()
+        result.name = os.path.basename(os.path.normpath(models[0]["path"]))
+        with open(models[0]["path"], "rb") as a:
+            result.file = a.read()
+        return result
 
     def GetCompatibleAUtoMlSolutions(self, request: "GetCompatibleAutoMlSolutionsRequest") -> "GetCompatibleAutoMlSolutionsResponse":
         """

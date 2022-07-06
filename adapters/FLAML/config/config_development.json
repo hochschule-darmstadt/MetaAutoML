@@ -4,8 +4,9 @@
   "env-varname-cluster": "RUNTIME",
   "grpc-server-address": "127.0.0.1",
   "export-zip-file-name": "flaml-export",
-  "output-path": "app-data/output",
+  "output-path": "C:/Users/alex/Desktop/MetaAutoML/adapters/FLAML/app-data/output",
   "job-file-path": "app-data/jobs",
   "templates-path": "app-data/templates",
-  "predict-time-sources-path": "../Utils/AutoMLs/predict_time_sources.py"
+  "predict-time-sources-path": "../Utils/AutoMLs/predict_time_sources.py",
+  "local_execution": "YES"
 }

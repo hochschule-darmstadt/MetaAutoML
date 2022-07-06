@@ -195,9 +195,13 @@ def zip_script(session_id):
     shutil.copyfile(os.path.join(tmp_session_folder,  zip_file_name + '.zip'), os.path.join(session_path, zip_file_name + '.zip'))
     shutil.rmtree(tmp_session_folder)
 
-    file_loc_on_controller = os.path.join(output_path,
-                                          get_config_property('adapter-name'),
-                                          str(session_id))
+    if get_config_property("local_execution") == "YES":
+        file_loc_on_controller = os.path.join(output_path,
+                                            str(session_id))
+    else:
+        file_loc_on_controller = os.path.join(output_path,
+                                            get_config_property('adapter-name'),
+                                            str(session_id))
 
     return {
         'file_name': f'{zip_file_name}.zip',
