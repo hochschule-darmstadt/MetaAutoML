@@ -26,6 +26,35 @@
     @if (lastCheckedChip != "testLabel")
     {
         <div style="display:flex; flex-direction:row; justify-content:left">
+            <div style="display: flex; align-items: center; padding-right: 1%">Compatible Libraries:</div>
+            <MatChipSet Filter="true">
+                @if (_supportedMlLibraries != null && _supportedMlLibraries.MlLibraries.Count != 0)
+                {
+                    @foreach (var item in _supportedMlLibraries.MlLibraries)
+                    {
+                        <MatChip Label="@item" IsCheckable="true"></MatChip>
+                    }
+                }
+                @* <MatChip label="test1" IsCheckable="true">test1</MatChip>
+                <MatChip label="test2" IsCheckable="true">test2</MatChip>
+                <MatChip label="test3" IsCheckable="true">test3</MatChip> *@
+            </MatChipSet>
+        </div>
+
+        <div style="display:flex; flex-direction:row; justify-content:left">
+            <div style="display: flex; align-items: center; padding-right: 1%">AutoML Solution:</div>
+            <MatChipSet Filter="true" SelectedChipsChanged="OnChipAutoMLSolutionChanged">
+                @if (_compatibleAutoMl != null && _compatibleAutoMl.AutoMlSolutions.Count != 0)
+                {
+                    @foreach (var item in _compatibleAutoMl.AutoMlSolutions)
+                    {
+                        <MatChip Label="@item" IsCheckable="true"></MatChip>
+                    }
+                }
+            </MatChipSet>
+        </div>
+
+        <div style="display:flex; flex-direction:row; justify-content:left">
             <div style="display: flex; align-items: center; padding-right: 1% ">Target Column:</div>
             @if (_columnNames != null)
             {
@@ -39,17 +68,6 @@
                     <MatExpansionPanelHeader>Advanced Settings</MatExpansionPanelHeader>
                 </MatExpansionPanelSummary>
                 <MatExpansionPanelDetails>
-                    <MatChipSet Filter="true" SelectedChipsChanged="OnChipAutoMLSolutionChanged">
-                        @if (_compatibleAutoMl != null && _compatibleAutoMl.AutoMlSolutions.Count != 0)
-                        {
-                            <p style="margin-bottom: 0px;">AutoML Solution :</p>
-                            @foreach (var item in _compatibleAutoMl.AutoMlSolutions)
-                            {
-                                <MatChip Value="@item.ID" Label="@item.Properties["skos:prefLabel"]" IsCheckable="true"></MatChip>
-                            }
-                        }
-                    </MatChipSet>
-
                     <div style="display:flex; flex-direction:row; justify-content:left">
                         <div style="display: flex; align-items: center; padding-right: 1% ">Time limit [minutes]:</div>
                         @if (WizardState.automlRequest.RuntimeConstraints != null)
@@ -69,6 +87,7 @@
 @code {
     private GetDatasetCompatibleTasksResponseDto _tasks;
     private GetCompatibleAutoMlSolutionsResponseDto _compatibleAutoMl;
+    private GetSupportedMlLibrariesResponseDto _supportedMlLibraries;
     private List<String> _columnNames;
     private MatChip[] selectedChips = null;
     private string lastCheckedChip = "testLabel";

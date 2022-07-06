@@ -6,6 +6,7 @@
     <div Style="padding: 10px;">
         <p Style="margin-bottom: 2px;">Dataset: @Session.DatasetName</p>
         <p Style="margin-bottom: 2px;">Task: @Session.Task</p>
+        <p Style="margin-bottom: 2px;">Libraries: @Session.Libraries</p>
         <p>Target: @Session.Configuration["Target"]["Target"] (@Session.Configuration["target"]["type"])</p>
         <MatDivider></MatDivider>
         <p Style="margin-top: 1em;">Selected AutoMLs: @(String.Join(", ", Session.RequiredAutoMLs.ToArray()))</p>
