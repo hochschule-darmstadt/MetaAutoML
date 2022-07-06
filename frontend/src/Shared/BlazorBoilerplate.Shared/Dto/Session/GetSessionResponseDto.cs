@@ -9,20 +9,29 @@ namespace BlazorBoilerplate.Shared.Dto.Session
 {
     public class GetSessionResponseDto
     {
-        public int Status { get; set; }
+        public string Status { get; set; }
         public List<AutoMLStatusDto> AutoMls { get; set; }
-        public string Dataset { get; set; }
-        public BlazorBoilerplate.Server.MachineLearningTask Task { get; set; }
-        public AutoMLTabularDataConfiguration Configuration { get; set; }
+        public string DatasetId { get; set; }
+        public string DatasetName { get; set; }
+        public string Task { get; set; }
         public List<String> RequiredMlLibraries { get; set; }
         public List<String> RequiredAutoMLs { get; set; }
-        public AutoMLRuntimeConstraints RuntimeConstraints { get; set; }
+        public Dictionary<string, dynamic> DatasetConfiguration { get; set; }
+        public Dictionary<string, dynamic> Configuration { get; set; }
+        public Dictionary<string, dynamic> RuntimeConstraints { get; set; }
+        public Dictionary<string, dynamic> FileConfiguration { get; set; }
+        public Dictionary<string, dynamic> TestConfiguration { get; set; }
 
         public GetSessionResponseDto()
         {
             AutoMls = new List<AutoMLStatusDto>();
             RequiredMlLibraries = new List<String>();
             RequiredAutoMLs = new List<String>();
+            DatasetConfiguration = new Dictionary<string, dynamic>();
+            Configuration = new Dictionary<string, dynamic>();
+            RuntimeConstraints = new Dictionary<string, dynamic>();
+            FileConfiguration = new Dictionary<string, dynamic>();
+            TestConfiguration = new Dictionary<string, dynamic>();
         }
     }
 }

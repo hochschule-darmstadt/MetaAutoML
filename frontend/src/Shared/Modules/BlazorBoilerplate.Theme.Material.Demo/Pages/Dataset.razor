@@ -1,5 +1,5 @@
-﻿@page "/datasets/{id}/{name}"
-@page "/datasets/{id}/{name}/{tabIndex:int?}"
+﻿@page "/datasets/{id}/{name}/{type}"
+@page "/datasets/{id}/{name}/{type}/{tabIndex:int?}"
 @inject IStringLocalizer<Global> L
 @using System
 @inject IApiClient apiClient
@@ -47,7 +47,17 @@
             <div id="container-fluid">
                 @if (ActiveStepId == 1)
                 {
-                    <DisplayTabularDataset></DisplayTabularDataset>
+                    switch (Type)
+                    {
+                        case ":tabular":
+                            <DisplayTabularDataset></DisplayTabularDataset>
+                            break;
+                        case ":image":
+                            <DisplayImageDataset></DisplayImageDataset>
+                            break;
+                        case ":panel":
+                            break;
+                    }
                 }
                 else
                 {
@@ -76,6 +86,8 @@
     [Parameter]
     public string? Name { get; set; }
     [Parameter]
+    public string? Type { get; set; }
+    [Parameter]
     public int? TabIndex { get; set; }
 
     public int SelectedIndex;
@@ -88,7 +100,7 @@
     {
         WizardState.automlRequest = new StartAutoMLRequestDto();
         WizardState.automlRequest.DatasetIdentifier = Id;
-        WizardState.automlRequest.DatasetType = ":tabular";
+        WizardState.automlRequest.DatasetType = Type;
     }
 
     protected override void OnAfterRender(bool firstRender)
@@ -112,21 +124,14 @@
 
     protected void OnSubmit()
     {
-        if(IsConfigurationCompleted()){
+        if(WizardState.IsCompleted())
+        {
             OnWizzardCompleted();
             AutoMLStarted = true;
             StateHasChanged();
         }
     }
 
-    // checks if required configuration is selected
-    private bool IsConfigurationCompleted()
-    {
-        if (string.IsNullOrEmpty(WizardState.automlRequest.Task) | string.IsNullOrEmpty(((AutoMLTabularDataConfiguration)WizardState.automlRequest.Configuration).Target.Target)){
-            return false;
-        }
-        return true;
-    }
 
     private async Task OnWizzardCompleted()
     {

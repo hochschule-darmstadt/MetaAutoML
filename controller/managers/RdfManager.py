@@ -67,16 +67,30 @@ class RdfManager(object):
             self.__log.exception("task key in configuration dictonary has no value")
             result.AutoMlSolutions.append("Task parameter value missing")
             return result
+        
+        
+        if "library" not in request.configuration:  # Check if library parameter is contained, we require it for a successful query
+            self.__log.exception("Configuration dictonary does not contain the key library")
+            result.AutoMlSolutions.append("Library parameter missing")
+            return result
+
+        if len(request.configuration[
+                   "library"]) == 0:  # Check if library parameter has value, we require it for a successful query
+            self.__log.exception("library key in configuration dictonary has no value")
+            result.AutoMlSolutions.append("Library parameter value missing")
+            return result
+        
 
         # TODO add more parameter to query
         # task = rdflib.Literal(u'binary classification')
         task = rdflib.Literal(request.configuration["task"])
-        q = prepareQuery(Queries.ONTOLOGY_QUERY_GET_ACTIVE_AUTOML_FOR_TASK,
+        library = rdflib.Literal(request.configuration["library"])
+        q = prepareQuery(Queries.ONTOLOGY_QUERY_GET_COMPATIBLE_AUTO_ML_SOLUTIONS_FOR_TASK_AND_LIBRARIES,
                          initNs={"skos": SKOS})
 
-        queryResult = self.__executeQuery(q, {"task": task})
+        queryResult = self.__executeQuery(q, {"taskName": task}, {"library": library})
         for row in queryResult:
-            result.auto_ml_solutions.append(row.automl.replace(ML_ONTOLOGY_NAMESPACE, ""))
+            result.auto_ml_solutions.append(row.automl.replace(ML_ONTOLOGY_NAMESPACE, ":"))
         return result
 
     def GetDatasetCompatibleTasks(self, request: GetDatasetCompatibleTasksRequest) -> GetDatasetCompatibleTasksResponse:
@@ -102,7 +116,7 @@ class RdfManager(object):
 
         queryResult = self.__executeQuery(q, {"dataset": dataset})
         for row in queryResult:
-            result.tasks.append(row.task.replace(ML_ONTOLOGY_NAMESPACE, ""))
+            result.tasks.append(row.task.replace(ML_ONTOLOGY_NAMESPACE, ":"))
         return result
 
     def GetDatasetTypes(self, request: GetDatasetTypesRequest) -> GetDatasetTypesResponse:
@@ -174,7 +188,7 @@ class RdfManager(object):
             return result
 
         task = rdflib.Literal(request.task)
-        q = prepareQuery(Queries.ONTOLOGY_QUERY_GET_SUPPORTED_MACHINE_LEARNING_LIBRARY,
+        q = prepareQuery(Queries.ONTOLOGY_QUERY_GET_SUPPORTED_ML_LIBRARIES_FOR_TASK,
                          initNs={"skos": SKOS})
 
         queryResult = self.__executeQuery(q, {"taskName": task})
