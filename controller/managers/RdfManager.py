@@ -70,13 +70,13 @@ class RdfManager(object):
 
         # TODO add more parameter to query
         # task = rdflib.Literal(u'binary classification')
-        task = rdflib.Literal(request.configuration["task"])
+        task = rdflib.URIRef(ML_ONTOLOGY_NAMESPACE + request.configuration["task"].replace(":", ""))
         q = prepareQuery(Queries.ONTOLOGY_QUERY_GET_ACTIVE_AUTOML_FOR_TASK,
                          initNs={"skos": SKOS})
 
         queryResult = self.__executeQuery(q, {"task": task})
         for row in queryResult:
-            result.auto_ml_solutions.append(row.automl.replace(ML_ONTOLOGY_NAMESPACE, ""))
+            result.auto_ml_solutions.append(row.automl.replace(ML_ONTOLOGY_NAMESPACE, ":"))
         return result
 
     def GetDatasetCompatibleTasks(self, request: GetDatasetCompatibleTasksRequest) -> GetDatasetCompatibleTasksResponse:
@@ -102,7 +102,7 @@ class RdfManager(object):
 
         queryResult = self.__executeQuery(q, {"dataset": dataset})
         for row in queryResult:
-            result.tasks.append(row.task.replace(ML_ONTOLOGY_NAMESPACE, ""))
+            result.tasks.append(row.task.replace(ML_ONTOLOGY_NAMESPACE, ":"))
         return result
 
     def GetDatasetTypes(self, request: GetDatasetTypesRequest) -> GetDatasetTypesResponse:

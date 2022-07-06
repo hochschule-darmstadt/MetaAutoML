@@ -1,19 +1,17 @@
-import grpc
-import os
-import logging
 import json
-import time
+import logging
+import os
 import shutil
-
-from autogluon.tabular import TabularPredictor
+import time
+from concurrent import futures
 
 import Adapter_pb2
 import Adapter_pb2_grpc
-
-from concurrent import futures
+import grpc
+from AdapterUtils import *
+from autogluon.tabular import TabularPredictor
 from JsonUtil import get_config_property
 
-from AdapterUtils import *
 
 def GetMetaInformations(config_json):
     working_dir = os.path.join(get_config_property("output-path"), "working_dir")
@@ -70,7 +68,7 @@ class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
 
 
             library, model = GetMetaInformations(config_json)
-            test_score, prediction_time= evaluate(config_json, job_file_location)
+            test_score, prediction_time= evaluate(config_json, job_file_location, data_loader)
             response = yield from get_response(output_json, start_time, test_score, prediction_time, library, model)
 
             print(f'{get_config_property("adapter-name")} job finished')

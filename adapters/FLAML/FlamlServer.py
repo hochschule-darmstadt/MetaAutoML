@@ -1,19 +1,17 @@
-import os
-import logging
-import shutil
 import json
+import logging
+import os
+import shutil
 import time
-import dill
-
 from concurrent import futures
-
-import grpc
 
 import Adapter_pb2
 import Adapter_pb2_grpc
-
-from JsonUtil import get_config_property
+import dill
+import grpc
 from AdapterUtils import *
+from JsonUtil import get_config_property
+
 
 def GetMetaInformation(config_json):
     working_dir = os.path.join(get_config_property("output-path"), "working_dir")
@@ -56,7 +54,7 @@ class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
             generate_script(config_json)
             output_json = zip_script(config_json["session_id"])
             library, model = GetMetaInformation(config_json)
-            test_score, prediction_time  = evaluate(config_json, job_file_location)
+            test_score, prediction_time  = evaluate(config_json, job_file_location, data_loader)
             response = yield from get_response(output_json, start_time, test_score, prediction_time, library, model)
             print(f'{get_config_property("adapter-name")} job finished')
             return response

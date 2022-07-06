@@ -1,8 +1,11 @@
-import autokeras as ak
 import os
-from JsonUtil import get_config_property
+
+import autokeras as ak
+import tensorflow as tf
 from AbstractAdapter import AbstractAdapter
-from AdapterUtils import read_tabular_dataset_training_data, prepare_tabular_dataset, export_model
+from AdapterUtils import export_model, prepare_tabular_dataset, data_loader
+from JsonUtil import get_config_property
+
 
 class AutoKerasAdapter(AbstractAdapter):
     """
@@ -21,15 +24,21 @@ class AutoKerasAdapter(AbstractAdapter):
     def start(self):
         """Execute the ML task"""
         if True:
-            if self._configuration["task"] == 1:
+            if self._configuration["task"] == ":tabular_classification":
                 self.__tabular_classification()
-            elif self._configuration["task"] == 2:
+            elif self._configuration["task"] == ":tabular_regression":
                 self.__tabular_regression()
+            elif self._configuration["task"] == ":image_classification":
+                self.__image_classification()
+            elif self._configuration["task"] == ":image_regression":
+                self.__image_regression()
 
     def __tabular_classification(self):
         """Execute the classification task"""
-        self.df = read_tabular_dataset_training_data(self._configuration)
+
+        self.df, test = data_loader(self._configuration)
         X, y = prepare_tabular_dataset(self.df, self._configuration)
+
         clf = ak.StructuredDataClassifier(overwrite=True,
                                           max_trials=self._max_iter,
                                           # metric=self._configuration['metric'],
@@ -41,12 +50,46 @@ class AutoKerasAdapter(AbstractAdapter):
 
     def __tabular_regression(self):
         """Execute the regression task"""
-        self.df = read_tabular_dataset_training_data(self._configuration)
+
+        self.df, test = data_loader(self._configuration)
         X, y = prepare_tabular_dataset(self.df, self._configuration)
+
         reg = ak.StructuredDataRegressor(overwrite=True,
                                          max_trials=self._max_iter,
                                          # metric=self._configuration['metric'],
                                          directory=self._result_path,
                                          seed=42)
+
         reg.fit(x=X, y=y)
-        self.__export_model(reg, self._configuration["session_id"], 'model_keras.p')
+        export_model(reg, self._configuration["session_id"], 'model_keras.p')
+
+    def __image_classification(self):
+        """"Execute image classification task"""
+
+        train_data, test_data = data_loader(self._configuration)
+
+        clf = ak.ImageClassifier(overwrite=True, 
+                                max_trials=self._configuration["runtime_constraints"]["max_iter"],
+                                # metric=self._configuration['metric'],
+                                seed=42,
+                                directory=self._result_path)
+
+        clf.fit(train_data, epochs=self._configuration["runtime_constraints"]["epochs"])
+
+        export_model(clf, self._configuration["session_id"], 'model_keras.p')
+
+    def __image_regression(self):
+        """Execute image regression task"""
+
+        train_data, test_data = data_loader(self._configuration)
+
+        reg = ak.ImageRegressor(overwrite=True, 
+                                max_trials=self._configuration["runtime_constraints"]["max_iter"],
+                                # metric=self._configuration['metric'],
+                                seed=42,
+                                directory=self._result_path)
+                                
+        reg.fit(train_data, epochs=self._configuration["runtime_constraints"]["epochs"])
+
+        export_model(reg, self._configuration["session_id"], 'model_keras.p')
+

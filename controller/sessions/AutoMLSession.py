@@ -1,7 +1,7 @@
 
 from Controller_bgrpc import *
 from IAutoMLManager import IAutoMLManager
-
+import json
 
 class AutoMLSession(object):
     """
@@ -56,18 +56,11 @@ class AutoMLSession(object):
         ---
         Return the session status as Controller_pb2.GetSessionStatusResponse
         """
-        target_config = AutoMlTarget(target=self.__configuration.tabular_config.target.target,
-                                                    type=self.__configuration.tabular_config.target.type)
-        tabular_config = AutoMlConfigurationTabularData(
-            target=target_config, features=dict(self.__configuration.tabular_config.features))
 
-        runtime_constraints = AutoMlRuntimeConstraints(
-            runtime_limit=self.__configuration.runtime_constraints.runtime_limit,
-            max_iter=self.__configuration.runtime_constraints.max_iter)
-
-        response = GetSessionStatusResponse(tabular_config=tabular_config,
+        response = GetSessionStatusResponse(configuration=self.__configuration.configuration,
+                                                            dataset_configuration=self.__configuration.dataset_configuration,
                                                            required_auto_mls=[automl.name for automl in self.automls],
-                                                           runtime_constraints=runtime_constraints,)
+                                                           runtime_constraints=self.__configuration.runtime_constraints)
         response.status = SessionStatus.SESSION_STATUS_COMPLETED
         response.dataset = self.__configuration.dataset
         response.task = self.__configuration.task

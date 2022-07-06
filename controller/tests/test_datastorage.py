@@ -102,7 +102,7 @@ class TestDataStorage(unittest.TestCase):
                 "sep":","
             },
             "metric":"",
-            "status":"running",
+            "status":"busy",
             "models":[ ]
         }
         sess_id = data_storage.insert_session("test_user", session)
@@ -137,7 +137,7 @@ class TestDataStorage(unittest.TestCase):
                     "sep":","
                 },
                 "metric":"",
-                "status":"running",
+                "status":"busy",
                 "models":[ ]
             })
 
@@ -175,7 +175,7 @@ class TestDataStorage(unittest.TestCase):
                 "sep":","
             },
             "metric":"",
-            "status":"running",
+            "status":"busy",
             "models":[ ]
         }
         sess_id = data_storage.insert_session("test_user", session)
