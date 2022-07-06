@@ -1,19 +1,7 @@
-###Retrive all active and with task compatible AutoMLs
-ONTOLOGY_QUERY_GET_ACTIVE_AUTOML_FOR_TASK = """
+###Retrieve all active ML libraries compatible with a given task
+ONTOLOGY_QUERY_GET_SUPPORTED_ML_LIBRARIES_FOR_TASK = """
             PREFIX : <http://h-da.de/ml-ontology/>
-            SELECT ?automl
-            WHERE {
-            ?automl a :AutoML_solution;
-                      :supported_by_oma_ml "true" ;
-                      :can_perform ?p .
-            ?p skos:prefLabel ?task .
-            }
-            """
-
-###Retrieve all compatible tasks for a dataset type
-ONTOLOGY_QUERY_GET_TASKS_FOR_DATASET_TYPE = """
-            PREFIX : <http://h-da.de/ml-ontology/>
-            SELECT ?task
+            SELECT DISTINCT ?library
             WHERE {
             ?t a :ML_task ;
                        :has_dataset_type ?set ;
@@ -23,10 +11,10 @@ ONTOLOGY_QUERY_GET_TASKS_FOR_DATASET_TYPE = """
             }
             """
 
-###Retrieve all ML libraries compatible with a given task
-ONTOLOGY_QUERY_GET_SUPPORTED_MACHINE_LEARNING_LIBRARY = """
+###Retrive all ML solutions compatible with a given task and libraries
+ONTOLOGY_QUERY_GET_COMPATIBLE_AUTO_ML_SOLUTIONS_FOR_TASK_AND_LIBRARIES = """
             PREFIX : <http://h-da.de/ml-ontology/>
-            SELECT DISTINCT ?library
+            SELECT DISTINCT ?automl
             WHERE {
             ?automl a :AutoML_solution ;
                        :can_perform ?task ;
@@ -35,7 +23,20 @@ ONTOLOGY_QUERY_GET_SUPPORTED_MACHINE_LEARNING_LIBRARY = """
             ?task a :ML_task ;
                        skos:prefLabel ?taskName .
             ?lib a :ML_library ;
-                        skos:prefLabel ?library .
+                       skos:prefLabel ?library .
+            }
+            """
+
+###Retrieve all compatible tasks for a dataset type
+ONTOLOGY_QUERY_GET_TASKS_FOR_DATASET_TYPE = """
+            PREFIX : <http://h-da.de/ml-ontology/>
+            SELECT ?task
+            WHERE {
+            ?task a :ML_task ;
+                       :has_dataset_type ?set ;
+                       skos:prefLabel ?taskLabel .
+            ?set a :Enum ;
+                       skos:prefLabel "tabular" .
             }
             """
             

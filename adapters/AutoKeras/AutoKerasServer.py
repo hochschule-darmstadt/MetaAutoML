@@ -1,22 +1,16 @@
-import os
-
-import logging
 import json
+import logging
+import os
 import time
 from concurrent import futures
 
-import grpc
-
 import Adapter_pb2
 import Adapter_pb2_grpc
-
-from JsonUtil import get_config_property
-
+import grpc
 from AdapterUtils import *
-
-
-
-
+from AutoKerasAdapter import AutoKerasAdapter
+from AdapterUtils import data_loader
+from JsonUtil import get_config_property
 
 
 class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
@@ -33,8 +27,10 @@ class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
             start_time = time.time()
             # saving AutoML configuration JSON
             config_json = json.loads(request.processJson)
+
             job_file_location = os.path.join(get_config_property("job-file-path"),
                                              get_config_property("job-file-name"))
+
             with open(job_file_location, "w+") as f:
                 json.dump(config_json, f)
 
@@ -44,7 +40,7 @@ class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
             output_json = zip_script(config_json["session_id"])
             library = "neural network"
             model = "keras"
-            test_score, prediction_time = evaluate(config_json, job_file_location)
+            test_score, prediction_time = evaluate(config_json, job_file_location, data_loader)
             response = yield from get_response(output_json, start_time, test_score, prediction_time, library, model)
             print(f'{get_config_property("adapter-name")} job finished')
             return response
@@ -79,6 +75,23 @@ def serve():
     Adapter_pb2_grpc.add_AdapterServiceServicer_to_server(AdapterServiceServicer(), server)
     server.add_insecure_port(f'{get_config_property("grpc-server-address")}:{os.getenv("GRPC_SERVER_PORT")}')
     server.start()
+
+    # ToDo:
+    # - Make image tasks available in frontend 
+    # - Test image task application wide
+    # 
+    # Local testing
+    # channel = grpc.insecure_channel(f'{get_config_property("grpc-server-address")}:{os.getenv("GRPC_SERVER_PORT")}')
+    # stub = Adapter_pb2_grpc.AdapterServiceStub(channel)
+    # request = Adapter_pb2.StartAutoMLRequest() 
+    # 
+    # job_file_location = os.path.join(get_config_property("job-file-path"),
+    #                                 get_config_property("job-file-name"))
+    # with open(job_file_location) as file:
+    #     request.processJson = json.dumps(json.load(file))
+    # 
+    # response = stub.StartAutoML(request)
+
     print(get_config_property("adapter-name") + " started")
     server.wait_for_termination()
 

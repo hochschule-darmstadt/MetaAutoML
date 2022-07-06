@@ -26,11 +26,6 @@ class CsvManager:
         """
         response = GetDatasetResponse()
         dataset = pd.read_csv(path)
-        # P: Dataset Analysis happens here, will return small json with metadata
-        
-
-        analysisResult = DataSetAnalysisManager.startAnalysis(dataset)
-        DataSetAnalysisManager.persistAnalysisResult(analysisResult)
     
         for col in dataset.columns:
             table_column = TableColumn()

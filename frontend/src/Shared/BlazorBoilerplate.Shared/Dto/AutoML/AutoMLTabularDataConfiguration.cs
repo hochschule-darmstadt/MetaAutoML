@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace BlazorBoilerplate.Shared.Dto.AutoML
 {
-    public class AutoMLTabularDataConfiguration : IAutoMLConfiguration
+    public class AutoMLConfiguration : IAutoMLConfiguration
     {
         public AutoML.AutoMLTarget Target { get; set; }
         public Dictionary<string,Server.DataType> Features { get; set; }

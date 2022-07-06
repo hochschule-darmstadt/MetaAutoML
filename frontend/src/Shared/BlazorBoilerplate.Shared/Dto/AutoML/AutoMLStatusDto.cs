@@ -11,7 +11,7 @@ namespace BlazorBoilerplate.Shared.Dto.AutoML
         public string Name { get; set; }
         public string Library { get; set; }
         public string Model { get; set; }
-        public int Status { get; set; }
+        public string Status { get; set; }
         public List<string> Messages { get; set; }
         public double TestScore { get; set; }
         public double ValidationScore { get; set; }

@@ -17,6 +17,9 @@ class DataSetAnalysisManager:
         ---
         Return a python dictionary containing dataset analysis
         """
+        #Already a dataframe???
+        #dataset = pd.read_csv(dataset, delimiter=',')
+
         jsonfile = {}
         jsonfile["basic analysis"] = {
 
@@ -25,27 +28,11 @@ class DataSetAnalysisManager:
             "na_columns": DataSetAnalysisManager.__missing_values_columns(dataset),
             "high_na_rows": DataSetAnalysisManager.__missing_values_rows(dataset),
             "outlier": DataSetAnalysisManager.__detect_outliers(dataset),
-            #"duplicate_columns": DataSetAnalysisManager.__detect_duplicate_columns(dataset),
-            #"duplicate_rows": DataSetAnalysisManager.__detect_duplicate_rows(dataset),
+            "duplicate_columns": DataSetAnalysisManager.__detect_duplicate_columns(dataset),
+            "duplicate_rows": DataSetAnalysisManager.__detect_duplicate_rows(dataset),
         }
 
-        # for debugging purposes
-        print(json.dumps(jsonfile))
-
         return jsonfile
-
-    def persistAnalysisResult(jsonfile:dict):
-        """
-        Persists a python dictionary containing dataset analysis.
-        ---
-        Parameter
-        1. the pythondictionary to persist
-        ---
-        Return None
-        """
-        with open('.\\app-data\\analysis.json', 'w+') as target:
-            json.dump(jsonfile, target)
-            target.close()
 
     @staticmethod
     def __number_of_columns(dataset: pd.DataFrame) -> int:
@@ -91,7 +78,7 @@ class DataSetAnalysisManager:
         return na_counts
 
     @staticmethod
-    def __missing_values_rows(dataset: pd.DataFrame) -> list[int]:
+    def __missing_values_rows(dataset: pd.DataFrame) -> 'list[int]':
         """
         Counts missing values of each row and adds the indices of rows with a lot of missing values to a list
         ---
@@ -113,7 +100,7 @@ class DataSetAnalysisManager:
         return missing_rows_indices
 
     @staticmethod
-    def __detect_outliers(dataset: pd.DataFrame) -> list[dict]:
+    def __detect_outliers(dataset: pd.DataFrame) -> 'list[dict]':
         """
         Detects outliers in all columns in a dataset containing floats
         ---
@@ -150,3 +137,68 @@ class DataSetAnalysisManager:
             outlier_columns.append({column_name: outlier_indices})
         
         return outlier_columns
+
+    @staticmethod
+    def __detect_duplicate_columns(dataset: pd.DataFrame) -> 'list[tuple]':
+        """
+        Detects duplicate columns in a dataset
+        ---
+        Parameter
+        1. dataset to be analyzed
+        ---
+        Return a list of tuples each containing a pair of duplicate column indices.
+        """
+        duplicate_column_list = []
+
+        for x in range(dataset.shape[1]):
+            col = dataset.iloc[:, x]
+            
+            for y in range(x + 1, dataset.shape[1]):
+
+                other_col = dataset.iloc[:, y]
+                
+                if col.equals(other_col):
+                    duplicate_column_pair = (x,y)
+                    duplicate_column_list.append(duplicate_column_pair)
+
+        return duplicate_column_list
+
+    @staticmethod
+    def __detect_duplicate_rows(dataset: pd.DataFrame) -> 'list[tuple]':
+        """
+        Detects duplicate rows
+        ---
+        Parameter
+        1. dataset to be analyzed
+        ---
+        Return a list of tuples each containing a pair of duplicate row indices
+        """
+        duplicate_row_list = []
+
+        # create index column so that rows can later be identified by id
+        dataset["index"] = dataset.index
+
+        column_names= list(dataset.columns)
+        column_names.remove("index")
+
+        # dataframe containing duplicate rows only
+        duplicates_only = dataset[dataset.duplicated(subset=column_names, keep=False)]
+
+        # save the pairs of duplicate rows in a list
+        for x in range(duplicates_only.shape[0]):
+
+            row = duplicates_only.iloc[x]
+            row_without_index = duplicates_only.iloc[x, :-1]
+
+            for y in range(x + 1, duplicates_only.shape[0]):
+
+                other_row = duplicates_only.iloc[y]
+                other_row_without_index = duplicates_only.iloc[y, :-1]
+
+                if row_without_index.equals(other_row_without_index):
+                    index1 = row["index"]
+                    index2 = other_row["index"]
+                    duplicate_row_pair = (int(index1), int(index2))
+                    duplicate_row_list.append(duplicate_row_pair)
+
+        return duplicate_row_list

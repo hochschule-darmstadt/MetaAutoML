@@ -19,11 +19,13 @@ namespace BlazorBoilerplate.Server.Managers
         private readonly ApplicationDbContext _dbContext;
         private readonly ControllerService.ControllerServiceClient _client;
         private readonly IHttpContextAccessor _httpContextAccessor;
-        public OntologyManager(ApplicationDbContext dbContext, ControllerService.ControllerServiceClient client, IHttpContextAccessor httpContextAccessor)
+        private readonly ICacheManager _cacheManager;
+        public OntologyManager(ApplicationDbContext dbContext, ControllerService.ControllerServiceClient client, IHttpContextAccessor httpContextAccessor, ICacheManager cacheManager)
         {
             _dbContext = dbContext;
             _client = client;
             _httpContextAccessor = httpContextAccessor;
+            _cacheManager = cacheManager;
         }
 
         public async Task<ApiResponse> GetCompatibleAutoMlSolutions(GetCompatibleAutoMlSolutionsRequestDto request)
@@ -37,7 +39,7 @@ namespace BlazorBoilerplate.Server.Managers
                 requestGrpc.Username = username;
                 requestGrpc.Configuration.Add(request.Configuration);
                 var reply = _client.GetCompatibleAutoMlSolutions(requestGrpc);
-                response.AutoMlSolutions = reply.AutoMlSolutions.ToList();
+                response.AutoMlSolutions = await _cacheManager.GetObjectInformationList(reply.AutoMlSolutions.ToList());
                 return new ApiResponse(Status200OK, null, response);
             }
             catch (Exception ex)
@@ -77,7 +79,7 @@ namespace BlazorBoilerplate.Server.Managers
                 request.DatasetName = dataset.DatasetName;
                 request.DatasetType = dataset.DatasetType;
                 var reply = _client.GetDatasetCompatibleTasks(request);
-                response.Tasks = reply.Tasks.ToList();
+                response.Tasks = await _cacheManager.GetObjectInformationList(reply.Tasks.ToList());
                 return new ApiResponse(Status200OK, null, response);
             }
             catch (Exception ex)

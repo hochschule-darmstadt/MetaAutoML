@@ -12,16 +12,18 @@ if __name__ == '__main__':
     with open(config_path) as file:
         config_json = json.load(file)
 
-    target = config_json["tabular_configuration"]["target"]["target"]
-    features = config_json["tabular_configuration"]["features"].items()
+    target = config_json["configuration"]["target"]["target"]
+    features = config_json["dataset_configuration"]["features"]
     X = pd.read_csv(filepath).drop(target, axis=1, errors='ignore')
+    features.pop(target, None)
+    features = features.items()
 
     # convert all object columns to categories, because autosklearn only supports numerical, bool and categorical features
     X[X.select_dtypes(['object']).columns] = X.select_dtypes(['object']) \
         .apply(lambda x: x.astype('category'))
 
     # split training set
-    if SplitMethod.SPLIT_METHOD_RANDOM == config_json["test_configuration"]["method"]:
+    if SplitMethod.SPLIT_METHOD_RANDOM.value == config_json["test_configuration"]["method"]:
         X = X.sample(random_state=config_json["test_configuration"]["random_state"], frac=1)
     else:
         X = X.iloc[int(X.shape[0] * config_json["test_configuration"]["split_ratio"]):]
