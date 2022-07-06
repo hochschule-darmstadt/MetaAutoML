@@ -90,8 +90,7 @@ class RdfManager(object):
 
         queryResult = self.__executeQuery(q, {"taskName": task}, {"library": library})
         for row in queryResult:
-            result.auto_ml_solutions.append(row.automl.replace(ML_ONTOLOGY_NAMESPACE, ""))
-            
+            result.auto_ml_solutions.append(row.automl.replace(ML_ONTOLOGY_NAMESPACE, ":"))
         return result
 
     def GetDatasetCompatibleTasks(self, request: GetDatasetCompatibleTasksRequest) -> GetDatasetCompatibleTasksResponse:
@@ -117,7 +116,7 @@ class RdfManager(object):
 
         queryResult = self.__executeQuery(q, {"dataset": dataset})
         for row in queryResult:
-            result.tasks.append(row.task.replace(ML_ONTOLOGY_NAMESPACE, ""))
+            result.tasks.append(row.task.replace(ML_ONTOLOGY_NAMESPACE, ":"))
         return result
 
     def GetDatasetTypes(self, request: GetDatasetTypesRequest) -> GetDatasetTypesResponse:

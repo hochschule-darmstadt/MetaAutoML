@@ -8,6 +8,6 @@ namespace BlazorBoilerplate.Shared.Dto.Ontology
 {
     public class GetDatasetCompatibleTasksResponseDto
     {
-        public List<string> Tasks { get; set; }
+        public List<ObjectInfomationDto> Tasks { get; set; }
     }
 }

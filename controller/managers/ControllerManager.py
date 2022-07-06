@@ -2,6 +2,7 @@ import os
 import pandas as pd
 from requests import request
 from AutoMLSession import AutoMLSession
+import json
 
 import uuid
 
@@ -11,6 +12,7 @@ from AdapterManager import AdapterManager
 from CsvManager import CsvManager
 from RdfManager import RdfManager
 from persistence.data_storage import DataStorage
+
 
 class ControllerManager(object):
     """
@@ -25,10 +27,10 @@ class ControllerManager(object):
         1. local datasets folder path
         ---
         """
-        self.__rdfManager = RdfManager()
-        self.__adapterManager = AdapterManager()
-        self.__sessions: dict[str, AutoMLSession] = {}
         self.__data_storage = data_storage
+        self.__rdfManager = RdfManager()
+        self.__adapterManager = AdapterManager(self.__data_storage)
+        self.__sessions: dict[str, AutoMLSession] = {}
         return
 
     def CreateNewUser(self, request: "CreateNewUserRequest") -> "CreateNewUserResponse":
@@ -93,13 +95,13 @@ class ControllerManager(object):
         
         for dataset in all_datasets:
             try:
-                rows, cols = pd.read_csv(dataset["path"]).shape
                 response_dataset = Dataset()
+                if dataset['type'] == ':tabular':
+                    response_dataset.rows = dataset['analysis']['basic analysis']['number_of_rows']
+                    response_dataset.columns = dataset['analysis']['basic analysis']['number_of_columns']
                 response_dataset.identifier = str(dataset["_id"])
                 response_dataset.file_name = dataset["name"]
-                response_dataset.type = "TABULAR"
-                response_dataset.rows = rows
-                response_dataset.columns = cols
+                response_dataset.type = dataset['type']
                 response_dataset.creation_date = datetime.fromtimestamp(int(dataset["mtime"]))
                 response.dataset.append(response_dataset)
             except Exception as e:
@@ -114,17 +116,6 @@ class ControllerManager(object):
         Return list of all dataset types
         """
         return self.__rdfManager.GetDatasetTypes(request)
-
-    def GetDatasetType(self, request: "GetDatasetTypeRequest") -> "GetDatasetTypeResponse":
-        """
-        Get a selected dataset type
-        ---
-        Return a name of a selected dataset type
-        """
-        # TODO: figure out what needs to be done
-        response = GetDatasetTypeResponse()
-        response.return_code = 0
-        return response
 
     def GetDataset(self, request: "GetDatasetRequest") -> "GetDatasetResponse":
         """
@@ -154,11 +145,14 @@ class ControllerManager(object):
         Return list of all sessions
         """
         response = GetSessionsResponse()
-
-        # only return sessions from this runtime
-        for id in self.__sessions.keys():
-            response.session_ids.append(id)
-
+        all_sessions: list[dict[str, object]] = self.__data_storage.get_sessions(request.username)
+        
+        for session in all_sessions:
+            try:
+                response.session_ids.append(str(session["_id"]))
+            except Exception as e:
+                print(f"exception: {e}")
+                
         return response
 
     def GetSessionStatus(self, request: "GetSessionStatusRequest") -> "GetSessionStatusResponse":
@@ -170,7 +164,39 @@ class ControllerManager(object):
         ---
         Return the session status
         """
-        return self.__sessions[request.id].get_session_status()
+        response = GetSessionStatusResponse() 
+        session = self.__data_storage.get_session(request.username, request.id)
+        if session == None:
+            raise Exception(f"cannot find session with id: {request.id}")
+        session_models = self.__data_storage.get_models(request.username, request.id)
+        
+        if len(list(session_models)) == 0:
+            return response
+
+        response.status = session["status"]
+        for model in list(session_models):
+            autoMlStatus = AutoMlStatus()
+            autoMlStatus.name = model["automl_name"]
+            autoMlStatus.status = model["status"]
+            autoMlStatus.messages[:] =  model["status_messages"]
+            autoMlStatus.test_score =  model["test_score"]
+            autoMlStatus.validation_score =  model["validation_score"]
+            autoMlStatus.runtime =  model["runtime"]
+            autoMlStatus.predictiontime =  model["prediction_time"]
+            autoMlStatus.model =  model["model"]
+            autoMlStatus.library =  model["library"]
+            response.automls.append(autoMlStatus)
+        
+        response.dataset_id = session["dataset_id"]
+        response.dataset_name = session["dataset_name"]
+        response.task = session["task"]
+        response.configuration = json.dumps(session["configuration"])
+        for automl in session['required_automls']:
+            response.required_auto_mls.append(automl)
+        response.runtime_constraints = json.dumps(session["runtime_constraints"])
+        response.dataset_configuration = json.dumps(session["dataset_configuration"])
+
+        return response
     
     def GetSupportedMlLibraries(self, request: "GetSupportedMlLibrariesRequest") -> "GetSupportedMlLibrariesResponse":
         """
@@ -232,6 +258,7 @@ class ControllerManager(object):
         ---
         Return dictonary of object informations
         """
+        print("GET OBJECT INFOS TRIGGERED")
         return self.__rdfManager.GetObjectsInformation(request)
 
     def UploadNewDataset(self, dataset: "UploadDatasetFileRequest") -> "UploadDatasetFileResponse":
@@ -243,6 +270,12 @@ class ControllerManager(object):
         ---
         Return upload status
         """
+        # NOTE: dataset fields mixed up (bug in dummy)
+        #dataset.file_name = dataset.content.decode("utf-8")
+        #dataset.content = bytes(dataset.username, "ascii")
+        #dataset.username = "User"
+
+
         dataset_id: str = self.__data_storage.save_dataset(dataset.username, dataset.file_name, dataset.content, dataset.type, dataset.dataset_name)
         print(f"saved new dataset: {dataset_id}")
         
@@ -278,33 +311,27 @@ class ControllerManager(object):
         
         # restructure configuration into python dictionaries
         config = {
-            "dataset": dataset_filename,
+            "dataset_id": str(dataset["_id"]),
+            "dataset_name": dataset["name"],
             "task": configuration.task,
-            "tabular_config": {
-                "target": {
-                    "target": configuration.tabular_config.target.target,
-                    "type": configuration.tabular_config.target.type,
-                },
-                "features": dict(configuration.tabular_config.features)
-            },
-            "file_configuration": dict(configuration.file_configuration),
+            "configuration": json.loads(configuration.configuration),
+            "dataset_configuration": json.loads(configuration.dataset_configuration),
+            "runtime_constraints": json.loads(configuration.runtime_constraints),
+            "test_configuration": json.loads(configuration.test_configuration),
             "metric": configuration.metric,
-            "status": "running",
+            "status": "busy",
             "models": [],
-            "runtime_constraints": {
-                "runtime_limit": configuration.runtime_constraints.runtime_limit,
-                "max_iter": configuration.runtime_constraints.max_iter
-            },
             "required_automls": list(configuration.required_auto_mls),
+            "file_configuration": json.loads(configuration.file_configuration)
         }
         sess_id = self.__data_storage.insert_session(configuration.username, config)
         print(f"inserted new session: {sess_id}")
 
         # will be called when any automl is done
         # NOTE: will run in parallel
-        def callback(session_id, model: 'dict[str, object]'):
-            _mdl_id = self.__data_storage.insert_model(configuration.username, model)
-            print(f"inserted new model: {_mdl_id}")
+        def callback(session_id, model_id, model: 'dict[str, object]'):
+            _mdl_id = self.__data_storage.update_model(configuration.username, model_id, model)
+            print(f"updated model: {_mdl_id}")
 
             # lock data storage to prevent race condition between get and update
             with self.__data_storage.lock():
@@ -317,7 +344,7 @@ class ControllerManager(object):
 
 
         newSession: AutoMLSession = self.__adapterManager.start_automl(configuration, dataset_folder,
-                                                               sess_id, callback)
+                                                               sess_id, configuration.username, callback)
 
         self.__sessions[sess_id] = newSession
         response.result = 1

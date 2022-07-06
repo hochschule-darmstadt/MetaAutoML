@@ -48,12 +48,6 @@ class ControllerReturnCode(betterproto.Enum):
     CONTROLLER_RETURN_CODE_ERROR = 100
 
 
-class MachineLearningTask(betterproto.Enum):
-    MACHINE_LEARNING_TASK_UNKNOWN = 0
-    MACHINE_LEARNING_TASK_TABULAR_CLASSIFICATION = 1
-    MACHINE_LEARNING_TASK_TABULAR_REGRESSION = 2
-
-
 class SessionStatus(betterproto.Enum):
     SESSION_STATUS_UNKNOWN = 0
     SESSION_STATUS_BUSY = 1
@@ -71,20 +65,6 @@ class TestConfiguration(betterproto.Message):
     split_ratio: float = betterproto.float_field(1)
     method: "SplitMethod" = betterproto.enum_field(2)
     random_state: int = betterproto.int32_field(3)
-
-
-@dataclass(eq=False, repr=False)
-class AutoMlRuntimeConstraints(betterproto.Message):
-    runtime_limit: int = betterproto.int32_field(1)
-    max_iter: int = betterproto.int32_field(2)
-
-
-@dataclass(eq=False, repr=False)
-class AutoMlConfigurationTabularData(betterproto.Message):
-    target: "AutoMlTarget" = betterproto.message_field(1)
-    features: Dict[str, "DataType"] = betterproto.map_field(
-        2, betterproto.TYPE_STRING, betterproto.TYPE_ENUM
-    )
 
 
 @dataclass(eq=False, repr=False)
@@ -217,20 +197,22 @@ class GetSessionStatusRequest(betterproto.Message):
 
 @dataclass(eq=False, repr=False)
 class GetSessionStatusResponse(betterproto.Message):
-    status: "SessionStatus" = betterproto.enum_field(1)
+    status: str = betterproto.string_field(1)
     automls: List["AutoMlStatus"] = betterproto.message_field(2)
-    dataset: str = betterproto.string_field(3)
-    task: "MachineLearningTask" = betterproto.enum_field(4)
-    tabular_config: "AutoMlConfigurationTabularData" = betterproto.message_field(5)
-    required_ml_libraries: List[str] = betterproto.string_field(6)
-    required_auto_mls: List[str] = betterproto.string_field(7)
-    runtime_constraints: "AutoMlRuntimeConstraints" = betterproto.message_field(8)
+    dataset_id: str = betterproto.string_field(3)
+    dataset_name: str = betterproto.string_field(4)
+    task: str = betterproto.string_field(5)
+    configuration: str = betterproto.string_field(6)
+    required_ml_libraries: List[str] = betterproto.string_field(7)
+    required_auto_mls: List[str] = betterproto.string_field(8)
+    runtime_constraints: str = betterproto.string_field(9)
+    dataset_configuration: str = betterproto.string_field(10)
 
 
 @dataclass(eq=False, repr=False)
 class AutoMlStatus(betterproto.Message):
     name: str = betterproto.string_field(1)
-    status: "SessionStatus" = betterproto.enum_field(2)
+    status: str = betterproto.string_field(2)
     messages: List[str] = betterproto.string_field(3)
     test_score: float = betterproto.float_field(4)
     validation_score: float = betterproto.float_field(5)
@@ -305,15 +287,14 @@ class GetSupportedMlLibrariesResponse(betterproto.Message):
 class StartAutoMlProcessRequest(betterproto.Message):
     username: str = betterproto.string_field(1)
     dataset: str = betterproto.string_field(2)
-    task: "MachineLearningTask" = betterproto.enum_field(3)
-    tabular_config: "AutoMlConfigurationTabularData" = betterproto.message_field(4)
+    task: str = betterproto.string_field(3)
+    configuration: str = betterproto.string_field(4)
     required_auto_mls: List[str] = betterproto.string_field(5)
-    runtime_constraints: "AutoMlRuntimeConstraints" = betterproto.message_field(6)
-    file_configuration: Dict[str, str] = betterproto.map_field(
-        7, betterproto.TYPE_STRING, betterproto.TYPE_STRING
-    )
-    test_config: "TestConfiguration" = betterproto.message_field(8)
-    metric: str = betterproto.string_field(9)
+    runtime_constraints: str = betterproto.string_field(6)
+    dataset_configuration: str = betterproto.string_field(7)
+    test_configuration: str = betterproto.string_field(8)
+    file_configuration: str = betterproto.string_field(9)
+    metric: str = betterproto.string_field(10)
 
 
 @dataclass(eq=False, repr=False)

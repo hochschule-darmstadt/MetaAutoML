@@ -1,9 +1,10 @@
-from flaml import AutoML
 import os
-from JsonUtil import get_config_property
 
 from AbstractAdapter import AbstractAdapter
-from AdapterUtils import read_tabular_dataset_training_data, prepare_tabular_dataset, export_model
+from AdapterUtils import export_model, prepare_tabular_dataset, data_loader
+from flaml import AutoML
+from JsonUtil import get_config_property
+
 
 class FLAMLAdapter(AbstractAdapter):
     """
@@ -25,9 +26,9 @@ class FLAMLAdapter(AbstractAdapter):
         """
         Execute the ML task
         """
-        if self._configuration["task"] == 1:
+        if self._configuration["task"] == ":tabular_classification":
             self.__tabular_classification()
-        elif self._configuration["task"] == 2:
+        elif self._configuration["task"] == ":tabular_regression":
             self.__tabular_regression()
 
     def __generate_settings(self):
@@ -42,7 +43,7 @@ class FLAMLAdapter(AbstractAdapter):
         """
         Execute the classification task
         """
-        self.df = read_tabular_dataset_training_data(self._configuration)
+        self.df, test = data_loader(self._configuration)
         X, y = prepare_tabular_dataset(self.df, self._configuration)
         automl = AutoML()
         automl_settings = self.__generate_settings()
@@ -59,7 +60,7 @@ class FLAMLAdapter(AbstractAdapter):
         """
         Execute the regression task
         """
-        self.df = read_tabular_dataset_training_data(self._configuration)
+        self.df, test = data_loader(self._configuration)
         X, y = prepare_tabular_dataset(self.df, self._configuration)
         automl = AutoML()
         automl_settings = self.__generate_settings()

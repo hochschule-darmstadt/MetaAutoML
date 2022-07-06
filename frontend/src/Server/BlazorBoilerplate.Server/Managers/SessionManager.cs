@@ -2,7 +2,10 @@
 using BlazorBoilerplate.Infrastructure.Server.Models;
 using BlazorBoilerplate.Shared.Dto.Session;
 using BlazorBoilerplate.Storage;
+using Google.Protobuf.Collections;
+using Google.Protobuf.WellKnownTypes;
 using Microsoft.AspNetCore.Http;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,11 +22,13 @@ namespace BlazorBoilerplate.Server.Managers
         private readonly ApplicationDbContext _dbContext;
         private readonly ControllerService.ControllerServiceClient _client;
         private readonly IHttpContextAccessor _httpContextAccessor;
-        public SessionManager(ApplicationDbContext dbContext, ControllerService.ControllerServiceClient client, IHttpContextAccessor httpContextAccessor)
+        private readonly ICacheManager _cacheManager;
+        public SessionManager(ApplicationDbContext dbContext, ControllerService.ControllerServiceClient client, IHttpContextAccessor httpContextAccessor, ICacheManager cacheManager)
         {
             _dbContext = dbContext;
             _client = client;
             _httpContextAccessor = httpContextAccessor;
+            _cacheManager = cacheManager;   
         }
         /// <summary>
         /// Get informations about a specific session
@@ -45,8 +50,8 @@ namespace BlazorBoilerplate.Server.Managers
                     response.AutoMls.Add(new Shared.Dto.AutoML.AutoMLStatusDto
                     {
                         Messages = automl.Messages.ToList(),
-                        Status = (int) automl.Status,
-                        Name = automl.Name,
+                        Status = automl.Status,
+                        Name = (await _cacheManager.GetObjectInformation(automl.Name)).Properties["skos:prefLabel"],
                         Library = automl.Library,
                         Model = automl.Model,
                         TestScore = (double) automl.TestScore,
@@ -55,24 +60,19 @@ namespace BlazorBoilerplate.Server.Managers
                         Runtime = (int)automl.Runtime
                     });
                 }
-                response.Status = (int)reply.Status;
-                response.Dataset = reply.Dataset;
-                response.Task = (BlazorBoilerplate.Server.MachineLearningTask)reply.Task;
+                response.Status = reply.Status;
+                response.DatasetId = reply.DatasetId;
+                response.DatasetName = reply.DatasetName;
+                response.Task = reply.Task;
 
-                response.Configuration = new Shared.Dto.AutoML.AutoMLTabularDataConfiguration();
-                response.Configuration.Target = new Shared.Dto.AutoML.AutoMLTarget();
-                response.Configuration.Target.Target = reply.TabularConfig.Target.Target;
-                response.Configuration.Target.Type = (BlazorBoilerplate.Server.DataType)reply.TabularConfig.Target.Type;
+                response.Configuration = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(reply.Configuration);
+                response.DatasetConfiguration = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(reply.DatasetConfiguration);
+                response.RuntimeConstraints = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(reply.RuntimeConstraints);
 
-                response.Configuration.Features = new Dictionary<string, BlazorBoilerplate.Server.DataType>();
+                //response.Configuration.Features = new Dictionary<string, BlazorBoilerplate.Server.DataType>();
 
-                foreach (KeyValuePair<string, BlazorBoilerplate.Server.DataType> pair in reply.TabularConfig.Features)
-                {
 
-                    response.Configuration.Features.Add(pair.Key, pair.Value);
-                }
-
-                foreach(var mllibrarie in reply.RequiredMlLibraries)
+                foreach (var mllibrarie in reply.RequiredMlLibraries)
                 {
                     response.RequiredMlLibraries.Add(mllibrarie);
                 }
@@ -82,9 +82,6 @@ namespace BlazorBoilerplate.Server.Managers
                     response.RequiredAutoMLs.Add(automl);
                 }
 
-                response.RuntimeConstraints = new Shared.Dto.AutoML.AutoMLRuntimeConstraints();
-                response.RuntimeConstraints.Runtime_limit = (int)reply.RuntimeConstraints.RuntimeLimit;
-                response.RuntimeConstraints.Max_iter = (int)reply.RuntimeConstraints.MaxIter;
 
                 return new ApiResponse(Status200OK, null, response);
 
@@ -108,7 +105,6 @@ namespace BlazorBoilerplate.Server.Managers
             try
             {
                 request.Username = username;
-                request.Username = ""; //TODO USER MANAGERMENT
                 var reply = _client.GetSessions(request);
                 response.SessionIds = reply.SessionIds.ToList();
                 return new ApiResponse(Status200OK, null, response);

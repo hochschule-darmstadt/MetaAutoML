@@ -120,17 +120,17 @@
     }
 
     private void PopulateTable(GetSessionResponseDto session, string _sessionId){
-        if(session.Dataset == DatasetId){
+        if(session.DatasetId == DatasetId){
             foreach (AutoMLStatusDto automl in session.AutoMls){
                 string status = "";
                 switch(automl.Status){
-                    case 0: status = "Unknown";
+                    case "unknown": status = "Unknown";
                             break;
-                    case 1: status = "Running";
+                    case "busy": status = "Running";
                             break;
-                    case 2: status = "Completed";
+                    case "completed": status = "Completed";
                             break;
-                    case 3: status = "Failed";
+                    case "failed": status = "Failed";
                             break;
                 }
                 automls.Add(new AutoML(_sessionId, automl.Name, automl.Library, automl.Model, automl.TestScore, automl.Predictiontime, status));

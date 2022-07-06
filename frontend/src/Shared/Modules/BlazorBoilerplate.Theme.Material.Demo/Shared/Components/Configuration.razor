@@ -4,20 +4,20 @@
 
 @if (Session!=null){
     <div Style="padding: 10px;">
-        <p Style="margin-bottom: 2px;">Dataset: @Session.Dataset</p>
+        <p Style="margin-bottom: 2px;">Dataset: @Session.DatasetName</p>
         <p Style="margin-bottom: 2px;">Task: @Session.Task</p>
         <p Style="margin-bottom: 2px;">Libraries: @Session.Libraries</p>
-        <p>Target: @Session.Configuration.Target.Target (@Session.Configuration.Target.Type)</p>
+        <p>Target: @Session.Configuration["Target"]["Target"] (@Session.Configuration["target"]["type"])</p>
         <MatDivider></MatDivider>
         <p Style="margin-top: 1em;">Selected AutoMLs: @(String.Join(", ", Session.RequiredAutoMLs.ToArray()))</p>
         <p Style="margin-top: 1em; margin-bottom: 0px;">RuntimeConstraints:</p>
-        <p Style="margin-bottom: 0px;">&emsp;Runtime Limit: @Session.RuntimeConstraints.Runtime_limit</p>
-        <p>&emsp;Maximum Iterations: @Session.RuntimeConstraints.Max_iter</p>
+        <p Style="margin-bottom: 0px;">&emsp;Runtime Limit: @Session.RuntimeConstraints["runtime_limit"]</p>
+        <p>&emsp;Maximum Iterations: @Session.RuntimeConstraints["max_iter"]</p>
         <MatDivider></MatDivider>
         <p Style="margin-top: 1em; margin-bottom: 0px;">Feature Configuration:</p>
         <div style="padding: 5px;">
             <MatList Style=" min-height: 2rem; max-height: 30rem; overflow-y: auto;">
-                @foreach (KeyValuePair<string, BlazorBoilerplate.Server.DataType> pair in Session.Configuration.Features.OrderBy(x => x.Key))
+                @foreach (KeyValuePair<string, BlazorBoilerplate.Server.DataType> pair in Session.Configuration["features"])
                 {
                     <MatListItem Style="height: 30px;">
                         @pair.Key : @pair.Value

@@ -35,9 +35,9 @@ ONTOLOGY_QUERY_GET_TASKS_FOR_DATASET_TYPE = """
             PREFIX : <http://h-da.de/ml-ontology/>
             SELECT ?task
             WHERE {
-            ?t a :ML_task ;
+            ?task a :ML_task ;
                        :has_dataset_type ?set ;
-                       skos:prefLabel ?task .
+                       skos:prefLabel ?taskLabel .
             ?set a :Enum ;
                        skos:prefLabel "tabular" .
             }
