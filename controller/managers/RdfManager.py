@@ -99,22 +99,23 @@ class RdfManager(object):
         ---
         Parameter
         1. dataset name
+        2. dataset type
         ---
         Return a list of compatible AutoML tasks
         """
         result = GetDatasetCompatibleTasksResponse()
 
-        ###TODO change approach, we want to log on upload what a dataset is, now we need to somehow guess it. ATM only tabular data is supported 
-        if len(request.dataset_name) == 0:  # Check if dataset name is present, we require it for a successful query
+        if len(request.dataset_name) == 0:  # check if dataset name is present, we require it for a successful query
             self.__log.exception("Dataset name is empty")
             result.tasks.append("Dataset name parameter empty")
             return result
 
-        dataset = rdflib.Literal(u"tabular data")
+        # dataset = rdflib.Literal(u"tabular data")
+        dataset_type = rdflib.Literal(request.dataset_type)
         q = prepareQuery(Queries.ONTOLOGY_QUERY_GET_TASKS_FOR_DATASET_TYPE,
                          initNs={"skos": SKOS})
 
-        queryResult = self.__executeQuery(q, {"dataset": dataset})
+        queryResult = self.__executeQuery(q, {"dataset_type": dataset_type})
         for row in queryResult:
             result.tasks.append(row.task.replace(ML_ONTOLOGY_NAMESPACE, ":"))
         return result

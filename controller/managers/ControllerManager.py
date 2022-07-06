@@ -233,6 +233,7 @@ class ControllerManager(object):
         ---
         Parameter
         1. dataset name
+        2. dataset type
         ---
         Return list of tasks
         """

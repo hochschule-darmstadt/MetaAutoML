@@ -3,14 +3,11 @@ ONTOLOGY_QUERY_GET_SUPPORTED_ML_LIBRARIES_FOR_TASK = """
             PREFIX : <http://h-da.de/ml-ontology/>
             SELECT DISTINCT ?library
             WHERE {
-            ?automl a :AutoML_solution ;
-                       :can_perform ?task ;
-                       :supported_by_oma_ml "true" ;
-                       :used_for ?lib .
-            ?task a :ML_task ;
-                       skos:prefLabel ?taskName .
-            ?lib a :ML_library ;
-                        skos:prefLabel ?library .
+            ?t a :ML_task ;
+                       :has_dataset_type ?set ;
+                       skos:prefLabel ?task .
+            ?set a :Enum ;
+                       skos:prefLabel ?dataset_type .
             }
             """
 

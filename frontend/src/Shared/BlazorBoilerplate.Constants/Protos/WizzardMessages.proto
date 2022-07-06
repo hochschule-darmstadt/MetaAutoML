@@ -17,6 +17,7 @@ message GetCompatibleAutoMlSolutionsResponse {
 message GetDatasetCompatibleTasksRequest {
     string username = 1;
     string datasetName = 2;
+    string datasetType = 3;
   }
   
 message GetDatasetCompatibleTasksResponse {
