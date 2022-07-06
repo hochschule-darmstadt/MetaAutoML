@@ -66,7 +66,7 @@ class AutoKerasAdapter(AbstractAdapter):
     def __image_classification(self):
         """"Execute image classification task"""
 
-        train_data, test_data = data_loader(self._configuration)
+        X_train, y_train, X_val, y_val = data_loader(self._configuration)
 
         clf = ak.ImageClassifier(overwrite=True, 
                                 max_trials=self._configuration["runtime_constraints"]["max_iter"],
@@ -74,14 +74,15 @@ class AutoKerasAdapter(AbstractAdapter):
                                 seed=42,
                                 directory=self._result_path)
 
-        clf.fit(train_data, epochs=self._configuration["runtime_constraints"]["epochs"])
+        #clf.fit(train_data, epochs=self._configuration["runtime_constraints"]["epochs"])
+        clf.fit(x = X_train, y = y_train, epochs=1)
 
         export_model(clf, self._configuration["session_id"], 'model_keras.p')
 
     def __image_regression(self):
         """Execute image regression task"""
 
-        train_data, test_data = data_loader(self._configuration)
+        X_train, y_train, X_val, y_val = data_loader(self._configuration)
 
         reg = ak.ImageRegressor(overwrite=True, 
                                 max_trials=self._configuration["runtime_constraints"]["max_iter"],
@@ -89,7 +90,7 @@ class AutoKerasAdapter(AbstractAdapter):
                                 seed=42,
                                 directory=self._result_path)
                                 
-        reg.fit(train_data, epochs=self._configuration["runtime_constraints"]["epochs"])
+        reg.fit(x = X_train, y = y_train)
 
         export_model(reg, self._configuration["session_id"], 'model_keras.p')
 

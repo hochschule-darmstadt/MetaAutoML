@@ -51,14 +51,16 @@
                 }
             </MatChipSet>
         </div>
-
-        <div style="display:flex; flex-direction:row; justify-content:left">
-            <div style="display: flex; align-items: center; padding-right: 1% ">Target Column:</div>
-            @if (_columnNames != null)
-            {
-                <MatSelectItem Items="@_columnNames" TValue="string" ValueChanged="@OnTargetChanged"></MatSelectItem>
-            }
-        </div>
+        @if (WizardState.automlRequest.DatasetType == ":tabular")
+        {
+            <div style="display:flex; flex-direction:row; justify-content:left">
+                <div style="display: flex; align-items: center; padding-right: 1% ">Target Column:</div>
+                @if (_columnNames != null)
+                {
+                    <MatSelectItem Items="@_columnNames" TValue="string" ValueChanged="@OnTargetChanged"></MatSelectItem>
+                }
+            </div>
+        }
 
         <MatAccordion>
             <MatExpansionPanel @bind-Expanded="@advancedOptionsSelected">
@@ -101,11 +103,14 @@
     {
         await LoadData();
         _columnNames = new List<string>();
-        foreach (KeyValuePair<string, dynamic> pair in WizardState.automlRequest.DatasetConfiguration["features"])
+        if (WizardState.automlRequest.DatasetType == ":tabular")
         {
-            if((int)pair.Value != 7)
+            foreach (KeyValuePair<string, dynamic> pair in WizardState.automlRequest.DatasetConfiguration["features"])
             {
-                _columnNames.Add(pair.Key);
+                if((int)pair.Value != 7)
+                {
+                    _columnNames.Add(pair.Key);
+                }
             }
         }
         if (WizardState.automlRequest.RuntimeConstraints.Count == 0)

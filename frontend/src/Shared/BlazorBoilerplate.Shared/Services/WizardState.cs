@@ -23,7 +23,8 @@ namespace BlazorBoilerplate.Shared.Services
                     }
                     return false;
                 case ":image":
-                    return false;
+                    //ATM no required parameter
+                    return true;
                 case ":panel":
                     return false;
             }

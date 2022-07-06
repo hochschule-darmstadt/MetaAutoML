@@ -18,6 +18,8 @@ from sklearn.metrics import accuracy_score, mean_squared_error
 
 from JsonUtil import get_config_property
 from TemplateGenerator import TemplateGenerator
+import glob
+from PIL import Image
 
 ######################################################################
 ## GRPC HELPER FUNCTIONS
@@ -126,9 +128,9 @@ def data_loader(config):
     elif config["task"] == ":tabular_regression":
         train_data, test_data = read_tabular_dataset_training_data(config)
     elif config["task"] == ":image_classification":
-        train_data, test_data = read_image_dataset(config)
+        return read_image_dataset(config)
     elif config["task"] == ":image_regression":
-        train_data, test_data = read_image_dataset(config)
+        return read_image_dataset(config)
 
     return train_data, test_data
 
@@ -392,9 +394,52 @@ def read_image_dataset(json_configuration):
 
         local_dir_path = os.path.dirname(local_file_path)
     """
+    session_dir = os.path.join(get_config_property("output-path"), json_configuration["session_id"])
     data_dir = os.path.join(local_dir_path, json_configuration["file_name"])
-    train_data = None
-    test_data = None
+    shutil.unpack_archive(data_dir, session_dir)
+    files_train = []
+    dataset_folder_name = json_configuration["file_name"].replace(".zip", "")
+    for folder in os.listdir(os.path.join(session_dir, dataset_folder_name, "train")):
+        files_train.append(glob.glob(os.path.join(session_dir, dataset_folder_name, "train", folder, "*.jpeg")))
+
+    train_df_list =[]
+    for i in range(len(files_train)):
+        df = pd.DataFrame()
+        df["name"] = [x for x in files_train[i]]
+        df['outcome'] = i
+        train_df_list.append(df)
+    
+    train_data = pd.concat(train_df_list, axis=0,ignore_index=True)
+    files_valid = []
+    dataset_folder_name = json_configuration["file_name"].replace(".zip", "")
+    for folder in os.listdir(os.path.join(session_dir, dataset_folder_name, "train")):
+        files_valid.append(glob.glob(os.path.join(session_dir, dataset_folder_name, "val", folder, "*.jpeg")))
+
+    vali_df_list =[]
+    for i in range(len(files_valid)):
+        df = pd.DataFrame()
+        df["name"] = [x for x in files_valid[i]]
+        df['outcome'] = i
+        vali_df_list.append(df)
+    
+    vali_data = pd.concat(vali_df_list, axis=0,ignore_index=True)
+
+    def img_preprocess(img):
+        """
+        Opens the image and does some preprocessing 
+        such as converting to RGB, resize and converting to array
+        """
+        img = Image.open(img)
+        img = img.convert('RGB')
+        img = img.resize((256,256))
+        img = np.asarray(img)/255
+        return img
+
+    X_train = np.array([img_preprocess(p) for p in train_data.name.values])
+    y_train = train_data.outcome.values
+    X_val = np.array([img_preprocess(p) for p in vali_data.name.values])
+    y_val = vali_data.outcome.values
+    return X_train, y_train, X_val, y_val
     """
     if(json_configuration["test_configuration"]["dataset_structure"] == 1):
         train_data = ak.image_dataset_from_directory(
@@ -432,7 +477,7 @@ def read_image_dataset(json_configuration):
                         json_configuration["test_configuration"]["image_width"]),
             batch_size=json_configuration["test_configuration"]["batch_size"]
         )
+    return train_data, vali_data
     """
-    return train_data, test_data
 
 #endregion

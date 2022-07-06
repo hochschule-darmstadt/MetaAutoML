@@ -89,6 +89,7 @@
                     stream.Seek(0, SeekOrigin.Begin);
                     using (var reader = new StreamReader(stream))
                     {
+                        long x = reader.BaseStream.Length;
                         var content = reader.ReadToEnd();
                         _fileUpload.FileName = file.Name;
                         _fileUpload.Content = content;
