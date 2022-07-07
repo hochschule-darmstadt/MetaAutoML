@@ -46,7 +46,7 @@ class Database:
 
             return mongo
         except:
-            raise Exception("cannot find MongoDB!\n    Did you forget to launch it with `docker-compose up --build mongo`?")
+            raise Exception("cannot find MongoDB! URL "+ server_url +"\n    Did you forget to launch it with `docker-compose up --build mongo`?")
         
     def CheckIfUserExists(self, username: str) -> bool:
         """
