@@ -3,8 +3,8 @@ kind: Service
 metadata:
   namespace: omaml
   labels:
-    io.kompose.service: redisserver
-  name: redisserver
+    io.kompose.service: redis
+  name: redis
 spec:
   type: ClusterIP
   ports:
@@ -13,6 +13,6 @@ spec:
     protocol: TCP
     targetPort: 6379
   selector:
-    io.kompose.service: redisserver
+    io.kompose.service: redis
 status:
   loadBalancer: {}

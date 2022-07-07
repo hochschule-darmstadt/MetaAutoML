@@ -58,7 +58,7 @@ spec:
         - containerPort: 443
         resources:
           limits:
-            cpu: "1"
+            cpu: "2"
             memory: "2194304e3"
       restartPolicy: Always
 status: {}

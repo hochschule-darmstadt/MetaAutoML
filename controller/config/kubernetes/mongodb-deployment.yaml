@@ -15,19 +15,13 @@ spec:
       labels:
         io.kompose.service: mongodb
     spec:
-      affinity:
-        nodeAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            nodeSelectorTerms:
-            - matchExpressions:
-              - key: kubernetes.io/hostname
-                operator: In
-                values:
-                - cai-omaml-main
       containers:
       - image: mongo
         name: mongodb
-        command: ['mongod']
+        command: ['mongod', '--bind_ip', '0.0.0.0']
+        ports:
+        - containerPort: 27017
+          name: mongocontainer
         env:
         - name: "MONGO_INITDB_ROOT_USERNAME"
           value: "root"
