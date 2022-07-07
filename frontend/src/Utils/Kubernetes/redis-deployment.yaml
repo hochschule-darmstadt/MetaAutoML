@@ -2,24 +2,26 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   namespace: omaml
-  name: redisserver
+  name: redis
 spec:
   replicas: 1
   selector:
     matchLabels:
-      io.kompose.service: redisserver
+      io.kompose.service: redis
   strategy:
     type: Recreate
   template:
     metadata:
       labels:
-        io.kompose.service: redisserver
+        io.kompose.service: redis
     spec:
       containers:
-      - env:
-        image: gcr.io/google_containers/redis:v1
-        imagePullPolicy: ""
-        name: redisserver
+      - image: redis
+        name: redis
+        command: ['redis-server', '/usr/local/etc/redis/redis.conf']
+        ports:
+        - containerPort: 6379
+          name: rediscontainer
         resources:
           limits:
             cpu: "1"
