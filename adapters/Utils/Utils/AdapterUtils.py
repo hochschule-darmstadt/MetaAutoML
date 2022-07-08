@@ -18,7 +18,7 @@ from sklearn.metrics import accuracy_score, mean_squared_error
 from sklearn.metrics import classification_report
 from sklearn.model_selection import train_test_split
 from sktime.datatypes import convert_to
-from sktime.datasets import load_from_tsfile
+from sktime.datasets import load_from_tsfile_to_dataframe
 
 from JsonUtil import get_config_property
 from TemplateGenerator import TemplateGenerator
@@ -333,8 +333,8 @@ def predict(data, config_json, config_path):
     # test = pd.read_csv(file_path)
     if config_json["task"] == ":time_series_classification":
         # Time Series Classification Task
-        X_test, y_test = load_from_tsfile(file_path)
-        test = pd.DataFrame(data=y_test, columns=["target"])
+        test = load_from_tsfile_to_dataframe(file_path, return_separate_X_and_y=False)
+        test = test.rename(columns={"class_vals": "target"})
     else:
         test = pd.read_csv(file_path)
 
@@ -545,7 +545,7 @@ def read_image_dataset(json_configuration):
 #region
 
 
-def split_longitudinal_data(X, y, json_configuration):
+def split_longitudinal_data(dataset, json_configuration):
     """
     Split the given dataset into train and test subsets
     """
@@ -554,31 +554,31 @@ def split_longitudinal_data(X, y, json_configuration):
     random_state = json_configuration["test_configuration"]["random_state"]
 
     if int(SplitMethod.SPLIT_METHOD_RANDOM.value) == split_method:
-        X_train, X_test, y_train, y_test = train_test_split(
-            X,
-            y,
+        df_train, df_test = train_test_split(
+            dataset,
             train_size=split_ratio,
             random_state=random_state,
             shuffle=True,
-            stratify=y
+            stratify=dataset["target"]
         )
     else:
-        X_train, X_test, y_train, y_test = train_test_split(
-            X,
-            y,
+        df_train, df_test = train_test_split(
+            dataset,
             train_size=split_ratio,
             shuffle=False,
-            stratify=y
+            stratify=dataset["target"]
         )
-    return (X_train, y_train), (X_test, y_test)
+    return df_train, df_test
 
 
 def read_longitudinal_dataset(json_configuration):
     """
     Read longitudinal data from the `.ts` file
     """
-    X, y = load_from_tsfile(os.path.join(json_configuration["file_location"], json_configuration["file_name"]))
-    return split_longitudinal_data(X, y, json_configuration)
+    file_path = os.path.join(json_configuration["file_location"], json_configuration["file_name"])
+    dataset = load_from_tsfile_to_dataframe(file_path, return_separate_X_and_y=False)
+    dataset = dataset.rename(columns={"class_vals": "target"})
+    return split_longitudinal_data(dataset, json_configuration)
 
 
 def convert_longitudinal_to_numpy(X, y, label_binarizer):
