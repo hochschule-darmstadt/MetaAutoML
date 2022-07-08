@@ -34,6 +34,21 @@ class DataSetAnalysisManager:
 
         return jsonfile
 
+    def startLongitudinalDataAnalysis(dataset: pd.DataFrame) -> dict:
+        jsonfile = {}
+        rows, cols = dataset.shape
+
+        jsonfile["basic analysis"] = {
+            "number_of_columns": cols,
+            "number_of_rows": rows,
+            "na_columns": 0,
+            "high_na_rows": 0,
+            "outlier": 0,
+            "duplicate_columns": 0,
+            "duplicate_rows": 0,
+        }
+        return jsonfile
+
     @staticmethod
     def __number_of_columns(dataset: pd.DataFrame) -> int:
         """
