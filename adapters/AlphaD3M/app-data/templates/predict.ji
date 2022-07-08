@@ -1,0 +1,37 @@
+import pickle
+import pandas as pd
+import numpy as np
+import sys
+import json
+from predict_time_sources import DataType, SplitMethod, feature_preparation
+import d3m_interface as d3mi
+
+if __name__ == '__main__':
+    filepath = sys.argv[1]
+    config_path = sys.argv[2]
+
+    with open(config_path) as file:
+        config_json = json.load(file)
+
+    target = config_json["tabular_configuration"]["target"]["target"]
+    features = config_json["tabular_configuration"]["features"].items()
+    X = pd.read_csv(filepath).drop(target, axis=1, errors='ignore')
+
+    # convert all object columns to categories, because autosklearn only supports numerical, bool and categorical features
+    X[X.select_dtypes(['object']).columns] = X.select_dtypes(['object']) \
+        .apply(lambda x: x.astype('category'))
+
+    # split training set
+    if SplitMethod.SPLIT_METHOD_RANDOM == config_json["test_configuration"]["method"]:
+        X = X.sample(random_state=config_json["test_configuration"]["random_state"], frac=1)
+    else:
+        X = X.iloc[int(X.shape[0] * config_json["test_configuration"]["split_ratio"]):]
+
+    X = feature_preparation(X, features)
+
+    with open(sys.path[0] + '/model_alphad3m.p', 'rb') as file:
+        automl = pickle.load(file)
+
+    model_id = automl.get_best_pipeline_id()
+    predict = automl.test(model_id, X)
+    pd.DataFrame(data=predict, columns=["predicted"]).to_csv(sys.path[0] + "/predictions.csv")
