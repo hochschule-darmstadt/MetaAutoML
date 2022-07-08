@@ -27,6 +27,8 @@ namespace BlazorBoilerplate.Shared.Services
                     return true;
                 case ":panel":
                     return false;
+                case ":longitudinal":
+                    return true;
             }
             return false;
         }
