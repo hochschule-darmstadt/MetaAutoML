@@ -10,6 +10,7 @@ from Controller_bgrpc import *
 
 from AdapterManager import AdapterManager
 from CsvManager import CsvManager
+from LongitudinalDataManager import LongitudinalDataManager
 from RdfManager import RdfManager
 from persistence.data_storage import DataStorage
 
@@ -143,7 +144,11 @@ class ControllerManager(object):
         if not found:
             raise Exception(f"cannot find dataset with name: {request.dataset}")
 
-        dataset = CsvManager.read_dataset(dataset["path"])
+        if dataset["type"] == ":tabular":
+            dataset = CsvManager.read_dataset(dataset["path"])
+        elif dataset["type"] == ":longitudinal":
+            dataset = LongitudinalDataManager.read_dataset(dataset["path"])
+
         return dataset
 
     def GetSessions(self, request: "GetSessionsRequest") -> "GetSessionsResponse":
@@ -229,11 +234,14 @@ class ControllerManager(object):
 
         # TODO: change gRPC message to dataset id instead of name
         found, dataset = self.__data_storage.find_dataset(request.username, request.datasetName)
-        if found: 
-            return CsvManager.read_column_names(dataset["path"])
-        else:
+        if not found:
             # no dataset found -> return empty response
             return GetTabularDatasetColumnNamesResponse()
+
+        if dataset["type"] == ":tabular":
+            return CsvManager.read_column_names(dataset["path"])
+        elif dataset["type"] == ":longitudinal":
+            return LongitudinalDataManager.read_column_names(dataset["path"])
 
     def GetDatasetCompatibleTasks(self, request: "GetDatasetCompatibleTasksRequest") -> "GetDatasetCompatibleTasksResponse":
         """
