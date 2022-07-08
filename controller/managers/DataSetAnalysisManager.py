@@ -41,11 +41,11 @@ class DataSetAnalysisManager:
         jsonfile["basic analysis"] = {
             "number_of_columns": cols,
             "number_of_rows": rows,
-            "na_columns": 0,
-            "high_na_rows": 0,
-            "outlier": 0,
-            "duplicate_columns": 0,
-            "duplicate_rows": 0,
+            "na_columns": {},
+            "high_na_rows": [],
+            "outlier": [],
+            "duplicate_columns": [],
+            "duplicate_rows": [],
         }
         return jsonfile
 
