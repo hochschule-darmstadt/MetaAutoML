@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: mcfly
+spec:
+  type: ClusterIP
+  ports:
+  - name: "50054"
+    port: 50054
+    protocol: TCP
+    targetPort: 50054
+  selector:
+    io.kompose.service: mcfly
+status:
+  loadBalancer: {}

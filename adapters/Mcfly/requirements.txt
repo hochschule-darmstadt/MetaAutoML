@@ -1,0 +1,11 @@
+grpcio
+dill
+jinja2
+protobuf==3.17.3
+sktime
+numpy
+scikit-learn
+scipy
+tensorflow
+h5py
+mcfly
