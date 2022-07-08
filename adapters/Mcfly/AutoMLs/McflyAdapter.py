@@ -1,15 +1,16 @@
-from AbstractAdapter import AbstractAdapter
-from AdapterUtils import (
-    read_tabular_dataset_training_data,
-    read_panel_dataset,
-    convert_panel_to_numpy3D,
-    prepare_tabular_dataset,
-    export_model,
-    export_keras_model,
-    split_data,
-    export_label_binarizer
-)
 from mcfly.find_architecture import find_best_architecture
+from sklearn.preprocessing import LabelBinarizer
+from AbstractAdapter import AbstractAdapter
+from JsonUtil import get_config_property
+import numpy as np
+from AdapterUtils import (
+    convert_longitudinal_to_numpy,
+    read_longitudinal_dataset,
+    split_longitudinal_data,
+    export_label_binarizer,
+    export_keras_model
+)
+
 
 class McflyAdapter(AbstractAdapter):
     """
@@ -23,30 +24,31 @@ class McflyAdapter(AbstractAdapter):
         1. Configuration JSON of type dictionary
         """
         super(McflyAdapter, self).__init__(configuration)
+        self._result_path = os.path.join(get_config_property("output-path"), self._configuration["session_id"])
 
     def start(self):
         """Execute the ML task"""
         if True:
-            if self._configuration["task"] == 3:
+            if self._configuration["task"] == ":time_series_classification":
                 self.__time_series_classification()
 
     def __time_series_classification(self):
         """Execute time series classification task"""
         # self.df = read_panel_dataset_training_data(self._configuration)
         # Get training dataset and the label binarizer for the categorial target variable
-        X, y, label_binarizer = read_panel_dataset(self._configuration)
+        (X_train, y_train), (X_test, y_test) = read_longitudinal_dataset(self._configuration)
+        label_binarizer = LabelBinarizer()
+        label_binarizer.fit(np.concatenate([y_train, y_test]))
         # Split dataset into train and test
-        X_train, X_test, y_train, y_test = split_data(X, y, self._configuration)
         # The Mcfly framework is based on keras lib. That's why it expects train and validation datasets
         X_train, X_val, y_train, y_val = split_data(X_train, y_train, self._configuration)
         # Convert datasets into numpy 3d array
-        X_train, y_train_binary = convert_panel_to_numpy3D(X_train, y_train, label_binarizer)
-        X_val, y_val_binary = convert_panel_to_numpy3D(X_val, y_val, label_binarizer)
+        X_train, y_train_binary = convert_longitudinal_to_numpy(X_train, y_train, label_binarizer)
+        X_val, y_val_binary = convert_longitudinal_to_numpy(X_val, y_val, label_binarizer)
 
         params = {
             'number_of_models': 1,
             'nr_epochs': 5,
-            'subset_size': 100,
             'nr_rows': X_train.shape[0],
             'nr_columns': X_train.shape[1]
         }
@@ -59,8 +61,7 @@ class McflyAdapter(AbstractAdapter):
                 X_val=X_val,
                 y_val=y_val_binary,
                 nr_epochs=params['nr_epochs'],
-                number_of_models=params['number_of_models'],
-                subset_size=params['subset_size']
+                number_of_models=params['number_of_models']
             )
         # Train the best model on full dataset
         history = best_model.fit(
@@ -70,6 +71,6 @@ class McflyAdapter(AbstractAdapter):
             validation_data=(X_val, y_val_binary),
         )
         # Save the model
-        export_keras_model(best_model, 'model_mcfly.p')
+        export_keras_model(best_model, self._configuration["session_id"], 'model_mcfly.p')
         # Save the Label Binarizer
-        export_label_binarizer(label_binarizer, 'label_binarizer_mcfly.p')
+        export_label_binarizer(label_binarizer, self._configuration["session_id"], 'label_binarizer_mcfly.p')
