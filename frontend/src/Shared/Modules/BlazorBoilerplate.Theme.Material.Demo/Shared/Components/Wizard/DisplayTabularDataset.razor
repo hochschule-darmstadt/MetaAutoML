@@ -33,7 +33,7 @@
             </tr>
             @for (int i = StartIndex; i < SizeOffset; i++)
             {
-                <tr>
+                <tr align="right">
                     @foreach (var column in _datasets)
                     {
                         <td>@column.FirstEntries[i]</td>
