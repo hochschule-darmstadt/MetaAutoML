@@ -8,9 +8,9 @@ FIRST_ROW_AMOUNT = 50
 FIRST_N_ITEMS = 3
 TARGET_COL = "target"
 
-class PanelDataManager:
+class LongitudinalDataManager:
     """
-    Static Panel Data Manager class to interact with the local file system
+    Static Longitudinal Data Manager class to interact with the local file system
     """
     @staticmethod
     def read_dataset(path) -> GetDatasetResponse:
@@ -30,7 +30,7 @@ class PanelDataManager:
             table_column = Controller_pb2.TableColumn()
             table_column.name = col
             numpy_datatype = dataset[col].dtype.name
-            datatype, convertible_types = PanelDataManager.__get_datatype(numpy_datatype, dataset[col])
+            datatype, convertible_types = LongitudinalDataManager.__get_datatype(numpy_datatype, dataset[col])
 
             table_column.type = datatype
             for convertible_type in convertible_types:
@@ -41,7 +41,7 @@ class PanelDataManager:
                     table_column.firstEntries.append(str(item))
             else:
                 for item in dataset[col].head(FIRST_ROW_AMOUNT):
-                    # Create a preview of the given panel dataset
+                    # Create a preview of the given longitudinal dataset
                     preview = item.to_list()
                     preview = preview[0:FIRST_N_ITEMS]
                     preview = str(preview)
