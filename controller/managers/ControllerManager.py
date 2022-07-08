@@ -104,6 +104,9 @@ class ControllerManager(object):
                 if dataset['type'] == ':tabular':
                     response_dataset.rows = dataset['analysis']['basic analysis']['number_of_rows']
                     response_dataset.columns = dataset['analysis']['basic analysis']['number_of_columns']
+                elif dataset['type'] == ':longitudinal':
+                    response_dataset.rows = dataset['analysis']['basic analysis']['number_of_rows']
+                    response_dataset.columns = dataset['analysis']['basic analysis']['number_of_columns']
                 response_dataset.identifier = str(dataset["_id"])
                 response_dataset.file_name = dataset["name"]
                 response_dataset.type = dataset['type']
