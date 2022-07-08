@@ -23,6 +23,8 @@ services:
       - AUTOKERAS_SERVICE_PORT=50052
       - MLJAR_SERVICE_HOST=mljar
       - MLJAR_SERVICE_PORT=50053
+      - MCFLY_SERVICE_HOST=mcfly
+      - MCFLY_SERVICE_PORT=50054
       - SKLEARN_SERVICE_HOST=sklearn
       - SKLEARN_SERVICE_PORT=50055
       - FLAML_SERVICE_HOST=flaml
@@ -83,6 +85,17 @@ services:
     volumes:
       - datasets:/app/app-data/datasets
       - output-mljar:/app/app-data/output
+
+  mcfly:
+    build:
+      context: ./adapters
+      dockerfile: ./Mcfly/Dockerfile
+    container_name: mcfly
+    environment:
+      - GRPC_SERVER_PORT=50054
+    volumes:
+      - datasets:/app/app-data/datasets
+      - output-mcfly:/app/app-data/output
 
   sklearn:
     build: 
@@ -149,6 +162,7 @@ volumes:
   output-pytorch:
   output-autocve:
   output-mljar:
+  output-mcfly:
   # shared volume between controller and frontend / dummy to transfer output
   output:
   mongodata:
