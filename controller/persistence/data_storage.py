@@ -6,6 +6,8 @@ from persistence.mongo_client import Database
 from bson.objectid import ObjectId
 from DataSetAnalysisManager import DataSetAnalysisManager
 import pandas as pd
+from tempfile import NamedTemporaryFile
+from sktime.datasets import load_from_tsfile_to_dataframe
 
 class DataStorage:
     """
@@ -159,7 +161,18 @@ class DataStorage:
         if type == ":tabular":
             dataset_for_analysis = pd.read_csv(io.BytesIO(content))
             analysisResult = DataSetAnalysisManager.startAnalysis(dataset_for_analysis)
+        elif type == ":longitudinal":
+            tmp_file = NamedTemporaryFile(delete=False)
+            dataset_for_analysis = None
 
+            try:
+                tmp_file.write(content)
+                tmp_file.seek(0)
+                dataset_for_analysis = load_from_tsfile_to_dataframe(tmp_file.name, return_separate_X_and_y=False)
+            finally:
+                tmp_file.close()
+                os.unlink(tmp_file.name)
+            analysisResult = DataSetAnalysisManager.startLongitudinalDataAnalysis(dataset_for_analysis)
 
         #build dictionary for database
         database_content = {
