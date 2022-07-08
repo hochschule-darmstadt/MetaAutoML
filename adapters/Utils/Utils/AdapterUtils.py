@@ -15,6 +15,10 @@ import numpy as np
 import pandas as pd
 from predict_time_sources import DataType, SplitMethod, feature_preparation
 from sklearn.metrics import accuracy_score, mean_squared_error
+from sklearn.metrics import classification_report
+from sklearn.model_selection import train_test_split
+from sktime.datatypes import convert_to
+from sktime.datasets import load_from_tsfile
 
 from JsonUtil import get_config_property
 from TemplateGenerator import TemplateGenerator
@@ -131,6 +135,8 @@ def data_loader(config):
         return read_image_dataset(config)
     elif config["task"] == ":image_regression":
         return read_image_dataset(config)
+    elif config["task"] == ":time_series_classification":
+        return read_longitudinal_dataset(config)
 
     return train_data, test_data
 
@@ -144,6 +150,33 @@ def export_model(model, sessionId, file_name):
     """
     with open(os.path.join(get_config_property('output-path'), sessionId, file_name), 'wb+') as file:
         dill.dump(model, file)
+
+
+def export_keras_model(model, sessionId, file_name):
+    """
+    Saves the given keras model
+    ---
+    Parameter:
+    1. keras model
+    2. session id
+    3. file name
+    """
+    save_path = os.path.join(get_config_property('output-path'), sessionId, file_name)
+    model.save(save_path)
+
+
+def export_label_binarizer(label_binarizer, sessionId, file_name):
+    """
+    Saves the given instance of the sklearn.preprocessing.LabelBinarizer class
+    ---
+    Parameter:
+    1. instance of LabelBinarizer
+    2. session id
+    3. file name
+    """
+    with open(os.path.join(get_config_property('output-path'), sessionId, file_name), 'wb+') as file:
+        dill.dump(label_binarizer, file)
+
 
 def start_automl_process():
     """"
@@ -249,6 +282,15 @@ def evaluate(config_json, config_path, dataloader):
     elif config_json["task"] == ":image_regression":
         return mean_squared_error(test.y, predictions["predicted"], squared=False), \
                (predict_time * 1000) / predictions.shape[0]
+    elif config_json["task"] == ":time_series_classification":
+        test_target = test[1].astype("string")
+        predicted_target = predictions["predicted"].astype("string")
+        acc_score = accuracy_score(test_target, predicted_target)
+        print("accuracy", acc_score)
+        print("Classification Report \n",
+              classification_report(test_target, predicted_target,zero_division=0)
+              )
+        return acc_score, (predict_time * 1000) / test.shape[0]
 
 
 def predict(data, config_json, config_path):
@@ -270,7 +312,12 @@ def predict(data, config_json, config_path):
                           working_dir,
                           "zip")
 
-    file_path = os.path.join(working_dir, "test.csv")
+    # file_path = os.path.join(working_dir, "test.csv")
+    if config_json["task"] == ":time_series_classification":
+        # Time Series Classification Task
+        file_path = os.path.join(working_dir, "test.ts")
+    else:
+        file_path = os.path.join(working_dir, "test.csv")
 
     with open(file_path, "w+") as f:
         f.write(data)
@@ -283,7 +330,13 @@ def predict(data, config_json, config_path):
     subprocess.call([python_env, os.path.join(working_dir, "predict.py"), file_path, config_path])
     predict_time = time.time() - predict_start
 
-    test = pd.read_csv(file_path)
+    # test = pd.read_csv(file_path)
+    if config_json["task"] == ":time_series_classification":
+        # Time Series Classification Task
+        X_test, y_test = load_from_tsfile(file_path)
+        test = pd.DataFrame(data=y_test, columns=["target"])
+    else:
+        test = pd.read_csv(file_path)
 
     predictions = pd.read_csv(os.path.join(working_dir, "predictions.csv"))
     shutil.rmtree(working_dir)
@@ -295,6 +348,9 @@ def predict(data, config_json, config_path):
     elif config_json["task"] == 2 and target in test:
         return mean_squared_error(test[target], predictions["predicted"], squared=False), predict_time, \
                predictions["predicted"].astype(np.string).tolist()
+    elif config_json["task"] == ":time_series_classification" and target in test:
+        acc_score = accuracy_score(test[target].astype("string"), predictions["predicted"].astype("string"))
+        return acc_score, predict_time, predictions["predicted"].astype('string').tolist()
     else:
         return 0, predict_time, predictions["predicted"].astype('string').tolist()
 
@@ -479,5 +535,58 @@ def read_image_dataset(json_configuration):
         )
     return train_data, vali_data
     """
+
+#endregion
+
+######################################################################
+## LONGITUDINAL DATASET HELPER FUNCTIONS
+######################################################################
+
+#region
+
+
+def split_longitudinal_data(X, y, json_configuration):
+    """
+    Split the given dataset into train and test subsets
+    """
+    split_method = json_configuration["test_configuration"]["method"]
+    split_ratio = json_configuration["test_configuration"]["split_ratio"]
+    random_state = json_configuration["test_configuration"]["random_state"]
+
+    if int(SplitMethod.SPLIT_METHOD_RANDOM.value) == split_method:
+        X_train, X_test, y_train, y_test = train_test_split(
+            X,
+            y,
+            train_size=split_ratio,
+            random_state=random_state,
+            shuffle=True,
+            stratify=y
+        )
+    else:
+        X_train, X_test, y_train, y_test = train_test_split(
+            X,
+            y,
+            train_size=split_ratio,
+            shuffle=False,
+            stratify=y
+        )
+    return (X_train, y_train), (X_test, y_test)
+
+
+def read_longitudinal_dataset(json_configuration):
+    """
+    Read longitudinal data from the `.ts` file
+    """
+    X, y = load_from_tsfile(os.path.join(json_configuration["file_location"], json_configuration["file_name"]))
+    return split_longitudinal_data(X, y, json_configuration)
+
+
+def convert_longitudinal_to_numpy(X, y, label_binarizer):
+    """
+    Convert the panel dataset to numpy3D
+    """
+    X_np = convert_to(X, to_type="numpy3D")
+    y_binary = label_binarizer.transform(y)
+    return X_np, y_binary
 
 #endregion
