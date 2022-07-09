@@ -25,10 +25,17 @@ namespace BlazorBoilerplate.Shared.Services
                 case ":image":
                     //ATM no required parameter
                     return true;
-                case ":panel":
-                    return false;
                 case ":longitudinal":
-                    return true;
+                    if (automlRequest.Configuration.ContainsKey("target"))
+                    {
+                        var target = automlRequest.Configuration["target"]["target"];
+                        if (string.IsNullOrEmpty(automlRequest.Task) | string.IsNullOrEmpty((string)target))
+                        {
+                            return false;
+                        }
+                        return true;
+                    }
+                    return false;
             }
             return false;
         }
