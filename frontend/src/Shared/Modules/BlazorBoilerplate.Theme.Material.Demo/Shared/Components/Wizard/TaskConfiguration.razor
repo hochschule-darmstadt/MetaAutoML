@@ -51,7 +51,7 @@
                 }
             </MatChipSet>
         </div>
-        @if (WizardState.automlRequest.DatasetType == ":tabular")
+        @if (WizardState.automlRequest.DatasetType == ":tabular" | WizardState.automlRequest.DatasetType == ":longitudinal") 
         {
             <div style="display:flex; flex-direction:row; justify-content:left">
                 <div style="display: flex; align-items: center; padding-right: 1% ">Target Column:</div>
@@ -103,7 +103,7 @@
     {
         await LoadData();
         _columnNames = new List<string>();
-        if (WizardState.automlRequest.DatasetType == ":tabular")
+        if (WizardState.automlRequest.DatasetType == ":tabular" | WizardState.automlRequest.DatasetType == ":longitudinal")
         {
             foreach (KeyValuePair<string, dynamic> pair in WizardState.automlRequest.DatasetConfiguration["features"])
             {
