@@ -283,7 +283,7 @@ def evaluate(config_json, config_path, dataloader):
         return mean_squared_error(test.y, predictions["predicted"], squared=False), \
                (predict_time * 1000) / predictions.shape[0]
     elif config_json["task"] == ":time_series_classification":
-        test_target = test[1].astype("string")
+        test_target = test[target].astype("string")
         predicted_target = predictions["predicted"].astype("string")
         acc_score = accuracy_score(test_target, predicted_target)
         print("accuracy", acc_score)
