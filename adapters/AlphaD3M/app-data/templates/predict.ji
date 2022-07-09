@@ -1,4 +1,4 @@
-import pickle
+import dill
 import pandas as pd
 import numpy as np
 import sys
@@ -30,7 +30,7 @@ if __name__ == '__main__':
     X = feature_preparation(X, features)
 
     with open(sys.path[0] + '/model_alphad3m.p', 'rb') as file:
-        automl = pickle.load(file)
+        automl = dill.load(file)
 
     model_id = automl.get_best_pipeline_id()
     predict = automl.test(model_id, X)
