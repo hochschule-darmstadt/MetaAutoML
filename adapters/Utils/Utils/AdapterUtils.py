@@ -545,16 +545,17 @@ def read_image_dataset(json_configuration):
 #region
 
 
-def split_longitudinal_data(dataset, json_configuration):
+def split_dataset(dataset, json_configuration):
     """
     Split the given dataset into train and test subsets
     """
     split_method = json_configuration["test_configuration"]["method"]
     split_ratio = json_configuration["test_configuration"]["split_ratio"]
     random_state = json_configuration["test_configuration"]["random_state"]
+    np.random.seed(random_state)
 
     if int(SplitMethod.SPLIT_METHOD_RANDOM.value) == split_method:
-        df_train, df_test = train_test_split(
+        return train_test_split(
             dataset,
             train_size=split_ratio,
             random_state=random_state,
@@ -562,13 +563,12 @@ def split_longitudinal_data(dataset, json_configuration):
             stratify=dataset["target"]
         )
     else:
-        df_train, df_test = train_test_split(
+        return train_test_split(
             dataset,
             train_size=split_ratio,
             shuffle=False,
             stratify=dataset["target"]
         )
-    return df_train, df_test
 
 
 def read_longitudinal_dataset(json_configuration):
@@ -578,7 +578,7 @@ def read_longitudinal_dataset(json_configuration):
     file_path = os.path.join(json_configuration["file_location"], json_configuration["file_name"])
     dataset = load_from_tsfile_to_dataframe(file_path, return_separate_X_and_y=False)
     dataset = dataset.rename(columns={"class_vals": "target"})
-    return split_longitudinal_data(dataset, json_configuration)
+    return split_dataset(dataset, json_configuration)
 
 
 def convert_longitudinal_to_numpy(X, y, label_binarizer):
