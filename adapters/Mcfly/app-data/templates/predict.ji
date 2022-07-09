@@ -6,6 +6,7 @@ import pandas as pd
 import numpy as np
 from sktime.datatypes import convert_to
 from sktime.datasets import load_from_tsfile
+from sktime.datasets import load_from_tsfile_to_dataframe
 from sklearn.model_selection import train_test_split
 from tensorflow import keras
 
@@ -17,55 +18,62 @@ class SplitMethod(Enum):
     SPLIT_METHOD_END = 1
 
 
-def split_data(X, y, json_configuration):
+def split_dataset(dataset, json_configuration):
     """
     Split the given dataset into train and test subsets
     """
-    if int(SplitMethod.SPLIT_METHOD_RANDOM.value) == json_configuration["test_configuration"]["method"]:
-        return train_test_split(X,
-                                y,
-                                train_size=json_configuration["test_configuration"]["split_ratio"],
-                                shuffle=True,
-                                random_state=json_configuration["test_configuration"]["random_state"])
-    elif int(json_configuration["test_configuration"]["split_ratio"]) == 0:
-        return None, X, None, y
+    split_method = json_configuration["test_configuration"]["method"]
+    split_ratio = json_configuration["test_configuration"]["split_ratio"]
+    random_state = json_configuration["test_configuration"]["random_state"]
+    np.random.seed(random_state)
+
+    if int(SplitMethod.SPLIT_METHOD_RANDOM.value) == split_method:
+        return train_test_split(
+            dataset,
+            train_size=split_ratio,
+            random_state=random_state,
+            shuffle=True,
+            stratify=dataset["target"]
+        )
+    elif split_ratio == 0:
+        return dataset
     else:
-        return train_test_split(X,
-                                y,
-                                train_size=json_configuration["test_configuration"]["split_ratio"],
-                                shuffle=False)
+        return train_test_split(
+            dataset,
+            train_size=split_ratio,
+            shuffle=False,
+            stratify=dataset["target"]
+        )
 
 
-def convert_panel_to_numpy3D(X):
+def read_longitudinal_dataset(file_path, json_configuration):
     """
-    Convert the panel dataset to numpy3D
+    Read longitudinal data from the `.ts` file
     """
-    X_np = convert_to(X, to_type="numpy3D")
-    # Change the shape of data to (samples, timesteps, features)
-    X_np = np.swapaxes(X_np, 1, 2)
-    return X_np
+    dataset = load_from_tsfile_to_dataframe(file_path, return_separate_X_and_y=False)
+    dataset = dataset.rename(columns={"class_vals": "target"})
+    return split_dataset(dataset, json_configuration)
 
 
 if __name__ == '__main__':
-    filepath = sys.argv[1]
+    file_path = sys.argv[1]
     config_path = sys.argv[2]
     sys_path_0 = sys.path[0]
 
     with open(config_path) as file:
         config_json = json.load(file)
 
-    X, y = load_from_tsfile(filepath)
-
     # split training set
-    X_train, X_test, y_train, y_test = split_data(X, y, config_json)
+    df_train, df_test = read_longitudinal_dataset(file_path, config_json)
+    X_test, y_test = df_test.drop(["target"], axis=1), df_test["target"]
 
     print("Loading the label binarizer")
     with open(os.path.join(sys_path_0, 'label_binarizer_mcfly.p'), 'rb') as file:
         label_binarizer = dill.load(file)
 
-    # Convert panel data to numpy3D
-    X_test = convert_panel_to_numpy3D(X_test)
-    y_test_binary = label_binarizer.transform(y_test)
+    # Convert longitudinal data to numpy3D
+    X_test = convert_to(X_test, to_type="numpy3D")
+    X_test = np.swapaxes(X_test, 1, 2)
 
     # Load the saved model
     model_path = os.path.join(sys_path_0, 'model_mcfly.p')
