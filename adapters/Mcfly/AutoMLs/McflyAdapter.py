@@ -3,12 +3,13 @@ from sklearn.preprocessing import LabelBinarizer
 from AbstractAdapter import AbstractAdapter
 from JsonUtil import get_config_property
 import numpy as np
+import os
 from AdapterUtils import (
     convert_longitudinal_to_numpy,
     read_longitudinal_dataset,
-    split_longitudinal_data,
     export_label_binarizer,
-    export_keras_model
+    export_keras_model,
+    split_dataset,
 )
 
 
@@ -36,15 +37,24 @@ class McflyAdapter(AbstractAdapter):
         """Execute time series classification task"""
         # self.df = read_panel_dataset_training_data(self._configuration)
         # Get training dataset and the label binarizer for the categorial target variable
-        (X_train, y_train), (X_test, y_test) = read_longitudinal_dataset(self._configuration)
+        df_train, df_test = read_longitudinal_dataset(self._configuration)
+        TARGET_col = "target"
         label_binarizer = LabelBinarizer()
-        label_binarizer.fit(np.concatenate([y_train, y_test]))
+        label_binarizer.fit(np.concatenate([df_train[TARGET_col], df_test[TARGET_col]]))
+
         # Split dataset into train and test
         # The Mcfly framework is based on keras lib. That's why it expects train and validation datasets
-        X_train, X_val, y_train, y_val = split_data(X_train, y_train, self._configuration)
+        df_train, df_val = split_dataset(df_train, self._configuration)
+
+        X_train, y_train = df_train.drop([TARGET_col], axis=1), df_train[TARGET_col]
+        X_val, y_val = df_val.drop([TARGET_col], axis=1), df_val[TARGET_col]
+
         # Convert datasets into numpy 3d array
         X_train, y_train_binary = convert_longitudinal_to_numpy(X_train, y_train, label_binarizer)
+        X_train = np.swapaxes(X_train, 1, 2)
+
         X_val, y_val_binary = convert_longitudinal_to_numpy(X_val, y_val, label_binarizer)
+        X_val = np.swapaxes(X_val, 1, 2)
 
         params = {
             'number_of_models': 1,
