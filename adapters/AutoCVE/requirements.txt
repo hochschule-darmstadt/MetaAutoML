@@ -4,3 +4,4 @@ dill
 jinja2
 git+https://github.com/celiolarcher/AUTOCVE@e87985d#egg=autocve
 pillow
+sktime==0.12.0

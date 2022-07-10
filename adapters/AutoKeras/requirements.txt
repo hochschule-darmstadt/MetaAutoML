@@ -75,3 +75,4 @@ wrapt==1.12.1
 zipp==3.5.0
 dill==0.3.4
 pillow
+sktime==0.12.0
