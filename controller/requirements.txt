@@ -33,3 +33,4 @@ zope.interface==5.4.0
 git+https://github.com/danielgtaylor/python-betterproto.git@v2.0.0b4
 pymongo==4.1.1
 mongomock==4.0.0
+sktime==0.12.1

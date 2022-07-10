@@ -3,4 +3,4 @@ grpcio
 protobuf==3.17.3
 dill
 pillow
-sktime==0.12.0
+sktime==0.12.1

@@ -4,4 +4,4 @@ dill
 jinja2
 protobuf==3.17.3
 pillow
-sktime==0.12.0
+sktime==0.12.1
