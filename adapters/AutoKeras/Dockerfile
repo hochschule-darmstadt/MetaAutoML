@@ -1,4 +1,4 @@
-FROM python:3.7.11-slim-buster AS base
+FROM python:3.9.13-slim-buster AS base
 EXPOSE 50052
 
 COPY ./AutoKeras/requirements.txt .
