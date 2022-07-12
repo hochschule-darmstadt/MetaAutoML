@@ -11,6 +11,7 @@ import Adapter_pb2
 import Adapter_pb2_grpc
 
 from JsonUtil import get_config_property
+from AdapterUtils import data_loader
 
 from AdapterUtils import *
 
@@ -40,7 +41,7 @@ class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
             output_json = zip_script(config_json["session_id"])
             library = "scikit-learn"
             model = "d3m"
-            test_score, prediction_time = evaluate(config_json, job_file_location)
+            test_score, prediction_time = evaluate(config_json, job_file_location, data_loader)
             response = yield from get_response(output_json, start_time, test_score, prediction_time, library, model)
             print(f'{get_config_property("adapter-name")} job finished')
             return response

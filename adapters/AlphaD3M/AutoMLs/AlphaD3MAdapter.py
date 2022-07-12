@@ -5,6 +5,7 @@ import os, sys
 from AbstractAdapter import AbstractAdapter
 from AdapterUtils import read_tabular_dataset_training_data, prepare_tabular_dataset, export_model
 from JsonUtil import get_config_property
+from AdapterUtils import export_model, prepare_tabular_dataset, data_loader
 
 
 meta_filepath = 'model.meta.json'
@@ -32,9 +33,14 @@ class AlphaD3MAdapter(AbstractAdapter):
         if self._configuration["task"] == ":tabular_classification":
             self.__tabular_classification()
 
+    def __export_model(self, model):
+        model.save_pipeline(model.get_best_pipeline_id(), os.path.join(get_config_property('output-path'), self._configuration["session_id"]))
 
     def __tabular_classification(self):
         """Execute the classification task"""
+        self.df, test = data_loader(self._configuration)
+        X, y = prepare_tabular_dataset(self.df, self._configuration)
+
 
         d3m_obj = d3mi.AutoML(os.path.join(sys.path[0], "d3mTmp"),
                                 "AlphaD3M", "pypi")
@@ -48,6 +54,7 @@ class AlphaD3MAdapter(AbstractAdapter):
         pipeline_id = d3m_obj.get_best_pipeline_id()
         d3m_obj.train(pipeline_id)
 
-        export_model(d3m_obj, self._configuration["session_id"], "model_alphad3m.p")
+        self.__export_model(d3m_obj)
+        #export_model(d3m_obj, self._configuration["session_id"], "model_alphad3m.p")
 
         d3m_obj.end_session()
