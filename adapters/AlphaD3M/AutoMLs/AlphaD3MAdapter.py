@@ -34,7 +34,19 @@ class AlphaD3MAdapter(AbstractAdapter):
             self.__tabular_classification()
 
     def __export_model(self, model):
-        model.save_pipeline(model.get_best_pipeline_id(), os.path.join(get_config_property('output-path'), self._configuration["session_id"]))
+        model.save_pipeline(model.get_best_pipeline_id(), os.path.join(
+            get_config_property('output-path'),
+            self._configuration["session_id"]))
+
+        file_path = os.path.join(get_config_property("job-file-path"),
+                             get_config_property("job-file-name"))
+
+        with open(file_path) as file:
+            process_json = json.load(file)
+            process_json["pipeline_id"] = model.get_best_pipeline_id()
+
+        with open(file_path, "w+") as file:
+            json.dump(process_json, file)
 
     def __tabular_classification(self):
         """Execute the classification task"""
@@ -55,6 +67,5 @@ class AlphaD3MAdapter(AbstractAdapter):
         d3m_obj.train(pipeline_id)
 
         self.__export_model(d3m_obj)
-        #export_model(d3m_obj, self._configuration["session_id"], "model_alphad3m.p")
 
         d3m_obj.end_session()

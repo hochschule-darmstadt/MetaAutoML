@@ -29,12 +29,18 @@ if __name__ == '__main__':
 
     X = feature_preparation(X, features)
 
+    with open(sys.path[0] + "/testDataset.csv", 'w') as file:
+        file.write(pd.DataFrame.to_csv(X))
+
+
     automl = d3mi.AutoML(os.path.join(sys.path[0], "d3mTmp"),
                             "AlphaD3M", "pypi")
-    automl.load_pipeline(sys.path[0])
-    #with open(sys.path[0] + '/model_alphad3m.p', 'rb') as file:
-    #    automl = dill.load(file)
+    automl.load_pipeline(os.path.join(sys.path[0], config_json["pipeline_id"]))
+
+    # print(sys.path[0]) # /app/app-data/output/62cded1922b26f2629704272
+    # print(config_json["pipeline_id"]) # 53f57dcd-d9cb-45d0-9bd6-8f0ab8d2d3ee
 
     model_id = automl.get_best_pipeline_id()
-    predict = automl.test(model_id, X)
+    predict = automl.test(model_id, sys.path[0] + "/testDataset.csv")
+
     pd.DataFrame(data=predict, columns=["predicted"]).to_csv(sys.path[0] + "/predictions.csv")
