@@ -11,6 +11,11 @@ if __name__ == '__main__':
     filepath = sys.argv[1]
     config_path = sys.argv[2]
 
+    alphad3m_keywords = ["timeSeries", "geospatial", "graph", "tabular", "nonOverlapping", "missingMetadata", "semiSupervised", "regression", "audio", "lupi", "vertexClassification", "forecasting", "image", "text", "classification", "clustering", "communityDetection", "multipleInstanceLearning", "relational", "linkPrediction", "nested", "collaborativeFiltering", "multivariate", "multiLabel", "speech", "vertexNomination", "binary", "multiClass", "grouped", "graphMatching", "objectDetection", "multiGraph", "univariate", "video", "overlapping", "remoteSensing"]
+    alphad3m_keywords_lowercase = ["timeseries", "geospatial", "graph", "tabular", "nonoverlapping", "missingmetadata", "semisupervised", "regression", "audio", "lupi", "vertexclassification", "forecasting", "image", "text", "classification", "clustering", "communitydetection", "multipleinstancelearning", "relational", "linkprediction", "nested", "collaborativefiltering", "multivariate", "multilabel", "speech", "vertexnomination", "binary", "multiclass", "grouped", "graphmatching", "objectdetection", "multigraph", "univariate", "video", "overlapping", "remotesensing"]
+    alphad3m_metric = ["hitsAtK", "f1", "hammingLoss", "precisionAtTopK", "objectDetectionAP", "f1Micro", "normalizedMutualInformation", "precision", "f1Macro", "jaccardSimilarityScore", "meanReciprocalRank", "rocAucMicro", "meanSquaredError", "recall", "rootMeanSquaredError", "rSquared", "accuracy", "rocAucMacro", "rocAuc", "meanAbsoluteError"]
+    alphad3m_metric_lowercase = ["hitsatk", "f1", "hammingloss", "precisionattopk", "objectdetectionap", "f1micro", "normalizedmutualinformation", "precision", "f1macro", "jaccardsimilarityscore", "meanreciprocalrank", "rocaucmicro", "meansquarederror", "recall", "rootmeansquarederror", "rsquared", "accuracy", "rocaucmacro", "rocauc", "meanabsoluteerror"]
+
     with open(config_path) as file:
         config_json = json.load(file)
 
@@ -19,15 +24,15 @@ if __name__ == '__main__':
     features.pop(target, None)
     features = features.items()
 
-    X = pd.read_csv(filepath).drop(target, axis=1, errors='ignore')
+    X = pd.read_csv(filepath)
 
     # split training set
-    if SplitMethod.SPLIT_METHOD_RANDOM.value == config_json["test_configuration"]["method"]:
-        X = X.sample(random_state=config_json["test_configuration"]["random_state"], frac=1)
-    else:
-        X = X.iloc[int(X.shape[0] * config_json["test_configuration"]["split_ratio"]):]
+    # if SplitMethod.SPLIT_METHOD_RANDOM.value == config_json["test_configuration"]["method"]:
+    #     X = X.sample(random_state=config_json["test_configuration"]["random_state"], frac=1)
+    # else:
+    #     X = X.iloc[int(X.shape[0] * config_json["test_configuration"]["split_ratio"]):]
 
-    X = feature_preparation(X, features)
+    # X = feature_preparation(X, features)
 
     with open(sys.path[0] + "/testDataset.csv", 'w') as file:
         file.write(pd.DataFrame.to_csv(X))
@@ -37,10 +42,26 @@ if __name__ == '__main__':
                             "AlphaD3M", "pypi")
     automl.load_pipeline(os.path.join(sys.path[0], config_json["pipeline_id"]))
 
-    # print(sys.path[0]) # /app/app-data/output/62cded1922b26f2629704272
-    # print(config_json["pipeline_id"]) # 53f57dcd-d9cb-45d0-9bd6-8f0ab8d2d3ee
+    with open(os.path.join(sys.path[0], config_json["pipeline_id"], "problem.json"), 'r') as file:
+        automl.problem_config = json.load(file)
+        
+        automl.problem_config["target_column"] = automl.problem_config["inputs"][0]["targets"][0]["column_name"]
+        
+        task_keywords_lowercase = [x.lower() for x in automl.problem_config["problem"]["task_keywords"]]
+        correct_keywords = []
+        for keyword in task_keywords_lowercase:
+            index = alphad3m_keywords_lowercase.index(keyword)
+            correct_keywords.append(alphad3m_keywords[index])
+        automl.problem_config["task_keywords"] = correct_keywords
+
+        metric_lowercase = automl.problem_config["problem"]["performance_metrics"][0]["metric"].lower()
+        automl.problem_config["metric"] = alphad3m_metric[alphad3m_metric_lowercase.index(metric_lowercase)]
+        automl.problem_config["extras"] = ""
 
     model_id = automl.get_best_pipeline_id()
+    automl.pipelines[model_id]["fitted_id"] = config_json["pipeline_id"]
     predict = automl.test(model_id, sys.path[0] + "/testDataset.csv")
 
+    # print(sys.path[0]) # /app/app-data/output/62cded1922b26f2629704272
+    # print(config_json["pipeline_id"]) # 53f57dcd-d9cb-45d0-9bd6-8f0ab8d2d3ee
     pd.DataFrame(data=predict, columns=["predicted"]).to_csv(sys.path[0] + "/predictions.csv")

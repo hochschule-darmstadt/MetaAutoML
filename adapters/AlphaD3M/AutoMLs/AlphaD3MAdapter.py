@@ -53,9 +53,8 @@ class AlphaD3MAdapter(AbstractAdapter):
         self.df, test = data_loader(self._configuration)
         X, y = prepare_tabular_dataset(self.df, self._configuration)
 
-
-        d3m_obj = d3mi.AutoML(os.path.join(sys.path[0], "d3mTmp"),
-                                "AlphaD3M", "pypi")
+        d3m_obj = d3mi.AutoML(os.path.join(get_config_property(
+            'output-path'), self._configuration["session_id"], "d3mTmp"), "AlphaD3M", "pypi")
         d3m_obj.search_pipelines(self._configuration["file_location"]+"/"+self._configuration["file_name"],
                                 time_bound=int(self._configuration["runtime_constraints"]["runtime_limit"]),
                                 time_bound_run=int(self._configuration["runtime_constraints"]["runtime_limit"]),
