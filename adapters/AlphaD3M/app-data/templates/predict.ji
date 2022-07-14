@@ -6,6 +6,7 @@ import json
 from predict_time_sources import DataType, SplitMethod, feature_preparation
 import d3m_interface as d3mi
 import os 
+import shutil
 
 if __name__ == '__main__':
     filepath = sys.argv[1]
@@ -19,50 +20,19 @@ if __name__ == '__main__':
     with open(config_path) as file:
         config_json = json.load(file)
 
-    target = config_json["configuration"]["target"]["target"]
-    features = config_json["dataset_configuration"]["features"]
-    features.pop(target, None)
-    features = features.items()
-
-    X = pd.read_csv(filepath)
-
-    # split training set
-    if SplitMethod.SPLIT_METHOD_RANDOM.value == config_json["test_configuration"]["method"]:
-        X = X.sample(random_state=config_json["test_configuration"]["random_state"], frac=1)
-    else:
-        X = X.iloc[int(X.shape[0] * config_json["test_configuration"]["split_ratio"]):]
-
-    # X = feature_preparation(X, features)
-
-    with open(sys.path[0] + "/testDataset.csv", 'w') as file:
-        file.write(pd.DataFrame.to_csv(X))
-
-
     automl = d3mi.AutoML(os.path.join(sys.path[0], "d3mTmp"),
                             "AlphaD3M", "pypi")
     automl.load_pipeline(os.path.join(sys.path[0], config_json["pipeline_id"]))
 
-    with open(os.path.join(sys.path[0], config_json["pipeline_id"], "problem.json"), 'r') as file:
+    with open(os.path.join(sys.path[0], "problem_config.json")) as file:
         automl.problem_config = json.load(file)
-        
-        automl.problem_config["target_column"] = automl.problem_config["inputs"][0]["targets"][0]["column_name"]
-        
-        task_keywords_lowercase = [x.lower() for x in automl.problem_config["problem"]["task_keywords"]]
-        correct_keywords = []
-        for keyword in task_keywords_lowercase:
-            index = alphad3m_keywords_lowercase.index(keyword)
-            correct_keywords.append(alphad3m_keywords[index])
-        automl.problem_config["task_keywords"] = correct_keywords
-
-        metric_lowercase = automl.problem_config["problem"]["performance_metrics"][0]["metric"].lower()
-        automl.problem_config["metric"] = alphad3m_metric[alphad3m_metric_lowercase.index(metric_lowercase)]
-        automl.problem_config["extras"] = ""
 
     model_id = automl.get_best_pipeline_id()
     automl.pipelines[model_id]["fitted_id"] = config_json["pipeline_id"]
-    predict = automl.test(model_id, sys.path[0] + "/testDataset.csv")
-
-    print(sys.path[0] + "/predictions.csv")
+    
+    target = config_json["configuration"]["target"]["target"]
+    predict = automl.test(model_id, filepath).rename(columns = { target : 'predicted'})
+    print(predict)
+    
     with open(sys.path[0] + "/predictions.csv", 'w') as file:
-        file.write("")
         pd.DataFrame(data=predict, columns=["predicted"]).to_csv(file)

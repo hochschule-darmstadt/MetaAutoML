@@ -33,19 +33,20 @@ class AlphaD3MAdapter(AbstractAdapter):
         if self._configuration["task"] == ":tabular_classification":
             self.__tabular_classification()
 
-    def __export_model(self, model):
-        model.save_pipeline(model.get_best_pipeline_id(), os.path.join(
-            get_config_property('output-path'),
-            self._configuration["session_id"]))
+    def __export_model(self, model: d3mi.AutoML):
+        path_to_session = os.path.join(get_config_property('output-path'),
+            self._configuration["session_id"])
+        model.save_pipeline(model.get_best_pipeline_id(), path_to_session)
 
+        with open(path_to_session + "/problem_config.json", "w") as file:
+            json.dump(model.problem_config, file)
+        
         file_path = os.path.join(get_config_property("job-file-path"),
                              get_config_property("job-file-name"))
-
-        with open(file_path) as file:
+        with open(file_path, 'r') as file:
             process_json = json.load(file)
             process_json["pipeline_id"] = model.get_best_pipeline_id()
-
-        with open(file_path, "w+") as file:
+        with open(file_path, "w") as file:
             json.dump(process_json, file)
 
     def __tabular_classification(self):
