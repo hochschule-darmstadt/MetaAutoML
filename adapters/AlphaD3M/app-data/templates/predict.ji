@@ -27,10 +27,10 @@ if __name__ == '__main__':
     X = pd.read_csv(filepath)
 
     # split training set
-    # if SplitMethod.SPLIT_METHOD_RANDOM.value == config_json["test_configuration"]["method"]:
-    #     X = X.sample(random_state=config_json["test_configuration"]["random_state"], frac=1)
-    # else:
-    #     X = X.iloc[int(X.shape[0] * config_json["test_configuration"]["split_ratio"]):]
+    if SplitMethod.SPLIT_METHOD_RANDOM.value == config_json["test_configuration"]["method"]:
+        X = X.sample(random_state=config_json["test_configuration"]["random_state"], frac=1)
+    else:
+        X = X.iloc[int(X.shape[0] * config_json["test_configuration"]["split_ratio"]):]
 
     # X = feature_preparation(X, features)
 
@@ -62,6 +62,7 @@ if __name__ == '__main__':
     automl.pipelines[model_id]["fitted_id"] = config_json["pipeline_id"]
     predict = automl.test(model_id, sys.path[0] + "/testDataset.csv")
 
-    # print(sys.path[0]) # /app/app-data/output/62cded1922b26f2629704272
-    # print(config_json["pipeline_id"]) # 53f57dcd-d9cb-45d0-9bd6-8f0ab8d2d3ee
-    pd.DataFrame(data=predict, columns=["predicted"]).to_csv(sys.path[0] + "/predictions.csv")
+    print(sys.path[0] + "/predictions.csv")
+    with open(sys.path[0] + "/predictions.csv", 'w') as file:
+        file.write("")
+        pd.DataFrame(data=predict, columns=["predicted"]).to_csv(file)
