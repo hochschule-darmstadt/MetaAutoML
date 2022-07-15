@@ -1,4 +1,5 @@
 import io
+import shutil
 from threading import Lock
 import os
 import os.path
@@ -176,8 +177,12 @@ class DataStorage:
             filename_dest = filename_dest.replace("/app/", "")
         # make sure directory exists in case it's the first upload from this user
         os.makedirs(os.path.dirname(filename_dest), exist_ok=True)
+
         with open(filename_dest, 'wb') as outfp:
             outfp.write(content)
+
+        #if type == ":image":
+        #    shutil
 
         # fill in missing values
         success = self.__mongo.update_dataset(username, dataset_id, {
