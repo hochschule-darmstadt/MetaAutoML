@@ -4,7 +4,7 @@
   "env-varname-cluster": "RUNTIME",
   "grpc-server-address": "127.0.0.1",     
   "export-zip-file-name": "alphad3m-export",
-  "output-path": "C:/Users/alex/Desktop/MetaAutoML/adapters/AlphaD3M/app-data/output",
+  "output-path": "/home/alex/Desktop/MetaAutoML/adapters/AlphaD3M/app-data/output",
   "job-file-path": "app-data/jobs",
   "templates-path": "app-data/templates",
   "predict-time-sources-path": "../Utils/AutoMLs/predict_time_sources.py",
