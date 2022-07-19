@@ -34,8 +34,8 @@ def read_image_dataset(filepath, json_configuration):
             validation_split=json_configuration["test_configuration"]["split_ratio"],
             subset="validation",
             seed=123,
-            image_size=(json_configuration["test_configuration"]["image_height"], json_configuration["test_configuration"]["image_width"]),
-            batch_size=json_configuration["test_configuration"]["batch_size"],
+            #image_size=(json_configuration["test_configuration"]["image_height"], json_configuration["test_configuration"]["image_width"]),
+            #batch_size=json_configuration["test_configuration"]["batch_size"],
         )
 
     else:

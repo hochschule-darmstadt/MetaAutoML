@@ -152,14 +152,14 @@ namespace BlazorBoilerplate.Server.Managers
         public async Task<ApiResponse> Upload(FileUploadRequestDto file)
         {
             UploadDatasetFileRequest request = new UploadDatasetFileRequest();
-            var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
-            request.Username = username;
-            request.FileName = file.FileName;
-            request.DatasetName = file.DatasetName;
-            request.Type = file.DatasetType;
-            request.Content = Google.Protobuf.ByteString.CopyFromUtf8(file.Content);
             try
             {
+                var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
+                request.Username = username;
+                request.FileName = file.FileName;
+                request.DatasetName = file.DatasetName;
+                request.Type = file.DatasetType;
+                request.Content = Google.Protobuf.ByteString.CopyFrom(file.Content);
                 var reply = _client.UploadDatasetFile(request);
                 return new ApiResponse(Status200OK, null, reply.ReturnCode);
             }

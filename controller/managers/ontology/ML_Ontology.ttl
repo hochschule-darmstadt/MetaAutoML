@@ -1,5 +1,5 @@
 ### Ontology file generated from ML_Ontology.xlsx.
-### 2022-06-29 11:10:41.892298
+### 2022-07-12 10:23:41.725467
 
 
 # PREFIXES
@@ -1274,6 +1274,7 @@
 :alphad3m a :AutoML_solution ;
     skos:prefLabel "Alphad3m" ;
     :used_for :scikit_learn_lib ;
+    :supported_by_oma_ml "True" ;
     :can_perform :tabular_classification , :tabular_regression , :clustering , :time_series_forecasting , :text_classification , :text_regression , :image_classification , :object_detection , :remote_sensing , :video_classification , :audio_classification , :audio_regression , :collaborative_graph_filtering , :graph_matching , :vertex_classification , :link_prediction , :community_detection .
 :atm a :AutoML_solution ;
     skos:prefLabel "ATM" ;
@@ -1286,27 +1287,27 @@
 :autocve a :AutoML_solution ;
     skos:prefLabel "AutoCVE" ;
     :used_for :xgboost_lib , :scikit_learn_lib ;
-    :supported_by_oma_ml "true" ;
+    :supported_by_oma_ml "True" ;
     :can_perform :tabular_classification .
 :autogluon a :AutoML_solution ;
     skos:prefLabel "Autogluon" ;
     :used_for :scikit_learn_lib , :catboost_lib , :lightgbm_lib , :xgboost_lib , :pytorch_lib , :mxnet_lib ;
-    :supported_by_oma_ml "true" ;
+    :supported_by_oma_ml "True" ;
     :can_perform :tabular_classification , :tabular_regression , :text_classification , :text_regression , :sentiment_analysis , :sentence_similarity , :image_classification , :object_detection , :video_classification , :video_object_tracking , :action_recognition .
 :autokeras a :AutoML_solution ;
     skos:prefLabel "Autokeras" ;
     :used_for :keras_lib ;
-    :supported_by_oma_ml "true" ;
+    :supported_by_oma_ml "True" ;
     :can_perform :tabular_classification , :tabular_regression , :time_series_forecasting , :text_classification , :text_regression , :image_classification , :image_regression .
 :autopytorch a :AutoML_solution ;
     skos:prefLabel "Autopytorch" ;
     :used_for :pytorch_lib ;
-    :supported_by_oma_ml "true" ;
+    :supported_by_oma_ml "True" ;
     :can_perform :tabular_classification , :tabular_regression , :image_classification .
 :autosklearn a :AutoML_solution ;
     skos:prefLabel "Autosklearn" ;
     :used_for :scikit_learn_lib ;
-    :supported_by_oma_ml "true" ;
+    :supported_by_oma_ml "True" ;
     :can_perform :tabular_classification , :tabular_regression .
 :aws_sagemaker_autopilot a :AutoML_solution ;
     skos:prefLabel "AWS Sagemaker Autopilot" ;
@@ -1322,7 +1323,7 @@
 :flaml a :AutoML_solution ;
     skos:prefLabel "FLAML" ;
     :used_for :scikit_learn_lib , :catboost_lib , :lightgbm_lib , :xgboost_lib ;
-    :supported_by_oma_ml "true" ;
+    :supported_by_oma_ml "True" ;
     :can_perform :tabular_classification , :tabular_regression , :ranking , :time_series_forecasting , :text_classification .
 :google_automl a :AutoML_solution ;
     skos:prefLabel "Google AutoML" ;
@@ -1339,7 +1340,7 @@
 :mljar a :AutoML_solution ;
     skos:prefLabel "MLJAR" ;
     :used_for :scikit_learn_lib , :catboost_lib , :lightgbm_lib , :xgboost_lib ;
-    :supported_by_oma_ml "true" ;
+    :supported_by_oma_ml "True" ;
     :can_perform :tabular_classification , :tabular_regression .
 :rapidminer a :AutoML_solution ;
     skos:prefLabel "Rapidminer" ;
@@ -1481,7 +1482,8 @@
     :automl_solution :mcfly ;
     :ml_task :time_series_classification ;
     :parameter_value :use_approach_mcfly_time_series_classification , :metric_mcfly_time_series_classification .
-:image_classification_in_autokeras skos:prefLabel "image classification in AutoKeras" ;
+:image_classification_in_autokeras a :Configuration_item ;
+    skos:prefLabel "image classification in AutoKeras" ;
     :category :task_configuration ;
     :automl_solution :autokeras ;
     :ml_task :image_classification ;

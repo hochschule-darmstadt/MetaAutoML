@@ -36,6 +36,7 @@ class AdapterManager(object):
             ":autocve":      ["AUTOCVE_SERVICE_HOST",   "AUTOCVE_SERVICE_PORT"],
             ":autopytorch": ["PYTORCH_SERVICE_HOST",   "PYTORCH_SERVICE_PORT"],
             ":mljar":        ["MLJAR_SERVICE_HOST",     "MLJAR_SERVICE_PORT"],
+            ":alphad3m":        ["ALPHAD3M_SERVICE_HOST",  "ALPHAD3M_SERVICE_PORT"],
         }
 
         automl_names: list[str] = configuration.required_auto_mls

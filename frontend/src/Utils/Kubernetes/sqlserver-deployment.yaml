@@ -30,6 +30,10 @@ spec:
           value: "Y"
         - name: "SA_PASSWORD"
           value: "yourVeryStrong(!)Password"
+        - name: SQL_POD_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
         image: mcr.microsoft.com/mssql/server
         imagePullPolicy: ""
         name: sqlserver
