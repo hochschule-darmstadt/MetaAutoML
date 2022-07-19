@@ -2,6 +2,7 @@
 using BlazorBoilerplate.Infrastructure.Server;
 using BlazorBoilerplate.Infrastructure.Server.Models;
 using BlazorBoilerplate.Shared.Dto.Dataset;
+using BlazorBoilerplate.Shared.Dto.Ontology;
 using BlazorBoilerplate.Storage;
 using Grpc.Core;
 using Grpc.Net.Client;
@@ -105,7 +106,8 @@ namespace BlazorBoilerplate.Server.Managers
                 var reply = _client.GetDatasets(getDatasetsRequest);
                 foreach (Dataset item in reply.Dataset)
                 {
-                    response.Add(new GetDatasetsResponseDto(item.FileName, item.Type, item.Columns, item.Rows,item.CreationDate.ToDateTime(), item.Identifier));
+                    ObjectInfomationDto typeInformation = await _cacheManager.GetObjectInformation(item.Type);
+                    response.Add(new GetDatasetsResponseDto(item.FileName, typeInformation, item.Columns, item.Rows,item.CreationDate.ToDateTime(), item.Identifier));
                 }
                 return new ApiResponse(Status200OK, null, response);
 
@@ -150,14 +152,14 @@ namespace BlazorBoilerplate.Server.Managers
         public async Task<ApiResponse> Upload(FileUploadRequestDto file)
         {
             UploadDatasetFileRequest request = new UploadDatasetFileRequest();
-            var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
-            request.Username = username;
-            request.FileName = file.FileName;
-            request.DatasetName = file.DatasetName;
-            request.Type = file.DatasetType;
-            request.Content = Google.Protobuf.ByteString.CopyFromUtf8(file.Content);
             try
             {
+                var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
+                request.Username = username;
+                request.FileName = file.FileName;
+                request.DatasetName = file.DatasetName;
+                request.Type = file.DatasetType;
+                request.Content = Google.Protobuf.ByteString.CopyFrom(file.Content);
                 var reply = _client.UploadDatasetFile(request);
                 return new ApiResponse(Status200OK, null, reply.ReturnCode);
             }

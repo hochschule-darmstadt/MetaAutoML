@@ -1,4 +1,5 @@
 import io
+import shutil
 from threading import Lock
 import os
 import os.path
@@ -176,8 +177,12 @@ class DataStorage:
             filename_dest = filename_dest.replace("/app/", "")
         # make sure directory exists in case it's the first upload from this user
         os.makedirs(os.path.dirname(filename_dest), exist_ok=True)
+
         with open(filename_dest, 'wb') as outfp:
             outfp.write(content)
+
+        #if type == ":image":
+        #    shutil
 
         # fill in missing values
         success = self.__mongo.update_dataset(username, dataset_id, {
@@ -246,7 +251,44 @@ class DataStorage:
         """
         return self.__mongo.insert_model(username, model)
 
+    def update_model(self, username: str, id: str, new_values: 'dict[str, object]') -> bool:
+        """
+        Update single model with new values. 
+        ---
+        >>> success: bool = data_storage.update_models("automl_user", model_id, {
+                "status": "completed"
+            })
 
+        ---
+        Parameter
+        1. username: name of the user
+        2. id: model id
+        3. new_values: dict with new values
+        ---
+        Returns `True` if successfully updated, otherwise `False`.
+        """
+        return self.__mongo.update_model(username, id, new_values)
+
+    def get_models(self, username: str, session_id: str = None) -> 'list[dict[str, object]]':
+        """
+        Get all models, or all models by session id
+        ---
+        >>> models = ds.get_models("automl_user", "session_id")
+
+        ---
+        Parameter
+        1. username: name of the user
+        2. session_id: optinal session id
+        ---
+        Returns a models list
+        """
+        if session_id == None:
+            filter = None
+        else:
+            filter = { "session_id": session_id }
+        result = self.__mongo.get_models(username, filter)
+
+        return [ds for ds in result]
 
     class __DbLock():
         """

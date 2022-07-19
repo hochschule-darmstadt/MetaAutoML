@@ -11,6 +11,41 @@ import os
 
 from predict_time_sources import feature_preparation, DataType, SplitMethod
 
+def read_image_dataset(filepath, json_configuration):
+
+    local_dir_path = filepath
+
+    if not (os.path.exists(os.path.join(filepath))):
+        local_file_path = tf.keras.utils.get_file(
+            origin=filepath, 
+            fname="image_data", 
+            cache_dir=os.path.abspath(os.path.join("data")), 
+            extract=True
+        )
+
+        local_dir_path = os.path.dirname(local_file_path)
+
+    data_dir = os.path.join(local_dir_path)
+    test_data = None
+
+    if(json_configuration["test_configuration"]["split_ratio"] > 0):
+        test_data = ak.image_dataset_from_directory(
+            data_dir,
+            validation_split=json_configuration["test_configuration"]["split_ratio"],
+            subset="validation",
+            seed=123,
+            #image_size=(json_configuration["test_configuration"]["image_height"], json_configuration["test_configuration"]["image_width"]),
+            #batch_size=json_configuration["test_configuration"]["batch_size"],
+        )
+
+    else:
+        test_data = ak.image_dataset_from_directory(
+            os.path.join(data_dir, "test"), 
+            shuffle=False, 
+            batch_size=json_configuration["test_configuration"]["batch_size"]
+        )
+    
+    return test_data
 
 
 if __name__ == '__main__':
@@ -20,20 +55,37 @@ if __name__ == '__main__':
     with open(configpath) as file:
         config_json = json.load(file)
 
-    target = config_json["tabular_configuration"]["target"]["target"]
-    features = config_json["tabular_configuration"]["features"].items()
-    X = pd.read_csv(filepath).drop(target, axis=1, errors='ignore')
+    if(config_json["task"] == ":tabular_classification" or config_json["task"] == ":tabular_regression"):
+        target = config_json["configuration"]["target"]["target"]
+        features = config_json["dataset_configuration"]["features"]
+        features.pop(target, None)
+        features = features.items()
 
-    # split training set
-    if SplitMethod.SPLIT_METHOD_RANDOM == config_json["test_configuration"]["method"]:
-        X = X.sample(random_state=config_json["test_configuration"]["random_state"], frac=1)
-    else:
-        X = X.iloc[int(X.shape[0] * config_json["test_configuration"]["split_ratio"]):]
+    X = None
+    labels= np.array([])
 
-    X = feature_preparation(X, features)
+    if(config_json["task"] == ":tabular_classification" or config_json["task"] == ":tabular_regression"):
+        X = pd.read_csv(filepath).drop(target, axis=1, errors='ignore')
+
+        # split training set
+        if SplitMethod.SPLIT_METHOD_RANDOM.value == config_json["test_configuration"]["method"]:
+            X = X.sample(random_state=config_json["test_configuration"]["random_state"], frac=1)
+        else:
+            X = X.iloc[int(X.shape[0] * config_json["test_configuration"]["split_ratio"]):]
+
+        X = feature_preparation(X, features)
+
+    elif(config_json["task"] == ":image_classification" or config_json["task"] == ":image_regression"):
+        X = read_image_dataset(filepath, config_json)
+
+        y = np.concatenate([y for x, y in X], axis=0)
+
+        for entry in y:
+            labels = np.append(labels, entry.decode('utf-8'))
 
     with open(sys.path[0] + '/model_keras.p', 'rb') as file:
         loaded_model = dill.load(file)
     predicted_y = loaded_model.predict(X)
 
-    pd.DataFrame(data=predicted_y, columns=["predicted"]).to_csv(sys.path[0] +"/predictions.csv")
+    pd.concat([pd.DataFrame(data=predicted_y, columns=["predicted"]), 
+                pd.DataFrame(data=labels, columns=["label"])], axis=1).to_csv(sys.path[0] +"/predictions.csv")

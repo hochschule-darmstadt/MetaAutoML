@@ -1,8 +1,6 @@
-import grpc
-import os
-import logging
 import json
-import time
+import logging
+import os
 import shutil
 
 from autogluon.tabular import TabularPredictor
@@ -10,8 +8,9 @@ from autogluon.vision import ImagePredictor, ImageDataset
 
 import Adapter_pb2
 import Adapter_pb2_grpc
-
-from concurrent import futures
+import grpc
+from AdapterUtils import *
+from autogluon.tabular import TabularPredictor
 from JsonUtil import get_config_property
 
 

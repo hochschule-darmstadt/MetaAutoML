@@ -8,6 +8,6 @@ namespace BlazorBoilerplate.Shared.Dto.Ontology
 {
     public class GetSupportedMlLibrariesResponseDto
     {
-        public List<string> MlLibraries { get; set; }
+        public List<ObjectInfomationDto> MlLibraries { get; set; }
     }
 }

@@ -46,7 +46,7 @@ class Database:
 
             return mongo
         except:
-            raise Exception("cannot find MongoDB!\n    Did you forget to launch it with `docker-compose up --build mongo`?")
+            raise Exception("cannot find MongoDB! URL "+ server_url +"\n    Did you forget to launch it with `docker-compose up --build mongo`?")
         
     def CheckIfUserExists(self, username: str) -> bool:
         """
@@ -187,7 +187,22 @@ class Database:
         result = models.insert_one(model_details)
         return str(result.inserted_id)
 
-    def get_models(self, username: str) -> 'list[dict[str, object]]':
+    def update_model(self, username: str, id: str, new_values: 'dict[str, str]') -> bool:
+        """
+        Update a model record
+        ---
+        Parameter
+        1. username
+        2. session id
+        3. dictionary of new values
+        ---
+        Returns `True` if a record was updated otherwise `False`
+        """
+        models: Collection = self.__mongo[username]["models"]
+        result = models.update_one({ "_id": ObjectId(id) }, { "$set": new_values })
+        return result.modified_count >= 1
+
+    def get_models(self, username: str, session_id: str=None) -> 'list[dict[str, object]]':
         """
         Get all models from a user
         ---
@@ -197,7 +212,7 @@ class Database:
         Returns models as list of dicts
         """
         models: Collection = self.__mongo[username]["models"]
-        return models.find()
+        return models.find(session_id)
 
 
     def drop_database(self, username: str):

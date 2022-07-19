@@ -40,6 +40,8 @@ class ControllerService(ControllerServiceBase):
         data_storage_dir = os.path.join(ROOT_PATH, get_config_property("datasets-path"))
         if os.getenv("MONGO_DB_DEBUG") == "YES":
             data_storage = DataStorage(data_storage_dir, "mongodb://localhost:27017/")
+        elif os.getenv("MONGO_CLUSTER") == "YES":
+            data_storage = DataStorage(data_storage_dir, "mongodb://"+os.getenv("MONGODB_SERVICE_HOST")+":"+os.getenv("MONGODB_SERVICE_PORT")+"")
         else:
             data_storage = DataStorage(data_storage_dir)
         self._controllerManager = ControllerManager(data_storage)

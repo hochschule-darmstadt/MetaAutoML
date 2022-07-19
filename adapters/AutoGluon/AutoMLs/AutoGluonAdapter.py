@@ -1,10 +1,13 @@
 import os
+
+from AbstractAdapter import AbstractAdapter
+from AdapterUtils import export_model, prepare_tabular_dataset, data_loader
 from autogluon.tabular import TabularDataset, TabularPredictor
-from JsonUtil import get_config_property
+from JsonUtil import get_config_property#
 from AbstractAdapter import AbstractAdapter
 from AdapterUtils import read_tabular_dataset_training_data, prepare_tabular_dataset, export_model
 from AutoGluonServer.py import data_loader
-import shutil
+import shutil#
 
 from autogluon.vision import ImagePredictor, ImageDataset
 
@@ -54,9 +57,9 @@ class AutoGluonAdapter(AbstractAdapter):
         NOTE: AutoGLUON automatically saves the model in a file
         Therefore we do not need to export it using pickle
         """
-        if self._configuration["task"] == 1:
+        if self._configuration["task"] == ":tabular_classification":
             self.__tabular_classification()
-        elif self._configuration["task"] == 2:
+        elif self._configuration["task"] == ":tabular_regression":
             self.__tabular_regression()
         elif self._configuration["task"] == 4:
             self.__image_classification()
@@ -65,7 +68,7 @@ class AutoGluonAdapter(AbstractAdapter):
         """
         Execute the classification task
         """
-        self.df = read_tabular_dataset_training_data(self._configuration)
+        self.df, test = data_loader(self._configuration)
         X, y = prepare_tabular_dataset(self.df, self._configuration)
         data = X
         data[self._target] = y

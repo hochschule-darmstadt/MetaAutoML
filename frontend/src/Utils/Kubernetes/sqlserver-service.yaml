@@ -9,8 +9,8 @@ spec:
   externalTrafficPolicy: Cluster
   type: NodePort
   ports:
-  - name: "1533"
-    port: 1533
+  - name: "1433"
+    port: 1433
     protocol: TCP
     targetPort: 1433
   selector:

@@ -1,0 +1,38 @@
+import dill
+import pandas as pd
+import numpy as np
+import sys
+import json
+from predict_time_sources import DataType, SplitMethod, feature_preparation
+import d3m_interface as d3mi
+import os 
+import shutil
+
+if __name__ == '__main__':
+    filepath = sys.argv[1]
+    config_path = sys.argv[2]
+
+    alphad3m_keywords = ["timeSeries", "geospatial", "graph", "tabular", "nonOverlapping", "missingMetadata", "semiSupervised", "regression", "audio", "lupi", "vertexClassification", "forecasting", "image", "text", "classification", "clustering", "communityDetection", "multipleInstanceLearning", "relational", "linkPrediction", "nested", "collaborativeFiltering", "multivariate", "multiLabel", "speech", "vertexNomination", "binary", "multiClass", "grouped", "graphMatching", "objectDetection", "multiGraph", "univariate", "video", "overlapping", "remoteSensing"]
+    alphad3m_keywords_lowercase = ["timeseries", "geospatial", "graph", "tabular", "nonoverlapping", "missingmetadata", "semisupervised", "regression", "audio", "lupi", "vertexclassification", "forecasting", "image", "text", "classification", "clustering", "communitydetection", "multipleinstancelearning", "relational", "linkprediction", "nested", "collaborativefiltering", "multivariate", "multilabel", "speech", "vertexnomination", "binary", "multiclass", "grouped", "graphmatching", "objectdetection", "multigraph", "univariate", "video", "overlapping", "remotesensing"]
+    alphad3m_metric = ["hitsAtK", "f1", "hammingLoss", "precisionAtTopK", "objectDetectionAP", "f1Micro", "normalizedMutualInformation", "precision", "f1Macro", "jaccardSimilarityScore", "meanReciprocalRank", "rocAucMicro", "meanSquaredError", "recall", "rootMeanSquaredError", "rSquared", "accuracy", "rocAucMacro", "rocAuc", "meanAbsoluteError"]
+    alphad3m_metric_lowercase = ["hitsatk", "f1", "hammingloss", "precisionattopk", "objectdetectionap", "f1micro", "normalizedmutualinformation", "precision", "f1macro", "jaccardsimilarityscore", "meanreciprocalrank", "rocaucmicro", "meansquarederror", "recall", "rootmeansquarederror", "rsquared", "accuracy", "rocaucmacro", "rocauc", "meanabsoluteerror"]
+
+    with open(config_path) as file:
+        config_json = json.load(file)
+
+    automl = d3mi.AutoML(os.path.join(sys.path[0], "d3mTmp"),
+                            "AlphaD3M", "pypi")
+    automl.load_pipeline(os.path.join(sys.path[0], config_json["pipeline_id"]))
+
+    with open(os.path.join(sys.path[0], "problem_config.json")) as file:
+        automl.problem_config = json.load(file)
+
+    model_id = automl.get_best_pipeline_id()
+    automl.pipelines[model_id]["fitted_id"] = config_json["pipeline_id"]
+    
+    target = config_json["configuration"]["target"]["target"]
+    predict = automl.test(model_id, filepath).rename(columns = { target : 'predicted'})
+    print(predict)
+    
+    with open(sys.path[0] + "/predictions.csv", 'w') as file:
+        pd.DataFrame(data=predict, columns=["predicted"]).to_csv(file)

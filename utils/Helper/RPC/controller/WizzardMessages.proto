@@ -1,6 +1,7 @@
 syntax = "proto3";
 option csharp_namespace = "BlazorBoilerplate.Server";
 
+import "google/protobuf/any.proto";
 import "Enumerations.proto";
 import "Common.proto";
 
@@ -35,13 +36,15 @@ message GetSupportedMlLibrariesResponse {
 message StartAutoMlProcessRequest {
     string username = 1;
     string dataset = 2;
-    MachineLearningTask task = 3;
-    AutoMlConfigurationTabularData tabularConfig = 4;
+    string task = 3;
+    string configuration = 4;
     repeated string requiredAutoMls = 5;
-    AutoMlRuntimeConstraints runtimeConstraints = 6;
-    map<string, string> fileConfiguration = 7;
-    TestConfiguration testConfig = 8;
-    string metric = 9;
+    string runtimeConstraints = 6;
+    string datasetConfiguration = 7;
+    string testConfiguration = 8;
+    string fileConfiguration = 9;
+    string metric = 10;
+    repeated string requiredLibraries = 11;
   }
   
   
