@@ -3,8 +3,13 @@ import os
 from AbstractAdapter import AbstractAdapter
 from AdapterUtils import export_model, prepare_tabular_dataset, data_loader
 from autogluon.tabular import TabularDataset, TabularPredictor
-from JsonUtil import get_config_property
+from JsonUtil import get_config_property#
+from AbstractAdapter import AbstractAdapter
+from AdapterUtils import read_tabular_dataset_training_data, prepare_tabular_dataset, export_model
+from AutoGluonServer.py import data_loader
+import shutil#
 
+from autogluon.vision import ImagePredictor, ImageDataset
 
 class AutoGluonAdapter(AbstractAdapter):
     """
@@ -56,6 +61,8 @@ class AutoGluonAdapter(AbstractAdapter):
             self.__tabular_classification()
         elif self._configuration["task"] == ":tabular_regression":
             self.__tabular_regression()
+        elif self._configuration["task"] == 4:
+            self.__image_classification()
 
     def __tabular_classification(self):
         """
@@ -86,3 +93,26 @@ class AutoGluonAdapter(AbstractAdapter):
             data,
             time_limit=self._time_limit)
         #Fit methode already saves the model
+
+    def __image_classification(self):
+        """
+        Execute the classiciation task
+        """
+        # Daten Laden 
+        train , test = data_loader(self._configuration)
+        
+        # Einteilen 
+        set_hyperparameters={ 
+            'batch_size': self._configuration["test_configuration"]["batch_size"], 
+            'epochs': self._configuration["runtime_constraints"]["epochs"] 
+            }
+        
+        model = ImagePredictor(
+            label=self._target,
+            path=self._result_path)
+        
+         # Trainieren 
+        model.fit(
+            train , 
+            hyperparameters=set_hyperparameters , 
+            time_limit = self._configuration["runtime_constraints"]["runtime_limit"]  ) 

@@ -2,8 +2,9 @@ import json
 import logging
 import os
 import shutil
-import time
-from concurrent import futures
+
+from autogluon.tabular import TabularPredictor
+from autogluon.vision import ImagePredictor, ImageDataset
 
 import Adapter_pb2
 import Adapter_pb2_grpc
@@ -11,6 +12,88 @@ import grpc
 from AdapterUtils import *
 from autogluon.tabular import TabularPredictor
 from JsonUtil import get_config_property
+
+
+from AdapterUtils import *
+
+
+def data_loader(config):
+    """
+    Get exception message
+    ---
+    Parameter
+    1. config: Job config
+    ---
+    Return job type specific dataset
+    """
+    train_data = None
+    test_data = None
+
+    if config["task"] == 1:
+        train_data, test_data = read_tabular_dataset_training_data(config)
+    elif config["task"] == 2:
+        train_data, test_data = read_tabular_dataset_training_data(config)
+    elif config["task"] == 3:
+        train_data, test_data = None
+    elif config["task"] == 4:
+        train_data, test_data = read_image_dataset(config)
+    elif config["task"] == 5:
+        train_data, test_data = read_image_dataset(config)
+
+    return train_data, test_data
+
+
+
+def AutoGluon_data_loader():
+
+    """
+    Get exception message
+    ---
+    Parameter
+    1. config: Job config
+    ---
+    Return job type specific dataset
+    """
+    train_data = None
+    test_data = None
+
+    if config["task"] == 1:
+        train_data, test_data = read_tabular_dataset_training_data(config)
+    elif config["task"] == 2:
+        train_data, test_data = read_tabular_dataset_training_data(config)
+    elif config["task"] == 3:
+        train_data, test_data = None
+    elif config["task"] == 4:
+        train_data, test_data = read_image_dataset_auto_gluon(config)
+    
+    return train_data, test_data
+
+def read_image_dataset_auto_gluon():
+
+    """Reads image data and return sets
+    ---
+    Parameter
+    1. config: Job config
+    ---
+    Return image dataset
+    """
+
+    local_dir_path = json_configuration["file_location"]
+
+    data_dir = os.path.join(local_dir_path, json_configuration["file_name"])
+    train_data = None
+    test_data = None
+
+    if(json_configuration["test_configuration"]["dataset_structure"] == 1):
+
+        all_data = ImageDataset.from_folder(data_dir)
+        train_data, val_data, test_data = all_data.random_split(val_size=json_configuration["test_configuration"]["split_ratio"], test_size=json_configuration["test_configuration"]["split_ratio"])
+
+
+    else:
+        train_data, val_data, test_data = ImageDataset.from_folders(data_dir)
+
+    return train_data, test_data
 
 
 def GetMetaInformations(config_json):
@@ -68,7 +151,7 @@ class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
 
 
             library, model = GetMetaInformations(config_json)
-            test_score, prediction_time= evaluate(config_json, job_file_location, data_loader)
+            test_score, prediction_time= evaluate(config_json, job_file_location,AutoGluon_data_loader)
             response = yield from get_response(output_json, start_time, test_score, prediction_time, library, model)
 
             print(f'{get_config_property("adapter-name")} job finished')
@@ -103,6 +186,23 @@ def serve():
     Adapter_pb2_grpc.add_AdapterServiceServicer_to_server(AdapterServiceServicer(), server)
     server.add_insecure_port(f'{get_config_property("grpc-server-address")}:{os.getenv("GRPC_SERVER_PORT")}')
     server.start()
+
+    # ToDo:
+    # - Make image tasks available in frontend 
+    # - Test image task application wide
+    # 
+    # Local testing
+    # channel = grpc.insecure_channel(f'{get_config_property("grpc-server-address")}:{os.getenv("GRPC_SERVER_PORT")}')
+    # stub = Adapter_pb2_grpc.AdapterServiceStub(channel)
+    # request = Adapter_pb2.StartAutoMLRequest() 
+    # 
+    # job_file_location = os.path.join(get_config_property("job-file-path"),
+    #                                 get_config_property("job-file-name"))
+    # with open(job_file_location) as file:
+    #     request.processJson = json.dumps(json.load(file))
+    # 
+    # response = stub.StartAutoML(request)
+
     print(get_config_property("adapter-name") + " started")
     server.wait_for_termination()
 
