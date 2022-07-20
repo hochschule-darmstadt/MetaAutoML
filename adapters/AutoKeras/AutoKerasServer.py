@@ -35,7 +35,7 @@ class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
                 json.dump(config_json, f)
 
             process = start_automl_process()
-            yield from capture_process_output(process, start_time)
+            yield from capture_process_output(process, start_time, False)
             generate_script(config_json)
             output_json = zip_script(config_json["session_id"])
             library = "neural network"

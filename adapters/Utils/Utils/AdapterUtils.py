@@ -43,7 +43,7 @@ def get_except_response(context, e):
     return Adapter_pb2.StartAutoMLResponse()
 
 
-def capture_process_output(process, start_time):
+def capture_process_output(process, start_time , use_error):
     """
     Read console log from subprocess, and send it after each \n to the controller
     ---
@@ -51,8 +51,12 @@ def capture_process_output(process, start_time):
     1. system process representing the AutoML process
     2. Process start time
     """
+    s = ""
     capture = ""
-    s = process.stdout.read(1)
+    if(use_error == False):
+        s = process.stdout.read(1)
+    else:
+        s = process.stderr.read(1)
     capture += s
     # Run until no more output is produced by the subprocess
     while len(s) > 0:
@@ -69,6 +73,7 @@ def capture_process_output(process, start_time):
             process_update.library = ""
             process_update.model = ""
             yield process_update
+
             sys.stdout.write(capture)
             sys.stdout.flush()
             capture = ""

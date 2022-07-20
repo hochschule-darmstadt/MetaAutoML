@@ -125,6 +125,8 @@ def GetMetaInformations(config_json):
     shutil.rmtree(working_dir)
     return library, model
 
+
+
 class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
     """
     AutoML Adapter Service implementation.
@@ -145,7 +147,7 @@ class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
                 json.dump(config_json, f)
 
             process = start_automl_process()
-            yield from capture_process_output(process, start_time)
+            yield from capture_process_output(process, start_time, True)
             generate_script(config_json)
             output_json = zip_script(config_json["session_id"])
 
