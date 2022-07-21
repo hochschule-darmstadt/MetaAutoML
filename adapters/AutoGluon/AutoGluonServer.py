@@ -5,6 +5,7 @@ import shutil
 
 from autogluon.tabular import TabularPredictor
 from autogluon.vision import ImagePredictor, ImageDataset
+from concurrent import futures
 
 import Adapter_pb2
 import Adapter_pb2_grpc

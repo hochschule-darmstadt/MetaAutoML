@@ -181,6 +181,10 @@ class DataStorage:
         with open(filename_dest, 'wb') as outfp:
             outfp.write(content)
 
+        #unpack zip file
+        if type == ":image":
+            shutil.unpack_archive(filename_dest, os.path.join(self.__storage_dir, username, dataset_id))
+
         #if type == ":image":
         #    shutil
 

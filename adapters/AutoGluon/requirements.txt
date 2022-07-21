@@ -1,4 +1,5 @@
 autogluon.tabular
+autogluon.vision
 grpcio
 dill
 jinja2

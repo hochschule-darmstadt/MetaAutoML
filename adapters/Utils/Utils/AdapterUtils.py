@@ -78,7 +78,11 @@ def capture_process_output(process, start_time , use_error):
             sys.stdout.flush()
             capture = ""
         capture += s
-        s = process.stdout.read(1)
+        if(use_error == False):
+            s = process.stdout.read(1)
+        else:
+            s = process.stderr.read(1)
+        capture += s
 
 
 def get_response(output_json, start_time, test_score, prediction_time, library, model):
@@ -129,9 +133,9 @@ def data_loader(config):
     test_data = None
 
     if config["task"] == ":tabular_classification":
-        train_data, test_data = read_tabular_dataset_training_data(config)
+        return read_tabular_dataset_training_data(config)
     elif config["task"] == ":tabular_regression":
-        train_data, test_data = read_tabular_dataset_training_data(config)
+        return read_tabular_dataset_training_data(config)
     elif config["task"] == ":image_classification":
         return read_image_dataset(config)
     elif config["task"] == ":image_regression":
@@ -237,9 +241,13 @@ def evaluate(config_json, config_path, dataloader):
     subprocess.call([python_env, os.path.join(session_path, "predict.py"), file_path, config_path])
     predict_time = time.time() - predict_start
 
-    train, test = dataloader(config_json)
+    if(config_json["task"] == ":tabular_classification" or config_json["task"] == ":tabular_regression"):
+        train, test = dataloader(config_json)
+        target = config_json["configuration"]["target"]["target"]
+    elif(config_json["task"] == ":image_classification" or config_json["task"] == ":image_regression"):
+        X_train, y_train, X_val, y_val, X_test, y_test = data_loader(config_json)
+
     predictions = pd.read_csv(os.path.join(session_path, "predictions.csv"))
-    target = config_json["configuration"]["target"]["target"]
 
     if config_json["task"] == ":tabular_classification":
         return accuracy_score(test[target], predictions["predicted"]), (predict_time * 1000) / test.shape[0]
@@ -249,11 +257,11 @@ def evaluate(config_json, config_path, dataloader):
                (predict_time * 1000) / test.shape[0]
 
     elif config_json["task"] == ":image_classification":
-        return accuracy_score(predictions["label"], predictions["predicted"]), (predict_time * 1000) / predictions.shape[0]
+        return accuracy_score(y_test, predictions["predicted"]), (predict_time * 1000) / y_test.shape[0]
 
     elif config_json["task"] == ":image_regression":
-        return mean_squared_error(test.y, predictions["predicted"], squared=False), \
-               (predict_time * 1000) / predictions.shape[0]
+        return mean_squared_error(y_test, predictions["predicted"], squared=False), \
+               (predict_time * 1000) / y_test.shape[0]
 
 
 def predict(data, config_json, config_path):
@@ -382,9 +390,6 @@ def read_image_dataset(json_configuration):
     ---
     Return image dataset
     """
-
-    local_dir_path = json_configuration["file_location"]
-
     # Treat file location like URL if it does not exist as dir. URL/Filename need to be specified.
     # Mainly used for testing purposes in the hard coded json for the job
     # Example: app-data/datasets vs https://storage.googleapis.com/download.tensorflow.org/example_images/flower_photos.tgz
@@ -399,35 +404,32 @@ def read_image_dataset(json_configuration):
 
         local_dir_path = os.path.dirname(local_file_path)
     """
-    session_dir = os.path.join(get_config_property("output-path"), json_configuration["session_id"])
-    data_dir = os.path.join(local_dir_path, json_configuration["file_name"])
-    shutil.unpack_archive(data_dir, session_dir)
-    files_train = []
-    dataset_folder_name = json_configuration["file_name"].replace(".zip", "")
-    for folder in os.listdir(os.path.join(session_dir, dataset_folder_name, "train")):
-        files_train.append(glob.glob(os.path.join(session_dir, dataset_folder_name, "train", folder, "*.jpeg")))
-
+    data_dir = os.path.join(json_configuration["file_location"], json_configuration["file_name"].replace(".zip", ""))
     train_df_list =[]
-    for i in range(len(files_train)):
-        df = pd.DataFrame()
-        df["name"] = [x for x in files_train[i]]
-        df['outcome'] = i
-        train_df_list.append(df)
-    
-    train_data = pd.concat(train_df_list, axis=0,ignore_index=True)
-    files_valid = []
-    dataset_folder_name = json_configuration["file_name"].replace(".zip", "")
-    for folder in os.listdir(os.path.join(session_dir, dataset_folder_name, "train")):
-        files_valid.append(glob.glob(os.path.join(session_dir, dataset_folder_name, "val", folder, "*.jpeg")))
-
     vali_df_list =[]
-    for i in range(len(files_valid)):
-        df = pd.DataFrame()
-        df["name"] = [x for x in files_valid[i]]
-        df['outcome'] = i
-        vali_df_list.append(df)
-    
+    test_df_list =[]
+
+    def read_image_dataset_folder(sub_folder_type):
+        files = []
+        df = []
+        for folder in os.listdir(os.path.join(data_dir, sub_folder_type)):
+            files.append(glob.glob(os.path.join(data_dir, sub_folder_type, folder, "*.jpeg")))
+
+        df_list =[]
+        for i in range(len(files)):
+            df = pd.DataFrame()
+            df["name"] = [x for x in files[i]]
+            df['outcome'] = i
+            df_list.append(df)
+        return df_list
+
+    train_df_list = read_image_dataset_folder("train")
+    vali_df_list = read_image_dataset_folder("val")
+    test_df_list = read_image_dataset_folder("test")
+
+    train_data = pd.concat(train_df_list, axis=0,ignore_index=True)
     vali_data = pd.concat(vali_df_list, axis=0,ignore_index=True)
+    test_data = pd.concat(test_df_list, axis=0,ignore_index=True)
 
     def img_preprocess(img):
         """
@@ -444,45 +446,8 @@ def read_image_dataset(json_configuration):
     y_train = train_data.outcome.values
     X_val = np.array([img_preprocess(p) for p in vali_data.name.values])
     y_val = vali_data.outcome.values
-    return X_train, y_train, X_val, y_val
-    """
-    if(json_configuration["test_configuration"]["dataset_structure"] == 1):
-        train_data = ak.image_dataset_from_directory(
-            data_dir,
-            validation_split=json_configuration["test_configuration"]["split_ratio"],
-            subset="training",
-            seed=123,
-            image_size=(json_configuration["test_configuration"]["image_height"], 
-                        json_configuration["test_configuration"]["image_width"]),
-            batch_size=json_configuration["test_configuration"]["batch_size"],
-        )
-
-        test_data = ak.image_dataset_from_directory(
-            data_dir,
-            validation_split=json_configuration["test_configuration"]["split_ratio"],
-            subset="validation",
-            seed=123,
-            image_size=(json_configuration["test_configuration"]["image_height"], 
-                        json_configuration["test_configuration"]["image_width"]),
-            batch_size=json_configuration["test_configuration"]["batch_size"],
-        )
-
-    else:
-        train_data = ak.image_dataset_from_directory(
-            os.path.join(data_dir, "train"),
-            image_size=(json_configuration["test_configuration"]["image_height"], 
-                        json_configuration["test_configuration"]["image_width"]),
-            batch_size = json_configuration["test_configuration"]["batch_size"]
-        )
-
-        test_data = ak.image_dataset_from_directory(
-            os.path.join(data_dir, "test"), 
-            shuffle=False,
-            image_size=(json_configuration["test_configuration"]["image_height"], 
-                        json_configuration["test_configuration"]["image_width"]),
-            batch_size=json_configuration["test_configuration"]["batch_size"]
-        )
-    return train_data, vali_data
-    """
-
+    X_test = np.array([img_preprocess(p) for p in test_data.name.values])
+    y_test = test_data.outcome.values
+    return X_train, y_train, X_val, y_val, X_test, y_test
+    
 #endregion

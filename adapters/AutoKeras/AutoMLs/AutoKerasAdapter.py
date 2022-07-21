@@ -59,14 +59,14 @@ class AutoKerasAdapter(AbstractAdapter):
                                          # metric=self._configuration['metric'],
                                          directory=self._result_path,
                                          seed=42)
-
+        
         reg.fit(x=X, y=y)
         export_model(reg, self._configuration["session_id"], 'model_keras.p')
 
     def __image_classification(self):
         """"Execute image classification task"""
 
-        X_train, y_train, X_val, y_val = data_loader(self._configuration)
+        X_train, y_train, X_val, y_val, X_test, y_test = data_loader(self._configuration)
 
         clf = ak.ImageClassifier(overwrite=True, 
                                 max_trials=self._configuration["runtime_constraints"]["max_iter"],

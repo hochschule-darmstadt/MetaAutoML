@@ -19,11 +19,12 @@
         <MatTextField @bind-Value="@_fileUpload.DatasetName" Label="Dataset Name"></MatTextField>
 
         <MatFileUpload OnChange="@FilesReady" Label="Choose File"></MatFileUpload>
-
+        
+        <MatProgressBar Indeterminate="true" Closed="@IsLoaderClosed"></MatProgressBar>
     </MatDialogContent>
     <MatDialogActions>
         <MatButton OnClick="@Close">Close</MatButton>
-        <MatButton OnClick="@Upload">Upload</MatButton>
+        <MatButton OnClick="@Upload" Disabled="@IsUploading">Upload</MatButton>
     </MatDialogActions>
 </MatDialog>
 
@@ -41,6 +42,9 @@
     public EventCallback OnUploadCompletedCallback { get; set; }
 
     private FileUploadRequestDto _fileUpload = new FileUploadRequestDto();
+
+    private bool IsUploading { get; set; } = false;
+    private bool IsLoaderClosed { get; set; } = true;
 
     private void OnDatasetSelectedChanged(string value)
     {
@@ -123,6 +127,9 @@
                 return;
             }
 
+            IsUploading = true;
+            IsLoaderClosed = false;
+            StateHasChanged();
             ApiResponseDto apiResponse = new ApiResponseDto();
             apiResponse = await apiClient.UploadDataset(_fileUpload);
             if (apiResponse.IsSuccessStatusCode)
@@ -134,6 +141,9 @@
             {
                 viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
             }
+            IsUploading = false;
+            IsLoaderClosed = true;
+            StateHasChanged();
             await Close();
         }
         catch (Exception ex)

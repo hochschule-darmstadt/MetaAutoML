@@ -6,8 +6,8 @@ from autogluon.tabular import TabularDataset, TabularPredictor
 from JsonUtil import get_config_property#
 from AbstractAdapter import AbstractAdapter
 from AdapterUtils import read_tabular_dataset_training_data, prepare_tabular_dataset, export_model
-from AutoGluonServer.py import data_loader
-import shutil#
+from AutoGluonServer import data_loader
+import shutil
 
 from autogluon.vision import ImagePredictor, ImageDataset
 
