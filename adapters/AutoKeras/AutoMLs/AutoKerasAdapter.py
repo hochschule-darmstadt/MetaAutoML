@@ -19,7 +19,7 @@ class AutoKerasAdapter(AbstractAdapter):
         1. Configuration JSON of type dictionary
         """
         super(AutoKerasAdapter, self).__init__(configuration)
-        self._result_path = os.path.join(get_config_property("output-path"), self._configuration["session_id"])
+        self._result_path = os.path.join(get_config_property("output-path"), self._configuration["training_id"])
 
     def start(self):
         """Execute the ML task"""
@@ -46,7 +46,7 @@ class AutoKerasAdapter(AbstractAdapter):
                                           seed=42)
                                           
         clf.fit(x=X, y=y)
-        export_model(clf, self._configuration["session_id"], 'model_keras.p')
+        export_model(clf, self._configuration["training_id"], 'model_keras.p')
 
     def __tabular_regression(self):
         """Execute the regression task"""
@@ -61,7 +61,7 @@ class AutoKerasAdapter(AbstractAdapter):
                                          seed=42)
         
         reg.fit(x=X, y=y)
-        export_model(reg, self._configuration["session_id"], 'model_keras.p')
+        export_model(reg, self._configuration["training_id"], 'model_keras.p')
 
     def __image_classification(self):
         """"Execute image classification task"""
@@ -77,7 +77,7 @@ class AutoKerasAdapter(AbstractAdapter):
         #clf.fit(train_data, epochs=self._configuration["runtime_constraints"]["epochs"])
         clf.fit(x = X_train, y = y_train, epochs=1)
 
-        export_model(clf, self._configuration["session_id"], 'model_keras.p')
+        export_model(clf, self._configuration["training_id"], 'model_keras.p')
 
     def __image_regression(self):
         """Execute image regression task"""
@@ -92,5 +92,5 @@ class AutoKerasAdapter(AbstractAdapter):
                                 
         reg.fit(x = X_train, y = y_train)
 
-        export_model(reg, self._configuration["session_id"], 'model_keras.p')
+        export_model(reg, self._configuration["training_id"], 'model_keras.p')
 

@@ -77,7 +77,6 @@ def capture_process_output(process, start_time , use_error):
             sys.stdout.write(capture)
             sys.stdout.flush()
             capture = ""
-        capture += s
         if(use_error == False):
             s = process.stdout.read(1)
         else:
@@ -144,14 +143,14 @@ def data_loader(config):
     return train_data, test_data
 
 
-def export_model(model, sessionId, file_name):
+def export_model(model, trainingId, file_name):
     """
     Export the generated ML model to disk
     ---
     Parameter:
     1. generate ML model
     """
-    with open(os.path.join(get_config_property('output-path'), sessionId, file_name), 'wb+') as file:
+    with open(os.path.join(get_config_property('output-path'), trainingId, file_name), 'wb+') as file:
         dill.dump(model, file)
 
 def start_automl_process():
@@ -174,12 +173,12 @@ def generate_script(config_json):
     generator = TemplateGenerator()
     generator.generate_script(config_json)
 
-def zip_script(session_id):
+def zip_script(training_id):
     """
     Zip the model and script from the current run
     ---
     Parameter
-    1. current run session id
+    1. current run training id
     ---
     Return json with zip information
     """
@@ -187,32 +186,32 @@ def zip_script(session_id):
 
     zip_file_name = get_config_property("export-zip-file-name")
     output_path = get_config_property("output-path")
-    session_path = os.path.join(output_path, str(session_id))
+    training_path = os.path.join(output_path, str(training_id))
     tmp_base_folder = os.path.join(output_path, 'tmp')
-    tmp_session_folder = os.path.join(tmp_base_folder, str(session_id))
+    tmp_training_folder = os.path.join(tmp_base_folder, str(training_id))
     shutil.copy(get_config_property("predict-time-sources-path"),
-                session_path)
+                training_path)
 
     #create tmp if not already existing
     if not os.path.isdir(tmp_base_folder):
         os.mkdir(tmp_base_folder)
 
-    shutil.make_archive(os.path.join(tmp_session_folder, zip_file_name),
+    shutil.make_archive(os.path.join(tmp_training_folder, zip_file_name),
                         'zip',
-                        session_path,
+                        training_path,
                         base_dir=None)
 
-    #copy zip from temp to session folder and delete tmp session zip
-    shutil.copyfile(os.path.join(tmp_session_folder,  zip_file_name + '.zip'), os.path.join(session_path, zip_file_name + '.zip'))
-    shutil.rmtree(tmp_session_folder)
+    #copy zip from temp to training folder and delete tmp training zip
+    shutil.copyfile(os.path.join(tmp_training_folder,  zip_file_name + '.zip'), os.path.join(training_path, zip_file_name + '.zip'))
+    shutil.rmtree(tmp_training_folder)
 
     if get_config_property("local_execution") == "YES":
         file_loc_on_controller = os.path.join(output_path,
-                                            str(session_id))
+                                            str(training_id))
     else:
         file_loc_on_controller = os.path.join(output_path,
                                             get_config_property('adapter-name'),
-                                            str(session_id))
+                                            str(training_id))
 
     return {
         'file_name': f'{zip_file_name}.zip',
@@ -232,13 +231,13 @@ def evaluate(config_json, config_path, dataloader):
     """
     file_path = os.path.join(config_json["file_location"], config_json["file_name"])
     output_path = get_config_property("output-path")
-    session_path = os.path.join(output_path, str(config_json["session_id"]))
+    training_path = os.path.join(output_path, str(config_json["training_id"]))
     # predict
-    os.chmod(os.path.join(session_path, "predict.py"), 0o777)
+    os.chmod(os.path.join(training_path, "predict.py"), 0o777)
     python_env = os.getenv("PYTHON_ENV", default="PYTHON_ENV_UNSET")
 
     predict_start = time.time()
-    subprocess.call([python_env, os.path.join(session_path, "predict.py"), file_path, config_path])
+    subprocess.call([python_env, os.path.join(training_path, "predict.py"), file_path, config_path])
     predict_time = time.time() - predict_start
 
     if(config_json["task"] == ":tabular_classification" or config_json["task"] == ":tabular_regression"):
@@ -247,7 +246,7 @@ def evaluate(config_json, config_path, dataloader):
     elif(config_json["task"] == ":image_classification" or config_json["task"] == ":image_regression"):
         X_train, y_train, X_val, y_val, X_test, y_test = data_loader(config_json)
 
-    predictions = pd.read_csv(os.path.join(session_path, "predictions.csv"))
+    predictions = pd.read_csv(os.path.join(training_path, "predictions.csv"))
 
     if config_json["task"] == ":tabular_classification":
         return accuracy_score(test[target], predictions["predicted"]), (predict_time * 1000) / test.shape[0]
@@ -278,7 +277,7 @@ def predict(data, config_json, config_path):
     working_dir = os.path.join(get_config_property("output-path"), "working_dir")
 
     shutil.unpack_archive(os.path.join(get_config_property("output-path"),
-                                       str(config_json["session_id"]),
+                                       str(config_json["training_id"]),
                                        get_config_property("export-zip-file-name") + ".zip"),
                           working_dir,
                           "zip")
@@ -301,15 +300,8 @@ def predict(data, config_json, config_path):
     predictions = pd.read_csv(os.path.join(working_dir, "predictions.csv"))
     shutil.rmtree(working_dir)
 
-    target = config_json["tabular_configuration"]["target"]["target"]
-    if config_json["task"] == 1 and target in test:
-        return accuracy_score(test[target], predictions["predicted"]), predict_time, \
-               predictions["predicted"].astype('string').tolist()
-    elif config_json["task"] == 2 and target in test:
-        return mean_squared_error(test[target], predictions["predicted"], squared=False), predict_time, \
-               predictions["predicted"].astype(np.string).tolist()
-    else:
-        return 0, predict_time, predictions["predicted"].astype('string').tolist()
+    
+    return 0, predict_time, predictions["predicted"].astype('string').tolist()
 
 #endregion
 

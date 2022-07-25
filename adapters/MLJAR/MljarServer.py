@@ -15,7 +15,7 @@ from JsonUtil import get_config_property
 
 
 def GetMetaInformation(config_json):
-    working_dir = os.path.join(get_config_property("output-path"), config_json["session_id"])
+    working_dir = os.path.join(get_config_property("output-path"), config_json["training_id"])
     leaderboard = pd.read_csv(os.path.join(working_dir, "Models", "leaderboard.csv"))
     #print(leaderboard[leaderboard["metric_value"].eq(leaderboard["metric_value"].min())])
     model = leaderboard[leaderboard["metric_value"].eq(leaderboard["metric_value"].min())]["model_type"].values[0]
@@ -45,7 +45,7 @@ class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
             process = start_automl_process()
             yield from capture_process_output(process, start_time, False)
             generate_script(config_json)
-            output_json = zip_script(config_json["session_id"])
+            output_json = zip_script(config_json["training_id"])
             library, model = GetMetaInformation(config_json)
             test_score, prediction_time = evaluate(config_json, job_file_location, data_loader)
             response = yield from get_response(output_json, start_time, test_score, prediction_time, library, model)

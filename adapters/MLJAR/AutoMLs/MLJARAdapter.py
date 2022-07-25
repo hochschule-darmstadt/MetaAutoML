@@ -12,7 +12,7 @@ class MLJARAdapter(AbstractAdapter):
 
     def __init__(self, configuration):
         super(MLJARAdapter, self).__init__(configuration)
-        #Create correct output folder for current session
+        #Create correct output folder for current training
         
 
     def start(self):
@@ -24,7 +24,7 @@ class MLJARAdapter(AbstractAdapter):
                 self.__tabular_regression()
 
     def __tabular_classification(self):
-        result_path = os.path.join(get_config_property("output-path"), self._configuration["session_id"], "Models")
+        result_path = os.path.join(get_config_property("output-path"), self._configuration["training_id"], "Models")
         self.df, test = data_loader(self._configuration)
         X, y = prepare_tabular_dataset(self.df, self._configuration)
         os.mkdir(result_path)

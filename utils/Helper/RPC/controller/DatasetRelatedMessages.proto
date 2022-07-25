@@ -22,7 +22,7 @@ message GetDatasetsResponse {
   }
 
 message Dataset {
-    string fileName = 1;
+    string name = 1;
     string type = 2;
     int32 columns = 3;
     int32 rows = 4;
@@ -37,7 +37,7 @@ message GetDatasetRequest {
   }
   
 message GetDatasetResponse {
-    repeated TableColumn columns = 1;
+    Dataset datasetInfos = 1;
   }
 
 message TableColumn {
@@ -47,13 +47,13 @@ message TableColumn {
     repeated string firstEntries = 4;
   }
   
-message GetTabularDatasetColumnNamesRequest {
+message GetTabularDatasetColumnRequest {
     string username = 1;
-    string datasetName = 2;
+    string datasetIdentifier = 2;
   }
   
-message GetTabularDatasetColumnNamesResponse {
-    repeated string columnNames = 1;
+message GetTabularDatasetColumnResponse {
+    repeated TableColumn columns = 1;
   }
 
 

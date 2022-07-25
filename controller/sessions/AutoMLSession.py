@@ -20,7 +20,7 @@ class AutoMLSession(object):
         self.__configuration: StartAutoMlProcessRequest = configuration
         self.automls = []
 
-    def add_automl_to_session(self, automl: IAutoMLManager):
+    def add_automl_to_training(self, automl: IAutoMLManager):
         """
         Add an AutoML to the current session
         ---
@@ -50,14 +50,14 @@ class AutoMLSession(object):
             if automl.name == request.auto_ml:
                 return automl.get_automl_model()
 
-    def get_session_status(self) -> GetSessionStatusResponse:
+    def get_session_status(self) -> GetTrainingResponse:
         """
         Get the session status
         ---
         Return the session status as Controller_pb2.GetSessionStatusResponse
         """
 
-        response = GetSessionStatusResponse(configuration=self.__configuration.configuration,
+        response = GetTrainingResponse(configuration=self.__configuration.configuration,
                                                             dataset_configuration=self.__configuration.dataset_configuration,
                                                            required_auto_mls=[automl.name for automl in self.automls],
                                                            runtime_constraints=self.__configuration.runtime_constraints)

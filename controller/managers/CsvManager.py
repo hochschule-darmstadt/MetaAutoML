@@ -31,7 +31,7 @@ class CsvManager:
             table_column = TableColumn()
             table_column.name = col
             numpy_datatype = dataset[col].dtype.name
-            datatype, convertible_types = CsvManager.__get_datatype(numpy_datatype, dataset[col])
+            datatype, convertible_types = CsvManager.__getDatatype(numpy_datatype, dataset[col])
 
             table_column.type = datatype
             for convertible_type in convertible_types:
@@ -45,7 +45,7 @@ class CsvManager:
         return response
 
     @staticmethod
-    def __get_datatype(numpy_datatype: np.dtype, column: pd.Series):
+    def __getDatatype(numpy_datatype: np.dtype, column: pd.Series):
         """
         Identify the np datatype and mark correct OMAML datatype
         ---
@@ -94,7 +94,7 @@ class CsvManager:
                                                     DataType.DATATYPE_BOOLEAN]
 
     @staticmethod
-    def read_column_names(path) -> GetTabularDatasetColumnNamesResponse:
+    def GetColumns(path) -> GetTabularDatasetColumnResponse:
         """
         Read only the column names of a dataset
         ---
@@ -103,10 +103,23 @@ class CsvManager:
         ---
         Return the column names as GetTabularDatasetColumnNamesResponse
         """
-        response = GetTabularDatasetColumnNamesResponse()
+        response = GetTabularDatasetColumnResponse()
         dataset = pd.read_csv(path)
+    
         for col in dataset.columns:
-            response.columnNames.append(col)
+            table_column = TableColumn()
+            table_column.name = col
+            numpy_datatype = dataset[col].dtype.name
+            datatype, convertible_types = CsvManager.__getDatatype(numpy_datatype, dataset[col])
+
+            table_column.type = datatype
+            for convertible_type in convertible_types:
+                table_column.convertible_types.append(convertible_type)
+
+            for item in dataset[col].head(FIRST_ROW_AMOUNT).tolist():
+                table_column.first_entries.append(str(item))
+
+            response.columns.append(table_column)
         return response
 
     @staticmethod

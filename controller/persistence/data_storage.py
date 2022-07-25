@@ -43,7 +43,7 @@ class DataStorage:
         self.__lock = Lock()
 
 
-    def lock(self):
+    def Lock(self):
         """
         Lock access to the data storage to a single thread.
         ---
@@ -69,11 +69,11 @@ class DataStorage:
         """
         return self.__mongo.CheckIfUserExists(username)
 
-    def insert_session(self, username: str, session: 'dict[str, object]') -> str:
+    def InsertTraining(self, username: str, training: 'dict[str, object]') -> str:
         """
-        Insert single session into the database.
+        Insert single training into the database.
         ---
-        >>> id: str = ds.insert_session("automl_user", {
+        >>> id: str = ds.InsertTraining("automl_user", {
                 "dataset": ...,
                 ...
             })
@@ -81,69 +81,69 @@ class DataStorage:
         ---
         Parameter
         1. username: name of the user
-        2. session: session dict to be inserted
+        2. training: training dict to be inserted
         ---
-        Returns session id
+        Returns training id
         """
-        return self.__mongo.insert_session(username, session)
+        return self.__mongo.InsertTraining(username, training)
 
 
-    def get_session(self, username: str, id: str) -> 'dict[str, object]':
+    def GetTraining(self, username: str, id: str) -> 'dict[str, object]':
         """
-        Get single session by id. 
+        Get single training by id. 
         ---
-        >>> sess = data_storage.get_session("automl_user", sess_id)
+        >>> sess = data_storage.GetTraining("automl_user", sess_id)
         >>> if sess is None:
-                raise Exception("cannot find session")
+                raise Exception("cannot find training")
         
         ---
         Parameter
         1. username: name of the user
-        2. id: id of session
+        2. id: id of training
         ---
-        Returns session as `dict` or `None` if not found.
+        Returns training as `dict` or `None` if not found.
         """
-        return self.__mongo.get_session(username, id)
+        return self.__mongo.GetTraining(username, id)
 
-    def get_sessions(self, username: str) -> 'list[dict[str, object]]':
+    def GetTrainings(self, username: str) -> 'list[dict[str, object]]':
         """
-        Get all sessions for a user. 
+        Get all trainings for a user. 
         ---
-        >>> for sess in data_storage.get_sessions("automl_user"):
+        >>> for sess in data_storage.GetTrainings("automl_user"):
                 print(sess["dataset"])
 
         ---
         Parameter
         1. username: name of the user
         ---
-        Returns sessions as `list` of dictionaries.
+        Returns trainings as `list` of dictionaries.
         """
-        return [sess for sess in self.__mongo.get_sessions(username)]
+        return [sess for sess in self.__mongo.GetTrainings(username)]
 
-    def update_session(self, username: str, id: str, new_values: 'dict[str, object]') -> bool:
+    def UpdateTraining(self, username: str, id: str, new_values: 'dict[str, object]') -> bool:
         """
-        Update single session with new values. 
+        Update single training with new values. 
         ---
-        >>> success: bool = data_storage.update_session("automl_user", sess_id, {
+        >>> success: bool = data_storage.UpdateTraining("automl_user", sess_id, {
                 "status": "completed"
             })
 
         ---
         Parameter
         1. username: name of the user
-        2. id: id of session
+        2. id: id of training
         3. new_values: dict with new values
         ---
         Returns `True` if successfully updated, otherwise `False`.
         """
-        return self.__mongo.update_session(username, id, new_values)
+        return self.__mongo.UpdateTraining(username, id, new_values)
 
 
-    def save_dataset(self, username: str, fileName: str, content: bytes, type: str, name: str) -> str:
+    def SaveDataset(self, username: str, fileName: str, content: bytes, type: str, name: str) -> str:
         """
         Store dataset contents on disk and insert entry to database.
         ---
-        >>> id: str = ds.save_dataset("automl_user", "my_dataset", ...)
+        >>> id: str = ds.SaveDataset("automl_user", "my_dataset", ...)
 
         ---
         Parameter
@@ -166,10 +166,11 @@ class DataStorage:
         database_content = {
             "name": name,
             "type": type,
-            "analysis": analysisResult
+            "analysis": analysisResult,
+            "models": []
         }
         
-        dataset_id = self.__mongo.insert_dataset(username, database_content)
+        dataset_id = self.__mongo.InsertDataset(username, database_content)
 
         filename_dest = os.path.join(self.__storage_dir, username, dataset_id, fileName)
         if os.getenv("MONGO_DB_DEBUG") != "YES":
@@ -189,20 +190,38 @@ class DataStorage:
         #    shutil
 
         # fill in missing values
-        success = self.__mongo.update_dataset(username, dataset_id, {
+        success = self.__mongo.UpdateDataset(username, dataset_id, {
             "path": filename_dest,
             "mtime": os.path.getmtime(filename_dest)
         })
-        assert success, f"cannot update session with id {dataset_id}"
+        assert success, f"cannot update dataset with id {dataset_id}"
 
         return dataset_id
 
+    def UpdateDataset(self, username: str, id: str, new_values: 'dict[str, object]') -> bool:
+        """
+        Update single dataset with new values. 
+        ---
+        >>> success: bool = data_storage.UpdateDataset("automl_user", dataset_id, {
+                "status": "completed"
+            })
 
-    def find_dataset(self, username: str, identifier: str) -> 'tuple[bool, dict[str, object]]':
+        ---
+        Parameter
+        1. username: name of the user
+        2. id: dataset id
+        3. new_values: dict with new values
+        ---
+        Returns `True` if successfully updated, otherwise `False`.
+        """
+        return self.__mongo.UpdateDataset(username, id, new_values)
+
+
+    def FindDataset(self, username: str, identifier: str) -> 'tuple[bool, dict[str, object]]':
         """
         Try to find the _first_ dataset with this name. 
         ---
-        >>> found, dataset = ds.find_dataset("automl_user", "my_dataset")
+        >>> found, dataset = ds.FindDataset("automl_user", "my_dataset")
         >>> if not found:
                 print("We have a problem")
 
@@ -213,18 +232,18 @@ class DataStorage:
         ---
         Returns either `(True, Dataset)` or `(False, None)`.
         """
-        result = self.__mongo.find_dataset(username, {
+        result = self.__mongo.FindDataset(username, {
             "_id": ObjectId(identifier)
         })
 
         return result is not None, result
 
 
-    def get_datasets(self, username: str) -> 'list[dict[str, object]]':
+    def GetDatasets(self, username: str) -> 'list[dict[str, object]]':
         """
         Get all datasets for a user. 
         ---
-        >>> for dataset in data_storage.get_datasets("automl_user"):
+        >>> for dataset in data_storage.GetDatasets("automl_user"):
                 print(dataset["path"])
 
         ---
@@ -233,16 +252,16 @@ class DataStorage:
         ---
         Returns `list` of all datasets.
         """
-        return [ds for ds in self.__mongo.get_datasets(username)]
+        return [ds for ds in self.__mongo.GetDatasets(username)]
 
 
-    def insert_model(self, username: str, model: 'dict[str, object]') -> str:
+    def InsertModel(self, username: str, model: 'dict[str, object]') -> str:
         """
         Insert single model into the database.
         ---
-        >>> mdl_id: str = data_storage.insert_model("automl_user", {
+        >>> mdl_id: str = data_storage.InsertModel("automl_user", {
                 "automl_name": "MLJAR",
-                "session_id": session_id,
+                "training_id": training_id,
                 ...
             })
 
@@ -253,13 +272,13 @@ class DataStorage:
         ---
         Returns id of new model.
         """
-        return self.__mongo.insert_model(username, model)
+        return self.__mongo.InsertModel(username, model)
 
-    def update_model(self, username: str, id: str, new_values: 'dict[str, object]') -> bool:
+    def UpdateModel(self, username: str, id: str, new_values: 'dict[str, object]') -> bool:
         """
         Update single model with new values. 
         ---
-        >>> success: bool = data_storage.update_models("automl_user", model_id, {
+        >>> success: bool = data_storage.UpdateModel("automl_user", model_id, {
                 "status": "completed"
             })
 
@@ -271,28 +290,47 @@ class DataStorage:
         ---
         Returns `True` if successfully updated, otherwise `False`.
         """
-        return self.__mongo.update_model(username, id, new_values)
+        return self.__mongo.UpdateModel(username, id, new_values)
 
-    def get_models(self, username: str, session_id: str = None) -> 'list[dict[str, object]]':
+    def GetModels(self, username: str, training_id: str = None, dataset_id: str = None) -> 'list[dict[str, object]]':
         """
-        Get all models, or all models by session id
+        Get all models, or all models by training id or dataset id
         ---
-        >>> models = ds.get_models("automl_user", "session_id")
+        >>> models = ds.GetModels("automl_user", "training_id")
 
         ---
         Parameter
         1. username: name of the user
-        2. session_id: optinal session id
+        2. training_id: optinal training id
+        2. dataset_id: optinal dataset id
         ---
         Returns a models list
         """
-        if session_id == None:
-            filter = None
+        if training_id != None:
+            filter = { "training_id": training_id }
+        elif dataset_id != None:
+            filter = { "dataset_id": dataset_id }
         else:
-            filter = { "session_id": session_id }
-        result = self.__mongo.get_models(username, filter)
+            filter = None
+        result = self.__mongo.GetModels(username, filter)
 
         return [ds for ds in result]
+
+    def GetModel(self, username: str, model_id: str = None) -> 'dict[str, object]':
+        """
+        Get models by model id
+        ---
+        >>> models = ds.GetModel("automl_user", "model_id")
+
+        ---
+        Parameter
+        1. username: name of the user
+        2. model_id: optinal model id
+        ---
+        Returns a models list
+        """
+        return self.__mongo.GetModel(username, model_id)
+
 
     class __DbLock():
         """

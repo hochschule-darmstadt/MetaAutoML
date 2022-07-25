@@ -26,7 +26,7 @@ class AutoSklearnAdapter(AbstractAdapter):
         if self._configuration["metric"] == "":
             # handle empty metric field, None is the default metric parameter for AutoSklearn
             self._configuration["metric"] = None
-        self._result_path = os.path.join(get_config_property("output-path"), self._configuration["session_id"])
+        self._result_path = os.path.join(get_config_property("output-path"), self._configuration["training_id"])
         return
 
     def start(self):
@@ -57,7 +57,7 @@ class AutoSklearnAdapter(AbstractAdapter):
         auto_cls = autosklearn.classification.AutoSklearnClassifier(**automl_settings)
         auto_cls.fit(X, y)
 
-        export_model(auto_cls, self._configuration["session_id"], "model_sklearn.p")
+        export_model(auto_cls, self._configuration["training_id"], "model_sklearn.p")
 
     def __tabular_regression(self):
         """
@@ -70,7 +70,7 @@ class AutoSklearnAdapter(AbstractAdapter):
         auto_reg = autosklearn.regression.AutoSklearnRegressor(**automl_settings)
         auto_reg.fit(X, y, )
 
-        export_model(auto_reg, self._configuration["session_id"], "model_sklearn.p")
+        export_model(auto_reg, self._configuration["training_id"], "model_sklearn.p")
 
     def __get_logging_config(self) -> dict:
         return {

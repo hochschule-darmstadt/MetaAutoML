@@ -80,26 +80,20 @@
         await IsOpenChanged.InvokeAsync(IsOpen);
     }
 
-    private async Task FilesReady(IMatFileUploadEntry[] files)
+    private async Task FilesReady(InputFileChangeEventArgs e)
     {
         try
         {
-            foreach (var file in files)
-            {
-                //Only one file can always be read
-                using (var stream = new MemoryStream())
-                {
-                    await file.WriteToStreamAsync(stream);
-                    stream.Seek(0, SeekOrigin.Begin);
-                    using (var reader = new BinaryReader(stream))
-                    {
-                        long x = stream.Length;
-                        var content = reader.ReadBytes((int)stream.Length);
-                        _fileUpload.FileName = file.Name;
-                        _fileUpload.Content = content;
-                    }
-                }
-            }
+            var file = e.File;
+            using var stream = e.File.OpenReadStream((512000 * 2 * 400));
+            using var ms = new MemoryStream();
+            await stream.CopyToAsync(ms);
+            var content = ms.ToArray();
+
+            _fileUpload.FileName = file.Name;
+            _fileUpload.DatasetName = file.Name;
+            _fileUpload.Content = content;
+
 
         }
         catch (Exception ex)

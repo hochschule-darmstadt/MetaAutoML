@@ -19,7 +19,7 @@ class FLAMLAdapter(AbstractAdapter):
         1. Configuration JSON of type dictionary
         """
         super(FLAMLAdapter, self).__init__(configuration)
-        self._result_path = os.path.join(get_config_property("output-path"), self._configuration["session_id"])
+        self._result_path = os.path.join(get_config_property("output-path"), self._configuration["training_id"])
         self._log_file_path = os.path.join(self._result_path, "flaml.log")
 
     def start(self):
@@ -54,7 +54,7 @@ class FLAMLAdapter(AbstractAdapter):
         })
 
         automl.fit(X_train=X, y_train=y, **automl_settings)
-        export_model(automl, self._configuration["session_id"], 'model_flaml.p')
+        export_model(automl, self._configuration["training_id"], 'model_flaml.p')
 
     def __tabular_regression(self):
         """
@@ -71,4 +71,4 @@ class FLAMLAdapter(AbstractAdapter):
         })
 
         automl.fit(X_train=X, y_train=y, **automl_settings)
-        export_model(automl, self._configuration["session_id"], 'model_flaml.p')
+        export_model(automl, self._configuration["training_id"], 'model_flaml.p')

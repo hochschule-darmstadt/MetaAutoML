@@ -1,6 +1,6 @@
 {
     "task": 4,
-    "session_id": "1234",
+    "training_id": "1234",
     "runtime_constraints": {
         "runtime_limit": 300,
         "max_iter": 1,

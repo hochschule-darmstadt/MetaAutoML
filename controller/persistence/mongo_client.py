@@ -62,7 +62,7 @@ class Database:
         else:
             return False
 
-    def insert_dataset(self, username: str, dataset: 'dict[str, str]') -> str:
+    def InsertDataset(self, username: str, dataset: 'dict[str, str]') -> str:
         """
         Insert dataset
         ---
@@ -76,7 +76,7 @@ class Database:
         result = datasets.insert_one(dataset)
         return str(result.inserted_id)
 
-    def get_datasets(self, username: str) -> 'list[dict[str, object]]':
+    def GetDatasets(self, username: str) -> 'list[dict[str, object]]':
         """
         Get a dataset byy it"s name
         ---
@@ -89,7 +89,7 @@ class Database:
         datasets: Collection = self.__mongo[username]["datasets"]
         return datasets.find()
 
-    def find_dataset(self, username: str, filter: 'dict[str, object]') -> 'dict[str, object]':
+    def FindDataset(self, username: str, filter: 'dict[str, object]') -> 'dict[str, object]':
         """
         Get a dataset by it's name
         ---
@@ -102,7 +102,7 @@ class Database:
         datasets: Collection = self.__mongo[username]["datasets"]
         return datasets.find_one(filter)
 
-    def update_dataset(self, username: str, id: str, new_values: 'dict[str, object]') -> bool:
+    def UpdateDataset(self, username: str, id: str, new_values: 'dict[str, object]') -> bool:
         """
         Update a dataset record
         ---
@@ -118,62 +118,62 @@ class Database:
         return result.modified_count >= 1
 
 
-    def insert_session(self, username: str, session_config: 'dict[str, str]'):
+    def InsertTraining(self, username: str, training_config: 'dict[str, str]'):
         """
-        Insert session
+        Insert training
         ---
         Parameter
         1. username
-        2. session as dict
+        2. training as dict
         ---
-        Returns session id
+        Returns training id
         """
-        sessions: Collection = self.__mongo[username]["sessions"]
-        result = sessions.insert_one(session_config)
+        trainings: Collection = self.__mongo[username]["trainings"]
+        result = trainings.insert_one(training_config)
         return str(result.inserted_id)
 
-    def get_session(self, username: str, id: str) -> 'dict[str, object]':
+    def GetTraining(self, username: str, id: str) -> 'dict[str, object]':
         """
-        Get a session by it's id
+        Get a training by it's id
         ---
         Parameter
         1. username
-        2. session id
+        2. training id
         ---
-        Returns session as dict
+        Returns training as dict
         """
-        sessions: Collection = self.__mongo[username]["sessions"]
-        return sessions.find_one({ "_id": ObjectId(id) })
+        trainings: Collection = self.__mongo[username]["trainings"]
+        return trainings.find_one({ "_id": ObjectId(id) })
 
-    def get_sessions(self, username: str) -> 'list[dict[str, object]]':
+    def GetTrainings(self, username: str) -> 'list[dict[str, object]]':
         """
-        Get all sessions from a user
+        Get all trainings from a user
         ---
         Parameter
         1. username
         ---
-        Returns sessions as list of dicts
+        Returns trainings as list of dicts
         """
-        sessions: Collection = self.__mongo[username]["sessions"]
-        return sessions.find()
+        trainings: Collection = self.__mongo[username]["trainings"]
+        return trainings.find()
 
-    def update_session(self, username: str, id: str, new_values: 'dict[str, str]') -> bool:
+    def UpdateTraining(self, username: str, id: str, new_values: 'dict[str, str]') -> bool:
         """
-        Update a session record
+        Update a training record
         ---
         Parameter
         1. username
-        2. session id
+        2. training id
         3. dictionary of new values
         ---
         Returns `True` if a record was updated otherwise `False`
         """
-        sessions: Collection = self.__mongo[username]["sessions"]
-        result = sessions.update_one({ "_id": ObjectId(id) }, { "$set": new_values })
+        trainings: Collection = self.__mongo[username]["trainings"]
+        result = trainings.update_one({ "_id": ObjectId(id) }, { "$set": new_values })
         return result.modified_count >= 1
 
 
-    def insert_model(self, username: str, model_details: 'dict[str, str]') -> str:
+    def InsertModel(self, username: str, model_details: 'dict[str, str]') -> str:
         """
         Insert model
         ---
@@ -187,13 +187,13 @@ class Database:
         result = models.insert_one(model_details)
         return str(result.inserted_id)
 
-    def update_model(self, username: str, id: str, new_values: 'dict[str, str]') -> bool:
+    def UpdateModel(self, username: str, id: str, new_values: 'dict[str, str]') -> bool:
         """
         Update a model record
         ---
         Parameter
         1. username
-        2. session id
+        2. training id
         3. dictionary of new values
         ---
         Returns `True` if a record was updated otherwise `False`
@@ -202,20 +202,34 @@ class Database:
         result = models.update_one({ "_id": ObjectId(id) }, { "$set": new_values })
         return result.modified_count >= 1
 
-    def get_models(self, username: str, session_id: str=None) -> 'list[dict[str, object]]':
+    def GetModels(self, username: str, filter: str=None) -> 'list[dict[str, object]]':
         """
         Get all models from a user
         ---
         Parameter
         1. username
+        2. optional filter
         ---
         Returns models as list of dicts
         """
         models: Collection = self.__mongo[username]["models"]
-        return models.find(session_id)
+        return models.find(filter)
+
+    def GetModel(self, username: str, id: str) -> 'dict[str, object]':
+        """
+        Get a model by it's id
+        ---
+        Parameter
+        1. username
+        2. model id
+        ---
+        Returns training as dict
+        """
+        models: Collection = self.__mongo[username]["models"]
+        return models.find_one({ "_id": ObjectId(id) })
 
 
-    def drop_database(self, username: str):
+    def DropDatabase(self, username: str):
         """
         Delete all datasets sessions and models for a user
         ---

@@ -53,7 +53,7 @@ class AutoPytorchAdapter(AbstractAdapter):
         elif self._configuration["metric"] == "" and self._configuration["task"] == ":tabular_regression":
             # handle empty metric field, 'r2' should be the default metric parameter for AutoPytorch regression
             self._configuration["metric"] = 'r2'
-        self._result_path = os.path.join(get_config_property("output-path"), self._configuration["session_id"])
+        self._result_path = os.path.join(get_config_property("output-path"), self._configuration["training_id"])
 
     def __tabular_classification(self):
         """
@@ -79,7 +79,7 @@ class AutoPytorchAdapter(AbstractAdapter):
                 max_budget=self._iter_limit
             )
 
-        export_model(auto_cls, self._configuration["session_id"], "model_pytorch.p")
+        export_model(auto_cls, self._configuration["training_id"], "model_pytorch.p")
 
     def __tabular_regression(self):
         """
@@ -111,7 +111,7 @@ class AutoPytorchAdapter(AbstractAdapter):
                 max_budget=self._iter_limit
             )
 
-        export_model(auto_reg, self._configuration["session_id"], "model_pytorch.p")
+        export_model(auto_reg, self._configuration["training_id"], "model_pytorch.p")
 
     def start(self):
         """

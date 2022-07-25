@@ -7,7 +7,7 @@ import "Enumerations.proto";
 
 import "DatasetRelatedMessages.proto";
 import "ModelRelatedMessages.proto";
-import "SessionRelatedMessages.proto";
+import "TrainingRelatedMessages.proto";
 import "TestingRelatedMessages.proto";
 import "UserRelatedMessages.proto";
 import "WizzardMessages.proto";
@@ -18,7 +18,7 @@ service ControllerService {
   /*return the OMA-ML user name for a newly created frontend user, the result ID needs to be linked to the new user in the frontend user storage*/
   rpc CreateNewUser(CreateNewUserRequest) returns (CreateNewUserResponse) {}
 
-  /*return the generated model as a .zip for one AutoML by its session id*/
+  /*return the generated model as a .zip for one AutoML by its Training id*/
   rpc GetAutoMlModel(GetAutoMlModelRequest) returns (GetAutoMlModelResponse) {}
   /*return a list of AutoML solutions compatible with the current configuration*/
   rpc GetCompatibleAutoMlSolutions(GetCompatibleAutoMlSolutionsRequest) returns (GetCompatibleAutoMlSolutionsResponse) {}
@@ -35,16 +35,22 @@ service ControllerService {
     firstEntries: the first couple of rows of the dataset
    */
   rpc GetDataset(GetDatasetRequest) returns (GetDatasetResponse) {}
-  /*return a list of all sessions the controller has knowledge of*/
-  rpc GetSessions(GetSessionsRequest) returns (GetSessionsResponse) {}
-  /*return the status of a specific session. The result is a session status and a list of the automl output and its status*/
-  rpc GetSessionStatus(GetSessionStatusRequest) returns (GetSessionStatusResponse) {}
+  /*return a list of all Trainings the controller has knowledge of*/
+  rpc GetTrainings(GetTrainingsRequest) returns (GetTrainingsResponse) {}
+  /*return the status of a specific Training. The result is a Training status and a list of the automl output and its status*/
+  rpc GetTraining(GetTrainingRequest) returns (GetTrainingResponse) {}
+  /*return all existing trainings */
+  rpc GetAllTrainings(GetAllTrainingsRequest) returns (GetAllTrainingsResponse) {}
   /*return all supported machine learning libraries for a specific task (by searching supported AutoML)*/
   rpc GetSupportedMlLibraries(GetSupportedMlLibrariesRequest) returns (GetSupportedMlLibrariesResponse) {}
   /*return all the column names of a tabular dataset*/
-  rpc GetTabularDatasetColumnNames(GetTabularDatasetColumnNamesRequest) returns (GetTabularDatasetColumnNamesResponse) {}
+  rpc GetTabularDatasetColumn(GetTabularDatasetColumnRequest) returns (GetTabularDatasetColumnResponse) {}
   /*return all supported AutoML tasks*/
   rpc GetDatasetCompatibleTasks(GetDatasetCompatibleTasksRequest) returns (GetDatasetCompatibleTasksResponse) {}
+  /*return all models for a given dataset, with option to only return top 3*/
+  rpc GetModels(GetModelsRequest) returns (GetModelsResponse) {}
+  /*return model for a given id*/
+  rpc GetModel(GetModelRequest) returns (GetModelResponse) {}
   /*return all information fields of an object*/
   rpc GetObjectsInformation(GetObjectsInformationRequest) returns (GetObjectsInformationResponse) {}
   /*upload a new dataset file as bytes to the controller repository*/

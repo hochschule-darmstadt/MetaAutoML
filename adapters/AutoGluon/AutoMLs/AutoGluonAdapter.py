@@ -44,11 +44,11 @@ class AutoGluonAdapter(AbstractAdapter):
             self._max_iter = self._configuration["runtime_constraints"]["max_iter"] = 3
 
         # Erstelle den pfad der später verwendet wird.
-        os.mkdir(os.path.join(get_config_property("output-path"), self._configuration["session_id"]))
+        os.mkdir(os.path.join(get_config_property("output-path"), self._configuration["training_id"]))
 
         """
 
-        self._result_path = os.path.join(get_config_property("output-path"), configuration["session_id"], "model_gluon.gluon")
+        self._result_path = os.path.join(get_config_property("output-path"), configuration["training_id"], "model_gluon.gluon")
         # this only sets the result path tbh.
 
     def start(self):

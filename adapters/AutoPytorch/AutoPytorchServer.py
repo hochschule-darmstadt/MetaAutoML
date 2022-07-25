@@ -16,7 +16,7 @@ from JsonUtil import get_config_property
 def GetMetInformation(config_json):
     working_dir = os.path.join(get_config_property("output-path"), "working_dir")
     shutil.unpack_archive(os.path.join(get_config_property("output-path"),
-                                       str(config_json["session_id"]),
+                                       str(config_json["training_id"]),
                                        get_config_property("export-zip-file-name") + ".zip"),
                           working_dir,
                           "zip")
@@ -62,7 +62,7 @@ class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
             process = start_automl_process()
             yield from capture_process_output(process, start_time, False)
             generate_script(config_json)
-            output_json = zip_script(config_json["session_id"])
+            output_json = zip_script(config_json["training_id"])
             library, model = GetMetInformation(config_json)
             test_score, prediction_time = evaluate(config_json, job_file_location, data_loader)
 

@@ -38,7 +38,7 @@ class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
             process = start_automl_process()
             yield from capture_process_output(process, start_time)
             generate_script(config_json)
-            output_json = zip_script(config_json["session_id"])
+            output_json = zip_script(config_json["training_id"])
             library = "scikit-learn"
             model = "d3m"
             test_score, prediction_time = evaluate(config_json, job_file_location, data_loader)

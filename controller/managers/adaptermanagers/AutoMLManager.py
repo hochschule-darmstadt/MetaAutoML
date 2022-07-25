@@ -1,10 +1,11 @@
+from cgi import test
 import json
 import os
 import grpc
 import zope.interface
 import Adapter_pb2
 import Adapter_pb2_grpc
-
+import io
 from IAutoMLManager import IAutoMLManager
 from threading import *
 from abc import ABC
@@ -17,7 +18,7 @@ class AutoMLManager(ABC, Thread):
     Base implementation of the  AutoML functionality
     """
 
-    def __init__(self, configuration: "StartAutoMlProcessRequest", folder_location, automl_service_host, automl_service_port, session_id, username, data_storage, callback=None):
+    def __init__(self, configuration: "StartAutoMlProcessRequest", dataset_id, folder_location, automl_service_host, automl_service_port, training_id, username, data_storage, callback=None):
         """
         Init a new instance of the abstract class AutoMLManager
         ---
@@ -28,7 +29,7 @@ class AutoMLManager(ABC, Thread):
         super(AutoMLManager, self).__init__()
         self._configuration = configuration
         self.__file_dest = folder_location
-        self.__session_id = session_id
+        self.__training_id = training_id
         self.__result_json = {}
         self.__is_completed = False
         self.__status_messages = []
@@ -39,6 +40,7 @@ class AutoMLManager(ABC, Thread):
         self.__model = ""
         self.__library = ""
         self.__last_status = "Busy"
+        self.__dataset_id = dataset_id
 
         self.__AUTOML_SERVICE_HOST = automl_service_host
         self.__AUTOML_SERVICE_PORT = automl_service_port
@@ -48,7 +50,7 @@ class AutoMLManager(ABC, Thread):
         self.__username = username
         self.__data_storage = data_storage
 
-    def get_automl_model(self) -> GetSessionStatusResponse:
+    def get_automl_model(self) -> GetTrainingResponse:
         """
         Get the generated AutoML model
         ---
@@ -85,36 +87,52 @@ class AutoMLManager(ABC, Thread):
 
             self._run_server_until_connection_closed(stub, request)
 
-    def testSolution(self, test_data, session_id):
+    def testSolution(self, test_data, training_id):
         """
         Init a new instance of the specific AutoMLManager
         ---
         Parameter
         1. configuration dictionary
         2. folder location of the dataset
-        3. session id to use
+        3. training id to use
         ---
         Return a new specific AutoML Manager
         """
 
-        print(f"connecting to {self.name}: {self.__AUTOML_SERVICE_HOST}:{self.__AUTOML_SERVICE_PORT}")
+        print(f"connecting {self.__AUTOML_SERVICE_HOST}:{self.__AUTOML_SERVICE_PORT}")
 
         with grpc.insecure_channel(f"{self.__AUTOML_SERVICE_HOST}:{self.__AUTOML_SERVICE_PORT}") as channel:  # Connect to Adapter
             stub = Adapter_pb2_grpc.AdapterServiceStub(channel)  # Create Interface Stub
 
             request = Adapter_pb2.TestAdapterRequest()  # Request Object
-            process_json = self._generate_process_json()
-            process_json["session_id"] = session_id
+            process_json = self._generate_test_json()
+            process_json["training_id"] = training_id
             process_json["test_configuration"]["method"] = 1
             process_json["test_configuration"]["split_ratio"] = 0
             request.processJson = json.dumps(process_json)
-            request.testData = test_data
+            request.testData = test_data.decode()
 
             try:
                 return stub.TestAdapter(request)
 
             except grpc.RpcError as rpc_error:
                 print(f"Received unknown RPC error: code={rpc_error.code()} message={rpc_error.details()}")
+
+    def _generate_test_json(self,):
+        """
+        Generate AutoML configuration JSON
+        ---
+        Return configuration JSON
+        """
+        return {
+            "task": self._configuration["task"],
+            "configuration": self._configuration["configuration"],
+            "dataset_configuration": self._configuration["dataset_configuration"],
+            "runtime_constraints": self._configuration["runtime_constraints"],
+            "test_configuration": self._configuration["test_configuration"],
+            "file_configuration": self._configuration["file_configuration"],
+            "metric": self._configuration["metric"]
+        }
 
     def _generate_process_json(self,):
         """
@@ -131,7 +149,7 @@ class AutoMLManager(ABC, Thread):
         test_config.update({"random_state": 42})
 
         return {
-            "session_id": self.__session_id,
+            "training_id": self.__training_id,
             "file_name": self._configuration.dataset,
             "file_location": self.__file_dest,
             "task": self._configuration.task,
@@ -155,7 +173,8 @@ class AutoMLManager(ABC, Thread):
             #create new model
             model_details = {
                 "automl_name": self.name,
-                "session_id": self.__session_id,
+                "training_id": self.__training_id,
+                "dataset_id": self.__dataset_id,
                 "path": "",
                 "test_score": 0,
                 "validation_score": 0,
@@ -166,7 +185,12 @@ class AutoMLManager(ABC, Thread):
                 "status_messages": [],
                 "prediction_time": 0
                 }
-            _mdl_id = self.__data_storage.insert_model(self.__username, model_details)
+            _mdl_id = self.__data_storage.InsertModel(self.__username, model_details)
+
+            # Append model_id to dataset
+            found, dataset = self.__data_storage.FindDataset(self.__username, self.__dataset_id)
+            self.__data_storage.UpdateDataset(self.__username, self.__dataset_id, { "models": dataset["models"] + [_mdl_id] })
+
             for response in stub.StartAutoML(dataset_to_send):
                 # Send request WATCH OUT THIS IS A LOOP REQUEST Check out for normal request
                 # https://grpc.io/docs/languages/python/quickstart/#update-the-client
@@ -174,7 +198,7 @@ class AutoMLManager(ABC, Thread):
                 if response.returnCode == Adapter_pb2.ADAPTER_RETURN_CODE_STATUS_UPDATE:
                     self.__status_messages.append(response.statusUpdate)
                     self.__runtime = response.runtime
-                    self.__data_storage.update_model(self.__username, _mdl_id, {"status": "busy", "status_messages": self.__status_messages, "runtime": response.runtime})
+                    self.__data_storage.UpdateModel(self.__username, _mdl_id, {"status": "busy", "status_messages": self.__status_messages, "runtime": response.runtime})
                 elif response.returnCode == Adapter_pb2.ADAPTER_RETURN_CODE_SUCCESS:
                     self.__result_json = json.loads(response.outputJson)
                     self.__is_completed = True
@@ -192,7 +216,7 @@ class AutoMLManager(ABC, Thread):
                         # TODO: implement better automl naming mechanism
                         model_details = {
                             "automl_name": self.name,
-                            "session_id": self.__session_id,
+                            "training_id": self.__training_id,
                             "path": os.path.join(self.__result_json["file_location"], self.__result_json["file_name"]),
                             "test_score": self.__testScore,
                             "validation_score": self.__validationScore,
@@ -202,7 +226,7 @@ class AutoMLManager(ABC, Thread):
                             "prediction_time": self.__predictiontime,
                             "status": self.__last_status
                         }
-                        self.__callback(self.__session_id, _mdl_id, model_details)
+                        self.__callback(self.__training_id, _mdl_id, model_details)
 
                     return
         except grpc.RpcError as rpc_error:
@@ -211,7 +235,7 @@ class AutoMLManager(ABC, Thread):
             self.__last_status = "failed"
             model_details = {
                 "automl_name": self.name,
-                "session_id": self.__session_id,
+                "training_id": self.__training_id,
                 "path": "",
                 "test_score": 0,
                 "validation_score": 0,
@@ -221,6 +245,6 @@ class AutoMLManager(ABC, Thread):
                 "prediction_time": 0,
                 "status": self.__last_status
                 }
-            self.__data_storage.update_model(self.__username, _mdl_id, {"status": "Failed"})
-            self.__callback(self.__session_id, _mdl_id, model_details)
+            self.__data_storage.UpdateModel(self.__username, _mdl_id, {"status": "Failed"})
+            self.__callback(self.__training_id, _mdl_id, model_details)
                         
