@@ -1,0 +1,55 @@
+﻿
+<MudCard>
+    <MudCardHeader Class="mud-theme-primary">
+        <CardHeaderContent >
+            <MudText Typo="Typo.h6">Details</MudText>
+        </CardHeaderContent>
+        <CardHeaderActions>
+            @if (Model != null)
+            {
+                <MudButton Href="@("/models/" + Model.Model.ID + "/details")"
+                    Variant="Variant.Filled" 
+                    EndIcon="@Icons.Material.Filled.MoreHoriz" 
+                    Color="Color.Secondary"
+                    Size="Size.Small" 
+                    Style="margin-top: 8px">More</MudButton>
+            }
+        </CardHeaderActions>
+    </MudCardHeader>
+    <MudCardContent>
+        @if (Model == null)
+        {
+            <DataLoaderSpinner />
+        }
+        else
+        {
+            <div style="height:300px;overflow: auto;">
+                <MudPaper Elevation="0">
+                    <MudStack>
+                        @foreach (var item in Model.Model.Messages)
+                        {
+                            <MudText Typo="Typo.body1">@item</MudText>
+                        }
+                    </MudStack>
+                </MudPaper>
+            </div>
+        }
+    </MudCardContent>
+</MudCard>
+
+@code {
+    [Parameter]
+    public GetModelResponseDto Model
+    { 
+        get
+        {
+            return _model;
+        } 
+        set
+        {
+            _model = value;
+            StateHasChanged();
+        } 
+    }
+    private GetModelResponseDto _model;
+}

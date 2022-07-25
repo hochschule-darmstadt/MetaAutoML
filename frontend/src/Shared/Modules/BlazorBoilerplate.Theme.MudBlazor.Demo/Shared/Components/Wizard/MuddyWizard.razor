@@ -1,0 +1,103 @@
+﻿@namespace BlazorBoilerplate.Theme.Material.Demo.Shared.Components.Wizard
+@using Microsoft.AspNetCore.Components
+@using MudBlazor
+
+@inherits MudComponentBase
+
+<CascadingValue Value="this" IsFixed="true">
+    <MudCard @attributes="UserAttributes" 
+             Class="@Classname" 
+             Style="@Style" 
+             Elevation="@Elevation"
+             Outlined="@Outlined"
+             Square="@Square">
+        @if (null != SelectedIndex)
+        {
+            <MudCardHeader Style=@(ShowHeaderBorder ? "border-bottom: 1px solid grey;" : "")>
+                <CardHeaderContent>
+                    @if (ShowChips)
+                    {
+                        <MudGrid Justify="Justify.SpaceEvenly">
+                            @foreach (var panel in _panels)
+                            {
+                                <MudItem>
+                                    @if (panel == SelectedPanel)
+                                    {
+                                        <MudChip Size="Size.Small" 
+                                                Color="@HeaderChipSelectedColor" 
+                                                Variant="@HeaderChipVariant"
+                                                Text="@panel.Title"/> }
+                                    else
+                                    {
+                                        <MudChip Size="Size.Small" 
+                                                Text="@panel.Title"
+                                                Variant="@HeaderChipVariant"
+                                                Color="@HeaderChipColor"
+                                                OnClick="(() => ChipSelect(panel))" /> 
+                                    }
+                                </MudItem> 
+                            }
+                        </MudGrid>
+                    }
+                    @if (null != SelectedPanel)
+                    {
+                        if (!ShowChips)
+                        {
+                            <MudText Class="mt-2 mx-2" 
+                                     Typo="@TitleTypo"
+                                     Color="@TitleColor">
+                                @SelectedPanel?.Title
+                            </MudText> 
+                        }
+                        <MudText Class="mt-2 mx-2" 
+                                 Typo="@DescriptionTypo"
+                                 Color="@DescriptionColor">
+                            @SelectedPanel?.Description
+                        </MudText> 
+                    }
+                </CardHeaderContent>
+                <CardHeaderActions>
+                    <span style="display: flex; margin-left: auto">
+                        <MudStack Row="true">
+                            <MudTooltip Text="Move to the previous step.">
+                                <MudButton OnClick="OnPrevious" 
+                                        Disabled="@IsPreviousDisabled"
+                                        Color="Color.Secondary"
+                                        Variant="@ButtonVariant">
+                                    Previous
+                                </MudButton>
+			                </MudTooltip>
+                            @if (@IsFinishVisible)
+                            {
+                                <MudTooltip Text="Finish the wizard.">
+                                    <MudButton OnClick="OnFinish"
+                                                Color="Color.Secondary"
+                                                Disabled="@DisableNext"
+                                                Variant="@ButtonVariant">
+                                        Finish
+                                    </MudButton>
+					            </MudTooltip>
+                            }
+                            else
+                            {
+                                <MudTooltip Text="Move to the next step.">
+                                    <MudButton OnClick="OnNext" 
+                                                Disabled="@IsNextDisabled"
+                                                Color="Color.Secondary"
+                                                Variant="@ButtonVariant">
+                                        Next
+                                    </MudButton> 
+					            </MudTooltip>
+                            }
+                        </MudStack>
+                    </span>
+                </CardHeaderActions>
+            </MudCardHeader>
+        }
+
+
+        <MudCardContent>
+            @ChildContent
+        </MudCardContent>
+    </MudCard>
+</CascadingValue> 

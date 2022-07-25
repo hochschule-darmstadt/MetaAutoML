@@ -1,0 +1,100 @@
+﻿
+@using Newtonsoft.Json.Linq
+
+<MudCard>
+    <MudCardHeader Class="mud-theme-primary">
+        <CardHeaderContent >
+            <MudText Typo="Typo.h6">Configuration</MudText>
+        </CardHeaderContent>
+        <CardHeaderActions>
+            @if (Model != null)
+            {
+                <MudButton Href="@("/models/" + Model.Model.ID + "/details")"
+                    Variant="Variant.Filled" 
+                    EndIcon="@Icons.Material.Filled.MoreHoriz" 
+                    Color="Color.Secondary"
+                    Size="Size.Small" 
+                    Style="margin-top: 8px">More</MudButton>
+            }
+        </CardHeaderActions>
+    </MudCardHeader>
+    <MudCardContent>
+        @if (Training == null)
+        {
+            <DataLoaderSpinner />
+        }
+        else
+        {
+            <MudStack>
+                <MudText Typo="Typo.body1">Dataset: @Training.DatasetName</MudText>
+                <MudText Typo="Typo.body1">Task: @Training.Task.Properties["skos:prefLabel"]</MudText>
+                <MudText Typo="Typo.body1">Selected Ml libraries: 
+                    <MudStack Row="true">
+                        @foreach (var item in Training.RequiredMlLibraries)
+                        {
+                            <MudText Typo="Typo.body1">@item.Properties["skos:prefLabel"]</MudText>
+                        }
+                    </MudStack>
+                </MudText>
+                <MudText Typo="Typo.body1">Selected AutoMl solutions: 
+                    <MudStack Row="true">
+                        @foreach (var item in Training.RequiredAutoMLs)
+                        {
+                            <MudText Typo="Typo.body1">@item.Properties["skos:prefLabel"]</MudText>
+                        }
+                    </MudStack>
+                </MudText>
+                <MudText Typo="Typo.body1">Target: @Training.Configuration["target"]["target"]</MudText>
+                <MudDivider />
+                <MudExpansionPanels MultiExpansion="true">
+                    <MudExpansionPanel Text="Dataset configuration">
+                        @if (_training.Task.Properties[":has_dataset_type"] == ":tabular")
+                        {
+                            <MudStack>
+                                @foreach (JToken item in Training.DatasetConfiguration["features"])
+                                {
+                                    <MudText Typo="Typo.body1">@item.Path: @((Server.DataType)((int)item.First))</MudText>
+                                }
+                            </MudStack>
+                        }
+                    </MudExpansionPanel>
+                    <MudExpansionPanel Text="Runtime constrains">
+
+                    </MudExpansionPanel>
+                </MudExpansionPanels>
+            </MudStack>
+        }
+    </MudCardContent>
+</MudCard>
+
+@code {
+    [Parameter]
+    public GetTrainingResponseDto Training
+    { 
+        get
+        {
+            return _training;
+        } 
+        set
+        {
+            _training = value;
+            StateHasChanged();
+        } 
+    }
+    private GetTrainingResponseDto _training;
+
+    [Parameter]
+    public GetModelResponseDto Model
+    { 
+        get
+        {
+            return _model;
+        } 
+        set
+        {
+            _model = value;
+            StateHasChanged();
+        } 
+    }
+    private GetModelResponseDto _model;
+}

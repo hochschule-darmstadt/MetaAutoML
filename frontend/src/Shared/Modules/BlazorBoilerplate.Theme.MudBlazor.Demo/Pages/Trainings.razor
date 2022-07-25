@@ -1,0 +1,67 @@
+﻿@page "/trainings"
+@page "/trainings/{id}"
+@inject IStringLocalizer<Global> L
+@inject ISnackbar Snackbar
+@inject IApiClient apiClient
+@inject IViewNotifier viewNotifier
+@attribute [Authorize]
+
+<TopSection>
+    <Breadcrumbs>
+        <Breadcrumb Title="Trainings" />
+    </Breadcrumbs>
+</TopSection>
+
+<PageTitle>Trainings</PageTitle>
+<MudGrid>
+    <MudItem xs="12" sm="12" md="12">
+        <MudCard>
+            <MudCardHeader Class="mud-theme-primary">
+                <CardHeaderContent >
+                    <MudText Typo="Typo.h6">Overview</MudText>
+                </CardHeaderContent>
+            </MudCardHeader>
+            <MudCardContent>
+
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+    <MudItem xs="12" sm="12" md="12">
+        <RecentTrainings Trainings="_trainings" OpenTrainingId="@Id"/>
+    </MudItem>
+    <MudItem xs="12" sm="12" md="12">
+        <PastTrainings Trainings="_trainings" OpenTrainingId="@Id"/>
+    </MudItem>
+</MudGrid>
+
+@code{
+    [Parameter]
+    public string Id { get; set; }
+    private GetAllTrainingsResponseDto _trainings;
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadTrainings();
+    }
+    private async Task LoadTrainings()
+    {
+        try
+        {
+            ApiResponseDto apiResponse = await apiClient.GetAllTrainings(new GetAllTrainingsRequestDto());
+
+            if (apiResponse.IsSuccessStatusCode)
+            {
+                _trainings = Newtonsoft.Json.JsonConvert.DeserializeObject<GetAllTrainingsResponseDto>(apiResponse.Result.ToString());
+                StateHasChanged();
+                viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
+            }
+            else
+            {
+                viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
+            }
+        }
+        catch (Exception ex)
+        {
+            viewNotifier.Show(ex.GetBaseException().Message, ViewNotifierType.Error, L["Operation Failed"]);
+        }
+    }
+}

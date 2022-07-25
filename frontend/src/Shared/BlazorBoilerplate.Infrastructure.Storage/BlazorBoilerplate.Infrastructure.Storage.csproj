@@ -1,0 +1,44 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <RunPostBuildEvent>OnOutputUpdated</RunPostBuildEvent>
+	<ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Finbuckle.MultiTenant" Version="6.7.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="6.0.6" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.6" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Utils\BlazorBoilerplate.SourceGenerator\BlazorBoilerplate.SourceGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\BlazorBoilerplate.Constants\BlazorBoilerplate.Constants.csproj" />
+    <ProjectReference Include="..\BlazorBoilerplate.Shared.DataInterfaces\BlazorBoilerplate.Shared.DataInterfaces.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Permissions\Permissions.cs">
+      <DependentUpon>Permissions.tt</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Permissions\Permissions.tt">
+      <LastGenOutput>Permissions.cs</LastGenOutput>
+      <Generator>TextTemplatingFileGenerator</Generator>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
+  </ItemGroup>
+
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="dotnet build &quot;$(SolutionDir)Shared\BlazorBoilerplate.Shared\BlazorBoilerplate.Shared.csproj&quot;" />
+  </Target>
+
+</Project>

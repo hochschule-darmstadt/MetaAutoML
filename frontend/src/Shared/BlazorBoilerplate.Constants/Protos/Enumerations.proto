@@ -1,0 +1,43 @@
+syntax = "proto3";
+option csharp_namespace = "BlazorBoilerplate.Server";
+
+enum ResultCode {
+    RESULT_CODE_OKAY = 0;
+    RESULT_CODE_ERROR_CAN_NOT_CREATE_USER = 1;
+}
+
+enum DataType {
+    DATATYPE_UNKNOW = 0;
+    DATATYPE_STRING = 1;
+    DATATYPE_INT = 2;
+    DATATYPE_FLOAT = 3;
+    DATATYPE_CATEGORY = 4;
+    DATATYPE_BOOLEAN = 5;
+    DATATYPE_DATETIME = 6;
+    DATATYPE_IGNORE = 7;
+  }
+  
+
+enum DatasetType {
+    DATASET_TYPE_UNKNOWN = 0;
+    DATASET_TYPE_TABULAR_DATA = 1;
+  }
+  
+enum ControllerReturnCode {
+    CONTROLLER_RETURN_CODE_UNKNOWN = 0;
+    CONTROLLER_RETURN_CODE_SUCCESS = 1;
+    CONTROLLER_RETURN_CODE_STATUS_UPDATE = 2;
+    CONTROLLER_RETURN_CODE_ERROR = 100;
+  }
+  
+enum SessionStatus {
+    SESSION_STATUS_UNKNOWN = 0;
+    SESSION_STATUS_BUSY = 1;
+    SESSION_STATUS_COMPLETED = 2;
+    SESSION_STATUS_FAILED = 3;
+  }
+  
+enum SplitMethod {
+    SPLIT_METHOD_RANDOM = 0;
+    SPLIT_METHOD_END = 1;
+  }

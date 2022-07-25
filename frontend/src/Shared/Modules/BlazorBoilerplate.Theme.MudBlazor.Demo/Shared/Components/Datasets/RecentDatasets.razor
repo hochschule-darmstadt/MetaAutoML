@@ -1,0 +1,29 @@
+﻿@inject IStringLocalizer<Global> L
+@using System
+@using System.IO;
+@inject IApiClient apiClient
+@inject IViewNotifier viewNotifier
+@inject IDialogService DialogService
+
+<MudCard>
+    <MudCardHeader Class="mud-theme-primary">
+        <CardHeaderContent >
+            <MudText Typo="Typo.h6">Datasets</MudText>
+        </CardHeaderContent>
+        <CardHeaderActions>
+            <MudButton Href="/Datasets"
+                Variant="Variant.Filled" 
+                EndIcon="@Icons.Material.Filled.MoreHoriz" 
+                Color="Color.Secondary"
+                Size="Size.Small"
+                Style="margin-top: 8px">More</MudButton>
+        </CardHeaderActions>
+    </MudCardHeader>
+    <MudCardContent>
+
+    </MudCardContent>
+</MudCard>
+
+@code {
+
+}

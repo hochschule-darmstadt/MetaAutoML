@@ -1,0 +1,19 @@
+syntax = "proto3";
+option csharp_namespace = "BlazorBoilerplate.Server";
+
+import "Enumerations.proto";
+import "Common.proto";
+
+message TestAutoMlRequest {
+    string username = 1;
+    bytes testData = 2;
+    string modelId = 3;
+  }
+  
+  message TestAutoMlResponse {
+    repeated string predictions = 1;
+    float score = 2;
+    float predictiontime = 3;
+  }
+  
+  

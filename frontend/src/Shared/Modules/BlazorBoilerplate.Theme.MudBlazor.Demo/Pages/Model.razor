@@ -1,0 +1,133 @@
+﻿@page "/models/{id}"
+@inject IStringLocalizer<Global> L
+@inject IApiClient apiClient
+@inject IViewNotifier viewNotifier
+@inject NavigationManager NavManager
+@attribute [Authorize]
+
+@if (_model != null && _training != null)
+{
+    <TopSection>
+        <Breadcrumbs>
+            <Breadcrumb Title="Datasets" Link="/datasets" />
+            <Breadcrumb Title="@("Dataset " + _training.DatasetName)" Link="@("/datasets/" + _model.Model.DatasetId)"/>
+            <Breadcrumb Title="@("Model " + _model.Model.Model)" />
+        </Breadcrumbs>
+    </TopSection>
+}
+
+<MudText Typo="Typo.h6">@_pageTitle</MudText>
+<MudSpacer/>
+
+<MudGrid>
+    <MudItem xs="12" sm="12" md="12">
+        <MudCard>
+            <MudCardHeader Class="mud-theme-primary">
+                <CardHeaderContent >
+                    <MudText Typo="Typo.h6">Overview</MudText>
+                </CardHeaderContent>
+            </MudCardHeader>
+            <MudCardContent>
+                @if ((_model == null) && (_training == null))
+                {
+                    <MudGrid>
+                        <MudItem Class="d-flex align-center justify-center mud-width-full" xs="12">
+                            <MudProgressCircular Color="Color.Primary" Indeterminate="true"/>
+                        </MudItem>
+                    </MudGrid>
+                }
+                else
+                {
+                    <MudGrid>
+                        <MudItem xs="4" sm="4" md="4">
+                            <MudText Typo="Typo.body1">Dataset: @_training.DatasetName</MudText>
+                            <MudText Typo="Typo.body1">Start: @_training.StartTime</MudText>
+                            <MudText Typo="Typo.body1">Status: @_model.Model.Status</MudText>
+                            <MudText Typo="Typo.body1">Runtime: @_model.Model.Runtime</MudText>
+                        </MudItem>
+                        <MudItem xs="4" sm="4" md="4">
+                            <MudText Typo="Typo.body1">AutoMl solution: @_model.Model.Name</MudText>
+                            <MudText Typo="Typo.body1">Ml library: @_model.Model.Library</MudText>
+                            <MudText Typo="Typo.body1">Model: @_model.Model.Model</MudText>
+                            <MudText Typo="Typo.body1">Training: <a href="@NavManager.ToAbsoluteUri("trainings/" + @_training.ID).AbsoluteUri" Style="cursor: pointer;">@_training.ID</a></MudText>
+                        </MudItem>
+                        <MudItem xs="4" sm="4" md="4">
+                            <MudText Typo="Typo.body1">Metric type: </MudText>
+                            <MudText Typo="Typo.body1">Metric test: @_model.Model.TestScore</MudText>
+                            <MudText Typo="Typo.body1">Metric validation: @_model.Model.ValidationScore</MudText>
+                            <MudText Typo="Typo.body1">Prediction time: @_model.Model.Predictiontime</MudText>
+                        </MudItem>
+                    </MudGrid>
+                }
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+    <MudItem xs="6" sm="6" md="6">
+        <OnlinePrediction Model="_model"/>
+    </MudItem>
+    <MudItem xs="6" sm="6" md="6">
+        <DownloadMlPipeline Model="_model"/>
+    </MudItem>
+    <MudItem xs="6" sm="6" md="6">
+        <ModelExplain Model="_model" />
+    </MudItem>
+    <MudItem xs="3" sm="3" md="3">
+        <ModelConfiguration Training="_training" Model="_model"/>
+    </MudItem>
+    <MudItem xs="3" sm="3" md="3">
+        <ModelDetail Model="_model"/>
+    </MudItem>
+</MudGrid>
+
+
+@code{
+    [Parameter]
+    public string Id { get; set; }
+
+    private string _pageTitle = "Model";
+    private GetAutoMlModelResponseDto _downloadModel;
+    private GetModelResponseDto _model;
+    private GetTrainingResponseDto _training;
+
+    protected async override void OnInitialized()
+    {
+        await LoadModel();
+    }
+    private async Task LoadModel()
+    {
+        try
+        {
+            //Get Model infos
+            ApiResponseDto apiResponse = await apiClient.GetModel(new GetModelRequestDto() { ModelId = Id });
+
+            if (apiResponse.IsSuccessStatusCode)
+            {
+                _model = Newtonsoft.Json.JsonConvert.DeserializeObject<GetModelResponseDto>(apiResponse.Result.ToString());
+
+                //Get Training infos
+                apiResponse = await apiClient.GetTraining(new GetTrainingRequestDto() { TrainingId = _model.Model.TrainingId });
+
+                if (apiResponse.IsSuccessStatusCode)
+                {
+                    _training = Newtonsoft.Json.JsonConvert.DeserializeObject<GetTrainingResponseDto>(apiResponse.Result.ToString());
+                    StateHasChanged();
+                    StateHasChanged();
+                    viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
+                }
+                else
+                {
+                    viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
+                }
+            }
+            else
+            {
+                viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
+            }
+        }
+        catch (Exception ex)
+        {
+            viewNotifier.Show(ex.GetBaseException().Message, ViewNotifierType.Error, L["Operation Failed"]);
+        }
+    }
+}
+

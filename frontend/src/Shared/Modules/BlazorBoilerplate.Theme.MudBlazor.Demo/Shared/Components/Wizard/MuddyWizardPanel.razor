@@ -1,0 +1,8 @@
+﻿@namespace BlazorBoilerplate.Theme.Material.Demo.Shared.Components.Wizard
+@inherits MudComponentBase
+@implements IAsyncDisposable
+
+@if (Parent.SelectedPanel == this)
+{
+    @ChildContent
+}

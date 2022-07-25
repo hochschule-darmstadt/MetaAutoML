@@ -1,0 +1,54 @@
+syntax = "proto3";
+option csharp_namespace = "BlazorBoilerplate.Server";
+
+import "google/protobuf/any.proto";
+import "Enumerations.proto";
+import "Common.proto";
+
+message GetCompatibleAutoMlSolutionsRequest {
+    string username = 1;
+    map<string, string> configuration = 2;
+  }
+  
+message GetCompatibleAutoMlSolutionsResponse {
+    repeated string AutoMlSolutions = 1;
+  }
+
+message GetDatasetCompatibleTasksRequest {
+    string username = 1;
+    string datasetName = 2;
+  }
+  
+message GetDatasetCompatibleTasksResponse {
+    repeated string tasks = 1;
+  }
+  
+message GetSupportedMlLibrariesRequest {
+    string username = 1;
+    string task = 2;
+  }
+  
+message GetSupportedMlLibrariesResponse {
+    repeated string MlLibraries = 1;
+  }
+
+
+message StartAutoMlProcessRequest {
+    string username = 1;
+    string dataset = 2;
+    string task = 3;
+    string configuration = 4;
+    repeated string requiredAutoMls = 5;
+    string runtimeConstraints = 6;
+    string datasetConfiguration = 7;
+    string testConfiguration = 8;
+    string fileConfiguration = 9;
+    string metric = 10;
+    repeated string requiredLibraries = 11;
+  }
+  
+  
+message StartAutoMlProcessResponse {
+    ControllerReturnCode result = 1;
+    string trainingId = 2;
+  }

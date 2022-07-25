@@ -1,0 +1,263 @@
+﻿@inject IStringLocalizer<Global> L
+@inject NavigationManager NavManager
+@using System.Linq
+@using System.Timers
+@inject IViewNotifier viewNotifier
+@inject IApiClient apiClient
+@implements IDisposable
+
+<MudCard>
+    <MudCardHeader Class="mud-theme-primary">
+        <CardHeaderContent >
+            <MudText Typo="Typo.h6">Recent training</MudText>
+        </CardHeaderContent>
+        <CardHeaderActions>
+            @if (SummaryVersion != false)
+            {
+                <MudButton Href="@("/trainings")"
+                    Variant="Variant.Filled" 
+                    EndIcon="@Icons.Material.Filled.MoreHoriz" 
+                    Color="Color.Secondary"
+                    Size="Size.Small"
+                    Style="margin-top: 8px">More</MudButton>
+            }
+        </CardHeaderActions>
+    </MudCardHeader>
+    <MudCardContent>
+        @if (Trainings == null)
+        {
+             <DataLoaderSpinner />
+        }
+        else
+        {
+            @if (SummaryVersion == true)
+            {
+                <MudTable Items="@_activeTraining.Trainings" style="width:stretch" class="mat-elevation-z5" AllowSelection="false" Dense="true">
+                <HeaderContent>
+                    <MudTh><MudTableSortLabel SortBy="new Func<GetTrainingResponseDto, object>(x=>x.StartTime)">Start datetime</MudTableSortLabel></MudTh>
+                    <MudTh><MudTableSortLabel SortBy="new Func<GetTrainingResponseDto, object>(x=>x.Status)">Status</MudTableSortLabel></MudTh>
+                    <MudTh><MudTableSortLabel SortBy="new Func<GetTrainingResponseDto, object>(x=>x.DatasetName)">Dataset</MudTableSortLabel></MudTh>
+                    <MudTh>Task</MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd>
+                        <a href="@NavManager.ToAbsoluteUri("trainings/" + @context.ID).AbsoluteUri" Style="cursor: pointer;">@context.StartTime</a>
+                    </MudTd>
+                    <MudTd>
+                        @context.Status
+                        @if (context.Status == "busy")
+                        {
+                            <MudProgressCircular Color="Color.Primary" Indeterminate="true"/>
+                        }
+                    </MudTd>
+                    <MudTd>@context.DatasetName</MudTd>
+                    <MudTd>@context.Task.Properties["skos:prefLabel"]</MudTd>
+                </RowTemplate>
+                <PagerContent>
+                    <MudTablePager  />
+                </PagerContent>
+            </MudTable>
+            }
+            else
+            {
+                <MudTable Items="@_activeTraining.Trainings" style="width:stretch" class="mat-elevation-z5" AllowSelection="false" Dense="true" Filter="new Func<GetTrainingResponseDto,bool>(FilterFunc)">
+                <ToolBarContent>
+                    <MudTextField @bind-Value="searchString" Placeholder="Search" Adornment="Adornment.Start"
+                                  AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+                </ToolBarContent>
+                <HeaderContent>
+		            <MudTh></MudTh>
+                    <MudTh><MudTableSortLabel SortBy="new Func<GetTrainingResponseDto, object>(x=>x.StartTime)">Start datetime</MudTableSortLabel></MudTh>
+                    <MudTh><MudTableSortLabel SortBy="new Func<GetTrainingResponseDto, object>(x=>x.Status)">Status</MudTableSortLabel></MudTh>
+                    <MudTh><MudTableSortLabel SortBy="new Func<GetTrainingResponseDto, object>(x=>x.DatasetName)">Dataset</MudTableSortLabel></MudTh>
+                    <MudTh>Task</MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd><MudIconButton Icon="@((context.ShowDetails == true)? Icons.Material.Filled.KeyboardArrowUp : Icons.Material.Filled.KeyboardArrowDown)" OnClick="@(() => context.ShowDetails = !context.ShowDetails)" aria-label="delete"></MudIconButton></MudTd>
+                    <MudTd>
+                        <a href="@NavManager.ToAbsoluteUri("trainings/" + @context.ID).AbsoluteUri" Style="cursor: pointer;">@context.StartTime</a>
+                    </MudTd>
+                    <MudTd>
+                        @context.Status
+                        @if (context.Status == "busy")
+                        {
+                            <MudProgressCircular Color="Color.Primary" Indeterminate="true"/>
+                        }
+                    </MudTd>
+                    <MudTd>@context.DatasetName</MudTd>
+                    <MudTd>@context.Task.Properties["skos:prefLabel"]</MudTd>
+                </RowTemplate>
+	            <ChildRowContent>
+                    @if (@context.ShowDetails)
+                    {
+                        <MudTr>
+                            <td colspan="5">
+                                <MudCard>
+                                    <MudCardHeader>
+                                        <CardHeaderContent>
+                                            <MudText Typo="Typo.body1">Trained models</MudText>
+                                        </CardHeaderContent>
+                                    </MudCardHeader>
+                                    <MudCardContent Class="pa-0">
+                                        <MudTable Items="@context.AutoMls" Context="AutoMl">
+                                            <HeaderContent>
+                                                <MudTh>Name</MudTh>
+                                                <MudTh>Status</MudTh>
+                                                <MudTh>Model</MudTh>
+                                                <MudTh>Library</MudTh>
+                                                <MudTh>Test score</MudTh>
+                                                <MudTh>Validation score</MudTh>
+                                                <MudTh>Prediction time</MudTh>
+                                                <MudTh>Runtime</MudTh>
+                                            </HeaderContent>
+                                            <RowTemplate>
+                                                <MudTd>@AutoMl.Name</MudTd>
+                                                <MudTd>
+                                                    @AutoMl.Status
+                                                    @if (AutoMl.Status == "busy")
+                                                    {
+                                                        <MudProgressCircular Color="Color.Primary" Indeterminate="true"/>
+                                                    }
+                                                </MudTd>
+                                                <MudTd>
+                                                    <a href="@NavManager.ToAbsoluteUri("models/" + @AutoMl.ID).AbsoluteUri" Style="cursor: pointer;">@AutoMl.Model</a>
+                                                </MudTd>
+                                                <MudTd>@AutoMl.Library</MudTd>
+                                                <MudTd>@AutoMl.TestScore</MudTd>
+                                                <MudTd>@AutoMl.ValidationScore</MudTd>
+                                                <MudTd>@AutoMl.Predictiontime</MudTd>
+                                                <MudTd>@AutoMl.Runtime</MudTd>
+                                            </RowTemplate>
+                                        </MudTable>
+                                    </MudCardContent>
+                                </MudCard>
+                            </td>
+                        </MudTr>
+                    }
+                </ChildRowContent>
+                <PagerContent>
+                    <MudTablePager  />
+                </PagerContent>
+            </MudTable>
+            }
+        }
+    </MudCardContent>
+</MudCard>
+
+@code {
+    [Parameter]
+    public string OpenTrainingId { get; set; }
+    [Parameter]
+    public bool SummaryVersion { get; set; } = false;
+    [Parameter]
+    public GetAllTrainingsResponseDto Trainings 
+    { 
+        get
+        {
+            return _trainings;
+        } 
+        set
+        {
+            _trainings = value;
+            if(_trainings != null)
+            {
+                _activeTraining.Trainings = _trainings.Trainings.Where(x => x.StartTime > DateTime.Now.AddDays(-1)).ToList();
+                if (!string.IsNullOrEmpty(OpenTrainingId))
+                {
+                    foreach (var item in _activeTraining.Trainings.Where(x => x.ID == OpenTrainingId))
+                    {
+                        item.ShowDetails = true;
+                    }
+                }
+                RefreshActiveTrainings(null, null);
+                _timer = new Timer()
+                {
+                    AutoReset = true,
+                    Enabled = true,
+                    Interval = 5000
+                };
+                _timer.Elapsed += RefreshActiveTrainings;
+                StateHasChanged();
+            }
+        } 
+    }
+    private GetAllTrainingsResponseDto _trainings;
+    private GetAllTrainingsResponseDto _activeTraining;
+    private Timer _timer;
+    private string searchString = "";
+
+    protected override void OnInitialized()
+    {
+        _activeTraining = new GetAllTrainingsResponseDto();
+    }
+
+    private bool FilterFunc(GetTrainingResponseDto element)
+    {
+        if (string.IsNullOrWhiteSpace(searchString))
+            return true;
+        if (element.Status.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (element.Task.Properties["skos:prefLabel"].Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (element.DatasetName.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        return false;
+    } 
+
+    public void Dispose()
+    {
+        DisposeTimer();
+    }
+
+    private async void RefreshActiveTrainings(object sender, ElapsedEventArgs e)
+    {
+        await InvokeAsync(async () =>
+        {
+            try
+            {
+                if (_activeTraining.Trainings.Where(x => x.Status == "busy").ToList().Count == 0)
+                {
+                    DisposeTimer();
+                    return;
+                }
+
+                for (int i = 0; i < _activeTraining.Trainings.Count; i++)
+                {
+                    if (_activeTraining.Trainings[i].Status == "busy")
+                    {
+                        ApiResponseDto apiResponse = await apiClient.GetTraining(new GetTrainingRequestDto { TrainingId = _activeTraining.Trainings[i].ID });
+
+                        if (apiResponse.IsSuccessStatusCode)
+                        {
+                            bool _showDetails = _activeTraining.Trainings[i].ShowDetails;
+                            _activeTraining.Trainings[i] = Newtonsoft.Json.JsonConvert.DeserializeObject<GetTrainingResponseDto>(apiResponse.Result.ToString());
+                            _activeTraining.Trainings[i].ShowDetails = _showDetails;
+                            StateHasChanged();
+                        }
+                        else
+                        {
+                            viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
+                        }
+                    }
+                }
+
+                _activeTraining.Trainings.ForEach(async x =>
+                {
+                });
+            }
+            catch (Exception ex)
+            {
+                viewNotifier.Show(ex.GetBaseException().Message, ViewNotifierType.Error, L["Operation Failed"]);
+                _timer.Elapsed -= RefreshActiveTrainings;
+            }
+        });
+    }
+
+    public void DisposeTimer(){
+        if(_timer!=null){
+            _timer.Elapsed -= RefreshActiveTrainings;
+            _timer?.Dispose();
+            _timer = null;
+        }
+    }
+}

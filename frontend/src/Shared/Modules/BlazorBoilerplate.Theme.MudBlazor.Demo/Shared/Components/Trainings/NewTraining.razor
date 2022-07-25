@@ -1,0 +1,43 @@
+﻿@inject IStringLocalizer<Global> L
+@inject IApiClient apiClient
+@inject IViewNotifier viewNotifier
+@inject NavigationManager NavManager
+
+<MudCard>
+    <MudCardHeader Class="mud-theme-primary">
+        <CardHeaderContent >
+            <MudText Typo="Typo.h6">New Training</MudText>
+        </CardHeaderContent>
+    </MudCardHeader>
+    <MudCardContent>
+        @if (Dataset == null)
+        {
+            <DataLoaderSpinner />
+        }
+        else
+        {
+            <MudStack>
+                <MudTimeline TimelineOrientation="@TimelineOrientation.Horizontal" TimelinePosition="@TimelinePosition.Bottom">
+                    <MudTimelineItem Color="Color.Secondary">
+                        <MudText Align="Align.Center" Typo="Typo.body2">Dataset preparation</MudText>
+                    </MudTimelineItem>
+                    <MudTimelineItem>
+                        <MudText Align="Align.Center" Typo="Typo.body2">Configuration</MudText>
+                    </MudTimelineItem>
+                </MudTimeline>
+
+                <MudButton OnClick="@(e => { NavManager.NavigateTo("/wizard/" + Dataset.Identifier); })" 
+                    Variant="Variant.Filled" 
+                    StartIcon="@Icons.Filled.ModelTraining"
+                    Color="Color.Secondary">
+                    Start Training
+                </MudButton>
+            </MudStack>
+        }
+    </MudCardContent>
+</MudCard>
+
+@code {
+    [Parameter]
+    public GetDatasetResponseDto Dataset { get; set; }
+}

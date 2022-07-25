@@ -1,0 +1,18 @@
+﻿@inject IStringLocalizer<Global> L
+@inject NavigationManager NavManager
+
+
+<MudMenu Icon="@Icons.Material.Filled.MoreVert">
+    <MudMenuItem OnClick="NavigateToDatasetPage">Train</MudMenuItem>
+    <MudMenuItem>Delete</MudMenuItem>
+</MudMenu>
+
+@code {
+    [Parameter]
+    public GetDatasetResponseDto Dataset { get; set; }
+
+    private void NavigateToDatasetPage()
+    {
+        NavManager.NavigateTo("datasets/" + Dataset.Identifier);
+    }
+}

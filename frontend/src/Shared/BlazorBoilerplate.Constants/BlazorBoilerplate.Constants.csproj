@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+	<ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Google.Protobuf" Version="3.21.2" />
+    <PackageReference Include="Grpc.Net.Client" Version="2.47.0" />
+    <PackageReference Include="Grpc.Net.ClientFactory" Version="2.47.0" />
+    <PackageReference Include="Grpc.Tools" Version="2.47.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+	<ItemGroup>
+		<Protobuf Include="Protos/Common.proto" GrpcServices="Client" ProtoRoot="Protos\" />
+		<Protobuf Include="Protos/Enumerations.proto" GrpcServices="Client" ProtoRoot="Protos\" />
+		<Protobuf Include="Protos/ControllerService.proto" GrpcServices="Client" ProtoRoot="Protos\" />
+		<Protobuf Include="Protos/DatasetRelatedMessages.proto" GrpcServices="Client" ProtoRoot="Protos\" />
+		<Protobuf Include="Protos/ModelRelatedMessages.proto" GrpcServices="Client" ProtoRoot="Protos\" />
+		<Protobuf Include="Protos/TestingRelatedMessages.proto" GrpcServices="Client" ProtoRoot="Protos\" />
+		<Protobuf Include="Protos/TrainingRelatedMessages.proto" GrpcServices="Client" ProtoRoot="Protos\" />
+		<Protobuf Include="Protos/UserRelatedMessages.proto" GrpcServices="Client" ProtoRoot="Protos\" />
+		<Protobuf Include="Protos/WizzardMessages.proto" GrpcServices="Client" ProtoRoot="Protos\" />
+	</ItemGroup>
+</Project>
