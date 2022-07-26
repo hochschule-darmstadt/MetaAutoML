@@ -1,84 +1,82 @@
-from typing import Dict
 import pandas as pd
 import numpy as np
-import json
+import xai
+import os
+import matplotlib.pyplot as plt
+from datetime import date, datetime
+from scipy.stats import spearmanr
 
 class DataSetAnalysisManager:
     """
     Static DataSetAnalysisManager class to analyze the dataset
     """
+    def __init__(self, dataset: pd.DataFrame):
+        self.__dataset = dataset
     
-    def startAnalysis(dataset: pd.DataFrame) -> dict:
+    def basicAnalysis(self) -> dict:
         """
-        Initialization of the analysis, results are written to JSON file
-        ---
-        Parameter
-        1. dataset to be analyzed
-        ---
+        Basic analysis, results are returned as dict
+        Analyzed are:
+            "number_of_columns": Number of columns
+            "number_of_rows": Number of rows
+            "na_columns": Missing value counts for each column
+            "high_na_rows": Missing value counts for each row
+            "outlier": Outlier detection
+            "duplicate_columns": Duplicate columns
+            "duplicate_rows": Duplicate rows
+
         Return a python dictionary containing dataset analysis
         """
-        #Already a dataframe???
-        #dataset = pd.read_csv(dataset, delimiter=',')
+        return {
+            "number_of_columns": self.__dataset.shape[1],
+            "number_of_rows": self.__dataset.shape[0],
+            "na_columns": dict(self.__dataset.isna().sum().items()),
+            "high_na_rows": DataSetAnalysisManager.__missing_values_rows(self.__dataset),
+            "outlier": DataSetAnalysisManager.__detect_outliers(self.__dataset),
+            "duplicate_columns": DataSetAnalysisManager.__detect_duplicate_columns(self.__dataset),
+            "duplicate_rows": DataSetAnalysisManager.__detect_duplicate_rows(self.__dataset),
+            }
 
-        jsonfile = {}
-        jsonfile["basic analysis"] = {
+    def advancedAnalysis(self, save_path):
+        plt.ioff()
 
-            "number_of_columns": DataSetAnalysisManager.__number_of_columns(dataset),
-            "number_of_rows": DataSetAnalysisManager.__number_of_rows(dataset),
-            "na_columns": DataSetAnalysisManager.__missing_values_columns(dataset),
-            "high_na_rows": DataSetAnalysisManager.__missing_values_rows(dataset),
-            "outlier": DataSetAnalysisManager.__detect_outliers(dataset),
-            "duplicate_columns": DataSetAnalysisManager.__detect_duplicate_columns(dataset),
-            "duplicate_rows": DataSetAnalysisManager.__detect_duplicate_rows(dataset),
-        }
+        proc_dataset = self.__process_categorical_columns()
+        proc_dataset = self.__fill_nan_values(proc_dataset)
 
-        return jsonfile
+        categorical_columns = list(self.__dataset.select_dtypes(['category']).columns) + list(self.__dataset.select_dtypes(['bool']).columns)
+        plot_filenames = []
 
-    @staticmethod
-    def __number_of_columns(dataset: pd.DataFrame) -> int:
-        """
-        Counts the number of columns in the dataset and adds that information to a JSON file
-        ---
-        Parameter
-        1. dataset to be analyzed
-        ---
-        Return the number of columns in the dataset
-        """
-        number_of_columns = dataset.shape[1]
-        
-        return number_of_columns
+        for col in list(self.__dataset.columns):
+            filename = self.__make_column_plot(col, save_path)
+            plot_filenames.append(filename)
 
-    @staticmethod
-    def __number_of_rows(dataset: pd.DataFrame) -> int:
-        """
-        Counts the number of rows in the dataset and adds that information to a JSON file
-        ---
-        Parameter
-        1. dataset to be analyzed
-        ---
-        Return the number of rows in the dataset
-        """
-        number_of_rows = dataset.shape[0]
+        filename = self.__make_correlation_matrix_plot(proc_dataset, categorical_columns, save_path)
+        plot_filenames.append(filename)
 
-        return number_of_rows
+        # get correlations using spearmanr
+        corr = spearmanr(proc_dataset).correlation
+        # get indices of correlations ordered desc
+        indices = self.__largest_indices(corr, (len(proc_dataset.columns) * len(proc_dataset.columns)))
 
-    @staticmethod
-    def __missing_values_columns(dataset: pd.DataFrame) -> dict:
-        """
-        Counts missing values of each column and row and adds that information to a JSON file
-        ---
-        Parameter
-        1. dataset to be analyzed
-        ---
-        Return a dictionary containing information about the missing values in each column
-        """
-        # map all columns with the number of missing values
-        na_counts = dict(dataset.isna().sum().items())
-        
-        return na_counts
+        plotted_indices = []
+        for first_col_idx, second_col_index in zip(indices[0], indices[1]):
+            # if the correlation isnt a col with itself or has already been plotted the other way around -> plot it
+            if first_col_idx != second_col_index and [second_col_index, first_col_idx] not in plotted_indices:
+                filename = self.__make_feature_imbalance_plot(self.__dataset.columns[first_col_idx],
+                                                            self.__dataset.columns[second_col_index],
+                                                              categorical_columns,
+                                                    save_path)
+                plot_filenames.append(filename)
+                plotted_indices.append([first_col_idx, second_col_index])
+            # only plot top 5
+            if len(plotted_indices) == 5:
+                break
+
+        return plot_filenames
+
 
     @staticmethod
-    def __missing_values_rows(dataset: pd.DataFrame) -> 'list[int]':
+    def __missing_values_rows(dataset) -> 'list[int]':
         """
         Counts missing values of each row and adds the indices of rows with a lot of missing values to a list
         ---
@@ -100,7 +98,7 @@ class DataSetAnalysisManager:
         return missing_rows_indices
 
     @staticmethod
-    def __detect_outliers(dataset: pd.DataFrame) -> 'list[dict]':
+    def __detect_outliers(dataset) -> 'list[dict]':
         """
         Detects outliers in all columns in a dataset containing floats
         ---
@@ -139,7 +137,7 @@ class DataSetAnalysisManager:
         return outlier_columns
 
     @staticmethod
-    def __detect_duplicate_columns(dataset: pd.DataFrame) -> 'list[tuple]':
+    def __detect_duplicate_columns(dataset) -> 'list[tuple]':
         """
         Detects duplicate columns in a dataset
         ---
@@ -164,7 +162,7 @@ class DataSetAnalysisManager:
         return duplicate_column_list
 
     @staticmethod
-    def __detect_duplicate_rows(dataset: pd.DataFrame) -> 'list[tuple]':
+    def __detect_duplicate_rows(dataset) -> 'list[tuple]':
         """
         Detects duplicate rows
         ---
@@ -202,3 +200,92 @@ class DataSetAnalysisManager:
                     duplicate_row_list.append(duplicate_row_pair)
 
         return duplicate_row_list
+
+    def __process_categorical_columns(self):
+        """
+        Process categories.
+        At a certain step it is necessary to convert string categories and bool into int.
+        This is used for the feature correlation matrix, as the scipy spearmanr algorithm used for calculating the
+        correlation is incompatible with string categories and bool.
+
+        Return dataset: Copy of dataset stored in the DataSetAnalysisManager with processed categorical values
+        """
+        dataset = self.__dataset.copy()
+        for i, dtype in enumerate(dataset.dtypes):
+            if dtype.name == "category":
+                # Process the corresponding column
+                # Get all unique values in the category column
+                unique_values = dataset.iloc[:, i].unique()
+                # Replace values in dataframe with their index in the list
+                dataset.iloc[:, i] = dataset.iloc[:, i].map({val: i for i, val in enumerate(unique_values.categories.values)})
+            if dtype.name == "bool":
+                # Bool values have to be processed too
+                unique_values = [False, True]
+                dataset.iloc[:, i] = dataset.iloc[:, i].map({val: i for i, val in enumerate(unique_values)})
+
+        return dataset
+
+    def __fill_nan_values(self, dataset):
+        """
+        Fill nan values.
+        Fill with 9999... with the length of the max number of digits in the df + 1.
+        This is done in this convoluted way to fill the na values of both categorical and non-categorical columns with
+        a value that is guaranteed to not be anywhere in the dataframe.
+
+        Return dataset: Dataset with filled nan values
+        """
+        fill_value = int("9" * (len(str(int(dataset.max().max()))) + 1))
+        for col in dataset.columns:
+            if dataset[col].dtype.name == "category":
+                # Category cols require special handling
+                dataset[col] = dataset[col].cat.add_categories(fill_value).fillna(fill_value)
+            else:
+                dataset[col] = dataset[col].fillna(fill_value)
+
+        return dataset
+
+    def __largest_indices(self, ary, n):
+        """Returns the n largest indices from a numpy array."""
+        flat = ary.flatten()
+        indices = np.argpartition(flat, -n)[-n:]
+        indices = indices[np.argsort(-flat[indices])]
+        return np.unravel_index(indices, ary.shape)
+
+
+    def __make_column_plot(self, colname, plot_path):
+        plt.clf()
+        if self.__dataset[colname].dtype.name == "category" or self.__dataset[colname].dtype.name == "bool":
+            # Make a bar chart for categorical or bool columns
+            self.__dataset[colname].value_counts().plot(kind='bar')
+        else:
+            # Make a histogram for numerical columns
+            self.__dataset[colname].plot(kind='hist')
+        plt.margins(0.2)
+        plt.subplots_adjust(bottom=0.2)
+        plt.title(colname)
+        filename = plot_path + "_" + colname + "_plot.svg"
+        plt.savefig(filename)
+        return filename
+
+    def __make_feature_imbalance_plot(self, first_colname, second_colname, categorical_columns, plot_path):
+        plt.clf()
+        plt.figure(figsize=(12, 6))
+        xai.imbalance_plot(self.__dataset, first_colname, second_colname, categorical_cols=categorical_columns)
+        plt.margins(0.2)
+        plt.subplots_adjust(bottom=0.2)
+        filename = plot_path + "_" + first_colname + "_vs_" + second_colname + "_feature_imbalance.svg"
+        plt.savefig(filename)
+        return filename
+
+    def __make_correlation_matrix_plot(self, dataset, categorical_columns, plot_path):
+        plt.clf()
+        plt.rcParams['figure.figsize'] = [16, 16]
+        feature_correlation_plot = xai.correlations(dataset,
+                                                    include_categorical=True,
+                                                    categorical_cols=categorical_columns,
+                                                    plot_type="matrix")
+        plt.margins(0.2)
+        plt.subplots_adjust(bottom=0.5)
+        filename = plot_path + "_correlation_matrix.svg"
+        plt.savefig(filename)
+        return filename

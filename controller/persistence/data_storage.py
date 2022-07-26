@@ -154,44 +154,47 @@ class DataStorage:
         ---
         Returns dataset id
         """
-        analysisResult = {}
 
-        #Perform analysis for tabular data datasets
-        if type == ":tabular":
-            dataset_for_analysis = pd.read_csv(io.BytesIO(content))
-            analysisResult = DataSetAnalysisManager.startAnalysis(dataset_for_analysis)
-
-
-        #build dictionary for database
+        # Build dictionary for database
         database_content = {
             "name": name,
             "type": type,
-            "analysis": analysisResult,
             "models": []
         }
-        
+
+        # Get generated dataset_id from mongo
         dataset_id = self.__mongo.InsertDataset(username, database_content)
-
+        # Get destination filepath using the generated id
         filename_dest = os.path.join(self.__storage_dir, username, dataset_id, fileName)
-        if os.getenv("MONGO_DB_DEBUG") != "YES":
-            #Within docker we do not want to add the app section, as this leads to broken links
-            filename_dest = filename_dest.replace("/app/", "")
-        # make sure directory exists in case it's the first upload from this user
-        os.makedirs(os.path.dirname(filename_dest), exist_ok=True)
 
+        if os.getenv("MONGO_DB_DEBUG") != "YES":
+            # When not in a debug environment (for example within docker) we do not want to add the app section,
+            # as this leads to broken links
+            filename_dest = filename_dest.replace("/app/", "")
+
+        # Make sure directory exists in case it's the first upload from this user
+        os.makedirs(os.path.dirname(filename_dest), exist_ok=True)
+        # Write file content to destination filepath
         with open(filename_dest, 'wb') as outfp:
             outfp.write(content)
 
-        #unpack zip file
+        # If the dataset is an image dataset, which is always uploaded as a .zip file the images have to be unzipped
+        # after saving
         if type == ":image":
             shutil.unpack_archive(filename_dest, os.path.join(self.__storage_dir, username, dataset_id))
 
-        #if type == ":image":
-        #    shutil
+        analysis_result = {}
+        # If the dataset is a tabular dataset it can be analyzed.
+        if type == ":tabular":
+            dsam = DataSetAnalysisManager(pd.read_csv(io.BytesIO(content)))
+            analysis_result["basic_analysis"] = dsam.basicAnalysis()
+            plot_filepath = os.path.join(os.path.dirname(filename_dest), "plots")
+            analysis_result["advanced_analysis_plots"] = dsam.advancedAnalysis(plot_filepath)
 
-        # fill in missing values
+        # Fill in missing values
         success = self.__mongo.UpdateDataset(username, dataset_id, {
             "path": filename_dest,
+            "analysis": analysis_result,
             "mtime": os.path.getmtime(filename_dest)
         })
         assert success, f"cannot update dataset with id {dataset_id}"
