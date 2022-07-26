@@ -11,31 +11,33 @@
 @inject IHttpClientFactory ClientFactory
 
 
-<MudCard>
-    <MudCardHeader Class="mud-theme-primary">
+<MudCard Elevation="5">
+    <MudCardHeader Style="border-bottom-style: inset; border-bottom-width: 1px;">
         <CardHeaderContent >
             <MudText Typo="Typo.h6">Online Prediction</MudText>
         </CardHeaderContent>
     </MudCardHeader>
     <MudCardContent>
-        @if (Model == null)
-        {
-            <DataLoaderSpinner />
-        }
-        else
-        {
-            <InputFile id="fileInput" OnChange="UploadFiles" hidden />
-            <MudStack>
-                <MudButton HtmlTag="label"
-                           Variant="Variant.Filled"
-                           Color="Color.Secondary"
-                           StartIcon="@Icons.Filled.CloudUpload"
-                           for="fileInput">
-                    Upload File
-                </MudButton>
-                <MudButton StartIcon="@Icons.Filled.CloudDownload" Color="Color.Secondary" Disabled="@_downloadReady" OnClick="@DownloadPredictions">Download result CSV</MudButton>
-            </MudStack>
-        }
+        <MudPaper Height="100px" Elevation="0">
+            @if (Model == null)
+            {
+                <DataLoaderSpinner />
+            }
+            else
+            {
+                <InputFile id="fileInput" OnChange="UploadFiles" hidden />
+                <MudStack>
+                    <MudButton HtmlTag="label"
+                               Variant="Variant.Filled"
+                               Color="Color.Secondary"
+                               StartIcon="@Icons.Filled.CloudUpload"
+                               for="fileInput">
+                        Upload File
+                    </MudButton>
+                    <MudButton StartIcon="@Icons.Filled.CloudDownload" Color="Color.Secondary" Disabled="@_downloadReady" OnClick="@DownloadPredictions">Download result CSV</MudButton>
+                </MudStack>
+            }
+        </MudPaper>
     </MudCardContent>
 </MudCard>
 

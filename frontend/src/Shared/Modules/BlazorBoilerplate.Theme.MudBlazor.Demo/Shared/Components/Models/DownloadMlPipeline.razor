@@ -4,28 +4,30 @@
 @inject IStringLocalizer<Global> L
 
 
-<MudCard>
-    <MudCardHeader Class="mud-theme-primary">
+<MudCard Elevation="5">
+    <MudCardHeader Style="border-bottom-style: inset; border-bottom-width: 1px;">
         <CardHeaderContent >
             <MudText Typo="Typo.h6">Download ML pipeline</MudText>
         </CardHeaderContent>
     </MudCardHeader>
     <MudCardContent>
-        @if (Model == null)
-        {
-            <DataLoaderSpinner />
-        }
-        else
-        {
-            <MudStack>
-                <MudButton OnClick="@DownloadModel" 
-                    Variant="Variant.Filled" 
-                    StartIcon="@Icons.Filled.CloudDownload"
-                    Color="Color.Secondary">
-                    Download model
-                </MudButton>
-            </MudStack>
-        }
+        <MudPaper Height="100px" Elevation="0">
+            @if (Model == null)
+            {
+                <DataLoaderSpinner />
+            }
+            else
+            {
+                <MudStack>
+                    <MudButton OnClick="@DownloadModel" 
+                        Variant="Variant.Filled" 
+                        StartIcon="@Icons.Filled.CloudDownload"
+                        Color="Color.Secondary">
+                        Download model
+                    </MudButton>
+                </MudStack>
+            }
+        </MudPaper>
     </MudCardContent>
 </MudCard>
 

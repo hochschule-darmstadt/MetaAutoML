@@ -1,4 +1,5 @@
-﻿@page "/models/{id}/details"
+﻿@page "/datasets/{datasetId}/models/{id}/details"
+@page "/trainings/{trainingId}/models/{id}/details"
 @inject IStringLocalizer<Global> L
 @inject ISnackbar Snackbar
 @inject IViewNotifier viewNotifier
@@ -14,14 +15,32 @@
 <PageTitle>Home</PageTitle>
 <MudGrid>
     <MudItem xs="12" sm="12" md="12">
-        <MudCard>
-            <MudCardHeader Class="mud-theme-primary">
+        <MudCard Elevation="5">
+            <MudCardHeader Style="border-bottom-style: inset; border-bottom-width: 1px;">
                 <CardHeaderContent >
                     <MudText Typo="Typo.h6">Overview</MudText>
                 </CardHeaderContent>
             </MudCardHeader>
             <MudCardContent>
-
+                <MudPaper Height="100px" Elevation="0">
+                    @if (true)
+                    {
+                        <DataLoaderSpinner />
+                    }
+                    else
+                    {
+                        <MudGrid>
+                            <MudItem xs="3" sm="3" md="3">
+                            </MudItem>
+                            <MudItem xs="3" sm="3" md="3">
+                            </MudItem>
+                            <MudItem xs="3" sm="3" md="3">
+                            </MudItem>
+                            <MudItem xs="3" sm="3" md="3">
+                            </MudItem>
+                        </MudGrid>
+                    }
+                </MudPaper>
             </MudCardContent>
         </MudCard>
     </MudItem>

@@ -1,4 +1,4 @@
-﻿@page "/wizard/{id}"
+﻿@page "/datasets/{id}/train"
 @inject IStringLocalizer<Global> L
 @inject ISnackbar Snackbar
 @inject IApiClient apiClient
@@ -6,57 +6,51 @@
 @inject NavigationManager NavManager
 @attribute [Authorize]
 
-<TopSection>
-    <Breadcrumbs>
-        <Breadcrumb Title="Wizard" />
-    </Breadcrumbs>
-</TopSection>
+@if (!string.IsNullOrEmpty(_datasetTitle))
+{
+    <TopSection>
+        <Breadcrumbs>
+            <Breadcrumb Title="Datasets" Link="/datasets" />
+            <Breadcrumb Title="@_datasetTitle" Link="@("/datasets/" + _dataset.Identifier)"/>
+            <Breadcrumb Title="Train" />
+        </Breadcrumbs>
+    </TopSection>
+}
 
-<PageTitle>Datasets</PageTitle>
-<MudGrid>
-    <MudItem xs="12" sm="12" md="12">
-        <MudCard>
-            <MudCardHeader Class="mud-theme-primary">
-                <CardHeaderContent >
-                    <MudText Typo="Typo.h6">Overview</MudText>
-                </CardHeaderContent>
-            </MudCardHeader>
-            <MudCardContent>
-                @if (_dataset == null)
-                {
-                    <DataLoaderSpinner />
-                }
-                else
-                {
-                    <MuddyWizard WizardFinished="@OnWizardFinished">
-                        <MuddyWizardPanel Title="Dataset preparation">
-                            @switch (_dataset.Type.ID)
-                            {
-                                case ":tabular":
-                                <DisplayTabularDataset Dataset="@_dataset" @bind-StartAutoMlRequest="@_automlRequest"/>
-                                    break;
-                                case ":image":
-                                <DisplayImageDataset Dataset="@_dataset" @bind-StartAutoMlRequest="@_automlRequest"/>
-                                    break;
-                            }
-                        </MuddyWizardPanel>
-                        <MuddyWizardPanel Title="Configuration">
-                            <TaskConfiguration Dataset="@_dataset" @bind-StartAutoMlRequest="@_automlRequest" />
-                        </MuddyWizardPanel>
-                    </MuddyWizard>
-                }
-            </MudCardContent>
-        </MudCard>
-    </MudItem>
-    <MudItem xs="12" sm="12" md="12">
-    </MudItem>
-</MudGrid>
+
+<MudText Typo="Typo.h6">Train</MudText>
+<MudSpacer/>
+
+@if (_dataset == null)
+{
+    <DataLoaderSpinner />
+}
+else
+{
+    <MuddyWizard WizardFinished="@OnWizardFinished">
+        <MuddyWizardPanel Title="Dataset preparation">
+            @switch (_dataset.Type.ID)
+            {
+                case ":tabular":
+                <DisplayTabularDataset Dataset="@_dataset" @bind-StartAutoMlRequest="@_automlRequest"/>
+                    break;
+                case ":image":
+                <DisplayImageDataset Dataset="@_dataset" @bind-StartAutoMlRequest="@_automlRequest"/>
+                    break;
+            }
+        </MuddyWizardPanel>
+        <MuddyWizardPanel Title="Configuration">
+            <TaskConfiguration Dataset="@_dataset" @bind-StartAutoMlRequest="@_automlRequest" />
+        </MuddyWizardPanel>
+    </MuddyWizard>
+}
+
 @code {
     [Parameter]
     public string Id { get; set; }
 
     private GetDatasetResponseDto _dataset;
-    private string _pageTitle = "";
+    private string _datasetTitle = "";
     private StartAutoMLRequestDto _automlRequest;
 
     protected async override void OnInitialized()
@@ -77,7 +71,8 @@
             if (apiResponse.IsSuccessStatusCode)
             {
                 _dataset = Newtonsoft.Json.JsonConvert.DeserializeObject<GetDatasetResponseDto>(apiResponse.Result.ToString());
-                _pageTitle = "Dataset " + _dataset.Name;
+                _datasetTitle = "Dataset " + _dataset.Name;
+                StateHasChanged();
                 StateHasChanged();
                 viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
             }

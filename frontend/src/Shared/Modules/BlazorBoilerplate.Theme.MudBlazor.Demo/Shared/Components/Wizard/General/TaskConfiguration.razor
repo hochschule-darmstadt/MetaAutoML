@@ -4,35 +4,19 @@
 @using Newtonsoft.Json
 
 <MudStack>
-    <MudSelect Label="ML task" T="string" ValueChanged="@OnMlTaskSelectionChanged">
-        @if (_compatibletasks != null)
-        {
+    @if (_compatibletasks != null)
+    {
+        <MudSelect Label="ML task" T="string" ValueChanged="@OnMlTaskSelectionChanged">
             @foreach (var task in _compatibletasks.Tasks)
             {
                 <MudSelectItem Value="@task.ID">@task.Properties["skos:prefLabel"]</MudSelectItem>
             }
-        }
-    </MudSelect>
-
-    <MudChipSet SelectedChipsChanged="OnMlLibrarySelectionChanged" Filter="true" MultiSelection="true" >
-        @if (_supportedMlLibraries != null)
-        {
-            @foreach (var lib in _supportedMlLibraries.MlLibraries)
-            {
-                <MudChip Value="@lib.ID" Text="@lib.Properties["skos:prefLabel"]" Default="true" Variant="Variant.Outlined" Color="Color.Secondary" />
-            }
-        }
-    </MudChipSet>
-
-    <MudChipSet SelectedChipsChanged="OnAutoMlSolutionSelectionChanged" Filter="true" MultiSelection="true" >
-        @if (_compatibleAutoMls != null)
-        {
-            @foreach (var lib in _compatibleAutoMls.AutoMlSolutions)
-            {
-                <MudChip Value="@lib.ID" Text="@lib.Properties["skos:prefLabel"]" Default="true" Variant="Variant.Outlined" Color="Color.Secondary" />
-            }
-        }
-    </MudChipSet>
+        </MudSelect>
+    }
+    else
+    {
+        <DataLoaderSpinner />
+    }
 
     @if (StartAutoMlRequest.DatasetType == ":tabular")
     {
@@ -46,6 +30,47 @@
             }
         </MudSelect>
     }
+    <MudNumericField ValueChanged="@OnRuntimeValueChanged" T="int" Label="Runtime" Variant="Variant.Text" Min="3" Max="180" Value="@StartAutoMlRequest.RuntimeConstraints["runtime_limit"]"/>
+
+    <MudExpansionPanels>
+        <MudExpansionPanel Text="Details">
+            @if (_supportedMlLibraries != null)
+            {
+                <MudText Typo="Typo.body1">ML libraries</MudText>
+                <MudChipSet SelectedChipsChanged="OnMlLibrarySelectionChanged" Filter="true" MultiSelection="true" >
+                    @if (_supportedMlLibraries != null)
+                    {
+                        @foreach (var lib in _supportedMlLibraries.MlLibraries)
+                        {
+                            <MudChip Value="@lib.ID" Text="@lib.Properties["skos:prefLabel"]" Default="true" Variant="Variant.Text" Color="Color.Secondary" />
+                        }
+                    }
+                </MudChipSet>
+            }
+            else
+            {
+                <DataLoaderSpinner />
+            }
+            @if (_compatibleAutoMls != null)
+            {
+                <MudText Typo="Typo.body1">AutoML solutions</MudText>
+                <MudChipSet SelectedChipsChanged="OnAutoMlSolutionSelectionChanged" Filter="true" MultiSelection="true" >
+                    @if (_compatibleAutoMls != null)
+                    {
+                        @foreach (var lib in _compatibleAutoMls.AutoMlSolutions)
+                        {
+                            <MudChip Value="@lib.ID" Text="@lib.Properties["skos:prefLabel"]" Default="true" Variant="Variant.Text" Color="Color.Secondary" />
+                        }
+                    }
+                </MudChipSet>
+            }
+            else
+            {
+                <DataLoaderSpinner />
+            }
+        </MudExpansionPanel>
+    </MudExpansionPanels>
+
 </MudStack>
 
 @code {
@@ -73,6 +98,11 @@
         base.OnInitialized();
         SetupStartAutoMLConfiguration();
         await LoadData();
+    }
+
+    private void OnRuntimeValueChanged(int e)
+    {
+        StartAutoMlRequest.RuntimeConstraints["runtime_limit"] = e;
     }
 
     private async void SetupStartAutoMLConfiguration()
@@ -179,12 +209,20 @@
             Dictionary<string, string> dictionary = new Dictionary<string, string>();
             dictionary.Add("task", StartAutoMlRequest.Task);
             List<string> libraries = new List<string>();
+
+
+
             StartAutoMlRequest.RequiredMlLibraries = new List<string>();
             foreach (var chip in libs)
             {
                 StartAutoMlRequest.RequiredMlLibraries.Add((string)chip.Value);
                 libraries.Add((string)chip.Value);
             }
+
+
+
+
+
             await UpdateStartAutoMlRequest();
             if (libraries.Count != 0)
             {

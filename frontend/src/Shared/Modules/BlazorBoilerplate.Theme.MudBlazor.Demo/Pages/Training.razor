@@ -1,17 +1,21 @@
-﻿@page "/trainings"
+﻿@page "/trainings/{id}"
 @inject IStringLocalizer<Global> L
 @inject ISnackbar Snackbar
-@inject IApiClient apiClient
 @inject IViewNotifier viewNotifier
+@inject IApiClient apiClient
 @attribute [Authorize]
 
-<TopSection>
-    <Breadcrumbs>
-        <Breadcrumb Title="Trainings" />
-    </Breadcrumbs>
-</TopSection>
+@if (!string.IsNullOrEmpty(_pageTitle))
+{
+    <TopSection>
+        <Breadcrumbs>
+            <Breadcrumb Title="Trainings" Link="/trainings"/>
+            <Breadcrumb Title="@_pageTitle"/>
+        </Breadcrumbs>
+    </TopSection>
+}
 
-<PageTitle>Trainings</PageTitle>
+<PageTitle>Home</PageTitle>
 <MudGrid>
     <MudItem xs="12" sm="12" md="12">
         <MudCard Elevation="5">
@@ -44,25 +48,34 @@
         </MudCard>
     </MudItem>
     <MudItem xs="12" sm="12" md="12">
-        <AllTrainings Trainings="_trainings"/>
+        <TrainingDetails Training="_training" />
     </MudItem>
 </MudGrid>
 
-@code{
-    private GetAllTrainingsResponseDto _trainings;
-    protected override async Task OnInitializedAsync()
+
+@code {
+    [Parameter]
+    public string Id { get; set; }
+    private string _pageTitle = "";
+    private GetTrainingResponseDto _training;
+
+    protected async override void OnInitialized()
     {
-        await LoadTrainings();
+        await GetTraining();
     }
-    private async Task LoadTrainings()
+
+    private async Task GetTraining()
     {
         try
         {
-            ApiResponseDto apiResponse = await apiClient.GetAllTrainings(new GetAllTrainingsRequestDto());
+            ApiResponseDto apiResponse = await apiClient.GetTraining(new GetTrainingRequestDto() { TrainingId = Id});
 
             if (apiResponse.IsSuccessStatusCode)
             {
-                _trainings = Newtonsoft.Json.JsonConvert.DeserializeObject<GetAllTrainingsResponseDto>(apiResponse.Result.ToString());
+                _training = Newtonsoft.Json.JsonConvert.DeserializeObject<GetTrainingResponseDto>(apiResponse.Result.ToString());
+                _pageTitle = "Training " + _training.StartTime;
+                StateHasChanged();
+                StateHasChanged();
                 viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
             }
             else

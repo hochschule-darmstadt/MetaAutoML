@@ -1,0 +1,87 @@
+﻿@inject IStringLocalizer<Global> L
+@inject NavigationManager NavManager
+
+
+<MudCard Elevation="5">
+    <MudCardHeader Style="border-bottom-style: inset; border-bottom-width: 1px;">
+        <CardHeaderContent >
+            <MudText Typo="Typo.h6">All datasets</MudText>
+        </CardHeaderContent>
+        <CardHeaderActions>
+            <MudStack Row="true" Class="align-content-center" Style="margin-top: 8px">
+                <UploadDataset OnUploadCompletedCallback="@OnUploadCompletedCallback"/>
+            </MudStack>
+        </CardHeaderActions>
+    </MudCardHeader>
+    <MudCardContent>
+        @if (Datasets == null)
+        {
+                <DataLoaderSpinner />
+        }
+        else
+        {
+            <MudTable Items="@Datasets.Datasets" style="width:stretch" class="mat-elevation-z5" AllowSelection="false" Dense="true" Filter="new Func<GetDatasetResponseDto,bool>(FilterFunc)">
+                <ToolBarContent>
+                    <MudSpacer />
+                    <MudTextField @bind-Value="searchString" Placeholder="Search" Adornment="Adornment.Start"
+                                    AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+                </ToolBarContent>
+                <HeaderContent>
+                    <MudTh><MudTableSortLabel SortBy="new Func<GetDatasetResponseDto, object>(x=>x.Name)">Name</MudTableSortLabel></MudTh>
+                    <MudTh><MudTableSortLabel SortBy="new Func<GetDatasetResponseDto, object>(x=>x.Type)">Type</MudTableSortLabel></MudTh>
+                    <MudTh>Rows</MudTh>
+                    <MudTh>Columns</MudTh>
+                    <MudTh><MudTableSortLabel SortBy="new Func<GetDatasetResponseDto, object>(x=>x.Creation_date)">Date</MudTableSortLabel></MudTh>
+                    <MudTh></MudTh>   
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd >
+                        <a href="@NavManager.ToAbsoluteUri("datasets/" + @context.Identifier).AbsoluteUri" Style="cursor: pointer;">@context.Name</a>
+                    </MudTd>
+                    <MudTd >@context.Type.Properties["skos:prefLabel"]</MudTd>
+                    <MudTd >@context.Rows</MudTd>
+                    <MudTd >@context.Columns</MudTd>
+                    <MudTd  style="white-space:nowrap;">@context.Creation_date.ToString("yyyy-MM-dd")</MudTd>
+                    <MudTd><DatasetMenu Dataset="@context"/></MudTd>
+                </RowTemplate>
+                <PagerContent>
+                    <MudTablePager />
+                </PagerContent>
+            </MudTable>
+        }
+    </MudCardContent>
+</MudCard>
+
+@code {
+    [Parameter]
+    public GetDatasetsResponseDto Datasets
+    { 
+        get
+        {
+            return _datasets;
+        } 
+        set
+        {
+            _datasets = value;
+            if(_datasets != null)
+            {
+                StateHasChanged();
+            }
+        } 
+    }
+    private GetDatasetsResponseDto _datasets;
+    [Parameter]
+    public EventCallback OnUploadCompletedCallback { get; set; }
+    private string searchString = "";
+    
+    private bool FilterFunc(GetDatasetResponseDto element)
+    {
+        if (string.IsNullOrWhiteSpace(searchString))
+            return true;
+        if (element.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (element.Type.Properties["skos:prefLabel"].Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        return false;
+    } 
+}

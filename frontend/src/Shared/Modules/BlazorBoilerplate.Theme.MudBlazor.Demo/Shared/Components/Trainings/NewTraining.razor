@@ -3,37 +3,39 @@
 @inject IViewNotifier viewNotifier
 @inject NavigationManager NavManager
 
-<MudCard>
-    <MudCardHeader Class="mud-theme-primary">
+<MudCard Elevation="5">
+    <MudCardHeader Style="border-bottom-style: inset; border-bottom-width: 1px;">
         <CardHeaderContent >
             <MudText Typo="Typo.h6">New Training</MudText>
         </CardHeaderContent>
     </MudCardHeader>
     <MudCardContent>
-        @if (Dataset == null)
-        {
-            <DataLoaderSpinner />
-        }
-        else
-        {
-            <MudStack>
-                <MudTimeline TimelineOrientation="@TimelineOrientation.Horizontal" TimelinePosition="@TimelinePosition.Bottom">
-                    <MudTimelineItem Color="Color.Secondary">
-                        <MudText Align="Align.Center" Typo="Typo.body2">Dataset preparation</MudText>
-                    </MudTimelineItem>
-                    <MudTimelineItem>
-                        <MudText Align="Align.Center" Typo="Typo.body2">Configuration</MudText>
-                    </MudTimelineItem>
-                </MudTimeline>
+        <MudPaper Height="215px" Elevation="0">
+            @if (Dataset == null)
+            {
+                <DataLoaderSpinner />
+            }
+            else
+            {
+                <MudStack>
+                    <MudTimeline TimelineOrientation="@TimelineOrientation.Horizontal" TimelinePosition="@TimelinePosition.Bottom">
+                        <MudTimelineItem Color="Color.Secondary">
+                            <MudText Align="Align.Center" Typo="Typo.body2">Dataset preparation</MudText>
+                        </MudTimelineItem>
+                        <MudTimelineItem>
+                            <MudText Align="Align.Center" Typo="Typo.body2">Configuration</MudText>
+                        </MudTimelineItem>
+                    </MudTimeline>
 
-                <MudButton OnClick="@(e => { NavManager.NavigateTo("/wizard/" + Dataset.Identifier); })" 
-                    Variant="Variant.Filled" 
-                    StartIcon="@Icons.Filled.ModelTraining"
-                    Color="Color.Secondary">
-                    Start Training
-                </MudButton>
-            </MudStack>
-        }
+                    <MudButton OnClick="@(e => { NavManager.NavigateTo("/datasets/" + Dataset.Identifier + "/train"); })" 
+                        Variant="Variant.Filled" 
+                        StartIcon="@Icons.Filled.ModelTraining"
+                        Color="Color.Secondary">
+                        Start Training
+                    </MudButton>
+                </MudStack>
+            }
+        </MudPaper>
     </MudCardContent>
 </MudCard>
 

@@ -3,8 +3,8 @@
 @inject IViewNotifier viewNotifier
 @inject NavigationManager NavManager
 
-<MudCard>
-    <MudCardHeader Class="mud-theme-primary">
+<MudCard Elevation="5">
+    <MudCardHeader Style="border-bottom-style: inset; border-bottom-width: 1px;">
         <CardHeaderContent >
             <MudText Typo="Typo.h6">Top 3 models</MudText>
         </CardHeaderContent>
@@ -21,35 +21,37 @@
         </CardHeaderActions>
     </MudCardHeader>
     <MudCardContent>
-        @if (_top3Models == null)
-        {
-            <DataLoaderSpinner />
-        }
-        else
-        {
-            <MudTable Items="@_top3Models.Models">
-                <HeaderContent>
-                    <MudTh>Name</MudTh>
-                    <MudTh>Model</MudTh>
-                    <MudTh>Library</MudTh>
-                    <MudTh>Test score</MudTh>
-                    <MudTh>Validation score</MudTh>
-                    <MudTh>Prediction time</MudTh>
-                    <MudTh>Runtime</MudTh>
-                </HeaderContent>
-                <RowTemplate>
-                    <MudTd >
-                        <a href="@NavManager.ToAbsoluteUri("models/" + @context.ID).AbsoluteUri" Style="cursor: pointer;">@context.Name</a>
-                    </MudTd>
-                    <MudTd >@context.Model</MudTd>
-                    <MudTd >@context.Library</MudTd>
-                    <MudTd >@context.TestScore</MudTd>
-                    <MudTd >@context.ValidationScore</MudTd>
-                    <MudTd >@context.Predictiontime</MudTd>
-                    <MudTd >@context.Runtime</MudTd>
-                </RowTemplate>
-            </MudTable>
-        }
+        <MudPaper Height="215px" Elevation="0">
+            @if (_top3Models == null)
+            {
+                <DataLoaderSpinner />
+            }
+            else
+            {
+                <MudTable Items="@_top3Models.Models">
+                    <HeaderContent>
+                        <MudTh>Name</MudTh>
+                        <MudTh>Model</MudTh>
+                        <MudTh>Library</MudTh>
+                        <MudTh>Test score</MudTh>
+                        <MudTh>Validation score</MudTh>
+                        <MudTh>Prediction time</MudTh>
+                        <MudTh>Runtime</MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd >
+                            <a href="@NavManager.ToAbsoluteUri("datasets/" + Dataset.Identifier + "/models/" + @context.ID).AbsoluteUri" Style="cursor: pointer;">@context.Name</a>
+                        </MudTd>
+                        <MudTd >@context.Model</MudTd>
+                        <MudTd >@context.Library</MudTd>
+                        <MudTd >@context.TestScore</MudTd>
+                        <MudTd >@context.ValidationScore</MudTd>
+                        <MudTd >@context.Predictiontime</MudTd>
+                        <MudTd >@context.Runtime</MudTd>
+                    </RowTemplate>
+                </MudTable>
+            }
+        </MudPaper>
     </MudCardContent>
 </MudCard>
 

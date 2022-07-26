@@ -1,0 +1,151 @@
+﻿@inject IStringLocalizer<Global> L
+@inject NavigationManager NavManager
+@using System.Timers
+@implements IDisposable
+@inject IViewNotifier viewNotifier
+@inject IApiClient apiClient
+
+<MudCard Elevation="5">
+    <MudCardHeader Style="border-bottom-style: inset; border-bottom-width: 1px;">
+        <CardHeaderContent >
+            <MudText Typo="Typo.h6">Leaderboard</MudText>
+        </CardHeaderContent>
+    </MudCardHeader>
+    <MudCardContent>
+        <MudPaper Height="250px" Elevation="0">
+            @if (Training == null)
+            {
+                <DataLoaderSpinner />
+            }
+            else
+            {
+                
+                <MudTable Items="@Training.AutoMls" Context="AutoMl" Filter="new Func<AutoMLStatusDto,bool>(FilterFunc)">
+                    <ToolBarContent>
+                        <MudSpacer />
+                        <MudTextField @bind-Value="searchString" Placeholder="Search" Adornment="Adornment.Start"
+                                    AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+                    </ToolBarContent>
+                    <HeaderContent>
+                        <MudTh><MudTableSortLabel SortBy="new Func<AutoMLStatusDto, object>(x=>x.Name)">Name</MudTableSortLabel></MudTh>
+                        <MudTh><MudTableSortLabel SortBy="new Func<AutoMLStatusDto, object>(x=>x.Status)">Status</MudTableSortLabel></MudTh>
+                        <MudTh><MudTableSortLabel SortBy="new Func<AutoMLStatusDto, object>(x=>x.Library)">Library</MudTableSortLabel></MudTh>
+                        <MudTh><MudTableSortLabel SortBy="new Func<AutoMLStatusDto, object>(x=>x.Model)">Model</MudTableSortLabel></MudTh>
+                        <MudTh><MudTableSortLabel SortBy="new Func<AutoMLStatusDto, object>(x=>x.TestScore)">Test score</MudTableSortLabel></MudTh>
+                        <MudTh><MudTableSortLabel SortBy="new Func<AutoMLStatusDto, object>(x=>x.Predictiontime)">Prediction time</MudTableSortLabel></MudTh>
+                        <MudTh><MudTableSortLabel SortBy="new Func<AutoMLStatusDto, object>(x=>x.Runtime)">Runtime</MudTableSortLabel></MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd>
+                            <a href="@NavManager.ToAbsoluteUri("trainings/" + Training.ID + "/models/" + @AutoMl.ID).AbsoluteUri" Style="cursor: pointer;">@AutoMl.Name</a>
+                        </MudTd>
+                        <MudTd>
+                            @AutoMl.Status
+                            @if (AutoMl.Status == "busy")
+                            {
+                                <MudProgressCircular Size="Size.Small"  Color="Color.Secondary" Indeterminate="true"/>
+                            }
+                        </MudTd>
+                        <MudTd>
+                            @AutoMl.Model
+                        </MudTd>
+                        <MudTd>@AutoMl.Library</MudTd>
+                        <MudTd>@AutoMl.TestScore</MudTd>
+                        <MudTd>@AutoMl.Predictiontime</MudTd>
+                        <MudTd>@AutoMl.Runtime</MudTd>
+                    </RowTemplate>
+                </MudTable>
+            }
+        </MudPaper>
+    </MudCardContent>
+</MudCard>
+
+@code {
+    [Parameter]
+    public GetTrainingResponseDto Training
+    { 
+        get
+        {
+            return _training;
+        } 
+        set
+        {
+            _training = value;
+            if(_training != null)
+            {
+                RefreshTraining(null, null);
+                _timer = new Timer()
+                {
+                    AutoReset = true,
+                    Enabled = true,
+                    Interval = 5000
+                };
+                _timer.Elapsed += RefreshTraining;
+                StateHasChanged();
+            }
+        } 
+    }
+    private GetTrainingResponseDto _training;
+    private Timer _timer;
+    private string searchString = "";
+
+    private bool FilterFunc(AutoMLStatusDto element)
+    {
+        if (string.IsNullOrWhiteSpace(searchString))
+            return true;
+        if (element.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (element.Status.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (element.Library.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (element.Model.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        return false;
+    } 
+    public void Dispose()
+    {
+        DisposeTimer();
+    }
+
+    private async void RefreshTraining(object sender, ElapsedEventArgs e)
+    {
+        await InvokeAsync(async () =>
+        {
+            try
+            {
+                if (_training.Status != "busy")
+                {
+                    DisposeTimer();
+                    return;
+                }
+                
+                ApiResponseDto apiResponse = await apiClient.GetTraining(new GetTrainingRequestDto { TrainingId = Training.ID });
+
+                if (apiResponse.IsSuccessStatusCode)
+                {
+                    _training = Newtonsoft.Json.JsonConvert.DeserializeObject<GetTrainingResponseDto>(apiResponse.Result.ToString());
+                    StateHasChanged();
+                }
+                else
+                {
+                    viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
+                }
+                
+            }
+            catch (Exception ex)
+            {
+                viewNotifier.Show(ex.GetBaseException().Message, ViewNotifierType.Error, L["Operation Failed"]);
+                _timer.Elapsed -= RefreshTraining;
+            }
+        });
+    }
+
+    public void DisposeTimer(){
+        if(_timer!=null){
+            _timer.Elapsed -= RefreshTraining;
+            _timer?.Dispose();
+            _timer = null;
+        }
+    }
+}

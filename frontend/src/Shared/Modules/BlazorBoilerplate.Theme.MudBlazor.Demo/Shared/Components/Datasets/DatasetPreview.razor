@@ -1,0 +1,44 @@
+﻿
+@using System 
+@using System.IO
+@using Microsoft.AspNetCore.Hosting
+@using Microsoft.Extensions.Logging
+@using System.Net.Http.Headers
+@inject IApiClient apiClient
+@inject IViewNotifier viewNotifier
+@inject IJSRuntime JS
+@inject IStringLocalizer<Global> L
+@inject IHttpClientFactory ClientFactory
+
+
+<MudCard Elevation="5">
+    <MudCardHeader Style="border-bottom-style: inset; border-bottom-width: 1px;">
+        <CardHeaderContent >
+            <MudText Typo="Typo.h6">Preview</MudText>
+        </CardHeaderContent>
+    </MudCardHeader>
+    <MudCardContent>
+        <MudPaper Height="250px" Elevation="0">
+        </MudPaper>
+    </MudCardContent>
+</MudCard>
+
+@code {
+    [Parameter]
+    public GetModelResponseDto Model
+    { 
+        get
+        {
+            return _model;
+        } 
+        set
+        {
+            _model = value;
+            StateHasChanged();
+        } 
+    }
+    private GetModelResponseDto _model;
+    private bool _downloadReady = true;
+    private TestAutoMLResponseDto _predictionResult;
+
+}

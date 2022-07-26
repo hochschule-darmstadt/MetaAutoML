@@ -119,7 +119,7 @@ namespace BlazorBoilerplate.Server
 
             string redisHost = Environment.GetEnvironmentVariable("REDIS_SERVICE_HOST");
             string redisPort = Environment.GetEnvironmentVariable("REDIS_SERVICE_PORT");
-            string redisEndpoint = $"{redisHost}:{redisPort}";
+            string redisEndpoint = $"{redisHost}:{redisPort},connectTimeout=1000,syncTimeout=1000,asyncTimeout=1000";
 
             ////////////////////////////////////////////////////////////////////////////////////////////////////////
             //GRPC CONTROLLER FACTORY 
@@ -130,8 +130,8 @@ namespace BlazorBoilerplate.Server
             })
             .ConfigureChannel(o =>
             {
-                o.MaxReceiveMessageSize = 2000 * 1024 * 1024; // 2000 MB
-                o.MaxSendMessageSize = 2000 * 1024 * 1024; // 2000 MB
+                o.MaxReceiveMessageSize = 2000 * 1024 * 1024;   // 2000 MB
+                o.MaxSendMessageSize = 2000 * 1024 * 1024;      // 2000 MB
             })
             .ConfigurePrimaryHttpMessageHandler(() =>
             {

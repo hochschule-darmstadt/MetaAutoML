@@ -2,8 +2,8 @@
 @inject NavigationManager NavManager
 
 
-<MudCard>
-    <MudCardHeader Class="mud-theme-primary">
+<MudCard Elevation="5">
+    <MudCardHeader Style="border-bottom-style: inset; border-bottom-width: 1px;">
         <CardHeaderContent >
             <MudText Typo="Typo.h6">All Models</MudText>
         </CardHeaderContent>
@@ -11,14 +11,14 @@
     <MudCardContent>
         @if (Models == null)
         {
-             <DataLoaderSpinner />
+                <DataLoaderSpinner />
         }
         else
         {
             <MudTable Items="@Models.Models" style="width:stretch" class="mat-elevation-z5" AllowSelection="false" Dense="true" Filter="new Func<ModelDto,bool>(FilterFunc)">                
                 <ToolBarContent>
                     <MudTextField @bind-Value="searchString" Placeholder="Search" Adornment="Adornment.Start"
-                                  AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+                                    AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
                 </ToolBarContent>
                 <HeaderContent>
                     <MudTh><MudTableSortLabel SortBy="new Func<ModelDto, object>(x=>x.Model)">Name</MudTableSortLabel></MudTh>
@@ -30,7 +30,9 @@
                     <MudTh><MudTableSortLabel SortBy="new Func<ModelDto, object>(x=>x.Predictiontime)">Prediction time</MudTableSortLabel></MudTh>
                 </HeaderContent>
                 <RowTemplate>
-                    <MudTd>@context.Model</MudTd>
+                    <MudTd >
+                        <a href="@NavManager.ToAbsoluteUri("models/" + @context.ID).AbsoluteUri" Style="cursor: pointer;">@context.Model</a>
+                    </MudTd>
                     <MudTd>@context.Status</MudTd>
                     <MudTd>@context.Library</MudTd>
                     <MudTd>@context.Name</MudTd>

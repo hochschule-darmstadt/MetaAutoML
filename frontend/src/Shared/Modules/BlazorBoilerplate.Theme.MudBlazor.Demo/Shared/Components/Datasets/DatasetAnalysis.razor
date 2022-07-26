@@ -2,8 +2,8 @@
 @inject IApiClient apiClient
 @inject IViewNotifier viewNotifier
 
-<MudCard>
-    <MudCardHeader Class="mud-theme-primary">
+<MudCard Elevation="5">
+    <MudCardHeader Style="border-bottom-style: inset; border-bottom-width: 1px;">
         <CardHeaderContent >
             <MudText Typo="Typo.h6">Analysis</MudText>
         </CardHeaderContent>
@@ -17,13 +17,15 @@
         </CardHeaderActions>
     </MudCardHeader>
     <MudCardContent>
-        @if (Dataset == null)
-        {
-             <DataLoaderSpinner />
-        }
-        else
-        {
-        }
+        <MudPaper Height="250px" Elevation="0">
+            @if (Dataset == null)
+            {
+                 <DataLoaderSpinner />
+            }
+            else
+            {
+            }
+        </MudPaper>
     </MudCardContent>
 </MudCard>
 

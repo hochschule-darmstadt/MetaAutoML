@@ -20,37 +20,41 @@
 
 <MudGrid>
     <MudItem xs="12" sm="12" md="12">
-        <MudCard>
-            <MudCardHeader Class="mud-theme-primary">
+        <MudCard Elevation="5">
+            <MudCardHeader Style="border-bottom-style: inset; border-bottom-width: 1px;">
                 <CardHeaderContent >
                     <MudText Typo="Typo.h6">Overview</MudText>
                 </CardHeaderContent>
             </MudCardHeader>
             <MudCardContent>
-                @if (_dataset == null)
-                {
-                    <DataLoaderSpinner />
-                }
-                else
-                {
-                    <MudGrid>
-                        <MudItem xs="4" sm="4" md="4">
-                            <MudText Typo="Typo.body1">Name: @_dataset.Name</MudText>
-                            <MudText Typo="Typo.body1">Dataset type: @_dataset.Type.Properties["skos:prefLabel"]</MudText>
-                        </MudItem>
-                        <MudItem xs="4" sm="4" md="4">
-                            <MudText Typo="Typo.body1">Date: @_dataset.Creation_date</MudText>
-                        </MudItem>
-                        <MudItem xs="4" sm="4" md="4">
-                            <MudText Typo="Typo.body1">File Size: </MudText>
-                            @if (@_dataset.Type.ID == ":tabular")
-                            {
-                                <MudText Typo="Typo.body1">Number of rows: @_dataset.Rows</MudText>
-                                <MudText Typo="Typo.body1">Number of columns: @_dataset.Columns</MudText>
-                            }
-                        </MudItem>
-                    </MudGrid>
-                }
+                <MudPaper Height="100px" Elevation="0">
+                    @if (_dataset == null)
+                    {
+                        <DataLoaderSpinner />
+                    }
+                    else
+                    {
+                        <MudGrid>
+                            <MudItem xs="3" sm="3" md="3">
+                                <MudText Typo="Typo.body1">Name: @_dataset.Name</MudText>
+                                <MudText Typo="Typo.body1">Dataset type: @_dataset.Type.Properties["skos:prefLabel"]</MudText>
+                            </MudItem>
+                            <MudItem xs="3" sm="3" md="3">
+                                <MudText Typo="Typo.body1">Date: @_dataset.Creation_date</MudText>
+                            </MudItem>
+                            <MudItem xs="3" sm="3" md="3">
+                                <MudText Typo="Typo.body1">File Size: </MudText>
+                                @if (@_dataset.Type.ID == ":tabular")
+                                {
+                                    <MudText Typo="Typo.body1">Number of rows: @_dataset.Rows</MudText>
+                                    <MudText Typo="Typo.body1">Number of columns: @_dataset.Columns</MudText>
+                                }
+                            </MudItem>
+                            <MudItem xs="3" sm="3" md="3">
+                            </MudItem>
+                        </MudGrid>
+                    }
+                </MudPaper>
             </MudCardContent>
         </MudCard>
     </MudItem>
@@ -60,7 +64,10 @@
     <MudItem xs="9" sm="9" md="9">
         <Top3Models Dataset="_dataset"/>
     </MudItem>
-    <MudItem xs="12" sm="12" md="12">
+    <MudItem xs="6" sm="6" md="6">
+        <DatasetAnalysis Dataset="_dataset"/>
+    </MudItem>
+    <MudItem xs="6" sm="6" md="6">
         <DatasetAnalysis Dataset="_dataset"/>
     </MudItem>
 </MudGrid>

@@ -1,13 +1,13 @@
 ﻿
-<MudCard>
-    <MudCardHeader Class="mud-theme-primary">
+<MudCard Elevation="5">
+    <MudCardHeader Style="border-bottom-style: inset; border-bottom-width: 1px;">
         <CardHeaderContent >
             <MudText Typo="Typo.h6">Explain</MudText>
         </CardHeaderContent>
         <CardHeaderActions>
             @if (Model != null)
             {
-                <MudButton Href="@("/models/" + Model.Model.ID + "/analysis")"
+                <MudButton Href="@("datasets/" + Model.Model.DatasetId + "/models/" + Model.Model.ID + "/explanation")"
                     Variant="Variant.Filled" 
                     EndIcon="@Icons.Material.Filled.MoreHoriz" 
                     Color="Color.Secondary"
@@ -17,13 +17,15 @@
         </CardHeaderActions>
     </MudCardHeader>
     <MudCardContent>
-        @if (true)
-        {
-            <DataLoaderSpinner />
-        }
-        else
-        {
-        }
+        <MudPaper Height="250px" Elevation="0">
+            @if (true)
+            {
+                <DataLoaderSpinner />
+            }
+            else
+            {
+            }
+        </MudPaper>
     </MudCardContent>
 </MudCard>
 
