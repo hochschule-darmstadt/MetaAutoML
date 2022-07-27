@@ -38,37 +38,54 @@ class DataSetAnalysisManager:
             }
 
     def advancedAnalysis(self, save_path):
-        plt.ioff()
+        """
+        Advanced analysis that produces several plots based on the dataset passed to the DataSetAnalysisManager.
+        The plots are saved in the same folder as the dataset, their paths are saved in the mongodb under
+        analysis > advanced_analysis_plots so that they can be loaded later for display in the frontend.
 
-        proc_dataset = self.__process_categorical_columns()
-        proc_dataset = self.__fill_nan_values(proc_dataset)
+        Plots produced are:
+            Distribution plots of all features (columns) in the dataset.
+            Correlation matrix indicating the correlation of all features in the dataset
+            Correlation plots of the 5 features with the highest correlation
+
+        Returns: Array of plot filenames
+        """
+        # Turn off io of matplotlib as the plots are saved, not displayed
+        plt.ioff()
 
         categorical_columns = list(self.__dataset.select_dtypes(['category']).columns) + list(self.__dataset.select_dtypes(['bool']).columns)
         plot_filenames = []
 
+        # Plot distributions of all columns
         for col in list(self.__dataset.columns):
             filename = self.__make_column_plot(col, save_path)
             plot_filenames.append(filename)
 
+        # Get processed version of dataset to make calculation of feature correlation using scipy spearmanr possible
+        proc_dataset = self.__process_categorical_columns()
+        proc_dataset = self.__fill_nan_values(proc_dataset)
+
+        # Make correlation plot
         filename = self.__make_correlation_matrix_plot(proc_dataset, categorical_columns, save_path)
         plot_filenames.append(filename)
 
-        # get correlations using spearmanr
+        # Get correlations using spearmanr
         corr = spearmanr(proc_dataset).correlation
-        # get indices of correlations ordered desc
+        # Get indices of correlations ordered desc
         indices = self.__largest_indices(corr, (len(proc_dataset.columns) * len(proc_dataset.columns)))
 
+        # Plot features with the highest correlation
         plotted_indices = []
         for first_col_idx, second_col_index in zip(indices[0], indices[1]):
-            # if the correlation isnt a col with itself or has already been plotted the other way around -> plot it
+            # If the correlation isn't a col with itself or has already been plotted the other way around -> plot it
             if first_col_idx != second_col_index and [second_col_index, first_col_idx] not in plotted_indices:
                 filename = self.__make_feature_imbalance_plot(self.__dataset.columns[first_col_idx],
-                                                            self.__dataset.columns[second_col_index],
+                                                              self.__dataset.columns[second_col_index],
                                                               categorical_columns,
-                                                    save_path)
+                                                              save_path)
                 plot_filenames.append(filename)
                 plotted_indices.append([first_col_idx, second_col_index])
-            # only plot top 5
+            # Only plot top 5
             if len(plotted_indices) == 5:
                 break
 
@@ -251,8 +268,16 @@ class DataSetAnalysisManager:
         indices = indices[np.argsort(-flat[indices])]
         return np.unravel_index(indices, ary.shape)
 
-
     def __make_column_plot(self, colname, plot_path):
+        """
+        Plot a single feature (column) of the dataframe. If the feature is categorical or bool it is plotted as a bar
+        chart, otherwise it is plotted as a histogram.
+        ---
+        Param colname: Name of column to plot.
+        Param plot_path: Path where the plots are saved.
+        ---
+        Returns filename: Filepath of the produced plot.
+        """
         plt.clf()
         if self.__dataset[colname].dtype.name == "category" or self.__dataset[colname].dtype.name == "bool":
             # Make a bar chart for categorical or bool columns
@@ -267,17 +292,19 @@ class DataSetAnalysisManager:
         plt.savefig(filename)
         return filename
 
-    def __make_feature_imbalance_plot(self, first_colname, second_colname, categorical_columns, plot_path):
-        plt.clf()
-        plt.figure(figsize=(12, 6))
-        xai.imbalance_plot(self.__dataset, first_colname, second_colname, categorical_cols=categorical_columns)
-        plt.margins(0.2)
-        plt.subplots_adjust(bottom=0.2)
-        filename = plot_path + "_" + first_colname + "_vs_" + second_colname + "_feature_imbalance.svg"
-        plt.savefig(filename)
-        return filename
-
     def __make_correlation_matrix_plot(self, dataset, categorical_columns, plot_path):
+        """
+        Plot a correlation matrix visualizing the correlation between all features of the dataset. The correlation score
+        is calculated with the scipy spearmanr algorithm.
+        ---
+        Param dataset: Dataset to plot the correlations from. This is a separate parameter as the dataset processed here
+            has to have processed categorical columns (as processed by __process_categorical_columns and
+            __fill_nan_values) for the spearmanr algorithm to work.
+        Param categorical_columns: List of columns that contain (processed) categorical data.
+        Param plot_path: Path where the plots are saved.
+        ---
+        Returns filename: Filepath of the produced plot.
+        """
         plt.clf()
         plt.rcParams['figure.figsize'] = [16, 16]
         feature_correlation_plot = xai.correlations(dataset,
@@ -289,3 +316,26 @@ class DataSetAnalysisManager:
         filename = plot_path + "_correlation_matrix.svg"
         plt.savefig(filename)
         return filename
+
+    def __make_feature_imbalance_plot(self, first_colname, second_colname, categorical_columns, plot_path):
+        """
+        Plot feature imbalance plot between two columns. The feature imbalance plot shows all the combinations the
+        values of two features (columns) can have along with their frequency.
+        ---
+        Param first_colname: Name of first column.
+        Param second_colname: Name of second column.
+        Param categorical_columns: List of columns that contain categorical data.
+        Param plot_path: Path where the plots are saved.
+        ---
+        Returns filename: Filepath of the produced plot.
+        """
+        plt.clf()
+        plt.figure(figsize=(12, 6))
+        xai.imbalance_plot(self.__dataset, first_colname, second_colname, categorical_cols=categorical_columns)
+        plt.margins(0.2)
+        plt.subplots_adjust(bottom=0.2)
+        filename = plot_path + "_" + first_colname + "_vs_" + second_colname + "_feature_imbalance.svg"
+        plt.savefig(filename)
+        return filename
+
+
