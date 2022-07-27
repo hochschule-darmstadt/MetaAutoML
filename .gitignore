@@ -203,5 +203,4 @@ FLAML/templates/output
 #MLJAR ignores
 #AutoMLs
 MLJAR/AutoML_*
-frontend/src/Server/BlazorBoilerplate.Server/appsettings.json
 controller/app-data/analysis.json
