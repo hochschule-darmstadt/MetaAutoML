@@ -18,8 +18,10 @@
 }
 
 
-<MudText Typo="Typo.h6">Train</MudText>
-<MudSpacer/>
+<MudStack AlignItems="AlignItems.Center" Row="true" Class="mb-2">
+    <MudIcon Size="Size.Large" Icon="@Icons.Filled.ModelTraining" Color="@Color.Secondary"/>
+    <MudText Typo="Typo.h4">Train</MudText>
+</MudStack>
 
 @if (_dataset == null)
 {

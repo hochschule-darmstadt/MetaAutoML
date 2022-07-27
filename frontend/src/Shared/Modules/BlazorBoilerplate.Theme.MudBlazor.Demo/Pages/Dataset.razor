@@ -15,8 +15,10 @@
     </TopSection>
 }
 
-<MudText Typo="Typo.h6">@_pageTitle</MudText>
-<MudSpacer/>
+<MudStack AlignItems="AlignItems.Center" Row="true" Class="mb-2">
+    <MudIcon Size="Size.Large" Icon="@Icons.Filled.ListAlt" Color="@Color.Secondary"/>
+    <MudText Typo="Typo.h4">@_pageTitle</MudText>
+</MudStack>
 
 <MudGrid>
     <MudItem xs="12" sm="12" md="12">

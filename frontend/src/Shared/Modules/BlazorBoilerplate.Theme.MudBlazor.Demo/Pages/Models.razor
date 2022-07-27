@@ -5,13 +5,27 @@
 @inject IViewNotifier viewNotifier
 @attribute [Authorize]
 
+@if (!string.IsNullOrEmpty(_pageTitle))
+{
+    <TopSection>
+        <Breadcrumbs>
+            <Breadcrumb Title="Datasets" Link="/datasets" />
+            <Breadcrumb Title="@_pageTitle" Link="@("/datasets/" + Id)"/>
+            <Breadcrumb Title="Models" />
+        </Breadcrumbs>
+    </TopSection>
+}
 <TopSection>
     <Breadcrumbs>
         <Breadcrumb Title="Models" />
     </Breadcrumbs>
 </TopSection>
 
-<PageTitle>Models</PageTitle>
+<MudStack AlignItems="AlignItems.Center" Row="true" Class="mb-2">
+    <MudIcon Size="Size.Large" Icon="@Icons.Filled.Lightbulb" Color="@Color.Secondary"/>
+    <MudText Typo="Typo.h4">Models</MudText>
+</MudStack>
+
 <MudGrid>
     <MudItem xs="12" sm="12" md="12">
         <MudCard Elevation="5">
@@ -52,6 +66,8 @@
     [Parameter]
     public string Id { get; set; }
     private GetModelsResponseDto _models;
+    private GetDatasetResponseDto _dataset;
+    private string _pageTitle;
     protected override async Task OnInitializedAsync()
     {
         await LoadModels();
@@ -65,8 +81,20 @@
             if (apiResponse.IsSuccessStatusCode)
             {
                 _models = Newtonsoft.Json.JsonConvert.DeserializeObject<GetModelsResponseDto>(apiResponse.Result.ToString());
-                StateHasChanged();
-                viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
+                apiResponse = await apiClient.GetDataset(new GetDatasetRequestDto() { Identifier = Id});
+
+                if (apiResponse.IsSuccessStatusCode)
+                {
+                    _dataset = Newtonsoft.Json.JsonConvert.DeserializeObject<GetDatasetResponseDto>(apiResponse.Result.ToString());
+                    _pageTitle = "Dataset " + _dataset.Name;
+                    StateHasChanged();
+                    StateHasChanged();
+                    viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
+                }
+                else
+                {
+                    viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
+                }
             }
             else
             {

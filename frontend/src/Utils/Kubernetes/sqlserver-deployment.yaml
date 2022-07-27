@@ -15,26 +15,13 @@ spec:
       labels:
         io.kompose.service: sqlserver
     spec:
-      affinity:
-        nodeAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            nodeSelectorTerms:
-            - matchExpressions:
-              - key: kubernetes.io/hostname
-                operator: In
-                values:
-                - cai-omaml-main
       containers:
       - env:
         - name: "ACCEPT_EULA"
           value: "Y"
         - name: "SA_PASSWORD"
           value: "yourVeryStrong(!)Password"
-        - name: SQL_POD_IP
-          valueFrom:
-            fieldRef:
-              fieldPath: status.podIP
-        image: mcr.microsoft.com/mssql/server
+        image: mcr.microsoft.com/mssql/server:2019-latest
         imagePullPolicy: ""
         name: sqlserver
         ports:

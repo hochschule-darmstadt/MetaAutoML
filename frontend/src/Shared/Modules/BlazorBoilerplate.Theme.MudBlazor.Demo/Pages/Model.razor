@@ -1,5 +1,6 @@
 ﻿@page "/datasets/{datasetId}/models/{id}"
 @page "/trainings/{trainingId}/models/{id}"
+@page "/datasets/{datasetId}/modelsview/{listId}"
 @inject IStringLocalizer<Global> L
 @inject IApiClient apiClient
 @inject IViewNotifier viewNotifier
@@ -10,12 +11,18 @@
 {
     <TopSection>
         <Breadcrumbs>
-            @if (TrainingId != null)
+            @if (ListId != null)
+            {
+                <Breadcrumb Title="Datasets" Link="/datasets" />
+                <Breadcrumb Title="@("Dataset " + _training.DatasetName)" Link="@("/datasets/" + _model.Model.DatasetId)"/>
+                <Breadcrumb Title="Models" Link="@("/datasets/" + _model.Model.DatasetId + "/models")" />
+            }
+            else if (TrainingId != null)
             {
                 <Breadcrumb Title="Trainings" Link="/trainings" />
                 <Breadcrumb Title="@("Training " + _training.StartTime)" Link="@("/trainings/" + _model.Model.DatasetId)"/>
             }
-            else
+            else if (DatasetId != null)
             {
                 <Breadcrumb Title="Datasets" Link="/datasets" />
                 <Breadcrumb Title="@("Dataset " + _training.DatasetName)" Link="@("/datasets/" + _model.Model.DatasetId)"/>
@@ -25,9 +32,12 @@
     </TopSection>
 }
 
-<MudStack Row="true">
-    <MudIcon Icon="@Icons.Filled.Lightbulb" Color="@Color.Secondary"/>
-    <MudText Typo="Typo.h4">@_pageTitle</MudText>
+<MudStack AlignItems="AlignItems.Center" Row="true" Class="mb-2">
+    <MudIcon Size="Size.Large" Icon="@Icons.Filled.Lightbulb" Color="@Color.Secondary"/>
+    @if (_model != null)
+    {
+        <MudText Typo="Typo.h4">@("Model " + _model.Model.Model)</MudText>
+    }
 </MudStack>
 
 <MudGrid Elevation="5">
@@ -102,6 +112,8 @@
     public string DatasetId { get; set; }
     [Parameter]
     public string TrainingId { get; set; }
+    [Parameter]
+    public string ListId { get; set; }
 
     private string _pageTitle = "Model";
     private GetAutoMlModelResponseDto _downloadModel;
@@ -116,8 +128,16 @@
     {
         try
         {
+            ApiResponseDto apiResponse;
             //Get Model infos
-            ApiResponseDto apiResponse = await apiClient.GetModel(new GetModelRequestDto() { ModelId = Id });
+            if (Id == null)
+            {
+                apiResponse = await apiClient.GetModel(new GetModelRequestDto() { ModelId = ListId });
+            }
+            else
+            {
+                apiResponse = await apiClient.GetModel(new GetModelRequestDto() { ModelId = Id });
+            }
 
             if (apiResponse.IsSuccessStatusCode)
             {
