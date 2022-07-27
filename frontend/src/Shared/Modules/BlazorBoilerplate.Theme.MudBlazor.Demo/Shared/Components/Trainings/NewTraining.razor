@@ -18,15 +18,6 @@
             else
             {
                 <MudStack>
-                    <MudTimeline TimelineOrientation="@TimelineOrientation.Horizontal" TimelinePosition="@TimelinePosition.Bottom">
-                        <MudTimelineItem Color="Color.Secondary">
-                            <MudText Align="Align.Center" Typo="Typo.body2">Dataset preparation</MudText>
-                        </MudTimelineItem>
-                        <MudTimelineItem>
-                            <MudText Align="Align.Center" Typo="Typo.body2">Configuration</MudText>
-                        </MudTimelineItem>
-                    </MudTimeline>
-
                     <MudButton OnClick="@(e => { NavManager.NavigateTo("/datasets/" + Dataset.Identifier + "/train"); })" 
                         Variant="Variant.Filled" 
                         StartIcon="@Icons.Filled.ModelTraining"

@@ -9,39 +9,52 @@
 }
 else
 {
-    <MudTable Items="@_columns.RowContent" CustomHeader="true">
-        <HeaderContent>
-            <MudTHeadRow>
-                @foreach (var item in _columns.Columns)
+    <MudStack>
+        <MudTimeline TimelineOrientation="@TimelineOrientation.Horizontal" TimelinePosition="@TimelinePosition.Bottom">
+            <MudTimelineItem Color="Color.Secondary">
+                <MudText Align="Align.Center" Typo="Typo.body2">Dataset preparation</MudText>
+            </MudTimelineItem>
+            <MudTimelineItem>
+                <MudText Align="Align.Center" Typo="Typo.body2">Configuration</MudText>
+            </MudTimelineItem>
+        </MudTimeline>
+
+
+        <MudTable Items="@_columns.RowContent" CustomHeader="true">
+            <HeaderContent>
+                <MudTHeadRow>
+                    @foreach (var item in _columns.Columns)
+                    {
+                        <MudTh>@item.Name</MudTh>
+                    }
+                </MudTHeadRow>
+                    @foreach (var (col, index) in _columns.Columns.Select((v, i) => (v, i)))
+                    {
+                        <MudTh>
+                            <MudSelect  T="int" Value="@(_dataTypeList[index])" ValueChanged="@((e) => { _dataTypeList[index] = e; ChangeValue(); })">
+                                <MudSelectItem  T="int" Value="@((int)col.Type)">@Enum.GetName(typeof(ColumnType), (int)col.Type)</MudSelectItem>
+                                @foreach (int val in col.ConvertibleTypes)
+                                {
+                                    <MudSelectItem  T="int" Value="@((int) val)">@Enum.GetName(typeof(ColumnType), val)</MudSelectItem>
+                                }
+                            </MudSelect>
+                        </MudTh>
+                    }
+                <MudTHeadRow>
+                </MudTHeadRow>
+            </HeaderContent>
+            <RowTemplate>
+                @foreach (var item in context)
                 {
-                    <MudTh>@item.Name</MudTh>
+                    <MudTd>@item</MudTd>
                 }
-            </MudTHeadRow>
-                @foreach (var (col, index) in _columns.Columns.Select((v, i) => (v, i)))
-                {
-                    <MudTh>
-                        <MudSelect  T="int" Value="@(_dataTypeList[index])" ValueChanged="@((e) => { _dataTypeList[index] = e; ChangeValue(); })">
-                            <MudSelectItem  T="int" Value="@((int)col.Type)">@Enum.GetName(typeof(ColumnType), (int)col.Type)</MudSelectItem>
-                            @foreach (int val in col.ConvertibleTypes)
-                            {
-                                <MudSelectItem  T="int" Value="@((int) val)">@Enum.GetName(typeof(ColumnType), val)</MudSelectItem>
-                            }
-                        </MudSelect>
-                    </MudTh>
-                }
-            <MudTHeadRow>
-            </MudTHeadRow>
-        </HeaderContent>
-        <RowTemplate>
-            @foreach (var item in context)
-            {
-                <MudTd>@item</MudTd>
-            }
-        </RowTemplate>
-        <PagerContent>
-            <MudTablePager HorizontalAlignment="HorizontalAlignment.Left"/>
-        </PagerContent>
-    </MudTable>
+            </RowTemplate>
+            <PagerContent>
+                <MudTablePager HorizontalAlignment="HorizontalAlignment.Left"/>
+            </PagerContent>
+        </MudTable>
+    </MudStack>     
+    
 }
 
 @code {

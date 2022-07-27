@@ -9,7 +9,7 @@
 
 <MudDialog @bind-IsVisible="_isVisible">
     <DialogContent>
-        <MudPaper Height="250px" Elevation="0">
+        <MudPaper Height="220px" Elevation="0">
             @if (_datasetTypes == null)
             {
             
@@ -18,28 +18,26 @@
             {
                 <MudStack>
                     <InputFile id="fileInput" OnChange="@FilesReady" hidden />
-                    <MudStack>
-                        <MudStack Row="true">
-                            <MudSelect Label="Dataset type" T="string" ValueChanged="@OnDatasetTypeSelectChanged" Style="width: 150px">
-                                @foreach (var item in _datasetTypes.DatasetTypes)
-                                {
-                                    <MudSelectItem Value="@item.ID">@item.Properties["skos:prefLabel"]</MudSelectItem>
-                                }
-                            </MudSelect>
-                            <MudTextField @bind-Value="@_fileUpload.DatasetName" Label="Dataset Name"></MudTextField>
-                        </MudStack>
-                        <MudButton HtmlTag="label"
-                                   Variant="Variant.Filled"
-                                   Color="Color.Secondary"
-                                   StartIcon="@Icons.Filled.CloudUpload"
-                                   for="fileInput">
-                            Select Dataset
-                        </MudButton>
-                        @if (_isLoaderClosed == false)
-                        {
-                            <MudProgressLinear Color="Color.Secondary" Indeterminate="true" Class="my-7"/>
-                        }
+                    <MudButton HtmlTag="label"
+                                Variant="Variant.Filled"
+                                Color="Color.Secondary"
+                                StartIcon="@Icons.Filled.CloudUpload"
+                                for="fileInput">
+                        Select Dataset
+                    </MudButton>
+                    <MudStack Row="true">
+                        <MudSelect Label="Dataset type" T="string" ValueChanged="@OnDatasetTypeSelectChanged" Style="width: 150px">
+                            @foreach (var item in _datasetTypes.DatasetTypes)
+                            {
+                                <MudSelectItem Value="@item.ID">@item.Properties["skos:prefLabel"]</MudSelectItem>
+                            }
+                        </MudSelect>
+                        <MudTextField @bind-Value="@_fileUpload.DatasetName" Label="Dataset Name"></MudTextField>
                     </MudStack>
+                    @if (_isLoaderClosed == false)
+                    {
+                        <MudProgressLinear Color="Color.Secondary" Indeterminate="true"/>
+                    }
                 </MudStack>
             }
         </MudPaper>
