@@ -116,10 +116,10 @@ class GetDatasetsResponse(betterproto.Message):
 class Dataset(betterproto.Message):
     name: str = betterproto.string_field(1)
     type: str = betterproto.string_field(2)
-    columns: int = betterproto.int32_field(3)
-    rows: int = betterproto.int32_field(4)
-    creation_date: datetime = betterproto.message_field(5)
-    identifier: str = betterproto.string_field(6)
+    creation_date: datetime = betterproto.message_field(3)
+    identifier: str = betterproto.string_field(4)
+    size: int = betterproto.int64_field(5)
+    analysis: str = betterproto.string_field(6)
 
 
 @dataclass(eq=False, repr=False)

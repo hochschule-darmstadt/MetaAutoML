@@ -29,22 +29,26 @@
 }
 else
 {
-    <MuddyWizard WizardFinished="@OnWizardFinished">
-        <MuddyWizardPanel Title="Dataset preparation" >
-            @switch (_dataset.Type.ID)
-            {
-                case ":tabular":
-                <DisplayTabularDataset Dataset="@_dataset" @bind-StartAutoMlRequest="@_automlRequest"/>
-                    break;
-                case ":image":
-                <DisplayImageDataset Dataset="@_dataset" @bind-StartAutoMlRequest="@_automlRequest"/>
-                    break;
-            }
-        </MuddyWizardPanel>
-        <MuddyWizardPanel Title="Configuration">
-            <TaskConfiguration Dataset="@_dataset" @bind-StartAutoMlRequest="@_automlRequest" />
-        </MuddyWizardPanel>
-    </MuddyWizard>
+    @switch (_dataset.Type.ID)
+    {
+        case ":tabular":
+            <MuddyWizard WizardFinished="@OnWizardFinished">
+                <MuddyWizardPanel Title="Dataset preparation" >
+                    <PrepareTabularDataset Dataset="@_dataset" @bind-StartAutoMlRequest="@_automlRequest" />
+                </MuddyWizardPanel>
+                <MuddyWizardPanel Title="Configuration">
+                    <TaskConfiguration Dataset="@_dataset" @bind-StartAutoMlRequest="@_automlRequest" />
+                </MuddyWizardPanel>
+            </MuddyWizard>
+            break;
+        case ":image":
+            <MuddyWizard WizardFinished="@OnWizardFinished">
+                <MuddyWizardPanel Title="Configuration">
+                    <TaskConfiguration Dataset="@_dataset" @bind-StartAutoMlRequest="@_automlRequest" />
+                </MuddyWizardPanel>
+            </MuddyWizard>
+            break;
+    }
 }
 
 @code {
@@ -92,6 +96,16 @@ else
     {
         try
         {
+            if (string.IsNullOrEmpty(_automlRequest.Task))
+            {
+                viewNotifier.Show("No task selected", ViewNotifierType.Error, L["Operation Failed"]);
+                return;
+            }
+            if ((_automlRequest.DatasetType == ":tabular") && (_automlRequest.Configuration.ContainsKey("target") == false))
+            {
+                viewNotifier.Show("No target selected", ViewNotifierType.Error, L["Operation Failed"]);
+                return;
+            }
             StartAutoMLResponseDto automlResponse;
             ApiResponseDto apiResponse = await apiClient.StartAutoML(_automlRequest);
 

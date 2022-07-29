@@ -4,7 +4,7 @@
 @inject AppState appState
 @inject IStringLocalizer<Global> L
 
-<AuthorizeView Context="AuthorizeContext">
+@*<AuthorizeView Context="AuthorizeContext">
     <Authorized>
         <MudTooltip Text="@L["Logout"]" Placement="Placement.End">
             <MudButton StartIcon="@Icons.Filled.ExitToApp" Color="Color.Inherit" OnClick="LogoutClick" Style="min-width: auto; padding-right:0">
@@ -21,7 +21,8 @@
             </MudButton>
         </MudTooltip>
     </NotAuthorized>
-</AuthorizeView>
+</AuthorizeView>*@
+<MudMenuItem OnClick="LogoutClick">@L["Logout"]</MudMenuItem>
 
 @code {
     [Parameter]

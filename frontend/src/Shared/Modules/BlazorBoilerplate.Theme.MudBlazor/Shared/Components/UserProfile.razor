@@ -36,10 +36,13 @@
 
 <AuthorizeView>
     <Authorized>
-        <MudMenu Icon="@Icons.Material.Filled.AccountCircle"  Color="Color.Inherit">
-            <MudMenuItem Href="/account/profile">Profile</MudMenuItem>
-            <MudMenuItem><Login/></MudMenuItem>
-        </MudMenu>
+            @if (userViewModel != null)
+            {
+                <MudMenu Icon="@Icons.Material.Filled.AccountCircle" Label="@userViewModel.UserName"  Color="Color.Inherit">
+                    <MudMenuItem Href="/account/profile">Profile</MudMenuItem>
+                    <Login />
+                </MudMenu>
+            }
     </Authorized>
 </AuthorizeView>
 

@@ -62,7 +62,7 @@
                     {
                         <MudGrid>
                             <MudItem xs="3" sm="3" md="3">
-                                <MudText Typo="Typo.body1">Dataset: @_training.DatasetName</MudText>
+                                <MudText Typo="Typo.body1">Dataset: <a href="@NavManager.ToAbsoluteUri("datasets/" + @_training.DatasetId).AbsoluteUri" Style="cursor: pointer;">@_training.DatasetName</a></MudText>
                                 <MudText Typo="Typo.body1">Start: @_training.StartTime.ToString("dd/MM/yyy HH:mm")</MudText>
                                 <MudText Typo="Typo.body1">Status: @_model.Model.Status</MudText>
                                 <MudText Typo="Typo.body1">Total training time: @_model.Model.Runtime s</MudText>

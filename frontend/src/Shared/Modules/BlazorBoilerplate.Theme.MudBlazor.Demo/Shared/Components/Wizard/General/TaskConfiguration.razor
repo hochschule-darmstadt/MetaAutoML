@@ -4,14 +4,27 @@
 @using Newtonsoft.Json
 
 <MudStack>
-    <MudTimeline TimelineOrientation="@TimelineOrientation.Horizontal" TimelinePosition="@TimelinePosition.Bottom">
-        <MudTimelineItem Color="Color.Secondary">
-            <MudText Align="Align.Center" Typo="Typo.body2">Dataset preparation</MudText>
-        </MudTimelineItem>
-        <MudTimelineItem Color="Color.Secondary">
-            <MudText Align="Align.Center" Typo="Typo.body2">Configuration</MudText>
-        </MudTimelineItem>
-    </MudTimeline>
+    @switch (Dataset.Type.ID)
+    {
+        case ":tabular":
+            <MudTimeline TimelineOrientation="@TimelineOrientation.Horizontal" TimelinePosition="@TimelinePosition.Bottom">
+                <MudTimelineItem>
+                    <MudText Align="Align.Center" Typo="Typo.body2">Dataset preparation</MudText>
+                </MudTimelineItem>
+                <MudTimelineItem Color="Color.Secondary">
+                    <MudText Align="Align.Center" Typo="Typo.body2">Configuration</MudText>
+                </MudTimelineItem>
+            </MudTimeline>
+            break;
+        case ":image":
+            <MudTimeline TimelineOrientation="@TimelineOrientation.Horizontal" TimelinePosition="@TimelinePosition.Bottom">
+                <MudTimelineItem Color="Color.Secondary">
+                    <MudText Align="Align.Center" Typo="Typo.body2">Configuration</MudText>
+                </MudTimelineItem>
+            </MudTimeline>
+            break;
+    }
+
     @if (_compatibletasks != null)
     {
         <MudSelect Label="ML task" T="string" ValueChanged="@OnMlTaskSelectionChanged">

@@ -89,7 +89,7 @@ class Database:
         datasets: Collection = self.__mongo[username]["datasets"]
         return datasets.find()
 
-    def FindDataset(self, username: str, filter: 'dict[str, object]') -> 'dict[str, object]':
+    def GetDataset(self, username: str, filter: 'dict[str, object]') -> 'dict[str, object]':
         """
         Get a dataset by it's name
         ---

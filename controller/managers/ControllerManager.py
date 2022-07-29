@@ -49,7 +49,7 @@ class ControllerManager(object):
             return CreateNewUserResponse(ResultCode.RESULT_CODE_ERROR_CAN_NOT_CREATE_USER, "")
         else:
             CsvManager.CopyDefaultDataset(username)
-            self.__data_storage.SaveDataset(username, "titanic_train.csv", ":tabular", "Titanic")
+            self.__data_storage.InsertDataset(username, "titanic_train.csv", ":tabular", "Titanic")
             return CreateNewUserResponse(ResultCode.RESULT_CODE_OKAY, username)
             
 
@@ -138,7 +138,7 @@ class ControllerManager(object):
         firstEntries: the first couple of rows of the dataset
         """
         response = GetDatasetResponse()
-        found, dataset = self.__data_storage.FindDataset(request.username, request.identifier)
+        found, dataset = self.__data_storage.GetDataset(request.username, request.identifier)
         
         try:
             response_dataset = Dataset()
@@ -298,7 +298,7 @@ class ControllerManager(object):
         ---
         Return list of column names
         """
-        found, dataset = self.__data_storage.FindDataset(request.username, request.dataset_identifier)
+        found, dataset = self.__data_storage.GetDataset(request.username, request.dataset_identifier)
         if found: 
             return CsvManager.GetColumns(dataset["path"])
         else:
@@ -315,7 +315,7 @@ class ControllerManager(object):
         ---
         Return list of tasks
         """
-        dataset = self.__data_storage.FindDataset(request.username, request.dataset_name)
+        dataset = self.__data_storage.GetDataset(request.username, request.dataset_name)
         return self.__rdfManager.GetDatasetCompatibleTasks(request, dataset[1]["type"])
 
     def GetObjectsInformation(self, request: "GetObjectsInformationRequest") -> "GetObjectsInformationResponse":
@@ -414,7 +414,7 @@ class ControllerManager(object):
         #dataset.username = "User"
 
 
-        dataset_id: str = self.__data_storage.SaveDataset(dataset.username, dataset.file_name, dataset.type, dataset.dataset_name)
+        dataset_id: str = self.__data_storage.InsertDataset(dataset.username, dataset.file_name, dataset.type, dataset.dataset_name)
         print(f"saved new dataset: {dataset_id}")
         
         response = UploadDatasetFileResponse()
@@ -433,7 +433,7 @@ class ControllerManager(object):
         response = StartAutoMlProcessResponse()
         # find requested dataset 
         # TODO: change gRPC message to dataset id instead of name
-        found, dataset = self.__data_storage.FindDataset(configuration.username, configuration.dataset)
+        found, dataset = self.__data_storage.GetDataset(configuration.username, configuration.dataset)
         if not found:
             raise Exception(f"cannot find dataset with name: {configuration.dataset}")
         

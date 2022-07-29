@@ -24,10 +24,10 @@ message GetDatasetsResponse {
 message Dataset {
     string name = 1;
     string type = 2;
-    int32 columns = 3;
-    int32 rows = 4;
-    google.protobuf.Timestamp creation_date = 5;
-    string identifier = 6;
+    google.protobuf.Timestamp creation_date = 3;
+    string identifier = 4;
+    int64 size = 5;
+    string analysis = 6;
   }
 
 

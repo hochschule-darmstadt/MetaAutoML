@@ -140,11 +140,11 @@ class DataStorage:
         return self.__mongo.UpdateTraining(username, id, new_values)
 
 
-    def SaveDataset(self, username: str, fileName: str, type: str, name: str) -> str:
+    def InsertDataset(self, username: str, fileName: str, type: str, name: str) -> str:
         """
         Store dataset contents on disk and insert entry to database.
         ---
-        >>> id: str = ds.SaveDataset("automl_user", "my_dataset", ...)
+        >>> id: str = ds.InsertDataset("automl_user", "my_dataset", ...)
 
         ---
         Parameter
@@ -157,39 +157,47 @@ class DataStorage:
         """
         analysisResult = {}
 
-        upload_file = os.path.join(self.__storage_dir, username, "uploads", fileName)
-        if os.getenv("MONGO_DB_DEBUG") != "YES":
-            #Within docker we do not want to add the app section, as this leads to broken links
-            upload_file = upload_file.replace("/app/", "")
-
-        #Perform analysis for tabular data datasets
-        if type == ":tabular":
-            dataset_for_analysis = pd.read_csv(upload_file, engine="python")
-            analysisResult = DataSetAnalysisManager.startAnalysis(dataset_for_analysis)
-
-
         #build dictionary for database
         database_content = {
             "name": name,
             "type": type,
-            "analysis": analysisResult,
-            "models": []
+            "analysis": "",
+            "models": [],
+            "path": "",
+            "size": "",
+            "mtime": ""
         }
         
         dataset_id = self.__mongo.InsertDataset(username, database_content)
 
+        upload_file = os.path.join(self.__storage_dir, username, "uploads", fileName)
         filename_dest = os.path.join(self.__storage_dir, username, dataset_id, fileName)
         if os.getenv("MONGO_DB_DEBUG") != "YES":
             #Within docker we do not want to add the app section, as this leads to broken links
+            upload_file = upload_file.replace("/app/", "")
             filename_dest = filename_dest.replace("/app/", "")
-        # make sure directory exists in case it's the first upload from this user
+        #Make sure directory exists
         os.makedirs(os.path.dirname(filename_dest), exist_ok=True)
-        
+        #Copy dataset into final folder
         shutil.move(upload_file, filename_dest)
 
-        #unpack zip file
+        #unpack zip file for image files
         if type == ":image":
             shutil.unpack_archive(filename_dest, os.path.join(self.__storage_dir, username, dataset_id))
+            #delete zip
+            os.remove(filename_dest)
+            filename_dest = filename_dest.replace(".zip", "")
+
+        nbytes = sum(d.stat().st_size for d in os.scandir(os.path.join(self.__storage_dir, username, dataset_id)) if d.is_file())
+
+
+        #Perform analysis for tabular data datasets
+        if type == ":tabular":
+            dataset_for_analysis = pd.read_csv(filename_dest, engine="python")
+            analysisResult = DataSetAnalysisManager.startAnalysis(dataset_for_analysis)
+
+
+
 
         #if type == ":image":
         #    shutil
@@ -197,7 +205,9 @@ class DataStorage:
         # fill in missing values
         success = self.__mongo.UpdateDataset(username, dataset_id, {
             "path": filename_dest,
-            "mtime": os.path.getmtime(filename_dest)
+            "size": nbytes,
+            "mtime": os.path.getmtime(filename_dest),
+            "analysis": analysisResult
         })
         assert success, f"cannot update dataset with id {dataset_id}"
 
@@ -222,11 +232,11 @@ class DataStorage:
         return self.__mongo.UpdateDataset(username, id, new_values)
 
 
-    def FindDataset(self, username: str, identifier: str) -> 'tuple[bool, dict[str, object]]':
+    def GetDataset(self, username: str, identifier: str) -> 'tuple[bool, dict[str, object]]':
         """
         Try to find the _first_ dataset with this name. 
         ---
-        >>> found, dataset = ds.FindDataset("automl_user", "my_dataset")
+        >>> found, dataset = ds.GetDataset("automl_user", "my_dataset")
         >>> if not found:
                 print("We have a problem")
 
@@ -237,7 +247,7 @@ class DataStorage:
         ---
         Returns either `(True, Dataset)` or `(False, None)`.
         """
-        result = self.__mongo.FindDataset(username, {
+        result = self.__mongo.GetDataset(username, {
             "_id": ObjectId(identifier)
         })
 
