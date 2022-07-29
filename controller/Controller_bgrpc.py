@@ -155,10 +155,9 @@ class GetTabularDatasetColumnResponse(betterproto.Message):
 @dataclass(eq=False, repr=False)
 class UploadDatasetFileRequest(betterproto.Message):
     username: str = betterproto.string_field(1)
-    content: bytes = betterproto.bytes_field(2)
-    file_name: str = betterproto.string_field(3)
-    dataset_name: str = betterproto.string_field(4)
-    type: str = betterproto.string_field(5)
+    file_name: str = betterproto.string_field(2)
+    dataset_name: str = betterproto.string_field(3)
+    type: str = betterproto.string_field(4)
 
 
 @dataclass(eq=False, repr=False)

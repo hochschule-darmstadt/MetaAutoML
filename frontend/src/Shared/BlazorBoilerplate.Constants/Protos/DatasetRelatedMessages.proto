@@ -59,10 +59,9 @@ message GetTabularDatasetColumnResponse {
 
 message UploadDatasetFileRequest {
     string username = 1;
-    bytes content = 2;
-    string fileName = 3;
-    string datasetName = 4;
-    string type = 5;
+    string fileName = 2;
+    string datasetName = 3;
+    string type = 4;
   }
   
 message UploadDatasetFileResponse {

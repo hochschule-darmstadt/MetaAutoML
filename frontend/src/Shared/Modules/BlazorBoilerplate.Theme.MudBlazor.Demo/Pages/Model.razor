@@ -20,7 +20,7 @@
             else if (TrainingId != null)
             {
                 <Breadcrumb Title="Trainings" Link="/trainings" />
-                <Breadcrumb Title="@("Training " + _training.StartTime)" Link="@("/trainings/" + _model.Model.DatasetId)"/>
+                <Breadcrumb Title="@(_training.StartTime.ToString("dd/MM/yy HH:mm"))" Link="@("/trainings/" + _training.ID)"/>
             }
             else if (DatasetId != null)
             {
@@ -33,7 +33,7 @@
 }
 
 <MudStack AlignItems="AlignItems.Center" Row="true" Class="mb-2">
-    <MudIcon Size="Size.Large" Icon="@Icons.Filled.Lightbulb" Color="@Color.Secondary"/>
+    <MudIcon Size="Size.Large" Icon="@Icons.Filled.Lightbulb" />
     @if (_model != null)
     {
         <MudText Typo="Typo.h4">@("Model " + _model.Model.Model)</MudText>
@@ -63,21 +63,19 @@
                         <MudGrid>
                             <MudItem xs="3" sm="3" md="3">
                                 <MudText Typo="Typo.body1">Dataset: @_training.DatasetName</MudText>
-                                <MudText Typo="Typo.body1">Start: @_training.StartTime</MudText>
+                                <MudText Typo="Typo.body1">Start: @_training.StartTime.ToString("dd/MM/yyy HH:mm")</MudText>
                                 <MudText Typo="Typo.body1">Status: @_model.Model.Status</MudText>
-                                <MudText Typo="Typo.body1">Runtime: @_model.Model.Runtime</MudText>
+                                <MudText Typo="Typo.body1">Total training time: @_model.Model.Runtime s</MudText>
                             </MudItem>
                             <MudItem xs="3" sm="3" md="3">
-                                <MudText Typo="Typo.body1">AutoMl solution: @_model.Model.Name</MudText>
-                                <MudText Typo="Typo.body1">Ml library: @_model.Model.Library</MudText>
+                                <MudText Typo="Typo.body1">AutoML solution: @_model.Model.Name</MudText>
+                                <MudText Typo="Typo.body1">ML library: @_model.Model.Library</MudText>
                                 <MudText Typo="Typo.body1">Model: @_model.Model.Model</MudText>
-                                <MudText Typo="Typo.body1">Training: <a href="@NavManager.ToAbsoluteUri("trainings/" + @_training.ID).AbsoluteUri" Style="cursor: pointer;">@_training.ID</a></MudText>
+                                <MudText Typo="Typo.body1">Training: <a href="@NavManager.ToAbsoluteUri("trainings/" + @_training.ID).AbsoluteUri" Style="cursor: pointer;">@_training.StartTime.ToString("dd/MM/yyy")</a></MudText>
                             </MudItem>
                             <MudItem xs="3" sm="3" md="3">
-                                <MudText Typo="Typo.body1">Metric type: </MudText>
-                                <MudText Typo="Typo.body1">Metric test: @_model.Model.TestScore</MudText>
-                                <MudText Typo="Typo.body1">Metric validation: @_model.Model.ValidationScore</MudText>
-                                <MudText Typo="Typo.body1">Prediction time: @_model.Model.Predictiontime</MudText>
+                                <MudText Typo="Typo.body1">Metric test: @String.Format("{0:0.00}", _model.Model.TestScore)</MudText>
+                                <MudText Typo="Typo.body1">Prediction time per sample: @String.Format("{0:0}", _model.Model.Predictiontime) s</MudText>
                             </MudItem>
                             <MudItem xs="3" sm="3" md="3">
                             </MudItem>
@@ -94,7 +92,7 @@
         <DownloadMlPipeline Model="_model"/>
     </MudItem>
     <MudItem xs="6" sm="6" md="6">
-        <ModelExplain Model="_model" />
+        <ModelExplanation Model="_model" />
     </MudItem>
     <MudItem xs="3" sm="3" md="3">
         <ModelConfiguration Training="_training" Model="_model"/>

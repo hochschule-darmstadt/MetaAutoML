@@ -27,13 +27,13 @@
                                     AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
                     </ToolBarContent>
                     <HeaderContent>
-                        <MudTh><MudTableSortLabel SortBy="new Func<AutoMLStatusDto, object>(x=>x.Name)">Name</MudTableSortLabel></MudTh>
+                        <MudTh><MudTableSortLabel SortBy="new Func<AutoMLStatusDto, object>(x=>x.Name)">AutoML solution</MudTableSortLabel></MudTh>
                         <MudTh><MudTableSortLabel SortBy="new Func<AutoMLStatusDto, object>(x=>x.Status)">Status</MudTableSortLabel></MudTh>
                         <MudTh><MudTableSortLabel SortBy="new Func<AutoMLStatusDto, object>(x=>x.Library)">Library</MudTableSortLabel></MudTh>
                         <MudTh><MudTableSortLabel SortBy="new Func<AutoMLStatusDto, object>(x=>x.Model)">Model</MudTableSortLabel></MudTh>
                         <MudTh><MudTableSortLabel SortBy="new Func<AutoMLStatusDto, object>(x=>x.TestScore)">Test score</MudTableSortLabel></MudTh>
-                        <MudTh><MudTableSortLabel SortBy="new Func<AutoMLStatusDto, object>(x=>x.Predictiontime)">Prediction time</MudTableSortLabel></MudTh>
-                        <MudTh><MudTableSortLabel SortBy="new Func<AutoMLStatusDto, object>(x=>x.Runtime)">Runtime</MudTableSortLabel></MudTh>
+                        <MudTh><MudTableSortLabel SortBy="new Func<AutoMLStatusDto, object>(x=>x.Predictiontime)">Prediction time per sample</MudTableSortLabel></MudTh>
+                        <MudTh><MudTableSortLabel SortBy="new Func<AutoMLStatusDto, object>(x=>x.Runtime)">Total training time</MudTableSortLabel></MudTh>
                     </HeaderContent>
                     <RowTemplate>
                         <MudTd>
@@ -50,9 +50,9 @@
                             @AutoMl.Model
                         </MudTd>
                         <MudTd>@AutoMl.Library</MudTd>
-                        <MudTd>@AutoMl.TestScore</MudTd>
-                        <MudTd>@AutoMl.Predictiontime</MudTd>
-                        <MudTd>@AutoMl.Runtime</MudTd>
+                        <MudTd>@(String.Format("{0:0.00}", AutoMl.TestScore))</MudTd>
+                        <MudTd>@(String.Format("{0:0}", AutoMl.Predictiontime)) ms</MudTd>
+                        <MudTd>@AutoMl.Runtime s</MudTd>
                     </RowTemplate>
                 </MudTable>
             }

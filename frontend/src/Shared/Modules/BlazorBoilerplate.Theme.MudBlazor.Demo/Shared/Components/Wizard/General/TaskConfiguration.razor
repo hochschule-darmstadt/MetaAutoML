@@ -4,6 +4,14 @@
 @using Newtonsoft.Json
 
 <MudStack>
+    <MudTimeline TimelineOrientation="@TimelineOrientation.Horizontal" TimelinePosition="@TimelinePosition.Bottom">
+        <MudTimelineItem Color="Color.Secondary">
+            <MudText Align="Align.Center" Typo="Typo.body2">Dataset preparation</MudText>
+        </MudTimelineItem>
+        <MudTimelineItem Color="Color.Secondary">
+            <MudText Align="Align.Center" Typo="Typo.body2">Configuration</MudText>
+        </MudTimelineItem>
+    </MudTimeline>
     @if (_compatibletasks != null)
     {
         <MudSelect Label="ML task" T="string" ValueChanged="@OnMlTaskSelectionChanged">

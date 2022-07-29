@@ -15,6 +15,7 @@ using BlazorBoilerplate.Server.Factories;
 using BlazorBoilerplate.Server.Managers;
 using BlazorBoilerplate.Server.Middleware;
 using BlazorBoilerplate.Server.Providers;
+using BlazorBoilerplate.Server.Services;
 using BlazorBoilerplate.Shared.Dto.ExternalAuth;
 using BlazorBoilerplate.Shared.Interfaces;
 using BlazorBoilerplate.Shared.Localizer;
@@ -24,6 +25,7 @@ using BlazorBoilerplate.Shared.Services;
 using BlazorBoilerplate.Shared.Validators.Db;
 using BlazorBoilerplate.Storage;
 using BlazorBoilerplate.Storage.Mapping;
+using BlazorBoilerplate.Theme.Material.Services;
 using Breeze.AspNetCore;
 using Breeze.Core;
 using FluentValidation.AspNetCore;
@@ -128,11 +130,6 @@ namespace BlazorBoilerplate.Server
             {
                 o.Address = new Uri(grpcEndpoint);
             })
-            .ConfigureChannel(o =>
-            {
-                o.MaxReceiveMessageSize = 2000 * 1024 * 1024;   // 2000 MB
-                o.MaxSendMessageSize = 2000 * 1024 * 1024;      // 2000 MB
-            })
             .ConfigurePrimaryHttpMessageHandler(() =>
             {
                 var httpHandler = new HttpClientHandler();
@@ -161,7 +158,7 @@ namespace BlazorBoilerplate.Server
             services.AddTransient<ITrainingManager, TrainingManager>();
             services.AddTransient<ICacheManager, CacheManager>();
             services.AddTransient<IModelManager, ModelManager>();
-
+            services.AddScoped<IFileUploader, FileUploader>();
 
 
             var authAuthority = Configuration[$"{projectName}:IS4ApplicationUrl"].TrimEnd('/');
@@ -718,6 +715,8 @@ namespace BlazorBoilerplate.Server
         }
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+
+
             app.UseRequestLocalization();
 
             // cookie policy to deal with temporary browser incompatibilities
@@ -776,6 +775,11 @@ namespace BlazorBoilerplate.Server
                     };
                 });
             }
+
+
+            ////////////////////////////////////////////////////////////////////////////////////////////////////////
+            //GRPC FILE SERVICE
+            ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
             app.UseEndpoints(endpoints =>
             {

@@ -1,9 +1,11 @@
 import pandas as pd
 import numpy as np
 from Controller_bgrpc import *
+from JsonUtil import get_config_property
+import sys
 
 from DataSetAnalysisManager import DataSetAnalysisManager
-
+import shutil
 import os
 
 FIRST_ROW_AMOUNT = 50
@@ -123,8 +125,16 @@ class CsvManager:
         return response
 
     @staticmethod
-    def ReadDefaultDatasetAsBytes():
-        file = open(os.path.join( os.path.dirname( __file__ ), "../config/defaults/titanic_train.csv"))
-        data = file.read().encode()
-        file.close()
-        return data
+    def CopyDefaultDataset(username):
+        upload_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), get_config_property("datasets-path"), username, "uploads")
+        default_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config", "defaults", "titanic_train.csv")
+        upload_folder = upload_folder.replace("\\managers", "")
+        default_file = default_file.replace("\\managers", "")
+        if os.getenv("MONGO_DB_DEBUG") != "YES":
+            #Within docker we do not want to add the app section, as this leads to broken links
+            upload_folder = upload_folder.replace("/app/", "")
+            default_file = default_file.replace("/app/", "")
+        # make sure directory exists in case it's the first upload from this user
+        os.makedirs(upload_folder, exist_ok=True)
+        shutil.copy(default_file, os.path.join(upload_folder, "titanic_train.csv"))
+        return 

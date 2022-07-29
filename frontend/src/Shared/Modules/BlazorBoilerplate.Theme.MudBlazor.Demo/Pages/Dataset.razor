@@ -16,7 +16,7 @@
 }
 
 <MudStack AlignItems="AlignItems.Center" Row="true" Class="mb-2">
-    <MudIcon Size="Size.Large" Icon="@Icons.Filled.ListAlt" Color="@Color.Secondary"/>
+    <MudIcon Size="Size.Large" Icon="@Icons.Filled.ListAlt" />
     <MudText Typo="Typo.h4">@_pageTitle</MudText>
 </MudStack>
 
@@ -70,7 +70,7 @@
         <DatasetAnalysis Dataset="_dataset"/>
     </MudItem>
     <MudItem xs="6" sm="6" md="6">
-        <DatasetAnalysis Dataset="_dataset"/>
+        <DatasetPreview />
     </MudItem>
 </MudGrid>
 

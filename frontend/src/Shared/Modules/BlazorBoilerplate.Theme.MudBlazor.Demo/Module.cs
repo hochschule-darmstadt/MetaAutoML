@@ -17,6 +17,7 @@ namespace BlazorBoilerplate.Theme.Material.Demo
         {
             services.AddSingleton<IDynamicComponent, NavMenu>();
             services.AddSingleton<IDynamicComponent, Footer>();
+            services.AddSingleton<IDynamicComponent, DrawerFooter>();
             services.AddSingleton<IDynamicComponent, TopRightBarSection>();
         }
 

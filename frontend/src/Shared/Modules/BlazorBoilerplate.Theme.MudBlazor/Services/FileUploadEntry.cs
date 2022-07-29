@@ -16,7 +16,7 @@ namespace BlazorBoilerplate.Theme.Material.Services
         {
             var buffer = new byte[fileUploadEntry.Size];
 
-            await fileUploadEntry.OpenReadStream(104857600).ReadAsync(buffer);
+            await fileUploadEntry.OpenReadStream(512000).ReadAsync(buffer);
 
             await stream.WriteAsync(buffer);
         }

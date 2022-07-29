@@ -44,11 +44,12 @@ class ControllerManager(object):
         Return a new OMA-ML user id
         """
         username = str(uuid.uuid4())
+        ROOT_PATH = os.path.dirname(os.path.abspath(__file__))
         if self.__data_storage.CheckIfUserExists(username) == True: #User already exists
             return CreateNewUserResponse(ResultCode.RESULT_CODE_ERROR_CAN_NOT_CREATE_USER, "")
         else:
-            dataset = CsvManager.ReadDefaultDatasetAsBytes()
-            self.__data_storage.SaveDataset(username, "titanic_train.csv", dataset, ":tabular", "Titanic")
+            CsvManager.CopyDefaultDataset(username)
+            self.__data_storage.SaveDataset(username, "titanic_train.csv", ":tabular", "Titanic")
             return CreateNewUserResponse(ResultCode.RESULT_CODE_OKAY, username)
             
 
@@ -413,7 +414,7 @@ class ControllerManager(object):
         #dataset.username = "User"
 
 
-        dataset_id: str = self.__data_storage.SaveDataset(dataset.username, dataset.file_name, dataset.content, dataset.type, dataset.dataset_name)
+        dataset_id: str = self.__data_storage.SaveDataset(dataset.username, dataset.file_name, dataset.type, dataset.dataset_name)
         print(f"saved new dataset: {dataset_id}")
         
         response = UploadDatasetFileResponse()

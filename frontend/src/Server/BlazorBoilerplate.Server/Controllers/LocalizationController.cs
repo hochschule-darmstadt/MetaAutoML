@@ -176,7 +176,7 @@ namespace BlazorBoilerplate.Server.Controllers
         }
 
         [HttpPost]
-        [Authorize(Policies.IsAdmin)]
+        //[Authorize(Policies.IsAdmin)]
         public async Task<ApiResponse> Upload(IFormFile uploadedFile)
         {
             if (uploadedFile == null || uploadedFile.Length == 0)

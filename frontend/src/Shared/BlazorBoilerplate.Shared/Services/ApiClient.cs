@@ -80,6 +80,10 @@ namespace BlazorBoilerplate.Shared.Services
         {
             return await httpClient.PostJsonAsync<ApiResponseDto>("api/Dataset/Upload", file);
         }
+        public async Task<ApiResponseDto> UploadDatasetFile(MultipartFormDataContent file)
+        {
+            return await httpClient.PostFileAsync<ApiResponseDto>("api/Dataset/UploadData", file);
+        }
 
         public async Task<ApiResponseDto> GetTasks(GetSupportedMlLibrariesRequestDto dataset)
         {

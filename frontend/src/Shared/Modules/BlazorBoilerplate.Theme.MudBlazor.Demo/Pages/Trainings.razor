@@ -12,41 +12,11 @@
 </TopSection>
 
 <MudStack AlignItems="AlignItems.Center" Row="true" Class="mb-2">
-    <MudIcon Size="Size.Large" Icon="@Icons.Filled.ModelTraining" Color="@Color.Secondary"/>
+    <MudIcon Size="Size.Large" Icon="@Icons.Filled.ModelTraining"/>
     <MudText Typo="Typo.h4">Trainings</MudText>
 </MudStack>
 
 <MudGrid>
-    <MudItem xs="12" sm="12" md="12">
-        <MudCard Elevation="5">
-            <MudCardHeader Style="border-bottom-style: inset; border-bottom-width: 1px;">
-                <CardHeaderContent >
-                    <MudText Typo="Typo.h6">Overview</MudText>
-                </CardHeaderContent>
-            </MudCardHeader>
-            <MudCardContent>
-                <MudPaper Height="100px" Elevation="0">
-                    @if (true)
-                    {
-                        <DataLoaderSpinner />
-                    }
-                    else
-                    {
-                        <MudGrid>
-                            <MudItem xs="3" sm="3" md="3">
-                            </MudItem>
-                            <MudItem xs="3" sm="3" md="3">
-                            </MudItem>
-                            <MudItem xs="3" sm="3" md="3">
-                            </MudItem>
-                            <MudItem xs="3" sm="3" md="3">
-                            </MudItem>
-                        </MudGrid>
-                    }
-                </MudPaper>
-            </MudCardContent>
-        </MudCard>
-    </MudItem>
     <MudItem xs="12" sm="12" md="12">
         <AllTrainings Trainings="_trainings"/>
     </MudItem>

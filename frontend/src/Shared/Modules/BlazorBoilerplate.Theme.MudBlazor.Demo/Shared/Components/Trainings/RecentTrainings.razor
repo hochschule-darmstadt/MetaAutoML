@@ -37,7 +37,7 @@
                     </HeaderContent>
                     <RowTemplate>
                         <MudTd>
-                            <a href="@NavManager.ToAbsoluteUri("trainings/" + @context.ID).AbsoluteUri" Style="cursor: pointer;">@context.StartTime</a>
+                            <a href="@NavManager.ToAbsoluteUri("trainings/" + @context.ID).AbsoluteUri" Style="cursor: pointer;">@context.StartTime.ToString("dd/MM/yy HH:mm")</a>
                         </MudTd>
                         <MudTd>
                             @context.Status

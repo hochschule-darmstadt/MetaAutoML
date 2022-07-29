@@ -1,5 +1,6 @@
 ﻿@inject IStringLocalizer<Global> L
 @inject NavigationManager NavManager
+@inject IFileUploader fileUploader
 
 
 <MudCard Elevation="5">
@@ -9,7 +10,11 @@
         </CardHeaderContent>
         <CardHeaderActions>
             <MudStack Row="true" Class="align-content-center" Style="margin-top: 8px">
-                <UploadDataset OnUploadCompletedCallback="@OnUploadCompletedCallback"/>
+                <MudButton OnClick="OnOpenUpload"
+                    Variant="Variant.Filled" 
+                    Color="Color.Secondary"
+                    EndIcon="@Icons.Filled.CloudUpload"
+                        Size="Size.Small">Add</MudButton>
             </MudStack>
         </CardHeaderActions>
     </MudCardHeader>
@@ -23,12 +28,12 @@
             <MudTable Items="@Datasets.Datasets" style="width:stretch" class="mat-elevation-z5" AllowSelection="false" Dense="true" Filter="new Func<GetDatasetResponseDto,bool>(FilterFunc)">
                 <ToolBarContent>
                     <MudSpacer />
-                    <MudTextField @bind-Value="searchString" Placeholder="Search" Adornment="Adornment.Start"
+                    <MudTextField @bind-Value="searchString" Placeholder="Search for name or type" Adornment="Adornment.Start"
                                     AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
                 </ToolBarContent>
                 <HeaderContent>
                     <MudTh><MudTableSortLabel SortBy="new Func<GetDatasetResponseDto, object>(x=>x.Name)">Name</MudTableSortLabel></MudTh>
-                    <MudTh><MudTableSortLabel SortBy="new Func<GetDatasetResponseDto, object>(x=>x.Type)">Type</MudTableSortLabel></MudTh>
+                    <MudTh><MudTableSortLabel SortBy="@(new Func<GetDatasetResponseDto, object>(x=>x.Type.Properties["skos:prefLabel"]))">Type</MudTableSortLabel></MudTh>
                     <MudTh>Rows</MudTh>
                     <MudTh>Columns</MudTh>
                     <MudTh><MudTableSortLabel SortBy="new Func<GetDatasetResponseDto, object>(x=>x.Creation_date)">Date</MudTableSortLabel></MudTh>
@@ -84,4 +89,9 @@
             return true;
         return false;
     } 
+    private void OnOpenUpload()
+    {
+        fileUploader.IsUploadDialogOpen = true;
+        fileUploader.RefreshUploadComponentCallback();
+    }
 }

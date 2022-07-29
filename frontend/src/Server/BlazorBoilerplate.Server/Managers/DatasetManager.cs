@@ -11,6 +11,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
@@ -163,19 +164,65 @@ namespace BlazorBoilerplate.Server.Managers
             try
             {
                 var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
-                request.Username = username;
-                request.FileName = file.FileName;
-                request.DatasetName = file.DatasetName;
-                request.Type = file.DatasetType;
-                request.Content = Google.Protobuf.ByteString.CopyFrom(file.Content);
-                var reply = _client.UploadDatasetFile(request);
-                return new ApiResponse(Status200OK, null, reply.ReturnCode);
+                string trustedFileNameForDisplay = WebUtility.HtmlEncode(file.FileName);
+                string controllerDatasetPath = Environment.GetEnvironmentVariable("CONTROLLER_DATASET_FOLDER_PATH");
+                var path = Path.Combine(controllerDatasetPath, username, "uploads");
+
+
+                if (!Directory.Exists(path))
+                {
+                    Directory.CreateDirectory(path);
+                }
+
+                await using FileStream fs = new(Path.Combine(path, trustedFileNameForDisplay), FileMode.Append);
+                fs.Write(file.Content, 0, file.Content.Length);
+
+                //We uploaded everything, send grpc request to controller to persist
+                if (file.ChunkNumber == file.TotalChunkNumber)
+                {
+                    fs.Dispose();
+                    request.Username = username;
+                    request.FileName = trustedFileNameForDisplay;
+                    request.DatasetName = file.DatasetName;
+                    request.Type = file.DatasetType;
+                    var reply = _client.UploadDatasetFile(request);
+                    return new ApiResponse(Status200OK, null, reply.ReturnCode);
+                }
+                return new ApiResponse(Status200OK, null, 0);
             }
             catch (Exception ex)
             {
 
                 return new ApiResponse(Status404NotFound, ex.Message);
             }            
+        }
+
+        public async Task<ApiResponse> UploadData(IFormFile file)
+        {
+            try
+            {
+                if (file == null || file.Length == 0)
+                    return new ApiResponse(Status404NotFound, "File not selected");
+                var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
+                string trustedFileNameForDisplay = WebUtility.HtmlEncode(file.FileName);
+                string controllerDatasetPath = Environment.GetEnvironmentVariable("CONTROLLER_DATASET_FOLDER_PATH");
+                var path = Path.Combine(controllerDatasetPath, username, "uploads");
+
+                if (!Directory.Exists(path))
+                {
+                    Directory.CreateDirectory(path);
+                }
+
+                await using FileStream fs = new(Path.Combine(path, trustedFileNameForDisplay), FileMode.Create);
+                await file.CopyToAsync(fs);
+
+                return new ApiResponse(Status200OK, null, trustedFileNameForDisplay);
+            }
+            catch (Exception ex)
+            {
+
+                return new ApiResponse(Status404NotFound, ex.Message);
+            }
         }
     }
 }

@@ -35,7 +35,9 @@
                     </MudTd>
                     <MudTd>@context.Status</MudTd>
                     <MudTd>@context.Library</MudTd>
-                    <MudTd>@context.Name</MudTd>
+                    <MudTd>
+                        <a href="@NavManager.ToAbsoluteUri("datasets/" + @context.DatasetId + "/modelsview/" + @context.ID).AbsoluteUri" Style="cursor: pointer;">@context.Name</a>
+                    </MudTd>
                     <MudTd>@context.TestScore</MudTd>
                     <MudTd>@context.Runtime</MudTd>
                     <MudTd>@context.Predictiontime</MudTd>

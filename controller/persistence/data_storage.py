@@ -1,3 +1,4 @@
+import sys
 import io
 import shutil
 from threading import Lock
@@ -139,7 +140,7 @@ class DataStorage:
         return self.__mongo.UpdateTraining(username, id, new_values)
 
 
-    def SaveDataset(self, username: str, fileName: str, content: bytes, type: str, name: str) -> str:
+    def SaveDataset(self, username: str, fileName: str, type: str, name: str) -> str:
         """
         Store dataset contents on disk and insert entry to database.
         ---
@@ -156,9 +157,14 @@ class DataStorage:
         """
         analysisResult = {}
 
+        upload_file = os.path.join(self.__storage_dir, username, "uploads", fileName)
+        if os.getenv("MONGO_DB_DEBUG") != "YES":
+            #Within docker we do not want to add the app section, as this leads to broken links
+            upload_file = upload_file.replace("/app/", "")
+
         #Perform analysis for tabular data datasets
         if type == ":tabular":
-            dataset_for_analysis = pd.read_csv(io.BytesIO(content))
+            dataset_for_analysis = pd.read_csv(upload_file, engine="python")
             analysisResult = DataSetAnalysisManager.startAnalysis(dataset_for_analysis)
 
 
@@ -178,9 +184,8 @@ class DataStorage:
             filename_dest = filename_dest.replace("/app/", "")
         # make sure directory exists in case it's the first upload from this user
         os.makedirs(os.path.dirname(filename_dest), exist_ok=True)
-
-        with open(filename_dest, 'wb') as outfp:
-            outfp.write(content)
+        
+        shutil.move(upload_file, filename_dest)
 
         #unpack zip file
         if type == ":image":
