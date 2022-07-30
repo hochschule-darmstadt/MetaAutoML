@@ -30,11 +30,11 @@ namespace BlazorBoilerplate.Theme.Material.Services
         public bool IsUploading { get; set; } = false;
         public Action OnUploadChangedCallback { get; set; }
         public Action RefreshUploadComponentCallback { get; set; }
+        public Func<Task> OnUploadCompletedCallback { get; set; }
         public bool IsUploadDialogOpen { get; set; } = false;
         public async Task UploadDataset()
         {
-            int chunkSize = 100000; 
-            int chunkAmount;
+            int chunkSize = 1000000; 
             long bytesRead = 0;
             byte[] data = new byte[chunkSize];
             IsUploading = true;
@@ -80,6 +80,10 @@ namespace BlazorBoilerplate.Theme.Material.Services
                 if (OnUploadChangedCallback != null)
                 {
                     OnUploadChangedCallback();
+                }
+                if (OnUploadCompletedCallback != null)
+                {
+                    await OnUploadCompletedCallback();
                 }
             }
             catch (Exception ex)

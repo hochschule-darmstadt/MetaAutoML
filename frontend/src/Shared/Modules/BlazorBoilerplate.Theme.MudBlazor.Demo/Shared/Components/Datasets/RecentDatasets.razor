@@ -37,8 +37,7 @@
                     <HeaderContent>
                         <MudTh>Name</MudTh>
                         <MudTh>Type</MudTh>
-                        <MudTh>Rows</MudTh>
-                        <MudTh>Columns</MudTh>
+                        <MudTh>Size</MudTh>
                         <MudTh>Date</MudTh>
                     </HeaderContent>
                     <RowTemplate>
@@ -46,8 +45,7 @@
                             <a href="@NavManager.ToAbsoluteUri("datasets/" + @context.Identifier).AbsoluteUri" Style="cursor: pointer;">@context.Name</a>
                         </MudTd>
                         <MudTd >@context.Type.Properties["skos:prefLabel"]</MudTd>
-                        <MudTd >@context.Rows</MudTd>
-                        <MudTd >@context.Columns</MudTd>
+                        <MudTd >@FormatBytes(context.Size)</MudTd>
                         <MudTd  style="white-space:nowrap;">@context.Creation_date.ToString("yyyy-MM-dd")</MudTd>
                     </RowTemplate>
                 </MudTable>
@@ -70,7 +68,7 @@
 
             if (_datasets != null)
             {
-                _datasets.Datasets = _datasets.Datasets.OrderByDescending(x => x.Creation_date).Take(3).ToList();
+                _datasets.Datasets = _datasets.Datasets.OrderByDescending(x => x.Creation_date).Take(6).ToList();
                 StateHasChanged();
             }
         } 
@@ -86,5 +84,20 @@
         {
             fileUploader.RefreshUploadComponentCallback();
         }
+    }
+    public string FormatBytes(long bytes)
+    {
+      const int scale = 1024;
+      string[] orders = new string[] { "GB", "MB", "KB", "Bytes" };
+      long max = (long)Math.Pow(scale, orders.Length - 1);
+
+      foreach (string order in orders)
+      {
+        if ( bytes > max )
+          return string.Format("{0:##.##} {1}", decimal.Divide( bytes, max ), order);
+
+        max /= scale;
+      }
+      return "0 Bytes";
     }
 }

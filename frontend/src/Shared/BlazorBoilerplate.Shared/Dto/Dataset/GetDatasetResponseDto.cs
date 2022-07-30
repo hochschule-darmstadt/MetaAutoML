@@ -12,18 +12,9 @@ namespace BlazorBoilerplate.Shared.Dto.Dataset
     {
         public string Name { get; set; }
         public ObjectInfomationDto Type { get; set; }
-        public int? Columns { get; set; }
-        public int? Rows { get; set; }
+        public long Size { get; set; }
         public DateTime Creation_date { get; set; }
         public string Identifier { get; set; }
-        public GetDatasetResponseDto(string name, ObjectInfomationDto type, int columns, int rows, DateTime time, string identifier)
-        {
-            Name = name;
-            Type = type;
-            Columns = columns;
-            Rows = rows;
-            Creation_date = time;
-            Identifier = identifier;
-        }
+        public Dictionary<string, dynamic> Analysis { get; set; }
     }
 }

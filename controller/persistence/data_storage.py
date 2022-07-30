@@ -157,6 +157,10 @@ class DataStorage:
         """
         analysisResult = {}
 
+        if type == ":image":
+            #replace zip sufix with nothing as it will be unpacked
+            name = name.replace(".zip", "")
+
         #build dictionary for database
         database_content = {
             "name": name,
@@ -188,14 +192,23 @@ class DataStorage:
             os.remove(filename_dest)
             filename_dest = filename_dest.replace(".zip", "")
 
-        nbytes = sum(d.stat().st_size for d in os.scandir(os.path.join(self.__storage_dir, username, dataset_id)) if d.is_file())
+        def get_size(start_path = '.'):
+            total_size = 0
+            for dirpath, dirnames, filenames in os.walk(start_path):
+                for f in filenames:
+                    fp = os.path.join(dirpath, f)
+                    # skip if it is symbolic link
+                    if not os.path.islink(fp):
+                        total_size += os.path.getsize(fp)
+
+            return total_size
+        nbytes = get_size(os.path.join(self.__storage_dir, username, dataset_id))
 
 
         #Perform analysis for tabular data datasets
         if type == ":tabular":
             dataset_for_analysis = pd.read_csv(filename_dest, engine="python")
             analysisResult = DataSetAnalysisManager.startAnalysis(dataset_for_analysis)
-
 
 
 

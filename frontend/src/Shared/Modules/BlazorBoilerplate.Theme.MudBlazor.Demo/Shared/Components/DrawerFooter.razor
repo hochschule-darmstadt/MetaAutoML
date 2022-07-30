@@ -9,7 +9,7 @@
 @if (fileUploader.IsUploading == true)
 {
     <MudStack Class="mt-4">
-        <MudText Typo="Typo.body2">Uploading @fileUploader.UploadFile.DatasetName</MudText>
+        <MudText Typo="Typo.body2">@UploadText</MudText>
         <MudProgressLinear Color="Color.Secondary" Value="@Progress" Class="my-7" />
     </MudStack>
 }
@@ -24,7 +24,7 @@
             else if (fileUploader.IsUploading == true)
             {
                 <MudStack Class="mt-4">
-                    <MudText Typo="Typo.body2">Uploading @fileUploader.UploadFile.DatasetName</MudText>
+                    <MudText Typo="Typo.body2">@UploadText</MudText>
                     <MudProgressLinear Color="Color.Secondary" Value="@Progress" Class="my-7" />
                 </MudStack>
             }
@@ -67,13 +67,37 @@
 
 
 @code {
+
+    [Parameter]
+    public EventCallback OnUploadCompletedCallback { get; set; }
     public bool IsSelectFileDisabled { get; set; } = true;
     public string AcceptedFileType { get; set; } = "";
     public int Progress { get; set; }
+    public string UploadText { get; set; } = "";
+
+    public int Order { get => 1; }
+    public string IntoComponent { get => "DrawerFooter"; }
+
+    private GetDatasetTypesResponseDto _datasetTypes;
+    private bool _uploadReady = true;
+    private bool _isLoaderClosed = true;
+
     private void UpdateProgress()
     {
-        float divideResult = (float)fileUploader.UploadFile.ChunkNumber / (float)fileUploader.UploadFile.TotalChunkNumber;
-        Progress = (int)(divideResult * 100);
+        //Reset FileUploader after completing upload, (+1 to total to compensate to loop offset)
+        if ((fileUploader.UploadFile.ChunkNumber == (fileUploader.UploadFile.TotalChunkNumber+1)) && (fileUploader.IsUploading == false))
+        {
+            fileUploader.UploadFile = new FileUploadRequestDto();
+            IsSelectFileDisabled = true;
+            _uploadReady = true;
+        }
+        else
+        {
+            float divideResult = (float)fileUploader.UploadFile.ChunkNumber / (float)fileUploader.UploadFile.TotalChunkNumber;
+            Progress = (int)(divideResult * 100);
+            UploadText = "Uploading " + fileUploader.UploadFile.DatasetName + " " + String.Format("{0:0.00}", divideResult * 100) + "%";
+        }
+
         RefreshComponent();
     }
 
@@ -82,19 +106,9 @@
         StateHasChanged();
     }
 
-    public int Order { get => 1; }
-    public string IntoComponent { get => "DrawerFooter"; }
 
 
 
-
-
-    private GetDatasetTypesResponseDto _datasetTypes;
-    private bool _uploadReady = true;
-    private bool _isLoaderClosed = true;
-
-    [Parameter]
-    public EventCallback OnUploadCompletedCallback { get; set; }
 
 
     protected override async void OnInitialized()
@@ -140,12 +154,13 @@
             {
                 case ":tabular":
                     AcceptedFileType = ".csv";
+                    IsSelectFileDisabled = false;
                     break;
                 case ":image":
                     AcceptedFileType = ".zip";
+                    IsSelectFileDisabled = false;
                     break;
             }
-            IsSelectFileDisabled = false;
         }
         fileUploader.UploadFile.DatasetType = (string)value;
         StateHasChanged();
@@ -197,6 +212,7 @@
 
             _isLoaderClosed = false;
             _uploadReady = false;
+            UploadText = "Preparing upload...";
             StateHasChanged();
 
             fileUploader.UploadDataset();

@@ -3,6 +3,7 @@
 @inject ISnackbar Snackbar
 @inject IViewNotifier viewNotifier
 @inject IApiClient apiClient
+@inject IFileUploader fileUploader
 @attribute [Authorize]
 
 <TopSection>
@@ -62,6 +63,7 @@
     protected override async Task OnInitializedAsync()
     {
         await LoadTrainings();
+        fileUploader.OnUploadCompletedCallback = LoadDatasetWithReRendering;
     }
 
     private async Task LoadTrainings()
@@ -86,6 +88,12 @@
         {
             viewNotifier.Show(ex.GetBaseException().Message, ViewNotifierType.Error, L["Operation Failed"]);
         }
+    }
+
+    private async Task LoadDatasetWithReRendering()
+    {
+        await LoadDataset();
+        StateHasChanged();
     }
 
     private async Task LoadDataset()

@@ -8,6 +8,7 @@ using Grpc.Core;
 using Grpc.Net.Client;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -72,13 +73,13 @@ namespace BlazorBoilerplate.Server.Managers
                 getDatasetRequest.Username = username;
                 getDatasetRequest.Identifier = dataset.Identifier;
                 var reply = _client.GetDataset(getDatasetRequest);
-                response = new GetDatasetResponseDto(
-                    reply.DatasetInfos.Name,
-                    await _cacheManager.GetObjectInformation(reply.DatasetInfos.Type),
-                    reply.DatasetInfos.Columns,
-                    reply.DatasetInfos.Rows,
-                    reply.DatasetInfos.CreationDate.ToDateTime(),
-                    reply.DatasetInfos.Identifier);
+                response = new GetDatasetResponseDto();
+                response.Name = reply.DatasetInfos.Name;
+                response.Type = await _cacheManager.GetObjectInformation(reply.DatasetInfos.Type);
+                response.Size = reply.DatasetInfos.Size;
+                response.Analysis = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(reply.DatasetInfos.Analysis);
+                response.Creation_date = reply.DatasetInfos.CreationDate.ToDateTime();
+                response.Identifier = reply.DatasetInfos.Identifier;
 
                 return new ApiResponse(Status200OK, null, response);
 
@@ -106,7 +107,15 @@ namespace BlazorBoilerplate.Server.Managers
                 foreach (Dataset item in reply.Dataset)
                 {
                     ObjectInfomationDto typeInformation = await _cacheManager.GetObjectInformation(item.Type);
-                    response.Datasets.Add(new GetDatasetResponseDto(item.Name, typeInformation, item.Columns, item.Rows,item.CreationDate.ToDateTime(), item.Identifier));
+                    response.Datasets.Add(new GetDatasetResponseDto()
+                    {
+                        Name = item.Name,
+                        Type = await _cacheManager.GetObjectInformation(item.Type),
+                        Size = item.Size,
+                        Analysis = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(item.Analysis),
+                        Creation_date = item.CreationDate.ToDateTime(),
+                        Identifier = item.Identifier
+                    });
                 }
                 return new ApiResponse(Status200OK, null, response);
 

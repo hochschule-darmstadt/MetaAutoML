@@ -17,6 +17,7 @@ namespace BlazorBoilerplate.Shared.Interfaces
         bool IsUploading { get; set; }
         Action OnUploadChangedCallback { get; set; }
         Action RefreshUploadComponentCallback { get; set; }
+        Func<Task> OnUploadCompletedCallback { get; set; }
         bool IsUploadDialogOpen { get; set; }
     }
 }

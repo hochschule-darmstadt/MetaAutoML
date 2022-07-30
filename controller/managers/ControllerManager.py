@@ -103,9 +103,9 @@ class ControllerManager(object):
         for dataset in all_datasets:
             try:
                 response_dataset = Dataset()
-                if dataset['type'] == ':tabular':
-                    response_dataset.rows = dataset['analysis']['basic analysis']['number_of_rows']
-                    response_dataset.columns = dataset['analysis']['basic analysis']['number_of_columns']
+                
+                response_dataset.analysis = json.dumps(dataset['analysis'])
+                response_dataset.size = dataset['size']
                 response_dataset.identifier = str(dataset["_id"])
                 response_dataset.name = dataset["name"]
                 response_dataset.type = dataset['type']
@@ -142,9 +142,8 @@ class ControllerManager(object):
         
         try:
             response_dataset = Dataset()
-            if dataset['type'] == ':tabular':
-                response_dataset.rows = dataset['analysis']['basic analysis']['number_of_rows']
-                response_dataset.columns = dataset['analysis']['basic analysis']['number_of_columns']
+            response_dataset.analysis = json.dumps(dataset['analysis'])
+            response_dataset.size = dataset['size']
             response_dataset.identifier = str(dataset["_id"])
             response_dataset.name = dataset["name"]
             response_dataset.type = dataset['type']

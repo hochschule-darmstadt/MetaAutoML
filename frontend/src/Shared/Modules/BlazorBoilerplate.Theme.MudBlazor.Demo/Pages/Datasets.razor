@@ -3,6 +3,7 @@
 @inject ISnackbar Snackbar
 @inject IApiClient apiClient
 @inject IViewNotifier viewNotifier
+@inject IFileUploader fileUploader
 @attribute [Authorize]
 
 <TopSection>
@@ -27,6 +28,12 @@
     protected override async Task OnInitializedAsync()
     {
         await LoadDatasets();
+        fileUploader.OnUploadCompletedCallback = LoadDatasetsWithReRendering;
+    }
+    private async Task LoadDatasetsWithReRendering()
+    {
+        await LoadDatasets();
+        StateHasChanged();
     }
     private async Task LoadDatasets()
     {
