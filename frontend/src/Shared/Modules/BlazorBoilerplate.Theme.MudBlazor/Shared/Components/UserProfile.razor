@@ -38,9 +38,14 @@
     <Authorized>
             @if (userViewModel != null)
             {
-                <MudMenu Icon="@Icons.Material.Filled.AccountCircle" Label="@userViewModel.UserName"  Color="Color.Inherit">
-                    <MudMenuItem Href="/account/profile">Profile</MudMenuItem>
-                    <Login />
+                <MudMenu FullWidth="true">
+                    <ActivatorContent>
+                        <MudButton Variant="Variant.Text" StartIcon="@Icons.Material.Filled.AccountCircle" Color="Color.Inherit" >@userViewModel.UserName</MudButton>
+                    </ActivatorContent>
+                    <ChildContent>
+                        <MudMenuItem Href="/account/profile">Profile</MudMenuItem>
+                        <Login />
+                    </ChildContent>
                 </MudMenu>
             }
     </Authorized>

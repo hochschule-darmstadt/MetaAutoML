@@ -38,7 +38,7 @@ class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
             yield from capture_process_output(process, start_time, False)
             generate_script(config_json)
             output_json = zip_script(config_json["training_id"])
-            library = "keras"
+            library = ":keras"
             model = "neural network"
             test_score, prediction_time = evaluate(config_json, job_file_location, data_loader)
             response = yield from get_response(output_json, start_time, test_score, prediction_time, library, model)

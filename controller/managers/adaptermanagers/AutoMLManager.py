@@ -183,12 +183,14 @@ class AutoMLManager(ABC, Thread):
                 "library": "", 
                 "status": "busy",
                 "status_messages": [],
-                "prediction_time": 0
+                "prediction_time": 0,
+                "start_time": datetime.now(),
+                "end_time": ""
                 }
             _mdl_id = self.__data_storage.InsertModel(self.__username, model_details)
 
             # Append model_id to dataset
-            found, dataset = self.__data_storage.FindDataset(self.__username, self.__dataset_id)
+            found, dataset = self.__data_storage.GetDataset(self.__username, self.__dataset_id)
             self.__data_storage.UpdateDataset(self.__username, self.__dataset_id, { "models": dataset["models"] + [_mdl_id] })
 
             for response in stub.StartAutoML(dataset_to_send):
@@ -224,7 +226,8 @@ class AutoMLManager(ABC, Thread):
                             "model": self.__model,
                             "library": self.__library,
                             "prediction_time": self.__predictiontime,
-                            "status": self.__last_status
+                            "status": self.__last_status,
+                            "end_time": datetime.now()
                         }
                         self.__callback(self.__training_id, _mdl_id, model_details)
 
@@ -245,6 +248,5 @@ class AutoMLManager(ABC, Thread):
                 "prediction_time": 0,
                 "status": self.__last_status
                 }
-            self.__data_storage.UpdateModel(self.__username, _mdl_id, {"status": "Failed"})
             self.__callback(self.__training_id, _mdl_id, model_details)
                         

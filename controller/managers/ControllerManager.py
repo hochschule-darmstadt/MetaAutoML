@@ -469,17 +469,18 @@ class ControllerManager(object):
         # will be called when any automl is done
         # NOTE: will run in parallel
         def callback(training_id, model_id, model: 'dict[str, object]'):
-            training = self.__data_storage.GetTraining(configuration.username, training_id)
-            model["dataset_id"] = training["dataset_id"]
-            _mdl_id = self.__data_storage.UpdateModel(configuration.username, model_id, model)
-            model_list = self.__data_storage.GetModels(configuration.username, training_id)
             # lock data storage to prevent race condition between get and update
             with self.__data_storage.Lock():
                 # append new model to training
+                training = self.__data_storage.GetTraining(configuration.username, training_id)
+                model["dataset_id"] = training["dataset_id"]
+                _mdl_id = self.__data_storage.UpdateModel(configuration.username, model_id, model)
+                model_list = self.__data_storage.GetModels(configuration.username, training_id)
                 if len(training["models"]) == len(model_list)-1:
                     self.__data_storage.UpdateTraining(configuration.username, training_id, {
                         "models": training["models"] + [model_id],
-                        "status": "completed"
+                        "status": "completed",
+                        "end_time": datetime.now()
                     })
                 else:
                     self.__data_storage.UpdateTraining(configuration.username, training_id, {

@@ -58,7 +58,7 @@
             @if (_supportedMlLibraries != null)
             {
                 <MudText Typo="Typo.body1">ML libraries</MudText>
-                <MudChipSet SelectedChipsChanged="OnMlLibrarySelectionChanged" Filter="true" MultiSelection="true" >
+                <MudChipSet Filter="true" MultiSelection="true" @bind-SelectedChips="SelectedMlLibsChips">
                     @if (_supportedMlLibraries != null)
                     {
                         @foreach (var lib in _supportedMlLibraries.MlLibraries)
@@ -113,6 +113,24 @@
     private GetSupportedMlLibrariesResponseDto _supportedMlLibraries;
     private GetCompatibleAutoMlSolutionsResponseDto _compatibleAutoMls;
     private List<String> _columnNames;
+    private bool IsLibPolled = false;
+
+    public MudChip[] SelectedMlLibsChips 
+    { 
+        get
+        {
+            return _selectedMlLibChips;
+        } 
+        set
+        {
+            _selectedMlLibChips = value;
+            if (_selectedMlLibChips != null)
+            {
+                OnMlLibrarySelectionChanged(SelectedMlLibsChips);
+            }
+        }
+    }
+    private MudChip[] _selectedMlLibChips;
 
     protected async override void OnInitialized()
     {
@@ -188,29 +206,33 @@
             dictionary.Add("task", StartAutoMlRequest.Task);
             await UpdateStartAutoMlRequest();
             /** Configuration = dictionary is currently dummy */
-            GetCompatibleAutoMlSolutionsRequestDto compatibleAutoMlRequest = new GetCompatibleAutoMlSolutionsRequestDto { Configuration = dictionary };
+            //GetCompatibleAutoMlSolutionsRequestDto compatibleAutoMlRequest = new GetCompatibleAutoMlSolutionsRequestDto { Configuration = dictionary };
 
-            ApiResponseDto apiResponse = await apiClient.GetCompatibleAutoMlSolutions(compatibleAutoMlRequest);
+            //ApiResponseDto apiResponse = await apiClient.GetCompatibleAutoMlSolutions(compatibleAutoMlRequest);
 
-            if (apiResponse.IsSuccessStatusCode)
-            {
-                _compatibleAutoMls = Newtonsoft.Json.JsonConvert.DeserializeObject<GetCompatibleAutoMlSolutionsResponseDto>(apiResponse.Result.ToString());
-                StateHasChanged();
-                viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["AutoMlSolution Operation Successful"]);
-            }
-            else
-            {
-                viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["AutoMlSolution Operation Failed"]);
-            }
+            //if (apiResponse.IsSuccessStatusCode)
+            //{
+            //    _compatibleAutoMls = Newtonsoft.Json.JsonConvert.DeserializeObject<GetCompatibleAutoMlSolutionsResponseDto>(apiResponse.Result.ToString());
+            //    StateHasChanged();
+            //    viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["AutoMlSolution Operation Successful"]);
+            //}
+            //else
+            //{
+            //    viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["AutoMlSolution Operation Failed"]);
+            //}
 
             GetSupportedMlLibrariesRequestDto supportedMlLibrariesRequest = new GetSupportedMlLibrariesRequestDto { Task = StartAutoMlRequest.Task };
-            apiResponse = await apiClient.GetSupportedMlLibraries(supportedMlLibrariesRequest);
+            ApiResponseDto apiResponse = await apiClient.GetSupportedMlLibraries(supportedMlLibrariesRequest);
 
             if (apiResponse.IsSuccessStatusCode)
             {
                 _supportedMlLibraries = Newtonsoft.Json.JsonConvert.DeserializeObject<GetSupportedMlLibrariesResponseDto>(apiResponse.Result.ToString());
                 StateHasChanged();
                 viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["SupportedMlLibraries Operation Successful"]);
+                //quick and dirty way to avoid inconsistent automl solution polling
+                await Task.Delay(1000);
+                IsLibPolled = true;
+                OnMlLibrarySelectionChanged(SelectedMlLibsChips);
             }
             else
             {
@@ -225,6 +247,10 @@
 
     private async void OnMlLibrarySelectionChanged(MudChip[] libs)
     {
+        if (IsLibPolled == false)
+        {
+            return;
+        }
         try
         {
             Dictionary<string, string> dictionary = new Dictionary<string, string>();
