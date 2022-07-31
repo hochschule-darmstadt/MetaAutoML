@@ -52,12 +52,15 @@ class DataSetAnalysisManager:
         """
         # Turn off io of matplotlib as the plots are saved, not displayed
         plt.ioff()
+        print("[Upload dataset]: Starting advanced dataset analysis")
 
+        self.__dataset.loc[:, self.__dataset.dtypes == 'object'] = self.__dataset.select_dtypes(['object']).apply(lambda x: x.astype('category'))
         categorical_columns = list(self.__dataset.select_dtypes(['category']).columns) + list(self.__dataset.select_dtypes(['bool']).columns)
         plot_filenames = []
 
         # Plot distributions of all columns
-        for col in list(self.__dataset.columns):
+        for i, col in enumerate(list(self.__dataset.columns)):
+            print(f"[Dataset analysis]: Plotting columns {i}/{len(list(self.__dataset.columns))}", end="\r")
             filename = self.__make_column_plot(col, save_path)
             plot_filenames.append(filename)
 
@@ -66,6 +69,7 @@ class DataSetAnalysisManager:
         proc_dataset = self.__fill_nan_values(proc_dataset)
 
         # Make correlation plot
+        print("[Dataset analysis]: Plotting correlation matrix")
         filename = self.__make_correlation_matrix_plot(proc_dataset, categorical_columns, save_path)
         plot_filenames.append(filename)
 
@@ -79,6 +83,7 @@ class DataSetAnalysisManager:
         for first_col_idx, second_col_index in zip(indices[0], indices[1]):
             # If the correlation isn't a col with itself or has already been plotted the other way around -> plot it
             if first_col_idx != second_col_index and [second_col_index, first_col_idx] not in plotted_indices:
+                print(f"[Dataset analysis]: Plotting feature imbalance plot {len(plotted_indices) + 1}/5", end="\r")
                 filename = self.__make_feature_imbalance_plot(self.__dataset.columns[first_col_idx],
                                                               self.__dataset.columns[second_col_index],
                                                               categorical_columns,
@@ -89,6 +94,7 @@ class DataSetAnalysisManager:
             if len(plotted_indices) == 5:
                 break
 
+        print(f"[Dataset analysis]: Dataset analysis finished, saved {len(plot_filenames)} plots")
         return plot_filenames
 
 
@@ -306,6 +312,7 @@ class DataSetAnalysisManager:
         Returns filename: Filepath of the produced plot.
         """
         plt.clf()
+        plt.ioff()
         plt.rcParams['figure.figsize'] = [16, 16]
         feature_correlation_plot = xai.correlations(dataset,
                                                     include_categorical=True,
@@ -330,6 +337,7 @@ class DataSetAnalysisManager:
         Returns filename: Filepath of the produced plot.
         """
         plt.clf()
+        plt.ioff()
         plt.figure(figsize=(12, 6))
         xai.imbalance_plot(self.__dataset, first_colname, second_colname, categorical_cols=categorical_columns)
         plt.margins(0.2)
