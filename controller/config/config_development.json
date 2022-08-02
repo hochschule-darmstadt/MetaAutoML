@@ -3,5 +3,5 @@
     "controller-server-port": "5001",
     "controller-server-port-insecure": "5002",
     "datasets-path": "app-data\\datasets",
-    "controller-server-adress": "127.0.0.1"
+    "controller-server-adress": "192.168.1.29"
   }

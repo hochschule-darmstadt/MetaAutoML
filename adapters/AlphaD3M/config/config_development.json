@@ -9,6 +9,7 @@
   "model-folder-name": "model",
   "export-folder-name": "export",
   "result-folder-name": "result",
+  "templates-path": "app-data/templates",
   "predict-time-sources-path": "../Utils/AutoMLs/predict_time_sources.py",
   "local_execution": "YES"
 }

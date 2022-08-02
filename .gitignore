@@ -164,7 +164,7 @@ dmypy.json
 controller/app-data/output/*/*
 !controller/app-data/output/*/.gitkeep
 controller/.vs
-
+controller/app-data\datasets/*
 
 #all adapter ignores
 # by adapter generated files, but keep the directories
@@ -201,3 +201,4 @@ FLAML/templates/output
 #AutoMLs
 MLJAR/AutoML_*
 controller/app-data/analysis.json
+controller/app-data/datasets/*

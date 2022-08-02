@@ -1,3 +1,4 @@
+import shutil
 import d3m_interface as d3mi
 import json
 import os, sys
@@ -47,6 +48,9 @@ class AlphaD3MAdapter(AbstractAdapter):
             process_json["pipeline_id"] = model.get_best_pipeline_id()
         with open(file_path, "w") as file:
             json.dump(process_json, file)
+        #copy best model pipeline and problem json to result folder
+        shutil.copytree(os.path.join(self._configuration["model_folder_location"], model.get_best_pipeline_id()), os.path.join(self._configuration["result_folder_location"], model.get_best_pipeline_id()))
+        shutil.copyfile(os.path.join(self._configuration["model_folder_location"], "problem_config.json"), os.path.join(self._configuration["result_folder_location"], "problem_config.json"))
 
     def __tabular_classification(self):
         """Execute the classification task"""

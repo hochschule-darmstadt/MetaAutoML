@@ -22,6 +22,7 @@ class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
         Execute a new AutoML run.
         """
         try:
+            start_time = time.time()
             config = SetupRunNewRunEnvironment(request.processJson)
 
             process = start_automl_process(config)

@@ -32,7 +32,7 @@ class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
             config = SetupRunNewRunEnvironment(request.processJson)
 
             process = start_automl_process(config)
-            yield from capture_process_output(process, start_time)
+            yield from capture_process_output(process, start_time, False)
             generate_script(config)
             output_json = zip_script(config)
 

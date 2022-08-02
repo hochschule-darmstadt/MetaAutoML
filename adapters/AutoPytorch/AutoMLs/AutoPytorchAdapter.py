@@ -53,7 +53,6 @@ class AutoPytorchAdapter(AbstractAdapter):
         elif self._configuration["metric"] == "" and self._configuration["task"] == ":tabular_regression":
             # handle empty metric field, 'r2' should be the default metric parameter for AutoPytorch regression
             self._configuration["metric"] = 'r2'
-        self._result_path = self._configuration["model_result_path"]
 
     def __tabular_classification(self):
         """
@@ -68,7 +67,7 @@ class AutoPytorchAdapter(AbstractAdapter):
                 X_train=X,
                 y_train=y,
                 optimize_metric=self._configuration["metric"],
-                total_walltime_limit=self._time_limit
+                total_walltime_limit=self._time_limit*60
             )
         else:
             auto_cls.search(
@@ -79,7 +78,7 @@ class AutoPytorchAdapter(AbstractAdapter):
                 max_budget=self._iter_limit
             )
 
-        export_model(auto_cls, self._configuration["result_folder_path"], "model_pytorch.p")
+        export_model(auto_cls, self._configuration["result_folder_location"], "model_pytorch.p")
 
     def __tabular_regression(self):
         """
@@ -111,7 +110,7 @@ class AutoPytorchAdapter(AbstractAdapter):
                 max_budget=self._iter_limit
             )
 
-        export_model(auto_reg, self._configuration["result_folder_path"], "model_pytorch.p")
+        export_model(auto_reg, self._configuration["result_folder_location"], "model_pytorch.p")
 
     def start(self):
         """

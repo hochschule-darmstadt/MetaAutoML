@@ -31,7 +31,6 @@ def GetMetInformation(config_json):
                 librarylist.add(":pytorch_lib")
         model = "ensemble selection"
         library = " + ".join(librarylist)
-    shutil.rmtree(working_dir)
     return library, model
 
 

@@ -128,8 +128,12 @@ class CsvManager:
     def CopyDefaultDataset(username):
         upload_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), get_config_property("datasets-path"), username, "uploads")
         default_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config", "defaults", "titanic_train.csv")
-        upload_folder = upload_folder.replace("\\managers", "")
+        #Replace for windows
+        pload_folder = upload_folder.replace("\\managers", "")
         default_file = default_file.replace("\\managers", "")
+        #Replace for UNIX
+        upload_folder = upload_folder.replace("/managers", "")
+        default_file = default_file.replace("/managers", "")
         if os.getenv("MONGO_DB_DEBUG") != "YES":
             #Within docker we do not want to add the app section, as this leads to broken links
             upload_folder = upload_folder.replace("/app/", "")
