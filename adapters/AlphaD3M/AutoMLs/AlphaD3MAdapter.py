@@ -34,14 +34,13 @@ class AlphaD3MAdapter(AbstractAdapter):
             self.__tabular_classification()
 
     def __export_model(self, model: d3mi.AutoML):
-        path_to_training = os.path.join(get_config_property('output-path'),
-            self._configuration["training_id"])
+        path_to_training = self._configuration["model_folder_location"]
         model.save_pipeline(model.get_best_pipeline_id(), path_to_training)
 
         with open(path_to_training + "/problem_config.json", "w") as file:
             json.dump(model.problem_config, file)
         
-        file_path = os.path.join(get_config_property("job-file-path"),
+        file_path = os.path.join(self._configuration["job_folder_location"],
                              get_config_property("job-file-name"))
         with open(file_path, 'r') as file:
             process_json = json.load(file)
@@ -54,8 +53,7 @@ class AlphaD3MAdapter(AbstractAdapter):
         self.df, test = data_loader(self._configuration)
         X, y = prepare_tabular_dataset(self.df, self._configuration)
 
-        d3m_obj = d3mi.AutoML(os.path.join(get_config_property(
-            'output-path'), self._configuration["training_id"], "d3mTmp"), "AlphaD3M", "pypi")
+        d3m_obj = d3mi.AutoML(self._configuration["model_folder_location"], "AlphaD3M", "pypi")
         d3m_obj.search_pipelines(self._configuration["file_location"]+"/"+self._configuration["file_name"],
                                 time_bound=int(self._configuration["runtime_constraints"]["runtime_limit"]),
                                 time_bound_run=int(self._configuration["runtime_constraints"]["runtime_limit"]),

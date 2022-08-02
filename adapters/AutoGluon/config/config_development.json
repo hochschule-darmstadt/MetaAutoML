@@ -4,8 +4,11 @@
   "env-varname-cluster": "RUNTIME",
   "grpc-server-address": "127.0.0.1",
   "export-zip-file-name": "gluon-export",
-  "output-path": "C:/Users/alex/Desktop/MetaAutoML/adapters/AutoGluon/app-data/output",
-  "job-file-path": "app-data/jobs",
+  "training-path": "C:/Users/alex/Desktop/MetaAutoML/adapters/AutoGluon/app-data/training",
+  "job-folder-name": "job",
+  "model-folder-name": "model",
+  "export-folder-name": "export",
+  "result-folder-name": "result",
   "templates-path": "app-data/templates",
   "predict-time-sources-path": "../Utils/AutoMLs/predict_time_sources.py",
   "local_execution": "YES"

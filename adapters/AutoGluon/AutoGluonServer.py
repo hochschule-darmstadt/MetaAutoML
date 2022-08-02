@@ -18,94 +18,10 @@ from JsonUtil import get_config_property
 from AdapterUtils import *
 
 
-def data_loader(config):
-    """
-    Get exception message
-    ---
-    Parameter
-    1. config: Job config
-    ---
-    Return job type specific dataset
-    """
-    train_data = None
-    test_data = None
-
-    if config["task"] == 1:
-        train_data, test_data = read_tabular_dataset_training_data(config)
-    elif config["task"] == 2:
-        train_data, test_data = read_tabular_dataset_training_data(config)
-    elif config["task"] == 3:
-        train_data, test_data = None
-    elif config["task"] == 4:
-        train_data, test_data = read_image_dataset(config)
-    elif config["task"] == 5:
-        train_data, test_data = read_image_dataset(config)
-
-    return train_data, test_data
-
-
-
-def AutoGluon_data_loader():
-
-    """
-    Get exception message
-    ---
-    Parameter
-    1. config: Job config
-    ---
-    Return job type specific dataset
-    """
-    train_data = None
-    test_data = None
-
-    if config["task"] == 1:
-        train_data, test_data = read_tabular_dataset_training_data(config)
-    elif config["task"] == 2:
-        train_data, test_data = read_tabular_dataset_training_data(config)
-    elif config["task"] == 3:
-        train_data, test_data = None
-    elif config["task"] == 4:
-        train_data, test_data = read_image_dataset_auto_gluon(config)
-    
-    return train_data, test_data
-
-def read_image_dataset_auto_gluon():
-
-    """Reads image data and return sets
-    ---
-    Parameter
-    1. config: Job config
-    ---
-    Return image dataset
-    """
-
-    local_dir_path = json_configuration["file_location"]
-
-    data_dir = os.path.join(local_dir_path, json_configuration["file_name"])
-    train_data = None
-    test_data = None
-
-    if(json_configuration["test_configuration"]["dataset_structure"] == 1):
-
-        all_data = ImageDataset.from_folder(data_dir)
-        train_data, val_data, test_data = all_data.random_split(val_size=json_configuration["test_configuration"]["split_ratio"], test_size=json_configuration["test_configuration"]["split_ratio"])
-
-
-    else:
-        train_data, val_data, test_data = ImageDataset.from_folders(data_dir)
-
-    return train_data, test_data
-
-
 def GetMetaInformations(config_json):
-    working_dir = os.path.join(get_config_property("output-path"), "working_dir")
-    shutil.unpack_archive(os.path.join(get_config_property("output-path"),
-        str(config_json["training_id"]),
-        get_config_property("export-zip-file-name") + ".zip"),
-        working_dir,
-        "zip")
+    working_dir = config_json["result_folder_location"]
     # extract additional information from automl
-    automl = TabularPredictor.load(os.path.join(os.path.join(get_config_property("output-path"), "working_dir"), 'model_gluon.gluon'))
+    automl = TabularPredictor.load(os.path.join(os.path.join(working_dir, 'model_gluon.gluon')))
     automl_info = automl._learner.get_info(include_model_info=True)
     librarylist = set()
     model = automl_info['best_model']
@@ -113,17 +29,16 @@ def GetMetaInformations(config_json):
         if model_info == model:
             pass
         elif model_info in ('LightGBM', 'LightGBMXT'):
-            librarylist.add("lightgbm")
+            librarylist.add(":lightgbm_lib")
         elif model_info == 'XGBoost':
-            librarylist.add("xgboost")
+            librarylist.add(":xgboost_lib")
         elif model_info == 'CatBoost':
-            librarylist.add("catboost")
+            librarylist.add(":catboost_lib")
         elif model_info == 'NeuralNetFastAI':
-            librarylist.add("pytorch")
+            librarylist.add(":pytorch_lib")
         else:
-            librarylist.add("sklearn")
+            librarylist.add(":scikit_learn_lib")
     library = " + ".join(librarylist)
-    shutil.rmtree(working_dir)
     return library, model
 
 
@@ -141,20 +56,16 @@ class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
         try:
             start_time = time.time()
             # saving AutoML configuration JSON
-            config_json = json.loads(request.processJson)
-            job_file_location = os.path.join(get_config_property("job-file-path"),
-                                             get_config_property("job-file-name"))
-            with open(job_file_location, "w+") as f:
-                json.dump(config_json, f)
+            config = SetupRunNewRunEnvironment(request.processJson)
 
-            process = start_automl_process()
-            yield from capture_process_output(process, start_time, True)
-            generate_script(config_json)
-            output_json = zip_script(config_json["training_id"])
+            process = start_automl_process(config)
+            yield from capture_process_output(process, start_time, False)
+            generate_script(config)
+            output_json = zip_script(config)
 
 
-            library, model = GetMetaInformations(config_json)
-            test_score, prediction_time= evaluate(config_json, job_file_location,AutoGluon_data_loader)
+            library, model = GetMetaInformations(config)
+            test_score, prediction_time= evaluate(config, os.path.join(config["job_folder_location"], get_config_property("job-file-name")), data_loader)
             response = yield from get_response(output_json, start_time, test_score, prediction_time, library, model)
 
             print(f'{get_config_property("adapter-name")} job finished')
@@ -167,8 +78,11 @@ class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
         try:
             # saving AutoML configuration JSON
             config_json = json.loads(request.processJson)
-            job_file_location = os.path.join(get_config_property("job-file-path"),
-                                             get_config_property("job-file-name"))
+            job_file_location = os.path.join(get_config_property("training-path"),
+                                        config_json["user_identifier"],
+                                        config_json["training_id"],
+                                        get_config_property("job-folder-name"),
+                                        get_config_property("job-file-name"))
             with open(job_file_location, "w+") as f:
                 json.dump(config_json, f)
 
@@ -211,8 +125,6 @@ def serve():
 
 
 if __name__ == '__main__':
-    if not os.path.exists('app-data/output/tmp'):
-        os.mkdir('app-data/output/tmp')
     logging.basicConfig()
     serve()
     print('done.')

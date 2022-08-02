@@ -87,7 +87,7 @@ class AutoMLManager(ABC, Thread):
 
             self._run_server_until_connection_closed(stub, request)
 
-    def testSolution(self, test_data, training_id):
+    def testSolution(self, test_data, training_id, username):
         """
         Init a new instance of the specific AutoMLManager
         ---
@@ -107,6 +107,7 @@ class AutoMLManager(ABC, Thread):
             request = Adapter_pb2.TestAdapterRequest()  # Request Object
             process_json = self._generate_test_json()
             process_json["training_id"] = training_id
+            process_json["user_identifier"] = username
             process_json["test_configuration"]["method"] = 1
             process_json["test_configuration"]["split_ratio"] = 0
             request.processJson = json.dumps(process_json)
@@ -118,7 +119,7 @@ class AutoMLManager(ABC, Thread):
             except grpc.RpcError as rpc_error:
                 print(f"Received unknown RPC error: code={rpc_error.code()} message={rpc_error.details()}")
 
-    def _generate_test_json(self,):
+    def _generate_test_json(self):
         """
         Generate AutoML configuration JSON
         ---
@@ -158,7 +159,8 @@ class AutoMLManager(ABC, Thread):
             "runtime_constraints": json.loads(self._configuration.runtime_constraints),
             "test_configuration": test_config,
             "file_configuration": json.loads(self._configuration.file_configuration),
-            "metric": self._configuration.metric
+            "metric": self._configuration.metric,
+            "user_identifier": self._configuration.username
         }
 
     def _run_server_until_connection_closed(self, stub, dataset_to_send):

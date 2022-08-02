@@ -48,7 +48,7 @@ class AutoGluonAdapter(AbstractAdapter):
 
         """
 
-        self._result_path = os.path.join(get_config_property("output-path"), configuration["training_id"], "model_gluon.gluon")
+        self._result_path = os.path.join(self._configuration["model_folder_location"], "model_gluon.gluon")
         # this only sets the result path tbh.
 
     def start(self):
@@ -61,7 +61,7 @@ class AutoGluonAdapter(AbstractAdapter):
             self.__tabular_classification()
         elif self._configuration["task"] == ":tabular_regression":
             self.__tabular_regression()
-        elif self._configuration["task"] == 4:
+        elif self._configuration["task"] == ":image_classification":
             self.__image_classification()
 
     def __tabular_classification(self):
@@ -77,6 +77,7 @@ class AutoGluonAdapter(AbstractAdapter):
                                  path=self._result_path).fit(
             data,
             time_limit=self._time_limit)
+        shutil.copytree(self._result_path, os.path.join(self._configuration["result_folder_location"], "model_gluon.gluon"))
         #Fit methode already saves the model
 
     def __tabular_regression(self):
@@ -92,6 +93,7 @@ class AutoGluonAdapter(AbstractAdapter):
                                  path=self._result_path).fit(
             data,
             time_limit=self._time_limit)
+        shutil.copytree(self._result_path, os.path.join(self._configuration["result_folder_location"], "model_gluon.gluon"))
         #Fit methode already saves the model
 
     def __image_classification(self):
@@ -99,8 +101,8 @@ class AutoGluonAdapter(AbstractAdapter):
         Execute the classiciation task
         """
         # Daten Laden 
-        train , test = data_loader(self._configuration)
-        
+        X_train, y_train, X_test, y_test = data_loader(self._configuration)
+        train_data, _, test_data = ImageDataset.from_folders(os.path.join(self._configuration["file_location"], self._configuration["file_name"]), train='train', test='test')
         # Einteilen 
         set_hyperparameters={ 
             'batch_size': self._configuration["test_configuration"]["batch_size"], 
@@ -108,11 +110,11 @@ class AutoGluonAdapter(AbstractAdapter):
             }
         
         model = ImagePredictor(
-            label=self._target,
             path=self._result_path)
         
          # Trainieren 
         model.fit(
-            train , 
+            train_data, 
             hyperparameters=set_hyperparameters , 
             time_limit = self._configuration["runtime_constraints"]["runtime_limit"]  ) 
+        shutil.copytree(self._result_path, os.path.join(self._configuration["result_folder_location"], "model_gluon.gluon"))

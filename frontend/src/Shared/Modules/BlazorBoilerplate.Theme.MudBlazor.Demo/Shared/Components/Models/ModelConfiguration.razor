@@ -30,7 +30,10 @@
                     <MudStack>
                         <MudText Typo="Typo.body1">Dataset: @Training.DatasetName</MudText>
                         <MudText Typo="Typo.body1">Task: @Training.Task.Properties["skos:prefLabel"]</MudText>
-                        <MudText Typo="Typo.body1">Target: @Training.Configuration["target"]["target"]</MudText>
+                        @if (Training.Configuration.ContainsKey("target"))
+                        {
+                            <MudText Typo="Typo.body1">Target: @Training.Configuration["target"]["target"]</MudText>
+                        }
                         <MudDivider />
                         <MudExpansionPanels MultiExpansion="true">
                             <MudExpansionPanel Text="Selected Ml libraries">

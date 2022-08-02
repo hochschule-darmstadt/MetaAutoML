@@ -168,12 +168,9 @@ controller/.vs
 
 #all adapter ignores
 # by adapter generated files, but keep the directories
-*/*/app-data/output/working_dir/*
-*/*/app-data/output/*
-adapters/*/app-data/output/*
-!*/app-data/output/.gitkeep
-*/app-data/jobs/*
-!*/app-data/jobs/.gitkeep
+
+!*/*/app-data/training/.gitkeep
+*/*/app-data/training/*
 # ignore datasets, because they are mapped into the datasets directory via shared volume by the controller
 */app-data/datasets/*
 */*/app-data/datasets/*

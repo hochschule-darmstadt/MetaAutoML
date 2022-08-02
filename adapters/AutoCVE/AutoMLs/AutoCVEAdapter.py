@@ -19,7 +19,6 @@ class AutoCVEAdapter(AbstractAdapter):
         1. Configuration JSON of type dictionary
         """
         super().__init__(configuration)
-        self._result_path = os.path.join(get_config_property("output-path"), self._configuration["training_id"])
 
     def __tabular_classification(self):
         """
@@ -45,7 +44,7 @@ class AutoCVEAdapter(AbstractAdapter):
             print("Ensemble size: " + str(len(best_voting_ensemble.estimators)))
             print("Train Score: {}".format(best_voting_ensemble.score(X, y)))
 
-            export_model(best_voting_ensemble, self._configuration["training_id"], "autocve-model.p")
+            export_model(best_voting_ensemble, self._configuration["result_folder_location"], "autocve-model.p")
 
         except Exception as e:
             print(f"Critical error running autoCVE on {self._configuration['file_name']}. The AutoCVE "

@@ -31,7 +31,7 @@ class AdapterManager(object):
     def TestAutoml(self, request: TestAutoMlRequest, automl: str, training_id, config):
         host, port = map(os.getenv, self.__automl_addresses[automl.lower()])
         automlInstance =AutoMLManager(config, None, None, host, port, request, training_id, request.username, None)
-        return automlInstance.testSolution(request.test_data, training_id)
+        return automlInstance.testSolution(request.test_data, training_id, request.username)
 
     def start_automl(self, configuration: "StartAutoMlProcessRequest", dataset_id, folder_location, training_id, username, callback) -> AutoMLSession:
         """

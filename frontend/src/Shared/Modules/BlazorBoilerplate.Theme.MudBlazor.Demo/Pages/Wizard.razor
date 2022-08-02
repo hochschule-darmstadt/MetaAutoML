@@ -62,6 +62,7 @@ else
     protected async override void OnInitialized()
     {
         _automlRequest = new StartAutoMLRequestDto();
+        _automlRequest.DatasetIdentifier = Id;
         await LoadDataset();
     }
     private async Task LoadDataset()
