@@ -66,10 +66,11 @@ if __name__ == '__main__':
     # split training set
     df_train, df_test = read_longitudinal_dataset(file_path, config_json)
     X_test, y_test = df_test.drop(["target"], axis=1), df_test["target"]
+    y_test = y_test.to_numpy()
 
-    print("Loading the label binarizer")
-    with open(os.path.join(sys_path_0, 'label_binarizer_mcfly.p'), 'rb') as file:
-        label_binarizer = dill.load(file)
+    print("Loading the one_hot_encoder")
+    with open(os.path.join(sys_path_0, 'one_hot_encoder_mcfly.p'), 'rb') as file:
+        one_hot_encoder = dill.load(file)
 
     # Convert longitudinal data to numpy3D
     X_test = convert_to(X_test, to_type="numpy3D")
@@ -85,8 +86,8 @@ if __name__ == '__main__':
     # Predict values
     print('predicting ...')
     predicted_y = loaded_model.predict(X_test)
-    predicted_y = label_binarizer.inverse_transform(predicted_y)
-    print('predicted_y_inversed:', predicted_y)
+    predicted_y = one_hot_encoder.inverse_transform(predicted_y).reshape(1, -1)[0]
+    print('y_predicted:', predicted_y)
     print('y_true:', y_test)
 
     # Save the predictions

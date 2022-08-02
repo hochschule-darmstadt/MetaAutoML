@@ -178,6 +178,19 @@ def export_label_binarizer(label_binarizer, sessionId, file_name):
         dill.dump(label_binarizer, file)
 
 
+def export_one_hot_encoder(one_hot_encoder, sessionId, file_name):
+    """
+    Saves the given instance of the sklearn.preprocessing.OneHotEncoder class
+    ---
+    Parameter:
+    1. instance of sklearn.preprocessing.OneHotEncoder
+    2. session id
+    3. file name
+    """
+    with open(os.path.join(get_config_property('output-path'), sessionId, file_name), 'wb+') as file:
+        dill.dump(one_hot_encoder, file)
+
+
 def start_automl_process():
     """"
     @:return started automl process
@@ -581,12 +594,12 @@ def read_longitudinal_dataset(json_configuration):
     return split_dataset(dataset, json_configuration)
 
 
-def convert_longitudinal_to_numpy(X, y, label_binarizer):
+def convert_longitudinal_to_numpy(X, y, one_hot_encoder):
     """
     Convert the panel dataset to numpy3D
     """
     X_np = convert_to(X, to_type="numpy3D")
-    y_binary = label_binarizer.transform(y)
+    y_binary = one_hot_encoder.transform(y.reshape(-1, 1)).toarray()
     return X_np, y_binary
 
 #endregion

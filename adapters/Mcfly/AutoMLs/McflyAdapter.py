@@ -1,5 +1,5 @@
 from mcfly.find_architecture import find_best_architecture
-from sklearn.preprocessing import LabelBinarizer
+from sklearn.preprocessing import OneHotEncoder
 from AbstractAdapter import AbstractAdapter
 from JsonUtil import get_config_property
 import numpy as np
@@ -7,7 +7,7 @@ import os
 from AdapterUtils import (
     convert_longitudinal_to_numpy,
     read_longitudinal_dataset,
-    export_label_binarizer,
+    export_one_hot_encoder,
     export_keras_model,
     split_dataset,
 )
@@ -36,11 +36,11 @@ class McflyAdapter(AbstractAdapter):
     def __time_series_classification(self):
         """Execute time series classification task"""
         # self.df = read_panel_dataset_training_data(self._configuration)
-        # Get training dataset and the label binarizer for the categorial target variable
+        # Get training dataset and the one hot encoder for the categorical target variable
         df_train, df_test = read_longitudinal_dataset(self._configuration)
         TARGET_col = "target"
-        label_binarizer = LabelBinarizer()
-        label_binarizer.fit(np.concatenate([df_train[TARGET_col], df_test[TARGET_col]]))
+        one_hot_encoder = OneHotEncoder()
+        one_hot_encoder.fit(np.concatenate([df_train[TARGET_col], df_test[TARGET_col]]).reshape(-1, 1))
 
         # Split dataset into train and test
         # The Mcfly framework is based on keras lib. That's why it expects train and validation datasets
@@ -50,10 +50,10 @@ class McflyAdapter(AbstractAdapter):
         X_val, y_val = df_val.drop([TARGET_col], axis=1), df_val[TARGET_col]
 
         # Convert datasets into numpy 3d array
-        X_train, y_train_binary = convert_longitudinal_to_numpy(X_train, y_train, label_binarizer)
+        X_train, y_train_binary = convert_longitudinal_to_numpy(X_train, y_train.to_numpy(), one_hot_encoder)
         X_train = np.swapaxes(X_train, 1, 2)
 
-        X_val, y_val_binary = convert_longitudinal_to_numpy(X_val, y_val, label_binarizer)
+        X_val, y_val_binary = convert_longitudinal_to_numpy(X_val, y_val.to_numpy(), one_hot_encoder)
         X_val = np.swapaxes(X_val, 1, 2)
 
         params = {
@@ -82,5 +82,5 @@ class McflyAdapter(AbstractAdapter):
         )
         # Save the model
         export_keras_model(best_model, self._configuration["session_id"], 'model_mcfly.p')
-        # Save the Label Binarizer
-        export_label_binarizer(label_binarizer, self._configuration["session_id"], 'label_binarizer_mcfly.p')
+        # Save the One Hot Encoder instance
+        export_one_hot_encoder(one_hot_encoder, self._configuration["session_id"], 'one_hot_encoder_mcfly.p')
