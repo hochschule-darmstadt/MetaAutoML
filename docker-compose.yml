@@ -37,14 +37,14 @@ services:
       - ALPHAD3M_SERVICE_PORT=50060
     volumes:
       - datasets:/app/app-data/datasets
-      - output:/app/app-data/output
-      - output-autokeras:/app/app-data/output/autokeras
-      - output-mljar:/app/app-data/output/mljar
-      - output-sklearn:/app/app-data/output/sklearn
-      - output-flaml:/app/app-data/output/flaml
-      - output-gluon:/app/app-data/output/gluon
-      - output-autocve:/app/app-data/output/autocve
-      - output-pytorch:/app/app-data/output/pytorch
+      - training:/app/app-data/training
+      - training-autokeras:/app/app-data/training/autokeras
+      - training-mljar:/app/app-data/training/mljar
+      - training-sklearn:/app/app-data/training/sklearn
+      - training-flaml:/app/app-data/training/flaml
+      - training-gluon:/app/app-data/training/gluon
+      - training-autocve:/app/app-data/training/autocve
+      - training-pytorch:/app/app-data/training/pytorch
 
   mongo:
     image: mongo
@@ -73,7 +73,7 @@ services:
       - GRPC_SERVER_PORT=50052
     volumes:
       - datasets:/app/app-data/datasets
-      - output-autokeras:/app/app-data/output
+      - training-autokeras:/app/app-data/training
 
   mljar:
     build: 
@@ -84,7 +84,7 @@ services:
       - GRPC_SERVER_PORT=50053
     volumes:
       - datasets:/app/app-data/datasets
-      - output-mljar:/app/app-data/output
+      - training-mljar:/app/app-data/training
 
   sklearn:
     build: 
@@ -95,7 +95,7 @@ services:
       - GRPC_SERVER_PORT=50055
     volumes:
       - datasets:/app/app-data/datasets
-      - output-sklearn:/app/app-data/output
+      - training-sklearn:/app/app-data/training
 
   flaml:
     build: 
@@ -106,7 +106,7 @@ services:
       - GRPC_SERVER_PORT=50056
     volumes:
       - datasets:/app/app-data/datasets
-      - output-flaml:/app/app-data/output
+      - training-flaml:/app/app-data/training
 
   gluon:
     build: 
@@ -117,7 +117,7 @@ services:
       - GRPC_SERVER_PORT=50057
     volumes:
       - datasets:/app/app-data/datasets
-      - output-gluon:/app/app-data/output
+      - training-gluon:/app/app-data/training
 
   autocve:
     build: 
@@ -128,7 +128,7 @@ services:
       - GRPC_SERVER_PORT=50058
     volumes:
       - datasets:/app/app-data/datasets
-      - output-autocve:/app/app-data/output
+      - training-autocve:/app/app-data/training
 
   pytorch:
     build: 
@@ -139,7 +139,7 @@ services:
       - GRPC_SERVER_PORT=50059
     volumes:
       - datasets:/app/app-data/datasets
-      - output-pytorch:/app/app-data/output
+      - training-pytorch:/app/app-data/training
 
   alphad3m:
     build: 
@@ -150,20 +150,20 @@ services:
       - GRPC_SERVER_PORT=50060
     volumes:
       - datasets:/app/app-data/datasets
-      - output-alphad3m:/app/app-data/output
+      - training-alphad3m:/app/app-data/training
 
 volumes:
   datasets: # shared volume between controller, adapters and frontend/dummy to transfer datasets
-   # shared volumes between controller and adapters to transfer output files e.g. *.zip file
-  output-autokeras:
-  output-sklearn:
-  output-flaml:
-  output-gluon:
-  output-pytorch:
-  output-autocve:
-  output-mljar:
-  output-alphad3m:
+   # shared volumes between controller and adapters to transfer training files e.g. *.zip file
+  training-autokeras:
+  training-sklearn:
+  training-flaml:
+  training-gluon:
+  training-pytorch:
+  training-autocve:
+  training-mljar:
+  training-alphad3m:
 
-  # shared volume between controller and frontend / dummy to transfer output
-  output:
+  # shared volume between controller and frontend / dummy to transfer training
+  training:
   mongodata:

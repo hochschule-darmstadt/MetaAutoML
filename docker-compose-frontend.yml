@@ -28,11 +28,12 @@ services:
       - CONTROLLER_SERVICE_PORT=5001
       - REDIS_SERVICE_HOST=redis
       - REDIS_SERVICE_PORT=6379
+      - CONTROLLER_DATASET_FOLDER_PATH=/app/app-data
     restart: on-failure
     volumes:
       # shared volumes between frontend and controller
       - datasets:/app/app-data/datasets
-      - output:/app/app-data/output
+      - training:/app/app-data/training
     extra_hosts:
       - "docker.host.internal:host-gateway"
 
