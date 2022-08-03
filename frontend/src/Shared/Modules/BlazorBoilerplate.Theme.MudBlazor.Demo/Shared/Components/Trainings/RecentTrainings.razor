@@ -70,7 +70,7 @@
             _trainings = value;
             if(_trainings != null)
             {
-                _trainings.Trainings = _trainings.Trainings.Where(x => x.StartTime > DateTime.Now.AddDays(-1)).ToList();
+                _trainings.Trainings = _trainings.Trainings.Where(x => x.StartTime > DateTime.Now.AddDays(-1)).Take(6).ToList();
                 if (!string.IsNullOrEmpty(OpenTrainingId))
                 {
                     foreach (var item in _trainings.Trainings.Where(x => x.ID == OpenTrainingId))

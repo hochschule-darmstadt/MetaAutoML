@@ -13,7 +13,7 @@
       "launchBrowser": true,
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "CONTROLLER_SERVICE_HOST": "192.168.1.29",
+        "CONTROLLER_SERVICE_HOST": "localhost",
         "CONTROLLER_DATASET_FOLDER_PATH": "C:\\Users\\alex\\Desktop\\MetaAutoML\\controller\\app-data\\datasets",
         "CONTROLLER_SERVICE_PORT": "5001",
         "no_proxy": "localhost",

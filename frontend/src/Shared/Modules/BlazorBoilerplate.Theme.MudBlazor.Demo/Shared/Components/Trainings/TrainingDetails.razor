@@ -12,7 +12,7 @@
         </CardHeaderContent>
     </MudCardHeader>
     <MudCardContent>
-        <MudPaper Height="250px" Elevation="0">
+        <MudPaper Elevation="0">
             @if (Training == null)
             {
                 <DataLoaderSpinner />
@@ -54,6 +54,9 @@
                         <MudTd>@(String.Format("{0:0}", AutoMl.Predictiontime)) ms</MudTd>
                         <MudTd>@AutoMl.Runtime s</MudTd>
                     </RowTemplate>
+                    <PagerContent>
+                        <MudTablePager />
+                    </PagerContent>
                 </MudTable>
             }
         </MudPaper>

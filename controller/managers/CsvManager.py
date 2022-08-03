@@ -129,7 +129,7 @@ class CsvManager:
         upload_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), get_config_property("datasets-path"), username, "uploads")
         default_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config", "defaults", "titanic_train.csv")
         #Replace for windows
-        pload_folder = upload_folder.replace("\\managers", "")
+        upload_folder = upload_folder.replace("\\managers", "")
         default_file = default_file.replace("\\managers", "")
         #Replace for UNIX
         upload_folder = upload_folder.replace("/managers", "")
