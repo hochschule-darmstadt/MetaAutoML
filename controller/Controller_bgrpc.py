@@ -120,6 +120,7 @@ class Dataset(betterproto.Message):
     identifier: str = betterproto.string_field(4)
     size: int = betterproto.int64_field(5)
     analysis: str = betterproto.string_field(6)
+    file_name: str = betterproto.string_field(7)
 
 
 @dataclass(eq=False, repr=False)

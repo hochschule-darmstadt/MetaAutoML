@@ -148,6 +148,7 @@ class ControllerManager(object):
             response_dataset.name = dataset["name"]
             response_dataset.type = dataset['type']
             response_dataset.creation_date = datetime.fromtimestamp(int(dataset["mtime"]))
+            response_dataset.file_name = dataset["file_name"]
             response.dataset_infos = response_dataset
         except Exception as e:
             print(f"exception: {e}")

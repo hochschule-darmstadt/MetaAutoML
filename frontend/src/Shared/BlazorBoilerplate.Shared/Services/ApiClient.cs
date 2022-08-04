@@ -75,6 +75,10 @@ namespace BlazorBoilerplate.Shared.Services
         {
             return await httpClient.PostJsonAsync<ApiResponseDto>("api/Dataset/GetDataset", name);
         }
+        public async Task<ApiResponseDto> GetDatasetPreview(GetDatasetPreviewRequestDto dataset)
+        {
+            return await httpClient.PostJsonAsync<ApiResponseDto>("api/Dataset/GetDatasetPreview", dataset);
+        }
 
         public async Task<ApiResponseDto> UploadDataset(FileUploadRequestDto file)
         {

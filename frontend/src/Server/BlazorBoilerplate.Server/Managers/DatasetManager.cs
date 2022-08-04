@@ -7,10 +7,12 @@ using BlazorBoilerplate.Storage;
 using Grpc.Core;
 using Grpc.Net.Client;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Data.Analysis;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -127,6 +129,94 @@ namespace BlazorBoilerplate.Server.Managers
                 return new ApiResponse(Status404NotFound, ex.Message);
             }
         }
+        /// <summary>
+        /// Get a list of all Datasets
+        /// </summary>
+        /// <returns></returns>
+        public async Task<ApiResponse> GetDatasetPreview(GetDatasetPreviewRequestDto dataset)
+        {
+            GetDatasetPreviewResponseDto response = new GetDatasetPreviewResponseDto();
+            GetDatasetRequest getDatasetRequest = new GetDatasetRequest();
+            var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
+            string controllerDatasetPath = Environment.GetEnvironmentVariable("CONTROLLER_DATASET_FOLDER_PATH");
+            try
+            {
+                getDatasetRequest.Username = username;
+                getDatasetRequest.Identifier = dataset.DatasetIdentifier;
+                var reply = _client.GetDataset(getDatasetRequest);
+                string datasetLocation = Path.Combine(controllerDatasetPath, username, reply.DatasetInfos.Identifier, reply.DatasetInfos.FileName);
+                switch (reply.DatasetInfos.Type)
+                {
+                    case ":tabular":
+                        response.DatasetPreview = File.ReadAllText(datasetLocation.Replace(".csv", "_preview.csv"));
+
+                        break;
+                    case ":image":
+                        string[] classificationTargets = Directory.GetDirectories(Path.Combine(datasetLocation, "train"));
+                        response.DatasetPreview = new List<ImagePreviewDto>();
+                        foreach (string classificationTarget in classificationTargets)
+                        {
+                            for (int i = 0; i < 5; i++)
+                            {
+                                ImagePreviewDto preview = new ImagePreviewDto();
+                                var imgeInfo = GetRandomImage(classificationTarget);
+                                preview.FileType = imgeInfo.Item2;
+                                preview.FolderType = classificationTarget.Replace(Path.Combine(datasetLocation, "train"), "");
+                                preview.Content = GetImageAsBytes(imgeInfo.Item1);
+                                response.DatasetPreview.Add(preview);
+                            }
+                        }
+                        break;
+                    default:
+                        break;
+                }
+                return new ApiResponse(Status200OK, null, response);
+
+            }
+            catch (Exception ex)
+            {
+
+                Console.WriteLine(ex.Message);
+                return new ApiResponse(Status404NotFound, ex.Message);
+            }
+        }
+
+        private byte[] GetImageAsBytes(string path)
+        {
+            byte[] content = null;
+            FileStream fileStream = new FileStream(path, FileMode.Open, FileAccess.Read);
+            using (BinaryReader reader = new BinaryReader(fileStream))
+            {
+                content = reader.ReadBytes((int)reader.BaseStream.Length);
+            }
+            return content;
+        }
+
+        private Tuple<string, string> GetRandomImage(string folder)
+        {
+            string filename = null;
+            string type = null;
+            if (!string.IsNullOrEmpty(folder))
+            {
+                var extensions = new string[] { ".jpeg" };
+                try
+                {
+                    var di = new DirectoryInfo(folder);
+                    var randomImage = di.GetFiles("*.*").Where(f => extensions.Contains(f.Extension.ToLower()));
+                    Random R = new Random();
+                    int index = R.Next(0, randomImage.Count());
+                    filename = randomImage.ElementAt(index).FullName;
+                    type = randomImage.ElementAt(index).Extension;
+                }
+                catch (Exception)
+                {
+
+                    throw;
+                }
+            }
+            return Tuple.Create(filename, type);
+        }
+
         /// <summary>
         /// Helper function, get all column names of a structured data dataset
         /// </summary>

@@ -28,6 +28,7 @@ message Dataset {
     string identifier = 4;
     int64 size = 5;
     string analysis = 6;
+    string fileName = 7;
   }
 
 

@@ -1,3 +1,4 @@
+from ast import Index
 import sys
 import io
 import shutil
@@ -160,7 +161,6 @@ class DataStorage:
         if type == ":image":
             #replace zip sufix with nothing as it will be unpacked
             name = name.replace(".zip", "")
-
         #build dictionary for database
         database_content = {
             "name": name,
@@ -169,7 +169,8 @@ class DataStorage:
             "models": [],
             "path": "",
             "size": "",
-            "mtime": ""
+            "mtime": "",
+            "file_name" : ""
         }
         
         dataset_id = self.__mongo.InsertDataset(username, database_content)
@@ -190,7 +191,13 @@ class DataStorage:
             shutil.unpack_archive(filename_dest, os.path.join(self.__storage_dir, username, dataset_id))
             #delete zip
             os.remove(filename_dest)
+            #remove .zip suffix of filename and path
             filename_dest = filename_dest.replace(".zip", "")
+            fileName = fileName.replace(".zip", "")
+        if type == ":tabular":
+            #generate preview of tabular dataset
+            previewDf = pd.read_csv(filename_dest)
+            previewDf.head(50).to_csv(filename_dest.replace(".csv", "_preview.csv"), index=False)
 
         def get_size(start_path = '.'):
             total_size = 0
@@ -220,7 +227,8 @@ class DataStorage:
             "path": filename_dest,
             "size": nbytes,
             "mtime": os.path.getmtime(filename_dest),
-            "analysis": analysisResult
+            "analysis": analysisResult,
+            "file_name" : fileName
         })
         assert success, f"cannot update dataset with id {dataset_id}"
 
