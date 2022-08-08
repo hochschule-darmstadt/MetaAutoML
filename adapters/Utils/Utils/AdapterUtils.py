@@ -168,7 +168,7 @@ def export_keras_model(model, path, file_name):
     2. session id
     3. file name
     """
-    save_path = open(os.path.join(path, file_name)
+    save_path = open(os.path.join(path, file_name))
     model.save(save_path)
 
 
