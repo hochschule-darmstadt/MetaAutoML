@@ -6,11 +6,45 @@ import "Common.proto";
 
 message GetAutoMlModelRequest {
     string username = 1;
-    string sessionId = 2;
+    string trainingId = 2;
     string autoMl = 3;
-  }
+}
   
-  message GetAutoMlModelResponse {
-    string name = 1;
-    bytes file = 2;
-  }
+message GetAutoMlModelResponse {
+  string name = 1;
+  bytes file = 2;
+}
+
+message GetModelsRequest {
+  string username = 1;
+  string datasetId = 2;
+  bool top3 = 3;
+}
+
+message GetModelsResponse {
+  repeated ModelInformation models = 1;
+}
+
+message GetModelRequest {
+  string username = 1;
+  string modelId = 2;
+}
+
+message GetModelResponse {
+  ModelInformation model = 1;
+}
+
+message ModelInformation {
+  string identifier = 1;
+  string trainingId = 2;
+  float testScore = 3;
+  float validationScore = 4;
+  int32 runtime = 5;
+  string model = 6;
+  string library = 7;
+  string status = 8;
+  repeated string statusMessages = 9;
+  float predictionTime = 10;
+  string automl = 11;
+  string datasetId = 12;
+}

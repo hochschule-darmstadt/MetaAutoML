@@ -8,6 +8,7 @@ namespace BlazorBoilerplate.Shared.Dto.AutoML
 {
     public class AutoMLStatusDto
     {
+        public string ID { get; set; }
         public string Name { get; set; }
         public string Library { get; set; }
         public string Model { get; set; }

@@ -1,15 +1,14 @@
 ﻿using BlazorBoilerplate.Shared.Dto;
+using BlazorBoilerplate.Shared.Dto.AutoML;
+using BlazorBoilerplate.Shared.Dto.Dataset;
 using BlazorBoilerplate.Shared.Dto.Db;
 using BlazorBoilerplate.Shared.Dto.Email;
+using BlazorBoilerplate.Shared.Dto.Model;
+using BlazorBoilerplate.Shared.Dto.Ontology;
+using BlazorBoilerplate.Shared.Dto.Training;
 using BlazorBoilerplate.Shared.Models;
 using Breeze.Sharp;
-using System;
 using System.Linq.Expressions;
-using System.Threading.Tasks;
-using BlazorBoilerplate.Shared.Dto.Dataset;
-using BlazorBoilerplate.Shared.Dto.Ontology;
-using BlazorBoilerplate.Shared.Dto.AutoML;
-using BlazorBoilerplate.Shared.Dto.Session;
 
 namespace BlazorBoilerplate.Shared.Interfaces
 {
@@ -30,15 +29,20 @@ namespace BlazorBoilerplate.Shared.Interfaces
 
         Task<ApiResponseDto> SendTestEmail(EmailDto email);
 
-        Task<ApiResponseDto> GetModel(GetAutoMlModelRequestDto automl);
+        Task<ApiResponseDto> GetModel(GetModelRequestDto model);
+        Task<ApiResponseDto> GetModels(GetModelsRequestDto models);
+        Task<ApiResponseDto> GetModelDownload(GetAutoMlModelRequestDto automl);
         Task<ApiResponseDto> GetDatasets();
         Task<ApiResponseDto> GetDataset(GetDatasetRequestDto name);
         Task<ApiResponseDto> GetDatasetTypes();
-        Task<ApiResponseDto> GetTabularDatasetColumnNames(GetTabularDatasetColumnNamesRequestDto dataset);
+        Task<ApiResponseDto> GetDatasetPreview(GetDatasetPreviewRequestDto dataset);
+        Task<ApiResponseDto> GetTabularDatasetColumn(GetTabularDatasetColumnRequestDto dataset);
         Task<ApiResponseDto> StartAutoML(StartAutoMLRequestDto automl);
+        Task<ApiResponseDto> UploadDatasetFile(MultipartFormDataContent file);
         Task<ApiResponseDto> UploadDataset(FileUploadRequestDto file);
-        Task<ApiResponseDto> GetSessions(GetSessionsRequestDto sessions);
-        Task<ApiResponseDto> GetSession(GetSessionRequestDto sessions);
+        Task<ApiResponseDto> GetTrainingIds(GetTrainingIdsRequestDto training);
+        Task<ApiResponseDto> GetTraining(GetTrainingRequestDto training);
+        Task<ApiResponseDto> GetAllTrainings(GetAllTrainingsRequestDto training);
 
         Task<ApiResponseDto> GetCompatibleAutoMlSolutions(GetCompatibleAutoMlSolutionsRequestDto request);
         Task<ApiResponseDto> GetSupportedMlLibraries(GetSupportedMlLibrariesRequestDto task);

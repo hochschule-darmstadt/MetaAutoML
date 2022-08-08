@@ -5,8 +5,6 @@ using BlazorBoilerplate.Shared.Providers;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.Extensions.Localization;
-using System;
-using System.Threading.Tasks;
 
 namespace BlazorBoilerplate.UI.Base.Pages.Account
 {
@@ -20,7 +18,7 @@ namespace BlazorBoilerplate.UI.Base.Pages.Account
         protected bool updatePasswordDialogOpen = false;
         protected UpdatePasswordViewModel updatePasswordViewModel { get; set; } = new UpdatePasswordViewModel();
         protected AuthenticatorVerificationCodeViewModel authenticatorVerificationCodeViewModel { get; set; } = new AuthenticatorVerificationCodeViewModel();
-        
+
         IdentityAuthenticationStateProvider identityAuthenticationStateProvider;
 
         protected bool BrowserRemembered

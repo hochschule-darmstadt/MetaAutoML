@@ -1,0 +1,12 @@
+﻿@inject IStringLocalizer<Global> L
+@inject NavigationManager NavManager
+
+
+<MudMenu Icon="@Icons.Material.Filled.MoreVert">
+    <MudMenuItem>Delete</MudMenuItem>
+</MudMenu>
+
+@code {
+    [Parameter]
+    public ModelDto Dataset { get; set; }
+}

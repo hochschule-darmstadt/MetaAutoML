@@ -7,8 +7,6 @@ using BlazorBoilerplate.Shared.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.Extensions.Localization;
-using System;
-using System.Threading.Tasks;
 
 namespace BlazorBoilerplate.UI.Base.Pages.Account
 {
@@ -21,7 +19,7 @@ namespace BlazorBoilerplate.UI.Base.Pages.Account
         [Inject] IViewNotifier viewNotifier { get; set; }
 
         [CascadingParameter]
-        Task<AuthenticationState> authenticationStateTask { get; set; }        
+        Task<AuthenticationState> authenticationStateTask { get; set; }
 
         private string navigateTo = null;
         private IdentityAuthenticationStateProvider identityAuthenticationStateProvider;
@@ -109,7 +107,7 @@ namespace BlazorBoilerplate.UI.Base.Pages.Account
                     }
                 }
                 else
-                    viewNotifier.Show(response.Message, ViewNotifierType.Error, L["LoginFailed"]);
+                    viewNotifier.Show(response.Message, ViewNotifierType.Error);
             }
             catch (Exception ex)
             {

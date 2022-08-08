@@ -6,15 +6,11 @@ using BlazorBoilerplate.Shared.Localizer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Localization;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace BlazorBoilerplate.UI.Base.Pages.Admin.Settings
 {
     [Authorize(Policies.IsAdmin)]
-    public abstract class SettingsBase : ComponentBase
+    public abstract class SettingsBase : ComponentBase, IDisposable
     {
         protected Dictionary<SettingKey, TenantSetting> settings;
 
@@ -71,6 +67,11 @@ namespace BlazorBoilerplate.UI.Base.Pages.Admin.Settings
             {
                 viewNotifier.Show(ex.GetBaseException().Message, ViewNotifierType.Error, L["Operation Failed"]);
             }
+        }
+
+        public void Dispose()
+        {
+            apiClient.CancelChanges();
         }
     }
 }

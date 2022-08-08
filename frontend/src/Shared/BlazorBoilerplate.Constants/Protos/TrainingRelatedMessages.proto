@@ -1,0 +1,57 @@
+syntax = "proto3";
+option csharp_namespace = "BlazorBoilerplate.Server";
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/any.proto";
+import "Enumerations.proto";
+import "Common.proto";
+
+message GetAllTrainingsRequest {
+    string username = 1;
+}
+
+message GetAllTrainingsResponse {
+    repeated GetTrainingResponse trainings = 1;
+}
+
+message GetTrainingsRequest {
+    string username = 1;
+  }
+  
+message GetTrainingsResponse {
+    repeated string trainingIds = 1;
+  }
+  
+message GetTrainingRequest {
+    string username = 1;
+    string id = 2;
+  }
+  
+message GetTrainingResponse {
+    string status = 1;
+    repeated AutoMlStatus automls = 2;
+    string datasetId = 3;
+    string datasetName = 4;
+    string task = 5;
+    string configuration = 6;
+    repeated string requiredMlLibraries = 7;
+    repeated string requiredAutoMls = 8;
+    string runtimeConstraints = 9;
+    string datasetConfiguration = 10;
+    string identifier = 11;
+    google.protobuf.Timestamp startTime = 12;
+  }
+ 
+
+message AutoMlStatus {
+    string name = 1;
+    string status = 2;
+    repeated string messages = 3;
+    float testScore = 4;
+    float validationScore = 5;
+    int32 runtime = 6;
+    float predictiontime = 7;
+    string library = 8;
+    string model = 9;
+    string identifier = 10;
+  }

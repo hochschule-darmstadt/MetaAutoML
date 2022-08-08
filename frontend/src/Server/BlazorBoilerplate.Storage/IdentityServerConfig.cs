@@ -2,7 +2,6 @@
 using Humanizer;
 using IdentityModel;
 using IdentityServer4.Models;
-using System.Collections.Generic;
 using static IdentityServer4.IdentityServerConstants;
 
 namespace BlazorBoilerplate.Storage
@@ -27,7 +26,9 @@ namespace BlazorBoilerplate.Storage
         public static readonly IEnumerable<ApiScope> GetApiScopes =
             new[]
             {
-                new ApiScope(LocalApi.ScopeName)
+                new ApiScope(LocalApi.ScopeName),
+
+                new ApiScope(LocalApiName, "My API")
             };
 
         // https://identityserver4.readthedocs.io/en/latest/reference/api_resource.html
@@ -36,7 +37,7 @@ namespace BlazorBoilerplate.Storage
             {
                 new ApiResource(LocalApiName) {
                     DisplayName = LocalApiName.Humanize(LetterCasing.Title),
-                    Scopes = { LocalApi.ScopeName },
+                    Scopes = { LocalApi.ScopeName, LocalApiName },
                     UserClaims = {
                         JwtClaimTypes.Name,
                         JwtClaimTypes.Email,
@@ -74,6 +75,30 @@ namespace BlazorBoilerplate.Storage
                         StandardScopes.Email,
                         ScopeConstants.Roles,
                         LocalApi.ScopeName
+                    }
+                },
+
+                new Client
+                {
+                    ClientClaimsPrefix = string.Empty,
+
+                    ClientId = "clientToDo",
+
+                    // no interactive user, use the clientid/secret for authentication
+                    AllowedGrantTypes = GrantTypes.ClientCredentials,
+
+                    // secret for authentication
+                    ClientSecrets =
+                    {
+                        new Secret("secret".Sha256())
+                    },
+
+                    // scopes that client has access to
+                    AllowedScopes = { LocalApiName },
+
+                    Claims =
+                    {
+                        new ClientClaim(ApplicationClaimTypes.Permission, "Todo.Delete")
                     }
                 }
             };

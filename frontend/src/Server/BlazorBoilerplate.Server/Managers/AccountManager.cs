@@ -17,18 +17,11 @@ using IdentityServer4.Extensions;
 using IdentityServer4.Services;
 using IdentityServer4.Stores;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Localization;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Encodings.Web;
-using System.Threading.Tasks;
 using static Microsoft.AspNetCore.Http.StatusCodes;
 
 namespace BlazorBoilerplate.Server.Managers
@@ -83,8 +76,8 @@ namespace BlazorBoilerplate.Server.Managers
             _urlEncoder = urlEncoder;
             _events = events;
             L = l;
-            baseUrl = configuration["Robot:ApplicationUrl"];
-            _client = client;   
+            baseUrl = configuration[$"{nameof(BlazorBoilerplate)}:ApplicationUrl"];
+            _client = client;
         }
 
         public async Task<ApiResponse> ConfirmEmail(ConfirmEmailViewModel parameters)
@@ -109,7 +102,7 @@ namespace BlazorBoilerplate.Server.Managers
 
                 if (!result.Succeeded)
                 {
-                    var msg = string.Join(",", result.Errors.Select(i => i.Description));
+                    var msg = result.GetErrors();
                     _logger.LogWarning("User Email Confirmation Failed: {0}", msg);
                     return new ApiResponse(Status400BadRequest, msg);
                 }
@@ -478,7 +471,7 @@ namespace BlazorBoilerplate.Server.Managers
             }
             else
             {
-                var msg = string.Join(",", result.Errors.Select(i => i.Description));
+                var msg = result.GetErrors();
                 _logger.LogWarning("Error while resetting the password: {0}", msg);
                 return new ApiResponse(Status400BadRequest, msg);
             }
@@ -502,7 +495,7 @@ namespace BlazorBoilerplate.Server.Managers
             }
             else
             {
-                var msg = string.Join(",", result.Errors.Select(i => i.Description));
+                var msg = result.GetErrors();
                 _logger.LogWarning($"Error while updating the password of {user.UserName}: {msg}");
                 return new ApiResponse(Status400BadRequest, msg);
             }
@@ -650,7 +643,7 @@ namespace BlazorBoilerplate.Server.Managers
 
             if (!result.Succeeded)
             {
-                var msg = string.Join(",", result.Errors.Select(i => i.Description));
+                var msg = result.GetErrors();
                 _logger.LogWarning("User Update Failed: {0}", msg);
                 return new ApiResponse(Status400BadRequest, msg);
             }
@@ -670,7 +663,7 @@ namespace BlazorBoilerplate.Server.Managers
 
             if (!result.Succeeded)
             {
-                var msg = string.Join(",", result.Errors.Select(i => i.Description));
+                var msg = result.GetErrors();
                 _logger.LogWarning($"Error while creating {user.UserName}: {msg}");
                 return new ApiResponse(Status400BadRequest, msg);
             }
@@ -683,11 +676,6 @@ namespace BlazorBoilerplate.Server.Managers
                         new Claim(JwtClaimTypes.EmailVerified, ClaimValues.falseString, ClaimValueTypes.Boolean)
                     }).Result;
             }
-
-            var defaultRoleExists = await _roleManager.RoleExistsAsync(DefaultRoleNames.User);
-
-            if (defaultRoleExists)
-                await _userManager.AddToRoleAsync(user, DefaultRoleNames.User);
 
             if (_userManager.Options.SignIn.RequireConfirmedEmail)
             {
@@ -727,9 +715,6 @@ namespace BlazorBoilerplate.Server.Managers
                     FirstName = user.FirstName,
                     LastName = user.LastName
                 };
-
-                if (defaultRoleExists)
-                    userViewModel.Roles = new List<string> { DefaultRoleNames.User };
 
                 return new ApiResponse(Status200OK, L["User {0} created", userViewModel.UserName], userViewModel);
             }
@@ -848,7 +833,7 @@ namespace BlazorBoilerplate.Server.Managers
             {
                 _logger.LogWarning(user.UserName + "'s password reset failed; Requested from Admin interface by:" + authenticatedUser.Identity.Name);
 
-                var msg = string.Join(",", result.Errors.Select(i => i.Description));
+                var msg = result.GetErrors();
                 _logger.LogWarning($"Error while resetting password of {user.UserName}: {msg}");
                 return new ApiResponse(Status400BadRequest, msg);
             }
@@ -872,7 +857,7 @@ namespace BlazorBoilerplate.Server.Managers
                 await _userManager.CreateAsync(user, password);
 
             if (!result.Succeeded)
-                throw new DomainException(string.Join(",", result.Errors.Select(i => i.Description)));
+                throw new DomainException(result.GetErrors());
 
             await _userManager.AddClaimsAsync(user, new Claim[]{
                     new Claim(Policies.IsUser, string.Empty),
@@ -881,9 +866,6 @@ namespace BlazorBoilerplate.Server.Managers
                     new Claim(JwtClaimTypes.EmailVerified, ClaimValues.falseString, ClaimValueTypes.Boolean),
                     new Claim("omaml", user.OmaMlId)
                 });
-
-            if (await _roleManager.RoleExistsAsync(DefaultRoleNames.User))
-                await _userManager.AddToRoleAsync(user, DefaultRoleNames.User);
 
             _logger.LogInformation("New user registered: {0}", user);
 

@@ -1,5 +1,6 @@
 ﻿using BlazorBoilerplate.Infrastructure.Server.Models;
 using BlazorBoilerplate.Shared.Dto.Dataset;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,7 +14,9 @@ namespace BlazorBoilerplate.Infrastructure.Server
         Task<ApiResponse> GetDatasetTypes();
         Task<ApiResponse> GetDataset(GetDatasetRequestDto dataset);
         Task<ApiResponse> GetDatasets();
-        Task<ApiResponse> GetTabularDatasetColumnNames(GetTabularDatasetColumnNamesRequestDto dataset);
+        Task<ApiResponse> GetDatasetPreview(GetDatasetPreviewRequestDto dataset);
+        Task<ApiResponse> GetTabularDatasetColumn(GetTabularDatasetColumnRequestDto dataset);
         Task<ApiResponse> Upload(FileUploadRequestDto file);
+        Task<ApiResponse> UploadData(IFormFile files);
     }
 }

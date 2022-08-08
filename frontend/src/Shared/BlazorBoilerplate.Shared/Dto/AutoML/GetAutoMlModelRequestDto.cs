@@ -8,7 +8,7 @@ namespace BlazorBoilerplate.Shared.Dto.AutoML
 {
     public class GetAutoMlModelRequestDto
     {
-        public string SessionId { get; set; }
+        public string TrainingId { get; set; }
         public string AutoMl { get; set; }
     }
 }

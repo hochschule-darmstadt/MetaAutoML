@@ -8,7 +8,7 @@ namespace BlazorBoilerplate.Shared.Dto.Ontology
 {
     public class GetDatasetCompatibleTasksRequestDto
     {
-        public string DatasetName { get; set; }
+        public string DatasetIdentifier { get; set; }
         public string DatasetType { get; set; }
     }
 }

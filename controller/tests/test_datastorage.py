@@ -74,9 +74,9 @@ class TestDataStorage(unittest.TestCase):
         assert len(ids) == len(set(ids)), "Dataset IDs are not unique"
 
 
-    def test_insert_session(self):
+    def test_insert_training(self):
         """
-        Test Session Insertion
+        Test training Insertion
         ---
         """
 
@@ -85,8 +85,8 @@ class TestDataStorage(unittest.TestCase):
 
         data_storage = DataStorage("/tmp/data_storage_test", database)
 
-        # check single session
-        session = {
+        # check single training
+        training = {
             "dataset":"titanic_train_1.csv",
             "task":1,
             "tabularConfig":{
@@ -105,23 +105,23 @@ class TestDataStorage(unittest.TestCase):
             "status":"busy",
             "models":[ ]
         }
-        sess_id = data_storage.insert_session("test_user", session)
-        assert sess_id is not None and len(sess_id) > 0, "Session ID is None or empty"
+        sess_id = data_storage.insert_training("test_user", training)
+        assert sess_id is not None and len(sess_id) > 0, "training ID is None or empty"
         print("sess_id:", sess_id)
 
 
-        from_database = data_storage.get_session("test_user", sess_id)
-        assert session == from_database, "Session in database does not match"
+        from_database = data_storage.get_training("test_user", sess_id)
+        assert training == from_database, "training in database does not match"
 
-        sessions = data_storage.get_sessions("test_user")
+        trainings = data_storage.get_trainings("test_user")
 
-        # check multiple sessions
+        # check multiple trainings
         for i in range(5):
-            # NOTE: we cannot reuse session dict here, MongoDB will complain with:
+            # NOTE: we cannot reuse training dict here, MongoDB will complain with:
             #       E11000 Duplicate Key Error
             #  * possibly connected to how python stores nested dictionaires, but not sure
-            #  * in production we will never try to insert the same session dict, so not really relevant
-            data_storage.insert_session("test_user", {
+            #  * in production we will never try to insert the same training dict, so not really relevant
+            data_storage.insert_training("test_user", {
                 "dataset":"titanic_train_1.csv",
                 "task":1,
                 "tabularConfig":{
@@ -141,16 +141,16 @@ class TestDataStorage(unittest.TestCase):
                 "models":[ ]
             })
 
-        sessions = data_storage.get_sessions("test_user")
-        assert len(sessions) == 6, "Some Sessions were not inserted"
+        trainings = data_storage.get_trainings("test_user")
+        assert len(trainings) == 6, "Some trainings were not inserted"
 
-        ids = list(map(lambda s: s["_id"], sessions))
-        assert len(ids) == len(set(ids)), "Session IDs are not unique"
+        ids = list(map(lambda s: s["_id"], trainings))
+        assert len(ids) == len(set(ids)), "training IDs are not unique"
 
 
-    def test_update_session(self):
+    def test_update_training(self):
         """
-        Test Session Update
+        Test training Update
         ---
         """
 
@@ -159,7 +159,7 @@ class TestDataStorage(unittest.TestCase):
 
         data_storage = DataStorage("/tmp/data_storage_test", database)
 
-        session = {
+        training = {
             "dataset": "titanic_train_1.csv",
             "task":1,
             "tabularConfig":{
@@ -178,23 +178,23 @@ class TestDataStorage(unittest.TestCase):
             "status":"busy",
             "models":[ ]
         }
-        sess_id = data_storage.insert_session("test_user", session)
+        sess_id = data_storage.insert_training("test_user", training)
 
         # update and refetch
-        data_storage.update_session("test_user", sess_id, { "status": "done" })
-        from_database = data_storage.get_session("test_user", sess_id)
-        assert from_database["status"] == "done", "Session was not updated"
+        data_storage.update_training("test_user", sess_id, { "status": "done" })
+        from_database = data_storage.get_training("test_user", sess_id)
+        assert from_database["status"] == "done", "training was not updated"
 
 
         # update and refetch
-        data_storage.update_session("test_user", sess_id, { "models": [ 1 ] })
-        from_database = data_storage.get_session("test_user", sess_id)
-        assert len(from_database["models"]) == 1, "Session was not updated correctly"
+        data_storage.update_training("test_user", sess_id, { "models": [ 1 ] })
+        from_database = data_storage.get_training("test_user", sess_id)
+        assert len(from_database["models"]) == 1, "training was not updated correctly"
 
         # update and refetch
-        data_storage.update_session("test_user", sess_id, { "models": [ 1, 2 ] })
-        from_database = data_storage.get_session("test_user", sess_id)
-        assert len(from_database["models"]) == 2, "Session was not updated correctly"
+        data_storage.update_training("test_user", sess_id, { "models": [ 1, 2 ] })
+        from_database = data_storage.get_training("test_user", sess_id)
+        assert len(from_database["models"]) == 2, "training was not updated correctly"
 
     def test_insert_model(self):
         """
@@ -210,7 +210,7 @@ class TestDataStorage(unittest.TestCase):
         # check single model
         model = {
             "automl_name": "AutoGluon",
-            "session_id": "629bc1b7d4a68ec6443716cd",
+            "training_id": "629bc1b7d4a68ec6443716cd",
             "path": "app-data/output/gluon/629bc1b7d4a68ec6443716cd/gluon-export.zip",
             "test_score": 0.826815664768219,
             "validation_score": 0.0,
@@ -235,7 +235,7 @@ class TestDataStorage(unittest.TestCase):
 
         data_storage = DataStorage("/tmp/data_storage_test", database)
 
-        sess_id = data_storage.insert_session("test_user", {
+        sess_id = data_storage.insert_training("test_user", {
             # skip other fields for clarity
             "models": [ 1 ]
         })
@@ -245,9 +245,9 @@ class TestDataStorage(unittest.TestCase):
         #   will run in parallel
         def access_db(data_storage):
             with data_storage.lock():
-                # get same session object inserted above and make changes
-                from_db = data_storage.get_session("test_user", sess_id)
-                data_storage.update_session("test_user", sess_id, { 
+                # get same training object inserted above and make changes
+                from_db = data_storage.get_training("test_user", sess_id)
+                data_storage.update_training("test_user", sess_id, { 
                     # append another value to the list
                     "models": from_db["models"] + [ 1 ]
                 })
@@ -257,7 +257,7 @@ class TestDataStorage(unittest.TestCase):
                 # wait a bit for other threads to make changes
                 sleep(0.1)
 
-                from_db = data_storage.get_session("test_user", sess_id)
+                from_db = data_storage.get_training("test_user", sess_id)
                 assert len(from_db["models"]) == expected_model_count, "exclusive database access does not work"
 
 

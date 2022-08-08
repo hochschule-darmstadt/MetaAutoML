@@ -29,33 +29,6 @@ namespace BlazorBoilerplate.Server.Managers
             _httpContextAccessor = httpContextAccessor;
         }
         /// <summary>
-        /// Get the result model from a specific AutoML
-        /// </summary>
-        /// <param name="autoMl"></param>
-        /// <returns></returns>
-        public async Task<ApiResponse> GetModel(GetAutoMlModelRequestDto autoMl)
-        {
-            GetAutoMlModelResponseDto response = new GetAutoMlModelResponseDto();
-            GetAutoMlModelRequest getmodelRequest = new GetAutoMlModelRequest();
-            var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
-            try
-            {
-                getmodelRequest.Username = username;
-                getmodelRequest.SessionId = autoMl.SessionId;
-                getmodelRequest.AutoMl = autoMl.AutoMl;
-                var reply = _client.GetAutoMlModel(getmodelRequest);
-                response.Name = reply.Name;
-                response.Content = reply.File.ToByteArray();
-                return new ApiResponse(Status200OK, null, response);
-
-            }
-            catch (Exception ex)
-            {
-
-                return new ApiResponse(Status404NotFound, ex.Message);
-            }
-        }
-        /// <summary>
         /// Start the OMAML process to search for a model
         /// </summary>
         /// <param name="autoMl"></param>
@@ -74,6 +47,10 @@ namespace BlazorBoilerplate.Server.Managers
                 {
                     startAutoMLrequest.RequiredAutoMls.Add(i);
                 }
+                foreach (var i in autoMl.RequiredMlLibraries)
+                {
+                    startAutoMLrequest.RequiredLibraries.Add(i);
+                }
                 startAutoMLrequest.Task = autoMl.Task;
                 startAutoMLrequest.Configuration = JsonConvert.SerializeObject(autoMl.Configuration);// = GetTabularDataConfiguration(autoMl);
                 // TODO consider to refactor
@@ -84,7 +61,7 @@ namespace BlazorBoilerplate.Server.Managers
                 var reply = _client.StartAutoMlProcess(startAutoMLrequest);
                 if (reply.Result == ControllerReturnCode.Success)
                 {
-                    response.SessionId = reply.SessionId;
+                    response.TrainingId = reply.TrainingId;
                     return new ApiResponse(Status200OK, null, response);
                 }
                 else
@@ -108,9 +85,8 @@ namespace BlazorBoilerplate.Server.Managers
             try
             {
                 testAutoMLrequest.Username = username;
-                testAutoMLrequest.TestData = testAutoML.TestData;
-                testAutoMLrequest.SessionId = testAutoML.SessionId;
-                testAutoMLrequest.AutoMlName = testAutoML.AutoMlName;
+                testAutoMLrequest.ModelId = testAutoML.ModelId;
+                testAutoMLrequest.TestData = Google.Protobuf.ByteString.CopyFrom(testAutoML.TestData);
 
                 var reply = _client.TestAutoML(testAutoMLrequest);
 

@@ -76,7 +76,7 @@ namespace BlazorBoilerplate.Server.Managers
             try
             {
                 request.Username = username;
-                request.DatasetName = dataset.DatasetName;
+                request.DatasetName = dataset.DatasetIdentifier;
                 var reply = _client.GetDatasetCompatibleTasks(request);
                 response.Tasks = await _cacheManager.GetObjectInformationList(reply.Tasks.ToList());
                 return new ApiResponse(Status200OK, null, response);

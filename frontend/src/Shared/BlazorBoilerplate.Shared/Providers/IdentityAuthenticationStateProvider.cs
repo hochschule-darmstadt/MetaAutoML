@@ -1,13 +1,8 @@
-﻿using BlazorBoilerplate.Shared.Interfaces;
-using BlazorBoilerplate.Shared.Dto;
-using Microsoft.AspNetCore.Components.Authorization;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
-using System.Security.Claims;
-using System.Threading.Tasks;
+﻿using BlazorBoilerplate.Shared.Dto;
+using BlazorBoilerplate.Shared.Interfaces;
 using BlazorBoilerplate.Shared.Models.Account;
+using Microsoft.AspNetCore.Components.Authorization;
+using System.Security.Claims;
 
 namespace BlazorBoilerplate.Shared.Providers
 {
@@ -129,18 +124,13 @@ namespace BlazorBoilerplate.Shared.Providers
         public override async Task<AuthenticationState> GetAuthenticationStateAsync()
         {
             var identity = new ClaimsIdentity();
-            try
+
+            var userViewModel = await GetUserViewModel();
+
+            if (userViewModel.IsAuthenticated)
             {
-                var userViewModel = await GetUserViewModel();
-                if (userViewModel.IsAuthenticated)
-                {
-                    var claims = new[] { new Claim(ClaimTypes.Name, userViewModel.UserName) }.Concat(userViewModel.ExposedClaims.Select(c => new Claim(c.Key, c.Value)));
-                    identity = new ClaimsIdentity(claims, "Server authentication", "name", "role");
-                }
-            }
-            catch (HttpRequestException ex)
-            {
-                Console.WriteLine("Request failed:" + ex.ToString());
+                var claims = new[] { new Claim(ClaimTypes.Name, userViewModel.UserName) }.Concat(userViewModel.ExposedClaims.Select(c => new Claim(c.Key, c.Value)));
+                identity = new ClaimsIdentity(claims, "Server authentication", "name", "role");
             }
 
             return new AuthenticationState(new ClaimsPrincipal(identity));

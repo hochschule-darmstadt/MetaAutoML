@@ -1,0 +1,89 @@
+﻿@inject IStringLocalizer<Global> L
+@inject NavigationManager NavManager
+
+
+<MudCard Elevation="5">
+    <MudCardHeader Style="border-bottom-style: inset; border-bottom-width: 1px;">
+        <CardHeaderContent >
+            <MudText Typo="Typo.h6">All Models</MudText>
+        </CardHeaderContent>
+    </MudCardHeader>
+    <MudCardContent>
+        @if (Models == null)
+        {
+                <DataLoaderSpinner />
+        }
+        else
+        {
+            <MudTable Items="@Models.Models" style="width:stretch" class="mat-elevation-z5" AllowSelection="false" Dense="true" Filter="new Func<ModelDto,bool>(FilterFunc)">                
+                <ToolBarContent>
+                    <MudTextField @bind-Value="searchString" Placeholder="Search" Adornment="Adornment.Start"
+                                    AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+                </ToolBarContent>
+                <HeaderContent>
+                    <MudTh><MudTableSortLabel SortBy="new Func<ModelDto, object>(x=>x.Model)">Name</MudTableSortLabel></MudTh>
+                    <MudTh><MudTableSortLabel SortBy="new Func<ModelDto, object>(x=>x.Status)">Status</MudTableSortLabel></MudTh>
+                    <MudTh><MudTableSortLabel SortBy="new Func<ModelDto, object>(x=>x.Library)">Library</MudTableSortLabel></MudTh>
+                    <MudTh><MudTableSortLabel SortBy="new Func<ModelDto, object>(x=>x.Name)">AutoML solution</MudTableSortLabel></MudTh>
+                    <MudTh><MudTableSortLabel SortBy="new Func<ModelDto, object>(x=>x.TestScore)">Test score</MudTableSortLabel></MudTh>
+                    <MudTh><MudTableSortLabel SortBy="new Func<ModelDto, object>(x=>x.Runtime)">Runtime</MudTableSortLabel></MudTh>
+                    <MudTh><MudTableSortLabel SortBy="new Func<ModelDto, object>(x=>x.Predictiontime)">Prediction time</MudTableSortLabel></MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd >
+                        <a href="@NavManager.ToAbsoluteUri("datasets/" + @context.DatasetId + "/modelsview/" + @context.ID).AbsoluteUri" Style="cursor: pointer;">@context.Model</a>
+                    </MudTd>
+                    <MudTd>@context.Status</MudTd>
+                    <MudTd>@context.Library</MudTd>
+                    <MudTd>
+                        <a href="@NavManager.ToAbsoluteUri("datasets/" + @context.DatasetId + "/modelsview/" + @context.ID).AbsoluteUri" Style="cursor: pointer;">@context.Name</a>
+                    </MudTd>
+                    <MudTd>@context.TestScore</MudTd>
+                    <MudTd>@context.Runtime</MudTd>
+                    <MudTd>@context.Predictiontime</MudTd>
+                    <MudTd><ModelMenu Dataset="@context"/></MudTd>
+                </RowTemplate>
+                <PagerContent>
+                    <MudTablePager  />
+                </PagerContent>
+            </MudTable>
+        }
+    </MudCardContent>
+</MudCard>
+
+@code {
+    [Parameter]
+    public GetModelsResponseDto Models
+    { 
+        get
+        {
+            return _models;
+        } 
+        set
+        {
+            _models = value;
+            if(_models != null)
+            {
+                StateHasChanged();
+            }
+        } 
+    }
+    private string searchString = "";
+    private GetModelsResponseDto _models;
+
+    private bool FilterFunc(ModelDto element)
+    {
+        if (string.IsNullOrWhiteSpace(searchString))
+            return true;
+        if (element.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (element.Model.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (element.Status.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (element.Library.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        return false;
+    } 
+
+}

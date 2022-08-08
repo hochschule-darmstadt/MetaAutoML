@@ -1,7 +1,5 @@
-﻿using BlazorBoilerplate.Constants;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Options;
-using System.Threading.Tasks;
 
 namespace BlazorBoilerplate.Infrastructure.AuthorizationDefinitions
 {
@@ -26,7 +24,7 @@ namespace BlazorBoilerplate.Infrastructure.AuthorizationDefinitions
                     //In DatabaseInitializer: await _userManager.AddClaimAsync(applicationUser, new Claim($"Is{role}", ClaimValues.trueString));
                     case Policies.IsAdmin:
                         policy = new AuthorizationPolicyBuilder()
-                            .RequireAuthenticatedUser()
+                            .Combine(await GetPolicyAsync(Policies.IsUser))
                             .RequireClaim("IsAdministrator")
                             .Build();
 
@@ -36,7 +34,7 @@ namespace BlazorBoilerplate.Infrastructure.AuthorizationDefinitions
                     case Policies.IsUser:
                         policy = new AuthorizationPolicyBuilder()
                             .RequireAuthenticatedUser()
-                            .RequireAssertion(ctx => ctx.User.HasClaim(claim => claim.Type == "IsUser") || ctx.User.IsInRole(DefaultRoleNames.Administrator))
+                            .AddRequirements(new EmailVerifiedRequirement(true))
                             .Build();
 
                         created = true;

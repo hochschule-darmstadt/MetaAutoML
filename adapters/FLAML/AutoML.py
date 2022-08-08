@@ -13,9 +13,12 @@ if __name__ == '__main__':
     FORMAT = '%(asctime)s %(message)s'
     logging.basicConfig(stream=sys.stdout, level=logging.DEBUG, format=FORMAT)
 
-    file_path = os.path.join(get_config_property("job-file-path"),
-                             get_config_property("job-file-name"))
-    with open(file_path) as file:
+    job_file_location = os.path.join(get_config_property("training-path"),
+                                        sys.argv[1],
+                                        sys.argv[2],
+                                        get_config_property("job-folder-name"),
+                                        get_config_property("job-file-name"))
+    with open(job_file_location) as file:
         process_json = json.load(file)
 
     autoML = FLAMLAdapter(process_json)

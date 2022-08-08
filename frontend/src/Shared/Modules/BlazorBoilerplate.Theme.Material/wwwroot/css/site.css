@@ -49,7 +49,7 @@ app {
     top: 0;
     bottom: 0;
     z-index: -1;
-    background-color: #5474FC;
+    background-color: #5D2E8F;
 }
 
 .triangles {
@@ -113,7 +113,7 @@ app {
 }
 
 .mdc-top-app-bar__section .mdc-icon-button i {
-    color: #5474FC;
+    color: #5D2E8F;
 }
 
 .logo-img {
@@ -277,7 +277,7 @@ app {
 }
 
 .mdc-drawer__content {
-    background-image: linear-gradient(180deg, #5474fc 50%, #9fb1fd);
+    background-image: linear-gradient(180deg, rgb(5, 39, 103) 0%, #3a0647 70%);
     color: #FFF;
 }
 
@@ -322,9 +322,8 @@ app {
 .drawer-logo {
     display: flex;
     align-items: center;
-    justify-content: left;
-    padding-left: 1rem;
-    background-color: #5474FC;
+    justify-content: center;
+    background-color: #5D2E8F;
     height: 64px;
     color: #fff;
 }
@@ -457,7 +456,7 @@ hr {
 
 .mdc-dialog__title {
     color: #fff !important;
-    background: #5474fc;
+    background: #5D2E8F;
 }
 
 .mdc-dialog__actions {
@@ -734,32 +733,4 @@ div.refresh-timer-interval-wrapper {
 
 #editashtmldialog .mdc-dialog__surface {
     overflow: visible;
-}
-
-.btn-primary {
-    background-color: #5474fc;
-    border-color: #5474fc;
-}
-
-.mdc-chip-set{
-    align-items:center;
-}
-
-.mdc-chip--selected{
-    background-color: #fef3e1;
-    color: #ff9800;
-    border: solid 2px #ff9800;
-    font-weight: bold;
-}
-
-.mdc-chip--selected:hover{
-    background-color: #fef3e1;
-    color: #ff9800;
-    border: solid 2px #ff9800;
-    font-weight: bold;
-}
-
-.mdc-chip--selected > span > svg > path {
-    stroke: #ff9800;
-    stroke-width: 3px;
 }

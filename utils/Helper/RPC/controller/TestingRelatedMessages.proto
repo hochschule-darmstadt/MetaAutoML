@@ -6,9 +6,8 @@ import "Common.proto";
 
 message TestAutoMlRequest {
     string username = 1;
-    string testData = 2;
-    string sessionId = 3;
-    string autoMlName = 4;
+    bytes testData = 2;
+    string modelId = 3;
   }
   
   message TestAutoMlResponse {

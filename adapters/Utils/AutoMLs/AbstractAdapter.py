@@ -25,7 +25,6 @@ class AbstractAdapter(ABC):
             self._target = self._configuration["configuration"]["target"]["target"]
         if self._configuration["runtime_constraints"]["max_iter"] == 0:
             self._max_iter = self._configuration["runtime_constraints"]["max_iter"] = 3
-        os.mkdir(os.path.join(get_config_property("output-path"), self._configuration["session_id"]))
 
     @abstractmethod
     def start(self):

@@ -3,8 +3,6 @@ using BlazorBoilerplate.Shared.Interfaces;
 using BlazorBoilerplate.Shared.Localizer;
 using Humanizer;
 using Microsoft.Extensions.Localization;
-using System;
-using System.Threading.Tasks;
 
 namespace BlazorBoilerplate.Shared.Services
 {
@@ -23,8 +21,8 @@ namespace BlazorBoilerplate.Shared.Services
         public AppState(IApiClient apiClient, IStringLocalizer<Global> l)
         {
             L = l;
-            AppName = L["AppName"].ToString().Humanize(LetterCasing.Title);
-            AppShortName = L["AppShortName"].ToString().Humanize(LetterCasing.Title);
+            AppName = "OMA-ML".ToString().Humanize(LetterCasing.Title);
+            AppShortName = "OMA-ML".ToString().Humanize(LetterCasing.Title);
             _apiClient = apiClient;
         }
 

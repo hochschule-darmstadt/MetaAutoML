@@ -23,23 +23,18 @@ class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
         """
         try:
             start_time = time.time()
-            # saving AutoML configuration JSON
-            config_json = json.loads(request.processJson)
-            job_file_location = os.path.join(get_config_property("job-file-path"),
-                                             get_config_property("job-file-name"))
-            with open(job_file_location, "w+") as f:
-                json.dump(config_json, f)
+            config = SetupRunNewRunEnvironment(request.processJson)
 
-            process = start_automl_process()
-            yield from capture_process_output(process, start_time)
-            generate_script(config_json)
-            output_json = zip_script(config_json["session_id"])
+            process = start_automl_process(config)
+            yield from capture_process_output(process, start_time, False)
+            generate_script(config)
+            output_json = zip_script(config)
 
             # AutoSklearn uses an ensemble of up to 50 different models we are not able to show them all in our current GUI
             model = "ensemble selection"
             # autosklearn always uses only sklearn
-            library = "sklearn"
-            test_score, prediction_time = evaluate(config_json, job_file_location, data_loader)
+            library = ":scikit_learn_lib"
+            test_score, prediction_time = evaluate(config, os.path.join(config["job_folder_location"], get_config_property("job-file-name")), data_loader)
 
             response = yield from get_response(output_json, start_time, test_score, prediction_time, library, model)
             print(f'{get_config_property("adapter-name")} job finished')
@@ -52,8 +47,11 @@ class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
         try:
             # saving AutoML configuration JSON
             config_json = json.loads(request.processJson)
-            job_file_location = os.path.join(get_config_property("job-file-path"),
-                                             get_config_property("job-file-name"))
+            job_file_location = os.path.join(get_config_property("training-path"),
+                                        config_json["user_identifier"],
+                                        config_json["training_id"],
+                                        get_config_property("job-folder-name"),
+                                        get_config_property("job-file-name"))
             with open(job_file_location, "w+") as f:
                 json.dump(config_json, f)
 
@@ -80,8 +78,6 @@ def serve():
 
 
 if __name__ == '__main__':
-    if not os.path.exists('app-data/output/tmp'):
-        os.mkdir('app-data/output/tmp')
     logging.basicConfig()
     serve()
     print('done.')

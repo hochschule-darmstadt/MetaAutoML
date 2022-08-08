@@ -1,6 +1,5 @@
 ﻿using Karambolo.PO;
 using Microsoft.Extensions.Options;
-using System;
 using System.Globalization;
 
 namespace BlazorBoilerplate.Shared.Localizer
@@ -22,6 +21,8 @@ namespace BlazorBoilerplate.Shared.Localizer
 
         protected override POCatalog Catalog => GetCatalogForCulture(CurrentCulture);
 
+        protected override POCatalog ParentCultureCatalog => GetCatalogForCulture(CurrentCulture.Parent, true);
+
         protected override POCatalog FallBackCatalog => GetCatalogForCulture(new CultureInfo(Settings.NeutralCulture));
 
         public CultureInfo CurrentCulture
@@ -30,11 +31,13 @@ namespace BlazorBoilerplate.Shared.Localizer
             set => throw new NotSupportedException();
         }
 
-        POCatalog GetCatalogForCulture(CultureInfo culture)
+        POCatalog GetCatalogForCulture(CultureInfo culture, bool exactMatch = false)
         {
             while (culture != null && !culture.Equals(CultureInfo.InvariantCulture))
                 if (Provider.TextCatalogs.TryGetValue(culture.Name, out var catalog))
                     return catalog;
+                else if (exactMatch)
+                    return null;
                 else
                     culture = culture.Parent;
 

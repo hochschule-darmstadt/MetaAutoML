@@ -5,7 +5,7 @@ ONTOLOGY_QUERY_GET_SUPPORTED_ML_LIBRARIES_FOR_TASK = """
             WHERE {
             ?automl a :AutoML_solution ;
                        :can_perform ?task ;
-                       :supported_by_oma_ml "true" ;
+                       :supported_by_oma_ml "True" ;
                        :used_for ?lib .
             }
             """
@@ -17,7 +17,7 @@ ONTOLOGY_QUERY_GET_COMPATIBLE_AUTO_ML_SOLUTIONS_FOR_TASK_AND_LIBRARIES = """
             WHERE {
             ?automl a :AutoML_solution ;
                        :can_perform ?task ;
-                       :supported_by_oma_ml "true" ;
+                       :supported_by_oma_ml "True" ;
                        :used_for ?lib .
             }
             """
@@ -28,7 +28,7 @@ ONTOLOGY_QUERY_GET_COMPATIBLE_AUTO_ML_SOLUTIONS_FOR_TASK = """
             WHERE {
             ?automl a :AutoML_solution ;
                        :can_perform ?task ;
-                       :supported_by_oma_ml "true" .
+                       :supported_by_oma_ml "True" .
             }
             """
 

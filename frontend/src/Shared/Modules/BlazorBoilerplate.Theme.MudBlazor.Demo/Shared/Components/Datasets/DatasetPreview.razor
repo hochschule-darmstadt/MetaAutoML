@@ -1,0 +1,108 @@
+﻿
+@using System 
+@using System.IO
+@using Microsoft.AspNetCore.Hosting
+@using Microsoft.Extensions.Logging
+@using System.Net.Http.Headers
+@inject IApiClient apiClient
+@inject IViewNotifier viewNotifier
+@inject IJSRuntime JS
+@inject IStringLocalizer<Global> L
+@inject IHttpClientFactory ClientFactory
+
+
+<MudCard Elevation="5">
+    <MudCardHeader Style="border-bottom-style: inset; border-bottom-width: 1px;">
+        <CardHeaderContent >
+            <MudText Typo="Typo.h6">Preview</MudText>
+        </CardHeaderContent>
+    </MudCardHeader>
+    <MudCardContent>
+        <MudPaper Height="250px" Elevation="0">
+            @if (_dataset != null)
+            {
+                @switch (_dataset.Type.ID)
+                {
+                    case ":tabular":
+                        <TabularPreview Dataset="_tabularDataset" />
+                        break;
+                    case ":image":
+                        <ImagePreview Dataset="_imageDataset" />
+                        break;
+                    default:
+                        break;
+                }
+            }
+        </MudPaper>
+    </MudCardContent>
+</MudCard>
+
+@code {
+    [Parameter]
+    public GetDatasetResponseDto Dataset
+    { 
+        get
+        {
+            return _dataset;
+        } 
+        set
+        {
+            _dataset = value;
+            if (_dataset != null)
+            {
+                LoadDatasetPreview();
+            }
+            StateHasChanged();
+        } 
+    }
+    private GetDatasetResponseDto _dataset;
+    private GetDatasetPreviewResponseDto _datasetPreview;
+    private bool isPreviewRequestRunning = false;
+    private DataFrame _tabularDataset;
+    private List<ImagePreviewDto> _imageDataset;
+
+    private async Task LoadDatasetPreview()
+    {
+        //Due to frontend refreshes it may occur that this is triggered twice, leading to an error while the first request is reading
+        if (isPreviewRequestRunning == true)
+        {
+            return;
+        }
+        try
+        {
+            isPreviewRequestRunning = true;
+            GetDatasetPreviewRequestDto datasetRequest = new GetDatasetPreviewRequestDto()
+            {
+                    DatasetIdentifier = _dataset.Identifier
+            };
+            ApiResponseDto apiResponse = await apiClient.GetDatasetPreview(datasetRequest);
+
+            if (apiResponse.IsSuccessStatusCode)
+            {
+                _datasetPreview = Newtonsoft.Json.JsonConvert.DeserializeObject<GetDatasetPreviewResponseDto>(apiResponse.Result.ToString());
+                switch (_dataset.Type.ID)
+                {
+                    case ":tabular":
+                        _tabularDataset = DataFrame.LoadCsvFromString(_datasetPreview.DatasetPreview);
+                        break;
+                    case ":image":
+                        _imageDataset = _datasetPreview.DatasetPreview.ToObject<List<ImagePreviewDto>>();
+                        break;
+                    default:
+                        break;
+                }
+                StateHasChanged();
+                viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
+            }
+            else
+            {
+                viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
+            }
+        }
+        catch (Exception ex)
+        {
+            viewNotifier.Show(ex.GetBaseException().Message, ViewNotifierType.Error, L["Operation Failed"]);
+        }
+        isPreviewRequestRunning = false;
+    }
+}

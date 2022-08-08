@@ -1,0 +1,135 @@
+﻿@inject IStringLocalizer<Global> L
+@using System
+@inject IApiClient apiClient
+@inject IViewNotifier viewNotifier
+
+@if (_columns == null)
+{
+    
+}
+else
+{
+    <MudStack>
+        <MudTimeline TimelineOrientation="@TimelineOrientation.Horizontal" TimelinePosition="@TimelinePosition.Bottom">
+            <MudTimelineItem Color="Color.Secondary">
+                <MudText Align="Align.Center" Typo="Typo.body2">Dataset preparation</MudText>
+            </MudTimelineItem>
+            <MudTimelineItem>
+                <MudText Align="Align.Center" Typo="Typo.body2">Configuration</MudText>
+            </MudTimelineItem>
+        </MudTimeline>
+
+
+        <MudTable Items="@_columns.RowContent" CustomHeader="true">
+            <HeaderContent>
+                <MudTHeadRow>
+                    @foreach (var item in _columns.Columns)
+                    {
+                        <MudTh>@item.Name</MudTh>
+                    }
+                </MudTHeadRow>
+                    @foreach (var (col, index) in _columns.Columns.Select((v, i) => (v, i)))
+                    {
+                        <MudTh>
+                            <MudSelect  T="int" Value="@(_dataTypeList[index])" ValueChanged="@((e) => { _dataTypeList[index] = e; ChangeValue(); })">
+                                <MudSelectItem  T="int" Value="@((int)col.Type)">@Enum.GetName(typeof(ColumnType), (int)col.Type)</MudSelectItem>
+                                @foreach (int val in col.ConvertibleTypes)
+                                {
+                                    <MudSelectItem  T="int" Value="@((int) val)">@Enum.GetName(typeof(ColumnType), val)</MudSelectItem>
+                                }
+                            </MudSelect>
+                        </MudTh>
+                    }
+                <MudTHeadRow>
+                </MudTHeadRow>
+            </HeaderContent>
+            <RowTemplate>
+                @foreach (var item in context)
+                {
+                    <MudTd>@item</MudTd>
+                }
+            </RowTemplate>
+            <PagerContent>
+                <MudTablePager HorizontalAlignment="HorizontalAlignment.Left"/>
+            </PagerContent>
+        </MudTable>
+    </MudStack>     
+    
+}
+
+@code {
+    [Parameter]
+    public GetDatasetResponseDto Dataset { get; set; }
+    [Parameter]
+    public StartAutoMLRequestDto StartAutoMlRequest { get; set; }
+    [Parameter]
+    public EventCallback<StartAutoMLRequestDto> StartAutoMlRequestChanged { get; set; }
+
+    async Task UpdateStartAutoMlRequest()
+    {
+        await StartAutoMlRequestChanged.InvokeAsync(StartAutoMlRequest);
+    }
+
+    private GetTabularDatasetColumnResponseDto _columns;
+    // store all data type as list so we can bind in to our value onpurpose
+    // i have to do that because i cant bind value to _dataset[i].type
+    private List<int> _dataTypeList;
+    // function call to synchronize changed column typed
+    public async void ChangeValue()
+    {
+        Dictionary<string, dynamic> features = new Dictionary<string, dynamic>();
+        for (int i = 0; i < (_dataTypeList).Count; i++)
+        {
+            features.Add(_columns.Columns[i].Name, (Server.DataType)_dataTypeList[i]);
+        }
+        StartAutoMlRequest.DatasetConfiguration["features"] = features;
+        await UpdateStartAutoMlRequest();
+    }
+    
+    protected override async void OnInitialized()
+    {
+        try
+        {
+            ApiResponseDto apiResponse = await apiClient.GetTabularDatasetColumn(new GetTabularDatasetColumnRequestDto { DatasetIdentifier = Dataset.Identifier });
+
+            if (apiResponse.IsSuccessStatusCode)
+            {
+                _columns = Newtonsoft.Json.JsonConvert.DeserializeObject<GetTabularDatasetColumnResponseDto>(apiResponse.Result.ToString());
+                _dataTypeList = new List<int>();
+                // add feature for manipulating and steps3
+                Dictionary<string, dynamic> features = new Dictionary<string, dynamic>();
+                
+                if (StartAutoMlRequest.DatasetConfiguration.Count != 0)
+                {
+                    _dataTypeList = new List<int>();
+                    foreach (var item in StartAutoMlRequest.DatasetConfiguration["features"])
+                    {
+                        _dataTypeList.Add((int)item.Value);
+                    }
+                }
+                else
+                {
+                    for (int i = 0; i < (_columns.Columns).Count; i++)
+                    {
+                        _dataTypeList.Add((int)_columns.Columns[i].Type);
+                        features.Add(_columns.Columns[i].Name, (Server.DataType)_dataTypeList[i]);
+                    }
+                    StartAutoMlRequest.DatasetConfiguration.Add("features", features);
+                }
+                StartAutoMlRequest.DatasetIdentifier = Dataset.Identifier;
+                StartAutoMlRequest.DatasetType = Dataset.Type.ID;
+                await UpdateStartAutoMlRequest();
+                StateHasChanged();
+                viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
+            }
+            else
+            {
+                viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
+            }
+        }
+        catch (Exception ex)
+        {
+            viewNotifier.Show(ex.GetBaseException().Message, ViewNotifierType.Error, L["Operation Failed"]);
+        }
+    }
+}

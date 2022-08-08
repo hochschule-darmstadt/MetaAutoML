@@ -1,4 +1,5 @@
 ﻿using BlazorBoilerplate.Constants;
+using BlazorBoilerplate.Shared.Dto.Ontology;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,10 +10,11 @@ namespace BlazorBoilerplate.Shared.Dto.Dataset
 {
     public class GetDatasetResponseDto
     {
-        // consider to change it to public List <TableColumn>
         public string Name { get; set; }
-        public Server.DataType Type { get; set; }
-        public List<Server.DataType> ConvertibleTypes { get; set; }
-        public List<string> FirstEntries { get; set; }
+        public ObjectInfomationDto Type { get; set; }
+        public long Size { get; set; }
+        public DateTime Creation_date { get; set; }
+        public string Identifier { get; set; }
+        public Dictionary<string, dynamic> Analysis { get; set; }
     }
 }

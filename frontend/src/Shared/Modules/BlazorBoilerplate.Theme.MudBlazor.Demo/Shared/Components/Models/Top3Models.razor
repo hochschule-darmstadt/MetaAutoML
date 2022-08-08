@@ -1,0 +1,98 @@
+﻿@inject IStringLocalizer<Global> L
+@inject IApiClient apiClient
+@inject IViewNotifier viewNotifier
+@inject NavigationManager NavManager
+
+<MudCard Elevation="5">
+    <MudCardHeader Style="border-bottom-style: inset; border-bottom-width: 1px;">
+        <CardHeaderContent >
+            <MudText Typo="Typo.h6">Top 3 models</MudText>
+        </CardHeaderContent>
+        <CardHeaderActions>
+            @if (Dataset != null)
+            {
+                <MudButton Href="@("/datasets/" + Dataset.Identifier + "/models")"
+                    Variant="Variant.Filled" 
+                    EndIcon="@Icons.Material.Filled.ReadMore" 
+                    Color="Color.Secondary"
+                    Size="Size.Small" 
+                    Style="margin-top: 8px">More</MudButton>
+            }
+        </CardHeaderActions>
+    </MudCardHeader>
+    <MudCardContent>
+        <MudPaper Height="215px" Elevation="0">
+            @if (_top3Models == null)
+            {
+                <DataLoaderSpinner />
+            }
+            else
+            {
+                <MudTable Items="@_top3Models.Models">
+                    <HeaderContent>
+                        <MudTh>Name</MudTh>
+                        <MudTh>Model</MudTh>
+                        <MudTh>Library</MudTh>
+                        <MudTh>Test score</MudTh>
+                        <MudTh>Prediction time per sample</MudTh>
+                        <MudTh>Total training time</MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd >
+                            <a href="@NavManager.ToAbsoluteUri("datasets/" + Dataset.Identifier + "/models/" + @context.ID).AbsoluteUri" Style="cursor: pointer;">@context.Name</a>
+                        </MudTd>
+                        <MudTd >@context.Model</MudTd>
+                        <MudTd >@context.Library</MudTd>
+                        <MudTd >@String.Format("{0:0.00}", context.TestScore)</MudTd>
+                        <MudTd >@String.Format("{0:0}", context.Predictiontime) ms</MudTd>
+                        <MudTd >@context.Runtime s</MudTd>
+                    </RowTemplate>
+                </MudTable>
+            }
+        </MudPaper>
+    </MudCardContent>
+</MudCard>
+
+@code {
+    [Parameter]
+    public GetDatasetResponseDto Dataset 
+    { 
+        get
+        {
+            return _dataset;
+        }
+        set
+        {
+            _dataset = value;
+            if (_dataset != null)
+            {
+                LoadTrainings();
+            }
+        }
+    }
+    private GetDatasetResponseDto _dataset;
+    private GetModelsResponseDto _top3Models;
+
+    private async Task LoadTrainings()
+    {
+        try
+        {
+            ApiResponseDto apiResponse = await apiClient.GetModels(new GetModelsRequestDto() { DatasetIdentifier = Dataset.Identifier, Top3Only = true });
+
+            if (apiResponse.IsSuccessStatusCode)
+            {
+                _top3Models = Newtonsoft.Json.JsonConvert.DeserializeObject<GetModelsResponseDto>(apiResponse.Result.ToString());
+                StateHasChanged();
+                viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
+            }
+            else
+            {
+                viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
+            }
+        }
+        catch (Exception ex)
+        {
+            viewNotifier.Show(ex.GetBaseException().Message, ViewNotifierType.Error, L["Operation Failed"]);
+        }
+    }
+}

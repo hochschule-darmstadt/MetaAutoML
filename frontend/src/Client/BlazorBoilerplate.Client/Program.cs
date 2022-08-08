@@ -8,13 +8,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.AspNetCore.DataProtection;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.JSInterop;
-using System;
 using System.Globalization;
-using System.Net.Http;
 using System.Reflection;
-using System.Threading.Tasks;
 
 namespace BlazorBoilerplate.Client
 {
@@ -23,7 +19,6 @@ namespace BlazorBoilerplate.Client
         public static async Task Main(string[] args)
         {
             var builder = WebAssemblyHostBuilder.CreateDefault(args);
-
 
             //TODO see what oqtane does
             var baseModule = new Theme.Material.Module();
@@ -47,6 +42,7 @@ namespace BlazorBoilerplate.Client
             builder.Services.AddAuthorizationCore();
             builder.Services.AddSingleton<IAuthorizationPolicyProvider, SharedAuthorizationPolicyProvider>();
             builder.Services.AddTransient<IAuthorizationHandler, DomainRequirementHandler>();
+            builder.Services.AddTransient<IAuthorizationHandler, EmailVerifiedHandler>();
             builder.Services.AddScoped<AuthenticationStateProvider, IdentityAuthenticationStateProvider>();
 
             builder.Services.AddScoped<ILocalizationApiClient, LocalizationApiClient>();

@@ -8,6 +8,6 @@ namespace BlazorBoilerplate.Shared.Dto.AutoML
 {
     public class StartAutoMLResponseDto
     {
-        public string SessionId { get; set; }
+        public string TrainingId { get; set; }
     }
 }

@@ -50,5 +50,5 @@ message StartAutoMlProcessRequest {
   
 message StartAutoMlProcessResponse {
     ControllerReturnCode result = 1;
-    string sessionId = 2;
+    string trainingId = 2;
   }

@@ -1,4 +1,5 @@
-﻿using BlazorBoilerplate.Infrastructure.Server.Models;
+﻿using BlazorBoilerplate.Infrastructure.AuthorizationDefinitions;
+using BlazorBoilerplate.Infrastructure.Server.Models;
 using BlazorBoilerplate.Infrastructure.Storage.DataModels;
 using BlazorBoilerplate.Server.Aop;
 using BlazorBoilerplate.Shared.Dto;
@@ -9,23 +10,16 @@ using Breeze.AspNetCore;
 using Breeze.Persistence;
 using Breeze.Persistence.EFCore;
 using Breeze.Sharp.Core;
-using IdentityServer4.AccessTokenValidation;
 using Karambolo.PO;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
-using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
-using System;
-using System.Collections.Generic;
-using System.IO;
 using System.IO.Compression;
-using System.Linq;
 using System.Net.Mime;
 using System.Text;
-using System.Threading.Tasks;
 using static Microsoft.AspNetCore.Http.StatusCodes;
 
 namespace BlazorBoilerplate.Server.Controllers
@@ -37,7 +31,7 @@ namespace BlazorBoilerplate.Server.Controllers
     public class LocalizationController : Controller
     {
         private const string AuthSchemes =
-            "Identity.Application" + "," + IdentityServerAuthenticationDefaults.AuthenticationScheme; //Cookie + Token authentication
+            "Identity.Application" + "," + JwtBearerDefaults.AuthenticationScheme; //Cookie + Token authentication
 
         private readonly LocalizationPersistenceManager persistenceManager;
         private readonly ILocalizationProvider localizationProvider;
@@ -65,14 +59,14 @@ namespace BlazorBoilerplate.Server.Controllers
         [HttpGet]
         public IQueryable<PluralFormRule> PluralFormRules()
         {
-            return persistenceManager.GetEntities<PluralFormRule>();
+            return persistenceManager.GetEntities<PluralFormRule>().AsNoTracking();
         }
 
         [AllowAnonymous]
         [HttpGet]
         public IQueryable<LocalizationRecord> LocalizationRecords(string contextId, string msgId)
         {
-            return persistenceManager.GetEntities<LocalizationRecord>()
+            return persistenceManager.GetEntities<LocalizationRecord>().AsNoTracking()
                 .Where(i => (contextId == null || i.ContextId == contextId) && (msgId == null || i.MsgId == msgId))
                 .Include(i => i.PluralTranslations)
                 .OrderBy(i => i.Culture == Settings.NeutralCulture ? 0 : 1).ThenBy(i => i.Culture);
@@ -81,11 +75,12 @@ namespace BlazorBoilerplate.Server.Controllers
         [HttpGet]
         public IQueryable<LocalizationRecordKey> LocalizationRecordKeys(string contextId, string filter)
         {
-            return persistenceManager.GetEntities<LocalizationRecord>()
+            return persistenceManager.GetEntities<LocalizationRecord>().AsNoTracking()
                 .Where(i => (contextId == null || i.ContextId == contextId) && (filter == null || i.MsgId.ToLower().Contains(filter.ToLower()) || i.Translation.ToLower().Contains(filter.ToLower())))
-                .OrderBy(i => i.ContextId).ThenBy(i => i.MsgId)
                 .Select(i => new LocalizationRecordKey() { MsgId = i.MsgId, ContextId = i.ContextId })
-                .Distinct(i => new LocalizationRecordKey() { MsgId = i.MsgId, ContextId = i.ContextId }).AsQueryable();
+                .Distinct(i => new LocalizationRecordKey() { MsgId = i.MsgId, ContextId = i.ContextId })
+                .OrderBy(i => i.ContextId).ThenBy(i => i.MsgId)
+                .AsQueryable();
         }
 
         [HttpPost]
@@ -108,6 +103,7 @@ namespace BlazorBoilerplate.Server.Controllers
         }
 
         [HttpPost]
+        [Authorize(Policies.IsAdmin)]
         public ApiResponse ReloadTranslations()
         {
             localizationProvider.Init(persistenceManager.Context.LocalizationRecords.Include(i => i.PluralTranslations), persistenceManager.Context.PluralFormRules, true);
@@ -133,6 +129,7 @@ namespace BlazorBoilerplate.Server.Controllers
         }
 
         [HttpGet]
+        [Authorize(Policies.IsAdmin)]
         [Produces(MediaTypeNames.Application.Zip)]
         public IActionResult Export()
         {
@@ -146,10 +143,29 @@ namespace BlazorBoilerplate.Server.Controllers
                 {
                     foreach (var textCatalog in localizationProvider.TextCatalogs)
                     {
-                        var zipEntry = archive.CreateEntry($"{textCatalog.Key}.po");
+                        var entries = Enumerable.AsEnumerable<IPOEntry>(textCatalog.Value);
 
-                        using var entryStream = zipEntry.Open();
-                        generator.Generate(entryStream, textCatalog.Value);
+                        var contextIds = entries.Select(i => i.Key.ContextId).Distinct();
+
+                        foreach (var contextId in contextIds)
+                        {
+                            var filteredCatalog = new POCatalog(entries.Where(entry => entry.Key.ContextId == contextId))
+                            {
+                                Encoding = textCatalog.Value.Encoding,
+                                PluralFormCount = textCatalog.Value.PluralFormCount,
+                                PluralFormSelector = textCatalog.Value.PluralFormSelector,
+                                Language = textCatalog.Value.Language,
+                                Headers = new Dictionary<string, string>
+                                {
+                                    { "X-Generator", "BlazorBoilerplate" },
+                                }
+                            };
+
+                            var zipEntry = archive.CreateEntry($"{contextId}-{textCatalog.Key}.po");
+
+                            using var entryStream = zipEntry.Open();
+                            generator.Generate(entryStream, filteredCatalog);
+                        }
                     }
                 }
 
@@ -160,6 +176,7 @@ namespace BlazorBoilerplate.Server.Controllers
         }
 
         [HttpPost]
+        //[Authorize(Policies.IsAdmin)]
         public async Task<ApiResponse> Upload(IFormFile uploadedFile)
         {
             if (uploadedFile == null || uploadedFile.Length == 0)

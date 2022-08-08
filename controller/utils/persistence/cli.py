@@ -20,7 +20,7 @@ mongo: Database = Database("mongodb://root:example@localhost")
 
 
 get_datasets = lambda: [ds for ds in mongo.get_datasets(username)]
-get_sessions = lambda: [sess for sess in mongo.get_sessions(username)]
+get_trainings = lambda: [sess for sess in mongo.get_trainings(username)]
 get_models = lambda: [mdl for mdl in mongo.get_models(username)]
 drop_database = lambda: mongo.drop_database(username)
 
@@ -29,9 +29,9 @@ print(f"found {len(datasets)} datasets:")
 for ds in datasets:
     print(f"  {ds['name']}:\t'{ds['path']}'")
 
-sessions = get_sessions()
-print(f"found {len(sessions)} sessions:")
-for sess in sessions:
+trainings = get_trainings()
+print(f"found {len(trainings)} trainings:")
+for sess in trainings:
     print(f"  {sess['_id']}")
 
 

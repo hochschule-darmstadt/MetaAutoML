@@ -1,7 +1,4 @@
 ﻿using BlazorBoilerplate.Shared.Providers;
-using Microsoft.Extensions.DependencyInjection;
-using System.Collections.Generic;
-using System.IO;
 using System.Reflection;
 using System.Runtime.Loader;
 
@@ -11,19 +8,27 @@ namespace BlazorBoilerplate.Server.Extensions
     {
         static ModuleLoader()
         {
-            var assemblyPath = Path.GetDirectoryName(Assembly.GetEntryAssembly()?.Location);
+            var assemblyPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly()?.Location);
 
-            assemblyPath = Path.Combine(@$"{assemblyPath}","Modules");
+            var assemblyThemePath = Path.Combine(@$"{assemblyPath}", "Themes/MudBlazor");
 
             List<Assembly> allAssemblies = new();
 
-            if (Directory.Exists(assemblyPath))
+            if (Directory.Exists(assemblyThemePath))
             {
-                foreach (var dll in Directory.GetFiles(assemblyPath, "*.dll"))
+                foreach (var dll in Directory.GetFiles(assemblyThemePath, "*.dll"))
                     allAssemblies.Add(AssemblyLoadContext.Default.LoadFromStream(new MemoryStream(File.ReadAllBytes(dll))));
-
-                ModuleProvider.Init(allAssemblies);
             }
+
+            var assemblyModulesPath = Path.Combine(@$"{assemblyPath}", "Modules");
+
+            if (Directory.Exists(assemblyModulesPath))
+            {
+                foreach (var dll in Directory.GetFiles(assemblyModulesPath, "*.dll"))
+                    allAssemblies.Add(AssemblyLoadContext.Default.LoadFromStream(new MemoryStream(File.ReadAllBytes(dll))));
+            }
+
+            ModuleProvider.Init(allAssemblies);
         }
 
         public static IServiceCollection AddModules(this IServiceCollection services)

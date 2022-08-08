@@ -6,12 +6,6 @@ using Karambolo.Common.Localization;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Localization;
 using ObjectCloner.Extensions;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net.Http;
-using System.Threading.Tasks;
 using static BlazorBoilerplate.Shared.Localizer.Settings;
 
 namespace BlazorBoilerplate.UI.Base.Pages.Admin
@@ -28,8 +22,6 @@ namespace BlazorBoilerplate.UI.Base.Pages.Admin
         protected Dictionary<string, PluralFormRule> PluralFormRules { get; set; }
 
         protected List<string> LocalizationCultures { get; set; } = new List<string>();
-
-        protected List<LocalizationRecord> localizationRecords { get; set; } = new List<LocalizationRecord>();
         protected int pageSize { get; set; } = 10;
         private int pageIndex { get; set; } = 0;
         protected int totalItemsCount { get; set; } = 0;
@@ -39,6 +31,8 @@ namespace BlazorBoilerplate.UI.Base.Pages.Admin
         protected bool isNewKeyDialogOpen = false;
         protected bool isPluralDialogOpen = false;
         protected bool isEditAsHtmlDialogOpen = false;
+
+        protected string filter;
 
         protected LocalizationRecordKey currentKey { get; set; }
         protected LocalizationRecordKey newKey { get; set; } = new LocalizationRecordKey();
@@ -64,9 +58,14 @@ namespace BlazorBoilerplate.UI.Base.Pages.Admin
 
             await LoadKeys();
         }
-        protected async Task LoadKeys(string filter = null)
+
+        protected virtual async Task Reload()
         {
-            localizationRecords = new List<LocalizationRecord>();
+            await LoadKeys();
+        }
+        protected async Task LoadKeys()
+        {
+            currentKey = null;
 
             try
             {
@@ -101,15 +100,18 @@ namespace BlazorBoilerplate.UI.Base.Pages.Admin
             if (key != null)
                 try
                 {
+                    if (currentKey != null)
+                        currentKey.LocalizationRecords = null;
+
                     currentKey = key;
                     localizationApiClient.ClearEntitiesCache();
                     var result = await localizationApiClient.GetLocalizationRecords(key);
-                    localizationRecords = new List<LocalizationRecord>(result);
+                    currentKey.LocalizationRecords = new List<LocalizationRecord>(result);
 
                     LocalizationCultures.Clear();
 
                     LocalizationCultures.AddRange(SupportedCultures
-                        .Where(i => !localizationRecords.Any(l => l.Culture == i)));
+                        .Where(i => !currentKey.LocalizationRecords.Any(l => l.Culture == i)));
 
                     if (LocalizationCultures.Count > 0)
                         newLocalizationRecord = new LocalizationRecord() { ContextId = currentKey.ContextId, MsgId = currentKey.MsgId, Culture = LocalizationCultures[0] };
@@ -120,8 +122,6 @@ namespace BlazorBoilerplate.UI.Base.Pages.Admin
                 {
                     viewNotifier.Show(ex.GetBaseException().Message, ViewNotifierType.Error, L["Operation Failed"]);
                 }
-            else
-                localizationRecords = new List<LocalizationRecord>();
 
             StateHasChanged();
         }
@@ -143,8 +143,7 @@ namespace BlazorBoilerplate.UI.Base.Pages.Admin
 
                     if (response.IsSuccessStatusCode)
                     {
-                        await LoadKeys();
-                        localizationRecords = new List<LocalizationRecord>();
+                        await Reload();
                         LocalizationCultures.Clear();
 
                         viewNotifier.Show(L["Operation Successful"], ViewNotifierType.Success);
@@ -170,11 +169,9 @@ namespace BlazorBoilerplate.UI.Base.Pages.Admin
                     localizationApiClient.ClearEntitiesCache();
                     var response = await localizationApiClient.DeleteLocalizationRecordKey(key);
 
-
                     if (response.IsSuccessStatusCode)
                     {
-                        await LoadKeys();
-                        localizationRecords = new List<LocalizationRecord>();
+                        await Reload();
                         LocalizationCultures.Clear();
 
                         viewNotifier.Show(response.Message, ViewNotifierType.Success, L["Operation Successful"]);
@@ -207,11 +204,14 @@ namespace BlazorBoilerplate.UI.Base.Pages.Admin
 
         protected abstract void SetHTML(string html);
         protected abstract Task<string> GetHTML();
-        protected void OpenEditAsHtmlDialog(LocalizationRecord record)
+        protected async Task OpenEditAsHtmlDialog(LocalizationRecord record)
         {
             currentLocalizationRecord = record;
-            SetHTML(currentLocalizationRecord.Translation);
             isEditAsHtmlDialogOpen = true;
+
+            await Task.Delay(500);
+
+            SetHTML(currentLocalizationRecord.Translation);
         }
         protected void OpenNewKeyDialogOpen()
         {
@@ -222,8 +222,11 @@ namespace BlazorBoilerplate.UI.Base.Pages.Admin
 
         protected void DeleteLocalizationRecord(LocalizationRecord record)
         {
-            localizationApiClient.RemoveEntity(record);
-            localizationRecords.Remove(record);
+            if (currentKey != null)
+            {
+                localizationApiClient.RemoveEntity(record);
+                currentKey.LocalizationRecords.Remove(record);
+            }
         }
 
         protected void DeletePluralTranslation(PluralTranslation plural)
@@ -256,34 +259,45 @@ namespace BlazorBoilerplate.UI.Base.Pages.Admin
             if (await SaveChanges())
             {
                 isNewKeyDialogOpen = false;
-                await LoadKeys();
+                await Reload();
                 newLocalizationRecord = new LocalizationRecord();
             }
         }
 
         protected async Task SaveNewPlural()
         {
-            newPlural.LocalizationRecord = currentLocalizationRecord;
-            localizationApiClient.AddEntity(newPlural);
+            if (currentKey != null)
+            {
+                newPlural.LocalizationRecord = currentLocalizationRecord;
+                localizationApiClient.AddEntity(newPlural);
 
-            if (currentLocalizationRecord.Culture == NeutralCulture
-                && newPlural.Index == 1)
-                foreach (var record in localizationRecords)
-                    record.MsgIdPlural = newPlural.Translation;
+                if (currentLocalizationRecord.Culture == NeutralCulture && newPlural.Index == 1)
+                    foreach (var record in currentKey.LocalizationRecords)
+                        record.MsgIdPlural = newPlural.Translation;
 
-            if (await SaveChanges())
-                newPlural = new PluralTranslation();
+                if (await SaveChanges())
+                    newPlural = new PluralTranslation();
+            }
         }
 
-        protected async Task<bool> SavePluralChanges()
+        protected async Task SavePluralChanges()
         {
-            var msgIdPlural = localizationRecords.Single(i => i.Culture == NeutralCulture)
-                .PluralTranslations.Single(i => i.Index == 1).Translation;
+            if (currentKey != null)
+            {
+                var plural = currentKey.LocalizationRecords
+                    .Single(i => i.Culture == NeutralCulture)
+                    .PluralTranslations.SingleOrDefault(i => i.Index == 1);
 
-            foreach (var record in localizationRecords)
-                record.MsgIdPlural = msgIdPlural;
+                if (plural != null)
+                {
+                    var msgIdPlural = plural.Translation;
 
-            return await SaveChanges();
+                    foreach (var record in currentKey.LocalizationRecords)
+                        record.MsgIdPlural = msgIdPlural;
+
+                    await SaveChanges();
+                }
+            }
         }
 
         protected async Task SaveNewLocalizationRecord()
