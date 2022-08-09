@@ -115,7 +115,7 @@ class LongitudinalDataManager:
                                               DataType.DATATYPE_BOOLEAN]
 
     @staticmethod
-    def read_dimension_names(path) -> GetTabularDatasetColumnNamesResponse:
+    def read_dimension_names(path) -> GetTabularDatasetColumnResponse:
         """
         Read only the dimension (column) names of the given dataset
         ---
