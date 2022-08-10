@@ -1,0 +1,18 @@
+﻿@*@inject IStringLocalizer<Global> L
+@inject NavigationManager NavManager
+
+
+<MudMenu Icon="@Icons.Material.Filled.MoreVert">
+    @if (Training != null)
+    {
+        <MudMenuItem OnClick="@(e => { NavManager.NavigateTo("/trainings/" + Training.ID + "/details"); })">Configuration</MudMenuItem>
+        <MudMenuItem>Delete</MudMenuItem>
+    }
+</MudMenu>
+
+@code {
+    [Parameter]
+    public AutoMLStatusDto Training { get; set; }
+
+}
+*@

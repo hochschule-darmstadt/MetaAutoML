@@ -152,5 +152,10 @@ namespace BlazorBoilerplate.Shared.Services
         {
             return await httpClient.PostJsonAsync<ApiResponseDto>("api/AutoMl/TestAutoML", automl);
         }
+
+        public async Task<ApiResponseDto> GetHomeOverviewInformation()
+        {
+            return await httpClient.GetJsonAsync<ApiResponseDto>("api/GeneralInformation/GetHomeOverviewInformations");
+        }
     }
 }

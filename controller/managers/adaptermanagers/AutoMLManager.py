@@ -39,7 +39,7 @@ class AutoMLManager(ABC, Thread):
         self.__predictiontime = 0
         self.__model = ""
         self.__library = ""
-        self.__last_status = "Busy"
+        self.__last_status = "busy"
         self.__dataset_id = dataset_id
 
         self.__AUTOML_SERVICE_HOST = automl_service_host

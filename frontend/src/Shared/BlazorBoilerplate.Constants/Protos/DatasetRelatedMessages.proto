@@ -45,7 +45,6 @@ message TableColumn {
     string name = 1;
     DataType type = 2;
     repeated DataType convertibleTypes = 3; // types that this column can be converted to
-    repeated string firstEntries = 4;
   }
   
 message GetTabularDatasetColumnRequest {

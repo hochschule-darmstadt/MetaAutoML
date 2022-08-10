@@ -53,6 +53,8 @@ service ControllerService {
   rpc GetModel(GetModelRequest) returns (GetModelResponse) {}
   /*return all information fields of an object*/
   rpc GetObjectsInformation(GetObjectsInformationRequest) returns (GetObjectsInformationResponse) {}
+  /*return overview information for home page*/
+  rpc GetHomeOverviewInformation(GetHomeOverviewInformationRequest) returns (GetHomeOverviewInformationResponse) {}
   /*upload a new dataset file as bytes to the controller repository*/
   rpc UploadDatasetFile(UploadDatasetFileRequest) returns (UploadDatasetFileResponse) {}
   /*start a new AutoML run, using the provided configuration*/

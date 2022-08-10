@@ -160,6 +160,14 @@
                     AcceptedFileType = ".zip";
                     IsSelectFileDisabled = false;
                     break;
+                case ":text":
+                    AcceptedFileType = ".csv";
+                    IsSelectFileDisabled = false;
+                    break;
+                case ":time_series":
+                    AcceptedFileType = ".csv";
+                    IsSelectFileDisabled = false;
+                    break;
             }
         }
         fileUploader.UploadFile.DatasetType = (string)value;

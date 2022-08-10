@@ -16,18 +16,6 @@ namespace BlazorBoilerplate.Shared.Dto.Dataset
             Columns = new List<ColumnsDto>();
             RowContent = new List<List<string>>();
         }
-        public void ConvertColumnsToRows()
-        {
-            for (int b = 0; b < Columns[0].FirstEntries.Count; b++)
-            {
-                List<string> row = new List<string>();
-                for (int i = 0; i < Columns.Count; i++)
-                {
-                    row.Add(Columns[i].FirstEntries[b]);
-                }
-                RowContent.Add(row);
-            }
-        }
     }
 
     public class ColumnsDto
@@ -36,6 +24,5 @@ namespace BlazorBoilerplate.Shared.Dto.Dataset
         public string Name { get; set; }
         public Server.DataType Type { get; set; }
         public List<Server.DataType> ConvertibleTypes { get; set; }
-        public List<string> FirstEntries { get; set; }
     }
 }

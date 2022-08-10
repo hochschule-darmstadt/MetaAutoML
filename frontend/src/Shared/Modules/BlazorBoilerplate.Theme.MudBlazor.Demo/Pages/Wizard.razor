@@ -48,6 +48,16 @@ else
                 </MuddyWizardPanel>
             </MuddyWizard>
             break;
+        case ":text":
+            <MuddyWizard WizardFinished="@OnWizardFinished">
+                <MuddyWizardPanel Title="Dataset preparation" >
+                    <PrepareTextDataset Dataset="@_dataset" @bind-StartAutoMlRequest="@_automlRequest" />
+                </MuddyWizardPanel>
+                <MuddyWizardPanel Title="Configuration">
+                    <TaskConfiguration Dataset="@_dataset" @bind-StartAutoMlRequest="@_automlRequest" />
+                </MuddyWizardPanel>
+            </MuddyWizard>
+            break;
     }
 }
 

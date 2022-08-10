@@ -167,6 +167,12 @@ namespace BlazorBoilerplate.Server.Managers
                             }
                         }
                         break;
+                    case ":text":
+                        response.DatasetPreview = File.ReadAllText(datasetLocation.Replace(".csv", "_preview.csv"));
+                        break;
+                    case ":time_series":
+                        response.DatasetPreview = File.ReadAllText(datasetLocation.Replace(".csv", "_preview.csv"));
+                        break;
                     default:
                         break;
                 }
@@ -239,10 +245,8 @@ namespace BlazorBoilerplate.Server.Managers
                         Name = item.Name,
                         Type = item.Type,
                         ConvertibleTypes = item.ConvertibleTypes.ToList(),
-                        FirstEntries = item.FirstEntries.ToList()
                     });
                 }
-                response.ConvertColumnsToRows();
                 return new ApiResponse(Status200OK, null, response);
 
             }

@@ -194,8 +194,8 @@ class DataStorage:
             #remove .zip suffix of filename and path
             filename_dest = filename_dest.replace(".zip", "")
             fileName = fileName.replace(".zip", "")
-        if type == ":tabular":
-            #generate preview of tabular dataset
+        if type == ":tabular" or type == ":text" or type == ":time_series":
+            #generate preview of tabular and text dataset
             previewDf = pd.read_csv(filename_dest)
             previewDf.head(50).to_csv(filename_dest.replace(".csv", "_preview.csv"), index=False)
 

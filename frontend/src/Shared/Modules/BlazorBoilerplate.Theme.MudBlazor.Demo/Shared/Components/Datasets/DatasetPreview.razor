@@ -29,6 +29,12 @@
                     case ":image":
                         <ImagePreview Dataset="_imageDataset" />
                         break;
+                    case ":text":
+                        <TextPreview Dataset="_textDataset" />
+                        break;
+                    case ":time_series":
+                        <TimeSeriesPreview Dataset="_timeSeriesDataset" />
+                        break;
                     default:
                         break;
                 }
@@ -60,6 +66,8 @@
     private bool isPreviewRequestRunning = false;
     private DataFrame _tabularDataset;
     private List<ImagePreviewDto> _imageDataset;
+    private DataFrame _textDataset;
+    private DataFrame _timeSeriesDataset;
 
     private async Task LoadDatasetPreview()
     {
@@ -88,6 +96,12 @@
                     case ":image":
                         _imageDataset = _datasetPreview.DatasetPreview.ToObject<List<ImagePreviewDto>>();
                         break;
+                    case ":text":
+                        _textDataset = DataFrame.LoadCsvFromString(_datasetPreview.DatasetPreview);
+                        break;
+                    case ":time_series":
+                        _timeSeriesDataset = DataFrame.LoadCsvFromString(_datasetPreview.DatasetPreview);
+                        break;
                     default:
                         break;
                 }
@@ -105,4 +119,47 @@
         }
         isPreviewRequestRunning = false;
     }
+
+    //private Frame<int,string> ConvertCSVStringToFrame(string csvString)
+    //{
+    //    Frame<int,string> frame;
+    //    using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(csvString)))
+    //    {
+    //        using (var reader = new StreamReader(stream))
+    //        {
+    //            frame = Frame.ReadCsv(stream, separators:";", culture:"us-US");
+    //        }
+    //    }
+    //    return frame;
+    //}
+
+    //private DataTable ConvertCSVStringToDataTable(string csvString)
+    //{
+    //    var table = new DataTable();
+
+    //    using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(csvString)))
+    //    {
+    //        using (var reader = new StreamReader(stream))
+    //        {
+    //            string header = reader.ReadLine();
+    //            var fields = header.Split(";");
+    //            foreach (string column in fields)
+    //            {
+    //                // add columns to new datatable based on first row of csv
+    //                table.Columns.Add(column);
+    //            }
+
+    //            string row = reader.ReadLine();
+    //            // read to end
+    //            while (row != null)
+    //            {
+    //                // add each row to datatable 
+    //                var rowDatas = row.Split(";");
+    //                table.Rows.Add(rowDatas);
+    //                row = reader.ReadLine();
+    //            }
+    //        }
+    //    }
+    //    return table;
+    //}
 }

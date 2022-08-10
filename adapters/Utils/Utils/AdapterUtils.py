@@ -139,6 +139,8 @@ def data_loader(config):
         return read_image_dataset(config)
     elif config["task"] == ":image_regression":
         return read_image_dataset(config)
+    elif config["task"] == ":text_classification":
+        return read_tabular_dataset_training_data(config)
 
     return train_data, test_data
 
@@ -359,8 +361,7 @@ def read_tabular_dataset_training_data(json_configuration):
     """
     Read the training dataset from disk
     """
-    data = pd.read_csv(os.path.join(json_configuration["file_location"], json_configuration["file_name"]),
-                    **json_configuration["file_configuration"])
+    data = pd.read_csv(os.path.join(json_configuration["file_location"], json_configuration["file_name"]), **json_configuration["file_configuration"])
 
     # convert all object columns to categories, because autosklearn only supports numerical,
     # bool and categorical features

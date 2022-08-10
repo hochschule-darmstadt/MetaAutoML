@@ -58,24 +58,24 @@ class CsvManager:
         Return DataType.DATATYPE of the passed value + List of convertible datatypes
         """
         if numpy_datatype == np.dtype(np.object):
-            if column.nunique() < column.size/10:
-                if column.nunique() <= 2:
-                    return DataType.DATATYPE_BOOLEAN, [DataType.DATATYPE_IGNORE,
-                                                             DataType.DATATYPE_CATEGORY]
-                return DataType.DATATYPE_CATEGORY, [DataType.DATATYPE_IGNORE]
-            return DataType.DATATYPE_IGNORE, [DataType.DATATYPE_CATEGORY]
+            #if column.nunique() < column.size/10:
+            #    if column.nunique() <= 2:
+            #        return DataType.DATATYPE_BOOLEAN, [DataType.DATATYPE_IGNORE,
+            #                                                 DataType.DATATYPE_CATEGORY]
+            #    return DataType.DATATYPE_CATEGORY, [DataType.DATATYPE_IGNORE]
+            return DataType.DATATYPE_STRING, [DataType.DATATYPE_CATEGORY, DataType.DATATYPE_IGNORE]
         elif numpy_datatype == np.dtype(np.unicode_):
-            return DataType.DATATYPE_STRING
+            return DataType.DATATYPE_STRING, [DataType.DATATYPE_CATEGORY, DataType.DATATYPE_IGNORE]
         elif numpy_datatype == np.dtype(np.int64):
             if "id" in str.lower(str(column.name)) and column.nunique() == column.size:
-                return DataType.DATATYPE_IGNORE, []
+                return DataType.DATATYPE_INT, [DataType.DATATYPE_CATEGORY, DataType.DATATYPE_IGNORE]
             elif column.nunique() <= 2:
                 return DataType.DATATYPE_BOOLEAN, [DataType.DATATYPE_IGNORE,
                                                          DataType.DATATYPE_CATEGORY,
                                                          DataType.DATATYPE_INT]
-            if column.nunique() < 10:
-                return DataType.DATATYPE_CATEGORY, [DataType.DATATYPE_IGNORE,
-                                                          DataType.DATATYPE_INT]
+            #if column.nunique() < 10:
+            #    return DataType.DATATYPE_CATEGORY, [DataType.DATATYPE_IGNORE,
+            #                                              DataType.DATATYPE_INT]
             return DataType.DATATYPE_INT, [DataType.DATATYPE_IGNORE,
                                                  DataType.DATATYPE_CATEGORY]
         elif numpy_datatype == np.dtype(np.float_):
@@ -117,9 +117,6 @@ class CsvManager:
             table_column.type = datatype
             for convertible_type in convertible_types:
                 table_column.convertible_types.append(convertible_type)
-
-            for item in dataset[col].head(FIRST_ROW_AMOUNT).tolist():
-                table_column.first_entries.append(str(item))
 
             response.columns.append(table_column)
         return response
