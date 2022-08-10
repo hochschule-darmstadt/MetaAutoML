@@ -1,0 +1,29 @@
+﻿
+@if (Dataset == null)
+{
+        <DataLoaderSpinner />
+}
+else
+{
+    <MudTable Items="@Dataset.Head(2).Rows" style="width:stretch" class="mat-elevation-z5" FixedHeader="true" Height="250px" Dense="true" >
+        <HeaderContent>
+            @foreach (var item in Dataset.Columns)
+            {
+                <MudTh>@item.Name</MudTh>
+            }
+            <MudTh></MudTh>   
+        </HeaderContent>
+        <RowTemplate>
+            @foreach (var item in context)
+            {
+                <MudTd>@item</MudTd>
+            }
+        </RowTemplate>
+    </MudTable>
+}
+
+@code {
+    [Parameter]
+    public DataFrame Dataset { get; set; }
+    private string searchString = "";
+}

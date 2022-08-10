@@ -143,6 +143,8 @@ def data_loader(config):
         return read_image_dataset(config)
     elif config["task"] == ":image_regression":
         return read_image_dataset(config)
+    elif config["task"] == ":text_classification":
+        return read_tabular_dataset_training_data(config)
     elif config["task"] == ":time_series_classification":
         return read_longitudinal_dataset(config)
 
@@ -328,7 +330,6 @@ def predict(data, config_json, config_path):
     else:
         file_path = os.path.join(result_folder_location, "test.csv")
 
-
     with open(file_path, "w+") as f:
         f.write(data)
 
@@ -344,7 +345,7 @@ def predict(data, config_json, config_path):
     os.remove(file_path)
     os.remove(os.path.join(result_folder_location, "predictions.csv"))
 
-
+    
     return 0, predict_time, predictions["predicted"].astype('string').tolist()
 
 def SetupRunNewRunEnvironment(configuration):
@@ -387,7 +388,7 @@ def SetupRunNewRunEnvironment(configuration):
     #Save job file
     with open(os.path.join(job_folder_location, get_config_property("job-file-name")), "w+") as f:
         json.dump(config_json, f)
-
+        
     return config_json
 
 #endregion
@@ -416,8 +417,7 @@ def read_tabular_dataset_training_data(json_configuration):
     """
     Read the training dataset from disk
     """
-    data = pd.read_csv(os.path.join(json_configuration["file_location"], json_configuration["file_name"]),
-                    **json_configuration["file_configuration"])
+    data = pd.read_csv(os.path.join(json_configuration["file_location"], json_configuration["file_name"]), **json_configuration["file_configuration"])
 
     # convert all object columns to categories, because autosklearn only supports numerical,
     # bool and categorical features
@@ -523,7 +523,7 @@ def read_image_dataset(json_configuration):
     X_test = np.array([img_preprocess(p) for p in test_data.name.values])
     y_test = test_data.outcome.values
     return X_train, y_train, X_test, y_test
-
+    
 #endregion
 
 ######################################################################

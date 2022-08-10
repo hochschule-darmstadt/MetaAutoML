@@ -27,7 +27,7 @@
             </MudCardHeader>
             <MudCardContent>
                 <MudPaper Height="100px" Elevation="0">
-                    @if (true)
+                    @if (_overviewInfos == null)
                     {
                         <DataLoaderSpinner />
                     }
@@ -35,12 +35,16 @@
                     {
                         <MudGrid>
                             <MudItem xs="3" sm="3" md="3">
+                                <MudText Typo="Typo.body2">My datasets: @_overviewInfos.TotalDatasetAmount</MudText>
                             </MudItem>
                             <MudItem xs="3" sm="3" md="3">
+                                <MudText Typo="Typo.body2">My trainings: @_overviewInfos.TotalTrainingAmount</MudText>
                             </MudItem>
                             <MudItem xs="3" sm="3" md="3">
+                                <MudText Typo="Typo.body2">My models: @_overviewInfos.TotalModelAmount</MudText>
                             </MudItem>
                             <MudItem xs="3" sm="3" md="3">
+                                <MudText Typo="Typo.body2">Executing trainings: @_overviewInfos.RunningTrainingAmount</MudText>
                             </MudItem>
                         </MudGrid>
                     }
@@ -59,6 +63,7 @@
 @code {
     private GetAllTrainingsResponseDto _trainings;
     private GetDatasetsResponseDto _datasets;
+    private GetHomeOverviewInformationResponseDto _overviewInfos;
 
     protected override async Task OnInitializedAsync()
     {
@@ -106,6 +111,28 @@
             if (apiResponse.IsSuccessStatusCode)
             {
                 _datasets = Newtonsoft.Json.JsonConvert.DeserializeObject<GetDatasetsResponseDto>(apiResponse.Result.ToString());
+                await LoadOverviewInformation();
+            }
+            else
+            {
+                viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
+            }
+        }
+        catch (Exception ex)
+        {
+            viewNotifier.Show(ex.GetBaseException().Message, ViewNotifierType.Error, L["Operation Failed"]);
+        }
+    }
+    private async Task LoadOverviewInformation()
+    {
+        try
+        {
+            ApiResponseDto
+            apiResponse = await apiClient.GetHomeOverviewInformation();
+
+            if (apiResponse.IsSuccessStatusCode)
+            {
+                _overviewInfos = Newtonsoft.Json.JsonConvert.DeserializeObject<GetHomeOverviewInformationResponseDto>(apiResponse.Result.ToString());
                 viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
             }
             else

@@ -159,6 +159,7 @@ namespace BlazorBoilerplate.Server
             services.AddTransient<ICacheManager, CacheManager>();
             services.AddTransient<IModelManager, ModelManager>();
             services.AddScoped<IFileUploader, FileUploader>();
+            services.AddScoped<IGeneralInformation, GeneralInformationManager>();
 
 
             var authAuthority = Configuration[$"{projectName}:IS4ApplicationUrl"].TrimEnd('/');

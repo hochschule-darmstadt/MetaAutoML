@@ -334,6 +334,23 @@ class ControllerManager(object):
         print("GET OBJECT INFOS TRIGGERED")
         return self.__rdfManager.GetObjectsInformation(request)
 
+    def GetHomeOverviewInformation(self, request: "GetHomeOverviewInformationRequest") -> "GetHomeOverviewInformationResponse":
+        """
+        Get all information for the home information page
+        ---
+        Parameter
+        1. user id
+        ---
+        Return home information to display
+        """
+        response = GetHomeOverviewInformationResponse()
+        response.dataset_amount = len(self.__data_storage.GetDatasets(request.user))
+        response.model_amount = len(self.__data_storage.GetModels(request.user))
+        response.training_amount = len(self.__data_storage.GetTrainings(request.user))
+        response.running_training_amount = len([t for t in self.__data_storage.GetTrainings(request.user) if t["status"] == "busy"])
+        return response
+
+
     def GetModels(self, request: "GetModelsRequest") -> "GetModelsResponse":
         """
         Get all models, or optinally get top 3 models for a dataset

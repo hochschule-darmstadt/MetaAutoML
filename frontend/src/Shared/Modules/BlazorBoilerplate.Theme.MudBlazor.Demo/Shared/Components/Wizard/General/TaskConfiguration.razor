@@ -6,7 +6,9 @@
 <MudStack>
     @switch (Dataset.Type.ID)
     {
+        case ":text":
         case ":tabular":
+        case ":time_series_forecasting":
             <MudTimeline TimelineOrientation="@TimelineOrientation.Horizontal" TimelinePosition="@TimelinePosition.Bottom">
                 <MudTimelineItem>
                     <MudText Align="Align.Center" Typo="Typo.body2">Dataset preparation</MudText>
@@ -39,7 +41,7 @@
         <DataLoaderSpinner />
     }
 
-    @if (StartAutoMlRequest.DatasetType == ":tabular")
+    @if ((StartAutoMlRequest.DatasetType == ":tabular") || (StartAutoMlRequest.DatasetType == ":text") || (StartAutoMlRequest.DatasetType == ":time_series_forecasting"))
     {
         <MudSelect Label="Target" T="string" ValueChanged="@OnTargetChanged">
             @if (_columnNames != null)
@@ -147,7 +149,7 @@
     private async void SetupStartAutoMLConfiguration()
     {
         _columnNames = new List<string>();
-        if (StartAutoMlRequest.DatasetType == ":tabular")
+        if ((StartAutoMlRequest.DatasetType == ":tabular")|| (StartAutoMlRequest.DatasetType == ":text"))
         {
             foreach (KeyValuePair<string, dynamic> pair in StartAutoMlRequest.DatasetConfiguration["features"])
             {

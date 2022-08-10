@@ -1,5 +1,5 @@
 import os
-
+import numpy as np
 import autokeras as ak
 import tensorflow as tf
 from AbstractAdapter import AbstractAdapter
@@ -31,6 +31,10 @@ class AutoKerasAdapter(AbstractAdapter):
                 self.__image_classification()
             elif self._configuration["task"] == ":image_regression":
                 self.__image_regression()
+            elif self._configuration["task"] == ":text_classification":
+                self.__text_classification()
+            elif self._configuration["task"] == ":text_regression":
+                self.__text_regression()
 
     def __tabular_classification(self):
         """Execute the classification task"""
@@ -90,5 +94,37 @@ class AutoKerasAdapter(AbstractAdapter):
                                 directory=self._configuration["model_folder_location"])
                                 
         reg.fit(x = X_train, y = y_train)
+
+        export_model(reg, self._configuration["result_folder_location"], 'model_keras.p')
+
+    def __text_classification(self):
+        """Execute image regression task"""
+
+        self.df, test = data_loader(self._configuration)
+        X, y = prepare_tabular_dataset(self.df, self._configuration)
+
+        reg = ak.TextClassifier(overwrite=True, 
+                                max_trials=self._configuration["runtime_constraints"]["max_iter"],
+                                # metric=self._configuration['metric'],
+                                seed=42,
+                                directory=self._configuration["model_folder_location"])
+                                
+        reg.fit(x = np.array(X), y = np.array(y))
+
+        export_model(reg, self._configuration["result_folder_location"], 'model_keras.p')
+
+    def __text_regression(self):
+        """Execute image regression task"""
+
+        self.df, test = data_loader(self._configuration)
+        X, y = prepare_tabular_dataset(self.df, self._configuration)
+
+        reg = ak.TextClassifier(overwrite=True, 
+                                max_trials=self._configuration["runtime_constraints"]["max_iter"],
+                                # metric=self._configuration['metric'],
+                                seed=42,
+                                directory=self._configuration["model_folder_location"])
+                                
+        reg.fit(x = np.array(X), y = np.array(y))
 
         export_model(reg, self._configuration["result_folder_location"], 'model_keras.p')

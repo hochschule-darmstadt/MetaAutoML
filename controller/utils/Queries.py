@@ -38,7 +38,8 @@ ONTOLOGY_QUERY_GET_TASKS_FOR_DATASET_TYPE = """
             SELECT ?task
             WHERE {
             ?task a :ML_task ;
-                       :has_dataset_type ?dataset_type .
+                        :has_dataset_type ?dataset_type ;
+                        :supported_by_oma_ml "True" .
             }
             """
             
@@ -49,7 +50,7 @@ ONTOLOGY_QUERY_GET_DATASET_TYPES = """
             WHERE {
                     ?type a :Enum ;
                             :category ?dataset_type ;
-                            :supported_by_oma_ml "true" .
+                            :supported_by_oma_ml "True" .
             } 
             """
 

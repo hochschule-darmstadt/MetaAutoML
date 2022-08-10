@@ -149,6 +149,13 @@ class ControllerService(ControllerServiceBase):
         response = self._controllerManager.GetObjectsInformation(get_object_information_request)
         return response
 
+    async def get_home_overview_information(
+        self, get_home_overview_information_request: "GetHomeOverviewInformationRequest"
+    ) -> "GetHomeOverviewInformationResponse":
+        """return overview information for home page"""
+        response = self._controllerManager.GetHomeOverviewInformation(get_home_overview_information_request)
+        return response
+
     async def get_models(
         self, get_models_request: "GetModelsRequest"
     ) -> "GetModelsResponse":

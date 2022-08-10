@@ -92,6 +92,19 @@ class ObjectInformation(betterproto.Message):
 
 
 @dataclass(eq=False, repr=False)
+class GetHomeOverviewInformationRequest(betterproto.Message):
+    user: str = betterproto.string_field(1)
+
+
+@dataclass(eq=False, repr=False)
+class GetHomeOverviewInformationResponse(betterproto.Message):
+    dataset_amount: int = betterproto.int32_field(1)
+    training_amount: int = betterproto.int32_field(2)
+    model_amount: int = betterproto.int32_field(3)
+    running_training_amount: int = betterproto.int32_field(4)
+
+
+@dataclass(eq=False, repr=False)
 class GetDatasetTypesRequest(betterproto.Message):
     pass
 
@@ -139,7 +152,6 @@ class TableColumn(betterproto.Message):
     name: str = betterproto.string_field(1)
     type: "DataType" = betterproto.enum_field(2)
     convertible_types: List["DataType"] = betterproto.enum_field(3)
-    first_entries: List[str] = betterproto.string_field(4)
 
 
 @dataclass(eq=False, repr=False)
@@ -596,6 +608,22 @@ class ControllerServiceStub(betterproto.ServiceStub):
             metadata=metadata,
         )
 
+    async def get_home_overview_information(
+        self,
+        get_home_overview_information_request: "GetHomeOverviewInformationRequest",
+        timeout: Optional[float] = None,
+        deadline: Optional["Deadline"] = None,
+        metadata: Optional["_MetadataLike"] = None,
+    ) -> "GetHomeOverviewInformationResponse":
+        return await self._unary_unary(
+            "/ControllerService/GetHomeOverviewInformation",
+            get_home_overview_information_request,
+            GetHomeOverviewInformationResponse,
+            timeout=timeout,
+            deadline=deadline,
+            metadata=metadata,
+        )
+
     async def upload_dataset_file(
         self,
         upload_dataset_file_request: "UploadDatasetFileRequest",
@@ -722,6 +750,11 @@ class ControllerServiceBase(ServiceBase):
     ) -> "GetObjectsInformationResponse":
         raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
 
+    async def get_home_overview_information(
+        self, get_home_overview_information_request: "GetHomeOverviewInformationRequest"
+    ) -> "GetHomeOverviewInformationResponse":
+        raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
+
     async def upload_dataset_file(
         self, upload_dataset_file_request: "UploadDatasetFileRequest"
     ) -> "UploadDatasetFileResponse":
@@ -820,6 +853,13 @@ class ControllerServiceBase(ServiceBase):
     ) -> None:
         request = await stream.recv_message()
         response = await self.get_objects_information(request)
+        await stream.send_message(response)
+
+    async def __rpc_get_home_overview_information(
+        self, stream: grpclib.server.Stream
+    ) -> None:
+        request = await stream.recv_message()
+        response = await self.get_home_overview_information(request)
         await stream.send_message(response)
 
     async def __rpc_upload_dataset_file(self, stream: grpclib.server.Stream) -> None:
@@ -928,6 +968,12 @@ class ControllerServiceBase(ServiceBase):
                 grpclib.const.Cardinality.UNARY_UNARY,
                 GetObjectsInformationRequest,
                 GetObjectsInformationResponse,
+            ),
+            "/ControllerService/GetHomeOverviewInformation": grpclib.const.Handler(
+                self.__rpc_get_home_overview_information,
+                grpclib.const.Cardinality.UNARY_UNARY,
+                GetHomeOverviewInformationRequest,
+                GetHomeOverviewInformationResponse,
             ),
             "/ControllerService/UploadDatasetFile": grpclib.const.Handler(
                 self.__rpc_upload_dataset_file,

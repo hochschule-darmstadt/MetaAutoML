@@ -19,10 +19,10 @@ else
             </MudTimelineItem>
         </MudTimeline>
         
-        <MudTable Items="@_tabularDataset.Head(50).Rows" style="width:stretch" class="mat-elevation-z5" FixedHeader="true" CustomHeader="true">
+        <MudTable Items="@_textDataset.Head(50).Rows" style="width:stretch" class="mat-elevation-z5" FixedHeader="true" CustomHeader="true">
             <HeaderContent>
                 <MudTHeadRow>
-                    @foreach (var item in _tabularDataset.Columns)
+                    @foreach (var item in _textDataset.Columns)
                     {
                         <MudTh>@item.Name</MudTh>
                     }
@@ -65,7 +65,7 @@ else
     [Parameter]
     public EventCallback<StartAutoMLRequestDto> StartAutoMlRequestChanged { get; set; }
     private bool isPreviewRequestRunning = false;
-    private DataFrame _tabularDataset;
+    private DataFrame _textDataset;
     private GetDatasetPreviewResponseDto _datasetPreview;
 
     async Task UpdateStartAutoMlRequest()
@@ -173,7 +173,7 @@ else
 
                     }
                 }).ToList();
-                _tabularDataset = DataFrame.LoadCsvFromString(_datasetPreview.DatasetPreview,columnNames:columnNames.ToArray(), dataTypes:columnTypes.ToArray());
+                _textDataset = DataFrame.LoadCsvFromString(_datasetPreview.DatasetPreview,columnNames:columnNames.ToArray(), dataTypes:columnTypes.ToArray());
                 StateHasChanged();
                 viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
             }
