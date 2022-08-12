@@ -26,6 +26,11 @@ class AdapterServiceStub(object):
                 request_serializer=Adapter__pb2.TestAdapterRequest.SerializeToString,
                 response_deserializer=Adapter__pb2.TestAdapterResponse.FromString,
                 )
+        self.ExplainModel = channel.unary_unary(
+                '/AdapterService/ExplainModel',
+                request_serializer=Adapter__pb2.ExplainModelRequest.SerializeToString,
+                response_deserializer=Adapter__pb2.ExplainModelResponse.FromString,
+                )
 
 
 class AdapterServiceServicer(object):
@@ -47,6 +52,12 @@ class AdapterServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def ExplainModel(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_AdapterServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -59,6 +70,11 @@ def add_AdapterServiceServicer_to_server(servicer, server):
                     servicer.TestAdapter,
                     request_deserializer=Adapter__pb2.TestAdapterRequest.FromString,
                     response_serializer=Adapter__pb2.TestAdapterResponse.SerializeToString,
+            ),
+            'ExplainModel': grpc.unary_unary_rpc_method_handler(
+                    servicer.ExplainModel,
+                    request_deserializer=Adapter__pb2.ExplainModelRequest.FromString,
+                    response_serializer=Adapter__pb2.ExplainModelResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -103,5 +119,22 @@ class AdapterService(object):
         return grpc.experimental.unary_unary(request, target, '/AdapterService/TestAdapter',
             Adapter__pb2.TestAdapterRequest.SerializeToString,
             Adapter__pb2.TestAdapterResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def ExplainModel(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/AdapterService/ExplainModel',
+            Adapter__pb2.ExplainModelRequest.SerializeToString,
+            Adapter__pb2.ExplainModelResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

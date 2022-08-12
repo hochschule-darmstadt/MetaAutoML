@@ -104,9 +104,9 @@ class AutoGluonAdapter(AbstractAdapter):
         X_train, y_train, X_test, y_test = data_loader(self._configuration)
         train_data, _, test_data = ImageDataset.from_folders(os.path.join(self._configuration["file_location"], self._configuration["file_name"]), train='train', test='test')
         # Einteilen 
-        #set_hyperparameters={ 
-        #    'batch_size': self._configuration["test_configuration"]["batch_size"], 
-        #    'epochs': self._configuration["runtime_constraints"]["epochs"] 
+        #set_hyperparameters={
+        #    'batch_size': self._configuration["test_configuration"]["batch_size"],
+        #    'epochs': self._configuration["runtime_constraints"]["epochs"]
         #    }
         
         model = ImagePredictor(
@@ -114,7 +114,7 @@ class AutoGluonAdapter(AbstractAdapter):
         
          # Trainieren 
         model.fit(
-            train_data, 
-            #hyperparameters=set_hyperparameters , 
+            train_data,
+            #hyperparameters=set_hyperparameters ,
             time_limit = self._configuration["runtime_constraints"]["runtime_limit"]  ) 
         shutil.copytree(self._result_path, os.path.join(self._configuration["result_folder_location"], "model_gluon.gluon"))

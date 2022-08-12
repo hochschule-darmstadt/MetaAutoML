@@ -13,7 +13,7 @@ from AdapterManager import AdapterManager
 from CsvManager import CsvManager
 from RdfManager import RdfManager
 from persistence.data_storage import DataStorage
-
+from ExplainableAIManager import ExplainableAIManager
 
 class ControllerManager(object):
     """
@@ -31,6 +31,7 @@ class ControllerManager(object):
         self.__data_storage = data_storage
         self.__rdfManager = RdfManager()
         self.__adapterManager = AdapterManager(self.__data_storage)
+        self.__explainableAiManager = ExplainableAIManager(self.__data_storage)
         self.__trainings: dict[str, AutoMLSession] = {}
         return
 
@@ -556,7 +557,21 @@ class ControllerManager(object):
         Parameter
         1. dataset configuration
         ---
-        Return 
-        """ 
+        Return
+        """
         self.__data_storage.UpdateDataset(request.username, request.identifier, { "file_configuration": request.file_configuration })
         return SetDatasetConfigurationResponse()
+
+    def debugExplainAutoML(self):
+        request = TestAutoMlRequest
+        request.username = "720719a2-257e-4347-9ad3-55b57b61cde5"
+        request.model_id = "62e8f2682201aa279fd8dff3"
+        model = self.__data_storage.GetModel(request.username, request.model_id)
+        config = self.__data_storage.GetTraining(request.username, model["training_id"])
+        for modelid in config["models"]:
+            request.model_id = modelid
+            try:
+                self.__explainableAiManager.explain_shap(request=request)
+            except Exception as e:
+                print(e)
+

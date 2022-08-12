@@ -2,6 +2,7 @@ import json
 import logging
 import os
 import shutil
+import pandas as pd
 
 from autogluon.tabular import TabularPredictor
 from autogluon.vision import ImagePredictor, ImageDataset
@@ -49,6 +50,10 @@ class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
     Service provide functionality to execute and interact with the current AutoML process.
     """
 
+    def __init__(self):
+        self._automl = None
+        self._loaded_training_id = None
+
     def StartAutoML(self, request, context):
         """
         Execute a new AutoML run.
@@ -94,6 +99,23 @@ class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
 
         except Exception as e:
             return get_except_response(context, e)
+
+    def ExplainModel(self, request, context):
+        config_json = json.loads(request.processJson)
+        if self._loaded_training_id != config_json["training_id"] or not os.path.exists(os.path.join(get_config_property("output-path"), "working_dir")):
+            self._automl = loadAutoML(config_json)
+            df, test = AutoGluon_data_loader(config_json)
+            self._dataframeX, y = prepare_tabular_dataset(df, config_json)
+            self._loaded_training_id = config_json["training_id"]
+            print("Loaded")
+
+        df = pd.DataFrame(data=json.loads(request.data), columns=self._dataframeX.columns)
+        df = df.astype(dtype=dict(zip(self._dataframeX.columns, self._dataframeX.dtypes.values)))
+        probabilities = json.dumps(self._automl.predict_proba(df).values.tolist())
+        return Adapter_pb2.ExplainModelResponse(probabilities=probabilities)
+
+
+
 
 def serve():
     """
