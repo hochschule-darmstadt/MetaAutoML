@@ -49,5 +49,6 @@ namespace BlazorBoilerplate.Shared.Interfaces
         Task<ApiResponseDto> GetDatasetCompatibleTasks(GetDatasetCompatibleTasksRequestDto dataset);
         Task<ApiResponseDto> TestAutoML(TestAutoMLRequestDto datasetName);
         Task<ApiResponseDto> GetHomeOverviewInformation();
+        Task<ApiResponseDto> SetDatasetConfiguration(SetDatasetFileConfigurationRequestDto dataset);
     }
 }

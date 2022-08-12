@@ -110,6 +110,7 @@ class ControllerManager(object):
                 response_dataset.name = dataset["name"]
                 response_dataset.type = dataset['type']
                 response_dataset.creation_date = datetime.fromtimestamp(int(dataset["mtime"]))
+                response_dataset.file_configuration = dataset["file_configuration"]
                 response.dataset.append(response_dataset)
             except Exception as e:
                 print(f"exception: {e}")
@@ -149,6 +150,7 @@ class ControllerManager(object):
             response_dataset.type = dataset['type']
             response_dataset.creation_date = datetime.fromtimestamp(int(dataset["mtime"]))
             response_dataset.file_name = dataset["file_name"]
+            response_dataset.file_configuration = dataset["file_configuration"]
             response.dataset_infos = response_dataset
         except Exception as e:
             print(f"exception: {e}")
@@ -546,3 +548,15 @@ class ControllerManager(object):
         else:
             response = TestAutoMlResponse()
         return response
+
+    def SetDatasetConfiguration(self, request: "SetDatasetConfigurationRequest") -> "SetDatasetConfigurationResponse":
+        """
+        Persist new dataset configuration in db
+        ---
+        Parameter
+        1. dataset configuration
+        ---
+        Return 
+        """ 
+        self.__data_storage.UpdateDataset(request.username, request.identifier, { "file_configuration": request.file_configuration })
+        return SetDatasetConfigurationResponse()

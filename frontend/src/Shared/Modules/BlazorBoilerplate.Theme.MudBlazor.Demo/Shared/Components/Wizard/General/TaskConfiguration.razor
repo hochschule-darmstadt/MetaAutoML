@@ -41,7 +41,7 @@
         <DataLoaderSpinner />
     }
 
-    @if ((StartAutoMlRequest.DatasetType == ":tabular") || (StartAutoMlRequest.DatasetType == ":text") || (StartAutoMlRequest.DatasetType == ":time_series_forecasting"))
+    @if (((StartAutoMlRequest.DatasetType == ":tabular") || (StartAutoMlRequest.DatasetType == ":text") || (StartAutoMlRequest.DatasetType == ":time_series_forecasting")) && (!string.IsNullOrEmpty(StartAutoMlRequest.Task)))
     {
         <MudSelect Label="Target" T="string" ValueChanged="@OnTargetChanged">
             @if (_columnNames != null)

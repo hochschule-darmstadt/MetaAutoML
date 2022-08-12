@@ -6,7 +6,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Deedle" Version="2.5.0" />
     <PackageReference Include="Google.Protobuf" Version="3.21.2" />
     <PackageReference Include="Grpc.Net.Client" Version="2.47.0" />
     <PackageReference Include="Grpc.Net.ClientFactory" Version="2.47.0" />

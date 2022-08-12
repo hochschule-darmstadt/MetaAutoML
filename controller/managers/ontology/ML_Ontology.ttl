@@ -1,5 +1,5 @@
 ### Ontology file generated from ML_Ontology.xlsx.
-### 2022-08-09 16:53:19.402719
+### 2022-08-10 14:26:46.133567
 
 
 # PREFIXES
@@ -323,7 +323,7 @@
 :time_series_forecasting a :ML_task ;
     skos:prefLabel "time series forecasting" ;
     :belongs_to :supervised_learning ;
-    :has_dataset_type :tabular ;
+    :has_dataset_type :time_series ;
     rdfs:comment "The prediction of events through a sequenc of time" ;
     :supported_by_oma_ml "True" .
 :topic_modeling a :ML_task ;

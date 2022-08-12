@@ -19,7 +19,7 @@
         }
         else
         {
-            <MudTable Items="@_trainings.Trainings" style="width:stretch" class="mat-elevation-z5" AllowSelection="false" Dense="true" Filter="new Func<GetTrainingResponseDto,bool>(FilterFunc)">
+            <MudTable Items="@_trainings.Trainings" style="width:stretch" class="mat-elevation-z5" AllowSelection="false" Filter="new Func<GetTrainingResponseDto,bool>(FilterFunc)">
                 <ToolBarContent>
                     <MudSpacer />
                     <MudTextField @bind-Value="searchString" Placeholder="Search" Adornment="Adornment.Start"

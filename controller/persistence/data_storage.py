@@ -170,7 +170,8 @@ class DataStorage:
             "path": "",
             "size": "",
             "mtime": "",
-            "file_name" : ""
+            "file_name" : "",
+            "file_configuration": ""
         }
         
         dataset_id = self.__mongo.InsertDataset(username, database_content)
@@ -185,7 +186,7 @@ class DataStorage:
         os.makedirs(os.path.dirname(filename_dest), exist_ok=True)
         #Copy dataset into final folder
         shutil.move(upload_file, filename_dest)
-
+        fileConfiguration = ""
         #unpack zip file for image files
         if type == ":image":
             shutil.unpack_archive(filename_dest, os.path.join(self.__storage_dir, username, dataset_id))
@@ -196,8 +197,18 @@ class DataStorage:
             fileName = fileName.replace(".zip", "")
         if type == ":tabular" or type == ":text" or type == ":time_series":
             #generate preview of tabular and text dataset
-            previewDf = pd.read_csv(filename_dest)
-            previewDf.head(50).to_csv(filename_dest.replace(".csv", "_preview.csv"), index=False)
+            #previewDf = pd.read_csv(filename_dest)
+            #previewDf.head(50).to_csv(filename_dest.replace(".csv", "_preview.csv"), index=False)
+            #causes error with different delimiters use normal string division
+            with open(filename_dest) as file:
+                lines = file.readlines()
+            with open(filename_dest.replace(".csv", "_preview.csv"), "x") as preview:
+                preview_line = lines[:51]
+                for line in preview_line:
+                    preview.write(line)
+                    #preview.write("\n")
+            fileConfiguration = "{\"use_header\":false,\"start_row\":2,\"delimiter\":\"comma\",\"escape_character\":\"\\\",\"decimal_character\":\".\"}"
+
 
         def get_size(start_path = '.'):
             total_size = 0
@@ -228,7 +239,8 @@ class DataStorage:
             "size": nbytes,
             "mtime": os.path.getmtime(filename_dest),
             "analysis": analysisResult,
-            "file_name" : fileName
+            "file_name" : fileName,
+            "file_configuration": fileConfiguration
         })
         assert success, f"cannot update dataset with id {dataset_id}"
 

@@ -13,21 +13,21 @@
         <Breadcrumbs>
             @if (ListId != null)
             {
-                <Breadcrumb Title="Datasets" Link="/datasets" />
-                <Breadcrumb Title="@("Dataset " + _training.DatasetName)" Link="@("/datasets/" + _model.Model.DatasetId)"/>
-                <Breadcrumb Title="Models" Link="@("/datasets/" + _model.Model.DatasetId + "/models")" />
+                <Breadcrumb Title="Datasets" Link="/datasets" Icon="@Icons.Filled.ListAlt" />
+                <Breadcrumb Title="@("Dataset " + _training.DatasetName)" Link="@("/datasets/" + _model.Model.DatasetId)" Icon="@Icons.Filled.ListAlt"/>
+                <Breadcrumb Title="Models" Link="@("/datasets/" + _model.Model.DatasetId + "/models")" Icon="@Icons.Filled.Lightbulb" />
             }
             else if (TrainingId != null)
             {
-                <Breadcrumb Title="Trainings" Link="/trainings" />
-                <Breadcrumb Title="@(_training.StartTime.ToString("dd/MM/yy HH:mm"))" Link="@("/trainings/" + _training.ID)"/>
+                <Breadcrumb Title="Trainings" Link="/trainings" Icon="@Icons.Filled.ModelTraining" />
+                <Breadcrumb Title="@(_training.StartTime.ToString("dd/MM/yy HH:mm"))" Link="@("/trainings/" + _training.ID)" Icon="@Icons.Filled.ModelTraining"/>
             }
             else if (DatasetId != null)
             {
-                <Breadcrumb Title="Datasets" Link="/datasets" />
-                <Breadcrumb Title="@("Dataset " + _training.DatasetName)" Link="@("/datasets/" + _model.Model.DatasetId)"/>
+                <Breadcrumb Title="Datasets" Link="/datasets" Icon="@Icons.Filled.ListAlt"/>
+                <Breadcrumb Title="@("Dataset " + _training.DatasetName)" Link="@("/datasets/" + _model.Model.DatasetId)" Icon="@Icons.Filled.ListAlt"/>
             }
-            <Breadcrumb Title="@("Model " + _model.Model.Model)" />
+            <Breadcrumb Title="@("Model " + _model.Model.Model)" Icon="@Icons.Filled.Lightbulb" />
         </Breadcrumbs>
     </TopSection>
 }

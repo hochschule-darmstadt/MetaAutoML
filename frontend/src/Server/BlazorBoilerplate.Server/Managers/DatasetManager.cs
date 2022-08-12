@@ -82,6 +82,7 @@ namespace BlazorBoilerplate.Server.Managers
                 response.Analysis = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(reply.DatasetInfos.Analysis);
                 response.Creation_date = reply.DatasetInfos.CreationDate.ToDateTime();
                 response.Identifier = reply.DatasetInfos.Identifier;
+                response.Configuration = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(reply.DatasetInfos.FileConfiguration);
 
                 return new ApiResponse(Status200OK, null, response);
 
@@ -116,7 +117,8 @@ namespace BlazorBoilerplate.Server.Managers
                         Size = item.Size,
                         Analysis = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(item.Analysis),
                         Creation_date = item.CreationDate.ToDateTime(),
-                        Identifier = item.Identifier
+                        Identifier = item.Identifier,
+                        Configuration = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(item.FileConfiguration)
                     });
                 }
                 return new ApiResponse(Status200OK, null, response);
@@ -271,6 +273,15 @@ namespace BlazorBoilerplate.Server.Managers
                 string controllerDatasetPath = Environment.GetEnvironmentVariable("CONTROLLER_DATASET_FOLDER_PATH");
                 var path = Path.Combine(controllerDatasetPath, username, "uploads");
 
+                if (file.ChunkNumber == 1)
+                {
+                    var dir = new DirectoryInfo(path);
+
+                    foreach (var info in dir.GetFiles())
+                    {
+                        info.Delete();
+                    }
+                }
 
                 if (!Directory.Exists(path))
                 {
@@ -300,32 +311,52 @@ namespace BlazorBoilerplate.Server.Managers
             }            
         }
 
-        public async Task<ApiResponse> UploadData(IFormFile file)
+        public async Task<ApiResponse> SetDatasetConfiguration(SetDatasetFileConfigurationRequestDto dataset)
         {
+            SetDatasetFileConfigurationResponseDto response = new SetDatasetFileConfigurationResponseDto();
+            SetDatasetConfigurationRequest request = new SetDatasetConfigurationRequest();
+            var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
             try
             {
-                if (file == null || file.Length == 0)
-                    return new ApiResponse(Status404NotFound, "File not selected");
-                var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
-                string trustedFileNameForDisplay = WebUtility.HtmlEncode(file.FileName);
-                string controllerDatasetPath = Environment.GetEnvironmentVariable("CONTROLLER_DATASET_FOLDER_PATH");
-                var path = Path.Combine(controllerDatasetPath, username, "uploads");
+                request.Username = username;
+                request.Identifier = dataset.DatasetIdentifier;
+                request.FileConfiguration = JsonConvert.SerializeObject(dataset.Configuration);
+                var reply = _client.SetDatasetConfiguration(request);
+                return new ApiResponse(Status200OK, null, response);
 
-                if (!Directory.Exists(path))
-                {
-                    Directory.CreateDirectory(path);
-                }
-
-                await using FileStream fs = new(Path.Combine(path, trustedFileNameForDisplay), FileMode.Create);
-                await file.CopyToAsync(fs);
-
-                return new ApiResponse(Status200OK, null, trustedFileNameForDisplay);
             }
             catch (Exception ex)
             {
-
                 return new ApiResponse(Status404NotFound, ex.Message);
             }
         }
+
+        //public async Task<ApiResponse> UploadData(IFormFile file)
+        //{
+        //    try
+        //    {
+        //        if (file == null || file.Length == 0)
+        //            return new ApiResponse(Status404NotFound, "File not selected");
+        //        var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
+        //        string trustedFileNameForDisplay = WebUtility.HtmlEncode(file.FileName);
+        //        string controllerDatasetPath = Environment.GetEnvironmentVariable("CONTROLLER_DATASET_FOLDER_PATH");
+        //        var path = Path.Combine(controllerDatasetPath, username, "uploads");
+
+        //        if (!Directory.Exists(path))
+        //        {
+        //            Directory.CreateDirectory(path);
+        //        }
+
+        //        await using FileStream fs = new(Path.Combine(path, trustedFileNameForDisplay), FileMode.Create);
+        //        await file.CopyToAsync(fs);
+
+        //        return new ApiResponse(Status200OK, null, trustedFileNameForDisplay);
+        //    }
+        //    catch (Exception ex)
+        //    {
+
+        //        return new ApiResponse(Status404NotFound, ex.Message);
+        //    }
+        //}
     }
 }

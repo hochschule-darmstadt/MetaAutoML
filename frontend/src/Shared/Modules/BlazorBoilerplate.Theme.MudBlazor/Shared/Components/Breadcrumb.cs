@@ -13,6 +13,9 @@ namespace BlazorBoilerplate.Theme.Material.Shared.Components
         [Parameter]
         public string Title { get; set; }
 
+        [Parameter]
+        public string Icon { get; set; }
+
         protected override void OnInitialized()
         {
             Parent.Items.Add(this);
@@ -23,6 +26,6 @@ namespace BlazorBoilerplate.Theme.Material.Shared.Components
             Parent.Items.Remove(this);
         }
 
-        public static Breadcrumb New(string link, string title) => new Breadcrumb { Link = link, Title = title };
+        public static Breadcrumb New(string link, string title, string icon) => new Breadcrumb { Link = link, Title = title, Icon = icon };
     }
 }

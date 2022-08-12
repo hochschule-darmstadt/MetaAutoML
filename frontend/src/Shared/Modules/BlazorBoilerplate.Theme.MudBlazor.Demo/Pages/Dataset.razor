@@ -9,8 +9,8 @@
 {
     <TopSection>
         <Breadcrumbs>
-            <Breadcrumb Title="Datasets" Link="/datasets" />
-            <Breadcrumb Title="@_pageTitle" />
+            <Breadcrumb Title="Datasets" Link="/datasets" Icon="@Icons.Filled.ListAlt" />
+            <Breadcrumb Title="@_pageTitle" Icon="@Icons.Filled.ListAlt" />
         </Breadcrumbs>
     </TopSection>
 }
@@ -70,7 +70,7 @@
         <DatasetAnalysis Dataset="_dataset"/>
     </MudItem>
     <MudItem xs="6" sm="6" md="6">
-        <DatasetPreview Dataset="_dataset" />
+        <DatasetPreviewShort Dataset="_dataset" />
     </MudItem>
 </MudGrid>
 

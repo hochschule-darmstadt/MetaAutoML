@@ -157,5 +157,10 @@ namespace BlazorBoilerplate.Shared.Services
         {
             return await httpClient.GetJsonAsync<ApiResponseDto>("api/GeneralInformation/GetHomeOverviewInformations");
         }
+
+        public async Task<ApiResponseDto> SetDatasetConfiguration(SetDatasetFileConfigurationRequestDto dataset)
+        {
+            return await httpClient.PostJsonAsync<ApiResponseDto>("api/Dataset/SetDatasetConfiguration", dataset);
+        }
     }
 }

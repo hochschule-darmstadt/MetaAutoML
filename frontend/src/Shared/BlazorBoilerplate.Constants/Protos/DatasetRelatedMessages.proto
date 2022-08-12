@@ -29,8 +29,18 @@ message Dataset {
     int64 size = 5;
     string analysis = 6;
     string fileName = 7;
+    string fileConfiguration = 8;
   }
 
+message SetDatasetConfigurationRequest {
+  string username = 1;
+  string identifier = 2;
+  string file_configuration = 3;
+}
+
+message SetDatasetConfigurationResponse {
+
+}
 
 message GetDatasetRequest {
     string username = 1;
