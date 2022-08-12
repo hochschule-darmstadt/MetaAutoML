@@ -2,10 +2,13 @@ import json
 import logging
 import os
 import shutil
+import pandas as pd
 
 from autogluon.tabular import TabularPredictor
 from autogluon.vision import ImagePredictor, ImageDataset
 from concurrent import futures
+
+from sklearn.manifold._t_sne import _joint_probabilities
 
 import Adapter_pb2
 import Adapter_pb2_grpc
@@ -17,10 +20,9 @@ from JsonUtil import get_config_property
 
 from AdapterUtils import *
 
-
-def data_loader(config):
+def AutoGluon_data_loader(config):
     """
-    Get exception message
+    Load data specified in the config file. Specifically tailored to AutoGluon
     ---
     Parameter
     1. config: Job config
@@ -30,37 +32,9 @@ def data_loader(config):
     train_data = None
     test_data = None
 
-    if config["task"] == 1:
+    if config["task"] == ':tabular_classification':
         train_data, test_data = read_tabular_dataset_training_data(config)
-    elif config["task"] == 2:
-        train_data, test_data = read_tabular_dataset_training_data(config)
-    elif config["task"] == 3:
-        train_data, test_data = None
-    elif config["task"] == 4:
-        train_data, test_data = read_image_dataset(config)
-    elif config["task"] == 5:
-        train_data, test_data = read_image_dataset(config)
-
-    return train_data, test_data
-
-
-
-def AutoGluon_data_loader():
-
-    """
-    Get exception message
-    ---
-    Parameter
-    1. config: Job config
-    ---
-    Return job type specific dataset
-    """
-    train_data = None
-    test_data = None
-
-    if config["task"] == 1:
-        train_data, test_data = read_tabular_dataset_training_data(config)
-    elif config["task"] == 2:
+    elif config["task"] == ':tabular_regression':
         train_data, test_data = read_tabular_dataset_training_data(config)
     elif config["task"] == 3:
         train_data, test_data = None
@@ -95,6 +69,28 @@ def read_image_dataset_auto_gluon():
         train_data, val_data, test_data = ImageDataset.from_folders(data_dir)
 
     return train_data, test_data
+
+def loadAutoML(config_json):
+    """
+    Load automl from a past training.
+    This unpacks the zip archive of the finished run, loads the automl and removes the unpacked archive.
+    ---
+    Param config_json: config_json of the run to be loaded. The significant feature is the "training_id"
+    ---
+    Return automl: Loaded automl
+    """
+    # Create dir and unpack archive
+    working_dir = os.path.join(get_config_property("output-path"), "working_dir")
+    shutil.unpack_archive(os.path.join(get_config_property("output-path"),
+                                       str(config_json["training_id"]),
+                                       get_config_property("export-zip-file-name") + ".zip"),
+                          working_dir,
+                          "zip")
+    # Load automl. This is specific to each adapter
+    automl = TabularPredictor.load(os.path.join(working_dir, 'model_gluon.gluon'))
+    # Remove unpacked dir
+    # shutil.rmtree(working_dir)
+    return automl
 
 
 def GetMetaInformations(config_json):
@@ -134,34 +130,42 @@ class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
     Service provide functionality to execute and interact with the current AutoML process.
     """
 
+    def __init__(self):
+        self._automl = None
+        self._loaded_training_id = None
+
     def StartAutoML(self, request, context):
         """
         Execute a new AutoML run.
         """
-        try:
-            start_time = time.time()
-            # saving AutoML configuration JSON
-            config_json = json.loads(request.processJson)
-            job_file_location = os.path.join(get_config_property("job-file-path"),
-                                             get_config_property("job-file-name"))
-            with open(job_file_location, "w+") as f:
-                json.dump(config_json, f)
 
-            process = start_automl_process()
-            yield from capture_process_output(process, start_time, True)
-            generate_script(config_json)
-            output_json = zip_script(config_json["training_id"])
+        start_time = time.time()
+        # saving AutoML configuration JSON
+        config_json = json.loads(request.processJson)
+        job_file_location = os.path.join(get_config_property("job-file-path"),
+                                         get_config_property("job-file-name"))
+        with open(job_file_location, "w+") as f:
+            json.dump(config_json, f)
 
 
-            library, model = GetMetaInformations(config_json)
-            test_score, prediction_time= evaluate(config_json, job_file_location,AutoGluon_data_loader)
-            response = yield from get_response(output_json, start_time, test_score, prediction_time, library, model)
+        process = start_automl_process()
+        yield from capture_process_output(process, start_time, True)
 
-            print(f'{get_config_property("adapter-name")} job finished')
-            return response
+        generate_script(config_json)
+        output_json = zip_script(config_json["training_id"])
 
-        except Exception as e:
+
+        library, model = GetMetaInformations(config_json)
+        test_score, prediction_time = evaluate(config_json, job_file_location, AutoGluon_data_loader)
+        response = yield from get_response(output_json, start_time, test_score, prediction_time, library, model)
+
+        print(f'{get_config_property("adapter-name")} job finished')
+
+        return response
+
+        """        except Exception as e:
             return get_except_response(context, e)
+            """
     
     def TestAdapter(self, request, context):
         try:
@@ -180,6 +184,23 @@ class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
 
         except Exception as e:
             return get_except_response(context, e)
+
+    def ExplainModel(self, request, context):
+        config_json = json.loads(request.processJson)
+        if self._loaded_training_id != config_json["training_id"] or not os.path.exists(os.path.join(get_config_property("output-path"), "working_dir")):
+            self._automl = loadAutoML(config_json)
+            df, test = AutoGluon_data_loader(config_json)
+            self._dataframeX, y = prepare_tabular_dataset(df, config_json)
+            self._loaded_training_id = config_json["training_id"]
+            print("Loaded")
+
+        df = pd.DataFrame(data=json.loads(request.data), columns=self._dataframeX.columns)
+        df = df.astype(dtype=dict(zip(self._dataframeX.columns, self._dataframeX.dtypes.values)))
+        probabilities = json.dumps(self._automl.predict_proba(df).values.tolist())
+        return Adapter_pb2.ExplainModelResponse(probabilities=probabilities)
+
+
+
 
 def serve():
     """

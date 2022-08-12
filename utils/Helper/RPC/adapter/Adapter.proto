@@ -9,6 +9,7 @@ Execute a new AutoML run.
 */
 	rpc StartAutoML(StartAutoMLRequest) returns (stream StartAutoMLResponse) {}
 	rpc TestAdapter(TestAdapterRequest) returns (TestAdapterResponse) {}
+  rpc ExplainModel(ExplainModelRequest) returns (ExplainModelResponse) {}
 }
 
 message TestAdapterRequest {
@@ -43,4 +44,13 @@ enum AdapterReturnCode {
 	ADAPTER_RETURN_CODE_SUCCESS = 1;
 	ADAPTER_RETURN_CODE_STATUS_UPDATE = 2;
 	ADAPTER_RETURN_CODE_ERROR = 100;
+}
+
+message ExplainModelRequest {
+    string data = 1;
+    string processJson = 2;
+}
+
+message ExplainModelResponse {
+    string probabilities = 1;
 }
