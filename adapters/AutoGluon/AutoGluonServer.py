@@ -20,9 +20,14 @@ from AdapterUtils import *
 
 
 def GetMetaInformations(config_json):
-    working_dir = config_json["result_folder_location"]
+    working_dir = os.path.join(get_config_property("output-path"), "working_dir")
+    shutil.unpack_archive(os.path.join(get_config_property("output-path"),
+        str(config_json["training_id"]),
+        get_config_property("export-zip-file-name") + ".zip"),
+        working_dir,
+        "zip")
     # extract additional information from automl
-    automl = TabularPredictor.load(os.path.join(os.path.join(working_dir, 'model_gluon.gluon')))
+    automl = TabularPredictor.load(os.path.join(os.path.join(get_config_property("output-path"), "working_dir"), 'model_gluon.gluon'))
     automl_info = automl._learner.get_info(include_model_info=True)
     librarylist = set()
     model = automl_info['best_model']
@@ -30,16 +35,17 @@ def GetMetaInformations(config_json):
         if model_info == model:
             pass
         elif model_info in ('LightGBM', 'LightGBMXT'):
-            librarylist.add(":lightgbm_lib")
+            librarylist.add("lightgbm")
         elif model_info == 'XGBoost':
-            librarylist.add(":xgboost_lib")
+            librarylist.add("xgboost")
         elif model_info == 'CatBoost':
-            librarylist.add(":catboost_lib")
+            librarylist.add("catboost")
         elif model_info == 'NeuralNetFastAI':
-            librarylist.add(":pytorch_lib")
+            librarylist.add("pytorch")
         else:
-            librarylist.add(":scikit_learn_lib")
+            librarylist.add("sklearn")
     library = " + ".join(librarylist)
+    shutil.rmtree(working_dir)
     return library, model
 
 
@@ -58,27 +64,35 @@ class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
         """
         Execute a new AutoML run.
         """
-        try:
-            start_time = time.time()
-            # saving AutoML configuration JSON
-            config = SetupRunNewRunEnvironment(request.processJson)
 
-            process = start_automl_process(config)
-            yield from capture_process_output(process, start_time, False)
-            generate_script(config)
-            output_json = zip_script(config)
+        start_time = time.time()
+        # saving AutoML configuration JSON
+        config_json = json.loads(request.processJson)
+        job_file_location = os.path.join(get_config_property("job-file-path"),
+                                         get_config_property("job-file-name"))
+        with open(job_file_location, "w+") as f:
+            json.dump(config_json, f)
 
 
-            library, model = GetMetaInformations(config)
-            test_score, prediction_time= evaluate(config, os.path.join(config["job_folder_location"], get_config_property("job-file-name")), data_loader)
-            response = yield from get_response(output_json, start_time, test_score, prediction_time, library, model)
+        process = start_automl_process()
+        yield from capture_process_output(process, start_time, True)
 
-            print(f'{get_config_property("adapter-name")} job finished')
-            return response
+        generate_script(config_json)
+        output_json = zip_script(config_json["training_id"])
 
-        except Exception as e:
+
+        library, model = GetMetaInformations(config_json)
+        test_score, prediction_time = evaluate(config_json, job_file_location, AutoGluon_data_loader)
+        response = yield from get_response(output_json, start_time, test_score, prediction_time, library, model)
+
+        print(f'{get_config_property("adapter-name")} job finished')
+
+        return response
+
+        """        except Exception as e:
             return get_except_response(context, e)
-    
+            """
+
     def TestAdapter(self, request, context):
         try:
             # saving AutoML configuration JSON
@@ -147,6 +161,8 @@ def serve():
 
 
 if __name__ == '__main__':
+    if not os.path.exists('app-data/output/tmp'):
+        os.mkdir('app-data/output/tmp')
     logging.basicConfig()
     serve()
     print('done.')

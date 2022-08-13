@@ -48,7 +48,7 @@ class AutoGluonAdapter(AbstractAdapter):
 
         """
 
-        self._result_path = os.path.join(self._configuration["model_folder_location"], "model_gluon.gluon")
+        self._result_path = os.path.join(os.path.join(get_config_property("output-path"), self._configuration["training_id"]), 'model_gluon.gluon')
         # this only sets the result path tbh.
 
     def start(self):
@@ -77,7 +77,6 @@ class AutoGluonAdapter(AbstractAdapter):
                                  path=self._result_path).fit(
             data,
             time_limit=self._time_limit)
-        shutil.copytree(self._result_path, os.path.join(self._configuration["result_folder_location"], "model_gluon.gluon"))
         #Fit methode already saves the model
 
     def __tabular_regression(self):
@@ -93,7 +92,6 @@ class AutoGluonAdapter(AbstractAdapter):
                                  path=self._result_path).fit(
             data,
             time_limit=self._time_limit)
-        shutil.copytree(self._result_path, os.path.join(self._configuration["result_folder_location"], "model_gluon.gluon"))
         #Fit methode already saves the model
 
     def __image_classification(self):
@@ -101,20 +99,20 @@ class AutoGluonAdapter(AbstractAdapter):
         Execute the classiciation task
         """
         # Daten Laden 
-        X_train, y_train, X_test, y_test = data_loader(self._configuration)
-        train_data, _, test_data = ImageDataset.from_folders(os.path.join(self._configuration["file_location"], self._configuration["file_name"]), train='train', test='test')
+        train , test = data_loader(self._configuration)
+        
         # Einteilen 
-        #set_hyperparameters={
-        #    'batch_size': self._configuration["test_configuration"]["batch_size"],
-        #    'epochs': self._configuration["runtime_constraints"]["epochs"]
-        #    }
+        set_hyperparameters={ 
+            'batch_size': self._configuration["test_configuration"]["batch_size"], 
+            'epochs': self._configuration["runtime_constraints"]["epochs"] 
+            }
         
         model = ImagePredictor(
+            label=self._target,
             path=self._result_path)
         
          # Trainieren 
         model.fit(
-            train_data,
-            #hyperparameters=set_hyperparameters ,
+            train , 
+            hyperparameters=set_hyperparameters , 
             time_limit = self._configuration["runtime_constraints"]["runtime_limit"]  ) 
-        shutil.copytree(self._result_path, os.path.join(self._configuration["result_folder_location"], "model_gluon.gluon"))
