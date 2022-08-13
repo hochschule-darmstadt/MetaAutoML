@@ -319,7 +319,8 @@
     skos:broader :classification ;
     :belongs_to :supervised_learning ;
     :has_dataset_type :longitudinal ;
-    rdfs:comment "Classification of time series" .
+    rdfs:comment "Classification of time series" ;
+    :supported_by_oma_ml "True" .
 :time_series_forecasting a :ML_task ;
     skos:prefLabel "time series forecasting" ;
     :belongs_to :supervised_learning ;
