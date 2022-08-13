@@ -34,8 +34,6 @@ class LongitudinalDataManager:
         df_y = pd.DataFrame(y, columns=[TARGET_COL])
         # Merge the panel data and labels into a single long format pandas dataset
         dataset = df_x.merge(df_y, left_on=INSTANCES_COL, right_index=True)
-        # dataset = load_from_tsfile_to_dataframe(path, return_separate_X_and_y=False)
-        # dataset = dataset.rename(columns={"class_vals": TARGET_COL})
 
         for col in dataset.columns:
             table_column = TableColumn()
@@ -124,10 +122,22 @@ class LongitudinalDataManager:
         ---
         Return the column names as GetTabularDatasetColumnNamesResponse
         """
-        response = GetTabularDatasetColumnNamesResponse()
-        dataset = load_from_tsfile_to_dataframe(path, return_separate_X_and_y=False)
-        dataset = dataset.rename(columns={"class_vals": TARGET_COL})
+        response = GetTabularDatasetColumnResponse()
+        X, y = load_from_tsfile(path)
+        df_x = convert_to(X, to_type=PD_MULTI_INDEX)
+        df_y = pd.DataFrame(y, columns=[TARGET_COL])
+        # Merge the panel data and labels into a single long format pandas dataset
+        dataset = df_x.merge(df_y, left_on=INSTANCES_COL, right_index=True)
 
         for col in dataset.columns:
-            response.columnNames.append(col)
+            table_column = TableColumn()
+            table_column.name = col
+            numpy_datatype = dataset[col].dtype.name
+            datatype, convertible_types = LongitudinalDataManager.__get_datatype(numpy_datatype, dataset[col])
+
+            table_column.type = datatype
+            for convertible_type in convertible_types:
+                table_column.convertible_types.append(convertible_type)
+
+            response.columns.append(table_column)
         return response
