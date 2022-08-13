@@ -24,6 +24,7 @@
                 @switch (_dataset.Type.ID)
                 {
                     case ":tabular":
+                    case ":longitudinal":
                         <TabularPreview Dataset="_tabularDataset" />
                         break;
                     case ":image":
@@ -91,6 +92,7 @@
                 switch (_dataset.Type.ID)
                 {
                     case ":tabular":
+                    case ":longitudinal":
                         _tabularDataset = DataFrame.LoadCsvFromString(_datasetPreview.DatasetPreview);
                         break;
                     case ":image":

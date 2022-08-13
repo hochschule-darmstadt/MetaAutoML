@@ -32,6 +32,7 @@ else
     @switch (_dataset.Type.ID)
     {
         case ":tabular":
+        case ":longitudinal":
             <MuddyWizard WizardFinished="@OnWizardFinished">
                 <MuddyWizardPanel Title="Dataset preparation" >
                     <PrepareTabularDataset Dataset="@_dataset" @bind-StartAutoMlRequest="@_automlRequest" />
@@ -113,6 +114,11 @@ else
                 return;
             }
             if ((_automlRequest.DatasetType == ":tabular") && (_automlRequest.Configuration.ContainsKey("target") == false))
+            {
+                viewNotifier.Show("No target selected", ViewNotifierType.Error, L["Operation Failed"]);
+                return;
+            }
+            if ((_automlRequest.DatasetType == ":longitudinal") && (_automlRequest.Configuration.ContainsKey("target") == false))
             {
                 viewNotifier.Show("No target selected", ViewNotifierType.Error, L["Operation Failed"]);
                 return;

@@ -9,6 +9,7 @@
         case ":text":
         case ":tabular":
         case ":time_series_forecasting":
+        case ":longitudinal":
             <MudTimeline TimelineOrientation="@TimelineOrientation.Horizontal" TimelinePosition="@TimelinePosition.Bottom">
                 <MudTimelineItem>
                     <MudText Align="Align.Center" Typo="Typo.body2">Dataset preparation</MudText>
@@ -41,7 +42,7 @@
         <DataLoaderSpinner />
     }
 
-    @if ((StartAutoMlRequest.DatasetType == ":tabular") || (StartAutoMlRequest.DatasetType == ":text") || (StartAutoMlRequest.DatasetType == ":time_series_forecasting"))
+    @if ((StartAutoMlRequest.DatasetType == ":tabular") || (StartAutoMlRequest.DatasetType == ":text") || (StartAutoMlRequest.DatasetType == ":time_series_forecasting") || (StartAutoMlRequest.DatasetType == ":longitudinal"))
     {
         <MudSelect Label="Target" T="string" ValueChanged="@OnTargetChanged">
             @if (_columnNames != null)
@@ -148,8 +149,8 @@
 
     private async void SetupStartAutoMLConfiguration()
     {
-        _columnNames = new List<string>();
-        if ((StartAutoMlRequest.DatasetType == ":tabular")|| (StartAutoMlRequest.DatasetType == ":text"))
+        _columnNames = new List<string>(); // longitudinal
+        if ((StartAutoMlRequest.DatasetType == ":tabular") || (StartAutoMlRequest.DatasetType == ":text") || (StartAutoMlRequest.DatasetType == ":longitudinal"))
         {
             foreach (KeyValuePair<string, dynamic> pair in StartAutoMlRequest.DatasetConfiguration["features"])
             {
