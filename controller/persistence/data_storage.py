@@ -8,8 +8,10 @@ import os.path
 from persistence.mongo_client import Database
 from bson.objectid import ObjectId
 from DataSetAnalysisManager import DataSetAnalysisManager
+import numpy as np
 import pandas as pd
-from tempfile import NamedTemporaryFile
+from sklearn.model_selection import train_test_split
+from sktime.datasets import write_dataframe_to_tsfile
 from sktime.datasets import load_from_tsfile_to_dataframe
 
 class DataStorage:
@@ -201,17 +203,47 @@ class DataStorage:
             previewDf = pd.read_csv(filename_dest)
             previewDf.head(50).to_csv(filename_dest.replace(".csv", "_preview.csv"), index=False)
         if type == ":longitudinal":
-            tmp_file = NamedTemporaryFile(delete=False)
-            dataset_for_analysis = None
+            TARGET_COL = "target"
+            FIRST_N_ROW = 50
+            FIRST_N_ITEMS = 3
+            SEED = 42
+            df_dict = {}
 
-            try:
-                tmp_file.write(content)
-                tmp_file.seek(0)
-                dataset_for_analysis = load_from_tsfile_to_dataframe(tmp_file.name, return_separate_X_and_y=False)
-            finally:
-                tmp_file.close()
-                os.unlink(tmp_file.name)
-            analysisResult = DataSetAnalysisManager.startLongitudinalDataAnalysis(dataset_for_analysis)
+            df_preview = load_from_tsfile_to_dataframe(filename_dest, return_separate_X_and_y=False)
+            df_preview = df_preview.rename(columns={"class_vals": TARGET_COL})
+
+            index_preview, _ = train_test_split(
+                df_preview.index,
+                train_size=min(len(df_preview), FIRST_N_ROW),
+                random_state=SEED,
+                shuffle=True,
+                stratify=df_preview[TARGET_COL]
+            )
+
+            df_preview = df_preview.loc[index_preview]
+
+            for col in df_preview.columns:
+                # Create a new dictionary key if it doesn't exist
+                if col not in df_dict.keys():
+                    df_dict[col] = []
+                # Extract target values
+                if (col == TARGET_COL):
+                    for item in df_preview[col]:
+                        df_dict[col].append(item)
+                else:
+                    # Extract the first 3 values from each row and
+                    # create a string value, e.g. "[1.9612, 0.9619, 1.0172, ...]"
+                    for item in df_preview[col]:
+                        preview = item.to_list()
+                        preview = preview[0:FIRST_N_ITEMS]
+                        preview = str(preview)
+                        preview = preview.replace("]", ", ...]")
+                        df_dict[col].append(preview)
+
+            # Save the new dataframe as a csv file
+            df_preview_filename = filename_dest.replace(".ts", "_preview.csv")
+            pd.DataFrame(df_dict).to_csv(df_preview_filename, index=False)
+
         def get_size(start_path = '.'):
             total_size = 0
             for dirpath, dirnames, filenames in os.walk(start_path):
@@ -222,15 +254,17 @@ class DataStorage:
                         total_size += os.path.getsize(fp)
 
             return total_size
-        nbytes = get_size(os.path.join(self.__storage_dir, username, dataset_id))
 
+        nbytes = get_size(os.path.join(self.__storage_dir, username, dataset_id))
 
         #Perform analysis for tabular data datasets
         if type == ":tabular":
             dataset_for_analysis = pd.read_csv(filename_dest, engine="python")
             analysisResult = DataSetAnalysisManager.startAnalysis(dataset_for_analysis)
 
-
+        if type == ":longitudinal":
+            dataset_for_analysis = load_from_tsfile_to_dataframe(filename_dest, return_separate_X_and_y=False)
+            analysisResult = DataSetAnalysisManager.startLongitudinalDataAnalysis(dataset_for_analysis)
 
         #if type == ":image":
         #    shutil

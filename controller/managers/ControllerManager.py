@@ -307,7 +307,7 @@ class ControllerManager(object):
         if dataset["type"] == ":tabular":
             return CsvManager.GetColumns(dataset["path"])
         elif dataset["type"] == ":longitudinal":
-            return LongitudinalDataManager.read_column_names(dataset["path"])
+            return LongitudinalDataManager.read_dimension_names(dataset["path"])
 
     def GetDatasetCompatibleTasks(self, request: "GetDatasetCompatibleTasksRequest") -> "GetDatasetCompatibleTasksResponse":
         """
