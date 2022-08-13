@@ -78,7 +78,7 @@ if __name__ == '__main__':
 
     # Load the saved model
     model_path = os.path.join(sys_path_0, 'model_mcfly.p')
-    print('model_path', model_path)
+    print('model_path:', model_path)
 
     print('Loading mcfly model')
     loaded_model = keras.models.load_model(model_path)

@@ -25,7 +25,8 @@ class McflyAdapter(AbstractAdapter):
         1. Configuration JSON of type dictionary
         """
         super(McflyAdapter, self).__init__(configuration)
-        self._result_path = os.path.join(get_config_property("output-path"), self._configuration["session_id"])
+        # self._result_path = os.path.join(get_config_property("output-path"), self._configuration["session_id"])
+        self._result_path = configuration["model_folder_location"]
 
     def start(self):
         """Execute the ML task"""
@@ -81,6 +82,10 @@ class McflyAdapter(AbstractAdapter):
             validation_data=(X_val, y_val_binary),
         )
         # Save the model
-        export_keras_model(best_model, self._configuration["session_id"], 'model_mcfly.p')
+        export_keras_model(best_model,
+                           self._configuration["result_folder_location"],
+                           'model_mcfly.p')
         # Save the One Hot Encoder instance
-        export_one_hot_encoder(one_hot_encoder, self._configuration["session_id"], 'one_hot_encoder_mcfly.p')
+        export_one_hot_encoder(one_hot_encoder,
+                               self._configuration["result_folder_location"],
+                               'one_hot_encoder_mcfly.p')
