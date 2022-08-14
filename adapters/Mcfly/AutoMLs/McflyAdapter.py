@@ -4,7 +4,7 @@ from AbstractAdapter import AbstractAdapter
 from JsonUtil import get_config_property
 import numpy as np
 import os
-from AdapterUtils import (
+from McflyUtils import (
     convert_longitudinal_to_numpy,
     read_longitudinal_dataset,
     export_one_hot_encoder,
@@ -38,24 +38,19 @@ class McflyAdapter(AbstractAdapter):
         """Execute time series classification task"""
         # self.df = read_panel_dataset_training_data(self._configuration)
         # Get training dataset and the one hot encoder for the categorical target variable
-        df_train, df_test = read_longitudinal_dataset(self._configuration)
-        TARGET_col = "target"
+        # df_train, df_test = read_longitudinal_dataset(self._configuration)
+        X, y = read_longitudinal_dataset(self._configuration)
+        X = np.swapaxes(X, 1, 2)
+
         one_hot_encoder = OneHotEncoder()
-        one_hot_encoder.fit(np.concatenate([df_train[TARGET_col], df_test[TARGET_col]]).reshape(-1, 1))
+        one_hot_encoder.fit(y.reshape(-1, 1))
+        y_binary = one_hot_encoder.transform(y.reshape(-1, 1)).toarray()
 
         # Split dataset into train and test
-        # The Mcfly framework is based on keras lib. That's why it expects train and validation datasets
-        df_train, df_val = split_dataset(df_train, self._configuration)
-
-        X_train, y_train = df_train.drop([TARGET_col], axis=1), df_train[TARGET_col]
-        X_val, y_val = df_val.drop([TARGET_col], axis=1), df_val[TARGET_col]
-
-        # Convert datasets into numpy 3d array
-        X_train, y_train_binary = convert_longitudinal_to_numpy(X_train, y_train.to_numpy(), one_hot_encoder)
-        X_train = np.swapaxes(X_train, 1, 2)
-
-        X_val, y_val_binary = convert_longitudinal_to_numpy(X_val, y_val.to_numpy(), one_hot_encoder)
-        X_val = np.swapaxes(X_val, 1, 2)
+        # The Mcfly framework is based on keras lib. That's why it
+        # expects train and validation datasets
+        X_train, X_test, y_train_binary, y_test_binary = split_dataset(X, y_binary, self._configuration)
+        X_train, X_val, y_train_binary, y_val_binary = split_dataset(X_train, y_train_binary, self._configuration)
 
         params = {
             'number_of_models': 1,
