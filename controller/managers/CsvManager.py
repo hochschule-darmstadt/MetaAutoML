@@ -1,9 +1,11 @@
 import pandas as pd
 import numpy as np
 from Controller_bgrpc import *
+from JsonUtil import get_config_property
+import sys
 
 from DataSetAnalysisManager import DataSetAnalysisManager
-
+import shutil
 import os
 
 FIRST_ROW_AMOUNT = 50
@@ -26,17 +28,12 @@ class CsvManager:
         """
         response = GetDatasetResponse()
         dataset = pd.read_csv(path)
-        # P: Dataset Analysis happens here, will return small json with metadata
-        
-
-        analysisResult = DataSetAnalysisManager.startAnalysis(dataset)
-        DataSetAnalysisManager.persistAnalysisResult(analysisResult)
     
         for col in dataset.columns:
             table_column = TableColumn()
             table_column.name = col
             numpy_datatype = dataset[col].dtype.name
-            datatype, convertible_types = CsvManager.__get_datatype(numpy_datatype, dataset[col])
+            datatype, convertible_types = CsvManager.__getDatatype(numpy_datatype, dataset[col])
 
             table_column.type = datatype
             for convertible_type in convertible_types:
@@ -50,7 +47,7 @@ class CsvManager:
         return response
 
     @staticmethod
-    def __get_datatype(numpy_datatype: np.dtype, column: pd.Series):
+    def __getDatatype(numpy_datatype: np.dtype, column: pd.Series):
         """
         Identify the np datatype and mark correct OMAML datatype
         ---
@@ -61,24 +58,24 @@ class CsvManager:
         Return DataType.DATATYPE of the passed value + List of convertible datatypes
         """
         if numpy_datatype == np.dtype(np.object):
-            if column.nunique() < column.size/10:
-                if column.nunique() <= 2:
-                    return DataType.DATATYPE_BOOLEAN, [DataType.DATATYPE_IGNORE,
-                                                             DataType.DATATYPE_CATEGORY]
-                return DataType.DATATYPE_CATEGORY, [DataType.DATATYPE_IGNORE]
-            return DataType.DATATYPE_IGNORE, [DataType.DATATYPE_CATEGORY]
+            #if column.nunique() < column.size/10:
+            #    if column.nunique() <= 2:
+            #        return DataType.DATATYPE_BOOLEAN, [DataType.DATATYPE_IGNORE,
+            #                                                 DataType.DATATYPE_CATEGORY]
+            #    return DataType.DATATYPE_CATEGORY, [DataType.DATATYPE_IGNORE]
+            return DataType.DATATYPE_STRING, [DataType.DATATYPE_CATEGORY, DataType.DATATYPE_IGNORE]
         elif numpy_datatype == np.dtype(np.unicode_):
-            return DataType.DATATYPE_STRING
+            return DataType.DATATYPE_STRING, [DataType.DATATYPE_CATEGORY, DataType.DATATYPE_IGNORE]
         elif numpy_datatype == np.dtype(np.int64):
             if "id" in str.lower(str(column.name)) and column.nunique() == column.size:
-                return DataType.DATATYPE_IGNORE, []
+                return DataType.DATATYPE_INT, [DataType.DATATYPE_CATEGORY, DataType.DATATYPE_IGNORE]
             elif column.nunique() <= 2:
                 return DataType.DATATYPE_BOOLEAN, [DataType.DATATYPE_IGNORE,
                                                          DataType.DATATYPE_CATEGORY,
                                                          DataType.DATATYPE_INT]
-            if column.nunique() < 10:
-                return DataType.DATATYPE_CATEGORY, [DataType.DATATYPE_IGNORE,
-                                                          DataType.DATATYPE_INT]
+            #if column.nunique() < 10:
+            #    return DataType.DATATYPE_CATEGORY, [DataType.DATATYPE_IGNORE,
+            #                                              DataType.DATATYPE_INT]
             return DataType.DATATYPE_INT, [DataType.DATATYPE_IGNORE,
                                                  DataType.DATATYPE_CATEGORY]
         elif numpy_datatype == np.dtype(np.float_):
@@ -99,7 +96,7 @@ class CsvManager:
                                                     DataType.DATATYPE_BOOLEAN]
 
     @staticmethod
-    def read_column_names(path) -> GetTabularDatasetColumnNamesResponse:
+    def GetColumns(path) -> GetTabularDatasetColumnResponse:
         """
         Read only the column names of a dataset
         ---
@@ -108,15 +105,37 @@ class CsvManager:
         ---
         Return the column names as GetTabularDatasetColumnNamesResponse
         """
-        response = GetTabularDatasetColumnNamesResponse()
+        response = GetTabularDatasetColumnResponse()
         dataset = pd.read_csv(path)
+    
         for col in dataset.columns:
-            response.columnNames.append(col)
+            table_column = TableColumn()
+            table_column.name = col
+            numpy_datatype = dataset[col].dtype.name
+            datatype, convertible_types = CsvManager.__getDatatype(numpy_datatype, dataset[col])
+
+            table_column.type = datatype
+            for convertible_type in convertible_types:
+                table_column.convertible_types.append(convertible_type)
+
+            response.columns.append(table_column)
         return response
 
     @staticmethod
-    def ReadDefaultDatasetAsBytes():
-        file = open(os.path.join( os.path.dirname( __file__ ), "../config/defaults/titanic_train.csv"))
-        data = file.read().encode()
-        file.close()
-        return data
+    def CopyDefaultDataset(username):
+        upload_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), get_config_property("datasets-path"), username, "uploads")
+        default_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config", "defaults", "titanic_train.csv")
+        #Replace for windows
+        upload_folder = upload_folder.replace("\\managers", "")
+        default_file = default_file.replace("\\managers", "")
+        #Replace for UNIX
+        upload_folder = upload_folder.replace("/managers", "")
+        default_file = default_file.replace("/managers", "")
+        if os.getenv("MONGO_DB_DEBUG") != "YES":
+            #Within docker we do not want to add the app section, as this leads to broken links
+            upload_folder = upload_folder.replace("/app/", "")
+            default_file = default_file.replace("/app/", "")
+        # make sure directory exists in case it's the first upload from this user
+        os.makedirs(upload_folder, exist_ok=True)
+        shutil.copy(default_file, os.path.join(upload_folder, "titanic_train.csv"))
+        return 

@@ -1,0 +1,139 @@
+﻿@page "/datasets/{id}/train"
+@inject IStringLocalizer<Global> L
+@inject ISnackbar Snackbar
+@inject IApiClient apiClient
+@inject IViewNotifier viewNotifier
+@inject NavigationManager NavManager
+@attribute [Authorize]
+
+@if (!string.IsNullOrEmpty(_datasetTitle))
+{
+    <TopSection>
+        <Breadcrumbs>
+            <Breadcrumb Title="Datasets" Link="/datasets" Icon="@Icons.Filled.ListAlt" />
+            <Breadcrumb Title="@_datasetTitle" Link="@("/datasets/" + _dataset.Identifier)" Icon="@Icons.Filled.ListAlt"/>
+            <Breadcrumb Title="Train" Icon="@Icons.Filled.ModelTraining" />
+        </Breadcrumbs>
+    </TopSection>
+}
+
+
+<MudStack AlignItems="AlignItems.Center" Row="true" Class="mb-2">
+    <MudIcon Size="Size.Large" Icon="@Icons.Filled.ModelTraining"/>
+    <MudText Typo="Typo.h4">Train</MudText>
+</MudStack>
+
+@if (_dataset == null)
+{
+    <DataLoaderSpinner />
+}
+else
+{
+    @switch (_dataset.Type.ID)
+    {
+        case ":tabular":
+            <MuddyWizard WizardFinished="@OnWizardFinished">
+                <MuddyWizardPanel Title="Dataset preparation" >
+                    <PrepareTabularDataset Dataset="@_dataset" @bind-StartAutoMlRequest="@_automlRequest" />
+                </MuddyWizardPanel>
+                <MuddyWizardPanel Title="Configuration">
+                    <TaskConfiguration Dataset="@_dataset" @bind-StartAutoMlRequest="@_automlRequest" />
+                </MuddyWizardPanel>
+            </MuddyWizard>
+            break;
+        case ":image":
+            <MuddyWizard WizardFinished="@OnWizardFinished">
+                <MuddyWizardPanel Title="Configuration">
+                    <TaskConfiguration Dataset="@_dataset" @bind-StartAutoMlRequest="@_automlRequest" />
+                </MuddyWizardPanel>
+            </MuddyWizard>
+            break;
+        case ":text":
+            <MuddyWizard WizardFinished="@OnWizardFinished">
+                <MuddyWizardPanel Title="Dataset preparation" >
+                    <PrepareTextDataset Dataset="@_dataset" @bind-StartAutoMlRequest="@_automlRequest" />
+                </MuddyWizardPanel>
+                <MuddyWizardPanel Title="Configuration">
+                    <TaskConfiguration Dataset="@_dataset" @bind-StartAutoMlRequest="@_automlRequest" />
+                </MuddyWizardPanel>
+            </MuddyWizard>
+            break;
+    }
+}
+
+@code {
+    [Parameter]
+    public string Id { get; set; }
+
+    private GetDatasetResponseDto _dataset;
+    private string _datasetTitle = "";
+    private StartAutoMLRequestDto _automlRequest;
+
+    protected async override void OnInitialized()
+    {
+        _automlRequest = new StartAutoMLRequestDto();
+        _automlRequest.DatasetIdentifier = Id;
+        await LoadDataset();
+    }
+    private async Task LoadDataset()
+    {
+        try
+        {
+            GetDatasetRequestDto datasetRequest = new GetDatasetRequestDto()
+                {
+                    Identifier = Id
+                };
+            ApiResponseDto apiResponse = await apiClient.GetDataset(datasetRequest);
+
+            if (apiResponse.IsSuccessStatusCode)
+            {
+                _dataset = Newtonsoft.Json.JsonConvert.DeserializeObject<GetDatasetResponseDto>(apiResponse.Result.ToString());
+                _datasetTitle = "Dataset " + _dataset.Name;
+                StateHasChanged();
+                StateHasChanged();
+                viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
+            }
+            else
+            {
+                viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
+            }
+        }
+        catch (Exception ex)
+        {
+            viewNotifier.Show(ex.GetBaseException().Message, ViewNotifierType.Error, L["Operation Failed"]);
+        }
+    }
+    private async void OnWizardFinished()
+    {
+        try
+        {
+            if (string.IsNullOrEmpty(_automlRequest.Task))
+            {
+                viewNotifier.Show("No task selected", ViewNotifierType.Error, L["Operation Failed"]);
+                return;
+            }
+            if ((_automlRequest.DatasetType == ":tabular") && (_automlRequest.Configuration.ContainsKey("target") == false))
+            {
+                viewNotifier.Show("No target selected", ViewNotifierType.Error, L["Operation Failed"]);
+                return;
+            }
+            StartAutoMLResponseDto automlResponse;
+            ApiResponseDto apiResponse = await apiClient.StartAutoML(_automlRequest);
+
+            if (apiResponse.IsSuccessStatusCode)
+            {
+                automlResponse = Newtonsoft.Json.JsonConvert.DeserializeObject<StartAutoMLResponseDto>(apiResponse.Result.ToString());
+                viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
+                NavManager.NavigateTo("/trainings/" + automlResponse.TrainingId);
+            }
+            else
+            {
+                viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
+            }
+        }
+        catch (Exception ex)
+        {
+            viewNotifier.Show(ex.GetBaseException().Message, ViewNotifierType.Error, L["Operation Failed"]);
+        }
+    }
+}

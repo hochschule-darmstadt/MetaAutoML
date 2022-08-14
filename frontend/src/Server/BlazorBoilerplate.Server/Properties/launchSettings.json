@@ -3,7 +3,7 @@
     "windowsAuthentication": false,
     "anonymousAuthentication": true,
     "iisExpress": {
-      "applicationUrl": "http://localhost:56580",
+      "applicationUrl": "http://localhost:53414/",
       "sslPort": 0
     }
   },
@@ -14,8 +14,11 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "CONTROLLER_SERVICE_HOST": "localhost",
+        "CONTROLLER_DATASET_FOLDER_PATH": "C:\\Users\\alex\\Desktop\\MetaAutoML\\controller\\app-data\\datasets",
         "CONTROLLER_SERVICE_PORT": "5001",
-        "no_proxy": "localhost"
+        "no_proxy": "localhost",
+        "REDIS_SERVICE_HOST": "localhost",
+        "REDIS_SERVICE_PORT": "6379"
       },
       "inspectUri": "{wsProtocol}://{url.hostname}:{url.port}/_framework/debug/ws-proxy?browser={browserInspectUri}"
     },

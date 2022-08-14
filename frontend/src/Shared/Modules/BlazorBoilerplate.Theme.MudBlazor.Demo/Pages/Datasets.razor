@@ -1,0 +1,60 @@
+﻿@page "/datasets"
+@inject IStringLocalizer<Global> L
+@inject ISnackbar Snackbar
+@inject IApiClient apiClient
+@inject IViewNotifier viewNotifier
+@inject IFileUploader fileUploader
+@attribute [Authorize]
+
+<TopSection>
+    <Breadcrumbs>
+        <Breadcrumb Title="Datasets" Icon="@Icons.Filled.ListAlt" />
+    </Breadcrumbs>
+</TopSection>
+
+<MudStack AlignItems="AlignItems.Center" Row="true" Class="mb-2">
+    <MudIcon Size="Size.Large" Icon="@Icons.Filled.ListAlt" />
+    <MudText Typo="Typo.h4">Datasets</MudText>
+</MudStack>
+
+<MudGrid>
+    <MudItem xs="12" sm="12" md="12">
+        <AllDatasets Datasets="_datasets" OnUploadCompletedCallback="@LoadDatasets"/>
+    </MudItem>
+</MudGrid>
+
+@code{
+    private GetDatasetsResponseDto _datasets;
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadDatasets();
+        fileUploader.OnUploadCompletedCallback = LoadDatasetsWithReRendering;
+    }
+    private async Task LoadDatasetsWithReRendering()
+    {
+        await LoadDatasets();
+        StateHasChanged();
+    }
+    private async Task LoadDatasets()
+    {
+        try
+        {
+            ApiResponseDto apiResponse = await apiClient.GetDatasets();
+
+            if (apiResponse.IsSuccessStatusCode)
+            {
+                _datasets = Newtonsoft.Json.JsonConvert.DeserializeObject<GetDatasetsResponseDto>(apiResponse.Result.ToString());
+                StateHasChanged();
+                viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
+            }
+            else
+            {
+                viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
+            }
+        }
+        catch (Exception ex)
+        {
+            viewNotifier.Show(ex.GetBaseException().Message, ViewNotifierType.Error, L["Operation Failed"]);
+        }
+    }
+}

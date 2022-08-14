@@ -9,15 +9,7 @@ message TestConfiguration {
     int32 random_state = 3;
   }
   
-message AutoMlRuntimeConstraints {
-    int32 runtime_limit = 1;
-    int32 max_iter = 2;
-  }
-message AutoMlConfigurationTabularData {
-    AutoMlTarget target = 1;
-    map<string, DataType> features = 2;
-  }
-  
+
 message AutoMlTarget {
     string target = 1;
     DataType type = 2;
@@ -35,4 +27,15 @@ message GetObjectsInformationResponse {
 message ObjectInformation {
   string id = 1;
   map<string, string> informations = 2;
+}
+
+message GetHomeOverviewInformationRequest {
+  string user = 1;
+}
+
+message GetHomeOverviewInformationResponse {
+  int32 dataset_amount = 1;
+  int32 training_amount = 2;
+  int32 model_amount = 3;
+  int32 running_training_amount = 4;
 }

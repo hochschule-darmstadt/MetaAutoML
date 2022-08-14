@@ -1,0 +1,148 @@
+﻿@page "/"
+@inject IStringLocalizer<Global> L
+@inject ISnackbar Snackbar
+@inject IViewNotifier viewNotifier
+@inject IApiClient apiClient
+@inject IFileUploader fileUploader
+@attribute [Authorize]
+
+<TopSection>
+    <Breadcrumbs>
+        <Breadcrumb Title="Home" Icon="@Icons.Filled.Home"/>
+    </Breadcrumbs>
+</TopSection>
+
+<MudStack AlignItems="AlignItems.Center" Row="true" Class="mb-2">
+    <MudIcon Size="Size.Large" Icon="@Icons.Filled.Home" />
+    <MudText Typo="Typo.h4">Home</MudText>
+</MudStack>
+
+<MudGrid>
+    <MudItem xs="12" sm="12" md="12">
+        <MudCard Elevation="5">
+            <MudCardHeader Style="border-bottom-style: inset; border-bottom-width: 1px;">
+                <CardHeaderContent >
+                    <MudText Typo="Typo.h6">Overview</MudText>
+                </CardHeaderContent>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudPaper Height="100px" Elevation="0">
+                    @if (_overviewInfos == null)
+                    {
+                        <DataLoaderSpinner />
+                    }
+                    else
+                    {
+                        <MudGrid>
+                            <MudItem xs="3" sm="3" md="3">
+                                <MudText Typo="Typo.body2">My datasets: @_overviewInfos.TotalDatasetAmount</MudText>
+                            </MudItem>
+                            <MudItem xs="3" sm="3" md="3">
+                                <MudText Typo="Typo.body2">My trainings: @_overviewInfos.TotalTrainingAmount</MudText>
+                            </MudItem>
+                            <MudItem xs="3" sm="3" md="3">
+                                <MudText Typo="Typo.body2">My models: @_overviewInfos.TotalModelAmount</MudText>
+                            </MudItem>
+                            <MudItem xs="3" sm="3" md="3">
+                                <MudText Typo="Typo.body2">Executing trainings: @_overviewInfos.RunningTrainingAmount</MudText>
+                            </MudItem>
+                        </MudGrid>
+                    }
+                </MudPaper>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+    <MudItem xs="12" sm="6" md="6">
+        <RecentDatasets Datasets="@_datasets" OnUploadCompletedCallback="@LoadDataset"/>
+    </MudItem>
+    <MudItem xs="12" sm="6" md="6">
+        <RecentTrainings Trainings="@_trainings"/>
+    </MudItem>
+</MudGrid>
+
+@code {
+    private GetAllTrainingsResponseDto _trainings;
+    private GetDatasetsResponseDto _datasets;
+    private GetHomeOverviewInformationResponseDto _overviewInfos;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadTrainings();
+        fileUploader.OnUploadCompletedCallback = LoadDatasetWithReRendering;
+    }
+
+    private async Task LoadTrainings()
+    {
+        try
+        {
+            ApiResponseDto apiResponse = await apiClient.GetAllTrainings(new GetAllTrainingsRequestDto());
+
+            if (apiResponse.IsSuccessStatusCode)
+            {
+                _trainings = Newtonsoft.Json.JsonConvert.DeserializeObject<GetAllTrainingsResponseDto>(apiResponse.Result.ToString());
+
+                apiResponse = await apiClient.GetDatasets();
+                await LoadDataset();
+            }
+            else
+            {
+                viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
+            }
+        }
+        catch (Exception ex)
+        {
+            viewNotifier.Show(ex.GetBaseException().Message, ViewNotifierType.Error, L["Operation Failed"]);
+        }
+    }
+
+    private async Task LoadDatasetWithReRendering()
+    {
+        await LoadDataset();
+        StateHasChanged();
+    }
+
+    private async Task LoadDataset()
+    {
+        try
+        {
+            ApiResponseDto
+            apiResponse = await apiClient.GetDatasets();
+
+            if (apiResponse.IsSuccessStatusCode)
+            {
+                _datasets = Newtonsoft.Json.JsonConvert.DeserializeObject<GetDatasetsResponseDto>(apiResponse.Result.ToString());
+                await LoadOverviewInformation();
+            }
+            else
+            {
+                viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
+            }
+        }
+        catch (Exception ex)
+        {
+            viewNotifier.Show(ex.GetBaseException().Message, ViewNotifierType.Error, L["Operation Failed"]);
+        }
+    }
+    private async Task LoadOverviewInformation()
+    {
+        try
+        {
+            ApiResponseDto
+            apiResponse = await apiClient.GetHomeOverviewInformation();
+
+            if (apiResponse.IsSuccessStatusCode)
+            {
+                _overviewInfos = Newtonsoft.Json.JsonConvert.DeserializeObject<GetHomeOverviewInformationResponseDto>(apiResponse.Result.ToString());
+                viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
+            }
+            else
+            {
+                viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
+            }
+        }
+        catch (Exception ex)
+        {
+            viewNotifier.Show(ex.GetBaseException().Message, ViewNotifierType.Error, L["Operation Failed"]);
+        }
+    }
+}

@@ -15,7 +15,6 @@ adapters/AutoKeras/structured_data_classifier
 #VS 
 *.suo
 *.proj
-*.sln
 *.csv
 *.pyproj
 
@@ -165,17 +164,17 @@ dmypy.json
 controller/app-data/output/*/*
 !controller/app-data/output/*/.gitkeep
 controller/.vs
-
+controller/app-data\datasets/*
 
 #all adapter ignores
 # by adapter generated files, but keep the directories
-*/*/app-data/output/working_dir/*
-*/*/app-data/output/*
-!*/app-data/output/.gitkeep
-*/app-data/jobs/*
-!*/app-data/jobs/.gitkeep
+
+!*/*/app-data/training/.gitkeep
+*/*/app-data/training/*
 # ignore datasets, because they are mapped into the datasets directory via shared volume by the controller
 */app-data/datasets/*
+*/*/app-data/datasets/*
+adapters/*/app-data/datasets/*
 !*/app-data/datasets/.gitkeep
 
 
@@ -201,5 +200,5 @@ FLAML/templates/output
 #MLJAR ignores
 #AutoMLs
 MLJAR/AutoML_*
-frontend/src/Server/BlazorBoilerplate.Server/appsettings.json
 controller/app-data/analysis.json
+controller/app-data/datasets/*

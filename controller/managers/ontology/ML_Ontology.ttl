@@ -1,5 +1,5 @@
 ### Ontology file generated from ML_Ontology.xlsx.
-### 2022-06-29 11:10:41.892298
+### 2022-08-10 14:26:46.133567
 
 
 # PREFIXES
@@ -204,7 +204,8 @@
     :belongs_to :supervised_learning ;
     :has_dataset_type :image ;
     rdfs:comment "set of methods to group images" ;
-    rdfs:seeAlso <https://www.wikidata.org/wiki/Q98526763> .
+    rdfs:seeAlso <https://www.wikidata.org/wiki/Q98526763> ;
+    :supported_by_oma_ml "True" .
 :image_object_tracking a :ML_task ;
     skos:prefLabel "image object tracking" ;
     :belongs_to :supervised_learning ;
@@ -279,13 +280,15 @@
     skos:broader :classification ;
     :belongs_to :supervised_learning ;
     :has_dataset_type :tabular ;
-    rdfs:comment "Tabulation of data occurs after the data has gone through classification. After data classification is over, those data are represented in a tabular form which can be called tables" .
+    rdfs:comment "Tabulation of data occurs after the data has gone through classification. After data classification is over, those data are represented in a tabular form which can be called tables" ;
+    :supported_by_oma_ml "True" .
 :tabular_regression a :ML_task ;
     skos:prefLabel "tabular regression" ;
     skos:broader :regression ;
     :belongs_to :supervised_learning ;
     :has_dataset_type :tabular ;
-    rdfs:comment "Analyze the relationship between predicted variables and a response variable" .
+    rdfs:comment "Analyze the relationship between predicted variables and a response variable" ;
+    :supported_by_oma_ml "True" .
 :text_analytics a :ML_task ;
     skos:prefLabel "text analytics" ;
     :belongs_to :supervised_learning , :unsupervised_learning ;
@@ -297,7 +300,8 @@
     :belongs_to :supervised_learning ;
     :has_dataset_type :text ;
     rdfs:comment "classification of texts" ;
-    rdfs:seeAlso <https://www.wikidata.org/wiki/Q102190569> .
+    rdfs:seeAlso <https://www.wikidata.org/wiki/Q102190569> ;
+    :supported_by_oma_ml "True" .
 :text_regression a :ML_task ;
     skos:prefLabel "text regression" ;
     skos:broader :regression ;
@@ -319,8 +323,9 @@
 :time_series_forecasting a :ML_task ;
     skos:prefLabel "time series forecasting" ;
     :belongs_to :supervised_learning ;
-    :has_dataset_type :tabular ;
-    rdfs:comment "The prediction of events through a sequenc of time" .
+    :has_dataset_type :time_series ;
+    rdfs:comment "The prediction of events through a sequenc of time" ;
+    :supported_by_oma_ml "True" .
 :topic_modeling a :ML_task ;
     skos:prefLabel "topic modeling" ;
     :belongs_to :unsupervised_learning ;
@@ -1274,6 +1279,7 @@
 :alphad3m a :AutoML_solution ;
     skos:prefLabel "Alphad3m" ;
     :used_for :scikit_learn_lib ;
+    :supported_by_oma_ml "True" ;
     :can_perform :tabular_classification , :tabular_regression , :clustering , :time_series_forecasting , :text_classification , :text_regression , :image_classification , :object_detection , :remote_sensing , :video_classification , :audio_classification , :audio_regression , :collaborative_graph_filtering , :graph_matching , :vertex_classification , :link_prediction , :community_detection .
 :atm a :AutoML_solution ;
     skos:prefLabel "ATM" ;
@@ -1286,27 +1292,27 @@
 :autocve a :AutoML_solution ;
     skos:prefLabel "AutoCVE" ;
     :used_for :xgboost_lib , :scikit_learn_lib ;
-    :supported_by_oma_ml "true" ;
+    :supported_by_oma_ml "True" ;
     :can_perform :tabular_classification .
 :autogluon a :AutoML_solution ;
     skos:prefLabel "Autogluon" ;
     :used_for :scikit_learn_lib , :catboost_lib , :lightgbm_lib , :xgboost_lib , :pytorch_lib , :mxnet_lib ;
-    :supported_by_oma_ml "true" ;
+    :supported_by_oma_ml "True" ;
     :can_perform :tabular_classification , :tabular_regression , :text_classification , :text_regression , :sentiment_analysis , :sentence_similarity , :image_classification , :object_detection , :video_classification , :video_object_tracking , :action_recognition .
 :autokeras a :AutoML_solution ;
     skos:prefLabel "Autokeras" ;
     :used_for :keras_lib ;
-    :supported_by_oma_ml "true" ;
+    :supported_by_oma_ml "True" ;
     :can_perform :tabular_classification , :tabular_regression , :time_series_forecasting , :text_classification , :text_regression , :image_classification , :image_regression .
 :autopytorch a :AutoML_solution ;
     skos:prefLabel "Autopytorch" ;
     :used_for :pytorch_lib ;
-    :supported_by_oma_ml "true" ;
+    :supported_by_oma_ml "True" ;
     :can_perform :tabular_classification , :tabular_regression , :image_classification .
 :autosklearn a :AutoML_solution ;
     skos:prefLabel "Autosklearn" ;
     :used_for :scikit_learn_lib ;
-    :supported_by_oma_ml "true" ;
+    :supported_by_oma_ml "True" ;
     :can_perform :tabular_classification , :tabular_regression .
 :aws_sagemaker_autopilot a :AutoML_solution ;
     skos:prefLabel "AWS Sagemaker Autopilot" ;
@@ -1322,7 +1328,7 @@
 :flaml a :AutoML_solution ;
     skos:prefLabel "FLAML" ;
     :used_for :scikit_learn_lib , :catboost_lib , :lightgbm_lib , :xgboost_lib ;
-    :supported_by_oma_ml "true" ;
+    :supported_by_oma_ml "True" ;
     :can_perform :tabular_classification , :tabular_regression , :ranking , :time_series_forecasting , :text_classification .
 :google_automl a :AutoML_solution ;
     skos:prefLabel "Google AutoML" ;
@@ -1339,7 +1345,7 @@
 :mljar a :AutoML_solution ;
     skos:prefLabel "MLJAR" ;
     :used_for :scikit_learn_lib , :catboost_lib , :lightgbm_lib , :xgboost_lib ;
-    :supported_by_oma_ml "true" ;
+    :supported_by_oma_ml "True" ;
     :can_perform :tabular_classification , :tabular_regression .
 :rapidminer a :AutoML_solution ;
     skos:prefLabel "Rapidminer" ;
@@ -1481,7 +1487,8 @@
     :automl_solution :mcfly ;
     :ml_task :time_series_classification ;
     :parameter_value :use_approach_mcfly_time_series_classification , :metric_mcfly_time_series_classification .
-:image_classification_in_autokeras skos:prefLabel "image classification in AutoKeras" ;
+:image_classification_in_autokeras a :Configuration_item ;
+    skos:prefLabel "image classification in AutoKeras" ;
     :category :task_configuration ;
     :automl_solution :autokeras ;
     :ml_task :image_classification ;
@@ -1920,15 +1927,15 @@
     skos:prefLabel "tabular" ;
     :category :dataset_type ;
     rdfs:comment "A dataset presented in a tabular form (CSV file)" ;
-    :supported_by_oma_ml "true" .
+    :supported_by_oma_ml "True" .
 :text a :Enum ;
     skos:prefLabel "text" ;
     :category :dataset_type ;
-    :supported_by_oma_ml "false" .
+    :supported_by_oma_ml "True" .
 :image a :Enum ;
     skos:prefLabel "image" ;
     :category :dataset_type ;
-    :supported_by_oma_ml "true" .
+    :supported_by_oma_ml "True" .
 :video a :Enum ;
     skos:prefLabel "video" ;
     :category :dataset_type ;
@@ -1945,7 +1952,11 @@
     skos:prefLabel "panel" ;
     :category :dataset_type ;
     rdfs:comment "Panel Data - also called Longitudinal Data, 3D Numpy Array - for time series classification, which has 3 dimentions: (num_samples, num_features, num_timesteps)" ;
-    :supported_by_oma_ml "true" .
+    :supported_by_oma_ml "True" .
+:time_series a :Enum ;
+    skos:prefLabel "time series" ;
+    :category :dataset_type ;
+    :supported_by_oma_ml "True" .
 :greedy a :Enum ;
     skos:prefLabel "greedy" ;
     :category :tuner_approach ;

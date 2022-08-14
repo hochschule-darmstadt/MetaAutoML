@@ -1,5 +1,6 @@
-autogluon.tabular
+autogluon
 grpcio
 dill
 jinja2
 protobuf==3.17.3
+pillow

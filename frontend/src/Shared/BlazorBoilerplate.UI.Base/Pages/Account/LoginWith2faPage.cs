@@ -8,8 +8,6 @@ using BlazorBoilerplate.Shared.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.Extensions.Localization;
-using System;
-using System.Threading.Tasks;
 
 namespace BlazorBoilerplate.UI.Base.Pages.Account
 {
@@ -36,7 +34,7 @@ namespace BlazorBoilerplate.UI.Base.Pages.Account
 
         protected override async Task OnInitializedAsync()
         {
-            if (navigationManager.TryGetQueryString<string>("ReturnUrl", out string url))
+            if (navigationManager.TryGetQueryString("ReturnUrl", out string url))
                 ReturnUrl = url;
 
             var user = (await authenticationStateTask).User;

@@ -8,32 +8,78 @@ import pandas as pd
 import tensorflow as tf
 import autokeras as ak
 import os
+import glob
+from PIL import Image
 
 from predict_time_sources import feature_preparation, DataType, SplitMethod
 
+def read_image_dataset(json_configuration):
 
+    data_dir = os.path.join(json_configuration["file_location"], json_configuration["file_name"].replace(".zip", ""))
+    test_df_list =[]
+
+    def read_image_dataset_folder(sub_folder_type):
+        files = []
+        df = []
+        for folder in os.listdir(os.path.join(data_dir, sub_folder_type)):
+            files.append(glob.glob(os.path.join(data_dir, sub_folder_type, folder, "*.jpeg")))
+
+        df_list =[]
+        for i in range(len(files)):
+            df = pd.DataFrame()
+            df["name"] = [x for x in files[i]]
+            df['outcome'] = i
+            df_list.append(df)
+        return df_list
+
+    test_df_list = read_image_dataset_folder("test")
+
+    test_data = pd.concat(test_df_list, axis=0,ignore_index=True)
+
+    def img_preprocess(img):
+        """
+        Opens the image and does some preprocessing 
+        such as converting to RGB, resize and converting to array
+        """
+        img = Image.open(img)
+        img = img.convert('RGB')
+        img = img.resize((256,256))
+        img = np.asarray(img)/255
+        return img
+
+    X_test = np.array([img_preprocess(p) for p in test_data.name.values])
+    y_test = test_data.outcome.values
+    return X_test, y_test
 
 if __name__ == '__main__':
     filepath = sys.argv[1]
     configpath = sys.argv[2]
+    X = None
 
     with open(configpath) as file:
         config_json = json.load(file)
 
-    target = config_json["tabular_configuration"]["target"]["target"]
-    features = config_json["tabular_configuration"]["features"].items()
-    X = pd.read_csv(filepath).drop(target, axis=1, errors='ignore')
+    if(config_json["task"] == ":tabular_classification" or config_json["task"] == ":tabular_regression" or config_json["task"] == ":text_regression"):
+        target = config_json["configuration"]["target"]["target"]
+        features = config_json["dataset_configuration"]["features"]
+        features.pop(target, None)
+        features = features.items()
+        X = pd.read_csv(filepath).drop(target, axis=1, errors='ignore')
 
-    # split training set
-    if SplitMethod.SPLIT_METHOD_RANDOM == config_json["test_configuration"]["method"]:
-        X = X.sample(random_state=config_json["test_configuration"]["random_state"], frac=1)
-    else:
-        X = X.iloc[int(X.shape[0] * config_json["test_configuration"]["split_ratio"]):]
+        # split training set
+        if SplitMethod.SPLIT_METHOD_RANDOM.value == config_json["test_configuration"]["method"]:
+            X = X.sample(random_state=config_json["test_configuration"]["random_state"], frac=1)
+        else:
+            X = X.iloc[int(X.shape[0] * config_json["test_configuration"]["split_ratio"]):]
 
-    X = feature_preparation(X, features)
+        X = feature_preparation(X, features)
+
+    elif(config_json["task"] == ":image_classification" or config_json["task"] == ":image_regression"):
+        X, y = read_image_dataset(config_json)
 
     with open(sys.path[0] + '/model_keras.p', 'rb') as file:
         loaded_model = dill.load(file)
     predicted_y = loaded_model.predict(X)
-
+    predicted_y = [np.round(y[0],0) for y in predicted_y]
+    
     pd.DataFrame(data=predicted_y, columns=["predicted"]).to_csv(sys.path[0] +"/predictions.csv")

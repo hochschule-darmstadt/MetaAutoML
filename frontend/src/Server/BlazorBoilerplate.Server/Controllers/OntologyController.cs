@@ -50,9 +50,9 @@ namespace BlazorBoilerplate.Server.Controllers
         [ProducesResponseType(Status200OK)]
         [ProducesResponseType(Status400BadRequest)]
         [ProducesResponseType(Status404NotFound)]
-        public async Task<ApiResponse> GetDatasetCompatibleTasks(GetDatasetCompatibleTasksRequestDto datasetName)
+        public async Task<ApiResponse> GetDatasetCompatibleTasks(GetDatasetCompatibleTasksRequestDto dataset)
             => ModelState.IsValid ?
-            await _ontologyManager.GetDatasetCompatibleTasks(datasetName) :
+            await _ontologyManager.GetDatasetCompatibleTasks(dataset) :
             new ApiResponse(Status400BadRequest, L["InvalidData"]);
     }
 }

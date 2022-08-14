@@ -1,0 +1,52 @@
+﻿@page "/trainings"
+@inject IStringLocalizer<Global> L
+@inject ISnackbar Snackbar
+@inject IApiClient apiClient
+@inject IViewNotifier viewNotifier
+@attribute [Authorize]
+
+<TopSection>
+    <Breadcrumbs>
+        <Breadcrumb Title="Trainings" Icon="@Icons.Filled.ModelTraining" />
+    </Breadcrumbs>
+</TopSection>
+
+<MudStack AlignItems="AlignItems.Center" Row="true" Class="mb-2">
+    <MudIcon Size="Size.Large" Icon="@Icons.Filled.ModelTraining"/>
+    <MudText Typo="Typo.h4">Trainings</MudText>
+</MudStack>
+
+<MudGrid>
+    <MudItem xs="12" sm="12" md="12">
+        <AllTrainings Trainings="_trainings"/>
+    </MudItem>
+</MudGrid>
+
+@code{
+    private GetAllTrainingsResponseDto _trainings;
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadTrainings();
+    }
+    private async Task LoadTrainings()
+    {
+        try
+        {
+            ApiResponseDto apiResponse = await apiClient.GetAllTrainings(new GetAllTrainingsRequestDto());
+
+            if (apiResponse.IsSuccessStatusCode)
+            {
+                _trainings = Newtonsoft.Json.JsonConvert.DeserializeObject<GetAllTrainingsResponseDto>(apiResponse.Result.ToString());
+                viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
+            }
+            else
+            {
+                viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
+            }
+        }
+        catch (Exception ex)
+        {
+            viewNotifier.Show(ex.GetBaseException().Message, ViewNotifierType.Error, L["Operation Failed"]);
+        }
+    }
+}

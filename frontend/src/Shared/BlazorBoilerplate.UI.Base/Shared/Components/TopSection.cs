@@ -1,6 +1,5 @@
-﻿using BlazorBoilerplate.UI.Base.Shared.Layouts;
+using BlazorBoilerplate.UI.Base.Shared.Layouts;
 using Microsoft.AspNetCore.Components;
-using System;
 
 namespace BlazorBoilerplate.UI.Base.Shared.Components
 {
@@ -14,17 +13,18 @@ namespace BlazorBoilerplate.UI.Base.Shared.Components
 
         protected override void OnInitialized()
         {
-            RootLayout.SetTopSection(this);
+            RootLayout?.SetTopSection(this);
+
             base.OnInitialized();
         }
 
         protected override bool ShouldRender()
         {
             var shouldRender = base.ShouldRender();
+
             if (shouldRender)
-            {
-                RootLayout.Update();
-            }
+                RootLayout?.Update();
+
             return base.ShouldRender();
         }
 

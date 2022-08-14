@@ -5,6 +5,18 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Autokeras image test",
+            "type": "python",
+            "request": "launch",
+            "program": "AutoML.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "env": {
+                "PYTHONPATH": "AutoMLs;Utils;../Utils/Utils;../Utils/AutoMLs;../GRPC/Adapter;",
+                "PYTHON_ENV": ".venv/Scripts/python"
+            },
+        },
+        {
             "name": "AutoKeras Adapter",
             "type": "python",
             "request": "launch",

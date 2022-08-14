@@ -15,22 +15,13 @@ spec:
       labels:
         io.kompose.service: sqlserver
     spec:
-      affinity:
-        nodeAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            nodeSelectorTerms:
-            - matchExpressions:
-              - key: kubernetes.io/hostname
-                operator: In
-                values:
-                - cai-omaml-main
       containers:
       - env:
         - name: "ACCEPT_EULA"
           value: "Y"
         - name: "SA_PASSWORD"
           value: "yourVeryStrong(!)Password"
-        image: mcr.microsoft.com/mssql/server
+        image: mcr.microsoft.com/mssql/server:2019-latest
         imagePullPolicy: ""
         name: sqlserver
         ports:
@@ -40,11 +31,11 @@ spec:
             cpu: "1"
             memory: "2097152e3"
         volumeMounts:
-        - mountPath: /var/opt/mssql/data
-          name: dbdata-pvc
+        - mountPath: /var/opt/mssql
+          name: dbdata
       restartPolicy: Always
       serviceAccountName: ""
       volumes:
-      - name: dbdata-pvc
+      - name: dbdata
         persistentVolumeClaim:
-          claimName: dbdata-pvc
+          claimName: dbdata-claim

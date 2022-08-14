@@ -2,13 +2,7 @@
 using BlazorBoilerplate.Shared.Interfaces;
 using Breeze.Sharp;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Net.Http;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace BlazorBoilerplate.Shared.Services
 {
@@ -43,11 +37,40 @@ namespace BlazorBoilerplate.Shared.Services
 
             entityManager.MetadataStore.NamingConvention = new NamingConvention().WithServerClientNamespaceMapping(dic);
 
+            entityManager.MetadataStore.AllowedMetadataMismatchTypes = MetadataMismatchTypes.MissingCLRDataProperty;
+
             entityManager.FetchMetadata().ContinueWith(t =>
             {
                 if (t.IsFaulted)
-                    logger.LogError("FetchMetadata: {0}", t.Exception.GetBaseException());
+                {
+                    var message = t.Exception.GetBaseException().ToString();
+
+                    var breezeException = t.Exception.GetBaseException().InnerException as DataServiceRequestException;
+
+                    if (breezeException != null)
+                        message = breezeException.Message;
+
+                    if (breezeException?.HttpResponse.StatusCode != System.Net.HttpStatusCode.Unauthorized)
+                        logger.LogError("BaseApiClient.FetchMetadata: {0}", message);
+                }
             });
+        }
+
+        protected static Expression<Func<T, object>> GenerateExpression<T>(string propertyName)
+        {
+            if (string.IsNullOrWhiteSpace(propertyName))
+                return null;
+            else
+            {
+                var param = Expression.Parameter(typeof(T), "i");
+
+                Expression body = param;
+
+                foreach (var member in propertyName.Split('.'))
+                    body = Expression.PropertyOrField(body, member);
+
+                return Expression.Lambda<Func<T, object>>(Expression.Convert(body, typeof(object)), param);
+            }
         }
 
         public void ClearEntitiesCache()
@@ -60,6 +83,20 @@ namespace BlazorBoilerplate.Shared.Services
             entityManager.RejectChanges();
         }
 
+        public event EventHandler<EntityChangedEventArgs> EntityChanged
+        {
+            add
+            {
+                entityManager.EntityChanged += value;
+
+            }
+            remove
+            {
+                entityManager.EntityChanged -= value;
+
+            }
+        }
+
         public async Task SaveChanges()
         {
             try
@@ -68,8 +105,13 @@ namespace BlazorBoilerplate.Shared.Services
             }
             catch (SaveException ex)
             {
-                var msg = ex.EntityErrors.First().ErrorMessage;
+                var msg = ex.EntityErrors.FirstOrDefault()?.ErrorMessage;
+
+                if (msg == null)
+                    msg = ex.ValidationErrors.FirstOrDefault()?.Message;
+
                 logger.LogWarning("SaveChanges: {0}", msg);
+
                 throw new Exception(msg);
             }
             catch (Exception ex)
@@ -92,7 +134,7 @@ namespace BlazorBoilerplate.Shared.Services
         {
             entity.EntityAspect.Delete();
         }
-        protected async Task<QueryResult<T>> GetItems<T>(string from,
+        public async Task<QueryResult<T>> GetItems<T>(string from,
             Expression<Func<T, bool>> predicate = null,
             Expression<Func<T, object>> orderBy = null,
             Expression<Func<T, object>> orderByDescending = null,
@@ -121,6 +163,8 @@ namespace BlazorBoilerplate.Shared.Services
 
                 if (skip != null)
                     query = query.Skip(skip.Value);
+                else
+                    query = query.Skip(0); //query errors if skip is not defined so default to 0
 
                 var response = await entityManager.ExecuteQuery(query, CancellationToken.None);
 
@@ -142,6 +186,24 @@ namespace BlazorBoilerplate.Shared.Services
 
                 throw;
             }
+        }
+
+        public async Task<QueryResult<T>> GetItemsByFilter<T>(
+            string from,
+            string orderByDefaultField,
+            string filter = null,
+            string orderBy = null,
+            string orderByDescending = null,
+            int? take = null, int? skip = null,
+            Dictionary<string, object> parameters = null)
+        {
+            if (orderBy == null && orderByDescending == null)
+                orderBy = orderByDefaultField;
+
+            if (!string.IsNullOrWhiteSpace(filter) && parameters == null)
+                parameters = new() { { "filter", filter } };
+
+            return await GetItems(from, null, GenerateExpression<T>(orderBy), GenerateExpression<T>(orderByDescending), take, skip, parameters);
         }
     }
 }

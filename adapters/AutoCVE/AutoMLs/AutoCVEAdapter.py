@@ -1,9 +1,11 @@
 import os
+
+from AbstractAdapter import AbstractAdapter
+from AdapterUtils import (convert_X_and_y_dataframe_to_numpy, export_model,
+                          prepare_tabular_dataset, data_loader)
 from AUTOCVE.AUTOCVE import AUTOCVEClassifier
 from JsonUtil import get_config_property
-from AbstractAdapter import AbstractAdapter
-from AdapterUtils import read_tabular_dataset_training_data, prepare_tabular_dataset, convert_X_and_y_dataframe_to_numpy, export_model
-import os
+
 
 class AutoCVEAdapter(AbstractAdapter):
     """
@@ -17,13 +19,12 @@ class AutoCVEAdapter(AbstractAdapter):
         1. Configuration JSON of type dictionary
         """
         super().__init__(configuration)
-        self._result_path = os.path.join(get_config_property("output-path"), self._configuration["session_id"])
 
     def __tabular_classification(self):
         """
         Execute the classification task
         """
-        self.df = read_tabular_dataset_training_data(self._configuration)
+        self.df, test = data_loader(self._configuration)
         X, y = prepare_tabular_dataset(self.df, self._configuration)
         X, y = convert_X_and_y_dataframe_to_numpy(X, y)
 
@@ -43,7 +44,7 @@ class AutoCVEAdapter(AbstractAdapter):
             print("Ensemble size: " + str(len(best_voting_ensemble.estimators)))
             print("Train Score: {}".format(best_voting_ensemble.score(X, y)))
 
-            export_model(best_voting_ensemble, self._configuration["session_id"], "autocve-model.p")
+            export_model(best_voting_ensemble, self._configuration["result_folder_location"], "autocve-model.p")
 
         except Exception as e:
             print(f"Critical error running autoCVE on {self._configuration['file_name']}. The AutoCVE "
@@ -56,7 +57,7 @@ class AutoCVEAdapter(AbstractAdapter):
         """
         Execute the ML task
         """
-        if self._configuration["task"] == 1:
+        if self._configuration["task"] == ":tabular_classification":
             self.__tabular_classification()
         else:
             raise ValueError(

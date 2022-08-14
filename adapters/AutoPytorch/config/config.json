@@ -4,8 +4,12 @@
   "env-varname-cluster": "RUNTIME",
   "grpc-server-address": "0.0.0.0",
   "export-zip-file-name": "pytorch-export",
-  "output-path": "app-data/output",
-  "job-file-path": "app-data/jobs",
+  "training-path": "app-data/training",
+  "job-folder-name": "job",
+  "model-folder-name": "model",
+  "export-folder-name": "export",
+  "result-folder-name": "result",
   "templates-path": "app-data/templates",
-  "predict-time-sources-path": "AutoMLs/predict_time_sources.py"
+  "predict-time-sources-path": "AutoMLs/predict_time_sources.py",
+  "local_execution": "NO"
 }

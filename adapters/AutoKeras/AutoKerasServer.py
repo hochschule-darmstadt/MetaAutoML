@@ -1,22 +1,15 @@
-import os
-
-import logging
 import json
+import logging
+import os
 import time
 from concurrent import futures
 
-import grpc
-
 import Adapter_pb2
 import Adapter_pb2_grpc
-
-from JsonUtil import get_config_property
-
+import grpc
 from AdapterUtils import *
-
-
-
-
+from AutoKerasAdapter import AutoKerasAdapter
+from JsonUtil import get_config_property
 
 
 class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
@@ -32,19 +25,16 @@ class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
         try:
             start_time = time.time()
             # saving AutoML configuration JSON
-            config_json = json.loads(request.processJson)
-            job_file_location = os.path.join(get_config_property("job-file-path"),
-                                             get_config_property("job-file-name"))
-            with open(job_file_location, "w+") as f:
-                json.dump(config_json, f)
+            config = SetupRunNewRunEnvironment(request.processJson)
 
-            process = start_automl_process()
-            yield from capture_process_output(process, start_time)
-            generate_script(config_json)
-            output_json = zip_script(config_json["session_id"])
-            library = "neural network"
-            model = "keras"
-            test_score, prediction_time = evaluate(config_json, job_file_location)
+            process = start_automl_process(config)
+            yield from capture_process_output(process, start_time, False)
+            generate_script(config)
+            output_json = zip_script(config)
+            #AutoKeras only produces keras based ANN
+            library = ":keras_lib"
+            model = ":artificial_neural_network"
+            test_score, prediction_time = evaluate(config, os.path.join(config["job_folder_location"], get_config_property("job-file-name")), data_loader)
             response = yield from get_response(output_json, start_time, test_score, prediction_time, library, model)
             print(f'{get_config_property("adapter-name")} job finished')
             return response
@@ -54,10 +44,14 @@ class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
 
     def TestAdapter(self, request, context):
         try:
-            # saving AutoML configuration JSON
             config_json = json.loads(request.processJson)
-            job_file_location = os.path.join(get_config_property("job-file-path"),
-                                             get_config_property("job-file-name"))
+            job_file_location = os.path.join(get_config_property("training-path"),
+                                        config_json["user_identifier"],
+                                        config_json["training_id"],
+                                        get_config_property("job-folder-name"),
+                                        get_config_property("job-file-name"))
+
+            # saving AutoML configuration JSON
             with open(job_file_location, "w+") as f:
                 json.dump(config_json, f)
 
@@ -79,13 +73,28 @@ def serve():
     Adapter_pb2_grpc.add_AdapterServiceServicer_to_server(AdapterServiceServicer(), server)
     server.add_insecure_port(f'{get_config_property("grpc-server-address")}:{os.getenv("GRPC_SERVER_PORT")}')
     server.start()
+
+    # ToDo:
+    # - Make image tasks available in frontend 
+    # - Test image task application wide
+    # 
+    # Local testing
+    # channel = grpc.insecure_channel(f'{get_config_property("grpc-server-address")}:{os.getenv("GRPC_SERVER_PORT")}')
+    # stub = Adapter_pb2_grpc.AdapterServiceStub(channel)
+    # request = Adapter_pb2.StartAutoMLRequest() 
+    # 
+    # job_file_location = os.path.join(get_config_property("job-file-path"),
+    #                                 get_config_property("job-file-name"))
+    # with open(job_file_location) as file:
+    #     request.processJson = json.dumps(json.load(file))
+    # 
+    # response = stub.StartAutoML(request)
+
     print(get_config_property("adapter-name") + " started")
     server.wait_for_termination()
 
 
 if __name__ == '__main__':
-    if not os.path.exists('app-data/output/tmp'):
-        os.mkdir('app-data/output/tmp')
     logging.basicConfig()
     serve()
     print('done.')

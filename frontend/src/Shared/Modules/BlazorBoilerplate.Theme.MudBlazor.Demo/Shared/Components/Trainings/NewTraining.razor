@@ -1,0 +1,36 @@
+﻿@inject IStringLocalizer<Global> L
+@inject IApiClient apiClient
+@inject IViewNotifier viewNotifier
+@inject NavigationManager NavManager
+
+<MudCard Elevation="5">
+    <MudCardHeader Style="border-bottom-style: inset; border-bottom-width: 1px;">
+        <CardHeaderContent >
+            <MudText Typo="Typo.h6">New Training</MudText>
+        </CardHeaderContent>
+    </MudCardHeader>
+    <MudCardContent>
+        <MudPaper Height="215px" Elevation="0">
+            @if (Dataset == null)
+            {
+                <DataLoaderSpinner />
+            }
+            else
+            {
+                <MudStack>
+                    <MudButton OnClick="@(e => { NavManager.NavigateTo("/datasets/" + Dataset.Identifier + "/train"); })" 
+                        Variant="Variant.Filled" 
+                        StartIcon="@Icons.Filled.ModelTraining"
+                        Color="Color.Secondary">
+                        Start Training
+                    </MudButton>
+                </MudStack>
+            }
+        </MudPaper>
+    </MudCardContent>
+</MudCard>
+
+@code {
+    [Parameter]
+    public GetDatasetResponseDto Dataset { get; set; }
+}

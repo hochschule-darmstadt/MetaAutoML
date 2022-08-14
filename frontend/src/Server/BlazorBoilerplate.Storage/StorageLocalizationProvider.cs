@@ -6,12 +6,7 @@ using Karambolo.PO;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace BlazorBoilerplate.Storage
 {
@@ -32,15 +27,9 @@ namespace BlazorBoilerplate.Storage
 
             IReadOnlyDictionary<string, POCatalog> TextCatalogs = new Dictionary<string, POCatalog>();
 
-            var cultures = _environment.ContentRootFileProvider.GetDirectoryContents(basePath)
-                .Where(fi => fi.IsDirectory)
-                .Select(fi => fi.Name)
+            var textCatalogFiles = _environment.ContentRootFileProvider.GetDirectoryContents(basePath)
+                .Where(fi => !fi.IsDirectory && ".po".Equals(Path.GetExtension(fi.Name)))
                 .ToArray();
-
-            var textCatalogFiles = cultures.SelectMany(
-                c => _environment.ContentRootFileProvider.GetDirectoryContents(Path.Combine(basePath, c))
-                .Where(fi => !fi.IsDirectory && ".po".Equals(Path.GetExtension(fi.Name), StringComparison.OrdinalIgnoreCase)),
-                (c, f) => (Culture: c, FileInfo: f));
 
             var textCatalogs = new List<(string FileName, string Culture, POCatalog Catalog)>();
 
@@ -52,28 +41,30 @@ namespace BlazorBoilerplate.Storage
 
             Parallel.ForEach(textCatalogFiles,
                 () => new POParser(parserSettings),
-                (it, s, p) =>
+                (file, s, p) =>
                 {
-                    POParseResult result;
-                    using (var stream = it.FileInfo.CreateReadStream())
-                        result = p.Parse(new StreamReader(stream));
-
-                    if (result.Success)
+                    try
                     {
-                        if (result.Catalog.GetCultureName() != it.Culture)
-                            Logger.LogWarning($"Translation file '{Path.Combine(basePath, it.Culture, it.FileInfo.Name)}' language / folder mismatch.");
-                        else
+                        POParseResult result;
+                        using (var stream = file.CreateReadStream())
+                            result = p.Parse(new StreamReader(stream));
+
+                        if (result.Success)
                         {
                             lock (textCatalogs)
-                                textCatalogs.Add((it.FileInfo.Name, it.Culture, result.Catalog));
+                                textCatalogs.Add((file.Name, result.Catalog.GetCultureName(), result.Catalog));
                         }
+                        else
+                            Logger.LogWarning($"Translation file '{file.Name}' has errors.");
                     }
-                    else
-                        Logger.LogWarning($"Translation file '{Path.Combine(basePath, it.Culture, it.FileInfo.Name)}' has errors.");
+                    catch (Exception ex)
+                    {
+                        Logger.LogError($"Translation file '{file.Name}': {ex.GetBaseException().Message}");
+                    }
 
                     return p;
                 },
-                Noop<POParser>.Action);
+                CachedDelegates.Noop<POParser>.Action);
 
             TextCatalogs = textCatalogs
                 .GroupBy(it => it.Culture, it => (it.FileName, it.Catalog))

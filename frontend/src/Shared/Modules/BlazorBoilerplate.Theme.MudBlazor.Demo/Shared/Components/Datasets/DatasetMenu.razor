@@ -1,0 +1,17 @@
+﻿@inject IStringLocalizer<Global> L
+@inject NavigationManager NavManager
+
+
+<MudMenu Icon="@Icons.Material.Filled.MoreVert">
+    @if (Dataset != null)
+    {
+        <MudMenuItem OnClick="@(e => { NavManager.NavigateTo("/datasets/" + Dataset.Identifier + "/train"); })">Train</MudMenuItem>
+        <MudMenuItem>Delete</MudMenuItem>
+    }
+</MudMenu>
+
+@code {
+    [Parameter]
+    public GetDatasetResponseDto Dataset { get; set; }
+
+}

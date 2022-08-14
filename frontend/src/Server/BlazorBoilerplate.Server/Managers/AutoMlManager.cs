@@ -29,33 +29,6 @@ namespace BlazorBoilerplate.Server.Managers
             _httpContextAccessor = httpContextAccessor;
         }
         /// <summary>
-        /// Get the result model from a specific AutoML
-        /// </summary>
-        /// <param name="autoMl"></param>
-        /// <returns></returns>
-        public async Task<ApiResponse> GetModel(GetAutoMlModelRequestDto autoMl)
-        {
-            GetAutoMlModelResponseDto response = new GetAutoMlModelResponseDto();
-            GetAutoMlModelRequest getmodelRequest = new GetAutoMlModelRequest();
-            var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
-            try
-            {
-                getmodelRequest.Username = username;
-                getmodelRequest.SessionId = autoMl.SessionId;
-                getmodelRequest.AutoMl = autoMl.AutoMl;
-                var reply = _client.GetAutoMlModel(getmodelRequest);
-                response.Name = reply.Name;
-                response.Content = reply.File.ToByteArray();
-                return new ApiResponse(Status200OK, null, response);
-
-            }
-            catch (Exception ex)
-            {
-
-                return new ApiResponse(Status404NotFound, ex.Message);
-            }
-        }
-        /// <summary>
         /// Start the OMAML process to search for a model
         /// </summary>
         /// <param name="autoMl"></param>
@@ -74,18 +47,21 @@ namespace BlazorBoilerplate.Server.Managers
                 {
                     startAutoMLrequest.RequiredAutoMls.Add(i);
                 }
-                startAutoMLrequest.Task = GetMachineLearningTask(autoMl);
-                startAutoMLrequest.TabularConfig = GetTabularDataConfiguration(autoMl);
-                // TODO consider to refactor
-                startAutoMLrequest.RuntimeConstraints = new AutoMlRuntimeConstraints
+                foreach (var i in autoMl.RequiredMlLibraries)
                 {
-                    MaxIter = autoMl.RuntimeConstraints.Max_iter,
-                    RuntimeLimit = autoMl.RuntimeConstraints.Runtime_limit
-                };
+                    startAutoMLrequest.RequiredLibraries.Add(i);
+                }
+                startAutoMLrequest.Task = autoMl.Task;
+                startAutoMLrequest.Configuration = JsonConvert.SerializeObject(autoMl.Configuration);// = GetTabularDataConfiguration(autoMl);
+                // TODO consider to refactor
+                startAutoMLrequest.RuntimeConstraints = JsonConvert.SerializeObject(autoMl.RuntimeConstraints);
+                startAutoMLrequest.DatasetConfiguration = JsonConvert.SerializeObject(autoMl.DatasetConfiguration);
+                startAutoMLrequest.TestConfiguration = JsonConvert.SerializeObject(autoMl.TestConfig);
+                startAutoMLrequest.FileConfiguration = JsonConvert.SerializeObject(autoMl.FileConfiguration);
                 var reply = _client.StartAutoMlProcess(startAutoMLrequest);
                 if (reply.Result == ControllerReturnCode.Success)
                 {
-                    response.SessionId = reply.SessionId;
+                    response.TrainingId = reply.TrainingId;
                     return new ApiResponse(Status200OK, null, response);
                 }
                 else
@@ -109,9 +85,8 @@ namespace BlazorBoilerplate.Server.Managers
             try
             {
                 testAutoMLrequest.Username = username;
-                testAutoMLrequest.TestData = testAutoML.TestData;
-                testAutoMLrequest.SessionId = testAutoML.SessionId;
-                testAutoMLrequest.AutoMlName = testAutoML.AutoMlName;
+                testAutoMLrequest.ModelId = testAutoML.ModelId;
+                testAutoMLrequest.TestData = Google.Protobuf.ByteString.CopyFrom(testAutoML.TestData);
 
                 var reply = _client.TestAutoML(testAutoMLrequest);
 
@@ -126,51 +101,6 @@ namespace BlazorBoilerplate.Server.Managers
                 return new ApiResponse(Status404NotFound, ex.Message);
             }
         }
-        /// <summary>
-        /// Convert AutoML task to enum equivalent
-        /// </summary>
-        /// <param name="autoMl"></param>
-        /// <returns></returns>
-        private MachineLearningTask GetMachineLearningTask(StartAutoMLRequestDto autoMl)
-        {
-            switch (autoMl.DatasetType)
-            {
-                case ":tabular":
-                    switch (autoMl.Task)
-                    {
-                        case "tabular classification":
-                            return MachineLearningTask.TabularClassification;
-                        case "tabular regression":
-                            return MachineLearningTask.TabularRegression;
-                        default:
-                            return MachineLearningTask.Unknown;
-                    }
-                default:
-                    return MachineLearningTask.Unknown;
-            }
-        }
-        /// <summary>
-        /// retrive the Tabular data configuration accordingly to correct template
-        /// Needed since a correct conversion requires explicit knowledge of the JSON structure
-        /// </summary>
-        /// <param name="autoMl"></param>
-        /// <returns></returns>
-        private AutoMlConfigurationTabularData GetTabularDataConfiguration(StartAutoMLRequestDto autoMl)
-        {
-            switch (autoMl.DatasetType)
-            {
-                case ":tabular":
-                    AutoMlConfigurationTabularData conf = new AutoMlConfigurationTabularData();
-                    conf.Target = new AutoMlTarget();
-                    conf.Target.Target = ((AutoMLTabularDataConfiguration)autoMl.Configuration).Target.Target;
-                    conf.Target.Type = ((AutoMLTabularDataConfiguration)autoMl.Configuration).Target.Type;
-                    // remove target from features
-                    ((AutoMLTabularDataConfiguration)autoMl.Configuration).Features.Remove(((AutoMLTabularDataConfiguration)autoMl.Configuration).Target.Target);
-                    conf.Features.Add(((AutoMLTabularDataConfiguration)autoMl.Configuration).Features);
-                    return conf;
-                default:
-                    return null;
-            }
-        }
+        
     }
 }

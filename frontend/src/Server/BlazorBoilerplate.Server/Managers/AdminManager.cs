@@ -6,6 +6,7 @@ using BlazorBoilerplate.Infrastructure.Server.Models;
 using BlazorBoilerplate.Infrastructure.Storage.DataModels;
 using BlazorBoilerplate.Infrastructure.Storage.Permissions;
 using BlazorBoilerplate.Server.Aop;
+using BlazorBoilerplate.Server.Extensions;
 using BlazorBoilerplate.Shared.Dto.Admin;
 using BlazorBoilerplate.Shared.Localizer;
 using BlazorBoilerplate.Shared.Models.Account;
@@ -16,11 +17,7 @@ using IdentityServer4.EntityFramework.Mappers;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
-using Microsoft.Extensions.Logging;
-using System.Collections.Generic;
-using System.Linq;
 using System.Security.Claims;
-using System.Threading.Tasks;
 using static Microsoft.AspNetCore.Http.StatusCodes;
 
 namespace BlazorBoilerplate.Server.Managers
@@ -88,7 +85,7 @@ namespace BlazorBoilerplate.Server.Managers
         #region Roles
         public async Task<ApiResponse> GetRolesAsync(int pageSize = 0, int pageNumber = 0)
         {
-            var roleQuery = _roleManager.Roles.AsQueryable().OrderBy(x => x.Id);
+            var roleQuery = _roleManager.Roles.AsQueryable().OrderBy(x => x.Name);
             var count = roleQuery.Count();
             var listResponse = (pageSize > 0 ? roleQuery.Skip(pageNumber * pageSize).Take(pageSize) : roleQuery).ToList();
 
@@ -97,7 +94,7 @@ namespace BlazorBoilerplate.Server.Managers
             foreach (var role in listResponse)
             {
                 var claims = await _roleManager.GetClaimsAsync(role);
-                var permissions = claims.Where(x => x.Type == ApplicationClaimTypes.Permission).Select(x => _entityPermissions.GetPermissionByValue(x.Value).Name).ToList();
+                List<string> permissions = claims.OrderBy(x => x.Value).Where(x => x.Type == ApplicationClaimTypes.Permission).Select(x => _entityPermissions.GetPermissionByValue(x.Value).Name).ToList();
 
                 roleDtoList.Add(new RoleDto
                 {
@@ -114,7 +111,7 @@ namespace BlazorBoilerplate.Server.Managers
             var identityRole = await _roleManager.FindByNameAsync(roleName);
 
             var claims = await _roleManager.GetClaimsAsync(identityRole);
-            var permissions = claims.Where(x => x.Type == ApplicationClaimTypes.Permission).Select(x => _entityPermissions.GetPermissionByValue(x.Value).Name).ToList();
+            var permissions = claims.OrderBy(x => x.Value).Where(x => x.Type == ApplicationClaimTypes.Permission).Select(x => _entityPermissions.GetPermissionByValue(x.Value).Name).ToList();
 
             var roleDto = new RoleDto
             {
@@ -134,7 +131,7 @@ namespace BlazorBoilerplate.Server.Managers
 
             if (!result.Succeeded)
             {
-                var msg = string.Join(",", result.Errors.Select(i => i.Description));
+                var msg = result.GetErrors();
                 _logger.LogWarning($"Error while creating role {roleDto.Name}: {msg}");
                 return new ApiResponse(Status400BadRequest, msg);
             }
@@ -150,7 +147,7 @@ namespace BlazorBoilerplate.Server.Managers
                     await _roleManager.DeleteAsync(role);
             }
 
-            return new ApiResponse(Status200OK, L["Role {0} created", roleDto.Name], roleDto); //fix a strange System.Text.Json exception shown only in Debug_SSB 
+            return new ApiResponse(Status200OK, L["Role {0} created", roleDto.Name], roleDto); //fix a strange System.Text.Json exception shown only in Debug_SSB
         }
 
         public async Task<ApiResponse> UpdateRoleAsync(RoleDto roleDto)
@@ -169,7 +166,7 @@ namespace BlazorBoilerplate.Server.Managers
                     var role = await _roleManager.FindByNameAsync(roleDto.Name);
 
                     var claims = await _roleManager.GetClaimsAsync(role);
-                    var permissions = claims.Where(x => x.Type == ApplicationClaimTypes.Permission).Select(x => x.Value).ToList();
+                    var permissions = claims.OrderBy(x => x.Value).Where(x => x.Type == ApplicationClaimTypes.Permission).Select(x => x.Value).ToList();
 
                     foreach (var permission in permissions)
                     {

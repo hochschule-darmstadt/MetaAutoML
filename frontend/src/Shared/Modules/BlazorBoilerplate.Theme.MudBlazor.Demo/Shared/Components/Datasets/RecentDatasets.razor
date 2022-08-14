@@ -1,0 +1,103 @@
+﻿@inject IStringLocalizer<Global> L
+@inject NavigationManager NavManager
+@inject IFileUploader fileUploader
+
+
+<MudCard Elevation="5">
+    <MudCardHeader Style="border-bottom-style: inset; border-bottom-width: 1px;">
+        <CardHeaderContent >
+            <MudText Typo="Typo.h6">Recent datasets</MudText>
+        </CardHeaderContent>
+        <CardHeaderActions>
+            <MudStack Row="true" Class="align-content-center" Style="margin-top: 8px">
+                @*<UploadDataset OnUploadCompletedCallback="@OnUploadCompletedCallback"/>*@
+                
+                <MudButton OnClick="OnOpenUpload"
+                    Variant="Variant.Filled" 
+                    Color="Color.Secondary"
+                    EndIcon="@Icons.Filled.CloudUpload"
+                        Size="Size.Small">Add</MudButton>
+                <MudButton Href="@("/datasets")"
+                    Variant="Variant.Filled" 
+                    Color="Color.Secondary"
+                    EndIcon="@Icons.Filled.ReadMore"
+                        Size="Size.Small">More</MudButton>
+            </MudStack>
+        </CardHeaderActions>
+    </MudCardHeader>
+    <MudCardContent>
+        <MudPaper Height="250px" Elevation="0">
+            @if (Datasets == null)
+            {
+                 <DataLoaderSpinner />
+            }
+            else
+            {
+                <MudTable Items="@Datasets.Datasets" style="width:stretch" class="mat-elevation-z5" AllowSelection="false" Dense="true">
+                    <HeaderContent>
+                        <MudTh>Name</MudTh>
+                        <MudTh>Type</MudTh>
+                        <MudTh>Size</MudTh>
+                        <MudTh>Date</MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd >
+                            <a href="@NavManager.ToAbsoluteUri("datasets/" + @context.Identifier).AbsoluteUri" Style="cursor: pointer;">@context.Name</a>
+                        </MudTd>
+                        <MudTd >@context.Type.Properties["skos:prefLabel"]</MudTd>
+                        <MudTd >@FormatBytes(context.Size)</MudTd>
+                        <MudTd  style="white-space:nowrap;">@context.Creation_date.ToString("yyyy-MM-dd")</MudTd>
+                    </RowTemplate>
+                </MudTable>
+            }
+        </MudPaper>
+    </MudCardContent>
+</MudCard>
+
+@code {
+    [Parameter]
+    public GetDatasetsResponseDto Datasets
+    { 
+        get
+        {
+            return _datasets;
+        } 
+        set
+        {
+            _datasets = value;
+
+            if (_datasets != null)
+            {
+                _datasets.Datasets = _datasets.Datasets.OrderByDescending(x => x.Creation_date).Take(6).ToList();
+                StateHasChanged();
+            }
+        } 
+    }
+    private GetDatasetsResponseDto _datasets;
+    [Parameter]
+    public EventCallback OnUploadCompletedCallback { get; set; }
+
+    private void OnOpenUpload()
+    {
+        fileUploader.IsUploadDialogOpen = true;
+        if (fileUploader.RefreshUploadComponentCallback != null)
+        {
+            fileUploader.RefreshUploadComponentCallback();
+        }
+    }
+    public string FormatBytes(long bytes)
+    {
+      const int scale = 1024;
+      string[] orders = new string[] { "GB", "MB", "KB", "Bytes" };
+      long max = (long)Math.Pow(scale, orders.Length - 1);
+
+      foreach (string order in orders)
+      {
+        if ( bytes > max )
+          return string.Format("{0:##.##} {1}", decimal.Divide( bytes, max ), order);
+
+        max /= scale;
+      }
+      return "0 Bytes";
+    }
+}

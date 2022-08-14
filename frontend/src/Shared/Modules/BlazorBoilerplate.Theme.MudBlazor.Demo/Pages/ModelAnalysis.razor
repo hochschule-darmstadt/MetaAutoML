@@ -1,0 +1,31 @@
+﻿@page "/datasets/{datasetId}/models/{id}/analysis"
+@page "/trainings/{trainingId}/models/{id}/analysis"
+@inject IStringLocalizer<Global> L
+@inject ISnackbar Snackbar
+@inject IViewNotifier viewNotifier
+@inject IApiClient apiClient
+@attribute [Authorize]
+
+<TopSection>
+    <Breadcrumbs>
+        <Breadcrumb Title="Home" />
+    </Breadcrumbs>
+</TopSection>
+
+<MudStack AlignItems="AlignItems.Center" Row="true" Class="mb-2">
+    <MudIcon Size="Size.Large" Icon="@Icons.Filled.Lightbulb" />
+    <MudText Typo="Typo.h4">Analysis</MudText>
+</MudStack>
+
+<MudGrid>
+    <MudItem xs="12" sm="6" md="6">
+    </MudItem>
+    <MudItem xs="12" sm="6" md="6">
+    </MudItem>
+</MudGrid>
+
+
+@code {
+    [Parameter]
+    public string Id { get; set; }
+}

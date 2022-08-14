@@ -1,10 +1,9 @@
 using AutoMapper;
 using Azure.Core;
 using Azure.Identity;
-using Azure.Security.KeyVault.Secrets;
 using Azure.Security.KeyVault.Certificates;
+using Azure.Security.KeyVault.Secrets;
 using Azure.Storage.Blobs;
-using static BlazorBoilerplate.Constants.PasswordPolicy;
 using BlazorBoilerplate.Infrastructure.AuthorizationDefinitions;
 using BlazorBoilerplate.Infrastructure.Server;
 using BlazorBoilerplate.Infrastructure.Storage;
@@ -15,6 +14,8 @@ using BlazorBoilerplate.Server.Extensions;
 using BlazorBoilerplate.Server.Factories;
 using BlazorBoilerplate.Server.Managers;
 using BlazorBoilerplate.Server.Middleware;
+using BlazorBoilerplate.Server.Providers;
+using BlazorBoilerplate.Server.Services;
 using BlazorBoilerplate.Shared.Dto.ExternalAuth;
 using BlazorBoilerplate.Shared.Interfaces;
 using BlazorBoilerplate.Shared.Localizer;
@@ -24,49 +25,38 @@ using BlazorBoilerplate.Shared.Services;
 using BlazorBoilerplate.Shared.Validators.Db;
 using BlazorBoilerplate.Storage;
 using BlazorBoilerplate.Storage.Mapping;
+using BlazorBoilerplate.Theme.Material.Services;
 using Breeze.AspNetCore;
 using Breeze.Core;
 using FluentValidation.AspNetCore;
 using IdentityServer4;
-using IdentityServer4.AccessTokenValidation;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authentication.OAuth;
 using Microsoft.AspNetCore.Authentication.Twitter;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization; //ServerSideBlazor
+using Microsoft.AspNetCore.Components.WebAssembly.Services;
 using Microsoft.AspNetCore.DataProtection;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json.Serialization;
 using NSwag;
 using NSwag.AspNetCore;
 using NSwag.Generation.Processors.Security;
 using Serilog;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net.Http; //ServerSideBlazor
 using System.Reflection;
 using System.Security.Claims;
 using System.Security.Cryptography.X509Certificates;
-using System.Threading.Tasks;
+using static BlazorBoilerplate.Constants.PasswordPolicy;
+using static IdentityModel.JwtClaimTypes;
 using static IdentityServer4.IdentityServerConstants;
 using static Microsoft.AspNetCore.Http.StatusCodes;
-using Microsoft.AspNetCore.Components.WebAssembly.Services;
-using Grpc.Net.Client;
-using BlazorBoilerplate.Server.Services;
 
 namespace BlazorBoilerplate.Server
 {
@@ -116,7 +106,6 @@ namespace BlazorBoilerplate.Server
             services.AddScoped<IUserClaimsPrincipalFactory<ApplicationUser>,
                 AdditionalUserClaimsPrincipalFactory>();
 
-
             services.Configure<IISServerOptions>(options =>
             {
                 options.AllowSynchronousIO = true;
@@ -126,29 +115,20 @@ namespace BlazorBoilerplate.Server
             ////////////////////////////////////////////////////////////////////////////////////////////////////////
             /////ENV VARIABLE
             ///////////////////////////////////////////////////////////////////////////////////////////////////////
-            string endpoint = Environment.GetEnvironmentVariable("CONTROLLER_SERVICE_HOST");
-            string port = Environment.GetEnvironmentVariable("CONTROLLER_SERVICE_PORT");
-            string grpcEndpoint = $"https://{endpoint}:{port}";
-            if (endpoint == null || port == null)
-            {
-                // fix minor bug, frontend cannot debug locally
-                // throw new Exception("provide a grpc endpoint where to connect to the controller as an environment variable as CONTROLLER_SERVER_ADDRESS=<address>");
-                endpoint = Configuration["CONTROLLER_SERVICE_HOST"];
-                port = Configuration["CONTROLLER_SERVICE_PORT"];
-                grpcEndpoint = "https://localhost:5001";
-            }
-            
+            string grpcHost = Environment.GetEnvironmentVariable("CONTROLLER_SERVICE_HOST");
+            string grpcPort = Environment.GetEnvironmentVariable("CONTROLLER_SERVICE_PORT");
+            string grpcEndpoint = $"https://{grpcHost}:{grpcPort}";
+
+            string redisHost = Environment.GetEnvironmentVariable("REDIS_SERVICE_HOST");
+            string redisPort = Environment.GetEnvironmentVariable("REDIS_SERVICE_PORT");
+            string redisEndpoint = $"{redisHost}:{redisPort},connectTimeout=1000,syncTimeout=1000,asyncTimeout=1000";
+
             ////////////////////////////////////////////////////////////////////////////////////////////////////////
             //GRPC CONTROLLER FACTORY 
             ///////////////////////////////////////////////////////////////////////////////////////////////////////
             services.AddGrpcClient<ControllerService.ControllerServiceClient>(o =>
             {
                 o.Address = new Uri(grpcEndpoint);
-            })
-            .ConfigureChannel(o =>
-            {
-                o.MaxReceiveMessageSize = 200 * 1024 * 1024; // 200 MB
-                o.MaxSendMessageSize = 200 * 1024 * 1024; // 200 MB
             })
             .ConfigurePrimaryHttpMessageHandler(() =>
             {
@@ -157,6 +137,29 @@ namespace BlazorBoilerplate.Server
                     HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
                 return httpHandler;
             });
+
+
+            ////////////////////////////////////////////////////////////////////////////////////////////////////////
+            //REDIS CACHE 
+            ///////////////////////////////////////////////////////////////////////////////////////////////////////
+
+            services.AddStackExchangeRedisCache(options =>
+            {
+                options.Configuration = redisEndpoint;
+            });
+
+            ////////////////////////////////////////////////////////////////////////////////////////////////////////
+            //SERVICES
+            ///////////////////////////////////////////////////////////////////////////////////////////////////////
+
+            services.AddTransient<IAutoMlManager, AutoMlManager>();
+            services.AddTransient<IDatasetManager, DatasetManager>();
+            services.AddTransient<IOntologyManager, OntologyManager>();
+            services.AddTransient<ITrainingManager, TrainingManager>();
+            services.AddTransient<ICacheManager, CacheManager>();
+            services.AddTransient<IModelManager, ModelManager>();
+            services.AddScoped<IFileUploader, FileUploader>();
+            services.AddScoped<IGeneralInformation, GeneralInformationManager>();
 
 
             var authAuthority = Configuration[$"{projectName}:IS4ApplicationUrl"].TrimEnd('/');
@@ -286,9 +289,9 @@ namespace BlazorBoilerplate.Server
                 if (Convert.ToBoolean(Configuration[$"{projectName}:UseLocalCertStore"]) == true)
                 {
                     var certificateThumbprint = Configuration[$"{projectName}:CertificateThumbprint"];
-                    
+
                     var storeLocation = StoreLocation.LocalMachine;
-                    
+
                     dynamic storeName = "WebHosting";
 
                     if (OperatingSystem.IsLinux())
@@ -338,16 +341,14 @@ namespace BlazorBoilerplate.Server
                 }
             }
 
-            var authBuilder = services.AddAuthentication(options =>
-            {
-                options.DefaultScheme = IdentityServerAuthenticationDefaults.AuthenticationScheme;
-            })
-            .AddIdentityServerAuthentication(options =>
+            var authBuilder = services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer(options =>
             {
                 options.Authority = authAuthority;
-                options.SupportedTokens = SupportedTokens.Jwt;
                 options.RequireHttpsMetadata = _environment.IsProduction();
-                options.ApiName = IdentityServerConfig.LocalApiName;
+                options.Audience = IdentityServerConfig.LocalApiName;
+                options.TokenValidationParameters.ValidTypes = new[] { JwtTypes.AccessToken };
+
                 options.Events = new JwtBearerEvents
                 {
                     OnMessageReceived = context =>
@@ -357,7 +358,7 @@ namespace BlazorBoilerplate.Server
                         // If the request is for our hub...
                         var path = context.HttpContext.Request.Path;
                         if (!string.IsNullOrEmpty(accessToken) &&
-                            (path.StartsWithSegments("/chathub")))
+                            path.StartsWithSegments(Constants.HubPaths.Chat))
                         {
                             // Read the token out of the query string
                             context.Token = accessToken;
@@ -481,6 +482,7 @@ namespace BlazorBoilerplate.Server
             services.AddScoped<EntityPermissions>();
             services.AddSingleton<IAuthorizationPolicyProvider, AuthorizationPolicyProvider>();
             services.AddTransient<IAuthorizationHandler, DomainRequirementHandler>();
+            services.AddTransient<IAuthorizationHandler, EmailVerifiedHandler>();
             services.AddTransient<IAuthorizationHandler, PermissionRequirementHandler>();
             #endregion
 
@@ -582,6 +584,8 @@ namespace BlazorBoilerplate.Server
 
             services.AddServerSideBlazor().AddCircuitOptions(o =>
             {
+                o.DetailedErrors = Convert.ToBoolean(Configuration[$"{projectName}:DetailedErrors"] ?? bool.FalseString);
+
                 if (_environment.IsDevelopment())
                 {
                     o.DetailedErrors = true;
@@ -592,6 +596,7 @@ namespace BlazorBoilerplate.Server
             });
 
             services.AddSignalR();
+            services.AddSingleton<IUserIdProvider, UserIdProvider>();
 
             if (_enableAPIDoc)
                 services.AddOpenApiDocument(document =>
@@ -630,15 +635,10 @@ namespace BlazorBoilerplate.Server
 
             services.AddTransient<IEmailFactory, EmailFactory>();
 
-            services.AddTransient<IAutoMlManager, AutoMlManager>();
             services.AddTransient<IAccountManager, AccountManager>();
             services.AddTransient<IAdminManager, AdminManager>();
             services.AddTransient<IEmailManager, EmailManager>();
-            services.AddTransient<IDatasetManager, DatasetManager>();
-            services.AddTransient<IOntologyManager, OntologyManager>();
-            services.AddTransient<ISessionManager, SessionManager>();
             services.AddTransient<IExternalAuthManager, ExternalAuthManager>();
-            services.AddTransient<ICacheManager, CacheManager>();
 
             #region Automapper
             //Automapper to map DTO to Models https://www.c-sharpcorner.com/UploadFile/1492b1/crud-operations-using-automapper-in-mvc-application/
@@ -665,7 +665,7 @@ namespace BlazorBoilerplate.Server
                 var navigationManager = s.GetRequiredService<NavigationManager>();
                 var httpContextAccessor = s.GetRequiredService<IHttpContextAccessor>();
                 var cookies = httpContextAccessor.HttpContext.Request.Cookies;
-                var httpClientHandler = new HttpClientHandler(){ UseCookies = false };
+                var httpClientHandler = new HttpClientHandler() { UseCookies = false };
                 if (_environment.IsDevelopment())
                 {
                     // Return 'true' to allow certificates that are untrusted/invalid
@@ -713,12 +713,11 @@ namespace BlazorBoilerplate.Server
                 foreach (var service in services)
                     Log.Logger.Debug($"\n\tService: {service.ServiceType.FullName}\n\tLifetime: {service.Lifetime}\n\tInstance: {service.ImplementationType?.FullName}");
             }
-
-            services.AddScoped<SessionState>();
-            services.AddScoped<WizardState>();
         }
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+
+
             app.UseRequestLocalization();
 
             // cookie policy to deal with temporary browser incompatibilities
@@ -742,7 +741,7 @@ namespace BlazorBoilerplate.Server
             app.UseRouting();
 
             app.UseIdentityServer();
-            app.UseAuthentication();
+            //app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseMultiTenant();
@@ -778,6 +777,11 @@ namespace BlazorBoilerplate.Server
                 });
             }
 
+
+            ////////////////////////////////////////////////////////////////////////////////////////////////////////
+            //GRPC FILE SERVICE
+            ///////////////////////////////////////////////////////////////////////////////////////////////////////
+
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapDefaultControllerRoute();
@@ -787,7 +791,7 @@ namespace BlazorBoilerplate.Server
                 endpoints.MapFallbackToPage("/_Index");
 
                 // new SignalR endpoint routing setup
-                endpoints.MapHub<Hubs.ChatHub>("/chathub");
+                endpoints.MapHub<Hubs.ChatHub>(Constants.HubPaths.Chat);
             });
 
             Program.Sync.Release();

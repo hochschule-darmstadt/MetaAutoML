@@ -75,6 +75,7 @@ Cons
    :hidden:
    :caption: Quickstarts
 
+   quickstarts/security
    quickstarts/breeze_sharp_with_blazor
    quickstarts/entity_framework_core
    quickstarts/localization
@@ -89,3 +90,4 @@ Cons
    features/dual_mode_blazor
    features/multitenancy
    features/identityserver
+   features/source_generators

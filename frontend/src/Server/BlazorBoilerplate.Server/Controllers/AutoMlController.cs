@@ -32,15 +32,6 @@ namespace BlazorBoilerplate.Server.Controllers
         [ProducesResponseType(Status200OK)]
         [ProducesResponseType(Status400BadRequest)]
         [ProducesResponseType(Status404NotFound)]
-        public async Task<ApiResponse> GetAutoMlModel(GetAutoMlModelRequestDto autoMl)
-            => ModelState.IsValid ?
-                await _autoMlManager.GetModel(autoMl) :
-                new ApiResponse(Status400BadRequest, L["InvalidData"]);
-
-        [HttpPost]
-        [ProducesResponseType(Status200OK)]
-        [ProducesResponseType(Status400BadRequest)]
-        [ProducesResponseType(Status404NotFound)]
         public async Task<ApiResponse> StartAuto(StartAutoMLRequestDto autoMl)
             => ModelState.IsValid ?
                 await _autoMlManager.Start(autoMl) :

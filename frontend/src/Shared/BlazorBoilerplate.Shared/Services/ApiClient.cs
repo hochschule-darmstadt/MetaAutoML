@@ -3,20 +3,15 @@ using BlazorBoilerplate.Shared.Dto.AutoML;
 using BlazorBoilerplate.Shared.Dto.Dataset;
 using BlazorBoilerplate.Shared.Dto.Db;
 using BlazorBoilerplate.Shared.Dto.Email;
+using BlazorBoilerplate.Shared.Dto.Model;
 using BlazorBoilerplate.Shared.Dto.Ontology;
-using BlazorBoilerplate.Shared.Dto.Session;
+using BlazorBoilerplate.Shared.Dto.Training;
 using BlazorBoilerplate.Shared.Extensions;
 using BlazorBoilerplate.Shared.Interfaces;
 using BlazorBoilerplate.Shared.Models;
 using Breeze.Sharp;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Net.Http;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace BlazorBoilerplate.Shared.Services
 {
@@ -53,15 +48,15 @@ namespace BlazorBoilerplate.Shared.Services
         }
         public async Task<QueryResult<Todo>> GetToDos(ToDoFilter filter, int? take = null, int? skip = null)
         {
-            return await GetItems<Todo>(from: "Todos", orderByDescending: i => i.CreatedOn, take: take, skip: skip, parameters: filter.ToDictionary());
+            return await GetItems<Todo>(from: "Todos", orderByDescending: i => i.CreatedOn, take: take, skip: skip, parameters: filter?.ToDictionary());
         }
         public async Task<QueryResult<ApplicationUser>> GetTodoCreators(ToDoFilter filter)
         {
-            return await GetItems<ApplicationUser>(from: "TodoCreators", orderBy: i => i.UserName, parameters: filter.ToDictionary());
+            return await GetItems<ApplicationUser>(from: "TodoCreators", orderBy: i => i.UserName, parameters: filter?.ToDictionary());
         }
         public async Task<QueryResult<ApplicationUser>> GetTodoEditors(ToDoFilter filter)
         {
-            return await GetItems<ApplicationUser>(from: "TodoEditors", orderBy: i => i.UserName, parameters: filter.ToDictionary());
+            return await GetItems<ApplicationUser>(from: "TodoEditors", orderBy: i => i.UserName, parameters: filter?.ToDictionary());
         }
         public async Task<ApiResponseDto> SendTestEmail(EmailDto email)
         {
@@ -80,10 +75,18 @@ namespace BlazorBoilerplate.Shared.Services
         {
             return await httpClient.PostJsonAsync<ApiResponseDto>("api/Dataset/GetDataset", name);
         }
+        public async Task<ApiResponseDto> GetDatasetPreview(GetDatasetPreviewRequestDto dataset)
+        {
+            return await httpClient.PostJsonAsync<ApiResponseDto>("api/Dataset/GetDatasetPreview", dataset);
+        }
 
         public async Task<ApiResponseDto> UploadDataset(FileUploadRequestDto file)
         {
             return await httpClient.PostJsonAsync<ApiResponseDto>("api/Dataset/Upload", file);
+        }
+        public async Task<ApiResponseDto> UploadDatasetFile(MultipartFormDataContent file)
+        {
+            return await httpClient.PostFileAsync<ApiResponseDto>("api/Dataset/UploadData", file);
         }
 
         public async Task<ApiResponseDto> GetTasks(GetSupportedMlLibrariesRequestDto dataset)
@@ -91,9 +94,9 @@ namespace BlazorBoilerplate.Shared.Services
             return await httpClient.PostJsonAsync<ApiResponseDto>("api/Ontology/GetTasks", dataset);
         }
 
-        public async Task<ApiResponseDto> GetTabularDatasetColumnNames(GetTabularDatasetColumnNamesRequestDto dataset)
+        public async Task<ApiResponseDto> GetTabularDatasetColumn(GetTabularDatasetColumnRequestDto dataset)
         {
-            return await httpClient.PostJsonAsync<ApiResponseDto>("api/Dataset/GetTabularDatasetColumnNames", dataset);
+            return await httpClient.PostJsonAsync<ApiResponseDto>("api/Dataset/GetTabularDatasetColumn", dataset);
         }
 
         public async Task<ApiResponseDto> StartAutoML(StartAutoMLRequestDto automl)
@@ -101,21 +104,35 @@ namespace BlazorBoilerplate.Shared.Services
             return await httpClient.PostJsonAsync<ApiResponseDto>("api/AutoMl/StartAuto", automl);
         }
 
-        public async Task<ApiResponseDto> GetSessions(GetSessionsRequestDto sessions)
+        public async Task<ApiResponseDto> GetTrainingIds(GetTrainingIdsRequestDto trainings)
         {
-            return await httpClient.PostJsonAsync<ApiResponseDto>("api/Session/GetSessions", sessions);
+            return await httpClient.PostJsonAsync<ApiResponseDto>("api/Training/GetTrainingIds", trainings);
         }
 
-        public async Task<ApiResponseDto> GetSession(GetSessionRequestDto sessions)
+        public async Task<ApiResponseDto> GetTraining(GetTrainingRequestDto training)
         {
-            return await httpClient.PostJsonAsync<ApiResponseDto>("api/Session/GetSession", sessions);
+            return await httpClient.PostJsonAsync<ApiResponseDto>("api/Training/GetTraining", training);
         }
 
-        public async Task<ApiResponseDto> GetModel(GetAutoMlModelRequestDto automl)
+        public async Task<ApiResponseDto> GetAllTrainings(GetAllTrainingsRequestDto training)
         {
-            return await httpClient.PostJsonAsync<ApiResponseDto>("api/AutoMl/GetAutoMlModel", automl);
+            return await httpClient.PostJsonAsync<ApiResponseDto>("api/Training/GetAllTrainings", training);
         }
 
+        public async Task<ApiResponseDto> GetModelDownload(GetAutoMlModelRequestDto automl)
+        {
+            return await httpClient.PostJsonAsync<ApiResponseDto>("api/Model/GetModelDownload", automl);
+        }
+
+        public async Task<ApiResponseDto> GetModel(GetModelRequestDto model)
+        {
+            return await httpClient.PostJsonAsync<ApiResponseDto>("api/Model/GetModel", model);
+        }
+
+        public async Task<ApiResponseDto> GetModels(GetModelsRequestDto models)
+        {
+            return await httpClient.PostJsonAsync<ApiResponseDto>("api/Model/GetModels", models);
+        }
         public async Task<ApiResponseDto> GetCompatibleAutoMlSolutions(GetCompatibleAutoMlSolutionsRequestDto request)
         {
             return await httpClient.PostJsonAsync<ApiResponseDto>("api/Ontology/GetCompatibleAutoMlSolutions", request);
@@ -126,14 +143,24 @@ namespace BlazorBoilerplate.Shared.Services
             return await httpClient.PostJsonAsync<ApiResponseDto>("api/Ontology/GetSupportedMlLibraries", task);
         }
 
-        public async Task<ApiResponseDto> GetDatasetCompatibleTasks(GetDatasetCompatibleTasksRequestDto datasetName)
+        public async Task<ApiResponseDto> GetDatasetCompatibleTasks(GetDatasetCompatibleTasksRequestDto dataset)
         {
-            return await httpClient.PostJsonAsync<ApiResponseDto>("api/Ontology/GetDatasetCompatibleTasks", datasetName);
+            return await httpClient.PostJsonAsync<ApiResponseDto>("api/Ontology/GetDatasetCompatibleTasks", dataset);
         }
 
         public async Task<ApiResponseDto> TestAutoML(TestAutoMLRequestDto automl)
         {
             return await httpClient.PostJsonAsync<ApiResponseDto>("api/AutoMl/TestAutoML", automl);
+        }
+
+        public async Task<ApiResponseDto> GetHomeOverviewInformation()
+        {
+            return await httpClient.GetJsonAsync<ApiResponseDto>("api/GeneralInformation/GetHomeOverviewInformations");
+        }
+
+        public async Task<ApiResponseDto> SetDatasetConfiguration(SetDatasetFileConfigurationRequestDto dataset)
+        {
+            return await httpClient.PostJsonAsync<ApiResponseDto>("api/Dataset/SetDatasetConfiguration", dataset);
         }
     }
 }

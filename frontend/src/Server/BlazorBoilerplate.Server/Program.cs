@@ -1,11 +1,5 @@
 ﻿using BlazorBoilerplate.Server.Services;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Serilog;
-using System;
-using System.Threading;
 
 namespace BlazorBoilerplate.Server
 {
@@ -21,6 +15,7 @@ namespace BlazorBoilerplate.Server
             var configuration = new ConfigurationBuilder()
                 .AddJsonFile("appsettings.json")
                 .AddJsonFile($"appsettings.{environment}.json", optional: true)
+                .AddEnvironmentVariables()
                 .Build();
 
             Log.Logger = new LoggerConfiguration()
@@ -48,12 +43,11 @@ namespace BlazorBoilerplate.Server
             })
             .ConfigureWebHostDefaults(webBuilder =>
             {
-                webBuilder.UseStaticWebAssets();
                 webBuilder.UseConfiguration(new ConfigurationBuilder()
                     .AddCommandLine(args)
                     .Build());
                 webBuilder.UseStartup<Startup>();
-                webBuilder.UseSerilog();
-            });
+            })
+            .UseSerilog();
     }
 }

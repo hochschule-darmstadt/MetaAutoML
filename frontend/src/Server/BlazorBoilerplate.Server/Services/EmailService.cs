@@ -2,15 +2,7 @@
 using BlazorBoilerplate.Server.Managers;
 using BlazorBoilerplate.Shared.Dto.Email;
 using BlazorBoilerplate.Storage;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace BlazorBoilerplate.Server.Services
 {
@@ -29,7 +21,7 @@ namespace BlazorBoilerplate.Server.Services
         {
             try
             {
-                await Program.Sync.WaitAsync(stoppingToken);                
+                await Program.Sync.WaitAsync(stoppingToken);
 
                 _logger.LogInformation($"EmailService starting...");
 
@@ -40,7 +32,7 @@ namespace BlazorBoilerplate.Server.Services
                         var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
                         var emailManager = scope.ServiceProvider.GetRequiredService<IEmailManager>();
 
-                        foreach (var email in dbContext.QueuedEmails.Where(i => i.SentOn == null).OrderBy(i => i.CreatedOn))
+                        foreach (var email in dbContext.QueuedEmails.Where(i => i.SentOn == null).OrderBy(i => i.CreatedOn).ToArray())
                         {
                             var response = await emailManager.SendEmail(JsonConvert.DeserializeObject<EmailMessageDto>(email.Email));
 
@@ -62,7 +54,8 @@ namespace BlazorBoilerplate.Server.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError($"EmailService: ExecuteAsync {ex.GetBaseException()}");
+                if (ex is not OperationCanceledException)
+                    _logger.LogError($"EmailService: ExecuteAsync {ex.GetBaseException()}");
             }
         }
     }

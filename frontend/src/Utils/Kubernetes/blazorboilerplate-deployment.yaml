@@ -48,13 +48,9 @@ spec:
         - name: BlazorBoilerplate__UseSqlServer
           value: "true"
         - name: ConnectionStrings__DefaultConnection
-          value: "Server=141.100.60.107,32715;Database=blazor_boilerplate;Trusted_Connection=True;MultipleActiveResultSets=true;User=sa;Password=yourVeryStrong(!)Password;Integrated Security=false"
+          value: "Server=sqlserver;Database=blazor_boilerplate;Trusted_Connection=True;MultipleActiveResultSets=true;User=sa;Password=yourVeryStrong(!)Password;Integrated Security=false"
         - name: Serilog__MinimumLevel__Default
           value: Debug
-        - name: CONTROLLER_SERVICE_HOST
-          value: controller
-        - name: CONTROLLER_SERVICE_PORT
-          value: 5001
         image: alexhda/omaml-frontend:latest
         name: blazorboilerplate
         ports:
@@ -62,7 +58,7 @@ spec:
         - containerPort: 443
         resources:
           limits:
-            cpu: "1"
+            cpu: "2"
             memory: "2194304e3"
       restartPolicy: Always
 status: {}

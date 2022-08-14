@@ -1,9 +1,9 @@
-﻿using BlazorBoilerplate.Infrastructure.Storage.DataModels;
+﻿using BlazorBoilerplate.Infrastructure.AuthorizationDefinitions;
+using BlazorBoilerplate.Infrastructure.Storage.DataModels;
+using IdentityModel;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
-using System;
 using System.Security.Claims;
-using System.Threading.Tasks;
 
 //# Links
 //## ASP.NET Core Roles/Policies/Claims
@@ -25,7 +25,7 @@ namespace BlazorBoilerplate.Server.Authorization
             RoleManager<ApplicationRole> roleManager,
             IOptions<IdentityOptions> optionsAccessor)
             : base(userManager, roleManager, optionsAccessor)
-        {  }
+        { }
 
         public async override Task<ClaimsPrincipal> CreateAsync(ApplicationUser user)
         {
@@ -50,14 +50,14 @@ namespace BlazorBoilerplate.Server.Authorization
             //https://docs.microsoft.com/it-it/aspnet/core/security/authentication/mfa
             if (user.TwoFactorEnabled)
             {
-                identity.AddClaim(new Claim("amr", "mfa"));
+                identity.AddClaim(new Claim(JwtClaimTypes.AuthenticationMethod, ClaimValues.AuthenticationMethodMFA));
             }
             else
             {
-                identity.AddClaim(new Claim("amr", "pwd"));
+                identity.AddClaim(new Claim(JwtClaimTypes.AuthenticationMethod, ClaimValues.AuthenticationMethodPwd));
             }
 
-            return principal;         
+            return principal;
         }
     }
 }

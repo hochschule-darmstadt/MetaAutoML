@@ -1,19 +1,25 @@
-from predict_time_sources import feature_preparation, DataType, SplitMethod
-from JsonUtil import get_config_property
-import numpy as np
-import pandas as pd
-import os
-import grpc
-import subprocess
-import time
-import sys
 import json
+import os
 import shutil
+import subprocess
+import sys
+import time
+#import autokeras as ak
+#import tensorflow as tf
+
 import Adapter_pb2
 import Adapter_pb2_grpc
-from TemplateGenerator import TemplateGenerator
-from sklearn.metrics import mean_squared_error, accuracy_score
 import dill
+import grpc
+import numpy as np
+import pandas as pd
+from predict_time_sources import DataType, SplitMethod, feature_preparation
+from sklearn.metrics import accuracy_score, mean_squared_error
+
+from JsonUtil import get_config_property
+from TemplateGenerator import TemplateGenerator
+import glob
+from PIL import Image
 
 ######################################################################
 ## GRPC HELPER FUNCTIONS
@@ -37,7 +43,7 @@ def get_except_response(context, e):
     return Adapter_pb2.StartAutoMLResponse()
 
 
-def capture_process_output(process, start_time):
+def capture_process_output(process, start_time , use_error):
     """
     Read console log from subprocess, and send it after each \n to the controller
     ---
@@ -45,8 +51,12 @@ def capture_process_output(process, start_time):
     1. system process representing the AutoML process
     2. Process start time
     """
+    s = ""
     capture = ""
-    s = process.stdout.read(1)
+    if(use_error == False):
+        s = process.stdout.read(1)
+    else:
+        s = process.stderr.read(1)
     capture += s
     # Run until no more output is produced by the subprocess
     while len(s) > 0:
@@ -63,11 +73,15 @@ def capture_process_output(process, start_time):
             process_update.library = ""
             process_update.model = ""
             yield process_update
+
             sys.stdout.write(capture)
             sys.stdout.flush()
             capture = ""
+        if(use_error == False):
+            s = process.stdout.read(1)
+        else:
+            s = process.stderr.read(1)
         capture += s
-        s = process.stdout.read(1)
 
 
 def get_response(output_json, start_time, test_score, prediction_time, library, model):
@@ -104,114 +118,141 @@ def get_response(output_json, start_time, test_score, prediction_time, library, 
 
 #region
 
+def data_loader(config):
+    """
+    Get exception message
+    ---
+    Parameter
+    1. config: Job config
+    ---
+    Return job type specific dataset
+    """
 
-def export_model(model, sessionId, file_name):
+    train_data = None
+    test_data = None
+
+    if config["task"] == ":tabular_classification":
+        return read_tabular_dataset_training_data(config)
+    elif config["task"] == ":tabular_regression":
+        return read_tabular_dataset_training_data(config)
+    elif config["task"] == ":image_classification":
+        return read_image_dataset(config)
+    elif config["task"] == ":image_regression":
+        return read_image_dataset(config)
+    elif config["task"] == ":text_classification":
+        return read_tabular_dataset_training_data(config)
+
+    return train_data, test_data
+
+
+def export_model(model, path, file_name):
     """
     Export the generated ML model to disk
     ---
     Parameter:
     1. generate ML model
     """
-    with open(os.path.join(get_config_property('output-path'), sessionId, file_name), 'wb+') as file:
+    with open(os.path.join(path, file_name), 'wb+') as file:
         dill.dump(model, file)
 
-def start_automl_process():
+def start_automl_process(config):
     """"
     @:return started automl process
     """
     python_env = os.getenv("PYTHON_ENV", default="PYTHON_ENV_UNSET")
 
-    return subprocess.Popen([python_env, "AutoML.py", ""],
+    return subprocess.Popen([python_env, "AutoML.py", config["user_identifier"], config["training_id"]],
                             stdout=subprocess.PIPE,
                             universal_newlines=True)
 
-def generate_script(config_json):
+def generate_script(config):
     """
     Generate the result python script
     ---
     Parameter
     1. process configuration
     """
-    generator = TemplateGenerator()
-    generator.generate_script(config_json)
+    generator = TemplateGenerator(config)
+    generator.generate_script()
 
-def zip_script(session_id):
+def zip_script(config):
     """
     Zip the model and script from the current run
     ---
     Parameter
-    1. current run session id
+    1. current run training id
     ---
     Return json with zip information
     """
     print(f"saving model zip file for {get_config_property('adapter-name')}")
 
     zip_file_name = get_config_property("export-zip-file-name")
-    output_path = get_config_property("output-path")
-    session_path = os.path.join(output_path, str(session_id))
-    tmp_base_folder = os.path.join(output_path, 'tmp')
-    tmp_session_folder = os.path.join(tmp_base_folder, str(session_id))
+    output_path = config["export_folder_location"]
+    result_path = config["result_folder_location"]
     shutil.copy(get_config_property("predict-time-sources-path"),
-                session_path)
+                result_path)
 
-    #create tmp if not already existing
-    if not os.path.isdir(tmp_base_folder):
-        os.mkdir(tmp_base_folder)
-
-    shutil.make_archive(os.path.join(tmp_session_folder, zip_file_name),
+    shutil.make_archive(os.path.join(output_path, zip_file_name),
                         'zip',
-                        session_path,
+                        result_path,
                         base_dir=None)
 
-    #copy zip from temp to session folder and delete tmp session zip
-    shutil.copyfile(os.path.join(tmp_session_folder,  zip_file_name + '.zip'), os.path.join(session_path, zip_file_name + '.zip'))
-    shutil.rmtree(tmp_session_folder)
-
-    file_loc_on_controller = os.path.join(output_path,
-                                          get_config_property('adapter-name'),
-                                          str(session_id))
+    if get_config_property("local_execution") == "YES":
+        file_loc_on_controller = output_path
+    else:
+        file_loc_on_controller = os.path.join(get_config_property("training-path"),
+                                            get_config_property('adapter-name'),
+                                        config["user_identifier"],
+                                        config["training_id"])
 
     return {
         'file_name': f'{zip_file_name}.zip',
         'file_location': file_loc_on_controller
     }
 
-def evaluate(config_json, config_path):
+def evaluate(config_json, config_path, dataloader):
     """
     Evaluate the model by using the test set
     ---
     Parameter
     1. configuration json
     2. configuration path
+    3. dataloader
     ---
     Return evaluation score
     """
     file_path = os.path.join(config_json["file_location"], config_json["file_name"])
-    output_path = get_config_property("output-path")
-    session_path = os.path.join(output_path, str(config_json["session_id"]))
+    result_path = config_json["result_folder_location"]
     # predict
-    os.chmod(os.path.join(session_path, "predict.py"), 0o777)
+    os.chmod(os.path.join(result_path, "predict.py"), 0o777)
     python_env = os.getenv("PYTHON_ENV", default="PYTHON_ENV_UNSET")
 
     predict_start = time.time()
-    subprocess.call([python_env, os.path.join(session_path, "predict.py"), file_path, config_path])
+    subprocess.call([python_env, os.path.join(result_path, "predict.py"), file_path, config_path])
     predict_time = time.time() - predict_start
 
-    test = pd.read_csv(file_path)
-    if SplitMethod.SPLIT_METHOD_RANDOM == config_json["test_configuration"]["method"]:
-        test = test.sample(random_state=config_json["test_configuration"]["random_state"], frac=1)
-    else:
-        test = test.iloc[int(test.shape[0] * config_json["test_configuration"]["split_ratio"]):]
+    if(config_json["task"] == ":tabular_classification" or config_json["task"] == ":tabular_regression"):
+        train, test = dataloader(config_json)
+        target = config_json["configuration"]["target"]["target"]
+    elif(config_json["task"] == ":image_classification" or config_json["task"] == ":image_regression"):
+        X_train, y_train, X_val, y_val, X_test, y_test = data_loader(config_json)
 
-    predictions = pd.read_csv(os.path.join(session_path, "predictions.csv"))
+    predictions = pd.read_csv(os.path.join(result_path, "predictions.csv"))
+    os.remove(os.path.join(result_path, "predictions.csv"))
 
-    target = config_json["tabular_configuration"]["target"]["target"]
-    if config_json["task"] == 1:
-        return accuracy_score(test[target], predictions["predicted"]), (predict_time * 1000) / test.shape[
-            0]
-    elif config_json["task"] == 2:
+    if config_json["task"] == ":tabular_classification":
+        return accuracy_score(test[target], predictions["predicted"]), (predict_time * 1000) / test.shape[0]
+
+    elif config_json["task"] == ":tabular_regression":
         return mean_squared_error(test[target], predictions["predicted"], squared=False), \
                (predict_time * 1000) / test.shape[0]
+
+    elif config_json["task"] == ":image_classification":
+        return accuracy_score(y_test, predictions["predicted"]), (predict_time * 1000) / y_test.shape[0]
+
+    elif config_json["task"] == ":image_regression":
+        return mean_squared_error(y_test, predictions["predicted"], squared=False), \
+               (predict_time * 1000) / y_test.shape[0]
 
 
 def predict(data, config_json, config_path):
@@ -225,41 +266,74 @@ def predict(data, config_json, config_path):
     ---
     Return prediction score 
     """
-    working_dir = os.path.join(get_config_property("output-path"), "working_dir")
+    result_folder_location = os.path.join(get_config_property("training-path"),
+                                        config_json["user_identifier"],
+                                        config_json["training_id"],
+                                        get_config_property("result-folder-name"))
 
-    shutil.unpack_archive(os.path.join(get_config_property("output-path"),
-                                       str(config_json["session_id"]),
-                                       get_config_property("export-zip-file-name") + ".zip"),
-                          working_dir,
-                          "zip")
 
-    file_path = os.path.join(working_dir, "test.csv")
+    file_path = os.path.join(result_folder_location, "test.csv")
 
     with open(file_path, "w+") as f:
         f.write(data)
 
     # predict
-    os.chmod(os.path.join(working_dir, "predict.py"), 0o777)
+    os.chmod(os.path.join(result_folder_location, "predict.py"), 0o777)
     python_env = os.getenv("PYTHON_ENV", default="PYTHON_ENV_UNSET")
 
     predict_start = time.time()
-    subprocess.call([python_env, os.path.join(working_dir, "predict.py"), file_path, config_path])
+    subprocess.call([python_env, os.path.join(result_folder_location, "predict.py"), file_path, config_path])
     predict_time = time.time() - predict_start
 
-    test = pd.read_csv(file_path)
+    predictions = pd.read_csv(os.path.join(result_folder_location, "predictions.csv"))
+    os.remove(file_path)
+    os.remove(os.path.join(result_folder_location, "predictions.csv"))
 
-    predictions = pd.read_csv(os.path.join(working_dir, "predictions.csv"))
-    shutil.rmtree(working_dir)
+    
+    return 0, predict_time, predictions["predicted"].astype('string').tolist()
 
-    target = config_json["tabular_configuration"]["target"]["target"]
-    if config_json["task"] == 1 and target in test:
-        return accuracy_score(test[target], predictions["predicted"]), predict_time, \
-               predictions["predicted"].astype('string').tolist()
-    elif config_json["task"] == 2 and target in test:
-        return mean_squared_error(test[target], predictions["predicted"], squared=False), predict_time, \
-               predictions["predicted"].astype(np.string).tolist()
-    else:
-        return 0, predict_time, predictions["predicted"].astype('string').tolist()
+def SetupRunNewRunEnvironment(configuration):
+    # saving AutoML configuration JSON
+    config_json = json.loads(configuration)
+
+    #folder location for job related files
+    job_folder_location = os.path.join(get_config_property("training-path"),
+                                        config_json["user_identifier"],
+                                        config_json["training_id"],
+                                        get_config_property("job-folder-name"))
+
+    #folder location for automl generated model files (not copied in ZIP)
+    model_folder_location = os.path.join(get_config_property("training-path"),
+                                        config_json["user_identifier"],
+                                        config_json["training_id"],
+                                        get_config_property("model-folder-name"))
+
+    export_folder_location = os.path.join(get_config_property("training-path"),
+                                        config_json["user_identifier"],
+                                        config_json["training_id"],
+                                        get_config_property("export-folder-name"))
+
+    result_folder_location = os.path.join(get_config_property("training-path"),
+                                        config_json["user_identifier"],
+                                        config_json["training_id"],
+                                        get_config_property("result-folder-name"))
+
+    config_json["job_folder_location"] = job_folder_location
+    config_json["model_folder_location"] = model_folder_location
+    config_json["export_folder_location"] = export_folder_location
+    config_json["result_folder_location"] = result_folder_location
+
+    #Make sure job folders exists
+    os.makedirs(job_folder_location, exist_ok=True)
+    os.makedirs(model_folder_location, exist_ok=True)
+    os.makedirs(export_folder_location, exist_ok=True)
+    os.makedirs(result_folder_location, exist_ok=True)
+
+    #Save job file
+    with open(os.path.join(job_folder_location, get_config_property("job-file-name")), "w+") as f:
+        json.dump(config_json, f)
+        
+    return config_json
 
 #endregion
 
@@ -287,31 +361,31 @@ def read_tabular_dataset_training_data(json_configuration):
     """
     Read the training dataset from disk
     """
-    df = pd.read_csv(os.path.join(json_configuration["file_location"], json_configuration["file_name"]),
-                    **json_configuration["file_configuration"])
+    data = pd.read_csv(os.path.join(json_configuration["file_location"], json_configuration["file_name"]), **json_configuration["file_configuration"])
 
     # convert all object columns to categories, because autosklearn only supports numerical,
     # bool and categorical features
     #TODO: change to ontology based preprocessing
-    df[df.select_dtypes(['object']).columns] = df.select_dtypes(['object']).apply(lambda x: x.astype('category'))
-
+    data[data.select_dtypes(['object']).columns] = data.select_dtypes(['object']).apply(lambda x: x.astype('category'))
 
     # split training set
-    if SplitMethod.SPLIT_METHOD_RANDOM == json_configuration["test_configuration"]["method"]:
-        df = df.sample(random_state=json_configuration["test_configuration"]["random_state"], frac=1)
+    if SplitMethod.SPLIT_METHOD_RANDOM.value == json_configuration["test_configuration"]["method"]:
+        train = data.sample(random_state=json_configuration["test_configuration"]["random_state"], frac=1)
+        test = data.sample(random_state=json_configuration["test_configuration"]["random_state"], frac=1)
     else:
-        df = df.iloc[:int(df.shape[0] * json_configuration["test_configuration"]["split_ratio"])]
+        train = data.iloc[:int(data.shape[0] * json_configuration["test_configuration"]["split_ratio"])]
+        test = data.iloc[int(data.shape[0] * json_configuration["test_configuration"]["split_ratio"]):]
 
-    return df
+    return train, test
 
 def prepare_tabular_dataset(df, json_configuration):
     """
     Prepare tabular dataset, perform feature preparation and data type casting
     """
-    df = feature_preparation(df, json_configuration["tabular_configuration"]["features"].items())
-    df = cast_dataframe_column(df, json_configuration["tabular_configuration"]["target"]["target"], json_configuration["tabular_configuration"]["target"]["type"])
-    X = df.drop(json_configuration["tabular_configuration"]["target"]["target"], axis=1)
-    y = df[json_configuration["tabular_configuration"]["target"]["target"]]
+    df = feature_preparation(df, json_configuration["dataset_configuration"]["features"].items())
+    df = cast_dataframe_column(df, json_configuration["configuration"]["target"]["target"], json_configuration["configuration"]["target"]["type"])
+    X = df.drop(json_configuration["configuration"]["target"]["target"], axis=1)
+    y = df[json_configuration["configuration"]["target"]["target"]]
     return X, y
 
 def convert_X_and_y_dataframe_to_numpy(X, y):
@@ -323,4 +397,75 @@ def convert_X_and_y_dataframe_to_numpy(X, y):
     y = y.to_numpy()
     return X, y
 
+#endregion
+
+######################################################################
+## IMAGE DATASET HELPER FUNCTIONS
+######################################################################
+
+#region
+
+def read_image_dataset(json_configuration):
+    """Reads image data and creates AutoKeras specific structure/sets
+    ---
+    Parameter
+    1. config: Job config
+    ---
+    Return image dataset
+    """
+    # Treat file location like URL if it does not exist as dir. URL/Filename need to be specified.
+    # Mainly used for testing purposes in the hard coded json for the job
+    # Example: app-data/datasets vs https://storage.googleapis.com/download.tensorflow.org/example_images/flower_photos.tgz
+    """
+    if not (os.path.exists(os.path.join(local_dir_path, json_configuration["file_name"]))):
+        local_file_path = tf.keras.utils.get_file(
+            origin=json_configuration["file_location"], 
+            fname="image_data", 
+            cache_dir=os.path.abspath(os.path.join("app-data")), 
+            extract=True
+        )
+
+        local_dir_path = os.path.dirname(local_file_path)
+    """
+    data_dir = os.path.join(json_configuration["file_location"], json_configuration["file_name"])
+    train_df_list =[]
+    test_df_list =[]
+
+    def read_image_dataset_folder(sub_folder_type):
+        files = []
+        df = []
+        for folder in os.listdir(os.path.join(data_dir, sub_folder_type)):
+            files.append(glob.glob(os.path.join(data_dir, sub_folder_type, folder, "*.jpeg")))
+
+        df_list =[]
+        for i in range(len(files)):
+            df = pd.DataFrame()
+            df["name"] = [x for x in files[i]]
+            df['outcome'] = i
+            df_list.append(df)
+        return df_list
+
+    train_df_list = read_image_dataset_folder("train")
+    test_df_list = read_image_dataset_folder("test")
+
+    train_data = pd.concat(train_df_list, axis=0,ignore_index=True)
+    test_data = pd.concat(test_df_list, axis=0,ignore_index=True)
+
+    def img_preprocess(img):
+        """
+        Opens the image and does some preprocessing 
+        such as converting to RGB, resize and converting to array
+        """
+        img = Image.open(img)
+        img = img.convert('RGB')
+        img = img.resize((256,256))
+        img = np.asarray(img)/255
+        return img
+
+    X_train = np.array([img_preprocess(p) for p in train_data.name.values])
+    y_train = train_data.outcome.values
+    X_test = np.array([img_preprocess(p) for p in test_data.name.values])
+    y_test = test_data.outcome.values
+    return X_train, y_train, X_test, y_test
+    
 #endregion

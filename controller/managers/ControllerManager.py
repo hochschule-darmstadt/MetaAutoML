@@ -2,6 +2,8 @@ import os
 import pandas as pd
 from requests import request
 from AutoMLSession import AutoMLSession
+import json
+from google.protobuf.timestamp_pb2 import Timestamp
 
 import uuid
 
@@ -11,6 +13,7 @@ from AdapterManager import AdapterManager
 from CsvManager import CsvManager
 from RdfManager import RdfManager
 from persistence.data_storage import DataStorage
+
 
 class ControllerManager(object):
     """
@@ -25,10 +28,10 @@ class ControllerManager(object):
         1. local datasets folder path
         ---
         """
-        self.__rdfManager = RdfManager()
-        self.__adapterManager = AdapterManager()
-        self.__sessions: dict[str, AutoMLSession] = {}
         self.__data_storage = data_storage
+        self.__rdfManager = RdfManager()
+        self.__adapterManager = AdapterManager(self.__data_storage)
+        self.__trainings: dict[str, AutoMLSession] = {}
         return
 
     def CreateNewUser(self, request: "CreateNewUserRequest") -> "CreateNewUserResponse":
@@ -41,11 +44,12 @@ class ControllerManager(object):
         Return a new OMA-ML user id
         """
         username = str(uuid.uuid4())
+        ROOT_PATH = os.path.dirname(os.path.abspath(__file__))
         if self.__data_storage.CheckIfUserExists(username) == True: #User already exists
             return CreateNewUserResponse(ResultCode.RESULT_CODE_ERROR_CAN_NOT_CREATE_USER, "")
         else:
-            dataset = CsvManager.ReadDefaultDatasetAsBytes()
-            self.__data_storage.save_dataset(username, "titanic_train.csv", dataset, ":tabular", "Titanic")
+            CsvManager.CopyDefaultDataset(username)
+            self.__data_storage.InsertDataset(username, "titanic_train.csv", ":tabular", "Titanic")
             return CreateNewUserResponse(ResultCode.RESULT_CODE_OKAY, username)
             
 
@@ -54,11 +58,16 @@ class ControllerManager(object):
         Get the generated model zip for one AutoML 
         ---
         Parameter
-        1. session id
+        1. training id
         ---
         Return a .zip containing the model and executable script
         """
-        return self.__sessions[request.session_id].get_automl_model(request)
+        models = self.__data_storage.GetModels(request.username, request.training_id)
+        result = GetAutoMlModelResponse()
+        result.name = os.path.basename(os.path.normpath(models[0]["path"]))
+        with open(models[0]["path"], "rb") as a:
+            result.file = a.read()
+        return result
 
     def GetCompatibleAUtoMlSolutions(self, request: "GetCompatibleAutoMlSolutionsRequest") -> "GetCompatibleAutoMlSolutionsResponse":
         """
@@ -89,18 +98,19 @@ class ControllerManager(object):
         Return a list of compatible datasets
         """
         response = GetDatasetsResponse()
-        all_datasets: list[dict[str, object]] = self.__data_storage.get_datasets(request.username)
+        all_datasets: list[dict[str, object]] = self.__data_storage.GetDatasets(request.username)
         
         for dataset in all_datasets:
             try:
-                rows, cols = pd.read_csv(dataset["path"]).shape
                 response_dataset = Dataset()
+                
+                response_dataset.analysis = json.dumps(dataset['analysis'])
+                response_dataset.size = dataset['size']
                 response_dataset.identifier = str(dataset["_id"])
-                response_dataset.file_name = dataset["name"]
-                response_dataset.type = "TABULAR"
-                response_dataset.rows = rows
-                response_dataset.columns = cols
+                response_dataset.name = dataset["name"]
+                response_dataset.type = dataset['type']
                 response_dataset.creation_date = datetime.fromtimestamp(int(dataset["mtime"]))
+                response_dataset.file_configuration = dataset["file_configuration"]
                 response.dataset.append(response_dataset)
             except Exception as e:
                 print(f"exception: {e}")
@@ -115,17 +125,6 @@ class ControllerManager(object):
         """
         return self.__rdfManager.GetDatasetTypes(request)
 
-    def GetDatasetType(self, request: "GetDatasetTypeRequest") -> "GetDatasetTypeResponse":
-        """
-        Get a selected dataset type
-        ---
-        Return a name of a selected dataset type
-        """
-        # TODO: figure out what needs to be done
-        response = GetDatasetTypeResponse()
-        response.return_code = 0
-        return response
-
     def GetDataset(self, request: "GetDatasetRequest") -> "GetDatasetResponse":
         """
         Get dataset details for a specific dataset
@@ -139,39 +138,148 @@ class ControllerManager(object):
         datatype: the datatype of the column
         firstEntries: the first couple of rows of the dataset
         """
-        # TODO: change gRPC message to dataset id instead of name
-        found, dataset = self.__data_storage.find_dataset(request.username, request.identifier)
-        if not found:
-            raise Exception(f"cannot find dataset with name: {request.dataset}")
+        response = GetDatasetResponse()
+        found, dataset = self.__data_storage.GetDataset(request.username, request.identifier)
+        
+        try:
+            response_dataset = Dataset()
+            response_dataset.analysis = json.dumps(dataset['analysis'])
+            response_dataset.size = dataset['size']
+            response_dataset.identifier = str(dataset["_id"])
+            response_dataset.name = dataset["name"]
+            response_dataset.type = dataset['type']
+            response_dataset.creation_date = datetime.fromtimestamp(int(dataset["mtime"]))
+            response_dataset.file_name = dataset["file_name"]
+            response_dataset.file_configuration = dataset["file_configuration"]
+            response.dataset_infos = response_dataset
+        except Exception as e:
+            print(f"exception: {e}")
+                
+        return response
 
-        dataset = CsvManager.read_dataset(dataset["path"])
-        return dataset
-
-    def GetSessions(self, request: "GetSessionsRequest") -> "GetSessionsResponse":
+    def GetTrainings(self, request: "GetTrainingsRequest") -> "GetTrainingsResponse":
         """
-        Get all sessions
+        Get all trainings
         ---
-        Return list of all sessions
+        Return list of all trainings
         """
-        response = GetSessionsResponse()
+        response = GetTrainingsResponse()
+        all_trainings: list[dict[str, object]] = self.__data_storage.GetTrainings(request.username)
+        
+        for training in all_trainings:
+            try:
+                response.training_ids.append(str(training["_id"]))
+            except Exception as e:
+                print(f"exception: {e}")
+                
+        return response
 
-        # only return sessions from this runtime
-        for id in self.__sessions.keys():
-            response.session_ids.append(id)
+    def GetTraining(self, request: "GetTrainingRequest") -> "GetTrainingResponse":
+        """
+        Get status of a specific Training
+        ---
+        Parameter
+        1. Training id
+        ---
+        Return the Training status
+        """
+        response = GetTrainingResponse() 
+        training = self.__data_storage.GetTraining(request.username, request.id)
+        if training == None:
+            raise Exception(f"cannot find training with id: {request.id}")
+        training_models = self.__data_storage.GetModels(request.username, request.id)
+        
+        if len(list(training_models)) == 0:
+            return response
+
+        response.status = training["status"]
+        for model in list(training_models):
+            autoMlStatus = AutoMlStatus()
+            autoMlStatus.identifier = str(model["_id"])
+            autoMlStatus.name = model["automl_name"]
+            autoMlStatus.status = model["status"]
+            autoMlStatus.messages[:] =  model["status_messages"]
+            autoMlStatus.test_score =  model["test_score"]
+            autoMlStatus.validation_score =  model["validation_score"]
+            autoMlStatus.runtime =  model["runtime"]
+            autoMlStatus.predictiontime =  model["prediction_time"]
+            autoMlStatus.model =  model["model"]
+            autoMlStatus.library =  model["library"]
+            response.automls.append(autoMlStatus)
+            response.identifier = str(model["_id"])
+            response.dataset_id = model["dataset_id"]
+                    
+        
+        response.dataset_id = training["dataset_id"]
+        response.dataset_name = training["dataset_name"]
+        response.task = training["task"]
+        response.start_time = training["start_time"]
+        response.identifier = str(training["_id"])
+        response.configuration = json.dumps(training["configuration"])
+        for automl in training['required_automls']:
+            response.required_auto_mls.append(automl)
+        for lib in training['required_libraries']:
+            response.required_ml_libraries.append(lib)
+        response.runtime_constraints = json.dumps(training["runtime_constraints"])
+        response.dataset_configuration = json.dumps(training["dataset_configuration"])
+
+        return response
+    
+    def GetAllTrainings(self, request: "GetAllTrainingsRequest") -> "GetAllTrainingsResponse":
+        """
+        Get list of all trainings
+        ---
+        Parameter
+        1. user identifier
+        ---
+        Return list of All trainings
+        """
+        response = GetAllTrainingsResponse() 
+
+        all_trainings: list[dict[str, object]] = self.__data_storage.GetTrainings(request.username)
+        
+        for training in all_trainings:
+            try:
+                trainingItem = GetTrainingResponse()
+
+                training_models = self.__data_storage.GetModels(request.username, str(training["_id"]))
+
+                trainingItem.status = training["status"]
+                for model in list(training_models):
+                    autoMlStatus = AutoMlStatus()
+                    autoMlStatus.identifier = str(model["_id"])
+                    autoMlStatus.name = model["automl_name"]
+                    autoMlStatus.status = model["status"]
+                    autoMlStatus.messages[:] =  model["status_messages"]
+                    autoMlStatus.test_score =  model["test_score"]
+                    autoMlStatus.validation_score =  model["validation_score"]
+                    autoMlStatus.runtime =  model["runtime"]
+                    autoMlStatus.predictiontime =  model["prediction_time"]
+                    autoMlStatus.model =  model["model"]
+                    autoMlStatus.library =  model["library"]
+                    trainingItem.automls.append(autoMlStatus)
+                    trainingItem.identifier = str(model["_id"])
+                    trainingItem.dataset_id = model["dataset_id"]
+
+                trainingItem.dataset_id = training["dataset_id"]
+                trainingItem.dataset_name = training["dataset_name"]
+                trainingItem.task = training["task"]
+                trainingItem.configuration = json.dumps(training["configuration"])
+                trainingItem.start_time = training["start_time"]
+                trainingItem.identifier = str(training["_id"])
+                for automl in training['required_automls']:
+                    trainingItem.required_auto_mls.append(automl)
+                for lib in training['required_libraries']:
+                    trainingItem.required_ml_libraries.append(lib)
+                trainingItem.runtime_constraints = json.dumps(training["runtime_constraints"])
+                trainingItem.dataset_configuration = json.dumps(training["dataset_configuration"])
+                response.trainings.append(trainingItem)
+            except Exception as e:
+                print(f"exception: {e}")
+
 
         return response
 
-    def GetSessionStatus(self, request: "GetSessionStatusRequest") -> "GetSessionStatusResponse":
-        """
-        Get status of a specific session
-        ---
-        Parameter
-        1. session id
-        ---
-        Return the session status
-        """
-        return self.__sessions[request.id].get_session_status()
-    
     def GetSupportedMlLibraries(self, request: "GetSupportedMlLibrariesRequest") -> "GetSupportedMlLibrariesResponse":
         """
         Get supported ML libraries for a task
@@ -183,7 +291,7 @@ class ControllerManager(object):
         """
         return self.__rdfManager.GetSupportedMlLibraries(request)
 
-    def GetTabularDatasetColumnNames(self, request: "GetTabularDatasetColumnNamesRequest") -> "GetTabularDatasetColumnNamesResponse":
+    def GetTabularDatasetColumn(self, request: "GetTabularDatasetColumnRequest") -> "GetTabularDatasetColumnResponse":
         """
         Get column names for a specific tabular dataset
         ---
@@ -192,25 +300,12 @@ class ControllerManager(object):
         ---
         Return list of column names
         """
-
-        # TODO: change gRPC message to dataset id instead of name
-        found, dataset = self.__data_storage.find_dataset(request.username, request.datasetName)
+        found, dataset = self.__data_storage.GetDataset(request.username, request.dataset_identifier)
         if found: 
-            return CsvManager.read_column_names(dataset["path"])
+            return CsvManager.GetColumns(dataset["path"])
         else:
             # no dataset found -> return empty response
-            return GetTabularDatasetColumnNamesResponse()
-    
-    def GetSupportedMlLibraries(self, request) -> GetSupportedMlLibrariesResponse:
-        """
-        Get supported ML libraries for a task
-        ---
-        Parameter
-        1. task identifier
-        ---
-        Return list of ML libraries
-        """
-        return self.__rdfManager.GetSupportedMlLibraries(request)
+            return GetTabularDatasetColumnResponse()
 
     def GetDatasetCompatibleTasks(self, request: "GetDatasetCompatibleTasksRequest") -> "GetDatasetCompatibleTasksResponse":
         """
@@ -218,10 +313,110 @@ class ControllerManager(object):
         ---
         Parameter
         1. dataset name
+        2. dataset type
         ---
         Return list of tasks
         """
-        return self.__rdfManager.GetDatasetCompatibleTasks(request)
+        dataset = self.__data_storage.GetDataset(request.username, request.dataset_name)
+        return self.__rdfManager.GetDatasetCompatibleTasks(request, dataset[1]["type"])
+
+    def GetObjectsInformation(self, request: "GetObjectsInformationRequest") -> "GetObjectsInformationResponse":
+        """
+        Get all information for a specific object
+        ---
+        Parameter
+        1. object id
+        ---
+        Return dictonary of object informations
+        """
+        print("GET OBJECT INFOS TRIGGERED")
+        return self.__rdfManager.GetObjectsInformation(request)
+
+    def GetHomeOverviewInformation(self, request: "GetHomeOverviewInformationRequest") -> "GetHomeOverviewInformationResponse":
+        """
+        Get all information for the home information page
+        ---
+        Parameter
+        1. user id
+        ---
+        Return home information to display
+        """
+        response = GetHomeOverviewInformationResponse()
+        response.dataset_amount = len(self.__data_storage.GetDatasets(request.user))
+        response.model_amount = len(self.__data_storage.GetModels(request.user))
+        response.training_amount = len(self.__data_storage.GetTrainings(request.user))
+        response.running_training_amount = len([t for t in self.__data_storage.GetTrainings(request.user) if t["status"] == "busy"])
+        return response
+
+
+    def GetModels(self, request: "GetModelsRequest") -> "GetModelsResponse":
+        """
+        Get all models, or optinally get top 3 models for a dataset
+        ---
+        Parameter
+        1. request object
+        ---
+        Return dictonary of object informations
+        """
+        response = GetModelsResponse()
+        top3Counter = 0
+        def GetScore(e):
+            return e["test_score"]
+        
+        model_list = self.__data_storage.GetModels(request.username, dataset_id=request.dataset_id)
+        model_list.sort(key=GetScore, reverse=True)
+        
+        for model in list(model_list):
+            if  top3Counter >= 3 and request.top3 == True:
+                return response
+            model_info = ModelInformation()
+            model_info.identifier = str(model["_id"])
+            model_info.automl = model["automl_name"]
+            model_info.status = model["status"]
+            model_info.status_messages[:] =  model["status_messages"]
+            model_info.test_score =  model["test_score"]
+            model_info.validation_score =  model["validation_score"]
+            model_info.runtime =  model["runtime"]
+            model_info.prediction_time =  model["prediction_time"]
+            model_info.model =  model["model"]
+            model_info.library =  model["library"]
+            model_info.training_id = model["training_id"]
+            model_info.dataset_id = model["dataset_id"]
+            response.models.append(model_info)
+            top3Counter = top3Counter + 1
+            
+        return response
+
+    def GetModel(self, request: "GetModelRequest") -> "GetModelResponse":
+        """
+        Get all models, or optinally get top 3 models for a dataset
+        ---
+        Parameter
+        1. request object
+        ---
+        Return dictonary of object informations
+        """
+        response = GetModelResponse()
+        
+        model = self.__data_storage.GetModel(request.username, request.model_id)
+        
+        model_info = ModelInformation()
+        model_info.identifier = str(model["_id"])
+        model_info.automl = model["automl_name"]
+        model_info.status = model["status"]
+        model_info.status_messages[:] =  model["status_messages"]
+        model_info.test_score =  model["test_score"]
+        model_info.validation_score =  model["validation_score"]
+        model_info.runtime =  model["runtime"]
+        model_info.prediction_time =  model["prediction_time"]
+        model_info.model =  model["model"]
+        model_info.library =  model["library"]
+        model_info.training_id = model["training_id"]
+        model_info.dataset_id = model["dataset_id"]
+        response.model = model_info
+            
+        return response
+
 
     def GetObjectsInformation(self, request: "GetObjectsInformationRequest") -> "GetObjectsInformationResponse":
         """
@@ -243,7 +438,13 @@ class ControllerManager(object):
         ---
         Return upload status
         """
-        dataset_id: str = self.__data_storage.save_dataset(dataset.username, dataset.file_name, dataset.content, dataset.type, dataset.dataset_name)
+        # NOTE: dataset fields mixed up (bug in dummy)
+        #dataset.file_name = dataset.content.decode("utf-8")
+        #dataset.content = bytes(dataset.username, "ascii")
+        #dataset.username = "User"
+
+
+        dataset_id: str = self.__data_storage.InsertDataset(dataset.username, dataset.file_name, dataset.type, dataset.dataset_name)
         print(f"saved new dataset: {dataset_id}")
         
         response = UploadDatasetFileResponse()
@@ -262,7 +463,7 @@ class ControllerManager(object):
         response = StartAutoMlProcessResponse()
         # find requested dataset 
         # TODO: change gRPC message to dataset id instead of name
-        found, dataset = self.__data_storage.find_dataset(configuration.username, configuration.dataset)
+        found, dataset = self.__data_storage.GetDataset(configuration.username, configuration.dataset)
         if not found:
             raise Exception(f"cannot find dataset with name: {configuration.dataset}")
         
@@ -278,53 +479,55 @@ class ControllerManager(object):
         
         # restructure configuration into python dictionaries
         config = {
-            "dataset": dataset_filename,
+            "dataset_id": str(dataset["_id"]),
+            "dataset_name": dataset["name"],
             "task": configuration.task,
-            "tabular_config": {
-                "target": {
-                    "target": configuration.tabular_config.target.target,
-                    "type": configuration.tabular_config.target.type,
-                },
-                "features": dict(configuration.tabular_config.features)
-            },
-            "file_configuration": dict(configuration.file_configuration),
+            "configuration": json.loads(configuration.configuration),
+            "dataset_configuration": json.loads(configuration.dataset_configuration),
+            "runtime_constraints": json.loads(configuration.runtime_constraints),
+            "test_configuration": json.loads(configuration.test_configuration),
             "metric": configuration.metric,
-            "status": "running",
+            "status": "busy",
             "models": [],
-            "runtime_constraints": {
-                "runtime_limit": configuration.runtime_constraints.runtime_limit,
-                "max_iter": configuration.runtime_constraints.max_iter
-            },
             "required_automls": list(configuration.required_auto_mls),
+            "required_libraries": list(configuration.required_libraries),
+            "file_configuration": json.loads(configuration.file_configuration),
+            "start_time": datetime.now()
         }
-        sess_id = self.__data_storage.insert_session(configuration.username, config)
-        print(f"inserted new session: {sess_id}")
+        training_id = self.__data_storage.InsertTraining(configuration.username, config)
+        print(f"inserted new training: {training_id}")
 
         # will be called when any automl is done
         # NOTE: will run in parallel
-        def callback(session_id, model: 'dict[str, object]'):
-            _mdl_id = self.__data_storage.insert_model(configuration.username, model)
-            print(f"inserted new model: {_mdl_id}")
-
+        def callback(training_id, model_id, model: 'dict[str, object]'):
             # lock data storage to prevent race condition between get and update
-            with self.__data_storage.lock():
-                # append new model to session
-                _sess = self.__data_storage.get_session(configuration.username, session_id)
-                self.__data_storage.update_session(configuration.username, session_id, {
-                    "models": _sess["models"] + [_mdl_id],
-                    "status": "completed"
-                })
+            with self.__data_storage.Lock():
+                # append new model to training
+                training = self.__data_storage.GetTraining(configuration.username, training_id)
+                model["dataset_id"] = training["dataset_id"]
+                _mdl_id = self.__data_storage.UpdateModel(configuration.username, model_id, model)
+                model_list = self.__data_storage.GetModels(configuration.username, training_id)
+                if len(training["models"]) == len(model_list)-1:
+                    self.__data_storage.UpdateTraining(configuration.username, training_id, {
+                        "models": training["models"] + [model_id],
+                        "status": "completed",
+                        "end_time": datetime.now()
+                    })
+                else:
+                    self.__data_storage.UpdateTraining(configuration.username, training_id, {
+                        "models": training["models"] + [model_id]
+                    })
 
 
-        newSession: AutoMLSession = self.__adapterManager.start_automl(configuration, dataset_folder,
-                                                               sess_id, callback)
+        newTraining: AutoMLSession = self.__adapterManager.start_automl(configuration, str(dataset["_id"]), dataset_folder,
+                                                               training_id, configuration.username, callback)
 
-        self.__sessions[sess_id] = newSession
+        self.__trainings[training_id] = newTraining
         response.result = 1
-        response.session_id = newSession.get_id()
+        response.training_id = newTraining.get_id()
         return response
 
-    def TestAutoML(self, request: "TestAutoMlResponse") -> "TestAutoMlResponse":
+    def TestAutoML(self, request: "TestAutoMlRequest") -> "TestAutoMlResponse":
         """
         Start a new AutoML process as Test
         ---
@@ -333,17 +536,38 @@ class ControllerManager(object):
         ---
         Return start process status
         """ 
-        session = self.__sessions.get(request.sessionId)
-        automls = session.automls
-        test_auto_ml = None
-        for automl in automls:
-            if automl.name == request.autoMlName:
-                test_auto_ml = automl.testSolution(request.testData, request.sessionId)
-                break
+        model = self.__data_storage.GetModel(request.username, request.model_id)
+        training = self.__data_storage.GetTraining(request.username, model["training_id"])
+
+        config = {
+            "task": training["task"],
+            "configuration": training["configuration"],
+            "dataset_configuration": training["dataset_configuration"],
+            "runtime_constraints": training["runtime_constraints"],
+            "test_configuration": training["test_configuration"],
+            "metric": training["metric"],
+            "file_configuration": training["file_configuration"]
+        }
+        automl = AdapterManager(self.__data_storage)
+        test_auto_ml = automl.TestAutoml(request, model["automl_name"], model["training_id"], config)
         if test_auto_ml:
-            response = TestAutoMlResponse(predictions=test_auto_ml.predictions)
+            response = TestAutoMlResponse()
+            for prediction in test_auto_ml.predictions:
+                response.predictions.append(prediction)
             response.score = test_auto_ml.score
             response.predictiontime = test_auto_ml.predictiontime
         else:
             response = TestAutoMlResponse()
         return response
+
+    def SetDatasetConfiguration(self, request: "SetDatasetConfigurationRequest") -> "SetDatasetConfigurationResponse":
+        """
+        Persist new dataset configuration in db
+        ---
+        Parameter
+        1. dataset configuration
+        ---
+        Return 
+        """ 
+        self.__data_storage.UpdateDataset(request.username, request.identifier, { "file_configuration": request.file_configuration })
+        return SetDatasetConfigurationResponse()

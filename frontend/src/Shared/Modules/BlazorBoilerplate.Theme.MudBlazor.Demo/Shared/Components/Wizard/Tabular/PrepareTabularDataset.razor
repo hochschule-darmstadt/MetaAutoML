@@ -1,0 +1,191 @@
+﻿@inject IStringLocalizer<Global> L
+@using System
+@inject IApiClient apiClient
+@inject IViewNotifier viewNotifier
+
+@if (_columns == null)
+{
+    
+}
+else
+{
+    <MudStack>
+        <MudTimeline TimelineOrientation="@TimelineOrientation.Horizontal" TimelinePosition="@TimelinePosition.Bottom">
+            <MudTimelineItem Color="Color.Secondary">
+                <MudText Align="Align.Center" Typo="Typo.body2">Dataset preparation</MudText>
+            </MudTimelineItem>
+            <MudTimelineItem>
+                <MudText Align="Align.Center" Typo="Typo.body2">Configuration</MudText>
+            </MudTimelineItem>
+        </MudTimeline>
+        
+        <MudTable Items="@_tabularDataset.Head(50).Rows" style="width:stretch" class="mat-elevation-z5" FixedHeader="true" CustomHeader="true">
+            <HeaderContent>
+                <MudTHeadRow>
+                    @foreach (var item in _tabularDataset.Columns)
+                    {
+                        <MudTh>@item.Name</MudTh>
+                    }
+                </MudTHeadRow>
+                <MudTHeadRow>
+                    @foreach (var (col, index) in _columns.Columns.Select((v, i) => (v, i)))
+                    {
+                        <MudTh>
+                            <MudSelect  T="int" Value="@(_dataTypeList[index])" ValueChanged="@((e) => { _dataTypeList[index] = e; ChangeValue(); })">
+                                <MudSelectItem  T="int" Value="@((int)col.Type)">@Enum.GetName(typeof(ColumnType), (int)col.Type)</MudSelectItem>
+                                @foreach (int val in col.ConvertibleTypes)
+                                {
+                                    <MudSelectItem  T="int" Value="@((int) val)">@Enum.GetName(typeof(ColumnType), val)</MudSelectItem>
+                                }
+                            </MudSelect>
+                        </MudTh>
+                    }
+                </MudTHeadRow>
+            </HeaderContent>
+            <RowTemplate>
+                @foreach (var item in context)
+                {
+                    <MudTd>@item</MudTd>
+                }
+            </RowTemplate>
+            <PagerContent>
+                <MudTablePager HorizontalAlignment="HorizontalAlignment.Left"/>
+            </PagerContent>
+        </MudTable>
+
+    </MudStack>     
+    
+}
+
+@code {
+    [Parameter]
+    public GetDatasetResponseDto Dataset { get; set; }
+    [Parameter]
+    public StartAutoMLRequestDto StartAutoMlRequest { get; set; }
+    [Parameter]
+    public EventCallback<StartAutoMLRequestDto> StartAutoMlRequestChanged { get; set; }
+    private bool isPreviewRequestRunning = false;
+    private DataFrame _tabularDataset;
+    private GetDatasetPreviewResponseDto _datasetPreview;
+
+    async Task UpdateStartAutoMlRequest()
+    {
+        await StartAutoMlRequestChanged.InvokeAsync(StartAutoMlRequest);
+    }
+
+    private GetTabularDatasetColumnResponseDto _columns;
+    // store all data type as list so we can bind in to our value onpurpose
+    // i have to do that because i cant bind value to _dataset[i].type
+    private List<int> _dataTypeList;
+    // function call to synchronize changed column typed
+    public async void ChangeValue()
+    {
+        Dictionary<string, dynamic> features = new Dictionary<string, dynamic>();
+        for (int i = 0; i < (_dataTypeList).Count; i++)
+        {
+            features.Add(_columns.Columns[i].Name, (Server.DataType)_dataTypeList[i]);
+        }
+        StartAutoMlRequest.DatasetConfiguration["features"] = features;
+        await UpdateStartAutoMlRequest();
+    }
+
+    protected override async void OnInitialized()
+    {
+        try
+        {
+            ApiResponseDto apiResponse = await apiClient.GetTabularDatasetColumn(new GetTabularDatasetColumnRequestDto { DatasetIdentifier = Dataset.Identifier });
+
+            if (apiResponse.IsSuccessStatusCode)
+            {
+                _columns = Newtonsoft.Json.JsonConvert.DeserializeObject<GetTabularDatasetColumnResponseDto>(apiResponse.Result.ToString());
+                _dataTypeList = new List<int>();
+                // add feature for manipulating and steps3
+                Dictionary<string, dynamic> features = new Dictionary<string, dynamic>();
+
+                if (StartAutoMlRequest.DatasetConfiguration.Count != 0)
+                {
+                    _dataTypeList = new List<int>();
+                    foreach (var item in StartAutoMlRequest.DatasetConfiguration["features"])
+                    {
+                        _dataTypeList.Add((int)item.Value);
+                    }
+                }
+                else
+                {
+                    for (int i = 0; i < (_columns.Columns).Count; i++)
+                    {
+                        _dataTypeList.Add((int)_columns.Columns[i].Type);
+                        features.Add(_columns.Columns[i].Name, (Server.DataType)_dataTypeList[i]);
+                    }
+                    StartAutoMlRequest.DatasetConfiguration.Add("features", features);
+                }
+                StartAutoMlRequest.DatasetIdentifier = Dataset.Identifier;
+                StartAutoMlRequest.DatasetType = Dataset.Type.ID;
+                await LoadDatasetPreview();
+                await UpdateStartAutoMlRequest();
+            }
+            else
+            {
+                viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
+            }
+        }
+        catch (Exception ex)
+        {
+            viewNotifier.Show(ex.GetBaseException().Message, ViewNotifierType.Error, L["Operation Failed"]);
+        }
+    }
+    private async Task LoadDatasetPreview()
+    {
+        //Due to frontend refreshes it may occur that this is triggered twice, leading to an error while the first request is reading
+        if (isPreviewRequestRunning == true)
+        {
+            return;
+        }
+        try
+        {
+            isPreviewRequestRunning = true;
+            GetDatasetPreviewRequestDto datasetRequest = new GetDatasetPreviewRequestDto()
+            {
+                    DatasetIdentifier = Dataset.Identifier
+            };
+            ApiResponseDto apiResponse = await apiClient.GetDatasetPreview(datasetRequest);
+
+            if (apiResponse.IsSuccessStatusCode)
+            {
+                _datasetPreview = Newtonsoft.Json.JsonConvert.DeserializeObject<GetDatasetPreviewResponseDto>(apiResponse.Result.ToString());
+                List<string> columnNames = _columns.Columns.Select(x => x.Name).ToList();
+                List<Type> columnTypes = _columns.Columns.Select(x =>
+                {
+                    switch (x.Type)
+                    {
+                        case Server.DataType.String:
+                            return typeof(string);
+                        case Server.DataType.Int:
+                            return typeof(int);
+                        case Server.DataType.Float:
+                            return typeof(string);  //Float value are currently not really supported somehow, maybe in next release of the analytic package. To avoid casting to wrong type use string
+                        case Server.DataType.Boolean:
+                            return typeof(int);
+                        case Server.DataType.Datetime:
+                            return typeof(DateTime);
+                        default:
+                            return typeof(string);
+
+                    }
+                }).ToList();
+                _tabularDataset = DataFrame.LoadCsvFromString(_datasetPreview.DatasetPreview,columnNames:columnNames.ToArray(), dataTypes:columnTypes.ToArray());
+                StateHasChanged();
+                viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
+            }
+            else
+            {
+                viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
+            }
+        }
+        catch (Exception ex)
+        {
+            viewNotifier.Show(ex.GetBaseException().Message, ViewNotifierType.Error, L["Operation Failed"]);
+        }
+        isPreviewRequestRunning = false;
+    }
+}

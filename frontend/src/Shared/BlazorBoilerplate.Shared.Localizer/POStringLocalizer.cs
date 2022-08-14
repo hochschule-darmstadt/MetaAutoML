@@ -3,7 +3,6 @@ using Karambolo.PO;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
-using System;
 using System.Globalization;
 
 namespace BlazorBoilerplate.Shared.Localizer
@@ -18,6 +17,8 @@ namespace BlazorBoilerplate.Shared.Localizer
         }
 
         protected abstract POCatalog Catalog { get; }
+
+        protected abstract POCatalog ParentCultureCatalog { get; }
 
         protected abstract POCatalog FallBackCatalog { get; }
 
@@ -34,13 +35,23 @@ namespace BlazorBoilerplate.Shared.Localizer
                     value = translation;
                     return true;
                 }
-                else if (Options.Value.FallBackNeutralCulture && catalog.GetCultureName() != Settings.NeutralCulture)
+                else
                 {
-                    return TryGetTranslationCore(key, pluralCount, out value, FallBackCatalog);
+                    translation = ParentCultureCatalog?.GetTranslation(key, pluralCount);
+                    if (translation != null)
+                    {
+                        value = translation;
+                        return true;
+                    }
+                    else if (Options.Value.FallBackNeutralCulture && catalog.GetCultureName() != Settings.NeutralCulture)
+                    {
+                        return TryGetTranslationCore(key, pluralCount, out value, FallBackCatalog);
+                    }
                 }
             }
 
             value = null;
+
             return false;
         }
 
@@ -74,17 +85,21 @@ namespace BlazorBoilerplate.Shared.Localizer
         }
 
         readonly POCatalog _catalog;
+        readonly POCatalog _parentCultureCatalog;
         readonly POCatalog _fallBackCatalog;
-        readonly Func<CultureInfo, POCatalog> _getCatalogForCulture;
+        readonly Func<CultureInfo, bool, POCatalog> _getCatalogForCulture;
 
-        public POStringLocalizer(CultureInfo culture, string contextId, Func<CultureInfo, POCatalog> getCatalogForCulture, IOptions<TextLocalizationOptions> localizationOptions) : base(contextId, localizationOptions)
+        public POStringLocalizer(CultureInfo culture, string contextId, Func<CultureInfo, bool, POCatalog> getCatalogForCulture, IOptions<TextLocalizationOptions> localizationOptions) : base(contextId, localizationOptions)
         {
-            _catalog = getCatalogForCulture(culture);
-            _fallBackCatalog = getCatalogForCulture(new CultureInfo(Settings.NeutralCulture));
+            _catalog = getCatalogForCulture(culture, false);
+            _parentCultureCatalog = getCatalogForCulture(culture.Parent, true);
+            _fallBackCatalog = getCatalogForCulture(new CultureInfo(Settings.NeutralCulture), false);
             _getCatalogForCulture = getCatalogForCulture;
         }
 
         protected override POCatalog Catalog => _catalog;
+
+        protected override POCatalog ParentCultureCatalog => _parentCultureCatalog;
 
         protected override POCatalog FallBackCatalog => _fallBackCatalog;
 

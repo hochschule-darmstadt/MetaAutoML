@@ -1,0 +1,241 @@
+﻿@implements IDynamicComponent
+@inject IStringLocalizer<Global> L
+@inject IFileUploader fileUploader
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+@inject IApiClient apiClient
+@inject IViewNotifier viewNotifier
+
+@if (fileUploader.IsUploading == true)
+{
+    <MudStack Class="mt-4">
+        <MudText Typo="Typo.body2">@UploadText</MudText>
+        <MudProgressLinear Color="Color.Secondary" Value="@Progress" Class="my-7" />
+    </MudStack>
+}
+
+<MudDialog @bind-IsVisible="fileUploader.IsUploadDialogOpen">
+    <DialogContent>
+        <MudPaper Height="180px" Width="250px"  Elevation="0">
+            @if (_datasetTypes == null)
+            {
+            
+            }
+            else if (fileUploader.IsUploading == true)
+            {
+                <MudStack Class="mt-4">
+                    <MudText Typo="Typo.body2">@UploadText</MudText>
+                    <MudProgressLinear Color="Color.Secondary" Value="@Progress" Class="my-7" />
+                </MudStack>
+            }
+            else
+            {
+                <MudStack>
+                    <MudSelect Label="Dataset type" T="string" ValueChanged="@OnDatasetTypeSelectChanged" Style="width: 150px">
+                        @foreach (var item in _datasetTypes.DatasetTypes)
+                        {
+                            <MudSelectItem Value="@item.ID">@item.Properties["skos:prefLabel"]</MudSelectItem>
+                        }
+                    </MudSelect>
+                    <InputFile id="fileInput" OnChange="@FilesReady" hidden accept="@AcceptedFileType"/>
+                    <MudButton HtmlTag="label"
+                                Variant="Variant.Filled"
+                                Color="Color.Secondary"
+                                StartIcon="@Icons.Filled.CloudUpload"
+                                for="fileInput"
+                                Class="mt-1"
+                                Disabled="IsSelectFileDisabled">
+                        Select Dataset
+                    </MudButton>
+                    <MudTextField @bind-Value="@fileUploader.UploadFile.DatasetName" Label="Dataset Name" Class="mt-1"></MudTextField>
+                    @if (_isLoaderClosed == false)
+                    {
+                        <MudProgressLinear Color="Color.Secondary" Indeterminate="true"/>
+                    }
+                </MudStack>
+            }
+        </MudPaper>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Color="Color.Secondary" OnClick="Close">Close</MudButton>
+        @if (fileUploader.IsUploading == false)
+        {
+            <MudButton StartIcon="@Icons.Filled.CloudUpload" Color="Color.Secondary" Disabled="@_uploadReady" OnClick="@Upload">Upload</MudButton>
+        }
+    </DialogActions>
+</MudDialog>
+
+
+@code {
+
+    [Parameter]
+    public EventCallback OnUploadCompletedCallback { get; set; }
+    public bool IsSelectFileDisabled { get; set; } = true;
+    public string AcceptedFileType { get; set; } = "";
+    public int Progress { get; set; }
+    public string UploadText { get; set; } = "";
+
+    public int Order { get => 1; }
+    public string IntoComponent { get => "DrawerFooter"; }
+
+    private GetDatasetTypesResponseDto _datasetTypes;
+    private bool _uploadReady = true;
+    private bool _isLoaderClosed = true;
+
+    private void UpdateProgress()
+    {
+        //Reset FileUploader after completing upload, (+1 to total to compensate to loop offset)
+        if ((fileUploader.UploadFile.ChunkNumber == (fileUploader.UploadFile.TotalChunkNumber+1)) && (fileUploader.IsUploading == false))
+        {
+            fileUploader.UploadFile = new FileUploadRequestDto();
+            IsSelectFileDisabled = true;
+            _uploadReady = true;
+        }
+        else
+        {
+            float divideResult = (float)fileUploader.UploadFile.ChunkNumber / (float)fileUploader.UploadFile.TotalChunkNumber;
+            Progress = (int)(divideResult * 100);
+            UploadText = "Uploading " + fileUploader.UploadFile.DatasetName + " " + String.Format("{0:0.00}", divideResult * 100) + "%";
+        }
+
+        RefreshComponent();
+    }
+
+    private void RefreshComponent()
+    {
+        StateHasChanged();
+    }
+
+
+
+
+
+
+    protected override async void OnInitialized()
+    {
+        fileUploader.UploadFile = new FileUploadRequestDto();
+        await LoadDatasetTypes();
+        fileUploader.OnUploadChangedCallback = UpdateProgress;
+        fileUploader.RefreshUploadComponentCallback = RefreshComponent;
+    }
+
+    private async Task LoadDatasetTypes()
+    {
+        try
+        {
+            ApiResponseDto apiResponse = new ApiResponseDto();
+            apiResponse = await apiClient.GetDatasetTypes();
+            if (apiResponse.IsSuccessStatusCode)
+            {
+                _datasetTypes = Newtonsoft.Json.JsonConvert.DeserializeObject<GetDatasetTypesResponseDto>(apiResponse.Result.ToString());
+                StateHasChanged();
+                viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
+            }
+            else
+            {
+                viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
+            }
+        }
+        catch (Exception ex)
+        {
+            viewNotifier.Show(ex.GetBaseException().Message, ViewNotifierType.Error, L["Operation Failed"]);
+        }
+    }
+
+    private void OnDatasetTypeSelectChanged(string value)
+    {
+        if (string.IsNullOrEmpty(value))
+        {
+            IsSelectFileDisabled = true;
+        }
+        else
+        {
+            switch (value)
+            {
+                case ":tabular":
+                    AcceptedFileType = ".csv";
+                    IsSelectFileDisabled = false;
+                    break;
+                case ":image":
+                    AcceptedFileType = ".zip";
+                    IsSelectFileDisabled = false;
+                    break;
+                case ":text":
+                    AcceptedFileType = ".csv";
+                    IsSelectFileDisabled = false;
+                    break;
+                case ":time_series":
+                    AcceptedFileType = ".csv";
+                    IsSelectFileDisabled = false;
+                    break;
+            }
+        }
+        fileUploader.UploadFile.DatasetType = (string)value;
+        StateHasChanged();
+    }
+
+    private void Close()
+    {
+        fileUploader.IsUploadDialogOpen = false;
+        RefreshComponent();
+    }
+    private async Task FilesReady(InputFileChangeEventArgs e)
+    {
+        try
+        {
+            _isLoaderClosed = false;
+            StateHasChanged();
+            fileUploader.UploadFileContent = e.File;
+            fileUploader.UploadFile.FileName = e.File.Name;
+            fileUploader.UploadFile.DatasetName = e.File.Name;
+
+            _uploadReady = false;
+            _isLoaderClosed = true;
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            viewNotifier.Show(ex.GetBaseException().Message, ViewNotifierType.Error, L["Operation Failed"]);
+        }
+    }
+    private async Task Upload()
+    {
+        try
+        {
+            if (string.IsNullOrEmpty(fileUploader.UploadFile.DatasetName))
+            {
+                viewNotifier.Show("Please enter a dataset name first!", ViewNotifierType.Error, L["Operation Failed"]);
+                return;
+            }
+            if (string.IsNullOrEmpty(fileUploader.UploadFile.DatasetType))
+            {
+                viewNotifier.Show("Please select a dataset type first!", ViewNotifierType.Error, L["Operation Failed"]);
+                return;
+            }
+            if (string.IsNullOrEmpty(fileUploader.UploadFile.FileName))
+            {
+                viewNotifier.Show("Please select a file first!", ViewNotifierType.Error, L["Operation Failed"]);
+                return;
+            }
+
+            _isLoaderClosed = false;
+            _uploadReady = false;
+            UploadText = "Preparing upload...";
+            StateHasChanged();
+
+            fileUploader.UploadDataset();
+
+            _isLoaderClosed = true;
+            StateHasChanged();
+            Close();
+        }
+        catch (Exception ex)
+        {
+            viewNotifier.Show(ex.GetBaseException().Message, ViewNotifierType.Error, L["Operation Failed"]);
+        }
+    }
+
+
+
+
+}

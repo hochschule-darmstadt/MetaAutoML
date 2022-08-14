@@ -1,0 +1,133 @@
+﻿@page "/datasets/{id}"
+@inject IStringLocalizer<Global> L
+@inject IApiClient apiClient
+@inject IViewNotifier viewNotifier
+@inject NavigationManager NavManager
+@attribute [Authorize]
+
+@if (!string.IsNullOrEmpty(_pageTitle))
+{
+    <TopSection>
+        <Breadcrumbs>
+            <Breadcrumb Title="Datasets" Link="/datasets" Icon="@Icons.Filled.ListAlt" />
+            <Breadcrumb Title="@_pageTitle" Icon="@Icons.Filled.ListAlt" />
+        </Breadcrumbs>
+    </TopSection>
+}
+
+<MudStack AlignItems="AlignItems.Center" Row="true" Class="mb-2">
+    <MudIcon Size="Size.Large" Icon="@Icons.Filled.ListAlt" />
+    <MudText Typo="Typo.h4">@_pageTitle</MudText>
+</MudStack>
+
+<MudGrid>
+    <MudItem xs="12" sm="12" md="12">
+        <MudCard Elevation="5">
+            <MudCardHeader Style="border-bottom-style: inset; border-bottom-width: 1px;">
+                <CardHeaderContent >
+                    <MudText Typo="Typo.h6">Overview</MudText>
+                </CardHeaderContent>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudPaper Height="100px" Elevation="0">
+                    @if (_dataset == null)
+                    {
+                        <DataLoaderSpinner />
+                    }
+                    else
+                    {
+                        <MudGrid>
+                            <MudItem xs="3" sm="3" md="3">
+                                <MudText Typo="Typo.body1">Name: @_dataset.Name</MudText>
+                                <MudText Typo="Typo.body1">Dataset type: @_dataset.Type.Properties["skos:prefLabel"]</MudText>
+                            </MudItem>
+                            <MudItem xs="3" sm="3" md="3">
+                                <MudText Typo="Typo.body1">Date: @_dataset.Creation_date</MudText>
+                            </MudItem>
+                            <MudItem xs="3" sm="3" md="3">
+                                <MudText Typo="Typo.body1">File Size: @FormatBytes(_dataset.Size)</MudText>
+                                @if (@_dataset.Type.ID == ":tabular")
+                                {
+                                    <MudText Typo="Typo.body1">Number of rows: @_dataset.Analysis["basic analysis"]["number_of_rows"]</MudText>
+                                    <MudText Typo="Typo.body1">Number of columns: @_dataset.Analysis["basic analysis"]["number_of_columns"]</MudText>
+                                }
+                            </MudItem>
+                            <MudItem xs="3" sm="3" md="3">
+                            </MudItem>
+                        </MudGrid>
+                    }
+                </MudPaper>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+    <MudItem xs="3" sm="3" md="3">
+        <NewTraining Dataset="_dataset"/>
+    </MudItem>
+    <MudItem xs="9" sm="9" md="9">
+        <Top3Models Dataset="_dataset"/>
+    </MudItem>
+    <MudItem xs="6" sm="6" md="6">
+        <DatasetAnalysis Dataset="_dataset"/>
+    </MudItem>
+    <MudItem xs="6" sm="6" md="6">
+        <DatasetPreviewShort Dataset="_dataset" />
+    </MudItem>
+</MudGrid>
+
+
+@code{
+    [Parameter]
+    public string Id { get; set; }
+
+    private string _pageTitle;
+    private GetDatasetResponseDto _dataset;
+
+    protected async override void OnInitialized()
+    {
+        await LoadDataset();
+    }
+    private async Task LoadDataset()
+    {
+        try
+        {
+            GetDatasetRequestDto datasetRequest = new GetDatasetRequestDto()
+                {
+                    Identifier = Id
+                };
+            ApiResponseDto apiResponse = await apiClient.GetDataset(datasetRequest);
+
+            if (apiResponse.IsSuccessStatusCode)
+            {
+                _dataset = Newtonsoft.Json.JsonConvert.DeserializeObject<GetDatasetResponseDto>(apiResponse.Result.ToString());
+                _pageTitle = "Dataset " + _dataset.Name;
+                StateHasChanged();
+                StateHasChanged();
+                viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
+            }
+            else
+            {
+                viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
+            }
+        }
+        catch (Exception ex)
+        {
+            viewNotifier.Show(ex.GetBaseException().Message, ViewNotifierType.Error, L["Operation Failed"]);
+        }
+    }
+    public string FormatBytes(long bytes)
+    {
+      const int scale = 1024;
+      string[] orders = new string[] { "GB", "MB", "KB", "Bytes" };
+      long max = (long)Math.Pow(scale, orders.Length - 1);
+
+      foreach (string order in orders)
+      {
+        if ( bytes > max )
+          return string.Format("{0:##.##} {1}", decimal.Divide( bytes, max ), order);
+
+        max /= scale;
+      }
+      return "0 Bytes";
+    }
+}
+

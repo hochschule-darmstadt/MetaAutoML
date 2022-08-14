@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BlazorBoilerplate.Shared.Dto.Ontology;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,20 +9,10 @@ namespace BlazorBoilerplate.Shared.Dto.Dataset
 {
     public class GetDatasetsResponseDto
     {
-        public string Name { get; set; }
-        public string Type { get; set; }
-        public int Columns { get; set; }
-        public int Rows { get; set; }
-        public DateTime Creation_date { get; set; }
-        public string Identifier { get; set; }
-        public GetDatasetsResponseDto(string name, string type,int columns,int rows, DateTime time, string identifier)
+        public List<GetDatasetResponseDto> Datasets { get; set; }
+        public GetDatasetsResponseDto()
         {
-            Name = name;
-            Type = type;
-            Columns = columns;
-            Rows = rows;
-            Creation_date = time;
-            Identifier = identifier;
+            Datasets = new List<GetDatasetResponseDto>();
         }
     }
 }

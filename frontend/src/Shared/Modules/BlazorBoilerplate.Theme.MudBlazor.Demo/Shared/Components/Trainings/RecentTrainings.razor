@@ -1,0 +1,164 @@
+﻿@inject IStringLocalizer<Global> L
+@inject NavigationManager NavManager
+@using System.Linq
+@using System.Timers
+@inject IViewNotifier viewNotifier
+@inject IApiClient apiClient
+@implements IDisposable
+
+<MudCard Elevation="5">
+    <MudCardHeader Style="border-bottom-style: inset; border-bottom-width: 1px;">
+        <CardHeaderContent >
+            <MudText Typo="Typo.h6">Recent trainings</MudText>
+        </CardHeaderContent>
+        <CardHeaderActions>
+            <MudButton Href="@("/trainings")"
+                Variant="Variant.Filled" 
+                EndIcon="@Icons.Material.Filled.ReadMore" 
+                Color="Color.Secondary"
+                Size="Size.Small"
+                Style="margin-top: 8px">More</MudButton>
+        </CardHeaderActions>
+    </MudCardHeader>
+    <MudCardContent>
+        <MudPaper Height="250px" Elevation="0">
+            @if (Trainings == null)
+            {
+                 <DataLoaderSpinner />
+            }
+            else
+            {
+                <MudTable Items="@_trainings.Trainings" style="width:stretch" class="mat-elevation-z5" AllowSelection="false" Dense="true">
+                    <HeaderContent>
+                        <MudTh><MudTableSortLabel SortBy="new Func<GetTrainingResponseDto, object>(x=>x.StartTime)">Start datetime</MudTableSortLabel></MudTh>
+                        <MudTh><MudTableSortLabel SortBy="new Func<GetTrainingResponseDto, object>(x=>x.Status)">Status</MudTableSortLabel></MudTh>
+                        <MudTh><MudTableSortLabel SortBy="new Func<GetTrainingResponseDto, object>(x=>x.DatasetName)">Dataset</MudTableSortLabel></MudTh>
+                        <MudTh>Task</MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd>
+                            <a href="@NavManager.ToAbsoluteUri("trainings/" + @context.ID).AbsoluteUri" Style="cursor: pointer;">@context.StartTime.ToString("dd/MM/yy HH:mm")</a>
+                        </MudTd>
+                        <MudTd>
+                            @context.Status
+                            @if (context.Status == "busy")
+                            {
+                                <MudProgressCircular Size="Size.Small"  Color="Color.Secondary" Indeterminate="true"/>
+                            }
+                        </MudTd>
+                        <MudTd>@context.DatasetName</MudTd>
+                        <MudTd>@context.Task.Properties["skos:prefLabel"]</MudTd>
+                    </RowTemplate>
+                </MudTable>
+            }
+        </MudPaper>
+    </MudCardContent>
+</MudCard>
+
+@code {
+    [Parameter]
+    public string OpenTrainingId { get; set; }
+    [Parameter]
+    public GetAllTrainingsResponseDto Trainings 
+    { 
+        get
+        {
+            return _trainings;
+        } 
+        set
+        {
+            _trainings = value;
+            if(_trainings != null)
+            {
+                _trainings.Trainings = _trainings.Trainings.Where(x => x.StartTime > DateTime.Now.AddDays(-1)).Take(6).ToList();
+                if (!string.IsNullOrEmpty(OpenTrainingId))
+                {
+                    foreach (var item in _trainings.Trainings.Where(x => x.ID == OpenTrainingId))
+                    {
+                        item.ShowDetails = true;
+                    }
+                }
+                RefreshRecentTrainings(null, null);
+                _timer = new Timer()
+                {
+                    AutoReset = true,
+                    Enabled = true,
+                    Interval = 5000
+                };
+                _timer.Elapsed += RefreshRecentTrainings;
+                StateHasChanged();
+            }
+        } 
+    }
+    private GetAllTrainingsResponseDto _trainings;
+    private Timer _timer;
+    private string searchString = "";
+
+
+    private bool FilterFunc(GetTrainingResponseDto element)
+    {
+        if (string.IsNullOrWhiteSpace(searchString))
+            return true;
+        if (element.Status.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (element.Task.Properties["skos:prefLabel"].Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (element.DatasetName.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        return false;
+    } 
+
+    public void Dispose()
+    {
+        DisposeTimer();
+    }
+
+    private async void RefreshRecentTrainings(object sender, ElapsedEventArgs e)
+    {
+        await InvokeAsync(async () =>
+        {
+            try
+            {
+                if (_trainings.Trainings.Where(x => x.Status == "busy").ToList().Count == 0)
+                {
+                    DisposeTimer();
+                    return;
+                }
+
+                for (int i = 0; i < _trainings.Trainings.Count; i++)
+                {
+                    if (_trainings.Trainings[i].Status == "busy")
+                    {
+                        ApiResponseDto apiResponse = await apiClient.GetTraining(new GetTrainingRequestDto { TrainingId = _trainings.Trainings[i].ID });
+
+                        if (apiResponse.IsSuccessStatusCode)
+                        {
+                            bool _showDetails = _trainings.Trainings[i].ShowDetails;
+                            _trainings.Trainings[i] = Newtonsoft.Json.JsonConvert.DeserializeObject<GetTrainingResponseDto>(apiResponse.Result.ToString());
+                            _trainings.Trainings[i].ShowDetails = _showDetails;
+                            StateHasChanged();
+                        }
+                        else
+                        {
+                            viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                viewNotifier.Show(ex.GetBaseException().Message, ViewNotifierType.Error, L["Operation Failed"]);
+                _timer.Elapsed -= RefreshRecentTrainings;
+            }
+        });
+    }
+
+    public void DisposeTimer(){
+        if(_timer!=null)
+        {
+            _timer.Elapsed -= RefreshRecentTrainings;
+            _timer?.Dispose();
+            _timer = null;
+        }
+    }
+}

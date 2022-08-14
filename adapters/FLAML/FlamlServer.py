@@ -1,33 +1,26 @@
-import os
-import logging
-import shutil
 import json
+import logging
+import os
+import shutil
 import time
-import dill
-
 from concurrent import futures
-
-import grpc
 
 import Adapter_pb2
 import Adapter_pb2_grpc
-
-from JsonUtil import get_config_property
+import dill
+import grpc
 from AdapterUtils import *
+from JsonUtil import get_config_property
+
 
 def GetMetaInformation(config_json):
-    working_dir = os.path.join(get_config_property("output-path"), "working_dir")
-    shutil.unpack_archive(os.path.join(get_config_property("output-path"),
-                                       str(config_json["session_id"]),
-                                       get_config_property("export-zip-file-name") + ".zip"),
-                          working_dir,
-                          "zip")
+    working_dir = config_json["result_folder_location"]
     # extract additional information from automl
     with open(os.path.join(working_dir, "model_flaml.p"), 'rb') as file:
         automl = dill.load(file)
         model = automl.best_estimator
         library = automl.model.estimator.__module__.split(".")[0]
-    shutil.rmtree(working_dir)
+
     return library, model
 
 
@@ -45,18 +38,14 @@ class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
         try:
             start_time = time.time()
             # saving AutoML configuration JSON
-            config_json = json.loads(request.processJson)
-            job_file_location = os.path.join(get_config_property("job-file-path"),
-                                             get_config_property("job-file-name"))
-            with open(job_file_location, "w+") as f:
-                json.dump(config_json, f)
+            config = SetupRunNewRunEnvironment(request.processJson)
 
-            process = start_automl_process()
-            yield from capture_process_output(process, start_time)
-            generate_script(config_json)
-            output_json = zip_script(config_json["session_id"])
-            library, model = GetMetaInformation(config_json)
-            test_score, prediction_time  = evaluate(config_json, job_file_location)
+            process = start_automl_process(config)
+            yield from capture_process_output(process, start_time, False)
+            generate_script(config)
+            output_json = zip_script(config)
+            library, model = GetMetaInformation(config)
+            test_score, prediction_time  = evaluate(config, os.path.join(config["job_folder_location"], get_config_property("job-file-name")), data_loader)
             response = yield from get_response(output_json, start_time, test_score, prediction_time, library, model)
             print(f'{get_config_property("adapter-name")} job finished')
             return response
@@ -68,8 +57,12 @@ class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
         try:
             # saving AutoML configuration JSON
             config_json = json.loads(request.processJson)
-            job_file_location = os.path.join(get_config_property("job-file-path"),
-                                             get_config_property("job-file-name"))
+            job_file_location = os.path.join(get_config_property("training-path"),
+                                        config_json["user_identifier"],
+                                        config_json["training_id"],
+                                        get_config_property("job-folder-name"),
+                                        get_config_property("job-file-name"))
+
             with open(job_file_location, "w+") as f:
                 json.dump(config_json, f)
 
@@ -96,8 +89,6 @@ def serve():
 
 
 if __name__ == '__main__':
-    if not os.path.exists('app-data/output/tmp'):
-        os.mkdir('app-data/output/tmp')
     logging.basicConfig()
     serve()
     print('done.')

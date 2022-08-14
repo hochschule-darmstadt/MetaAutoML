@@ -19,11 +19,13 @@ namespace BlazorBoilerplate.Server.Managers
         private readonly ApplicationDbContext _dbContext;
         private readonly ControllerService.ControllerServiceClient _client;
         private readonly IHttpContextAccessor _httpContextAccessor;
-        public OntologyManager(ApplicationDbContext dbContext, ControllerService.ControllerServiceClient client, IHttpContextAccessor httpContextAccessor)
+        private readonly ICacheManager _cacheManager;
+        public OntologyManager(ApplicationDbContext dbContext, ControllerService.ControllerServiceClient client, IHttpContextAccessor httpContextAccessor, ICacheManager cacheManager)
         {
             _dbContext = dbContext;
             _client = client;
             _httpContextAccessor = httpContextAccessor;
+            _cacheManager = cacheManager;
         }
 
         public async Task<ApiResponse> GetCompatibleAutoMlSolutions(GetCompatibleAutoMlSolutionsRequestDto request)
@@ -37,7 +39,7 @@ namespace BlazorBoilerplate.Server.Managers
                 requestGrpc.Username = username;
                 requestGrpc.Configuration.Add(request.Configuration);
                 var reply = _client.GetCompatibleAutoMlSolutions(requestGrpc);
-                response.AutoMlSolutions = reply.AutoMlSolutions.ToList();
+                response.AutoMlSolutions = await _cacheManager.GetObjectInformationList(reply.AutoMlSolutions.ToList());
                 return new ApiResponse(Status200OK, null, response);
             }
             catch (Exception ex)
@@ -57,7 +59,7 @@ namespace BlazorBoilerplate.Server.Managers
                 requestGrpc.Username = username;
                 requestGrpc.Task = task.Task;
                 var reply = _client.GetSupportedMlLibraries(requestGrpc);
-                response.MlLibraries = reply.MlLibraries.ToList();
+                response.MlLibraries = await _cacheManager.GetObjectInformationList(reply.MlLibraries.ToList());
                 return new ApiResponse(Status200OK, null, response);
             }
             catch (Exception ex)
@@ -65,18 +67,18 @@ namespace BlazorBoilerplate.Server.Managers
                 return new ApiResponse(Status404NotFound, ex.Message);
             }
         }
-        public async Task<ApiResponse> GetDatasetCompatibleTasks(GetDatasetCompatibleTasksRequestDto datasetName)
+        public async Task<ApiResponse> GetDatasetCompatibleTasks(GetDatasetCompatibleTasksRequestDto dataset)
         {
             // call grpc method
-            GetDatasetCompatibleTasksRequest requestGrpc = new GetDatasetCompatibleTasksRequest();
+            GetDatasetCompatibleTasksRequest request = new GetDatasetCompatibleTasksRequest();
             GetDatasetCompatibleTasksResponseDto response = new GetDatasetCompatibleTasksResponseDto();
             var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
             try
             {
-                requestGrpc.Username = username;
-                requestGrpc.DatasetName = datasetName.DatasetName;
-                var reply = _client.GetDatasetCompatibleTasks(requestGrpc);
-                response.Tasks = reply.Tasks.ToList();
+                request.Username = username;
+                request.DatasetName = dataset.DatasetIdentifier;
+                var reply = _client.GetDatasetCompatibleTasks(request);
+                response.Tasks = await _cacheManager.GetObjectInformationList(reply.Tasks.ToList());
                 return new ApiResponse(Status200OK, null, response);
             }
             catch (Exception ex)

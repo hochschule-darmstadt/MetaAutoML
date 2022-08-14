@@ -1,0 +1,40 @@
+@using Microsoft.AspNetCore.Components;
+@inject NavigationManager navigationManager
+@inject IStringLocalizer<Global> L
+@implements IDynamicComponent
+
+<MudNavMenu Rounded="true" Margin="Margin.Normal" Color="Color.Secondary" Class="pa-2">
+    <MudNavLink Href="@navigationManager.ToAbsoluteUri(" ").AbsoluteUri" Match="NavLinkMatch.All" Icon="@Icons.Filled.Home">
+        Home
+    </MudNavLink>
+
+    <MudNavLink Href="@navigationManager.ToAbsoluteUri("datasets").AbsoluteUri" Icon="@Icons.Filled.ListAlt">
+        Datasets
+    </MudNavLink>
+
+    <MudNavLink Href="@navigationManager.ToAbsoluteUri("trainings").AbsoluteUri" Icon="@Icons.Filled.ModelTraining">
+        Trainings
+    </MudNavLink>
+</MudNavMenu>
+
+@code {
+
+    public int Order { get => 1; }
+    public string IntoComponent { get => "NavMenu"; }
+
+    public bool IsLoggedIn = false;
+
+    [CascadingParameter]
+    Task<AuthenticationState> authenticationStateTask { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        IsLoggedIn = false;
+        var user = (await authenticationStateTask).User;
+
+        if (user.Identity.IsAuthenticated)
+        {
+            IsLoggedIn = true;
+        }
+    }
+}

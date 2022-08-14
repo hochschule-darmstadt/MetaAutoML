@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using BlazorBoilerplate.Shared.Dto.Db;
 
 namespace BlazorBoilerplate.Shared.Dto
 {
@@ -7,6 +6,7 @@ namespace BlazorBoilerplate.Shared.Dto
     {
         public string ContextId { get; set; }
         public string MsgId { get; set; }
+        public List<LocalizationRecord> LocalizationRecords { get; set; }
 
         public override bool Equals(object obj)
         {

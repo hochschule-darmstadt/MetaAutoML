@@ -1,12 +1,13 @@
 import os
-import pandas as pd
+
 import autosklearn.classification
 import autosklearn.regression
-import os
+import pandas as pd
+from AbstractAdapter import AbstractAdapter
+from AdapterUtils import export_model, prepare_tabular_dataset, data_loader
 from JsonUtil import get_config_property
 from predict_time_sources import SplitMethod
-from AbstractAdapter import AbstractAdapter
-from AdapterUtils import read_tabular_dataset_training_data, prepare_tabular_dataset, export_model
+
 
 class AutoSklearnAdapter(AbstractAdapter):
     """
@@ -25,23 +26,23 @@ class AutoSklearnAdapter(AbstractAdapter):
         if self._configuration["metric"] == "":
             # handle empty metric field, None is the default metric parameter for AutoSklearn
             self._configuration["metric"] = None
-        self._result_path = os.path.join(get_config_property("output-path"), self._configuration["session_id"])
+        self._result_path = self._configuration["model_folder_location"]
         return
 
     def start(self):
         """
         Execute the ML task
         """
-        if self._configuration["task"] == 1:
+        if self._configuration["task"] == ":tabular_classification":
             self.__tabular_classification()
-        elif self._configuration["task"] == 2:
+        elif self._configuration["task"] == ":tabular_regression":
             self.__tabular_regression()
 
     def __generate_settings(self):
         automl_settings = {"logging_config": self.__get_logging_config()}
         if self._configuration["runtime_constraints"]["runtime_limit"] != 0:
             automl_settings.update(
-                {"time_left_for_this_task": self._configuration["runtime_constraints"]["runtime_limit"]})
+                {"time_left_for_this_task": (self._configuration["runtime_constraints"]["runtime_limit"] * 60)}) #convert into seconds
         automl_settings.update({"metric": self._configuration["metric"]})
         return automl_settings
 
@@ -49,27 +50,27 @@ class AutoSklearnAdapter(AbstractAdapter):
         """
         Execute the classification task
         """
-        self.df = read_tabular_dataset_training_data(self._configuration)
+        self.df, test = data_loader(self._configuration)
         X, y = prepare_tabular_dataset(self.df, self._configuration)
 
         automl_settings = self.__generate_settings()
         auto_cls = autosklearn.classification.AutoSklearnClassifier(**automl_settings)
         auto_cls.fit(X, y)
 
-        export_model(auto_cls, self._configuration["session_id"], "model_sklearn.p")
+        export_model(auto_cls, self._configuration["result_folder_location"], "model_sklearn.p")
 
     def __tabular_regression(self):
         """
         Execute the regression task
         """
-        self.df = read_tabular_dataset_training_data(self._configuration)
+        self.df, test = data_loader(self._configuration)
         X, y = prepare_tabular_dataset(self.df, self._configuration)
 
         automl_settings = self.__generate_settings()
         auto_reg = autosklearn.regression.AutoSklearnRegressor(**automl_settings)
         auto_reg.fit(X, y, )
 
-        export_model(auto_reg, self._configuration["session_id"], "model_sklearn.p")
+        export_model(auto_reg, self._configuration["result_folder_location"], "model_sklearn.p")
 
     def __get_logging_config(self) -> dict:
         return {

@@ -40,6 +40,8 @@ class ControllerService(ControllerServiceBase):
         data_storage_dir = os.path.join(ROOT_PATH, get_config_property("datasets-path"))
         if os.getenv("MONGO_DB_DEBUG") == "YES":
             data_storage = DataStorage(data_storage_dir, "mongodb://localhost:27017/")
+        elif os.getenv("MONGO_CLUSTER") == "YES":
+            data_storage = DataStorage(data_storage_dir, "mongodb://"+os.getenv("MONGODB_SERVICE_HOST")+":"+os.getenv("MONGODB_SERVICE_PORT")+"")
         else:
             data_storage = DataStorage(data_storage_dir)
         self._controllerManager = ControllerManager(data_storage)
@@ -54,7 +56,7 @@ class ControllerService(ControllerServiceBase):
     async def get_auto_ml_model(
         self, get_auto_ml_model_request: "GetAutoMlModelRequest"
     ) -> "GetAutoMlModelResponse":
-        """ return the generated model as a .zip for one AutoML by its session id."""
+        """ return the generated model as a .zip for one AutoML by its Training id."""
         response = self._controllerManager.GetAutoMlModel(get_auto_ml_model_request)
         return response
 
@@ -95,19 +97,27 @@ class ControllerService(ControllerServiceBase):
         response = self._controllerManager.GetDataset(get_dataset_request)
         return response
 
-    async def get_sessions(
-        self, get_sessions_request: "GetSessionsRequest"
-    ) -> "GetSessionsResponse":
-        """return a list of all sessions the controller has knowledge of. """
-        response = self._controllerManager.GetSessions(get_sessions_request)
+    async def get_trainings(
+        self, get_trainings_request: "GetTrainingsRequest"
+    ) -> "GetTrainingsResponse":
+        """return a list of all Trainings the controller has knowledge of. """
+        response = self._controllerManager.GetTrainings(get_trainings_request)
         return response
 
-    async def get_session_status(
-        self, get_session_status_request: "GetSessionStatusRequest"
-    ) -> "GetSessionStatusResponse":
-        """return the status of a specific session. The result is a session status and a list of the automl output and its status."""
-        response = self._controllerManager.GetSessionStatus(get_session_status_request)
+    async def get_training(
+        self, get_training_request: "GetTrainingRequest"
+    ) -> "GetTrainingResponse":
+        """return the status of a specific Training. The result is a Training status and a list of the automl output and its status."""
+        response = self._controllerManager.GetTraining(get_training_request)
         return response
+
+    async def get_all_trainings(
+        self, get_all_trainings_request: "GetAllTrainingsRequest"
+    ) -> "GetAllTrainingsResponse":
+        """return all existing trainings for a user"""
+        response = self._controllerManager.GetAllTrainings(get_all_trainings_request)
+        return response
+
 
     async def get_supported_ml_libraries(
         self, get_supported_ml_libraries_request: "GetSupportedMlLibrariesRequest"
@@ -117,12 +127,12 @@ class ControllerService(ControllerServiceBase):
         response = self._controllerManager.GetSupportedMlLibraries(get_supported_ml_libraries_request)
         return response
 
-    async def get_tabular_dataset_column_names(
+    async def get_tabular_dataset_column(
         self,
-        get_tabular_dataset_column_names_request: "GetTabularDatasetColumnNamesRequest",
-    ) -> "GetTabularDatasetColumnNamesResponse":
+        get_tabular_dataset_column_names_request: "GetTabularDatasetColumnRequest",
+    ) -> "GetTabularDatasetColumnResponse":
         """return all the column names of a tabular dataset."""
-        response = self._controllerManager.GetTabularDatasetColumnNames(get_tabular_dataset_column_names_request)
+        response = self._controllerManager.GetTabularDatasetColumn(get_tabular_dataset_column_names_request)
         return response
 
     async def get_dataset_compatible_tasks(
@@ -139,11 +149,39 @@ class ControllerService(ControllerServiceBase):
         response = self._controllerManager.GetObjectsInformation(get_object_information_request)
         return response
 
+    async def get_home_overview_information(
+        self, get_home_overview_information_request: "GetHomeOverviewInformationRequest"
+    ) -> "GetHomeOverviewInformationResponse":
+        """return overview information for home page"""
+        response = self._controllerManager.GetHomeOverviewInformation(get_home_overview_information_request)
+        return response
+
+    async def get_models(
+        self, get_models_request: "GetModelsRequest"
+    ) -> "GetModelsResponse":
+        """return all models for a given dataset, with option to only return top 3"""
+        response = self._controllerManager.GetModels(get_models_request)
+        return response
+
+    async def get_model(
+        self, get_model_request: "GetModelRequest"
+    ) -> "GetModelResponse":
+        """return model for a given id"""
+        response = self._controllerManager.GetModel(get_model_request)
+        return response
+
     async def upload_dataset_file(
         self, upload_dataset_file_request: "UploadDatasetFileRequest"
     ) -> "UploadDatasetFileResponse":
         """upload a new dataset file as bytes to the controller repository."""
         response = self._controllerManager.UploadNewDataset(upload_dataset_file_request)
+        return response
+
+    async def set_dataset_configuration(
+        self, set_dataset_configuration_request: "SetDatasetConfigurationRequest"
+    ) -> "SetDatasetConfigurationResponse":
+        """persist new dataset configuration"""
+        response = self._controllerManager.SetDatasetConfiguration(set_dataset_configuration_request)
         return response
 
     async def start_auto_ml_process(
@@ -189,6 +227,7 @@ async def main():
 
 
 if __name__ == '__main__':
+
     logging.basicConfig()
     #serve()
     loop = asyncio.get_event_loop()

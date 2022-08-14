@@ -1,0 +1,105 @@
+﻿
+@using System 
+@using System.IO
+@using Microsoft.AspNetCore.Hosting
+@using Microsoft.Extensions.Logging
+@using System.Net.Http.Headers
+@inject IApiClient apiClient
+@inject IViewNotifier viewNotifier
+@inject IJSRuntime JS
+@inject IStringLocalizer<Global> L
+@inject IHttpClientFactory ClientFactory
+
+
+<MudCard Elevation="5">
+    <MudCardHeader Style="border-bottom-style: inset; border-bottom-width: 1px;">
+        <CardHeaderContent >
+            <MudText Typo="Typo.h6">Predict online</MudText>
+        </CardHeaderContent>
+    </MudCardHeader>
+    <MudCardContent>
+        <MudPaper Height="100px" Elevation="0">
+            @if (Model == null)
+            {
+                <DataLoaderSpinner />
+            }
+            else
+            {
+                <InputFile id="fileInput" OnChange="UploadFiles" hidden />
+                <MudStack>
+                    <MudButton HtmlTag="label"
+                               Variant="Variant.Filled"
+                               Color="Color.Secondary"
+                               StartIcon="@Icons.Filled.CloudUpload"
+                               for="fileInput">
+                        Upload File
+                    </MudButton>
+                    <MudButton StartIcon="@Icons.Filled.CloudDownload" Color="Color.Secondary" Disabled="@_downloadReady" OnClick="@DownloadPredictions">Download result CSV</MudButton>
+                </MudStack>
+            }
+        </MudPaper>
+    </MudCardContent>
+</MudCard>
+
+@code {
+    [Parameter]
+    public GetModelResponseDto Model
+    { 
+        get
+        {
+            return _model;
+        } 
+        set
+        {
+            _model = value;
+            StateHasChanged();
+        } 
+    }
+    private GetModelResponseDto _model;
+    private bool _downloadReady = true;
+    private TestAutoMLResponseDto _predictionResult;
+
+    private async Task UploadFiles(InputFileChangeEventArgs e)
+    {
+        try
+        {
+            var file = e.File;
+            using var stream = e.File.OpenReadStream((512000 * 2 * 400));
+            using var ms = new MemoryStream();
+            await stream.CopyToAsync(ms);
+            var content = ms.ToArray();
+
+
+            ApiResponseDto apiResponse = await apiClient.TestAutoML(new TestAutoMLRequestDto { TestData = content, ModelId = Model.Model.ID});
+            if (apiResponse.IsSuccessStatusCode)
+            {
+                _predictionResult = Newtonsoft.Json.JsonConvert.DeserializeObject<TestAutoMLResponseDto>(apiResponse.Result.ToString());
+                _downloadReady = false;
+                StateHasChanged();
+            }
+            else
+            {
+                viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
+            }
+        }
+        catch (Exception ex)
+        {
+            viewNotifier.Show(ex.GetBaseException().Message, ViewNotifierType.Error, L["Operation Failed"]);
+        }
+    }
+
+    private async void DownloadPredictions()
+    {
+        try{
+            byte[] predictionBytes = _predictionResult.Predictions.SelectMany(s => System.Text.Encoding.UTF8.GetBytes(s + Environment.NewLine)).ToArray();
+            
+            var stream = new MemoryStream(predictionBytes);
+            using var streamRef = new DotNetStreamReference(stream: stream);
+            await JS.InvokeVoidAsync("downloadFileFromStream", "predictions.csv", streamRef);
+        }
+        catch (Exception ex)
+        {
+            viewNotifier.Show(ex.GetBaseException().Message, ViewNotifierType.Error, L["Operation Failed"]);
+        }
+    }
+}

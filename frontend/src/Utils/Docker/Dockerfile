@@ -1,9 +1,10 @@
-FROM mcr.microsoft.com/dotnet/aspnet:5.0-buster-slim AS base
+FROM mcr.microsoft.com/dotnet/aspnet:6.0.7-bullseye-slim-amd64 AS base
 WORKDIR /
 EXPOSE 443
 EXPOSE 80
 
-FROM mcr.microsoft.com/dotnet/sdk:5.0-buster-slim AS build
+FROM mcr.microsoft.com/dotnet/sdk:6.0.302-bullseye-slim-amd64 AS build
+WORKDIR /
 COPY . .
 RUN dotnet restore "src/Server/BlazorBoilerplate.Server/BlazorBoilerplate.Server.csproj"
 WORKDIR "/src/Server/BlazorBoilerplate.Server"
@@ -20,5 +21,4 @@ FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
 COPY --from=publish /app/publish/aspnetapp.pfx ./AuthSample.pfx
-COPY --from=build /app-data .
 ENTRYPOINT ["dotnet", "BlazorBoilerplate.Server.dll"]

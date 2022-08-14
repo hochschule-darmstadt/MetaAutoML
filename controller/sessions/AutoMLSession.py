@@ -1,5 +1,5 @@
 
-import atexit
+import atexit, json
 from Controller_bgrpc import *
 from IAutoMLManager import IAutoMLManager
 from blackboard.Blackboard import Blackboard
@@ -34,7 +34,7 @@ class AutoMLSession(object):
         from blackboard.agents.AutoMLSessionAgent import AutoMLSessionAgent
         session_agent = AutoMLSessionAgent(blackboard=self.blackboard, session=self)
 
-    def add_automl_to_session(self, automl: IAutoMLManager):
+    def add_automl_to_training(self, automl: IAutoMLManager):
         """
         Add an AutoML to the current session
         ---
@@ -65,24 +65,17 @@ class AutoMLSession(object):
             if automl.name == request.auto_ml:
                 return automl.get_automl_model()
 
-    def get_session_status(self) -> GetSessionStatusResponse:
+    def get_session_status(self) -> GetTrainingResponse:
         """
         Get the session status
         ---
         Return the session status as Controller_pb2.GetSessionStatusResponse
         """
-        target_config = AutoMlTarget(target=self.__configuration.tabular_config.target.target,
-                                                    type=self.__configuration.tabular_config.target.type)
-        tabular_config = AutoMlConfigurationTabularData(
-            target=target_config, features=dict(self.__configuration.tabular_config.features))
 
-        runtime_constraints = AutoMlRuntimeConstraints(
-            runtime_limit=self.__configuration.runtime_constraints.runtime_limit,
-            max_iter=self.__configuration.runtime_constraints.max_iter)
-
-        response = GetSessionStatusResponse(tabular_config=tabular_config,
+        response = GetTrainingResponse(configuration=self.__configuration.configuration,
+                                                            dataset_configuration=self.__configuration.dataset_configuration,
                                                            required_auto_mls=[automl.name for automl in self.automls],
-                                                           runtime_constraints=runtime_constraints,)
+                                                           runtime_constraints=self.__configuration.runtime_constraints)
         response.status = SessionStatus.SESSION_STATUS_COMPLETED
         response.dataset = self.__configuration.dataset
         response.task = self.__configuration.task

@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,8 +9,7 @@ namespace BlazorBoilerplate.Shared.Dto.AutoML
 {
     public class TestAutoMLRequestDto
     {
-        public string TestData { get; set; }
-        public string SessionId { get; set; }
-        public string AutoMlName { get; set; }
+        public byte[] TestData { get; set; }
+        public string ModelId { get; set; }
     }
 }

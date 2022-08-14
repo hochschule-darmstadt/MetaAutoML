@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 import dill
 import os
 from JsonUtil import get_config_property
+import json
 
 class AbstractAdapter(ABC):
     """
@@ -20,10 +21,10 @@ class AbstractAdapter(ABC):
             self._time_limit = self._configuration["runtime_constraints"]["runtime_limit"]
         else:
             self._time_limit = 30
-        self._target = self._configuration["tabular_configuration"]["target"]["target"]
+        if self._configuration["task"] == ":tabular_classification" or self._configuration["task"] == ":tabular_regression":
+            self._target = self._configuration["configuration"]["target"]["target"]
         if self._configuration["runtime_constraints"]["max_iter"] == 0:
             self._max_iter = self._configuration["runtime_constraints"]["max_iter"] = 3
-        os.mkdir(os.path.join(get_config_property("output-path"), self._configuration["session_id"]))
 
     @abstractmethod
     def start(self):

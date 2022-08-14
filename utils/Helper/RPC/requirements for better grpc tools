@@ -1,0 +1,9 @@
+pip install "betterproto[compiler]"
+pip install git+https://github.com/danielgtaylor/python-betterproto.git@v2.0.0b4
+pip install grpcio-tools
+
+cd controller
+python -m grpc_tools.protoc -I . --python_betterproto_out=out ControllerService.proto
+
+
+compiles init.py
