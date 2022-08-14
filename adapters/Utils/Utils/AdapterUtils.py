@@ -14,6 +14,7 @@ import grpc
 import numpy as np
 import pandas as pd
 from predict_time_sources import DataType, SplitMethod, feature_preparation
+from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, mean_squared_error
 from sklearn.metrics import classification_report
 
@@ -142,6 +143,8 @@ def data_loader(config):
         return read_image_dataset(config)
     elif config["task"] == ":text_classification":
         return read_tabular_dataset_training_data(config)
+    elif config["task"] == ":time_series_classification":
+        return read_longitudinal_dataset(config)
 
     return train_data, test_data
 
@@ -256,6 +259,9 @@ def evaluate(config_json, config_path, dataloader):
         return mean_squared_error(y_test, predictions["predicted"], squared=False), \
                (predict_time * 1000) / y_test.shape[0]
     elif config_json["task"] == ":time_series_classification":
+        train, test = dataloader(config_json)
+        target = config_json["configuration"]["target"]["target"]
+
         test_target = test[target].astype("string")
         predicted_target = predictions["predicted"].astype("string")
         acc_score = accuracy_score(test_target, predicted_target)
@@ -482,4 +488,49 @@ def read_image_dataset(json_configuration):
     y_test = test_data.outcome.values
     return X_train, y_train, X_test, y_test
     
+#endregion
+
+
+######################################################################
+## LONGITUDINAL DATASET HELPER FUNCTIONS
+######################################################################
+
+#region
+
+def read_longitudinal_dataset(json_configuration):
+    """
+    Read longitudinal data from the `.ts` file
+    """
+    from sktime.datasets import load_from_tsfile_to_dataframe
+
+    file_path = os.path.join(json_configuration["file_location"], json_configuration["file_name"])
+    dataset = load_from_tsfile_to_dataframe(file_path, return_separate_X_and_y=False)
+    dataset = dataset.rename(columns={"class_vals": "target"})
+    return split_dataset(dataset, json_configuration)
+
+
+def split_dataset(dataset, json_configuration):
+    """
+    Split the given dataset into train and test subsets
+    """
+    split_method = json_configuration["test_configuration"]["method"]
+    split_ratio = json_configuration["test_configuration"]["split_ratio"]
+    random_state = json_configuration["test_configuration"]["random_state"]
+    np.random.seed(random_state)
+
+    if int(SplitMethod.SPLIT_METHOD_RANDOM.value) == split_method:
+        return train_test_split(
+            dataset,
+            train_size=split_ratio,
+            random_state=random_state,
+            shuffle=True,
+            stratify=dataset["target"]
+        )
+    else:
+        return train_test_split(
+            dataset,
+            train_size=split_ratio,
+            shuffle=False,
+            stratify=dataset["target"]
+        )
 #endregion
