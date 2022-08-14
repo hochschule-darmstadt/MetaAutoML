@@ -7,4 +7,3 @@ Jinja2
 mljar-supervised
 dill
 pillow
-sktime==0.12.1
