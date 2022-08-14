@@ -142,8 +142,6 @@ def data_loader(config):
         return read_image_dataset(config)
     elif config["task"] == ":text_classification":
         return read_tabular_dataset_training_data(config)
-    elif config["task"] == ":time_series_classification":
-        return read_longitudinal_dataset(config)
 
     return train_data, test_data
 
@@ -158,43 +156,6 @@ def export_model(model, path, file_name):
     with open(os.path.join(path, file_name), 'wb+') as file:
         dill.dump(model, file)
 
-def export_keras_model(model, path, file_name):
-    """
-    Saves the given keras model
-    ---
-    Parameter:
-    1. keras model
-    2. session id
-    3. file name
-    """
-    save_path = os.path.join(path, file_name)
-    model.save(save_path)
-
-
-def export_label_binarizer(label_binarizer, path, file_name):
-    """
-    Saves the given instance of the sklearn.preprocessing.LabelBinarizer class
-    ---
-    Parameter:
-    1. instance of LabelBinarizer
-    2. session id
-    3. file name
-    """
-    with open(os.path.join(path, file_name), 'wb+') as file:
-        dill.dump(label_binarizer, file)
-
-
-def export_one_hot_encoder(one_hot_encoder, path, file_name):
-    """
-    Saves the given instance of the sklearn.preprocessing.OneHotEncoder class
-    ---
-    Parameter:
-    1. instance of sklearn.preprocessing.OneHotEncoder
-    2. session id
-    3. file name
-    """
-    with open(os.path.join(path, file_name), 'wb+') as file:
-        dill.dump(one_hot_encoder, file)
 
 def start_automl_process(config):
     """"
