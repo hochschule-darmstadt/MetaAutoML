@@ -110,6 +110,7 @@ class AutoGluonAdapter(AbstractAdapter):
         #    }
         
         model = ImagePredictor(
+            label=self._target,
             path=self._result_path)
         
          # Trainieren 

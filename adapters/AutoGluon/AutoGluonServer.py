@@ -2,7 +2,6 @@ import json
 import logging
 import os
 import shutil
-import pandas as pd
 
 from autogluon.tabular import TabularPredictor
 from autogluon.vision import ImagePredictor, ImageDataset
@@ -58,27 +57,35 @@ class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
         """
         Execute a new AutoML run.
         """
-        try:
-            start_time = time.time()
-            # saving AutoML configuration JSON
-            config = SetupRunNewRunEnvironment(request.processJson)
 
-            process = start_automl_process(config)
-            yield from capture_process_output(process, start_time, False)
-            generate_script(config)
-            output_json = zip_script(config)
+        start_time = time.time()
+        # saving AutoML configuration JSON
+        config_json = json.loads(request.processJson)
+        job_file_location = os.path.join(get_config_property("job-file-path"),
+                                         get_config_property("job-file-name"))
+        with open(job_file_location, "w+") as f:
+            json.dump(config_json, f)
 
 
-            library, model = GetMetaInformations(config)
-            test_score, prediction_time= evaluate(config, os.path.join(config["job_folder_location"], get_config_property("job-file-name")), data_loader)
-            response = yield from get_response(output_json, start_time, test_score, prediction_time, library, model)
+        process = start_automl_process()
+        yield from capture_process_output(process, start_time, True)
 
-            print(f'{get_config_property("adapter-name")} job finished')
-            return response
+        generate_script(config_json)
+        output_json = zip_script(config_json["training_id"])
 
-        except Exception as e:
+
+        library, model = GetMetaInformations(config_json)
+        test_score, prediction_time = evaluate(config_json, job_file_location, AutoGluon_data_loader)
+        response = yield from get_response(output_json, start_time, test_score, prediction_time, library, model)
+
+        print(f'{get_config_property("adapter-name")} job finished')
+
+        return response
+
+        """        except Exception as e:
             return get_except_response(context, e)
-    
+            """
+
     def TestAdapter(self, request, context):
         try:
             # saving AutoML configuration JSON
