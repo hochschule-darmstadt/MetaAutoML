@@ -207,7 +207,7 @@ class DataStorage:
                 for line in preview_line:
                     preview.write(line)
                     #preview.write("\n")
-            fileConfiguration = "{\"use_header\":false,\"start_row\":2,\"delimiter\":\"comma\",\"escape_character\":\"\\\",\"decimal_character\":\".\"}"
+            fileConfiguration = "{\"use_header\":false,\"start_row\":2,\"delimiter\":\"comma\",\"escape_character\":\"\\\\\",\"decimal_character\":\".\"}"
 
 
         def get_size(start_path = '.'):
