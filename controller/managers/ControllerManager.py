@@ -31,7 +31,6 @@ class ControllerManager(object):
         self.__data_storage = data_storage
         self.__rdfManager = RdfManager()
         self.__adapterManager = AdapterManager(self.__data_storage)
-        self.__explainableAiManager = ExplainableAIManager(self.__data_storage)
         self.__trainings: dict[str, AutoMLSession] = {}
         return
 
