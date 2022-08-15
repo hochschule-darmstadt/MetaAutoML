@@ -56,6 +56,9 @@ class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
     """
 
     def __init__(self):
+        """
+        These variables are used by the ExplainModel function.
+        """
         self._automl = None
         self._loaded_training_id = None
 
@@ -63,34 +66,26 @@ class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
         """
         Execute a new AutoML run.
         """
+        try:
+            start_time = time.time()
+            # saving AutoML configuration JSON
+            config = SetupRunNewRunEnvironment(request.processJson)
 
-        start_time = time.time()
-        # saving AutoML configuration JSON
-        config_json = json.loads(request.processJson)
-        job_file_location = os.path.join(get_config_property("job-file-path"),
-                                         get_config_property("job-file-name"))
-        with open(job_file_location, "w+") as f:
-            json.dump(config_json, f)
-
-
-        process = start_automl_process()
-        yield from capture_process_output(process, start_time, True)
-
-        generate_script(config_json)
-        output_json = zip_script(config_json["training_id"])
+            process = start_automl_process(config)
+            yield from capture_process_output(process, start_time, False)
+            generate_script(config)
+            output_json = zip_script(config)
 
 
-        library, model = GetMetaInformations(config_json)
-        test_score, prediction_time = evaluate(config_json, job_file_location, AutoGluon_data_loader)
-        response = yield from get_response(output_json, start_time, test_score, prediction_time, library, model)
+            library, model = GetMetaInformations(config)
+            test_score, prediction_time= evaluate(config, os.path.join(config["job_folder_location"], get_config_property("job-file-name")), data_loader)
+            response = yield from get_response(output_json, start_time, test_score, prediction_time, library, model)
 
-        print(f'{get_config_property("adapter-name")} job finished')
+            print(f'{get_config_property("adapter-name")} job finished')
+            return response
 
-        return response
-
-        """        except Exception as e:
+        except Exception as e:
             return get_except_response(context, e)
-            """
 
     def TestAdapter(self, request, context):
         try:
@@ -114,19 +109,45 @@ class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
             return get_except_response(context, e)
 
     def ExplainModel(self, request, context):
-        config_json = json.loads(request.processJson)
-        if self._loaded_training_id != config_json["training_id"] or not os.path.exists(os.path.join(get_config_property("output-path"), "working_dir")):
-            self._automl = loadAutoML(config_json)
-            df, test = AutoGluon_data_loader(config_json)
-            self._dataframeX, y = prepare_tabular_dataset(df, config_json)
-            self._loaded_training_id = config_json["training_id"]
-            print("Loaded")
+        """
+        Function for explaining a model. This returns the prediction probabilities for the data passed within the
+        request.data.
+        This loads the model and stores it in the adapter object. This is done because SHAP, the explanation module
+        accesses this function multiple times and reloading the model every time would add overhead.
+        The data transferred is reformatted by SHAP (regarding datatypes and column names). However, the AutoMLs
+        struggle with this reformatting so the dataset is loaded separately and the datatypes and column names of the
+        transferred data are replaced.
+        ---
+        param request: Grpc request of type ExplainModelRequest
+        param context: Context for correctly handling exceptions
+        ---
+        return ExplainModelResponse: Grpc response of type ExplainModelResponse containing prediction probabilities
+        """
+        try:
+            config_json = json.loads(request.processJson)
+            print(f"ExplainModel: ExplainModelRequest for user: {config_json['user_identifier']}, training: {config_json['training_id']}")
+            result_folder_location = os.path.join(get_config_property("training-path"),
+                                                  config_json["user_identifier"],
+                                                  config_json["training_id"],
+                                                  get_config_property("result-folder-name"))
+            # Check if the requested training is already loaded. If not: Load model and load & prep dataset.
+            if self._loaded_training_id != config_json["training_id"]:
+                print(f"ExplainModel: Model not already loaded; Loading model")
+                self._automl = TabularPredictor.load(os.path.join(result_folder_location, 'model_gluon.gluon'))
+                df, test = data_loader(config_json)
+                self._dataframeX, y = prepare_tabular_dataset(df, config_json)
+                self._loaded_training_id = config_json["training_id"]
 
-        df = pd.DataFrame(data=json.loads(request.data), columns=self._dataframeX.columns)
-        df = df.astype(dtype=dict(zip(self._dataframeX.columns, self._dataframeX.dtypes.values)))
-        probabilities = json.dumps(self._automl.predict_proba(df).values.tolist())
-        return Adapter_pb2.ExplainModelResponse(probabilities=probabilities)
+            # Reassemble dataset with the datatypes and column names from the preprocessed data and the content of the
+            # transmitted data.
+            df = pd.DataFrame(data=json.loads(request.data), columns=self._dataframeX.columns)
+            df = df.astype(dtype=dict(zip(self._dataframeX.columns, self._dataframeX.dtypes.values)))
+            # Get prediction probabilities and send them back.
+            probabilities = json.dumps(self._automl.predict_proba(df).values.tolist())
+            return Adapter_pb2.ExplainModelResponse(probabilities=probabilities)
 
+        except Exception as e:
+            return get_except_response(context, e)
 
 
 

@@ -4,7 +4,7 @@ import shap
 import os
 import pandas as pd
 import matplotlib.pyplot as plt
-from datetime import date, datetime
+import threading
 
 from AdapterManager import AdapterManager
 from Controller_bgrpc import *
@@ -124,14 +124,24 @@ class ExplainableAIManager:
     def __init__(self, data_storage):
         self.__data_storage = data_storage
         self.__adapterManager = AdapterManager(self.__data_storage)
-        logging.basicConfig(level=logging.INFO, format='%(name)s - %(levelname)s - %(message)s')
-    
-    def explain_shap(self, request: TestAutoMlRequest, number_of_samples=5):
-        model = self.__data_storage.GetModel(request.username, request.model_id)
-        config = self.__data_storage.GetTraining(request.username, model["training_id"])
-        dataset_path = self.__data_storage.GetDataset(request.username, config["dataset_id"])[1]["path"]
+        self.__threads = []
 
-        logging.info(f"Initializing new shap explanation. AutoML: {model['automl_name'].replace(':', '')} | Training ID: {model['training_id']} | Dataset: {config['dataset_id']} ({config['dataset_name']})")
+    def explain(self, username, model_id):
+        def callback(thread, username, model_id, data):
+            self.__data_storage.UpdateModel(username, model_id, data)
+            self.__threads.remove(thread)
+
+        thread = threading.Thread(target=self.explain_shap, name=f"{username}:{model_id}", args=(username, model_id, callback))
+        thread.start()
+        self.__threads.append(thread)
+        self.__data_storage.UpdateModel(username, model_id, {"explanation": {"status": "started"}})
+    
+    def explain_shap(self, username, model_id, callback, number_of_samples=5):
+        model = self.__data_storage.GetModel(username, model_id)
+        config = self.__data_storage.GetTraining(username, model["training_id"])
+        dataset_path = self.__data_storage.GetDataset(username, config["dataset_id"])[1]["path"]
+
+        print(f"Initializing new shap explanation. AutoML: {model['automl_name'].replace(':', '')} | Training ID: {model['training_id']} | Dataset: {config['dataset_id']} ({config['dataset_name']})")
         
         config["file_location"], config["file_name"] = os.path.split(dataset_path)
         output_path = os.path.join(os.getcwd(), "app-data", "output", model["automl_name"].replace(":", ""), model["training_id"])
@@ -146,11 +156,20 @@ class ExplainableAIManager:
         dataset_Y = dataset[config["configuration"]["target"]["target"]]
         sampled_dataset_X = dataset_X.iloc[0:number_of_samples, :]
 
-        logging.info(f"Output is saved to {output_path}")
-        logging.info(f"Starting explanation with {number_of_samples} samples. This may take a while.")
+        print(f"Output is saved to {output_path}")
+        print(f"Starting explanation with {number_of_samples} samples. This may take a while.")
+
+        request = TestAutoMlRequest
+        request.username = username
+        request.model_id = model_id
 
         if config["task"] == ":tabular_classification":
-            explainer = self.get_shap_explainer(request, model, config, sampled_dataset_X)
+            try:
+                explainer = self.get_shap_explainer(request, model, config, sampled_dataset_X)
+            except RuntimeError as e:
+                status_data = {"explanation": {"status": "failed", "reason": f"exeption: {e}"}}
+                callback(threading.current_thread(), username, model_id, data=status_data)
+                return
             shap_values = explainer.shap_values(sampled_dataset_X)
 
             with open(dataset_path, "r") as f:
@@ -159,16 +178,21 @@ class ExplainableAIManager:
                                                                 model["training_id"],
                                                                 config).predictions)
 
-            logging.info("Explanation finished. Beginning plots.")
+            print("Explanation finished. Beginning plots.")
 
             filenames = plot_tabular_classification(sampled_dataset_X, dataset_Y, predictions, explainer, shap_values, plot_path)
             plot_filenames = filenames
         else:
-            logging.warning("The ML task of the selected training is not tabular classification. This module is only compatible with tabular classification.")
+            message = "The ML task of the selected training is not tabular classification. This module is only compatible with tabular classification."
+            status_data = {"explanation": {"status": "failed", "reason": f"incompatible: {message}"}}
+            callback(threading.current_thread(), username, model_id, data=status_data)
+            print(message)
             return
 
         compile_html(plot_filenames, output_path)
-        logging.info("Plots completed")
+        print("Plots completed")
+        status_data = {"explanation": {"status": "finished", "plots": plot_filenames}}
+        callback(threading.current_thread(), username, model_id, status_data)
 
     def get_shap_explainer(self, request, model, config, sampled_dataset_X):
         def prediction_probability(data):
@@ -182,3 +206,4 @@ class ExplainableAIManager:
                 return pd.DataFrame(json.loads(result.probabilities))
 
         return shap.KernelExplainer(prediction_probability, sampled_dataset_X)
+
