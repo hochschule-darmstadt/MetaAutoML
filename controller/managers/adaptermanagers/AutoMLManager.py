@@ -119,7 +119,7 @@ class AutoMLManager(ABC, Thread):
             except grpc.RpcError as rpc_error:
                 print(f"Received unknown RPC error: code={rpc_error.code()} message={rpc_error.details()}")
 
-    def explain_model(self, data, training_id):
+    def explain_model(self, data, training_id, user_id):
         """
         Explain a specific model.
         This loads the model and returns the output of the "predict_proba()" function in case of tabular classification.
@@ -141,6 +141,7 @@ class AutoMLManager(ABC, Thread):
             request = Adapter_pb2.ExplainModelRequest()  # Request Object
             process_json = self._generate_test_json()
             process_json["training_id"] = training_id
+            process_json["user_identifier"] = user_id
             process_json["test_configuration"]["method"] = 1
             process_json["test_configuration"]["split_ratio"] = 0
             process_json["file_location"] = self._configuration["file_location"]

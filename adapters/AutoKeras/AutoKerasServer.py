@@ -97,6 +97,8 @@ class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
                 print(f"ExplainModel: Model not already loaded; Loading model")
                 with open(result_folder_location + '/model_keras.p', 'rb') as file:
                     self._automl = dill.load(file)
+                    # Export model as AutoKeras does not provide the prediction probability.
+                    self._automl = self._automl.export_model()
                 df, test = data_loader(config_json)
                 self._dataframeX, y = prepare_tabular_dataset(df, config_json)
                 self._loaded_training_id = config_json["training_id"]
@@ -106,7 +108,8 @@ class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
             df = pd.DataFrame(data=json.loads(request.data), columns=self._dataframeX.columns)
             df = df.astype(dtype=dict(zip(self._dataframeX.columns, self._dataframeX.dtypes.values)))
             # Get prediction probabilities and send them back.
-            probabilities = json.dumps(self._automl.predict_proba(df).values.tolist())
+            # Fixme: Currently not working. This fails with "Failed to convert a NumPy array to a Tensor (Unsupported object type int)."
+            probabilities = json.dumps(self._automl.predict_on_batch(df).values.tolist())
             return Adapter_pb2.ExplainModelResponse(probabilities=probabilities)
 
         except Exception as e:

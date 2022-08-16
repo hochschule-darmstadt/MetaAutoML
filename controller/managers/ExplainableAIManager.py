@@ -1,5 +1,4 @@
 import json
-import logging
 import shap
 import os
 import pandas as pd
@@ -65,10 +64,17 @@ def compile_html(plots, path):
 def plot_tabular_classification(dataset_X, dataset_Y, predictions, explainer, shap_values, plot_path):
     plot_filenames = []
     dataset_X[dataset_X.select_dtypes(['bool']).columns] = dataset_X[dataset_X.select_dtypes(['bool']).columns].astype(str)
-    classlist = list(str(val) for val in dataset_Y.unique())
+    classlist = list(val for val in dataset_Y.unique())
+    # TODO: Remove debug
+    print(f"[ExplainableAIManager]: classlist is: {classlist}")
+    print(f"[ExplainableAIManager]: distinct dataset Y is: {dataset_Y.unique()}")
+    print(f"[ExplainableAIManager]: predictions[0:10] is : {predictions[0:10]}")
     for class_idx, class_value in enumerate(classlist):
-        row_idx = dataset_Y[dataset_Y.astype(str) == class_value].index[0]
+        print(f"[ExplainableAIManager]: class_idx is: {class_idx} | class_value is {class_value}")
+        row_idx = int(dataset_Y[dataset_Y == class_value].index[0])
         # Locate prediction (class_idx is the true value)
+        print(f"[ExplainableAIManager]: row_idx is : {row_idx}")
+        print(f"[ExplainableAIManager]: predictions[row_idx] is : {predictions[row_idx]}")
         prediction_class_idx = classlist.index(predictions[row_idx])
 
         filename = make_html_force_plot(base_value=explainer.expected_value[class_idx],
@@ -126,7 +132,8 @@ class ExplainableAIManager:
         self.__adapterManager = AdapterManager(self.__data_storage)
         self.__threads = []
 
-    def explain(self, username, model_id):
+    def explain(self, username, training_id, model_id):
+        # TODO: Add explanation infos to training entry in mongo
         def callback(thread, username, model_id, data):
             self.__data_storage.UpdateModel(username, model_id, data)
             self.__threads.remove(thread)
@@ -136,15 +143,15 @@ class ExplainableAIManager:
         self.__threads.append(thread)
         self.__data_storage.UpdateModel(username, model_id, {"explanation": {"status": "started"}})
     
-    def explain_shap(self, username, model_id, callback, number_of_samples=5):
+    def explain_shap(self, username, model_id, callback, number_of_samples=50):
         model = self.__data_storage.GetModel(username, model_id)
         config = self.__data_storage.GetTraining(username, model["training_id"])
         dataset_path = self.__data_storage.GetDataset(username, config["dataset_id"])[1]["path"]
 
-        print(f"Initializing new shap explanation. AutoML: {model['automl_name'].replace(':', '')} | Training ID: {model['training_id']} | Dataset: {config['dataset_id']} ({config['dataset_name']})")
+        print(f"[ExplainableAIManager]: Initializing new shap explanation. AutoML: {model['automl_name'].replace(':', '')} | Training ID: {model['training_id']} | Dataset: {config['dataset_id']} ({config['dataset_name']})")
         
         config["file_location"], config["file_name"] = os.path.split(dataset_path)
-        output_path = os.path.join(os.getcwd(), "app-data", "output", model["automl_name"].replace(":", ""), model["training_id"])
+        output_path = os.path.join(os.getcwd(), "app-data", "training", model["automl_name"].replace(":", ""), username, model["training_id"], "result", "plots")
         os.makedirs(output_path, exist_ok=True)
         plot_path = os.path.join(output_path, "plots")
         os.makedirs(plot_path, exist_ok=True)
@@ -156,48 +163,41 @@ class ExplainableAIManager:
         dataset_Y = dataset[config["configuration"]["target"]["target"]]
         sampled_dataset_X = dataset_X.iloc[0:number_of_samples, :]
 
-        print(f"Output is saved to {output_path}")
-        print(f"Starting explanation with {number_of_samples} samples. This may take a while.")
-
-        request = TestAutoMlRequest
-        request.username = username
-        request.model_id = model_id
+        print(f"[ExplainableAIManager]: Output is saved to {output_path}")
+        print(f"[ExplainableAIManager]: Starting explanation with {number_of_samples} samples. This may take a while.")
 
         if config["task"] == ":tabular_classification":
             try:
-                explainer = self.get_shap_explainer(request, model, config, sampled_dataset_X)
+                explainer = self.get_shap_explainer(username, model, config, sampled_dataset_X)
             except RuntimeError as e:
                 status_data = {"explanation": {"status": "failed", "reason": f"exeption: {e}"}}
                 callback(threading.current_thread(), username, model_id, data=status_data)
                 return
             shap_values = explainer.shap_values(sampled_dataset_X)
 
-            with open(dataset_path, "r") as f:
-                request.test_data = f.read().encode()
-            predictions = list(self.__adapterManager.TestAutoml(request, model["automl_name"],
-                                                                model["training_id"],
-                                                                config).predictions)
+            predictions = self.get_predictions(username, model_id, dataset_path, model, config, dataset_Y)
 
-            print("Explanation finished. Beginning plots.")
+            print("[ExplainableAIManager]: Explanation finished. Beginning plots.")
 
             filenames = plot_tabular_classification(sampled_dataset_X, dataset_Y, predictions, explainer, shap_values, plot_path)
             plot_filenames = filenames
         else:
             message = "The ML task of the selected training is not tabular classification. This module is only compatible with tabular classification."
             status_data = {"explanation": {"status": "failed", "reason": f"incompatible: {message}"}}
+            print("[ExplainableAIManager]:" + message)
             callback(threading.current_thread(), username, model_id, data=status_data)
-            print(message)
             return
 
         compile_html(plot_filenames, output_path)
-        print("Plots completed")
+        print("[ExplainableAIManager]: Plots completed")
         status_data = {"explanation": {"status": "finished", "plots": plot_filenames}}
         callback(threading.current_thread(), username, model_id, status_data)
 
-    def get_shap_explainer(self, request, model, config, sampled_dataset_X):
+    def get_shap_explainer(self, username, model, config, sampled_dataset_X):
         def prediction_probability(data):
-            request.test_data = data.tolist()
-            result = self.__adapterManager.explain_automl(request, model["automl_name"],
+            result = self.__adapterManager.explain_automl(data.tolist(),
+                                                          username,
+                                                          model["automl_name"],
                                                           model["training_id"],
                                                           config)
             if result is None:
@@ -206,4 +206,43 @@ class ExplainableAIManager:
                 return pd.DataFrame(json.loads(result.probabilities))
 
         return shap.KernelExplainer(prediction_probability, sampled_dataset_X)
+
+    def get_predictions(self, username, model_id, dataset_path, model, config, dataset_Y):
+        """
+        Get and process predictions.
+        Predictions are acquired using the TestAutoml() functionality.
+        After the predictions are made they are processed and returned.
+
+        Some AutoMLs do not return the same datatype in their predictions compared to the truth (dataset_Y)
+        Therefore it is necessary to test and possibly convert the predictions before they can be processed further.
+        """
+        request = TestAutoMlRequest
+        request.username = username
+        request.model_id = model_id
+
+        with open(dataset_path, "r") as f:
+            request.test_data = f.read().encode()
+        predictions = list(self.__adapterManager.TestAutoml(request,
+                                                            model["automl_name"],
+                                                            model["training_id"],
+                                                            config).predictions)
+
+        # Convert mismatched datatypes between the dataset_Y and the list of predictions
+        print(f"[ExplainableAIManager]: Predictions: "
+              f"dataset_Y.iloc[0] is {dataset_Y.iloc[0]} with dtype {dataset_Y.iloc[0]}"
+              f"predictions[0] is {predictions[0]} with dtype {type(predictions[0])}")
+        if dataset_Y.dtype == "bool" and type(predictions[0]) == str:
+            # if predictions are string and truth is bool the predictions could be either '0' or 'False'
+            try:  # try to convert a string formatted int
+                return [bool(int(pred)) for pred in predictions]
+            except ValueError as e:
+                pass
+            try:  # try to convert a string formatted bool
+                return [bool(pred) for pred in predictions]
+            except ValueError as e:
+                pass
+        if dataset_Y.dtype == "bool" and type(predictions[0]) == int:
+            return [bool(pred) for pred in predictions]
+        return predictions
+
 

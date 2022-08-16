@@ -31,7 +31,7 @@ class AdapterManager(object):
     def TestAutoml(self, request: TestAutoMlRequest, automl: str, training_id, config):
         host, port = map(os.getenv, self.__automl_addresses[automl.lower()])
         automlInstance = AutoMLManager(config, None, None, host, port, request, training_id, request.username, None)
-        return automlInstance.testSolution(request.test_data, training_id)
+        return automlInstance.testSolution(request.test_data, training_id, request.username)
 
     def start_automl(self, configuration: "StartAutoMlProcessRequest", dataset_id, folder_location, training_id, username, callback) -> AutoMLSession:
         """
@@ -70,7 +70,7 @@ class AdapterManager(object):
             new_training.add_automl_to_training(automl)
         return new_training
 
-    def explain_automl(self, request: TestAutoMlRequest, automl: str, training_id, config):
+    def explain_automl(self, test_data, username, automl: str, training_id, config):
         host, port = map(os.getenv, self.__automl_addresses[automl.lower()])
-        automlInstance = AutoMLManager(config, None, None, host, port, request, training_id, request.username, None)
-        return automlInstance.explain_model(request.test_data, training_id)
+        automlInstance = AutoMLManager(config, None, None, host, port, training_id, username, None)
+        return automlInstance.explain_model(test_data, training_id, username)

@@ -19,14 +19,9 @@ from AdapterUtils import *
 
 
 def GetMetaInformations(config_json):
-    working_dir = os.path.join(get_config_property("output-path"), "working_dir")
-    shutil.unpack_archive(os.path.join(get_config_property("output-path"),
-        str(config_json["training_id"]),
-        get_config_property("export-zip-file-name") + ".zip"),
-        working_dir,
-        "zip")
+    working_dir = config_json["result_folder_location"]
     # extract additional information from automl
-    automl = TabularPredictor.load(os.path.join(os.path.join(get_config_property("output-path"), "working_dir"), 'model_gluon.gluon'))
+    automl = TabularPredictor.load(os.path.join(os.path.join(working_dir, 'model_gluon.gluon')))
     automl_info = automl._learner.get_info(include_model_info=True)
     librarylist = set()
     model = automl_info['best_model']
@@ -34,20 +29,17 @@ def GetMetaInformations(config_json):
         if model_info == model:
             pass
         elif model_info in ('LightGBM', 'LightGBMXT'):
-            librarylist.add("lightgbm")
+            librarylist.add(":lightgbm_lib")
         elif model_info == 'XGBoost':
-            librarylist.add("xgboost")
+            librarylist.add(":xgboost_lib")
         elif model_info == 'CatBoost':
-            librarylist.add("catboost")
+            librarylist.add(":catboost_lib")
         elif model_info == 'NeuralNetFastAI':
-            librarylist.add("pytorch")
+            librarylist.add(":pytorch_lib")
         else:
-            librarylist.add("sklearn")
+            librarylist.add(":scikit_learn_lib")
     library = " + ".join(librarylist)
-    shutil.rmtree(working_dir)
     return library, model
-
-
 
 class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
     """

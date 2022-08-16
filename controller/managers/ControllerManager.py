@@ -508,7 +508,9 @@ class ControllerManager(object):
                         "models": training["models"] + [model_id]
                     })
 
-            self.__explainableAIManager.explain(configuration.username, model_id)
+            print(f"startautmlcallback: model: {str(model)}")
+            if model["status"] == "completed":
+                self.__explainableAIManager.explain(configuration.username, model["training_id"], model_id)
 
 
         newTraining: AutoMLSession = self.__adapterManager.start_automl(configuration, str(dataset["_id"]), dataset_folder,
@@ -566,7 +568,7 @@ class ControllerManager(object):
 
     def debugExplainAutoML(self):
         request = TestAutoMlRequest
-        username = "720719a2-257e-4347-9ad3-55b57b61cde5"
+        request.username = "720719a2-257e-4347-9ad3-55b57b61cde5"
         request.model_id = "62e8f2682201aa279fd8dff3"
         model = self.__data_storage.GetModel(request.username, request.model_id)
         config = self.__data_storage.GetTraining(request.username, model["training_id"])
