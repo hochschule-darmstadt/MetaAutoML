@@ -47,6 +47,8 @@ services:
       - training-gluon:/app/app-data/training/gluon
       - training-autocve:/app/app-data/training/autocve
       - training-pytorch:/app/app-data/training/pytorch
+      - training-alphad3m:/app/app-data/training/alphad3m
+      - training-mcfly:/app/app-data/training/mcfly
 
   mongo:
     image: mongo
@@ -97,7 +99,7 @@ services:
       - GRPC_SERVER_PORT=50054
     volumes:
       - datasets:/app/app-data/datasets
-      - output-mcfly:/app/app-data/output
+      - training-mcfly:/app/app-data/training
 
   sklearn:
     build: 
