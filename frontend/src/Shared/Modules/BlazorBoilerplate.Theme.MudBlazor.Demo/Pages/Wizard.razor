@@ -31,6 +31,8 @@ else
 {
     @switch (_dataset.Type.ID)
     {
+        case ":time_series":
+        case ":text":
         case ":tabular":
             <MuddyWizard WizardFinished="@OnWizardFinished">
                 <MuddyWizardPanel Title="Dataset preparation" >
@@ -43,16 +45,6 @@ else
             break;
         case ":image":
             <MuddyWizard WizardFinished="@OnWizardFinished">
-                <MuddyWizardPanel Title="Configuration">
-                    <TaskConfiguration Dataset="@_dataset" @bind-StartAutoMlRequest="@_automlRequest" />
-                </MuddyWizardPanel>
-            </MuddyWizard>
-            break;
-        case ":text":
-            <MuddyWizard WizardFinished="@OnWizardFinished">
-                <MuddyWizardPanel Title="Dataset preparation" >
-                    <PrepareTextDataset Dataset="@_dataset" @bind-StartAutoMlRequest="@_automlRequest" />
-                </MuddyWizardPanel>
                 <MuddyWizardPanel Title="Configuration">
                     <TaskConfiguration Dataset="@_dataset" @bind-StartAutoMlRequest="@_automlRequest" />
                 </MuddyWizardPanel>

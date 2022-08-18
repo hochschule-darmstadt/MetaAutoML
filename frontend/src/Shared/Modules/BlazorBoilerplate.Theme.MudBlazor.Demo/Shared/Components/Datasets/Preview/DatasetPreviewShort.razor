@@ -19,12 +19,24 @@
         <CardHeaderActions>
             @if (_dataset != null)
             {
-                <MudButton Href="@NavManager.ToAbsoluteUri("datasets/" + @Dataset.Identifier + "/preview").AbsoluteUri"
-                    Variant="Variant.Filled" 
-                    EndIcon="@Icons.Material.Filled.ReadMore" 
-                    Color="Color.Secondary"
-                    Size="Size.Small"
-                     Style="margin-top: 8px">More</MudButton>
+                if (_dataset.Type.ID == ":image")
+                {
+                    <MudButton Href="@NavManager.ToAbsoluteUri("datasets/" + @Dataset.Identifier + "/preview").AbsoluteUri"
+                        Variant="Variant.Filled" 
+                        EndIcon="@Icons.Material.Filled.ReadMore" 
+                        Color="Color.Secondary"
+                        Size="Size.Small"
+                         Style="margin-top: 8px">More</MudButton>
+                }
+                else
+                {
+                    <MudButton Href="@NavManager.ToAbsoluteUri("datasets/" + @Dataset.Identifier + "/preview").AbsoluteUri"
+                        Variant="Variant.Filled" 
+                        EndIcon="@Icons.Material.Filled.ReadMore" 
+                        Color="Color.Secondary"
+                        Size="Size.Small"
+                         Style="margin-top: 8px">Configure</MudButton>
+                }
             }
         </CardHeaderActions>
     </MudCardHeader>
