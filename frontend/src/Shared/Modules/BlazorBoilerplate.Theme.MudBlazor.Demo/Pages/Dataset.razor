@@ -5,15 +5,10 @@
 @inject NavigationManager NavManager
 @attribute [Authorize]
 
-@if (!string.IsNullOrEmpty(_pageTitle))
-{
-    <TopSection>
-        <Breadcrumbs>
-            <Breadcrumb Title="Datasets" Link="/datasets" Icon="@Icons.Filled.ListAlt" />
-            <Breadcrumb Title="@_pageTitle" Icon="@Icons.Filled.ListAlt" />
-        </Breadcrumbs>
-    </TopSection>
-}
+<TopSection>
+    <MudBreadcrumbs Items="_breadcrumbs">
+    </MudBreadcrumbs>
+</TopSection>
 
 <MudStack AlignItems="AlignItems.Center" Row="true" Class="mb-2">
     <MudIcon Size="Size.Large" Icon="@Icons.Filled.ListAlt" />
@@ -81,10 +76,14 @@
 
     private string _pageTitle;
     private GetDatasetResponseDto _dataset;
-
+    private List<BreadcrumbItem> _breadcrumbs = new List<BreadcrumbItem>();
     protected async override void OnInitialized()
     {
         await LoadDataset();
+        _breadcrumbs.Add(new BreadcrumbItem("Home", "/", false, Icons.Filled.Home));
+        _breadcrumbs.Add(new BreadcrumbItem("Datasets", "/datasets", false, Icons.Filled.ListAlt));
+        _breadcrumbs.Add(new BreadcrumbItem(_pageTitle, null, true, Icons.Filled.ListAlt));
+        StateHasChanged();
     }
     private async Task LoadDataset()
     {
@@ -100,8 +99,6 @@
             {
                 _dataset = Newtonsoft.Json.JsonConvert.DeserializeObject<GetDatasetResponseDto>(apiResponse.Result.ToString());
                 _pageTitle = "Dataset " + _dataset.Name;
-                StateHasChanged();
-                StateHasChanged();
                 viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
             }
             else

@@ -42,5 +42,6 @@ namespace BlazorBoilerplate.Infrastructure.Storage.DataModels
 
         [JsonIgnore]
         public string OmaMlId { get; set; }
+        public bool DoIntroductionTutorial { get; set; } = false;
     }
 }
