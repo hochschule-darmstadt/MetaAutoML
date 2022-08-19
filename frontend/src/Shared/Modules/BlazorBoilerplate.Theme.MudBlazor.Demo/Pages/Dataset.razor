@@ -56,7 +56,14 @@
         </MudCard>
     </MudItem>
     <MudItem xs="3" sm="3" md="3">
-        <NewTraining Dataset="_dataset"/>
+        @if (_readDatasetFailed == false)
+        {
+            <NewTraining Dataset="@_dataset" />
+        }
+        else
+        {
+            <NewTrainingDatasetNotReadable />
+        }
     </MudItem>
     <MudItem xs="9" sm="9" md="9">
         <Top3Models Dataset="_dataset"/>
@@ -65,7 +72,7 @@
         <DatasetAnalysis Dataset="_dataset"/>
     </MudItem>
     <MudItem xs="6" sm="6" md="6">
-        <DatasetPreviewShort Dataset="_dataset" />
+        <DatasetPreviewShort @bind-ReadDatasetFailed="@_readDatasetFailed" Dataset="@_dataset" />
     </MudItem>
 </MudGrid>
 
@@ -73,7 +80,7 @@
 @code{
     [Parameter]
     public string Id { get; set; }
-
+    private bool _readDatasetFailed;
     private string _pageTitle;
     private GetDatasetResponseDto _dataset;
     private List<BreadcrumbItem> _breadcrumbs = new List<BreadcrumbItem>();
