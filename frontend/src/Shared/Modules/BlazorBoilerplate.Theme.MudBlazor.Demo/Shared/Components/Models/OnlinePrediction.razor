@@ -26,16 +26,33 @@
             else
             {
                 <InputFile id="fileInput" OnChange="UploadFiles" hidden />
-                <MudStack>
-                    <MudButton HtmlTag="label"
-                               Variant="Variant.Filled"
-                               Color="Color.Secondary"
-                               StartIcon="@Icons.Filled.CloudUpload"
-                               for="fileInput">
-                        Upload File
-                    </MudButton>
-                    <MudButton StartIcon="@Icons.Filled.CloudDownload" Color="Color.Secondary" Disabled="@_downloadReady" OnClick="@DownloadPredictions">Download result CSV</MudButton>
-                </MudStack>
+                if (Model.Model.Status == "completed")
+                {
+                    <MudStack>
+                        <MudButton HtmlTag="label"
+                                   Variant="Variant.Filled"
+                                   Color="Color.Secondary"
+                                   StartIcon="@Icons.Filled.CloudUpload"
+                                   for="fileInput">
+                            Upload File
+                        </MudButton>
+                        <MudButton StartIcon="@Icons.Filled.CloudDownload" Color="Color.Secondary" Disabled="@_downloadReady" OnClick="@DownloadPredictions">Download result CSV</MudButton>
+                    </MudStack>
+                }
+                else
+                {
+                    <MudStack>
+                        <MudButton HtmlTag="label"
+                            Disabled="true"
+                           Variant="Variant.Filled"
+                           Color="Color.Secondary"
+                           StartIcon="@Icons.Filled.CloudUpload"
+                           >
+                            Upload File
+                        </MudButton>
+                        <MudButton StartIcon="@Icons.Filled.CloudDownload" Color="Color.Secondary" Disabled="true">Download result CSV</MudButton>
+                    </MudStack>
+                }
             }
         </MudPaper>
     </MudCardContent>
