@@ -147,7 +147,7 @@ class AutoMLManager(ABC, Thread):
             process_json["file_location"] = self._configuration["file_location"]
             process_json["file_name"] = self._configuration["file_name"]
             request.processJson = json.dumps(process_json)
-            request.data = json.dumps(data)
+            request.data = data
 
             try:
                 return stub.ExplainModel(request)

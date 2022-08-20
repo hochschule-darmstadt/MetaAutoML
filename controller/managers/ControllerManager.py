@@ -33,6 +33,8 @@ class ControllerManager(object):
         self.__adapterManager = AdapterManager(self.__data_storage)
         self.__trainings: dict[str, AutoMLSession] = {}
         self.__explainableAIManager = ExplainableAIManager(self.__data_storage)
+
+        self.__explainableAIManager.explain("3c8e1f29-20f9-445f-b65b-2d8b78960f9e", "62ff508238907ebedd4ea3b1")
         return
 
     def CreateNewUser(self, request: "CreateNewUserRequest") -> "CreateNewUserResponse":
@@ -510,7 +512,7 @@ class ControllerManager(object):
 
             print(f"startautmlcallback: model: {str(model)}")
             if model["status"] == "completed":
-                self.__explainableAIManager.explain(configuration.username, model["training_id"], model_id)
+                self.__explainableAIManager.explain(configuration.username, model_id)
 
 
         newTraining: AutoMLSession = self.__adapterManager.start_automl(configuration, str(dataset["_id"]), dataset_folder,

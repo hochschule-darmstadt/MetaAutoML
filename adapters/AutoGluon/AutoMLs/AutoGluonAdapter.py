@@ -48,7 +48,7 @@ class AutoGluonAdapter(AbstractAdapter):
 
         """
 
-        self._result_path = os.path.join(self._configuration["model_folder_location"], "model_gluon.gluon")
+        self._result_path = os.path.join(self._configuration["result_folder_location"], "model_gluon.gluon")
         # this only sets the result path tbh.
 
     def start(self):

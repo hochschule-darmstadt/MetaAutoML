@@ -1,15 +1,17 @@
 import json
-import shap
 import os
 import pandas as pd
 import matplotlib.pyplot as plt
 import threading
+import sys
+import numpy as np
 
 from AdapterManager import AdapterManager
 from Controller_bgrpc import *
 
 
 def make_html_force_plot(base_value, shap_values, X, path, filename_detail):
+    import shap
     shap.initjs()
     filename = os.path.join(path, f"shap_force_plot_{filename_detail}.html")
     shap.save_html(filename, shap.force_plot(base_value, shap_values, X))
@@ -17,6 +19,7 @@ def make_html_force_plot(base_value, shap_values, X, path, filename_detail):
 
 
 def make_svg_waterfall_plot(base_value, shap_values, X, path, filename_detail):
+    import shap
     filename = os.path.join(path, f"waterfall_{filename_detail}.svg")
     plot = shap.waterfall_plot(
         shap.Explanation(values=shap_values, base_values=base_value,
@@ -29,6 +32,7 @@ def make_svg_waterfall_plot(base_value, shap_values, X, path, filename_detail):
 
 
 def make_svg_beeswarm_plot(base_value, shap_values, X, path, filename_detail):
+    import shap
     filename = os.path.join(path, f"beeswarm_{filename_detail}.svg")
     shap.plots.beeswarm(shap.Explanation(values=shap_values,
                                          base_values=base_value,
@@ -41,6 +45,7 @@ def make_svg_beeswarm_plot(base_value, shap_values, X, path, filename_detail):
 
 
 def make_svg_summary_plot(shap_values, X, path):
+    import shap
     filename = os.path.join(path, "summary_bar.svg")
     shap.summary_plot(shap_values=shap_values, features=X, plot_type='bar', show=False)
     plt.savefig(filename)
@@ -132,18 +137,33 @@ class ExplainableAIManager:
         self.__adapterManager = AdapterManager(self.__data_storage)
         self.__threads = []
 
-    def explain(self, username, training_id, model_id):
-        # TODO: Add explanation infos to training entry in mongo
-        def callback(thread, username, model_id, data):
-            self.__data_storage.UpdateModel(username, model_id, data)
+    def explain(self, username, model_id):
+        def callback(thread, username, model, status, detail, plot_paths):
+            with self.__data_storage.Lock():
+                # Add explanation results to model
+                model_data = {"explanation": {"status": status, "detail": detail, "plot_paths": plot_paths}}
+                self.__data_storage.UpdateModel(username, str(model['_id']), model_data)
+
+                # Add explanation results (status) to training
+                training = self.__data_storage.GetTraining(username, model['training_id'])
+                if "explanation" in training:
+                    training["explanation"].update({model['automl_name']: status})
+                else:
+                    training["explanation"] = {model['automl_name']: status}
+                self.__data_storage.UpdateTraining(username, model['training_id'], {"explanation": training["explanation"]})
+
+            # Remove tread from thread list
             self.__threads.remove(thread)
 
+        # Create a new thread for the explanation
         thread = threading.Thread(target=self.explain_shap, name=f"{username}:{model_id}", args=(username, model_id, callback))
         thread.start()
         self.__threads.append(thread)
         self.__data_storage.UpdateModel(username, model_id, {"explanation": {"status": "started"}})
+        return
     
-    def explain_shap(self, username, model_id, callback, number_of_samples=50):
+    def explain_shap(self, username, model_id, callback, number_of_samples=5):
+        import shap
         model = self.__data_storage.GetModel(username, model_id)
         config = self.__data_storage.GetTraining(username, model["training_id"])
         dataset_path = self.__data_storage.GetDataset(username, config["dataset_id"])[1]["path"]
@@ -170,8 +190,7 @@ class ExplainableAIManager:
             try:
                 explainer = self.get_shap_explainer(username, model, config, sampled_dataset_X)
             except RuntimeError as e:
-                status_data = {"explanation": {"status": "failed", "reason": f"exeption: {e}"}}
-                callback(threading.current_thread(), username, model_id, data=status_data)
+                callback(thread=threading.current_thread(), username=username, model=model, status="failed", detail=f"exeption: {e}", plot_paths=[])
                 return
             shap_values = explainer.shap_values(sampled_dataset_X)
 
@@ -183,29 +202,51 @@ class ExplainableAIManager:
             plot_filenames = filenames
         else:
             message = "The ML task of the selected training is not tabular classification. This module is only compatible with tabular classification."
-            status_data = {"explanation": {"status": "failed", "reason": f"incompatible: {message}"}}
             print("[ExplainableAIManager]:" + message)
-            callback(threading.current_thread(), username, model_id, data=status_data)
+            callback(thread=threading.current_thread(), username=username, model=model, status="failed", detail=f"incompatible: {message}", plot_paths=[])
             return
 
         compile_html(plot_filenames, output_path)
-        print("[ExplainableAIManager]: Plots completed")
-        status_data = {"explanation": {"status": "finished", "plots": plot_filenames}}
-        callback(threading.current_thread(), username, model_id, status_data)
+        print(f"[ExplainableAIManager]: Plots for {model['automl_name']} completed")
+        callback(thread=threading.current_thread(), username=username, model=model, status="finished", detail=f"{len(plot_filenames)} plots created", plot_paths=plot_filenames)
 
-    def get_shap_explainer(self, username, model, config, sampled_dataset_X):
+    def get_shap_explainer(self, username, model, config, sampled_dataset_x):
+        """
+        Calculate and return the SHAP explainer object.
+        Usually this is a one-liner as with any "normal" ML-model the explainer is passed the model predict_proba (for
+        classification tasks) function.
+        But as here this function is called over gRPC, and it is implemented by AutoML's just passing the functions will
+        not work at all.
+        Our new prediction_probability function does several things (on this side and on the adapter side):
+            - Pass the data requested by SHAP to the adapter and return the probabilities (both sides)
+            - Convert the data back to the original Dataframe format (concerning columns and datatypes) while keeping
+                the content requested by SHAP (adapter side)
+            - Chunk the data if the requested data size is too large (this side). This is because gRPC is limited to a
+                certain file size but SHAP (especially with larger sample sizes) often requests very large datasets.
+                If the dataset as a whole is too large it gets requested as several chunks.
+            - Convert the received data back into a dataframe so that SHAP can work with the results.
+        """
         def prediction_probability(data):
-            result = self.__adapterManager.explain_automl(data.tolist(),
-                                                          username,
-                                                          model["automl_name"],
-                                                          model["training_id"],
-                                                          config)
-            if result is None:
-                raise RuntimeError("Unable to create SHAP values")
-            else:
-                return pd.DataFrame(json.loads(result.probabilities))
+            # Get number of chunks necessary. The max gRPC msg. size is 4194304.
+            no_chunks = int(sys.getsizeof(json.dumps(data.tolist())) / 4190000) + 1
+            data_chunks = np.array_split(np.array(data), no_chunks)
+            probabilities = []
+            for chunk in data_chunks:
+                # Request the data
+                result = self.__adapterManager.explain_automl(json.dumps(chunk.tolist()),
+                                                              username,
+                                                              model["automl_name"],
+                                                              model["training_id"],
+                                                              config)
+                if result is None:
+                    raise RuntimeError(f"Unable to create SHAP values for Automl {model['automl_name']} | Training_id {model['training_id']}")
+                else:
+                    probabilities = probabilities + json.loads(result.probabilities)
 
-        return shap.KernelExplainer(prediction_probability, sampled_dataset_X)
+            return pd.DataFrame(probabilities)
+
+        import shap
+        return shap.KernelExplainer(prediction_probability, sampled_dataset_x)
 
     def get_predictions(self, username, model_id, dataset_path, model, config, dataset_Y):
         """
