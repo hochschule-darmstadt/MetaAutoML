@@ -189,8 +189,16 @@ def zip_script(config):
     zip_file_name = get_config_property("export-zip-file-name")
     output_path = config["export_folder_location"]
     result_path = config["result_folder_location"]
-    shutil.copy(get_config_property("predict-time-sources-path"),
-                result_path)
+    shutil.copy(get_config_property("predict-time-sources-path"), result_path)
+
+    # Filter and save the config (<automl>-job.json).
+    # However exporting and therefore exposing internal paths is not intended so every config property that contains
+    # identifiers or paths is filtered out.
+    keys_to_filter_out = {"training_id", "file_location", "user_identifier", "job_folder_location",
+                          "model_folder_location", "export_folder_location", "result_folder_location"}
+    export_job_file = {key: value for key, value in config.items() if key not in keys_to_filter_out}
+    with open(os.path.join(result_path, get_config_property("job-file-name")), "w+") as f:
+        json.dump(export_job_file, f)
 
     shutil.make_archive(os.path.join(output_path, zip_file_name),
                         'zip',
