@@ -1,7 +1,7 @@
 ﻿@inject IViewNotifier viewNotifier
 @inject IStringLocalizer<Global> L
 @inject IApiClient apiClient
-
+@using Deedle
 
 @if ((_datasetFrame == null) && (_datasetReadError == false))
 {
@@ -37,31 +37,35 @@ else
         }
         else
         {
-            <MudTable Items="@_datasetFrame.Rows" style="width:stretch" class="mat-elevation-z5" FixedHeader="true" Dense="true" >
+            <MudTable Items="@_datasetFrame.Rows.ValuesAll" style="width:stretch" class="mat-elevation-z5" FixedHeader="true" Dense="true">
                 <HeaderContent>
-                    @foreach (var item in _datasetFrame.Columns)
+                    @foreach (var item in _datasetFrame.Rows.ValuesAll)
                     {
-                        @if (UseHeader == true)
+                        foreach (var ite in item.Keys)
                         {
-                            <MudTh>@item.Name</MudTh>
+                            @if (UseHeader == true)
+                            {
+                                <MudTh>@ite</MudTh>
+                            }
+                            else
+                            {
+                                <MudTh Style="background-color: gray">@ite</MudTh>
+                            }
                         }
-                        else
-                        {
-                            <MudTh Style="background-color: gray">@item.Name</MudTh>
-                        }
+                        break;
                     }
                     <MudTh></MudTh>   
                 </HeaderContent>
                 <RowTemplate>
-                    @foreach (var item in context)
+                    @foreach (var item in context.Keys)
                     {
-                        @if ((int)context[0] < StartRow)
+                        @if ((int)context["index"] < StartRow)
                         {
-                            <MudTd Style="background-color: gray">@item</MudTd>
+                            <MudTd Style="background-color: gray">@context[item]</MudTd>
                         }
                         else
                         {
-                            <MudTd>@item</MudTd>
+                            <MudTd>@context[item]</MudTd>
                         }
                     }
                 </RowTemplate>
@@ -87,7 +91,7 @@ else
     }
     private string _datasetData;
 
-    private DataFrame _datasetFrame;
+    private Frame<int, string> _datasetFrame;
 
     [Parameter]
     public GetDatasetResponseDto Dataset
@@ -99,19 +103,6 @@ else
         set
         {
             _dataset = value;
-            //if (_dataset != null)
-            //{
-            //    //if (Dataset.Configuration == null)
-            //    //{
-            //    //    //No config present yet, create default for tabular data
-            //    //    Dataset.Configuration = new Dictionary<string, dynamic>();
-            //    //    Dataset.Configuration.Add("use_header", true);
-            //    //    Dataset.Configuration.Add("start_row", 1);
-            //    //    Dataset.Configuration.Add("delimiter", "comma");
-            //    //    Dataset.Configuration.Add("escape_character", "\\");
-            //    //    Dataset.Configuration.Add("decimal_character", ".");
-            //    //}
-            //}
             ReloadDataFrame();
         } 
     }
@@ -205,14 +196,31 @@ else
         {
             if (DatasetData != null)
             {
-                _datasetFrame = DataFrame.LoadCsvFromString(DatasetData, Dataset.GetDelimiter());
+                // convert string to stream
+                byte[] byteArray = Encoding.ASCII.GetBytes(DatasetData);
+                MemoryStream stream = new MemoryStream(byteArray);
+                _datasetFrame = Frame.ReadCsv(stream, separators: Dataset.GetDelimiterStr());
                 PrimitiveDataFrameColumn<int> indexes = new PrimitiveDataFrameColumn<int>("Index");
-                for (int i = 1; i <= _datasetFrame.Rows.Count; i++)
+
+                foreach (var item in _datasetFrame.ColumnKeys)
+                {
+                    var newcolumn = _datasetFrame.Columns[item].FillMissing(st =>
+                    {
+                        return "NaN";
+                    });
+                    _datasetFrame.ReplaceColumn(item, newcolumn);
+                }
+                for (int i = 1; i <= _datasetFrame.Rows.ValuesAll.Count(); i++)
                 {
                     indexes.Append(i);
                 }
-                DataFrame indexFrame = new DataFrame(indexes);
-                _datasetFrame = indexFrame.Join(_datasetFrame);
+                Series<int, int?> indexSeries = indexes.ToOrdinalSeries();
+                var keys = _datasetFrame.ColumnKeys;
+                var newOrder = new List<string>() { "index" };
+                newOrder.AddRange(keys.ToArray());
+                _datasetFrame.AddColumn("index", indexSeries);
+
+                _datasetFrame = Frame.FromColumns(_datasetFrame.Columns.Realign(newOrder));
                 //_datasetFrame = _datasetFrame[[]];
                 _isSavingAllowed = true;
                 _datasetReadError = false;

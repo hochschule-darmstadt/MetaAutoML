@@ -42,7 +42,7 @@
                     </HeaderContent>
                     <RowTemplate>
                         <MudTd >
-                            <a href="@NavManager.ToAbsoluteUri("datasets/" + @context.Identifier).AbsoluteUri" Style="cursor: pointer;">@context.Name</a>
+                            <MudLink Href="@NavManager.ToAbsoluteUri("datasets/" + @context.Identifier).AbsoluteUri" Style="cursor: pointer; display: flex;"><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.ListAlt" Style="margin-right: 4px;" /> @context.Name</MudLink>
                         </MudTd>
                         <MudTd >@context.Type.Properties["skos:prefLabel"]</MudTd>
                         <MudTd >@FormatBytes(context.Size)</MudTd>

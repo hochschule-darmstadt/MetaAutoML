@@ -5,18 +5,21 @@
 }
 else
 {
-    <MudTable Items="@Dataset.Head(2).Rows" style="width:stretch" class="mat-elevation-z5" FixedHeader="true" Height="250px" Dense="true" >
+    <MudTable Items="@Dataset.Where(d => d.Key < 3).Rows.ValuesAll" style="width:stretch" class="mat-elevation-z5" FixedHeader="true" Height="250px" Dense="true">
         <HeaderContent>
-            @foreach (var item in Dataset.Columns)
+            @foreach (var item in Dataset.Rows.ValuesAll)
             {
-                <MudTh>@item.Name</MudTh>
+                foreach (var ite in item.Keys)
+                {
+                    <MudTh>@ite</MudTh>
+                }
+                break;
             }
-            <MudTh></MudTh>   
         </HeaderContent>
         <RowTemplate>
-            @foreach (var item in context)
+            @foreach (var item in context.Keys)
             {
-                <MudTd>@item</MudTd>
+                <MudTd>@context[item]</MudTd>
             }
         </RowTemplate>
     </MudTable>
@@ -24,6 +27,6 @@ else
 
 @code {
     [Parameter]
-    public DataFrame Dataset { get; set; }
+    public Frame<int, string> Dataset { get; set; }
     private string searchString = "";
 }

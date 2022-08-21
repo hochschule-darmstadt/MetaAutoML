@@ -6,9 +6,8 @@
 @attribute [Authorize]
 
 <TopSection>
-    <Breadcrumbs>
-        <Breadcrumb Title="Trainings" Icon="@Icons.Filled.ModelTraining" />
-    </Breadcrumbs>
+    <MudBreadcrumbs Items="_breadcrumbs">
+    </MudBreadcrumbs>
 </TopSection>
 
 <MudStack AlignItems="AlignItems.Center" Row="true" Class="mb-2">
@@ -24,9 +23,15 @@
 
 @code{
     private GetAllTrainingsResponseDto _trainings;
+    private List<BreadcrumbItem> _breadcrumbs = new List<BreadcrumbItem>();
+
     protected override async Task OnInitializedAsync()
     {
         await LoadTrainings();
+        _breadcrumbs.Add(new BreadcrumbItem("Home", null, false, Icons.Filled.Home));
+        _breadcrumbs.Add(new BreadcrumbItem("Trainings", null, true, Icons.Filled.ModelTraining));
+        StateHasChanged();
+
     }
     private async Task LoadTrainings()
     {
