@@ -109,10 +109,13 @@ class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
             df = df.astype(dtype=dict(zip(self._dataframeX.columns, self._dataframeX.dtypes.values)))
             # Get prediction probabilities and send them back.
             probabilities = self._automl.predict(np.array(df.values.tolist()))
-            print(f"init probabilities: {probabilities}")
+            # Keras is strange as it does not provide a predict_proba() function to get the class probabilities.
+            # Instead, it returns these probabilities (in case there is a binary classification) when calling predict
+            # but only as a one dimensional array. Shap however requires the probabilities in the format
+            # [[prob class 0, prob class 1], [...]]. So to return the proper format we have to process the results of
+            # predict().
             if probabilities.shape[1] == 1:
                 probabilities = [[prob[0], 1 - prob[0]] for prob in probabilities.tolist()]
-            print(f"afterproc probabilities: {probabilities}")
             probabilities = json.dumps(probabilities)
             return Adapter_pb2.ExplainModelResponse(probabilities=probabilities)
 

@@ -261,22 +261,33 @@ class ExplainableAIManager:
                                                             model["training_id"],
                                                             config).predictions)
 
+        # Convert truth to base list to avoid dealing with special numpy or pandas datatypes
+        dataset_Y = dataset_Y.tolist()
+
         # Convert mismatched datatypes between the dataset_Y and the list of predictions
-        print(f"[ExplainableAIManager]: Predictions: "
-              f"dataset_Y.iloc[0] is {dataset_Y.iloc[0]} with dtype {type(dataset_Y.iloc[0])} | "
+        print(f"[ExplainableAIManager]: Predictions finished, aligning dtypes: "
+              f"dataset_Y[0] is {dataset_Y[0]} with dtype {type(dataset_Y[0])} | "
               f"predictions[0] is {predictions[0]} with dtype {type(predictions[0])}")
-        if dataset_Y.dtype == "bool" and type(predictions[0]) == str:
-            # if predictions are string and truth is bool the predictions could be either '0' or 'False'
-            try:  # try to convert a string formatted int
-                return [bool(int(pred)) for pred in predictions]
-            except ValueError as e:
-                pass
-            try:  # try to convert a string formatted bool
+
+        if type(dataset_Y[0]) == bool:
+            if type(predictions[0]) == str:
+                # if predictions are string and truth is bool the predictions could be either '0' or 'False'
+                try:  # try to convert a string formatted int
+                    return [bool(int(pred)) for pred in predictions]
+                except ValueError as e:
+                    pass
+                try:  # try to convert a string formatted bool
+                    return [bool(pred) for pred in predictions]
+                except ValueError as e:
+                    pass
+            if type(predictions[0]) == int:
                 return [bool(pred) for pred in predictions]
-            except ValueError as e:
-                pass
-        if dataset_Y.dtype == "bool" and type(predictions[0]) == int:
-            return [bool(pred) for pred in predictions]
+
+        if type(dataset_Y[0]) == int:
+            if type(predictions[0]) == str:
+                # predictions could be either '0' or '0.0' so converting to float and then to int covers both
+                return [int(float(pred)) for pred in predictions]
+
         return predictions
 
 

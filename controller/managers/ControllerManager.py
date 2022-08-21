@@ -519,7 +519,6 @@ class ControllerManager(object):
                         "models": training["models"] + [model_id]
                     })
 
-            print(f"startautmlcallback: model: {str(model)}")
             if model["status"] == "completed":
                 self.__explainableAIManager.explain(configuration.username, model_id)
 
