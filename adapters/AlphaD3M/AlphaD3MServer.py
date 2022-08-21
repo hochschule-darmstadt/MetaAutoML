@@ -37,7 +37,7 @@ class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
             output_json = zip_script(config)
 
             library = ":scikit_learn_lib"
-            model = "d3m"
+            model = ":ensemble"
             test_score, prediction_time = evaluate(config, os.path.join(config["job_folder_location"], get_config_property("job-file-name")), data_loader)
             response = yield from get_response(output_json, start_time, test_score, prediction_time, library, model)
             print(f'{get_config_property("adapter-name")} job finished')
