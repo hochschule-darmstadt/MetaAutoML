@@ -34,7 +34,16 @@ class ControllerManager(object):
         self.__trainings: dict[str, AutoMLSession] = {}
         self.__explainableAIManager = ExplainableAIManager(self.__data_storage)
 
-        self.__explainableAIManager.explain("3c8e1f29-20f9-445f-b65b-2d8b78960f9e", "62ff508238907ebedd4ea3b1")
+        #self.__explainableAIManager.explain("3c8e1f29-20f9-445f-b65b-2d8b78960f9e", "62ff508238907ebedd4ea3b1")  # local gluon
+        #self.__explainableAIManager.explain("3c8e1f29-20f9-445f-b65b-2d8b78960f9e", "6300838c801e54b3b8a371a0")  # local keras
+        #self.__explainableAIManager.explain("58dde592-c6bc-4886-8470-bcbf6ee0626d", "63007178a65fb366123bf119")  # autocve
+        # self.__explainableAIManager.explain("58dde592-c6bc-4886-8470-bcbf6ee0626d", "63007178a65fb366123bf11e")  # flaml
+        # self.__explainableAIManager.explain("58dde592-c6bc-4886-8470-bcbf6ee0626d", "63007178a65fb366123bf11c")  # gluon
+        # self.__explainableAIManager.explain("58dde592-c6bc-4886-8470-bcbf6ee0626d", "63007178a65fb366123bf11f")  # mljar
+        # self.__explainableAIManager.explain("58dde592-c6bc-4886-8470-bcbf6ee0626d", "63007178a65fb366123bf11a")  # d3m
+        # self.__explainableAIManager.explain("58dde592-c6bc-4886-8470-bcbf6ee0626d", "63007178a65fb366123bf120")  # keras
+        # self.__explainableAIManager.explain("58dde592-c6bc-4886-8470-bcbf6ee0626d", "63007178a65fb366123bf11b")  # sklearn
+        # self.__explainableAIManager.explain("58dde592-c6bc-4886-8470-bcbf6ee0626d", "63007178a65fb366123bf11d")  # pytorch
         return
 
     def CreateNewUser(self, request: "CreateNewUserRequest") -> "CreateNewUserResponse":

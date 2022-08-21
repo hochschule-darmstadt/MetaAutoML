@@ -1,7 +1,6 @@
 import json
 import os
 import pandas as pd
-import matplotlib.pyplot as plt
 import threading
 import sys
 import numpy as np
@@ -20,6 +19,7 @@ def make_html_force_plot(base_value, shap_values, X, path, filename_detail):
 
 def make_svg_waterfall_plot(base_value, shap_values, X, path, filename_detail):
     import shap
+    import matplotlib.pyplot as plt
     filename = os.path.join(path, f"waterfall_{filename_detail}.svg")
     plot = shap.waterfall_plot(
         shap.Explanation(values=shap_values, base_values=base_value,
@@ -33,6 +33,7 @@ def make_svg_waterfall_plot(base_value, shap_values, X, path, filename_detail):
 
 def make_svg_beeswarm_plot(base_value, shap_values, X, path, filename_detail):
     import shap
+    import matplotlib.pyplot as plt
     filename = os.path.join(path, f"beeswarm_{filename_detail}.svg")
     shap.plots.beeswarm(shap.Explanation(values=shap_values,
                                          base_values=base_value,
@@ -46,6 +47,7 @@ def make_svg_beeswarm_plot(base_value, shap_values, X, path, filename_detail):
 
 def make_svg_summary_plot(shap_values, X, path):
     import shap
+    import matplotlib.pyplot as plt
     filename = os.path.join(path, "summary_bar.svg")
     shap.summary_plot(shap_values=shap_values, features=X, plot_type='bar', show=False)
     plt.savefig(filename)
@@ -70,16 +72,9 @@ def plot_tabular_classification(dataset_X, dataset_Y, predictions, explainer, sh
     plot_filenames = []
     dataset_X[dataset_X.select_dtypes(['bool']).columns] = dataset_X[dataset_X.select_dtypes(['bool']).columns].astype(str)
     classlist = list(val for val in dataset_Y.unique())
-    # TODO: Remove debug
-    print(f"[ExplainableAIManager]: classlist is: {classlist}")
-    print(f"[ExplainableAIManager]: distinct dataset Y is: {dataset_Y.unique()}")
-    print(f"[ExplainableAIManager]: predictions[0:10] is : {predictions[0:10]}")
     for class_idx, class_value in enumerate(classlist):
-        print(f"[ExplainableAIManager]: class_idx is: {class_idx} | class_value is {class_value}")
         row_idx = int(dataset_Y[dataset_Y == class_value].index[0])
         # Locate prediction (class_idx is the true value)
-        print(f"[ExplainableAIManager]: row_idx is : {row_idx}")
-        print(f"[ExplainableAIManager]: predictions[row_idx] is : {predictions[row_idx]}")
         prediction_class_idx = classlist.index(predictions[row_idx])
 
         filename = make_html_force_plot(base_value=explainer.expected_value[class_idx],
@@ -175,7 +170,6 @@ class ExplainableAIManager:
         os.makedirs(output_path, exist_ok=True)
         plot_path = os.path.join(output_path, "plots")
         os.makedirs(plot_path, exist_ok=True)
-        plot_filenames = []
         
         dataset = pd.read_csv(dataset_path)
         dataset = feature_preparation(dataset, config["dataset_configuration"]["features"].items())
@@ -198,8 +192,7 @@ class ExplainableAIManager:
 
             print("[ExplainableAIManager]: Explanation finished. Beginning plots.")
 
-            filenames = plot_tabular_classification(sampled_dataset_X, dataset_Y, predictions, explainer, shap_values, plot_path)
-            plot_filenames = filenames
+            plot_filenames = plot_tabular_classification(sampled_dataset_X, dataset_Y, predictions, explainer, shap_values, plot_path)
         else:
             message = "The ML task of the selected training is not tabular classification. This module is only compatible with tabular classification."
             print("[ExplainableAIManager]:" + message)
@@ -270,7 +263,7 @@ class ExplainableAIManager:
 
         # Convert mismatched datatypes between the dataset_Y and the list of predictions
         print(f"[ExplainableAIManager]: Predictions: "
-              f"dataset_Y.iloc[0] is {dataset_Y.iloc[0]} with dtype {dataset_Y.iloc[0]}"
+              f"dataset_Y.iloc[0] is {dataset_Y.iloc[0]} with dtype {type(dataset_Y.iloc[0])} | "
               f"predictions[0] is {predictions[0]} with dtype {type(predictions[0])}")
         if dataset_Y.dtype == "bool" and type(predictions[0]) == str:
             # if predictions are string and truth is bool the predictions could be either '0' or 'False'

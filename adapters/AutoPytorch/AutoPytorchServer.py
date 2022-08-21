@@ -127,7 +127,7 @@ class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
             df = pd.DataFrame(data=json.loads(request.data), columns=self._dataframeX.columns)
             df = df.astype(dtype=dict(zip(self._dataframeX.columns, self._dataframeX.dtypes.values)))
             # Get prediction probabilities and send them back.
-            probabilities = json.dumps(self._automl.predict_proba(df).values.tolist())
+            probabilities = json.dumps(self._automl.predict_proba(df).tolist())
             return Adapter_pb2.ExplainModelResponse(probabilities=probabilities)
 
         except Exception as e:

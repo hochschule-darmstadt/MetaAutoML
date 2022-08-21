@@ -108,8 +108,12 @@ class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
             df = pd.DataFrame(data=json.loads(request.data), columns=self._dataframeX.columns)
             df = df.astype(dtype=dict(zip(self._dataframeX.columns, self._dataframeX.dtypes.values)))
             # Get prediction probabilities and send them back.
-            # Fixme: Currently not working. This fails with "Failed to convert a NumPy array to a Tensor (Unsupported object type int)."
-            probabilities = json.dumps(self._automl.predict_on_batch(df).values.tolist())
+            probabilities = self._automl.predict(np.array(df.values.tolist()))
+            print(f"init probabilities: {probabilities}")
+            if probabilities.shape[1] == 1:
+                probabilities = [[prob[0], 1 - prob[0]] for prob in probabilities.tolist()]
+            print(f"afterproc probabilities: {probabilities}")
+            probabilities = json.dumps(probabilities)
             return Adapter_pb2.ExplainModelResponse(probabilities=probabilities)
 
         except Exception as e:
