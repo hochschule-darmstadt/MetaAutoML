@@ -5,16 +5,17 @@ from IAutoMLManager import IAutoMLManager
 from blackboard.Blackboard import Blackboard
 from blackboard.Controller import StrategyController
 from blackboard.agents.AutoMLRunAgent import AutoMLRunAgent
+from persistence.data_storage import DataStorage
 
 import logging
-logging.basicConfig(level=logging.DEBUG)
+# logging.basicConfig(level=logging.DEBUG)
 
 class AutoMLSession(object):
     """
     Implementation of an AutoML session object
     """
 
-    def __init__(self, session_id: int, configuration):
+    def __init__(self, session_id: int, dataset_id: str, configuration, data_storage: DataStorage):
         """
         Init a new instance of AutoMLSession
         ---
@@ -23,16 +24,19 @@ class AutoMLSession(object):
         2. configuration: session configuration
         """
         self.__id = session_id
-        self.__configuration: StartAutoMlProcessRequest = configuration
+        self.configuration: StartAutoMlProcessRequest = configuration
         self.automls = []
+        self.data_storage = data_storage
 
         self.blackboard = Blackboard()
         self.controller = StrategyController(self.blackboard)
-        self.controller.StartLoop()
-        atexit.register(self.controller.StopLoop)
-
         from blackboard.agents.AutoMLSessionAgent import AutoMLSessionAgent
-        session_agent = AutoMLSessionAgent(blackboard=self.blackboard, session=self)
+        session_agent = AutoMLSessionAgent(blackboard=self.blackboard, controller=self.controller, session=self)
+        from blackboard.agents.DataAnalysisAgent import DataAnalysisAgent
+        data_analysis_agent = DataAnalysisAgent(blackboard=self.blackboard, controller=self.controller, dataset_id=dataset_id, data_storage=data_storage)
+        self.controller.SetPhase('preprocessing')
+        self.controller.StartLoop()
+        # IDEA: atexit.register(self.controller.StopLoop)
 
     def add_automl_to_training(self, automl: IAutoMLManager):
         """
@@ -42,7 +46,7 @@ class AutoMLSession(object):
         1. automl the automl object implementing the IAutoMLManager
         """
         self.automls.append(automl)
-        automl_run_agent = AutoMLRunAgent(blackboard=self.blackboard, manager=automl)
+        automl_run_agent = AutoMLRunAgent(blackboard=self.blackboard, controller=self.controller, manager=automl)
 
     def get_id(self) -> str:
         """
@@ -51,6 +55,14 @@ class AutoMLSession(object):
         Return session id as str
         """
         return str(self.__id)
+
+    def get_configuration(self) -> str:
+        """
+        Get the session configuration
+        ---
+        Return session configuration as dict
+        """
+        return self.configuration.to_dict()
 
     def get_automl_model(self, request: GetAutoMlModelRequest) -> GetAutoMlModelResponse:
         """
@@ -72,16 +84,17 @@ class AutoMLSession(object):
         Return the session status as Controller_pb2.GetSessionStatusResponse
         """
 
-        response = GetTrainingResponse(configuration=self.__configuration.configuration,
-                                                            dataset_configuration=self.__configuration.dataset_configuration,
+        response = GetTrainingResponse(configuration=self.configuration.configuration,
+                                                            dataset_configuration=self.configuration.dataset_configuration,
                                                            required_auto_mls=[automl.name for automl in self.automls],
-                                                           runtime_constraints=self.__configuration.runtime_constraints)
+                                                           runtime_constraints=self.configuration.runtime_constraints)
         response.status = SessionStatus.SESSION_STATUS_COMPLETED
-        response.dataset = self.__configuration.dataset
-        response.task = self.__configuration.task
+        response.dataset = self.configuration.dataset
+        response.task = self.configuration.task
 
         for automl in self.automls:
             response.automls.append(automl.get_status())
             if automl.is_running():
                 response.status = SessionStatus.SESSION_STATUS_BUSY
+
         return response

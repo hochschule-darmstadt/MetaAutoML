@@ -62,22 +62,3 @@ ONTOLOGY_QUERY_GET_ALL_DETAILS_BY_ID = """
             ?s ?p ?o
             }
             """
-            
-#Retreive all dataset types          
-ONTOLOGY_QUERY_GET_DATASET_TYPES = """
-            PREFIX : <http://h-da.de/ml-ontology/> 
-            SELECT ?type
-            WHERE {
-                    ?type a :Enum ;
-                            :category :dataset_type ;
-                            :supported_by_oma_ml "true" .
-            } 
-            """
-#Retrieve all object information by id
-ONTOLOGY_QUERY_GET_ALL_DETAILS_BY_ID = """
-            PREFIX : <http://h-da.de/ml-ontology/>
-            SELECT ?p ?o
-            WHERE {
-            ?s ?p ?o
-            }
-            """

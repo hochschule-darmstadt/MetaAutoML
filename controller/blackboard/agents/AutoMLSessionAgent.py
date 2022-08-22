@@ -3,22 +3,28 @@ from .AbstractAgent import IAbstractBlackboardAgent
 from Controller_bgrpc import SessionStatus
 
 class AutoMLSessionAgent(IAbstractBlackboardAgent):
-    def __init__(self, blackboard, session: AutoMLSession):
-        super().__init__(blackboard, session.get_id())
+    blackboard_key = 'session'
+
+    def __init__(self, blackboard, controller, session: AutoMLSession):
+        super().__init__(blackboard, controller, 'automl-session')
         self.session = session
 
     def CanContribute(self) -> bool:
-        return self.blackboard.common_state.get('session', {}) != self.session.get_session_status().to_dict()
+        return self.GetState() != self.session.get_session_status().to_dict()
         
     def DoContribute(self) -> None:
         session_status = self.session.get_session_status()
 
-        self.blackboard.common_state.update({
-            'session': session_status.to_dict()
+        self.UpdateState({
+            'id': self.session.get_id(),
+            'status': session_status.status, # FIXME: session_status.to_dict()
+            'configuration': self.session.get_configuration(),
         })
 
-        if self.session.get_session_status().status != SessionStatus.SESSION_STATUS_BUSY:
-            print(f'Session {self.session.get_id()} is inactive, stopping controller loop.')
-            self.session.controller.StopLoop()
+        if session_status.status != SessionStatus.SESSION_STATUS_BUSY:
+            self._log.info(f'Session {self.session.get_id()} is inactive, stopping controller loop.')
+            self.session.controller.SetPhase('stopping')
+            self.Unregister()
+            raise StopIteration('AutoML session inactive, stopping..')
 
         return session_status

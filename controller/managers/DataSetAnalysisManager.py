@@ -150,16 +150,15 @@ class DataSetAnalysisManager:
         """
         duplicate_column_list = []
 
-        for x in range(dataset.shape[1]):
-            col = dataset.iloc[:, x]
-            
-            for y in range(x + 1, dataset.shape[1]):
-
-                other_col = dataset.iloc[:, y]
-                
-                if col.equals(other_col):
-                    duplicate_column_pair = (x,y)
-                    duplicate_column_list.append(duplicate_column_pair)
+        for idx_a, column_a in enumerate(dataset.columns):
+            for idx_b, column_b in enumerate(dataset.columns):
+                if idx_a == idx_b:
+                    continue
+                values_a = dataset[column_a].iloc[1:]
+                values_b = dataset[column_b].iloc[1:]
+                if values_a.equals(values_b):
+                    if (column_a, column_b) not in duplicate_column_list and (column_b, column_a) not in duplicate_column_list:
+                        duplicate_column_list.append((column_a, column_b))
 
         return duplicate_column_list
 

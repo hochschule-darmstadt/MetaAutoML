@@ -1,12 +1,13 @@
 import logging, collections.abc
 from ..Blackboard import Blackboard
+from ..Controller import StrategyController
 
 class IAbstractBlackboardAgent():
     """
-    Interface representing the functionality any blackboard agent must provide
+    Interface representing the functionality any blackboard agent must provide.
     """
 
-    def __init__(self, blackboard: Blackboard, agent_id: str) -> None:
+    def __init__(self, blackboard: Blackboard, controller: StrategyController, agent_id: str) -> None:
         """
         Constructs a new blackboard agent
         ---
@@ -14,8 +15,9 @@ class IAbstractBlackboardAgent():
         1. blackboard: The blackboard to attach to
         """
         self.agent_id = agent_id
-        self.__log = logging.getLogger(self.agent_id)
-        self.__log.debug(f'Initialized blackboard agent: "{self.agent_id}"')
+        self._log = logging.getLogger(self.agent_id)
+        self._log.debug(f'Initialized blackboard agent: "{self.agent_id}"')
+        self.controller = controller
         self.blackboard = blackboard
         self.blackboard.RegisterAgent(self)
 
@@ -39,13 +41,18 @@ class IAbstractBlackboardAgent():
         """
         self.blackboard.UnregisterAgent(self)
 
-    def UpdateNestedState(self, d, u) -> dict:
+    def GetState(self, default = None):
         """
-        Performs a deep (recursive) update on the common state and returns the new state dict.
+        Helper function that returns the blackboard state under a default key ("blackboard_key") for the agent class.
         """
-        for k, v in u.items():
-            if isinstance(v, collections.abc.Mapping):
-                d[k] = self.UpdateNestedState(d.get(k, {}), v)
-            else:
-                d[k] = v
-        return d
+        if not self.blackboard_key:
+            raise RuntimeError(f'{self.__class__.__name__} has no "blackboard_key" attribute!')
+        return self.blackboard.GetState(self.blackboard_key, default)
+        
+    def UpdateState(self, update, update_dict_recursive: bool = False):
+        """
+        Helper function that updates the blackboard state under a default key ("blackboard_key") for the agent class.
+        """
+        if not self.blackboard_key:
+            raise RuntimeError(f'{self.__class__.__name__} has no "blackboard_key" attribute!')
+        return self.blackboard.UpdateState(self.blackboard_key, update, update_dict_recursive)
