@@ -38,7 +38,7 @@ services:
       - "docker.host.internal:host-gateway"
 
   sqlserver:
-    image: mcr.microsoft.com/mssql/server
+    image: mcr.microsoft.com/mssql/server:2019-latest
     volumes:
       - dbdata:/var/opt/mssql
     environment:
