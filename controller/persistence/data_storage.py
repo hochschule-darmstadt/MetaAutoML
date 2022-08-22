@@ -139,11 +139,11 @@ class DataStorage:
         return self.__mongo.UpdateTraining(username, id, new_values)
 
 
-    def SaveDataset(self, username: str, fileName: str, content: bytes, type: str, name: str) -> str:
+    def InsertDataset(self, username: str, fileName: str, type: str, name: str) -> str:
         """
         Store dataset contents on disk and insert entry to database.
         ---
-        >>> id: str = ds.SaveDataset("automl_user", "my_dataset", ...)
+        >>> id: str = ds.InsertDataset("automl_user", "my_dataset", ...)
 
         ---
         Parameter
@@ -155,47 +155,99 @@ class DataStorage:
         Returns dataset id
         """
 
-        # Build dictionary for database
+        if type == ":image":
+            # replace zip sufix with nothing as it will be unpacked
+            name = name.replace(".zip", "")
+
+        # build dictionary for database
         database_content = {
             "name": name,
             "type": type,
-            "models": []
+            "analysis": "",
+            "models": [],
+            "path": "",
+            "size": "",
+            "mtime": "",
+            "file_name" : "",
+            "file_configuration": ""
         }
 
         # Get generated dataset_id from mongo
         dataset_id = self.__mongo.InsertDataset(username, database_content)
+        # Upload file to temporary upload folder
+        upload_file = os.path.join(self.__storage_dir, username, "uploads", fileName)
         # Get destination filepath using the generated id
         filename_dest = os.path.join(self.__storage_dir, username, dataset_id, fileName)
 
         if os.getenv("MONGO_DB_DEBUG") != "YES":
             # When not in a debug environment (for example within docker) we do not want to add the app section,
             # as this leads to broken links
+            upload_file = upload_file.replace("/app/", "")
             filename_dest = filename_dest.replace("/app/", "")
 
         # Make sure directory exists in case it's the first upload from this user
         os.makedirs(os.path.dirname(filename_dest), exist_ok=True)
-        # Write file content to destination filepath
-        with open(filename_dest, 'wb') as outfp:
-            outfp.write(content)
+        # Copy dataset into final folder
+        shutil.move(upload_file, filename_dest)
+        file_configuration = ""
 
         # If the dataset is an image dataset, which is always uploaded as a .zip file the images have to be unzipped
         # after saving
         if type == ":image":
             shutil.unpack_archive(filename_dest, os.path.join(self.__storage_dir, username, dataset_id))
+            # delete zip
+            os.remove(filename_dest)
+            # remove .zip suffix of filename and path
+            filename_dest = filename_dest.replace(".zip", "")
+            fileName = fileName.replace(".zip", "")
+
+        if type == ":tabular" or type == ":text" or type == ":time_series":
+            # generate preview of tabular and text dataset
+            # previewDf = pd.read_csv(filename_dest)
+            # previewDf.head(50).to_csv(filename_dest.replace(".csv", "_preview.csv"), index=False)
+            # causes error with different delimiters use normal string division
+            with open(filename_dest) as file:
+                lines = file.readlines()
+            with open(filename_dest.replace(".csv", "_preview.csv"), "x") as preview:
+                preview_line = lines[:51]
+                for line in preview_line:
+                    preview.write(line)
+                    # preview.write("\n")
+            #fileConfiguration = "{\"use_header\":false,\"start_row\":2,\"delimiter\":\"comma\",\"escape_character\":\"\\\\\",\"decimal_character\":\".\"}"
+            file_configuration = '{"use_header":false, "start_row":2, "delimiter":"comma", "escape_character":""", "decimal_character":"."}'
+
+        def get_size(start_path='.'):
+            total_size = 0
+            for dirpath, dirnames, filenames in os.walk(start_path):
+                for f in filenames:
+                    fp = os.path.join(dirpath, f)
+                    # skip if it is symbolic link
+                    if not os.path.islink(fp):
+                        total_size += os.path.getsize(fp)
+
+            return total_size
+
+        nbytes = get_size(os.path.join(self.__storage_dir, username, dataset_id))
 
         analysis_result = {}
         # If the dataset is a tabular dataset it can be analyzed.
         if type == ":tabular":
-            dsam = DataSetAnalysisManager(pd.read_csv(io.BytesIO(content)))
+            try:
+                dsam = DataSetAnalysisManager(pd.read_csv(filename_dest, engine="python"))
+            except pd.errors.ParserError as e:
+                # As the pandas python parsing engine sometimes fails: Retry with standard (c) parser engine.
+                dsam = DataSetAnalysisManager(pd.read_csv(filename_dest))
             analysis_result["basic_analysis"] = dsam.basicAnalysis()
             plot_filepath = os.path.join(os.path.dirname(filename_dest), "plots")
-            analysis_result["advanced_analysis_plots"] = dsam.advancedAnalysis(plot_filepath)
+            analysis_result["advanced_analysis"] = dsam.advancedAnalysis(plot_filepath)
 
-        # Fill in missing values
         success = self.__mongo.UpdateDataset(username, dataset_id, {
             "path": filename_dest,
+            "size": nbytes,
+            "mtime": os.path.getmtime(filename_dest),
             "analysis": analysis_result,
-            "mtime": os.path.getmtime(filename_dest)
+            "file_name": fileName,
+            "file_configuration": file_configuration
         })
         assert success, f"cannot update dataset with id {dataset_id}"
 
