@@ -209,7 +209,6 @@ class ControllerManager(object):
             response.identifier = str(model["_id"])
             response.dataset_id = model["dataset_id"]
                     
-        
         response.dataset_id = training["dataset_id"]
         response.dataset_name = training["dataset_name"]
         response.task = training["task"]
@@ -222,6 +221,11 @@ class ControllerManager(object):
             response.required_ml_libraries.append(lib)
         response.runtime_constraints = json.dumps(training["runtime_constraints"])
         response.dataset_configuration = json.dumps(training["dataset_configuration"])
+            
+        response.events = []
+        for event in training.get('events', []):
+            event.meta = json.dumps(event.meta)
+            response.events.append(event)
 
         return response
     

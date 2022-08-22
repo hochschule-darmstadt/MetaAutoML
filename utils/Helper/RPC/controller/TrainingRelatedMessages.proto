@@ -40,6 +40,7 @@ message GetTrainingResponse {
     string datasetConfiguration = 10;
     string identifier = 11;
     google.protobuf.Timestamp startTime = 12;
+    repeated StrategyControllerEvent events = 13;
   }
  
 
@@ -54,4 +55,10 @@ message AutoMlStatus {
     string library = 8;
     string model = 9;
     string identifier = 10;
+  }
+
+message StrategyControllerEvent {
+    string type = 1;
+    string meta = 2;
+    google.protobuf.Timestamp timestamp = 3;
   }

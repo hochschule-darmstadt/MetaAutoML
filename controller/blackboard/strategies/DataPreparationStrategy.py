@@ -74,7 +74,12 @@ class DataPreparationStrategyController(IAbstractStrategy):
         duplicate_rows = state.get("dataset_analysis", {}).get("duplicate_rows")
         self._log.info(f'Encountered redundant samples ({duplicate_rows}), omitting these rows..')
 
-        # TODO: Re-implement the row omitting logic (check new structure!)
+        # TODO: Re-implement the row omitting logic
+        # Preparation (maybe reusable utility function):
+        #   - Copy dataset from dataset folder to training folder
+        #   - Change adapter/session config dataset path
+        # Load dataset from (new) dataset path
+        # Remove rows that should be omitted
         
         # IDEA: Update dataset analysis accordingly (may not be neccessary)
         blackboard.UpdateState('dataset_analysis', { 'duplicate_rows': [] }, True)

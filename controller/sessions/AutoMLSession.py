@@ -29,7 +29,7 @@ class AutoMLSession(object):
         self.data_storage = data_storage
 
         self.blackboard = Blackboard()
-        self.controller = StrategyController(self.blackboard)
+        self.controller = StrategyController(self.blackboard, data_storage)
         from blackboard.agents.AutoMLSessionAgent import AutoMLSessionAgent
         session_agent = AutoMLSessionAgent(blackboard=self.blackboard, controller=self.controller, session=self)
         from blackboard.agents.DataAnalysisAgent import DataAnalysisAgent

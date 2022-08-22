@@ -1,6 +1,7 @@
 import logging, time
 from threading import Thread, Lock
 from typing import Callable
+from persistence.data_storage import DataStorage
 from .Blackboard import Blackboard
 
 class StrategyController(object):
@@ -8,10 +9,11 @@ class StrategyController(object):
     Strategy controller which supervises the blackboard.
     """
 
-    def __init__(self, blackboard: Blackboard) -> None:
+    def __init__(self, blackboard: Blackboard, data_storage: DataStorage) -> None:
         self._log = logging.getLogger('strategy-controller')
         self._log.setLevel(logging.DEBUG) # FIXME: Remove this line, only for debugging
         self.blackboard = blackboard
+        self.data_storage = data_storage
         self._log.debug(f'Attached controller to the blackboard, current agents: {len(self.blackboard.agents)}')
 
         self.blackboard.common_state.update({
@@ -137,9 +139,14 @@ class StrategyController(object):
         }
         self.blackboard.common_state['events'].append(event)
         self._log.info(f'Encountered event "{event_type}": {meta}')
-        for callback in self.event_listeners.get(event_type, []):
+        for callback in (self.event_listeners.get('*', []) + self.event_listeners.get(event_type, [])):
             self._log.debug(f'Dispatching event callback for "{event_type}": {callback}')
-            callback(meta, self)
+            result = callback(meta, self)
+        session_id = self.blackboard.GetState('session', {}).get('id')
+        session_username = self.blackboard.GetState('session', {}).get('configuration', {}).get('username')
+        if session_id and session_username:
+            self._log.debug(f'Persisting events to the training storage')
+            self.data_storage.UpdateTraining(session_username, session_id, { 'events': self.blackboard.GetState('events', []) })
 
     def OnEvent(self, event_type: str, callback: Callable) -> None:
         if event_type not in self.event_listeners:
