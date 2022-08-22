@@ -31,7 +31,7 @@ class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
             output_json = zip_script(config)
 
             # AutoSklearn uses an ensemble of up to 50 different models we are not able to show them all in our current GUI
-            model = "ensemble selection"
+            model = ":ensemble"
             # autosklearn always uses only sklearn
             library = ":scikit_learn_lib"
             test_score, prediction_time = evaluate(config, os.path.join(config["job_folder_location"], get_config_property("job-file-name")), data_loader)

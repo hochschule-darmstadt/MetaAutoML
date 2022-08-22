@@ -44,6 +44,7 @@ namespace BlazorBoilerplate.Storage.Migrations.ApplicationDb
                     FirstName = table.Column<string>(type: "nvarchar(64)", maxLength: 64, nullable: true),
                     LastName = table.Column<string>(type: "nvarchar(64)", maxLength: 64, nullable: true),
                     OmaMlId = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    DoIntroductionTutorial = table.Column<bool>(type: "bit", nullable: false),
                     TenantId = table.Column<string>(type: "nvarchar(64)", maxLength: 64, nullable: false),
                     PasswordHash = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     SecurityStamp = table.Column<string>(type: "nvarchar(max)", nullable: true)

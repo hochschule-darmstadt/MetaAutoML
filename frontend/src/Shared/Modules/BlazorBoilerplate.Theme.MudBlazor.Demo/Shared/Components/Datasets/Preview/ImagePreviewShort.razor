@@ -1,22 +1,18 @@
 ﻿@if (Dataset != null)
 {
-    <MudStack Row="true" Style="max-width: auto; overflow-x: scroll">
-        @foreach (var category in Dataset.Select(p => p.FolderType).Distinct())
-        {
-            <MudStack>
-			    <MudText Align="@Align.Center" Class="mx-auto">@category.Replace("\\", "")</MudText>
-                <MudCarousel Style="height:200px" TData="object">
-                    @foreach (var item in Dataset.Where(p => p.FolderType == category).ToList())
-                    {
-                            <MudCarouselItem Transition="Transition.Slide" Color="@Color.Secondary">
-		                        <div class="d-flex flex-column flex-column justify-center" style="height:100%">
-                                    <MudImage Src="@GetImage(item)" />
-		                        </div>
-                            </MudCarouselItem>
-                    }
-                </MudCarousel>
-            </MudStack>
-        }
+    <MudStack Row="true" Style="justify-content: center;">
+        <MudCarousel Style="height:200px" TData="object" AutoCycle="false">
+            @for (int i = 0; i < 5; i++)
+            {
+                int r = new Random().Next(Dataset.Count);
+                <MudCarouselItem Transition="Transition.Slide" Color="@Color.Secondary">
+                    <div class="d-flex flex-column flex-column" style="height:100%">
+                        <MudText Align="@Align.Center" Class="mx-auto">@Dataset[r].FolderType.Replace("\\", "")</MudText>
+                        <MudImage Src="@GetImage(Dataset[r])" />
+                    </div>
+                </MudCarouselItem>
+            }
+        </MudCarousel>
     </MudStack>
 }
 

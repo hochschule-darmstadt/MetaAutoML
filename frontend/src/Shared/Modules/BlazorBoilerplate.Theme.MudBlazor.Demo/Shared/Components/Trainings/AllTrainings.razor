@@ -22,7 +22,7 @@
             <MudTable Items="@_trainings.Trainings" style="width:stretch" class="mat-elevation-z5" AllowSelection="false" Filter="new Func<GetTrainingResponseDto,bool>(FilterFunc)">
                 <ToolBarContent>
                     <MudSpacer />
-                    <MudTextField @bind-Value="searchString" Placeholder="Search" Adornment="Adornment.Start"
+                    <MudTextField @bind-Value="searchString" Placeholder="Search for status, task or dataset type" Adornment="Adornment.Start"
                                     AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
                 </ToolBarContent>
                 <HeaderContent>
@@ -33,7 +33,7 @@
                 </HeaderContent>
                 <RowTemplate>
                    <MudTd>
-                        <a href="@NavManager.ToAbsoluteUri("trainings/" + @context.ID).AbsoluteUri" Style="cursor: pointer;">@context.StartTime.ToString("dd/MM/yy HH:mm")</a>
+                        <MudLink Href="@NavManager.ToAbsoluteUri("trainings/" + @context.ID).AbsoluteUri" Style="cursor: pointer; display: flex;"><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.ModelTraining" Style="margin-right: 4px;" /> @context.StartTime.ToString("dd/MM/yy HH:mm")</MudLink>
                    </MudTd>
                     <MudTd>
                         @context.Status

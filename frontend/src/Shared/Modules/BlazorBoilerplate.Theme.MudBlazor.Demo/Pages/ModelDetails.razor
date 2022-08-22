@@ -7,9 +7,8 @@
 @attribute [Authorize]
 
 <TopSection>
-    <Breadcrumbs>
-        <Breadcrumb Title="Home" />
-    </Breadcrumbs>
+    <MudBreadcrumbs Items="_breadcrumbs">
+    </MudBreadcrumbs>
 </TopSection>
 
 <MudStack AlignItems="AlignItems.Center" Row="true" Class="mb-2">
@@ -28,4 +27,11 @@
 @code {
     [Parameter]
     public string Id { get; set; }
+    private List<BreadcrumbItem> _breadcrumbs = new List<BreadcrumbItem>();
+
+    protected override void OnInitialized()
+    {
+        _breadcrumbs.Add(new BreadcrumbItem("Home", "/", false, Icons.Filled.Home));
+
+    }
 }
