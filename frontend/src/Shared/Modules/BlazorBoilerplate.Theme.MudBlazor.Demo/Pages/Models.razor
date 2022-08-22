@@ -5,21 +5,11 @@
 @inject IViewNotifier viewNotifier
 @attribute [Authorize]
 
-@if (!string.IsNullOrEmpty(_pageTitle))
-{
-    <TopSection>
-        <Breadcrumbs>
-            <Breadcrumb Title="Datasets" Link="/datasets" Icon="@Icons.Filled.ListAlt" />
-            <Breadcrumb Title="@_pageTitle" Link="@("/datasets/" + Id)" Icon="@Icons.Filled.ListAlt"/>
-            <Breadcrumb Title="Models"  Icon="@Icons.Filled.Lightbulb"/>
-        </Breadcrumbs>
-    </TopSection>
-}
 <TopSection>
-    <Breadcrumbs>
-        <Breadcrumb Title="Models" Icon="@Icons.Filled.Lightbulb" />
-    </Breadcrumbs>
+    <MudBreadcrumbs Items="_breadcrumbs">
+    </MudBreadcrumbs>
 </TopSection>
+
 
 <MudStack AlignItems="AlignItems.Center" Row="true" Class="mb-2">
     <MudIcon Size="Size.Large" Icon="@Icons.Filled.Lightbulb" />
@@ -38,9 +28,17 @@
     private GetModelsResponseDto _models;
     private GetDatasetResponseDto _dataset;
     private string _pageTitle;
+    private List<BreadcrumbItem> _breadcrumbs = new List<BreadcrumbItem>();
+
     protected override async Task OnInitializedAsync()
     {
         await LoadModels();
+        _breadcrumbs.Add(new BreadcrumbItem("Home", "/", false, Icons.Filled.Home));
+        _breadcrumbs.Add(new BreadcrumbItem("Datasets", "/datasets", false, Icons.Filled.ListAlt));
+        _breadcrumbs.Add(new BreadcrumbItem(_pageTitle, "/datasets/" + Id, false, Icons.Filled.ListAlt));
+        _breadcrumbs.Add(new BreadcrumbItem("Models", null, true, Icons.Filled.Lightbulb));
+        StateHasChanged();
+
     }
     private async Task LoadModels()
     {

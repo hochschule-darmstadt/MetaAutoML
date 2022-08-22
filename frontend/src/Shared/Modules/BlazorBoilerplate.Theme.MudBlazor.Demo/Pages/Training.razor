@@ -5,15 +5,10 @@
 @inject IApiClient apiClient
 @attribute [Authorize]
 
-@if (!string.IsNullOrEmpty(_pageTitle))
-{
-    <TopSection>
-        <Breadcrumbs>
-            <Breadcrumb Title="Trainings" Link="/trainings" Icon="@Icons.Filled.ModelTraining" />
-            <Breadcrumb Title="@_pageTitle" Icon="@Icons.Filled.ModelTraining" />
-        </Breadcrumbs>
-    </TopSection>
-}
+<TopSection>
+    <MudBreadcrumbs Items="_breadcrumbs">
+    </MudBreadcrumbs>
+</TopSection>
 
 <MudStack AlignItems="AlignItems.Center" Row="true" Class="mb-2">
     <MudIcon Size="Size.Large" Icon="@Icons.Filled.ModelTraining"/>
@@ -32,10 +27,16 @@
     public string Id { get; set; }
     private string _pageTitle = "";
     private GetTrainingResponseDto _training;
+    private List<BreadcrumbItem> _breadcrumbs = new List<BreadcrumbItem>();
 
     protected async override void OnInitialized()
     {
         await GetTraining();
+        _breadcrumbs.Add(new BreadcrumbItem("Home", "/", false, Icons.Filled.Home));
+        _breadcrumbs.Add(new BreadcrumbItem("Trainings", "/trainings", false, Icons.Filled.ModelTraining));
+        _breadcrumbs.Add(new BreadcrumbItem(_pageTitle, null, true, Icons.Filled.ModelTraining));
+        StateHasChanged();
+
     }
 
     private async Task GetTraining()
@@ -48,8 +49,6 @@
             {
                 _training = Newtonsoft.Json.JsonConvert.DeserializeObject<GetTrainingResponseDto>(apiResponse.Result.ToString());
                 _pageTitle = "Training " + _training.StartTime.ToString("dd/MM/yy HH:mm");
-                StateHasChanged();
-                StateHasChanged();
                 viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
             }
             else

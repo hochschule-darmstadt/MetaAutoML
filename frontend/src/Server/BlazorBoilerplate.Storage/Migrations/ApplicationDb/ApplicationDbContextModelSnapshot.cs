@@ -122,6 +122,9 @@ namespace BlazorBoilerplate.Storage.Migrations.ApplicationDb
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("DoIntroductionTutorial")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Email")
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");

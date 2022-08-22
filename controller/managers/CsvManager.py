@@ -96,7 +96,7 @@ class CsvManager:
                                                     DataType.DATATYPE_BOOLEAN]
 
     @staticmethod
-    def GetColumns(path) -> GetTabularDatasetColumnResponse:
+    def GetColumns(path, fileConfiguration) -> GetTabularDatasetColumnResponse:
         """
         Read only the column names of a dataset
         ---
@@ -105,8 +105,14 @@ class CsvManager:
         ---
         Return the column names as GetTabularDatasetColumnNamesResponse
         """
+        delimiters = {
+            "comma":        ",",
+            "semicolon":    ";",
+            "space":        " ",
+            "tab":          "\t",
+        }
         response = GetTabularDatasetColumnResponse()
-        dataset = pd.read_csv(path)
+        dataset = pd.read_csv(path, delimiter=delimiters[fileConfiguration['delimiter']], skiprows=(fileConfiguration['start_row']-1), escapechar=fileConfiguration['escape_character'], decimal=fileConfiguration['decimal_character'])
     
         for col in dataset.columns:
             table_column = TableColumn()

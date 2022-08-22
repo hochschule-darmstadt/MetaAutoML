@@ -34,5 +34,21 @@ namespace BlazorBoilerplate.Shared.Dto.Dataset
                     return ',';
             }
         }
+        public string GetDelimiterStr()
+        {
+            switch (this.Configuration["delimiter"])
+            {
+                case "comma":
+                    return ",";
+                case "semicolon":
+                    return ";";
+                case "space":
+                    return " ";
+                case "tab":
+                    return "\t";
+                default:
+                    return ",";
+            }
+        }
     }
 }

@@ -24,7 +24,8 @@ def GetMetaInformations(config_json):
     automl = TabularPredictor.load(os.path.join(os.path.join(working_dir, 'model_gluon.gluon')))
     automl_info = automl._learner.get_info(include_model_info=True)
     librarylist = set()
-    model = automl_info['best_model']
+    #model = automl_info['best_model']
+    model = ":ensemble"
     for model_info in automl_info['model_info']:
         if model_info == model:
             pass
@@ -39,7 +40,8 @@ def GetMetaInformations(config_json):
         else:
             librarylist.add(":scikit_learn_lib")
     library = " + ".join(librarylist)
-    return library, model
+    #TODO correct read and array handling
+    return librarylist.pop(), model
 
 class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
     """

@@ -1,0 +1,28 @@
+﻿@inject IStringLocalizer<Global> L
+@inject IApiClient apiClient
+@inject IViewNotifier viewNotifier
+@inject NavigationManager NavManager
+
+<MudCard Elevation="5">
+    <MudCardHeader Style="border-bottom-style: inset; border-bottom-width: 1px;">
+        <CardHeaderContent>
+            <MudText Typo="Typo.h6">New Training</MudText>
+        </CardHeaderContent>
+    </MudCardHeader>
+    <MudCardContent>
+        <MudPaper Height="215px" Elevation="0">
+            <MudStack>
+                <MudButton Disabled="true"
+                           Variant="Variant.Filled"
+                           StartIcon="@Icons.Filled.ModelTraining"
+                           Color="Color.Secondary">
+                    Start Training
+                </MudButton>
+                <MudText Typo="Typo.body2">Dataset couln´t be read, use the preview config option to reconfigure the dataset.</MudText>
+            </MudStack>
+        </MudPaper>
+    </MudCardContent>
+</MudCard>
+
+@code {
+}

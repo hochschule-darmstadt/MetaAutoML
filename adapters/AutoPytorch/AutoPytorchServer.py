@@ -29,9 +29,9 @@ def GetMetInformation(config_json):
                     librarylist.add(":scikit_learn_lib")
             else:
                 librarylist.add(":pytorch_lib")
-        model = "ensemble selection"
+        model = ":ensemble"
         library = " + ".join(librarylist)
-    return library, model
+    return librarylist.pop(), model
 
 
 class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):

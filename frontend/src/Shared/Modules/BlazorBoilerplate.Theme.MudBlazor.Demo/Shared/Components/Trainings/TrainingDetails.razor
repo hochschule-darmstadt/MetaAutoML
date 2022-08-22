@@ -48,7 +48,7 @@
                             }
                         </MudTd>
                         <MudTd>
-                            <a href="@NavManager.ToAbsoluteUri("trainings/" + Training.ID + "/models/" + @AutoMl.ID).AbsoluteUri" Style="cursor: pointer;">@AutoMl.Model</a>
+                            <MudLink Href="@NavManager.ToAbsoluteUri("trainings/" + Training.ID + "/models/" + @AutoMl.ID).AbsoluteUri" Style="cursor: pointer; display: flex;"><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.Lightbulb" Style="margin-right: 4px;" />@AutoMl.Model</MudLink>
                         </MudTd>
                         <MudTd>@AutoMl.Library</MudTd>
                         <MudTd>@(String.Format("{0:0.00}", AutoMl.TestScore))</MudTd>

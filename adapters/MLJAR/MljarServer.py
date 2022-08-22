@@ -19,8 +19,16 @@ def GetMetaInformation(config_json):
     working_dir = config_json["result_folder_location"]
     leaderboard = pd.read_csv(os.path.join(working_dir, "Models", "leaderboard.csv"))
     #print(leaderboard[leaderboard["metric_value"].eq(leaderboard["metric_value"].min())])
-    model = leaderboard[leaderboard["metric_value"].eq(leaderboard["metric_value"].min())]["model_type"].values[0]
-    library = leaderboard[leaderboard["metric_value"].eq(leaderboard["metric_value"].min())]["model_type"].values[0]
+    #TODO add all constellations
+    if leaderboard[leaderboard["metric_value"].eq(leaderboard["metric_value"].min())]["model_type"].values[0] == "Decision Tree":
+        model = ":decision_tree"
+        library = ":scikit_learn_lib"
+    elif leaderboard[leaderboard["metric_value"].eq(leaderboard["metric_value"].min())]["model_type"].values[0] == "Ensemble":
+        model = ":ensemble"
+        library = ":scikit_learn_lib"
+    else:
+        model = ":ensemble"
+        library = ":scikit_learn_lib"
     return library, model
 
 

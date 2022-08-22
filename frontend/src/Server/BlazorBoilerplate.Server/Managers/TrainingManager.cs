@@ -58,13 +58,15 @@ namespace BlazorBoilerplate.Server.Managers
                         Predictiontime = (double)automl.Predictiontime,
                         Runtime = (int)automl.Runtime
                     };
-                    if (automl.Model != "")
+                    if (!string.IsNullOrEmpty(automl.Model))
                     {
                         status.Model = (await _cacheManager.GetObjectInformation(automl.Model)).Properties["skos:prefLabel"];
-                    }
-                    if (automl.Library != "")
-                    {
                         status.Library = (await _cacheManager.GetObjectInformation(automl.Library)).Properties["skos:prefLabel"];
+                    }
+                    else
+                    {
+                        status.Model = "";
+                        status.Library = "";
                     }
                     response.AutoMls.Add(status);
                 }

@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BlazorBoilerplate.Storage.Migrations.ApplicationDb
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20220721144244_CreateApplicationDb")]
+    [Migration("20220818134746_CreateApplicationDb")]
     partial class CreateApplicationDb
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -123,6 +123,9 @@ namespace BlazorBoilerplate.Storage.Migrations.ApplicationDb
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("DoIntroductionTutorial")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Email")
                         .HasMaxLength(256)

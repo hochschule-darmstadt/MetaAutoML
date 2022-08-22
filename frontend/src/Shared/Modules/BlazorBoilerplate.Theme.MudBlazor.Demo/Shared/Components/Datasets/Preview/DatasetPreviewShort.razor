@@ -19,12 +19,24 @@
         <CardHeaderActions>
             @if (_dataset != null)
             {
-                <MudButton Href="@NavManager.ToAbsoluteUri("datasets/" + @Dataset.Identifier + "/preview").AbsoluteUri"
-                    Variant="Variant.Filled" 
-                    EndIcon="@Icons.Material.Filled.ReadMore" 
-                    Color="Color.Secondary"
-                    Size="Size.Small"
-                     Style="margin-top: 8px">More</MudButton>
+                if (_dataset.Type.ID == ":image")
+                {
+                    <MudButton Href="@NavManager.ToAbsoluteUri("datasets/" + @Dataset.Identifier + "/preview").AbsoluteUri"
+                        Variant="Variant.Filled" 
+                        EndIcon="@Icons.Material.Filled.ReadMore" 
+                        Color="Color.Secondary"
+                        Size="Size.Small"
+                         Style="margin-top: 8px">More</MudButton>
+                }
+                else
+                {
+                    <MudButton Href="@NavManager.ToAbsoluteUri("datasets/" + @Dataset.Identifier + "/preview").AbsoluteUri"
+                        Variant="Variant.Filled" 
+                        EndIcon="@Icons.Material.Filled.ReadMore" 
+                        Color="Color.Secondary"
+                        Size="Size.Small"
+                         Style="margin-top: 8px">Configure</MudButton>
+                }
             }
         </CardHeaderActions>
     </MudCardHeader>
@@ -43,7 +55,7 @@
                         case ":time_series":
                         case ":text":
                         case ":tabular":
-                            <TabularPreviewShort Dataset="_tabularDataset" />
+                            <TabularPreviewShort Dataset="_datasetFrame" />
                             break;
                         case ":image":
                             <ImagePreviewShort Dataset="_imageDataset" />
@@ -78,9 +90,24 @@
     private GetDatasetResponseDto _dataset;
     private GetDatasetPreviewResponseDto _datasetPreview;
     private bool isPreviewRequestRunning = false;
-    private DataFrame _tabularDataset;
+    private Frame<int, string> _datasetFrame;
     private List<ImagePreviewDto> _imageDataset;
     private GetTabularDatasetColumnResponseDto _columns;
+
+    [Parameter]
+    public bool ReadDatasetFailed 
+    {
+        get 
+        {
+            return _readDatasetFailed;
+        }
+        set
+        {
+            _readDatasetFailed = value;
+        }
+    }
+    [Parameter]
+    public EventCallback<bool> ReadDatasetFailedChanged { get; set; }
 
     private bool _readDatasetFailed = false;
 
@@ -108,40 +135,23 @@
                     case ":time_series":
                     case ":text":
                     case ":tabular":
-                        _tabularDataset = DataFrame.LoadCsvFromString(_datasetPreview.DatasetPreview,separator:_dataset.GetDelimiter());
-                        _readDatasetFailed = false;
-                        //apiResponse = await apiClient.GetTabularDatasetColumn(new GetTabularDatasetColumnRequestDto { DatasetIdentifier = Dataset.Identifier });
+                        // convert string to stream
+                        byte[] byteArray = Encoding.ASCII.GetBytes(_datasetPreview.DatasetPreview);
+                        MemoryStream stream = new MemoryStream(byteArray);
+                        _datasetFrame = Frame.ReadCsv(stream, separators: Dataset.GetDelimiterStr());
 
-                        //if (apiResponse.IsSuccessStatusCode)
-                        //{
-                        //    //_columns = Newtonsoft.Json.JsonConvert.DeserializeObject<GetTabularDatasetColumnResponseDto>(apiResponse.Result.ToString());
-                        //    //List<string> columnNames = _columns.Columns.Select(x => x.Name).ToList();
-                        //    //List<Type> columnTypes = _columns.Columns.Select(x =>
-                        //    //{
-                        //    //    switch (x.Type)
-                        //    //    {
-                        //    //        case Server.DataType.String:
-                        //    //            return typeof(string);
-                        //    //        case Server.DataType.Int:
-                        //    //            return typeof(int);
-                        //    //        case Server.DataType.Float:
-                        //    //            return typeof(string);  //Float value are currently not really supported somehow, maybe in next release of the analytic package. To avoid casting to wrong type use string
-                        //    //        case Server.DataType.Boolean:
-                        //    //            return typeof(int);
-                        //    //        case Server.DataType.Datetime:
-                        //    //            return typeof(DateTime);
-                        //    //        default:
-                        //    //            return typeof(string);
+                        foreach (var item in _datasetFrame.ColumnKeys)
+                        {
+                            var newcolumn = _datasetFrame.Columns[item].FillMissing(st =>
+                            {
+                                return "NaN";
+                            });
+                            _datasetFrame.ReplaceColumn(item, newcolumn);
+                        }
 
-                        //    //    }
-                        //    //}).ToList();
-                        //    //_tabularDataset = DataFrame.LoadCsvFromString(_datasetPreview.DatasetPreview,columnNames:columnNames.ToArray(), dataTypes:columnTypes.ToArray());
-                        //    _tabularDataset = DataFrame.LoadCsvFromString(_datasetPreview.DatasetPreview,separator:_dataset.GetDelimiter());
-                        //}
-                        //else
-                        //{
-                        //    viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
-                        //}
+                        ReadDatasetFailed = false;
+                        await ReadDatasetFailedChanged.InvokeAsync(ReadDatasetFailed);
+                        
                         break;
                     case ":image":
                         _imageDataset = _datasetPreview.DatasetPreview.ToObject<List<ImagePreviewDto>>();
@@ -159,7 +169,8 @@
         }
         catch (Exception ex)
         {
-            _readDatasetFailed = true;
+            ReadDatasetFailed = true;
+            await ReadDatasetFailedChanged.InvokeAsync(ReadDatasetFailed);
             StateHasChanged();
             viewNotifier.Show(ex.GetBaseException().Message, ViewNotifierType.Error, L["Operation Failed"]);
         }

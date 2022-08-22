@@ -297,7 +297,7 @@ class ControllerManager(object):
         """
         found, dataset = self.__data_storage.GetDataset(request.username, request.dataset_identifier)
         if found: 
-            return CsvManager.GetColumns(dataset["path"])
+            return CsvManager.GetColumns(dataset["path"], json.loads(dataset["file_configuration"]))
         else:
             # no dataset found -> return empty response
             return GetTabularDatasetColumnResponse()
