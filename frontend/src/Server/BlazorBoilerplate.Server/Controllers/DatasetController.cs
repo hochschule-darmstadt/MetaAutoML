@@ -86,13 +86,22 @@ namespace BlazorBoilerplate.Server.Controllers
                 await _datasetManager.Upload(file) :
                 new ApiResponse(Status400BadRequest, L["InvalidData"]);
 
+        //[HttpPost]
+        //[ProducesResponseType(Status200OK)]
+        //[ProducesResponseType(Status400BadRequest)]
+        //[ProducesResponseType(Status404NotFound)]
+        //public async Task<ApiResponse> UploadData(IFormFile files)
+        //    => ModelState.IsValid ?
+        //        await _datasetManager.UploadData(files) :
+        //        new ApiResponse(Status400BadRequest, L["InvalidData"]);
+
         [HttpPost]
         [ProducesResponseType(Status200OK)]
         [ProducesResponseType(Status400BadRequest)]
         [ProducesResponseType(Status404NotFound)]
-        public async Task<ApiResponse> UploadData(IFormFile files)
+        public async Task<ApiResponse> SetDatasetConfiguration(SetDatasetFileConfigurationRequestDto dataset)
             => ModelState.IsValid ?
-                await _datasetManager.UploadData(files) :
+                await _datasetManager.SetDatasetConfiguration(dataset) :
                 new ApiResponse(Status400BadRequest, L["InvalidData"]);
     }
 }

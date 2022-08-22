@@ -1,18 +1,19 @@
-﻿@*@inject IStringLocalizer<Global> L
+﻿@inject IStringLocalizer<Global> L
 @inject NavigationManager NavManager
 
 
-<MudMenu Icon="@Icons.Material.Filled.MoreVert">
-    @if (Training != null)
-    {
-        <MudMenuItem OnClick="@(e => { NavManager.NavigateTo("/trainings/" + Training.ID + "/details"); })">Configuration</MudMenuItem>
+@if (Status != null)
+{
+    <MudMenu Icon="@Icons.Material.Filled.MoreVert">
+        <MudMenuItem OnClick="@(e => { NavManager.NavigateTo("trainings/" + TrainingId + "/models/" + Status.ID); })">Details</MudMenuItem>
         <MudMenuItem>Delete</MudMenuItem>
-    }
-</MudMenu>
+    </MudMenu>
+}
 
 @code {
     [Parameter]
-    public AutoMLStatusDto Training { get; set; }
+    public string TrainingId { get; set; }
+    [Parameter]
+    public AutoMLStatusDto Status { get; set; }
 
 }
-*@

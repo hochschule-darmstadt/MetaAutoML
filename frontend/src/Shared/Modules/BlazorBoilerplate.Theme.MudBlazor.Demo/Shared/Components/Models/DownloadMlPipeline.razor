@@ -18,14 +18,28 @@
             }
             else
             {
-                <MudStack>
-                    <MudButton OnClick="@DownloadModel" 
-                        Variant="Variant.Filled" 
-                        StartIcon="@Icons.Filled.CloudDownload"
-                        Color="Color.Secondary">
-                        Download model
-                    </MudButton>
-                </MudStack>
+                if (Model.Model.Status == "completed")
+                {
+                    <MudStack>
+                        <MudButton OnClick="@DownloadModel" 
+                            Variant="Variant.Filled" 
+                            StartIcon="@Icons.Filled.CloudDownload"
+                            Color="Color.Secondary">
+                            Download model
+                        </MudButton>
+                    </MudStack>
+                }
+                else
+                {
+                    <MudStack>
+                        <MudButton Disabled="true"
+                           Variant="Variant.Filled"
+                           StartIcon="@Icons.Filled.CloudDownload"
+                           Color="Color.Secondary">
+                            Download model
+                        </MudButton>
+                    </MudStack>
+                }
             }
         </MudPaper>
     </MudCardContent>

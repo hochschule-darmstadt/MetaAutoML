@@ -1,5 +1,5 @@
 ### Ontology file generated from ML_Ontology.xlsx.
-### 2022-08-09 16:53:19.402719
+### 2022-08-21 16:10:53.253366
 
 
 # PREFIXES
@@ -324,7 +324,7 @@
 :time_series_forecasting a :ML_task ;
     skos:prefLabel "time series forecasting" ;
     :belongs_to :supervised_learning ;
-    :has_dataset_type :tabular ;
+    :has_dataset_type :time_series ;
     rdfs:comment "The prediction of events through a sequenc of time" ;
     :supported_by_oma_ml "True" .
 :topic_modeling a :ML_task ;
@@ -488,6 +488,8 @@
     :used_for :clustering ;
     rdfs:comment "iterative method for finding maximum likelihood estimates in statistical models" ;
     rdfs:seeAlso <https://www.wikidata.org/wiki/Q1275153> .
+:ensemble skos:prefLabel "ensemble" ;
+    :used_for :tabular_classification , :tabular_regression .
 :extra_tree a :ML_approach ;
     skos:prefLabel "extra tree" ;
     skos:broader :decision_tree ;

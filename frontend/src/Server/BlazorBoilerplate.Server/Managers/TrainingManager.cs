@@ -47,19 +47,28 @@ namespace BlazorBoilerplate.Server.Managers
                 var reply = _client.GetTraining(request);
                 foreach (var automl in reply.Automls)
                 {
-                    response.AutoMls.Add(new Shared.Dto.AutoML.AutoMLStatusDto
+                    var status = new Shared.Dto.AutoML.AutoMLStatusDto
                     {
                         ID = automl.Identifier,
                         Messages = automl.Messages.ToList(),
                         Status = automl.Status,
                         Name = (await _cacheManager.GetObjectInformation(automl.Name)).Properties["skos:prefLabel"],
-                        Library = automl.Library,
-                        Model = automl.Model,
-                        TestScore = (double) automl.TestScore,
-                        ValidationScore = (double) automl.ValidationScore,
-                        Predictiontime = (double) automl.Predictiontime,
+                        TestScore = (double)automl.TestScore,
+                        ValidationScore = (double)automl.ValidationScore,
+                        Predictiontime = (double)automl.Predictiontime,
                         Runtime = (int)automl.Runtime
-                    });
+                    };
+                    if (!string.IsNullOrEmpty(automl.Model))
+                    {
+                        status.Model = (await _cacheManager.GetObjectInformation(automl.Model)).Properties["skos:prefLabel"];
+                        status.Library = (await _cacheManager.GetObjectInformation(automl.Library)).Properties["skos:prefLabel"];
+                    }
+                    else
+                    {
+                        status.Model = "";
+                        status.Library = "";
+                    }
+                    response.AutoMls.Add(status);
                 }
                 response.Status = reply.Status;
                 response.DatasetId = reply.DatasetId;

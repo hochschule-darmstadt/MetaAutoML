@@ -1,18 +1,18 @@
 ﻿@if (Dataset != null)
 {
-    <MudStack Row="true" Style="max-width: auto; overflow-x: scroll">
+    <MudStack Row="true" Style="justify-content: center;">
         @foreach (var category in Dataset.Select(p => p.FolderType).Distinct())
         {
             <MudStack>
-			    <MudText Align="@Align.Center" Class="mx-auto">@category.Replace("\\", "")</MudText>
-                <MudCarousel Style="height:200px" TData="object">
+                <MudCarousel Style="height:200px" TData="object" AutoCycle="false">
                     @foreach (var item in Dataset.Where(p => p.FolderType == category).ToList())
                     {
-                            <MudCarouselItem Transition="Transition.Slide" Color="@Color.Secondary">
-		                        <div class="d-flex flex-column flex-column justify-center" style="height:100%">
-                                    <MudImage Src="@GetImage(item)" />
-		                        </div>
-                            </MudCarouselItem>
+                        <MudCarouselItem Transition="Transition.Slide" Color="@Color.Secondary">
+                            <div class="d-flex flex-column flex-column" style="height:100%">
+                                <MudText Align="@Align.Center" Class="mx-auto">@category.Replace("\\", "")</MudText>
+                                <MudImage Src="@GetImage(item)" />
+                            </div>
+                        </MudCarouselItem>
                     }
                 </MudCarousel>
             </MudStack>
@@ -23,7 +23,7 @@
 @code {
     [Parameter]
     public List<ImagePreviewDto> Dataset { get; set; }
-    
+
     string GetImage(ImagePreviewDto image)
     {
         var imageSrc = Convert.ToBase64String(image.Content);

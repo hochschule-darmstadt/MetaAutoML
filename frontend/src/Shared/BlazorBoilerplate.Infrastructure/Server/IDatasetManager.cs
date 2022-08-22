@@ -17,6 +17,7 @@ namespace BlazorBoilerplate.Infrastructure.Server
         Task<ApiResponse> GetDatasetPreview(GetDatasetPreviewRequestDto dataset);
         Task<ApiResponse> GetTabularDatasetColumn(GetTabularDatasetColumnRequestDto dataset);
         Task<ApiResponse> Upload(FileUploadRequestDto file);
-        Task<ApiResponse> UploadData(IFormFile files);
+        //Task<ApiResponse> UploadData(IFormFile files);
+        Task<ApiResponse> SetDatasetConfiguration(SetDatasetFileConfigurationRequestDto dataset);
     }
 }

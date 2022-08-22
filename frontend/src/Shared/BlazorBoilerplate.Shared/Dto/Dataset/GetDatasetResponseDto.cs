@@ -16,5 +16,39 @@ namespace BlazorBoilerplate.Shared.Dto.Dataset
         public DateTime Creation_date { get; set; }
         public string Identifier { get; set; }
         public Dictionary<string, dynamic> Analysis { get; set; }
+        public Dictionary<string, dynamic> Configuration { get; set; }
+
+        public char GetDelimiter()
+        {
+            switch (this.Configuration["delimiter"])
+            {
+                case "comma":
+                    return ',';
+                case "semicolon":
+                    return ';';
+                case "space":
+                    return ' ';
+                case "tab":
+                    return '\t';
+                default:
+                    return ',';
+            }
+        }
+        public string GetDelimiterStr()
+        {
+            switch (this.Configuration["delimiter"])
+            {
+                case "comma":
+                    return ",";
+                case "semicolon":
+                    return ";";
+                case "space":
+                    return " ";
+                case "tab":
+                    return "\t";
+                default:
+                    return ",";
+            }
+        }
     }
 }

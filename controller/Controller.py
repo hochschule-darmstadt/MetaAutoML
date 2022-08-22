@@ -177,6 +177,13 @@ class ControllerService(ControllerServiceBase):
         response = self._controllerManager.UploadNewDataset(upload_dataset_file_request)
         return response
 
+    async def set_dataset_configuration(
+        self, set_dataset_configuration_request: "SetDatasetConfigurationRequest"
+    ) -> "SetDatasetConfigurationResponse":
+        """persist new dataset configuration"""
+        response = self._controllerManager.SetDatasetConfiguration(set_dataset_configuration_request)
+        return response
+
     async def start_auto_ml_process(
         self, start_auto_ml_process_request: "StartAutoMlProcessRequest"
     ) -> "StartAutoMlProcessResponse":

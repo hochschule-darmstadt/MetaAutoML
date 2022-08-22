@@ -104,13 +104,14 @@ class ControllerManager(object):
         for dataset in all_datasets:
             try:
                 response_dataset = Dataset()
-
+                
                 response_dataset.analysis = json.dumps(dataset['analysis'])
                 response_dataset.size = dataset['size']
                 response_dataset.identifier = str(dataset["_id"])
                 response_dataset.name = dataset["name"]
                 response_dataset.type = dataset['type']
                 response_dataset.creation_date = datetime.fromtimestamp(int(dataset["mtime"]))
+                response_dataset.file_configuration = dataset["file_configuration"]
                 response.dataset.append(response_dataset)
             except Exception as e:
                 print(f"exception: {e}")
@@ -140,7 +141,7 @@ class ControllerManager(object):
         """
         response = GetDatasetResponse()
         found, dataset = self.__data_storage.GetDataset(request.username, request.identifier)
-
+        
         try:
             response_dataset = Dataset()
             response_dataset.analysis = json.dumps(dataset['analysis'])
@@ -150,10 +151,11 @@ class ControllerManager(object):
             response_dataset.type = dataset['type']
             response_dataset.creation_date = datetime.fromtimestamp(int(dataset["mtime"]))
             response_dataset.file_name = dataset["file_name"]
+            response_dataset.file_configuration = dataset["file_configuration"]
             response.dataset_infos = response_dataset
         except Exception as e:
             print(f"exception: {e}")
-
+                
         return response
 
     def GetTrainings(self, request: "GetTrainingsRequest") -> "GetTrainingsResponse":
@@ -182,7 +184,7 @@ class ControllerManager(object):
         ---
         Return the Training status
         """
-        response = GetTrainingResponse()
+        response = GetTrainingResponse() 
         training = self.__data_storage.GetTraining(request.username, request.id)
         if training == None:
             raise Exception(f"cannot find training with id: {request.id}")
@@ -207,8 +209,8 @@ class ControllerManager(object):
             response.automls.append(autoMlStatus)
             response.identifier = str(model["_id"])
             response.dataset_id = model["dataset_id"]
-
-
+                    
+        
         response.dataset_id = training["dataset_id"]
         response.dataset_name = training["dataset_name"]
         response.task = training["task"]
@@ -223,7 +225,7 @@ class ControllerManager(object):
         response.dataset_configuration = json.dumps(training["dataset_configuration"])
 
         return response
-
+    
     def GetAllTrainings(self, request: "GetAllTrainingsRequest") -> "GetAllTrainingsResponse":
         """
         Get list of all trainings
@@ -233,10 +235,10 @@ class ControllerManager(object):
         ---
         Return list of All trainings
         """
-        response = GetAllTrainingsResponse()
+        response = GetAllTrainingsResponse() 
 
         all_trainings: list[dict[str, object]] = self.__data_storage.GetTrainings(request.username)
-
+        
         for training in all_trainings:
             try:
                 trainingItem = GetTrainingResponse()
@@ -305,9 +307,9 @@ class ControllerManager(object):
             return GetTabularDatasetColumnResponse()
 
         if dataset["type"] == ":tabular":
-            return CsvManager.GetColumns(dataset["path"])
+            return CsvManager.GetColumns(dataset["path"]), json.loads(dataset["file_configuration"]))
         elif dataset["type"] == ":longitudinal":
-            return LongitudinalDataManager.read_dimension_names(dataset["path"])
+            return LongitudinalDataManager.read_dimension_names(dataset["path"]), json.loads(dataset["file_configuration"]))
 
     def GetDatasetCompatibleTasks(self, request: "GetDatasetCompatibleTasksRequest") -> "GetDatasetCompatibleTasksResponse":
         """
@@ -364,10 +366,10 @@ class ControllerManager(object):
         top3Counter = 0
         def GetScore(e):
             return e["test_score"]
-
+        
         model_list = self.__data_storage.GetModels(request.username, dataset_id=request.dataset_id)
         model_list.sort(key=GetScore, reverse=True)
-
+        
         for model in list(model_list):
             if  top3Counter >= 3 and request.top3 == True:
                 return response
@@ -386,7 +388,7 @@ class ControllerManager(object):
             model_info.dataset_id = model["dataset_id"]
             response.models.append(model_info)
             top3Counter = top3Counter + 1
-
+            
         return response
 
     def GetModel(self, request: "GetModelRequest") -> "GetModelResponse":
@@ -399,9 +401,9 @@ class ControllerManager(object):
         Return dictonary of object informations
         """
         response = GetModelResponse()
-
+        
         model = self.__data_storage.GetModel(request.username, request.model_id)
-
+        
         model_info = ModelInformation()
         model_info.identifier = str(model["_id"])
         model_info.automl = model["automl_name"]
@@ -416,7 +418,7 @@ class ControllerManager(object):
         model_info.training_id = model["training_id"]
         model_info.dataset_id = model["dataset_id"]
         response.model = model_info
-
+            
         return response
 
 
@@ -550,3 +552,15 @@ class ControllerManager(object):
         else:
             response = TestAutoMlResponse()
         return response
+
+    def SetDatasetConfiguration(self, request: "SetDatasetConfigurationRequest") -> "SetDatasetConfigurationResponse":
+        """
+        Persist new dataset configuration in db
+        ---
+        Parameter
+        1. dataset configuration
+        ---
+        Return
+        """
+        self.__data_storage.UpdateDataset(request.username, request.identifier, { "file_configuration": request.file_configuration })
+        return SetDatasetConfigurationResponse()

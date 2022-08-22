@@ -1,0 +1,38 @@
+﻿@if (Dataset != null)
+{
+    <MudStack Row="true" Style="justify-content: center;">
+        <MudCarousel Style="height:200px" TData="object" AutoCycle="false">
+            @for (int i = 0; i < 5; i++)
+            {
+                int r = new Random().Next(Dataset.Count);
+                <MudCarouselItem Transition="Transition.Slide" Color="@Color.Secondary">
+                    <div class="d-flex flex-column flex-column" style="height:100%">
+                        <MudText Align="@Align.Center" Class="mx-auto">@Dataset[r].FolderType.Replace("\\", "")</MudText>
+                        <MudImage Src="@GetImage(Dataset[r])" />
+                    </div>
+                </MudCarouselItem>
+            }
+        </MudCarousel>
+    </MudStack>
+}
+
+@code {
+    [Parameter]
+    public List<ImagePreviewDto> Dataset { get; set; }
+    
+    string GetImage(ImagePreviewDto image)
+    {
+        var imageSrc = Convert.ToBase64String(image.Content);
+        switch (image.FileType)
+        {
+            case ".jpeg":
+                return string.Format("data:image/jpeg;base64,{0}", imageSrc);
+            case ".png":
+                return string.Format("data:image/png;base64,{0}", imageSrc);
+            case ".svg":
+                return string.Format("data:image/svg+xml;base64,{0}", imageSrc);
+            default:
+                return null;
+        }
+    }
+}

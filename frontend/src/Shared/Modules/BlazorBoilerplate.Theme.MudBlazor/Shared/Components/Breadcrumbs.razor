@@ -9,7 +9,10 @@
                 }
                 else
                 {
-                    <a href="@Items[i].Link">@Items[i].Title</a>
+                    <a href="@Items[i].Link">
+                        <MudIcon Icon="@Items[i].Icon" Style="font-size: 0.75rem" Size="Size.Small" />
+                        @Items[i].Title
+                    </a>
                 }
             </li>
         }

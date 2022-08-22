@@ -1,0 +1,32 @@
+﻿
+@if (Dataset == null)
+{
+        <DataLoaderSpinner />
+}
+else
+{
+    <MudTable Items="@Dataset.Where(d => d.Key < 3).Rows.ValuesAll" style="width:stretch" class="mat-elevation-z5" FixedHeader="true" Height="250px" Dense="true">
+        <HeaderContent>
+            @foreach (var item in Dataset.Rows.ValuesAll)
+            {
+                foreach (var ite in item.Keys)
+                {
+                    <MudTh>@ite</MudTh>
+                }
+                break;
+            }
+        </HeaderContent>
+        <RowTemplate>
+            @foreach (var item in context.Keys)
+            {
+                <MudTd>@context[item]</MudTd>
+            }
+        </RowTemplate>
+    </MudTable>
+}
+
+@code {
+    [Parameter]
+    public Frame<int, string> Dataset { get; set; }
+    private string searchString = "";
+}

@@ -4,6 +4,7 @@ using BlazorBoilerplate.Shared.Dto.AutoML;
 using BlazorBoilerplate.Shared.Dto.Model;
 using BlazorBoilerplate.Storage;
 using static Microsoft.AspNetCore.Http.StatusCodes;
+using static MudBlazor.CategoryTypes;
 
 namespace BlazorBoilerplate.Server.Managers
 {
@@ -36,8 +37,16 @@ namespace BlazorBoilerplate.Server.Managers
                 response.Model.Messages = reply.Model.StatusMessages.ToList();
                 response.Model.Status = reply.Model.Status;
                 response.Model.Name = (await _cacheManager.GetObjectInformation(reply.Model.Automl)).Properties["skos:prefLabel"];
-                response.Model.Library = reply.Model.Library;
-                response.Model.Model = reply.Model.Model;
+                if (!string.IsNullOrEmpty(reply.Model.Model))
+                {
+                    response.Model.Library = (await _cacheManager.GetObjectInformation(reply.Model.Library)).Properties["skos:prefLabel"];
+                    response.Model.Model = (await _cacheManager.GetObjectInformation(reply.Model.Model)).Properties["skos:prefLabel"];
+                }
+                else
+                {
+                    response.Model.Library = "";
+                    response.Model.Model = "";
+                }
                 response.Model.TestScore = (double)reply.Model.TestScore;
                 response.Model.ValidationScore = (double)reply.Model.ValidationScore;
                 response.Model.Predictiontime = (double)reply.Model.PredictionTime;
@@ -73,8 +82,16 @@ namespace BlazorBoilerplate.Server.Managers
                     model.Messages = item.StatusMessages.ToList();
                     model.Status = item.Status;
                     model.Name = (await _cacheManager.GetObjectInformation(item.Automl)).Properties["skos:prefLabel"];
-                    model.Library = item.Library;
-                    model.Model = item.Model;
+                    if (!string.IsNullOrEmpty(item.Model))
+                    {
+                        model.Library = (await _cacheManager.GetObjectInformation(item.Library)).Properties["skos:prefLabel"];
+                        model.Model = (await _cacheManager.GetObjectInformation(item.Model)).Properties["skos:prefLabel"];
+                    }
+                    else
+                    {
+                        model.Library = "";
+                        model.Model = "";
+                    }
                     model.TestScore = (double)item.TestScore;
                     model.ValidationScore = (double)item.ValidationScore;
                     model.Predictiontime = (double)item.PredictionTime;

@@ -80,6 +80,6 @@ if __name__ == '__main__':
     with open(sys.path[0] + '/model_keras.p', 'rb') as file:
         loaded_model = dill.load(file)
     predicted_y = loaded_model.predict(X)
-    predicted_y = [round(y[0],0) for y in predicted_y]
+    predicted_y = [np.round(y[0],0) for y in predicted_y]
     
     pd.DataFrame(data=predicted_y, columns=["predicted"]).to_csv(sys.path[0] +"/predictions.csv")

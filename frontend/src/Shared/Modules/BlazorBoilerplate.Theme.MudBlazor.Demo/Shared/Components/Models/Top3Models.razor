@@ -38,10 +38,10 @@
                         <MudTh>Total training time</MudTh>
                     </HeaderContent>
                     <RowTemplate>
-                        <MudTd >
-                            <a href="@NavManager.ToAbsoluteUri("datasets/" + Dataset.Identifier + "/models/" + @context.ID).AbsoluteUri" Style="cursor: pointer;">@context.Name</a>
+                        <MudTd >@context.Name</MudTd>
+                        <MudTd>
+                            <MudLink Href="@NavManager.ToAbsoluteUri("datasets/" + Dataset.Identifier + "/models/" + @context.ID).AbsoluteUri" Style="cursor: pointer; display: flex"><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.ModelTraining" Style="margin-right: 4px;" />@context.Model</MudLink>
                         </MudTd>
-                        <MudTd >@context.Model</MudTd>
                         <MudTd >@context.Library</MudTd>
                         <MudTd >@String.Format("{0:0.00}", context.TestScore)</MudTd>
                         <MudTd >@String.Format("{0:0}", context.Predictiontime) ms</MudTd>

@@ -59,6 +59,8 @@ service ControllerService {
   rpc UploadDatasetFile(UploadDatasetFileRequest) returns (UploadDatasetFileResponse) {}
   /*start a new AutoML run, using the provided configuration*/
   rpc StartAutoMlProcess(StartAutoMlProcessRequest) returns (StartAutoMlProcessResponse) {}
+  /*persist new dataset configuration*/
+  rpc SetDatasetConfiguration(SetDatasetConfigurationRequest) returns (SetDatasetConfigurationResponse) {}
   /*test an existing AutoML*/
   rpc TestAutoML(TestAutoMlRequest) returns (TestAutoMlResponse) {}
 }

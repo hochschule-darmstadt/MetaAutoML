@@ -9,7 +9,7 @@
 @inject IJSRuntime JS
 @inject IStringLocalizer<Global> L
 @inject IHttpClientFactory ClientFactory
-
+@inject NavigationManager NavManager
 
 <MudCard Elevation="5">
     <MudCardHeader Style="border-bottom-style: inset; border-bottom-width: 1px;">
@@ -18,23 +18,19 @@
         </CardHeaderContent>
     </MudCardHeader>
     <MudCardContent>
-        <MudPaper Height="250px" Elevation="0">
+        <MudPaper Elevation="0">
             @if (_dataset != null)
             {
                 @switch (_dataset.Type.ID)
                 {
-                    case ":tabular":
                     case ":longitudinal":
-                        <TabularPreview Dataset="_tabularDataset" />
+                    case ":time_series":
+                    case ":text":
+                    case ":tabular":
+                        <TabularPreviewFull DatasetData="@_tabularDataset" Dataset="@_dataset"/>
                         break;
                     case ":image":
-                        <ImagePreview Dataset="_imageDataset" />
-                        break;
-                    case ":text":
-                        <TextPreview Dataset="_textDataset" />
-                        break;
-                    case ":time_series":
-                        <TimeSeriesPreview Dataset="_timeSeriesDataset" />
+                        <ImagePreviewFull Dataset="_imageDataset" />
                         break;
                     default:
                         break;
@@ -65,7 +61,7 @@
     private GetDatasetResponseDto _dataset;
     private GetDatasetPreviewResponseDto _datasetPreview;
     private bool isPreviewRequestRunning = false;
-    private DataFrame _tabularDataset;
+    private string _tabularDataset;
     private List<ImagePreviewDto> _imageDataset;
     private DataFrame _textDataset;
     private DataFrame _timeSeriesDataset;
@@ -91,18 +87,14 @@
                 _datasetPreview = Newtonsoft.Json.JsonConvert.DeserializeObject<GetDatasetPreviewResponseDto>(apiResponse.Result.ToString());
                 switch (_dataset.Type.ID)
                 {
-                    case ":tabular":
                     case ":longitudinal":
-                        _tabularDataset = DataFrame.LoadCsvFromString(_datasetPreview.DatasetPreview);
+                    case ":tabular":
+                    case ":text":
+                    case ":time_series":
+                        _tabularDataset = _datasetPreview.DatasetPreview;
                         break;
                     case ":image":
                         _imageDataset = _datasetPreview.DatasetPreview.ToObject<List<ImagePreviewDto>>();
-                        break;
-                    case ":text":
-                        _textDataset = DataFrame.LoadCsvFromString(_datasetPreview.DatasetPreview);
-                        break;
-                    case ":time_series":
-                        _timeSeriesDataset = DataFrame.LoadCsvFromString(_datasetPreview.DatasetPreview);
                         break;
                     default:
                         break;
@@ -121,47 +113,4 @@
         }
         isPreviewRequestRunning = false;
     }
-
-    //private Frame<int,string> ConvertCSVStringToFrame(string csvString)
-    //{
-    //    Frame<int,string> frame;
-    //    using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(csvString)))
-    //    {
-    //        using (var reader = new StreamReader(stream))
-    //        {
-    //            frame = Frame.ReadCsv(stream, separators:";", culture:"us-US");
-    //        }
-    //    }
-    //    return frame;
-    //}
-
-    //private DataTable ConvertCSVStringToDataTable(string csvString)
-    //{
-    //    var table = new DataTable();
-
-    //    using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(csvString)))
-    //    {
-    //        using (var reader = new StreamReader(stream))
-    //        {
-    //            string header = reader.ReadLine();
-    //            var fields = header.Split(";");
-    //            foreach (string column in fields)
-    //            {
-    //                // add columns to new datatable based on first row of csv
-    //                table.Columns.Add(column);
-    //            }
-
-    //            string row = reader.ReadLine();
-    //            // read to end
-    //            while (row != null)
-    //            {
-    //                // add each row to datatable 
-    //                var rowDatas = row.Split(";");
-    //                table.Rows.Add(rowDatas);
-    //                row = reader.ReadLine();
-    //            }
-    //        }
-    //    }
-    //    return table;
-    //}
 }

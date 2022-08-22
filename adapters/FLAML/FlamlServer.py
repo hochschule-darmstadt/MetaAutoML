@@ -21,6 +21,9 @@ def GetMetaInformation(config_json):
         model = automl.best_estimator
         library = automl.model.estimator.__module__.split(".")[0]
 
+    #TODO ADD CORRECT lib and model display
+    library = ":lightgbm_lib"
+    model = ":light_gradient_boosting_machine"
     return library, model
 
 

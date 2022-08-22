@@ -28,8 +28,9 @@ def GetMetaInformation(config_json):
         # check if xgb library is used as atleast one of the estimators
         library = ":scikit_learn_lib"
         if "xgbclassifier" in str(automl.estimators):
-            library = ":scikit_learn_lib + :xgboost_lib"
-        model = "voting ensemble"
+            #library = ":scikit_learn_lib + :xgboost_lib"
+            library = ":xgboost_lib"
+        model = ":ensemble"
     return library, model
 
 class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):

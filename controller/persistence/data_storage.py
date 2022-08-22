@@ -96,7 +96,7 @@ class DataStorage:
 
     def GetTraining(self, username: str, id: str) -> 'dict[str, object]':
         """
-        Get single training by id.
+        Get single training by id. 
         ---
         >>> sess = data_storage.GetTraining("automl_user", sess_id)
         >>> if sess is None:
@@ -113,7 +113,7 @@ class DataStorage:
 
     def GetTrainings(self, username: str) -> 'list[dict[str, object]]':
         """
-        Get all trainings for a user.
+        Get all trainings for a user. 
         ---
         >>> for sess in data_storage.GetTrainings("automl_user"):
                 print(sess["dataset"])
@@ -128,7 +128,7 @@ class DataStorage:
 
     def UpdateTraining(self, username: str, id: str, new_values: 'dict[str, object]') -> bool:
         """
-        Update single training with new values.
+        Update single training with new values. 
         ---
         >>> success: bool = data_storage.UpdateTraining("automl_user", sess_id, {
                 "status": "completed"
@@ -174,7 +174,8 @@ class DataStorage:
             "path": "",
             "size": "",
             "mtime": "",
-            "file_name" : ""
+            "file_name" : "",
+            "file_configuration": ""
         }
         
         dataset_id = self.__mongo.InsertDataset(username, database_content)
@@ -189,7 +190,7 @@ class DataStorage:
         os.makedirs(os.path.dirname(filename_dest), exist_ok=True)
         #Copy dataset into final folder
         shutil.move(upload_file, filename_dest)
-
+        fileConfiguration = ""
         #unpack zip file for image files
         if type == ":image":
             shutil.unpack_archive(filename_dest, os.path.join(self.__storage_dir, username, dataset_id))
@@ -200,8 +201,18 @@ class DataStorage:
             fileName = fileName.replace(".zip", "")
         if type == ":tabular" or type == ":text" or type == ":time_series":
             #generate preview of tabular and text dataset
-            previewDf = pd.read_csv(filename_dest)
-            previewDf.head(50).to_csv(filename_dest.replace(".csv", "_preview.csv"), index=False)
+            #previewDf = pd.read_csv(filename_dest)
+            #previewDf.head(50).to_csv(filename_dest.replace(".csv", "_preview.csv"), index=False)
+            #causes error with different delimiters use normal string division
+            with open(filename_dest) as file:
+                lines = file.readlines()
+            with open(filename_dest.replace(".csv", "_preview.csv"), "x") as preview:
+                preview_line = lines[:51]
+                for line in preview_line:
+                    preview.write(line)
+                    #preview.write("\n")
+            fileConfiguration = "{\"use_header\":true,\"start_row\":1,\"delimiter\":\"comma\",\"escape_character\":\"\\\\\",\"decimal_character\":\".\"}"
+
         if type == ":longitudinal":
             TARGET_COL = "target"
             FIRST_N_ROW = 50
@@ -254,8 +265,8 @@ class DataStorage:
                         total_size += os.path.getsize(fp)
 
             return total_size
-
         nbytes = get_size(os.path.join(self.__storage_dir, username, dataset_id))
+
 
         #Perform analysis for tabular data datasets
         if type == ":tabular":
@@ -275,7 +286,8 @@ class DataStorage:
             "size": nbytes,
             "mtime": os.path.getmtime(filename_dest),
             "analysis": analysisResult,
-            "file_name" : fileName
+            "file_name" : fileName,
+            "file_configuration": fileConfiguration
         })
         assert success, f"cannot update dataset with id {dataset_id}"
 
@@ -283,7 +295,7 @@ class DataStorage:
 
     def UpdateDataset(self, username: str, id: str, new_values: 'dict[str, object]') -> bool:
         """
-        Update single dataset with new values.
+        Update single dataset with new values. 
         ---
         >>> success: bool = data_storage.UpdateDataset("automl_user", dataset_id, {
                 "status": "completed"

@@ -1,6 +1,7 @@
 ﻿using BlazorBoilerplate.Shared.Localizer;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Localization;
+using MudBlazor;
 
 namespace BlazorBoilerplate.Theme.Material.Shared.Components
 {
@@ -19,7 +20,7 @@ namespace BlazorBoilerplate.Theme.Material.Shared.Components
         protected override void OnInitialized()
         {
             if (IncludeRoot)
-                Items.Insert(0, Breadcrumb.New("/", "OMA-ML"));
+                Items.Insert(0, Breadcrumb.New("/", "OMA-ML", Icons.Filled.Home));
         }
     }
 }

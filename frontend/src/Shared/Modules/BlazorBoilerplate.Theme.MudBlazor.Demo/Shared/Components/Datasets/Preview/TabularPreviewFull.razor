@@ -1,0 +1,269 @@
+﻿@inject IViewNotifier viewNotifier
+@inject IStringLocalizer<Global> L
+@inject IApiClient apiClient
+@using Deedle
+
+@if ((_datasetFrame == null) && (_datasetReadError == false))
+{
+        <DataLoaderSpinner />
+}
+else
+{
+    <MudStack>
+        <MudGrid>
+            <MudItem xs="3" sm="3" md="3">
+                <MudCheckBox @bind-Checked="@UseHeader" Label="Use header"></MudCheckBox>
+                <MudNumericField @bind-Value="@StartRow" Label="Start row" Variant="Variant.Text" Min="1" />
+            </MudItem>
+            <MudItem xs="3" sm="3" md="3">
+                <MudSelect T="string" Label="Column seperator" AnchorOrigin="Origin.BottomCenter" @bind-Value="@Delimiter">
+                    <MudSelectItem Value="@("comma")" >@("Comma \",\"")</MudSelectItem>
+                    <MudSelectItem Value="@("semicolon")" >@("Semicolon \";\"")</MudSelectItem>
+                    <MudSelectItem Value="@("space")" >@("Space")</MudSelectItem>
+                    <MudSelectItem Value="@("tab")" >@("Tab")</MudSelectItem>
+                </MudSelect>
+            </MudItem>
+            <MudItem xs="3" sm="3" md="3">
+                <MudTextField Mask="@(new RegexMask(@"^.{1,1}$"))" Label="Escape character" @bind-Value="@EscapeCharacter"  Variant="@Variant.Text" />
+                <MudTextField Mask="@(new RegexMask(@"^.{1,1}$"))" Label="Decimal character" @bind-Value="@DecimalCharacter"  Variant="@Variant.Text" />
+            </MudItem>
+            <MudItem xs="3" sm="3" md="3">
+                <MudButton Variant="Variant.Filled" Color="Color.Secondary" OnClick="@SaveConfiguration">Save</MudButton>
+            </MudItem>
+        </MudGrid>
+        @if (_datasetReadError == true)
+        {
+            <MudText Typo="Typo.body2">Could not read dataset successfully, change configuration.</MudText>
+        }
+        else
+        {
+            <MudTable Items="@_datasetFrame.Rows.ValuesAll" style="width:stretch" class="mat-elevation-z5" FixedHeader="true" Dense="true">
+                <HeaderContent>
+                    @foreach (var item in _datasetFrame.Rows.ValuesAll)
+                    {
+                        foreach (var ite in item.Keys)
+                        {
+                            @if (UseHeader == true)
+                            {
+                                <MudTh>@ite</MudTh>
+                            }
+                            else
+                            {
+                                <MudTh Style="background-color: gray">@ite</MudTh>
+                            }
+                        }
+                        break;
+                    }
+                    <MudTh></MudTh>   
+                </HeaderContent>
+                <RowTemplate>
+                    @foreach (var item in context.Keys)
+                    {
+                        @if ((int)context["index"] < StartRow)
+                        {
+                            <MudTd Style="background-color: gray">@context[item]</MudTd>
+                        }
+                        else
+                        {
+                            <MudTd>@context[item]</MudTd>
+                        }
+                    }
+                </RowTemplate>
+            </MudTable>
+        }
+        
+    </MudStack>
+}
+
+@code {
+    [Parameter]
+    public string DatasetData
+    {
+        get
+        {
+            return _datasetData;
+        }
+        set
+        {
+            _datasetData = value;
+            ReloadDataFrame();
+        }
+    }
+    private string _datasetData;
+
+    private Frame<int, string> _datasetFrame;
+
+    [Parameter]
+    public GetDatasetResponseDto Dataset
+    { 
+        get
+        {
+            return _dataset;
+        } 
+        set
+        {
+            _dataset = value;
+            ReloadDataFrame();
+        } 
+    }
+    private GetDatasetResponseDto _dataset;
+
+    public bool UseHeader
+    { 
+        get
+        {
+            return Dataset.Configuration["use_header"];
+        } 
+        set
+        {
+            if (value != null)
+            {
+                Dataset.Configuration["use_header"] = value;
+            }
+        } 
+    }
+
+    public int StartRow
+    { 
+        get
+        {
+            return (int)Dataset.Configuration["start_row"];
+        } 
+        set
+        {
+            if (value != null)
+            {
+                Dataset.Configuration["start_row"] = value;
+                _rowIndex = 0;
+            }
+        } 
+    }
+
+    public string Delimiter
+    { 
+        get
+        {
+            return Dataset.Configuration["delimiter"];
+        } 
+        set
+        {
+            if (value != null)
+            {
+                Dataset.Configuration["delimiter"] = value;
+                _rowIndex = 0;
+                ReloadDataFrame();
+            }
+        } 
+    }
+    private string _delimiter;
+    private int _rowIndex = 0;
+    public string EscapeCharacter
+    { 
+        get
+        {
+            return Dataset.Configuration["escape_character"];
+        } 
+        set
+        {
+            if (value != null)
+            {
+                Dataset.Configuration["escape_character"] = value;
+            }
+        } 
+    }
+
+    public string DecimalCharacter
+    { 
+        get
+        {
+            return Dataset.Configuration["decimal_character"];
+        } 
+        set
+        {
+            if (value != null)
+            {
+                Dataset.Configuration["decimal_character"] = value;
+            }
+        } 
+    }
+    private string searchString = "";
+
+    private bool _isSavingAllowed = true;
+    private bool _datasetReadError = false;
+    private void ReloadDataFrame()
+    {
+        try
+        {
+            if (DatasetData != null)
+            {
+                // convert string to stream
+                byte[] byteArray = Encoding.ASCII.GetBytes(DatasetData);
+                MemoryStream stream = new MemoryStream(byteArray);
+                _datasetFrame = Frame.ReadCsv(stream, separators: Dataset.GetDelimiterStr());
+                PrimitiveDataFrameColumn<int> indexes = new PrimitiveDataFrameColumn<int>("Index");
+
+                foreach (var item in _datasetFrame.ColumnKeys)
+                {
+                    var newcolumn = _datasetFrame.Columns[item].FillMissing(st =>
+                    {
+                        return "NaN";
+                    });
+                    _datasetFrame.ReplaceColumn(item, newcolumn);
+                }
+                for (int i = 1; i <= _datasetFrame.Rows.ValuesAll.Count(); i++)
+                {
+                    indexes.Append(i);
+                }
+                Series<int, int?> indexSeries = indexes.ToOrdinalSeries();
+                var keys = _datasetFrame.ColumnKeys;
+                var newOrder = new List<string>() { "index" };
+                newOrder.AddRange(keys.ToArray());
+                _datasetFrame.AddColumn("index", indexSeries);
+
+                _datasetFrame = Frame.FromColumns(_datasetFrame.Columns.Realign(newOrder));
+                //_datasetFrame = _datasetFrame[[]];
+                _isSavingAllowed = true;
+                _datasetReadError = false;
+                StateHasChanged();
+            }
+        }
+        catch (Exception ex)
+        {
+            _datasetReadError = true;
+            _isSavingAllowed = false;
+            StateHasChanged();
+            viewNotifier.Show("Data can´t be read using column delimiter:" + ex.Message, ViewNotifierType.Error, L["Operation Failed"]);
+        }     
+    }
+
+    private async void SaveConfiguration()
+    {
+        try
+        {
+            if (_isSavingAllowed == false)
+            {
+                viewNotifier.Show("File configuration can not be saved, incompatible delimiter", ViewNotifierType.Error, L["Operation Failed"]);
+                return;
+            }
+            SetDatasetFileConfigurationRequestDto request = new SetDatasetFileConfigurationRequestDto()
+            {
+                Configuration = Dataset.Configuration,
+                DatasetIdentifier = Dataset.Identifier
+            };
+            ApiResponseDto apiResponse = await apiClient.SetDatasetConfiguration(request);
+
+            if (apiResponse.IsSuccessStatusCode)
+            {
+                viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
+            }
+            else
+            {
+                viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
+            }
+        }
+        catch (Exception ex)
+        {
+            viewNotifier.Show(ex.GetBaseException().Message, ViewNotifierType.Error, L["Operation Failed"]);
+        }
+    }
+}

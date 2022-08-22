@@ -134,6 +134,19 @@ class Dataset(betterproto.Message):
     size: int = betterproto.int64_field(5)
     analysis: str = betterproto.string_field(6)
     file_name: str = betterproto.string_field(7)
+    file_configuration: str = betterproto.string_field(8)
+
+
+@dataclass(eq=False, repr=False)
+class SetDatasetConfigurationRequest(betterproto.Message):
+    username: str = betterproto.string_field(1)
+    identifier: str = betterproto.string_field(2)
+    file_configuration: str = betterproto.string_field(3)
+
+
+@dataclass(eq=False, repr=False)
+class SetDatasetConfigurationResponse(betterproto.Message):
+    pass
 
 
 @dataclass(eq=False, repr=False)
@@ -656,6 +669,22 @@ class ControllerServiceStub(betterproto.ServiceStub):
             metadata=metadata,
         )
 
+    async def set_dataset_configuration(
+        self,
+        set_dataset_configuration_request: "SetDatasetConfigurationRequest",
+        timeout: Optional[float] = None,
+        deadline: Optional["Deadline"] = None,
+        metadata: Optional["_MetadataLike"] = None,
+    ) -> "SetDatasetConfigurationResponse":
+        return await self._unary_unary(
+            "/ControllerService/SetDatasetConfiguration",
+            set_dataset_configuration_request,
+            SetDatasetConfigurationResponse,
+            timeout=timeout,
+            deadline=deadline,
+            metadata=metadata,
+        )
+
     async def test_auto_ml(
         self,
         test_auto_ml_request: "TestAutoMlRequest",
@@ -765,6 +794,11 @@ class ControllerServiceBase(ServiceBase):
     ) -> "StartAutoMlProcessResponse":
         raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
 
+    async def set_dataset_configuration(
+        self, set_dataset_configuration_request: "SetDatasetConfigurationRequest"
+    ) -> "SetDatasetConfigurationResponse":
+        raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
+
     async def test_auto_ml(
         self, test_auto_ml_request: "TestAutoMlRequest"
     ) -> "TestAutoMlResponse":
@@ -870,6 +904,13 @@ class ControllerServiceBase(ServiceBase):
     async def __rpc_start_auto_ml_process(self, stream: grpclib.server.Stream) -> None:
         request = await stream.recv_message()
         response = await self.start_auto_ml_process(request)
+        await stream.send_message(response)
+
+    async def __rpc_set_dataset_configuration(
+        self, stream: grpclib.server.Stream
+    ) -> None:
+        request = await stream.recv_message()
+        response = await self.set_dataset_configuration(request)
         await stream.send_message(response)
 
     async def __rpc_test_auto_ml(self, stream: grpclib.server.Stream) -> None:
@@ -986,6 +1027,12 @@ class ControllerServiceBase(ServiceBase):
                 grpclib.const.Cardinality.UNARY_UNARY,
                 StartAutoMlProcessRequest,
                 StartAutoMlProcessResponse,
+            ),
+            "/ControllerService/SetDatasetConfiguration": grpclib.const.Handler(
+                self.__rpc_set_dataset_configuration,
+                grpclib.const.Cardinality.UNARY_UNARY,
+                SetDatasetConfigurationRequest,
+                SetDatasetConfigurationResponse,
             ),
             "/ControllerService/TestAutoML": grpclib.const.Handler(
                 self.__rpc_test_auto_ml,

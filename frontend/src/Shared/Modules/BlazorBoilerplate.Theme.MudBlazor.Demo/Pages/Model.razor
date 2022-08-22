@@ -7,30 +7,11 @@
 @inject NavigationManager NavManager
 @attribute [Authorize]
 
-@if (_model != null && _training != null)
-{
-    <TopSection>
-        <Breadcrumbs>
-            @if (ListId != null)
-            {
-                <Breadcrumb Title="Datasets" Link="/datasets" />
-                <Breadcrumb Title="@("Dataset " + _training.DatasetName)" Link="@("/datasets/" + _model.Model.DatasetId)"/>
-                <Breadcrumb Title="Models" Link="@("/datasets/" + _model.Model.DatasetId + "/models")" />
-            }
-            else if (TrainingId != null)
-            {
-                <Breadcrumb Title="Trainings" Link="/trainings" />
-                <Breadcrumb Title="@(_training.StartTime.ToString("dd/MM/yy HH:mm"))" Link="@("/trainings/" + _training.ID)"/>
-            }
-            else if (DatasetId != null)
-            {
-                <Breadcrumb Title="Datasets" Link="/datasets" />
-                <Breadcrumb Title="@("Dataset " + _training.DatasetName)" Link="@("/datasets/" + _model.Model.DatasetId)"/>
-            }
-            <Breadcrumb Title="@("Model " + _model.Model.Model)" />
-        </Breadcrumbs>
-    </TopSection>
-}
+
+<TopSection>
+    <MudBreadcrumbs Items="_breadcrumbs">
+    </MudBreadcrumbs>
+</TopSection>
 
 <MudStack AlignItems="AlignItems.Center" Row="true" Class="mb-2">
     <MudIcon Size="Size.Large" Icon="@Icons.Filled.Lightbulb" />
@@ -62,7 +43,7 @@
                     {
                         <MudGrid>
                             <MudItem xs="3" sm="3" md="3">
-                                <MudText Typo="Typo.body1">Dataset: <a href="@NavManager.ToAbsoluteUri("datasets/" + @_training.DatasetId).AbsoluteUri" Style="cursor: pointer;">@_training.DatasetName</a></MudText>
+                                <MudText Typo="Typo.body1" Style=" display: flex;">Dataset: <MudLink Href="@NavManager.ToAbsoluteUri("datasets/" + @_training.DatasetId).AbsoluteUri" Style="cursor: pointer; display: flex;"><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.ListAlt" Style="margin-right: 4px;" />@_training.DatasetName</MudLink></MudText>
                                 <MudText Typo="Typo.body1">Start: @_training.StartTime.ToString("dd/MM/yyy HH:mm")</MudText>
                                 <MudText Typo="Typo.body1">Status: @_model.Model.Status</MudText>
                                 <MudText Typo="Typo.body1">Total training time: @_model.Model.Runtime s</MudText>
@@ -71,7 +52,7 @@
                                 <MudText Typo="Typo.body1">AutoML solution: @_model.Model.Name</MudText>
                                 <MudText Typo="Typo.body1">ML library: @_model.Model.Library</MudText>
                                 <MudText Typo="Typo.body1">Model: @_model.Model.Model</MudText>
-                                <MudText Typo="Typo.body1">Training: <a href="@NavManager.ToAbsoluteUri("trainings/" + @_training.ID).AbsoluteUri" Style="cursor: pointer;">@_training.StartTime.ToString("dd/MM/yyy")</a></MudText>
+                                <MudText Typo="Typo.body1" Style=" display: flex;">Training: <MudLink Href="@NavManager.ToAbsoluteUri("trainings/" + @_training.ID).AbsoluteUri" Style="cursor: pointer; display: flex;"><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.ModelTraining" Style="margin-right: 4px;" />@_training.StartTime.ToString("dd/MM/yyy")</MudLink></MudText>
                             </MudItem>
                             <MudItem xs="3" sm="3" md="3">
                                 <MudText Typo="Typo.body1">Metric test: @String.Format("{0:0.00}", _model.Model.TestScore)</MudText>
@@ -117,10 +98,30 @@
     private GetAutoMlModelResponseDto _downloadModel;
     private GetModelResponseDto _model;
     private GetTrainingResponseDto _training;
+    private List<BreadcrumbItem> _breadcrumbs = new List<BreadcrumbItem>();
 
     protected async override void OnInitialized()
     {
         await LoadModel();
+        _breadcrumbs.Add(new BreadcrumbItem("Home", "/", false, Icons.Filled.Home));
+        if (ListId != null)
+        {
+            _breadcrumbs.Add(new BreadcrumbItem("Datasets", "/datasets", false, Icons.Filled.ListAlt));
+            _breadcrumbs.Add(new BreadcrumbItem("Dataset " + _training.DatasetName, "/datasets/" + _model.Model.DatasetId, false, Icons.Filled.ListAlt));
+            _breadcrumbs.Add(new BreadcrumbItem("Models", "/datasets/" + _model.Model.DatasetId + "/models", false, Icons.Filled.Lightbulb));
+        }
+        else if (TrainingId != null)
+        {
+            _breadcrumbs.Add(new BreadcrumbItem("Trainings", "/trainings", false, Icons.Filled.ModelTraining));
+            _breadcrumbs.Add(new BreadcrumbItem(_training.StartTime.ToString("dd/MM/yy HH:mm"), "/trainings/" + _training.ID, false, Icons.Filled.ModelTraining));
+        }
+        else if (DatasetId != null)
+        {
+            _breadcrumbs.Add(new BreadcrumbItem("Datasets", "/datasets", false, Icons.Filled.ListAlt));
+            _breadcrumbs.Add(new BreadcrumbItem("Dataset " + _training.DatasetName, "/datasets/" + _model.Model.DatasetId, false, Icons.Filled.ListAlt));
+        }
+        _breadcrumbs.Add(new BreadcrumbItem("Model " + _model.Model.Model, null, true, Icons.Filled.Lightbulb));
+        StateHasChanged();
     }
     private async Task LoadModel()
     {
@@ -147,8 +148,6 @@
                 if (apiResponse.IsSuccessStatusCode)
                 {
                     _training = Newtonsoft.Json.JsonConvert.DeserializeObject<GetTrainingResponseDto>(apiResponse.Result.ToString());
-                    StateHasChanged();
-                    StateHasChanged();
                     viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
                 }
                 else

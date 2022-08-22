@@ -29,16 +29,16 @@
                     <HeaderContent>
                         <MudTh><MudTableSortLabel SortBy="new Func<AutoMLStatusDto, object>(x=>x.Name)">AutoML solution</MudTableSortLabel></MudTh>
                         <MudTh><MudTableSortLabel SortBy="new Func<AutoMLStatusDto, object>(x=>x.Status)">Status</MudTableSortLabel></MudTh>
-                        <MudTh><MudTableSortLabel SortBy="new Func<AutoMLStatusDto, object>(x=>x.Library)">Library</MudTableSortLabel></MudTh>
                         <MudTh><MudTableSortLabel SortBy="new Func<AutoMLStatusDto, object>(x=>x.Model)">Model</MudTableSortLabel></MudTh>
+                        <MudTh><MudTableSortLabel SortBy="new Func<AutoMLStatusDto, object>(x=>x.Library)">Library</MudTableSortLabel></MudTh>
                         <MudTh><MudTableSortLabel SortBy="new Func<AutoMLStatusDto, object>(x=>x.TestScore)">Test score</MudTableSortLabel></MudTh>
                         <MudTh><MudTableSortLabel SortBy="new Func<AutoMLStatusDto, object>(x=>x.Predictiontime)">Prediction time per sample</MudTableSortLabel></MudTh>
                         <MudTh><MudTableSortLabel SortBy="new Func<AutoMLStatusDto, object>(x=>x.Runtime)">Total training time</MudTableSortLabel></MudTh>
-                        @*<MudTh></MudTh>*@
+                        <MudTh></MudTh>
                     </HeaderContent>
                     <RowTemplate>
                         <MudTd>
-                            <a href="@NavManager.ToAbsoluteUri("trainings/" + Training.ID + "/models/" + @AutoMl.ID).AbsoluteUri" Style="cursor: pointer;">@AutoMl.Name</a>
+                            @AutoMl.Name
                         </MudTd>
                         <MudTd>
                             @AutoMl.Status
@@ -48,13 +48,13 @@
                             }
                         </MudTd>
                         <MudTd>
-                            @AutoMl.Model
+                            <MudLink Href="@NavManager.ToAbsoluteUri("trainings/" + Training.ID + "/models/" + @AutoMl.ID).AbsoluteUri" Style="cursor: pointer; display: flex;"><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.Lightbulb" Style="margin-right: 4px;" />@AutoMl.Model</MudLink>
                         </MudTd>
                         <MudTd>@AutoMl.Library</MudTd>
                         <MudTd>@(String.Format("{0:0.00}", AutoMl.TestScore))</MudTd>
                         <MudTd>@(String.Format("{0:0}", AutoMl.Predictiontime)) ms</MudTd>
                         <MudTd>@AutoMl.Runtime s</MudTd>
-                        @*<MudTd><TrainingMenu Training="@context"/></MudTd>*@
+                        <MudTd><TrainingMenu TrainingId="@Training.ID" Status="@AutoMl"></TrainingMenu></MudTd>
                     </RowTemplate>
                     <PagerContent>
                         <MudTablePager />

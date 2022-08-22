@@ -6,16 +6,11 @@
 @inject NavigationManager NavManager
 @attribute [Authorize]
 
-@if (!string.IsNullOrEmpty(_datasetTitle))
-{
-    <TopSection>
-        <Breadcrumbs>
-            <Breadcrumb Title="Datasets" Link="/datasets" />
-            <Breadcrumb Title="@_datasetTitle" Link="@("/datasets/" + _dataset.Identifier)"/>
-            <Breadcrumb Title="Train" />
-        </Breadcrumbs>
-    </TopSection>
-}
+<TopSection>
+    <MudBreadcrumbs Items="_breadcrumbs">
+    </MudBreadcrumbs>
+</TopSection>
+
 
 
 <MudStack AlignItems="AlignItems.Center" Row="true" Class="mb-2">
@@ -31,6 +26,8 @@ else
 {
     @switch (_dataset.Type.ID)
     {
+        case ":time_series":
+        case ":text":
         case ":tabular":
         case ":longitudinal":
             <MuddyWizard WizardFinished="@OnWizardFinished">
@@ -49,16 +46,6 @@ else
                 </MuddyWizardPanel>
             </MuddyWizard>
             break;
-        case ":text":
-            <MuddyWizard WizardFinished="@OnWizardFinished">
-                <MuddyWizardPanel Title="Dataset preparation" >
-                    <PrepareTextDataset Dataset="@_dataset" @bind-StartAutoMlRequest="@_automlRequest" />
-                </MuddyWizardPanel>
-                <MuddyWizardPanel Title="Configuration">
-                    <TaskConfiguration Dataset="@_dataset" @bind-StartAutoMlRequest="@_automlRequest" />
-                </MuddyWizardPanel>
-            </MuddyWizard>
-            break;
     }
 }
 
@@ -69,12 +56,19 @@ else
     private GetDatasetResponseDto _dataset;
     private string _datasetTitle = "";
     private StartAutoMLRequestDto _automlRequest;
+    private List<BreadcrumbItem> _breadcrumbs = new List<BreadcrumbItem>();
 
     protected async override void OnInitialized()
     {
         _automlRequest = new StartAutoMLRequestDto();
         _automlRequest.DatasetIdentifier = Id;
         await LoadDataset();
+        _breadcrumbs.Add(new BreadcrumbItem("Home", "/", false, Icons.Filled.Home));
+        _breadcrumbs.Add(new BreadcrumbItem("Datasets", "/datasets", false, Icons.Filled.ListAlt));
+        _breadcrumbs.Add(new BreadcrumbItem(_datasetTitle, "/datasets/" + _dataset.Identifier, false, Icons.Filled.ListAlt));
+        _breadcrumbs.Add(new BreadcrumbItem("Train", null, true, Icons.Filled.ModelTraining));
+        StateHasChanged();
+
     }
     private async Task LoadDataset()
     {
@@ -90,8 +84,6 @@ else
             {
                 _dataset = Newtonsoft.Json.JsonConvert.DeserializeObject<GetDatasetResponseDto>(apiResponse.Result.ToString());
                 _datasetTitle = "Dataset " + _dataset.Name;
-                StateHasChanged();
-                StateHasChanged();
                 viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
             }
             else
