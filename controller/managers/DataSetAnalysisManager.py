@@ -1,3 +1,5 @@
+import os.path
+
 import pandas as pd
 import numpy as np
 import math
@@ -76,7 +78,7 @@ class DataSetAnalysisManager:
         indices = self.__largest_indices(corr, (len(proc_dataset.columns) * len(proc_dataset.columns)))
 
         # Plot features with the highest correlation
-        print(f"[Dataset analysis]: Plotting top 5 feature imbalance plots")
+        print(f"[DatasetAnalysisManager]: Plotting top 5 feature imbalance plots")
         plotted_indices = []
         for first_col_idx, second_col_index in zip(indices[0], indices[1]):
             # Only plot top 5
@@ -286,7 +288,7 @@ class DataSetAnalysisManager:
         plt.title(colname)
         plt.tight_layout()
         plt.show()
-        filename = plot_path + "_" + colname + "_plot.svg"
+        filename = os.path.join(plot_path, colname + "_column_plot.svg")
         plt.savefig(filename)
         self.__plots.append({"type": "column_plot",
                              "title": colname,
@@ -323,7 +325,7 @@ class DataSetAnalysisManager:
         ax.set_xticklabels(columns)
         ax.set_yticklabels(columns)
         plt.tight_layout()
-        filename = plot_path + "_correlation_matrix.svg"
+        filename = os.path.join(plot_path, "correlation_matrix.svg")
         plt.savefig(filename)
         plt.show()
         self.__plots.append({"type": "correlation_matrix",
@@ -354,7 +356,7 @@ class DataSetAnalysisManager:
         plt.ylabel(f"Combination count")
         plt.tight_layout()
         plt.show()
-        filename = plot_path + "_" + first_colname + "_vs_" + second_colname + "_feature_imbalance.svg"
+        filename = os.path.join(plot_path, "feature_imbalance_" + first_colname + "_vs_" + second_colname + ".svg")
         plt.savefig(filename)
         self.__plots.append({"type": "feature_imbalance_plot",
                              "title": f"Feature imbalance plot of [{first_colname}, {second_colname}]",

@@ -214,7 +214,7 @@ class DataStorage:
                     preview.write(line)
                     # preview.write("\n")
             #fileConfiguration = "{\"use_header\":false,\"start_row\":2,\"delimiter\":\"comma\",\"escape_character\":\"\\\\\",\"decimal_character\":\".\"}"
-            file_configuration = '{"use_header":false, "start_row":2, "delimiter":"comma", "escape_character":""", "decimal_character":"."}'
+            file_configuration = '{"use_header":false, "start_row":2, "delimiter":"comma", "escape_character":"", "decimal_character":"."}'
 
         def get_size(start_path='.'):
             total_size = 0
@@ -239,6 +239,7 @@ class DataStorage:
                 dsam = DataSetAnalysisManager(pd.read_csv(filename_dest))
             analysis_result["basic_analysis"] = dsam.basicAnalysis()
             plot_filepath = os.path.join(os.path.dirname(filename_dest), "plots")
+            os.makedirs(plot_filepath, exist_ok=True)
             analysis_result["advanced_analysis"] = dsam.advancedAnalysis(plot_filepath)
 
         success = self.__mongo.UpdateDataset(username, dataset_id, {
