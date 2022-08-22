@@ -98,7 +98,6 @@ class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
         """
         try:
             config_json = json.loads(request.processJson)
-            print(f"ExplainModel: ExplainModelRequest for user: {config_json['user_identifier']}, training: {config_json['training_id']}")
             result_folder_location = os.path.join(get_config_property("training-path"),
                                                   config_json["user_identifier"],
                                                   config_json["training_id"],

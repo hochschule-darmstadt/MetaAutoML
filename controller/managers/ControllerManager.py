@@ -1,14 +1,10 @@
 import os
-import pandas as pd
-from requests import request
-from AutoMLSession import AutoMLSession
 import json
-from google.protobuf.timestamp_pb2 import Timestamp
-
 import uuid
 
 from Controller_bgrpc import *
 
+from AutoMLSession import AutoMLSession
 from AdapterManager import AdapterManager
 from CsvManager import CsvManager
 from RdfManager import RdfManager
@@ -33,18 +29,6 @@ class ControllerManager(object):
         self.__adapterManager = AdapterManager(self.__data_storage)
         self.__trainings: dict[str, AutoMLSession] = {}
         self.__explainableAIManager = ExplainableAIManager(self.__data_storage)
-
-        #self.__explainableAIManager.explain("3c8e1f29-20f9-445f-b65b-2d8b78960f9e", "62ff508238907ebedd4ea3b1")  # local gluon
-        #self.__explainableAIManager.explain("3c8e1f29-20f9-445f-b65b-2d8b78960f9e", "6300838c801e54b3b8a371a0")  # local keras
-        #self.__explainableAIManager.explain("58dde592-c6bc-4886-8470-bcbf6ee0626d", "63007178a65fb366123bf119")  # autocve
-        # self.__explainableAIManager.explain("58dde592-c6bc-4886-8470-bcbf6ee0626d", "63007178a65fb366123bf11e")  # flaml
-        # self.__explainableAIManager.explain("58dde592-c6bc-4886-8470-bcbf6ee0626d", "63007178a65fb366123bf11c")  # gluon
-        # self.__explainableAIManager.explain("58dde592-c6bc-4886-8470-bcbf6ee0626d", "63007178a65fb366123bf11f")  # mljar
-        # self.__explainableAIManager.explain("58dde592-c6bc-4886-8470-bcbf6ee0626d", "63007178a65fb366123bf11a")  # d3m
-        # self.__explainableAIManager.explain("58dde592-c6bc-4886-8470-bcbf6ee0626d", "63007178a65fb366123bf120")  # keras
-        # self.__explainableAIManager.explain("58dde592-c6bc-4886-8470-bcbf6ee0626d", "63007178a65fb366123bf11b")  # sklearn
-        # self.__explainableAIManager.explain("58dde592-c6bc-4886-8470-bcbf6ee0626d", "63007178a65fb366123bf11d")  # pytorch
-        return
 
     def CreateNewUser(self, request: "CreateNewUserRequest") -> "CreateNewUserResponse":
         """
@@ -289,7 +273,6 @@ class ControllerManager(object):
             except Exception as e:
                 print(f"exception: {e}")
 
-
         return response
 
     def GetSupportedMlLibraries(self, request: "GetSupportedMlLibrariesRequest") -> "GetSupportedMlLibrariesResponse":
@@ -522,9 +505,12 @@ class ControllerManager(object):
             if model["status"] == "completed":
                 self.__explainableAIManager.explain(configuration.username, model_id)
 
-
-        newTraining: AutoMLSession = self.__adapterManager.start_automl(configuration, str(dataset["_id"]), dataset_folder,
-                                                               training_id, configuration.username, callback)
+        newTraining: AutoMLSession = self.__adapterManager.start_automl(configuration,
+                                                                        str(dataset["_id"]),
+                                                                        dataset_folder,
+                                                                        training_id,
+                                                                        configuration.username,
+                                                                        callback)
 
         self.__trainings[training_id] = newTraining
         response.result = 1
@@ -575,20 +561,3 @@ class ControllerManager(object):
         """
         self.__data_storage.UpdateDataset(request.username, request.identifier, { "file_configuration": request.file_configuration })
         return SetDatasetConfigurationResponse()
-
-    def debugExplainAutoML(self):
-        request = TestAutoMlRequest
-        request.username = "720719a2-257e-4347-9ad3-55b57b61cde5"
-        request.model_id = "62e8f2682201aa279fd8dff3"
-        model = self.__data_storage.GetModel(request.username, request.model_id)
-        config = self.__data_storage.GetTraining(request.username, model["training_id"])
-        for modelid in config["models"]:
-            request.model_id = modelid
-            try:
-                self.__explainableAiManager.explain_shap(request=request)
-            except Exception as e:
-                print(e)
-
-
-
-

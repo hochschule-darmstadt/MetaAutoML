@@ -12,7 +12,7 @@ from Controller_bgrpc import *
 def make_html_force_plot(base_value, shap_values, X, path, filename_detail):
     import shap
     shap.initjs()
-    filename = os.path.join(path, f"shap_force_plot_{filename_detail}.html")
+    filename = os.path.join(path, f"force_plot_{filename_detail}.html")
     shap.save_html(filename, shap.force_plot(base_value, shap_values, X))
     return filename
 
@@ -22,11 +22,14 @@ def make_svg_waterfall_plot(base_value, shap_values, X, path, filename_detail):
     import matplotlib.pyplot as plt
     filename = os.path.join(path, f"waterfall_{filename_detail}.svg")
     plot = shap.waterfall_plot(
-        shap.Explanation(values=shap_values, base_values=base_value,
-                         data=X, feature_names=X.index.tolist()),
+        shap.Explanation(values=shap_values,
+                         base_values=base_value,
+                         data=X,
+                         feature_names=X.index.tolist()),
         max_display=50,
         show=False)
-    plot.savefig(filename)
+    plt.tight_layout()
+    plt.savefig(filename)
     plt.clf()
     return filename
 
@@ -40,75 +43,123 @@ def make_svg_beeswarm_plot(base_value, shap_values, X, path, filename_detail):
                                          data=X,
                                          feature_names=X.columns.tolist()),
                         show=False)
+    plt.tight_layout()
     plt.savefig(filename)
     plt.clf()
     return filename
 
 
-def make_svg_summary_plot(shap_values, X, path):
+def make_svg_summary_plot(shap_values, X, classnames, path):
     import shap
     import matplotlib.pyplot as plt
     filename = os.path.join(path, "summary_bar.svg")
-    shap.summary_plot(shap_values=shap_values, features=X, plot_type='bar', show=False)
+    shap.summary_plot(shap_values=shap_values, features=X, plot_type='bar', show=False, class_names=classnames)
+    plt.tight_layout()
     plt.savefig(filename)
     plt.clf()
     return filename
 
 
 def compile_html(plots, path):
+    """
+    Compile html file
+    """
     path = os.path.join(path, "explanation.html")
     with open(path, "w", encoding="UTF-8") as output_file:
         output_file.write(f"<h1> SHAP output </h1>\n\n")
-        for filename in plots:
-            with open(filename, "r", encoding="UTF-8") as shap_file:
-                output_file.write(f"<h1> {filename} </h1>\n\n")
+        for plot in plots:
+            with open(plot["path"], "r", encoding="UTF-8") as shap_file:
+                output_file.write(f"<h1> {plot['title']} </h1>\n")
+                output_file.write(f"<p> {plot['description']} </p>\n")
                 output_file.write(shap_file.read())
-                output_file.write("\n\n")
+                output_file.write("<br /><br />\n\n")
                 shap_file.close()
         output_file.close()
 
 
-def plot_tabular_classification(dataset_X, dataset_Y, predictions, explainer, shap_values, plot_path):
-    plot_filenames = []
+def plot_tabular_classification(dataset_X, dataset_Y, target, no_samples, explainer, shap_values, plot_path):
+    """
+    Plot the produced explanation by using the functionality provided by shap.
+    This produces 4 kinds of plots: force plots, waterfall plots, which look at one row of the source data and beeswarm
+        and summary plots that look at a number of rows from the input dataset.
+        Force, waterfall and beeswarm plots are done for each individual target class of the classification while the
+        summary plot is done once for the whole model as it aggregates all of them.
+    ---
+    dataset_X: Pandas DataFrame of the dataset without the target column.
+    dataset_Y: Pandas Series of the dataset target column.
+    target: Name of the target column. This is only used for generating the plot descriptions.
+    no_samples: Number of samples used in the shap explanation. This is only used for generating the plot descriptions.
+    explainer: SHAP explainer object.
+    shap_values: Array of shap values produced by the explainer.
+    plot_path: Path where the plots should be saved.
+    """
+    plots = []
     dataset_X[dataset_X.select_dtypes(['bool']).columns] = dataset_X[dataset_X.select_dtypes(['bool']).columns].astype(str)
     classlist = list(val for val in dataset_Y.unique())
     for class_idx, class_value in enumerate(classlist):
         row_idx = int(dataset_Y[dataset_Y == class_value].index[0])
-        # Locate prediction (class_idx is the true value)
-        prediction_class_idx = classlist.index(predictions[row_idx])
 
         filename = make_html_force_plot(base_value=explainer.expected_value[class_idx],
                                         shap_values=shap_values[class_idx][row_idx], X=dataset_X.iloc[row_idx],
                                         path=plot_path,
-                                        filename_detail=f"classification_rowidx{row_idx}_classidx{class_idx}_truth")
-        plot_filenames.append(filename)
-        filename = make_html_force_plot(base_value=explainer.expected_value[int(prediction_class_idx)],
-                                        shap_values=shap_values[int(prediction_class_idx)][row_idx], X=dataset_X.iloc[row_idx],
-                                        path=plot_path,
-                                        filename_detail=f"classification_rowidx{row_idx}_classidx{int(prediction_class_idx)}_prediction")
-        plot_filenames.append(filename)
+                                        filename_detail=f"{target}_{class_value}")
+        plots.append({"type": "force_plot",
+                      "title": f"Force plot of {target} = {class_value}",
+                      "description": f"The force plot shows the significance of certain features within the dataset by "
+                                     f"their impact on the model. This is done by looking at one row within the "
+                                     f"dataset. The values quantify this impact. From the base value certain features "
+                                     f"'push' the model to make a certain decision. In this case the value of {target} "
+                                     f"is {class_value} and so features that push the model towards this decision are "
+                                     f"indicated by higher values and blue coloring while features that point towards "
+                                     f"other classes are marked in red.",
+                      "path": filename})
 
         filename = make_svg_waterfall_plot(base_value=explainer.expected_value[class_idx],
                                            shap_values=shap_values[class_idx][row_idx], X=dataset_X.iloc[row_idx],
                                            path=plot_path,
-                                           filename_detail=f"classification_rowidx{row_idx}_classidx{class_idx}_truth")
-        plot_filenames.append(filename)
-        filename = make_svg_waterfall_plot(base_value=explainer.expected_value[int(prediction_class_idx)],
-                                           shap_values=shap_values[int(prediction_class_idx)][row_idx], X=dataset_X.iloc[row_idx],
-                                           path=plot_path,
-                                           filename_detail=f"classification_rowidx{row_idx}_classidx{int(prediction_class_idx)}_prediction")
-        plot_filenames.append(filename)
+                                           filename_detail=f"{target}_{class_value}")
+        plots.append({"type": "waterfall_plot",
+                      "title": f"Waterfall plot of {target} = {class_value}",
+                      "description": f"The waterfall plot shows the significance of certain features within the dataset"
+                                     f" by their impact on the model. This is done by looking at one row within the "
+                                     f"dataset. The values quantify this impact. From the base value certain features "
+                                     f"'push' the model to make a certain decision. In this case the value of {target} "
+                                     f"is {class_value} and so features that push the model towards this decision are "
+                                     f"indicated by higher values and blue coloring while features that point towards "
+                                     f"other classes are marked in red.",
+                      "path": filename})
+
         filename = make_svg_beeswarm_plot(base_value=explainer.expected_value[class_idx],
                                           shap_values=shap_values[class_idx], X=dataset_X, path=plot_path,
-                                          filename_detail=f"classification_classidx{class_idx}_truth")
-        plot_filenames.append(filename)
-        filename = make_svg_beeswarm_plot(base_value=explainer.expected_value[int(prediction_class_idx)],
-                                          shap_values=shap_values[int(prediction_class_idx)], X=dataset_X, path=plot_path,
-                                          filename_detail=f"classification_classidx{class_idx}_prediction")
-        plot_filenames.append(filename)
-        filename = make_svg_summary_plot(shap_values, dataset_X, plot_path)
-        plot_filenames.append(filename)
-    return plot_filenames
+                                          filename_detail=f"{class_value}")
+        plots.append({"type": "beeswarm_plot",
+                      "title": f"Beeswarm plot of {target} = {class_value}",
+                      "description": f"The beeswarm plot shows the significance of certain features within the dataset "
+                                     f"by their impact on the model. This plot looks at {no_samples} samples from the "
+                                     f"dataset and aggregates their impact. This plot specifically looks at {target} = "
+                                     f"{class_value}. The shap values on the x axis indicate the impact. If the value "
+                                     f"is positive this value adds to the models confidence in predicting {class_value}"
+                                     f". The color of the dots indicate the feature values. So a red dot on the right "
+                                     f"side of the plot means that a high value of this feature pushes the model "
+                                     f"towards  predicting {class_value}. If a feature is in the middle it does not "
+                                     f"have any influence on the prediction the model makes, regardless of its value.\n"
+                                     f"If a feature is greyed out it means that it is a categorical feature and can "
+                                     f"therefore not be analyzed by its value.",
+                      "path": filename})
+
+    filename = make_svg_summary_plot(shap_values, dataset_X, classlist, plot_path)
+    plots.append({"type": "summary_plot",
+                  "title": f"Summary plot",
+                  "description": f"The summary plot aggregates the importance of all features towards all classes. "
+                                 f"The higher the x-axis value is for a feature the more significance this feature "
+                                 f"has for the model. The color split within the bars indicates for which class "
+                                 f"this feature is important. If the bar coloring is split evenly the values of "
+                                 f"this feature are equally important for all classes. If it is skewed towards one "
+                                 f"color the values of this feature are only important when deciding for the one "
+                                 f"corresponding class.",
+                  "path": filename})
+
+    return plots
 
 
 def feature_preparation(X, features):
@@ -133,13 +184,18 @@ class ExplainableAIManager:
         self.__threads = []
 
     def explain(self, username, model_id):
-        def callback(thread, username, model, status, detail, plot_paths):
+        """
+        Start new explanation.
+        This spawns a separate thread which is saved in self.__threads and is removed upon completion.
+        After the thread is finished (or has crashed) the database is updated with the new information.
+        """
+        def callback(thread, username, model, status, detail, plots):
             with self.__data_storage.Lock():
                 # Add explanation results to model
-                model_data = {"explanation": {"status": status, "detail": detail, "plot_paths": plot_paths}}
+                model_data = {"explanation": {"status": status, "detail": detail, "plots": plots}}
                 self.__data_storage.UpdateModel(username, str(model['_id']), model_data)
 
-                # Add explanation results (status) to training
+                # Add explanation results (only the status) to training
                 training = self.__data_storage.GetTraining(username, model['training_id'])
                 if "explanation" in training:
                     training["explanation"].update({model['automl_name']: status})
@@ -157,8 +213,7 @@ class ExplainableAIManager:
         self.__data_storage.UpdateModel(username, model_id, {"explanation": {"status": "started"}})
         return
     
-    def explain_shap(self, username, model_id, callback, number_of_samples=5):
-        import shap
+    def explain_shap(self, username, model_id, callback, number_of_samples=25):
         model = self.__data_storage.GetModel(username, model_id)
         config = self.__data_storage.GetTraining(username, model["training_id"])
         dataset_path = self.__data_storage.GetDataset(username, config["dataset_id"])[1]["path"]
@@ -166,7 +221,7 @@ class ExplainableAIManager:
         print(f"[ExplainableAIManager]: Initializing new shap explanation. AutoML: {model['automl_name'].replace(':', '')} | Training ID: {model['training_id']} | Dataset: {config['dataset_id']} ({config['dataset_name']})")
         
         config["file_location"], config["file_name"] = os.path.split(dataset_path)
-        output_path = os.path.join(os.getcwd(), "app-data", "training", model["automl_name"].replace(":", ""), username, model["training_id"], "result", "plots")
+        output_path = os.path.join(os.getcwd(), "app-data", "training", model["automl_name"].replace(":", ""), username, model["training_id"], "result")
         os.makedirs(output_path, exist_ok=True)
         plot_path = os.path.join(output_path, "plots")
         os.makedirs(plot_path, exist_ok=True)
@@ -184,31 +239,35 @@ class ExplainableAIManager:
             try:
                 explainer = self.get_shap_explainer(username, model, config, sampled_dataset_X)
             except RuntimeError as e:
-                callback(thread=threading.current_thread(), username=username, model=model, status="failed", detail=f"exeption: {e}", plot_paths=[])
+                callback(thread=threading.current_thread(), username=username, model=model, status="failed", detail=f"exeption: {e}", plots=[])
                 return
             shap_values = explainer.shap_values(sampled_dataset_X)
 
-            predictions = self.get_predictions(username, model_id, dataset_path, model, config, dataset_Y)
-
             print("[ExplainableAIManager]: Explanation finished. Beginning plots.")
 
-            plot_filenames = plot_tabular_classification(sampled_dataset_X, dataset_Y, predictions, explainer, shap_values, plot_path)
+            plots = plot_tabular_classification(sampled_dataset_X,
+                                                         dataset_Y,
+                                                         config["configuration"]["target"]["target"],
+                                                         number_of_samples,
+                                                         explainer,
+                                                         shap_values,
+                                                         plot_path)
         else:
             message = "The ML task of the selected training is not tabular classification. This module is only compatible with tabular classification."
             print("[ExplainableAIManager]:" + message)
-            callback(thread=threading.current_thread(), username=username, model=model, status="failed", detail=f"incompatible: {message}", plot_paths=[])
+            callback(thread=threading.current_thread(), username=username, model=model, status="failed", detail=f"incompatible: {message}", plots=[])
             return
 
-        compile_html(plot_filenames, output_path)
+        compile_html(plots, output_path)
         print(f"[ExplainableAIManager]: Plots for {model['automl_name']} completed")
-        callback(thread=threading.current_thread(), username=username, model=model, status="finished", detail=f"{len(plot_filenames)} plots created", plot_paths=plot_filenames)
+        callback(thread=threading.current_thread(), username=username, model=model, status="finished", detail=f"{len(plots)} plots created", plots=plots)
 
     def get_shap_explainer(self, username, model, config, sampled_dataset_x):
         """
         Calculate and return the SHAP explainer object.
         Usually this is a one-liner as with any "normal" ML-model the explainer is passed the model predict_proba (for
         classification tasks) function.
-        But as here this function is called over gRPC, and it is implemented by AutoML's just passing the functions will
+        But as here this function is called over gRPC, and it is implemented by AutoMLs, just passing the functions will
         not work at all.
         Our new prediction_probability function does several things (on this side and on the adapter side):
             - Pass the data requested by SHAP to the adapter and return the probabilities (both sides)
@@ -240,54 +299,5 @@ class ExplainableAIManager:
 
         import shap
         return shap.KernelExplainer(prediction_probability, sampled_dataset_x)
-
-    def get_predictions(self, username, model_id, dataset_path, model, config, dataset_Y):
-        """
-        Get and process predictions.
-        Predictions are acquired using the TestAutoml() functionality.
-        After the predictions are made they are processed and returned.
-
-        Some AutoMLs do not return the same datatype in their predictions compared to the truth (dataset_Y)
-        Therefore it is necessary to test and possibly convert the predictions before they can be processed further.
-        """
-        request = TestAutoMlRequest
-        request.username = username
-        request.model_id = model_id
-
-        with open(dataset_path, "r") as f:
-            request.test_data = f.read().encode()
-        predictions = list(self.__adapterManager.TestAutoml(request,
-                                                            model["automl_name"],
-                                                            model["training_id"],
-                                                            config).predictions)
-
-        # Convert truth to base list to avoid dealing with special numpy or pandas datatypes
-        dataset_Y = dataset_Y.tolist()
-
-        # Convert mismatched datatypes between the dataset_Y and the list of predictions
-        print(f"[ExplainableAIManager]: Predictions finished, aligning dtypes: "
-              f"dataset_Y[0] is {dataset_Y[0]} with dtype {type(dataset_Y[0])} | "
-              f"predictions[0] is {predictions[0]} with dtype {type(predictions[0])}")
-
-        if type(dataset_Y[0]) == bool:
-            if type(predictions[0]) == str:
-                # if predictions are string and truth is bool the predictions could be either '0' or 'False'
-                try:  # try to convert a string formatted int
-                    return [bool(int(pred)) for pred in predictions]
-                except ValueError as e:
-                    pass
-                try:  # try to convert a string formatted bool
-                    return [bool(pred) for pred in predictions]
-                except ValueError as e:
-                    pass
-            if type(predictions[0]) == int:
-                return [bool(pred) for pred in predictions]
-
-        if type(dataset_Y[0]) == int:
-            if type(predictions[0]) == str:
-                # predictions could be either '0' or '0.0' so converting to float and then to int covers both
-                return [int(float(pred)) for pred in predictions]
-
-        return predictions
 
 
