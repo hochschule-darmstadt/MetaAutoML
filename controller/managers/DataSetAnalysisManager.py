@@ -238,7 +238,7 @@ class DataSetAnalysisManager:
 
         Return dataset: Dataset with filled nan values
         """
-        fill_value = int("9" * (len(str(int(dataset.max().max()))) + 1))
+        fill_value = int("9" * (len(str(int(dataset.max(numeric_only=True).max()))) + 1))
         for col in dataset.columns:
             if dataset[col].dtype.name == "category":
                 # Category cols require special handling
