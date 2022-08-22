@@ -1,5 +1,6 @@
 import logging, time
 from threading import Thread, Lock
+from typing import Callable
 from .Blackboard import Blackboard
 
 class StrategyController(object):
@@ -25,6 +26,7 @@ class StrategyController(object):
             ]
         })
 
+        self.event_listeners = {}
         self.strategies = []
 
         from blackboard.strategies.DataPreparationStrategy import DataPreparationStrategyController
@@ -33,12 +35,12 @@ class StrategyController(object):
     def GetPhase(self) -> str:
         return self.blackboard.GetState('phase')
 
-    def SetPhase(self, phase) -> None:
+    def SetPhase(self, phase: str) -> None:
         old_phase = self.GetPhase()
         self.blackboard.UpdateState('phase', phase)
         self.LogEvent('phase_updated', { 'old_phase': old_phase, 'new_phase': phase })
 
-    def WaitForPhase(self, phase) -> None:
+    def WaitForPhase(self, phase: str) -> None:
         while self.GetPhase() != phase:
             time.sleep(2) # FIXME: Remove (for testing purposes)
             self._log.info(f'Waiting for phase: "{phase}" (current: "{self.GetPhase()}")')
@@ -75,8 +77,8 @@ class StrategyController(object):
                     self._log.debug(f'No contribution by agent: {agent.agent_id}')
             if state_changed:
                 # FIXME: Remove (for testing purposes)
-                import json
-                self._log.info('Current common_state:\n'+json.dumps(self.blackboard.common_state, indent=2))
+                # import json
+                # self._log.info('Current common_state:\n'+json.dumps(self.blackboard.common_state, indent=2))
                 self.EvaluateStrategy()
             self.__lock.release()
             if stop_requested:
@@ -86,19 +88,22 @@ class StrategyController(object):
         self.__lock.acquire()
         self.__is_running = False
         self._log.debug(f'Stopped controller thread: {self.__thread.native_id}')
+        # FIXME: Remove (for testing purposes)
+        import json
+        self._log.info('Final common_state:\n'+json.dumps(self.blackboard.common_state, indent=2))
         self.__lock.release()
 
     def IsStrategyEnabled(self, strategy_name: str) -> bool:
         return strategy_name in self.blackboard.GetState('enabled_strategies', [])
 
-    def EnableStrategy(self, strategy_name: str):
+    def EnableStrategy(self, strategy_name: str) -> None:
         enabled_strategies = self.blackboard.GetState('enabled_strategies', [])
         if not strategy_name in enabled_strategies:
             enabled_strategies.append(strategy_name)
             self.blackboard.UpdateState('enabled_strategies', enabled_strategies)
         self._log.debug(f'Enabled strategy: {strategy_name}')
 
-    def DisableStrategy(self, strategy_name: str):
+    def DisableStrategy(self, strategy_name: str) -> None:
         enabled_strategies = self.blackboard.GetState('enabled_strategies', [])
         if strategy_name in enabled_strategies:
             enabled_strategies.remove(strategy_name)
@@ -114,6 +119,7 @@ class StrategyController(object):
                     try:
                         if rule.matches(self.blackboard.common_state):
                             try:
+                                action_started = time.time()
                                 result = action(self.blackboard.common_state, self.blackboard, self)
                                 self.LogEvent('strategy_action', { 'rule_name': rule_name, 'result': result })
                             except Exception as err:
@@ -123,11 +129,20 @@ class StrategyController(object):
                         self._log.error(f'Could not evaluate rule match for rule "{rule_name}".')
                         self._log.exception(err)
 
-    def LogEvent(self, event_type: str, meta: dict = {}):
+    def LogEvent(self, event_type: str, meta: dict = {}, timestamp: float = None) -> None:
         event = {
-            'timestamp': time.time(),
             'type': event_type,
-            'meta': meta
+            'meta': meta,
+            'timestamp': timestamp if timestamp is not None else time.time()
         }
         self.blackboard.common_state['events'].append(event)
         self._log.info(f'Encountered event "{event_type}": {meta}')
+        for callback in self.event_listeners.get(event_type, []):
+            self._log.debug(f'Dispatching event callback for "{event_type}": {callback}')
+            callback(meta, self)
+
+    def OnEvent(self, event_type: str, callback: Callable) -> None:
+        if event_type not in self.event_listeners:
+            self.event_listeners[event_type] = list()
+        self.event_listeners[event_type].append(callback)
+        self._log.debug(f'Registered event listener "{event_type}": {callback}')

@@ -511,11 +511,13 @@ class ControllerManager(object):
                     self.__data_storage.UpdateTraining(configuration.username, training_id, {
                         "models": training["models"] + [model_id],
                         "status": "completed",
+                        "dataset_configuration": json.loads(configuration.dataset_configuration),
                         "end_time": datetime.now()
                     })
                 else:
                     self.__data_storage.UpdateTraining(configuration.username, training_id, {
-                        "models": training["models"] + [model_id]
+                        "models": training["models"] + [model_id],
+                        "dataset_configuration": json.loads(configuration.dataset_configuration)
                     })
 
 

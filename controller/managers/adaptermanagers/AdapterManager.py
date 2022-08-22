@@ -67,7 +67,4 @@ class AdapterManager(object):
         session = AutoMLSession(training_id, dataset_id, configuration, self.__data_storage)
         for automl in automls:
             session.add_automl_to_training(automl)
-        session.controller.WaitForPhase('running')
-        for automl in automls:
-            automl.start()
         return session

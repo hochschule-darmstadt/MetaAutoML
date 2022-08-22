@@ -34,6 +34,7 @@ class AutoMLSession(object):
         session_agent = AutoMLSessionAgent(blackboard=self.blackboard, controller=self.controller, session=self)
         from blackboard.agents.DataAnalysisAgent import DataAnalysisAgent
         data_analysis_agent = DataAnalysisAgent(blackboard=self.blackboard, controller=self.controller, dataset_id=dataset_id, data_storage=data_storage)
+        self.controller.OnEvent('phase_updated', self.handle_phase_update)
         self.controller.SetPhase('preprocessing')
         self.controller.StartLoop()
         # IDEA: atexit.register(self.controller.StopLoop)
@@ -47,6 +48,25 @@ class AutoMLSession(object):
         """
         self.automls.append(automl)
         automl_run_agent = AutoMLRunAgent(blackboard=self.blackboard, controller=self.controller, manager=automl)
+
+    def handle_phase_update(self, meta, controller):
+        """
+        Handles phase updates throughout the session (caused by the strategy controller)
+        ---
+        Parameter
+        1. The event meta (contains a dict holding the "old_phase" and "new_phase")
+        1. The strategy controller instance that caused the event
+        """
+        if meta.get('old_phase') == 'preprocessing' and meta.get('new_phase') == 'running':
+            # Preprocessing finished, start the AutoML training
+            self.start_automl_training()
+
+    def start_automl_training(self):
+        """
+        Starts all AutoMLs added to the current session
+        """
+        for automl in self.automls:
+            automl.start()
 
     def get_id(self) -> str:
         """
