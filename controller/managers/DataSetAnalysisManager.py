@@ -58,9 +58,8 @@ class DataSetAnalysisManager:
         plot_filenames = []
 
         # Plot distributions of all columns
-        print(f"[DatasetAnalysisManager]: Plotting columns")
+        print(f"[DatasetAnalysisManager]: Plotting {len(self.__dataset.columns)} columns")
         for i, col in enumerate(list(self.__dataset.columns)):
-            print(f"[DatasetAnalysisManager]: Plotting columns {i}/{len(list(self.__dataset.columns))}", end="\r")
             self.__make_column_plot(col, save_path)
 
         # Get processed version of dataset to make calculation of feature correlation using scipy spearmanr possible
@@ -77,7 +76,7 @@ class DataSetAnalysisManager:
         indices = self.__largest_indices(corr, (len(proc_dataset.columns) * len(proc_dataset.columns)))
 
         # Plot features with the highest correlation
-        print(f"[Dataset analysis]: Plotting feature imbalance plots")
+        print(f"[Dataset analysis]: Plotting top 5 feature imbalance plots")
         plotted_indices = []
         for first_col_idx, second_col_index in zip(indices[0], indices[1]):
             # Only plot top 5
@@ -85,7 +84,6 @@ class DataSetAnalysisManager:
                 break
             # If the correlation isn't a col with itself or has already been plotted the other way around -> plot it
             if first_col_idx != second_col_index and [second_col_index, first_col_idx] not in plotted_indices:
-                print(f"[Dataset analysis]: Plotting feature imbalance plot {len(plotted_indices) + 1}/5", end="\r")
                 self.__make_feature_imbalance_plot(self.__dataset.columns[first_col_idx],
                                                    self.__dataset.columns[second_col_index],
                                                    save_path)
