@@ -287,7 +287,7 @@ class DataSetAnalysisManager:
             self.__dataset[colname].plot(kind='hist')
         plt.title(colname)
         plt.tight_layout()
-        plt.show()
+        #plt.show()
         filename = os.path.join(plot_path, colname + "_column_plot.svg")
         plt.savefig(filename)
         self.__plots.append({"type": "column_plot",
@@ -327,7 +327,7 @@ class DataSetAnalysisManager:
         plt.tight_layout()
         filename = os.path.join(plot_path, "correlation_matrix.svg")
         plt.savefig(filename)
-        plt.show()
+        #plt.show()
         self.__plots.append({"type": "correlation_matrix",
                              "title": "Correlation matrix",
                              "description": "Higher values indicate greater correlation between features",
@@ -355,7 +355,7 @@ class DataSetAnalysisManager:
         plt.xlabel(f"Most common combinations of [{first_colname}, {second_colname}]")
         plt.ylabel(f"Combination count")
         plt.tight_layout()
-        plt.show()
+        #plt.show()
         filename = os.path.join(plot_path, "feature_imbalance_" + first_colname + "_vs_" + second_colname + ".svg")
         plt.savefig(filename)
         self.__plots.append({"type": "feature_imbalance_plot",

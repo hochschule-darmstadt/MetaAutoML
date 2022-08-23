@@ -272,11 +272,11 @@ class DataStorage:
         return self.__mongo.UpdateDataset(username, id, new_values)
 
 
-    def FindDataset(self, username: str, identifier: str) -> 'tuple[bool, dict[str, object]]':
+    def GetDataset(self, username: str, identifier: str) -> 'tuple[bool, dict[str, object]]':
         """
         Try to find the _first_ dataset with this name. 
         ---
-        >>> found, dataset = ds.FindDataset("automl_user", "my_dataset")
+        >>> found, dataset = ds.GetDataset("automl_user", "my_dataset")
         >>> if not found:
                 print("We have a problem")
 
@@ -287,7 +287,7 @@ class DataStorage:
         ---
         Returns either `(True, Dataset)` or `(False, None)`.
         """
-        result = self.__mongo.FindDataset(username, {
+        result = self.__mongo.GetDataset(username, {
             "_id": ObjectId(identifier)
         })
 
