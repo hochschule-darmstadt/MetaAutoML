@@ -174,8 +174,6 @@ def serve():
 
 
 if __name__ == '__main__':
-    if not os.path.exists('app-data/output/tmp'):
-        os.mkdir('app-data/output/tmp')
     logging.basicConfig()
     serve()
     print('done.')
