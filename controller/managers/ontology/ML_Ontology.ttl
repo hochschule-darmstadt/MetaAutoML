@@ -1363,7 +1363,7 @@
     :used_for :spark_mllib ;
     :can_perform :tabular_classification , :tabular_regression .
 :mcfly a :AutoML_solution ;
-    skos:prefLabel "mcfly" ;
+    skos:prefLabel "Mcfly" ;
     :used_for :tensorflow_lib ;
     :supported_by_oma_ml "True" ;
     :can_perform :time_series_classification .
