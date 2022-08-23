@@ -254,6 +254,7 @@ class DataStorage:
             # Save the new dataframe as a csv file
             df_preview_filename = filename_dest.replace(".ts", "_preview.csv")
             pd.DataFrame(df_dict).to_csv(df_preview_filename, index=False)
+            fileConfiguration = "{\"use_header\":true,\"start_row\":1,\"delimiter\":\"comma\",\"escape_character\":\"\\\\\",\"decimal_character\":\".\"}"
 
         def get_size(start_path = '.'):
             total_size = 0
