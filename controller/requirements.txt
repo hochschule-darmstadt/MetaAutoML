@@ -33,6 +33,7 @@ zope.interface==5.4.0
 git+https://github.com/danielgtaylor/python-betterproto.git@v2.0.0b4
 pymongo==4.1.1
 mongomock==4.0.0
-matplotlib==3.4.2
-scipy==1.7.0
 xai==0.1.0
+shap==0.41.0
+matplotlib==3.4.2
+ipython==8.4.0

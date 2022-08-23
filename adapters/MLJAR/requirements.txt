@@ -7,3 +7,4 @@ Jinja2
 mljar-supervised
 dill
 pillow
+ipython==7.34.0

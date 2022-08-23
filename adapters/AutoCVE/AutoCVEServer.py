@@ -38,6 +38,12 @@ class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
     AutoML Adapter Service implementation.
     Service provide functionality to execute and interact with the current AutoML process.
     """
+    def __init__(self):
+        """
+        These variables are used by the ExplainModel function.
+        """
+        self._automl = None
+        self._loaded_training_id = None
 
     def StartAutoML(self, request, context):
         """

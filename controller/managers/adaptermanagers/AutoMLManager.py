@@ -119,7 +119,43 @@ class AutoMLManager(ABC, Thread):
             except grpc.RpcError as rpc_error:
                 print(f"Received unknown RPC error: code={rpc_error.code()} message={rpc_error.details()}")
 
-    def _generate_test_json(self):
+    def explain_model(self, data, training_id, user_id):
+        """
+        Explain a specific model.
+        This loads the model and returns the output of the "predict_proba()" function in case of tabular classification.
+        If the ML task is tabular regression the output of "predict()" is returned instead.
+        ---
+        Parameter
+        data: Data to process
+        training_id: training id to use
+        ---
+        Return
+        List of produced outputs
+        """
+
+        print(f"connecting {self.__AUTOML_SERVICE_HOST}:{self.__AUTOML_SERVICE_PORT}")
+
+        with grpc.insecure_channel(f"{self.__AUTOML_SERVICE_HOST}:{self.__AUTOML_SERVICE_PORT}") as channel:  # Connect to Adapter
+            stub = Adapter_pb2_grpc.AdapterServiceStub(channel)  # Create Interface Stub
+
+            request = Adapter_pb2.ExplainModelRequest()  # Request Object
+            process_json = self._generate_test_json()
+            process_json["training_id"] = training_id
+            process_json["user_identifier"] = user_id
+            process_json["test_configuration"]["method"] = 1
+            process_json["test_configuration"]["split_ratio"] = 0
+            process_json["file_location"] = self._configuration["file_location"]
+            process_json["file_name"] = self._configuration["file_name"]
+            request.processJson = json.dumps(process_json)
+            request.data = data
+
+            try:
+                return stub.ExplainModel(request)
+
+            except grpc.RpcError as rpc_error:
+                print(f"Received unknown RPC error: code={rpc_error.code()} message={rpc_error.details()}")
+
+    def _generate_test_json(self,):
         """
         Generate AutoML configuration JSON
         ---

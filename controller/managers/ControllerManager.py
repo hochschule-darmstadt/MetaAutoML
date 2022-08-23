@@ -1,19 +1,15 @@
 import os
-import pandas as pd
-from requests import request
-from AutoMLSession import AutoMLSession
 import json
-from google.protobuf.timestamp_pb2 import Timestamp
-
 import uuid
 
 from Controller_bgrpc import *
 
+from AutoMLSession import AutoMLSession
 from AdapterManager import AdapterManager
 from CsvManager import CsvManager
 from RdfManager import RdfManager
 from persistence.data_storage import DataStorage
-
+from ExplainableAIManager import ExplainableAIManager
 
 class ControllerManager(object):
     """
@@ -32,7 +28,7 @@ class ControllerManager(object):
         self.__rdfManager = RdfManager()
         self.__adapterManager = AdapterManager(self.__data_storage)
         self.__trainings: dict[str, AutoMLSession] = {}
-        return
+        self.__explainableAIManager = ExplainableAIManager(self.__data_storage)
 
     def CreateNewUser(self, request: "CreateNewUserRequest") -> "CreateNewUserResponse":
         """
@@ -277,7 +273,6 @@ class ControllerManager(object):
             except Exception as e:
                 print(f"exception: {e}")
 
-
         return response
 
     def GetSupportedMlLibraries(self, request: "GetSupportedMlLibrariesRequest") -> "GetSupportedMlLibrariesResponse":
@@ -507,9 +502,15 @@ class ControllerManager(object):
                         "models": training["models"] + [model_id]
                     })
 
+            if model["status"] == "completed":
+                self.__explainableAIManager.explain(configuration.username, model_id)
 
-        newTraining: AutoMLSession = self.__adapterManager.start_automl(configuration, str(dataset["_id"]), dataset_folder,
-                                                               training_id, configuration.username, callback)
+        newTraining: AutoMLSession = self.__adapterManager.start_automl(configuration,
+                                                                        str(dataset["_id"]),
+                                                                        dataset_folder,
+                                                                        training_id,
+                                                                        configuration.username,
+                                                                        callback)
 
         self.__trainings[training_id] = newTraining
         response.result = 1
@@ -556,7 +557,7 @@ class ControllerManager(object):
         Parameter
         1. dataset configuration
         ---
-        Return 
-        """ 
+        Return
+        """
         self.__data_storage.UpdateDataset(request.username, request.identifier, { "file_configuration": request.file_configuration })
         return SetDatasetConfigurationResponse()
