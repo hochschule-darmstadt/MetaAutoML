@@ -202,18 +202,18 @@ class DataStorage:
             fileName = fileName.replace(".zip", "")
 
         if type == ":tabular" or type == ":text" or type == ":time_series":
-            # generate preview of tabular and text dataset
-            # previewDf = pd.read_csv(filename_dest)
-            # previewDf.head(50).to_csv(filename_dest.replace(".csv", "_preview.csv"), index=False)
-            # causes error with different delimiters use normal string division
-            with open(filename_dest) as file:
+            #generate preview of tabular and text dataset
+            #previewDf = pd.read_csv(filename_dest)
+            #previewDf.head(50).to_csv(filename_dest.replace(".csv", "_preview.csv"), index=False)
+            #causes error with different delimiters use normal string division
+            with open(filename_dest, encoding="utf8") as file:
                 lines = file.readlines()
             with open(filename_dest.replace(".csv", "_preview.csv"), "x") as preview:
                 preview_line = lines[:51]
                 for line in preview_line:
                     preview.write(line)
                     # preview.write("\n")
-            file_configuration = '{"use_header":false, "start_row":2, "delimiter":"comma", "escape_character":"", "decimal_character":"."}'
+            file_configuration = '{"use_header":true, "start_row":1, "delimiter":"comma", "escape_character":"\\\\", "decimal_character":"."}'
 
         def get_size(start_path='.'):
             total_size = 0

@@ -19,6 +19,8 @@ def make_html_force_plot(base_value, shap_values, X, path, filename_detail):
 
 def make_svg_waterfall_plot(base_value, shap_values, X, path, filename_detail):
     import shap
+    import matplotlib
+    matplotlib.use('Agg')
     import matplotlib.pyplot as plt
     filename = os.path.join(path, f"waterfall_{filename_detail}.svg")
     plot = shap.waterfall_plot(
@@ -36,6 +38,8 @@ def make_svg_waterfall_plot(base_value, shap_values, X, path, filename_detail):
 
 def make_svg_beeswarm_plot(base_value, shap_values, X, path, filename_detail):
     import shap
+    import matplotlib
+    matplotlib.use('Agg')
     import matplotlib.pyplot as plt
     filename = os.path.join(path, f"beeswarm_{filename_detail}.svg")
     shap.plots.beeswarm(shap.Explanation(values=shap_values,
@@ -51,6 +55,8 @@ def make_svg_beeswarm_plot(base_value, shap_values, X, path, filename_detail):
 
 def make_svg_summary_plot(shap_values, X, classnames, path):
     import shap
+    import matplotlib
+    matplotlib.use('Agg')
     import matplotlib.pyplot as plt
     filename = os.path.join(path, "summary_bar.svg")
     shap.summary_plot(shap_values=shap_values, features=X, plot_type='bar', show=False, class_names=classnames)
