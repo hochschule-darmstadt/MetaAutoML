@@ -377,6 +377,7 @@ class ControllerManager(object):
             model_info.library =  model["library"]
             model_info.training_id = model["training_id"]
             model_info.dataset_id = model["dataset_id"]
+            model_info.explanation = json.dumps(model["explanation"])
             response.models.append(model_info)
             top3Counter = top3Counter + 1
             
@@ -408,6 +409,7 @@ class ControllerManager(object):
         model_info.library =  model["library"]
         model_info.training_id = model["training_id"]
         model_info.dataset_id = model["dataset_id"]
+        model_info.explanation = json.dumps(model["explanation"])
         response.model = model_info
             
         return response

@@ -1,4 +1,5 @@
-﻿using BlazorBoilerplate.Constants;
+﻿using Azure;
+using BlazorBoilerplate.Constants;
 using BlazorBoilerplate.Infrastructure.Server;
 using BlazorBoilerplate.Infrastructure.Server.Models;
 using BlazorBoilerplate.Shared.Dto.Dataset;
@@ -177,6 +178,45 @@ namespace BlazorBoilerplate.Server.Managers
                         break;
                     default:
                         break;
+                }
+                return new ApiResponse(Status200OK, null, response);
+
+            }
+            catch (Exception ex)
+            {
+
+                Console.WriteLine(ex.Message);
+                return new ApiResponse(Status404NotFound, ex.Message);
+            }
+        }
+
+        public async Task<ApiResponse> GetDatasetAnalysis(GetDatasetAnalysisRequestDto dataset)
+        {
+            GetDatasetAnalysisResponseDto response = new GetDatasetAnalysisResponseDto();
+            GetDatasetRequest getDatasetRequest = new GetDatasetRequest();
+            var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
+            string controllerDatasetPath = Environment.GetEnvironmentVariable("CONTROLLER_DATASET_FOLDER_PATH");
+            try
+            {
+                getDatasetRequest.Username = username;
+                getDatasetRequest.Identifier = dataset.DatasetIdentifier;
+                var reply = _client.GetDataset(getDatasetRequest);
+                var analysis = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(reply.DatasetInfos.Analysis);
+                int index = 0;
+                foreach (var item in analysis["advanced_analysis"])
+                {
+                    if (dataset.GetShortPreview == true && index++ == 3)
+                    {
+                        break;
+                    }
+                    DatasetAnalysis datasetAnalysis = new DatasetAnalysis()
+                    {
+                        Title = item.SelectToken("title").ToString(),
+                        Type = item.SelectToken("type").ToString(),
+                        Description = item.SelectToken("description").ToString(),
+                        Content = GetImageAsBytes(item.SelectToken("path").ToString())
+                    };
+                    response.Analyses.Add(datasetAnalysis);
                 }
                 return new ApiResponse(Status200OK, null, response);
 

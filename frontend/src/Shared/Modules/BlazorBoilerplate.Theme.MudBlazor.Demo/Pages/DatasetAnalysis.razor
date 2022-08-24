@@ -1,0 +1,69 @@
+﻿@page "/datasets/{id}/analysis"
+@inject IStringLocalizer<Global> L
+@inject IApiClient apiClient
+@inject IViewNotifier viewNotifier
+@inject NavigationManager NavManager
+@attribute [Authorize]
+
+<TopSection>
+    <MudBreadcrumbs Items="_breadcrumbs">
+    </MudBreadcrumbs>
+</TopSection>
+
+<MudStack AlignItems="AlignItems.Center" Row="true" Class="mb-2">
+    <MudIcon Size="Size.Large" Icon="@Icons.Filled.ListAlt" />
+    <MudText Typo="Typo.h4">@_pageTitle</MudText>
+</MudStack>
+
+<MudGrid>
+    <MudItem xs="12" sm="12" md="12">
+        <DatasetAnalysisFull Dataset="_dataset" />
+    </MudItem>
+</MudGrid>
+
+
+@code {
+    [Parameter]
+    public string Id { get; set; }
+
+    private string _pageTitle;
+    private GetDatasetResponseDto _dataset;
+    private List<BreadcrumbItem> _breadcrumbs = new List<BreadcrumbItem>();
+
+    protected async override void OnInitialized()
+    {
+        await LoadDataset();
+        _breadcrumbs.Add(new BreadcrumbItem("Home", "/", false, Icons.Filled.Home));
+        _breadcrumbs.Add(new BreadcrumbItem("Datasets", "/datasets", false, Icons.Filled.ListAlt));
+        _breadcrumbs.Add(new BreadcrumbItem(_pageTitle, "/datasets/" + Id, false, Icons.Filled.ListAlt));
+        _breadcrumbs.Add(new BreadcrumbItem("Analysis", null, true, Icons.Filled.ListAlt));
+        StateHasChanged();
+    }
+    private async Task LoadDataset()
+    {
+        try
+        {
+            GetDatasetRequestDto datasetRequest = new GetDatasetRequestDto()
+                {
+                    Identifier = Id
+                };
+            ApiResponseDto apiResponse = await apiClient.GetDataset(datasetRequest);
+
+            if (apiResponse.IsSuccessStatusCode)
+            {
+                _dataset = Newtonsoft.Json.JsonConvert.DeserializeObject<GetDatasetResponseDto>(apiResponse.Result.ToString());
+                _pageTitle = "Dataset " + _dataset.Name;
+                viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
+            }
+            else
+            {
+                viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
+            }
+        }
+        catch (Exception ex)
+        {
+            viewNotifier.Show(ex.GetBaseException().Message, ViewNotifierType.Error, L["Operation Failed"]);
+        }
+    }
+
+}

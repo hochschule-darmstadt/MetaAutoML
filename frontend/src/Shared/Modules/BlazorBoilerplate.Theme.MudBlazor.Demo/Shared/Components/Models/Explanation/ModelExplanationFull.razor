@@ -1,0 +1,100 @@
+﻿@using System
+@using System.IO
+@using Microsoft.AspNetCore.Hosting
+@using Microsoft.Extensions.Logging
+@using System.Net.Http.Headers
+@inject IApiClient apiClient
+@inject IViewNotifier viewNotifier
+@inject IJSRuntime JS
+@inject IStringLocalizer<Global> L
+@inject IHttpClientFactory ClientFactory
+@inject NavigationManager NavManager
+
+<MudCard Elevation="5">
+    <MudCardHeader Style="border-bottom-style: inset; border-bottom-width: 1px;">
+        <CardHeaderContent>
+            <MudText Typo="Typo.h6">Analysis</MudText>
+        </CardHeaderContent>
+    </MudCardHeader>
+    <MudCardContent>
+        <MudPaper Elevation="0">
+            @if (_explanation != null)
+            {
+                <MudGrid>
+                    @foreach (var item in _explanation.Analyses)
+                    {
+                        <MudItem xs="12" Style="display: grid; justify-content: center;">
+                            <MudText Typo="Typo.body2">@item.Description</MudText>
+                        </MudItem>
+                        <MudItem xs="12" Style="display: grid; justify-content: center;">
+                            <MudImage Src="@GetImage(item.Content)" Style="height:400px;" />
+                        </MudItem>
+                    }
+                </MudGrid>
+            }
+        </MudPaper>
+    </MudCardContent>
+</MudCard>
+
+@code {
+    [Parameter]
+    public GetModelResponseDto Model
+    {
+        get
+        {
+            return _model;
+        }
+        set
+        {
+            _model = value;
+            if (_model != null)
+            {
+                LoadModelExplanation();
+            }
+            StateHasChanged();
+        }
+    }
+    private GetModelResponseDto _model;
+    private GetModelExplanationResponseDto _explanation;
+    private bool isPreviewRequestRunning = false;
+
+    private async Task LoadModelExplanation()
+    {
+        try
+        {
+            //Due to frontend refreshes it may occur that this is triggered twice, leading to an error while the first request is reading
+            if (isPreviewRequestRunning == true)
+            {
+                return;
+            }
+            isPreviewRequestRunning = true;
+            GetModelExplanationRequestDto modelRequest = new GetModelExplanationRequestDto()
+                {
+                    ModelIdentifier = _model.Model.ID,
+                    GetShortPreview = false
+                };
+            ApiResponseDto apiResponse = await apiClient.GetModelExplanation(modelRequest);
+
+            if (apiResponse.IsSuccessStatusCode)
+            {
+                _explanation = Newtonsoft.Json.JsonConvert.DeserializeObject<GetModelExplanationResponseDto>(apiResponse.Result.ToString());
+                StateHasChanged();
+                viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
+            }
+            else
+            {
+                viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
+            }
+        }
+        catch (Exception ex)
+        {
+            viewNotifier.Show(ex.GetBaseException().Message, ViewNotifierType.Error, L["Operation Failed"]);
+        }
+        isPreviewRequestRunning = false;
+    }
+    string GetImage(byte[] image)
+    {
+        var imageSrc = Convert.ToBase64String(image);
+        return string.Format("data:image/svg+xml;base64,{0}", imageSrc);
+    }
+}

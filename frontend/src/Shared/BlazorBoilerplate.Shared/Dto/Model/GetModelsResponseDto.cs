@@ -29,6 +29,7 @@ namespace BlazorBoilerplate.Shared.Dto.Model
         public int Runtime { get; set; }
         public string DatasetId { get; set; }
         public string TrainingId { get; set; }
+        public Dictionary<string, dynamic> Explanation { get; set; }
 
         public ModelDto()
         {

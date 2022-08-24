@@ -47,4 +47,5 @@ message ModelInformation {
   float predictionTime = 10;
   string automl = 11;
   string datasetId = 12;
+  string explanation = 13;
 }

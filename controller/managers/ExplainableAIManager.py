@@ -16,6 +16,18 @@ def make_html_force_plot(base_value, shap_values, X, path, filename_detail):
     shap.save_html(filename, shap.force_plot(base_value, shap_values, X))
     return filename
 
+def make_svg_force_plot(base_value, shap_values, X, path, filename_detail):
+    import shap
+    import matplotlib
+    matplotlib.use('SVG')
+    import matplotlib.pyplot as plt
+    filename = os.path.join(path, f"force_plot_{filename_detail}.svg")
+    plot = shap.force_plot(base_value, shap_values, X, matplotlib=True, show=False)
+    plt.tight_layout()
+    plt.savefig(filename)
+    plt.clf()
+    return filename
+
 
 def make_svg_waterfall_plot(base_value, shap_values, X, path, filename_detail):
     import shap
@@ -105,7 +117,22 @@ def plot_tabular_classification(dataset_X, dataset_Y, target, no_samples, explai
     for class_idx, class_value in enumerate(classlist):
         row_idx = int(dataset_Y[dataset_Y == class_value].index[0])
 
-        filename = make_html_force_plot(base_value=explainer.expected_value[class_idx],
+        #filename = make_html_force_plot(base_value=explainer.expected_value[class_idx],
+        #                                shap_values=shap_values[class_idx][row_idx], X=dataset_X.iloc[row_idx],
+        #                                path=plot_path,
+        #                                filename_detail=f"{target}_{class_value}")
+        #plots.append({"type": "force_plot HTML",
+        #              "title": f"Force plot of {target} = {class_value}",
+        #              "description": f"The force plot shows the significance of certain features within the dataset by "
+        #                             f"their impact on the model. This is done by looking at one row within the "
+        #                             f"dataset. The values quantify this impact. From the base value certain features "
+        #                             f"'push' the model to make a certain decision. In this case the value of {target} "
+        #                             f"is {class_value} and so features that push the model towards this decision are "
+        #                             f"indicated by higher values and blue coloring while features that point towards "
+        #                             f"other classes are marked in red.",
+        #              "path": filename})
+
+        filename = make_svg_force_plot(base_value=explainer.expected_value[class_idx],
                                         shap_values=shap_values[class_idx][row_idx], X=dataset_X.iloc[row_idx],
                                         path=plot_path,
                                         filename_detail=f"{target}_{class_value}")

@@ -73,7 +73,7 @@
         <DownloadMlPipeline Model="_model"/>
     </MudItem>
     <MudItem xs="6" sm="6" md="6">
-        <ModelExplanation Model="_model" />
+        <ModelExplanationShort Model="_model" ExplanationPagePath="@_explanationPagePath" />
     </MudItem>
     <MudItem xs="3" sm="3" md="3">
         <ModelConfiguration Training="_training" Model="_model"/>
@@ -94,6 +94,7 @@
     [Parameter]
     public string ListId { get; set; }
 
+    private string _explanationPagePath = "";
     private string _pageTitle = "Model";
     private GetAutoMlModelResponseDto _downloadModel;
     private GetModelResponseDto _model;
@@ -109,16 +110,19 @@
             _breadcrumbs.Add(new BreadcrumbItem("Datasets", "/datasets", false, Icons.Filled.ListAlt));
             _breadcrumbs.Add(new BreadcrumbItem("Dataset " + _training.DatasetName, "/datasets/" + _model.Model.DatasetId, false, Icons.Filled.ListAlt));
             _breadcrumbs.Add(new BreadcrumbItem("Models", "/datasets/" + _model.Model.DatasetId + "/models", false, Icons.Filled.Lightbulb));
+            _explanationPagePath = "/datasets/" + DatasetId + "/modelsview/" + ListId + "/explanation";
         }
         else if (TrainingId != null)
         {
             _breadcrumbs.Add(new BreadcrumbItem("Trainings", "/trainings", false, Icons.Filled.ModelTraining));
             _breadcrumbs.Add(new BreadcrumbItem(_training.StartTime.ToString("dd/MM/yy HH:mm"), "/trainings/" + _training.ID, false, Icons.Filled.ModelTraining));
+            _explanationPagePath = "/trainings/" + TrainingId + "/models/" + Id + "/explanation";
         }
         else if (DatasetId != null)
         {
             _breadcrumbs.Add(new BreadcrumbItem("Datasets", "/datasets", false, Icons.Filled.ListAlt));
             _breadcrumbs.Add(new BreadcrumbItem("Dataset " + _training.DatasetName, "/datasets/" + _model.Model.DatasetId, false, Icons.Filled.ListAlt));
+            _explanationPagePath = "/datasets/" + DatasetId + "/models/" + Id + "/explanation";
         }
         _breadcrumbs.Add(new BreadcrumbItem("Model " + _model.Model.Model, null, true, Icons.Filled.Lightbulb));
         StateHasChanged();
