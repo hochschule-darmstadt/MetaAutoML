@@ -220,8 +220,11 @@ class ControllerManager(object):
             
         response.events = []
         for event in training.get('events', []):
-            event.meta = json.dumps(event.meta)
-            response.events.append(event)
+            response_event = StrategyControllerEvent()
+            response_event.type = event.get('type')
+            response_event.meta = json.dumps(event.get('meta'))
+            response_event.timestamp = event.get('timestamp')
+            response.events.append(response_event)
 
         return response
     
@@ -273,6 +276,15 @@ class ControllerManager(object):
                     trainingItem.required_ml_libraries.append(lib)
                 trainingItem.runtime_constraints = json.dumps(training["runtime_constraints"])
                 trainingItem.dataset_configuration = json.dumps(training["dataset_configuration"])
+            
+                trainingItem.events = []
+                for event in training.get('events', []):
+                    response_event = StrategyControllerEvent()
+                    response_event.type = event.get('type')
+                    response_event.meta = json.dumps(event.get('meta'))
+                    response_event.timestamp = event.get('timestamp')
+                    trainingItem.events.append(response_event)
+
                 response.trainings.append(trainingItem)
             except Exception as e:
                 print(f"exception: {e}")

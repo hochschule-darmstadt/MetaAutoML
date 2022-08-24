@@ -19,7 +19,8 @@
             }
             else
             {
-                
+                <!-- FIXME: Build layout for training events -->
+                <MudText Typo="Typo.h6">@(Newtonsoft.Json.JsonConvert.SerializeObject(Training.Events))</MudText>
                 <MudTable Items="@Training.AutoMls" Context="AutoMl" Filter="new Func<AutoMLStatusDto,bool>(FilterFunc)">
                     <ToolBarContent>
                         <MudSpacer />

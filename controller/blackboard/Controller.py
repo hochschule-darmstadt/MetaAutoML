@@ -1,17 +1,26 @@
 import logging, time
-from threading import Thread, Lock
+from threading import Timer, Lock
 from typing import Callable
+from datetime import datetime
 from persistence.data_storage import DataStorage
 from .Blackboard import Blackboard
+
+class RepeatTimer(Timer):
+    def run(self):
+        while not self.finished.wait(self.interval):
+            self.function(*self.args, **self.kwargs)
 
 class StrategyController(object):
     """
     Strategy controller which supervises the blackboard.
     """
 
-    def __init__(self, blackboard: Blackboard, data_storage: DataStorage) -> None:
+    def __init__(self, blackboard: Blackboard, data_storage: DataStorage, timer_interval: int = 1) -> None:
         self._log = logging.getLogger('strategy-controller')
         self._log.setLevel(logging.DEBUG) # FIXME: Remove this line, only for debugging
+        self.__is_running = False
+        self.__timer_interval = timer_interval
+        self.__timer = None
         self.blackboard = blackboard
         self.data_storage = data_storage
         self._log.debug(f'Attached controller to the blackboard, current agents: {len(self.blackboard.agents)}')
@@ -44,56 +53,54 @@ class StrategyController(object):
 
     def WaitForPhase(self, phase: str) -> None:
         while self.GetPhase() != phase:
-            time.sleep(2) # FIXME: Remove (for testing purposes)
+            time.sleep(1)
             self._log.info(f'Waiting for phase: "{phase}" (current: "{self.GetPhase()}")')
         self._log.info(f'Waiting finished for phase: {phase}')
       
-    def StartLoop(self) -> None:
-        self.__is_running = True
-        self.__lock = Lock()
-        self.__thread = Thread(target=self.RunLoop)
-        self.__thread.daemon = True
-        self.__thread.start()
-        self._log.debug(f'Started controller thread: {self.__thread.native_id}')
+    def StartTimer(self) -> None:
+        if not self.__is_running:
+            self.__lock = Lock()
+            self.__timer = RepeatTimer(interval=self.__timer_interval, function=self.RunLoop)
+            self.__timer.daemon = True
+            self.__timer.start()
+            self._log.debug(f'Started controller timer thread: {self.__timer.native_id}')
+            self.__is_running = True
 
-    def RunLoop(self) -> None:
-        while self.__is_running:
-            time.sleep(2) # FIXME: Remove (for testing purposes)
-            self.__lock.acquire()
-            stop_requested = False
-            state_changed = False
-            for agent in list(self.blackboard.agents.values()):
-                if agent.CanContribute():
-                    self._log.debug(f'Executing contribution by agent: {agent.agent_id}')
-                    try:
-                        contribution = agent.DoContribute()
-                        state_changed = True
-                    except StopIteration as err:
-                        # An agent requested the controller to stop, will halt after all agents & strategies finished..
-                        self._log.error(f'Agent "{agent.agent_id}" requested a stop: {err}')
-                        stop_requested = True
-                    except Exception as err:
-                        self._log.error(f'Could not execute contribution by agent: {agent.agent_id}')
-                        self._log.exception(err)
-                else:
-                    self._log.debug(f'No contribution by agent: {agent.agent_id}')
-            if state_changed:
-                # FIXME: Remove (for testing purposes)
-                # import json
-                # self._log.info('Current common_state:\n'+json.dumps(self.blackboard.common_state, indent=2))
-                self.EvaluateStrategy()
-            self.__lock.release()
-            if stop_requested:
-                self.StopLoop()
-
-    def StopLoop(self) -> None:
+    def StopTimer(self) -> None:
         self.__lock.acquire()
+        self.__timer.cancel()
+        self._log.debug(f'Stopped controller timer thread: {self.__timer.native_id}')
         self.__is_running = False
-        self._log.debug(f'Stopped controller thread: {self.__thread.native_id}')
+        self.__lock.release()
+
         # FIXME: Remove (for testing purposes)
         import json
-        self._log.info('Final common_state:\n'+json.dumps(self.blackboard.common_state, indent=2))
+        self._log.info('Final common_state:\n'+json.dumps(self.blackboard.common_state, indent=2, default=str))
+
+    def RunLoop(self) -> None:
+        self.__lock.acquire()
+        stop_requested = False
+        state_changed = False
+        for agent in list(self.blackboard.agents.values()):
+            if agent.CanContribute():
+                self._log.debug(f'Executing contribution by agent: {agent.agent_id}')
+                try:
+                    contribution = agent.DoContribute()
+                    state_changed = True
+                except StopIteration as err:
+                    # An agent requested the controller to stop, will halt after all agents & strategies finished..
+                    self._log.error(f'Agent "{agent.agent_id}" requested a stop: {err}')
+                    stop_requested = True
+                except Exception as err:
+                    self._log.error(f'Could not execute contribution by agent: {agent.agent_id}')
+                    self._log.exception(err)
+            else:
+                self._log.debug(f'No contribution by agent: {agent.agent_id}')
+        if state_changed:
+            self.EvaluateStrategy()
         self.__lock.release()
+        if stop_requested:
+            self.StopTimer()
 
     def IsStrategyEnabled(self, strategy_name: str) -> bool:
         return strategy_name in self.blackboard.GetState('enabled_strategies', [])
@@ -121,7 +128,7 @@ class StrategyController(object):
                     try:
                         if rule.matches(self.blackboard.common_state):
                             try:
-                                action_started = time.time()
+                                action_started = datetime.now()
                                 result = action(self.blackboard.common_state, self.blackboard, self)
                                 self.LogEvent('strategy_action', { 'rule_name': rule_name, 'result': result })
                             except Exception as err:
@@ -135,7 +142,7 @@ class StrategyController(object):
         event = {
             'type': event_type,
             'meta': meta,
-            'timestamp': timestamp if timestamp is not None else time.time()
+            'timestamp': timestamp if timestamp is not None else datetime.now()
         }
         self.blackboard.common_state['events'].append(event)
         self._log.info(f'Encountered event "{event_type}": {meta}')
@@ -145,7 +152,7 @@ class StrategyController(object):
         session_id = self.blackboard.GetState('session', {}).get('id')
         session_username = self.blackboard.GetState('session', {}).get('configuration', {}).get('username')
         if session_id and session_username:
-            self._log.debug(f'Persisting events to the training storage')
+            self._log.debug(f'Updating events in the persistent storage..')
             self.data_storage.UpdateTraining(session_username, session_id, { 'events': self.blackboard.GetState('events', []) })
 
     def OnEvent(self, event_type: str, callback: Callable) -> None:

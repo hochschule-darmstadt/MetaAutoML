@@ -81,6 +81,17 @@ namespace BlazorBoilerplate.Server.Managers
                 response.DatasetConfiguration = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(reply.DatasetConfiguration);
                 response.RuntimeConstraints = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(reply.RuntimeConstraints);
 
+                foreach (var trainingEvent in reply.Events)
+                {
+                    var strategyControllerEvent = new Shared.Dto.AutoML.StrategyControllerEventDto
+                    {
+                        Type = trainingEvent.Type,
+                        Meta = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(trainingEvent.Meta),
+                        Timestamp = trainingEvent.Timestamp.ToDateTime()
+                    };
+                    response.Events.Add(strategyControllerEvent);
+                }
+
                 //response.Configuration.Features = new Dictionary<string, BlazorBoilerplate.Server.DataType>();
 
 
@@ -171,6 +182,17 @@ namespace BlazorBoilerplate.Server.Managers
                     item.Configuration = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(train.Configuration);
                     item.DatasetConfiguration = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(train.DatasetConfiguration);
                     item.RuntimeConstraints = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(train.RuntimeConstraints);
+
+                    foreach (var trainingEvent in train.Events)
+                    {
+                        var strategyControllerEvent = new Shared.Dto.AutoML.StrategyControllerEventDto
+                        {
+                            Type = trainingEvent.Type,
+                            Meta = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(trainingEvent.Meta),
+                            Timestamp = trainingEvent.Timestamp.ToDateTime()
+                        };
+                        item.Events.Add(strategyControllerEvent);
+                    }
 
                     //response.Configuration.Features = new Dictionary<string, BlazorBoilerplate.Server.DataType>();
 

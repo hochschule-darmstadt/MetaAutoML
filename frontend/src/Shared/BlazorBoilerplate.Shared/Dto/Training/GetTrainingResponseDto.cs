@@ -24,6 +24,7 @@ namespace BlazorBoilerplate.Shared.Dto.Training
         public Dictionary<string, dynamic> RuntimeConstraints { get; set; }
         public Dictionary<string, dynamic> FileConfiguration { get; set; }
         public Dictionary<string, dynamic> TestConfiguration { get; set; }
+        public List<StrategyControllerEventDto> Events { get; set; }
         public bool ShowDetails { get; set; }
 
         public GetTrainingResponseDto()
@@ -36,6 +37,7 @@ namespace BlazorBoilerplate.Shared.Dto.Training
             RuntimeConstraints = new Dictionary<string, dynamic>();
             FileConfiguration = new Dictionary<string, dynamic>();
             TestConfiguration = new Dictionary<string, dynamic>();
+            Events = new List<StrategyControllerEventDto>();
             ShowDetails = false;
         }
     }

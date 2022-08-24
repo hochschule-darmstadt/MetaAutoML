@@ -36,7 +36,7 @@ class AutoMLSession(object):
         data_analysis_agent = DataAnalysisAgent(blackboard=self.blackboard, controller=self.controller, dataset_id=dataset_id, data_storage=data_storage)
         self.controller.OnEvent('phase_updated', self.handle_phase_update)
         self.controller.SetPhase('preprocessing')
-        self.controller.StartLoop()
+        self.controller.StartTimer()
         # IDEA: atexit.register(self.controller.StopLoop)
 
     def add_automl_to_training(self, automl: IAutoMLManager):

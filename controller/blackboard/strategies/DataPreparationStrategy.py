@@ -92,10 +92,6 @@ class DataPreparationStrategyController(IAbstractStrategy):
         self._log.info(f'Encountered large input dataset ({number_of_rows} rows), splitting..')
 
         # TODO: Re-implement the data splitting (check new structure!)
-        self._log.debug("RUNNING PREPROCESSING (FIXME)")
-        import time
-        time.sleep(10)
-        self._log.debug("FINISHED PREPROCESSING (FIXME)")
 
         # IDEA: Update dataset analysis accordingly (may not be neccessary)
         blackboard.UpdateState('dataset_analysis', { 'number_of_rows': 10000 }, True)
