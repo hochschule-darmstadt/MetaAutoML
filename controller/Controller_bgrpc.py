@@ -231,6 +231,7 @@ class ModelInformation(betterproto.Message):
     prediction_time: float = betterproto.float_field(10)
     automl: str = betterproto.string_field(11)
     dataset_id: str = betterproto.string_field(12)
+    explanation: str = betterproto.string_field(13)
 
 
 @dataclass(eq=False, repr=False)

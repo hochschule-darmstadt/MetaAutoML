@@ -1,0 +1,128 @@
+﻿
+@using System 
+@using System.IO
+@using Microsoft.AspNetCore.Hosting
+@using Microsoft.Extensions.Logging
+@using System.Net.Http.Headers
+@inject IApiClient apiClient
+@inject IViewNotifier viewNotifier
+@inject IJSRuntime JS
+@inject IStringLocalizer<Global> L
+@inject IHttpClientFactory ClientFactory
+@inject NavigationManager NavManager
+
+<MudCard Elevation="5">
+    <MudCardHeader Style="border-bottom-style: inset; border-bottom-width: 1px;">
+        <CardHeaderContent >
+            <MudText Typo="Typo.h6">Analysis</MudText>
+        </CardHeaderContent>
+        <CardHeaderActions>
+            @if (ExplanationPagePath != null)
+            {
+                <MudButton Href="@NavManager.ToAbsoluteUri(ExplanationPagePath).AbsoluteUri"
+                       Variant="Variant.Filled"
+                       EndIcon="@Icons.Material.Filled.ReadMore"
+                       Color="Color.Secondary"
+                       Size="Size.Small"
+                       Style="margin-top: 8px">More</MudButton>
+            }
+        </CardHeaderActions>
+    </MudCardHeader>
+    <MudCardContent>
+        <MudPaper Height="250px" Elevation="0">
+            @if (_explanation != null)
+            {
+                <MudCarousel Class="mud-width-full" ItemsSource="@_explanation.Analyses" Style="height:250px;" AutoCycle="false">
+                    <ItemTemplate>
+                        <MudGrid>
+                            <MudItem xs="6" Style="position: relative;">
+                                <MudText Style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);" Typo="Typo.body2">@context.Description</MudText>
+                            </MudItem>
+                            <MudItem xs="6">
+                                @if (context.Type == "force_plot")
+                                {
+                                    @((MarkupString)GetHtml(context.Content))
+                                }
+                                else
+                                {
+                                    <MudImage Src="@GetImage(context.Content)" Style="height:220px;" />
+                                }
+                            </MudItem>
+                        </MudGrid>
+                    </ItemTemplate>
+                </MudCarousel>
+            }
+        </MudPaper>
+    </MudCardContent>
+</MudCard>
+
+
+@code {
+    [Parameter]
+    public string ExplanationPagePath { get; set; }
+    [Parameter]
+    public GetModelResponseDto Model
+    {
+        get
+        {
+            return _model;
+        }
+        set
+        {
+            _model = value;
+            if (_model != null)
+            {
+                LoadModelExplanation();
+            }
+            StateHasChanged();
+        }
+    }
+    private GetModelResponseDto _model;
+    private GetModelExplanationResponseDto _explanation;
+    private bool isPreviewRequestRunning = false;
+
+    private async Task LoadModelExplanation()
+    {
+        try
+        {
+            //Due to frontend refreshes it may occur that this is triggered twice, leading to an error while the first request is reading
+            if (isPreviewRequestRunning == true)
+            {
+                return;
+            }
+            isPreviewRequestRunning = true;
+            GetModelExplanationRequestDto modelRequest = new GetModelExplanationRequestDto()
+            {
+                ModelIdentifier = _model.Model.ID,
+                GetShortPreview = true
+            };
+            ApiResponseDto apiResponse = await apiClient.GetModelExplanation(modelRequest);
+
+            if (apiResponse.IsSuccessStatusCode)
+            {
+                _explanation = Newtonsoft.Json.JsonConvert.DeserializeObject<GetModelExplanationResponseDto>(apiResponse.Result.ToString());
+                StateHasChanged();
+                viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
+            }
+            else
+            {
+                viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
+            }
+        }
+        catch (Exception ex)
+        {
+            viewNotifier.Show(ex.GetBaseException().Message, ViewNotifierType.Error, L["Operation Failed"]);
+        }
+        isPreviewRequestRunning = false;
+    }
+    string GetImage(byte[] image)
+    {
+        var imageSrc = Convert.ToBase64String(image);
+        return string.Format("data:image/svg+xml;base64,{0}", imageSrc);
+    }
+    string GetHtml(byte[] text)
+    {
+        var html = Encoding.Default.GetString(text);
+        return html;
+    }
+}

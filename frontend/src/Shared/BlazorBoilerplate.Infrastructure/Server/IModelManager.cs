@@ -13,6 +13,7 @@ namespace BlazorBoilerplate.Infrastructure.Server
     {
         Task<ApiResponse> GetModel(GetModelRequestDto model);
         Task<ApiResponse> GetModels(GetModelsRequestDto models);
+        Task<ApiResponse> GetModelExplanation(GetModelExplanationRequestDto model);
         Task<ApiResponse> GetModelDownload(GetAutoMlModelRequestDto autoMl);
     }
 }
