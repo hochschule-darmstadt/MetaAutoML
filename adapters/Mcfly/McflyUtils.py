@@ -88,4 +88,22 @@ def export_one_hot_encoder(one_hot_encoder, path, file_name):
     with open(os.path.join(path, file_name), 'wb+') as file:
         dill.dump(one_hot_encoder, file)
 
+
+def estimate_num_models(param_values):
+    """
+    Estimates number of models using the precalculated linear regression coefficients.
+
+    All data for calculating the coefficients have been collected through running 69 training experiments
+    on multiple time series classification datasets. See https://www.timeseriesclassification.com/dataset.php
+
+    The method returns an estimated number of models.
+    ---
+    Parameter:
+    1. A list of parameter values: [num_epochs,	num_instances, series_length, num_channels, runtime_in_seconds]
+    """
+    intercept = 13.701875
+    # Coefficients for the input parameters: num_epochs,	num_instances, series_length, num_channels, runtime_in_seconds
+    coefficients = np.array([-0.16958759, -0.00380572, -0.00934381, -0.27648816, 0.01421024])
+    return int(np.ceil(intercept + np.dot(coefficients, param_values)))
+
 #endregion
