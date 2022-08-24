@@ -3,6 +3,7 @@ import os
 import dill
 import numpy as np
 from sklearn.metrics import accuracy_score, mean_squared_error
+from sklearn.utils.class_weight import compute_class_weight
 from sklearn.metrics import classification_report
 from sklearn.model_selection import train_test_split
 from sktime.datatypes import convert_to
@@ -106,4 +107,34 @@ def estimate_num_models(param_values):
     coefficients = np.array([-0.16958759, -0.00380572, -0.00934381, -0.27648816, 0.01421024])
     return int(np.ceil(intercept + np.dot(coefficients, param_values)))
 
+
+def get_class_weights(y_binary):
+    """
+    Calculate the class weights
+    ---
+    Parameter:
+    1. One-hot-encoded numpy array, e.g. [[0, 1], [1, 0], [1, 0], [0, 1]]
+    ---
+    Returns:
+    Dictionary containing class label and the weights, e.g. {0: 0.5015, 1: 2.5025}
+    """
+    class_weights = compute_class_weight(
+        class_weight="balanced",
+        classes=np.unique(np.argmax(y_binary, axis=1)),
+        y=np.argmax(y_binary, axis=1)
+    )
+    return dict(zip(np.unique(np.argmax(y_binary, axis=1)), class_weights))
+
+
+def get_subset(x_data, y_data, num_classes, subset_size=100):
+    train_size = subset_size if (len(x_data) > subset_size) else len(x_data) - num_classes
+    x_train_subset, _, y_train_subset, _ = train_test_split(
+        x_data,
+        y_data,
+        train_size=train_size,
+        random_state=42,
+        shuffle=True,
+        stratify=y_data
+    )
+    return x_train_subset, y_train_subset
 #endregion
