@@ -23,7 +23,6 @@ class AutoMLSessionAgent(IAbstractBlackboardAgent):
 
         if session_status.status != SessionStatus.SESSION_STATUS_BUSY:
             self._log.info(f'Session {self.session.get_id()} is inactive, stopping controller loop.')
-            self.session.controller.SetPhase('stopping')
             self.Unregister()
             raise StopIteration('AutoML session inactive, stopping..')
 

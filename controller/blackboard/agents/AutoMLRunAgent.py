@@ -1,6 +1,5 @@
 from managers.adaptermanagers.AutoMLManager import AutoMLManager
 from .AbstractAgent import IAbstractBlackboardAgent
-from Controller_bgrpc import SessionStatus
 
 class AutoMLRunAgent(IAbstractBlackboardAgent):
     blackboard_key = 'run_metrics'

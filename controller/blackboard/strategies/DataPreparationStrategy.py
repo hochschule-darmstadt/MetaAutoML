@@ -1,4 +1,4 @@
-import json
+import json, time
 from rule_engine import Rule, Context, DataType, type_resolver_from_dict
 from Controller_bgrpc import DataType as GrpcDataType
 from .AbstractStrategy import IAbstractStrategy
@@ -39,6 +39,8 @@ class DataPreparationStrategyController(IAbstractStrategy):
             'data_preparation.finish_preprocessing',
             Rule("""
                 phase == 'preprocessing' and
+                dataset_analysis != null and
+                not dataset_analysis.is_empty and
                 dataset_analysis['duplicate_columns'].is_empty and
                 dataset_analysis['duplicate_rows'].is_empty and
                 dataset_analysis['number_of_rows'] <= 10000
@@ -54,6 +56,8 @@ class DataPreparationStrategyController(IAbstractStrategy):
         if not agent or not agent.session:
             raise RuntimeError('Could not access AutoML session agent!')
         dataset_configuration = json.loads(agent.session.configuration.dataset_configuration)
+
+        time.sleep(20) # FIXME: Remo
 
         for column_a, column_b in duplicate_columns:
             self._log.info(f'Encountered redundant feature "{column_b}" (same as "{column_a}"), ingoring the column.')

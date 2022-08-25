@@ -183,12 +183,11 @@ class ControllerManager(object):
         training = self.__data_storage.GetTraining(request.username, request.id)
         if training == None:
             raise Exception(f"cannot find training with id: {request.id}")
-        training_models = self.__data_storage.GetModels(request.username, request.id)
         
-        if len(list(training_models)) == 0:
-            return response
+        # if len(list(training_models)) == 0:
+        #     return response
 
-        response.status = training["status"]
+        training_models = self.__data_storage.GetModels(request.username, request.id)
         for model in list(training_models):
             autoMlStatus = AutoMlStatus()
             autoMlStatus.identifier = str(model["_id"])
@@ -202,9 +201,8 @@ class ControllerManager(object):
             autoMlStatus.model =  model["model"]
             autoMlStatus.library =  model["library"]
             response.automls.append(autoMlStatus)
-            response.identifier = str(model["_id"])
-            response.dataset_id = model["dataset_id"]
                     
+        response.status = training["status"]
         response.dataset_id = training["dataset_id"]
         response.dataset_name = training["dataset_name"]
         response.task = training["task"]
@@ -507,8 +505,9 @@ class ControllerManager(object):
             "file_configuration": json.loads(configuration.file_configuration),
             "start_time": datetime.now()
         }
-        training_id = self.__data_storage.InsertTraining(configuration.username, config)
-        print(f"inserted new training: {training_id}")
+        with self.__data_storage.Lock():
+            training_id = self.__data_storage.InsertTraining(configuration.username, config)
+            print(f"inserted new training: {training_id}")
 
         # will be called when any automl is done
         # NOTE: will run in parallel

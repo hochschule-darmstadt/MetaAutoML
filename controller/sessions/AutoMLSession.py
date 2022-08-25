@@ -1,21 +1,14 @@
-
 import atexit, json
 from Controller_bgrpc import *
 from IAutoMLManager import IAutoMLManager
-from blackboard.Blackboard import Blackboard
-from blackboard.Controller import StrategyController
-from blackboard.agents.AutoMLRunAgent import AutoMLRunAgent
 from persistence.data_storage import DataStorage
-
-import logging
-# logging.basicConfig(level=logging.DEBUG)
 
 class AutoMLSession(object):
     """
     Implementation of an AutoML session object
     """
 
-    def __init__(self, session_id: int, dataset_id: str, configuration, data_storage: DataStorage):
+    def __init__(self, session_id: int, dataset_id: str, configuration: StartAutoMlProcessRequest, data_storage: DataStorage, username: str):
         """
         Init a new instance of AutoMLSession
         ---
@@ -24,20 +17,25 @@ class AutoMLSession(object):
         2. configuration: session configuration
         """
         self.__id = session_id
-        self.configuration: StartAutoMlProcessRequest = configuration
+        self.configuration = configuration
         self.automls = []
         self.data_storage = data_storage
+        self.username = username
 
+        from blackboard.Blackboard import Blackboard
+        from blackboard.Controller import StrategyController
         self.blackboard = Blackboard()
-        self.controller = StrategyController(self.blackboard, data_storage)
+        self.controller = StrategyController(self.blackboard, self)
+
         from blackboard.agents.AutoMLSessionAgent import AutoMLSessionAgent
         session_agent = AutoMLSessionAgent(blackboard=self.blackboard, controller=self.controller, session=self)
         from blackboard.agents.DataAnalysisAgent import DataAnalysisAgent
-        data_analysis_agent = DataAnalysisAgent(blackboard=self.blackboard, controller=self.controller, dataset_id=dataset_id, data_storage=data_storage)
+        data_analysis_agent = DataAnalysisAgent(blackboard=self.blackboard, controller=self.controller, dataset_id=dataset_id)
+
         self.controller.OnEvent('phase_updated', self.handle_phase_update)
         self.controller.SetPhase('preprocessing')
         self.controller.StartTimer()
-        # IDEA: atexit.register(self.controller.StopLoop)
+        # IDEA: atexit.register(self.controller.StopTimer)
 
     def add_automl_to_training(self, automl: IAutoMLManager):
         """
@@ -47,6 +45,8 @@ class AutoMLSession(object):
         1. automl the automl object implementing the IAutoMLManager
         """
         self.automls.append(automl)
+        
+        from blackboard.agents.AutoMLRunAgent import AutoMLRunAgent
         automl_run_agent = AutoMLRunAgent(blackboard=self.blackboard, controller=self.controller, manager=automl)
 
     def handle_phase_update(self, meta, controller):

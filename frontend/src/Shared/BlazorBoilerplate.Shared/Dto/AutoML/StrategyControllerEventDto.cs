@@ -9,7 +9,7 @@ namespace BlazorBoilerplate.Shared.Dto.AutoML
     public class StrategyControllerEventDto
     {
         public string Type { get; set; }
-        public Dictionary<string, dynamic> Meta { get; set; }
+        public Dictionary<string, dynamic>? Meta { get; set; }
         public DateTime Timestamp { get; set; }
 
         public StrategyControllerEventDto()

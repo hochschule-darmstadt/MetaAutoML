@@ -64,7 +64,7 @@ class AdapterManager(object):
             automls.append(automl)
 
         # start training and all AutoMLManager threads
-        session = AutoMLSession(training_id, dataset_id, configuration, self.__data_storage)
+        session = AutoMLSession(training_id, dataset_id, configuration, self.__data_storage, username)
         for automl in automls:
             session.add_automl_to_training(automl)
         return session

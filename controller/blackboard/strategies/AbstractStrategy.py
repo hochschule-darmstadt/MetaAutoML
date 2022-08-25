@@ -37,4 +37,4 @@ class IAbstractStrategy():
         """
         Registers all rules relevant to the strategy.
         """
-        raise RuntimeError('Not implemented!')
+        raise NotImplementedError('Not implemented!')

@@ -1,0 +1,163 @@
+@inject IStringLocalizer<TrainingTimeline> L
+@inject IApiClient apiClient
+@inject IViewNotifier viewNotifier
+@inject NavigationManager NavManager
+
+<MudTimeline
+    TimelineOrientation="TimelineOrientation.Horizontal"
+    TimelinePosition="TimelinePosition.Top"
+>
+    @foreach (var timelineItem in _timeline)
+    {
+        @if (timelineItem.Status == TimelineItemStatus.Success)
+        {
+            <MudTimelineItem Size="@(timelineItem.Type == TimelineItemType.Major ? Size.Medium : Size.Small)" Color="Color.Success">
+                <ItemDot>
+                    @if (timelineItem.Type == TimelineItemType.Major)
+                    {
+                    <MudIcon Size="Size.Small" Icon="@Icons.Filled.Check" />
+                    }
+                </ItemDot>
+                <ItemContent>
+                    <MudText Typo="Typo.subtitle2" Align="Align.Center">@timelineItem.Title</MudText>
+                    <MudText Typo="Typo.body2" Align="Align.Center" Class="mud-text-secondary">
+                        @((timelineItem.Subtitle != null) ? timelineItem.Subtitle : timelineItem.Timestamp?.ToLocalTime().ToString("dd/MM/yy HH:mm:ss"))
+                    </MudText>
+                </ItemContent>
+            </MudTimelineItem>
+        }
+        else if (timelineItem.Status == TimelineItemStatus.Active)
+        {
+            <MudTimelineItem Size="@(timelineItem.Type == TimelineItemType.Major ? Size.Medium : Size.Small)" Color="Color.Primary">
+                <ItemDot>
+                    @if (timelineItem.Type == TimelineItemType.Major)
+                    {
+                        <MudIcon Size="Size.Small" Icon="@Icons.Filled.HourglassBottom" />
+                    }
+                </ItemDot>
+                <ItemContent>
+                    <MudText Typo="Typo.subtitle2" Align="Align.Center">@timelineItem.Title</MudText>
+                    @if (timelineItem.Subtitle != null)
+                    {
+                        <MudText Typo="Typo.body2" Align="Align.Center" Class="mud-text-secondary">
+                            @((timelineItem.Subtitle != null) ? timelineItem.Subtitle : timelineItem.Timestamp?.ToLocalTime().ToString("dd/MM/yy HH:mm:ss"))
+                        </MudText>
+                    }
+                </ItemContent>
+            </MudTimelineItem>
+        }
+        else if (timelineItem.Status == TimelineItemStatus.Pending)
+        {
+            <MudTimelineItem Size="@(timelineItem.Type == TimelineItemType.Major ? Size.Medium : Size.Small)" Color="Color.Default">
+                <ItemDot>
+                    @if (timelineItem.Type == TimelineItemType.Major)
+                    {
+                        <MudIcon Size="Size.Small" Icon="@Icons.Filled.HourglassBottom" />
+                    }
+                </ItemDot>
+                <ItemContent>
+                    <MudText Typo="Typo.subtitle2" Align="Align.Center">@timelineItem.Title</MudText>
+                    @if (timelineItem.Subtitle != null)
+                    {
+                        <MudText Typo="Typo.body2" Align="Align.Center" Class="mud-text-secondary">
+                            @timelineItem.Subtitle
+                        </MudText>
+                    }
+                </ItemContent>
+            </MudTimelineItem>
+        }
+        else
+        {
+            <MudTimelineItem Size="Size.Small" Color="Color.Default">
+                <ItemContent>
+                    <MudText Typo="Typo.subtitle2" Align="Align.Center" Class="mud-text-secondary">@timelineItem.Title</MudText>
+                    <MudText Typo="Typo.subtitle2" Align="Align.Center" Class="mud-text-secondary">
+                        @((timelineItem.Subtitle != null) ? timelineItem.Subtitle : timelineItem.Timestamp?.ToLocalTime().ToString("dd/MM/yy HH:mm:ss"))
+                    </MudText>
+                </ItemContent>
+            </MudTimelineItem>
+        }
+        
+    }
+</MudTimeline>
+
+@code {
+    private List<TimelineItem> _timeline;
+    [Parameter]
+    public GetTrainingResponseDto Training { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        RefreshTimeline();
+    }
+
+    public enum TimelineItemType
+    {
+        Major,
+        Minor
+    }
+
+    public enum TimelineItemStatus
+    {
+        Success,
+        Error,
+        Active,
+        Pending
+    }
+    
+    public class TimelineItem
+    {
+        public string Title { get; set; }
+        public string? Subtitle { get; set; }
+        public TimelineItemType Type { get; set; }
+        public TimelineItemStatus Status { get; set; }
+        public DateTime? Timestamp { get; set; }
+    }
+
+    private IEnumerable<TimelineItem> RefreshTimeline()
+    {
+        var events = Training.Events;
+        var phases = new List<string>() { "started", "preprocessing", "running", "stopped" };
+        _timeline = new List<TimelineItem>();
+        for(int i = 0; i < phases.Count; i++)
+        {
+            string phase = phases[i];
+            string nextPhase = (i+1 < phases.Count) ? phases[i+1] : null;
+            // Find the index of the event when the phase started (became the "new_phase")
+            int phaseStartedEventIdx = events.FindIndex(eventItem => eventItem.Type == "phase_updated" && eventItem.Meta["new_phase"] == phase);
+            // Find the index of the event when the phase ended (became the "old_phase" or the "new_phase" if its the last phase)
+            int phaseCompletedEventIdx = events.FindIndex(eventItem => eventItem.Type == "phase_updated" && (eventItem.Meta["old_phase"] == phase || (nextPhase == null && eventItem.Meta["new_phase"] == phase)));
+            StrategyControllerEventDto phaseStartedEvent = (phaseStartedEventIdx != -1 ? events[phaseStartedEventIdx] : null);
+            var timelineItem = new TimelineItem
+            {
+                Title = L[phase],
+                Type = TimelineItemType.Major,
+                Status = (phaseCompletedEventIdx != -1 ? TimelineItemStatus.Success : (phaseStartedEventIdx != -1 ? TimelineItemStatus.Active : TimelineItemStatus.Pending)),
+                Timestamp = (phaseStartedEventIdx != -1 ? phaseStartedEvent.Timestamp : null)
+            };
+            _timeline.Add(timelineItem);
+
+            if(phaseStartedEventIdx != -1) {
+                int nextPhaseStartedEventIdx = (nextPhase != null) ? events.FindIndex(eventItem => eventItem.Type == "phase_updated" && eventItem.Meta["new_phase"] == nextPhase) : -1;
+                // Get all events until the start of the next phase (or all remaining if its the last phase)
+                IEnumerable<StrategyControllerEventDto> childEvents = events.Skip(phaseStartedEventIdx+1).Take((nextPhaseStartedEventIdx != -1 ? (nextPhaseStartedEventIdx-1) : (events.Count-1)) - phaseStartedEventIdx);
+                foreach (var childEvent in childEvents)
+                {
+                    var childTimelineItem = new TimelineItem
+                    {
+                        Title = childEvent.Type,
+                        Type = TimelineItemType.Minor,
+                        Status = (phaseCompletedEventIdx != -1 ? TimelineItemStatus.Success : TimelineItemStatus.Active),
+                        Timestamp = childEvent.Timestamp
+                    };
+                    if(childEvent.Type == "strategy_action") childTimelineItem.Title = L[childEvent.Meta["rule_name"]];
+                    else if(childEvent.Type == "automl_run_finished") childTimelineItem.Title = L["automl_run_finished_{0}", childEvent.Meta["name"]];
+                    else continue; // Ignore other event types for the timeline view (should have a title formatter if they are shown)
+                    _timeline.Add(childTimelineItem);
+                }
+            }
+        }
+        StateHasChanged();
+        return _timeline;
+    }
+}

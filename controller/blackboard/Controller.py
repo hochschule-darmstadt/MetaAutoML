@@ -1,8 +1,8 @@
 import logging, time
-from threading import Timer, Lock
+from threading import Timer
 from typing import Callable
 from datetime import datetime
-from persistence.data_storage import DataStorage
+from sessions.AutoMLSession import AutoMLSession
 from .Blackboard import Blackboard
 
 class RepeatTimer(Timer):
@@ -15,18 +15,20 @@ class StrategyController(object):
     Strategy controller which supervises the blackboard.
     """
 
-    def __init__(self, blackboard: Blackboard, data_storage: DataStorage, timer_interval: int = 1) -> None:
+    def __init__(self, blackboard: Blackboard, session: AutoMLSession, timer_interval: int = 1) -> None:
         self._log = logging.getLogger('strategy-controller')
         self._log.setLevel(logging.DEBUG) # FIXME: Remove this line, only for debugging
         self.__is_running = False
         self.__timer_interval = timer_interval
         self.__timer = None
+        self.__update_phase_next_run = None
         self.blackboard = blackboard
-        self.data_storage = data_storage
+        self.session = session
+        self.data_storage = session.data_storage
         self._log.debug(f'Attached controller to the blackboard, current agents: {len(self.blackboard.agents)}')
 
         self.blackboard.common_state.update({
-            'phase': 'initialization',
+            'phase': None,
             'events': [],
             'enabled_strategies': [
                 # FIXME: Inherit from session configuration
@@ -46,10 +48,14 @@ class StrategyController(object):
     def GetPhase(self) -> str:
         return self.blackboard.GetState('phase')
 
-    def SetPhase(self, phase: str) -> None:
-        old_phase = self.GetPhase()
-        self.blackboard.UpdateState('phase', phase)
-        self.LogEvent('phase_updated', { 'old_phase': old_phase, 'new_phase': phase })
+    def SetPhase(self, phase: str, force: bool = False) -> None:
+        if force:
+            old_phase = self.GetPhase()
+            self.blackboard.UpdateState('phase', phase)
+            self.LogEvent('phase_updated', { 'old_phase': old_phase, 'new_phase': phase })
+        else:
+            # Update the phase in the next controller loop iteration
+            self.__update_phase_next_run = phase
 
     def WaitForPhase(self, phase: str) -> None:
         while self.GetPhase() != phase:
@@ -59,28 +65,25 @@ class StrategyController(object):
       
     def StartTimer(self) -> None:
         if not self.__is_running:
-            self.__lock = Lock()
             self.__timer = RepeatTimer(interval=self.__timer_interval, function=self.RunLoop)
             self.__timer.daemon = True
             self.__timer.start()
             self._log.debug(f'Started controller timer thread: {self.__timer.native_id}')
             self.__is_running = True
+            self.SetPhase('started', force=True)
 
     def StopTimer(self) -> None:
-        self.__lock.acquire()
         self.__timer.cancel()
         self._log.debug(f'Stopped controller timer thread: {self.__timer.native_id}')
         self.__is_running = False
-        self.__lock.release()
-
-        # FIXME: Remove (for testing purposes)
-        import json
-        self._log.info('Final common_state:\n'+json.dumps(self.blackboard.common_state, indent=2, default=str))
+        self.SetPhase('stopped', force=True)
 
     def RunLoop(self) -> None:
-        self.__lock.acquire()
         stop_requested = False
         state_changed = False
+        if self.__update_phase_next_run is not None:
+            self.SetPhase(self.__update_phase_next_run, force=True)
+            self.__update_phase_next_run = None
         for agent in list(self.blackboard.agents.values()):
             if agent.CanContribute():
                 self._log.debug(f'Executing contribution by agent: {agent.agent_id}')
@@ -98,7 +101,6 @@ class StrategyController(object):
                 self._log.debug(f'No contribution by agent: {agent.agent_id}')
         if state_changed:
             self.EvaluateStrategy()
-        self.__lock.release()
         if stop_requested:
             self.StopTimer()
 
@@ -126,10 +128,10 @@ class StrategyController(object):
             for rule_name, (rule, action) in strategy.rules.items():
                 if self.IsStrategyEnabled(rule_name):
                     try:
-                        if rule.matches(self.blackboard.common_state):
+                        state = self.blackboard.GetState()
+                        if rule.matches(state):
                             try:
-                                action_started = datetime.now()
-                                result = action(self.blackboard.common_state, self.blackboard, self)
+                                result = action(state, self.blackboard, self)
                                 self.LogEvent('strategy_action', { 'rule_name': rule_name, 'result': result })
                             except Exception as err:
                                 self._log.error(f'Could not execute strategy action for rule "{rule_name}".')
@@ -144,16 +146,19 @@ class StrategyController(object):
             'meta': meta,
             'timestamp': timestamp if timestamp is not None else datetime.now()
         }
-        self.blackboard.common_state['events'].append(event)
+        events = self.blackboard.GetState('events')
+        events.append(event)
+        self.blackboard.UpdateState('events', events)
         self._log.info(f'Encountered event "{event_type}": {meta}')
         for callback in (self.event_listeners.get('*', []) + self.event_listeners.get(event_type, [])):
             self._log.debug(f'Dispatching event callback for "{event_type}": {callback}')
             result = callback(meta, self)
-        session_id = self.blackboard.GetState('session', {}).get('id')
-        session_username = self.blackboard.GetState('session', {}).get('configuration', {}).get('username')
-        if session_id and session_username:
-            self._log.debug(f'Updating events in the persistent storage..')
-            self.data_storage.UpdateTraining(session_username, session_id, { 'events': self.blackboard.GetState('events', []) })
+        session_id = self.session.get_id()
+        session_username = self.session.username
+        if session_id is not None and session_username is not None:
+            with self.data_storage.Lock():
+                self._log.debug(f'Updating events in the persistent storage..')
+                self.data_storage.UpdateTraining(session_username, session_id, { 'events': events })
 
     def OnEvent(self, event_type: str, callback: Callable) -> None:
         if event_type not in self.event_listeners:

@@ -27,13 +27,13 @@ class IAbstractBlackboardAgent():
         ---
         Return a boolean indicating the status
         """
-        raise RuntimeError('Not implemented!')
+        raise NotImplementedError('Not implemented!')
 
     def DoContribute(self) -> any:
         """
         Performs the contribution to the shared blackboard.
         """
-        raise RuntimeError('Not implemented!')
+        raise NotImplementedError('Not implemented!')
 
     def Unregister(self):
         """
@@ -46,7 +46,7 @@ class IAbstractBlackboardAgent():
         Helper function that returns the blackboard state under a default key ("blackboard_key") for the agent class.
         """
         if not self.blackboard_key:
-            raise RuntimeError(f'{self.__class__.__name__} has no "blackboard_key" attribute!')
+            raise NotImplementedError(f'{self.__class__.__name__} has no "blackboard_key" attribute!')
         return self.blackboard.GetState(self.blackboard_key, default)
         
     def UpdateState(self, update, update_dict_recursive: bool = False):
@@ -54,5 +54,5 @@ class IAbstractBlackboardAgent():
         Helper function that updates the blackboard state under a default key ("blackboard_key") for the agent class.
         """
         if not self.blackboard_key:
-            raise RuntimeError(f'{self.__class__.__name__} has no "blackboard_key" attribute!')
+            raise NotImplementedError(f'{self.__class__.__name__} has no "blackboard_key" attribute!')
         return self.blackboard.UpdateState(self.blackboard_key, update, update_dict_recursive)
