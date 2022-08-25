@@ -3,7 +3,9 @@ import os.path
 import pandas as pd
 import numpy as np
 import math
-import matplotlib.pyplot as plt
+#import matplotlib
+#matplotlib.use('Agg')
+#import matplotlib.pyplot as plt
 from scipy.stats import spearmanr
 
 class DataSetAnalysisManager:
@@ -52,6 +54,9 @@ class DataSetAnalysisManager:
         Returns: Array of plot filenames
         """
         # Turn off io of matplotlib as the plots are saved, not displayed
+        import matplotlib
+        matplotlib.use('SVG')
+        import matplotlib.pyplot as plt
         plt.ioff()
         print("[DatasetAnalysisManager]: Starting advanced dataset analysis")
 
@@ -126,8 +131,10 @@ class DataSetAnalysisManager:
         """
 
         outlier_columns = []
-        dataset_numerics_only = dataset.select_dtypes(include=[np.float])   
-    
+        dataset_numerics_only_float = dataset.select_dtypes(include=[np.float])   
+        dataset_numerics_only_int =  dataset.select_dtypes(include=[np.int])   
+        dataset_numerics_only = pd.concat([dataset_numerics_only_int, dataset_numerics_only_float])
+        print(dataset_numerics_only)
         for column_name in dataset_numerics_only:
             current_column = dataset_numerics_only[column_name].copy()
             current_column = current_column.dropna()
@@ -265,6 +272,9 @@ class DataSetAnalysisManager:
         ---
         Returns filename: Filepath of the produced plot.
         """
+        import matplotlib
+        matplotlib.use('SVG')
+        import matplotlib.pyplot as plt
         plt.clf()
         desc = f"This plot shows the {colname} column"
         if self.__dataset[colname].dtype.name == "category" or self.__dataset[colname].dtype.name == "bool":
@@ -305,6 +315,9 @@ class DataSetAnalysisManager:
         Param plot_path: Path where the plots are saved.
         ---
         """
+        import matplotlib
+        matplotlib.use('SVG')
+        import matplotlib.pyplot as plt
         plt.clf()
         # Resize figure. The standard size (6.4 x 4.8) works for <20 cols.
         # Above that: double the size for every 20 extra columns
@@ -343,6 +356,9 @@ class DataSetAnalysisManager:
         Param plot_path: Path where the plots are saved.
         ---
         """
+        import matplotlib
+        matplotlib.use('SVG')
+        import matplotlib.pyplot as plt
         samples = 25
         feature_df = self.__dataset.groupby([first_colname, second_colname]).size().reset_index().sort_values(by=[0], ascending=False)
         x_data = list(zip(feature_df[first_colname], feature_df[second_colname]))[:samples]

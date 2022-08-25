@@ -41,10 +41,23 @@
                             </MudItem>
                             <MudItem xs="3" sm="3" md="3">
                                 <MudText Typo="Typo.body1">File Size: @FormatBytes(_dataset.Size)</MudText>
-                                @if ((@_dataset.Type.ID == ":tabular") || (@_dataset.Type.ID == ":longitudinal"))
+                                @if ((@_dataset.Type.ID == ":tabular") || (@_dataset.Type.ID == ":text") || (@_dataset.Type.ID == ":time_series") || (@_dataset.Type.ID == ":longitudinal"))
                                 {
-                                    <MudText Typo="Typo.body1">Number of rows: @_dataset.Analysis["basic_analysis"]["number_of_rows"]</MudText>
-                                    <MudText Typo="Typo.body1">Number of columns: @_dataset.Analysis["basic_analysis"]["number_of_columns"]</MudText>
+                                    if (_dataset.Analysis == null)
+                                    {
+                                        <MudText Typo="Typo.body1">Number of rows: unknown</MudText>
+                                        <MudText Typo="Typo.body1">Number of columns: unknown</MudText>
+                                    }
+                                    else if (_dataset.Analysis.Count != 0)
+                                    {
+                                        <MudText Typo="Typo.body1">Number of rows: @_dataset.Analysis["basic_analysis"]["number_of_rows"]</MudText>
+                                        <MudText Typo="Typo.body1">Number of columns: @_dataset.Analysis["basic_analysis"]["number_of_columns"]</MudText>
+                                    }
+                                    else
+                                    {
+                                        <MudText Typo="Typo.body1">Number of rows: unknown</MudText>
+                                        <MudText Typo="Typo.body1">Number of columns: unknown</MudText>
+                                    }
                                 }
                             </MudItem>
                             <MudItem xs="3" sm="3" md="3">

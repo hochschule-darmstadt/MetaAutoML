@@ -230,7 +230,7 @@ class AutoMLManager(ABC, Thread):
 
             # Append model_id to dataset
             found, dataset = self.__data_storage.GetDataset(self.__username, self.__dataset_id)
-            self.__data_storage.UpdateDataset(self.__username, self.__dataset_id, { "models": dataset["models"] + [_mdl_id] })
+            self.__data_storage.UpdateDataset(self.__username, self.__dataset_id, { "models": dataset["models"] + [_mdl_id] }, False)
 
             for response in stub.StartAutoML(dataset_to_send):
                 # Send request WATCH OUT THIS IS A LOOP REQUEST Check out for normal request

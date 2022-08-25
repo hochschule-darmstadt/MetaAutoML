@@ -7,6 +7,7 @@ from persistence.mongo_client import Database
 from bson.objectid import ObjectId
 from DataSetAnalysisManager import DataSetAnalysisManager
 import pandas as pd
+import json
 import numpy as np
 from sklearn.model_selection import train_test_split
 from sktime.datasets import write_dataframe_to_tsfile
@@ -299,12 +300,12 @@ class DataStorage:
             "analysis": analysis_result,
             "file_name": fileName,
             "file_configuration": file_configuration
-        })
+        }, False)
         assert success, f"cannot update dataset with id {dataset_id}"
 
         return dataset_id
 
-    def UpdateDataset(self, username: str, id: str, new_values: 'dict[str, object]') -> bool:
+    def UpdateDataset(self, username: str, id: str, new_values: 'dict[str, object]', run_analysis: bool) -> bool:
         """
         Update single dataset with new values. 
         ---
@@ -320,6 +321,28 @@ class DataStorage:
         ---
         Returns `True` if successfully updated, otherwise `False`.
         """
+        delimiters = {
+            "comma":        ",",
+            "semicolon":    ";",
+            "space":        " ",
+            "tab":          "\t",
+        }
+        if run_analysis == True:
+            found, dataset = self.GetDataset(username, id)
+            analysis_result = {}
+            # If the dataset is a tabular dataset it can be analyzed.
+            if dataset['type'] == ":tabular" or dataset['type'] == ":text" or dataset['type'] == ":time_series":
+                #Delete old references
+                new_values["analysis"] = ""
+                self.__mongo.UpdateDataset(username, id, new_values)
+                file_config = json.loads(dataset["file_configuration"])
+                dsam = DataSetAnalysisManager(pd.read_csv(dataset['path'], delimiter=delimiters[file_config['delimiter']], skiprows=(file_config['start_row']-1), escapechar=file_config['escape_character'], decimal=file_config['decimal_character']))
+                analysis_result["basic_analysis"] = dsam.basicAnalysis()
+                plot_filepath = os.path.join(os.path.dirname(dataset['path']), "plots")
+                os.makedirs(plot_filepath, exist_ok=True)
+                analysis_result["advanced_analysis"] = dsam.advancedAnalysis(plot_filepath)
+                new_values["analysis"] = analysis_result
+
         return self.__mongo.UpdateDataset(username, id, new_values)
 
 
