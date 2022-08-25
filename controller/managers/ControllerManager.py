@@ -1,6 +1,7 @@
 import os
 import json
 import uuid
+import threading
 
 from Controller_bgrpc import *
 
@@ -407,8 +408,11 @@ class ControllerManager(object):
         model_list.sort(key=GetScore, reverse=True)
         
         for model in list(model_list):
-            if  top3Counter >= 3 and request.top3 == True:
-                return response
+            if request.top3 == True:
+                if model["status"] != "completed":
+                    continue
+                elif top3Counter >= 3:
+                    return response
             model_info = ModelInformation()
             model_info.identifier = str(model["_id"])
             model_info.automl = model["automl_name"]
@@ -620,5 +624,16 @@ class ControllerManager(object):
         ---
         Return
         """
-        self.__data_storage.UpdateDataset(request.username, request.identifier, { "file_configuration": request.file_configuration })
+        SetDatasetConfigurationTaskThread(request, self.__data_storage)
         return SetDatasetConfigurationResponse()
+
+class SetDatasetConfigurationTaskThread(object):
+    def __init__(self, request: "SetDatasetConfigurationRequest", data_storage):
+        self.request = request
+        self.__data_storage = data_storage
+        thread = threading.Thread(target=self.run, args=())
+        thread.daemon = True
+        thread.start()
+
+    def run(self):
+        self.__data_storage.UpdateDataset(self.request.username, self.request.identifier, { "file_configuration": self.request.file_configuration }, True)

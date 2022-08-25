@@ -133,22 +133,42 @@ namespace BlazorBoilerplate.Server.Managers
                 var reply = _client.GetModel(getModelRequest);
                 var explanation = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(reply.Model.Explanation);
                 int index = 0;
-                response.Status = explanation["status"];
-                response.Detail = explanation["detail"];
-                foreach (var item in explanation["plots"])
+                if (explanation == null)
                 {
-                    if (model.GetShortPreview == true && index++ == 3)
+                    response.Status = "";
+                    response.Detail = "";
+                }
+                else if (explanation["status"] == "started")
+                {
+                    response.Status = explanation["status"];
+                    response.Detail = "";
+                }
+                else
+                {
+                    response.Status = explanation["status"];
+                    response.Detail = explanation["detail"];
+                    foreach (var item in explanation["plots"])
                     {
-                        break;
+                        if (model.GetShortPreview == true)
+                        {
+                            if (item.SelectToken("type").ToString() == "force_plot")
+                            {
+                                continue;
+                            }
+                            else if (index++ == 3)
+                            {
+                                break;
+                            }
+                        }
+                        ModelExplanation datasetAnalysis = new ModelExplanation()
+                        {
+                            Title = item.SelectToken("title").ToString(),
+                            Type = item.SelectToken("type").ToString(),
+                            Description = item.SelectToken("description").ToString(),
+                            Content = GetImageAsBytes(item.SelectToken("path").ToString())
+                        };
+                        response.Analyses.Add(datasetAnalysis);
                     }
-                    ModelExplanation datasetAnalysis = new ModelExplanation()
-                    {
-                        Title = item.SelectToken("title").ToString(),
-                        Type = item.SelectToken("type").ToString(),
-                        Description = item.SelectToken("description").ToString(),
-                        Content = GetImageAsBytes(item.SelectToken("path").ToString())
-                    };
-                    response.Analyses.Add(datasetAnalysis);
                 }
                 return new ApiResponse(Status200OK, null, response);
 

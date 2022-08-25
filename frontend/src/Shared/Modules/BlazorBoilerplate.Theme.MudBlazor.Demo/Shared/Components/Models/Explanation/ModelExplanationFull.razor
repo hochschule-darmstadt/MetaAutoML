@@ -18,7 +18,15 @@
     </MudCardHeader>
     <MudCardContent>
         <MudPaper Elevation="0">
-            @if (_explanation != null)
+            @if (_explanation == null)
+            {
+                <DataLoaderSpinner />
+            }
+            else if (_explanation.Status != "finished")
+            {
+                <DataLoaderSpinner />
+            }
+            else
             {
                 <MudGrid>
                     @foreach (var item in _explanation.Analyses)

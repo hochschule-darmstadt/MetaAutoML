@@ -30,23 +30,21 @@
     </MudCardHeader>
     <MudCardContent>
         <MudPaper Height="250px" Elevation="0">
-            @if (_explanation != null)
+            @if (_explanation == null)
+            {
+                <DataLoaderSpinner />
+            }
+            else if (_explanation.Status != "finished")
+            {
+                <DataLoaderSpinner />
+            }
+            else
             {
                 <MudCarousel Class="mud-width-full" ItemsSource="@_explanation.Analyses" Style="height:250px;" AutoCycle="false">
                     <ItemTemplate>
                         <MudGrid>
-                            <MudItem xs="6" Style="position: relative;">
-                                <MudText Style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);" Typo="Typo.body2">@context.Description</MudText>
-                            </MudItem>
-                            <MudItem xs="6">
-                                @if (context.Type == "force_plot")
-                                {
-                                    @((MarkupString)GetHtml(context.Content))
-                                }
-                                else
-                                {
-                                    <MudImage Src="@GetImage(context.Content)" Style="height:220px;" />
-                                }
+                            <MudItem xs="12" Style="display: grid; justify-content: center;">
+                                <MudImage Src="@GetImage(context.Content)" Style="height:220px; max-width: 700px;" />
                             </MudItem>
                         </MudGrid>
                     </ItemTemplate>
