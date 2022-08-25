@@ -95,7 +95,15 @@
         {
             float divideResult = (float)fileUploader.UploadFile.ChunkNumber / (float)fileUploader.UploadFile.TotalChunkNumber;
             Progress = (int)(divideResult * 100);
-            UploadText = "Uploading " + fileUploader.UploadFile.DatasetName + " " + String.Format("{0:0.00}", divideResult * 100) + "%";
+            //if chunk amount is bigger 100 display after decimal percentage
+            if (fileUploader.UploadFile.TotalChunkNumber > 100)
+            {
+                UploadText = "Uploading " + fileUploader.UploadFile.DatasetName + " " + String.Format("{0:0.00}", divideResult * 100) + "%";
+            }
+            else
+            {
+                UploadText = "Uploading " + fileUploader.UploadFile.DatasetName + " " + String.Format("{0:0}", divideResult * 100) + "%";
+            }
         }
 
         RefreshComponent();

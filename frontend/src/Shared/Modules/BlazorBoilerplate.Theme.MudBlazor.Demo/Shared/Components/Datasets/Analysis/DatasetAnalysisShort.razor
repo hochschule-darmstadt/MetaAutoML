@@ -30,7 +30,11 @@
     </MudCardHeader>
     <MudCardContent>
         <MudPaper Height="250px" Elevation="0">
-            @if (_analysis != null)
+            @if (_analysis == null)
+            {
+                <DataLoaderSpinner />
+            }
+            else
             {
                 <MudCarousel Class="mud-width-full" ItemsSource="@_analysis.Analyses" Style="height:250px;" AutoCycle="false">
                     <ItemTemplate>

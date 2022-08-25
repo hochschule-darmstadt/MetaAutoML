@@ -30,7 +30,15 @@
     </MudCardHeader>
     <MudCardContent>
         <MudPaper Height="250px" Elevation="0">
-            @if (_explanation != null)
+            @if (_explanation == null)
+            {
+                <DataLoaderSpinner />
+            }
+            else if (_explanation.Status != "finished")
+            {
+                <DataLoaderSpinner />
+            }
+            else
             {
                 <MudCarousel Class="mud-width-full" ItemsSource="@_explanation.Analyses" Style="height:250px;" AutoCycle="false">
                     <ItemTemplate>
@@ -41,7 +49,7 @@
                             <MudItem xs="6">
                                 @if (context.Type == "force_plot")
                                 {
-                                    @((MarkupString)GetHtml(context.Content))
+                                    <MudImage Src="@GetImage(context.Content)" Style="width: 500px" />
                                 }
                                 else
                                 {

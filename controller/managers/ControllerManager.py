@@ -362,8 +362,11 @@ class ControllerManager(object):
         model_list.sort(key=GetScore, reverse=True)
         
         for model in list(model_list):
-            if  top3Counter >= 3 and request.top3 == True:
-                return response
+            if request.top3 == True:
+                if model["status"] != "completed":
+                    continue
+                elif top3Counter >= 3:
+                    return response
             model_info = ModelInformation()
             model_info.identifier = str(model["_id"])
             model_info.automl = model["automl_name"]

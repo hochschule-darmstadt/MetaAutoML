@@ -223,7 +223,8 @@ class AutoMLManager(ABC, Thread):
                 "status_messages": [],
                 "prediction_time": 0,
                 "start_time": datetime.now(),
-                "end_time": ""
+                "end_time": "",
+                "explanation": ""
                 }
             _mdl_id = self.__data_storage.InsertModel(self.__username, model_details)
 
