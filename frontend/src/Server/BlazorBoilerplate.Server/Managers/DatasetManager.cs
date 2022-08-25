@@ -203,20 +203,26 @@ namespace BlazorBoilerplate.Server.Managers
                 var reply = _client.GetDataset(getDatasetRequest);
                 var analysis = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(reply.DatasetInfos.Analysis);
                 int index = 0;
-                foreach (var item in analysis["advanced_analysis"])
+                if (analysis != null)
                 {
-                    if (dataset.GetShortPreview == true && index++ == 3)
+                    if (analysis.Count != 0)
                     {
-                        break;
+                        foreach (var item in analysis["advanced_analysis"])
+                        {
+                            if (dataset.GetShortPreview == true && index++ == 3)
+                            {
+                                break;
+                            }
+                            DatasetAnalysis datasetAnalysis = new DatasetAnalysis()
+                            {
+                                Title = item.SelectToken("title").ToString(),
+                                Type = item.SelectToken("type").ToString(),
+                                Description = item.SelectToken("description").ToString(),
+                                Content = GetImageAsBytes(item.SelectToken("path").ToString())
+                            };
+                            response.Analyses.Add(datasetAnalysis);
+                        }
                     }
-                    DatasetAnalysis datasetAnalysis = new DatasetAnalysis()
-                    {
-                        Title = item.SelectToken("title").ToString(),
-                        Type = item.SelectToken("type").ToString(),
-                        Description = item.SelectToken("description").ToString(),
-                        Content = GetImageAsBytes(item.SelectToken("path").ToString())
-                    };
-                    response.Analyses.Add(datasetAnalysis);
                 }
                 return new ApiResponse(Status200OK, null, response);
 
