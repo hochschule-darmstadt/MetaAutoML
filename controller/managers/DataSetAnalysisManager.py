@@ -370,7 +370,7 @@ class DataSetAnalysisManager:
         jsonfile = {}
         rows, cols = dataset.shape
 
-        jsonfile["basic analysis"] = {
+        jsonfile["basic_analysis"] = {
             "number_of_columns": cols,
             "number_of_rows": rows,
             "na_columns": {},
