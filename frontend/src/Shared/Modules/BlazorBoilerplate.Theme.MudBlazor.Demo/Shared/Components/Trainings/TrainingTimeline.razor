@@ -37,12 +37,9 @@
                 </ItemDot>
                 <ItemContent>
                     <MudText Typo="Typo.subtitle2" Align="Align.Center">@timelineItem.Title</MudText>
-                    @if (timelineItem.Subtitle != null)
-                    {
-                        <MudText Typo="Typo.body2" Align="Align.Center" Class="mud-text-secondary">
-                            @((timelineItem.Subtitle != null) ? timelineItem.Subtitle : timelineItem.Timestamp?.ToLocalTime().ToString("dd/MM/yy HH:mm:ss"))
-                        </MudText>
-                    }
+                    <MudText Typo="Typo.body2" Align="Align.Center" Class="mud-text-secondary">
+                        @((timelineItem.Subtitle != null) ? timelineItem.Subtitle : timelineItem.Timestamp?.ToLocalTime().ToString("dd/MM/yy HH:mm:ss"))
+                    </MudText>
                 </ItemContent>
             </MudTimelineItem>
         }

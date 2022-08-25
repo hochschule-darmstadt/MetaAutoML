@@ -32,6 +32,21 @@ message GetSupportedMlLibrariesResponse {
     repeated string MlLibraries = 1;
   }
 
+message GetAvailableStrategiesRequest {
+    string username = 1;
+    map<string, string> configuration = 2;
+  }
+  
+message GetAvailableStrategiesResponse {
+    repeated StrategyControllerStrategy Strategies = 1;
+  }
+
+message StrategyControllerStrategy {
+    string id = 1;
+    string title = 2;
+    string description = 3;
+  }
+
 
 message StartAutoMlProcessRequest {
     string username = 1;

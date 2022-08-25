@@ -359,6 +359,26 @@ class GetSupportedMlLibrariesResponse(betterproto.Message):
 
 
 @dataclass(eq=False, repr=False)
+class GetAvailableStrategiesRequest(betterproto.Message):
+    username: str = betterproto.string_field(1)
+    configuration: Dict[str, str] = betterproto.map_field(
+        2, betterproto.TYPE_STRING, betterproto.TYPE_STRING
+    )
+
+
+@dataclass(eq=False, repr=False)
+class GetAvailableStrategiesResponse(betterproto.Message):
+    strategies: List["StrategyControllerStrategy"] = betterproto.message_field(1)
+
+
+@dataclass(eq=False, repr=False)
+class StrategyControllerStrategy(betterproto.Message):
+    id: str = betterproto.string_field(1)
+    title: str = betterproto.string_field(2)
+    description: str = betterproto.string_field(3)
+
+
+@dataclass(eq=False, repr=False)
 class StartAutoMlProcessRequest(betterproto.Message):
     username: str = betterproto.string_field(1)
     dataset: str = betterproto.string_field(2)
@@ -413,6 +433,20 @@ class ControllerServiceStub(betterproto.ServiceStub):
             "/ControllerService/GetCompatibleAutoMlSolutions",
             request,
             GetCompatibleAutoMlSolutionsResponse,
+        )
+
+    async def get_available_strategies(
+        self, *, username: str = "", configuration: Dict[str, str] = None
+    ) -> "GetAvailableStrategiesResponse":
+
+        request = GetAvailableStrategiesRequest()
+        request.username = username
+        request.configuration = configuration
+
+        return await self._unary_unary(
+            "/ControllerService/GetAvailableStrategies",
+            request,
+            GetAvailableStrategiesResponse,
         )
 
     async def get_dataset_types(self) -> "GetDatasetTypesResponse":
@@ -670,6 +704,11 @@ class ControllerServiceBase(ServiceBase):
     ) -> "GetCompatibleAutoMlSolutionsResponse":
         raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
 
+    async def get_available_strategies(
+        self, username: str, configuration: Dict[str, str]
+    ) -> "GetAvailableStrategiesResponse":
+        raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
+
     async def get_dataset_types(self) -> "GetDatasetTypesResponse":
         raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
 
@@ -785,6 +824,19 @@ class ControllerServiceBase(ServiceBase):
         }
 
         response = await self.get_compatible_auto_ml_solutions(**request_kwargs)
+        await stream.send_message(response)
+
+    async def __rpc_get_available_strategies(
+        self, stream: grpclib.server.Stream
+    ) -> None:
+        request = await stream.recv_message()
+
+        request_kwargs = {
+            "username": request.username,
+            "configuration": request.configuration,
+        }
+
+        response = await self.get_available_strategies(**request_kwargs)
         await stream.send_message(response)
 
     async def __rpc_get_dataset_types(self, stream: grpclib.server.Stream) -> None:
@@ -1012,6 +1064,12 @@ class ControllerServiceBase(ServiceBase):
                 grpclib.const.Cardinality.UNARY_UNARY,
                 GetCompatibleAutoMlSolutionsRequest,
                 GetCompatibleAutoMlSolutionsResponse,
+            ),
+            "/ControllerService/GetAvailableStrategies": grpclib.const.Handler(
+                self.__rpc_get_available_strategies,
+                grpclib.const.Cardinality.UNARY_UNARY,
+                GetAvailableStrategiesRequest,
+                GetAvailableStrategiesResponse,
             ),
             "/ControllerService/GetDatasetTypes": grpclib.const.Handler(
                 self.__rpc_get_dataset_types,

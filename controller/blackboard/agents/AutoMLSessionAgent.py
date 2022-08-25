@@ -17,7 +17,7 @@ class AutoMLSessionAgent(IAbstractBlackboardAgent):
 
         self.UpdateState({
             'id': self.session.get_id(),
-            'status': session_status.status, # FIXME: session_status.to_dict()
+            'status': session_status.status,
             'configuration': self.session.get_configuration(),
         })
 

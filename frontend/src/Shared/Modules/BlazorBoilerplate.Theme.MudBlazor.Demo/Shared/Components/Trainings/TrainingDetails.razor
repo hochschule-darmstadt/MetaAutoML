@@ -83,7 +83,7 @@
                 {
                     AutoReset = true,
                     Enabled = true,
-                    Interval = 5000
+                    Interval = 2000
                 };
                 _timer.Elapsed += RefreshTraining;
                 StateHasChanged();
@@ -122,7 +122,6 @@
                 if (_training.Status != "busy")
                 {
                     DisposeTimer();
-                    return;
                 }
                 
                 ApiResponseDto apiResponse = await apiClient.GetTraining(new GetTrainingRequestDto { TrainingId = Training.ID });

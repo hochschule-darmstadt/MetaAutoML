@@ -65,7 +65,7 @@ class ControllerManager(object):
             result.file = a.read()
         return result
 
-    def GetCompatibleAUtoMlSolutions(self, request: "GetCompatibleAutoMlSolutionsRequest") -> "GetCompatibleAutoMlSolutionsResponse":
+    def GetCompatibleAutoMlSolutions(self, request: "GetCompatibleAutoMlSolutionsRequest") -> "GetCompatibleAutoMlSolutionsResponse":
         """
         Get list of comptatible AutoML solutions
         ---
@@ -75,6 +75,37 @@ class ControllerManager(object):
         Return a list of compatible AutoML
         """
         return self.__rdfManager.GetCompatibleAutoMlSolutions(request)
+
+    def GetAvailableStrategies(self, request: "GetAvailableStrategiesRequest") -> "GetAvailableStrategiesResponse":
+        """
+        Get a list of controller strategies available for the current configuration
+        ---
+        Parameter
+        1. username
+        2. current configuration
+        ---
+        Return a list of compatible AutoML
+        """
+        # FIXME: Implement ontology lookup
+        result = GetAvailableStrategiesResponse()
+        result.strategies = [
+            StrategyControllerStrategy(
+                'data_preparation.ignore_redundant_features',
+                'Ignore redundant features',
+                'This strategy ignores certain dataset columns if they have been flagged as duplicate in the dataset analysis.'
+            ),
+            StrategyControllerStrategy(
+                'data_preparation.ignore_redundant_samples',
+                'Ignore redundant samples',
+                'This strategy ignores certain dataset rows if they have been flagged as duplicate in the dataset analysis.'
+            ),
+            StrategyControllerStrategy(
+                'data_preparation.split_large_datasets',
+                'Split large datasets',
+                'This strategy truncates the training data if the time limit is relatively short for the size of the dataset.'
+            ),
+        ]
+        return result
 
     def GetDatasetTypes(self, request: "GetDatasetTypesRequest") -> "GetDatasetTypesResponse":
         """

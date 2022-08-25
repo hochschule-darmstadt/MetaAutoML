@@ -1,4 +1,4 @@
-import logging, time
+import logging, time, json
 from threading import Timer
 from typing import Callable
 from datetime import datetime
@@ -27,16 +27,19 @@ class StrategyController(object):
         self.data_storage = session.data_storage
         self._log.debug(f'Attached controller to the blackboard, current agents: {len(self.blackboard.agents)}')
 
+        try:
+            session_config = json.loads(self.session.configuration.configuration)
+            session_enabled_strategies = session_config.get('enabled_strategies', [])
+            self._log.debug(f'Found {len(session_enabled_strategies)} enabled strategies for the session: {session_enabled_strategies}')
+        except Exception as e:
+            self._log.error(f'Error while fetching the enabled strategies for the session:')
+            self._log.exception(e)
+            session_enabled_strategies = []
+
         self.blackboard.common_state.update({
             'phase': None,
             'events': [],
-            'enabled_strategies': [
-                # FIXME: Inherit from session configuration
-                'data_preparation.ignore_redundant_features',
-                'data_preparation.ignore_redundant_samples',
-                'data_preparation.split_large_datasets',
-                'data_preparation.finish_preprocessing',
-            ]
+            'enabled_strategies': session_enabled_strategies
         })
 
         self.event_listeners = {}

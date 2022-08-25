@@ -66,7 +66,15 @@ class ControllerService(ControllerServiceBase):
         """return a list of AutoML solutions compatible with the current configuration
         """
         request = GetCompatibleAutoMlSolutionsRequest(username, configuration)
-        response = self._controllerManager.GetCompatibleAUtoMlSolutions(request)
+        response = self._controllerManager.GetCompatibleAutoMlSolutions(request)
+        return response
+
+    async def get_available_strategies(
+        self, username: str = "", configuration: Dict[str, str] = None
+    ) -> "GetAvailableStrategiesResponse":
+        """return a list of controller strategies available for the current configuration"""
+        request = GetAvailableStrategiesRequest(username, configuration)
+        response = self._controllerManager.GetAvailableStrategies(request)
         return response
 
     async def get_dataset_types(self) -> "GetDatasetTypesResponse":
