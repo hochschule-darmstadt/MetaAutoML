@@ -31,6 +31,7 @@ namespace BlazorBoilerplate.Shared.Interfaces
 
         Task<ApiResponseDto> GetModel(GetModelRequestDto model);
         Task<ApiResponseDto> GetModels(GetModelsRequestDto models);
+        Task<ApiResponseDto> GetModelExplanation(GetModelExplanationRequestDto model);
         Task<ApiResponseDto> GetModelDownload(GetAutoMlModelRequestDto automl);
         Task<ApiResponseDto> GetDatasets();
         Task<ApiResponseDto> GetDataset(GetDatasetRequestDto name);
@@ -50,5 +51,6 @@ namespace BlazorBoilerplate.Shared.Interfaces
         Task<ApiResponseDto> TestAutoML(TestAutoMLRequestDto datasetName);
         Task<ApiResponseDto> GetHomeOverviewInformation();
         Task<ApiResponseDto> SetDatasetConfiguration(SetDatasetFileConfigurationRequestDto dataset);
+        Task<ApiResponseDto> GetDatasetAnalysis(GetDatasetAnalysisRequestDto dataset);
     }
 }

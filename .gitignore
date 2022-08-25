@@ -203,3 +203,4 @@ FLAML/templates/output
 MLJAR/AutoML_*
 controller/app-data/analysis.json
 controller/app-data/datasets/*
+controller/app-data/training/*

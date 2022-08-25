@@ -1,9 +1,8 @@
-﻿@page "/datasets"
+﻿@page "/datasets/{id}/analysis"
 @inject IStringLocalizer<Global> L
-@inject ISnackbar Snackbar
 @inject IApiClient apiClient
 @inject IViewNotifier viewNotifier
-@inject IFileUploader fileUploader
+@inject NavigationManager NavManager
 @attribute [Authorize]
 
 <TopSection>
@@ -13,41 +12,47 @@
 
 <MudStack AlignItems="AlignItems.Center" Row="true" Class="mb-2">
     <MudIcon Size="Size.Large" Icon="@Icons.Filled.ListAlt" />
-    <MudText Typo="Typo.h4">Datasets</MudText>
+    <MudText Typo="Typo.h4">@_pageTitle</MudText>
 </MudStack>
 
 <MudGrid>
     <MudItem xs="12" sm="12" md="12">
-        <AllDatasets Datasets="_datasets" OnUploadCompletedCallback="@LoadDatasets"/>
+        <DatasetAnalysisFull Dataset="_dataset" />
     </MudItem>
 </MudGrid>
 
-@code{
-    private GetDatasetsResponseDto _datasets;
+
+@code {
+    [Parameter]
+    public string Id { get; set; }
+
+    private string _pageTitle;
+    private GetDatasetResponseDto _dataset;
     private List<BreadcrumbItem> _breadcrumbs = new List<BreadcrumbItem>();
 
-    protected override async Task OnInitializedAsync()
+    protected async override void OnInitialized()
     {
-        await LoadDatasets();
-        fileUploader.OnUploadCompletedCallback = LoadDatasetsWithReRendering;
+        await LoadDataset();
         _breadcrumbs.Add(new BreadcrumbItem("Home", "/", false, Icons.Filled.Home));
-        _breadcrumbs.Add(new BreadcrumbItem("Datasets", null, true, Icons.Filled.ListAlt));
+        _breadcrumbs.Add(new BreadcrumbItem("Datasets", "/datasets", false, Icons.Filled.ListAlt));
+        _breadcrumbs.Add(new BreadcrumbItem(_pageTitle, "/datasets/" + Id, false, Icons.Filled.ListAlt));
+        _breadcrumbs.Add(new BreadcrumbItem("Analysis", null, true, Icons.Filled.ListAlt));
         StateHasChanged();
     }
-    private async Task LoadDatasetsWithReRendering()
-    {
-        await LoadDatasets();
-        StateHasChanged();
-    }
-    private async Task LoadDatasets()
+    private async Task LoadDataset()
     {
         try
         {
-            ApiResponseDto apiResponse = await apiClient.GetDatasets();
+            GetDatasetRequestDto datasetRequest = new GetDatasetRequestDto()
+                {
+                    Identifier = Id
+                };
+            ApiResponseDto apiResponse = await apiClient.GetDataset(datasetRequest);
 
             if (apiResponse.IsSuccessStatusCode)
             {
-                _datasets = Newtonsoft.Json.JsonConvert.DeserializeObject<GetDatasetsResponseDto>(apiResponse.Result.ToString());
+                _dataset = Newtonsoft.Json.JsonConvert.DeserializeObject<GetDatasetResponseDto>(apiResponse.Result.ToString());
+                _pageTitle = "Dataset " + _dataset.Name;
                 viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
             }
             else
@@ -60,4 +65,5 @@
             viewNotifier.Show(ex.GetBaseException().Message, ViewNotifierType.Error, L["Operation Failed"]);
         }
     }
+
 }

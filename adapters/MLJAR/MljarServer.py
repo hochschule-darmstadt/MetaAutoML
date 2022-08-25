@@ -5,6 +5,7 @@ import pickle
 import shutil
 import time
 from concurrent import futures
+from supervised.automl import AutoML
 
 import Adapter_pb2
 import Adapter_pb2_grpc
@@ -36,6 +37,13 @@ class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
     AutoML Adapter Service implementation.
     Service provide functionality to execute and interact with the current AutoML process.
     """
+
+    def __init__(self):
+        """
+        These variables are used by the ExplainModel function.
+        """
+        self._automl = None
+        self._loaded_training_id = None
 
     def StartAutoML(self, request, context):
         """
@@ -76,6 +84,46 @@ class AdapterServiceServicer(Adapter_pb2_grpc.AdapterServiceServicer):
             response.score = test_score
             response.predictiontime = prediction_time
             return response
+
+        except Exception as e:
+            return get_except_response(context, e)
+
+    def ExplainModel(self, request, context):
+        """
+        Function for explaining a model. This returns the prediction probabilities for the data passed within the
+        request.data.
+        This loads the model and stores it in the adapter object. This is done because SHAP, the explanation module
+        accesses this function multiple times and reloading the model every time would add overhead.
+        The data transferred is reformatted by SHAP (regarding datatypes and column names). However, the AutoMLs
+        struggle with this reformatting so the dataset is loaded separately and the datatypes and column names of the
+        transferred data are replaced.
+        ---
+        param request: Grpc request of type ExplainModelRequest
+        param context: Context for correctly handling exceptions
+        ---
+        return ExplainModelResponse: Grpc response of type ExplainModelResponse containing prediction probabilities
+        """
+        try:
+            config_json = json.loads(request.processJson)
+            result_folder_location = os.path.join(get_config_property("training-path"),
+                                                  config_json["user_identifier"],
+                                                  config_json["training_id"],
+                                                  get_config_property("result-folder-name"))
+            # Check if the requested training is already loaded. If not: Load model and load & prep dataset.
+            if self._loaded_training_id != config_json["training_id"]:
+                print(f"ExplainModel: Model not already loaded; Loading model")
+                self._automl = AutoML(results_path=os.path.join(result_folder_location, "Models"))
+                df, test = data_loader(config_json)
+                self._dataframeX, y = prepare_tabular_dataset(df, config_json)
+                self._loaded_training_id = config_json["training_id"]
+
+            # Reassemble dataset with the datatypes and column names from the preprocessed data and the content of the
+            # transmitted data.
+            df = pd.DataFrame(data=json.loads(request.data), columns=self._dataframeX.columns)
+            df = df.astype(dtype=dict(zip(self._dataframeX.columns, self._dataframeX.dtypes.values)))
+            # Get prediction probabilities and send them back.
+            probabilities = json.dumps(self._automl.predict_proba(df).tolist())
+            return Adapter_pb2.ExplainModelResponse(probabilities=probabilities)
 
         except Exception as e:
             return get_except_response(context, e)

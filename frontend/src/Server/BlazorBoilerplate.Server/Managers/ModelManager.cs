@@ -1,8 +1,10 @@
 ﻿using BlazorBoilerplate.Infrastructure.Server;
 using BlazorBoilerplate.Infrastructure.Server.Models;
 using BlazorBoilerplate.Shared.Dto.AutoML;
+using BlazorBoilerplate.Shared.Dto.Dataset;
 using BlazorBoilerplate.Shared.Dto.Model;
 using BlazorBoilerplate.Storage;
+using Newtonsoft.Json;
 using static Microsoft.AspNetCore.Http.StatusCodes;
 using static MudBlazor.CategoryTypes;
 
@@ -46,6 +48,10 @@ namespace BlazorBoilerplate.Server.Managers
                 {
                     response.Model.Library = "";
                     response.Model.Model = "";
+                }
+                if (!string.IsNullOrEmpty(reply.Model.Explanation))
+                {
+                    response.Model.Explanation = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(reply.Model.Explanation);
                 }
                 response.Model.TestScore = (double)reply.Model.TestScore;
                 response.Model.ValidationScore = (double)reply.Model.ValidationScore;
@@ -92,6 +98,10 @@ namespace BlazorBoilerplate.Server.Managers
                         model.Library = "";
                         model.Model = "";
                     }
+                    if (!string.IsNullOrEmpty(item.Explanation))
+                    {
+                        model.Explanation = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(item.Explanation);
+                    }
                     model.TestScore = (double)item.TestScore;
                     model.ValidationScore = (double)item.ValidationScore;
                     model.Predictiontime = (double)item.PredictionTime;
@@ -109,6 +119,77 @@ namespace BlazorBoilerplate.Server.Managers
 
                 return new ApiResponse(Status404NotFound, ex.Message);
             }
+        }
+        public async Task<ApiResponse> GetModelExplanation(GetModelExplanationRequestDto model)
+        {
+            GetModelExplanationResponseDto response = new GetModelExplanationResponseDto();
+            GetModelRequest getModelRequest = new GetModelRequest();
+            var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
+            string controllerDatasetPath = Environment.GetEnvironmentVariable("CONTROLLER_DATASET_FOLDER_PATH");
+            try
+            {
+                getModelRequest.Username = username;
+                getModelRequest.ModelId = model.ModelIdentifier;
+                var reply = _client.GetModel(getModelRequest);
+                var explanation = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(reply.Model.Explanation);
+                int index = 0;
+                if (explanation == null)
+                {
+                    response.Status = "";
+                    response.Detail = "";
+                }
+                else if (explanation["status"] == "started")
+                {
+                    response.Status = explanation["status"];
+                    response.Detail = "";
+                }
+                else
+                {
+                    response.Status = explanation["status"];
+                    response.Detail = explanation["detail"];
+                    foreach (var item in explanation["plots"])
+                    {
+                        if (model.GetShortPreview == true)
+                        {
+                            if (item.SelectToken("type").ToString() == "force_plot")
+                            {
+                                continue;
+                            }
+                            else if (index++ == 3)
+                            {
+                                break;
+                            }
+                        }
+                        ModelExplanation datasetAnalysis = new ModelExplanation()
+                        {
+                            Title = item.SelectToken("title").ToString(),
+                            Type = item.SelectToken("type").ToString(),
+                            Description = item.SelectToken("description").ToString(),
+                            Content = GetImageAsBytes(item.SelectToken("path").ToString())
+                        };
+                        response.Analyses.Add(datasetAnalysis);
+                    }
+                }
+                return new ApiResponse(Status200OK, null, response);
+
+            }
+            catch (Exception ex)
+            {
+
+                Console.WriteLine(ex.Message);
+                return new ApiResponse(Status404NotFound, ex.Message);
+            }
+        }
+
+        private byte[] GetImageAsBytes(string path)
+        {
+            byte[] content = null;
+            FileStream fileStream = new FileStream(path, FileMode.Open, FileAccess.Read);
+            using (BinaryReader reader = new BinaryReader(fileStream))
+            {
+                content = reader.ReadBytes((int)reader.BaseStream.Length);
+            }
+            return content;
         }
         /// <summary>
         /// Get the result model from a specific AutoML

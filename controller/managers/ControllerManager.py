@@ -1,20 +1,16 @@
 import os
-import pandas as pd
-from requests import request
-from AutoMLSession import AutoMLSession
 import json
-from google.protobuf.timestamp_pb2 import Timestamp
-
 import uuid
 
 from Controller_bgrpc import *
 
+from AutoMLSession import AutoMLSession
 from AdapterManager import AdapterManager
 from CsvManager import CsvManager
 from LongitudinalDataManager import LongitudinalDataManager
 from RdfManager import RdfManager
 from persistence.data_storage import DataStorage
-
+from ExplainableAIManager import ExplainableAIManager
 
 class ControllerManager(object):
     """
@@ -33,7 +29,7 @@ class ControllerManager(object):
         self.__rdfManager = RdfManager()
         self.__adapterManager = AdapterManager(self.__data_storage)
         self.__trainings: dict[str, AutoMLSession] = {}
-        return
+        self.__explainableAIManager = ExplainableAIManager(self.__data_storage)
 
     def CreateNewUser(self, request: "CreateNewUserRequest") -> "CreateNewUserResponse":
         """
@@ -278,7 +274,6 @@ class ControllerManager(object):
             except Exception as e:
                 print(f"exception: {e}")
 
-
         return response
 
     def GetSupportedMlLibraries(self, request: "GetSupportedMlLibrariesRequest") -> "GetSupportedMlLibrariesResponse":
@@ -371,8 +366,11 @@ class ControllerManager(object):
         model_list.sort(key=GetScore, reverse=True)
         
         for model in list(model_list):
-            if  top3Counter >= 3 and request.top3 == True:
-                return response
+            if request.top3 == True:
+                if model["status"] != "completed":
+                    continue
+                elif top3Counter >= 3:
+                    return response
             model_info = ModelInformation()
             model_info.identifier = str(model["_id"])
             model_info.automl = model["automl_name"]
@@ -386,6 +384,7 @@ class ControllerManager(object):
             model_info.library =  model["library"]
             model_info.training_id = model["training_id"]
             model_info.dataset_id = model["dataset_id"]
+            model_info.explanation = json.dumps(model["explanation"])
             response.models.append(model_info)
             top3Counter = top3Counter + 1
             
@@ -417,6 +416,7 @@ class ControllerManager(object):
         model_info.library =  model["library"]
         model_info.training_id = model["training_id"]
         model_info.dataset_id = model["dataset_id"]
+        model_info.explanation = json.dumps(model["explanation"])
         response.model = model_info
             
         return response
@@ -511,9 +511,15 @@ class ControllerManager(object):
                         "models": training["models"] + [model_id]
                     })
 
+            if model["status"] == "completed":
+                self.__explainableAIManager.explain(configuration.username, model_id)
 
-        newTraining: AutoMLSession = self.__adapterManager.start_automl(configuration, str(dataset["_id"]), dataset_folder,
-                                                               training_id, configuration.username, callback)
+        newTraining: AutoMLSession = self.__adapterManager.start_automl(configuration,
+                                                                        str(dataset["_id"]),
+                                                                        dataset_folder,
+                                                                        training_id,
+                                                                        configuration.username,
+                                                                        callback)
 
         self.__trainings[training_id] = newTraining
         response.result = 1

@@ -1,5 +1,3 @@
-from ast import Index
-import sys
 import io
 import shutil
 from threading import Lock
@@ -8,8 +6,8 @@ import os.path
 from persistence.mongo_client import Database
 from bson.objectid import ObjectId
 from DataSetAnalysisManager import DataSetAnalysisManager
-import numpy as np
 import pandas as pd
+import numpy as np
 from sklearn.model_selection import train_test_split
 from sktime.datasets import write_dataframe_to_tsfile
 from sktime.datasets import load_from_tsfile_to_dataframe
@@ -160,12 +158,12 @@ class DataStorage:
         ---
         Returns dataset id
         """
-        analysisResult = {}
 
         if type == ":image":
-            #replace zip sufix with nothing as it will be unpacked
+            # replace zip sufix with nothing as it will be unpacked
             name = name.replace(".zip", "")
-        #build dictionary for database
+
+        # build dictionary for database
         database_content = {
             "name": name,
             "type": type,
@@ -177,41 +175,49 @@ class DataStorage:
             "file_name" : "",
             "file_configuration": ""
         }
-        
-        dataset_id = self.__mongo.InsertDataset(username, database_content)
 
+        # Get generated dataset_id from mongo
+        dataset_id = self.__mongo.InsertDataset(username, database_content)
+        # Upload file to temporary upload folder
         upload_file = os.path.join(self.__storage_dir, username, "uploads", fileName)
+        # Get destination filepath using the generated id
         filename_dest = os.path.join(self.__storage_dir, username, dataset_id, fileName)
+
         if os.getenv("MONGO_DB_DEBUG") != "YES":
-            #Within docker we do not want to add the app section, as this leads to broken links
+            # When not in a debug environment (for example within docker) we do not want to add the app section,
+            # as this leads to broken links
             upload_file = upload_file.replace("/app/", "")
             filename_dest = filename_dest.replace("/app/", "")
-        #Make sure directory exists
+
+        # Make sure directory exists in case it's the first upload from this user
         os.makedirs(os.path.dirname(filename_dest), exist_ok=True)
-        #Copy dataset into final folder
+        # Copy dataset into final folder
         shutil.move(upload_file, filename_dest)
-        fileConfiguration = ""
-        #unpack zip file for image files
+        file_configuration = ""
+
+        # If the dataset is an image dataset, which is always uploaded as a .zip file the images have to be unzipped
+        # after saving
         if type == ":image":
             shutil.unpack_archive(filename_dest, os.path.join(self.__storage_dir, username, dataset_id))
-            #delete zip
+            # delete zip
             os.remove(filename_dest)
-            #remove .zip suffix of filename and path
+            # remove .zip suffix of filename and path
             filename_dest = filename_dest.replace(".zip", "")
             fileName = fileName.replace(".zip", "")
+
         if type == ":tabular" or type == ":text" or type == ":time_series":
             #generate preview of tabular and text dataset
             #previewDf = pd.read_csv(filename_dest)
             #previewDf.head(50).to_csv(filename_dest.replace(".csv", "_preview.csv"), index=False)
             #causes error with different delimiters use normal string division
-            with open(filename_dest) as file:
+            with open(filename_dest, encoding="utf8") as file:
                 lines = file.readlines()
             with open(filename_dest.replace(".csv", "_preview.csv"), "x") as preview:
                 preview_line = lines[:51]
                 for line in preview_line:
                     preview.write(line)
-                    #preview.write("\n")
-            fileConfiguration = "{\"use_header\":true,\"start_row\":1,\"delimiter\":\"comma\",\"escape_character\":\"\\\\\",\"decimal_character\":\".\"}"
+                    # preview.write("\n")
+            file_configuration = '{"use_header":true, "start_row":1, "delimiter":"comma", "escape_character":"\\\\", "decimal_character":"."}'
 
         if type == ":longitudinal":
             TARGET_COL = "target"
@@ -254,9 +260,9 @@ class DataStorage:
             # Save the new dataframe as a csv file
             df_preview_filename = filename_dest.replace(".ts", "_preview.csv")
             pd.DataFrame(df_dict).to_csv(df_preview_filename, index=False)
-            fileConfiguration = "{\"use_header\":true,\"start_row\":1,\"delimiter\":\"comma\",\"escape_character\":\"\\\\\",\"decimal_character\":\".\"}"
+            file_configuration = '{"use_header":true, "start_row":1, "delimiter":"comma", "escape_character":"\\\\", "decimal_character":"."}'
 
-        def get_size(start_path = '.'):
+        def get_size(start_path='.'):
             total_size = 0
             for dirpath, dirnames, filenames in os.walk(start_path):
                 for f in filenames:
@@ -266,29 +272,33 @@ class DataStorage:
                         total_size += os.path.getsize(fp)
 
             return total_size
+
         nbytes = get_size(os.path.join(self.__storage_dir, username, dataset_id))
 
-
-        #Perform analysis for tabular data datasets
+        analysis_result = {}
+        # If the dataset is a tabular dataset it can be analyzed.
         if type == ":tabular":
-            dataset_for_analysis = pd.read_csv(filename_dest, engine="python")
-            analysisResult = DataSetAnalysisManager.startAnalysis(dataset_for_analysis)
+            try:
+                dsam = DataSetAnalysisManager(pd.read_csv(filename_dest, engine="python"))
+            except pd.errors.ParserError as e:
+                # As the pandas python parsing engine sometimes fails: Retry with standard (c) parser engine.
+                dsam = DataSetAnalysisManager(pd.read_csv(filename_dest))
+            analysis_result["basic_analysis"] = dsam.basicAnalysis()
+            plot_filepath = os.path.join(os.path.dirname(filename_dest), "plots")
+            os.makedirs(plot_filepath, exist_ok=True)
+            analysis_result["advanced_analysis"] = dsam.advancedAnalysis(plot_filepath)
 
         if type == ":longitudinal":
             dataset_for_analysis = load_from_tsfile_to_dataframe(filename_dest, return_separate_X_and_y=False)
-            analysisResult = DataSetAnalysisManager.startLongitudinalDataAnalysis(dataset_for_analysis)
+            analysis_result["basic_analysis"] = DataSetAnalysisManager.startLongitudinalDataAnalysis(dataset_for_analysis)
 
-        #if type == ":image":
-        #    shutil
-
-        # fill in missing values
         success = self.__mongo.UpdateDataset(username, dataset_id, {
             "path": filename_dest,
             "size": nbytes,
             "mtime": os.path.getmtime(filename_dest),
-            "analysis": analysisResult,
-            "file_name" : fileName,
-            "file_configuration": fileConfiguration
+            "analysis": analysis_result,
+            "file_name": fileName,
+            "file_configuration": file_configuration
         })
         assert success, f"cannot update dataset with id {dataset_id}"
 

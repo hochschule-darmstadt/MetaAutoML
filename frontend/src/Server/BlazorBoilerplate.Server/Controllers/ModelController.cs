@@ -51,6 +51,15 @@ namespace BlazorBoilerplate.Server.Controllers
         [ProducesResponseType(Status200OK)]
         [ProducesResponseType(Status400BadRequest)]
         [ProducesResponseType(Status404NotFound)]
+        public async Task<ApiResponse> GetModelExplanation(GetModelExplanationRequestDto model)
+            => ModelState.IsValid ?
+                await _modelManager.GetModelExplanation(model) :
+                new ApiResponse(Status400BadRequest, L["InvalidData"]);
+
+        [HttpPost]
+        [ProducesResponseType(Status200OK)]
+        [ProducesResponseType(Status400BadRequest)]
+        [ProducesResponseType(Status404NotFound)]
         public async Task<ApiResponse> GetModelDownload(GetAutoMlModelRequestDto model)
             => ModelState.IsValid ?
                 await _modelManager.GetModelDownload(model) :
