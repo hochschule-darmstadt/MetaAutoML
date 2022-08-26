@@ -52,7 +52,7 @@
                 {
                     @switch (_dataset.Type.ID)
                     {
-                        case ":longitudinal":
+                        case ":time_series_longitudinal":
                         case ":time_series":
                         case ":text":
                         case ":tabular":
@@ -133,7 +133,7 @@
                 _datasetPreview = Newtonsoft.Json.JsonConvert.DeserializeObject<GetDatasetPreviewResponseDto>(apiResponse.Result.ToString());
                 switch (_dataset.Type.ID)
                 {
-                    case ":longitudinal":
+                    case ":time_series_longitudinal":
                     case ":time_series":
                     case ":text":
                     case ":tabular":

@@ -53,7 +53,7 @@
                                 </MudStack>
                             </MudExpansionPanel>
                             <MudExpansionPanel Text="Dataset configuration">
-                                @if ((_training.Task.Properties[":has_dataset_type"] == ":tabular") || (_training.Task.Properties[":has_dataset_type"] == ":longitudinal"))
+                                @if ((_training.Task.Properties[":has_dataset_type"] == ":tabular") || (_training.Task.Properties[":has_dataset_type"] == ":time_series_longitudinal"))
                                 {
                                     <MudStack>
                                         @foreach (JToken item in Training.DatasetConfiguration["features"])
