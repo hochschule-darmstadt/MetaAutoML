@@ -301,7 +301,7 @@ class DataStorage:
             "analysis": analysis_result,
             "file_name": fileName,
             "file_configuration": file_configuration
-        }, False)
+        })
         assert success, f"cannot update dataset with id {dataset_id}"
 
         return dataset_id
