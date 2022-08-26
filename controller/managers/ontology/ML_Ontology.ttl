@@ -1,5 +1,5 @@
 ### Ontology file generated from ML_Ontology.xlsx.
-### 2022-08-21 16:10:53.253366
+### 2022-08-25 17:38:37.624670
 
 
 # PREFIXES
@@ -1928,15 +1928,17 @@
 :tabular a :Enum ;
     skos:prefLabel "tabular" ;
     :category :dataset_type ;
-    rdfs:comment "A dataset presented in a tabular form (CSV file)" ;
+    rdfs:comment "A dataset presented in a tabular (table with rows and columns) form (CSV file)" ;
     :supported_by_oma_ml "True" .
 :text a :Enum ;
     skos:prefLabel "text" ;
     :category :dataset_type ;
+    rdfs:comment "A dataset presented in a tabular (table with rows and columns) form (CSV file)" ;
     :supported_by_oma_ml "True" .
 :image a :Enum ;
     skos:prefLabel "image" ;
     :category :dataset_type ;
+    rdfs:comment "A dataset presented in a folder structure of image files ordered by label form (ZIP file)" ;
     :supported_by_oma_ml "True" .
 :video a :Enum ;
     skos:prefLabel "video" ;
@@ -1958,6 +1960,7 @@
 :time_series a :Enum ;
     skos:prefLabel "time series" ;
     :category :dataset_type ;
+    rdfs:comment "A dataset presented in a tabular (table with rows and columns) form (CSV file)" ;
     :supported_by_oma_ml "True" .
 :greedy a :Enum ;
     skos:prefLabel "greedy" ;
