@@ -1,5 +1,5 @@
 ### Ontology file generated from ML_Ontology.xlsx.
-### 2022-08-25 17:38:37.624670
+### 2022-08-26 17:01:22.405417
 
 
 # PREFIXES
@@ -318,7 +318,7 @@
     skos:prefLabel "time series classification" ;
     skos:broader :classification ;
     :belongs_to :supervised_learning ;
-    :has_dataset_type :longitudinal ;
+    :has_dataset_type :time_series_longitudinal ;
     rdfs:comment "Classification of time series" ;
     :supported_by_oma_ml "True" .
 :time_series_forecasting a :ML_task ;
@@ -1954,10 +1954,10 @@
     skos:prefLabel "graph" ;
     :category :dataset_type ;
     :supported_by_oma_ml "false" .
-:longitudinal a :Enum ;
-    skos:prefLabel "longitudinal" ;
+:time_series_longitudinal a :Enum ;
+    skos:prefLabel "time series longitudinal" ;
     :category :dataset_type ;
-    rdfs:comment "Longitudinal Data - also called Panel Data, 3D Numpy Array - for time series classification, which has 3 dimentions: (num_samples, num_features, num_timesteps)" ;
+    rdfs:comment "Longitudinal data - also called panel data - for time series classification, which has 3 dimensions: (num_samples, num_features, num_timesteps)" ;
     :supported_by_oma_ml "True" .
 :time_series a :Enum ;
     skos:prefLabel "time series" ;
