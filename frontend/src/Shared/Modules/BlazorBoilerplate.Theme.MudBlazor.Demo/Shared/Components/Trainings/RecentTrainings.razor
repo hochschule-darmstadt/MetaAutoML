@@ -148,7 +148,6 @@
             catch (Exception ex)
             {
                 viewNotifier.Show(ex.GetBaseException().Message, ViewNotifierType.Error, L["Operation Failed"]);
-                _timer.Elapsed -= RefreshRecentTrainings;
             }
         });
     }

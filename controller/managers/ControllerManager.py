@@ -498,6 +498,7 @@ class ControllerManager(object):
             with self.__data_storage.Lock():
                 # append new model to training
                 training = self.__data_storage.GetTraining(configuration.username, training_id)
+                found, dataset = self.__data_storage.GetDataset(configuration.username, training["dataset_id"])
                 model["dataset_id"] = training["dataset_id"]
                 _mdl_id = self.__data_storage.UpdateModel(configuration.username, model_id, model)
                 model_list = self.__data_storage.GetModels(configuration.username, training_id)
@@ -513,7 +514,8 @@ class ControllerManager(object):
                     })
 
             if model["status"] == "completed":
-                self.__explainableAIManager.explain(configuration.username, model_id)
+                if dataset["type"] == ":tabular" or dataset["type"] == ":text" or dataset["type"] == ":time_series":
+                    self.__explainableAIManager.explain(configuration.username, model_id)
 
         newTraining: AutoMLSession = self.__adapterManager.start_automl(configuration,
                                                                         str(dataset["_id"]),
