@@ -1,4 +1,4 @@
-FROM python:3.6-slim-buster AS base
+FROM python:3.9.13-slim-buster AS base
 EXPOSE 50058
 
 RUN apt-get update && \

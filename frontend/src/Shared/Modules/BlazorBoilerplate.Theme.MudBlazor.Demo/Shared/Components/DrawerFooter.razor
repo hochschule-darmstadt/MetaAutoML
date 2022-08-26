@@ -34,10 +34,17 @@
                     <MudSelect Label="Select the data format of your dataset" T="string" ValueChanged="@OnDatasetTypeSelectChanged" Style="width: 150px">
                         @foreach (var item in _datasetTypes.DatasetTypes)
                         {
-                            <MudSelectItem Value="@item.ID">@item.Properties["skos:prefLabel"]</MudSelectItem>
+                            
+                            <MudSelectItem Value="@item.ID">
+                                <MudTooltip Text="@item.Properties["rdfs:comment"]" Style="z-index: 1600">
+                                    <MudText Typo="Typo.body2"> @item.Properties["skos:prefLabel"]</MudText>
+                                </MudTooltip>
+                            </MudSelectItem>
                         }
                     </MudSelect>
-                    <InputFile id="fileInput" OnChange="@FilesReady" hidden accept="@AcceptedFileType"/>
+                                <MudTooltip Text="asdsdadsd asd asdsa d sa as das dsadsa sdaasdasd asd asd adasd asd asdas dasd ads as dasd ad" >
+                                    <InputFile id="fileInput" OnChange="@FilesReady" hidden accept="@AcceptedFileType"/>
+                                </MudTooltip>
                     <MudButton HtmlTag="label"
                                 Variant="Variant.Filled"
                                 Color="Color.Secondary"
@@ -174,6 +181,10 @@
                     break;
                 case ":time_series":
                     AcceptedFileType = ".csv";
+                    IsSelectFileDisabled = false;
+                    break;
+                case ":longitudinal":
+                    AcceptedFileType = ".ts";
                     IsSelectFileDisabled = false;
                     break;
             }

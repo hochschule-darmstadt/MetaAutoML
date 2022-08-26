@@ -15,7 +15,7 @@ class DataSetAnalysisManager:
     def __init__(self, dataset: pd.DataFrame):
         self.__dataset = dataset
         self.__plots = []
-    
+
     def basicAnalysis(self) -> dict:
         """
         Basic analysis, results are returned as dict
@@ -382,3 +382,14 @@ class DataSetAnalysisManager:
                              "path": filename})
 
 
+    def startLongitudinalDataAnalysis(dataset: pd.DataFrame) -> dict:
+        rows, cols = dataset.shape
+        return {
+            "number_of_columns": cols,
+            "number_of_rows": rows,
+            "na_columns": {},
+            "high_na_rows": [],
+            "outlier": [],
+            "duplicate_columns": [],
+            "duplicate_rows": [],
+        }

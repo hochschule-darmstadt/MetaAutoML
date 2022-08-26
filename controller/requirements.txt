@@ -38,3 +38,4 @@ xai==0.1.0
 shap==0.41.0
 matplotlib==3.4.2
 ipython==8.4.0
+sktime==0.12.1

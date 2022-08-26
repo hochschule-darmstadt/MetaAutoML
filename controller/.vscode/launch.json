@@ -29,6 +29,8 @@
                 "PYTORCH_SERVICE_PORT": "50059",
                 "ALPHAD3M_SERVICE_HOST": "localhost",
                 "ALPHAD3M_SERVICE_PORT": "50060",
+                "MCFLY_SERVICE_HOST": "localhost",
+                "MCFLY_SERVICE_PORT": "50061",
                 "MONGO_DB_DEBUG": "YES",
                 "USE_DEV_CONFIG": "YES",
                 "MONGO_CLUSTER": "NO"

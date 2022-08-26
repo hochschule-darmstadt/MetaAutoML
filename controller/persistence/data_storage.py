@@ -8,6 +8,10 @@ from bson.objectid import ObjectId
 from DataSetAnalysisManager import DataSetAnalysisManager
 import pandas as pd
 import json
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sktime.datasets import write_dataframe_to_tsfile
+from sktime.datasets import load_from_tsfile_to_dataframe
 
 class DataStorage:
     """
@@ -216,6 +220,49 @@ class DataStorage:
                     # preview.write("\n")
             file_configuration = '{"use_header":true, "start_row":1, "delimiter":"comma", "escape_character":"\\\\", "decimal_character":"."}'
 
+        if type == ":longitudinal":
+            TARGET_COL = "target"
+            FIRST_N_ROW = 50
+            FIRST_N_ITEMS = 3
+            SEED = 42
+            df_dict = {}
+
+            df_preview = load_from_tsfile_to_dataframe(filename_dest, return_separate_X_and_y=False)
+            df_preview = df_preview.rename(columns={"class_vals": TARGET_COL})
+
+            index_preview, _ = train_test_split(
+                df_preview.index,
+                train_size=min(len(df_preview), FIRST_N_ROW),
+                random_state=SEED,
+                shuffle=True,
+                stratify=df_preview[TARGET_COL]
+            )
+
+            df_preview = df_preview.loc[index_preview]
+
+            for col in df_preview.columns:
+                # Create a new dictionary key if it doesn't exist
+                if col not in df_dict.keys():
+                    df_dict[col] = []
+                # Extract target values
+                if (col == TARGET_COL):
+                    for item in df_preview[col]:
+                        df_dict[col].append(item)
+                else:
+                    # Extract the first 3 values from each row and
+                    # create a string value, e.g. "[1.9612, 0.9619, 1.0172, ...]"
+                    for item in df_preview[col]:
+                        preview = item.to_list()
+                        preview = preview[0:FIRST_N_ITEMS]
+                        preview = str(preview)
+                        preview = preview.replace("]", ", ...]")
+                        df_dict[col].append(preview)
+
+            # Save the new dataframe as a csv file
+            df_preview_filename = filename_dest.replace(".ts", "_preview.csv")
+            pd.DataFrame(df_dict).to_csv(df_preview_filename, index=False)
+            file_configuration = '{"use_header":true, "start_row":1, "delimiter":"comma", "escape_character":"\\\\", "decimal_character":"."}'
+
         def get_size(start_path='.'):
             total_size = 0
             for dirpath, dirnames, filenames in os.walk(start_path):
@@ -242,6 +289,11 @@ class DataStorage:
             os.makedirs(plot_filepath, exist_ok=True)
             analysis_result["advanced_analysis"] = dsam.advancedAnalysis(plot_filepath)
 
+        if type == ":longitudinal":
+            dataset_for_analysis = load_from_tsfile_to_dataframe(filename_dest, return_separate_X_and_y=False)
+            analysis_result["basic_analysis"] = DataSetAnalysisManager.startLongitudinalDataAnalysis(dataset_for_analysis)
+            analysis_result["advanced_analysis"] = []
+
         success = self.__mongo.UpdateDataset(username, dataset_id, {
             "path": filename_dest,
             "size": nbytes,
@@ -249,7 +301,7 @@ class DataStorage:
             "analysis": analysis_result,
             "file_name": fileName,
             "file_configuration": file_configuration
-        }, False)
+        })
         assert success, f"cannot update dataset with id {dataset_id}"
 
         return dataset_id
@@ -290,6 +342,16 @@ class DataStorage:
                 plot_filepath = os.path.join(os.path.dirname(dataset['path']), "plots")
                 os.makedirs(plot_filepath, exist_ok=True)
                 analysis_result["advanced_analysis"] = dsam.advancedAnalysis(plot_filepath)
+                new_values["analysis"] = analysis_result
+            if type == ":longitudinal":
+                dataset_for_analysis = load_from_tsfile_to_dataframe(
+                    dataset['path'],
+                    return_separate_X_and_y=False
+                )
+                analysis_result["basic_analysis"] = DataSetAnalysisManager.startLongitudinalDataAnalysis(
+                    dataset_for_analysis
+                )
+                analysis_result["advanced_analysis"] = []
                 new_values["analysis"] = analysis_result
 
         return self.__mongo.UpdateDataset(username, id, new_values)
