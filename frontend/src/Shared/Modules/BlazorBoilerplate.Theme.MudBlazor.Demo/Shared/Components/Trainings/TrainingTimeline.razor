@@ -37,9 +37,12 @@
                 </ItemDot>
                 <ItemContent>
                     <MudText Typo="Typo.subtitle2" Align="Align.Center">@timelineItem.Title</MudText>
-                    <MudText Typo="Typo.body2" Align="Align.Center" Class="mud-text-secondary">
-                        @((timelineItem.Subtitle != null) ? timelineItem.Subtitle : timelineItem.Timestamp?.ToLocalTime().ToString("dd/MM/yy HH:mm:ss"))
-                    </MudText>
+                    @if (timelineItem.Subtitle != null)
+                    {
+                        <MudText Typo="Typo.body2" Align="Align.Center" Class="mud-text-secondary">
+                            @timelineItem.Subtitle
+                        </MudText>
+                    }
                 </ItemContent>
             </MudTimelineItem>
         }
@@ -143,6 +146,7 @@
                     var childTimelineItem = new TimelineItem
                     {
                         Title = childEvent.Type,
+                        Subtitle = childEvent.Timestamp.ToLocalTime().ToString("dd/MM/yy HH:mm:ss"),
                         Type = TimelineItemType.Minor,
                         Status = (phaseCompletedEventIdx != -1 ? TimelineItemStatus.Success : TimelineItemStatus.Active),
                         Timestamp = childEvent.Timestamp
