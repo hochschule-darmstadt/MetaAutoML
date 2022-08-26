@@ -292,6 +292,7 @@ class DataStorage:
         if type == ":longitudinal":
             dataset_for_analysis = load_from_tsfile_to_dataframe(filename_dest, return_separate_X_and_y=False)
             analysis_result["basic_analysis"] = DataSetAnalysisManager.startLongitudinalDataAnalysis(dataset_for_analysis)
+            analysis_result["advanced_analysis"] = []
 
         success = self.__mongo.UpdateDataset(username, dataset_id, {
             "path": filename_dest,
@@ -300,7 +301,7 @@ class DataStorage:
             "analysis": analysis_result,
             "file_name": fileName,
             "file_configuration": file_configuration
-        }, False)
+        })
         assert success, f"cannot update dataset with id {dataset_id}"
 
         return dataset_id
@@ -341,6 +342,16 @@ class DataStorage:
                 plot_filepath = os.path.join(os.path.dirname(dataset['path']), "plots")
                 os.makedirs(plot_filepath, exist_ok=True)
                 analysis_result["advanced_analysis"] = dsam.advancedAnalysis(plot_filepath)
+                new_values["analysis"] = analysis_result
+            if type == ":longitudinal":
+                dataset_for_analysis = load_from_tsfile_to_dataframe(
+                    dataset['path'],
+                    return_separate_X_and_y=False
+                )
+                analysis_result["basic_analysis"] = DataSetAnalysisManager.startLongitudinalDataAnalysis(
+                    dataset_for_analysis
+                )
+                analysis_result["advanced_analysis"] = []
                 new_values["analysis"] = analysis_result
 
         return self.__mongo.UpdateDataset(username, id, new_values)
