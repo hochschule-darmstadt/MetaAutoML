@@ -383,10 +383,8 @@ class DataSetAnalysisManager:
 
 
     def startLongitudinalDataAnalysis(dataset: pd.DataFrame) -> dict:
-        jsonfile = {}
         rows, cols = dataset.shape
-
-        jsonfile["basic_analysis"] = {
+        return {
             "number_of_columns": cols,
             "number_of_rows": rows,
             "na_columns": {},
@@ -395,4 +393,3 @@ class DataSetAnalysisManager:
             "duplicate_columns": [],
             "duplicate_rows": [],
         }
-        return jsonfile
