@@ -26,6 +26,7 @@ class AdapterManager(object):
             ":autopytorch": ["PYTORCH_SERVICE_HOST",   "PYTORCH_SERVICE_PORT"],
             ":mljar":        ["MLJAR_SERVICE_HOST",     "MLJAR_SERVICE_PORT"],
             ":alphad3m":        ["ALPHAD3M_SERVICE_HOST",  "ALPHAD3M_SERVICE_PORT"],
+            ":mcfly": ["MCFLY_SERVICE_HOST", "MCFLY_SERVICE_PORT"],
         }
 
     def TestAutoml(self, request: TestAutoMlRequest, automl: str, training_id, config):

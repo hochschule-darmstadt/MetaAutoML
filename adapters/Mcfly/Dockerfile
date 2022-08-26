@@ -1,12 +1,12 @@
-FROM python:3.9.13-slim-buster AS base
+FROM python:3.7.11-slim-buster AS base
 EXPOSE 50052
 
-COPY ./AutoKeras/requirements.txt .
+COPY ./Mcfly/requirements.txt .
 # Install dependencies
 RUN pip install -r requirements.txt
 # put all files in a directory called app
 WORKDIR /app
-COPY ./AutoKeras .
+COPY ./Mcfly .
 COPY ./Utils/Utils ./Utils
 COPY ./Utils/AutoMLs ./AutoMLs
 COPY ./GRPC/Adapter ./
@@ -18,4 +18,4 @@ ENV RUNTIME=DOCKER
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONPATH "AutoMLs:Utils"
 ENV PYTHON_ENV "python"
-ENTRYPOINT ["python", "AutoKerasServer.py"]
+ENTRYPOINT ["python", "McflyServer.py"]

@@ -176,6 +176,9 @@ namespace BlazorBoilerplate.Server.Managers
                     case ":time_series":
                         response.DatasetPreview = File.ReadAllText(datasetLocation.Replace(".csv", "_preview.csv"));
                         break;
+                    case ":longitudinal":
+                        response.DatasetPreview = File.ReadAllText(datasetLocation.Replace(".ts", "_preview.csv"));
+                        break;
                     default:
                         break;
                 }

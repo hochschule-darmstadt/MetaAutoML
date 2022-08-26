@@ -1,0 +1,15 @@
+{
+  "adapter-name": "mcfly",
+  "job-file-name": "mcfly-job.json",
+  "env-varname-cluster": "RUNTIME",
+  "grpc-server-address": "127.0.0.1",
+  "export-zip-file-name": "mcfly-export",
+  "training-path": "F:/Documents/GitProjects/MetaAutoML/adapters/Mcfly/app-data/training",
+  "job-folder-name": "job",
+  "model-folder-name": "model",
+  "export-folder-name": "export",
+  "result-folder-name": "result",
+  "templates-path": "app-data/templates",
+  "predict-time-sources-path": "../Utils/AutoMLs/predict_time_sources.py",
+  "local_execution": "YES"
+}

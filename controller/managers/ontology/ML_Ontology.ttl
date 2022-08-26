@@ -318,8 +318,9 @@
     skos:prefLabel "time series classification" ;
     skos:broader :classification ;
     :belongs_to :supervised_learning ;
-    :has_dataset_type :panel ;
-    rdfs:comment "Classification of time series" .
+    :has_dataset_type :longitudinal ;
+    rdfs:comment "Classification of time series" ;
+    :supported_by_oma_ml "True" .
 :time_series_forecasting a :ML_task ;
     skos:prefLabel "time series forecasting" ;
     :belongs_to :supervised_learning ;
@@ -1362,8 +1363,9 @@
     :used_for :spark_mllib ;
     :can_perform :tabular_classification , :tabular_regression .
 :mcfly a :AutoML_solution ;
-    skos:prefLabel "mcfly" ;
+    skos:prefLabel "Mcfly" ;
     :used_for :tensorflow_lib ;
+    :supported_by_oma_ml "True" ;
     :can_perform :time_series_classification .
 
 
@@ -1952,10 +1954,10 @@
     skos:prefLabel "graph" ;
     :category :dataset_type ;
     :supported_by_oma_ml "false" .
-:panel a :Enum ;
-    skos:prefLabel "panel" ;
+:longitudinal a :Enum ;
+    skos:prefLabel "longitudinal" ;
     :category :dataset_type ;
-    rdfs:comment "Panel Data - also called Longitudinal Data, 3D Numpy Array - for time series classification, which has 3 dimentions: (num_samples, num_features, num_timesteps)" ;
+    rdfs:comment "Longitudinal Data - also called Panel Data, 3D Numpy Array - for time series classification, which has 3 dimentions: (num_samples, num_features, num_timesteps)" ;
     :supported_by_oma_ml "True" .
 :time_series a :Enum ;
     skos:prefLabel "time series" ;
