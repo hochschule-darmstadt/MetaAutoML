@@ -70,8 +70,6 @@ class McflyAdapter(AbstractAdapter):
 
         model_types = ['CNN', 'ResNet', 'InceptionTime']
         num_models = max(len(model_types), num_models)
-        # Limit the max amount of generated models to avoid the OutOfMemory exception and longer training duration
-        num_models = max(15, num_models)
 
         # Generate new models
         metric_key = "accuracy"
