@@ -6,6 +6,15 @@ import "google/protobuf/any.proto";
 import "Enumerations.proto";
 import "Common.proto";
 
+message DeleteTrainingRequest {
+  string username = 1;
+  string identifier = 2;
+}
+
+message DeleteTrainingResponse {
+   uint32 status = 1;
+}
+
 message GetAllTrainingsRequest {
     string username = 1;
 }

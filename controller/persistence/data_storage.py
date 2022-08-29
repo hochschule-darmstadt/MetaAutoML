@@ -61,6 +61,42 @@ class DataStorage:
         """
         return DataStorage.__DbLock(self.__lock)
 
+    def DeleteDataset(self, username: bool, id: str):
+        """
+        Delete a dataset and its associated items
+        ---
+        Parameter
+        1. username: name of the user
+        2. id: object id
+        ---
+        Returns amount of deleted objects
+        """
+        return self.__mongo.DeleteDataset(username, { "_id": ObjectId(id) })
+
+    def DeleteModel(self, username: bool, id: str):
+        """
+        Delete model and its associated items
+        ---
+        Parameter
+        1. username: name of the user
+        2. id: object id
+        ---
+        Returns amount of deleted objects
+        """
+        return self.__mongo.DeleteModel(username, { "_id": ObjectId(id) })
+        
+    def DeleteTraining(self, username: bool, id: str):
+        """
+        Delete a training and its associated items
+        ---
+        Parameter
+        1. username: name of the user
+        2. id: object id
+        ---
+        Returns amount of deleted objects
+        """
+        return self.__mongo.DeleteTraining(username, { "_id": ObjectId(id) })
+
     def CheckIfUserExists(self, username: bool):
         """
         Check if user exists by checking if his database exists

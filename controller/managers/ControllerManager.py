@@ -32,6 +32,21 @@ class ControllerManager(object):
         self.__trainings: dict[str, AutoMLSession] = {}
         self.__explainableAIManager = ExplainableAIManager(self.__data_storage)
 
+    def DeleteDataset(self, request: "DeleteDatasetRequest") -> "DeleteDatasetResponse":
+        result = self.__data_storage.DeleteDataset(request.username, request.identifier)
+        print(result + " datasets deleted")
+        return DeleteDatasetResponse(result)
+
+    def DeleteTraining(self, request: "DeleteTrainingRequest") -> "DeleteTrainingResponse":
+        result = self.__data_storage.DeleteTraining(request.username, request.identifier)
+        print(result + " trainings deleted")
+        return DeleteDatasetResponse(result)
+
+    def DeleteModel(self, request: "DeleteModelRequest") -> "DeleteModelResponse":
+        result = self.__data_storage.DeleteModel(request.username, request.identifier)
+        print(result + " models deleted")
+        return DeleteDatasetResponse(result)
+
     def CreateNewUser(self, request: "CreateNewUserRequest") -> "CreateNewUserResponse":
         """
         Create a new OMA-ML managed user "account"

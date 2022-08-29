@@ -20,5 +20,6 @@ namespace BlazorBoilerplate.Infrastructure.Server
         //Task<ApiResponse> UploadData(IFormFile files);
         Task<ApiResponse> SetDatasetConfiguration(SetDatasetFileConfigurationRequestDto dataset);
         Task<ApiResponse> GetDatasetAnalysis(GetDatasetAnalysisRequestDto dataset);
+        Task<ApiResponse> DeleteDataset(DeleteDatasetRequestDto request);
     }
 }

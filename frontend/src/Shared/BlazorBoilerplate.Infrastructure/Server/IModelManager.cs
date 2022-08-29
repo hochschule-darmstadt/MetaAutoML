@@ -15,5 +15,6 @@ namespace BlazorBoilerplate.Infrastructure.Server
         Task<ApiResponse> GetModels(GetModelsRequestDto models);
         Task<ApiResponse> GetModelExplanation(GetModelExplanationRequestDto model);
         Task<ApiResponse> GetModelDownload(GetAutoMlModelRequestDto autoMl);
+        Task<ApiResponse> DeleteModel(DeleteModelRequestDto request);
     }
 }
