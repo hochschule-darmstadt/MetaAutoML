@@ -6,7 +6,7 @@ EXPOSE 5001
 #  python-betterproto is cloned from github 
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get -qq install \
-    git
+    git gcc
 
 COPY ./controller/requirements.txt .
 # Install dependencies

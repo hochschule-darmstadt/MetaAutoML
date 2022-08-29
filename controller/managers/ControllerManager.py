@@ -67,7 +67,7 @@ class ControllerManager(object):
             result.file = a.read()
         return result
 
-    def GetCompatibleAUtoMlSolutions(self, request: "GetCompatibleAutoMlSolutionsRequest") -> "GetCompatibleAutoMlSolutionsResponse":
+    def GetCompatibleAutoMlSolutions(self, request: "GetCompatibleAutoMlSolutionsRequest") -> "GetCompatibleAutoMlSolutionsResponse":
         """
         Get list of comptatible AutoML solutions
         ---
@@ -77,6 +77,37 @@ class ControllerManager(object):
         Return a list of compatible AutoML
         """
         return self.__rdfManager.GetCompatibleAutoMlSolutions(request)
+
+    def GetAvailableStrategies(self, request: "GetAvailableStrategiesRequest") -> "GetAvailableStrategiesResponse":
+        """
+        Get a list of controller strategies available for the current configuration
+        ---
+        Parameter
+        1. username
+        2. current configuration
+        ---
+        Return a list of compatible AutoML
+        """
+        # FIXME: Implement ontology lookup
+        result = GetAvailableStrategiesResponse()
+        result.strategies = [
+            StrategyControllerStrategy(
+                'data_preparation.ignore_redundant_features',
+                'Ignore redundant features',
+                'This strategy ignores certain dataset columns if they have been flagged as duplicate in the dataset analysis.'
+            ),
+            StrategyControllerStrategy(
+                'data_preparation.ignore_redundant_samples',
+                'Ignore redundant samples',
+                'This strategy ignores certain dataset rows if they have been flagged as duplicate in the dataset analysis.'
+            ),
+            StrategyControllerStrategy(
+                'data_preparation.split_large_datasets',
+                'Split large datasets',
+                'This strategy truncates the training data if the time limit is relatively short for the size of the dataset.'
+            ),
+        ]
+        return result
 
     def GetDatasetTypes(self, request: "GetDatasetTypesRequest") -> "GetDatasetTypesResponse":
         """
@@ -185,12 +216,11 @@ class ControllerManager(object):
         training = self.__data_storage.GetTraining(request.username, request.id)
         if training == None:
             raise Exception(f"cannot find training with id: {request.id}")
-        training_models = self.__data_storage.GetModels(request.username, request.id)
         
-        if len(list(training_models)) == 0:
-            return response
+        # if len(list(training_models)) == 0:
+        #     return response
 
-        response.status = training["status"]
+        training_models = self.__data_storage.GetModels(request.username, request.id)
         for model in list(training_models):
             autoMlStatus = AutoMlStatus()
             autoMlStatus.identifier = str(model["_id"])
@@ -204,10 +234,8 @@ class ControllerManager(object):
             autoMlStatus.model =  model["model"]
             autoMlStatus.library =  model["library"]
             response.automls.append(autoMlStatus)
-            response.identifier = str(model["_id"])
-            response.dataset_id = model["dataset_id"]
                     
-        
+        response.status = training["status"]
         response.dataset_id = training["dataset_id"]
         response.dataset_name = training["dataset_name"]
         response.task = training["task"]
@@ -220,6 +248,14 @@ class ControllerManager(object):
             response.required_ml_libraries.append(lib)
         response.runtime_constraints = json.dumps(training["runtime_constraints"])
         response.dataset_configuration = json.dumps(training["dataset_configuration"])
+            
+        response.events = []
+        for event in training.get('events', []):
+            response_event = StrategyControllerEvent()
+            response_event.type = event.get('type')
+            response_event.meta = json.dumps(event.get('meta'))
+            response_event.timestamp = event.get('timestamp')
+            response.events.append(response_event)
 
         return response
     
@@ -271,6 +307,15 @@ class ControllerManager(object):
                     trainingItem.required_ml_libraries.append(lib)
                 trainingItem.runtime_constraints = json.dumps(training["runtime_constraints"])
                 trainingItem.dataset_configuration = json.dumps(training["dataset_configuration"])
+            
+                trainingItem.events = []
+                for event in training.get('events', []):
+                    response_event = StrategyControllerEvent()
+                    response_event.type = event.get('type')
+                    response_event.meta = json.dumps(event.get('meta'))
+                    response_event.timestamp = event.get('timestamp')
+                    trainingItem.events.append(response_event)
+
                 response.trainings.append(trainingItem)
             except Exception as e:
                 print(f"exception: {e}")
@@ -423,6 +468,17 @@ class ControllerManager(object):
         return response
 
 
+    def GetObjectsInformation(self, request: "GetObjectsInformationRequest") -> "GetObjectsInformationResponse":
+        """
+        Get all information for a specific object
+        ---
+        Parameter
+        1. object id
+        ---
+        Return dictonary of object informations
+        """
+        return self.__rdfManager.GetObjectsInformation(request)
+
     def UploadNewDataset(self, dataset: "UploadDatasetFileRequest") -> "UploadDatasetFileResponse":
         """
         Upload a new dataset
@@ -488,8 +544,9 @@ class ControllerManager(object):
             "file_configuration": json.loads(configuration.file_configuration),
             "start_time": datetime.now()
         }
-        training_id = self.__data_storage.InsertTraining(configuration.username, config)
-        print(f"inserted new training: {training_id}")
+        with self.__data_storage.Lock():
+            training_id = self.__data_storage.InsertTraining(configuration.username, config)
+            print(f"inserted new training: {training_id}")
 
         # will be called when any automl is done
         # NOTE: will run in parallel
@@ -506,11 +563,13 @@ class ControllerManager(object):
                     self.__data_storage.UpdateTraining(configuration.username, training_id, {
                         "models": training["models"] + [model_id],
                         "status": "completed",
+                        "dataset_configuration": json.loads(configuration.dataset_configuration),
                         "end_time": datetime.now()
                     })
                 else:
                     self.__data_storage.UpdateTraining(configuration.username, training_id, {
-                        "models": training["models"] + [model_id]
+                        "models": training["models"] + [model_id],
+                        "dataset_configuration": json.loads(configuration.dataset_configuration)
                     })
 
             if model["status"] == "completed":

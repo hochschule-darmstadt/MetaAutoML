@@ -65,11 +65,10 @@ class AdapterManager(object):
             automls.append(automl)
 
         # start training and all AutoMLManager threads
-        new_training = AutoMLSession(training_id, configuration)
+        session = AutoMLSession(training_id, dataset_id, configuration, self.__data_storage, username)
         for automl in automls:
-            automl.start()
-            new_training.add_automl_to_training(automl)
-        return new_training
+            session.add_automl_to_training(automl)
+        return session
 
     def explain_automl(self, test_data, username, automl: str, training_id, config):
         host, port = map(os.getenv, self.__automl_addresses[automl.lower()])

@@ -48,6 +48,7 @@ namespace BlazorBoilerplate.Shared.Interfaces
         Task<ApiResponseDto> GetCompatibleAutoMlSolutions(GetCompatibleAutoMlSolutionsRequestDto request);
         Task<ApiResponseDto> GetSupportedMlLibraries(GetSupportedMlLibrariesRequestDto task);
         Task<ApiResponseDto> GetDatasetCompatibleTasks(GetDatasetCompatibleTasksRequestDto dataset);
+        Task<ApiResponseDto> GetAvailableStrategies(GetAvailableStrategiesRequestDto request);
         Task<ApiResponseDto> TestAutoML(TestAutoMLRequestDto datasetName);
         Task<ApiResponseDto> GetHomeOverviewInformation();
         Task<ApiResponseDto> SetDatasetConfiguration(SetDatasetFileConfigurationRequestDto dataset);

@@ -46,46 +46,52 @@ class ControllerService(ControllerServiceBase):
             data_storage = DataStorage(data_storage_dir)
         self._controllerManager = ControllerManager(data_storage)
 
-    async def create_new_user(
-        self, create_new_user_request: "CreateNewUserRequest"
-    ) -> "CreateNewUserResponse":
+    async def create_new_user(self) -> "CreateNewUserResponse":
         """ Return a new OMA-ML user id. """
-        response = self._controllerManager.CreateNewUser(create_new_user_request)
+        request = CreateNewUserRequest()
+        response = self._controllerManager.CreateNewUser(request)
         return response
 
     async def get_auto_ml_model(
-        self, get_auto_ml_model_request: "GetAutoMlModelRequest"
+        self, username: str, training_id: str, auto_ml: str
     ) -> "GetAutoMlModelResponse":
         """ return the generated model as a .zip for one AutoML by its Training id."""
-        response = self._controllerManager.GetAutoMlModel(get_auto_ml_model_request)
+        request = GetAutoMlModelRequest(username, training_id, auto_ml)
+        response = self._controllerManager.GetAutoMlModel(request)
         return response
 
     async def get_compatible_auto_ml_solutions(
-        self,
-        get_compatible_auto_ml_solutions_request: "GetCompatibleAutoMlSolutionsRequest",
+        self, username: str, configuration: Dict[str, str]
     ) -> "GetCompatibleAutoMlSolutionsResponse":
         """return a list of AutoML solutions compatible with the current configuration
         """
-        response = self._controllerManager.GetCompatibleAUtoMlSolutions(get_compatible_auto_ml_solutions_request)
+        request = GetCompatibleAutoMlSolutionsRequest(username, configuration)
+        response = self._controllerManager.GetCompatibleAutoMlSolutions(request)
         return response
 
-    async def get_dataset_types(
-        self, get_dataset_types_request: "GetDatasetTypesRequest"
-    ) -> "GetDatasetTypesResponse":
-            """return all dataset types."""
-            response = self._controllerManager.GetDatasetTypes(get_dataset_types_request)
-            return response
+    async def get_available_strategies(
+        self, username: str = "", configuration: Dict[str, str] = None
+    ) -> "GetAvailableStrategiesResponse":
+        """return a list of controller strategies available for the current configuration"""
+        request = GetAvailableStrategiesRequest(username, configuration)
+        response = self._controllerManager.GetAvailableStrategies(request)
+        return response
+
+    async def get_dataset_types(self) -> "GetDatasetTypesResponse":
+        """return all dataset types."""
+        request = GetDatasetTypesRequest()
+        response = self._controllerManager.GetDatasetTypes(request)
+        return response
 
     async def get_datasets(
-        self, get_datasets_request: "GetDatasetsRequest"
+        self, username: str, type: "DatasetType"
     ) -> "GetDatasetsResponse":
         """return all datasets of a specific type."""
-        datasets = self._controllerManager.GetDatasets(get_datasets_request)
+        request = GetDatasetsRequest(username, type)
+        datasets = self._controllerManager.GetDatasets(request)
         return datasets
 
-    async def get_dataset(
-        self, get_dataset_request: "GetDatasetRequest"
-    ) -> "GetDatasetResponse":
+    async def get_dataset(self, username: str, identifier: str) -> "GetDatasetResponse":
         """
         returns details of a specified dataset.
 
@@ -94,108 +100,136 @@ class ControllerService(ControllerServiceBase):
         datatype: the datatype of the column
         firstEntries: the first couple of rows of the dataset
         """
-        response = self._controllerManager.GetDataset(get_dataset_request)
+        request = GetDatasetRequest(username, identifier)
+        response = self._controllerManager.GetDataset(request)
         return response
 
-    async def get_trainings(
-        self, get_trainings_request: "GetTrainingsRequest"
-    ) -> "GetTrainingsResponse":
+    async def get_trainings(self, username: str) -> "GetTrainingsResponse":
         """return a list of all Trainings the controller has knowledge of. """
-        response = self._controllerManager.GetTrainings(get_trainings_request)
+        request = GetTrainingsRequest(username)
+        response = self._controllerManager.GetTrainings(request)
         return response
 
-    async def get_training(
-        self, get_training_request: "GetTrainingRequest"
-    ) -> "GetTrainingResponse":
+    async def get_training(self, username: str, id: str) -> "GetTrainingResponse":
         """return the status of a specific Training. The result is a Training status and a list of the automl output and its status."""
-        response = self._controllerManager.GetTraining(get_training_request)
+        request = GetTrainingRequest(username, id)
+        response = self._controllerManager.GetTraining(request)
         return response
 
-    async def get_all_trainings(
-        self, get_all_trainings_request: "GetAllTrainingsRequest"
-    ) -> "GetAllTrainingsResponse":
+    async def get_all_trainings(self, username: str) -> "GetAllTrainingsResponse":
         """return all existing trainings for a user"""
-        response = self._controllerManager.GetAllTrainings(get_all_trainings_request)
+        request = GetAllTrainingsRequest(username)
+        response = self._controllerManager.GetAllTrainings(request)
         return response
-
 
     async def get_supported_ml_libraries(
-        self, get_supported_ml_libraries_request: "GetSupportedMlLibrariesRequest"
+        self, username: str, task: str
     ) -> "GetSupportedMlLibrariesResponse":
         """return all supported machine learning libraries for a specific task (by searching supported AutoML)
         """
-        response = self._controllerManager.GetSupportedMlLibraries(get_supported_ml_libraries_request)
+        request = GetSupportedMlLibrariesRequest(username, task)
+        response = self._controllerManager.GetSupportedMlLibraries(request)
         return response
 
     async def get_tabular_dataset_column(
-        self,
-        get_tabular_dataset_column_names_request: "GetTabularDatasetColumnRequest",
+        self, username: str, dataset_identifier: str
     ) -> "GetTabularDatasetColumnResponse":
         """return all the column names of a tabular dataset."""
-        response = self._controllerManager.GetTabularDatasetColumn(get_tabular_dataset_column_names_request)
+        request = GetTabularDatasetColumnRequest(username, dataset_identifier)
+        response = self._controllerManager.GetTabularDatasetColumn(request)
         return response
 
     async def get_dataset_compatible_tasks(
-        self, get_dataset_compatible_tasks_request: "GetDatasetCompatibleTasksRequest"
+        self, username: str, dataset_name: str
     ) -> "GetDatasetCompatibleTasksResponse":
         """return all supported AutoML tasks."""
-        response = self._controllerManager.GetDatasetCompatibleTasks(get_dataset_compatible_tasks_request)
-        return response
-
-    async def get_objects_information(
-        self, get_object_information_request: "GetObjectsInformationRequest"
-    ) -> "GetObjectsInformationResponse":
-        """return all information fields of an object"""
-        response = self._controllerManager.GetObjectsInformation(get_object_information_request)
-        return response
-
-    async def get_home_overview_information(
-        self, get_home_overview_information_request: "GetHomeOverviewInformationRequest"
-    ) -> "GetHomeOverviewInformationResponse":
-        """return overview information for home page"""
-        response = self._controllerManager.GetHomeOverviewInformation(get_home_overview_information_request)
+        request = GetDatasetCompatibleTasksRequest(username, dataset_name)
+        response = self._controllerManager.GetDatasetCompatibleTasks(request)
         return response
 
     async def get_models(
-        self, get_models_request: "GetModelsRequest"
+        self, username: str, dataset_id: str, top3: bool
     ) -> "GetModelsResponse":
         """return all models for a given dataset, with option to only return top 3"""
-        response = self._controllerManager.GetModels(get_models_request)
+        request = GetModelsRequest(username, dataset_id, top3)
+        response = self._controllerManager.GetModels(request)
         return response
 
-    async def get_model(
-        self, get_model_request: "GetModelRequest"
-    ) -> "GetModelResponse":
+    async def get_model(self, username: str, model_id: str) -> "GetModelResponse":
         """return model for a given id"""
-        response = self._controllerManager.GetModel(get_model_request)
+        request = GetModelRequest(username, model_id)
+        response = self._controllerManager.GetModel(request)
+        return response
+
+    async def get_objects_information(
+        self, ids: Optional[List[str]]
+    ) -> "GetObjectsInformationResponse":
+        """return all information fields of an object"""
+        request = GetObjectsInformationRequest(ids)
+        response = self._controllerManager.GetObjectsInformation(request)
+        return response
+
+    async def get_home_overview_information(
+        self, user: str
+    ) -> "GetHomeOverviewInformationResponse":
+        """return overview information for home page"""
+        request = GetHomeOverviewInformationRequest(user)
+        response = self._controllerManager.GetHomeOverviewInformation(request)
         return response
 
     async def upload_dataset_file(
-        self, upload_dataset_file_request: "UploadDatasetFileRequest"
+        self, username: str, file_name: str, dataset_name: str, type: str
     ) -> "UploadDatasetFileResponse":
         """upload a new dataset file as bytes to the controller repository."""
-        response = self._controllerManager.UploadNewDataset(upload_dataset_file_request)
+        request = UploadDatasetFileRequest(username, file_name, dataset_name, type)
+        response = self._controllerManager.UploadNewDataset(request)
         return response
 
     async def set_dataset_configuration(
-        self, set_dataset_configuration_request: "SetDatasetConfigurationRequest"
+        self, username: str, identifier: str, file_configuration: str
     ) -> "SetDatasetConfigurationResponse":
         """persist new dataset configuration"""
-        response = self._controllerManager.SetDatasetConfiguration(set_dataset_configuration_request)
+        request = SetDatasetConfigurationRequest(username, identifier, file_configuration)
+        response = self._controllerManager.SetDatasetConfiguration(request)
         return response
 
     async def start_auto_ml_process(
-        self, start_auto_ml_process_request: "StartAutoMlProcessRequest"
+        self,
+        username: str,
+        dataset: str,
+        task: str,
+        configuration: str,
+        required_auto_mls: Optional[List[str]],
+        runtime_constraints: str,
+        dataset_configuration: str,
+        test_configuration: str,
+        file_configuration: str,
+        metric: str,
+        required_libraries: Optional[List[str]],
     ) -> "StartAutoMlProcessResponse":
         """start a new AutoML run, using the provided configuration."""
-        response = self._controllerManager.StartAutoMLProcess(start_auto_ml_process_request)
+        request = StartAutoMlProcessRequest(
+            username,
+            dataset,
+            task,
+            configuration,
+            required_auto_mls,
+            runtime_constraints,
+            dataset_configuration,
+            test_configuration,
+            file_configuration,
+            metric,
+            required_libraries,
+        )
+        response = self._controllerManager.StartAutoMLProcess(request)
         return response
 
     async def test_auto_ml(
-        self, test_auto_ml_request: "TestAutoMlRequest"
+        self, username: str, test_data: bytes, model_id: str
     ) -> "TestAutoMlResponse":
         """start a new AutoML run, using the provided configuration."""
-        response = self._controllerManager.TestAutoML(test_auto_ml_request)
+        request = TestAutoMlRequest(username, test_data, model_id)
+        response = self._controllerManager.TestAutoML(request)
         return response
 
 

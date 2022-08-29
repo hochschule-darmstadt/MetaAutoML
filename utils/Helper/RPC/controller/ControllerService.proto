@@ -22,6 +22,8 @@ service ControllerService {
   rpc GetAutoMlModel(GetAutoMlModelRequest) returns (GetAutoMlModelResponse) {}
   /*return a list of AutoML solutions compatible with the current configuration*/
   rpc GetCompatibleAutoMlSolutions(GetCompatibleAutoMlSolutionsRequest) returns (GetCompatibleAutoMlSolutionsResponse) {}
+  /*return a list of controller strategies available for the current configuration*/
+  rpc GetAvailableStrategies(GetAvailableStrategiesRequest) returns (GetAvailableStrategiesResponse) {}
   /*return all dataset types*/
   rpc GetDatasetTypes(GetDatasetTypesRequest) returns (GetDatasetTypesResponse) {}
   /*return all datasets of a specific type*/
