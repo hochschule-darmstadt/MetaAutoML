@@ -36,7 +36,7 @@ spec:
         - name: ASPNETCORE_ENVIRONMENT
           value: Development
         - name: ASPNETCORE_Kestrel__Certificates__Default__Password
-          value: Admin123
+          value: omaml2022Alex#
         - name: ASPNETCORE_Kestrel__Certificates__Default__Path
           value: aspnetapp.pfx
         - name: ASPNETCORE_URLS
@@ -44,13 +44,20 @@ spec:
         - name: BlazorBoilerplate__ApplicationUrl
           value: blazorboilerplate
         - name: BlazorBoilerplate__CertificatePassword
-          value: Admin123
+          value: omaml2022Alex#
         - name: BlazorBoilerplate__UseSqlServer
           value: "true"
         - name: ConnectionStrings__DefaultConnection
           value: "Server=sqlserver;Database=blazor_boilerplate;Trusted_Connection=True;MultipleActiveResultSets=true;User=sa;Password=yourVeryStrong(!)Password;Integrated Security=false"
         - name: Serilog__MinimumLevel__Default
           value: Debug
+        - name: CONTROLLER_DATASET_FOLDER_PATH
+          value: /app/app-data/datasets
+        volumeMounts:
+        - name: datasets
+          mountPath: /app/app-data/datasets
+        - name: training
+          mountPath: /app/app-data/training
         image: alexhda/omaml-frontend:latest
         name: blazorboilerplate
         ports:
@@ -61,4 +68,11 @@ spec:
             cpu: "2"
             memory: "2194304e3"
       restartPolicy: Always
+      volumes:
+      - name: datasets
+        persistentVolumeClaim:
+          claimName: datasets-claim
+      - name: training
+        persistentVolumeClaim:
+          claimName: training-claim
 status: {}

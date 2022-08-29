@@ -15,6 +15,12 @@ import "Common.proto";
 
 /*includes all gRPC functions available for the client frontend*/
 service ControllerService {
+  /*delete a specific dataset and every related object*/
+  rpc DeleteDataset(DeleteDatasetRequest) returns (DeleteDatasetResponse) {}
+  /*delete a specific training and every related object*/
+  rpc DeleteTraining(DeleteTrainingRequest) returns (DeleteTrainingResponse) {}
+  /*delete a specific model and every related object*/
+  rpc DeleteModel(DeleteModelRequest) returns (DeleteModelResponse) {}
   /*return the OMA-ML user name for a newly created frontend user, the result ID needs to be linked to the new user in the frontend user storage*/
   rpc CreateNewUser(CreateNewUserRequest) returns (CreateNewUserResponse) {}
 

@@ -4,6 +4,16 @@ option csharp_namespace = "BlazorBoilerplate.Server";
 import "Enumerations.proto";
 import "Common.proto";
 
+
+message DeleteModelRequest {
+  string username = 1;
+  string identifier = 2;
+}
+
+message DeleteModelResponse {
+   uint32 status = 1;
+}
+
 message GetAutoMlModelRequest {
     string username = 1;
     string trainingId = 2;

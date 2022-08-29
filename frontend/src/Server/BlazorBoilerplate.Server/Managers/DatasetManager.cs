@@ -133,6 +133,32 @@ namespace BlazorBoilerplate.Server.Managers
             }
         }
         /// <summary>
+        /// Delete a dataset
+        /// </summary>
+        /// <returns></returns>
+        public async Task<ApiResponse> DeleteDataset(DeleteDatasetRequestDto request)
+        {
+            DeleteDatasetResponseDto response = new DeleteDatasetResponseDto();
+            DeleteDatasetRequest deleteDatasetsRequest = new DeleteDatasetRequest();
+            var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
+            try
+            {
+                deleteDatasetsRequest.Identifier = request.Identifier;
+                deleteDatasetsRequest.Username = username;
+                var reply = _client.DeleteDataset(deleteDatasetsRequest);
+                response.Result = (int)reply.Status;
+                return new ApiResponse(Status200OK, null, response);
+
+            }
+            catch (Exception ex)
+            {
+
+                Console.WriteLine(ex.Message);
+                return new ApiResponse(Status404NotFound, ex.Message);
+            }
+        }
+
+        /// <summary>
         /// Get a list of all Datasets
         /// </summary>
         /// <returns></returns>

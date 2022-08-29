@@ -69,6 +69,31 @@ namespace BlazorBoilerplate.Server.Managers
                 return new ApiResponse(Status404NotFound, ex.Message);
             }
         }
+        /// <summary>
+        /// Delete a model
+        /// </summary>
+        /// <returns></returns>
+        public async Task<ApiResponse> DeleteModel(DeleteModelRequestDto request)
+        {
+            DeleteModelResponseDto response = new DeleteModelResponseDto();
+            DeleteModelRequest deleteModelsRequest = new DeleteModelRequest();
+            var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
+            try
+            {
+                deleteModelsRequest.Identifier = request.Identifier;
+                deleteModelsRequest.Username = username;
+                var reply = _client.DeleteModel(deleteModelsRequest);
+                response.Result = (int)reply.Status;
+                return new ApiResponse(Status200OK, null, response);
+
+            }
+            catch (Exception ex)
+            {
+
+                Console.WriteLine(ex.Message);
+                return new ApiResponse(Status404NotFound, ex.Message);
+            }
+        }
         public async Task<ApiResponse> GetModels(GetModelsRequestDto models)
         {
             GetModelsResponseDto response = new GetModelsResponseDto();

@@ -50,6 +50,15 @@ namespace BlazorBoilerplate.Server.Controllers
                 await _datasetManager.GetDataset(dataset) :
                 new ApiResponse(Status400BadRequest, L["InvalidData"]);
 
+        [HttpPost]
+        [ProducesResponseType(Status200OK)]
+        [ProducesResponseType(Status400BadRequest)]
+        [ProducesResponseType(Status404NotFound)]
+        public async Task<ApiResponse> DeleteDataset(DeleteDatasetRequestDto dataset)
+            => ModelState.IsValid ?
+                await _datasetManager.DeleteDataset(dataset) :
+                new ApiResponse(Status400BadRequest, L["InvalidData"]);
+
         [HttpGet]
         [ProducesResponseType(Status200OK)]
         [ProducesResponseType(Status400BadRequest)]

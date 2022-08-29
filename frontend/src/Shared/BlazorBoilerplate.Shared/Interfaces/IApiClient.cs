@@ -53,5 +53,8 @@ namespace BlazorBoilerplate.Shared.Interfaces
         Task<ApiResponseDto> GetHomeOverviewInformation();
         Task<ApiResponseDto> SetDatasetConfiguration(SetDatasetFileConfigurationRequestDto dataset);
         Task<ApiResponseDto> GetDatasetAnalysis(GetDatasetAnalysisRequestDto dataset);
+        Task<ApiResponseDto> DeleteDataset(DeleteDatasetRequestDto request);
+        Task<ApiResponseDto> DeleteTraining(DeleteModelRequestDto request);
+        Task<ApiResponseDto> DeleteModel(DeleteTrainingRequestDto request);
     }
 }

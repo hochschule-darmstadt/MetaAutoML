@@ -1,6 +1,8 @@
 ﻿using BlazorBoilerplate.Infrastructure.Server;
 using BlazorBoilerplate.Infrastructure.Server.Models;
 using BlazorBoilerplate.Server.Aop;
+using BlazorBoilerplate.Server.Managers;
+using BlazorBoilerplate.Shared.Dto.Dataset;
 using BlazorBoilerplate.Shared.Dto.Training;
 using BlazorBoilerplate.Shared.Localizer;
 using Microsoft.AspNetCore.Authorization;
@@ -28,6 +30,14 @@ namespace BlazorBoilerplate.Server.Controllers
             _trainingManager = trainingManager;
         }
 
+        [HttpPost]
+        [ProducesResponseType(Status200OK)]
+        [ProducesResponseType(Status400BadRequest)]
+        [ProducesResponseType(Status404NotFound)]
+        public async Task<ApiResponse> DeleteDataset(DeleteTrainingRequestDto training)
+            => ModelState.IsValid ?
+                await _trainingManager.DeleteTraining(training) :
+                new ApiResponse(Status400BadRequest, L["InvalidData"]);
         [HttpPost]
         [ProducesResponseType(Status200OK)]
         [ProducesResponseType(Status400BadRequest)]

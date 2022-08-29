@@ -13,13 +13,22 @@ message GetDatasetTypesResponse {
 }
 
 message GetDatasetsRequest {
-    string username = 1;
-    DatasetType type = 2;
-  }
-  
+  string username = 1;
+  DatasetType type = 2;
+}
+
 message GetDatasetsResponse {
-    repeated Dataset dataset = 1;
-  }
+  repeated Dataset dataset = 1;
+}
+
+message DeleteDatasetRequest {
+  string username = 1;
+  string identifier = 2;
+}
+
+message DeleteDatasetResponse {
+   uint32 status = 1;
+}
 
 message Dataset {
     string name = 1;

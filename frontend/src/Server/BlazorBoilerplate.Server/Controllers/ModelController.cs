@@ -2,8 +2,10 @@
 using BlazorBoilerplate.Infrastructure.Server.Models;
 using BlazorBoilerplate.Server.Aop;
 using BlazorBoilerplate.Shared.Dto.AutoML;
+using BlazorBoilerplate.Shared.Dto.Dataset;
 using BlazorBoilerplate.Shared.Dto.Model;
 using BlazorBoilerplate.Shared.Localizer;
+using BlazorBoilerplate.Theme.Material.Demo.Pages;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
@@ -28,6 +30,15 @@ namespace BlazorBoilerplate.Server.Controllers
             L = l;
             _modelManager = modelManager;
         }
+
+        [HttpPost]
+        [ProducesResponseType(Status200OK)]
+        [ProducesResponseType(Status400BadRequest)]
+        [ProducesResponseType(Status404NotFound)]
+        public async Task<ApiResponse> DeleteModel(DeleteModelRequestDto request)
+        => ModelState.IsValid ?
+                await _modelManager.DeleteModel(request) :
+                new ApiResponse(Status400BadRequest, L["InvalidData"]);
 
         [HttpPost]
         [ProducesResponseType(Status200OK)]

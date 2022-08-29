@@ -47,7 +47,6 @@ message StrategyControllerStrategy {
     string description = 3;
   }
 
-
 message StartAutoMlProcessRequest {
     string username = 1;
     string dataset = 2;

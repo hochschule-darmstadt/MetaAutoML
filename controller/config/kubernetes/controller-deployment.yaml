@@ -34,6 +34,8 @@ spec:
         volumeMounts:
         - name: datasets
           mountPath: /app/app-data/datasets
+        - name: training
+          mountPath: /app/app-data/training
         - name: autokeras-output
           mountPath: /app/app-data/output/autokeras
         - name: mljar-output
@@ -54,6 +56,9 @@ spec:
       - name: datasets
         persistentVolumeClaim:
           claimName: datasets-claim
+      - name: training
+        persistentVolumeClaim:
+          claimName: training-claim
       - name: autokeras-output
         persistentVolumeClaim:
           claimName: output-autokeras-claim

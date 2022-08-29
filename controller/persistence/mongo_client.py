@@ -1,9 +1,11 @@
 
+from re import U
 from xmlrpc.client import boolean
 from pymongo import MongoClient
 from pymongo.collection import Collection
 from bson.objectid import ObjectId
 from mongomock import MongoClient as MongoMockClient
+import shutil
 
 class Database:
     """
@@ -117,6 +119,76 @@ class Database:
         result = datasets.update_one({ "_id": ObjectId(id) }, { "$set": new_values })
         return result.modified_count >= 1
 
+    def DeleteDataset(self, username: str, filter: 'dict[str, object]'):
+        """
+        Delete a dataset record
+        ---
+        Parameter
+        1. username
+        2. deletion filter
+        ---
+        Returns amount of deleted objects
+        """
+        datasets: Collection = self.__mongo[username]["datasets"]
+        dataset = datasets.find_one(filter)
+        path = dataset["path"]
+        path = path.replace("\\"+ dataset["file_name"], "")
+        self.DeleteTraining(username, { "dataset_id": str(filter["_id"])})
+        datasets: Collection = self.__mongo[username]["datasets"]
+        result = datasets.delete_one(filter)
+        shutil.rmtree(path)
+        return result.deleted_count
+
+    def DeleteModel(self, username: str, filter: 'dict[str, object]'):
+        """
+        Delete models record
+        ---
+        Parameter
+        1. username
+        2. deletion filter
+        ---
+        Returns amount of deleted objects
+        """
+        models = self.GetModels(username, filter)
+        for model in list(models):
+            path: str = model["path"]
+            if model["automl_name"] == ":alphad3m":
+                path = path.replace("\\export\\alphad3m-export.zip", "")
+            elif model["automl_name"] == ":autocve":
+                path = path.replace("\\export\\autocve-export.zip", "")
+            elif model["automl_name"] == ":autogluon":
+                path = path.replace("\\export\\gluon-export.zip", "")
+            elif model["automl_name"] == ":autokeras":
+                path = path.replace("\\export\\keras-export.zip", "")
+            elif model["automl_name"] == ":autopytorch":
+                path = path.replace("\\export\\pytorch-export.zip", "")
+            elif model["automl_name"] == ":autosklearn":
+                path = path.replace("\\export\\sklearn-export.zip", "")
+            elif model["automl_name"] == ":flaml":
+                path = path.replace("\\export\\flaml-export.zip", "")
+            elif model["automl_name"] == ":mcfly":
+                path = path.replace("\\export\\mcfly-export.zip", "")
+            elif model["automl_name"] == ":mljar":
+                path = path.replace("\\export\\mljar-export.zip", "")
+            shutil.rmtree(path)
+        models: Collection = self.__mongo[username]["models"]
+        result = models.delete_many(filter)
+        return result.deleted_count
+
+    def DeleteTraining(self, username: str, filter: 'dict[str, object]'):
+        """
+        Delete trainings record
+        ---
+        Parameter
+        1. username
+        2. deletion filter
+        ---
+        Returns amount of deleted objects
+        """
+        trainings: Collection = self.__mongo[username]["trainings"]
+        self.DeleteModel(username, { "training_id": str(trainings["_id"])})
+        result = trainings.delete_many(filter)
+        return result.deleted_count
 
     def InsertTraining(self, username: str, training_config: 'dict[str, str]'):
         """

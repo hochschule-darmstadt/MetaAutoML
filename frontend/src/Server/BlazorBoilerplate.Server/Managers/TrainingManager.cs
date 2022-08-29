@@ -1,5 +1,6 @@
 ﻿using BlazorBoilerplate.Infrastructure.Server;
 using BlazorBoilerplate.Infrastructure.Server.Models;
+using BlazorBoilerplate.Shared.Dto.Dataset;
 using BlazorBoilerplate.Shared.Dto.Training;
 using BlazorBoilerplate.Storage;
 using Google.Protobuf.Collections;
@@ -28,7 +29,32 @@ namespace BlazorBoilerplate.Server.Managers
             _dbContext = dbContext;
             _client = client;
             _httpContextAccessor = httpContextAccessor;
-            _cacheManager = cacheManager;   
+            _cacheManager = cacheManager;
+        }
+        /// <summary>
+        /// Delete a training
+        /// </summary>
+        /// <returns></returns>
+        public async Task<ApiResponse> DeleteTraining(DeleteTrainingRequestDto request)
+        {
+            DeleteTrainingResponseDto response = new DeleteTrainingResponseDto();
+            DeleteTrainingRequest deleteTrainingsRequest = new DeleteTrainingRequest();
+            var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
+            try
+            {
+                deleteTrainingsRequest.Identifier = request.Identifier;
+                deleteTrainingsRequest.Username = username;
+                var reply = _client.DeleteTraining(deleteTrainingsRequest);
+                response.Result = (int)reply.Status;
+                return new ApiResponse(Status200OK, null, response);
+
+            }
+            catch (Exception ex)
+            {
+
+                Console.WriteLine(ex.Message);
+                return new ApiResponse(Status404NotFound, ex.Message);
+            }
         }
         /// <summary>
         /// Get informations about a specific session

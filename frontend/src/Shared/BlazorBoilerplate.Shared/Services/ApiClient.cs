@@ -177,5 +177,20 @@ namespace BlazorBoilerplate.Shared.Services
         {
             return await httpClient.PostJsonAsync<ApiResponseDto>("api/Model/GetModelExplanation", model);
         }
+
+        public async Task<ApiResponseDto> DeleteDataset(DeleteDatasetRequestDto request)
+        {
+            return await httpClient.PostJsonAsync<ApiResponseDto>("api/Dataset/DeleteDataset", request);
+        }
+
+        public async Task<ApiResponseDto> DeleteTraining(DeleteModelRequestDto request)
+        {
+            return await httpClient.PostJsonAsync<ApiResponseDto>("api/Training/DeleteTraining", request);
+        }
+
+        public async Task<ApiResponseDto> DeleteModel(DeleteTrainingRequestDto request)
+        {
+            return await httpClient.PostJsonAsync<ApiResponseDto>("api/Model/DeleteModel", request);
+        }
     }
 }

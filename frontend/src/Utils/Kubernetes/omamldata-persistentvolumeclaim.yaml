@@ -13,6 +13,18 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
+  name: training-claim
+spec:
+  accessModes:
+  - ReadWriteMany
+  resources:
+    requests:
+      storage: 50Gi
+  storageClassName: managed-nfs-storage
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
   name: datasets-claim
 spec:
   accessModes:
@@ -109,6 +121,30 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
+  name: output-alphad3m-claim
+spec:
+  accessModes:
+  - ReadWriteMany
+  resources:
+    requests:
+      storage: 50Gi
+  storageClassName: managed-nfs-storage
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: output-mcfly-claim
+spec:
+  accessModes:
+  - ReadWriteMany
+  resources:
+    requests:
+      storage: 50Gi
+  storageClassName: managed-nfs-storage
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
   name: mongodb-claim
 spec:
   accessModes:
@@ -127,7 +163,7 @@ spec:
   - ReadWriteMany
   resources:
     requests:
-      storage: 50Gi
+      storage: 10Gi
   storageClassName: managed-nfs-storage
 
 apiVersion: v1
