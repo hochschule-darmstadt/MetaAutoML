@@ -3,21 +3,11 @@
 # plugin: python-betterproto
 from dataclasses import dataclass
 from datetime import datetime
-from typing import (
-    TYPE_CHECKING,
-    Dict,
-    List,
-    Optional,
-)
+from typing import Dict, List, Optional
 
 import betterproto
-import grpclib
 from betterproto.grpc.grpclib_server import ServiceBase
-
-
-if TYPE_CHECKING:
-    from betterproto.grpc.grpclib_client import MetadataLike
-    from grpclib.metadata import Deadline
+import grpclib
 
 
 class ResultCode(betterproto.Enum):
@@ -284,6 +274,7 @@ class GetTrainingResponse(betterproto.Message):
     dataset_configuration: str = betterproto.string_field(10)
     identifier: str = betterproto.string_field(11)
     start_time: datetime = betterproto.message_field(12)
+    events: List["StrategyControllerEvent"] = betterproto.message_field(13)
 
 
 @dataclass(eq=False, repr=False)
@@ -298,6 +289,13 @@ class AutoMlStatus(betterproto.Message):
     library: str = betterproto.string_field(8)
     model: str = betterproto.string_field(9)
     identifier: str = betterproto.string_field(10)
+
+
+@dataclass(eq=False, repr=False)
+class StrategyControllerEvent(betterproto.Message):
+    type: str = betterproto.string_field(1)
+    meta: str = betterproto.string_field(2)
+    timestamp: datetime = betterproto.message_field(3)
 
 
 @dataclass(eq=False, repr=False)
@@ -361,6 +359,26 @@ class GetSupportedMlLibrariesResponse(betterproto.Message):
 
 
 @dataclass(eq=False, repr=False)
+class GetAvailableStrategiesRequest(betterproto.Message):
+    username: str = betterproto.string_field(1)
+    configuration: Dict[str, str] = betterproto.map_field(
+        2, betterproto.TYPE_STRING, betterproto.TYPE_STRING
+    )
+
+
+@dataclass(eq=False, repr=False)
+class GetAvailableStrategiesResponse(betterproto.Message):
+    strategies: List["StrategyControllerStrategy"] = betterproto.message_field(1)
+
+
+@dataclass(eq=False, repr=False)
+class StrategyControllerStrategy(betterproto.Message):
+    id: str = betterproto.string_field(1)
+    title: str = betterproto.string_field(2)
+    description: str = betterproto.string_field(3)
+
+
+@dataclass(eq=False, repr=False)
 class StartAutoMlProcessRequest(betterproto.Message):
     username: str = betterproto.string_field(1)
     dataset: str = betterproto.string_field(2)
@@ -382,541 +400,649 @@ class StartAutoMlProcessResponse(betterproto.Message):
 
 
 class ControllerServiceStub(betterproto.ServiceStub):
-    async def create_new_user(
-        self,
-        create_new_user_request: "CreateNewUserRequest",
-        timeout: Optional[float] = None,
-        deadline: Optional["Deadline"] = None,
-        metadata: Optional["_MetadataLike"] = None,
-    ) -> "CreateNewUserResponse":
+    async def create_new_user(self) -> "CreateNewUserResponse":
+
+        request = CreateNewUserRequest()
+
         return await self._unary_unary(
-            "/ControllerService/CreateNewUser",
-            create_new_user_request,
-            CreateNewUserResponse,
-            timeout=timeout,
-            deadline=deadline,
-            metadata=metadata,
+            "/ControllerService/CreateNewUser", request, CreateNewUserResponse
         )
 
     async def get_auto_ml_model(
-        self,
-        get_auto_ml_model_request: "GetAutoMlModelRequest",
-        timeout: Optional[float] = None,
-        deadline: Optional["Deadline"] = None,
-        metadata: Optional["_MetadataLike"] = None,
+        self, *, username: str = "", training_id: str = "", auto_ml: str = ""
     ) -> "GetAutoMlModelResponse":
+
+        request = GetAutoMlModelRequest()
+        request.username = username
+        request.training_id = training_id
+        request.auto_ml = auto_ml
+
         return await self._unary_unary(
-            "/ControllerService/GetAutoMlModel",
-            get_auto_ml_model_request,
-            GetAutoMlModelResponse,
-            timeout=timeout,
-            deadline=deadline,
-            metadata=metadata,
+            "/ControllerService/GetAutoMlModel", request, GetAutoMlModelResponse
         )
 
     async def get_compatible_auto_ml_solutions(
-        self,
-        get_compatible_auto_ml_solutions_request: "GetCompatibleAutoMlSolutionsRequest",
-        timeout: Optional[float] = None,
-        deadline: Optional["Deadline"] = None,
-        metadata: Optional["_MetadataLike"] = None,
+        self, *, username: str = "", configuration: Dict[str, str] = None
     ) -> "GetCompatibleAutoMlSolutionsResponse":
+
+        request = GetCompatibleAutoMlSolutionsRequest()
+        request.username = username
+        request.configuration = configuration
+
         return await self._unary_unary(
             "/ControllerService/GetCompatibleAutoMlSolutions",
-            get_compatible_auto_ml_solutions_request,
+            request,
             GetCompatibleAutoMlSolutionsResponse,
-            timeout=timeout,
-            deadline=deadline,
-            metadata=metadata,
         )
 
-    async def get_dataset_types(
-        self,
-        get_dataset_types_request: "GetDatasetTypesRequest",
-        timeout: Optional[float] = None,
-        deadline: Optional["Deadline"] = None,
-        metadata: Optional["_MetadataLike"] = None,
-    ) -> "GetDatasetTypesResponse":
+    async def get_available_strategies(
+        self, *, username: str = "", configuration: Dict[str, str] = None
+    ) -> "GetAvailableStrategiesResponse":
+
+        request = GetAvailableStrategiesRequest()
+        request.username = username
+        request.configuration = configuration
+
         return await self._unary_unary(
-            "/ControllerService/GetDatasetTypes",
-            get_dataset_types_request,
-            GetDatasetTypesResponse,
-            timeout=timeout,
-            deadline=deadline,
-            metadata=metadata,
+            "/ControllerService/GetAvailableStrategies",
+            request,
+            GetAvailableStrategiesResponse,
+        )
+
+    async def get_dataset_types(self) -> "GetDatasetTypesResponse":
+
+        request = GetDatasetTypesRequest()
+
+        return await self._unary_unary(
+            "/ControllerService/GetDatasetTypes", request, GetDatasetTypesResponse
         )
 
     async def get_datasets(
-        self,
-        get_datasets_request: "GetDatasetsRequest",
-        timeout: Optional[float] = None,
-        deadline: Optional["Deadline"] = None,
-        metadata: Optional["_MetadataLike"] = None,
+        self, *, username: str = "", type: "DatasetType" = 0
     ) -> "GetDatasetsResponse":
+
+        request = GetDatasetsRequest()
+        request.username = username
+        request.type = type
+
         return await self._unary_unary(
-            "/ControllerService/GetDatasets",
-            get_datasets_request,
-            GetDatasetsResponse,
-            timeout=timeout,
-            deadline=deadline,
-            metadata=metadata,
+            "/ControllerService/GetDatasets", request, GetDatasetsResponse
         )
 
     async def get_dataset(
-        self,
-        get_dataset_request: "GetDatasetRequest",
-        timeout: Optional[float] = None,
-        deadline: Optional["Deadline"] = None,
-        metadata: Optional["_MetadataLike"] = None,
+        self, *, username: str = "", identifier: str = ""
     ) -> "GetDatasetResponse":
+
+        request = GetDatasetRequest()
+        request.username = username
+        request.identifier = identifier
+
         return await self._unary_unary(
-            "/ControllerService/GetDataset",
-            get_dataset_request,
-            GetDatasetResponse,
-            timeout=timeout,
-            deadline=deadline,
-            metadata=metadata,
+            "/ControllerService/GetDataset", request, GetDatasetResponse
         )
 
-    async def get_trainings(
-        self,
-        get_trainings_request: "GetTrainingsRequest",
-        timeout: Optional[float] = None,
-        deadline: Optional["Deadline"] = None,
-        metadata: Optional["_MetadataLike"] = None,
-    ) -> "GetTrainingsResponse":
+    async def get_trainings(self, *, username: str = "") -> "GetTrainingsResponse":
+
+        request = GetTrainingsRequest()
+        request.username = username
+
         return await self._unary_unary(
-            "/ControllerService/GetTrainings",
-            get_trainings_request,
-            GetTrainingsResponse,
-            timeout=timeout,
-            deadline=deadline,
-            metadata=metadata,
+            "/ControllerService/GetTrainings", request, GetTrainingsResponse
         )
 
     async def get_training(
-        self,
-        get_training_request: "GetTrainingRequest",
-        timeout: Optional[float] = None,
-        deadline: Optional["Deadline"] = None,
-        metadata: Optional["_MetadataLike"] = None,
+        self, *, username: str = "", id: str = ""
     ) -> "GetTrainingResponse":
+
+        request = GetTrainingRequest()
+        request.username = username
+        request.id = id
+
         return await self._unary_unary(
-            "/ControllerService/GetTraining",
-            get_training_request,
-            GetTrainingResponse,
-            timeout=timeout,
-            deadline=deadline,
-            metadata=metadata,
+            "/ControllerService/GetTraining", request, GetTrainingResponse
         )
 
     async def get_all_trainings(
-        self,
-        get_all_trainings_request: "GetAllTrainingsRequest",
-        timeout: Optional[float] = None,
-        deadline: Optional["Deadline"] = None,
-        metadata: Optional["_MetadataLike"] = None,
+        self, *, username: str = ""
     ) -> "GetAllTrainingsResponse":
+
+        request = GetAllTrainingsRequest()
+        request.username = username
+
         return await self._unary_unary(
-            "/ControllerService/GetAllTrainings",
-            get_all_trainings_request,
-            GetAllTrainingsResponse,
-            timeout=timeout,
-            deadline=deadline,
-            metadata=metadata,
+            "/ControllerService/GetAllTrainings", request, GetAllTrainingsResponse
         )
 
     async def get_supported_ml_libraries(
-        self,
-        get_supported_ml_libraries_request: "GetSupportedMlLibrariesRequest",
-        timeout: Optional[float] = None,
-        deadline: Optional["Deadline"] = None,
-        metadata: Optional["_MetadataLike"] = None,
+        self, *, username: str = "", task: str = ""
     ) -> "GetSupportedMlLibrariesResponse":
+
+        request = GetSupportedMlLibrariesRequest()
+        request.username = username
+        request.task = task
+
         return await self._unary_unary(
             "/ControllerService/GetSupportedMlLibraries",
-            get_supported_ml_libraries_request,
+            request,
             GetSupportedMlLibrariesResponse,
-            timeout=timeout,
-            deadline=deadline,
-            metadata=metadata,
         )
 
     async def get_tabular_dataset_column(
-        self,
-        get_tabular_dataset_column_request: "GetTabularDatasetColumnRequest",
-        timeout: Optional[float] = None,
-        deadline: Optional["Deadline"] = None,
-        metadata: Optional["_MetadataLike"] = None,
+        self, *, username: str = "", dataset_identifier: str = ""
     ) -> "GetTabularDatasetColumnResponse":
+
+        request = GetTabularDatasetColumnRequest()
+        request.username = username
+        request.dataset_identifier = dataset_identifier
+
         return await self._unary_unary(
             "/ControllerService/GetTabularDatasetColumn",
-            get_tabular_dataset_column_request,
+            request,
             GetTabularDatasetColumnResponse,
-            timeout=timeout,
-            deadline=deadline,
-            metadata=metadata,
         )
 
     async def get_dataset_compatible_tasks(
-        self,
-        get_dataset_compatible_tasks_request: "GetDatasetCompatibleTasksRequest",
-        timeout: Optional[float] = None,
-        deadline: Optional["Deadline"] = None,
-        metadata: Optional["_MetadataLike"] = None,
+        self, *, username: str = "", dataset_name: str = ""
     ) -> "GetDatasetCompatibleTasksResponse":
+
+        request = GetDatasetCompatibleTasksRequest()
+        request.username = username
+        request.dataset_name = dataset_name
+
         return await self._unary_unary(
             "/ControllerService/GetDatasetCompatibleTasks",
-            get_dataset_compatible_tasks_request,
+            request,
             GetDatasetCompatibleTasksResponse,
-            timeout=timeout,
-            deadline=deadline,
-            metadata=metadata,
         )
 
     async def get_models(
-        self,
-        get_models_request: "GetModelsRequest",
-        timeout: Optional[float] = None,
-        deadline: Optional["Deadline"] = None,
-        metadata: Optional["_MetadataLike"] = None,
+        self, *, username: str = "", dataset_id: str = "", top3: bool = False
     ) -> "GetModelsResponse":
+
+        request = GetModelsRequest()
+        request.username = username
+        request.dataset_id = dataset_id
+        request.top3 = top3
+
         return await self._unary_unary(
-            "/ControllerService/GetModels",
-            get_models_request,
-            GetModelsResponse,
-            timeout=timeout,
-            deadline=deadline,
-            metadata=metadata,
+            "/ControllerService/GetModels", request, GetModelsResponse
         )
 
     async def get_model(
-        self,
-        get_model_request: "GetModelRequest",
-        timeout: Optional[float] = None,
-        deadline: Optional["Deadline"] = None,
-        metadata: Optional["_MetadataLike"] = None,
+        self, *, username: str = "", model_id: str = ""
     ) -> "GetModelResponse":
+
+        request = GetModelRequest()
+        request.username = username
+        request.model_id = model_id
+
         return await self._unary_unary(
-            "/ControllerService/GetModel",
-            get_model_request,
-            GetModelResponse,
-            timeout=timeout,
-            deadline=deadline,
-            metadata=metadata,
+            "/ControllerService/GetModel", request, GetModelResponse
         )
 
     async def get_objects_information(
-        self,
-        get_objects_information_request: "GetObjectsInformationRequest",
-        timeout: Optional[float] = None,
-        deadline: Optional["Deadline"] = None,
-        metadata: Optional["_MetadataLike"] = None,
+        self, *, ids: Optional[List[str]] = None
     ) -> "GetObjectsInformationResponse":
+        ids = ids or []
+
+        request = GetObjectsInformationRequest()
+        request.ids = ids
+
         return await self._unary_unary(
             "/ControllerService/GetObjectsInformation",
-            get_objects_information_request,
+            request,
             GetObjectsInformationResponse,
-            timeout=timeout,
-            deadline=deadline,
-            metadata=metadata,
         )
 
     async def get_home_overview_information(
-        self,
-        get_home_overview_information_request: "GetHomeOverviewInformationRequest",
-        timeout: Optional[float] = None,
-        deadline: Optional["Deadline"] = None,
-        metadata: Optional["_MetadataLike"] = None,
+        self, *, user: str = ""
     ) -> "GetHomeOverviewInformationResponse":
+
+        request = GetHomeOverviewInformationRequest()
+        request.user = user
+
         return await self._unary_unary(
             "/ControllerService/GetHomeOverviewInformation",
-            get_home_overview_information_request,
+            request,
             GetHomeOverviewInformationResponse,
-            timeout=timeout,
-            deadline=deadline,
-            metadata=metadata,
         )
 
     async def upload_dataset_file(
         self,
-        upload_dataset_file_request: "UploadDatasetFileRequest",
-        timeout: Optional[float] = None,
-        deadline: Optional["Deadline"] = None,
-        metadata: Optional["_MetadataLike"] = None,
+        *,
+        username: str = "",
+        file_name: str = "",
+        dataset_name: str = "",
+        type: str = ""
     ) -> "UploadDatasetFileResponse":
+
+        request = UploadDatasetFileRequest()
+        request.username = username
+        request.file_name = file_name
+        request.dataset_name = dataset_name
+        request.type = type
+
         return await self._unary_unary(
-            "/ControllerService/UploadDatasetFile",
-            upload_dataset_file_request,
-            UploadDatasetFileResponse,
-            timeout=timeout,
-            deadline=deadline,
-            metadata=metadata,
+            "/ControllerService/UploadDatasetFile", request, UploadDatasetFileResponse
         )
 
     async def start_auto_ml_process(
         self,
-        start_auto_ml_process_request: "StartAutoMlProcessRequest",
-        timeout: Optional[float] = None,
-        deadline: Optional["Deadline"] = None,
-        metadata: Optional["_MetadataLike"] = None,
+        *,
+        username: str = "",
+        dataset: str = "",
+        task: str = "",
+        configuration: str = "",
+        required_auto_mls: Optional[List[str]] = None,
+        runtime_constraints: str = "",
+        dataset_configuration: str = "",
+        test_configuration: str = "",
+        file_configuration: str = "",
+        metric: str = "",
+        required_libraries: Optional[List[str]] = None
     ) -> "StartAutoMlProcessResponse":
+        required_auto_mls = required_auto_mls or []
+        required_libraries = required_libraries or []
+
+        request = StartAutoMlProcessRequest()
+        request.username = username
+        request.dataset = dataset
+        request.task = task
+        request.configuration = configuration
+        request.required_auto_mls = required_auto_mls
+        request.runtime_constraints = runtime_constraints
+        request.dataset_configuration = dataset_configuration
+        request.test_configuration = test_configuration
+        request.file_configuration = file_configuration
+        request.metric = metric
+        request.required_libraries = required_libraries
+
         return await self._unary_unary(
-            "/ControllerService/StartAutoMlProcess",
-            start_auto_ml_process_request,
-            StartAutoMlProcessResponse,
-            timeout=timeout,
-            deadline=deadline,
-            metadata=metadata,
+            "/ControllerService/StartAutoMlProcess", request, StartAutoMlProcessResponse
         )
 
     async def set_dataset_configuration(
-        self,
-        set_dataset_configuration_request: "SetDatasetConfigurationRequest",
-        timeout: Optional[float] = None,
-        deadline: Optional["Deadline"] = None,
-        metadata: Optional["_MetadataLike"] = None,
+        self, *, username: str = "", identifier: str = "", file_configuration: str = ""
     ) -> "SetDatasetConfigurationResponse":
+
+        request = SetDatasetConfigurationRequest()
+        request.username = username
+        request.identifier = identifier
+        request.file_configuration = file_configuration
+
         return await self._unary_unary(
             "/ControllerService/SetDatasetConfiguration",
-            set_dataset_configuration_request,
+            request,
             SetDatasetConfigurationResponse,
-            timeout=timeout,
-            deadline=deadline,
-            metadata=metadata,
         )
 
     async def test_auto_ml(
-        self,
-        test_auto_ml_request: "TestAutoMlRequest",
-        timeout: Optional[float] = None,
-        deadline: Optional["Deadline"] = None,
-        metadata: Optional["_MetadataLike"] = None,
+        self, *, username: str = "", test_data: bytes = b"", model_id: str = ""
     ) -> "TestAutoMlResponse":
+
+        request = TestAutoMlRequest()
+        request.username = username
+        request.test_data = test_data
+        request.model_id = model_id
+
         return await self._unary_unary(
-            "/ControllerService/TestAutoML",
-            test_auto_ml_request,
-            TestAutoMlResponse,
-            timeout=timeout,
-            deadline=deadline,
-            metadata=metadata,
+            "/ControllerService/TestAutoML", request, TestAutoMlResponse
         )
 
 
 class ControllerServiceBase(ServiceBase):
-    async def create_new_user(
-        self, create_new_user_request: "CreateNewUserRequest"
-    ) -> "CreateNewUserResponse":
+    async def create_new_user(self) -> "CreateNewUserResponse":
         raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
 
     async def get_auto_ml_model(
-        self, get_auto_ml_model_request: "GetAutoMlModelRequest"
+        self, username: str, training_id: str, auto_ml: str
     ) -> "GetAutoMlModelResponse":
         raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
 
     async def get_compatible_auto_ml_solutions(
-        self,
-        get_compatible_auto_ml_solutions_request: "GetCompatibleAutoMlSolutionsRequest",
+        self, username: str, configuration: Dict[str, str]
     ) -> "GetCompatibleAutoMlSolutionsResponse":
         raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
 
-    async def get_dataset_types(
-        self, get_dataset_types_request: "GetDatasetTypesRequest"
-    ) -> "GetDatasetTypesResponse":
+    async def get_available_strategies(
+        self, username: str, configuration: Dict[str, str]
+    ) -> "GetAvailableStrategiesResponse":
+        raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
+
+    async def get_dataset_types(self) -> "GetDatasetTypesResponse":
         raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
 
     async def get_datasets(
-        self, get_datasets_request: "GetDatasetsRequest"
+        self, username: str, type: "DatasetType"
     ) -> "GetDatasetsResponse":
         raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
 
-    async def get_dataset(
-        self, get_dataset_request: "GetDatasetRequest"
-    ) -> "GetDatasetResponse":
+    async def get_dataset(self, username: str, identifier: str) -> "GetDatasetResponse":
         raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
 
-    async def get_trainings(
-        self, get_trainings_request: "GetTrainingsRequest"
-    ) -> "GetTrainingsResponse":
+    async def get_trainings(self, username: str) -> "GetTrainingsResponse":
         raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
 
-    async def get_training(
-        self, get_training_request: "GetTrainingRequest"
-    ) -> "GetTrainingResponse":
+    async def get_training(self, username: str, id: str) -> "GetTrainingResponse":
         raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
 
-    async def get_all_trainings(
-        self, get_all_trainings_request: "GetAllTrainingsRequest"
-    ) -> "GetAllTrainingsResponse":
+    async def get_all_trainings(self, username: str) -> "GetAllTrainingsResponse":
         raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
 
     async def get_supported_ml_libraries(
-        self, get_supported_ml_libraries_request: "GetSupportedMlLibrariesRequest"
+        self, username: str, task: str
     ) -> "GetSupportedMlLibrariesResponse":
         raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
 
     async def get_tabular_dataset_column(
-        self, get_tabular_dataset_column_request: "GetTabularDatasetColumnRequest"
+        self, username: str, dataset_identifier: str
     ) -> "GetTabularDatasetColumnResponse":
         raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
 
     async def get_dataset_compatible_tasks(
-        self, get_dataset_compatible_tasks_request: "GetDatasetCompatibleTasksRequest"
+        self, username: str, dataset_name: str
     ) -> "GetDatasetCompatibleTasksResponse":
         raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
 
     async def get_models(
-        self, get_models_request: "GetModelsRequest"
+        self, username: str, dataset_id: str, top3: bool
     ) -> "GetModelsResponse":
         raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
 
-    async def get_model(
-        self, get_model_request: "GetModelRequest"
-    ) -> "GetModelResponse":
+    async def get_model(self, username: str, model_id: str) -> "GetModelResponse":
         raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
 
     async def get_objects_information(
-        self, get_objects_information_request: "GetObjectsInformationRequest"
+        self, ids: Optional[List[str]]
     ) -> "GetObjectsInformationResponse":
         raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
 
     async def get_home_overview_information(
-        self, get_home_overview_information_request: "GetHomeOverviewInformationRequest"
+        self, user: str
     ) -> "GetHomeOverviewInformationResponse":
         raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
 
     async def upload_dataset_file(
-        self, upload_dataset_file_request: "UploadDatasetFileRequest"
+        self, username: str, file_name: str, dataset_name: str, type: str
     ) -> "UploadDatasetFileResponse":
         raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
 
     async def start_auto_ml_process(
-        self, start_auto_ml_process_request: "StartAutoMlProcessRequest"
+        self,
+        username: str,
+        dataset: str,
+        task: str,
+        configuration: str,
+        required_auto_mls: Optional[List[str]],
+        runtime_constraints: str,
+        dataset_configuration: str,
+        test_configuration: str,
+        file_configuration: str,
+        metric: str,
+        required_libraries: Optional[List[str]],
     ) -> "StartAutoMlProcessResponse":
         raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
 
     async def set_dataset_configuration(
-        self, set_dataset_configuration_request: "SetDatasetConfigurationRequest"
+        self, username: str, identifier: str, file_configuration: str
     ) -> "SetDatasetConfigurationResponse":
         raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
 
     async def test_auto_ml(
-        self, test_auto_ml_request: "TestAutoMlRequest"
+        self, username: str, test_data: bytes, model_id: str
     ) -> "TestAutoMlResponse":
         raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
 
     async def __rpc_create_new_user(self, stream: grpclib.server.Stream) -> None:
         request = await stream.recv_message()
-        response = await self.create_new_user(request)
+
+        request_kwargs = {}
+
+        response = await self.create_new_user(**request_kwargs)
         await stream.send_message(response)
 
     async def __rpc_get_auto_ml_model(self, stream: grpclib.server.Stream) -> None:
         request = await stream.recv_message()
-        response = await self.get_auto_ml_model(request)
+
+        request_kwargs = {
+            "username": request.username,
+            "training_id": request.training_id,
+            "auto_ml": request.auto_ml,
+        }
+
+        response = await self.get_auto_ml_model(**request_kwargs)
         await stream.send_message(response)
 
     async def __rpc_get_compatible_auto_ml_solutions(
         self, stream: grpclib.server.Stream
     ) -> None:
         request = await stream.recv_message()
-        response = await self.get_compatible_auto_ml_solutions(request)
+
+        request_kwargs = {
+            "username": request.username,
+            "configuration": request.configuration,
+        }
+
+        response = await self.get_compatible_auto_ml_solutions(**request_kwargs)
+        await stream.send_message(response)
+
+    async def __rpc_get_available_strategies(
+        self, stream: grpclib.server.Stream
+    ) -> None:
+        request = await stream.recv_message()
+
+        request_kwargs = {
+            "username": request.username,
+            "configuration": request.configuration,
+        }
+
+        response = await self.get_available_strategies(**request_kwargs)
         await stream.send_message(response)
 
     async def __rpc_get_dataset_types(self, stream: grpclib.server.Stream) -> None:
         request = await stream.recv_message()
-        response = await self.get_dataset_types(request)
+
+        request_kwargs = {}
+
+        response = await self.get_dataset_types(**request_kwargs)
         await stream.send_message(response)
 
     async def __rpc_get_datasets(self, stream: grpclib.server.Stream) -> None:
         request = await stream.recv_message()
-        response = await self.get_datasets(request)
+
+        request_kwargs = {
+            "username": request.username,
+            "type": request.type,
+        }
+
+        response = await self.get_datasets(**request_kwargs)
         await stream.send_message(response)
 
     async def __rpc_get_dataset(self, stream: grpclib.server.Stream) -> None:
         request = await stream.recv_message()
-        response = await self.get_dataset(request)
+
+        request_kwargs = {
+            "username": request.username,
+            "identifier": request.identifier,
+        }
+
+        response = await self.get_dataset(**request_kwargs)
         await stream.send_message(response)
 
     async def __rpc_get_trainings(self, stream: grpclib.server.Stream) -> None:
         request = await stream.recv_message()
-        response = await self.get_trainings(request)
+
+        request_kwargs = {
+            "username": request.username,
+        }
+
+        response = await self.get_trainings(**request_kwargs)
         await stream.send_message(response)
 
     async def __rpc_get_training(self, stream: grpclib.server.Stream) -> None:
         request = await stream.recv_message()
-        response = await self.get_training(request)
+
+        request_kwargs = {
+            "username": request.username,
+            "id": request.id,
+        }
+
+        response = await self.get_training(**request_kwargs)
         await stream.send_message(response)
 
     async def __rpc_get_all_trainings(self, stream: grpclib.server.Stream) -> None:
         request = await stream.recv_message()
-        response = await self.get_all_trainings(request)
+
+        request_kwargs = {
+            "username": request.username,
+        }
+
+        response = await self.get_all_trainings(**request_kwargs)
         await stream.send_message(response)
 
     async def __rpc_get_supported_ml_libraries(
         self, stream: grpclib.server.Stream
     ) -> None:
         request = await stream.recv_message()
-        response = await self.get_supported_ml_libraries(request)
+
+        request_kwargs = {
+            "username": request.username,
+            "task": request.task,
+        }
+
+        response = await self.get_supported_ml_libraries(**request_kwargs)
         await stream.send_message(response)
 
     async def __rpc_get_tabular_dataset_column(
         self, stream: grpclib.server.Stream
     ) -> None:
         request = await stream.recv_message()
-        response = await self.get_tabular_dataset_column(request)
+
+        request_kwargs = {
+            "username": request.username,
+            "dataset_identifier": request.dataset_identifier,
+        }
+
+        response = await self.get_tabular_dataset_column(**request_kwargs)
         await stream.send_message(response)
 
     async def __rpc_get_dataset_compatible_tasks(
         self, stream: grpclib.server.Stream
     ) -> None:
         request = await stream.recv_message()
-        response = await self.get_dataset_compatible_tasks(request)
+
+        request_kwargs = {
+            "username": request.username,
+            "dataset_name": request.dataset_name,
+        }
+
+        response = await self.get_dataset_compatible_tasks(**request_kwargs)
         await stream.send_message(response)
 
     async def __rpc_get_models(self, stream: grpclib.server.Stream) -> None:
         request = await stream.recv_message()
-        response = await self.get_models(request)
+
+        request_kwargs = {
+            "username": request.username,
+            "dataset_id": request.dataset_id,
+            "top3": request.top3,
+        }
+
+        response = await self.get_models(**request_kwargs)
         await stream.send_message(response)
 
     async def __rpc_get_model(self, stream: grpclib.server.Stream) -> None:
         request = await stream.recv_message()
-        response = await self.get_model(request)
+
+        request_kwargs = {
+            "username": request.username,
+            "model_id": request.model_id,
+        }
+
+        response = await self.get_model(**request_kwargs)
         await stream.send_message(response)
 
     async def __rpc_get_objects_information(
         self, stream: grpclib.server.Stream
     ) -> None:
         request = await stream.recv_message()
-        response = await self.get_objects_information(request)
+
+        request_kwargs = {
+            "ids": request.ids,
+        }
+
+        response = await self.get_objects_information(**request_kwargs)
         await stream.send_message(response)
 
     async def __rpc_get_home_overview_information(
         self, stream: grpclib.server.Stream
     ) -> None:
         request = await stream.recv_message()
-        response = await self.get_home_overview_information(request)
+
+        request_kwargs = {
+            "user": request.user,
+        }
+
+        response = await self.get_home_overview_information(**request_kwargs)
         await stream.send_message(response)
 
     async def __rpc_upload_dataset_file(self, stream: grpclib.server.Stream) -> None:
         request = await stream.recv_message()
-        response = await self.upload_dataset_file(request)
+
+        request_kwargs = {
+            "username": request.username,
+            "file_name": request.file_name,
+            "dataset_name": request.dataset_name,
+            "type": request.type,
+        }
+
+        response = await self.upload_dataset_file(**request_kwargs)
         await stream.send_message(response)
 
     async def __rpc_start_auto_ml_process(self, stream: grpclib.server.Stream) -> None:
         request = await stream.recv_message()
-        response = await self.start_auto_ml_process(request)
+
+        request_kwargs = {
+            "username": request.username,
+            "dataset": request.dataset,
+            "task": request.task,
+            "configuration": request.configuration,
+            "required_auto_mls": request.required_auto_mls,
+            "runtime_constraints": request.runtime_constraints,
+            "dataset_configuration": request.dataset_configuration,
+            "test_configuration": request.test_configuration,
+            "file_configuration": request.file_configuration,
+            "metric": request.metric,
+            "required_libraries": request.required_libraries,
+        }
+
+        response = await self.start_auto_ml_process(**request_kwargs)
         await stream.send_message(response)
 
     async def __rpc_set_dataset_configuration(
         self, stream: grpclib.server.Stream
     ) -> None:
         request = await stream.recv_message()
-        response = await self.set_dataset_configuration(request)
+
+        request_kwargs = {
+            "username": request.username,
+            "identifier": request.identifier,
+            "file_configuration": request.file_configuration,
+        }
+
+        response = await self.set_dataset_configuration(**request_kwargs)
         await stream.send_message(response)
 
     async def __rpc_test_auto_ml(self, stream: grpclib.server.Stream) -> None:
         request = await stream.recv_message()
-        response = await self.test_auto_ml(request)
+
+        request_kwargs = {
+            "username": request.username,
+            "test_data": request.test_data,
+            "model_id": request.model_id,
+        }
+
+        response = await self.test_auto_ml(**request_kwargs)
         await stream.send_message(response)
 
     def __mapping__(self) -> Dict[str, grpclib.const.Handler]:
@@ -938,6 +1064,12 @@ class ControllerServiceBase(ServiceBase):
                 grpclib.const.Cardinality.UNARY_UNARY,
                 GetCompatibleAutoMlSolutionsRequest,
                 GetCompatibleAutoMlSolutionsResponse,
+            ),
+            "/ControllerService/GetAvailableStrategies": grpclib.const.Handler(
+                self.__rpc_get_available_strategies,
+                grpclib.const.Cardinality.UNARY_UNARY,
+                GetAvailableStrategiesRequest,
+                GetAvailableStrategiesResponse,
             ),
             "/ControllerService/GetDatasetTypes": grpclib.const.Handler(
                 self.__rpc_get_dataset_types,

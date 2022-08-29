@@ -394,3 +394,42 @@ msgstr "Absender Name"
 msgid "MainSettings"
 msgstr "Einstellungen"
 
+msgctxt "TrainingTimeline"
+msgid "started"
+msgstr "Experiment gestartet"
+
+msgctxt "TrainingTimeline"
+msgid "preprocessing"
+msgstr "Vorverarbeitung"
+
+msgctxt "TrainingTimeline"
+msgid "running"
+msgstr "Ausführung der AutoMLs"
+
+msgctxt "TrainingTimeline"
+msgid "stopped"
+msgstr "Experiment beendet"
+
+msgctxt "TrainingTimeline"
+msgid "strategy_action"
+msgstr "Strategie-Aktion"
+
+msgctxt "TrainingTimeline"
+msgid "automl_run_finished"
+msgstr "AutoML beendet"
+
+msgctxt "TrainingTimeline"
+msgid "data_preparation.ignore_redundant_features"
+msgstr "Redundante Features ignoriert"
+
+msgctxt "TrainingTimeline"
+msgid "data_preparation.ignore_redundant_samples"
+msgstr "Redundante Samples ignoriert"
+
+msgctxt "TrainingTimeline"
+msgid "data_preparation.finish_preprocessing"
+msgstr "Datenvorbereitung abgeschlossen"
+
+msgctxt "TrainingTimeline"
+msgid "automl_run_finished_{0}"
+msgstr "AutoML abgeschlossen: {0}"

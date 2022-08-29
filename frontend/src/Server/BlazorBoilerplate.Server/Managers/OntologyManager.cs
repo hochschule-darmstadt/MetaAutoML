@@ -67,6 +67,7 @@ namespace BlazorBoilerplate.Server.Managers
                 return new ApiResponse(Status404NotFound, ex.Message);
             }
         }
+
         public async Task<ApiResponse> GetDatasetCompatibleTasks(GetDatasetCompatibleTasksRequestDto dataset)
         {
             // call grpc method
@@ -79,6 +80,34 @@ namespace BlazorBoilerplate.Server.Managers
                 request.DatasetName = dataset.DatasetIdentifier;
                 var reply = _client.GetDatasetCompatibleTasks(request);
                 response.Tasks = await _cacheManager.GetObjectInformationList(reply.Tasks.ToList());
+                return new ApiResponse(Status200OK, null, response);
+            }
+            catch (Exception ex)
+            {
+                return new ApiResponse(Status404NotFound, ex.Message);
+            }
+        }
+
+        public async Task<ApiResponse> GetAvailableStrategies(GetAvailableStrategiesRequestDto request)
+        {
+            // call grpc method
+            GetAvailableStrategiesRequest requestGrpc = new GetAvailableStrategiesRequest();
+            GetAvailableStrategiesResponseDto response = new GetAvailableStrategiesResponseDto();
+            var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
+            try
+            {
+                requestGrpc.Username = username;
+                requestGrpc.Configuration.Add(request.Configuration);
+                var reply = _client.GetAvailableStrategies(requestGrpc);
+                response.Strategies = new List<StrategyControllerStrategyDto>();
+                foreach(var strategy in reply.Strategies.ToList()) {
+                    StrategyControllerStrategyDto strategyDto = new StrategyControllerStrategyDto(){
+                        ID = strategy.Id,
+                        Title = strategy.Title,
+                        Description = strategy.Description
+                    };
+                    response.Strategies.Add(strategyDto);
+                }
                 return new ApiResponse(Status200OK, null, response);
             }
             catch (Exception ex)

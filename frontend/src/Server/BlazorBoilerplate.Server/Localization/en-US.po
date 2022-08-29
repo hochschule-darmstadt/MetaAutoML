@@ -1182,3 +1182,43 @@ msgstr ""
 msgctxt "Global"
 msgid "You are not authorized to access this page"
 msgstr "You are not authorized to access this page"
+
+msgctxt "TrainingTimeline"
+msgid "started"
+msgstr "Started Experiment"
+
+msgctxt "TrainingTimeline"
+msgid "preprocessing"
+msgstr "Preprocessing"
+
+msgctxt "TrainingTimeline"
+msgid "running"
+msgstr "Running AutoMLs"
+
+msgctxt "TrainingTimeline"
+msgid "stopped"
+msgstr "Finished Experiment"
+
+msgctxt "TrainingTimeline"
+msgid "strategy_action"
+msgstr "Strategy Action"
+
+msgctxt "TrainingTimeline"
+msgid "automl_run_finished"
+msgstr "AutoML finished"
+
+msgctxt "TrainingTimeline"
+msgid "data_preparation.ignore_redundant_features"
+msgstr "Ignored redundant features"
+
+msgctxt "TrainingTimeline"
+msgid "data_preparation.ignore_redundant_samples"
+msgstr "Ignored redundant samples"
+
+msgctxt "TrainingTimeline"
+msgid "data_preparation.finish_preprocessing"
+msgstr "Finished Data Preparation"
+
+msgctxt "TrainingTimeline"
+msgid "automl_run_finished_{0}"
+msgstr "Finished AutoML: {0}"

@@ -62,6 +62,23 @@ class AutoMLManager(ABC, Thread):
             result.file = a.read()
         return result
 
+    def get_status(self) -> "AutoMlStatus":
+        """
+        Get the execution status of the AutoML
+        ---
+        Return the current AutoML status
+        """
+        status = AutoMlStatus()
+        status.name = self.name
+        status.status = self.__last_status
+        status.messages[:] = self.__status_messages
+        status.testScore = self.__testScore
+        status.validationScore = self.__validationScore
+        status.runtime = self.__runtime
+        status.predictiontime = self.__predictiontime
+        status.model = self.__model
+        status.library = self.__library
+        return status
 
     def is_running(self) -> bool:
         """
