@@ -115,6 +115,7 @@ else
                 viewNotifier.Show("No target selected", ViewNotifierType.Error, L["Operation Failed"]);
                 return;
             }
+            _automlRequest.FileConfiguration = _dataset.Configuration;
             StartAutoMLResponseDto automlResponse;
             ApiResponseDto apiResponse = await apiClient.StartAutoML(_automlRequest);
 

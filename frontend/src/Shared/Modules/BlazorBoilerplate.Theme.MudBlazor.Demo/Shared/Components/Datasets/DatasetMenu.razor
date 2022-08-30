@@ -14,6 +14,8 @@
 
 @code {
     [Parameter]
+    public EventCallback OnDeleteCompleted { get; set; }
+    [Parameter]
     public GetDatasetResponseDto Dataset { get; set; }
 
     private async Task DeleteDataset()
@@ -28,6 +30,7 @@
 
             if (apiResponse.IsSuccessStatusCode)
             {
+                await OnDeleteCompleted.InvokeAsync();
                 viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
             }
             else

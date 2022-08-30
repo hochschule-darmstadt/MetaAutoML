@@ -34,7 +34,7 @@ class ControllerManager(object):
 
     def DeleteDataset(self, request: "DeleteDatasetRequest") -> "DeleteDatasetResponse":
         result = self.__data_storage.DeleteDataset(request.username, request.identifier)
-        print(result + " datasets deleted")
+        print(str(result) + " datasets deleted")
         return DeleteDatasetResponse(result)
 
     def DeleteTraining(self, request: "DeleteTrainingRequest") -> "DeleteTrainingResponse":
@@ -362,7 +362,7 @@ class ControllerManager(object):
             # no dataset found -> return empty response
             return GetTabularDatasetColumnResponse()
 
-        if dataset["type"] == ":tabular":
+        if dataset["type"] == ":tabular" or dataset["type"] == ":time_series":
             return CsvManager.GetColumns(dataset["path"], json.loads(dataset["file_configuration"]))
         elif dataset["type"] == ":time_series_longitudinal":
             return LongitudinalDataManager.read_dimension_names(dataset["path"])

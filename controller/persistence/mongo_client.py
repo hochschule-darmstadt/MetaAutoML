@@ -133,13 +133,14 @@ class Database:
         dataset = datasets.find_one(filter)
         path = dataset["path"]
         path = path.replace("\\"+ dataset["file_name"], "")
-        self.DeleteTraining(username, { "dataset_id": str(filter["_id"])})
+        amount_train = self.DeleteTraining(username, { "dataset_id": str(filter["_id"])})
+        print(str(amount_train) + " trainings deleted")
         datasets: Collection = self.__mongo[username]["datasets"]
         result = datasets.delete_one(filter)
         shutil.rmtree(path)
         return result.deleted_count
 
-    def DeleteModel(self, username: str, filter: 'dict[str, object]'):
+    def DeleteModels(self, username: str, filter: 'dict[str, object]'):
         """
         Delete models record
         ---
@@ -170,7 +171,10 @@ class Database:
                 path = path.replace("\\export\\mcfly-export.zip", "")
             elif model["automl_name"] == ":mljar":
                 path = path.replace("\\export\\mljar-export.zip", "")
-            shutil.rmtree(path)
+            try:
+                shutil.rmtree(path)
+            except:
+                print("path not found: " + path)
         models: Collection = self.__mongo[username]["models"]
         result = models.delete_many(filter)
         return result.deleted_count
@@ -186,7 +190,10 @@ class Database:
         Returns amount of deleted objects
         """
         trainings: Collection = self.__mongo[username]["trainings"]
-        self.DeleteModel(username, { "training_id": str(trainings["_id"])})
+        result_training = trainings.find(filter)
+        for training in list(result_training):
+            amount_model = self.DeleteModels(username, { "training_id": str(training["_id"])})
+            print(str(amount_model) + " models deleted")
         result = trainings.delete_many(filter)
         return result.deleted_count
 
