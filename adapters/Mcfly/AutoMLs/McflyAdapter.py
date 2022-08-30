@@ -68,13 +68,16 @@ class McflyAdapter(AbstractAdapter):
             num_epochs, num_instances, series_length, num_channels, runtime_seconds
         ])
 
+        model_types = ['CNN', 'ResNet', 'InceptionTime']
+        num_models = max(len(model_types), num_models)
+
         # Generate new models
         metric_key = "accuracy"
         models = generate_models(
             X_train.shape,
             y_train_binary.shape[1],
             number_of_models=num_models,
-            model_types=['CNN', 'ResNet', 'InceptionTime'],
+            model_types=model_types,
             metrics=[metric_key]
         )
 
@@ -126,6 +129,7 @@ class McflyAdapter(AbstractAdapter):
             epochs=num_epochs,
             validation_data=(X_val, y_val_binary),
             callbacks=[early_stopping],
+            class_weight=class_weights,
         )
 
         # Saving the best model

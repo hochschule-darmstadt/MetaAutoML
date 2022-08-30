@@ -256,7 +256,7 @@ class DataStorage:
                     # preview.write("\n")
             file_configuration = '{"use_header":true, "start_row":1, "delimiter":"comma", "escape_character":"\\\\", "decimal_character":"."}'
 
-        if type == ":longitudinal":
+        if type == ":time_series_longitudinal":
             TARGET_COL = "target"
             FIRST_N_ROW = 50
             FIRST_N_ITEMS = 3
@@ -325,7 +325,7 @@ class DataStorage:
             os.makedirs(plot_filepath, exist_ok=True)
             analysis_result["advanced_analysis"] = dsam.advancedAnalysis(plot_filepath)
 
-        if type == ":longitudinal":
+        if type == ":time_series_longitudinal":
             dataset_for_analysis = load_from_tsfile_to_dataframe(filename_dest, return_separate_X_and_y=False)
             analysis_result["basic_analysis"] = DataSetAnalysisManager.startLongitudinalDataAnalysis(dataset_for_analysis)
             analysis_result["advanced_analysis"] = []
@@ -379,7 +379,7 @@ class DataStorage:
                 os.makedirs(plot_filepath, exist_ok=True)
                 analysis_result["advanced_analysis"] = dsam.advancedAnalysis(plot_filepath)
                 new_values["analysis"] = analysis_result
-            if type == ":longitudinal":
+            if type == ":time_series_longitudinal":
                 dataset_for_analysis = load_from_tsfile_to_dataframe(
                     dataset['path'],
                     return_separate_X_and_y=False

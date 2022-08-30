@@ -41,7 +41,7 @@
                             </MudItem>
                             <MudItem xs="3" sm="3" md="3">
                                 <MudText Typo="Typo.body1">File Size: @FormatBytes(_dataset.Size)</MudText>
-                                @if ((@_dataset.Type.ID == ":tabular") || (@_dataset.Type.ID == ":text") || (@_dataset.Type.ID == ":time_series") || (@_dataset.Type.ID == ":longitudinal"))
+                                @if ((@_dataset.Type.ID == ":tabular") || (@_dataset.Type.ID == ":text") || (@_dataset.Type.ID == ":time_series") || (@_dataset.Type.ID == ":time_series_longitudinal"))
                                 {
                                     if (_dataset.Analysis == null)
                                     {
