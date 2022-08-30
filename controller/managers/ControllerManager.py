@@ -34,7 +34,7 @@ class ControllerManager(object):
 
     def DeleteDataset(self, request: "DeleteDatasetRequest") -> "DeleteDatasetResponse":
         result = self.__data_storage.DeleteDataset(request.username, request.identifier)
-        print(result + " datasets deleted")
+        print(str(result) + " datasets deleted")
         return DeleteDatasetResponse(result)
 
     def DeleteTraining(self, request: "DeleteTrainingRequest") -> "DeleteTrainingResponse":
