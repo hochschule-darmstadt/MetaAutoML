@@ -143,6 +143,8 @@ def data_loader(config):
         return read_image_dataset(config)
     elif config["task"] == ":text_classification":
         return read_tabular_dataset_training_data(config)
+    elif config["task"] == ":time_series_forecasting":
+        return read_tabular_dataset_training_data(config)
     elif config["task"] == ":time_series_classification":
         return read_longitudinal_dataset(config)
 
@@ -381,7 +383,13 @@ def read_tabular_dataset_training_data(json_configuration):
     """
     Read the training dataset from disk
     """
-    data = pd.read_csv(os.path.join(json_configuration["file_location"], json_configuration["file_name"]), **json_configuration["file_configuration"])
+    delimiters = {
+        "comma":        ",",
+        "semicolon":    ";",
+        "space":        " ",
+        "tab":          "\t",
+    }
+    data = pd.read_csv(os.path.join(json_configuration["file_location"], json_configuration["file_name"]), delimiter=delimiters[json_configuration['file_configuration']['delimiter']], skiprows=(json_configuration['file_configuration']['start_row']-1), escapechar=json_configuration['file_configuration']['escape_character'], decimal=json_configuration['file_configuration']['decimal_character'])
 
     # convert all object columns to categories, because autosklearn only supports numerical,
     # bool and categorical features

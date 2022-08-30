@@ -171,7 +171,10 @@ class Database:
                 path = path.replace("\\export\\mcfly-export.zip", "")
             elif model["automl_name"] == ":mljar":
                 path = path.replace("\\export\\mljar-export.zip", "")
-            shutil.rmtree(path)
+            try:
+                shutil.rmtree(path)
+            except:
+                print("path not found: " + path)
         models: Collection = self.__mongo[username]["models"]
         result = models.delete_many(filter)
         return result.deleted_count
