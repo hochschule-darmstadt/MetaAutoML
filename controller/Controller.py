@@ -6,6 +6,7 @@ import ssl
 from Controller_bgrpc import *
 from grpclib.server import Server
 import asyncio
+from grpclib.utils import graceful_exit
 
 from JsonUtil import get_config_property
 from ControllerManager import ControllerManager
@@ -241,6 +242,7 @@ if __name__ == '__main__':
     logging.basicConfig()
     print("controller started")
     #serve()
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(main())
+    #loop = asyncio.get_event_loop()
+    #loop.run_until_complete(main())
+    asyncio.run(main())
     print('done.')

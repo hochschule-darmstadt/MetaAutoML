@@ -645,7 +645,8 @@ class ControllerManager(object):
         ---
         Return
         """
-        SetDatasetConfigurationTaskThread(request, self.__data_storage)
+        #SetDatasetConfigurationTaskThread(request, self.__data_storage)
+        self.__data_storage.UpdateDataset(request.username, request.identifier, { "file_configuration": request.file_configuration }, True)
         return SetDatasetConfigurationResponse()
 
 class SetDatasetConfigurationTaskThread(object):

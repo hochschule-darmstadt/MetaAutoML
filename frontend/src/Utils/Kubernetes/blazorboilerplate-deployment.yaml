@@ -48,7 +48,7 @@ spec:
         - name: BlazorBoilerplate__UseSqlServer
           value: "true"
         - name: ConnectionStrings__DefaultConnection
-          value: "Server=sqlserver;Database=blazor_boilerplate;Trusted_Connection=True;MultipleActiveResultSets=true;User=sa;Password=yourVeryStrong(!)Password;Integrated Security=false"
+          value: "Server=sqlserver;Database=omaml;Trusted_Connection=True;MultipleActiveResultSets=true;User=sa;Password=yourVeryStrong(!)Password;Integrated Security=false"
         - name: Serilog__MinimumLevel__Default
           value: Debug
         - name: CONTROLLER_DATASET_FOLDER_PATH
