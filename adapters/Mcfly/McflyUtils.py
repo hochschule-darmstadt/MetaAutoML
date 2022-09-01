@@ -100,11 +100,11 @@ def estimate_num_models(param_values):
     The method returns an estimated number of models.
     ---
     Parameter:
-    1. A list of parameter values: [num_epochs,	num_instances, series_length, num_channels, runtime_in_seconds]
+    1. A list of parameter values: [num_instances, num_channels, series_length, num_classes, runtime_in_seconds]
     """
-    intercept = 13.701875
-    # Coefficients for the input parameters: num_epochs,	num_instances, series_length, num_channels, runtime_in_seconds
-    coefficients = np.array([-0.16958759, -0.00380572, -0.00934381, -0.27648816, 0.01421024])
+    intercept = 6.740452386098
+    # Coefficients for the input parameters: num_instances, num_channels, series_length, num_classes, runtime_in_seconds
+    coefficients = np.array([-0.000444112354, 0.024227796127, -0.004524512981, 0.164004397882, 0.002370540802])
     return int(np.ceil(intercept + np.dot(coefficients, param_values)))
 
 

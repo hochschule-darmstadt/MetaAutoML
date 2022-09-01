@@ -61,11 +61,13 @@ class McflyAdapter(AbstractAdapter):
         num_instances = X_train.shape[0]
         series_length = X_train.shape[1]
         num_channels = X.shape[2]
+        num_classes = y_train_binary.shape[1]
         runtime_seconds = int(self._configuration["runtime_constraints"]["runtime_limit"] * 60)
 
         # Estimate the number of ml models using linear regression
+        # num_instances, num_channels, series_length, num_classes, runtime_seconds
         num_models = estimate_num_models([
-            num_epochs, num_instances, series_length, num_channels, runtime_seconds
+            num_instances, num_channels, series_length, num_classes, runtime_seconds
         ])
 
         model_types = ['CNN', 'ResNet', 'InceptionTime']
