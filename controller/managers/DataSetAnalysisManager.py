@@ -1,18 +1,16 @@
 import os.path
 
-import pandas as pd
 import numpy as np
 import math
-#import matplotlib
-#matplotlib.use('Agg')
-#import matplotlib.pyplot as plt
+
+import pandas as pd
 from scipy.stats import spearmanr
 
 class DataSetAnalysisManager:
     """
     Static DataSetAnalysisManager class to analyze the dataset
     """
-    def __init__(self, dataset: pd.DataFrame):
+    def __init__(self, dataset):
         self.__dataset = dataset
         self.__plots = []
 
@@ -30,15 +28,24 @@ class DataSetAnalysisManager:
 
         Return a python dictionary containing dataset analysis
         """
-        return {
+        print("[DatasetAnalysisManager]: Starting basic dataset analysis")
+        print(self.__dataset)
+        analysis = {
             "number_of_columns": self.__dataset.shape[1],
             "number_of_rows": self.__dataset.shape[0],
-            "na_columns": dict(self.__dataset.isna().sum().items()),
-            "high_na_rows": DataSetAnalysisManager.__missing_values_rows(self.__dataset),
-            "outlier": DataSetAnalysisManager.__detect_outliers(self.__dataset),
-            "duplicate_columns": DataSetAnalysisManager.__detect_duplicate_columns(self.__dataset),
-            "duplicate_rows": DataSetAnalysisManager.__detect_duplicate_rows(self.__dataset),
-            }
+            "na_columns": dict(self.__dataset.isna().sum().items())
+        }
+        print("[DatasetAnalysisManager]: Calculating high NaN rows..")
+        analysis.update({"high_na_rows": DataSetAnalysisManager.__missing_values_rows(self.__dataset)})
+        print("[DatasetAnalysisManager]: Calculating outliers..")
+        analysis.update({"outlier": DataSetAnalysisManager.__detect_outliers(self.__dataset)})
+        print("[DatasetAnalysisManager]: Calculating duplicate columns..")
+        analysis.update({"duplicate_columns": DataSetAnalysisManager.__detect_duplicate_columns(self.__dataset)})
+        print("[DatasetAnalysisManager]: Calculating duplicate rows..")
+        analysis.update({"duplicate_rows": DataSetAnalysisManager.__detect_duplicate_rows(self.__dataset)})
+
+        print("[DatasetAnalysisManager]: Basic dataset analysis finished")
+        return analysis
 
     def advancedAnalysis(self, save_path):
         """
@@ -122,32 +129,26 @@ class DataSetAnalysisManager:
     @staticmethod
     def __detect_outliers(dataset) -> 'list[dict]':
         """
-        Detects outliers in all columns in a dataset containing floats
+        Detects outliers in all columns in a dataset containing floats.
+        Outliers are determined using the inter quartile range (IQR) with an outlier being classified as being above
+        or below 2 * IQR
         ---
         Parameter
         1. dataset to be analyzed
         ---
-        Return a list containing information about outliers on every column of the dataset
+        Return a list containing the indices of outliers for each numerical column
         """
+        import pandas as pd
 
         outlier_columns = []
-        dataset_numerics_only_float = dataset.select_dtypes(include=[np.float])   
-        dataset_numerics_only_int =  dataset.select_dtypes(include=[np.int])   
-        dataset_numerics_only = pd.concat([dataset_numerics_only_int, dataset_numerics_only_float])
-        print(dataset_numerics_only)
-        for column_name in dataset_numerics_only:
-            current_column = dataset_numerics_only[column_name].copy()
-            current_column = current_column.dropna()
-            current_column_sorted = current_column.sort_values()
-            Q1, Q3 = np.percentile(current_column_sorted, [25,75])
-            interquartile_range = Q3 - Q1
-
-            lower_boundary = Q1 - 2 * interquartile_range
-            upper_boundary = Q3 + 2 * interquartile_range
-            current_column_outlier = (current_column < lower_boundary) | (current_column > upper_boundary)
-            outlier_indices = current_column_outlier[current_column_outlier].index.values.tolist()
-            outlier_indices = [index + 1 for index in outlier_indices]
-            outlier_columns.append({column_name: outlier_indices})
+        for column_name in dataset:
+            if pd.api.types.is_numeric_dtype(dataset[column_name]):
+                Q1 = dataset[column_name].quantile(0.25)
+                Q3 = dataset[column_name].quantile(0.75)
+                IQR = Q3 - Q1
+                filter = (dataset[column_name] <= (Q1 - 2 * IQR)) | (dataset[column_name] >= (Q3 + 2 * IQR))
+                outlier_indices = dataset[column_name].loc[filter].index.tolist()
+                outlier_columns.append({column_name: outlier_indices})
         
         return outlier_columns
 
@@ -167,8 +168,8 @@ class DataSetAnalysisManager:
             for idx_b, column_b in enumerate(dataset.columns):
                 if idx_a == idx_b:
                     continue
-                values_a = dataset[column_a].iloc[1:]
-                values_b = dataset[column_b].iloc[1:]
+                values_a = dataset[column_a]
+                values_b = dataset[column_b]
                 if values_a.equals(values_b):
                     if (column_a, column_b) not in duplicate_column_list and (column_b, column_a) not in duplicate_column_list:
                         duplicate_column_list.append((column_a, column_b))
@@ -183,34 +184,14 @@ class DataSetAnalysisManager:
         Parameter
         1. dataset to be analyzed
         ---
-        Return a list of tuples each containing a pair of duplicate row indices
+        Return a list of tuples each containing a list of duplicate row indices
         """
-        duplicate_row_list = []
-
-        # create index column so that rows can later be identified by id
-        dataset["index"] = dataset.index
-        column_names= list(dataset.columns)
-        column_names.remove("index")
-
-        # dataframe containing duplicate rows only
-        duplicates_only = dataset[dataset.duplicated(subset=column_names, keep=False)]
-
-        # save the pairs of duplicate rows in a list
-        for x in range(duplicates_only.shape[0]):
-            row = duplicates_only.iloc[x]
-            row_without_index = duplicates_only.iloc[x, :-1]
-
-            for y in range(x + 1, duplicates_only.shape[0]):
-                other_row = duplicates_only.iloc[y]
-                other_row_without_index = duplicates_only.iloc[y, :-1]
-
-                if row_without_index.equals(other_row_without_index):
-                    index1 = row["index"]
-                    index2 = other_row["index"]
-                    duplicate_row_pair = (int(index1), int(index2))
-                    duplicate_row_list.append(duplicate_row_pair)
-
-        return duplicate_row_list
+        # Filter dataset, this only keeps rows that are duplicated. keep=False does keep every occurrence of the
+        # duplicated row (instead of first or last)
+        df = dataset[dataset.duplicated(keep=False)]
+        # Group the filtered (only duplicates) dataset by all values so all the duplicated rows are grouped.
+        # Then save the indices of the grouped items into tuples.
+        return df.groupby(list(df)).apply(lambda x: tuple(x.index)).values.tolist()
 
     def __process_categorical_columns(self):
         """
