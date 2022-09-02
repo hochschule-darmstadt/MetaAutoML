@@ -313,22 +313,11 @@ class DataStorage:
         nbytes = get_size(os.path.join(self.__storage_dir, username, dataset_id))
 
         analysis_result = {}
-        # If the dataset is a tabular dataset it can be analyzed.
-        if type == ":tabular":
-            try:
-                dsam = DataSetAnalysisManager(pd.read_csv(filename_dest, engine="python"))
-            except pd.errors.ParserError as e:
-                # As the pandas python parsing engine sometimes fails: Retry with standard (c) parser engine.
-                dsam = DataSetAnalysisManager(pd.read_csv(filename_dest))
-            analysis_result["basic_analysis"] = dsam.basicAnalysis()
-            plot_filepath = os.path.join(os.path.dirname(filename_dest), "plots")
-            os.makedirs(plot_filepath, exist_ok=True)
-            analysis_result["advanced_analysis"] = dsam.advancedAnalysis(plot_filepath)
-
-        if type == ":time_series_longitudinal":
-            dataset_for_analysis = load_from_tsfile_to_dataframe(filename_dest, return_separate_X_and_y=False)
-            analysis_result["basic_analysis"] = DataSetAnalysisManager.startLongitudinalDataAnalysis(dataset_for_analysis)
-            analysis_result["advanced_analysis"] = []
+        # If the dataset is a certain type the dataset can be analyzed.
+        if type in [":tabular", ":text", ":time_series", ":time_series_longitudinal"]:
+            analysis_result = DataSetAnalysisManager({"path": filename_dest,
+                                                      "file_configuration": file_configuration,
+                                                      "type": type}).analysis()
 
         success = self.__mongo.UpdateDataset(username, dataset_id, {
             "path": filename_dest,
@@ -358,37 +347,16 @@ class DataStorage:
         ---
         Returns `True` if successfully updated, otherwise `False`.
         """
-        delimiters = {
-            "comma":        ",",
-            "semicolon":    ";",
-            "space":        " ",
-            "tab":          "\t",
-        }
         if run_analysis == True:
+
             found, dataset = self.GetDataset(username, id)
-            analysis_result = {}
+
             # If the dataset is a tabular dataset it can be analyzed.
-            if dataset['type'] == ":tabular" or dataset['type'] == ":text" or dataset['type'] == ":time_series":
-                #Delete old references
+            if dataset['type'] in [":tabular", ":text", ":time_series", ":time_series_longitudinal"]:
+                # Delete old references
                 new_values["analysis"] = ""
                 self.__mongo.UpdateDataset(username, id, new_values)
-                file_config = json.loads(dataset["file_configuration"])
-                dsam = DataSetAnalysisManager(pd.read_csv(dataset['path'], delimiter=delimiters[file_config['delimiter']], skiprows=(file_config['start_row']-1), escapechar=file_config['escape_character'], decimal=file_config['decimal_character']))
-                analysis_result["basic_analysis"] = dsam.basicAnalysis()
-                plot_filepath = os.path.join(os.path.dirname(dataset['path']), "plots")
-                os.makedirs(plot_filepath, exist_ok=True)
-                analysis_result["advanced_analysis"] = dsam.advancedAnalysis(plot_filepath)
-                new_values["analysis"] = analysis_result
-            if type == ":time_series_longitudinal":
-                dataset_for_analysis = load_from_tsfile_to_dataframe(
-                    dataset['path'],
-                    return_separate_X_and_y=False
-                )
-                analysis_result["basic_analysis"] = DataSetAnalysisManager.startLongitudinalDataAnalysis(
-                    dataset_for_analysis
-                )
-                analysis_result["advanced_analysis"] = []
-                new_values["analysis"] = analysis_result
+                new_values["analysis"] = DataSetAnalysisManager(dataset).analysis()
 
         return self.__mongo.UpdateDataset(username, id, new_values)
 
