@@ -2,19 +2,67 @@ import os.path
 
 import numpy as np
 import math
-
+import json
 import pandas as pd
 from scipy.stats import spearmanr
+from sktime.datasets import load_from_tsfile_to_dataframe
+
 
 class DataSetAnalysisManager:
     """
     Static DataSetAnalysisManager class to analyze the dataset
     """
-    def __init__(self, dataset):
-        self.__dataset = dataset
+    def __init__(self, config):
+        file_config = json.loads(config["file_configuration"])
+        self.config = config
+        delimiters = {
+            "comma":        ",",
+            "semicolon":    ";",
+            "space":        " ",
+            "tab":          "\t",
+        }
+
+        # Load dataset
+        if config["type"] == ":time_series_longitudinal":
+            self.__dataset = load_from_tsfile_to_dataframe(config["path"], return_separate_X_and_y=False)
+        else:
+            try:
+                self.__dataset = pd.read_csv(config["path"],
+                                             delimiter=delimiters[file_config['delimiter']],
+                                             skiprows=(file_config['start_row'] - 1),
+                                             escapechar=file_config['escape_character'],
+                                             decimal=file_config['decimal_character'],
+                                             engine="python",
+                                             index_col=False)
+            except pd.errors.ParserError as e:
+                # As the pandas python parsing engine sometimes fails: Retry with standard (c) parser engine.
+                self.__dataset = pd.read_csv(config["path"],
+                                             delimiter=delimiters[file_config['delimiter']],
+                                             skiprows=(file_config['start_row'] - 1),
+                                             escapechar=file_config['escape_character'],
+                                             decimal=file_config['decimal_character'],
+                                             index_col=False)
+
+        # Create plot filepath
+        self.plot_filepath = os.path.join(os.path.dirname(config['path']), "plots")
+        os.makedirs(self.plot_filepath, exist_ok=True)
         self.__plots = []
 
-    def basicAnalysis(self) -> dict:
+    def analysis(self, basic_analysis=True, advanced_analysis=True):
+        analysis = {"basic_analysis": "", "advanced_analysis": ""}
+
+        if self.config["type"] == ":time_series_longitudinal":
+            analysis["basic_analysis"] = self.startLongitudinalDataAnalysis()
+
+        else:
+            if basic_analysis:
+                analysis["basic_analysis"] = self.basic_analysis()
+            if advanced_analysis:
+                analysis["advanced_analysis"] = self.advanced_analysis()
+
+        return analysis
+
+    def basic_analysis(self) -> dict:
         """
         Basic analysis, results are returned as dict
         Analyzed are:
@@ -47,7 +95,7 @@ class DataSetAnalysisManager:
         print("[DatasetAnalysisManager]: Basic dataset analysis finished")
         return analysis
 
-    def advancedAnalysis(self, save_path):
+    def advanced_analysis(self):
         """
         Advanced analysis that produces several plots based on the dataset passed to the DataSetAnalysisManager.
         The plots are saved in the same folder as the dataset, their paths are saved in the mongodb under
@@ -74,7 +122,7 @@ class DataSetAnalysisManager:
         # Plot distributions of all columns
         print(f"[DatasetAnalysisManager]: Plotting {len(self.__dataset.columns)} columns")
         for i, col in enumerate(list(self.__dataset.columns)):
-            self.__make_column_plot(col, save_path)
+            self.__make_column_plot(col, self.plot_filepath)
 
         # Get processed version of dataset to make calculation of feature correlation using scipy spearmanr possible
         proc_dataset = self.__process_categorical_columns()
@@ -84,7 +132,7 @@ class DataSetAnalysisManager:
         corr = spearmanr(proc_dataset).correlation
         # Make correlation plot
         print("[DatasetAnalysisManager]: Plotting correlation matrix")
-        self.__make_correlation_matrix_plot(corr, self.__dataset.columns, save_path)
+        self.__make_correlation_matrix_plot(corr, self.__dataset.columns, self.plot_filepath)
 
         # Get indices of correlations ordered desc
         indices = self.__largest_indices(corr, (len(proc_dataset.columns) * len(proc_dataset.columns)))
@@ -100,7 +148,7 @@ class DataSetAnalysisManager:
             if first_col_idx != second_col_index and [second_col_index, first_col_idx] not in plotted_indices:
                 self.__make_feature_imbalance_plot(self.__dataset.columns[first_col_idx],
                                                    self.__dataset.columns[second_col_index],
-                                                   save_path)
+                                                   self.plot_filepath)
                 plotted_indices.append([first_col_idx, second_col_index])
 
         print(f"[DatasetAnalysisManager]: Dataset analysis finished, saved {len(self.__plots)} plots")
@@ -363,8 +411,8 @@ class DataSetAnalysisManager:
                              "path": filename})
 
 
-    def startLongitudinalDataAnalysis(dataset: pd.DataFrame) -> dict:
-        rows, cols = dataset.shape
+    def startLongitudinalDataAnalysis(self) -> dict:
+        rows, cols = self.__dataset.shape
         return {
             "number_of_columns": cols,
             "number_of_rows": rows,
