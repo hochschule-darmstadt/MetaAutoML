@@ -14,7 +14,7 @@ services:
       - controller
       - redis
     environment:
-      - ASPNETCORE_ENVIRONMENT=Production #Consider changing this in Production
+      - ASPNETCORE_ENVIRONMENT=Development #Consider changing this in Production
       - Serilog__MinimumLevel__Default=Debug #Consider changing this in Production
       - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=blazor_boilerplate;Trusted_Connection=True;MultipleActiveResultSets=true;User=sa;Password=yourVeryStrong(!)Password;Integrated Security=false
       - BlazorBoilerplate__UseSqlServer=true

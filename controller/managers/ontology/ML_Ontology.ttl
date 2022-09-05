@@ -1282,7 +1282,7 @@
 :alphad3m a :AutoML_solution ;
     skos:prefLabel "Alphad3m" ;
     :used_for :scikit_learn_lib ;
-    :supported_by_oma_ml "True" ;
+    :supported_by_oma_ml "False" ;
     :can_perform :tabular_classification , :tabular_regression , :clustering , :time_series_forecasting , :text_classification , :text_regression , :image_classification , :object_detection , :remote_sensing , :video_classification , :audio_classification , :audio_regression , :collaborative_graph_filtering , :graph_matching , :vertex_classification , :link_prediction , :community_detection .
 :atm a :AutoML_solution ;
     skos:prefLabel "ATM" ;
@@ -1295,7 +1295,7 @@
 :autocve a :AutoML_solution ;
     skos:prefLabel "AutoCVE" ;
     :used_for :xgboost_lib , :scikit_learn_lib ;
-    :supported_by_oma_ml "True" ;
+    :supported_by_oma_ml "False" ;
     :can_perform :tabular_classification .
 :autogluon a :AutoML_solution ;
     skos:prefLabel "Autogluon" ;
