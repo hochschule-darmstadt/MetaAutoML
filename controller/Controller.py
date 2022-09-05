@@ -12,6 +12,7 @@ from JsonUtil import get_config_property
 from ControllerManager import ControllerManager
 from persistence.data_storage import DataStorage
 
+from concurrent.futures.process import ProcessPoolExecutor
 
 def _load_credential_from_file(filepath):
     """
@@ -36,8 +37,10 @@ SERVER_CERTIFICATE_KEY = _load_credential_from_file('certificate/server.key')
 class ControllerService(ControllerServiceBase):
     """includes all gRPC functions available for the client frontend"""
 
-    def __init__(self):
+    def __init__(self, executor: ProcessPoolExecutor):
         # init data storage
+        self._executor = executor
+        self._loop = asyncio.get_event_loop()
         data_storage_dir = os.path.join(ROOT_PATH, get_config_property("datasets-path"))
         if os.getenv("MONGO_DB_DEBUG") == "YES":
             data_storage = DataStorage(data_storage_dir, "mongodb://localhost:27017/")
@@ -192,7 +195,11 @@ class ControllerService(ControllerServiceBase):
         self, set_dataset_configuration_request: "SetDatasetConfigurationRequest"
     ) -> "SetDatasetConfigurationResponse":
         """persist new dataset configuration"""
-        response = self._controllerManager.SetDatasetConfiguration(set_dataset_configuration_request)
+        response = await self._loop.run_in_executor(
+            self._executor, 
+            SetDatasetConfiguration, 
+            set_dataset_configuration_request
+            )
         return response
 
     async def start_auto_ml_process(
@@ -209,6 +216,28 @@ class ControllerService(ControllerServiceBase):
         response = self._controllerManager.TestAutoML(test_auto_ml_request)
         return response
 
+def SetDatasetConfiguration(request: "SetDatasetConfigurationRequest") -> "SetDatasetConfigurationResponse":
+#def SetDatasetConfiguration(username, identifier, file_configuration) -> "SetDatasetConfigurationResponse":
+    """
+    Persist new dataset configuration in db
+    ---
+    Parameter
+    1. dataset configuration
+    ---
+    Return
+    """
+    data_storage_dir = os.path.join(ROOT_PATH, get_config_property("datasets-path"))
+    if os.getenv("MONGO_DB_DEBUG") == "YES":
+        data_storage = DataStorage(data_storage_dir, "mongodb://localhost:27017/")
+    elif os.getenv("MONGO_CLUSTER") == "YES":
+        data_storage = DataStorage(data_storage_dir, "mongodb://"+os.getenv("MONGODB_SERVICE_HOST")+":"+os.getenv("MONGODB_SERVICE_PORT")+"")
+    else:
+        data_storage = DataStorage(data_storage_dir)
+    _controllerManager = ControllerManager(data_storage)
+    #_controllerManager.SetDatasetConfigurationTaskThread(request, data_storage)
+    data_storage.UpdateDataset(request.username, request.identifier, { "file_configuration": request.file_configuration }, True)
+    #self.__data_storage.UpdateDataset(username, identifier, { "file_configuration": file_configuration }, True)
+    return SetDatasetConfigurationResponse()
 
 def create_secure_context() -> SSLContext:
     """
@@ -230,11 +259,12 @@ def create_secure_context() -> SSLContext:
     return ctx
 
 async def main():
-    server = Server([ControllerService()])
-    context = SSLContext(protocol=ssl.PROTOCOL_TLSv1_2)
-    context.load_cert_chain(certfile="certificate/server.crt", keyfile='certificate/server.key')
-    await server.start(get_config_property('controller-server-adress'), get_config_property('controller-server-port'), ssl=create_secure_context())
-    await server.wait_closed()
+    with ProcessPoolExecutor(max_workers=4) as executor:
+        server = Server([ControllerService(executor)])
+        context = SSLContext(protocol=ssl.PROTOCOL_TLSv1_2)
+        context.load_cert_chain(certfile="certificate/server.crt", keyfile='certificate/server.key')
+        await server.start(get_config_property('controller-server-adress'), get_config_property('controller-server-port'), ssl=create_secure_context())
+        await server.wait_closed()
 
 
 if __name__ == '__main__':

@@ -637,6 +637,7 @@ class ControllerManager(object):
         return response
 
     def SetDatasetConfiguration(self, request: "SetDatasetConfigurationRequest") -> "SetDatasetConfigurationResponse":
+    #def SetDatasetConfiguration(self, username, identifier, file_configuration) -> "SetDatasetConfigurationResponse":
         """
         Persist new dataset configuration in db
         ---
@@ -646,7 +647,8 @@ class ControllerManager(object):
         Return
         """
         #SetDatasetConfigurationTaskThread(request, self.__data_storage)
-        self.__data_storage.UpdateDataset(request.username, request.identifier, { "file_configuration": request.file_configuration }, True)
+        #self.__data_storage.UpdateDataset(request.username, request.identifier, { "file_configuration": request.file_configuration }, True)
+        #self.__data_storage.UpdateDataset(username, identifier, { "file_configuration": file_configuration }, True)
         return SetDatasetConfigurationResponse()
 
 class SetDatasetConfigurationTaskThread(object):
