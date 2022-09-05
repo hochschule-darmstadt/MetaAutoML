@@ -31,12 +31,12 @@ services:
       - FLAML_SERVICE_PORT=50056
       - AUTOGLUON_SERVICE_HOST=gluon
       - AUTOGLUON_SERVICE_PORT=50057
-      - AUTOCVE_SERVICE_HOST=autocve
-      - AUTOCVE_SERVICE_PORT=50058
+      #- AUTOCVE_SERVICE_HOST=autocve
+      #- AUTOCVE_SERVICE_PORT=50058
       - PYTORCH_SERVICE_HOST=pytorch
       - PYTORCH_SERVICE_PORT=50059
-      - ALPHAD3M_SERVICE_HOST=alphad3m
-      - ALPHAD3M_SERVICE_PORT=50060
+      #- ALPHAD3M_SERVICE_HOST=alphad3m
+      #- ALPHAD3M_SERVICE_PORT=50060
     volumes:
       - datasets:/app/app-data/datasets
       - training:/app/app-data/training
@@ -45,9 +45,9 @@ services:
       - training-sklearn:/app/app-data/training/sklearn
       - training-flaml:/app/app-data/training/flaml
       - training-gluon:/app/app-data/training/gluon
-      - training-autocve:/app/app-data/training/autocve
+      #- training-autocve:/app/app-data/training/autocve
       - training-pytorch:/app/app-data/training/pytorch
-      - training-alphad3m:/app/app-data/training/alphad3m
+      #- training-alphad3m:/app/app-data/training/alphad3m
       - training-mcfly:/app/app-data/training/mcfly
 
   mongo:
@@ -134,16 +134,16 @@ services:
       - datasets:/app/app-data/datasets
       - training-gluon:/app/app-data/training
 
-  autocve:
-    build: 
-      context: ./adapters
-      dockerfile: ./AutoCVE/Dockerfile
-    container_name: autocve
-    environment:
-      - GRPC_SERVER_PORT=50058
-    volumes:
-      - datasets:/app/app-data/datasets
-      - training-autocve:/app/app-data/training
+  #autocve:
+  #  build: 
+  #    context: ./adapters
+  #    dockerfile: ./AutoCVE/Dockerfile
+  #  container_name: autocve
+  #  environment:
+  #    - GRPC_SERVER_PORT=50058
+  #  volumes:
+  #    - datasets:/app/app-data/datasets
+  #    - training-autocve:/app/app-data/training
 
   pytorch:
     build: 
@@ -156,16 +156,16 @@ services:
       - datasets:/app/app-data/datasets
       - training-pytorch:/app/app-data/training
 
-  alphad3m:
-    build:
-      context: ./adapters
-      dockerfile: ./AlphaD3M/Dockerfile
-    container_name: alphad3m
-    environment:
-      - GRPC_SERVER_PORT=50060
-    volumes:
-      - datasets:/app/app-data/datasets
-      - training-alphad3m:/app/app-data/training
+  #alphad3m:
+  #  build:
+  #    context: ./adapters
+  #    dockerfile: ./AlphaD3M/Dockerfile
+  #  container_name: alphad3m
+  #  environment:
+  #    - GRPC_SERVER_PORT=50060
+  #  volumes:
+  #    - datasets:/app/app-data/datasets
+  #    - training-alphad3m:/app/app-data/training
 
 volumes:
   datasets: # shared volume between controller, adapters and frontend/dummy to transfer datasets
@@ -175,9 +175,9 @@ volumes:
   training-flaml:
   training-gluon:
   training-pytorch:
-  training-autocve:
+  #training-autocve:
   training-mljar:
-  training-alphad3m:
+  #training-alphad3m:
   training-mcfly:
 
   # shared volume between controller and frontend / dummy to transfer training
