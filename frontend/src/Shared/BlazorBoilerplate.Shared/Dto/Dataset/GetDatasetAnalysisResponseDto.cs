@@ -8,6 +8,11 @@ namespace BlazorBoilerplate.Shared.Dto.Dataset
 {
     public class GetDatasetAnalysisResponseDto
     {
+        public List<DatasetAnalysisCategory> AnalysisCategories { get; set; } = new List<DatasetAnalysisCategory>();
+    }
+    public class DatasetAnalysisCategory
+    {
+        public string CategoryTitle { get; set; }
         public List<DatasetAnalysis> Analyses { get; set; } = new List<DatasetAnalysis>();
     }
     public class DatasetAnalysis

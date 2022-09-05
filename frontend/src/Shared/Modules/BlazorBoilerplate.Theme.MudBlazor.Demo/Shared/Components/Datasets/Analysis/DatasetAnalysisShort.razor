@@ -1,5 +1,4 @@
-﻿
-@using System 
+﻿@using System
 @using System.IO
 @using Microsoft.AspNetCore.Hosting
 @using Microsoft.Extensions.Logging
@@ -13,7 +12,7 @@
 
 <MudCard Elevation="5">
     <MudCardHeader Style="border-bottom-style: inset; border-bottom-width: 1px;">
-        <CardHeaderContent >
+        <CardHeaderContent>
             <MudText Typo="Typo.h6">Analysis</MudText>
         </CardHeaderContent>
         <CardHeaderActions>
@@ -36,15 +35,9 @@
             }
             else
             {
-                <MudCarousel Class="mud-width-full" ItemsSource="@_analysis.Analyses" Style="height:250px;" AutoCycle="false">
-                    <ItemTemplate>
-                        <MudGrid>
-                            <MudItem xs="12" Style="display: grid; justify-content: center;">
-                                <MudImage Src="@GetImage(context.Content)" Style="height:220px; max-width: 700px;" />
-                            </MudItem>
-                        </MudGrid>
-                    </ItemTemplate>
-                </MudCarousel>
+                <MudItem xs="12" Style="display: grid; justify-content: center;">
+                    <MudImage Src="@GetImage(_analysis.AnalysisCategories[0].Analyses[0].Content)" Style="height:220px;" />
+                </MudItem>
             }
         </MudPaper>
     </MudCardContent>
@@ -84,10 +77,10 @@
             }
             isPreviewRequestRunning = true;
             GetDatasetAnalysisRequestDto datasetRequest = new GetDatasetAnalysisRequestDto()
-            {
-                DatasetIdentifier = _dataset.Identifier,
-                GetShortPreview = true
-            };
+                {
+                    DatasetIdentifier = _dataset.Identifier,
+                    GetShortPreview = true
+                };
             ApiResponseDto apiResponse = await apiClient.GetDatasetAnalysis(datasetRequest);
 
             if (apiResponse.IsSuccessStatusCode)
