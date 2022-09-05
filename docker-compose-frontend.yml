@@ -7,8 +7,8 @@ services:
       # the below path is relative to the build context
       dockerfile: ./src/Utils/Docker/Dockerfile
     ports:
-      - 54415:80
-      - 54443:443
+      - 53415:80
+      - 53443:443
     depends_on:
       - sqlserver
       - controller
@@ -20,9 +20,9 @@ services:
       - BlazorBoilerplate__UseSqlServer=true
       - BlazorBoilerplate__ApplicationUrl=blazorboilerplate
       - BlazorBoilerplate__IS4ApplicationUrl=blazorboilerplate
-      - BlazorBoilerplate__CertificatePassword=omaml2022Alex#
+      - BlazorBoilerplate__CertificatePassword=Admin123
       - ASPNETCORE_URLS=https://+:443;http://+80
-      - ASPNETCORE_Kestrel__Certificates__Default__Password=omaml2022Alex#
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=Admin123
       - ASPNETCORE_Kestrel__Certificates__Default__Path=aspnetapp.pfx
       - CONTROLLER_SERVICE_HOST=controller
       - CONTROLLER_SERVICE_PORT=5001
