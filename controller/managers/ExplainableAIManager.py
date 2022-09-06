@@ -8,34 +8,6 @@ import numpy as np
 from AdapterManager import AdapterManager
 from Controller_bgrpc import *
 
-# Config for matplotlib plot sizing. These values are interpreted as pixels / 100.
-# So a Y value of 4 means that the plots will be 400px high.
-# This is configured as vars here because the plots are capable of resizing themselves up to a factor of 3x.
-# The value this is set to should be correlated to the value in the frontend
-PLT_XVALUE = 6.5
-PLT_YVALUE = 5
-
-
-def make_html_force_plot(base_value, shap_values, X, path, filename_detail):
-    import shap
-    shap.initjs()
-    filename = os.path.join(path, f"force_plot_{filename_detail}.html")
-    shap.save_html(filename, shap.force_plot(base_value, shap_values, X))
-    return filename
-
-
-def make_svg_force_plot(base_value, shap_values, X, path, filename_detail):
-    import shap
-    import matplotlib
-    matplotlib.use('SVG')
-    import matplotlib.pyplot as plt
-    filename = os.path.join(path, f"force_plot_{filename_detail}.svg")
-    plot = shap.force_plot(base_value, shap_values, X, matplotlib=True, show=False)
-    plt.tight_layout()
-    plt.savefig(filename)
-    plt.clf()
-    return filename
-
 
 def make_svg_waterfall_plot(base_value, shap_values, X, path, filename_detail):
     import shap
@@ -46,13 +18,12 @@ def make_svg_waterfall_plot(base_value, shap_values, X, path, filename_detail):
     # Shorten string values if they are too long (Strings of length > 28 are shortened to 25 chars plus '...')
     X = X.astype(str)
     X[X.str.len() > 10] = X[X.str.len() > 10].str[:8] + ".."
-    plt.figure(figsize=((3 * PLT_XVALUE), PLT_YVALUE))
     shap.waterfall_plot(
         shap.Explanation(values=shap_values,
                          base_values=base_value,
                          data=X,
                          feature_names=X.index.tolist()),
-        max_display=50,
+        max_display=10,
         show=False)
     plt.tight_layout()
     plt.savefig(filename)
@@ -66,7 +37,6 @@ def make_svg_beeswarm_plot(base_value, shap_values, X, path, filename_detail):
     matplotlib.use('Agg')
     import matplotlib.pyplot as plt
     filename = os.path.join(path, f"beeswarm_{filename_detail}.svg")
-    plt.figure(figsize=(PLT_XVALUE, PLT_YVALUE))
     shap.plots.beeswarm(shap.Explanation(values=shap_values,
                                          base_values=base_value,
                                          data=X,
@@ -89,23 +59,6 @@ def make_svg_summary_plot(shap_values, X, classnames, path):
     plt.savefig(filename)
     plt.clf()
     return filename
-
-
-def compile_html(plots, path):
-    """
-    Compile html file
-    """
-    path = os.path.join(path, "explanation.html")
-    with open(path, "w", encoding="UTF-8") as output_file:
-        output_file.write(f"<h1> SHAP output </h1>\n\n")
-        for plot in plots:
-            with open(plot["path"], "r", encoding="UTF-8") as shap_file:
-                output_file.write(f"<h1> {plot['title']} </h1>\n")
-                output_file.write(f"<p> {plot['description']} </p>\n")
-                output_file.write(shap_file.read())
-                output_file.write("<br /><br />\n\n")
-                shap_file.close()
-        output_file.close()
 
 
 def plot_tabular_classification(dataset_X, dataset_Y, target, no_samples, explainer, shap_values, plot_path):
@@ -139,10 +92,11 @@ def plot_tabular_classification(dataset_X, dataset_Y, target, no_samples, explai
                       "description": f"The waterfall plot shows the significance of certain features within the dataset"
                                      f" by their impact on the model. This is done by looking at one row within the "
                                      f"dataset. The values quantify this impact. From the base value certain features "
-                                     f"'push' the model to make a certain decision. In this case the value of {target} "
+                                     f"'push' the model to make a certain decision. In this case the analysis looks "
+                                     f"only at row {row_idx} of the dataset where the value of {target} "
                                      f"is {class_value} and so features that push the model towards this decision are "
-                                     f"indicated by higher values and blue coloring while features that point towards "
-                                     f"other classes are marked in red.",
+                                     f"indicated by higher values and red coloring while features that point towards "
+                                     f"other classes are marked in blue.",
                       "path": filename})
 
         filename = make_svg_beeswarm_plot(base_value=explainer.expected_value[class_idx],
@@ -277,7 +231,6 @@ class ExplainableAIManager:
             callback(thread=threading.current_thread(), username=username, model=model, status="failed", detail=f"incompatible: {message}", plots=[], title="SHAP Explanation")
             return
 
-        compile_html(plots, output_path)
         print(f"[ExplainableAIManager]: Plots for {model['automl_name']} completed")
         callback(thread=threading.current_thread(), username=username, model=model, status="finished", detail=f"{len(plots)} plots created", plots=plots, title="SHAP Explanation")
 
