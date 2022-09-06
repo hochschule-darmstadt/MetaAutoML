@@ -161,7 +161,7 @@ class DataSetAnalysisManager:
             category["items"].append(self.__make_column_plot(col, self.plot_filepath))
         self.__plots.append(category)
 
-        print(f"[DatasetAnalysisManager]: Dataset analysis finished, saved {sum(len(x) for x in self.__plots)} plots")
+        print(f"[DatasetAnalysisManager]: Dataset analysis finished, saved {sum(len(x['items']) for x in self.__plots)} plots")
         return self.__plots
 
 

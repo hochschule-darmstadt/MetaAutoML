@@ -43,7 +43,10 @@ def make_svg_waterfall_plot(base_value, shap_values, X, path, filename_detail):
     matplotlib.use('Agg')
     import matplotlib.pyplot as plt
     filename = os.path.join(path, f"waterfall_{filename_detail}.svg")
-    plt.figure(figsize=((2 * PLT_XVALUE), PLT_YVALUE))
+    # Shorten string values if they are too long (Strings of length > 28 are shortened to 25 chars plus '...')
+    X = X.astype(str)
+    X[X.str.len() > 10] = X[X.str.len() > 10].str[:8] + ".."
+    plt.figure(figsize=((3 * PLT_XVALUE), PLT_YVALUE))
     shap.waterfall_plot(
         shap.Explanation(values=shap_values,
                          base_values=base_value,
@@ -229,7 +232,7 @@ class ExplainableAIManager:
         self.__data_storage.UpdateModel(username, model_id, {"explanation": {"status": "started"}})
         return
     
-    def explain_shap(self, username, model_id, callback, number_of_samples=25):
+    def explain_shap(self, username, model_id, callback, number_of_samples=5):
         model = self.__data_storage.GetModel(username, model_id)
         config = self.__data_storage.GetTraining(username, model["training_id"])
         dataset_path = self.__data_storage.GetDataset(username, config["dataset_id"])[1]["path"]
