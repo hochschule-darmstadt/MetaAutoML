@@ -40,15 +40,9 @@
             }
             else
             {
-                <MudCarousel Class="mud-width-full" ItemsSource="@_explanation.Analyses" Style="height:250px;" AutoCycle="false">
-                    <ItemTemplate>
-                        <MudGrid>
-                            <MudItem xs="12" Style="display: grid; justify-content: center;">
-                                <MudImage Src="@GetImage(context.Content)" Style="height:220px; max-width: 700px;" />
-                            </MudItem>
-                        </MudGrid>
-                    </ItemTemplate>
-                </MudCarousel>
+                <MudItem xs="12" Style="display: grid; justify-content: center;">
+                    <MudImage Src="@GetImage(_explanation.AnalysisCategories[0].Analyses[0].Content)" Style="height:220px;" />
+                </MudItem>
             }
         </MudPaper>
     </MudCardContent>

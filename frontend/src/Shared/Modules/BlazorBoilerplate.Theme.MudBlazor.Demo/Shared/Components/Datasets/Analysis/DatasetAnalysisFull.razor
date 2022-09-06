@@ -39,11 +39,11 @@
                         }
                         else
                         {   
-                            <MudDivider Class="mud-width-full" Style="margin-top: 40px;" margin-bottom: 20px;" />
+                            <MudDivider Class="mud-width-full" Style="margin-top: 40px;" />
                             <MudItem xs="12" Style="display: grid; justify-content: center;">
                                 <MudText Typo="Typo.h5">@category.CategoryTitle</MudText>
                             </MudItem>
-                            <MudDivider Class="mud-width-full" />
+                            <MudDivider Class="mud-width-full" Style="margin-bottom: 20px;" />
                             <MudCarousel Class="mud-width-full" ItemsSource="@category.Analyses" Style="height:560px" AutoCycle="false">
                                 <ItemTemplate>
                                     <MudGrid>

@@ -161,7 +161,7 @@ class DataSetAnalysisManager:
             category["items"].append(self.__make_column_plot(col, self.plot_filepath))
         self.__plots.append(category)
 
-        print(f"[DatasetAnalysisManager]: Dataset analysis finished, saved {len(self.__plots)} plots")
+        print(f"[DatasetAnalysisManager]: Dataset analysis finished, saved {sum(len(x) for x in self.__plots)} plots")
         return self.__plots
 
 
@@ -318,9 +318,9 @@ class DataSetAnalysisManager:
         desc = f"This plot shows the {colname} column"
         if self.__dataset[colname].dtype.name == "category" or self.__dataset[colname].dtype.name == "bool":
             # Make a bar chart for categorical or bool columns
-            df = self.__dataset[colname]
+            df = self.__dataset[colname].astype(str)
             # Shorten string values if they are too long (Strings of length > 28 are shortened to 25 chars plus '...')
-            df = df[df.str.len() < 28].str[:25] + "..."
+            df[df.str.len() > 28] = df[df.str.len() > 28].str[:25] + "..."
             df = df.value_counts()
             # Resize figure. The standard size (6.4 x 4.8) works for <50 unique values.
             # Above that: double the size for every 50 extra values up to a factor of 3x
