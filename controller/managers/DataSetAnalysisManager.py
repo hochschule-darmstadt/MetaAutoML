@@ -56,9 +56,15 @@ class DataSetAnalysisManager:
 
         else:
             if basic_analysis:
-                analysis["basic_analysis"] = self.basic_analysis()
+                try:
+                    analysis["basic_analysis"] = self.basic_analysis()
+                except:
+                    analysis["basic_analysis"] = ""
             if advanced_analysis:
-                analysis["advanced_analysis"] = self.advanced_analysis()
+                try:
+                    analysis["advanced_analysis"] = self.advanced_analysis()
+                except:
+                    analysis["advanced_analysis"] = ""
 
         return analysis
 
