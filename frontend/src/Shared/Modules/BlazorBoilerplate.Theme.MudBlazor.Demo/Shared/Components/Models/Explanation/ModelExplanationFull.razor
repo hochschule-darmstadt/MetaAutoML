@@ -29,14 +29,28 @@
             else
             {
                 <MudGrid>
-                    @foreach (var item in _explanation.Analyses)
+                    @foreach (var category in _explanation.AnalysisCategories)
                     {
+                        <MudDivider Class="mud-width-full" Style="margin-top: 40px;" />
                         <MudItem xs="12" Style="display: grid; justify-content: center;">
-                            <MudText Typo="Typo.body2">@item.Description</MudText>
+                            <MudText Typo="Typo.h5">@category.CategoryTitle</MudText>
                         </MudItem>
-                        <MudItem xs="12" Style="display: grid; justify-content: center;">
-                            <MudImage Src="@GetImage(item.Content)" Style="height:400px;" />
-                        </MudItem>
+                        <MudDivider Class="mud-width-full" Style="margin-bottom: 20px;" />
+                        <MudCarousel Class="mud-width-full" ItemsSource="@category.Analyses" Style="height:650px" AutoCycle="false">
+                            <ItemTemplate>
+                                <MudGrid>
+                                    <MudItem xs="12" Style="display: grid; justify-content: center;">
+                                        <MudText Typo="Typo.body2">@context.Title</MudText>
+                                    </MudItem>
+                                    <MudItem xs="12" Style="display: grid; justify-content: center;">
+                                        <MudImage Src="@GetImage(context.Content)" Style="height:440px;" />
+                                    </MudItem>
+                                    <MudItem xs="12" Style="display: grid; justify-content: center;">
+                                        <MudText Typo="Typo.body2" Style="padding: 0 20% 0 20%;">@context.Description</MudText>
+                                    </MudItem>
+                                </MudGrid>
+                            </ItemTemplate>
+                        </MudCarousel>
                     }
                 </MudGrid>
             }

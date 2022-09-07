@@ -9,38 +9,21 @@ from AdapterManager import AdapterManager
 from Controller_bgrpc import *
 
 
-def make_html_force_plot(base_value, shap_values, X, path, filename_detail):
-    import shap
-    shap.initjs()
-    filename = os.path.join(path, f"force_plot_{filename_detail}.html")
-    shap.save_html(filename, shap.force_plot(base_value, shap_values, X))
-    return filename
-
-def make_svg_force_plot(base_value, shap_values, X, path, filename_detail):
-    import shap
-    import matplotlib
-    matplotlib.use('SVG')
-    import matplotlib.pyplot as plt
-    filename = os.path.join(path, f"force_plot_{filename_detail}.svg")
-    plot = shap.force_plot(base_value, shap_values, X, matplotlib=True, show=False)
-    plt.tight_layout()
-    plt.savefig(filename)
-    plt.clf()
-    return filename
-
-
 def make_svg_waterfall_plot(base_value, shap_values, X, path, filename_detail):
     import shap
     import matplotlib
     matplotlib.use('Agg')
     import matplotlib.pyplot as plt
     filename = os.path.join(path, f"waterfall_{filename_detail}.svg")
-    plot = shap.waterfall_plot(
+    # Shorten string values if they are too long (Strings of length > 28 are shortened to 25 chars plus '...')
+    X = X.astype(str)
+    X[X.str.len() > 10] = X[X.str.len() > 10].str[:8] + ".."
+    shap.waterfall_plot(
         shap.Explanation(values=shap_values,
                          base_values=base_value,
                          data=X,
                          feature_names=X.index.tolist()),
-        max_display=50,
+        max_display=10,
         show=False)
     plt.tight_layout()
     plt.savefig(filename)
@@ -78,23 +61,6 @@ def make_svg_summary_plot(shap_values, X, classnames, path):
     return filename
 
 
-def compile_html(plots, path):
-    """
-    Compile html file
-    """
-    path = os.path.join(path, "explanation.html")
-    with open(path, "w", encoding="UTF-8") as output_file:
-        output_file.write(f"<h1> SHAP output </h1>\n\n")
-        for plot in plots:
-            with open(plot["path"], "r", encoding="UTF-8") as shap_file:
-                output_file.write(f"<h1> {plot['title']} </h1>\n")
-                output_file.write(f"<p> {plot['description']} </p>\n")
-                output_file.write(shap_file.read())
-                output_file.write("<br /><br />\n\n")
-                shap_file.close()
-        output_file.close()
-
-
 def plot_tabular_classification(dataset_X, dataset_Y, target, no_samples, explainer, shap_values, plot_path):
     """
     Plot the produced explanation by using the functionality provided by shap.
@@ -117,36 +83,6 @@ def plot_tabular_classification(dataset_X, dataset_Y, target, no_samples, explai
     for class_idx, class_value in enumerate(classlist):
         row_idx = int(dataset_Y[dataset_Y == class_value].index[0])
 
-        #filename = make_html_force_plot(base_value=explainer.expected_value[class_idx],
-        #                                shap_values=shap_values[class_idx][row_idx], X=dataset_X.iloc[row_idx],
-        #                                path=plot_path,
-        #                                filename_detail=f"{target}_{class_value}")
-        #plots.append({"type": "force_plot HTML",
-        #              "title": f"Force plot of {target} = {class_value}",
-        #              "description": f"The force plot shows the significance of certain features within the dataset by "
-        #                             f"their impact on the model. This is done by looking at one row within the "
-        #                             f"dataset. The values quantify this impact. From the base value certain features "
-        #                             f"'push' the model to make a certain decision. In this case the value of {target} "
-        #                             f"is {class_value} and so features that push the model towards this decision are "
-        #                             f"indicated by higher values and blue coloring while features that point towards "
-        #                             f"other classes are marked in red.",
-        #              "path": filename})
-
-        filename = make_svg_force_plot(base_value=explainer.expected_value[class_idx],
-                                        shap_values=shap_values[class_idx][row_idx], X=dataset_X.iloc[row_idx],
-                                        path=plot_path,
-                                        filename_detail=f"{target}_{class_value}")
-        plots.append({"type": "force_plot",
-                      "title": f"Force plot of {target} = {class_value}",
-                      "description": f"The force plot shows the significance of certain features within the dataset by "
-                                     f"their impact on the model. This is done by looking at one row within the "
-                                     f"dataset. The values quantify this impact. From the base value certain features "
-                                     f"'push' the model to make a certain decision. In this case the value of {target} "
-                                     f"is {class_value} and so features that push the model towards this decision are "
-                                     f"indicated by higher values and blue coloring while features that point towards "
-                                     f"other classes are marked in red.",
-                      "path": filename})
-
         filename = make_svg_waterfall_plot(base_value=explainer.expected_value[class_idx],
                                            shap_values=shap_values[class_idx][row_idx], X=dataset_X.iloc[row_idx],
                                            path=plot_path,
@@ -156,10 +92,11 @@ def plot_tabular_classification(dataset_X, dataset_Y, target, no_samples, explai
                       "description": f"The waterfall plot shows the significance of certain features within the dataset"
                                      f" by their impact on the model. This is done by looking at one row within the "
                                      f"dataset. The values quantify this impact. From the base value certain features "
-                                     f"'push' the model to make a certain decision. In this case the value of {target} "
+                                     f"'push' the model to make a certain decision. In this case the analysis looks "
+                                     f"only at row {row_idx} of the dataset where the value of {target} "
                                      f"is {class_value} and so features that push the model towards this decision are "
-                                     f"indicated by higher values and blue coloring while features that point towards "
-                                     f"other classes are marked in red.",
+                                     f"indicated by higher values and red coloring while features that point towards "
+                                     f"other classes are marked in blue.",
                       "path": filename})
 
         filename = make_svg_beeswarm_plot(base_value=explainer.expected_value[class_idx],
@@ -222,10 +159,13 @@ class ExplainableAIManager:
         This spawns a separate thread which is saved in self.__threads and is removed upon completion.
         After the thread is finished (or has crashed) the database is updated with the new information.
         """
-        def callback(thread, username, model, status, detail, plots):
+        def callback(thread, username, model, status, detail, plots, title):
             with self.__data_storage.Lock():
                 # Add explanation results to model
-                model_data = {"explanation": {"status": status, "detail": detail, "plots": plots}}
+                model_data = {"explanation":
+                                  {"status": status,
+                                   "detail": detail,
+                                   "content": [{"title": title, "items": plots}]}}
                 self.__data_storage.UpdateModel(username, str(model['_id']), model_data)
 
                 # Add explanation results (only the status) to training
@@ -246,7 +186,7 @@ class ExplainableAIManager:
         self.__data_storage.UpdateModel(username, model_id, {"explanation": {"status": "started"}})
         return
     
-    def explain_shap(self, username, model_id, callback, number_of_samples=25):
+    def explain_shap(self, username, model_id, callback, number_of_samples=5):
         model = self.__data_storage.GetModel(username, model_id)
         config = self.__data_storage.GetTraining(username, model["training_id"])
         dataset_path = self.__data_storage.GetDataset(username, config["dataset_id"])[1]["path"]
@@ -272,7 +212,7 @@ class ExplainableAIManager:
             try:
                 explainer = self.get_shap_explainer(username, model, config, sampled_dataset_X)
             except RuntimeError as e:
-                callback(thread=threading.current_thread(), username=username, model=model, status="failed", detail=f"exeption: {e}", plots=[])
+                callback(thread=threading.current_thread(), username=username, model=model, status="failed", detail=f"exeption: {e}", plots=[], title="SHAP Explanation")
                 return
             shap_values = explainer.shap_values(sampled_dataset_X)
 
@@ -288,12 +228,11 @@ class ExplainableAIManager:
         else:
             message = "The ML task of the selected training is not tabular classification. This module is only compatible with tabular classification."
             print("[ExplainableAIManager]:" + message)
-            callback(thread=threading.current_thread(), username=username, model=model, status="failed", detail=f"incompatible: {message}", plots=[])
+            callback(thread=threading.current_thread(), username=username, model=model, status="failed", detail=f"incompatible: {message}", plots=[], title="SHAP Explanation")
             return
 
-        compile_html(plots, output_path)
         print(f"[ExplainableAIManager]: Plots for {model['automl_name']} completed")
-        callback(thread=threading.current_thread(), username=username, model=model, status="finished", detail=f"{len(plots)} plots created", plots=plots)
+        callback(thread=threading.current_thread(), username=username, model=model, status="finished", detail=f"{len(plots)} plots created", plots=plots, title="SHAP Explanation")
 
     def get_shap_explainer(self, username, model, config, sampled_dataset_x):
         """

@@ -236,20 +236,28 @@ namespace BlazorBoilerplate.Server.Managers
                 {
                     if (analysis.Count != 0)
                     {
-                        foreach (var item in analysis["advanced_analysis"])
+                        foreach (var category in analysis["advanced_analysis"])
                         {
-                            if (dataset.GetShortPreview == true && index++ == 3)
-                            {
-                                break;
-                            }
-                            DatasetAnalysis datasetAnalysis = new DatasetAnalysis()
-                            {
-                                Title = item.SelectToken("title").ToString(),
-                                Type = item.SelectToken("type").ToString(),
-                                Description = item.SelectToken("description").ToString(),
-                                Content = GetImageAsBytes(item.SelectToken("path").ToString())
+                            DatasetAnalysisCategory datasetAnalysisCategory = new DatasetAnalysisCategory() 
+                            { 
+                                CategoryTitle = category.SelectToken("title")
                             };
-                            response.Analyses.Add(datasetAnalysis);
+                            foreach (var item in category["items"])
+                            {
+                                if (dataset.GetShortPreview == true && index++ == 3)
+                                {
+                                    break;
+                                }
+                                DatasetAnalysis datasetAnalysis = new DatasetAnalysis()
+                                {
+                                    Title = item.SelectToken("title").ToString(),
+                                    Type = item.SelectToken("type").ToString(),
+                                    Description = item.SelectToken("description").ToString(),
+                                    Content = GetImageAsBytes(item.SelectToken("path").ToString())
+                                };
+                                datasetAnalysisCategory.Analyses.Add(datasetAnalysis);
+                            }
+                            response.AnalysisCategories.Add(datasetAnalysisCategory);
                         }
                     }
                 }

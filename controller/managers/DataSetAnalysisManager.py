@@ -7,12 +7,19 @@ import pandas as pd
 from scipy.stats import spearmanr
 from sktime.datasets import load_from_tsfile_to_dataframe
 
+# Config for matplotlib plot sizing. These values are interpreted as pixels / 100.
+# So a Y value of 4 means that the plots will be 400px high.
+# This is configured as vars here because the plots are capable of resizing themselves up to a factor of 3x.
+# The value this is set to should be correlated to the value in the frontend
+PLT_XVALUE = 6.5
+PLT_YVALUE = 5
 
 class DataSetAnalysisManager:
     """
     Static DataSetAnalysisManager class to analyze the dataset
     """
     def __init__(self, config):
+        # Setup config
         file_config = json.loads(config["file_configuration"])
         self.config = config
         delimiters = {
@@ -121,14 +128,8 @@ class DataSetAnalysisManager:
         plt.ioff()
         print("[DatasetAnalysisManager]: Starting advanced dataset analysis")
 
+        # Convert all "object" columns to category
         self.__dataset.loc[:, self.__dataset.dtypes == 'object'] = self.__dataset.select_dtypes(['object']).apply(lambda x: x.astype('category'))
-        categorical_columns = list(self.__dataset.select_dtypes(['category']).columns) + list(self.__dataset.select_dtypes(['bool']).columns)
-        plot_filenames = []
-
-        # Plot distributions of all columns
-        print(f"[DatasetAnalysisManager]: Plotting {len(self.__dataset.columns)} columns")
-        for i, col in enumerate(list(self.__dataset.columns)):
-            self.__make_column_plot(col, self.plot_filepath)
 
         # Get processed version of dataset to make calculation of feature correlation using scipy spearmanr possible
         proc_dataset = self.__process_categorical_columns()
@@ -138,26 +139,35 @@ class DataSetAnalysisManager:
         corr = spearmanr(proc_dataset).correlation
         # Make correlation plot
         print("[DatasetAnalysisManager]: Plotting correlation matrix")
-        self.__make_correlation_matrix_plot(corr, self.__dataset.columns, self.plot_filepath)
-
+        filename = self.__make_correlation_matrix_plot(corr, self.__dataset.columns, self.plot_filepath)
+        self.__plots.append({"title": "Correlation Matrix", "items": [filename]})
         # Get indices of correlations ordered desc
         indices = self.__largest_indices(corr, (len(proc_dataset.columns) * len(proc_dataset.columns)))
 
         # Plot features with the highest correlation
         print(f"[DatasetAnalysisManager]: Plotting top 5 feature imbalance plots")
         plotted_indices = []
+        category = {"title": "Correlation analysis", "items": []}
         for first_col_idx, second_col_index in zip(indices[0], indices[1]):
             # Only plot top 5
             if len(plotted_indices) == 6:
                 break
             # If the correlation isn't a col with itself or has already been plotted the other way around -> plot it
             if first_col_idx != second_col_index and [second_col_index, first_col_idx] not in plotted_indices:
-                self.__make_feature_imbalance_plot(self.__dataset.columns[first_col_idx],
-                                                   self.__dataset.columns[second_col_index],
-                                                   self.plot_filepath)
+                category["items"].append(self.__make_feature_imbalance_plot(self.__dataset.columns[first_col_idx],
+                                                                            self.__dataset.columns[second_col_index],
+                                                                            self.plot_filepath))
                 plotted_indices.append([first_col_idx, second_col_index])
+        self.__plots.append(category)
 
-        print(f"[DatasetAnalysisManager]: Dataset analysis finished, saved {len(self.__plots)} plots")
+        # Plot distributions of all columns
+        print(f"[DatasetAnalysisManager]: Plotting {len(self.__dataset.columns)} columns")
+        category = {"title": "Column analysis", "items": []}
+        for i, col in enumerate(list(self.__dataset.columns)):
+            category["items"].append(self.__make_column_plot(col, self.plot_filepath))
+        self.__plots.append(category)
+
+        print(f"[DatasetAnalysisManager]: Dataset analysis finished, saved {sum(len(x['items']) for x in self.__plots)} plots")
         return self.__plots
 
 
@@ -177,7 +187,7 @@ class DataSetAnalysisManager:
 
         for index, _ in dataset_missings_rows[dataset_missings_rows > (number_of_columns * 0.5)].items():
             missing_rows_indices.append(index)
-        
+
         return missing_rows_indices
 
     @staticmethod
@@ -203,7 +213,7 @@ class DataSetAnalysisManager:
                 filter = (dataset[column_name] <= (Q1 - 2 * IQR)) | (dataset[column_name] >= (Q3 + 2 * IQR))
                 outlier_indices = dataset[column_name].loc[filter].index.tolist()
                 outlier_columns.append({column_name: outlier_indices})
-        
+
         return outlier_columns
 
     @staticmethod
@@ -314,31 +324,30 @@ class DataSetAnalysisManager:
         desc = f"This plot shows the {colname} column"
         if self.__dataset[colname].dtype.name == "category" or self.__dataset[colname].dtype.name == "bool":
             # Make a bar chart for categorical or bool columns
-            df = self.__dataset[colname]
+            df = self.__dataset[colname].astype(str)
             # Shorten string values if they are too long (Strings of length > 28 are shortened to 25 chars plus '...')
-            df = df[df.str.len() < 28].str[:25] + "..."
+            df[df.str.len() > 28] = df[df.str.len() > 28].str[:25] + "..."
             df = df.value_counts()
             # Resize figure. The standard size (6.4 x 4.8) works for <50 unique values.
-            # Above that: double the size for every 50 extra values
-            factor = min(math.ceil(df.shape[0] / 50), 3)
+            # Above that: double the size for every 50 extra values up to a factor of 3x
+            factor = min(math.ceil(df.shape[0] / 50), 2)
             # If there are too many
-            if df.shape[0] < 150:
-                df.plot(kind='bar', figsize=(factor * 6.4, 4.8))
+            if df.shape[0] < 100:
+                df.plot(kind='bar', figsize=(factor * PLT_XVALUE, PLT_YVALUE))
             else:
-                df.iloc[:150].plot(kind='bar', figsize=(factor * 6.4, 4.8))
-                desc = f"This plot shows the first 150 unique values of the {colname} column"
+                df.iloc[:100].plot(kind='bar', figsize=(factor * PLT_XVALUE, PLT_YVALUE))
+                desc = f"This plot shows the first 100 unique values of the {colname} column"
         else:
             # Make a histogram for numerical columns
             self.__dataset[colname].plot(kind='hist')
         plt.title(colname)
         plt.tight_layout()
-        #plt.show()
         filename = os.path.join(plot_path, colname + "_column_plot.svg")
         plt.savefig(filename)
-        self.__plots.append({"type": "column_plot",
-                             "title": colname,
-                             "description": desc,
-                             "path": filename})
+        return {"type": "column_plot",
+                "title": colname,
+                "description": desc,
+                "path": filename}
 
     def __make_correlation_matrix_plot(self, corr, columns, plot_path):
         """
@@ -357,8 +366,7 @@ class DataSetAnalysisManager:
         # Resize figure. The standard size (6.4 x 4.8) works for <20 cols.
         # Above that: double the size for every 20 extra columns
         factor = math.ceil(len(columns) / 20)
-        plt.rcParams['figure.figsize'] = [(factor * 6.4), (factor * 4.8)]
-        fig = plt.figure()
+        fig = plt.figure(figsize=((factor * PLT_XVALUE), (factor * PLT_YVALUE)))
         ax = fig.add_subplot(111)
         cax = ax.matshow(
             corr,
@@ -375,11 +383,10 @@ class DataSetAnalysisManager:
         plt.tight_layout()
         filename = os.path.join(plot_path, "correlation_matrix.svg")
         plt.savefig(filename)
-        #plt.show()
-        self.__plots.append({"type": "correlation_matrix",
-                             "title": "Correlation matrix",
-                             "description": "Higher values indicate greater correlation between features",
-                             "path": filename})
+        return {"type": "correlation_matrix",
+                "title": "Correlation matrix",
+                "description": "Higher values indicate greater correlation between features",
+                "path": filename}
 
     def __make_feature_imbalance_plot(self, first_colname, second_colname, plot_path):
         """
@@ -394,27 +401,32 @@ class DataSetAnalysisManager:
         import matplotlib
         matplotlib.use('SVG')
         import matplotlib.pyplot as plt
-        samples = 25
+        samples = 100
+
         feature_df = self.__dataset.groupby([first_colname, second_colname]).size().reset_index().sort_values(by=[0], ascending=False)
-        x_data = list(zip(feature_df[first_colname], feature_df[second_colname]))[:samples]
-        x_data = [f"[{x[0]}, {x[1]}]" for x in x_data]
+        x_data = list(zip(feature_df[first_colname].astype(str), feature_df[second_colname].astype(str)))[:samples]
+        x_data = [f"[{(x[0][:6] + '..') if len(x[0]) > 8 else x[0]}, {(x[1][:6] + '..') if len(x[1]) > 8 else x[1]}]" for x in x_data]
         y_data = list(feature_df[0])[:samples]
 
         plt.clf()
+        # Resize figure. The standard size (6.4 x 4.8) works for <50 unique values.
+        # Above that: double the size for every 50 extra values up to a factor of 3x
+        factor = min(math.ceil(len(y_data) / 50), 2)
+        plt.figure(figsize=((factor * PLT_XVALUE), PLT_YVALUE))
         plt.bar(x_data, y_data)
+        plt.title(f"Feature imbalance plot of [{first_colname}, {second_colname}]")
         plt.xticks(x_data, labels=x_data, rotation=90)
         plt.xlabel(f"Most common combinations of [{first_colname}, {second_colname}]")
         plt.ylabel(f"Combination count")
         plt.tight_layout()
-        #plt.show()
         filename = os.path.join(plot_path, "feature_imbalance_" + first_colname + "_vs_" + second_colname + ".svg")
         plt.savefig(filename)
-        self.__plots.append({"type": "feature_imbalance_plot",
-                             "title": f"Feature imbalance plot of [{first_colname}, {second_colname}]",
-                             "description": f"This plot shows the {samples} most common combinations of the columns "
-                                            f"{first_colname} and {second_colname} along with their frequency across "
-                                            f"the whole dataset",
-                             "path": filename})
+        return {"type": "feature_imbalance_plot",
+                "title": f"Feature imbalance plot of [{first_colname}, {second_colname}]",
+                "description": f"This plot shows the {len(x_data)} most common combinations of the columns "
+                               f"{first_colname} and {second_colname} along with their frequency across "
+                               f"the whole dataset",
+                "path": filename}
 
 
     def startLongitudinalDataAnalysis(self) -> dict:

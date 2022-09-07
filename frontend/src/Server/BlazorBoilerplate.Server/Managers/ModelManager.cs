@@ -172,28 +172,37 @@ namespace BlazorBoilerplate.Server.Managers
                 {
                     response.Status = explanation["status"];
                     response.Detail = explanation["detail"];
-                    foreach (var item in explanation["plots"])
+                    foreach (var category in explanation["content"])
                     {
-                        if (model.GetShortPreview == true)
+                        ModelExplanationCategory modelExplanationCategory = new ModelExplanationCategory()
                         {
-                            if (item.SelectToken("type").ToString() == "force_plot")
-                            {
-                                continue;
-                            }
-                            else if (index++ == 3)
-                            {
-                                break;
-                            }
-                        }
-                        ModelExplanation datasetAnalysis = new ModelExplanation()
-                        {
-                            Title = item.SelectToken("title").ToString(),
-                            Type = item.SelectToken("type").ToString(),
-                            Description = item.SelectToken("description").ToString(),
-                            Content = GetImageAsBytes(item.SelectToken("path").ToString())
+                            CategoryTitle = category.SelectToken("title")
                         };
-                        response.Analyses.Add(datasetAnalysis);
+                        foreach (var item in category["items"])
+                        {
+                            if (model.GetShortPreview == true)
+                            {
+                                if (item.SelectToken("type").ToString() == "force_plot")
+                                {
+                                    continue;
+                                }
+                                else if (index++ == 3)
+                                {
+                                    break;
+                                }
+                            }
+                            ModelExplanation modelExplanation = new ModelExplanation()
+                            {
+                                Title = item.SelectToken("title").ToString(),
+                                Type = item.SelectToken("type").ToString(),
+                                Description = item.SelectToken("description").ToString(),
+                                Content = GetImageAsBytes(item.SelectToken("path").ToString())
+                            };
+                            modelExplanationCategory.Analyses.Add(modelExplanation);
+                        }
+                        response.AnalysisCategories.Add(modelExplanationCategory);
                     }
+
                 }
                 return new ApiResponse(Status200OK, null, response);
 

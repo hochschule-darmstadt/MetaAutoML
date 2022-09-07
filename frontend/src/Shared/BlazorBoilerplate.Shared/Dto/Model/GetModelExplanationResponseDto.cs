@@ -10,6 +10,11 @@ namespace BlazorBoilerplate.Shared.Dto.Model
     {
         public string Status { get; set; }
         public string Detail { get; set; }
+        public List<ModelExplanationCategory> AnalysisCategories { get; set; } = new List<ModelExplanationCategory>();
+    }
+    public class ModelExplanationCategory
+    {   
+        public string CategoryTitle { get; set; }
         public List<ModelExplanation> Analyses { get; set; } = new List<ModelExplanation>();
     }
     public class ModelExplanation
