@@ -362,7 +362,7 @@ class ControllerManager(object):
             # no dataset found -> return empty response
             return GetTabularDatasetColumnResponse()
 
-        if dataset["type"] == ":tabular" or dataset["type"] == ":time_series":
+        if dataset["type"] == ":tabular" or dataset["type"] == ":time_series" or dataset["type"] == ":text":
             return CsvManager.GetColumns(dataset["path"], json.loads(dataset["file_configuration"]))
         elif dataset["type"] == ":time_series_longitudinal":
             return LongitudinalDataManager.read_dimension_names(dataset["path"])

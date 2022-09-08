@@ -59,7 +59,7 @@ if __name__ == '__main__':
     with open(configpath) as file:
         config_json = json.load(file)
 
-    if(config_json["task"] == ":tabular_classification" or config_json["task"] == ":tabular_regression" or config_json["task"] == ":text_regression"):
+    if(config_json["task"] == ":tabular_classification" or config_json["task"] == ":tabular_regression" or config_json["task"] == ":text_classification" or config_json["task"] == ":text_regression" or config_json["task"] == ":time_series"):
         target = config_json["configuration"]["target"]["target"]
         features = config_json["dataset_configuration"]["features"]
         features.pop(target, None)
@@ -79,7 +79,12 @@ if __name__ == '__main__':
 
     with open(sys.path[0] + '/model_keras.p', 'rb') as file:
         loaded_model = dill.load(file)
-    predicted_y = loaded_model.predict(X)
-    predicted_y = [np.round(y[0],0) for y in predicted_y]
+    if(config_json["task"] == ":text_classification" or config_json["task"] == ":text_regression"):
+        
+        predicted_y = loaded_model.predict(np.array(X))
+        #predicted_y = [np.round(y[0],0) for y in predicted_y]
+    else:
+        predicted_y = loaded_model.predict(X)
+        #predicted_y = [np.round(y[0],0) for y in predicted_y]
     
     pd.DataFrame(data=predicted_y, columns=["predicted"]).to_csv(sys.path[0] +"/predictions.csv")

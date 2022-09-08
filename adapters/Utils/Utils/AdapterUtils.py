@@ -238,7 +238,7 @@ def evaluate(config_json, config_path, dataloader):
     subprocess.call([python_env, os.path.join(result_path, "predict.py"), file_path, config_path])
     predict_time = time.time() - predict_start
 
-    if(config_json["task"] == ":tabular_classification" or config_json["task"] == ":tabular_regression"):
+    if(config_json["task"] == ":tabular_classification" or config_json["task"] == ":tabular_regression"or config_json["task"] == ":text_regression"or config_json["task"] == ":text_classification"):
         train, test = dataloader(config_json)
         target = config_json["configuration"]["target"]["target"]
     elif(config_json["task"] == ":image_classification" or config_json["task"] == ":image_regression"):
@@ -272,6 +272,13 @@ def evaluate(config_json, config_path, dataloader):
               classification_report(test_target, predicted_target,zero_division=0)
               )
         return acc_score, (predict_time * 1000) / test.shape[0]
+
+    elif config_json["task"] == ":text_classification":
+        return accuracy_score(test[target], predictions["predicted"]), (predict_time * 1000) / test.shape[0]
+
+    elif config_json["task"] == ":text_regression":
+        return mean_squared_error(test[target], predictions["predicted"], squared=False), \
+               (predict_time * 1000) / test.shape[0]
 
 
 def predict(data, config_json, config_path):

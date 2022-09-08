@@ -1,6 +1,6 @@
 absl-py==0.13.0
 astunparse==1.6.3
-autokeras==1.0.16
+autokeras==1.0.20
 backcall==0.2.0
 cached-property==1.5.2
 cachetools==4.2.2
@@ -27,7 +27,7 @@ joblib==1.0.1
 jsonpickle==2.0.0
 keras-nightly==2.5.0.dev2021032900
 Keras-Preprocessing==1.1.2
-keras-tuner==1.0.3
+keras-tuner==1.1.0
 kt-legacy==1.0.4
 Markdown==3.3.4
 MarkupSafe==2.0.1
@@ -59,7 +59,7 @@ tabulate==0.8.9
 tensorboard==2.6.0
 tensorboard-data-server==0.6.1
 tensorboard-plugin-wit==1.8.0
-tensorflow==2.5.0
+tensorflow==2.9.0
 tensorflow-estimator==2.5.0
 termcolor==1.1.0
 terminaltables==3.1.0
