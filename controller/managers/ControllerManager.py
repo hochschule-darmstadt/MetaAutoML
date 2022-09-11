@@ -75,10 +75,10 @@ class ControllerManager(object):
         ---
         Return a .zip containing the model and executable script
         """
-        models = self.__data_storage.GetModels(request.username, request.training_id)
+        model = self.__data_storage.GetModel(request.username, request.auto_ml)
         result = GetAutoMlModelResponse()
-        result.name = os.path.basename(os.path.normpath(models[0]["path"]))
-        with open(models[0]["path"], "rb") as a:
+        result.name = os.path.basename(os.path.normpath(model["path"]))
+        with open(model["path"], "rb") as a:
             result.file = a.read()
         return result
 

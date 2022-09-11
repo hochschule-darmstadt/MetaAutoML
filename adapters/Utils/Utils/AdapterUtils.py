@@ -210,7 +210,8 @@ def zip_script(config):
         file_loc_on_controller = os.path.join(get_config_property("training-path"),
                                             get_config_property('adapter-name'),
                                         config["user_identifier"],
-                                        config["training_id"])
+                                        config["training_id"],
+                                        get_config_property("export-folder-name"))
 
     return {
         'file_name': f'{zip_file_name}.zip',

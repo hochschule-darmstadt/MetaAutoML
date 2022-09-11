@@ -1310,7 +1310,7 @@
 :autopytorch a :AutoML_solution ;
     skos:prefLabel "Autopytorch" ;
     :used_for :pytorch_lib ;
-    :supported_by_oma_ml "True" ;
+    :supported_by_oma_ml "False" ;
     :can_perform :tabular_classification , :tabular_regression , :image_classification .
 :autosklearn a :AutoML_solution ;
     skos:prefLabel "Autosklearn" ;

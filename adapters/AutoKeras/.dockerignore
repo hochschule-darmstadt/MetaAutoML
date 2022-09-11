@@ -13,7 +13,7 @@ structured_data_classifier/
 *-deployment.yaml
 *-service.yaml
 adapters/*/AutoMLs/prediction_time_sources.py
-
+app-data/training/
 .gitkeep
 
 # datasets are mapped into the volume by controller, not by automl adapter, so ignore files if they are present
