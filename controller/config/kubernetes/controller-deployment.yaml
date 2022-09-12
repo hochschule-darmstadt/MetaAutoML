@@ -29,27 +29,29 @@ spec:
         name: controller
         resources:
           limits:
-            cpu: "1"
-            memory: "1097152e3"
+            cpu: "4"
+            memory: "4097152e3"
         volumeMounts:
         - name: datasets
           mountPath: /app/app-data/datasets
         - name: training
           mountPath: /app/app-data/training
         - name: autokeras-output
-          mountPath: /app/app-data/output/autokeras
+          mountPath: /app/app-data/training/autokeras
         - name: mljar-output
-          mountPath: /app/app-data/output/mljar
+          mountPath: /app/app-data/training/mljar
         - name: autocve-output
-          mountPath: /app/app-data/output/autocve
+          mountPath: /app/app-data/training/autocve
         - name: gluon-output
-          mountPath: /app/app-data/output/gluon
+          mountPath: /app/app-data/training/gluon
         - name: pytorch-output
-          mountPath: /app/app-data/output/pytorch
+          mountPath: /app/app-data/training/autopytorch
         - name: flaml-output
-          mountPath: /app/app-data/output/flaml
+          mountPath: /app/app-data/training/flaml
         - name: sklearn-output
-          mountPath: /app/app-data/output/sklearn
+          mountPath: /app/app-data/training/autosklearn
+        - name: mcfly-output
+          mountPath: /app/app-data/training/mcfly
       restartPolicy: Always
       serviceAccountName: ""
       volumes:
@@ -80,3 +82,6 @@ spec:
       - name: sklearn-output
         persistentVolumeClaim:
           claimName: output-sklearn-claim
+      - name: mcfly-output
+        persistentVolumeClaim:
+          claimName: output-mcfly-claim

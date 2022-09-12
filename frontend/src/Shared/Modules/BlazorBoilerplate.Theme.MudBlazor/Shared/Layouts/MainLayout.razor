@@ -6,17 +6,17 @@
 <CascadingValue Value="this">
     <MudLayout>
         <MudAppBar Elevation="1">
-            <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
+            <MudIconButton Icon="@Icons.Material.Filled.Menu" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
             <MudSpacer />
-            <MudText Typo="Typo.h6">OMA-ML: Effective Machine Learning made easy</MudText>
+            <MudText Color="Color.Dark" Typo="Typo.h6">OMA-ML: Effective Machine Learning made easy</MudText>
             <MudSpacer />
             <TopRightBarSection />
         </MudAppBar>
         <MudDrawer @bind-Open="@_navMenuOpened" Elevation="2">
             <MudDrawerHeader >
                 <div class="drawer-logo">
-                    <img alt="@appState.AppName" class="logo-img" src=@($"{Module.ContentPath}/images/logo.svg") title="@appState.AppName">
-                    <a href="/">@appState.AppName</a>
+                    <img alt="@appState.AppName" class="logo-img" src=@($"{Module.ContentPath}/images/oma-logo.svg") title="@appState.AppName">
+                    <MudText Typo="Typo.h4" Color="Color.Primary" style="font-family: 'Noto Sans'" Class="docs-brand-text">@appState.AppName</MudText>
                 </div>
             </MudDrawerHeader>
             <NavMenu />

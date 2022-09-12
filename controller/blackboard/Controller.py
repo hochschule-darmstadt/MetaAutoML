@@ -17,7 +17,7 @@ class StrategyController(object):
 
     def __init__(self, blackboard: Blackboard, session: AutoMLSession, timer_interval: int = 1) -> None:
         self._log = logging.getLogger('strategy-controller')
-        self._log.setLevel(logging.DEBUG) # FIXME: Remove this line, only for debugging
+        #self._log.setLevel(logging.DEBUG) # FIXME: Remove this line, only for debugging
         self.__is_running = False
         self.__timer_interval = timer_interval
         self.__timer = None

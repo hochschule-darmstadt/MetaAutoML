@@ -137,10 +137,10 @@ class CsvManager:
         #Replace for UNIX
         upload_folder = upload_folder.replace("/managers", "")
         default_file = default_file.replace("/managers", "")
-        if os.getenv("MONGO_DB_DEBUG") != "YES":
+        #if os.getenv("MONGO_DB_DEBUG") != "YES":
             #Within docker we do not want to add the app section, as this leads to broken links
-            upload_folder = upload_folder.replace("/app/", "")
-            default_file = default_file.replace("/app/", "")
+            #upload_folder = upload_folder.replace("/app/", "")
+            #default_file = default_file.replace("/app/", "")
         # make sure directory exists in case it's the first upload from this user
         os.makedirs(upload_folder, exist_ok=True)
         shutil.copy(default_file, os.path.join(upload_folder, "titanic_train.csv"))

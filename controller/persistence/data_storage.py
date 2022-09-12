@@ -220,11 +220,11 @@ class DataStorage:
         # Get destination filepath using the generated id
         filename_dest = os.path.join(self.__storage_dir, username, dataset_id, fileName)
 
-        if os.getenv("MONGO_DB_DEBUG") != "YES":
+        #if os.getenv("MONGO_DB_DEBUG") != "YES":
             # When not in a debug environment (for example within docker) we do not want to add the app section,
             # as this leads to broken links
-            upload_file = upload_file.replace("/app/", "")
-            filename_dest = filename_dest.replace("/app/", "")
+            #upload_file = upload_file.replace("/app/", "")
+            #filename_dest = filename_dest.replace("/app/", "")
 
         # Make sure directory exists in case it's the first upload from this user
         os.makedirs(os.path.dirname(filename_dest), exist_ok=True)

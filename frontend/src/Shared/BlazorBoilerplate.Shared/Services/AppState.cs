@@ -21,8 +21,10 @@ namespace BlazorBoilerplate.Shared.Services
         public AppState(IApiClient apiClient, IStringLocalizer<Global> l)
         {
             L = l;
-            AppName = "OMA-ML".ToString().Humanize(LetterCasing.Title);
-            AppShortName = "OMA-ML".ToString().Humanize(LetterCasing.Title);
+            //AppName = "OMA-ML".ToString().Humanize(LetterCasing.Title);
+            //AppShortName = "OMA-ML".ToString().Humanize(LetterCasing.Title);
+            AppName = "OMA-ML".ToString();
+            AppShortName = "OMA-ML".ToString();
             _apiClient = apiClient;
         }
 

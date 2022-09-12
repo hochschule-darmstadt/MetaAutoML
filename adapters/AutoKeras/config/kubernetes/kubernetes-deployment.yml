@@ -32,7 +32,7 @@ spec:
         - name: datasets
           mountPath: /app/app-data/datasets
         - name: output-autokeras
-          mountPath: /app/app-data/output
+          mountPath: /app/app-data/training
       restartPolicy: Always
       serviceAccountName: ""
       volumes:
