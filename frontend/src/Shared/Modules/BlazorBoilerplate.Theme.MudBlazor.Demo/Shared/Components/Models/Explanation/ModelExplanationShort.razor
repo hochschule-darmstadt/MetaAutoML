@@ -14,7 +14,7 @@
 <MudCard Elevation="5">
     <MudCardHeader Style="border-bottom-style: inset; border-bottom-width: 1px;">
         <CardHeaderContent >
-            <MudText Typo="Typo.h6">Analysis</MudText>
+            <MudText Typo="Typo.h6">@L["Analysis"]</MudText>
         </CardHeaderContent>
         <CardHeaderActions>
             @if (ExplanationPagePath != null)
@@ -24,7 +24,7 @@
                        EndIcon="@Icons.Material.Filled.ReadMore"
                        Color="Color.Secondary"
                        Size="Size.Small"
-                       Style="margin-top: 8px">More</MudButton>
+                       Style="margin-top: 8px">@L["More"]</MudButton>
             }
         </CardHeaderActions>
     </MudCardHeader>

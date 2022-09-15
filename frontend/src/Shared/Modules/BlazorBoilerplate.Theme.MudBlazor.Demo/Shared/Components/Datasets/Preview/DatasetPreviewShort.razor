@@ -14,7 +14,7 @@
 <MudCard Elevation="5">
     <MudCardHeader Style="border-bottom-style: inset; border-bottom-width: 1px;">
         <CardHeaderContent >
-            <MudText Typo="Typo.h6">Preview</MudText>
+            <MudText Typo="Typo.h6">@L["Preview"]</MudText>
         </CardHeaderContent>
         <CardHeaderActions>
             @if (_dataset != null)
@@ -26,7 +26,7 @@
                         EndIcon="@Icons.Material.Filled.ReadMore" 
                         Color="Color.Secondary"
                         Size="Size.Small"
-                         Style="margin-top: 8px">More</MudButton>
+                       Style="margin-top: 8px">@L["More"]</MudButton>
                 }
                 else
                 {
@@ -35,7 +35,7 @@
                         EndIcon="@Icons.Material.Filled.ReadMore" 
                         Color="Color.Secondary"
                         Size="Size.Small"
-                         Style="margin-top: 8px">Configure</MudButton>
+                         Style="margin-top: 8px">@L["Configure"]</MudButton>
                 }
             }
         </CardHeaderActions>
@@ -44,7 +44,7 @@
         <MudPaper Height="250px" Elevation="0">
             @if (_readDatasetFailed == true)
             {
-                <MudText Typo="Typo.body2">Dataset can not be read successfully, change file configuraiton.</MudText>
+                <MudText Typo="Typo.body2">@L["Dataset can not be read successfully, change file configuration."]</MudText>
             }
             else
             {

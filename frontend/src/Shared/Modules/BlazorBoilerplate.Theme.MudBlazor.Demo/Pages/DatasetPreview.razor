@@ -33,10 +33,10 @@
     protected async override void OnInitialized()
     {
         await LoadDataset();
-        _breadcrumbs.Add(new BreadcrumbItem("Home", "/", false, Icons.Filled.Home));
-        _breadcrumbs.Add(new BreadcrumbItem("Datasets", "/datasets", false, Icons.Filled.ListAlt));
+        _breadcrumbs.Add(new BreadcrumbItem(L["Home"], "/", false, Icons.Filled.Home));
+        _breadcrumbs.Add(new BreadcrumbItem(L["Datasets"], "/datasets", false, Icons.Filled.ListAlt));
         _breadcrumbs.Add(new BreadcrumbItem(_pageTitle, "/datasets/" + Id, false, Icons.Filled.ListAlt));
-        _breadcrumbs.Add(new BreadcrumbItem("Preview", null, true, Icons.Filled.ListAlt));
+        _breadcrumbs.Add(new BreadcrumbItem(L["Preview"], null, true, Icons.Filled.ListAlt));
         StateHasChanged();
     }
     private async Task LoadDataset()
@@ -52,7 +52,7 @@
             if (apiResponse.IsSuccessStatusCode)
             {
                 _dataset = Newtonsoft.Json.JsonConvert.DeserializeObject<GetDatasetResponseDto>(apiResponse.Result.ToString());
-                _pageTitle = "Dataset " + _dataset.Name;
+                _pageTitle = L["Dataset {0}", _dataset.Name];
                 viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
             }
             else

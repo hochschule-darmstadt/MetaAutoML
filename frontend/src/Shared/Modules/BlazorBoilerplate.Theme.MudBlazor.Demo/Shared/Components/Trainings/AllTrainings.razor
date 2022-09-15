@@ -9,7 +9,7 @@
 <MudCard Elevation="5">
     <MudCardHeader Style="border-bottom-style: inset; border-bottom-width: 1px;">
         <CardHeaderContent >
-            <MudText Typo="Typo.h6">Past training</MudText>
+            <MudText Typo="Typo.h6">@L["Past training"]</MudText>
         </CardHeaderContent>
     </MudCardHeader>
     <MudCardContent>
@@ -22,28 +22,31 @@
             <MudTable Items="@_trainings.Trainings" style="width:stretch" class="mat-elevation-z5" AllowSelection="false" Filter="new Func<GetTrainingResponseDto,bool>(FilterFunc)">
                 <ToolBarContent>
                     <MudSpacer />
-                    <MudTextField @bind-Value="searchString" Placeholder="Search for status, task or dataset type" Adornment="Adornment.Start"
+                    <MudTextField @bind-Value="searchString" Placeholder="@L["Search for status, task or dataset type"]" Adornment="Adornment.Start"
                                     AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
                 </ToolBarContent>
                 <HeaderContent>
-                    <MudTh><MudTableSortLabel SortBy="new Func<GetTrainingResponseDto, object>(x=>x.StartTime)">Start datetime</MudTableSortLabel></MudTh>
-                    <MudTh><MudTableSortLabel SortBy="new Func<GetTrainingResponseDto, object>(x=>x.Status)">Status</MudTableSortLabel></MudTh>
-                    <MudTh><MudTableSortLabel SortBy="new Func<GetTrainingResponseDto, object>(x=>x.DatasetName)">Dataset</MudTableSortLabel></MudTh>
-                    <MudTh>Task</MudTh>
+                    <MudTh><MudTableSortLabel SortBy="new Func<GetTrainingResponseDto, object>(x=>x.StartTime)">@L["Start datetime"]</MudTableSortLabel></MudTh>
+                    <MudTh><MudTableSortLabel SortBy="new Func<GetTrainingResponseDto, object>(x=>x.Status)">@L["Status"]</MudTableSortLabel></MudTh>
+                    <MudTh><MudTableSortLabel SortBy="new Func<GetTrainingResponseDto, object>(x=>x.DatasetName)">@L["Dataset"]</MudTableSortLabel></MudTh>
+                    <MudTh>@L["Task"]</MudTh>
                 </HeaderContent>
                 <RowTemplate>
                    <MudTd>
                         <MudLink Href="@NavManager.ToAbsoluteUri("trainings/" + @context.ID).AbsoluteUri" Style="cursor: pointer; display: flex;"><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.ModelTraining" Style="margin-right: 4px;" /> @context.StartTime.ToString("dd/MM/yy HH:mm")</MudLink>
                    </MudTd>
                     <MudTd>
-                        @context.Status
                         @if (context.Status == "busy")
                         {
                             <MudProgressCircular Size="Size.Small"  Color="Color.Secondary" Indeterminate="true"/>
                         }
+                        else
+                        {
+                            @L[context.Status]
+                        }
                     </MudTd>
                     <MudTd>@context.DatasetName</MudTd>
-                    <MudTd>@context.Task.Properties["skos:prefLabel"]</MudTd>
+                    <MudTd>@L[context.Task.Properties["skos:prefLabel"]]</MudTd>
                 </RowTemplate>
                 <PagerContent>
                     <MudTablePager />

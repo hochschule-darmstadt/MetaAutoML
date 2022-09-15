@@ -14,7 +14,7 @@
 <MudCard Elevation="5">
     <MudCardHeader Style="border-bottom-style: inset; border-bottom-width: 1px;">
         <CardHeaderContent >
-            <MudText Typo="Typo.h6">Predict online</MudText>
+            <MudText Typo="Typo.h6">@L["Predict online"]</MudText>
         </CardHeaderContent>
     </MudCardHeader>
     <MudCardContent>
@@ -34,9 +34,9 @@
                                    Color="Color.Secondary"
                                    StartIcon="@Icons.Filled.CloudUpload"
                                    for="fileInput">
-                            Upload File
+                            @L["Upload File"]
                         </MudButton>
-                        <MudButton StartIcon="@Icons.Filled.CloudDownload" Color="Color.Secondary" Disabled="@_downloadReady" OnClick="@DownloadPredictions">Download result CSV</MudButton>
+                        <MudButton StartIcon="@Icons.Filled.CloudDownload" Color="Color.Secondary" Disabled="@_downloadReady" OnClick="@DownloadPredictions">@L["Download result CSV"]</MudButton>
                     </MudStack>
                 }
                 else
@@ -46,11 +46,10 @@
                             Disabled="true"
                            Variant="Variant.Filled"
                            Color="Color.Secondary"
-                           StartIcon="@Icons.Filled.CloudUpload"
-                           >
-                            Upload File
+                           StartIcon="@Icons.Filled.CloudUpload">
+                            @L["Upload File"]
                         </MudButton>
-                        <MudButton StartIcon="@Icons.Filled.CloudDownload" Color="Color.Secondary" Disabled="true">Download result CSV</MudButton>
+                        <MudButton StartIcon="@Icons.Filled.CloudDownload" Color="Color.Secondary" Disabled="true">@L["Download result CSV"]</MudButton>
                     </MudStack>
                 }
             }

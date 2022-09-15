@@ -1,6 +1,7 @@
 ﻿@namespace BlazorBoilerplate.Theme.Material.Demo.Shared.Components.Wizard
 @using Microsoft.AspNetCore.Components
 @using MudBlazor
+@inject IStringLocalizer<Global> L
 
 @inherits MudComponentBase
 
@@ -60,35 +61,29 @@
                 <CardHeaderActions>
                     <span style="display: flex; margin-left: auto">
                         <MudStack Row="true">
-                            <MudTooltip Text="Move to the previous step.">
-                                <MudButton OnClick="OnPrevious" 
-                                        Disabled="@IsPreviousDisabled"
-                                        Color="Color.Secondary"
-                                        Variant="@ButtonVariant">
-                                    Previous
-                                </MudButton>
-			                </MudTooltip>
+                            <MudButton OnClick="OnPrevious"
+                                   Disabled="@IsPreviousDisabled"
+                                   Color="Color.Secondary"
+                                   Variant="@ButtonVariant">
+                                @L["Previous"]
+                            </MudButton>
                             @if (@IsFinishVisible)
                             {
-                                <MudTooltip Text="Finish the wizard.">
-                                    <MudButton OnClick="OnFinish"
-                                                Color="Color.Secondary"
-                                                Disabled="@DisableNext"
-                                                Variant="@ButtonVariant">
-                                        Finish
-                                    </MudButton>
-					            </MudTooltip>
+                                <MudButton OnClick="OnFinish"
+                                            Color="Color.Secondary"
+                                            Disabled="@DisableNext"
+                                            Variant="@ButtonVariant">
+                                    @L["Finish"]
+                                </MudButton>
                             }
                             else
                             {
-                                <MudTooltip Text="Move to the next step.">
-                                    <MudButton OnClick="OnNext" 
-                                                Disabled="@IsNextDisabled"
-                                                Color="Color.Secondary"
-                                                Variant="@ButtonVariant">
-                                        Next
-                                    </MudButton> 
-					            </MudTooltip>
+                                <MudButton OnClick="OnNext" 
+                                            Disabled="@IsNextDisabled"
+                                            Color="Color.Secondary"
+                                            Variant="@ButtonVariant">
+                                    @L["Next"]
+                                </MudButton> 
                             }
                         </MudStack>
                     </span>

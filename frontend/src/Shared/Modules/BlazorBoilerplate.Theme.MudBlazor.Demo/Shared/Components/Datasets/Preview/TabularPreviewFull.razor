@@ -13,28 +13,28 @@ else
     <MudStack>
         <MudGrid>
             <MudItem xs="3" sm="3" md="3">
-                <MudCheckBox @bind-Checked="@UseHeader" Label="Use header"></MudCheckBox>
-                <MudNumericField @bind-Value="@StartRow" Label="Start row" Variant="Variant.Text" Min="1" />
+                <MudCheckBox @bind-Checked="@UseHeader" Label="@L["Use header"]"></MudCheckBox>
+                <MudNumericField @bind-Value="@StartRow" Label="@L["Start row"]" Variant="Variant.Text" Min="1" />
             </MudItem>
             <MudItem xs="3" sm="3" md="3">
-                <MudSelect T="string" Label="Column seperator" AnchorOrigin="Origin.BottomCenter" @bind-Value="@Delimiter">
-                    <MudSelectItem Value="@("comma")" >@("Comma \",\"")</MudSelectItem>
-                    <MudSelectItem Value="@("semicolon")" >@("Semicolon \";\"")</MudSelectItem>
-                    <MudSelectItem Value="@("space")" >@("Space")</MudSelectItem>
-                    <MudSelectItem Value="@("tab")" >@("Tab")</MudSelectItem>
+                <MudSelect T="string" Label="@L["Column seperator"]" AnchorOrigin="Origin.BottomCenter" @bind-Value="@Delimiter">
+                    <MudSelectItem Value="@("comma")" >@(L["Comma \",\""])</MudSelectItem>
+                    <MudSelectItem Value="@("semicolon")" >@(L["Semicolon \";\""])</MudSelectItem>
+                    <MudSelectItem Value="@("space")">@(L["Space"])</MudSelectItem>
+                    <MudSelectItem Value="@("tab")">@(L["Tab"])</MudSelectItem>
                 </MudSelect>
             </MudItem>
             <MudItem xs="3" sm="3" md="3">
-                <MudTextField Mask="@(new RegexMask(@"^.{1,1}$"))" Label="Escape character" @bind-Value="@EscapeCharacter"  Variant="@Variant.Text" />
-                <MudTextField Mask="@(new RegexMask(@"^.{1,1}$"))" Label="Decimal character" @bind-Value="@DecimalCharacter"  Variant="@Variant.Text" />
+                <MudTextField Mask="@(new RegexMask(@"^.{1,1}$"))" Label="@L["Escape character"]" @bind-Value="@EscapeCharacter"  Variant="@Variant.Text" />
+                    <MudTextField Mask="@(new RegexMask(@"^.{1,1}$"))" Label="@L["Decimal character"]" @bind-Value="@DecimalCharacter" Variant="@Variant.Text" />
             </MudItem>
             <MudItem xs="3" sm="3" md="3">
-                <MudButton Variant="Variant.Filled" Color="Color.Secondary" OnClick="@SaveConfiguration">Save</MudButton>
+                    <MudButton Variant="Variant.Filled" Color="Color.Secondary" OnClick="@SaveConfiguration">@L["Save"]</MudButton>
             </MudItem>
         </MudGrid>
         @if (_datasetReadError == true)
         {
-            <MudText Typo="Typo.body2">Could not read dataset successfully, change configuration.</MudText>
+            <MudText Typo="Typo.body2">@L["Could not read dataset successfully, change configuration"]</MudText>
         }
         else
         {
@@ -241,7 +241,7 @@ else
     {
         if (_isSavingAllowed == false)
         {
-            viewNotifier.Show("File configuration can not be saved, incompatible delimiter", ViewNotifierType.Error, L["Operation Failed"]);
+            viewNotifier.Show(L["File configuration can not be saved, incompatible delimiter"], ViewNotifierType.Error, L["Operation Failed"]);
             return;
         }
         previewWorker.UpdateDatasetFileConfiguration(Dataset);

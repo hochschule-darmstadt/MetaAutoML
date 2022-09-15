@@ -13,7 +13,7 @@
 
 <MudStack AlignItems="AlignItems.Center" Row="true" Class="mb-2">
     <MudIcon Size="Size.Large" Icon="@Icons.Filled.ListAlt" />
-    <MudText Typo="Typo.h4">Datasets</MudText>
+    <MudText Typo="Typo.h4">@L["Datasets"]</MudText>
 </MudStack>
 
 <MudGrid>
@@ -30,8 +30,8 @@
     {
         await LoadDatasets();
         fileUploader.OnUploadCompletedCallback = LoadDatasetsWithReRendering;
-        _breadcrumbs.Add(new BreadcrumbItem("Home", "/", false, Icons.Filled.Home));
-        _breadcrumbs.Add(new BreadcrumbItem("Datasets", null, true, Icons.Filled.ListAlt));
+        _breadcrumbs.Add(new BreadcrumbItem(L["Home"], "/", false, Icons.Filled.Home));
+        _breadcrumbs.Add(new BreadcrumbItem(L["Datasets"], null, true, Icons.Filled.ListAlt));
         StateHasChanged();
     }
     private async Task LoadDatasetsWithReRendering()

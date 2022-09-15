@@ -18,17 +18,17 @@
         case ":time_series":
             <MudTimeline TimelineOrientation="@TimelineOrientation.Horizontal" TimelinePosition="@TimelinePosition.Bottom">
                 <MudTimelineItem>
-                    <MudText Align="Align.Center" Typo="Typo.body2">Dataset preparation</MudText>
+                    <MudText Align="Align.Center" Typo="Typo.body2">@L["Dataset preparation"]</MudText>
                 </MudTimelineItem>
                 <MudTimelineItem Color="Color.Secondary">
-                    <MudText Align="Align.Center" Typo="Typo.body2">Configuration</MudText>
+                    <MudText Align="Align.Center" Typo="Typo.body2">@L["Configuration"]</MudText>
                 </MudTimelineItem>
             </MudTimeline>
             break;
         case ":image":
             <MudTimeline TimelineOrientation="@TimelineOrientation.Horizontal" TimelinePosition="@TimelinePosition.Bottom">
                 <MudTimelineItem Color="Color.Secondary">
-                    <MudText Align="Align.Center" Typo="Typo.body2">Configuration</MudText>
+                    <MudText Align="Align.Center" Typo="Typo.body2">@L["Configuration"]</MudText>
                 </MudTimelineItem>
             </MudTimeline>
             break;
@@ -36,10 +36,10 @@
 
     @if (_compatibletasks != null)
     {
-        <MudSelect Label="ML task" T="string" ValueChanged="@OnMlTaskSelectionChanged">
+        <MudSelect Label="@L["ML task"]" T="string" ValueChanged="@OnMlTaskSelectionChanged">
             @foreach (var task in _compatibletasks.Tasks)
             {
-                <MudSelectItem Value="@task.ID">@task.Properties["skos:prefLabel"]</MudSelectItem>
+                <MudSelectItem Value="@task.ID">@L[task.Properties["skos:prefLabel"]]</MudSelectItem>
             }
         </MudSelect>
     }
@@ -51,7 +51,7 @@
     @if (((StartAutoMlRequest.DatasetType == ":tabular") || (StartAutoMlRequest.DatasetType == ":text") || (StartAutoMlRequest.DatasetType == ":time_series")) || (StartAutoMlRequest.DatasetType == ":time_series_longitudinal") && (!string.IsNullOrEmpty(StartAutoMlRequest.Task)))
 
     {
-        <MudSelect Label="Target" T="string" ValueChanged="@OnTargetChanged">
+        <MudSelect Label="@L["Target"]" T="string" ValueChanged="@OnTargetChanged">
             @if (_columnNames != null)
             {
                 @foreach (var column in _columnNames)
@@ -61,13 +61,13 @@
             }
         </MudSelect>
     }
-    <MudNumericField ValueChanged="@OnRuntimeValueChanged" T="int" Label="Runtime" Variant="Variant.Text" Min="3" Max="180" Value="@StartAutoMlRequest.RuntimeConstraints["runtime_limit"]"/>
+    <MudNumericField ValueChanged="@OnRuntimeValueChanged" T="int" Label="@L["Runtime"]" Variant="Variant.Text" Min="3" Max="180" Value="@StartAutoMlRequest.RuntimeConstraints["runtime_limit"]" />
 
     <MudExpansionPanels>
-        <MudExpansionPanel Text="Details">
+        <MudExpansionPanel Text="@L["Details"]">
             @if (_supportedMlLibraries != null)
             {
-                <MudText Typo="Typo.subtitle2">ML libraries</MudText>
+                <MudText Typo="Typo.subtitle2">@L["ML libraries"]</MudText>
                 <MudChipSet Filter="true" MultiSelection="true" @bind-SelectedChips="SelectedMlLibsChips">
                     @if (_supportedMlLibraries != null)
                     {
@@ -84,7 +84,7 @@
             }
             @if (_compatibleAutoMls != null)
             {
-                <MudText Typo="Typo.subtitle2" Class="mt-4">AutoML solutions</MudText>
+                <MudText Typo="Typo.subtitle2" Class="mt-4">@L["AutoML solutions"]</MudText>
                 <MudChipSet SelectedChipsChanged="OnAutoMlSolutionSelectionChanged" Filter="true" MultiSelection="true" >
                     @if (_compatibleAutoMls != null)
                     {
@@ -101,7 +101,7 @@
             }
             @if (_availableStrategies != null)
             {
-                <MudText Typo="Typo.subtitle2" Class="mt-4">Enabled strategies</MudText>
+                <MudText Typo="Typo.subtitle2" Class="mt-4">@L["Enabled strategies"]</MudText>
                 <MudChipSet
                     SelectedChipsChanged="OnStrategySelectionChanged"
                     Filter="true"
@@ -269,7 +269,7 @@
             {
                 _supportedMlLibraries = Newtonsoft.Json.JsonConvert.DeserializeObject<GetSupportedMlLibrariesResponseDto>(apiResponse.Result.ToString());
                 StateHasChanged();
-                viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["SupportedMlLibraries Operation Successful"]);
+                viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
                 //quick and dirty way to avoid inconsistent automl solution polling
                 await Task.Delay(1000);
                 IsLibPolled = true;

@@ -6,7 +6,7 @@
 <MudCard Elevation="5">
     <MudCardHeader Style="border-bottom-style: inset; border-bottom-width: 1px;">
         <CardHeaderContent >
-            <MudText Typo="Typo.h6">Top 3 models</MudText>
+            <MudText Typo="Typo.h6">@L["Top 3 models"]</MudText>
         </CardHeaderContent>
         <CardHeaderActions>
             @if (Dataset != null)
@@ -15,8 +15,8 @@
                     Variant="Variant.Filled" 
                     EndIcon="@Icons.Material.Filled.ReadMore" 
                     Color="Color.Secondary"
-                    Size="Size.Small" 
-                    Style="margin-top: 8px">More</MudButton>
+                    Size="Size.Small"
+                       Style="margin-top: 8px">@L["More"]</MudButton>
             }
         </CardHeaderActions>
     </MudCardHeader>
@@ -30,12 +30,12 @@
             {
                 <MudTable Items="@_top3Models.Models">
                     <HeaderContent>
-                        <MudTh>Name</MudTh>
-                        <MudTh>Model</MudTh>
-                        <MudTh>Library</MudTh>
-                        <MudTh>Test score</MudTh>
-                        <MudTh>Prediction time per sample</MudTh>
-                        <MudTh>Total training time</MudTh>
+                        <MudTh>@L["Name"]</MudTh>
+                        <MudTh>@L["Model"]</MudTh>
+                        <MudTh>@L["Library"]</MudTh>
+                        <MudTh>@L["Test score"]</MudTh>
+                        <MudTh>@L["Prediction time per sample"]</MudTh>
+                        <MudTh>@L["Total training time"]</MudTh>
                     </HeaderContent>
                     <RowTemplate>
                         <MudTd >@context.Name</MudTd>

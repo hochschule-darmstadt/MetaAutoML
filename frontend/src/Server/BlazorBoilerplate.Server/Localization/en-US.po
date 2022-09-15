@@ -1,10 +1,17 @@
+#, fuzzy
 msgid ""
 msgstr ""
-"Content-Transfer-Encoding: 8bit\n"
+"MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
-"Language: en-US\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: AdvaTel resgenEx 0.11\n"
+"Project-Id-Version: PACKAGE VERSION\n"
+"PO-Revision-Date: 2020-10-25 08:10+01:00\n"
+"Last-Translator: Giovanni <EMAIL@ADDRESS>\n"
+"Language-Team: English\n"
+"Language: en_US\n"
+"Report-Msgid-Bugs-To: \n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: BlazorBoilerplate\n"
 
 msgctxt "EmailFactory"
 msgid "TestEmail.template"
@@ -1222,3 +1229,491 @@ msgstr "Finished Data Preparation"
 msgctxt "TrainingTimeline"
 msgid "automl_run_finished_{0}"
 msgstr "Finished AutoML: {0}"
+
+msgctxt "Global"
+msgid "Email"
+msgstr "Email"
+
+msgctxt "Global"
+msgid "Password"
+msgstr "Password"
+
+msgctxt "Global"
+msgid "My datasets {0}"
+msgstr "My datasets: {0}"
+
+msgctxt "Global"
+msgid "My trainings {0}"
+msgstr "My trainings: {0}"
+
+msgctxt "Global"
+msgid "My models {0}"
+msgstr "My models: {0}"
+
+msgctxt "Global"
+msgid "Executing trainings {0}"
+msgstr "Executing trainings: {0}"
+
+msgctxt "Global"
+msgid "Home"
+msgstr "Home"
+
+msgctxt "Global"
+msgid "Overview"
+msgstr "Overview"
+
+msgctxt "Global"
+msgid "Recent datasets"
+msgstr "Recent datasets"
+
+msgctxt "Global"
+msgid "More"
+msgstr "More"
+
+msgctxt "Global"
+msgid "Type"
+msgstr "Type"
+
+msgctxt "Global"
+msgid "Size"
+msgstr "Size"
+
+msgctxt "Global"
+msgid "Date"
+msgstr "Date"
+
+msgctxt "Global"
+msgid "tabular"
+msgstr "Tabular"
+
+msgctxt "Global"
+msgid "text"
+msgstr "Text"
+
+msgctxt "Global"
+msgid "image"
+msgstr "Image"
+
+msgctxt "Global"
+msgid "time series longitudinal"
+msgstr "Time series longitudinal"
+
+msgctxt "Global"
+msgid "time series"
+msgstr "Time series"
+
+msgctxt "Global"
+msgid "Select the data format of your dataset"
+msgstr "Select the data format of your dataset"
+
+msgctxt "Global"
+msgid "Select Dataset"
+msgstr "Select Dataset"
+
+msgctxt "Global"
+msgid "Dataset Name"
+msgstr "Dataset Name"
+
+msgctxt "Global"
+msgid "Upload"
+msgstr "Upload"
+
+msgctxt "Global"
+msgid "Recent trainings"
+msgstr "Recent trainings"
+
+msgctxt "Global"
+msgid "Start datetime"
+msgstr "Start datetime"
+
+msgctxt "Global"
+msgid "Status"
+msgstr "Status"
+
+msgctxt "Global"
+msgid "Dataset"
+msgstr "Dataset"
+
+msgctxt "Global"
+msgid "Datasets"
+msgstr "Datasets"
+
+msgctxt "Global"
+msgid "Search for name or type"
+msgstr "Search for name or type"
+
+msgctxt "Global"
+msgid "All datasets"
+msgstr "All datasets"
+
+msgctxt "Global"
+msgid "Name: {0}"
+msgstr "Name: {0}"
+
+msgctxt "Global"
+msgid "Dataset type: {0}"
+msgstr "Dataset type: {0}"
+
+msgctxt "Global"
+msgid "Date: {0}"
+msgstr "Date: {0}"
+
+msgctxt "Global"
+msgid "File Size: {0}"
+msgstr "File Size: {0}"
+
+msgctxt "Global"
+msgid "Number of rows: {0}"
+msgstr "Number of rows: {0}"
+
+msgctxt "Global"
+msgid "Number of columns: {0}"
+msgstr "Number of columns: {0}"
+
+msgctxt "Global"
+msgid "New Training"
+msgstr "New Training"
+
+msgctxt "Global"
+msgid "Start Training"
+msgstr "Start Training"
+
+msgctxt "Global"
+msgid "Dataset {0}"
+msgstr "Dataset {0}"
+
+msgctxt "Global"
+msgid "Model"
+msgstr "Model"
+
+msgctxt "Global"
+msgid "Library"
+msgstr "Library"
+
+msgctxt "Global"
+msgid "Test score"
+msgstr "Test score"
+
+msgctxt "Global"
+msgid "Prediction time per sample"
+msgstr "Prediction time per sample"
+
+msgctxt "Global"
+msgid "Total training time"
+msgstr "Total training time"
+
+msgctxt "Global"
+msgid "Top 3 models"
+msgstr "Top 3 models"
+
+msgctxt "Global"
+msgid "Analysis"
+msgstr "Analysis"
+
+msgctxt "Global"
+msgid "Preview"
+msgstr "Preview"
+
+msgctxt "Global"
+msgid "Configure"
+msgstr "Configure"
+
+msgctxt "Global"
+msgid "Dataset can not be read successfully, change file configuration."
+msgstr "Dataset can not be read successfully, change file configuration."
+
+msgctxt "Global"
+msgid "Use header"
+msgstr "Use header"
+
+msgctxt "Global"
+msgid "Start row"
+msgstr "Start row"
+
+msgctxt "Global"
+msgid "Column seperator"
+msgstr "Column seperator"
+
+msgctxt "Global"
+msgid "Escape character"
+msgstr "Escape character"
+
+msgctxt "Global"
+msgid "Decimal character"
+msgstr "Decimal character"
+
+msgctxt "Global"
+msgid "Train"
+msgstr "Train"
+
+msgctxt "Global"
+msgid "Trainings"
+msgstr "Trainings"
+
+msgctxt "Global"
+msgid "Dataset preparation"
+msgstr "Dataset preparation"
+
+msgctxt "Global"
+msgid "Configuration"
+msgstr "Configuration"
+
+msgctxt "Global"
+msgid "Details"
+msgstr "Details"
+
+msgctxt "Global"
+msgid "Target"
+msgstr "Target"
+
+msgctxt "Global"
+msgid "ML task"
+msgstr "ML task"
+
+msgctxt "Global"
+msgid "AutoML solutions"
+msgstr "AutoML solutions"
+
+msgctxt "Global"
+msgid "ML libraries"
+msgstr "ML libraries"
+
+msgctxt "Global"
+msgid "Enabled strategies"
+msgstr "Enabled strategies"
+
+msgctxt "Global"
+msgid "Runtime"
+msgstr "Runtime"
+
+msgctxt "Global"
+msgid "Previous"
+msgstr "Previous"
+
+msgctxt "Global"
+msgid "Finish"
+msgstr "Finish"
+
+msgctxt "Global"
+msgid "Next"
+msgstr "Next"
+
+msgctxt "Global"
+msgid "Training {0}"
+msgstr "Training {0}"
+
+msgctxt "Global"
+msgid "Leaderboard"
+msgstr "Leaderboard"
+
+msgctxt "Global"
+msgid "AutoML solution"
+msgstr "AutoML solution"
+
+msgctxt "Global"
+msgid "completed"
+msgstr "completed"
+
+msgctxt "Global"
+msgid "busy"
+msgstr "busy"
+
+msgctxt "Global"
+msgid "failed"
+msgstr "failed"
+
+msgctxt "Global"
+msgid "Search by AutoML solution, Status, Model or Library"
+msgstr "Search by AutoML solution, Status, Model or Library"
+
+msgctxt "Global"
+msgid "Model {0}"
+msgstr "Model {0}"
+
+msgctxt "Global"
+msgid "Dataset: "
+msgstr "Dataset: "
+
+msgctxt "Global"
+msgid "Start {0}"
+msgstr "Start {0}"
+
+msgctxt "Global"
+msgid "Status {0}"
+msgstr "Status {0}"
+
+msgctxt "Global"
+msgid "Total training time: {0}"
+msgstr "Total training time: {0} s"
+
+msgctxt "Global"
+msgid "AutoML solution: {0}"
+msgstr "AutoML solution: {0}"
+
+msgctxt "Global"
+msgid "ML library: {0}"
+msgstr "ML library: {0}"
+
+msgctxt "Global"
+msgid "Training: "
+msgstr "Training: "
+
+msgctxt "Global"
+msgid "Metric score: {0}"
+msgstr "Metric score: {0}"
+
+msgctxt "Global"
+msgid "Prediction time per sample: {0}"
+msgstr "Prediction time per sample: {0} ms"
+
+msgctxt "Global"
+msgid "Predict online"
+msgstr "Predict online"
+
+msgctxt "Global"
+msgid "Upload File"
+msgstr "Upload File"
+
+msgctxt "Global"
+msgid "Download result CSV"
+msgstr "Download result CSV"
+
+msgctxt "Global"
+msgid "Download ML pipeline"
+msgstr "Download ML pipeline"
+
+msgctxt "Global"
+msgid "Download model"
+msgstr "Download model"
+
+msgctxt "Global"
+msgid "Dataset: {0}"
+msgstr "Dataset: {0}"
+
+msgctxt "Global"
+msgid "Task: {0}"
+msgstr "Task: {0}"
+
+msgctxt "Global"
+msgid "Target: {0}"
+msgstr "Target: {0}"
+
+msgctxt "Global"
+msgid "Selected Ml libraries"
+msgstr "Selected Ml libraries"
+
+msgctxt "Global"
+msgid "Selected AutoMl solutions"
+msgstr "Selected AutoMl solutions"
+
+msgctxt "Global"
+msgid "Dataset configuration"
+msgstr "Dataset configuration"
+
+msgctxt "Global"
+msgid "Runtime constrains"
+msgstr "Runtime constrains"
+
+msgctxt "Global"
+msgid "Explanation"
+msgstr "Explanation"
+
+msgctxt "Global"
+msgid "Models"
+msgstr "Models"
+
+msgctxt "Global"
+msgid "Past training"
+msgstr "Past Trainings"
+
+msgctxt "Global"
+msgid "Search for status, task or dataset type"
+msgstr "Search for status, datetime or dataset type"
+
+msgctxt "Global"
+msgid "Task"
+msgstr "Task"
+
+msgctxt "Global"
+msgid "Dataset not redable"
+msgstr "Dataset couln´t be read, use the preview config option to reconfigure the dataset."
+
+msgctxt "Global"
+msgid "Start: {0}"
+msgstr "Start: {0}"
+
+msgctxt "Global"
+msgid "Status: {0}"
+msgstr "Status: {0}"
+
+msgctxt "Global"
+msgid "Model: {0}"
+msgstr "Model: {0}"
+
+msgctxt "Global"
+msgid "Please enter a dataset name first!"
+msgstr "Please enter a dataset name first!"
+
+msgctxt "Global"
+msgid "Please select a dataset type first!"
+msgstr "Please select a dataset type first!"
+
+msgctxt "Global"
+msgid "Please select a file first!"
+msgstr "Please select a file first!"
+
+msgctxt "Global"
+msgid "Preparing upload..."
+msgstr "Preparing upload..."
+
+msgctxt "Global"
+msgid "Uploading {0} {1}"
+msgstr "Uploading {0} {1}%"
+
+msgctxt "Global"
+msgid "Comma \",\""
+msgstr "Comma \",\""
+
+msgctxt "Global"
+msgid "Semicolon \";\""
+msgstr "Semicolon \";\""
+
+msgctxt "Global"
+msgid "Space"
+msgstr "Space"
+
+msgctxt "Global"
+msgid "Tab"
+msgstr "Tab"
+
+msgctxt "Global"
+msgid "tabular classification"
+msgstr "Tabular classification"
+
+msgctxt "Global"
+msgid "tabular regression"
+msgstr "Tabular regression"
+
+msgctxt "Global"
+msgid "time series forecasting"
+msgstr "Time series forecasting"
+
+msgctxt "Global"
+msgid "image classification"
+msgstr "Image classification"
+
+msgctxt "Global"
+msgid "text classification"
+msgstr "Text classification"
+
+msgctxt "Global"
+msgid "File configuration can not be saved, incompatible delimiter"
+msgstr "File configuration can not be saved, incompatible delimiter."
+
+msgctxt "Global"
+msgid "Could not read dataset successfully, change configuration"
+msgstr "Could not read dataset successfully, change configuration."
+
+msgctxt "Global"
+msgid "Search by name, status, lib or AutoML system"
+msgstr "Search by name, status, lib, AutoML system"

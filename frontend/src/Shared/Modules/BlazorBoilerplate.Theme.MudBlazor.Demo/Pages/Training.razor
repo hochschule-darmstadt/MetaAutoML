@@ -32,8 +32,8 @@
     protected async override void OnInitialized()
     {
         await GetTraining();
-        _breadcrumbs.Add(new BreadcrumbItem("Home", "/", false, Icons.Filled.Home));
-        _breadcrumbs.Add(new BreadcrumbItem("Trainings", "/trainings", false, Icons.Filled.ModelTraining));
+        _breadcrumbs.Add(new BreadcrumbItem(L["Home"], "/", false, Icons.Filled.Home));
+        _breadcrumbs.Add(new BreadcrumbItem(L["Trainings"], "/trainings", false, Icons.Filled.ModelTraining));
         _breadcrumbs.Add(new BreadcrumbItem(_pageTitle, null, true, Icons.Filled.ModelTraining));
         StateHasChanged();
 
@@ -48,7 +48,7 @@
             if (apiResponse.IsSuccessStatusCode)
             {
                 _training = Newtonsoft.Json.JsonConvert.DeserializeObject<GetTrainingResponseDto>(apiResponse.Result.ToString());
-                _pageTitle = "Training " + _training.StartTime.ToString("dd/MM/yy HH:mm");
+                _pageTitle = L["Training {0}", _training.StartTime.ToString("dd/MM/yy HH:mm")];
                 viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
             }
             else

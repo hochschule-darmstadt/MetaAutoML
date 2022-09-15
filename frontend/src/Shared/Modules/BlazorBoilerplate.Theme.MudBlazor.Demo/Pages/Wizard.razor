@@ -15,7 +15,7 @@
 
 <MudStack AlignItems="AlignItems.Center" Row="true" Class="mb-2">
     <MudIcon Size="Size.Large" Icon="@Icons.Filled.ModelTraining"/>
-    <MudText Typo="Typo.h4">Train</MudText>
+    <MudText Typo="Typo.h4">@L["Train"]</MudText>
 </MudStack>
 
 @if (_dataset == null)
@@ -31,17 +31,17 @@ else
         case ":tabular":
         case ":time_series_longitudinal":
             <MuddyWizard WizardFinished="@OnWizardFinished">
-                <MuddyWizardPanel Title="Dataset preparation" >
+                <MuddyWizardPanel Title="@L["Dataset preparation"]">
                     <PrepareTabularDataset Dataset="@_dataset" @bind-StartAutoMlRequest="@_automlRequest" />
                 </MuddyWizardPanel>
-                <MuddyWizardPanel Title="Configuration">
+                <MuddyWizardPanel Title="@L["Configuration"]">
                     <TaskConfiguration Dataset="@_dataset" @bind-StartAutoMlRequest="@_automlRequest" />
                 </MuddyWizardPanel>
             </MuddyWizard>
             break;
         case ":image":
             <MuddyWizard WizardFinished="@OnWizardFinished">
-                <MuddyWizardPanel Title="Configuration">
+                <MuddyWizardPanel Title="@L["Configuration"]">
                     <TaskConfiguration Dataset="@_dataset" @bind-StartAutoMlRequest="@_automlRequest" />
                 </MuddyWizardPanel>
             </MuddyWizard>
@@ -63,10 +63,10 @@ else
         _automlRequest = new StartAutoMLRequestDto();
         _automlRequest.DatasetIdentifier = Id;
         await LoadDataset();
-        _breadcrumbs.Add(new BreadcrumbItem("Home", "/", false, Icons.Filled.Home));
-        _breadcrumbs.Add(new BreadcrumbItem("Datasets", "/datasets", false, Icons.Filled.ListAlt));
+        _breadcrumbs.Add(new BreadcrumbItem(L["Home"], "/", false, Icons.Filled.Home));
+        _breadcrumbs.Add(new BreadcrumbItem(L["Datasets"], "/datasets", false, Icons.Filled.ListAlt));
         _breadcrumbs.Add(new BreadcrumbItem(_datasetTitle, "/datasets/" + _dataset.Identifier, false, Icons.Filled.ListAlt));
-        _breadcrumbs.Add(new BreadcrumbItem("Train", null, true, Icons.Filled.ModelTraining));
+        _breadcrumbs.Add(new BreadcrumbItem(L["Train"], null, true, Icons.Filled.ModelTraining));
         StateHasChanged();
 
     }
@@ -83,7 +83,7 @@ else
             if (apiResponse.IsSuccessStatusCode)
             {
                 _dataset = Newtonsoft.Json.JsonConvert.DeserializeObject<GetDatasetResponseDto>(apiResponse.Result.ToString());
-                _datasetTitle = "Dataset " + _dataset.Name;
+                _datasetTitle = L["Dataset {0}", _dataset.Name];
                 viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
             }
             else

@@ -1,22 +1,22 @@
-﻿
-@using Newtonsoft.Json.Linq
+﻿@using Newtonsoft.Json.Linq
+@inject IStringLocalizer<Global> L
 
 <MudCard Elevation="5">
     <MudCardHeader Style="border-bottom-style: inset; border-bottom-width: 1px;">
         <CardHeaderContent >
-            <MudText Typo="Typo.h6">Configuration</MudText>
+            <MudText Typo="Typo.h6">@L["Configuration"]</MudText>
         </CardHeaderContent>
-        <CardHeaderActions>
+@*        <CardHeaderActions>
             @if (Model != null)
             {
                 <MudButton Href="@("/models/" + Model.Model.ID + "/details")"
                     Variant="Variant.Filled" 
                     EndIcon="@Icons.Material.Filled.ReadMore" 
                     Color="Color.Secondary"
-                    Size="Size.Small" 
-                    Style="margin-top: 8px">More</MudButton>
+                    Size="Size.Small"
+                       Style="margin-top: 8px">@L["More"]</MudButton>
             }
-        </CardHeaderActions>
+        </CardHeaderActions>*@
     </MudCardHeader>
     <MudCardContent>
         <MudPaper Height="250px" Elevation="0">
@@ -28,15 +28,15 @@
             {
                 <div style="height:250px;overflow: auto;">
                     <MudStack>
-                        <MudText Typo="Typo.body1">Dataset: @Training.DatasetName</MudText>
-                        <MudText Typo="Typo.body1">Task: @Training.Task.Properties["skos:prefLabel"]</MudText>
+                        <MudText Typo="Typo.body1">@L["Dataset: {0}", Training.DatasetName]</MudText>
+                        <MudText Typo="Typo.body1">@L["Task: {0}", Training.Task.Properties["skos:prefLabel"]]</MudText>
                         @if (Training.Configuration.ContainsKey("target"))
                         {
-                            <MudText Typo="Typo.body1">Target: @Training.Configuration["target"]["target"]</MudText>
+                            <MudText Typo="Typo.body1">@L["Target: {0}", Training.Configuration["target"]["target"]]</MudText>
                         }
                         <MudDivider />
                         <MudExpansionPanels MultiExpansion="true">
-                            <MudExpansionPanel Text="Selected Ml libraries">
+                            <MudExpansionPanel Text="@L["Selected Ml libraries"]">
                                 <MudStack>
                                     @foreach (var item in Training.RequiredMlLibraries)
                                     {
@@ -44,7 +44,7 @@
                                     }
                                 </MudStack>
                             </MudExpansionPanel>
-                            <MudExpansionPanel Text="Selected AutoMl solutions">
+                            <MudExpansionPanel Text="@L["Selected AutoMl solutions"]">
                                 <MudStack>
                                     @foreach (var item in Training.RequiredAutoMLs)
                                     {
@@ -52,7 +52,7 @@
                                     }
                                 </MudStack>
                             </MudExpansionPanel>
-                            <MudExpansionPanel Text="Dataset configuration">
+                            <MudExpansionPanel Text="@L["Dataset configuration"]">
                                 @if ((_training.Task.Properties[":has_dataset_type"] == ":tabular") || (_training.Task.Properties[":has_dataset_type"] == ":time_series_longitudinal"))
                                 {
                                     <MudStack>
@@ -63,7 +63,7 @@
                                     </MudStack>
                                 }
                             </MudExpansionPanel>
-                            <MudExpansionPanel Text="Runtime constrains">
+                            <MudExpansionPanel Text="@L["Runtime constrains"]">
 
                             </MudExpansionPanel>
                         </MudExpansionPanels>

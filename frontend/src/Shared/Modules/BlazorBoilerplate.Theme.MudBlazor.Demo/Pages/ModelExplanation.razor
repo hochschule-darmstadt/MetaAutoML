@@ -15,7 +15,7 @@
 
 <MudStack AlignItems="AlignItems.Center" Row="true" Class="mb-2">
     <MudIcon Size="Size.Large" Icon="@Icons.Filled.Lightbulb" />
-    <MudText Typo="Typo.h4">Analysis</MudText>
+    <MudText Typo="Typo.h4">@L["Analysis"]</MudText>
 </MudStack>
 
 <MudGrid>
@@ -41,27 +41,27 @@
     protected async override void OnInitialized()
     {
         await LoadModel();
-        _breadcrumbs.Add(new BreadcrumbItem("Home", "/", false, Icons.Filled.Home));
+        _breadcrumbs.Add(new BreadcrumbItem(L["Home"], "/", false, Icons.Filled.Home));
         if (ListId != null)
         {
-            _breadcrumbs.Add(new BreadcrumbItem("Datasets", "/datasets", false, Icons.Filled.ListAlt));
-            _breadcrumbs.Add(new BreadcrumbItem("Dataset " + _training.DatasetName, "/datasets/" + _model.Model.DatasetId, false, Icons.Filled.ListAlt));
-            _breadcrumbs.Add(new BreadcrumbItem("Models", "/datasets/" + _model.Model.DatasetId + "/models", false, Icons.Filled.Lightbulb));
-            _breadcrumbs.Add(new BreadcrumbItem("Model " + _model.Model.Model, "/datasets/" + _model.Model.DatasetId + "/models/" + _model.Model.Model, false, Icons.Filled.Lightbulb));
+            _breadcrumbs.Add(new BreadcrumbItem(L["Datasets"], "/datasets", false, Icons.Filled.ListAlt));
+            _breadcrumbs.Add(new BreadcrumbItem(L["Dataset {0}", _training.DatasetName], "/datasets/" + _model.Model.DatasetId, false, Icons.Filled.ListAlt));
+            _breadcrumbs.Add(new BreadcrumbItem(L["Models"], "/datasets/" + _model.Model.DatasetId + "/models", false, Icons.Filled.Lightbulb));
+            _breadcrumbs.Add(new BreadcrumbItem(L["Model {0}", _model.Model.Model], "/datasets/" + _model.Model.DatasetId + "/models/" + _model.Model.Model, false, Icons.Filled.Lightbulb));
         }
         else if (TrainingId != null)
         {
-            _breadcrumbs.Add(new BreadcrumbItem("Trainings", "/trainings", false, Icons.Filled.ModelTraining));
-            _breadcrumbs.Add(new BreadcrumbItem(_training.StartTime.ToString("dd/MM/yy HH:mm"), "/trainings/" + _training.ID, false, Icons.Filled.ModelTraining));
-            _breadcrumbs.Add(new BreadcrumbItem("Model " + _model.Model.Model, "/trainings/" + _training.ID + "/models/" + _model.Model.Model, false, Icons.Filled.Lightbulb));
+            _breadcrumbs.Add(new BreadcrumbItem(L["Trainings"], "/trainings", false, Icons.Filled.ModelTraining));
+            _breadcrumbs.Add(new BreadcrumbItem(L["Training {0}", _training.StartTime.ToString("dd/MM/yy HH:mm")], "/trainings/" + _training.ID, false, Icons.Filled.ModelTraining));
+            _breadcrumbs.Add(new BreadcrumbItem(L["Model {0}", _model.Model.Model], "/trainings/" + _training.ID + "/models/" + _model.Model.ID, false, Icons.Filled.Lightbulb));
         }
         else if (DatasetId != null)
         {
-            _breadcrumbs.Add(new BreadcrumbItem("Datasets", "/datasets", false, Icons.Filled.ListAlt));
-            _breadcrumbs.Add(new BreadcrumbItem("Dataset " + _training.DatasetName, "/datasets/" + _model.Model.DatasetId, false, Icons.Filled.ListAlt));
-            _breadcrumbs.Add(new BreadcrumbItem("Model " + _model.Model.Model, "/datasets/" + _model.Model.DatasetId + "/modelsview/" + ListId, false, Icons.Filled.Lightbulb));
+            _breadcrumbs.Add(new BreadcrumbItem(L["Datasets"], "/datasets", false, Icons.Filled.ListAlt));
+            _breadcrumbs.Add(new BreadcrumbItem(L["Dataset {0}", _training.DatasetName], "/datasets/" + _model.Model.DatasetId, false, Icons.Filled.ListAlt));
+            _breadcrumbs.Add(new BreadcrumbItem(L["Model {0}", _model.Model.Model], "/datasets/" + _model.Model.DatasetId + "/modelsview/" + ListId, false, Icons.Filled.Lightbulb));
         }
-        _breadcrumbs.Add(new BreadcrumbItem("Explanation", null, true, Icons.Filled.Lightbulb));
+        _breadcrumbs.Add(new BreadcrumbItem(L["Explanation"], null, true, Icons.Filled.Lightbulb));
         StateHasChanged();
     }
     private async Task LoadModel()

@@ -5,15 +5,15 @@
 
 <MudNavMenu Rounded="true" Margin="Margin.Normal" Color="Color.Secondary" Class="pa-2">
     <MudNavLink Href="@navigationManager.ToAbsoluteUri(" ").AbsoluteUri" Match="NavLinkMatch.All" Icon="@Icons.Filled.Home">
-        Home
+        @L["Home"]
     </MudNavLink>
 
     <MudNavLink Href="@navigationManager.ToAbsoluteUri("datasets").AbsoluteUri" Icon="@Icons.Filled.ListAlt">
-        Datasets
+        @L["Datasets"]
     </MudNavLink>
 
     <MudNavLink Href="@navigationManager.ToAbsoluteUri("trainings").AbsoluteUri" Icon="@Icons.Filled.ModelTraining">
-        Trainings
+        @L["Trainings"]
     </MudNavLink>
 </MudNavMenu>
 

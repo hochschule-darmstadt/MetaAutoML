@@ -433,3 +433,381 @@ msgstr "Datenvorbereitung abgeschlossen"
 msgctxt "TrainingTimeline"
 msgid "automl_run_finished_{0}"
 msgstr "AutoML abgeschlossen: {0}"
+
+
+msgid "Required"
+msgstr "Erforderlich"
+
+msgid "Email"
+msgstr "Email Adresse"
+
+msgid "Password"
+msgstr "Passwort"
+
+msgid "My datasets {0}"
+msgstr "Meine Datensets: {0}"
+
+msgid "My trainings {0}"
+msgstr "Meine Trainings: {0}"
+
+msgid "My models {0}"
+msgstr "Meine Modele: {0}"
+
+msgid "Executing trainings {0}"
+msgstr "Laufende Trainings: {0}"
+
+msgid "Home"
+msgstr "Home"
+
+msgid "Overview"
+msgstr "Übersicht"
+
+msgid "Recent datasets"
+msgstr "Aktuelle Datasets"
+
+msgid "Add"
+msgstr "Hinzufügen"
+
+msgid "More"
+msgstr "Mehr"
+
+msgid "Type"
+msgstr "Typ"
+
+msgid "Size"
+msgstr "Größe"
+
+msgid "Date"
+msgstr "Datum"
+
+msgid "tabular"
+msgstr "Tabellarisch"
+
+msgid "text"
+msgstr "Text"
+
+msgid "image"
+msgstr "Bilder"
+
+msgid "time series longitudinal"
+msgstr "Zeitreihen longitudinal"
+
+msgid "time series"
+msgstr "Zeitreihen"
+
+msgid "Select the data format of your dataset"
+msgstr "Datenset Datentyp auswählen"
+
+msgid "Select Dataset"
+msgstr "Datenset Auswählen"
+
+msgid "Dataset Name"
+msgstr "Datenset Name"
+
+msgid "Close"
+msgstr "Schließen"
+
+msgid "Upload"
+msgstr "Hochladen"
+
+msgid "Recent trainings"
+msgstr "Aktuelle Trainings"
+
+msgid "Start datetime"
+msgstr "Start Datum"
+
+msgid "Status"
+msgstr "Status"
+
+msgid "Dataset"
+msgstr "Datenset"
+
+msgid "Datasets"
+msgstr "Datensets"
+
+msgid "Search for name or type"
+msgstr "Nach Name oder Typ suchen"
+
+msgid "All datasets"
+msgstr "Alle Datensets"
+
+msgid "Name: {0}"
+msgstr "Name: {0}"
+
+msgid "Dataset type: {0}"
+msgstr "Datenset Typ: {0}"
+
+msgid "Date: {0}"
+msgstr "Datum: {0}"
+
+msgid "File Size: {0}"
+msgstr "Dateiengröße: {0}"
+
+msgid "Number of rows: {0}"
+msgstr "Reihenanzahl: {0}"
+
+msgid "Number of columns: {0}"
+msgstr "Spaltenanzahl: {0}"
+
+msgid "New Training"
+msgstr "Neues Training"
+
+msgid "Start Training"
+msgstr "Start Training"
+
+msgid "Dataset {0}"
+msgstr "Datenset {0}"
+
+msgid "Model"
+msgstr "Model"
+
+msgid "Library"
+msgstr "Bibliothek"
+
+msgid "Test score"
+msgstr "Test Ergebnis"
+
+msgid "Prediction time per sample"
+msgstr "Zeit pro Vorhersage"
+
+msgid "Total training time"
+msgstr "Gesamt Trainingszeit"
+
+msgid "Top 3 models"
+msgstr "Top 3 Modelle"
+
+msgid "Analysis"
+msgstr "Analyse"
+
+msgid "Preview"
+msgstr "Vorschau"
+
+msgid "Configure"
+msgstr "Konfigurieren"
+
+msgid "Dataset can not be read successfully, change file configuration."
+msgstr "Datenset konnte nicht erfolgreich gelesen werden, bitte die Datei Konfiguration ändern."
+
+msgid "Use header"
+msgstr "Header verwenden"
+
+msgid "Start row"
+msgstr "Start Reihe"
+
+msgid "Column seperator"
+msgstr "Spalten seperator"
+
+msgid "Escape character"
+msgstr "Escapezeichen"
+
+msgid "Decimal character"
+msgstr "Dezimalzeichen"
+
+msgid "Train"
+msgstr "Trainieren"
+
+msgid "Trainings"
+msgstr "Trainings"
+
+msgid "Dataset preparation"
+msgstr "Datensetvorbereitung"
+
+msgid "Configuration"
+msgstr "Konfiguration"
+
+msgid "Details"
+msgstr "Details"
+
+msgid "Target"
+msgstr "Target"
+
+msgid "ML task"
+msgstr "ML Task"
+
+msgid "AutoML solutions"
+msgstr "AutoML Systeme"
+
+msgid "ML libraries"
+msgstr "ML Bibliothek"
+
+msgid "Enabled strategies"
+msgstr "Aktivierte Strategien"
+
+msgid "Runtime"
+msgstr "Laufzeit"
+
+msgid "Previous"
+msgstr "Zurück"
+
+msgid "Finish"
+msgstr "Starten"
+
+msgid "Next"
+msgstr "Nächste"
+
+msgid "Training {0}"
+msgstr "Training {0}"
+
+msgid "Leaderboard"
+msgstr "Leaderboard"
+
+msgid "AutoML solution"
+msgstr "AutoML System"
+
+msgid "completed"
+msgstr "Erfolgreich"
+
+msgid "busy"
+msgstr "Läuft"
+
+msgid "failed"
+msgstr "Fehlgeschlagen"
+
+msgid "Search by AutoML solution, Status, Model or Library"
+msgstr "Nach AutoML System, Status, Model oder Bibliothek suchen"
+
+msgid "Model {0}"
+msgstr "Model {0}"
+
+msgid "Dataset: "
+msgstr "Datenset: "
+
+msgid "Start {0}"
+msgstr "Start {0}"
+
+msgid "Status {0}"
+msgstr "Status {0}"
+
+msgid "Total training time: {0}"
+msgstr "Gesamte Trainingszeit: {0} s"
+
+msgid "AutoML solution: {0}"
+msgstr "AutoML System: {0}"
+
+msgid "ML library: {0}"
+msgstr "ML Bibliothek: {0}"
+
+msgid "Training: "
+msgstr "Training: "
+
+msgid "Metric score: {0}"
+msgstr "Metric Ergebnis: {0}"
+
+msgid "Prediction time per sample: {0}"
+msgstr "Zeit pro Vorhersage: {0} ms"
+
+msgid "Predict online"
+msgstr "Online vorhersagen"
+
+msgid "Upload File"
+msgstr "Datei hochladen"
+
+msgid "Download result CSV"
+msgstr "CSV Ergebnis herunterladen"
+
+msgid "Download ML pipeline"
+msgstr "ML Pipeline herunterladen"
+
+msgid "Download model"
+msgstr "Model herunterladen"
+
+msgid "Dataset: {0}"
+msgstr "Datenset: {0}"
+
+msgid "Task: {0}"
+msgstr "Task: {0}"
+
+msgid "Target: {0}"
+msgstr "Target: {0}"
+
+msgid "Selected Ml libraries"
+msgstr "Ausgewählte Ml Bibliothek"
+
+msgid "Selected AutoMl solutions"
+msgstr "Ausgewählte AutoML Systeme"
+
+msgid "Dataset configuration"
+msgstr "Datenset Konfiguration"
+
+msgid "Runtime constrains"
+msgstr "Laufzeitbeschränkung"
+
+msgid "Explanation"
+msgstr "Explanation"
+
+msgid "Models"
+msgstr "Modelle"
+
+msgid "Past training"
+msgstr "Vergange Trainings"
+
+msgid "Search for status, task or dataset type"
+msgstr "Nach Status, Start Datum oder Datenset Typ suchen"
+
+msgid "Task"
+msgstr "Task"
+
+msgid "Dataset not redable"
+msgstr "Datenset konnte nicht gelessen werden! Das Datenset kann durch die Vorschau Konfiguration new konfiguriert werden"
+
+
+
+msgid "Start: {0}"
+msgstr "Start: {0}"
+
+msgid "Status: {0}"
+msgstr "Status: {0}"
+
+msgid "Model: {0}"
+msgstr "Modell: {0}"
+
+msgid "Please enter a dataset name first!"
+msgstr "Datenset Namen eingeben!"
+
+msgid "Please select a dataset type first!"
+msgstr "Datenset Typ auswählen!"
+
+msgid "Please select a file first!"
+msgstr "Datei auswählen!"
+
+msgid "Preparing upload..."
+msgstr "Upload wird vorbereitet..."
+
+msgid "Uploading {0} {1}"
+msgstr "Hochladen {0} {1}%"
+
+msgid "Comma \",\""
+msgstr "Komma \",\""
+
+msgid "Semicolon \";\""
+msgstr "Semikolon \";\""
+
+msgid "Space"
+msgstr "Leerzeichen"
+
+msgid "Tab"
+msgstr "Tabulator"
+
+msgid "tabular classification"
+msgstr "Tabellarische Klassifikation"
+
+msgid "tabular regression"
+msgstr "Tabellarische Regression"
+
+msgid "time series forecasting"
+msgstr "Zeitreihenvorhersage"
+
+msgid "image classification"
+msgstr "Bild Klassifikation"
+
+msgid "text classification"
+msgstr "Text Klassifikation"
+
+msgid "File configuration can not be saved, incompatible delimiter"
+msgstr "Datei Konfiguration konnte nicht gespeichert werden, Spalten seperator incompatible."
+
+msgid "Could not read dataset successfully, change configuration"
+msgstr "Datenset konnte nicht gelessen werden, ändern Sie die Konfiguration."
+
+msgid "Search by name, status, lib or AutoML system"
+msgstr "Nach Name, Status, Bibliothek oder AutoML System suchen"

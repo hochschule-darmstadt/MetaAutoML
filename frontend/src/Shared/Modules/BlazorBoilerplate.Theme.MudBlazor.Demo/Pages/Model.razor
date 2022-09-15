@@ -17,7 +17,7 @@
     <MudIcon Size="Size.Large" Icon="@Icons.Filled.Lightbulb" />
     @if (_model != null)
     {
-        <MudText Typo="Typo.h4">@("Model " + _model.Model.Model)</MudText>
+        <MudText Typo="Typo.h4">@L["Model {0}", _model.Model.Model]</MudText>
     }
 </MudStack>
 
@@ -26,7 +26,7 @@
         <MudCard Elevation="5">
             <MudCardHeader Style="border-bottom-style: inset; border-bottom-width: 1px;">
                 <CardHeaderContent >
-                    <MudText Typo="Typo.h6">Overview</MudText>
+                    <MudText Typo="Typo.h6">@L["Overview"]</MudText>
                 </CardHeaderContent>
             </MudCardHeader>
             <MudCardContent>
@@ -43,20 +43,20 @@
                     {
                         <MudGrid>
                             <MudItem xs="3" sm="3" md="3">
-                                <MudText Typo="Typo.body1" Style=" display: flex;">Dataset: <MudLink Href="@NavManager.ToAbsoluteUri("datasets/" + @_training.DatasetId).AbsoluteUri" Style="cursor: pointer; display: flex;"><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.ListAlt" Style="margin-right: 4px;" />@_training.DatasetName</MudLink></MudText>
-                                <MudText Typo="Typo.body1">Start: @_training.StartTime.ToString("dd/MM/yyy HH:mm")</MudText>
-                                <MudText Typo="Typo.body1">Status: @_model.Model.Status</MudText>
-                                <MudText Typo="Typo.body1">Total training time: @_model.Model.Runtime s</MudText>
+                                <MudText Typo="Typo.body1" Style=" display: flex;">@L["Dataset: "] <MudLink Href="@NavManager.ToAbsoluteUri("datasets/" + @_training.DatasetId).AbsoluteUri" Style="cursor: pointer; display: flex;"><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.ListAlt" Style="margin-right: 4px;" />@_training.DatasetName</MudLink></MudText>
+                                <MudText Typo="Typo.body1">@L["Start: {0}", _training.StartTime.ToString("dd/MM/yyy HH:mm")]</MudText>
+                                <MudText Typo="Typo.body1">@L["Status: {0}", _model.Model.Status]</MudText>
+                                <MudText Typo="Typo.body1">@L["Total training time: {0}", _model.Model.Runtime]</MudText>
                             </MudItem>
                             <MudItem xs="3" sm="3" md="3">
-                                <MudText Typo="Typo.body1">AutoML solution: @_model.Model.Name</MudText>
-                                <MudText Typo="Typo.body1">ML library: @_model.Model.Library</MudText>
-                                <MudText Typo="Typo.body1">Model: @_model.Model.Model</MudText>
-                                <MudText Typo="Typo.body1" Style=" display: flex;">Training: <MudLink Href="@NavManager.ToAbsoluteUri("trainings/" + @_training.ID).AbsoluteUri" Style="cursor: pointer; display: flex;"><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.ModelTraining" Style="margin-right: 4px;" />@_training.StartTime.ToString("dd/MM/yyy")</MudLink></MudText>
+                                <MudText Typo="Typo.body1">@L["AutoML solution: {0}", _model.Model.Name]</MudText>
+                                <MudText Typo="Typo.body1">@L["ML library: {0}", _model.Model.Library]</MudText>
+                                <MudText Typo="Typo.body1">@L["Model: {0}", _model.Model.Model]</MudText>
+                                <MudText Typo="Typo.body1" Style=" display: flex;">@L["Training: "]<MudLink Href="@NavManager.ToAbsoluteUri("trainings/" + @_training.ID).AbsoluteUri" Style="cursor: pointer; display: flex;"><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.ModelTraining" Style="margin-right: 4px;" />@_training.StartTime.ToString("dd/MM/yyy")</MudLink></MudText>
                             </MudItem>
                             <MudItem xs="3" sm="3" md="3">
-                                <MudText Typo="Typo.body1">Metric test: @String.Format("{0:0.00}", _model.Model.TestScore)</MudText>
-                                <MudText Typo="Typo.body1">Prediction time per sample: @String.Format("{0:0}", _model.Model.Predictiontime) ms</MudText>
+                                <MudText Typo="Typo.body1">@L["Metric score: {0}", String.Format("{0:0.00}", _model.Model.TestScore)]</MudText>
+                                <MudText Typo="Typo.body1">@L["Prediction time per sample: {0}", String.Format("{0:0}", _model.Model.Predictiontime)]</MudText>
                             </MudItem>
                             <MudItem xs="3" sm="3" md="3">
                             </MudItem>
@@ -107,24 +107,24 @@
         _breadcrumbs.Add(new BreadcrumbItem("Home", "/", false, Icons.Filled.Home));
         if (ListId != null)
         {
-            _breadcrumbs.Add(new BreadcrumbItem("Datasets", "/datasets", false, Icons.Filled.ListAlt));
-            _breadcrumbs.Add(new BreadcrumbItem("Dataset " + _training.DatasetName, "/datasets/" + _model.Model.DatasetId, false, Icons.Filled.ListAlt));
-            _breadcrumbs.Add(new BreadcrumbItem("Models", "/datasets/" + _model.Model.DatasetId + "/models", false, Icons.Filled.Lightbulb));
+            _breadcrumbs.Add(new BreadcrumbItem(L["Datasets"], "/datasets", false, Icons.Filled.ListAlt));
+            _breadcrumbs.Add(new BreadcrumbItem(L["Dataset {0}", _training.DatasetName], "/datasets/" + _model.Model.DatasetId, false, Icons.Filled.ListAlt));
+            _breadcrumbs.Add(new BreadcrumbItem(L["Models"], "/datasets/" + _model.Model.DatasetId + "/models", false, Icons.Filled.Lightbulb));
             _explanationPagePath = "/datasets/" + DatasetId + "/modelsview/" + ListId + "/explanation";
         }
         else if (TrainingId != null)
         {
-            _breadcrumbs.Add(new BreadcrumbItem("Trainings", "/trainings", false, Icons.Filled.ModelTraining));
-            _breadcrumbs.Add(new BreadcrumbItem(_training.StartTime.ToString("dd/MM/yy HH:mm"), "/trainings/" + _training.ID, false, Icons.Filled.ModelTraining));
+            _breadcrumbs.Add(new BreadcrumbItem(L["Trainings"], "/trainings", false, Icons.Filled.ModelTraining));
+            _breadcrumbs.Add(new BreadcrumbItem(L["Training {0}", _training.StartTime.ToString("dd/MM/yy HH:mm")], "/trainings/" + _training.ID, false, Icons.Filled.ModelTraining));
             _explanationPagePath = "/trainings/" + TrainingId + "/models/" + Id + "/explanation";
         }
         else if (DatasetId != null)
         {
-            _breadcrumbs.Add(new BreadcrumbItem("Datasets", "/datasets", false, Icons.Filled.ListAlt));
-            _breadcrumbs.Add(new BreadcrumbItem("Dataset " + _training.DatasetName, "/datasets/" + _model.Model.DatasetId, false, Icons.Filled.ListAlt));
+            _breadcrumbs.Add(new BreadcrumbItem(L["Datasets"], "/datasets", false, Icons.Filled.ListAlt));
+            _breadcrumbs.Add(new BreadcrumbItem(L["Dataset {0}", _training.DatasetName], "/datasets/" + _model.Model.DatasetId, false, Icons.Filled.ListAlt));
             _explanationPagePath = "/datasets/" + DatasetId + "/models/" + Id + "/explanation";
         }
-        _breadcrumbs.Add(new BreadcrumbItem("Model " + _model.Model.Model, null, true, Icons.Filled.Lightbulb));
+        _breadcrumbs.Add(new BreadcrumbItem(L["Model {0}", _model.Model.Model], null, true, Icons.Filled.Lightbulb));
         StateHasChanged();
     }
     private async Task LoadModel()

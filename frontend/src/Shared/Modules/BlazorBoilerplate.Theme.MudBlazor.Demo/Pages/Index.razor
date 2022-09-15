@@ -21,7 +21,7 @@
         <MudCard Elevation="5">
             <MudCardHeader Style="border-bottom-style: inset; border-bottom-width: 1px;">
                 <CardHeaderContent >
-                    <MudText Typo="Typo.h6">Overview</MudText>
+                    <MudText Typo="Typo.h6">@L["Overview"]</MudText>
                 </CardHeaderContent>
             </MudCardHeader>
             <MudCardContent>
@@ -34,16 +34,16 @@
                     {
                         <MudGrid>
                             <MudItem xs="3" sm="3" md="3">
-                                <MudText Typo="Typo.body2">My datasets: @_overviewInfos.TotalDatasetAmount</MudText>
+                                <MudText Typo="Typo.body2">@L["My datasets {0}", _overviewInfos.TotalDatasetAmount]</MudText>
                             </MudItem>
                             <MudItem xs="3" sm="3" md="3">
-                                <MudText Typo="Typo.body2">My trainings: @_overviewInfos.TotalTrainingAmount</MudText>
+                                <MudText Typo="Typo.body2">@L["My trainings {0}", _overviewInfos.TotalTrainingAmount]</MudText>
                             </MudItem>
                             <MudItem xs="3" sm="3" md="3">
-                                <MudText Typo="Typo.body2">My models: @_overviewInfos.TotalModelAmount</MudText>
+                                <MudText Typo="Typo.body2">@L["My models {0}", _overviewInfos.TotalModelAmount]</MudText>
                             </MudItem>
                             <MudItem xs="3" sm="3" md="3">
-                                <MudText Typo="Typo.body2">Executing trainings: @_overviewInfos.RunningTrainingAmount</MudText>
+                                <MudText Typo="Typo.body2">@L["Executing trainings {0}", _overviewInfos.RunningTrainingAmount]</MudText>
                             </MudItem>
                         </MudGrid>
                     }
@@ -68,7 +68,7 @@
     protected override async Task OnInitializedAsync()
     {
         await LoadTrainings();
-        _breadcrumbs.Add(new BreadcrumbItem("Home", null, true, Icons.Filled.Home));
+        _breadcrumbs.Add(new BreadcrumbItem(L["Home"], null, true, Icons.Filled.Home));
         fileUploader.OnUploadCompletedCallback = LoadDatasetWithReRendering;
         StateHasChanged();
     }

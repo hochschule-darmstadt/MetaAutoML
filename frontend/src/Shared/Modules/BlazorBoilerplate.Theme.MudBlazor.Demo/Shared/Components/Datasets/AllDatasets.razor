@@ -14,7 +14,7 @@
                     Variant="Variant.Filled" 
                     Color="Color.Secondary"
                     EndIcon="@Icons.Filled.CloudUpload"
-                        Size="Size.Small">Add</MudButton>
+                           Size="Size.Small">@L["Add"]</MudButton>
             </MudStack>
         </CardHeaderActions>
     </MudCardHeader>
@@ -28,21 +28,21 @@
             <MudTable Items="@Datasets.Datasets" style="width:stretch" class="mat-elevation-z5" AllowSelection="false" Dense="true" Filter="new Func<GetDatasetResponseDto,bool>(FilterFunc)">
                 <ToolBarContent>
                     <MudSpacer />
-                    <MudTextField @bind-Value="searchString" Placeholder="Search for name or type" Adornment="Adornment.Start"
+                    <MudTextField @bind-Value="searchString" Placeholder="@L["Search for name or type"]" Adornment="Adornment.Start"
                                     AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
                 </ToolBarContent>
                 <HeaderContent>
-                    <MudTh><MudTableSortLabel SortBy="new Func<GetDatasetResponseDto, object>(x=>x.Name)">Name</MudTableSortLabel></MudTh>
-                    <MudTh><MudTableSortLabel SortBy="@(new Func<GetDatasetResponseDto, object>(x=>x.Type.Properties["skos:prefLabel"]))">Type</MudTableSortLabel></MudTh>
-                    <MudTh><MudTableSortLabel SortBy="new Func<GetDatasetResponseDto, object>(x=>x.Size)">Size</MudTableSortLabel></MudTh>
-                    <MudTh><MudTableSortLabel SortBy="new Func<GetDatasetResponseDto, object>(x=>x.Creation_date)">Date</MudTableSortLabel></MudTh>
+                    <MudTh><MudTableSortLabel SortBy="new Func<GetDatasetResponseDto, object>(x=>x.Name)">@L["Name"]</MudTableSortLabel></MudTh>
+                    <MudTh><MudTableSortLabel SortBy="@(new Func<GetDatasetResponseDto, object>(x=>x.Type.Properties["skos:prefLabel"]))">@L["Type"]</MudTableSortLabel></MudTh>
+                    <MudTh><MudTableSortLabel SortBy="new Func<GetDatasetResponseDto, object>(x=>x.Size)">@L["Size"]</MudTableSortLabel></MudTh>
+                    <MudTh><MudTableSortLabel SortBy="new Func<GetDatasetResponseDto, object>(x=>x.Creation_date)">@L["Date"]</MudTableSortLabel></MudTh>
                     <MudTh></MudTh>   
                 </HeaderContent>
                 <RowTemplate>
                     <MudTd >
                         <MudLink Href="@NavManager.ToAbsoluteUri("datasets/" + @context.Identifier).AbsoluteUri" Style="cursor: pointer; display: flex;"><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.ListAlt" Style="margin-right: 4px;" />@context.Name</MudLink>
                     </MudTd>
-                    <MudTd >@context.Type.Properties["skos:prefLabel"]</MudTd>
+                    <MudTd >@L[context.Type.Properties["skos:prefLabel"]]</MudTd>
                     <MudTd >@FormatBytes(context.Size)</MudTd>
                     <MudTd  style="white-space:nowrap;">@context.Creation_date.ToString("yyyy-MM-dd")</MudTd>
                     <MudTd><DatasetMenu Dataset="@context" OnDeleteCompleted="@OnDeleteDatasetCompleted" /></MudTd>
