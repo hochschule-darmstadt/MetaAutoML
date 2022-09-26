@@ -1,14 +1,9 @@
 syntax = "proto3";
 option csharp_namespace = "BlazorBoilerplate.Server";
 
-import "google/protobuf/timestamp.proto";
-
-import "Enumerations.proto";
-
 import "DatasetRelatedMessages.proto";
 import "ModelRelatedMessages.proto";
 import "TrainingRelatedMessages.proto";
-import "TestingRelatedMessages.proto";
 import "WizzardMessages.proto";
 import "Miscellaneous.proto";
 

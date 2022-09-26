@@ -1,5 +1,4 @@
 pip install "betterproto[compiler]" --pre
-pip install git+https://github.com/danielgtaylor/python-betterproto.git@v2.0.0b5
 pip install grpcio-tools
 
 cd controller

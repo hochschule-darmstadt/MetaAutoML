@@ -32,8 +32,8 @@ message GetMlLibrariesForTaskResponse {
 
 message GetAvailableStrategiesRequest {
     string userIdentifier = 1;
-    string datasetIdentifier = 1;
-    map<string, string> configuration = 2;
+    string datasetIdentifier = 2;
+    map<string, string> configuration = 3;
   }
   
 message GetAvailableStrategiesResponse {
