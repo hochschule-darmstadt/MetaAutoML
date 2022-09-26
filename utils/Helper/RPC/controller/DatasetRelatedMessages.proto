@@ -2,7 +2,7 @@ syntax = "proto3";
 option csharp_namespace = "BlazorBoilerplate.Server";
 
 import "Enumerations.proto";
-import "Common.proto";
+import "Miscellaneous.proto";
 import "google/protobuf/timestamp.proto";
 
 message GetDatasetTypesRequest {
@@ -13,8 +13,8 @@ message GetDatasetTypesResponse {
 }
 
 message GetDatasetsRequest {
-  string username = 1;
-  DatasetType type = 2;
+  string userIdentifier = 1;
+  string type = 2;
 }
 
 message GetDatasetsResponse {
@@ -22,12 +22,12 @@ message GetDatasetsResponse {
 }
 
 message DeleteDatasetRequest {
-  string username = 1;
-  string identifier = 2;
+  string userIdentifier = 1;
+  string datasetIdentifier = 2;
 }
 
 message DeleteDatasetResponse {
-   uint32 status = 1;
+  
 }
 
 message Dataset {
@@ -41,19 +41,19 @@ message Dataset {
     string fileConfiguration = 8;
   }
 
-message SetDatasetConfigurationRequest {
-  string username = 1;
-  string identifier = 2;
+message SetDatasetFileConfigurationRequest {
+  string userIdentifier = 1;
+  string datasetIdentifier = 2;
   string file_configuration = 3;
 }
 
-message SetDatasetConfigurationResponse {
+message SetDatasetFileConfigurationResponse {
 
 }
 
 message GetDatasetRequest {
-    string username = 1;
-    string identifier = 2;
+    string userIdentifier = 1;
+    string datasetIdentifier = 2;
   }
   
 message GetDatasetResponse {
@@ -67,7 +67,7 @@ message TableColumn {
   }
   
 message GetTabularDatasetColumnRequest {
-    string username = 1;
+    string userIdentifier = 1;
     string datasetIdentifier = 2;
   }
   
@@ -76,13 +76,13 @@ message GetTabularDatasetColumnResponse {
   }
 
 
-message UploadDatasetFileRequest {
-    string username = 1;
+message CreateDatasetRequest {
+    string userIdentifier = 1;
     string fileName = 2;
     string datasetName = 3;
-    string type = 4;
+    string datasetType = 4;
   }
   
-message UploadDatasetFileResponse {
-    int32 returnCode = 1;
+message CreateDatasetResponse {
+  
   }
