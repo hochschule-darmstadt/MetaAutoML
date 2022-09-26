@@ -36,6 +36,8 @@ service ControllerService {
 
 
   /*OMA-ML TRAINING MESSAGES*/
+  /*create a new Training*/
+  rpc CreateTraining(CreateTrainingRequest) returns (CreateTrainingResponse) {}
   /*return a list of all Trainings*/
   rpc GetTrainings(GetTrainingsRequest) returns (GetTrainingsResponse) {}
   /*return a Training*/
@@ -64,8 +66,6 @@ service ControllerService {
   rpc GetMlLibrariesForTask(GetMlLibrariesForTaskRequest) returns (GetMlLibrariesForTaskResponse) {}
   /*return all supported AutoML tasks*/
   rpc GetTasksForDatasetType(GetTasksForDatasetTypeRequest) returns (GetTasksForDatasetTypeResponse) {}
-  /*start a new AutoML run, using the provided configuration*/
-  rpc StartTraining(StartTrainingRequest) returns (StartTrainingResponse) {}
 }
 
 

@@ -1,0 +1,74 @@
+{
+    // Verwendet IntelliSense zum Ermitteln möglicher Attribute.
+    // Zeigen Sie auf vorhandene Attribute, um die zugehörigen Beschreibungen anzuzeigen.
+    // Weitere Informationen finden Sie unter https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Controller Debug",
+            "type": "python",
+            "request": "launch",
+            "program": "Controller.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "env": {
+                "PYTHONPATH": "interfaces;managers;managers/adaptermanagers;managers/ontology;interfaces;sessions;utils;../adapters/GRPC/Controller;../adapters/Utils/Utils;../adapters/GRPC/Adapter;",
+                "AUTOKERAS_SERVICE_PORT": "50052",
+                "AUTOKERAS_SERVICE_HOST": "localhost",
+                "AUTOGLUON_SERVICE_PORT": "50057",
+                "AUTOGLUON_SERVICE_HOST": "localhost",
+                "AUTOCVE_SERVICE_HOST": "localhost",
+                "AUTOCVE_SERVICE_PORT": "50058",
+                "SKLEARN_SERVICE_HOST": "localhost",
+                "SKLEARN_SERVICE_PORT": "50055",
+                "FLAML_SERVICE_HOST": "localhost",
+                "FLAML_SERVICE_PORT": "50056",
+                "MLJAR_SERVICE_HOST": "localhost",
+                "MLJAR_SERVICE_PORT": "50053",
+                "PYTORCH_SERVICE_HOST": "localhost",
+                "PYTORCH_SERVICE_PORT": "50059",
+                "ALPHAD3M_SERVICE_HOST": "localhost",
+                "ALPHAD3M_SERVICE_PORT": "50060",
+                "MCFLY_SERVICE_HOST": "localhost",
+                "MCFLY_SERVICE_PORT": "50061",
+                "MONGO_DB_DEBUG": "YES",
+                "USE_DEV_CONFIG": "YES",
+                "MONGO_CLUSTER": "NO",
+                "PERSISTENCE_LOGGING_LEVEL": "DEBUG",
+                "SERVER_LOGGING_LEVEL": "DEBUG"
+            },
+        },
+        {
+            "name": "Ubuntu Controller Debug",
+            "type": "python",
+            "request": "launch",
+            "program": "Controller.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "env": {
+                "PYTHONPATH": "interfaces:managers:managers/adaptermanagers:managers/ontology:interfaces:sessions:utils:../adapters/GRPC/Controller:../adapters/Utils/Utils:../adapters/GRPC/Adapter:",
+                "AUTOKERAS_SERVICE_PORT": "50052",
+                "AUTOKERAS_SERVICE_HOST": "localhost",
+                "AUTOGLUON_SERVICE_PORT": "50057",
+                "AUTOGLUON_SERVICE_HOST": "localhost",
+                "AUTOCVE_SERVICE_HOST": "localhost",
+                "AUTOCVE_SERVICE_PORT": "50058",
+                "SKLEARN_SERVICE_HOST": "localhost",
+                "SKLEARN_SERVICE_PORT": "50055",
+                "FLAML_SERVICE_HOST": "localhost",
+                "FLAML_SERVICE_PORT": "50056",
+                "MLJAR_SERVICE_HOST": "localhost",
+                "MLJAR_SERVICE_PORT": "50053",
+                "PYTORCH_SERVICE_HOST": "localhost",
+                "PYTORCH_SERVICE_PORT": "50059",
+                "ALPHAD3M_SERVICE_HOST": "localhost",
+                "ALPHAD3M_SERVICE_PORT": "50060",
+                "MONGO_DB_DEBUG": "YES",
+                "USE_DEV_CONFIG": "YES",
+                "MONGO_CLUSTER": "NO",
+                "PERSISTENCE_LOGGING_LEVEL": "DEBUG",
+                "SERVER_LOGGING_LEVEL": "DEBUG"
+            },
+        }
+    ]
+}

@@ -69,7 +69,7 @@ message StrategyControllerEvent {
   }
   
 
-message StartTrainingRequest {
+message CreateTrainingRequest {
   string userIdentifier = 1;
   string datasetIdentifier = 2;
   string task = 3;
@@ -83,6 +83,6 @@ message StartTrainingRequest {
 }
 
 
-message StartTrainingResponse {
+message CreateTrainingResponse {
   string trainingIdentifier = 1;
 }
