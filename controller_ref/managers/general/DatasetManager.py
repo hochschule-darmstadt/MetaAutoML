@@ -151,5 +151,5 @@ class DatasetManager:
         Return
         """
         #self.__data_storage.UpdateDataset(request.username, request.identifier, { "file_configuration": request.file_configuration }, True)
-        self.__data_storage.create_dataset(username, identifier, { "file_configuration": file_configuration }, True)
+        self.__data_storage.create_dataset(set_dataset_file_configuration_request.user_identifier, set_dataset_file_configuration_request.dataset_identifier, { "file_configuration": set_dataset_file_configuration_request.file_configuration }, True)
         return SetDatasetFileConfigurationResponse()
