@@ -1,6 +1,7 @@
 from DatasetManager import DatasetManager
 from TrainingManager import TrainingManager
 from ModelManager import ModelManager
+from UserManger import UserManager
 from RdfManager import RdfManager
 from ControllerBGRPC import *
 import multiprocessing, os, logging, asyncio
@@ -32,19 +33,27 @@ class ControllerServiceManager(ControllerServiceBase):
         self.__log.info("__init__: New mongo db client intialized.")
 
     ####################################
-    ## MISC DATASTORAGE OPERATIONS
+    ## User OPERATIONS
     ####################################
 #region
 
     async def create_new_user(
         self, create_new_user_request: "CreateNewUserRequest"
     ) -> "CreateNewUserResponse":
-        raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
+        response = await self.__loop.run_in_executor(
+            self.__executor, UserManager(self.__data_storage_dir, self.__mongo_db_url, self.__data_storage_lock).create_new_user, create_new_user_request
+        )
+        self.__log.debug("create_new_user: executed")
+        return response
 
     async def get_home_overview_information(
         self, get_home_overview_information_request: "GetHomeOverviewInformationRequest"
     ) -> "GetHomeOverviewInformationResponse":
-        raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
+        response = await self.__loop.run_in_executor(
+            self.__executor, UserManager(self.__data_storage_dir, self.__mongo_db_url, self.__data_storage_lock).get_home_overview_information, get_home_overview_information_request
+        )
+        self.__log.debug("get_home_overview_information: executed")
+        return response
 
 
 #endregion
