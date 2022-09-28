@@ -9,7 +9,7 @@ import "Miscellaneous.proto";
 
 /*includes all gRPC functions available for the client frontend*/
 service ControllerService {
-  /*OMA-ML MISC MESSAGES*/
+  /*OMA-ML USER MESSAGES*/
   /*return the OMA-ML user identifier for a newly created frontend user*/
   rpc CreateNewUser(CreateNewUserRequest) returns (CreateNewUserResponse) {}
   /*return overview information for home page*/
@@ -60,10 +60,10 @@ service ControllerService {
   rpc GetAvailableStrategies(GetAvailableStrategiesRequest) returns (GetAvailableStrategiesResponse) {}
   /*return dataset types*/
   rpc GetDatasetTypes(GetDatasetTypesRequest) returns (GetDatasetTypesResponse) {}
-  /*return all information fields of an object*/
-  rpc GetObjectsInformation(GetObjectsInformationRequest) returns (GetObjectsInformationResponse) {}
   /*return all supported machine learning libraries for a specific task (by searching supported AutoML)*/
   rpc GetMlLibrariesForTask(GetMlLibrariesForTaskRequest) returns (GetMlLibrariesForTaskResponse) {}
+  /*return all information fields of an object*/
+  rpc GetObjectsInformation(GetObjectsInformationRequest) returns (GetObjectsInformationResponse) {}
   /*return all supported AutoML tasks*/
   rpc GetTasksForDatasetType(GetTasksForDatasetTypeRequest) returns (GetTasksForDatasetTypeResponse) {}
 }

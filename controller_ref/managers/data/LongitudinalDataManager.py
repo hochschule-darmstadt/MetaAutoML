@@ -4,7 +4,7 @@ from typing import Tuple, List
 from sktime.datasets import load_from_tsfile_to_dataframe
 from sktime.datasets import load_from_tsfile
 from sktime.datatypes import convert_to
-from Controller_bgrpc import *
+from ControllerBGRPC import *
 
 FIRST_ROW_AMOUNT = 50
 FIRST_N_ITEMS = 3
