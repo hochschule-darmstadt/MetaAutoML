@@ -35,7 +35,8 @@
                 "USE_DEV_CONFIG": "YES",
                 "MONGO_CLUSTER": "NO",
                 "PERSISTENCE_LOGGING_LEVEL": "DEBUG",
-                "SERVER_LOGGING_LEVEL": "DEBUG"
+                "SERVER_LOGGING_LEVEL": "DEBUG",
+                "ONTOLOGY_LOGGING_LEVEL": "DEBUG"
             },
         },
         {
@@ -67,7 +68,8 @@
                 "USE_DEV_CONFIG": "YES",
                 "MONGO_CLUSTER": "NO",
                 "PERSISTENCE_LOGGING_LEVEL": "DEBUG",
-                "SERVER_LOGGING_LEVEL": "DEBUG"
+                "SERVER_LOGGING_LEVEL": "DEBUG",
+                "ONTOLOGY_LOGGING_LEVEL": "DEBUG"
             },
         }
     ]

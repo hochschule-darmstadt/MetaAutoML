@@ -7,7 +7,7 @@ from sktime.datasets import load_from_tsfile_to_dataframe
 import pandas as pd
 from bson.objectid import ObjectId
 from DataSetAnalysisManager import DataSetAnalysisManager
-from controller_bgrpc import *
+from ControllerBGRPC import *
 
 class DataStorage:
     """
@@ -251,7 +251,7 @@ class DataStorage:
                     self.__log.warn(f"update_dataset: dataset type {dataset['type']} does not support dataset analysis in dataset {dataset_identifier} for user {user_identifier}")
             else:
                 self.__log.error(f"update_dataset: executing dataset analysis failed for dataset: {dataset_identifier} for user {user_identifier}, dataset not found")
-                raise grpclib.GRPCError(grpclib.Status.UNKNOWN, f"Dataset {dataset_identifier} for user {user_identifier} does not exist, can not execute dataset analysis!")
+                raise grpclib.GRPCError(grpclib.Status.NOT_FOUND, f"Dataset {dataset_identifier} for user {user_identifier} does not exist, can not execute dataset analysis!")
         return self.__mongo.update_dataset(user_identifier, dataset_identifier, new_values)
 
     def get_dataset(self, user_identifier: str, dataset_identifier: str) -> 'tuple[bool, dict[str, object]]':
@@ -304,7 +304,7 @@ class DataStorage:
         found, dataset = self.get_dataset(user_identifier, dataset_identifier)
         if not found:
             self.__log.error(f"delete_dataset: attempting to delete a dataset that does not exist: {dataset_identifier} for user {user_identifier}")
-            raise grpclib.GRPCError(grpclib.Status.UNKNOWN, f"Dataset {dataset_identifier} does not exist, already deleted?")
+            raise grpclib.GRPCError(grpclib.Status.NOT_FOUND, f"Dataset {dataset_identifier} does not exist, already deleted?")
         path = dataset["path"]
         path = path.replace("\\"+ dataset["file_name"], "")
         #Before deleting the dataset, delete all related documents
@@ -427,7 +427,7 @@ class DataStorage:
         found, model = self.get_model(user_identifier, model_identifier)
         if not found:
             self.__log.error(f"delete_model: attempting to delete a model that does not exist: {model_identifier} for user {user_identifier}")
-            raise grpclib.GRPCError(grpclib.Status.UNKNOWN, f"Model {model_identifier} does not exist, already deleted?")
+            raise grpclib.GRPCError(grpclib.Status.NOT_FOUND, f"Model {model_identifier} does not exist, already deleted?")
         #Before deleting the model, delete all related documents
         path: str = model["path"]
         if model["automl_name"] == ":alphad3m":
@@ -453,7 +453,7 @@ class DataStorage:
             shutil.rmtree(path)
         except:
             self.__log.error(f"delete_model: deleting files within path: {path} failed, path does not exist")
-            raise grpclib.GRPCError(grpclib.Status.UNKNOWN, f"Model {model_identifier} file path does not exist, already deleted?")
+            raise grpclib.GRPCError(grpclib.Status.NOT_FOUND, f"Model {model_identifier} file path does not exist, already deleted?")
 
 
         amount_deleted_models_result = self.__mongo.delete_model(user_identifier, { "_id": ObjectId(model_identifier) })
@@ -465,8 +465,7 @@ class DataStorage:
     ####################################
     ## TRAINING RELATED OPERATIONS
     ####################################
-#region 
-
+#region
 
     def create_training(self, user_identifier: str, training_details: 'dict[str, object]') -> str:
         """
@@ -558,7 +557,7 @@ class DataStorage:
         found, training = self.get_training(user_identifier, training_identifier)
         if not found:
             self.__log.error(f"delete_training: attempting to delete a training that does not exist: {training_identifier} for user {user_identifier}")
-            raise grpclib.GRPCError(grpclib.Status.UNKNOWN, f"Training {training_identifier} does not exist, already deleted?")
+            raise grpclib.GRPCError(grpclib.Status.NOT_FOUND, f"Training {training_identifier} does not exist, already deleted?")
 
         #Before deleting the training, delete all related documents
         existing_models = self.get_models(user_identifier, training_identifier=training_identifier)
@@ -572,6 +571,5 @@ class DataStorage:
         amount_deleted_trainings_result = self.__mongo.delete_training(user_identifier, { "_id": ObjectId(training_identifier) })
         self.__log.debug(f"delete_training: documents deleted within training: {amount_deleted_trainings_result}")
         return amount_deleted_trainings_result
-
-        
+   
 #endregion

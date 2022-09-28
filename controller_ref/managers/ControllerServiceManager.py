@@ -1,58 +1,15 @@
-import os
+from general.DatasetManager import DatasetManager
+from ControllerBGRPC import *
+import multiprocessing, os, logging, asyncio
 from JsonUtil import get_config_property
 from concurrent.futures.process import ProcessPoolExecutor
-from grpclib.server import Server
-from ssl import SSLContext
-import ssl
-import logging
-import asyncio
-from controller_bgrpc import *
-import multiprocessing
-
-from general.DatasetManager import DatasetManager
-
-def _load_credential_from_file(filepath):
-    """
-    Load the certificate from disk
-    ---
-    Parameter
-    1. path to certificate to read
-    ---
-    Return the certificate str
-    """
-    real_path = os.path.join(os.path.dirname(__file__), filepath)
-    with open(real_path, 'rb') as f:
-        return f.read()
-
-def create_secure_context() -> SSLContext:
-    """
-    Create the required SSL context for inbound Better GRPC connections
-    ---
-    Return the SSL Context for inbound connections
-    """
-    #Credit: https://github.com/vmagamedov/grpclib/blob/master/examples/mtls/server.py
-    ctx = ssl.SSLContext(ssl.PROTOCOL_TLS)
-    #ctx.verify_mode = ssl.CERT_REQUIRED
-    ctx.load_cert_chain(str("certificate/server.crt"), str('certificate/server.key'))
-    ctx.options |= ssl.OP_NO_TLSv1 | ssl.OP_NO_TLSv1_1
-    ctx.set_ciphers('ECDHE+AESGCM:ECDHE+CHACHA20:DHE+AESGCM:DHE+CHACHA20')
-    ctx.set_alpn_protocols(['h2'])
-    try:
-        ctx.set_npn_protocols(['h2'])
-    except NotImplementedError:
-        pass
-    return ctx
 
 ROOT_PATH = os.path.dirname(os.path.abspath(__file__))
 
-SERVER_CERTIFICATE = _load_credential_from_file('certificate/server.crt')
-SERVER_CERTIFICATE_KEY = _load_credential_from_file('certificate/server.key')
-
-
-class ControllerService(ControllerServiceBase):
+class ControllerServiceManager(ControllerServiceBase):
 
     def __init__(self, executor: ProcessPoolExecutor):
-        self.__log = logging.getLogger('ControllerService')
+        self.__log = logging.getLogger('ControllerServiceManager')
         self.__log.setLevel(logging.getLevelName(os.getenv("SERVER_LOGGING_LEVEL")))
         self.__executor = executor
         self.__loop = asyncio.get_event_loop()
@@ -60,16 +17,16 @@ class ControllerService(ControllerServiceBase):
         self.__data_storage_lock = self.__multiprocessing_manager.Lock()
         self.__data_storage_dir = os.path.join(ROOT_PATH, get_config_property("datasets-path"))
         if os.getenv("MONGO_DB_DEBUG") == "YES":
-            self.__log.info("Using localhost mongo db")
+            self.__log.info("__init__: Using localhost mongo db")
             self.__mongo_db_url = "mongodb://localhost:27017/"
         elif os.getenv("MONGO_CLUSTER") == "YES":
-            self.__log.info("Using cluster mongo db")
+            self.__log.info("__init__: Using cluster mongo db")
             self.__mongo_db_url = "mongodb://"+os.getenv("MONGODB_SERVICE_HOST")+":"+os.getenv("MONGODB_SERVICE_PORT")+""
         else:
-            self.__log.info("Using docker-compose mongo db")
+            self.__log.info("__init__: Using docker-compose mongo db")
             self.__mongo_db_url = "mongodb://root:example@mongo"
         super().__init__()
-        self.__log.info("New mongo db client intialized.")
+        self.__log.info("__init__: New mongo db client intialized.")
 
     async def create_new_user(
         self, create_new_user_request: "CreateNewUserRequest"
@@ -202,19 +159,3 @@ class ControllerService(ControllerServiceBase):
     ) -> "GetTasksForDatasetTypeResponse":
         raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
 
-
-
-async def main():
-    with ProcessPoolExecutor(max_workers=4) as executor:
-        server = Server([ControllerService(executor)])
-        context = SSLContext(protocol=ssl.PROTOCOL_TLSv1_2)
-        context.load_cert_chain(certfile="certificate/server.crt", keyfile='certificate/server.key')
-        await server.start(get_config_property('controller-server-adress'), get_config_property('controller-server-port'), ssl=create_secure_context())
-        await server.wait_closed()
-
-
-if __name__ == '__main__':
-    logging.basicConfig()
-    print("controller started")
-    asyncio.run(main())
-    print('done.')

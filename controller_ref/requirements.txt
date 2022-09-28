@@ -2,3 +2,4 @@ git+https://github.com/danielgtaylor/python-betterproto.git@v2.0.0b5
 pymongo==4.2.0
 mongomock==4.1.2
 sktime==0.13.3
+rdflib==6.2.0
