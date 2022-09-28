@@ -3,7 +3,6 @@ from DataStorage import DataStorage
 from ControllerBGRPC import *
 from DataStorage import DataStorage
 import json, logging, os
-from RdfManager import RdfManager
 from CsvManager import CsvManager
 from LongitudinalDataManager import LongitudinalDataManager
 
@@ -13,7 +12,6 @@ class DatasetManager:
         self.__data_storage: DataStorage = DataStorage(storage_dir, storage_lock, mongo_db_url)
         self.__log = logging.getLogger('DatasetManager')
         self.__log.setLevel(logging.getLevelName(os.getenv("SERVER_LOGGING_LEVEL")))
-        self.__rdfManager = RdfManager()
 
     def create_dataset(
         self, create_dataset_request: "CreateDatasetRequest"
@@ -32,17 +30,6 @@ class DatasetManager:
         response = CreateDatasetResponse()
         return response
 
-    def get_dataset_types(
-        self, get_dataset_types_request: "GetDatasetTypesRequest"
-    ) -> "GetDatasetTypesResponse":
-        """
-        Get all dataset types
-        ---
-        Return list of all dataset types
-        """
-        self.__log.debug("get_dataset_types: getting dataset types")
-        return self.__rdfManager.get_dataset_types()
-
     def get_datasets(
         self, get_datasets_request: "GetDatasetsRequest"
     ) -> "GetDatasetsResponse":
@@ -52,7 +39,7 @@ class DatasetManager:
         Parameter
         1. grpc request object, containing the user identifier
         ---
-        Return a list of compatible datasetsor a GRPC error UNAVAILABLE for read errors
+        Return a list of compatible datasets or a GRPC error UNAVAILABLE for read errors
         """
         response = GetDatasetsResponse()
         self.__log.debug(f"get_datasets: get all datasets for user {get_datasets_request.user_identifier}")
@@ -94,24 +81,23 @@ class DatasetManager:
         self.__log.debug(f"get_datasets: trying to get dataset {get_dataset_request.dataset_identifier} for user {get_dataset_request.user_identifier}")
         found, dataset = self.__data_storage.get_dataset(get_dataset_request.user_identifier, get_dataset_request.dataset_identifier)
         if not found:
-            try:
-                response_dataset = Dataset()
-                response_dataset.analysis = json.dumps(dataset['analysis'])
-                response_dataset.size = dataset['size']
-                response_dataset.identifier = str(dataset["_id"])
-                response_dataset.name = dataset["name"]
-                response_dataset.type = dataset['type']
-                response_dataset.creation_date = datetime.fromtimestamp(int(dataset["mtime"]))
-                response_dataset.file_name = dataset["file_name"]
-                response_dataset.file_configuration = dataset["file_configuration"]
-                response.dataset_infos = response_dataset
-            except Exception as e:
-                self.__log.error(f"get_datasets: Error while reading parameter for dataset {get_dataset_request.dataset_identifier} for user {get_dataset_request.user_identifier}")
-                self.__log.error(f"get_datasets: exception: {e}")
-                raise grpclib.GRPCError(grpclib.Status.UNAVAILABLE, f"Error while retrieving Dataset {get_dataset_request.dataset_identifier} for user {get_dataset_request.user_identifier}")
-        else:
             self.__log.error(f"get_datasets: dataset {get_dataset_request.dataset_identifier} for user {get_dataset_request.user_identifier} not found")
             raise grpclib.GRPCError(grpclib.Status.NOT_FOUND, f"Dataset {get_dataset_request.dataset_identifier} for user {get_dataset_request.user_identifier} not found, already deleted?")
+        try:
+            response_dataset = Dataset()
+            response_dataset.analysis = json.dumps(dataset['analysis'])
+            response_dataset.size = dataset['size']
+            response_dataset.identifier = str(dataset["_id"])
+            response_dataset.name = dataset["name"]
+            response_dataset.type = dataset['type']
+            response_dataset.creation_date = datetime.fromtimestamp(int(dataset["mtime"]))
+            response_dataset.file_name = dataset["file_name"]
+            response_dataset.file_configuration = dataset["file_configuration"]
+            response.dataset_infos = response_dataset
+        except Exception as e:
+            self.__log.error(f"get_datasets: Error while reading parameter for dataset {get_dataset_request.dataset_identifier} for user {get_dataset_request.user_identifier}")
+            self.__log.error(f"get_datasets: exception: {e}")
+            raise grpclib.GRPCError(grpclib.Status.UNAVAILABLE, f"Error while retrieving Dataset {get_dataset_request.dataset_identifier} for user {get_dataset_request.user_identifier}")
 
                 
         return response

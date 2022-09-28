@@ -49,7 +49,7 @@ class RdfManager(object):
 
         return queryResult
 
-    def GetCompatibleAutoMlSolutions(self, request: GetCompatibleAutoMlSolutionsRequest) -> GetCompatibleAutoMlSolutionsResponse:
+    def get_auto_ml_solutions_for_configuration(self, request: GetAutoMlSolutionsForConfigurationRequest) -> GetAutoMlSolutionsForConfigurationResponse:
         """
         Retrive all compatible AutoML solutions depending on the configuration
         ---
@@ -58,36 +58,31 @@ class RdfManager(object):
         ---
         Return a list of AutoML names
         """
-        result = GetCompatibleAutoMlSolutionsResponse()
+        result = GetAutoMlSolutionsForConfigurationResponse()
 
-        if "task" not in request.configuration:  # Check if task parameter is contained, we require it for a successful query
-            self.__log.exception("Configuration dictonary does not contain the key task")
-            result.AutoMlSolutions.append("Task parameter missing")
-            return result
-
-        if len(request.configuration[
-                   "task"]) == 0:  # Check if task parameter has value, we require it for a successful query
-            self.__log.exception("task key in configuration dictonary has no value")
-            result.AutoMlSolutions.append("Task parameter value missing")
-            return result
+        if (len(request.task) == 0):  # Check if task parameter is contained, we require it for a successful query
+            self.__log.error("get_auto_ml_solutions_for_configuration: Task parameter is empty")
+            raise grpclib.GRPCError(grpclib.Status.NOT_FOUND, "Task parameter is empty")
         
         
         task = rdflib.URIRef(ML_ONTOLOGY_NAMESPACE + request.configuration["task"].replace(":", ""))
         #task = rdflib.Literal(request.configuration["task"])
-        if "library" not in request.configuration:  # Check if library parameter is contained, we require it for a successful query
+        if request.libraries.count == 0:  # if libraries list is empty we do not query for library filter
+            self.__log.debug(f"get_auto_ml_solutions_for_configuration: querying for task only {request.task}")
             q = prepareQuery(Queries.ONTOLOGY_QUERY_GET_COMPATIBLE_AUTO_ML_SOLUTIONS_FOR_TASK,
                          initNs={"skos": SKOS})
-            queryResult = self.__executeQuery(q, {"task": task})
+            queryResult = self.__execute_query(q, {"task": task})
             for row in queryResult:
                 result.auto_ml_solutions.append(row.automl.replace(ML_ONTOLOGY_NAMESPACE, ":"))
             return result
         else:
+            self.__log.debug(f"get_auto_ml_solutions_for_configuration: querying for task {request.task} and libraries {request.libraries}")
             for lib in json.loads(request.configuration["library"]):
                 library = rdflib.URIRef(ML_ONTOLOGY_NAMESPACE + lib.replace(":", ""))
                 #library = rdflib.Literal(request.configuration["library"])
                 q = prepareQuery(Queries.ONTOLOGY_QUERY_GET_COMPATIBLE_AUTO_ML_SOLUTIONS_FOR_TASK_AND_LIBRARIES,
                             initNs={"skos": SKOS})
-                queryResult = self.__executeQuery(q, {"task": task, "lib": library})
+                queryResult = self.__execute_query(q, {"task": task, "lib": library})
                 
                 for row in queryResult:
                     solution = row.automl.replace(ML_ONTOLOGY_NAMESPACE, ":")
@@ -98,35 +93,6 @@ class RdfManager(object):
 
         # TODO add more parameter to query
         # task = rdflib.Literal(u'binary classification')
-
-
-    def GetDatasetCompatibleTasks(self, request: GetDatasetCompatibleTasksRequest, datasetType: str) -> GetDatasetCompatibleTasksResponse:
-        """
-        Retrive possible AutoML tasks for a given dataset
-        ---
-        Parameter
-        1. dataset name
-        2. dataset type
-        ---
-        Return a list of compatible AutoML tasks
-        """
-        result = GetDatasetCompatibleTasksResponse()
-
-        if len(request.dataset_name) == 0:  # check if dataset name is present, we require it for a successful query
-            self.__log.exception("Dataset name is empty")
-            result.tasks.append("Dataset name parameter empty")
-            return result
-
-        # dataset = rdflib.Literal(u"tabular data")
-        dataset_type = rdflib.URIRef(ML_ONTOLOGY_NAMESPACE + datasetType.replace(":", ""))
-        #dataset_type = rdflib.Literal(datasetType)
-        q = prepareQuery(Queries.ONTOLOGY_QUERY_GET_TASKS_FOR_DATASET_TYPE,
-                         initNs={"skos": SKOS})
-
-        queryResult = self.__executeQuery(q, {"dataset_type": dataset_type})
-        for row in queryResult:
-            result.tasks.append(row.task.replace(ML_ONTOLOGY_NAMESPACE, ":"))
-        return result
 
     def get_dataset_types(self) -> GetDatasetTypesResponse:
         """
@@ -145,7 +111,34 @@ class RdfManager(object):
             result.dataset_types.append(row.type.replace(ML_ONTOLOGY_NAMESPACE, ":"))
         return result
 
-    def GetObjectsInformation(self, request: GetObjectsInformationRequest) -> GetObjectsInformationResponse:
+
+    def get_ml_libraries_for_task(self, request: GetMlLibrariesForTaskRequest) -> GetMlLibrariesForTaskResponse:
+        """
+        Retrive all Machine Learn Library for this task by supported AutoMLs
+        ---
+        Parameter
+        1. configuration dictonary
+        ---
+        Return a list of Machine Learning libraries
+        """
+        result = GetMlLibrariesForTaskResponse()
+
+        if len(request.task) == 0:  # Check if task parameter has value, we require it for a successful query
+            self.__log.error("get_ml_libraries_for_task: Task parameter is empty")
+            raise grpclib.GRPCError(grpclib.Status.NOT_FOUND, "Task parameter is empty")
+
+        self.__log.debug(f"get_ml_libraries_for_task: querying for task {request.task}")
+        task = rdflib.URIRef(ML_ONTOLOGY_NAMESPACE + request.task.replace(":", ""))
+        #task = rdflib.Literal(request.task)
+        q = prepareQuery(Queries.ONTOLOGY_QUERY_GET_SUPPORTED_ML_LIBRARIES_FOR_TASK,
+                         initNs={"skos": SKOS})
+
+        queryResult = self.__execute_query(q, {"task": task})
+        for row in queryResult:
+            result.ml_libraries.append(row.lib.replace(ML_ONTOLOGY_NAMESPACE, ":"))
+        return result
+
+    def get_objects_information(self, request: GetObjectsInformationRequest) -> GetObjectsInformationResponse:
         """
         Get all object information
         ---
@@ -156,7 +149,8 @@ class RdfManager(object):
         """
         result = GetObjectsInformationResponse()
 
-        for id in request.ids:
+        for id in request.identifiers:
+            self.__log.debug(f"get_objects_information: querying for identifier {id}")
             current_object = ObjectInformation()
             q = prepareQuery(Queries.ONTOLOGY_QUERY_GET_ALL_DETAILS_BY_ID)
 
@@ -180,29 +174,30 @@ class RdfManager(object):
 
         return result
 
-
-    def GetSupportedMlLibraries(self, request: GetSupportedMlLibrariesRequest) -> GetSupportedMlLibrariesResponse:
+    def get_tasks_for_dataset_type(self, request: GetTasksForDatasetTypeRequest) -> GetTasksForDatasetTypeResponse:
         """
-        Retrive all Machine Learn Library for this task by supported AutoMLs
+        Retrive possible AutoML tasks for a given dataset
         ---
         Parameter
-        1. configuration dictonary
+        1. dataset name
+        2. dataset type
         ---
-        Return a list of Machine Learning libraries
+        Return a list of compatible AutoML tasks
         """
-        result = GetSupportedMlLibrariesResponse()
+        result = GetTasksForDatasetTypeResponse()
 
-        if len(request.task) == 0:  # Check if task parameter has value, we require it for a successful query
-            self.__log.exception("task parameter empty")
-            result.MlLibraries.append("Task parameter value missing")
-            return result
+        if len(request.dataset_type) == 0:  # check if dataset type is present, we require it for a successful query
+            self.__log.error("get_tasks_for_dataset_type: Dataset type is empty")
+            raise grpclib.GRPCError(grpclib.Status.NOT_FOUND, "Dataset type is empty")
 
-        task = rdflib.URIRef(ML_ONTOLOGY_NAMESPACE + request.task.replace(":", ""))
-        #task = rdflib.Literal(request.task)
-        q = prepareQuery(Queries.ONTOLOGY_QUERY_GET_SUPPORTED_ML_LIBRARIES_FOR_TASK,
+        self.__log.debug(f"get_tasks_for_dataset_type: querying for dataset type {request.dataset_type}")
+        # dataset = rdflib.Literal(u"tabular data")
+        dataset_type = rdflib.URIRef(ML_ONTOLOGY_NAMESPACE + request.dataset_type.replace(":", ""))
+        #dataset_type = rdflib.Literal(datasetType)
+        q = prepareQuery(Queries.ONTOLOGY_QUERY_GET_TASKS_FOR_DATASET_TYPE,
                          initNs={"skos": SKOS})
 
-        queryResult = self.__executeQuery(q, {"task": task})
+        queryResult = self.__execute_query(q, {"dataset_type": dataset_type})
         for row in queryResult:
-            result.ml_libraries.append(row.lib.replace(ML_ONTOLOGY_NAMESPACE, ":"))
+            result.tasks.append(row.task.replace(ML_ONTOLOGY_NAMESPACE, ":"))
         return result

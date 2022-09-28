@@ -55,6 +55,14 @@ class DataStorage:
         """
         return self.__mongo.check_if_user_exists(user_identifier)
 
+    def lock(self):
+        self.__log.debug("lock: aquiring lock...")
+        self.__lock.acquire()
+
+    def unlock(self):
+        self.__log.debug("unlock: releasing lock...")
+        self.__lock.release()
+
 #endregion
 
     ####################################
