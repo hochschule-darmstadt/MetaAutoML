@@ -13,6 +13,10 @@ namespace BlazorBoilerplate.Shared.Dto.User
         public int TotalTrainingAmount { get; set; }
         public int TotalModelAmount { get; set; }
         public int RunningTrainingAmount { get; set; }
+        public GetHomeOverviewInformationResponseDto()
+        {
+
+        }
         public GetHomeOverviewInformationResponseDto(GetHomeOverviewInformationResponse information)
         {
             TotalDatasetAmount = information.DatasetAmount;

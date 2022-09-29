@@ -210,33 +210,38 @@ class TrainingManager:
                 try:
                     model_details = Model()
                     model_details.identifier = str(model["_id"])
-                    model_details.automl = model["automl_name"]
-                    model_details.status = model["status"]
-                    model_details.status_messages[:] =  model["status_messages"]
+                    model_details.training_identifier = model["training_id"]
                     model_details.test_score =  model["test_score"]
                     model_details.runtime =  model["runtime"]
-                    model_details.prediction_time =  model["prediction_time"]
                     model_details.ml_model_type =  model["model"]
                     model_details.ml_library =  model["library"]
+                    model_details.status = model["status"]
+                    model_details.status_messages[:] =  model["status_messages"]
+                    model_details.prediction_time =  model["prediction_time"]
+                    model_details.automl = model["automl_name"]
+                    model_details.dataset_identifier = model["dataset_id"]
+                    model_details.explanation = model["explanation"]
                     response.training.models.append(model_details)
                 except Exception as e:
                     self.__log.error(f"get_training: Error while reading parameter for model")
                     self.__log.error(f"get_training: exception: {e}")
                     raise grpclib.GRPCError(grpclib.Status.UNAVAILABLE, f"Error while retrieving Model")
                         
-            response.training.status = training["status"]
+            response.training.identifier = str(training["_id"])
             response.training.dataset_identifier = training["dataset_id"]
             response.training.dataset_name = training["dataset_name"]
             response.training.task = training["task"]
-            response.training.start_time = training["start_time"]
-            response.training.identifier = str(training["_id"])
             response.training.configuration = json.dumps(training["configuration"])
-            for automl in training['required_automls']:
-                response.training.selected_auto_mls.append(automl)
             for lib in training['required_libraries']:
                 response.training.selected_ml_libraries.append(lib)
+            for automl in training['required_automls']:
+                response.training.selected_auto_mls.append(automl)
             response.training.runtime_constraints = json.dumps(training["runtime_constraints"])
             response.training.dataset_configuration = json.dumps(training["dataset_configuration"])
+            response.training.test_configuration = json.dumps(training["test_configuration"])
+            response.training.status = training["status"]
+            response.training.start_time = training["start_time"]
+            response.training.end_time = training["end_time"]
                 
             response.training.events = []
             for event in training.get('events', []):

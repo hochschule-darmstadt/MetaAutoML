@@ -18,7 +18,10 @@ namespace BlazorBoilerplate.Shared.Dto.Dataset
         public long Size { get; set; }
         public Dictionary<string, dynamic> Analysis { get; set; }
         public Dictionary<string, dynamic> Configuration { get; set; }
-
+        public DatasetDto()
+        {
+            Analysis = new Dictionary<string, dynamic>();
+        }
         public DatasetDto(GetDatasetResponse grpcObject, ObjectInfomationDto type)
         {
             Identifier = grpcObject.Dataset.Identifier;

@@ -50,12 +50,13 @@ class DatasetManager:
             try:
                 response_dataset = Dataset()
                 
-                response_dataset.analysis = json.dumps(dataset['analysis'])
-                response_dataset.size = dataset['size']
                 response_dataset.identifier = str(dataset["_id"])
                 response_dataset.name = dataset["name"]
                 response_dataset.type = dataset['type']
                 response_dataset.creation_date = datetime.fromtimestamp(int(dataset["mtime"]))
+                response_dataset.size = dataset['size']
+                response_dataset.analysis = json.dumps(dataset['analysis'])
+                response_dataset.file_name = dataset["file_name"]
                 response_dataset.file_configuration = dataset["file_configuration"]
                 response.dataset.append(response_dataset)
             except Exception as e:
@@ -85,12 +86,12 @@ class DatasetManager:
             raise grpclib.GRPCError(grpclib.Status.NOT_FOUND, f"Dataset {get_dataset_request.dataset_identifier} for user {get_dataset_request.user_identifier} not found, already deleted?")
         try:
             response_dataset = Dataset()
-            response_dataset.analysis = json.dumps(dataset['analysis'])
-            response_dataset.size = dataset['size']
             response_dataset.identifier = str(dataset["_id"])
             response_dataset.name = dataset["name"]
             response_dataset.type = dataset['type']
             response_dataset.creation_date = datetime.fromtimestamp(int(dataset["mtime"]))
+            response_dataset.size = dataset['size']
+            response_dataset.analysis = json.dumps(dataset['analysis'])
             response_dataset.file_name = dataset["file_name"]
             response_dataset.file_configuration = dataset["file_configuration"]
             response.dataset = response_dataset
