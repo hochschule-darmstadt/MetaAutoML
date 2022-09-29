@@ -4,14 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BlazorBoilerplate.Shared.Dto.AutoML
+namespace BlazorBoilerplate.Shared.Dto.Model
 {
-    public class TestAutoMLResponseDto
+    public class ModelPredictResponseDto
     {
         public List<string> Predictions { get; set; }
-        public double Score { get; set; }
         public double Predictiontime { get; set; }
-        public TestAutoMLResponseDto()
+        public ModelPredictResponseDto()
         {
             Predictions = new List<string>();
         }

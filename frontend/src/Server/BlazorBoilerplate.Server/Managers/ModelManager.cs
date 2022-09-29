@@ -1,6 +1,5 @@
 ﻿using BlazorBoilerplate.Infrastructure.Server;
 using BlazorBoilerplate.Infrastructure.Server.Models;
-using BlazorBoilerplate.Shared.Dto.AutoML;
 using BlazorBoilerplate.Shared.Dto.Dataset;
 using BlazorBoilerplate.Shared.Dto.Model;
 using BlazorBoilerplate.Storage;
@@ -23,117 +22,21 @@ namespace BlazorBoilerplate.Server.Managers
             _httpContextAccessor = httpContextAccessor;
             _cacheManager = cacheManager;
         }
-        public async Task<ApiResponse> GetModel(GetModelRequestDto model)
-        {
-            GetModelResponseDto response = new GetModelResponseDto();
-            GetModelRequest getmodelRequest = new GetModelRequest();
-            var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
-            try
-            {
-                getmodelRequest.Username = username;
-                getmodelRequest.ModelId = model.ModelId;
-                var reply = _client.GetModel(getmodelRequest);
-
-                response.Model = new ModelDto();
-                response.Model.ID = reply.Model.Identifier;
-                response.Model.Messages = reply.Model.StatusMessages.ToList();
-                response.Model.Status = reply.Model.Status;
-                response.Model.Name = (await _cacheManager.GetObjectInformation(reply.Model.Automl)).Properties["skos:prefLabel"];
-                if (!string.IsNullOrEmpty(reply.Model.Model))
-                {
-                    response.Model.Library = (await _cacheManager.GetObjectInformation(reply.Model.Library)).Properties["skos:prefLabel"];
-                    response.Model.Model = (await _cacheManager.GetObjectInformation(reply.Model.Model)).Properties["skos:prefLabel"];
-                }
-                else
-                {
-                    response.Model.Library = "";
-                    response.Model.Model = "";
-                }
-                if (!string.IsNullOrEmpty(reply.Model.Explanation))
-                {
-                    response.Model.Explanation = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(reply.Model.Explanation);
-                }
-                response.Model.TestScore = (double)reply.Model.TestScore;
-                response.Model.ValidationScore = (double)reply.Model.ValidationScore;
-                response.Model.Predictiontime = (double)reply.Model.PredictionTime;
-                response.Model.Runtime = (int)reply.Model.Runtime;
-                response.Model.DatasetId = reply.Model.DatasetId;
-                response.Model.TrainingId = reply.Model.TrainingId;
-
-                return new ApiResponse(Status200OK, null, response);
-
-            }
-            catch (Exception ex)
-            {
-
-                return new ApiResponse(Status404NotFound, ex.Message);
-            }
-        }
-        /// <summary>
-        /// Delete a model
-        /// </summary>
-        /// <returns></returns>
-        public async Task<ApiResponse> DeleteModel(DeleteModelRequestDto request)
-        {
-            DeleteModelResponseDto response = new DeleteModelResponseDto();
-            DeleteModelRequest deleteModelsRequest = new DeleteModelRequest();
-            var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
-            try
-            {
-                deleteModelsRequest.Identifier = request.Identifier;
-                deleteModelsRequest.Username = username;
-                var reply = _client.DeleteModel(deleteModelsRequest);
-                response.Result = (int)reply.Status;
-                return new ApiResponse(Status200OK, null, response);
-
-            }
-            catch (Exception ex)
-            {
-
-                Console.WriteLine(ex.Message);
-                return new ApiResponse(Status404NotFound, ex.Message);
-            }
-        }
-        public async Task<ApiResponse> GetModels(GetModelsRequestDto models)
+        public async Task<ApiResponse> GetModels(GetModelsRequestDto request)
         {
             GetModelsResponseDto response = new GetModelsResponseDto();
             GetModelsRequest getmodelRequest = new GetModelsRequest();
             var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
             try
             {
-                getmodelRequest.Username = username;
-                getmodelRequest.Top3 = models.Top3Only;
-                getmodelRequest.DatasetId = models.DatasetIdentifier;
+                getmodelRequest.UserIdentifier = username;
+                getmodelRequest.DatasetIdentifer = request.DatasetIdentifier;
                 var reply = _client.GetModels(getmodelRequest);
 
-                foreach (var item in reply.Models)
+                foreach (var model in reply.Models)
                 {
-                    ModelDto model = new ModelDto();
-                    model.ID = item.Identifier;
-                    model.Messages = item.StatusMessages.ToList();
-                    model.Status = item.Status;
-                    model.Name = (await _cacheManager.GetObjectInformation(item.Automl)).Properties["skos:prefLabel"];
-                    if (!string.IsNullOrEmpty(item.Model))
-                    {
-                        model.Library = (await _cacheManager.GetObjectInformation(item.Library)).Properties["skos:prefLabel"];
-                        model.Model = (await _cacheManager.GetObjectInformation(item.Model)).Properties["skos:prefLabel"];
-                    }
-                    else
-                    {
-                        model.Library = "";
-                        model.Model = "";
-                    }
-                    if (!string.IsNullOrEmpty(item.Explanation))
-                    {
-                        model.Explanation = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(item.Explanation);
-                    }
-                    model.TestScore = (double)item.TestScore;
-                    model.ValidationScore = (double)item.ValidationScore;
-                    model.Predictiontime = (double)item.PredictionTime;
-                    model.Runtime = (int)item.Runtime;
-                    model.DatasetId = item.DatasetId;
-                    model.TrainingId = item.TrainingId;
-                    response.Models.Add(model);
+                    ModelDto modelDto = new ModelDto(model, await _cacheManager.GetObjectInformation(model.MlModelType), await _cacheManager.GetObjectInformation(model.MlLibrary), await _cacheManager.GetObjectInformation(model.Automl));
+                    response.Models.Add(modelDto);
                 }
 
                 return new ApiResponse(Status200OK, null, response);
@@ -145,7 +48,28 @@ namespace BlazorBoilerplate.Server.Managers
                 return new ApiResponse(Status404NotFound, ex.Message);
             }
         }
-        public async Task<ApiResponse> GetModelExplanation(GetModelExplanationRequestDto model)
+        public async Task<ApiResponse> GetModel(GetModelRequestDto request)
+        {
+            GetModelResponseDto response = new GetModelResponseDto();
+            GetModelRequest getmodelRequest = new GetModelRequest();
+            var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
+            try
+            {
+                getmodelRequest.UserIdentifier = username;
+                getmodelRequest.ModelIdentifier = request.ModelIdentifier;
+                var reply = _client.GetModel(getmodelRequest);
+
+                response.Model = new ModelDto(reply.Model, await _cacheManager.GetObjectInformation(reply.Model.MlModelType), await _cacheManager.GetObjectInformation(reply.Model.MlLibrary), await _cacheManager.GetObjectInformation(reply.Model.Automl));
+                return new ApiResponse(Status200OK, null, response);
+
+            }
+            catch (Exception ex)
+            {
+
+                return new ApiResponse(Status404NotFound, ex.Message);
+            }
+        }
+        public async Task<ApiResponse> GetModelExplanation(GetModelExplanationRequestDto request)
         {
             GetModelExplanationResponseDto response = new GetModelExplanationResponseDto();
             GetModelRequest getModelRequest = new GetModelRequest();
@@ -153,8 +77,8 @@ namespace BlazorBoilerplate.Server.Managers
             string controllerDatasetPath = Environment.GetEnvironmentVariable("CONTROLLER_DATASET_FOLDER_PATH");
             try
             {
-                getModelRequest.Username = username;
-                getModelRequest.ModelId = model.ModelIdentifier;
+                getModelRequest.UserIdentifier = username;
+                getModelRequest.ModelIdentifier = request.ModelIdentifier;
                 var reply = _client.GetModel(getModelRequest);
                 var explanation = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(reply.Model.Explanation);
                 int index = 0;
@@ -180,7 +104,7 @@ namespace BlazorBoilerplate.Server.Managers
                         };
                         foreach (var item in category["items"])
                         {
-                            if (model.GetShortPreview == true)
+                            if (request.GetShortPreview == true)
                             {
                                 if (item.SelectToken("type").ToString() == "force_plot")
                                 {
@@ -225,30 +149,75 @@ namespace BlazorBoilerplate.Server.Managers
             }
             return content;
         }
+        public async Task<ApiResponse> ModelPrediction(ModelPredictRequestDto request)
+        {
+            ModelPredictResponseDto response = new ModelPredictResponseDto();
+            ModelPredictRequest testAutoMLrequest = new ModelPredictRequest();
+            var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
+            try
+            {
+                testAutoMLrequest.UserIdentifier = username;
+                testAutoMLrequest.ModelIdenfier = request.ModelId;
+                testAutoMLrequest.TestData = Google.Protobuf.ByteString.CopyFrom(request.TestData);
+
+                var reply = _client.ModelPredict(testAutoMLrequest);
+
+                response.Predictions.AddRange(reply.Predictions.ToList());
+                response.Predictiontime = reply.Predictiontime;
+                return new ApiResponse(Status200OK, null, response);
+            }
+            catch (Exception ex)
+            {
+
+                return new ApiResponse(Status404NotFound, ex.Message);
+            }
+        }
         /// <summary>
         /// Get the result model from a specific AutoML
         /// </summary>
         /// <param name="autoMl"></param>
         /// <returns></returns>
-        public async Task<ApiResponse> GetModelDownload(GetAutoMlModelRequestDto autoMl)
+        public async Task<ApiResponse> DownloadModel(DownloadModelRequestDto request)
         {
-            GetAutoMlModelResponseDto response = new GetAutoMlModelResponseDto();
-            GetAutoMlModelRequest getmodelRequest = new GetAutoMlModelRequest();
+            DownloadModelResponseDto response = new DownloadModelResponseDto();
+            GetModelRequest getmodelRequest = new GetModelRequest();
             var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
             try
             {
-                getmodelRequest.Username = username;
-                getmodelRequest.TrainingId = autoMl.TrainingId;
-                getmodelRequest.AutoMl = autoMl.AutoMl;
-                var reply = _client.GetAutoMlModel(getmodelRequest);
-                response.Name = reply.Name;
-                response.Content = reply.File.ToByteArray();
+                getmodelRequest.UserIdentifier = username;
+                getmodelRequest.ModelIdentifier = request.ModelIdentifier;
+                var reply = _client.GetModel(getmodelRequest);
+                //TODO NEW DOWNLOAD FUNCTIONALITY IMPLEMENTATION
                 return new ApiResponse(Status200OK, null, response);
 
             }
             catch (Exception ex)
             {
 
+                return new ApiResponse(Status404NotFound, ex.Message);
+            }
+        }
+        /// <summary>
+        /// Delete a model
+        /// </summary>
+        /// <returns></returns>
+        public async Task<ApiResponse> DeleteModel(DeleteModelRequestDto request)
+        {
+            DeleteModelResponseDto response = new DeleteModelResponseDto();
+            DeleteModelRequest deleteModelsRequest = new DeleteModelRequest();
+            var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
+            try
+            {
+                deleteModelsRequest.ModelIdentifier = request.ModelIdentifier;
+                deleteModelsRequest.UserIdentifier = username;
+                var reply = _client.DeleteModel(deleteModelsRequest);
+                return new ApiResponse(Status200OK, null, "");
+
+            }
+            catch (Exception ex)
+            {
+
+                Console.WriteLine(ex.Message);
                 return new ApiResponse(Status404NotFound, ex.Message);
             }
         }

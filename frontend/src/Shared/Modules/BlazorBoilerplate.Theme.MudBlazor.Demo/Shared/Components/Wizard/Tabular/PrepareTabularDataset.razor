@@ -1,5 +1,5 @@
 ﻿@inject IStringLocalizer<Global> L
-@using System
+@    using System
 @inject IApiClient apiClient
 @inject IViewNotifier viewNotifier
 
@@ -65,9 +65,9 @@ else
     [Parameter]
     public GetDatasetResponseDto Dataset { get; set; }
     [Parameter]
-    public StartAutoMLRequestDto StartAutoMlRequest { get; set; }
+    public CreateTrainingRequestDto StartAutoMlRequest { get; set; }
     [Parameter]
-    public EventCallback<StartAutoMLRequestDto> StartAutoMlRequestChanged { get; set; }
+    public EventCallback<CreateTrainingRequestDto> StartAutoMlRequestChanged { get; set; }
     private bool isPreviewRequestRunning = false;
     private Frame<int, string> _datasetFrame;
     private GetDatasetPreviewResponseDto _datasetPreview;

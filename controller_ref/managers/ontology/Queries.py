@@ -43,7 +43,10 @@ ONTOLOGY_QUERY_GET_TASKS_FOR_DATASET_TYPE = """
             }
             """
             
-#Retreive all dataset types          
+"""
+Retreive all dataset types
+---
+"""     
 ONTOLOGY_QUERY_GET_DATASET_TYPES = """
             PREFIX : <http://h-da.de/ml-ontology/> 
             SELECT ?type
@@ -54,7 +57,17 @@ ONTOLOGY_QUERY_GET_DATASET_TYPES = """
             } 
             """
 
-#Retrieve all object information by id
+"""Retrieve all object information by id
+
+        Response example:
+        :tabular_classification a :ML_task ;
+            skos:prefLabel "tabular classification" ;
+            skos:broader :classification ;
+            :belongs_to :supervised_learning ;
+            :has_dataset_type :tabular .
+
+            
+"""
 ONTOLOGY_QUERY_GET_ALL_DETAILS_BY_ID = """
             PREFIX : <http://h-da.de/ml-ontology/>
             SELECT ?p ?o

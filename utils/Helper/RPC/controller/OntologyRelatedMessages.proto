@@ -6,7 +6,7 @@ import "Enumerations.proto";
 
 message GetAutoMlSolutionsForConfigurationRequest {
     string task = 1;
-    repeated string libraries = 2;
+    map<string, string> configuration = 2;
   }
   
 message GetAutoMlSolutionsForConfigurationResponse {
@@ -47,7 +47,7 @@ message Strategy {
   
 
 message GetObjectsInformationRequest {
-  repeated string identifiers = 1;
+  repeated string identifiers = 1; //RDF object IRI. example: [":tabular_classification",”:autokeras”]
 }
 
 message GetObjectsInformationResponse {
@@ -55,7 +55,29 @@ message GetObjectsInformationResponse {
 }
 
 
+message GetDatasetTypesRequest {
+}
+
+message GetDatasetTypesResponse {
+  repeated string datasetTypes = 1;
+}
+
 message ObjectInformation {
+  /*
+    RDF subject IRI
+    example: “:tabular_classification"
+  */
   string identifier = 1;
+
+  /*
+    dictionary of RDF pairs for predicates and objects
+    example:
+    {
+      "skos:prefLabel": "tabular classification",
+      "skos:broader": ":classification",
+      ":belongs_to": ":supervised_learning",
+      ":has_dataset_type": ":tabular"
+    }
+  */
   map<string, string> informations = 2;
 }

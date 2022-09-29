@@ -12,7 +12,7 @@ namespace BlazorBoilerplate.Shared.Interfaces
     public interface IFileUploader
     {
         Task UploadDataset();
-        FileUploadRequestDto UploadFile { get; set; }
+        UploadDatasetRequestDto UploadFile { get; set; }
         IBrowserFile UploadFileContent { get; set; }
         bool IsUploading { get; set; }
         Action OnUploadChangedCallback { get; set; }

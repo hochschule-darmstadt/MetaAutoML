@@ -1,9 +1,9 @@
 ﻿
-@using System 
-@using System.IO
-@using Microsoft.AspNetCore.Hosting
-@using Microsoft.Extensions.Logging
-@using System.Net.Http.Headers
+@    using System 
+@    using System.IO
+@    using Microsoft.AspNetCore.Hosting
+@    using Microsoft.Extensions.Logging
+@    using System.Net.Http.Headers
 @inject IApiClient apiClient
 @inject IViewNotifier viewNotifier
 @inject IJSRuntime JS
@@ -73,7 +73,7 @@
     }
     private GetModelResponseDto _model;
     private bool _downloadReady = true;
-    private TestAutoMLResponseDto _predictionResult;
+    private ModelPredictResponseDto _predictionResult;
 
     private async Task UploadFiles(InputFileChangeEventArgs e)
     {
@@ -86,10 +86,10 @@
             var content = ms.ToArray();
 
 
-            ApiResponseDto apiResponse = await apiClient.TestAutoML(new TestAutoMLRequestDto { TestData = content, ModelId = Model.Model.ID});
+            ApiResponseDto apiResponse = await apiClient.TestAutoML(new ModelPredictRequestDto { TestData = content, ModelId = Model.Model.ID});
             if (apiResponse.IsSuccessStatusCode)
             {
-                _predictionResult = Newtonsoft.Json.JsonConvert.DeserializeObject<TestAutoMLResponseDto>(apiResponse.Result.ToString());
+                _predictionResult = Newtonsoft.Json.JsonConvert.DeserializeObject<ModelPredictResponseDto>(apiResponse.Result.ToString());
                 _downloadReady = false;
                 StateHasChanged();
             }

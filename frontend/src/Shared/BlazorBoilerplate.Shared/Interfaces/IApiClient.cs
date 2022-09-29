@@ -1,5 +1,4 @@
 ﻿using BlazorBoilerplate.Shared.Dto;
-using BlazorBoilerplate.Shared.Dto.AutoML;
 using BlazorBoilerplate.Shared.Dto.Dataset;
 using BlazorBoilerplate.Shared.Dto.Db;
 using BlazorBoilerplate.Shared.Dto.Email;
@@ -35,42 +34,39 @@ namespace BlazorBoilerplate.Shared.Interfaces
         #endregion
 
         #region OMA-ML DATASET MESSAGES
-        Task<ApiResponseDto> UploadDatasetFile(MultipartFormDataContent file);
-        Task<ApiResponseDto> UploadDataset(FileUploadRequestDto file);
+        Task<ApiResponseDto> UploadDataset(UploadDatasetRequestDto request);
         Task<ApiResponseDto> GetDatasets();
-        Task<ApiResponseDto> GetDataset(GetDatasetRequestDto name);
-        Task<ApiResponseDto> GetDatasetPreview(GetDatasetPreviewRequestDto dataset);
-        Task<ApiResponseDto> GetTabularDatasetColumn(GetTabularDatasetColumnRequestDto dataset);
-        Task<ApiResponseDto> SetDatasetConfiguration(SetDatasetFileConfigurationRequestDto dataset);
-        Task<ApiResponseDto> GetDatasetAnalysis(GetDatasetAnalysisRequestDto dataset);
+        Task<ApiResponseDto> GetDataset(GetDatasetRequestDto request);
+        Task<ApiResponseDto> GetDatasetPreview(GetDatasetPreviewRequestDto request);
+        Task<ApiResponseDto> GetTabularDatasetColumn(GetTabularDatasetColumnRequestDto request);
+        Task<ApiResponseDto> SetDatasetFileConfiguration(SetDatasetFileConfigurationRequestDto request);
+        Task<ApiResponseDto> GetDatasetAnalysis(GetDatasetAnalysisRequestDto request);
         Task<ApiResponseDto> DeleteDataset(DeleteDatasetRequestDto request);
         #endregion
 
         #region OMA-ML TRAINING MESSAGES
-
-        Task<ApiResponseDto> GetTrainings(GetTrainingIdsRequestDto training);
-        Task<ApiResponseDto> GetTraining(GetTrainingRequestDto training);
-        Task<ApiResponseDto> GetAllTrainings(GetAllTrainingsRequestDto training);
-        Task<ApiResponseDto> StartAutoML(StartAutoMLRequestDto automl);
+        Task<ApiResponseDto> CreateTraining(CreateTrainingRequestDto request);
+        Task<ApiResponseDto> GetTrainings();
+        Task<ApiResponseDto> GetTraining(GetTrainingRequestDto request);
         Task<ApiResponseDto> DeleteTraining(DeleteModelRequestDto request);
         #endregion
 
         #region OMA-ML MODEL MESSAGES
 
-        Task<ApiResponseDto> GetModels(GetModelsRequestDto models);
-        Task<ApiResponseDto> GetModel(GetModelRequestDto model);
-        Task<ApiResponseDto> GetModelExplanation(GetModelExplanationRequestDto model);
-        Task<ApiResponseDto> GetModelDownload(GetAutoMlModelRequestDto automl);
-        Task<ApiResponseDto> TestAutoML(TestAutoMLRequestDto datasetName);
+        Task<ApiResponseDto> GetModels(GetModelsRequestDto request);
+        Task<ApiResponseDto> GetModel(GetModelRequestDto request);
+        Task<ApiResponseDto> GetModelExplanation(GetModelExplanationRequestDto request);
+        Task<ApiResponseDto> ModelPrediction(ModelPredictRequestDto request);
+        Task<ApiResponseDto> DownloadModel(DownloadModelRequestDto request);
         Task<ApiResponseDto> DeleteModel(DeleteTrainingRequestDto request);
 
         #endregion
 
         #region OMA-ML ONTOLOGY MESSAGES
+        Task<ApiResponseDto> GetAutoMlSolutionsForConfiguration(GetAutoMlSolutionsForConfigurationRequestDto request);
+        Task<ApiResponseDto> GetTasksForDatasetType(GetTasksForDatasetTypeRequestDto request);
         Task<ApiResponseDto> GetDatasetTypes();
-        Task<ApiResponseDto> GetCompatibleAutoMlSolutions(GetCompatibleAutoMlSolutionsRequestDto request);
-        Task<ApiResponseDto> GetSupportedMlLibraries(GetSupportedMlLibrariesRequestDto task);
-        Task<ApiResponseDto> GetDatasetCompatibleTasks(GetDatasetCompatibleTasksRequestDto dataset);
+        Task<ApiResponseDto> GetMlLibrariesForTask(GetMlLibrariesForTaskRequestDto request);
         Task<ApiResponseDto> GetAvailableStrategies(GetAvailableStrategiesRequestDto request);
         #endregion
 

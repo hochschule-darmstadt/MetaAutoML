@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace BlazorBoilerplate.Shared.Dto.Ontology
 {
-    public class GetCompatibleAutoMlSolutionsRequestDto
+    public class GetTasksForDatasetTypeRequestDto
     {
-        public Dictionary<string, string> Configuration { get; set; }
+        public string DatasetType { get; set; }
     }
 }

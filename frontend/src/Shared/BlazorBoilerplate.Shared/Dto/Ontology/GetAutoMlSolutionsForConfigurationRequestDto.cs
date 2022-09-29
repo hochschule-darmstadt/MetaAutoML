@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace BlazorBoilerplate.Shared.Dto.Ontology
 {
-    public class GetSupportedMlLibrariesRequestDto
+    public class GetAutoMlSolutionsForConfigurationRequestDto
     {
-        public string Task { get; set; }
+        public Dictionary<string, string> Configuration { get; set; }
     }
 }

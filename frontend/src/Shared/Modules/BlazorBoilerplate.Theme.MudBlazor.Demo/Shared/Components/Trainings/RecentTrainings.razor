@@ -132,7 +132,7 @@
                 {
                     if (_trainings.Trainings[i].Status == "busy")
                     {
-                        ApiResponseDto apiResponse = await apiClient.GetTraining(new GetTrainingRequestDto { TrainingId = _trainings.Trainings[i].ID });
+                        ApiResponseDto apiResponse = await apiClient.GetTraining(new GetTrainingRequestDto { TrainingIdentifier = _trainings.Trainings[i].ID });
 
                         if (apiResponse.IsSuccessStatusCode)
                         {

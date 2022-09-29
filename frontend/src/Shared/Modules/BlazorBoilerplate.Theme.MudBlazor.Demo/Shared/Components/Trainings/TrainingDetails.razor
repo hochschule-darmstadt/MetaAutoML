@@ -127,7 +127,7 @@
                     DisposeTimer();
                 }
                 
-                ApiResponseDto apiResponse = await apiClient.GetTraining(new GetTrainingRequestDto { TrainingId = Training.ID });
+                ApiResponseDto apiResponse = await apiClient.GetTraining(new GetTrainingRequestDto { TrainingIdentifier = Training.ID });
 
                 if (apiResponse.IsSuccessStatusCode)
                 {

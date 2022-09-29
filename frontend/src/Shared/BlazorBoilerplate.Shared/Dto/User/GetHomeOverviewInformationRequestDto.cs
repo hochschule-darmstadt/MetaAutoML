@@ -4,10 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BlazorBoilerplate.Shared.Dto.AutoML
+namespace BlazorBoilerplate.Shared.Dto.User
 {
-    public class StartAutoMLResponseDto
+    public class GetHomeOverviewInformationRequestDto
     {
-        public string TrainingId { get; set; }
     }
 }

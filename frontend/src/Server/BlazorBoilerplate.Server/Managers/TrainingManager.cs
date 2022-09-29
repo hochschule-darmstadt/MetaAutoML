@@ -1,16 +1,8 @@
 ﻿using BlazorBoilerplate.Infrastructure.Server;
 using BlazorBoilerplate.Infrastructure.Server.Models;
-using BlazorBoilerplate.Shared.Dto.Dataset;
+using BlazorBoilerplate.Shared.Dto.Model;
 using BlazorBoilerplate.Shared.Dto.Training;
-using BlazorBoilerplate.Storage;
-using Google.Protobuf.Collections;
-using Google.Protobuf.WellKnownTypes;
-using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using static Microsoft.AspNetCore.Http.StatusCodes;
 
 namespace BlazorBoilerplate.Server.Managers
@@ -20,143 +12,45 @@ namespace BlazorBoilerplate.Server.Managers
     /// </summary>
     public class TrainingManager : ITrainingManager
     {
-        private readonly ApplicationDbContext _dbContext;
         private readonly ControllerService.ControllerServiceClient _client;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ICacheManager _cacheManager;
-        public TrainingManager(ApplicationDbContext dbContext, ControllerService.ControllerServiceClient client, IHttpContextAccessor httpContextAccessor, ICacheManager cacheManager)
+        public TrainingManager(ControllerService.ControllerServiceClient client, IHttpContextAccessor httpContextAccessor, ICacheManager cacheManager)
         {
-            _dbContext = dbContext;
             _client = client;
             _httpContextAccessor = httpContextAccessor;
             _cacheManager = cacheManager;
         }
         /// <summary>
-        /// Delete a training
+        /// Start the OMAML process to search for a model
         /// </summary>
+        /// <param name="autoMl"></param>
         /// <returns></returns>
-        public async Task<ApiResponse> DeleteTraining(DeleteTrainingRequestDto request)
+        public async Task<ApiResponse> CreateTraining(CreateTrainingRequestDto request)
         {
-            DeleteTrainingResponseDto response = new DeleteTrainingResponseDto();
-            DeleteTrainingRequest deleteTrainingsRequest = new DeleteTrainingRequest();
+            CreateTrainingRequest createTrainingRequest = new CreateTrainingRequest();
             var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
             try
             {
-                deleteTrainingsRequest.Identifier = request.Identifier;
-                deleteTrainingsRequest.Username = username;
-                var reply = _client.DeleteTraining(deleteTrainingsRequest);
-                response.Result = (int)reply.Status;
-                return new ApiResponse(Status200OK, null, response);
+                createTrainingRequest.UserIdentifier = username;
+                createTrainingRequest.DatasetIdentifier = request.DatasetIdentifier;
+                createTrainingRequest.Task = request.Task;
+                createTrainingRequest.Configuration = JsonConvert.SerializeObject(request.Configuration);
 
-            }
-            catch (Exception ex)
-            {
-
-                Console.WriteLine(ex.Message);
-                return new ApiResponse(Status404NotFound, ex.Message);
-            }
-        }
-        /// <summary>
-        /// Get informations about a specific session
-        /// </summary>
-        /// <param name="session"></param>
-        /// <returns></returns>
-        public async Task<ApiResponse> GetTraining(GetTrainingRequestDto training)
-        {
-            GetTrainingRequest request = new GetTrainingRequest();
-            GetTrainingResponseDto response = new GetTrainingResponseDto();
-            var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
-            try
-            {
-                request.Username = username;    
-                request.Id = training.TrainingId;
-                var reply = _client.GetTraining(request);
-                foreach (var automl in reply.Automls)
+                foreach (var i in request.SelectedAutoMLs)
                 {
-                    var status = new Shared.Dto.AutoML.AutoMLStatusDto
-                    {
-                        ID = automl.Identifier,
-                        Messages = automl.Messages.ToList(),
-                        Status = automl.Status,
-                        Name = (await _cacheManager.GetObjectInformation(automl.Name)).Properties["skos:prefLabel"],
-                        TestScore = (double)automl.TestScore,
-                        ValidationScore = (double)automl.ValidationScore,
-                        Predictiontime = (double)automl.Predictiontime,
-                        Runtime = (int)automl.Runtime
-                    };
-                    if (!string.IsNullOrEmpty(automl.Model))
-                    {
-                        status.Model = (await _cacheManager.GetObjectInformation(automl.Model)).Properties["skos:prefLabel"];
-                        status.Library = (await _cacheManager.GetObjectInformation(automl.Library)).Properties["skos:prefLabel"];
-                    }
-                    else
-                    {
-                        status.Model = "";
-                        status.Library = "";
-                    }
-                    response.AutoMls.Add(status);
+                    createTrainingRequest.SelectedAutoMls.Add(i);
                 }
-                response.Status = reply.Status;
-                response.DatasetId = reply.DatasetId;
-                response.DatasetName = reply.DatasetName;
-                response.Task = await _cacheManager.GetObjectInformation(reply.Task);
-                response.ID = reply.Identifier;
-                response.StartTime = reply.StartTime.ToDateTime();
-
-                response.Configuration = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(reply.Configuration);
-                response.DatasetConfiguration = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(reply.DatasetConfiguration);
-                response.RuntimeConstraints = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(reply.RuntimeConstraints);
-
-                foreach (var trainingEvent in reply.Events)
+                createTrainingRequest.RuntimeConstraints = JsonConvert.SerializeObject(request.RuntimeConstraints);
+                createTrainingRequest.DatasetConfiguration = JsonConvert.SerializeObject(request.DatasetConfiguration);
+                createTrainingRequest.TestConfiguration = JsonConvert.SerializeObject(request.TestConfiguration);
+                createTrainingRequest.Metric = request.Metric;
+                foreach (var i in request.SelectedMlLibraries)
                 {
-                    var strategyControllerEvent = new Shared.Dto.AutoML.StrategyControllerEventDto
-                    {
-                        Type = trainingEvent.Type,
-                        Meta = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(trainingEvent.Meta),
-                        Timestamp = trainingEvent.Timestamp.ToDateTime()
-                    };
-                    response.Events.Add(strategyControllerEvent);
+                    createTrainingRequest.SelectedLibraries.Add(i);
                 }
-
-                //response.Configuration.Features = new Dictionary<string, BlazorBoilerplate.Server.DataType>();
-
-
-                foreach (var mllibrarie in reply.RequiredMlLibraries)
-                {
-                    response.RequiredMlLibraries.Add(await _cacheManager.GetObjectInformation(mllibrarie));
-                }
-
-                foreach(var automl in reply.RequiredAutoMls)
-                {
-                    response.RequiredAutoMLs.Add(await _cacheManager.GetObjectInformation(automl));
-                }
-
-
-                return new ApiResponse(Status200OK, null, response);
-
-            }
-            catch (Exception ex)
-            {
-
-                return new ApiResponse(Status404NotFound, ex.Message);
-            }
-        }
-        /// <summary>
-        /// retrieve all training ids
-        /// </summary>
-        /// <param name="dataset"></param>
-        /// <returns></returns>
-        public async Task<ApiResponse> GetTrainingIds(GetTrainingIdsRequestDto training)
-        {
-            GetTrainingsRequest request = new GetTrainingsRequest();
-            GetTrainingIdsResponseDto response = new GetTrainingIdsResponseDto();
-            var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
-            try
-            {
-                request.Username = username;
-                var reply = _client.GetTrainings(request);
-                response.TrainingIds = reply.TrainingIds.ToList();
-                return new ApiResponse(Status200OK, null, response);
+                var reply = _client.CreateTraining(createTrainingRequest);
+                return new ApiResponse(Status200OK, null, new CreateTrainingResponseDto(reply.TrainingIdentifier));
 
             }
             catch (Exception ex)
@@ -170,69 +64,26 @@ namespace BlazorBoilerplate.Server.Managers
         /// </summary>
         /// <param name="dataset"></param>
         /// <returns></returns>
-        public async Task<ApiResponse> GetAllTrainings(GetAllTrainingsRequestDto training)
+        public async Task<ApiResponse> GetTrainings()
         {
-            GetAllTrainingsRequest request = new GetAllTrainingsRequest();
-            GetAllTrainingsResponseDto response = new GetAllTrainingsResponseDto();
+            GetTrainingsRequest getTrainings = new GetTrainingsRequest();
+            GetTrainingsResponseDto response = new GetTrainingsResponseDto();
             var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
             try
             {
-                request.Username = username;
-                var reply = _client.GetAllTrainings(request);
-                foreach (var train in reply.Trainings)
+                getTrainings.UserIdentifier = username;
+                var reply = _client.GetTrainings(getTrainings);
+                foreach (var training in reply.Trainings)
                 {
-                    GetTrainingResponseDto item = new GetTrainingResponseDto();
-                    foreach (var automl in train.Automls)
+                    TrainingDto trainingDto = new TrainingDto(training, await _cacheManager.GetObjectInformation(training.Task));
+                    foreach (var model in training.Models)
                     {
-                        item.AutoMls.Add(new Shared.Dto.AutoML.AutoMLStatusDto
-                        {
-                            ID = automl.Identifier,
-                            Messages = automl.Messages.ToList(),
-                            Status = automl.Status,
-                            Name = (await _cacheManager.GetObjectInformation(automl.Name)).Properties["skos:prefLabel"],
-                            Library = automl.Library,
-                            Model = automl.Model,
-                            TestScore = (double)automl.TestScore,
-                            ValidationScore = (double)automl.ValidationScore,
-                            Predictiontime = (double)automl.Predictiontime,
-                            Runtime = (int)automl.Runtime
-                        }); ;
+                        ModelDto modelDto = new ModelDto(model, await _cacheManager.GetObjectInformation(model.MlModelType), await _cacheManager.GetObjectInformation(model.MlLibrary), await _cacheManager.GetObjectInformation(model.Automl));
+                        trainingDto.models.Add(modelDto);
                     }
-                    item.ID = train.Identifier;
-                    item.StartTime = train.StartTime.ToDateTime();
-                    item.Status = train.Status;
-                    item.DatasetId = train.DatasetId;
-                    item.DatasetName = train.DatasetName;
-                    item.Task = await _cacheManager.GetObjectInformation(train.Task);
-
-                    item.Configuration = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(train.Configuration);
-                    item.DatasetConfiguration = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(train.DatasetConfiguration);
-                    item.RuntimeConstraints = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(train.RuntimeConstraints);
-
-                    foreach (var trainingEvent in train.Events)
-                    {
-                        var strategyControllerEvent = new Shared.Dto.AutoML.StrategyControllerEventDto
-                        {
-                            Type = trainingEvent.Type,
-                            Meta = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(trainingEvent.Meta),
-                            Timestamp = trainingEvent.Timestamp.ToDateTime()
-                        };
-                        item.Events.Add(strategyControllerEvent);
-                    }
-
-                    //response.Configuration.Features = new Dictionary<string, BlazorBoilerplate.Server.DataType>();
-
-
-                    foreach (var mllibrarie in train.RequiredMlLibraries)
-                    {
-                        item.RequiredMlLibraries.Add(await _cacheManager.GetObjectInformation(mllibrarie));
-                    }
-
-                    foreach (var automl in train.RequiredAutoMls)
-                    {
-                        item.RequiredAutoMLs.Add(await _cacheManager.GetObjectInformation(automl));
-                    }
-                    response.Trainings.Add(item);
+                    trainingDto.SelectedMlLibraries = await _cacheManager.GetObjectInformationList(training.SelectedMlLibraries.ToList());
+                    trainingDto.SelectedAutoMls = await _cacheManager.GetObjectInformationList(training.SelectedAutoMls.ToList());
+                    response.Trainings.Add(trainingDto);
                 }
                 return new ApiResponse(Status200OK, null, response);
 
@@ -240,6 +91,63 @@ namespace BlazorBoilerplate.Server.Managers
             catch (Exception ex)
             {
 
+                return new ApiResponse(Status404NotFound, ex.Message);
+            }
+        }
+        /// <summary>
+        /// Get informations about a specific session
+        /// </summary>
+        /// <param name="session"></param>
+        /// <returns></returns>
+        public async Task<ApiResponse> GetTraining(GetTrainingRequestDto request)
+        {
+            GetTrainingRequest getTrainingRequest = new GetTrainingRequest();
+            GetTrainingResponseDto response;
+            var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
+            try
+            {
+                getTrainingRequest.UserIdentifier = username;
+                getTrainingRequest.TrainingIdentifier = request.TrainingIdentifier;
+                GetTrainingResponse reply = _client.GetTraining(getTrainingRequest);
+                response = new GetTrainingResponseDto(new TrainingDto(reply.Training, await _cacheManager.GetObjectInformation(reply.Training.Task)));
+                foreach (var model in reply.Training.Models)
+                {
+                    ModelDto modelDto = new ModelDto(model, await _cacheManager.GetObjectInformation(model.MlModelType), await _cacheManager.GetObjectInformation(model.MlLibrary), await _cacheManager.GetObjectInformation(model.Automl));
+                    response.Training.models.Add(modelDto);
+                }
+                response.Training.SelectedMlLibraries = await _cacheManager.GetObjectInformationList(reply.Training.SelectedMlLibraries.ToList());
+                response.Training.SelectedAutoMls = await _cacheManager.GetObjectInformationList(reply.Training.SelectedAutoMls.ToList());
+
+
+                return new ApiResponse(Status200OK, null, response);
+
+            }
+            catch (Exception ex)
+            {
+
+                return new ApiResponse(Status404NotFound, ex.Message);
+            }
+        }
+        /// <summary>
+        /// Delete a training
+        /// </summary>
+        /// <returns></returns>
+        public async Task<ApiResponse> DeleteTraining(DeleteTrainingRequestDto request)
+        {
+            DeleteTrainingRequest deleteTrainingsRequest = new DeleteTrainingRequest();
+            var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
+            try
+            {
+                deleteTrainingsRequest.TrainingIdentifier = request.TrainingIdentifier;
+                deleteTrainingsRequest.UserIdentifier = username;
+                var reply = _client.DeleteTraining(deleteTrainingsRequest);
+                return new ApiResponse(Status200OK, null, "");
+
+            }
+            catch (Exception ex)
+            {
+
+                Console.WriteLine(ex.Message);
                 return new ApiResponse(Status404NotFound, ex.Message);
             }
         }

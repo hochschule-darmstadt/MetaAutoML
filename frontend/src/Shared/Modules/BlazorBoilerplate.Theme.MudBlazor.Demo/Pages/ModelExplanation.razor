@@ -72,11 +72,11 @@
             //Get Model infos
             if (Id == null)
             {
-                apiResponse = await apiClient.GetModel(new GetModelRequestDto() { ModelId = ListId });
+                apiResponse = await apiClient.GetModel(new GetModelRequestDto() { ModelIdentifier = ListId });
             }
             else
             {
-                apiResponse = await apiClient.GetModel(new GetModelRequestDto() { ModelId = Id });
+                apiResponse = await apiClient.GetModel(new GetModelRequestDto() { ModelIdentifier = Id });
             }
 
             if (apiResponse.IsSuccessStatusCode)
@@ -84,7 +84,7 @@
                 _model = Newtonsoft.Json.JsonConvert.DeserializeObject<GetModelResponseDto>(apiResponse.Result.ToString());
 
                 //Get Training infos
-                apiResponse = await apiClient.GetTraining(new GetTrainingRequestDto() { TrainingId = _model.Model.TrainingId });
+                apiResponse = await apiClient.GetTraining(new GetTrainingRequestDto() { TrainingIdentifier = _model.Model.TrainingId });
 
                 if (apiResponse.IsSuccessStatusCode)
                 {

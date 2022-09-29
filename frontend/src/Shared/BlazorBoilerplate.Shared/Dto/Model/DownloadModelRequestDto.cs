@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace BlazorBoilerplate.Shared.Dto.Model
 {
-    public class GetModelRequestDto
+    public class DownloadModelRequestDto
     {
         public string ModelIdentifier { get; set; }
     }

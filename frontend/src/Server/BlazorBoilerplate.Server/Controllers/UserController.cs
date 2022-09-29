@@ -1,7 +1,7 @@
 ﻿using BlazorBoilerplate.Infrastructure.Server;
 using BlazorBoilerplate.Infrastructure.Server.Models;
 using BlazorBoilerplate.Server.Aop;
-using BlazorBoilerplate.Shared.Dto.General;
+using BlazorBoilerplate.Shared.Dto.User;
 using BlazorBoilerplate.Shared.Localizer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -14,14 +14,14 @@ namespace BlazorBoilerplate.Server.Controllers
     [Route("api/[controller]/[action]")]
     [Authorize]
     [ApiController]
-    public class GeneralInformationController : Controller
+    public class UserController : Controller
     {
         private readonly IStringLocalizer<Global> L;
-        private readonly IGeneralInformation _generatlInformationManager;
-        public GeneralInformationController(IStringLocalizer<Global> l, IGeneralInformation generalInformationManager)
+        private readonly IUserInformation _userManager;
+        public UserController(IStringLocalizer<Global> l, IUserInformation userManager)
         {
             L = l;
-            _generatlInformationManager = generalInformationManager;
+            _userManager = userManager;
         }
 
         [HttpGet]
@@ -30,7 +30,7 @@ namespace BlazorBoilerplate.Server.Controllers
         [ProducesResponseType(Status404NotFound)]
         public async Task<ApiResponse> GetHomeOverviewInformations()
             => ModelState.IsValid ?
-                await _generatlInformationManager.GetHomeOverviewInformations() :
+                await _userManager.GetHomeOverviewInformations() :
                 new ApiResponse(Status400BadRequest, L["InvalidData"]);
 
     }

@@ -11,9 +11,10 @@ namespace BlazorBoilerplate.Infrastructure.Server
     public interface IOntologyManager
     {
 
-        Task<ApiResponse> GetCompatibleAutoMlSolutions(GetCompatibleAutoMlSolutionsRequestDto request);
-        Task<ApiResponse> GetSupportedMlLibraries(GetSupportedMlLibrariesRequestDto task);
-        Task<ApiResponse> GetDatasetCompatibleTasks(GetDatasetCompatibleTasksRequestDto datasetName);
+        Task<ApiResponse> GetAutoMlSolutionsForConfiguration(GetAutoMlSolutionsForConfigurationRequestDto request);
+        Task<ApiResponse> GetTasksForDatasetType(GetTasksForDatasetTypeRequestDto request);
+        Task<ApiResponse> GetDatasetTypes();
+        Task<ApiResponse> GetMlLibrariesForTask(GetMlLibrariesForTaskRequestDto request);
         Task<ApiResponse> GetAvailableStrategies(GetAvailableStrategiesRequestDto request);
 
     }

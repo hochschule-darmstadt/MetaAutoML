@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace BlazorBoilerplate.Shared.Dto.Ontology
 {
-    public class GetDatasetCompatibleTasksResponseDto
+    public class GetMlLibrariesForTaskRequestDto
     {
-        public List<ObjectInfomationDto> Tasks { get; set; }
+        public string Task { get; set; }
     }
 }

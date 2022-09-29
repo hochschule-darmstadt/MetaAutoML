@@ -1,6 +1,7 @@
 ﻿using BlazorBoilerplate.Infrastructure.Server;
 using BlazorBoilerplate.Infrastructure.Server.Models;
 using BlazorBoilerplate.Server.Aop;
+using BlazorBoilerplate.Server.Managers;
 using BlazorBoilerplate.Shared.Dto.AutoML;
 using BlazorBoilerplate.Shared.Dto.Dataset;
 using BlazorBoilerplate.Shared.Dto.Model;
@@ -30,6 +31,50 @@ namespace BlazorBoilerplate.Server.Controllers
             L = l;
             _modelManager = modelManager;
         }
+        [HttpPost]
+        [ProducesResponseType(Status200OK)]
+        [ProducesResponseType(Status400BadRequest)]
+        [ProducesResponseType(Status404NotFound)]
+        public async Task<ApiResponse> GetModels(GetModelsRequestDto request)
+            => ModelState.IsValid ?
+                await _modelManager.GetModels(request) :
+                new ApiResponse(Status400BadRequest, L["InvalidData"]);
+
+        [HttpPost]
+        [ProducesResponseType(Status200OK)]
+        [ProducesResponseType(Status400BadRequest)]
+        [ProducesResponseType(Status404NotFound)]
+        public async Task<ApiResponse> GetModel(GetModelRequestDto request)
+            => ModelState.IsValid ?
+                await _modelManager.GetModel(request) :
+                new ApiResponse(Status400BadRequest, L["InvalidData"]);
+
+        [HttpPost]
+        [ProducesResponseType(Status200OK)]
+        [ProducesResponseType(Status400BadRequest)]
+        [ProducesResponseType(Status404NotFound)]
+        public async Task<ApiResponse> GetModelExplanation(GetModelExplanationRequestDto request)
+            => ModelState.IsValid ?
+                await _modelManager.GetModelExplanation(request) :
+                new ApiResponse(Status400BadRequest, L["InvalidData"]);
+
+        [HttpPost]
+        [ProducesResponseType(Status200OK)]
+        [ProducesResponseType(Status400BadRequest)]
+        [ProducesResponseType(Status404NotFound)]
+        public async Task<ApiResponse> ModelPrediction(ModelPredictionRequestDto request)
+        => ModelState.IsValid ?
+                await _modelManager.ModelPrediction(request) :
+                new ApiResponse(Status400BadRequest, L["InvalidData"]);
+
+        [HttpPost]
+        [ProducesResponseType(Status200OK)]
+        [ProducesResponseType(Status400BadRequest)]
+        [ProducesResponseType(Status404NotFound)]
+        public async Task<ApiResponse> DownloadModel(DownloadModelRequestDto request)
+            => ModelState.IsValid ?
+                await _modelManager.DownloadModel(request) :
+                new ApiResponse(Status400BadRequest, L["InvalidData"]);
 
         [HttpPost]
         [ProducesResponseType(Status200OK)]
@@ -40,40 +85,5 @@ namespace BlazorBoilerplate.Server.Controllers
                 await _modelManager.DeleteModel(request) :
                 new ApiResponse(Status400BadRequest, L["InvalidData"]);
 
-        [HttpPost]
-        [ProducesResponseType(Status200OK)]
-        [ProducesResponseType(Status400BadRequest)]
-        [ProducesResponseType(Status404NotFound)]
-        public async Task<ApiResponse> GetModels(GetModelsRequestDto models)
-            => ModelState.IsValid ?
-                await _modelManager.GetModels(models) :
-                new ApiResponse(Status400BadRequest, L["InvalidData"]);
-
-        [HttpPost]
-        [ProducesResponseType(Status200OK)]
-        [ProducesResponseType(Status400BadRequest)]
-        [ProducesResponseType(Status404NotFound)]
-        public async Task<ApiResponse> GetModel(GetModelRequestDto model)
-            => ModelState.IsValid ?
-                await _modelManager.GetModel(model) :
-                new ApiResponse(Status400BadRequest, L["InvalidData"]);
-
-        [HttpPost]
-        [ProducesResponseType(Status200OK)]
-        [ProducesResponseType(Status400BadRequest)]
-        [ProducesResponseType(Status404NotFound)]
-        public async Task<ApiResponse> GetModelExplanation(GetModelExplanationRequestDto model)
-            => ModelState.IsValid ?
-                await _modelManager.GetModelExplanation(model) :
-                new ApiResponse(Status400BadRequest, L["InvalidData"]);
-
-        [HttpPost]
-        [ProducesResponseType(Status200OK)]
-        [ProducesResponseType(Status400BadRequest)]
-        [ProducesResponseType(Status404NotFound)]
-        public async Task<ApiResponse> GetModelDownload(GetAutoMlModelRequestDto model)
-            => ModelState.IsValid ?
-                await _modelManager.GetModelDownload(model) :
-                new ApiResponse(Status400BadRequest, L["InvalidData"]);
     }
 }

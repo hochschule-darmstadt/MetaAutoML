@@ -140,12 +140,12 @@ class RdfManager(object):
 
     def get_objects_information(self, request: GetObjectsInformationRequest) -> GetObjectsInformationResponse:
         """
-        Get all object information
+        SEE PROTO #TODO
         ---
         Parameter
-        1. object id
+        1. SEE PROTO #TODO
         ---
-        Return dictonary of object informations
+        Return SEE PROTO #TODO
         """
         result = GetObjectsInformationResponse()
 
@@ -155,7 +155,7 @@ class RdfManager(object):
             q = prepareQuery(Queries.ONTOLOGY_QUERY_GET_ALL_DETAILS_BY_ID)
 
             object_id = rdflib.URIRef(ML_ONTOLOGY_NAMESPACE + id.replace(":", ""))
-            queryResult = self.__executeQuery(q, {"s": object_id})
+            queryResult = self.__execute_query(q, {"s": object_id})
             current_object.id = id
             for row in queryResult:
                 row.p = row.p.replace(ML_ONTOLOGY_NAMESPACE, ":")

@@ -1,5 +1,7 @@
-﻿using BlazorBoilerplate.Shared.Dto.AutoML;
+﻿using BlazorBoilerplate.Server;
+using BlazorBoilerplate.Shared.Dto.Model;
 using BlazorBoilerplate.Shared.Dto.Ontology;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,10 +13,10 @@ namespace BlazorBoilerplate.Shared.Dto.Training
     public class TrainingDto
     {
         public string Identifier { get; set; }
-        public List<AdapterStatusDto> Adapters { get; set; }
+        public List<ModelDto> models { get; set; }
         public string DatasetIdentifier { get; set; }
         public string DatasetName { get; set; }
-        public string Task { get; set; }
+        public ObjectInfomationDto Task { get; set; }
         public Dictionary<string, dynamic> Configuration { get; set; }
         public List<ObjectInfomationDto> SelectedMlLibraries { get; set; }
         public List<ObjectInfomationDto> SelectedAutoMls { get; set; }
@@ -26,17 +28,33 @@ namespace BlazorBoilerplate.Shared.Dto.Training
         public DateTime EndTime { get; set; }
         public List<StrategyControllerEventDto> Events { get; set; }
 
-        public TrainingDto()
+        public TrainingDto(Server.Training grpcResponse, ObjectInfomationDto task)
         {
-            Adapters = new List<AdapterStatusDto>();
-            Configuration = new Dictionary<string, dynamic>();
+            Identifier = grpcResponse.Identifier;
+            models = new List<ModelDto>();
+            DatasetIdentifier = grpcResponse.DatasetIdentifier;
+            DatasetName = grpcResponse.DatasetName;
+            Task = task;
+            Configuration = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(grpcResponse.Configuration);
             SelectedMlLibraries = new List<ObjectInfomationDto>();
             SelectedAutoMls = new List<ObjectInfomationDto>();
-            RuntimeConstraints = new Dictionary<string, dynamic>();
-            DatasetConfiguration = new Dictionary<string, dynamic>();
+            RuntimeConstraints = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(grpcResponse.RuntimeConstraints);
+            DatasetConfiguration = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(grpcResponse.DatasetConfiguration);
             TestConfiguration = new Dictionary<string, dynamic>();
+            Status = grpcResponse.Status;
+            StartTime = grpcResponse.StartTime.ToDateTime();
+            EndTime = grpcResponse.EndTime.ToDateTime();
             Events = new List<StrategyControllerEventDto>();
-
+            foreach (var trainingEvent in grpcResponse.Events)
+            {
+                var strategyControllerEvent = new StrategyControllerEventDto
+                {
+                    Type = trainingEvent.Type,
+                    Meta = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(trainingEvent.Meta),
+                    Timestamp = trainingEvent.Timestamp.ToDateTime()
+                };
+               Events.Add(strategyControllerEvent);
+            }
         }
     }
 }

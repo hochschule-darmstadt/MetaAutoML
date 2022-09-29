@@ -56,7 +56,7 @@
                             </MudItem>
                             <MudItem xs="3" sm="3" md="3">
                                 <MudText Typo="Typo.body1">@L["Metric score: {0}", String.Format("{0:0.00}", _model.Model.TestScore)]</MudText>
-                                <MudText Typo="Typo.body1">@L["Prediction time per sample: {0}", String.Format("{0:0}", _model.Model.Predictiontime)]</MudText>
+                                <MudText Typo="Typo.body1">@L["Prediction time per sample: {0}", String.Format("{0:0}", _model.Model.PredictionTime)]</MudText>
                             </MudItem>
                             <MudItem xs="3" sm="3" md="3">
                             </MudItem>
@@ -96,7 +96,7 @@
 
     private string _explanationPagePath = "";
     private string _pageTitle = "Model";
-    private GetAutoMlModelResponseDto _downloadModel;
+    private DownloadModelResponseDto _downloadModel;
     private GetModelResponseDto _model;
     private GetTrainingResponseDto _training;
     private List<BreadcrumbItem> _breadcrumbs = new List<BreadcrumbItem>();
@@ -135,11 +135,11 @@
             //Get Model infos
             if (Id == null)
             {
-                apiResponse = await apiClient.GetModel(new GetModelRequestDto() { ModelId = ListId });
+                apiResponse = await apiClient.GetModel(new GetModelRequestDto() { ModelIdentifier = ListId });
             }
             else
             {
-                apiResponse = await apiClient.GetModel(new GetModelRequestDto() { ModelId = Id });
+                apiResponse = await apiClient.GetModel(new GetModelRequestDto() { ModelIdentifier = Id });
             }
 
             if (apiResponse.IsSuccessStatusCode)
@@ -147,7 +147,7 @@
                 _model = Newtonsoft.Json.JsonConvert.DeserializeObject<GetModelResponseDto>(apiResponse.Result.ToString());
 
                 //Get Training infos
-                apiResponse = await apiClient.GetTraining(new GetTrainingRequestDto() { TrainingId = _model.Model.TrainingId });
+                apiResponse = await apiClient.GetTraining(new GetTrainingRequestDto() { TrainingIdentifier = _model.Model.TrainingId });
 
                 if (apiResponse.IsSuccessStatusCode)
                 {

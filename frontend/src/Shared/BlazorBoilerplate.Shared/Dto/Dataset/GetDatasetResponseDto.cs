@@ -1,5 +1,7 @@
 ﻿using BlazorBoilerplate.Constants;
+using BlazorBoilerplate.Server;
 using BlazorBoilerplate.Shared.Dto.Ontology;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,45 +12,10 @@ namespace BlazorBoilerplate.Shared.Dto.Dataset
 {
     public class GetDatasetResponseDto
     {
-        public string Name { get; set; }
-        public ObjectInfomationDto Type { get; set; }
-        public long Size { get; set; }
-        public DateTime Creation_date { get; set; }
-        public string Identifier { get; set; }
-        public Dictionary<string, dynamic> Analysis { get; set; }
-        public Dictionary<string, dynamic> Configuration { get; set; }
-
-        public char GetDelimiter()
+        public DatasetDto Dataset { get; set; }
+        public GetDatasetResponseDto(DatasetDto dataset)
         {
-            switch (this.Configuration["delimiter"])
-            {
-                case "comma":
-                    return ',';
-                case "semicolon":
-                    return ';';
-                case "space":
-                    return ' ';
-                case "tab":
-                    return '\t';
-                default:
-                    return ',';
-            }
-        }
-        public string GetDelimiterStr()
-        {
-            switch (this.Configuration["delimiter"])
-            {
-                case "comma":
-                    return ",";
-                case "semicolon":
-                    return ";";
-                case "space":
-                    return " ";
-                case "tab":
-                    return "\t";
-                default:
-                    return ",";
-            }
+            Dataset = dataset;
         }
     }
 }

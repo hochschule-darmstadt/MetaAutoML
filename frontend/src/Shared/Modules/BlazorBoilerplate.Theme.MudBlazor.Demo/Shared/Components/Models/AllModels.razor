@@ -27,7 +27,7 @@
                     <MudTh><MudTableSortLabel SortBy="new Func<ModelDto, object>(x=>x.Name)">@L["AutoML solution"]</MudTableSortLabel></MudTh>
                     <MudTh><MudTableSortLabel SortBy="new Func<ModelDto, object>(x=>x.TestScore)">@L["Test score"]</MudTableSortLabel></MudTh>
                     <MudTh><MudTableSortLabel SortBy="new Func<ModelDto, object>(x=>x.Runtime)">@L["Runtime"]</MudTableSortLabel></MudTh>
-                    <MudTh><MudTableSortLabel SortBy="new Func<ModelDto, object>(x=>x.Predictiontime)">@L["Prediction time"]</MudTableSortLabel></MudTh>
+                    <MudTh><MudTableSortLabel SortBy="new Func<ModelDto, object>(x=>x.PredictionTime)">@L["Prediction time"]</MudTableSortLabel></MudTh>
                 </HeaderContent>
                 <RowTemplate>
                     <MudTd >
@@ -40,7 +40,7 @@
                     </MudTd>
                     <MudTd>@context.TestScore</MudTd>
                     <MudTd>@context.Runtime</MudTd>
-                    <MudTd>@context.Predictiontime</MudTd>
+                    <MudTd>@context.PredictionTime</MudTd>
                     <MudTd><ModelMenu Dataset="@context"/></MudTd>
                 </RowTemplate>
                 <PagerContent>

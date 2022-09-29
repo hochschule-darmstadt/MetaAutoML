@@ -33,13 +33,14 @@ class DataType(betterproto.Enum):
 
 
 @dataclass(eq=False, repr=False)
-class GetDatasetTypesRequest(betterproto.Message):
-    pass
+class GetDatasetRequest(betterproto.Message):
+    user_identifier: str = betterproto.string_field(1)
+    dataset_identifier: str = betterproto.string_field(2)
 
 
 @dataclass(eq=False, repr=False)
-class GetDatasetTypesResponse(betterproto.Message):
-    dataset_types: List[str] = betterproto.string_field(1)
+class GetDatasetResponse(betterproto.Message):
+    dataset: "Dataset" = betterproto.message_field(1)
 
 
 @dataclass(eq=False, repr=False)
@@ -66,10 +67,10 @@ class DeleteDatasetResponse(betterproto.Message):
 
 @dataclass(eq=False, repr=False)
 class Dataset(betterproto.Message):
-    name: str = betterproto.string_field(1)
-    type: str = betterproto.string_field(2)
-    creation_date: datetime = betterproto.message_field(3)
-    identifier: str = betterproto.string_field(4)
+    identifier: str = betterproto.string_field(1)
+    name: str = betterproto.string_field(2)
+    type: str = betterproto.string_field(3)
+    creation_date: datetime = betterproto.message_field(4)
     size: int = betterproto.int64_field(5)
     analysis: str = betterproto.string_field(6)
     file_name: str = betterproto.string_field(7)
@@ -86,17 +87,6 @@ class SetDatasetFileConfigurationRequest(betterproto.Message):
 @dataclass(eq=False, repr=False)
 class SetDatasetFileConfigurationResponse(betterproto.Message):
     pass
-
-
-@dataclass(eq=False, repr=False)
-class GetDatasetRequest(betterproto.Message):
-    user_identifier: str = betterproto.string_field(1)
-    dataset_identifier: str = betterproto.string_field(2)
-
-
-@dataclass(eq=False, repr=False)
-class GetDatasetResponse(betterproto.Message):
-    dataset_infos: "Dataset" = betterproto.message_field(1)
 
 
 @dataclass(eq=False, repr=False)
@@ -227,7 +217,7 @@ class GetTrainingResponse(betterproto.Message):
 @dataclass(eq=False, repr=False)
 class Training(betterproto.Message):
     identifier: str = betterproto.string_field(1)
-    adapters: List["AdapterStatus"] = betterproto.message_field(2)
+    models: List["Model"] = betterproto.message_field(2)
     dataset_identifier: str = betterproto.string_field(3)
     dataset_name: str = betterproto.string_field(4)
     task: str = betterproto.string_field(5)
@@ -236,22 +226,11 @@ class Training(betterproto.Message):
     selected_auto_mls: List[str] = betterproto.string_field(8)
     runtime_constraints: str = betterproto.string_field(9)
     dataset_configuration: str = betterproto.string_field(10)
-    status: str = betterproto.string_field(11)
-    start_time: datetime = betterproto.message_field(12)
-    events: List["StrategyControllerEvent"] = betterproto.message_field(13)
-
-
-@dataclass(eq=False, repr=False)
-class AdapterStatus(betterproto.Message):
-    identifier: str = betterproto.string_field(1)
-    name: str = betterproto.string_field(2)
-    status: str = betterproto.string_field(3)
-    messages: List[str] = betterproto.string_field(4)
-    test_score: float = betterproto.float_field(5)
-    runtime: int = betterproto.int32_field(6)
-    predictiontime: float = betterproto.float_field(7)
-    library: str = betterproto.string_field(8)
-    model: str = betterproto.string_field(9)
+    test_configuration: str = betterproto.string_field(11)
+    status: str = betterproto.string_field(12)
+    start_time: datetime = betterproto.message_field(13)
+    end_time: datetime = betterproto.message_field(14)
+    events: List["StrategyControllerEvent"] = betterproto.message_field(15)
 
 
 @dataclass(eq=False, repr=False)
@@ -283,7 +262,9 @@ class CreateTrainingResponse(betterproto.Message):
 @dataclass(eq=False, repr=False)
 class GetAutoMlSolutionsForConfigurationRequest(betterproto.Message):
     task: str = betterproto.string_field(1)
-    libraries: List[str] = betterproto.string_field(2)
+    configuration: Dict[str, str] = betterproto.map_field(
+        2, betterproto.TYPE_STRING, betterproto.TYPE_STRING
+    )
 
 
 @dataclass(eq=False, repr=False)
@@ -343,11 +324,29 @@ class GetObjectsInformationResponse(betterproto.Message):
 
 
 @dataclass(eq=False, repr=False)
+class GetDatasetTypesRequest(betterproto.Message):
+    pass
+
+
+@dataclass(eq=False, repr=False)
+class GetDatasetTypesResponse(betterproto.Message):
+    dataset_types: List[str] = betterproto.string_field(1)
+
+
+@dataclass(eq=False, repr=False)
 class ObjectInformation(betterproto.Message):
     identifier: str = betterproto.string_field(1)
+    """RDF subject IRIexample: “:tabular_classification"""
+
     informations: Dict[str, str] = betterproto.map_field(
         2, betterproto.TYPE_STRING, betterproto.TYPE_STRING
     )
+    """
+    dictionary of RDF pairs for predicates and
+    objectsexample:{"skos:prefLabel": "tabular classification","skos:broader":
+    ":classification",":belongs_to":
+    ":supervised_learning",":has_dataset_type": ":tabular"}
+    """
 
 
 @dataclass(eq=False, repr=False)

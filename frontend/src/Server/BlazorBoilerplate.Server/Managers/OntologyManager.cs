@@ -2,11 +2,6 @@
 using BlazorBoilerplate.Infrastructure.Server.Models;
 using BlazorBoilerplate.Shared.Dto.Ontology;
 using BlazorBoilerplate.Storage;
-using Microsoft.AspNetCore.Http;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using static Microsoft.AspNetCore.Http.StatusCodes;
 
 namespace BlazorBoilerplate.Server.Managers
@@ -28,18 +23,32 @@ namespace BlazorBoilerplate.Server.Managers
             _cacheManager = cacheManager;
         }
 
-        public async Task<ApiResponse> GetCompatibleAutoMlSolutions(GetCompatibleAutoMlSolutionsRequestDto request)
+        public async Task<ApiResponse> GetAutoMlSolutionsForConfiguration(GetAutoMlSolutionsForConfigurationRequestDto request)
         {
             // call grpc method
-            GetCompatibleAutoMlSolutionsRequest requestGrpc = new GetCompatibleAutoMlSolutionsRequest();
-            GetCompatibleAutoMlSolutionsResponseDto response = new GetCompatibleAutoMlSolutionsResponseDto();
-            var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
+            GetAutoMlSolutionsForConfigurationRequest requestGrpc = new GetAutoMlSolutionsForConfigurationRequest();
+            GetAutoMlSolutionsForConfigurationResponseDto response;
             try
             {
-                requestGrpc.Username = username;
                 requestGrpc.Configuration.Add(request.Configuration);
-                var reply = _client.GetCompatibleAutoMlSolutions(requestGrpc);
-                response.AutoMlSolutions = await _cacheManager.GetObjectInformationList(reply.AutoMlSolutions.ToList());
+                var reply = _client.GetAutoMlSolutionsForConfiguration(requestGrpc);
+                response = new GetAutoMlSolutionsForConfigurationResponseDto(await _cacheManager.GetObjectInformationList(reply.AutoMlSolutions.ToList()));
+                return new ApiResponse(Status200OK, null, response);
+            }
+            catch (Exception ex)
+            {
+                return new ApiResponse(Status404NotFound, ex.Message);
+            }
+        }
+        public async Task<ApiResponse> GetTasksForDatasetType(GetTasksForDatasetTypeRequestDto request)
+        {
+            GetTasksForDatasetTypeRequest getTasksForDatasetTypeRequest = new GetTasksForDatasetTypeRequest();
+            GetTasksForDatasetTypeResponseDto response;
+            try
+            {
+                getTasksForDatasetTypeRequest.DatasetType = request.DatasetType;
+                var reply = _client.GetTasksForDatasetType(getTasksForDatasetTypeRequest);
+                response = new GetTasksForDatasetTypeResponseDto(await _cacheManager.GetObjectInformationList(reply.Tasks.ToList()));
                 return new ApiResponse(Status200OK, null, response);
             }
             catch (Exception ex)
@@ -48,18 +57,18 @@ namespace BlazorBoilerplate.Server.Managers
             }
         }
 
-        public async Task<ApiResponse> GetSupportedMlLibraries(GetSupportedMlLibrariesRequestDto task)
+
+        /// <summary>
+        /// Retrive all Dataset Types
+        /// </summary>
+        /// <returns></returns>
+        public async Task<ApiResponse> GetDatasetTypes()
         {
-            // call grpc method
-            GetSupportedMlLibrariesRequest requestGrpc = new GetSupportedMlLibrariesRequest();
-            GetSupportedMlLibrariesResponseDto response = new GetSupportedMlLibrariesResponseDto();
-            var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
+            GetDatasetTypesResponseDto response = new GetDatasetTypesResponseDto();
             try
             {
-                requestGrpc.Username = username;
-                requestGrpc.Task = task.Task;
-                var reply = _client.GetSupportedMlLibraries(requestGrpc);
-                response.MlLibraries = await _cacheManager.GetObjectInformationList(reply.MlLibraries.ToList());
+                var reply = _client.GetDatasetTypes(new GetDatasetTypesRequest());
+                response.DatasetTypes = await _cacheManager.GetObjectInformationList(reply.DatasetTypes.ToList());
                 return new ApiResponse(Status200OK, null, response);
             }
             catch (Exception ex)
@@ -68,18 +77,16 @@ namespace BlazorBoilerplate.Server.Managers
             }
         }
 
-        public async Task<ApiResponse> GetDatasetCompatibleTasks(GetDatasetCompatibleTasksRequestDto dataset)
+        public async Task<ApiResponse> GetMlLibrariesForTask(GetMlLibrariesForTaskRequestDto request)
         {
             // call grpc method
-            GetDatasetCompatibleTasksRequest request = new GetDatasetCompatibleTasksRequest();
-            GetDatasetCompatibleTasksResponseDto response = new GetDatasetCompatibleTasksResponseDto();
-            var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
+            GetMlLibrariesForTaskRequest requestGrpc = new GetMlLibrariesForTaskRequest();
+            GetMlLibrariesForTaskResponseDto response;
             try
             {
-                request.Username = username;
-                request.DatasetName = dataset.DatasetIdentifier;
-                var reply = _client.GetDatasetCompatibleTasks(request);
-                response.Tasks = await _cacheManager.GetObjectInformationList(reply.Tasks.ToList());
+                requestGrpc.Task = request.Task;
+                var reply = _client.GetMlLibrariesForTask(requestGrpc);
+                response = new GetMlLibrariesForTaskResponseDto(await _cacheManager.GetObjectInformationList(reply.MlLibraries.ToList()));
                 return new ApiResponse(Status200OK, null, response);
             }
             catch (Exception ex)
@@ -96,16 +103,12 @@ namespace BlazorBoilerplate.Server.Managers
             var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
             try
             {
-                requestGrpc.Username = username;
+                requestGrpc.UserIdentifier = username;
                 requestGrpc.Configuration.Add(request.Configuration);
                 var reply = _client.GetAvailableStrategies(requestGrpc);
                 response.Strategies = new List<StrategyControllerStrategyDto>();
                 foreach(var strategy in reply.Strategies.ToList()) {
-                    StrategyControllerStrategyDto strategyDto = new StrategyControllerStrategyDto(){
-                        ID = strategy.Id,
-                        Title = strategy.Title,
-                        Description = strategy.Description
-                    };
+                    StrategyControllerStrategyDto strategyDto = new StrategyControllerStrategyDto(strategy);
                     response.Strategies.Add(strategyDto);
                 }
                 return new ApiResponse(Status200OK, null, response);

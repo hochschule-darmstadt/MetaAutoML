@@ -1,6 +1,7 @@
 ﻿using BlazorBoilerplate.Infrastructure.Server;
 using BlazorBoilerplate.Infrastructure.Server.Models;
 using BlazorBoilerplate.Server.Aop;
+using BlazorBoilerplate.Server.Managers;
 using BlazorBoilerplate.Shared.Dto.Ontology;
 using BlazorBoilerplate.Shared.Localizer;
 using Microsoft.AspNetCore.Authorization;
@@ -32,27 +33,27 @@ namespace BlazorBoilerplate.Server.Controllers
         [ProducesResponseType(Status200OK)]
         [ProducesResponseType(Status400BadRequest)]
         [ProducesResponseType(Status404NotFound)]   
-        public async Task<ApiResponse> GetCompatibleAutoMlSolutions(GetCompatibleAutoMlSolutionsRequestDto request)
+        public async Task<ApiResponse> GetCompatibleAutoMlSolutions(GetAutoMlSolutionsForConfigurationRequestDto request)
             => ModelState.IsValid ?
-                await _ontologyManager.GetCompatibleAutoMlSolutions(request) :
+                await _ontologyManager.GetAutoMlSolutionsForConfiguration(request) :
                 new ApiResponse(Status400BadRequest, L["InvalidData"]);
 
         [HttpPost]
         [ProducesResponseType(Status200OK)]
         [ProducesResponseType(Status400BadRequest)]
         [ProducesResponseType(Status404NotFound)]
-        public async Task<ApiResponse> GetSupportedMlLibraries(GetSupportedMlLibrariesRequestDto task)
+        public async Task<ApiResponse> GetSupportedMlLibraries(GetMlLibrariesForTaskRequestDto task)
             => ModelState.IsValid ?
-            await _ontologyManager.GetSupportedMlLibraries(task) :
+            await _ontologyManager.GetMlLibrariesForTask(task) :
             new ApiResponse(Status400BadRequest, L["InvalidData"]);
 
         [HttpPost]
         [ProducesResponseType(Status200OK)]
         [ProducesResponseType(Status400BadRequest)]
         [ProducesResponseType(Status404NotFound)]
-        public async Task<ApiResponse> GetDatasetCompatibleTasks(GetDatasetCompatibleTasksRequestDto dataset)
+        public async Task<ApiResponse> GetDatasetCompatibleTasks(GetTasksForDatasetTypeRequestDto dataset)
             => ModelState.IsValid ?
-            await _ontologyManager.GetDatasetCompatibleTasks(dataset) :
+            await _ontologyManager.GetTasksForDatasetType(dataset) :
             new ApiResponse(Status400BadRequest, L["InvalidData"]);
 
         [HttpPost]
@@ -62,6 +63,15 @@ namespace BlazorBoilerplate.Server.Controllers
         public async Task<ApiResponse> GetAvailableStrategies(GetAvailableStrategiesRequestDto request)
             => ModelState.IsValid ?
                 await _ontologyManager.GetAvailableStrategies(request) :
+                new ApiResponse(Status400BadRequest, L["InvalidData"]);
+
+        [HttpGet]
+        [ProducesResponseType(Status200OK)]
+        [ProducesResponseType(Status400BadRequest)]
+        [ProducesResponseType(Status404NotFound)]
+        public async Task<ApiResponse> GetDatasetTypes()
+        => ModelState.IsValid ?
+                await _ontologyManager.GetDatasetTypes() :
                 new ApiResponse(Status400BadRequest, L["InvalidData"]);
     }
 }

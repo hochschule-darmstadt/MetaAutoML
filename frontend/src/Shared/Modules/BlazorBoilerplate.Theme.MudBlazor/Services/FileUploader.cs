@@ -25,7 +25,7 @@ namespace BlazorBoilerplate.Theme.Material.Services
             _notifier = notifier;
             L = L;
         }
-        public FileUploadRequestDto UploadFile { get; set; }
+        public UploadDatasetRequestDto UploadFile { get; set; }
         public IBrowserFile UploadFileContent { get; set; }
         public bool IsUploading { get; set; } = false;
         public Action OnUploadChangedCallback { get; set; }

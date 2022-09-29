@@ -111,7 +111,7 @@
         {
             GetDatasetRequestDto datasetRequest = new GetDatasetRequestDto()
                 {
-                    Identifier = Id
+                    DatasetIdentifier = Id
                 };
             ApiResponseDto apiResponse = await apiClient.GetDataset(datasetRequest);
 

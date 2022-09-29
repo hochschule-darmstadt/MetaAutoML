@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace BlazorBoilerplate.Shared.Dto.Dataset
 {
-    public class FileUploadRequestDto
+    public class UploadDatasetRequestDto
     {
         public string FileName { get; set; }
         public string DatasetName { get; set; }

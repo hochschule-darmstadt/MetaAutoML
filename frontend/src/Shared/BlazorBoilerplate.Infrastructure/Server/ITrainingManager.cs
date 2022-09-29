@@ -11,9 +11,9 @@ namespace BlazorBoilerplate.Infrastructure.Server
 {
     public interface ITrainingManager
     {
-        Task<ApiResponse> GetTraining(GetTrainingRequestDto training);
-        Task<ApiResponse> GetTrainingIds(GetTrainingIdsRequestDto training);
-        Task<ApiResponse> GetAllTrainings(GetAllTrainingsRequestDto training);
+        Task<ApiResponse> CreateTraining(CreateTrainingRequestDto request);
+        Task<ApiResponse> GetTrainings();
+        Task<ApiResponse> GetTraining(GetTrainingRequestDto request);
         Task<ApiResponse> DeleteTraining(DeleteTrainingRequestDto request);
     }
 }

@@ -1,11 +1,11 @@
 ﻿using BlazorBoilerplate.Infrastructure.Server;
 using BlazorBoilerplate.Infrastructure.Server.Models;
-using BlazorBoilerplate.Shared.Dto.General;
+using BlazorBoilerplate.Shared.Dto.User;
 using static Microsoft.AspNetCore.Http.StatusCodes;
 
 namespace BlazorBoilerplate.Server.Managers
 {
-    public class GeneralInformationManager : IGeneralInformation
+    public class GeneralInformationManager : IUserInformation
     {
         private readonly ControllerService.ControllerServiceClient _client;
         private readonly IHttpContextAccessor _httpContextAccessor;
@@ -16,17 +16,14 @@ namespace BlazorBoilerplate.Server.Managers
         }
         public async Task<ApiResponse> GetHomeOverviewInformations()
         {
-            GetHomeOverviewInformationResponseDto response = new GetHomeOverviewInformationResponseDto();
+            GetHomeOverviewInformationResponseDto response;
             GetHomeOverviewInformationRequest infoRequest = new GetHomeOverviewInformationRequest();
             var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
             try
             {
-                infoRequest.User = username;
+                infoRequest.UserIdentifier = username;
                 var reply = _client.GetHomeOverviewInformation(infoRequest);
-                response.TotalDatasetAmount = reply.DatasetAmount;
-                response.TotalModelAmount = reply.ModelAmount;
-                response.TotalTrainingAmount = reply.TrainingAmount;
-                response.RunningTrainingAmount = reply.RunningTrainingAmount;
+                response = new GetHomeOverviewInformationResponseDto(reply);
                 return new ApiResponse(Status200OK, null, response);
 
             }

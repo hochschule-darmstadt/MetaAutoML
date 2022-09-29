@@ -6,12 +6,12 @@ using System.Threading.Tasks;
 
 namespace BlazorBoilerplate.Shared.Dto.Training
 {
-    public class GetTrainingIdsResponseDto
+    public class GetTrainingsResponseDto
     {
-        public List<string> TrainingIds { get; set; }
-        public GetTrainingIdsResponseDto()
+        public List<TrainingDto> Trainings { get; set; }
+        public GetTrainingsResponseDto()
         {
-            TrainingIds = new List<string>();
+            Trainings = new List<TrainingDto>();
         }
     }
 }

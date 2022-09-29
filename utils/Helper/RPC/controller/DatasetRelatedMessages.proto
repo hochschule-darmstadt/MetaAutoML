@@ -4,11 +4,13 @@ option csharp_namespace = "BlazorBoilerplate.Server";
 import "Enumerations.proto";
 import "google/protobuf/timestamp.proto";
 
-message GetDatasetTypesRequest {
+message GetDatasetRequest {
+  string userIdentifier = 1;
+  string datasetIdentifier = 2;
 }
 
-message GetDatasetTypesResponse {
-  repeated string datasetTypes = 1;
+message GetDatasetResponse {
+  Dataset dataset = 1;
 }
 
 message GetDatasetsRequest {
@@ -30,15 +32,15 @@ message DeleteDatasetResponse {
 }
 
 message Dataset {
-    string name = 1;
-    string type = 2;
-    google.protobuf.Timestamp creation_date = 3;
-    string identifier = 4;
-    int64 size = 5;
-    string analysis = 6;
-    string fileName = 7;
-    string fileConfiguration = 8;
-  }
+  string identifier = 1;
+  string name = 2;
+  string type = 3;
+  google.protobuf.Timestamp creation_date = 4;
+  int64 size = 5;
+  string analysis = 6;
+  string fileName = 7;
+  string fileConfiguration = 8;
+}
 
 message SetDatasetFileConfigurationRequest {
   string userIdentifier = 1;
@@ -49,15 +51,6 @@ message SetDatasetFileConfigurationRequest {
 message SetDatasetFileConfigurationResponse {
 
 }
-
-message GetDatasetRequest {
-    string userIdentifier = 1;
-    string datasetIdentifier = 2;
-  }
-  
-message GetDatasetResponse {
-    Dataset datasetInfos = 1;
-  }
 
 message TableColumn {
     string name = 1;
@@ -74,9 +67,8 @@ message GetTabularDatasetColumnResponse {
     repeated TableColumn columns = 1;
   }
 
-
 message CreateDatasetRequest {
-    string userIdentifier = 1;
+    string userIdentifier = 1;  //Id associated to a specific user
     string fileName = 2;
     string datasetName = 3;
     string datasetType = 4;

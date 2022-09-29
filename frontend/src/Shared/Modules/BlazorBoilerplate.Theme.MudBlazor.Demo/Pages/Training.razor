@@ -43,7 +43,7 @@
     {
         try
         {
-            ApiResponseDto apiResponse = await apiClient.GetTraining(new GetTrainingRequestDto() { TrainingId = Id});
+            ApiResponseDto apiResponse = await apiClient.GetTraining(new GetTrainingRequestDto() { TrainingIdentifier = Id});
 
             if (apiResponse.IsSuccessStatusCode)
             {

@@ -92,7 +92,7 @@
         //Reset FileUploader after completing upload, (+1 to total to compensate to loop offset)
         if ((fileUploader.UploadFile.ChunkNumber == (fileUploader.UploadFile.TotalChunkNumber+1)) && (fileUploader.IsUploading == false))
         {
-            fileUploader.UploadFile = new FileUploadRequestDto();
+            fileUploader.UploadFile = new UploadDatasetRequestDto();
             IsSelectFileDisabled = true;
             _uploadReady = true;
         }
@@ -126,7 +126,7 @@
 
     protected override async void OnInitialized()
     {
-        fileUploader.UploadFile = new FileUploadRequestDto();
+        fileUploader.UploadFile = new UploadDatasetRequestDto();
         await LoadDatasetTypes();
         fileUploader.OnUploadChangedCallback = UpdateProgress;
         fileUploader.RefreshUploadComponentCallback = RefreshComponent;

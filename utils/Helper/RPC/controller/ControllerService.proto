@@ -10,23 +10,28 @@ import "UserRelatedMessages.proto";
 /*includes all gRPC functions available for the client frontend*/
 service ControllerService {
   /*OMA-ML USER MESSAGES*/
-  /*return the OMA-ML user identifier for a newly created frontend user*/
+  /* return the OMA-ML user identifier for a newly created frontend user */
   rpc CreateNewUser(CreateNewUserRequest) returns (CreateNewUserResponse) {}
   /*return overview information for home page*/
   rpc GetHomeOverviewInformation(GetHomeOverviewInformationRequest) returns (GetHomeOverviewInformationResponse) {}
 
 
   /*OMA-ML DATASET MESSAGES*/
-  /*create a new Dataset*/
+  /* create a new Dataset */
   rpc CreateDataset(CreateDatasetRequest) returns (CreateDatasetResponse) {}
+
   /*return a list of all Datasets*/
   rpc GetDatasets(GetDatasetsRequest) returns (GetDatasetsResponse) {}
+
   /*return a Dataset*/
   rpc GetDataset(GetDatasetRequest) returns (GetDatasetResponse) {}
+
   /*return all the column names of a tabular dataset*/
   rpc GetTabularDatasetColumn(GetTabularDatasetColumnRequest) returns (GetTabularDatasetColumnResponse) {}
+
   /*delete a Dataset and every related object*/
   rpc DeleteDataset(DeleteDatasetRequest) returns (DeleteDatasetResponse) {}
+
   /*set a dataset file configuration*/
   rpc SetDatasetFileConfiguration(SetDatasetFileConfigurationRequest) returns (SetDatasetFileConfigurationResponse) {}
 

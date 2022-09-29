@@ -4,6 +4,7 @@ option csharp_namespace = "BlazorBoilerplate.Server";
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/any.proto";
 import "Enumerations.proto";
+import "ModelRelatedMessages.proto";
 
 message DeleteTrainingRequest {
   string userIdentifier = 1;
@@ -33,7 +34,7 @@ message GetTrainingResponse {
 
 message Training {
     string identifier = 1;
-    repeated AdapterStatus adapters = 2;
+    repeated Model models = 2;
     string datasetIdentifier = 3;
     string datasetName = 4;
     string task = 5;
@@ -42,23 +43,13 @@ message Training {
     repeated string selectedAutoMls = 8;
     string runtimeConstraints = 9;
     string datasetConfiguration = 10;
-    string status = 11;
-    google.protobuf.Timestamp startTime = 12;
-    repeated StrategyControllerEvent events = 13;
+    string testConfiguration = 11;
+    string status = 12;
+    google.protobuf.Timestamp startTime = 13;
+    google.protobuf.Timestamp endTime = 14;
+    repeated StrategyControllerEvent events = 15;
   }
  
-
-message AdapterStatus {
-    string identifier = 1;
-    string name = 2;
-    string status = 3;
-    repeated string messages = 4;
-    float testScore = 5;
-    int32 runtime = 6;
-    float predictiontime = 7;
-    string library = 8;
-    string model = 9;
-  }
 
 message StrategyControllerEvent {
     string type = 1;

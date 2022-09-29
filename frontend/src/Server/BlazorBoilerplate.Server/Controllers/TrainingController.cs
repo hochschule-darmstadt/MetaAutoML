@@ -34,37 +34,36 @@ namespace BlazorBoilerplate.Server.Controllers
         [ProducesResponseType(Status200OK)]
         [ProducesResponseType(Status400BadRequest)]
         [ProducesResponseType(Status404NotFound)]
-        public async Task<ApiResponse> DeleteDataset(DeleteTrainingRequestDto training)
+        public async Task<ApiResponse> CreateTraining(CreateTrainingRequestDto request)
             => ModelState.IsValid ?
-                await _trainingManager.DeleteTraining(training) :
+                await _trainingManager.CreateTraining(request) :
                 new ApiResponse(Status400BadRequest, L["InvalidData"]);
-        [HttpPost]
+
+        [HttpGet]
         [ProducesResponseType(Status200OK)]
         [ProducesResponseType(Status400BadRequest)]
         [ProducesResponseType(Status404NotFound)]
-        public async Task<ApiResponse> GetTraining(GetTrainingRequestDto training)
+        public async Task<ApiResponse> GetTrainings()
             => ModelState.IsValid ?
-                await _trainingManager.GetTraining(training) :
+                await _trainingManager.GetTrainings() :
                 new ApiResponse(Status400BadRequest, L["InvalidData"]);
 
         [HttpPost]
         [ProducesResponseType(Status200OK)]
         [ProducesResponseType(Status400BadRequest)]
         [ProducesResponseType(Status404NotFound)]
-        public async Task<ApiResponse> GetTrainingIds(GetTrainingIdsRequestDto training)
+        public async Task<ApiResponse> GetTraining(GetTrainingRequestDto request)
             => ModelState.IsValid ?
-                await _trainingManager.GetTrainingIds(training) :
+                await _trainingManager.GetTraining(request) :
                 new ApiResponse(Status400BadRequest, L["InvalidData"]);
-
         [HttpPost]
         [ProducesResponseType(Status200OK)]
         [ProducesResponseType(Status400BadRequest)]
         [ProducesResponseType(Status404NotFound)]
-        public async Task<ApiResponse> GetAllTrainings(GetAllTrainingsRequestDto training)
+        public async Task<ApiResponse> DeleteTraining(DeleteTrainingRequestDto request)
             => ModelState.IsValid ?
-                await _trainingManager.GetAllTrainings(training) :
+                await _trainingManager.DeleteTraining(request) :
                 new ApiResponse(Status400BadRequest, L["InvalidData"]);
-
 
     }
 }
