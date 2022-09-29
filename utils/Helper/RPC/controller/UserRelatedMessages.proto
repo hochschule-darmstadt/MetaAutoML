@@ -5,20 +5,6 @@ import "Enumerations.proto";
 
   
 
-message GetObjectsInformationRequest {
-  repeated string identifiers = 1;
-}
-
-message GetObjectsInformationResponse {
-  repeated ObjectInformation objectInformations = 1;
-}
-
-
-message ObjectInformation {
-  string identifier = 1;
-  map<string, string> informations = 2;
-}
-
 message GetHomeOverviewInformationRequest {
   string userIdentifier = 1;
 }

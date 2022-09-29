@@ -4,7 +4,6 @@ option csharp_namespace = "BlazorBoilerplate.Server";
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/any.proto";
 import "Enumerations.proto";
-import "Miscellaneous.proto";
 
 message DeleteTrainingRequest {
   string userIdentifier = 1;
@@ -69,7 +68,7 @@ message StrategyControllerEvent {
   }
   
 
-message StartTrainingRequest {
+message CreateTrainingRequest {
   string userIdentifier = 1;
   string datasetIdentifier = 2;
   string task = 3;
@@ -83,6 +82,6 @@ message StartTrainingRequest {
 }
 
 
-message StartTrainingResponse {
+message CreateTrainingResponse {
   string trainingIdentifier = 1;
 }

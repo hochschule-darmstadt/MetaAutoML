@@ -3,7 +3,7 @@ from pymongo import MongoClient
 from pymongo.collection import Collection
 from mongomock import MongoClient as MongoMockClient
 from bson.objectid import ObjectId
-import shutil, logging
+import logging
 
 class MongoDbClient:
     """

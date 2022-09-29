@@ -33,7 +33,7 @@ class CsvManager:
             table_column = TableColumn()
             table_column.name = col
             numpy_datatype = dataset[col].dtype.name
-            datatype, convertible_types = CsvManager.__getDatatype(numpy_datatype, dataset[col])
+            datatype, convertible_types = CsvManager.__get_datatype(numpy_datatype, dataset[col])
 
             table_column.type = datatype
             for convertible_type in convertible_types:
@@ -118,7 +118,7 @@ class CsvManager:
             table_column = TableColumn()
             table_column.name = col
             numpy_datatype = dataset[col].dtype.name
-            datatype, convertible_types = CsvManager.__getDatatype(numpy_datatype, dataset[col])
+            datatype, convertible_types = CsvManager.__get_atatype(numpy_datatype, dataset[col])
 
             table_column.type = datatype
             for convertible_type in convertible_types:

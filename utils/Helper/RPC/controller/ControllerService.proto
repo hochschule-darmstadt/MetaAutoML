@@ -4,8 +4,8 @@ option csharp_namespace = "BlazorBoilerplate.Server";
 import "DatasetRelatedMessages.proto";
 import "ModelRelatedMessages.proto";
 import "TrainingRelatedMessages.proto";
-import "WizzardMessages.proto";
-import "Miscellaneous.proto";
+import "OntologyMessages.proto";
+import "UserRelatedMessages.proto";
 
 /*includes all gRPC functions available for the client frontend*/
 service ControllerService {

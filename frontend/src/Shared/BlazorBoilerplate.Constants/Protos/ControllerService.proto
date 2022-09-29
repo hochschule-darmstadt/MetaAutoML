@@ -4,16 +4,14 @@ option csharp_namespace = "BlazorBoilerplate.Server";
 import "DatasetRelatedMessages.proto";
 import "ModelRelatedMessages.proto";
 import "TrainingRelatedMessages.proto";
-import "WizzardMessages.proto";
-import "Miscellaneous.proto";
+import "OntologyMessages.proto";
+import "UserRelatedMessages.proto";
 
 /*includes all gRPC functions available for the client frontend*/
 service ControllerService {
-  /*OMA-ML MISC MESSAGES*/
+  /*OMA-ML USER MESSAGES*/
   /*return the OMA-ML user identifier for a newly created frontend user*/
   rpc CreateNewUser(CreateNewUserRequest) returns (CreateNewUserResponse) {}
-  /*return all information fields of an object*/
-  rpc GetObjectsInformation(GetObjectsInformationRequest) returns (GetObjectsInformationResponse) {}
   /*return overview information for home page*/
   rpc GetHomeOverviewInformation(GetHomeOverviewInformationRequest) returns (GetHomeOverviewInformationResponse) {}
 
@@ -21,8 +19,6 @@ service ControllerService {
   /*OMA-ML DATASET MESSAGES*/
   /*create a new Dataset*/
   rpc CreateDataset(CreateDatasetRequest) returns (CreateDatasetResponse) {}
-  /*return dataset types*/
-  rpc GetDatasetTypes(GetDatasetTypesRequest) returns (GetDatasetTypesResponse) {}
   /*return a list of all Datasets*/
   rpc GetDatasets(GetDatasetsRequest) returns (GetDatasetsResponse) {}
   /*return a Dataset*/
@@ -36,6 +32,8 @@ service ControllerService {
 
 
   /*OMA-ML TRAINING MESSAGES*/
+  /*create a new Training*/
+  rpc CreateTraining(CreateTrainingRequest) returns (CreateTrainingResponse) {}
   /*return a list of all Trainings*/
   rpc GetTrainings(GetTrainingsRequest) returns (GetTrainingsResponse) {}
   /*return a Training*/
@@ -55,17 +53,19 @@ service ControllerService {
   rpc DeleteModel(DeleteModelRequest) returns (DeleteModelResponse) {}
 
 
-  /*OMA-ML WIZARD MESSAGES*/
+  /*OMA-ML ONTOLOGY MESSAGES*/
   /*return a list of AutoML solutions compatible with the current configuration*/
   rpc GetAutoMlSolutionsForConfiguration(GetAutoMlSolutionsForConfigurationRequest) returns (GetAutoMlSolutionsForConfigurationResponse) {}
   /*return a list of controller strategies available for the current configuration*/
   rpc GetAvailableStrategies(GetAvailableStrategiesRequest) returns (GetAvailableStrategiesResponse) {}
+  /*return dataset types*/
+  rpc GetDatasetTypes(GetDatasetTypesRequest) returns (GetDatasetTypesResponse) {}
   /*return all supported machine learning libraries for a specific task (by searching supported AutoML)*/
   rpc GetMlLibrariesForTask(GetMlLibrariesForTaskRequest) returns (GetMlLibrariesForTaskResponse) {}
+  /*return all information fields of an object*/
+  rpc GetObjectsInformation(GetObjectsInformationRequest) returns (GetObjectsInformationResponse) {}
   /*return all supported AutoML tasks*/
   rpc GetTasksForDatasetType(GetTasksForDatasetTypeRequest) returns (GetTasksForDatasetTypeResponse) {}
-  /*start a new AutoML run, using the provided configuration*/
-  rpc StartTraining(StartTrainingRequest) returns (StartTrainingResponse) {}
 }
 
 

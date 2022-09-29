@@ -3,7 +3,6 @@ option csharp_namespace = "BlazorBoilerplate.Server";
 
 import "google/protobuf/any.proto";
 import "Enumerations.proto";
-import "Miscellaneous.proto";
 
 message GetAutoMlSolutionsForConfigurationRequest {
     string task = 1;
@@ -45,3 +44,18 @@ message Strategy {
     string title = 2;
     string description = 3;
   }
+  
+
+message GetObjectsInformationRequest {
+  repeated string identifiers = 1;
+}
+
+message GetObjectsInformationResponse {
+  repeated ObjectInformation objectInformations = 1;
+}
+
+
+message ObjectInformation {
+  string identifier = 1;
+  map<string, string> informations = 2;
+}

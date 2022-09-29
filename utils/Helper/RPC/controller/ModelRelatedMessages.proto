@@ -2,7 +2,6 @@ syntax = "proto3";
 option csharp_namespace = "BlazorBoilerplate.Server";
 
 import "Enumerations.proto";
-import "Miscellaneous.proto";
 
 
 message DeleteModelRequest {
