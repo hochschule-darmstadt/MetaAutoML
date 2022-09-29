@@ -19,9 +19,9 @@
         <CardHeaderActions>
             @if (_dataset != null)
             {
-                if (_dataset.Type.ID == ":image")
+                if (_dataset.Dataset.Type.ID == ":image")
                 {
-                    <MudButton Href="@NavManager.ToAbsoluteUri("datasets/" + @Dataset.Identifier + "/preview").AbsoluteUri"
+                    <MudButton Href="@NavManager.ToAbsoluteUri("datasets/" + @Dataset.Dataset.Identifier + "/preview").AbsoluteUri"
                         Variant="Variant.Filled" 
                         EndIcon="@Icons.Material.Filled.ReadMore" 
                         Color="Color.Secondary"
@@ -30,7 +30,7 @@
                 }
                 else
                 {
-                    <MudButton Href="@NavManager.ToAbsoluteUri("datasets/" + @Dataset.Identifier + "/preview").AbsoluteUri"
+                    <MudButton Href="@NavManager.ToAbsoluteUri("datasets/" + @Dataset.Dataset.Identifier + "/preview").AbsoluteUri"
                         Variant="Variant.Filled" 
                         EndIcon="@Icons.Material.Filled.ReadMore" 
                         Color="Color.Secondary"
@@ -50,7 +50,7 @@
             {
                 @if (_dataset != null)
                 {
-                    @switch (_dataset.Type.ID)
+                    @switch (_dataset.Dataset.Type.ID)
                     {
                         case ":time_series_longitudinal":
                         case ":time_series":
@@ -124,14 +124,14 @@
             isPreviewRequestRunning = true;
             GetDatasetPreviewRequestDto datasetRequest = new GetDatasetPreviewRequestDto()
             {
-                    DatasetIdentifier = _dataset.Identifier
+                    DatasetIdentifier = _dataset.Dataset.Identifier
             };
             ApiResponseDto apiResponse = await apiClient.GetDatasetPreview(datasetRequest);
 
             if (apiResponse.IsSuccessStatusCode)
             {
                 _datasetPreview = Newtonsoft.Json.JsonConvert.DeserializeObject<GetDatasetPreviewResponseDto>(apiResponse.Result.ToString());
-                switch (_dataset.Type.ID)
+                switch (_dataset.Dataset.Type.ID)
                 {
                     case ":time_series_longitudinal":
                     case ":time_series":
@@ -140,7 +140,7 @@
                         // convert string to stream
                         byte[] byteArray = Encoding.ASCII.GetBytes(_datasetPreview.DatasetPreview);
                         MemoryStream stream = new MemoryStream(byteArray);
-                        _datasetFrame = Frame.ReadCsv(stream, separators: Dataset.GetDelimiterStr());
+                        _datasetFrame = Frame.ReadCsv(stream, separators: Dataset.Dataset.GetDelimiterStr());
 
                         foreach (var item in _datasetFrame.ColumnKeys)
                         {

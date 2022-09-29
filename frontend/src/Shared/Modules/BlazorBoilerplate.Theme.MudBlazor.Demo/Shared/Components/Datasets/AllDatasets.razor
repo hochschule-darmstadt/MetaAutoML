@@ -25,17 +25,17 @@
         }
         else
         {
-            <MudTable Items="@Datasets.Datasets" style="width:stretch" class="mat-elevation-z5" AllowSelection="false" Dense="true" Filter="new Func<GetDatasetResponseDto,bool>(FilterFunc)">
+            <MudTable Items="@Datasets.Datasets" style="width:stretch" class="mat-elevation-z5" AllowSelection="false" Dense="true" Filter="new Func<DatasetDto,bool>(FilterFunc)">
                 <ToolBarContent>
                     <MudSpacer />
                     <MudTextField @bind-Value="searchString" Placeholder="@L["Search for name or type"]" Adornment="Adornment.Start"
                                     AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
                 </ToolBarContent>
                 <HeaderContent>
-                    <MudTh><MudTableSortLabel SortBy="new Func<GetDatasetResponseDto, object>(x=>x.Name)">@L["Name"]</MudTableSortLabel></MudTh>
-                    <MudTh><MudTableSortLabel SortBy="@(new Func<GetDatasetResponseDto, object>(x=>x.Type.Properties["skos:prefLabel"]))">@L["Type"]</MudTableSortLabel></MudTh>
-                    <MudTh><MudTableSortLabel SortBy="new Func<GetDatasetResponseDto, object>(x=>x.Size)">@L["Size"]</MudTableSortLabel></MudTh>
-                    <MudTh><MudTableSortLabel SortBy="new Func<GetDatasetResponseDto, object>(x=>x.Creation_date)">@L["Date"]</MudTableSortLabel></MudTh>
+                    <MudTh><MudTableSortLabel SortBy="new Func<DatasetDto, object>(x=>x.Name)">@L["Name"]</MudTableSortLabel></MudTh>
+                    <MudTh><MudTableSortLabel SortBy="@(new Func<DatasetDto, object>(x=>x.Type.Properties["skos:prefLabel"]))">@L["Type"]</MudTableSortLabel></MudTh>
+                    <MudTh><MudTableSortLabel SortBy="new Func<DatasetDto, object>(x=>x.Size)">@L["Size"]</MudTableSortLabel></MudTh>
+                    <MudTh><MudTableSortLabel SortBy="new Func<DatasetDto, object>(x=>x.Creation_date)">@L["Date"]</MudTableSortLabel></MudTh>
                     <MudTh></MudTh>   
                 </HeaderContent>
                 <RowTemplate>
@@ -79,7 +79,7 @@
     public EventCallback OnDeleteDatasetCompleted { get; set; }
     private string searchString = "";
     
-    private bool FilterFunc(GetDatasetResponseDto element)
+    private bool FilterFunc(DatasetDto element)
     {
         if (string.IsNullOrWhiteSpace(searchString))
             return true;

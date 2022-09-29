@@ -113,13 +113,13 @@ else
     { 
         get
         {
-            return Dataset.Configuration["use_header"];
+            return Dataset.Dataset.Configuration["use_header"];
         } 
         set
         {
             if (value != null)
             {
-                Dataset.Configuration["use_header"] = value;
+                Dataset.Dataset.Configuration["use_header"] = value;
             }
         } 
     }
@@ -128,13 +128,13 @@ else
     { 
         get
         {
-            return (int)Dataset.Configuration["start_row"];
+            return (int)Dataset.Dataset.Configuration["start_row"];
         } 
         set
         {
             if (value != null)
             {
-                Dataset.Configuration["start_row"] = value;
+                Dataset.Dataset.Configuration["start_row"] = value;
                 _rowIndex = 0;
             }
         } 
@@ -144,13 +144,13 @@ else
     { 
         get
         {
-            return Dataset.Configuration["delimiter"];
+            return Dataset.Dataset.Configuration["delimiter"];
         } 
         set
         {
             if (value != null)
             {
-                Dataset.Configuration["delimiter"] = value;
+                Dataset.Dataset.Configuration["delimiter"] = value;
                 _rowIndex = 0;
                 ReloadDataFrame();
             }
@@ -162,13 +162,13 @@ else
     { 
         get
         {
-            return Dataset.Configuration["escape_character"];
+            return Dataset.Dataset.Configuration["escape_character"];
         } 
         set
         {
             if (value != null)
             {
-                Dataset.Configuration["escape_character"] = value;
+                Dataset.Dataset.Configuration["escape_character"] = value;
             }
         } 
     }
@@ -177,13 +177,13 @@ else
     { 
         get
         {
-            return Dataset.Configuration["decimal_character"];
+            return Dataset.Dataset.Configuration["decimal_character"];
         } 
         set
         {
             if (value != null)
             {
-                Dataset.Configuration["decimal_character"] = value;
+                Dataset.Dataset.Configuration["decimal_character"] = value;
             }
         } 
     }
@@ -200,7 +200,7 @@ else
                 // convert string to stream
                 byte[] byteArray = Encoding.ASCII.GetBytes(DatasetData);
                 MemoryStream stream = new MemoryStream(byteArray);
-                _datasetFrame = Frame.ReadCsv(stream, separators: Dataset.GetDelimiterStr());
+                _datasetFrame = Frame.ReadCsv(stream, separators: Dataset.Dataset.GetDelimiterStr());
                 PrimitiveDataFrameColumn<int> indexes = new PrimitiveDataFrameColumn<int>("Index");
 
                 foreach (var item in _datasetFrame.ColumnKeys)

@@ -21,7 +21,7 @@
         <MudPaper Elevation="0">
             @if (_dataset != null)
             {
-                @switch (_dataset.Type.ID)
+                @switch (_dataset.Dataset.Type.ID)
                 {
                     case ":time_series_longitudinal":
                     case ":time_series":
@@ -78,14 +78,14 @@
             isPreviewRequestRunning = true;
             GetDatasetPreviewRequestDto datasetRequest = new GetDatasetPreviewRequestDto()
             {
-                    DatasetIdentifier = _dataset.Identifier
+                    DatasetIdentifier = _dataset.Dataset.Identifier
             };
             ApiResponseDto apiResponse = await apiClient.GetDatasetPreview(datasetRequest);
 
             if (apiResponse.IsSuccessStatusCode)
             {
                 _datasetPreview = Newtonsoft.Json.JsonConvert.DeserializeObject<GetDatasetPreviewResponseDto>(apiResponse.Result.ToString());
-                switch (_dataset.Type.ID)
+                switch (_dataset.Dataset.Type.ID)
                 {
                     case ":time_series_longitudinal":
                     case ":tabular":

@@ -78,7 +78,10 @@ namespace BlazorBoilerplate.Server.Managers
                     TrainingDto trainingDto = new TrainingDto(training, await _cacheManager.GetObjectInformation(training.Task));
                     foreach (var model in training.Models)
                     {
-                        ModelDto modelDto = new ModelDto(model, await _cacheManager.GetObjectInformation(model.MlModelType), await _cacheManager.GetObjectInformation(model.MlLibrary), await _cacheManager.GetObjectInformation(model.Automl));
+                        ModelDto modelDto = new ModelDto(model, 
+                            (model.MlModelType == "" ? new Shared.Dto.Ontology.ObjectInfomationDto() :  await _cacheManager.GetObjectInformation(model.MlModelType)),
+                            (model.MlLibrary == "" ? new Shared.Dto.Ontology.ObjectInfomationDto() : await _cacheManager.GetObjectInformation(model.MlLibrary)),
+                            (model.Automl == "" ? new Shared.Dto.Ontology.ObjectInfomationDto() : await _cacheManager.GetObjectInformation(model.Automl)));
                         trainingDto.models.Add(modelDto);
                     }
                     trainingDto.SelectedMlLibraries = await _cacheManager.GetObjectInformationList(training.SelectedMlLibraries.ToList());
@@ -112,7 +115,10 @@ namespace BlazorBoilerplate.Server.Managers
                 response = new GetTrainingResponseDto(new TrainingDto(reply.Training, await _cacheManager.GetObjectInformation(reply.Training.Task)));
                 foreach (var model in reply.Training.Models)
                 {
-                    ModelDto modelDto = new ModelDto(model, await _cacheManager.GetObjectInformation(model.MlModelType), await _cacheManager.GetObjectInformation(model.MlLibrary), await _cacheManager.GetObjectInformation(model.Automl));
+                    ModelDto modelDto = new ModelDto(model,
+                            (model.MlModelType == "" ? new Shared.Dto.Ontology.ObjectInfomationDto() : await _cacheManager.GetObjectInformation(model.MlModelType)),
+                            (model.MlLibrary == "" ? new Shared.Dto.Ontology.ObjectInfomationDto() : await _cacheManager.GetObjectInformation(model.MlLibrary)),
+                            (model.Automl == "" ? new Shared.Dto.Ontology.ObjectInfomationDto() : await _cacheManager.GetObjectInformation(model.Automl)));
                     response.Training.models.Add(modelDto);
                 }
                 response.Training.SelectedMlLibraries = await _cacheManager.GetObjectInformationList(reply.Training.SelectedMlLibraries.ToList());

@@ -9,8 +9,8 @@ from LongitudinalDataManager import LongitudinalDataManager
 
 class TrainingManager:
 
-    def __init__(self, storage_dir: str, mongo_db_url: str, storage_lock: threading.Lock) -> None:
-        self.__data_storage: DataStorage = DataStorage(storage_dir, storage_lock, mongo_db_url)
+    def __init__(self, storage_dir: str, mongo_db_url: str) -> None:
+        self.__data_storage: DataStorage = DataStorage(storage_dir, mongo_db_url)
         self.__log = logging.getLogger('TrainingManager')
         self.__log.setLevel(logging.getLevelName(os.getenv("SERVER_LOGGING_LEVEL")))
         
@@ -67,28 +67,30 @@ class TrainingManager:
         # TODO REWORK AUTOML SESSION PROCESS
         # will be called when any automl is done
         # NOTE: will run in parallel
-        def callback(training_id, model_id, model: 'dict[str, object]'):
+        async def callback(training_id, model_id, model: 'dict[str, object]'):
             # lock data storage to prevent race condition between get and update
-            self.__data_storage.lock()
-            # append new model to training
-            training = self.__data_storage.get_training(create_training_request.user_identifier, training_id)
-            found, dataset = self.__data_storage.get_dataset(create_training_request.user_identifier, training["dataset_id"])
-            model["dataset_id"] = training["dataset_id"]
-            _mdl_id = self.__data_storage.update_model(create_training_request.user_identifier, model_id, model)
-            model_list = self.__data_storage.get_models(create_training_request.user_identifier, training_id)
-            if len(training["models"]) == len(model_list)-1:
-                self.__data_storage.update_training(create_training_request.user_identifier, training_id, {
-                    "models": training["models"] + [model_id],
-                    "status": "completed",
-                    "dataset_configuration": json.loads(create_training_request.dataset_configuration),
-                    "end_time": datetime.now()
-                })
-            else:
-                self.__data_storage.update_training(create_training_request.user_identifier, training_id, {
-                    "models": training["models"] + [model_id],
-                    "dataset_configuration": json.loads(create_training_request.dataset_configuration)
-                })
-            self.__data_storage.unlock()
+            await self.__data_storage.lock()
+            try:
+                # append new model to training
+                training = self.__data_storage.get_training(create_training_request.user_identifier, training_id)
+                found, dataset = self.__data_storage.get_dataset(create_training_request.user_identifier, training["dataset_id"])
+                model["dataset_id"] = training["dataset_id"]
+                _mdl_id = self.__data_storage.update_model(create_training_request.user_identifier, model_id, model)
+                model_list = self.__data_storage.get_models(create_training_request.user_identifier, training_id)
+                if len(training["models"]) == len(model_list)-1:
+                    self.__data_storage.update_training(create_training_request.user_identifier, training_id, {
+                        "models": training["models"] + [model_id],
+                        "status": "completed",
+                        "dataset_configuration": json.loads(create_training_request.dataset_configuration),
+                        "end_time": datetime.now()
+                    })
+                else:
+                    self.__data_storage.update_training(create_training_request.user_identifier, training_id, {
+                        "models": training["models"] + [model_id],
+                        "dataset_configuration": json.loads(create_training_request.dataset_configuration)
+                    })
+            finally:
+                self.__data_storage.unlock()
 
             if model["status"] == "completed":
                 if dataset["type"] == ":tabular" or dataset["type"] == ":text" or dataset["type"] == ":time_series":
@@ -130,41 +132,42 @@ class TrainingManager:
                 training_models = self.__data_storage.get_models(get_trainings_request.user_identifier, str(training["_id"]))
                 self.__log.debug(f"get_trainings: found {training_models.count} models")
         
-                trainingItem.status = training["status"]
-
-                for model in list(training_models):
+                for model in training_models:
                     try:
-                        adapterStatus = AdapterStatus()
-                        adapterStatus.identifier = str(model["_id"])
-                        adapterStatus.name = model["automl_name"]
-                        adapterStatus.status = model["status"]
-                        adapterStatus.messages[:] =  model["status_messages"]
-                        adapterStatus.test_score =  model["test_score"]
-                        adapterStatus.validation_score =  model["validation_score"]
-                        adapterStatus.runtime =  model["runtime"]
-                        adapterStatus.predictiontime =  model["prediction_time"]
-                        adapterStatus.model =  model["model"]
-                        adapterStatus.library =  model["library"]
-                        trainingItem.adapters.append(adapterStatus)
-                        trainingItem.identifier = str(model["_id"])
-                        trainingItem.dataset_identifier = model["dataset_id"]
+                        model_details = Model()
+                        model_details.identifier = str(model["_id"])
+                        model_details.training_identifier = model["training_id"]
+                        model_details.test_score =  model["test_score"]
+                        model_details.runtime =  model["runtime"]
+                        model_details.ml_model_type =  model["model"]
+                        model_details.ml_library =  model["library"]
+                        model_details.status = model["status"]
+                        model_details.status_messages[:] =  model["status_messages"]
+                        model_details.prediction_time =  model["prediction_time"]
+                        model_details.automl = model["automl_name"]
+                        model_details.dataset_identifier = model["dataset_id"]
+                        model_details.explanation = model["explanation"]
+                        trainingItem.models.append(model_details)
                     except Exception as e:
                         self.__log.error(f"get_trainings: Error while reading parameter for model")
                         self.__log.error(f"get_trainings: exception: {e}")
                         raise grpclib.GRPCError(grpclib.Status.UNAVAILABLE, f"Error while retrieving Model")
 
+                trainingItem.identifier = str(training["_id"])
                 trainingItem.dataset_identifier = training["dataset_id"]
                 trainingItem.dataset_name = training["dataset_name"]
                 trainingItem.task = training["task"]
                 trainingItem.configuration = json.dumps(training["configuration"])
-                trainingItem.start_time = training["start_time"]
-                trainingItem.identifier = str(training["_id"])
-                for automl in training['required_automls']:
-                    trainingItem.selected_auto_mls.append(automl)
                 for lib in training['required_libraries']:
                     trainingItem.selected_ml_libraries.append(lib)
+                for automl in training['required_automls']:
+                    trainingItem.selected_auto_mls.append(automl)
                 trainingItem.runtime_constraints = json.dumps(training["runtime_constraints"])
                 trainingItem.dataset_configuration = json.dumps(training["dataset_configuration"])
+                trainingItem.test_configuration = json.dumps(training["test_configuration"])
+                trainingItem.status = training["status"]
+                trainingItem.start_time = training["start_time"]
+                trainingItem.end_time = training["end_time"]
             
                 trainingItem.events = []
                 for event in training.get('events', []):
@@ -205,18 +208,17 @@ class TrainingManager:
             self.__log.debug(f"get_training: found {training_models.count} models")
             for model in list(training_models):
                 try:
-                    adapterStatus = AdapterStatus()
-                    adapterStatus.identifier = str(model["_id"])
-                    adapterStatus.name = model["automl_name"]
-                    adapterStatus.status = model["status"]
-                    adapterStatus.messages[:] =  model["status_messages"]
-                    adapterStatus.test_score =  model["test_score"]
-                    adapterStatus.validation_score =  model["validation_score"]
-                    adapterStatus.runtime =  model["runtime"]
-                    adapterStatus.predictiontime =  model["prediction_time"]
-                    adapterStatus.model =  model["model"]
-                    adapterStatus.library =  model["library"]
-                    response.training.adapters.append(adapterStatus)
+                    model_details = Model()
+                    model_details.identifier = str(model["_id"])
+                    model_details.automl = model["automl_name"]
+                    model_details.status = model["status"]
+                    model_details.status_messages[:] =  model["status_messages"]
+                    model_details.test_score =  model["test_score"]
+                    model_details.runtime =  model["runtime"]
+                    model_details.prediction_time =  model["prediction_time"]
+                    model_details.ml_model_type =  model["model"]
+                    model_details.ml_library =  model["library"]
+                    response.training.models.append(model_details)
                 except Exception as e:
                     self.__log.error(f"get_training: Error while reading parameter for model")
                     self.__log.error(f"get_training: exception: {e}")

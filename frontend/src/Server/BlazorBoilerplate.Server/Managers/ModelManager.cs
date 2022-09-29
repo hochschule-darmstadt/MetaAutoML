@@ -149,7 +149,7 @@ namespace BlazorBoilerplate.Server.Managers
             }
             return content;
         }
-        public async Task<ApiResponse> ModelPrediction(ModelPredictRequestDto request)
+        public async Task<ApiResponse> ModelPrediction(ModelPredictionRequestDto request)
         {
             ModelPredictResponseDto response = new ModelPredictResponseDto();
             ModelPredictRequest testAutoMLrequest = new ModelPredictRequest();

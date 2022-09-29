@@ -28,6 +28,10 @@ namespace BlazorBoilerplate.Shared.Dto.Training
         public DateTime EndTime { get; set; }
         public List<StrategyControllerEventDto> Events { get; set; }
 
+        public TrainingDto()
+        {
+
+        }
         public TrainingDto(Server.Training grpcResponse, ObjectInfomationDto task)
         {
             Identifier = grpcResponse.Identifier;

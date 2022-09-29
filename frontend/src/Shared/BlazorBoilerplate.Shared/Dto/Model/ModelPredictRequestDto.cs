@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace BlazorBoilerplate.Shared.Dto.Model
 {
-    public class ModelPredictRequestDto
+    public class ModelPredictionRequestDto
     {
         public byte[] TestData { get; set; }
         public string ModelId { get; set; }

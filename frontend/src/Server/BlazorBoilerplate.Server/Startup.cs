@@ -140,7 +140,7 @@ namespace BlazorBoilerplate.Server
 
 
             ////////////////////////////////////////////////////////////////////////////////////////////////////////
-            //REDIS CACHE 
+            //OMA-ML REDIS CACHE 
             ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
             services.AddStackExchangeRedisCache(options =>
@@ -149,10 +149,9 @@ namespace BlazorBoilerplate.Server
             });
 
             ////////////////////////////////////////////////////////////////////////////////////////////////////////
-            //SERVICES
+            //OMA-ML SERVICES
             ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
-            services.AddTransient<IAutoMlManager, AutoMlManager>();
             services.AddTransient<IDatasetManager, DatasetManager>();
             services.AddTransient<IOntologyManager, OntologyManager>();
             services.AddTransient<ITrainingManager, TrainingManager>();

@@ -45,7 +45,7 @@ SERVER_CERTIFICATE_KEY = _load_credential_from_file('certificate/server.key')
 
 
 async def main():
-    with ProcessPoolExecutor(max_workers=4) as executor:
+    with ProcessPoolExecutor(max_workers=40) as executor:
         server = Server([ControllerServiceManager(executor)])
         context = SSLContext(protocol=ssl.PROTOCOL_TLSv1_2)
         context.load_cert_chain(certfile="certificate/server.crt", keyfile='certificate/server.key')

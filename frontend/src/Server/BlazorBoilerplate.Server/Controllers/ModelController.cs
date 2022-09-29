@@ -2,7 +2,6 @@
 using BlazorBoilerplate.Infrastructure.Server.Models;
 using BlazorBoilerplate.Server.Aop;
 using BlazorBoilerplate.Server.Managers;
-using BlazorBoilerplate.Shared.Dto.AutoML;
 using BlazorBoilerplate.Shared.Dto.Dataset;
 using BlazorBoilerplate.Shared.Dto.Model;
 using BlazorBoilerplate.Shared.Localizer;

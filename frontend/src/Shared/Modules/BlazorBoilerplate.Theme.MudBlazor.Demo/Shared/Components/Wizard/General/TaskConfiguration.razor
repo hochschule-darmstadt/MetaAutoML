@@ -1,7 +1,7 @@
 ﻿@inject IStringLocalizer<Global> L
 @inject IApiClient apiClient
 @inject IViewNotifier viewNotifier
-@    using Newtonsoft.Json
+@using Newtonsoft.Json
 
 <style>
 .strategy-description-tooltip {
@@ -10,7 +10,7 @@
 </style>
 
 <MudStack>
-    @switch (Dataset.Type.ID)
+    @switch (Dataset.Dataset.Type.ID)
     {
         case ":time_series_longitudinal":
         case ":text":
@@ -48,7 +48,7 @@
         <DataLoaderSpinner />
     }
 
-    @if (((StartAutoMlRequest.DatasetType == ":tabular") || (StartAutoMlRequest.DatasetType == ":text") || (StartAutoMlRequest.DatasetType == ":time_series")) || (StartAutoMlRequest.DatasetType == ":time_series_longitudinal") && (!string.IsNullOrEmpty(StartAutoMlRequest.Task)))
+    @if (((Dataset.Dataset.Type.ID == ":tabular") || (Dataset.Dataset.Type.ID == ":text") || (Dataset.Dataset.Type.ID == ":time_series")) || (Dataset.Dataset.Type.ID == ":time_series_longitudinal") && (!string.IsNullOrEmpty(StartAutoMlRequest.Task)))
 
     {
         <MudSelect Label="@L["Target"]" T="string" ValueChanged="@OnTargetChanged">
@@ -188,7 +188,7 @@
     {
         _columnNames = new List<string>();
 
-        if ((StartAutoMlRequest.DatasetType == ":tabular") || (StartAutoMlRequest.DatasetType == ":text") || (StartAutoMlRequest.DatasetType == ":time_series") ||  (StartAutoMlRequest.DatasetType == ":time_series_longitudinal"))
+        if ((Dataset.Dataset.Type.ID == ":tabular") || (Dataset.Dataset.Type.ID == ":text") || (Dataset.Dataset.Type.ID == ":time_series") || (Dataset.Dataset.Type.ID == ":time_series_longitudinal"))
         {
             foreach (KeyValuePair<string, dynamic> pair in StartAutoMlRequest.DatasetConfiguration["features"])
             {
@@ -203,9 +203,9 @@
             StartAutoMlRequest.RuntimeConstraints.Add("runtime_limit", 3);
             StartAutoMlRequest.RuntimeConstraints.Add("max_iter", 0);
         }
-        if (StartAutoMlRequest.TestConfig.Count == 0)
+        if (StartAutoMlRequest.TestConfiguration.Count == 0)
         {
-            StartAutoMlRequest.TestConfig.Add("method", 0);
+            StartAutoMlRequest.TestConfiguration.Add("method", 0);
         }
         await UpdateStartAutoMlRequest();
     }
@@ -214,7 +214,7 @@
     {
         try
         {
-            GetTasksForDatasetTypeRequestDto taskRequest = new GetTasksForDatasetTypeRequestDto { DatasetIdentifier = Dataset.Identifier };
+            GetTasksForDatasetTypeRequestDto taskRequest = new GetTasksForDatasetTypeRequestDto { DatasetType = Dataset.Dataset.Type.ID };
             ApiResponseDto apiResponse = await apiClient.GetTasksForDatasetType(taskRequest);
 
             if (apiResponse.IsSuccessStatusCode)
@@ -263,7 +263,7 @@
             //}
 
             GetMlLibrariesForTaskRequestDto supportedMlLibrariesRequest = new GetMlLibrariesForTaskRequestDto { Task = StartAutoMlRequest.Task };
-            ApiResponseDto apiResponse = await apiClient.GetSupportedMlLibraries(supportedMlLibrariesRequest);
+            ApiResponseDto apiResponse = await apiClient.GetMlLibrariesForTask(supportedMlLibrariesRequest);
 
             if (apiResponse.IsSuccessStatusCode)
             {
@@ -317,7 +317,7 @@
                 dictionary.Add("library", JsonConvert.SerializeObject(libraries));
             }
             GetAutoMlSolutionsForConfigurationRequestDto compatibleAutoMlRequest = new GetAutoMlSolutionsForConfigurationRequestDto { Configuration = dictionary };
-            ApiResponseDto apiResponse = await apiClient.GetCompatibleAutoMlSolutions(compatibleAutoMlRequest);
+            ApiResponseDto apiResponse = await apiClient.GetAutoMlSolutionsForConfiguration(compatibleAutoMlRequest);
 
             if (apiResponse.IsSuccessStatusCode)
             {
@@ -352,10 +352,10 @@
 
     private async void OnAutoMlSolutionSelectionChanged(MudChip[] automls)
     {
-        StartAutoMlRequest.RequiredAutoMLs = new List<string>();
+        StartAutoMlRequest.SelectedAutoMLs = new List<string>();
         foreach (var chip in automls)
         {
-            StartAutoMlRequest.RequiredAutoMLs.Add(chip.Value.ToString());
+            StartAutoMlRequest.SelectedAutoMLs.Add(chip.Value.ToString());
         }
         await UpdateStartAutoMlRequest();
     }

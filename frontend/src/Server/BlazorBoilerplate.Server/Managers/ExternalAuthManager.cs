@@ -118,10 +118,14 @@ namespace BlazorBoilerplate.Server.Managers
                 {
                     //requireConfirmEmail = false because the external provider has just confirmed the user email.
                     //Some provider does not provide true email for privacy
-                    CreateNewUserResponse response = _client.CreateNewUser(new CreateNewUserRequest());
-                    if (response.Result != ResultCode.Okay)
+                    CreateNewUserResponse response;
+                    try
                     {
-                        throw new Exception($"Error while creating new user, result code: {response.Result}");
+                        response = _client.CreateNewUser(new CreateNewUserRequest());
+                    }
+                    catch (Exception)
+                    {
+                        throw new Exception($"Error while creating new user");
                     }
                     var userName = userNameClaim.Value.Replace(" ", string.Empty);
 
@@ -130,7 +134,7 @@ namespace BlazorBoilerplate.Server.Managers
 
                     try
                     {
-                        user = await _accountManager.RegisterNewUserAsync(userName, userEmailClaim.Value, null, false, response.OmaMlUserId);
+                        user = await _accountManager.RegisterNewUserAsync(userName, userEmailClaim.Value, null, false, response.UserIdentifier);
                     }
                     catch (DomainException ex)
                     {

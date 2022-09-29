@@ -24,7 +24,7 @@ class MongoDbClient:
         self.__log.info("New mongo db client intialized.")
 
 
-    def __use_real_database(server_url: str) -> MongoClient:
+    def __use_real_database(self, server_url: str) -> MongoClient:
         """
         Connects to a MongoDB database at the url.
         ---

@@ -16,7 +16,7 @@
     [Parameter]
     public EventCallback OnDeleteCompleted { get; set; }
     [Parameter]
-    public GetDatasetResponseDto Dataset { get; set; }
+    public DatasetDto Dataset { get; set; }
 
     private async Task DeleteDataset()
     {
@@ -24,7 +24,7 @@
         {
             DeleteDatasetRequestDto datasetRequest = new DeleteDatasetRequestDto()
             {
-                Identifier = Dataset.Identifier
+                DatasetIdentifier = Dataset.Identifier
             };
             ApiResponseDto apiResponse = await apiClient.DeleteDataset(datasetRequest);
 

@@ -18,7 +18,8 @@ class ControllerServiceManager(ControllerServiceBase):
         self.__executor = executor
         self.__loop = asyncio.get_event_loop()
         self.__multiprocessing_manager = multiprocessing.Manager()
-        self.__data_storage_lock = self.__multiprocessing_manager.Lock()
+        #self.__data_storage_lock = self.__multiprocessing_manager.Lock()
+        self.__data_storage_lock = asyncio.Lock()
         self.__data_storage_dir = os.path.join(ROOT_PATH, get_config_property("datasets-path"))
         if os.getenv("MONGO_DB_DEBUG") == "YES":
             self.__log.info("__init__: Using localhost mongo db")
@@ -41,7 +42,7 @@ class ControllerServiceManager(ControllerServiceBase):
         self, create_new_user_request: "CreateNewUserRequest"
     ) -> "CreateNewUserResponse":
         response = await self.__loop.run_in_executor(
-            self.__executor, UserManager(self.__data_storage_dir, self.__mongo_db_url, self.__data_storage_lock).create_new_user, create_new_user_request
+            self.__executor, UserManager(self.__data_storage_dir, self.__mongo_db_url).create_new_user, create_new_user_request
         )
         self.__log.debug("create_new_user: executed")
         return response
@@ -50,7 +51,7 @@ class ControllerServiceManager(ControllerServiceBase):
         self, get_home_overview_information_request: "GetHomeOverviewInformationRequest"
     ) -> "GetHomeOverviewInformationResponse":
         response = await self.__loop.run_in_executor(
-            self.__executor, UserManager(self.__data_storage_dir, self.__mongo_db_url, self.__data_storage_lock).get_home_overview_information, get_home_overview_information_request
+            self.__executor, UserManager(self.__data_storage_dir, self.__mongo_db_url).get_home_overview_information, get_home_overview_information_request
         )
         self.__log.debug("get_home_overview_information: executed")
         return response
@@ -68,7 +69,7 @@ class ControllerServiceManager(ControllerServiceBase):
         self, create_dataset_request: "CreateDatasetRequest"
     ) -> "CreateDatasetResponse":
         response = await self.__loop.run_in_executor(
-            self.__executor, DatasetManager(self.__data_storage_dir, self.__mongo_db_url, self.__data_storage_lock).create_dataset, create_dataset_request
+            self.__executor, DatasetManager(self.__data_storage_dir, self.__mongo_db_url).create_dataset, create_dataset_request
         )
         self.__log.debug("create_dataset: executed")
         return response
@@ -77,7 +78,7 @@ class ControllerServiceManager(ControllerServiceBase):
         self, get_datasets_request: "GetDatasetsRequest"
     ) -> "GetDatasetsResponse":
         response = await self.__loop.run_in_executor(
-            self.__executor, DatasetManager(self.__data_storage_dir, self.__mongo_db_url, self.__data_storage_lock).get_datasets, get_datasets_request
+            self.__executor, DatasetManager(self.__data_storage_dir, self.__mongo_db_url).get_datasets, get_datasets_request
         )
         self.__log.debug("get_datasets: executed")
         return response
@@ -86,7 +87,7 @@ class ControllerServiceManager(ControllerServiceBase):
         self, get_dataset_request: "GetDatasetRequest"
     ) -> "GetDatasetResponse":
         response = await self.__loop.run_in_executor(
-            self.__executor, DatasetManager(self.__data_storage_dir, self.__mongo_db_url, self.__data_storage_lock).get_dataset, get_dataset_request
+            self.__executor, DatasetManager(self.__data_storage_dir, self.__mongo_db_url).get_dataset, get_dataset_request
         )
         self.__log.debug("get_dataset: executed")
         return response
@@ -95,7 +96,7 @@ class ControllerServiceManager(ControllerServiceBase):
         self, get_tabular_dataset_column_request: "GetTabularDatasetColumnRequest"
     ) -> "GetTabularDatasetColumnResponse":
         response = await self.__loop.run_in_executor(
-            self.__executor, DatasetManager(self.__data_storage_dir, self.__mongo_db_url, self.__data_storage_lock).get_tabular_dataset_column, get_tabular_dataset_column_request
+            self.__executor, DatasetManager(self.__data_storage_dir, self.__mongo_db_url).get_tabular_dataset_column, get_tabular_dataset_column_request
         )
         self.__log.debug("get_tabular_dataset_column: executed")
         return response
@@ -104,7 +105,7 @@ class ControllerServiceManager(ControllerServiceBase):
         self, delete_dataset_request: "DeleteDatasetRequest"
     ) -> "DeleteDatasetResponse":
         response = await self.__loop.run_in_executor(
-            self.__executor, DatasetManager(self.__data_storage_dir, self.__mongo_db_url, self.__data_storage_lock).delete_dataset, delete_dataset_request
+            self.__executor, DatasetManager(self.__data_storage_dir, self.__mongo_db_url).delete_dataset, delete_dataset_request
         )
         self.__log.debug("delete_dataset: executed")
         return response
@@ -114,7 +115,7 @@ class ControllerServiceManager(ControllerServiceBase):
         set_dataset_file_configuration_request: "SetDatasetFileConfigurationRequest",
     ) -> "SetDatasetFileConfigurationResponse":
         response = await self.__loop.run_in_executor(
-            self.__executor, DatasetManager(self.__data_storage_dir, self.__mongo_db_url, self.__data_storage_lock).set_dataset_file_configuration, set_dataset_file_configuration_request
+            self.__executor, DatasetManager(self.__data_storage_dir, self.__mongo_db_url).set_dataset_file_configuration, set_dataset_file_configuration_request
         )
         self.__log.debug("delete_dataset: set_dataset_file_configuration")
         return response
@@ -133,7 +134,7 @@ class ControllerServiceManager(ControllerServiceBase):
         self, create_training_request: "CreateTrainingRequest"
     ) -> "CreateTrainingResponse":
         response = await self.__loop.run_in_executor(
-            self.__executor, TrainingManager(self.__data_storage_dir, self.__mongo_db_url, self.__data_storage_lock).create_training, create_training_request
+            self.__executor, TrainingManager(self.__data_storage_dir, self.__mongo_db_url).create_training, create_training_request
         )
         self.__log.debug("create_training: executed")
         return response
@@ -142,7 +143,7 @@ class ControllerServiceManager(ControllerServiceBase):
         self, get_trainings_request: "GetTrainingsRequest"
     ) -> "GetTrainingsResponse":
         response = await self.__loop.run_in_executor(
-            self.__executor, TrainingManager(self.__data_storage_dir, self.__mongo_db_url, self.__data_storage_lock).get_trainings, get_trainings_request
+            self.__executor, TrainingManager(self.__data_storage_dir, self.__mongo_db_url).get_trainings, get_trainings_request
         )
         self.__log.debug("get_trainings: executed")
         return response
@@ -151,7 +152,7 @@ class ControllerServiceManager(ControllerServiceBase):
         self, get_training_request: "GetTrainingRequest"
     ) -> "GetTrainingResponse":
         response = await self.__loop.run_in_executor(
-            self.__executor, TrainingManager(self.__data_storage_dir, self.__mongo_db_url, self.__data_storage_lock).get_training, get_training_request
+            self.__executor, TrainingManager(self.__data_storage_dir, self.__mongo_db_url).get_training, get_training_request
         )
         self.__log.debug("get_training: executed")
         return response
@@ -160,7 +161,7 @@ class ControllerServiceManager(ControllerServiceBase):
         self, delete_training_request: "DeleteTrainingRequest"
     ) -> "DeleteTrainingResponse":
         response = await self.__loop.run_in_executor(
-            self.__executor, TrainingManager(self.__data_storage_dir, self.__mongo_db_url, self.__data_storage_lock).delete_training, delete_training_request
+            self.__executor, TrainingManager(self.__data_storage_dir, self.__mongo_db_url).delete_training, delete_training_request
         )
         self.__log.debug("delete_training: executed")
         return response
@@ -179,7 +180,7 @@ class ControllerServiceManager(ControllerServiceBase):
         self, get_models_request: "GetModelsRequest"
     ) -> "GetModelsResponse":
         response = await self.__loop.run_in_executor(
-            self.__executor, ModelManager(self.__data_storage_dir, self.__mongo_db_url, self.__data_storage_lock).get_models, get_models_request
+            self.__executor, ModelManager(self.__data_storage_dir, self.__mongo_db_url).get_models, get_models_request
         )
         self.__log.debug("get_models: executed")
         return response
@@ -188,7 +189,7 @@ class ControllerServiceManager(ControllerServiceBase):
         self, get_model_request: "GetModelRequest"
     ) -> "GetModelResponse":
         response = await self.__loop.run_in_executor(
-            self.__executor, ModelManager(self.__data_storage_dir, self.__mongo_db_url, self.__data_storage_lock).get_model, get_model_request
+            self.__executor, ModelManager(self.__data_storage_dir, self.__mongo_db_url).get_model, get_model_request
         )
         self.__log.debug("get_model: executed")
         return response
@@ -197,7 +198,7 @@ class ControllerServiceManager(ControllerServiceBase):
         self, model_predict_request: "ModelPredictRequest"
     ) -> "ModelPredictResponse":
         response = await self.__loop.run_in_executor(
-            self.__executor, ModelManager(self.__data_storage_dir, self.__mongo_db_url, self.__data_storage_lock).model_predict, model_predict
+            self.__executor, ModelManager(self.__data_storage_dir, self.__mongo_db_url).model_predict, model_predict_request
         )
         self.__log.debug("model_predict: executed")
         return response
@@ -206,7 +207,7 @@ class ControllerServiceManager(ControllerServiceBase):
         self, delete_model_request: "DeleteModelRequest"
     ) -> "DeleteModelResponse":
         response = await self.__loop.run_in_executor(
-            self.__executor, ModelManager(self.__data_storage_dir, self.__mongo_db_url, self.__data_storage_lock).delete_model, delete_model_request
+            self.__executor, ModelManager(self.__data_storage_dir, self.__mongo_db_url).delete_model, delete_model_request
         )
         self.__log.debug("delete_model: executed")
         return response
@@ -259,7 +260,7 @@ class ControllerServiceManager(ControllerServiceBase):
         self, get_dataset_types_request: "GetDatasetTypesRequest"
     ) -> "GetDatasetTypesResponse":
         response = await self.__loop.run_in_executor(
-            self.__executor, RdfManager().get_dataset_types, get_dataset_types_request
+            self.__executor, RdfManager().get_dataset_types
         )
         self.__log.debug("get_dataset_types: executed")
         return response

@@ -1,5 +1,5 @@
 ﻿@inject IStringLocalizer<Global> L
-@    using System
+@using System
 @inject IApiClient apiClient
 @inject IViewNotifier viewNotifier
 
@@ -97,7 +97,7 @@ else
     {
         try
         {
-            ApiResponseDto apiResponse = await apiClient.GetTabularDatasetColumn(new GetTabularDatasetColumnRequestDto { DatasetIdentifier = Dataset.Identifier });
+            ApiResponseDto apiResponse = await apiClient.GetTabularDatasetColumn(new GetTabularDatasetColumnRequestDto { DatasetIdentifier = Dataset.Dataset.Identifier });
 
             if (apiResponse.IsSuccessStatusCode)
             {
@@ -123,8 +123,7 @@ else
                     }
                     StartAutoMlRequest.DatasetConfiguration.Add("features", features);
                 }
-                StartAutoMlRequest.DatasetIdentifier = Dataset.Identifier;
-                StartAutoMlRequest.DatasetType = Dataset.Type.ID;
+                StartAutoMlRequest.DatasetIdentifier = Dataset.Dataset.Identifier;
                 await LoadDatasetPreview();
                 await UpdateStartAutoMlRequest();
             }
@@ -150,7 +149,7 @@ else
             isPreviewRequestRunning = true;
             GetDatasetPreviewRequestDto datasetRequest = new GetDatasetPreviewRequestDto()
             {
-                    DatasetIdentifier = Dataset.Identifier
+                    DatasetIdentifier = Dataset.Dataset.Identifier
             };
             ApiResponseDto apiResponse = await apiClient.GetDatasetPreview(datasetRequest);
 
@@ -180,7 +179,7 @@ else
                 // convert string to stream
                 byte[] byteArray = Encoding.ASCII.GetBytes(_datasetPreview.DatasetPreview);
                 MemoryStream stream = new MemoryStream(byteArray);
-                _datasetFrame = Frame.ReadCsv(stream, separators: Dataset.GetDelimiterStr());
+                _datasetFrame = Frame.ReadCsv(stream, separators: Dataset.Dataset.GetDelimiterStr());
                 foreach (var item in _datasetFrame.ColumnKeys)
                 {
                     var newcolumn = _datasetFrame.Columns[item].FillMissing(st =>

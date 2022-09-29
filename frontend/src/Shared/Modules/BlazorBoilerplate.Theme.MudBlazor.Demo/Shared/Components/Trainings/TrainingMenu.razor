@@ -2,10 +2,10 @@
 @inject NavigationManager NavManager
 
 
-@if (Status != null)
+@if (Model != null)
 {
     <MudMenu Icon="@Icons.Material.Filled.MoreVert">
-        <MudMenuItem OnClick="@(e => { NavManager.NavigateTo("trainings/" + TrainingId + "/models/" + Status.ID); })">@L["Details"]</MudMenuItem>
+        <MudMenuItem OnClick="@(e => { NavManager.NavigateTo("trainings/" + TrainingId + "/models/" + Model.Identifier); })">@L["Details"]</MudMenuItem>
         <MudMenuItem>@L["Delete"]</MudMenuItem>
     </MudMenu>
 }
@@ -14,6 +14,6 @@
     [Parameter]
     public string TrainingId { get; set; }
     [Parameter]
-    public AutoMLStatusDto Status { get; set; }
+    public ModelDto Model { get; set; }
 
 }

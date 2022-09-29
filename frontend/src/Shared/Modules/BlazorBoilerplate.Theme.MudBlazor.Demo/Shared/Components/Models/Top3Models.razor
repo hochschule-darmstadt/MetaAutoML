@@ -11,7 +11,7 @@
         <CardHeaderActions>
             @if (Dataset != null)
             {
-                <MudButton Href="@("/datasets/" + Dataset.Identifier + "/models")"
+                <MudButton Href="@("/datasets/" + Dataset.Dataset.Identifier + "/models")"
                     Variant="Variant.Filled" 
                     EndIcon="@Icons.Material.Filled.ReadMore" 
                     Color="Color.Secondary"
@@ -38,11 +38,11 @@
                         <MudTh>@L["Total training time"]</MudTh>
                     </HeaderContent>
                     <RowTemplate>
-                        <MudTd >@context.Name</MudTd>
+                        <MudTd >@context.AutoMl.Properties["skos:prefLabel"]</MudTd>
                         <MudTd>
-                            <MudLink Href="@NavManager.ToAbsoluteUri("datasets/" + Dataset.Identifier + "/models/" + @context.ID).AbsoluteUri" Style="cursor: pointer; display: flex"><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.ModelTraining" Style="margin-right: 4px;" />@context.Model</MudLink>
+                            <MudLink Href="@NavManager.ToAbsoluteUri("datasets/" + Dataset.Dataset.Identifier + "/models/" + @context.Identifier).AbsoluteUri" Style="cursor: pointer; display: flex"><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.ModelTraining" Style="margin-right: 4px;" />@context.MlModelType.Properties["skos:prefLabel"]</MudLink>
                         </MudTd>
-                        <MudTd >@context.Library</MudTd>
+                        <MudTd>@context.MlLibrary.Properties["skos:prefLabel"]</MudTd>
                         <MudTd >@String.Format("{0:0.00}", context.TestScore)</MudTd>
                         <MudTd >@String.Format("{0:0}", context.PredictionTime) ms</MudTd>
                         <MudTd >@context.Runtime s</MudTd>
@@ -77,7 +77,7 @@
     {
         try
         {
-            ApiResponseDto apiResponse = await apiClient.GetModels(new GetModelsRequestDto() { DatasetIdentifier = Dataset.Identifier, Top3Only = true });
+            ApiResponseDto apiResponse = await apiClient.GetModels(new GetModelsRequestDto() { DatasetIdentifier = Dataset.Dataset.Identifier, Top3 = true });
 
             if (apiResponse.IsSuccessStatusCode)
             {

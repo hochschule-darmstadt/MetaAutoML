@@ -24,7 +24,10 @@ namespace BlazorBoilerplate.Shared.Dto.Model
         public ObjectInfomationDto AutoMl { get; set; }
         public string DatasetIdentifier { get; set; }
         public Dictionary<string, dynamic> Explanation { get; set; }
+        public ModelDto()
+        {
 
+        }
         public ModelDto(Server.Model model, ObjectInfomationDto mlModelType, ObjectInfomationDto mlLibrary, ObjectInfomationDto autoMl)
         {
             Identifier = model.Identifier;

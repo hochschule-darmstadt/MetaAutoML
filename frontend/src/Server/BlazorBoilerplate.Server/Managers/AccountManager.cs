@@ -425,12 +425,16 @@ namespace BlazorBoilerplate.Server.Managers
         public async Task<ApiResponse> Register(RegisterViewModel parameters)
         {
             //Before creating a new user, request the new OMA-ML user id
-            CreateNewUserResponse result = _client.CreateNewUser(new CreateNewUserRequest());
-            if (result.Result != ResultCode.Okay)
+            CreateNewUserResponse result;
+            try
             {
-                return new ApiResponse(Status400BadRequest, $"Error while creating new user, result code: {result.Result}");
+                result = _client.CreateNewUser(new CreateNewUserRequest());
             }
-            await RegisterNewUserAsync(parameters.UserName, parameters.Email, parameters.Password, _userManager.Options.SignIn.RequireConfirmedEmail, result.OmaMlUserId);
+            catch (Exception)
+            {
+                return new ApiResponse(Status400BadRequest, $"Error while creating new user");
+            }
+            await RegisterNewUserAsync(parameters.UserName, parameters.Email, parameters.Password, _userManager.Options.SignIn.RequireConfirmedEmail, result.UserIdentifier);
 
             if (_userManager.Options.SignIn.RequireConfirmedEmail)
                 return new ApiResponse(Status200OK, L["Operation Successful"]);

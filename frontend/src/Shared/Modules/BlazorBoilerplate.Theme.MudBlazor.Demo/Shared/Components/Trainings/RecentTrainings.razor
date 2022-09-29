@@ -30,14 +30,14 @@
             {
                 <MudTable Items="@_trainings.Trainings" style="width:stretch" class="mat-elevation-z5" AllowSelection="false" Dense="true">
                     <HeaderContent>
-                        <MudTh><MudTableSortLabel SortBy="new Func<GetTrainingResponseDto, object>(x=>x.StartTime)">@L["Start datetime"]</MudTableSortLabel></MudTh>
-                        <MudTh><MudTableSortLabel SortBy="new Func<GetTrainingResponseDto, object>(x=>x.Status)">@L["Status"]</MudTableSortLabel></MudTh>
-                        <MudTh><MudTableSortLabel SortBy="new Func<GetTrainingResponseDto, object>(x=>x.DatasetName)">@L["Dataset"]</MudTableSortLabel></MudTh>
+                        <MudTh><MudTableSortLabel SortBy="new Func<TrainingDto, object>(x=>x.StartTime)">@L["Start datetime"]</MudTableSortLabel></MudTh>
+                        <MudTh><MudTableSortLabel SortBy="new Func<TrainingDto, object>(x=>x.Status)">@L["Status"]</MudTableSortLabel></MudTh>
+                        <MudTh><MudTableSortLabel SortBy="new Func<TrainingDto, object>(x=>x.DatasetName)">@L["Dataset"]</MudTableSortLabel></MudTh>
                         <MudTh>Task</MudTh>
                     </HeaderContent>
                     <RowTemplate>
                         <MudTd>
-                            <MudLink Href="@NavManager.ToAbsoluteUri("trainings/" + @context.ID).AbsoluteUri" Style="cursor: pointer; display: flex;"><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.ModelTraining" Style="margin-right: 4px;" /> @context.StartTime.ToString("dd/MM/yy HH:mm")</MudLink>
+                            <MudLink Href="@NavManager.ToAbsoluteUri("trainings/" + @context.Identifier).AbsoluteUri" Style="cursor: pointer; display: flex;"><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.ModelTraining" Style="margin-right: 4px;" /> @context.StartTime.ToString("dd/MM/yy HH:mm")</MudLink>
                         </MudTd>
                         <MudTd>
                             @if (context.Status == "busy")
@@ -60,9 +60,7 @@
 
 @code {
     [Parameter]
-    public string OpenTrainingId { get; set; }
-    [Parameter]
-    public GetAllTrainingsResponseDto Trainings 
+    public GetTrainingsResponseDto Trainings 
     { 
         get
         {
@@ -74,13 +72,6 @@
             if(_trainings != null)
             {
                 _trainings.Trainings = _trainings.Trainings.Where(x => x.StartTime > DateTime.Now.AddDays(-1)).Take(6).ToList();
-                if (!string.IsNullOrEmpty(OpenTrainingId))
-                {
-                    foreach (var item in _trainings.Trainings.Where(x => x.ID == OpenTrainingId))
-                    {
-                        item.ShowDetails = true;
-                    }
-                }
                 RefreshRecentTrainings(null, null);
                 _timer = new Timer()
                 {
@@ -93,12 +84,12 @@
             }
         } 
     }
-    private GetAllTrainingsResponseDto _trainings;
+    private GetTrainingsResponseDto _trainings;
     private Timer _timer;
     private string searchString = "";
 
 
-    private bool FilterFunc(GetTrainingResponseDto element)
+    private bool FilterFunc(TrainingDto element)
     {
         if (string.IsNullOrWhiteSpace(searchString))
             return true;
@@ -132,13 +123,11 @@
                 {
                     if (_trainings.Trainings[i].Status == "busy")
                     {
-                        ApiResponseDto apiResponse = await apiClient.GetTraining(new GetTrainingRequestDto { TrainingIdentifier = _trainings.Trainings[i].ID });
+                        ApiResponseDto apiResponse = await apiClient.GetTraining(new GetTrainingRequestDto { TrainingIdentifier = _trainings.Trainings[i].Identifier });
 
                         if (apiResponse.IsSuccessStatusCode)
                         {
-                            bool _showDetails = _trainings.Trainings[i].ShowDetails;
-                            _trainings.Trainings[i] = Newtonsoft.Json.JsonConvert.DeserializeObject<GetTrainingResponseDto>(apiResponse.Result.ToString());
-                            _trainings.Trainings[i].ShowDetails = _showDetails;
+                            _trainings.Trainings[i] = Newtonsoft.Json.JsonConvert.DeserializeObject<GetTrainingResponseDto>(apiResponse.Result.ToString()).Training;
                             StateHasChanged();
                         }
                         else

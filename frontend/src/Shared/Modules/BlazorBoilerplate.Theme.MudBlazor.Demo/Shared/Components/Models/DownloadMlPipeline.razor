@@ -64,7 +64,7 @@
     {
         try
         {
-            ApiResponseDto apiResponse = await apiClient.GetModelDownload(new DownloadModelRequestDto { TrainingId = Model.Model.TrainingId, AutoMl = Model.Model.ID });
+            ApiResponseDto apiResponse = await apiClient.DownloadModel(new DownloadModelRequestDto { ModelIdentifier = Model.Model.Identifier });
 
             if (apiResponse.IsSuccessStatusCode)
             {

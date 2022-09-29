@@ -18,7 +18,7 @@
             else
             {
                 <MudStack>
-                    <MudButton OnClick="@(e => { NavManager.NavigateTo("/datasets/" + Dataset.Identifier + "/train"); })" 
+                    <MudButton OnClick="@(e => { NavManager.NavigateTo("/datasets/" + Dataset.Dataset.Identifier + "/train"); })" 
                         Variant="Variant.Filled" 
                         StartIcon="@Icons.Filled.ModelTraining"
                         Color="Color.Secondary">

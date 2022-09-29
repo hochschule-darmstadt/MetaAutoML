@@ -7,7 +7,7 @@
         <CardHeaderActions>
             @if (Model != null)
             {
-                <MudButton Href="@("datasets/" + Model.Model.DatasetId + "/models/" + Model.Model.ID + "/explanation")"
+                <MudButton Href="@("datasets/" + Model.Model.DatasetIdentifier + "/models/" + Model.Model.Identifier + "/explanation")"
                     Variant="Variant.Filled" 
                     EndIcon="@Icons.Material.Filled.ReadMore" 
                     Color="Color.Secondary"

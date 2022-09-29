@@ -25,9 +25,10 @@ class RdfManager(object):
     def __init__(self):        
         self.__log = logging.getLogger('RdfManager')
         self.__log.setLevel(logging.getLevelName(os.getenv("ONTOLOGY_LOGGING_LEVEL")))
-        ontologyPath = os.path.join(os.path.dirname(__file__), 'ontology', 'ML_Ontology.ttl')
+        ontologyPath = os.path.join(os.path.dirname(__file__), 'ML_Ontology.ttl')
         self.__ontologyGraph = rdflib.Graph()
         self.__ontologyGraph.parse(ontologyPath, format='turtle')
+        self.__log.info("__init__: Ontology loaded...")
 
     def __execute_query(self, query: str, binding: dict=None) -> list:
         """
@@ -156,7 +157,7 @@ class RdfManager(object):
 
             object_id = rdflib.URIRef(ML_ONTOLOGY_NAMESPACE + id.replace(":", ""))
             queryResult = self.__execute_query(q, {"s": object_id})
-            current_object.id = id
+            current_object.identifier = id
             for row in queryResult:
                 row.p = row.p.replace(ML_ONTOLOGY_NAMESPACE, ":")
                 row.p = row.p.replace(RDF_NAMESPACE, "rdf:")

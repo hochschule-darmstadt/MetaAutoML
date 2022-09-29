@@ -8,8 +8,8 @@ from LongitudinalDataManager import LongitudinalDataManager
 
 class DatasetManager:
 
-    def __init__(self, storage_dir: str, mongo_db_url: str, storage_lock: threading.Lock) -> None:
-        self.__data_storage: DataStorage = DataStorage(storage_dir, storage_lock, mongo_db_url)
+    def __init__(self, storage_dir: str, mongo_db_url: str) -> None:
+        self.__data_storage: DataStorage = DataStorage(storage_dir, mongo_db_url)
         self.__log = logging.getLogger('DatasetManager')
         self.__log.setLevel(logging.getLevelName(os.getenv("SERVER_LOGGING_LEVEL")))
 
@@ -93,7 +93,7 @@ class DatasetManager:
             response_dataset.creation_date = datetime.fromtimestamp(int(dataset["mtime"]))
             response_dataset.file_name = dataset["file_name"]
             response_dataset.file_configuration = dataset["file_configuration"]
-            response.dataset_infos = response_dataset
+            response.dataset = response_dataset
         except Exception as e:
             self.__log.error(f"get_datasets: Error while reading parameter for dataset {get_dataset_request.dataset_identifier} for user {get_dataset_request.user_identifier}")
             self.__log.error(f"get_datasets: exception: {e}")

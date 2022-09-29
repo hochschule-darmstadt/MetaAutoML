@@ -49,12 +49,12 @@
             if (apiResponse.IsSuccessStatusCode)
             {
                 _models = Newtonsoft.Json.JsonConvert.DeserializeObject<GetModelsResponseDto>(apiResponse.Result.ToString());
-                apiResponse = await apiClient.GetDataset(new GetDatasetRequestDto() { Identifier = Id});
+                apiResponse = await apiClient.GetDataset(new GetDatasetRequestDto() { DatasetIdentifier = Id});
 
                 if (apiResponse.IsSuccessStatusCode)
                 {
                     _dataset = Newtonsoft.Json.JsonConvert.DeserializeObject<GetDatasetResponseDto>(apiResponse.Result.ToString());
-                    _pageTitle = L["Dataset {0}", _dataset.Name];
+                    _pageTitle = L["Dataset {0}", _dataset.Dataset.Name];
                     StateHasChanged();
                     StateHasChanged();
                     viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);

@@ -21,22 +21,22 @@
                                     AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
                 </ToolBarContent>
                 <HeaderContent>
-                    <MudTh><MudTableSortLabel SortBy="new Func<ModelDto, object>(x=>x.Model)">@L["Name"]</MudTableSortLabel></MudTh>
+                    <MudTh><MudTableSortLabel SortBy="@(new Func<ModelDto, object>(x=>x.MlModelType.Properties["skos:prefLabel"]))">@L["Name"]</MudTableSortLabel></MudTh>
                     <MudTh><MudTableSortLabel SortBy="new Func<ModelDto, object>(x=>x.Status)">@L["Status"]</MudTableSortLabel></MudTh>
-                    <MudTh><MudTableSortLabel SortBy="new Func<ModelDto, object>(x=>x.Library)">@L["Library"]</MudTableSortLabel></MudTh>
-                    <MudTh><MudTableSortLabel SortBy="new Func<ModelDto, object>(x=>x.Name)">@L["AutoML solution"]</MudTableSortLabel></MudTh>
+                    <MudTh><MudTableSortLabel SortBy="@(new Func<ModelDto, object>(x=>x.MlLibrary.Properties[" skos:prefLabel"]))">@L["Library"]</MudTableSortLabel></MudTh>
+                    <MudTh><MudTableSortLabel SortBy="@(new Func<ModelDto, object>(x=>x.AutoMl.Properties[" skos:prefLabel"]))">@L["AutoML solution"]</MudTableSortLabel></MudTh>
                     <MudTh><MudTableSortLabel SortBy="new Func<ModelDto, object>(x=>x.TestScore)">@L["Test score"]</MudTableSortLabel></MudTh>
                     <MudTh><MudTableSortLabel SortBy="new Func<ModelDto, object>(x=>x.Runtime)">@L["Runtime"]</MudTableSortLabel></MudTh>
                     <MudTh><MudTableSortLabel SortBy="new Func<ModelDto, object>(x=>x.PredictionTime)">@L["Prediction time"]</MudTableSortLabel></MudTh>
                 </HeaderContent>
                 <RowTemplate>
                     <MudTd >
-                        <MudLink Href="@NavManager.ToAbsoluteUri("datasets/" + @context.DatasetId + "/modelsview/" + @context.ID).AbsoluteUri" Style="cursor: pointer; display: flex;"><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.ModelTraining" Style="margin-right: 4px;" />@context.Model</MudLink>
+                        <MudLink Href="@NavManager.ToAbsoluteUri("datasets/" + @context.DatasetIdentifier + "/modelsview/" + @context.Identifier).AbsoluteUri" Style="cursor: pointer; display: flex;"><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.ModelTraining" Style="margin-right: 4px;" />@context.MlModelType.Properties["skos:prefLabel"]</MudLink>
                     </MudTd>
                     <MudTd>@context.Status</MudTd>
-                    <MudTd>@context.Library</MudTd>
+                    <MudTd>@context.MlLibrary.Properties["skos:prefLabel"]</MudTd>
                     <MudTd>
-                        @context.Name
+                        @context.AutoMl.Properties["skos:prefLabel"]
                     </MudTd>
                     <MudTd>@context.TestScore</MudTd>
                     <MudTd>@context.Runtime</MudTd>
@@ -75,13 +75,13 @@
     {
         if (string.IsNullOrWhiteSpace(searchString))
             return true;
-        if (element.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+        if (element.AutoMl.Properties["skos:prefLabel"].Contains(searchString, StringComparison.OrdinalIgnoreCase))
             return true;
-        if (element.Model.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+        if (element.MlLibrary.Properties["skos:prefLabel"].Contains(searchString, StringComparison.OrdinalIgnoreCase))
             return true;
         if (element.Status.Contains(searchString, StringComparison.OrdinalIgnoreCase))
             return true;
-        if (element.Library.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+        if (element.MlLibrary.Properties["skos:prefLabel"].Contains(searchString, StringComparison.OrdinalIgnoreCase))
             return true;
         return false;
     } 

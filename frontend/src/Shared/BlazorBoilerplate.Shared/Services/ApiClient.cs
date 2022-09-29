@@ -137,9 +137,9 @@ namespace BlazorBoilerplate.Shared.Services
         {
             return await httpClient.PostJsonAsync<ApiResponseDto>("api/Model/GetModelExplanation", request);
         }
-        public async Task<ApiResponseDto> ModelPrediction(ModelPredictRequestDto request)
+        public async Task<ApiResponseDto> ModelPrediction(ModelPredictionRequestDto request)
         {
-            return await httpClient.PostJsonAsync<ApiResponseDto>("api/AutoMl/ModelPrediction", request);
+            return await httpClient.PostJsonAsync<ApiResponseDto>("api/Model/ModelPrediction", request);
         }
         public async Task<ApiResponseDto> DownloadModel(DownloadModelRequestDto request)
         {
@@ -162,7 +162,7 @@ namespace BlazorBoilerplate.Shared.Services
         }
         public async Task<ApiResponseDto> GetDatasetTypes()
         {
-            return await httpClient.GetJsonAsync<ApiResponseDto>("api/Dataset/GetDatasetTypes");
+            return await httpClient.GetJsonAsync<ApiResponseDto>("api/Ontology/GetDatasetTypes");
         }
 
         public async Task<ApiResponseDto> GetMlLibrariesForTask(GetMlLibrariesForTaskRequestDto request)

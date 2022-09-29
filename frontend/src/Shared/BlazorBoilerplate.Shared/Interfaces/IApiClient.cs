@@ -56,7 +56,7 @@ namespace BlazorBoilerplate.Shared.Interfaces
         Task<ApiResponseDto> GetModels(GetModelsRequestDto request);
         Task<ApiResponseDto> GetModel(GetModelRequestDto request);
         Task<ApiResponseDto> GetModelExplanation(GetModelExplanationRequestDto request);
-        Task<ApiResponseDto> ModelPrediction(ModelPredictRequestDto request);
+        Task<ApiResponseDto> ModelPrediction(ModelPredictionRequestDto request);
         Task<ApiResponseDto> DownloadModel(DownloadModelRequestDto request);
         Task<ApiResponseDto> DeleteModel(DeleteTrainingRequestDto request);
 

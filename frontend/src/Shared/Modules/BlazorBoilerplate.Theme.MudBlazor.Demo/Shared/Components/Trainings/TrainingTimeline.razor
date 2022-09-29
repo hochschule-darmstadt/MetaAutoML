@@ -116,7 +116,7 @@
 
     private IEnumerable<TimelineItem> RefreshTimeline()
     {
-        var events = Training.Events;
+        var events = Training.Training.Events;
         var phases = new List<string>() { "started", "preprocessing", "running", "stopped" };
         _timeline = new List<TimelineItem>();
         for(int i = 0; i < phases.Count; i++)
