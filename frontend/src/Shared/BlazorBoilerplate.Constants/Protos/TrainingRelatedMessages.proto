@@ -32,7 +32,7 @@ message GetTrainingResponse {
 }
 
 message Training {
-    string status = 1;
+    string identifier = 1;
     repeated AdapterStatus adapters = 2;
     string datasetIdentifier = 3;
     string datasetName = 4;
@@ -42,23 +42,22 @@ message Training {
     repeated string selectedAutoMls = 8;
     string runtimeConstraints = 9;
     string datasetConfiguration = 10;
-    string identifier = 11;
+    string status = 11;
     google.protobuf.Timestamp startTime = 12;
     repeated StrategyControllerEvent events = 13;
   }
  
 
 message AdapterStatus {
-    string name = 1;
-    string status = 2;
-    repeated string messages = 3;
-    float testScore = 4;
-    float validationScore = 5;
+    string identifier = 1;
+    string name = 2;
+    string status = 3;
+    repeated string messages = 4;
+    float testScore = 5;
     int32 runtime = 6;
     float predictiontime = 7;
     string library = 8;
     string model = 9;
-    string identifier = 10;
   }
 
 message StrategyControllerEvent {

@@ -16,4 +16,13 @@
     </PackageReference>
     <PackageReference Include="Microsoft.Data.Analysis" Version="0.19.1" />
   </ItemGroup>
+	<ItemGroup>
+		<Protobuf Include="Protos/ControllerService.proto" GrpcServices="Client" ProtoRoot="Protos\" />
+		<Protobuf Include="Protos/DatasetRelatedMessages.proto" GrpcServices="Client" ProtoRoot="Protos\" />
+		<Protobuf Include="Protos/Enumerations.proto" GrpcServices="Client" ProtoRoot="Protos\" />
+		<Protobuf Include="Protos/ModelRelatedMessages.proto" GrpcServices="Client" ProtoRoot="Protos\" />
+		<Protobuf Include="Protos/OntologyRelatedMessages.proto" GrpcServices="Client" ProtoRoot="Protos\" />
+		<Protobuf Include="Protos/TrainingRelatedMessages.proto" GrpcServices="Client" ProtoRoot="Protos\" />
+		<Protobuf Include="Protos/UserRelatedMessages.proto" GrpcServices="Client" ProtoRoot="Protos\" />
+	</ItemGroup>
 </Project>
