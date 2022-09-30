@@ -5,6 +5,7 @@ from ssl import SSLContext
 import ssl, asyncio, logging, os
 from ControllerBGRPC import *
 from ControllerServiceManager import ControllerServiceManager
+from Container import Application
 
 def _load_credential_from_file(filepath):
     """
@@ -45,17 +46,23 @@ SERVER_CERTIFICATE_KEY = _load_credential_from_file('certificate/server.key')
 
 
 async def main():
-    with ProcessPoolExecutor(max_workers=40) as executor:
-        server = Server([ControllerServiceManager(executor)])
-        context = SSLContext(protocol=ssl.PROTOCOL_TLSv1_2)
-        context.load_cert_chain(certfile="certificate/server.crt", keyfile='certificate/server.key')
-        await server.start(get_config_property('controller-server-adress'), get_config_property('controller-server-port'), ssl=create_secure_context())
-        await server.wait_closed()
+    #with ProcessPoolExecutor(max_workers=40) as executor:
+    server = Server([ControllerServiceManager()])
+    context = SSLContext(protocol=ssl.PROTOCOL_TLSv1_2)
+    context.load_cert_chain(certfile="certificate/server.crt", keyfile='certificate/server.key')
+    await server.start(get_config_property('controller-server-adress'), get_config_property('controller-server-port'), ssl=create_secure_context())
+    await server.wait_closed()
 
 
 if __name__ == '__main__':
+    application = Application()
+    application.init_resources()
+    application.wire(modules=["__main__"])
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(main())
+    #logging.basicConfig()
     __log = logging.getLogger('ControllerServer')
     __log.setLevel(logging.getLevelName(logging.DEBUG))
     __log.debug("__name__: controller started")
-    asyncio.run(main())
+    #asyncio.run(main())
     __log.debug("__name__: controller exited")

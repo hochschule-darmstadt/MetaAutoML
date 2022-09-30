@@ -44,7 +44,7 @@
                         <MudTd >
                             <MudLink Href="@NavManager.ToAbsoluteUri("datasets/" + @context.Identifier).AbsoluteUri" Style="cursor: pointer; display: flex;"><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.ListAlt" Style="margin-right: 4px;" /> @context.Name</MudLink>
                         </MudTd>
-                        <MudTd>@L[context.Type.Properties["skos:prefLabel"]]</MudTd>
+                        <MudTd>@L[context.Type.Properties.ContainsKey("skos:prefLabel") ? context.Type.Properties["skos:prefLabel"] : ""]</MudTd>
                         <MudTd >@FormatBytes(context.Size)</MudTd>
                         <MudTd  style="white-space:nowrap;">@context.Creation_date.ToString("yyyy-MM-dd")</MudTd>
                     </RowTemplate>

@@ -37,7 +37,7 @@
                             
                             <MudSelectItem Value="@item.ID">
                                 <MudTooltip Text="@item.Properties["rdfs:comment"]" Style="z-index: 1600">
-                                    <MudText Typo="Typo.body2">@L[item.Properties["skos:prefLabel"]]</MudText>
+                                    <MudText Typo="Typo.body2">@L[item.Properties.ContainsKey("skos:prefLabel") ? item.Properties["skos:prefLabel"] : ""]</MudText>
                                 </MudTooltip>
                             </MudSelectItem>
                         }

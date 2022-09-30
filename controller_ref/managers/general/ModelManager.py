@@ -3,14 +3,11 @@ from DataStorage import DataStorage
 from ControllerBGRPC import *
 from DataStorage import DataStorage
 import json, logging, os
-from RdfManager import RdfManager
-from CsvManager import CsvManager
-from LongitudinalDataManager import LongitudinalDataManager
 
 class ModelManager:
 
-    def __init__(self, storage_dir: str, mongo_db_url: str) -> None:
-        self.__data_storage: DataStorage = DataStorage(storage_dir, mongo_db_url)
+    def __init__(self, data_storage: DataStorage) -> None:
+        self.__data_storage: DataStorage = data_storage
         self.__log = logging.getLogger('ModelManager')
         self.__log.setLevel(logging.getLevelName(os.getenv("SERVER_LOGGING_LEVEL")))
 
@@ -31,7 +28,7 @@ class ModelManager:
             return e["test_score"]
 
         self.__log.debug(f"get_models: get all models for dataset {get_models_request.dataset_identifer} for user {get_models_request.user_identifier}")
-        all_models: list[dict[str, object]] = self.__data_storage.get_models(get_models_request.user_identifier, dataset_id=get_models_request.dataset_identifer)
+        all_models: list[dict[str, object]] = self.__data_storage.get_models(get_models_request.user_identifier, dataset_identifier=get_models_request.dataset_identifer)
         self.__log.debug(f"get_models: found {all_models.count} models for dataset {get_models_request.dataset_identifer} for user {get_models_request.user_identifier}")
         
         all_models.sort(key=GetScore, reverse=True)

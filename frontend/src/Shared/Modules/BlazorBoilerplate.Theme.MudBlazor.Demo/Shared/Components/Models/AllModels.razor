@@ -31,12 +31,17 @@
                 </HeaderContent>
                 <RowTemplate>
                     <MudTd >
-                        <MudLink Href="@NavManager.ToAbsoluteUri("datasets/" + @context.DatasetIdentifier + "/modelsview/" + @context.Identifier).AbsoluteUri" Style="cursor: pointer; display: flex;"><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.ModelTraining" Style="margin-right: 4px;" />@context.MlModelType.Properties["skos:prefLabel"]</MudLink>
+                        <MudLink Href="@NavManager.ToAbsoluteUri("datasets/" + @context.DatasetIdentifier + "/modelsview/" + @context.Identifier).AbsoluteUri" Style="cursor: pointer; display: flex;">
+                            <MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.ModelTraining" Style="margin-right: 4px;" />
+                            @(context.MlModelType.Properties.ContainsKey("skos:prefLabel") ? context.MlModelType.Properties["skos:prefLabel"] : "")
+                            </MudLink>
                     </MudTd>
                     <MudTd>@context.Status</MudTd>
-                    <MudTd>@context.MlLibrary.Properties["skos:prefLabel"]</MudTd>
                     <MudTd>
-                        @context.AutoMl.Properties["skos:prefLabel"]
+                        @(context.MlLibrary.Properties.ContainsKey("skos:prefLabel") ? context.MlLibrary.Properties["skos:prefLabel"] : "")
+                    </MudTd>
+                    <MudTd>
+                        @(context.AutoMl.Properties.ContainsKey("skos:prefLabel") ? context.AutoMl.Properties["skos:prefLabel"] : "")
                     </MudTd>
                     <MudTd>@context.TestScore</MudTd>
                     <MudTd>@context.Runtime</MudTd>

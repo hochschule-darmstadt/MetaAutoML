@@ -3,14 +3,11 @@ from DataStorage import DataStorage
 from ControllerBGRPC import *
 from DataStorage import DataStorage
 import json, logging, os
-from RdfManager import RdfManager
-from CsvManager import CsvManager
-from LongitudinalDataManager import LongitudinalDataManager
 
 class TrainingManager:
 
-    def __init__(self, storage_dir: str, mongo_db_url: str) -> None:
-        self.__data_storage: DataStorage = DataStorage(storage_dir, mongo_db_url)
+    def __init__(self, data_storage: DataStorage) -> None:
+        self.__data_storage: DataStorage = data_storage
         self.__log = logging.getLogger('TrainingManager')
         self.__log.setLevel(logging.getLevelName(os.getenv("SERVER_LOGGING_LEVEL")))
         

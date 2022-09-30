@@ -39,7 +39,7 @@
         <MudSelect Label="@L["ML task"]" T="string" ValueChanged="@OnMlTaskSelectionChanged">
             @foreach (var task in _compatibletasks.Tasks)
             {
-                <MudSelectItem Value="@task.ID">@L[task.Properties["skos:prefLabel"]]</MudSelectItem>
+                <MudSelectItem Value="@task.ID">@L[task.Properties.ContainsKey("skos:prefLabel") ? task.Properties["skos:prefLabel"] : ""]</MudSelectItem>
             }
         </MudSelect>
     }
@@ -73,7 +73,7 @@
                     {
                         @foreach (var lib in _supportedMlLibraries.MlLibraries)
                         {
-                            <MudChip Value="@lib.ID" Text="@lib.Properties["skos:prefLabel"]" Default="true" Variant="Variant.Text" Color="Color.Secondary" />
+                            <MudChip Value="@lib.ID" Text="@(lib.Properties.ContainsKey("skos:prefLabel") ? lib.Properties["skos:prefLabel"] : "")" Default="true" Variant="Variant.Text" Color="Color.Secondary" />
                         }
                     }
                 </MudChipSet>
@@ -90,7 +90,7 @@
                     {
                         @foreach (var lib in _compatibleAutoMls.AutoMlSolutions)
                         {
-                            <MudChip Value="@lib.ID" Text="@lib.Properties["skos:prefLabel"]" Default="true" Variant="Variant.Text" Color="Color.Secondary" />
+                            <MudChip Value="@lib.ID" Text="@(lib.Properties.ContainsKey("skos:prefLabel") ? lib.Properties["skos:prefLabel"] : "")" Default="true" Variant="Variant.Text" Color="Color.Secondary" />
                         }
                     }
                 </MudChipSet>

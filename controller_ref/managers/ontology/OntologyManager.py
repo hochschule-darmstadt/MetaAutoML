@@ -9,6 +9,7 @@ from rdflib.plugins.sparql import prepareQuery
 from rdflib.namespace import SKOS
 
 import json
+from MeasureDuration import MeasureDuration
 
 ML_ONTOLOGY_NAMESPACE = "http://h-da.de/ml-ontology/"
 RDF_NAMESPACE = "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
@@ -16,19 +17,23 @@ RDFS_NAMESPACE = "http://www.w3.org/2000/01/rdf-schema#"
 XSD_NAMESPACE = "http://www.w3.org/2001/XMLSchema#"
 SKOS_NAMESPACE = "http://www.w3.org/2004/02/skos/core#"
 
+#ontologyPath = os.path.join(os.path.dirname(__file__), 'ML_Ontology.ttl')
+#ontologyGraph = rdflib.Graph()
+#ontologyGraph.parse(ontologyPath, format='turtle')
 
-class RdfManager(object):
+class OntologyManager(object):
     """
     RDF Manager to interact with the remote ML Ontology
     """
 
     def __init__(self):        
-        self.__log = logging.getLogger('RdfManager')
-        self.__log.setLevel(logging.getLevelName(os.getenv("ONTOLOGY_LOGGING_LEVEL")))
-        ontologyPath = os.path.join(os.path.dirname(__file__), 'ML_Ontology.ttl')
-        self.__ontologyGraph = rdflib.Graph()
-        self.__ontologyGraph.parse(ontologyPath, format='turtle')
-        self.__log.info("__init__: Ontology loaded...")
+        with MeasureDuration() as m:
+            self.__log = logging.getLogger('OntologyManager')
+            self.__log.setLevel(logging.getLevelName(os.getenv("ONTOLOGY_LOGGING_LEVEL")))
+            ontologyPath = os.path.join(os.path.dirname(__file__), 'ML_Ontology.ttl')
+            self.__ontologyGraph = rdflib.Graph()
+            self.__ontologyGraph.parse(ontologyPath, format='turtle')
+            self.__log.info("__init__: new Ontology Manager created...")
 
     def __execute_query(self, query: str, binding: dict=None) -> list:
         """
@@ -60,7 +65,6 @@ class RdfManager(object):
         Return a list of AutoML names
         """
         result = GetAutoMlSolutionsForConfigurationResponse()
-
         if (len(request.task) == 0):  # Check if task parameter is contained, we require it for a successful query
             self.__log.error("get_auto_ml_solutions_for_configuration: Task parameter is empty")
             raise grpclib.GRPCError(grpclib.Status.NOT_FOUND, "Task parameter is empty")
@@ -71,7 +75,7 @@ class RdfManager(object):
         if request.libraries.count == 0:  # if libraries list is empty we do not query for library filter
             self.__log.debug(f"get_auto_ml_solutions_for_configuration: querying for task only {request.task}")
             q = prepareQuery(Queries.ONTOLOGY_QUERY_GET_COMPATIBLE_AUTO_ML_SOLUTIONS_FOR_TASK,
-                         initNs={"skos": SKOS})
+                        initNs={"skos": SKOS})
             queryResult = self.__execute_query(q, {"task": task})
             for row in queryResult:
                 result.auto_ml_solutions.append(row.automl.replace(ML_ONTOLOGY_NAMESPACE, ":"))
@@ -102,10 +106,9 @@ class RdfManager(object):
         Return list of all dataset types
         """
         result = GetDatasetTypesResponse()
-
         self.__log.debug("get_dataset_types: get all dataset types")
         q = prepareQuery(Queries.ONTOLOGY_QUERY_GET_DATASET_TYPES,
-                         initNs={"skos": SKOS})
+                        initNs={"skos": SKOS})
         
         queryResult = self.__execute_query(q)
         for row in queryResult:
@@ -123,7 +126,6 @@ class RdfManager(object):
         Return a list of Machine Learning libraries
         """
         result = GetMlLibrariesForTaskResponse()
-
         if len(request.task) == 0:  # Check if task parameter has value, we require it for a successful query
             self.__log.error("get_ml_libraries_for_task: Task parameter is empty")
             raise grpclib.GRPCError(grpclib.Status.NOT_FOUND, "Task parameter is empty")
@@ -132,7 +134,7 @@ class RdfManager(object):
         task = rdflib.URIRef(ML_ONTOLOGY_NAMESPACE + request.task.replace(":", ""))
         #task = rdflib.Literal(request.task)
         q = prepareQuery(Queries.ONTOLOGY_QUERY_GET_SUPPORTED_ML_LIBRARIES_FOR_TASK,
-                         initNs={"skos": SKOS})
+                        initNs={"skos": SKOS})
 
         queryResult = self.__execute_query(q, {"task": task})
         for row in queryResult:
@@ -149,7 +151,6 @@ class RdfManager(object):
         Return SEE PROTO #TODO
         """
         result = GetObjectsInformationResponse()
-
         for id in request.identifiers:
             self.__log.debug(f"get_objects_information: querying for identifier {id}")
             current_object = ObjectInformation()
@@ -186,7 +187,6 @@ class RdfManager(object):
         Return a list of compatible AutoML tasks
         """
         result = GetTasksForDatasetTypeResponse()
-
         if len(request.dataset_type) == 0:  # check if dataset type is present, we require it for a successful query
             self.__log.error("get_tasks_for_dataset_type: Dataset type is empty")
             raise grpclib.GRPCError(grpclib.Status.NOT_FOUND, "Dataset type is empty")
@@ -196,7 +196,7 @@ class RdfManager(object):
         dataset_type = rdflib.URIRef(ML_ONTOLOGY_NAMESPACE + request.dataset_type.replace(":", ""))
         #dataset_type = rdflib.Literal(datasetType)
         q = prepareQuery(Queries.ONTOLOGY_QUERY_GET_TASKS_FOR_DATASET_TYPE,
-                         initNs={"skos": SKOS})
+                        initNs={"skos": SKOS})
 
         queryResult = self.__execute_query(q, {"dataset_type": dataset_type})
         for row in queryResult:

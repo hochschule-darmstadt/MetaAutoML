@@ -5,13 +5,22 @@ from DataStorage import DataStorage
 import json, logging, os
 from CsvManager import CsvManager
 from LongitudinalDataManager import LongitudinalDataManager
+from dependency_injector.wiring import inject, Provide
 
 class DatasetManager:
 
-    def __init__(self, storage_dir: str, mongo_db_url: str) -> None:
-        self.__data_storage: DataStorage = DataStorage(storage_dir, mongo_db_url)
+    def __init__(self, data_storage: DataStorage) -> None:
+        self.__data_storage: DataStorage = data_storage
         self.__log = logging.getLogger('DatasetManager')
         self.__log.setLevel(logging.getLevelName(os.getenv("SERVER_LOGGING_LEVEL")))
+
+    def __getstate__(self):
+        state = self.__dict__.copy()
+        return state
+
+    @inject
+    def __setstate__(self, state):
+        self.__dict__.update(state)
 
     def create_dataset(
         self, create_dataset_request: "CreateDatasetRequest"

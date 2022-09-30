@@ -12,7 +12,9 @@
         "./utils",
         "../adapters/GRPC/Controller",
         "../adapters/Utils/Utils",
-        "../adapters/GRPC/Adapter"
+        "../adapters/GRPC/Adapter",
+        "utils",
+        "dependency-injection"
 
     ]
 }

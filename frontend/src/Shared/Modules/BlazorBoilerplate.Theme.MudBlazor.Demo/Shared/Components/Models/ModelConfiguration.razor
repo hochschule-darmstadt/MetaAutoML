@@ -29,7 +29,7 @@
                 <div style="height:250px;overflow: auto;">
                     <MudStack>
                         <MudText Typo="Typo.body1">@L["Dataset: {0}", Training.Training.DatasetName]</MudText>
-                        <MudText Typo="Typo.body1">@L["Task: {0}", Training.Training.Task.Properties["skos:prefLabel"]]</MudText>
+                        <MudText Typo="Typo.body1">@L["Task: {0}", Training.Training.Task.Properties.ContainsKey("skos:prefLabel") ? Training.Training.Task.Properties["skos:prefLabel"] : ""]</MudText>
                         @if (Training.Training.Configuration.ContainsKey("target"))
                         {
                             <MudText Typo="Typo.body1">@L["Target: {0}", Training.Training.Configuration["target"]["target"]]</MudText>
@@ -40,7 +40,7 @@
                                 <MudStack>
                                     @foreach (var item in Training.Training.SelectedMlLibraries)
                                     {
-                                        <MudText Typo="Typo.body1">@item.Properties["skos:prefLabel"]</MudText>
+                                        <MudText Typo="Typo.body1">@item.Properties.ContainsKey("skos:prefLabel") ? @item.Properties["skos:prefLabel"] : @("")</MudText>
                                     }
                                 </MudStack>
                             </MudExpansionPanel>
@@ -48,7 +48,7 @@
                                 <MudStack>
                                     @foreach (var item in Training.Training.SelectedAutoMls)
                                     {
-                                        <MudText Typo="Typo.body1">@item.Properties["skos:prefLabel"]</MudText>
+                                        <MudText Typo="Typo.body1">@item.Properties.ContainsKey("skos:prefLabel") ? @item.Properties["skos:prefLabel"] : @("")</MudText>
                                     }
                                 </MudStack>
                             </MudExpansionPanel>

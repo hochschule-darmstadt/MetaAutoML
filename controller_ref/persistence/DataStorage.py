@@ -9,6 +9,8 @@ from bson.objectid import ObjectId
 from DataSetAnalysisManager import DataSetAnalysisManager
 from ControllerBGRPC import *
 import asyncio
+from dependency_injector.wiring import Provide, inject
+from dependency_injector import containers, providers
 
 storage_lock = asyncio.Lock()
 
@@ -16,7 +18,9 @@ class DataStorage:
     """
     Centralized Access to File System and Database
     """
-    def __init__(self, data_storage_dir: str, mongo_db_url: str = None):
+    def __init__(self, data_storage_dir: str, mongo_db: MongoDbClient = None):
+    #def __init__(self, data_storage_dir: str, mongo_db_url: str = None):
+    #def __init__(self, data_storage_dir: str):
         """
         Initialize new instance. This should be done already.
         Do _not_ use multiple instances of this class.
@@ -37,8 +41,8 @@ class DataStorage:
         # ensure folder exists
         os.makedirs(data_storage_dir, exist_ok=True)
         self.__storage_dir = data_storage_dir
-        self.__mongo_db_url = mongo_db_url
-        self.__mongo: MongoDbClient = MongoDbClient(self.__mongo_db_url)
+        #self.__mongo_db_url = mongo_db_url
+        self.__mongo: MongoDbClient = mongo_db
         #self.__lock = storage_lock
 
     ####################################
@@ -47,6 +51,8 @@ class DataStorage:
 #region
 
     def check_if_user_exists(self, user_identifier: bool):
+    #@inject
+    #def check_if_user_exists(self, user_identifier: bool, mongo_db_client: MongoDbClient):
         """
         Check if user exists by checking if his database exists
         ---
@@ -58,6 +64,7 @@ class DataStorage:
         Returns database existance status, TRUE == EXITS
         """
         return self.__mongo.check_if_user_exists(user_identifier)
+        #return mongo_db_client.check_if_user_exists(user_identifier)
 
     async def lock(self):
         self.__log.debug("lock: aquiring lock...")
@@ -66,13 +73,14 @@ class DataStorage:
 
     def unlock(self):
         self.__log.debug("unlock: releasing lock...")
-        storage_lock.release()
+        #storage_lock.release()
         self.__log.debug("unlock: released lock...")
 
     def __getstate__(self):
         state = self.__dict__.copy()
         del state['_DataStorage__mongo']
         return state
+    
     def __setstate__(self, state):
         self.__dict__.update(state)
         self.__mongo: MongoDbClient = MongoDbClient(self.__mongo_db_url)
@@ -297,6 +305,7 @@ class DataStorage:
 
         return result is not None, result
 
+    #def get_datasets(self, user_identifier: bool):
     def get_datasets(self, user_identifier: str) -> 'list[dict[str, object]]':
         """
         Get all datasets for a user. 

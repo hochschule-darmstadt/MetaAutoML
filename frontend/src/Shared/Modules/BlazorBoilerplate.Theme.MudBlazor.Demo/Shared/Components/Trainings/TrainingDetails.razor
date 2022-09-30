@@ -38,7 +38,7 @@
                     </HeaderContent>
                     <RowTemplate>
                         <MudTd>
-                            @models.AutoMl.Properties["skos:prefLabel"]
+                            @models.AutoMl.Properties.ContainsKey("skos:prefLabel") ? models.AutoMl.Properties["skos:prefLabel"] : ""
                         </MudTd>
                         <MudTd>
                             @if (models.Status == "busy")
@@ -51,9 +51,9 @@
                             }
                         </MudTd>
                         <MudTd>
-                            <MudLink Href="@NavManager.ToAbsoluteUri("trainings/" + Training.Training.Identifier + "/models/" + @models.Identifier).AbsoluteUri" Style="cursor: pointer; display: flex;"><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.Lightbulb" Style="margin-right: 4px;" />@models.MlModelType.Properties["skos:prefLabel"]</MudLink>
+                            <MudLink Href="@NavManager.ToAbsoluteUri("trainings/" + Training.Training.Identifier + "/models/" + @models.Identifier).AbsoluteUri" Style="cursor: pointer; display: flex;"><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.Lightbulb" Style="margin-right: 4px;" />@(models.MlModelType.Properties.ContainsKey("skos:prefLabel") ? models.MlModelType.Properties["skos:prefLabel"] : "")</MudLink>
                         </MudTd>
-                        <MudTd>@models.MlLibrary.Properties["skos:prefLabel"]</MudTd>
+                            <MudTd>@(models.MlLibrary.Properties.ContainsKey("skos:prefLabel") ? models.MlLibrary.Properties["skos:prefLabel"] : "")</MudTd>
                         <MudTd>@(String.Format("{0:0.00}", models.TestScore))</MudTd>
                         <MudTd>@(String.Format("{0:0}", models.PredictionTime)) ms</MudTd>
                         <MudTd>@models.Runtime s</MudTd>

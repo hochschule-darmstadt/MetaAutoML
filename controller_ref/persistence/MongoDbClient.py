@@ -4,6 +4,7 @@ from pymongo.collection import Collection
 from mongomock import MongoClient as MongoMockClient
 from bson.objectid import ObjectId
 import logging
+from MeasureDuration import MeasureDuration
 
 class MongoDbClient:
     """
@@ -15,13 +16,14 @@ class MongoDbClient:
     """
 
     def __init__(self, server_url="mongodb://root:example@localhost"):
-        self.__log = logging.getLogger('MongoDbClient')
-        self.__log.setLevel(logging.getLevelName(os.getenv("PERSISTENCE_LOGGING_LEVEL")))
-        if server_url is not None:
-            self.__mongo = self.__use_real_database(server_url)
-        else:
-            self.__mongo = MongoMockClient()
-        self.__log.info("New mongo db client intialized.")
+        with MeasureDuration() as m:
+            self.__log = logging.getLogger('MongoDbClient')
+            self.__log.setLevel(logging.getLevelName(os.getenv("PERSISTENCE_LOGGING_LEVEL")))
+            if server_url is not None:
+                self.__mongo = self.__use_real_database(server_url)
+            else:
+                self.__mongo = MongoMockClient()
+            self.__log.info("New mongo db client intialized.")
 
 
     def __use_real_database(self, server_url: str) -> MongoClient:

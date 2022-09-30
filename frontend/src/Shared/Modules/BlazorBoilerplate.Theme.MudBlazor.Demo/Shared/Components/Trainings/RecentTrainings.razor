@@ -50,7 +50,7 @@
                             }
                         </MudTd>
                         <MudTd>@context.DatasetName</MudTd>
-                        <MudTd>@L[context.Task.Properties["skos:prefLabel"]]</MudTd>
+                        <MudTd>@L[context.Task.Properties.ContainsKey("skos:prefLabel") ? context.Task.Properties["skos:prefLabel"] : ""]</MudTd>
                     </RowTemplate>
                 </MudTable>
             }

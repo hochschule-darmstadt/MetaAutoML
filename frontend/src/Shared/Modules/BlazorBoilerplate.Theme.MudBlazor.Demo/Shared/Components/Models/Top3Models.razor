@@ -38,11 +38,28 @@
                         <MudTh>@L["Total training time"]</MudTh>
                     </HeaderContent>
                     <RowTemplate>
-                        <MudTd >@context.AutoMl.Properties["skos:prefLabel"]</MudTd>
                         <MudTd>
-                            <MudLink Href="@NavManager.ToAbsoluteUri("datasets/" + Dataset.Dataset.Identifier + "/models/" + @context.Identifier).AbsoluteUri" Style="cursor: pointer; display: flex"><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.ModelTraining" Style="margin-right: 4px;" />@context.MlModelType.Properties["skos:prefLabel"]</MudLink>
+                            @if (context.AutoMl.Properties.ContainsKey("skos:prefLabel"))
+                            {
+                                @context.AutoMl.Properties["skos:prefLabel"]
+                            }
                         </MudTd>
-                        <MudTd>@context.MlLibrary.Properties["skos:prefLabel"]</MudTd>
+                        <MudTd>
+                            <MudLink Href="@NavManager.ToAbsoluteUri("datasets/" + Dataset.Dataset.Identifier + "/models/" + @context.Identifier).AbsoluteUri" Style="cursor: pointer; display: flex">
+                                <MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.ModelTraining" Style="margin-right: 4px;" />
+                                @if (context.MlModelType.Properties.ContainsKey("skos:prefLabel"))
+                                {
+                                    @context.MlModelType.Properties["skos:prefLabel"]
+                                }
+                                
+                                </MudLink>
+                        </MudTd>
+                        <MudTd>
+                            @if (context.MlLibrary.Properties.ContainsKey("skos:prefLabel"))
+                            {
+                                <MudText>@context.MlLibrary.Properties["skos:prefLabel"]</MudText>
+                            }
+                        </MudTd>
                         <MudTd >@String.Format("{0:0.00}", context.TestScore)</MudTd>
                         <MudTd >@String.Format("{0:0}", context.PredictionTime) ms</MudTd>
                         <MudTd >@context.Runtime s</MudTd>

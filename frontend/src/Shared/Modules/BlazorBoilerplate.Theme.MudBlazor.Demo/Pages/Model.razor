@@ -17,7 +17,9 @@
     <MudIcon Size="Size.Large" Icon="@Icons.Filled.Lightbulb" />
     @if (_model != null)
     {
-        <MudText Typo="Typo.h4">@L["Model {0}", _model.Model.MlModelType.Properties["skos:prefLabel"]]</MudText>
+        <MudText Typo="Typo.h4">
+            @L["Model {0}", _model.Model.MlModelType.Properties.ContainsKey("skos:prefLabel") ? _model.Model.MlModelType.Properties["skos:prefLabel"] : ""]
+        </MudText>
     }
 </MudStack>
 
@@ -49,9 +51,9 @@
                                 <MudText Typo="Typo.body1">@L["Total training time: {0}", _model.Model.Runtime]</MudText>
                             </MudItem>
                             <MudItem xs="3" sm="3" md="3">
-                                <MudText Typo="Typo.body1">@L["AutoML solution: {0}", _model.Model.AutoMl.Properties["skos:prefLabel"]]</MudText>
-                                <MudText Typo="Typo.body1">@L["ML library: {0}", _model.Model.MlLibrary.Properties["skos:prefLabel"]]</MudText>
-                                <MudText Typo="Typo.body1">@L["Model: {0}", _model.Model.MlModelType.Properties["skos:prefLabel"]]</MudText>
+                                <MudText Typo="Typo.body1">@L["AutoML solution: {0}", _model.Model.AutoMl.Properties.ContainsKey("skos:prefLabel") ? _model.Model.AutoMl.Properties["skos:prefLabel"] : ""]</MudText>
+                                <MudText Typo="Typo.body1">@L["ML library: {0}", _model.Model.MlLibrary.Properties.ContainsKey("skos:prefLabel") ? _model.Model.MlLibrary.Properties["skos:prefLabel"] : ""]</MudText>
+                                <MudText Typo="Typo.body1">@L["Model: {0}", _model.Model.MlModelType.Properties.ContainsKey("skos:prefLabel") ? _model.Model.MlModelType.Properties["skos:prefLabel"] : ""]</MudText>
                                 <MudText Typo="Typo.body1" Style=" display: flex;">@L["Training: "]<MudLink Href="@NavManager.ToAbsoluteUri("trainings/" + @_training.Training.Identifier).AbsoluteUri" Style="cursor: pointer; display: flex;"><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.ModelTraining" Style="margin-right: 4px;" />@_training.Training.StartTime.ToString("dd/MM/yyy")</MudLink></MudText>
                             </MudItem>
                             <MudItem xs="3" sm="3" md="3">
@@ -124,7 +126,14 @@
             _breadcrumbs.Add(new BreadcrumbItem(L["Dataset {0}", _training.Training.DatasetName], "/datasets/" + _model.Model.DatasetIdentifier, false, Icons.Filled.ListAlt));
             _explanationPagePath = "/datasets/" + DatasetId + "/models/" + Id + "/explanation";
         }
-        _breadcrumbs.Add(new BreadcrumbItem(L["Model {0}", _model.Model.MlModelType.Properties["skos:prefLabel"]], null, true, Icons.Filled.Lightbulb));
+        @if (_model.Model.MlModelType.Properties.ContainsKey("skos:prefLabel"))
+        {
+            _breadcrumbs.Add(new BreadcrumbItem(L["Model {0}", _model.Model.MlModelType.Properties.ContainsKey("skos:prefLabel") ? _model.Model.MlModelType.Properties["skos:prefLabel"] : ""], null, true, Icons.Filled.Lightbulb));
+        }
+        else
+        {
+            _breadcrumbs.Add(new BreadcrumbItem(L["Model {0}", ""], null, true, Icons.Filled.Lightbulb));
+        }
         StateHasChanged();
     }
     private async Task LoadModel()
