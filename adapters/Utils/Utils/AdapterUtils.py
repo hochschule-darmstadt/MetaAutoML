@@ -22,6 +22,7 @@ from JsonUtil import get_config_property
 from TemplateGenerator import TemplateGenerator
 import glob
 from PIL import Image
+from AdapterBGRPC import *
 
 ######################################################################
 ## GRPC HELPER FUNCTIONS
@@ -45,7 +46,7 @@ def get_except_response(context, e):
     return Adapter_pb2.StartAutoMLResponse()
 
 
-def capture_process_output(process, start_time , use_error):
+async def capture_process_output(process, start_time , use_error):
     """
     Read console log from subprocess, and send it after each \n to the controller
     ---
@@ -63,14 +64,13 @@ def capture_process_output(process, start_time , use_error):
     # Run until no more output is produced by the subprocess
     while len(s) > 0:
         if capture[len(capture) - 1] == '\n':
-            process_update = Adapter_pb2.StartAutoMLResponse()
-            process_update.returnCode = Adapter_pb2.ADAPTER_RETURN_CODE_STATUS_UPDATE
-            process_update.statusUpdate = capture
-            process_update.outputJson = ""
+            process_update = StartAutoMlResponse()
+            process_update.return_code = AdapterReturnCode.ADAPTER_RETURN_CODE_STATUS_UPDATE
+            process_update.status_update = capture
+            process_update.output_json = ""
             process_update.runtime = int(time.time() - start_time) or 0
             # if return Code is ADAPTER_RETURN_CODE_STATUS_UPDATE we do not have score values yet
-            process_update.testScore = 0.0
-            process_update.validationScore = 0.0
+            process_update.test_score = 0.0
             process_update.predictiontime = 0.0
             process_update.library = ""
             process_update.model = ""
@@ -100,12 +100,11 @@ def get_response(output_json, start_time, test_score, prediction_time, library, 
     ---
     Return the process result message
     """
-    response = Adapter_pb2.StartAutoMLResponse()
-    response.returnCode = Adapter_pb2.ADAPTER_RETURN_CODE_SUCCESS
-    response.outputJson = json.dumps(output_json)
+    response = StartAutoMlResponse()
+    response.return_code = AdapterReturnCode.ADAPTER_RETURN_CODE_SUCCESS
+    response.output_json = json.dumps(output_json)
     response.runtime = int(time.time() - start_time)
-    response.testScore = test_score
-    response.validationScore = 0.0
+    response.test_score = test_score
     response.predictiontime = prediction_time
     response.library = library
     response.model = model
@@ -168,7 +167,7 @@ def start_automl_process(config):
     """
     python_env = os.getenv("PYTHON_ENV", default="PYTHON_ENV_UNSET")
 
-    return subprocess.Popen([python_env, "AutoML.py", config["user_identifier"], config["training_id"]],
+    return subprocess.Popen([python_env, "AutoML.py", config["user_identifier"], config["training_identifier"]],
                             stdout=subprocess.PIPE,
                             universal_newlines=True)
 
@@ -210,7 +209,7 @@ def zip_script(config):
         file_loc_on_controller = os.path.join(get_config_property("training-path"),
                                             get_config_property('adapter-name'),
                                         config["user_identifier"],
-                                        config["training_id"],
+                                        config["training_identifier"],
                                         get_config_property("export-folder-name"))
 
     return {
@@ -295,7 +294,7 @@ def predict(data, config_json, config_path):
     """
     result_folder_location = os.path.join(get_config_property("training-path"),
                                         config_json["user_identifier"],
-                                        config_json["training_id"],
+                                        config_json["training_identifier"],
                                         get_config_property("result-folder-name"))
 
     if config_json["task"] == ":time_series_classification":
@@ -329,23 +328,23 @@ def SetupRunNewRunEnvironment(configuration):
     #folder location for job related files
     job_folder_location = os.path.join(get_config_property("training-path"),
                                         config_json["user_identifier"],
-                                        config_json["training_id"],
+                                        config_json["training_identifier"],
                                         get_config_property("job-folder-name"))
 
     #folder location for automl generated model files (not copied in ZIP)
     model_folder_location = os.path.join(get_config_property("training-path"),
                                         config_json["user_identifier"],
-                                        config_json["training_id"],
+                                        config_json["training_identifier"],
                                         get_config_property("model-folder-name"))
 
     export_folder_location = os.path.join(get_config_property("training-path"),
                                         config_json["user_identifier"],
-                                        config_json["training_id"],
+                                        config_json["training_identifier"],
                                         get_config_property("export-folder-name"))
 
     result_folder_location = os.path.join(get_config_property("training-path"),
                                         config_json["user_identifier"],
-                                        config_json["training_id"],
+                                        config_json["training_identifier"],
                                         get_config_property("result-folder-name"))
 
     config_json["job_folder_location"] = job_folder_location
@@ -397,7 +396,7 @@ def read_tabular_dataset_training_data(json_configuration):
         "space":        " ",
         "tab":          "\t",
     }
-    data = pd.read_csv(os.path.join(json_configuration["file_location"], json_configuration["file_name"]), delimiter=delimiters[json_configuration['file_configuration']['delimiter']], skiprows=(json_configuration['file_configuration']['start_row']-1), escapechar=json_configuration['file_configuration']['escape_character'], decimal=json_configuration['file_configuration']['decimal_character'])
+    data = pd.read_csv(os.path.join(json_configuration["file_location"]), delimiter=delimiters[json_configuration['file_configuration']['delimiter']], skiprows=(json_configuration['file_configuration']['start_row']-1), escapechar=json_configuration['file_configuration']['escape_character'], decimal=json_configuration['file_configuration']['decimal_character'])
 
     # convert all object columns to categories, because autosklearn only supports numerical,
     # bool and categorical features

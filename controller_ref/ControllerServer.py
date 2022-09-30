@@ -6,6 +6,9 @@ import ssl, asyncio, logging, os
 from ControllerBGRPC import *
 from ControllerServiceManager import ControllerServiceManager
 from Container import Application
+import nest_asyncio
+
+ROOT_PATH = os.path.dirname(os.path.abspath(__file__))
 
 def _load_credential_from_file(filepath):
     """
@@ -59,6 +62,7 @@ if __name__ == '__main__':
     application.init_resources()
     application.wire(modules=["__main__"])
     loop = asyncio.get_event_loop()
+    nest_asyncio.apply()
     loop.run_until_complete(main())
     #logging.basicConfig()
     __log = logging.getLogger('ControllerServer')

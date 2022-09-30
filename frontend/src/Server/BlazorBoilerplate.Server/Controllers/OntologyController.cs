@@ -33,7 +33,7 @@ namespace BlazorBoilerplate.Server.Controllers
         [ProducesResponseType(Status200OK)]
         [ProducesResponseType(Status400BadRequest)]
         [ProducesResponseType(Status404NotFound)]   
-        public async Task<ApiResponse> GetCompatibleAutoMlSolutions(GetAutoMlSolutionsForConfigurationRequestDto request)
+        public async Task<ApiResponse> GetAutoMlSolutionsForConfiguration(GetAutoMlSolutionsForConfigurationRequestDto request)
             => ModelState.IsValid ?
                 await _ontologyManager.GetAutoMlSolutionsForConfiguration(request) :
                 new ApiResponse(Status400BadRequest, L["InvalidData"]);
@@ -42,7 +42,7 @@ namespace BlazorBoilerplate.Server.Controllers
         [ProducesResponseType(Status200OK)]
         [ProducesResponseType(Status400BadRequest)]
         [ProducesResponseType(Status404NotFound)]
-        public async Task<ApiResponse> GetSupportedMlLibraries(GetMlLibrariesForTaskRequestDto task)
+        public async Task<ApiResponse> GetMlLibrariesForTask(GetMlLibrariesForTaskRequestDto task)
             => ModelState.IsValid ?
             await _ontologyManager.GetMlLibrariesForTask(task) :
             new ApiResponse(Status400BadRequest, L["InvalidData"]);
@@ -51,7 +51,7 @@ namespace BlazorBoilerplate.Server.Controllers
         [ProducesResponseType(Status200OK)]
         [ProducesResponseType(Status400BadRequest)]
         [ProducesResponseType(Status404NotFound)]
-        public async Task<ApiResponse> GetDatasetCompatibleTasks(GetTasksForDatasetTypeRequestDto dataset)
+        public async Task<ApiResponse> GetTasksForDatasetType(GetTasksForDatasetTypeRequestDto dataset)
             => ModelState.IsValid ?
             await _ontologyManager.GetTasksForDatasetType(dataset) :
             new ApiResponse(Status400BadRequest, L["InvalidData"]);

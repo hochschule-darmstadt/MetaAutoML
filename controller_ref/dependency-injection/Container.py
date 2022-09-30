@@ -1,5 +1,5 @@
 from dependency_injector import containers, providers
-import os
+import os, sys
 from MongoDbClient import MongoDbClient
 from JsonUtil import get_config_property
 from DatasetManager import DatasetManager
@@ -8,8 +8,9 @@ from TrainingManager import TrainingManager
 from ModelManager import ModelManager
 from UserManager import UserManager
 from DataStorage import DataStorage
+from AdapterRuntimeManager import AdapterRuntimeManager
 
-ROOT_PATH = os.path.dirname(os.path.abspath(__file__))
+
 
 class Ressources(containers.DeclarativeContainer):
     if os.getenv("MONGO_DB_DEBUG") == "YES":
@@ -19,7 +20,7 @@ class Ressources(containers.DeclarativeContainer):
     else:
         mongo_db_url = "mongodb://root:example@mongo"
 
-    data_storage_dir = os.path.join(ROOT_PATH, get_config_property("datasets-path"))
+    data_storage_dir = os.path.join(os.path.dirname(os.path.abspath(sys.modules['__main__'].__file__)), get_config_property("datasets-path"))
 
     mongo_db_client = providers.ThreadSafeSingleton(
         MongoDbClient,
@@ -37,13 +38,18 @@ class Ressources(containers.DeclarativeContainer):
 
 class Managers(containers.DeclarativeContainer):
     ressources = providers.DependenciesContainer()
+    adapter_runtime_manager = providers.ThreadSafeSingleton(
+        AdapterRuntimeManager,
+        data_storage=ressources.data_storage
+    )
     dataset_manager = providers.Factory(
         DatasetManager,
         data_storage=ressources.data_storage
     )
     training_manager = providers.Factory(
         TrainingManager,
-        data_storage=ressources.data_storage
+        data_storage=ressources.data_storage,
+        adapter_runtime_manager=adapter_runtime_manager
     )
     model_manager = providers.Factory(
         ModelManager,
@@ -55,6 +61,8 @@ class Managers(containers.DeclarativeContainer):
     )
 
 class Application(containers.DeclarativeContainer):
+
+
     ressources = providers.Container(
         Ressources,
     )

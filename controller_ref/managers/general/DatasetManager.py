@@ -1,11 +1,9 @@
-import threading
 from DataStorage import DataStorage
 from ControllerBGRPC import *
 from DataStorage import DataStorage
 import json, logging, os
 from CsvManager import CsvManager
 from LongitudinalDataManager import LongitudinalDataManager
-from dependency_injector.wiring import inject, Provide
 
 class DatasetManager:
 
@@ -13,14 +11,6 @@ class DatasetManager:
         self.__data_storage: DataStorage = data_storage
         self.__log = logging.getLogger('DatasetManager')
         self.__log.setLevel(logging.getLevelName(os.getenv("SERVER_LOGGING_LEVEL")))
-
-    def __getstate__(self):
-        state = self.__dict__.copy()
-        return state
-
-    @inject
-    def __setstate__(self, state):
-        self.__dict__.update(state)
 
     def create_dataset(
         self, create_dataset_request: "CreateDatasetRequest"
@@ -62,7 +52,7 @@ class DatasetManager:
                 response_dataset.identifier = str(dataset["_id"])
                 response_dataset.name = dataset["name"]
                 response_dataset.type = dataset['type']
-                response_dataset.creation_date = datetime.fromtimestamp(int(dataset["mtime"]))
+                response_dataset.creation_date = datetime.fromtimestamp(int(dataset["creation_time"]))
                 response_dataset.size = dataset['size']
                 response_dataset.analysis = json.dumps(dataset['analysis'])
                 response_dataset.file_name = dataset["file_name"]
@@ -98,7 +88,7 @@ class DatasetManager:
             response_dataset.identifier = str(dataset["_id"])
             response_dataset.name = dataset["name"]
             response_dataset.type = dataset['type']
-            response_dataset.creation_date = datetime.fromtimestamp(int(dataset["mtime"]))
+            response_dataset.creation_date = datetime.fromtimestamp(int(dataset["creation_time"]))
             response_dataset.size = dataset['size']
             response_dataset.analysis = json.dumps(dataset['analysis'])
             response_dataset.file_name = dataset["file_name"]

@@ -43,10 +43,10 @@ class ModelManager:
                 model_info.test_score =  model["test_score"]
                 model_info.runtime =  model["runtime"]
                 model_info.prediction_time =  model["prediction_time"]
-                model_info.ml_model_type =  model["model"]
-                model_info.ml_library =  model["library"]
-                model_info.training_identifier = model["training_id"]
-                model_info.dataset_identifier = model["dataset_id"]
+                model_info.ml_model_type =  model["ml_model_type"]
+                model_info.ml_library =  model["ml_library"]
+                model_info.training_identifier = model["training_identifier"]
+                model_info.dataset_identifier = model["dataset_identifer"]
                 model_info.explanation = json.dumps(model["explanation"])
                 response.models.append(model_info)
             except Exception as e:
@@ -83,10 +83,10 @@ class ModelManager:
             model_info.test_score =  model["test_score"]
             model_info.runtime =  model["runtime"]
             model_info.prediction_time =  model["prediction_time"]
-            model_info.ml_model_type =  model["model"]
-            model_info.ml_library =  model["library"]
-            model_info.training_identifier = model["training_id"]
-            model_info.dataset_identifier = model["dataset_id"]
+            model_info.ml_model_type =  model["ml_model_type"]
+            model_info.ml_library =  model["ml_library"]
+            model_info.training_identifier = model["training_identifier"]
+            model_info.dataset_identifier = model["dataset_identifer"]
             model_info.explanation = json.dumps(model["explanation"])
             response.model = model_info
         except Exception as e:
@@ -108,7 +108,7 @@ class ModelManager:
         Return start process status
         """ 
         model = self.__data_storage.get_model(model_predict_request.user_identifier, model_predict_request.model_idenfier)
-        training = self.__data_storage.get_training(model_predict_request.user_identifier, model["training_id"])
+        training = self.__data_storage.get_training(model_predict_request.user_identifier, model["training_identifier"])
 
         config = {
             "task": training["task"],
@@ -121,7 +121,7 @@ class ModelManager:
         }
         #TODO REWORK ONLINE PREDICTION
         #automl = AdapterManager(self.__data_storage)
-        #test_auto_ml = automl.TestAutoml(model_predict_request, model["automl_name"], model["training_id"], config)
+        #test_auto_ml = automl.TestAutoml(model_predict_request, model["automl_name"], model["training_identifier"], config)
         #if test_auto_ml:
         #    response = TestAutoMlResponse()
         #    for prediction in test_auto_ml.predictions:

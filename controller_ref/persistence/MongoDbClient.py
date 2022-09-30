@@ -325,7 +325,7 @@ class MongoDbClient:
         trainings: Collection = self.__mongo[user_identifier]["trainings"]
         result_training = trainings.find(filter)
         for training in list(result_training):
-            amount_model = self.delete_models(user_identifier, { "training_id": str(training["_id"])})
+            amount_model = self.delete_model(user_identifier, { "training_identifier": str(training["_id"])})
             self.__log.debug(f"delete_training: documents deleted within models: {amount_model}")
         result = trainings.delete_many(filter)
         self.__log.debug(f"delete_training: documents deleted within trainings: {result.deleted_count}")

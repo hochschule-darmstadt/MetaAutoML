@@ -7,9 +7,9 @@ service AdapterService {
 /* 
 Execute a new AutoML run. 
 */
-	rpc StartAutoML(StartAutoMLRequest) returns (stream StartAutoMLResponse) {}
-	rpc TestAdapter(TestAdapterRequest) returns (TestAdapterResponse) {}
-  rpc ExplainModel(ExplainModelRequest) returns (ExplainModelResponse) {}
+    rpc StartAutoML(StartAutoMLRequest) returns (stream StartAutoMLResponse) {}
+    rpc TestAdapter(TestAdapterRequest) returns (TestAdapterResponse) {}
+    rpc ExplainModel(ExplainModelRequest) returns (ExplainModelResponse) {}
 }
 
 message TestAdapterRequest {

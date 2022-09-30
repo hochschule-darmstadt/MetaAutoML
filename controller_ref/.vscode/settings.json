@@ -8,6 +8,7 @@
         "./managers/adaptermanagers",
         "./managers/ontology",
         "./managers/data",
+        "./managers/adapter",
         "./sessions",
         "./utils",
         "../adapters/GRPC/Controller",

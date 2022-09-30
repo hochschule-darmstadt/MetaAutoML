@@ -118,7 +118,7 @@ class CsvManager:
             table_column = TableColumn()
             table_column.name = col
             numpy_datatype = dataset[col].dtype.name
-            datatype, convertible_types = CsvManager.__get_atatype(numpy_datatype, dataset[col])
+            datatype, convertible_types = CsvManager.__get_datatype(numpy_datatype, dataset[col])
 
             table_column.type = datatype
             for convertible_type in convertible_types:
@@ -129,14 +129,14 @@ class CsvManager:
 
     @staticmethod
     def copy_default_dataset(username):
-        upload_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), get_config_property("datasets-path"), username, "uploads")
-        default_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config", "defaults", "titanic_train.csv")
+        upload_folder = os.path.join(os.path.dirname(os.path.abspath(sys.modules['__main__'].__file__)), get_config_property("datasets-path"), username, "uploads")
+        default_file = os.path.join(os.path.dirname(os.path.abspath(sys.modules['__main__'].__file__)), "config", "defaults", "titanic_train.csv")
         #Replace for windows
-        upload_folder = upload_folder.replace("\\managers", "")
-        default_file = default_file.replace("\\managers", "")
+        #upload_folder = upload_folder.replace("\\managers", "")
+        #default_file = default_file.replace("\\managers", "")
         #Replace for UNIX
-        upload_folder = upload_folder.replace("/managers", "")
-        default_file = default_file.replace("/managers", "")
+        #upload_folder = upload_folder.replace("/managers", "")
+        #default_file = default_file.replace("/managers", "")
         #if os.getenv("MONGO_DB_DEBUG") != "YES":
             #Within docker we do not want to add the app section, as this leads to broken links
             #upload_folder = upload_folder.replace("/app/", "")

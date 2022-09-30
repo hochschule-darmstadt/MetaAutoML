@@ -12,6 +12,10 @@ namespace BlazorBoilerplate.Shared.Dto.Ontology
         public string Identifier { get; set; }
         public string Title { get; set; }
         public string Description { get; set; }
+        public StrategyControllerStrategyDto()
+        {
+
+        }
         public StrategyControllerStrategyDto(Strategy strategy)
         {
             Identifier = strategy.Identifier;

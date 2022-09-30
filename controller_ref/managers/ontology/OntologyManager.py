@@ -65,15 +65,15 @@ class OntologyManager(object):
         Return a list of AutoML names
         """
         result = GetAutoMlSolutionsForConfigurationResponse()
-        if (len(request.task) == 0):  # Check if task parameter is contained, we require it for a successful query
-            self.__log.error("get_auto_ml_solutions_for_configuration: Task parameter is empty")
-            raise grpclib.GRPCError(grpclib.Status.NOT_FOUND, "Task parameter is empty")
+        if "task" not in request.configuration or (len(request.configuration["task"]) == 0):  # Check if task parameter is contained, we require it for a successful query
+            self.__log.error("get_auto_ml_solutions_for_configuration: Task parameter not set or is empty")
+            raise grpclib.GRPCError(grpclib.Status.NOT_FOUND, "Task parameter not set or is empty")
         
         
         task = rdflib.URIRef(ML_ONTOLOGY_NAMESPACE + request.configuration["task"].replace(":", ""))
         #task = rdflib.Literal(request.configuration["task"])
-        if request.libraries.count == 0:  # if libraries list is empty we do not query for library filter
-            self.__log.debug(f"get_auto_ml_solutions_for_configuration: querying for task only {request.task}")
+        if "library" not in request.configuration or (len(request.configuration["library"]) == 0): # if libraries list is empty we do not query for library filter
+            self.__log.debug(f'get_auto_ml_solutions_for_configuration: querying for task only {request.configuration["task"]}')
             q = prepareQuery(Queries.ONTOLOGY_QUERY_GET_COMPATIBLE_AUTO_ML_SOLUTIONS_FOR_TASK,
                         initNs={"skos": SKOS})
             queryResult = self.__execute_query(q, {"task": task})
@@ -81,7 +81,7 @@ class OntologyManager(object):
                 result.auto_ml_solutions.append(row.automl.replace(ML_ONTOLOGY_NAMESPACE, ":"))
             return result
         else:
-            self.__log.debug(f"get_auto_ml_solutions_for_configuration: querying for task {request.task} and libraries {request.libraries}")
+            self.__log.debug(f'get_auto_ml_solutions_for_configuration: querying for task {request.configuration["task"]} and libraries {request.configuration["library"]}')
             for lib in json.loads(request.configuration["library"]):
                 library = rdflib.URIRef(ML_ONTOLOGY_NAMESPACE + lib.replace(":", ""))
                 #library = rdflib.Literal(request.configuration["library"])

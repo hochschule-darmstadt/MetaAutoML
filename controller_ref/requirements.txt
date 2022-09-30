@@ -4,3 +4,4 @@ mongomock==4.1.2
 sktime==0.13.3
 rdflib==6.2.0
 dependency_injector==4.40.0
+nest-asyncio==1.5.6

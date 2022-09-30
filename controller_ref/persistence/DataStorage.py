@@ -114,13 +114,14 @@ class DataStorage:
         database_content = {
             "name": name,
             "type": type,
-            "analysis": "",
+            "analysis": {},
             "models": [],
             "path": "",
-            "size": "",
-            "mtime": "",
+            "size": 0,
+            "creation_time": "",
             "file_name" : "",
-            "file_configuration": ""
+            "file_configuration": "",
+            "online_predictions": []
         }
 
         self.__log.debug("create_dataset: inserting new dataset into database...")
@@ -238,7 +239,7 @@ class DataStorage:
         success = self.__mongo.update_dataset(user_identifier, dataset_id, {
             "path": filename_dest,
             "size": nbytes,
-            "mtime": os.path.getmtime(filename_dest),
+            "creation_time": os.path.getmtime(filename_dest),
             "analysis": analysis_result,
             "file_name": file_name,
             "file_configuration": file_configuration
@@ -346,10 +347,10 @@ class DataStorage:
                 self.delete_training(user_identifier, str(training["_id"]))
             except:
                 self.__log.debug(f"delete_dataset: deleting training failed, already deleted. Skipping...")
-        self.__mongo.delete_training(user_identifier, { "dataset_id": dataset_identifier})
+        self.__mongo.delete_training(user_identifier, { "dataset_identifer": dataset_identifier})
         self.__log.debug(f"delete_dataset: deleting files within path: {path}")
         shutil.rmtree(path)
-        amount_deleted_datasets_result = self.__mongo.delete_dataset(user_identifier, { "dataset_id": dataset_identifier})
+        amount_deleted_datasets_result = self.__mongo.delete_dataset(user_identifier, { "dataset_identifer": dataset_identifier})
         self.__log.debug(f"delete_dataset: documents deleted within dataset: {amount_deleted_datasets_result}")
         return amount_deleted_datasets_result
 
@@ -368,7 +369,7 @@ class DataStorage:
         ---
         >>> mdl_id: str = data_storage.create_model("automl_user", {
                 "automl_name": "MLJAR",
-                "training_id": training_id,
+                "training_identifier": training_identifier,
                 ...
             })
 
@@ -424,7 +425,7 @@ class DataStorage:
         """
         Get all models, or all models by training id or dataset id
         ---
-        >>> models = ds.GetModels("automl_user", "training_id")
+        >>> models = ds.GetModels("automl_user", "training_identifier")
 
         ---
         Parameter
@@ -435,9 +436,9 @@ class DataStorage:
         Returns a models list
         """
         if training_identifier is not None:
-            filter = { "training_id": training_identifier }
+            filter = { "training_identifier": training_identifier }
         elif dataset_identifier is not None:
-            filter = { "dataset_id": dataset_identifier }
+            filter = { "dataset_identifer": dataset_identifier }
         else:
             filter = {}
         result = self.__mongo.get_models(user_identifier, filter)
@@ -572,7 +573,7 @@ class DataStorage:
         if dataset_identifier is None:
             return [sess for sess in self.__mongo.get_trainings(user_identifier)]
         else:
-            return [sess for sess in self.__mongo.get_trainings(user_identifier, {"dataset_id": dataset_identifier})]
+            return [sess for sess in self.__mongo.get_trainings(user_identifier, {"dataset_identifer": dataset_identifier})]
         
     def delete_training(self, user_identifier: bool, training_identifier: str):
         """

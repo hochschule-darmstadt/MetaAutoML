@@ -1,16 +1,18 @@
+from subprocess import call
 import threading
 from DataStorage import DataStorage
 from ControllerBGRPC import *
 from DataStorage import DataStorage
 import json, logging, os
+from AdapterRuntimeManager import AdapterRuntimeManager
 
 class TrainingManager:
 
-    def __init__(self, data_storage: DataStorage) -> None:
+    def __init__(self, data_storage: DataStorage, adapter_runtime_manager: AdapterRuntimeManager) -> None:
         self.__data_storage: DataStorage = data_storage
         self.__log = logging.getLogger('TrainingManager')
         self.__log.setLevel(logging.getLevelName(os.getenv("SERVER_LOGGING_LEVEL")))
-        
+        self.__adapter_runtime_manager = adapter_runtime_manager
 
     def create_training(
         self, create_training_request: "CreateTrainingRequest"
@@ -31,6 +33,15 @@ class TrainingManager:
             self.__log.error(f"create_training: dataset {create_training_request.dataset_identifier} for user {create_training_request.user_identifier} not found")
             raise grpclib.GRPCError(grpclib.Status.NOT_FOUND, f"Training {create_training_request.dataset_identifier} for user {create_training_request.user_identifier} not found, already deleted?")
         
+        if not create_training_request.selected_auto_mls:
+            self.__log.error(f"create_training: user {create_training_request.user_identifier} started a new run with empty AutoML list.")
+            raise grpclib.GRPCError(grpclib.Status.CANCELLED, "started a new run with empty AutoML list, wizard error?")
+        
+        if not create_training_request.selected_libraries:
+            self.__log.error(f"create_training: user {create_training_request.user_identifier} started a new run with empty ML library list.")
+            raise grpclib.GRPCError(grpclib.Status.CANCELLED, "started a new run with empty ML library list, wizard error?")
+        
+
         # TODO: rework file access in AutoMLSession
         #       we do not want to make datastore paths public
         dataset_folder = os.path.dirname(dataset["path"])
@@ -43,7 +54,7 @@ class TrainingManager:
         
         self.__log.debug(f"create_training: generating training details")
         config = {
-            "dataset_id": str(dataset["_id"]),
+            "dataset_identifier": str(dataset["_id"]),
             "dataset_name": dataset["name"],
             "task": create_training_request.task,
             "configuration": json.loads(create_training_request.configuration),
@@ -55,7 +66,11 @@ class TrainingManager:
             "models": [],
             "selected_automls": list(create_training_request.selected_auto_mls),
             "selected_libraries": list(create_training_request.selected_libraries),
-            "start_time": datetime.now()
+            "file_configuration": dataset["file_configuration"],
+            "start_time": datetime.now(),
+            "events" : [],
+            "end_time" : 0,
+            "explanation": {}
         }
         
         training_id = self.__data_storage.create_training(create_training_request.user_identifier, config)
@@ -69,9 +84,9 @@ class TrainingManager:
             await self.__data_storage.lock()
             try:
                 # append new model to training
-                training = self.__data_storage.get_training(create_training_request.user_identifier, training_id)
-                found, dataset = self.__data_storage.get_dataset(create_training_request.user_identifier, training["dataset_id"])
-                model["dataset_id"] = training["dataset_id"]
+                found, training = self.__data_storage.get_training(create_training_request.user_identifier, training_id)
+                found, dataset = self.__data_storage.get_dataset(create_training_request.user_identifier, training["dataset_identifer"])
+                model["dataset_identifer"] = training["dataset_identifer"]
                 _mdl_id = self.__data_storage.update_model(create_training_request.user_identifier, model_id, model)
                 model_list = self.__data_storage.get_models(create_training_request.user_identifier, training_id)
                 if len(training["models"]) == len(model_list)-1:
@@ -93,6 +108,8 @@ class TrainingManager:
                 if dataset["type"] == ":tabular" or dataset["type"] == ":text" or dataset["type"] == ":time_series":
                     self.__explainableAIManager.explain(create_training_request.user_identifier, model_id)
 
+        self.__adapter_runtime_manager.start_new_training(create_training_request, training_id, dataset, callback)
+        response.training_identifier = training_id
         #newTraining: AutoMLSession = self.__adapterManager.start_automl(create_training_request,
         #                                                                str(dataset["_id"]),
         #                                                                dataset_folder,
@@ -133,7 +150,7 @@ class TrainingManager:
                     try:
                         model_details = Model()
                         model_details.identifier = str(model["_id"])
-                        model_details.training_identifier = model["training_id"]
+                        model_details.training_identifier = model["training_identifier"]
                         model_details.test_score =  model["test_score"]
                         model_details.runtime =  model["runtime"]
                         model_details.ml_model_type =  model["model"]
@@ -142,7 +159,7 @@ class TrainingManager:
                         model_details.status_messages[:] =  model["status_messages"]
                         model_details.prediction_time =  model["prediction_time"]
                         model_details.automl = model["automl_name"]
-                        model_details.dataset_identifier = model["dataset_id"]
+                        model_details.dataset_identifier = model["dataset_identifer"]
                         model_details.explanation = model["explanation"]
                         trainingItem.models.append(model_details)
                     except Exception as e:
@@ -151,7 +168,7 @@ class TrainingManager:
                         raise grpclib.GRPCError(grpclib.Status.UNAVAILABLE, f"Error while retrieving Model")
 
                 trainingItem.identifier = str(training["_id"])
-                trainingItem.dataset_identifier = training["dataset_id"]
+                trainingItem.dataset_identifier = training["dataset_identifer"]
                 trainingItem.dataset_name = training["dataset_name"]
                 trainingItem.task = training["task"]
                 trainingItem.configuration = json.dumps(training["configuration"])
@@ -207,16 +224,16 @@ class TrainingManager:
                 try:
                     model_details = Model()
                     model_details.identifier = str(model["_id"])
-                    model_details.training_identifier = model["training_id"]
+                    model_details.training_identifier = model["training_identifier"]
                     model_details.test_score =  model["test_score"]
                     model_details.runtime =  model["runtime"]
-                    model_details.ml_model_type =  model["model"]
-                    model_details.ml_library =  model["library"]
+                    model_details.ml_model_type =  model["ml_model_type"]
+                    model_details.ml_library =  model["ml_library"]
                     model_details.status = model["status"]
                     model_details.status_messages[:] =  model["status_messages"]
                     model_details.prediction_time =  model["prediction_time"]
                     model_details.automl = model["automl_name"]
-                    model_details.dataset_identifier = model["dataset_id"]
+                    model_details.dataset_identifier = model["dataset_identifer"]
                     model_details.explanation = model["explanation"]
                     response.training.models.append(model_details)
                 except Exception as e:
@@ -225,7 +242,7 @@ class TrainingManager:
                     raise grpclib.GRPCError(grpclib.Status.UNAVAILABLE, f"Error while retrieving Model")
                         
             response.training.identifier = str(training["_id"])
-            response.training.dataset_identifier = training["dataset_id"]
+            response.training.dataset_identifier = training["dataset_identifer"]
             response.training.dataset_name = training["dataset_name"]
             response.training.task = training["task"]
             response.training.configuration = json.dumps(training["configuration"])
