@@ -41,7 +41,7 @@
                             </MudItem>
                             <MudItem xs="3" sm="3" md="3">
                                 <MudText Typo="Typo.body1">@L["File Size: {0}", FormatBytes(_dataset.Size)]</MudText>
-                                @if ((@_dataset.Type.ID == ":tabular") || (@_dataset.Type.ID == ":text") || (@_dataset.Type.ID == ":time_series") || (@_dataset.Type.ID == ":time_series_longitudinal"))
+                                @if ((@_dataset.Type.ID == ":tabular") || (@_dataset.Type.ID == ":text") || (@_dataset.Type.ID == ":time_series"))
                                 {
                                     if (_dataset.Analysis == null)
                                     {
@@ -57,6 +57,26 @@
                                     {
                                         <MudText Typo="Typo.body1">@L["Number of rows: {0}", "unknown"]</MudText>
                                         <MudText Typo="Typo.body1">@L["Number of columns: {0}", "unknown"]</MudText>
+                                    }
+                                } else if (@_dataset.Type.ID == ":time_series_longitudinal")
+                                {
+                                    if (_dataset.Analysis == null)
+                                    {
+                                        <MudText Typo="Typo.body1">@L["Number of instances: {0}", "unknown"]</MudText>
+                                        <MudText Typo="Typo.body1">@L["Number of dimensions: {0}", "unknown"]</MudText>
+                                        <MudText Typo="Typo.body1">@L["Series length: {0}", "unknown"]</MudText>
+                                    }
+                                    else if (_dataset.Analysis.Count != 0)
+                                    {
+                                        <MudText Typo="Typo.body1">@L["Number of instances: {0}", _dataset.Analysis["basic_analysis"]["number_of_rows"]]</MudText>
+                                        <MudText Typo="Typo.body1">@L["Number of dimensions: {0}", _dataset.Analysis["basic_analysis"]["number_of_columns"]]</MudText>
+                                        <MudText Typo="Typo.body1">@L["Series length: {0}", _dataset.Analysis["basic_analysis"]["series_length"]]</MudText>
+                                    }
+                                    else
+                                    {
+                                        <MudText Typo="Typo.body1">@L["Number of instances: {0}", "unknown"]</MudText>
+                                        <MudText Typo="Typo.body1">@L["Number of dimensions: {0}", "unknown"]</MudText>
+                                        <MudText Typo="Typo.body1">@L["Series length: {0}", "unknown"]</MudText>
                                     }
                                 }
                             </MudItem>

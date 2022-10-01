@@ -59,8 +59,10 @@ class DataSetAnalysisManager:
         analysis = {"basic_analysis": "", "advanced_analysis": ""}
 
         if self.config["type"] == ":time_series_longitudinal":
-            analysis["basic_analysis"] = self.startLongitudinalDataAnalysis()
-
+            try:
+                analysis["basic_analysis"] = self.longitudinal_analysis()
+            except:
+                analysis["basic_analysis"] = ""
         else:
             if basic_analysis:
                 try:
@@ -429,11 +431,13 @@ class DataSetAnalysisManager:
                 "path": filename}
 
 
-    def startLongitudinalDataAnalysis(self) -> dict:
-        rows, cols = self.__dataset.shape
+    def longitudinal_analysis(self) -> dict:
+        instances, dimensions = self.__dataset.shape
+        series_length = len(self.__dataset.loc[0][0])
         return {
-            "number_of_columns": cols,
-            "number_of_rows": rows,
+            "number_of_columns": dimensions - 1,
+            "number_of_rows": instances,
+            "series_length": series_length,
             "na_columns": {},
             "high_na_rows": [],
             "outlier": [],

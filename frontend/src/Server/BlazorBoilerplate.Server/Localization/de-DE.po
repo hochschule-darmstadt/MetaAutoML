@@ -549,6 +549,15 @@ msgstr "Reihenanzahl: {0}"
 msgid "Number of columns: {0}"
 msgstr "Spaltenanzahl: {0}"
 
+msgid "Number of instances: {0}"
+msgstr "Anzahl Instanzen: {0}"
+
+msgid "Number of dimensions: {0}"
+msgstr "Dimensionen: {0}"
+
+msgid "Series length: {0}"
+msgstr "Länge der Zeitreihen: {0}"
+
 msgid "New Training"
 msgstr "Neues Training"
 

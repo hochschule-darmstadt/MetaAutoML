@@ -1371,6 +1371,18 @@ msgid "Number of columns: {0}"
 msgstr "Number of columns: {0}"
 
 msgctxt "Global"
+msgid "Number of instances: {0}"
+msgstr "Number of instances: {0}"
+
+msgctxt "Global"
+msgid "Number of dimensions: {0}"
+msgstr "Number of dimensions: {0}"
+
+msgctxt "Global"
+msgid "Series length: {0}"
+msgstr "Series length: {0}"
+
+msgctxt "Global"
 msgid "New Training"
 msgstr "New Training"
 
@@ -1636,7 +1648,7 @@ msgstr "Task"
 
 msgctxt "Global"
 msgid "Dataset not redable"
-msgstr "Dataset couln´t be read, use the preview config option to reconfigure the dataset."
+msgstr "Dataset coulnï¿½t be read, use the preview config option to reconfigure the dataset."
 
 msgctxt "Global"
 msgid "Start: {0}"
