@@ -22,12 +22,13 @@
             "request": "launch",
             "program": "AutoKerasServer.py",
             "console": "integratedTerminal",
-            "justMyCode": true,
+            "justMyCode": false,
             "env": {
                 "PYTHONPATH": "AutoMLs;Utils;../Utils/Utils;../Utils/AutoMLs;../GRPC/Adapter;",
                 "GRPC_SERVER_PORT": "50052",
                 "PYTHON_ENV": ".venv/Scripts/python",
-                "USE_DEV_CONFIG": "YES"
+                "USE_DEV_CONFIG": "YES",
+                "PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION": "python"
             },
         }
     ]

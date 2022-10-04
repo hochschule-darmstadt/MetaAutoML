@@ -15,7 +15,7 @@ message DeleteModelResponse {
 
 message GetModelsRequest {
   string userIdentifier = 1;
-  string datasetIdentifer = 2;
+  string datasetIdentifier = 2;
 }
 
 message GetModelsResponse {
@@ -48,12 +48,11 @@ message Model {
 
 message ModelPredictRequest {
   string userIdentifier = 1;
-  bytes testData = 2;
-  string modelIdenfier = 3;
+  string predictionDatasetIdentifier = 2;
+  string modelIdentifier = 3;
 }
 
 message ModelPredictResponse {
-  repeated string predictions = 1;
-  float predictiontime = 2;
+  string modelPredictionIdentifier = 1;
 }
 

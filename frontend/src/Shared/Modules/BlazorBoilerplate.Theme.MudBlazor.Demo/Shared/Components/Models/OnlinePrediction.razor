@@ -9,6 +9,8 @@
 @inject IJSRuntime JS
 @inject IStringLocalizer<Global> L
 @inject IHttpClientFactory ClientFactory
+@inject IFileUploader fileUploader
+@inject NavigationManager NavManager
 
 
 <MudCard Elevation="5">
@@ -16,15 +18,44 @@
         <CardHeaderContent >
             <MudText Typo="Typo.h6">@L["Predict online"]</MudText>
         </CardHeaderContent>
+        <CardHeaderActions>
+            <MudStack Row="true" Class="align-content-center" Style="margin-top: 8px">
+                <MudButton OnClick="OnOpenUpload"
+                    Variant="Variant.Filled" 
+                    Color="Color.Secondary"
+                    EndIcon="@Icons.Filled.CloudUpload"
+                           Size="Size.Small">@L["Add"]</MudButton>
+            </MudStack>
+        </CardHeaderActions>
     </MudCardHeader>
     <MudCardContent>
         <MudPaper Height="100px" Elevation="0">
-            @if (Model == null)
+            @if (_predictionDatasets == null)
             {
                 <DataLoaderSpinner />
             }
             else
             {
+                <MudTable Items="@_predictionDatasets.Datasets" style="width:stretch" class="mat-elevation-z5" AllowSelection="false" Dense="true">
+                    <HeaderContent>
+                        <MudTh>@L["Name"]</MudTh>
+                        <MudTh>@L["Date"]</MudTh>
+                        <MudTh>@L["Predict online"]</MudTh>
+                        <MudTh>@L["Predict online"]</MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd>
+                            <MudLink Href="@NavManager.ToAbsoluteUri("datasets/" + @context.Identifier).AbsoluteUri" Style="cursor: pointer; display: flex;"><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.ListAlt" Style="margin-right: 4px;" /> @context.Name</MudLink>
+                        </MudTd>
+                        <MudTd>@L[context.Type.Properties.ContainsKey("skos:prefLabel") ? context.Type.Properties["skos:prefLabel"] : ""]</MudTd>
+                        <MudTd>
+                            <MudButton OnClick="@(() => MakeOnlinePrediction(context))" Variant="Variant.Filled" Color="Color.Secondary" Size="Size.Small">@L["Predict online"]</MudButton>
+                        </MudTd>
+                        <MudTd>
+                            <MudButton OnClick="OnOpenUpload" Variant="Variant.Filled" Color="Color.Secondary" Size="Size.Small">@L["Download result CSV"]</MudButton>
+                        </MudTd>
+                    </RowTemplate>
+                </MudTable>
                 <InputFile id="fileInput" OnChange="UploadFiles" hidden />
                 if (Model.Model.Status == "completed")
                 {
@@ -72,25 +103,48 @@
         } 
     }
     private GetModelResponseDto _model;
+    [Parameter]
+    public string DatasetIdentifier
+    {
+        get
+        {
+            return _datasetIdentifier;
+        }
+        set
+        {
+            _datasetIdentifier = value;
+            if (_datasetIdentifier != null)
+            {
+                fileUploader.UploadPredictionDatasetRequest.DatasetIdentifier = _datasetIdentifier;
+                LoadPredictionDatasets();
+            }
+            StateHasChanged();
+        }
+    }
+    private string _datasetIdentifier;
+
+    private GetPredictionDatasetsResponseDto _predictionDatasets;
+    private ModelPredictResponseDto _modelPrediction;
     private bool _downloadReady = true;
     private ModelPredictResponseDto _predictionResult;
 
-    private async Task UploadFiles(InputFileChangeEventArgs e)
+
+    private void OnOpenUpload()
     {
+        fileUploader.IsPredictionDatasetToUpload = true;
+        fileUploader.IsUploadPredictionDatasetDialogOpen = true;
+        fileUploader.RefreshUploadComponentCallback();
+    }
+    private async Task LoadPredictionDatasets()
+    {
+
         try
         {
-            var file = e.File;
-            using var stream = e.File.OpenReadStream((512000 * 2 * 400));
-            using var ms = new MemoryStream();
-            await stream.CopyToAsync(ms);
-            var content = ms.ToArray();
 
-
-            ApiResponseDto apiResponse = await apiClient.ModelPrediction(new ModelPredictionRequestDto { TestData = content, ModelId = Model.Model.Identifier});
+            ApiResponseDto apiResponse = await apiClient.GetPredictionDatasets(new GetPredictionDatasetsRequestDto { DatasetIdentifier = _datasetIdentifier });
             if (apiResponse.IsSuccessStatusCode)
             {
-                _predictionResult = Newtonsoft.Json.JsonConvert.DeserializeObject<ModelPredictResponseDto>(apiResponse.Result.ToString());
-                _downloadReady = false;
+                _predictionDatasets = Newtonsoft.Json.JsonConvert.DeserializeObject<GetPredictionDatasetsResponseDto>(apiResponse.Result.ToString());
                 StateHasChanged();
             }
             else
@@ -102,6 +156,56 @@
         {
             viewNotifier.Show(ex.GetBaseException().Message, ViewNotifierType.Error, L["Operation Failed"]);
         }
+    }
+
+    private async void MakeOnlinePrediction(PredictionDatasetDto predictionDataset)
+    {
+        try
+        {
+            ApiResponseDto apiResponse = await apiClient.ModelPrediction(new ModelPredictionRequestDto() { PredictionDatasetIdentifier = predictionDataset.Identifier, ModelIdentifier=_model.Model.Identifier });
+        if (apiResponse.IsSuccessStatusCode)
+            {
+                _modelPrediction = Newtonsoft.Json.JsonConvert.DeserializeObject<ModelPredictResponseDto>(apiResponse.Result.ToString());
+                StateHasChanged();
+            }
+            else
+            {
+                viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
+            }
+        }
+        catch (Exception ex)
+        {
+            viewNotifier.Show(ex.GetBaseException().Message, ViewNotifierType.Error, L["Operation Failed"]);
+        }
+    }
+
+    private async Task UploadFiles(InputFileChangeEventArgs e)
+    {
+        //try
+        //{
+        //    var file = e.File;
+        //    using var stream = e.File.OpenReadStream((512000 * 2 * 400));
+        //    using var ms = new MemoryStream();
+        //    await stream.CopyToAsync(ms);
+        //    var content = ms.ToArray();
+
+
+        //    //ApiResponseDto apiResponse = await apiClient.ModelPrediction(new ModelPredictionRequestDto { TestData = content, ModelId = Model.Model.Identifier});
+        //    if (apiResponse.IsSuccessStatusCode)
+        //    {
+        //        _predictionResult = Newtonsoft.Json.JsonConvert.DeserializeObject<ModelPredictResponseDto>(apiResponse.Result.ToString());
+        //        _downloadReady = false;
+        //        StateHasChanged();
+        //    }
+        //    else
+        //    {
+        //        viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
+        //    }
+        //}
+        //catch (Exception ex)
+        //{
+        //    viewNotifier.Show(ex.GetBaseException().Message, ViewNotifierType.Error, L["Operation Failed"]);
+        //}
     }
 
     private async void DownloadPredictions()
@@ -118,4 +222,6 @@
             viewNotifier.Show(ex.GetBaseException().Message, ViewNotifierType.Error, L["Operation Failed"]);
         }
     }
+
+
 }

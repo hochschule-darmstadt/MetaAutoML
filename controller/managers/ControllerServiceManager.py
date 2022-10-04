@@ -1,0 +1,422 @@
+from urllib import response
+from Container import Application
+from DatasetManager import DatasetManager
+from PredictionDatasetManager import PredictionDatasetManager
+from TrainingManager import TrainingManager
+from ModelManager import ModelManager
+from UserManager import UserManager
+from OntologyManager import OntologyManager
+from ControllerBGRPC import *
+import multiprocessing, os, logging, asyncio
+from JsonUtil import get_config_property
+from concurrent.futures.process import ProcessPoolExecutor
+from dependency_injector.wiring import inject, Provide
+from MeasureDuration import MeasureDuration
+
+ROOT_PATH = os.path.dirname(os.path.abspath(__file__))
+
+class ControllerServiceManager(ControllerServiceBase):
+
+    def __init__(self, executor: ProcessPoolExecutor=None):
+        self.__log = logging.getLogger('ControllerServiceManager')
+        self.__log.setLevel(logging.getLevelName(os.getenv("SERVER_LOGGING_LEVEL")))
+        self.__executor = executor
+        self.__loop = asyncio.get_event_loop()
+        super().__init__()
+        self.__log.info("__init__: New Controller Service Manager intialized.")
+
+    ####################################
+    ## User OPERATIONS
+    ####################################
+#region
+
+    @inject
+    async def create_new_user(
+        self, create_new_user_request: "CreateNewUserRequest",
+        user_manager: UserManager=Provide[Application.managers.user_manager]
+    ) -> "CreateNewUserResponse":
+        with MeasureDuration() as m:
+            response = user_manager.create_new_user(create_new_user_request)
+        #response = await self.__loop.run_in_executor(
+        #    self.__executor, user_manager.create_new_user, create_new_user_request
+        #)
+        self.__log.warn("create_new_user: executed")
+        return response
+
+    @inject
+    async def get_home_overview_information(
+        self, get_home_overview_information_request: "GetHomeOverviewInformationRequest",
+        user_manager: UserManager=Provide[Application.managers.user_manager]
+    ) -> "GetHomeOverviewInformationResponse":  
+        with MeasureDuration() as m:
+            response = user_manager.get_home_overview_information(get_home_overview_information_request)
+        #response = await self.__loop.run_in_executor(
+        #    self.__executor, user_manager.get_home_overview_information, get_home_overview_information_request
+        #)
+        self.__log.warn("get_home_overview_information: executed")
+        return response
+
+
+#endregion
+
+    ####################################
+    ## DATASET RELATED OPERATIONS
+    ####################################
+#region 
+
+    @inject
+    async def create_dataset(
+        self, create_dataset_request: "CreateDatasetRequest",
+        dataset_manager: DatasetManager=Provide[Application.managers.dataset_manager]
+    ) -> "CreateDatasetResponse":
+        with MeasureDuration() as m:
+            response = dataset_manager.create_dataset(create_dataset_request)
+        #response = await self.__loop.run_in_executor(
+        #    self.__executor, dataset_manager.create_dataset, create_dataset_request
+        #)
+        self.__log.warn("create_dataset: executed")
+        return response
+
+    @inject
+    async def get_datasets(
+        self, get_datasets_request: "GetDatasetsRequest",
+        dataset_manager: DatasetManager=Provide[Application.managers.dataset_manager]
+    ) -> "GetDatasetsResponse":
+        with MeasureDuration() as m:
+            response = dataset_manager.get_datasets(get_datasets_request)
+        #response = await self.__loop.run_in_executor(
+        #    self.__executor, dataset_manager.get_datasets, get_datasets_request
+        #)
+        self.__log.warn("get_datasets: executed")
+        return response
+
+    @inject
+    async def get_dataset(
+        self, get_dataset_request: "GetDatasetRequest",
+        dataset_manager: DatasetManager=Provide[Application.managers.dataset_manager]
+    ) -> "GetDatasetResponse":
+        with MeasureDuration() as m:
+            response = dataset_manager.get_dataset(get_dataset_request)
+        #response = await self.__loop.run_in_executor(
+        #    self.__executor, dataset_manager.get_dataset, get_dataset_request
+        #)
+        self.__log.warn("get_dataset: executed")
+        return response
+
+    @inject
+    async def get_tabular_dataset_column(
+        self, get_tabular_dataset_column_request: "GetTabularDatasetColumnRequest",
+        dataset_manager: DatasetManager=Provide[Application.managers.dataset_manager]
+    ) -> "GetTabularDatasetColumnResponse":
+        with MeasureDuration() as m:
+            response = dataset_manager.get_tabular_dataset_column(get_tabular_dataset_column_request)
+        #response = await self.__loop.run_in_executor(
+        #    self.__executor, dataset_manager.get_tabular_dataset_column, get_tabular_dataset_column_request
+        #)
+        self.__log.warn("get_tabular_dataset_column: executed")
+        return response
+
+    @inject
+    async def delete_dataset(
+        self, delete_dataset_request: "DeleteDatasetRequest",
+        dataset_manager: DatasetManager=Provide[Application.managers.dataset_manager]
+    ) -> "DeleteDatasetResponse":
+        with MeasureDuration() as m:
+            response = dataset_manager.delete_dataset(delete_dataset_request)
+        #response = await self.__loop.run_in_executor(
+        #    self.__executor, dataset_manager.delete_dataset, delete_dataset_request
+        #)
+        self.__log.warn("delete_dataset: executed")
+        return response
+
+    @inject
+    async def set_dataset_file_configuration(
+        self,
+        set_dataset_file_configuration_request: "SetDatasetFileConfigurationRequest",
+        dataset_manager: DatasetManager=Provide[Application.managers.dataset_manager]
+    ) -> "SetDatasetFileConfigurationResponse":
+        with MeasureDuration() as m:
+            response = dataset_manager.set_dataset_file_configuration(set_dataset_file_configuration_request)
+        #response = await self.__loop.run_in_executor(
+        #    self.__executor, dataset_manager.set_dataset_file_configuration, set_dataset_file_configuration_request
+        #)
+        self.__log.warn("delete_dataset: set_dataset_file_configuration")
+        return response
+
+
+#endregion
+
+    ####################################
+    ## TRAINING RELATED OPERATIONS
+    ####################################
+#region
+
+
+
+    @inject
+    async def create_training(
+        self, create_training_request: "CreateTrainingRequest",
+        training_manager: TrainingManager=Provide[Application.managers.training_manager]
+    ) -> "CreateTrainingResponse":
+        with MeasureDuration() as m:
+            response = await training_manager.create_training(create_training_request)
+        #response = await self.__loop.run_in_executor(
+        #    self.__executor, training_manager.create_training, create_training_request
+        #)
+        self.__log.warn("create_training: executed")
+        return response
+
+    @inject
+    async def get_trainings(
+        self, get_trainings_request: "GetTrainingsRequest",
+        training_manager: TrainingManager=Provide[Application.managers.training_manager]
+    ) -> "GetTrainingsResponse":
+        with MeasureDuration() as m:
+            response = training_manager.get_trainings(get_trainings_request)
+        #response = await self.__loop.run_in_executor(
+        #    self.__executor, training_manager.get_trainings, get_trainings_request
+        #)
+        self.__log.warn("get_trainings: executed")
+        return response
+
+    @inject
+    async def get_training(
+        self, get_training_request: "GetTrainingRequest",
+        training_manager: TrainingManager=Provide[Application.managers.training_manager]
+    ) -> "GetTrainingResponse":
+        with MeasureDuration() as m:
+            response = training_manager.get_training(get_training_request)
+        #response = await self.__loop.run_in_executor(
+        #    self.__executor, training_manager.get_training, get_training_request
+        #)
+        self.__log.warn("get_training: executed")
+        return response
+
+    @inject
+    async def delete_training(
+        self, delete_training_request: "DeleteTrainingRequest",
+        training_manager: TrainingManager=Provide[Application.managers.training_manager]
+    ) -> "DeleteTrainingResponse":
+        with MeasureDuration() as m:
+            response = training_manager.delete_training(delete_training_request)
+        #response = await self.__loop.run_in_executor(
+        #    self.__executor, training_manager.delete_training, delete_training_request
+        #)
+        self.__log.warn("delete_training: executed")
+        return response
+
+
+
+#endregion
+
+    ####################################
+    ## MODEL RELATED OPERATIONS
+    ####################################
+#region
+
+    @inject
+    async def get_models(
+        self, get_models_request: "GetModelsRequest",
+        model_manager: ModelManager=Provide[Application.managers.model_manager]
+    ) -> "GetModelsResponse":
+        with MeasureDuration() as m:
+            response = model_manager.get_models(get_models_request)
+        #response = await self.__loop.run_in_executor(
+        #    self.__executor, model_manager.get_models, get_models_request
+        #)
+        self.__log.warn("get_models: executed")
+        return response
+
+    @inject
+    async def get_model(
+        self, get_model_request: "GetModelRequest",
+        model_manager: ModelManager=Provide[Application.managers.model_manager]
+    ) -> "GetModelResponse":
+        with MeasureDuration() as m:
+            response = model_manager.get_model(get_model_request)
+        #response = await self.__loop.run_in_executor(
+        #    self.__executor, model_manager.get_model, get_model_request
+        #)
+        self.__log.warn("get_model: executed")
+        return response
+
+    @inject
+    async def model_predict(
+        self, model_predict_request: "ModelPredictRequest",
+        model_manager: ModelManager=Provide[Application.managers.model_manager]
+    ) -> "ModelPredictResponse":
+        with MeasureDuration() as m:
+            response = model_manager.model_predict(model_predict_request)
+        #response = await self.__loop.run_in_executor(
+        #    self.__executor, model_manager.model_predict, model_predict_request
+        #)
+        self.__log.warn("model_predict: executed")
+        return response
+
+    @inject
+    async def delete_model(
+        self, delete_model_request: "DeleteModelRequest",
+        model_manager: ModelManager=Provide[Application.managers.model_manager]
+    ) -> "DeleteModelResponse":
+        with MeasureDuration() as m:
+            response = model_manager.delete_model(delete_model_request)
+        #response = await self.__loop.run_in_executor(
+        #    self.__executor, model_manager.delete_model, delete_model_request
+        #)
+        self.__log.warn("delete_model: executed")
+        return response
+
+
+
+#endregion
+
+    ####################################
+    ## ONTOLOGY RELATED OPERATIONS
+    ####################################
+#region
+
+
+    @inject
+    async def get_auto_ml_solutions_for_configuration(
+        self,
+        get_auto_ml_solutions_for_configuration_request: "GetAutoMlSolutionsForConfigurationRequest",
+        ontology_manager: OntologyManager=Provide[Application.ressources.ontology_manager]
+    ) -> "GetAutoMlSolutionsForConfigurationResponse":
+        with MeasureDuration() as m:
+            response = ontology_manager.get_auto_ml_solutions_for_configuration(get_auto_ml_solutions_for_configuration_request)
+        #response = await self.__loop.run_in_executor(
+        #    self.__executor, ontology_manager.get_auto_ml_solutions_for_configuration, get_auto_ml_solutions_for_configuration_request
+        #)
+        self.__log.warn("get_auto_ml_solutions_for_configuration: executed")
+        return response
+
+    @inject
+    async def get_available_strategies(
+        self, get_available_strategies_request: "GetAvailableStrategiesRequest",
+        ontology_manager: OntologyManager=Provide[Application.ressources.ontology_manager]
+    ) -> "GetAvailableStrategiesResponse":
+        #TODO add to ontology and RdfManager
+        with MeasureDuration() as m:
+            result = GetAvailableStrategiesResponse()
+            result.strategies = [
+                Strategy(
+                    'data_preparation.ignore_redundant_features',
+                    'Ignore redundant features',
+                    'This strategy ignores certain dataset columns if they have been flagged as duplicate in the dataset analysis.'
+                ),
+                Strategy(
+                    'data_preparation.ignore_redundant_samples',
+                    'Ignore redundant samples',
+                    'This strategy ignores certain dataset rows if they have been flagged as duplicate in the dataset analysis.'
+                ),
+                Strategy(
+                    'data_preparation.split_large_datasets',
+                    'Split large datasets',
+                    'This strategy truncates the training data if the time limit is relatively short for the size of the dataset.'
+                ),
+            ]
+        return result
+
+    @inject
+    async def get_dataset_types(
+        self, get_dataset_types_request: "GetDatasetTypesRequest",
+        ontology_manager: OntologyManager=Provide[Application.ressources.ontology_manager]
+    ) -> "GetDatasetTypesResponse":
+        with MeasureDuration() as m:
+            response = ontology_manager.get_dataset_types()
+        #response = await self.__loop.run_in_executor(
+        #    self.__executor, ontology_manager.get_dataset_types
+        #)
+        self.__log.warn("get_dataset_types: executed")
+        return response
+
+    @inject
+    async def get_ml_libraries_for_task(
+        self, get_ml_libraries_for_task_request: "GetMlLibrariesForTaskRequest",
+        ontology_manager: OntologyManager=Provide[Application.ressources.ontology_manager]
+    ) -> "GetMlLibrariesForTaskResponse":
+        with MeasureDuration() as m:
+            response = ontology_manager.get_ml_libraries_for_task(get_ml_libraries_for_task_request)
+        #response = await self.__loop.run_in_executor(
+        #    self.__executor, ontology_manager.get_ml_libraries_for_task, get_ml_libraries_for_task_request
+        #)
+        self.__log.warn("get_ml_libraries_for_task: executed")
+        return response
+
+    @inject
+    async def get_objects_information(
+        self, get_objects_information_request: "GetObjectsInformationRequest",
+        ontology_manager: OntologyManager=Provide[Application.ressources.ontology_manager]
+    ) -> "GetObjectsInformationResponse":
+        with MeasureDuration() as m:
+            response = ontology_manager.get_objects_information(get_objects_information_request)
+        #response = await self.__loop.run_in_executor(
+        #    self.__executor, ontology_manager.get_objects_information, get_objects_information_request
+        #)
+        self.__log.warn("get_objects_information: executed")
+        return response
+
+    @inject
+    async def get_tasks_for_dataset_type(
+        self, get_tasks_for_dataset_type_request: "GetTasksForDatasetTypeRequest",
+        ontology_manager: OntologyManager=Provide[Application.ressources.ontology_manager]
+    ) -> "GetTasksForDatasetTypeResponse":
+        with MeasureDuration() as m:
+            response = ontology_manager.get_tasks_for_dataset_type(get_tasks_for_dataset_type_request)
+        #response = await self.__loop.run_in_executor(
+        #    self.__executor, ontology_manager.get_tasks_for_dataset_type, get_tasks_for_dataset_type_request
+        #)
+        self.__log.warn("get_tasks_for_dataset_type: executed")
+        return response
+
+
+#endregion
+
+    ####################################
+    ## PREDICTION DATASET RELATED OPERATIONS
+    ####################################
+#region
+
+
+
+    @inject
+    async def create_prediction_dataset(
+        self, create_prediction_dataset_request: "CreatePredictionDatasetRequest",
+        predictionDatasetManager: PredictionDatasetManager=Provide[Application.managers.prediction_dataset_manager]
+    ) -> "CreatePredictionDatasetResponse":
+        with MeasureDuration() as m:
+            response = predictionDatasetManager.create_prediction_dataset(create_prediction_dataset_request)
+        self.__log.warn("create_prediction_dataset: executed")
+        return response
+
+    @inject
+    async def get_prediction_datasets(
+        self, get_prediction_datasets_request: "GetPredictionDatasetsRequest",
+        predictionDatasetManager: PredictionDatasetManager=Provide[Application.managers.prediction_dataset_manager]
+    ) -> "GetPredictionDatasetsResponse":
+        with MeasureDuration() as m:
+            response = predictionDatasetManager.get_prediction_datasets(get_prediction_datasets_request)
+        self.__log.warn("get_prediction_datasets: executed")
+        return response
+
+    @inject
+    async def get_prediction_dataset(
+        self, get_prediction_dataset_request: "GetPredictionDatasetRequest",
+        predictionDatasetManager: PredictionDatasetManager=Provide[Application.managers.prediction_dataset_manager]
+    ) -> "GetPredictionDatasetResponse":
+        with MeasureDuration() as m:
+            response = predictionDatasetManager.get_prediction_dataset(get_prediction_dataset_request)
+        self.__log.warn("get_prediction_dataset: executed")
+        return response
+
+    @inject
+    async def delete_prediction_dataset(
+        self, delete_prediction_dataset_request: "DeletePredictionDatasetRequest",
+        predictionDatasetManager: PredictionDatasetManager=Provide[Application.managers.prediction_dataset_manager]
+    ) -> "DeletePredictionDatasetResponse":
+        with MeasureDuration() as m:
+            response = predictionDatasetManager.delete_prediction_dataset(delete_prediction_dataset_request)
+        self.__log.warn("delete_prediction_dataset: executed")
+        return response
+        
+#endregion

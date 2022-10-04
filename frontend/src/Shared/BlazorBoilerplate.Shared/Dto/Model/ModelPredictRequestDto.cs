@@ -1,3 +1,4 @@
+using BlazorBoilerplate.Shared.Dto.PredictionDataset;
 using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
@@ -9,7 +10,7 @@ namespace BlazorBoilerplate.Shared.Dto.Model
 {
     public class ModelPredictionRequestDto
     {
-        public byte[] TestData { get; set; }
-        public string ModelId { get; set; }
+        public string PredictionDatasetIdentifier { get; set; }
+        public string ModelIdentifier { get; set; }
     }
 }

@@ -7,8 +7,6 @@ import time
 #import autokeras as ak
 #import tensorflow as tf
 
-import Adapter_pb2
-import Adapter_pb2_grpc
 import dill
 import grpc
 import numpy as np
@@ -43,10 +41,10 @@ def get_except_response(context, e):
     adapter_name = get_config_property("adapter-name")
     context.set_details(f"Error while executing {adapter_name}: {e}")
     context.set_code(grpc.StatusCode.UNAVAILABLE)
-    return Adapter_pb2.StartAutoMLResponse()
+    return StartAutoMlStreamResponse()
 
 
-async def capture_process_output(process, start_time , use_error):
+def capture_process_output(process, start_time , use_error):
     """
     Read console log from subprocess, and send it after each \n to the controller
     ---
@@ -64,7 +62,7 @@ async def capture_process_output(process, start_time , use_error):
     # Run until no more output is produced by the subprocess
     while len(s) > 0:
         if capture[len(capture) - 1] == '\n':
-            process_update = StartAutoMlResponse()
+            process_update = StartAutoMlStreamResponse()
             process_update.return_code = AdapterReturnCode.ADAPTER_RETURN_CODE_STATUS_UPDATE
             process_update.status_update = capture
             process_update.output_json = ""
@@ -100,7 +98,7 @@ def get_response(output_json, start_time, test_score, prediction_time, library, 
     ---
     Return the process result message
     """
-    response = StartAutoMlResponse()
+    response = StartAutoMlStreamResponse()
     response.return_code = AdapterReturnCode.ADAPTER_RETURN_CODE_SUCCESS
     response.output_json = json.dumps(output_json)
     response.runtime = int(time.time() - start_time)
@@ -228,7 +226,7 @@ def evaluate(config_json, config_path, dataloader):
     ---
     Return evaluation score
     """
-    file_path = os.path.join(config_json["file_location"], config_json["file_name"])
+    file_path = config_json["file_location"]
     result_path = config_json["result_folder_location"]
     # predict
     os.chmod(os.path.join(result_path, "predict.py"), 0o777)
@@ -281,7 +279,7 @@ def evaluate(config_json, config_path, dataloader):
                (predict_time * 1000) / test.shape[0]
 
 
-def predict(data, config_json, config_path):
+def predict(config_json, config_path):
     """
     Make a prediction on test data
     ---
@@ -297,29 +295,25 @@ def predict(data, config_json, config_path):
                                         config_json["training_identifier"],
                                         get_config_property("result-folder-name"))
 
-    if config_json["task"] == ":time_series_classification":
+    #if config_json["task"] == ":time_series_classification":
         # Time Series Classification Task
-        file_path = os.path.join(result_folder_location, "test.ts")
-    else:
-        file_path = os.path.join(result_folder_location, "test.csv")
+    #    file_path = os.path.join(result_folder_location, "test.ts")
+    #else:
+    #    file_path = os.path.join(result_folder_location, "test.csv")
 
-    with open(file_path, "w+") as f:
-        f.write(data)
+    #with open(file_path, "w+") as f:
+    #    f.write(data)
 
     # predict
     os.chmod(os.path.join(result_folder_location, "predict.py"), 0o777)
     python_env = os.getenv("PYTHON_ENV", default="PYTHON_ENV_UNSET")
 
     predict_start = time.time()
-    subprocess.call([python_env, os.path.join(result_folder_location, "predict.py"), file_path, config_path])
+    subprocess.call([python_env, os.path.join(result_folder_location, "predict.py"), config_json["prediction_dataset_path"], config_path])
     predict_time = time.time() - predict_start
 
-    predictions = pd.read_csv(os.path.join(result_folder_location, "predictions.csv"))
-    os.remove(file_path)
-    os.remove(os.path.join(result_folder_location, "predictions.csv"))
-
     
-    return 0, predict_time, predictions["predicted"].astype('string').tolist()
+    return 0, predict_time, os.path.join(result_folder_location, "predictions.csv")
 
 def SetupRunNewRunEnvironment(configuration):
     # saving AutoML configuration JSON
@@ -462,7 +456,7 @@ def read_image_dataset(json_configuration):
 
         local_dir_path = os.path.dirname(local_file_path)
     """
-    data_dir = os.path.join(json_configuration["file_location"], json_configuration["file_name"])
+    data_dir = json_configuration["file_location"]
     train_df_list =[]
     test_df_list =[]
 

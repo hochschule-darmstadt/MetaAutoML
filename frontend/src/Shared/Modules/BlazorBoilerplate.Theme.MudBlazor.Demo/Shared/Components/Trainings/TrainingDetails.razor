@@ -38,7 +38,7 @@
                     </HeaderContent>
                     <RowTemplate>
                         <MudTd>
-                            @models.AutoMl.Properties.ContainsKey("skos:prefLabel") ? models.AutoMl.Properties["skos:prefLabel"] : ""
+                            @(models.AutoMl.Properties.ContainsKey("skos:prefLabel") ? models.AutoMl.Properties["skos:prefLabel"] : "")
                         </MudTd>
                         <MudTd>
                             @if (models.Status == "busy")
@@ -57,7 +57,7 @@
                         <MudTd>@(String.Format("{0:0.00}", models.TestScore))</MudTd>
                         <MudTd>@(String.Format("{0:0}", models.PredictionTime)) ms</MudTd>
                         <MudTd>@models.Runtime s</MudTd>
-                        <MudTd><TrainingMenu TrainingId="@Training.Training.Identifier" Status="@models"></TrainingMenu></MudTd>
+                        <MudTd><TrainingMenu TrainingId="@Training.Training.Identifier"></TrainingMenu></MudTd>
                     </RowTemplate>
                     <PagerContent>
                         <MudTablePager />

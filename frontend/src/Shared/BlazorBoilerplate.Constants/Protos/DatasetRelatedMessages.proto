@@ -19,7 +19,7 @@ message GetDatasetsRequest {
 }
 
 message GetDatasetsResponse {
-  repeated Dataset dataset = 1;
+  repeated Dataset datasets = 1;
 }
 
 message DeleteDatasetRequest {
@@ -38,9 +38,21 @@ message Dataset {
   google.protobuf.Timestamp creation_date = 4;
   int64 size = 5;
   string analysis = 6;
-  string fileName = 7;
-  string fileConfiguration = 8;
+  string path = 7;
+  string fileName = 8;
+  string fileConfiguration = 9;
 }
+
+message CreateDatasetRequest {
+    string userIdentifier = 1;  //Id associated to a specific user
+    string fileName = 2;
+    string datasetName = 3;
+    string datasetType = 4;
+  }
+  
+message CreateDatasetResponse {
+  
+  }
 
 message SetDatasetFileConfigurationRequest {
   string userIdentifier = 1;
@@ -65,15 +77,4 @@ message GetTabularDatasetColumnRequest {
   
 message GetTabularDatasetColumnResponse {
     repeated TableColumn columns = 1;
-  }
-
-message CreateDatasetRequest {
-    string userIdentifier = 1;  //Id associated to a specific user
-    string fileName = 2;
-    string datasetName = 3;
-    string datasetType = 4;
-  }
-  
-message CreateDatasetResponse {
-  
   }

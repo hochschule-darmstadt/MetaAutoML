@@ -8,11 +8,11 @@
             "name": "Controller Debug",
             "type": "python",
             "request": "launch",
-            "program": "Controller.py",
+            "program": "ControllerServer.py",
             "console": "integratedTerminal",
-            "justMyCode": true,
+            "justMyCode": false,
             "env": {
-                "PYTHONPATH": "interfaces;managers;managers/adaptermanagers;managers/ontology;interfaces;sessions;utils;../adapters/GRPC/Controller;../adapters/Utils/Utils;../adapters/GRPC/Adapter;",
+                "PYTHONPATH": "blackboard;blackboard/agents;blackboard/strategies;dependency-injection;utils;interfaces;managers;managers/adapter/online_prediction;managers/adapter;managers/analysis;managers/data;managers/general;managers/ontology;persistence;interfaces;sessions;utils;../adapters/GRPC/Controller;../adapters/Utils/Utils;../adapters/GRPC/Adapter;",
                 "AUTOKERAS_SERVICE_PORT": "50052",
                 "AUTOKERAS_SERVICE_HOST": "localhost",
                 "AUTOGLUON_SERVICE_PORT": "50057",
@@ -33,18 +33,23 @@
                 "MCFLY_SERVICE_PORT": "50061",
                 "MONGO_DB_DEBUG": "YES",
                 "USE_DEV_CONFIG": "YES",
-                "MONGO_CLUSTER": "NO"
+                "MONGO_CLUSTER": "NO",
+                "PERSISTENCE_LOGGING_LEVEL": "DEBUG",
+                "SERVER_LOGGING_LEVEL": "DEBUG",
+                "ONTOLOGY_LOGGING_LEVEL": "DEBUG",
+                "BLACKBOARD_LOGGING_LEVEL": "DEBUG",
+                "PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION": "python"
             },
         },
         {
             "name": "Ubuntu Controller Debug",
             "type": "python",
             "request": "launch",
-            "program": "Controller.py",
+            "program": "ControllerServer.py",
             "console": "integratedTerminal",
             "justMyCode": true,
             "env": {
-                "PYTHONPATH": "interfaces:managers:managers/adaptermanagers:managers/ontology:interfaces:sessions:utils:../adapters/GRPC/Controller:../adapters/Utils/Utils:../adapters/GRPC/Adapter:",
+                "PYTHONPATH": "interfaces:managers:managers/analysis:managers/data:managers/general:managers/ontology:persistence:interfaces:sessions:utils:../adapters/GRPC/Controller:../adapters/Utils/Utils:../adapters/GRPC/Adapter:",
                 "AUTOKERAS_SERVICE_PORT": "50052",
                 "AUTOKERAS_SERVICE_HOST": "localhost",
                 "AUTOGLUON_SERVICE_PORT": "50057",
@@ -63,7 +68,10 @@
                 "ALPHAD3M_SERVICE_PORT": "50060",
                 "MONGO_DB_DEBUG": "YES",
                 "USE_DEV_CONFIG": "YES",
-                "MONGO_CLUSTER": "NO"
+                "MONGO_CLUSTER": "NO",
+                "PERSISTENCE_LOGGING_LEVEL": "DEBUG",
+                "SERVER_LOGGING_LEVEL": "DEBUG",
+                "ONTOLOGY_LOGGING_LEVEL": "DEBUG"
             },
         }
     ]

@@ -7,10 +7,11 @@ service AdapterService {
 /* 
 Execute a new AutoML run. 
 */
-    rpc StartAutoML(StartAutoMLRequest) returns (stream StartAutoMLResponse) {}
+    rpc StartAutoMLStream(StartAutoMLRequest) returns (stream StartAutoMLStreamResponse) {}
     rpc TestAdapter(TestAdapterRequest) returns (TestAdapterResponse) {}
     rpc ExplainModel(ExplainModelRequest) returns (ExplainModelResponse) {}
 }
+
 
 message TestAdapterRequest {
     string testData = 1;
@@ -27,7 +28,7 @@ message StartAutoMLRequest {
 	string processJson = 1;
 }
 
-message StartAutoMLResponse {
+message StartAutoMLStreamResponse {
 	AdapterReturnCode returnCode = 1;
 	string statusUpdate = 2;
 	string outputJson = 3;

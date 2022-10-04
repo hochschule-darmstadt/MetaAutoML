@@ -81,6 +81,7 @@ namespace BlazorBoilerplate.Server.Managers
                     grpcRequest.UserIdentifier = username;
                     grpcRequest.FileName = trustedFileNameForDisplay;
                     grpcRequest.DatasetName = request.DatasetName;
+
                     grpcRequest.DatasetType = request.DatasetType;
                     var reply = _client.CreateDataset(grpcRequest);
                     return new ApiResponse(Status200OK, null, "");
@@ -107,7 +108,7 @@ namespace BlazorBoilerplate.Server.Managers
                 getDatasetsRequest.Type = "";
                 getDatasetsRequest.UserIdentifier = username;
                 var reply = _client.GetDatasets(getDatasetsRequest);
-                foreach (Dataset item in reply.Dataset)
+                foreach (Dataset item in reply.Datasets)
                 {
                     response.Datasets.Add(new DatasetDto(item, await _cacheManager.GetObjectInformation(item.Type)));
                 }
@@ -172,6 +173,7 @@ namespace BlazorBoilerplate.Server.Managers
 
                         break;
                     case ":image":
+                        datasetLocation = datasetLocation.Replace(".zip", "");
                         string[] classificationTargets = Directory.GetDirectories(Path.Combine(datasetLocation, "train"));
                         response.DatasetPreview = new List<ImagePreviewDto>();
                         foreach (string classificationTarget in classificationTargets)

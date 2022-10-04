@@ -69,7 +69,10 @@
         </MudCard>
     </MudItem>
     <MudItem xs="6" sm="6" md="6">
-        <OnlinePrediction Model="_model"/>
+        @if(_training != null)
+        {
+            <OnlinePrediction Model="_model" DatasetIdentifier="@_training.Training.DatasetIdentifier" />
+        }
     </MudItem>
     <MudItem xs="6" sm="6" md="6">
         <DownloadMlPipeline Model="_model"/>

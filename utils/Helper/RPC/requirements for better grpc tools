@@ -1,4 +1,4 @@
-pip install "betterproto[compiler]" --pre
+pip install --pre "betterproto[compiler]"
 pip install grpcio-tools
 
 cd controller
@@ -6,5 +6,6 @@ python -m grpc_tools.protoc -I . --python_betterproto_out=out ControllerService.
 
 cd adapter
 python -m grpc_tools.protoc -I . --python_betterproto_out=out AdapterService.proto
+
 
 compiles init.py

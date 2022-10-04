@@ -79,7 +79,8 @@
 
     private void OnOpenUpload()
     {
-        fileUploader.IsUploadDialogOpen = true;
+        fileUploader.IsPredictionDatasetToUpload = false;
+        fileUploader.IsUploadDatasetDialogOpen = true;
         if (fileUploader.RefreshUploadComponentCallback != null)
         {
             fileUploader.RefreshUploadComponentCallback();

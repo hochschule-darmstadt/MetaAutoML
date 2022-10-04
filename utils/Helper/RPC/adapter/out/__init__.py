@@ -47,7 +47,7 @@ class StartAutoMlRequest(betterproto.Message):
 
 
 @dataclass(eq=False, repr=False)
-class StartAutoMlResponse(betterproto.Message):
+class StartAutoMlStreamResponse(betterproto.Message):
     return_code: "AdapterReturnCode" = betterproto.enum_field(1)
     status_update: str = betterproto.string_field(2)
     output_json: str = betterproto.string_field(3)
@@ -71,18 +71,18 @@ class ExplainModelResponse(betterproto.Message):
 
 
 class AdapterServiceStub(betterproto.ServiceStub):
-    async def start_auto_ml(
+    async def start_auto_ml_stream(
         self,
         start_auto_ml_request: "StartAutoMlRequest",
         *,
         timeout: Optional[float] = None,
         deadline: Optional["Deadline"] = None,
         metadata: Optional["MetadataLike"] = None
-    ) -> AsyncIterator["StartAutoMlResponse"]:
+    ) -> AsyncIterator["StartAutoMlStreamResponse"]:
         async for response in self._unary_stream(
-            "/AdapterService/StartAutoML",
+            "/AdapterService/StartAutoMLStream",
             start_auto_ml_request,
-            StartAutoMlResponse,
+            StartAutoMlStreamResponse,
             timeout=timeout,
             deadline=deadline,
             metadata=metadata,
@@ -125,7 +125,8 @@ class AdapterServiceStub(betterproto.ServiceStub):
 
 
 class AdapterServiceBase(ServiceBase):
-    async def start_auto_ml(self, start_auto_ml_request: "StartAutoMlRequest") -> AsyncIterator["StartAutoMlResponse"]:
+    async def start_auto_ml_stream(self, start_auto_ml_request: "StartAutoMlRequest"
+    ) -> AsyncIterator["StartAutoMlStreamResponse"]:
         raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
 
     async def test_adapter(
@@ -138,12 +139,13 @@ class AdapterServiceBase(ServiceBase):
     ) -> "ExplainModelResponse":
         raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
 
-    async def __rpc_start_auto_ml(
-        self, stream: "grpclib.server.Stream[StartAutoMlRequest, StartAutoMlResponse]"
+    async def __rpc_start_auto_ml_stream(
+        self,
+        stream: "grpclib.server.Stream[StartAutoMlRequest, StartAutoMlStreamResponse]",
     ) -> None:
         request = await stream.recv_message()
         await self._call_rpc_handler_server_stream(
-            self.start_auto_ml,
+            self.start_auto_ml_stream,
             stream,
             request,
         )
@@ -164,11 +166,11 @@ class AdapterServiceBase(ServiceBase):
 
     def __mapping__(self) -> Dict[str, grpclib.const.Handler]:
         return {
-            "/AdapterService/StartAutoML": grpclib.const.Handler(
-                self.__rpc_start_auto_ml,
+            "/AdapterService/StartAutoMLStream": grpclib.const.Handler(
+                self.__rpc_start_auto_ml_stream,
                 grpclib.const.Cardinality.UNARY_STREAM,
                 StartAutoMlRequest,
-                StartAutoMlResponse,
+                StartAutoMlStreamResponse,
             ),
             "/AdapterService/TestAdapter": grpclib.const.Handler(
                 self.__rpc_test_adapter,

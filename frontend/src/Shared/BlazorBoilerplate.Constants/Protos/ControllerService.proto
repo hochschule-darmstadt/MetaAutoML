@@ -2,6 +2,7 @@ syntax = "proto3";
 option csharp_namespace = "BlazorBoilerplate.Server";
 
 import "DatasetRelatedMessages.proto";
+import "PredictionDatasetRelatedMessages.proto";
 import "ModelRelatedMessages.proto";
 import "TrainingRelatedMessages.proto";
 import "OntologyRelatedMessages.proto";
@@ -71,6 +72,20 @@ service ControllerService {
   rpc GetObjectsInformation(GetObjectsInformationRequest) returns (GetObjectsInformationResponse) {}
   /*return all supported AutoML tasks*/
   rpc GetTasksForDatasetType(GetTasksForDatasetTypeRequest) returns (GetTasksForDatasetTypeResponse) {}
+
+  
+  /*OMA-ML PREDICTION DATASET MESSAGES*/
+  /* create a new Dataset */
+  rpc CreatePredictionDataset(CreatePredictionDatasetRequest) returns (CreatePredictionDatasetResponse) {}
+
+  /*return a list of all Datasets*/
+  rpc GetPredictionDatasets(GetPredictionDatasetsRequest) returns (GetPredictionDatasetsResponse) {}
+
+  /*return a Dataset*/
+  rpc GetPredictionDataset(GetPredictionDatasetRequest) returns (GetPredictionDatasetResponse) {}
+
+  /*delete a Dataset and every related object*/
+  rpc DeletePredictionDataset(DeletePredictionDatasetRequest) returns (DeletePredictionDatasetResponse) {}
 }
 
 

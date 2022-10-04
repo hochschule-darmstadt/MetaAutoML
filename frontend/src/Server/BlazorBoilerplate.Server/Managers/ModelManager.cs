@@ -30,7 +30,7 @@ namespace BlazorBoilerplate.Server.Managers
             try
             {
                 getmodelRequest.UserIdentifier = username;
-                getmodelRequest.DatasetIdentifer = request.DatasetIdentifier;
+                getmodelRequest.DatasetIdentifier = request.DatasetIdentifier;
                 var reply = _client.GetModels(getmodelRequest);
 
                 foreach (var model in reply.Models)
@@ -157,13 +157,13 @@ namespace BlazorBoilerplate.Server.Managers
             try
             {
                 testAutoMLrequest.UserIdentifier = username;
-                testAutoMLrequest.ModelIdenfier = request.ModelId;
-                testAutoMLrequest.TestData = Google.Protobuf.ByteString.CopyFrom(request.TestData);
+                testAutoMLrequest.ModelIdentifier = request.ModelIdentifier;
+                testAutoMLrequest.PredictionDatasetIdentifier = request.PredictionDatasetIdentifier;
 
                 var reply = _client.ModelPredict(testAutoMLrequest);
 
-                response.Predictions.AddRange(reply.Predictions.ToList());
-                response.Predictiontime = reply.Predictiontime;
+                //response.Predictions.AddRange(reply.Predictions.ToList());
+                //response.Predictiontime = reply.Predictiontime;
                 return new ApiResponse(Status200OK, null, response);
             }
             catch (Exception ex)

@@ -11,6 +11,7 @@ using BlazorBoilerplate.Shared.Localizer;
 using Microsoft.Extensions.Localization;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Components;
+using BlazorBoilerplate.Shared.Dto.PredictionDataset;
 
 namespace BlazorBoilerplate.Theme.Material.Services
 {
@@ -25,13 +26,16 @@ namespace BlazorBoilerplate.Theme.Material.Services
             _notifier = notifier;
             L = L;
         }
-        public UploadDatasetRequestDto UploadFile { get; set; }
+        public UploadDatasetRequestDto UploadDatasetRequest { get; set; }
+        public UploadPredictionDatasetRequestDto UploadPredictionDatasetRequest { get; set; }
         public IBrowserFile UploadFileContent { get; set; }
         public bool IsUploading { get; set; } = false;
         public Action OnUploadChangedCallback { get; set; }
         public Action RefreshUploadComponentCallback { get; set; }
         public Func<Task> OnUploadCompletedCallback { get; set; }
-        public bool IsUploadDialogOpen { get; set; } = false;
+        public bool IsUploadDatasetDialogOpen { get; set; } = false;
+        public bool IsPredictionDatasetToUpload { get; set; } = false;
+        public bool IsUploadPredictionDatasetDialogOpen { get; set; } = false;
         public async Task UploadDataset()
         {
             int chunkSize = 1000000; 
@@ -41,35 +45,81 @@ namespace BlazorBoilerplate.Theme.Material.Services
             try
             {
                 MemoryStream ms = new MemoryStream();
-                var reader = new StreamReader(UploadFileContent.OpenReadStream(long.MaxValue));
+                StreamReader reader = new StreamReader(UploadFileContent.OpenReadStream(long.MaxValue));
                 await reader.BaseStream.CopyToAsync(ms);
                 ms.Seek(0, SeekOrigin.Begin);
                 if ((ms.Length % chunkSize) == 0) //no extra chunk
                 {
-                    UploadFile.TotalChunkNumber = (int)(ms.Length / chunkSize);
+                    if (IsPredictionDatasetToUpload == true)
+                    {
+                        UploadPredictionDatasetRequest.TotalChunkNumber = (int)(ms.Length / chunkSize);
+                    }
+                    else
+                    {
+                        UploadDatasetRequest.TotalChunkNumber = (int)(ms.Length / chunkSize);
+                    }
                 }
                 else
                 {
-                    UploadFile.TotalChunkNumber = (int)(ms.Length / chunkSize) + 1;      //append extra chunk
+                    if (IsPredictionDatasetToUpload == true)
+                    {
+                        UploadPredictionDatasetRequest.TotalChunkNumber = (int)(ms.Length / chunkSize) + 1; //append extra chunk
+                    }
+                    else
+                    {
+                        UploadDatasetRequest.TotalChunkNumber = (int)(ms.Length / chunkSize) + 1; //append extra chunk
+                    }
                 }
-                UploadFile.ChunkNumber = 1;
+                if (IsPredictionDatasetToUpload == true)
+                {
+                    UploadPredictionDatasetRequest.ChunkNumber = 1;
+                }
+                else
+                {
+                    UploadDatasetRequest.ChunkNumber = 1;
+                }
+               
                 while (bytesRead < ms.Length)
                 {
                     var bytesToRead = ms.Length - bytesRead;
                     var bufferSize = Math.Min(chunkSize, bytesToRead);
                     var buffer = new byte[bufferSize];
                     var reallyRead = ms.Read(buffer, 0, buffer.Length);
-                    UploadFile.Content = buffer;
+                    if (IsPredictionDatasetToUpload == true)
+                    {
+                        UploadPredictionDatasetRequest.Content = buffer;
+                    }
+                    else
+                    {
+                        UploadDatasetRequest.Content = buffer;
+                    }
+                    
 
                     ApiResponseDto apiResponse = new ApiResponseDto();
-                    apiResponse = await _client.UploadDataset(UploadFile);
+                    
+                    if (IsPredictionDatasetToUpload == true)
+                    {
+                        apiResponse = await _client.UploadPredictionDataset(UploadPredictionDatasetRequest);
+                    }
+                    else
+                    {
+                        apiResponse = await _client.UploadDataset(UploadDatasetRequest);
+                    }
                     if (!apiResponse.IsSuccessStatusCode)
                     {
                         _notifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
                     }
 
                     bytesRead += reallyRead;
-                    UploadFile.ChunkNumber++;
+                    if (IsPredictionDatasetToUpload == true)
+                    {
+                        UploadPredictionDatasetRequest.ChunkNumber++;
+                    }
+                    else
+                    {
+                        UploadDatasetRequest.ChunkNumber++;
+                    }
+                    
                     if (OnUploadChangedCallback != null)
                     {
                         OnUploadChangedCallback();

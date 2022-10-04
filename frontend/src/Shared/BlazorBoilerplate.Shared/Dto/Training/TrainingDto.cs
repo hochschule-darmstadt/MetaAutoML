@@ -47,7 +47,10 @@ namespace BlazorBoilerplate.Shared.Dto.Training
             TestConfiguration = new Dictionary<string, dynamic>();
             Status = grpcResponse.Status;
             StartTime = grpcResponse.StartTime.ToDateTime();
-            EndTime = grpcResponse.EndTime.ToDateTime();
+            if (grpcResponse.EndTime != null)
+            {
+                EndTime = grpcResponse.EndTime.ToDateTime();
+            }
             Events = new List<StrategyControllerEventDto>();
             foreach (var trainingEvent in grpcResponse.Events)
             {

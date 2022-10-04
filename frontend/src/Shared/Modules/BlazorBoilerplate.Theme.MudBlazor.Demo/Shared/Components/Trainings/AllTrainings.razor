@@ -102,12 +102,18 @@
         DisposeTimer();
     }
 
+    SemaphoreSlim timerSemaphore = new SemaphoreSlim(1);
     private async void RefreshAllTrainings(object sender, ElapsedEventArgs e)
     {
         await InvokeAsync(async () =>
         {
             try
             {
+                var gotLock = timerSemaphore.Wait(0);
+                if (!gotLock)
+                {
+                    return;
+                }
                 if (_trainings.Trainings.Where(x => x.Status == "busy").ToList().Count == 0)
                 {
                     DisposeTimer();
@@ -124,6 +130,13 @@
                         {
                             _trainings.Trainings[i] = Newtonsoft.Json.JsonConvert.DeserializeObject<GetTrainingResponseDto>(apiResponse.Result.ToString()).Training;
                             StateHasChanged();
+                        }
+                        //Training does not exist anymore
+                        else if (apiResponse.StatusCode == 404)
+                        {
+                            _trainings.Trainings.RemoveAt(i);
+                            DisposeTimer();
+                            return;
                         }
                         else
                         {
