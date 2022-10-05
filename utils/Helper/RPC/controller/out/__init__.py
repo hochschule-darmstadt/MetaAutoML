@@ -165,6 +165,7 @@ class PredictionDataset(betterproto.Message):
     path: str = betterproto.string_field(7)
     file_name: str = betterproto.string_field(8)
     file_configuration: str = betterproto.string_field(9)
+    predictions: str = betterproto.string_field(10)
 
 
 @dataclass(eq=False, repr=False)

@@ -638,7 +638,6 @@ class DataStorage:
             self.__log.debug(f"create_prediction_dataset: dataset type is image, removing .zip ending from {name} as not necessary after unzipping anymore...")
             name = name.replace(".zip", "")
 
-        file_configuration = dataset["file_configuration"]
 
 
         # build dictionary for database
@@ -652,7 +651,6 @@ class DataStorage:
             "creation_time": "",
             "file_name" : "",
             "predictions": {},
-            "file_configuration": file_configuration
         }
 
         self.__log.debug("create_prediction_dataset: inserting new prediction dataset into database...")
@@ -663,7 +661,7 @@ class DataStorage:
         upload_file = os.path.join(self.__storage_dir, user_identifier, "uploads", file_name)
         self.__log.debug(f"create_prediction_dataset: upload location is: {upload_file}")
         
-        filename_dest = os.path.join(self.__storage_dir, user_identifier, prediction_dataset_id, "prediction_datasets", file_name)
+        filename_dest = os.path.join(self.__storage_dir, user_identifier, str(dataset["_id"]), "prediction_datasets", prediction_dataset_id, file_name)
         self.__log.debug(f"create_prediction_dataset: final persistence location is: {filename_dest}")
 
         self.__log.debug(f"create_prediction_dataset: creating dataset folder location: {filename_dest}")
@@ -686,7 +684,7 @@ class DataStorage:
         if dataset["type"] in [":tabular", ":text", ":time_series", ":time_series_longitudinal"]:
             self.__log.debug("create_prediction_dataset: executing dataset analysis...")
             analysis_result = DataSetAnalysisManager({"path": filename_dest,
-                                                      "file_configuration": file_configuration,
+                                                      "file_configuration": dataset["file_configuration"],
                                                       "type": dataset["type"]}).analysis(advanced_analysis=False)
 
         success = self.__mongo.update_prediction_dataset(user_identifier, prediction_dataset_id, {

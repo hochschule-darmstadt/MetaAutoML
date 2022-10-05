@@ -1,8 +1,4 @@
 from abc import ABC, abstractmethod
-import dill
-import os
-from JsonUtil import get_config_property
-import json
 
 class AbstractAdapter(ABC):
     """

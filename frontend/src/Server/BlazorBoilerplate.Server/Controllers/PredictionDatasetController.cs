@@ -46,6 +46,16 @@ namespace BlazorBoilerplate.Server.Controllers
         [ProducesResponseType(Status200OK)]
         [ProducesResponseType(Status400BadRequest)]
         [ProducesResponseType(Status404NotFound)]
+        public async Task<ApiResponse> GetPredictionDatasetPrediction(GetPredictionDatasetPredictionRequestDto request)
+            => ModelState.IsValid ?
+                await _predictionDatasetManager.GetPredictionDatasetPrediction(request) :
+                new ApiResponse(Status400BadRequest, L["InvalidData"]);
+
+
+        [HttpPost]
+        [ProducesResponseType(Status200OK)]
+        [ProducesResponseType(Status400BadRequest)]
+        [ProducesResponseType(Status404NotFound)]
         public async Task<ApiResponse> GetPredictionDatasets(GetPredictionDatasetsRequestDto request)
             => ModelState.IsValid ?
                 await _predictionDatasetManager.GetPredictionDatasets(request) :

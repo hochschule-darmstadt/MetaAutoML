@@ -18,6 +18,7 @@ namespace BlazorBoilerplate.Shared.Dto.PredictionDataset
         public long Size { get; set; }
         public Dictionary<string, dynamic> Analysis { get; set; }
         public Dictionary<string, dynamic> Configuration { get; set; }
+        public Dictionary<string, dynamic> Predictions { get; set; }
         public PredictionDatasetDto()
         {
             Analysis = new Dictionary<string, dynamic>();
@@ -31,6 +32,7 @@ namespace BlazorBoilerplate.Shared.Dto.PredictionDataset
             Size = grpcObject.PredictionDataset.Size;
             Analysis = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(grpcObject.PredictionDataset.Analysis);
             Configuration = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(grpcObject.PredictionDataset.FileConfiguration);
+            Predictions = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(grpcObject.PredictionDataset.Predictions);
         }
         public PredictionDatasetDto(Server.PredictionDataset grpcObject, ObjectInfomationDto type)
         {
@@ -40,7 +42,7 @@ namespace BlazorBoilerplate.Shared.Dto.PredictionDataset
             Creation_date = grpcObject.CreationDate.ToDateTime();
             Size = grpcObject.Size;
             Analysis = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(grpcObject.Analysis);
-            Configuration = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(grpcObject.FileConfiguration);
+            Predictions = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(grpcObject.Predictions);
         }
 
         public char GetDelimiter()

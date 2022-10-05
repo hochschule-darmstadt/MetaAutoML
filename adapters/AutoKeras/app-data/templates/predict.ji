@@ -54,6 +54,7 @@ def read_image_dataset(json_configuration):
 if __name__ == '__main__':
     filepath = sys.argv[1]
     configpath = sys.argv[2]
+    save_path = sys.argv[3]
     X = None
 
     with open(configpath) as file:
@@ -87,4 +88,4 @@ if __name__ == '__main__':
         predicted_y = loaded_model.predict(X)
         #predicted_y = [np.round(y[0],0) for y in predicted_y]
     
-    pd.DataFrame(data=predicted_y, columns=["predicted"]).to_csv(sys.path[0] +"/predictions.csv")
+    pd.DataFrame(data=predicted_y, columns=["predicted"]).to_csv(save_path)

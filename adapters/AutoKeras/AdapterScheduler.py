@@ -1,0 +1,37 @@
+import uuid
+from AdapterManager import *
+from AdapterBGRPC import *
+import asyncio
+
+class AdapterScheduler:
+
+    def __init__(self) -> None:
+        self.__adapter_managers: dict[str, AdapterManager] = {}
+        return 
+
+    async def start_auto_ml(self, start_auto_ml_request):
+        new_session_identifier = str(uuid.uuid4())
+        adapter_manager = AdapterManager(new_session_identifier, self.__on_explain_completed)
+        self.__adapter_managers[new_session_identifier] = adapter_manager
+        adapter_manager.start_auto_ml(start_auto_ml_request)
+        adapter_manager.start()
+        response = StartAutoMlResponse()
+        response.session_identifier = new_session_identifier
+        return response
+    async def get_auto_ml_status(self, start_auto_ml_request: "GetAutoMlStatusRequest"):
+        if (start_auto_ml_request.session_identifier in self.__adapter_managers.keys()):
+            return self.__adapter_managers[start_auto_ml_request.session_identifier].get_auto_ml_status()
+        print(f"GET_AUTO_ML_STATUS DID NOT FIND KEY {start_auto_ml_request.session_identifier} inside {self.__adapter_managers.keys()}")
+        raise grpclib.GRPCError(grpclib.Status.NOT_FOUND, f"get_auto_ml_status: Adapter session {start_auto_ml_request.session_identifier} does not exist can not get status!")
+
+    async def explain_model(self, explain_auto_ml_request: "ExplainModelRequest"):
+        if (explain_auto_ml_request.session_identifier in self.__adapter_managers.keys()):
+            return await self.__adapter_managers[explain_auto_ml_request.session_identifier].explain_model(explain_auto_ml_request)
+        raise grpclib.GRPCError(grpclib.Status.NOT_FOUND, f"explain_model: Adapter session {explain_auto_ml_request.session_identifier} does not exist can not get model explanation!")
+
+    async def predict_model(self, predict_model_request: "PredictModelRequest"):
+        adapter_manager = AdapterManager("", self.__on_explain_completed)
+        return await adapter_manager.predict_model(predict_model_request)
+
+    async def __on_explain_completed(self, session_identifier):
+        del self.__adapter_managers[session_identifier]

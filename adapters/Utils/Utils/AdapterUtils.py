@@ -3,19 +3,14 @@ import os
 import shutil
 import subprocess
 import sys
-import time
-#import autokeras as ak
-#import tensorflow as tf
-
+import time, datetime
 import dill
-import grpc
 import numpy as np
 import pandas as pd
 from predict_time_sources import DataType, SplitMethod, feature_preparation
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, mean_squared_error
 from sklearn.metrics import classification_report
-
 from JsonUtil import get_config_property
 from TemplateGenerator import TemplateGenerator
 import glob
@@ -28,7 +23,7 @@ from AdapterBGRPC import *
 
 #region
 
-def get_except_response(context, e):
+def get_except_response(e):
     """
     Get exception message
     ---
@@ -38,10 +33,9 @@ def get_except_response(context, e):
     Return exception GRPC message
     """
     print(e)
-    adapter_name = get_config_property("adapter-name")
-    context.set_details(f"Error while executing {adapter_name}: {e}")
-    context.set_code(grpc.StatusCode.UNAVAILABLE)
-    return StartAutoMlStreamResponse()
+    response = GetAutoMlStatusResponse()
+    response.return_code = AdapterReturnCode.ADAPTER_RETURN_CODE_ERROR
+    return response
 
 
 def capture_process_output(process, start_time , use_error):
@@ -62,14 +56,14 @@ def capture_process_output(process, start_time , use_error):
     # Run until no more output is produced by the subprocess
     while len(s) > 0:
         if capture[len(capture) - 1] == '\n':
-            process_update = StartAutoMlStreamResponse()
+            process_update = GetAutoMlStatusResponse()
             process_update.return_code = AdapterReturnCode.ADAPTER_RETURN_CODE_STATUS_UPDATE
             process_update.status_update = capture
             process_update.output_json = ""
             process_update.runtime = int(time.time() - start_time) or 0
             # if return Code is ADAPTER_RETURN_CODE_STATUS_UPDATE we do not have score values yet
             process_update.test_score = 0.0
-            process_update.predictiontime = 0.0
+            process_update.prediction_time = 0.0
             process_update.library = ""
             process_update.model = ""
             yield process_update
@@ -98,15 +92,15 @@ def get_response(output_json, start_time, test_score, prediction_time, library, 
     ---
     Return the process result message
     """
-    response = StartAutoMlStreamResponse()
+    response = GetAutoMlStatusResponse()
     response.return_code = AdapterReturnCode.ADAPTER_RETURN_CODE_SUCCESS
     response.output_json = json.dumps(output_json)
     response.runtime = int(time.time() - start_time)
     response.test_score = test_score
-    response.predictiontime = prediction_time
+    response.prediction_time = prediction_time
     response.library = library
     response.model = model
-    yield response
+    return response
 
 
 #endregion
@@ -165,7 +159,7 @@ def start_automl_process(config):
     """
     python_env = os.getenv("PYTHON_ENV", default="PYTHON_ENV_UNSET")
 
-    return subprocess.Popen([python_env, "AutoML.py", config["user_identifier"], config["training_identifier"]],
+    return subprocess.Popen([python_env, "AutoML.py", config["job_folder_location"]],
                             stdout=subprocess.PIPE,
                             universal_newlines=True)
 
@@ -233,7 +227,7 @@ def evaluate(config_json, config_path, dataloader):
     python_env = os.getenv("PYTHON_ENV", default="PYTHON_ENV_UNSET")
 
     predict_start = time.time()
-    subprocess.call([python_env, os.path.join(result_path, "predict.py"), file_path, config_path])
+    subprocess.call([python_env, os.path.join(result_path, "predict.py"), file_path, config_path, os.path.join(result_path, "predictions.csv")])
     predict_time = time.time() - predict_start
 
     if(config_json["task"] == ":tabular_classification" or config_json["task"] == ":tabular_regression"or config_json["task"] == ":text_regression"or config_json["task"] == ":text_classification"):
@@ -279,7 +273,7 @@ def evaluate(config_json, config_path, dataloader):
                (predict_time * 1000) / test.shape[0]
 
 
-def predict(config_json, config_path):
+def predict(config_json, config_path, automl):
     """
     Make a prediction on test data
     ---
@@ -292,6 +286,7 @@ def predict(config_json, config_path):
     """
     result_folder_location = os.path.join(get_config_property("training-path"),
                                         config_json["user_identifier"],
+                                        config_json["dataset_identifier"],
                                         config_json["training_identifier"],
                                         get_config_property("result-folder-name"))
 
@@ -307,13 +302,14 @@ def predict(config_json, config_path):
     # predict
     os.chmod(os.path.join(result_folder_location, "predict.py"), 0o777)
     python_env = os.getenv("PYTHON_ENV", default="PYTHON_ENV_UNSET")
-
+    file_path = config_json["prediction_identifier"] + "_" + automl + ".csv"
+    result_prediction_path = os.path.join(os.path.dirname(config_json["prediction_dataset_path"]), file_path)
     predict_start = time.time()
-    subprocess.call([python_env, os.path.join(result_folder_location, "predict.py"), config_json["prediction_dataset_path"], config_path])
+    subprocess.call([python_env, os.path.join(result_folder_location, "predict.py"), config_json["prediction_dataset_path"], config_path, result_prediction_path])
     predict_time = time.time() - predict_start
 
     
-    return 0, predict_time, os.path.join(result_folder_location, "predictions.csv")
+    return predict_time, result_prediction_path
 
 def SetupRunNewRunEnvironment(configuration):
     # saving AutoML configuration JSON
@@ -322,22 +318,26 @@ def SetupRunNewRunEnvironment(configuration):
     #folder location for job related files
     job_folder_location = os.path.join(get_config_property("training-path"),
                                         config_json["user_identifier"],
+                                        config_json["dataset_identifier"],
                                         config_json["training_identifier"],
                                         get_config_property("job-folder-name"))
 
     #folder location for automl generated model files (not copied in ZIP)
     model_folder_location = os.path.join(get_config_property("training-path"),
                                         config_json["user_identifier"],
+                                        config_json["dataset_identifier"],
                                         config_json["training_identifier"],
                                         get_config_property("model-folder-name"))
 
     export_folder_location = os.path.join(get_config_property("training-path"),
                                         config_json["user_identifier"],
+                                        config_json["dataset_identifier"],
                                         config_json["training_identifier"],
                                         get_config_property("export-folder-name"))
 
     result_folder_location = os.path.join(get_config_property("training-path"),
                                         config_json["user_identifier"],
+                                        config_json["dataset_identifier"],
                                         config_json["training_identifier"],
                                         get_config_property("result-folder-name"))
 

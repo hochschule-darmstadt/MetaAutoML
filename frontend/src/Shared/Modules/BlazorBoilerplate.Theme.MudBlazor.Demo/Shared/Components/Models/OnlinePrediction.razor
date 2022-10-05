@@ -52,12 +52,12 @@
                             <MudButton OnClick="@(() => MakeOnlinePrediction(context))" Variant="Variant.Filled" Color="Color.Secondary" Size="Size.Small">@L["Predict online"]</MudButton>
                         </MudTd>
                         <MudTd>
-                            <MudButton OnClick="OnOpenUpload" Variant="Variant.Filled" Color="Color.Secondary" Size="Size.Small">@L["Download result CSV"]</MudButton>
+                            <MudButton OnClick="@(() => DownlaodPrediction(context))" Variant="Variant.Filled" Color="Color.Secondary" Size="Size.Small">@L["Download result CSV"]</MudButton>
                         </MudTd>
                     </RowTemplate>
                 </MudTable>
-                <InputFile id="fileInput" OnChange="UploadFiles" hidden />
-                if (Model.Model.Status == "completed")
+                @*<InputFile id="fileInput" OnChange="UploadFiles" hidden />*@
+@*                @if (Model.Model.Status == "completed")
                 {
                     <MudStack>
                         <MudButton HtmlTag="label"
@@ -82,7 +82,7 @@
                         </MudButton>
                         <MudButton StartIcon="@Icons.Filled.CloudDownload" Color="Color.Secondary" Disabled="true">@L["Download result CSV"]</MudButton>
                     </MudStack>
-                }
+                }*@
             }
         </MudPaper>
     </MudCardContent>
@@ -179,49 +179,74 @@
         }
     }
 
-    private async Task UploadFiles(InputFileChangeEventArgs e)
+    private async void DownlaodPrediction(PredictionDatasetDto predictionDataset)
     {
-        //try
-        //{
-        //    var file = e.File;
-        //    using var stream = e.File.OpenReadStream((512000 * 2 * 400));
-        //    using var ms = new MemoryStream();
-        //    await stream.CopyToAsync(ms);
-        //    var content = ms.ToArray();
+        try
+        {
+            ApiResponseDto apiResponse = await apiClient.GetPredictionDatasetPrediction(new GetPredictionDatasetPredictionRequestDto() { PredictionDatasetIdentifier = predictionDataset.Identifier, PredictionIdentifier = ((string)((KeyValuePair<string, dynamic>)predictionDataset.Predictions.ElementAt(0)).Key) });
+            if (apiResponse.IsSuccessStatusCode)
+            {
+                GetPredictionDatasetPredictionResponseDto response = Newtonsoft.Json.JsonConvert.DeserializeObject<GetPredictionDatasetPredictionResponseDto>(apiResponse.Result.ToString());
 
-
-        //    //ApiResponseDto apiResponse = await apiClient.ModelPrediction(new ModelPredictionRequestDto { TestData = content, ModelId = Model.Model.Identifier});
-        //    if (apiResponse.IsSuccessStatusCode)
-        //    {
-        //        _predictionResult = Newtonsoft.Json.JsonConvert.DeserializeObject<ModelPredictResponseDto>(apiResponse.Result.ToString());
-        //        _downloadReady = false;
-        //        StateHasChanged();
-        //    }
-        //    else
-        //    {
-        //        viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
-        //    }
-        //}
-        //catch (Exception ex)
-        //{
-        //    viewNotifier.Show(ex.GetBaseException().Message, ViewNotifierType.Error, L["Operation Failed"]);
-        //}
-    }
-
-    private async void DownloadPredictions()
-    {
-        try{
-            byte[] predictionBytes = _predictionResult.Predictions.SelectMany(s => System.Text.Encoding.UTF8.GetBytes(s + Environment.NewLine)).ToArray();
-            
-            var stream = new MemoryStream(predictionBytes);
-            using var streamRef = new DotNetStreamReference(stream: stream);
-            await JS.InvokeVoidAsync("downloadFileFromStream", "predictions.csv", streamRef);
+                var stream = new MemoryStream(response.Content);
+                using var streamRef = new DotNetStreamReference(stream: stream);
+                await JS.InvokeVoidAsync("downloadFileFromStream", "predictions.csv", streamRef);
+                StateHasChanged();
+            }
+            else
+            {
+                viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
+            }
         }
         catch (Exception ex)
         {
             viewNotifier.Show(ex.GetBaseException().Message, ViewNotifierType.Error, L["Operation Failed"]);
         }
     }
+
+    //private async Task UploadFiles(InputFileChangeEventArgs e)
+    //{
+    //    //try
+    //    //{
+    //    //    var file = e.File;
+    //    //    using var stream = e.File.OpenReadStream((512000 * 2 * 400));
+    //    //    using var ms = new MemoryStream();
+    //    //    await stream.CopyToAsync(ms);
+    //    //    var content = ms.ToArray();
+
+
+    //    //    //ApiResponseDto apiResponse = await apiClient.ModelPrediction(new ModelPredictionRequestDto { TestData = content, ModelId = Model.Model.Identifier});
+    //    //    if (apiResponse.IsSuccessStatusCode)
+    //    //    {
+    //    //        _predictionResult = Newtonsoft.Json.JsonConvert.DeserializeObject<ModelPredictResponseDto>(apiResponse.Result.ToString());
+    //    //        _downloadReady = false;
+    //    //        StateHasChanged();
+    //    //    }
+    //    //    else
+    //    //    {
+    //    //        viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
+    //    //    }
+    //    //}
+    //    //catch (Exception ex)
+    //    //{
+    //    //    viewNotifier.Show(ex.GetBaseException().Message, ViewNotifierType.Error, L["Operation Failed"]);
+    //    //}
+    //}
+
+    //private async void DownloadPredictions()
+    //{
+    //    try{
+    //        byte[] predictionBytes = _predictionResult.Predictions.SelectMany(s => System.Text.Encoding.UTF8.GetBytes(s + Environment.NewLine)).ToArray();
+            
+    //        var stream = new MemoryStream(predictionBytes);
+    //        using var streamRef = new DotNetStreamReference(stream: stream);
+    //        await JS.InvokeVoidAsync("downloadFileFromStream", "predictions.csv", streamRef);
+    //    }
+    //    catch (Exception ex)
+    //    {
+    //        viewNotifier.Show(ex.GetBaseException().Message, ViewNotifierType.Error, L["Operation Failed"]);
+    //    }
+    //}
 
 
 }

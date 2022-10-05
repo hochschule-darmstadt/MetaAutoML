@@ -73,6 +73,7 @@ namespace BlazorBoilerplate.Shared.Interfaces
 
         #region OMA-ML PREDICTION DATASET MESSAGES
         Task<ApiResponseDto> UploadPredictionDataset(UploadPredictionDatasetRequestDto request);
+        Task<ApiResponseDto> GetPredictionDatasetPrediction(GetPredictionDatasetPredictionRequestDto request);
         Task<ApiResponseDto> GetPredictionDatasets(GetPredictionDatasetsRequestDto request);
         Task<ApiResponseDto> GetPredictionDataset(GetPredictionDatasetRequestDto request);
         Task<ApiResponseDto> DeletePredictionDataset(DeletePredictionDatasetRequestDto request);

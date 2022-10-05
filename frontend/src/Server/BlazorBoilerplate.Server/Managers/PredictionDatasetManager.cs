@@ -1,8 +1,10 @@
 ﻿using BlazorBoilerplate.Infrastructure.Server;
 using BlazorBoilerplate.Infrastructure.Server.Models;
 using BlazorBoilerplate.Shared.Dto.Dataset;
+using BlazorBoilerplate.Shared.Dto.Model;
 using BlazorBoilerplate.Shared.Dto.PredictionDataset;
 using BlazorBoilerplate.Storage;
+using Newtonsoft.Json;
 using System.Net;
 using static Microsoft.AspNetCore.Http.StatusCodes;
 
@@ -40,6 +42,40 @@ namespace BlazorBoilerplate.Server.Managers
             {
 
                 Console.WriteLine(ex.Message);
+                return new ApiResponse(Status404NotFound, ex.Message);
+            }
+        }
+        async public Task<ApiResponse> GetPredictionDatasetPrediction(GetPredictionDatasetPredictionRequestDto request)
+        {
+            GetPredictionDatasetPredictionResponseDto response = new GetPredictionDatasetPredictionResponseDto();
+            GetPredictionDatasetRequest getPredictionDatasetRequest = new GetPredictionDatasetRequest();
+            var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
+            try
+            {
+                getPredictionDatasetRequest.UserIdentifier = username;
+                getPredictionDatasetRequest.PredictionDatasetIdentifier = request.PredictionDatasetIdentifier;
+                var reply = _client.GetPredictionDataset(getPredictionDatasetRequest);
+                //TODO NEW DOWNLOAD FUNCTIONALITY IMPLEMENTATION
+                var predictions = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(reply.PredictionDataset.Predictions);
+                foreach (var item in predictions)
+                {
+                    if (item.Key == request.PredictionIdentifier)
+                    {
+                        var prediction = item.Value;
+                        string predictionFilePath = (string)prediction["result_path"].Value;
+                        byte[] predictionFile = File.ReadAllBytes(predictionFilePath);
+                        response.Content = predictionFile;
+                        response.Name = "predicitons.csv";
+                        break;
+                    }
+                }
+                string path = predictions[request.PredictionIdentifier]["result_path"];
+                return new ApiResponse(Status200OK, null, response);
+
+            }
+            catch (Exception ex)
+            {
+
                 return new ApiResponse(Status404NotFound, ex.Message);
             }
         }

@@ -7,51 +7,62 @@ service AdapterService {
 /* 
 Execute a new AutoML run. 
 */
-    rpc StartAutoMLStream(StartAutoMLRequest) returns (stream StartAutoMLStreamResponse) {}
-    rpc TestAdapter(TestAdapterRequest) returns (TestAdapterResponse) {}
+    rpc StartAutoML(StartAutoMLRequest) returns (StartAutoMLResponse) {}
+    rpc GetAutoMLStatus(GetAutoMLStatusRequest) returns (GetAutoMLStatusResponse) {}
     rpc ExplainModel(ExplainModelRequest) returns (ExplainModelResponse) {}
+    rpc PredictModel(PredictModelRequest) returns (PredictModelResponse) {}
 }
 
-
-message TestAdapterRequest {
-    string testData = 1;
-    string processJson = 2;
-}
-
-message TestAdapterResponse {
-    repeated string predictions = 1;
-    float score = 2;
-    float predictiontime = 3;
-}
 
 message StartAutoMLRequest {
 	string processJson = 1;
 }
 
-message StartAutoMLStreamResponse {
+message StartAutoMLResponse {
+    string session_identifier = 1;
+}
+
+message GetAutoMLStatusRequest {
+    string session_identifier = 1;
+}
+
+message GetAutoMLStatusResponse {
 	AdapterReturnCode returnCode = 1;
 	string statusUpdate = 2;
 	string outputJson = 3;
 	float testScore = 4;
     float validationScore = 5;
     int32 runtime = 6;
-    float predictiontime = 7;
+    float predictionTime = 7;
     string library = 8;
     string model = 9;
-}
-
-enum AdapterReturnCode {
-	ADAPTER_RETURN_CODE_UNKNOWN = 0;
-	ADAPTER_RETURN_CODE_SUCCESS = 1;
-	ADAPTER_RETURN_CODE_STATUS_UPDATE = 2;
-	ADAPTER_RETURN_CODE_ERROR = 100;
 }
 
 message ExplainModelRequest {
     string data = 1;
     string processJson = 2;
+    string session_identifier = 3;
 }
 
 message ExplainModelResponse {
-    string probabilities = 1;
+    string session_identifier = 1;
+    string probabilities = 2;
+}
+
+message PredictModelRequest {
+    string processJson = 1;
+}
+
+message PredictModelResponse {
+    repeated string predictions = 1;
+    float predictiontime = 2;
+    string resultPath = 3;
+}
+
+enum AdapterReturnCode {
+	ADAPTER_RETURN_CODE_UNKNOWN = 0;
+	ADAPTER_RETURN_CODE_SUCCESS = 1;
+	ADAPTER_RETURN_CODE_PENDING = 2;
+	ADAPTER_RETURN_CODE_STATUS_UPDATE = 3;
+	ADAPTER_RETURN_CODE_ERROR = 100;
 }

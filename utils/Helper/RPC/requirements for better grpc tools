@@ -7,5 +7,6 @@ python -m grpc_tools.protoc -I . --python_betterproto_out=out ControllerService.
 cd adapter
 python -m grpc_tools.protoc -I . --python_betterproto_out=out AdapterService.proto
 
+python -m grpc_tools.protoc -I . --python_out=out  --grpclib_python_out=out AdapterServiceTest.proto
 
 compiles init.py

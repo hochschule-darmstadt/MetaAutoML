@@ -73,7 +73,7 @@
 
 <MudDialog @bind-IsVisible="fileUploader.IsUploadPredictionDatasetDialogOpen">
     <DialogContent>
-        if (fileUploader.IsUploading == true)
+        @if (fileUploader.IsUploading == true)
         {
         <MudStack Class="mt-4">
             <MudText Typo="Typo.body2">@UploadText</MudText>

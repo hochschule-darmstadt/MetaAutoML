@@ -41,6 +41,7 @@ message PredictionDataset {
   string path = 7;
   string fileName = 8;
   string fileConfiguration = 9;
+  string predictions = 10;
 }
 
 message CreatePredictionDatasetRequest {

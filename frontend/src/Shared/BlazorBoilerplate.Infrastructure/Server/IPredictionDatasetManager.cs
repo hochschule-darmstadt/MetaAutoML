@@ -12,6 +12,7 @@ namespace BlazorBoilerplate.Infrastructure.Server
     {
         Task<ApiResponse> UploadPredictionDataset(UploadPredictionDatasetRequestDto request);
         Task<ApiResponse> GetPredictionDatasets(GetPredictionDatasetsRequestDto request);
+        Task<ApiResponse> GetPredictionDatasetPrediction(GetPredictionDatasetPredictionRequestDto request);
         Task<ApiResponse> GetPredictionDataset(GetPredictionDatasetRequestDto request);
         Task<ApiResponse> DeletePredictionDataset(DeletePredictionDatasetRequestDto request);
     }

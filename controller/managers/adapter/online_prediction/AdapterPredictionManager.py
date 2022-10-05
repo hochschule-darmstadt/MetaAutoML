@@ -55,17 +55,25 @@ class AdapterPredictionManager(Thread):
                 self.__data_storage.update_prediction_dataset(self.__request.user_identifier, self.__request.prediction_dataset_identifier, {"predictions": predicitons})
 
 
-            request = TestAdapterRequest()
+            request = PredictModelRequest()
             process_json = self.__request_configuration
             request.process_json = json.dumps(process_json)
             channel = Channel(host=self.__host, port=self.__port)
             service = AdapterServiceStub(channel=channel)
             self.__log.debug(f"run: connecting to AutoML Adapter {self.__host}:{self.__port}")
             
-            response = await service.test_adapter(request)
-                # Send request WATCH OUT THIS IS A LOOP REQUEST Check out for normal request
-                # https://grpc.io/docs/languages/python/quickstart/#update-the-client
-            print("")
+            response = await service.predict_model(request)
+            with self.__data_storage.lock():
+                found, prediction_dataset = self.__data_storage.get_prediction_dataset(self.__request.user_identifier, self.__request.prediction_dataset_identifier)
+                predicitons = prediction_dataset["predictions"]
+                predicitons[self.__prediction_identifier]["status"] = "completed"
+                predicitons[self.__prediction_identifier]["result_path"] = response.result_path
+                predicitons[self.__prediction_identifier]["predictiontime"] = response.predictiontime
+                new_values = {
+                    "predictions": predicitons
+                }
+                self.__data_storage.update_prediction_dataset(self.__request.user_identifier, self.__request.prediction_dataset_identifier, new_values)
+            return
         except Exception as rpc_error:
             #print(f"Received unknown RPC error: code={rpc_error.message} message={rpc_error.details()}")
             print("Connection failed to adapter")

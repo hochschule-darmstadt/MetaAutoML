@@ -4,7 +4,6 @@ import pandas as pd
 import threading
 import sys
 import numpy as np
-import asyncio
 
 from AdapterManager import AdapterManager
 from ControllerBGRPC import *

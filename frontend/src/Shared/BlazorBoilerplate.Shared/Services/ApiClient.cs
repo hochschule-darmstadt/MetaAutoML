@@ -183,6 +183,10 @@ namespace BlazorBoilerplate.Shared.Services
             return await httpClient.PostJsonAsync<ApiResponseDto>("api/PredictionDataset/UploadPredictionDataset", request);
         }
 
+        async public Task<ApiResponseDto> GetPredictionDatasetPrediction(GetPredictionDatasetPredictionRequestDto request)
+        {
+            return await httpClient.PostJsonAsync<ApiResponseDto>("api/PredictionDataset/GetPredictionDatasetPrediction", request);
+        }
         async public Task<ApiResponseDto> GetPredictionDatasets(GetPredictionDatasetsRequestDto request)
         {
             return await httpClient.PostJsonAsync<ApiResponseDto>("api/PredictionDataset/GetPredictionDatasets", request);

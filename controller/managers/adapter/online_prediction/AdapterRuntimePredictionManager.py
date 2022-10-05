@@ -37,6 +37,8 @@ class AdapterRuntimePredictionManager:
         prediction_configuration = {
             "training_identifier": str(training["_id"]),
             "user_identifier": self.__request.user_identifier,
+            "dataset_identifier": training["dataset_identifier"],
+            "prediction_identifier": self.__prediction_identifier,
             "task": training["task"],
             "configuration": training["configuration"],
             "dataset_configuration": training["dataset_configuration"],

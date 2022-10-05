@@ -27,7 +27,7 @@ class AdapterManager(Thread):
         self.__port = port
         self.__status_messages = []
         self.__adapter_finished_callback = adapter_finished_callback
-        self.__status = "started"
+        self.__status = "busy"
         self.__testScore = 0
         self.__runtime = 0
         self.__prediction_time = 0
@@ -84,6 +84,7 @@ class AdapterManager(Thread):
 
         return {
             "training_identifier": self.__training_identifier,
+            "dataset_identifier": str(self.__dataset["_id"]),
             "file_name": self.__dataset["file_name"],
             "file_location": self.__dataset["path"],
             "task": self.__request.task,
@@ -130,10 +131,19 @@ class AdapterManager(Thread):
             channel = Channel(host=self.__host, port=self.__port)
             service = AdapterServiceStub(channel=channel)
             self.__log.debug(f"run: connecting to AutoML Adapter {self.__host}:{self.__port}")
-            
-            async for response in service.start_auto_ml_stream(request):
+            response = await service.start_auto_ml(request)
+            self.__session_identifier = response.session_identifier
+            await asyncio.sleep(5)
+
+            while True:
+                await asyncio.sleep(0.2)
+                request = GetAutoMlStatusRequest()
+                request.session_identifier = self.__session_identifier
+                response = await service.get_auto_ml_status(request)
                 # Send request WATCH OUT THIS IS A LOOP REQUEST Check out for normal request
                 # https://grpc.io/docs/languages/python/quickstart/#update-the-client
+                if response.return_code == AdapterReturnCode.ADAPTER_RETURN_CODE_PENDING:
+                    continue
                 if response.return_code == AdapterReturnCode.ADAPTER_RETURN_CODE_STATUS_UPDATE:
                     self.__status_messages.append(response.status_update)
                     self.__runtime = response.runtime
@@ -144,7 +154,7 @@ class AdapterManager(Thread):
                     self.__status = "completed"
                     self.__testScore = response.test_score
                     self.__runtime = response.runtime
-                    self.__prediction_time = response.predictiontime
+                    self.__prediction_time = response.prediction_time
                     self.__ml_model_type = response.model
                     self.__ml_library = response.library
 
@@ -163,6 +173,8 @@ class AdapterManager(Thread):
 
         except Exception as rpc_error:
             #print(f"Received unknown RPC error: code={rpc_error.message} message={rpc_error.details()}")
+            print(rpc_error)
+            channel.close()
             print("Connection failed to adapter")
             self.__status = "failed"
             model_details = {
@@ -193,6 +205,7 @@ class AdapterManager(Thread):
         return {
             "training_identifier": self.__training_identifier,
             "user_identifier": self.__request.user_identifier,
+            "dataset_identifier": str(self.__dataset["_id"]),
             "task": self.__request.task,
             "configuration": self.__request.configuration,
             "dataset_configuration": self.__request.dataset_configuration,
@@ -227,6 +240,7 @@ class AdapterManager(Thread):
             channel = Channel(host=self.__host, port=self.__port)
             service = AdapterServiceStub(channel=channel)
             request = ExplainModelRequest()  # Request Object
+            request.session_identifier = self.__session_identifier
             process_json = self._generate_test_json()
             process_json["test_configuration"]["method"] = 1
             process_json["test_configuration"]["split_ratio"] = 0
