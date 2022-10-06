@@ -2,7 +2,7 @@ syntax = "proto3";
 option csharp_namespace = "BlazorBoilerplate.Server";
 
 import "DatasetRelatedMessages.proto";
-import "PredictionDatasetRelatedMessages.proto";
+import "PredictionRelatedMessages.proto";
 import "ModelRelatedMessages.proto";
 import "TrainingRelatedMessages.proto";
 import "OntologyRelatedMessages.proto";
@@ -11,7 +11,7 @@ import "UserRelatedMessages.proto";
 /*includes all gRPC functions available for the client frontend*/
 service ControllerService {
   /*OMA-ML USER MESSAGES*/
-  /* return the OMA-ML user identifier for a newly created frontend user */
+  /* return the OMA-ML user id for a newly created frontend user */
   rpc CreateNewUser(CreateNewUserRequest) returns (CreateNewUserResponse) {}
   /*return overview information for home page*/
   rpc GetHomeOverviewInformation(GetHomeOverviewInformationRequest) returns (GetHomeOverviewInformationResponse) {}
@@ -76,16 +76,16 @@ service ControllerService {
   
   /*OMA-ML PREDICTION DATASET MESSAGES*/
   /* create a new Dataset */
-  rpc CreatePredictionDataset(CreatePredictionDatasetRequest) returns (CreatePredictionDatasetResponse) {}
+  rpc CreatePrediction(CreatePredictionRequest) returns (CreatePredictionResponse) {}
 
   /*return a list of all Datasets*/
-  rpc GetPredictionDatasets(GetPredictionDatasetsRequest) returns (GetPredictionDatasetsResponse) {}
+  rpc GetPredictions(GetPredictionsRequest) returns (GetPredictionsResponse) {}
 
   /*return a Dataset*/
-  rpc GetPredictionDataset(GetPredictionDatasetRequest) returns (GetPredictionDatasetResponse) {}
+  rpc GetPrediction(GetPredictionRequest) returns (GetPredictionResponse) {}
 
   /*delete a Dataset and every related object*/
-  rpc DeletePredictionDataset(DeletePredictionDatasetRequest) returns (DeletePredictionDatasetResponse) {}
+  rpc DeletePrediction(DeletePredictionRequest) returns (DeletePredictionResponse) {}
 }
 
 

@@ -151,14 +151,14 @@ class OntologyManager(object):
         Return SEE PROTO #TODO
         """
         result = GetObjectsInformationResponse()
-        for id in request.identifiers:
-            self.__log.debug(f"get_objects_information: querying for identifier {id}")
+        for id in request.ids:
+            self.__log.debug(f"get_objects_information: querying for id {id}")
             current_object = ObjectInformation()
             q = prepareQuery(Queries.ONTOLOGY_QUERY_GET_ALL_DETAILS_BY_ID)
 
             object_id = rdflib.URIRef(ML_ONTOLOGY_NAMESPACE + id.replace(":", ""))
             queryResult = self.__execute_query(q, {"s": object_id})
-            current_object.identifier = id
+            current_object.id = id
             for row in queryResult:
                 row.p = row.p.replace(ML_ONTOLOGY_NAMESPACE, ":")
                 row.p = row.p.replace(RDF_NAMESPACE, "rdf:")

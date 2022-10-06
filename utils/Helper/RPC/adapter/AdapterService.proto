@@ -19,11 +19,11 @@ message StartAutoMLRequest {
 }
 
 message StartAutoMLResponse {
-    string session_identifier = 1;
+    string sessionId = 1;
 }
 
 message GetAutoMLStatusRequest {
-    string session_identifier = 1;
+    string sessionId = 1;
 }
 
 message GetAutoMLStatusResponse {
@@ -41,11 +41,11 @@ message GetAutoMLStatusResponse {
 message ExplainModelRequest {
     string data = 1;
     string processJson = 2;
-    string session_identifier = 3;
+    string sessionId = 3;
 }
 
 message ExplainModelResponse {
-    string session_identifier = 1;
+    string sessionId = 1;
     string probabilities = 2;
 }
 

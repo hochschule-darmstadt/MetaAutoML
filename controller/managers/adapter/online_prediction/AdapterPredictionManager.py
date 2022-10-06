@@ -12,7 +12,7 @@ from betterproto.grpc.util.async_channel import AsyncChannel
 
 class AdapterPredictionManager(Thread):
 
-    def __init__(self, data_storage: DataStorage, request: "ModelPredictRequest", request_configuration: dict, user_identifier: str, automl:str, training_identifier: str, host: str, port: int, prediction_identifier: str, adapter_finished_callback) -> None:
+    def __init__(self, data_storage: DataStorage, request: "ModelPredictRequest", request_configuration: dict, user_id: str, automl:str, training_id: str, host: str, port: int, prediction_id: str, adapter_finished_callback) -> None:
         
         super(AdapterPredictionManager, self).__init__()
         self.__log = logging.getLogger('AdapterPredictionManager')
@@ -20,10 +20,10 @@ class AdapterPredictionManager(Thread):
         self.__data_storage = data_storage
         self.__request = request
         self.__request_configuration = request_configuration
-        self.__prediction_identifier = prediction_identifier
+        self.__prediction_id = prediction_id
         self.__automl = automl
-        self.__training_identifier = training_identifier
-        self.__user_identifier = user_identifier
+        self.__training_id = training_id
+        self.__user_id = user_id
         self.__host = host
         self.__port = port
         self.__status_messages = []
@@ -49,10 +49,10 @@ class AdapterPredictionManager(Thread):
             self.__status = "busy"
             # Append model_id to dataset
             with self.__data_storage.lock():
-                found, prediction_dataset = self.__data_storage.get_prediction_dataset(self.__request.user_identifier, self.__request.prediction_dataset_identifier)
-                predicitons = prediction_dataset["predictions"]
-                predicitons[self.__request.model_identifier][self.__prediction_identifier]["status"] = "busy"
-                self.__data_storage.update_prediction_dataset(self.__request.user_identifier, self.__request.prediction_dataset_identifier, {"predictions": predicitons})
+                found, prediction = self.__data_storage.get_prediction(self.__request.user_id, self.__request.prediction_id)
+                predicitons = prediction["predictions"]
+                predicitons[self.__request.model_id][self.__prediction_id]["status"] = "busy"
+                self.__data_storage.update_prediction(self.__request.user_id, self.__request.prediction_id, {"predictions": predicitons})
 
 
             request = PredictModelRequest()
@@ -65,15 +65,15 @@ class AdapterPredictionManager(Thread):
 
             response = await service.predict_model(request)
             with self.__data_storage.lock():
-                found, prediction_dataset = self.__data_storage.get_prediction_dataset(self.__request.user_identifier, self.__request.prediction_dataset_identifier)
-                predicitons = prediction_dataset["predictions"]
-                predicitons[self.__request.model_identifier][self.__prediction_identifier]["status"] = "completed"
-                predicitons[self.__request.model_identifier][self.__prediction_identifier]["prediction_path"] = response.result_path
-                predicitons[self.__request.model_identifier][self.__prediction_identifier]["prediction_time"] = response.predictiontime
+                found, prediction = self.__data_storage.get_prediction(self.__request.user_id, self.__request.prediction_id)
+                predicitons = prediction["predictions"]
+                predicitons[self.__request.model_id][self.__prediction_id]["status"] = "completed"
+                predicitons[self.__request.model_id][self.__prediction_id]["prediction_path"] = response.result_path
+                predicitons[self.__request.model_id][self.__prediction_id]["prediction_time"] = response.predictiontime
                 new_values = {
                     "predictions": predicitons
                 }
-                self.__data_storage.update_prediction_dataset(self.__request.user_identifier, self.__request.prediction_dataset_identifier, new_values)
+                self.__data_storage.update_prediction(self.__request.user_id, self.__request.prediction_id, new_values)
             return
         except Exception as rpc_error:
             #print(f"Received unknown RPC error: code={rpc_error.message} message={rpc_error.details()}")
@@ -82,7 +82,7 @@ class AdapterPredictionManager(Thread):
             model_details = {
                 "status": self.__status
                 }
-            self.__adapter_finished_callback(self.__training_identifier, self.__request.user_identifier, self.__request.model_identifier, model_details, self)
+            self.__adapter_finished_callback(self.__training_id, self.__request.user_id, self.__request.model_id, model_details, self)
 
     
     def run(self):

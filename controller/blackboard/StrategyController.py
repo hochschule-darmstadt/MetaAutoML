@@ -92,19 +92,19 @@ class StrategyController(object):
             self.__update_phase_next_run = None
         for agent in list(self.blackboard.agents.values()):
             if agent.can_contribute():
-                self._log.debug(f'run_loop: Executing contribution by agent: {agent.agent_identifier}')
+                self._log.debug(f'run_loop: Executing contribution by agent: {agent.agent_id}')
                 try:
                     contribution = agent.do_contribute()
                     state_changed = True
                 except StopIteration as err:
                     # An agent requested the controller to stop, will halt after all agents & strategies finished..
-                    self._log.error(f'run_loop: Agent "{agent.agent_identifier}" requested a stop: {err}')
+                    self._log.error(f'run_loop: Agent "{agent.agent_id}" requested a stop: {err}')
                     stop_requested = True
                 except Exception as err:
-                    self._log.error(f'run_loop: Could not execute contribution by agent: {agent.agent_identifier}')
+                    self._log.error(f'run_loop: Could not execute contribution by agent: {agent.agent_id}')
                     self._log.exception(err)
             else:
-                self._log.debug(f'run_loop: No contribution by agent: {agent.agent_identifier}')
+                self._log.debug(f'run_loop: No contribution by agent: {agent.agent_id}')
         if state_changed:
             self.evaluate_strategy()
         if stop_requested:
@@ -159,12 +159,12 @@ class StrategyController(object):
         for callback in (self.event_listeners.get('*', []) + self.event_listeners.get(event_type, [])):
             self._log.debug(f'Dispatching event callback for "{event_type}": {callback}')
             result = callback(meta, self)
-        training_identifier = self.__adapter_runtime_manager.get_training_identifier()
-        user_identifier = self.__adapter_runtime_manager.get_user_identifier()
-        if training_identifier is not None and user_identifier is not None:
+        training_id = self.__adapter_runtime_manager.get_training_id()
+        user_id = self.__adapter_runtime_manager.get_user_id()
+        if training_id is not None and user_id is not None:
             with self.__data_storage.lock():
                 self._log.debug(f'log_event: Updating events in the persistent storage..')
-                self.__data_storage.update_training(user_identifier, training_identifier, { 'events': events })
+                self.__data_storage.update_training(user_id, training_id, { 'events': events })
 
     def on_event(self, event_type: str, callback: Callable) -> None:
         if event_type not in self.event_listeners:

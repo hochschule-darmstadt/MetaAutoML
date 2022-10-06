@@ -1,7 +1,7 @@
 from urllib import response
 from Container import Application
 from DatasetManager import DatasetManager
-from PredictionDatasetManager import PredictionDatasetManager
+from PredictionManager import PredictionDatasetManager
 from TrainingManager import TrainingManager
 from ModelManager import ModelManager
 from UserManager import UserManager
@@ -380,43 +380,43 @@ class ControllerServiceManager(ControllerServiceBase):
 
 
     @inject
-    async def create_prediction_dataset(
-        self, create_prediction_dataset_request: "CreatePredictionDatasetRequest",
-        predictionDatasetManager: PredictionDatasetManager=Provide[Application.managers.prediction_dataset_manager]
+    async def create_prediction(
+        self, create_prediction_request: "CreatePredictionDatasetRequest",
+        predictionDatasetManager: PredictionDatasetManager=Provide[Application.managers.prediction_manager]
     ) -> "CreatePredictionDatasetResponse":
         with MeasureDuration() as m:
-            response = predictionDatasetManager.create_prediction_dataset(create_prediction_dataset_request)
-        self.__log.warn("create_prediction_dataset: executed")
+            response = predictionDatasetManager.create_prediction(create_prediction_request)
+        self.__log.warn("create_prediction: executed")
         return response
 
     @inject
-    async def get_prediction_datasets(
-        self, get_prediction_datasets_request: "GetPredictionDatasetsRequest",
-        predictionDatasetManager: PredictionDatasetManager=Provide[Application.managers.prediction_dataset_manager]
+    async def get_predictions(
+        self, get_predictions_request: "GetPredictionDatasetsRequest",
+        predictionDatasetManager: PredictionDatasetManager=Provide[Application.managers.prediction_manager]
     ) -> "GetPredictionDatasetsResponse":
         with MeasureDuration() as m:
-            response = predictionDatasetManager.get_prediction_datasets(get_prediction_datasets_request)
-        self.__log.warn("get_prediction_datasets: executed")
+            response = predictionDatasetManager.get_predictions(get_predictions_request)
+        self.__log.warn("get_predictions: executed")
         return response
 
     @inject
-    async def get_prediction_dataset(
-        self, get_prediction_dataset_request: "GetPredictionDatasetRequest",
-        predictionDatasetManager: PredictionDatasetManager=Provide[Application.managers.prediction_dataset_manager]
+    async def get_prediction(
+        self, get_prediction_request: "GetPredictionDatasetRequest",
+        predictionDatasetManager: PredictionDatasetManager=Provide[Application.managers.prediction_manager]
     ) -> "GetPredictionDatasetResponse":
         with MeasureDuration() as m:
-            response = predictionDatasetManager.get_prediction_dataset(get_prediction_dataset_request)
-        self.__log.warn("get_prediction_dataset: executed")
+            response = predictionDatasetManager.get_prediction(get_prediction_request)
+        self.__log.warn("get_prediction: executed")
         return response
 
     @inject
-    async def delete_prediction_dataset(
-        self, delete_prediction_dataset_request: "DeletePredictionDatasetRequest",
-        predictionDatasetManager: PredictionDatasetManager=Provide[Application.managers.prediction_dataset_manager]
+    async def delete_prediction(
+        self, delete_prediction_request: "DeletePredictionDatasetRequest",
+        predictionDatasetManager: PredictionDatasetManager=Provide[Application.managers.prediction_manager]
     ) -> "DeletePredictionDatasetResponse":
         with MeasureDuration() as m:
-            response = predictionDatasetManager.delete_prediction_dataset(delete_prediction_dataset_request)
-        self.__log.warn("delete_prediction_dataset: executed")
+            response = predictionDatasetManager.delete_prediction(delete_prediction_request)
+        self.__log.warn("delete_prediction: executed")
         return response
         
 #endregion

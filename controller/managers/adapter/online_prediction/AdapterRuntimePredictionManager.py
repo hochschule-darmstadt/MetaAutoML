@@ -8,10 +8,10 @@ from AdapterManager import AdapterManager
 
 class AdapterRuntimePredictionManager:
 
-    def __init__(self, data_storage: DataStorage, request: "ModelPredictRequest", prediction_identifier) -> None:
+    def __init__(self, data_storage: DataStorage, request: "ModelPredictRequest", prediction_id) -> None:
         self.__data_storage: DataStorage = data_storage
         self.__request = request
-        self.__prediction_identifier = prediction_identifier
+        self.__prediction_id = prediction_id
         self.__log = logging.getLogger('AdapterPredictionManager')
         self.__log.setLevel(logging.getLevelName(os.getenv("SERVER_LOGGING_LEVEL")))
         self.__automl_addresses = {
@@ -31,14 +31,14 @@ class AdapterRuntimePredictionManager:
 
     def create_new_prediction(self):
 
-        found, model = self.__data_storage.get_model(self.__request.user_identifier, self.__request.model_identifier)
-        found, training = self.__data_storage.get_training(self.__request.user_identifier, model["training_identifier"])
-        found, prediction_dataset = self.__data_storage.get_prediction_dataset(self.__request.user_identifier, self.__request.prediction_dataset_identifier)
+        found, model = self.__data_storage.get_model(self.__request.user_id, self.__request.model_id)
+        found, training = self.__data_storage.get_training(self.__request.user_id, model["training_id"])
+        found, prediction = self.__data_storage.get_prediction(self.__request.user_id, self.__request.prediction_id)
         prediction_configuration = {
-            "training_identifier": str(training["_id"]),
-            "user_identifier": self.__request.user_identifier,
-            "dataset_identifier": training["dataset_identifier"],
-            "prediction_identifier": self.__prediction_identifier,
+            "training_id": str(training["_id"]),
+            "user_id": self.__request.user_id,
+            "dataset_id": training["dataset_id"],
+            "prediction_id": self.__prediction_id,
             "task": training["task"],
             "configuration": training["configuration"],
             "dataset_configuration": training["dataset_configuration"],
@@ -46,7 +46,7 @@ class AdapterRuntimePredictionManager:
             "test_configuration": training["test_configuration"],
             "file_configuration": training["file_configuration"],
             "metric": training["metric"],
-            "prediction_dataset_path": prediction_dataset["path"]
+            "prediction_path": prediction["path"]
         }
         prediction_configuration["test_configuration"]["method"] = 1
         prediction_configuration["test_configuration"]["split_ratio"] = 0
@@ -57,9 +57,9 @@ class AdapterRuntimePredictionManager:
         host, port = map(os.getenv, self.__automl_addresses[model["automl_name"].lower()])
         port = int(port)
         self.__log.debug(f"create_new_prediction: creating new prediction adapter manager and adapter manager agent")
-        adapter_prediction = AdapterPredictionManager(self.__data_storage, self.__request, prediction_configuration, self.__request.user_identifier, model['automl_name'], str(training["_id"]), host, port, self.__prediction_identifier, self.__adapter_finished_callback)
+        adapter_prediction = AdapterPredictionManager(self.__data_storage, self.__request, prediction_configuration, self.__request.user_id, model['automl_name'], str(training["_id"]), host, port, self.__prediction_id, self.__adapter_finished_callback)
         self.__adapters.append(adapter_prediction)
         adapter_prediction.start()
 
-    def __adapter_finished_callback(self, training_identifier, user_identifier, model_identifier, model_details: 'dict[str, object]', adapter_manager: AdapterManager):
+    def __adapter_finished_callback(self, training_id, user_id, model_id, model_details: 'dict[str, object]', adapter_manager: AdapterManager):
         return        

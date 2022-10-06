@@ -14,10 +14,10 @@ from ExplainableAIManager import ExplainableAIManager
 
 class AdapterRuntimeManager:
 
-    def __init__(self, data_storage: DataStorage, request: "CreateTrainingRequest", training_identifier: str, dataset) -> None:
+    def __init__(self, data_storage: DataStorage, request: "CreateTrainingRequest", training_id: str, dataset) -> None:
         self.__data_storage: DataStorage = data_storage
         self.__request = request
-        self.__training_identifier = training_identifier
+        self.__training_id = training_id
         self.__dataset = dataset
         self.__log = logging.getLogger('AdapterRuntimeManager')
         self.__log.setLevel(logging.getLevelName(os.getenv("SERVER_LOGGING_LEVEL")))
@@ -39,35 +39,35 @@ class AdapterRuntimeManager:
         DataAnalysisAgent(self.__blackboard, self.__strategy_controller, self.__dataset)
         return
 
-    def __adapter_finished_callback(self, training_identifier, user_identifier, model_identifier, model_details: 'dict[str, object]', adapter_manager: AdapterManager):
+    def __adapter_finished_callback(self, training_id, user_id, model_id, model_details: 'dict[str, object]', adapter_manager: AdapterManager):
         # lock data storage to prevent race condition between get and update
         with self.__data_storage.lock():
             # append new model to training
-            found, training = self.__data_storage.get_training(user_identifier, training_identifier)
-            found, dataset = self.__data_storage.get_dataset(user_identifier, training["dataset_identifier"])
-            _mdl_id = self.__data_storage.update_model(user_identifier, model_identifier, model_details)
-            model_list = self.__data_storage.get_models(user_identifier, training_identifier)
+            found, training = self.__data_storage.get_training(user_id, training_id)
+            found, dataset = self.__data_storage.get_dataset(user_id, training["dataset_id"])
+            _mdl_id = self.__data_storage.update_model(user_id, model_id, model_details)
+            model_list = self.__data_storage.get_models(user_id, training_id)
             if len(training["models"]) == len(model_list)-1:
-                self.__data_storage.update_training(user_identifier, training_identifier, {
-                    "models": training["models"] + [model_identifier],
+                self.__data_storage.update_training(user_id, training_id, {
+                    "models": training["models"] + [model_id],
                     "status": "completed",
                     "end_time": datetime.now()
                 })
             else:
-                self.__data_storage.update_training(user_identifier, training_identifier, {
-                    "models": training["models"] + [model_identifier]
+                self.__data_storage.update_training(user_id, training_id, {
+                    "models": training["models"] + [model_id]
                 })
 
         if model_details["status"] == "completed":
             if dataset["type"] == ":tabular" or dataset["type"] == ":text" or dataset["type"] == ":time_series":
-                ExplainableAIManager(self.__data_storage, adapter_manager).explain(user_identifier, model_identifier)
+                ExplainableAIManager(self.__data_storage, adapter_manager).explain(user_id, model_id)
                 return
     
-    def get_training_identifier(self):
-        return self.__training_identifier
+    def get_training_id(self):
+        return self.__training_id
 
-    def get_user_identifier(self):
-        return self.__request.user_identifier
+    def get_user_id(self):
+        return self.__request.user_id
 
     def get_status_for_blackboard(self):
         status = "completed"
@@ -75,7 +75,7 @@ class AdapterRuntimeManager:
             if automl.is_running():
                 status = "busy"
         return {
-            'training_identifier': self.__training_identifier,
+            'training_id': self.__training_id,
             'status': status,
             'configuration': self.__request.to_dict(),
         }
@@ -93,7 +93,7 @@ class AdapterRuntimeManager:
             host, port = map(os.getenv, self.__automl_addresses[automl.lower()])
             port = int(port)
             self.__log.debug(f"start_new_training: creating new adapter manager and adapter manager agent")
-            adapter_training = AdapterManager(self.__data_storage, self.__request, automl, self.__training_identifier, self.__dataset, host, port, self.__blackboard, self.__strategy_controller, self.__adapter_finished_callback)
+            adapter_training = AdapterManager(self.__data_storage, self.__request, automl, self.__training_id, self.__dataset, host, port, self.__blackboard, self.__strategy_controller, self.__adapter_finished_callback)
             self.__adapters.append(adapter_training)
         
         self.__strategy_controller.on_event('phase_updated', self.blackboard_phase_update_handler)

@@ -12,7 +12,7 @@ from betterproto.grpc.util.async_channel import AsyncChannel
 
 class AdapterManager(Thread):
 
-    def __init__(self, data_storage: DataStorage, request: "CreateTrainingRequest", automl:str, training_identifier: str, dataset, host: str, port: int, blackboard, strategy_controller, adapter_finished_callback) -> None:
+    def __init__(self, data_storage: DataStorage, request: "CreateTrainingRequest", automl:str, training_id: str, dataset, host: str, port: int, blackboard, strategy_controller, adapter_finished_callback) -> None:
         
         super(AdapterManager, self).__init__()
         self.__log = logging.getLogger('AdapterManager')
@@ -21,7 +21,7 @@ class AdapterManager(Thread):
         self.__request = request
 
         self.__automl = automl
-        self.__training_identifier = training_identifier
+        self.__training_id = training_id
         self.__dataset = dataset
         self.__host = host
         self.__port = port
@@ -35,15 +35,15 @@ class AdapterManager(Thread):
         self.__ml_library = ""
         self.__blackboard = blackboard 
         self.__strategy_controller = strategy_controller
-        self.__model_identifier = self.__create_new_model_entry()
+        self.__model_id = self.__create_new_model_entry()
 
         self.__adapter_agent = AdapterManagerAgent(self.__blackboard, self.__strategy_controller, self)
 
     def get_automl_name(self):
         return self.__automl
 
-    def get_training_identifier(self):
-        return self.__training_identifier
+    def get_training_id(self):
+        return self.__training_id
 
     def is_running(self):
         if self.__status == "failed" or self.__status == "completed":
@@ -83,8 +83,8 @@ class AdapterManager(Thread):
         test_config.update({"random_state": 42})
 
         return {
-            "training_identifier": self.__training_identifier,
-            "dataset_identifier": str(self.__dataset["_id"]),
+            "training_id": self.__training_id,
+            "dataset_id": str(self.__dataset["_id"]),
             "file_name": self.__dataset["file_name"],
             "file_location": self.__dataset["path"],
             "task": self.__request.task,
@@ -92,16 +92,16 @@ class AdapterManager(Thread):
             "dataset_configuration": json.loads(self.__request.dataset_configuration),
             "runtime_constraints": json.loads(self.__request.runtime_constraints),
             "test_configuration": test_config,
-            "file_configuration": json.loads(self.__dataset["file_configuration"]),
+            "file_configuration": self.__dataset["file_configuration"],
             "metric": self.__request.metric,
-            "user_identifier": self.__request.user_identifier
+            "user_id": self.__request.user_id
         }
 
     def __create_new_model_entry(self):
         model_details = {
             "automl_name": self.__automl,
-            "training_identifier": self.__training_identifier,
-            "dataset_identifier": str(self.__dataset["_id"]),
+            "training_id": self.__training_id,
+            "dataset_id": str(self.__dataset["_id"]),
             "path": "",
             "test_score": 0,
             "runtime": 0,
@@ -114,16 +114,16 @@ class AdapterManager(Thread):
             "end_time": 0,
             "explanation": ""
             }
-        return self.__data_storage.create_model(self.__request.user_identifier, model_details)
+        return self.__data_storage.create_model(self.__request.user_id, model_details)
     
     async def __read_grpc_connection(self):
         try:  # Run until server closes connection
             self.__status = "busy"
             # Append model_id to dataset
             with self.__data_storage.lock():
-                self.__data_storage.update_model(self.__request.user_identifier, self.__model_identifier, {"status": self.__status})
-                found, dataset = self.__data_storage.get_dataset(self.__request.user_identifier, str(self.__dataset["_id"]))
-                self.__data_storage.update_dataset(self.__request.user_identifier, str(self.__dataset["_id"]), { "models": dataset["models"] + [self.__model_identifier] }, False)
+                self.__data_storage.update_model(self.__request.user_id, self.__model_id, {"status": self.__status})
+                found, dataset = self.__data_storage.get_dataset(self.__request.user_id, str(self.__dataset["_id"]))
+                self.__data_storage.update_dataset(self.__request.user_id, str(self.__dataset["_id"]), { "models": dataset["models"] + [self.__model_id] }, False)
 
             request = StartAutoMlRequest()
             process_json = self.__generate_process_json()
@@ -131,15 +131,15 @@ class AdapterManager(Thread):
             channel = Channel(host=self.__host, port=self.__port)
             service = AdapterServiceStub(channel=channel)
             self.__log.debug(f"run: connecting to AutoML Adapter {self.__host}:{self.__port}")
-            response = await service.start_auto_ml(request)
-            self.__session_identifier = response.session_identifier
+            response: StartAutoMlResponse = await service.start_auto_ml(request)
+            self.__session_id = response.session_id
             await asyncio.sleep(5)
 
             while True:
                 await asyncio.sleep(0.2)
                 request = GetAutoMlStatusRequest()
-                request.session_identifier = self.__session_identifier
-                response = await service.get_auto_ml_status(request)
+                request.session_id = self.__session_id
+                response: GetAutoMlStatusResponse = await service.get_auto_ml_status(request)
                 # Send request WATCH OUT THIS IS A LOOP REQUEST Check out for normal request
                 # https://grpc.io/docs/languages/python/quickstart/#update-the-client
                 if response.return_code == AdapterReturnCode.ADAPTER_RETURN_CODE_PENDING:
@@ -147,7 +147,7 @@ class AdapterManager(Thread):
                 if response.return_code == AdapterReturnCode.ADAPTER_RETURN_CODE_STATUS_UPDATE:
                     self.__status_messages.append(response.status_update)
                     self.__runtime = response.runtime
-                    self.__data_storage.update_model(self.__request.user_identifier, self.__model_identifier, {"status": "busy", "status_messages": self.__status_messages, "runtime": self.__runtime})
+                    self.__data_storage.update_model(self.__request.user_id, self.__model_id, {"status": "busy", "status_messages": self.__status_messages, "runtime": self.__runtime})
                 elif response.return_code == AdapterReturnCode.ADAPTER_RETURN_CODE_SUCCESS:
                     channel.close()
                     self.__result_json = json.loads(response.output_json)
@@ -168,7 +168,7 @@ class AdapterManager(Thread):
                         "status": self.__status,
                         "end_time": datetime.now()
                     }
-                    self.__adapter_finished_callback(self.__training_identifier, self.__request.user_identifier, self.__model_identifier, model_details, self)
+                    self.__adapter_finished_callback(self.__training_id, self.__request.user_id, self.__model_id, model_details, self)
                     return
 
         except Exception as rpc_error:
@@ -180,7 +180,7 @@ class AdapterManager(Thread):
             model_details = {
                 "status": self.__status
                 }
-            self.__adapter_finished_callback(self.__training_identifier, self.__request.user_identifier, self.__model_identifier, model_details, self)
+            self.__adapter_finished_callback(self.__training_id, self.__request.user_id, self.__model_id, model_details, self)
 
     
     def run(self):
@@ -203,9 +203,9 @@ class AdapterManager(Thread):
         Return configuration JSON
         """
         return {
-            "training_identifier": self.__training_identifier,
-            "user_identifier": self.__request.user_identifier,
-            "dataset_identifier": str(self.__dataset["_id"]),
+            "training_id": self.__training_id,
+            "user_id": self.__request.user_id,
+            "dataset_id": str(self.__dataset["_id"]),
             "task": self.__request.task,
             "configuration": self.__request.configuration,
             "dataset_configuration": self.__request.dataset_configuration,
@@ -240,7 +240,7 @@ class AdapterManager(Thread):
             channel = Channel(host=self.__host, port=self.__port)
             service = AdapterServiceStub(channel=channel)
             request = ExplainModelRequest()  # Request Object
-            request.session_identifier = self.__session_identifier
+            request.session_id = self.__session_id
             process_json = self._generate_test_json()
             process_json["test_configuration"]["method"] = 1
             process_json["test_configuration"]["split_ratio"] = 0

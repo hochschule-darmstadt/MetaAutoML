@@ -57,108 +57,108 @@ class MongoDbClient:
     ## MISC MONGO DB OPERATIONS
     ####################################
 #region
-    def drop_database(self, user_identifier: str):
+    def drop_database(self, user_id: str):
         """
         Delete all datasets sessions and models for a user
         ---
         Parameter
-        1. user identifier
+        1. user id
         """
-        self.__mongo.drop_database(user_identifier)
-        self.__log.debug(f"drop_database: database {user_identifier} dropped")
+        self.__mongo.drop_database(user_id)
+        self.__log.debug(f"drop_database: database {user_id} dropped")
 
-    def check_if_user_exists(self, user_identifier: str) -> bool:
+    def check_if_user_exists(self, user_id: str) -> bool:
         """
         Check if user exists by checking if his database exists
         ---
         Parameter
-        1. user identifier: name of the user
+        1. user id: name of the user
         ---
         Returns database existance status, TRUE == EXITS
         """
-        if user_identifier in self.__mongo.list_databases() == True:
-            self.__log.debug(f"check_if_user_exists: database {user_identifier} exists")
+        if user_id in self.__mongo.list_databases() == True:
+            self.__log.debug(f"check_if_user_exists: database {user_id} exists")
             return True
         else:
-            self.__log.debug(f"check_if_user_exists: database {user_identifier} does not exists")
+            self.__log.debug(f"check_if_user_exists: database {user_id} does not exists")
             return False
 #endregion
     ####################################
     ## DATASET MONGO DB OPERATIONS
     ####################################
 #region
-    def insert_dataset(self, user_identifier: str, dataset_details: 'dict[str, str]') -> str:
+    def insert_dataset(self, user_id: str, dataset_details: 'dict[str, str]') -> str:
         """
         Insert a new dataset
         ---
         Parameter
-        1. user identifier
+        1. user id
         2. dataset as dict
         ---
         Returns dataset id
         """
-        datasets: Collection = self.__mongo[user_identifier]["datasets"]
+        datasets: Collection = self.__mongo[user_id]["datasets"]
         self.__log.debug(f"insert_dataset: inserting new dataset with values: {dataset_details}")
         result = datasets.insert_one(dataset_details)
         self.__log.debug(f"insert_dataset: new dataset inserted: {result.inserted_id}")
         return str(result.inserted_id)
 
-    def get_dataset(self, user_identifier: str, filter: 'dict[str, object]') -> 'dict[str, object]':
+    def get_dataset(self, user_id: str, filter: 'dict[str, object]') -> 'dict[str, object]':
         """
         Get a dataset by filter
         ---
         Parameter
-        1. user identifier
+        1. user id
         2. filter dictonary to find dataset for
         ---
         Returns dataset as dict or `None`
         """
-        datasets: Collection = self.__mongo[user_identifier]["datasets"]
+        datasets: Collection = self.__mongo[user_id]["datasets"]
         self.__log.debug(f"get_dataset: documents within dataset: {datasets.count_documents}, filter {filter}")
         return datasets.find_one(filter)
 
-    def get_datasets(self, user_identifier: str, filter: 'dict[str, object]'={}) -> 'list[dict[str, object]]':
+    def get_datasets(self, user_id: str, filter: 'dict[str, object]'={}) -> 'list[dict[str, object]]':
         """
         Get all datasets for a user, optinally by filter
         ---
         Parameter
-        1. user identifier
+        1. user id
         2. optional filter
         ---
         Returns dataset as dict
         """
-        datasets: Collection = self.__mongo[user_identifier]["datasets"]
+        datasets: Collection = self.__mongo[user_id]["datasets"]
         self.__log.debug(f"get_datasets: documents within dataset: {datasets.count_documents}, filter {filter}")
         return datasets.find(filter)
 
-    def update_dataset(self, user_identifier: str, dataset_identifier: str, new_values: 'dict[str, object]') -> bool:
+    def update_dataset(self, user_id: str, dataset_id: str, new_values: 'dict[str, object]') -> bool:
         """
         Update a dataset record
         ---
         Parameter
-        1. user identifier
+        1. user id
         2. dataset id
         3. dictionary of new values
         ---
         Returns `True` if a record was updated otherwise `False`
         """
-        datasets: Collection = self.__mongo[user_identifier]["datasets"]
-        self.__log.debug(f"update_dataset: updating dataset with identifier: {dataset_identifier}, with new values {new_values}")
-        result = datasets.update_one({ "_id": ObjectId(dataset_identifier) }, { "$set": new_values })
+        datasets: Collection = self.__mongo[user_id]["datasets"]
+        self.__log.debug(f"update_dataset: updating dataset with id: {dataset_id}, with new values {new_values}")
+        result = datasets.update_one({ "_id": ObjectId(dataset_id) }, { "$set": new_values })
         self.__log.debug(f"update_dataset: documents changed within dataset: {result.modified_count}")
         return result.modified_count >= 1
 
-    def delete_dataset(self, user_identifier: str, filter: 'dict[str, object]'):
+    def delete_dataset(self, user_id: str, filter: 'dict[str, object]'):
         """
         Delete a dataset record and all it's associated records and files
         ---
         Parameter
-        1. user identifier
+        1. user id
         2. deletion filter
         ---
         Returns amount of deleted objects
         """
-        datasets: Collection = self.__mongo[user_identifier]["datasets"]
+        datasets: Collection = self.__mongo[user_id]["datasets"]
         self.__log.debug(f"delete_dataset: deleting dataset with filter: {filter}")
         result = datasets.delete_one(filter)
         self.__log.debug(f"delete_dataset: {result.deleted_count} datasets deleted")
@@ -169,78 +169,78 @@ class MongoDbClient:
     ## MODEL MONGO DB OPERATIONS
     ####################################
 #region
-    def insert_model(self, user_identifier: str, model_details: 'dict[str, str]') -> str:
+    def insert_model(self, user_id: str, model_details: 'dict[str, str]') -> str:
         """
         Insert model
         ---
         Parameter
-        1. user identifier
+        1. user id
         2. model as dict
         ---
         Returns model id
         """
-        models: Collection = self.__mongo[user_identifier]["models"]
+        models: Collection = self.__mongo[user_id]["models"]
         self.__log.debug(f"insert_model: inserting new model with values: {model_details}")
         result = models.insert_one(model_details)
         self.__log.debug(f"insert_model: new model inserted: {result.inserted_id}")
         return str(result.inserted_id)
 
-    def get_model(self, user_identifier: str, filter: 'dict[str, object]') -> 'dict[str, object]':
+    def get_model(self, user_id: str, filter: 'dict[str, object]') -> 'dict[str, object]':
         """
         Get a model by it's filter
         ---
         Parameter
-        1. user identifier
+        1. user id
         2. filter dictonary to find model for
         ---
         Returns training as dict
         """
-        models: Collection = self.__mongo[user_identifier]["models"]
+        models: Collection = self.__mongo[user_id]["models"]
         self.__log.debug(f"get_model: documents within model: {models.count_documents}, filter {filter}")
         return models.find_one(filter)
 
-    def get_models(self, user_identifier: str, filter: 'dict[str, object]'={}) -> 'list[dict[str, object]]':
+    def get_models(self, user_id: str, filter: 'dict[str, object]'={}) -> 'list[dict[str, object]]':
         """
         Get all models from a user, by optionally filter
         ---
         Parameter
-        1. user identifier
+        1. user id
         2. optional filter
         ---
         Returns models as list of dicts
         """
-        models: Collection = self.__mongo[user_identifier]["models"]
+        models: Collection = self.__mongo[user_id]["models"]
         self.__log.debug(f"get_models: documents within models: {models.count_documents}, filter {filter}")
         return models.find(filter)
 
-    def update_model(self, user_identifier: str, model_identifier: str, new_values: 'dict[str, str]') -> bool:
+    def update_model(self, user_id: str, model_id: str, new_values: 'dict[str, str]') -> bool:
         """
         Update a model record
         ---
         Parameter
-        1. user identifier
+        1. user id
         2. training id
         3. dictionary of new values
         ---
         Returns `True` if a record was updated otherwise `False`
         """
-        models: Collection = self.__mongo[user_identifier]["models"]
-        self.__log.debug(f"update_model: updating model with identifier: {model_identifier}, with new values {new_values}")
-        result = models.update_one({ "_id": ObjectId(model_identifier) }, { "$set": new_values })
+        models: Collection = self.__mongo[user_id]["models"]
+        self.__log.debug(f"update_model: updating model with id: {model_id}, with new values {new_values}")
+        result = models.update_one({ "_id": ObjectId(model_id) }, { "$set": new_values })
         self.__log.debug(f"update_model: documents changed within models: {result.modified_count}")
         return result.modified_count >= 1
 
-    def delete_model(self, user_identifier: str, filter: 'dict[str, object]'):
+    def delete_model(self, user_id: str, filter: 'dict[str, object]'):
         """
         Delete model record and all it's associated records and files
         ---
         Parameter
-        1. user identifier
+        1. user id
         2. deletion filter
         ---
         Returns amount of deleted objects
         """
-        models: Collection = self.__mongo[user_identifier]["models"]
+        models: Collection = self.__mongo[user_id]["models"]
         self.__log.debug(f"delete_models: deleting model with filter: {filter}")
         result = models.delete_many(filter)
         self.__log.debug(f"delete_models: documents deleted within model: {result.deleted_count}")
@@ -252,81 +252,81 @@ class MongoDbClient:
     ####################################
 #region
 
-    def insert_training(self, user_identifier: str, training_details: 'dict[str, str]'):
+    def insert_training(self, user_id: str, training_details: 'dict[str, str]'):
         """
         Insert training
         ---
         Parameter
-        1. user identifier
+        1. user id
         2. training as dict
         ---
         Returns training id
         """
-        trainings: Collection = self.__mongo[user_identifier]["trainings"]
+        trainings: Collection = self.__mongo[user_id]["trainings"]
         self.__log.debug(f"insert_training: inserting new training with values: {training_details}")
         result = trainings.insert_one(training_details)
         self.__log.debug(f"insert_training: new training inserted: {result.inserted_id}")
         return str(result.inserted_id)
 
-    def get_training(self, user_identifier: str, filter: 'dict[str, object]') -> 'dict[str, object]':
+    def get_training(self, user_id: str, filter: 'dict[str, object]') -> 'dict[str, object]':
         """
         Get a training by it's filter
         ---
         Parameter
-        1. user identifier
+        1. user id
         2. filter dictonary to find training for
         ---
         Returns training as dict
         """
-        trainings: Collection = self.__mongo[user_identifier]["trainings"]
+        trainings: Collection = self.__mongo[user_id]["trainings"]
         self.__log.debug(f"get_training: documents within trainings: {trainings.count_documents}, filter {filter}")
         return trainings.find_one(filter)
 
-    def get_trainings(self, user_identifier: str, filter: 'dict[str, object]'={}) -> 'list[dict[str, object]]':
+    def get_trainings(self, user_id: str, filter: 'dict[str, object]'={}) -> 'list[dict[str, object]]':
         """
         Get all trainings from a user, optionally by filter
         ---
         Parameter
-        1. user identifier
+        1. user id
         2. optional filter
         ---
         Returns trainings as list of dicts
         """
-        trainings: Collection = self.__mongo[user_identifier]["trainings"]
+        trainings: Collection = self.__mongo[user_id]["trainings"]
         self.__log.debug(f"get_trainings: documents within trainings: {trainings.count_documents}, filter {filter}")
         return trainings.find(filter)
 
-    def update_training(self, user_identifier: str, training_identifier: str, new_values: 'dict[str, str]') -> bool:
+    def update_training(self, user_id: str, training_id: str, new_values: 'dict[str, str]') -> bool:
         """
         Update a training record
         ---
         Parameter
-        1. user identifier
+        1. user id
         2. training id
         3. dictionary of new values
         ---
         Returns `True` if a record was updated otherwise `False`
         """
-        trainings: Collection = self.__mongo[user_identifier]["trainings"]
-        self.__log.debug(f"update_training: updating training with identifier: {training_identifier}, with new values {new_values}")
-        result = trainings.update_one({ "_id": ObjectId(training_identifier) }, { "$set": new_values })
+        trainings: Collection = self.__mongo[user_id]["trainings"]
+        self.__log.debug(f"update_training: updating training with id: {training_id}, with new values {new_values}")
+        result = trainings.update_one({ "_id": ObjectId(training_id) }, { "$set": new_values })
         self.__log.debug(f"update_training: documents changed within trainings: {result.modified_count}")
         return result.modified_count >= 1
 
-    def delete_training(self, user_identifier: str, filter: 'dict[str, object]'):
+    def delete_training(self, user_id: str, filter: 'dict[str, object]'):
         """
         Delete trainings record and all it's associated records and files
         ---
         Parameter
-        1. user identifier
+        1. user id
         2. deletion filter
         ---
         Returns amount of deleted objects
         """
-        trainings: Collection = self.__mongo[user_identifier]["trainings"]
+        trainings: Collection = self.__mongo[user_id]["trainings"]
         result_training = trainings.find(filter)
         for training in list(result_training):
-            amount_model = self.delete_model(user_identifier, { "training_identifier": str(training["_id"])})
+            amount_model = self.delete_model(user_id, { "training_id": str(training["_id"])})
             self.__log.debug(f"delete_training: documents deleted within models: {amount_model}")
         result = trainings.delete_many(filter)
         self.__log.debug(f"delete_training: documents deleted within trainings: {result.deleted_count}")
@@ -337,81 +337,81 @@ class MongoDbClient:
     ## PREDICTION DATASET MONGO DB OPERATIONS
     ####################################
 #region
-    def insert_prediction_dataset(self, user_identifier: str, prediction_dataset_details: 'dict[str, str]') -> str:
+    def insert_prediction(self, user_id: str, prediction_details: 'dict[str, str]') -> str:
         """
         Insert a new dataset
         ---
         Parameter
-        1. user identifier
+        1. user id
         2. dataset as dict
         ---
         Returns dataset id
         """
-        datasets: Collection = self.__mongo[user_identifier]["prediction_datasets"]
-        self.__log.debug(f"insert_prediction_dataset: inserting new dataset with values: {prediction_dataset_details}")
-        result = datasets.insert_one(prediction_dataset_details)
-        self.__log.debug(f"insert_prediction_dataset: new dataset inserted: {result.inserted_id}")
+        datasets: Collection = self.__mongo[user_id]["predictions"]
+        self.__log.debug(f"insert_prediction: inserting new dataset with values: {prediction_details}")
+        result = datasets.insert_one(prediction_details)
+        self.__log.debug(f"insert_prediction: new dataset inserted: {result.inserted_id}")
         return str(result.inserted_id)
 
-    def get_prediction_dataset(self, user_identifier: str, filter: 'dict[str, object]') -> 'dict[str, object]':
+    def get_prediction(self, user_id: str, filter: 'dict[str, object]') -> 'dict[str, object]':
         """
         Get a dataset by filter
         ---
         Parameter
-        1. user identifier
+        1. user id
         2. filter dictonary to find dataset for
         ---
         Returns dataset as dict or `None`
         """
-        prediction_datasets: Collection = self.__mongo[user_identifier]["prediction_datasets"]
-        self.__log.debug(f"get_prediction_dataset: documents within dataset: {prediction_datasets.count_documents}, filter {filter}")
-        return prediction_datasets.find_one(filter)
+        predictions: Collection = self.__mongo[user_id]["predictions"]
+        self.__log.debug(f"get_prediction: documents within dataset: {predictions.count_documents}, filter {filter}")
+        return predictions.find_one(filter)
 
-    def get_prediction_datasets(self, user_identifier: str, filter: 'dict[str, object]'={}) -> 'list[dict[str, object]]':
+    def get_predictions(self, user_id: str, filter: 'dict[str, object]'={}) -> 'list[dict[str, object]]':
         """
         Get all datasets for a user, optinally by filter
         ---
         Parameter
-        1. user identifier
+        1. user id
         2. optional filter
         ---
         Returns dataset as dict
         """
-        prediction_datasets: Collection = self.__mongo[user_identifier]["prediction_datasets"]
-        self.__log.debug(f"get_prediction_datasets: documents within dataset: {prediction_datasets.count_documents}, filter {filter}")
-        return prediction_datasets.find(filter)
+        predictions: Collection = self.__mongo[user_id]["predictions"]
+        self.__log.debug(f"get_predictions: documents within dataset: {predictions.count_documents}, filter {filter}")
+        return predictions.find(filter)
 
-    def update_prediction_dataset(self, user_identifier: str, prediction_dataset_identifier: str, new_values: 'dict[str, object]') -> bool:
+    def update_prediction(self, user_id: str, prediction_id: str, new_values: 'dict[str, object]') -> bool:
         """
         Update a dataset record
         ---
         Parameter
-        1. user identifier
+        1. user id
         2. dataset id
         3. dictionary of new values
         ---
         Returns `True` if a record was updated otherwise `False`
         """
-        prediction_datasets: Collection = self.__mongo[user_identifier]["prediction_datasets"]
-        self.__log.debug(f"update_prediction_dataset: updating dataset with identifier: {prediction_dataset_identifier}, with new values {new_values}")
-        result = prediction_datasets.update_one({ "_id": ObjectId(prediction_dataset_identifier) }, { "$set": new_values })
-        self.__log.debug(f"update_prediction_dataset: documents changed within dataset: {result.modified_count}")
+        predictions: Collection = self.__mongo[user_id]["predictions"]
+        self.__log.debug(f"update_prediction: updating dataset with id: {prediction_id}, with new values {new_values}")
+        result = predictions.update_one({ "_id": ObjectId(prediction_id) }, { "$set": new_values })
+        self.__log.debug(f"update_prediction: documents changed within dataset: {result.modified_count}")
         return result.modified_count >= 1
 
-    def delete_prediction_dataset(self, user_identifier: str, filter: 'dict[str, object]'):
+    def delete_prediction(self, user_id: str, filter: 'dict[str, object]'):
         """
         Delete a dataset record and all it's associated records and files
         ---
         Parameter
-        1. user identifier
+        1. user id
         2. deletion filter
         ---
         Returns amount of deleted objects
         """
-        prediction_datasets: Collection = self.__mongo[user_identifier]["prediction_datasets"]
-        self.__log.debug(f"delete_prediction_dataset: deleting dataset with filter: {filter}")
-        result = prediction_datasets.delete_one(filter)
-        self.__log.debug(f"delete_prediction_dataset: {result.deleted_count} datasets deleted")
+        predictions: Collection = self.__mongo[user_id]["predictions"]
+        self.__log.debug(f"delete_prediction: deleting dataset with filter: {filter}")
+        result = predictions.delete_one(filter)
+        self.__log.debug(f"delete_prediction: {result.deleted_count} datasets deleted")
         return result.deleted_count
 #endregion
     

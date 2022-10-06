@@ -1,0 +1,59 @@
+syntax = "proto3";
+option csharp_namespace = "BlazorBoilerplate.Server";
+
+import "Enumerations.proto";
+import "google/protobuf/timestamp.proto";
+
+message GetPredictionRequest {
+  string userId = 1;
+  string PredictionId = 2;
+}
+
+message GetPredictionResponse {
+    Prediction Prediction = 1;
+}
+
+message GetPredictionsRequest {
+  string userId = 1;
+  string datasetId = 2;
+}
+
+message GetPredictionsResponse {
+  repeated Prediction Predictions = 1;
+}
+
+message DeletePredictionRequest {
+  string userId = 1;
+  string PredictionId = 2;
+}
+
+message DeletePredictionResponse {
+  
+}
+
+message Prediction {
+  string id = 1;
+  string live_dataset_path = 2;
+  string prediction_result_path = 3;
+  string status = 4;
+  google.protobuf.Timestamp startTime = 5;
+  google.protobuf.Timestamp endTime = 6;
+  RuntimeProfile runtimeProfile = 7;
+}
+
+message RuntimeProfile {
+  string cpu = 1;
+  string ram = 2;
+  string eco = 3;
+}
+
+message CreatePredictionRequest {
+    string userId = 1;  //Id associated to a specific user
+    string fileName = 2;
+    string PredictionName = 3;
+    string datasetId = 4;
+  }
+  
+message CreatePredictionResponse {
+  
+  }

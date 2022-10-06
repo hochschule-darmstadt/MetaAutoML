@@ -21,7 +21,7 @@ class AdapterRuntimeManagerAgent(IAbstractBlackboardAgent):
         self.update_state(session_status)
 
         if session_status["status"] != "busy":
-            self._log.info(f'Session {self.__adapter_runtime_manager.get_training_identifier()} is inactive, stopping controller loop.')
+            self._log.info(f'Session {self.__adapter_runtime_manager.get_training_id()} is inactive, stopping controller loop.')
             self.unregister()
             raise StopIteration('Training session inactive, stopping..')
 

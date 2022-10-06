@@ -9,17 +9,17 @@ class IAbstractBlackboardAgent():
     Interface representing the functionality any blackboard agent must provide.
     """
 
-    def __init__(self, blackboard: "Blackboard", strategy_controller: "StrategyController", agent_identifier: str) -> None:
+    def __init__(self, blackboard: "Blackboard", strategy_controller: "StrategyController", agent_id: str) -> None:
         """
         Constructs a new blackboard agent
         ---
         Parameter
         1. blackboard: The blackboard to attach to
         """
-        self.agent_identifier = agent_identifier
-        self._log = logging.getLogger(self.agent_identifier)
+        self.agent_id = agent_id
+        self._log = logging.getLogger(self.agent_id)
         self._log.setLevel(logging.getLevelName(os.getenv("BLACKBOARD_LOGGING_LEVEL")))
-        self._log.debug(f'Initialized blackboard agent: "{self.agent_identifier}"')
+        self._log.debug(f'Initialized blackboard agent: "{self.agent_id}"')
         self.strategy_controller = strategy_controller
         self.blackboard = blackboard
         self.blackboard.register_agent(self)

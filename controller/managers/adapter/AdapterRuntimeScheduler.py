@@ -14,12 +14,12 @@ class AdapterRuntimeScheduler:
         self.__running_online_predictions: dict[str, AdapterRuntimeManager] = {}
         return
 
-    def create_new_training(self, request: "CreateTrainingRequest", training_identifier: str, dataset):
-        adapter_runtime_manager: AdapterRuntimeManager = AdapterRuntimeManager(self.__data_storage, request, training_identifier, dataset)
+    def create_new_training(self, request: "CreateTrainingRequest", training_id: str, dataset):
+        adapter_runtime_manager: AdapterRuntimeManager = AdapterRuntimeManager(self.__data_storage, request, training_id, dataset)
         adapter_runtime_manager.create_new_training()
-        self.__running_trainings[training_identifier] = adapter_runtime_manager
+        self.__running_trainings[training_id] = adapter_runtime_manager
         
-    def create_new_prediction(self, request: "ModelPredictRequest", prediction_identifier: str):
-        adapter_runtime_manager: AdapterRuntimePredictionManager = AdapterRuntimePredictionManager(self.__data_storage, request, prediction_identifier)
-        self.__running_online_predictions[prediction_identifier] = adapter_runtime_manager
+    def create_new_prediction(self, request: "ModelPredictRequest", prediction_id: str):
+        adapter_runtime_manager: AdapterRuntimePredictionManager = AdapterRuntimePredictionManager(self.__data_storage, request, prediction_id)
+        self.__running_online_predictions[prediction_id] = adapter_runtime_manager
         adapter_runtime_manager.create_new_prediction()

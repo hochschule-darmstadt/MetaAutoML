@@ -22,7 +22,7 @@ class ModelManager:
         Get all models for a specific dataset
         ---
         Parameter
-        1. grpc request object, containing the user and dataset identifier
+        1. grpc request object, containing the user and dataset id
         ---
         Return a list of compatible trainings or a GRPC error UNAVAILABLE for read errors
         """
@@ -30,16 +30,16 @@ class ModelManager:
         def GetScore(e):
             return e["test_score"]
 
-        self.__log.debug(f"get_models: get all models for dataset {get_models_request.dataset_identifier} for user {get_models_request.user_identifier}")
-        all_models: list[dict[str, object]] = self.__data_storage.get_models(get_models_request.user_identifier, dataset_identifier=get_models_request.dataset_identifier)
-        self.__log.debug(f"get_models: found {all_models.count} models for dataset {get_models_request.dataset_identifier} for user {get_models_request.user_identifier}")
+        self.__log.debug(f"get_models: get all models for dataset {get_models_request.dataset_id} for user {get_models_request.user_id}")
+        all_models: list[dict[str, object]] = self.__data_storage.get_models(get_models_request.user_id, dataset_id=get_models_request.dataset_id)
+        self.__log.debug(f"get_models: found {all_models.count} models for dataset {get_models_request.dataset_id} for user {get_models_request.user_id}")
         
         all_models.sort(key=GetScore, reverse=True)
         
         for model in list(all_models):
             try:
                 model_info = Model()
-                model_info.identifier = str(model["_id"])
+                model_info.id = str(model["_id"])
                 model_info.automl = model["automl_name"]
                 model_info.status = model["status"]
                 model_info.status_messages[:] =  model["status_messages"]
@@ -48,8 +48,8 @@ class ModelManager:
                 model_info.prediction_time =  model["prediction_time"]
                 model_info.ml_model_type =  model["ml_model_type"]
                 model_info.ml_library =  model["ml_library"]
-                model_info.training_identifier = model["training_identifier"]
-                model_info.dataset_identifier = model["dataset_identifier"]
+                model_info.training_id = model["training_id"]
+                model_info.dataset_id = model["dataset_id"]
                 model_info.explanation = json.dumps(model["explanation"])
                 response.models.append(model_info)
             except Exception as e:
@@ -66,20 +66,20 @@ class ModelManager:
         Get model details for a specific model
         ---
         Parameter
-        1. grpc request object, containing the user, and traininig identifier
+        1. grpc request object, containing the user, and traininig id
         ---
         Return model details
         The result is a GetTrainingResponse object describing one model or a GRPC error if ressource NOT_FOUND or UNAVAILABLE for read errors
         """
         response = GetModelResponse()
-        found, model = self.__data_storage.get_model(get_model_request.user_identifier, get_model_request.model_identifier)
+        found, model = self.__data_storage.get_model(get_model_request.user_id, get_model_request.model_id)
         if not found:
-            self.__log.error(f"get_training: model {get_model_request.model_identifier} for user {get_model_request.user_identifier} not found")
-            raise grpclib.GRPCError(grpclib.Status.NOT_FOUND, f"Model {get_model_request.model_identifier} for user {get_model_request.user_identifier} not found, already deleted?")
+            self.__log.error(f"get_training: model {get_model_request.model_id} for user {get_model_request.user_id} not found")
+            raise grpclib.GRPCError(grpclib.Status.NOT_FOUND, f"Model {get_model_request.model_id} for user {get_model_request.user_id} not found, already deleted?")
         
         try:        
             model_info = Model()
-            model_info.identifier = str(model["_id"])
+            model_info.id = str(model["_id"])
             model_info.automl = model["automl_name"]
             model_info.status = model["status"]
             model_info.status_messages[:] =  model["status_messages"]
@@ -88,14 +88,14 @@ class ModelManager:
             model_info.prediction_time =  model["prediction_time"]
             model_info.ml_model_type =  model["ml_model_type"]
             model_info.ml_library =  model["ml_library"]
-            model_info.training_identifier = model["training_identifier"]
-            model_info.dataset_identifier = model["dataset_identifier"]
+            model_info.training_id = model["training_id"]
+            model_info.dataset_id = model["dataset_id"]
             model_info.explanation = json.dumps(model["explanation"])
             response.model = model_info
         except Exception as e:
-            self.__log.error(f"get_model: Error while reading parameter for model {get_model_request.model_identifier}")
+            self.__log.error(f"get_model: Error while reading parameter for model {get_model_request.model_id}")
             self.__log.error(f"get_model: exception: {e}")
-            raise grpclib.GRPCError(grpclib.Status.UNAVAILABLE, f"Error while retrieving Model {get_model_request.model_identifier}")
+            raise grpclib.GRPCError(grpclib.Status.UNAVAILABLE, f"Error while retrieving Model {get_model_request.model_id}")
             
         return response
 
@@ -110,9 +110,9 @@ class ModelManager:
         ---
         Return start process status
         """ 
-        prediction_identifier = str(uuid.uuid4())
+        prediction_id = str(uuid.uuid4())
         with self.__data_storage.lock():
-            found, prediction_dataset = self.__data_storage.get_prediction_dataset(model_predict_request.user_identifier, model_predict_request.prediction_dataset_identifier)
+            found, prediction = self.__data_storage.get_prediction(model_predict_request.user_id, model_predict_request.prediction_id)
 
             online_prediction_session = { 
                     "creation_time": datetime.timestamp(datetime.now()),
@@ -121,15 +121,15 @@ class ModelManager:
                     "prediction_time": 0
                 }
 
-            if model_predict_request.model_identifier not in prediction_dataset["predictions"].keys():
-                prediction_dataset["predictions"][model_predict_request.model_identifier] = {}
+            if model_predict_request.model_id not in prediction["predictions"].keys():
+                prediction["predictions"][model_predict_request.model_id] = {}
             
-            prediction_dataset["predictions"][model_predict_request.model_identifier][prediction_identifier] = online_prediction_session
-            self.__data_storage.update_prediction_dataset(model_predict_request.user_identifier, model_predict_request.prediction_dataset_identifier, {
-                "predictions": prediction_dataset["predictions"]
+            prediction["predictions"][model_predict_request.model_id][prediction_id] = online_prediction_session
+            self.__data_storage.update_prediction(model_predict_request.user_id, model_predict_request.prediction_id, {
+                "predictions": prediction["predictions"]
             })
 
-        self.__adapter_runtime_scheduler.create_new_prediction(model_predict_request, prediction_identifier)
+        self.__adapter_runtime_scheduler.create_new_prediction(model_predict_request, prediction_id)
         return ModelPredictResponse()
 
     def delete_model(
@@ -139,12 +139,12 @@ class ModelManager:
         Delete a model from database and disc
         ---
         Parameter
-        1. grpc request object containing the user, model identifier
+        1. grpc request object containing the user, model id
         ---
         Return empty DeleteModelResponse object or a GRPC error if ressource NOT_FOUND
         """
-        self.__log.debug(f"delete_model: deleting model {delete_model_request.model_identifier}, of user {delete_model_request.user_identifier}")
-        result = self.__data_storage.delete_model(delete_model_request.user_identifier, delete_model_request.model_identifier)
+        self.__log.debug(f"delete_model: deleting model {delete_model_request.model_id}, of user {delete_model_request.user_id}")
+        result = self.__data_storage.delete_model(delete_model_request.user_id, delete_model_request.model_id)
         self.__log.debug(f"delete_model: {str(result)} models deleted")
         return DeleteDatasetResponse(result)
 

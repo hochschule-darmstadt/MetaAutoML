@@ -27,18 +27,18 @@ class TrainingManager:
         """
         response = CreateTrainingResponse()
         
-        self.__log.debug(f"create_training: trying to get dataset {create_training_request.dataset_identifier} for user {create_training_request.user_identifier}")
-        found, dataset = self.__data_storage.get_dataset(create_training_request.user_identifier, create_training_request.dataset_identifier)
+        self.__log.debug(f"create_training: trying to get dataset {create_training_request.dataset_id} for user {create_training_request.user_id}")
+        found, dataset = self.__data_storage.get_dataset(create_training_request.user_id, create_training_request.dataset_id)
         if not found:
-            self.__log.error(f"create_training: dataset {create_training_request.dataset_identifier} for user {create_training_request.user_identifier} not found")
-            raise grpclib.GRPCError(grpclib.Status.NOT_FOUND, f"Training {create_training_request.dataset_identifier} for user {create_training_request.user_identifier} not found, already deleted?")
+            self.__log.error(f"create_training: dataset {create_training_request.dataset_id} for user {create_training_request.user_id} not found")
+            raise grpclib.GRPCError(grpclib.Status.NOT_FOUND, f"Training {create_training_request.dataset_id} for user {create_training_request.user_id} not found, already deleted?")
         
         if not create_training_request.selected_auto_mls:
-            self.__log.error(f"create_training: user {create_training_request.user_identifier} started a new run with empty AutoML list.")
+            self.__log.error(f"create_training: user {create_training_request.user_id} started a new run with empty AutoML list.")
             raise grpclib.GRPCError(grpclib.Status.CANCELLED, "started a new run with empty AutoML list, wizard error?")
         
         if not create_training_request.selected_libraries:
-            self.__log.error(f"create_training: user {create_training_request.user_identifier} started a new run with empty ML library list.")
+            self.__log.error(f"create_training: user {create_training_request.user_id} started a new run with empty ML library list.")
             raise grpclib.GRPCError(grpclib.Status.CANCELLED, "started a new run with empty ML library list, wizard error?")
         
 
@@ -54,7 +54,7 @@ class TrainingManager:
         
         self.__log.debug(f"create_training: generating training details")
         config = {
-            "dataset_identifier": str(dataset["_id"]),
+            "dataset_id": str(dataset["_id"]),
             "dataset_name": dataset["name"],
             "task": create_training_request.task,
             "configuration": json.loads(create_training_request.configuration),
@@ -73,21 +73,21 @@ class TrainingManager:
             "explanation": {}
         }
         
-        training_id = self.__data_storage.create_training(create_training_request.user_identifier, config)
+        training_id = self.__data_storage.create_training(create_training_request.user_id, config)
         self.__log.debug(f"create_training: inserted new training: {training_id}")
 
         self.__adapter_runtime_scheduler.create_new_training(create_training_request, training_id, dataset)
-        response.training_identifier = training_id
+        response.training_id = training_id
         #newTraining: AutoMLSession = self.__adapterManager.start_automl(create_training_request,
         #                                                                str(dataset["_id"]),
         #                                                                dataset_folder,
         #                                                                training_id,
-        #                                                                create_training_request.user_identifier,
+        #                                                                create_training_request.user_id,
          #                                                               callback)
 
         #self.__trainings[training_id] = newTraining
         #response.result = 1
-        #response.training_identifier = newTraining.get_id()
+        #response.training_id = newTraining.get_id()
         return response
 
     def get_trainings(
@@ -97,28 +97,28 @@ class TrainingManager:
         Get all trainings for a specific user
         ---
         Parameter
-        1. grpc request object, containing the user identifier
+        1. grpc request object, containing the user id
         ---
         Return a list of compatible trainings or a GRPC error UNAVAILABLE for read errors
         """
         response = GetTrainingsResponse() 
-        self.__log.debug(f"get_trainings: get all trainings for user {get_trainings_request.user_identifier}")
-        all_trainings: list[dict[str, object]] = self.__data_storage.get_trainings(get_trainings_request.user_identifier)
-        self.__log.debug(f"get_trainings: found {all_trainings.count} trainings for user {get_trainings_request.user_identifier}")
+        self.__log.debug(f"get_trainings: get all trainings for user {get_trainings_request.user_id}")
+        all_trainings: list[dict[str, object]] = self.__data_storage.get_trainings(get_trainings_request.user_id)
+        self.__log.debug(f"get_trainings: found {all_trainings.count} trainings for user {get_trainings_request.user_id}")
         
         for training in all_trainings:
             try:
                 trainingItem = Training()
 
                 self.__log.debug("get_trainings: get all models for training")
-                training_models = self.__data_storage.get_models(get_trainings_request.user_identifier, str(training["_id"]))
+                training_models = self.__data_storage.get_models(get_trainings_request.user_id, str(training["_id"]))
                 self.__log.debug(f"get_trainings: found {training_models.count} models")
         
                 for model in training_models:
                     try:
                         model_details = Model()
-                        model_details.identifier = str(model["_id"])
-                        model_details.training_identifier = model["training_identifier"]
+                        model_details.id = str(model["_id"])
+                        model_details.training_id = model["training_id"]
                         model_details.test_score =  model["test_score"]
                         model_details.runtime =  model["runtime"]
                         model_details.ml_model_type =  model["ml_model_type"]
@@ -127,7 +127,7 @@ class TrainingManager:
                         model_details.status_messages[:] =  model["status_messages"]
                         model_details.prediction_time =  model["prediction_time"]
                         model_details.automl = model["automl_name"]
-                        model_details.dataset_identifier = model["dataset_identifier"]
+                        model_details.dataset_id = model["dataset_id"]
                         model_details.explanation = json.dumps(model["explanation"])
                         trainingItem.models.append(model_details)
                     except Exception as e:
@@ -135,8 +135,8 @@ class TrainingManager:
                         self.__log.error(f"get_trainings: exception: {e}")
                         raise grpclib.GRPCError(grpclib.Status.UNAVAILABLE, f"Error while retrieving Model")
 
-                trainingItem.identifier = str(training["_id"])
-                trainingItem.dataset_identifier = training["dataset_identifier"]
+                trainingItem.id = str(training["_id"])
+                trainingItem.dataset_id = training["dataset_id"]
                 trainingItem.dataset_name = training["dataset_name"]
                 trainingItem.task = training["task"]
                 trainingItem.configuration = json.dumps(training["configuration"])
@@ -174,25 +174,25 @@ class TrainingManager:
         Get training details for a specific dataset
         ---
         Parameter
-        1. grpc request object, containing the user, and traininig identifier
+        1. grpc request object, containing the user, and traininig id
         ---
         Return dataset details
         The result is a GetTrainingResponse object describing one dataset or a GRPC error if ressource NOT_FOUND or UNAVAILABLE for read errors
         """
         response = GetTrainingResponse() 
-        found, training = self.__data_storage.get_training(get_training_request.user_identifier, get_training_request.training_identifier)
+        found, training = self.__data_storage.get_training(get_training_request.user_id, get_training_request.training_id)
         if not found:
-            self.__log.error(f"get_training: training {get_training_request.training_identifier} for user {get_training_request.user_identifier} not found")
-            raise grpclib.GRPCError(grpclib.Status.NOT_FOUND, f"Training {get_training_request.training_identifier} for user {get_training_request.user_identifier} not found, already deleted?")
+            self.__log.error(f"get_training: training {get_training_request.training_id} for user {get_training_request.user_id} not found")
+            raise grpclib.GRPCError(grpclib.Status.NOT_FOUND, f"Training {get_training_request.training_id} for user {get_training_request.user_id} not found, already deleted?")
         try:
             self.__log.debug("get_training: get all models for training")
-            training_models = self.__data_storage.get_models(get_training_request.user_identifier, get_training_request.training_identifier)
+            training_models = self.__data_storage.get_models(get_training_request.user_id, get_training_request.training_id)
             self.__log.debug(f"get_training: found {training_models.count} models")
             for model in list(training_models):
                 try:
                     model_details = Model()
-                    model_details.identifier = str(model["_id"])
-                    model_details.training_identifier = model["training_identifier"]
+                    model_details.id = str(model["_id"])
+                    model_details.training_id = model["training_id"]
                     model_details.test_score =  model["test_score"]
                     model_details.runtime =  model["runtime"]
                     model_details.ml_model_type =  model["ml_model_type"]
@@ -201,7 +201,7 @@ class TrainingManager:
                     model_details.status_messages[:] =  model["status_messages"]
                     model_details.prediction_time =  model["prediction_time"]
                     model_details.automl = model["automl_name"]
-                    model_details.dataset_identifier = model["dataset_identifier"]
+                    model_details.dataset_id = model["dataset_id"]
                     model_details.explanation = json.dumps(model["explanation"])
                     response.training.models.append(model_details)
                 except Exception as e:
@@ -209,8 +209,8 @@ class TrainingManager:
                     self.__log.error(f"get_training: exception: {e}")
                     raise grpclib.GRPCError(grpclib.Status.UNAVAILABLE, f"Error while retrieving Model")
                         
-            response.training.identifier = str(training["_id"])
-            response.training.dataset_identifier = training["dataset_identifier"]
+            response.training.id = str(training["_id"])
+            response.training.dataset_id = training["dataset_id"]
             response.training.dataset_name = training["dataset_name"]
             response.training.task = training["task"]
             response.training.configuration = json.dumps(training["configuration"])
@@ -233,9 +233,9 @@ class TrainingManager:
                 response_event.timestamp = event.get('timestamp')
                 response.training.events.append(response_event)
         except Exception as e:
-            self.__log.error(f"get_training: Error while reading parameter for training {get_training_request.training_identifier} for user {get_training_request.user_identifier}")
+            self.__log.error(f"get_training: Error while reading parameter for training {get_training_request.training_id} for user {get_training_request.user_id}")
             self.__log.error(f"get_training: exception: {e}")
-            raise grpclib.GRPCError(grpclib.Status.UNAVAILABLE, f"Error while retrieving Training {get_training_request.training_identifier} for user {get_training_request.user_identifier}")
+            raise grpclib.GRPCError(grpclib.Status.UNAVAILABLE, f"Error while retrieving Training {get_training_request.training_id} for user {get_training_request.user_id}")
 
 
         return response
@@ -247,11 +247,11 @@ class TrainingManager:
         Delete a training from database and disc
         ---
         Parameter
-        1. grpc request object containing the user, training identifier
+        1. grpc request object containing the user, training id
         ---
         Return empty DeleteTrainingResponse object or a GRPC error if ressource NOT_FOUND
         """
-        self.__log.debug(f"delete_training: deleting training {delete_training_request.training_identifier}, of user {delete_training_request.user_identifier}")
-        result = self.__data_storage.delete_dataset(delete_training_request.user_identifier, delete_training_request.training_identifier)
+        self.__log.debug(f"delete_training: deleting training {delete_training_request.training_id}, of user {delete_training_request.user_id}")
+        result = self.__data_storage.delete_dataset(delete_training_request.user_id, delete_training_request.training_id)
         self.__log.debug(f"delete_training: {str(result)} trainings deleted")
         return DeleteTrainingResponse()

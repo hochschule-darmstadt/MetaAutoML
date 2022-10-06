@@ -22,7 +22,7 @@ class DataSetAnalysisManager:
     """
     def __init__(self, config):
         # Setup config
-        file_config = json.loads(config["file_configuration"])
+        file_config = config["file_configuration"]
         self.config = config
         delimiters = {
             "comma":        ",",

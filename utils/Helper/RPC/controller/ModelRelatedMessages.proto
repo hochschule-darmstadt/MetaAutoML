@@ -5,8 +5,8 @@ import "Enumerations.proto";
 
 
 message DeleteModelRequest {
-  string userIdentifier = 1;
-  string modelIdentifier = 2;
+  string userId = 1;
+  string modelId = 2;
 }
 
 message DeleteModelResponse {
@@ -14,8 +14,8 @@ message DeleteModelResponse {
 }
 
 message GetModelsRequest {
-  string userIdentifier = 1;
-  string datasetIdentifier = 2;
+  string userId = 1;
+  string datasetId = 2;
 }
 
 message GetModelsResponse {
@@ -23,8 +23,8 @@ message GetModelsResponse {
 }
 
 message GetModelRequest {
-  string userIdentifier = 1;
-  string modelIdentifier = 2;
+  string userId = 1;
+  string modelId = 2;
 }
 
 message GetModelResponse {
@@ -32,8 +32,8 @@ message GetModelResponse {
 }
 
 message Model {
-  string identifier = 1;
-  string trainingIdentifier = 2;
+  string id = 1;
+  string trainingId = 2;
   float testScore = 3;
   int32 runtime = 4;
   string mlModelType = 5;
@@ -42,17 +42,17 @@ message Model {
   repeated string statusMessages = 8;
   float predictionTime = 9;
   string automl = 10;
-  string datasetIdentifier = 11;
+  string datasetId = 11;
   string explanation = 12;
 }
 
 message ModelPredictRequest {
-  string userIdentifier = 1;
-  string predictionDatasetIdentifier = 2;
-  string modelIdentifier = 3;
+  string userId = 1;
+  string predictionId = 2;
+  string modelId = 3;
 }
 
 message ModelPredictResponse {
-  string modelPredictionIdentifier = 1;
+  string modelPredictionId = 1;
 }
 

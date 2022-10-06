@@ -5,8 +5,8 @@ import "Enumerations.proto";
 import "google/protobuf/timestamp.proto";
 
 message GetDatasetRequest {
-  string userIdentifier = 1;
-  string datasetIdentifier = 2;
+  string userId = 1;
+  string datasetId = 2;
 }
 
 message GetDatasetResponse {
@@ -14,7 +14,7 @@ message GetDatasetResponse {
 }
 
 message GetDatasetsRequest {
-  string userIdentifier = 1;
+  string userId = 1;
   string type = 2;
 }
 
@@ -23,8 +23,8 @@ message GetDatasetsResponse {
 }
 
 message DeleteDatasetRequest {
-  string userIdentifier = 1;
-  string datasetIdentifier = 2;
+  string userId = 1;
+  string datasetId = 2;
 }
 
 message DeleteDatasetResponse {
@@ -32,19 +32,17 @@ message DeleteDatasetResponse {
 }
 
 message Dataset {
-  string identifier = 1;
+  string id = 1;
   string name = 2;
   string type = 3;
-  google.protobuf.Timestamp creationTime = 4;
-  int64 size = 5;
-  string analysis = 6;
-  string path = 7;
-  string fileName = 8;
-  string fileConfiguration = 9;
+  string path = 4;
+  string fileConfiguration = 5;
+  repeated string trainingIds = 6;
+  string analysis = 7;
 }
 
 message CreateDatasetRequest {
-    string userIdentifier = 1;  //Id associated to a specific user
+    string userId = 1;  //Id associated to a specific user
     string fileName = 2;
     string datasetName = 3;
     string datasetType = 4;
@@ -55,8 +53,8 @@ message CreateDatasetResponse {
   }
 
 message SetDatasetFileConfigurationRequest {
-  string userIdentifier = 1;
-  string datasetIdentifier = 2;
+  string userId = 1;
+  string datasetId = 2;
   string file_configuration = 3;
 }
 
@@ -71,8 +69,8 @@ message TableColumn {
   }
   
 message GetTabularDatasetColumnRequest {
-    string userIdentifier = 1;
-    string datasetIdentifier = 2;
+    string userId = 1;
+    string datasetId = 2;
   }
   
 message GetTabularDatasetColumnResponse {

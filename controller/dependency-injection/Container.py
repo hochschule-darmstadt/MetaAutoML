@@ -6,7 +6,7 @@ from DatasetManager import DatasetManager
 from OntologyManager import OntologyManager
 from TrainingManager import TrainingManager
 from ModelManager import ModelManager
-from PredictionDatasetManager import PredictionDatasetManager
+from PredictionManager import PredictionManager
 from UserManager import UserManager
 from DataStorage import DataStorage
 from AdapterRuntimeScheduler import AdapterRuntimeScheduler
@@ -61,8 +61,8 @@ class Managers(containers.DeclarativeContainer):
         UserManager,
         data_storage=ressources.data_storage
     )
-    prediction_dataset_manager = providers.Factory(
-        PredictionDatasetManager,
+    prediction_manager = providers.Factory(
+        PredictionManager,
         data_storage=ressources.data_storage
     )
 

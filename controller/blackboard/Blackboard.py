@@ -16,22 +16,22 @@ class Blackboard():
         self.agents: dict[str, IAbstractBlackboardAgent] = {}
         self._log.debug('Initialized new blackboard.')
 
-    def get_agent(self, agent_identifier) -> IAbstractBlackboardAgent:
-        return self.agents[agent_identifier]
+    def get_agent(self, agent_id) -> IAbstractBlackboardAgent:
+        return self.agents[agent_id]
 
     def register_agent(self, agent: IAbstractBlackboardAgent):
-        if agent.agent_identifier in self.agents:
-            raise RuntimeError(f'The agent "{agent.agent_identifier}" has already been registered on this blackboard!')
+        if agent.agent_id in self.agents:
+            raise RuntimeError(f'The agent "{agent.agent_id}" has already been registered on this blackboard!')
         else:
-            self.agents[agent.agent_identifier] = agent
-            self._log.debug(f'Registered blackboard agent: "{agent.agent_identifier}"')
+            self.agents[agent.agent_id] = agent
+            self._log.debug(f'Registered blackboard agent: "{agent.agent_id}"')
 
     def unregister_agent(self, agent: IAbstractBlackboardAgent):
-        if agent.agent_identifier not in self.agents:
-            raise RuntimeError(f'The agent "{agent.agent_identifier}" has not been registered on this blackboard!')
+        if agent.agent_id not in self.agents:
+            raise RuntimeError(f'The agent "{agent.agent_id}" has not been registered on this blackboard!')
         else:
-            del self.agents[agent.agent_identifier]
-            self._log.debug(f'Unregistered blackboard agent: "{agent.agent_identifier}"')
+            del self.agents[agent.agent_id]
+            self._log.debug(f'Unregistered blackboard agent: "{agent.agent_id}"')
     
     def get_state(self, key = None, default = None):
         with self.__lock:

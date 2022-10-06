@@ -49,21 +49,21 @@ class DataStorage:
     ####################################
 #region
 
-    def check_if_user_exists(self, user_identifier: bool):
+    def check_if_user_exists(self, user_id: bool):
     #@inject
-    #def check_if_user_exists(self, user_identifier: bool, mongo_db_client: MongoDbClient):
+    #def check_if_user_exists(self, user_id: bool, mongo_db_client: MongoDbClient):
         """
         Check if user exists by checking if his database exists
         ---
         >>> id: str = ds.check_if_user_exists("automl_user")
         ---
         Parameter
-        1. user identifier
+        1. user id
         ---
         Returns database existance status, TRUE == EXITS
         """
-        return self.__mongo.check_if_user_exists(user_identifier)
-        #return mongo_db_client.check_if_user_exists(user_identifier)
+        return self.__mongo.check_if_user_exists(user_id)
+        #return mongo_db_client.check_if_user_exists(user_id)
 
 
 
@@ -97,12 +97,12 @@ class DataStorage:
 #region 
 
 
-    def create_dataset(self, user_identifier: str, file_name: str, type: str, name: str) -> str:
+    def create_dataset(self, user_id: str, file_name: str, type: str, name: str) -> str:
         """
         Store dataset contents on disk and insert entry to database.
         ---
         Parameter
-        1. user identifier
+        1. user id
         2. file name: file name of dataset
         3. type: dataset type
         4. name: dataset name
@@ -118,25 +118,22 @@ class DataStorage:
         database_content = {
             "name": name,
             "type": type,
-            "analysis": {},
-            "models": [],
             "path": "",
-            "size": 0,
-            "creation_time": "",
-            "file_name" : "",
-            "file_configuration": "{}",
-            "prediction_datasets": []
+            "file_configuration": {},
+            "creation_date": "",
+            "training_ids": [],
+            "analysis": {},
         }
 
         self.__log.debug("create_dataset: inserting new dataset into database...")
-        dataset_id = self.__mongo.insert_dataset(user_identifier, database_content)
+        dataset_id = self.__mongo.insert_dataset(user_id, database_content)
         self.__log.debug(f"create_dataset: new dataset inserted with id: {dataset_id}")
 
 
-        upload_file = os.path.join(self.__storage_dir, user_identifier, "uploads", file_name)
+        upload_file = os.path.join(self.__storage_dir, user_id, "uploads", file_name)
         self.__log.debug(f"create_dataset: upload location is: {upload_file}")
         
-        filename_dest = os.path.join(self.__storage_dir, user_identifier, dataset_id, file_name)
+        filename_dest = os.path.join(self.__storage_dir, user_id, dataset_id, file_name)
         self.__log.debug(f"create_dataset: final persistence location is: {filename_dest}")
 
         #if os.getenv("MONGO_DB_DEBUG") != "YES":
@@ -149,11 +146,11 @@ class DataStorage:
         os.makedirs(os.path.dirname(filename_dest), exist_ok=True)
         self.__log.debug(f"create_dataset: moving dataset from: {upload_file} to: {filename_dest}")
         shutil.move(upload_file, filename_dest)
-        file_configuration = "{}"
+        file_configuration = {}
 
         if type == ":image":
             self.__log.debug("create_dataset: dataset is of image type: unzipping, deleting zip archive and remove .zip suffix...")
-            shutil.unpack_archive(filename_dest, os.path.join(self.__storage_dir, user_identifier, dataset_id))
+            shutil.unpack_archive(filename_dest, os.path.join(self.__storage_dir, user_id, dataset_id))
             os.remove(filename_dest)
             filename_dest = filename_dest.replace(".zip", "")
             fileName = file_name.replace(".zip", "")
@@ -171,7 +168,7 @@ class DataStorage:
                 for line in preview_line:
                     preview.write(line)
                     # preview.write("\n")
-            file_configuration = '{"use_header":true, "start_row":1, "delimiter":"comma", "escape_character":"\\\\", "decimal_character":"."}'
+            file_configuration = {"use_header": True, "start_row":1, "delimiter":"comma", "escape_character":"\\", "decimal_character":"."}
 
         if type == ":time_series_longitudinal":
             self.__log.debug("create_dataset: dataset is of TS nature: creating subset preview file, and generating csv file configuration...")
@@ -215,7 +212,7 @@ class DataStorage:
             # Save the new dataframe as a csv file
             df_preview_filename = filename_dest.replace(".ts", "_preview.csv")
             pd.DataFrame(df_dict).to_csv(df_preview_filename, index=False)
-            file_configuration = '{"use_header":true, "start_row":1, "delimiter":"comma", "escape_character":"\\\\", "decimal_character":"."}'
+            file_configuration = {"use_header": True, "start_row":1, "delimiter":"comma", "escape_character":"\\", "decimal_character":"."}
 
         def get_size(start_path='.'):
             total_size = 0
@@ -229,7 +226,7 @@ class DataStorage:
             return total_size
 
         self.__log.debug("create_dataset: get the total occupied disc size of the dataset...")
-        nbytes = get_size(os.path.join(self.__storage_dir, user_identifier, dataset_id))
+        nbytes = get_size(os.path.join(self.__storage_dir, user_id, dataset_id))
         self.__log.debug(f"create_dataset: dataset disc usage is: {nbytes} bytes")
 
         analysis_result = {}
@@ -239,20 +236,17 @@ class DataStorage:
             analysis_result = DataSetAnalysisManager({"path": filename_dest,
                                                       "file_configuration": file_configuration,
                                                       "type": type}).analysis()
-
-        success = self.__mongo.update_dataset(user_identifier, dataset_id, {
+            analysis_result.update({ "size_bytes": nbytes, "creation_date": os.path.getmtime(filename_dest)})
+        success = self.__mongo.update_dataset(user_id, dataset_id, {
             "path": filename_dest,
-            "size": nbytes,
-            "creation_time": os.path.getmtime(filename_dest),
-            "analysis": analysis_result,
-            "file_name": file_name,
-            "file_configuration": file_configuration
+            "file_configuration": file_configuration,
+            "analysis": analysis_result
         })
         assert success, f"cannot update dataset with id {dataset_id}"
 
         return dataset_id
 
-    def update_dataset(self, user_identifier: str, dataset_identifier: str, new_values: 'dict[str, object]', run_analysis: bool) -> bool:
+    def update_dataset(self, user_id: str, dataset_id: str, new_values: 'dict[str, object]', run_analysis: bool) -> bool:
         """
         Update single dataset with new values. 
         ---
@@ -262,36 +256,36 @@ class DataStorage:
 
         ---
         Parameter
-        1. user identifier: name of the user
-        2. dataset identifier
+        1. user id: name of the user
+        2. dataset id
         3. new values: dict with new values
         4. run analysis: if the dataset analysis should be executed
         ---
         Returns `True` if successfully updated, otherwise `False`.
         """
-        self.__log.debug(f"update_dataset: updating: {dataset_identifier} for user {user_identifier}, new values {new_values}")
+        self.__log.debug(f"update_dataset: updating: {dataset_id} for user {user_id}, new values {new_values}")
         if run_analysis == True:
-            found, dataset = self.get_dataset(user_identifier, dataset_identifier)
+            found, dataset = self.get_dataset(user_id, dataset_id)
             if found is not None:
-                self.__log.debug(f"update_dataset: executing dataset analysis for dataset: {dataset_identifier} for user {user_identifier}")
+                self.__log.debug(f"update_dataset: executing dataset analysis for dataset: {dataset_id} for user {user_id}")
                 # If the dataset is a tabular dataset it can be analyzed.
                 if dataset['type'] in [":tabular", ":text", ":time_series", ":time_series_longitudinal"]:
                     # Delete old references
                     new_values["analysis"] = ""
-                    self.__log.debug(f"update_dataset: deleting old dataset analysis for dataset: {dataset_identifier} for user {user_identifier}")
-                    self.__mongo.update_dataset(user_identifier, dataset_identifier, new_values)
-                    self.__log.debug(f"update_dataset: saving new dataset analysis for dataset: {dataset_identifier} for user {user_identifier}, new values {new_values}")
-                    new_values["analysis"] = DataSetAnalysisManager(dataset).analysis()
+                    self.__log.debug(f"update_dataset: deleting old dataset analysis for dataset: {dataset_id} for user {user_id}")
+                    self.__mongo.update_dataset(user_id, dataset_id, new_values)
+                    self.__log.debug(f"update_dataset: saving new dataset analysis for dataset: {dataset_id} for user {user_id}, new values {new_values}")
+                    new_values["analysis"].update(DataSetAnalysisManager(dataset).analysis())
                 else:
-                    self.__log.warn(f"update_dataset: dataset type {dataset['type']} does not support dataset analysis in dataset {dataset_identifier} for user {user_identifier}")
+                    self.__log.warn(f"update_dataset: dataset type {dataset['type']} does not support dataset analysis in dataset {dataset_id} for user {user_id}")
             else:
-                self.__log.error(f"update_dataset: executing dataset analysis failed for dataset: {dataset_identifier} for user {user_identifier}, dataset not found")
-                raise grpclib.GRPCError(grpclib.Status.NOT_FOUND, f"Dataset {dataset_identifier} for user {user_identifier} does not exist, can not execute dataset analysis!")
-        return self.__mongo.update_dataset(user_identifier, dataset_identifier, new_values)
+                self.__log.error(f"update_dataset: executing dataset analysis failed for dataset: {dataset_id} for user {user_id}, dataset not found")
+                raise grpclib.GRPCError(grpclib.Status.NOT_FOUND, f"Dataset {dataset_id} for user {user_id} does not exist, can not execute dataset analysis!")
+        return self.__mongo.update_dataset(user_id, dataset_id, new_values)
 
-    def get_dataset(self, user_identifier: str, dataset_identifier: str) -> 'tuple[bool, dict[str, object]]':
+    def get_dataset(self, user_id: str, dataset_id: str) -> 'tuple[bool, dict[str, object]]':
         """
-        Try to find the first dataset with this identifier 
+        Try to find the first dataset with this id 
         ---
         >>> found, dataset = ds.get_dataset("automl_user", "12323asdas")
         >>> if not found:
@@ -299,19 +293,19 @@ class DataStorage:
 
         ---
         Parameter
-        1. user identifier 
-        2. dataset identifier
+        1. user id 
+        2. dataset id
         ---
         Returns either `(True, Dataset)` or `(False, None)`.
         """
-        result = self.__mongo.get_dataset(user_identifier, {
-            "_id": ObjectId(dataset_identifier)
+        result = self.__mongo.get_dataset(user_id, {
+            "_id": ObjectId(dataset_id)
         })
 
         return result is not None, result
 
-    #def get_datasets(self, user_identifier: bool):
-    def get_datasets(self, user_identifier: str) -> 'list[dict[str, object]]':
+    #def get_datasets(self, user_id: bool):
+    def get_datasets(self, user_id: str) -> 'list[dict[str, object]]':
         """
         Get all datasets for a user. 
         ---
@@ -320,41 +314,41 @@ class DataStorage:
 
         ---
         Parameter
-        1. user_identifier: name of the user
+        1. user_id: name of the user
         ---
         Returns `list` of all datasets.
         """
-        return [ds for ds in self.__mongo.get_datasets(user_identifier)]
+        return [ds for ds in self.__mongo.get_datasets(user_id)]
 
-    def delete_dataset(self, user_identifier: str, dataset_identifier: str):
+    def delete_dataset(self, user_id: str, dataset_id: str):
         """
         Delete a dataset and its associated items
         ---
         Parameter
-        1. user identifier
-        2. dataset identifier
+        1. user id
+        2. dataset id
         ---
         Returns amount of deleted objects
         """
         #First check if dataset isn't already deleted
-        found, dataset = self.get_dataset(user_identifier, dataset_identifier)
+        found, dataset = self.get_dataset(user_id, dataset_id)
         if not found:
-            self.__log.error(f"delete_dataset: attempting to delete a dataset that does not exist: {dataset_identifier} for user {user_identifier}")
-            raise grpclib.GRPCError(grpclib.Status.NOT_FOUND, f"Dataset {dataset_identifier} does not exist, already deleted?")
+            self.__log.error(f"delete_dataset: attempting to delete a dataset that does not exist: {dataset_id} for user {user_id}")
+            raise grpclib.GRPCError(grpclib.Status.NOT_FOUND, f"Dataset {dataset_id} does not exist, already deleted?")
         path = dataset["path"]
         path = path.replace("\\"+ dataset["file_name"], "")
         #Before deleting the dataset, delete all related documents
-        existing_trainings = self.get_trainings(user_identifier, dataset_identifier)
+        existing_trainings = self.get_trainings(user_id, dataset_id)
         self.__log.debug(f"delete_dataset: deleting {existing_trainings.count} trainings")
         for training in existing_trainings:
             try:
-                self.delete_training(user_identifier, str(training["_id"]))
+                self.delete_training(user_id, str(training["_id"]))
             except:
                 self.__log.debug(f"delete_dataset: deleting training failed, already deleted. Skipping...")
-        self.__mongo.delete_training(user_identifier, { "dataset_identifier": dataset_identifier})
+        self.__mongo.delete_training(user_id, { "dataset_id": dataset_id})
         self.__log.debug(f"delete_dataset: deleting files within path: {path}")
         shutil.rmtree(path)
-        amount_deleted_datasets_result = self.__mongo.delete_dataset(user_identifier, { "dataset_identifier": dataset_identifier})
+        amount_deleted_datasets_result = self.__mongo.delete_dataset(user_id, { "dataset_id": dataset_id})
         self.__log.debug(f"delete_dataset: documents deleted within dataset: {amount_deleted_datasets_result}")
         return amount_deleted_datasets_result
 
@@ -367,26 +361,26 @@ class DataStorage:
 #region
 
 
-    def create_model(self, user_identifier: str, model_details: 'dict[str, object]') -> str:
+    def create_model(self, user_id: str, model_details: 'dict[str, object]') -> str:
         """
         Insert single model into the database.
         ---
         >>> mdl_id: str = data_storage.create_model("automl_user", {
                 "automl_name": "MLJAR",
-                "training_identifier": training_identifier,
+                "training_id": training_id,
                 ...
             })
 
         ---
         Parameter
-        1. user identifier
+        1. user id
         2. model details
         ---
         Returns id of new model.
         """
-        return self.__mongo.insert_model(user_identifier, model_details)
+        return self.__mongo.insert_model(user_id, model_details)
 
-    def update_model(self, user_identifier: str, model_identifier: str, new_values: 'dict[str, object]') -> bool:
+    def update_model(self, user_id: str, model_id: str, new_values: 'dict[str, object]') -> bool:
         """
         Update single model with new values. 
         ---
@@ -396,17 +390,17 @@ class DataStorage:
 
         ---
         Parameter
-        1. user identifier
-        2. model identifier
+        1. user id
+        2. model id
         3. new_values: dict with new values
         ---
         Returns `True` if successfully updated, otherwise `False`.
         """
-        return self.__mongo.update_model(user_identifier, model_identifier, new_values)
+        return self.__mongo.update_model(user_id, model_id, new_values)
 
-    def get_model(self, user_identifier: str, model_identifier: str = None) -> 'tuple[bool, dict[str, object]]':
+    def get_model(self, user_id: str, model_id: str = None) -> 'tuple[bool, dict[str, object]]':
         """
-        Try to find the first model with this identifier 
+        Try to find the first model with this id 
         ---
         >>> found, model = ds.get_model("automl_user", "asdasd123213")
         >>> if not found:
@@ -414,56 +408,56 @@ class DataStorage:
         
         ---
         Parameter
-        1. user identifier
-        2. model identifier
+        1. user id
+        2. model id
         ---
         Returns either `(True, Model)` or `(False, None)`.
         """
-        result = self.__mongo.get_model(user_identifier, {
-            "_id": ObjectId(model_identifier)
+        result = self.__mongo.get_model(user_id, {
+            "_id": ObjectId(model_id)
         })
 
         return result is not None, result
 
-    def get_models(self, user_identifier: str, training_identifier: str = None, dataset_identifier: str = None) -> 'list[dict[str, object]]':
+    def get_models(self, user_id: str, training_id: str = None, dataset_id: str = None) -> 'list[dict[str, object]]':
         """
         Get all models, or all models by training id or dataset id
         ---
-        >>> models = ds.GetModels("automl_user", "training_identifier")
+        >>> models = ds.GetModels("automl_user", "training_id")
 
         ---
         Parameter
-        1. user identifier
-        2. optinally training identifier
-        2. optinally dataset identifier
+        1. user id
+        2. optinally training id
+        2. optinally dataset id
         ---
         Returns a models list
         """
-        if training_identifier is not None:
-            filter = { "training_identifier": training_identifier }
-        elif dataset_identifier is not None:
-            filter = { "dataset_identifier": dataset_identifier }
+        if training_id is not None:
+            filter = { "training_id": training_id }
+        elif dataset_id is not None:
+            filter = { "dataset_id": dataset_id }
         else:
             filter = {}
-        result = self.__mongo.get_models(user_identifier, filter)
+        result = self.__mongo.get_models(user_id, filter)
 
         return [ds for ds in result]
 
-    def delete_model(self, user_identifier: bool, model_identifier: str):
+    def delete_model(self, user_id: bool, model_id: str):
         """
         Delete model and its associated items
         ---
         Parameter
-        1. user identifier
-        2. model identifier
+        1. user id
+        2. model id
         ---
         Returns amount of deleted objects
         """
         #First check if training isn't already deleted
-        found, model = self.get_model(user_identifier, model_identifier)
+        found, model = self.get_model(user_id, model_id)
         if not found:
-            self.__log.error(f"delete_model: attempting to delete a model that does not exist: {model_identifier} for user {user_identifier}")
-            raise grpclib.GRPCError(grpclib.Status.NOT_FOUND, f"Model {model_identifier} does not exist, already deleted?")
+            self.__log.error(f"delete_model: attempting to delete a model that does not exist: {model_id} for user {user_id}")
+            raise grpclib.GRPCError(grpclib.Status.NOT_FOUND, f"Model {model_id} does not exist, already deleted?")
         #Before deleting the model, delete all related documents
         path: str = model["path"]
         if model["automl_name"] == ":alphad3m":
@@ -489,10 +483,10 @@ class DataStorage:
             shutil.rmtree(path)
         except:
             self.__log.error(f"delete_model: deleting files within path: {path} failed, path does not exist")
-            raise grpclib.GRPCError(grpclib.Status.NOT_FOUND, f"Model {model_identifier} file path does not exist, already deleted?")
+            raise grpclib.GRPCError(grpclib.Status.NOT_FOUND, f"Model {model_id} file path does not exist, already deleted?")
 
 
-        amount_deleted_models_result = self.__mongo.delete_model(user_identifier, { "_id": ObjectId(model_identifier) })
+        amount_deleted_models_result = self.__mongo.delete_model(user_id, { "_id": ObjectId(model_id) })
         self.__log.debug(f"delete_model: documents deleted within model: {amount_deleted_models_result}")
         return amount_deleted_models_result
 
@@ -503,7 +497,7 @@ class DataStorage:
     ####################################
 #region
 
-    def create_training(self, user_identifier: str, training_details: 'dict[str, object]') -> str:
+    def create_training(self, user_id: str, training_details: 'dict[str, object]') -> str:
         """
         Insert single training into the database.
         ---
@@ -514,14 +508,14 @@ class DataStorage:
 
         ---
         Parameter
-        1. user identifier
+        1. user id
         2. training details: training dict to be inserted
         ---
         Returns training id
         """
-        return self.__mongo.insert_training(user_identifier, training_details)
+        return self.__mongo.insert_training(user_id, training_details)
 
-    def update_training(self, user_identifier: str, training_identifier: str, new_values: 'dict[str, object]') -> bool:
+    def update_training(self, user_id: str, training_id: str, new_values: 'dict[str, object]') -> bool:
         """
         Update single training with new values. 
         ---
@@ -531,17 +525,17 @@ class DataStorage:
 
         ---
         Parameter
-        1. user identifier
-        2. training identifier
+        1. user id
+        2. training id
         3. new_values: dict with new values
         ---
         Returns `True` if successfully updated, otherwise `False`.
         """
-        return self.__mongo.update_training(user_identifier, training_identifier, new_values)
+        return self.__mongo.update_training(user_id, training_id, new_values)
 
-    def get_training(self, user_identifier: str, training_identifier: str) -> 'tuple[bool, dict[str, object]]':
+    def get_training(self, user_id: str, training_id: str) -> 'tuple[bool, dict[str, object]]':
         """
-        Try to find the first training with this identifier 
+        Try to find the first training with this id 
         ---
         >>> found, dataset = ds.get_training("automl_user", "asdasd123213")
         >>> if not found:
@@ -549,18 +543,18 @@ class DataStorage:
         
         ---
         Parameter
-        1. user identifier
-        2. training identifier
+        1. user id
+        2. training id
         ---
         Returns either `(True, Training)` or `(False, None)`.
         """
-        result = self.__mongo.get_training(user_identifier, {
-            "_id": ObjectId(training_identifier)
+        result = self.__mongo.get_training(user_id, {
+            "_id": ObjectId(training_id)
         })
 
         return result is not None, result
 
-    def get_trainings(self, user_identifier: str, dataset_identifier:str=None) -> 'list[dict[str, object]]':
+    def get_trainings(self, user_id: str, dataset_id:str=None) -> 'list[dict[str, object]]':
         """
         Get all trainings for a user. 
         ---
@@ -569,42 +563,42 @@ class DataStorage:
 
         ---
         Parameter
-        1. user identifier
-        2. optinally dataset identifier
+        1. user id
+        2. optinally dataset id
         ---
         Returns trainings as `list` of dictionaries.
         """
-        if dataset_identifier is None:
-            return [sess for sess in self.__mongo.get_trainings(user_identifier)]
+        if dataset_id is None:
+            return [sess for sess in self.__mongo.get_trainings(user_id)]
         else:
-            return [sess for sess in self.__mongo.get_trainings(user_identifier, {"dataset_identifier": dataset_identifier})]
+            return [sess for sess in self.__mongo.get_trainings(user_id, {"dataset_id": dataset_id})]
         
-    def delete_training(self, user_identifier: bool, training_identifier: str):
+    def delete_training(self, user_id: bool, training_id: str):
         """
         Delete a training and its associated items
         ---
         Parameter
-        1. user identifier
-        2. training identifier
+        1. user id
+        2. training id
         ---
         Returns amount of deleted objects
         """
         #First check if training isn't already deleted
-        found, training = self.get_training(user_identifier, training_identifier)
+        found, training = self.get_training(user_id, training_id)
         if not found:
-            self.__log.error(f"delete_training: attempting to delete a training that does not exist: {training_identifier} for user {user_identifier}")
-            raise grpclib.GRPCError(grpclib.Status.NOT_FOUND, f"Training {training_identifier} does not exist, already deleted?")
+            self.__log.error(f"delete_training: attempting to delete a training that does not exist: {training_id} for user {user_id}")
+            raise grpclib.GRPCError(grpclib.Status.NOT_FOUND, f"Training {training_id} does not exist, already deleted?")
 
         #Before deleting the training, delete all related documents
-        existing_models = self.get_models(user_identifier, training_identifier=training_identifier)
+        existing_models = self.get_models(user_id, training_id=training_id)
         self.__log.debug(f"delete_training: deleting {existing_models.count} models")
         for model in existing_models:
             try:
-                self.delete_model(user_identifier, str(model["_id"]))
+                self.delete_model(user_id, str(model["_id"]))
             except:
                 self.__log.debug(f"delete_training: deleting model failed, already deleted. Skipping...")
         #Finally delete training
-        amount_deleted_trainings_result = self.__mongo.delete_training(user_identifier, { "_id": ObjectId(training_identifier) })
+        amount_deleted_trainings_result = self.__mongo.delete_training(user_id, { "_id": ObjectId(training_id) })
         self.__log.debug(f"delete_training: documents deleted within training: {amount_deleted_trainings_result}")
         return amount_deleted_trainings_result
    
@@ -616,26 +610,26 @@ class DataStorage:
 #region 
 
 
-    def create_prediction_dataset(self, user_identifier: str, file_name: str, dataset_identifier: str, name: str) -> str:
+    def create_prediction(self, user_id: str, file_name: str, dataset_id: str, name: str) -> str:
         """
         Store dataset contents on disk and insert entry to database.
         ---
         Parameter
-        1. user identifier
+        1. user id
         2. file name: file name of dataset
         3. type: dataset type
         4. name: dataset name
         ---
         Returns dataset id
         """
-        self.__log.debug(f"create_prediction_dataset: getting main dataset {dataset_identifier} for new prediction dataset")
-        found, dataset = self.get_dataset(user_identifier, dataset_identifier)
+        self.__log.debug(f"create_prediction: getting main dataset {dataset_id} for new prediction dataset")
+        found, dataset = self.get_dataset(user_id, dataset_id)
 
         if not found:
-            raise grpclib.GRPCError(grpclib.Status.NOT_FOUND, f"Dataset {dataset_identifier} for user {user_identifier} does not exist, can not create a new prediction dataset!")
+            raise grpclib.GRPCError(grpclib.Status.NOT_FOUND, f"Dataset {dataset_id} for user {user_id} does not exist, can not create a new prediction dataset!")
 
         if dataset["type"] == ":image":
-            self.__log.debug(f"create_prediction_dataset: dataset type is image, removing .zip ending from {name} as not necessary after unzipping anymore...")
+            self.__log.debug(f"create_prediction: dataset type is image, removing .zip ending from {name} as not necessary after unzipping anymore...")
             name = name.replace(".zip", "")
 
 
@@ -643,7 +637,7 @@ class DataStorage:
         # build dictionary for database
         database_content = {
             "name": name,
-            "dataset_identifier": dataset_identifier,
+            "dataset_id": dataset_id,
             "type": dataset["type"],
             "path": "",
             "size": 0,
@@ -652,44 +646,44 @@ class DataStorage:
             "predictions": {},
         }
 
-        self.__log.debug("create_prediction_dataset: inserting new prediction dataset into database...")
-        prediction_dataset_id = self.__mongo.insert_prediction_dataset(user_identifier, database_content)
-        self.__log.debug(f"create_prediction_dataset: new dataset inserted with id: {prediction_dataset_id}")
+        self.__log.debug("create_prediction: inserting new prediction dataset into database...")
+        prediction_id = self.__mongo.insert_prediction(user_id, database_content)
+        self.__log.debug(f"create_prediction: new dataset inserted with id: {prediction_id}")
 
 
-        upload_file = os.path.join(self.__storage_dir, user_identifier, "uploads", file_name)
-        self.__log.debug(f"create_prediction_dataset: upload location is: {upload_file}")
+        upload_file = os.path.join(self.__storage_dir, user_id, "uploads", file_name)
+        self.__log.debug(f"create_prediction: upload location is: {upload_file}")
         
-        filename_dest = os.path.join(self.__storage_dir, user_identifier, str(dataset["_id"]), "prediction_datasets", prediction_dataset_id, file_name)
-        self.__log.debug(f"create_prediction_dataset: final persistence location is: {filename_dest}")
+        filename_dest = os.path.join(self.__storage_dir, user_id, str(dataset["_id"]), "predictions", prediction_id, file_name)
+        self.__log.debug(f"create_prediction: final persistence location is: {filename_dest}")
 
-        self.__log.debug(f"create_prediction_dataset: creating dataset folder location: {filename_dest}")
+        self.__log.debug(f"create_prediction: creating dataset folder location: {filename_dest}")
         os.makedirs(os.path.dirname(filename_dest), exist_ok=True)
-        self.__log.debug(f"create_prediction_dataset: moving prediction dataset from: {upload_file} to: {filename_dest}")
+        self.__log.debug(f"create_prediction: moving prediction dataset from: {upload_file} to: {filename_dest}")
         shutil.move(upload_file, filename_dest)
 
         if dataset["type"] == ":image":
-            self.__log.debug("create_prediction_dataset: dataset is of image type: unzipping, deleting zip archive and remove .zip suffix...")
-            shutil.unpack_archive(filename_dest, os.path.join(self.__storage_dir, user_identifier, prediction_dataset_id, "prediction_datasets"))
+            self.__log.debug("create_prediction: dataset is of image type: unzipping, deleting zip archive and remove .zip suffix...")
+            shutil.unpack_archive(filename_dest, os.path.join(self.__storage_dir, user_id, prediction_id, "predictions"))
             os.remove(filename_dest)
             filename_dest = filename_dest.replace(".zip", "")
 
-        self.__log.debug("create_prediction_dataset: get the total occupied disc size of the dataset...")
-        nbytes = self.__get_size(os.path.join(self.__storage_dir, user_identifier, str(dataset["_id"]), "prediction_datasets", prediction_dataset_id))
-        self.__log.debug(f"create_prediction_dataset: dataset disc usage is: {nbytes} bytes")
+        self.__log.debug("create_prediction: get the total occupied disc size of the dataset...")
+        nbytes = self.__get_size(os.path.join(self.__storage_dir, user_id, str(dataset["_id"]), "predictions", prediction_id))
+        self.__log.debug(f"create_prediction: dataset disc usage is: {nbytes} bytes")
 
 
-        success = self.__mongo.update_prediction_dataset(user_identifier, prediction_dataset_id, {
+        success = self.__mongo.update_prediction(user_id, prediction_id, {
             "path": filename_dest,
             "size": nbytes,
             "creation_time": os.path.getmtime(filename_dest),
             "file_name": file_name
         })
-        assert success, f"cannot update dataset with id {prediction_dataset_id}"
+        assert success, f"cannot update dataset with id {prediction_id}"
 
-        return prediction_dataset_id
+        return prediction_id
 
-    def update_prediction_dataset(self, user_identifier: str, prediction_dataset_identifier: str, new_values: 'dict[str, object]', run_analysis: bool=False) -> bool:
+    def update_prediction(self, user_id: str, prediction_id: str, new_values: 'dict[str, object]', run_analysis: bool=False) -> bool:
         """
         Update single dataset with new values. 
         ---
@@ -699,36 +693,36 @@ class DataStorage:
 
         ---
         Parameter
-        1. user identifier: name of the user
-        2. dataset identifier
+        1. user id: name of the user
+        2. dataset id
         3. new values: dict with new values
         4. run analysis: if the dataset analysis should be executed
         ---
         Returns `True` if successfully updated, otherwise `False`.
         """
-        self.__log.debug(f"update_prediction_dataset: updating: {prediction_dataset_identifier} for user {user_identifier}, new values {new_values}")
+        self.__log.debug(f"update_prediction: updating: {prediction_id} for user {user_id}, new values {new_values}")
         if run_analysis == True:
-            found, dataset = self.get_prediction_dataset(user_identifier, prediction_dataset_identifier)
+            found, dataset = self.get_prediction(user_id, prediction_id)
             if found is not None:
-                self.__log.debug(f"update_prediction_dataset: executing dataset analysis for dataset: {prediction_dataset_identifier} for user {user_identifier}")
+                self.__log.debug(f"update_prediction: executing dataset analysis for dataset: {prediction_id} for user {user_id}")
                 # If the dataset is a tabular dataset it can be analyzed.
                 if dataset['type'] in [":tabular", ":text", ":time_series", ":time_series_longitudinal"]:
                     # Delete old references
                     new_values["analysis"] = ""
-                    self.__log.debug(f"update_prediction_dataset: deleting old dataset analysis for dataset: {prediction_dataset_identifier} for user {user_identifier}")
-                    self.__mongo.update_prediction_dataset(user_identifier, prediction_dataset_identifier, new_values)
-                    self.__log.debug(f"update_prediction_dataset: saving new dataset analysis for dataset: {prediction_dataset_identifier} for user {user_identifier}, new values {new_values}")
+                    self.__log.debug(f"update_prediction: deleting old dataset analysis for dataset: {prediction_id} for user {user_id}")
+                    self.__mongo.update_prediction(user_id, prediction_id, new_values)
+                    self.__log.debug(f"update_prediction: saving new dataset analysis for dataset: {prediction_id} for user {user_id}, new values {new_values}")
                     new_values["analysis"] = DataSetAnalysisManager(dataset).analysis(advanced_analysis=False)
                 else:
-                    self.__log.warn(f"update_prediction_dataset: dataset type {dataset['type']} does not support dataset analysis in dataset {prediction_dataset_identifier} for user {user_identifier}")
+                    self.__log.warn(f"update_prediction: dataset type {dataset['type']} does not support dataset analysis in dataset {prediction_id} for user {user_id}")
             else:
-                self.__log.error(f"update_prediction_dataset: executing dataset analysis failed for dataset: {prediction_dataset_identifier} for user {user_identifier}, dataset not found")
-                raise grpclib.GRPCError(grpclib.Status.NOT_FOUND, f"Dataset {prediction_dataset_identifier} for user {user_identifier} does not exist, can not execute dataset analysis!")
-        return self.__mongo.update_prediction_dataset(user_identifier, prediction_dataset_identifier, new_values)
+                self.__log.error(f"update_prediction: executing dataset analysis failed for dataset: {prediction_id} for user {user_id}, dataset not found")
+                raise grpclib.GRPCError(grpclib.Status.NOT_FOUND, f"Dataset {prediction_id} for user {user_id} does not exist, can not execute dataset analysis!")
+        return self.__mongo.update_prediction(user_id, prediction_id, new_values)
 
-    def get_prediction_dataset(self, user_identifier: str, prediction_dataset_identifier: str) -> 'tuple[bool, dict[str, object]]':
+    def get_prediction(self, user_id: str, prediction_id: str) -> 'tuple[bool, dict[str, object]]':
         """
-        Try to find the first dataset with this identifier 
+        Try to find the first dataset with this id 
         ---
         >>> found, dataset = ds.get_dataset("automl_user", "12323asdas")
         >>> if not found:
@@ -736,19 +730,19 @@ class DataStorage:
 
         ---
         Parameter
-        1. user identifier 
-        2. dataset identifier
+        1. user id 
+        2. dataset id
         ---
         Returns either `(True, Dataset)` or `(False, None)`.
         """
-        result = self.__mongo.get_prediction_dataset(user_identifier, {
-            "_id": ObjectId(prediction_dataset_identifier)
+        result = self.__mongo.get_prediction(user_id, {
+            "_id": ObjectId(prediction_id)
         })
 
         return result is not None, result
 
-    #def get_datasets(self, user_identifier: bool):
-    def get_prediction_datasets(self, user_identifier: str, dataset_identifier: str) -> 'list[dict[str, object]]':
+    #def get_datasets(self, user_id: bool):
+    def get_predictions(self, user_id: str, dataset_id: str) -> 'list[dict[str, object]]':
         """
         Get all datasets for a user. 
         ---
@@ -757,43 +751,43 @@ class DataStorage:
 
         ---
         Parameter
-        1. user_identifier: name of the user
+        1. user_id: name of the user
         ---
         Returns `list` of all datasets.
         """
-        return [ds for ds in self.__mongo.get_prediction_datasets(user_identifier, {"dataset_identifier": dataset_identifier})]
+        return [ds for ds in self.__mongo.get_predictions(user_id, {"dataset_id": dataset_id})]
 
-    def delete_prediction_dataset(self, user_identifier: str, prediction_dataset_identifier: str):
+    def delete_prediction(self, user_id: str, prediction_id: str):
         """
         Delete a dataset and its associated items
         ---
         Parameter
-        1. user identifier
-        2. dataset identifier
+        1. user id
+        2. dataset id
         ---
         Returns amount of deleted objects
         """
         #TODO
         #First check if dataset isn't already deleted
-        found, dataset = self.get_prediction_dataset(user_identifier, prediction_dataset_identifier)
+        found, dataset = self.get_prediction(user_id, prediction_id)
         if not found:
-            self.__log.error(f"delete_prediction_dataset: attempting to delete a dataset that does not exist: {prediction_dataset_identifier} for user {user_identifier}")
-            raise grpclib.GRPCError(grpclib.Status.NOT_FOUND, f"Dataset {prediction_dataset_identifier} does not exist, already deleted?")
+            self.__log.error(f"delete_prediction: attempting to delete a dataset that does not exist: {prediction_id} for user {user_id}")
+            raise grpclib.GRPCError(grpclib.Status.NOT_FOUND, f"Dataset {prediction_id} does not exist, already deleted?")
         path = dataset["path"]
         path = path.replace("\\"+ dataset["file_name"], "")
         #Before deleting the dataset, delete all related documents
-        existing_trainings = self.get_trainings(user_identifier, prediction_dataset_identifier)
-        self.__log.debug(f"delete_prediction_dataset: deleting {existing_trainings.count} trainings")
+        existing_trainings = self.get_trainings(user_id, prediction_id)
+        self.__log.debug(f"delete_prediction: deleting {existing_trainings.count} trainings")
         for training in existing_trainings:
             try:
-                self.delete_training(user_identifier, str(training["_id"]))
+                self.delete_training(user_id, str(training["_id"]))
             except:
-                self.__log.debug(f"delete_prediction_dataset: deleting training failed, already deleted. Skipping...")
-        self.__mongo.delete_training(user_identifier, { "prediction_dataset_identifier": prediction_dataset_identifier})
-        self.__log.debug(f"delete_prediction_dataset: deleting files within path: {path}")
+                self.__log.debug(f"delete_prediction: deleting training failed, already deleted. Skipping...")
+        self.__mongo.delete_training(user_id, { "prediction_id": prediction_id})
+        self.__log.debug(f"delete_prediction: deleting files within path: {path}")
         shutil.rmtree(path)
-        amount_deleted_datasets_result = self.__mongo.delete_prediction_dataset(user_identifier, { "prediction_dataset_identifier": prediction_dataset_identifier})
-        self.__log.debug(f"delete_prediction_dataset: documents deleted within dataset: {amount_deleted_datasets_result}")
+        amount_deleted_datasets_result = self.__mongo.delete_prediction(user_id, { "prediction_id": prediction_id})
+        self.__log.debug(f"delete_prediction: documents deleted within dataset: {amount_deleted_datasets_result}")
         return amount_deleted_datasets_result
 
 

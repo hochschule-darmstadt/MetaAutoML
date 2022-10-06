@@ -154,48 +154,48 @@ class ExplainableAIManager:
         self.__adapter_manager = adapter_manager
         self.__threads = []
 
-    def explain(self, user_identifier, model_identifier):
+    def explain(self, user_id, model_id):
         """
         Start new explanation.
         This spawns a separate thread which is saved in self.__threads and is removed upon completion.
         After the thread is finished (or has crashed) the database is updated with the new information.
         """
-        def callback(thread, user_identifier, model, status, detail, plots, title):
+        def callback(thread, user_id, model, status, detail, plots, title):
             with self.__data_storage.lock():
                 # Add explanation results to model
                 model_data = {"explanation":
                                   {"status": status,
                                    "detail": detail,
                                    "content": [{"title": title, "items": plots}]}}
-                self.__data_storage.update_model(user_identifier, str(model['_id']), model_data)
+                self.__data_storage.update_model(user_id, str(model['_id']), model_data)
 
                 # Add explanation results (only the status) to training
-                found, training = self.__data_storage.get_training(user_identifier, model['training_identifier'])
+                found, training = self.__data_storage.get_training(user_id, model['training_id'])
                 if "explanation" in training:
                     training["explanation"].update({model['automl_name']: status})
                 else:
                     training["explanation"] = {model['automl_name']: status}
-                self.__data_storage.update_training(user_identifier, model['training_identifier'], {"explanation": training["explanation"]})
+                self.__data_storage.update_training(user_id, model['training_id'], {"explanation": training["explanation"]})
 
             # Remove tread from thread list
             self.__threads.remove(thread)
 
         # Create a new thread for the explanation
-        thread = threading.Thread(target=self.explain_shap, name=f"{user_identifier}:{model_identifier}", args=(user_identifier, model_identifier, callback))
+        thread = threading.Thread(target=self.explain_shap, name=f"{user_id}:{model_id}", args=(user_id, model_id, callback))
         thread.start()
         self.__threads.append(thread)
-        self.__data_storage.update_model(user_identifier, model_identifier, {"explanation": {"status": "started"}})
+        self.__data_storage.update_model(user_id, model_id, {"explanation": {"status": "started"}})
         return
 
-    def explain_shap(self, user_identifier, model_identifier, callback, number_of_samples=5):
-        found, model = self.__data_storage.get_model(user_identifier, model_identifier)
-        found, training = self.__data_storage.get_training(user_identifier, model["training_identifier"])
-        dataset_path = self.__data_storage.get_dataset(user_identifier, training["dataset_identifier"])[1]["path"]
+    def explain_shap(self, user_id, model_id, callback, number_of_samples=5):
+        found, model = self.__data_storage.get_model(user_id, model_id)
+        found, training = self.__data_storage.get_training(user_id, model["training_id"])
+        dataset_path = self.__data_storage.get_dataset(user_id, training["dataset_id"])[1]["path"]
 
-        print(f"[ExplainableAIManager]: Initializing new shap explanation. AutoML: {model['automl_name'].replace(':', '')} | Training ID: {model['training_identifier']} | Dataset: {training['dataset_identifier']} ({training['dataset_name']})")
+        print(f"[ExplainableAIManager]: Initializing new shap explanation. AutoML: {model['automl_name'].replace(':', '')} | Training ID: {model['training_id']} | Dataset: {training['dataset_id']} ({training['dataset_name']})")
         
         training["file_location"], training["file_name"] = os.path.split(dataset_path)
-        output_path = os.path.join(os.getcwd(), "app-data", "training", model["automl_name"].replace(":", ""), user_identifier, model["training_identifier"], "result")
+        output_path = os.path.join(os.getcwd(), "app-data", "training", model["automl_name"].replace(":", ""), user_id, model["training_id"], "result")
         os.makedirs(output_path, exist_ok=True)
         plot_path = os.path.join(output_path, "plots")
         os.makedirs(plot_path, exist_ok=True)
@@ -211,9 +211,9 @@ class ExplainableAIManager:
 
         if training["task"] == ":tabular_classification":
             try:
-                explainer = self.get_shap_explainer(user_identifier, model, training, sampled_dataset_X)
+                explainer = self.get_shap_explainer(user_id, model, training, sampled_dataset_X)
             except RuntimeError as e:
-                callback(thread=threading.current_thread(), user_identifier=user_identifier, model=model, status="failed", detail=f"exeption: {e}", plots=[], title="SHAP Explanation")
+                callback(thread=threading.current_thread(), user_id=user_id, model=model, status="failed", detail=f"exeption: {e}", plots=[], title="SHAP Explanation")
                 return
             shap_values = explainer.shap_values(sampled_dataset_X)
 
@@ -229,13 +229,13 @@ class ExplainableAIManager:
         else:
             message = "The ML task of the selected training is not tabular classification. This module is only compatible with tabular classification."
             print("[ExplainableAIManager]:" + message)
-            callback(thread=threading.current_thread(), user_identifier=user_identifier, model=model, status="failed", detail=f"incompatible: {message}", plots=[], title="SHAP Explanation")
+            callback(thread=threading.current_thread(), user_id=user_id, model=model, status="failed", detail=f"incompatible: {message}", plots=[], title="SHAP Explanation")
             return
 
         print(f"[ExplainableAIManager]: Plots for {model['automl_name']} completed")
-        callback(thread=threading.current_thread(), user_identifier=user_identifier, model=model, status="finished", detail=f"{len(plots)} plots created", plots=plots, title="SHAP Explanation")
+        callback(thread=threading.current_thread(), user_id=user_id, model=model, status="finished", detail=f"{len(plots)} plots created", plots=plots, title="SHAP Explanation")
 
-    def get_shap_explainer(self, user_identifier, model, config, sampled_dataset_x):
+    def get_shap_explainer(self, user_id, model, config, sampled_dataset_x):
         """
         Calculate and return the SHAP explainer object.
         Usually this is a one-liner as with any "normal" ML-model the explainer is passed the model predict_proba (for
@@ -260,7 +260,7 @@ class ExplainableAIManager:
                 # Request the data
                 result = self.__adapter_manager.explain_model(json.dumps(chunk.tolist()))
                 if result is None:
-                    raise RuntimeError(f"Unable to create SHAP values for Automl {model['automl_name']} | Training_id {model['training_identifier']}")
+                    raise RuntimeError(f"Unable to create SHAP values for Automl {model['automl_name']} | Training_id {model['training_id']}")
                 else:
                     probabilities = probabilities + json.loads(result.probabilities)
 

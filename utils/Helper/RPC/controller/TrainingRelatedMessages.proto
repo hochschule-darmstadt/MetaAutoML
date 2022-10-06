@@ -7,8 +7,8 @@ import "Enumerations.proto";
 import "ModelRelatedMessages.proto";
 
 message DeleteTrainingRequest {
-  string userIdentifier = 1;
-  string trainingIdentifier = 2;
+  string userId = 1;
+  string trainingId = 2;
 }
 
 message DeleteTrainingResponse {
@@ -16,7 +16,7 @@ message DeleteTrainingResponse {
 }
 
 message GetTrainingsRequest {
-    string userIdentifier = 1;
+    string userId = 1;
   }
   
 message GetTrainingsResponse {
@@ -24,8 +24,8 @@ message GetTrainingsResponse {
   }
   
 message GetTrainingRequest {
-    string userIdentifier = 1;
-    string trainingIdentifier = 2;
+    string userId = 1;
+    string trainingId = 2;
   }
   
 message GetTrainingResponse {
@@ -33,9 +33,9 @@ message GetTrainingResponse {
 }
 
 message Training {
-    string identifier = 1;
+    string id = 1;
     repeated Model models = 2;
-    string datasetIdentifier = 3;
+    string datasetId = 3;
     string datasetName = 4;
     string task = 5;
     string configuration = 6;
@@ -59,8 +59,8 @@ message StrategyControllerEvent {
   
 
 message CreateTrainingRequest {
-  string userIdentifier = 1;
-  string datasetIdentifier = 2;
+  string userId = 1;
+  string datasetId = 2;
   string task = 3;
   string configuration = 4;
   repeated string selectedAutoMls = 5;
@@ -73,5 +73,5 @@ message CreateTrainingRequest {
 
 
 message CreateTrainingResponse {
-  string trainingIdentifier = 1;
+  string trainingId = 1;
 }
