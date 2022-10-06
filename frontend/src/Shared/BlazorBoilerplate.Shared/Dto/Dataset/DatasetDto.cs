@@ -14,7 +14,7 @@ namespace BlazorBoilerplate.Shared.Dto.Dataset
         public string Identifier { get; set; }
         public string Name { get; set; }
         public ObjectInfomationDto Type { get; set; }
-        public DateTime Creation_date { get; set; }
+        public DateTime CreationTime { get; set; }
         public long Size { get; set; }
         public Dictionary<string, dynamic> Analysis { get; set; }
         public Dictionary<string, dynamic> Configuration { get; set; }
@@ -27,7 +27,7 @@ namespace BlazorBoilerplate.Shared.Dto.Dataset
             Identifier = grpcObject.Dataset.Identifier;
             Name = grpcObject.Dataset.Name;
             Type = type;
-            Creation_date = grpcObject.Dataset.CreationDate.ToDateTime();
+            CreationTime = grpcObject.Dataset.CreationTime.ToDateTime();
             Size = grpcObject.Dataset.Size;
             Analysis = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(grpcObject.Dataset.Analysis);
             Configuration = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(grpcObject.Dataset.FileConfiguration);
@@ -37,7 +37,7 @@ namespace BlazorBoilerplate.Shared.Dto.Dataset
             Identifier = grpcObject.Identifier;
             Name = grpcObject.Name;
             Type = type;
-            Creation_date = grpcObject.CreationDate.ToDateTime();
+            CreationTime = grpcObject.CreationTime.ToDateTime();
             Size = grpcObject.Size;
             Analysis = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(grpcObject.Analysis);
             Configuration = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(grpcObject.FileConfiguration);

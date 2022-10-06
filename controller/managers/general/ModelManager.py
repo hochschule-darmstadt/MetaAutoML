@@ -115,29 +115,21 @@ class ModelManager:
             found, prediction_dataset = self.__data_storage.get_prediction_dataset(model_predict_request.user_identifier, model_predict_request.prediction_dataset_identifier)
 
             online_prediction_session = { 
-                    "prediction_identifier": prediction_identifier,
-                    "model_identifier": model_predict_request.model_identifier,
-                    "request_datetime": datetime.timestamp(datetime.now()),
-                    "status": "created",
-                    "result_path": ""
+                    "creation_time": datetime.timestamp(datetime.now()),
+                    "status": "busy",
+                    "prediction_path": "",
+                    "prediction_time": 0
                 }
-            prediction_dataset["predictions"][prediction_identifier] = online_prediction_session
+
+            if model_predict_request.model_identifier not in prediction_dataset["predictions"].keys():
+                prediction_dataset["predictions"][model_predict_request.model_identifier] = {}
+            
+            prediction_dataset["predictions"][model_predict_request.model_identifier][prediction_identifier] = online_prediction_session
             self.__data_storage.update_prediction_dataset(model_predict_request.user_identifier, model_predict_request.prediction_dataset_identifier, {
                 "predictions": prediction_dataset["predictions"]
             })
 
         self.__adapter_runtime_scheduler.create_new_prediction(model_predict_request, prediction_identifier)
-        #TODO REWORK ONLINE PREDICTION
-        #automl = AdapterManager(self.__data_storage)
-        #test_auto_ml = automl.TestAutoml(model_predict_request, model["automl_name"], model["training_identifier"], config)
-        #if test_auto_ml:
-        #    response = TestAutoMlResponse()
-        #    for prediction in test_auto_ml.predictions:
-        #        response.predictions.append(prediction)
-        #    response.score = test_auto_ml.score
-        #    response.predictiontime = test_auto_ml.predictiontime
-        #else:
-        #    response = ModelPredictResponse()
         return ModelPredictResponse()
 
     def delete_model(

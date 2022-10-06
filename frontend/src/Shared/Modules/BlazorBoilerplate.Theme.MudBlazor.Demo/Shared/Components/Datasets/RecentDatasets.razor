@@ -46,7 +46,7 @@
                         </MudTd>
                         <MudTd>@L[context.Type.Properties.ContainsKey("skos:prefLabel") ? context.Type.Properties["skos:prefLabel"] : ""]</MudTd>
                         <MudTd >@FormatBytes(context.Size)</MudTd>
-                        <MudTd  style="white-space:nowrap;">@context.Creation_date.ToString("yyyy-MM-dd")</MudTd>
+                        <MudTd  style="white-space:nowrap;">@context.CreationTime.ToString("yyyy-MM-dd")</MudTd>
                     </RowTemplate>
                 </MudTable>
             }
@@ -68,7 +68,7 @@
 
             if (_datasets != null)
             {
-                _datasets.Datasets = _datasets.Datasets.OrderByDescending(x => x.Creation_date).Take(6).ToList();
+                _datasets.Datasets = _datasets.Datasets.OrderByDescending(x => x.CreationTime).Take(6).ToList();
                 StateHasChanged();
             }
         } 

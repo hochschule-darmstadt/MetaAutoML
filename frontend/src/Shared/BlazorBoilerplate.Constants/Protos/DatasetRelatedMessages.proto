@@ -35,7 +35,7 @@ message Dataset {
   string identifier = 1;
   string name = 2;
   string type = 3;
-  google.protobuf.Timestamp creation_date = 4;
+  google.protobuf.Timestamp creationTime = 4;
   int64 size = 5;
   string analysis = 6;
   string path = 7;

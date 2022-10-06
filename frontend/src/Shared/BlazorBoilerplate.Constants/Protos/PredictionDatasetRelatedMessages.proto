@@ -35,13 +35,22 @@ message PredictionDataset {
   string identifier = 1;
   string name = 2;
   string type = 3;
-  google.protobuf.Timestamp creation_date = 4;
+  google.protobuf.Timestamp creationTime = 4;
   int64 size = 5;
-  string analysis = 6;
-  string path = 7;
-  string fileName = 8;
-  string fileConfiguration = 9;
-  string predictions = 10;
+  string path = 6;
+  string fileName = 7;
+  map<string, ModelPrediction> predictions = 8;
+}
+
+message ModelPrediction {
+  map<string, Prediction> predictions = 1;
+}
+
+message Prediction {
+  google.protobuf.Timestamp creationTime = 1;
+  string status = 2;
+  string predictionPath = 3;
+  float predictionTime = 4;
 }
 
 message CreatePredictionDatasetRequest {

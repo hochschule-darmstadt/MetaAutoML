@@ -2,11 +2,15 @@
 using BlazorBoilerplate.Infrastructure.Server.Models;
 using BlazorBoilerplate.Shared.Dto.Dataset;
 using BlazorBoilerplate.Shared.Dto.Model;
+using BlazorBoilerplate.Shared.Dto.Ontology;
 using BlazorBoilerplate.Shared.Dto.PredictionDataset;
 using BlazorBoilerplate.Storage;
+using Microsoft.Extensions.Caching.Distributed;
 using Newtonsoft.Json;
 using System.Net;
+using System.Text;
 using static Microsoft.AspNetCore.Http.StatusCodes;
+using static MudBlazor.CategoryTypes;
 
 namespace BlazorBoilerplate.Server.Managers
 {
@@ -55,21 +59,11 @@ namespace BlazorBoilerplate.Server.Managers
                 getPredictionDatasetRequest.UserIdentifier = username;
                 getPredictionDatasetRequest.PredictionDatasetIdentifier = request.PredictionDatasetIdentifier;
                 var reply = _client.GetPredictionDataset(getPredictionDatasetRequest);
-                //TODO NEW DOWNLOAD FUNCTIONALITY IMPLEMENTATION
-                var predictions = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(reply.PredictionDataset.Predictions);
-                foreach (var item in predictions)
-                {
-                    if (item.Key == request.PredictionIdentifier)
-                    {
-                        var prediction = item.Value;
-                        string predictionFilePath = (string)prediction["result_path"].Value;
-                        byte[] predictionFile = File.ReadAllBytes(predictionFilePath);
-                        response.Content = predictionFile;
-                        response.Name = "predicitons.csv";
-                        break;
-                    }
-                }
-                string path = predictions[request.PredictionIdentifier]["result_path"];
+
+                var predictionPath = reply.PredictionDataset.Predictions[request.ModelIdentifier].Predictions[request.PredictionIdentifier].PredictionPath;
+                byte[] predictionFile = File.ReadAllBytes(predictionPath);
+                response.Content = predictionFile;
+                response.Name = "predicitons.csv";
                 return new ApiResponse(Status200OK, null, response);
 
             }

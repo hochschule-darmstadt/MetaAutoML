@@ -52,7 +52,7 @@ class DatasetManager:
                 response_dataset.identifier = str(dataset["_id"])
                 response_dataset.name = dataset["name"]
                 response_dataset.type = dataset['type']
-                response_dataset.creation_date = datetime.fromtimestamp(int(dataset["creation_time"]))
+                response_dataset.creation_time = datetime.fromtimestamp(int(dataset["creation_time"]))
                 response_dataset.size = dataset['size']
                 response_dataset.analysis = json.dumps(dataset['analysis'])
                 response_dataset.file_name = dataset["file_name"]
@@ -89,7 +89,7 @@ class DatasetManager:
             response_dataset.identifier = str(dataset["_id"])
             response_dataset.name = dataset["name"]
             response_dataset.type = dataset['type']
-            response_dataset.creation_date = datetime.fromtimestamp(int(dataset["creation_time"]))
+            response_dataset.creation_time = datetime.fromtimestamp(int(dataset["creation_time"]))
             response_dataset.size = dataset['size']
             response_dataset.analysis = json.dumps(dataset['analysis'])
             response_dataset.file_name = dataset["file_name"]

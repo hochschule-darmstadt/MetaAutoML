@@ -9,6 +9,7 @@ namespace BlazorBoilerplate.Shared.Dto.PredictionDataset
     public class GetPredictionDatasetPredictionRequestDto
     {
         public string PredictionDatasetIdentifier { get; set; }
+        public string ModelIdentifier { get; set; }
         public string PredictionIdentifier { get; set; }
     }
 }

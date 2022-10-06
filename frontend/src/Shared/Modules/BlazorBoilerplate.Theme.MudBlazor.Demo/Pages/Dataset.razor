@@ -37,7 +37,7 @@
                                 <MudText Typo="Typo.body1">@L["Dataset type: {0}", L[_dataset.Dataset.Type.Properties.ContainsKey("skos:prefLabel") ? _dataset.Dataset.Type.Properties["skos:prefLabel"] : ""]]</MudText>
                             </MudItem>
                             <MudItem xs="3" sm="3" md="3">
-                                <MudText Typo="Typo.body1">@L["Date: {0}", _dataset.Dataset.Creation_date]</MudText>
+                                <MudText Typo="Typo.body1">@L["Date: {0}", _dataset.Dataset.CreationTime]</MudText>
                             </MudItem>
                             <MudItem xs="3" sm="3" md="3">
                                 <MudText Typo="Typo.body1">@L["File Size: {0}", FormatBytes(_dataset.Dataset.Size)]</MudText>

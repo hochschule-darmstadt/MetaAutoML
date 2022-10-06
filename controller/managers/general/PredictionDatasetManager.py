@@ -50,12 +50,20 @@ class PredictionDatasetManager:
                 response_dataset.identifier = str(dataset["_id"])
                 response_dataset.name = dataset["name"]
                 response_dataset.type = dataset['type']
-                response_dataset.creation_date = datetime.fromtimestamp(int(dataset["creation_time"]))
+                response_dataset.creation_time = datetime.fromtimestamp(int(dataset["creation_time"]))
                 response_dataset.size = dataset['size']
-                response_dataset.analysis = json.dumps(dataset['analysis'])
                 response_dataset.path = dataset["path"]
                 response_dataset.file_name = dataset["file_name"]
-                response_dataset.predictions = json.dumps(dataset['predictions'])
+                for model_item in dataset['predictions'].keys():
+                    model_prediction = ModelPrediction()
+                    for prediction_item in dataset['predictions'][model_item].keys():
+                        prediction = Prediction()
+                        prediction.creation_time = datetime.fromtimestamp(int(dataset['predictions'][model_item][prediction_item]['creation_time']))
+                        prediction.status = dataset['predictions'][model_item][prediction_item]['status']
+                        prediction.prediction_path = dataset['predictions'][model_item][prediction_item]['prediction_path']
+                        prediction.prediction_time = dataset['predictions'][model_item][prediction_item]['prediction_time']
+                        model_prediction.predictions[prediction_item] = prediction
+                    response_dataset.predictions[model_item] = model_prediction
                 response.prediction_datasets.append(response_dataset)
             except Exception as e:
                 self.__log.error(f"get_prediction_datasets: Error while reading parameter prediction dataset for dataset {get_prediction_datasets_request.dataset_identifier} for user {get_prediction_datasets_request.user_identifier}")
@@ -87,12 +95,20 @@ class PredictionDatasetManager:
             response_dataset.identifier = str(dataset["_id"])
             response_dataset.name = dataset["name"]
             response_dataset.type = dataset['type']
-            response_dataset.creation_date = datetime.fromtimestamp(int(dataset["creation_time"]))
+            response_dataset.creation_time = datetime.fromtimestamp(int(dataset["creation_time"]))
             response_dataset.size = dataset['size']
-            response_dataset.analysis = json.dumps(dataset['analysis'])
             response_dataset.path = dataset["path"]
             response_dataset.file_name = dataset["file_name"]
-            response_dataset.predictions = json.dumps(dataset['predictions'])
+            for model_item in dataset['predictions'].keys():
+                model_prediction = ModelPrediction()
+                for prediction_item in dataset['predictions'][model_item].keys():
+                    prediction = Prediction()
+                    prediction.creation_time = datetime.fromtimestamp(int(dataset['predictions'][model_item][prediction_item]['creation_time']))
+                    prediction.status = dataset['predictions'][model_item][prediction_item]['status']
+                    prediction.prediction_path = dataset['predictions'][model_item][prediction_item]['prediction_path']
+                    prediction.prediction_time = dataset['predictions'][model_item][prediction_item]['prediction_time']
+                    model_prediction.predictions[prediction_item] = prediction
+                response_dataset.predictions[model_item] = model_prediction
             response.prediction_dataset = response_dataset
         except Exception as e:
             self.__log.error(f"get_prediction_dataset: Error while reading parameter for prediction dataset {get_prediction_dataset_request.prediction_dataset_identifier} for user {get_prediction_dataset_request.user_identifier}")

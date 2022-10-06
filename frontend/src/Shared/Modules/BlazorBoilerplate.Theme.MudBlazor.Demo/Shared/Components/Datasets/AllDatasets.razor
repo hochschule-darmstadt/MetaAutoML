@@ -35,7 +35,7 @@
                     <MudTh><MudTableSortLabel SortBy="new Func<DatasetDto, object>(x=>x.Name)">@L["Name"]</MudTableSortLabel></MudTh>
                     <MudTh><MudTableSortLabel SortBy="@(new Func<DatasetDto, object>(x=>x.Type.Properties["skos:prefLabel"]))">@L["Type"]</MudTableSortLabel></MudTh>
                     <MudTh><MudTableSortLabel SortBy="new Func<DatasetDto, object>(x=>x.Size)">@L["Size"]</MudTableSortLabel></MudTh>
-                    <MudTh><MudTableSortLabel SortBy="new Func<DatasetDto, object>(x=>x.Creation_date)">@L["Date"]</MudTableSortLabel></MudTh>
+                    <MudTh><MudTableSortLabel SortBy="new Func<DatasetDto, object>(x=>x.CreationTime)">@L["Date"]</MudTableSortLabel></MudTh>
                     <MudTh></MudTh>   
                 </HeaderContent>
                 <RowTemplate>
@@ -44,7 +44,7 @@
                     </MudTd>
                     <MudTd >@L[context.Type.Properties.ContainsKey("skos:prefLabel") ? context.Type.Properties["skos:prefLabel"] : ""]</MudTd>
                     <MudTd >@FormatBytes(context.Size)</MudTd>
-                    <MudTd  style="white-space:nowrap;">@context.Creation_date.ToString("yyyy-MM-dd")</MudTd>
+                    <MudTd  style="white-space:nowrap;">@context.CreationTime.ToString("yyyy-MM-dd")</MudTd>
                     <MudTd><DatasetMenu Dataset="@context" OnDeleteCompleted="@OnDeleteDatasetCompleted" /></MudTd>
                 </RowTemplate>
                 <PagerContent>

@@ -51,7 +51,7 @@ class AdapterPredictionManager(Thread):
             with self.__data_storage.lock():
                 found, prediction_dataset = self.__data_storage.get_prediction_dataset(self.__request.user_identifier, self.__request.prediction_dataset_identifier)
                 predicitons = prediction_dataset["predictions"]
-                predicitons[self.__prediction_identifier]["status"] = "busy"
+                predicitons[self.__request.model_identifier][self.__prediction_identifier]["status"] = "busy"
                 self.__data_storage.update_prediction_dataset(self.__request.user_identifier, self.__request.prediction_dataset_identifier, {"predictions": predicitons})
 
 
@@ -62,13 +62,14 @@ class AdapterPredictionManager(Thread):
             service = AdapterServiceStub(channel=channel)
             self.__log.debug(f"run: connecting to AutoML Adapter {self.__host}:{self.__port}")
             
+
             response = await service.predict_model(request)
             with self.__data_storage.lock():
                 found, prediction_dataset = self.__data_storage.get_prediction_dataset(self.__request.user_identifier, self.__request.prediction_dataset_identifier)
                 predicitons = prediction_dataset["predictions"]
-                predicitons[self.__prediction_identifier]["status"] = "completed"
-                predicitons[self.__prediction_identifier]["result_path"] = response.result_path
-                predicitons[self.__prediction_identifier]["predictiontime"] = response.predictiontime
+                predicitons[self.__request.model_identifier][self.__prediction_identifier]["status"] = "completed"
+                predicitons[self.__request.model_identifier][self.__prediction_identifier]["prediction_path"] = response.result_path
+                predicitons[self.__request.model_identifier][self.__prediction_identifier]["prediction_time"] = response.predictiontime
                 new_values = {
                     "predictions": predicitons
                 }
@@ -81,7 +82,7 @@ class AdapterPredictionManager(Thread):
             model_details = {
                 "status": self.__status
                 }
-            self.__adapter_finished_callback(self.__training_identifier, self.__request.user_identifier, self.__model_identifier, model_details, self)
+            self.__adapter_finished_callback(self.__training_identifier, self.__request.user_identifier, self.__request.model_identifier, model_details, self)
 
     
     def run(self):

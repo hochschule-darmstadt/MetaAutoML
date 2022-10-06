@@ -645,7 +645,6 @@ class DataStorage:
             "name": name,
             "dataset_identifier": dataset_identifier,
             "type": dataset["type"],
-            "analysis": {},
             "path": "",
             "size": 0,
             "creation_time": "",
@@ -676,22 +675,14 @@ class DataStorage:
             filename_dest = filename_dest.replace(".zip", "")
 
         self.__log.debug("create_prediction_dataset: get the total occupied disc size of the dataset...")
-        nbytes = self.__get_size(os.path.join(self.__storage_dir, user_identifier, prediction_dataset_id))
+        nbytes = self.__get_size(os.path.join(self.__storage_dir, user_identifier, str(dataset["_id"]), "prediction_datasets", prediction_dataset_id))
         self.__log.debug(f"create_prediction_dataset: dataset disc usage is: {nbytes} bytes")
 
-        analysis_result = {}
-        # If the dataset is a certain type the dataset can be analyzed.
-        if dataset["type"] in [":tabular", ":text", ":time_series", ":time_series_longitudinal"]:
-            self.__log.debug("create_prediction_dataset: executing dataset analysis...")
-            analysis_result = DataSetAnalysisManager({"path": filename_dest,
-                                                      "file_configuration": dataset["file_configuration"],
-                                                      "type": dataset["type"]}).analysis(advanced_analysis=False)
 
         success = self.__mongo.update_prediction_dataset(user_identifier, prediction_dataset_id, {
             "path": filename_dest,
             "size": nbytes,
             "creation_time": os.path.getmtime(filename_dest),
-            "analysis": analysis_result,
             "file_name": file_name
         })
         assert success, f"cannot update dataset with id {prediction_dataset_id}"

@@ -183,7 +183,7 @@
     {
         try
         {
-            ApiResponseDto apiResponse = await apiClient.GetPredictionDatasetPrediction(new GetPredictionDatasetPredictionRequestDto() { PredictionDatasetIdentifier = predictionDataset.Identifier, PredictionIdentifier = ((string)((KeyValuePair<string, dynamic>)predictionDataset.Predictions.ElementAt(0)).Key) });
+            ApiResponseDto apiResponse = await apiClient.GetPredictionDatasetPrediction(new GetPredictionDatasetPredictionRequestDto() { PredictionDatasetIdentifier = predictionDataset.Identifier, ModelIdentifier=_model.Model.Identifier, PredictionIdentifier = predictionDataset.Predictions[_model.Model.Identifier].Predictions.ElementAt(0).Key });
             if (apiResponse.IsSuccessStatusCode)
             {
                 GetPredictionDatasetPredictionResponseDto response = Newtonsoft.Json.JsonConvert.DeserializeObject<GetPredictionDatasetPredictionResponseDto>(apiResponse.Result.ToString());

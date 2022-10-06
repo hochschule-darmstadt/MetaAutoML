@@ -70,7 +70,7 @@ class Dataset(betterproto.Message):
     identifier: str = betterproto.string_field(1)
     name: str = betterproto.string_field(2)
     type: str = betterproto.string_field(3)
-    creation_date: datetime = betterproto.message_field(4)
+    creation_time: datetime = betterproto.message_field(4)
     size: int = betterproto.int64_field(5)
     analysis: str = betterproto.string_field(6)
     path: str = betterproto.string_field(7)
@@ -159,13 +159,28 @@ class PredictionDataset(betterproto.Message):
     identifier: str = betterproto.string_field(1)
     name: str = betterproto.string_field(2)
     type: str = betterproto.string_field(3)
-    creation_date: datetime = betterproto.message_field(4)
+    creation_time: datetime = betterproto.message_field(4)
     size: int = betterproto.int64_field(5)
-    analysis: str = betterproto.string_field(6)
-    path: str = betterproto.string_field(7)
-    file_name: str = betterproto.string_field(8)
-    file_configuration: str = betterproto.string_field(9)
-    predictions: str = betterproto.string_field(10)
+    path: str = betterproto.string_field(6)
+    file_name: str = betterproto.string_field(7)
+    predictions: Dict[str, "ModelPrediction"] = betterproto.map_field(
+        8, betterproto.TYPE_STRING, betterproto.TYPE_MESSAGE
+    )
+
+
+@dataclass(eq=False, repr=False)
+class ModelPrediction(betterproto.Message):
+    predictions: Dict[str, "Prediction"] = betterproto.map_field(
+        1, betterproto.TYPE_STRING, betterproto.TYPE_MESSAGE
+    )
+
+
+@dataclass(eq=False, repr=False)
+class Prediction(betterproto.Message):
+    creation_time: datetime = betterproto.message_field(1)
+    status: str = betterproto.string_field(2)
+    prediction_path: str = betterproto.string_field(3)
+    prediction_time: float = betterproto.float_field(4)
 
 
 @dataclass(eq=False, repr=False)
