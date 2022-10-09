@@ -1,17 +1,53 @@
 from DataStorage import DataStorage
 from ControllerBGRPC import *
 from DataStorage import DataStorage
-import json, logging, os
+import json, logging, os, datetime
+from AdapterRuntimeScheduler import AdapterRuntimeScheduler
 
 class PredictionManager:
     
-    def __init__(self, data_storage: DataStorage) -> None:
+    def __init__(self, data_storage: DataStorage, adapter_runtime_scheduler: AdapterRuntimeScheduler) -> None:
         self.__data_storage: DataStorage = data_storage
+        self.__adapter_runtime_scheduler: AdapterRuntimeScheduler = adapter_runtime_scheduler
         self.__log = logging.getLogger('PredictionManager')
         self.__log.setLevel(logging.getLevelName(os.getenv("SERVER_LOGGING_LEVEL")))
 
+
+    def model_predict(
+        self, model_predict_request: "ModelPredictRequest"
+    ) -> "ModelPredictResponse":
+        """
+        Start a new AutoML process as Test
+        ---
+        Parameter
+        1. Run configuration
+        ---
+        Return start process status
+        """ 
+        prediction_id = str(uuid.uuid4())
+        with self.__data_storage.lock():
+            found, prediction = self.__data_storage.get_prediction(model_predict_request.user_id, model_predict_request.prediction_id)
+
+            online_prediction_session = { 
+                    "creation_time": datetime.timestamp(datetime.now()),
+                    "status": "busy",
+                    "prediction_path": "",
+                    "prediction_time": 0
+                }
+
+            if model_predict_request.model_id not in prediction["predictions"].keys():
+                prediction["predictions"][model_predict_request.model_id] = {}
+            
+            prediction["predictions"][model_predict_request.model_id][prediction_id] = online_prediction_session
+            self.__data_storage.update_prediction(model_predict_request.user_id, model_predict_request.prediction_id, {
+                "predictions": prediction["predictions"]
+            })
+
+        return ModelPredictResponse()
+
+
     def create_prediction(
-        self, create_dataset_request: "CreatePredictionRequest"
+        self, create_prediction_request: "CreatePredictionRequest"
     ) -> "CreatePredictionResponse":
         """
         Upload a new dataset
@@ -21,11 +57,50 @@ class PredictionManager:
         ---
         Return empty CreateDatasetResponse object
         """
-        self.__log.debug(f"create_prediction: saving new prediction dataset {create_dataset_request.prediction_name} for user {create_dataset_request.user_id}, with filename {create_dataset_request.file_name}, with dataset id {create_dataset_request.dataset_id}")
-        dataset_id: str = self.__data_storage.create_prediction(create_dataset_request.user_id, create_dataset_request.file_name, create_dataset_request.dataset_id, create_dataset_request.file_name)
-        self.__log.debug(f"create_prediction: new prediction dataset saved id: {dataset_id}")
         response = CreatePredictionResponse()
+
+
+        self.__log.debug(f"create_training: generating training details")
+        config = {
+            "model_id": create_prediction_request.model_id,
+            "live_dataset_path": "",
+            "prediction_path": "busy",
+            "status": "busy",
+            "runtime_profile": {
+                "start_time": datetime.datetime.now(),
+                "end_time": ""
+            }
+        }
+        
+        self.__log.debug(f"create_prediction: saving new prediction {config} for user {create_prediction_request.user_id}")
+        prediction_id: str = self.__data_storage.create_prediction(create_prediction_request.user_id, create_prediction_request.live_dataset_file_name, config)
+        self.__log.debug(f"create_prediction: new prediction saved id: {prediction_id}")
+
+        self.__adapter_runtime_scheduler.create_new_prediction(create_prediction_request.user_id, prediction_id)
+
+
+
         return response
+
+    def __prediction_object_to_rpc_object(self, user_id, prediction):
+        try:
+            prediction_info = Prediction()
+            prediction_info.id = str(prediction["_id"])
+            prediction_info.model_id = prediction["model_id"]
+            prediction_info.live_dataset_path = prediction["live_dataset_path"]
+            prediction_info.prediction_path = prediction["prediction_path"]
+            prediction_info.status = prediction["status"]
+
+            prediction_runtime_profile = PredictionRuntimeProfile()
+            prediction_runtime_profile.start_time = prediction["runtime_profile"]["start_time"]
+            prediction_runtime_profile.end_time = prediction["runtime_profile"]["end_time"]
+            prediction_info.runtime_profile = prediction_runtime_profile
+            return prediction_info
+        except Exception as e:
+            self.__log.error(f"__prediction_object_to_rpc_object: Error while reading parameter for prediction {str(prediction['_id'])} for user {user_id}")
+            self.__log.error(f"__prediction_object_to_rpc_object: exception: {e}")
+            raise grpclib.GRPCError(grpclib.Status.UNAVAILABLE, f"Error while retrieving Prediciton {str(prediction['_id'])} for user {user_id}")
+                
 
     def get_predictions(
         self, get_predictions_request: "GetPredictionsRequest"
@@ -40,36 +115,10 @@ class PredictionManager:
         """
         response = GetPredictionsResponse()
         self.__log.debug(f"get_predictions: get all prediction datasets for user {get_predictions_request.user_id} and dataset id {get_predictions_request.dataset_id}")
-        all_datasets: list[dict[str, object]] = self.__data_storage.get_predictions(get_predictions_request.user_id, get_predictions_request.dataset_id)
-        
-        self.__log.debug(f"get_predictions: found {all_datasets.count} prediction datasets for user {get_predictions_request.user_id}")
-        for dataset in all_datasets:
-            try:
-                response_dataset = Prediction()
-                
-                response_dataset.id = str(dataset["_id"])
-                response_dataset.name = dataset["name"]
-                response_dataset.type = dataset['type']
-                response_dataset.creation_time = datetime.fromtimestamp(int(dataset["creation_time"]))
-                response_dataset.size = dataset['size']
-                response_dataset.path = dataset["path"]
-                response_dataset.file_name = dataset["file_name"]
-                for model_item in dataset['predictions'].keys():
-                    model_prediction = ModelPrediction()
-                    for prediction_item in dataset['predictions'][model_item].keys():
-                        prediction = Prediction()
-                        prediction.creation_time = datetime.fromtimestamp(int(dataset['predictions'][model_item][prediction_item]['creation_time']))
-                        prediction.status = dataset['predictions'][model_item][prediction_item]['status']
-                        prediction.prediction_path = dataset['predictions'][model_item][prediction_item]['prediction_path']
-                        prediction.prediction_time = dataset['predictions'][model_item][prediction_item]['prediction_time']
-                        model_prediction.predictions[prediction_item] = prediction
-                    response_dataset.predictions[model_item] = model_prediction
-                response.predictions.append(response_dataset)
-            except Exception as e:
-                self.__log.error(f"get_predictions: Error while reading parameter prediction dataset for dataset {get_predictions_request.dataset_id} for user {get_predictions_request.user_id}")
-                self.__log.error(f"get_predictions: exception: {e}")
-                raise grpclib.GRPCError(grpclib.Status.UNAVAILABLE, f"Error while retrieving Prediciton Dataset for dataset {get_predictions_request.dataset_id} for user {get_predictions_request.user_id}")
-                
+        all_predictions: list[dict[str, object]] = self.__data_storage.get_predictions(get_predictions_request.user_id, get_predictions_request.pre)
+        self.__log.debug(f"get_predictions: found {all_predictions.count} prediction datasets for user {get_predictions_request.user_id}")
+        for prediction in all_predictions:
+            response.predictions.append(self.__prediction_object_to_rpc_object(get_predictions_request.user_id, prediction))
         return response
 
     def get_prediction(
@@ -86,36 +135,12 @@ class PredictionManager:
         """
         response = GetPredictionResponse()
         self.__log.debug(f"get_prediction: trying to get prediction dataset {get_prediction_request.prediction_id} for user {get_prediction_request.user_id}")
-        found, dataset = self.__data_storage.get_prediction(get_prediction_request.user_id, get_prediction_request.prediction_id)
+        found, prediction = self.__data_storage.get_prediction(get_prediction_request.user_id, get_prediction_request.prediction_id)
         if not found:
-            self.__log.error(f"get_prediction: dataset {get_prediction_request.prediction_id} for user {get_prediction_request.user_id} not found")
+            self.__log.error(f"get_prediction: prediction {get_prediction_request.prediction_id} for user {get_prediction_request.user_id} not found")
             raise grpclib.GRPCError(grpclib.Status.NOT_FOUND, f"Dataset {get_prediction_request.prediction_id} for user {get_prediction_request.user_id} not found, already deleted?")
-        try:
-            response_dataset = Prediction()
-            response_dataset.id = str(dataset["_id"])
-            response_dataset.name = dataset["name"]
-            response_dataset.type = dataset['type']
-            response_dataset.creation_time = datetime.fromtimestamp(int(dataset["creation_time"]))
-            response_dataset.size = dataset['size']
-            response_dataset.path = dataset["path"]
-            response_dataset.file_name = dataset["file_name"]
-            for model_item in dataset['predictions'].keys():
-                model_prediction = ModelPrediction()
-                for prediction_item in dataset['predictions'][model_item].keys():
-                    prediction = Prediction()
-                    prediction.creation_time = datetime.fromtimestamp(int(dataset['predictions'][model_item][prediction_item]['creation_time']))
-                    prediction.status = dataset['predictions'][model_item][prediction_item]['status']
-                    prediction.prediction_path = dataset['predictions'][model_item][prediction_item]['prediction_path']
-                    prediction.prediction_time = dataset['predictions'][model_item][prediction_item]['prediction_time']
-                    model_prediction.predictions[prediction_item] = prediction
-                response_dataset.predictions[model_item] = model_prediction
-            response.prediction = response_dataset
-        except Exception as e:
-            self.__log.error(f"get_prediction: Error while reading parameter for prediction dataset {get_prediction_request.prediction_id} for user {get_prediction_request.user_id}")
-            self.__log.error(f"get_prediction: exception: {e}")
-            raise grpclib.GRPCError(grpclib.Status.UNAVAILABLE, f"Error while retrieving Prediction Dataset {get_prediction_request.prediction_id} for user {get_prediction_request.user_id}")
-
-                
+        
+        response.prediction = self.__prediction_object_to_rpc_object(get_prediction_request.user_id, prediction)
         return response
 
     def delete_prediction(

@@ -23,7 +23,7 @@ class DataSetAnalysisManager:
     def __init__(self, config):
         # Setup config
         file_config = config["file_configuration"]
-        self.config = config
+        self.__config = config
         delimiters = {
             "comma":        ",",
             "semicolon":    ";",
@@ -58,22 +58,13 @@ class DataSetAnalysisManager:
         self.__plots = []
 
     def analysis(self, basic_analysis=True, advanced_analysis=True):
-        analysis = {"basic_analysis": "", "advanced_analysis": ""}
-
-        if self.config["type"] == ":time_series_longitudinal":
-            analysis["basic_analysis"] = self.startLongitudinalDataAnalysis()
-
-        else:
-            if basic_analysis:
-                try:
-                    analysis["basic_analysis"] = self.basic_analysis()
-                except:
-                    analysis["basic_analysis"] = ""
-            if advanced_analysis:
-                try:
-                    analysis["advanced_analysis"] = self.advanced_analysis()
-                except:
-                    analysis["advanced_analysis"] = ""
+        analysis = {}
+        if basic_analysis:
+            analysis.update(self.basic_analysis())
+                
+        if advanced_analysis:
+            analysis.update({ "plots": self.advanced_analysis()})
+                
 
         return analysis
 
@@ -94,18 +85,28 @@ class DataSetAnalysisManager:
         print("[DatasetAnalysisManager]: Starting basic dataset analysis")
         print(self.__dataset)
         analysis = {
-            "number_of_columns": self.__dataset.shape[1],
-            "number_of_rows": self.__dataset.shape[0],
-            "na_columns": dict(self.__dataset.isna().sum().items())
+                "size_bytes": DataSetAnalysisManager.__get_size_bytes(self.__config["path"]),
+                "creation_date": os.path.getmtime(self.__config["path"])
         }
-        print("[DatasetAnalysisManager]: Calculating high NaN rows..")
-        analysis.update({"high_na_rows": DataSetAnalysisManager.__missing_values_rows(self.__dataset)})
-        print("[DatasetAnalysisManager]: Calculating outliers..")
-        analysis.update({"outlier": DataSetAnalysisManager.__detect_outliers(self.__dataset)})
-        print("[DatasetAnalysisManager]: Calculating duplicate columns..")
-        analysis.update({"duplicate_columns": DataSetAnalysisManager.__detect_duplicate_columns(self.__dataset)})
-        print("[DatasetAnalysisManager]: Calculating duplicate rows..")
-        analysis.update({"duplicate_rows": DataSetAnalysisManager.__detect_duplicate_rows(self.__dataset)})
+        if self.__config["type"] == ":time_series_longitudinal":
+            rows, cols = self.__dataset.shape
+            analysis = {
+                "number_of_columns": cols,
+                "number_of_rows": rows
+            }
+        elif self.__config["type"] in [":tabular", ":text", ":time_series"]:
+            analysis = {
+                "number_of_columns": self.__dataset.shape[1],
+                "number_of_rows": self.__dataset.shape[0],
+                "missings_per_column": dict(self.__dataset.isna().sum().items()),
+                "missings_per_row": DataSetAnalysisManager.__missing_values_rows(self.__dataset),
+                "outlier": DataSetAnalysisManager.__detect_outliers(self.__dataset),
+                "duplicate_columns": DataSetAnalysisManager.__detect_duplicate_columns(self.__dataset),
+                "duplicate_rows": DataSetAnalysisManager.__detect_duplicate_rows(self.__dataset),
+                "columns_datatype": DataSetAnalysisManager.__get_dataset_datatypes(self.__dataset)
+            }
+        elif self.__config["type"] == ":image":
+            pass
 
         print("[DatasetAnalysisManager]: Basic dataset analysis finished")
         return analysis
@@ -258,6 +259,48 @@ class DataSetAnalysisManager:
         # Group the filtered (only duplicates) dataset by all values so all the duplicated rows are grouped.
         # Then save the indices of the grouped items into tuples.
         return df.groupby(list(df)).apply(lambda x: tuple(x.index)).values.tolist()
+
+    @staticmethod
+    def __get_size_bytes(start_path='.'):
+        total_size = 0
+        for dirpath, dirnames, filenames in os.walk(start_path):
+            for f in filenames:
+                fp = os.path.join(dirpath, f)
+                # skip if it is symbolic link
+                if not os.path.islink(fp):
+                    total_size += os.path.getsize(fp)
+
+        return total_size
+
+    @staticmethod
+    def __get_dataset_datatypes(dataset):
+        dataset_datatypes = {}
+
+        def get_datatype(numpy_datatype):
+            if numpy_datatype == np.dtype(np.object):
+                return ":string"
+            elif numpy_datatype == np.dtype(np.unicode_):
+                return ":string"
+            elif numpy_datatype == np.dtype(np.int64):
+                if "id" in str.lower(str(column.name)) and column.nunique() == column.size:
+                    return ":integer"
+                elif column.nunique() <= 2:
+                    return ":boolean"
+                return ":integer"
+            elif numpy_datatype == np.dtype(np.float_):
+                return ":float"
+            elif numpy_datatype == np.dtype(np.bool_):
+                return ":boolean"
+            elif numpy_datatype == np.dtype(np.datetime64):
+                return ":datetime"
+            else:
+                return ":string"
+
+        for column in dataset.columns:
+            numpy_datatype = dataset[column].dtype.name
+            dataset_datatypes.update({ column: get_datatype(numpy_datatype)})
+        
+        return dataset_datatypes
 
     def __process_categorical_columns(self):
         """

@@ -30,17 +30,30 @@ class AdapterReturnCode(betterproto.Enum):
 
 @dataclass(eq=False, repr=False)
 class StartAutoMlRequest(betterproto.Message):
-    process_json: str = betterproto.string_field(1)
+    training_id: str = betterproto.string_field(1)
+    dataset_id: str = betterproto.string_field(2)
+    user_id: str = betterproto.string_field(3)
+    dataset_path: str = betterproto.string_field(4)
+    configuration: "StartAutoMlConfiguration" = betterproto.message_field(5)
+    dataset_configuration: str = betterproto.string_field(6)
+
+
+@dataclass(eq=False, repr=False)
+class StartAutoMlConfiguration(betterproto.Message):
+    task: str = betterproto.string_field(1)
+    target: str = betterproto.string_field(2)
+    runtime_limit: int = betterproto.int32_field(4)
+    metric: str = betterproto.string_field(5)
 
 
 @dataclass(eq=False, repr=False)
 class StartAutoMlResponse(betterproto.Message):
-    session_identifier: str = betterproto.string_field(1)
+    session_id: str = betterproto.string_field(1)
 
 
 @dataclass(eq=False, repr=False)
 class GetAutoMlStatusRequest(betterproto.Message):
-    session_identifier: str = betterproto.string_field(1)
+    session_id: str = betterproto.string_field(1)
 
 
 @dataclass(eq=False, repr=False)
@@ -60,12 +73,12 @@ class GetAutoMlStatusResponse(betterproto.Message):
 class ExplainModelRequest(betterproto.Message):
     data: str = betterproto.string_field(1)
     process_json: str = betterproto.string_field(2)
-    session_identifier: str = betterproto.string_field(3)
+    session_id: str = betterproto.string_field(3)
 
 
 @dataclass(eq=False, repr=False)
 class ExplainModelResponse(betterproto.Message):
-    session_identifier: str = betterproto.string_field(1)
+    session_id: str = betterproto.string_field(1)
     probabilities: str = betterproto.string_field(2)
 
 
@@ -152,12 +165,10 @@ class AdapterServiceStub(betterproto.ServiceStub):
 
 
 class AdapterServiceBase(ServiceBase):
-    async def start_auto_ml(self, start_automl_request: "StartAutoMlRequest"
-    ) -> "StartAutoMlResponse":
+    async def start_auto_ml(self) -> "StartAutoMlResponse":
         raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
 
-    async def get_auto_ml_status(self, get_auto_ml_status: "GetAutoMlStatusRequest"
-    ) -> "GetAutoMlStatusResponse":
+    async def get_auto_ml_status(self) -> "GetAutoMlStatusResponse":
         raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
 
     async def explain_model(

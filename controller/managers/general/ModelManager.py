@@ -3,17 +3,58 @@ from urllib import request
 from DataStorage import DataStorage
 from ControllerBGRPC import *
 from DataStorage import DataStorage
-import json, logging, os, uuid
-from AdapterRuntimeScheduler import AdapterRuntimeScheduler
+import json, logging, os
 
 class ModelManager:
 
-    def __init__(self, data_storage: DataStorage, adapter_runtime_scheduler: AdapterRuntimeScheduler) -> None:
+    def __init__(self, data_storage: DataStorage) -> None:
         self.__data_storage: DataStorage = data_storage
-        self.__adapter_runtime_scheduler: AdapterRuntimeScheduler = adapter_runtime_scheduler
         self.__log = logging.getLogger('ModelManager')
         self.__log.setLevel(logging.getLevelName(os.getenv("SERVER_LOGGING_LEVEL")))
 
+
+    def __model_object_to_rpc_object(self, user_id, model):
+        try:        
+            self.__log.debug("__model_object_to_rpc_object: get all predictions for model")
+            model_predictions = self.__data_storage.get_predictions(user_id, str(model["_id"]))
+            self.__log.debug(f"__model_object_to_rpc_object: found {model_predictions.count} predictions")
+
+            model_info = Model()
+            model_info.id = str(model["_id"])
+            model_info.training_id = model["training_id"]
+
+            for prediction in model_predictions:
+                prediction_detail = Prediction()
+                prediction_detail.model_id = prediction["model_id"]
+                prediction_detail.live_dataset_path = prediction["live_dataset_path"]
+                prediction_detail.prediction_path = prediction["prediction_path"]
+                prediction_detail.status = prediction["status"]
+                prediction_runtime_profile = PredictionRuntimeProfile()
+                prediction_runtime_profile.start_time = prediction["runtime_profile"]["start_time"]
+                prediction_runtime_profile.end_time = prediction["runtime_profile"]["end_time"]
+                prediction_detail.runtime_profile = prediction_runtime_profile
+
+            model_info.status = model["status"]
+            model_info.auto_ml_solution = model["auto_ml_solution"]
+            model_info.ml_model_type = model["ml_model_type"]
+            model_info.ml_library =  model["ml_library"]
+            model_info.path = model["path"]
+            model_info.test_score = model["test_score"]
+            model_info.prediction_time =  model["prediction_time"]
+
+            model_runtime_profile = ModelruntimeProfile()
+            model_runtime_profile.start_time = model["runtime_profile"]["start_time"]
+            model_runtime_profile.end_time = model["runtime_profile"]["end_time"]
+            model_info.runtime_profile = model_runtime_profile
+
+            model_info.status_messages[:] =  model["status_messages"]
+            model_info.explanation = json.dumps(model["explanation"])
+            return model_info
+        except Exception as e:
+            self.__log.error(f"__model_object_to_rpc_object: Error while reading parameter for model {model.model_id}")
+            self.__log.error(f"__model_object_to_rpc_object: exception: {e}")
+            raise grpclib.GRPCError(grpclib.Status.UNAVAILABLE, f"Error while retrieving Model {model.model_id}")
+            
 
     def get_models(
         self, get_models_request: "GetModelsRequest"
@@ -36,27 +77,9 @@ class ModelManager:
         
         all_models.sort(key=GetScore, reverse=True)
         
-        for model in list(all_models):
-            try:
-                model_info = Model()
-                model_info.id = str(model["_id"])
-                model_info.automl = model["automl_name"]
-                model_info.status = model["status"]
-                model_info.status_messages[:] =  model["status_messages"]
-                model_info.test_score =  model["test_score"]
-                model_info.runtime =  model["runtime"]
-                model_info.prediction_time =  model["prediction_time"]
-                model_info.ml_model_type =  model["ml_model_type"]
-                model_info.ml_library =  model["ml_library"]
-                model_info.training_id = model["training_id"]
-                model_info.dataset_id = model["dataset_id"]
-                model_info.explanation = json.dumps(model["explanation"])
-                response.models.append(model_info)
-            except Exception as e:
-                self.__log.error(f"get_models: Error while reading parameter for model")
-                self.__log.error(f"get_models: exception: {e}")
-                raise grpclib.GRPCError(grpclib.Status.UNAVAILABLE, f"Error while retrieving Model")
-            
+        for model in all_models:
+            response.models.append(self.__model_object_to_rpc_object(get_models_request.user_id, model))
+
         return response
 
     def get_model(
@@ -77,60 +100,9 @@ class ModelManager:
             self.__log.error(f"get_training: model {get_model_request.model_id} for user {get_model_request.user_id} not found")
             raise grpclib.GRPCError(grpclib.Status.NOT_FOUND, f"Model {get_model_request.model_id} for user {get_model_request.user_id} not found, already deleted?")
         
-        try:        
-            model_info = Model()
-            model_info.id = str(model["_id"])
-            model_info.automl = model["automl_name"]
-            model_info.status = model["status"]
-            model_info.status_messages[:] =  model["status_messages"]
-            model_info.test_score =  model["test_score"]
-            model_info.runtime =  model["runtime"]
-            model_info.prediction_time =  model["prediction_time"]
-            model_info.ml_model_type =  model["ml_model_type"]
-            model_info.ml_library =  model["ml_library"]
-            model_info.training_id = model["training_id"]
-            model_info.dataset_id = model["dataset_id"]
-            model_info.explanation = json.dumps(model["explanation"])
-            response.model = model_info
-        except Exception as e:
-            self.__log.error(f"get_model: Error while reading parameter for model {get_model_request.model_id}")
-            self.__log.error(f"get_model: exception: {e}")
-            raise grpclib.GRPCError(grpclib.Status.UNAVAILABLE, f"Error while retrieving Model {get_model_request.model_id}")
-            
+        response.model = self.__model_object_to_rpc_object(get_model_request.user_id, model)
         return response
 
-    def model_predict(
-        self, model_predict_request: "ModelPredictRequest"
-    ) -> "ModelPredictResponse":
-        """
-        Start a new AutoML process as Test
-        ---
-        Parameter
-        1. Run configuration
-        ---
-        Return start process status
-        """ 
-        prediction_id = str(uuid.uuid4())
-        with self.__data_storage.lock():
-            found, prediction = self.__data_storage.get_prediction(model_predict_request.user_id, model_predict_request.prediction_id)
-
-            online_prediction_session = { 
-                    "creation_time": datetime.timestamp(datetime.now()),
-                    "status": "busy",
-                    "prediction_path": "",
-                    "prediction_time": 0
-                }
-
-            if model_predict_request.model_id not in prediction["predictions"].keys():
-                prediction["predictions"][model_predict_request.model_id] = {}
-            
-            prediction["predictions"][model_predict_request.model_id][prediction_id] = online_prediction_session
-            self.__data_storage.update_prediction(model_predict_request.user_id, model_predict_request.prediction_id, {
-                "predictions": prediction["predictions"]
-            })
-
-        self.__adapter_runtime_scheduler.create_new_prediction(model_predict_request, prediction_id)
-        return ModelPredictResponse()
 
     def delete_model(
         self, delete_model_request: "DeleteModelRequest"

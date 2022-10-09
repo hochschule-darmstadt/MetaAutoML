@@ -214,29 +214,12 @@ class DataStorage:
             pd.DataFrame(df_dict).to_csv(df_preview_filename, index=False)
             file_configuration = {"use_header": True, "start_row":1, "delimiter":"comma", "escape_character":"\\", "decimal_character":"."}
 
-        def get_size(start_path='.'):
-            total_size = 0
-            for dirpath, dirnames, filenames in os.walk(start_path):
-                for f in filenames:
-                    fp = os.path.join(dirpath, f)
-                    # skip if it is symbolic link
-                    if not os.path.islink(fp):
-                        total_size += os.path.getsize(fp)
-
-            return total_size
-
-        self.__log.debug("create_dataset: get the total occupied disc size of the dataset...")
-        nbytes = get_size(os.path.join(self.__storage_dir, user_id, dataset_id))
-        self.__log.debug(f"create_dataset: dataset disc usage is: {nbytes} bytes")
-
         analysis_result = {}
         # If the dataset is a certain type the dataset can be analyzed.
-        if type in [":tabular", ":text", ":time_series", ":time_series_longitudinal"]:
-            self.__log.debug("create_dataset: executing dataset analysis...")
-            analysis_result = DataSetAnalysisManager({"path": filename_dest,
-                                                      "file_configuration": file_configuration,
-                                                      "type": type}).analysis()
-            analysis_result.update({ "size_bytes": nbytes, "creation_date": os.path.getmtime(filename_dest)})
+        self.__log.debug("create_dataset: executing dataset analysis...")
+        analysis_result = DataSetAnalysisManager({"path": filename_dest,
+                                                    "file_configuration": file_configuration,
+                                                    "type": type}).analysis()
         success = self.__mongo.update_dataset(user_id, dataset_id, {
             "path": filename_dest,
             "file_configuration": file_configuration,
@@ -609,8 +592,7 @@ class DataStorage:
     ####################################
 #region 
 
-
-    def create_prediction(self, user_id: str, file_name: str, dataset_id: str, name: str) -> str:
+    def create_prediction(self, user_id: str, live_dataset_file_name: str, prediction_details: 'dict[str, object]') -> str:
         """
         Store dataset contents on disk and insert entry to database.
         ---
@@ -622,39 +604,30 @@ class DataStorage:
         ---
         Returns dataset id
         """
-        self.__log.debug(f"create_prediction: getting main dataset {dataset_id} for new prediction dataset")
-        found, dataset = self.get_dataset(user_id, dataset_id)
+        self.__log.debug(f"create_prediction: getting model {prediction_details['model_id']} for new prediction")
+        found, model = self.get_model(user_id, prediction_details["model_id"])
 
         if not found:
-            raise grpclib.GRPCError(grpclib.Status.NOT_FOUND, f"Dataset {dataset_id} for user {user_id} does not exist, can not create a new prediction dataset!")
+            raise grpclib.GRPCError(grpclib.Status.NOT_FOUND, f"Model {prediction_details['model_id']} for user {user_id} does not exist, can not create a new prediction!")
 
-        if dataset["type"] == ":image":
-            self.__log.debug(f"create_prediction: dataset type is image, removing .zip ending from {name} as not necessary after unzipping anymore...")
-            name = name.replace(".zip", "")
+        self.__log.debug(f"create_prediction: getting training {prediction_details['training_id']} for model")
+        found, training = self.get_training(user_id, model["training_id"])
+        if not found:
+            raise grpclib.GRPCError(grpclib.Status.NOT_FOUND, f"Training {model['training_id']} for user {user_id} does not exist, can not create a new prediction!")
 
 
-
-        # build dictionary for database
-        database_content = {
-            "name": name,
-            "dataset_id": dataset_id,
-            "type": dataset["type"],
-            "path": "",
-            "size": 0,
-            "creation_time": "",
-            "file_name" : "",
-            "predictions": {},
-        }
+        self.__log.debug(f"create_prediction: getting dataset {training['dataset_id']} for training")
+        found, dataset = self.get_dataset(user_id, training["dataset_id"])
+        if not found:
+            raise grpclib.GRPCError(grpclib.Status.NOT_FOUND, f"Dataset {training['dataset_id']} for user {user_id} does not exist, can not create a new prediction!")
 
         self.__log.debug("create_prediction: inserting new prediction dataset into database...")
-        prediction_id = self.__mongo.insert_prediction(user_id, database_content)
-        self.__log.debug(f"create_prediction: new dataset inserted with id: {prediction_id}")
+        prediction_id = self.__mongo.insert_prediction(user_id, prediction_details)
 
-
-        upload_file = os.path.join(self.__storage_dir, user_id, "uploads", file_name)
+        upload_file = os.path.join(self.__storage_dir, user_id, "uploads", live_dataset_file_name)
         self.__log.debug(f"create_prediction: upload location is: {upload_file}")
         
-        filename_dest = os.path.join(self.__storage_dir, user_id, str(dataset["_id"]), "predictions", prediction_id, file_name)
+        filename_dest = os.path.join(self.__storage_dir, user_id, str(dataset["_id"]), "predictions", prediction_id, live_dataset_file_name)
         self.__log.debug(f"create_prediction: final persistence location is: {filename_dest}")
 
         self.__log.debug(f"create_prediction: creating dataset folder location: {filename_dest}")
@@ -664,20 +637,14 @@ class DataStorage:
 
         if dataset["type"] == ":image":
             self.__log.debug("create_prediction: dataset is of image type: unzipping, deleting zip archive and remove .zip suffix...")
-            shutil.unpack_archive(filename_dest, os.path.join(self.__storage_dir, user_id, prediction_id, "predictions"))
+            shutil.unpack_archive(filename_dest, os.path.join(self.__storage_dir, user_id, str(dataset["_id"]), "predictions", prediction_id))
             os.remove(filename_dest)
             filename_dest = filename_dest.replace(".zip", "")
 
-        self.__log.debug("create_prediction: get the total occupied disc size of the dataset...")
-        nbytes = self.__get_size(os.path.join(self.__storage_dir, user_id, str(dataset["_id"]), "predictions", prediction_id))
-        self.__log.debug(f"create_prediction: dataset disc usage is: {nbytes} bytes")
 
-
+        self.__log.debug(f"create_prediction: new dataset inserted with id: {prediction_id}")
         success = self.__mongo.update_prediction(user_id, prediction_id, {
-            "path": filename_dest,
-            "size": nbytes,
-            "creation_time": os.path.getmtime(filename_dest),
-            "file_name": file_name
+            "path": filename_dest
         })
         assert success, f"cannot update dataset with id {prediction_id}"
 
@@ -742,7 +709,7 @@ class DataStorage:
         return result is not None, result
 
     #def get_datasets(self, user_id: bool):
-    def get_predictions(self, user_id: str, dataset_id: str) -> 'list[dict[str, object]]':
+    def get_predictions(self, user_id: str, model_id: str) -> 'list[dict[str, object]]':
         """
         Get all datasets for a user. 
         ---
@@ -755,7 +722,7 @@ class DataStorage:
         ---
         Returns `list` of all datasets.
         """
-        return [ds for ds in self.__mongo.get_predictions(user_id, {"dataset_id": dataset_id})]
+        return [ds for ds in self.__mongo.get_predictions(user_id, {"model_id": model_id})]
 
     def delete_prediction(self, user_id: str, prediction_id: str):
         """
@@ -817,4 +784,4 @@ class DataStorage:
             self.__inner.acquire()
             
         def __exit__(self, type, value, traceback):
-            self.__inner .release()
+            self.__inner.release()

@@ -33,11 +33,11 @@ class TrainingManager:
             self.__log.error(f"create_training: dataset {create_training_request.dataset_id} for user {create_training_request.user_id} not found")
             raise grpclib.GRPCError(grpclib.Status.NOT_FOUND, f"Training {create_training_request.dataset_id} for user {create_training_request.user_id} not found, already deleted?")
         
-        if not create_training_request.selected_auto_mls:
+        if not create_training_request.configuration.selected_auto_ml_solutions:
             self.__log.error(f"create_training: user {create_training_request.user_id} started a new run with empty AutoML list.")
             raise grpclib.GRPCError(grpclib.Status.CANCELLED, "started a new run with empty AutoML list, wizard error?")
         
-        if not create_training_request.selected_libraries:
+        if not create_training_request.configuration.selected_ml_libraries:
             self.__log.error(f"create_training: user {create_training_request.user_id} started a new run with empty ML library list.")
             raise grpclib.GRPCError(grpclib.Status.CANCELLED, "started a new run with empty ML library list, wizard error?")
         
@@ -55,22 +55,11 @@ class TrainingManager:
         self.__log.debug(f"create_training: generating training details")
         config = {
             "dataset_id": str(dataset["_id"]),
-            "dataset_name": dataset["name"],
-            "task": create_training_request.task,
-            "configuration": json.loads(create_training_request.configuration),
-            "dataset_configuration": json.loads(create_training_request.dataset_configuration),
-            "runtime_constraints": json.loads(create_training_request.runtime_constraints),
-            "test_configuration": json.loads(create_training_request.test_configuration),
-            "metric": create_training_request.metric,
+            "model_ids": [],
             "status": "busy",
-            "models": [],
-            "selected_automls": list(create_training_request.selected_auto_mls),
-            "selected_libraries": list(create_training_request.selected_libraries),
-            "file_configuration": dataset["file_configuration"],
-            "start_time": datetime.now(),
-            "events" : [],
-            "end_time" : 0,
-            "explanation": {}
+            "configuration": create_training_request.configuration,
+            "dataset_configuration": json.loads(create_training_request.dataset_configuration),
+            "runtime_profile": create_training_request.runtime_profile
         }
         
         training_id = self.__data_storage.create_training(create_training_request.user_id, config)
@@ -78,17 +67,73 @@ class TrainingManager:
 
         self.__adapter_runtime_scheduler.create_new_training(create_training_request, training_id, dataset)
         response.training_id = training_id
-        #newTraining: AutoMLSession = self.__adapterManager.start_automl(create_training_request,
-        #                                                                str(dataset["_id"]),
-        #                                                                dataset_folder,
-        #                                                                training_id,
-        #                                                                create_training_request.user_id,
-         #                                                               callback)
-
-        #self.__trainings[training_id] = newTraining
-        #response.result = 1
-        #response.training_id = newTraining.get_id()
         return response
+
+    def __training_object_rpc_object(self, user_id, training):
+        try:
+            training_item = Training()
+
+            self.__log.debug("__training_object_rpc_object: get all models for training")
+            training_models = self.__data_storage.get_models(user_id, str(training["_id"]))
+            self.__log.debug(f"__training_object_rpc_object: found {training_models.count} models")
+    
+            training_item.id = str(training["_id"])
+            training_item.dataset_id = training["dataset_id"]
+            for model in training_models:
+                try:
+                    model_detail = Model()
+                    model_detail.id = str(model["_id"])
+                    model_detail.training_id = model["training_id"]
+
+                    model_detail.status = model["status"]
+                    model_detail.auto_ml_solution = model["auto_ml_solution"]
+                    model_detail.ml_model_type =  model["ml_model_type"]
+                    model_detail.ml_library =  model["ml_library"]
+                    model_detail.path = model["path"]
+                    model_detail.test_score =  model["test_score"]
+                    model_detail.prediction_time =  model["prediction_time"]
+
+                    model_detail.runtime_profile =  model["runtime_profile"]
+                    model_detail.status_messages[:] =  model["status_messages"]
+                    model_detail.explanation = json.dumps(model["explanation"])
+                    training_item.models.append(model_detail)
+                except Exception as e:
+                    self.__log.error(f"__training_object_rpc_object: Error while reading parameter for model")
+                    self.__log.error(f"__training_object_rpc_object: exception: {e}")
+                    raise grpclib.GRPCError(grpclib.Status.UNAVAILABLE, f"Error while retrieving Model")
+
+                training_item.status = training["status"]
+
+                training_configuration = Configuration()
+                training_configuration.task = training["configuration"]["task"]
+                training_configuration.target = training["configuration"]["target"]
+                training_configuration.enabled_strategies = training["configuration"]["enabled_strategies"]
+                training_configuration.runtime_limit = training["configuration"]["runtime_limit"]
+                training_configuration.metric = training["configuration"]["metric"]
+                training_configuration.selected_auto_ml_solutions = training["configuration"]["selected_auto_ml_solutions"]
+                training_configuration.selected_ml_libraries = training["configuration"]["selected_ml_libraries"]
+                training_item.configuration = training_configuration
+
+                training_item.dataset_configuration = json.dumps(training["dataset_configuration"])
+
+                training_runtime_profile = TrainingRuntimeProfile()
+                training_runtime_profile.start_time = training["runtime_profile"]["start_time"]
+                for event in training["runtime_profile"].get('events', []):
+                    response_event = StrategyControllerEvent()
+                    response_event.type = event.get('type')
+                    response_event.meta = json.dumps(event.get('meta'))
+                    response_event.timestamp = event.get('timestamp')
+                    training_runtime_profile.events.append(response_event)
+
+                training_runtime_profile.end_time = training["runtime_profile"]["end_time"]
+
+                
+                return training_item
+        except Exception as e:
+            self.__log.error(f"__training_object_rpc_object: Error while reading parameter for training")
+            self.__log.error(f"__training_object_rpc_object: exception: {e}")
+            raise grpclib.GRPCError(grpclib.Status.UNAVAILABLE, f"Error while retrieving Training")
+
 
     def get_trainings(
         self, get_trainings_request: "GetTrainingsRequest"
@@ -107,64 +152,7 @@ class TrainingManager:
         self.__log.debug(f"get_trainings: found {all_trainings.count} trainings for user {get_trainings_request.user_id}")
         
         for training in all_trainings:
-            try:
-                trainingItem = Training()
-
-                self.__log.debug("get_trainings: get all models for training")
-                training_models = self.__data_storage.get_models(get_trainings_request.user_id, str(training["_id"]))
-                self.__log.debug(f"get_trainings: found {training_models.count} models")
-        
-                for model in training_models:
-                    try:
-                        model_details = Model()
-                        model_details.id = str(model["_id"])
-                        model_details.training_id = model["training_id"]
-                        model_details.test_score =  model["test_score"]
-                        model_details.runtime =  model["runtime"]
-                        model_details.ml_model_type =  model["ml_model_type"]
-                        model_details.ml_library =  model["ml_library"]
-                        model_details.status = model["status"]
-                        model_details.status_messages[:] =  model["status_messages"]
-                        model_details.prediction_time =  model["prediction_time"]
-                        model_details.automl = model["automl_name"]
-                        model_details.dataset_id = model["dataset_id"]
-                        model_details.explanation = json.dumps(model["explanation"])
-                        trainingItem.models.append(model_details)
-                    except Exception as e:
-                        self.__log.error(f"get_trainings: Error while reading parameter for model")
-                        self.__log.error(f"get_trainings: exception: {e}")
-                        raise grpclib.GRPCError(grpclib.Status.UNAVAILABLE, f"Error while retrieving Model")
-
-                trainingItem.id = str(training["_id"])
-                trainingItem.dataset_id = training["dataset_id"]
-                trainingItem.dataset_name = training["dataset_name"]
-                trainingItem.task = training["task"]
-                trainingItem.configuration = json.dumps(training["configuration"])
-                for lib in training['selected_libraries']:
-                    trainingItem.selected_ml_libraries.append(lib)
-                for automl in training['selected_automls']:
-                    trainingItem.selected_auto_mls.append(automl)
-                trainingItem.runtime_constraints = json.dumps(training["runtime_constraints"])
-                trainingItem.dataset_configuration = json.dumps(training["dataset_configuration"])
-                trainingItem.test_configuration = json.dumps(training["test_configuration"])
-                trainingItem.status = training["status"]
-                trainingItem.start_time = training["start_time"]
-                trainingItem.end_time = training["end_time"]
-            
-                trainingItem.events = []
-                for event in training.get('events', []):
-                    response_event = StrategyControllerEvent()
-                    response_event.type = event.get('type')
-                    response_event.meta = json.dumps(event.get('meta'))
-                    response_event.timestamp = event.get('timestamp')
-                    trainingItem.events.append(response_event)
-
-                response.trainings.append(trainingItem)
-            except Exception as e:
-                    self.__log.error(f"get_trainings: Error while reading parameter for training")
-                    self.__log.error(f"get_trainings: exception: {e}")
-                    raise grpclib.GRPCError(grpclib.Status.UNAVAILABLE, f"Error while retrieving Training")
-
+            response.trainings.append(self.__training_object_rpc_object(get_trainings_request.user_id, training))
         return response
 
     def get_training(
@@ -184,60 +172,7 @@ class TrainingManager:
         if not found:
             self.__log.error(f"get_training: training {get_training_request.training_id} for user {get_training_request.user_id} not found")
             raise grpclib.GRPCError(grpclib.Status.NOT_FOUND, f"Training {get_training_request.training_id} for user {get_training_request.user_id} not found, already deleted?")
-        try:
-            self.__log.debug("get_training: get all models for training")
-            training_models = self.__data_storage.get_models(get_training_request.user_id, get_training_request.training_id)
-            self.__log.debug(f"get_training: found {training_models.count} models")
-            for model in list(training_models):
-                try:
-                    model_details = Model()
-                    model_details.id = str(model["_id"])
-                    model_details.training_id = model["training_id"]
-                    model_details.test_score =  model["test_score"]
-                    model_details.runtime =  model["runtime"]
-                    model_details.ml_model_type =  model["ml_model_type"]
-                    model_details.ml_library =  model["ml_library"]
-                    model_details.status = model["status"]
-                    model_details.status_messages[:] =  model["status_messages"]
-                    model_details.prediction_time =  model["prediction_time"]
-                    model_details.automl = model["automl_name"]
-                    model_details.dataset_id = model["dataset_id"]
-                    model_details.explanation = json.dumps(model["explanation"])
-                    response.training.models.append(model_details)
-                except Exception as e:
-                    self.__log.error(f"get_training: Error while reading parameter for model")
-                    self.__log.error(f"get_training: exception: {e}")
-                    raise grpclib.GRPCError(grpclib.Status.UNAVAILABLE, f"Error while retrieving Model")
-                        
-            response.training.id = str(training["_id"])
-            response.training.dataset_id = training["dataset_id"]
-            response.training.dataset_name = training["dataset_name"]
-            response.training.task = training["task"]
-            response.training.configuration = json.dumps(training["configuration"])
-            for lib in training['selected_libraries']:
-                response.training.selected_ml_libraries.append(lib)
-            for automl in training['selected_automls']:
-                response.training.selected_auto_mls.append(automl)
-            response.training.runtime_constraints = json.dumps(training["runtime_constraints"])
-            response.training.dataset_configuration = json.dumps(training["dataset_configuration"])
-            response.training.test_configuration = json.dumps(training["test_configuration"])
-            response.training.status = training["status"]
-            response.training.start_time = training["start_time"]
-            response.training.end_time = training["end_time"]
-                
-            response.training.events = []
-            for event in training.get('events', []):
-                response_event = StrategyControllerEvent()
-                response_event.type = event.get('type')
-                response_event.meta = json.dumps(event.get('meta'))
-                response_event.timestamp = event.get('timestamp')
-                response.training.events.append(response_event)
-        except Exception as e:
-            self.__log.error(f"get_training: Error while reading parameter for training {get_training_request.training_id} for user {get_training_request.user_id}")
-            self.__log.error(f"get_training: exception: {e}")
-            raise grpclib.GRPCError(grpclib.Status.UNAVAILABLE, f"Error while retrieving Training {get_training_request.training_id} for user {get_training_request.user_id}")
-
-
+        response.training = self.__training_object_rpc_object(get_training_request.user_id, training)
         return response
 
     def delete_training(

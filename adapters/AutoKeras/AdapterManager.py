@@ -17,11 +17,6 @@ class AdapterManager(Thread):
         self._automl = None
         self._loaded_training_identifier = None
         self._on_explain_finished_callback = on_explain_finished_callback
-        
-    def run(self):
-        """
-        Execute a new AutoML run.
-        """
 
     def run(self):
         """
@@ -29,10 +24,6 @@ class AdapterManager(Thread):
         ---
         Parameter
         """
-        #loop = asyncio.new_event_loop()
-        #asyncio.set_event_loop(loop)
-        #loop.run_until_complete(self.__read_grpc_connection())
-        #loop.close()
         asyncio.run(self.__background_start_auto_ml())
     
     def start_auto_ml(self, start_auto_ml_request: StartAutoMlRequest):
@@ -43,7 +34,7 @@ class AdapterManager(Thread):
             self.__start_auto_ml_running = True
             start_time = time.time()
             # saving AutoML configuration JSON
-            config = SetupRunNewRunEnvironment(self.__start_auto_ml_request.process_json)
+            config = SetupRunNewRunEnvironment(self.__start_auto_ml_request)
             process = start_automl_process(config)
             for response in capture_process_output(process, start_time, False):
                 self.__auto_ml_status_messages.append(response)
@@ -52,7 +43,7 @@ class AdapterManager(Thread):
             #AutoKeras only produces keras based ANN
             library = ":keras_lib"
             model = ":artificial_neural_network"
-            test_score, prediction_time = evaluate(config, os.path.join(config["job_folder_location"], get_config_property("job-file-name")), data_loader)
+            test_score, prediction_time = evaluate(config, os.path.join(config.job_folder_location, get_config_property("job-file-name")), data_loader)
             self.__auto_ml_status_messages.append(get_response(output_json, start_time, test_score, prediction_time, library, model))
             print(f'{get_config_property("adapter-name")} job finished')
             self.__start_auto_ml_running = False

@@ -19,7 +19,7 @@ class AdapterRuntimeScheduler:
         adapter_runtime_manager.create_new_training()
         self.__running_trainings[training_id] = adapter_runtime_manager
         
-    def create_new_prediction(self, request: "ModelPredictRequest", prediction_id: str):
-        adapter_runtime_manager: AdapterRuntimePredictionManager = AdapterRuntimePredictionManager(self.__data_storage, request, prediction_id)
+    def create_new_prediction(self, user_id: str, prediction_id: str):
+        adapter_runtime_manager: AdapterRuntimePredictionManager = AdapterRuntimePredictionManager(self.__data_storage, user_id, prediction_id)
         self.__running_online_predictions[prediction_id] = adapter_runtime_manager
         adapter_runtime_manager.create_new_prediction()

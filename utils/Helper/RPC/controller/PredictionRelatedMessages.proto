@@ -4,6 +4,19 @@ option csharp_namespace = "BlazorBoilerplate.Server";
 import "Enumerations.proto";
 import "google/protobuf/timestamp.proto";
 
+
+message CreatePredictionRequest {
+  string userId = 1;
+  string modelId = 2;
+  string liveDatasetFileName = 3;
+}
+
+message CreatePredictionResponse {
+  string predictionId = 1;
+}
+
+
+
 message GetPredictionRequest {
   string userId = 1;
   string PredictionId = 2;
@@ -15,7 +28,7 @@ message GetPredictionResponse {
 
 message GetPredictionsRequest {
   string userId = 1;
-  string datasetId = 2;
+  string predictionId = 2;
 }
 
 message GetPredictionsResponse {
@@ -33,27 +46,14 @@ message DeletePredictionResponse {
 
 message Prediction {
   string id = 1;
-  string live_dataset_path = 2;
-  string prediction_result_path = 3;
-  string status = 4;
-  google.protobuf.Timestamp startTime = 5;
-  google.protobuf.Timestamp endTime = 6;
-  RuntimeProfile runtimeProfile = 7;
+  string modelId = 2;
+  string live_dataset_path = 3;
+  string prediction_path = 4;
+  string status = 5;
+  PredictionRuntimeProfile runtimeProfile = 6;
 }
 
-message RuntimeProfile {
-  string cpu = 1;
-  string ram = 2;
-  string eco = 3;
+message PredictionRuntimeProfile {
+  google.protobuf.Timestamp startTime = 1;
+  google.protobuf.Timestamp endTime = 2;
 }
-
-message CreatePredictionRequest {
-    string userId = 1;  //Id associated to a specific user
-    string fileName = 2;
-    string PredictionName = 3;
-    string datasetId = 4;
-  }
-  
-message CreatePredictionResponse {
-  
-  }

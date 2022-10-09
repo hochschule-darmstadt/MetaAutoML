@@ -120,6 +120,18 @@ class GetTabularDatasetColumnResponse(betterproto.Message):
 
 
 @dataclass(eq=False, repr=False)
+class CreatePredictionRequest(betterproto.Message):
+    user_id: str = betterproto.string_field(1)
+    model_id: str = betterproto.string_field(2)
+    live_dataset_file_name: str = betterproto.string_field(3)
+
+
+@dataclass(eq=False, repr=False)
+class CreatePredictionResponse(betterproto.Message):
+    prediction_id: str = betterproto.string_field(1)
+
+
+@dataclass(eq=False, repr=False)
 class GetPredictionRequest(betterproto.Message):
     user_id: str = betterproto.string_field(1)
     prediction_id: str = betterproto.string_field(2)
@@ -133,7 +145,7 @@ class GetPredictionResponse(betterproto.Message):
 @dataclass(eq=False, repr=False)
 class GetPredictionsRequest(betterproto.Message):
     user_id: str = betterproto.string_field(1)
-    dataset_id: str = betterproto.string_field(2)
+    prediction_id: str = betterproto.string_field(2)
 
 
 @dataclass(eq=False, repr=False)
@@ -155,32 +167,17 @@ class DeletePredictionResponse(betterproto.Message):
 @dataclass(eq=False, repr=False)
 class Prediction(betterproto.Message):
     id: str = betterproto.string_field(1)
-    live_dataset_path: str = betterproto.string_field(2)
-    prediction_result_path: str = betterproto.string_field(3)
-    status: str = betterproto.string_field(4)
-    start_time: datetime = betterproto.message_field(5)
-    end_time: datetime = betterproto.message_field(6)
-    runtime_profile: "RuntimeProfile" = betterproto.message_field(7)
+    model_id: str = betterproto.string_field(2)
+    live_dataset_path: str = betterproto.string_field(3)
+    prediction_path: str = betterproto.string_field(4)
+    status: str = betterproto.string_field(5)
+    runtime_profile: "PredictionRuntimeProfile" = betterproto.message_field(6)
 
 
 @dataclass(eq=False, repr=False)
-class RuntimeProfile(betterproto.Message):
-    cpu: str = betterproto.string_field(1)
-    ram: str = betterproto.string_field(2)
-    eco: str = betterproto.string_field(3)
-
-
-@dataclass(eq=False, repr=False)
-class CreatePredictionRequest(betterproto.Message):
-    user_id: str = betterproto.string_field(1)
-    file_name: str = betterproto.string_field(2)
-    prediction_name: str = betterproto.string_field(3)
-    dataset_id: str = betterproto.string_field(4)
-
-
-@dataclass(eq=False, repr=False)
-class CreatePredictionResponse(betterproto.Message):
-    pass
+class PredictionRuntimeProfile(betterproto.Message):
+    start_time: datetime = betterproto.message_field(1)
+    end_time: datetime = betterproto.message_field(2)
 
 
 @dataclass(eq=False, repr=False)
@@ -220,28 +217,23 @@ class GetModelResponse(betterproto.Message):
 class Model(betterproto.Message):
     id: str = betterproto.string_field(1)
     training_id: str = betterproto.string_field(2)
-    test_score: float = betterproto.float_field(3)
-    runtime: int = betterproto.int32_field(4)
-    ml_model_type: str = betterproto.string_field(5)
-    ml_library: str = betterproto.string_field(6)
-    status: str = betterproto.string_field(7)
-    status_messages: List[str] = betterproto.string_field(8)
-    prediction_time: float = betterproto.float_field(9)
-    automl: str = betterproto.string_field(10)
-    dataset_id: str = betterproto.string_field(11)
-    explanation: str = betterproto.string_field(12)
+    predictions: List["Prediction"] = betterproto.message_field(3)
+    status: str = betterproto.string_field(4)
+    auto_ml_solution: str = betterproto.string_field(5)
+    ml_model_type: str = betterproto.string_field(6)
+    ml_library: str = betterproto.string_field(7)
+    path: str = betterproto.string_field(8)
+    test_score: float = betterproto.float_field(9)
+    prediction_time: float = betterproto.float_field(10)
+    runtime_profile: "ModelruntimeProfile" = betterproto.message_field(11)
+    status_messages: List[str] = betterproto.string_field(12)
+    explanation: str = betterproto.string_field(13)
 
 
 @dataclass(eq=False, repr=False)
-class ModelPredictRequest(betterproto.Message):
-    user_id: str = betterproto.string_field(1)
-    prediction_id: str = betterproto.string_field(2)
-    model_id: str = betterproto.string_field(3)
-
-
-@dataclass(eq=False, repr=False)
-class ModelPredictResponse(betterproto.Message):
-    model_prediction_id: str = betterproto.string_field(1)
+class ModelruntimeProfile(betterproto.Message):
+    start_time: datetime = betterproto.message_field(1)
+    end_time: datetime = betterproto.message_field(2)
 
 
 @dataclass(eq=False, repr=False)
@@ -279,20 +271,30 @@ class GetTrainingResponse(betterproto.Message):
 @dataclass(eq=False, repr=False)
 class Training(betterproto.Message):
     id: str = betterproto.string_field(1)
-    models: List["Model"] = betterproto.message_field(2)
-    dataset_id: str = betterproto.string_field(3)
-    dataset_name: str = betterproto.string_field(4)
-    task: str = betterproto.string_field(5)
-    configuration: str = betterproto.string_field(6)
+    dataset_id: str = betterproto.string_field(2)
+    models: List["Model"] = betterproto.message_field(3)
+    status: str = betterproto.string_field(4)
+    configuration: "Configuration" = betterproto.message_field(5)
+    dataset_configuration: str = betterproto.string_field(6)
+    runtime_profile: "TrainingRuntimeProfile" = betterproto.message_field(7)
+
+
+@dataclass(eq=False, repr=False)
+class Configuration(betterproto.Message):
+    task: str = betterproto.string_field(1)
+    target: str = betterproto.string_field(2)
+    enabled_strategies: List[str] = betterproto.string_field(3)
+    runtime_limit: int = betterproto.int32_field(4)
+    metric: str = betterproto.string_field(5)
+    selected_auto_ml_solutions: List[str] = betterproto.string_field(6)
     selected_ml_libraries: List[str] = betterproto.string_field(7)
-    selected_auto_mls: List[str] = betterproto.string_field(8)
-    runtime_constraints: str = betterproto.string_field(9)
-    dataset_configuration: str = betterproto.string_field(10)
-    test_configuration: str = betterproto.string_field(11)
-    status: str = betterproto.string_field(12)
-    start_time: datetime = betterproto.message_field(13)
-    end_time: datetime = betterproto.message_field(14)
-    events: List["StrategyControllerEvent"] = betterproto.message_field(15)
+
+
+@dataclass(eq=False, repr=False)
+class TrainingRuntimeProfile(betterproto.Message):
+    start_time: datetime = betterproto.message_field(1)
+    end_time: datetime = betterproto.message_field(2)
+    events: List["StrategyControllerEvent"] = betterproto.message_field(3)
 
 
 @dataclass(eq=False, repr=False)
@@ -306,14 +308,11 @@ class StrategyControllerEvent(betterproto.Message):
 class CreateTrainingRequest(betterproto.Message):
     user_id: str = betterproto.string_field(1)
     dataset_id: str = betterproto.string_field(2)
-    task: str = betterproto.string_field(3)
-    configuration: str = betterproto.string_field(4)
-    selected_auto_mls: List[str] = betterproto.string_field(5)
-    runtime_constraints: str = betterproto.string_field(6)
-    dataset_configuration: str = betterproto.string_field(7)
-    test_configuration: str = betterproto.string_field(8)
-    metric: str = betterproto.string_field(9)
-    selected_libraries: List[str] = betterproto.string_field(10)
+    models: List["Model"] = betterproto.message_field(3)
+    status: str = betterproto.string_field(4)
+    configuration: "Configuration" = betterproto.message_field(5)
+    dataset_configuration: str = betterproto.string_field(6)
+    runtime_profile: "TrainingRuntimeProfile" = betterproto.message_field(7)
 
 
 @dataclass(eq=False, repr=False)
@@ -672,23 +671,6 @@ class ControllerServiceStub(betterproto.ServiceStub):
             metadata=metadata,
         )
 
-    async def model_predict(
-        self,
-        model_predict_request: "ModelPredictRequest",
-        *,
-        timeout: Optional[float] = None,
-        deadline: Optional["Deadline"] = None,
-        metadata: Optional["MetadataLike"] = None
-    ) -> "ModelPredictResponse":
-        return await self._unary_unary(
-            "/ControllerService/ModelPredict",
-            model_predict_request,
-            ModelPredictResponse,
-            timeout=timeout,
-            deadline=deadline,
-            metadata=metadata,
-        )
-
     async def delete_model(
         self,
         delete_model_request: "DeleteModelRequest",
@@ -949,11 +931,6 @@ class ControllerServiceBase(ServiceBase):
     ) -> "GetModelResponse":
         raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
 
-    async def model_predict(
-        self, model_predict_request: "ModelPredictRequest"
-    ) -> "ModelPredictResponse":
-        raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
-
     async def delete_model(
         self, delete_model_request: "DeleteModelRequest"
     ) -> "DeleteModelResponse":
@@ -1114,13 +1091,6 @@ class ControllerServiceBase(ServiceBase):
     ) -> None:
         request = await stream.recv_message()
         response = await self.get_model(request)
-        await stream.send_message(response)
-
-    async def __rpc_model_predict(
-        self, stream: "grpclib.server.Stream[ModelPredictRequest, ModelPredictResponse]"
-    ) -> None:
-        request = await stream.recv_message()
-        response = await self.model_predict(request)
         await stream.send_message(response)
 
     async def __rpc_delete_model(
@@ -1295,12 +1265,6 @@ class ControllerServiceBase(ServiceBase):
                 grpclib.const.Cardinality.UNARY_UNARY,
                 GetModelRequest,
                 GetModelResponse,
-            ),
-            "/ControllerService/ModelPredict": grpclib.const.Handler(
-                self.__rpc_model_predict,
-                grpclib.const.Cardinality.UNARY_UNARY,
-                ModelPredictRequest,
-                ModelPredictResponse,
             ),
             "/ControllerService/DeleteModel": grpclib.const.Handler(
                 self.__rpc_delete_model,

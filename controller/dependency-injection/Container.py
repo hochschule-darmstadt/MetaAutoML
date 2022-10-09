@@ -54,8 +54,7 @@ class Managers(containers.DeclarativeContainer):
     )
     model_manager = providers.Factory(
         ModelManager,
-        data_storage=ressources.data_storage,
-        adapter_runtime_scheduler=adapter_runtime_scheduler
+        data_storage=ressources.data_storage
     )
     user_manager = providers.Factory(
         UserManager,
@@ -63,7 +62,8 @@ class Managers(containers.DeclarativeContainer):
     )
     prediction_manager = providers.Factory(
         PredictionManager,
-        data_storage=ressources.data_storage
+        data_storage=ressources.data_storage,
+        adapter_runtime_scheduler=adapter_runtime_scheduler
     )
 
 class Application(containers.DeclarativeContainer):

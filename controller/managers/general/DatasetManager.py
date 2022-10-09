@@ -29,6 +29,24 @@ class DatasetManager:
         response = CreateDatasetResponse()
         return response
 
+    def __dataset_object_to_rpc_object(self, user_id, dataset):
+        try:
+            dataset_detail = Dataset()
+            dataset_detail.id = str(dataset["_id"])
+            dataset_detail.name = dataset["name"]
+            dataset_detail.type = dataset['type']
+            dataset_detail.path = dataset["path"]
+            dataset_detail.file_configuration = json.dumps(dataset["file_configuration"])
+            dataset_detail.training_ids = dataset['training_ids']
+            dataset_detail.analysis = json.dumps(dataset['analysis'])
+            return dataset_detail
+        except Exception as e:
+            self.__log.error(f"__dataset_object_to_rpc_object: Error while reading parameter for dataset {str(dataset['_id'])} for user {user_id}")
+            self.__log.error(f"__dataset_object_to_rpc_object: exception: {e}")
+            raise grpclib.GRPCError(grpclib.Status.UNAVAILABLE, f"Error while retrieving Dataset {str(dataset['_id'])} for user {user_id}")
+
+
+
     def get_datasets(
         self, get_datasets_request: "GetDatasetsRequest"
     ) -> "GetDatasetsResponse":
@@ -46,22 +64,7 @@ class DatasetManager:
         
         self.__log.debug(f"get_datasets: found {all_datasets.count} datasets for user {get_datasets_request.user_id}")
         for dataset in all_datasets:
-            try:
-                response_dataset = Dataset()
-                
-                response_dataset.id = str(dataset["_id"])
-                response_dataset.name = dataset["name"]
-                response_dataset.type = dataset['type']
-                response_dataset.path = dataset["path"]
-                response_dataset.file_configuration = json.dumps(dataset["file_configuration"])
-                response_dataset.training_ids = dataset['training_ids']
-                response_dataset.analysis = json.dumps(dataset['analysis'])
-                response.datasets.append(response_dataset)
-            except Exception as e:
-                self.__log.error(f"get_datasets: Error while reading parameter for dataset {get_datasets_request.dataset_id} for user {get_datasets_request.user_id}")
-                self.__log.error(f"get_datasets: exception: {e}")
-                raise grpclib.GRPCError(grpclib.Status.UNAVAILABLE, f"Error while retrieving Dataset {get_datasets_request.dataset_id} for user {get_datasets_request.user_id}")
-                
+            response.datasets.append(self.__dataset_object_to_rpc_object(get_datasets_request.user_id, dataset))
         return response
 
     def get_dataset(
@@ -82,22 +85,8 @@ class DatasetManager:
         if not found:
             self.__log.error(f"get_datasets: dataset {get_dataset_request.dataset_id} for user {get_dataset_request.user_id} not found")
             raise grpclib.GRPCError(grpclib.Status.NOT_FOUND, f"Dataset {get_dataset_request.dataset_id} for user {get_dataset_request.user_id} not found, already deleted?")
-        try:
-            response_dataset = Dataset()
-            response_dataset.id = str(dataset["_id"])
-            response_dataset.name = dataset["name"]
-            response_dataset.type = dataset['type']
-            response_dataset.path = dataset["path"]
-            response_dataset.file_configuration = json.dumps(dataset["file_configuration"])
-            response_dataset.training_ids = dataset['training_ids']
-            response_dataset.analysis = json.dumps(dataset['analysis'])
-            response.dataset = response_dataset
-        except Exception as e:
-            self.__log.error(f"get_datasets: Error while reading parameter for dataset {get_dataset_request.dataset_id} for user {get_dataset_request.user_id}")
-            self.__log.error(f"get_datasets: exception: {e}")
-            raise grpclib.GRPCError(grpclib.Status.UNAVAILABLE, f"Error while retrieving Dataset {get_dataset_request.dataset_id} for user {get_dataset_request.user_id}")
 
-                
+        response.dataset = self.__dataset_object_to_rpc_object(get_dataset_request.user_id, dataset)
         return response
 
     def get_tabular_dataset_column(

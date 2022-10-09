@@ -30,7 +30,20 @@ class AdapterReturnCode(betterproto.Enum):
 
 @dataclass(eq=False, repr=False)
 class StartAutoMlRequest(betterproto.Message):
-    process_json: str = betterproto.string_field(1)
+    training_id: str = betterproto.string_field(1)
+    dataset_id: str = betterproto.string_field(2)
+    user_id: str = betterproto.string_field(3)
+    dataset_path: str = betterproto.string_field(4)
+    configuration: "StartAutoMlConfiguration" = betterproto.message_field(5)
+    dataset_configuration: str = betterproto.string_field(6)
+
+
+@dataclass(eq=False, repr=False)
+class StartAutoMlConfiguration(betterproto.Message):
+    task: str = betterproto.string_field(1)
+    target: str = betterproto.string_field(2)
+    runtime_limit: int = betterproto.int32_field(4)
+    metric: str = betterproto.string_field(5)
 
 
 @dataclass(eq=False, repr=False)
@@ -84,6 +97,7 @@ class PredictModelResponse(betterproto.Message):
 class AdapterServiceStub(betterproto.ServiceStub):
     async def start_auto_ml(
         self,
+        start_auto_ml_request: "StartAutoMlRequest",
         *,
         timeout: Optional[float] = None,
         deadline: Optional["Deadline"] = None,
@@ -100,6 +114,7 @@ class AdapterServiceStub(betterproto.ServiceStub):
 
     async def get_auto_ml_status(
         self,
+        get_auto_ml_status_request: "GetAutoMlStatusRequest",
         *,
         timeout: Optional[float] = None,
         deadline: Optional["Deadline"] = None,

@@ -7,7 +7,6 @@ import asyncio
 from grpclib.client import Channel
 from AdapterBGRPC import *
 from DataStorage import DataStorage
-from AdapterBGRPC import *
 from betterproto.grpc.util.async_channel import AsyncChannel
 
 class AdapterManager(Thread):
@@ -68,75 +67,62 @@ class AdapterManager(Thread):
     def handle_blackboard_phase_update(self):
         return
 
-    def __generate_process_json(self):
+    def __generate_process_request(self) -> "StartAutoMlRequest":
         """
         Generate AutoML configuration JSON
         ---
         Return configuration JSON
         """
 
-        test_config = json.loads(self.__request.test_configuration)
+        request = StartAutoMlRequest()
+        request.training_id = self.__training_id
+        request.dataset_id = str(self.__dataset["_id"])
+        request.user_id = self.__request.user_id
+        request.dataset_path =  self.__dataset["path"]
 
-    
-        #if test_config.update("split_ratio": 0):
-        test_config.update({"split_ratio": 0.8})
-        test_config.update({"random_state": 42})
+        configuration = StartAutoMlConfiguration()
+        configuration.task = self.__request.configuration.task
+        configuration.target = self.__request.configuration.target
+        configuration.runtime_limit = self.__request.configuration.runtime_limit
+        configuration.metric = self.__request.configuration.metric
 
-        return {
-            "training_id": self.__training_id,
-            "dataset_id": str(self.__dataset["_id"]),
-            "file_name": self.__dataset["file_name"],
-            "file_location": self.__dataset["path"],
-            "task": self.__request.task,
-            "configuration": json.loads(self.__request.configuration),
-            "dataset_configuration": json.loads(self.__request.dataset_configuration),
-            "runtime_constraints": json.loads(self.__request.runtime_constraints),
-            "test_configuration": test_config,
-            "file_configuration": self.__dataset["file_configuration"],
-            "metric": self.__request.metric,
-            "user_id": self.__request.user_id
-        }
+        request.configuration = configuration
+        request.dataset_configuration = self.__request.dataset_configuration
+
+        return request
 
     def __create_new_model_entry(self):
         model_details = {
-            "automl_name": self.__automl,
             "training_id": self.__training_id,
-            "dataset_id": str(self.__dataset["_id"]),
-            "path": "",
-            "test_score": 0,
-            "runtime": 0,
+            "prediction_ids": [],
+            "status": self.__status,
+            "auto_ml_solution": self.__automl,
             "ml_model_type": "",
             "ml_library": "", 
-            "status": self.__status,
-            "status_messages": [],
+            "path": "",
+            "test_score": 0,
             "prediction_time": 0,
-            "start_time": datetime.now(),
-            "end_time": 0,
-            "explanation": ""
+            "runtime_profile": {
+                "start_time": datetime.now(),
+                "end_time": 0,
+            },
+            "status_messages": [],
+            "explanation": {}
             }
         return self.__data_storage.create_model(self.__request.user_id, model_details)
     
     async def __read_grpc_connection(self):
         try:  # Run until server closes connection
-            self.__status = "busy"
-            # Append model_id to dataset
-            with self.__data_storage.lock():
-                self.__data_storage.update_model(self.__request.user_id, self.__model_id, {"status": self.__status})
-                found, dataset = self.__data_storage.get_dataset(self.__request.user_id, str(self.__dataset["_id"]))
-                self.__data_storage.update_dataset(self.__request.user_id, str(self.__dataset["_id"]), { "models": dataset["models"] + [self.__model_id] }, False)
 
-            request = StartAutoMlRequest()
-            process_json = self.__generate_process_json()
-            request.process_json = json.dumps(process_json)
             channel = Channel(host=self.__host, port=self.__port)
             service = AdapterServiceStub(channel=channel)
             self.__log.debug(f"run: connecting to AutoML Adapter {self.__host}:{self.__port}")
-            response: StartAutoMlResponse = await service.start_auto_ml(request)
+            response: StartAutoMlResponse = await service.start_auto_ml(self.__generate_process_request())
             self.__session_id = response.session_id
             await asyncio.sleep(5)
 
             while True:
-                await asyncio.sleep(0.2)
+                await asyncio.sleep(0.1)
                 request = GetAutoMlStatusRequest()
                 request.session_id = self.__session_id
                 response: GetAutoMlStatusResponse = await service.get_auto_ml_status(request)
@@ -147,7 +133,7 @@ class AdapterManager(Thread):
                 if response.return_code == AdapterReturnCode.ADAPTER_RETURN_CODE_STATUS_UPDATE:
                     self.__status_messages.append(response.status_update)
                     self.__runtime = response.runtime
-                    self.__data_storage.update_model(self.__request.user_id, self.__model_id, {"status": "busy", "status_messages": self.__status_messages, "runtime": self.__runtime})
+                    self.__data_storage.update_model(self.__request.user_id, self.__model_id, {"status_messages": self.__status_messages})
                 elif response.return_code == AdapterReturnCode.ADAPTER_RETURN_CODE_SUCCESS:
                     channel.close()
                     self.__result_json = json.loads(response.output_json)
@@ -159,14 +145,15 @@ class AdapterManager(Thread):
                     self.__ml_library = response.library
 
                     model_details = {
-                        "path": os.path.join(self.__result_json["file_location"], self.__result_json["file_name"]),
-                        "test_score": self.__testScore,
-                        "runtime": self.__runtime,
+                        "status": self.__status,
                         "ml_model_type": self.__ml_model_type,
                         "ml_library": self.__ml_library,
+                        "path": os.path.join(self.__result_json["file_location"], self.__result_json["file_name"]),
                         "prediction_time": self.__prediction_time,
-                        "status": self.__status,
-                        "end_time": datetime.now()
+                        "test_score": self.__testScore,
+                        "runtime_profile": {
+                            "end_time": datetime.now()
+                        }
                     }
                     self.__adapter_finished_callback(self.__training_id, self.__request.user_id, self.__model_id, model_details, self)
                     return

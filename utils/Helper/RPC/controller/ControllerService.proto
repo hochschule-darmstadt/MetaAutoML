@@ -53,8 +53,6 @@ service ControllerService {
   rpc GetModels(GetModelsRequest) returns (GetModelsResponse) {}
   /*return a Model*/
   rpc GetModel(GetModelRequest) returns (GetModelResponse) {}
-  /*make predictions using a Model*/
-  rpc ModelPredict(ModelPredictRequest) returns (ModelPredictResponse) {}
   /*delete a Model and every related object*/
   rpc DeleteModel(DeleteModelRequest) returns (DeleteModelResponse) {}
 

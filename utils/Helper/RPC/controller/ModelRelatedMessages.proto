@@ -2,6 +2,8 @@ syntax = "proto3";
 option csharp_namespace = "BlazorBoilerplate.Server";
 
 import "Enumerations.proto";
+import "PredictionRelatedMessages.proto";
+import "google/protobuf/timestamp.proto";
 
 
 message DeleteModelRequest {
@@ -34,25 +36,20 @@ message GetModelResponse {
 message Model {
   string id = 1;
   string trainingId = 2;
-  float testScore = 3;
-  int32 runtime = 4;
-  string mlModelType = 5;
-  string mlLibrary = 6;
-  string status = 7;
-  repeated string statusMessages = 8;
-  float predictionTime = 9;
-  string automl = 10;
-  string datasetId = 11;
-  string explanation = 12;
+  repeated Prediction predictions = 3;
+  string status = 4;
+  string autoMlSolution = 5;
+  string mlModelType = 6;
+  string mlLibrary = 7;
+  string path = 8;
+  float testScore = 9;
+  float predictionTime = 10;
+  ModelruntimeProfile runtimeProfile = 11;
+  repeated string statusMessages = 12;
+  string explanation = 13;
 }
 
-message ModelPredictRequest {
-  string userId = 1;
-  string predictionId = 2;
-  string modelId = 3;
+message ModelruntimeProfile {
+  google.protobuf.Timestamp startTime = 1;
+  google.protobuf.Timestamp endTime = 2;
 }
-
-message ModelPredictResponse {
-  string modelPredictionId = 1;
-}
-

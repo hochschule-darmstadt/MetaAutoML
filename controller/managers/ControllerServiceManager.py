@@ -1,7 +1,7 @@
 from urllib import response
 from Container import Application
 from DatasetManager import DatasetManager
-from PredictionManager import PredictionDatasetManager
+from PredictionManager import PredictionManager
 from TrainingManager import TrainingManager
 from ModelManager import ModelManager
 from UserManager import UserManager
@@ -241,19 +241,6 @@ class ControllerServiceManager(ControllerServiceBase):
         return response
 
     @inject
-    async def model_predict(
-        self, model_predict_request: "ModelPredictRequest",
-        model_manager: ModelManager=Provide[Application.managers.model_manager]
-    ) -> "ModelPredictResponse":
-        with MeasureDuration() as m:
-            response = model_manager.model_predict(model_predict_request)
-        #response = await self.__loop.run_in_executor(
-        #    self.__executor, model_manager.model_predict, model_predict_request
-        #)
-        self.__log.warn("model_predict: executed")
-        return response
-
-    @inject
     async def delete_model(
         self, delete_model_request: "DeleteModelRequest",
         model_manager: ModelManager=Provide[Application.managers.model_manager]
@@ -378,22 +365,21 @@ class ControllerServiceManager(ControllerServiceBase):
 #region
 
 
-
     @inject
     async def create_prediction(
-        self, create_prediction_request: "CreatePredictionDatasetRequest",
-        predictionDatasetManager: PredictionDatasetManager=Provide[Application.managers.prediction_manager]
-    ) -> "CreatePredictionDatasetResponse":
+        self, create_prediction_request: "CreatePredictionRequest",
+        predictionManager: PredictionManager=Provide[Application.managers.prediction_manager]
+    ) -> "CreatePredictionResponse":
         with MeasureDuration() as m:
-            response = predictionDatasetManager.create_prediction(create_prediction_request)
+            response = PredictionManager.create_prediction(create_prediction_request)
         self.__log.warn("create_prediction: executed")
         return response
 
     @inject
     async def get_predictions(
-        self, get_predictions_request: "GetPredictionDatasetsRequest",
-        predictionDatasetManager: PredictionDatasetManager=Provide[Application.managers.prediction_manager]
-    ) -> "GetPredictionDatasetsResponse":
+        self, get_predictions_request: "GetPredictionsRequest",
+        predictionDatasetManager: PredictionManager=Provide[Application.managers.prediction_manager]
+    ) -> "GetPredictionsResponse":
         with MeasureDuration() as m:
             response = predictionDatasetManager.get_predictions(get_predictions_request)
         self.__log.warn("get_predictions: executed")
@@ -401,9 +387,9 @@ class ControllerServiceManager(ControllerServiceBase):
 
     @inject
     async def get_prediction(
-        self, get_prediction_request: "GetPredictionDatasetRequest",
-        predictionDatasetManager: PredictionDatasetManager=Provide[Application.managers.prediction_manager]
-    ) -> "GetPredictionDatasetResponse":
+        self, get_prediction_request: "GetPredictionRequest",
+        predictionDatasetManager: PredictionManager=Provide[Application.managers.prediction_manager]
+    ) -> "GetPredictionResponse":
         with MeasureDuration() as m:
             response = predictionDatasetManager.get_prediction(get_prediction_request)
         self.__log.warn("get_prediction: executed")
@@ -411,9 +397,9 @@ class ControllerServiceManager(ControllerServiceBase):
 
     @inject
     async def delete_prediction(
-        self, delete_prediction_request: "DeletePredictionDatasetRequest",
-        predictionDatasetManager: PredictionDatasetManager=Provide[Application.managers.prediction_manager]
-    ) -> "DeletePredictionDatasetResponse":
+        self, delete_prediction_request: "DeletePredictionRequest",
+        predictionDatasetManager: PredictionManager=Provide[Application.managers.prediction_manager]
+    ) -> "DeletePredictionResponse":
         with MeasureDuration() as m:
             response = predictionDatasetManager.delete_prediction(delete_prediction_request)
         self.__log.warn("delete_prediction: executed")
