@@ -80,6 +80,19 @@ def plot_tabular_classification(dataset_X, dataset_Y, target, no_samples, explai
     plots = []
     dataset_X[dataset_X.select_dtypes(['bool']).columns] = dataset_X[dataset_X.select_dtypes(['bool']).columns].astype(str)
     classlist = list(val for val in dataset_Y.unique())
+
+    filename = make_svg_summary_plot(shap_values, dataset_X, classlist, plot_path)
+    plots.append({"type": "summary_plot",
+                  "title": f"Summary plot",
+                  "description": f"The summary plot aggregates the importance of all features towards all classes. "
+                                 f"The higher the x-axis value is for a feature the more significance this feature "
+                                 f"has for the model. The color split within the bars indicates for which class "
+                                 f"this feature is important. If the bar coloring is split evenly the values of "
+                                 f"this feature are equally important for all classes. If it is skewed towards one "
+                                 f"color the values of this feature are only important when deciding for the one "
+                                 f"corresponding class.",
+                  "path": filename})
+
     for class_idx, class_value in enumerate(classlist):
         row_idx = int(dataset_Y[dataset_Y == class_value].index[0])
 
@@ -116,18 +129,6 @@ def plot_tabular_classification(dataset_X, dataset_Y, target, no_samples, explai
                                      f"If a feature is greyed out it means that it is a categorical feature and can "
                                      f"therefore not be analyzed by its value.",
                       "path": filename})
-
-    filename = make_svg_summary_plot(shap_values, dataset_X, classlist, plot_path)
-    plots.append({"type": "summary_plot",
-                  "title": f"Summary plot",
-                  "description": f"The summary plot aggregates the importance of all features towards all classes. "
-                                 f"The higher the x-axis value is for a feature the more significance this feature "
-                                 f"has for the model. The color split within the bars indicates for which class "
-                                 f"this feature is important. If the bar coloring is split evenly the values of "
-                                 f"this feature are equally important for all classes. If it is skewed towards one "
-                                 f"color the values of this feature are only important when deciding for the one "
-                                 f"corresponding class.",
-                  "path": filename})
 
     return plots
 
@@ -186,7 +187,7 @@ class ExplainableAIManager:
         self.__data_storage.UpdateModel(username, model_id, {"explanation": {"status": "started"}})
         return
     
-    def explain_shap(self, username, model_id, callback, number_of_samples=5):
+    def explain_shap(self, username, model_id, callback, number_of_samples=25):
         model = self.__data_storage.GetModel(username, model_id)
         config = self.__data_storage.GetTraining(username, model["training_id"])
         dataset_path = self.__data_storage.GetDataset(username, config["dataset_id"])[1]["path"]
