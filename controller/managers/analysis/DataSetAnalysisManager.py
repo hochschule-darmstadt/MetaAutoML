@@ -1,3 +1,4 @@
+from genericpath import isfile
 import os.path
 
 import numpy as np
@@ -90,12 +91,12 @@ class DataSetAnalysisManager:
         }
         if self.__config["type"] == ":time_series_longitudinal":
             rows, cols = self.__dataset.shape
-            analysis = {
+            analysis.update({
                 "number_of_columns": cols,
                 "number_of_rows": rows
-            }
+            })
         elif self.__config["type"] in [":tabular", ":text", ":time_series"]:
-            analysis = {
+            analysis.update({
                 "number_of_columns": self.__dataset.shape[1],
                 "number_of_rows": self.__dataset.shape[0],
                 "missings_per_column": dict(self.__dataset.isna().sum().items()),
@@ -104,7 +105,7 @@ class DataSetAnalysisManager:
                 "duplicate_columns": DataSetAnalysisManager.__detect_duplicate_columns(self.__dataset),
                 "duplicate_rows": DataSetAnalysisManager.__detect_duplicate_rows(self.__dataset),
                 "columns_datatype": DataSetAnalysisManager.__get_dataset_datatypes(self.__dataset)
-            }
+            })
         elif self.__config["type"] == ":image":
             pass
 
@@ -261,14 +262,17 @@ class DataSetAnalysisManager:
         return df.groupby(list(df)).apply(lambda x: tuple(x.index)).values.tolist()
 
     @staticmethod
-    def __get_size_bytes(start_path='.'):
+    def __get_size_bytes(path='.'):
         total_size = 0
-        for dirpath, dirnames, filenames in os.walk(start_path):
-            for f in filenames:
-                fp = os.path.join(dirpath, f)
-                # skip if it is symbolic link
-                if not os.path.islink(fp):
-                    total_size += os.path.getsize(fp)
+        if os.path.isfile(path):
+            total_size = os.path.getsize(path)
+        else:
+            for dirpath, dirnames, filenames in os.walk(path):
+                for f in filenames:
+                    fp = os.path.join(dirpath, f)
+                    # skip if it is symbolic link
+                    if not os.path.islink(fp):
+                        total_size += os.path.getsize(fp)
 
         return total_size
 
@@ -282,10 +286,6 @@ class DataSetAnalysisManager:
             elif numpy_datatype == np.dtype(np.unicode_):
                 return ":string"
             elif numpy_datatype == np.dtype(np.int64):
-                if "id" in str.lower(str(column.name)) and column.nunique() == column.size:
-                    return ":integer"
-                elif column.nunique() <= 2:
-                    return ":boolean"
                 return ":integer"
             elif numpy_datatype == np.dtype(np.float_):
                 return ":float"

@@ -30,8 +30,8 @@ class StrategyController(object):
         self._log.debug(f'Attached controller to the blackboard, current agents: {len(self.blackboard.agents)}')
 
         try:
-            session_config = json.loads(self.__adapter_runtime_manager.get_training_request().configuration)
-            session_enabled_strategies = session_config.get('enabled_strategies', [])
+            session_config = self.__adapter_runtime_manager.get_training_request().configuration
+            session_enabled_strategies = session_config.enabled_strategies
             self._log.debug(f'Found {len(session_enabled_strategies)} enabled strategies for the session: {session_enabled_strategies}')
         except Exception as e:
             self._log.error(f'Error while fetching the enabled strategies for the session:')

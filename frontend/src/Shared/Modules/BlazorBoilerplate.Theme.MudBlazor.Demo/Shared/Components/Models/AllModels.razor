@@ -31,7 +31,7 @@
                 </HeaderContent>
                 <RowTemplate>
                     <MudTd >
-                        <MudLink Href="@NavManager.ToAbsoluteUri("datasets/" + @context.DatasetIdentifier + "/modelsview/" + @context.Identifier).AbsoluteUri" Style="cursor: pointer; display: flex;">
+                        <MudLink Href="@NavManager.ToAbsoluteUri("datasets/" + @DatasetId + "/modelsview/" + @context.Id).AbsoluteUri" Style="cursor: pointer; display: flex;">
                             <MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.ModelTraining" Style="margin-right: 4px;" />
                             @(context.MlModelType.Properties.ContainsKey("skos:prefLabel") ? context.MlModelType.Properties["skos:prefLabel"] : "")
                             </MudLink>
@@ -57,6 +57,8 @@
 </MudCard>
 
 @code {
+    [Parameter]
+    public string DatasetId { get; set; }
     [Parameter]
     public GetModelsResponseDto Models
     { 

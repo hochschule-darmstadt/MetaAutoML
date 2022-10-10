@@ -20,19 +20,19 @@ class AutoKerasAdapter(AbstractAdapter):
     def start(self):
         """Execute the ML task"""
         if True:
-            if self._configuration["task"] == ":tabular_classification":
+            if self._configuration["configuration"]["task"] == ":tabular_classification":
                 self.__tabular_classification()
-            elif self._configuration["task"] == ":tabular_regression":
+            elif self._configuration["configuration"]["task"] == ":tabular_regression":
                 self.__tabular_regression()
-            elif self._configuration["task"] == ":image_classification":
+            elif self._configuration["configuration"]["task"] == ":image_classification":
                 self.__image_classification()
-            elif self._configuration["task"] == ":image_regression":
+            elif self._configuration["configuration"]["task"] == ":image_regression":
                 self.__image_regression()
-            elif self._configuration["task"] == ":text_classification":
+            elif self._configuration["configuration"]["task"] == ":text_classification":
                 self.__text_classification()
-            elif self._configuration["task"] == ":text_regression":
+            elif self._configuration["configuration"]["task"] == ":text_regression":
                 self.__text_regression()
-            elif self._configuration["task"] == ":time_series_forecasting":
+            elif self._configuration["configuration"]["task"] == ":time_series_forecasting":
                 self.__time_series_forecasting()
 
     def __tabular_classification(self):
@@ -42,7 +42,7 @@ class AutoKerasAdapter(AbstractAdapter):
         X, y = prepare_tabular_dataset(self.df, self._configuration)
 
         clf = ak.StructuredDataClassifier(overwrite=True,
-                                          max_trials=self._max_iter,
+                                          max_trials=3,
                                           # metric=self._configuration['metric'],
                                           directory=self._configuration["model_folder_location"],
                                           seed=42)
@@ -57,7 +57,7 @@ class AutoKerasAdapter(AbstractAdapter):
         X, y = prepare_tabular_dataset(self.df, self._configuration)
 
         reg = ak.StructuredDataRegressor(overwrite=True,
-                                         max_trials=self._max_iter,
+                                          max_trials=3,
                                          # metric=self._configuration['metric'],
                                          directory=self._configuration["model_folder_location"],
                                          seed=42)
@@ -71,7 +71,7 @@ class AutoKerasAdapter(AbstractAdapter):
         X_train, y_train, X_test, y_test = data_loader(self._configuration)
 
         clf = ak.ImageClassifier(overwrite=True, 
-                                max_trials=self._configuration["runtime_constraints"]["max_iter"],
+                                          max_trials=3,
                                 # metric=self._configuration['metric'],
                                 seed=42,
                                 directory=self._configuration["model_folder_location"])
@@ -87,7 +87,7 @@ class AutoKerasAdapter(AbstractAdapter):
         X_train, y_train, X_val, y_val = data_loader(self._configuration)
 
         reg = ak.ImageRegressor(overwrite=True, 
-                                max_trials=self._configuration["runtime_constraints"]["max_iter"],
+                                          max_trials=3,
                                 # metric=self._configuration['metric'],
                                 seed=42,
                                 directory=self._configuration["model_folder_location"])
@@ -103,7 +103,7 @@ class AutoKerasAdapter(AbstractAdapter):
         X, y = prepare_tabular_dataset(self.df, self._configuration)
 
         reg = ak.TextClassifier(overwrite=True, 
-                                max_trials=self._configuration["runtime_constraints"]["max_iter"],
+                                          max_trials=3,
                                 # metric=self._configuration['metric'],
                                 seed=42,
                                 directory=self._configuration["model_folder_location"])
@@ -119,7 +119,7 @@ class AutoKerasAdapter(AbstractAdapter):
         X, y = prepare_tabular_dataset(self.df, self._configuration)
 
         reg = ak.TextClassifier(overwrite=True, 
-                                max_trials=self._configuration["runtime_constraints"]["max_iter"],
+                                          max_trials=3,
                                 # metric=self._configuration['metric'],
                                 seed=42,
                                 directory=self._configuration["model_folder_location"])
@@ -135,7 +135,7 @@ class AutoKerasAdapter(AbstractAdapter):
         X, y = prepare_tabular_dataset(self.df, self._configuration)
 
         reg = ak.TimeseriesForecaster(overwrite=True, 
-                                max_trials=self._configuration["runtime_constraints"]["max_iter"],
+                                          max_trials=3,
                                 # metric=self._configuration['metric'],
                                 seed=42,
                                 directory=self._configuration["model_folder_location"])

@@ -57,12 +57,23 @@ class TrainingManager:
             "dataset_id": str(dataset["_id"]),
             "model_ids": [],
             "status": "busy",
-            "configuration": create_training_request.configuration,
-            "dataset_configuration": json.loads(create_training_request.dataset_configuration),
+            "configuration": {
+                "task": create_training_request.configuration.task,
+                "target": create_training_request.configuration.target,
+                "enabled_strategies": create_training_request.configuration.enabled_strategies,
+                "runtime_limit": create_training_request.configuration.runtime_limit,
+                "metric": create_training_request.configuration.metric,
+                "selected_auto_ml_solutions": create_training_request.configuration.selected_auto_ml_solutions,
+                "selected_ml_libraries": create_training_request.configuration.selected_ml_libraries
+            },
+            "dataset_configuration": {
+                "column_datatypes": json.loads(create_training_request.dataset_configuration)["column_datatypes"],
+                "file_configuration": dataset["file_configuration"]
+            },
             "runtime_profile": {
                 "start_time": datetime.datetime.now(),
                 "events": [],
-                "end_time": ""
+                "end_time": datetime.datetime.now()
             }
         }
         
@@ -97,7 +108,10 @@ class TrainingManager:
                     model_detail.test_score =  model["test_score"]
                     model_detail.prediction_time =  model["prediction_time"]
 
-                    model_detail.runtime_profile =  model["runtime_profile"]
+                    model_runtime = ModelruntimeProfile()
+                    model_runtime.start_time = model["runtime_profile"]["start_time"]
+                    model_runtime.end_time = model["runtime_profile"]["end_time"]
+                    model_detail.runtime_profile = model_runtime
                     model_detail.status_messages[:] =  model["status_messages"]
                     model_detail.explanation = json.dumps(model["explanation"])
                     training_item.models.append(model_detail)
@@ -122,15 +136,15 @@ class TrainingManager:
 
                 training_runtime_profile = TrainingRuntimeProfile()
                 training_runtime_profile.start_time = training["runtime_profile"]["start_time"]
-                for event in training["runtime_profile"].get('events', []):
+                for event in training["runtime_profile"]['events']:
                     response_event = StrategyControllerEvent()
-                    response_event.type = event.get('type')
-                    response_event.meta = json.dumps(event.get('meta'))
-                    response_event.timestamp = event.get('timestamp')
+                    response_event.type = event['type']
+                    response_event.meta = json.dumps(event['meta'])
+                    response_event.timestamp = event['timestamp']
                     training_runtime_profile.events.append(response_event)
 
                 training_runtime_profile.end_time = training["runtime_profile"]["end_time"]
-
+                training_item.runtime_profile = training_runtime_profile
                 
                 return training_item
         except Exception as e:

@@ -285,7 +285,7 @@ namespace BlazorBoilerplate.Storage
                         FirstName = firstName,
                         LastName = lastName,
                         EmailConfirmed = true,
-                        OmaMlId = response.UserIdentifier
+                        OmaMlId = response.UserId
                     };
 
                     var result = _userManager.CreateAsync(applicationUser, password).Result;

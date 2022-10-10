@@ -93,7 +93,7 @@
                             Class="mt-1">
                     @L["Select Dataset"]
                 </MudButton>
-                <MudTextField @bind-Value="@fileUploader.UploadPredictionDatasetRequest.LiveDatasetName" Label="@L["Dataset Name"]" Class="mt-1"></MudTextField>
+                <MudTextField @bind-Value="@fileUploader.UploadPredictionRequest.FileName" Label="@L["Dataset Name"]" Class="mt-1" Disabled="true"></MudTextField>
                 @if (_isLoaderClosed == false)
                 {
                     <MudProgressLinear Color="Color.Secondary" Indeterminate="true"/>
@@ -198,24 +198,24 @@
         {
             
             //Reset FileUploader after completing upload, (+1 to total to compensate to loop offset)
-            if ((fileUploader.UploadPredictionDatasetRequest.ChunkNumber == (fileUploader.UploadPredictionDatasetRequest.TotalChunkNumber + 1)) && (fileUploader.IsUploading == false))
+            if ((fileUploader.UploadPredictionRequest.ChunkNumber == (fileUploader.UploadPredictionRequest.TotalChunkNumber + 1)) && (fileUploader.IsUploading == false))
             {
-                fileUploader.UploadPredictionDatasetRequest = new UploadPredictionRequestDto();
+                fileUploader.UploadPredictionRequest = new UploadPredictionRequestDto();
                 IsSelectFileDisabled = true;
                 _uploadReady = true;
             }
             else
             {
-                float divideResult = (float)fileUploader.UploadPredictionDatasetRequest.ChunkNumber / (float)fileUploader.UploadPredictionDatasetRequest.TotalChunkNumber;
+                float divideResult = (float)fileUploader.UploadPredictionRequest.ChunkNumber / (float)fileUploader.UploadPredictionRequest.TotalChunkNumber;
                 Progress = (int)(divideResult * 100);
                 //if chunk amount is bigger 100 display after decimal percentage
-                if (fileUploader.UploadPredictionDatasetRequest.TotalChunkNumber > 100)
+                if (fileUploader.UploadPredictionRequest.TotalChunkNumber > 100)
                 {
-                    UploadText = L["Uploading {0} {1}", fileUploader.UploadPredictionDatasetRequest.LiveDatasetName, String.Format("{0:0.00}", divideResult * 100)];
+                    UploadText = L["Uploading {0} {1}", fileUploader.UploadPredictionRequest.FileName, String.Format("{0:0.00}", divideResult * 100)];
                 }
                 else
                 {
-                    UploadText = L["Uploading {0} {1}", fileUploader.UploadPredictionDatasetRequest.LiveDatasetName, String.Format("{0:0}", divideResult * 100)];
+                    UploadText = L["Uploading {0} {1}", fileUploader.UploadPredictionRequest.FileName, String.Format("{0:0}", divideResult * 100)];
                 }
             }
         }
@@ -260,7 +260,7 @@
     protected override async void OnInitialized()
     {
         fileUploader.UploadDatasetRequest = new UploadDatasetRequestDto();
-        fileUploader.UploadPredictionDatasetRequest = new UploadPredictionRequestDto();
+        fileUploader.UploadPredictionRequest = new UploadPredictionRequestDto();
         await LoadDatasetTypes();
         fileUploader.OnUploadChangedCallback = UpdateProgress;
         fileUploader.RefreshUploadComponentCallback = RefreshComponent;
@@ -340,8 +340,7 @@
                 fileUploader.UploadFileContent = e.File;
             if (fileUploader.IsPredictionDatasetToUpload == true)
             {
-                fileUploader.UploadPredictionDatasetRequest.FileName = e.File.Name;
-                fileUploader.UploadPredictionDatasetRequest.LiveDatasetName = e.File.Name;
+                fileUploader.UploadPredictionRequest.FileName = e.File.Name;
             }
             else
             {
@@ -364,12 +363,7 @@
         {
             if (fileUploader.IsPredictionDatasetToUpload == true)
             {
-                if (string.IsNullOrEmpty(fileUploader.UploadPredictionDatasetRequest.LiveDatasetName))
-                {
-                    viewNotifier.Show(L["Please enter a dataset name first!"], ViewNotifierType.Error, L["Operation Failed"]);
-                    return;
-                }
-                if (string.IsNullOrEmpty(fileUploader.UploadPredictionDatasetRequest.FileName))
+                if (string.IsNullOrEmpty(fileUploader.UploadPredictionRequest.FileName))
                 {
                     viewNotifier.Show(L["Please select a file first!"], ViewNotifierType.Error, L["Operation Failed"]);
                     return;

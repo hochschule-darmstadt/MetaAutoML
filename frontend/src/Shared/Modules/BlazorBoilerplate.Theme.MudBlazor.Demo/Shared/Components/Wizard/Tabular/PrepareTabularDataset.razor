@@ -89,7 +89,7 @@ else
         {
             features.Add(_columns.Columns[i].Name, (Server.DataType)_dataTypeList[i]);
         }
-        StartAutoMlRequest.DatasetConfiguration["features"] = features;
+        StartAutoMlRequest.DatasetConfiguration["column_datatypes"] = features;
         await UpdateStartAutoMlRequest();
     }
 
@@ -97,7 +97,7 @@ else
     {
         try
         {
-            ApiResponseDto apiResponse = await apiClient.GetTabularDatasetColumn(new GetTabularDatasetColumnRequestDto { DatasetId = Dataset.Dataset.Identifier });
+            ApiResponseDto apiResponse = await apiClient.GetTabularDatasetColumn(new GetTabularDatasetColumnRequestDto { DatasetId = Dataset.Dataset.Id });
 
             if (apiResponse.IsSuccessStatusCode)
             {
@@ -109,7 +109,7 @@ else
                 if (StartAutoMlRequest.DatasetConfiguration.Count != 0)
                 {
                     _dataTypeList = new List<int>();
-                    foreach (var item in StartAutoMlRequest.DatasetConfiguration["features"])
+                    foreach (var item in StartAutoMlRequest.DatasetConfiguration["column_datatypes"])
                     {
                         _dataTypeList.Add((int)item.Value);
                     }
@@ -121,9 +121,9 @@ else
                         _dataTypeList.Add((int)_columns.Columns[i].Type);
                         features.Add(_columns.Columns[i].Name, (Server.DataType)_dataTypeList[i]);
                     }
-                    StartAutoMlRequest.DatasetConfiguration.Add("features", features);
+                    StartAutoMlRequest.DatasetConfiguration.Add("column_datatypes", features);
                 }
-                StartAutoMlRequest.DatasetId = Dataset.Dataset.Identifier;
+                StartAutoMlRequest.DatasetId = Dataset.Dataset.Id;
                 await LoadDatasetPreview();
                 await UpdateStartAutoMlRequest();
             }
@@ -149,7 +149,7 @@ else
             isPreviewRequestRunning = true;
             GetDatasetPreviewRequestDto datasetRequest = new GetDatasetPreviewRequestDto()
             {
-                    DatasetId = Dataset.Dataset.Identifier
+                    DatasetId = Dataset.Dataset.Id
             };
             ApiResponseDto apiResponse = await apiClient.GetDatasetPreview(datasetRequest);
 

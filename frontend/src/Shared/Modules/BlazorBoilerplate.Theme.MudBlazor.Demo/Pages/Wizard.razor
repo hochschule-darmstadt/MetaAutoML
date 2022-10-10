@@ -65,7 +65,7 @@ else
         await LoadDataset();
         _breadcrumbs.Add(new BreadcrumbItem(L["Home"], "/", false, Icons.Filled.Home));
         _breadcrumbs.Add(new BreadcrumbItem(L["Datasets"], "/datasets", false, Icons.Filled.ListAlt));
-        _breadcrumbs.Add(new BreadcrumbItem(_datasetTitle, "/datasets/" + _dataset.Dataset.Identifier, false, Icons.Filled.ListAlt));
+        _breadcrumbs.Add(new BreadcrumbItem(_datasetTitle, "/datasets/" + _dataset.Dataset.Id, false, Icons.Filled.ListAlt));
         _breadcrumbs.Add(new BreadcrumbItem(L["Train"], null, true, Icons.Filled.ModelTraining));
         StateHasChanged();
 
@@ -100,17 +100,12 @@ else
     {
         try
         {
-            if (string.IsNullOrEmpty(_automlRequest.Task))
+            if (string.IsNullOrEmpty(_automlRequest.Configuration.Task))
             {
                 viewNotifier.Show("No task selected", ViewNotifierType.Error, L["Operation Failed"]);
                 return;
             }
-            if ((_dataset.Dataset.Type.ID == ":tabular") && (_automlRequest.Configuration.ContainsKey("target") == false))
-            {
-                viewNotifier.Show("No target selected", ViewNotifierType.Error, L["Operation Failed"]);
-                return;
-            }
-            if ((_dataset.Dataset.Type.ID == ":time_series_longitudinal") && (_automlRequest.Configuration.ContainsKey("target") == false))
+            if (((_dataset.Dataset.Type.ID == ":tabular") || (_dataset.Dataset.Type.ID == ":test") || (_dataset.Dataset.Type.ID == ":time_series") || (_dataset.Dataset.Type.ID == ":time_series_longitudinal")) && string.IsNullOrEmpty(_automlRequest.Configuration.Target))
             {
                 viewNotifier.Show("No target selected", ViewNotifierType.Error, L["Operation Failed"]);
                 return;

@@ -103,7 +103,7 @@ namespace BlazorBoilerplate.Server.Managers
             var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
             try
             {
-                requestGrpc.UserIdentifier = username;
+                requestGrpc.UserId = username;
                 requestGrpc.Configuration.Add(request.Configuration);
                 var reply = _client.GetAvailableStrategies(requestGrpc);
                 response.Strategies = new List<StrategyControllerStrategyDto>();

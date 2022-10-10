@@ -64,7 +64,7 @@
     {
         try
         {
-            ApiResponseDto apiResponse = await apiClient.DownloadModel(new DownloadModelRequestDto { ModelIdentifier = Model.Model.Identifier });
+            ApiResponseDto apiResponse = await apiClient.DownloadModel(new DownloadModelRequestDto { ModelId = Model.Model.Id });
 
             if (apiResponse.IsSuccessStatusCode)
             {

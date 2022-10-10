@@ -71,12 +71,12 @@ namespace BlazorBoilerplate.Shared.Interfaces
         Task<ApiResponseDto> GetAvailableStrategies(GetAvailableStrategiesRequestDto request);
         #endregion
 
-        #region OMA-ML PREDICTION DATASET MESSAGES
-        Task<ApiResponseDto> UploadPredictionDataset(UploadPredictionRequestDto request);
-        Task<ApiResponseDto> GetPredictionDatasetPrediction(DownloadPredictionRequestDto request);
-        Task<ApiResponseDto> GetPredictionDatasets(GetPredictionsRequestDto request);
-        Task<ApiResponseDto> GetPredictionDataset(GetPredictionDatasetRequestDto request);
-        Task<ApiResponseDto> DeletePredictionDataset(DeletePredictionRequestDto request);
+        #region OMA-ML PREDICTION MESSAGES
+        Task<ApiResponseDto> UploadPrediction(UploadPredictionRequestDto request);
+        Task<ApiResponseDto> GetPrediction(GetPredictionRequestDto request);
+        Task<ApiResponseDto> GetPredictions(GetPredictionsRequestDto request);
+        Task<ApiResponseDto> DownloadPrediction(DownloadPredictionRequestDto request);
+        Task<ApiResponseDto> DeletePrediction(DeletePredictionRequestDto request);
         #endregion
 
     }

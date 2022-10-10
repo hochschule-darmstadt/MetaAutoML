@@ -61,15 +61,6 @@ namespace BlazorBoilerplate.Server.Controllers
         [ProducesResponseType(Status200OK)]
         [ProducesResponseType(Status400BadRequest)]
         [ProducesResponseType(Status404NotFound)]
-        public async Task<ApiResponse> ModelPrediction(ModelPredictionRequestDto request)
-        => ModelState.IsValid ?
-                await _modelManager.ModelPrediction(request) :
-                new ApiResponse(Status400BadRequest, L["InvalidData"]);
-
-        [HttpPost]
-        [ProducesResponseType(Status200OK)]
-        [ProducesResponseType(Status400BadRequest)]
-        [ProducesResponseType(Status404NotFound)]
         public async Task<ApiResponse> DownloadModel(DownloadModelRequestDto request)
             => ModelState.IsValid ?
                 await _modelManager.DownloadModel(request) :

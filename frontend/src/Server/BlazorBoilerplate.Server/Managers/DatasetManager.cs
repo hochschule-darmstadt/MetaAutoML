@@ -280,7 +280,7 @@ namespace BlazorBoilerplate.Server.Managers
                 {
                     if (analysis.Count != 0)
                     {
-                        foreach (var category in analysis["advanced_analysis"])
+                        foreach (var category in analysis["plots"])
                         {
                             DatasetAnalysisCategory datasetAnalysisCategory = new DatasetAnalysisCategory() 
                             { 

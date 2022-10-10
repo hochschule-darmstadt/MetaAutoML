@@ -434,7 +434,7 @@ namespace BlazorBoilerplate.Server.Managers
             {
                 return new ApiResponse(Status400BadRequest, $"Error while creating new user");
             }
-            await RegisterNewUserAsync(parameters.UserName, parameters.Email, parameters.Password, _userManager.Options.SignIn.RequireConfirmedEmail, result.UserIdentifier);
+            await RegisterNewUserAsync(parameters.UserName, parameters.Email, parameters.Password, _userManager.Options.SignIn.RequireConfirmedEmail, result.UserId);
 
             if (_userManager.Options.SignIn.RequireConfirmedEmail)
                 return new ApiResponse(Status200OK, L["Operation Successful"]);

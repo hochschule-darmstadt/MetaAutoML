@@ -14,7 +14,7 @@ namespace BlazorBoilerplate.Shared.Interfaces
     {
         Task UploadDataset();
         UploadDatasetRequestDto UploadDatasetRequest { get; set; }
-        UploadPredictionRequestDto UploadPredictionDatasetRequest { get; set; }
+        UploadPredictionRequestDto UploadPredictionRequest { get; set; }
         IBrowserFile UploadFileContent { get; set; }
         bool IsUploading { get; set; }
         Action OnUploadChangedCallback { get; set; }

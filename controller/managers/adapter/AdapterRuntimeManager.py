@@ -4,7 +4,7 @@ from AdapterManagerAgent import AdapterManagerAgent
 from AdapterRuntimeManagerAgent import AdapterRuntimeManagerAgent
 from DataAnalysisAgent import DataAnalysisAgent
 from DataStorage import DataStorage
-import json, logging, os, asyncio
+import json, logging, os, asyncio, datetime
 from ControllerBGRPC import *
 from AdapterManager import AdapterManager
 import Blackboard
@@ -16,7 +16,7 @@ class AdapterRuntimeManager:
 
     def __init__(self, data_storage: DataStorage, request: "CreateTrainingRequest", training_id: str, dataset) -> None:
         self.__data_storage: DataStorage = data_storage
-        self.__request = request
+        self.__request: "CreateTrainingRequest" = request
         self.__training_id = training_id
         self.__dataset = dataset
         self.__log = logging.getLogger('AdapterRuntimeManager')
@@ -47,15 +47,17 @@ class AdapterRuntimeManager:
             found, dataset = self.__data_storage.get_dataset(user_id, training["dataset_id"])
             _mdl_id = self.__data_storage.update_model(user_id, model_id, model_details)
             model_list = self.__data_storage.get_models(user_id, training_id)
-            if len(training["models"]) == len(model_list)-1:
+            if len(training["model_ids"]) == len(model_list)-1:
                 self.__data_storage.update_training(user_id, training_id, {
-                    "models": training["models"] + [model_id],
-                    "status": "completed",
-                    "end_time": datetime.now()
+                    "model_ids": training["model_ids"] + [model_id],
+                    "status": "ended",
+                    "runtime_profile": {
+                        "end_time": datetime.datetime.now()
+                    }
                 })
             else:
                 self.__data_storage.update_training(user_id, training_id, {
-                    "models": training["models"] + [model_id]
+                    "model_ids": training["model_ids"] + [model_id]
                 })
 
         if model_details["status"] == "completed":
@@ -88,7 +90,7 @@ class AdapterRuntimeManager:
 
     def create_new_training(self):
         self.__log.debug("start_new_training: creating new blackboard and strategy controller for training")
-        for automl in self.__request.selected_auto_mls:
+        for automl in self.__request.configuration.selected_auto_ml_solutions:
             self.__log.debug(f"start_new_training: getting adapter endpoint information for automl {automl}")
             host, port = map(os.getenv, self.__automl_addresses[automl.lower()])
             port = int(port)

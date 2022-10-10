@@ -1,7 +1,7 @@
 
 from AdapterManagerAgent import AdapterManagerAgent
 from ControllerBGRPC import *
-import json, logging, os
+import json, logging, os, datetime
 from threading import *
 import asyncio
 from grpclib.client import Channel
@@ -87,7 +87,8 @@ class AdapterManager(Thread):
         configuration.metric = self.__request.configuration.metric
 
         request.configuration = configuration
-        request.dataset_configuration = self.__request.dataset_configuration
+        found, training = self.__data_storage.get_training(self.__request.user_id, self.__training_id)
+        request.dataset_configuration = json.dumps(training["dataset_configuration"])
 
         return request
 
@@ -103,8 +104,8 @@ class AdapterManager(Thread):
             "test_score": 0,
             "prediction_time": 0,
             "runtime_profile": {
-                "start_time": datetime.now(),
-                "end_time": 0,
+                "start_time": datetime.datetime.now(),
+                "end_time": datetime.datetime.now(),
             },
             "status_messages": [],
             "explanation": {}
@@ -113,7 +114,7 @@ class AdapterManager(Thread):
     
     async def __read_grpc_connection(self):
         try:  # Run until server closes connection
-
+            import datetime
             channel = Channel(host=self.__host, port=self.__port)
             service = AdapterServiceStub(channel=channel)
             self.__log.debug(f"run: connecting to AutoML Adapter {self.__host}:{self.__port}")
@@ -132,14 +133,12 @@ class AdapterManager(Thread):
                     continue
                 if response.return_code == AdapterReturnCode.ADAPTER_RETURN_CODE_STATUS_UPDATE:
                     self.__status_messages.append(response.status_update)
-                    self.__runtime = response.runtime
                     self.__data_storage.update_model(self.__request.user_id, self.__model_id, {"status_messages": self.__status_messages})
                 elif response.return_code == AdapterReturnCode.ADAPTER_RETURN_CODE_SUCCESS:
                     channel.close()
-                    self.__result_json = json.loads(response.output_json)
+                    self.__path = response.path
                     self.__status = "completed"
                     self.__testScore = response.test_score
-                    self.__runtime = response.runtime
                     self.__prediction_time = response.prediction_time
                     self.__ml_model_type = response.model
                     self.__ml_library = response.library
@@ -148,11 +147,11 @@ class AdapterManager(Thread):
                         "status": self.__status,
                         "ml_model_type": self.__ml_model_type,
                         "ml_library": self.__ml_library,
-                        "path": os.path.join(self.__result_json["file_location"], self.__result_json["file_name"]),
+                        "path": self.__path,
                         "prediction_time": self.__prediction_time,
                         "test_score": self.__testScore,
                         "runtime_profile": {
-                            "end_time": datetime.now()
+                            "end_time": datetime.datetime.now()
                         }
                     }
                     self.__adapter_finished_callback(self.__training_id, self.__request.user_id, self.__model_id, model_details, self)

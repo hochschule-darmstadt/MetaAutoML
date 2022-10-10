@@ -18,7 +18,7 @@ class DataAnalysisAgent(IAbstractBlackboardAgent):
         )
     
     def do_contribute(self) -> None:
-        dataset_analysis = self.__dataset.get('analysis', {}).get('basic_analysis')
+        dataset_analysis = self.__dataset.get('analysis', {})
         if dataset_analysis is None:
             dataset_analysis = {}
         self.update_state(dataset_analysis)

@@ -9,7 +9,7 @@ namespace BlazorBoilerplate.Shared.Dto.Ontology
 {
     public class StrategyControllerStrategyDto
     {
-        public string Identifier { get; set; }
+        public string Id { get; set; }
         public string Title { get; set; }
         public string Description { get; set; }
         public StrategyControllerStrategyDto()
@@ -18,7 +18,7 @@ namespace BlazorBoilerplate.Shared.Dto.Ontology
         }
         public StrategyControllerStrategyDto(Strategy strategy)
         {
-            Identifier = strategy.Identifier;
+            Id = strategy.Id;
             Title = strategy.Title;
             Description = strategy.Description;
         }

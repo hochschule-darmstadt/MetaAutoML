@@ -60,13 +60,12 @@ class GetAutoMlStatusRequest(betterproto.Message):
 class GetAutoMlStatusResponse(betterproto.Message):
     return_code: "AdapterReturnCode" = betterproto.enum_field(1)
     status_update: str = betterproto.string_field(2)
-    output_json: str = betterproto.string_field(3)
+    path: str = betterproto.string_field(3)
     test_score: float = betterproto.float_field(4)
     validation_score: float = betterproto.float_field(5)
-    runtime: int = betterproto.int32_field(6)
-    prediction_time: float = betterproto.float_field(7)
-    library: str = betterproto.string_field(8)
-    model: str = betterproto.string_field(9)
+    prediction_time: float = betterproto.float_field(6)
+    library: str = betterproto.string_field(7)
+    model: str = betterproto.string_field(8)
 
 
 @dataclass(eq=False, repr=False)

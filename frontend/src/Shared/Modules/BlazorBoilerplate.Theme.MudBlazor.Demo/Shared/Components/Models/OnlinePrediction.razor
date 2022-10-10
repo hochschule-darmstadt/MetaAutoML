@@ -30,59 +30,48 @@
     </MudCardHeader>
     <MudCardContent>
         <MudPaper Height="100px" Elevation="0">
-            @if (_predictionDatasets == null)
+            @if (_predictions == null)
             {
                 <DataLoaderSpinner />
             }
             else
             {
-                <MudTable Items="@_predictionDatasets.Datasets" style="width:stretch" class="mat-elevation-z5" AllowSelection="false" Dense="true">
+                <MudTable Items="@_predictions.Predictions" style="width:stretch" class="mat-elevation-z5" AllowSelection="false" Dense="true">
                     <HeaderContent>
                         <MudTh>@L["Name"]</MudTh>
                         <MudTh>@L["Date"]</MudTh>
-                        <MudTh>@L["Predict online"]</MudTh>
-                        <MudTh>@L["Predict online"]</MudTh>
+                        <MudTh>@L["Status"]</MudTh>
+                        <MudTh>@L["Download"]</MudTh>
                     </HeaderContent>
                     <RowTemplate>
                         <MudTd>
-                            <MudLink Href="@NavManager.ToAbsoluteUri("datasets/" + @context.Identifier).AbsoluteUri" Style="cursor: pointer; display: flex;"><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.ListAlt" Style="margin-right: 4px;" /> @context.Name</MudLink>
-                        </MudTd>
-                        <MudTd>@L[context.Type.Properties.ContainsKey("skos:prefLabel") ? context.Type.Properties["skos:prefLabel"] : ""]</MudTd>
-                        <MudTd>
-                            <MudButton OnClick="@(() => MakeOnlinePrediction(context))" Variant="Variant.Filled" Color="Color.Secondary" Size="Size.Small">@L["Predict online"]</MudButton>
+                             @context.LiveDatasetName 
                         </MudTd>
                         <MudTd>
-                            <MudButton OnClick="@(() => DownlaodPrediction(context))" Variant="Variant.Filled" Color="Color.Secondary" Size="Size.Small">@L["Download result CSV"]</MudButton>
+                            @context.RuntimeProfile.StartTime.ToString("dd/mm/yyyy");
+                        </MudTd>
+                        <MudTd>
+                            @if (context.Status == "busy")
+                            {
+                                <MudProgressCircular Size="Size.Small" Color="Color.Secondary" Indeterminate="true" />
+                            }
+                            else
+                            {
+                                @L[context.Status];
+                            }
+                        </MudTd>
+                        <MudTd>
+                            @if (context.Status == "completed")
+                            {
+                                <MudButton OnClick="@(() => DownlaodPrediction(context))" Variant="Variant.Filled" Color="Color.Secondary" Size="Size.Small">@L["Download result CSV"]</MudButton>
+                            }
+                            else
+                            {
+                                <MudButton Variant="Variant.Filled" Color="Color.Secondary" Size="Size.Small" Disabled="true">@L["Download result CSV"]</MudButton>
+                            }
                         </MudTd>
                     </RowTemplate>
                 </MudTable>
-                @*<InputFile id="fileInput" OnChange="UploadFiles" hidden />*@
-@*                @if (Model.Model.Status == "completed")
-                {
-                    <MudStack>
-                        <MudButton HtmlTag="label"
-                                   Variant="Variant.Filled"
-                                   Color="Color.Secondary"
-                                   StartIcon="@Icons.Filled.CloudUpload"
-                                   for="fileInput">
-                            @L["Upload File"]
-                        </MudButton>
-                        <MudButton StartIcon="@Icons.Filled.CloudDownload" Color="Color.Secondary" Disabled="@_downloadReady" OnClick="@DownloadPredictions">@L["Download result CSV"]</MudButton>
-                    </MudStack>
-                }
-                else
-                {
-                    <MudStack>
-                        <MudButton HtmlTag="label"
-                            Disabled="true"
-                           Variant="Variant.Filled"
-                           Color="Color.Secondary"
-                           StartIcon="@Icons.Filled.CloudUpload">
-                            @L["Upload File"]
-                        </MudButton>
-                        <MudButton StartIcon="@Icons.Filled.CloudDownload" Color="Color.Secondary" Disabled="true">@L["Download result CSV"]</MudButton>
-                    </MudStack>
-                }*@
             }
         </MudPaper>
     </MudCardContent>
@@ -103,27 +92,8 @@
         } 
     }
     private GetModelResponseDto _model;
-    [Parameter]
-    public string DatasetIdentifier
-    {
-        get
-        {
-            return _datasetIdentifier;
-        }
-        set
-        {
-            _datasetIdentifier = value;
-            if (_datasetIdentifier != null)
-            {
-                fileUploader.UploadPredictionDatasetRequest.DatasetIdentifier = _datasetIdentifier;
-                LoadPredictionDatasets();
-            }
-            StateHasChanged();
-        }
-    }
-    private string _datasetIdentifier;
 
-    private GetPredictionsResponseDto _predictionDatasets;
+    private GetPredictionsResponseDto _predictions;
     private ModelPredictResponseDto _modelPrediction;
     private bool _downloadReady = true;
     private ModelPredictResponseDto _predictionResult;
@@ -141,10 +111,10 @@
         try
         {
 
-            ApiResponseDto apiResponse = await apiClient.GetPredictionDatasets(new GetPredictionsRequestDto { ModelId = _datasetIdentifier });
+            ApiResponseDto apiResponse = await apiClient.GetPredictions(new GetPredictionsRequestDto { ModelId = _model.Model.Id });
             if (apiResponse.IsSuccessStatusCode)
             {
-                _predictionDatasets = Newtonsoft.Json.JsonConvert.DeserializeObject<GetPredictionsResponseDto>(apiResponse.Result.ToString());
+                _predictions = Newtonsoft.Json.JsonConvert.DeserializeObject<GetPredictionsResponseDto>(apiResponse.Result.ToString());
                 StateHasChanged();
             }
             else
@@ -158,32 +128,11 @@
         }
     }
 
-    private async void MakeOnlinePrediction(PredictionDatasetDto predictionDataset)
+    private async void DownlaodPrediction(PredictionDto predictionDataset)
     {
         try
         {
-            ApiResponseDto apiResponse = await apiClient.ModelPrediction(new ModelPredictionRequestDto() { PredictionDatasetIdentifier = predictionDataset.Identifier, ModelIdentifier=_model.Model.Identifier });
-        if (apiResponse.IsSuccessStatusCode)
-            {
-                _modelPrediction = Newtonsoft.Json.JsonConvert.DeserializeObject<ModelPredictResponseDto>(apiResponse.Result.ToString());
-                StateHasChanged();
-            }
-            else
-            {
-                viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
-            }
-        }
-        catch (Exception ex)
-        {
-            viewNotifier.Show(ex.GetBaseException().Message, ViewNotifierType.Error, L["Operation Failed"]);
-        }
-    }
-
-    private async void DownlaodPrediction(PredictionDatasetDto predictionDataset)
-    {
-        try
-        {
-            ApiResponseDto apiResponse = await apiClient.GetPredictionDatasetPrediction(new DownloadPredictionRequestDto() { PredictionDatasetIdentifier = predictionDataset.Identifier, ModelIdentifier=_model.Model.Identifier, PredictionIdentifier = predictionDataset.Predictions[_model.Model.Identifier].Predictions.ElementAt(0).Key });
+            ApiResponseDto apiResponse = await apiClient.DownloadPrediction(new DownloadPredictionRequestDto() { PredictionId = predictionDataset.Id });
             if (apiResponse.IsSuccessStatusCode)
             {
                 DownloadPredictionResponseDto response = Newtonsoft.Json.JsonConvert.DeserializeObject<DownloadPredictionResponseDto>(apiResponse.Result.ToString());

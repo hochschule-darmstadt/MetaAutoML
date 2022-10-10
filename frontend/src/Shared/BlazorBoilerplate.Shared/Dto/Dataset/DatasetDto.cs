@@ -11,41 +11,36 @@ namespace BlazorBoilerplate.Shared.Dto.Dataset
 {
     public class DatasetDto
     {
-        public string Identifier { get; set; }
+        public string Id { get; set; }
         public string Name { get; set; }
         public ObjectInfomationDto Type { get; set; }
-        public DateTime CreationTime { get; set; }
-        public long Size { get; set; }
+        public Dictionary<string, dynamic> FileConfiguration { get; set; }
         public Dictionary<string, dynamic> Analysis { get; set; }
-        public Dictionary<string, dynamic> Configuration { get; set; }
         public DatasetDto()
         {
             Analysis = new Dictionary<string, dynamic>();
         }
         public DatasetDto(GetDatasetResponse grpcObject, ObjectInfomationDto type)
         {
-            Identifier = grpcObject.Dataset.Identifier;
+            Id = grpcObject.Dataset.Id;
             Name = grpcObject.Dataset.Name;
             Type = type;
-            CreationTime = grpcObject.Dataset.CreationTime.ToDateTime();
-            Size = grpcObject.Dataset.Size;
+            FileConfiguration = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(grpcObject.Dataset.FileConfiguration);
             Analysis = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(grpcObject.Dataset.Analysis);
-            Configuration = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(grpcObject.Dataset.FileConfiguration);
         }
         public DatasetDto(Server.Dataset grpcObject, ObjectInfomationDto type)
         {
-            Identifier = grpcObject.Identifier;
+            Id = grpcObject.Id;
             Name = grpcObject.Name;
             Type = type;
-            CreationTime = grpcObject.CreationTime.ToDateTime();
-            Size = grpcObject.Size;
+            FileConfiguration = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(grpcObject.FileConfiguration);
             Analysis = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(grpcObject.Analysis);
-            Configuration = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(grpcObject.FileConfiguration);
+            Analysis["creation_date"] = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc).AddSeconds(Analysis["creation_date"]);
         }
 
         public char GetDelimiter()
         {
-            switch (this.Configuration["delimiter"])
+            switch (this.FileConfiguration["delimiter"])
             {
                 case "comma":
                     return ',';
@@ -61,7 +56,7 @@ namespace BlazorBoilerplate.Shared.Dto.Dataset
         }
         public string GetDelimiterStr()
         {
-            switch (this.Configuration["delimiter"])
+            switch (this.FileConfiguration["delimiter"])
             {
                 case "comma":
                     return ",";

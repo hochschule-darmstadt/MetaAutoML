@@ -51,13 +51,13 @@
                             }
                         </MudTd>
                         <MudTd>
-                            <MudLink Href="@NavManager.ToAbsoluteUri("trainings/" + Training.Training.Identifier + "/models/" + @models.Identifier).AbsoluteUri" Style="cursor: pointer; display: flex;"><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.Lightbulb" Style="margin-right: 4px;" />@(models.MlModelType.Properties.ContainsKey("skos:prefLabel") ? models.MlModelType.Properties["skos:prefLabel"] : "")</MudLink>
+                            <MudLink Href="@NavManager.ToAbsoluteUri("trainings/" + Training.Training.Id + "/models/" + @models.Id).AbsoluteUri" Style="cursor: pointer; display: flex;"><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.Lightbulb" Style="margin-right: 4px;" />@(models.MlModelType.Properties.ContainsKey("skos:prefLabel") ? models.MlModelType.Properties["skos:prefLabel"] : "")</MudLink>
                         </MudTd>
                             <MudTd>@(models.MlLibrary.Properties.ContainsKey("skos:prefLabel") ? models.MlLibrary.Properties["skos:prefLabel"] : "")</MudTd>
                         <MudTd>@(String.Format("{0:0.00}", models.TestScore))</MudTd>
                         <MudTd>@(String.Format("{0:0}", models.PredictionTime)) ms</MudTd>
                         <MudTd>@models.RuntimeProfile s</MudTd>
-                        <MudTd><TrainingMenu TrainingId="@Training.Training.Identifier"></TrainingMenu></MudTd>
+                        <MudTd><TrainingMenu TrainingId="@Training.Training.Id"></TrainingMenu></MudTd>
                     </RowTemplate>
                     <PagerContent>
                         <MudTablePager />
@@ -127,7 +127,7 @@
                     DisposeTimer();
                 }
                 
-                ApiResponseDto apiResponse = await apiClient.GetTraining(new GetTrainingRequestDto { TrainingId = Training.Training.Identifier });
+                ApiResponseDto apiResponse = await apiClient.GetTraining(new GetTrainingRequestDto { TrainingId = Training.Training.Id });
 
                 if (apiResponse.IsSuccessStatusCode)
                 {

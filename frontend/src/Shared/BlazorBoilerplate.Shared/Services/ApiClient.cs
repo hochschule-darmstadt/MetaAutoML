@@ -178,28 +178,28 @@ namespace BlazorBoilerplate.Shared.Services
         #endregion
 
         #region OMA-ML PREDICTION DATASET MESSAGES
-        async public Task<ApiResponseDto> UploadPredictionDataset(UploadPredictionRequestDto request)
+        async public Task<ApiResponseDto> UploadPrediction(UploadPredictionRequestDto request)
         {
-            return await httpClient.PostJsonAsync<ApiResponseDto>("api/PredictionDataset/UploadPredictionDataset", request);
+            return await httpClient.PostJsonAsync<ApiResponseDto>("api/Prediction/UploadPrediction", request);
         }
 
-        async public Task<ApiResponseDto> GetPredictionDatasetPrediction(DownloadPredictionRequestDto request)
+        async public Task<ApiResponseDto> GetPrediction(GetPredictionRequestDto request)
         {
-            return await httpClient.PostJsonAsync<ApiResponseDto>("api/PredictionDataset/GetPredictionDatasetPrediction", request);
+            return await httpClient.PostJsonAsync<ApiResponseDto>("api/Prediction/GetPrediction", request);
         }
-        async public Task<ApiResponseDto> GetPredictionDatasets(GetPredictionsRequestDto request)
+        async public Task<ApiResponseDto> GetPredictions(GetPredictionsRequestDto request)
         {
-            return await httpClient.PostJsonAsync<ApiResponseDto>("api/PredictionDataset/GetPredictionDatasets", request);
-        }
-
-        async public Task<ApiResponseDto> GetPredictionDataset(GetPredictionDatasetRequestDto request)
-        {
-            return await httpClient.PostJsonAsync<ApiResponseDto>("api/PredictionDataset/GetPredictionDataset", request);
+            return await httpClient.PostJsonAsync<ApiResponseDto>("api/Prediction/GetPredictions", request);
         }
 
-        async public Task<ApiResponseDto> DeletePredictionDataset(DeletePredictionRequestDto request)
+        async public Task<ApiResponseDto> DownloadPrediction(DownloadPredictionRequestDto request)
         {
-            return await httpClient.PostJsonAsync<ApiResponseDto>("api/PredictionDataset/DeletePredictionDataset", request);
+            return await httpClient.PostJsonAsync<ApiResponseDto>("api/Prediction/DownloadPrediction", request);
+        }
+
+        async public Task<ApiResponseDto> DeletePrediction(DeletePredictionRequestDto request)
+        {
+            return await httpClient.PostJsonAsync<ApiResponseDto>("api/Prediction/DeletePrediction", request);
         }
         #endregion
 

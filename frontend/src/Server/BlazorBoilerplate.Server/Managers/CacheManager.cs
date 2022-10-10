@@ -53,14 +53,14 @@ namespace BlazorBoilerplate.Server.Managers
                         //Copy cached label
                         result.Add(new ObjectInfomationDto()
                         {
-                            ID = retrievedRdfObject.Identifier,
+                            ID = retrievedRdfObject.Id,
                             Properties = new Dictionary<string, string>(retrievedRdfObject.Informations)
                         });
                     }
                     else
                     {
                         //add id to poll list
-                        request.Identifiers.Add(key);
+                        request.Ids.Add(key);
                     }
                 }
                 //we have already every rdf object in cache, no need to query ontology and controller
@@ -74,7 +74,7 @@ namespace BlazorBoilerplate.Server.Managers
                     //copy received RDF object into reply and persist into redis
                     result.Add(new ObjectInfomationDto()
                     {
-                        ID = objectInformation.Identifier,
+                        ID = objectInformation.Id,
                         Properties = new Dictionary<string, string>(objectInformation.Informations)
                     });
                     var rdfObject = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(objectInformation));
@@ -82,21 +82,21 @@ namespace BlazorBoilerplate.Server.Managers
                     var options = new DistributedCacheEntryOptions()
                         .SetAbsoluteExpiration(DateTime.Now.AddHours(24))
                         .SetSlidingExpiration(TimeSpan.FromHours(22));
-                    await _distributedCache.SetAsync(objectInformation.Identifier, rdfObject, options);
+                    await _distributedCache.SetAsync(objectInformation.Id, rdfObject, options);
                 }
             }
             catch (Exception ex)
             {
                 //In case redis is not available we always query data from the ontology
                 //FALLBACK 
-                request.Identifiers.Add(ids);
+                request.Ids.Add(ids);
                 GetObjectsInformationResponse response = _client.GetObjectsInformation(request);
                 foreach (var objectInformation in response.ObjectInformations)
                 {
                     //copy received RDF object into reply and persist into redis
                     result.Add(new ObjectInfomationDto()
                     {
-                        ID = objectInformation.Identifier,
+                        ID = objectInformation.Id,
                         Properties = new Dictionary<string, string>(objectInformation.Informations)
                     });
                 }

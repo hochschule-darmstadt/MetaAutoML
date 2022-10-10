@@ -37,19 +37,13 @@ namespace BlazorBoilerplate.Server.Managers
                 createTrainingRequest.UserId = username;
                 createTrainingRequest.DatasetId = request.DatasetId;
                 createTrainingRequest.Configuration = new Configuration();
-                createTrainingRequest.Configuration.Task = request.Configuration.Task.ID;
+                createTrainingRequest.Configuration.Task = request.Configuration.Task;
                 createTrainingRequest.Configuration.Target = request.Configuration.Target;
                 createTrainingRequest.Configuration.EnabledStrategies.AddRange(request.Configuration.EnabledStrategies);
                 createTrainingRequest.Configuration.RuntimeLimit = request.Configuration.RuntimeLimit;
-                createTrainingRequest.Configuration.Metric = request.Configuration.Metric.ID;
-                foreach (var item in request.Configuration.SelectedAutoMlSolutions)
-                {
-                    createTrainingRequest.Configuration.SelectedAutoMlSolutions.Add(item.ID);
-                }
-                foreach (var item in request.Configuration.SelecctedMlLibraries)
-                {
-                    createTrainingRequest.Configuration.SelectedMlLibraries.Add(item.ID);
-                }
+                createTrainingRequest.Configuration.Metric = request.Configuration.Metric;
+                createTrainingRequest.Configuration.SelectedAutoMlSolutions.AddRange(request.Configuration.SelectedAutoMlSolutions);
+                createTrainingRequest.Configuration.SelectedMlLibraries.AddRange(request.Configuration.SelecctedMlLibraries);
                 createTrainingRequest.DatasetConfiguration = JsonConvert.SerializeObject(request.DatasetConfiguration);
                 var reply = _client.CreateTraining(createTrainingRequest);
                 return new ApiResponse(Status200OK, null, new CreateTrainingResponseDto(reply.TrainingId));
@@ -77,7 +71,8 @@ namespace BlazorBoilerplate.Server.Managers
                 var reply = _client.GetTrainings(getTrainings);
                 foreach (var training in reply.Trainings)
                 {
-                    TrainingDto trainingDto = new TrainingDto(training);
+                    GetDatasetResponse dataset = _client.GetDataset(new GetDatasetRequest { DatasetId = training.DatasetId, UserId = username });
+                    TrainingDto trainingDto = new TrainingDto(training, dataset.Dataset.Name);
                     trainingDto.Configuration.Task = await _cacheManager.GetObjectInformation(training.Configuration.Task);
                     trainingDto.Configuration.Target = training.Configuration.Target;
                     trainingDto.Configuration.EnabledStrategies.AddRange(training.Configuration.EnabledStrategies);
@@ -127,7 +122,8 @@ namespace BlazorBoilerplate.Server.Managers
                 getTrainingRequest.TrainingId = request.TrainingId;
                 GetTrainingResponse reply = _client.GetTraining(getTrainingRequest);
 
-                TrainingDto trainingDto = new TrainingDto(reply.Training);
+                GetDatasetResponse dataset = _client.GetDataset(new GetDatasetRequest { DatasetId = reply.Training.DatasetId, UserId = username });
+                TrainingDto trainingDto = new TrainingDto(reply.Training, dataset.Dataset.Name);
                 trainingDto.Configuration.Task = await _cacheManager.GetObjectInformation(reply.Training.Configuration.Task);
                 trainingDto.Configuration.Target = reply.Training.Configuration.Target;
                 trainingDto.Configuration.EnabledStrategies.AddRange(reply.Training.Configuration.EnabledStrategies);

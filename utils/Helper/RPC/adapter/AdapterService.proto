@@ -37,13 +37,12 @@ message GetAutoMLStatusRequest {
 message GetAutoMLStatusResponse {
 	AdapterReturnCode returnCode = 1;
 	string statusUpdate = 2;
-	string outputJson = 3;
+	string path = 3;
 	float testScore = 4;
     float validationScore = 5;
-    int32 runtime = 6;
-    float predictionTime = 7;
-    string library = 8;
-    string model = 9;
+    float predictionTime = 6;
+    string library = 7;
+    string model = 8;
 }
 
 message ExplainModelRequest {

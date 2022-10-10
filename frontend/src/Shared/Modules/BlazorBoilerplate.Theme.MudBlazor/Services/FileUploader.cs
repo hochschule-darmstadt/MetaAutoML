@@ -27,7 +27,7 @@ namespace BlazorBoilerplate.Theme.Material.Services
             L = L;
         }
         public UploadDatasetRequestDto UploadDatasetRequest { get; set; }
-        public UploadPredictionRequestDto UploadPredictionDatasetRequest { get; set; }
+        public UploadPredictionRequestDto UploadPredictionRequest { get; set; }
         public IBrowserFile UploadFileContent { get; set; }
         public bool IsUploading { get; set; } = false;
         public Action OnUploadChangedCallback { get; set; }
@@ -52,7 +52,7 @@ namespace BlazorBoilerplate.Theme.Material.Services
                 {
                     if (IsPredictionDatasetToUpload == true)
                     {
-                        UploadPredictionDatasetRequest.TotalChunkNumber = (int)(ms.Length / chunkSize);
+                        UploadPredictionRequest.TotalChunkNumber = (int)(ms.Length / chunkSize);
                     }
                     else
                     {
@@ -63,7 +63,7 @@ namespace BlazorBoilerplate.Theme.Material.Services
                 {
                     if (IsPredictionDatasetToUpload == true)
                     {
-                        UploadPredictionDatasetRequest.TotalChunkNumber = (int)(ms.Length / chunkSize) + 1; //append extra chunk
+                        UploadPredictionRequest.TotalChunkNumber = (int)(ms.Length / chunkSize) + 1; //append extra chunk
                     }
                     else
                     {
@@ -72,7 +72,7 @@ namespace BlazorBoilerplate.Theme.Material.Services
                 }
                 if (IsPredictionDatasetToUpload == true)
                 {
-                    UploadPredictionDatasetRequest.ChunkNumber = 1;
+                    UploadPredictionRequest.ChunkNumber = 1;
                 }
                 else
                 {
@@ -87,7 +87,7 @@ namespace BlazorBoilerplate.Theme.Material.Services
                     var reallyRead = ms.Read(buffer, 0, buffer.Length);
                     if (IsPredictionDatasetToUpload == true)
                     {
-                        UploadPredictionDatasetRequest.Content = buffer;
+                        UploadPredictionRequest.Content = buffer;
                     }
                     else
                     {
@@ -99,7 +99,7 @@ namespace BlazorBoilerplate.Theme.Material.Services
                     
                     if (IsPredictionDatasetToUpload == true)
                     {
-                        apiResponse = await _client.UploadPredictionDataset(UploadPredictionDatasetRequest);
+                        apiResponse = await _client.UploadPrediction(UploadPredictionRequest);
                     }
                     else
                     {
@@ -113,7 +113,7 @@ namespace BlazorBoilerplate.Theme.Material.Services
                     bytesRead += reallyRead;
                     if (IsPredictionDatasetToUpload == true)
                     {
-                        UploadPredictionDatasetRequest.ChunkNumber++;
+                        UploadPredictionRequest.ChunkNumber++;
                     }
                     else
                     {

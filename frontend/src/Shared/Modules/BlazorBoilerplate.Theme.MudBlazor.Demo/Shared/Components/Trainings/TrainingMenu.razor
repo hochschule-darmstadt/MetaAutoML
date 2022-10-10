@@ -5,7 +5,7 @@
 @if (Model != null)
 {
     <MudMenu Icon="@Icons.Material.Filled.MoreVert">
-        <MudMenuItem OnClick="@(e => { NavManager.NavigateTo("trainings/" + TrainingId + "/models/" + Model.Identifier); })">@L["Details"]</MudMenuItem>
+        <MudMenuItem OnClick="@(e => { NavManager.NavigateTo("trainings/" + TrainingId + "/models/" + Model.Id); })">@L["Details"]</MudMenuItem>
         <MudMenuItem>@L["Delete"]</MudMenuItem>
     </MudMenu>
 }

@@ -28,17 +28,14 @@
             {
                 <div style="height:250px;overflow: auto;">
                     <MudStack>
-                        <MudText Typo="Typo.body1">@L["Dataset: {0}", Training.Training.DatasetName]</MudText>
-                        <MudText Typo="Typo.body1">@L["Task: {0}", Training.Training.Task.Properties.ContainsKey("skos:prefLabel") ? Training.Training.Task.Properties["skos:prefLabel"] : ""]</MudText>
-                        @if (Training.Training.Configuration.ContainsKey("target"))
-                        {
-                            <MudText Typo="Typo.body1">@L["Target: {0}", Training.Training.Configuration["target"]["target"]]</MudText>
-                        }
+                        <MudText Typo="Typo.body1">@L["Dataset: {0}", Dataset.Dataset.Name]</MudText>
+                        <MudText Typo="Typo.body1">@L["Task: {0}", Training.Training.Configuration.Task.Properties.ContainsKey("skos:prefLabel") ? Training.Training.Configuration.Task.Properties["skos:prefLabel"] : ""]</MudText>
+                        <MudText Typo="Typo.body1">@L["Target: {0}", Training.Training.Configuration.Target]</MudText>
                         <MudDivider />
                         <MudExpansionPanels MultiExpansion="true">
                             <MudExpansionPanel Text="@L["Selected Ml libraries"]">
                                 <MudStack>
-                                    @foreach (var item in Training.Training.SelectedMlLibraries)
+                                    @foreach (var item in Training.Training.Configuration.SelecctedMlLibraries)
                                     {
                                         <MudText Typo="Typo.body1">@item.Properties.ContainsKey("skos:prefLabel") ? @item.Properties["skos:prefLabel"] : @("")</MudText>
                                     }
@@ -46,14 +43,14 @@
                             </MudExpansionPanel>
                             <MudExpansionPanel Text="@L["Selected AutoMl solutions"]">
                                 <MudStack>
-                                    @foreach (var item in Training.Training.SelectedAutoMls)
+                                    @foreach (var item in Training.Training.Configuration.SelectedAutoMlSolutions)
                                     {
                                         <MudText Typo="Typo.body1">@item.Properties.ContainsKey("skos:prefLabel") ? @item.Properties["skos:prefLabel"] : @("")</MudText>
                                     }
                                 </MudStack>
                             </MudExpansionPanel>
                             <MudExpansionPanel Text="@L["Dataset configuration"]">
-                                @if ((_training.Training.Task.Properties[":has_dataset_type"] == ":tabular") || (_training.Training.Task.Properties[":has_dataset_type"] == ":time_series_longitudinal"))
+                                @if ((_training.Training.Configuration.Task.Properties[":has_dataset_type"] == ":tabular") || (_training.Training.Configuration.Task.Properties[":has_dataset_type"] == ":time_series_longitudinal"))
                                 {
                                     <MudStack>
                                         @foreach (JToken item in Training.Training.DatasetConfiguration["features"])
@@ -104,4 +101,19 @@
         } 
     }
     private GetModelResponseDto _model;
+
+    [Parameter]
+    public GetDatasetResponseDto Dataset
+    {
+        get
+        {
+            return _dataset;
+        }
+        set
+        {
+            _dataset = value;
+            StateHasChanged();
+        }
+    }
+    private GetDatasetResponseDto _dataset;
 }

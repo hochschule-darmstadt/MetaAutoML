@@ -134,7 +134,7 @@ namespace BlazorBoilerplate.Server.Managers
 
                     try
                     {
-                        user = await _accountManager.RegisterNewUserAsync(userName, userEmailClaim.Value, null, false, response.UserIdentifier);
+                        user = await _accountManager.RegisterNewUserAsync(userName, userEmailClaim.Value, null, false, response.UserId);
                     }
                     catch (DomainException ex)
                     {

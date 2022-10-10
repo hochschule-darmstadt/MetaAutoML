@@ -11,7 +11,7 @@
         <CardHeaderActions>
             @if (Dataset != null)
             {
-                <MudButton Href="@("/datasets/" + Dataset.Dataset.Identifier + "/models")"
+                <MudButton Href="@("/datasets/" + Dataset.Dataset.Id + "/models")"
                     Variant="Variant.Filled" 
                     EndIcon="@Icons.Material.Filled.ReadMore" 
                     Color="Color.Secondary"
@@ -45,7 +45,7 @@
                             }
                         </MudTd>
                         <MudTd>
-                            <MudLink Href="@NavManager.ToAbsoluteUri("datasets/" + Dataset.Dataset.Identifier + "/models/" + @context.Identifier).AbsoluteUri" Style="cursor: pointer; display: flex">
+                            <MudLink Href="@NavManager.ToAbsoluteUri("datasets/" + Dataset.Dataset.Id + "/models/" + @context.Id).AbsoluteUri" Style="cursor: pointer; display: flex">
                                 <MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.ModelTraining" Style="margin-right: 4px;" />
                                 @if (context.MlModelType.Properties.ContainsKey("skos:prefLabel"))
                                 {
@@ -94,7 +94,7 @@
     {
         try
         {
-            ApiResponseDto apiResponse = await apiClient.GetModels(new GetModelsRequestDto() { DatasetId = Dataset.Dataset.Identifier, Top3 = true });
+            ApiResponseDto apiResponse = await apiClient.GetModels(new GetModelsRequestDto() { DatasetId = Dataset.Dataset.Id, Top3 = true });
 
             if (apiResponse.IsSuccessStatusCode)
             {

@@ -48,7 +48,7 @@
         <DataLoaderSpinner />
     }
 
-    @if (((Dataset.Dataset.Type.ID == ":tabular") || (Dataset.Dataset.Type.ID == ":text") || (Dataset.Dataset.Type.ID == ":time_series")) || (Dataset.Dataset.Type.ID == ":time_series_longitudinal") && (!string.IsNullOrEmpty(StartAutoMlRequest.Task)))
+    @if (((Dataset.Dataset.Type.ID == ":tabular") || (Dataset.Dataset.Type.ID == ":text") || (Dataset.Dataset.Type.ID == ":time_series")) || (Dataset.Dataset.Type.ID == ":time_series_longitudinal") && (!string.IsNullOrEmpty(StartAutoMlRequest.Configuration.Task)))
 
     {
         <MudSelect Label="@L["Target"]" T="string" ValueChanged="@OnTargetChanged">
@@ -61,7 +61,7 @@
             }
         </MudSelect>
     }
-    <MudNumericField ValueChanged="@OnRuntimeValueChanged" T="int" Label="@L["Runtime"]" Variant="Variant.Text" Min="3" Max="180" Value="@StartAutoMlRequest.RuntimeConstraints["runtime_limit"]" />
+    <MudNumericField ValueChanged="@OnRuntimeValueChanged" T="int" Label="@L["Runtime"]" Variant="Variant.Text" Min="3" Max="180" Value="@StartAutoMlRequest.Configuration.RuntimeLimit" />
 
     <MudExpansionPanels>
         <MudExpansionPanel Text="@L["Details"]">
@@ -113,7 +113,7 @@
                         {
                             <MudTooltip Text="@strategy.Description" Delay="600" Arrow="true" Placement="Placement.Bottom" Class="strategy-description-tooltip">
                                 <MudChip
-                                    Value="@strategy.Identifier"
+                                    Value="@strategy.Id"
                                     Text="@strategy.Title"
                                     Default="true"
                                     Variant="Variant.Text"
@@ -181,7 +181,7 @@
 
     private void OnRuntimeValueChanged(int e)
     {
-        StartAutoMlRequest.RuntimeConstraints["runtime_limit"] = e;
+        StartAutoMlRequest.Configuration.RuntimeLimit = e;
     }
 
     private async void SetupStartAutoMLConfiguration()
@@ -190,7 +190,7 @@
 
         if ((Dataset.Dataset.Type.ID == ":tabular") || (Dataset.Dataset.Type.ID == ":text") || (Dataset.Dataset.Type.ID == ":time_series") || (Dataset.Dataset.Type.ID == ":time_series_longitudinal"))
         {
-            foreach (KeyValuePair<string, dynamic> pair in StartAutoMlRequest.DatasetConfiguration["features"])
+            foreach (KeyValuePair<string, dynamic> pair in StartAutoMlRequest.DatasetConfiguration["column_datatypes"])
             {
                 if((int)pair.Value != 7)
                 {
@@ -198,16 +198,8 @@
                 }
             }
         }
-        if (StartAutoMlRequest.RuntimeConstraints.Count == 0)
-        {
-            StartAutoMlRequest.RuntimeConstraints.Add("runtime_limit", 3);
-            StartAutoMlRequest.RuntimeConstraints.Add("max_iter", 0);
-        }
-        if (StartAutoMlRequest.TestConfiguration.Count == 0)
-        {
-            StartAutoMlRequest.TestConfiguration.Add("method", 0);
-        }
-        StartAutoMlRequest.Metric = "";
+        StartAutoMlRequest.Configuration.RuntimeLimit = 3;
+        StartAutoMlRequest.Configuration.Metric = ":accuracy";
         await UpdateStartAutoMlRequest();
     }
 
@@ -241,11 +233,11 @@
         {
             return;
         }
-        StartAutoMlRequest.Task = task;
+        StartAutoMlRequest.Configuration.Task = task;
         try
         {
             Dictionary<string, string> dictionary = new Dictionary<string, string>();
-            dictionary.Add("task", StartAutoMlRequest.Task);
+            dictionary.Add("task", StartAutoMlRequest.Configuration.Task);
             await UpdateStartAutoMlRequest();
             /** Configuration = dictionary is currently dummy */
             //GetCompatibleAutoMlSolutionsRequestDto compatibleAutoMlRequest = new GetCompatibleAutoMlSolutionsRequestDto { Configuration = dictionary };
@@ -263,7 +255,7 @@
             //    viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["AutoMlSolution Operation Failed"]);
             //}
 
-            GetMlLibrariesForTaskRequestDto supportedMlLibrariesRequest = new GetMlLibrariesForTaskRequestDto { Task = StartAutoMlRequest.Task };
+            GetMlLibrariesForTaskRequestDto supportedMlLibrariesRequest = new GetMlLibrariesForTaskRequestDto { Task = StartAutoMlRequest.Configuration.Task };
             ApiResponseDto apiResponse = await apiClient.GetMlLibrariesForTask(supportedMlLibrariesRequest);
 
             if (apiResponse.IsSuccessStatusCode)
@@ -296,15 +288,15 @@
         try
         {
             Dictionary<string, string> dictionary = new Dictionary<string, string>();
-            dictionary.Add("task", StartAutoMlRequest.Task);
+            dictionary.Add("task", StartAutoMlRequest.Configuration.Task);
             List<string> libraries = new List<string>();
 
 
 
-            StartAutoMlRequest.SelectedMlLibraries = new List<string>();
+            StartAutoMlRequest.Configuration.SelecctedMlLibraries = new List<string>();
             foreach (var chip in libs)
             {
-                StartAutoMlRequest.SelectedMlLibraries.Add((string)chip.Value);
+                StartAutoMlRequest.Configuration.SelecctedMlLibraries.Add((string)chip.Value);
                 libraries.Add((string)chip.Value);
             }
 
@@ -353,41 +345,27 @@
 
     private async void OnAutoMlSolutionSelectionChanged(MudChip[] automls)
     {
-        StartAutoMlRequest.SelectedAutoMLs = new List<string>();
+        StartAutoMlRequest.Configuration.SelectedAutoMlSolutions = new List<string>();
         foreach (var chip in automls)
         {
-            StartAutoMlRequest.SelectedAutoMLs.Add(chip.Value.ToString());
+            StartAutoMlRequest.Configuration.SelectedAutoMlSolutions.Add(chip.Value.ToString());
         }
         await UpdateStartAutoMlRequest();
     }
 
     private async void OnStrategySelectionChanged(MudChip[] strategies)
     {
-        StartAutoMlRequest.Configuration["enabled_strategies"] = new List<string>();
+        StartAutoMlRequest.Configuration.EnabledStrategies = new List<string>();
         foreach (var chip in strategies)
         {
-            StartAutoMlRequest.Configuration["enabled_strategies"].Add(chip.Value.ToString());
+            StartAutoMlRequest.Configuration.EnabledStrategies.Add(chip.Value.ToString());
         }
         await UpdateStartAutoMlRequest();
     }
 
     private async void OnTargetChanged(string value)
     {
-        if (!StartAutoMlRequest.Configuration.ContainsKey("target"))
-        {
-            var target = new Dictionary<string, dynamic>();
-            target.Add("target", "");
-            StartAutoMlRequest.Configuration.Add("target", target);
-        }
-        StartAutoMlRequest.Configuration["target"]["target"] = value;
-        foreach (var kvp in StartAutoMlRequest.DatasetConfiguration["features"])
-        {
-            if (kvp.Key == value)
-            {
-                StartAutoMlRequest.Configuration["target"]["type"] = kvp.Value;
-                break;
-            }
-        }
+        StartAutoMlRequest.Configuration.Target = value;
         await UpdateStartAutoMlRequest();
     }
 }

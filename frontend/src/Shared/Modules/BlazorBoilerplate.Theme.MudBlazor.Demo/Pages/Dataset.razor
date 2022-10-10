@@ -37,10 +37,10 @@
                                 <MudText Typo="Typo.body1">@L["Dataset type: {0}", L[_dataset.Dataset.Type.Properties.ContainsKey("skos:prefLabel") ? _dataset.Dataset.Type.Properties["skos:prefLabel"] : ""]]</MudText>
                             </MudItem>
                             <MudItem xs="3" sm="3" md="3">
-                                <MudText Typo="Typo.body1">@L["Date: {0}", _dataset.Dataset.CreationTime]</MudText>
+                                <MudText Typo="Typo.body1">@L["Date: {0}", _dataset.Dataset.Analysis.ContainsKey("creation_date") ? _dataset.Dataset.Analysis["creation_date"] : ""]</MudText>
                             </MudItem>
                             <MudItem xs="3" sm="3" md="3">
-                                <MudText Typo="Typo.body1">@L["File Size: {0}", FormatBytes(_dataset.Dataset.Size)]</MudText>
+                                <MudText Typo="Typo.body1">@L["File Size: {0}", FormatBytes(_dataset.Dataset.Analysis.ContainsKey("size_bytes") ? _dataset.Dataset.Analysis["size_bytes"] : 0)]</MudText>
                                 @if ((@_dataset.Dataset.Type.ID == ":tabular") || (@_dataset.Dataset.Type.ID == ":text") || (@_dataset.Dataset.Type.ID == ":time_series") || (@_dataset.Dataset.Type.ID == ":time_series_longitudinal"))
                                 {
                                     if (_dataset.Dataset.Analysis == null)
@@ -50,8 +50,8 @@
                                     }
                                     else if (_dataset.Dataset.Analysis.Count != 0)
                                     {
-                                        <MudText Typo="Typo.body1">@L["Number of rows: {0}", _dataset.Dataset.Analysis["basic_analysis"]["number_of_rows"]]</MudText>
-                                        <MudText Typo="Typo.body1">@L["Number of columns: {0}", _dataset.Dataset.Analysis["basic_analysis"]["number_of_columns"]]</MudText>
+                                        <MudText Typo="Typo.body1">@L["Number of rows: {0}", _dataset.Dataset.Analysis.ContainsKey("number_of_rows") ? _dataset.Dataset.Analysis["number_of_rows"] : "0"]</MudText>
+                                        <MudText Typo="Typo.body1">@L["Number of columns: {0}", _dataset.Dataset.Analysis.ContainsKey("number_of_columns") ? _dataset.Dataset.Analysis["number_of_columns"] : "0"]</MudText>
                                     }
                                     else
                                     {

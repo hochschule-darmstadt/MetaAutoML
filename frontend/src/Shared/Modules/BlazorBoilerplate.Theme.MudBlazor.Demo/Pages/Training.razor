@@ -48,7 +48,7 @@
             if (apiResponse.IsSuccessStatusCode)
             {
                 _training = Newtonsoft.Json.JsonConvert.DeserializeObject<GetTrainingResponseDto>(apiResponse.Result.ToString());
-                _pageTitle = L["Training {0}", _training.Training.StartTime.ToString("dd/MM/yy HH:mm")];
+                _pageTitle = L["Training {0}", _training.Training.RuntimeProfile.StartTime.ToString("dd/MM/yy HH:mm")];
                 viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
             }
             else

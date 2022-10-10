@@ -113,13 +113,13 @@ else
     { 
         get
         {
-            return Dataset.Dataset.Configuration["use_header"];
+            return Dataset.Dataset.FileConfiguration["use_header"];
         } 
         set
         {
             if (value != null)
             {
-                Dataset.Dataset.Configuration["use_header"] = value;
+                Dataset.Dataset.FileConfiguration["use_header"] = value;
             }
         } 
     }
@@ -128,13 +128,13 @@ else
     { 
         get
         {
-            return (int)Dataset.Dataset.Configuration["start_row"];
+            return (int)Dataset.Dataset.FileConfiguration["start_row"];
         } 
         set
         {
             if (value != null)
             {
-                Dataset.Dataset.Configuration["start_row"] = value;
+                Dataset.Dataset.FileConfiguration["start_row"] = value;
                 _rowIndex = 0;
             }
         } 
@@ -144,13 +144,13 @@ else
     { 
         get
         {
-            return Dataset.Dataset.Configuration["delimiter"];
+            return Dataset.Dataset.FileConfiguration["delimiter"];
         } 
         set
         {
             if (value != null)
             {
-                Dataset.Dataset.Configuration["delimiter"] = value;
+                Dataset.Dataset.FileConfiguration["delimiter"] = value;
                 _rowIndex = 0;
                 ReloadDataFrame();
             }
@@ -162,13 +162,13 @@ else
     { 
         get
         {
-            return Dataset.Dataset.Configuration["escape_character"];
+            return Dataset.Dataset.FileConfiguration["escape_character"];
         } 
         set
         {
             if (value != null)
             {
-                Dataset.Dataset.Configuration["escape_character"] = value;
+                Dataset.Dataset.FileConfiguration["escape_character"] = value;
             }
         } 
     }
@@ -177,13 +177,13 @@ else
     { 
         get
         {
-            return Dataset.Dataset.Configuration["decimal_character"];
+            return Dataset.Dataset.FileConfiguration["decimal_character"];
         } 
         set
         {
             if (value != null)
             {
-                Dataset.Dataset.Configuration["decimal_character"] = value;
+                Dataset.Dataset.FileConfiguration["decimal_character"] = value;
             }
         } 
     }

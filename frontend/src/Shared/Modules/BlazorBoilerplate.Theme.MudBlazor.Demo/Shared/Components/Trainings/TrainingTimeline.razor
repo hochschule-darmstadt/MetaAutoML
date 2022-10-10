@@ -116,7 +116,7 @@
 
     private IEnumerable<TimelineItem> RefreshTimeline()
     {
-        var events = Training.Training.Events;
+        var events = Training.Training.RuntimeProfile.Events;
         var phases = new List<string>() { "started", "preprocessing", "running", "stopped" };
         _timeline = new List<TimelineItem>();
         for(int i = 0; i < phases.Count; i++)
@@ -127,7 +127,7 @@
             int phaseStartedEventIdx = events.FindIndex(eventItem => eventItem.Type == "phase_updated" && eventItem.Meta["new_phase"] == phase);
             // Find the index of the event when the phase ended (became the "old_phase" or the "new_phase" if its the last phase)
             int phaseCompletedEventIdx = events.FindIndex(eventItem => eventItem.Type == "phase_updated" && (eventItem.Meta["old_phase"] == phase || (nextPhase == null && eventItem.Meta["new_phase"] == phase)));
-            StrategyControllerEventDto phaseStartedEvent = (phaseStartedEventIdx != -1 ? events[phaseStartedEventIdx] : null);
+            TrainingEventDto phaseStartedEvent = (phaseStartedEventIdx != -1 ? events[phaseStartedEventIdx] : null);
             var timelineItem = new TimelineItem
             {
                 Title = L[phase],
@@ -140,7 +140,7 @@
             if(phaseStartedEventIdx != -1) {
                 int nextPhaseStartedEventIdx = (nextPhase != null) ? events.FindIndex(eventItem => eventItem.Type == "phase_updated" && eventItem.Meta["new_phase"] == nextPhase) : -1;
                 // Get all events until the start of the next phase (or all remaining if its the last phase)
-                IEnumerable<StrategyControllerEventDto> childEvents = events.Skip(phaseStartedEventIdx+1).Take((nextPhaseStartedEventIdx != -1 ? (nextPhaseStartedEventIdx-1) : (events.Count-1)) - phaseStartedEventIdx);
+                IEnumerable<TrainingEventDto> childEvents = events.Skip(phaseStartedEventIdx + 1).Take((nextPhaseStartedEventIdx != -1 ? (nextPhaseStartedEventIdx - 1) : (events.Count - 1)) - phaseStartedEventIdx);
                 foreach (var childEvent in childEvents)
                 {
                     var childTimelineItem = new TimelineItem

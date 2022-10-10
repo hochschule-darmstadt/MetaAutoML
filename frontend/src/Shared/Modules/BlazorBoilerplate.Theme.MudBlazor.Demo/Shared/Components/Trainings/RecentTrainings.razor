@@ -30,14 +30,14 @@
             {
                 <MudTable Items="@_trainings.Trainings" style="width:stretch" class="mat-elevation-z5" AllowSelection="false" Dense="true">
                     <HeaderContent>
-                        <MudTh><MudTableSortLabel SortBy="new Func<TrainingDto, object>(x=>x.StartTime)">@L["Start datetime"]</MudTableSortLabel></MudTh>
+                        <MudTh><MudTableSortLabel SortBy="new Func<TrainingDto, object>(x=>x.RuntimeProfile.StartTime)">@L["Start datetime"]</MudTableSortLabel></MudTh>
                         <MudTh><MudTableSortLabel SortBy="new Func<TrainingDto, object>(x=>x.Status)">@L["Status"]</MudTableSortLabel></MudTh>
                         <MudTh><MudTableSortLabel SortBy="new Func<TrainingDto, object>(x=>x.DatasetName)">@L["Dataset"]</MudTableSortLabel></MudTh>
                         <MudTh>Task</MudTh>
                     </HeaderContent>
                     <RowTemplate>
                         <MudTd>
-                            <MudLink Href="@NavManager.ToAbsoluteUri("trainings/" + @context.Identifier).AbsoluteUri" Style="cursor: pointer; display: flex;"><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.ModelTraining" Style="margin-right: 4px;" /> @context.StartTime.ToString("dd/MM/yy HH:mm")</MudLink>
+                            <MudLink Href="@NavManager.ToAbsoluteUri("trainings/" + @context.Id).AbsoluteUri" Style="cursor: pointer; display: flex;"><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.ModelTraining" Style="margin-right: 4px;" /> @context.RuntimeProfile.StartTime.ToString("dd/MM/yy HH:mm")</MudLink>
                         </MudTd>
                         <MudTd>
                             @if (context.Status == "busy")
@@ -50,7 +50,7 @@
                             }
                         </MudTd>
                         <MudTd>@context.DatasetName</MudTd>
-                        <MudTd>@L[context.Task.Properties.ContainsKey("skos:prefLabel") ? context.Task.Properties["skos:prefLabel"] : ""]</MudTd>
+                        <MudTd>@L[context.Configuration.Task.Properties.ContainsKey("skos:prefLabel") ? context.Configuration.Task.Properties["skos:prefLabel"] : ""]</MudTd>
                     </RowTemplate>
                 </MudTable>
             }
@@ -71,7 +71,7 @@
             _trainings = value;
             if(_trainings != null)
             {
-                _trainings.Trainings = _trainings.Trainings.Where(x => x.StartTime > DateTime.Now.AddDays(-1)).Take(6).ToList();
+                _trainings.Trainings = _trainings.Trainings.Where(x => x.RuntimeProfile.StartTime > DateTime.Now.AddDays(-1)).Take(6).ToList();
                 RefreshRecentTrainings(null, null);
                 _timer = new Timer()
                 {
@@ -95,7 +95,7 @@
             return true;
         if (element.Status.Contains(searchString, StringComparison.OrdinalIgnoreCase))
             return true;
-        if (element.Task.Properties["skos:prefLabel"].Contains(searchString, StringComparison.OrdinalIgnoreCase))
+        if (element.Configuration.Task.Properties["skos:prefLabel"].Contains(searchString, StringComparison.OrdinalIgnoreCase))
             return true;
         if (element.DatasetName.Contains(searchString, StringComparison.OrdinalIgnoreCase))
             return true;
@@ -128,7 +128,7 @@
                 {
                     if (_trainings.Trainings[i].Status == "busy")
                     {
-                        ApiResponseDto apiResponse = await apiClient.GetTraining(new GetTrainingRequestDto { TrainingId = _trainings.Trainings[i].Identifier });
+                        ApiResponseDto apiResponse = await apiClient.GetTraining(new GetTrainingRequestDto { TrainingId = _trainings.Trainings[i].Id });
 
                         if (apiResponse.IsSuccessStatusCode)
                         {

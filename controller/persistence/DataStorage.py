@@ -254,7 +254,7 @@ class DataStorage:
                 # If the dataset is a tabular dataset it can be analyzed.
                 if dataset['type'] in [":tabular", ":text", ":time_series", ":time_series_longitudinal"]:
                     # Delete old references
-                    new_values["analysis"] = ""
+                    new_values["analysis"] = {}
                     self.__log.debug(f"update_dataset: deleting old dataset analysis for dataset: {dataset_id} for user {user_id}")
                     self.__mongo.update_dataset(user_id, dataset_id, new_values)
                     self.__log.debug(f"update_dataset: saving new dataset analysis for dataset: {dataset_id} for user {user_id}, new values {new_values}")

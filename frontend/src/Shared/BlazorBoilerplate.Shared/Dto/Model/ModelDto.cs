@@ -36,7 +36,7 @@ namespace BlazorBoilerplate.Shared.Dto.Model
             Predictions = new List<PredictionDto>();
             foreach (var item in model.Predictions)
             {
-                Predictions.Add(item);
+                Predictions.Add(new PredictionDto(item));
             }
             Status = model.Status;
             AutoMlSolution = autoMl;

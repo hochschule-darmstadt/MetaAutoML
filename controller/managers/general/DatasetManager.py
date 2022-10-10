@@ -141,5 +141,5 @@ class DatasetManager:
         Return empty SetDatasetFileConfigurationResponse object or a GRPC error if ressource NOT_FOUND
         """
         self.__log.debug(f"set_dataset_file_configuration: setting new file configuration new configuration {set_dataset_file_configuration_request.file_configuration}, for dataset {set_dataset_file_configuration_request.dataset_id}, of user {set_dataset_file_configuration_request.user_id}")
-        self.__data_storage.update_dataset(set_dataset_file_configuration_request.user_id, set_dataset_file_configuration_request.dataset_id, { "file_configuration": set_dataset_file_configuration_request.file_configuration }, True)
+        self.__data_storage.update_dataset(set_dataset_file_configuration_request.user_id, set_dataset_file_configuration_request.dataset_id, { "file_configuration": json.loads(set_dataset_file_configuration_request.file_configuration) }, True)
         return SetDatasetFileConfigurationResponse()

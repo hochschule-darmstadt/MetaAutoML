@@ -14,5 +14,6 @@ if __name__ == '__main__':
     with open(job_file_location) as file:
         process_json = json.load(file)
 
+    process_json["dataset_configuration"] = json.loads(process_json["dataset_configuration"])
     adapter = AutoKerasAdapter(process_json)
     adapter.start()

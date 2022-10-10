@@ -1,3 +1,4 @@
+from http.client import REQUEST_HEADER_FIELDS_TOO_LARGE
 import json
 import os
 import shutil
@@ -94,8 +95,7 @@ def get_response(output_json, start_time, test_score, prediction_time, library, 
     """
     response = GetAutoMlStatusResponse()
     response.return_code = AdapterReturnCode.ADAPTER_RETURN_CODE_SUCCESS
-    response.output_json = json.dumps(output_json)
-    response.runtime = int(time.time() - start_time)
+    response.path = os.path.join(output_json.file_location, output_json.file_name)
     response.test_score = test_score
     response.prediction_time = prediction_time
     response.library = library
@@ -124,9 +124,9 @@ def data_loader(config):
     train_data = None
     test_data = None
 
-    if config.configuration.task in [":tabular_classification", ":tabular_regression", ":text_classification", ":time_series_forecasting", ":time_series_classification"]:
+    if config["configuration"]["task"] in [":tabular_classification", ":tabular_regression", ":text_classification", ":time_series_forecasting", ":time_series_classification"]:
         return read_tabular_dataset_training_data(config)
-    elif config.configuration.task in [":image_classification", ":image_regression"]:
+    elif config["configuration"]["task"] in [":image_classification", ":image_regression"]:
         return read_image_dataset(config)
     return train_data, test_data
 
@@ -207,8 +207,10 @@ def evaluate(config, config_path, dataloader):
     ---
     Return evaluation score
     """
-    file_path = config.file_location
-    result_path = config.result_folder_location
+    config = config.__dict__
+    config["dataset_configuration"] = json.loads(config["dataset_configuration"])
+    file_path = config["dataset_path"]
+    result_path = config["result_folder_location"]
     # predict
     os.chmod(os.path.join(result_path, "predict.py"), 0o777)
     python_env = os.getenv("PYTHON_ENV", default="PYTHON_ENV_UNSET")
@@ -217,31 +219,31 @@ def evaluate(config, config_path, dataloader):
     subprocess.call([python_env, os.path.join(result_path, "predict.py"), file_path, config_path, os.path.join(result_path, "predictions.csv")])
     predict_time = time.time() - predict_start
 
-    if(config.configuration.task in [":tabular_classification", ":tabular_regression", ":text_regression", ":text_classification"]):
-        train, test = dataloader(config)
-        target = config.configuration.target
-    elif(config.configuration.task in[":image_classification", ":image_regression"]):
+    if(config["configuration"]["task"] in [":tabular_classification", ":tabular_regression", ":text_regression", ":text_classification"]):
+        train, test = data_loader(config)
+        target = config["configuration"]["target"]
+    elif(config["configuration"]["task"] in[":image_classification", ":image_regression"]):
         X_train, y_train, X_val, y_val, X_test, y_test = data_loader(config)
 
     predictions = pd.read_csv(os.path.join(result_path, "predictions.csv"))
     os.remove(os.path.join(result_path, "predictions.csv"))
 
-    if config.configuration.task == ":tabular_classification":
+    if config["configuration"]["task"] == ":tabular_classification":
         return accuracy_score(test[target], predictions["predicted"]), (predict_time * 1000) / test.shape[0]
 
-    elif config.configuration.task == ":tabular_regression":
+    elif config["configuration"]["task"] == ":tabular_regression":
         return mean_squared_error(test[target], predictions["predicted"], squared=False), \
                (predict_time * 1000) / test.shape[0]
 
-    elif config.configuration.task == ":image_classification":
+    elif config["configuration"]["task"] == ":image_classification":
         return accuracy_score(y_test, predictions["predicted"]), (predict_time * 1000) / y_test.shape[0]
 
-    elif config.configuration.task == ":image_regression":
+    elif config["configuration"]["task"] == ":image_regression":
         return mean_squared_error(y_test, predictions["predicted"], squared=False), \
                (predict_time * 1000) / y_test.shape[0]
-    elif config.configuration.task == ":time_series_classification":
-        train, test = dataloader(config)
-        target = config.configuration.target
+    elif config["configuration"]["task"] == ":time_series_classification":
+        train, test = data_loader(config)
+        target = config["configuration"]["target"]
 
         test_target = test[target].astype("string")
         predicted_target = predictions["predicted"].astype("string")
@@ -252,10 +254,10 @@ def evaluate(config, config_path, dataloader):
               )
         return acc_score, (predict_time * 1000) / test.shape[0]
 
-    elif config.configuration.task == ":text_classification":
+    elif config["configuration"]["task"] == ":text_classification":
         return accuracy_score(test[target], predictions["predicted"]), (predict_time * 1000) / test.shape[0]
 
-    elif config.configuration.task == ":text_regression":
+    elif config["configuration"]["task"] == ":text_regression":
         return mean_squared_error(test[target], predictions["predicted"], squared=False), \
                (predict_time * 1000) / test.shape[0]
 
@@ -336,10 +338,17 @@ def SetupRunNewRunEnvironment(request: "StartAutoMlRequest"):
     os.makedirs(model_folder_location, exist_ok=True)
     os.makedirs(export_folder_location, exist_ok=True)
     os.makedirs(result_folder_location, exist_ok=True)
-
+    request_dict = request.__dict__
+    request_dict.pop("_serialized_on_wire")
+    request_dict.pop("_unknown_fields")
+    request_dict.pop("_group_current")
+    request_dict.update({"configuration": request_dict["configuration"].__dict__})
+    request_dict["configuration"].pop("_serialized_on_wire")
+    request_dict["configuration"].pop("_unknown_fields")
+    request_dict["configuration"].pop("_group_current")
     #Save job file
     with open(os.path.join(job_folder_location, get_config_property("job-file-name")), "w+") as f:
-        json.dump(request, f)
+        json.dump(request_dict, f)
         
     return request
 
@@ -376,9 +385,8 @@ def read_tabular_dataset_training_data(config):
         "tab":          "\t",
     }
 
-    dataset_configuration = json.loads(config.dataset_configuration)
 
-    data = pd.read_csv(os.path.join(config.file_location), delimiter=delimiters[dataset_configuration['file_configuration']['delimiter']], skiprows=(dataset_configuration['file_configuration']['start_row']-1), escapechar=dataset_configuration['file_configuration']['escape_character'], decimal=dataset_configuration['file_configuration']['decimal_character'])
+    data = pd.read_csv(os.path.join(config["dataset_path"]), delimiter=delimiters[config["dataset_configuration"]['file_configuration']['delimiter']], skiprows=(config["dataset_configuration"]['file_configuration']['start_row']-1), escapechar=config["dataset_configuration"]['file_configuration']['escape_character'], decimal=config["dataset_configuration"]['file_configuration']['decimal_character'])
 
     # convert all object columns to categories, because autosklearn only supports numerical,
     # bool and categorical features
@@ -399,10 +407,10 @@ def prepare_tabular_dataset(df, json_configuration):
     """
     Prepare tabular dataset, perform feature preparation and data type casting
     """
-    df = feature_preparation(df, json_configuration["dataset_configuration"]["features"].items())
-    df = cast_dataframe_column(df, json_configuration["configuration"]["target"]["target"], json_configuration["configuration"]["target"]["type"])
-    X = df.drop(json_configuration["configuration"]["target"]["target"], axis=1)
-    y = df[json_configuration["configuration"]["target"]["target"]]
+    df = feature_preparation(df, json_configuration["dataset_configuration"]["column_datatypes"].items())
+    df = cast_dataframe_column(df, json_configuration["configuration"]["target"], json_configuration["dataset_configuration"]["column_datatypes"][json_configuration["configuration"]["target"]])
+    X = df.drop(json_configuration["configuration"]["target"], axis=1)
+    y = df[json_configuration["configuration"]["target"]]
     return X, y
 
 def convert_X_and_y_dataframe_to_numpy(X, y):

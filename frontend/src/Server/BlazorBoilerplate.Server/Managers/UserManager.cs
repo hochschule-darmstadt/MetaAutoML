@@ -21,7 +21,7 @@ namespace BlazorBoilerplate.Server.Managers
             var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
             try
             {
-                infoRequest.UserIdentifier = username;
+                infoRequest.UserId = username;
                 var reply = _client.GetHomeOverviewInformation(infoRequest);
                 response = new GetHomeOverviewInformationResponseDto(reply);
                 return new ApiResponse(Status200OK, null, response);
