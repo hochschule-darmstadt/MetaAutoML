@@ -3,7 +3,7 @@ using BlazorBoilerplate.Infrastructure.Server.Models;
 using BlazorBoilerplate.Shared.Dto.Dataset;
 using BlazorBoilerplate.Shared.Dto.Model;
 using BlazorBoilerplate.Shared.Dto.Ontology;
-using BlazorBoilerplate.Shared.Dto.PredictionDataset;
+using BlazorBoilerplate.Shared.Dto.Prediction;
 using BlazorBoilerplate.Storage;
 using Microsoft.Extensions.Caching.Distributed;
 using Newtonsoft.Json;
@@ -14,14 +14,14 @@ using static MudBlazor.CategoryTypes;
 
 namespace BlazorBoilerplate.Server.Managers
 {
-    public class PredictionDatasetManager : IPredictionDatasetManager
+    public class PredictionManager : IPredictionManager
     {
         private readonly ApplicationDbContext _dbContext;
         private readonly ILogger<EmailManager> _logger;
         private readonly ControllerService.ControllerServiceClient _client;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ICacheManager _cacheManager;
-        public PredictionDatasetManager(ApplicationDbContext dbContext, ILogger<EmailManager> logger, ControllerService.ControllerServiceClient client, IHttpContextAccessor httpContextAccessor, ICacheManager cacheManager)
+        public PredictionManager(ApplicationDbContext dbContext, ILogger<EmailManager> logger, ControllerService.ControllerServiceClient client, IHttpContextAccessor httpContextAccessor, ICacheManager cacheManager)
         {
             _dbContext = dbContext;
             _logger = logger;
@@ -30,15 +30,15 @@ namespace BlazorBoilerplate.Server.Managers
             _cacheManager = cacheManager;
         }
 
-        async public Task<ApiResponse> DeletePredictionDataset(DeletePredictionDatasetRequestDto request)
+        async public Task<ApiResponse> DeletePrediction(DeletePredictionRequestDto request)
         {
-            DeletePredictionDatasetRequest deleteDatasetsRequest = new DeletePredictionDatasetRequest();
+            DeletePredictionRequest deleteDatasetsRequest = new DeletePredictionRequest();
             var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
             try
             {
-                deleteDatasetsRequest.PredictionDatasetIdentifier = request.PredictionDatasetIdentifier;
-                deleteDatasetsRequest.UserIdentifier = username;
-                var reply = _client.DeletePredictionDataset(deleteDatasetsRequest);
+                deleteDatasetsRequest.PredictionId = request.PredictionId;
+                deleteDatasetsRequest.UserId = username;
+                var reply = _client.DeletePrediction(deleteDatasetsRequest);
                 return new ApiResponse(Status200OK, null, "");
 
             }
@@ -49,18 +49,19 @@ namespace BlazorBoilerplate.Server.Managers
                 return new ApiResponse(Status404NotFound, ex.Message);
             }
         }
-        async public Task<ApiResponse> GetPredictionDatasetPrediction(GetPredictionDatasetPredictionRequestDto request)
+
+        async public Task<ApiResponse> DownloadPrediction(DownloadPredictionRequestDto request)
         {
-            GetPredictionDatasetPredictionResponseDto response = new GetPredictionDatasetPredictionResponseDto();
-            GetPredictionDatasetRequest getPredictionDatasetRequest = new GetPredictionDatasetRequest();
+            DownloadPredictionResponseDto response = new DownloadPredictionResponseDto();
+            GetPredictionRequest getPredictionDatasetRequest = new GetPredictionRequest();
             var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
             try
             {
-                getPredictionDatasetRequest.UserIdentifier = username;
-                getPredictionDatasetRequest.PredictionDatasetIdentifier = request.PredictionDatasetIdentifier;
-                var reply = _client.GetPredictionDataset(getPredictionDatasetRequest);
+                getPredictionDatasetRequest.UserId = username;
+                getPredictionDatasetRequest.PredictionId = request.PredictionId;
+                var reply = _client.GetPrediction(getPredictionDatasetRequest);
 
-                var predictionPath = reply.PredictionDataset.Predictions[request.ModelIdentifier].Predictions[request.PredictionIdentifier].PredictionPath;
+                var predictionPath = reply.Prediction.PredictionPath;
                 byte[] predictionFile = File.ReadAllBytes(predictionPath);
                 response.Content = predictionFile;
                 response.Name = "predicitons.csv";
@@ -74,17 +75,19 @@ namespace BlazorBoilerplate.Server.Managers
             }
         }
 
-        async public Task<ApiResponse> GetPredictionDataset(GetPredictionDatasetRequestDto request)
+
+        async public Task<ApiResponse> GetPrediction(GetPredictionRequestDto request)
         {
-            GetPredictionDatasetResponseDto response;
-            GetPredictionDatasetRequest getDatasetRequest = new GetPredictionDatasetRequest();
+            GetPredictionResponseDto response;
+            GetPredictionRequest getPredictionDatasetRequest = new GetPredictionRequest();
             var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
             try
             {
-                getDatasetRequest.UserIdentifier = username;
-                getDatasetRequest.PredictionDatasetIdentifier = request.PredictionDatasetIdentifier;
-                var reply = _client.GetPredictionDataset(getDatasetRequest);
-                response = new GetPredictionDatasetResponseDto(new PredictionDatasetDto(reply, await _cacheManager.GetObjectInformation(reply.PredictionDataset.Type)));
+                getPredictionDatasetRequest.UserId = username;
+                getPredictionDatasetRequest.PredictionId = request.PredictionId;
+                var reply = _client.GetPrediction(getPredictionDatasetRequest);
+
+                response = new GetPredictionResponseDto(reply);
 
                 return new ApiResponse(Status200OK, null, response);
 
@@ -96,20 +99,17 @@ namespace BlazorBoilerplate.Server.Managers
             }
         }
 
-        async public Task<ApiResponse> GetPredictionDatasets(GetPredictionDatasetsRequestDto request)
+        async public Task<ApiResponse> GetPredictions(GetPredictionsRequestDto request)
         {
-            GetPredictionDatasetsResponseDto response = new GetPredictionDatasetsResponseDto();
-            GetPredictionDatasetsRequest getDatasetsRequest = new GetPredictionDatasetsRequest();
+            GetPredictionsResponseDto response;
+            GetPredictionsRequest getPredictionsRequest = new GetPredictionsRequest();
             var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
             try
             {
-                getDatasetsRequest.DatasetIdentifier = request.DatasetIdentifier;
-                getDatasetsRequest.UserIdentifier = username;
-                var reply = _client.GetPredictionDatasets(getDatasetsRequest);
-                foreach (PredictionDataset item in reply.PredictionDatasets)
-                {
-                    response.Datasets.Add(new PredictionDatasetDto(item, await _cacheManager.GetObjectInformation(item.Type)));
-                }
+                getPredictionsRequest.ModelId = request.ModelId;
+                getPredictionsRequest.UserId = username;
+                var reply = _client.GetPredictions(getPredictionsRequest);
+                response = new GetPredictionsResponseDto(reply);
                 return new ApiResponse(Status200OK, null, response);
 
             }
@@ -121,9 +121,9 @@ namespace BlazorBoilerplate.Server.Managers
             }
         }
 
-        async public Task<ApiResponse> UploadPredictionDataset(UploadPredictionDatasetRequestDto request)
+        async public Task<ApiResponse> UploadPrediction(UploadPredictionRequestDto request)
         {
-            CreatePredictionDatasetRequest grpcRequest = new CreatePredictionDatasetRequest();
+            CreatePredictionRequest grpcRequest = new CreatePredictionRequest();
             try
             {
                 var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
@@ -153,12 +153,11 @@ namespace BlazorBoilerplate.Server.Managers
                 if (request.ChunkNumber == request.TotalChunkNumber)
                 {
                     fs.Dispose();
-                    grpcRequest.UserIdentifier = username;
-                    grpcRequest.FileName = trustedFileNameForDisplay;
-                    grpcRequest.PredictionDatasetName = request.PredictionDatasetName;
+                    grpcRequest.UserId = username;
+                    grpcRequest.LiveDatasetFileName = trustedFileNameForDisplay;
+                    grpcRequest.ModelId = request.ModelId;
 
-                    grpcRequest.DatasetIdentifier = request.DatasetIdentifier;
-                    var reply = _client.CreatePredictionDataset(grpcRequest);
+                    var reply = _client.CreatePrediction(grpcRequest);
                     return new ApiResponse(Status200OK, null, "");
                 }
                 return new ApiResponse(Status200OK, null, 0);

@@ -48,10 +48,10 @@
                                 <MudText Typo="Typo.body1" Style=" display: flex;">@L["Dataset: "] <MudLink Href="@NavManager.ToAbsoluteUri("datasets/" + @_training.Training.DatasetIdentifier).AbsoluteUri" Style="cursor: pointer; display: flex;"><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.ListAlt" Style="margin-right: 4px;" />@_training.Training.DatasetName</MudLink></MudText>
                                 <MudText Typo="Typo.body1">@L["Start: {0}", _training.Training.StartTime.ToString("dd/MM/yyy HH:mm")]</MudText>
                                 <MudText Typo="Typo.body1">@L["Status: {0}", _model.Model.Status]</MudText>
-                                <MudText Typo="Typo.body1">@L["Total training time: {0}", _model.Model.Runtime]</MudText>
+                                <MudText Typo="Typo.body1">@L["Total training time: {0}", _model.Model.RuntimeProfile]</MudText>
                             </MudItem>
                             <MudItem xs="3" sm="3" md="3">
-                                <MudText Typo="Typo.body1">@L["AutoML solution: {0}", _model.Model.AutoMl.Properties.ContainsKey("skos:prefLabel") ? _model.Model.AutoMl.Properties["skos:prefLabel"] : ""]</MudText>
+                                <MudText Typo="Typo.body1">@L["AutoML solution: {0}", _model.Model.AutoMlSolution.Properties.ContainsKey("skos:prefLabel") ? _model.Model.AutoMlSolution.Properties["skos:prefLabel"] : ""]</MudText>
                                 <MudText Typo="Typo.body1">@L["ML library: {0}", _model.Model.MlLibrary.Properties.ContainsKey("skos:prefLabel") ? _model.Model.MlLibrary.Properties["skos:prefLabel"] : ""]</MudText>
                                 <MudText Typo="Typo.body1">@L["Model: {0}", _model.Model.MlModelType.Properties.ContainsKey("skos:prefLabel") ? _model.Model.MlModelType.Properties["skos:prefLabel"] : ""]</MudText>
                                 <MudText Typo="Typo.body1" Style=" display: flex;">@L["Training: "]<MudLink Href="@NavManager.ToAbsoluteUri("trainings/" + @_training.Training.Identifier).AbsoluteUri" Style="cursor: pointer; display: flex;"><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.ModelTraining" Style="margin-right: 4px;" />@_training.Training.StartTime.ToString("dd/MM/yyy")</MudLink></MudText>
@@ -147,11 +147,11 @@
             //Get Model infos
             if (Id == null)
             {
-                apiResponse = await apiClient.GetModel(new GetModelRequestDto() { ModelIdentifier = ListId });
+                apiResponse = await apiClient.GetModel(new GetModelRequestDto() { ModelId = ListId });
             }
             else
             {
-                apiResponse = await apiClient.GetModel(new GetModelRequestDto() { ModelIdentifier = Id });
+                apiResponse = await apiClient.GetModel(new GetModelRequestDto() { ModelId = Id });
             }
 
             if (apiResponse.IsSuccessStatusCode)
@@ -159,7 +159,7 @@
                 _model = Newtonsoft.Json.JsonConvert.DeserializeObject<GetModelResponseDto>(apiResponse.Result.ToString());
 
                 //Get Training infos
-                apiResponse = await apiClient.GetTraining(new GetTrainingRequestDto() { TrainingIdentifier = _model.Model.TrainingIdentifier });
+                apiResponse = await apiClient.GetTraining(new GetTrainingRequestDto() { TrainingId = _model.Model.TrainingIdentifier });
 
                 if (apiResponse.IsSuccessStatusCode)
                 {

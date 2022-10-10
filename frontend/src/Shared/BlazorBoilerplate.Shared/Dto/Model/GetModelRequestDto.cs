@@ -8,6 +8,6 @@ namespace BlazorBoilerplate.Shared.Dto.Model
 {
     public class GetModelRequestDto
     {
-        public string ModelIdentifier { get; set; }
+        public string ModelId { get; set; }
     }
 }

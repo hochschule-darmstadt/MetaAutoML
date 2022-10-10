@@ -6,7 +6,7 @@ import "Enumerations.proto";
   
 
 message GetHomeOverviewInformationRequest {
-  string userIdentifier = 1;
+  string userId = 1;
 }
 
 message GetHomeOverviewInformationResponse {
@@ -21,5 +21,5 @@ message CreateNewUserRequest {
 }
 
 message CreateNewUserResponse {
-    string userIdentifier = 1; //OmaMlId persisted within the SQL database of blazor AspNetUser Table
+    string userId = 1; //OmaMlId persisted within the SQL database of blazor AspNetUser Table
 }

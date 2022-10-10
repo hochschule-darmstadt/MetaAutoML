@@ -29,13 +29,13 @@ namespace BlazorBoilerplate.Server.Managers
             var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
             try
             {
-                getmodelRequest.UserIdentifier = username;
-                getmodelRequest.DatasetIdentifier = request.DatasetIdentifier;
+                getmodelRequest.UserId = username;
+                getmodelRequest.DatasetId = request.DatasetId;
                 var reply = _client.GetModels(getmodelRequest);
 
                 foreach (var model in reply.Models)
                 {
-                    ModelDto modelDto = new ModelDto(model, await _cacheManager.GetObjectInformation(model.MlModelType), await _cacheManager.GetObjectInformation(model.MlLibrary), await _cacheManager.GetObjectInformation(model.Automl));
+                    ModelDto modelDto = new ModelDto(model, await _cacheManager.GetObjectInformation(model.MlModelType), await _cacheManager.GetObjectInformation(model.MlLibrary), await _cacheManager.GetObjectInformation(model.AutoMlSolution));
                     response.Models.Add(modelDto);
                 }
 
@@ -55,11 +55,11 @@ namespace BlazorBoilerplate.Server.Managers
             var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
             try
             {
-                getmodelRequest.UserIdentifier = username;
-                getmodelRequest.ModelIdentifier = request.ModelIdentifier;
+                getmodelRequest.UserId = username;
+                getmodelRequest.ModelId = request.ModelId;
                 var reply = _client.GetModel(getmodelRequest);
 
-                response.Model = new ModelDto(reply.Model, await _cacheManager.GetObjectInformation(reply.Model.MlModelType), await _cacheManager.GetObjectInformation(reply.Model.MlLibrary), await _cacheManager.GetObjectInformation(reply.Model.Automl));
+                response.Model = new ModelDto(reply.Model, await _cacheManager.GetObjectInformation(reply.Model.MlModelType), await _cacheManager.GetObjectInformation(reply.Model.MlLibrary), await _cacheManager.GetObjectInformation(reply.Model.AutoMlSolution));
                 return new ApiResponse(Status200OK, null, response);
 
             }
@@ -77,8 +77,8 @@ namespace BlazorBoilerplate.Server.Managers
             string controllerDatasetPath = Environment.GetEnvironmentVariable("CONTROLLER_DATASET_FOLDER_PATH");
             try
             {
-                getModelRequest.UserIdentifier = username;
-                getModelRequest.ModelIdentifier = request.ModelIdentifier;
+                getModelRequest.UserId = username;
+                getModelRequest.ModelId = request.ModelId;
                 var reply = _client.GetModel(getModelRequest);
                 var explanation = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(reply.Model.Explanation);
                 int index = 0;
@@ -149,29 +149,6 @@ namespace BlazorBoilerplate.Server.Managers
             }
             return content;
         }
-        public async Task<ApiResponse> ModelPrediction(ModelPredictionRequestDto request)
-        {
-            ModelPredictResponseDto response = new ModelPredictResponseDto();
-            ModelPredictRequest testAutoMLrequest = new ModelPredictRequest();
-            var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
-            try
-            {
-                testAutoMLrequest.UserIdentifier = username;
-                testAutoMLrequest.ModelIdentifier = request.ModelIdentifier;
-                testAutoMLrequest.PredictionDatasetIdentifier = request.PredictionDatasetIdentifier;
-
-                var reply = _client.ModelPredict(testAutoMLrequest);
-
-                //response.Predictions.AddRange(reply.Predictions.ToList());
-                //response.Predictiontime = reply.Predictiontime;
-                return new ApiResponse(Status200OK, null, response);
-            }
-            catch (Exception ex)
-            {
-
-                return new ApiResponse(Status404NotFound, ex.Message);
-            }
-        }
         /// <summary>
         /// Get the result model from a specific AutoML
         /// </summary>
@@ -184,8 +161,8 @@ namespace BlazorBoilerplate.Server.Managers
             var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
             try
             {
-                getmodelRequest.UserIdentifier = username;
-                getmodelRequest.ModelIdentifier = request.ModelIdentifier;
+                getmodelRequest.UserId = username;
+                getmodelRequest.ModelId = request.ModelId;
                 var reply = _client.GetModel(getmodelRequest);
                 //TODO NEW DOWNLOAD FUNCTIONALITY IMPLEMENTATION
                 return new ApiResponse(Status200OK, null, response);
@@ -208,8 +185,8 @@ namespace BlazorBoilerplate.Server.Managers
             var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
             try
             {
-                deleteModelsRequest.ModelIdentifier = request.ModelIdentifier;
-                deleteModelsRequest.UserIdentifier = username;
+                deleteModelsRequest.ModelId = request.ModelId;
+                deleteModelsRequest.UserId = username;
                 var reply = _client.DeleteModel(deleteModelsRequest);
                 return new ApiResponse(Status200OK, null, "");
 

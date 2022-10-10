@@ -24,9 +24,9 @@
                     <MudTh><MudTableSortLabel SortBy="@(new Func<ModelDto, object>(x=>x.MlModelType.Properties["skos:prefLabel"]))">@L["Name"]</MudTableSortLabel></MudTh>
                     <MudTh><MudTableSortLabel SortBy="new Func<ModelDto, object>(x=>x.Status)">@L["Status"]</MudTableSortLabel></MudTh>
                     <MudTh><MudTableSortLabel SortBy="@(new Func<ModelDto, object>(x=>x.MlLibrary.Properties[" skos:prefLabel"]))">@L["Library"]</MudTableSortLabel></MudTh>
-                    <MudTh><MudTableSortLabel SortBy="@(new Func<ModelDto, object>(x=>x.AutoMl.Properties[" skos:prefLabel"]))">@L["AutoML solution"]</MudTableSortLabel></MudTh>
+                    <MudTh><MudTableSortLabel SortBy="@(new Func<ModelDto, object>(x=>x.AutoMlSolution.Properties[" skos:prefLabel"]))">@L["AutoML solution"]</MudTableSortLabel></MudTh>
                     <MudTh><MudTableSortLabel SortBy="new Func<ModelDto, object>(x=>x.TestScore)">@L["Test score"]</MudTableSortLabel></MudTh>
-                    <MudTh><MudTableSortLabel SortBy="new Func<ModelDto, object>(x=>x.Runtime)">@L["Runtime"]</MudTableSortLabel></MudTh>
+                    <MudTh><MudTableSortLabel SortBy="new Func<ModelDto, object>(x=>x.RuntimeProfile)">@L["Runtime"]</MudTableSortLabel></MudTh>
                     <MudTh><MudTableSortLabel SortBy="new Func<ModelDto, object>(x=>x.PredictionTime)">@L["Prediction time"]</MudTableSortLabel></MudTh>
                 </HeaderContent>
                 <RowTemplate>
@@ -41,10 +41,10 @@
                         @(context.MlLibrary.Properties.ContainsKey("skos:prefLabel") ? context.MlLibrary.Properties["skos:prefLabel"] : "")
                     </MudTd>
                     <MudTd>
-                        @(context.AutoMl.Properties.ContainsKey("skos:prefLabel") ? context.AutoMl.Properties["skos:prefLabel"] : "")
+                        @(context.AutoMlSolution.Properties.ContainsKey("skos:prefLabel") ? context.AutoMlSolution.Properties["skos:prefLabel"] : "")
                     </MudTd>
                     <MudTd>@context.TestScore</MudTd>
-                    <MudTd>@context.Runtime</MudTd>
+                    <MudTd>@context.RuntimeProfile</MudTd>
                     <MudTd>@context.PredictionTime</MudTd>
                     <MudTd><ModelMenu Dataset="@context"/></MudTd>
                 </RowTemplate>
@@ -80,7 +80,7 @@
     {
         if (string.IsNullOrWhiteSpace(searchString))
             return true;
-        if (element.AutoMl.Properties["skos:prefLabel"].Contains(searchString, StringComparison.OrdinalIgnoreCase))
+        if (element.AutoMlSolution.Properties["skos:prefLabel"].Contains(searchString, StringComparison.OrdinalIgnoreCase))
             return true;
         if (element.MlLibrary.Properties["skos:prefLabel"].Contains(searchString, StringComparison.OrdinalIgnoreCase))
             return true;

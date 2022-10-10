@@ -2,11 +2,13 @@ syntax = "proto3";
 option csharp_namespace = "BlazorBoilerplate.Server";
 
 import "Enumerations.proto";
+import "PredictionRelatedMessages.proto";
+import "google/protobuf/timestamp.proto";
 
 
 message DeleteModelRequest {
-  string userIdentifier = 1;
-  string modelIdentifier = 2;
+  string userId = 1;
+  string modelId = 2;
 }
 
 message DeleteModelResponse {
@@ -14,8 +16,8 @@ message DeleteModelResponse {
 }
 
 message GetModelsRequest {
-  string userIdentifier = 1;
-  string datasetIdentifier = 2;
+  string userId = 1;
+  string datasetId = 2;
 }
 
 message GetModelsResponse {
@@ -23,8 +25,8 @@ message GetModelsResponse {
 }
 
 message GetModelRequest {
-  string userIdentifier = 1;
-  string modelIdentifier = 2;
+  string userId = 1;
+  string modelId = 2;
 }
 
 message GetModelResponse {
@@ -32,27 +34,22 @@ message GetModelResponse {
 }
 
 message Model {
-  string identifier = 1;
-  string trainingIdentifier = 2;
-  float testScore = 3;
-  int32 runtime = 4;
-  string mlModelType = 5;
-  string mlLibrary = 6;
-  string status = 7;
-  repeated string statusMessages = 8;
-  float predictionTime = 9;
-  string automl = 10;
-  string datasetIdentifier = 11;
-  string explanation = 12;
+  string id = 1;
+  string trainingId = 2;
+  repeated Prediction predictions = 3;
+  string status = 4;
+  string autoMlSolution = 5;
+  string mlModelType = 6;
+  string mlLibrary = 7;
+  string path = 8;
+  float testScore = 9;
+  float predictionTime = 10;
+  ModelruntimeProfile runtimeProfile = 11;
+  repeated string statusMessages = 12;
+  string explanation = 13;
 }
 
-message ModelPredictRequest {
-  string userIdentifier = 1;
-  string predictionDatasetIdentifier = 2;
-  string modelIdentifier = 3;
+message ModelruntimeProfile {
+  google.protobuf.Timestamp startTime = 1;
+  google.protobuf.Timestamp endTime = 2;
 }
-
-message ModelPredictResponse {
-  string modelPredictionIdentifier = 1;
-}
-

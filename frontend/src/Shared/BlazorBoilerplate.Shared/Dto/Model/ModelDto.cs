@@ -6,23 +6,24 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using BlazorBoilerplate.Shared.Dto.Ontology;
+using BlazorBoilerplate.Shared.Dto.Prediction;
 
 namespace BlazorBoilerplate.Shared.Dto.Model
 {
 
     public class ModelDto
     {
-        public string Identifier { get; set; }
-        public string TrainingIdentifier { get; set; }
-        public double TestScore { get; set; }
-        public int Runtime { get; set; }
+        public string Id { get; set; }
+        public string TrainingId { get; set; }
+        public List<PredictionDto> Predictions { get; set; }
+        public string Status { get; set; }
+        public ObjectInfomationDto AutoMlSolution { get; set; }
         public ObjectInfomationDto MlModelType { get; set; }
         public ObjectInfomationDto MlLibrary { get; set; }
-        public string Status { get; set; }
-        public List<string> Messages { get; set; }
+        public double TestScore { get; set; }
         public double PredictionTime { get; set; }
-        public ObjectInfomationDto AutoMl { get; set; }
-        public string DatasetIdentifier { get; set; }
+        public ModelRuntimeProfile RuntimeProfile { get; set; }
+        public List<string> StatusMessages { get; set; }
         public Dictionary<string, dynamic> Explanation { get; set; }
         public ModelDto()
         {
@@ -30,17 +31,21 @@ namespace BlazorBoilerplate.Shared.Dto.Model
         }
         public ModelDto(Server.Model model, ObjectInfomationDto mlModelType, ObjectInfomationDto mlLibrary, ObjectInfomationDto autoMl)
         {
-            Identifier = model.Identifier;
-            TrainingIdentifier = model.TrainingIdentifier;
-            TestScore = model.TestScore;
-            Runtime = model.Runtime;
+            Id = model.Id;
+            TrainingId = model.TrainingId;
+            Predictions = new List<PredictionDto>();
+            foreach (var item in model.Predictions)
+            {
+                Predictions.Add(item);
+            }
+            Status = model.Status;
+            AutoMlSolution = autoMl;
             MlModelType = mlModelType;
             MlLibrary = mlLibrary;
-            Status = model.Status;
-            Messages = model.StatusMessages.ToList();
+            TestScore = model.TestScore;
             PredictionTime = model.PredictionTime;
-            AutoMl = autoMl;
-            DatasetIdentifier = model.DatasetIdentifier;
+            RuntimeProfile = new ModelRuntimeProfile(model.RuntimeProfile);
+            StatusMessages = model.StatusMessages.ToList();
             Explanation = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(model.Explanation);
         }
     }

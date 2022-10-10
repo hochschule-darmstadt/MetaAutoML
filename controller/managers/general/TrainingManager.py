@@ -3,7 +3,7 @@ import threading
 from DataStorage import DataStorage
 from ControllerBGRPC import *
 from DataStorage import DataStorage
-import json, logging, os
+import json, logging, os, datetime
 from AdapterRuntimeScheduler import AdapterRuntimeScheduler
 
 class TrainingManager:
@@ -59,7 +59,11 @@ class TrainingManager:
             "status": "busy",
             "configuration": create_training_request.configuration,
             "dataset_configuration": json.loads(create_training_request.dataset_configuration),
-            "runtime_profile": create_training_request.runtime_profile
+            "runtime_profile": {
+                "start_time": datetime.datetime.now(),
+                "events": [],
+                "end_time": ""
+            }
         }
         
         training_id = self.__data_storage.create_training(create_training_request.user_id, config)

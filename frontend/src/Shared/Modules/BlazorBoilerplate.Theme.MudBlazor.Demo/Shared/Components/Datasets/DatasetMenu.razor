@@ -24,7 +24,7 @@
         {
             DeleteDatasetRequestDto datasetRequest = new DeleteDatasetRequestDto()
             {
-                DatasetIdentifier = Dataset.Identifier
+                DatasetId = Dataset.Identifier
             };
             ApiResponseDto apiResponse = await apiClient.DeleteDataset(datasetRequest);
 

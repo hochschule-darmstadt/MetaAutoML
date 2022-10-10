@@ -97,7 +97,7 @@ else
     {
         try
         {
-            ApiResponseDto apiResponse = await apiClient.GetTabularDatasetColumn(new GetTabularDatasetColumnRequestDto { DatasetIdentifier = Dataset.Dataset.Identifier });
+            ApiResponseDto apiResponse = await apiClient.GetTabularDatasetColumn(new GetTabularDatasetColumnRequestDto { DatasetId = Dataset.Dataset.Identifier });
 
             if (apiResponse.IsSuccessStatusCode)
             {
@@ -123,7 +123,7 @@ else
                     }
                     StartAutoMlRequest.DatasetConfiguration.Add("features", features);
                 }
-                StartAutoMlRequest.DatasetIdentifier = Dataset.Dataset.Identifier;
+                StartAutoMlRequest.DatasetId = Dataset.Dataset.Identifier;
                 await LoadDatasetPreview();
                 await UpdateStartAutoMlRequest();
             }
@@ -149,7 +149,7 @@ else
             isPreviewRequestRunning = true;
             GetDatasetPreviewRequestDto datasetRequest = new GetDatasetPreviewRequestDto()
             {
-                    DatasetIdentifier = Dataset.Dataset.Identifier
+                    DatasetId = Dataset.Dataset.Identifier
             };
             ApiResponseDto apiResponse = await apiClient.GetDatasetPreview(datasetRequest);
 

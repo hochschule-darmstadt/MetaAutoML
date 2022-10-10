@@ -27,18 +27,18 @@
                                     AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
                     </ToolBarContent>
                     <HeaderContent>
-                        <MudTh><MudTableSortLabel SortBy="@(new Func<ModelDto, object>(x=>x.AutoMl.Properties["skos:prefLabel"]))">@L["AutoML solution"]</MudTableSortLabel></MudTh>
+                        <MudTh><MudTableSortLabel SortBy="@(new Func<ModelDto, object>(x=>x.AutoMlSolution.Properties["skos:prefLabel"]))">@L["AutoML solution"]</MudTableSortLabel></MudTh>
                         <MudTh><MudTableSortLabel SortBy="new Func<ModelDto, object>(x=>x.Status)">@L["Status"]</MudTableSortLabel></MudTh>
                         <MudTh><MudTableSortLabel SortBy="@(new Func<ModelDto, object>(x=>x.MlModelType.Properties["skos:prefLabel"]))">@L["Model"]</MudTableSortLabel></MudTh>
                         <MudTh><MudTableSortLabel SortBy="@(new Func<ModelDto, object>(x=>x.MlLibrary.Properties["skos:prefLabel"]))">@L["Library"]</MudTableSortLabel></MudTh>
                         <MudTh><MudTableSortLabel SortBy="new Func<ModelDto, object>(x=>x.TestScore)">@L["Test score"]</MudTableSortLabel></MudTh>
                         <MudTh><MudTableSortLabel SortBy="new Func<ModelDto, object>(x=>x.PredictionTime)">@L["Prediction time per sample"]</MudTableSortLabel></MudTh>
-                        <MudTh><MudTableSortLabel SortBy="new Func<ModelDto, object>(x=>x.Runtime)">@L["Total training time"]</MudTableSortLabel></MudTh>
+                        <MudTh><MudTableSortLabel SortBy="new Func<ModelDto, object>(x=>x.RuntimeProfile)">@L["Total training time"]</MudTableSortLabel></MudTh>
                         <MudTh></MudTh>
                     </HeaderContent>
                     <RowTemplate>
                         <MudTd>
-                            @(models.AutoMl.Properties.ContainsKey("skos:prefLabel") ? models.AutoMl.Properties["skos:prefLabel"] : "")
+                            @(models.AutoMlSolution.Properties.ContainsKey("skos:prefLabel") ? models.AutoMlSolution.Properties["skos:prefLabel"] : "")
                         </MudTd>
                         <MudTd>
                             @if (models.Status == "busy")
@@ -56,7 +56,7 @@
                             <MudTd>@(models.MlLibrary.Properties.ContainsKey("skos:prefLabel") ? models.MlLibrary.Properties["skos:prefLabel"] : "")</MudTd>
                         <MudTd>@(String.Format("{0:0.00}", models.TestScore))</MudTd>
                         <MudTd>@(String.Format("{0:0}", models.PredictionTime)) ms</MudTd>
-                        <MudTd>@models.Runtime s</MudTd>
+                        <MudTd>@models.RuntimeProfile s</MudTd>
                         <MudTd><TrainingMenu TrainingId="@Training.Training.Identifier"></TrainingMenu></MudTd>
                     </RowTemplate>
                     <PagerContent>
@@ -101,7 +101,7 @@
     {
         if (string.IsNullOrWhiteSpace(searchString))
             return true;
-        if (element.AutoMl.Properties["skos:prefLabel"].Contains(searchString, StringComparison.OrdinalIgnoreCase))
+        if (element.AutoMlSolution.Properties["skos:prefLabel"].Contains(searchString, StringComparison.OrdinalIgnoreCase))
             return true;
         if (element.Status.Contains(searchString, StringComparison.OrdinalIgnoreCase))
             return true;
@@ -127,7 +127,7 @@
                     DisposeTimer();
                 }
                 
-                ApiResponseDto apiResponse = await apiClient.GetTraining(new GetTrainingRequestDto { TrainingIdentifier = Training.Training.Identifier });
+                ApiResponseDto apiResponse = await apiClient.GetTraining(new GetTrainingRequestDto { TrainingId = Training.Training.Identifier });
 
                 if (apiResponse.IsSuccessStatusCode)
                 {

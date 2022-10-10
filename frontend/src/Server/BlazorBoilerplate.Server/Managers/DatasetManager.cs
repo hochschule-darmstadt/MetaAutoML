@@ -78,7 +78,7 @@ namespace BlazorBoilerplate.Server.Managers
                 if (request.ChunkNumber == request.TotalChunkNumber)
                 {
                     fs.Dispose();
-                    grpcRequest.UserIdentifier = username;
+                    grpcRequest.UserId = username;
                     grpcRequest.FileName = trustedFileNameForDisplay;
                     grpcRequest.DatasetName = request.DatasetName;
 
@@ -106,7 +106,7 @@ namespace BlazorBoilerplate.Server.Managers
             try
             {
                 getDatasetsRequest.Type = "";
-                getDatasetsRequest.UserIdentifier = username;
+                getDatasetsRequest.UserId = username;
                 var reply = _client.GetDatasets(getDatasetsRequest);
                 foreach (Dataset item in reply.Datasets)
                 {
@@ -135,8 +135,8 @@ namespace BlazorBoilerplate.Server.Managers
             var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
             try
             {
-                getDatasetRequest.UserIdentifier = username;
-                getDatasetRequest.DatasetIdentifier = request.DatasetIdentifier;
+                getDatasetRequest.UserId = username;
+                getDatasetRequest.DatasetId = request.DatasetId;
                 var reply = _client.GetDataset(getDatasetRequest);
                 response = new GetDatasetResponseDto(new DatasetDto(reply, await _cacheManager.GetObjectInformation(reply.Dataset.Type)));
 
@@ -162,10 +162,10 @@ namespace BlazorBoilerplate.Server.Managers
             string controllerDatasetPath = Environment.GetEnvironmentVariable("CONTROLLER_DATASET_FOLDER_PATH");
             try
             {
-                getDatasetRequest.UserIdentifier = username;
-                getDatasetRequest.DatasetIdentifier = request.DatasetIdentifier;
+                getDatasetRequest.UserId = username;
+                getDatasetRequest.DatasetId = request.DatasetId;
                 var reply = _client.GetDataset(getDatasetRequest);
-                string datasetLocation = Path.Combine(controllerDatasetPath, username, reply.Dataset.Identifier, reply.Dataset.FileName);
+                string datasetLocation = reply.Dataset.Path;
                 switch (reply.Dataset.Type)
                 {
                     case ":tabular":
@@ -223,8 +223,8 @@ namespace BlazorBoilerplate.Server.Managers
             var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
             try
             {
-                getColumnNamesRequest.UserIdentifier = username;
-                getColumnNamesRequest.DatasetIdentifier = request.DatasetIdentifier;
+                getColumnNamesRequest.UserId = username;
+                getColumnNamesRequest.DatasetId = request.DatasetId;
                 var reply = _client.GetTabularDatasetColumn(getColumnNamesRequest);
                 foreach (var item in reply.Columns.ToList())
                 {
@@ -251,8 +251,8 @@ namespace BlazorBoilerplate.Server.Managers
             var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
             try
             {
-                grpcRequest.UserIdentifier = username;
-                grpcRequest.DatasetIdentifier = request.DatasetIdentifier;
+                grpcRequest.UserId = username;
+                grpcRequest.DatasetId = request.DatasetId;
                 grpcRequest.FileConfiguration = JsonConvert.SerializeObject(request.Configuration);
                 var reply = _client.SetDatasetFileConfiguration(grpcRequest);
                 return new ApiResponse(Status200OK, null, "");
@@ -271,8 +271,8 @@ namespace BlazorBoilerplate.Server.Managers
             string controllerDatasetPath = Environment.GetEnvironmentVariable("CONTROLLER_DATASET_FOLDER_PATH");
             try
             {
-                getDatasetRequest.UserIdentifier = username;
-                getDatasetRequest.DatasetIdentifier = request.DatasetIdentifier;
+                getDatasetRequest.UserId = username;
+                getDatasetRequest.DatasetId = request.DatasetId;
                 var reply = _client.GetDataset(getDatasetRequest);
                 var analysis = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(reply.Dataset.Analysis);
                 int index = 0;
@@ -362,8 +362,8 @@ namespace BlazorBoilerplate.Server.Managers
             var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
             try
             {
-                deleteDatasetsRequest.DatasetIdentifier = request.DatasetIdentifier;
-                deleteDatasetsRequest.UserIdentifier = username;
+                deleteDatasetsRequest.DatasetId = request.DatasetId;
+                deleteDatasetsRequest.UserId = username;
                 var reply = _client.DeleteDataset(deleteDatasetsRequest);
                 return new ApiResponse(Status200OK, null, "");
 

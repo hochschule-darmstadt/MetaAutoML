@@ -1,4 +1,4 @@
-using BlazorBoilerplate.Shared.Dto.PredictionDataset;
+using BlazorBoilerplate.Shared.Dto.Prediction;
 using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;

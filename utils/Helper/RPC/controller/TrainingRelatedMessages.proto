@@ -69,11 +69,8 @@ message StrategyControllerEvent {
 message CreateTrainingRequest {
   string userId = 1;
   string datasetId = 2;
-  repeated Model models = 3;
-  string status = 4;
-  Configuration configuration = 5;
-  string datasetConfiguration = 6;
-  TrainingRuntimeProfile RuntimeProfile = 7;
+  Configuration configuration = 3;
+  string datasetConfiguration = 4;
 }
 
 

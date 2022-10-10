@@ -1,5 +1,5 @@
 ﻿using BlazorBoilerplate.Shared.Dto.Dataset;
-using BlazorBoilerplate.Shared.Dto.PredictionDataset;
+using BlazorBoilerplate.Shared.Dto.Prediction;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using System;
@@ -14,7 +14,7 @@ namespace BlazorBoilerplate.Shared.Interfaces
     {
         Task UploadDataset();
         UploadDatasetRequestDto UploadDatasetRequest { get; set; }
-        UploadPredictionDatasetRequestDto UploadPredictionDatasetRequest { get; set; }
+        UploadPredictionRequestDto UploadPredictionDatasetRequest { get; set; }
         IBrowserFile UploadFileContent { get; set; }
         bool IsUploading { get; set; }
         Action OnUploadChangedCallback { get; set; }

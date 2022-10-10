@@ -123,7 +123,7 @@
     }
     private string _datasetIdentifier;
 
-    private GetPredictionDatasetsResponseDto _predictionDatasets;
+    private GetPredictionsResponseDto _predictionDatasets;
     private ModelPredictResponseDto _modelPrediction;
     private bool _downloadReady = true;
     private ModelPredictResponseDto _predictionResult;
@@ -141,10 +141,10 @@
         try
         {
 
-            ApiResponseDto apiResponse = await apiClient.GetPredictionDatasets(new GetPredictionDatasetsRequestDto { DatasetIdentifier = _datasetIdentifier });
+            ApiResponseDto apiResponse = await apiClient.GetPredictionDatasets(new GetPredictionsRequestDto { ModelId = _datasetIdentifier });
             if (apiResponse.IsSuccessStatusCode)
             {
-                _predictionDatasets = Newtonsoft.Json.JsonConvert.DeserializeObject<GetPredictionDatasetsResponseDto>(apiResponse.Result.ToString());
+                _predictionDatasets = Newtonsoft.Json.JsonConvert.DeserializeObject<GetPredictionsResponseDto>(apiResponse.Result.ToString());
                 StateHasChanged();
             }
             else
@@ -183,10 +183,10 @@
     {
         try
         {
-            ApiResponseDto apiResponse = await apiClient.GetPredictionDatasetPrediction(new GetPredictionDatasetPredictionRequestDto() { PredictionDatasetIdentifier = predictionDataset.Identifier, ModelIdentifier=_model.Model.Identifier, PredictionIdentifier = predictionDataset.Predictions[_model.Model.Identifier].Predictions.ElementAt(0).Key });
+            ApiResponseDto apiResponse = await apiClient.GetPredictionDatasetPrediction(new DownloadPredictionRequestDto() { PredictionDatasetIdentifier = predictionDataset.Identifier, ModelIdentifier=_model.Model.Identifier, PredictionIdentifier = predictionDataset.Predictions[_model.Model.Identifier].Predictions.ElementAt(0).Key });
             if (apiResponse.IsSuccessStatusCode)
             {
-                GetPredictionDatasetPredictionResponseDto response = Newtonsoft.Json.JsonConvert.DeserializeObject<GetPredictionDatasetPredictionResponseDto>(apiResponse.Result.ToString());
+                DownloadPredictionResponseDto response = Newtonsoft.Json.JsonConvert.DeserializeObject<DownloadPredictionResponseDto>(apiResponse.Result.ToString());
 
                 var stream = new MemoryStream(response.Content);
                 using var streamRef = new DotNetStreamReference(stream: stream);

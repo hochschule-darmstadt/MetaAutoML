@@ -4,7 +4,7 @@ using BlazorBoilerplate.Shared.Dto.Db;
 using BlazorBoilerplate.Shared.Dto.Email;
 using BlazorBoilerplate.Shared.Dto.Model;
 using BlazorBoilerplate.Shared.Dto.Ontology;
-using BlazorBoilerplate.Shared.Dto.PredictionDataset;
+using BlazorBoilerplate.Shared.Dto.Prediction;
 using BlazorBoilerplate.Shared.Dto.Training;
 using BlazorBoilerplate.Shared.Models;
 using Breeze.Sharp;
@@ -72,11 +72,11 @@ namespace BlazorBoilerplate.Shared.Interfaces
         #endregion
 
         #region OMA-ML PREDICTION DATASET MESSAGES
-        Task<ApiResponseDto> UploadPredictionDataset(UploadPredictionDatasetRequestDto request);
-        Task<ApiResponseDto> GetPredictionDatasetPrediction(GetPredictionDatasetPredictionRequestDto request);
-        Task<ApiResponseDto> GetPredictionDatasets(GetPredictionDatasetsRequestDto request);
+        Task<ApiResponseDto> UploadPredictionDataset(UploadPredictionRequestDto request);
+        Task<ApiResponseDto> GetPredictionDatasetPrediction(DownloadPredictionRequestDto request);
+        Task<ApiResponseDto> GetPredictionDatasets(GetPredictionsRequestDto request);
         Task<ApiResponseDto> GetPredictionDataset(GetPredictionDatasetRequestDto request);
-        Task<ApiResponseDto> DeletePredictionDataset(DeletePredictionDatasetRequestDto request);
+        Task<ApiResponseDto> DeletePredictionDataset(DeletePredictionRequestDto request);
         #endregion
 
     }

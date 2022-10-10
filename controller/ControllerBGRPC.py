@@ -145,7 +145,7 @@ class GetPredictionResponse(betterproto.Message):
 @dataclass(eq=False, repr=False)
 class GetPredictionsRequest(betterproto.Message):
     user_id: str = betterproto.string_field(1)
-    prediction_id: str = betterproto.string_field(2)
+    model_id: str = betterproto.string_field(2)
 
 
 @dataclass(eq=False, repr=False)
@@ -308,11 +308,8 @@ class StrategyControllerEvent(betterproto.Message):
 class CreateTrainingRequest(betterproto.Message):
     user_id: str = betterproto.string_field(1)
     dataset_id: str = betterproto.string_field(2)
-    models: List["Model"] = betterproto.message_field(3)
-    status: str = betterproto.string_field(4)
-    configuration: "Configuration" = betterproto.message_field(5)
-    dataset_configuration: str = betterproto.string_field(6)
-    runtime_profile: "TrainingRuntimeProfile" = betterproto.message_field(7)
+    configuration: "Configuration" = betterproto.message_field(3)
+    dataset_configuration: str = betterproto.string_field(4)
 
 
 @dataclass(eq=False, repr=False)

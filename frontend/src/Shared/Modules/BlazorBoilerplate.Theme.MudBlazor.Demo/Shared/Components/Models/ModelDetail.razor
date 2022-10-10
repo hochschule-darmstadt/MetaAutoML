@@ -28,7 +28,7 @@
                 <div style="height:250px;overflow: auto;">
                     <MudPaper Elevation="0">
                         <MudStack>
-                            @foreach (var item in Model.Model.Messages)
+                            @foreach (var item in Model.Model.StatusMessages)
                             {
                                 <MudText Typo="Typo.body1">@item</MudText>
                             }

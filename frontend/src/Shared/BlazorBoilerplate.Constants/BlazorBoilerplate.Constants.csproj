@@ -6,6 +6,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Protos\PredictionRelatedMessages.proto" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Deedle" Version="2.5.0" />
     <PackageReference Include="Google.Protobuf" Version="3.21.2" />
     <PackageReference Include="Grpc.Net.Client" Version="2.47.0" />
@@ -24,6 +28,6 @@
 		<Protobuf Include="Protos/OntologyRelatedMessages.proto" GrpcServices="Client" ProtoRoot="Protos\" />
 		<Protobuf Include="Protos/TrainingRelatedMessages.proto" GrpcServices="Client" ProtoRoot="Protos\" />
 		<Protobuf Include="Protos/UserRelatedMessages.proto" GrpcServices="Client" ProtoRoot="Protos\" />
-		<Protobuf Include="Protos/PredictionDatasetRelatedMessages.proto" GrpcServices="Client" ProtoRoot="Protos\" />
+		<Protobuf Include="Protos\PredictionRelatedMessages.proto" GrpcServices="Client" ProtoRoot="Protos\" />
 	</ItemGroup>
 </Project>

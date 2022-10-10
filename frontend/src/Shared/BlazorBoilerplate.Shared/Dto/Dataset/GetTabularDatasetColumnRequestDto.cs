@@ -8,6 +8,6 @@ namespace BlazorBoilerplate.Shared.Dto.Dataset
 {
     public class GetTabularDatasetColumnRequestDto
     {
-        public string DatasetIdentifier { get; set; }
+        public string DatasetId { get; set; }
     }
 }

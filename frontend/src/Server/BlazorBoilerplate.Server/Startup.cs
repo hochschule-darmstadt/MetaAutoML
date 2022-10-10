@@ -157,7 +157,7 @@ namespace BlazorBoilerplate.Server
             services.AddTransient<ITrainingManager, TrainingManager>();
             services.AddTransient<ICacheManager, CacheManager>();
             services.AddTransient<IModelManager, ModelManager>();
-            services.AddTransient<IPredictionDatasetManager, PredictionDatasetManager>();
+            services.AddTransient<IPredictionManager, PredictionManager>();
             services.AddScoped<IUserInformation, GeneralInformationManager>();
 
             services.AddScoped<IFileUploader, FileUploader>();

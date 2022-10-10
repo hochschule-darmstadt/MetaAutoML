@@ -61,7 +61,7 @@ else
     protected async override void OnInitialized()
     {
         _automlRequest = new CreateTrainingRequestDto();
-        _automlRequest.DatasetIdentifier = Id;
+        _automlRequest.DatasetId = Id;
         await LoadDataset();
         _breadcrumbs.Add(new BreadcrumbItem(L["Home"], "/", false, Icons.Filled.Home));
         _breadcrumbs.Add(new BreadcrumbItem(L["Datasets"], "/datasets", false, Icons.Filled.ListAlt));
@@ -76,7 +76,7 @@ else
         {
             GetDatasetRequestDto datasetRequest = new GetDatasetRequestDto()
                 {
-                    DatasetIdentifier = Id
+                    DatasetId = Id
                 };
             ApiResponseDto apiResponse = await apiClient.GetDataset(datasetRequest);
 

@@ -39,9 +39,9 @@
                     </HeaderContent>
                     <RowTemplate>
                         <MudTd>
-                            @if (context.AutoMl.Properties.ContainsKey("skos:prefLabel"))
+                            @if (context.AutoMlSolution.Properties.ContainsKey("skos:prefLabel"))
                             {
-                                @context.AutoMl.Properties["skos:prefLabel"]
+                                @context.AutoMlSolution.Properties["skos:prefLabel"]
                             }
                         </MudTd>
                         <MudTd>
@@ -62,7 +62,7 @@
                         </MudTd>
                         <MudTd >@String.Format("{0:0.00}", context.TestScore)</MudTd>
                         <MudTd >@String.Format("{0:0}", context.PredictionTime) ms</MudTd>
-                        <MudTd >@context.Runtime s</MudTd>
+                        <MudTd >@context.RuntimeProfile s</MudTd>
                     </RowTemplate>
                 </MudTable>
             }
@@ -94,7 +94,7 @@
     {
         try
         {
-            ApiResponseDto apiResponse = await apiClient.GetModels(new GetModelsRequestDto() { DatasetIdentifier = Dataset.Dataset.Identifier, Top3 = true });
+            ApiResponseDto apiResponse = await apiClient.GetModels(new GetModelsRequestDto() { DatasetId = Dataset.Dataset.Identifier, Top3 = true });
 
             if (apiResponse.IsSuccessStatusCode)
             {

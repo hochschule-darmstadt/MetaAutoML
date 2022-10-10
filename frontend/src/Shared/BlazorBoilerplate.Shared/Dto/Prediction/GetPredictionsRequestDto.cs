@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BlazorBoilerplate.Shared.Dto.Model
+namespace BlazorBoilerplate.Shared.Dto.Prediction
 {
-    public class DeleteModelRequestDto
+    public class GetPredictionsRequestDto
     {
         public string ModelId { get; set; }
     }

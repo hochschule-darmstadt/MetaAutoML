@@ -8,6 +8,6 @@ namespace BlazorBoilerplate.Shared.Dto.Training
 {
     public class DeleteTrainingRequestDto
     {
-        public string TrainingIdentifier { get; set; }
+        public string TrainingId { get; set; }
     }
 }

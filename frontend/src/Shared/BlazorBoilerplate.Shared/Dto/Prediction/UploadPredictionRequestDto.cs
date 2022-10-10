@@ -8,13 +8,12 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BlazorBoilerplate.Shared.Dto.PredictionDataset
+namespace BlazorBoilerplate.Shared.Dto.Prediction
 {
-    public class UploadPredictionDatasetRequestDto
+    public class UploadPredictionRequestDto
     {
         public string FileName { get; set; }
-        public string PredictionDatasetName { get; set; }
-        public string DatasetIdentifier { get; set; }
+        public string ModelId { get; set; }
         public byte[] Content { get; set; }
         public int ChunkNumber { get; set; }
         public int TotalChunkNumber { get; set; }

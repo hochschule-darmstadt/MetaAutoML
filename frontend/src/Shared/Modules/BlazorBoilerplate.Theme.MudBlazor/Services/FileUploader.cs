@@ -11,7 +11,7 @@ using BlazorBoilerplate.Shared.Localizer;
 using Microsoft.Extensions.Localization;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Components;
-using BlazorBoilerplate.Shared.Dto.PredictionDataset;
+using BlazorBoilerplate.Shared.Dto.Prediction;
 
 namespace BlazorBoilerplate.Theme.Material.Services
 {
@@ -27,7 +27,7 @@ namespace BlazorBoilerplate.Theme.Material.Services
             L = L;
         }
         public UploadDatasetRequestDto UploadDatasetRequest { get; set; }
-        public UploadPredictionDatasetRequestDto UploadPredictionDatasetRequest { get; set; }
+        public UploadPredictionRequestDto UploadPredictionDatasetRequest { get; set; }
         public IBrowserFile UploadFileContent { get; set; }
         public bool IsUploading { get; set; } = false;
         public Action OnUploadChangedCallback { get; set; }

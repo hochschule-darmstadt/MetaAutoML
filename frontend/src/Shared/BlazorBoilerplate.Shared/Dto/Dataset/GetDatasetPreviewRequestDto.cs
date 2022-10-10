@@ -8,7 +8,7 @@ namespace BlazorBoilerplate.Shared.Dto.Dataset
 {
     public class GetDatasetPreviewRequestDto
     {
-        public string DatasetIdentifier { get; set; }
+        public string DatasetId { get; set; }
 
     }
 }

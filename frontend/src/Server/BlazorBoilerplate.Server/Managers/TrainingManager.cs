@@ -2,7 +2,9 @@
 using BlazorBoilerplate.Infrastructure.Server.Models;
 using BlazorBoilerplate.Shared.Dto.Model;
 using BlazorBoilerplate.Shared.Dto.Training;
+using BlazorBoilerplate.Theme.Material.Demo.Pages;
 using Newtonsoft.Json;
+using Org.BouncyCastle.Tls;
 using static Microsoft.AspNetCore.Http.StatusCodes;
 
 namespace BlazorBoilerplate.Server.Managers
@@ -32,25 +34,25 @@ namespace BlazorBoilerplate.Server.Managers
             var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
             try
             {
-                createTrainingRequest.UserIdentifier = username;
-                createTrainingRequest.DatasetIdentifier = request.DatasetIdentifier;
-                createTrainingRequest.Task = request.Task;
-                createTrainingRequest.Configuration = JsonConvert.SerializeObject(request.Configuration);
-
-                foreach (var i in request.SelectedAutoMLs)
+                createTrainingRequest.UserId = username;
+                createTrainingRequest.DatasetId = request.DatasetId;
+                createTrainingRequest.Configuration = new Configuration();
+                createTrainingRequest.Configuration.Task = request.Configuration.Task.ID;
+                createTrainingRequest.Configuration.Target = request.Configuration.Target;
+                createTrainingRequest.Configuration.EnabledStrategies.AddRange(request.Configuration.EnabledStrategies);
+                createTrainingRequest.Configuration.RuntimeLimit = request.Configuration.RuntimeLimit;
+                createTrainingRequest.Configuration.Metric = request.Configuration.Metric.ID;
+                foreach (var item in request.Configuration.SelectedAutoMlSolutions)
                 {
-                    createTrainingRequest.SelectedAutoMls.Add(i);
+                    createTrainingRequest.Configuration.SelectedAutoMlSolutions.Add(item.ID);
                 }
-                createTrainingRequest.RuntimeConstraints = JsonConvert.SerializeObject(request.RuntimeConstraints);
+                foreach (var item in request.Configuration.SelecctedMlLibraries)
+                {
+                    createTrainingRequest.Configuration.SelectedMlLibraries.Add(item.ID);
+                }
                 createTrainingRequest.DatasetConfiguration = JsonConvert.SerializeObject(request.DatasetConfiguration);
-                createTrainingRequest.TestConfiguration = JsonConvert.SerializeObject(request.TestConfiguration);
-                createTrainingRequest.Metric = request.Metric;
-                foreach (var i in request.SelectedMlLibraries)
-                {
-                    createTrainingRequest.SelectedLibraries.Add(i);
-                }
                 var reply = _client.CreateTraining(createTrainingRequest);
-                return new ApiResponse(Status200OK, null, new CreateTrainingResponseDto(reply.TrainingIdentifier));
+                return new ApiResponse(Status200OK, null, new CreateTrainingResponseDto(reply.TrainingId));
 
             }
             catch (Exception ex)
@@ -71,21 +73,33 @@ namespace BlazorBoilerplate.Server.Managers
             var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
             try
             {
-                getTrainings.UserIdentifier = username;
+                getTrainings.UserId = username;
                 var reply = _client.GetTrainings(getTrainings);
                 foreach (var training in reply.Trainings)
                 {
-                    TrainingDto trainingDto = new TrainingDto(training, await _cacheManager.GetObjectInformation(training.Task));
+                    TrainingDto trainingDto = new TrainingDto(training);
+                    trainingDto.Configuration.Task = await _cacheManager.GetObjectInformation(training.Configuration.Task);
+                    trainingDto.Configuration.Target = training.Configuration.Target;
+                    trainingDto.Configuration.EnabledStrategies.AddRange(training.Configuration.EnabledStrategies);
+                    trainingDto.Configuration.RuntimeLimit = training.Configuration.RuntimeLimit;
+                    trainingDto.Configuration.Metric = await _cacheManager.GetObjectInformation(training.Configuration.Metric);
+                    foreach (var item in training.Configuration.SelectedAutoMlSolutions)
+                    {
+                        trainingDto.Configuration.SelectedAutoMlSolutions.Add(await _cacheManager.GetObjectInformation(item));
+                    }
+                    foreach (var item in training.Configuration.SelectedMlLibraries)
+                    {
+                        trainingDto.Configuration.SelecctedMlLibraries.Add(await _cacheManager.GetObjectInformation(item));
+                    }
+
                     foreach (var model in training.Models)
                     {
                         ModelDto modelDto = new ModelDto(model, 
                             (model.MlModelType == "" ? new Shared.Dto.Ontology.ObjectInfomationDto() :  await _cacheManager.GetObjectInformation(model.MlModelType)),
                             (model.MlLibrary == "" ? new Shared.Dto.Ontology.ObjectInfomationDto() : await _cacheManager.GetObjectInformation(model.MlLibrary)),
-                            (model.Automl == "" ? new Shared.Dto.Ontology.ObjectInfomationDto() : await _cacheManager.GetObjectInformation(model.Automl)));
+                            (model.AutoMlSolution == "" ? new Shared.Dto.Ontology.ObjectInfomationDto() : await _cacheManager.GetObjectInformation(model.AutoMlSolution)));
                         trainingDto.models.Add(modelDto);
                     }
-                    trainingDto.SelectedMlLibraries = await _cacheManager.GetObjectInformationList(training.SelectedMlLibraries.ToList());
-                    trainingDto.SelectedAutoMls = await _cacheManager.GetObjectInformationList(training.SelectedAutoMls.ToList());
                     response.Trainings.Add(trainingDto);
                 }
                 return new ApiResponse(Status200OK, null, response);
@@ -109,22 +123,34 @@ namespace BlazorBoilerplate.Server.Managers
             var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
             try
             {
-                getTrainingRequest.UserIdentifier = username;
-                getTrainingRequest.TrainingIdentifier = request.TrainingIdentifier;
+                getTrainingRequest.UserId = username;
+                getTrainingRequest.TrainingId = request.TrainingId;
                 GetTrainingResponse reply = _client.GetTraining(getTrainingRequest);
-                response = new GetTrainingResponseDto(new TrainingDto(reply.Training, await _cacheManager.GetObjectInformation(reply.Training.Task)));
+
+                TrainingDto trainingDto = new TrainingDto(reply.Training);
+                trainingDto.Configuration.Task = await _cacheManager.GetObjectInformation(reply.Training.Configuration.Task);
+                trainingDto.Configuration.Target = reply.Training.Configuration.Target;
+                trainingDto.Configuration.EnabledStrategies.AddRange(reply.Training.Configuration.EnabledStrategies);
+                trainingDto.Configuration.RuntimeLimit = reply.Training.Configuration.RuntimeLimit;
+                trainingDto.Configuration.Metric = await _cacheManager.GetObjectInformation(reply.Training.Configuration.Metric);
+                foreach (var item in reply.Training.Configuration.SelectedAutoMlSolutions)
+                {
+                    trainingDto.Configuration.SelectedAutoMlSolutions.Add(await _cacheManager.GetObjectInformation(item));
+                }
+                foreach (var item in reply.Training.Configuration.SelectedMlLibraries)
+                {
+                    trainingDto.Configuration.SelecctedMlLibraries.Add(await _cacheManager.GetObjectInformation(item));
+                }
+
                 foreach (var model in reply.Training.Models)
                 {
                     ModelDto modelDto = new ModelDto(model,
-                            (model.MlModelType == "" ? new Shared.Dto.Ontology.ObjectInfomationDto() : await _cacheManager.GetObjectInformation(model.MlModelType)),
-                            (model.MlLibrary == "" ? new Shared.Dto.Ontology.ObjectInfomationDto() : await _cacheManager.GetObjectInformation(model.MlLibrary)),
-                            (model.Automl == "" ? new Shared.Dto.Ontology.ObjectInfomationDto() : await _cacheManager.GetObjectInformation(model.Automl)));
-                    response.Training.models.Add(modelDto);
+                        (model.MlModelType == "" ? new Shared.Dto.Ontology.ObjectInfomationDto() : await _cacheManager.GetObjectInformation(model.MlModelType)),
+                        (model.MlLibrary == "" ? new Shared.Dto.Ontology.ObjectInfomationDto() : await _cacheManager.GetObjectInformation(model.MlLibrary)),
+                        (model.AutoMlSolution == "" ? new Shared.Dto.Ontology.ObjectInfomationDto() : await _cacheManager.GetObjectInformation(model.AutoMlSolution)));
+                    trainingDto.models.Add(modelDto);
                 }
-                response.Training.SelectedMlLibraries = await _cacheManager.GetObjectInformationList(reply.Training.SelectedMlLibraries.ToList());
-                response.Training.SelectedAutoMls = await _cacheManager.GetObjectInformationList(reply.Training.SelectedAutoMls.ToList());
-
-
+                response = new GetTrainingResponseDto(trainingDto);
                 return new ApiResponse(Status200OK, null, response);
 
             }
@@ -144,8 +170,8 @@ namespace BlazorBoilerplate.Server.Managers
             var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
             try
             {
-                deleteTrainingsRequest.TrainingIdentifier = request.TrainingIdentifier;
-                deleteTrainingsRequest.UserIdentifier = username;
+                deleteTrainingsRequest.TrainingId = request.TrainingId;
+                deleteTrainingsRequest.UserId = username;
                 var reply = _client.DeleteTraining(deleteTrainingsRequest);
                 return new ApiResponse(Status200OK, null, "");
 

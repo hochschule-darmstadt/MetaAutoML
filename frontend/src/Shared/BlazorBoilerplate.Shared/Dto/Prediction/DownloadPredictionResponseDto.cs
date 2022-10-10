@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BlazorBoilerplate.Shared.Dto.PredictionDataset
+namespace BlazorBoilerplate.Shared.Dto.Prediction
 {
-    public class GetPredictionDatasetPredictionResponseDto
+    public class DownloadPredictionResponseDto
     {
         public string Name { get; set; }
         public byte[] Content { get; set; }

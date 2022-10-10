@@ -7,8 +7,8 @@ import "Enumerations.proto";
 import "ModelRelatedMessages.proto";
 
 message DeleteTrainingRequest {
-  string userIdentifier = 1;
-  string trainingIdentifier = 2;
+  string userId = 1;
+  string trainingId = 2;
 }
 
 message DeleteTrainingResponse {
@@ -16,7 +16,7 @@ message DeleteTrainingResponse {
 }
 
 message GetTrainingsRequest {
-    string userIdentifier = 1;
+    string userId = 1;
   }
   
 message GetTrainingsResponse {
@@ -24,8 +24,8 @@ message GetTrainingsResponse {
   }
   
 message GetTrainingRequest {
-    string userIdentifier = 1;
-    string trainingIdentifier = 2;
+    string userId = 1;
+    string trainingId = 2;
   }
   
 message GetTrainingResponse {
@@ -33,22 +33,30 @@ message GetTrainingResponse {
 }
 
 message Training {
-    string identifier = 1;
-    repeated Model models = 2;
-    string datasetIdentifier = 3;
-    string datasetName = 4;
-    string task = 5;
-    string configuration = 6;
-    repeated string selectedMlLibraries = 7;
-    repeated string selectedAutoMls = 8;
-    string runtimeConstraints = 9;
-    string datasetConfiguration = 10;
-    string testConfiguration = 11;
-    string status = 12;
-    google.protobuf.Timestamp startTime = 13;
-    google.protobuf.Timestamp endTime = 14;
-    repeated StrategyControllerEvent events = 15;
+    string id = 1;
+    string datasetId = 2;
+    repeated Model models = 3;
+    string status = 4;
+    Configuration configuration = 5;
+    string datasetConfiguration = 6;
+    TrainingRuntimeProfile RuntimeProfile = 7;
   }
+
+message Configuration {
+  string task = 1;
+  string target = 2;
+  repeated string enabledStrategies = 3;
+  int32 runtimeLimit = 4;
+  string metric = 5;
+  repeated string selectedAutoMlSolutions = 6;
+  repeated string selectedMlLibraries = 7;
+}
+
+message TrainingRuntimeProfile {
+  google.protobuf.Timestamp startTime = 1;
+  google.protobuf.Timestamp endTime = 2;
+  repeated StrategyControllerEvent events = 3;
+}
  
 
 message StrategyControllerEvent {
@@ -59,19 +67,13 @@ message StrategyControllerEvent {
   
 
 message CreateTrainingRequest {
-  string userIdentifier = 1;
-  string datasetIdentifier = 2;
-  string task = 3;
-  string configuration = 4;
-  repeated string selectedAutoMls = 5;
-  string runtimeConstraints = 6;
-  string datasetConfiguration = 7;
-  string testConfiguration = 8;
-  string metric = 9;
-  repeated string selectedLibraries = 10;
+  string userId = 1;
+  string datasetId = 2;
+  Configuration configuration = 3;
+  string datasetConfiguration = 4;
 }
 
 
 message CreateTrainingResponse {
-  string trainingIdentifier = 1;
+  string trainingId = 1;
 }

@@ -30,7 +30,7 @@ namespace BlazorBoilerplate.Theme.Material.Services
                 SetDatasetFileConfigurationRequestDto request = new SetDatasetFileConfigurationRequestDto()
                 {
                     Configuration = dataset.Dataset.Configuration,
-                    DatasetIdentifier = dataset.Dataset.Identifier
+                    DatasetId = dataset.Dataset.Identifier
                 };
                 ApiResponseDto apiResponse = await _client.SetDatasetFileConfiguration(request);
 

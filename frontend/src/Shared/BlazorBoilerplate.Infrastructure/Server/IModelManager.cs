@@ -8,7 +8,6 @@ namespace BlazorBoilerplate.Infrastructure.Server
         Task<ApiResponse> GetModels(GetModelsRequestDto request);
         Task<ApiResponse> GetModel(GetModelRequestDto request);
         Task<ApiResponse> GetModelExplanation(GetModelExplanationRequestDto request);
-        Task<ApiResponse> ModelPrediction(ModelPredictionRequestDto request);
         Task<ApiResponse> DownloadModel(DownloadModelRequestDto request);
         Task<ApiResponse> DeleteModel(DeleteModelRequestDto request);
     }

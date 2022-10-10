@@ -85,7 +85,7 @@
             isPreviewRequestRunning = true;
             GetModelExplanationRequestDto modelRequest = new GetModelExplanationRequestDto()
             {
-                ModelIdentifier = _model.Model.Identifier,
+                ModelId = _model.Model.Identifier,
                 GetShortPreview = true
             };
             ApiResponseDto apiResponse = await apiClient.GetModelExplanation(modelRequest);

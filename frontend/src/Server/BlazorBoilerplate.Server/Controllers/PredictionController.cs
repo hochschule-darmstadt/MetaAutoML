@@ -2,7 +2,7 @@
 using BlazorBoilerplate.Infrastructure.Server.Models;
 using BlazorBoilerplate.Server.Aop;
 using BlazorBoilerplate.Shared.Dto.Dataset;
-using BlazorBoilerplate.Shared.Dto.PredictionDataset;
+using BlazorBoilerplate.Shared.Dto.Prediction;
 using BlazorBoilerplate.Shared.Localizer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -21,12 +21,12 @@ namespace BlazorBoilerplate.Server.Controllers
     [Route("api/[controller]/[action]")]
     [Authorize]
     [ApiController]
-    public class PredictionDatasetController : ControllerBase
+    public class PredictionController : ControllerBase
     {
         private readonly IStringLocalizer<Global> L;
-        private readonly IPredictionDatasetManager _predictionDatasetManager;
+        private readonly IPredictionManager _predictionDatasetManager;
         private readonly ILogger<DatasetController> _logger;
-        public PredictionDatasetController(IStringLocalizer<Global> l, IPredictionDatasetManager predictionDatasetManager, ILogger<DatasetController> logger)
+        public PredictionController(IStringLocalizer<Global> l, IPredictionManager predictionDatasetManager, ILogger<DatasetController> logger)
         {
             L = l;
             _predictionDatasetManager = predictionDatasetManager;
@@ -37,18 +37,18 @@ namespace BlazorBoilerplate.Server.Controllers
         [ProducesResponseType(Status200OK)]
         [ProducesResponseType(Status400BadRequest)]
         [ProducesResponseType(Status404NotFound)]
-        public async Task<ApiResponse> UploadPredictionDataset(UploadPredictionDatasetRequestDto request)
+        public async Task<ApiResponse> UploadPrediction(UploadPredictionRequestDto request)
             => ModelState.IsValid ?
-                await _predictionDatasetManager.UploadPredictionDataset(request) :
+                await _predictionDatasetManager.UploadPrediction(request) :
                 new ApiResponse(Status400BadRequest, L["InvalidData"]);
 
         [HttpPost]
         [ProducesResponseType(Status200OK)]
         [ProducesResponseType(Status400BadRequest)]
         [ProducesResponseType(Status404NotFound)]
-        public async Task<ApiResponse> GetPredictionDatasetPrediction(GetPredictionDatasetPredictionRequestDto request)
+        public async Task<ApiResponse> GetPrediction(GetPredictionRequestDto request)
             => ModelState.IsValid ?
-                await _predictionDatasetManager.GetPredictionDatasetPrediction(request) :
+                await _predictionDatasetManager.GetPrediction(request) :
                 new ApiResponse(Status400BadRequest, L["InvalidData"]);
 
 
@@ -56,27 +56,27 @@ namespace BlazorBoilerplate.Server.Controllers
         [ProducesResponseType(Status200OK)]
         [ProducesResponseType(Status400BadRequest)]
         [ProducesResponseType(Status404NotFound)]
-        public async Task<ApiResponse> GetPredictionDatasets(GetPredictionDatasetsRequestDto request)
+        public async Task<ApiResponse> GetPredictions(GetPredictionsRequestDto request)
             => ModelState.IsValid ?
-                await _predictionDatasetManager.GetPredictionDatasets(request) :
+                await _predictionDatasetManager.GetPredictions(request) :
                 new ApiResponse(Status400BadRequest, L["InvalidData"]);
 
         [HttpPost]
         [ProducesResponseType(Status200OK)]
         [ProducesResponseType(Status400BadRequest)]
         [ProducesResponseType(Status404NotFound)]
-        public async Task<ApiResponse> GetPredictionDataset(GetPredictionDatasetRequestDto request)
+        public async Task<ApiResponse> DownloadPrediction(DownloadPredictionRequestDto request)
             => ModelState.IsValid ?
-                await _predictionDatasetManager.GetPredictionDataset(request) :
+                await _predictionDatasetManager.DownloadPrediction(request) :
                 new ApiResponse(Status400BadRequest, L["InvalidData"]);
 
         [HttpPost]
         [ProducesResponseType(Status200OK)]
         [ProducesResponseType(Status400BadRequest)]
         [ProducesResponseType(Status404NotFound)]
-        public async Task<ApiResponse> DeletePredictionDataset(DeletePredictionDatasetRequestDto request)
+        public async Task<ApiResponse> DeletePrediction(DeletePredictionRequestDto request)
             => ModelState.IsValid ?
-                await _predictionDatasetManager.DeletePredictionDataset(request) :
+                await _predictionDatasetManager.DeletePrediction(request) :
                 new ApiResponse(Status400BadRequest, L["InvalidData"]);
     }
 }
