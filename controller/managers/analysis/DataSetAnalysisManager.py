@@ -35,7 +35,7 @@ class DataSetAnalysisManager:
         # Load dataset
         if config["type"] == ":time_series_longitudinal":
             self.__dataset = load_from_tsfile_to_dataframe(config["path"], return_separate_X_and_y=False)
-        else:
+        elif self.__config["type"] in [":tabular", ":text", ":time_series"]:
             try:
                 self.__dataset = pd.read_csv(config["path"],
                                              delimiter=delimiters[file_config['delimiter']],
@@ -52,7 +52,8 @@ class DataSetAnalysisManager:
                                              escapechar=file_config['escape_character'],
                                              decimal=file_config['decimal_character'],
                                              index_col=False)
-
+        else:
+            pass
         # Create plot filepath
         self.plot_filepath = os.path.join(os.path.dirname(config['path']), "plots")
         os.makedirs(self.plot_filepath, exist_ok=True)
@@ -84,7 +85,7 @@ class DataSetAnalysisManager:
         Return a python dictionary containing dataset analysis
         """
         print("[DatasetAnalysisManager]: Starting basic dataset analysis")
-        print(self.__dataset)
+        #print(self.__dataset)
         analysis = {
                 "size_bytes": DataSetAnalysisManager.__get_size_bytes(self.__config["path"]),
                 "creation_date": os.path.getmtime(self.__config["path"])
@@ -131,7 +132,8 @@ class DataSetAnalysisManager:
         import matplotlib.pyplot as plt
         plt.ioff()
         print("[DatasetAnalysisManager]: Starting advanced dataset analysis")
-
+        if self.__config["type"] in [":image"]:
+            return
         # Convert all "object" columns to category
         self.__dataset.loc[:, self.__dataset.dtypes == 'object'] = self.__dataset.select_dtypes(['object']).apply(lambda x: x.astype('category'))
 

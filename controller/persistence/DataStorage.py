@@ -120,7 +120,6 @@ class DataStorage:
             "type": type,
             "path": "",
             "file_configuration": {},
-            "creation_date": "",
             "training_ids": [],
             "analysis": {},
         }

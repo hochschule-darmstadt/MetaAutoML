@@ -165,6 +165,13 @@ namespace BlazorBoilerplate.Server.Managers
                 getmodelRequest.ModelId = request.ModelId;
                 var reply = _client.GetModel(getmodelRequest);
                 //TODO NEW DOWNLOAD FUNCTIONALITY IMPLEMENTATION
+
+                var resultPath = reply.Model.Path;
+                byte[] resultFile = File.ReadAllBytes(resultPath);
+                response.Content = resultFile;
+                response.Name = Path.GetFileName(resultPath);
+                return new ApiResponse(Status200OK, null, response);
+
                 return new ApiResponse(Status200OK, null, response);
 
             }
