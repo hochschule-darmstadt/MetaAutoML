@@ -4,37 +4,37 @@ syntax = "proto3";
 AutoML Adapter Service implementation. Service provide functionality to execute and interact with the current AutoML process.
 */
 service AdapterService {
-  rpc StartAutoML(StartAutoMLRequest) returns (StartAutoMLResponse) {}
-  rpc GetAutoMLStatus(GetAutoMLStatusRequest) returns (GetAutoMLStatusResponse) {}
+  rpc StartAutoMl(StartAutoMlRequest) returns (StartAutoMlResponse) {}
+  rpc GetAutoMlStatus(GetAutoMlStatusRequest) returns (GetAutoMlStatusResponse) {}
   rpc ExplainModel(ExplainModelRequest) returns (ExplainModelResponse) {}
   rpc PredictModel(PredictModelRequest) returns (PredictModelResponse) {}
 }
 
 
-message StartAutoMLRequest {
+message StartAutoMlRequest {
     string trainingId = 1;
     string datasetId = 2;
     string userId = 3;
     string DatasetPath = 4;
-    StartAutoMLConfiguration configuration = 5;
+    StartAutoMlConfiguration configuration = 5;
     string datasetConfiguration = 6;
 }
-message StartAutoMLConfiguration {
+message StartAutoMlConfiguration {
     string task = 1;
     string target = 2;
     int32 runtimeLimit = 4;
     string metric = 5;
 }
 
-message StartAutoMLResponse {
+message StartAutoMlResponse {
     string sessionId = 1;
 }
 
-message GetAutoMLStatusRequest {
+message GetAutoMlStatusRequest {
     string sessionId = 1;
 }
 
-message GetAutoMLStatusResponse {
+message GetAutoMlStatusResponse {
 	AdapterReturnCode returnCode = 1;
 	string statusUpdate = 2;
 	string path = 3;
@@ -52,8 +52,7 @@ message ExplainModelRequest {
 }
 
 message ExplainModelResponse {
-    string sessionId = 1;
-    string probabilities = 2;
+    string probabilities = 1;
 }
 
 message PredictModelRequest {

@@ -206,7 +206,7 @@ class AdapterManager(Thread):
 
 
 
-    def explain_model(self, data):
+    def explain_model(self, data, last_chunk):
         """
         Explain a specific model.
         This loads the model and returns the output of the "predict_proba()" function in case of tabular classification.
@@ -232,7 +232,6 @@ class AdapterManager(Thread):
             request.data = data
             response = loop.run_until_complete(service.explain_model(request))
             channel.close()
-            response = response
             return response
         except grpclib.GRPCError as rpc_error:
             print(f"Received unknown RPC error: code={rpc_error.message} message={rpc_error.details()}")

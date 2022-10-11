@@ -77,8 +77,7 @@ class ExplainModelRequest(betterproto.Message):
 
 @dataclass(eq=False, repr=False)
 class ExplainModelResponse(betterproto.Message):
-    session_id: str = betterproto.string_field(1)
-    probabilities: str = betterproto.string_field(2)
+    probabilities: str = betterproto.string_field(1)
 
 
 @dataclass(eq=False, repr=False)
@@ -103,7 +102,7 @@ class AdapterServiceStub(betterproto.ServiceStub):
         metadata: Optional["MetadataLike"] = None
     ) -> "StartAutoMlResponse":
         return await self._unary_unary(
-            "/AdapterService/StartAutoML",
+            "/AdapterService/StartAutoMl",
             start_auto_ml_request,
             StartAutoMlResponse,
             timeout=timeout,
@@ -120,7 +119,7 @@ class AdapterServiceStub(betterproto.ServiceStub):
         metadata: Optional["MetadataLike"] = None
     ) -> "GetAutoMlStatusResponse":
         return await self._unary_unary(
-            "/AdapterService/GetAutoMLStatus",
+            "/AdapterService/GetAutoMlStatus",
             get_auto_ml_status_request,
             GetAutoMlStatusResponse,
             timeout=timeout,
@@ -164,10 +163,14 @@ class AdapterServiceStub(betterproto.ServiceStub):
 
 
 class AdapterServiceBase(ServiceBase):
-    async def start_auto_ml(self) -> "StartAutoMlResponse":
+    async def start_auto_ml(
+        self, start_auto_ml_request: "StartAutoMlRequest"
+    ) -> "StartAutoMlResponse":
         raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
 
-    async def get_auto_ml_status(self) -> "GetAutoMlStatusResponse":
+    async def get_auto_ml_status(
+        self, get_auto_ml_status_request: "GetAutoMlStatusRequest"
+    ) -> "GetAutoMlStatusResponse":
         raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
 
     async def explain_model(
@@ -211,13 +214,13 @@ class AdapterServiceBase(ServiceBase):
 
     def __mapping__(self) -> Dict[str, grpclib.const.Handler]:
         return {
-            "/AdapterService/StartAutoML": grpclib.const.Handler(
+            "/AdapterService/StartAutoMl": grpclib.const.Handler(
                 self.__rpc_start_auto_ml,
                 grpclib.const.Cardinality.UNARY_UNARY,
                 StartAutoMlRequest,
                 StartAutoMlResponse,
             ),
-            "/AdapterService/GetAutoMLStatus": grpclib.const.Handler(
+            "/AdapterService/GetAutoMlStatus": grpclib.const.Handler(
                 self.__rpc_get_auto_ml_status,
                 grpclib.const.Cardinality.UNARY_UNARY,
                 GetAutoMlStatusRequest,

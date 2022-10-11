@@ -1,7 +1,7 @@
 import uuid
 from AdapterManager import *
 from AdapterBGRPC import *
-import asyncio
+from dependency_injector.wiring import inject, Provide
 
 class AdapterScheduler:
 
@@ -9,11 +9,11 @@ class AdapterScheduler:
         self.__adapter_managers: dict[str, AdapterManager] = {}
         return 
 
-    async def start_auto_ml(self, start_auto_ml_request):
+    @inject
+    async def start_auto_ml(self, start_auto_ml_request, adapter_manager: AdapterManager = Provide["managers.adapter_manager"]):
         new_session_id = str(uuid.uuid4())
-        adapter_manager = AdapterManager(new_session_id, self.__on_explain_completed)
         self.__adapter_managers[new_session_id] = adapter_manager
-        adapter_manager.start_auto_ml(start_auto_ml_request)
+        adapter_manager.start_auto_ml(start_auto_ml_request, new_session_id)
         adapter_manager.start()
         response = StartAutoMlResponse()
         response.session_id = new_session_id
@@ -26,12 +26,14 @@ class AdapterScheduler:
 
     async def explain_model(self, explain_auto_ml_request: "ExplainModelRequest"):
         if (explain_auto_ml_request.session_id in self.__adapter_managers.keys()):
-            return await self.__adapter_managers[explain_auto_ml_request.session_id].explain_model(explain_auto_ml_request)
+            result = await self.__adapter_managers[explain_auto_ml_request.session_id].explain_model(explain_auto_ml_request)
+            if explain_auto_ml_request.last_chunk == True:
+                del self.__adapter_managers[explain_auto_ml_request.session_id]
+            return result
         raise grpclib.GRPCError(grpclib.Status.NOT_FOUND, f"explain_model: Adapter session {explain_auto_ml_request.session_id} does not exist can not get model explanation!")
 
-    async def predict_model(self, predict_model_request: "PredictModelRequest"):
-        adapter_manager = AdapterManager("", self.__on_explain_completed)
-        return await adapter_manager.predict_model(predict_model_request)
-
-    async def __on_explain_completed(self, session_id):
-        del self.__adapter_managers[session_id]
+    @inject
+    async def predict_model(self, predict_model_request: "PredictModelRequest", adapter_manager: AdapterManager = Provide["managers.adapter_manager"]):
+        result = await adapter_manager.predict_model(predict_model_request)
+        del adapter_manager
+        return result
