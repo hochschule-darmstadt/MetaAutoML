@@ -32,7 +32,7 @@ class AdapterManager(Thread):
         self.__start_auto_ml_request = start_auto_ml_request
         self.__session_id = session_id
 
-    def _get_ml_model_and_lib(self):
+    def _get_ml_model_and_lib(self, config):
         return ("", "")
 
     async def __background_start_auto_ml(self):
@@ -47,7 +47,7 @@ class AdapterManager(Thread):
             generate_script(config)
             output_json = zip_script(config)
             #AutoKeras only produces keras based ANN
-            library, model = self._get_ml_model_and_lib()
+            library, model = self._get_ml_model_and_lib(config)
             test_score, prediction_time = evaluate(config, os.path.join(config.job_folder_location, get_config_property("job-file-name")), data_loader)
             self.__auto_ml_status_messages.append(get_response(output_json, start_time, test_score, prediction_time, library, model))
             print(f'{get_config_property("adapter-name")} job finished')
@@ -74,9 +74,8 @@ class AdapterManager(Thread):
         return
 
 
-    async def predict_model(self, predict_model_request: PredictModelRequest, on_prediction_finished_callback):
+    async def predict_model(self, predict_model_request: PredictModelRequest):
         try:
-            self.__on_prediction_finished_callback = on_prediction_finished_callback
             config_json = json.loads(predict_model_request.process_json)
             job_file_location = os.path.join(get_config_property("training-path"),
                                         config_json["user_id"],
@@ -89,7 +88,7 @@ class AdapterManager(Thread):
             with open(job_file_location, "w+") as f:
                 json.dump(config_json, f)
 
-            prediction_time, result_path = predict(config_json, job_file_location, "autokeras")
+            prediction_time, result_path = predict(config_json, job_file_location, get_config_property("adapter-name"))
             response = PredictModelResponse()
             response.result_path = result_path
             response.predictiontime = prediction_time

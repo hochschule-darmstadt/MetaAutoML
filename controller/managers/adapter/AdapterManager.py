@@ -206,7 +206,7 @@ class AdapterManager(Thread):
 
 
 
-    def explain_model(self, data, last_chunk):
+    def explain_model(self, data):
         """
         Explain a specific model.
         This loads the model and returns the output of the "predict_proba()" function in case of tabular classification.

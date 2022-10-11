@@ -27,8 +27,6 @@ class AdapterScheduler:
     async def explain_model(self, explain_auto_ml_request: "ExplainModelRequest"):
         if (explain_auto_ml_request.session_id in self.__adapter_managers.keys()):
             result = await self.__adapter_managers[explain_auto_ml_request.session_id].explain_model(explain_auto_ml_request)
-            if explain_auto_ml_request.last_chunk == True:
-                del self.__adapter_managers[explain_auto_ml_request.session_id]
             return result
         raise grpclib.GRPCError(grpclib.Status.NOT_FOUND, f"explain_model: Adapter session {explain_auto_ml_request.session_id} does not exist can not get model explanation!")
 
