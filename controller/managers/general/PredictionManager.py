@@ -13,39 +13,6 @@ class PredictionManager:
         self.__log.setLevel(logging.getLevelName(os.getenv("SERVER_LOGGING_LEVEL")))
 
 
-    def model_predict(
-        self, model_predict_request: "ModelPredictRequest"
-    ) -> "ModelPredictResponse":
-        """
-        Start a new AutoML process as Test
-        ---
-        Parameter
-        1. Run configuration
-        ---
-        Return start process status
-        """ 
-        prediction_id = str(uuid.uuid4())
-        with self.__data_storage.lock():
-            found, prediction = self.__data_storage.get_prediction(model_predict_request.user_id, model_predict_request.prediction_id)
-
-            online_prediction_session = { 
-                    "creation_time": datetime.timestamp(datetime.now()),
-                    "status": "busy",
-                    "prediction_path": "",
-                    "prediction_time": 0
-                }
-
-            if model_predict_request.model_id not in prediction["predictions"].keys():
-                prediction["predictions"][model_predict_request.model_id] = {}
-            
-            prediction["predictions"][model_predict_request.model_id][prediction_id] = online_prediction_session
-            self.__data_storage.update_prediction(model_predict_request.user_id, model_predict_request.prediction_id, {
-                "predictions": prediction["predictions"]
-            })
-
-        return ModelPredictResponse()
-
-
     def create_prediction(
         self, create_prediction_request: "CreatePredictionRequest"
     ) -> "CreatePredictionResponse":
@@ -64,11 +31,11 @@ class PredictionManager:
         config = {
             "model_id": create_prediction_request.model_id,
             "live_dataset_path": "",
-            "prediction_path": "busy",
+            "prediction_path": "",
             "status": "busy",
             "runtime_profile": {
                 "start_time": datetime.datetime.now(),
-                "end_time": ""
+                "end_time": datetime.datetime.now()
             }
         }
         

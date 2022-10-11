@@ -610,7 +610,7 @@ class DataStorage:
         if not found:
             raise grpclib.GRPCError(grpclib.Status.NOT_FOUND, f"Model {prediction_details['model_id']} for user {user_id} does not exist, can not create a new prediction!")
 
-        self.__log.debug(f"create_prediction: getting training {prediction_details['training_id']} for model")
+        self.__log.debug(f"create_prediction: getting training {model['training_id']} for model")
         found, training = self.get_training(user_id, model["training_id"])
         if not found:
             raise grpclib.GRPCError(grpclib.Status.NOT_FOUND, f"Training {model['training_id']} for user {user_id} does not exist, can not create a new prediction!")
@@ -644,7 +644,7 @@ class DataStorage:
 
         self.__log.debug(f"create_prediction: new dataset inserted with id: {prediction_id}")
         success = self.__mongo.update_prediction(user_id, prediction_id, {
-            "path": filename_dest
+            "live_dataset_path": filename_dest
         })
         assert success, f"cannot update dataset with id {prediction_id}"
 

@@ -274,9 +274,9 @@ def predict(config_json, config_path, automl):
     Return prediction score 
     """
     result_folder_location = os.path.join(get_config_property("training-path"),
-                                        config_json["user_identifier"],
-                                        config_json["dataset_identifier"],
-                                        config_json["training_identifier"],
+                                        config_json["user_id"],
+                                        config_json["dataset_id"],
+                                        config_json["training_id"],
                                         get_config_property("result-folder-name"))
 
     #if config_json["task"] == ":time_series_classification":
@@ -291,10 +291,10 @@ def predict(config_json, config_path, automl):
     # predict
     os.chmod(os.path.join(result_folder_location, "predict.py"), 0o777)
     python_env = os.getenv("PYTHON_ENV", default="PYTHON_ENV_UNSET")
-    file_path = config_json["prediction_identifier"] + "_" + automl + ".csv"
-    result_prediction_path = os.path.join(os.path.dirname(config_json["prediction_dataset_path"]), file_path)
+    file_path = config_json["prediction_id"] + "_" + automl + ".csv"
+    result_prediction_path = os.path.join(os.path.dirname(config_json["live_dataset_path"]), file_path)
     predict_start = time.time()
-    subprocess.call([python_env, os.path.join(result_folder_location, "predict.py"), config_json["prediction_dataset_path"], config_path, result_prediction_path])
+    subprocess.call([python_env, os.path.join(result_folder_location, "predict.py"), config_json["live_dataset_path"], config_path, result_prediction_path])
     predict_time = time.time() - predict_start
 
     

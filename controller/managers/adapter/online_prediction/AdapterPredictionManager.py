@@ -1,7 +1,7 @@
 
 from AdapterManagerAgent import AdapterManagerAgent
 from ControllerBGRPC import *
-import json, logging, os
+import json, logging, os,datetime
 from threading import *
 import asyncio
 from grpclib.client import Channel
@@ -47,8 +47,15 @@ class AdapterPredictionManager(Thread):
             
 
             response = await service.predict_model(request)
+            found, prediction = self.__data_storage.get_prediction(self.__user_id, self.__prediction_id)
+            prediction_details = { 
+                "status": "completed", 
+                "runtime_profile": prediction["runtime_profile"],
+                "prediction_path": response.result_path 
+            }
+            prediction_details["runtime_profile"]["end_time"] = datetime.datetime.now()
             with self.__data_storage.lock():
-                self.__data_storage.update_prediction(self.__user_id, self.__prediction_id, { "status": "completed", "prediction_path": response.result_path })
+                self.__data_storage.update_prediction(self.__user_id, self.__prediction_id, prediction_details)
             return
         except Exception as rpc_error:
             #print(f"Received unknown RPC error: code={rpc_error.message} message={rpc_error.details()}")

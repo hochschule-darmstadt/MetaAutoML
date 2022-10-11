@@ -40,14 +40,14 @@ class AdapterRuntimePredictionManager:
             "training_id": str(training["_id"]),
             "prediction_id": self.__prediction_id,
             "configuration": training["configuration"],
-            "dataset_configuration": training["dataset_configuration"],
-            "prediction_path": prediction["path"]
+            "dataset_configuration": json.dumps(training["dataset_configuration"]),
+            "live_dataset_path": prediction["live_dataset_path"]
         }
 
         self.__log.debug("create_new_prediction: creating new blackboard and strategy controller for training")
         
-        self.__log.debug(f"create_new_prediction: getting adapter endpoint information for automl {model['automl_name']}")
-        host, port = map(os.getenv, self.__automl_addresses[model["automl_name"].lower()])
+        self.__log.debug(f"create_new_prediction: getting adapter endpoint information for automl {model['auto_ml_solution']}")
+        host, port = map(os.getenv, self.__automl_addresses[model["auto_ml_solution"].lower()])
         port = int(port)
         self.__log.debug(f"create_new_prediction: creating new prediction adapter manager and adapter manager agent")
         adapter_prediction = AdapterPredictionManager(self.__data_storage, prediction_configuration, self.__user_id,  self.__prediction_id, host, port)
