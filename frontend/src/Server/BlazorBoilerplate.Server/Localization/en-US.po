@@ -1028,6 +1028,10 @@ msgid "Add"
 msgstr "Add"
 
 msgctxt "Global"
+msgid "Add Live Dataset"
+msgstr "Add Live Dataset"
+
+msgctxt "Global"
 msgid "ReloadTranslations"
 msgstr "Reload translations"
 
@@ -1513,6 +1517,15 @@ msgstr "AutoML solution"
 msgctxt "Global"
 msgid "completed"
 msgstr "completed"
+
+
+msgctxt "Global"
+msgid "ended"
+msgstr "ended"
+
+msgctxt "Global"
+msgid "download"
+msgstr "download"
 
 msgctxt "Global"
 msgid "busy"

@@ -142,7 +142,7 @@ class AdapterManager(Thread):
                     self.__prediction_time = response.prediction_time
                     self.__ml_model_type = response.model
                     self.__ml_library = response.library
-
+                    found, model = self.__data_storage.get_model(self.__request.user_id, self.__model_id)
                     model_details = {
                         "status": self.__status,
                         "ml_model_type": self.__ml_model_type,
@@ -150,10 +150,10 @@ class AdapterManager(Thread):
                         "path": self.__path,
                         "prediction_time": self.__prediction_time,
                         "test_score": self.__testScore,
-                        "runtime_profile": {
-                            "end_time": datetime.datetime.now()
-                        }
+                        "runtime_profile": model["runtime_profile"]
                     }
+                    model_details["runtime_profile"]["end_time"] = datetime.datetime.now()
+                        
                     self.__adapter_finished_callback(self.__training_id, self.__request.user_id, self.__model_id, model_details, self)
                     return
 
@@ -192,15 +192,15 @@ class AdapterManager(Thread):
             "training_id": self.__training_id,
             "user_id": self.__request.user_id,
             "dataset_id": str(self.__dataset["_id"]),
-            "task": self.__request.task,
-            "configuration": self.__request.configuration,
-            "dataset_configuration": self.__request.dataset_configuration,
-            "runtime_constraints": self.__request.runtime_constraints,
-            "test_configuration": json.loads(self.__request.test_configuration),
-            "file_configuration": self.__dataset["file_configuration"],
-            "file_location": self.__dataset["path"],
-            "file_name": self.__dataset["file_name"],
-            "metric": self.__request.metric
+            "configuration": {
+                "task": self.__request.configuration.task,
+                "target": self.__request.configuration.target
+            },
+            "dataset_configuration": {
+                "column_datatypes": json.loads(self.__request.dataset_configuration)["column_datatypes"],
+                "file_configuration": self.__dataset["file_configuration"],
+            },
+            "dataset_path": self.__dataset["path"]
         }
 
 
@@ -228,8 +228,6 @@ class AdapterManager(Thread):
             request = ExplainModelRequest()  # Request Object
             request.session_id = self.__session_id
             process_json = self._generate_test_json()
-            process_json["test_configuration"]["method"] = 1
-            process_json["test_configuration"]["split_ratio"] = 0
             request.process_json = json.dumps(process_json)
             request.data = data
             response = loop.run_until_complete(service.explain_model(request))

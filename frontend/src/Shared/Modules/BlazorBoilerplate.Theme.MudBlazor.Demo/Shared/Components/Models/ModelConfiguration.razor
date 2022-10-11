@@ -20,7 +20,7 @@
     </MudCardHeader>
     <MudCardContent>
         <MudPaper Height="250px" Elevation="0">
-            @if (Training == null)
+            @if (Training == null || Dataset == null || Model == null)
             {
                 <DataLoaderSpinner />
             }
@@ -53,7 +53,7 @@
                                 @if ((_training.Training.Configuration.Task.Properties[":has_dataset_type"] == ":tabular") || (_training.Training.Configuration.Task.Properties[":has_dataset_type"] == ":time_series_longitudinal"))
                                 {
                                     <MudStack>
-                                        @foreach (JToken item in Training.Training.DatasetConfiguration["features"])
+                                        @foreach (JToken item in Training.Training.DatasetConfiguration["column_datatypes"])
                                         {
                                             <MudText Typo="Typo.body1">@item.Path: @((Server.DataType)((int)item.First))</MudText>
                                         }

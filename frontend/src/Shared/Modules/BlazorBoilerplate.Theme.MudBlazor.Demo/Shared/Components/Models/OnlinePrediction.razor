@@ -24,7 +24,7 @@
                     Variant="Variant.Filled" 
                     Color="Color.Secondary"
                     EndIcon="@Icons.Filled.CloudUpload"
-                           Size="Size.Small">@L["Add"]</MudButton>
+                           Size="Size.Small">@L["Add Live Dataset"]</MudButton>
             </MudStack>
         </CardHeaderActions>
     </MudCardHeader>
@@ -41,7 +41,7 @@
                         <MudTh>@L["Name"]</MudTh>
                         <MudTh>@L["Date"]</MudTh>
                         <MudTh>@L["Status"]</MudTh>
-                        <MudTh>@L["Download"]</MudTh>
+                        <MudTh>@L["download"]</MudTh>
                     </HeaderContent>
                     <RowTemplate>
                         <MudTd>
@@ -88,6 +88,10 @@
         set
         {
             _model = value;
+            if (_model != null)
+            {
+                LoadPredictions();
+            }
             StateHasChanged();
         } 
     }
@@ -105,7 +109,7 @@
         fileUploader.IsUploadPredictionDatasetDialogOpen = true;
         fileUploader.RefreshUploadComponentCallback();
     }
-    private async Task LoadPredictionDatasets()
+    private async Task LoadPredictions()
     {
 
         try

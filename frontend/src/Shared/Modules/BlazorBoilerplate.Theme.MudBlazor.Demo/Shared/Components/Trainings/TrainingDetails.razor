@@ -56,7 +56,16 @@
                             <MudTd>@(models.MlLibrary.Properties.ContainsKey("skos:prefLabel") ? models.MlLibrary.Properties["skos:prefLabel"] : "")</MudTd>
                         <MudTd>@(String.Format("{0:0.00}", models.TestScore))</MudTd>
                         <MudTd>@(String.Format("{0:0}", models.PredictionTime)) ms</MudTd>
-                        <MudTd>@models.RuntimeProfile s</MudTd>
+                        <MudTd>
+                            @if (models.Status == "busy")
+                            {
+                                @(DateTime.Now.Subtract(models.RuntimeProfile.StartTime).TotalSeconds.ToString("0 s"))
+                            }
+                            else
+                            {
+                                @(models.RuntimeProfile.EndTime.Subtract(models.RuntimeProfile.StartTime).TotalSeconds.ToString("0 s"))
+                            }
+                        </MudTd>
                         <MudTd><TrainingMenu TrainingId="@Training.Training.Id"></TrainingMenu></MudTd>
                     </RowTemplate>
                     <PagerContent>

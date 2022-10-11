@@ -172,9 +172,9 @@ class ExplainableAIManager:
                 # Add explanation results (only the status) to training
                 found, training = self.__data_storage.get_training(user_id, model['training_id'])
                 if "explanation" in training:
-                    training["explanation"].update({model['automl_name']: status})
+                    training["explanation"].update({model['auto_ml_solution']: status})
                 else:
-                    training["explanation"] = {model['automl_name']: status}
+                    training["explanation"] = {model['auto_ml_solution']: status}
                 self.__data_storage.update_training(user_id, model['training_id'], {"explanation": training["explanation"]})
 
             # Remove tread from thread list
@@ -192,24 +192,31 @@ class ExplainableAIManager:
         found, training = self.__data_storage.get_training(user_id, model["training_id"])
         dataset_path = self.__data_storage.get_dataset(user_id, training["dataset_id"])[1]["path"]
 
-        print(f"[ExplainableAIManager]: Initializing new shap explanation. AutoML: {model['automl_name'].replace(':', '')} | Training ID: {model['training_id']} | Dataset: {training['dataset_id']} ({training['dataset_name']})")
+        print(f"[ExplainableAIManager]: Initializing new shap explanation. AutoML: {model['auto_ml_solution'].replace(':', '')} | Training ID: {model['training_id']} | Dataset: {training['dataset_id']}")
         
         training["file_location"], training["file_name"] = os.path.split(dataset_path)
-        output_path = os.path.join(os.getcwd(), "app-data", "training", model["automl_name"].replace(":", ""), user_id, model["training_id"], "result")
+        output_path = os.path.join(os.getcwd(), "app-data", "training", model["auto_ml_solution"].replace(":", ""), user_id, model["training_id"], "result")
         os.makedirs(output_path, exist_ok=True)
         plot_path = os.path.join(output_path, "plots")
         os.makedirs(plot_path, exist_ok=True)
+        delimiters = {
+            "comma":        ",",
+            "semicolon":    ";",
+            "space":        " ",
+            "tab":          "\t",
+        }
+
         
-        dataset = pd.read_csv(dataset_path)
-        dataset = feature_preparation(dataset, training["dataset_configuration"]["features"].items())
-        dataset_X = dataset.drop(training["configuration"]["target"]["target"], axis=1)
-        dataset_Y = dataset[training["configuration"]["target"]["target"]]
+        dataset = pd.read_csv(dataset_path, delimiter=delimiters[training["dataset_configuration"]['file_configuration']['delimiter']], skiprows=(training["dataset_configuration"]['file_configuration']['start_row']-1), escapechar=training["dataset_configuration"]['file_configuration']['escape_character'], decimal=training["dataset_configuration"]['file_configuration']['decimal_character'])
+        dataset = feature_preparation(dataset, training["dataset_configuration"]["column_datatypes"].items())
+        dataset_X = dataset.drop(training["configuration"]["target"], axis=1)
+        dataset_Y = dataset[training["configuration"]["target"]]
         sampled_dataset_X = dataset_X.iloc[0:number_of_samples, :]
 
         print(f"[ExplainableAIManager]: Output is saved to {output_path}")
         print(f"[ExplainableAIManager]: Starting explanation with {number_of_samples} samples. This may take a while.")
 
-        if training["task"] == ":tabular_classification":
+        if training["configuration"]["task"] == ":tabular_classification":
             try:
                 explainer = self.get_shap_explainer(user_id, model, training, sampled_dataset_X)
             except RuntimeError as e:
@@ -221,7 +228,7 @@ class ExplainableAIManager:
 
             plots = plot_tabular_classification(sampled_dataset_X,
                                                          dataset_Y,
-                                                         training["configuration"]["target"]["target"],
+                                                         training["configuration"]["target"],
                                                          number_of_samples,
                                                          explainer,
                                                          shap_values,
@@ -232,7 +239,7 @@ class ExplainableAIManager:
             callback(thread=threading.current_thread(), user_id=user_id, model=model, status="failed", detail=f"incompatible: {message}", plots=[], title="SHAP Explanation")
             return
 
-        print(f"[ExplainableAIManager]: Plots for {model['automl_name']} completed")
+        print(f"[ExplainableAIManager]: Plots for {model['auto_ml_solution']} completed")
         callback(thread=threading.current_thread(), user_id=user_id, model=model, status="finished", detail=f"{len(plots)} plots created", plots=plots, title="SHAP Explanation")
 
     def get_shap_explainer(self, user_id, model, config, sampled_dataset_x):
@@ -260,7 +267,7 @@ class ExplainableAIManager:
                 # Request the data
                 result = self.__adapter_manager.explain_model(json.dumps(chunk.tolist()))
                 if result is None:
-                    raise RuntimeError(f"Unable to create SHAP values for Automl {model['automl_name']} | Training_id {model['training_id']}")
+                    raise RuntimeError(f"Unable to create SHAP values for Automl {model['auto_ml_solution']} | Training_id {model['training_id']}")
                 else:
                     probabilities = probabilities + json.loads(result.probabilities)
 

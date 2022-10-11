@@ -114,8 +114,8 @@ class PredictionManager:
         Return a list of compatible datasets or a GRPC error UNAVAILABLE for read errors
         """
         response = GetPredictionsResponse()
-        self.__log.debug(f"get_predictions: get all prediction datasets for user {get_predictions_request.user_id} and dataset id {get_predictions_request.dataset_id}")
-        all_predictions: list[dict[str, object]] = self.__data_storage.get_predictions(get_predictions_request.user_id, get_predictions_request.pre)
+        self.__log.debug(f"get_predictions: get all prediction datasets for user {get_predictions_request.user_id}")
+        all_predictions: list[dict[str, object]] = self.__data_storage.get_predictions(get_predictions_request.user_id, get_predictions_request.model_id)
         self.__log.debug(f"get_predictions: found {all_predictions.count} prediction datasets for user {get_predictions_request.user_id}")
         for prediction in all_predictions:
             response.predictions.append(self.__prediction_object_to_rpc_object(get_predictions_request.user_id, prediction))

@@ -41,6 +41,7 @@ class AdapterRuntimeManager:
 
     def __adapter_finished_callback(self, training_id, user_id, model_id, model_details: 'dict[str, object]', adapter_manager: AdapterManager):
         # lock data storage to prevent race condition between get and update
+        import datetime
         with self.__data_storage.lock():
             # append new model to training
             found, training = self.__data_storage.get_training(user_id, training_id)
@@ -48,13 +49,13 @@ class AdapterRuntimeManager:
             _mdl_id = self.__data_storage.update_model(user_id, model_id, model_details)
             model_list = self.__data_storage.get_models(user_id, training_id)
             if len(training["model_ids"]) == len(model_list)-1:
-                self.__data_storage.update_training(user_id, training_id, {
+                training_details = {
                     "model_ids": training["model_ids"] + [model_id],
                     "status": "ended",
-                    "runtime_profile": {
-                        "end_time": datetime.datetime.now()
-                    }
-                })
+                    "runtime_profile": training["runtime_profile"]
+                }
+                training_details["runtime_profile"]["end_time"] = datetime.datetime.now()
+                self.__data_storage.update_training(user_id, training_id, training_details)
             else:
                 self.__data_storage.update_training(user_id, training_id, {
                     "model_ids": training["model_ids"] + [model_id]

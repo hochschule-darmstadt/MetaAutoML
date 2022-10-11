@@ -657,6 +657,15 @@ msgstr "AutoML System"
 msgid "completed"
 msgstr "Erfolgreich"
 
+msgid "ended"
+msgstr "Beendet"
+
+msgid "download"
+msgstr "Herunterladen"
+
+msgid "Add Live Dataset"
+msgstr "Live Dataset hinzufügen"
+
 msgid "busy"
 msgstr "Läuft"
 

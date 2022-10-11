@@ -8,14 +8,14 @@ from JsonUtil import get_config_property
 
 class AdapterManager(Thread):
 
-    def __init__(self, session_identifier, on_explain_finished_callback) -> None:
+    def __init__(self, session_id, on_explain_finished_callback) -> None:
         super(AdapterManager, self).__init__()
-        self.__session_identifier = session_identifier
+        self.__session_id = session_id
         self.__start_auto_ml_running = False
         self.__auto_ml_status_messages = []
         self.__start_auto_ml_request: StartAutoMlRequest = None
         self._automl = None
-        self._loaded_training_identifier = None
+        self._loaded_training_id = None
         self._on_explain_finished_callback = on_explain_finished_callback
 
     def run(self):
@@ -55,7 +55,7 @@ class AdapterManager(Thread):
 
     def get_auto_ml_status(self):
         if (len(self.__auto_ml_status_messages) == 0) and self.__start_auto_ml_running == False:
-            raise grpclib.GRPCError(grpclib.Status.NOT_FOUND, f"Adapter session {self.__session_identifier} endded and no messages are left!")
+            raise grpclib.GRPCError(grpclib.Status.NOT_FOUND, f"Adapter session {self.__session_id} endded and no messages are left!")
         if (len(self.__auto_ml_status_messages) == 0) and self.__start_auto_ml_running == True:
             response = GetAutoMlStatusResponse()
             response.return_code = AdapterReturnCode.ADAPTER_RETURN_CODE_PENDING
@@ -81,17 +81,13 @@ class AdapterManager(Thread):
         """
         try:
             config_json = json.loads(explain_auto_ml_request.process_json)
-            config_json['configuration'] = json.loads(config_json['configuration'])
-            config_json['dataset_configuration'] = json.loads(config_json['dataset_configuration'])
-            config_json['runtime_constraints'] = json.loads(config_json['runtime_constraints'])
-            config_json['file_configuration'] = json.loads(config_json['file_configuration'])
             result_folder_location = os.path.join(get_config_property("training-path"),
-                                                  config_json["user_identifier"],
-                                                    config_json["dataset_identifier"],
-                                                  config_json["training_identifier"],
+                                                  config_json["user_id"],
+                                                    config_json["dataset_id"],
+                                                  config_json["training_id"],
                                                   get_config_property("result-folder-name"))
             # Check if the requested training is already loaded. If not: Load model and load & prep dataset.
-            if self._loaded_training_identifier != config_json["training_identifier"]:
+            if self._loaded_training_id != config_json["training_id"]:
                 print(f"ExplainModel: Model not already loaded; Loading model")
                 with open(result_folder_location + '/model_keras.p', 'rb') as file:
                     self._automl = dill.load(file)
@@ -99,7 +95,7 @@ class AdapterManager(Thread):
                     self._automl = self._automl.export_model()
                 df, test = data_loader(config_json)
                 self._dataframeX, y = prepare_tabular_dataset(df, config_json)
-                self._loaded_training_identifier = config_json["training_identifier"]
+                self._loaded_training_id = config_json["training_id"]
 
             # Reassemble dataset with the datatypes and column names from the preprocessed data and the content of the
             # transmitted data.
@@ -126,9 +122,9 @@ class AdapterManager(Thread):
         try:
             config_json = json.loads(predict_model_request.process_json)
             job_file_location = os.path.join(get_config_property("training-path"),
-                                        config_json["user_identifier"],
-                                        config_json["dataset_identifier"],
-                                        config_json["training_identifier"],
+                                        config_json["user_id"],
+                                        config_json["dataset_id"],
+                                        config_json["training_id"],
                                         get_config_property("job-folder-name"),
                                         get_config_property("job-file-name"))
 
