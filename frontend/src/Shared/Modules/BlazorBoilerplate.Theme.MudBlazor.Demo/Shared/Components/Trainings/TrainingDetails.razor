@@ -59,7 +59,7 @@
                         <MudTd>
                             @if (models.Status == "busy")
                             {
-                                @(DateTime.Now.Subtract(models.RuntimeProfile.StartTime).TotalSeconds.ToString("0 s"))
+                                @(DateTime.UtcNow.Subtract(models.RuntimeProfile.StartTime).TotalSeconds.ToString("0 s"))
                             }
                             else
                             {

@@ -120,33 +120,33 @@ class TrainingManager:
                     self.__log.error(f"__training_object_rpc_object: exception: {e}")
                     raise grpclib.GRPCError(grpclib.Status.UNAVAILABLE, f"Error while retrieving Model")
 
-                training_item.status = training["status"]
+            training_item.status = training["status"]
 
-                training_configuration = Configuration()
-                training_configuration.task = training["configuration"]["task"]
-                training_configuration.target = training["configuration"]["target"]
-                training_configuration.enabled_strategies = training["configuration"]["enabled_strategies"]
-                training_configuration.runtime_limit = training["configuration"]["runtime_limit"]
-                training_configuration.metric = training["configuration"]["metric"]
-                training_configuration.selected_auto_ml_solutions = training["configuration"]["selected_auto_ml_solutions"]
-                training_configuration.selected_ml_libraries = training["configuration"]["selected_ml_libraries"]
-                training_item.configuration = training_configuration
+            training_configuration = Configuration()
+            training_configuration.task = training["configuration"]["task"]
+            training_configuration.target = training["configuration"]["target"]
+            training_configuration.enabled_strategies = training["configuration"]["enabled_strategies"]
+            training_configuration.runtime_limit = training["configuration"]["runtime_limit"]
+            training_configuration.metric = training["configuration"]["metric"]
+            training_configuration.selected_auto_ml_solutions = training["configuration"]["selected_auto_ml_solutions"]
+            training_configuration.selected_ml_libraries = training["configuration"]["selected_ml_libraries"]
+            training_item.configuration = training_configuration
 
-                training_item.dataset_configuration = json.dumps(training["dataset_configuration"])
+            training_item.dataset_configuration = json.dumps(training["dataset_configuration"])
 
-                training_runtime_profile = TrainingRuntimeProfile()
-                training_runtime_profile.start_time = training["runtime_profile"]["start_time"]
-                for event in training["runtime_profile"]['events']:
-                    response_event = StrategyControllerEvent()
-                    response_event.type = event['type']
-                    response_event.meta = json.dumps(event['meta'])
-                    response_event.timestamp = event['timestamp']
-                    training_runtime_profile.events.append(response_event)
+            training_runtime_profile = TrainingRuntimeProfile()
+            training_runtime_profile.start_time = training["runtime_profile"]["start_time"]
+            for event in training["runtime_profile"]['events']:
+                response_event = StrategyControllerEvent()
+                response_event.type = event['type']
+                response_event.meta = json.dumps(event['meta'])
+                response_event.timestamp = event['timestamp']
+                training_runtime_profile.events.append(response_event)
 
-                training_runtime_profile.end_time = training["runtime_profile"]["end_time"]
-                training_item.runtime_profile = training_runtime_profile
+            training_runtime_profile.end_time = training["runtime_profile"]["end_time"]
+            training_item.runtime_profile = training_runtime_profile
                 
-                return training_item
+            return training_item
         except Exception as e:
             self.__log.error(f"__training_object_rpc_object: Error while reading parameter for training")
             self.__log.error(f"__training_object_rpc_object: exception: {e}")

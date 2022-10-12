@@ -62,7 +62,7 @@ class AdapterRuntimeManager:
                 })
 
         if model_details["status"] == "completed":
-            if dataset["type"] == ":tabular" or dataset["type"] == ":text" or dataset["type"] == ":time_series":
+            if dataset["type"] in  [":tabular", ":text", ":time_series"]:
                 ExplainableAIManager(self.__data_storage, adapter_manager).explain(user_id, model_id)
                 return
     
