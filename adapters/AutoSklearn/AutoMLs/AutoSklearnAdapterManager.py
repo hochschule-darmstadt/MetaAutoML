@@ -27,6 +27,6 @@ class AutoSklearnAdapterManager(AdapterManager):
                     self._automl = pickle.load(file)
             self._loaded_training_id = config_json["training_id"]
             # Get prediction probabilities and send them back.
-            probabilities = json.dumps(self._automl.predict_proba(dataframe).tolist())
+        probabilities = json.dumps(self._automl.predict_proba(dataframe).tolist())
         return probabilities
 

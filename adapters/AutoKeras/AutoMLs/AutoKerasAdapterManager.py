@@ -27,13 +27,13 @@ class AutoKerasAdapterManager(AdapterManager):
                 self.__automl = self.__automl.export_model()
             self._loaded_training_id = config_json["training_id"]
             # Get prediction probabilities and send them back.
-            probabilities = self.__automl.predict(np.array(df.values.tolist()))
-            # Keras is strange as it does not provide a predict_proba() function to get the class probabilities.
-            # Instead, it returns these probabilities (in case there is a binary classification) when calling predict
-            # but only as a one dimensional array. Shap however requires the probabilities in the format
-            # [[prob class 0, prob class 1], [...]]. So to return the proper format we have to process the results of
-            # predict().
-            if probabilities.shape[1] == 1:
-                probabilities = [[prob[0], 1 - prob[0]] for prob in probabilities.tolist()]
-            probabilities = json.dumps(probabilities)
+        probabilities = self.__automl.predict(np.array(dataframe.values.tolist()))
+        # Keras is strange as it does not provide a predict_proba() function to get the class probabilities.
+        # Instead, it returns these probabilities (in case there is a binary classification) when calling predict
+        # but only as a one dimensional array. Shap however requires the probabilities in the format
+        # [[prob class 0, prob class 1], [...]]. So to return the proper format we have to process the results of
+        # predict().
+        if probabilities.shape[1] == 1:
+            probabilities = [[prob[0], 1 - prob[0]] for prob in probabilities.tolist()]
+        probabilities = json.dumps(probabilities)
         return probabilities
