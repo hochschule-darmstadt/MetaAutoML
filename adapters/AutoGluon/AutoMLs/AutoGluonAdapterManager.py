@@ -40,44 +40,12 @@ class AutoGluonAdapterManager(AdapterManager):
         #TODO correct read and array handling
         return librarylist.pop(), model
 
-    async def explain_model(self, explain_auto_ml_request: "ExplainModelRequest"):
-        """
-        Function for explaining a model. This returns the prediction probabilities for the data passed within the
-        request.data.
-        This loads the model and stores it in the adapter object. This is done because SHAP, the explanation module
-        accesses this function multiple times and reloading the model every time would add overhead.
-        The data transferred is reformatted by SHAP (regarding datatypes and column names). However, the AutoMLs
-        struggle with this reformatting so the dataset is loaded separately and the datatypes and column names of the
-        transferred data are replaced.
-        ---
-        param request: Grpc request of type ExplainModelRequest
-        param context: Context for correctly handling exceptions
-        ---
-        return ExplainModelResponse: Grpc response of type ExplainModelResponse containing prediction probabilities
-        """
-        try:
-            config_json = json.loads(explain_auto_ml_request.process_json)
-            result_folder_location = os.path.join(get_config_property("training-path"),
-                                                  config_json["user_id"],
-                                                  config_json["dataset_id"],
-                                                  config_json["training_id"],
-                                                  get_config_property("result-folder-name"))
-            # Check if the requested training is already loaded. If not: Load model and load & prep dataset.
-            if self.__loaded_training_id != config_json["training_id"]:
-                print(f"ExplainModel: Model not already loaded; Loading model")
-                self.__automl = TabularPredictor.load(os.path.join(result_folder_location, 'model_gluon.gluon'))
-                df, test = data_loader(config_json)
-                self._dataframeX, y = prepare_tabular_dataset(df, config_json)
-                self.__loaded_training_id = config_json["training_id"]
-
-            # Reassemble dataset with the datatypes and column names from the preprocessed data and the content of the
-            # transmitted data.
-            df = pd.DataFrame(data=json.loads(explain_auto_ml_request.data), columns=self._dataframeX.columns)
-            df = df.astype(dtype=dict(zip(self._dataframeX.columns, self._dataframeX.dtypes.values)))
-            # Get prediction probabilities and send them back.
-            probabilities = json.dumps(self.__automl.predict_proba(df).values.tolist())
-            return ExplainModelResponse(probabilities=probabilities)
-
-        except Exception as e:
-            print(e)
-            raise grpclib.GRPCError(grpclib.Status.UNAVAILABLE, f"Error while traninh")
+    def _load_model_and_make_probabilities(self, config_json, result_folder_location, dataframe):
+        # Check if the requested training is already loaded. If not: Load model and load & prep dataset.
+        if self._loaded_training_id != config_json["training_id"]:
+            print(f"ExplainModel: Model not already loaded; Loading model")
+            self.__automl = TabularPredictor.load(os.path.join(result_folder_location, 'model_gluon.gluon'))
+            self._loaded_training_id = config_json["training_id"]
+        # Get prediction probabilities and send them back.
+        probabilities = json.dumps(self.__automl.predict_proba(dataframe).values.tolist())
+        return probabilities

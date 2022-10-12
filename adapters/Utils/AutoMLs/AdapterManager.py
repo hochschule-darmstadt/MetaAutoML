@@ -15,10 +15,10 @@ class AdapterManager(Thread):
         self.__start_auto_ml_running = False
         self.__auto_ml_status_messages = []
         self.__start_auto_ml_request: StartAutoMlRequest = None
-        self.__automl = None
-        self.__loaded_training_id = None
         self.__on_explain_finished_callback = ""
         self.__on_prediction_finished_callback = ""
+        self._automl = None
+        self._loaded_training_id = None
 
     def run(self):
         """
@@ -68,10 +68,48 @@ class AdapterManager(Thread):
         len(self.__auto_ml_status_messages)
         return self.__auto_ml_status_messages.pop(0)
 
+    def _load_model_and_make_probabilities(self, config, result_folder_location, dataframe):
+        return
 
     async def explain_model(self, explain_auto_ml_request: "ExplainModelRequest"):
-        #Unique to every AutoML, implement in concrete class
-        return
+        """
+        Function for explaining a model. This returns the prediction probabilities for the data passed within the
+        request.data.
+        This loads the model and stores it in the adapter object. This is done because SHAP, the explanation module
+        accesses this function multiple times and reloading the model every time would add overhead.
+        The data transferred is reformatted by SHAP (regarding datatypes and column names). However, the AutoMLs
+        struggle with this reformatting so the dataset is loaded separately and the datatypes and column names of the
+        transferred data are replaced.
+        ---
+        param request: Grpc request of type ExplainModelRequest
+        param context: Context for correctly handling exceptions
+        ---
+        return ExplainModelResponse: Grpc response of type ExplainModelResponse containing prediction probabilities
+        """
+        try:
+            config_json = json.loads(explain_auto_ml_request.process_json)
+            result_folder_location = os.path.join(get_config_property("training-path"),
+                                                  config_json["user_id"],
+                                                  config_json["dataset_id"],
+                                                  config_json["training_id"],
+                                                  get_config_property("result-folder-name"))
+                                                  
+            if self._loaded_training_id != config_json["training_id"]:
+                df, test = data_loader(config_json)
+                self._dataframeX, y = prepare_tabular_dataset(df, config_json)
+
+            # Reassemble dataset with the datatypes and column names from the preprocessed data and the content of the
+            # transmitted data.
+            df = pd.DataFrame(data=json.loads(explain_auto_ml_request.data), columns=self._dataframeX.columns)
+            df = df.astype(dtype=dict(zip(self._dataframeX.columns, self._dataframeX.dtypes.values)))
+
+            probabilities = self._load_model_and_make_probabilities(config_json, result_folder_location, df)
+
+            return ExplainModelResponse(probabilities=probabilities)
+
+        except Exception as e:
+            print(e)
+            raise grpclib.GRPCError(grpclib.Status.UNAVAILABLE, f"Error while traninh")
 
 
     async def predict_model(self, predict_model_request: PredictModelRequest):
