@@ -40,7 +40,7 @@ class AdapterManager(Thread):
             self.__start_auto_ml_running = True
             start_time = time.time()
             # saving AutoML configuration JSON
-            config = SetupRunNewRunEnvironment(self.__start_auto_ml_request)
+            config = setup_run_environment(self.__start_auto_ml_request, self._adapter_name)
             process = start_automl_process(config)
             for response in capture_process_output(process, start_time, False):
                 self.__auto_ml_status_messages.append(response)

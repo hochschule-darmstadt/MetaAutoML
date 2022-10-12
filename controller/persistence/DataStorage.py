@@ -325,7 +325,10 @@ class DataStorage:
             self.__log.error(f"delete_dataset: attempting to delete a dataset that does not exist: {dataset_id} for user {user_id}")
             raise grpclib.GRPCError(grpclib.Status.NOT_FOUND, f"Dataset {dataset_id} does not exist, already deleted?")
         path = dataset["path"]
-        path = path.replace( "\\"+ os.path.basename(dataset["path"]), "")
+        if os.getenv("WIN_DEV_MACHINE") == "YES":
+            path = path.replace( "\\"+ os.path.basename(dataset["path"]), "")
+        else:
+            path = path.replace( "/"+ os.path.basename(dataset["path"]), "")
         #Before deleting the dataset, delete all related documents
         existing_trainings = self.get_trainings(user_id, dataset_id)
         self.__log.debug(f"delete_dataset: deleting {existing_trainings.count} trainings")
@@ -450,23 +453,59 @@ class DataStorage:
         #Before deleting the model, delete all related documents
         path: str = model["path"]
         if model["auto_ml_solution"] == ":alphad3m":
-            path = path.replace("\\export\\alphad3m-export.zip", "")
+            if os.getenv("WIN_DEV_MACHINE") == "YES":
+                path = path.replace("\\export\\alphad3m-export.zip", "")
+            else:
+                path = path.replace("/export/alphad3m-export.zip", "")
+            
         elif model["auto_ml_solution"] == ":autocve":
-            path = path.replace("\\export\\autocve-export.zip", "")
+            if os.getenv("WIN_DEV_MACHINE") == "YES":
+                path = path.replace("\\export\\autocve-export.zip", "")
+            else:
+                path = path.replace("/export/autocve-export.zip", "")
+
         elif model["auto_ml_solution"] == ":autogluon":
-            path = path.replace("\\export\\gluon-export.zip", "")
+            if os.getenv("WIN_DEV_MACHINE") == "YES":
+                path = path.replace("\\export\\gluon-export.zip", "")
+            else:
+                path = path.replace("/export/gluon-export.zip", "")
+
         elif model["auto_ml_solution"] == ":autokeras":
-            path = path.replace("\\export\\keras-export.zip", "")
+            if os.getenv("WIN_DEV_MACHINE") == "YES":
+                path = path.replace("\\export\\keras-export.zip", "")
+            else:
+                path = path.replace("/export/keras-export.zip", "")
+
         elif model["auto_ml_solution"] == ":autopytorch":
-            path = path.replace("\\export\\pytorch-export.zip", "")
+            if os.getenv("WIN_DEV_MACHINE") == "YES":
+                path = path.replace("\\export\\pytorch-export.zip", "")
+            else:
+                path = path.replace("/export/pytorch-export.zip", "")
+
         elif model["auto_ml_solution"] == ":autosklearn":
-            path = path.replace("\\export\\sklearn-export.zip", "")
+            if os.getenv("WIN_DEV_MACHINE") == "YES":
+                path = path.replace("\\export\\sklearn-export.zip", "")
+            else:
+                path = path.replace("/export/sklearn-export.zip", "")
+
         elif model["auto_ml_solution"] == ":flaml":
-            path = path.replace("\\export\\flaml-export.zip", "")
+            if os.getenv("WIN_DEV_MACHINE") == "YES":
+                path = path.replace("\\export\\flaml-export.zip", "")
+            else:
+                path = path.replace("/export/flaml-export.zip", "")
+
         elif model["auto_ml_solution"] == ":mcfly":
-            path = path.replace("\\export\\mcfly-export.zip", "")
+            if os.getenv("WIN_DEV_MACHINE") == "YES":
+                path = path.replace("\\export\\mcfly-export.zip", "")
+            else:
+                path = path.replace("/export/mcfly-export.zip", "")
+
         elif model["auto_ml_solution"] == ":mljar":
-            path = path.replace("\\export\\mljar-export.zip", "")
+            if os.getenv("WIN_DEV_MACHINE") == "YES":
+                path = path.replace("\\export\\mljar-export.zip", "")
+            else:
+                path = path.replace("/export/mljar-export.zip", "")
+
         try:
             self.__log.debug(f"delete_model: deleting files within path: {path}")
             shutil.rmtree(path)
@@ -747,7 +786,10 @@ class DataStorage:
             self.__log.error(f"delete_prediction: attempting to delete a dataset that does not exist: {prediction_id} for user {user_id}")
             raise grpclib.GRPCError(grpclib.Status.NOT_FOUND, f"Dataset {prediction_id} does not exist, already deleted?")
         path = dataset["path"]
-        path = path.replace("\\"+ dataset["file_name"], "")
+        if os.getenv("WIN_DEV_MACHINE") == "YES":
+            path = path.replace( "\\"+ os.path.basename(dataset["path"]), "")
+        else:
+            path = path.replace( "/"+ os.path.basename(dataset["path"]), "")
         #Before deleting the dataset, delete all related documents
         existing_trainings = self.get_trainings(user_id, prediction_id)
         self.__log.debug(f"delete_prediction: deleting {existing_trainings.count} trainings")

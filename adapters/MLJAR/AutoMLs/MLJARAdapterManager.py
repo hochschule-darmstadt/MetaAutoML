@@ -12,6 +12,7 @@ class MLJARAdapterManager(AdapterManager):
 
     def __init__(self) -> None:
         super(MLJARAdapterManager, self).__init__()
+        self._adapter_name = "mljar"
 
     def _get_ml_model_and_lib(self, config):
         working_dir = config.result_folder_location

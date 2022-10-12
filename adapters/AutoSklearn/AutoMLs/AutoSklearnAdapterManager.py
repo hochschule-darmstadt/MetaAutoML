@@ -6,6 +6,7 @@ from AdapterUtils import *
 from AdapterBGRPC import *
 from threading import *
 from JsonUtil import get_config_property
+import pickle5 as pickle
 
 class AutoSklearnAdapterManager(AdapterManager):
 
@@ -13,6 +14,7 @@ class AutoSklearnAdapterManager(AdapterManager):
         super(AutoSklearnAdapterManager, self).__init__()
         self.__automl = None
         self.__loaded_training_id = None
+        self._adapter_name = "sklearn"
 
     def _get_ml_model_and_lib(self, config):
         # AutoSklearn uses an ensemble of up to 50 different models we are not able to show them all in our current GUI

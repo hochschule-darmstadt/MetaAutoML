@@ -95,7 +95,10 @@ def get_response(output_json, start_time, test_score, prediction_time, library, 
     """
     response = GetAutoMlStatusResponse()
     response.return_code = AdapterReturnCode.ADAPTER_RETURN_CODE_SUCCESS
-    response.path = os.path.join(output_json.file_location, output_json.file_name)
+    if get_config_property("local_execution") == "NO":
+        response.path = os.path.join(output_json.controller_export_folder_location, output_json.file_name)
+    else:
+        response.path = os.path.join(output_json.file_location, output_json.file_name)
     response.test_score = test_score
     response.prediction_time = prediction_time
     response.library = library
@@ -300,7 +303,7 @@ def predict(config_json, config_path, automl):
     
     return predict_time, result_prediction_path
 
-def SetupRunNewRunEnvironment(request: "StartAutoMlRequest"):
+def setup_run_environment(request: "StartAutoMlRequest", adapter_name):
 
     #folder location for job related files
     job_folder_location = os.path.join(get_config_property("training-path"),
@@ -328,10 +331,18 @@ def SetupRunNewRunEnvironment(request: "StartAutoMlRequest"):
                                         request.training_id,
                                         get_config_property("result-folder-name"))
 
+    controller_export_folder_location  = os.path.join(get_config_property("training-path"),
+                                        adapter_name,
+                                        request.user_id,
+                                        request.dataset_id,
+                                        request.training_id,
+                                        get_config_property("export-folder-name"))
+
     request.job_folder_location = job_folder_location
     request.model_folder_location = model_folder_location
     request.export_folder_location = export_folder_location
     request.result_folder_location = result_folder_location
+    request.controller_export_folder_location = controller_export_folder_location
 
     #Make sure job folders exists
     os.makedirs(job_folder_location, exist_ok=True)

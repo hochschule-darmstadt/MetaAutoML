@@ -12,6 +12,7 @@ class McflyAdapterManager(AdapterManager):
         super(McflyAdapterManager, self).__init__()
         self.__automl = None
         self.__loaded_training_id = None
+        self._adapter_name = "mcfly"
 
     def _get_ml_model_and_lib(self, config):
             # Mcfly is based on the TensorFlow/Keras library

@@ -13,6 +13,7 @@ class AutoKerasAdapterManager(AdapterManager):
         super(AutoKerasAdapterManager, self).__init__()
         self.__automl = None
         self.__loaded_training_id = None
+        self._adapter_name = "autokeras"
 
     def _get_ml_model_and_lib(self, config):
         return (":keras_lib", ":artificial_neural_network")

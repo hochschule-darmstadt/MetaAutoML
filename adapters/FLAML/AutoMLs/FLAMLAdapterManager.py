@@ -13,6 +13,7 @@ class FLAMLAdapterManager(AdapterManager):
         super(FLAMLAdapterManager, self).__init__()
         self.__automl = None
         self.__loaded_training_id = None
+        self._adapter_name = "flaml"
 
     def _get_ml_model_and_lib(self, config):
         working_dir = config.result_folder_location

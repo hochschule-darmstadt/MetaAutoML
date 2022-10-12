@@ -7,7 +7,6 @@ from Container import *
 from concurrent import futures
 
 import dill
-import grpc
 from AdapterUtils import *
 from JsonUtil import get_config_property
 from grpclib.server import Server

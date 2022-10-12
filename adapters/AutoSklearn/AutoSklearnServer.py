@@ -4,10 +4,8 @@ import os
 import time
 from concurrent import futures
 
-import grpc
 from AdapterUtils import *
 from JsonUtil import get_config_property
-import pickle
 from grpclib.server import Server
 from AdapterService import AdapterService
 from Container import *

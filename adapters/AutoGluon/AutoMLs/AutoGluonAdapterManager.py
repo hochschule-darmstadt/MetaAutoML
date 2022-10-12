@@ -14,6 +14,7 @@ class AutoGluonAdapterManager(AdapterManager):
         super(AutoGluonAdapterManager, self).__init__()
         self.__automl = None
         self.__loaded_training_id = None
+        self._adapter_name = "gluon"
 
     def _get_ml_model_and_lib(self, config):
         working_dir = config.result_folder_location

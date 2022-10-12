@@ -19,6 +19,6 @@ RUN mkdir -p /app/app-data/output/tmp
 
 ENV RUNTIME=DOCKER
 ENV PYTHONUNBUFFERED=1
-ENV PYTHONPATH "AutoMLs:Utils"
+ENV PYTHONPATH ".:dependency-injection:AutoMLs:Utils"
 ENV PYTHON_ENV "python"
 ENTRYPOINT ["python", "FlamlServer.py"]

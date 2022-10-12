@@ -12,7 +12,7 @@
             "console": "integratedTerminal",
             "justMyCode": false,
             "env": {
-                "PYTHONPATH": "blackboard;blackboard/agents;blackboard/strategies;dependency-injection;utils;interfaces;managers;managers/adapter/online_prediction;managers/adapter;managers/analysis;managers/data;managers/general;managers/ontology;persistence;interfaces;sessions;utils;../adapters/GRPC/Controller;../adapters/Utils/Utils;../adapters/GRPC/Adapter;",
+                "PYTHONPATH": "blackboard;blackboard/agents;blackboard/strategies;dependency-injection;utils;interfaces;managers;managers/adapter/online_prediction;managers/adapter;managers/analysis;managers/data;managers/general;managers/ontology;persistence;utils;../adapters/GRPC/Controller;../adapters/Utils/Utils;../adapters/GRPC/Adapter;",
                 "AUTOKERAS_SERVICE_PORT": "50052",
                 "AUTOKERAS_SERVICE_HOST": "localhost",
                 "AUTOGLUON_SERVICE_PORT": "50057",
@@ -33,6 +33,7 @@
                 "MCFLY_SERVICE_PORT": "50061",
                 "MONGO_DB_DEBUG": "YES",
                 "USE_DEV_CONFIG": "YES",
+                "WIN_DEV_MACHINE": "YES",
                 "MONGO_CLUSTER": "NO",
                 "PERSISTENCE_LOGGING_LEVEL": "DEBUG",
                 "SERVER_LOGGING_LEVEL": "DEBUG",

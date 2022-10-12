@@ -43,7 +43,7 @@ class AutoSklearnAdapter(AbstractAdapter):
         if self._configuration["configuration"]["runtime_limit"] != 0:
             automl_settings.update(
                 {"time_left_for_this_task": (self._configuration["configuration"]["runtime_limit"] * 60)}) #convert into seconds
-        automl_settings.update({"metric": 'accuracy'})
+        automl_settings.update({"metric": None})
         return automl_settings
 
     def __tabular_classification(self):

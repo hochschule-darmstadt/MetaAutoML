@@ -6,7 +6,6 @@ import shutil
 import time
 from concurrent import futures
 
-import grpc
 import pandas as pd
 from AdapterUtils import *
 from JsonUtil import get_config_property
