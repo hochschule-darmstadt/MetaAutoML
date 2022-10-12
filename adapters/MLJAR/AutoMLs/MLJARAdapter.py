@@ -18,16 +18,16 @@ class MLJARAdapter(AbstractAdapter):
     def start(self):
         """Execute the ML task"""
         if True:
-            if self._configuration["task"] == ":tabular_classification":
+            if self._configuration["configuration"]["task"] == ":tabular_classification":
                 self.__tabular_classification()
-            elif self._configuration["task"] == ":tabular_regression":
+            elif self._configuration["configuration"]["task"] == ":tabular_regression":
                 self.__tabular_regression()
 
     def __tabular_classification(self):
         result_path = self._configuration["model_folder_location"]
         self.df, test = data_loader(self._configuration)
         X, y = prepare_tabular_dataset(self.df, self._configuration)
-        automl = AutoML(total_time_limit=self._configuration["runtime_constraints"]["runtime_limit"], mode="Compete", results_path=result_path)
+        automl = AutoML(total_time_limit=self._configuration["configuration"]["runtime_limit"], mode="Compete", results_path=result_path)
         automl.fit(X, y)
         shutil.copytree(self._configuration["model_folder_location"], os.path.join(self._configuration["result_folder_location"], "Models"))
 
