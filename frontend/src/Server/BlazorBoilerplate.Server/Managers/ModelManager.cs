@@ -26,6 +26,7 @@ namespace BlazorBoilerplate.Server.Managers
         {
             GetModelsResponseDto response = new GetModelsResponseDto();
             GetModelsRequest getmodelRequest = new GetModelsRequest();
+            int top3Counter = 0;
             var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
             try
             {
@@ -35,8 +36,13 @@ namespace BlazorBoilerplate.Server.Managers
 
                 foreach (var model in reply.Models)
                 {
+                    if ((request.Top3 == true) && (top3Counter == 3))
+                    {
+                        break;
+                    }
                     ModelDto modelDto = new ModelDto(model, await _cacheManager.GetObjectInformation(model.MlModelType), await _cacheManager.GetObjectInformation(model.MlLibrary), await _cacheManager.GetObjectInformation(model.AutoMlSolution));
                     response.Models.Add(modelDto);
+                    top3Counter++;
                 }
 
                 return new ApiResponse(Status200OK, null, response);

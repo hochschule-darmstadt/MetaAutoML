@@ -79,7 +79,7 @@ class TrainingManager:
         
         training_id = self.__data_storage.create_training(create_training_request.user_id, config)
         self.__log.debug(f"create_training: inserted new training: {training_id}")
-
+        self.__data_storage.update_dataset(create_training_request.user_id, create_training_request.dataset_id, { "training_ids": dataset["training_ids"] + [training_id] }, False)
         self.__adapter_runtime_scheduler.create_new_training(create_training_request, training_id, dataset)
         response.training_id = training_id
         return response

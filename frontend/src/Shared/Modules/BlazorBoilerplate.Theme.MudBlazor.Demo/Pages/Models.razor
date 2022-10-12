@@ -18,7 +18,7 @@
 
 <MudGrid>
     <MudItem xs="12" sm="12" md="12">
-        <AllModels Models="_models" DatasetId="_dataset.Id"/>
+        <AllModels Models="_models" DatasetId="_dataset.Id" OnDeleteDatasetCompleted="@LoadModels"/>
     </MudItem>
 </MudGrid>
 

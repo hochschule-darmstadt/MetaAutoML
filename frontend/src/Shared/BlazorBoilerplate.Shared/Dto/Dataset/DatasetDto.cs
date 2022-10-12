@@ -27,6 +27,7 @@ namespace BlazorBoilerplate.Shared.Dto.Dataset
             Type = type;
             FileConfiguration = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(grpcObject.Dataset.FileConfiguration);
             Analysis = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(grpcObject.Dataset.Analysis);
+            Analysis["creation_date"] = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc).AddSeconds(Analysis["creation_date"]);
         }
         public DatasetDto(Server.Dataset grpcObject, ObjectInfomationDto type)
         {

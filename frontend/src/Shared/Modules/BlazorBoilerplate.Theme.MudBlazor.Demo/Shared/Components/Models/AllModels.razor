@@ -43,10 +43,20 @@
                     <MudTd>
                         @(context.AutoMlSolution.Properties.ContainsKey("skos:prefLabel") ? context.AutoMlSolution.Properties["skos:prefLabel"] : "")
                     </MudTd>
-                    <MudTd>@context.TestScore</MudTd>
-                    <MudTd>@context.RuntimeProfile</MudTd>
-                    <MudTd>@context.PredictionTime</MudTd>
-                    <MudTd><ModelMenu Dataset="@context"/></MudTd>
+                    <MudTd>@String.Format("{0:0.00}", context.TestScore)</MudTd>
+                    <MudTd>
+                        @if (context.Status == "busy")
+                            {
+                                @(DateTime.UtcNow.Subtract(context.RuntimeProfile.StartTime).TotalSeconds.ToString("0 s"))
+                            }
+                            else
+                            {
+                            @(context.RuntimeProfile.EndTime.Subtract(context.RuntimeProfile.StartTime).TotalSeconds.ToString("0 s"))
+                            }
+
+                    </MudTd>
+                    <MudTd>@String.Format("{0:0}", context.PredictionTime) ms</MudTd>
+                    <MudTd><ModelMenu Model="@context" OnDeleteCompleted="@OnDeleteDatasetCompleted" /></MudTd>
                 </RowTemplate>
                 <PagerContent>
                     <MudTablePager  />
@@ -57,6 +67,8 @@
 </MudCard>
 
 @code {
+    [Parameter]
+    public EventCallback OnDeleteDatasetCompleted { get; set; }
     [Parameter]
     public string DatasetId { get; set; }
     [Parameter]

@@ -146,7 +146,7 @@ namespace BlazorBoilerplate.Shared.Services
         {
             return await httpClient.PostJsonAsync<ApiResponseDto>("api/Model/DownloadModel", request);
         }
-        public async Task<ApiResponseDto> DeleteModel(DeleteTrainingRequestDto request)
+        public async Task<ApiResponseDto> DeleteModel(DeleteModelRequestDto request)
         {
             return await httpClient.PostJsonAsync<ApiResponseDto>("api/Model/DeleteModel", request);
         }

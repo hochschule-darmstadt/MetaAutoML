@@ -196,7 +196,7 @@ class ExplainableAIManager:
         print(f"[ExplainableAIManager]: Initializing new shap explanation. AutoML: {model['auto_ml_solution'].replace(':', '')} | Training ID: {model['training_id']} | Dataset: {training['dataset_id']}")
         
         training["file_location"], training["file_name"] = os.path.split(dataset_path)
-        output_path = os.path.join(os.getcwd(), "app-data", "training", model["auto_ml_solution"].replace(":", ""), user_id, model["training_id"], "result")
+        output_path = os.path.join(os.getcwd(), "app-data", "training", model["auto_ml_solution"].replace(":", ""), user_id, training["dataset_id"], model["training_id"], "result")
         os.makedirs(output_path, exist_ok=True)
         plot_path = os.path.join(output_path, "plots")
         os.makedirs(plot_path, exist_ok=True)

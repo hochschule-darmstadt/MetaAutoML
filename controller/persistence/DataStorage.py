@@ -1,4 +1,4 @@
-import os, shutil, logging
+import os, shutil, logging, datetime
 import threading 
 from MongoDbClient import MongoDbClient
 from sklearn.model_selection import train_test_split
@@ -111,7 +111,7 @@ class DataStorage:
         ---
         Returns dataset id
         """
-
+        import datetime
         if type == ":image":
             self.__log.debug(f"create_dataset: dataset type is image, removing .zip ending from {name} as not necessary after unzipping anymore...")
             name = name.replace(".zip", "")
@@ -123,7 +123,10 @@ class DataStorage:
             "path": "",
             "file_configuration": {},
             "training_ids": [],
-            "analysis": {},
+            "analysis": {
+                "creation_date": 0,
+                "size_bytes": 0
+            },
         }
 
         self.__log.debug("create_dataset: inserting new dataset into database...")
@@ -322,7 +325,7 @@ class DataStorage:
             self.__log.error(f"delete_dataset: attempting to delete a dataset that does not exist: {dataset_id} for user {user_id}")
             raise grpclib.GRPCError(grpclib.Status.NOT_FOUND, f"Dataset {dataset_id} does not exist, already deleted?")
         path = dataset["path"]
-        path = path.replace("\\"+ dataset["file_name"], "")
+        path = path.replace( "\\"+ os.path.basename(dataset["path"]), "")
         #Before deleting the dataset, delete all related documents
         existing_trainings = self.get_trainings(user_id, dataset_id)
         self.__log.debug(f"delete_dataset: deleting {existing_trainings.count} trainings")
@@ -331,10 +334,9 @@ class DataStorage:
                 self.delete_training(user_id, str(training["_id"]))
             except:
                 self.__log.debug(f"delete_dataset: deleting training failed, already deleted. Skipping...")
-        self.__mongo.delete_training(user_id, { "dataset_id": dataset_id})
         self.__log.debug(f"delete_dataset: deleting files within path: {path}")
         shutil.rmtree(path)
-        amount_deleted_datasets_result = self.__mongo.delete_dataset(user_id, { "dataset_id": dataset_id})
+        amount_deleted_datasets_result = self.__mongo.delete_dataset(user_id, { "_id": ObjectId(dataset_id)})
         self.__log.debug(f"delete_dataset: documents deleted within dataset: {amount_deleted_datasets_result}")
         return amount_deleted_datasets_result
 
@@ -422,7 +424,8 @@ class DataStorage:
         if training_id is not None:
             filter = { "training_id": training_id }
         elif dataset_id is not None:
-            filter = { "dataset_id": dataset_id }
+            found, dataset = self.get_dataset(user_id, dataset_id)
+            filter = { "training_id": { '$in': dataset["training_ids"] } }
         else:
             filter = {}
         result = self.__mongo.get_models(user_id, filter)
@@ -446,23 +449,23 @@ class DataStorage:
             raise grpclib.GRPCError(grpclib.Status.NOT_FOUND, f"Model {model_id} does not exist, already deleted?")
         #Before deleting the model, delete all related documents
         path: str = model["path"]
-        if model["automl_name"] == ":alphad3m":
+        if model["auto_ml_solution"] == ":alphad3m":
             path = path.replace("\\export\\alphad3m-export.zip", "")
-        elif model["automl_name"] == ":autocve":
+        elif model["auto_ml_solution"] == ":autocve":
             path = path.replace("\\export\\autocve-export.zip", "")
-        elif model["automl_name"] == ":autogluon":
+        elif model["auto_ml_solution"] == ":autogluon":
             path = path.replace("\\export\\gluon-export.zip", "")
-        elif model["automl_name"] == ":autokeras":
+        elif model["auto_ml_solution"] == ":autokeras":
             path = path.replace("\\export\\keras-export.zip", "")
-        elif model["automl_name"] == ":autopytorch":
+        elif model["auto_ml_solution"] == ":autopytorch":
             path = path.replace("\\export\\pytorch-export.zip", "")
-        elif model["automl_name"] == ":autosklearn":
+        elif model["auto_ml_solution"] == ":autosklearn":
             path = path.replace("\\export\\sklearn-export.zip", "")
-        elif model["automl_name"] == ":flaml":
+        elif model["auto_ml_solution"] == ":flaml":
             path = path.replace("\\export\\flaml-export.zip", "")
-        elif model["automl_name"] == ":mcfly":
+        elif model["auto_ml_solution"] == ":mcfly":
             path = path.replace("\\export\\mcfly-export.zip", "")
-        elif model["automl_name"] == ":mljar":
+        elif model["auto_ml_solution"] == ":mljar":
             path = path.replace("\\export\\mljar-export.zip", "")
         try:
             self.__log.debug(f"delete_model: deleting files within path: {path}")
