@@ -3,7 +3,8 @@ EXPOSE 50053
 
 RUN python -m pip install --upgrade pip
 RUN apt update && \
-    apt install -y build-essential
+    apt install -y build-essential \
+    && apt-get install -y git 
 
 COPY ./MLJAR/requirements.txt .
 # Install dependencies

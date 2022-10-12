@@ -1,6 +1,9 @@
 FROM python:3.9.13-slim-buster AS base
 EXPOSE 50052
 
+RUN apt-get update \
+    && apt-get install -y git 
+    
 COPY ./AutoKeras/requirements.txt .
 # Install dependencies
 RUN pip install -r requirements.txt

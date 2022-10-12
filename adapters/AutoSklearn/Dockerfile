@@ -1,6 +1,9 @@
 FROM python:3.7.11-slim-buster AS base
 EXPOSE 50055
 
+RUN apt-get update && \
+    apt-get install -y git 
+    
 COPY ./AutoSklearn/requirements.txt .
 # Install dependencies
 RUN pip install -r requirements.txt
