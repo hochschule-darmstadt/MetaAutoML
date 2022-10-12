@@ -4,6 +4,7 @@
 @using Microsoft.AspNetCore.Hosting
 @using Microsoft.Extensions.Logging
 @using System.Net.Http.Headers
+@using System.Timers
 @inject IApiClient apiClient
 @inject IViewNotifier viewNotifier
 @inject IJSRuntime JS
@@ -30,13 +31,13 @@
     </MudCardHeader>
     <MudCardContent>
         <MudPaper Height="100px" Elevation="0">
-            @if (_predictions == null)
+            @if (_model == null)
             {
                 <DataLoaderSpinner />
             }
             else
             {
-                <MudTable Items="@_predictions.Predictions" style="width:stretch" class="mat-elevation-z5" AllowSelection="false" Dense="true">
+                <MudTable Items="@_model.Model.Predictions" style="width:stretch" class="mat-elevation-z5" AllowSelection="false" Dense="true">
                     <HeaderContent>
                         <MudTh>@L["Name"]</MudTh>
                         <MudTh>@L["Date"]</MudTh>
@@ -48,7 +49,7 @@
                              @context.LiveDatasetName 
                         </MudTd>
                         <MudTd>
-                            @context.RuntimeProfile.StartTime.ToString("dd/mm/yyyy")
+                            @context.RuntimeProfile.StartTime.ToString("dd/MM/yyyy")
                         </MudTd>
                         <MudTd>
                             @if (context.Status == "busy")
@@ -90,7 +91,13 @@
             _model = value;
             if (_model != null)
             {
-                LoadPredictions();
+                _timer = new Timer()
+                {
+                    AutoReset = true,
+                    Enabled = true,
+                    Interval = 5000
+                };
+                _timer.Elapsed += RefreshPredictions;
             }
             StateHasChanged();
         } 
@@ -99,8 +106,8 @@
 
     private GetPredictionsResponseDto _predictions;
     private ModelPredictResponseDto _modelPrediction;
-    private bool _downloadReady = true;
     private ModelPredictResponseDto _predictionResult;
+    private Timer _timer;
 
 
     private void OnOpenUpload()
@@ -110,26 +117,66 @@
         fileUploader.IsUploadPredictionDatasetDialogOpen = true;
         fileUploader.RefreshUploadComponentCallback();
     }
-    private async Task LoadPredictions()
+
+    public void Dispose()
     {
-
-        try
+        DisposeTimer();
+    }
+    SemaphoreSlim timerSemaphore = new SemaphoreSlim(1);
+    private async void RefreshPredictions(object sender, ElapsedEventArgs e)
+    {
+        await InvokeAsync(async () =>
         {
+            var gotLock = timerSemaphore.Wait(0);
+            if (!gotLock)
+            {
+                return;
+            }
+            try
+            {
+                for (int i = 0; i < _model.Model.Predictions.Count; i++)
+                {
+                    if (_model.Model.Predictions[i].Status == "busy")
+                    {
+                        ApiResponseDto apiResponse = await apiClient.GetPrediction(new GetPredictionRequestDto { PredictionId = _model.Model.Predictions[i].Id });
+                        if (apiResponse.IsSuccessStatusCode)
+                        {
+                            _model.Model.Predictions[i] = Newtonsoft.Json.JsonConvert.DeserializeObject<GetPredictionResponseDto>(apiResponse.Result.ToString()).Prediction;
+                            StateHasChanged();
+                        }
+                        //Prediction does not exist anymore
+                        else if (apiResponse.StatusCode == 404)
+                        {
+                            _model.Model.Predictions.RemoveAt(i);
+                            DisposeTimer();
+                            return;
+                        }
+                        else
+                        {
+                            viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                viewNotifier.Show(ex.GetBaseException().Message, ViewNotifierType.Error, L["Operation Failed"]);
+            }
+            finally
+            {
+                timerSemaphore.Release();
+            }
+        });
+    }
 
-            ApiResponseDto apiResponse = await apiClient.GetPredictions(new GetPredictionsRequestDto { ModelId = _model.Model.Id });
-            if (apiResponse.IsSuccessStatusCode)
-            {
-                _predictions = Newtonsoft.Json.JsonConvert.DeserializeObject<GetPredictionsResponseDto>(apiResponse.Result.ToString());
-                StateHasChanged();
-            }
-            else
-            {
-                viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
-            }
-        }
-        catch (Exception ex)
+    public void DisposeTimer()
+    {
+        if (_timer != null)
         {
-            viewNotifier.Show(ex.GetBaseException().Message, ViewNotifierType.Error, L["Operation Failed"]);
+            _timer.Stop();
+            _timer.Elapsed -= RefreshPredictions;
+            _timer?.Dispose();
+            _timer = null;
         }
     }
 
@@ -157,50 +204,4 @@
             viewNotifier.Show(ex.GetBaseException().Message, ViewNotifierType.Error, L["Operation Failed"]);
         }
     }
-
-    //private async Task UploadFiles(InputFileChangeEventArgs e)
-    //{
-    //    //try
-    //    //{
-    //    //    var file = e.File;
-    //    //    using var stream = e.File.OpenReadStream((512000 * 2 * 400));
-    //    //    using var ms = new MemoryStream();
-    //    //    await stream.CopyToAsync(ms);
-    //    //    var content = ms.ToArray();
-
-
-    //    //    //ApiResponseDto apiResponse = await apiClient.ModelPrediction(new ModelPredictionRequestDto { TestData = content, ModelId = Model.Model.Identifier});
-    //    //    if (apiResponse.IsSuccessStatusCode)
-    //    //    {
-    //    //        _predictionResult = Newtonsoft.Json.JsonConvert.DeserializeObject<ModelPredictResponseDto>(apiResponse.Result.ToString());
-    //    //        _downloadReady = false;
-    //    //        StateHasChanged();
-    //    //    }
-    //    //    else
-    //    //    {
-    //    //        viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
-    //    //    }
-    //    //}
-    //    //catch (Exception ex)
-    //    //{
-    //    //    viewNotifier.Show(ex.GetBaseException().Message, ViewNotifierType.Error, L["Operation Failed"]);
-    //    //}
-    //}
-
-    //private async void DownloadPredictions()
-    //{
-    //    try{
-    //        byte[] predictionBytes = _predictionResult.Predictions.SelectMany(s => System.Text.Encoding.UTF8.GetBytes(s + Environment.NewLine)).ToArray();
-            
-    //        var stream = new MemoryStream(predictionBytes);
-    //        using var streamRef = new DotNetStreamReference(stream: stream);
-    //        await JS.InvokeVoidAsync("downloadFileFromStream", "predictions.csv", streamRef);
-    //    }
-    //    catch (Exception ex)
-    //    {
-    //        viewNotifier.Show(ex.GetBaseException().Message, ViewNotifierType.Error, L["Operation Failed"]);
-    //    }
-    //}
-
-
 }

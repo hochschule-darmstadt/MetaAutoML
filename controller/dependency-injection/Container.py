@@ -1,3 +1,4 @@
+import threading
 from dependency_injector import containers, providers
 import os, sys
 from MongoDbClient import MongoDbClient
@@ -10,7 +11,7 @@ from PredictionManager import PredictionManager
 from UserManager import UserManager
 from DataStorage import DataStorage
 from AdapterRuntimeScheduler import AdapterRuntimeScheduler
-
+from ThreadLock import ThreadLock
 
 
 class Ressources(containers.DeclarativeContainer):
@@ -37,11 +38,16 @@ class Ressources(containers.DeclarativeContainer):
         OntologyManager
     )
 
+    explainable_lock = providers.ThreadSafeSingleton(
+        ThreadLock
+    )
+
 class Managers(containers.DeclarativeContainer):
     ressources = providers.DependenciesContainer()
     adapter_runtime_scheduler = providers.ThreadSafeSingleton(
         AdapterRuntimeScheduler,
-        data_storage=ressources.data_storage
+        data_storage=ressources.data_storage,
+        explainable_lock=ressources.explainable_lock
     )
     dataset_manager = providers.Factory(
         DatasetManager,

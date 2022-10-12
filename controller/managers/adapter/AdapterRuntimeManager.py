@@ -10,15 +10,17 @@ from AdapterManager import AdapterManager
 import Blackboard
 import StrategyController
 from ExplainableAIManager import ExplainableAIManager
+from ThreadLock import ThreadLock
 
 
 class AdapterRuntimeManager:
 
-    def __init__(self, data_storage: DataStorage, request: "CreateTrainingRequest", training_id: str, dataset) -> None:
+    def __init__(self, data_storage: DataStorage, request: "CreateTrainingRequest", training_id: str, dataset, explainable_lock: ThreadLock) -> None:
         self.__data_storage: DataStorage = data_storage
         self.__request: "CreateTrainingRequest" = request
         self.__training_id = training_id
         self.__dataset = dataset
+        self.__explainable_lock = explainable_lock
         self.__log = logging.getLogger('AdapterRuntimeManager')
         self.__log.setLevel(logging.getLevelName(os.getenv("SERVER_LOGGING_LEVEL")))
         self.__automl_addresses = {
@@ -63,7 +65,7 @@ class AdapterRuntimeManager:
 
         if model_details["status"] == "completed":
             if dataset["type"] in  [":tabular", ":text", ":time_series"]:
-                ExplainableAIManager(self.__data_storage, adapter_manager).explain(user_id, model_id)
+                ExplainableAIManager(self.__data_storage, adapter_manager, self.__explainable_lock).explain(user_id, model_id)
                 return
     
     def get_training_id(self):

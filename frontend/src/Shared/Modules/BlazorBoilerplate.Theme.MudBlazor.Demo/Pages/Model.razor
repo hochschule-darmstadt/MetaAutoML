@@ -4,6 +4,7 @@
 @inject IStringLocalizer<Global> L
 @inject IApiClient apiClient
 @inject IViewNotifier viewNotifier
+@inject IFileUploader fileUploader
 @inject NavigationManager NavManager
 @attribute [Authorize]
 
@@ -46,9 +47,9 @@
                         <MudGrid>
                             <MudItem xs="3" sm="3" md="3">
                                 <MudText Typo="Typo.body1" Style=" display: flex;">@L["Dataset: "] <MudLink Href="@NavManager.ToAbsoluteUri("datasets/" + @_training.Training.DatasetId).AbsoluteUri" Style="cursor: pointer; display: flex;"><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.ListAlt" Style="margin-right: 4px;" />@_dataset.Dataset.Name</MudLink></MudText>
-                                <MudText Typo="Typo.body1">@L["Start: {0}", _training.Training.RuntimeProfile.StartTime.ToString("dd/MM/yyy HH:mm")]</MudText>
+                                <MudText Typo="Typo.body1">@L["Start: {0}", _training.Training.RuntimeProfile.StartTime.ToString("dd/MM/yyyy HH:mm")]</MudText>
                                 <MudText Typo="Typo.body1">@L["Status: {0}", _model.Model.Status]</MudText>
-                                <MudText Typo="Typo.body1">@L["Total training time: {0}", _model.Model.Status == "busy" ? DateTime.Now.Subtract(_model.Model.RuntimeProfile.StartTime).TotalSeconds.ToString("0") : _model.Model.RuntimeProfile.EndTime.Subtract(_model.Model.RuntimeProfile.StartTime).TotalSeconds.ToString("0")]</MudText>
+                                <MudText Typo="Typo.body1">@L["Total training time: {0}", _model.Model.Status == "busy" ? DateTime.UtcNow.Subtract(_model.Model.RuntimeProfile.StartTime).TotalSeconds.ToString("0") : _model.Model.RuntimeProfile.EndTime.Subtract(_model.Model.RuntimeProfile.StartTime).TotalSeconds.ToString("0")]</MudText>
                             </MudItem>
                             <MudItem xs="3" sm="3" md="3">
                                 <MudText Typo="Typo.body1">@L["AutoML solution: {0}", _model.Model.AutoMlSolution.Properties.ContainsKey("skos:prefLabel") ? _model.Model.AutoMlSolution.Properties["skos:prefLabel"] : ""]</MudText>
@@ -138,6 +139,7 @@
         {
             _breadcrumbs.Add(new BreadcrumbItem(L["Model {0}", ""], null, true, Icons.Filled.Lightbulb));
         }
+        fileUploader.OnUploadCompletedCallback = LoadModel;
         StateHasChanged();
     }
     private async Task LoadModel()
@@ -187,6 +189,7 @@
             {
                 viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
             }
+            StateHasChanged();
         }
         catch (Exception ex)
         {

@@ -125,15 +125,22 @@
         DisposeTimer();
     }
 
+    SemaphoreSlim timerSemaphore = new SemaphoreSlim(1);
     private async void RefreshTraining(object sender, ElapsedEventArgs e)
     {
         await InvokeAsync(async () =>
         {
+            var gotLock = timerSemaphore.Wait(0);
+            if (!gotLock)
+            {
+                return;
+            }
             try
             {
                 if (_training.Training.Status != "busy")
                 {
                     DisposeTimer();
+                    return;
                 }
                 
                 ApiResponseDto apiResponse = await apiClient.GetTraining(new GetTrainingRequestDto { TrainingId = Training.Training.Id });
@@ -142,6 +149,12 @@
                 {
                     _training = Newtonsoft.Json.JsonConvert.DeserializeObject<GetTrainingResponseDto>(apiResponse.Result.ToString());
                     StateHasChanged();
+                }
+                //Training does not exist anymore
+                else if (apiResponse.StatusCode == 404)
+                {
+                    DisposeTimer();
+                    return;
                 }
                 else
                 {
@@ -152,7 +165,10 @@
             catch (Exception ex)
             {
                 viewNotifier.Show(ex.GetBaseException().Message, ViewNotifierType.Error, L["Operation Failed"]);
-                _timer.Elapsed -= RefreshTraining;
+            }
+            finally
+            {
+                timerSemaphore.Release();
             }
         });
     }

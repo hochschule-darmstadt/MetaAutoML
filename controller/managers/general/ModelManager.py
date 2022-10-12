@@ -25,6 +25,7 @@ class ModelManager:
 
             for prediction in model_predictions:
                 prediction_detail = Prediction()
+                prediction_detail.id = str(prediction["_id"])
                 prediction_detail.model_id = prediction["model_id"]
                 prediction_detail.live_dataset_path = prediction["live_dataset_path"]
                 prediction_detail.prediction_path = prediction["prediction_path"]
@@ -33,6 +34,7 @@ class ModelManager:
                 prediction_runtime_profile.start_time = prediction["runtime_profile"]["start_time"]
                 prediction_runtime_profile.end_time = prediction["runtime_profile"]["end_time"]
                 prediction_detail.runtime_profile = prediction_runtime_profile
+                model_info.predictions.append(prediction_detail)
 
             model_info.status = model["status"]
             model_info.auto_ml_solution = model["auto_ml_solution"]

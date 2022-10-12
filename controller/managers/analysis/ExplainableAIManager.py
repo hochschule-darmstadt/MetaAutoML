@@ -4,11 +4,11 @@ import pandas as pd
 import threading
 import sys
 import numpy as np
-
+from threading import Lock, Thread
 from AdapterManager import AdapterManager
 from ControllerBGRPC import *
 from DataStorage import DataStorage
-
+from ThreadLock import ThreadLock
 
 def make_svg_waterfall_plot(base_value, shap_values, X, path, filename_detail):
     import shap
@@ -149,10 +149,11 @@ def feature_preparation(X, features):
 
 
 class ExplainableAIManager:
-    def __init__(self, data_storage: DataStorage, adapter_manager: AdapterManager):
+    def __init__(self, data_storage: DataStorage, adapter_manager: AdapterManager, explainable_lock: ThreadLock):
         self.__data_storage = data_storage
         self.__adapter_manager = adapter_manager
         self.__threads = []
+        self.__explainable_lock = explainable_lock
 
     def explain(self, user_id, model_id):
         """
@@ -225,14 +226,16 @@ class ExplainableAIManager:
             shap_values = explainer.shap_values(sampled_dataset_X)
 
             print("[ExplainableAIManager]: Explanation finished. Beginning plots.")
-
-            plots = plot_tabular_classification(sampled_dataset_X,
-                                                         dataset_Y,
-                                                         training["configuration"]["target"],
-                                                         number_of_samples,
-                                                         explainer,
-                                                         shap_values,
-                                                         plot_path)
+            with self.__explainable_lock.lock():
+                print("[ExplainableAIManager]: ENTERING LOCK.")
+                plots = plot_tabular_classification(sampled_dataset_X,
+                                                            dataset_Y,
+                                                            training["configuration"]["target"],
+                                                            number_of_samples,
+                                                            explainer,
+                                                            shap_values,
+                                                            plot_path)
+                print("[ExplainableAIManager]: EXITING LOCK.")
         else:
             message = "The ML task of the selected training is not tabular classification. This module is only compatible with tabular classification."
             print("[ExplainableAIManager]:" + message)
