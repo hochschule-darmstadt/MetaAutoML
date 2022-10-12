@@ -4,3 +4,5 @@ protobuf==3.17.3
 dill
 jinja2
 pillow
+betterproto @ git+https://github.com/danielgtaylor/python-betterproto.git@496eba27506a2fe18df409c4cd34a47d8ce04ffe
+dependency-injector==4.40.0
