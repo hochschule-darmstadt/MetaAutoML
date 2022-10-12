@@ -9,7 +9,7 @@
             "console": "integratedTerminal",
             "justMyCode": true,
             "env": {
-                "PYTHONPATH": "AutoMLs;Utils;../Utils/Utils;../Utils/AutoMLs;../GRPC/Adapter;",
+                "PYTHONPATH": ".;dependency-injection;AutoMLs;Utils;../Utils/Utils;../Utils/AutoMLs;../GRPC/Adapter;",
                 "GRPC_SERVER_PORT": "50061",
                 "PYTHON_ENV": ".venv/Scripts/python",
                 "USE_DEV_CONFIG": "YES"
