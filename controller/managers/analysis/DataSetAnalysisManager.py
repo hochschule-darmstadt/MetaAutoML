@@ -1,6 +1,6 @@
 from genericpath import isfile
 import os.path
-
+from threading import Thread
 import numpy as np
 import math
 import json
@@ -17,11 +17,12 @@ from sktime.datasets import load_from_tsfile_to_dataframe
 PLT_XVALUE = 6.5
 PLT_YVALUE = 5
 
-class DataSetAnalysisManager:
+class DataSetAnalysisManager(Thread):
     """
     Static DataSetAnalysisManager class to analyze the dataset
     """
-    def __init__(self, config):
+    def __init__(self, config, data_storage, dataset_analysis_lock, basic_analysis=True, advanced_analysis=True):
+        super(DataSetAnalysisManager, self).__init__()
         # Setup config
         file_config = config["file_configuration"]
         self.__config = config
@@ -31,7 +32,10 @@ class DataSetAnalysisManager:
             "space":        " ",
             "tab":          "\t",
         }
-
+        self.__data_storage = data_storage
+        self.__dataset_analysis_lock = dataset_analysis_lock
+        self.__basic_analysis = basic_analysis
+        self.__advanced_analysis = advanced_analysis
         # Load dataset
         if config["type"] == ":time_series_longitudinal":
             self.__dataset = load_from_tsfile_to_dataframe(config["path"], return_separate_X_and_y=False)
@@ -59,16 +63,21 @@ class DataSetAnalysisManager:
         os.makedirs(self.plot_filepath, exist_ok=True)
         self.__plots = []
 
-    def analysis(self, basic_analysis=True, advanced_analysis=True):
+    def run(self):
         analysis = {}
-        if basic_analysis:
-            analysis.update(self.basic_analysis())
-                
-        if advanced_analysis:
-            analysis.update({ "plots": self.advanced_analysis()})
-                
-
-        return analysis
+        with self.__dataset_analysis_lock.lock():
+            print("[DataSetAnalysisManager]: ENTERING LOCK.")
+            if self.__basic_analysis:
+                analysis.update(self.basic_analysis())
+                    
+            if self.__advanced_analysis:
+                analysis.update({ "plots": self.advanced_analysis()})
+            
+            found, dataset = self.__data_storage.get_dataset(self.__config["user_id"], self.__config["dataset_id"])
+            analysis_details = dataset["analysis"]
+            analysis_details.update(analysis)
+            self.__data_storage.update_dataset(self.__config["user_id"], self.__config["dataset_id"], { "analysis": analysis_details}, False)
+            print("[DataSetAnalysisManager]: EXITING LOCK.")
 
     def basic_analysis(self) -> dict:
         """

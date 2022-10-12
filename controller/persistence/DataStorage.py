@@ -11,12 +11,14 @@ from ControllerBGRPC import *
 import asyncio
 from threading import Lock
 
+from ThreadLock import ThreadLock
+
 
 class DataStorage:
     """
     Centralized Access to File System and Database
     """
-    def __init__(self, data_storage_dir: str, mongo_db: MongoDbClient = None):
+    def __init__(self, data_storage_dir: str, dataset_analysis_lock: ThreadLock, mongo_db: MongoDbClient = None):
     #def __init__(self, data_storage_dir: str, mongo_db_url: str = None):
     #def __init__(self, data_storage_dir: str):
         """
@@ -40,6 +42,7 @@ class DataStorage:
         os.makedirs(data_storage_dir, exist_ok=True)
         self.__storage_dir = data_storage_dir
         #self.__mongo_db_url = mongo_db_url
+        self.__dataset_analysis_lock = dataset_analysis_lock
         self.__mongo: MongoDbClient = mongo_db
         self.__lock = Lock()
 
@@ -212,17 +215,18 @@ class DataStorage:
             pd.DataFrame(df_dict).to_csv(df_preview_filename, index=False)
             file_configuration = {"use_header": True, "start_row":1, "delimiter":"comma", "escape_character":"\\", "decimal_character":"."}
 
-        analysis_result = {}
         # If the dataset is a certain type the dataset can be analyzed.
         self.__log.debug("create_dataset: executing dataset analysis...")
-        analysis_result = DataSetAnalysisManager({"path": filename_dest,
+        dataset_analysis = DataSetAnalysisManager({"path": filename_dest,
                                                     "file_configuration": file_configuration,
-                                                    "type": type}).analysis()
+                                                    "type": type,
+                                                    "dataset_id": dataset_id,
+                                                    "user_id": user_id}, self, self.__dataset_analysis_lock)
         success = self.__mongo.update_dataset(user_id, dataset_id, {
             "path": filename_dest,
-            "file_configuration": file_configuration,
-            "analysis": analysis_result
+            "file_configuration": file_configuration
         })
+        dataset_analysis.start()
         assert success, f"cannot update dataset with id {dataset_id}"
 
         return dataset_id
@@ -251,12 +255,13 @@ class DataStorage:
                 self.__log.debug(f"update_dataset: executing dataset analysis for dataset: {dataset_id} for user {user_id}")
                 # If the dataset is a tabular dataset it can be analyzed.
                 if dataset['type'] in [":tabular", ":text", ":time_series", ":time_series_longitudinal"]:
-                    # Delete old references
-                    new_values["analysis"] = {}
-                    self.__log.debug(f"update_dataset: deleting old dataset analysis for dataset: {dataset_id} for user {user_id}")
-                    self.__mongo.update_dataset(user_id, dataset_id, new_values)
                     self.__log.debug(f"update_dataset: saving new dataset analysis for dataset: {dataset_id} for user {user_id}, new values {new_values}")
-                    new_values["analysis"].update(DataSetAnalysisManager(dataset).analysis())
+                    dataset_analysis = DataSetAnalysisManager({"path": dataset["path"],
+                                                    "file_configuration": dataset["file_configuration"],
+                                                    "type": dataset["type"],
+                                                    "dataset_id": dataset_id,
+                                                    "user_id": user_id}, self, self.__dataset_analysis_lock)
+                    dataset_analysis.start()
                 else:
                     self.__log.warn(f"update_dataset: dataset type {dataset['type']} does not support dataset analysis in dataset {dataset_id} for user {user_id}")
             else:

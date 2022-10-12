@@ -13,7 +13,6 @@ from DataStorage import DataStorage
 from AdapterRuntimeScheduler import AdapterRuntimeScheduler
 from ThreadLock import ThreadLock
 
-
 class Ressources(containers.DeclarativeContainer):
     if os.getenv("MONGO_DB_DEBUG") == "YES":
         mongo_db_url = "mongodb://localhost:27017/"
@@ -29,9 +28,14 @@ class Ressources(containers.DeclarativeContainer):
         server_url=mongo_db_url
     )
 
+    dataset_analysis_lock = providers.ThreadSafeSingleton(
+        ThreadLock
+    )
+
     data_storage = providers.Factory(
         DataStorage,
         data_storage_dir=data_storage_dir,
+        dataset_analysis_lock=dataset_analysis_lock,
         mongo_db=mongo_db_client
     )
     ontology_manager = providers.ThreadSafeSingleton(
