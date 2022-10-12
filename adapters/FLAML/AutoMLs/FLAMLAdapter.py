@@ -26,17 +26,15 @@ class FLAMLAdapter(AbstractAdapter):
         """
         Execute the ML task
         """
-        if self._configuration["task"] == ":tabular_classification":
+        if self._configuration["configuration"]["task"] == ":tabular_classification":
             self.__tabular_classification()
-        elif self._configuration["task"] == ":tabular_regression":
+        elif self._configuration["configuration"]["task"] == ":tabular_regression":
             self.__tabular_regression()
 
     def __generate_settings(self):
         automl_settings = {"log_file_name": 'flaml.log'}
-        if self._configuration["runtime_constraints"]["runtime_limit"] != 0:
-            automl_settings.update({"time_budget": self._configuration["runtime_constraints"]["runtime_limit"]})
-        if self._configuration["runtime_constraints"]["max_iter"] != 0:
-            automl_settings.update({"max_iter": self._configuration["runtime_constraints"]["max_iter"]})
+        if self._configuration["configuration"]["runtime_limit"] != 0:
+            automl_settings.update({"time_budget": self._configuration["configuration"]["runtime_limit"]})
         return automl_settings
 
     def __tabular_classification(self):
@@ -48,7 +46,8 @@ class FLAMLAdapter(AbstractAdapter):
         automl = AutoML()
         automl_settings = self.__generate_settings()
         automl_settings.update({
-            "metric": self._configuration["metric"] if self._configuration["metric"] != "" else 'accuracy',
+            #"metric": self._configuration["configuration"]["metric"] if self._configuration["configuration"]["metric"] != "" else 'accuracy',
+            "metric": 'accuracy',
             "task": 'classification',
             "log_file_name": self._log_file_path,
         })
@@ -65,7 +64,8 @@ class FLAMLAdapter(AbstractAdapter):
         automl = AutoML()
         automl_settings = self.__generate_settings()
         automl_settings.update({
-            "metric": self._configuration["metric"] if self._configuration["metric"] != "" else 'rmse',
+            #"metric": self._configuration["configuration"]["metric"] if self._configuration["configuration"]["metric"] != "" else 'accuracy',
+            "metric": 'accuracy',
             "task": 'regression',
             "log_file_name": self._log_file_path,
         })
