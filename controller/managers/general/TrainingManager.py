@@ -205,6 +205,6 @@ class TrainingManager:
         Return empty DeleteTrainingResponse object or a GRPC error if ressource NOT_FOUND
         """
         self.__log.debug(f"delete_training: deleting training {delete_training_request.training_id}, of user {delete_training_request.user_id}")
-        result = self.__data_storage.delete_dataset(delete_training_request.user_id, delete_training_request.training_id)
+        result = self.__data_storage.delete_training(delete_training_request.user_id, delete_training_request.training_id)
         self.__log.debug(f"delete_training: {str(result)} trainings deleted")
         return DeleteTrainingResponse()

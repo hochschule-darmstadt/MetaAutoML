@@ -69,13 +69,16 @@
         </MudCard>
     </MudItem>
     <MudItem xs="3" sm="3" md="3">
-        @if (_readDatasetFailed == false)
+        @if (_dataset != null)
         {
-            <NewTraining Dataset="@_dataset" />
-        }
-        else
-        {
-            <NewTrainingDatasetNotReadable />
+            @if ((_readDatasetFailed == false) && (_dataset.Dataset.Analysis["size_bytes"] != 0))
+            {
+                <NewTraining Dataset="@_dataset" />
+            }
+            else
+            {
+                <NewTrainingDatasetNotReadable />
+            }
         }
     </MudItem>
     <MudItem xs="9" sm="9" md="9">

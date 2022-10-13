@@ -56,7 +56,7 @@
 
                     </MudTd>
                     <MudTd>@String.Format("{0:0}", context.PredictionTime) ms</MudTd>
-                    <MudTd><ModelMenu Model="@context" OnDeleteCompleted="@OnDeleteDatasetCompleted" /></MudTd>
+                    <MudTd><ModelMenu Model="@context" OnDeleteCompleted="@OnDeleteModelCompleted" /></MudTd>
                 </RowTemplate>
                 <PagerContent>
                     <MudTablePager  />
@@ -68,7 +68,7 @@
 
 @code {
     [Parameter]
-    public EventCallback OnDeleteDatasetCompleted { get; set; }
+    public EventCallback OnDeleteModelCompleted { get; set; }
     [Parameter]
     public string DatasetId { get; set; }
     [Parameter]

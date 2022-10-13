@@ -49,7 +49,7 @@ namespace BlazorBoilerplate.Shared.Interfaces
         Task<ApiResponseDto> CreateTraining(CreateTrainingRequestDto request);
         Task<ApiResponseDto> GetTrainings();
         Task<ApiResponseDto> GetTraining(GetTrainingRequestDto request);
-        Task<ApiResponseDto> DeleteTraining(DeleteModelRequestDto request);
+        Task<ApiResponseDto> DeleteTraining(DeleteTrainingRequestDto request);
         #endregion
 
         #region OMA-ML MODEL MESSAGES

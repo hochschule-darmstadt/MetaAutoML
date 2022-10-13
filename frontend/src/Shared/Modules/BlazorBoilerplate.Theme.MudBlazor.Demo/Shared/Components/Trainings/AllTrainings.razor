@@ -30,6 +30,7 @@
                     <MudTh><MudTableSortLabel SortBy="new Func<TrainingDto, object>(x=>x.Status)">@L["Status"]</MudTableSortLabel></MudTh>
                     <MudTh><MudTableSortLabel SortBy="@(new Func<TrainingDto, object>(x=>x.DatasetName))">@L["Dataset"]</MudTableSortLabel></MudTh>
                     <MudTh>@L["Task"]</MudTh>
+                    <MudTh></MudTh>
                 </HeaderContent>
                 <RowTemplate>
                    <MudTd>
@@ -47,6 +48,7 @@
                     </MudTd>
                     <MudTd>@context.DatasetName</MudTd>
                     <MudTd>@L[context.Configuration.Task.Properties.ContainsKey("skos:prefLabel") ? context.Configuration.Task.Properties["skos:prefLabel"] : ""]</MudTd>
+                    <MudTd><TrainingMenu Training="@context" OnDeleteCompleted="@OnDeleteTrainingCompleted" /></MudTd>
                 </RowTemplate>
                 <PagerContent>
                     <MudTablePager />
@@ -57,6 +59,8 @@
 </MudCard>
 
 @code {
+    [Parameter]
+    public EventCallback OnDeleteTrainingCompleted { get; set; }
     [Parameter]
     public GetTrainingsResponseDto Trainings
     { 

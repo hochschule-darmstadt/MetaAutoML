@@ -507,6 +507,9 @@ class DataStorage:
                 path = path.replace("/export/mljar-export.zip", "")
 
         try:
+            self.__log.debug("delete_model: deleting predictions")
+            for prediction_id in model["prediction_ids"]:
+                self.delete_prediction(user_id, prediction_id)
             self.__log.debug(f"delete_model: deleting files within path: {path}")
             shutil.rmtree(path)
         except:
@@ -790,15 +793,7 @@ class DataStorage:
             path = path.replace( "\\"+ os.path.basename(dataset["path"]), "")
         else:
             path = path.replace( "/"+ os.path.basename(dataset["path"]), "")
-        #Before deleting the dataset, delete all related documents
-        existing_trainings = self.get_trainings(user_id, prediction_id)
-        self.__log.debug(f"delete_prediction: deleting {existing_trainings.count} trainings")
-        for training in existing_trainings:
-            try:
-                self.delete_training(user_id, str(training["_id"]))
-            except:
-                self.__log.debug(f"delete_prediction: deleting training failed, already deleted. Skipping...")
-        self.__mongo.delete_training(user_id, { "prediction_id": prediction_id})
+        #Before deleting the prediction, delete all related documents
         self.__log.debug(f"delete_prediction: deleting files within path: {path}")
         shutil.rmtree(path)
         amount_deleted_datasets_result = self.__mongo.delete_prediction(user_id, { "prediction_id": prediction_id})

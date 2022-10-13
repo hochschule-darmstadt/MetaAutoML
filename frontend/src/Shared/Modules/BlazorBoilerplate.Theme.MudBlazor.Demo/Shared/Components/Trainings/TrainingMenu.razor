@@ -1,19 +1,42 @@
 ﻿@inject IStringLocalizer<Global> L
+@inject IApiClient apiClient
+@inject IViewNotifier viewNotifier
 @inject NavigationManager NavManager
 
 
-@if (Model != null)
+@if (Training != null)
 {
     <MudMenu Icon="@Icons.Material.Filled.MoreVert">
-        <MudMenuItem OnClick="@(e => { NavManager.NavigateTo("trainings/" + TrainingId + "/models/" + Model.Id); })">@L["Details"]</MudMenuItem>
-        <MudMenuItem>@L["Delete"]</MudMenuItem>
+        <MudMenuItem OnClick="@(e => { NavManager.NavigateTo("trainings/" + Training.Id); })">@L["Details"]</MudMenuItem>
+        <MudMenuItem OnClick="@DeleteTraining">@L["Delete"]</MudMenuItem>
     </MudMenu>
 }
 
 @code {
     [Parameter]
-    public string TrainingId { get; set; }
+    public EventCallback OnDeleteCompleted { get; set; }
     [Parameter]
-    public ModelDto Model { get; set; }
+    public TrainingDto Training { get; set; }
+    private async Task DeleteTraining()
+    {
+        try
+        {
+            ApiResponseDto apiResponse = await apiClient.DeleteTraining(new DeleteTrainingRequestDto { TrainingId = Training.Id });
+
+            if (apiResponse.IsSuccessStatusCode)
+            {
+                await OnDeleteCompleted.InvokeAsync();
+                viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
+            }
+            else
+            {
+                viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
+            }
+        }
+        catch (Exception ex)
+        {
+            viewNotifier.Show(ex.GetBaseException().Message, ViewNotifierType.Error, L["Operation Failed"]);
+        }
+    }
 
 }
