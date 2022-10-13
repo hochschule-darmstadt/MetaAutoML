@@ -1,0 +1,82 @@
+syntax = "proto3";
+option csharp_namespace = "BlazorBoilerplate.Server";
+
+import "google/protobuf/any.proto";
+import "Enumerations.proto";
+
+message GetAutoMlSolutionsForConfigurationRequest {
+    map<string, string> configuration = 1;
+  }
+  
+message GetAutoMlSolutionsForConfigurationResponse {
+    repeated string AutoMlSolutions = 1;
+  }
+
+message GetTasksForDatasetTypeRequest {
+    string datasetType = 1;
+  }
+  
+message GetTasksForDatasetTypeResponse {
+    repeated string tasks = 1;
+  }
+  
+message GetMlLibrariesForTaskRequest {
+    string task = 1;
+  }
+  
+message GetMlLibrariesForTaskResponse {
+    repeated string MlLibraries = 1;
+  }
+
+message GetAvailableStrategiesRequest {
+    string userId = 1;
+    string datasetId = 2;
+    map<string, string> configuration = 3;
+  }
+  
+message GetAvailableStrategiesResponse {
+    repeated Strategy Strategies = 1;
+  }
+
+message Strategy {
+    string id = 1;
+    string title = 2;
+    string description = 3;
+  }
+  
+
+message GetObjectsInformationRequest {
+  repeated string Ids = 1; //RDF object IRI. example: [":tabular_classification",”:autokeras”]
+}
+
+message GetObjectsInformationResponse {
+  repeated ObjectInformation objectInformations = 1;
+}
+
+
+message GetDatasetTypesRequest {
+}
+
+message GetDatasetTypesResponse {
+  repeated string datasetTypes = 1;
+}
+
+message ObjectInformation {
+  /*
+    RDF subject IRI
+    example: “:tabular_classification"
+  */
+  string id = 1;
+
+  /*
+    dictionary of RDF pairs for predicates and objects
+    example:
+    {
+      "skos:prefLabel": "tabular classification",
+      "skos:broader": ":classification",
+      ":belongs_to": ":supervised_learning",
+      ":has_dataset_type": ":tabular"
+    }
+  */
+  map<string, string> informations = 2;
+}

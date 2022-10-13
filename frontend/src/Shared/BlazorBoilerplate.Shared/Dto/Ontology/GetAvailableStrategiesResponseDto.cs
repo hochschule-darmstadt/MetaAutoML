@@ -1,3 +1,4 @@
+using BlazorBoilerplate.Server;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,9 +9,19 @@ namespace BlazorBoilerplate.Shared.Dto.Ontology
 {
     public class StrategyControllerStrategyDto
     {
-        public string ID { get; set; }
+        public string Id { get; set; }
         public string Title { get; set; }
         public string Description { get; set; }
+        public StrategyControllerStrategyDto()
+        {
+
+        }
+        public StrategyControllerStrategyDto(Strategy strategy)
+        {
+            Id = strategy.Id;
+            Title = strategy.Title;
+            Description = strategy.Description;
+        }
     }
 
     public class GetAvailableStrategiesResponseDto

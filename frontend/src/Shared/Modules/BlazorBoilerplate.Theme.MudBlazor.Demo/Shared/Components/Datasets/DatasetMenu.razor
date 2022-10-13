@@ -7,7 +7,7 @@
 <MudMenu Icon="@Icons.Material.Filled.MoreVert">
     @if (Dataset != null)
     {
-        <MudMenuItem OnClick="@(e => { NavManager.NavigateTo("/datasets/" + Dataset.Identifier + "/train"); })">@L["Train"]</MudMenuItem>
+        <MudMenuItem OnClick="@(e => { NavManager.NavigateTo("/datasets/" + Dataset.Id + "/train"); })">@L["Train"]</MudMenuItem>
         <MudMenuItem OnClick="@DeleteDataset">@L["Delete"]</MudMenuItem>
     }
 </MudMenu>
@@ -16,7 +16,7 @@
     [Parameter]
     public EventCallback OnDeleteCompleted { get; set; }
     [Parameter]
-    public GetDatasetResponseDto Dataset { get; set; }
+    public DatasetDto Dataset { get; set; }
 
     private async Task DeleteDataset()
     {
@@ -24,7 +24,7 @@
         {
             DeleteDatasetRequestDto datasetRequest = new DeleteDatasetRequestDto()
             {
-                Identifier = Dataset.Identifier
+                DatasetId = Dataset.Id
             };
             ApiResponseDto apiResponse = await apiClient.DeleteDataset(datasetRequest);
 

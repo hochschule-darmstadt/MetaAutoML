@@ -32,31 +32,13 @@ namespace BlazorBoilerplate.Server.Controllers
             _logger = logger;
         }
 
-        [HttpGet]
-        [ProducesResponseType(Status200OK)]
-        [ProducesResponseType(Status400BadRequest)]
-        [ProducesResponseType(Status404NotFound)]
-        public async Task<ApiResponse> GetDatasetTypes()
-            => ModelState.IsValid ?
-                await _datasetManager.GetDatasetTypes() :
-                new ApiResponse(Status400BadRequest, L["InvalidData"]);
-
         [HttpPost]
         [ProducesResponseType(Status200OK)]
         [ProducesResponseType(Status400BadRequest)]
         [ProducesResponseType(Status404NotFound)]
-        public async Task<ApiResponse> GetDataset(GetDatasetRequestDto dataset)
+        public async Task<ApiResponse> UploadDataset(UploadDatasetRequestDto request)
             => ModelState.IsValid ?
-                await _datasetManager.GetDataset(dataset) :
-                new ApiResponse(Status400BadRequest, L["InvalidData"]);
-
-        [HttpPost]
-        [ProducesResponseType(Status200OK)]
-        [ProducesResponseType(Status400BadRequest)]
-        [ProducesResponseType(Status404NotFound)]
-        public async Task<ApiResponse> DeleteDataset(DeleteDatasetRequestDto dataset)
-            => ModelState.IsValid ?
-                await _datasetManager.DeleteDataset(dataset) :
+                await _datasetManager.UploadDataset(request) :
                 new ApiResponse(Status400BadRequest, L["InvalidData"]);
 
         [HttpGet]
@@ -72,36 +54,55 @@ namespace BlazorBoilerplate.Server.Controllers
         [ProducesResponseType(Status200OK)]
         [ProducesResponseType(Status400BadRequest)]
         [ProducesResponseType(Status404NotFound)]
-        public async Task<ApiResponse> GetTabularDatasetColumn(GetTabularDatasetColumnRequestDto dataset)
+        public async Task<ApiResponse> GetDataset(GetDatasetRequestDto request)
             => ModelState.IsValid ?
-                await _datasetManager.GetTabularDatasetColumn(dataset) :
+                await _datasetManager.GetDataset(request) :
                 new ApiResponse(Status400BadRequest, L["InvalidData"]);
 
         [HttpPost]
         [ProducesResponseType(Status200OK)]
         [ProducesResponseType(Status400BadRequest)]
         [ProducesResponseType(Status404NotFound)]
-        public async Task<ApiResponse> GetDatasetPreview(GetDatasetPreviewRequestDto dataset)
+        public async Task<ApiResponse> GetDatasetPreview(GetDatasetPreviewRequestDto request)
             => ModelState.IsValid ?
-                await _datasetManager.GetDatasetPreview(dataset) :
+                await _datasetManager.GetDatasetPreview(request) :
+                new ApiResponse(Status400BadRequest, L["InvalidData"]);
+
+
+        [HttpPost]
+        [ProducesResponseType(Status200OK)]
+        [ProducesResponseType(Status400BadRequest)]
+        [ProducesResponseType(Status404NotFound)]
+        public async Task<ApiResponse> GetTabularDatasetColumn(GetTabularDatasetColumnRequestDto request)
+            => ModelState.IsValid ?
+                await _datasetManager.GetTabularDatasetColumn(request) :
                 new ApiResponse(Status400BadRequest, L["InvalidData"]);
 
         [HttpPost]
         [ProducesResponseType(Status200OK)]
         [ProducesResponseType(Status400BadRequest)]
         [ProducesResponseType(Status404NotFound)]
-        public async Task<ApiResponse> GetDatasetAnalysis(GetDatasetAnalysisRequestDto dataset)
+        public async Task<ApiResponse> SetDatasetFileConfiguration(SetDatasetFileConfigurationRequestDto request)
             => ModelState.IsValid ?
-                await _datasetManager.GetDatasetAnalysis(dataset) :
+                await _datasetManager.SetDatasetFileConfiguration(request) :
                 new ApiResponse(Status400BadRequest, L["InvalidData"]);
 
         [HttpPost]
         [ProducesResponseType(Status200OK)]
         [ProducesResponseType(Status400BadRequest)]
         [ProducesResponseType(Status404NotFound)]
-        public async Task<ApiResponse> Upload(FileUploadRequestDto file)
+        public async Task<ApiResponse> GetDatasetAnalysis(GetDatasetAnalysisRequestDto request)
             => ModelState.IsValid ?
-                await _datasetManager.Upload(file) :
+                await _datasetManager.GetDatasetAnalysis(request) :
+                new ApiResponse(Status400BadRequest, L["InvalidData"]);
+
+        [HttpPost]
+        [ProducesResponseType(Status200OK)]
+        [ProducesResponseType(Status400BadRequest)]
+        [ProducesResponseType(Status404NotFound)]
+        public async Task<ApiResponse> DeleteDataset(DeleteDatasetRequestDto request)
+            => ModelState.IsValid ?
+                await _datasetManager.DeleteDataset(request) :
                 new ApiResponse(Status400BadRequest, L["InvalidData"]);
 
         //[HttpPost]
@@ -111,15 +112,6 @@ namespace BlazorBoilerplate.Server.Controllers
         //public async Task<ApiResponse> UploadData(IFormFile files)
         //    => ModelState.IsValid ?
         //        await _datasetManager.UploadData(files) :
-        //        new ApiResponse(Status400BadRequest, L["InvalidData"]);
-
-        [HttpPost]
-        [ProducesResponseType(Status200OK)]
-        [ProducesResponseType(Status400BadRequest)]
-        [ProducesResponseType(Status404NotFound)]
-        public async Task<ApiResponse> SetDatasetConfiguration(SetDatasetFileConfigurationRequestDto dataset)
-            => ModelState.IsValid ?
-                await _datasetManager.SetDatasetConfiguration(dataset) :
-                new ApiResponse(Status400BadRequest, L["InvalidData"]);
+        //        new ApiResponse(Status400BadRequest, L["InvalidData"])
     }
 }

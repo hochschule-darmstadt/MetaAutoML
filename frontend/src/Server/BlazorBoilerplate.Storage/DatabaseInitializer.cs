@@ -274,28 +274,26 @@ namespace BlazorBoilerplate.Storage
             if (applicationUser == null)
             {
                 //Before creating a new user, request the new OMA-ML user id
-                CreateNewUserResponse response = _client.CreateNewUser(new CreateNewUserRequest());
-                if (response.Result != ResultCode.Okay)
+                try
                 {
-                    throw new Exception($"Error while creating new user, result code: {response.Result}");
-                }
-                applicationUser = new ApplicationUser
-                {
-                    UserName = userName,
-                    Email = email,
-                    PhoneNumber = phoneNumber,
-                    FirstName = firstName,
-                    LastName = lastName,
-                    EmailConfirmed = true,
-                    OmaMlId = response.OmaMlUserId
-                };
+                    CreateNewUserResponse response = _client.CreateNewUser(new CreateNewUserRequest());
+                    applicationUser = new ApplicationUser
+                    {
+                        UserName = userName,
+                        Email = email,
+                        PhoneNumber = phoneNumber,
+                        FirstName = firstName,
+                        LastName = lastName,
+                        EmailConfirmed = true,
+                        OmaMlId = response.UserId
+                    };
 
-                var result = _userManager.CreateAsync(applicationUser, password).Result;
+                    var result = _userManager.CreateAsync(applicationUser, password).Result;
 
-                if (!result.Succeeded)
-                    throw new Exception(result.Errors.First().Description);
+                    if (!result.Succeeded)
+                        throw new Exception(result.Errors.First().Description);
 
-                result = _userManager.AddClaimsAsync(applicationUser, new Claim[]{
+                    result = _userManager.AddClaimsAsync(applicationUser, new Claim[]{
                         new Claim(JwtClaimTypes.Name, userName),
                         new Claim(JwtClaimTypes.GivenName, firstName),
                         new Claim(JwtClaimTypes.FamilyName, lastName),
@@ -305,33 +303,38 @@ namespace BlazorBoilerplate.Storage
                         new Claim("omaml", applicationUser.OmaMlId)
                     }).Result;
 
-                if (!result.Succeeded)
-                    throw new Exception(result.Errors.First().Description);
-
-                //add claims version of roles
-                if (roles != null)
-                {
-                    foreach (var role in roles.Distinct())
-                    {
-                        await _userManager.AddClaimAsync(applicationUser, new Claim($"Is{role}", ClaimValues.trueString));
-                    }
-
-                    ApplicationUser user = await _userManager.FindByNameAsync(applicationUser.UserName);
-
-                    try
-                    {
-                        result = await _userManager.AddToRolesAsync(user, roles.Distinct());
-                    }
-                    catch
-                    {
-                        await _userManager.DeleteAsync(user);
-                        throw;
-                    }
-
                     if (!result.Succeeded)
+                        throw new Exception(result.Errors.First().Description);
+
+                    //add claims version of roles
+                    if (roles != null)
                     {
-                        await _userManager.DeleteAsync(user);
+                        foreach (var role in roles.Distinct())
+                        {
+                            await _userManager.AddClaimAsync(applicationUser, new Claim($"Is{role}", ClaimValues.trueString));
+                        }
+
+                        ApplicationUser user = await _userManager.FindByNameAsync(applicationUser.UserName);
+
+                        try
+                        {
+                            result = await _userManager.AddToRolesAsync(user, roles.Distinct());
+                        }
+                        catch
+                        {
+                            await _userManager.DeleteAsync(user);
+                            throw;
+                        }
+
+                        if (!result.Succeeded)
+                        {
+                            await _userManager.DeleteAsync(user);
+                        }
                     }
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception($"Error while creating new user");
                 }
             }
 

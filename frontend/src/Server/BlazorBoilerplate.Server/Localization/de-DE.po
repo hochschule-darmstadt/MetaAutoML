@@ -657,6 +657,15 @@ msgstr "AutoML System"
 msgid "completed"
 msgstr "Erfolgreich"
 
+msgid "ended"
+msgstr "Beendet"
+
+msgid "download"
+msgstr "Herunterladen"
+
+msgid "Add Live Dataset"
+msgstr "Live Dataset hinzufügen"
+
 msgid "busy"
 msgstr "Läuft"
 
@@ -748,7 +757,7 @@ msgid "Task"
 msgstr "Task"
 
 msgid "Dataset not redable"
-msgstr "Datenset konnte nicht gelessen werden! Das Datenset kann durch die Vorschau Konfiguration new konfiguriert werden"
+msgstr "Datenset konnte nicht gelessen werden! Wenn das Datenset gerade hochgeladen wurde muss noch etwas gewartet werden bevor dieses bereitsteht. Ansonsten stimmt die Datenset Konfigurierung nicht, diese kann durch die Vorschau Konfiguration new konfiguriert werden"
 
 
 

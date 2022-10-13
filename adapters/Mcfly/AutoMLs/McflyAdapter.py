@@ -36,7 +36,7 @@ class McflyAdapter(AbstractAdapter):
     def start(self):
         """Execute the ML task"""
         if True:
-            if self._configuration["task"] == ":time_series_classification":
+            if self._configuration["configuration"]["task"] == ":time_series_classification":
                 self.__time_series_classification()
 
     def __time_series_classification(self):
@@ -62,7 +62,7 @@ class McflyAdapter(AbstractAdapter):
         series_length = X_train.shape[1]
         num_channels = X.shape[2]
         num_classes = y_train_binary.shape[1]
-        runtime_seconds = int(self._configuration["runtime_constraints"]["runtime_limit"] * 60)
+        runtime_seconds = int(self._configuration["configuration"]["runtime_limit"] * 60)
 
         # Estimate the number of ml models using linear regression
         # num_instances, num_channels, series_length, num_classes, runtime_seconds

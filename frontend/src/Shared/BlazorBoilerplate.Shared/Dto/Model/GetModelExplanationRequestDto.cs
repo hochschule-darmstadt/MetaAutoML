@@ -8,7 +8,7 @@ namespace BlazorBoilerplate.Shared.Dto.Model
 {
     public class GetModelExplanationRequestDto
     {
-        public string ModelIdentifier { get; set; }
+        public string ModelId { get; set; }
         public bool GetShortPreview { get; set; }
     }
 }

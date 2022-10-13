@@ -1,0 +1,74 @@
+syntax = "proto3";
+
+/* 
+AutoML Adapter Service implementation. Service provide functionality to execute and interact with the current AutoML process.
+*/
+service AdapterService {
+  rpc StartAutoMl(StartAutoMlRequest) returns (StartAutoMlResponse) {}
+  rpc GetAutoMlStatus(GetAutoMlStatusRequest) returns (GetAutoMlStatusResponse) {}
+  rpc ExplainModel(ExplainModelRequest) returns (ExplainModelResponse) {}
+  rpc PredictModel(PredictModelRequest) returns (PredictModelResponse) {}
+}
+
+
+message StartAutoMlRequest {
+    string trainingId = 1;
+    string datasetId = 2;
+    string userId = 3;
+    string DatasetPath = 4;
+    StartAutoMlConfiguration configuration = 5;
+    string datasetConfiguration = 6;
+}
+message StartAutoMlConfiguration {
+    string task = 1;
+    string target = 2;
+    int32 runtimeLimit = 4;
+    string metric = 5;
+}
+
+message StartAutoMlResponse {
+    string sessionId = 1;
+}
+
+message GetAutoMlStatusRequest {
+    string sessionId = 1;
+}
+
+message GetAutoMlStatusResponse {
+	AdapterReturnCode returnCode = 1;
+	string statusUpdate = 2;
+	string path = 3;
+	float testScore = 4;
+    float validationScore = 5;
+    float predictionTime = 6;
+    string library = 7;
+    string model = 8;
+}
+
+message ExplainModelRequest {
+    string data = 1;
+    string processJson = 2;
+    string sessionId = 3;
+}
+
+message ExplainModelResponse {
+    string probabilities = 1;
+}
+
+message PredictModelRequest {
+    string processJson = 1;
+}
+
+message PredictModelResponse {
+    repeated string predictions = 1;
+    float predictiontime = 2;
+    string resultPath = 3;
+}
+
+enum AdapterReturnCode {
+	ADAPTER_RETURN_CODE_UNKNOWN = 0;
+	ADAPTER_RETURN_CODE_SUCCESS = 1;
+	ADAPTER_RETURN_CODE_PENDING = 2;
+	ADAPTER_RETURN_CODE_STATUS_UPDATE = 3;
+	ADAPTER_RETURN_CODE_ERROR = 100;
+}

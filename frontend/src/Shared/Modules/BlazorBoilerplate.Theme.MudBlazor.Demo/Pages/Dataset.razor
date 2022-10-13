@@ -33,25 +33,25 @@
                     {
                         <MudGrid>
                             <MudItem xs="3" sm="3" md="3">
-                                <MudText Typo="Typo.body1">@L["Name: {0}", _dataset.Name] </MudText>
-                                <MudText Typo="Typo.body1">@L["Dataset type: {0}", L[_dataset.Type.Properties["skos:prefLabel"]]]</MudText>
+                                <MudText Typo="Typo.body1">@L["Name: {0}", _dataset.Dataset.Name] </MudText>
+                                <MudText Typo="Typo.body1">@L["Dataset type: {0}", L[_dataset.Dataset.Type.Properties.ContainsKey("skos:prefLabel") ? _dataset.Dataset.Type.Properties["skos:prefLabel"] : ""]]</MudText>
                             </MudItem>
                             <MudItem xs="3" sm="3" md="3">
-                                <MudText Typo="Typo.body1">@L["Date: {0}", _dataset.Creation_date]</MudText>
+                                <MudText Typo="Typo.body1">@L["Date: {0}", _dataset.Dataset.Analysis.ContainsKey("creation_date") ? _dataset.Dataset.Analysis["creation_date"].ToString("yyyy-MM-dd") : ""]</MudText>
                             </MudItem>
                             <MudItem xs="3" sm="3" md="3">
-                                <MudText Typo="Typo.body1">@L["File Size: {0}", FormatBytes(_dataset.Size)]</MudText>
-                                @if ((@_dataset.Type.ID == ":tabular") || (@_dataset.Type.ID == ":text") || (@_dataset.Type.ID == ":time_series") || (@_dataset.Type.ID == ":time_series_longitudinal"))
+                                <MudText Typo="Typo.body1">@L["File Size: {0}", FormatBytes(_dataset.Dataset.Analysis.ContainsKey("size_bytes") ? _dataset.Dataset.Analysis["size_bytes"] : 0)]</MudText>
+                                @if ((@_dataset.Dataset.Type.ID == ":tabular") || (@_dataset.Dataset.Type.ID == ":text") || (@_dataset.Dataset.Type.ID == ":time_series") || (@_dataset.Dataset.Type.ID == ":time_series_longitudinal"))
                                 {
-                                    if (_dataset.Analysis == null)
+                                    if (_dataset.Dataset.Analysis == null)
                                     {
                                         <MudText Typo="Typo.body1">@L["Number of rows: {0}", "unknown"]</MudText>
                                         <MudText Typo="Typo.body1">@L["Number of columns: {0}", "unknown"]</MudText>
                                     }
-                                    else if (_dataset.Analysis.Count != 0)
+                                    else if (_dataset.Dataset.Analysis.Count != 0)
                                     {
-                                        <MudText Typo="Typo.body1">@L["Number of rows: {0}", _dataset.Analysis["basic_analysis"]["number_of_rows"]]</MudText>
-                                        <MudText Typo="Typo.body1">@L["Number of columns: {0}", _dataset.Analysis["basic_analysis"]["number_of_columns"]]</MudText>
+                                        <MudText Typo="Typo.body1">@L["Number of rows: {0}", _dataset.Dataset.Analysis.ContainsKey("number_of_rows") ? _dataset.Dataset.Analysis["number_of_rows"] : "0"]</MudText>
+                                        <MudText Typo="Typo.body1">@L["Number of columns: {0}", _dataset.Dataset.Analysis.ContainsKey("number_of_columns") ? _dataset.Dataset.Analysis["number_of_columns"] : "0"]</MudText>
                                     }
                                     else
                                     {
@@ -69,13 +69,16 @@
         </MudCard>
     </MudItem>
     <MudItem xs="3" sm="3" md="3">
-        @if (_readDatasetFailed == false)
+        @if (_dataset != null)
         {
-            <NewTraining Dataset="@_dataset" />
-        }
-        else
-        {
-            <NewTrainingDatasetNotReadable />
+            @if ((_readDatasetFailed == false) && (_dataset.Dataset.Analysis["size_bytes"] != 0))
+            {
+                <NewTraining Dataset="@_dataset" />
+            }
+            else
+            {
+                <NewTrainingDatasetNotReadable />
+            }
         }
     </MudItem>
     <MudItem xs="9" sm="9" md="9">
@@ -111,14 +114,14 @@
         {
             GetDatasetRequestDto datasetRequest = new GetDatasetRequestDto()
                 {
-                    Identifier = Id
+                    DatasetId = Id
                 };
             ApiResponseDto apiResponse = await apiClient.GetDataset(datasetRequest);
 
             if (apiResponse.IsSuccessStatusCode)
             {
                 _dataset = Newtonsoft.Json.JsonConvert.DeserializeObject<GetDatasetResponseDto>(apiResponse.Result.ToString());
-                _pageTitle = L["Dataset {0}", _dataset.Name];
+                _pageTitle = L["Dataset {0}", _dataset.Dataset.Name];
                 viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
             }
             else

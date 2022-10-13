@@ -14,26 +14,4 @@ namespace BlazorBoilerplate.Shared.Dto.Model
             Models = new List<ModelDto>();
         }
     }
-
-    public class ModelDto
-    {
-        public string ID { get; set; }
-        public string Name { get; set; }
-        public string Library { get; set; }
-        public string Model { get; set; }
-        public string Status { get; set; }
-        public List<string> Messages { get; set; }
-        public double TestScore { get; set; }
-        public double ValidationScore { get; set; }
-        public double Predictiontime { get; set; }
-        public int Runtime { get; set; }
-        public string DatasetId { get; set; }
-        public string TrainingId { get; set; }
-        public Dictionary<string, dynamic> Explanation { get; set; }
-
-        public ModelDto()
-        {
-            Messages = new List<string>();
-        }
-    }
 }

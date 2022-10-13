@@ -1,7 +1,5 @@
-grpcio
 dill
 jinja2
-protobuf==3.17.3
 sktime==0.12.1
 numpy
 scikit-learn
@@ -10,3 +8,5 @@ tensorflow
 h5py
 mcfly
 pillow
+betterproto @ git+https://github.com/danielgtaylor/python-betterproto.git@496eba27506a2fe18df409c4cd34a47d8ce04ffe
+dependency-injector==4.40.0

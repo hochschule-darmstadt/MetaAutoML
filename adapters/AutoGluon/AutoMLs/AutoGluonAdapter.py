@@ -57,11 +57,11 @@ class AutoGluonAdapter(AbstractAdapter):
         NOTE: AutoGLUON automatically saves the model in a file
         Therefore we do not need to export it using pickle
         """
-        if self._configuration["task"] == ":tabular_classification":
+        if self._configuration["configuration"]["task"] == ":tabular_classification":
             self.__tabular_classification()
-        elif self._configuration["task"] == ":tabular_regression":
+        elif self._configuration["configuration"]["task"] == ":tabular_regression":
             self.__tabular_regression()
-        elif self._configuration["task"] == ":image_classification":
+        elif self._configuration["configuration"]["task"] == ":image_classification":
             self.__image_classification()
 
     def __tabular_classification(self):
@@ -114,5 +114,5 @@ class AutoGluonAdapter(AbstractAdapter):
          # Trainieren 
         model.fit(
             train , 
-            hyperparameters=set_hyperparameters , 
-            time_limit = self._configuration["runtime_constraints"]["runtime_limit"]  ) 
+            #hyperparameters=set_hyperparameters , 
+            time_limit=self._time_limit  ) 

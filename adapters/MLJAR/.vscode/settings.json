@@ -5,7 +5,8 @@
         "../Utils/Utils",
         "../Utils/AutoMLs",
         "../GRPC/Adapter",
-        "./utils"
+        "./utils",
+        "./dependency-injection"
 
     ]
 }

@@ -6,8 +6,9 @@ RUN apt-get update && apt-get install -y \
     libquadmath0 \
     ffmpeg \
     libsm6 \
-    libxext6  
-
+    libxext6  \
+    && apt-get install -y git 
+    
 RUN python3 -m pip install --upgrade "mxnet<2.0.0"
 
 COPY ./AutoGluon/requirements.txt .
@@ -25,6 +26,6 @@ RUN mkdir -p /app/app-data/output/tmp
 
 ENV RUNTIME=DOCKER
 ENV PYTHONUNBUFFERED=1
-ENV PYTHONPATH "AutoMLs:Utils"
+ENV PYTHONPATH ".:dependency-injection:AutoMLs:Utils"
 ENV PYTHON_ENV "python"
 ENTRYPOINT ["python", "AutoGluonServer.py"]

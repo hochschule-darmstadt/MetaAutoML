@@ -17,12 +17,12 @@
 
 <MudGrid>
     <MudItem xs="12" sm="12" md="12">
-        <AllTrainings Trainings="_trainings"/>
+        <AllTrainings Trainings="_trainings" OnDeleteTrainingCompleted="@LoadTrainings"/>
     </MudItem>
 </MudGrid>
 
 @code{
-    private GetAllTrainingsResponseDto _trainings;
+    private GetTrainingsResponseDto _trainings;
     private List<BreadcrumbItem> _breadcrumbs = new List<BreadcrumbItem>();
 
     protected override async Task OnInitializedAsync()
@@ -37,11 +37,11 @@
     {
         try
         {
-            ApiResponseDto apiResponse = await apiClient.GetAllTrainings(new GetAllTrainingsRequestDto());
+            ApiResponseDto apiResponse = await apiClient.GetTrainings();
 
             if (apiResponse.IsSuccessStatusCode)
             {
-                _trainings = Newtonsoft.Json.JsonConvert.DeserializeObject<GetAllTrainingsResponseDto>(apiResponse.Result.ToString());
+                _trainings = Newtonsoft.Json.JsonConvert.DeserializeObject<GetTrainingsResponseDto>(apiResponse.Result.ToString());
                 viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
             }
             else

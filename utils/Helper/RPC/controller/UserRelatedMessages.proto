@@ -2,13 +2,24 @@ syntax = "proto3";
 option csharp_namespace = "BlazorBoilerplate.Server";
 
 import "Enumerations.proto";
-import "Common.proto";
+
+  
+
+message GetHomeOverviewInformationRequest {
+  string userId = 1;
+}
+
+message GetHomeOverviewInformationResponse {
+  int32 datasetAmount = 1;
+  int32 trainingAmount = 2;
+  int32 modelAmount = 3;
+  int32 runningTrainingAmount = 4;
+}
 
 message CreateNewUserRequest {
 
 }
 
 message CreateNewUserResponse {
-    ResultCode Result = 1;
-    string OmaMlUserId = 2;
+    string userId = 1; //OmaMlId persisted within the SQL database of blazor AspNetUser Table
 }

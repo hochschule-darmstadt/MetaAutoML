@@ -29,14 +29,14 @@ namespace BlazorBoilerplate.Theme.Material.Services
             {
                 SetDatasetFileConfigurationRequestDto request = new SetDatasetFileConfigurationRequestDto()
                 {
-                    Configuration = dataset.Configuration,
-                    DatasetIdentifier = dataset.Identifier
+                    Configuration = dataset.Dataset.FileConfiguration,
+                    DatasetId = dataset.Dataset.Id
                 };
-                ApiResponseDto apiResponse = await _client.SetDatasetConfiguration(request);
+                ApiResponseDto apiResponse = await _client.SetDatasetFileConfiguration(request);
 
                 if (apiResponse.IsSuccessStatusCode)
                 {
-                    _notifier.Show("Dataset analysis completed for: " + dataset.Name, ViewNotifierType.Success, L["Operation Successful"]);
+                    _notifier.Show("Dataset analysis completed for: " + dataset.Dataset.Name, ViewNotifierType.Success, L["Operation Successful"]);
                 }
                 else
                 {

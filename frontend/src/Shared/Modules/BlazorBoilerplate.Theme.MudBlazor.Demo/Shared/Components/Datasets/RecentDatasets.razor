@@ -42,11 +42,11 @@
                     </HeaderContent>
                     <RowTemplate>
                         <MudTd >
-                            <MudLink Href="@NavManager.ToAbsoluteUri("datasets/" + @context.Identifier).AbsoluteUri" Style="cursor: pointer; display: flex;"><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.ListAlt" Style="margin-right: 4px;" /> @context.Name</MudLink>
+                            <MudLink Href="@NavManager.ToAbsoluteUri("datasets/" + @context.Id).AbsoluteUri" Style="cursor: pointer; display: flex;"><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.ListAlt" Style="margin-right: 4px;" /> @context.Name</MudLink>
                         </MudTd>
-                        <MudTd>@L[context.Type.Properties["skos:prefLabel"]]</MudTd>
-                        <MudTd >@FormatBytes(context.Size)</MudTd>
-                        <MudTd  style="white-space:nowrap;">@context.Creation_date.ToString("yyyy-MM-dd")</MudTd>
+                        <MudTd>@L[context.Type.Properties.ContainsKey("skos:prefLabel") ? context.Type.Properties["skos:prefLabel"] : ""]</MudTd>
+                        <MudTd>@FormatBytes(context.Analysis["size_bytes"])</MudTd>
+                        <MudTd style="white-space:nowrap;">@context.Analysis["creation_date"].ToString("yyyy-MM-dd")</MudTd>
                     </RowTemplate>
                 </MudTable>
             }
@@ -68,7 +68,7 @@
 
             if (_datasets != null)
             {
-                _datasets.Datasets = _datasets.Datasets.OrderByDescending(x => x.Creation_date).Take(6).ToList();
+                _datasets.Datasets = _datasets.Datasets.OrderByDescending(x => x.Analysis["creation_date"]).Take(6).ToList();
                 StateHasChanged();
             }
         } 
@@ -79,7 +79,8 @@
 
     private void OnOpenUpload()
     {
-        fileUploader.IsUploadDialogOpen = true;
+        fileUploader.IsPredictionDatasetToUpload = false;
+        fileUploader.IsUploadDatasetDialogOpen = true;
         if (fileUploader.RefreshUploadComponentCallback != null)
         {
             fileUploader.RefreshUploadComponentCallback();

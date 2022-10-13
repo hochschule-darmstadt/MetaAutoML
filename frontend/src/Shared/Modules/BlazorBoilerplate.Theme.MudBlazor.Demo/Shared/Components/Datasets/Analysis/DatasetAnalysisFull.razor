@@ -98,7 +98,7 @@
             isPreviewRequestRunning = true;
             GetDatasetAnalysisRequestDto datasetRequest = new GetDatasetAnalysisRequestDto()
                 {
-                    DatasetIdentifier = _dataset.Identifier,
+                    DatasetId = _dataset.Dataset.Id,
                     GetShortPreview = false
                 };
             ApiResponseDto apiResponse = await apiClient.GetDatasetAnalysis(datasetRequest);

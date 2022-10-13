@@ -20,44 +20,52 @@
             else
             {
                 <TrainingTimeline Training="@Training" />
-                <MudTable Items="@Training.AutoMls" Context="AutoMl" Filter="new Func<AutoMLStatusDto,bool>(FilterFunc)">
+                <MudTable Items="@Training.Training.models" Context="models" Filter="new Func<ModelDto,bool>(FilterFunc)">
                     <ToolBarContent>
                         <MudSpacer />
                         <MudTextField @bind-Value="searchString" Placeholder="@L["Search by AutoML solution, Status, Model or Library"]" Adornment="Adornment.Start"
                                     AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
                     </ToolBarContent>
                     <HeaderContent>
-                        <MudTh><MudTableSortLabel SortBy="new Func<AutoMLStatusDto, object>(x=>x.Name)">@L["AutoML solution"]</MudTableSortLabel></MudTh>
-                        <MudTh><MudTableSortLabel SortBy="new Func<AutoMLStatusDto, object>(x=>x.Status)">@L["Status"]</MudTableSortLabel></MudTh>
-                        <MudTh><MudTableSortLabel SortBy="new Func<AutoMLStatusDto, object>(x=>x.Model)">@L["Model"]</MudTableSortLabel></MudTh>
-                        <MudTh><MudTableSortLabel SortBy="new Func<AutoMLStatusDto, object>(x=>x.Library)">@L["Library"]</MudTableSortLabel></MudTh>
-                        <MudTh><MudTableSortLabel SortBy="new Func<AutoMLStatusDto, object>(x=>x.TestScore)">@L["Test score"]</MudTableSortLabel></MudTh>
-                        <MudTh><MudTableSortLabel SortBy="new Func<AutoMLStatusDto, object>(x=>x.Predictiontime)">@L["Prediction time per sample"]</MudTableSortLabel></MudTh>
-                        <MudTh><MudTableSortLabel SortBy="new Func<AutoMLStatusDto, object>(x=>x.Runtime)">@L["Total training time"]</MudTableSortLabel></MudTh>
+                        <MudTh><MudTableSortLabel SortBy="@(new Func<ModelDto, object>(x=>x.AutoMlSolution.Properties["skos:prefLabel"]))">@L["AutoML solution"]</MudTableSortLabel></MudTh>
+                        <MudTh><MudTableSortLabel SortBy="new Func<ModelDto, object>(x=>x.Status)">@L["Status"]</MudTableSortLabel></MudTh>
+                        <MudTh><MudTableSortLabel SortBy="@(new Func<ModelDto, object>(x=>x.MlModelType.Properties["skos:prefLabel"]))">@L["Model"]</MudTableSortLabel></MudTh>
+                        <MudTh><MudTableSortLabel SortBy="@(new Func<ModelDto, object>(x=>x.MlLibrary.Properties["skos:prefLabel"]))">@L["Library"]</MudTableSortLabel></MudTh>
+                        <MudTh><MudTableSortLabel SortBy="new Func<ModelDto, object>(x=>x.TestScore)">@L["Test score"]</MudTableSortLabel></MudTh>
+                        <MudTh><MudTableSortLabel SortBy="new Func<ModelDto, object>(x=>x.PredictionTime)">@L["Prediction time per sample"]</MudTableSortLabel></MudTh>
+                        <MudTh><MudTableSortLabel SortBy="new Func<ModelDto, object>(x=>x.RuntimeProfile)">@L["Total training time"]</MudTableSortLabel></MudTh>
                         <MudTh></MudTh>
                     </HeaderContent>
                     <RowTemplate>
                         <MudTd>
-                            @AutoMl.Name
+                            @(models.AutoMlSolution.Properties.ContainsKey("skos:prefLabel") ? models.AutoMlSolution.Properties["skos:prefLabel"] : "")
                         </MudTd>
                         <MudTd>
-                            @if (AutoMl.Status == "busy")
+                            @if (models.Status == "busy")
                             {
                                 <MudProgressCircular Size="Size.Small" Color="Color.Secondary" Indeterminate="true" />
                             }
                             else
                             {
-                                @L[AutoMl.Status]
+                                @L[models.Status]
                             }
                         </MudTd>
                         <MudTd>
-                            <MudLink Href="@NavManager.ToAbsoluteUri("trainings/" + Training.ID + "/models/" + @AutoMl.ID).AbsoluteUri" Style="cursor: pointer; display: flex;"><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.Lightbulb" Style="margin-right: 4px;" />@AutoMl.Model</MudLink>
+                            <MudLink Href="@NavManager.ToAbsoluteUri("trainings/" + Training.Training.Id + "/models/" + @models.Id).AbsoluteUri" Style="cursor: pointer; display: flex;"><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.Lightbulb" Style="margin-right: 4px;" />@(models.MlModelType.Properties.ContainsKey("skos:prefLabel") ? models.MlModelType.Properties["skos:prefLabel"] : "")</MudLink>
                         </MudTd>
-                        <MudTd>@AutoMl.Library</MudTd>
-                        <MudTd>@(String.Format("{0:0.00}", AutoMl.TestScore))</MudTd>
-                        <MudTd>@(String.Format("{0:0}", AutoMl.Predictiontime)) ms</MudTd>
-                        <MudTd>@AutoMl.Runtime s</MudTd>
-                        <MudTd><TrainingMenu TrainingId="@Training.ID" Status="@AutoMl"></TrainingMenu></MudTd>
+                            <MudTd>@(models.MlLibrary.Properties.ContainsKey("skos:prefLabel") ? models.MlLibrary.Properties["skos:prefLabel"] : "")</MudTd>
+                        <MudTd>@(String.Format("{0:0.00}", models.TestScore))</MudTd>
+                        <MudTd>@(String.Format("{0:0}", models.PredictionTime)) ms</MudTd>
+                        <MudTd>
+                            @if (models.Status == "busy")
+                            {
+                                @(DateTime.UtcNow.Subtract(models.RuntimeProfile.StartTime).TotalSeconds.ToString("0 s"))
+                            }
+                            else
+                            {
+                                @(models.RuntimeProfile.EndTime.Subtract(models.RuntimeProfile.StartTime).TotalSeconds.ToString("0 s"))
+                            }
+                        </MudTd>
                     </RowTemplate>
                     <PagerContent>
                         <MudTablePager />
@@ -97,17 +105,17 @@
     private Timer _timer;
     private string searchString = "";
 
-    private bool FilterFunc(AutoMLStatusDto element)
+    private bool FilterFunc(ModelDto element)
     {
         if (string.IsNullOrWhiteSpace(searchString))
             return true;
-        if (element.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+        if (element.AutoMlSolution.Properties["skos:prefLabel"].Contains(searchString, StringComparison.OrdinalIgnoreCase))
             return true;
         if (element.Status.Contains(searchString, StringComparison.OrdinalIgnoreCase))
             return true;
-        if (element.Library.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+        if (element.MlLibrary.Properties["skos:prefLabel"].Contains(searchString, StringComparison.OrdinalIgnoreCase))
             return true;
-        if (element.Model.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+        if (element.MlModelType.Properties["skos:prefLabel"].Contains(searchString, StringComparison.OrdinalIgnoreCase))
             return true;
         return false;
     } 
@@ -116,23 +124,36 @@
         DisposeTimer();
     }
 
+    SemaphoreSlim timerSemaphore = new SemaphoreSlim(1);
     private async void RefreshTraining(object sender, ElapsedEventArgs e)
     {
         await InvokeAsync(async () =>
         {
+            var gotLock = timerSemaphore.Wait(0);
+            if (!gotLock)
+            {
+                return;
+            }
             try
             {
-                if (_training.Status != "busy")
+                if (_training.Training.Status != "busy")
                 {
                     DisposeTimer();
+                    return;
                 }
                 
-                ApiResponseDto apiResponse = await apiClient.GetTraining(new GetTrainingRequestDto { TrainingId = Training.ID });
+                ApiResponseDto apiResponse = await apiClient.GetTraining(new GetTrainingRequestDto { TrainingId = Training.Training.Id });
 
                 if (apiResponse.IsSuccessStatusCode)
                 {
                     _training = Newtonsoft.Json.JsonConvert.DeserializeObject<GetTrainingResponseDto>(apiResponse.Result.ToString());
                     StateHasChanged();
+                }
+                //Training does not exist anymore
+                else if (apiResponse.StatusCode == 404)
+                {
+                    DisposeTimer();
+                    return;
                 }
                 else
                 {
@@ -143,7 +164,10 @@
             catch (Exception ex)
             {
                 viewNotifier.Show(ex.GetBaseException().Message, ViewNotifierType.Error, L["Operation Failed"]);
-                _timer.Elapsed -= RefreshTraining;
+            }
+            finally
+            {
+                timerSemaphore.Release();
             }
         });
     }

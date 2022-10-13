@@ -45,14 +45,14 @@
         {
             GetDatasetRequestDto datasetRequest = new GetDatasetRequestDto()
                 {
-                    Identifier = Id
+                    DatasetId = Id
                 };
             ApiResponseDto apiResponse = await apiClient.GetDataset(datasetRequest);
 
             if (apiResponse.IsSuccessStatusCode)
             {
                 _dataset = Newtonsoft.Json.JsonConvert.DeserializeObject<GetDatasetResponseDto>(apiResponse.Result.ToString());
-                _pageTitle = L["Dataset {0}", _dataset.Name];
+                _pageTitle = L["Dataset {0}", _dataset.Dataset.Name];
                 viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
             }
             else

@@ -9,10 +9,10 @@ namespace BlazorBoilerplate.Shared.Dto.Dataset
 {
     public class GetDatasetsResponseDto
     {
-        public List<GetDatasetResponseDto> Datasets { get; set; }
+        public List<DatasetDto> Datasets { get; set; }
         public GetDatasetsResponseDto()
         {
-            Datasets = new List<GetDatasetResponseDto>();
+            Datasets = new List<DatasetDto>();
         }
     }
 }

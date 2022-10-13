@@ -8,7 +8,7 @@ namespace BlazorBoilerplate.Shared.Dto.Dataset
 {
     public class SetDatasetFileConfigurationRequestDto
     {
-        public string DatasetIdentifier { get; set; }
+        public string DatasetId { get; set; }
         public Dictionary<string, dynamic> Configuration { get; set; }
     }
 }

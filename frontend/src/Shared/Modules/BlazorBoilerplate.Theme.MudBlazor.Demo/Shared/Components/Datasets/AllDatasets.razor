@@ -25,26 +25,26 @@
         }
         else
         {
-            <MudTable Items="@Datasets.Datasets" style="width:stretch" class="mat-elevation-z5" AllowSelection="false" Dense="true" Filter="new Func<GetDatasetResponseDto,bool>(FilterFunc)">
+            <MudTable Items="@Datasets.Datasets" style="width:stretch" class="mat-elevation-z5" AllowSelection="false" Dense="true" Filter="new Func<DatasetDto,bool>(FilterFunc)">
                 <ToolBarContent>
                     <MudSpacer />
                     <MudTextField @bind-Value="searchString" Placeholder="@L["Search for name or type"]" Adornment="Adornment.Start"
                                     AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
                 </ToolBarContent>
                 <HeaderContent>
-                    <MudTh><MudTableSortLabel SortBy="new Func<GetDatasetResponseDto, object>(x=>x.Name)">@L["Name"]</MudTableSortLabel></MudTh>
-                    <MudTh><MudTableSortLabel SortBy="@(new Func<GetDatasetResponseDto, object>(x=>x.Type.Properties["skos:prefLabel"]))">@L["Type"]</MudTableSortLabel></MudTh>
-                    <MudTh><MudTableSortLabel SortBy="new Func<GetDatasetResponseDto, object>(x=>x.Size)">@L["Size"]</MudTableSortLabel></MudTh>
-                    <MudTh><MudTableSortLabel SortBy="new Func<GetDatasetResponseDto, object>(x=>x.Creation_date)">@L["Date"]</MudTableSortLabel></MudTh>
+                    <MudTh><MudTableSortLabel SortBy="new Func<DatasetDto, object>(x=>x.Name)">@L["Name"]</MudTableSortLabel></MudTh>
+                    <MudTh><MudTableSortLabel SortBy="@(new Func<DatasetDto, object>(x=>x.Type.Properties["skos:prefLabel"]))">@L["Type"]</MudTableSortLabel></MudTh>
+                    <MudTh><MudTableSortLabel SortBy="@(new Func<DatasetDto, object>(x=>x.Analysis["size_bytes"]))">@L["Size"]</MudTableSortLabel></MudTh>
+                    <MudTh><MudTableSortLabel SortBy="@(new Func<DatasetDto, object>(x=>x.Analysis["creation_date"]))">@L["Date"]</MudTableSortLabel></MudTh>
                     <MudTh></MudTh>   
                 </HeaderContent>
                 <RowTemplate>
                     <MudTd >
-                        <MudLink Href="@NavManager.ToAbsoluteUri("datasets/" + @context.Identifier).AbsoluteUri" Style="cursor: pointer; display: flex;"><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.ListAlt" Style="margin-right: 4px;" />@context.Name</MudLink>
+                        <MudLink Href="@NavManager.ToAbsoluteUri("datasets/" + @context.Id).AbsoluteUri" Style="cursor: pointer; display: flex;"><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.ListAlt" Style="margin-right: 4px;" />@context.Name</MudLink>
                     </MudTd>
-                    <MudTd >@L[context.Type.Properties["skos:prefLabel"]]</MudTd>
-                    <MudTd >@FormatBytes(context.Size)</MudTd>
-                    <MudTd  style="white-space:nowrap;">@context.Creation_date.ToString("yyyy-MM-dd")</MudTd>
+                    <MudTd >@L[context.Type.Properties.ContainsKey("skos:prefLabel") ? context.Type.Properties["skos:prefLabel"] : ""]</MudTd>
+                    <MudTd>@FormatBytes(context.Analysis["size_bytes"])</MudTd>
+                    <MudTd style="white-space:nowrap;">@context.Analysis["creation_date"].ToString("yyyy-MM-dd")</MudTd>
                     <MudTd><DatasetMenu Dataset="@context" OnDeleteCompleted="@OnDeleteDatasetCompleted" /></MudTd>
                 </RowTemplate>
                 <PagerContent>
@@ -79,7 +79,7 @@
     public EventCallback OnDeleteDatasetCompleted { get; set; }
     private string searchString = "";
     
-    private bool FilterFunc(GetDatasetResponseDto element)
+    private bool FilterFunc(DatasetDto element)
     {
         if (string.IsNullOrWhiteSpace(searchString))
             return true;
@@ -91,7 +91,8 @@
     } 
     private void OnOpenUpload()
     {
-        fileUploader.IsUploadDialogOpen = true;
+        fileUploader.IsPredictionDatasetToUpload = false;
+        fileUploader.IsUploadDatasetDialogOpen = true;
         fileUploader.RefreshUploadComponentCallback();
     }
     public string FormatBytes(long bytes)

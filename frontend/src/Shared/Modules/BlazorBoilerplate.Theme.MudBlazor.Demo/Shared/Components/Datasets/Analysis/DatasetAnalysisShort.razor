@@ -18,7 +18,7 @@
         <CardHeaderActions>
             @if (_dataset != null)
             {
-                <MudButton Href="@NavManager.ToAbsoluteUri("datasets/" + @Dataset.Identifier + "/analysis").AbsoluteUri"
+                <MudButton Href="@NavManager.ToAbsoluteUri("datasets/" + @Dataset.Dataset.Id + "/analysis").AbsoluteUri"
                        Variant="Variant.Filled"
                        EndIcon="@Icons.Material.Filled.ReadMore"
                        Color="Color.Secondary"
@@ -78,7 +78,7 @@
             isPreviewRequestRunning = true;
             GetDatasetAnalysisRequestDto datasetRequest = new GetDatasetAnalysisRequestDto()
                 {
-                    DatasetIdentifier = _dataset.Identifier,
+                    DatasetId = _dataset.Dataset.Id,
                     GetShortPreview = true
                 };
             ApiResponseDto apiResponse = await apiClient.GetDatasetAnalysis(datasetRequest);

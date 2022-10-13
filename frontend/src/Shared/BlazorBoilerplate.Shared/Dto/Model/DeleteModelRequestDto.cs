@@ -8,6 +8,6 @@ namespace BlazorBoilerplate.Shared.Dto.Model
 {
     public class DeleteModelRequestDto
     {
-        public string Identifier { get; set; }
+        public string ModelId { get; set; }
     }
 }

@@ -8,6 +8,6 @@ namespace BlazorBoilerplate.Shared.Dto.Dataset
 {
     public class DeleteDatasetRequestDto
     {
-        public string Identifier { get; set; }
+        public string DatasetId { get; set; }
     }
 }

@@ -1,15 +1,17 @@
 import json, time
 from rule_engine import Rule, Context, DataType, type_resolver_from_dict
-from Controller_bgrpc import DataType as GrpcDataType
-from .AbstractStrategy import IAbstractStrategy
-from ..Controller import StrategyController
-from ..Blackboard import Blackboard
+from AdapterRuntimeManagerAgent import AdapterRuntimeManagerAgent
+from ControllerBGRPC import DataType as GrpcDataType
+from IAbstractStrategy import IAbstractStrategy
+from StrategyController import StrategyController
+from Blackboard import Blackboard
 
 class DataPreparationStrategyController(IAbstractStrategy):
-    def RegisterRules(self):
+    def register_rules(self):
         data_preparation_context = Context(
             type_resolver=type_resolver_from_dict({
                 'phase': DataType.STRING,
+                'dataset_type' : DataType.STRING,
                 'enabled_strategies': DataType.ARRAY(DataType.STRING, value_type_nullable=False),
                 'dataset_analysis': DataType.MAPPING(
                     key_type=DataType.STRING,
@@ -18,66 +20,66 @@ class DataPreparationStrategyController(IAbstractStrategy):
             })
         )
 
-        self.RegisterRule(
+        self.register_rule(
             'data_preparation.ignore_redundant_features',
-            Rule("phase == 'preprocessing' and not dataset_analysis['duplicate_columns'].is_empty", context=data_preparation_context),
-            self.DoIgnoreRedundantFeatures
+            Rule("phase == 'preprocessing' and not (dataset_type == ':image') and not dataset_analysis['duplicate_columns'].is_empty", context=data_preparation_context),
+            self.do_ignore_redundant_features
         )
 
-        self.RegisterRule(
+        self.register_rule(
             'data_preparation.ignore_redundant_samples',
-            Rule("phase == 'preprocessing' and not dataset_analysis['duplicate_rows'].is_empty", context=data_preparation_context),
-            self.DoIgnoreRedundantSamples
+            Rule("phase == 'preprocessing' and not (dataset_type == ':image') and not dataset_analysis['duplicate_rows'].is_empty", context=data_preparation_context),
+            self.do_ignore_redundant_samples
         )
 
-        self.RegisterRule(
+        self.register_rule(
             'data_preparation.split_large_datasets',
-            Rule("phase == 'preprocessing' and dataset_analysis['number_of_rows'] > 10000", context=data_preparation_context),
-            self.DoSplitLargeDatasets
+            Rule("phase == 'preprocessing' and not (dataset_type == ':image') and dataset_analysis['number_of_rows'] > 10000", context=data_preparation_context),
+            self.do_split_large_datasets
         )
 
-        self.RegisterRule(
+        self.register_rule(
             'data_preparation.finish_preprocessing',
             Rule("""
                 phase == 'preprocessing' and
-                not dataset_analysis.is_empty and
+                ((dataset_type == ':image') or (not dataset_analysis.is_empty)) and
                 ('data_preparation.ignore_redundant_features' not in enabled_strategies or dataset_analysis['duplicate_columns'].is_empty) and
                 ('data_preparation.ignore_redundant_samples' not in enabled_strategies or dataset_analysis['duplicate_rows'].is_empty) and
                 ('data_preparation.split_large_datasets' not in enabled_strategies or dataset_analysis['number_of_rows'] <= 10000)
             """, context=data_preparation_context),
-            self.DoFinishPreprocessing
+            self.do_finish_preprocessing
         )
 
         # Force enable this strategy to ensure preprocessing always finishes
-        self.controller.EnableStrategy('data_preparation.finish_preprocessing')
+        self.controller.enable_strategy('data_preparation.finish_preprocessing')
 
-    def DoIgnoreRedundantFeatures(self, state: dict, blackboard: Blackboard, controller: StrategyController):
+    def do_ignore_redundant_features(self, state: dict, blackboard: Blackboard, controller: StrategyController):
         duplicate_columns = state.get("dataset_analysis", {}).get("duplicate_columns", [])
         ignored_columns = []
 
-        agent = controller.blackboard.GetAgent('automl-session')
-        if not agent or not agent.session:
-            raise RuntimeError('Could not access AutoML session agent!')
-        dataset_configuration = json.loads(agent.session.configuration.dataset_configuration)
+        agent: AdapterRuntimeManagerAgent = controller.blackboard.get_agent('training-runtime')
+        if not agent or not agent.__adapter_runtime_manager:
+            raise RuntimeError('Could not access Adapter Runtime Manager Agent!')
+        dataset_configuration = json.loads(agent.__adapter_runtime_manager.__request.dataset_configuration)
 
         for column_a, column_b in duplicate_columns:
-            self._log.info(f'Encountered redundant feature "{column_b}" (same as "{column_a}"), ingoring the column.')
+            self._log.info(f'do_ignore_redundant_features: Encountered redundant feature "{column_b}" (same as "{column_a}"), ingoring the column.')
             dataset_configuration['features'][column_b] = GrpcDataType.DATATYPE_IGNORE
             ignored_columns.append(column_b)
 
-        agent.session.configuration.dataset_configuration = json.dumps(dataset_configuration) 
+        agent.__adapter_runtime_manager.__request.dataset_configuration = json.dumps(dataset_configuration) 
 
         # IDEA: Update dataset analysis accordingly (may not be neccessary)
-        blackboard.UpdateState('dataset_analysis', { 'duplicate_columns': [] }, True)
+        blackboard.update_state('dataset_analysis', { 'duplicate_columns': [] }, True)
 
         # Finished action (should only run once, therefore disable the strategy rule)
-        controller.DisableStrategy('data_preparation.ignore_redundant_features')
+        controller.disable_strategy('data_preparation.ignore_redundant_features')
 
         return { 'ignored_columns': ignored_columns }
 
-    def DoIgnoreRedundantSamples(self, state: dict, blackboard: Blackboard, controller: StrategyController):
+    def do_ignore_redundant_samples(self, state: dict, blackboard: Blackboard, controller: StrategyController):
         duplicate_rows = state.get("dataset_analysis", {}).get("duplicate_rows")
-        self._log.info(f'Encountered redundant samples ({duplicate_rows}), omitting these rows..')
+        self._log.info(f'do_ignore_redundant_samples: Encountered redundant samples ({duplicate_rows}), omitting these rows..')
 
         # TODO: Re-implement the row omitting logic
         # Preparation (maybe reusable utility function):
@@ -87,25 +89,25 @@ class DataPreparationStrategyController(IAbstractStrategy):
         # Remove rows that should be omitted
         
         # IDEA: Update dataset analysis accordingly (may not be neccessary)
-        blackboard.UpdateState('dataset_analysis', { 'duplicate_rows': [] }, True)
+        blackboard.update_state('dataset_analysis', { 'duplicate_rows': [] }, True)
 
         # Finished action (should only run once, therefore disable the strategy rule)
-        controller.DisableStrategy('data_preparation.ignore_redundant_samples')
+        controller.disable_strategy('data_preparation.ignore_redundant_samples')
 
-    def DoSplitLargeDatasets(self, state: dict, blackboard: Blackboard, controller: StrategyController):
+    def do_split_large_datasets(self, state: dict, blackboard: Blackboard, controller: StrategyController):
         number_of_rows = state.get("dataset_analysis", {}).get("number_of_rows")
-        self._log.info(f'Encountered large input dataset ({number_of_rows} rows), splitting..')
+        self._log.info(f'do_split_large_datasets: do_ignore_redundant_samples: Encountered large input dataset ({number_of_rows} rows), splitting..')
 
         # TODO: Re-implement the data splitting (check new structure!)
         time.sleep(5) # FIXME: Remove this line, only for debugging
 
         # IDEA: Update dataset analysis accordingly (may not be neccessary)
-        blackboard.UpdateState('dataset_analysis', { 'number_of_rows': 10000 }, True)
+        blackboard.update_state('dataset_analysis', { 'number_of_rows': 10000 }, True)
 
         # Finished action (should only run once, therefore disable the strategy rule)
-        controller.DisableStrategy('data_preparation.split_large_datasets')
+        controller.disable_strategy('data_preparation.split_large_datasets')
 
-    def DoFinishPreprocessing(self, state: dict, blackboard: Blackboard, controller: StrategyController):
-        self._log.info(f'Finished data preparation, advancing to phase "running"..')
-        controller.SetPhase('running')
-        controller.DisableStrategy('data_preparation.finish_preprocessing')
+    def do_finish_preprocessing(self, state: dict, blackboard: Blackboard, controller: StrategyController):
+        self._log.info(f'do_finish_preprocessing: Finished data preparation, advancing to phase "running"..')
+        controller.set_phase('running')
+        controller.disable_strategy('data_preparation.finish_preprocessing')

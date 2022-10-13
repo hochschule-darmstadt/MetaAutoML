@@ -64,11 +64,11 @@
     {
         try
         {
-            ApiResponseDto apiResponse = await apiClient.GetModelDownload(new GetAutoMlModelRequestDto { TrainingId = Model.Model.TrainingId, AutoMl = Model.Model.ID });
+            ApiResponseDto apiResponse = await apiClient.DownloadModel(new DownloadModelRequestDto { ModelId = Model.Model.Id });
 
             if (apiResponse.IsSuccessStatusCode)
             {
-                GetAutoMlModelResponseDto file = Newtonsoft.Json.JsonConvert.DeserializeObject<GetAutoMlModelResponseDto>(apiResponse.Result.ToString());
+                DownloadModelResponseDto file = Newtonsoft.Json.JsonConvert.DeserializeObject<DownloadModelResponseDto>(apiResponse.Result.ToString());
                 viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
                 var stream = new MemoryStream(file.Content);
                 using var streamRef = new DotNetStreamReference(stream: stream);

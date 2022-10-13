@@ -1,10 +1,10 @@
 ﻿using BlazorBoilerplate.Shared.Dto;
-using BlazorBoilerplate.Shared.Dto.AutoML;
 using BlazorBoilerplate.Shared.Dto.Dataset;
 using BlazorBoilerplate.Shared.Dto.Db;
 using BlazorBoilerplate.Shared.Dto.Email;
 using BlazorBoilerplate.Shared.Dto.Model;
 using BlazorBoilerplate.Shared.Dto.Ontology;
+using BlazorBoilerplate.Shared.Dto.Prediction;
 using BlazorBoilerplate.Shared.Dto.Training;
 using BlazorBoilerplate.Shared.Extensions;
 using BlazorBoilerplate.Shared.Interfaces;
@@ -62,135 +62,146 @@ namespace BlazorBoilerplate.Shared.Services
         {
             return await httpClient.PostJsonAsync<ApiResponseDto>("api/Email/SendTestEmail", email);
         }
-        public async Task<ApiResponseDto> GetDatasetTypes()
-        {
-            return await httpClient.GetJsonAsync<ApiResponseDto>("api/Dataset/GetDatasetTypes");
-        }
 
+        #region OMA-ML USER MESSAGES
+        public async Task<ApiResponseDto> GetHomeOverviewInformation()
+        {
+            return await httpClient.GetJsonAsync<ApiResponseDto>("api/User/GetHomeOverviewInformations");
+        }
+        #endregion
+
+        #region OMA-ML DATASET MESSAGES
+        public async Task<ApiResponseDto> UploadDataset(UploadDatasetRequestDto request)
+        {
+            return await httpClient.PostJsonAsync<ApiResponseDto>("api/Dataset/UploadDataset", request);
+        }
         public async Task<ApiResponseDto> GetDatasets()
         {
             return await httpClient.GetJsonAsync<ApiResponseDto>("api/Dataset/GetDatasets");
         }
-        public async Task<ApiResponseDto> GetDataset(GetDatasetRequestDto name)
+        public async Task<ApiResponseDto> GetDataset(GetDatasetRequestDto request)
         {
-            return await httpClient.PostJsonAsync<ApiResponseDto>("api/Dataset/GetDataset", name);
+            return await httpClient.PostJsonAsync<ApiResponseDto>("api/Dataset/GetDataset", request);
         }
-        public async Task<ApiResponseDto> GetDatasetPreview(GetDatasetPreviewRequestDto dataset)
+        public async Task<ApiResponseDto> GetDatasetPreview(GetDatasetPreviewRequestDto request)
         {
-            return await httpClient.PostJsonAsync<ApiResponseDto>("api/Dataset/GetDatasetPreview", dataset);
+            return await httpClient.PostJsonAsync<ApiResponseDto>("api/Dataset/GetDatasetPreview", request);
+        }
+        public async Task<ApiResponseDto> GetTabularDatasetColumn(GetTabularDatasetColumnRequestDto request)
+        {
+            return await httpClient.PostJsonAsync<ApiResponseDto>("api/Dataset/GetTabularDatasetColumn", request);
+        }
+        public async Task<ApiResponseDto> SetDatasetFileConfiguration(SetDatasetFileConfigurationRequestDto request)
+        {
+            return await httpClient.PostJsonAsync<ApiResponseDto>("api/Dataset/SetDatasetFileConfiguration", request);
+        }
+        public async Task<ApiResponseDto> GetDatasetAnalysis(GetDatasetAnalysisRequestDto request)
+        {
+            return await httpClient.PostJsonAsync<ApiResponseDto>("api/Dataset/GetDatasetAnalysis", request);
+        }
+        public async Task<ApiResponseDto> DeleteDataset(DeleteDatasetRequestDto request)
+        {
+            return await httpClient.PostJsonAsync<ApiResponseDto>("api/Dataset/DeleteDataset", request);
+        }
+        #endregion
+
+        #region OMA-ML TRAINING MESSAGES
+        public async Task<ApiResponseDto> CreateTraining(CreateTrainingRequestDto request)
+        {
+            return await httpClient.PostJsonAsync<ApiResponseDto>("api/Training/CreateTraining", request);
+        }
+        public async Task<ApiResponseDto> GetTrainings()
+        {
+            return await httpClient.GetJsonAsync<ApiResponseDto>("api/Training/GetTrainings");
+        }
+        public async Task<ApiResponseDto> GetTraining(GetTrainingRequestDto request)
+        {
+            return await httpClient.PostJsonAsync<ApiResponseDto>("api/Training/GetTraining", request);
+        }
+        public async Task<ApiResponseDto> DeleteTraining(DeleteTrainingRequestDto request)
+        {
+            return await httpClient.PostJsonAsync<ApiResponseDto>("api/Training/DeleteTraining", request);
+        }
+        #endregion
+
+        #region OMA-ML MODEL MESSAGES
+
+        public async Task<ApiResponseDto> GetModels(GetModelsRequestDto request)
+        {
+            return await httpClient.PostJsonAsync<ApiResponseDto>("api/Model/GetModels", request);
+        }
+        public async Task<ApiResponseDto> GetModel(GetModelRequestDto request)
+        {
+            return await httpClient.PostJsonAsync<ApiResponseDto>("api/Model/GetModel", request);
+        }
+        public async Task<ApiResponseDto> GetModelExplanation(GetModelExplanationRequestDto request)
+        {
+            return await httpClient.PostJsonAsync<ApiResponseDto>("api/Model/GetModelExplanation", request);
+        }
+        public async Task<ApiResponseDto> ModelPrediction(ModelPredictionRequestDto request)
+        {
+            return await httpClient.PostJsonAsync<ApiResponseDto>("api/Model/ModelPrediction", request);
+        }
+        public async Task<ApiResponseDto> DownloadModel(DownloadModelRequestDto request)
+        {
+            return await httpClient.PostJsonAsync<ApiResponseDto>("api/Model/DownloadModel", request);
+        }
+        public async Task<ApiResponseDto> DeleteModel(DeleteModelRequestDto request)
+        {
+            return await httpClient.PostJsonAsync<ApiResponseDto>("api/Model/DeleteModel", request);
+        }
+        #endregion
+
+        #region OMA-ML ONTOLOGY MESSAGES
+        public async Task<ApiResponseDto> GetAutoMlSolutionsForConfiguration(GetAutoMlSolutionsForConfigurationRequestDto request)
+        {
+            return await httpClient.PostJsonAsync<ApiResponseDto>("api/Ontology/GetAutoMlSolutionsForConfiguration", request);
+        }
+        public async Task<ApiResponseDto> GetTasksForDatasetType(GetTasksForDatasetTypeRequestDto request)
+        {
+            return await httpClient.PostJsonAsync<ApiResponseDto>("api/Ontology/GetTasksForDatasetType", request);
+        }
+        public async Task<ApiResponseDto> GetDatasetTypes()
+        {
+            return await httpClient.GetJsonAsync<ApiResponseDto>("api/Ontology/GetDatasetTypes");
         }
 
-        public async Task<ApiResponseDto> UploadDataset(FileUploadRequestDto file)
+        public async Task<ApiResponseDto> GetMlLibrariesForTask(GetMlLibrariesForTaskRequestDto request)
         {
-            return await httpClient.PostJsonAsync<ApiResponseDto>("api/Dataset/Upload", file);
-        }
-        public async Task<ApiResponseDto> UploadDatasetFile(MultipartFormDataContent file)
-        {
-            return await httpClient.PostFileAsync<ApiResponseDto>("api/Dataset/UploadData", file);
-        }
-
-        public async Task<ApiResponseDto> GetTasks(GetSupportedMlLibrariesRequestDto dataset)
-        {
-            return await httpClient.PostJsonAsync<ApiResponseDto>("api/Ontology/GetTasks", dataset);
-        }
-
-        public async Task<ApiResponseDto> GetTabularDatasetColumn(GetTabularDatasetColumnRequestDto dataset)
-        {
-            return await httpClient.PostJsonAsync<ApiResponseDto>("api/Dataset/GetTabularDatasetColumn", dataset);
-        }
-
-        public async Task<ApiResponseDto> StartAutoML(StartAutoMLRequestDto automl)
-        {
-            return await httpClient.PostJsonAsync<ApiResponseDto>("api/AutoMl/StartAuto", automl);
-        }
-
-        public async Task<ApiResponseDto> GetTrainingIds(GetTrainingIdsRequestDto trainings)
-        {
-            return await httpClient.PostJsonAsync<ApiResponseDto>("api/Training/GetTrainingIds", trainings);
-        }
-
-        public async Task<ApiResponseDto> GetTraining(GetTrainingRequestDto training)
-        {
-            return await httpClient.PostJsonAsync<ApiResponseDto>("api/Training/GetTraining", training);
-        }
-
-        public async Task<ApiResponseDto> GetAllTrainings(GetAllTrainingsRequestDto training)
-        {
-            return await httpClient.PostJsonAsync<ApiResponseDto>("api/Training/GetAllTrainings", training);
-        }
-
-        public async Task<ApiResponseDto> GetModelDownload(GetAutoMlModelRequestDto automl)
-        {
-            return await httpClient.PostJsonAsync<ApiResponseDto>("api/Model/GetModelDownload", automl);
-        }
-
-        public async Task<ApiResponseDto> GetModel(GetModelRequestDto model)
-        {
-            return await httpClient.PostJsonAsync<ApiResponseDto>("api/Model/GetModel", model);
-        }
-
-        public async Task<ApiResponseDto> GetModels(GetModelsRequestDto models)
-        {
-            return await httpClient.PostJsonAsync<ApiResponseDto>("api/Model/GetModels", models);
-        }
-        public async Task<ApiResponseDto> GetCompatibleAutoMlSolutions(GetCompatibleAutoMlSolutionsRequestDto request)
-        {
-            return await httpClient.PostJsonAsync<ApiResponseDto>("api/Ontology/GetCompatibleAutoMlSolutions", request);
-        }
-
-        public async Task<ApiResponseDto> GetSupportedMlLibraries(GetSupportedMlLibrariesRequestDto task)
-        {
-            return await httpClient.PostJsonAsync<ApiResponseDto>("api/Ontology/GetSupportedMlLibraries", task);
-        }
-
-        public async Task<ApiResponseDto> GetDatasetCompatibleTasks(GetDatasetCompatibleTasksRequestDto dataset)
-        {
-            return await httpClient.PostJsonAsync<ApiResponseDto>("api/Ontology/GetDatasetCompatibleTasks", dataset);
+            return await httpClient.PostJsonAsync<ApiResponseDto>("api/Ontology/GetMlLibrariesForTask", request);
         }
 
         public async Task<ApiResponseDto> GetAvailableStrategies(GetAvailableStrategiesRequestDto request)
         {
             return await httpClient.PostJsonAsync<ApiResponseDto>("api/Ontology/GetAvailableStrategies", request);
         }
+        #endregion
 
-        public async Task<ApiResponseDto> TestAutoML(TestAutoMLRequestDto automl)
+        #region OMA-ML PREDICTION DATASET MESSAGES
+        async public Task<ApiResponseDto> UploadPrediction(UploadPredictionRequestDto request)
         {
-            return await httpClient.PostJsonAsync<ApiResponseDto>("api/AutoMl/TestAutoML", automl);
+            return await httpClient.PostJsonAsync<ApiResponseDto>("api/Prediction/UploadPrediction", request);
         }
 
-        public async Task<ApiResponseDto> GetHomeOverviewInformation()
+        async public Task<ApiResponseDto> GetPrediction(GetPredictionRequestDto request)
         {
-            return await httpClient.GetJsonAsync<ApiResponseDto>("api/GeneralInformation/GetHomeOverviewInformations");
+            return await httpClient.PostJsonAsync<ApiResponseDto>("api/Prediction/GetPrediction", request);
+        }
+        async public Task<ApiResponseDto> GetPredictions(GetPredictionsRequestDto request)
+        {
+            return await httpClient.PostJsonAsync<ApiResponseDto>("api/Prediction/GetPredictions", request);
         }
 
-        public async Task<ApiResponseDto> SetDatasetConfiguration(SetDatasetFileConfigurationRequestDto dataset)
+        async public Task<ApiResponseDto> DownloadPrediction(DownloadPredictionRequestDto request)
         {
-            return await httpClient.PostJsonAsync<ApiResponseDto>("api/Dataset/SetDatasetConfiguration", dataset);
+            return await httpClient.PostJsonAsync<ApiResponseDto>("api/Prediction/DownloadPrediction", request);
         }
 
-        public async Task<ApiResponseDto> GetDatasetAnalysis(GetDatasetAnalysisRequestDto dataset)
+        async public Task<ApiResponseDto> DeletePrediction(DeletePredictionRequestDto request)
         {
-            return await httpClient.PostJsonAsync<ApiResponseDto>("api/Dataset/GetDatasetAnalysis", dataset);
+            return await httpClient.PostJsonAsync<ApiResponseDto>("api/Prediction/DeletePrediction", request);
         }
+        #endregion
 
-        public async Task<ApiResponseDto> GetModelExplanation(GetModelExplanationRequestDto model)
-        {
-            return await httpClient.PostJsonAsync<ApiResponseDto>("api/Model/GetModelExplanation", model);
-        }
-
-        public async Task<ApiResponseDto> DeleteDataset(DeleteDatasetRequestDto request)
-        {
-            return await httpClient.PostJsonAsync<ApiResponseDto>("api/Dataset/DeleteDataset", request);
-        }
-
-        public async Task<ApiResponseDto> DeleteTraining(DeleteModelRequestDto request)
-        {
-            return await httpClient.PostJsonAsync<ApiResponseDto>("api/Training/DeleteTraining", request);
-        }
-
-        public async Task<ApiResponseDto> DeleteModel(DeleteTrainingRequestDto request)
-        {
-            return await httpClient.PostJsonAsync<ApiResponseDto>("api/Model/DeleteModel", request);
-        }
     }
 }

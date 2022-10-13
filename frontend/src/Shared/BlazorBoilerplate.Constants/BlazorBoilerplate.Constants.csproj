@@ -6,6 +6,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Protos\PredictionRelatedMessages.proto" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Deedle" Version="2.5.0" />
     <PackageReference Include="Google.Protobuf" Version="3.21.2" />
     <PackageReference Include="Grpc.Net.Client" Version="2.47.0" />
@@ -16,16 +20,14 @@
     </PackageReference>
     <PackageReference Include="Microsoft.Data.Analysis" Version="0.19.1" />
   </ItemGroup>
-
 	<ItemGroup>
-		<Protobuf Include="Protos/Common.proto" GrpcServices="Client" ProtoRoot="Protos\" />
-		<Protobuf Include="Protos/Enumerations.proto" GrpcServices="Client" ProtoRoot="Protos\" />
 		<Protobuf Include="Protos/ControllerService.proto" GrpcServices="Client" ProtoRoot="Protos\" />
 		<Protobuf Include="Protos/DatasetRelatedMessages.proto" GrpcServices="Client" ProtoRoot="Protos\" />
+		<Protobuf Include="Protos/Enumerations.proto" GrpcServices="Client" ProtoRoot="Protos\" />
 		<Protobuf Include="Protos/ModelRelatedMessages.proto" GrpcServices="Client" ProtoRoot="Protos\" />
-		<Protobuf Include="Protos/TestingRelatedMessages.proto" GrpcServices="Client" ProtoRoot="Protos\" />
+		<Protobuf Include="Protos/OntologyRelatedMessages.proto" GrpcServices="Client" ProtoRoot="Protos\" />
 		<Protobuf Include="Protos/TrainingRelatedMessages.proto" GrpcServices="Client" ProtoRoot="Protos\" />
 		<Protobuf Include="Protos/UserRelatedMessages.proto" GrpcServices="Client" ProtoRoot="Protos\" />
-		<Protobuf Include="Protos/WizzardMessages.proto" GrpcServices="Client" ProtoRoot="Protos\" />
+		<Protobuf Include="Protos\PredictionRelatedMessages.proto" GrpcServices="Client" ProtoRoot="Protos\" />
 	</ItemGroup>
 </Project>

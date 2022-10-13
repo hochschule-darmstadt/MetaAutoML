@@ -24,7 +24,7 @@
 }
 else
 {
-    @switch (_dataset.Type.ID)
+    @switch (_dataset.Dataset.Type.ID)
     {
         case ":time_series":
         case ":text":
@@ -55,17 +55,17 @@ else
 
     private GetDatasetResponseDto _dataset;
     private string _datasetTitle = "";
-    private StartAutoMLRequestDto _automlRequest;
+    private CreateTrainingRequestDto _automlRequest;
     private List<BreadcrumbItem> _breadcrumbs = new List<BreadcrumbItem>();
 
     protected async override void OnInitialized()
     {
-        _automlRequest = new StartAutoMLRequestDto();
-        _automlRequest.DatasetIdentifier = Id;
+        _automlRequest = new CreateTrainingRequestDto();
+        _automlRequest.DatasetId = Id;
         await LoadDataset();
         _breadcrumbs.Add(new BreadcrumbItem(L["Home"], "/", false, Icons.Filled.Home));
         _breadcrumbs.Add(new BreadcrumbItem(L["Datasets"], "/datasets", false, Icons.Filled.ListAlt));
-        _breadcrumbs.Add(new BreadcrumbItem(_datasetTitle, "/datasets/" + _dataset.Identifier, false, Icons.Filled.ListAlt));
+        _breadcrumbs.Add(new BreadcrumbItem(_datasetTitle, "/datasets/" + _dataset.Dataset.Id, false, Icons.Filled.ListAlt));
         _breadcrumbs.Add(new BreadcrumbItem(L["Train"], null, true, Icons.Filled.ModelTraining));
         StateHasChanged();
 
@@ -76,14 +76,14 @@ else
         {
             GetDatasetRequestDto datasetRequest = new GetDatasetRequestDto()
                 {
-                    Identifier = Id
+                    DatasetId = Id
                 };
             ApiResponseDto apiResponse = await apiClient.GetDataset(datasetRequest);
 
             if (apiResponse.IsSuccessStatusCode)
             {
                 _dataset = Newtonsoft.Json.JsonConvert.DeserializeObject<GetDatasetResponseDto>(apiResponse.Result.ToString());
-                _datasetTitle = L["Dataset {0}", _dataset.Name];
+                _datasetTitle = L["Dataset {0}", _dataset.Dataset.Name];
                 viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
             }
             else
@@ -100,30 +100,24 @@ else
     {
         try
         {
-            if (string.IsNullOrEmpty(_automlRequest.Task))
+            if (string.IsNullOrEmpty(_automlRequest.Configuration.Task))
             {
                 viewNotifier.Show("No task selected", ViewNotifierType.Error, L["Operation Failed"]);
                 return;
             }
-            if ((_automlRequest.DatasetType == ":tabular") && (_automlRequest.Configuration.ContainsKey("target") == false))
+            if (((_dataset.Dataset.Type.ID == ":tabular") || (_dataset.Dataset.Type.ID == ":test") || (_dataset.Dataset.Type.ID == ":time_series") || (_dataset.Dataset.Type.ID == ":time_series_longitudinal")) && string.IsNullOrEmpty(_automlRequest.Configuration.Target))
             {
                 viewNotifier.Show("No target selected", ViewNotifierType.Error, L["Operation Failed"]);
                 return;
             }
-            if ((_automlRequest.DatasetType == ":time_series_longitudinal") && (_automlRequest.Configuration.ContainsKey("target") == false))
-            {
-                viewNotifier.Show("No target selected", ViewNotifierType.Error, L["Operation Failed"]);
-                return;
-            }
-            _automlRequest.FileConfiguration = _dataset.Configuration;
-            StartAutoMLResponseDto automlResponse;
-            ApiResponseDto apiResponse = await apiClient.StartAutoML(_automlRequest);
+            CreateTrainingResponseDto automlResponse;
+            ApiResponseDto apiResponse = await apiClient.CreateTraining(_automlRequest);
 
             if (apiResponse.IsSuccessStatusCode)
             {
-                automlResponse = Newtonsoft.Json.JsonConvert.DeserializeObject<StartAutoMLResponseDto>(apiResponse.Result.ToString());
+                automlResponse = Newtonsoft.Json.JsonConvert.DeserializeObject<CreateTrainingResponseDto>(apiResponse.Result.ToString());
                 viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
-                NavManager.NavigateTo("/trainings/" + automlResponse.TrainingId);
+                NavManager.NavigateTo("/trainings/" + automlResponse.TrainingIdentifier);
             }
             else
             {

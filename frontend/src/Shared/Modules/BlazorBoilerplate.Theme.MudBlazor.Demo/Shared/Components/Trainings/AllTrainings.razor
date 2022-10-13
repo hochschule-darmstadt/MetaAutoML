@@ -19,21 +19,22 @@
         }
         else
         {
-            <MudTable Items="@_trainings.Trainings" style="width:stretch" class="mat-elevation-z5" AllowSelection="false" Filter="new Func<GetTrainingResponseDto,bool>(FilterFunc)">
+            <MudTable Items="@_trainings.Trainings" style="width:stretch" class="mat-elevation-z5" AllowSelection="false" Filter="new Func<TrainingDto,bool>(FilterFunc)">
                 <ToolBarContent>
                     <MudSpacer />
                     <MudTextField @bind-Value="searchString" Placeholder="@L["Search for status, task or dataset type"]" Adornment="Adornment.Start"
                                     AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
                 </ToolBarContent>
                 <HeaderContent>
-                    <MudTh><MudTableSortLabel SortBy="new Func<GetTrainingResponseDto, object>(x=>x.StartTime)">@L["Start datetime"]</MudTableSortLabel></MudTh>
-                    <MudTh><MudTableSortLabel SortBy="new Func<GetTrainingResponseDto, object>(x=>x.Status)">@L["Status"]</MudTableSortLabel></MudTh>
-                    <MudTh><MudTableSortLabel SortBy="new Func<GetTrainingResponseDto, object>(x=>x.DatasetName)">@L["Dataset"]</MudTableSortLabel></MudTh>
+                    <MudTh><MudTableSortLabel SortBy="@(new Func<TrainingDto, object>(x=>x.RuntimeProfile.StartTime))">@L["Start datetime"]</MudTableSortLabel></MudTh>
+                    <MudTh><MudTableSortLabel SortBy="new Func<TrainingDto, object>(x=>x.Status)">@L["Status"]</MudTableSortLabel></MudTh>
+                    <MudTh><MudTableSortLabel SortBy="@(new Func<TrainingDto, object>(x=>x.DatasetName))">@L["Dataset"]</MudTableSortLabel></MudTh>
                     <MudTh>@L["Task"]</MudTh>
+                    <MudTh></MudTh>
                 </HeaderContent>
                 <RowTemplate>
                    <MudTd>
-                        <MudLink Href="@NavManager.ToAbsoluteUri("trainings/" + @context.ID).AbsoluteUri" Style="cursor: pointer; display: flex;"><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.ModelTraining" Style="margin-right: 4px;" /> @context.StartTime.ToString("dd/MM/yy HH:mm")</MudLink>
+                        <MudLink Href="@NavManager.ToAbsoluteUri("trainings/" + @context.Id).AbsoluteUri" Style="cursor: pointer; display: flex;"><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.ModelTraining" Style="margin-right: 4px;" /> @context.RuntimeProfile.StartTime.ToString("dd/MM/yy HH:mm")</MudLink>
                    </MudTd>
                     <MudTd>
                         @if (context.Status == "busy")
@@ -46,7 +47,8 @@
                         }
                     </MudTd>
                     <MudTd>@context.DatasetName</MudTd>
-                    <MudTd>@L[context.Task.Properties["skos:prefLabel"]]</MudTd>
+                    <MudTd>@L[context.Configuration.Task.Properties.ContainsKey("skos:prefLabel") ? context.Configuration.Task.Properties["skos:prefLabel"] : ""]</MudTd>
+                    <MudTd><TrainingMenu Training="@context" OnDeleteCompleted="@OnDeleteTrainingCompleted" /></MudTd>
                 </RowTemplate>
                 <PagerContent>
                     <MudTablePager />
@@ -58,7 +60,9 @@
 
 @code {
     [Parameter]
-    public GetAllTrainingsResponseDto Trainings
+    public EventCallback OnDeleteTrainingCompleted { get; set; }
+    [Parameter]
+    public GetTrainingsResponseDto Trainings
     { 
         get
         {
@@ -81,17 +85,17 @@
             }
         } 
     }
-    private GetAllTrainingsResponseDto _trainings;
+    private GetTrainingsResponseDto _trainings;
     private string searchString = "";
     private Timer _timer;
     
-    private bool FilterFunc(GetTrainingResponseDto element)
+    private bool FilterFunc(TrainingDto element)
     {
         if (string.IsNullOrWhiteSpace(searchString))
             return true;
         if (element.Status.Contains(searchString, StringComparison.OrdinalIgnoreCase))
             return true;
-        if (element.Task.Properties["skos:prefLabel"].Contains(searchString, StringComparison.OrdinalIgnoreCase))
+        if (element.Configuration.Task.Properties["skos:prefLabel"].Contains(searchString, StringComparison.OrdinalIgnoreCase))
             return true;
         if (element.DatasetName.Contains(searchString, StringComparison.OrdinalIgnoreCase))
             return true;
@@ -102,12 +106,18 @@
         DisposeTimer();
     }
 
+    SemaphoreSlim timerSemaphore = new SemaphoreSlim(1);
     private async void RefreshAllTrainings(object sender, ElapsedEventArgs e)
     {
         await InvokeAsync(async () =>
         {
             try
             {
+                var gotLock = timerSemaphore.Wait(0);
+                if (!gotLock)
+                {
+                    return;
+                }
                 if (_trainings.Trainings.Where(x => x.Status == "busy").ToList().Count == 0)
                 {
                     DisposeTimer();
@@ -118,14 +128,19 @@
                 {
                     if (_trainings.Trainings[i].Status == "busy")
                     {
-                        ApiResponseDto apiResponse = await apiClient.GetTraining(new GetTrainingRequestDto { TrainingId = _trainings.Trainings[i].ID });
+                        ApiResponseDto apiResponse = await apiClient.GetTraining(new GetTrainingRequestDto { TrainingId = _trainings.Trainings[i].Id });
 
                         if (apiResponse.IsSuccessStatusCode)
                         {
-                            bool _showDetails = _trainings.Trainings[i].ShowDetails;
-                            _trainings.Trainings[i] = Newtonsoft.Json.JsonConvert.DeserializeObject<GetTrainingResponseDto>(apiResponse.Result.ToString());
-                            _trainings.Trainings[i].ShowDetails = _showDetails;
+                            _trainings.Trainings[i] = Newtonsoft.Json.JsonConvert.DeserializeObject<GetTrainingResponseDto>(apiResponse.Result.ToString()).Training;
                             StateHasChanged();
+                        }
+                        //Training does not exist anymore
+                        else if (apiResponse.StatusCode == 404)
+                        {
+                            _trainings.Trainings.RemoveAt(i);
+                            DisposeTimer();
+                            return;
                         }
                         else
                         {

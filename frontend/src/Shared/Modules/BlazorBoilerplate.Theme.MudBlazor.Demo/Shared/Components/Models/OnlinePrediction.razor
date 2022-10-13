@@ -4,11 +4,14 @@
 @using Microsoft.AspNetCore.Hosting
 @using Microsoft.Extensions.Logging
 @using System.Net.Http.Headers
+@using System.Timers
 @inject IApiClient apiClient
 @inject IViewNotifier viewNotifier
 @inject IJSRuntime JS
 @inject IStringLocalizer<Global> L
 @inject IHttpClientFactory ClientFactory
+@inject IFileUploader fileUploader
+@inject NavigationManager NavManager
 
 
 <MudCard Elevation="5">
@@ -16,42 +19,60 @@
         <CardHeaderContent >
             <MudText Typo="Typo.h6">@L["Predict online"]</MudText>
         </CardHeaderContent>
+        <CardHeaderActions>
+            <MudStack Row="true" Class="align-content-center" Style="margin-top: 8px">
+                <MudButton OnClick="OnOpenUpload"
+                    Variant="Variant.Filled" 
+                    Color="Color.Secondary"
+                    EndIcon="@Icons.Filled.CloudUpload"
+                           Size="Size.Small">@L["Add Live Dataset"]</MudButton>
+            </MudStack>
+        </CardHeaderActions>
     </MudCardHeader>
     <MudCardContent>
         <MudPaper Height="100px" Elevation="0">
-            @if (Model == null)
+            @if (_model == null)
             {
                 <DataLoaderSpinner />
             }
             else
             {
-                <InputFile id="fileInput" OnChange="UploadFiles" hidden />
-                if (Model.Model.Status == "completed")
-                {
-                    <MudStack>
-                        <MudButton HtmlTag="label"
-                                   Variant="Variant.Filled"
-                                   Color="Color.Secondary"
-                                   StartIcon="@Icons.Filled.CloudUpload"
-                                   for="fileInput">
-                            @L["Upload File"]
-                        </MudButton>
-                        <MudButton StartIcon="@Icons.Filled.CloudDownload" Color="Color.Secondary" Disabled="@_downloadReady" OnClick="@DownloadPredictions">@L["Download result CSV"]</MudButton>
-                    </MudStack>
-                }
-                else
-                {
-                    <MudStack>
-                        <MudButton HtmlTag="label"
-                            Disabled="true"
-                           Variant="Variant.Filled"
-                           Color="Color.Secondary"
-                           StartIcon="@Icons.Filled.CloudUpload">
-                            @L["Upload File"]
-                        </MudButton>
-                        <MudButton StartIcon="@Icons.Filled.CloudDownload" Color="Color.Secondary" Disabled="true">@L["Download result CSV"]</MudButton>
-                    </MudStack>
-                }
+                <MudTable Items="@_model.Model.Predictions" style="width:stretch" class="mat-elevation-z5" AllowSelection="false" Dense="true">
+                    <HeaderContent>
+                        <MudTh>@L["Name"]</MudTh>
+                        <MudTh>@L["Date"]</MudTh>
+                        <MudTh>@L["Status"]</MudTh>
+                        <MudTh>@L["download"]</MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd>
+                             @context.LiveDatasetName 
+                        </MudTd>
+                        <MudTd>
+                            @context.RuntimeProfile.StartTime.ToString("dd/MM/yyyy")
+                        </MudTd>
+                        <MudTd>
+                            @if (context.Status == "busy")
+                            {
+                                <MudProgressCircular Size="Size.Small" Color="Color.Secondary" Indeterminate="true" />
+                            }
+                            else
+                            {
+                                @L[context.Status];
+                            }
+                        </MudTd>
+                        <MudTd>
+                            @if (context.Status == "completed")
+                            {
+                                <MudButton OnClick="@(() => DownlaodPrediction(context))" Variant="Variant.Filled" Color="Color.Secondary" Size="Size.Small">@L["Download result CSV"]</MudButton>
+                            }
+                            else
+                            {
+                                <MudButton Variant="Variant.Filled" Color="Color.Secondary" Size="Size.Small" Disabled="true">@L["Download result CSV"]</MudButton>
+                            }
+                        </MudTd>
+                    </RowTemplate>
+                </MudTable>
             }
         </MudPaper>
     </MudCardContent>
@@ -68,50 +89,115 @@
         set
         {
             _model = value;
+            if (_model != null)
+            {
+                _timer = new Timer()
+                {
+                    AutoReset = true,
+                    Enabled = true,
+                    Interval = 5000
+                };
+                _timer.Elapsed += RefreshPredictions;
+            }
             StateHasChanged();
         } 
     }
     private GetModelResponseDto _model;
-    private bool _downloadReady = true;
-    private TestAutoMLResponseDto _predictionResult;
 
-    private async Task UploadFiles(InputFileChangeEventArgs e)
+    private GetPredictionsResponseDto _predictions;
+    private ModelPredictResponseDto _modelPrediction;
+    private ModelPredictResponseDto _predictionResult;
+    private Timer _timer;
+
+
+    private void OnOpenUpload()
+    {
+        fileUploader.UploadPredictionRequest.ModelId = _model.Model.Id;
+        fileUploader.IsPredictionDatasetToUpload = true;
+        fileUploader.IsUploadPredictionDatasetDialogOpen = true;
+        fileUploader.RefreshUploadComponentCallback();
+    }
+
+    public void Dispose()
+    {
+        DisposeTimer();
+    }
+    SemaphoreSlim timerSemaphore = new SemaphoreSlim(1);
+    private async void RefreshPredictions(object sender, ElapsedEventArgs e)
+    {
+        await InvokeAsync(async () =>
+        {
+            var gotLock = timerSemaphore.Wait(0);
+            if (!gotLock)
+            {
+                return;
+            }
+            try
+            {
+                for (int i = 0; i < _model.Model.Predictions.Count; i++)
+                {
+                    if (_model.Model.Predictions[i].Status == "busy")
+                    {
+                        ApiResponseDto apiResponse = await apiClient.GetPrediction(new GetPredictionRequestDto { PredictionId = _model.Model.Predictions[i].Id });
+                        if (apiResponse.IsSuccessStatusCode)
+                        {
+                            _model.Model.Predictions[i] = Newtonsoft.Json.JsonConvert.DeserializeObject<GetPredictionResponseDto>(apiResponse.Result.ToString()).Prediction;
+                            StateHasChanged();
+                        }
+                        //Prediction does not exist anymore
+                        else if (apiResponse.StatusCode == 404)
+                        {
+                            _model.Model.Predictions.RemoveAt(i);
+                            DisposeTimer();
+                            return;
+                        }
+                        else
+                        {
+                            viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                viewNotifier.Show(ex.GetBaseException().Message, ViewNotifierType.Error, L["Operation Failed"]);
+            }
+            finally
+            {
+                timerSemaphore.Release();
+            }
+        });
+    }
+
+    public void DisposeTimer()
+    {
+        if (_timer != null)
+        {
+            _timer.Stop();
+            _timer.Elapsed -= RefreshPredictions;
+            _timer?.Dispose();
+            _timer = null;
+        }
+    }
+
+    private async void DownlaodPrediction(PredictionDto predictionDataset)
     {
         try
         {
-            var file = e.File;
-            using var stream = e.File.OpenReadStream((512000 * 2 * 400));
-            using var ms = new MemoryStream();
-            await stream.CopyToAsync(ms);
-            var content = ms.ToArray();
-
-
-            ApiResponseDto apiResponse = await apiClient.TestAutoML(new TestAutoMLRequestDto { TestData = content, ModelId = Model.Model.ID});
+            ApiResponseDto apiResponse = await apiClient.DownloadPrediction(new DownloadPredictionRequestDto() { PredictionId = predictionDataset.Id });
             if (apiResponse.IsSuccessStatusCode)
             {
-                _predictionResult = Newtonsoft.Json.JsonConvert.DeserializeObject<TestAutoMLResponseDto>(apiResponse.Result.ToString());
-                _downloadReady = false;
+                DownloadPredictionResponseDto response = Newtonsoft.Json.JsonConvert.DeserializeObject<DownloadPredictionResponseDto>(apiResponse.Result.ToString());
+
+                var stream = new MemoryStream(response.Content);
+                using var streamRef = new DotNetStreamReference(stream: stream);
+                await JS.InvokeVoidAsync("downloadFileFromStream", "predictions.csv", streamRef);
                 StateHasChanged();
             }
             else
             {
                 viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
             }
-        }
-        catch (Exception ex)
-        {
-            viewNotifier.Show(ex.GetBaseException().Message, ViewNotifierType.Error, L["Operation Failed"]);
-        }
-    }
-
-    private async void DownloadPredictions()
-    {
-        try{
-            byte[] predictionBytes = _predictionResult.Predictions.SelectMany(s => System.Text.Encoding.UTF8.GetBytes(s + Environment.NewLine)).ToArray();
-            
-            var stream = new MemoryStream(predictionBytes);
-            using var streamRef = new DotNetStreamReference(stream: stream);
-            await JS.InvokeVoidAsync("downloadFileFromStream", "predictions.csv", streamRef);
         }
         catch (Exception ex)
         {

@@ -5,29 +5,18 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Autokeras image test",
-            "type": "python",
-            "request": "launch",
-            "program": "AutoML.py",
-            "console": "integratedTerminal",
-            "justMyCode": true,
-            "env": {
-                "PYTHONPATH": "AutoMLs;Utils;../Utils/Utils;../Utils/AutoMLs;../GRPC/Adapter;",
-                "PYTHON_ENV": ".venv/Scripts/python"
-            },
-        },
-        {
             "name": "AutoKeras Adapter",
             "type": "python",
             "request": "launch",
             "program": "AutoKerasServer.py",
             "console": "integratedTerminal",
-            "justMyCode": true,
+            "justMyCode": false,
             "env": {
-                "PYTHONPATH": "AutoMLs;Utils;../Utils/Utils;../Utils/AutoMLs;../GRPC/Adapter;",
+                "PYTHONPATH": ".;dependency-injection;AutoMLs;Utils;../Utils/Utils;../Utils/AutoMLs;../GRPC/Adapter;",
                 "GRPC_SERVER_PORT": "50052",
                 "PYTHON_ENV": ".venv/Scripts/python",
-                "USE_DEV_CONFIG": "YES"
+                "USE_DEV_CONFIG": "YES",
+                "PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION": "python"
             },
         }
     ]

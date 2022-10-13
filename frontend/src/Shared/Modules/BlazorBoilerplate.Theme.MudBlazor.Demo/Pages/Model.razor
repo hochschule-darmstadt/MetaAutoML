@@ -4,6 +4,7 @@
 @inject IStringLocalizer<Global> L
 @inject IApiClient apiClient
 @inject IViewNotifier viewNotifier
+@inject IFileUploader fileUploader
 @inject NavigationManager NavManager
 @attribute [Authorize]
 
@@ -17,7 +18,9 @@
     <MudIcon Size="Size.Large" Icon="@Icons.Filled.Lightbulb" />
     @if (_model != null)
     {
-        <MudText Typo="Typo.h4">@L["Model {0}", _model.Model.Model]</MudText>
+        <MudText Typo="Typo.h4">
+            @L["Model {0}", _model.Model.MlModelType.Properties.ContainsKey("skos:prefLabel") ? _model.Model.MlModelType.Properties["skos:prefLabel"] : ""]
+        </MudText>
     }
 </MudStack>
 
@@ -31,7 +34,7 @@
             </MudCardHeader>
             <MudCardContent>
                 <MudPaper Height="100px" Elevation="0">
-                    @if ((_model == null) && (_training == null))
+                    @if ((_model == null) && (_training == null) && (_dataset == null))
                     {
                         <MudGrid>
                             <MudItem Class="d-flex align-center justify-center mud-width-full" xs="12">
@@ -43,20 +46,20 @@
                     {
                         <MudGrid>
                             <MudItem xs="3" sm="3" md="3">
-                                <MudText Typo="Typo.body1" Style=" display: flex;">@L["Dataset: "] <MudLink Href="@NavManager.ToAbsoluteUri("datasets/" + @_training.DatasetId).AbsoluteUri" Style="cursor: pointer; display: flex;"><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.ListAlt" Style="margin-right: 4px;" />@_training.DatasetName</MudLink></MudText>
-                                <MudText Typo="Typo.body1">@L["Start: {0}", _training.StartTime.ToString("dd/MM/yyy HH:mm")]</MudText>
+                                <MudText Typo="Typo.body1" Style=" display: flex;">@L["Dataset: "] <MudLink Href="@NavManager.ToAbsoluteUri("datasets/" + @_training.Training.DatasetId).AbsoluteUri" Style="cursor: pointer; display: flex;"><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.ListAlt" Style="margin-right: 4px;" />@_dataset.Dataset.Name</MudLink></MudText>
+                                <MudText Typo="Typo.body1">@L["Start: {0}", _training.Training.RuntimeProfile.StartTime.ToString("dd/MM/yyyy HH:mm")]</MudText>
                                 <MudText Typo="Typo.body1">@L["Status: {0}", _model.Model.Status]</MudText>
-                                <MudText Typo="Typo.body1">@L["Total training time: {0}", _model.Model.Runtime]</MudText>
+                                <MudText Typo="Typo.body1">@L["Total training time: {0}", _model.Model.Status == "busy" ? DateTime.UtcNow.Subtract(_model.Model.RuntimeProfile.StartTime).TotalSeconds.ToString("0") : _model.Model.RuntimeProfile.EndTime.Subtract(_model.Model.RuntimeProfile.StartTime).TotalSeconds.ToString("0")]</MudText>
                             </MudItem>
                             <MudItem xs="3" sm="3" md="3">
-                                <MudText Typo="Typo.body1">@L["AutoML solution: {0}", _model.Model.Name]</MudText>
-                                <MudText Typo="Typo.body1">@L["ML library: {0}", _model.Model.Library]</MudText>
-                                <MudText Typo="Typo.body1">@L["Model: {0}", _model.Model.Model]</MudText>
-                                <MudText Typo="Typo.body1" Style=" display: flex;">@L["Training: "]<MudLink Href="@NavManager.ToAbsoluteUri("trainings/" + @_training.ID).AbsoluteUri" Style="cursor: pointer; display: flex;"><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.ModelTraining" Style="margin-right: 4px;" />@_training.StartTime.ToString("dd/MM/yyy")</MudLink></MudText>
+                                <MudText Typo="Typo.body1">@L["AutoML solution: {0}", _model.Model.AutoMlSolution.Properties.ContainsKey("skos:prefLabel") ? _model.Model.AutoMlSolution.Properties["skos:prefLabel"] : ""]</MudText>
+                                <MudText Typo="Typo.body1">@L["ML library: {0}", _model.Model.MlLibrary.Properties.ContainsKey("skos:prefLabel") ? _model.Model.MlLibrary.Properties["skos:prefLabel"] : ""]</MudText>
+                                <MudText Typo="Typo.body1">@L["Model: {0}", _model.Model.MlModelType.Properties.ContainsKey("skos:prefLabel") ? _model.Model.MlModelType.Properties["skos:prefLabel"] : ""]</MudText>
+                                <MudText Typo="Typo.body1" Style=" display: flex;">@L["Training: "]<MudLink Href="@NavManager.ToAbsoluteUri("trainings/" + @_training.Training.Id).AbsoluteUri" Style="cursor: pointer; display: flex;"><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.ModelTraining" Style="margin-right: 4px;" />@_training.Training.RuntimeProfile.StartTime.ToString("dd/MM/yyy")</MudLink></MudText>
                             </MudItem>
                             <MudItem xs="3" sm="3" md="3">
                                 <MudText Typo="Typo.body1">@L["Metric score: {0}", String.Format("{0:0.00}", _model.Model.TestScore)]</MudText>
-                                <MudText Typo="Typo.body1">@L["Prediction time per sample: {0}", String.Format("{0:0}", _model.Model.Predictiontime)]</MudText>
+                                <MudText Typo="Typo.body1">@L["Prediction time per sample: {0}", String.Format("{0:0}", _model.Model.PredictionTime)]</MudText>
                             </MudItem>
                             <MudItem xs="3" sm="3" md="3">
                             </MudItem>
@@ -67,7 +70,10 @@
         </MudCard>
     </MudItem>
     <MudItem xs="6" sm="6" md="6">
-        <OnlinePrediction Model="_model"/>
+        @if (_model != null)
+        {
+            <OnlinePrediction Model="_model" />
+        }
     </MudItem>
     <MudItem xs="6" sm="6" md="6">
         <DownloadMlPipeline Model="_model"/>
@@ -76,7 +82,7 @@
         <ModelExplanationShort Model="_model" ExplanationPagePath="@_explanationPagePath" />
     </MudItem>
     <MudItem xs="3" sm="3" md="3">
-        <ModelConfiguration Training="_training" Model="_model"/>
+        <ModelConfiguration Training="_training" Model="_model" Dataset="_dataset"/>
     </MudItem>
     <MudItem xs="3" sm="3" md="3">
         <ModelDetail Model="_model"/>
@@ -96,9 +102,10 @@
 
     private string _explanationPagePath = "";
     private string _pageTitle = "Model";
-    private GetAutoMlModelResponseDto _downloadModel;
+    private DownloadModelResponseDto _downloadModel;
     private GetModelResponseDto _model;
     private GetTrainingResponseDto _training;
+    private GetDatasetResponseDto _dataset;
     private List<BreadcrumbItem> _breadcrumbs = new List<BreadcrumbItem>();
 
     protected async override void OnInitialized()
@@ -108,23 +115,31 @@
         if (ListId != null)
         {
             _breadcrumbs.Add(new BreadcrumbItem(L["Datasets"], "/datasets", false, Icons.Filled.ListAlt));
-            _breadcrumbs.Add(new BreadcrumbItem(L["Dataset {0}", _training.DatasetName], "/datasets/" + _model.Model.DatasetId, false, Icons.Filled.ListAlt));
-            _breadcrumbs.Add(new BreadcrumbItem(L["Models"], "/datasets/" + _model.Model.DatasetId + "/models", false, Icons.Filled.Lightbulb));
+            _breadcrumbs.Add(new BreadcrumbItem(L["Dataset {0}", _dataset.Dataset.Name], "/datasets/" + _dataset.Dataset.Id, false, Icons.Filled.ListAlt));
+            _breadcrumbs.Add(new BreadcrumbItem(L["Models"], "/datasets/" + _dataset.Dataset.Id + "/models", false, Icons.Filled.Lightbulb));
             _explanationPagePath = "/datasets/" + DatasetId + "/modelsview/" + ListId + "/explanation";
         }
         else if (TrainingId != null)
         {
             _breadcrumbs.Add(new BreadcrumbItem(L["Trainings"], "/trainings", false, Icons.Filled.ModelTraining));
-            _breadcrumbs.Add(new BreadcrumbItem(L["Training {0}", _training.StartTime.ToString("dd/MM/yy HH:mm")], "/trainings/" + _training.ID, false, Icons.Filled.ModelTraining));
+            _breadcrumbs.Add(new BreadcrumbItem(L["Training {0}", _training.Training.RuntimeProfile.StartTime.ToString("dd/MM/yy HH:mm")], "/trainings/" + _training.Training.Id, false, Icons.Filled.ModelTraining));
             _explanationPagePath = "/trainings/" + TrainingId + "/models/" + Id + "/explanation";
         }
         else if (DatasetId != null)
         {
             _breadcrumbs.Add(new BreadcrumbItem(L["Datasets"], "/datasets", false, Icons.Filled.ListAlt));
-            _breadcrumbs.Add(new BreadcrumbItem(L["Dataset {0}", _training.DatasetName], "/datasets/" + _model.Model.DatasetId, false, Icons.Filled.ListAlt));
+            _breadcrumbs.Add(new BreadcrumbItem(L["Dataset {0}", _dataset.Dataset.Name], "/datasets/" + _dataset.Dataset.Id, false, Icons.Filled.ListAlt));
             _explanationPagePath = "/datasets/" + DatasetId + "/models/" + Id + "/explanation";
         }
-        _breadcrumbs.Add(new BreadcrumbItem(L["Model {0}", _model.Model.Model], null, true, Icons.Filled.Lightbulb));
+        @if (_model.Model.MlModelType.Properties.ContainsKey("skos:prefLabel"))
+        {
+            _breadcrumbs.Add(new BreadcrumbItem(L["Model {0}", _model.Model.MlModelType.Properties.ContainsKey("skos:prefLabel") ? _model.Model.MlModelType.Properties["skos:prefLabel"] : ""], null, true, Icons.Filled.Lightbulb));
+        }
+        else
+        {
+            _breadcrumbs.Add(new BreadcrumbItem(L["Model {0}", ""], null, true, Icons.Filled.Lightbulb));
+        }
+        fileUploader.OnUploadCompletedCallback = LoadModel;
         StateHasChanged();
     }
     private async Task LoadModel()
@@ -152,7 +167,18 @@
                 if (apiResponse.IsSuccessStatusCode)
                 {
                     _training = Newtonsoft.Json.JsonConvert.DeserializeObject<GetTrainingResponseDto>(apiResponse.Result.ToString());
-                    viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
+                    //Get Training infos
+                    apiResponse = await apiClient.GetDataset(new GetDatasetRequestDto() { DatasetId = _training.Training.DatasetId });
+
+                    if (apiResponse.IsSuccessStatusCode)
+                    {
+                        _dataset = Newtonsoft.Json.JsonConvert.DeserializeObject<GetDatasetResponseDto>(apiResponse.Result.ToString());
+                        viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
+                    }
+                    else
+                    {
+                        viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
+                    }
                 }
                 else
                 {
@@ -163,6 +189,7 @@
             {
                 viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
             }
+            StateHasChanged();
         }
         catch (Exception ex)
         {

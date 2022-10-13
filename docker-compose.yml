@@ -37,6 +37,11 @@ services:
       #- PYTORCH_SERVICE_PORT=50059
       #- ALPHAD3M_SERVICE_HOST=alphad3m
       #- ALPHAD3M_SERVICE_PORT=50060
+      - PERSISTENCE_LOGGING_LEVEL=DEBUG
+      - SERVER_LOGGING_LEVEL=DEBUG
+      - ONTOLOGY_LOGGING_LEVEL=DEBUG
+      - BLACKBOARD_LOGGING_LEVEL=DEBUG
+      - WIN_DEV_MACHINE=NO
     volumes:
       - datasets:/app/app-data/datasets
       - training:/app/app-data/training

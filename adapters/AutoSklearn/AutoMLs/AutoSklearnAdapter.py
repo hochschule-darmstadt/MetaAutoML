@@ -23,9 +23,9 @@ class AutoSklearnAdapter(AbstractAdapter):
         """
         super().__init__(configuration)
 
-        if self._configuration["metric"] == "":
+        if self._configuration["configuration"]["metric"] == "":
             # handle empty metric field, None is the default metric parameter for AutoSklearn
-            self._configuration["metric"] = None
+            self._configuration["configuration"]["metric"] = None
         self._result_path = self._configuration["model_folder_location"]
         return
 
@@ -33,17 +33,17 @@ class AutoSklearnAdapter(AbstractAdapter):
         """
         Execute the ML task
         """
-        if self._configuration["task"] == ":tabular_classification":
+        if self._configuration["configuration"]["task"] == ":tabular_classification":
             self.__tabular_classification()
-        elif self._configuration["task"] == ":tabular_regression":
+        elif self._configuration["configuration"]["task"] == ":tabular_regression":
             self.__tabular_regression()
 
     def __generate_settings(self):
         automl_settings = {"logging_config": self.__get_logging_config()}
-        if self._configuration["runtime_constraints"]["runtime_limit"] != 0:
+        if self._configuration["configuration"]["runtime_limit"] != 0:
             automl_settings.update(
-                {"time_left_for_this_task": (self._configuration["runtime_constraints"]["runtime_limit"] * 60)}) #convert into seconds
-        automl_settings.update({"metric": self._configuration["metric"]})
+                {"time_left_for_this_task": (self._configuration["configuration"]["runtime_limit"] * 60)}) #convert into seconds
+        automl_settings.update({"metric": None})
         return automl_settings
 
     def __tabular_classification(self):

@@ -3,7 +3,8 @@ EXPOSE 50053
 
 RUN python -m pip install --upgrade pip
 RUN apt update && \
-    apt install -y build-essential
+    apt install -y build-essential \
+    && apt-get install -y git 
 
 COPY ./MLJAR/requirements.txt .
 # Install dependencies
@@ -20,6 +21,6 @@ RUN mkdir -p /app/app-data/output/tmp
 
 ENV RUNTIME=DOCKER
 ENV PYTHONUNBUFFERED=1
-ENV PYTHONPATH "AutoMLs:Utils"
+ENV PYTHONPATH ".:dependency-injection:AutoMLs:Utils"
 ENV PYTHON_ENV "python"
 ENTRYPOINT ["python", "MljarServer.py"]

@@ -14,7 +14,7 @@ class TemplateGenerator(object):
         Init a new instance of TemplateGenerator
         """
         self.__TEMPLATES_PATH = get_config_property("templates-path")
-        self.__OUTPUT_PATH = config["result_folder_location"]
+        self.__OUTPUT_PATH = config.result_folder_location
         self._configuration = config
         return
 

@@ -41,52 +41,52 @@ namespace BlazorBoilerplate.Server.Managers
             _httpContextAccessor = httpContextAccessor;
             _cacheManager = cacheManager;
         }
-
         /// <summary>
-        /// Retrive all Dataset Types
+        /// Upload a new dataset, currently only CSV are supported
         /// </summary>
+        /// <param name="request"></param>
         /// <returns></returns>
-        public async Task<ApiResponse> GetDatasetTypes()
+        public async Task<ApiResponse> UploadDataset(UploadDatasetRequestDto request)
         {
-            GetDatasetTypesResponseDto response = new GetDatasetTypesResponseDto();
+            CreateDatasetRequest grpcRequest = new CreateDatasetRequest();
             try
             {
-                var reply = _client.GetDatasetTypes(new GetDatasetTypesRequest());
-                response.DatasetTypes = await _cacheManager.GetObjectInformationList(reply.DatasetTypes.ToList());
-                return new ApiResponse(Status200OK, null, response);
-            }
-            catch (Exception ex)
-            {
-                return new ApiResponse(Status404NotFound, ex.Message);
-            }
-        }
+                var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
+                string trustedFileNameForDisplay = WebUtility.HtmlEncode(request.FileName);
+                string controllerDatasetPath = Environment.GetEnvironmentVariable("CONTROLLER_DATASET_FOLDER_PATH");
+                var path = Path.Combine(controllerDatasetPath, username, "uploads");
 
-        /// <summary>
-        /// Retrive a concrete Dataset
-        /// </summary>
-        /// <param name="dataset"></param>
-        /// <returns></returns>
-        public async Task<ApiResponse> GetDataset(GetDatasetRequestDto dataset)
-        {
-            GetDatasetResponseDto response;
-            GetDatasetRequest getDatasetRequest = new GetDatasetRequest();
-            var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
-            try
-            {
-                getDatasetRequest.Username = username;
-                getDatasetRequest.Identifier = dataset.Identifier;
-                var reply = _client.GetDataset(getDatasetRequest);
-                response = new GetDatasetResponseDto();
-                response.Name = reply.DatasetInfos.Name;
-                response.Type = await _cacheManager.GetObjectInformation(reply.DatasetInfos.Type);
-                response.Size = reply.DatasetInfos.Size;
-                response.Analysis = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(reply.DatasetInfos.Analysis);
-                response.Creation_date = reply.DatasetInfos.CreationDate.ToDateTime();
-                response.Identifier = reply.DatasetInfos.Identifier;
-                response.Configuration = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(reply.DatasetInfos.FileConfiguration);
+                if (request.ChunkNumber == 1)
+                {
+                    var dir = new DirectoryInfo(path);
 
-                return new ApiResponse(Status200OK, null, response);
+                    foreach (var info in dir.GetFiles())
+                    {
+                        info.Delete();
+                    }
+                }
 
+                if (!Directory.Exists(path))
+                {
+                    Directory.CreateDirectory(path);
+                }
+
+                await using FileStream fs = new(Path.Combine(path, trustedFileNameForDisplay), FileMode.Append);
+                fs.Write(request.Content, 0, request.Content.Length);
+
+                //We uploaded everything, send grpc request to controller to persist
+                if (request.ChunkNumber == request.TotalChunkNumber)
+                {
+                    fs.Dispose();
+                    grpcRequest.UserId = username;
+                    grpcRequest.FileName = trustedFileNameForDisplay;
+                    grpcRequest.DatasetName = request.DatasetName;
+
+                    grpcRequest.DatasetType = request.DatasetType;
+                    var reply = _client.CreateDataset(grpcRequest);
+                    return new ApiResponse(Status200OK, null, "");
+                }
+                return new ApiResponse(Status200OK, null, 0);
             }
             catch (Exception ex)
             {
@@ -105,22 +105,12 @@ namespace BlazorBoilerplate.Server.Managers
             var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
             try
             {
-                getDatasetsRequest.Type = DatasetType.TabularData;
-                getDatasetsRequest.Username = username;
+                getDatasetsRequest.Type = "";
+                getDatasetsRequest.UserId = username;
                 var reply = _client.GetDatasets(getDatasetsRequest);
-                foreach (Dataset item in reply.Dataset)
+                foreach (Dataset item in reply.Datasets)
                 {
-                    ObjectInfomationDto typeInformation = await _cacheManager.GetObjectInformation(item.Type);
-                    response.Datasets.Add(new GetDatasetResponseDto()
-                    {
-                        Name = item.Name,
-                        Type = await _cacheManager.GetObjectInformation(item.Type),
-                        Size = item.Size,
-                        Analysis = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(item.Analysis),
-                        Creation_date = item.CreationDate.ToDateTime(),
-                        Identifier = item.Identifier,
-                        Configuration = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(item.FileConfiguration)
-                    });
+                    response.Datasets.Add(new DatasetDto(item, await _cacheManager.GetObjectInformation(item.Type)));
                 }
                 return new ApiResponse(Status200OK, null, response);
 
@@ -132,28 +122,30 @@ namespace BlazorBoilerplate.Server.Managers
                 return new ApiResponse(Status404NotFound, ex.Message);
             }
         }
+
         /// <summary>
-        /// Delete a dataset
+        /// Retrive a concrete Dataset
         /// </summary>
+        /// <param name="dataset"></param>
         /// <returns></returns>
-        public async Task<ApiResponse> DeleteDataset(DeleteDatasetRequestDto request)
+        public async Task<ApiResponse> GetDataset(GetDatasetRequestDto request)
         {
-            DeleteDatasetResponseDto response = new DeleteDatasetResponseDto();
-            DeleteDatasetRequest deleteDatasetsRequest = new DeleteDatasetRequest();
+            GetDatasetResponseDto response;
+            GetDatasetRequest getDatasetRequest = new GetDatasetRequest();
             var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
             try
             {
-                deleteDatasetsRequest.Identifier = request.Identifier;
-                deleteDatasetsRequest.Username = username;
-                var reply = _client.DeleteDataset(deleteDatasetsRequest);
-                response.Result = (int)reply.Status;
+                getDatasetRequest.UserId = username;
+                getDatasetRequest.DatasetId = request.DatasetId;
+                var reply = _client.GetDataset(getDatasetRequest);
+                response = new GetDatasetResponseDto(new DatasetDto(reply, await _cacheManager.GetObjectInformation(reply.Dataset.Type)));
+
                 return new ApiResponse(Status200OK, null, response);
 
             }
             catch (Exception ex)
             {
 
-                Console.WriteLine(ex.Message);
                 return new ApiResponse(Status404NotFound, ex.Message);
             }
         }
@@ -162,7 +154,7 @@ namespace BlazorBoilerplate.Server.Managers
         /// Get a list of all Datasets
         /// </summary>
         /// <returns></returns>
-        public async Task<ApiResponse> GetDatasetPreview(GetDatasetPreviewRequestDto dataset)
+        public async Task<ApiResponse> GetDatasetPreview(GetDatasetPreviewRequestDto request)
         {
             GetDatasetPreviewResponseDto response = new GetDatasetPreviewResponseDto();
             GetDatasetRequest getDatasetRequest = new GetDatasetRequest();
@@ -170,17 +162,18 @@ namespace BlazorBoilerplate.Server.Managers
             string controllerDatasetPath = Environment.GetEnvironmentVariable("CONTROLLER_DATASET_FOLDER_PATH");
             try
             {
-                getDatasetRequest.Username = username;
-                getDatasetRequest.Identifier = dataset.DatasetIdentifier;
+                getDatasetRequest.UserId = username;
+                getDatasetRequest.DatasetId = request.DatasetId;
                 var reply = _client.GetDataset(getDatasetRequest);
-                string datasetLocation = Path.Combine(controllerDatasetPath, username, reply.DatasetInfos.Identifier, reply.DatasetInfos.FileName);
-                switch (reply.DatasetInfos.Type)
+                string datasetLocation = reply.Dataset.Path;
+                switch (reply.Dataset.Type)
                 {
                     case ":tabular":
                         response.DatasetPreview = File.ReadAllText(datasetLocation.Replace(".csv", "_preview.csv"));
 
                         break;
                     case ":image":
+                        datasetLocation = datasetLocation.Replace(".zip", "");
                         string[] classificationTargets = Directory.GetDirectories(Path.Combine(datasetLocation, "train"));
                         response.DatasetPreview = new List<ImagePreviewDto>();
                         foreach (string classificationTarget in classificationTargets)
@@ -218,8 +211,59 @@ namespace BlazorBoilerplate.Server.Managers
                 return new ApiResponse(Status404NotFound, ex.Message);
             }
         }
+        /// <summary>
+        /// Helper function, get all column names of a structured data dataset
+        /// </summary>
+        /// <param name="dataset"></param>
+        /// <returns></returns>
+        public async Task<ApiResponse> GetTabularDatasetColumn(GetTabularDatasetColumnRequestDto request)
+        {
+            GetTabularDatasetColumnResponseDto response = new GetTabularDatasetColumnResponseDto();
+            GetTabularDatasetColumnRequest getColumnNamesRequest = new GetTabularDatasetColumnRequest();
+            var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
+            try
+            {
+                getColumnNamesRequest.UserId = username;
+                getColumnNamesRequest.DatasetId = request.DatasetId;
+                var reply = _client.GetTabularDatasetColumn(getColumnNamesRequest);
+                foreach (var item in reply.Columns.ToList())
+                {
+                    response.Columns.Add(new ColumnsDto
+                    {
+                        Name = item.Name,
+                        Type = item.Type,
+                        ConvertibleTypes = item.ConvertibleTypes.ToList(),
+                    });
+                }
+                return new ApiResponse(Status200OK, null, response);
 
-        public async Task<ApiResponse> GetDatasetAnalysis(GetDatasetAnalysisRequestDto dataset)
+            }
+            catch (Exception ex)
+            {
+
+                return new ApiResponse(Status404NotFound, ex.Message);
+            }
+        }
+
+        public async Task<ApiResponse> SetDatasetFileConfiguration(SetDatasetFileConfigurationRequestDto request)
+        {
+            SetDatasetFileConfigurationRequest grpcRequest = new SetDatasetFileConfigurationRequest();
+            var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
+            try
+            {
+                grpcRequest.UserId = username;
+                grpcRequest.DatasetId = request.DatasetId;
+                grpcRequest.FileConfiguration = JsonConvert.SerializeObject(request.Configuration);
+                var reply = _client.SetDatasetFileConfiguration(grpcRequest);
+                return new ApiResponse(Status200OK, null, "");
+
+            }
+            catch (Exception ex)
+            {
+                return new ApiResponse(Status404NotFound, ex.Message);
+            }
+        }
+        public async Task<ApiResponse> GetDatasetAnalysis(GetDatasetAnalysisRequestDto request)
         {
             GetDatasetAnalysisResponseDto response = new GetDatasetAnalysisResponseDto();
             GetDatasetRequest getDatasetRequest = new GetDatasetRequest();
@@ -227,37 +271,40 @@ namespace BlazorBoilerplate.Server.Managers
             string controllerDatasetPath = Environment.GetEnvironmentVariable("CONTROLLER_DATASET_FOLDER_PATH");
             try
             {
-                getDatasetRequest.Username = username;
-                getDatasetRequest.Identifier = dataset.DatasetIdentifier;
+                getDatasetRequest.UserId = username;
+                getDatasetRequest.DatasetId = request.DatasetId;
                 var reply = _client.GetDataset(getDatasetRequest);
-                var analysis = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(reply.DatasetInfos.Analysis);
+                var analysis = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(reply.Dataset.Analysis);
                 int index = 0;
                 if (analysis != null)
                 {
                     if (analysis.Count != 0)
                     {
-                        foreach (var category in analysis["advanced_analysis"])
+                        if (analysis["plots"] != null)
                         {
-                            DatasetAnalysisCategory datasetAnalysisCategory = new DatasetAnalysisCategory() 
-                            { 
-                                CategoryTitle = category.SelectToken("title")
-                            };
-                            foreach (var item in category["items"])
+                            foreach (var category in analysis["plots"])
                             {
-                                if (dataset.GetShortPreview == true && index++ == 3)
+                                DatasetAnalysisCategory datasetAnalysisCategory = new DatasetAnalysisCategory()
                                 {
-                                    break;
-                                }
-                                DatasetAnalysis datasetAnalysis = new DatasetAnalysis()
-                                {
-                                    Title = item.SelectToken("title").ToString(),
-                                    Type = item.SelectToken("type").ToString(),
-                                    Description = item.SelectToken("description").ToString(),
-                                    Content = GetImageAsBytes(item.SelectToken("path").ToString())
+                                    CategoryTitle = category.SelectToken("title")
                                 };
-                                datasetAnalysisCategory.Analyses.Add(datasetAnalysis);
+                                foreach (var item in category["items"])
+                                {
+                                    if (request.GetShortPreview == true && index++ == 3)
+                                    {
+                                        break;
+                                    }
+                                    DatasetAnalysis datasetAnalysis = new DatasetAnalysis()
+                                    {
+                                        Title = item.SelectToken("title").ToString(),
+                                        Type = item.SelectToken("type").ToString(),
+                                        Description = item.SelectToken("description").ToString(),
+                                        Content = GetImageAsBytes(item.SelectToken("path").ToString())
+                                    };
+                                    datasetAnalysisCategory.Analyses.Add(datasetAnalysis);
+                                }
+                                response.AnalysisCategories.Add(datasetAnalysisCategory);
                             }
-                            response.AnalysisCategories.Add(datasetAnalysisCategory);
                         }
                     }
                 }
@@ -309,137 +356,27 @@ namespace BlazorBoilerplate.Server.Managers
         }
 
         /// <summary>
-        /// Helper function, get all column names of a structured data dataset
+        /// Delete a dataset
         /// </summary>
-        /// <param name="dataset"></param>
         /// <returns></returns>
-        public async Task<ApiResponse> GetTabularDatasetColumn(GetTabularDatasetColumnRequestDto dataset)
+        public async Task<ApiResponse> DeleteDataset(DeleteDatasetRequestDto request)
         {
-            GetTabularDatasetColumnResponseDto response = new GetTabularDatasetColumnResponseDto();
-            GetTabularDatasetColumnRequest getColumnNamesRequest = new GetTabularDatasetColumnRequest();
+            DeleteDatasetRequest deleteDatasetsRequest = new DeleteDatasetRequest();
             var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
             try
             {
-                getColumnNamesRequest.Username = username;
-                getColumnNamesRequest.DatasetIdentifier = dataset.DatasetIdentifier;
-                var reply = _client.GetTabularDatasetColumn(getColumnNamesRequest);
-                foreach (var item in reply.Columns.ToList())
-                {
-                    response.Columns.Add(new ColumnsDto
-                    {
-                        Name = item.Name,
-                        Type = item.Type,
-                        ConvertibleTypes = item.ConvertibleTypes.ToList(),
-                    });
-                }
-                return new ApiResponse(Status200OK, null, response);
+                deleteDatasetsRequest.DatasetId = request.DatasetId;
+                deleteDatasetsRequest.UserId = username;
+                var reply = _client.DeleteDataset(deleteDatasetsRequest);
+                return new ApiResponse(Status200OK, null, "");
 
             }
             catch (Exception ex)
             {
 
+                Console.WriteLine(ex.Message);
                 return new ApiResponse(Status404NotFound, ex.Message);
             }
         }
-        /// <summary>
-        /// Upload a new dataset, currently only CSV are supported
-        /// </summary>
-        /// <param name="file"></param>
-        /// <returns></returns>
-        public async Task<ApiResponse> Upload(FileUploadRequestDto file)
-        {
-            UploadDatasetFileRequest request = new UploadDatasetFileRequest();
-            try
-            {
-                var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
-                string trustedFileNameForDisplay = WebUtility.HtmlEncode(file.FileName);
-                string controllerDatasetPath = Environment.GetEnvironmentVariable("CONTROLLER_DATASET_FOLDER_PATH");
-                var path = Path.Combine(controllerDatasetPath, username, "uploads");
-
-                if (file.ChunkNumber == 1)
-                {
-                    var dir = new DirectoryInfo(path);
-
-                    foreach (var info in dir.GetFiles())
-                    {
-                        info.Delete();
-                    }
-                }
-
-                if (!Directory.Exists(path))
-                {
-                    Directory.CreateDirectory(path);
-                }
-
-                await using FileStream fs = new(Path.Combine(path, trustedFileNameForDisplay), FileMode.Append);
-                fs.Write(file.Content, 0, file.Content.Length);
-
-                //We uploaded everything, send grpc request to controller to persist
-                if (file.ChunkNumber == file.TotalChunkNumber)
-                {
-                    fs.Dispose();
-                    request.Username = username;
-                    request.FileName = trustedFileNameForDisplay;
-                    request.DatasetName = file.DatasetName;
-                    request.Type = file.DatasetType;
-                    var reply = _client.UploadDatasetFile(request);
-                    return new ApiResponse(Status200OK, null, reply.ReturnCode);
-                }
-                return new ApiResponse(Status200OK, null, 0);
-            }
-            catch (Exception ex)
-            {
-
-                return new ApiResponse(Status404NotFound, ex.Message);
-            }            
-        }
-
-        public async Task<ApiResponse> SetDatasetConfiguration(SetDatasetFileConfigurationRequestDto dataset)
-        {
-            SetDatasetFileConfigurationResponseDto response = new SetDatasetFileConfigurationResponseDto();
-            SetDatasetConfigurationRequest request = new SetDatasetConfigurationRequest();
-            var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
-            try
-            {
-                request.Username = username;
-                request.Identifier = dataset.DatasetIdentifier;
-                request.FileConfiguration = JsonConvert.SerializeObject(dataset.Configuration);
-                var reply = _client.SetDatasetConfiguration(request);
-                return new ApiResponse(Status200OK, null, response);
-
-            }
-            catch (Exception ex)
-            {
-                return new ApiResponse(Status404NotFound, ex.Message);
-            }
-        }
-
-        //public async Task<ApiResponse> UploadData(IFormFile file)
-        //{
-        //    try
-        //    {
-        //        if (file == null || file.Length == 0)
-        //            return new ApiResponse(Status404NotFound, "File not selected");
-        //        var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
-        //        string trustedFileNameForDisplay = WebUtility.HtmlEncode(file.FileName);
-        //        string controllerDatasetPath = Environment.GetEnvironmentVariable("CONTROLLER_DATASET_FOLDER_PATH");
-        //        var path = Path.Combine(controllerDatasetPath, username, "uploads");
-
-        //        if (!Directory.Exists(path))
-        //        {
-        //            Directory.CreateDirectory(path);
-        //        }
-
-        //        await using FileStream fs = new(Path.Combine(path, trustedFileNameForDisplay), FileMode.Create);
-        //        await file.CopyToAsync(fs);
-
-        //        return new ApiResponse(Status200OK, null, trustedFileNameForDisplay);
-        //    }
-        //    catch (Exception ex)
-        //    {
-
-        //        return new ApiResponse(Status404NotFound, ex.Message);
-        //    }
-        //}
     }
 }

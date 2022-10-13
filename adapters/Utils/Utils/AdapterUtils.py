@@ -1,27 +1,22 @@
+from http.client import REQUEST_HEADER_FIELDS_TOO_LARGE
 import json
 import os
 import shutil
 import subprocess
 import sys
-import time
-#import autokeras as ak
-#import tensorflow as tf
-
-import Adapter_pb2
-import Adapter_pb2_grpc
+import time, datetime
 import dill
-import grpc
 import numpy as np
 import pandas as pd
 from predict_time_sources import DataType, SplitMethod, feature_preparation
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, mean_squared_error
 from sklearn.metrics import classification_report
-
 from JsonUtil import get_config_property
 from TemplateGenerator import TemplateGenerator
 import glob
 from PIL import Image
+from AdapterBGRPC import *
 
 ######################################################################
 ## GRPC HELPER FUNCTIONS
@@ -29,7 +24,7 @@ from PIL import Image
 
 #region
 
-def get_except_response(context, e):
+def get_except_response(e):
     """
     Get exception message
     ---
@@ -39,10 +34,9 @@ def get_except_response(context, e):
     Return exception GRPC message
     """
     print(e)
-    adapter_name = get_config_property("adapter-name")
-    context.set_details(f"Error while executing {adapter_name}: {e}")
-    context.set_code(grpc.StatusCode.UNAVAILABLE)
-    return Adapter_pb2.StartAutoMLResponse()
+    response = GetAutoMlStatusResponse()
+    response.return_code = AdapterReturnCode.ADAPTER_RETURN_CODE_ERROR
+    return response
 
 
 def capture_process_output(process, start_time , use_error):
@@ -63,15 +57,14 @@ def capture_process_output(process, start_time , use_error):
     # Run until no more output is produced by the subprocess
     while len(s) > 0:
         if capture[len(capture) - 1] == '\n':
-            process_update = Adapter_pb2.StartAutoMLResponse()
-            process_update.returnCode = Adapter_pb2.ADAPTER_RETURN_CODE_STATUS_UPDATE
-            process_update.statusUpdate = capture
-            process_update.outputJson = ""
+            process_update = GetAutoMlStatusResponse()
+            process_update.return_code = AdapterReturnCode.ADAPTER_RETURN_CODE_STATUS_UPDATE
+            process_update.status_update = capture
+            process_update.output_json = ""
             process_update.runtime = int(time.time() - start_time) or 0
             # if return Code is ADAPTER_RETURN_CODE_STATUS_UPDATE we do not have score values yet
-            process_update.testScore = 0.0
-            process_update.validationScore = 0.0
-            process_update.predictiontime = 0.0
+            process_update.test_score = 0.0
+            process_update.prediction_time = 0.0
             process_update.library = ""
             process_update.model = ""
             yield process_update
@@ -100,16 +93,17 @@ def get_response(output_json, start_time, test_score, prediction_time, library, 
     ---
     Return the process result message
     """
-    response = Adapter_pb2.StartAutoMLResponse()
-    response.returnCode = Adapter_pb2.ADAPTER_RETURN_CODE_SUCCESS
-    response.outputJson = json.dumps(output_json)
-    response.runtime = int(time.time() - start_time)
-    response.testScore = test_score
-    response.validationScore = 0.0
-    response.predictiontime = prediction_time
+    response = GetAutoMlStatusResponse()
+    response.return_code = AdapterReturnCode.ADAPTER_RETURN_CODE_SUCCESS
+    if get_config_property("local_execution") == "NO":
+        response.path = os.path.join(output_json.controller_export_folder_location, output_json.file_name)
+    else:
+        response.path = os.path.join(output_json.file_location, output_json.file_name)
+    response.test_score = test_score
+    response.prediction_time = prediction_time
     response.library = library
     response.model = model
-    yield response
+    return response
 
 
 #endregion
@@ -133,21 +127,10 @@ def data_loader(config):
     train_data = None
     test_data = None
 
-    if config["task"] == ":tabular_classification":
+    if config["configuration"]["task"] in [":tabular_classification", ":tabular_regression", ":text_classification", ":time_series_forecasting", ":time_series_classification"]:
         return read_tabular_dataset_training_data(config)
-    elif config["task"] == ":tabular_regression":
-        return read_tabular_dataset_training_data(config)
-    elif config["task"] == ":image_classification":
+    elif config["configuration"]["task"] in [":image_classification", ":image_regression"]:
         return read_image_dataset(config)
-    elif config["task"] == ":image_regression":
-        return read_image_dataset(config)
-    elif config["task"] == ":text_classification":
-        return read_tabular_dataset_training_data(config)
-    elif config["task"] == ":time_series_forecasting":
-        return read_tabular_dataset_training_data(config)
-    elif config["task"] == ":time_series_classification":
-        return read_longitudinal_dataset(config)
-
     return train_data, test_data
 
 
@@ -168,7 +151,7 @@ def start_automl_process(config):
     """
     python_env = os.getenv("PYTHON_ENV", default="PYTHON_ENV_UNSET")
 
-    return subprocess.Popen([python_env, "AutoML.py", config["user_identifier"], config["training_id"]],
+    return subprocess.Popen([python_env, "AutoML.py", config.job_folder_location],
                             stdout=subprocess.PIPE,
                             universal_newlines=True)
 
@@ -194,8 +177,8 @@ def zip_script(config):
     print(f"saving model zip file for {get_config_property('adapter-name')}")
 
     zip_file_name = get_config_property("export-zip-file-name")
-    output_path = config["export_folder_location"]
-    result_path = config["result_folder_location"]
+    output_path = config.export_folder_location
+    result_path = config.result_folder_location
     shutil.copy(get_config_property("predict-time-sources-path"),
                 result_path)
 
@@ -209,16 +192,14 @@ def zip_script(config):
     else:
         file_loc_on_controller = os.path.join(get_config_property("training-path"),
                                             get_config_property('adapter-name'),
-                                        config["user_identifier"],
-                                        config["training_id"],
+                                        config.user_id,
+                                        config.training_id,
                                         get_config_property("export-folder-name"))
+    config.file_name = f'{zip_file_name}.zip'
+    config.file_location = file_loc_on_controller
+    return config
 
-    return {
-        'file_name': f'{zip_file_name}.zip',
-        'file_location': file_loc_on_controller
-    }
-
-def evaluate(config_json, config_path, dataloader):
+def evaluate(config, config_path, dataloader):
     """
     Evaluate the model by using the test set
     ---
@@ -229,41 +210,43 @@ def evaluate(config_json, config_path, dataloader):
     ---
     Return evaluation score
     """
-    file_path = os.path.join(config_json["file_location"], config_json["file_name"])
-    result_path = config_json["result_folder_location"]
+    config = config.__dict__
+    config["dataset_configuration"] = json.loads(config["dataset_configuration"])
+    file_path = config["dataset_path"]
+    result_path = config["result_folder_location"]
     # predict
     os.chmod(os.path.join(result_path, "predict.py"), 0o777)
     python_env = os.getenv("PYTHON_ENV", default="PYTHON_ENV_UNSET")
 
     predict_start = time.time()
-    subprocess.call([python_env, os.path.join(result_path, "predict.py"), file_path, config_path])
+    subprocess.call([python_env, os.path.join(result_path, "predict.py"), file_path, config_path, os.path.join(result_path, "predictions.csv")])
     predict_time = time.time() - predict_start
 
-    if(config_json["task"] == ":tabular_classification" or config_json["task"] == ":tabular_regression"or config_json["task"] == ":text_regression"or config_json["task"] == ":text_classification"):
-        train, test = dataloader(config_json)
-        target = config_json["configuration"]["target"]["target"]
-    elif(config_json["task"] == ":image_classification" or config_json["task"] == ":image_regression"):
-        X_train, y_train, X_val, y_val, X_test, y_test = data_loader(config_json)
+    if(config["configuration"]["task"] in [":tabular_classification", ":tabular_regression", ":text_regression", ":text_classification"]):
+        train, test = data_loader(config)
+        target = config["configuration"]["target"]
+    elif(config["configuration"]["task"] in[":image_classification", ":image_regression"]):
+        X_train, y_train, X_val, y_val, X_test, y_test = data_loader(config)
 
     predictions = pd.read_csv(os.path.join(result_path, "predictions.csv"))
     os.remove(os.path.join(result_path, "predictions.csv"))
 
-    if config_json["task"] == ":tabular_classification":
+    if config["configuration"]["task"] == ":tabular_classification":
         return accuracy_score(test[target], predictions["predicted"]), (predict_time * 1000) / test.shape[0]
 
-    elif config_json["task"] == ":tabular_regression":
+    elif config["configuration"]["task"] == ":tabular_regression":
         return mean_squared_error(test[target], predictions["predicted"], squared=False), \
                (predict_time * 1000) / test.shape[0]
 
-    elif config_json["task"] == ":image_classification":
+    elif config["configuration"]["task"] == ":image_classification":
         return accuracy_score(y_test, predictions["predicted"]), (predict_time * 1000) / y_test.shape[0]
 
-    elif config_json["task"] == ":image_regression":
+    elif config["configuration"]["task"] == ":image_regression":
         return mean_squared_error(y_test, predictions["predicted"], squared=False), \
                (predict_time * 1000) / y_test.shape[0]
-    elif config_json["task"] == ":time_series_classification":
-        train, test = dataloader(config_json)
-        target = config_json["configuration"]["target"]["target"]
+    elif config["configuration"]["task"] == ":time_series_classification":
+        train, test = data_loader(config)
+        target = config["configuration"]["target"]
 
         test_target = test[target].astype("string")
         predicted_target = predictions["predicted"].astype("string")
@@ -274,15 +257,15 @@ def evaluate(config_json, config_path, dataloader):
               )
         return acc_score, (predict_time * 1000) / test.shape[0]
 
-    elif config_json["task"] == ":text_classification":
+    elif config["configuration"]["task"] == ":text_classification":
         return accuracy_score(test[target], predictions["predicted"]), (predict_time * 1000) / test.shape[0]
 
-    elif config_json["task"] == ":text_regression":
+    elif config["configuration"]["task"] == ":text_regression":
         return mean_squared_error(test[target], predictions["predicted"], squared=False), \
                (predict_time * 1000) / test.shape[0]
 
 
-def predict(data, config_json, config_path):
+def predict(config_json, config_path, automl):
     """
     Make a prediction on test data
     ---
@@ -294,76 +277,91 @@ def predict(data, config_json, config_path):
     Return prediction score 
     """
     result_folder_location = os.path.join(get_config_property("training-path"),
-                                        config_json["user_identifier"],
+                                        config_json["user_id"],
+                                        config_json["dataset_id"],
                                         config_json["training_id"],
                                         get_config_property("result-folder-name"))
 
-    if config_json["task"] == ":time_series_classification":
+    #if config_json["task"] == ":time_series_classification":
         # Time Series Classification Task
-        file_path = os.path.join(result_folder_location, "test.ts")
-    else:
-        file_path = os.path.join(result_folder_location, "test.csv")
+    #    file_path = os.path.join(result_folder_location, "test.ts")
+    #else:
+    #    file_path = os.path.join(result_folder_location, "test.csv")
 
-    with open(file_path, "w+") as f:
-        f.write(data)
+    #with open(file_path, "w+") as f:
+    #    f.write(data)
 
     # predict
     os.chmod(os.path.join(result_folder_location, "predict.py"), 0o777)
     python_env = os.getenv("PYTHON_ENV", default="PYTHON_ENV_UNSET")
-
+    file_path = config_json["prediction_id"] + "_" + automl + ".csv"
+    result_prediction_path = os.path.join(os.path.dirname(config_json["live_dataset_path"]), file_path)
     predict_start = time.time()
-    subprocess.call([python_env, os.path.join(result_folder_location, "predict.py"), file_path, config_path])
+    subprocess.call([python_env, os.path.join(result_folder_location, "predict.py"), config_json["live_dataset_path"], config_path, result_prediction_path])
     predict_time = time.time() - predict_start
 
-    predictions = pd.read_csv(os.path.join(result_folder_location, "predictions.csv"))
-    os.remove(file_path)
-    os.remove(os.path.join(result_folder_location, "predictions.csv"))
-
     
-    return 0, predict_time, predictions["predicted"].astype('string').tolist()
+    return predict_time, result_prediction_path
 
-def SetupRunNewRunEnvironment(configuration):
-    # saving AutoML configuration JSON
-    config_json = json.loads(configuration)
+def setup_run_environment(request: "StartAutoMlRequest", adapter_name):
 
     #folder location for job related files
     job_folder_location = os.path.join(get_config_property("training-path"),
-                                        config_json["user_identifier"],
-                                        config_json["training_id"],
+                                        request.user_id,
+                                        request.dataset_id,
+                                        request.training_id,
                                         get_config_property("job-folder-name"))
 
     #folder location for automl generated model files (not copied in ZIP)
     model_folder_location = os.path.join(get_config_property("training-path"),
-                                        config_json["user_identifier"],
-                                        config_json["training_id"],
+                                        request.user_id,
+                                        request.dataset_id,
+                                        request.training_id,
                                         get_config_property("model-folder-name"))
 
     export_folder_location = os.path.join(get_config_property("training-path"),
-                                        config_json["user_identifier"],
-                                        config_json["training_id"],
+                                        request.user_id,
+                                        request.dataset_id,
+                                        request.training_id,
                                         get_config_property("export-folder-name"))
 
     result_folder_location = os.path.join(get_config_property("training-path"),
-                                        config_json["user_identifier"],
-                                        config_json["training_id"],
+                                        request.user_id,
+                                        request.dataset_id,
+                                        request.training_id,
                                         get_config_property("result-folder-name"))
 
-    config_json["job_folder_location"] = job_folder_location
-    config_json["model_folder_location"] = model_folder_location
-    config_json["export_folder_location"] = export_folder_location
-    config_json["result_folder_location"] = result_folder_location
+    controller_export_folder_location  = os.path.join(get_config_property("training-path"),
+                                        adapter_name,
+                                        request.user_id,
+                                        request.dataset_id,
+                                        request.training_id,
+                                        get_config_property("export-folder-name"))
+
+    request.job_folder_location = job_folder_location
+    request.model_folder_location = model_folder_location
+    request.export_folder_location = export_folder_location
+    request.result_folder_location = result_folder_location
+    request.controller_export_folder_location = controller_export_folder_location
 
     #Make sure job folders exists
     os.makedirs(job_folder_location, exist_ok=True)
     os.makedirs(model_folder_location, exist_ok=True)
     os.makedirs(export_folder_location, exist_ok=True)
     os.makedirs(result_folder_location, exist_ok=True)
-
+    request_dict = request.__dict__
+    request_dict.pop("_serialized_on_wire")
+    request_dict.pop("_unknown_fields")
+    request_dict.pop("_group_current")
+    request_dict.update({"configuration": request_dict["configuration"].__dict__})
+    request_dict["configuration"].pop("_serialized_on_wire")
+    request_dict["configuration"].pop("_unknown_fields")
+    request_dict["configuration"].pop("_group_current")
     #Save job file
     with open(os.path.join(job_folder_location, get_config_property("job-file-name")), "w+") as f:
-        json.dump(config_json, f)
+        json.dump(request_dict, f)
         
-    return config_json
+    return request
 
 #endregion
 
@@ -387,7 +385,7 @@ def cast_dataframe_column(dataframe, column_index, datatype):
         dataframe[column_index] = dataframe[column_index].astype('float')
     return dataframe
 
-def read_tabular_dataset_training_data(json_configuration):
+def read_tabular_dataset_training_data(config):
     """
     Read the training dataset from disk
     """
@@ -397,7 +395,9 @@ def read_tabular_dataset_training_data(json_configuration):
         "space":        " ",
         "tab":          "\t",
     }
-    data = pd.read_csv(os.path.join(json_configuration["file_location"], json_configuration["file_name"]), delimiter=delimiters[json_configuration['file_configuration']['delimiter']], skiprows=(json_configuration['file_configuration']['start_row']-1), escapechar=json_configuration['file_configuration']['escape_character'], decimal=json_configuration['file_configuration']['decimal_character'])
+
+
+    data = pd.read_csv(os.path.join(config["dataset_path"]), delimiter=delimiters[config["dataset_configuration"]['file_configuration']['delimiter']], skiprows=(config["dataset_configuration"]['file_configuration']['start_row']-1), escapechar=config["dataset_configuration"]['file_configuration']['escape_character'], decimal=config["dataset_configuration"]['file_configuration']['decimal_character'])
 
     # convert all object columns to categories, because autosklearn only supports numerical,
     # bool and categorical features
@@ -405,12 +405,12 @@ def read_tabular_dataset_training_data(json_configuration):
     data[data.select_dtypes(['object']).columns] = data.select_dtypes(['object']).apply(lambda x: x.astype('category'))
 
     # split training set
-    if SplitMethod.SPLIT_METHOD_RANDOM.value == json_configuration["test_configuration"]["method"]:
-        train = data.sample(random_state=json_configuration["test_configuration"]["random_state"], frac=1)
-        test = data.sample(random_state=json_configuration["test_configuration"]["random_state"], frac=1)
-    else:
-        train = data.iloc[:int(data.shape[0] * json_configuration["test_configuration"]["split_ratio"])]
-        test = data.iloc[int(data.shape[0] * json_configuration["test_configuration"]["split_ratio"]):]
+    #if SplitMethod.SPLIT_METHOD_RANDOM.value == json_configuration["test_configuration"]["method"]:
+    #    train = data.sample(random_state=json_configuration["test_configuration"]["random_state"], frac=1)
+    #    test = data.sample(random_state=json_configuration["test_configuration"]["random_state"], frac=1)
+    #else:
+    train = data.iloc[:int(data.shape[0] * 0.8)]
+    test = data.iloc[int(data.shape[0] * 0.2):]
 
     return train, test
 
@@ -418,10 +418,10 @@ def prepare_tabular_dataset(df, json_configuration):
     """
     Prepare tabular dataset, perform feature preparation and data type casting
     """
-    df = feature_preparation(df, json_configuration["dataset_configuration"]["features"].items())
-    df = cast_dataframe_column(df, json_configuration["configuration"]["target"]["target"], json_configuration["configuration"]["target"]["type"])
-    X = df.drop(json_configuration["configuration"]["target"]["target"], axis=1)
-    y = df[json_configuration["configuration"]["target"]["target"]]
+    df = feature_preparation(df, json_configuration["dataset_configuration"]["column_datatypes"].items())
+    df = cast_dataframe_column(df, json_configuration["configuration"]["target"], json_configuration["dataset_configuration"]["column_datatypes"][json_configuration["configuration"]["target"]])
+    X = df.drop(json_configuration["configuration"]["target"], axis=1)
+    y = df[json_configuration["configuration"]["target"]]
     return X, y
 
 def convert_X_and_y_dataframe_to_numpy(X, y):
@@ -441,7 +441,7 @@ def convert_X_and_y_dataframe_to_numpy(X, y):
 
 #region
 
-def read_image_dataset(json_configuration):
+def read_image_dataset(config):
     """Reads image data and creates AutoKeras specific structure/sets
     ---
     Parameter
@@ -463,7 +463,7 @@ def read_image_dataset(json_configuration):
 
         local_dir_path = os.path.dirname(local_file_path)
     """
-    data_dir = os.path.join(json_configuration["file_location"], json_configuration["file_name"])
+    data_dir = config.file_location
     train_df_list =[]
     test_df_list =[]
 
