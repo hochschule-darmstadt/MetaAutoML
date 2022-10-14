@@ -35,7 +35,6 @@ class Ressources(containers.DeclarativeContainer):
     data_storage = providers.Factory(
         DataStorage,
         data_storage_dir=data_storage_dir,
-        dataset_analysis_lock=dataset_analysis_lock,
         mongo_db=mongo_db_client
     )
     ontology_manager = providers.ThreadSafeSingleton(
@@ -55,7 +54,8 @@ class Managers(containers.DeclarativeContainer):
     )
     dataset_manager = providers.Factory(
         DatasetManager,
-        data_storage=ressources.data_storage
+        data_storage=ressources.data_storage,
+        dataset_analysis_lock=ressources.dataset_analysis_lock
     )
     training_manager = providers.Factory(
         TrainingManager,

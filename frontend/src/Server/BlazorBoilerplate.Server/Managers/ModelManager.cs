@@ -9,6 +9,9 @@ using static MudBlazor.CategoryTypes;
 
 namespace BlazorBoilerplate.Server.Managers
 {
+    /// <summary>
+    /// Manages functionality that access the Model objects
+    /// </summary>
     public class ModelManager : IModelManager
     {
         private readonly ApplicationDbContext _dbContext;
@@ -156,10 +159,10 @@ namespace BlazorBoilerplate.Server.Managers
             return content;
         }
         /// <summary>
-        /// Get the result model from a specific AutoML
+        /// Download a perviously generated ML model
         /// </summary>
-        /// <param name="autoMl"></param>
-        /// <returns></returns>
+        /// <param name="request">The DownloadModelRequestDto providing the model information</param>
+        /// <returns>Returns an ApiResponse containing the DownloadModelResponseDto object that holds the ML model</returns>
         public async Task<ApiResponse> DownloadModel(DownloadModelRequestDto request)
         {
             DownloadModelResponseDto response = new DownloadModelResponseDto();

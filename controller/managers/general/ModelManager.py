@@ -2,7 +2,6 @@ import threading
 from urllib import request
 from DataStorage import DataStorage
 from ControllerBGRPC import *
-from DataStorage import DataStorage
 import json, logging, os
 
 class ModelManager:

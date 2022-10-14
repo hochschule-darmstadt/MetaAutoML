@@ -7,7 +7,8 @@ import json
 import pandas as pd
 from scipy.stats import spearmanr
 from sktime.datasets import load_from_tsfile_to_dataframe
-
+from DataStorage import DataStorage
+from ThreadLock import ThreadLock
 ##TODO REFACTORING
 
 # Config for matplotlib plot sizing. These values are interpreted as pixels / 100.
@@ -21,11 +22,14 @@ class DataSetAnalysisManager(Thread):
     """
     Static DataSetAnalysisManager class to analyze the dataset
     """
-    def __init__(self, config, data_storage, dataset_analysis_lock, basic_analysis=True, advanced_analysis=True):
+    def __init__(self, dataset_id: str, user_id: str, data_storage: DataStorage, dataset_analysis_lock: ThreadLock, basic_analysis=True, advanced_analysis=True):
         super(DataSetAnalysisManager, self).__init__()
         # Setup config
-        file_config = config["file_configuration"]
-        self.__config = config
+        self.__dataset_id = dataset_id
+        self.__user_id = user_id
+        found, dataset = data_storage.get_dataset(user_id, dataset_id)
+        file_config = dataset["file_configuration"]
+        self.__dataset = dataset
         delimiters = {
             "comma":        ",",
             "semicolon":    ";",
@@ -37,11 +41,11 @@ class DataSetAnalysisManager(Thread):
         self.__basic_analysis = basic_analysis
         self.__advanced_analysis = advanced_analysis
         # Load dataset
-        if config["type"] == ":time_series_longitudinal":
-            self.__dataset = load_from_tsfile_to_dataframe(config["path"], return_separate_X_and_y=False)
-        elif self.__config["type"] in [":tabular", ":text", ":time_series"]:
+        if self.__dataset["type"] == ":time_series_longitudinal":
+            self.__dataset_df = load_from_tsfile_to_dataframe(self.__dataset["path"], return_separate_X_and_y=False)
+        elif self.__dataset["type"] in [":tabular", ":text", ":time_series"]:
             try:
-                self.__dataset = pd.read_csv(config["path"],
+                self.__dataset_df = pd.read_csv(self.__dataset["path"],
                                              delimiter=delimiters[file_config['delimiter']],
                                              skiprows=(file_config['start_row'] - 1),
                                              escapechar=file_config['escape_character'],
@@ -50,7 +54,7 @@ class DataSetAnalysisManager(Thread):
                                              index_col=False)
             except pd.errors.ParserError as e:
                 # As the pandas python parsing engine sometimes fails: Retry with standard (c) parser engine.
-                self.__dataset = pd.read_csv(config["path"],
+                self.__dataset_df = pd.read_csv(self.__dataset["path"],
                                              delimiter=delimiters[file_config['delimiter']],
                                              skiprows=(file_config['start_row'] - 1),
                                              escapechar=file_config['escape_character'],
@@ -59,7 +63,7 @@ class DataSetAnalysisManager(Thread):
         else:
             pass
         # Create plot filepath
-        self.plot_filepath = os.path.join(os.path.dirname(config['path']), "plots")
+        self.plot_filepath = os.path.join(os.path.dirname(self.__dataset['path']), "plots")
         os.makedirs(self.plot_filepath, exist_ok=True)
         self.__plots = []
 
@@ -73,10 +77,10 @@ class DataSetAnalysisManager(Thread):
             if self.__advanced_analysis:
                 analysis.update({ "plots": self.advanced_analysis()})
             
-            found, dataset = self.__data_storage.get_dataset(self.__config["user_id"], self.__config["dataset_id"])
+            found, dataset = self.__data_storage.get_dataset(self.__user_id, self.__dataset_id)
             analysis_details = dataset["analysis"]
             analysis_details.update(analysis)
-            self.__data_storage.update_dataset(self.__config["user_id"], self.__config["dataset_id"], { "analysis": analysis_details}, False)
+            self.__data_storage.update_dataset(self.__user_id, self.__dataset_id, { "analysis": analysis_details})
             print("[DataSetAnalysisManager]: EXITING LOCK.")
 
     def basic_analysis(self) -> dict:
@@ -96,27 +100,27 @@ class DataSetAnalysisManager(Thread):
         print("[DatasetAnalysisManager]: Starting basic dataset analysis")
         #print(self.__dataset)
         analysis = {
-                "size_bytes": DataSetAnalysisManager.__get_size_bytes(self.__config["path"]),
-                "creation_date": os.path.getmtime(self.__config["path"])
+                "size_bytes": DataSetAnalysisManager.__get_size_bytes(self.__dataset["path"]),
+                "creation_date": os.path.getmtime(self.__dataset["path"])
         }
-        if self.__config["type"] == ":time_series_longitudinal":
-            rows, cols = self.__dataset.shape
+        if self.__dataset["type"] == ":time_series_longitudinal":
+            rows, cols = self.__dataset_df.shape
             analysis.update({
                 "number_of_columns": cols,
                 "number_of_rows": rows
             })
-        elif self.__config["type"] in [":tabular", ":text", ":time_series"]:
+        elif self.__dataset["type"] in [":tabular", ":text", ":time_series"]:
             analysis.update({
-                "number_of_columns": self.__dataset.shape[1],
-                "number_of_rows": self.__dataset.shape[0],
-                "missings_per_column": dict(self.__dataset.isna().sum().items()),
-                "missings_per_row": DataSetAnalysisManager.__missing_values_rows(self.__dataset),
-                "outlier": DataSetAnalysisManager.__detect_outliers(self.__dataset),
-                "duplicate_columns": DataSetAnalysisManager.__detect_duplicate_columns(self.__dataset),
-                "duplicate_rows": DataSetAnalysisManager.__detect_duplicate_rows(self.__dataset),
-                "columns_datatype": DataSetAnalysisManager.__get_dataset_datatypes(self.__dataset)
+                "number_of_columns": self.__dataset_df.shape[1],
+                "number_of_rows": self.__dataset_df.shape[0],
+                "missings_per_column": dict(self.__dataset_df.isna().sum().items()),
+                "missings_per_row": DataSetAnalysisManager.__missing_values_rows(self.__dataset_df),
+                "outlier": DataSetAnalysisManager.__detect_outliers(self.__dataset_df),
+                "duplicate_columns": DataSetAnalysisManager.__detect_duplicate_columns(self.__dataset_df),
+                "duplicate_rows": DataSetAnalysisManager.__detect_duplicate_rows(self.__dataset_df),
+                "columns_datatype": DataSetAnalysisManager.__get_dataset_datatypes(self.__dataset_df)
             })
-        elif self.__config["type"] == ":image":
+        elif self.__dataset["type"] == ":image":
             pass
 
         print("[DatasetAnalysisManager]: Basic dataset analysis finished")
@@ -141,10 +145,10 @@ class DataSetAnalysisManager(Thread):
         import matplotlib.pyplot as plt
         plt.ioff()
         print("[DatasetAnalysisManager]: Starting advanced dataset analysis")
-        if self.__config["type"] in [":image"]:
+        if self.__dataset["type"] in [":image"]:
             return
         # Convert all "object" columns to category
-        self.__dataset.loc[:, self.__dataset.dtypes == 'object'] = self.__dataset.select_dtypes(['object']).apply(lambda x: x.astype('category'))
+        self.__dataset_df.loc[:, self.__dataset_df.dtypes == 'object'] = self.__dataset_df.select_dtypes(['object']).apply(lambda x: x.astype('category'))
 
         # Get processed version of dataset to make calculation of feature correlation using scipy spearmanr possible
         proc_dataset = self.__process_categorical_columns()
@@ -154,7 +158,7 @@ class DataSetAnalysisManager(Thread):
         corr = spearmanr(proc_dataset).correlation
         # Make correlation plot
         print("[DatasetAnalysisManager]: Plotting correlation matrix")
-        filename = self.__make_correlation_matrix_plot(corr, self.__dataset.columns, self.plot_filepath)
+        filename = self.__make_correlation_matrix_plot(corr, self.__dataset_df.columns, self.plot_filepath)
         self.__plots.append({"title": "Correlation Matrix", "items": [filename]})
         # Get indices of correlations ordered desc
         indices = self.__largest_indices(corr, (len(proc_dataset.columns) * len(proc_dataset.columns)))
@@ -169,16 +173,16 @@ class DataSetAnalysisManager(Thread):
                 break
             # If the correlation isn't a col with itself or has already been plotted the other way around -> plot it
             if first_col_idx != second_col_index and [second_col_index, first_col_idx] not in plotted_indices:
-                category["items"].append(self.__make_feature_imbalance_plot(self.__dataset.columns[first_col_idx],
-                                                                            self.__dataset.columns[second_col_index],
+                category["items"].append(self.__make_feature_imbalance_plot(self.__dataset_df.columns[first_col_idx],
+                                                                            self.__dataset_df.columns[second_col_index],
                                                                             self.plot_filepath))
                 plotted_indices.append([first_col_idx, second_col_index])
         self.__plots.append(category)
 
         # Plot distributions of all columns
-        print(f"[DatasetAnalysisManager]: Plotting {len(self.__dataset.columns)} columns")
+        print(f"[DatasetAnalysisManager]: Plotting {len(self.__dataset_df.columns)} columns")
         category = {"title": "Column analysis", "items": []}
-        for i, col in enumerate(list(self.__dataset.columns)):
+        for i, col in enumerate(list(self.__dataset_df.columns)):
             category["items"].append(self.__make_column_plot(col, self.plot_filepath))
         self.__plots.append(category)
 
@@ -322,7 +326,7 @@ class DataSetAnalysisManager(Thread):
 
         Return dataset: Copy of dataset stored in the DataSetAnalysisManager with processed categorical values
         """
-        dataset = self.__dataset.copy()
+        dataset = self.__dataset_df.copy()
         for i, dtype in enumerate(dataset.dtypes):
             if dtype.name == "category":
                 # Process the corresponding column
@@ -378,9 +382,9 @@ class DataSetAnalysisManager(Thread):
         import matplotlib.pyplot as plt
         plt.clf()
         desc = f"This plot shows the {colname} column"
-        if self.__dataset[colname].dtype.name == "category" or self.__dataset[colname].dtype.name == "bool":
+        if self.__dataset_df[colname].dtype.name == "category" or self.__dataset_df[colname].dtype.name == "bool":
             # Make a bar chart for categorical or bool columns
-            df = self.__dataset[colname].astype(str)
+            df = self.__dataset_df[colname].astype(str)
             # Shorten string values if they are too long (Strings of length > 28 are shortened to 25 chars plus '...')
             df[df.str.len() > 28] = df[df.str.len() > 28].str[:25] + "..."
             df = df.value_counts()
@@ -395,7 +399,7 @@ class DataSetAnalysisManager(Thread):
                 desc = f"This plot shows the first 100 unique values of the {colname} column"
         else:
             # Make a histogram for numerical columns
-            self.__dataset[colname].plot(kind='hist')
+            self.__dataset_df[colname].plot(kind='hist')
         plt.title(colname)
         plt.tight_layout()
         filename = os.path.join(plot_path, colname + "_column_plot.svg")
@@ -459,7 +463,7 @@ class DataSetAnalysisManager(Thread):
         import matplotlib.pyplot as plt
         samples = 100
 
-        feature_df = self.__dataset.groupby([first_colname, second_colname]).size().reset_index().sort_values(by=[0], ascending=False)
+        feature_df = self.__dataset_df.groupby([first_colname, second_colname]).size().reset_index().sort_values(by=[0], ascending=False)
         x_data = list(zip(feature_df[first_colname].astype(str), feature_df[second_colname].astype(str)))[:samples]
         x_data = [f"[{(x[0][:6] + '..') if len(x[0]) > 8 else x[0]}, {(x[1][:6] + '..') if len(x[1]) > 8 else x[1]}]" for x in x_data]
         y_data = list(feature_df[0])[:samples]
@@ -486,7 +490,7 @@ class DataSetAnalysisManager(Thread):
 
 
     def start_longitudinal_data_analysis(self) -> dict:
-        rows, cols = self.__dataset.shape
+        rows, cols = self.__dataset_df.shape
         return {
             "number_of_columns": cols,
             "number_of_rows": rows,

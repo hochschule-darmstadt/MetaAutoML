@@ -1,5 +1,4 @@
 
-from AdapterManagerAgent import AdapterManagerAgent
 from ControllerBGRPC import *
 import json, logging, os,datetime
 from threading import *
@@ -8,7 +7,6 @@ from grpclib.client import Channel
 from AdapterBGRPC import *
 from DataStorage import DataStorage
 from AdapterBGRPC import *
-from betterproto.grpc.util.async_channel import AsyncChannel
 
 class AdapterPredictionManager(Thread):
 

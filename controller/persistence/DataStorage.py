@@ -1,26 +1,19 @@
-import os, shutil, logging, datetime
-import threading 
+import os, shutil, logging
 from MongoDbClient import MongoDbClient
 from sklearn.model_selection import train_test_split
-from sktime.datasets import write_dataframe_to_tsfile
 from sktime.datasets import load_from_tsfile_to_dataframe
 import pandas as pd
 from bson.objectid import ObjectId
-from DataSetAnalysisManager import DataSetAnalysisManager
 from ControllerBGRPC import *
-import asyncio
 from threading import Lock
 
-from ThreadLock import ThreadLock
 
 
 class DataStorage:
     """
     Centralized Access to File System and Database
     """
-    def __init__(self, data_storage_dir: str, dataset_analysis_lock: ThreadLock, mongo_db: MongoDbClient = None):
-    #def __init__(self, data_storage_dir: str, mongo_db_url: str = None):
-    #def __init__(self, data_storage_dir: str):
+    def __init__(self, data_storage_dir: str, mongo_db: MongoDbClient = None):
         """
         Initialize new instance. This should be done already.
         Do _not_ use multiple instances of this class.
@@ -42,7 +35,6 @@ class DataStorage:
         os.makedirs(data_storage_dir, exist_ok=True)
         self.__storage_dir = data_storage_dir
         #self.__mongo_db_url = mongo_db_url
-        self.__dataset_analysis_lock = dataset_analysis_lock
         self.__mongo: MongoDbClient = mongo_db
         self.__lock = Lock()
 
@@ -111,7 +103,6 @@ class DataStorage:
         ---
         Returns dataset id
         """
-        import datetime
         if type == ":image":
             self.__log.debug(f"create_dataset: dataset type is image, removing .zip ending from {name} as not necessary after unzipping anymore...")
             name = name.replace(".zip", "")
@@ -127,6 +118,7 @@ class DataStorage:
                 "creation_date": 0,
                 "size_bytes": 0
             },
+            "is_deleted": False
         }
 
         self.__log.debug("create_dataset: inserting new dataset into database...")
@@ -218,58 +210,33 @@ class DataStorage:
             pd.DataFrame(df_dict).to_csv(df_preview_filename, index=False)
             file_configuration = {"use_header": True, "start_row":1, "delimiter":"comma", "escape_character":"\\", "decimal_character":"."}
 
-        # If the dataset is a certain type the dataset can be analyzed.
-        self.__log.debug("create_dataset: executing dataset analysis...")
-        dataset_analysis = DataSetAnalysisManager({"path": filename_dest,
-                                                    "file_configuration": file_configuration,
-                                                    "type": type,
-                                                    "dataset_id": dataset_id,
-                                                    "user_id": user_id}, self, self.__dataset_analysis_lock)
         success = self.__mongo.update_dataset(user_id, dataset_id, {
             "path": filename_dest,
             "file_configuration": file_configuration
         })
-        dataset_analysis.start()
         assert success, f"cannot update dataset with id {dataset_id}"
 
         return dataset_id
-
-    def update_dataset(self, user_id: str, dataset_id: str, new_values: 'dict[str, object]', run_analysis: bool) -> bool:
-        """
-        Update single dataset with new values. 
-        ---
-        >>> success: bool = data_storage.UpdateDataset("automl_user", dataset_id, {
+        
+        
+    def update_dataset(self, user_id: str, dataset_id: str, new_values: 'dict[str, object]') -> bool:
+        """Update single dataset with new values
+        >>> success: bool = data_storage.update_dataset("automl_user", dataset_id, {
                 "status": "completed"
             })
+        Args:
+            user_id (str): user identifier, stored inside the frontend application database
+            dataset_id (str): identifier of dataset that will be updated
+            new_values (dict[str, object]): dictonary of values that will be update for the dataset
+            run_analysis (bool): if the dataset analysis module will be executed for the dataset again
 
-        ---
-        Parameter
-        1. user id: name of the user
-        2. dataset id
-        3. new values: dict with new values
-        4. run analysis: if the dataset analysis should be executed
-        ---
-        Returns `True` if successfully updated, otherwise `False`.
+        Raises:
+            grpclib.GRPCError: grpclib.Status.NOT_FOUND is raised when the dataset to be updated is not present within MongoDB
+
+        Returns:
+            bool: if the dataset was updated successfully
         """
         self.__log.debug(f"update_dataset: updating: {dataset_id} for user {user_id}, new values {new_values}")
-        if run_analysis == True:
-            found, dataset = self.get_dataset(user_id, dataset_id)
-            if found is not None:
-                self.__log.debug(f"update_dataset: executing dataset analysis for dataset: {dataset_id} for user {user_id}")
-                # If the dataset is a tabular dataset it can be analyzed.
-                if dataset['type'] in [":tabular", ":text", ":time_series", ":time_series_longitudinal"]:
-                    self.__log.debug(f"update_dataset: saving new dataset analysis for dataset: {dataset_id} for user {user_id}, new values {new_values}")
-                    dataset_analysis = DataSetAnalysisManager({"path": dataset["path"],
-                                                    "file_configuration": dataset["file_configuration"],
-                                                    "type": dataset["type"],
-                                                    "dataset_id": dataset_id,
-                                                    "user_id": user_id}, self, self.__dataset_analysis_lock)
-                    dataset_analysis.start()
-                else:
-                    self.__log.warn(f"update_dataset: dataset type {dataset['type']} does not support dataset analysis in dataset {dataset_id} for user {user_id}")
-            else:
-                self.__log.error(f"update_dataset: executing dataset analysis failed for dataset: {dataset_id} for user {user_id}, dataset not found")
-                raise grpclib.GRPCError(grpclib.Status.NOT_FOUND, f"Dataset {dataset_id} for user {user_id} does not exist, can not execute dataset analysis!")
         return self.__mongo.update_dataset(user_id, dataset_id, new_values)
 
     def get_dataset(self, user_id: str, dataset_id: str) -> 'tuple[bool, dict[str, object]]':
@@ -698,7 +665,7 @@ class DataStorage:
 
         return prediction_id
 
-    def update_prediction(self, user_id: str, prediction_id: str, new_values: 'dict[str, object]', run_analysis: bool=False) -> bool:
+    def update_prediction(self, user_id: str, prediction_id: str, new_values: 'dict[str, object]') -> bool:
         """
         Update single dataset with new values. 
         ---
@@ -716,23 +683,6 @@ class DataStorage:
         Returns `True` if successfully updated, otherwise `False`.
         """
         self.__log.debug(f"update_prediction: updating: {prediction_id} for user {user_id}, new values {new_values}")
-        if run_analysis == True:
-            found, dataset = self.get_prediction(user_id, prediction_id)
-            if found is not None:
-                self.__log.debug(f"update_prediction: executing dataset analysis for dataset: {prediction_id} for user {user_id}")
-                # If the dataset is a tabular dataset it can be analyzed.
-                if dataset['type'] in [":tabular", ":text", ":time_series", ":time_series_longitudinal"]:
-                    # Delete old references
-                    new_values["analysis"] = ""
-                    self.__log.debug(f"update_prediction: deleting old dataset analysis for dataset: {prediction_id} for user {user_id}")
-                    self.__mongo.update_prediction(user_id, prediction_id, new_values)
-                    self.__log.debug(f"update_prediction: saving new dataset analysis for dataset: {prediction_id} for user {user_id}, new values {new_values}")
-                    new_values["analysis"] = DataSetAnalysisManager(dataset).analysis(advanced_analysis=False)
-                else:
-                    self.__log.warn(f"update_prediction: dataset type {dataset['type']} does not support dataset analysis in dataset {prediction_id} for user {user_id}")
-            else:
-                self.__log.error(f"update_prediction: executing dataset analysis failed for dataset: {prediction_id} for user {user_id}, dataset not found")
-                raise grpclib.GRPCError(grpclib.Status.NOT_FOUND, f"Dataset {prediction_id} for user {user_id} does not exist, can not execute dataset analysis!")
         return self.__mongo.update_prediction(user_id, prediction_id, new_values)
 
     def get_prediction(self, user_id: str, prediction_id: str) -> 'tuple[bool, dict[str, object]]':

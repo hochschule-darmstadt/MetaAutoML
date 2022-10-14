@@ -4,7 +4,6 @@ from ControllerBGRPC import *
 from DataStorage import DataStorage
 import logging, os, uuid
 from CsvManager import CsvManager
-from LongitudinalDataManager import LongitudinalDataManager
 
 class UserManager:
 

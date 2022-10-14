@@ -18,6 +18,7 @@ class AdapterScheduler:
         response = StartAutoMlResponse()
         response.session_id = new_session_id
         return response
+        
     async def get_auto_ml_status(self, start_auto_ml_request: "GetAutoMlStatusRequest"):
         if (start_auto_ml_request.session_id in self.__adapter_managers.keys()):
             return self.__adapter_managers[start_auto_ml_request.session_id].get_auto_ml_status()

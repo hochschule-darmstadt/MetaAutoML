@@ -1,14 +1,16 @@
 from DataStorage import DataStorage
 from ControllerBGRPC import *
-from DataStorage import DataStorage
 import json, logging, os
 from CsvManager import CsvManager
 from LongitudinalDataManager import LongitudinalDataManager
+from DataSetAnalysisManager import DataSetAnalysisManager
+from ThreadLock import ThreadLock
 
 class DatasetManager:
 
-    def __init__(self, data_storage: DataStorage) -> None:
+    def __init__(self, data_storage: DataStorage, dataset_analysis_lock: ThreadLock) -> None:
         self.__data_storage: DataStorage = data_storage
+        self.__dataset_analysis_lock = dataset_analysis_lock
         self.__log = logging.getLogger('DatasetManager')
         self.__log.setLevel(logging.getLevelName(os.getenv("SERVER_LOGGING_LEVEL")))
 
@@ -26,6 +28,10 @@ class DatasetManager:
         self.__log.debug(f"create_dataset: saving new dataset {create_dataset_request.dataset_name} for user {create_dataset_request.user_id}, with filename {create_dataset_request.file_name}, with dataset type {create_dataset_request.dataset_type}")
         dataset_id: str = self.__data_storage.create_dataset(create_dataset_request.user_id, create_dataset_request.file_name, create_dataset_request.dataset_type, create_dataset_request.dataset_name)
         self.__log.debug(f"create_dataset: new dataset saved id: {dataset_id}")
+        # If the dataset is a certain type the dataset can be analyzed.
+        self.__log.debug("create_dataset: executing dataset analysis...")
+        dataset_analysis = DataSetAnalysisManager(dataset_id, create_dataset_request.user_id, self.__data_storage, self.__dataset_analysis_lock)
+        dataset_analysis.start()
         response = CreateDatasetResponse()
         return response
 
@@ -141,5 +147,8 @@ class DatasetManager:
         Return empty SetDatasetFileConfigurationResponse object or a GRPC error if ressource NOT_FOUND
         """
         self.__log.debug(f"set_dataset_file_configuration: setting new file configuration new configuration {set_dataset_file_configuration_request.file_configuration}, for dataset {set_dataset_file_configuration_request.dataset_id}, of user {set_dataset_file_configuration_request.user_id}")
-        self.__data_storage.update_dataset(set_dataset_file_configuration_request.user_id, set_dataset_file_configuration_request.dataset_id, { "file_configuration": json.loads(set_dataset_file_configuration_request.file_configuration) }, True)
+        self.__data_storage.update_dataset(set_dataset_file_configuration_request.user_id, set_dataset_file_configuration_request.dataset_id, { "file_configuration": json.loads(set_dataset_file_configuration_request.file_configuration) })
+        self.__log.debug(f"set_dataset_file_configuration: executing dataset analysis for dataset: {set_dataset_file_configuration_request.dataset_id} for user {set_dataset_file_configuration_request.user_id}")
+        dataset_analysis = DataSetAnalysisManager(set_dataset_file_configuration_request.dataset_id, set_dataset_file_configuration_request.user_id, self.__data_storage, self.__dataset_analysis_lock)
+        dataset_analysis.start()
         return SetDatasetFileConfigurationResponse()

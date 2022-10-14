@@ -7,7 +7,6 @@ import asyncio
 from grpclib.client import Channel
 from AdapterBGRPC import *
 from DataStorage import DataStorage
-from betterproto.grpc.util.async_channel import AsyncChannel
 
 class AdapterManager(Thread):
 
@@ -108,7 +107,8 @@ class AdapterManager(Thread):
                 "end_time": datetime.datetime.now(),
             },
             "status_messages": [],
-            "explanation": {}
+            "explanation": {},
+            "is_deleted": False
             }
         return self.__data_storage.create_model(self.__request.user_id, model_details)
     
