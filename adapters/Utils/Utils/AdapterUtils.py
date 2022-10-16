@@ -60,13 +60,11 @@ def capture_process_output(process, start_time , use_error):
             process_update = GetAutoMlStatusResponse()
             process_update.return_code = AdapterReturnCode.ADAPTER_RETURN_CODE_STATUS_UPDATE
             process_update.status_update = capture
-            process_update.output_json = ""
-            process_update.runtime = int(time.time() - start_time) or 0
             # if return Code is ADAPTER_RETURN_CODE_STATUS_UPDATE we do not have score values yet
             process_update.test_score = 0.0
             process_update.prediction_time = 0.0
-            process_update.library = ""
-            process_update.model = ""
+            process_update.ml_library = ""
+            process_update.ml_model_type = ""
             yield process_update
 
             sys.stdout.write(capture)
@@ -101,8 +99,8 @@ def get_response(output_json, start_time, test_score, prediction_time, library, 
         response.path = os.path.join(output_json.file_location, output_json.file_name)
     response.test_score = test_score
     response.prediction_time = prediction_time
-    response.library = library
-    response.model = model
+    response.ml_library = library
+    response.ml_model_type = model
     return response
 
 

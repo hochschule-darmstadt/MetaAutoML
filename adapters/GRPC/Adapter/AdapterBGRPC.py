@@ -5,7 +5,6 @@ from dataclasses import dataclass
 from typing import (
     TYPE_CHECKING,
     Dict,
-    List,
     Optional,
 )
 
@@ -62,10 +61,9 @@ class GetAutoMlStatusResponse(betterproto.Message):
     status_update: str = betterproto.string_field(2)
     path: str = betterproto.string_field(3)
     test_score: float = betterproto.float_field(4)
-    validation_score: float = betterproto.float_field(5)
-    prediction_time: float = betterproto.float_field(6)
-    library: str = betterproto.string_field(7)
-    model: str = betterproto.string_field(8)
+    prediction_time: float = betterproto.float_field(5)
+    ml_library: str = betterproto.string_field(6)
+    ml_model_type: str = betterproto.string_field(7)
 
 
 @dataclass(eq=False, repr=False)
@@ -87,9 +85,7 @@ class PredictModelRequest(betterproto.Message):
 
 @dataclass(eq=False, repr=False)
 class PredictModelResponse(betterproto.Message):
-    predictions: List[str] = betterproto.string_field(1)
-    predictiontime: float = betterproto.float_field(2)
-    result_path: str = betterproto.string_field(3)
+    result_path: str = betterproto.string_field(1)
 
 
 class AdapterServiceStub(betterproto.ServiceStub):

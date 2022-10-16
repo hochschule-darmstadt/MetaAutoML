@@ -140,8 +140,8 @@ class AdapterManager(Thread):
                     self.__status = "completed"
                     self.__testScore = response.test_score
                     self.__prediction_time = response.prediction_time
-                    self.__ml_model_type = response.model
-                    self.__ml_library = response.library
+                    self.__ml_model_type = response.ml_model_type
+                    self.__ml_library = response.ml_library
                     found, model = self.__data_storage.get_model(self.__request.user_id, self.__model_id)
                     model_details = {
                         "status": self.__status,

@@ -129,7 +129,6 @@ class AdapterManager(Thread):
             prediction_time, result_path = predict(config_json, job_file_location, get_config_property("adapter-name"))
             response = PredictModelResponse()
             response.result_path = result_path
-            response.predictiontime = prediction_time
             return response
 
         except Exception as e:

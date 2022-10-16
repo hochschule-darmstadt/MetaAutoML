@@ -14,8 +14,6 @@ RUN pip install -r requirements.txt
 # put all files in a directory called app
 WORKDIR /app
 COPY ./controller .
-COPY ./adapters/GRPC/Adapter ./
-COPY ./adapters/GRPC/Controller ./
 COPY ./adapters/Utils/Utils ./utils
 # set all environment variables that are valid for docker-compose and kubernetes
 # all specific enviraonment variables shall then be set by docker or cubernetes when starting the container
