@@ -7,7 +7,7 @@ Clone MetaAutoML Repository:
 
 ## Quick Start Guide
 
-Please refer to the [docker run guide](https://github.com/hochschule-darmstadt/MetaAutoML/wiki/III-Docker-run-guide) in the wiki.
+Please refer to the [docker run guide]([https://github.com/hochschule-darmstadt/MetaAutoML/wiki/III-Docker-run-guide](https://github.com/hochschule-darmstadt/MetaAutoML/wiki/1.-Docker-run-guide)) in the wiki.
 
 ## Docker Setup
 
