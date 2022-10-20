@@ -46,7 +46,7 @@ message Strategy {
   
 
 message GetObjectsInformationRequest {
-  repeated string Ids = 1; //RDF object IRI. example: [":tabular_classification",”:autokeras”]
+  repeated string Ids = 1;                            //List of ontology IRI to retrieve the complete information from. example: [":tabular_classification",”:autokeras”]
 }
 
 message GetObjectsInformationResponse {
