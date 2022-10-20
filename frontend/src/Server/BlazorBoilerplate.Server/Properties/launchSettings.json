@@ -10,7 +10,8 @@
         "CONTROLLER_SERVICE_PORT": "5001",
         "no_proxy": "localhost",
         "REDIS_SERVICE_HOST": "localhost",
-        "REDIS_SERVICE_PORT": "6379"
+        "REDIS_SERVICE_PORT": "6379",
+        "REGISTRATION_ALLOWED": "false"
       },
       "inspectUri": "{wsProtocol}://{url.hostname}:{url.port}/_framework/debug/ws-proxy?browser={browserInspectUri}",
       "sqlDebugging": false

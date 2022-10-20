@@ -29,6 +29,7 @@ services:
       - REDIS_SERVICE_HOST=redis
       - REDIS_SERVICE_PORT=6379
       - CONTROLLER_DATASET_FOLDER_PATH=/app/app-data/datasets
+      - REGISTRATION_ALLOWED=false
     restart: on-failure
     volumes:
       # shared volumes between frontend and controller

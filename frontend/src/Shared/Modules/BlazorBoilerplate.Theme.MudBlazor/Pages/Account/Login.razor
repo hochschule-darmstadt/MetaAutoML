@@ -1,6 +1,5 @@
 @inherits LoginPage
 @page "/account/login"
-
 @layout LoginLayout
 
 <AuthorizeView Context="AuthorizeContext">
@@ -47,7 +46,10 @@
                         <MudCardActions>
                             <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">@L["Login"]</MudButton>
                         </MudCardActions>
-                        <MudButton OnClick="@Register" Variant="Variant.Filled" Color="Color.Primary">@L["Sign up"]</MudButton>
+                        @if (loginViewModel.EnableRegistration == true)
+                        {
+                            <MudButton OnClick="@Register" Variant="Variant.Filled" Color="Color.Primary">@L["Sign up"]</MudButton>
+                        }
                     </MudCard>
                 </EditForm>
 

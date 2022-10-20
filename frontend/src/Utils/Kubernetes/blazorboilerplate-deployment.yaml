@@ -53,6 +53,8 @@ spec:
           value: Debug
         - name: CONTROLLER_DATASET_FOLDER_PATH
           value: /app/app-data/datasets
+        - name: REGISTRATION_ALLOWED
+          value: false
         volumeMounts:
         - name: datasets
           mountPath: /app/app-data/datasets

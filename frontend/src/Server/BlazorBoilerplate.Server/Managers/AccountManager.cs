@@ -145,13 +145,18 @@ namespace BlazorBoilerplate.Server.Managers
         public async Task<ApiResponse> BuildLoginViewModel(string returnUrl)
         {
             var context = await _interaction.GetAuthorizationContextAsync(returnUrl);
+            bool registrationAllowed;
+            if (!bool.TryParse(Environment.GetEnvironmentVariable("REGISTRATION_ALLOWED"), out registrationAllowed))
+            {
+                return new ApiResponse(Status400BadRequest, $"REGISTRATION_ALLOWED Environment variable could not be parsed!");
+            }
             if (context?.IdP != null && await _schemeProvider.GetSchemeAsync(context.IdP) != null)
             {
                 var local = context.IdP == IdentityServer4.IdentityServerConstants.LocalIdentityProvider;
-
                 // this is meant to short circuit the UI and only trigger the one external IdP
                 var vm = new LoginViewModel
                 {
+                    EnableRegistration = registrationAllowed,
                     EnableLocalLogin = local,
                     ReturnUrl = returnUrl,
                     UserName = context?.LoginHint
@@ -192,6 +197,7 @@ namespace BlazorBoilerplate.Server.Managers
 
             return new ApiResponse(Status200OK, L["Operation Successful"], new LoginViewModel
             {
+                EnableRegistration = registrationAllowed,
                 AllowRememberLogin = AccountOptions.AllowRememberLogin,
                 EnableLocalLogin = allowLocal && AccountOptions.AllowLocalLogin,
                 ReturnUrl = returnUrl,
@@ -426,6 +432,16 @@ namespace BlazorBoilerplate.Server.Managers
         {
             //Before creating a new user, request the new OMA-ML user id
             CreateNewUserResponse result;
+
+            bool registrationAllowed;
+            if (!bool.TryParse(Environment.GetEnvironmentVariable("REGISTRATION_ALLOWED"), out registrationAllowed))
+            {
+                return new ApiResponse(Status400BadRequest, $"REGISTRATION_ALLOWED Environment variable could not be parsed!");
+            }
+            if (registrationAllowed == false)
+            {
+                return new ApiResponse(Status400BadRequest, $"Registration is not allowed");
+            }
             try
             {
                 result = _client.CreateNewUser(new CreateNewUserRequest());
