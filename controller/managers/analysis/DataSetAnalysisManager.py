@@ -1,3 +1,4 @@
+
 from genericpath import isfile
 import os.path
 from threading import Thread
@@ -164,7 +165,7 @@ class DataSetAnalysisManager(Thread):
         indices = self.__largest_indices(corr, (len(proc_dataset.columns) * len(proc_dataset.columns)))
 
         # Plot features with the highest correlation
-        print(f"[DatasetAnalysisManager]: Plotting top 5 feature imbalance plots")
+        print(f"[DatasetAnalysisManager]: Plotting top 10 feature imbalance plots")
         plotted_indices = []
         category = {"title": "Correlation analysis", "items": []}
         for first_col_idx, second_col_index in zip(indices[0], indices[1]):
@@ -175,6 +176,7 @@ class DataSetAnalysisManager(Thread):
             if first_col_idx != second_col_index and [second_col_index, first_col_idx] not in plotted_indices:
                 category["items"].append(self.__make_feature_imbalance_plot(self.__dataset_df.columns[first_col_idx],
                                                                             self.__dataset_df.columns[second_col_index],
+                                                                            corr[second_col_index, first_col_idx],
                                                                             self.plot_filepath))
                 plotted_indices.append([first_col_idx, second_col_index])
         self.__plots.append(category)
@@ -389,21 +391,39 @@ class DataSetAnalysisManager(Thread):
             df[df.str.len() > 28] = df[df.str.len() > 28].str[:25] + "..."
             df = df.value_counts()
             # Resize figure. The standard size (6.4 x 4.8) works for <50 unique values.
-            # Above that: double the size for every 50 extra values up to a factor of 3x
+            # Above that: double the size for every 50 extra values up to a factor of 2x
             factor = min(math.ceil(df.shape[0] / 50), 2)
             # If there are too many
-            if df.shape[0] < 100:
-                df.plot(kind='bar', figsize=(factor * PLT_XVALUE, PLT_YVALUE))
+            if df.shape[0] < 100:                
+                df.plot(kind='bar',
+                        figsize=(factor * PLT_XVALUE, PLT_YVALUE),
+                        xlabel=f"Value of {colname}",
+                        ylabel="Frequency")
+                desc = f"This is a frequency diagram of the {colname} column. The Frequency indicates how often the " \
+                       f"corresponding value is found within the dataset."
             else:
-                df.iloc[:100].plot(kind='bar', figsize=(factor * PLT_XVALUE, PLT_YVALUE))
-                desc = f"This plot shows the first 100 unique values of the {colname} column"
+                df.iloc[:100].plot(kind='bar',
+                                   figsize=(factor * PLT_XVALUE, PLT_YVALUE),
+                                   xlabel=f"Value of {colname}",
+                                   ylabel="Frequency")
+                desc = f"This shows the 100 most common unique values of the {colname} column along with their " \
+                       f"frequency. The Frequency indicates how often the corresponding value is found within the " \
+                       f"dataset. This plot only shows a subset of values as the {colname} column has too many " \
+                       f"distinct values."
         else:
             # Make a histogram for numerical columns
-            self.__dataset_df[colname].plot(kind='hist')
+            self.__dataset[colname].plot(kind='hist',
+                                         figsize=(PLT_XVALUE, PLT_YVALUE),
+                                         xlabel=f"Distribution of {colname}",
+                                         ylabel="Frequency")
+            desc = f"This is a histogram of the {colname} column. It shows the distribution of the {colname} " \
+                   f"values."
         plt.title(colname)
         plt.tight_layout()
         filename = os.path.join(plot_path, colname + "_column_plot.svg")
         plt.savefig(filename)
+        plt.clf()
+        plt.close('all')
         return {"type": "column_plot",
                 "title": colname,
                 "description": desc,
@@ -443,12 +463,15 @@ class DataSetAnalysisManager(Thread):
         plt.tight_layout()
         filename = os.path.join(plot_path, "correlation_matrix.svg")
         plt.savefig(filename)
+        plt.clf()
+        plt.close('all')
         return {"type": "correlation_matrix",
                 "title": "Correlation matrix",
-                "description": "Higher values indicate greater correlation between features",
+                "description": "The correlation matrix visualizes the correlation between columns in the dataset. "
+                               "Higher values indicate greater correlation between features. ",
                 "path": filename}
 
-    def __make_feature_imbalance_plot(self, first_colname, second_colname, plot_path):
+    def __make_feature_imbalance_plot(self, first_colname, second_colname, correlation_value, plot_path):
         """
         Plot feature imbalance plot between two columns. The feature imbalance plot shows the most common combinations
         the values of two features (columns) can have along with their frequency.
@@ -470,22 +493,24 @@ class DataSetAnalysisManager(Thread):
 
         plt.clf()
         # Resize figure. The standard size (6.4 x 4.8) works for <50 unique values.
-        # Above that: double the size for every 50 extra values up to a factor of 3x
+        # Above that: double the size for every 50 extra values up to a factor of 2x
         factor = min(math.ceil(len(y_data) / 50), 2)
         plt.figure(figsize=((factor * PLT_XVALUE), PLT_YVALUE))
         plt.bar(x_data, y_data)
-        plt.title(f"Feature imbalance plot of [{first_colname}, {second_colname}]")
+        plt.title(f"Correlaton plot of [{first_colname}, {second_colname}]")
         plt.xticks(x_data, labels=x_data, rotation=90)
         plt.xlabel(f"Most common combinations of [{first_colname}, {second_colname}]")
-        plt.ylabel(f"Combination count")
+        plt.ylabel(f"Frequency")
         plt.tight_layout()
         filename = os.path.join(plot_path, "feature_imbalance_" + first_colname + "_vs_" + second_colname + ".svg")
         plt.savefig(filename)
+        plt.clf()
+        plt.close('all')
         return {"type": "feature_imbalance_plot",
-                "title": f"Feature imbalance plot of [{first_colname}, {second_colname}]",
+                "title": f"Correlation plot of [{first_colname}, {second_colname}]",
                 "description": f"This plot shows the {len(x_data)} most common combinations of the columns "
-                               f"{first_colname} and {second_colname} along with their frequency across "
-                               f"the whole dataset",
+                               f"{first_colname} and {second_colname} ordered by their frequency."
+                               f"These two columns have a correlation value of {round(correlation_value, 2)}",
                 "path": filename}
 
 
