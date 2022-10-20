@@ -412,7 +412,7 @@ class DataSetAnalysisManager(Thread):
                        f"distinct values."
         else:
             # Make a histogram for numerical columns
-            self.__dataset[colname].plot(kind='hist',
+            self.__dataset_df[colname].plot(kind='hist',
                                          figsize=(PLT_XVALUE, PLT_YVALUE),
                                          xlabel=f"Distribution of {colname}",
                                          ylabel="Frequency")
