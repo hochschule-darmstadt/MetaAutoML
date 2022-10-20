@@ -37,7 +37,7 @@ class PredictionManager:
                 "start_time": datetime.datetime.now(),
                 "end_time": datetime.datetime.now()
             },
-            "is_deleted": False
+            "lifecycle_state": "active"
         }
         
         self.__log.debug(f"create_prediction: saving new prediction {config} for user {create_prediction_request.user_id}")

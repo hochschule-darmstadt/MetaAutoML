@@ -117,7 +117,7 @@ class ModelManager:
         Return empty DeleteModelResponse object or a GRPC error if ressource NOT_FOUND
         """
         self.__log.debug(f"delete_model: deleting model {delete_model_request.model_id}, of user {delete_model_request.user_id}")
-        result = self.__data_storage.delete_model(delete_model_request.user_id, delete_model_request.model_id)
-        self.__log.debug(f"delete_model: {str(result)} models deleted")
+        amount_delelted_models = self.__data_storage.delete_model(delete_model_request.user_id, delete_model_request.model_id)
+        self.__log.debug(f"delete_model: model deleted {amount_delelted_models}")
         return DeleteModelResponse()
 

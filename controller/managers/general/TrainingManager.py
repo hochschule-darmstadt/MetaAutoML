@@ -74,7 +74,7 @@ class TrainingManager:
                 "events": [],
                 "end_time": datetime.datetime.now()
             },
-            "is_deleted": False
+            "lifecycle_state": "active"
         }
         
         training_id = self.__data_storage.create_training(create_training_request.user_id, config)

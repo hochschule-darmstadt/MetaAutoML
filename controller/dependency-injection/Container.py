@@ -68,7 +68,8 @@ class Managers(containers.DeclarativeContainer):
     )
     user_manager = providers.Factory(
         UserManager,
-        data_storage=ressources.data_storage
+        data_storage=ressources.data_storage,
+        dataset_analysis_lock=ressources.dataset_analysis_lock
     )
     prediction_manager = providers.Factory(
         PredictionManager,

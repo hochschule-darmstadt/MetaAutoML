@@ -118,7 +118,7 @@ class DataStorage:
                 "creation_date": 0,
                 "size_bytes": 0
             },
-            "is_deleted": False
+            "lifecycle_state": "active"
         }
 
         self.__log.debug("create_dataset: inserting new dataset into database...")
@@ -255,7 +255,8 @@ class DataStorage:
         Returns either `(True, Dataset)` or `(False, None)`.
         """
         result = self.__mongo.get_dataset(user_id, {
-            "_id": ObjectId(dataset_id)
+            "_id": ObjectId(dataset_id),
+            "lifecycle_state": "active"
         })
 
         return result is not None, result
@@ -274,7 +275,7 @@ class DataStorage:
         ---
         Returns `list` of all datasets.
         """
-        return [ds for ds in self.__mongo.get_datasets(user_id)]
+        return [ds for ds in self.__mongo.get_datasets(user_id, {"lifecycle_state": "active"})]
 
     def delete_dataset(self, user_id: str, dataset_id: str):
         """
@@ -306,7 +307,7 @@ class DataStorage:
                 self.__log.debug(f"delete_dataset: deleting training failed, already deleted. Skipping...")
         self.__log.debug(f"delete_dataset: deleting files within path: {path}")
         shutil.rmtree(path)
-        amount_deleted_datasets_result = self.__mongo.delete_dataset(user_id, { "_id": ObjectId(dataset_id)})
+        amount_deleted_datasets_result = self.__mongo.delete_dataset(user_id, dataset_id)
         self.__log.debug(f"delete_dataset: documents deleted within dataset: {amount_deleted_datasets_result}")
         return amount_deleted_datasets_result
 
@@ -372,7 +373,8 @@ class DataStorage:
         Returns either `(True, Model)` or `(False, None)`.
         """
         result = self.__mongo.get_model(user_id, {
-            "_id": ObjectId(model_id)
+            "_id": ObjectId(model_id),
+            "lifecycle_state": "active"
         })
 
         return result is not None, result
@@ -392,10 +394,10 @@ class DataStorage:
         Returns a models list
         """
         if training_id is not None:
-            filter = { "training_id": training_id }
+            filter = { "training_id": training_id, "lifecycle_state": "active" }
         elif dataset_id is not None:
             found, dataset = self.get_dataset(user_id, dataset_id)
-            filter = { "training_id": { '$in': dataset["training_ids"] } }
+            filter = { "training_id": { '$in': dataset["training_ids"] }, "lifecycle_state": "active" }
         else:
             filter = {}
         result = self.__mongo.get_models(user_id, filter)
@@ -479,14 +481,13 @@ class DataStorage:
                 self.delete_prediction(user_id, prediction_id)
             self.__log.debug(f"delete_model: deleting files within path: {path}")
             shutil.rmtree(path)
+            amount_deleted_models = self.__mongo.delete_model(user_id, model_id)
         except:
             self.__log.error(f"delete_model: deleting files within path: {path} failed, path does not exist")
+            amount_deleted_models = self.__mongo.delete_model(user_id, model_id)
             raise grpclib.GRPCError(grpclib.Status.NOT_FOUND, f"Model {model_id} file path does not exist, already deleted?")
 
-
-        amount_deleted_models_result = self.__mongo.delete_model(user_id, { "_id": ObjectId(model_id) })
-        self.__log.debug(f"delete_model: documents deleted within model: {amount_deleted_models_result}")
-        return amount_deleted_models_result
+        return amount_deleted_models
 
 #endregion
 
@@ -547,7 +548,8 @@ class DataStorage:
         Returns either `(True, Training)` or `(False, None)`.
         """
         result = self.__mongo.get_training(user_id, {
-            "_id": ObjectId(training_id)
+            "_id": ObjectId(training_id),
+            "lifecycle_state": "active"
         })
 
         return result is not None, result
@@ -567,9 +569,9 @@ class DataStorage:
         Returns trainings as `list` of dictionaries.
         """
         if dataset_id is None:
-            return [sess for sess in self.__mongo.get_trainings(user_id)]
+            return [sess for sess in self.__mongo.get_trainings(user_id, {"lifecycle_state": "active"})]
         else:
-            return [sess for sess in self.__mongo.get_trainings(user_id, {"dataset_id": dataset_id})]
+            return [sess for sess in self.__mongo.get_trainings(user_id, {"dataset_id": dataset_id, "lifecycle_state": "active"})]
         
     def delete_training(self, user_id: bool, training_id: str):
         """
@@ -596,7 +598,7 @@ class DataStorage:
             except:
                 self.__log.debug(f"delete_training: deleting model failed, already deleted. Skipping...")
         #Finally delete training
-        amount_deleted_trainings_result = self.__mongo.delete_training(user_id, { "_id": ObjectId(training_id) })
+        amount_deleted_trainings_result = self.__mongo.delete_training(user_id, training_id)
         self.__log.debug(f"delete_training: documents deleted within training: {amount_deleted_trainings_result}")
         return amount_deleted_trainings_result
    
@@ -638,6 +640,9 @@ class DataStorage:
 
         self.__log.debug("create_prediction: inserting new prediction dataset into database...")
         prediction_id = self.__mongo.insert_prediction(user_id, prediction_details)
+
+        self.__log.debug("create_prediction: adding prediction id to model prediction ids...")
+        self.__mongo.update_model(user_id, prediction_details['model_id'], {"prediction_ids": model["prediction_ids"] + [prediction_id]})
 
         upload_file = os.path.join(self.__storage_dir, user_id, "uploads", live_dataset_file_name)
         self.__log.debug(f"create_prediction: upload location is: {upload_file}")
@@ -701,7 +706,8 @@ class DataStorage:
         Returns either `(True, Dataset)` or `(False, None)`.
         """
         result = self.__mongo.get_prediction(user_id, {
-            "_id": ObjectId(prediction_id)
+            "_id": ObjectId(prediction_id),
+            "lifecycle_state": "active"
         })
 
         return result is not None, result
@@ -720,7 +726,7 @@ class DataStorage:
         ---
         Returns `list` of all datasets.
         """
-        return [ds for ds in self.__mongo.get_predictions(user_id, {"model_id": model_id})]
+        return [ds for ds in self.__mongo.get_predictions(user_id, {"model_id": model_id, "lifecycle_state": "active"})]
 
     def delete_prediction(self, user_id: str, prediction_id: str):
         """
@@ -738,15 +744,18 @@ class DataStorage:
         if not found:
             self.__log.error(f"delete_prediction: attempting to delete a dataset that does not exist: {prediction_id} for user {user_id}")
             raise grpclib.GRPCError(grpclib.Status.NOT_FOUND, f"Dataset {prediction_id} does not exist, already deleted?")
-        path = dataset["path"]
-        if os.getenv("WIN_DEV_MACHINE") == "YES":
-            path = path.replace( "\\"+ os.path.basename(dataset["path"]), "")
-        else:
-            path = path.replace( "/"+ os.path.basename(dataset["path"]), "")
-        #Before deleting the prediction, delete all related documents
-        self.__log.debug(f"delete_prediction: deleting files within path: {path}")
-        shutil.rmtree(path)
-        amount_deleted_datasets_result = self.__mongo.delete_prediction(user_id, { "prediction_id": prediction_id})
+        try:
+            path = dataset["live_dataset_path"]
+            if os.getenv("WIN_DEV_MACHINE") == "YES":
+                path = path.replace( "\\"+ os.path.basename(dataset["path"]), "")
+            else:
+                path = path.replace( "/"+ os.path.basename(dataset["path"]), "")
+            #Before deleting the prediction, delete all related documents
+            self.__log.debug(f"delete_prediction: deleting files within path: {path}")
+            shutil.rmtree(path)
+        except:
+            self.__log.debug(f"delete_prediction: deleting files within path: {path} failed, path unknown")
+        amount_deleted_datasets_result = self.__mongo.delete_prediction(user_id, prediction_id)
         self.__log.debug(f"delete_prediction: documents deleted within dataset: {amount_deleted_datasets_result}")
         return amount_deleted_datasets_result
 

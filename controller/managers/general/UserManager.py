@@ -4,11 +4,14 @@ from ControllerBGRPC import *
 from DataStorage import DataStorage
 import logging, os, uuid
 from CsvManager import CsvManager
+from DataSetAnalysisManager import DataSetAnalysisManager
+from ThreadLock import ThreadLock
 
 class UserManager:
 
-    def __init__(self, data_storage: DataStorage) -> None:
+    def __init__(self, data_storage: DataStorage, dataset_analysis_lock: ThreadLock) -> None:
         self.__data_storage: DataStorage = data_storage
+        self.__dataset_analysis_lock = dataset_analysis_lock
         self.__log = logging.getLogger('UserManager')
         self.__log.setLevel(logging.getLevelName(os.getenv("SERVER_LOGGING_LEVEL")))
         
@@ -32,7 +35,10 @@ class UserManager:
         else:
             self.__log.debug(f"create_new_user: copying default dataset for a new user {user_id}")
             CsvManager.copy_default_dataset(user_id)
-            self.__data_storage.create_dataset(user_id, "titanic_train.csv", ":tabular", "Titanic")
+            dataset_id: str = self.__data_storage.create_dataset(user_id, "titanic_train.csv", ":tabular", "Titanic")
+            self.__log.debug("create_dataset: executing dataset analysis...")
+            dataset_analysis = DataSetAnalysisManager(dataset_id, user_id, self.__data_storage, self.__dataset_analysis_lock)
+            dataset_analysis.start()
             return CreateNewUserResponse(user_id)
 
     def get_home_overview_information(

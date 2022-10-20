@@ -148,7 +148,7 @@ class MongoDbClient:
         self.__log.debug(f"update_dataset: documents changed within dataset: {result.modified_count}")
         return result.modified_count >= 1
 
-    def delete_dataset(self, user_id: str, filter: 'dict[str, object]'):
+    def delete_dataset(self, user_id: str, dataset_id: str):
         """
         Delete a dataset record and all it's associated records and files
         ---
@@ -159,10 +159,10 @@ class MongoDbClient:
         Returns amount of deleted objects
         """
         datasets: Collection = self.__mongo[user_id]["datasets"]
-        self.__log.debug(f"delete_dataset: deleting dataset with filter: {filter}")
-        result = datasets.delete_one(filter)
-        self.__log.debug(f"delete_dataset: {result.deleted_count} datasets deleted")
-        return result.deleted_count
+        self.__log.debug(f"delete_dataset: setting soft delete for dataset with filter: {filter}")
+        result = datasets.update_one({ "_id": ObjectId(dataset_id) }, { "$set": { "lifecycle_state": "deleted"} })
+        self.__log.debug(f"delete_dataset: soft delete for {result.matched_count} documents")
+        return result.matched_count
 #endregion
     
     ####################################
@@ -230,7 +230,7 @@ class MongoDbClient:
         self.__log.debug(f"update_model: documents changed within models: {result.modified_count}")
         return result.modified_count >= 1
 
-    def delete_model(self, user_id: str, filter: 'dict[str, object]'):
+    def delete_model(self, user_id: str, model_id: str):
         """
         Delete model record and all it's associated records and files
         ---
@@ -241,10 +241,10 @@ class MongoDbClient:
         Returns amount of deleted objects
         """
         models: Collection = self.__mongo[user_id]["models"]
-        self.__log.debug(f"delete_models: deleting model with filter: {filter}")
-        result = models.delete_many(filter)
-        self.__log.debug(f"delete_models: documents deleted within model: {result.deleted_count}")
-        return result.deleted_count
+        self.__log.debug(f"delete_models: setting soft delete for model id: {model_id}")
+        result = models.update_one({ "_id": ObjectId(model_id) }, { "$set": { "lifecycle_state": "deleted"} })
+        self.__log.debug(f"delete_models: soft delete for {result.matched_count} documents")
+        return result.matched_count
 #endregion
 
     ####################################
@@ -313,7 +313,7 @@ class MongoDbClient:
         self.__log.debug(f"update_training: documents changed within trainings: {result.modified_count}")
         return result.modified_count >= 1
 
-    def delete_training(self, user_id: str, filter: 'dict[str, object]'):
+    def delete_training(self, user_id: str, training_id: str):
         """
         Delete trainings record and all it's associated records and files
         ---
@@ -324,13 +324,10 @@ class MongoDbClient:
         Returns amount of deleted objects
         """
         trainings: Collection = self.__mongo[user_id]["trainings"]
-        result_training = trainings.find(filter)
-        for training in list(result_training):
-            amount_model = self.delete_model(user_id, { "training_id": str(training["_id"])})
-            self.__log.debug(f"delete_training: documents deleted within models: {amount_model}")
-        result = trainings.delete_many(filter)
-        self.__log.debug(f"delete_training: documents deleted within trainings: {result.deleted_count}")
-        return result.deleted_count
+        self.__log.debug(f"delete_training: setting soft delete for training id: {training_id}")
+        result = trainings.update_one({ "_id": ObjectId(training_id) }, { "$set": { "lifecycle_state": "deleted"} })
+        self.__log.debug(f"delete_training: soft delete for {result.matched_count} documents")
+        return result.matched_count
 
 #endregion
     ####################################
@@ -398,7 +395,7 @@ class MongoDbClient:
         self.__log.debug(f"update_prediction: documents changed within dataset: {result.modified_count}")
         return result.modified_count >= 1
 
-    def delete_prediction(self, user_id: str, filter: 'dict[str, object]'):
+    def delete_prediction(self, user_id: str, prediction_id: str):
         """
         Delete a dataset record and all it's associated records and files
         ---
@@ -409,10 +406,10 @@ class MongoDbClient:
         Returns amount of deleted objects
         """
         predictions: Collection = self.__mongo[user_id]["predictions"]
-        self.__log.debug(f"delete_prediction: deleting dataset with filter: {filter}")
-        result = predictions.delete_one(filter)
-        self.__log.debug(f"delete_prediction: {result.deleted_count} datasets deleted")
-        return result.deleted_count
+        self.__log.debug(f"delete_prediction: setting soft delete for prediction id: {prediction_id}")
+        result = predictions.update_one({ "_id": ObjectId(prediction_id) }, { "$set": { "lifecycle_state": "deleted"} })
+        self.__log.debug(f"delete_prediction: soft delete for {result.matched_count} documents")
+        return result.matched_count
 #endregion
     
     

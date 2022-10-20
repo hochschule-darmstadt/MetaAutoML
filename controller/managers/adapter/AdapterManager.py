@@ -108,7 +108,7 @@ class AdapterManager(Thread):
             },
             "status_messages": [],
             "explanation": {},
-            "is_deleted": False
+            "lifecycle_state": "active"
             }
         return self.__data_storage.create_model(self.__request.user_id, model_details)
     
