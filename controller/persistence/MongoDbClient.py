@@ -8,14 +8,15 @@ from MeasureDuration import MeasureDuration
 
 class MongoDbClient:
     """
-    MongoDB database interface API.
-    ---
-    Do not use independently, always use the public MongoDbStorage API.
-    ---
-    Everything regarding MongoDB should live in this class.
+    MongoDB database interface API. Not to be used independently, always use the public MongoDbStorage API.
     """
 
     def __init__(self, server_url="mongodb://root:example@localhost"):
+        """Initialize a new MongoDbClient instance.
+
+        Args:
+            server_url (str, optional): The connection URL to a MongoDB server. Defaults to "mongodb://root:example@localhost".
+        """
         with MeasureDuration() as m:
             self.__log = logging.getLogger('MongoDbClient')
             self.__log.setLevel(logging.getLevelName(os.getenv("PERSISTENCE_LOGGING_LEVEL")))
@@ -27,13 +28,16 @@ class MongoDbClient:
 
 
     def __use_real_database(self, server_url: str) -> MongoClient:
-        """
-        Connects to a MongoDB database at the url.
-        ---
-        Parameter
-        1. server url with host as defined in docker-compose.yml
-        ---
-        Returns database interface
+        """Connect to a real MongoDB server
+
+        Args:
+            server_url (str): The connection URL to a MongoDB server
+
+        Raises:
+            Exception: Raised when MongoDB could not be reached
+
+        Returns:
+            MongoClient: The MongoClient instance to interact with the connected MongoDB server
         """
         try:
             # sample credentials from docker-compose
@@ -58,23 +62,22 @@ class MongoDbClient:
     ####################################
 #region
     def drop_database(self, user_id: str):
-        """
-        Delete all datasets sessions and models for a user
-        ---
-        Parameter
-        1. user id
+        """Drop a user database from MongoDB
+
+        Args:
+            user_id (str): Unique user id saved within the MS Sql database of the frontend
         """
         self.__mongo.drop_database(user_id)
         self.__log.debug(f"drop_database: database {user_id} dropped")
 
     def check_if_user_exists(self, user_id: str) -> bool:
-        """
-        Check if user exists by checking if his database exists
-        ---
-        Parameter
-        1. user id: name of the user
-        ---
-        Returns database existance status, TRUE == EXITS
+        """Check if a user database already exists
+
+        Args:
+            user_id (str): Unique user id saved within the MS Sql database of the frontend
+
+        Returns:
+            bool: True if the user already has a database, False if the user does not have a database
         """
         if user_id in self.__mongo.list_databases() == True:
             self.__log.debug(f"check_if_user_exists: database {user_id} exists")
@@ -83,19 +86,20 @@ class MongoDbClient:
             self.__log.debug(f"check_if_user_exists: database {user_id} does not exists")
             return False
 #endregion
+    
     ####################################
     ## DATASET MONGO DB OPERATIONS
     ####################################
 #region
     def insert_dataset(self, user_id: str, dataset_details: 'dict[str, str]') -> str:
-        """
-        Insert a new dataset
-        ---
-        Parameter
-        1. user id
-        2. dataset as dict
-        ---
-        Returns dataset id
+        """Insert a new dataset record into a users database
+
+        Args:
+            user_id (str): Unique user id saved within the MS Sql database of the frontend
+            dataset_details (dict[str, str]): Dictonary with the record fields and values for the new record
+
+        Returns:
+            str: The record id of the newly inserted dataset record
         """
         datasets: Collection = self.__mongo[user_id]["datasets"]
         self.__log.debug(f"insert_dataset: inserting new dataset with values: {dataset_details}")
@@ -104,43 +108,43 @@ class MongoDbClient:
         return str(result.inserted_id)
 
     def get_dataset(self, user_id: str, filter: 'dict[str, object]') -> 'dict[str, object]':
-        """
-        Get a dataset by filter
-        ---
-        Parameter
-        1. user id
-        2. filter dictonary to find dataset for
-        ---
-        Returns dataset as dict or `None`
+        """Retrieve a single dataset record from a user database
+
+        Args:
+            user_id (str): Unique user id saved within the MS Sql database of the frontend
+            filter (dict[str, object]): Dictionary of record fields to filter the dataset record from
+
+        Returns:
+            dict[str, object]: Dictonary representing a dataset record
         """
         datasets: Collection = self.__mongo[user_id]["datasets"]
         self.__log.debug(f"get_dataset: documents within dataset: {datasets.count_documents}, filter {filter}")
         return datasets.find_one(filter)
 
     def get_datasets(self, user_id: str, filter: 'dict[str, object]'={}) -> 'list[dict[str, object]]':
-        """
-        Get all datasets for a user, optinally by filter
-        ---
-        Parameter
-        1. user id
-        2. optional filter
-        ---
-        Returns dataset as dict
+        """Retrieve all dataset records from a user database
+
+        Args:
+            user_id (str): Unique user id saved within the MS Sql database of the frontend
+            filter (dict[str, object], optional): Dictionary of record fields to filter the dataset records from. Defaults to {}.
+
+        Returns:
+            list[dict[str, object]]: List of dictonaries representing dataset records
         """
         datasets: Collection = self.__mongo[user_id]["datasets"]
         self.__log.debug(f"get_datasets: documents within dataset: {datasets.count_documents}, filter {filter}")
         return datasets.find(filter)
 
     def update_dataset(self, user_id: str, dataset_id: str, new_values: 'dict[str, object]') -> bool:
-        """
-        Update a dataset record
-        ---
-        Parameter
-        1. user id
-        2. dataset id
-        3. dictionary of new values
-        ---
-        Returns `True` if a record was updated otherwise `False`
+        """Update a single dataset record from a user database
+
+        Args:
+            user_id (str): Unique user id saved within the MS Sql database of the frontend
+            dataset_id (str): The dataset id of the dataset record which is to be updated
+            new_values (dict[str, object]): Dictonary of new dataset record field values that will be updated
+
+        Returns:
+            bool: True if the record was updated, False if the record was not updated
         """
         datasets: Collection = self.__mongo[user_id]["datasets"]
         self.__log.debug(f"update_dataset: updating dataset with id: {dataset_id}, with new values {new_values}")
@@ -148,15 +152,15 @@ class MongoDbClient:
         self.__log.debug(f"update_dataset: documents changed within dataset: {result.modified_count}")
         return result.modified_count >= 1
 
-    def delete_dataset(self, user_id: str, dataset_id: str):
-        """
-        Delete a dataset record and all it's associated records and files
-        ---
-        Parameter
-        1. user id
-        2. deletion filter
-        ---
-        Returns amount of deleted objects
+    def delete_dataset(self, user_id: str, dataset_id: str) -> int:
+        """Delete a single dataset record, by applying soft delete (setting the livecycle of the dataset record to 'deleted')
+
+        Args:
+            user_id (str): Unique user id saved within the MS Sql database of the frontend
+            dataset_id (str): The dataset id of the dataset record which is to be updated
+
+        Returns:
+            int: amount of dataset deleted
         """
         datasets: Collection = self.__mongo[user_id]["datasets"]
         self.__log.debug(f"delete_dataset: setting soft delete for dataset with filter: {filter}")
@@ -170,14 +174,14 @@ class MongoDbClient:
     ####################################
 #region
     def insert_model(self, user_id: str, model_details: 'dict[str, str]') -> str:
-        """
-        Insert model
-        ---
-        Parameter
-        1. user id
-        2. model as dict
-        ---
-        Returns model id
+        """Insert a new model record into a users database
+
+        Args:
+            user_id (str): Unique user id saved within the MS Sql database of the frontend
+            model_details (dict[str, str]): Dictonary with the record fields and values for the new record
+
+        Returns:
+            str: The record id of the newly inserted model record
         """
         models: Collection = self.__mongo[user_id]["models"]
         self.__log.debug(f"insert_model: inserting new model with values: {model_details}")
@@ -186,43 +190,43 @@ class MongoDbClient:
         return str(result.inserted_id)
 
     def get_model(self, user_id: str, filter: 'dict[str, object]') -> 'dict[str, object]':
-        """
-        Get a model by it's filter
-        ---
-        Parameter
-        1. user id
-        2. filter dictonary to find model for
-        ---
-        Returns training as dict
+        """Retrieve a single model record from a user database
+
+        Args:
+            user_id (str): Unique user id saved within the MS Sql database of the frontend
+            filter (dict[str, object]): Dictionary of record fields to filter the model record from
+
+        Returns:
+            dict[str, object]: Dictonary representing a model record
         """
         models: Collection = self.__mongo[user_id]["models"]
         self.__log.debug(f"get_model: documents within model: {models.count_documents}, filter {filter}")
         return models.find_one(filter)
 
     def get_models(self, user_id: str, filter: 'dict[str, object]'={}) -> 'list[dict[str, object]]':
-        """
-        Get all models from a user, by optionally filter
-        ---
-        Parameter
-        1. user id
-        2. optional filter
-        ---
-        Returns models as list of dicts
+        """Retrieve all model records from a user database
+
+        Args:
+            user_id (str): Unique user id saved within the MS Sql database of the frontend
+            filter (dict[str, object], optional): Dictionary of record fields to filter the model records from. Defaults to {}.
+
+        Returns:
+            list[dict[str, object]]: List of dictonaries representing model records
         """
         models: Collection = self.__mongo[user_id]["models"]
         self.__log.debug(f"get_models: documents within models: {models.count_documents}, filter {filter}")
         return models.find(filter)
 
     def update_model(self, user_id: str, model_id: str, new_values: 'dict[str, str]') -> bool:
-        """
-        Update a model record
-        ---
-        Parameter
-        1. user id
-        2. training id
-        3. dictionary of new values
-        ---
-        Returns `True` if a record was updated otherwise `False`
+        """Update a single model record from a user database
+
+        Args:
+            user_id (str): Unique user id saved within the MS Sql database of the frontend
+            model_id (str): The model id of the model record which is to be updated
+            new_values (dict[str, object]): Dictonary of new model record field values that will be updated
+
+        Returns:
+            bool: True if the record was updated, False if the record was not updated
         """
         models: Collection = self.__mongo[user_id]["models"]
         self.__log.debug(f"update_model: updating model with id: {model_id}, with new values {new_values}")
@@ -230,15 +234,15 @@ class MongoDbClient:
         self.__log.debug(f"update_model: documents changed within models: {result.modified_count}")
         return result.modified_count >= 1
 
-    def delete_model(self, user_id: str, model_id: str):
-        """
-        Delete model record and all it's associated records and files
-        ---
-        Parameter
-        1. user id
-        2. deletion filter
-        ---
-        Returns amount of deleted objects
+    def delete_model(self, user_id: str, model_id: str) -> int:
+        """Delete a single model record, by applying soft delete (setting the livecycle of the model record to 'deleted')
+
+        Args:
+            user_id (str): Unique user id saved within the MS Sql database of the frontend
+            model_id (str): The model id of the model record which is to be updated
+
+        Returns:
+            int: amount of model deleted
         """
         models: Collection = self.__mongo[user_id]["models"]
         self.__log.debug(f"delete_models: setting soft delete for model id: {model_id}")
@@ -252,15 +256,15 @@ class MongoDbClient:
     ####################################
 #region
 
-    def insert_training(self, user_id: str, training_details: 'dict[str, str]'):
-        """
-        Insert training
-        ---
-        Parameter
-        1. user id
-        2. training as dict
-        ---
-        Returns training id
+    def insert_training(self, user_id: str, training_details: 'dict[str, str]') -> str:
+        """Insert a new training record into a users database
+
+        Args:
+            user_id (str): Unique user id saved within the MS Sql database of the frontend
+            training_details (dict[str, str]): Dictonary with the record fields and values for the new record
+
+        Returns:
+            str: The record id of the newly inserted training record
         """
         trainings: Collection = self.__mongo[user_id]["trainings"]
         self.__log.debug(f"insert_training: inserting new training with values: {training_details}")
@@ -269,43 +273,43 @@ class MongoDbClient:
         return str(result.inserted_id)
 
     def get_training(self, user_id: str, filter: 'dict[str, object]') -> 'dict[str, object]':
-        """
-        Get a training by it's filter
-        ---
-        Parameter
-        1. user id
-        2. filter dictonary to find training for
-        ---
-        Returns training as dict
+        """Retrieve a single training record from a user database
+
+        Args:
+            user_id (str): Unique user id saved within the MS Sql database of the frontend
+            filter (dict[str, object]): Dictionary of record fields to filter the training record from
+
+        Returns:
+            dict[str, object]: Dictonary representing a training record
         """
         trainings: Collection = self.__mongo[user_id]["trainings"]
         self.__log.debug(f"get_training: documents within trainings: {trainings.count_documents}, filter {filter}")
         return trainings.find_one(filter)
 
     def get_trainings(self, user_id: str, filter: 'dict[str, object]'={}) -> 'list[dict[str, object]]':
-        """
-        Get all trainings from a user, optionally by filter
-        ---
-        Parameter
-        1. user id
-        2. optional filter
-        ---
-        Returns trainings as list of dicts
+        """Retrieve all training records from a user database
+
+        Args:
+            user_id (str): Unique user id saved within the MS Sql database of the frontend
+            filter (dict[str, object], optional): Dictionary of record fields to filter the training records from. Defaults to {}.
+
+        Returns:
+            list[dict[str, object]]: List of dictonaries representing training records
         """
         trainings: Collection = self.__mongo[user_id]["trainings"]
         self.__log.debug(f"get_trainings: documents within trainings: {trainings.count_documents}, filter {filter}")
         return trainings.find(filter)
 
     def update_training(self, user_id: str, training_id: str, new_values: 'dict[str, str]') -> bool:
-        """
-        Update a training record
-        ---
-        Parameter
-        1. user id
-        2. training id
-        3. dictionary of new values
-        ---
-        Returns `True` if a record was updated otherwise `False`
+        """Update a single training record from a user database
+
+        Args:
+            user_id (str): Unique user id saved within the MS Sql database of the frontend
+            training_id (str): The training id of the training record which is to be updated
+            new_values (dict[str, object]): Dictonary of new training record field values that will be updated
+
+        Returns:
+            bool: True if the record was updated, False if the record was not updated
         """
         trainings: Collection = self.__mongo[user_id]["trainings"]
         self.__log.debug(f"update_training: updating training with id: {training_id}, with new values {new_values}")
@@ -313,15 +317,15 @@ class MongoDbClient:
         self.__log.debug(f"update_training: documents changed within trainings: {result.modified_count}")
         return result.modified_count >= 1
 
-    def delete_training(self, user_id: str, training_id: str):
-        """
-        Delete trainings record and all it's associated records and files
-        ---
-        Parameter
-        1. user id
-        2. deletion filter
-        ---
-        Returns amount of deleted objects
+    def delete_training(self, user_id: str, training_id: str) -> int:
+        """Delete a single training record, by applying soft delete (setting the livecycle of the training record to 'deleted')
+
+        Args:
+            user_id (str): Unique user id saved within the MS Sql database of the frontend
+            training_id (str): The training id of the training record which is to be updated
+
+        Returns:
+            int: amount of training deleted
         """
         trainings: Collection = self.__mongo[user_id]["trainings"]
         self.__log.debug(f"delete_training: setting soft delete for training id: {training_id}")
@@ -335,14 +339,14 @@ class MongoDbClient:
     ####################################
 #region
     def insert_prediction(self, user_id: str, prediction_details: 'dict[str, str]') -> str:
-        """
-        Insert a new dataset
-        ---
-        Parameter
-        1. user id
-        2. dataset as dict
-        ---
-        Returns dataset id
+        """Insert a new prediction record into a users database
+
+        Args:
+            user_id (str): Unique user id saved within the MS Sql database of the frontend
+            prediction_details (dict[str, str]): Dictonary with the record fields and values for the new record
+
+        Returns:
+            str: The record id of the newly inserted prediction record
         """
         datasets: Collection = self.__mongo[user_id]["predictions"]
         self.__log.debug(f"insert_prediction: inserting new dataset with values: {prediction_details}")
@@ -351,43 +355,43 @@ class MongoDbClient:
         return str(result.inserted_id)
 
     def get_prediction(self, user_id: str, filter: 'dict[str, object]') -> 'dict[str, object]':
-        """
-        Get a dataset by filter
-        ---
-        Parameter
-        1. user id
-        2. filter dictonary to find dataset for
-        ---
-        Returns dataset as dict or `None`
+        """Retrieve a single prediction record from a user database
+
+        Args:
+            user_id (str): Unique user id saved within the MS Sql database of the frontend
+            filter (dict[str, object]): Dictionary of record fields to filter the prediction record from
+
+        Returns:
+            dict[str, object]: Dictonary representing a prediction record
         """
         predictions: Collection = self.__mongo[user_id]["predictions"]
         self.__log.debug(f"get_prediction: documents within dataset: {predictions.count_documents}, filter {filter}")
         return predictions.find_one(filter)
 
     def get_predictions(self, user_id: str, filter: 'dict[str, object]'={}) -> 'list[dict[str, object]]':
-        """
-        Get all datasets for a user, optinally by filter
-        ---
-        Parameter
-        1. user id
-        2. optional filter
-        ---
-        Returns dataset as dict
+        """Retrieve all prediction records from a user database
+
+        Args:
+            user_id (str): Unique user id saved within the MS Sql database of the frontend
+            filter (dict[str, object], optional): Dictionary of record fields to filter the prediction records from. Defaults to {}.
+
+        Returns:
+            list[dict[str, object]]: List of dictonaries representing prediction records
         """
         predictions: Collection = self.__mongo[user_id]["predictions"]
         self.__log.debug(f"get_predictions: documents within dataset: {predictions.count_documents}, filter {filter}")
         return predictions.find(filter)
 
     def update_prediction(self, user_id: str, prediction_id: str, new_values: 'dict[str, object]') -> bool:
-        """
-        Update a dataset record
-        ---
-        Parameter
-        1. user id
-        2. dataset id
-        3. dictionary of new values
-        ---
-        Returns `True` if a record was updated otherwise `False`
+        """Update a single prediction record from a user database
+
+        Args:
+            user_id (str): Unique user id saved within the MS Sql database of the frontend
+            prediction_id (str): The prediction id of the prediction record which is to be updated
+            new_values (dict[str, object]): Dictonary of new prediction record field values that will be updated
+
+        Returns:
+            bool: True if the record was updated, False if the record was not updated
         """
         predictions: Collection = self.__mongo[user_id]["predictions"]
         self.__log.debug(f"update_prediction: updating dataset with id: {prediction_id}, with new values {new_values}")
@@ -396,14 +400,14 @@ class MongoDbClient:
         return result.modified_count >= 1
 
     def delete_prediction(self, user_id: str, prediction_id: str):
-        """
-        Delete a dataset record and all it's associated records and files
-        ---
-        Parameter
-        1. user id
-        2. deletion filter
-        ---
-        Returns amount of deleted objects
+        """Delete a single prediction record, by applying soft delete (setting the livecycle of the prediction record to 'deleted')
+
+        Args:
+            user_id (str): Unique user id saved within the MS Sql database of the frontend
+            prediction_id (str): The prediction id of the prediction record which is to be updated
+
+        Returns:
+            int: amount of prediction deleted
         """
         predictions: Collection = self.__mongo[user_id]["predictions"]
         self.__log.debug(f"delete_prediction: setting soft delete for prediction id: {prediction_id}")

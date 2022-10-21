@@ -14,20 +14,11 @@ class DataStorage:
     Centralized Access to File System and Database
     """
     def __init__(self, data_storage_dir: str, mongo_db: MongoDbClient = None):
-        """
-        Initialize new instance. This should be done already.
-        Do _not_ use multiple instances of this class.
-
-        Will connect to the MongoDB database defined in docker-compose
-        unless `database` is provided.
-
-        >>> data_storage = DataStorage("/tmp/")
-
-        ----
-        Parameter
-        1. storage directory on disk
-        2. multiprocessing lock for thread safety 
-        3. optional Database object (used for Testing)
+        """Initialize a new DataStorage instance.
+        
+        Args:
+            data_storage_dir (str): Directory path which the data storage uses as base to save data
+            mongo_db (MongoDbClient, optional): Mongodb client used to interact with the mongodb. Defaults to None.
         """
         self.__log = logging.getLogger('DataStorage')
         self.__log.setLevel(logging.getLevelName(os.getenv("PERSISTENCE_LOGGING_LEVEL")))
@@ -43,27 +34,20 @@ class DataStorage:
     ####################################
 #region
 
-    def check_if_user_exists(self, user_id: bool):
-    #@inject
-    #def check_if_user_exists(self, user_id: bool, mongo_db_client: MongoDbClient):
-        """
-        Check if user exists by checking if his database exists
-        ---
-        >>> id: str = ds.check_if_user_exists("automl_user")
-        ---
-        Parameter
-        1. user id
-        ---
-        Returns database existance status, TRUE == EXITS
+    def check_if_user_exists(self, user_id: bool) -> bool:
+        """Check if user already exists by checking if a database with his user id exists.
+
+        Args:
+            user_id (bool): Unique user id saved within the MS Sql database of the frontend
+
+        Returns:
+            bool: True if the user exists, False if the user does not exists
         """
         return self.__mongo.check_if_user_exists(user_id)
-        #return mongo_db_client.check_if_user_exists(user_id)
-
 
 
     def lock(self):
-        """
-        Lock access to the data storage to a single thread.
+        """Lock access to the data storage to a single thread.
         ---
         >>> with data_store.lock():
                 # critical region
@@ -71,6 +55,9 @@ class DataStorage:
                 data_storage.update_session(..., {
                     "models": sess["models"] + [new_model]
                 })
+
+        Returns:
+            __DbLock: datastorage internal lock
         """
         return DataStorage.__DbLock(self.__lock)
 
@@ -90,18 +77,17 @@ class DataStorage:
     ####################################
 #region 
 
-
     def create_dataset(self, user_id: str, file_name: str, type: str, name: str) -> str:
-        """
-        Store dataset contents on disk and insert entry to database.
-        ---
-        Parameter
-        1. user id
-        2. file name: file name of dataset
-        3. type: dataset type
-        4. name: dataset name
-        ---
-        Returns dataset id
+        """Create new dataset record and move dataset from upload folder to final path
+
+        Args:
+            user_id (str): Unique user id saved within the MS Sql database of the frontend
+            file_name (str): Uploaded file name within the users upload folder
+            type (str): The selected dataset type
+            name (str): User defined name used when displaying the dataset
+
+        Returns:
+            str: The new dataset record id
         """
         if type == ":image":
             self.__log.debug(f"create_dataset: dataset type is image, removing .zip ending from {name} as not necessary after unzipping anymore...")
@@ -131,12 +117,6 @@ class DataStorage:
         
         filename_dest = os.path.join(self.__storage_dir, user_id, dataset_id, file_name)
         self.__log.debug(f"create_dataset: final persistence location is: {filename_dest}")
-
-        #if os.getenv("MONGO_DB_DEBUG") != "YES":
-            # When not in a debug environment (for example within docker) we do not want to add the app section,
-            # as this leads to broken links
-            #upload_file = upload_file.replace("/app/", "")
-            #filename_dest = filename_dest.replace("/app/", "")
 
         self.__log.debug(f"create_dataset: creating dataset folder location: {filename_dest}")
         os.makedirs(os.path.dirname(filename_dest), exist_ok=True)
@@ -217,42 +197,29 @@ class DataStorage:
         assert success, f"cannot update dataset with id {dataset_id}"
 
         return dataset_id
-        
-        
+               
     def update_dataset(self, user_id: str, dataset_id: str, new_values: 'dict[str, object]') -> bool:
-        """Update single dataset with new values
-        >>> success: bool = data_storage.update_dataset("automl_user", dataset_id, {
-                "status": "completed"
-            })
+        """Update single dataset record with new values
         Args:
-            user_id (str): user identifier, stored inside the frontend application database
-            dataset_id (str): identifier of dataset that will be updated
-            new_values (dict[str, object]): dictonary of values that will be update for the dataset
-            run_analysis (bool): if the dataset analysis module will be executed for the dataset again
-
-        Raises:
-            grpclib.GRPCError: grpclib.Status.NOT_FOUND is raised when the dataset to be updated is not present within MongoDB
+            user_id (str): Unique user id saved within the MS Sql database of the frontend
+            dataset_id (str): The dataset id of the dataset record which is to be updated
+            new_values (dict[str, object]): Dictonary of new dataset record field values that will be updated
 
         Returns:
-            bool: if the dataset was updated successfully
+            bool: True if the record was updated, False if the record was not updated
         """
         self.__log.debug(f"update_dataset: updating: {dataset_id} for user {user_id}, new values {new_values}")
         return self.__mongo.update_dataset(user_id, dataset_id, new_values)
 
     def get_dataset(self, user_id: str, dataset_id: str) -> 'tuple[bool, dict[str, object]]':
-        """
-        Try to find the first dataset with this id 
-        ---
-        >>> found, dataset = ds.get_dataset("automl_user", "12323asdas")
-        >>> if not found:
-                print("We have a problem")
+        """Get a dataset record by id from a specific user database
 
-        ---
-        Parameter
-        1. user id 
-        2. dataset id
-        ---
-        Returns either `(True, Dataset)` or `(False, None)`.
+        Args:
+            user_id (str): Unique user id saved within the MS Sql database of the frontend
+            dataset_id (str): The dataset id of the dataset record which is to be updated
+
+        Returns:
+            tuple[bool, dict[str, object]]: Tuple first identifying if a dataset record was found and secondly the dataset record (`(True, Dataset)` or `(False, None)`)
         """
         result = self.__mongo.get_dataset(user_id, {
             "_id": ObjectId(dataset_id),
@@ -261,31 +228,29 @@ class DataStorage:
 
         return result is not None, result
 
-    #def get_datasets(self, user_id: bool):
     def get_datasets(self, user_id: str) -> 'list[dict[str, object]]':
-        """
-        Get all datasets for a user. 
-        ---
-        >>> for dataset in data_storage.GetDatasets("automl_user"):
-                print(dataset["path"])
+        """Get all dataset records from a specific user database
 
-        ---
-        Parameter
-        1. user_id: name of the user
-        ---
-        Returns `list` of all datasets.
+        Args:
+            user_id (str): Unique user id saved within the MS Sql database of the frontend
+
+        Returns:
+            list[dict[str, object]]: List of all available dataset records
         """
         return [ds for ds in self.__mongo.get_datasets(user_id, {"lifecycle_state": "active"})]
+        
+    def delete_dataset(self, user_id: str, dataset_id: str) -> int:
+        """Delete a dataset record by id from a user databse. (all related record and files will also be deleted (Trainings, Models, Predictions))
 
-    def delete_dataset(self, user_id: str, dataset_id: str):
-        """
-        Delete a dataset and its associated items
-        ---
-        Parameter
-        1. user id
-        2. dataset id
-        ---
-        Returns amount of deleted objects
+        Args:
+            user_id (str): Unique user id saved within the MS Sql database of the frontend
+            dataset_id (str): The dataset id of the dataset record which is to be updated
+
+        Raises:
+            grpclib.GRPCError: grpclib.Status.NOT_FOUND is raised when the to be deleted dataset does not exist inside MongoDB
+
+        Returns:
+            int: The amount of dataset records deleted (should always be 1)
         """
         #First check if dataset isn't already deleted
         found, dataset = self.get_dataset(user_id, dataset_id)
@@ -321,56 +286,39 @@ class DataStorage:
 
 
     def create_model(self, user_id: str, model_details: 'dict[str, object]') -> str:
-        """
-        Insert single model into the database.
-        ---
-        >>> mdl_id: str = data_storage.create_model("automl_user", {
-                "automl_name": "MLJAR",
-                "training_id": training_id,
-                ...
-            })
+        """Create new model record inside MongoDB
 
-        ---
-        Parameter
-        1. user id
-        2. model details
-        ---
-        Returns id of new model.
+        Args:
+            user_id (str): Unique user id saved within the MS Sql database of the frontend
+            model_details (dict[str, object]): Dictonary of model record fields (see data schema in WIKI for more information)
+
+        Returns:
+            str: The new model record id
         """
         return self.__mongo.insert_model(user_id, model_details)
 
     def update_model(self, user_id: str, model_id: str, new_values: 'dict[str, object]') -> bool:
-        """
-        Update single model with new values. 
-        ---
-        >>> success: bool = data_storage.update_model("automl_user", model_id, {
-                "status": "completed"
-            })
+        """Update single model record with new values
 
-        ---
-        Parameter
-        1. user id
-        2. model id
-        3. new_values: dict with new values
-        ---
-        Returns `True` if successfully updated, otherwise `False`.
+        Args:
+            user_id (str): Unique user id saved within the MS Sql database of the frontend
+            model_id (str): The model id of the model record which is to be updated
+            new_values (dict[str, object]): Dictonary of new model record field values that will be updated
+
+        Returns:
+            bool: True if the record was updated, False if the record was not updated
         """
         return self.__mongo.update_model(user_id, model_id, new_values)
 
-    def get_model(self, user_id: str, model_id: str = None) -> 'tuple[bool, dict[str, object]]':
-        """
-        Try to find the first model with this id 
-        ---
-        >>> found, model = ds.get_model("automl_user", "asdasd123213")
-        >>> if not found:
-                print("We have a problem")
-        
-        ---
-        Parameter
-        1. user id
-        2. model id
-        ---
-        Returns either `(True, Model)` or `(False, None)`.
+    def get_model(self, user_id: str, model_id: str) -> 'tuple[bool, dict[str, object]]':
+        """Get a model record by id from a specific user database
+
+        Args:
+            user_id (str): Unique user id saved within the MS Sql database of the frontend
+            model_id (str, optional): The model id of the model record which is to be updated
+
+        Returns:
+            tuple[bool, dict[str, object]]: Tuple first identifying if a model record was found and secondly the model record (`(True, Model)` or `(False, None)`)
         """
         result = self.__mongo.get_model(user_id, {
             "_id": ObjectId(model_id),
@@ -380,18 +328,15 @@ class DataStorage:
         return result is not None, result
 
     def get_models(self, user_id: str, training_id: str = None, dataset_id: str = None) -> 'list[dict[str, object]]':
-        """
-        Get all models, or all models by training id or dataset id
-        ---
-        >>> models = ds.GetModels("automl_user", "training_id")
+        """Get all model records from a specific user database
 
-        ---
-        Parameter
-        1. user id
-        2. optinally training id
-        2. optinally dataset id
-        ---
-        Returns a models list
+        Args:
+            user_id (str): Unique user id saved within the MS Sql database of the frontend
+            training_id (str, optional): Set a filter to get model records by training id. Defaults to None.
+            dataset_id (str, optional): Set a filter to get model records by dataset id. Defaults to None.
+
+        Returns:
+            list[dict[str, object]]: List of all available model records
         """
         if training_id is not None:
             filter = { "training_id": training_id, "lifecycle_state": "active" }
@@ -404,15 +349,19 @@ class DataStorage:
 
         return [ds for ds in result]
 
-    def delete_model(self, user_id: bool, model_id: str):
-        """
-        Delete model and its associated items
-        ---
-        Parameter
-        1. user id
-        2. model id
-        ---
-        Returns amount of deleted objects
+    def delete_model(self, user_id: bool, model_id: str) -> int:
+        """Delete a model record by id from a user databse. (all related record and files will also be deleted (Predictions))
+
+        Args:
+            user_id (bool): Unique user id saved within the MS Sql database of the frontend
+            model_id (str): The model id of the dataset record which is to be updated
+
+        Raises:
+            grpclib.GRPCError: grpclib.Status.NOT_FOUND is raised when the to be deleted model does not exist inside MongoDB
+            grpclib.GRPCError: grpclib.Status.NOT_FOUND is raised when the to be model files do not exist on the disk anymore (model will still be deleted from MongoDB)
+
+        Returns:
+            int: The amount of model records deleted (should always be 1)
         """
         #First check if training isn't already deleted
         found, model = self.get_model(user_id, model_id)
@@ -497,55 +446,39 @@ class DataStorage:
 #region
 
     def create_training(self, user_id: str, training_details: 'dict[str, object]') -> str:
-        """
-        Insert single training into the database.
-        ---
-        >>> id: str = ds.create_training("automl_user", {
-                "dataset": ...,
-                ...
-            })
+        """Create new training record inside MongoDB
 
-        ---
-        Parameter
-        1. user id
-        2. training details: training dict to be inserted
-        ---
-        Returns training id
+        Args:
+            user_id (str): Unique user id saved within the MS Sql database of the frontend
+            training_details (dict[str, object]): Dictonary of training record fields (see data schema in WIKI for more information)
+
+        Returns:
+            str: The new training record id
         """
         return self.__mongo.insert_training(user_id, training_details)
 
     def update_training(self, user_id: str, training_id: str, new_values: 'dict[str, object]') -> bool:
-        """
-        Update single training with new values. 
-        ---
-        >>> success: bool = data_storage.update_training("automl_user", sess_id, {
-                "status": "completed"
-            })
+        """Update single training record with new values
 
-        ---
-        Parameter
-        1. user id
-        2. training id
-        3. new_values: dict with new values
-        ---
-        Returns `True` if successfully updated, otherwise `False`.
+        Args:
+            user_id (str): Unique user id saved within the MS Sql database of the frontend
+            training_id (str): The training id of the training record which is to be updated
+            new_values (dict[str, object]): Dictonary of new training record field values that will be updated
+
+        Returns:
+            bool: True if the record was updated, False if the record was not updated
         """
         return self.__mongo.update_training(user_id, training_id, new_values)
 
     def get_training(self, user_id: str, training_id: str) -> 'tuple[bool, dict[str, object]]':
-        """
-        Try to find the first training with this id 
-        ---
-        >>> found, dataset = ds.get_training("automl_user", "asdasd123213")
-        >>> if not found:
-                print("We have a problem")
-        
-        ---
-        Parameter
-        1. user id
-        2. training id
-        ---
-        Returns either `(True, Training)` or `(False, None)`.
+        """Get a training record by id from a specific user database
+
+        Args:
+            user_id (str): Unique user id saved within the MS Sql database of the frontend
+            training_id (str, optional): The training id of the training record which is to be updated
+
+        Returns:
+            tuple[bool, dict[str, object]]: Tuple first identifying if a training record was found and secondly the training record (`(True, Training)` or `(False, None)`)
         """
         result = self.__mongo.get_training(user_id, {
             "_id": ObjectId(training_id),
@@ -555,33 +488,32 @@ class DataStorage:
         return result is not None, result
 
     def get_trainings(self, user_id: str, dataset_id:str=None) -> 'list[dict[str, object]]':
-        """
-        Get all trainings for a user. 
-        ---
-        >>> for sess in data_storage.get_trainings("automl_user"):
-                print(sess["dataset"])
+        """Get all training records from a specific user database
 
-        ---
-        Parameter
-        1. user id
-        2. optinally dataset id
-        ---
-        Returns trainings as `list` of dictionaries.
+        Args:
+            user_id (str): Unique user id saved within the MS Sql database of the frontend
+            dataset_id (str, optional): Set a filter to get training records by dataset id. Defaults to None.
+
+        Returns:
+            list[dict[str, object]]: List of all available training records
         """
         if dataset_id is None:
             return [sess for sess in self.__mongo.get_trainings(user_id, {"lifecycle_state": "active"})]
         else:
             return [sess for sess in self.__mongo.get_trainings(user_id, {"dataset_id": dataset_id, "lifecycle_state": "active"})]
         
-    def delete_training(self, user_id: bool, training_id: str):
-        """
-        Delete a training and its associated items
-        ---
-        Parameter
-        1. user id
-        2. training id
-        ---
-        Returns amount of deleted objects
+    def delete_training(self, user_id: bool, training_id: str) -> int:
+        """Delete a training record by id from a user databse. (all related record and files will also be deleted (Models, Predictions))
+
+        Args:
+            user_id (bool): Unique user id saved within the MS Sql database of the frontend
+            training_id (str): The training id of the dataset record which is to be updated
+
+        Raises:
+            grpclib.GRPCError: grpclib.Status.NOT_FOUND is raised when the to be deleted training does not exist inside MongoDB
+
+        Returns:
+            int: The amount of training records deleted (should always be 1)
         """
         #First check if training isn't already deleted
         found, training = self.get_training(user_id, training_id)
@@ -610,16 +542,20 @@ class DataStorage:
 #region 
 
     def create_prediction(self, user_id: str, live_dataset_file_name: str, prediction_details: 'dict[str, object]') -> str:
-        """
-        Store dataset contents on disk and insert entry to database.
-        ---
-        Parameter
-        1. user id
-        2. file name: file name of dataset
-        3. type: dataset type
-        4. name: dataset name
-        ---
-        Returns dataset id
+        """Create new prediction record inside MongoDB
+
+        Args:
+            user_id (str): Unique user id saved within the MS Sql database of the frontend
+            live_dataset_file_name (str): File name within the upload folder of the uploaded live dataset file
+            prediction_details (dict[str, object]): Dictonary of prediction record fields (see data schema in WIKI for more information)
+
+        Raises:
+            grpclib.GRPCError: grpclib.Status.NOT_FOUND is raised when the the related model does not exist inside MongoDB
+            grpclib.GRPCError: grpclib.Status.NOT_FOUND is raised when the the related training does not exist inside MongoDB
+            grpclib.GRPCError: grpclib.Status.NOT_FOUND is raised when the the related dataset does not exist inside MongoDB
+
+        Returns:
+            str: The new prediction record id
         """
         self.__log.debug(f"create_prediction: getting model {prediction_details['model_id']} for new prediction")
         found, model = self.get_model(user_id, prediction_details["model_id"])
@@ -671,39 +607,28 @@ class DataStorage:
         return prediction_id
 
     def update_prediction(self, user_id: str, prediction_id: str, new_values: 'dict[str, object]') -> bool:
-        """
-        Update single dataset with new values. 
-        ---
-        >>> success: bool = data_storage.UpdateDataset("automl_user", dataset_id, {
-                "status": "completed"
-            })
+        """Update single prediction record with new values
 
-        ---
-        Parameter
-        1. user id: name of the user
-        2. dataset id
-        3. new values: dict with new values
-        4. run analysis: if the dataset analysis should be executed
-        ---
-        Returns `True` if successfully updated, otherwise `False`.
+        Args:
+            user_id (str): Unique user id saved within the MS Sql database of the frontend
+            prediction_id (str): The prediction id of the prediction record which is to be updated
+            new_values (dict[str, object]): Dictonary of new prediction record field values that will be updated
+
+        Returns:
+            bool: True if the record was updated, False if the record was not updated
         """
         self.__log.debug(f"update_prediction: updating: {prediction_id} for user {user_id}, new values {new_values}")
         return self.__mongo.update_prediction(user_id, prediction_id, new_values)
 
     def get_prediction(self, user_id: str, prediction_id: str) -> 'tuple[bool, dict[str, object]]':
-        """
-        Try to find the first dataset with this id 
-        ---
-        >>> found, dataset = ds.get_dataset("automl_user", "12323asdas")
-        >>> if not found:
-                print("We have a problem")
+        """Get a prediction record by id from a specific user database
 
-        ---
-        Parameter
-        1. user id 
-        2. dataset id
-        ---
-        Returns either `(True, Dataset)` or `(False, None)`.
+        Args:
+            user_id (str): Unique user id saved within the MS Sql database of the frontend
+            prediction_id (str, optional): The prediction id of the prediction record which is to be updated
+
+        Returns:
+            tuple[bool, dict[str, object]]: Tuple first identifying if a prediction record was found and secondly the prediction record (`(True, Prediction)` or `(False, None)`)
         """
         result = self.__mongo.get_prediction(user_id, {
             "_id": ObjectId(prediction_id),
@@ -714,31 +639,30 @@ class DataStorage:
 
     #def get_datasets(self, user_id: bool):
     def get_predictions(self, user_id: str, model_id: str) -> 'list[dict[str, object]]':
-        """
-        Get all datasets for a user. 
-        ---
-        >>> for dataset in data_storage.GetDatasets("automl_user"):
-                print(dataset["path"])
+        """Get all prediction records from a specific user database
 
-        ---
-        Parameter
-        1. user_id: name of the user
-        ---
-        Returns `list` of all datasets.
+        Args:
+            user_id (str): Unique user id saved within the MS Sql database of the frontend
+            model_id (str, optional): Set a filter to get prediction records by model id. Defaults to None.
+
+        Returns:
+            list[dict[str, object]]: List of all available prediction records
         """
         return [ds for ds in self.__mongo.get_predictions(user_id, {"model_id": model_id, "lifecycle_state": "active"})]
 
-    def delete_prediction(self, user_id: str, prediction_id: str):
+    def delete_prediction(self, user_id: str, prediction_id: str) -> int:
+        """Delete a prediction record by id from a user databse.
+
+        Args:
+            user_id (bool): Unique user id saved within the MS Sql database of the frontend
+            prediction_id (str): The prediction id of the dataset record which is to be updated
+
+        Raises:
+            grpclib.GRPCError: grpclib.Status.NOT_FOUND is raised when the to be deleted prediction does not exist inside MongoDB
+
+        Returns:
+            int: The amount of prediction records deleted (should always be 1)
         """
-        Delete a dataset and its associated items
-        ---
-        Parameter
-        1. user id
-        2. dataset id
-        ---
-        Returns amount of deleted objects
-        """
-        #TODO
         #First check if dataset isn't already deleted
         found, dataset = self.get_prediction(user_id, prediction_id)
         if not found:
