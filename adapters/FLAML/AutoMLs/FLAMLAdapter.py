@@ -65,7 +65,7 @@ class FLAMLAdapter(AbstractAdapter):
         automl_settings = self.__generate_settings()
         automl_settings.update({
             #"metric": self._configuration["configuration"]["metric"] if self._configuration["configuration"]["metric"] != "" else 'accuracy',
-            "metric": 'accuracy',
+            "metric": 'mse',
             "task": 'regression',
             "log_file_name": self._log_file_path,
         })

@@ -32,4 +32,9 @@ class MLJARAdapter(AbstractAdapter):
         shutil.copytree(self._configuration["model_folder_location"], os.path.join(self._configuration["result_folder_location"], "Models"))
 
     def __tabular_regression(self):
-        raise NotImplementedError()
+        result_path = self._configuration["model_folder_location"]
+        self.df, test = data_loader(self._configuration)
+        X, y = prepare_tabular_dataset(self.df, self._configuration)
+        automl = AutoML(total_time_limit=self._configuration["configuration"]["runtime_limit"], mode="Compete", results_path=result_path)
+        automl.fit(X, y)
+        shutil.copytree(self._configuration["model_folder_location"], os.path.join(self._configuration["result_folder_location"], "Models"))

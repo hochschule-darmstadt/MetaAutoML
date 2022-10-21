@@ -68,7 +68,7 @@ class AutoSklearnAdapter(AbstractAdapter):
 
         automl_settings = self.__generate_settings()
         auto_reg = autosklearn.regression.AutoSklearnRegressor(**automl_settings)
-        auto_reg.fit(X, y, )
+        auto_reg.fit(X, y)
 
         export_model(auto_reg, self._configuration["result_folder_location"], "model_sklearn.p")
 

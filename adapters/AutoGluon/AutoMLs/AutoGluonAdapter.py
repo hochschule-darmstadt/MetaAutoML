@@ -83,10 +83,10 @@ class AutoGluonAdapter(AbstractAdapter):
         """
         Execute the regression task
         """
-        self._read_training_data()
-        self._dataset_preparation()
-        data = self._X
-        data[self._target] = self._y
+        self.df, test = data_loader(self._configuration)
+        X, y = prepare_tabular_dataset(self.df, self._configuration)
+        data = X
+        data[self._target] = y
         model = TabularPredictor(label=self._target,
                                  problem_type="regression",
                                  path=self._result_path).fit(
