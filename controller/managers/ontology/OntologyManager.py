@@ -23,10 +23,12 @@ SKOS_NAMESPACE = "http://www.w3.org/2004/02/skos/core#"
 
 class OntologyManager(object):
     """
-    RDF Manager to interact with the remote ML Ontology
+    Ontology Manager provides functionality to interact with the ML Ontology
     """
 
     def __init__(self):        
+        """Initiate a new OntologyManager instance
+        """
         with MeasureDuration() as m:
             self.__log = logging.getLogger('OntologyManager')
             self.__log.setLevel(logging.getLevelName(os.getenv("ONTOLOGY_LOGGING_LEVEL")))
@@ -36,33 +38,32 @@ class OntologyManager(object):
             self.__log.info("__init__: new Ontology Manager created...")
 
     def __execute_query(self, query: str, binding: dict=None) -> list:
-        """
-        Execute the SPARQL query on our ML Ontology and convert the result set to usable format
-        ---
-        Parameter
-        1. SPARQL query to execute
-        2. Binding dictinary for parameter queries, pass empty dictonary if not required
-        ---
-        Return a list with string results
+        """Execute the SPARQL query on the ML Ontology
+
+        Args:
+            query (str): SPARQL query string
+            binding (dict, optional): Query parameter dictonary used within the SPARQL query. Defaults to None.
+
+        Returns:
+            list: Item rows returned by the ontology as a result of the executed SPARQL query
         """
         resultList = []
         self.__log.debug(f"__execute_query: Executing SPARQL query: {query}")
         queryResult = self.__ontologyGraph.query(query, initBindings=binding)
         self.__log.debug(f"__execute_query: Received {len(queryResult)} results")
-
-        # for row in queryResult: #Remove default namespace name from any result
-        # resultList.append(row.automl.replace(ML_ONTOLOGY_NAMESPACE, ""))
-
         return queryResult
 
     def get_auto_ml_solutions_for_configuration(self, request: GetAutoMlSolutionsForConfigurationRequest) -> GetAutoMlSolutionsForConfigurationResponse:
-        """
-        Retrive all compatible AutoML solutions depending on the configuration
-        ---
-        Parameter
-        1. configuration dictonary
-        ---
-        Return a list of AutoML names
+        """Get AutoML solutions matching the provided configuration
+
+        Args:
+            request (GetAutoMlSolutionsForConfigurationRequest): The GRPC request message holding the configuration dictonary
+
+        Raises:
+            grpclib.GRPCError: grpclib.Status.NOT_FOUND, raised if the configuration does not hold a Task key or has an empty value for the Task key
+
+        Returns:
+            GetAutoMlSolutionsForConfigurationResponse: The GRPC response message holding the list of AutoML solution IRIs
         """
         result = GetAutoMlSolutionsForConfigurationResponse()
         if "task" not in request.configuration or (len(request.configuration["task"]) == 0):  # Check if task parameter is contained, we require it for a successful query
@@ -100,10 +101,10 @@ class OntologyManager(object):
         # task = rdflib.Literal(u'binary classification')
 
     def get_dataset_types(self) -> GetDatasetTypesResponse:
-        """
-        Get all dataset types
-        ---
-        Return list of all dataset types
+        """Get dataset types available within the ML Ontology
+
+        Returns:
+            GetDatasetTypesResponse: The GRPC response message holding the list of dataset type IRIs
         """
         result = GetDatasetTypesResponse()
         self.__log.debug("get_dataset_types: get all dataset types")
@@ -117,13 +118,16 @@ class OntologyManager(object):
 
 
     def get_ml_libraries_for_task(self, request: GetMlLibrariesForTaskRequest) -> GetMlLibrariesForTaskResponse:
-        """
-        Retrive all Machine Learn Library for this task by supported AutoMLs
-        ---
-        Parameter
-        1. configuration dictonary
-        ---
-        Return a list of Machine Learning libraries
+        """Get ML libraries for a specific task 
+
+        Args:
+            request (GetMlLibrariesForTaskRequest): The GPRC request message holding task IRI
+
+        Raises:
+            grpclib.GRPCError: grpclib.Status.NOT_FOUND, raised if the task variable is empty
+
+        Returns:
+            GetMlLibrariesForTaskResponse: The GRPC response message holding the list of ML library IRIs
         """
         result = GetMlLibrariesForTaskResponse()
         if len(request.task) == 0:  # Check if task parameter has value, we require it for a successful query
@@ -142,13 +146,13 @@ class OntologyManager(object):
         return result
 
     def get_objects_information(self, request: GetObjectsInformationRequest) -> GetObjectsInformationResponse:
-        """
-        SEE PROTO #TODO
-        ---
-        Parameter
-        1. SEE PROTO #TODO
-        ---
-        Return SEE PROTO #TODO
+        """Get the object information by its IRI
+
+        Args:
+            request (GetObjectsInformationRequest): The GRPC request message holding the object IRI
+
+        Returns:
+            GetObjectsInformationResponse: The GRPC response message holding the dictonary of object informations
         """
         result = GetObjectsInformationResponse()
         for id in request.ids:
@@ -177,14 +181,16 @@ class OntologyManager(object):
         return result
 
     def get_tasks_for_dataset_type(self, request: GetTasksForDatasetTypeRequest) -> GetTasksForDatasetTypeResponse:
-        """
-        Retrive possible AutoML tasks for a given dataset
-        ---
-        Parameter
-        1. dataset name
-        2. dataset type
-        ---
-        Return a list of compatible AutoML tasks
+        """Get tasks supported by a dataset type
+
+        Args:
+            request (GetTasksForDatasetTypeRequest): The GRPC request message holding the dataset type IRI
+
+        Raises:
+            grpclib.GRPCError: grpclib.Status.NOT_FOUND, raised if the dataset type is empty
+
+        Returns:
+            GetTasksForDatasetTypeResponse: The GRPC response message holding the list of task IRIs
         """
         result = GetTasksForDatasetTypeResponse()
         if len(request.dataset_type) == 0:  # check if dataset type is present, we require it for a successful query

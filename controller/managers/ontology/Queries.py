@@ -1,4 +1,6 @@
-###Retrieve all active ML libraries compatible with a given task
+"""
+SPARQL query to retrieve all supported ML library IRIs for a given task
+"""
 ONTOLOGY_QUERY_GET_SUPPORTED_ML_LIBRARIES_FOR_TASK = """
             PREFIX : <http://h-da.de/ml-ontology/>
             SELECT DISTINCT ?lib
@@ -10,7 +12,9 @@ ONTOLOGY_QUERY_GET_SUPPORTED_ML_LIBRARIES_FOR_TASK = """
             }
             """
 
-###Retrive all ML solutions compatible with a given task and libraries
+"""
+SPARQL query to retrieve all AutoML solution IRIs by task and ML library
+"""
 ONTOLOGY_QUERY_GET_COMPATIBLE_AUTO_ML_SOLUTIONS_FOR_TASK_AND_LIBRARIES = """
             PREFIX : <http://h-da.de/ml-ontology/>
             SELECT DISTINCT ?automl
@@ -21,7 +25,9 @@ ONTOLOGY_QUERY_GET_COMPATIBLE_AUTO_ML_SOLUTIONS_FOR_TASK_AND_LIBRARIES = """
                        :used_for ?lib .
             }
             """
-###Retrive all ML solutions compatible with a given task
+"""
+SPARQL query to retrieve AutoML solution IRIs by task
+"""
 ONTOLOGY_QUERY_GET_COMPATIBLE_AUTO_ML_SOLUTIONS_FOR_TASK = """
             PREFIX : <http://h-da.de/ml-ontology/>
             SELECT DISTINCT ?automl
@@ -32,7 +38,9 @@ ONTOLOGY_QUERY_GET_COMPATIBLE_AUTO_ML_SOLUTIONS_FOR_TASK = """
             }
             """
 
-###Retrieve all compatible tasks for a dataset type
+"""
+SPARQL query to retrieve task IRIs by dataset type
+"""
 ONTOLOGY_QUERY_GET_TASKS_FOR_DATASET_TYPE = """
             PREFIX : <http://h-da.de/ml-ontology/>
             SELECT ?task
@@ -44,8 +52,7 @@ ONTOLOGY_QUERY_GET_TASKS_FOR_DATASET_TYPE = """
             """
             
 """
-Retreive all dataset types
----
+SPARQL query to retrieve all dataset type IRIs
 """     
 ONTOLOGY_QUERY_GET_DATASET_TYPES = """
             PREFIX : <http://h-da.de/ml-ontology/> 
@@ -57,7 +64,8 @@ ONTOLOGY_QUERY_GET_DATASET_TYPES = """
             } 
             """
 
-"""Retrieve all object information by id
+"""
+SPARQL query to retrieve all object informations by IRI
 
         Response example:
         :tabular_classification a :ML_task ;
@@ -66,7 +74,6 @@ ONTOLOGY_QUERY_GET_DATASET_TYPES = """
             :belongs_to :supervised_learning ;
             :has_dataset_type :tabular .
 
-            
 """
 ONTOLOGY_QUERY_GET_ALL_DETAILS_BY_ID = """
             PREFIX : <http://h-da.de/ml-ontology/>

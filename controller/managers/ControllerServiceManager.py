@@ -17,6 +17,11 @@ from MeasureDuration import MeasureDuration
 ROOT_PATH = os.path.dirname(os.path.abspath(__file__))
 
 class ControllerServiceManager(ControllerServiceBase):
+    """Service class that implements GRPC controller interface, all inbound calls are received within this class. 
+
+    Args:
+        ControllerServiceBase (ControllerServiceBase): Automatically generated GRPC server stub base class
+    """
 
     def __init__(self, executor: ProcessPoolExecutor=None):
         self.__log = logging.getLogger('ControllerServiceManager')

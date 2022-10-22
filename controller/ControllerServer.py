@@ -65,9 +65,9 @@ if __name__ == '__main__':
     loop = asyncio.get_event_loop()
     nest_asyncio.apply()
     loop.run_until_complete(main())
+    #Uncomment to activate local logging
     #logging.basicConfig()
     __log = logging.getLogger('ControllerServer')
     __log.setLevel(logging.getLevelName(logging.DEBUG))
     __log.debug("__name__: controller started")
-    #asyncio.run(main())
     __log.debug("__name__: controller exited")
