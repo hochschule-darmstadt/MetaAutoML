@@ -7,7 +7,6 @@ from autogluon.tabular import TabularPredictor
 from autogluon.vision import ImagePredictor, ImageDataset
 from concurrent import futures
 
-import grpc
 from AdapterUtils import *
 from Container import *
 from autogluon.tabular import TabularPredictor
