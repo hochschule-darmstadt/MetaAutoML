@@ -1,7 +1,0 @@
-autokeras
-grpcio
-dill
-pillow
-scikit-learn
-jinja2
-numpy==1.19.5
