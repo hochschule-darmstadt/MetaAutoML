@@ -1,4 +1,4 @@
-version: "3.8"
+version: "3.3"
 services:
   # sometimes when building the controller it does not copy the contents of the datasets folder.
   # This is probably a caching docker caching issue, which can be fixed with:
