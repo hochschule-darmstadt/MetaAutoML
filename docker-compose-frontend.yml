@@ -48,11 +48,11 @@ services:
       - "docker.host.internal:host-gateway"
 
   sqlserver:
-    image: mcr.microsoft.com/mssql/server:2019-latest
+    image: mcr.microsoft.com/azure-sql-edge:latest
     volumes:
       - dbdata:/var/opt/mssql
     environment:
-      - SA_PASSWORD=yourVeryStrong(!)Password
+      - MSSQL_SA_PASSWORD=yourVeryStrong(!)Password
       - ACCEPT_EULA=Y
     ports:
       - 1533:1433 #expose port, so can connect to it using host: 'localhost,1533' | user: sa, password: yourVeryStrong(!)Password
