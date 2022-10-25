@@ -8,39 +8,39 @@ from JsonUtil import get_config_property
 
 class FLAMLAdapter(AbstractAdapter):
     """
-    Implementation of the AutoML functionality fo structured data a.k.a. tabular data
+    Implementation of the AutoML functionality for FLAML
     """
 
     def __init__(self, configuration: dict):
-        """
-        Init a new instance of TabularDataAutoML
-        ---
-        Parameter:
-        1. Configuration JSON of type dictionary
+        """Init a new instance of FLAMLAdapter
+
+        Args:
+            configuration (dict): Dictonary holding the training configuration
         """
         super(FLAMLAdapter, self).__init__(configuration)
         self._result_path = configuration["model_folder_location"]
         self._log_file_path = os.path.join(self._result_path, "flaml.log")
 
     def start(self):
-        """
-        Execute the ML task
-        """
+        """Start the correct ML task functionality of FLAML"""
         if self._configuration["configuration"]["task"] == ":tabular_classification":
             self.__tabular_classification()
         elif self._configuration["configuration"]["task"] == ":tabular_regression":
             self.__tabular_regression()
 
-    def __generate_settings(self):
+    def __generate_settings(self) -> dict:
+        """Generate the settings dictionary for FLAML
+
+        Returns:
+            dict: Settings configuration for FLAML
+        """
         automl_settings = {"log_file_name": 'flaml.log'}
         if self._configuration["configuration"]["runtime_limit"] != 0:
             automl_settings.update({"time_budget": self._configuration["configuration"]["runtime_limit"]})
         return automl_settings
 
     def __tabular_classification(self):
-        """
-        Execute the classification task
-        """
+        """Execute the tabular classification task and export the found model"""
         self.df, test = data_loader(self._configuration)
         X, y = prepare_tabular_dataset(self.df, self._configuration)
         automl = AutoML()
@@ -56,9 +56,7 @@ class FLAMLAdapter(AbstractAdapter):
         export_model(automl, self._configuration["result_folder_location"], 'model_flaml.p')
 
     def __tabular_regression(self):
-        """
-        Execute the regression task
-        """
+        """Execute the tabular regression task and export the found model"""
         self.df, test = data_loader(self._configuration)
         X, y = prepare_tabular_dataset(self.df, self._configuration)
         automl = AutoML()

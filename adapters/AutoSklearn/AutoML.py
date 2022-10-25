@@ -6,7 +6,7 @@ from AutoSklearnAdapter import AutoSklearnAdapter
 
 if __name__ == '__main__':
     """
-    Entry point for the AutoML subprocess, read configuration json and execute the correct AutoML task
+    Entry point for the AutoML subprocess, read configuration json and start the background AutoML process
     """
     job_file_location = os.path.join(sys.argv[1],
                                         get_config_property("job-file-name"))

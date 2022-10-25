@@ -4,6 +4,12 @@ from FLAMLAdapterManager import FLAMLAdapterManager
 
 
 class Managers(containers.DeclarativeContainer):
+    """Dependency injection declarative container object, providing the different manager instances when injected.
+    For each individual adapter the correct AdapterManager is injected here
+
+    Args:
+        containers (containers.DeclarativeContainer): dependency-injector dependency providing functionality to inject dependencies
+    """
     adapter_scheduler = providers.ThreadSafeSingleton(
         AdapterScheduler,
     )
@@ -12,6 +18,11 @@ class Managers(containers.DeclarativeContainer):
     )
 
 class Application(containers.DeclarativeContainer):
+    """Dependency injection declarative container object, providing the application context level containers when injected, all dependencies injected by Managers
+
+    Args:
+        containers (containers.DeclarativeContainer): dependency-injector dependency providing functionality to inject dependencies
+    """
     managers =  providers.Container(
         Managers,
     )

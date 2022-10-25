@@ -11,15 +11,14 @@ from predict_time_sources import SplitMethod
 
 class AutoSklearnAdapter(AbstractAdapter):
     """
-    Implementation of the AutoML functionality fo structured data a.k.a. tabular data
+    Implementation of the AutoML functionality for AutoSklearnAdapter
     """
 
     def __init__(self, configuration: dict):
-        """
-        Init a new instance of AutoSklearnAdapter
-        ---
-        Parameter:
-        1. Configuration JSON of type dictionary
+        """Init a new instance of AutoSklearnAdapter
+
+        Args:
+            configuration (dict): Dictonary holding the training configuration
         """
         super().__init__(configuration)
 
@@ -30,15 +29,18 @@ class AutoSklearnAdapter(AbstractAdapter):
         return
 
     def start(self):
-        """
-        Execute the ML task
-        """
+        """Start the correct ML task functionality of AutoSklearn"""
         if self._configuration["configuration"]["task"] == ":tabular_classification":
             self.__tabular_classification()
         elif self._configuration["configuration"]["task"] == ":tabular_regression":
             self.__tabular_regression()
 
-    def __generate_settings(self):
+    def __generate_settings(self) -> dict:
+        """Generate the autosklearn settings dictionary for the new training
+
+        Returns:
+            dict: Autosklearn setttings dictionary
+        """
         automl_settings = {"logging_config": self.__get_logging_config()}
         if self._configuration["configuration"]["runtime_limit"] != 0:
             automl_settings.update(
@@ -47,9 +49,7 @@ class AutoSklearnAdapter(AbstractAdapter):
         return automl_settings
 
     def __tabular_classification(self):
-        """
-        Execute the classification task
-        """
+        """Execute the tabular classification task and export the found model"""
         self.df, test = data_loader(self._configuration)
         X, y = prepare_tabular_dataset(self.df, self._configuration)
 
@@ -60,9 +60,7 @@ class AutoSklearnAdapter(AbstractAdapter):
         export_model(auto_cls, self._configuration["result_folder_location"], "model_sklearn.p")
 
     def __tabular_regression(self):
-        """
-        Execute the regression task
-        """
+        """Execute the tabular regression task and export the found model"""
         self.df, test = data_loader(self._configuration)
         X, y = prepare_tabular_dataset(self.df, self._configuration)
 
@@ -73,6 +71,11 @@ class AutoSklearnAdapter(AbstractAdapter):
         export_model(auto_reg, self._configuration["result_folder_location"], "model_sklearn.p")
 
     def __get_logging_config(self) -> dict:
+        """Generate the logging configuration dict for autosklearn 
+
+        Returns:
+            dict: logging configuration dict
+        """
         return {
             'version': 1,
             'disable_existing_loggers': True,

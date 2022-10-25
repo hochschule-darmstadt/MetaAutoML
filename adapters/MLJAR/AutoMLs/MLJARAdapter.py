@@ -8,15 +8,22 @@ from supervised.automl import AutoML
 
 
 class MLJARAdapter(AbstractAdapter):
-    """description of class"""
+    """
+    Implementation of the AutoML functionality for MLJAR
+    """
 
-    def __init__(self, configuration):
+    def __init__(self, configuration: dict):
+        """Init a new instance of MLJARAdapter
+
+        Args:
+            configuration (dict): Dictonary holding the training configuration
+        """
         super(MLJARAdapter, self).__init__(configuration)
         #Create correct output folder for current training
         
 
     def start(self):
-        """Execute the ML task"""
+        """Start the correct ML task functionality of AutoKeras"""
         if True:
             if self._configuration["configuration"]["task"] == ":tabular_classification":
                 self.__tabular_classification()
@@ -24,6 +31,7 @@ class MLJARAdapter(AbstractAdapter):
                 self.__tabular_regression()
 
     def __tabular_classification(self):
+        """Execute the tabular classification task and export the found model"""
         result_path = self._configuration["model_folder_location"]
         self.df, test = data_loader(self._configuration)
         X, y = prepare_tabular_dataset(self.df, self._configuration)
@@ -32,6 +40,7 @@ class MLJARAdapter(AbstractAdapter):
         shutil.copytree(self._configuration["model_folder_location"], os.path.join(self._configuration["result_folder_location"], "Models"))
 
     def __tabular_regression(self):
+        """Execute the tabular regression task and export the found model"""
         result_path = self._configuration["model_folder_location"]
         self.df, test = data_loader(self._configuration)
         X, y = prepare_tabular_dataset(self.df, self._configuration)

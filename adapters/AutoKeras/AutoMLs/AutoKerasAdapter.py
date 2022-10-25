@@ -9,16 +9,15 @@ class AutoKerasAdapter(AbstractAdapter):
     Implementation of the AutoML functionality for AutoKeras
     """
     def __init__(self, configuration: dict):
-        """
-        Init a new instance of AutoKerasAdapter
-        ---
-        Parameter:
-        1. Configuration JSON of type dictionary
+        """Init a new instance of AutoKerasAdapter
+
+        Args:
+            configuration (dict): Dictonary holding the training configuration
         """
         super(AutoKerasAdapter, self).__init__(configuration)
 
     def start(self):
-        """Execute the ML task"""
+        """Start the correct ML task functionality of AutoKeras"""
         if True:
             if self._configuration["configuration"]["task"] == ":tabular_classification":
                 self.__tabular_classification()
@@ -36,7 +35,7 @@ class AutoKerasAdapter(AbstractAdapter):
                 self.__time_series_forecasting()
 
     def __tabular_classification(self):
-        """Execute the classification task"""
+        """Execute the tabular classification task and export the found model"""
 
         self.df, test = data_loader(self._configuration)
         X, y = prepare_tabular_dataset(self.df, self._configuration)
@@ -51,7 +50,7 @@ class AutoKerasAdapter(AbstractAdapter):
         export_model(clf, self._configuration["result_folder_location"], 'model_keras.p')
 
     def __tabular_regression(self):
-        """Execute the regression task"""
+        """Execute the tabular regression task and export the found model"""
 
         self.df, test = data_loader(self._configuration)
         X, y = prepare_tabular_dataset(self.df, self._configuration)
@@ -66,7 +65,7 @@ class AutoKerasAdapter(AbstractAdapter):
         export_model(reg, self._configuration["result_folder_location"], 'model_keras.p')
 
     def __image_classification(self):
-        """"Execute image classification task"""
+        """"Execute image classification task and export the found model"""
 
         X_train, y_train, X_test, y_test = data_loader(self._configuration)
 
@@ -82,7 +81,7 @@ class AutoKerasAdapter(AbstractAdapter):
         export_model(clf, self._configuration["result_folder_location"], 'model_keras.p')
 
     def __image_regression(self):
-        """Execute image regression task"""
+        """Execute image regression task and export the found model"""
 
         X_train, y_train, X_val, y_val = data_loader(self._configuration)
 
@@ -97,7 +96,7 @@ class AutoKerasAdapter(AbstractAdapter):
         export_model(reg, self._configuration["result_folder_location"], 'model_keras.p')
 
     def __text_classification(self):
-        """Execute image regression task"""
+        """Execute text classifiction task and export the found model"""
 
         self.df, test = data_loader(self._configuration)
         X, y = prepare_tabular_dataset(self.df, self._configuration)
@@ -113,7 +112,7 @@ class AutoKerasAdapter(AbstractAdapter):
         export_model(reg, self._configuration["result_folder_location"], 'model_keras.p')
 
     def __text_regression(self):
-        """Execute image regression task"""
+        """Execute text regression task and export the found model"""
 
         self.df, test = data_loader(self._configuration)
         X, y = prepare_tabular_dataset(self.df, self._configuration)
@@ -129,7 +128,7 @@ class AutoKerasAdapter(AbstractAdapter):
         export_model(reg, self._configuration["result_folder_location"], 'model_keras.p')
 
     def __time_series_forecasting(self):
-        """Execute time series forecasting task"""
+        """Execute time series forecasting task and export the found model"""
 
         self.df, test = data_loader(self._configuration)
         X, y = prepare_tabular_dataset(self.df, self._configuration)

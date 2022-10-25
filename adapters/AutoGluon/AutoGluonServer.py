@@ -18,11 +18,15 @@ from AdapterService import AdapterService
 from AdapterUtils import *
 
 async def main():
+    """The adapter main function starting the adapter GRPC server and waiting on incoming requests of the controller
+    """
     server = Server([AdapterService()])
     await server.start(get_config_property('grpc-server-address'), os.getenv('GRPC_SERVER_PORT'))
     await server.wait_closed()
 
 if __name__ == '__main__':
+    """Python entry point setting up the dependency injection and starting main
+    """
     application = Application()
     application.init_resources()
     application.wire(modules=["__main__"])

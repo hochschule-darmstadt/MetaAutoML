@@ -5,11 +5,17 @@ from AdapterUtils import *
 from AdapterBGRPC import *
 from threading import *
 from JsonUtil import get_config_property
-
+import pandas as pd
 
 class AdapterManager(Thread):
+    """The base adapter manager object providing the shared functionality between all adapters
 
+    Args:
+        Thread (Thread): Allowing the AdapterManager to start a background thread
+    """
     def __init__(self) -> None:
+        """Initialize a new AdapterManager instance
+        """
         super(AdapterManager, self).__init__()
         self.__session_id = ""
         self.__start_auto_ml_running = False
@@ -21,21 +27,35 @@ class AdapterManager(Thread):
         self._loaded_training_id = None
 
     def run(self):
-        """
-        Listen to the started AutoML process until termination
-        ---
-        Parameter
+        """Start the AutoML solution as a background process
         """
         asyncio.run(self.__background_start_auto_ml())
     
-    def start_auto_ml(self, start_auto_ml_request: StartAutoMlRequest, session_id):
+    def start_auto_ml(self, start_auto_ml_request: "StartAutoMlRequest", session_id: str):
+        """Initiate the new AutoML search process
+
+        Args:
+            start_auto_ml_request (StartAutoMlRequest): The StartAutoMlRequest message holding the training configuration
+            session_id (str): The unique session id, identifying the current session
+        """
         self.__start_auto_ml_request = start_auto_ml_request
         self.__session_id = session_id
 
-    def _get_ml_model_and_lib(self, config):
+    def _get_ml_model_and_lib(self, config: "StartAutoMlRequest") -> "tuple[str, str]":
+        """Must be overwriten! Get the ML model type and ml library used by the result model
+
+        Args:
+            config (StartAutoMlRequest): extended Start AutoMlRequest holding the training configuration and local training paths
+
+        Returns:
+            tuple[str, str]: Tuple returning the ontology IRI of the Ml model type, and ontology IRI of the ML library
+        """
         return ("", "")
 
     async def __background_start_auto_ml(self):
+        """Sets up the training run environment and start the background AutoML solution process. While the AutoML solution is running, collect all console messages and create the result messages. 
+        After the process concludes create the result archive and test the found model with the test set.
+        """
         try:
             self.__start_auto_ml_running = True
             start_time = time.time()
@@ -58,7 +78,15 @@ class AdapterManager(Thread):
             self.__auto_ml_status_messages.append(get_except_response(e))
 
 
-    def get_auto_ml_status(self):
+    def get_auto_ml_status(self) -> "GetAutoMlStatusResponse":
+        """Retrive the latest status message created by the AutoML solution subprocess if one is available. If no new message is available while the process is running, a message will be return with the status code set to PENDING
+
+        Raises:
+            grpclib.GRPCError: grpclib.Status.NOT_FOUND, raised if the AutoML solution subprocess is not running and there is no messages left in the message list
+
+        Returns:
+            GetAutoMlStatusResponse: return a GetAutoMlStatusResponse message holding the current AutoML solution training state
+        """
         if (len(self.__auto_ml_status_messages) == 0) and self.__start_auto_ml_running == False:
             raise grpclib.GRPCError(grpclib.Status.NOT_FOUND, f"Adapter session {self.__session_id} endded and no messages are left!")
         if (len(self.__auto_ml_status_messages) == 0) and self.__start_auto_ml_running == True:
@@ -68,23 +96,33 @@ class AdapterManager(Thread):
         len(self.__auto_ml_status_messages)
         return self.__auto_ml_status_messages.pop(0)
 
-    def _load_model_and_make_probabilities(self, config, result_folder_location, dataframe):
+    def _load_model_and_make_probabilities(self, config: "StartAutoMlRequest", result_folder_location: str, dataframe: pd.DataFrame):
+        """Must be overwriten! Load the found model, and execute a prediction using the provided data to calculate the probability metric used by the ExplanableAI module inside the controller
+
+        Args:
+            config (StartAutoMlRequest): extended Start AutoMlRequest holding the training configuration and local training paths
+            result_folder_location (str): The absolute path leading to the model result location
+            dataframe (DataFrame): The dataframe holding the dataset to execute a new prediction on
+        """
         return
 
-    async def explain_model(self, explain_auto_ml_request: "ExplainModelRequest"):
-        """
-        Function for explaining a model. This returns the prediction probabilities for the data passed within the
+    async def explain_model(self, explain_auto_ml_request: "ExplainModelRequest") -> ExplainModelResponse:
+        """Function for explaining a model. This returns the prediction probabilities for the data passed within the
         request.data.
         This loads the model and stores it in the adapter object. This is done because SHAP, the explanation module
         accesses this function multiple times and reloading the model every time would add overhead.
         The data transferred is reformatted by SHAP (regarding datatypes and column names). However, the AutoMLs
         struggle with this reformatting so the dataset is loaded separately and the datatypes and column names of the
         transferred data are replaced.
-        ---
-        param request: Grpc request of type ExplainModelRequest
-        param context: Context for correctly handling exceptions
-        ---
-        return ExplainModelResponse: Grpc response of type ExplainModelResponse containing prediction probabilities
+
+        Args:
+            explain_auto_ml_request (ExplainModelRequest): The ExplainModelRequest holding the prediction data
+
+        Raises:
+            grpclib.GRPCError: grpclib.Status.UNAVAILABLE, raised when any error is raised during the prediction process
+
+        Returns:
+            ExplainModelResponse: The ExplainModelResponse message holding the prediction probabilities
         """
         try:
             config_json = json.loads(explain_auto_ml_request.process_json)
@@ -108,11 +146,21 @@ class AdapterManager(Thread):
             return ExplainModelResponse(probabilities=probabilities)
 
         except Exception as e:
-            print(e)
-            raise grpclib.GRPCError(grpclib.Status.UNAVAILABLE, f"Error while traninh")
+            raise grpclib.GRPCError(grpclib.Status.UNAVAILABLE, f"Error while generating probabilities {e}")
 
 
-    async def predict_model(self, predict_model_request: PredictModelRequest):
+    async def predict_model(self, predict_model_request: "PredictModelRequest") -> "PredictModelResponse":
+        """Load a previously found model to execute a new prediction on it using a live dataset uploaded by the user
+
+        Args:
+            predict_model_request (PredictModelRequest): The PredictModelRequest holding the prediction informations
+
+        Raises:
+            grpclib.GRPCError: grpclib.Status.UNAVAILABLE, raised when any error is raised during the prediction process
+
+        Returns:
+            PredictModelResponse: The PredictModelResponse message holding the prediction.csv result path
+        """
         try:
             config_json = json.loads(predict_model_request.process_json)
             job_file_location = os.path.join(get_config_property("training-path"),
@@ -132,4 +180,4 @@ class AdapterManager(Thread):
             return response
 
         except Exception as e:
-            raise grpclib.GRPCError(grpclib.Status.UNAVAILABLE, f"Error while traninh")
+            raise grpclib.GRPCError(grpclib.Status.UNAVAILABLE, f"Error while generating probabilities {e}")

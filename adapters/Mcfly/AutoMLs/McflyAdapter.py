@@ -23,24 +23,23 @@ class McflyAdapter(AbstractAdapter):
     Implementation of the AutoML functionality for Mcfly
     """
     def __init__(self, configuration: dict):
-        """
-        Init a new instance of McflyAdapter
-        ---
-        Parameter:
-        1. Configuration JSON of type dictionary
+        """Init a new instance of McflyAdapter
+
+        Args:
+            configuration (dict): Dictonary holding the training configuration
         """
         super(McflyAdapter, self).__init__(configuration)
         # self._result_path = os.path.join(get_config_property("output-path"), self._configuration["session_id"])
         self._result_path = configuration["model_folder_location"]
 
     def start(self):
-        """Execute the ML task"""
+        """Start the correct ML task functionality of Mcfly"""
         if True:
             if self._configuration["configuration"]["task"] == ":time_series_classification":
                 self.__time_series_classification()
 
     def __time_series_classification(self):
-        """Execute time series classification task"""
+        """Execute the time series classification task and export the found model"""
         # Get training dataset
         X, y = read_longitudinal_dataset(self._configuration)
         X = np.swapaxes(X, 1, 2)

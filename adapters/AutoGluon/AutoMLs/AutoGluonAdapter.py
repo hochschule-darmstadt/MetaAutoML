@@ -13,15 +13,13 @@ from autogluon.vision import ImagePredictor, ImageDataset
 
 class AutoGluonAdapter(AbstractAdapter):
     """
-    Implementation of the AutoML functionality fo structured data a.k.a. tabular data
+    Implementation of the AutoML functionality for AutoGluon
     """
-
     def __init__(self, configuration: dict):
-        """
-        Init a new instance of TabularDataAutoML
-        ---
-        Parameter:
-        1. Configuration JSON of type dictionary
+        """Init a new instance of AutoKerasAdapter
+
+        Args:
+            configuration (dict): Dictonary holding the training configuration
         """
         super().__init__(configuration)
 
@@ -65,9 +63,7 @@ class AutoGluonAdapter(AbstractAdapter):
             self.__image_classification()
 
     def __tabular_classification(self):
-        """
-        Execute the classification task
-        """
+        """Execute the tabular classification task and export the found model"""
         self.df, test = data_loader(self._configuration)
         X, y = prepare_tabular_dataset(self.df, self._configuration)
         data = X
@@ -80,9 +76,8 @@ class AutoGluonAdapter(AbstractAdapter):
         #Fit methode already saves the model
 
     def __tabular_regression(self):
-        """
-        Execute the regression task
-        """
+        """Execute the tabular regression task and export the found model"""
+
         self.df, test = data_loader(self._configuration)
         X, y = prepare_tabular_dataset(self.df, self._configuration)
         data = X
@@ -95,9 +90,8 @@ class AutoGluonAdapter(AbstractAdapter):
         #Fit methode already saves the model
 
     def __image_classification(self):
-        """
-        Execute the classiciation task
-        """
+        """"Execute image classification task and export the found model"""
+
         # Daten Laden 
         train , test = data_loader(self._configuration)
         

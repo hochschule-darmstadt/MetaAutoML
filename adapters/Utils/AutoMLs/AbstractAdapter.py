@@ -2,14 +2,13 @@ from abc import ABC, abstractmethod
 
 class AbstractAdapter(ABC):
     """
-    Abstract adapter class, implement for every specific adapter
+    Abstract adapter class, implemented by every specific adapter implementation providing the base functionality shared by all adapters
     """
     def __init__(self, configuration: dict):
-        """
-        Init a new instance of StructuredDataAutoML
-        ---
-        Parameter:
-        1. Configuration JSON of type dictionary
+        """Initialize a new AbstractAdapter instance
+
+        Args:
+            configuration (dict): training configuration dictonary holding all informations set during the wizard process
         """
         # set runtime limit from configuration, if it isn't specified its set to 30s
         self._configuration = configuration
@@ -22,5 +21,6 @@ class AbstractAdapter(ABC):
 
     @abstractmethod
     def start(self):
-        """Execute the ML task"""
+        """Start the AutoML process
+        """
         pass

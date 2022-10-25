@@ -2,6 +2,7 @@ import json
 import os
 import dill
 import numpy as np
+import pandas as pd
 from sklearn.metrics import accuracy_score, mean_squared_error
 from sklearn.utils.class_weight import compute_class_weight
 from sklearn.metrics import classification_report
@@ -44,15 +45,20 @@ def split_dataset(X, y, json_configuration):
     )
 
 
-def read_longitudinal_dataset(json_configuration):
-    """
-    Read longitudinal data from the `.ts` file
+def read_longitudinal_dataset(configuration: dict) -> pd.DataFrame:
+    """Read longitudinal data from the `.ts` file
+
+    Args:
+        configuration (dict): The training configuration dictonary
+
+    Returns:
+        pd.DataFrame: Dataframe holding the time series
     """
     #file_path = os.path.join(json_configuration["file_location"], json_configuration["file_name"])
     # dataset = load_from_tsfile_to_dataframe(file_path, return_separate_X_and_y=False)
     # dataset = dataset.rename(columns={"class_vals": "target"})
     # return split_dataset(dataset, json_configuration)
-    return load_from_tsfile(json_configuration["dataset_path"], return_y=True, return_data_type="numpy3D")
+    return load_from_tsfile(configuration["dataset_path"], return_y=True, return_data_type="numpy3D")
 
 
 def convert_longitudinal_to_numpy(X, y, one_hot_encoder):

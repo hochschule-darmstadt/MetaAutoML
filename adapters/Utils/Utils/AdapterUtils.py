@@ -301,7 +301,16 @@ def predict(config_json, config_path, automl):
     
     return predict_time, result_prediction_path
 
-def setup_run_environment(request: "StartAutoMlRequest", adapter_name):
+def setup_run_environment(request: "StartAutoMlRequest", adapter_name: str) -> "StartAutoMlRequest":
+    """Setup the necessary folder structure for the new training
+
+    Args:
+        request (StartAutoMlRequest): The training request configuration
+        adapter_name (str): The adapter name
+
+    Returns:
+        StartAutoMlRequest: The extended training request configuration holding the training paths
+    """
 
     #folder location for job related files
     job_folder_location = os.path.join(get_config_property("training-path"),
