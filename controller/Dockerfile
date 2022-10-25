@@ -1,4 +1,4 @@
-FROM python:3.9.13-slim-buster AS base
+FROM --platform=linux/amd64 python:3.9.13-slim-buster AS base
 WORKDIR /
 EXPOSE 5001
 

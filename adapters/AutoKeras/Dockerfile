@@ -1,4 +1,4 @@
-FROM python:3.9.13-slim-buster AS base
+FROM --platform=linux/amd64 python:3.9.13-slim-buster AS base
 EXPOSE 50052
 
 RUN apt-get update \

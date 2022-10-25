@@ -1,4 +1,4 @@
-FROM python:3.7.11-slim-buster AS base
+FROM --platform=linux/amd64 python:3.7.11-slim-buster AS base
 EXPOSE 50053
 
 RUN python -m pip install --upgrade pip
