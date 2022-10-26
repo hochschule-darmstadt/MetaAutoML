@@ -11,24 +11,25 @@ import nest_asyncio
 
 ROOT_PATH = os.path.dirname(os.path.abspath(__file__))
 
-def _load_credential_from_file(filepath):
-    """
-    Load the certificate from disk
-    ---
-    Parameter
-    1. path to certificate to read
-    ---
-    Return the certificate str
+
+def _load_credential_from_file(filepath: str) -> bytes:
+    """Load the certificate file from disk
+
+    Args:
+        filepath (str): Path to the certificate file
+
+    Returns:
+        bytes: byte array of certificate file content
     """
     real_path = os.path.join(os.path.dirname(__file__), filepath)
     with open(real_path, 'rb') as f:
         return f.read()
 
 def create_secure_context() -> SSLContext:
-    """
-    Create the required SSL context for inbound Better GRPC connections
-    ---
-    Return the SSL Context for inbound connections
+    """Create the required SSL context for inbound GRPC connections
+
+    Returns:
+        SSLContext: SSL Context for inbound connections
     """
     #Credit: https://github.com/vmagamedov/grpclib/blob/master/examples/mtls/server.py
     ctx = ssl.SSLContext(ssl.PROTOCOL_TLS)
@@ -50,6 +51,8 @@ SERVER_CERTIFICATE_KEY = _load_credential_from_file('certificate/server.key')
 
 
 async def main():
+    """The controller main function starting the controller GRPC server and waiting on incoming requests of the frontend
+    """
     #with ProcessPoolExecutor(max_workers=40) as executor:
     server = Server([ControllerServiceManager()])
     context = SSLContext(protocol=ssl.PROTOCOL_TLSv1_2)
@@ -59,6 +62,8 @@ async def main():
 
 
 if __name__ == '__main__':
+    """Python entry point setting up the dependency injection and starting main
+    """
     application = Application()
     application.init_resources()
     application.wire(modules=["__main__"])

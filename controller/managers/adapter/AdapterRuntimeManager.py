@@ -13,8 +13,19 @@ from ThreadLock import ThreadLock
 
 
 class AdapterRuntimeManager:
+    """The AdapterRuntimeManager represent a single training session started by a user and manages it
+    """
 
     def __init__(self, data_storage: DataStorage, request: "CreateTrainingRequest", training_id: str, dataset, explainable_lock: ThreadLock) -> None:
+        """Initialize a new AdapterRuntimeManager instance
+
+        Args:
+            data_storage (DataStorage): The datastore instance to access MongoDB
+            request (CreateTrainingRequest): The GRPC request message holding the training configuration
+            training_id (str): The training id which identify the new training session
+            dataset (_type_): The dataset record used by the training session
+            explainable_lock (ThreadLock): The explainable lock instance to protect from multiple thread using critical parts of the ExplainableAIManager module
+        """
         self.__data_storage: DataStorage = data_storage
         self.__request: "CreateTrainingRequest" = request
         self.__training_id = training_id
@@ -41,6 +52,15 @@ class AdapterRuntimeManager:
         return
 
     def __adapter_finished_callback(self, training_id, user_id, model_id, model_details: 'dict[str, object]', adapter_manager: AdapterManager):
+        """persists the AutoML adapter training session results
+
+        Args:
+            training_id (_type_): The training id which identify the new training session
+            user_id (_type_): Unique user id saved within the MS Sql database of the frontend
+            model_id (_type_): Unique model record id that will be updated
+            model_details (dict[str, object]): The dictonary of fields that will be updated inside the model record
+            adapter_manager (AdapterManager): The calling AdapterManager, passed to the ExplanableAIManager to connect to the same adapter to start the explanation process
+        """
         # lock data storage to prevent race condition between get and update
         import datetime
         with self.__data_storage.lock():
@@ -67,13 +87,28 @@ class AdapterRuntimeManager:
                 ExplainableAIManager(self.__data_storage, adapter_manager, self.__explainable_lock).explain(user_id, model_id)
                 return
     
-    def get_training_id(self):
+    def get_training_id(self) -> str:
+        """Get the training id to which the found model is linked too
+
+        Returns:
+            str: The training id
+        """
         return self.__training_id
 
-    def get_user_id(self):
+    def get_user_id(self) -> str:
+        """Get the user id to which the found model is linked too
+
+        Returns:
+            str: The user id
+        """
         return self.__request.user_id
 
-    def get_status_for_blackboard(self):
+    def get_status_for_blackboard(self) -> dict:
+        """Get the current general training status for the blackboard
+
+        Returns:
+            dict: The current general training status
+        """
         status = "completed"
         for automl in self.__adapters:
             if automl.is_running():
@@ -84,13 +119,25 @@ class AdapterRuntimeManager:
             'configuration': self.__request.to_dict(),
         }
 
-    def get_training_request(self):
+    def get_training_request(self) -> "CreateTrainingRequest":
+        """Get the training request object
+
+        Returns:
+            CreateTrainingRequest: The training request object
+        """
         return self.__request
 
     def get_dataset(self):
+        """Get the dataset record used by the training
+
+        Returns:
+            _type_: The dataset record
+        """
         return self.__dataset
 
     def create_new_training(self):
+        """Initialize the required AdapterManager for this training session and kick off strategy controller timer to begin training process
+        """
         self.__log.debug("start_new_training: creating new blackboard and strategy controller for training")
         for automl in self.__request.configuration.selected_auto_ml_solutions:
             self.__log.debug(f"start_new_training: getting adapter endpoint information for automl {automl}")
@@ -105,18 +152,19 @@ class AdapterRuntimeManager:
         self.__strategy_controller.start_timer()
 
     def blackboard_phase_update_handler(self, meta, controller):
-        """
-        Handles phase updates throughout the session (caused by the strategy controller)
-        ---
-        Parameter
-        1. The event meta (contains a dict holding the "old_phase" and "new_phase")
-        1. The strategy controller instance that caused the event
+        """Handles phase updates throughout the session (caused by the strategy controller)
+
+        Args:
+            meta (_type_): The event meta (contains a dict holding the "old_phase" and "new_phase")
+            controller (_type_): The strategy controller instance that caused the event
         """
         if meta.get('old_phase') == 'preprocessing' and meta.get('new_phase') == 'running':
             # Preprocessing finished, start the AutoML training
             self.__phase_start_automl_training()
 
     def __phase_start_automl_training(self):
+        """Start the AutoML adapter training process by starting the AdapterManager task
+        """
         for automl in self.__adapters:
             self.__log.debug(f"__phase_start_automl_training: adapter endpoint information for automl {automl}")
             automl.start()

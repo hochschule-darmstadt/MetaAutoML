@@ -9,9 +9,27 @@ from AdapterBGRPC import *
 from DataStorage import DataStorage
 
 class AdapterManager(Thread):
+    """The AdapterManager provides functionality for the training process to connect to the correct adapter and execute the training
+
+    Args:
+        Thread (_type_): _description_
+    """
 
     def __init__(self, data_storage: DataStorage, request: "CreateTrainingRequest", automl:str, training_id: str, dataset, host: str, port: int, blackboard, strategy_controller, adapter_finished_callback) -> None:
-        
+        """Initialize a new AdapterManager
+
+        Args:
+            data_storage (DataStorage): The datastore instance to access MongoDB
+            request (CreateTrainingRequest): The training request configuration
+            automl (str): The AutoML adapter name
+            training_id (str): The training id to which the found model is linked too
+            dataset (_type_): The Dataset record used by this training
+            host (str): The AutoML adapter ip address
+            port (int): The AutoML adapter port 
+            blackboard (_type_): The blackboard instance for this training session
+            strategy_controller (_type_): The Blackboard instance for this training session
+            adapter_finished_callback (_type_): The callback function to execute when the training finishes
+        """
         super(AdapterManager, self).__init__()
         self.__log = logging.getLogger('AdapterManager')
         self.__log.setLevel(logging.getLevelName(os.getenv("SERVER_LOGGING_LEVEL")))
@@ -37,23 +55,47 @@ class AdapterManager(Thread):
 
         self.__adapter_agent = AdapterManagerAgent(self.__blackboard, self.__strategy_controller, self)
 
-    def get_automl_name(self):
+    def get_automl_name(self) -> str:
+        """Get the AutoML adapter name
+
+        Returns:
+            str: The AutoML adapter name
+        """
         return self.__automl
 
-    def get_training_id(self):
+    def get_training_id(self) -> str:
+        """Get the training id to which the found model is linked too
+
+        Returns:
+            str: The training id
+        """
         return self.__training_id
 
-    def is_running(self):
+    def is_running(self) -> bool:
+        """Check if the AutoML adapter training is still running
+
+        Returns:
+            bool: True if the training is still running, False if it has ended
+        """
         if self.__status == "failed" or self.__status == "completed":
             return False
         else:
             return True
 
-    def get_status(self):
+    def get_status(self) -> str:
+        """Get the current training process status
+
+        Returns:
+            str: The current training process status
+        """
         return self.__status
 
-    def get_status_for_blackboard(self):
+    def get_status_for_blackboard(self) -> dict:
+        """Get the current AutoML adapter status for the blackboard
 
+        Returns:
+            dict: The current AutoML adapter status
+        """
         return {
             'status': self.__status,
             'test_score': self.__testScore,
@@ -64,15 +106,18 @@ class AdapterManager(Thread):
         }
 
     def handle_blackboard_phase_update(self):
+        """Blackboard functionality called when the blackboard changes phases
+        TODO: still needded?
+        """
         return
 
-    def __generate_process_request(self) -> "StartAutoMlRequest":
-        """
-        Generate AutoML configuration JSON
-        ---
-        Return configuration JSON
-        """
 
+    def __generate_process_request(self) -> "StartAutoMlRequest":
+        """Generate AutoML training configuration 
+
+        Returns:
+            StartAutoMlRequest: The GRPC request message holding the training configuration
+        """
         request = StartAutoMlRequest()
         request.training_id = self.__training_id
         request.dataset_id = str(self.__dataset["_id"])
@@ -91,7 +136,12 @@ class AdapterManager(Thread):
 
         return request
 
-    def __create_new_model_entry(self):
+    def __create_new_model_entry(self) -> str:
+        """Create the model record for this AutoML adapter
+
+        Returns:
+            str: The model record id
+        """
         model_details = {
             "training_id": self.__training_id,
             "prediction_ids": [],
@@ -113,6 +163,8 @@ class AdapterManager(Thread):
         return self.__data_storage.create_model(self.__request.user_id, model_details)
     
     async def __read_grpc_connection(self):
+        """Open a new connection to the AutoML adapter and start the training process and read all Status messages until the process concludes
+        """
         try:  # Run until server closes connection
             import datetime
             channel = Channel(host=self.__host, port=self.__port)
@@ -170,10 +222,7 @@ class AdapterManager(Thread):
 
     
     def run(self):
-        """
-        Listen to the started AutoML process until termination
-        ---
-        Parameter
+        """Listen to the started AutoML process until termination
         """
         #loop = asyncio.new_event_loop()
         #asyncio.set_event_loop(loop)
@@ -182,11 +231,11 @@ class AdapterManager(Thread):
         asyncio.run(self.__read_grpc_connection())
 
 
-    def _generate_test_json(self,):
-        """
-        Generate AutoML configuration JSON
-        ---
-        Return configuration JSON
+    def _generate_test_json(self) -> dict:
+        """Generate AutoML configuration for the explanation request
+
+        Returns:
+            dict: AutoML explanation configuration
         """
         return {
             "training_id": self.__training_id,
@@ -204,20 +253,16 @@ class AdapterManager(Thread):
         }
 
 
-
-
     def explain_model(self, data):
-        """
-        Explain a specific model.
+        """Explain a specific model.
         This loads the model and returns the output of the "predict_proba()" function in case of tabular classification.
         If the ML task is tabular regression the output of "predict()" is returned instead.
-        ---
-        Parameter
-        data: Data to process
-        training_id: training id to use
-        ---
-        Return
-        List of produced outputs
+
+        Args:
+            data (_type_): Data to process to compute probabilities within the AutoML adapter
+
+        Returns:
+            _type_: List of produced outputs
         """
         print(f"connecting {self.__host}:{self.__port}")
         try:

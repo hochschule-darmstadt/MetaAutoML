@@ -9,9 +9,23 @@ from DataStorage import DataStorage
 from AdapterBGRPC import *
 
 class AdapterPredictionManager(Thread):
+    """The AdapterPredictionManager provides functionality for the prediction process to connect to the correct adapter and execute the prediction
+
+    Args:
+        Thread (_type_): _description_
+    """
 
     def __init__(self, data_storage: DataStorage, request_configuration: dict, user_id: str, prediction_id: str, host: str, port: int) -> None:
-        
+        """Initialize a new AdapterPredictionManager instance
+
+        Args:
+            data_storage (DataStorage): The datastore instance to access MongoDB
+            request_configuration (dict): The prediction request configuration dictonary
+            user_id (str): Unique user id saved within the MS Sql database of the frontend
+            prediction_id (str): Unique prediction record id
+            host (str): The ip address to the AutoML adapter GRPC Server
+            port (int): The port to the AutoML adapter GRPC Server
+        """
         super(AdapterPredictionManager, self).__init__()
         self.__log = logging.getLogger('AdapterPredictionManager')
         self.__log.setLevel(logging.getLevelName(os.getenv("SERVER_LOGGING_LEVEL")))
@@ -23,16 +37,28 @@ class AdapterPredictionManager(Thread):
         self.__port = port
         self.__status = "started"
 
-    def is_running(self):
+    def is_running(self) -> bool:
+        """Check if the AutoML adapter is still running
+
+        Returns:
+            bool: True if the adapter is still running, False if the adapter finished
+        """
         if self.__status == "failed" or self.__status == "completed":
             return False
         else:
             return True
 
-    def get_status(self):
+    def get_status(self) -> str:
+        """Get the current AutoML adapter status
+
+        Returns:
+            str: The current AutoML adapter status
+        """
         return self.__status
 
     async def __read_grpc_connection(self):
+        """Open the connection to the AutoML adapter to start the prediction process and wait for the result
+        """
         try:  # Run until server closes connection
             self.__status = "busy"
 
@@ -63,11 +89,9 @@ class AdapterPredictionManager(Thread):
             return
 
     
-    def run(self):
+    def run(self) -> None:
         """
-        Listen to the started AutoML process until termination
-        ---
-        Parameter
+        Listen to the started AutoML process until termination as a background task
         """
         #loop = asyncio.new_event_loop()
         #asyncio.set_event_loop(loop)

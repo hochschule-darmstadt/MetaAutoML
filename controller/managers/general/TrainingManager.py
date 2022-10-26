@@ -6,8 +6,16 @@ import json, logging, os, datetime
 from AdapterRuntimeScheduler import AdapterRuntimeScheduler
 
 class TrainingManager:
+    """The TrainingManager provides all functionality related to Trainings objects
+    """
 
     def __init__(self, data_storage: DataStorage, adapter_runtime_scheduler: AdapterRuntimeScheduler) -> None:
+        """Initialize a new TrainingManager instance
+
+        Args:
+            data_storage (DataStorage): The datastore instance to access MongoDB
+            adapter_runtime_scheduler (AdapterRuntimeScheduler): The AdapterRuntimeScheduler managing the training processes within the controller
+        """
         self.__data_storage: DataStorage = data_storage
         self.__log = logging.getLogger('TrainingManager')
         self.__log.setLevel(logging.getLevelName(os.getenv("SERVER_LOGGING_LEVEL")))
@@ -16,13 +24,18 @@ class TrainingManager:
     async def create_training(
         self, create_training_request: "CreateTrainingRequest"
     ) -> "CreateTrainingResponse":
-        """
-        Create a new training run
-        ---
-        Parameter
-        1. training information
-        ---
-        Return empty CreateTrainingResponse object
+        """Create a new training record and start the training process
+
+        Args:
+            create_training_request (CreateTrainingRequest): GRPC message holding the user id and training configuration for the new training
+
+        Raises:
+            grpclib.GRPCError: grpclib.Status.NOT_FOUND, raised if no dataset record was found
+            grpclib.GRPCError: grpclib.Status.CANCELLED, raised if the AutoML list field inside the config is empty
+            grpclib.GRPCError: grpclib.Status.CANCELLED, raised if the ML Library list field inside the config is empty
+
+        Returns:
+            CreateTrainingResponse: The GRPC response message holding the newly created training record id
         """
         response = CreateTrainingResponse()
         
@@ -84,7 +97,20 @@ class TrainingManager:
         response.training_id = training_id
         return response
 
-    def __training_object_rpc_object(self, user_id, training):
+    def __training_object_rpc_object(self, user_id: str, training: dict) -> Training:
+        """Convert a training record dictionary into the GRPC Training object
+
+        Args:
+            user_id (str): Unique user id saved within the MS Sql database of the frontend
+            training (dict): The retrieved training record dictionary
+
+        Raises:
+            grpclib.GRPCError: grpclib.Status.UNAVAILABLE, raised when a dictionary field could not be read
+            grpclib.GRPCError: grpclib.Status.UNAVAILABLE, raised when a dictionary field could not be read
+
+        Returns:
+            Training: The GRPC training object generated from the dictonary
+        """
         try:
             training_item = Training()
 
@@ -156,13 +182,13 @@ class TrainingManager:
     def get_trainings(
         self, get_trainings_request: "GetTrainingsRequest"
     ) -> "GetTrainingsResponse":
-        """
-        Get all trainings for a specific user
-        ---
-        Parameter
-        1. grpc request object, containing the user id
-        ---
-        Return a list of compatible trainings or a GRPC error UNAVAILABLE for read errors
+        """Get all trainings or get all trainings using an optional filter
+
+        Args:
+            get_trainings_request (GetTrainingsRequest): The GRPC request holding the user id and filters
+
+        Returns:
+            GetTrainingsResponse: The GRPC response holding the list of found trainings
         """
         response = GetTrainingsResponse() 
         self.__log.debug(f"get_trainings: get all trainings for user {get_trainings_request.user_id}")
@@ -176,14 +202,16 @@ class TrainingManager:
     def get_training(
         self, get_training_request: "GetTrainingRequest"
     ) -> "GetTrainingResponse":
-        """
-        Get training details for a specific dataset
-        ---
-        Parameter
-        1. grpc request object, containing the user, and traininig id
-        ---
-        Return dataset details
-        The result is a GetTrainingResponse object describing one dataset or a GRPC error if ressource NOT_FOUND or UNAVAILABLE for read errors
+        """Get training details for a specific training
+
+        Args:
+            get_training_request (GetTrainingRequest): The GRPC request holding the user id and and training id
+
+        Raises:
+            grpclib.GRPCError: grpclib.Status.NOT_FOUND, raised if no training record was found
+
+        Returns:
+            GetTrainingResponse: The GRPC response holding the found training
         """
         response = GetTrainingResponse() 
         found, training = self.__data_storage.get_training(get_training_request.user_id, get_training_request.training_id)
@@ -196,13 +224,13 @@ class TrainingManager:
     def delete_training(
         self, delete_training_request: "DeleteTrainingRequest"
     ) -> "DeleteTrainingResponse":
-        """
-        Delete a training from database and disc
-        ---
-        Parameter
-        1. grpc request object containing the user, training id
-        ---
-        Return empty DeleteTrainingResponse object or a GRPC error if ressource NOT_FOUND
+        """Delete a training from database and disc
+
+        Args:
+            delete_training_request (DeleteTrainingRequest): The GRPC request containing the user id, training id
+
+        Returns:
+            DeleteTrainingResponse: The empty GRPC response
         """
         self.__log.debug(f"delete_training: deleting training {delete_training_request.training_id}, of user {delete_training_request.user_id}")
         result = self.__data_storage.delete_training(delete_training_request.user_id, delete_training_request.training_id)

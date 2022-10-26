@@ -16,13 +16,13 @@ class PredictionManager:
     def create_prediction(
         self, create_prediction_request: "CreatePredictionRequest"
     ) -> "CreatePredictionResponse":
-        """
-        Upload a new dataset
-        ---
-        Parameter
-        1. dataset information
-        ---
-        Return empty CreateDatasetResponse object
+        """Create a new prediction record and start prediction process
+
+        Args:
+            create_prediction_request (CreatePredictionRequest): GRPC message holding the user id, live dataset- and prediction informations
+
+        Returns:
+            CreatePredictionResponse: The empty GRPC response message
         """
         response = CreatePredictionResponse()
 
@@ -50,7 +50,19 @@ class PredictionManager:
 
         return response
 
-    def __prediction_object_to_rpc_object(self, user_id, prediction):
+    def __prediction_object_to_rpc_object(self, user_id: str, prediction: dict) -> Dataset:
+        """Convert a prediction record dictionary into the GRPC Prediction object
+
+        Args:
+            user_id (str): Unique user id saved within the MS Sql database of the frontend
+            prediction (dict): The retrieved prediction record dictionary
+
+        Raises:
+            grpclib.GRPCError: grpclib.Status.UNAVAILABLE, raised when a dictionary field could not be read
+
+        Returns:
+            Dataset: The GRPC prediction object generated from the dictonary
+        """
         try:
             prediction_info = Prediction()
             prediction_info.id = str(prediction["_id"])
@@ -73,13 +85,13 @@ class PredictionManager:
     def get_predictions(
         self, get_predictions_request: "GetPredictionsRequest"
     ) -> "GetPredictionsResponse":
-        """
-        Get all datasets for a specific task
-        ---
-        Parameter
-        1. grpc request object, containing the user id
-        ---
-        Return a list of compatible datasets or a GRPC error UNAVAILABLE for read errors
+        """Get all predictions by model
+
+        Args:
+            get_predictions_request (GetPredictionsRequest): The GRPC request holding the user id and model id
+
+        Returns:
+            GetPredictionsResponse: The GRPC response holding the list of found predictions
         """
         response = GetPredictionsResponse()
         self.__log.debug(f"get_predictions: get all prediction datasets for user {get_predictions_request.user_id}")
@@ -92,14 +104,16 @@ class PredictionManager:
     def get_prediction(
         self, get_prediction_request: "GetPredictionRequest"
     ) -> "GetPredictionResponse":
-        """
-        Get dataset details for a specific dataset
-        ---
-        Parameter
-        1. grpc request object, containing the user, and dataset id
-        ---
-        Return dataset details
-        The result is a GetDatasetResponse object describing one dataset or a GRPC error if ressource NOT_FOUND or UNAVAILABLE for read errors
+        """Get prediction details for a specific prediction
+
+        Args:
+            get_prediction_request (GetPredictionRequest): The GRPC request holding the user id and and prediction id
+
+        Raises:
+            grpclib.GRPCError: grpclib.Status.NOT_FOUND, raised if no dataset record was found
+
+        Returns:
+            GetPredictionResponse: The GRPC response holding the found prediction
         """
         response = GetPredictionResponse()
         self.__log.debug(f"get_prediction: trying to get prediction dataset {get_prediction_request.prediction_id} for user {get_prediction_request.user_id}")
@@ -114,13 +128,13 @@ class PredictionManager:
     def delete_prediction(
         self, delete_prediction_request: "DeletePredictionRequest"
     ) -> "DeletePredictionResponse":
-        """
-        Delete a dataset from database and disc
-        ---
-        Parameter
-        1. grpc request object containing the user id, dataset id
-        ---
-        Return empty DeleteDatasetResponse object or a GRPC error if ressource NOT_FOUND
+        """Delete a prediction from database and disc
+
+        Args:
+            delete_prediction_request (DeletePredictionRequest): The GRPC request containing the user id, prediction id
+
+        Returns:
+            DeletePredictionResponse: The empty GRPC response
         """
         self.__log.debug(f"delete_prediction: deleting prediction dataset {delete_prediction_request.prediction_id}, of user {delete_prediction_request.user_id}")
         result = self.__data_storage.delete_prediction(delete_prediction_request.user_id, delete_prediction_request.prediction_id)

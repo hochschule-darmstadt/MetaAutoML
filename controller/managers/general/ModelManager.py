@@ -5,14 +5,33 @@ from ControllerBGRPC import *
 import json, logging, os
 
 class ModelManager:
+    """The ModelManager provides all functionality related to Models objects
+    """
 
     def __init__(self, data_storage: DataStorage) -> None:
+        """Initialize a new ModelManager instance
+
+        Args:
+            data_storage (DataStorage): The datastore instance to access MongoDB
+        """
         self.__data_storage: DataStorage = data_storage
         self.__log = logging.getLogger('ModelManager')
         self.__log.setLevel(logging.getLevelName(os.getenv("SERVER_LOGGING_LEVEL")))
 
 
-    def __model_object_to_rpc_object(self, user_id, model):
+    def __model_object_to_rpc_object(self, user_id: str, model: dict) -> Model:
+        """Convert a model record dictionary into the GRPC Model object
+
+        Args:
+            user_id (str): Unique user id saved within the MS Sql database of the frontend
+            model (dict): The retrieved model record dictionary
+
+        Raises:
+            grpclib.GRPCError: grpclib.Status.UNAVAILABLE, raised when a dictionary field could not be read
+
+        Returns:
+            Model: The GRPC model object generated from the dictonary
+        """
         try:        
             self.__log.debug("__model_object_to_rpc_object: get all predictions for model")
             model_predictions = self.__data_storage.get_predictions(user_id, str(model["_id"]))
@@ -60,13 +79,13 @@ class ModelManager:
     def get_models(
         self, get_models_request: "GetModelsRequest"
     ) -> "GetModelsResponse":
-        """
-        Get all models for a specific dataset
-        ---
-        Parameter
-        1. grpc request object, containing the user and dataset id
-        ---
-        Return a list of compatible trainings or a GRPC error UNAVAILABLE for read errors
+        """Get all datasets or get all datasets using an optional filter
+
+        Args:
+            get_models_request (GetModelsRequest): The GRPC request holding the user id and filters
+
+        Returns:
+            GetModelsResponse: The GRPC response holding the list of found models
         """
         response = GetModelsResponse()
         def GetScore(e):
@@ -86,14 +105,16 @@ class ModelManager:
     def get_model(
         self, get_model_request: "GetModelRequest"
     ) -> "GetModelResponse":
-        """
-        Get model details for a specific model
-        ---
-        Parameter
-        1. grpc request object, containing the user, and traininig id
-        ---
-        Return model details
-        The result is a GetTrainingResponse object describing one model or a GRPC error if ressource NOT_FOUND or UNAVAILABLE for read errors
+        """Get model details for a specific model
+
+        Args:
+            get_model_request (GetModelRequest): The GRPC request holding the user id and and model id
+
+        Raises:
+            grpclib.GRPCError: grpclib.Status.NOT_FOUND, raised if no model record was found
+
+        Returns:
+            GetModelResponse: The GRPC response holding the found model
         """
         response = GetModelResponse()
         found, model = self.__data_storage.get_model(get_model_request.user_id, get_model_request.model_id)
@@ -108,13 +129,13 @@ class ModelManager:
     def delete_model(
         self, delete_model_request: "DeleteModelRequest"
     ) -> "DeleteModelResponse":
-        """
-        Delete a model from database and disc
-        ---
-        Parameter
-        1. grpc request object containing the user, model id
-        ---
-        Return empty DeleteModelResponse object or a GRPC error if ressource NOT_FOUND
+        """Delete a model from database and disc
+
+        Args:
+            delete_model_request (DeleteModelRequest): The GRPC request containing the user id, model id
+
+        Returns:
+            DeleteModelResponse: The empty GRPC response
         """
         self.__log.debug(f"delete_model: deleting model {delete_model_request.model_id}, of user {delete_model_request.user_id}")
         amount_delelted_models = self.__data_storage.delete_model(delete_model_request.user_id, delete_model_request.model_id)

@@ -7,8 +7,17 @@ from ControllerBGRPC import *
 from AdapterManager import AdapterManager
 
 class AdapterRuntimePredictionManager:
+    """The AdapterRuntimePredictionManager manages the prediction processes
+    """
 
     def __init__(self, data_storage: DataStorage, user_id: str, prediction_id: str) -> None:
+        """Initiate a new AdapterRuntimePredictionManager instance
+
+        Args:
+            data_storage (DataStorage): The datastore instance to access MongoDB
+            user_id (str): Unique user id saved within the MS Sql database of the frontend
+            prediction_id (str): Unique prediction record id
+        """
         self.__data_storage: DataStorage = data_storage
         self.__user_id = user_id
         self.__prediction_id = prediction_id
@@ -25,11 +34,13 @@ class AdapterRuntimePredictionManager:
             ":alphad3m":        ["ALPHAD3M_SERVICE_HOST",  "ALPHAD3M_SERVICE_PORT"],
             ":mcfly":           ["MCFLY_SERVICE_HOST", "MCFLY_SERVICE_PORT"],
         }
-        self.__adapters: list[AdapterManager] = []
+        self.__adapters: list[AdapterPredictionManager] = []
         return
         
 
     def create_new_prediction(self):
+        """Create a new AdapterPredictionManager responsible to connect to the AutoML adapter and kick off the prediction process
+        """
 
         found, prediction = self.__data_storage.get_prediction(self.__user_id, self.__prediction_id)
         found, model = self.__data_storage.get_model(self.__user_id, prediction["model_id"])

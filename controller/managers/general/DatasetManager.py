@@ -9,10 +9,16 @@ from ThreadLock import ThreadLock
 
 
 class DatasetManager:
-    """
+    """The DatasetManager provides all functionality related to Datasets objects
     """
 
     def __init__(self, data_storage: DataStorage, dataset_analysis_lock: ThreadLock) -> None:
+        """Initialize a new DatasetManager instance
+
+        Args:
+            data_storage (DataStorage): The datastore instance to access MongoDB
+            dataset_analysis_lock (ThreadLock): The dataset analysis lock instance to protect from multiple thread using critical parts of the DatasetAnalysisManager
+        """
         self.__data_storage: DataStorage = data_storage
         self.__dataset_analysis_lock = dataset_analysis_lock
         self.__log = logging.getLogger('DatasetManager')
@@ -21,13 +27,13 @@ class DatasetManager:
     def create_dataset(
         self, create_dataset_request: "CreateDatasetRequest"
     ) -> "CreateDatasetResponse":
-        """
-        Upload a new dataset
-        ---
-        Parameter
-        1. dataset information
-        ---
-        Return empty CreateDatasetResponse object
+        """Create a new dataset record and start the dataset analysis
+
+        Args:
+            create_dataset_request (CreateDatasetRequest): GRPC message holding the user id and dataset informations of the new dataset
+
+        Returns:
+            CreateDatasetResponse: The empty GRPC response message
         """
         self.__log.debug(f"create_dataset: saving new dataset {create_dataset_request.dataset_name} for user {create_dataset_request.user_id}, with filename {create_dataset_request.file_name}, with dataset type {create_dataset_request.dataset_type}")
         dataset_id: str = self.__data_storage.create_dataset(create_dataset_request.user_id, create_dataset_request.file_name, create_dataset_request.dataset_type, create_dataset_request.dataset_name)
@@ -39,7 +45,19 @@ class DatasetManager:
         response = CreateDatasetResponse()
         return response
 
-    def __dataset_object_to_rpc_object(self, user_id, dataset):
+    def __dataset_object_to_rpc_object(self, user_id: str, dataset: dict) -> Dataset:
+        """Convert a dataset record dictionary into the GRPC Dataset object
+
+        Args:
+            user_id (str): Unique user id saved within the MS Sql database of the frontend
+            dataset (dict): The retrieved dataset record dictionary
+
+        Raises:
+            grpclib.GRPCError: grpclib.Status.UNAVAILABLE, raised when a dictionary field could not be read
+
+        Returns:
+            Dataset: The GRPC dataset object generated from the dictonary
+        """
         try:
             dataset_detail = Dataset()
             dataset_detail.id = str(dataset["_id"])
@@ -55,18 +73,16 @@ class DatasetManager:
             self.__log.error(f"__dataset_object_to_rpc_object: exception: {e}")
             raise grpclib.GRPCError(grpclib.Status.UNAVAILABLE, f"Error while retrieving Dataset {str(dataset['_id'])} for user {user_id}")
 
-
-
     def get_datasets(
         self, get_datasets_request: "GetDatasetsRequest"
     ) -> "GetDatasetsResponse":
-        """
-        Get all datasets for a specific task
-        ---
-        Parameter
-        1. grpc request object, containing the user id
-        ---
-        Return a list of compatible datasets or a GRPC error UNAVAILABLE for read errors
+        """Get all datasets or get all datasets using an optional filter
+
+        Args:
+            get_datasets_request (GetDatasetsRequest): The GRPC request holding the user id and filters
+
+        Returns:
+            GetDatasetsResponse: The GRPC response holding the list of found datasets
         """
         response = GetDatasetsResponse()
         self.__log.debug(f"get_datasets: get all datasets for user {get_datasets_request.user_id}")
@@ -80,14 +96,16 @@ class DatasetManager:
     def get_dataset(
         self, get_dataset_request: "GetDatasetRequest"
     ) -> "GetDatasetResponse":
-        """
-        Get dataset details for a specific dataset
-        ---
-        Parameter
-        1. grpc request object, containing the user, and dataset id
-        ---
-        Return dataset details
-        The result is a GetDatasetResponse object describing one dataset or a GRPC error if ressource NOT_FOUND or UNAVAILABLE for read errors
+        """Get dataset details for a specific dataset
+
+        Args:
+            get_dataset_request (GetDatasetRequest): The GRPC request holding the user id and and dataset id
+
+        Raises:
+            grpclib.GRPCError: grpclib.Status.NOT_FOUND, raised if no dataset record was found
+
+        Returns:
+            GetDatasetResponse: The GRPC response holding the found dataset
         """
         response = GetDatasetResponse()
         self.__log.debug(f"get_datasets: trying to get dataset {get_dataset_request.dataset_id} for user {get_dataset_request.user_id}")
@@ -102,13 +120,16 @@ class DatasetManager:
     def get_tabular_dataset_column(
         self, get_tabular_dataset_column_request: "GetTabularDatasetColumnRequest"
     ) -> "GetTabularDatasetColumnResponse":
-        """
-        Get column names for a specific tabular dataset
-        ---
-        Parameter
-        1. grpc object containing the user and dataset ids
-        ---
-        Return list of column names or a GRPC error if ressource NOT_FOUND
+        """Get column names for a specific tabular dataset
+
+        Args:
+            get_tabular_dataset_column_request (GetTabularDatasetColumnRequest): The GRPC request holding the user and dataset ids
+
+        Raises:
+            grpclib.GRPCError: grpclib.Status.NOT_FOUND, raised when no dataset was found for the requested informations
+
+        Returns:
+            GetTabularDatasetColumnResponse: The GRPC response holding the list of columns of a tabular dataset
         """
         found, dataset = self.__data_storage.get_dataset(get_tabular_dataset_column_request.user_id, get_tabular_dataset_column_request.dataset_id)
         if not found:
@@ -122,16 +143,17 @@ class DatasetManager:
             self.__log.debug(f"get_tabular_dataset_column: dataset {get_tabular_dataset_column_request.dataset_id} for user {get_tabular_dataset_column_request.user_id} has TS type, using LongitudinalDataManager")
             return LongitudinalDataManager.read_dimension_names(dataset["path"])
 
+
     def delete_dataset(
         self, delete_dataset_request: "DeleteDatasetRequest"
     ) -> "DeleteDatasetResponse":
-        """
-        Delete a dataset from database and disc
-        ---
-        Parameter
-        1. grpc request object containing the user id, dataset id
-        ---
-        Return empty DeleteDatasetResponse object or a GRPC error if ressource NOT_FOUND
+        """Delete a dataset from database and disc
+
+        Args:
+            delete_dataset_request (DeleteDatasetRequest): The GRPC request containing the user id, dataset id
+
+        Returns:
+            DeleteDatasetResponse: The empty GRPC response
         """
         self.__log.debug(f"delete_dataset: deleting dataset {delete_dataset_request.dataset_id}, of user {delete_dataset_request.user_id}")
         result = self.__data_storage.delete_dataset(delete_dataset_request.user_id, delete_dataset_request.dataset_id)
@@ -142,13 +164,13 @@ class DatasetManager:
         self,
         set_dataset_file_configuration_request: "SetDatasetFileConfigurationRequest",
     ) -> "SetDatasetFileConfigurationResponse":
-        """
-        Persist new dataset file configuration in db
-        ---
-        Parameter
-        1. grpc request object containing the user id, dataset id, and new file configuration
-        ---
-        Return empty SetDatasetFileConfigurationResponse object or a GRPC error if ressource NOT_FOUND
+        """Persist new dataset file configuration in MongoDB for the dataset
+
+        Args:
+            set_dataset_file_configuration_request (SetDatasetFileConfigurationRequest): The GRPC request object containing the user id, dataset id, and new file configuration
+
+        Returns:
+            SetDatasetFileConfigurationResponse: The empty GRPC response
         """
         self.__log.debug(f"set_dataset_file_configuration: setting new file configuration new configuration {set_dataset_file_configuration_request.file_configuration}, for dataset {set_dataset_file_configuration_request.dataset_id}, of user {set_dataset_file_configuration_request.user_id}")
         self.__data_storage.update_dataset(set_dataset_file_configuration_request.user_id, set_dataset_file_configuration_request.dataset_id, { "file_configuration": json.loads(set_dataset_file_configuration_request.file_configuration) })
