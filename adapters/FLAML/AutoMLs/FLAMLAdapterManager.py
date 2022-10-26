@@ -54,11 +54,11 @@ class FLAMLAdapterManager(AdapterManager):
             dataframe (DataFrame): The dataframe holding the dataset to execute a new prediction on
         """
         # Check if the requested training is already loaded. If not: Load model and load & prep dataset.
-        if self._loaded_training_id != config_json["training_id"]:
+        if self._loaded_training_id != config["training_id"]:
             print(f"ExplainModel: Model not already loaded; Loading model")
             with open(result_folder_location + '/model_flaml.p', 'rb') as file:
                 self.__automl = dill.load(file)
-            self._loaded_training_id = config_json["training_id"]
+            self._loaded_training_id = config["training_id"]
         # Get prediction probabilities and send them back.
         probabilities = json.dumps(self.__automl.predict_proba(dataframe).tolist())
         return probabilities
