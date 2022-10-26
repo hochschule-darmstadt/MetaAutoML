@@ -52,9 +52,22 @@ class StrategyController(object):
         self.strategies.append(DataPreparationStrategyController(self))
 
     def get_phase(self) -> str:
+        """
+        Returns the currently active phase based on the blackboard state.
+        
+        Returns:
+            str: The currently active phase.
+        """
         return self.blackboard.get_state('phase')
 
     def set_phase(self, phase: str, force: bool = False) -> None:
+        """
+        Updates the currently active phase.
+        
+        Args:
+            phase (str): The new phase that should be active.
+            force (bool): Forces the phase to be updated immediately instead of at the beginning of the next loop iteration.
+        """
         if force:
             old_phase = self.get_phase()
             self.blackboard.update_state('phase', phase)
@@ -64,12 +77,21 @@ class StrategyController(object):
             self.__update_phase_next_run = phase
 
     def wait_for_phase(self, phase: str) -> None:
+        """
+        Synchronously waits for a specific phase to become active.
+        
+        Args:
+            phase (str): The phase that should be waited for.
+        """
         while self.get_phase() != phase:
             time.sleep(1)
             self._log.info(f'Waiting for phase: "{phase}" (current: "{self.get_phase()}")')
         self._log.info(f'Waiting finished for phase: {phase}')
       
     def start_timer(self) -> None:
+        """
+        Starts a repeated timer in a separate daemon thread, sets the "is_running" flag to true and the currently active phase to "started".
+        """
         if not self.__is_running:
             self.__timer = RepeatTimer(interval=self.__timer_interval, function=self.run_loop)
             self.__timer.daemon = True
@@ -79,12 +101,24 @@ class StrategyController(object):
             self.set_phase('started', force=True)
 
     def stop_timer(self) -> None:
+        """
+        Stops the repeated timer and kills the daemon thread, sets the "is_running" flag to false and the currently active phase to "stopped".
+        """
         self.__timer.cancel()
         self._log.debug(f'stop_timer: Stopped controller timer thread: {self.__timer.native_id}')
         self.__is_running = False
         self.set_phase('stopped', force=True)
 
     def run_loop(self) -> None:
+        """
+        Performs one strategy controller loop iteration.
+        
+        Sequentially invokes all registered agents, checks whether
+        they have anything to contribute at the moment and executes
+        their contributions accordingly. If at least one contribution
+        has been made and the blackboard state has changed, all
+        enabled strategies are evaluated. Also performs pending phase changes.
+        """
         stop_requested = False
         state_changed = False
         if self.__update_phase_next_run is not None:
@@ -106,14 +140,28 @@ class StrategyController(object):
             else:
                 self._log.debug(f'run_loop: No contribution by agent: {agent.agent_id}')
         if state_changed:
-            self.evaluate_strategy()
+            self.evaluate_strategies()
         if stop_requested:
             self.stop_timer()
 
     def is_strategy_enabled(self, strategy_name: str) -> bool:
+        """
+        Checks whether the given strategy is currently enabled.
+        
+        Args:
+            strategy_name (str): The name of the respective strategy.
+        Returns:
+            bool: A boolean indicating whether the strategy is currently enabled.
+        """
         return strategy_name in self.blackboard.get_state('enabled_strategies', [])
 
     def enable_strategy(self, strategy_name: str) -> None:
+        """
+        Enables a given strategy by its name.
+        
+        Args:
+            strategy_name (str): The name of the respective strategy to enable.
+        """
         enabled_strategies = self.blackboard.get_state('enabled_strategies', [])
         if not strategy_name in enabled_strategies:
             enabled_strategies.append(strategy_name)
@@ -121,14 +169,23 @@ class StrategyController(object):
         self._log.debug(f'enable_strategy: Enabled strategy: {strategy_name}')
 
     def disable_strategy(self, strategy_name: str) -> None:
+        """
+        Disables a given strategy by its name.
+        
+        Args:
+            strategy_name (str): The name of the respective strategy to enable.
+        """
         enabled_strategies = self.blackboard.get_state('enabled_strategies', [])
         if strategy_name in enabled_strategies:
             enabled_strategies.remove(strategy_name)
             self.blackboard.update_state('enabled_strategies', enabled_strategies)
         self._log.debug(f'disable_strategy: Disabled strategy: {strategy_name}')
 
-    def evaluate_strategy(self) -> None:
-        self._log.debug(f'evaluate_strategy: Evaluating strategy based on the new common state..')
+    def evaluate_strategies(self) -> None:
+        """
+        Evaluates all enabled strategies based on the current blackboard state.
+        """
+        self._log.debug(f'evaluate_strategies: Evaluating strategy based on the new common state..')
 
         for strategy in self.strategies:
             for rule_name, (rule, action) in strategy.rules.items():
@@ -140,13 +197,21 @@ class StrategyController(object):
                                 result = action(state, self.blackboard, self)
                                 self.log_event('strategy_action', { 'rule_name': rule_name, 'result': result })
                             except Exception as err:
-                                self._log.error(f'evaluate_strategy: Could not execute strategy action for rule "{rule_name}".')
+                                self._log.error(f'evaluate_strategies: Could not execute strategy action for rule "{rule_name}".')
                                 self._log.exception(err)
                     except Exception as err:
-                        self._log.error(f'evaluate_strategy: Could not evaluate rule match for rule "{rule_name}".')
+                        self._log.error(f'evaluate_strategies: Could not evaluate rule match for rule "{rule_name}".')
                         self._log.exception(err)
 
     def log_event(self, event_type: str, meta: dict = {}, timestamp: float = None) -> None:
+        """
+        Logs an event of a certain type.
+        
+        Args:
+            event_type (str): The type of the event to log (e.g. "phase_updated").
+            meta (dict): A dictionary used to specify arbitrary metadata for the event.
+            timestamp (float): Used to overwrite the standard timestamp for the event, which is the current time by default.
+        """
         event = {
             'type': event_type,
             'meta': meta,
@@ -167,6 +232,15 @@ class StrategyController(object):
                 self.__data_storage.update_training(user_id, training_id, { 'events': events })
 
     def on_event(self, event_type: str, callback: Callable) -> None:
+        """
+        Registers an event listener for a certain type.
+        
+        (Multiple listeners/handlers may be registered for the same event type.)
+
+        Args:
+            event_type (str): The type of the event to subscribe to.
+            callback (Callable): A callback/hook that is called whenever a relevant event is emitted.
+        """
         if event_type not in self.event_listeners:
             self.event_listeners[event_type] = list()
         self.event_listeners[event_type].append(callback)

@@ -114,7 +114,7 @@
         public DateTime? Timestamp { get; set; }
     }
 
-    private IEnumerable<TimelineItem> RefreshTimeline()
+    private IEnumerable<TimelineItem> RefreshTimeline(bool includeEvents = false)
     {
         var events = Training.Training.RuntimeProfile.Events;
         var phases = new List<string>() { "started", "preprocessing", "running", "stopped" };
@@ -137,7 +137,7 @@
             };
             _timeline.Add(timelineItem);
 
-            if(phaseStartedEventIdx != -1) {
+            if(includeEvents && phaseStartedEventIdx != -1) {
                 int nextPhaseStartedEventIdx = (nextPhase != null) ? events.FindIndex(eventItem => eventItem.Type == "phase_updated" && eventItem.Meta["new_phase"] == nextPhase) : -1;
                 // Get all events until the start of the next phase (or all remaining if its the last phase)
                 IEnumerable<TrainingEventDto> childEvents = events.Skip(phaseStartedEventIdx + 1).Take((nextPhaseStartedEventIdx != -1 ? (nextPhaseStartedEventIdx - 1) : (events.Count - 1)) - phaseStartedEventIdx);

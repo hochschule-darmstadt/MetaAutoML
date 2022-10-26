@@ -12,6 +12,7 @@ class DataAnalysisAgent(IAbstractBlackboardAgent):
         self.__dataset = dataset
 
     def can_contribute(self) -> bool:
+        # Only contribute if no dataset analysis information yet exists on the blackboard
         return (
             self.blackboard.get_state('dataset_analysis') is None and
             self.blackboard.get_state('training_runtime') is not None

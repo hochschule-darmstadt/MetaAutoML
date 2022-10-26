@@ -103,9 +103,9 @@
             {
                 <MudText Typo="Typo.subtitle2" Class="mt-4">@L["Enabled strategies"]</MudText>
                 <MudChipSet
-                    SelectedChipsChanged="OnStrategySelectionChanged"
                     Filter="true"
                     MultiSelection="true"
+                    SelectedChipsChanged="OnStrategySelectionChanged"
                 >
                     @if (_availableStrategies != null)
                     {
@@ -115,7 +115,7 @@
                                 <MudChip
                                     Value="@strategy.Id"
                                     Text="@strategy.Title"
-                                    Default="true"
+                                    Default="false"
                                     Variant="Variant.Text"
                                     Color="Color.Secondary"
                                 />

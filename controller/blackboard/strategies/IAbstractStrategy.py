@@ -11,9 +11,9 @@ class IAbstractStrategy():
     def __init__(self, controller: StrategyController) -> None:
         """
         Constructs a new controller strategy.
-        ---
-        Parameter
-        1. controller: The strategy controller to attach to.
+        
+        Args:
+            controller (StrategyController): The strategy controller to attach to.
         """
         self._log = logging.getLogger(self.__class__.__name__)
         self.controller = controller
@@ -22,9 +22,12 @@ class IAbstractStrategy():
 
     def register_rule(self, name: str, rule: Rule, action: Callable, overwrite_existing: bool = False):
         """
-        Indicates whether the blackboard agent wants to contribute something currently.
-        ---
-        Return a boolean indicating the status
+        Registers a new rule/action pair that represents a strategy to enact if applicable.
+        
+        Args:
+            rule (Rule): The rule under which the strategy becomes relevant.
+            action (Callable): The action hook to enact whenever the strategy becomes relevant.
+            overwrite_existing (bool): May be used to overwrite existing strategy rules with the same name.
         """
         if name in self.rules and not overwrite_existing:
             raise RuntimeError(f'A rule with the name {name} already exists.')

@@ -12,9 +12,11 @@ class IAbstractBlackboardAgent():
     def __init__(self, blackboard: "Blackboard", strategy_controller: "StrategyController", agent_id: str) -> None:
         """
         Constructs a new blackboard agent
-        ---
-        Parameter
-        1. blackboard: The blackboard to attach to
+        
+        Args:
+            blackboard (Blackboard): The blackboard to attach to.
+            controller (StrategyController): The strategy controller that is invoking this agent.
+            agent_id (str): A unique identifier for the agent.
         """
         self.agent_id = agent_id
         self._log = logging.getLogger(self.agent_id)
@@ -27,8 +29,9 @@ class IAbstractBlackboardAgent():
     def can_contribute(self) -> bool:
         """
         Indicates whether the blackboard agent wants to contribute something currently.
-        ---
-        Return a boolean indicating the status
+        
+        Returns:
+            bool: A boolean indicating wheter the agent wants to contribute something at the current state.
         """
         raise NotImplementedError('Not implemented!')
 
@@ -46,7 +49,10 @@ class IAbstractBlackboardAgent():
 
     def get_state(self, default = None):
         """
-        Helper function that returns the blackboard state under a default key ("blackboard_key") for the agent class.
+        Helper function that returns the current blackboard state under a default key ("blackboard_key") for the agent class.
+        
+        Args:
+            1default (any): A fallback value that is returned if the specified key does not exist.
         """
         if not self.blackboard_key:
             raise NotImplementedError(f'{self.__class__.__name__} has no "blackboard_key" attribute!')
@@ -54,7 +60,11 @@ class IAbstractBlackboardAgent():
         
     def update_state(self, update, update_dict_recursive: bool = False):
         """
-        Helper function that updates the blackboard state under a default key ("blackboard_key") for the agent class.
+        Helper function that updates the current blackboard state under a default key ("blackboard_key") for the agent class.
+        
+        Args:
+            update (dict|any): The value to set at the default key ("blackboard_key") for the agent class.
+            update_dict_recursive (bool): If enabled and the "update" is a dictionary, the state is updated via a recursive merge.
         """
         if not self.blackboard_key:
             raise NotImplementedError(f'{self.__class__.__name__} has no "blackboard_key" attribute!')
