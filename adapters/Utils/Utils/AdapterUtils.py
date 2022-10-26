@@ -18,6 +18,7 @@ from TemplateGenerator import TemplateGenerator
 import glob
 from PIL import Image
 from AdapterBGRPC import *
+from typing import Tuple
 
 ######################################################################
 ## GRPC HELPER FUNCTIONS
@@ -40,7 +41,7 @@ def get_except_response(e: Exception) -> "GetAutoMlStatusResponse":
     return response
 
 
-def capture_process_output(process: subprocess.Popen, use_error: bool) -> Iterator["GetAutoMlStatusResponse"]:
+def capture_process_output(process: subprocess.Popen, use_error: bool):
     """Read the console log from the AutoML subprocess until no new text is produced by the subprocess, and yield AutoML status messages
 
     Args:
@@ -204,7 +205,7 @@ def zip_script(config: "StartAutoMlRequest"):
     config.file_location = file_loc_on_controller
     return config
 
-def evaluate(config: "StartAutoMlRequest", config_path: str) -> tuple[float, float]:
+def evaluate(config: "StartAutoMlRequest", config_path: str) -> Tuple[float, float]:
     """Evaluate the model by executing the Python script to compute the test score and prediction time metric
 
     Args:
@@ -269,7 +270,7 @@ def evaluate(config: "StartAutoMlRequest", config_path: str) -> tuple[float, flo
                (predict_time * 1000) / test.shape[0]
 
 
-def predict(config: dict, config_path: str, automl: str) -> tuple[float, str]:
+def predict(config: dict, config_path: str, automl: str) -> Tuple[float, str]:
     """Execute a prediction on an uploaded live dataset
 
     Args:
@@ -405,7 +406,7 @@ def cast_dataframe_column(dataframe: pd.DataFrame, column_index: Any, datatype: 
         dataframe[column_index] = dataframe[column_index].astype('float')
     return dataframe
 
-def read_tabular_dataset_training_data(config: "StartAutoMlRequest") -> tuple[pd.DataFrame, pd.DataFrame]:
+def read_tabular_dataset_training_data(config: "StartAutoMlRequest") -> Tuple[pd.DataFrame, pd.DataFrame]:
     """Read a CSV dataset into train and test dataframes
 
     Args:
@@ -439,7 +440,7 @@ def read_tabular_dataset_training_data(config: "StartAutoMlRequest") -> tuple[pd
 
     return train, test
 
-def prepare_tabular_dataset(df: pd.DataFrame, json_configuration: dict) -> tuple[pd.DataFrame, pd.Series]:
+def prepare_tabular_dataset(df: pd.DataFrame, json_configuration: dict) -> Tuple[pd.DataFrame, pd.Series]:
     """Prepare tabular dataset, perform feature preparation and data type casting
 
     Args:
@@ -455,7 +456,7 @@ def prepare_tabular_dataset(df: pd.DataFrame, json_configuration: dict) -> tuple
     y = df[json_configuration["configuration"]["target"]]
     return X, y
 
-def convert_X_and_y_dataframe_to_numpy(X: pd.DataFrame, y: pd.Series) -> tuple[np.ndarray, np.ndarray]:
+def convert_X_and_y_dataframe_to_numpy(X: pd.DataFrame, y: pd.Series) -> Tuple[np.ndarray, np.ndarray]:
     """Convert the X and y dataframes to numpy datatypes and fill up nans
 
     Args:
@@ -478,7 +479,7 @@ def convert_X_and_y_dataframe_to_numpy(X: pd.DataFrame, y: pd.Series) -> tuple[n
 
 #region
 
-def read_image_dataset(config: "StartAutoMlRequest") -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+def read_image_dataset(config: "StartAutoMlRequest") -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     """Read image dataset and create training and test dataframes
 
     Args:

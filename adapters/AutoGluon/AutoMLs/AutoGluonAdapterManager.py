@@ -8,6 +8,7 @@ from AdapterBGRPC import *
 from threading import *
 from JsonUtil import get_config_property
 from autogluon.tabular import TabularPredictor
+from typing import Tuple
 
 class AutoGluonAdapterManager(AdapterManager):
     """The AutoML solution specific functionality implementation of the AdapterManager class
@@ -25,7 +26,7 @@ class AutoGluonAdapterManager(AdapterManager):
         self.__loaded_training_id = None
         self._adapter_name = "gluon"
 
-    def _get_ml_model_and_lib(self, config: "StartAutoMlRequest") -> "tuple[str, str]":
+    def _get_ml_model_and_lib(self, config: "StartAutoMlRequest") -> Tuple[str, str]:
         """Get the ML model type and ml library used by the result model
 
         Args:

@@ -6,6 +6,7 @@ from AdapterBGRPC import *
 from threading import *
 from JsonUtil import get_config_property
 import pandas as pd
+from typing import Tuple
 
 class AdapterManager(Thread):
     """The base adapter manager object providing the shared functionality between all adapters
@@ -41,7 +42,7 @@ class AdapterManager(Thread):
         self.__start_auto_ml_request = start_auto_ml_request
         self.__session_id = session_id
 
-    def _get_ml_model_and_lib(self, config: "StartAutoMlRequest") -> "tuple[str, str]":
+    def _get_ml_model_and_lib(self, config: "StartAutoMlRequest") -> Tuple[str, str]:
         """Must be overwriten! Get the ML model type and ml library used by the result model
 
         Args:
@@ -67,7 +68,7 @@ class AdapterManager(Thread):
             output_json = zip_script(config)
             #AutoKeras only produces keras based ANN
             library, model = self._get_ml_model_and_lib(config)
-            test_score, prediction_time = evaluate(config, os.path.join(config.job_folder_location, get_config_property("job-file-name")), data_loader)
+            test_score, prediction_time = evaluate(config, os.path.join(config.job_folder_location, get_config_property("job-file-name")))
             self.__auto_ml_status_messages.append(get_response(output_json, test_score, prediction_time, library, model))
             print(f'{get_config_property("adapter-name")} job finished')
             self.__start_auto_ml_running = False

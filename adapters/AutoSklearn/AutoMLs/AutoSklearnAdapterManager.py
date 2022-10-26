@@ -8,7 +8,7 @@ from threading import *
 from JsonUtil import get_config_property
 import pickle5 as pickle
 import pandas as pd
-
+from typing import Tuple
 
 class AutoSklearnAdapterManager(AdapterManager):
     """The AutoML solution specific functionality implementation of the AdapterManager class
@@ -26,7 +26,7 @@ class AutoSklearnAdapterManager(AdapterManager):
         self.__loaded_training_id = None
         self._adapter_name = "sklearn"
 
-    def _get_ml_model_and_lib(self, config: "StartAutoMlRequest") -> "tuple[str, str]":
+    def _get_ml_model_and_lib(self, config: "StartAutoMlRequest") -> Tuple[str, str]:
         """Get the ML model type and ml library used by the result model
 
         Args:
