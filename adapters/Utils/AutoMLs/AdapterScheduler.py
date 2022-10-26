@@ -4,8 +4,11 @@ from AdapterBGRPC import *
 from dependency_injector.wiring import inject, Provide
 
 class AdapterScheduler:
+    """The AdapterScheduler manages all adapter processes, it create new AdapterManagers on-demand for new training or predictions, and provide functionality to query the correct AdapterManager
+    """
 
     def __init__(self) -> None:
+        """Initialize a new AdapterScheduler, is managed by dependency injection"""
         self.__adapter_managers: dict[str, AdapterManager] = {}
         return 
 

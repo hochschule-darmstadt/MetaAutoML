@@ -58,18 +58,17 @@ class AdapterManager(Thread):
         """
         try:
             self.__start_auto_ml_running = True
-            start_time = time.time()
             # saving AutoML configuration JSON
             config = setup_run_environment(self.__start_auto_ml_request, self._adapter_name)
             process = start_automl_process(config)
-            for response in capture_process_output(process, start_time, False):
+            for response in capture_process_output(process, False):
                 self.__auto_ml_status_messages.append(response)
             generate_script(config)
             output_json = zip_script(config)
             #AutoKeras only produces keras based ANN
             library, model = self._get_ml_model_and_lib(config)
             test_score, prediction_time = evaluate(config, os.path.join(config.job_folder_location, get_config_property("job-file-name")), data_loader)
-            self.__auto_ml_status_messages.append(get_response(output_json, start_time, test_score, prediction_time, library, model))
+            self.__auto_ml_status_messages.append(get_response(output_json, test_score, prediction_time, library, model))
             print(f'{get_config_property("adapter-name")} job finished')
             self.__start_auto_ml_running = False
 

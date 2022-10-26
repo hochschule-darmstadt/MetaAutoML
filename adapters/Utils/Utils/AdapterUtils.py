@@ -5,6 +5,7 @@ import shutil
 import subprocess
 import sys
 import time, datetime
+from typing import Any
 import dill
 import numpy as np
 import pandas as pd
@@ -24,14 +25,14 @@ from AdapterBGRPC import *
 
 #region
 
-def get_except_response(e):
-    """
-    Get exception message
-    ---
-    Parameter
-    1. exception
-    ---
-    Return exception GRPC message
+def get_except_response(e: Exception) -> "GetAutoMlStatusResponse":
+    """Generate a GRPC status message holding the raised exception informations
+
+    Args:
+        e (Exception): The raised exception
+
+    Returns:
+        GetAutoMlStatusResponse: The GRPC response message
     """
     print(e)
     response = GetAutoMlStatusResponse()
@@ -39,13 +40,15 @@ def get_except_response(e):
     return response
 
 
-def capture_process_output(process, start_time , use_error):
-    """
-    Read console log from subprocess, and send it after each \n to the controller
-    ---
-    Parameter
-    1. system process representing the AutoML process
-    2. Process start time
+def capture_process_output(process: subprocess.Popen, use_error: bool) -> Iterator["GetAutoMlStatusResponse"]:
+    """Read the console log from the AutoML subprocess until no new text is produced by the subprocess, and yield AutoML status messages
+
+    Args:
+        process (subprocess.Popen): The AutoML subprocess instance
+        use_error (bool): If instead of the STD OUT the STD ERR is used as input to capture from
+
+    Yields:
+        Iterator[GetAutoMlStatusResponse]: The latest Grpc response message generated from reading the subprocess console
     """
     s = ""
     capture = ""
@@ -77,26 +80,25 @@ def capture_process_output(process, start_time , use_error):
         capture += s
 
 
-def get_response(output_json, start_time, test_score, prediction_time, library, model):
-    """
-    Get Start automl response object
-    ---
-    Parameter
-    1. output json
-    2. process start time
-    3. test score of the new model
-    4. prediction time
-    5. used ML library
-    6. model object
-    ---
-    Return the process result message
+def get_response(config: "StartAutoMlRequest", test_score: float, prediction_time: float, library: str, model: str) -> "GetAutoMlStatusResponse":
+    """Generate the final GRPC AutoML status message
+
+    Args:
+        config (StartAutoMlRequest): The StartAutoMlRequest request, extended with the trainings folder paths
+        test_score (float): The test score archieve by the model
+        prediction_time (float): The passed time to make one prediction using the model
+        library (str): The ML library the model is based upon
+        model (str): The ML model type the model is composed off
+
+    Returns:
+        GetAutoMlStatusResponse: The GRPS AutoML status messages
     """
     response = GetAutoMlStatusResponse()
     response.return_code = AdapterReturnCode.ADAPTER_RETURN_CODE_SUCCESS
     if get_config_property("local_execution") == "NO":
-        response.path = os.path.join(output_json.controller_export_folder_location, output_json.file_name)
+        response.path = os.path.join(config.controller_export_folder_location, config.file_name)
     else:
-        response.path = os.path.join(output_json.file_location, output_json.file_name)
+        response.path = os.path.join(config.file_location, config.file_name)
     response.test_score = test_score
     response.prediction_time = prediction_time
     response.ml_library = library
@@ -112,14 +114,14 @@ def get_response(output_json, start_time, test_score, prediction_time, library, 
 
 #region
 
-def data_loader(config):
-    """
-    Get exception message
-    ---
-    Parameter
-    1. config: Job config
-    ---
-    Return job type specific dataset
+def data_loader(config: "StartAutoMlRequest") -> Any:
+    """Load the dataframes for the requested dataset, by loading them into different DataFrames. See Returns section for more information.
+
+    Args:
+        config (StartAutoMlRequest): The StartAutoMlRequest request, extended with the trainings folder paths
+
+    Returns:
+        Any: Depending on the dataset type: CSV data: tuple[DataFrame (Train), DataFrame (Test)], image data: tuple[DataFrame (X_train), DataFrame (y_train), DataFrame (X_test), DataFrame (y_test)]
     """
 
     train_data = None
@@ -132,20 +134,26 @@ def data_loader(config):
     return train_data, test_data
 
 
-def export_model(model, path, file_name):
-    """
-    Export the generated ML model to disk
-    ---
-    Parameter:
-    1. generate ML model
+def export_model(model: Any, path: str, file_name: str):
+    """Export a model instance to disc by using dill
+
+    Args:
+        model (Any): The AutoML solutions model instance
+        path (str): The absolute folder path where to save the model to
+        file_name (str): The file name for the saved model
     """
     with open(os.path.join(path, file_name), 'wb+') as file:
         dill.dump(model, file)
 
 
-def start_automl_process(config):
-    """"
-    @:return started automl process
+def start_automl_process(config: "StartAutoMlRequest") -> subprocess.Popen:
+    """Start the AutoML subprocess
+
+    Args:
+        config (StartAutoMlRequest): The StartAutoMlRequest request, extended with the trainings folder paths
+
+    Returns:
+        subprocess.Popen: The AutoML subprocess instance
     """
     python_env = os.getenv("PYTHON_ENV", default="PYTHON_ENV_UNSET")
 
@@ -153,24 +161,23 @@ def start_automl_process(config):
                             stdout=subprocess.PIPE,
                             universal_newlines=True)
 
-def generate_script(config):
-    """
-    Generate the result python script
-    ---
-    Parameter
-    1. process configuration
+def generate_script(config: "StartAutoMlRequest") -> None:
+    """Generate the Python script allowing the independent execution of the model
+
+    Args:
+        config (StartAutoMlRequest): The StartAutoMlRequest request, extended with the trainings folder paths
     """
     generator = TemplateGenerator(config)
     generator.generate_script()
 
-def zip_script(config):
-    """
-    Zip the model and script from the current run
-    ---
-    Parameter
-    1. current run training id
-    ---
-    Return json with zip information
+def zip_script(config: "StartAutoMlRequest"):
+    """Zip the model and generated script together, to a single file which the user can download
+
+    Args:
+        config (StartAutoMlRequest): The StartAutoMlRequest request, extended with the trainings folder paths
+
+    Returns:
+        StartAutoMlRequest: The StartAutoMlRequest request, extended with addition informations about the saved archive
     """
     print(f"saving model zip file for {get_config_property('adapter-name')}")
 
@@ -197,16 +204,15 @@ def zip_script(config):
     config.file_location = file_loc_on_controller
     return config
 
-def evaluate(config, config_path, dataloader):
-    """
-    Evaluate the model by using the test set
-    ---
-    Parameter
-    1. configuration json
-    2. configuration path
-    3. dataloader
-    ---
-    Return evaluation score
+def evaluate(config: "StartAutoMlRequest", config_path: str) -> tuple[float, float]:
+    """Evaluate the model by executing the Python script to compute the test score and prediction time metric
+
+    Args:
+        config (StartAutoMlRequest): The StartAutoMlRequest request, extended with addition informations about the saved archive
+        config_path (str): The path to the training configuration json
+
+    Returns:
+        tuple[float, float]: tuple holding the test score, prediction time metrics
     """
     config = config.__dict__
     config["dataset_configuration"] = json.loads(config["dataset_configuration"])
@@ -263,24 +269,24 @@ def evaluate(config, config_path, dataloader):
                (predict_time * 1000) / test.shape[0]
 
 
-def predict(config_json, config_path, automl):
-    """
-    Make a prediction on test data
-    ---
-    Parameter
-    1. prediction data
-    2. configuration json
-    3. configuration path
-    ---
-    Return prediction score 
+def predict(config: dict, config_path: str, automl: str) -> tuple[float, str]:
+    """Execute a prediction on an uploaded live dataset
+
+    Args:
+        config (dict): The prediction configuration holding the prediction request information
+        config_path (str): The path to the training configuration json path
+        automl (str): The AutoML adapter name, needed to find the correct path
+
+    Returns:
+        tuple[float, str]: Result tuple with the prediction time metric and the path to the prediction.csv holding the prediction made by the model
     """
     result_folder_location = os.path.join(get_config_property("training-path"),
-                                        config_json["user_id"],
-                                        config_json["dataset_id"],
-                                        config_json["training_id"],
+                                        config["user_id"],
+                                        config["dataset_id"],
+                                        config["training_id"],
                                         get_config_property("result-folder-name"))
 
-    #if config_json["task"] == ":time_series_classification":
+    #if config["task"] == ":time_series_classification":
         # Time Series Classification Task
     #    file_path = os.path.join(result_folder_location, "test.ts")
     #else:
@@ -292,10 +298,10 @@ def predict(config_json, config_path, automl):
     # predict
     os.chmod(os.path.join(result_folder_location, "predict.py"), 0o777)
     python_env = os.getenv("PYTHON_ENV", default="PYTHON_ENV_UNSET")
-    file_path = config_json["prediction_id"] + "_" + automl + ".csv"
-    result_prediction_path = os.path.join(os.path.dirname(config_json["live_dataset_path"]), file_path)
+    file_path = config["prediction_id"] + "_" + automl + ".csv"
+    result_prediction_path = os.path.join(os.path.dirname(config["live_dataset_path"]), file_path)
     predict_start = time.time()
-    subprocess.call([python_env, os.path.join(result_folder_location, "predict.py"), config_json["live_dataset_path"], config_path, result_prediction_path])
+    subprocess.call([python_env, os.path.join(result_folder_location, "predict.py"), config["live_dataset_path"], config_path, result_prediction_path])
     predict_time = time.time() - predict_start
 
     
@@ -378,9 +384,16 @@ def setup_run_environment(request: "StartAutoMlRequest", adapter_name: str) -> "
 
 #region
 
-def cast_dataframe_column(dataframe, column_index, datatype):
-    """
-    Cast a specific column to a new data type
+def cast_dataframe_column(dataframe: pd.DataFrame, column_index: Any, datatype: Any) -> pd.DataFrame:
+    """Cast a specific column to a new data type
+
+    Args:
+        dataframe (pd.DataFrame): The dataset dataframe
+        column_index (Any): The column index which will be casted to a new data type
+        datatype (Any): The new data type for the column
+
+    Returns:
+        pd.DataFrame: The new dataset dataframe with the casted column
     """
     if DataType(datatype) is DataType.DATATYPE_CATEGORY:
         dataframe[column_index] = dataframe[column_index].astype('category')
@@ -392,9 +405,14 @@ def cast_dataframe_column(dataframe, column_index, datatype):
         dataframe[column_index] = dataframe[column_index].astype('float')
     return dataframe
 
-def read_tabular_dataset_training_data(config):
-    """
-    Read the training dataset from disk
+def read_tabular_dataset_training_data(config: "StartAutoMlRequest") -> tuple[pd.DataFrame, pd.DataFrame]:
+    """Read a CSV dataset into train and test dataframes
+
+    Args:
+        config (StartAutoMlRequest): The extended training request configuration holding the training paths
+
+    Returns:
+        tuple[pd.DataFrame, pd.DataFrame]: Dataframe tuples holding the training and test datasets tuple[(train), (test)]
     """
     delimiters = {
         "comma":        ",",
@@ -421,9 +439,15 @@ def read_tabular_dataset_training_data(config):
 
     return train, test
 
-def prepare_tabular_dataset(df, json_configuration):
-    """
-    Prepare tabular dataset, perform feature preparation and data type casting
+def prepare_tabular_dataset(df: pd.DataFrame, json_configuration: dict) -> tuple[pd.DataFrame, pd.Series]:
+    """Prepare tabular dataset, perform feature preparation and data type casting
+
+    Args:
+        df (pd.DataFrame): The dataset dataframe
+        json_configuration (dict): the training configuration dictonary
+
+    Returns:
+        tuple[pd.DataFrame, pd.Series]: tuple holding the dataset dataframe without the target column, and a Series holding the Target column tuple[(X_dataframe, y_series)]
     """
     df = feature_preparation(df, json_configuration["dataset_configuration"]["column_datatypes"].items())
     df = cast_dataframe_column(df, json_configuration["configuration"]["target"], json_configuration["dataset_configuration"]["column_datatypes"][json_configuration["configuration"]["target"]])
@@ -431,9 +455,15 @@ def prepare_tabular_dataset(df, json_configuration):
     y = df[json_configuration["configuration"]["target"]]
     return X, y
 
-def convert_X_and_y_dataframe_to_numpy(X, y):
-    """
-    Convert the X and y dataframes to numpy datatypes and fill up nans
+def convert_X_and_y_dataframe_to_numpy(X: pd.DataFrame, y: pd.Series) -> tuple[np.ndarray, np.ndarray]:
+    """Convert the X and y dataframes to numpy datatypes and fill up nans
+
+    Args:
+        X (pd.DataFrame): The dataset dataframe holding the features without target
+        y (pd.Series): The dataset series holding only the target
+
+    Returns:
+        tuple[np.ndarray, np.ndarray]: Tuple holding numpy array versions of the dataset, and target variable tuple[dataset, target]
     """
     X = X.to_numpy()
     X = np.nan_to_num(X, 0)
@@ -448,13 +478,14 @@ def convert_X_and_y_dataframe_to_numpy(X, y):
 
 #region
 
-def read_image_dataset(config):
-    """Reads image data and creates AutoKeras specific structure/sets
-    ---
-    Parameter
-    1. config: Job config
-    ---
-    Return image dataset
+def read_image_dataset(config: "StartAutoMlRequest") -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+    """Read image dataset and create training and test dataframes
+
+    Args:
+        config (StartAutoMlRequest): The extended training request configuration holding the training paths
+
+    Returns:
+        tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]: Dataframe tuples holding the different datasets: tuple[(X_train), (y_train), (X_test), (y_test)]
     """
     # Treat file location like URL if it does not exist as dir. URL/Filename need to be specified.
     # Mainly used for testing purposes in the hard coded json for the job
@@ -520,9 +551,14 @@ def read_image_dataset(config):
 
 #region
 
-def read_longitudinal_dataset(json_configuration):
-    """
-    Read longitudinal data from the `.ts` file
+def read_longitudinal_dataset(json_configuration: dict):
+    """Read longitudinal data from the `.ts` file and generate training and test datasets
+
+    Args:
+        json_configuration (dict): The training configuration dictionary
+
+    Returns:
+        Any: tuple of training and test dataset
     """
     from sktime.datasets import load_from_tsfile_to_dataframe
 
@@ -532,10 +568,17 @@ def read_longitudinal_dataset(json_configuration):
     return split_dataset(dataset, json_configuration)
 
 
-def split_dataset(dataset, json_configuration):
+def split_dataset(dataset: Any, json_configuration: dict):
+    """Split the given dataset into train and test subsets
+
+    Args:
+        dataset (Any): The loaded TS dataset
+        json_configuration (dict): The training configuration dictionary
+
+    Returns:
+        _type_: tuple of training and test dataset
     """
-    Split the given dataset into train and test subsets
-    """
+    
     split_method = json_configuration["test_configuration"]["method"]
     split_ratio = json_configuration["test_configuration"]["split_ratio"]
     random_state = json_configuration["test_configuration"]["random_state"]
