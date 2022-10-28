@@ -16,6 +16,8 @@ from ThreadLock import ThreadLock
 class Ressources(containers.DeclarativeContainer):
     if os.getenv("MONGO_DB_DEBUG") == "YES":
         mongo_db_url = "mongodb://localhost:27017/"
+    elif os.getenv("MONGO_DB_DOCKER_DEBUG") == "YES":
+        mongo_db_url = f"mongodb://root:example@{os.getenv('DEFAULT_GATEWAY_IP')}:27017/"
     elif os.getenv("MONGO_CLUSTER") == "YES":
         mongo_db_url = "mongodb://"+os.getenv("MONGODB_SERVICE_HOST")+":"+os.getenv("MONGODB_SERVICE_PORT")+""
     else:

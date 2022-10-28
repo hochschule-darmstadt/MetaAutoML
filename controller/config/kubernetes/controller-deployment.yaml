@@ -22,6 +22,8 @@ spec:
       - env:
         - name: "MONGO_DB_DEBUG"
           value: "NO"
+        - name: "MONGO_DB_DOCKER_DEBUG"
+          value: "NO"
         - name: "MONGO_CLUSTER"
           value: "YES"
         image: alexhda/omaml-controller
