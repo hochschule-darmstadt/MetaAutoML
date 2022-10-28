@@ -31,12 +31,12 @@
                 "ALPHAD3M_SERVICE_PORT": "50060",
                 "MCFLY_SERVICE_HOST": "localhost",
                 "MCFLY_SERVICE_PORT": "50061",
-                "MONGO_DB_DEBUG": "YES",
-                "MONGO_DB_DOCKER_DEBUG": "NO",
-                "MONGO_CLUSTER": "NO",
-                "DEFAULT_GATEWAY_IP": "host.docker.internal",
+                "MONGO_DB_DEBUG": "YES",                        //Use the locally installed MongoDB
+                "MONGO_DB_DOCKER_DEBUG": "NO",                  //Use the development docker-compose MongoDB
+                "MONGO_CLUSTER": "NO",                          //Use the MongoDB inside the cluster
+                "DEFAULT_GATEWAY_IP": "host.docker.internal",   //Set the systems default gateways IP address under which docker can be reached
                 "USE_DEV_CONFIG": "YES",
-                "WIN_DEV_MACHINE": "YES",
+                "WIN_DEV_MACHINE": "YES",                       //Change the default naming paths to Windows based paths instead of UNIX based paths
                 "PERSISTENCE_LOGGING_LEVEL": "DEBUG",
                 "SERVER_LOGGING_LEVEL": "DEBUG",
                 "ONTOLOGY_LOGGING_LEVEL": "DEBUG",
