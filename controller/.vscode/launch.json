@@ -5,7 +5,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Controller Debug",
+            "name": "WIN Controller Debug",
             "type": "python",
             "request": "launch",
             "program": "ControllerServer.py",
@@ -71,12 +71,12 @@
                 "ALPHAD3M_SERVICE_PORT": "50060",
                 "MCFLY_SERVICE_HOST": "localhost",
                 "MCFLY_SERVICE_PORT": "50061",
-                "MONGO_DB_DEBUG": "NO",                        //Use the locally installed MongoDB
-                "MONGO_DB_DOCKER_DEBUG": "YES",                  //Use the development docker-compose MongoDB
+                "MONGO_DB_DEBUG": "NO",                         //Use the locally installed MongoDB
+                "MONGO_DB_DOCKER_DEBUG": "YES",                 //Use the development docker-compose MongoDB
                 "MONGO_CLUSTER": "NO",                          //Use the MongoDB inside the cluster
-                "DEFAULT_GATEWAY_IP": "localhost",   //Set the systems default gateways IP address under which docker can be reached
+                "DEFAULT_GATEWAY_IP": "localhost",              //Set the systems default gateways IP address under which docker can be reached
                 "USE_DEV_CONFIG": "YES",
-                "WIN_DEV_MACHINE": "NO",                       //Change the default naming paths to Windows based paths instead of UNIX based paths
+                "WIN_DEV_MACHINE": "NO",                        //Change the default naming paths to Windows based paths instead of UNIX based paths
                 "PERSISTENCE_LOGGING_LEVEL": "DEBUG",
                 "SERVER_LOGGING_LEVEL": "DEBUG",
                 "ONTOLOGY_LOGGING_LEVEL": "DEBUG",
