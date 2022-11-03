@@ -3,7 +3,7 @@ import os
 import sys
 from JsonUtil import get_config_property
 
-from AutoKerasAdapter import AutoKerasAdapter
+from TPOTAdapter import TPOTAdapter
 
 if __name__ == '__main__':
     """
@@ -15,5 +15,5 @@ if __name__ == '__main__':
         process_json = json.load(file)
 
     process_json["dataset_configuration"] = json.loads(process_json["dataset_configuration"])
-    adapter = AutoKerasAdapter(process_json)
+    adapter = TPOTAdapter(process_json)
     adapter.start()

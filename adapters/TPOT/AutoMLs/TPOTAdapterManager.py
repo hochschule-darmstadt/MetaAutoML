@@ -17,7 +17,7 @@ class TPOTAdapterManager(AdapterManager):
     """
 
     def __init__(self) -> None:
-        """Initialize a new AutokerasAdapterManager setting AutoML adapter specific variables
+        """Initialize a new TPOTAdapterManager setting AutoML adapter specific variables
         """
         super(TPOTAdapterManager, self).__init__()
         self.__automl = None
