@@ -38,7 +38,7 @@
                             <MudValidationSummary />
                             <MudTextField AutoFocus="true" @bind-Value="@loginViewModel.UserName" Label=@L["UserName"] AdornmentIcon="@Icons.Material.Filled.Person" Adornment="Adornment.End" FullWidth="true" Required="true" RequiredError=@L["Required"]></MudTextField>
 
-                            <MudTextField @bind-Value="@loginViewModel.Password" Label=@L["Password"] AdornmentIcon="@Icons.Material.Outlined.Lock" Adornment="Adornment.End" FullWidth="true" Required="true" RequiredError=@L["Required"] InputType="InputType.Password"></MudTextField>
+                            <MudTextField @bind-Value="@loginViewModel.Password" Label=@L["Password"] Variant="Variant.Text" AdornmentIcon="@PasswordInputIcon" OnAdornmentClick="PasswordVisibility" AdornmentAriaLabel="Show Password" Adornment="Adornment.End" FullWidth="true" Required="true" RequiredError=@L["Required"] InputType="@PasswordInput"></MudTextField>
 
                             @if (loginViewModel.AllowRememberLogin)
                             {<MudCheckBox @bind-Checked="@loginViewModel.RememberMe" Class="ml-n2">@L["Keep me logged in"]</MudCheckBox>}
@@ -122,5 +122,24 @@
     </NotAuthorized>
 </AuthorizeView>
 @code {
+    bool isShow = false;
+    InputType PasswordInput = InputType.Password;
+    string PasswordInputIcon = Icons.Material.Filled.VisibilityOff;
+
+    void PasswordVisibility()
+    {
+            @if (isShow)
+                {
+                    isShow = false;
+                    PasswordInputIcon = Icons.Material.Filled.VisibilityOff;
+                    PasswordInput = InputType.Password;
+                }
+                else
+                {
+                    isShow = true;
+                    PasswordInputIcon = Icons.Material.Filled.Visibility;
+                    PasswordInput = InputType.Text;
+                }
+        }
 
 }
