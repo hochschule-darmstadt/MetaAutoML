@@ -2,7 +2,7 @@ import os
 
 from AbstractAdapter import AbstractAdapter
 from AdapterUtils import export_model, prepare_tabular_dataset, data_loader
-from autogluon.tabular import TabularDataset, TabularPredictor
+from autogluon.tabular import TabularDataset, TabularPredictor, TextPredictor
 from JsonUtil import get_config_property#
 from AbstractAdapter import AbstractAdapter
 from AdapterUtils import read_tabular_dataset_training_data, prepare_tabular_dataset, export_model
@@ -61,6 +61,10 @@ class AutoGluonAdapter(AbstractAdapter):
             self.__tabular_regression()
         elif self._configuration["configuration"]["task"] == ":image_classification":
             self.__image_classification()
+        elif self._configuration["configuration"]["task"] == ":text_classification":
+            self.__text_classification
+        elif self._configuration["configuration"]["task"] == ":text_regression":
+            self.__text_regression
 
     def __tabular_classification(self):
         """Execute the tabular classification task and export the found model"""
@@ -110,3 +114,29 @@ class AutoGluonAdapter(AbstractAdapter):
             train , 
             #hyperparameters=set_hyperparameters , 
             time_limit=self._time_limit  ) 
+
+    def __text_classification(self):
+        """Execute the text classification task and export the found model"""
+        self.df, test = data_loader(self._configuration)
+        X, y = prepare_tabular_dataset(self.df, self._configuration)
+        data = X
+        data[self._target] = y
+        model = TextPredictor(label=self._target,
+                                 problem_type="multiclass",
+                                 path=self._result_path).fit(
+            data,
+            time_limit=self._time_limit)
+        #Fit methode already saves the model
+
+    def __text_regression(self):
+        """Execute the text regression task and export the found model"""
+        self.df, test = data_loader(self._configuration)
+        X, y = prepare_tabular_dataset(self.df, self._configuration)
+        data = X
+        data[self._target] = y
+        model = TextPredictor(label=self._target,
+                                 problem_type="regression",
+                                 path=self._result_path).fit(
+            data,
+            time_limit=self._time_limit)
+        #Fit methode already saves the model
