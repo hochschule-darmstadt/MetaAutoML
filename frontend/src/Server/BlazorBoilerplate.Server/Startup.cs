@@ -718,6 +718,23 @@ namespace BlazorBoilerplate.Server
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
 
+            //Add robots.txt
+            app.Use(async (context, next) =>
+            {
+                if (context.Request.Path.StartsWithSegments("/robots.txt"))
+                {
+                    var robotsTxtPath = Path.Combine(env.ContentRootPath, "robots.txt");
+                    string output = "User-agent: *  \nDisallow: /";
+                    if (File.Exists(robotsTxtPath))
+                    {
+                        output = await File.ReadAllTextAsync(robotsTxtPath);
+                    }
+                    context.Response.ContentType = "text/plain";
+                    await context.Response.WriteAsync(output);
+                }
+                else await next();
+            });
+
 
             app.UseRequestLocalization();
 
