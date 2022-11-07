@@ -44,12 +44,16 @@
                             {<MudCheckBox @bind-Checked="@loginViewModel.RememberMe" Class="ml-n2">@L["Keep me logged in"]</MudCheckBox>}
                         </MudCardContent>
                         <MudCardActions>
-                            <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">@L["Login"]</MudButton>
+                            <MudGrid Spacing="1" Justify="Justify.FlexEnd"> // You might want to consider Justify.Center, by Krzys
+                                <MudItem>
+                                    <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">@L["Login"]</MudButton>
+                                </MudItem>
+                                <MudItem>
+                                    @if (loginViewModel.EnableRegistration == true)
+                                    {<MudButton OnClick="@Register" Variant="Variant.Filled" Color="Color.Primary">@L["Sign up"]</MudButton>}
+                                </MudItem>
+                            </MudGrid>
                         </MudCardActions>
-                        @if (loginViewModel.EnableRegistration == true)
-                        {
-                            <MudButton OnClick="@Register" Variant="Variant.Filled" Color="Color.Primary">@L["Sign up"]</MudButton>
-                        }
                     </MudCard>
                 </EditForm>
 
