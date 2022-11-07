@@ -2,7 +2,8 @@ import os
 
 from AbstractAdapter import AbstractAdapter
 from AdapterUtils import export_model, prepare_tabular_dataset, data_loader
-from autogluon.tabular import TabularDataset, TabularPredictor, TextPredictor
+from autogluon.tabular import TabularDataset, TabularPredictor 
+from autogluon.text import TextPredictor
 from JsonUtil import get_config_property#
 from AbstractAdapter import AbstractAdapter
 from AdapterUtils import read_tabular_dataset_training_data, prepare_tabular_dataset, export_model
