@@ -17,6 +17,9 @@ namespace BlazorBoilerplate.Theme.Material.TagHelpers
 <link href=""_content/{path}/css/bootstrap/bootstrap.min.css"" rel=""stylesheet"" />
 <link href=""_content/{path}/stackpath.bootstrapcdn.com/font-awesome/4.7.0/font-awesome.min.css"" rel=""stylesheet"" />
 <link href=""_content/{path}/fonts.googleapis.com/Roboto.css"" rel=""stylesheet"" />
+<link href=""_content/{path}/fonts.googleapis.com/KFOlCnqEu92Fr1MmEU9fBBc4.woff2"" rel=""woff2"" />
+<link href=""_content/{path}/fonts.googleapis.com/KFOlCnqEu92Fr1MmWUlfBBc4.woff2"" rel=""woff2"" />
+<link href=""_content/{path}/fonts.googleapis.com/KFOmCnqEu92Fr1Mu4mxK.woff2"" rel=""woff2"" />
 <link href=""_content/{path}/fonts/roboto/roboto.css"" rel=""stylesheet"" />
 <link href=""_content/MatBlazor/dist/matBlazor.css"" rel=""stylesheet"" />
 <link href=""_content/{path}/css/cdn.quilljs.com/1.3.6/quill.snow.css"" rel=""stylesheet"">

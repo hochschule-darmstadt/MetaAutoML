@@ -154,7 +154,9 @@ class DataSetAnalysisManager(Thread):
         # Get processed version of dataset to make calculation of feature correlation using scipy spearmanr possible
         proc_dataset = self.__process_categorical_columns()
         proc_dataset = self.__fill_nan_values(proc_dataset)
-
+        ## TODO consider to add more analysis feature in case of text, image,...
+        if self.__dataset["type"] in [":text"]:
+            return
         # Get correlations using spearmanr
         corr = spearmanr(proc_dataset).correlation
         # Make correlation plot
@@ -352,7 +354,12 @@ class DataSetAnalysisManager(Thread):
 
         Return dataset: Dataset with filled nan values
         """
-        fill_value = int("9" * (len(str(int(dataset.max(numeric_only=True).max()))) + 1))
+        # TODO refactoring
+        # handle in case most of the data are not numeric 
+        # consider using this function only where numerical values are avaialbe
+        max_value = dataset.max(numeric_only=True).max() # max value in data set
+        max_value = 0 if max_value != pd.isna(max_value) else max_value
+        fill_value = int("9" * (len(str(int(max_value))) + 1))
         for col in dataset.columns:
             if dataset[col].dtype.name == "category":
                 # Category cols require special handling
