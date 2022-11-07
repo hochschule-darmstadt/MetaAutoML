@@ -208,3 +208,19 @@ class OntologyManager(object):
         for row in queryResult:
             result.tasks.append(row.task.replace(ML_ONTOLOGY_NAMESPACE, ":"))
         return result
+
+    # TODO: Define return value
+    # TODO: Add doc string
+    def get_configuration_options_by_automl_and_task(self, automl_id: str, task_id: str):
+        q = prepareQuery(Queries.ONTOLOGY_QUERY_GET_CONFIGURATION_BY_AUTOML_ID_AND_TASK_ID,
+                        initNs={"skos": SKOS})
+        queryResult = self.__execute_query(q, {"automl": automl_id, "task": task_id})
+
+        # replace namespace in response with colon
+        for row in queryResult:
+            props = vars(row)
+            for name, value in props.items():
+                setattr(row, name, str(value).replace(ML_ONTOLOGY_NAMESPACE, ":"))
+
+        return queryResult
+            
