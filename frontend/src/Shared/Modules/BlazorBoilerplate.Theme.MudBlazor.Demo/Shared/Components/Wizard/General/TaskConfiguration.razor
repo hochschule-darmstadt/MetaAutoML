@@ -128,6 +128,20 @@
             {
                 <DataLoaderSpinner />
             }
+            @if (_availableParameters != null)
+            {
+                <MudText Typo="Typo.subtitle2" Class="mt-4">Available parameters</MudText>
+                <ul class="list-disc">
+                @foreach (var param in _availableParameters)
+                {
+                    <li>@param.ToString()</li>
+                }
+                </ul>
+            }
+            else
+            {
+                <DataLoaderSpinner />
+            }
         </MudExpansionPanel>
     </MudExpansionPanels>
 
@@ -152,6 +166,7 @@
     private GetMlLibrariesForTaskResponseDto _supportedMlLibraries;
     private GetAutoMlSolutionsForConfigurationResponseDto _compatibleAutoMls;
     private GetAvailableStrategiesResponseDto _availableStrategies;
+    private List<AutoMlParameterDto> _availableParameters;
     private List<String> _columnNames;
     private bool IsLibPolled = false;
 
@@ -227,6 +242,21 @@
         }
     }
 
+    private async Task RefreshParameters()
+    {
+        var taskIri = StartAutoMlRequest.Configuration.Task;
+        var selectedAutoMls = StartAutoMlRequest.Configuration.SelectedAutoMlSolutions;
+        var apiResponse = await apiClient.GetAutoMlParameters(new GetAutoMlParametersRequestDto { AutoMls = selectedAutoMls, TaskIri = taskIri });
+        if (apiResponse.IsSuccessStatusCode)
+        {
+            _availableParameters = apiResponse.Result.AutoMlParameters;
+        }
+        else
+        {
+            viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["Fetching available parameters failed."]);
+        }
+    }
+
     private async void OnMlTaskSelectionChanged(string task)
     {
         if (string.IsNullOrEmpty(task))
@@ -291,18 +321,12 @@
             dictionary.Add("task", StartAutoMlRequest.Configuration.Task);
             List<string> libraries = new List<string>();
 
-
-
             StartAutoMlRequest.Configuration.SelecctedMlLibraries = new List<string>();
             foreach (var chip in libs)
             {
                 StartAutoMlRequest.Configuration.SelecctedMlLibraries.Add((string)chip.Value);
                 libraries.Add((string)chip.Value);
             }
-
-
-
-
 
             await UpdateStartAutoMlRequest();
             if (libraries.Count != 0)
@@ -351,6 +375,7 @@
             StartAutoMlRequest.Configuration.SelectedAutoMlSolutions.Add(chip.Value.ToString());
         }
         await UpdateStartAutoMlRequest();
+        await RefreshParameters();
     }
 
     private async void OnStrategySelectionChanged(MudChip[] strategies)
