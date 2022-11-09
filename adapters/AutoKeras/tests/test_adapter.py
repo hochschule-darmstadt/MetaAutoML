@@ -1,5 +1,6 @@
 import sys
 import os
+from pathlib import Path
 base_path = sys.path[0]
 base_path = base_path.replace("\\tests", "")
 sys.path.insert(0,base_path)
@@ -16,6 +17,9 @@ from dependency_injector.wiring import inject, Provide
 from unittest import IsolatedAsyncioTestCase
 import unittest
 events = []
+TRAINING_ID = '63650604550f952c84d49b06'
+DATASET_ID = '63538f02a8499d239605e4c3'
+USER_ID = 'e1d36b1b-bb75-4f16-a631-d93bdb31e9c7'
 
 class TestAdapter(IsolatedAsyncioTestCase):
     
@@ -29,9 +33,9 @@ class TestAdapter(IsolatedAsyncioTestCase):
 
         self.__session_id = uuid.uuid4()
 
-        start_automl_request.training_id = '63650604550f952c84d49b06'
-        start_automl_request.dataset_id = '63538f02a8499d239605e4c3'
-        start_automl_request.user_id = 'e1d36b1b-bb75-4f16-a631-d93bdb31e9c7'
+        start_automl_request.training_id = TRAINING_ID
+        start_automl_request.dataset_id = DATASET_ID
+        start_automl_request.user_id = USER_ID
         start_automl_request.dataset_path = 'C:\\Users\\Hung\\Personal\\Sem1\\MetaAutoML\\controller\\app-data/datasets\\'+start_automl_request.user_id+'\\'+start_automl_request.dataset_id+'\\titanic_train.csv'
         start_automl_request.configuration.task = ':tabular_classification'
         start_automl_request.configuration.target = 'Survived'
@@ -43,6 +47,10 @@ class TestAdapter(IsolatedAsyncioTestCase):
         self.__adapter_manager.start()
         self.__adapter_manager.join()
         self.assertEqual(self.__adapter_manager.get_start_auto_ml_request(), start_automl_request)
+        path_to_model = 'C:\\Users\\Hung\\Personal\\Sem1\\MetaAutoML\\adapters\\AutoKeras\\app-data\\training\\'+start_automl_request.user_id+'\\'+start_automl_request.dataset_id+'\\'+start_automl_request.training_id+'\\export\\keras-export.zip'
+        # check if model exists
+        self.assertEqual(True, Path(path_to_model).is_file())
+        #self.assertEqual(True, False)
         # delete exported model 
         export_model_to_be_deleted = 'C:\\Users\\Hung\\Personal\\Sem1\\MetaAutoML\\adapters\\AutoKeras\\app-data\\training\\'+start_automl_request.user_id+'\\'+start_automl_request.dataset_id+'\\'+start_automl_request.training_id
         shutil.rmtree(export_model_to_be_deleted)
