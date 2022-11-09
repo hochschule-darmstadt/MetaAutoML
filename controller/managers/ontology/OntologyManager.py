@@ -209,17 +209,28 @@ class OntologyManager(object):
             result.tasks.append(row.task.replace(ML_ONTOLOGY_NAMESPACE, ":"))
         return result
 
+    # TODO: Add doc
+    def get_auto_ml_parameters(self, request: GetAutoMlParametersRequest) -> GetAutoMlParametersResponse:
+        result = GetAutoMlParametersResponse()
+        for autoMl in request.auto_mls:
+            result = self.get_configuration_options_by_automl_and_task(autoMl, request.task_iri)
+            for param in result:
+                param.auto_ml_iri = autoMl
+                result.append(param)
+        return result
+            
+
     # TODO: Define return value
     # TODO: Add doc string
-    def get_configuration_options_by_automl_and_task(self, automl_id: str, task_id: str):
+    def get_configuration_options_by_automl_and_task(self, auto_ml_iri: str, task_iri: str):
         q = prepareQuery(Queries.ONTOLOGY_QUERY_GET_CONFIGURATION_BY_AUTOML_ID_AND_TASK_ID,
                         initNs={"skos": SKOS})
-        queryResult = self.__execute_query(q, {"automl": automl_id, "task": task_id})
+        queryResult: List[AutoMlParameter] = self.__execute_query(q, {"auto_ml_iri": auto_ml_iri, "task_iri": task_iri})
 
         # replace namespace in response with colon
         for row in queryResult:
-            props = vars(row)
-            for name, value in props.items():
+            param = vars(row)
+            for name, value in param.items():
                 setattr(row, name, str(value).replace(ML_ONTOLOGY_NAMESPACE, ":"))
 
         return queryResult
