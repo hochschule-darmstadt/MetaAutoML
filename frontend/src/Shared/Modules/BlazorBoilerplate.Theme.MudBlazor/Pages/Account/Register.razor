@@ -2,6 +2,7 @@
 @page "/account/register"
 
 @layout LoginLayout
+@using System.Text.RegularExpressions
 
 
 <EditForm Model="@registerViewModel" OnValidSubmit="@RegisterUser">
@@ -23,7 +24,7 @@
 
             <MudTextField @bind-Value="@registerViewModel.Email" Label=@L["Email"] AdornmentIcon="@Icons.Material.Outlined.Mail" Adornment="Adornment.End" FullWidth="true" Required="true" RequiredError=@L["Required"]></MudTextField>
 
-            <MudTextField @bind-Value="@registerViewModel.Password" Label=@L["Password"] AdornmentIcon="@Icons.Material.Outlined.Lock" Adornment="Adornment.End" FullWidth="true" Required="true" RequiredError=@L["Required"] InputType="InputType.Password"></MudTextField>
+            <MudTextField @bind-Value="@registerViewModel.Password" Label=@L["Password"] AdornmentIcon="@Icons.Material.Outlined.Lock" Adornment="Adornment.End" FullWidth="true" Required="true" RequiredError=@L["Required"] InputType="InputType.Password" Validation="@(new Func<string, IEnumerable<string>>(PasswordStrength))"></MudTextField>
 
             <MudTextField @bind-Value="@registerViewModel.PasswordConfirm" Label=@L["Password Confirmation"] AdornmentIcon="@Icons.Material.Outlined.Lock" Adornment="Adornment.End" FullWidth="true" Required="true" RequiredError=@L["Required"] InputType="InputType.Password"></MudTextField>
 
@@ -38,5 +39,24 @@
 </EditForm>
 
 @code {
+
+    private IEnumerable<string> PasswordStrength(string pw)
+    {
+        if (string.IsNullOrWhiteSpace(pw))
+        {
+            yield return "Password is required!";
+            yield break;
+        }
+        if (pw.Length < 8)
+            yield return "Password must be at least of length 8";
+        if (!Regex.IsMatch(pw, @"[A-Z]"))
+            yield return "Password must contain at least one capital letter";
+        if (!Regex.IsMatch(pw, @"[a-z]"))
+            yield return "Password must contain at least one lowercase letter";
+        if (!Regex.IsMatch(pw, @"[0-9]"))
+            yield return "Password must contain at least one digit";
+        if (!Regex.IsMatch(pw, @"[^A-Za-z0-9]"))
+            yield return "Password must contain at least one special character";
+    }
 
 }
