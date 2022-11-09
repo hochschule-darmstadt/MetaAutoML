@@ -1,7 +1,7 @@
-import numpy as np
 import autokeras as ak
+import numpy as np
 from AbstractAdapter import AbstractAdapter
-from AdapterUtils import export_model, prepare_tabular_dataset, data_loader
+from AdapterUtils import data_loader, export_model, prepare_tabular_dataset
 
 
 class AutoKerasAdapter(AbstractAdapter):

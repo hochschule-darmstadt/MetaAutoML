@@ -63,6 +63,8 @@ class DataSetAnalysisManager(Thread):
                                              index_col=False)
         else:
             pass
+        # remove / in column names to avoid path error
+        self.__dataset_df.columns = self.__dataset_df.columns.str.replace('/', '')
         # Create plot filepath
         self.plot_filepath = os.path.join(os.path.dirname(self.__dataset['path']), "plots")
         os.makedirs(self.plot_filepath, exist_ok=True)
