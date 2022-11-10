@@ -293,14 +293,19 @@ class ControllerServiceManager(ControllerServiceBase):
             result = GetAvailableStrategiesResponse()
             result.strategies = [
                 Strategy(
-                    'data_preparation.ignore_redundant_features',
-                    'Ignore redundant features',
-                    'This strategy ignores certain dataset columns if they have been flagged as duplicate in the dataset analysis.'
+                    'pretraining.multi_fidelity_optimization',
+                    'Multi-Fidelity Optimization',
+                    'This strategy first starts the training with a subset of the data to check which autoMl solutions are most promising.'
                 ),
                 Strategy(
                     'data_preparation.ignore_redundant_samples',
                     'Ignore redundant samples',
                     'This strategy ignores certain dataset rows if they have been flagged as duplicate in the dataset analysis.'
+                ),
+                Strategy(
+                    'data_preparation.split_large_datasets',
+                    'Split large datasets',
+                    'This strategy truncates the training data if the time limit is relatively short for the size of the dataset.'
                 ),
                 Strategy(
                     'data_preparation.split_large_datasets',

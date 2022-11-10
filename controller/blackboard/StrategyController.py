@@ -51,6 +51,11 @@ class StrategyController(object):
         from blackboard.strategies.DataPreparationStrategy import DataPreparationStrategyController
         self.strategies.append(DataPreparationStrategyController(self))
 
+        from blackboard.strategies.PreTrainingStrategy import PreTrainingStrategyController
+        self.strategies.append(PreTrainingStrategyController(self))
+
+        pass
+
     def get_phase(self) -> str:
         return self.blackboard.get_state('phase')
 

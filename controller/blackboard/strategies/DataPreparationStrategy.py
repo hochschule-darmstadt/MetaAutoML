@@ -109,5 +109,5 @@ class DataPreparationStrategyController(IAbstractStrategy):
 
     def do_finish_preprocessing(self, state: dict, blackboard: Blackboard, controller: StrategyController):
         self._log.info(f'do_finish_preprocessing: Finished data preparation, advancing to phase "running"..')
-        controller.set_phase('running')
+        controller.set_phase('pretraining')
         controller.disable_strategy('data_preparation.finish_preprocessing')

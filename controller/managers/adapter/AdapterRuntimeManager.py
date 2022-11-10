@@ -47,6 +47,7 @@ class AdapterRuntimeManager:
         self.__adapters: list[AdapterManager] = []
         self.__blackboard = Blackboard.Blackboard()
         self.__strategy_controller = StrategyController.StrategyController(self.__blackboard, self, self.__data_storage)
+        self.__current_phase = "init"
         AdapterRuntimeManagerAgent(self.__blackboard, self.__strategy_controller, self)
         DataAnalysisAgent(self.__blackboard, self.__strategy_controller, self.__dataset)
         return
@@ -117,6 +118,7 @@ class AdapterRuntimeManager:
             'training_id': self.__training_id,
             'status': status,
             'configuration': self.__request.to_dict(),
+            'current_phase': self.__current_phase,
         }
 
     def get_training_request(self) -> "CreateTrainingRequest":
@@ -158,8 +160,11 @@ class AdapterRuntimeManager:
             meta (_type_): The event meta (contains a dict holding the "old_phase" and "new_phase")
             controller (_type_): The strategy controller instance that caused the event
         """
-        if meta.get('old_phase') == 'preprocessing' and meta.get('new_phase') == 'running':
-            # Preprocessing finished, start the AutoML training
+        if meta.get('old_phase') == 'preprocessing' and meta.get('new_phase') == 'pretraining':
+            # Pretraining finished, start the AutoML pretraining
+            self.__current_phase = "pretraining"
+        elif meta.get('old_phase') == 'pretraining' and meta.get('new_phase') == 'running':
+            # Pretraining finished, start the AutoML training
             self.__phase_start_automl_training()
 
     def __phase_start_automl_training(self):
