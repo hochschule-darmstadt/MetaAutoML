@@ -29,11 +29,17 @@
 
         </MudCardContent>
         <MudCardActions>
-            <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">@L["Register"]</MudButton>
-        </MudCardActions>
-        <MudButton Link="account/login" Color="Color.Primary">
-            @L["AlreadyRegistered"]
-        </MudButton>
+            <MudGrid Spacing="1" Justify="Justify.Center">
+                <MudItem>
+                    <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">@L["Register"]</MudButton>
+                </MudItem>
+                <MudItem>
+                    <MudButton Link="account/login" Color="Color.Primary">
+                        @L["AlreadyRegistered"]
+                    </MudButton>
+                </MudItem>
+            </MudGrid>
+        </MudCardActions> 
     </MudCard>
 </EditForm>
 
