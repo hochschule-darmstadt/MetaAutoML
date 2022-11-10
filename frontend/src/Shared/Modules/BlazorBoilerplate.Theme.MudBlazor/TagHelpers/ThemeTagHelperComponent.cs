@@ -13,13 +13,14 @@ namespace BlazorBoilerplate.Theme.Material.TagHelpers
                 output.PostContent.AppendHtml(@$"
 <link rel=""shortcut icon"" type=""image/x-icon"" href=""{Module.ContentPath}/images/favicon.ico"">
 <link rel=""icon"" type=""image/x-icon"" href=""{Module.ContentPath}/images/favicon.ico"">
-<link href=""{Module.ContentPath}/stackpath.bootstrapcdn.com/font-awesome/4.7.0/font-awesome.min.css"" rel=""stylesheet"" />
-<link href=""{Module.ContentPath}/fonts.googleapis.com/Roboto.css"" rel=""stylesheet"" />
+<link href=""{Module.ContentPath}/css/stackpath.bootstrapcdn.com/font-awesome/4.7.0/font-awesome.min.css"" rel=""stylesheet"" />
+<link href=""{Module.ContentPath}/css/fonts.googleapis.com/Roboto.css"" rel=""stylesheet"" />
 <link href=""_content/MudBlazor/MudBlazor.min.css"" rel=""stylesheet"" />
 <link href=""{Module.ContentPath}/css/cdn.quilljs.com/1.3.6/quill.snow.css"" rel=""stylesheet"">
 <link href=""{Module.ContentPath}/css/cdn.quilljs.com/1.3.6/quill.bubble.css"" rel=""stylesheet"">
 <link href=""{Module.ContentPath}/css/site.css"" rel=""stylesheet"" />
-<link href=""{Module.ContentPath}/{Module.Path}.bundle.scp.css"" rel=""stylesheet"" />");
+<link href=""{Module.ContentPath}/{Module.Path}.bundle.scp.css"" rel=""stylesheet"" />
+<link rel=""stylesheet"" href=""_content/BytexDigital.Blazor.Components.CookieConsent/styles.min.css"" />");
             }
             else if (string.Equals(context.TagName, "app", StringComparison.OrdinalIgnoreCase))
             {
