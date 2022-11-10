@@ -1,8 +1,14 @@
 ﻿@implements IDynamicComponent
 @inject AppState appState
-©&nbsp;@DateTime.Now.Year&nbsp;<a href="//oma-ml.ai">@appState.AppName</a>&nbsp;Version 0.1.0 - Developed by&nbsp;Hochschule Darmstadt&nbsp;
+@inject CookieConsentService cookieConsentService
+©&nbsp;@DateTime.Now.Year&nbsp;<a href="//oma-ml.ai">@appState.AppName</a>&nbsp;Version 0.1.0 - Developed by&nbsp;Hochschule Darmstadt&nbsp; <MudButton Size="Size.Small" OnClick="@OnCookiePreferenceClick">Cookie Preferences</MudButton>
 
 @code {
     public int Order { get => 1; }
     public string IntoComponent { get => "Footer"; }
+
+    private void OnCookiePreferenceClick()
+    {
+        cookieConsentService.ShowSettingsModalAsync();
+    }
 }

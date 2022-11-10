@@ -358,7 +358,8 @@ class DataSetAnalysisManager(Thread):
         # handle in case most of the data are not numeric 
         # consider using this function only where numerical values are avaialbe
         max_value = dataset.max(numeric_only=True).max() # max value in data set
-        max_value = 0 if max_value != pd.isna(max_value) else max_value
+        if pd.isna(max_value):
+            max_value = 0
         fill_value = int("9" * (len(str(int(max_value))) + 1))
         for col in dataset.columns:
             if dataset[col].dtype.name == "category":
