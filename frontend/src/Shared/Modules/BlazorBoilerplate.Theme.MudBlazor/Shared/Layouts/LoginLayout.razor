@@ -4,9 +4,15 @@
     <div class="triangles">
     </div>
 </div>
-<div class="login-container d-flex justify-center">
-    <div class="login-body pa-2">
-        @Body
-    </div>
-</div>
 
+<MudMainContent Style="min-height: 100vh; display: flex; flex-direction: column">
+    <MudContainer MaxWidth="MaxWidth.False" Style="flex: 1">
+        <div class="login-container d-flex justify-center">
+
+            <div class="login-body pa-2">
+                @Body
+            </div>
+        </div>
+    </MudContainer>
+    <Footer />
+</MudMainContent>

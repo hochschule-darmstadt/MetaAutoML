@@ -1,3 +1,8 @@
+.cc-font-overwrite {
+    z-index: 2000 !important;
+}
+
+
 html, body {
     font-family: Roboto, Noto Sans, HelveticaNeue, "Helvetica Neue", Helvetica, Arial, sans-serif !important;
 }

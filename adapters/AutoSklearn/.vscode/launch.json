@@ -5,7 +5,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Ubuntu AutoSklearn Adapter Debug",
+            "name": "UNIX AutoSklearn Adapter Debug",
             "type": "python",
             "request": "launch",
             "program": "AutoSklearnServer.py",
