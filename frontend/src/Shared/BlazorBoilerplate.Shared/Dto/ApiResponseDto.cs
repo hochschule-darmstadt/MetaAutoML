@@ -23,5 +23,9 @@ namespace BlazorBoilerplate.Shared.Dto
     [DataContract]
     public class ApiResponseDto : ApiResponseDto<object>
     {
+        public T GetPayload<T>()
+        {
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<T>(Result.ToString());
+        }
     }
 }

@@ -249,7 +249,7 @@
         var apiResponse = await apiClient.GetAutoMlParameters(new GetAutoMlParametersRequestDto { AutoMls = selectedAutoMls, TaskIri = taskIri });
         if (apiResponse.IsSuccessStatusCode)
         {
-            _availableParameters = apiResponse.Result.AutoMlParameters;
+            _availableParameters = apiResponse.GetPayload<GetAutoMlParametersResponseDto>().AutoMlParameters;
         }
         else
         {
