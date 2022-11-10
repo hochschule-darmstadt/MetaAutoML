@@ -9,9 +9,9 @@
     <MudCard Elevation="2" Class="pa-4">
         <MudCardHeader>
             <CardHeaderContent>
-                <MudIconButton Icon="@Icons.Filled.Home" Class="ml-auto" Link="/" />
+                <MudIconButton Icon="@Icons.Filled.ArrowBack" Class="ml-auto" Link="/" />
                 <div class="logo">
-                    <a href="/" title="@appState.AppName Home"><img src=@($"{Module.ContentPath}/images/logo.svg") style="width:100px;" title="@appState.AppName Home" alt="@appState.AppName" /><br />@appState.AppName</a>
+                    <a href="/" title="@appState.AppName Home"><img src=@($"{Module.ContentPath}/images/oma-logo.svg") style="width:100px;" title="@appState.AppName Home" alt="@appState.AppName" /><br />@appState.AppName</a>
                     <br />
                 </div>
                 <MudText Typo="Typo.h5" Align="Align.Center">@L["Registration"]</MudText>
@@ -29,12 +29,13 @@
             <MudTextField @bind-Value="@registerViewModel.PasswordConfirm" Label=@L["Password Confirmation"] AdornmentIcon="@Icons.Material.Outlined.Lock" Adornment="Adornment.End" FullWidth="true" Required="true" RequiredError=@L["Required"] InputType="InputType.Password"></MudTextField>
 
         </MudCardContent>
-        <MudCardActions>
-            <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">@L["Register"]</MudButton>
-        </MudCardActions>
-        <MudButton Link="account/login" Color="Color.Primary">
-            @L["AlreadyRegistered"]
-        </MudButton>
+        <MudCardActions Class="d-flex align-center flex-grow-1 gap-1">
+                    <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="d-flex flex-1">@L["Register"]</MudButton>
+                    <MudButton Link="account/login" Color="Color.Primary" Class="d-flex flex-1">
+                        @L["AlreadyRegistered"]
+                    </MudButton>
+            
+        </MudCardActions> 
     </MudCard>
 </EditForm>
 

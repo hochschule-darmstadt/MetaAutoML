@@ -820,3 +820,65 @@ msgstr "Datenset konnte nicht gelessen werden, ändern Sie die Konfiguration."
 
 msgid "Search by name, status, lib or AutoML system"
 msgstr "Nach Name, Status, Bibliothek oder AutoML System suchen"
+
+msgid "CookieName"
+msgstr "Name"
+
+msgid "CookieLifecycle"
+msgstr "Gültigkeit"
+
+msgid "CookieDescription"
+msgstr "Beschreibung"
+
+
+msgid "AntiforgeryCookieName"
+msgstr ".AspNetCore.Antiforgery"
+
+msgid "AntiforgeryCookieLifecycle"
+msgstr "Sitzung"
+
+msgid "AntiforgeryCookieDescription"
+msgstr "Diese Cookie speichert den Anti Forgery Token ab, wird zum Schutz vor Cross-Site-Request-Forgery-Attack verwendet."
+
+
+
+msgid "CultureCookieName"
+msgstr ".AspNetCore.Culture"
+
+msgid "CultureCookieLifecycle"
+msgstr "1 Monat"
+
+msgid "CultureCookieDescription"
+msgstr "Diese Cookie speichert die Sprachauswahl, wird zur Darstellung der richtige Sprache verwendet."
+
+
+
+msgid "CookieConsentCookieName"
+msgstr ".AspNet.CookieConsent"
+
+msgid "CookieConsentCookieLifecycle"
+msgstr "6 Monate"
+
+msgid "CookieConsentCookieDescription"
+msgstr "Dieses Cookie speichert die vom User erlaubten Cookies ab."
+
+
+
+msgid "IdentityApplicationCookieName"
+msgstr ".AspNetCore.Identity.Application"
+
+msgid "IdentityApplicationCookieLifecycle"
+msgstr "Sitzung"
+
+msgid "IdentityApplicationCookieDescription"
+msgstr "Diese Cookie ermöglicht die Cookie basierte Nutzer autorisierung, wird für das Nutzer Management verwendet."
+
+
+msgid "IdsrvSessionCookieName"
+msgstr "idsrv.session"
+
+msgid "IdsrvSessionCookieLifecycle"
+msgstr "Sitzung"
+
+msgid "IdsrvSessionCookieDescription"
+msgstr "Dieses Cookie speichert die aktuelle Sitzungs id, wird für das Nutzer Management verwendet."

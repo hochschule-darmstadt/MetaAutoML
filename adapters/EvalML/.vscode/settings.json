@@ -1,0 +1,12 @@
+{
+    "python.analysis.extraPaths": [
+        "./AutoMLs",
+        "./Utils",
+        "../Utils/Utils",
+        "../Utils/AutoMLs",
+        "../GRPC/Adapter",
+        "./utils",
+        "./dependency-injection"
+
+    ]
+}

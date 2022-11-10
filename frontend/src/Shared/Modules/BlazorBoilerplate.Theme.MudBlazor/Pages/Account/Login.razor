@@ -21,13 +21,10 @@
                     <MudCard Elevation="2" Class="pa-4">
                         <MudCardHeader>
                             <CardHeaderContent>
-                                <MudIconButton Icon="@Icons.Filled.Home" Class="ml-auto" Link="/" />
                                 <div class="logo">
-                                    <a href="/" title="@appState.AppName Home">
-                                        <img src=@($"{Module.ContentPath}/images/oma-logo.svg") style="width:100px;" title="@appState.AppName Home" alt="@appState.AppName" />
-                                        <br />
-                                        <MudText Typo="Typo.h4" Color="Color.Primary" style="font-family: 'Noto Sans'" Class="docs-brand-text">@appState.AppName</MudText>
-                                    </a>
+                                    <img src=@($"{Module.ContentPath}/images/oma-logo.svg") style="width:100px;" title="@appState.AppName Home" alt="@appState.AppName" />
+                                    <br />
+                                    <MudText Typo="Typo.h4" Color="Color.Primary" style="font-family: 'Noto Sans'" Class="docs-brand-text">@appState.AppName</MudText>
                                     <br />
                                 </div>
                                 <MudText Typo="Typo.h5" Align="Align.Center">@L["Log in"]</MudText>
@@ -43,16 +40,10 @@
                             @if (loginViewModel.AllowRememberLogin)
                             {<MudCheckBox @bind-Checked="@loginViewModel.RememberMe" Class="ml-n2">@L["Keep me logged in"]</MudCheckBox>}
                         </MudCardContent>
-                        <MudCardActions>
-                            <MudGrid Spacing="1" Justify="Justify.FlexEnd"> <!--You might want to consider Justify.Center, by Krzys-->
-                                <MudItem>
-                                    <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">@L["Login"]</MudButton>
-                                </MudItem>
-                                <MudItem>
+                        <MudCardActions Class="d-flex align-center flex-grow-1 gap-1">
+                            <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="d-flex flex-1">@L["Login"]</MudButton>
                                     @if (loginViewModel.EnableRegistration == true)
-                                    {<MudButton OnClick="@Register" Variant="Variant.Filled" Color="Color.Primary">@L["Sign up"]</MudButton>}
-                                </MudItem>
-                            </MudGrid>
+                                    {<MudButton OnClick="@Register" Variant="Variant.Filled" Color="Color.Primary" Class="d-flex flex-1">@L["Sign up"]</MudButton>}
                         </MudCardActions>
                     </MudCard>
                 </EditForm>
@@ -85,7 +76,7 @@
                         <CardHeaderContent>
                             @if (!loginViewModel.EnableLocalLogin)
                             {
-                                <MudIconButton Icon="@Icons.Filled.Home" Class="ml-auto" Link="/" />
+                               
                                 <div class="logo">
                                     <a href="/" title="@appState.AppName Home"><img src=@($"{Module.ContentPath}/images/logo.svg") style="width:100px;" title="@appState.AppName Home" alt="@appState.AppName" /><br />@appState.AppName</a>
                                     <br />

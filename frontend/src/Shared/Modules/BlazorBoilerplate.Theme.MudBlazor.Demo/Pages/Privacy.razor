@@ -4,7 +4,6 @@
 @inject IApiClient apiClient
 @inject IViewNotifier viewNotifier
 @inject NavigationManager NavManager
-@attribute [Authorize]
 
 <h1>
     Datenschutzerklärung (privacy statement, in German)
@@ -301,6 +300,67 @@
 </p>
 <p>Quelle: <a href="https://www.e-recht24.de">e-recht24.de</a></p>
 
-@code {
+<p>
+    Notwendige Cookies:
+</p>
 
+
+<MudTable Items="@NecessaryCookies">
+    <HeaderContent>
+        <MudTh>@L["CookieName"]</MudTh>
+        <MudTh>@L["CookieLifecycle"]</MudTh>
+        <MudTh>@L["CookieDescription"]</MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd>@L[context.Name]</MudTd>
+        <MudTd>@L[context.Lifecycle]</MudTd>
+        <MudTd>@L[context.Description]</MudTd>
+    </RowTemplate>
+</MudTable>
+
+@code {
+    private class GdprCookie
+    {
+        public string Name { get; set; }
+        public string Lifecycle { get; set; }
+        public string Description { get; set; }
+    }
+    private List<GdprCookie> NecessaryCookies;
+
+    protected override void OnInitialized()
+    {
+        NecessaryCookies = new()
+        {
+            new GdprCookie()
+            {
+                Name = "AntiforgeryCookieName",
+                Lifecycle = "AntiforgeryCookieLifecycle",
+                Description = "AntiforgeryCookieDescription"
+            },
+            new GdprCookie()
+            {
+                Name = "CultureCookieName",
+                Lifecycle = "CultureCookieLifecycle",
+                Description = "CultureCookieDescription"
+            },
+            new GdprCookie()
+            {
+                Name = "CookieConsentCookieName",
+                Lifecycle = "CookieConsentCookieLifecycle",
+                Description = "CookieConsentCookieDescription"
+            },
+            new GdprCookie()
+            {
+                Name = "IdentityApplicationCookieName",
+                Lifecycle = "IdentityApplicationCookieLifecycle",
+                Description = "IdentityApplicationCookieDescription"
+            },
+            new GdprCookie()
+            {
+                Name = "IdsrvSessionCookieName",
+                Lifecycle = "IdsrvSessionCookieLifecycle",
+                Description = "IdsrvSessionCookieDescription"
+            },
+        };
+    }
 }
