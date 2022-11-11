@@ -28,6 +28,7 @@ using BlazorBoilerplate.Storage.Mapping;
 using BlazorBoilerplate.Theme.Material.Services;
 using Breeze.AspNetCore;
 using Breeze.Core;
+using BytexDigital.Blazor.Components.CookieConsent;
 using FluentValidation.AspNetCore;
 using IdentityServer4;
 using Microsoft.AspNetCore.Authentication;
@@ -146,6 +147,19 @@ namespace BlazorBoilerplate.Server
             services.AddStackExchangeRedisCache(options =>
             {
                 options.Configuration = redisEndpoint;
+            });
+
+            ////////////////////////////////////////////////////////////////////////////////////////////////////////
+            //OMA-ML SERVICES
+            ///////////////////////////////////////////////////////////////////////////////////////////////////////
+            services.AddCookieConsent(o =>
+            {
+                o.Revision = 1;
+                o.ConsentModalPosition = ConsentModalPosition.BottomCenter;
+                o.ConsentModalLayout = ConsentModalLayout.Cloud;
+                o.ConsentSecondaryActionOpensSettings = false;
+                o.PolicyUrl = "/privacy";
+                
             });
 
             ////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -528,7 +542,7 @@ namespace BlazorBoilerplate.Server
             //});
 
             services.ConfigureApplicationCookie(options =>
-            {
+            { 
                 options.Cookie.IsEssential = true;
                 options.Cookie.HttpOnly = true;
                 options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
