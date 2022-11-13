@@ -69,7 +69,7 @@ namespace BlazorBoilerplate.Shared.Interfaces
         Task<ApiResponseDto> GetDatasetTypes();
         Task<ApiResponseDto> GetMlLibrariesForTask(GetMlLibrariesForTaskRequestDto request);
         Task<ApiResponseDto> GetAvailableStrategies(GetAvailableStrategiesRequestDto request);
-        Task<ApiResponseDto> GetAutoMlParameters(GetAutoMlParametersRequestDto request);
+        Task<ApiResponseDto<GetAutoMlParametersResponseDto>> GetAutoMlParameters(GetAutoMlParametersRequestDto request);
         #endregion
 
         #region OMA-ML PREDICTION MESSAGES
