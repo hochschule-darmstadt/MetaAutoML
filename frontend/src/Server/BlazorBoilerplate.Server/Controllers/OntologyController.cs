@@ -74,7 +74,7 @@ namespace BlazorBoilerplate.Server.Controllers
                 await _ontologyManager.GetDatasetTypes() :
                 new ApiResponse(Status400BadRequest, L["InvalidData"]);
 
-        [HttpGet]
+        [HttpPost]
         [ProducesResponseType(Status200OK)]
         [ProducesResponseType(Status400BadRequest)]
         [ProducesResponseType(Status404NotFound)]
