@@ -181,3 +181,5 @@ class AdapterManager(Thread):
 
         except Exception as e:
             raise grpclib.GRPCError(grpclib.Status.UNAVAILABLE, f"Error while generating probabilities {e}")
+    def get_start_auto_ml_request(self) -> StartAutoMlRequest:
+        return self.__start_auto_ml_request
