@@ -212,7 +212,7 @@ msgid "Sign in with"
 msgstr "Anmelden mit"
 
 msgid "Sign up"
-msgstr "Anmelden"
+msgstr "Registrieren"
 
 msgid "Keep me logged in"
 msgstr "Eingeloggt bleiben"
