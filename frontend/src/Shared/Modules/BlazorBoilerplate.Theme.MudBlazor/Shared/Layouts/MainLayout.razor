@@ -14,10 +14,12 @@
         </MudAppBar>
         <MudDrawer @bind-Open="@_navMenuOpened" Elevation="2">
             <MudDrawerHeader >
-                <div class="drawer-logo">
-                    <img alt="@appState.AppName" class="logo-img" src=@($"{Module.ContentPath}/images/oma-logo.svg") title="@appState.AppName">
-                    <MudText Typo="Typo.h4" Color="Color.Primary" style="font-family: 'Noto Sans'" Class="docs-brand-text">@appState.AppName</MudText>
-                </div>
+                <a href="/">
+                    <div class="drawer-logo">
+                        <img alt="@appState.AppName" class="logo-img" src=@($"{Module.ContentPath}/images/oma-logo.svg") title="@appState.AppName">
+                        <MudText Typo="Typo.h4" Color="Color.Primary" style="font-family: 'Noto Sans'" Class="docs-brand-text">@appState.AppName</MudText>
+                    </div>
+                </a>
             </MudDrawerHeader>
             <NavMenu />
             <DrawerFooter />
