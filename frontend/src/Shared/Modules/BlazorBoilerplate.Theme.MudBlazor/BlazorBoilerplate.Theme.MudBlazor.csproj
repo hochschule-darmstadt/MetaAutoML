@@ -7,7 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="MudBlazor" Version="6.0.14" />
+    <PackageReference Include="BytexDigital.Blazor.Components.CookieConsent" Version="1.0.15" />
+    <PackageReference Include="MudBlazor" Version="6.0.18" />
     <PackageReference Include="System.Net.Http" Version="4.3.4" />
     <PackageReference Include="System.Net.Http.Json" Version="6.0.0" />
     <PackageReference Include="Toolbelt.Blazor.LoadingBar" Version="13.1.2" />
@@ -19,7 +20,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="wwwroot\fonts\" />
+    <Content Update="wwwroot\css\fonts.googleapis.com\Roboto.css">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">

@@ -1,0 +1,42 @@
+# supplementary docker-compose file
+version: "3.3"
+services:
+  sqlserver:
+    image: mcr.microsoft.com/azure-sql-edge:latest
+    volumes:
+      - dev-dbdata:/var/opt/mssql
+    environment:
+      - MSSQL_SA_PASSWORD=yourVeryStrong(!)Password
+      - ACCEPT_EULA=Y
+    ports:
+      - 1533:1433 #expose port, so can connect to it using host: 'localhost,1533' | user: sa, password: yourVeryStrong(!)Password
+
+  redis:
+    image: "redis:alpine"
+    volumes:
+      - dev-redisdata:/data
+      - dev-redisdata:/var/lib/redis
+      - dev-redisdata:/usr/local/etc/redis/redis.conf
+    ports:
+      - "6379:6379"
+
+  mongo:
+    image: mongo
+    container_name: mongo
+    ports:
+      - "27017:27017"
+
+    # limit log verbosity
+    command: --quiet --logpath /dev/null 
+
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+    volumes:
+      - dev-mongodata:/data/configdb
+      - dev-mongodata:/data/db
+
+volumes:
+  dev-dbdata:
+  dev-redisdata:
+  dev-mongodata:

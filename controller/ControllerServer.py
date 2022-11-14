@@ -38,10 +38,10 @@ def create_secure_context() -> SSLContext:
     ctx.options |= ssl.OP_NO_TLSv1 | ssl.OP_NO_TLSv1_1
     ctx.set_ciphers('ECDHE+AESGCM:ECDHE+CHACHA20:DHE+AESGCM:DHE+CHACHA20')
     ctx.set_alpn_protocols(['h2'])
-    try:
+    """try:
         ctx.set_npn_protocols(['h2'])
     except NotImplementedError:
-        pass
+        pass"""
     return ctx
 
 

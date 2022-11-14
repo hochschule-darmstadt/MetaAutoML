@@ -5,7 +5,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Ubuntu AutoPytorch Adapter Debug",
+            "name": "UNIX AutoPytorch Adapter Debug",
             "type": "python",
             "request": "launch",
             "program": "AutoPytorchServer.py",

@@ -5,7 +5,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "MLJAR Adapter",
+            "name": "WIN MLJAR Adapter",
             "type": "python",
             "request": "launch",
             "program": "MljarServer.py",
@@ -13,6 +13,20 @@
             "justMyCode": true,
             "env": {
                 "PYTHONPATH": ".;dependency-injection;AutoMLs;Utils;../Utils/Utils;../Utils/AutoMLs;../GRPC/Adapter;",
+                "GRPC_SERVER_PORT": "50053",
+                "PYTHON_ENV": ".venv/Scripts/python",
+                "USE_DEV_CONFIG": "YES"
+            },
+        },
+        {
+            "name": "UNIX MLJAR Adapter",
+            "type": "python",
+            "request": "launch",
+            "program": "MljarServer.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "env": {
+                "PYTHONPATH": ".:dependency-injection:AutoMLs:Utils:../Utils/Utils:../Utils/AutoMLs:../GRPC/Adapter:",
                 "GRPC_SERVER_PORT": "50053",
                 "PYTHON_ENV": ".venv/Scripts/python",
                 "USE_DEV_CONFIG": "YES"

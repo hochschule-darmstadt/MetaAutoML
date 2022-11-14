@@ -28,6 +28,7 @@ using BlazorBoilerplate.Storage.Mapping;
 using BlazorBoilerplate.Theme.Material.Services;
 using Breeze.AspNetCore;
 using Breeze.Core;
+using BytexDigital.Blazor.Components.CookieConsent;
 using FluentValidation.AspNetCore;
 using IdentityServer4;
 using Microsoft.AspNetCore.Authentication;
@@ -146,6 +147,19 @@ namespace BlazorBoilerplate.Server
             services.AddStackExchangeRedisCache(options =>
             {
                 options.Configuration = redisEndpoint;
+            });
+
+            ////////////////////////////////////////////////////////////////////////////////////////////////////////
+            //OMA-ML SERVICES
+            ///////////////////////////////////////////////////////////////////////////////////////////////////////
+            services.AddCookieConsent(o =>
+            {
+                o.Revision = 1;
+                o.ConsentModalPosition = ConsentModalPosition.BottomCenter;
+                o.ConsentModalLayout = ConsentModalLayout.Cloud;
+                o.ConsentSecondaryActionOpensSettings = false;
+                o.PolicyUrl = "/privacy";
+                
             });
 
             ////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -528,7 +542,7 @@ namespace BlazorBoilerplate.Server
             //});
 
             services.ConfigureApplicationCookie(options =>
-            {
+            { 
                 options.Cookie.IsEssential = true;
                 options.Cookie.HttpOnly = true;
                 options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
@@ -717,6 +731,23 @@ namespace BlazorBoilerplate.Server
         }
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+
+            //Add robots.txt
+            app.Use(async (context, next) =>
+            {
+                if (context.Request.Path.StartsWithSegments("/robots.txt"))
+                {
+                    var robotsTxtPath = Path.Combine(env.ContentRootPath, "robots.txt");
+                    string output = "User-agent: *  \nDisallow: /";
+                    if (File.Exists(robotsTxtPath))
+                    {
+                        output = await File.ReadAllTextAsync(robotsTxtPath);
+                    }
+                    context.Response.ContentType = "text/plain";
+                    await context.Response.WriteAsync(output);
+                }
+                else await next();
+            });
 
 
             app.UseRequestLocalization();
