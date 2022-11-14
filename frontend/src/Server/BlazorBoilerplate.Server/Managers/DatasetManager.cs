@@ -11,15 +11,18 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Data.Analysis;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using Serilog.Core;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using static Microsoft.AspNetCore.Http.StatusCodes;
+using System.IO.Compression;
 
 namespace BlazorBoilerplate.Server.Managers
 {
@@ -74,19 +77,28 @@ namespace BlazorBoilerplate.Server.Managers
                 await using FileStream fs = new(Path.Combine(path, trustedFileNameForDisplay), FileMode.Append);
                 fs.Write(request.Content, 0, request.Content.Length);
 
-                //We uploaded everything, send grpc request to controller to persist
-                if (request.ChunkNumber == request.TotalChunkNumber)
-                {
-                    fs.Dispose();
-                    grpcRequest.UserId = username;
-                    grpcRequest.FileName = trustedFileNameForDisplay;
-                    grpcRequest.DatasetName = request.DatasetName;
+                bool correctStrukture = CheckUploadStructure(path);
 
-                    grpcRequest.DatasetType = request.DatasetType;
-                    var reply = _client.CreateDataset(grpcRequest);
-                    return new ApiResponse(Status200OK, null, "");
+                if (correctStrukture == true) { 
+                //We uploaded everything, send grpc request to controller to persist
+                    if (request.ChunkNumber == request.TotalChunkNumber)
+                    {
+                        fs.Dispose();
+                        grpcRequest.UserId = username;
+                        grpcRequest.FileName = trustedFileNameForDisplay;
+                        grpcRequest.DatasetName = request.DatasetName;
+
+                        grpcRequest.DatasetType = request.DatasetType;
+                        var reply = _client.CreateDataset(grpcRequest);
+                        return new ApiResponse(Status200OK, null, "");
+                    }
+                    return new ApiResponse(Status200OK, null, 0);
                 }
-                return new ApiResponse(Status200OK, null, 0);
+                else
+                {
+                    // do not upload data, display a banner that the format is wrong
+                    return new ApiResponse(Status406NotAcceptable, null, 0);
+                }
             }
             catch (Exception ex)
             {
@@ -317,6 +329,32 @@ namespace BlazorBoilerplate.Server.Managers
                 Console.WriteLine(ex.Message);
                 return new ApiResponse(Status404NotFound, ex.Message);
             }
+        }
+
+        private bool CheckUploadStructure(string upload)
+        {
+            string fileExt = System.IO.Path.GetExtension(upload);
+            bool structureCorrect = false;
+
+            if (fileExt == ".csv")
+            {
+                // .csv does not need validation
+                structureCorrect = true; ;
+            }
+            else if (fileExt == ".zip")
+            {
+                string extractionLocation = Directory.GetCurrentDirectory() + "/extracted";
+                ZipFile.ExtractToDirectory(upload, extractionLocation);
+                if (File.Exists(extractionLocation + "/train") && File.Exists(extractionLocation + "/test"))
+                {
+                    structureCorrect = true;
+                } else
+                {
+                    structureCorrect = false;
+                }
+                Directory.Delete(extractionLocation, true);
+            }
+            return structureCorrect;
         }
 
         private byte[] GetImageAsBytes(string path)

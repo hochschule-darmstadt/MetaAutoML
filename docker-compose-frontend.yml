@@ -7,8 +7,8 @@ services:
       # the below path is relative to the build context
       dockerfile: ./src/Utils/Docker/Dockerfile
     ports:
-      - 53415:80
-      - 53443:443
+      - 54415:80
+      - 54443:443
     depends_on:
       - sqlserver
       - controller
