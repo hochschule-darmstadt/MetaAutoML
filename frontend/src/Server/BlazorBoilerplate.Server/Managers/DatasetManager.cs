@@ -77,7 +77,7 @@ namespace BlazorBoilerplate.Server.Managers
                 await using FileStream fs = new(Path.Combine(path, trustedFileNameForDisplay), FileMode.Append);
                 fs.Write(request.Content, 0, request.Content.Length);
 
-                bool correctStrukture = CheckUploadStructure(path);
+                bool correctStrukture = CheckUploadStructure(fs, path);
 
                 if (correctStrukture == true) { 
                 //We uploaded everything, send grpc request to controller to persist
@@ -331,10 +331,12 @@ namespace BlazorBoilerplate.Server.Managers
             }
         }
 
-        private bool CheckUploadStructure(string upload)
+        private bool CheckUploadStructure(FileStream fs, string path)
         {
-            string fileExt = System.IO.Path.GetExtension(upload);
+            string fileExt = System.IO.Path.GetExtension(fs.Name);
             bool structureCorrect = false;
+
+            // simplify with fs.Name
 
             if (fileExt == ".csv")
             {
@@ -343,8 +345,8 @@ namespace BlazorBoilerplate.Server.Managers
             }
             else if (fileExt == ".zip")
             {
-                string extractionLocation = Directory.GetCurrentDirectory() + "/extracted";
-                ZipFile.ExtractToDirectory(upload, extractionLocation);
+                string extractionLocation = path + "/" + Path.GetFileNameWithoutExtension(fs.Name);
+                ZipFile.ExtractToDirectory(fs.Name, extractionLocation);
                 if (File.Exists(extractionLocation + "/train") && File.Exists(extractionLocation + "/test"))
                 {
                     structureCorrect = true;
@@ -352,7 +354,7 @@ namespace BlazorBoilerplate.Server.Managers
                 {
                     structureCorrect = false;
                 }
-                Directory.Delete(extractionLocation, true);
+                //Directory.Delete(extractionLocation, true);
             }
             return structureCorrect;
         }
