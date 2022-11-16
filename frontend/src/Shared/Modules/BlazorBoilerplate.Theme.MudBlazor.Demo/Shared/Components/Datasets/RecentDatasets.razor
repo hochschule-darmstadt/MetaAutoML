@@ -26,14 +26,14 @@
         </CardHeaderActions>
     </MudCardHeader>
     <MudCardContent>
-        <MudPaper Height="250px" Elevation="0">
+        <MudPaper Height="200px" Elevation="0">
             @if (Datasets == null)
             {
-                 <DataLoaderSpinner />
+                <DataLoaderSpinner />
             }
             else
             {
-                <MudTable Items="@Datasets.Datasets" style="width:stretch" class="mat-elevation-z5" AllowSelection="false" Dense="true">
+                <MudTable Items="@Datasets.Datasets" FixedHeader="true" Height="200px" style="width:stretch" class="mat-elevation-z5" AllowSelection="false" Dense="true">
                     <HeaderContent>
                         <MudTh>@L["Name"]</MudTh>
                         <MudTh>@L["Type"]</MudTh>
@@ -41,13 +41,14 @@
                         <MudTh>@L["Date"]</MudTh>
                     </HeaderContent>
                     <RowTemplate>
-                        <MudTd >
+                        <MudTd>
                             <MudLink Href="@NavManager.ToAbsoluteUri("datasets/" + @context.Id).AbsoluteUri" Style="cursor: pointer; display: flex;"><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.ListAlt" Style="margin-right: 4px;" /> @context.Name</MudLink>
                         </MudTd>
                         <MudTd>@L[context.Type.Properties.ContainsKey("skos:prefLabel") ? context.Type.Properties["skos:prefLabel"] : ""]</MudTd>
                         <MudTd>@FormatBytes(context.Analysis["size_bytes"])</MudTd>
                         <MudTd style="white-space:nowrap;">@context.Analysis["creation_date"].ToString("yyyy-MM-dd")</MudTd>
                     </RowTemplate>
+
                 </MudTable>
             }
         </MudPaper>
