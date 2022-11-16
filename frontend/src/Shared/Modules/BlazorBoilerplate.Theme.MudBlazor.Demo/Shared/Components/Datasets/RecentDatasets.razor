@@ -39,6 +39,7 @@
                         <MudTh>@L["Type"]</MudTh>
                         <MudTh>@L["Size"]</MudTh>
                         <MudTh>@L["Date"]</MudTh>
+                        <MudTh>@L["Time"]</MudTh>
                     </HeaderContent>
                     <RowTemplate>
                         <MudTd>
@@ -46,7 +47,8 @@
                         </MudTd>
                         <MudTd>@L[context.Type.Properties.ContainsKey("skos:prefLabel") ? context.Type.Properties["skos:prefLabel"] : ""]</MudTd>
                         <MudTd>@FormatBytes(context.Analysis["size_bytes"])</MudTd>
-                        <MudTd style="white-space:nowrap;">@context.Analysis["creation_date"].ToString("yyyy-MM-dd")</MudTd>
+                        <MudTd style="white-space:nowrap;">@context.Analysis["creation_date"].ToString("dd-MM-yyyy")</MudTd>
+                        <MudTd style="white-space:nowrap;">@context.Analysis["creation_date"].ToString("HH:mm:ss")</MudTd>
                     </RowTemplate>
 
                 </MudTable>
