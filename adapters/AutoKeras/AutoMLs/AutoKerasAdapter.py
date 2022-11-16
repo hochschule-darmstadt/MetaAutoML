@@ -148,4 +148,5 @@ class AutoKerasAdapter(AbstractAdapter):
                                 
         reg.fit(x = np.array(X), y = np.array(y),batch_size=50,epochs=1,)
 
-        export_model(reg.export_model(), self._configuration["result_folder_location"], 'model_keras.p')
+        #export_model(reg.export_model(), self._configuration["result_folder_location"], 'model_keras.p')
+        export_model(reg, self._configuration["result_folder_location"], 'model_keras.p')
