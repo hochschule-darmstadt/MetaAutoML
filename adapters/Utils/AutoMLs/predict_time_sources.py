@@ -1,5 +1,5 @@
 from enum import Enum, unique
-
+import pandas as pd
 
 @unique
 class DataType(Enum):
@@ -19,7 +19,16 @@ class SplitMethod(Enum):
     SPLIT_METHOD_END = 1
 
 
-def feature_preparation(X, features):
+def feature_preparation(X: pd.DataFrame, features) -> pd.DataFrame:
+    """prepare features for training
+
+    Args:
+        X (pd.DataFrame):input df
+        features (_type_): _description_
+
+    Returns:
+        pd.DataFrame: preprocessed dataframe
+    """
     for column, dt in features:
         if DataType(dt) is DataType.DATATYPE_IGNORE:
             X.drop(column, axis=1, inplace=True)
@@ -31,4 +40,6 @@ def feature_preparation(X, features):
             X[column] = X[column].astype('int')
         elif DataType(dt) is DataType.DATATYPE_FLOAT:
             X[column] = X[column].astype('float')
+        else:
+            X.drop(column, axis=1, inplace=True)
     return X

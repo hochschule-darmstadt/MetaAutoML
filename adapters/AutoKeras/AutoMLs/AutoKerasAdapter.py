@@ -133,12 +133,19 @@ class AutoKerasAdapter(AbstractAdapter):
         self.df, test = data_loader(self._configuration)
         X, y = prepare_tabular_dataset(self.df, self._configuration)
 
-        reg = ak.TimeseriesForecaster(overwrite=True, 
-                                          max_trials=3,
+        predict_from = 1
+        predict_until = 10
+        lookback = 1
+        reg = ak.TimeseriesForecaster(overwrite=True,
+                                lookback=lookback,
+                                predict_from=predict_from,
+                                predict_until=predict_until,
+                                max_trials=1,
+                                objective="val_loss",
                                 # metric=self._configuration['metric'],
                                 seed=42,
                                 directory=self._configuration["model_folder_location"])
                                 
-        reg.fit(x = np.array(X), y = np.array(y))
+        reg.fit(x = np.array(X), y = np.array(y),batch_size=50,epochs=1,)
 
-        export_model(reg, self._configuration["result_folder_location"], 'model_keras.p')
+        export_model(reg.export_model(), self._configuration["result_folder_location"], 'model_keras.p')
