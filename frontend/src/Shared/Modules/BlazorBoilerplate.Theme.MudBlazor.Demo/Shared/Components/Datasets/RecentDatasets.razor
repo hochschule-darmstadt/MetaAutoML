@@ -26,14 +26,14 @@
         </CardHeaderActions>
     </MudCardHeader>
     <MudCardContent>
-        <MudPaper Height="200px" Elevation="0">
+        <MudPaper Height="250px" Elevation="0">
             @if (Datasets == null)
             {
                 <DataLoaderSpinner />
             }
             else
             {
-                <MudTable Items="@Datasets.Datasets" FixedHeader="true" Height="200px" style="width:stretch" class="mat-elevation-z5" AllowSelection="false" Dense="true">
+                <MudTable Items="@Datasets.Datasets" FixedHeader="true" Height="250px" style="width:stretch" class="mat-elevation-z5" AllowSelection="false" Dense="true">
                     <HeaderContent>
                         <MudTh>@L["Name"]</MudTh>
                         <MudTh>@L["Type"]</MudTh>
