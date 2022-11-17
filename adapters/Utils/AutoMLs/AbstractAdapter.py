@@ -16,7 +16,7 @@ class AbstractAdapter(ABC):
             self._time_limit = self._configuration["configuration"]["runtime_limit"]
         else:
             self._time_limit = 30
-        if self._configuration["configuration"]["task"] == ":tabular_classification" or self._configuration["configuration"]["task"] == ":tabular_regression":
+        if self._configuration["configuration"]["task"] == ":tabular_classification" or self._configuration["configuration"]["task"] == ":tabular_regression" or self._configuration["configuration"]["task"] == ":text_classification" or self._configuration["configuration"]["task"] == ":text_regression":
             self._target = self._configuration["configuration"]["target"]
 
     @abstractmethod

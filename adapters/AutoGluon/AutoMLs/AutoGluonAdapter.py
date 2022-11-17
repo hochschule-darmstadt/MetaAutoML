@@ -63,9 +63,9 @@ class AutoGluonAdapter(AbstractAdapter):
         elif self._configuration["configuration"]["task"] == ":image_classification":
             self.__image_classification()
         elif self._configuration["configuration"]["task"] == ":text_classification":
-            self.__text_classification
+            self.__text_classification()
         elif self._configuration["configuration"]["task"] == ":text_regression":
-            self.__text_regression
+            self.__text_regression()
 
     def __tabular_classification(self):
         """Execute the tabular classification task and export the found model"""
