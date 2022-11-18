@@ -51,7 +51,7 @@ class AdapterManager(Thread):
         Returns:
             tuple[str, str]: Tuple returning the ontology IRI of the Ml model type, and ontology IRI of the ML library
         """
-        return ("", "")
+        raise Exception("_get_ml_model_and_lib has to be implemented in sub class")
 
     async def __background_start_auto_ml(self):
         """Sets up the training run environment and start the background AutoML solution process. While the AutoML solution is running, collect all console messages and create the result messages. 
