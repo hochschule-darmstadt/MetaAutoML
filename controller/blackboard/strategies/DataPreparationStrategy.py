@@ -79,9 +79,6 @@ class DataPreparationStrategyController(IAbstractStrategy):
 
     def do_ignore_redundant_samples(self, state: dict, blackboard: Blackboard, controller: StrategyController):
         duplicate_rows = state.get("dataset_analysis", {}).get("duplicate_rows")
-        #self._log.info(f'do_ignore_redundant_samples: Encountered redundant samples ({duplicate_rows}), omitting these rows..')
-
-
 
         ignored_samples = []
 
@@ -90,23 +87,14 @@ class DataPreparationStrategyController(IAbstractStrategy):
             raise RuntimeError('Could not access Adapter Runtime Manager Agent!')
         dataset_configuration = json.loads(agent.get_adapter_runtime_manager().get_training_request().dataset_configuration)
 
-        dataset_configuration['samples'] = {}
+        dataset_configuration['ignored_samples'] = {}
         for row_a, row_b in duplicate_rows:
             self._log.info(f'do_ignore_redundant_samples: Encountered redundant sample "{row_a}" (same as "{row_b}"), ingoring the sample.')
-            dataset_configuration['samples'][row_b] = GrpcDataType.DATATYPE_IGNORE
             ignored_samples.append(row_b)
+        
+        dataset_configuration['ignored_samples'] = ignored_samples
 
         agent.get_adapter_runtime_manager().get_training_request().dataset_configuration = json.dumps(dataset_configuration) 
-
-
-
-
-        # TODO: Re-implement the row omitting logic
-        # Preparation (maybe reusable utility function):
-        #   - Copy dataset from dataset folder to training folder
-        #   - Change adapter/session config dataset path
-        # Load dataset from (new) dataset path
-        # Remove rows that should be omitted
         
         # IDEA: Update dataset analysis accordingly (may not be neccessary)
         blackboard.update_state('dataset_analysis', { 'duplicate_rows': [] }, True)
