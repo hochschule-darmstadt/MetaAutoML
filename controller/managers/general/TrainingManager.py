@@ -79,7 +79,7 @@ class TrainingManager:
                 "selected_ml_libraries": create_training_request.configuration.selected_ml_libraries
             },
             "dataset_configuration": {
-                "column_datatypes": json.loads(create_training_request.dataset_configuration)["column_datatypes"],
+                #"column_datatypes": json.loads(create_training_request.dataset_configuration)["column_datatypes"],
                 "file_configuration": dataset["file_configuration"]
             },
             "runtime_profile": {

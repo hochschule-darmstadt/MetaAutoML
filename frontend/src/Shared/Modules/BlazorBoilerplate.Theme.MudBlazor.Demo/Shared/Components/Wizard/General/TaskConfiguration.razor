@@ -198,6 +198,10 @@
                 }
             }
         }
+        if (Dataset.Dataset.Type.ID == ":image")
+        {
+            StartAutoMlRequest.Configuration.Target = "";
+        }
         StartAutoMlRequest.Configuration.RuntimeLimit = 3;
         StartAutoMlRequest.Configuration.Metric = ":accuracy";
         await UpdateStartAutoMlRequest();
