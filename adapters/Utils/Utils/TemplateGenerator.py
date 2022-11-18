@@ -28,11 +28,11 @@ class TemplateGenerator(object):
         # Render Python script
         with open(os.path.join(self.__TEMPLATES_PATH, 'predict.ji')) as file:
             template = Template(file.read())
-        script_file = open(os.path.join(self.__OUTPUT_PATH, 'predict.py'), "w")
-        script_file.write(template.render(task=self._configuration))
+        with open(os.path.join(self.__OUTPUT_PATH, 'predict.py'), "w") as script_file:
+            script_file.write(template.render(task=self._configuration))
 
         # Render Requirement.txt
         with open(os.path.join(self.__TEMPLATES_PATH, 'requirements.ji')) as file:
             template = Template(file.read())
-        script_file = open(os.path.join(self.__OUTPUT_PATH, 'requirements.txt'), "w")
-        script_file.write(template.render())
+        with open(os.path.join(self.__OUTPUT_PATH, 'requirements.txt'), "w") as script_file:
+            script_file.write(template.render())
