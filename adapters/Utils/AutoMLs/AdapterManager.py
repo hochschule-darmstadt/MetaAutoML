@@ -74,8 +74,14 @@ class AdapterManager(Thread):
             self.__start_auto_ml_running = False
 
         except Exception as e:
-            self.__start_auto_ml_running = False
-            self.__auto_ml_status_messages.append(get_except_response(e))
+            # always crash if we are not running in production environment
+            if get_config_property("local_execution") == "YES":
+                # reraise exception above to crash
+                raise e
+            else:
+                # do not crash in prodution environment
+                self.__start_auto_ml_running = False
+                self.__auto_ml_status_messages.append(get_except_response(e))
 
 
     def get_auto_ml_status(self) -> "GetAutoMlStatusResponse":
@@ -181,5 +187,7 @@ class AdapterManager(Thread):
 
         except Exception as e:
             raise grpclib.GRPCError(grpclib.Status.UNAVAILABLE, f"Error while generating probabilities {e}")
+            
     def get_start_auto_ml_request(self) -> StartAutoMlRequest:
         return self.__start_auto_ml_request
+
