@@ -34,10 +34,10 @@
             break;
     }
 
-    @if (_compatibletasks != null)
+    @if (_compatibleTasks != null)
     {
         <MudSelect Label="@L["ML task"]" T="string" ValueChanged="@OnMlTaskSelectionChanged">
-            @foreach (var task in _compatibletasks.Tasks)
+            @foreach (var task in _compatibleTasks.Tasks)
             {
                 <MudSelectItem Value="@task.ID">@L[task.Properties.ContainsKey("skos:prefLabel") ? task.Properties["skos:prefLabel"] : ""]</MudSelectItem>
             }
@@ -63,15 +63,16 @@
     }
     <MudNumericField ValueChanged="@OnRuntimeValueChanged" T="int" Label="@L["Runtime"]" Variant="Variant.Text" Min="3" Max="180" Value="@StartAutoMlRequest.Configuration.RuntimeLimit" />
 
+    @* TODO: Extract the conbination: MudText, MudChipset into a separate component. It is used several times here. *@
     <MudExpansionPanels>
         <MudExpansionPanel Text="@L["Details"]">
-            @if (_supportedMlLibraries != null)
+            @if (_supportedMlLibrariesForTask != null)
             {
                 <MudText Typo="Typo.subtitle2">@L["ML libraries"]</MudText>
                 <MudChipSet Filter="true" MultiSelection="true" @bind-SelectedChips="SelectedMlLibsChips">
-                    @if (_supportedMlLibraries != null)
+                    @if (_supportedMlLibrariesForTask != null)
                     {
-                        @foreach (var lib in _supportedMlLibraries.MlLibraries)
+                        @foreach (var lib in _supportedMlLibrariesForTask.MlLibraries)
                         {
                             <MudChip Value="@lib.ID" Text="@(lib.Properties.ContainsKey("skos:prefLabel") ? lib.Properties["skos:prefLabel"] : "")" Default="true" Variant="Variant.Text" Color="Color.Secondary" />
                         }
@@ -82,15 +83,15 @@
             {
                 <DataLoaderSpinner />
             }
-            @if (_compatibleAutoMls != null)
+            @if (_availableAutoMls != null)
             {
                 <MudText Typo="Typo.subtitle2" Class="mt-4">@L["AutoML solutions"]</MudText>
                 <MudChipSet SelectedChipsChanged="OnAutoMlSolutionSelectionChanged" Filter="true" MultiSelection="true" >
-                    @if (_compatibleAutoMls != null)
+                    @if (_availableAutoMls != null)
                     {
-                        @foreach (var lib in _compatibleAutoMls.AutoMlSolutions)
+                        @foreach (var sln in _availableAutoMls.AutoMlSolutions)
                         {
-                            <MudChip Value="@lib.ID" Text="@(lib.Properties.ContainsKey("skos:prefLabel") ? lib.Properties["skos:prefLabel"] : "")" Default="true" Variant="Variant.Text" Color="Color.Secondary" />
+                            <MudChip Value="@sln.ID" Text="@(sln.Properties.ContainsKey("skos:prefLabel") ? sln.Properties["skos:prefLabel"] : "")" Default="true" Variant="Variant.Text" Color="Color.Secondary" />
                         }
                     }
                 </MudChipSet>
@@ -154,6 +155,8 @@
     [Parameter]
     public CreateTrainingRequestDto StartAutoMlRequest { get; set; }
 
+
+    // TODO: This callback is never actually filled. Can it be removed?
     [Parameter]
     public EventCallback<CreateTrainingRequestDto> StartAutoMlRequestChanged { get; set; }
 
@@ -162,14 +165,18 @@
         await StartAutoMlRequestChanged.InvokeAsync(StartAutoMlRequest);
     }
 
-    private GetTasksForDatasetTypeResponseDto _compatibletasks;
-    private GetMlLibrariesForTaskResponseDto _supportedMlLibraries;
-    private GetAutoMlSolutionsForConfigurationResponseDto _compatibleAutoMls;
+    private GetTasksForDatasetTypeResponseDto _compatibleTasks;
+    private GetMlLibrariesForTaskResponseDto _supportedMlLibrariesForTask;
+    private GetAutoMlSolutionsForConfigurationResponseDto _availableAutoMls;
     private GetAvailableStrategiesResponseDto _availableStrategies;
     private List<AutoMlParameterDto> _availableParameters;
     private List<String> _columnNames;
-    private bool IsLibPolled = false;
 
+    // TODO: Something like this shouldn't be necessary. Also: This doesn't work, if the execution takes longer than the configured delay.
+    // true, if the libs have been requested once before. This is used to prevent handling UI events that are fired due to initial load.
+    private bool IsLibsLoaded = false;
+
+    // TODO: Refactoring: Don't bind to UI elements directly.
     public MudChip[] SelectedMlLibsChips 
     { 
         get
@@ -194,6 +201,7 @@
         await LoadData();
     }
 
+    // TODO: Use binding instead of event handlers, if blazor supports that.
     private void OnRuntimeValueChanged(int e)
     {
         StartAutoMlRequest.Configuration.RuntimeLimit = e;
@@ -207,7 +215,8 @@
         {
             foreach (KeyValuePair<string, dynamic> pair in StartAutoMlRequest.DatasetConfiguration["column_datatypes"])
             {
-                if((int)pair.Value != 7)
+                // TODO: Document what this magic number means and extract it into a constant
+                if ((int)pair.Value != 7)
                 {
                     _columnNames.Add(pair.Key);
                 }
@@ -227,7 +236,7 @@
 
             if (apiResponse.IsSuccessStatusCode)
             {
-                _compatibletasks = Newtonsoft.Json.JsonConvert.DeserializeObject<GetTasksForDatasetTypeResponseDto>(apiResponse.Result.ToString());
+                _compatibleTasks = Newtonsoft.Json.JsonConvert.DeserializeObject<GetTasksForDatasetTypeResponseDto>(apiResponse.Result.ToString());
                 StateHasChanged();
                 viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
             }
@@ -290,12 +299,12 @@
 
             if (apiResponse.IsSuccessStatusCode)
             {
-                _supportedMlLibraries = Newtonsoft.Json.JsonConvert.DeserializeObject<GetMlLibrariesForTaskResponseDto>(apiResponse.Result.ToString());
+                _supportedMlLibrariesForTask = Newtonsoft.Json.JsonConvert.DeserializeObject<GetMlLibrariesForTaskResponseDto>(apiResponse.Result.ToString());
                 StateHasChanged();
                 viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
                 //quick and dirty way to avoid inconsistent automl solution polling
                 await Task.Delay(1000);
-                IsLibPolled = true;
+                IsLibsLoaded = true;
                 OnMlLibrarySelectionChanged(SelectedMlLibsChips);
             }
             else
@@ -311,7 +320,7 @@
 
     private async void OnMlLibrarySelectionChanged(MudChip[] libs)
     {
-        if (IsLibPolled == false)
+        if (IsLibsLoaded == false)
         {
             return;
         }
@@ -338,7 +347,7 @@
 
             if (apiResponse.IsSuccessStatusCode)
             {
-                _compatibleAutoMls = Newtonsoft.Json.JsonConvert.DeserializeObject<GetAutoMlSolutionsForConfigurationResponseDto>(apiResponse.Result.ToString());
+                _availableAutoMls = Newtonsoft.Json.JsonConvert.DeserializeObject<GetAutoMlSolutionsForConfigurationResponseDto>(apiResponse.Result.ToString());
                 StateHasChanged();
                 viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
             }
@@ -388,6 +397,7 @@
         await UpdateStartAutoMlRequest();
     }
 
+    // TODO: Use binding instead of event handlers
     private async void OnTargetChanged(string value)
     {
         StartAutoMlRequest.Configuration.Target = value;
