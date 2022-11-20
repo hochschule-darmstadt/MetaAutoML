@@ -66,23 +66,7 @@
     @* TODO: Extract the conbination: MudText, MudChipset into a separate component. It is used several times here. *@
     <MudExpansionPanels>
         <MudExpansionPanel Text="@L["Details"]">
-            @if (_supportedMlLibrariesForTask != null)
-            {
-                <MudText Typo="Typo.subtitle2">@L["ML libraries"]</MudText>
-                <MudChipSet Filter="true" MultiSelection="true" @bind-SelectedValues="SelectedMlLibs">
-                    @if (_supportedMlLibrariesForTask != null)
-                    {
-                        @foreach (var lib in _supportedMlLibrariesForTask.MlLibraries)
-                        {
-                            <MudChip Value="@lib.ID" Text="@(lib.Properties.ContainsKey("skos:prefLabel") ? lib.Properties["skos:prefLabel"] : "")" Variant="Variant.Text" Color="Color.Secondary" />
-                        }
-                    }
-                </MudChipSet>
-            }
-            else
-            {
-                <DataLoaderSpinner />
-            }
+            <ChipSet AvailableChips="@_availableLibraries" Label="@L["ML libraries"]" @bind-SelectedIds="SelectedMlLibs" />
             @if (_availableAutoMls != null)
             {
                 <MudText Typo="Typo.subtitle2" Class="mt-4">@L["AutoML solutions"]</MudText>
@@ -154,9 +138,6 @@
 
     [Parameter]
     public CreateTrainingRequestDto StartAutoMlRequest { get; set; }
-
-
-    // TODO: This callback is never actually filled. Can it be removed?
     [Parameter]
     public EventCallback<CreateTrainingRequestDto> StartAutoMlRequestChanged { get; set; }
 
@@ -166,13 +147,13 @@
     }
 
     private GetTasksForDatasetTypeResponseDto _compatibleTasks;
-    private GetMlLibrariesForTaskResponseDto _supportedMlLibrariesForTask;
+    private List<ChipSet.ChipViewModel> _availableLibraries;
     private GetAutoMlSolutionsForConfigurationResponseDto _availableAutoMls;
     private GetAvailableStrategiesResponseDto _availableStrategies;
     private List<AutoMlParameterDto> _availableParameters;
     private List<string> _columnNames;
 
-    public ICollection<object> SelectedMlLibs 
+    public ICollection<string> SelectedMlLibs 
     { 
         get
         {
@@ -187,7 +168,7 @@
             }
         }
     }
-    private ICollection<object> _selectedMlLibs;
+    private ICollection<string> _selectedMlLibs;
 
     protected async override void OnInitialized()
     {
@@ -294,8 +275,15 @@
 
             if (apiResponse.IsSuccessStatusCode)
             {
-                _supportedMlLibrariesForTask = Newtonsoft.Json.JsonConvert.DeserializeObject<GetMlLibrariesForTaskResponseDto>(apiResponse.Result.ToString());
-                SelectedMlLibs = _supportedMlLibrariesForTask.MlLibraries.Select(lib => lib.ID).Cast<object>().ToList();
+                var librariesDto = Newtonsoft.Json.JsonConvert.DeserializeObject<GetMlLibrariesForTaskResponseDto>(apiResponse.Result.ToString());
+                _availableLibraries = librariesDto.MlLibraries
+                    .Select(lib => new ChipSet.ChipViewModel 
+                        {
+                            Id = lib.ID,
+                            Label = lib.Properties.GetValueOrDefault("skos:prefLabel")
+                        })
+                    .ToList();
+                SelectedMlLibs = _availableLibraries.Select(lib => lib.Id).ToList();
                 StateHasChanged();
                 viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
             }
@@ -310,7 +298,7 @@
         }
     }
 
-    private async void OnMlLibrarySelectionChanged(ICollection<object> libs)
+    private async void OnMlLibrarySelectionChanged(ICollection<string> libs)
     {
         try
         {
@@ -319,7 +307,7 @@
             List<string> libraries = new List<string>();
 
             StartAutoMlRequest.Configuration.SelecctedMlLibraries = new List<string>();
-            foreach (var libName in libs.Cast<string>())
+            foreach (var libName in libs)
             {
                 StartAutoMlRequest.Configuration.SelecctedMlLibraries.Add(libName);
                 libraries.Add(libName);

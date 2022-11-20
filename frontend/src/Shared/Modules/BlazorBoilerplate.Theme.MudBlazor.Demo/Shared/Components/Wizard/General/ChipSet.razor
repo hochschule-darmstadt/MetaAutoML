@@ -1,0 +1,42 @@
+@if (AvailableChips?.Any() ?? false)
+{
+    <MudText Typo="Typo.subtitle2">@Label</MudText>
+    <MudChipSet Filter="true" MultiSelection="true" @bind-SelectedValues="SelectedValues">
+        @foreach (var chip in AvailableChips)
+        {
+            <MudChip Value="@chip.Id" Text="@chip.Label" Variant="Variant.Text" Color="Color.Secondary" />
+        }
+    </MudChipSet>
+}
+else
+{
+    <DataLoaderSpinner />
+}
+
+@code {
+    [Parameter]
+    public ICollection<ChipViewModel> AvailableChips { get; set; }
+
+    [Parameter]
+    public string Label { get; set; }
+
+    [Parameter]
+    public ICollection<string> SelectedIds { get; set; }
+    [Parameter]
+    public EventCallback<ICollection<string>> SelectedIdsChanged { get; set; }
+
+    private ICollection<object> SelectedValues 
+    {
+        get => SelectedIds.Cast<object>().ToList();
+        set 
+        { 
+            SelectedIds = value.Cast<string>().ToList();
+            SelectedIdsChanged.InvokeAsync(SelectedIds);
+        }
+    }
+
+    public class ChipViewModel {
+        public string Label { get; set; }
+        public string Id { get; set; }
+    }
+}
