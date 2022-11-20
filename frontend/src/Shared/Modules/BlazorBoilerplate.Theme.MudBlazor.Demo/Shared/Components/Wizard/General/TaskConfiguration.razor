@@ -69,7 +69,7 @@
             @if (_supportedMlLibrariesForTask != null)
             {
                 <MudText Typo="Typo.subtitle2">@L["ML libraries"]</MudText>
-                <MudChipSet Filter="true" MultiSelection="true" @bind-SelectedChips="SelectedMlLibsChips">
+                <MudChipSet Filter="true" MultiSelection="true" @bind-SelectedValues="SelectedMlLibs">
                     @if (_supportedMlLibrariesForTask != null)
                     {
                         @foreach (var lib in _supportedMlLibrariesForTask.MlLibraries)
@@ -86,7 +86,7 @@
             @if (_availableAutoMls != null)
             {
                 <MudText Typo="Typo.subtitle2" Class="mt-4">@L["AutoML solutions"]</MudText>
-                <MudChipSet SelectedChipsChanged="OnAutoMlSolutionSelectionChanged" Filter="true" MultiSelection="true" >
+                <MudChipSet SelectedValuesChanged="OnAutoMlSolutionSelectionChanged" Filter="true" MultiSelection="true" >
                     @if (_availableAutoMls != null)
                     {
                         @foreach (var sln in _availableAutoMls.AutoMlSolutions)
@@ -104,7 +104,7 @@
             {
                 <MudText Typo="Typo.subtitle2" Class="mt-4">@L["Enabled strategies"]</MudText>
                 <MudChipSet
-                    SelectedChipsChanged="OnStrategySelectionChanged"
+                    SelectedValuesChanged="OnStrategySelectionChanged"
                     Filter="true"
                     MultiSelection="true"
                 >
@@ -170,29 +170,29 @@
     private GetAutoMlSolutionsForConfigurationResponseDto _availableAutoMls;
     private GetAvailableStrategiesResponseDto _availableStrategies;
     private List<AutoMlParameterDto> _availableParameters;
-    private List<String> _columnNames;
+    private List<string> _columnNames;
 
     // TODO: Something like this shouldn't be necessary. Also: This doesn't work, if the execution takes longer than the configured delay.
     // true, if the libs have been requested once before. This is used to prevent handling UI events that are fired due to initial load.
     private bool IsLibsLoaded = false;
 
     // TODO: Refactoring: Don't bind to UI elements directly.
-    public MudChip[] SelectedMlLibsChips 
+    public ICollection<object> SelectedMlLibs 
     { 
         get
         {
-            return _selectedMlLibChips;
+            return _selectedMlLibs;
         } 
         set
         {
-            _selectedMlLibChips = value;
-            if (_selectedMlLibChips != null)
+            _selectedMlLibs = value;
+            if (_selectedMlLibs != null)
             {
-                OnMlLibrarySelectionChanged(SelectedMlLibsChips);
+                OnMlLibrarySelectionChanged(SelectedMlLibs);
             }
         }
     }
-    private MudChip[] _selectedMlLibChips;
+    private ICollection<object> _selectedMlLibs;
 
     protected async override void OnInitialized()
     {
@@ -305,7 +305,7 @@
                 //quick and dirty way to avoid inconsistent automl solution polling
                 await Task.Delay(1000);
                 IsLibsLoaded = true;
-                OnMlLibrarySelectionChanged(SelectedMlLibsChips);
+                OnMlLibrarySelectionChanged(SelectedMlLibs);
             }
             else
             {
@@ -318,7 +318,7 @@
         }
     }
 
-    private async void OnMlLibrarySelectionChanged(MudChip[] libs)
+    private async void OnMlLibrarySelectionChanged(ICollection<object> libs)
     {
         if (IsLibsLoaded == false)
         {
@@ -331,10 +331,10 @@
             List<string> libraries = new List<string>();
 
             StartAutoMlRequest.Configuration.SelecctedMlLibraries = new List<string>();
-            foreach (var chip in libs)
+            foreach (var libName in libs.Cast<string>())
             {
-                StartAutoMlRequest.Configuration.SelecctedMlLibraries.Add((string)chip.Value);
-                libraries.Add((string)chip.Value);
+                StartAutoMlRequest.Configuration.SelecctedMlLibraries.Add(libName);
+                libraries.Add(libName);
             }
 
             await UpdateStartAutoMlRequest();
@@ -376,23 +376,23 @@
         } 
     }
 
-    private async void OnAutoMlSolutionSelectionChanged(MudChip[] automls)
+    private async void OnAutoMlSolutionSelectionChanged(ICollection<object> automls)
     {
         StartAutoMlRequest.Configuration.SelectedAutoMlSolutions = new List<string>();
         foreach (var chip in automls)
         {
-            StartAutoMlRequest.Configuration.SelectedAutoMlSolutions.Add(chip.Value.ToString());
+            StartAutoMlRequest.Configuration.SelectedAutoMlSolutions.Add(chip.ToString());
         }
         await UpdateStartAutoMlRequest();
         await RefreshParameters();
     }
 
-    private async void OnStrategySelectionChanged(MudChip[] strategies)
+    private async void OnStrategySelectionChanged(ICollection<object> strategies)
     {
         StartAutoMlRequest.Configuration.EnabledStrategies = new List<string>();
         foreach (var chip in strategies)
         {
-            StartAutoMlRequest.Configuration.EnabledStrategies.Add(chip.Value.ToString());
+            StartAutoMlRequest.Configuration.EnabledStrategies.Add(chip.ToString());
         }
         await UpdateStartAutoMlRequest();
     }
