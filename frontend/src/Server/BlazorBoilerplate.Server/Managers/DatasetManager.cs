@@ -23,6 +23,8 @@ using System.Text;
 using System.Threading.Tasks;
 using static Microsoft.AspNetCore.Http.StatusCodes;
 using System.IO.Compression;
+using System.Runtime.CompilerServices;
+using Karambolo.Common;
 
 namespace BlazorBoilerplate.Server.Managers
 {
@@ -77,28 +79,28 @@ namespace BlazorBoilerplate.Server.Managers
                 await using FileStream fs = new(Path.Combine(path, trustedFileNameForDisplay), FileMode.Append);
                 fs.Write(request.Content, 0, request.Content.Length);
 
-                bool correctStrukture = CheckUploadStructure(fs, path);
+                // get the complete file path before fs is released
+                string filePath = path + "/" + Path.GetFileName(fs.Name);
 
-                if (correctStrukture == true) { 
-                //We uploaded everything, send grpc request to controller to persist
-                    if (request.ChunkNumber == request.TotalChunkNumber)
+                if (request.ChunkNumber == request.TotalChunkNumber)
+                {
+                    fs.Dispose();
+
+                    bool correctStrukture = CheckUploadStructure(filePath);
+
+                    if (correctStrukture == true)
                     {
-                        fs.Dispose();
                         grpcRequest.UserId = username;
                         grpcRequest.FileName = trustedFileNameForDisplay;
                         grpcRequest.DatasetName = request.DatasetName;
-
                         grpcRequest.DatasetType = request.DatasetType;
                         var reply = _client.CreateDataset(grpcRequest);
                         return new ApiResponse(Status200OK, null, "");
+                    } else {
+                        return new ApiResponse(Status406NotAcceptable, "The uploaded dataset is not structured correctly.");
                     }
-                    return new ApiResponse(Status200OK, null, 0);
                 }
-                else
-                {
-                    // do not upload data, display a banner that the format is wrong
-                    return new ApiResponse(Status406NotAcceptable, null, 0);
-                }
+                return new ApiResponse(Status200OK, null, "");
             }
             catch (Exception ex)
             {
@@ -331,32 +333,40 @@ namespace BlazorBoilerplate.Server.Managers
             }
         }
 
-        private bool CheckUploadStructure(FileStream fs, string path)
+        private bool CheckUploadStructure(string filePath)
         {
-            string fileExt = System.IO.Path.GetExtension(fs.Name);
-            bool structureCorrect = false;
-
-            // simplify with fs.Name
+            string fileExt = filePath.Substring(filePath.Length - 4);
+            List<string> zipEntries = new List<string>();
 
             if (fileExt == ".csv")
             {
-                // .csv does not need validation
-                structureCorrect = true; ;
+                // .csv does not need validation at the moment
+                return true; 
             }
             else if (fileExt == ".zip")
             {
-                string extractionLocation = path + "/" + Path.GetFileNameWithoutExtension(fs.Name);
-                ZipFile.ExtractToDirectory(fs.Name, extractionLocation);
-                if (File.Exists(extractionLocation + "/train") && File.Exists(extractionLocation + "/test"))
+                using (ZipArchive archive = ZipFile.OpenRead(filePath))
                 {
-                    structureCorrect = true;
-                } else
-                {
-                    structureCorrect = false;
+                    foreach (ZipArchiveEntry entry in archive.Entries)
+                    {
+                        // take only top level folders
+                        if (entry.FullName.EndsWith("/", StringComparison.OrdinalIgnoreCase))
+                        {
+                            // check if a folder is named test or train
+                            if (entry.FullName.Contains("/train/", StringComparison.Ordinal) || entry.FullName.Contains("/test/", StringComparison.Ordinal))
+                            {
+                                zipEntries.Add(entry.FullName);
+                            }
+                        }
+                    }
                 }
-                //Directory.Delete(extractionLocation, true);
+                // if test and train are found, return true
+                if (zipEntries.Count == 2)
+                {
+                    return true;
+                }
             }
-            return structureCorrect;
+            return false;
         }
 
         private byte[] GetImageAsBytes(string path)
