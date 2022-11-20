@@ -74,7 +74,7 @@
                     {
                         @foreach (var lib in _supportedMlLibrariesForTask.MlLibraries)
                         {
-                            <MudChip Value="@lib.ID" Text="@(lib.Properties.ContainsKey("skos:prefLabel") ? lib.Properties["skos:prefLabel"] : "")" Default="true" Variant="Variant.Text" Color="Color.Secondary" />
+                            <MudChip Value="@lib.ID" Text="@(lib.Properties.ContainsKey("skos:prefLabel") ? lib.Properties["skos:prefLabel"] : "")" Variant="Variant.Text" Color="Color.Secondary" />
                         }
                     }
                 </MudChipSet>
@@ -172,11 +172,6 @@
     private List<AutoMlParameterDto> _availableParameters;
     private List<string> _columnNames;
 
-    // TODO: Something like this shouldn't be necessary. Also: This doesn't work, if the execution takes longer than the configured delay.
-    // true, if the libs have been requested once before. This is used to prevent handling UI events that are fired due to initial load.
-    private bool IsLibsLoaded = false;
-
-    // TODO: Refactoring: Don't bind to UI elements directly.
     public ICollection<object> SelectedMlLibs 
     { 
         get
@@ -300,12 +295,9 @@
             if (apiResponse.IsSuccessStatusCode)
             {
                 _supportedMlLibrariesForTask = Newtonsoft.Json.JsonConvert.DeserializeObject<GetMlLibrariesForTaskResponseDto>(apiResponse.Result.ToString());
+                SelectedMlLibs = _supportedMlLibrariesForTask.MlLibraries.Select(lib => lib.ID).Cast<object>().ToList();
                 StateHasChanged();
                 viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
-                //quick and dirty way to avoid inconsistent automl solution polling
-                await Task.Delay(1000);
-                IsLibsLoaded = true;
-                OnMlLibrarySelectionChanged(SelectedMlLibs);
             }
             else
             {
@@ -320,10 +312,6 @@
 
     private async void OnMlLibrarySelectionChanged(ICollection<object> libs)
     {
-        if (IsLibsLoaded == false)
-        {
-            return;
-        }
         try
         {
             Dictionary<string, string> dictionary = new Dictionary<string, string>();
