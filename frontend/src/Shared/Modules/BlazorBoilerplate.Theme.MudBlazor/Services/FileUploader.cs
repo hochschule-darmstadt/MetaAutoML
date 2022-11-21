@@ -12,6 +12,7 @@ using Microsoft.Extensions.Localization;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Components;
 using BlazorBoilerplate.Shared.Dto.Prediction;
+using static Microsoft.AspNetCore.Http.StatusCodes;
 
 namespace BlazorBoilerplate.Theme.Material.Services
 {
@@ -105,6 +106,13 @@ namespace BlazorBoilerplate.Theme.Material.Services
                     {
                         apiResponse = await _client.UploadDataset(UploadDatasetRequest);
                     }
+
+                    if (apiResponse.StatusCode == Status406NotAcceptable)
+                    {
+                        // If the Dataset is not structured correctly, stop the upload and do not safe it
+                        break;
+                    }
+
                     if (!apiResponse.IsSuccessStatusCode)
                     {
                         _notifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
