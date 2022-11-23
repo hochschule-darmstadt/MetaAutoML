@@ -210,16 +210,11 @@
             GetTasksForDatasetTypeRequestDto taskRequest = new GetTasksForDatasetTypeRequestDto { DatasetType = Dataset.Dataset.Type.ID };
             ApiResponseDto apiResponse = await apiClient.GetTasksForDatasetType(taskRequest);
 
-            if (apiResponse.IsSuccessStatusCode)
+            HandleApiResponseWrapper(apiResponse, () =>
             {
                 _compatibleTasks = Newtonsoft.Json.JsonConvert.DeserializeObject<GetTasksForDatasetTypeResponseDto>(apiResponse.Result.ToString());
                 StateHasChanged();
-                viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
-            }
-            else
-            {
-                viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
-            }
+            });
         }
         catch (Exception ex)
         {
@@ -232,14 +227,10 @@
         var taskIri = StartAutoMlRequest.Configuration.Task;
         var selectedAutoMls = StartAutoMlRequest.Configuration.SelectedAutoMlSolutions;
         var apiResponse = await apiClient.GetAutoMlParameters(new GetAutoMlParametersRequestDto { AutoMls = selectedAutoMls, TaskIri = taskIri });
-        if (apiResponse.IsSuccessStatusCode)
-        {
-            _availableParameters = apiResponse.Result.AutoMlParameters;
-        }
-        else
-        {
-            viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["Fetching available parameters failed."]);
-        }
+        HandleApiResponseWrapper(
+            apiResponse,
+            () => _availableParameters = apiResponse.Result.AutoMlParameters,
+            errorMessageKey: "Fetching available parameters failed");
     }
 
     private async void OnMlTaskSelectionChanged(string task)
@@ -251,8 +242,10 @@
         StartAutoMlRequest.Configuration.Task = task;
         try
         {
-            Dictionary<string, string> dictionary = new Dictionary<string, string>();
-            dictionary.Add("task", StartAutoMlRequest.Configuration.Task);
+            Dictionary<string, string> dictionary = new Dictionary<string, string>
+            {
+                { "task", StartAutoMlRequest.Configuration.Task }
+            };
             await UpdateStartAutoMlRequest();
             /** Configuration = dictionary is currently dummy */
             //GetCompatibleAutoMlSolutionsRequestDto compatibleAutoMlRequest = new GetCompatibleAutoMlSolutionsRequestDto { Configuration = dictionary };
@@ -273,9 +266,9 @@
             GetMlLibrariesForTaskRequestDto supportedMlLibrariesRequest = new GetMlLibrariesForTaskRequestDto { Task = StartAutoMlRequest.Configuration.Task };
             ApiResponseDto apiResponse = await apiClient.GetMlLibrariesForTask(supportedMlLibrariesRequest);
 
-            if (apiResponse.IsSuccessStatusCode)
+            HandleApiResponseWrapper(apiResponse, () => 
             {
-                var librariesDto = Newtonsoft.Json.JsonConvert.DeserializeObject<GetMlLibrariesForTaskResponseDto>(apiResponse.Result.ToString());
+                 var librariesDto = Newtonsoft.Json.JsonConvert.DeserializeObject<GetMlLibrariesForTaskResponseDto>(apiResponse.Result.ToString());
                 _availableLibraries = librariesDto.MlLibraries
                     .Select(lib => new ChipSet.ChipViewModel 
                         {
@@ -285,12 +278,7 @@
                     .ToList();
                 SelectedMlLibs = _availableLibraries.Select(lib => lib.Id).ToList();
                 StateHasChanged();
-                viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
-            }
-            else
-            {
-                viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["SupportedMlLibraries Operation Failed"]);
-            }
+            }, errorMessageKey: "SupportedMlLibraries Operation Failed");
         }
         catch (Exception ex)
         {
@@ -302,54 +290,54 @@
     {
         try
         {
-            Dictionary<string, string> dictionary = new Dictionary<string, string>();
-            dictionary.Add("task", StartAutoMlRequest.Configuration.Task);
-            List<string> libraries = new List<string>();
-
-            StartAutoMlRequest.Configuration.SelecctedMlLibraries = new List<string>();
-            foreach (var libName in libs)
+            Dictionary<string, string> dictionary = new Dictionary<string, string>
             {
-                StartAutoMlRequest.Configuration.SelecctedMlLibraries.Add(libName);
-                libraries.Add(libName);
-            }
+                { "task", StartAutoMlRequest.Configuration.Task }
+            };
+
+            List<string> libraries = libs.ToList();
+            StartAutoMlRequest.Configuration.SelecctedMlLibraries = libs.ToList();
 
             await UpdateStartAutoMlRequest();
-            if (libraries.Count != 0)
+            if (libraries.Any())
             {
                 dictionary.Add("library", JsonConvert.SerializeObject(libraries));
             }
             GetAutoMlSolutionsForConfigurationRequestDto compatibleAutoMlRequest = new GetAutoMlSolutionsForConfigurationRequestDto { Configuration = dictionary };
             ApiResponseDto apiResponse = await apiClient.GetAutoMlSolutionsForConfiguration(compatibleAutoMlRequest);
 
-            if (apiResponse.IsSuccessStatusCode)
+            HandleApiResponseWrapper(apiResponse, () => 
             {
                 _availableAutoMls = Newtonsoft.Json.JsonConvert.DeserializeObject<GetAutoMlSolutionsForConfigurationResponseDto>(apiResponse.Result.ToString());
                 StateHasChanged();
-                viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
-            }
-            else
-            {
-                viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
-            }
+            });
 
             GetAvailableStrategiesRequestDto availableStrategiesRequest = new GetAvailableStrategiesRequestDto { Configuration = dictionary };
             ApiResponseDto availableStrategiesResponse = await apiClient.GetAvailableStrategies(availableStrategiesRequest);
 
-            if (apiResponse.IsSuccessStatusCode)
+            HandleApiResponseWrapper(availableStrategiesResponse, () => 
             {
                 _availableStrategies = Newtonsoft.Json.JsonConvert.DeserializeObject<GetAvailableStrategiesResponseDto>(availableStrategiesResponse.Result.ToString());
                 StateHasChanged();
-                viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
-            }
-            else
-            {
-                viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
-            }
+            });
         }
         catch (Exception ex)
         {
             viewNotifier.Show(ex.GetBaseException().Message, ViewNotifierType.Error, L["Operation Failed"]);
         } 
+    }
+
+    private void HandleApiResponseWrapper<T>(ApiResponseDto<T> apiResponse, Action successAction, string errorMessageKey = "Operation Failed", string successMessageKey = "Operation Successful")
+    {
+        if (apiResponse.IsSuccessStatusCode)
+        {
+            successAction();
+            viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L[successMessageKey]);
+        }
+        else
+        {
+            viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L[errorMessageKey]);
+        }
     }
 
     private async void OnAutoMlSolutionSelectionChanged(ICollection<object> automls)
