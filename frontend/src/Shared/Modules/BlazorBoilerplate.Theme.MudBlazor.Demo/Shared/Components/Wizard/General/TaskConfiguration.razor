@@ -208,11 +208,11 @@
         try
         {
             GetTasksForDatasetTypeRequestDto taskRequest = new GetTasksForDatasetTypeRequestDto { DatasetType = Dataset.Dataset.Type.ID };
-            ApiResponseDto apiResponse = await apiClient.GetTasksForDatasetType(taskRequest);
+            var apiResponse = await apiClient.GetTasksForDatasetType(taskRequest);
 
             HandleApiResponseWrapper(apiResponse, () =>
             {
-                _compatibleTasks = Newtonsoft.Json.JsonConvert.DeserializeObject<GetTasksForDatasetTypeResponseDto>(apiResponse.Result.ToString());
+                _compatibleTasks = apiResponse.Result;
             });
         }
         catch (Exception ex)
@@ -263,11 +263,11 @@
             //}
 
             GetMlLibrariesForTaskRequestDto supportedMlLibrariesRequest = new GetMlLibrariesForTaskRequestDto { Task = StartAutoMlRequest.Configuration.Task };
-            ApiResponseDto apiResponse = await apiClient.GetMlLibrariesForTask(supportedMlLibrariesRequest);
+            var apiResponse = await apiClient.GetMlLibrariesForTask(supportedMlLibrariesRequest);
 
             HandleApiResponseWrapper(apiResponse, () => 
             {
-                 var librariesDto = Newtonsoft.Json.JsonConvert.DeserializeObject<GetMlLibrariesForTaskResponseDto>(apiResponse.Result.ToString());
+                 var librariesDto = apiResponse.Result;
                 _availableLibraries = librariesDto.MlLibraries
                     .Select(lib => new ChipSet.ChipViewModel 
                         {
@@ -302,19 +302,19 @@
                 dictionary.Add("library", JsonConvert.SerializeObject(libraries));
             }
             GetAutoMlSolutionsForConfigurationRequestDto compatibleAutoMlRequest = new GetAutoMlSolutionsForConfigurationRequestDto { Configuration = dictionary };
-            ApiResponseDto apiResponse = await apiClient.GetAutoMlSolutionsForConfiguration(compatibleAutoMlRequest);
+            var apiResponse = await apiClient.GetAutoMlSolutionsForConfiguration(compatibleAutoMlRequest);
 
             HandleApiResponseWrapper(apiResponse, () => 
             {
-                _availableAutoMls = Newtonsoft.Json.JsonConvert.DeserializeObject<GetAutoMlSolutionsForConfigurationResponseDto>(apiResponse.Result.ToString());
+                _availableAutoMls = apiResponse.Result;
             });
 
             GetAvailableStrategiesRequestDto availableStrategiesRequest = new GetAvailableStrategiesRequestDto { Configuration = dictionary };
-            ApiResponseDto availableStrategiesResponse = await apiClient.GetAvailableStrategies(availableStrategiesRequest);
+            var availableStrategiesResponse = await apiClient.GetAvailableStrategies(availableStrategiesRequest);
 
             HandleApiResponseWrapper(availableStrategiesResponse, () => 
             {
-                _availableStrategies = Newtonsoft.Json.JsonConvert.DeserializeObject<GetAvailableStrategiesResponseDto>(availableStrategiesResponse.Result.ToString());
+                _availableStrategies = availableStrategiesResponse.Result;
             });
         }
         catch (Exception ex)
