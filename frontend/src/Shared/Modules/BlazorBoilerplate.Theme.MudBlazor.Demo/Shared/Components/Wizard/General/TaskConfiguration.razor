@@ -213,7 +213,6 @@
             HandleApiResponseWrapper(apiResponse, () =>
             {
                 _compatibleTasks = Newtonsoft.Json.JsonConvert.DeserializeObject<GetTasksForDatasetTypeResponseDto>(apiResponse.Result.ToString());
-                StateHasChanged();
             });
         }
         catch (Exception ex)
@@ -277,7 +276,6 @@
                         })
                     .ToList();
                 SelectedMlLibs = _availableLibraries.Select(lib => lib.Id).ToList();
-                StateHasChanged();
             }, errorMessageKey: "SupportedMlLibraries Operation Failed");
         }
         catch (Exception ex)
@@ -309,7 +307,6 @@
             HandleApiResponseWrapper(apiResponse, () => 
             {
                 _availableAutoMls = Newtonsoft.Json.JsonConvert.DeserializeObject<GetAutoMlSolutionsForConfigurationResponseDto>(apiResponse.Result.ToString());
-                StateHasChanged();
             });
 
             GetAvailableStrategiesRequestDto availableStrategiesRequest = new GetAvailableStrategiesRequestDto { Configuration = dictionary };
@@ -318,7 +315,6 @@
             HandleApiResponseWrapper(availableStrategiesResponse, () => 
             {
                 _availableStrategies = Newtonsoft.Json.JsonConvert.DeserializeObject<GetAvailableStrategiesResponseDto>(availableStrategiesResponse.Result.ToString());
-                StateHasChanged();
             });
         }
         catch (Exception ex)
@@ -332,6 +328,7 @@
         if (apiResponse.IsSuccessStatusCode)
         {
             successAction();
+            StateHasChanged();
             viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L[successMessageKey]);
         }
         else
