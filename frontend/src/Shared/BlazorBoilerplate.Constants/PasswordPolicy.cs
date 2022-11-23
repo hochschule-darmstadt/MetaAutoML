@@ -2,10 +2,10 @@
 {
     public static class PasswordPolicy
     {
-        public const bool RequireDigit = false;
-        public const int RequiredLength = 6;
-        public const bool RequireNonAlphanumeric = false;
-        public const bool RequireUppercase = false;
-        public const bool RequireLowercase = false;
+        public const bool RequireDigit = true;
+        public const int RequiredLength = 8;
+        public const bool RequireNonAlphanumeric = true;
+        public const bool RequireUppercase = true;
+        public const bool RequireLowercase = true;
     }
 }
