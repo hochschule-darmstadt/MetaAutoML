@@ -67,37 +67,8 @@
     <MudExpansionPanels>
         <MudExpansionPanel Text="@L["Details"]">
             <ChipSet ViewModel="@_mlLibsViewModel" Label="@L["ML libraries"]" />
-            <ChipSet ViewModel="@_autoMlSolutionsViewModel" Label="@L["ML libraries"]" />
-            
-            @if (_availableStrategies != null)
-            {
-                <MudText Typo="Typo.subtitle2" Class="mt-4">@L["Enabled strategies"]</MudText>
-                <MudChipSet
-                    SelectedValuesChanged="OnStrategySelectionChanged"
-                    Filter="true"
-                    MultiSelection="true"
-                >
-                    @if (_availableStrategies != null)
-                    {
-                        @foreach (var strategy in _availableStrategies.Strategies)
-                        {
-                            <MudTooltip Text="@strategy.Description" Delay="600" Arrow="true" Placement="Placement.Bottom" Class="strategy-description-tooltip">
-                                <MudChip
-                                    Value="@strategy.Id"
-                                    Text="@strategy.Title"
-                                    Default="true"
-                                    Variant="Variant.Text"
-                                    Color="Color.Secondary"
-                                />
-                            </MudTooltip>
-                        }
-                    }
-                </MudChipSet>
-            }
-            else
-            {
-                <DataLoaderSpinner />
-            }
+            <ChipSet ViewModel="@_autoMlSolutionsViewModel" Label="@L["AutoML solutions"]" />
+            <ChipSet ViewModel="@_strategiesViewModel" Label="@L["Enabled strategies"]" />
             @if (_availableParameters != null)
             {
                 <MudText Typo="Typo.subtitle2" Class="mt-4">Available parameters</MudText>
@@ -132,12 +103,12 @@
     }
 
     private GetTasksForDatasetTypeResponseDto _compatibleTasks;
-    private GetAvailableStrategiesResponseDto _availableStrategies;
     private List<AutoMlParameterDto> _availableParameters;
     private List<string> _columnNames;
 
     private ChipSet.ChipSetViewModel _mlLibsViewModel = new();
     private ChipSet.ChipSetViewModel _autoMlSolutionsViewModel = new();
+    private ChipSet.ChipSetViewModel _strategiesViewModel = new();
 
     protected async override void OnInitialized()
     {
@@ -145,6 +116,7 @@
         SetupStartAutoMLConfiguration();
         _mlLibsViewModel.SelectedIdsChanged += async (_, __) => await OnMlLibrarySelectionChanged();
         _autoMlSolutionsViewModel.SelectedIdsChanged += async (_, __) => await OnAutoMlSolutionSelectionChanged();
+        _strategiesViewModel.SelectedIdsChanged += async (_, __) => await OnStrategySelectionChanged();
         await LoadData();
     }
 
@@ -249,8 +221,8 @@
         }
     }
 
-    private (string id, string label) ConvertObjectInfoToChip(ObjectInfomationDto objectInfo) =>
-        (objectInfo.ID, objectInfo.Properties.GetValueOrDefault("skos:prefLabel"));
+    private (string id, string label, string toolTip) ConvertObjectInfoToChip(ObjectInfomationDto objectInfo) =>
+        (objectInfo.ID, objectInfo.Properties.GetValueOrDefault("skos:prefLabel"), null);
 
     private async Task OnMlLibrarySelectionChanged()
     {
@@ -282,7 +254,7 @@
 
             HandleApiResponseWrapper(availableStrategiesResponse, () => 
             {
-                _availableStrategies = availableStrategiesResponse.Result;
+                _strategiesViewModel.SetAvailableChips(availableStrategiesResponse.Result.Strategies.Select(s => (s.Id, s.Title, s.Description)));
             });
         }
         catch (Exception ex)
@@ -313,14 +285,10 @@
         await RefreshParameters();
     }
 
-    private async void OnStrategySelectionChanged(ICollection<object> strategies)
+    private Task OnStrategySelectionChanged()
     {
-        StartAutoMlRequest.Configuration.EnabledStrategies = new List<string>();
-        foreach (var chip in strategies)
-        {
-            StartAutoMlRequest.Configuration.EnabledStrategies.Add(chip.ToString());
-        }
-        await UpdateStartAutoMlRequest();
+        StartAutoMlRequest.Configuration.EnabledStrategies = _strategiesViewModel.SelectedIds.ToList();
+        return UpdateStartAutoMlRequest();
     }
 
     // TODO: Use binding instead of event handlers
