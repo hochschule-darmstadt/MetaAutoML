@@ -153,10 +153,7 @@
             GetTasksForDatasetTypeRequestDto taskRequest = new GetTasksForDatasetTypeRequestDto { DatasetType = Dataset.Dataset.Type.ID };
             var apiResponse = await apiClient.GetTasksForDatasetType(taskRequest);
 
-            HandleApiResponseWrapper(apiResponse, () =>
-            {
-                _compatibleTasks = apiResponse.Result;
-            });
+            HandleApiResponseWrapper(apiResponse, () => _compatibleTasks = apiResponse.Result);
         }
         catch (Exception ex)
         {
@@ -209,11 +206,10 @@
             var apiResponse = await apiClient.GetMlLibrariesForTask(supportedMlLibrariesRequest);
 
             HandleApiResponseWrapper(apiResponse, () => 
-            {
                  _mlLibsViewModel.SetAvailableChips(
                     apiResponse.Result.MlLibraries
-                        .Select(ConvertObjectInfoToChip));
-            }, errorMessageKey: "SupportedMlLibraries Operation Failed");
+                        .Select(ConvertObjectInfoToChip)),
+            errorMessageKey: "SupportedMlLibraries Operation Failed");
         }
         catch (Exception ex)
         {
@@ -245,17 +241,15 @@
             var apiResponse = await apiClient.GetAutoMlSolutionsForConfiguration(compatibleAutoMlRequest);
 
             HandleApiResponseWrapper(apiResponse, () => 
-            {
-                _autoMlSolutionsViewModel.SetAvailableChips(apiResponse.Result.AutoMlSolutions.Select(ConvertObjectInfoToChip));
-            });
+                _autoMlSolutionsViewModel.SetAvailableChips(apiResponse.Result.AutoMlSolutions.Select(ConvertObjectInfoToChip))
+            );
 
             GetAvailableStrategiesRequestDto availableStrategiesRequest = new GetAvailableStrategiesRequestDto { Configuration = dictionary };
             var availableStrategiesResponse = await apiClient.GetAvailableStrategies(availableStrategiesRequest);
 
-            HandleApiResponseWrapper(availableStrategiesResponse, () => 
-            {
-                _strategiesViewModel.SetAvailableChips(availableStrategiesResponse.Result.Strategies.Select(s => (s.Id, s.Title, s.Description)));
-            });
+            HandleApiResponseWrapper(availableStrategiesResponse, () =>
+                _strategiesViewModel.SetAvailableChips(availableStrategiesResponse.Result.Strategies.Select(s => (s.Id, s.Title, s.Description)))
+            );
         }
         catch (Exception ex)
         {
