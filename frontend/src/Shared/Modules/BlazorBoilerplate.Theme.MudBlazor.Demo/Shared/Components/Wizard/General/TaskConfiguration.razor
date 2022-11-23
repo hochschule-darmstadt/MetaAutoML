@@ -158,7 +158,7 @@
     {
         base.OnInitialized();
         SetupStartAutoMLConfiguration();
-        _mlLibsViewModel.SelectedIdsChanged += (sender, _) => OnMlLibrarySelectionChanged(_mlLibsViewModel.SelectedIds);
+        _mlLibsViewModel.SelectedIdsChanged += async (_, __) => await OnMlLibrarySelectionChanged();
         await LoadData();
     }
 
@@ -263,7 +263,7 @@
         }
     }
 
-    private async void OnMlLibrarySelectionChanged(ICollection<string> libs)
+    private async Task OnMlLibrarySelectionChanged()
     {
         try
         {
@@ -272,8 +272,8 @@
                 { "task", StartAutoMlRequest.Configuration.Task }
             };
 
-            List<string> libraries = libs.ToList();
-            StartAutoMlRequest.Configuration.SelecctedMlLibraries = libs.ToList();
+            List<string> libraries = _mlLibsViewModel.SelectedIds.ToList();
+            StartAutoMlRequest.Configuration.SelecctedMlLibraries = _mlLibsViewModel.SelectedIds.ToList();
 
             await UpdateStartAutoMlRequest();
             if (libraries.Any())
