@@ -1,10 +1,10 @@
-@if (AvailableChips?.Any() ?? false)
+@if (ViewModel.AvailableChips?.Any() ?? false)
 {
     <MudText Typo="Typo.subtitle2">@Label</MudText>
-    <MudChipSet Filter="true" MultiSelection="true" @bind-SelectedValues="SelectedValues">
-        @foreach (var chip in AvailableChips)
+    <MudChipSet Filter="true" MultiSelection="true" SelectedValues="SelectedValues">
+        @foreach (var chip in ViewModel.AvailableChips)
         {
-            <MudChip Value="@chip.Id" Text="@chip.Label" Variant="Variant.Text" Color="Color.Secondary" />
+            <MudChip Value="@chip.Id" Text="@chip.Label" Variant="Variant.Text" Color="Color.Secondary" @onclick="() => ToggleChip(chip)"/>
         }
     </MudChipSet>
 }
@@ -15,23 +15,69 @@ else
 
 @code {
     [Parameter]
-    public ICollection<ChipViewModel> AvailableChips { get; set; }
+    public ChipSetViewModel ViewModel { get; set; }
 
     [Parameter]
     public string Label { get; set; }
 
-    [Parameter]
-    public ICollection<string> SelectedIds { get; set; }
-    [Parameter]
-    public EventCallback<ICollection<string>> SelectedIdsChanged { get; set; }
+    private ICollection<object> SelectedValues => ViewModel.SelectedIds.Cast<object>().ToList();
 
-    private ICollection<object> SelectedValues 
+    private void ToggleChip(ChipViewModel chip)
     {
-        get => SelectedIds.Cast<object>().ToList();
-        set 
-        { 
-            SelectedIds = value.Cast<string>().ToList();
-            SelectedIdsChanged.InvokeAsync(SelectedIds);
+        chip.IsSelected = !chip.IsSelected;
+        ViewModel.RaiseSelectedIdsChanged();
+        StateHasChanged();
+    }
+
+    /// <summary>
+    /// ViewModel for ChipSet component. Wraps all the data needed and allows listening to data events instead of UI events.
+    /// </summary>
+    public class ChipSetViewModel
+    {
+
+        /// <summary>
+        /// Event that is fired when the selected ids changed.
+        /// </summary>
+        public event EventHandler SelectedIdsChanged;
+
+        /// <summary>
+        /// List of available elements in the ChipSet
+        /// </summary>
+        /// <returns></returns>
+        public ICollection<ChipViewModel> AvailableChips { get; } = new List<ChipViewModel>();
+
+        /// <summary>
+        /// List of selected elements in the ChipSet.
+        /// </summary>
+        /// <value></value>
+        public IEnumerable<string> SelectedIds => AvailableChips.Where(c => c.IsSelected).Select(c => c.Id); 
+        
+
+        /// <summary>
+        /// Updates the collection of available chips and adapt the selected ids accordingly.
+        /// Newly available options are selected by default.
+        /// </summary>
+        /// <param name="availableChips">Collection of tuples that contain an id and a label. (Each one is shown as a chip)</param>
+        public void SetAvailableChips(IEnumerable<(string id, string label)> availableChips)
+        {
+            var addedChips = availableChips.Where(ac => AvailableChips.All(c => c.Id != ac.id)).ToList();
+            var removedChips = AvailableChips.Where(c => availableChips.All(ac => ac.id != c.Id)).ToList();
+            foreach (var chipToRemove in removedChips)
+            {
+                AvailableChips.Remove(chipToRemove);
+            }
+
+            foreach (var chipToAdd in addedChips.Select(ac => new ChipViewModel {Id = ac.id, Label = ac.label}))
+            {
+                AvailableChips.Add(chipToAdd);
+            }
+
+            RaiseSelectedIdsChanged();
+        }
+
+        public void RaiseSelectedIdsChanged()
+        {
+            SelectedIdsChanged(this, EventArgs.Empty);
         }
     }
 
@@ -39,5 +85,6 @@ else
     {
         public string Label { get; set; }
         public string Id { get; set; }
+        public bool IsSelected { get; set; } = true;
     }
 }

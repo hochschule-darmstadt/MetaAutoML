@@ -66,24 +66,9 @@
     @* TODO: Extract the conbination: MudText, MudChipset into a separate component. It is used several times here. *@
     <MudExpansionPanels>
         <MudExpansionPanel Text="@L["Details"]">
-            <ChipSet AvailableChips="@_mlLibsViewModel.AvailableChips" Label="@L["ML libraries"]" @bind-SelectedIds="_mlLibsViewModel.SelectedIds" />
-            @if (_availableAutoMls != null)
-            {
-                <MudText Typo="Typo.subtitle2" Class="mt-4">@L["AutoML solutions"]</MudText>
-                <MudChipSet SelectedValuesChanged="OnAutoMlSolutionSelectionChanged" Filter="true" MultiSelection="true" >
-                    @if (_availableAutoMls != null)
-                    {
-                        @foreach (var sln in _availableAutoMls.AutoMlSolutions)
-                        {
-                            <MudChip Value="@sln.ID" Text="@(sln.Properties.ContainsKey("skos:prefLabel") ? sln.Properties["skos:prefLabel"] : "")" Default="true" Variant="Variant.Text" Color="Color.Secondary" />
-                        }
-                    }
-                </MudChipSet>
-            }
-            else
-            {
-                <DataLoaderSpinner />
-            }
+            <ChipSet ViewModel="@_mlLibsViewModel" Label="@L["ML libraries"]" />
+            <ChipSet ViewModel="@_autoMlSolutionsViewModel" Label="@L["ML libraries"]" />
+            
             @if (_availableStrategies != null)
             {
                 <MudText Typo="Typo.subtitle2" Class="mt-4">@L["Enabled strategies"]</MudText>
@@ -147,18 +132,19 @@
     }
 
     private GetTasksForDatasetTypeResponseDto _compatibleTasks;
-    private GetAutoMlSolutionsForConfigurationResponseDto _availableAutoMls;
     private GetAvailableStrategiesResponseDto _availableStrategies;
     private List<AutoMlParameterDto> _availableParameters;
     private List<string> _columnNames;
 
-    private ChipSetViewModel _mlLibsViewModel = new();
+    private ChipSet.ChipSetViewModel _mlLibsViewModel = new();
+    private ChipSet.ChipSetViewModel _autoMlSolutionsViewModel = new();
 
     protected async override void OnInitialized()
     {
         base.OnInitialized();
         SetupStartAutoMLConfiguration();
         _mlLibsViewModel.SelectedIdsChanged += async (_, __) => await OnMlLibrarySelectionChanged();
+        _autoMlSolutionsViewModel.SelectedIdsChanged += async (_, __) => await OnAutoMlSolutionSelectionChanged();
         await LoadData();
     }
 
@@ -254,7 +240,7 @@
             {
                  _mlLibsViewModel.SetAvailableChips(
                     apiResponse.Result.MlLibraries
-                        .Select(lib => (lib.ID, lib.Properties.GetValueOrDefault("skos:prefLabel"))));                
+                        .Select(ConvertObjectInfoToChip));
             }, errorMessageKey: "SupportedMlLibraries Operation Failed");
         }
         catch (Exception ex)
@@ -262,6 +248,9 @@
             viewNotifier.Show(ex.GetBaseException().Message, ViewNotifierType.Error, L["Operation Failed"]);
         }
     }
+
+    private (string id, string label) ConvertObjectInfoToChip(ObjectInfomationDto objectInfo) =>
+        (objectInfo.ID, objectInfo.Properties.GetValueOrDefault("skos:prefLabel"));
 
     private async Task OnMlLibrarySelectionChanged()
     {
@@ -285,7 +274,7 @@
 
             HandleApiResponseWrapper(apiResponse, () => 
             {
-                _availableAutoMls = apiResponse.Result;
+                _autoMlSolutionsViewModel.SetAvailableChips(apiResponse.Result.AutoMlSolutions.Select(ConvertObjectInfoToChip));
             });
 
             GetAvailableStrategiesRequestDto availableStrategiesRequest = new GetAvailableStrategiesRequestDto { Configuration = dictionary };
@@ -316,13 +305,10 @@
         }
     }
 
-    private async void OnAutoMlSolutionSelectionChanged(ICollection<object> automls)
+    private async Task OnAutoMlSolutionSelectionChanged()
     {
-        StartAutoMlRequest.Configuration.SelectedAutoMlSolutions = new List<string>();
-        foreach (var chip in automls)
-        {
-            StartAutoMlRequest.Configuration.SelectedAutoMlSolutions.Add(chip.ToString());
-        }
+        StartAutoMlRequest.Configuration.SelectedAutoMlSolutions = _autoMlSolutionsViewModel.SelectedIds.ToList();
+
         await UpdateStartAutoMlRequest();
         await RefreshParameters();
     }
@@ -342,72 +328,5 @@
     {
         StartAutoMlRequest.Configuration.Target = value;
         await UpdateStartAutoMlRequest();
-    }
-
-    /// <summary>
-    /// ViewModel for ChipSet component. Wraps all the data needed and allows listening to data events instead of UI events.
-    /// </summary>
-    private class ChipSetViewModel
-    {
-        private ICollection<string> _selectedIds = new List<string>();
-
-        /// <summary>
-        /// Event that is fired when the selected ids changed.
-        /// </summary>
-        public event EventHandler SelectedIdsChanged;
-
-        /// <summary>
-        /// List of available elements in the ChipSet
-        /// </summary>
-        /// <returns></returns>
-        public ICollection<ChipSet.ChipViewModel> AvailableChips { get; } = new List<ChipSet.ChipViewModel>();
-
-        /// <summary>
-        /// List of selected elements in the ChipSet.
-        /// </summary>
-        /// <value></value>
-        public ICollection<string> SelectedIds 
-        { 
-            get => _selectedIds; 
-            set 
-            {
-                if (_selectedIds.SequenceEqual(value))
-                {
-                    return;
-                }
-                
-                _selectedIds = value;
-                RaiseSelectedIdsChanged();
-            }
-        }
-
-        /// <summary>
-        /// Updates the collection of available chips and adapt the selected ids accordingly.
-        /// Newly available options are selected by default.
-        /// </summary>
-        /// <param name="availableChips">Collection of tuples that contain an id and a label. (Each one is shown as a chip)</param>
-        public void SetAvailableChips(IEnumerable<(string id, string label)> availableChips)
-        {
-            var addedChips = availableChips.Where(ac => AvailableChips.All(c => c.Id != ac.id)).ToList();
-            var removedChips = AvailableChips.Where(c => availableChips.All(ac => ac.id != c.Id)).ToList();
-            foreach (var chipToRemove in removedChips)
-            {
-                AvailableChips.Remove(chipToRemove);
-                SelectedIds.Remove(chipToRemove.Id);
-            }
-
-            foreach (var chipToAdd in addedChips.Select(ac => new ChipSet.ChipViewModel {Id = ac.id, Label = ac.label}))
-            {
-                AvailableChips.Add(chipToAdd);
-                SelectedIds.Add(chipToAdd.Id);
-            }
-
-            RaiseSelectedIdsChanged();
-        }
-
-        private void RaiseSelectedIdsChanged()
-        {
-            SelectedIdsChanged(this, EventArgs.Empty);
-        }
-    }
+    }    
 }
