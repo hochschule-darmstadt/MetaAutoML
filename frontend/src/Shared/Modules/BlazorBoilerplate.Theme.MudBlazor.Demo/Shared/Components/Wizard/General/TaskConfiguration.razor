@@ -66,7 +66,7 @@
     @* TODO: Extract the conbination: MudText, MudChipset into a separate component. It is used several times here. *@
     <MudExpansionPanels>
         <MudExpansionPanel Text="@L["Details"]">
-            <ChipSet AvailableChips="@_availableLibraries" Label="@L["ML libraries"]" @bind-SelectedIds="SelectedMlLibs" />
+            <ChipSet AvailableChips="@_mlLibsViewModel.AvailableChips" Label="@L["ML libraries"]" @bind-SelectedIds="_mlLibsViewModel.SelectedIds" />
             @if (_availableAutoMls != null)
             {
                 <MudText Typo="Typo.subtitle2" Class="mt-4">@L["AutoML solutions"]</MudText>
@@ -147,33 +147,18 @@
     }
 
     private GetTasksForDatasetTypeResponseDto _compatibleTasks;
-    private List<ChipSet.ChipViewModel> _availableLibraries;
     private GetAutoMlSolutionsForConfigurationResponseDto _availableAutoMls;
     private GetAvailableStrategiesResponseDto _availableStrategies;
     private List<AutoMlParameterDto> _availableParameters;
     private List<string> _columnNames;
 
-    public ICollection<string> SelectedMlLibs 
-    { 
-        get
-        {
-            return _selectedMlLibs;
-        } 
-        set
-        {
-            _selectedMlLibs = value;
-            if (_selectedMlLibs != null)
-            {
-                OnMlLibrarySelectionChanged(SelectedMlLibs);
-            }
-        }
-    }
-    private ICollection<string> _selectedMlLibs;
+    private ChipSetViewModel _mlLibsViewModel = new();
 
     protected async override void OnInitialized()
     {
         base.OnInitialized();
         SetupStartAutoMLConfiguration();
+        _mlLibsViewModel.SelectedIdsChanged += (sender, _) => OnMlLibrarySelectionChanged(_mlLibsViewModel.SelectedIds);
         await LoadData();
     }
 
@@ -267,15 +252,9 @@
 
             HandleApiResponseWrapper(apiResponse, () => 
             {
-                 var librariesDto = apiResponse.Result;
-                _availableLibraries = librariesDto.MlLibraries
-                    .Select(lib => new ChipSet.ChipViewModel 
-                        {
-                            Id = lib.ID,
-                            Label = lib.Properties.GetValueOrDefault("skos:prefLabel")
-                        })
-                    .ToList();
-                SelectedMlLibs = _availableLibraries.Select(lib => lib.Id).ToList();
+                 _mlLibsViewModel.SetAvailableChips(
+                    apiResponse.Result.MlLibraries
+                        .Select(lib => (lib.ID, lib.Properties.GetValueOrDefault("skos:prefLabel"))));                
             }, errorMessageKey: "SupportedMlLibraries Operation Failed");
         }
         catch (Exception ex)
@@ -363,5 +342,72 @@
     {
         StartAutoMlRequest.Configuration.Target = value;
         await UpdateStartAutoMlRequest();
+    }
+
+    /// <summary>
+    /// ViewModel for ChipSet component. Wraps all the data needed and allows listening to data events instead of UI events.
+    /// </summary>
+    private class ChipSetViewModel
+    {
+        private ICollection<string> _selectedIds = new List<string>();
+
+        /// <summary>
+        /// Event that is fired when the selected ids changed.
+        /// </summary>
+        public event EventHandler SelectedIdsChanged;
+
+        /// <summary>
+        /// List of available elements in the ChipSet
+        /// </summary>
+        /// <returns></returns>
+        public ICollection<ChipSet.ChipViewModel> AvailableChips { get; } = new List<ChipSet.ChipViewModel>();
+
+        /// <summary>
+        /// List of selected elements in the ChipSet.
+        /// </summary>
+        /// <value></value>
+        public ICollection<string> SelectedIds 
+        { 
+            get => _selectedIds; 
+            set 
+            {
+                if (_selectedIds.SequenceEqual(value))
+                {
+                    return;
+                }
+                
+                _selectedIds = value;
+                RaiseSelectedIdsChanged();
+            }
+        }
+
+        /// <summary>
+        /// Updates the collection of available chips and adapt the selected ids accordingly.
+        /// Newly available options are selected by default.
+        /// </summary>
+        /// <param name="availableChips">Collection of tuples that contain an id and a label. (Each one is shown as a chip)</param>
+        public void SetAvailableChips(IEnumerable<(string id, string label)> availableChips)
+        {
+            var addedChips = availableChips.Where(ac => AvailableChips.All(c => c.Id != ac.id)).ToList();
+            var removedChips = AvailableChips.Where(c => availableChips.All(ac => ac.id != c.Id)).ToList();
+            foreach (var chipToRemove in removedChips)
+            {
+                AvailableChips.Remove(chipToRemove);
+                SelectedIds.Remove(chipToRemove.Id);
+            }
+
+            foreach (var chipToAdd in addedChips.Select(ac => new ChipSet.ChipViewModel {Id = ac.id, Label = ac.label}))
+            {
+                AvailableChips.Add(chipToAdd);
+                SelectedIds.Add(chipToAdd.Id);
+            }
+
+            RaiseSelectedIdsChanged();
+        }
+
+        private void RaiseSelectedIdsChanged()
+        {
+            SelectedIdsChanged(this, EventArgs.Empty);
+        }
     }
 }
