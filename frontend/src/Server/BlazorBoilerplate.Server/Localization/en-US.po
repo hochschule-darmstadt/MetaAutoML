@@ -1730,3 +1730,76 @@ msgstr "Could not read dataset successfully, change configuration."
 msgctxt "Global"
 msgid "Search by name, status, lib or AutoML system"
 msgstr "Search by name, status, lib, AutoML system"
+
+
+msgctxt "Global"
+msgid "CookieName"
+msgstr "Name"
+
+msgctxt "Global"
+msgid "CookieLifecycle"
+msgstr "Validity"
+
+msgctxt "Global"
+msgid "CookieDescription"
+msgstr "Description"
+
+msgctxt "Global"
+msgid "AntiforgeryCookieName"
+msgstr ".AspNetCore.Antiforgery"
+
+msgctxt "Global"
+msgid "AntiforgeryCookieLifecycle"
+msgstr "Session"
+
+msgctxt "Global"
+msgid "AntiforgeryCookieDescription"
+msgstr "This cookie saves the anti forgery token, used to prevent Cross-Site-Request-Forgery-Attack."
+
+msgctxt "Global"
+msgid "CultureCookieName"
+msgstr ".AspNetCore.Culture"
+
+msgctxt "Global"
+msgid "CultureCookieLifecycle"
+msgstr "1 month"
+
+msgctxt "Global"
+msgid "CultureCookieDescription"
+msgstr "This cookie saves the language selection, used to display the correct language."
+
+msgctxt "Global"
+msgid "CookieConsentCookieName"
+msgstr ".AspNet.CookieConsent"
+
+msgctxt "Global"
+msgid "CookieConsentCookieLifecycle"
+msgstr "6 month"
+
+msgctxt "Global"
+msgid "CookieConsentCookieDescription"
+msgstr "This cookie saves the list of allowed cookies by the user."
+
+msgctxt "Global"
+msgid "IdentityApplicationCookieName"
+msgstr ".AspNetCore.Identity.Application"
+
+msgctxt "Global"
+msgid "IdentityApplicationCookieLifecycle"
+msgstr "Session"
+
+msgctxt "Global"
+msgid "IdentityApplicationCookieDescription"
+msgstr "This cookie allows the cookie based user authorisation, used for the user management."
+
+msgctxt "Global"
+msgid "IdsrvSessionCookieName"
+msgstr "idsrv.session"
+
+msgctxt "Global"
+msgid "IdsrvSessionCookieLifecycle"
+msgstr "Session"
+
+msgctxt "Global"
+msgid "IdsrvSessionCookieDescription"
+msgstr "This cookie saves the current session id, used for the user management."

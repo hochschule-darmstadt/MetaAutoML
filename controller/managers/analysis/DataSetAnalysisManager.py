@@ -63,6 +63,7 @@ class DataSetAnalysisManager(Thread):
                                              index_col=False)
         else:
             pass
+
         # Create plot filepath
         self.plot_filepath = os.path.join(os.path.dirname(self.__dataset['path']), "plots")
         os.makedirs(self.plot_filepath, exist_ok=True)
@@ -154,7 +155,9 @@ class DataSetAnalysisManager(Thread):
         # Get processed version of dataset to make calculation of feature correlation using scipy spearmanr possible
         proc_dataset = self.__process_categorical_columns()
         proc_dataset = self.__fill_nan_values(proc_dataset)
-
+        ## TODO consider to add more analysis feature in case of text, image,...
+        if self.__dataset["type"] in [":text"]:
+            return
         # Get correlations using spearmanr
         corr = spearmanr(proc_dataset).correlation
         # Make correlation plot
@@ -352,7 +355,13 @@ class DataSetAnalysisManager(Thread):
 
         Return dataset: Dataset with filled nan values
         """
-        fill_value = int("9" * (len(str(int(dataset.max(numeric_only=True).max()))) + 1))
+        # TODO refactoring
+        # handle in case most of the data are not numeric 
+        # consider using this function only where numerical values are avaialbe
+        max_value = dataset.max(numeric_only=True).max() # max value in data set
+        if pd.isna(max_value):
+            max_value = 0
+        fill_value = int("9" * (len(str(int(max_value))) + 1))
         for col in dataset.columns:
             if dataset[col].dtype.name == "category":
                 # Category cols require special handling
@@ -420,7 +429,7 @@ class DataSetAnalysisManager(Thread):
                    f"values."
         plt.title(colname)
         plt.tight_layout()
-        filename = os.path.join(plot_path, colname + "_column_plot.svg")
+        filename = os.path.join(plot_path, self.escape_column_name(colname) + "_column_plot.svg")
         plt.savefig(filename)
         plt.clf()
         plt.close('all')
@@ -502,7 +511,7 @@ class DataSetAnalysisManager(Thread):
         plt.xlabel(f"Most common combinations of [{first_colname}, {second_colname}]")
         plt.ylabel(f"Frequency")
         plt.tight_layout()
-        filename = os.path.join(plot_path, "feature_imbalance_" + first_colname + "_vs_" + second_colname + ".svg")
+        filename = os.path.join(plot_path, "feature_imbalance_" + self.escape_column_name(first_colname) + "_vs_" + self.escape_column_name(second_colname) + ".svg")
         plt.savefig(filename)
         plt.clf()
         plt.close('all')
@@ -525,3 +534,8 @@ class DataSetAnalysisManager(Thread):
             "duplicate_columns": [],
             "duplicate_rows": [],
         }
+
+
+    def escape_column_name(self, colname: str) -> str:
+        # remove / in column names to avoid path error
+        return colname.replace('/', '')
