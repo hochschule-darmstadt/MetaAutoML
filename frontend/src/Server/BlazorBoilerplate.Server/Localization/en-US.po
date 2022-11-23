@@ -1803,3 +1803,7 @@ msgstr "Session"
 msgctxt "Global"
 msgid "IdsrvSessionCookieDescription"
 msgstr "This cookie saves the current session id, used for the user management."
+
+msgctxt "Global"
+msgid "FolderStructureNotCorrectErrorMessage"
+msgstr "Die Ordnerstruktur der Zip-Datei entspricht nicht den Anforderungen."

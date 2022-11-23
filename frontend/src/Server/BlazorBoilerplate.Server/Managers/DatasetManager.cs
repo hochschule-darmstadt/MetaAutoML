@@ -97,7 +97,7 @@ namespace BlazorBoilerplate.Server.Managers
                         var reply = _client.CreateDataset(grpcRequest);
                         return new ApiResponse(Status200OK, null, "");
                     } else {
-                        return new ApiResponse(Status406NotAcceptable, "The uploaded dataset is not structured correctly.");
+                        return new ApiResponse(Status406NotAcceptable, "FolderStructureNotCorrectErrorMessage");
                     }
                 }
                 return new ApiResponse(Status200OK, null, "");
