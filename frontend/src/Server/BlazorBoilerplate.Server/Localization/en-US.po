@@ -1806,4 +1806,4 @@ msgstr "This cookie saves the current session id, used for the user management."
 
 msgctxt "Global"
 msgid "FolderStructureNotCorrectErrorMessage"
-msgstr "Die Ordnerstruktur der Zip-Datei entspricht nicht den Anforderungen."
+msgstr "The folder structure of the zip file does not meet the requirements.."
