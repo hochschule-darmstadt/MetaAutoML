@@ -160,6 +160,10 @@ dmypy.json
 .devcontainer
 #.vscode
 
+#User specific files
+frontend/src/Server/BlazorBoilerplate.Server/appsettings.json
+frontend/src/Server/BlazorBoilerplate.Server/Properties/launchSettings.json
+
 #controller ignores
 # ignore all output files, but keep the directories with the .gitkeep file
 controller/app-data/output/*/*
