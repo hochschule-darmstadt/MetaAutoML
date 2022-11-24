@@ -109,7 +109,7 @@ namespace BlazorBoilerplate.Theme.Material.Services
 
                     if (!apiResponse.IsSuccessStatusCode)
                     {
-                        _notifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, _l["Operation Failed"]);
+                        _notifier.Show(_l[apiResponse.Message] + " : " + apiResponse.StatusCode, ViewNotifierType.Error, _l["Operation Failed"]);
                     }
 
                     if (apiResponse.StatusCode == Status406NotAcceptable)
