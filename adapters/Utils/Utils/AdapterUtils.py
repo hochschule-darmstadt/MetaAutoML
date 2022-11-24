@@ -455,7 +455,7 @@ def write_tabular_dataset_test_data(df: pd.DataFrame, dir_name: str) -> str:
     """
     file_path = os.path.join(dir_name, "test.csv")
     #np.reshape(df, (-1, 1))
-    pd.DataFrame(data=df, columns=df.columns).to_csv(file_path)
+    pd.DataFrame(data=df, columns=df.columns).to_csv(file_path, index=False)
     os.chmod(file_path, 0o744)
     return file_path
 
