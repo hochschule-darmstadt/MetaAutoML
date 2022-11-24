@@ -74,7 +74,7 @@ if __name__ == '__main__':
         }
         X = pd.read_csv(filepath, delimiter=delimiters[config_json["dataset_configuration"]['file_configuration']['delimiter']], escapechar=config_json["dataset_configuration"]['file_configuration']['escape_character'], decimal=config_json["dataset_configuration"]['file_configuration']['decimal_character']).drop(target, axis=1, errors='ignore')
 
-        X = X.iloc[int(X.shape[0] * 0.2):]
+        X = X.iloc[:]
 
         X = feature_preparation(X, features)
 
