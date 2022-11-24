@@ -62,6 +62,7 @@ class DataPreparationStrategyController(IAbstractStrategy):
             raise RuntimeError('Could not access Adapter Runtime Manager Agent!')
         dataset_configuration = json.loads(agent.get_adapter_runtime_manager().get_training_request().dataset_configuration)
 
+        dataset_configuration['features'] = {}
         for column_a, column_b in duplicate_columns:
             self._log.info(f'do_ignore_redundant_features: Encountered redundant feature "{column_b}" (same as "{column_a}"), ingoring the column.')
             dataset_configuration['features'][column_b] = GrpcDataType.DATATYPE_IGNORE
