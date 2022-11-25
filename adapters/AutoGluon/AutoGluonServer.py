@@ -3,13 +3,10 @@ import logging
 import os
 import shutil
 
-from autogluon.tabular import TabularPredictor
-from autogluon.vision import ImagePredictor, ImageDataset
 from concurrent import futures
 
 from AdapterUtils import *
 from Container import *
-from autogluon.tabular import TabularPredictor
 from JsonUtil import get_config_property
 from grpclib.server import Server
 from AdapterService import AdapterService

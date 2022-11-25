@@ -2,8 +2,8 @@ import os
 
 from AbstractAdapter import AbstractAdapter
 from AdapterUtils import export_model, prepare_tabular_dataset, data_loader
-from autogluon.tabular import TabularDataset, TabularPredictor 
-from autogluon.text import TextPredictor
+from autogluon.tabular import TabularDataset, TabularPredictor
+from autogluon.multimodal import MultiModalPredictor
 from JsonUtil import get_config_property#
 from AbstractAdapter import AbstractAdapter
 from AdapterUtils import read_tabular_dataset_training_data, prepare_tabular_dataset, export_model
@@ -106,7 +106,7 @@ class AutoGluonAdapter(AbstractAdapter):
             'epochs': self._configuration["runtime_constraints"]["epochs"] 
             }
         
-        model = ImagePredictor(
+        model = MultiModalPredictor(
             label=self._target,
             path=self._result_path)
         
@@ -122,8 +122,8 @@ class AutoGluonAdapter(AbstractAdapter):
         X, y = prepare_tabular_dataset(self.df, self._configuration)
         data = X
         data[self._target] = y
-        model = TextPredictor(label=self._target,
-                                 problem_type="multiclass",
+        model = MultiModalPredictor(label=self._target,
+                                 #problem_type="multiclass",
                                  path=self._result_path).fit(
             data,
             time_limit=self._time_limit)
@@ -135,8 +135,8 @@ class AutoGluonAdapter(AbstractAdapter):
         X, y = prepare_tabular_dataset(self.df, self._configuration)
         data = X
         data[self._target] = y
-        model = TextPredictor(label=self._target,
-                                 problem_type="regression",
+        model = MultiModalPredictor(label=self._target,
+                                 #problem_type="regression",
                                  path=self._result_path).fit(
             data,
             time_limit=self._time_limit)
