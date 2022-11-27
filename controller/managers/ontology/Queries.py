@@ -82,3 +82,23 @@ ONTOLOGY_QUERY_GET_ALL_DETAILS_BY_ID = """
             ?s ?p ?o
             }
             """
+
+"""
+SPARQL query to retrieve all configuration options with their corresponding values of a given automl and a given task
+"""
+ONTOLOGY_QUERY_GET_CONFIGURATION_BY_AUTOML_ID_AND_TASK_ID = """
+        PREFIX : <http://h-da.de/ml-ontology/>
+
+        SELECT ?param_iri ?param_label ?param_type ?value_iri ?value_label
+        WHERE {
+                ?ci a :Configuration_item ;
+                        :category :task_configuration ;
+                        :automl_solution ?auto_ml_iri ;
+                        :ml_task ?task_iri ;
+                        :parameter_value ?param_iri .
+                ?param_iri :parameter_value ?value_iri ;
+                        skos:prefLabel ?param_label ;
+                        :has_datatype ?param_type .
+                ?value_iri skos:prefLabel ?value_label .
+        }
+        """

@@ -11,78 +11,91 @@ import "UserRelatedMessages.proto";
 /*includes all gRPC functions available for the client frontend*/
 service ControllerService {
   /*OMA-ML USER MESSAGES*/
-  /* return the OMA-ML user id for a newly created frontend user */
+  /* create a new unique user id that must be persisted inside the frontend database */
   rpc CreateNewUser(CreateNewUserRequest) returns (CreateNewUserResponse) {}
-  /*return overview information for home page*/
+
+  /* returns the information displayed on the home page overview component */
   rpc GetHomeOverviewInformation(GetHomeOverviewInformationRequest) returns (GetHomeOverviewInformationResponse) {}
 
 
   /*OMA-ML DATASET MESSAGES*/
-  /* create a new Dataset */
+  /* create a new Dataset record in MongoDB and start the dataset analysis */
   rpc CreateDataset(CreateDatasetRequest) returns (CreateDatasetResponse) {}
 
-  /*return a list of all Datasets*/
+  /*return a list of all Datasets records for a user id*/
   rpc GetDatasets(GetDatasetsRequest) returns (GetDatasetsResponse) {}
 
-  /*return a Dataset*/
+  /*return a Dataset record by user id and dataset id*/
   rpc GetDataset(GetDatasetRequest) returns (GetDatasetResponse) {}
 
   /*return all the column names of a tabular dataset*/
   rpc GetTabularDatasetColumn(GetTabularDatasetColumnRequest) returns (GetTabularDatasetColumnResponse) {}
 
-  /*delete a Dataset and every related object*/
+  /*delete a Dataset record and every related object inside MongoDB and files on disc (Trainings, Models, Predictions)*/
   rpc DeleteDataset(DeleteDatasetRequest) returns (DeleteDatasetResponse) {}
 
-  /*set a dataset file configuration*/
+  /*update the dataset file configuration and execute the dataset analysis again*/
   rpc SetDatasetFileConfiguration(SetDatasetFileConfigurationRequest) returns (SetDatasetFileConfigurationResponse) {}
 
 
   /*OMA-ML TRAINING MESSAGES*/
-  /*create a new Training*/
+  /*create a new Training record in MongoDB and start the a new training session*/
   rpc CreateTraining(CreateTrainingRequest) returns (CreateTrainingResponse) {}
-  /*return a list of all Trainings*/
+
+  /*return a list of all Trainings records for a user id*/
   rpc GetTrainings(GetTrainingsRequest) returns (GetTrainingsResponse) {}
-  /*return a Training*/
+
+  /*return a Training record by user id and training id*/
   rpc GetTraining(GetTrainingRequest) returns (GetTrainingResponse) {}
-  /*delete a Training and every related object*/
+
+  /*delete a Training record and every related object inside MongoDB and files on disc (Models, Predictions)*/
   rpc DeleteTraining(DeleteTrainingRequest) returns (DeleteTrainingResponse) {}
 
 
   /*OMA-ML MODEL MESSAGES*/
-  /*return a list of all Models*/
+  /*return a list of all Models records for a training id or dataset id and user id*/
   rpc GetModels(GetModelsRequest) returns (GetModelsResponse) {}
-  /*return a Model*/
+
+  /*return a Model record by user id and training id*/
   rpc GetModel(GetModelRequest) returns (GetModelResponse) {}
-  /*delete a Model and every related object*/
+
+  /*delete a Model record and every related object inside MongoDB and files on disc (Predictions)*/
   rpc DeleteModel(DeleteModelRequest) returns (DeleteModelResponse) {}
 
 
   /*OMA-ML ONTOLOGY MESSAGES*/
   /*return a list of AutoML solutions compatible with the current configuration*/
   rpc GetAutoMlSolutionsForConfiguration(GetAutoMlSolutionsForConfigurationRequest) returns (GetAutoMlSolutionsForConfigurationResponse) {}
+
   /*return a list of controller strategies available for the current configuration*/
   rpc GetAvailableStrategies(GetAvailableStrategiesRequest) returns (GetAvailableStrategiesResponse) {}
+
   /*return dataset types*/
   rpc GetDatasetTypes(GetDatasetTypesRequest) returns (GetDatasetTypesResponse) {}
+
   /*return all supported machine learning libraries for a specific task (by searching supported AutoML)*/
   rpc GetMlLibrariesForTask(GetMlLibrariesForTaskRequest) returns (GetMlLibrariesForTaskResponse) {}
+
   /*return all information fields of an object*/
   rpc GetObjectsInformation(GetObjectsInformationRequest) returns (GetObjectsInformationResponse) {}
+  
   /*return all supported AutoML tasks*/
   rpc GetTasksForDatasetType(GetTasksForDatasetTypeRequest) returns (GetTasksForDatasetTypeResponse) {}
 
+  /*return all parameters available for the current configuration*/
+  rpc GetAutoMlParameters(GetAutoMlParametersRequest) returns (GetAutoMlParametersResponse) {}
   
-  /*OMA-ML PREDICTION DATASET MESSAGES*/
-  /* create a new Dataset */
+  /*OMA-ML PREDICTION MESSAGES*/
+  /* create a new Prediction record in MongoDB and start the a new prediction session */
   rpc CreatePrediction(CreatePredictionRequest) returns (CreatePredictionResponse) {}
 
-  /*return a list of all Datasets*/
+  /*return a list of all Predictions record by model id and user id*/
   rpc GetPredictions(GetPredictionsRequest) returns (GetPredictionsResponse) {}
 
-  /*return a Dataset*/
+  /*return a Prediction by prediction id and user id*/
   rpc GetPrediction(GetPredictionRequest) returns (GetPredictionResponse) {}
 
-  /*delete a Dataset and every related object*/
+  /*delete a Prediction and every related object inside MongoDB and files on disc*/
   rpc DeletePrediction(DeletePredictionRequest) returns (DeletePredictionResponse) {}
 }
 
