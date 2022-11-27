@@ -26,6 +26,14 @@ spec:
           value: "NO"
         - name: "MONGO_CLUSTER"
           value: "YES"
+        - name: "PERSISTENCE_LOGGING_LEVEL"
+          value: "DEBUG"
+        - name: "SERVER_LOGGING_LEVEL"
+          value: "DEBUG"
+        - name: "ONTOLOGY_LOGGING_LEVEL"
+          value: "DEBUG"
+        - name: "BLACKBOARD_LOGGING_LEVEL"
+          value: "DEBUG"
         image: alexhda/omaml-controller
         imagePullPolicy: ""
         name: controller
