@@ -73,14 +73,5 @@ namespace BlazorBoilerplate.Server.Controllers
         => ModelState.IsValid ?
                 await _ontologyManager.GetDatasetTypes() :
                 new ApiResponse(Status400BadRequest, L["InvalidData"]);
-
-        [HttpPost]
-        [ProducesResponseType(Status200OK)]
-        [ProducesResponseType(Status400BadRequest)]
-        [ProducesResponseType(Status404NotFound)]
-        public Task<ApiResponse> GetAutoMlParameters(GetAutoMlParametersRequestDto request) =>
-            ModelState.IsValid ?
-                _ontologyManager.GetAutoMlParameters(request) :
-                Task.FromResult(new ApiResponse(Status400BadRequest, L["InvalidData"]));
     }
 }

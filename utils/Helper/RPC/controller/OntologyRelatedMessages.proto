@@ -152,38 +152,3 @@ message GetDatasetTypesResponse {
   */
   repeated string datasetTypes = 1;
 }
-
-message GetAutoMlParametersRequest {
-  /*Iri of the auto ml task. Example: :tabular_classification*/
-  string taskIri = 1;
-  /*List of auto ml iris. Example: [":autokeras", ":mljar"]*/
-  repeated string autoMls = 2;
-}
-  
-message GetAutoMlParametersResponse {
-  /*
-    List of available auto ml parameters
-  */
-  repeated AutoMlParameter autoMlParameters = 1;
-}
-
-/*
-  Parameter for an auto ml solution
-  example:
-  {
-    autoMlIri: ":autokeras",
-    paramIri: ":metric_autokeras_regression",
-    paramLabel: "metric autokeras regression",
-    paramType: ":list",
-    valueIri: ":median_absolute_error",
-    valueLabel: "median absolute error",
-  }
-*/
-message AutoMlParameter {
-  string autoMlIri =1;
-  string paramIri = 2;
-  string paramLabel = 3;
-  string paramType = 4;
-  optional string valueIri = 5;
-  optional string valueLabel = 6;
-}

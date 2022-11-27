@@ -68,20 +68,6 @@
             <ChipSet ViewModel="@_mlLibsViewModel" Label="@L["ML libraries"]" />
             <ChipSet ViewModel="@_autoMlSolutionsViewModel" Label="@L["AutoML solutions"]" />
             <ChipSet ViewModel="@_strategiesViewModel" Label="@L["Enabled strategies"]" />
-            @if (_availableParameters != null)
-            {
-                <MudText Typo="Typo.subtitle2" Class="mt-4">Available parameters</MudText>
-                <ul class="list-disc">
-                @foreach (var param in _availableParameters)
-                {
-                    <li>@param.ToString()</li>
-                }
-                </ul>
-            }
-            else
-            {
-                <DataLoaderSpinner />
-            }
         </MudExpansionPanel>
     </MudExpansionPanels>
 
@@ -103,7 +89,6 @@
     }
 
     private GetTasksForDatasetTypeResponseDto _compatibleTasks;
-    private List<AutoMlParameterDto> _availableParameters;
     private List<string> _columnNames;
 
     private ChipSet.ChipSetViewModel _mlLibsViewModel = new();
@@ -158,17 +143,6 @@
         {
             viewNotifier.Show(ex.GetBaseException().Message, ViewNotifierType.Error, L["Operation Failed"]);
         }
-    }
-
-    private async Task RefreshParameters()
-    {
-        var taskIri = StartAutoMlRequest.Configuration.Task;
-        var selectedAutoMls = StartAutoMlRequest.Configuration.SelectedAutoMlSolutions;
-        var apiResponse = await apiClient.GetAutoMlParameters(new GetAutoMlParametersRequestDto { AutoMls = selectedAutoMls, TaskIri = taskIri });
-        HandleApiResponseWrapper(
-            apiResponse,
-            () => _availableParameters = apiResponse.Result.AutoMlParameters,
-            errorMessageKey: "Fetching available parameters failed");
     }
 
     private async void OnMlTaskSelectionChanged(string task)
@@ -275,7 +249,6 @@
         StartAutoMlRequest.Configuration.SelectedAutoMlSolutions = _autoMlSolutionsViewModel.SelectedIds.ToList();
 
         await UpdateStartAutoMlRequest();
-        await RefreshParameters();
     }
 
     private Task OnStrategySelectionChanged()

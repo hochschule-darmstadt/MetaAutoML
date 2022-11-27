@@ -118,30 +118,5 @@ namespace BlazorBoilerplate.Server.Managers
                 return new ApiResponse(Status404NotFound, ex.Message);
             }
         }
-
-        public async Task<ApiResponse> GetAutoMlParameters(GetAutoMlParametersRequestDto request)
-        {
-            var requestParams = new GetAutoMlParametersRequest { TaskIri = request.TaskIri };
-            requestParams.AutoMls.AddRange(request.AutoMls);
-            var response = new GetAutoMlParametersResponseDto();
-            try
-            {
-                var grpcResponse = await _client.GetAutoMlParametersAsync(requestParams);
-                response.AutoMlParameters = grpcResponse.AutoMlParameters.Select(p => new AutoMlParameterDto
-                    {
-                        AutoMlIri = p.AutoMlIri,
-                        ParamIri = p.ParamIri,
-                        ParamLabel = p.ParamLabel,
-                        ParamType = p.ParamType,
-                        ValueIri = p.ValueIri,
-                        ValueLabel = p.ValueLabel
-                    }).ToList();
-                return new ApiResponse(Status200OK, null, response);
-            }
-            catch (Exception ex)
-            {
-                return new ApiResponse(Status404NotFound, ex.Message);
-            }
-        }
     }
 }
