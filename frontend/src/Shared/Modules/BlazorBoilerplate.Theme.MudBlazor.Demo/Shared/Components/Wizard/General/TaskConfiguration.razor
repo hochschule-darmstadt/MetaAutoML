@@ -63,7 +63,6 @@
     }
     <MudNumericField ValueChanged="@OnRuntimeValueChanged" T="int" Label="@L["Runtime"]" Variant="Variant.Text" Min="3" Max="180" Value="@StartAutoMlRequest.Configuration.RuntimeLimit" />
 
-    @* TODO: Extract the conbination: MudText, MudChipset into a separate component. It is used several times here. *@
     <MudExpansionPanels>
         <MudExpansionPanel Text="@L["Details"]">
             <ChipSet ViewModel="@_mlLibsViewModel" Label="@L["ML libraries"]" />
@@ -88,7 +87,8 @@
 
 </MudStack>
 
-@code {
+@code
+{
     [Parameter]
     public GetDatasetResponseDto Dataset { get; set; }
 
@@ -120,7 +120,6 @@
         await LoadData();
     }
 
-    // TODO: Use binding instead of event handlers, if blazor supports that.
     private void OnRuntimeValueChanged(int e)
     {
         StartAutoMlRequest.Configuration.RuntimeLimit = e;
@@ -285,7 +284,6 @@
         return UpdateStartAutoMlRequest();
     }
 
-    // TODO: Use binding instead of event handlers
     private async void OnTargetChanged(string value)
     {
         StartAutoMlRequest.Configuration.Target = value;
