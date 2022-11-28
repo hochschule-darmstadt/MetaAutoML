@@ -883,6 +883,9 @@ msgstr "Sitzung"
 msgid "IdsrvSessionCookieDescription"
 msgstr "Dieses Cookie speichert die aktuelle Sitzungs id, wird für das Nutzer Management verwendet."
 
+msgid "FolderStructureNotCorrectErrorMessage"
+msgstr "Die Ordnerstruktur der Zip-Datei entspricht nicht den Anforderungen."
+
 msgid "AffinityCookieName"
 msgstr "affinity"
 
@@ -891,3 +894,4 @@ msgstr "4 Stunden"
 
 msgid "AffinityCookieDescription"
 msgstr "Dieses Cookie speichert die aktuelle Sticky Sitzungs id, wird für das korrekte Routing verwendet."
+
