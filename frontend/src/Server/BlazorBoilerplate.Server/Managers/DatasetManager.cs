@@ -25,6 +25,7 @@ using static Microsoft.AspNetCore.Http.StatusCodes;
 using System.IO.Compression;
 using System.Runtime.CompilerServices;
 using Karambolo.Common;
+using System.Diagnostics;
 
 namespace BlazorBoilerplate.Server.Managers
 {
@@ -349,14 +350,10 @@ namespace BlazorBoilerplate.Server.Managers
                 {
                     foreach (ZipArchiveEntry entry in archive.Entries)
                     {
-                        // take only top level folders
-                        if (entry.FullName.EndsWith("/", StringComparison.OrdinalIgnoreCase))
+                        // take only top level folders, look for test and train
+                        if (entry.FullName.EndsWith("/train/") || entry.FullName.EndsWith("/test/"))
                         {
-                            // check if a folder is named test or train
-                            if (entry.FullName.Contains("/train/", StringComparison.Ordinal) || entry.FullName.Contains("/test/", StringComparison.Ordinal))
-                            {
-                                zipEntries.Add(entry.FullName);
-                            }
+                            zipEntries.Add(entry.FullName);
                         }
                     }
                 }
