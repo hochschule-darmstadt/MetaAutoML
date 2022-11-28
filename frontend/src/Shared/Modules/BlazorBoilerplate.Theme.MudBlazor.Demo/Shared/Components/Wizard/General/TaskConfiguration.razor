@@ -34,10 +34,10 @@
             break;
     }
 
-    @if (_compatibletasks != null)
+    @if (_compatibleTasks != null)
     {
         <MudSelect Label="@L["ML task"]" T="string" ValueChanged="@OnMlTaskSelectionChanged">
-            @foreach (var task in _compatibletasks.Tasks)
+            @foreach (var task in _compatibleTasks.Tasks)
             {
                 <MudSelectItem Value="@task.ID">@L[task.Properties.ContainsKey("skos:prefLabel") ? task.Properties["skos:prefLabel"] : ""]</MudSelectItem>
             }
@@ -65,81 +65,21 @@
 
     <MudExpansionPanels>
         <MudExpansionPanel Text="@L["Details"]">
-            @if (_supportedMlLibraries != null)
-            {
-                <MudText Typo="Typo.subtitle2">@L["ML libraries"]</MudText>
-                <MudChipSet Filter="true" MultiSelection="true" @bind-SelectedChips="SelectedMlLibsChips">
-                    @if (_supportedMlLibraries != null)
-                    {
-                        @foreach (var lib in _supportedMlLibraries.MlLibraries)
-                        {
-                            <MudChip Value="@lib.ID" Text="@(lib.Properties.ContainsKey("skos:prefLabel") ? lib.Properties["skos:prefLabel"] : "")" Default="true" Variant="Variant.Text" Color="Color.Secondary" />
-                        }
-                    }
-                </MudChipSet>
-            }
-            else
-            {
-                <DataLoaderSpinner />
-            }
-            @if (_compatibleAutoMls != null)
-            {
-                <MudText Typo="Typo.subtitle2" Class="mt-4">@L["AutoML solutions"]</MudText>
-                <MudChipSet SelectedChipsChanged="OnAutoMlSolutionSelectionChanged" Filter="true" MultiSelection="true" >
-                    @if (_compatibleAutoMls != null)
-                    {
-                        @foreach (var lib in _compatibleAutoMls.AutoMlSolutions)
-                        {
-                            <MudChip Value="@lib.ID" Text="@(lib.Properties.ContainsKey("skos:prefLabel") ? lib.Properties["skos:prefLabel"] : "")" Default="true" Variant="Variant.Text" Color="Color.Secondary" />
-                        }
-                    }
-                </MudChipSet>
-            }
-            else
-            {
-                <DataLoaderSpinner />
-            }
-            @if (_availableStrategies != null)
-            {
-                <MudText Typo="Typo.subtitle2" Class="mt-4">@L["Enabled strategies"]</MudText>
-                <MudChipSet
-                    SelectedChipsChanged="OnStrategySelectionChanged"
-                    Filter="true"
-                    MultiSelection="true"
-                >
-                    @if (_availableStrategies != null)
-                    {
-                        @foreach (var strategy in _availableStrategies.Strategies)
-                        {
-                            <MudTooltip Text="@strategy.Description" Delay="600" Arrow="true" Placement="Placement.Bottom" Class="strategy-description-tooltip">
-                                <MudChip
-                                    Value="@strategy.Id"
-                                    Text="@strategy.Title"
-                                    Default="true"
-                                    Variant="Variant.Text"
-                                    Color="Color.Secondary"
-                                />
-                            </MudTooltip>
-                        }
-                    }
-                </MudChipSet>
-            }
-            else
-            {
-                <DataLoaderSpinner />
-            }
+            <ChipSet ViewModel="@_mlLibsViewModel" Label="@L["ML libraries"]" />
+            <ChipSet ViewModel="@_autoMlSolutionsViewModel" Label="@L["AutoML solutions"]" />
+            <ChipSet ViewModel="@_strategiesViewModel" Label="@L["Enabled strategies"]" />
         </MudExpansionPanel>
     </MudExpansionPanels>
 
 </MudStack>
 
-@code {
+@code
+{
     [Parameter]
     public GetDatasetResponseDto Dataset { get; set; }
 
     [Parameter]
     public CreateTrainingRequestDto StartAutoMlRequest { get; set; }
-
     [Parameter]
     public EventCallback<CreateTrainingRequestDto> StartAutoMlRequestChanged { get; set; }
 
@@ -148,34 +88,20 @@
         await StartAutoMlRequestChanged.InvokeAsync(StartAutoMlRequest);
     }
 
-    private GetTasksForDatasetTypeResponseDto _compatibletasks;
-    private GetMlLibrariesForTaskResponseDto _supportedMlLibraries;
-    private GetAutoMlSolutionsForConfigurationResponseDto _compatibleAutoMls;
-    private GetAvailableStrategiesResponseDto _availableStrategies;
-    private List<String> _columnNames;
-    private bool IsLibPolled = false;
+    private GetTasksForDatasetTypeResponseDto _compatibleTasks;
+    private List<string> _columnNames;
 
-    public MudChip[] SelectedMlLibsChips 
-    { 
-        get
-        {
-            return _selectedMlLibChips;
-        } 
-        set
-        {
-            _selectedMlLibChips = value;
-            if (_selectedMlLibChips != null)
-            {
-                OnMlLibrarySelectionChanged(SelectedMlLibsChips);
-            }
-        }
-    }
-    private MudChip[] _selectedMlLibChips;
+    private ChipSet.ChipSetViewModel _mlLibsViewModel = new();
+    private ChipSet.ChipSetViewModel _autoMlSolutionsViewModel = new();
+    private ChipSet.ChipSetViewModel _strategiesViewModel = new();
 
     protected async override void OnInitialized()
     {
         base.OnInitialized();
         SetupStartAutoMLConfiguration();
+        _mlLibsViewModel.SelectedIdsChanged += async (_, __) => await OnMlLibrarySelectionChanged();
+        _autoMlSolutionsViewModel.SelectedIdsChanged += async (_, __) => await OnAutoMlSolutionSelectionChanged();
+        _strategiesViewModel.SelectedIdsChanged += async (_, __) => await OnStrategySelectionChanged();
         await LoadData();
     }
 
@@ -192,7 +118,8 @@
         {
             foreach (KeyValuePair<string, dynamic> pair in StartAutoMlRequest.DatasetConfiguration["column_datatypes"])
             {
-                if((int)pair.Value != 7)
+                // TODO: Document what this magic number means and extract it into a constant
+                if ((int)pair.Value != 7)
                 {
                     _columnNames.Add(pair.Key);
                 }
@@ -208,18 +135,9 @@
         try
         {
             GetTasksForDatasetTypeRequestDto taskRequest = new GetTasksForDatasetTypeRequestDto { DatasetType = Dataset.Dataset.Type.ID };
-            ApiResponseDto apiResponse = await apiClient.GetTasksForDatasetType(taskRequest);
+            var apiResponse = await apiClient.GetTasksForDatasetType(taskRequest);
 
-            if (apiResponse.IsSuccessStatusCode)
-            {
-                _compatibletasks = Newtonsoft.Json.JsonConvert.DeserializeObject<GetTasksForDatasetTypeResponseDto>(apiResponse.Result.ToString());
-                StateHasChanged();
-                viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
-            }
-            else
-            {
-                viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
-            }
+            HandleApiResponseWrapper(apiResponse, () => _compatibleTasks = apiResponse.Result);
         }
         catch (Exception ex)
         {
@@ -236,8 +154,10 @@
         StartAutoMlRequest.Configuration.Task = task;
         try
         {
-            Dictionary<string, string> dictionary = new Dictionary<string, string>();
-            dictionary.Add("task", StartAutoMlRequest.Configuration.Task);
+            Dictionary<string, string> dictionary = new Dictionary<string, string>
+            {
+                { "task", StartAutoMlRequest.Configuration.Task }
+            };
             await UpdateStartAutoMlRequest();
             /** Configuration = dictionary is currently dummy */
             //GetCompatibleAutoMlSolutionsRequestDto compatibleAutoMlRequest = new GetCompatibleAutoMlSolutionsRequestDto { Configuration = dictionary };
@@ -256,22 +176,13 @@
             //}
 
             GetMlLibrariesForTaskRequestDto supportedMlLibrariesRequest = new GetMlLibrariesForTaskRequestDto { Task = StartAutoMlRequest.Configuration.Task };
-            ApiResponseDto apiResponse = await apiClient.GetMlLibrariesForTask(supportedMlLibrariesRequest);
+            var apiResponse = await apiClient.GetMlLibrariesForTask(supportedMlLibrariesRequest);
 
-            if (apiResponse.IsSuccessStatusCode)
-            {
-                _supportedMlLibraries = Newtonsoft.Json.JsonConvert.DeserializeObject<GetMlLibrariesForTaskResponseDto>(apiResponse.Result.ToString());
-                StateHasChanged();
-                viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
-                //quick and dirty way to avoid inconsistent automl solution polling
-                await Task.Delay(1000);
-                IsLibPolled = true;
-                OnMlLibrarySelectionChanged(SelectedMlLibsChips);
-            }
-            else
-            {
-                viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["SupportedMlLibraries Operation Failed"]);
-            }
+            HandleApiResponseWrapper(apiResponse, () => 
+                 _mlLibsViewModel.SetAvailableChips(
+                    apiResponse.Result.MlLibraries
+                        .Select(ConvertObjectInfoToChip)),
+            errorMessageKey: "SupportedMlLibraries Operation Failed");
         }
         catch (Exception ex)
         {
@@ -279,63 +190,39 @@
         }
     }
 
-    private async void OnMlLibrarySelectionChanged(MudChip[] libs)
+    private (string id, string label, string toolTip) ConvertObjectInfoToChip(ObjectInfomationDto objectInfo) =>
+        (objectInfo.ID, objectInfo.Properties.GetValueOrDefault("skos:prefLabel"), null);
+
+    private async Task OnMlLibrarySelectionChanged()
     {
-        if (IsLibPolled == false)
-        {
-            return;
-        }
         try
         {
-            Dictionary<string, string> dictionary = new Dictionary<string, string>();
-            dictionary.Add("task", StartAutoMlRequest.Configuration.Task);
-            List<string> libraries = new List<string>();
-
-
-
-            StartAutoMlRequest.Configuration.SelecctedMlLibraries = new List<string>();
-            foreach (var chip in libs)
+            Dictionary<string, string> dictionary = new Dictionary<string, string>
             {
-                StartAutoMlRequest.Configuration.SelecctedMlLibraries.Add((string)chip.Value);
-                libraries.Add((string)chip.Value);
-            }
+                { "task", StartAutoMlRequest.Configuration.Task }
+            };
 
-
-
-
+            List<string> libraries = _mlLibsViewModel.SelectedIds.ToList();
+            StartAutoMlRequest.Configuration.SelecctedMlLibraries = _mlLibsViewModel.SelectedIds.ToList();
 
             await UpdateStartAutoMlRequest();
-            if (libraries.Count != 0)
+            if (libraries.Any())
             {
                 dictionary.Add("library", JsonConvert.SerializeObject(libraries));
             }
             GetAutoMlSolutionsForConfigurationRequestDto compatibleAutoMlRequest = new GetAutoMlSolutionsForConfigurationRequestDto { Configuration = dictionary };
-            ApiResponseDto apiResponse = await apiClient.GetAutoMlSolutionsForConfiguration(compatibleAutoMlRequest);
+            var apiResponse = await apiClient.GetAutoMlSolutionsForConfiguration(compatibleAutoMlRequest);
 
-            if (apiResponse.IsSuccessStatusCode)
-            {
-                _compatibleAutoMls = Newtonsoft.Json.JsonConvert.DeserializeObject<GetAutoMlSolutionsForConfigurationResponseDto>(apiResponse.Result.ToString());
-                StateHasChanged();
-                viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
-            }
-            else
-            {
-                viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
-            }
+            HandleApiResponseWrapper(apiResponse, () => 
+                _autoMlSolutionsViewModel.SetAvailableChips(apiResponse.Result.AutoMlSolutions.Select(ConvertObjectInfoToChip))
+            );
 
             GetAvailableStrategiesRequestDto availableStrategiesRequest = new GetAvailableStrategiesRequestDto { Configuration = dictionary };
-            ApiResponseDto availableStrategiesResponse = await apiClient.GetAvailableStrategies(availableStrategiesRequest);
+            var availableStrategiesResponse = await apiClient.GetAvailableStrategies(availableStrategiesRequest);
 
-            if (apiResponse.IsSuccessStatusCode)
-            {
-                _availableStrategies = Newtonsoft.Json.JsonConvert.DeserializeObject<GetAvailableStrategiesResponseDto>(availableStrategiesResponse.Result.ToString());
-                StateHasChanged();
-                viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
-            }
-            else
-            {
-                viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
-            }
+            HandleApiResponseWrapper(availableStrategiesResponse, () =>
+                _strategiesViewModel.SetAvailableChips(availableStrategiesResponse.Result.Strategies.Select(s => (s.Id, s.Title, s.Description)))
+            );
         }
         catch (Exception ex)
         {
@@ -343,29 +230,36 @@
         } 
     }
 
-    private async void OnAutoMlSolutionSelectionChanged(MudChip[] automls)
+    private void HandleApiResponseWrapper<T>(ApiResponseDto<T> apiResponse, Action successAction, string errorMessageKey = "Operation Failed", string successMessageKey = "Operation Successful")
     {
-        StartAutoMlRequest.Configuration.SelectedAutoMlSolutions = new List<string>();
-        foreach (var chip in automls)
+        if (apiResponse.IsSuccessStatusCode)
         {
-            StartAutoMlRequest.Configuration.SelectedAutoMlSolutions.Add(chip.Value.ToString());
+            successAction();
+            StateHasChanged();
+            viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L[successMessageKey]);
         }
+        else
+        {
+            viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L[errorMessageKey]);
+        }
+    }
+
+    private async Task OnAutoMlSolutionSelectionChanged()
+    {
+        StartAutoMlRequest.Configuration.SelectedAutoMlSolutions = _autoMlSolutionsViewModel.SelectedIds.ToList();
+
         await UpdateStartAutoMlRequest();
     }
 
-    private async void OnStrategySelectionChanged(MudChip[] strategies)
+    private Task OnStrategySelectionChanged()
     {
-        StartAutoMlRequest.Configuration.EnabledStrategies = new List<string>();
-        foreach (var chip in strategies)
-        {
-            StartAutoMlRequest.Configuration.EnabledStrategies.Add(chip.Value.ToString());
-        }
-        await UpdateStartAutoMlRequest();
+        StartAutoMlRequest.Configuration.EnabledStrategies = _strategiesViewModel.SelectedIds.ToList();
+        return UpdateStartAutoMlRequest();
     }
 
     private async void OnTargetChanged(string value)
     {
         StartAutoMlRequest.Configuration.Target = value;
         await UpdateStartAutoMlRequest();
-    }
+    }    
 }
