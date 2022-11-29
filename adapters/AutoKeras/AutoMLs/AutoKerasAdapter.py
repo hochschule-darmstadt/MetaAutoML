@@ -18,21 +18,24 @@ class AutoKerasAdapter(AbstractAdapter):
 
     def start(self):
         """Start the correct ML task functionality of AutoKeras"""
-        if True:
-            if self._configuration["configuration"]["task"] == ":tabular_classification":
-                self.__tabular_classification()
-            elif self._configuration["configuration"]["task"] == ":tabular_regression":
-                self.__tabular_regression()
-            elif self._configuration["configuration"]["task"] == ":image_classification":
-                self.__image_classification()
-            elif self._configuration["configuration"]["task"] == ":image_regression":
-                self.__image_regression()
-            elif self._configuration["configuration"]["task"] == ":text_classification":
-                self.__text_classification()
-            elif self._configuration["configuration"]["task"] == ":text_regression":
-                self.__text_regression()
-            elif self._configuration["configuration"]["task"] == ":time_series_forecasting":
-                self.__time_series_forecasting()
+        
+        task_name = self._configuration["configuration"]["task"]
+        if task_name == ":tabular_classification":
+            self.__tabular_classification()
+        elif task_name == ":tabular_regression":
+            self.__tabular_regression()
+        elif task_name == ":image_classification":
+            self.__image_classification()
+        elif task_name == ":image_regression":
+            self.__image_regression()
+        elif task_name == ":text_classification":
+            self.__text_classification()
+        elif task_name == ":text_regression":
+            self.__text_regression()
+        elif task_name == ":time_series_forecasting":
+            self.__time_series_forecasting()
+        else:
+            raise Exception(f"cannot find task {task_name} for AutoKeras")
 
     def __tabular_classification(self):
         """Execute the tabular classification task and export the found model"""
