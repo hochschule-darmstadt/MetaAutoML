@@ -37,7 +37,7 @@ if __name__ == '__main__':
 
 
     # split training set
-    X = X.iloc[int(X.shape[0] * 0.2):]
+    X = X.iloc[:]
 
     X = feature_preparation(X, features)
 

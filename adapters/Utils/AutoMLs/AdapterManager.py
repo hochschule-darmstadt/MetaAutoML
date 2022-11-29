@@ -51,7 +51,7 @@ class AdapterManager(Thread):
         Returns:
             tuple[str, str]: Tuple returning the ontology IRI of the Ml model type, and ontology IRI of the ML library
         """
-        return ("", "")
+        raise Exception("_get_ml_model_and_lib has to be implemented in sub class")
 
     async def __background_start_auto_ml(self):
         """Sets up the training run environment and start the background AutoML solution process. While the AutoML solution is running, collect all console messages and create the result messages. 
@@ -74,8 +74,14 @@ class AdapterManager(Thread):
             self.__start_auto_ml_running = False
 
         except Exception as e:
-            self.__start_auto_ml_running = False
-            self.__auto_ml_status_messages.append(get_except_response(e))
+            # always crash if we are not running in production environment
+            if get_config_property("local_execution") == "YES":
+                # reraise exception above to crash
+                raise e
+            else:
+                # do not crash in prodution environment
+                self.__start_auto_ml_running = False
+                self.__auto_ml_status_messages.append(get_except_response(e))
 
 
     def get_auto_ml_status(self) -> "GetAutoMlStatusResponse":
@@ -181,5 +187,7 @@ class AdapterManager(Thread):
 
         except Exception as e:
             raise grpclib.GRPCError(grpclib.Status.UNAVAILABLE, f"Error while generating probabilities {e}")
+            
     def get_start_auto_ml_request(self) -> StartAutoMlRequest:
         return self.__start_auto_ml_request
+
