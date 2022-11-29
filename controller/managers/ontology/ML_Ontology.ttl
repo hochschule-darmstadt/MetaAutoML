@@ -1930,17 +1930,17 @@
 :tabular a :Enum ;
     skos:prefLabel "tabular" ;
     :category :dataset_type ;
-    rdfs:comment "A dataset presented in a tabular (table with rows and columns) form (CSV file)?=?.csv?=?Additional-Info-About-File-Structure" ;
+    rdfs:comment "A dataset presented in a tabular (table with rows and columns) form (CSV file)" ;
     :supported_by_oma_ml "True" .
 :text a :Enum ;
     skos:prefLabel "text" ;
     :category :dataset_type ;
-    rdfs:comment "A dataset presented in a tabular (table with rows and columns) form (CSV file)?=?.csv?=?Additional-Info-About-File-Structure" ;
+    rdfs:comment "A dataset presented in a tabular (table with rows and columns) form (CSV file)" ;
     :supported_by_oma_ml "True" .
 :image a :Enum ;
     skos:prefLabel "image" ;
     :category :dataset_type ;
-    rdfs:comment "A dataset presented in a folder structure of image files ordered by label form (ZIP file)?=?.zip?=?Additional-Info-About-File-Structure" ;
+    rdfs:comment "A dataset presented in a folder structure of image files ordered by label form (ZIP file)" ;
     :supported_by_oma_ml "True" .
 :video a :Enum ;
     skos:prefLabel "video" ;
@@ -1957,12 +1957,12 @@
 :time_series_longitudinal a :Enum ;
     skos:prefLabel "time series longitudinal" ;
     :category :dataset_type ;
-    rdfs:comment "Longitudinal data - also called panel data - for time series classification, which has 3 dimensions: (num_samples, num_features, num_timesteps)?=?.ts?=?Additional-Info-About-File-Structure" ;
+    rdfs:comment "Longitudinal data - also called panel data - for time series classification, which has 3 dimensions: (num_samples, num_features, num_timesteps)" ;
     :supported_by_oma_ml "True" .
 :time_series a :Enum ;
     skos:prefLabel "time series" ;
     :category :dataset_type ;
-    rdfs:comment "A dataset presented in a tabular (table with rows and columns) form (CSV file)?=?.csv?=?Additional-Info-About-File-Structure" ;
+    rdfs:comment "A dataset presented in a tabular (table with rows and columns) form (CSV file)" ;
     :supported_by_oma_ml "True" .
 :greedy a :Enum ;
     skos:prefLabel "greedy" ;

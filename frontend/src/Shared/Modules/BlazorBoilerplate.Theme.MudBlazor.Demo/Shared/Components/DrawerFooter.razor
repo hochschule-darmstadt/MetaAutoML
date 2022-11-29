@@ -137,8 +137,7 @@
                             
                             <MudSelectItem Value="@item.ID">
                                 <MudTooltip Text="@item.Properties["rdfs:comment"]" Style="z-index: 1600">
-                                    <MudText Typo="Typo.body2">@L[item.Properties.ContainsKey("skos:prefLabel") ? item.Properties["skos:prefLabel"] : ""] 
-                                    (@(SplitComment(item.Properties["rdfs:comment"])[1]))</MudText>
+                                    <MudText Typo="Typo.body2">@L[item.Properties.ContainsKey("skos:prefLabel") ? item.Properties["skos:prefLabel"] : ""]</MudText>
                                 </MudTooltip>
                             </MudSelectItem>
                         }
@@ -396,6 +395,7 @@
         }
     }
 
+    // Method currently not in use (anymore), but keeping it for eventual reuse. But feel free to delete it completely if you want. 
     private string[] SplitComment(string comment) {
         string[] subcomments = comment.Split(new[] { "?=?" }, StringSplitOptions.None);
         return subcomments;
