@@ -43,6 +43,8 @@ spec:
           value: https://+:443;http://+80
         - name: BlazorBoilerplate__ApplicationUrl
           value: blazorboilerplate
+        - name: BlazorBoilerplate__IS4ApplicationUrl
+          value: blazorboilerplate
         - name: BlazorBoilerplate__CertificatePassword
           value: Admin123
         - name: BlazorBoilerplate__UseSqlServer
@@ -86,6 +88,10 @@ spec:
             cpu: "2"
             memory: "2194304e3"
       restartPolicy: Always
+      hostAliases:
+      - ip: "127.0.0.1"
+        hostnames:
+        - "dev.oma-ml.ai"
       volumes:
       - name: datasets
         persistentVolumeClaim:

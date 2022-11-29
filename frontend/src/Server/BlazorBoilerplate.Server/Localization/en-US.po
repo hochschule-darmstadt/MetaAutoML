@@ -1649,7 +1649,7 @@ msgstr "Task"
 
 msgctxt "Global"
 msgid "Dataset not redable"
-msgstr "Dataset couln´t be read, if the dataset was uploaded recently you need to wait a bit for our analysises to end. If that is not the case use the preview config option to reconfigure the dataset."
+msgstr "Dataset coulnÂ´t be read, if the dataset was uploaded recently you need to wait a bit for our analysises to end. If that is not the case use the preview config option to reconfigure the dataset."
 
 msgctxt "Global"
 msgid "Start: {0}"
@@ -1774,7 +1774,7 @@ msgstr ".AspNet.CookieConsent"
 
 msgctxt "Global"
 msgid "CookieConsentCookieLifecycle"
-msgstr "6 month"
+msgstr "6 months"
 
 msgctxt "Global"
 msgid "CookieConsentCookieDescription"
@@ -1803,3 +1803,20 @@ msgstr "Session"
 msgctxt "Global"
 msgid "IdsrvSessionCookieDescription"
 msgstr "This cookie saves the current session id, used for the user management."
+
+msgctxt "Global"
+msgid "FolderStructureNotCorrectErrorMessage"
+msgstr "The folder structure of the zip file does not meet the requirements.."
+
+msgctxt "Global"
+msgid "AffinityCookieName"
+msgstr "affinity"
+
+msgctxt "Global"
+msgid "AffinityCookieLifecycle"
+msgstr "4 hours"
+
+msgctxt "Global"
+msgid "AffinityCookieDescription"
+msgstr "This cookie saves the sticky session id, used for correct routing."
+
