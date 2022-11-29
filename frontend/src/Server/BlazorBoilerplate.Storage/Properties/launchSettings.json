@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "BlazorBoilerplate.Storage": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "https://localhost:63147;http://localhost:63148"
+    }
+  }
+}

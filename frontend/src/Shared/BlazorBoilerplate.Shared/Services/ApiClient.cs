@@ -153,27 +153,27 @@ namespace BlazorBoilerplate.Shared.Services
         #endregion
 
         #region OMA-ML ONTOLOGY MESSAGES
-        public Task<ApiResponseDto<GetAutoMlSolutionsForConfigurationResponseDto>> GetAutoMlSolutionsForConfiguration(GetAutoMlSolutionsForConfigurationRequestDto request)
+        public async Task<ApiResponseDto> GetAutoMlSolutionsForConfiguration(GetAutoMlSolutionsForConfigurationRequestDto request)
         {
-            return httpClient.PostJsonAsync<ApiResponseDto<GetAutoMlSolutionsForConfigurationResponseDto>>("api/Ontology/GetAutoMlSolutionsForConfiguration", request);
+            return await httpClient.PostJsonAsync<ApiResponseDto>("api/Ontology/GetAutoMlSolutionsForConfiguration", request);
         }
-        public Task<ApiResponseDto<GetTasksForDatasetTypeResponseDto>> GetTasksForDatasetType(GetTasksForDatasetTypeRequestDto request)
+        public async Task<ApiResponseDto> GetTasksForDatasetType(GetTasksForDatasetTypeRequestDto request)
         {
-            return httpClient.PostJsonAsync<ApiResponseDto<GetTasksForDatasetTypeResponseDto>>("api/Ontology/GetTasksForDatasetType", request);
+            return await httpClient.PostJsonAsync<ApiResponseDto>("api/Ontology/GetTasksForDatasetType", request);
         }
         public async Task<ApiResponseDto> GetDatasetTypes()
         {
             return await httpClient.GetJsonAsync<ApiResponseDto>("api/Ontology/GetDatasetTypes");
         }
 
-        public Task<ApiResponseDto<GetMlLibrariesForTaskResponseDto>> GetMlLibrariesForTask(GetMlLibrariesForTaskRequestDto request)
+        public async Task<ApiResponseDto> GetMlLibrariesForTask(GetMlLibrariesForTaskRequestDto request)
         {
-            return httpClient.PostJsonAsync<ApiResponseDto<GetMlLibrariesForTaskResponseDto>>("api/Ontology/GetMlLibrariesForTask", request);
+            return await httpClient.PostJsonAsync<ApiResponseDto>("api/Ontology/GetMlLibrariesForTask", request);
         }
 
-        public Task<ApiResponseDto<GetAvailableStrategiesResponseDto>> GetAvailableStrategies(GetAvailableStrategiesRequestDto request)
+        public async Task<ApiResponseDto> GetAvailableStrategies(GetAvailableStrategiesRequestDto request)
         {
-            return httpClient.PostJsonAsync<ApiResponseDto<GetAvailableStrategiesResponseDto>>("api/Ontology/GetAvailableStrategies", request);
+            return await httpClient.PostJsonAsync<ApiResponseDto>("api/Ontology/GetAvailableStrategies", request);
         }
         #endregion
 

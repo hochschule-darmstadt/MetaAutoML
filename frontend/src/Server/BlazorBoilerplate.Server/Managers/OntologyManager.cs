@@ -7,7 +7,7 @@ using static Microsoft.AspNetCore.Http.StatusCodes;
 namespace BlazorBoilerplate.Server.Managers
 {
     /// <summary>
-    /// Manages all RPC calls which are connected to requests for knowledge from the Ontology
+    /// Manages all RPC calls which are connected to requests for knowledge from the Ontologie
     /// </summary>
     public class OntologyManager : IOntologyManager
     {
@@ -59,7 +59,7 @@ namespace BlazorBoilerplate.Server.Managers
 
 
         /// <summary>
-        /// Retrieve all Dataset Types
+        /// Retrive all Dataset Types
         /// </summary>
         /// <returns></returns>
         public async Task<ApiResponse> GetDatasetTypes()

@@ -516,5 +516,3 @@ msgstr "ToDo"
 msgid "TodoNav"
 msgstr "Lista Todo"
 
-msgid "FolderStructureNotCorrectErrorMessage"
-msgstr "A estrutura de pastas do arquivo zip não atende aos requisitos."

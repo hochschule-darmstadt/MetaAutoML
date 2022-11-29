@@ -11,21 +11,15 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Data.Analysis;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using Serilog.Core;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using static Microsoft.AspNetCore.Http.StatusCodes;
-using System.IO.Compression;
-using System.Runtime.CompilerServices;
-using Karambolo.Common;
-using System.Diagnostics;
 
 namespace BlazorBoilerplate.Server.Managers
 {
@@ -80,28 +74,19 @@ namespace BlazorBoilerplate.Server.Managers
                 await using FileStream fs = new(Path.Combine(path, trustedFileNameForDisplay), FileMode.Append);
                 fs.Write(request.Content, 0, request.Content.Length);
 
-                // get the complete file path before fs is released
-                string filePath = path + "/" + Path.GetFileName(fs.Name);
-
+                //We uploaded everything, send grpc request to controller to persist
                 if (request.ChunkNumber == request.TotalChunkNumber)
                 {
                     fs.Dispose();
+                    grpcRequest.UserId = username;
+                    grpcRequest.FileName = trustedFileNameForDisplay;
+                    grpcRequest.DatasetName = request.DatasetName;
 
-                    bool correctStrukture = CheckUploadStructure(filePath);
-
-                    if (correctStrukture == true)
-                    {
-                        grpcRequest.UserId = username;
-                        grpcRequest.FileName = trustedFileNameForDisplay;
-                        grpcRequest.DatasetName = request.DatasetName;
-                        grpcRequest.DatasetType = request.DatasetType;
-                        var reply = _client.CreateDataset(grpcRequest);
-                        return new ApiResponse(Status200OK, null, "");
-                    } else {
-                        return new ApiResponse(Status406NotAcceptable, "FolderStructureNotCorrectErrorMessage");
-                    }
+                    grpcRequest.DatasetType = request.DatasetType;
+                    var reply = _client.CreateDataset(grpcRequest);
+                    return new ApiResponse(Status200OK, null, "");
                 }
-                return new ApiResponse(Status200OK, null, "");
+                return new ApiResponse(Status200OK, null, 0);
             }
             catch (Exception ex)
             {
@@ -332,38 +317,6 @@ namespace BlazorBoilerplate.Server.Managers
                 Console.WriteLine(ex.Message);
                 return new ApiResponse(Status404NotFound, ex.Message);
             }
-        }
-
-        private bool CheckUploadStructure(string filePath)
-        {
-            string fileExt = filePath.Substring(filePath.Length - 4);
-            List<string> zipEntries = new List<string>();
-
-            if (fileExt == ".csv")
-            {
-                // .csv does not need validation at the moment
-                return true; 
-            }
-            else if (fileExt == ".zip")
-            {
-                using (ZipArchive archive = ZipFile.OpenRead(filePath))
-                {
-                    foreach (ZipArchiveEntry entry in archive.Entries)
-                    {
-                        // take only top level folders, look for test and train
-                        if (entry.FullName.EndsWith("/train/") || entry.FullName.EndsWith("/test/"))
-                        {
-                            zipEntries.Add(entry.FullName);
-                        }
-                    }
-                }
-                // if test and train are found, return true
-                if (zipEntries.Count == 2)
-                {
-                    return true;
-                }
-            }
-            return false;
         }
 
         private byte[] GetImageAsBytes(string path)

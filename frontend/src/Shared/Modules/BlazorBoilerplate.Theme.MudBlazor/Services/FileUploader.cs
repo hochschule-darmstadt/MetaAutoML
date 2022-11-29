@@ -12,7 +12,6 @@ using Microsoft.Extensions.Localization;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Components;
 using BlazorBoilerplate.Shared.Dto.Prediction;
-using static Microsoft.AspNetCore.Http.StatusCodes;
 
 namespace BlazorBoilerplate.Theme.Material.Services
 {
@@ -20,12 +19,12 @@ namespace BlazorBoilerplate.Theme.Material.Services
     {
         private IApiClient _client;
         private IViewNotifier _notifier;
-        private IStringLocalizer<Global> _l;
+        private IStringLocalizer<Global> L;
         public FileUploader(IApiClient client, IViewNotifier notifier, IStringLocalizer<Global> L)
         {
             _client = client;
             _notifier = notifier;
-            _l = L;
+            L = L;
         }
         public UploadDatasetRequestDto UploadDatasetRequest { get; set; }
         public UploadPredictionRequestDto UploadPredictionRequest { get; set; }
@@ -106,16 +105,9 @@ namespace BlazorBoilerplate.Theme.Material.Services
                     {
                         apiResponse = await _client.UploadDataset(UploadDatasetRequest);
                     }
-
                     if (!apiResponse.IsSuccessStatusCode)
                     {
-                        _notifier.Show(_l[apiResponse.Message] + " : " + apiResponse.StatusCode, ViewNotifierType.Error, _l["Operation Failed"]);
-                    }
-
-                    if (apiResponse.StatusCode == Status406NotAcceptable)
-                    {
-                        // If the Dataset is not structured correctly, stop the upload and do not safe it
-                        break;
+                        _notifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
                     }
 
                     bytesRead += reallyRead;
@@ -146,7 +138,7 @@ namespace BlazorBoilerplate.Theme.Material.Services
             }
             catch (Exception ex)
             {
-                _notifier.Show(ex.Message, ViewNotifierType.Error, _l["Operation Failed"]);
+                _notifier.Show(ex.Message, ViewNotifierType.Error, L["Operation Failed"]);
             }
             return;
         }
