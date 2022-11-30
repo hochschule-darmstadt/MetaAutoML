@@ -80,6 +80,10 @@ def capture_process_output(process: subprocess.Popen, use_error: bool):
             s = process.stderr.read(1)
         capture += s
 
+    if use_error:
+        process.stderr.close()
+    else:
+        process.stdout.close()
 
 def get_response(config: "StartAutoMlRequest", test_score: float, prediction_time: float, library: str, model: str) -> "GetAutoMlStatusResponse":
     """Generate the final GRPC AutoML status message

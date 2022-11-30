@@ -64,6 +64,8 @@ class AdapterManager(Thread):
             process = start_automl_process(config)
             for response in capture_process_output(process, False):
                 self.__auto_ml_status_messages.append(response)
+            process.wait()
+
             generate_script(config)
             output_json = zip_script(config)
             #AutoKeras only produces keras based ANN
