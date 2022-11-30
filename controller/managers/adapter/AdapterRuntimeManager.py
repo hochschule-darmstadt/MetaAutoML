@@ -43,6 +43,7 @@ class AdapterRuntimeManager:
             ":mljar":           ["MLJAR_SERVICE_HOST",     "MLJAR_SERVICE_PORT"],
             ":alphad3m":        ["ALPHAD3M_SERVICE_HOST",  "ALPHAD3M_SERVICE_PORT"],
             ":mcfly":           ["MCFLY_SERVICE_HOST", "MCFLY_SERVICE_PORT"],
+            ":evalml":          ["EVALML_SERVICE_HOST", "EVALML_SERVICE_PORT"],
         }
         self.__adapters: list[AdapterManager] = []
         self.__blackboard = Blackboard.Blackboard()
