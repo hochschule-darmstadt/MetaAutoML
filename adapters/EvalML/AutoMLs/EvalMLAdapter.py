@@ -29,11 +29,15 @@ class EvalMLAdapter(AbstractAdapter):
         # why do we need True here ?
         if True:
             if self._configuration["configuration"]["task"] == ":tabular_classification":
-                self.__tabular_classification()
+                self.__classification()
             elif self._configuration["configuration"]["task"] == ":tabular_regression":
-                self.__tabular_regression()
+                self.__regression()
+            elif self._configuration["configuration"]["task"] == ":text_classification":
+                self.__classification()
+            elif self._configuration["configuration"]["task"] == ":text_regression":
+                self.__regression()
 
-    def __tabular_classification(self):
+    def __classification(self):
         """Execute the tabular classification task and export the found model"""
         #TODO add implmentation for multiclassification
         self.df, test = data_loader(self._configuration)
@@ -54,7 +58,7 @@ class EvalMLAdapter(AbstractAdapter):
         best_pipeline_tobe_export = automl.best_pipeline
         export_model(best_pipeline_tobe_export, self._configuration["result_folder_location"], 'evalml.p')
     
-    def __tabular_regression(self):
+    def __regression(self):
         """Execute the tabular regression task and export the found model"""
 
         self.df, test = data_loader(self._configuration)
