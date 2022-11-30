@@ -24,7 +24,7 @@ class TestAdapter(IsolatedAsyncioTestCase):
         start_automl_request.training_id = "test"
         start_automl_request.dataset_id = "test"
         start_automl_request.user_id = "test"
-        start_automl_request.dataset_path = "tests/datasets/even_numbers.csv"
+        start_automl_request.dataset_path = "tests/datasets/10_modulo.csv"
         start_automl_request.configuration.task = ':tabular_classification'
         start_automl_request.configuration.target = 'Even'
         start_automl_request.configuration.runtime_limit = 3

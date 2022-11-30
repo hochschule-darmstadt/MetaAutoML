@@ -36,17 +36,17 @@ class EvalMLAdapter(AbstractAdapter):
         #TODO add implmentation for multiclassification
         self.df, test = data_loader(self._configuration)
         X, y = prepare_tabular_dataset(self.df, self._configuration)
+        classification_type = "binary" if y.nunique() == 2 else "multiclass"
         # parameters must be set correctly
         automl = AutoMLSearch(
                     X_train=X,
                     y_train=y,
-                    problem_type="binary",
+                    problem_type=classification_type,
                     objective="auto",
                     max_batches=3,
                     verbose=True,
                 )
         automl.search()
-        automl.rankings
         automl.describe_pipeline(3)
         best_pipeline_tobe_export = automl.best_pipeline
         export_model(best_pipeline_tobe_export, self._configuration["result_folder_location"], 'evalml.p')
