@@ -480,6 +480,9 @@ msgstr "Größe"
 msgid "Date"
 msgstr "Datum"
 
+msgid "Time"
+msgstr "Uhrzeit"
+
 msgid "tabular"
 msgstr "Tabellarisch"
 
