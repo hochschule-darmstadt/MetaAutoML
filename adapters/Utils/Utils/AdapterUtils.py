@@ -13,7 +13,9 @@ from predict_time_sources import DataType, SplitMethod, feature_preparation
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, mean_squared_error
 from sklearn.metrics import classification_report
-from JsonUtil import get_config_property
+from JsonUtil import get_config_property    predict_time_sources_path = get_config_property("predict-time-sources-path")
+    if os.path.exists(predict_time_sources_path):
+        shutil.copy(predict_time_sources_path, result_path)
 from TemplateGenerator import TemplateGenerator
 import glob
 from PIL import Image
@@ -185,8 +187,11 @@ def zip_script(config: "StartAutoMlRequest"):
     zip_file_name = get_config_property("export-zip-file-name")
     output_path = config.export_folder_location
     result_path = config.result_folder_location
-    shutil.copy(get_config_property("predict-time-sources-path"),
-                result_path)
+    
+    # copy predict_time_sources.py if present
+    predict_time_sources_path = get_config_property("predict-time-sources-path")
+    if os.path.exists(predict_time_sources_path):
+        shutil.copy(predict_time_sources_path, result_path)
 
     shutil.make_archive(os.path.join(output_path, zip_file_name),
                         'zip',
