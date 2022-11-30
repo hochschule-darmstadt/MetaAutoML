@@ -21,34 +21,23 @@ from unittest import IsolatedAsyncioTestCase
 import unittest
 
 class TestAdapter(IsolatedAsyncioTestCase):
-    
+
     async def test_start_automl_process(self):
 
         autokeras_dir = "adapters/AutoKeras"
         os.chdir(autokeras_dir)
-        
+
         start_automl_request = StartAutoMlRequest()
         start_automl_request.training_id = "test"
         start_automl_request.dataset_id = "test"
         start_automl_request.user_id = "test"
-        start_automl_request.dataset_path = os.path.join("tests", "datasets", "even_numbers.csv")
-        start_automl_request.configuration.task = ':tabular_classification'
+        start_automl_request.dataset_path = "tests/datasets/pens"
+        start_automl_request.file_location = "tests/datasets/pens"
+        start_automl_request.configuration.task = ':image_classification'
         start_automl_request.configuration.target = 'Even'
-        start_automl_request.configuration.runtime_limit = 3
+        start_automl_request.configuration.runtime_limit = 1
         start_automl_request.configuration.metric = ':accuracy'
-        start_automl_request.dataset_configuration = json.dumps({
-            "column_datatypes": {
-                "Number": 2, 
-                "Even": 5
-            }, 
-            "file_configuration": {
-                "use_header": True, 
-                "start_row": 1, 
-                "delimiter": "comma", 
-                "escape_character": "\\", 
-                "decimal_character": "." 
-            }
-        })
+        start_automl_request.dataset_configuration = json.dumps({ })
 
         session_id = uuid.uuid4()
         adapter_manager = AutoKerasAdapterManager()

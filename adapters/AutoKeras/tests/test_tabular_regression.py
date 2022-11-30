@@ -1,5 +1,8 @@
+import json
+import shutil
 import sys
 import os
+import uuid
 
 base_path = sys.path[0]
 base_path = base_path.replace("\\tests", "")
@@ -20,6 +23,10 @@ import unittest
 class AutoKerasTabularRegressionTest(IsolatedAsyncioTestCase):
     
     async def test_start_automl_process(self):
+        
+        autokeras_dir = "adapters/AutoKeras"
+        os.chdir(autokeras_dir)
+
         request = StartAutoMlRequest()
         request.training_id = "test"
         request.dataset_id = "test"

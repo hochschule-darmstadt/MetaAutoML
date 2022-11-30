@@ -91,7 +91,7 @@ class AutoKerasAdapter(AbstractAdapter):
                                 seed=42,
                                 directory=self._configuration["model_folder_location"])
                                 
-        reg.fit(x = X_train, y = y_train)
+        reg.fit(x = X_train, y = y_train, epochs=1)
 
         export_model(reg, self._configuration["result_folder_location"], 'model_keras.p')
 

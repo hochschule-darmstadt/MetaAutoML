@@ -526,7 +526,7 @@ def read_image_dataset(config: "StartAutoMlRequest") -> Tuple[pd.DataFrame, pd.D
 
         local_dir_path = os.path.dirname(local_file_path)
     """
-    data_dir = config.file_location
+    data_dir = config["dataset_path"]
     train_df_list =[]
     test_df_list =[]
 
@@ -534,7 +534,7 @@ def read_image_dataset(config: "StartAutoMlRequest") -> Tuple[pd.DataFrame, pd.D
         files = []
         df = []
         for folder in os.listdir(os.path.join(data_dir, sub_folder_type)):
-            files.append(glob.glob(os.path.join(data_dir, sub_folder_type, folder, "*.jpeg")))
+            files.append(glob.glob(os.path.join(data_dir, sub_folder_type, folder, "*.jp*g")))
 
         df_list =[]
         for i in range(len(files)):
