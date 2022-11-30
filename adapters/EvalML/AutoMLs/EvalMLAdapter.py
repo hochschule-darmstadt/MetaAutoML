@@ -8,6 +8,10 @@ import evalml
 from evalml import AutoMLSearch
 from evalml.objectives import FraudCost
 
+import pandas as pd
+from predict_time_sources import feature_preparation, DataType, SplitMethod
+
+
 # TODO implement
 class EvalMLAdapter(AbstractAdapter):
     """Implementation of the AutoML functionality for EvalML
@@ -44,6 +48,8 @@ class EvalMLAdapter(AbstractAdapter):
         X, y = prepare_tabular_dataset(self.df, self._configuration)
         classification_type = "binary" if y.nunique() == 2 else "multiclass"
         print(classification_type)
+        print(type(X))
+        print(X)
         # parameters must be set correctly
         automl = AutoMLSearch(
                     X_train=X,
@@ -51,18 +57,43 @@ class EvalMLAdapter(AbstractAdapter):
                     problem_type=classification_type,
                     objective="auto",
                     max_batches=3,
-                    verbose=True,
+                    verbose=False,
                 )
         automl.search()
         automl.describe_pipeline(3)
         best_pipeline_tobe_export = automl.best_pipeline
         export_model(best_pipeline_tobe_export, self._configuration["result_folder_location"], 'evalml.p')
+        ### test model
+        """
+        target = self._configuration["configuration"]["target"]
+        features =  self._configuration["dataset_configuration"]["column_datatypes"]
+        features.pop(target, None)
+        features = features.items()
+        delimiters = {
+                "comma":        ",",
+                "semicolon":    ";",
+                "space":        " ",
+                "tab":          "\t",
+            }
+
+        X = pd.read_csv('C:\\Users\\Hung\\Personal\\Sem1\\MetaAutoML\\controller\\app-data/datasets\\a6971d82-571a-40ac-96e5-8dcb7f5d6b0c\\63742aa4f1dbbe586eb62911\\titanic_train.csv', delimiter=delimiters[self._configuration["dataset_configuration"]['file_configuration']['delimiter']], escapechar=self._configuration["dataset_configuration"]['file_configuration']['escape_character'], decimal=self._configuration["dataset_configuration"]['file_configuration']['decimal_character']).drop(target, axis=1, errors='ignore')
+
+        # split training set
+        X = X.iloc[:]
+
+        X = feature_preparation(X, features)
+        predicted_y = best_pipeline_tobe_export.predict(X)
+        print(predicted_y)
+        """
+
+
     
     def __regression(self):
         """Execute the tabular regression task and export the found model"""
 
         self.df, test = data_loader(self._configuration)
         X, y = prepare_tabular_dataset(self.df, self._configuration)
+        print(type(X))
         problem_type = "REGRESSION"
         # parameters must be set correctly
         automl = AutoMLSearch(
@@ -71,7 +102,7 @@ class EvalMLAdapter(AbstractAdapter):
                     problem_type=problem_type,
                     objective="auto",
                     max_batches=3,
-                    verbose=True,
+                    verbose=False,
                 )
         automl.search()
         automl.describe_pipeline(3)

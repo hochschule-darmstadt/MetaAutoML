@@ -9,7 +9,7 @@ from JsonUtil import get_config_property
 import pandas as pd
 from typing import Tuple
 
-class EvalMlAdapterManager(AdapterManager):
+class EvalMLAdapterManager(AdapterManager):
     """The AutoML solution specific functionality implementation of the AdapterManager class
 
     Args:
@@ -19,7 +19,7 @@ class EvalMlAdapterManager(AdapterManager):
     def __init__(self) -> None:
         """Initialize a new FLAMLAdapterManager setting AutoML adapter specific variables
         """
-        super(EvalMlAdapterManager, self).__init__()
+        super(EvalMLAdapterManager, self).__init__()
         self.__automl = None
         self.__loaded_training_id = None
         self._adapter_name = "evalml"

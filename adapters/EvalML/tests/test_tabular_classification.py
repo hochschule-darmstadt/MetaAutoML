@@ -11,7 +11,7 @@ sys.path.insert(0, str(os.path.join(base_path, "Utils/Utils")))
 sys.path.insert(0, str(os.path.join(base_path, "Utils/AutoMLs")))
 sys.path.insert(0, str(os.path.join(base_path, "GRPC/Adapter")))
 
-from EvalMLAdapterManager import EvalMlAdapterManager
+from EvalMLAdapterManager import EvalMLAdapterManager
 from Container import *
 from AdapterBGRPC import *
 from unittest import IsolatedAsyncioTestCase
@@ -44,7 +44,7 @@ class TestAdapter(IsolatedAsyncioTestCase):
         })
 
         session_id = uuid.uuid4()
-        adapter_manager = EvalMlAdapterManager()
+        adapter_manager = EvalMLAdapterManager()
         adapter_manager.start_auto_ml(start_automl_request, session_id)
         adapter_manager.start()
         adapter_manager.join()

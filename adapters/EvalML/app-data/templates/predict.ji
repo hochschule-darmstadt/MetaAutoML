@@ -8,6 +8,7 @@ import numpy as np
 import evalml
 from evalml import AutoMLSearch
 
+
 if __name__ == '__main__':
     filepath = sys.argv[1]
     config_path = sys.argv[2]
@@ -30,7 +31,7 @@ if __name__ == '__main__':
         }
 
     X = pd.read_csv(filepath, delimiter=delimiters[config_json["dataset_configuration"]['file_configuration']['delimiter']], escapechar=config_json["dataset_configuration"]['file_configuration']['escape_character'], decimal=config_json["dataset_configuration"]['file_configuration']['decimal_character']).drop(target, axis=1, errors='ignore')
-
+    X[X.select_dtypes(['object']).columns] = X.select_dtypes(['object']).apply(lambda x: x.astype('category'))
     # split training set
     X = X.iloc[:]
 
@@ -38,11 +39,12 @@ if __name__ == '__main__':
 
     with open(sys.path[0] + '/evalml.p', 'rb') as file:
         loaded_model = dill.load(file)
-
-    predicted_y = loaded_model.predict(X)
+        
+    print(type(X))
+    print(X)
+    predicted_y = loaded_model.predict((X))
     #print(X)
     #print(predicted_y)
-    #print(type(predicted_y))
     df = (predicted_y.to_frame())
     df.columns = [ 'predicted']
     df.to_csv(save_path)

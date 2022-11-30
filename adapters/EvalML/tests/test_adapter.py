@@ -10,7 +10,7 @@ base_path = base_path.replace("\\EvalML", "")
 sys.path.insert(0, str(os.path.join(base_path, "Utils/Utils")))
 sys.path.insert(0, str(os.path.join(base_path, "Utils/AutoMLs")))
 sys.path.insert(0, str(os.path.join(base_path, "GRPC/Adapter")))
-from EvalMLAdapter import EvalMlAdapterManager
+from EvalMLAdapterManager import EvalMLAdapterManager
 from Container import *
 from AdapterBGRPC import *
 from dependency_injector.wiring import inject, Provide
@@ -25,7 +25,7 @@ class TestAdapter(IsolatedAsyncioTestCase):
     
     def setUp(self):
         self.__session_id = ""
-        self.__adapter_manager = EvalMlAdapterManager()
+        self.__adapter_manager = EvalMLAdapterManager()
     
     @inject
     async def test_start_automl_process(self):
@@ -47,12 +47,12 @@ class TestAdapter(IsolatedAsyncioTestCase):
         self.__adapter_manager.start()
         self.__adapter_manager.join()
         self.assertEqual(self.__adapter_manager.get_start_auto_ml_request(), start_automl_request)
-        path_to_model = 'C:\\Users\\Hung\\Personal\\Sem1\\MetaAutoML\\adapters\\AutoKeras\\app-data\\training\\'+start_automl_request.user_id+'\\'+start_automl_request.dataset_id+'\\'+start_automl_request.training_id+'\\export\\keras-export.zip'
+        path_to_model = 'C:\\Users\\Hung\\Personal\\Sem1\\MetaAutoML\\adapters\\EvalML\\app-data\\training\\'+start_automl_request.user_id+'\\'+start_automl_request.dataset_id+'\\'+start_automl_request.training_id+'\\export\\evalml-export.zip'
         # check if model exists
         self.assertEqual(True, Path(path_to_model).is_file())
         #self.assertEqual(True, False)
         # delete exported model 
-        export_model_to_be_deleted = 'C:\\Users\\Hung\\Personal\\Sem1\\MetaAutoML\\adapters\\AutoKeras\\app-data\\training\\'+start_automl_request.user_id+'\\'+start_automl_request.dataset_id+'\\'+start_automl_request.training_id
+        export_model_to_be_deleted = 'C:\\Users\\Hung\\Personal\\Sem1\\MetaAutoML\\adapters\\EvalML\\app-data\\training\\'+start_automl_request.user_id+'\\'+start_automl_request.dataset_id+'\\'+start_automl_request.training_id
         shutil.rmtree(export_model_to_be_deleted)
 
     def tearDown(self):
