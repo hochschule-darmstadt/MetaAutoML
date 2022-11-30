@@ -75,159 +75,159 @@
 
 @code
 {
-    [Parameter]
-    public GetDatasetResponseDto Dataset { get; set; }
+            [Parameter]
+            public GetDatasetResponseDto Dataset { get; set; }
 
-    [Parameter]
-    public CreateTrainingRequestDto StartAutoMlRequest { get; set; }
-    [Parameter]
-    public EventCallback<CreateTrainingRequestDto> StartAutoMlRequestChanged { get; set; }
+            [Parameter]
+            public CreateTrainingRequestDto StartAutoMlRequest { get; set; }
+            [Parameter]
+            public EventCallback<CreateTrainingRequestDto> StartAutoMlRequestChanged { get; set; }
 
-    async Task UpdateStartAutoMlRequest()
-    {
-        await StartAutoMlRequestChanged.InvokeAsync(StartAutoMlRequest);
-    }
-
-    private GetTasksForDatasetTypeResponseDto _compatibleTasks;
-    private List<string> _columnNames;
-
-    private ChipSet.ChipSetViewModel _mlLibsViewModel = new();
-    private ChipSet.ChipSetViewModel _autoMlSolutionsViewModel = new();
-    private ChipSet.ChipSetViewModel _strategiesViewModel = new();
-
-    protected async override void OnInitialized()
-    {
-        base.OnInitialized();
-        SetupStartAutoMLConfiguration();
-        _mlLibsViewModel.SelectedIdsChanged += async (_, __) => await OnMlLibrarySelectionChanged();
-        _autoMlSolutionsViewModel.SelectedIdsChanged += async (_, __) => await OnAutoMlSolutionSelectionChanged();
-        _strategiesViewModel.SelectedIdsChanged += async (_, __) => await OnStrategySelectionChanged();
-        await LoadData();
-    }
-
-    private void OnRuntimeValueChanged(int e)
-    {
-        StartAutoMlRequest.Configuration.RuntimeLimit = e;
-    }
-
-    private async void SetupStartAutoMLConfiguration()
-    {
-        _columnNames = new List<string>();
-
-        if ((Dataset.Dataset.Type.ID == ":tabular") || (Dataset.Dataset.Type.ID == ":text") || (Dataset.Dataset.Type.ID == ":time_series") || (Dataset.Dataset.Type.ID == ":time_series_longitudinal"))
-        {
-            foreach (KeyValuePair<string, dynamic> pair in StartAutoMlRequest.DatasetConfiguration["column_datatypes"])
+            async Task UpdateStartAutoMlRequest()
             {
-                // TODO: Document what this magic number means and extract it into a constant
-                if ((int)pair.Value != 7)
+                await StartAutoMlRequestChanged.InvokeAsync(StartAutoMlRequest);
+            }
+
+            private GetTasksForDatasetTypeResponseDto _compatibleTasks;
+            private List<string> _columnNames;
+
+            private ChipSet.ChipSetViewModel _mlLibsViewModel = new();
+            private ChipSet.ChipSetViewModel _autoMlSolutionsViewModel = new();
+            private ChipSet.ChipSetViewModel _strategiesViewModel = new();
+
+            protected async override void OnInitialized()
+            {
+                base.OnInitialized();
+                SetupStartAutoMLConfiguration();
+                _mlLibsViewModel.SelectedIdsChanged += async (_, __) => await OnMlLibrarySelectionChanged();
+                _autoMlSolutionsViewModel.SelectedIdsChanged += async (_, __) => await OnAutoMlSolutionSelectionChanged();
+                _strategiesViewModel.SelectedIdsChanged += async (_, __) => await OnStrategySelectionChanged();
+                await LoadData();
+            }
+
+            private void OnRuntimeValueChanged(int e)
+            {
+                StartAutoMlRequest.Configuration.RuntimeLimit = e;
+            }
+
+            private async void SetupStartAutoMLConfiguration()
+            {
+                _columnNames = new List<string>();
+
+                if ((Dataset.Dataset.Type.ID == ":tabular") || (Dataset.Dataset.Type.ID == ":text") || (Dataset.Dataset.Type.ID == ":time_series") || (Dataset.Dataset.Type.ID == ":time_series_longitudinal"))
                 {
-                    _columnNames.Add(pair.Key);
+                    foreach (KeyValuePair<string, dynamic> pair in StartAutoMlRequest.DatasetConfiguration["column_datatypes"])
+                    {
+                        // TODO: Document what this magic number means and extract it into a constant
+                        if ((int)pair.Value != 7)
+                        {
+                            _columnNames.Add(pair.Key);
+                        }
+                    }
+                }
+                StartAutoMlRequest.Configuration.RuntimeLimit = 3;
+                StartAutoMlRequest.Configuration.Metric = ":accuracy";
+                await UpdateStartAutoMlRequest();
+            }
+
+            private async Task LoadData()
+            {
+                try
+                {
+                    GetTasksForDatasetTypeRequestDto taskRequest = new GetTasksForDatasetTypeRequestDto { DatasetType = Dataset.Dataset.Type.ID };
+                    var apiResponse = await apiClient.GetTasksForDatasetType(taskRequest);
+
+                    HandleApiResponseWrapper(apiResponse, () => _compatibleTasks = apiResponse.Result);
+                }
+                catch (Exception ex)
+                {
+                    viewNotifier.Show(ex.GetBaseException().Message, ViewNotifierType.Error, L["Operation Failed"]);
                 }
             }
-        }
-        StartAutoMlRequest.Configuration.RuntimeLimit = 3;
-        StartAutoMlRequest.Configuration.Metric = ":accuracy";
-        await UpdateStartAutoMlRequest();
-    }
 
-    private async Task LoadData()
-    {
-        try
-        {
-            GetTasksForDatasetTypeRequestDto taskRequest = new GetTasksForDatasetTypeRequestDto { DatasetType = Dataset.Dataset.Type.ID };
-            var apiResponse = await apiClient.GetTasksForDatasetType(taskRequest);
-
-            HandleApiResponseWrapper(apiResponse, () => _compatibleTasks = apiResponse.Result);
-        }
-        catch (Exception ex)
-        {
-            viewNotifier.Show(ex.GetBaseException().Message, ViewNotifierType.Error, L["Operation Failed"]);
-        }
-    }
-
-    private async void OnMlTaskSelectionChanged(string task)
-    {
-        if (string.IsNullOrEmpty(task))
-        {
-            return;
-        }
-        StartAutoMlRequest.Configuration.Task = task;
-        try
-        {
-            Dictionary<string, string> dictionary = new Dictionary<string, string>
+            private async void OnMlTaskSelectionChanged(string task)
+            {
+                if (string.IsNullOrEmpty(task))
+                {
+                    return;
+                }
+                StartAutoMlRequest.Configuration.Task = task;
+                try
+                {
+                    Dictionary<string, string> dictionary = new Dictionary<string, string>
             {
                 { "task", StartAutoMlRequest.Configuration.Task }
             };
-            await UpdateStartAutoMlRequest();
-            /** Configuration = dictionary is currently dummy */
-            //GetCompatibleAutoMlSolutionsRequestDto compatibleAutoMlRequest = new GetCompatibleAutoMlSolutionsRequestDto { Configuration = dictionary };
+                    await UpdateStartAutoMlRequest();
+                    /** Configuration = dictionary is currently dummy */
+                    //GetCompatibleAutoMlSolutionsRequestDto compatibleAutoMlRequest = new GetCompatibleAutoMlSolutionsRequestDto { Configuration = dictionary };
 
-            //ApiResponseDto apiResponse = await apiClient.GetCompatibleAutoMlSolutions(compatibleAutoMlRequest);
+                    //ApiResponseDto apiResponse = await apiClient.GetCompatibleAutoMlSolutions(compatibleAutoMlRequest);
 
-            //if (apiResponse.IsSuccessStatusCode)
-            //{
-            //    _compatibleAutoMls = Newtonsoft.Json.JsonConvert.DeserializeObject<GetCompatibleAutoMlSolutionsResponseDto>(apiResponse.Result.ToString());
-            //    StateHasChanged();
-            //    viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["AutoMlSolution Operation Successful"]);
-            //}
-            //else
-            //{
-            //    viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["AutoMlSolution Operation Failed"]);
-            //}
+                    //if (apiResponse.IsSuccessStatusCode)
+                    //{
+                    //    _compatibleAutoMls = Newtonsoft.Json.JsonConvert.DeserializeObject<GetCompatibleAutoMlSolutionsResponseDto>(apiResponse.Result.ToString());
+                    //    StateHasChanged();
+                    //    viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["AutoMlSolution Operation Successful"]);
+                    //}
+                    //else
+                    //{
+                    //    viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["AutoMlSolution Operation Failed"]);
+                    //}
 
-            GetMlLibrariesForTaskRequestDto supportedMlLibrariesRequest = new GetMlLibrariesForTaskRequestDto { Task = StartAutoMlRequest.Configuration.Task };
-            var apiResponse = await apiClient.GetMlLibrariesForTask(supportedMlLibrariesRequest);
+                    GetMlLibrariesForTaskRequestDto supportedMlLibrariesRequest = new GetMlLibrariesForTaskRequestDto { Task = StartAutoMlRequest.Configuration.Task };
+                    var apiResponse = await apiClient.GetMlLibrariesForTask(supportedMlLibrariesRequest);
 
-            HandleApiResponseWrapper(apiResponse, () => 
-                 _mlLibsViewModel.SetAvailableChips(
-                    apiResponse.Result.MlLibraries
-                        .Select(ConvertObjectInfoToChip)),
-            errorMessageKey: "SupportedMlLibraries Operation Failed");
-        }
-        catch (Exception ex)
-        {
-            viewNotifier.Show(ex.GetBaseException().Message, ViewNotifierType.Error, L["Operation Failed"]);
-        }
-    }
-
-    private (string id, string label, string toolTip) ConvertObjectInfoToChip(ObjectInfomationDto objectInfo) =>
-        (objectInfo.ID, objectInfo.Properties.GetValueOrDefault("skos:prefLabel"), null);
-
-    private async Task OnMlLibrarySelectionChanged()
-    {
-        try
-        {
-            Dictionary<string, string> dictionary = new Dictionary<string, string>
-            {
-                { "task", StartAutoMlRequest.Configuration.Task }
-            };
-
-            List<string> libraries = _mlLibsViewModel.SelectedIds.ToList();
-            StartAutoMlRequest.Configuration.SelecctedMlLibraries = _mlLibsViewModel.SelectedIds.ToList();
-
-            await UpdateStartAutoMlRequest();
-            if (libraries.Any())
-            {
-                dictionary.Add("library", JsonConvert.SerializeObject(libraries));
+                    HandleApiResponseWrapper(apiResponse, () =>
+                         _mlLibsViewModel.SetAvailableChips(
+                            apiResponse.Result.MlLibraries
+                                .Select(ConvertObjectInfoToChip)),
+                    errorMessageKey: "SupportedMlLibraries Operation Failed");
+                }
+                catch (Exception ex)
+                {
+                    viewNotifier.Show(ex.GetBaseException().Message, ViewNotifierType.Error, L["Operation Failed"]);
+                }
             }
-            GetAutoMlSolutionsForConfigurationRequestDto compatibleAutoMlRequest = new GetAutoMlSolutionsForConfigurationRequestDto { Configuration = dictionary };
-            var apiResponse = await apiClient.GetAutoMlSolutionsForConfiguration(compatibleAutoMlRequest);
 
-            HandleApiResponseWrapper(apiResponse, () => 
-                _autoMlSolutionsViewModel.SetAvailableChips(apiResponse.Result.AutoMlSolutions.Select(ConvertObjectInfoToChip))
-            );
+            private (string id, string label, string toolTip) ConvertObjectInfoToChip(ObjectInfomationDto objectInfo) =>
+                (objectInfo.ID, objectInfo.Properties.GetValueOrDefault("skos:prefLabel"), null);
 
-            GetAvailableStrategiesRequestDto availableStrategiesRequest = new GetAvailableStrategiesRequestDto { Configuration = dictionary };
-            var availableStrategiesResponse = await apiClient.GetAvailableStrategies(availableStrategiesRequest);
+            private async Task OnMlLibrarySelectionChanged()
+            {
+                try
+                {
+                    Dictionary<string, string> dictionary = new Dictionary<string, string>
+            {
+                { "task", StartAutoMlRequest.Configuration.Task }
+            };
 
-            HandleApiResponseWrapper(availableStrategiesResponse, () =>
-                _strategiesViewModel.SetAvailableChips(availableStrategiesResponse.Result.Strategies.Select(s => (s.Id, s.Title, s.Description)))
-            );
-        }
+                    List<string> libraries = _mlLibsViewModel.SelectedIds.ToList();
+                    StartAutoMlRequest.Configuration.SelecctedMlLibraries = _mlLibsViewModel.SelectedIds.ToList();
+
+                    await UpdateStartAutoMlRequest();
+                    if (libraries.Any())
+                    {
+                        dictionary.Add("library", JsonConvert.SerializeObject(libraries));
+                    }
+                    GetAutoMlSolutionsForConfigurationRequestDto compatibleAutoMlRequest = new GetAutoMlSolutionsForConfigurationRequestDto { Configuration = dictionary };
+                    var apiResponse = await apiClient.GetAutoMlSolutionsForConfiguration(compatibleAutoMlRequest);
+
+                    HandleApiResponseWrapper(apiResponse, () =>
+                        _autoMlSolutionsViewModel.SetAvailableChips(apiResponse.Result.AutoMlSolutions.Select(ConvertObjectInfoToChip))
+                    );
+
+                    GetAvailableStrategiesRequestDto availableStrategiesRequest = new GetAvailableStrategiesRequestDto { Configuration = dictionary, DatasetId = Dataset.Dataset.Id };
+                var availableStrategiesResponse = await apiClient.GetAvailableStrategies(availableStrategiesRequest);
+
+                HandleApiResponseWrapper(availableStrategiesResponse, () =>
+                    _strategiesViewModel.SetAvailableChips(availableStrategiesResponse.Result.Strategies.Select(s => (s.Id, s.Title, s.Description)))
+                );
+            }
         catch (Exception ex)
         {
             viewNotifier.Show(ex.GetBaseException().Message, ViewNotifierType.Error, L["Operation Failed"]);
-        } 
+        }
     }
 
     private void HandleApiResponseWrapper<T>(ApiResponseDto<T> apiResponse, Action successAction, string errorMessageKey = "Operation Failed", string successMessageKey = "Operation Successful")
@@ -261,5 +261,5 @@
     {
         StartAutoMlRequest.Configuration.Target = value;
         await UpdateStartAutoMlRequest();
-    }    
+    }
 }
