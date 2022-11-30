@@ -80,6 +80,10 @@ def capture_process_output(process: subprocess.Popen, use_error: bool):
             s = process.stderr.read(1)
         capture += s
 
+    if use_error:
+        process.stderr.close()
+    else:
+        process.stdout.close()
 
 def get_response(config: "StartAutoMlRequest", test_score: float, prediction_time: float, library: str, model: str) -> "GetAutoMlStatusResponse":
     """Generate the final GRPC AutoML status message
@@ -223,15 +227,18 @@ def evaluate(config: "StartAutoMlRequest", config_path: str) -> Tuple[float, flo
     os.chmod(os.path.join(result_path, "predict.py"), 0o777)
     python_env = os.getenv("PYTHON_ENV", default="PYTHON_ENV_UNSET")
 
-    predict_start = time.time()
-    subprocess.call([python_env, os.path.join(result_path, "predict.py"), file_path, config_path, os.path.join(result_path, "predictions.csv")])
-    predict_time = time.time() - predict_start
-
     if(config["configuration"]["task"] in [":tabular_classification", ":tabular_regression", ":text_regression", ":text_classification"]):
         train, test = data_loader(config)
         target = config["configuration"]["target"]
+        # override file_path to path to test file
+        file_path = write_tabular_dataset_test_data(test, os.path.dirname(file_path))
+        
     elif(config["configuration"]["task"] in[":image_classification", ":image_regression"]):
         X_train, y_train, X_val, y_val, X_test, y_test = data_loader(config)
+
+    predict_start = time.time()
+    subprocess.call([python_env, os.path.join(result_path, "predict.py"), file_path, config_path, os.path.join(result_path, "predictions.csv")])
+    predict_time = time.time() - predict_start
 
     predictions = pd.read_csv(os.path.join(result_path, "predictions.csv"))
     os.remove(os.path.join(result_path, "predictions.csv"))
@@ -436,9 +443,26 @@ def read_tabular_dataset_training_data(config: "StartAutoMlRequest") -> Tuple[pd
     #    test = data.sample(random_state=json_configuration["test_configuration"]["random_state"], frac=1)
     #else:
     train = data.iloc[:int(data.shape[0] * 0.8)]
-    test = data.iloc[int(data.shape[0] * 0.2):]
+    test = data.iloc[int(data.shape[0] * 0.8):]
 
     return train, test
+
+def write_tabular_dataset_test_data(df: pd.DataFrame, dir_name: str) -> str:
+    """Writes dataframe into a csv file.
+
+    Args:
+        df (pd.DataFrame): The dataset dataframe
+        dir_name (str): path of output directory
+
+    Returns:
+        file_path (str): file path to output file "test.csv"
+    """
+    file_path = os.path.join(dir_name, "test.csv")
+    #np.reshape(df, (-1, 1))
+    pd.DataFrame(data=df, columns=df.columns).to_csv(file_path, index=False)
+    os.chmod(file_path, 0o744)
+    return file_path
+
 
 def prepare_tabular_dataset(df: pd.DataFrame, json_configuration: dict) -> Tuple[pd.DataFrame, pd.Series]:
     """Prepare tabular dataset, perform feature preparation and data type casting

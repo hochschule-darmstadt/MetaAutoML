@@ -1,0 +1,2 @@
+betterproto==1.2.5
+grpclib==0.4.3

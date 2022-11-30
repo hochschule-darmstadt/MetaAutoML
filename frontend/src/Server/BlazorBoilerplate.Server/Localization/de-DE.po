@@ -838,7 +838,7 @@ msgid "AntiforgeryCookieLifecycle"
 msgstr "Sitzung"
 
 msgid "AntiforgeryCookieDescription"
-msgstr "Diese Cookie speichert den Anti Forgery Token ab, wird zum Schutz vor Cross-Site-Request-Forgery-Attack verwendet."
+msgstr "Dieses Cookie speichert den Anti Forgery Token ab, wird zum Schutz vor Cross-Site-Request-Forgery-Attack verwendet."
 
 
 
@@ -849,7 +849,7 @@ msgid "CultureCookieLifecycle"
 msgstr "1 Monat"
 
 msgid "CultureCookieDescription"
-msgstr "Diese Cookie speichert die Sprachauswahl, wird zur Darstellung der richtige Sprache verwendet."
+msgstr "Dieses Cookie speichert die Sprachauswahl, wird zur Darstellung der richtige Sprache verwendet."
 
 
 
@@ -871,7 +871,7 @@ msgid "IdentityApplicationCookieLifecycle"
 msgstr "Sitzung"
 
 msgid "IdentityApplicationCookieDescription"
-msgstr "Diese Cookie ermöglicht die Cookie basierte Nutzer autorisierung, wird für das Nutzer Management verwendet."
+msgstr "Dieses Cookie ermöglicht die Cookie basierte Nutzer autorisierung, wird für das Nutzer Management verwendet."
 
 
 msgid "IdsrvSessionCookieName"
@@ -882,3 +882,16 @@ msgstr "Sitzung"
 
 msgid "IdsrvSessionCookieDescription"
 msgstr "Dieses Cookie speichert die aktuelle Sitzungs id, wird für das Nutzer Management verwendet."
+
+msgid "FolderStructureNotCorrectErrorMessage"
+msgstr "Die Ordnerstruktur der Zip-Datei entspricht nicht den Anforderungen."
+
+msgid "AffinityCookieName"
+msgstr "affinity"
+
+msgid "AffinityCookieLifecycle"
+msgstr "4 Stunden"
+
+msgid "AffinityCookieDescription"
+msgstr "Dieses Cookie speichert die aktuelle Sticky Sitzungs id, wird für das korrekte Routing verwendet."
+
