@@ -37,6 +37,7 @@ class EvalMLAdapter(AbstractAdapter):
         self.df, test = data_loader(self._configuration)
         X, y = prepare_tabular_dataset(self.df, self._configuration)
         classification_type = "binary" if y.nunique() == 2 else "multiclass"
+        print(classification_type)
         # parameters must be set correctly
         automl = AutoMLSearch(
                     X_train=X,

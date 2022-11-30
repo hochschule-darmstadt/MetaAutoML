@@ -32,7 +32,7 @@ class TestAdapter(IsolatedAsyncioTestCase):
         start_automl_request.dataset_configuration = json.dumps({
             "column_datatypes": {
                 "Number": 2, 
-                "Even": 5
+                "Even": 2
             }, 
             "file_configuration": {
                 "use_header": True, 
