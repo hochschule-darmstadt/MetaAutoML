@@ -19,12 +19,12 @@ namespace BlazorBoilerplate.Theme.Material.Services
     {
         private IApiClient _client;
         private IViewNotifier _notifier;
-        private IStringLocalizer<Global> L;
+        private IStringLocalizer<Global> _l;
         public FileUploader(IApiClient client, IViewNotifier notifier, IStringLocalizer<Global> L)
         {
             _client = client;
             _notifier = notifier;
-            L = L;
+            _l = L;
         }
         public UploadDatasetRequestDto UploadDatasetRequest { get; set; }
         public UploadPredictionRequestDto UploadPredictionRequest { get; set; }
@@ -107,7 +107,7 @@ namespace BlazorBoilerplate.Theme.Material.Services
                     }
                     if (!apiResponse.IsSuccessStatusCode)
                     {
-                        _notifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
+                        _notifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, _l["Operation Failed"]);
                     }
 
                     bytesRead += reallyRead;
@@ -138,7 +138,7 @@ namespace BlazorBoilerplate.Theme.Material.Services
             }
             catch (Exception ex)
             {
-                _notifier.Show(ex.Message, ViewNotifierType.Error, L["Operation Failed"]);
+                _notifier.Show(ex.Message, ViewNotifierType.Error, _l["Operation Failed"]);
             }
             return;
         }
