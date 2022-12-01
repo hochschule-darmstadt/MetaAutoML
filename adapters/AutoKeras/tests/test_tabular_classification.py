@@ -20,26 +20,54 @@ from AdapterBGRPC import *
 from unittest import IsolatedAsyncioTestCase
 import unittest
 
+import sklearn.datasets
+from pandas import DataFrame
+
 class TestAdapter(IsolatedAsyncioTestCase):
     
+    def prepare_test_dataset():
+
+        file_path = os.path.join("tests", "datasets", "diabetes.csv")
+        if not os.path.exists(file_path):
+            print("did not find dataset, will download")
+            diabetes = sklearn.datasets.load_diabetes(as_frame=True, scaled=False)
+            # drop columns that are not interesting
+            diabetes: DataFrame = diabetes.frame[["age", "sex", "bmi"]]
+            
+            diabetes["age"] = diabetes["age"].astype("int")
+            diabetes["sex"] = diabetes["sex"].astype("int")
+            diabetes["bmi"] = diabetes["bmi"].astype("int")
+
+            with open(file_path, "w+") as outfp:
+                DataFrame.to_csv(diabetes, outfp)
+
+        return file_path
+    
+
     async def test_start_automl_process(self):
 
+        # NOTE: we are running the test in the root directory.
+        #       the application is expected to start inside the adapter solution,
+        #       so we need to change working directories
         autokeras_dir = "adapters/AutoKeras"
         os.chdir(autokeras_dir)
         
-        start_automl_request = StartAutoMlRequest()
-        start_automl_request.training_id = "test"
-        start_automl_request.dataset_id = "test"
-        start_automl_request.user_id = "test"
-        start_automl_request.dataset_path = os.path.join("tests", "datasets", "even_numbers.csv")
-        start_automl_request.configuration.task = ':tabular_classification'
-        start_automl_request.configuration.target = 'Even'
-        start_automl_request.configuration.runtime_limit = 3
-        start_automl_request.configuration.metric = ':accuracy'
-        start_automl_request.dataset_configuration = json.dumps({
+        dataset_path = TestAdapter.prepare_test_dataset()
+
+        req = StartAutoMlRequest()
+        req.training_id = "test"
+        req.dataset_id = "test"
+        req.user_id = "test"
+        req.dataset_path = os.path.join("tests", "datasets", "diabetes.csv")
+        req.configuration.task = ':tabular_classification'
+        req.configuration.target = 'sex'
+        req.configuration.runtime_limit = 3
+        req.configuration.metric = ':accuracy'
+        req.dataset_configuration = json.dumps({
             "column_datatypes": {
-                "Number": 2, 
-                "Even": 5
+                "age": 2, 
+                "sex": 2,
+                "bmi": 2
             }, 
             "file_configuration": {
                 "use_header": True, 
@@ -50,14 +78,13 @@ class TestAdapter(IsolatedAsyncioTestCase):
             }
         })
 
-        session_id = uuid.uuid4()
         adapter_manager = AutoKerasAdapterManager()
-        adapter_manager.start_auto_ml(start_automl_request, session_id)
+        adapter_manager.start_auto_ml(req, uuid.uuid4())
         adapter_manager.start()
         adapter_manager.join()
 
         # check if model archive exists
-        out_dir = os.path.join("app-data", "training", start_automl_request.user_id, start_automl_request.dataset_id, start_automl_request.training_id)
+        out_dir = os.path.join("app-data", "training", req.user_id, req.dataset_id, req.training_id)
         path_to_model = os.path.join(out_dir, "export", "keras-export.zip")
         self.assertTrue(os.path.exists(path_to_model))
         
