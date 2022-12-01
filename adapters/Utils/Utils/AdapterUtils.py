@@ -26,65 +26,6 @@ from typing import Tuple
 
 #region
 
-def get_except_response(e: Exception) -> "GetAutoMlStatusResponse":
-    """Generate a GRPC status message holding the raised exception informations
-
-    Args:
-        e (Exception): The raised exception
-
-    Returns:
-        GetAutoMlStatusResponse: The GRPC response message
-    """
-    print(e)
-    response = GetAutoMlStatusResponse()
-    response.return_code = AdapterReturnCode.ADAPTER_RETURN_CODE_ERROR
-    return response
-
-
-def capture_process_output(process: subprocess.Popen, use_error: bool):
-    """Read the console log from the AutoML subprocess until no new text is produced by the subprocess, and yield AutoML status messages
-
-    Args:
-        process (subprocess.Popen): The AutoML subprocess instance
-        use_error (bool): If instead of the STD OUT the STD ERR is used as input to capture from
-
-    Yields:
-        Iterator[GetAutoMlStatusResponse]: The latest Grpc response message generated from reading the subprocess console
-    """
-    s = ""
-    capture = ""
-    if(use_error == False):
-        s = process.stdout.read(1)
-    else:
-        s = process.stderr.read(1)
-    capture += s
-    # Run until no more output is produced by the subprocess
-    while len(s) > 0:
-        if capture[len(capture) - 1] == '\n':
-            process_update = GetAutoMlStatusResponse()
-            process_update.return_code = AdapterReturnCode.ADAPTER_RETURN_CODE_STATUS_UPDATE
-            process_update.status_update = capture
-            # if return Code is ADAPTER_RETURN_CODE_STATUS_UPDATE we do not have score values yet
-            process_update.test_score = 0.0
-            process_update.prediction_time = 0.0
-            process_update.ml_library = ""
-            process_update.ml_model_type = ""
-            yield process_update
-
-            sys.stdout.write(capture)
-            sys.stdout.flush()
-            capture = ""
-        if(use_error == False):
-            s = process.stdout.read(1)
-        else:
-            s = process.stderr.read(1)
-        capture += s
-
-    if use_error:
-        process.stderr.close()
-    else:
-        process.stdout.close()
-
 def get_response(config: "StartAutoMlRequest", test_score: float, prediction_time: float, library: str, model: str) -> "GetAutoMlStatusResponse":
     """Generate the final GRPC AutoML status message
 
