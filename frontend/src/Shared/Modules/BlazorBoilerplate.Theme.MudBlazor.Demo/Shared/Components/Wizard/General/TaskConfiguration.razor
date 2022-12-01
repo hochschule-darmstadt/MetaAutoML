@@ -68,15 +68,33 @@
             <ChipSet ViewModel="@_mlLibsViewModel" Label="@L["ML libraries"]" />
             <ChipSet ViewModel="@_autoMlSolutionsViewModel" Label="@L["AutoML solutions"]" />
             <ChipSet ViewModel="@_strategiesViewModel" Label="@L["Enabled strategies"]" />
-            @if (_availableParameters != null)
+            @if (_parameterValues != null)
             {
                 <MudText Typo="Typo.subtitle2" Class="mt-4">Available parameters</MudText>
-                <ul class="list-disc">
-                @foreach (var param in _availableParameters)
+                
+
+                @foreach (var param in _parameterValues)
                 {
-                    <li>@param.ToString()</li>
+                    <MudText Typo="Typo.body2" Class="mt-4">@param.Value[0]</MudText>
+                    @if (param.Value[1] == "http://h-da.de/ml-ontology/single_value")
+                    {
+                            <MudSelect Label="@param.Value[0]" T="string">
+                                @foreach (var paramValue in param.Value.Skip(2))
+                                {
+                                <MudSelectItem Value="@paramValue">@paramValue</MudSelectItem>
+                                }
+                            </MudSelect>
+                    }
+                    @if (param.Value[1] == "http://h-da.de/ml-ontology/list")
+                    {
+                        <MudSelect Label="@param.Value[0]" T="string" MultiSelection="true">
+                            @foreach (var paramValue in param.Value.Skip(2))
+                            {
+                                <MudSelectItem Value="@paramValue">@paramValue</MudSelectItem>
+                            }
+                        </MudSelect>
+                    }
                 }
-                </ul>
             }
             else
             {
@@ -104,6 +122,7 @@
 
     private GetTasksForDatasetTypeResponseDto _compatibleTasks;
     private List<AutoMlParameterDto> _availableParameters;
+    private Dictionary<String,List<String>> _parameterValues = new Dictionary<string, List<string>>();
     private List<string> _columnNames;
 
     private ChipSet.ChipSetViewModel _mlLibsViewModel = new();
@@ -169,6 +188,23 @@
             apiResponse,
             () => _availableParameters = apiResponse.Result.AutoMlParameters,
             errorMessageKey: "Fetching available parameters failed");
+        foreach (AutoMlParameterDto param in _availableParameters)
+        {
+            List<String> parameterObject;
+            if(_parameterValues.ContainsKey(param.ParamIri))
+            {
+                _parameterValues.TryGetValue(param.ParamIri, out parameterObject);
+                parameterObject.Add(param.ValueLabel);
+                _parameterValues[param.ParamIri] = parameterObject;
+            } else
+            {
+                parameterObject = new List<string>();
+                parameterObject.Add(param.ParamLabel);
+                parameterObject.Add(param.ParamType);
+                parameterObject.Add(param.ValueLabel);
+                _parameterValues.Add(param.ParamIri, parameterObject);
+            }
+        }
     }
 
     private async void OnMlTaskSelectionChanged(string task)
