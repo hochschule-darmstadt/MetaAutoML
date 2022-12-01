@@ -6,7 +6,7 @@
 <CascadingValue Value="this">
     <MudLayout>
         <MudAppBar Elevation="1">
-            <MudIconButton Icon="@Icons.Material.Filled.Menu" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
+            <MudIconButton Icon="@navMenuIcon" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
             <MudSpacer />
             <MudText Color="Color.Dark" Typo="Typo.h6">OMA-ML: Effective Machine Learning made easy!</MudText>
             <MudSpacer />
@@ -41,6 +41,7 @@
 
 @code {
     bool _navMenuOpened = true;
+    string navMenuIcon = Icons.Filled.ArrowBackIos;
 
     [CascadingParameter]
     Task<AuthenticationState> authenticationStateTask { get; set; }
@@ -60,5 +61,11 @@
     private void DrawerToggle()
     {
         _navMenuOpened = !_navMenuOpened;
+        @if (_navMenuOpened == true) {
+            navMenuIcon = Icons.Filled.ArrowBackIos;
+        }
+        else {
+            navMenuIcon = Icons.Filled.ArrowForwardIos;
+        }
     }
 }
