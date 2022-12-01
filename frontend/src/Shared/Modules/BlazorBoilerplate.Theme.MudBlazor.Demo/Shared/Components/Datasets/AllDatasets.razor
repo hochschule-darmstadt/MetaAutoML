@@ -28,7 +28,7 @@
             <MudTable Items="@Datasets.Datasets" style="width:stretch" class="mat-elevation-z5" AllowSelection="false" Dense="true" Filter="new Func<DatasetDto,bool>(FilterFunc)">
                 <ToolBarContent>
                     <MudSpacer />
-                    <MudTextField @bind-Value="searchString" Placeholder="@L["Search for name or type"]" Adornment="Adornment.Start"
+                    <MudTextField @bind-Value="searchString" Placeholder="@L["Search for name or type"]" Adornment="Adornment.Start" Immediate="true"
                                     AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
                 </ToolBarContent>
                 <HeaderContent>
