@@ -38,6 +38,19 @@ class TestDataUpload(IsolatedAsyncioTestCase):
             create_request.dataset_type=":tabular"
             create_respone = self.__dataset_manager.create_dataset(create_request)
             self.assertIsInstance(create_respone,CreateDatasetResponse)
+            
+    async def test_imgae_upload(self):
+        image_test_data_dir = f"{self.test_data_path}\\image\\"
+        for file in os.listdir(os.fsencode(image_test_data_dir)):
+            filename = os.fsdecode(file)
+            shutil.copy(image_test_data_dir+filename, self.__upload_file_path)
+            create_request = CreateDatasetRequest()
+            create_request.user_id=USER_ID
+            create_request.file_name= filename
+            create_request.dataset_name= filename
+            create_request.dataset_type=":image"
+            create_respone = self.__dataset_manager.create_dataset(create_request)
+            self.assertIsInstance(create_respone,CreateDatasetResponse)
 
 
     def tearDown(self):
