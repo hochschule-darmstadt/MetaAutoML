@@ -36,15 +36,17 @@
                     <MudTh><MudTableSortLabel SortBy="@(new Func<DatasetDto, object>(x=>x.Type.Properties["skos:prefLabel"]))">@L["Type"]</MudTableSortLabel></MudTh>
                     <MudTh><MudTableSortLabel SortBy="@(new Func<DatasetDto, object>(x=>x.Analysis["size_bytes"]))">@L["Size"]</MudTableSortLabel></MudTh>
                     <MudTh><MudTableSortLabel SortBy="@(new Func<DatasetDto, object>(x=>x.Analysis["creation_date"]))">@L["Date"]</MudTableSortLabel></MudTh>
-                    <MudTh></MudTh>   
+                    <MudTh><MudTableSortLabel SortBy="@(new Func<DatasetDto, object>(x=>x.Analysis["creation_date"]))">@L["Time"]</MudTableSortLabel></MudTh>
+                    <MudTh></MudTh>
                 </HeaderContent>
                 <RowTemplate>
-                    <MudTd >
+                    <MudTd>
                         <MudLink Href="@NavManager.ToAbsoluteUri("datasets/" + @context.Id).AbsoluteUri" Style="cursor: pointer; display: flex;"><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.ListAlt" Style="margin-right: 4px;" />@context.Name</MudLink>
                     </MudTd>
-                    <MudTd >@L[context.Type.Properties.ContainsKey("skos:prefLabel") ? context.Type.Properties["skos:prefLabel"] : ""]</MudTd>
+                    <MudTd>@L[context.Type.Properties.ContainsKey("skos:prefLabel") ? context.Type.Properties["skos:prefLabel"] : ""]</MudTd>
                     <MudTd>@FormatBytes(context.Analysis["size_bytes"])</MudTd>
                     <MudTd style="white-space:nowrap;">@context.Analysis["creation_date"].ToString("yyyy-MM-dd")</MudTd>
+                    <MudTd style="white-space:nowrap;">@context.Analysis["creation_date"].ToString("HH:mm:ss")</MudTd>
                     <MudTd><DatasetMenu Dataset="@context" OnDeleteCompleted="@OnDeleteDatasetCompleted" /></MudTd>
                 </RowTemplate>
                 <PagerContent>
