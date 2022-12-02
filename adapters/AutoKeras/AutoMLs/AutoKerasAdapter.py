@@ -46,7 +46,7 @@ class AutoKerasAdapter(AbstractAdapter):
                                           directory=self._configuration["model_folder_location"],
                                           seed=42)
                                           
-        clf.fit(x=X, y=y)
+        clf.fit(x=X, y=y, epochs=1)
         export_model(clf, self._configuration["result_folder_location"], 'model_keras.p')
 
     def __tabular_regression(self):
@@ -61,7 +61,7 @@ class AutoKerasAdapter(AbstractAdapter):
                                          directory=self._configuration["model_folder_location"],
                                          seed=42)
         
-        reg.fit(x=X, y=y)
+        reg.fit(x=X, y=y, epochs=1)
         export_model(reg, self._configuration["result_folder_location"], 'model_keras.p')
 
     def __image_classification(self):
@@ -123,7 +123,7 @@ class AutoKerasAdapter(AbstractAdapter):
                                 seed=42,
                                 directory=self._configuration["model_folder_location"])
                                 
-        reg.fit(x = np.array(X), y = np.array(y))
+        reg.fit(x = np.array(X), y = np.array(y), epochs=1)
 
         export_model(reg, self._configuration["result_folder_location"], 'model_keras.p')
 
@@ -139,6 +139,6 @@ class AutoKerasAdapter(AbstractAdapter):
                                 seed=42,
                                 directory=self._configuration["model_folder_location"])
                                 
-        reg.fit(x = np.array(X), y = np.array(y))
+        reg.fit(x = np.array(X), y = np.array(y), epochs=1)
 
         export_model(reg, self._configuration["result_folder_location"], 'model_keras.p')

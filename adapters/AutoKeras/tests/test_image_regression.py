@@ -1,81 +1,86 @@
 import json
-import sys
+import shutil
 import os
 import uuid
-import AdapterUtils
-from AutoKerasAdapter import AutoKerasAdapter
-from AutoKerasAdapterManager import AutoKerasAdapterManager
-# from AutoKerasAdapter import AutoKerasAdapter
-
-# base_path = sys.path[0]
-# base_path = base_path.replace("\\tests", "")
-# sys.path.insert(0,base_path)
-# sys.path.insert(0, str(os.path.join(base_path, "AutoMLs")))
-# sys.path.insert(0, str(os.path.join(base_path, "dependency-injection")))
-# base_path = base_path.replace("\\AutoKeras", "")
-# sys.path.insert(0, str(os.path.join(base_path, "Utils/Utils")))
-# sys.path.insert(0, str(os.path.join(base_path, "Utils/AutoMLs")))
-# sys.path.insert(0, str(os.path.join(base_path, "GRPC/Adapter")))
-
-# from AutoKerasAdapterManager import AutoKerasAdapterManager
-from Container import *
-from AdapterBGRPC import *
-from unittest import IsolatedAsyncioTestCase
 import unittest
+import numpy as np
+import sklearn.datasets
+from PIL import Image
 
-class TestAdapter(IsolatedAsyncioTestCase):
+from AdapterBGRPC import StartAutoMlRequest
+from AutoKerasAdapterManager import AutoKerasAdapterManager
+
+
+class TestAdapter(unittest.IsolatedAsyncioTestCase):
+
+    def prepare_test_dataset():
+        # load image dataset with hand-drawn digits
+        #   X = numpy array with numbers from 0-16 --> needs scaling to 0-255
+        #   y = integer indicating the number in the picture
+        X_digits, y_digits = sklearn.datasets.load_digits(return_X_y=True)
+        # take only a small subset for this test
+        X_y = list(zip(X_digits, y_digits))[:20]
+
+        dataset_folder = os.path.join("tests", "datasets", "digits")
+
+        for i, (img, digit) in enumerate(X_y):
+
+            # reshape array into 8x8 matrix and
+            img = np.reshape(img, (8, 8))
+            # scale each pixel to 0-255
+            img = img * 16
+
+            # 25% of images are test data
+            ftype = "test" if i % 4 == 0 else "train"
+
+            # create folder and build image path
+            folder = os.path.join(dataset_folder, ftype, str(digit))
+            os.makedirs(folder, exist_ok=True)
+            file_path = os.path.join(folder, f"{i}.jpeg")
+
+            # save image to file
+            img = Image.fromarray(img)
+            img = img.convert("RGB")
+            img.save(file_path)
+
+        return dataset_folder
 
     async def test_start_automl_process(self):
 
+        # NOTE: we are running the test in the root directory.
+        #       the application is expected to start inside the adapter solution,
+        #       so we need to change working directories
         autokeras_dir = "adapters/AutoKeras"
         os.chdir(autokeras_dir)
 
-        start_automl_request = StartAutoMlRequest()
-        start_automl_request.training_id = "test"
-        start_automl_request.dataset_id = "test"
-        start_automl_request.user_id = "test"
-        start_automl_request.dataset_path = "tests/datasets/facials"
-        start_automl_request.file_location = "tests/datasets/facials"
-        start_automl_request.configuration.task = ':image_regression'
-        start_automl_request.configuration.target = 'Even'
-        start_automl_request.configuration.runtime_limit = 1
-        start_automl_request.configuration.metric = ':accuracy'
-        start_automl_request.dataset_configuration = json.dumps({ })
+        dataset_path = TestAdapter.prepare_test_dataset()
+
+        req = StartAutoMlRequest()
+        req.training_id = "test"
+        req.dataset_id = "test"
+        req.user_id = "test"
+        req.dataset_path = dataset_path
+        req.configuration.task = ':image_regression'
+        req.configuration.target = 'Even'
+        req.configuration.runtime_limit = 1
+        req.configuration.metric = ':accuracy'
+        req.dataset_configuration = json.dumps({})
 
         session_id = uuid.uuid4()
         adapter_manager = AutoKerasAdapterManager()
-        adapter_manager.start_auto_ml(start_automl_request, session_id)
+        adapter_manager.start_auto_ml(req, session_id)
         adapter_manager.start()
         adapter_manager.join()
-        # config = {
-        #     "training_id": "test", 
-        #     "dataset_id": "test", 
-        #     "user_id": "test", 
-        #     "dataset_path": "tests/datasets/facials", 
-        #     "configuration": {
-        #         "task": ":image_regression", 
-        #         "runtime_limit": 3,
-        #         "metric": ":accuracy"
-        #     },
-        #     "dataset_configuration": "{}", 
-        #     "file_location": "tests/datasets/facials", 
-        #     "job_folder_location": "app-data/training/test/test/test/job", 
-        #     "model_folder_location": "app-data/training/test/test/test/model", 
-        #     "export_folder_location": "app-data/training/test/test/test/export", 
-        #     "result_folder_location": "app-data/training/test/test/test/result", 
-        #     "controller_export_folder_location": "app-data/training/AutoKeras/test/test/test/export"
-        # }
-        # AdapterUtils.setup_run_environment(config, "AutoKeras")
-        # adapter = AutoKerasAdapter(config)
-        # adapter.start()
 
         # check if model archive exists
-        # path_to_model = os.path.join(config["export_folder_location"], "keras-export.zip")
-        # self.assertTrue(os.path.exists(path_to_model))
-        
-        # # clean up
-        # traning_dir = os.path.dirname(config["export_folder_location"])
-        # shutil.rmtree(traning_dir)
-        
+        out_dir = os.path.join("app-data", "training",
+                               req.user_id, req.dataset_id, req.training_id)
+        path_to_model = os.path.join(out_dir, "export", "keras-export.zip")
+        self.assertTrue(os.path.exists(path_to_model))
+
+        # clean up
+        shutil.rmtree(out_dir)
+
+
 if __name__ == "__main__":
     unittest.main()

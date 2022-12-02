@@ -1,68 +1,87 @@
 import json
 import shutil
-import sys
 import os
 import uuid
-
-base_path = sys.path[0]
-base_path = base_path.replace("\\tests", "")
-sys.path.insert(0,base_path)
-sys.path.insert(0, str(os.path.join(base_path, "AutoMLs")))
-sys.path.insert(0, str(os.path.join(base_path, "dependency-injection")))
-base_path = base_path.replace("\\AutoKeras", "")
-sys.path.insert(0, str(os.path.join(base_path, "Utils/Utils")))
-sys.path.insert(0, str(os.path.join(base_path, "Utils/AutoMLs")))
-sys.path.insert(0, str(os.path.join(base_path, "GRPC/Adapter")))
-
-from AutoKerasAdapterManager import AutoKerasAdapterManager
-from Container import *
-from AdapterBGRPC import *
-from unittest import IsolatedAsyncioTestCase
 import unittest
 
+from AutoKerasAdapterManager import AutoKerasAdapterManager
+from unittest import IsolatedAsyncioTestCase
+from AdapterBGRPC import StartAutoMlRequest
+
+import sklearn.datasets
+from pandas import DataFrame
+
+
 class AutoKerasTabularRegressionTest(IsolatedAsyncioTestCase):
-    
-    async def test_start_automl_process(self):
-        
+
+    def prepare_test_dataset():
+
+        file_path = os.path.join("tests", "datasets", "diabetes.csv")
+        if not os.path.exists(file_path):
+            print("did not find dataset, will download")
+            diabetes = sklearn.datasets.load_diabetes(
+                as_frame=True, scaled=False)
+            # drop columns that are not interesting
+            diabetes: DataFrame = diabetes.frame[["age", "sex", "bmi"]]
+
+            diabetes["age"] = diabetes["age"].astype("int")
+            diabetes["sex"] = diabetes["sex"].astype("int")
+            diabetes["bmi"] = diabetes["bmi"].astype("int")
+
+            with open(file_path, "w+") as outfp:
+                DataFrame.to_csv(diabetes, outfp)
+
+        return file_path
+
+    def test_start_automl_process(self):
+
+        # NOTE: we are running the test in the root directory.
+        #       the application is expected to start inside the adapter solution,
+        #       so we need to change working directories
         autokeras_dir = "adapters/AutoKeras"
         os.chdir(autokeras_dir)
 
-        request = StartAutoMlRequest()
-        request.training_id = "test"
-        request.dataset_id = "test"
-        request.user_id = "test"
-        request.dataset_path = "tests/datasets/even_numbers.csv"
-        request.configuration.task = ":tabular_regression"
-        request.configuration.target = "Even"
-        request.configuration.runtime_limit = 3
-        request.configuration.metric = ":accuracy"
-        request.dataset_configuration = json.dumps({
+        dataset_path = AutoKerasTabularRegressionTest.prepare_test_dataset()
+
+        req = StartAutoMlRequest()
+        req.training_id = "test"
+        req.dataset_id = "test"
+        req.user_id = "test"
+        req.dataset_path = dataset_path
+        req.configuration.task = ":tabular_regression"
+        req.configuration.target = "bmi"
+        req.configuration.runtime_limit = 3
+        req.configuration.metric = ":accuracy"
+        req.dataset_configuration = json.dumps({
             "column_datatypes": {
-                "Number": 2, 
-                "Even": 5
-            }, 
+                # all integers
+                "age": 2,
+                "sex": 2,
+                "bmi": 2
+            },
             "file_configuration": {
-                "use_header": True, 
-                "start_row": 1, 
-                "delimiter": "comma", 
-                "escape_character": "\\", 
-                "decimal_character": "." 
+                "use_header": True,
+                "start_row": 1,
+                "delimiter": "comma",
+                "escape_character": "\\",
+                "decimal_character": "."
             }
         })
 
-        session_id = uuid.uuid4()
         adapter_manager = AutoKerasAdapterManager()
-        adapter_manager.start_auto_ml(request, session_id)
+        adapter_manager.start_auto_ml(req, uuid.uuid4())
         adapter_manager.start()
         adapter_manager.join()
 
         # check if model archive exists
-        out_dir = os.path.join("app-data", "training", request.user_id, request.dataset_id, request.training_id)
+        out_dir = os.path.join("app-data", "training",
+                               req.user_id, req.dataset_id, req.training_id)
         path_to_model = os.path.join(out_dir, "export", "keras-export.zip")
         self.assertTrue(os.path.exists(path_to_model))
-        
+
         # clean up
         shutil.rmtree(out_dir)
-        
+
+
 if __name__ == "__main__":
     unittest.main()

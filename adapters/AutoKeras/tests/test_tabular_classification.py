@@ -1,3 +1,10 @@
+from pandas import DataFrame
+import sklearn.datasets
+import unittest
+from unittest import IsolatedAsyncioTestCase
+from AdapterBGRPC import *
+from Container import *
+from AutoKerasAdapterManager import AutoKerasAdapterManager
 import json
 import shutil
 import sys
@@ -6,7 +13,7 @@ import uuid
 
 base_path = sys.path[0]
 base_path = base_path.replace("\\tests", "")
-sys.path.insert(0,base_path)
+sys.path.insert(0, base_path)
 sys.path.insert(0, str(os.path.join(base_path, "AutoMLs")))
 sys.path.insert(0, str(os.path.join(base_path, "dependency-injection")))
 base_path = base_path.replace("\\AutoKeras", "")
@@ -14,26 +21,19 @@ sys.path.insert(0, str(os.path.join(base_path, "Utils/Utils")))
 sys.path.insert(0, str(os.path.join(base_path, "Utils/AutoMLs")))
 sys.path.insert(0, str(os.path.join(base_path, "GRPC/Adapter")))
 
-from AutoKerasAdapterManager import AutoKerasAdapterManager
-from Container import *
-from AdapterBGRPC import *
-from unittest import IsolatedAsyncioTestCase
-import unittest
-
-import sklearn.datasets
-from pandas import DataFrame
 
 class TestAdapter(IsolatedAsyncioTestCase):
-    
+
     def prepare_test_dataset():
 
         file_path = os.path.join("tests", "datasets", "diabetes.csv")
         if not os.path.exists(file_path):
             print("did not find dataset, will download")
-            diabetes = sklearn.datasets.load_diabetes(as_frame=True, scaled=False)
+            diabetes = sklearn.datasets.load_diabetes(
+                as_frame=True, scaled=False)
             # drop columns that are not interesting
             diabetes: DataFrame = diabetes.frame[["age", "sex", "bmi"]]
-            
+
             diabetes["age"] = diabetes["age"].astype("int")
             diabetes["sex"] = diabetes["sex"].astype("int")
             diabetes["bmi"] = diabetes["bmi"].astype("int")
@@ -42,16 +42,15 @@ class TestAdapter(IsolatedAsyncioTestCase):
                 DataFrame.to_csv(diabetes, outfp)
 
         return file_path
-    
 
-    async def test_start_automl_process(self):
+    def test_start_automl_process(self):
 
         # NOTE: we are running the test in the root directory.
         #       the application is expected to start inside the adapter solution,
         #       so we need to change working directories
         autokeras_dir = "adapters/AutoKeras"
         os.chdir(autokeras_dir)
-        
+
         dataset_path = TestAdapter.prepare_test_dataset()
 
         req = StartAutoMlRequest()
@@ -65,16 +64,16 @@ class TestAdapter(IsolatedAsyncioTestCase):
         req.configuration.metric = ':accuracy'
         req.dataset_configuration = json.dumps({
             "column_datatypes": {
-                "age": 2, 
+                "age": 2,
                 "sex": 2,
                 "bmi": 2
-            }, 
+            },
             "file_configuration": {
-                "use_header": True, 
-                "start_row": 1, 
-                "delimiter": "comma", 
-                "escape_character": "\\", 
-                "decimal_character": "." 
+                "use_header": True,
+                "start_row": 1,
+                "delimiter": "comma",
+                "escape_character": "\\",
+                "decimal_character": "."
             }
         })
 
@@ -84,12 +83,14 @@ class TestAdapter(IsolatedAsyncioTestCase):
         adapter_manager.join()
 
         # check if model archive exists
-        out_dir = os.path.join("app-data", "training", req.user_id, req.dataset_id, req.training_id)
+        out_dir = os.path.join("app-data", "training",
+                               req.user_id, req.dataset_id, req.training_id)
         path_to_model = os.path.join(out_dir, "export", "keras-export.zip")
         self.assertTrue(os.path.exists(path_to_model))
-        
+
         # clean up
         shutil.rmtree(out_dir)
-        
+
+
 if __name__ == '__main__':
     unittest.main()
