@@ -28,7 +28,7 @@
         </CardHeaderActions>
     </MudCardHeader>
     <MudCardContent>
-        <MudPaper Height="250px" Elevation="0">
+        <MudPaper Height="214px" Elevation="0">
             @if ((_analysis == null) || (_analysis.AnalysisCategories.Count == 0))
             {
                 <DataLoaderSpinner />
@@ -36,7 +36,7 @@
             else
             {
                 <MudItem xs="12" Style="display: grid; justify-content: center;">
-                    <MudImage Src="@GetImage(_analysis.AnalysisCategories[0].Analyses[0].Content)" Style="height:220px;" />
+                    <MudImage Src="@GetImage(_analysis.AnalysisCategories[0].Analyses[0].Content)" Style="height:200px;" />
                 </MudItem>
             }
         </MudPaper>
