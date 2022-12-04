@@ -35,9 +35,11 @@
             }
             else
             {
-                <MudItem xs="12" Style="display: grid; justify-content: center;">
-                    <MudImage Src="@GetImage(_analysis.AnalysisCategories[0].Analyses[0].Content)" Style="height:200px;" />
-                </MudItem>
+        <MudButton Href="@NavManager.ToAbsoluteUri("datasets/" + @Dataset.Dataset.Id + "/analysis").AbsoluteUri">
+            <MudItem xs="12" Style="display: grid; justify-content: center;">
+                <MudImage Src="@GetImage(_analysis.AnalysisCategories[0].Analyses[0].Content)" Style="height:200px;" />
+            </MudItem>
+        </MudButton>
             }
         </MudPaper>
     </MudCardContent>
