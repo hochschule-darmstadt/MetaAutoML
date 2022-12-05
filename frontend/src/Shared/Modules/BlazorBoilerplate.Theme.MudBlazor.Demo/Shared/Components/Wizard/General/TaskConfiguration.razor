@@ -75,22 +75,22 @@
 
                 @foreach (var param in _parameterValues)
                 {
-                    <MudText Typo="Typo.body2" Class="mt-4">@param.Value[0]</MudText>
-                    @if (param.Value[1] == "http://h-da.de/ml-ontology/single_value")
+                    <MudText Typo="Typo.body2" Class="mt-4">@param.Value.parameterLabel</MudText>
+                    @if (param.Value.parameterType == "http://h-da.de/ml-ontology/single_value")
                     {
-                            <MudSelect Label="@param.Value[0]" T="string">
-                                @foreach (var paramValue in param.Value.Skip(2))
+                            <MudSelect Label="@param.Value.parameterLabel" T="string">
+                                @foreach (var paramValue in param.Value.parameterValue)
                                 {
-                                <MudSelectItem Value="@paramValue">@paramValue</MudSelectItem>
+                                <MudSelectItem Value="@paramValue.valueIri">@paramValue.valueLabel</MudSelectItem>
                                 }
                             </MudSelect>
                     }
-                    @if (param.Value[1] == "http://h-da.de/ml-ontology/list")
+                    @if (param.Value.parameterType == "http://h-da.de/ml-ontology/list")
                     {
-                        <MudSelect Label="@param.Value[0]" T="string" MultiSelection="true">
-                            @foreach (var paramValue in param.Value.Skip(2))
+                        <MudSelect Label="@param.Value.parameterLabel" T="string" MultiSelection="true">
+                            @foreach (var paramValue in param.Value.parameterValue)
                             {
-                                <MudSelectItem Value="@paramValue">@paramValue</MudSelectItem>
+                                <MudSelectItem Value="@paramValue.valueIri">@paramValue.valueLabel</MudSelectItem>
                             }
                         </MudSelect>
                     }
@@ -122,7 +122,7 @@
 
     private GetTasksForDatasetTypeResponseDto _compatibleTasks;
     private List<AutoMlParameterDto> _availableParameters;
-    private Dictionary<String,List<String>> _parameterValues = new Dictionary<string, List<string>>();
+    private Dictionary<String, ParameterObject> _parameterValues = new Dictionary<string, ParameterObject>();
     private List<string> _columnNames;
 
     private ChipSet.ChipSetViewModel _mlLibsViewModel = new();
@@ -188,21 +188,31 @@
             apiResponse,
             () => _availableParameters = apiResponse.Result.AutoMlParameters,
             errorMessageKey: "Fetching available parameters failed");
+        _parameterValues.Clear();
         foreach (AutoMlParameterDto param in _availableParameters)
         {
-            List<String> parameterObject;
+            ParameterObject parameterObj;
+            ParameterValueViewModel parameterVal;
             if(_parameterValues.ContainsKey(param.ParamIri))
             {
-                _parameterValues.TryGetValue(param.ParamIri, out parameterObject);
-                parameterObject.Add(param.ValueLabel);
-                _parameterValues[param.ParamIri] = parameterObject;
+                _parameterValues.TryGetValue(param.ParamIri, out parameterObj);
+                parameterVal = new ParameterValueViewModel();
+                parameterVal.valueIri = param.ValueIri;
+                parameterVal.valueLabel = param.ValueLabel;
+                parameterObj.parameterValue.Add(parameterVal);
+                _parameterValues[param.ParamIri] = parameterObj;
             } else
             {
-                parameterObject = new List<string>();
-                parameterObject.Add(param.ParamLabel);
-                parameterObject.Add(param.ParamType);
-                parameterObject.Add(param.ValueLabel);
-                _parameterValues.Add(param.ParamIri, parameterObject);
+                parameterObj = new ParameterObject();
+                parameterObj.parameterIri = param.ParamIri;
+                parameterObj.parameterLabel = param.ParamLabel;
+                parameterObj.parameterType = param.ParamType;
+                parameterObj.parameterValue = new List<ParameterValueViewModel>();
+                parameterVal = new ParameterValueViewModel();
+                parameterVal.valueIri = param.ValueIri;
+                parameterVal.valueLabel = param.ValueLabel;
+                parameterObj.parameterValue.Add(parameterVal);
+                _parameterValues.Add(param.ParamIri, parameterObj);
             }
         }
     }
@@ -325,4 +335,19 @@
         StartAutoMlRequest.Configuration.Target = value;
         await UpdateStartAutoMlRequest();
     }    
+
+    public class ParameterValueViewModel
+    {
+        public string valueIri { get; set; }
+        public string valueLabel { get; set; }
+        public bool IsSelected { get; set; } = true;
+    }
+
+    public class ParameterObject
+    {
+        public string parameterIri { get; set; }
+        public string parameterLabel { get; set; }
+        public string parameterType { get; set; }
+        public List<ParameterValueViewModel> parameterValue { get; set; }
+    }
 }
