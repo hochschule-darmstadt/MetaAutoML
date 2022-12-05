@@ -87,7 +87,7 @@
                     }
                     @if (param.Value.parameterType == "http://h-da.de/ml-ontology/list")
                     {
-                        <MudSelect Label="@param.Value.parameterLabel" T="string" MultiSelection="true">
+                        <MudSelect Label="@param.Value.parameterLabel" T="string" MultiSelection="true" SelectAll="true" SelectedValues="@param.Value.parameterValue.Where(pv => pv.IsSelected).Select(v => v.valueIri)">
                             @foreach (var paramValue in param.Value.parameterValue)
                             {
                                 <MudSelectItem Value="@paramValue.valueIri">@paramValue.valueLabel</MudSelectItem>
