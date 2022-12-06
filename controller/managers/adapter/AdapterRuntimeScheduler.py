@@ -1,6 +1,7 @@
 from DataStorage import DataStorage
 import logging, os
 from ControllerBGRPC import *
+from StrategyController import StrategyController
 from AdapterRuntimeManager import AdapterRuntimeManager
 from AdapterRuntimePredictionManager import AdapterRuntimePredictionManager
 from ThreadLock import ThreadLock
@@ -19,7 +20,7 @@ class AdapterRuntimeScheduler:
         self.__data_storage: DataStorage = data_storage
         self.__log = logging.getLogger('AdapterRuntimeScheduler')
         self.__log.setLevel(logging.getLevelName(os.getenv("SERVER_LOGGING_LEVEL")))
-        self.__running_trainings: dict[str, AdapterRuntimeManager] = {}
+        self.__running_trainings: dict[str, StrategyController] = {}
         self.__running_online_predictions: dict[str, AdapterRuntimeManager] = {}
         self.__explainable_lock = explainable_lock
         return
@@ -32,9 +33,9 @@ class AdapterRuntimeScheduler:
             training_id (str): The training id which identify the new training session
             dataset (_type_): The dataset record used by the training session
         """
-        adapter_runtime_manager: AdapterRuntimeManager = AdapterRuntimeManager(self.__data_storage, request, training_id, dataset, self.__explainable_lock)
-        adapter_runtime_manager.create_new_training()
-        self.__running_trainings[training_id] = adapter_runtime_manager
+        strategy_controller = StrategyController(self.__data_storage, request, training_id, dataset, self.__explainable_lock)
+        
+        self.__running_trainings[training_id] = strategy_controller
         
     def create_new_prediction(self, user_id: str, prediction_id: str):
         """Create a new prediction session and add it to the running prediction list

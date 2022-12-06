@@ -1,13 +1,7 @@
-
-from enum import auto
-from AdapterRuntimeManagerAgent import AdapterRuntimeManagerAgent
-from DataAnalysisAgent import DataAnalysisAgent
 from DataStorage import DataStorage
 import logging, os
 from ControllerBGRPC import *
 from AdapterManager import AdapterManager
-import Blackboard
-import StrategyController
 from ExplainableAIManager import ExplainableAIManager
 from ThreadLock import ThreadLock
 
@@ -45,10 +39,14 @@ class AdapterRuntimeManager:
             ":mcfly":           ["MCFLY_SERVICE_HOST", "MCFLY_SERVICE_PORT"],
         }
         self.__adapters: list[AdapterManager] = []
-        self.__blackboard = Blackboard.Blackboard()
-        self.__strategy_controller = StrategyController.StrategyController(self.__blackboard, self, self.__data_storage)
-        AdapterRuntimeManagerAgent(self.__blackboard, self.__strategy_controller, self)
-        DataAnalysisAgent(self.__blackboard, self.__strategy_controller, self.__dataset)
+        self.__log.debug("start_new_training: creating new blackboard and strategy controller for training")
+        for automl in self.__request.configuration.selected_auto_ml_solutions:
+            self.__log.debug(f"start_new_training: getting adapter endpoint information for automl {automl}")
+            host, port = map(os.getenv, self.__automl_addresses[automl.lower()])
+            port = int(port)
+            self.__log.debug(f"start_new_training: creating new adapter manager and adapter manager agent")
+            adapter_training = AdapterManager(self.__data_storage, self.__request, automl, self.__training_id, self.__dataset, host, port, self.__adapter_finished_callback)
+            self.__adapters.append(adapter_training)
         return
 
     def __adapter_finished_callback(self, training_id, user_id, model_id, model_details: 'dict[str, object]', adapter_manager: AdapterManager):
@@ -119,6 +117,14 @@ class AdapterRuntimeManager:
             'configuration': self.__request.to_dict(),
         }
 
+    def get_adapter_managers(self) -> list[AdapterManager]:
+        """Get adapter manager list
+
+        Returns:
+            list[AdapterManager]: list of all adapter managers
+        """
+        return self.__adapters
+
     def get_training_request(self) -> "CreateTrainingRequest":
         """Get the training request object
 
@@ -134,22 +140,6 @@ class AdapterRuntimeManager:
             _type_: The dataset record
         """
         return self.__dataset
-
-    def create_new_training(self):
-        """Initialize the required AdapterManager for this training session and kick off strategy controller timer to begin training process
-        """
-        self.__log.debug("start_new_training: creating new blackboard and strategy controller for training")
-        for automl in self.__request.configuration.selected_auto_ml_solutions:
-            self.__log.debug(f"start_new_training: getting adapter endpoint information for automl {automl}")
-            host, port = map(os.getenv, self.__automl_addresses[automl.lower()])
-            port = int(port)
-            self.__log.debug(f"start_new_training: creating new adapter manager and adapter manager agent")
-            adapter_training = AdapterManager(self.__data_storage, self.__request, automl, self.__training_id, self.__dataset, host, port, self.__blackboard, self.__strategy_controller, self.__adapter_finished_callback)
-            self.__adapters.append(adapter_training)
-        
-        self.__strategy_controller.on_event('phase_updated', self.blackboard_phase_update_handler)
-        self.__strategy_controller.set_phase('preprocessing')
-        self.__strategy_controller.start_timer()
 
     def blackboard_phase_update_handler(self, meta, controller):
         """Handles phase updates throughout the session (caused by the strategy controller)
