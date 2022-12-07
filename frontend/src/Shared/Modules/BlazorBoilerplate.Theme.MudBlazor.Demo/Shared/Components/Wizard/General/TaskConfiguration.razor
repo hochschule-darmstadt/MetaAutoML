@@ -71,7 +71,7 @@
             @if (_parameterValues != null)
             {
                 <MudText Typo="Typo.subtitle2" Class="mt-4">Available parameters</MudText>
-                
+
 
                 @foreach (var param in _parameterValues)
                 {
@@ -186,35 +186,38 @@
         var apiResponse = await apiClient.GetAutoMlParameters(new GetAutoMlParametersRequestDto { AutoMls = selectedAutoMls, TaskIri = taskIri });
         HandleApiResponseWrapper(
             apiResponse,
-            () => _availableParameters = apiResponse.Result.AutoMlParameters,
+            () =>
+            {
+                _availableParameters = apiResponse.Result.AutoMlParameters;
+                _parameterValues.Clear();
+                foreach (AutoMlParameterDto param in _availableParameters)
+                {
+                    ParameterObject parameterObj;
+                    ParameterValueViewModel parameterVal;
+                    if(_parameterValues.ContainsKey(param.ParamIri))
+                    {
+                        _parameterValues.TryGetValue(param.ParamIri, out parameterObj);
+                        parameterVal = new ParameterValueViewModel();
+                        parameterVal.valueIri = param.ValueIri;
+                        parameterVal.valueLabel = param.ValueLabel;
+                        parameterObj.parameterValue.Add(parameterVal);
+                        _parameterValues[param.ParamIri] = parameterObj;
+                    } else
+                    {
+                        parameterObj = new ParameterObject();
+                        parameterObj.parameterIri = param.ParamIri;
+                        parameterObj.parameterLabel = param.ParamLabel;
+                        parameterObj.parameterType = param.ParamType;
+                        parameterObj.parameterValue = new List<ParameterValueViewModel>();
+                        parameterVal = new ParameterValueViewModel();
+                        parameterVal.valueIri = param.ValueIri;
+                        parameterVal.valueLabel = param.ValueLabel;
+                        parameterObj.parameterValue.Add(parameterVal);
+                        _parameterValues.Add(param.ParamIri, parameterObj);
+                    }
+                }
+            },
             errorMessageKey: "Fetching available parameters failed");
-        _parameterValues.Clear();
-        foreach (AutoMlParameterDto param in _availableParameters)
-        {
-            ParameterObject parameterObj;
-            ParameterValueViewModel parameterVal;
-            if(_parameterValues.ContainsKey(param.ParamIri))
-            {
-                _parameterValues.TryGetValue(param.ParamIri, out parameterObj);
-                parameterVal = new ParameterValueViewModel();
-                parameterVal.valueIri = param.ValueIri;
-                parameterVal.valueLabel = param.ValueLabel;
-                parameterObj.parameterValue.Add(parameterVal);
-                _parameterValues[param.ParamIri] = parameterObj;
-            } else
-            {
-                parameterObj = new ParameterObject();
-                parameterObj.parameterIri = param.ParamIri;
-                parameterObj.parameterLabel = param.ParamLabel;
-                parameterObj.parameterType = param.ParamType;
-                parameterObj.parameterValue = new List<ParameterValueViewModel>();
-                parameterVal = new ParameterValueViewModel();
-                parameterVal.valueIri = param.ValueIri;
-                parameterVal.valueLabel = param.ValueLabel;
-                parameterObj.parameterValue.Add(parameterVal);
-                _parameterValues.Add(param.ParamIri, parameterObj);
-            }
-        }
     }
 
     private async void OnMlTaskSelectionChanged(string task)
@@ -250,7 +253,7 @@
             GetMlLibrariesForTaskRequestDto supportedMlLibrariesRequest = new GetMlLibrariesForTaskRequestDto { Task = StartAutoMlRequest.Configuration.Task };
             var apiResponse = await apiClient.GetMlLibrariesForTask(supportedMlLibrariesRequest);
 
-            HandleApiResponseWrapper(apiResponse, () => 
+            HandleApiResponseWrapper(apiResponse, () =>
                  _mlLibsViewModel.SetAvailableChips(
                     apiResponse.Result.MlLibraries
                         .Select(ConvertObjectInfoToChip)),
@@ -285,7 +288,7 @@
             GetAutoMlSolutionsForConfigurationRequestDto compatibleAutoMlRequest = new GetAutoMlSolutionsForConfigurationRequestDto { Configuration = dictionary };
             var apiResponse = await apiClient.GetAutoMlSolutionsForConfiguration(compatibleAutoMlRequest);
 
-            HandleApiResponseWrapper(apiResponse, () => 
+            HandleApiResponseWrapper(apiResponse, () =>
                 _autoMlSolutionsViewModel.SetAvailableChips(apiResponse.Result.AutoMlSolutions.Select(ConvertObjectInfoToChip))
             );
 
@@ -299,7 +302,7 @@
         catch (Exception ex)
         {
             viewNotifier.Show(ex.GetBaseException().Message, ViewNotifierType.Error, L["Operation Failed"]);
-        } 
+        }
     }
 
     private void HandleApiResponseWrapper<T>(ApiResponseDto<T> apiResponse, Action successAction, string errorMessageKey = "Operation Failed", string successMessageKey = "Operation Successful")
@@ -334,7 +337,7 @@
     {
         StartAutoMlRequest.Configuration.Target = value;
         await UpdateStartAutoMlRequest();
-    }    
+    }
 
     public class ParameterValueViewModel
     {
