@@ -3,7 +3,8 @@
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
     <RunPostBuildEvent>OnOutputUpdated</RunPostBuildEvent>
-	<ImplicitUsings>enable</ImplicitUsings>
+	  <ImplicitUsings>enable</ImplicitUsings>
+    <DebugType>Portable</DebugType>
   </PropertyGroup>
 
   <ItemGroup>
