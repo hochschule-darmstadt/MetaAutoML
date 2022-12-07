@@ -20,7 +20,7 @@ class StrategyController(object):
     """
     Strategy controller which supervises the blackboard.
     """, 
-    def __init__(self, data_storage:DataStorage, request: "CreateTrainingRequest", training_id: str, dataset, explainable_lock: ThreadLock, timer_interval: int = 1) -> None:
+    def __init__(self, data_storage:DataStorage, request: "CreateTrainingRequest", explainable_lock: ThreadLock, timer_interval: int = 1) -> None:
         self._log = logging.getLogger('StrategyController')
         self._log.setLevel(logging.getLevelName(os.getenv("BLACKBOARD_LOGGING_LEVEL")))
         self.__is_running = False
@@ -30,16 +30,14 @@ class StrategyController(object):
         self.__blackboard = Blackboard()
         self.__data_storage: DataStorage = data_storage
         self.__request: "CreateTrainingRequest" = request
-        self.__training_id = training_id
-        self.__dataset = dataset
         self.__explainable_lock = explainable_lock
         #Init training session
-        self.__adapter_runtime_manager = AdapterRuntimeManager(self.__data_storage, self.__request, self.__training_id, self.__dataset, self.__explainable_lock) 
+        self.__adapter_runtime_manager = AdapterRuntimeManager(self.__data_storage, self.__request, self.__explainable_lock) 
         #Init Agents  
         for adapter_manager in self.__adapter_runtime_manager.get_adapter_managers():
             AdapterManagerAgent(self.__blackboard, self, adapter_manager)
         AdapterRuntimeManagerAgent(self.__blackboard, self, self.__adapter_runtime_manager)
-        DataAnalysisAgent(self.__blackboard, self, self.__dataset)
+        DataAnalysisAgent(self.__blackboard, self, self.__adapter_runtime_manager.get_dataset())
         self._log.debug(f'Attached controller to the blackboard, current agents: {len(self.__blackboard.agents)}')
 
         try:
@@ -67,6 +65,14 @@ class StrategyController(object):
         self.on_event('phase_updated', self.__adapter_runtime_manager.blackboard_phase_update_handler)
         self.set_phase('preprocessing')
         self.start_timer()
+
+    def get_training_id(self) -> str:
+        """get the training id of this session
+
+        Returns:
+            str: The training id which identify this training session
+        """
+        return self.__adapter_runtime_manager.get_training_id()
 
     def get_phase(self) -> str:
         return self.__blackboard.get_state('phase')

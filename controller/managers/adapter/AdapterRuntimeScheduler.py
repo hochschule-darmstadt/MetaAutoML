@@ -25,17 +25,18 @@ class AdapterRuntimeScheduler:
         self.__explainable_lock = explainable_lock
         return
 
-    def create_new_training(self, request: "CreateTrainingRequest", training_id: str, dataset):
+    def create_new_training(self, request: "CreateTrainingRequest") -> str:
         """Create a new training session and add it to the running training list
 
         Args:
             request (CreateTrainingRequest): The GRPC request message holding the training configuration
-            training_id (str): The training id which identify the new training session
-            dataset (_type_): The dataset record used by the training session
+        Returns:
+            str: The training id which identify the new training session
         """
-        strategy_controller = StrategyController(self.__data_storage, request, training_id, dataset, self.__explainable_lock)
-        
+        strategy_controller = StrategyController(self.__data_storage, request, self.__explainable_lock)
+        training_id = strategy_controller.get_training_id()
         self.__running_trainings[training_id] = strategy_controller
+        return training_id
         
     def create_new_prediction(self, user_id: str, prediction_id: str):
         """Create a new prediction session and add it to the running prediction list

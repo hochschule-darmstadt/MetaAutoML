@@ -1,16 +1,17 @@
 from DataStorage import DataStorage
-import logging, os
+import logging, os, json, datetime
 from ControllerBGRPC import *
 from AdapterManager import AdapterManager
 from ExplainableAIManager import ExplainableAIManager
 from ThreadLock import ThreadLock
 
 
+
 class AdapterRuntimeManager:
     """The AdapterRuntimeManager represent a single training session started by a user and manages it
     """
 
-    def __init__(self, data_storage: DataStorage, request: "CreateTrainingRequest", training_id: str, dataset, explainable_lock: ThreadLock) -> None:
+    def __init__(self, data_storage: DataStorage, request: "CreateTrainingRequest", explainable_lock: ThreadLock) -> None:
         """Initialize a new AdapterRuntimeManager instance
 
         Args:
@@ -22,11 +23,10 @@ class AdapterRuntimeManager:
         """
         self.__data_storage: DataStorage = data_storage
         self.__request: "CreateTrainingRequest" = request
-        self.__training_id = training_id
-        self.__dataset = dataset
         self.__explainable_lock = explainable_lock
         self.__log = logging.getLogger('AdapterRuntimeManager')
         self.__log.setLevel(logging.getLevelName(os.getenv("SERVER_LOGGING_LEVEL")))
+        self.__training_id = self.__create_training_record()
         self.__automl_addresses = {
             ":autokeras":       ["AUTOKERAS_SERVICE_HOST", "AUTOKERAS_SERVICE_PORT"],
             ":flaml":           ["FLAML_SERVICE_HOST",     "FLAML_SERVICE_PORT"],
@@ -48,6 +48,51 @@ class AdapterRuntimeManager:
             adapter_training = AdapterManager(self.__data_storage, self.__request, automl, self.__training_id, self.__dataset, host, port, self.__adapter_finished_callback)
             self.__adapters.append(adapter_training)
         return
+
+    def __create_training_record(self) -> str:
+        """Create a new training record for this training inside MongoDB
+
+        Returns:
+            str: The training id which identify the new training session
+        """
+        found, dataset = self.__data_storage.get_dataset(self.__request.user_id, self.__request.dataset_id)
+        self.__dataset = dataset
+        self.__log.debug(f"__create_training_record: generating training details")
+        config = {
+            "dataset_id": str(dataset["_id"]),
+            "model_ids": [],
+            "status": "busy",
+            "configuration": {
+                "task": self.__request.configuration.task,
+                "target": self.__request.configuration.target,
+                "enabled_strategies": self.__request.configuration.enabled_strategies,
+                "runtime_limit": self.__request.configuration.runtime_limit,
+                "metric": self.__request.configuration.metric,
+                "selected_auto_ml_solutions": self.__request.configuration.selected_auto_ml_solutions,
+                "selected_ml_libraries": self.__request.configuration.selected_ml_libraries
+            },
+            "dataset_configuration": {
+                "column_datatypes": json.loads(self.__request.dataset_configuration)["column_datatypes"],
+                "file_configuration": dataset["file_configuration"]
+            },
+            "runtime_profile": {
+                "start_time": datetime.now(),
+                "events": [],
+                "end_time": datetime.now()
+            },
+            "lifecycle_state": "active"
+        }
+        
+        training_id = self.__data_storage.create_training(self.__request.user_id, config)
+        self.__log.debug(f"__create_training_record: inserted new training: {training_id}")
+        self.__data_storage.update_dataset(self.__request.user_id, self.__request.dataset_id, { "training_ids": dataset["training_ids"] + [training_id] })
+        return training_id
+
+    def get_dataset(self) -> str:
+        return self.__dataset
+
+    def get_training_id(self) -> str:
+        return self.__training_id
 
     def __adapter_finished_callback(self, training_id, user_id, model_id, model_details: 'dict[str, object]', adapter_manager: AdapterManager):
         """persists the AutoML adapter training session results
