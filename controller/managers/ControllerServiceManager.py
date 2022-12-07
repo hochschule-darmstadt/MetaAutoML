@@ -309,6 +309,7 @@ class ControllerServiceManager(ControllerServiceBase):
                     'This strategy ignores certain dataset columns if they have been flagged as duplicate in the dataset analysis.'
                     )
                 )
+            
             if (not found) or (len(dataset['analysis']['duplicate_rows']) != 0):
                 result.strategies.append(
                     Strategy(
@@ -318,13 +319,15 @@ class ControllerServiceManager(ControllerServiceBase):
                     )
                 )
             
-            #Always append this strategy, ToDo: writing suitable if statement
-            result.strategies.append(
-                Strategy(
-                'data_preparation.split_large_datasets',
-                'Split large datasets',
-                'This strategy truncates the training data if the time limit is relatively short for the size of the dataset.'
-                )
+            size_time_ratio = dataset['analysis']['size_bytes'] / int(get_available_strategies_request.configuration['runtimeLimit'])
+            
+            if (not found) or (size_time_ratio > 20000):
+                result.strategies.append(
+                    Strategy(
+                    'data_preparation.split_large_datasets',
+                    'Split large datasets',
+                    'This strategy truncates the training data if the time limit is relatively short for the size of the dataset.'
+                    )
             )
             
         return result
