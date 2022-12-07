@@ -20,7 +20,7 @@
                 <MudButton Href="@("/datasets")"
                     Variant="Variant.Filled" 
                     Color="Color.Secondary"
-                    EndIcon="@Icons.Filled.MoreHoriz"
+                    EndIcon="@Icons.Filled.ArrowForward"
                         Size="Size.Small">@L["More"]</MudButton>
             </MudStack>
         </CardHeaderActions>
@@ -29,39 +29,45 @@
         <MudPaper Height="250px" Elevation="0">
             @if (Datasets == null)
             {
-                 <DataLoaderSpinner />
+                <DataLoaderSpinner />
             }
             else
             {
-                <MudTable Items="@Datasets.Datasets" style="width:stretch" class="mat-elevation-z5" AllowSelection="false" Dense="true">
-                    <HeaderContent>
-                        <MudTh>@L["Name"]</MudTh>
-                        <MudTh>@L["Type"]</MudTh>
-                        <MudTh>@L["Size"]</MudTh>
-                        <MudTh>@L["Date"]</MudTh>
-                    </HeaderContent>
-                    <RowTemplate>
-                        <MudTd >
-                            <MudLink Href="@NavManager.ToAbsoluteUri("datasets/" + @context.Id).AbsoluteUri" Style="cursor: pointer; display: flex;"><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.ListAlt" Style="margin-right: 4px;" /> @context.Name</MudLink>
-                        </MudTd>
-                        <MudTd>@L[context.Type.Properties.ContainsKey("skos:prefLabel") ? context.Type.Properties["skos:prefLabel"] : ""]</MudTd>
-                        <MudTd>@FormatBytes(context.Analysis["size_bytes"])</MudTd>
-                        <MudTd style="white-space:nowrap;">@context.Analysis["creation_date"].ToString("yyyy-MM-dd")</MudTd>
-                    </RowTemplate>
-                </MudTable>
+        <MudTable Items="@Datasets.Datasets" FixedHeader="true" Height="250px" style="width:stretch" class="mat-elevation-z5" AllowSelection="false" Dense="true" RowStyleFunc="@RowStyleFunc">
+            <HeaderContent>
+                <MudTh>@L["Name"]</MudTh>
+                <MudTh>@L["Type"]</MudTh>
+                <MudTh>@L["Size"]</MudTh>
+                <MudTh>@L["Date"]</MudTh>
+                <MudTh>@L["Time"]</MudTh>
+            </HeaderContent>
+
+            <RowTemplate>
+                <MudTd>
+                    <MudLink Href="@NavManager.ToAbsoluteUri("datasets/" + @context.Id).AbsoluteUri" Style="cursor: pointer; display: flex;"><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.ListAlt" Style="margin-right: 4px;" /> @context.Name</MudLink>
+                </MudTd>
+                <MudTd>@L[context.Type.Properties.ContainsKey("skos:prefLabel") ? context.Type.Properties["skos:prefLabel"] : ""]</MudTd>
+                <MudTd>@FormatBytes(context.Analysis["size_bytes"])</MudTd>
+                <MudTd style="white-space:nowrap;">@context.Analysis["creation_date"].ToString("dd-MM-yyyy")</MudTd>
+                <MudTd style="white-space:nowrap;">@context.Analysis["creation_date"].ToString("HH:mm:ss")</MudTd>
+            </RowTemplate>
+
+        </MudTable>
             }
         </MudPaper>
     </MudCardContent>
 </MudCard>
 
 @code {
+    //private DateTime NewestDate;
+
     [Parameter]
     public GetDatasetsResponseDto Datasets
-    { 
+    {
         get
         {
             return _datasets;
-        } 
+        }
         set
         {
             _datasets = value;
@@ -69,9 +75,31 @@
             if (_datasets != null)
             {
                 _datasets.Datasets = _datasets.Datasets.OrderByDescending(x => x.Analysis["creation_date"]).Take(6).ToList();
+                /* if (_datasets.Datasets.Count > 0)
+                 {
+                     NewestDate = _datasets.Datasets[0].Analysis["creation_date"];
+                 }*/
+
                 StateHasChanged();
+
             }
-        } 
+        }
+    }
+
+    private string RowStyleFunc(DatasetDto arg1, int index)
+    {
+
+        if (_datasets.Datasets.Count > 0)
+        {
+            if (arg1.Analysis["creation_date"] == _datasets.Datasets[0].Analysis["creation_date"])
+            {
+                return "background-color:rgba(255,148,61,0.25)";
+            }
+        }
+        
+            return "background-color:transparent";
+        
+
     }
     private GetDatasetsResponseDto _datasets;
     [Parameter]
@@ -88,17 +116,17 @@
     }
     public string FormatBytes(long bytes)
     {
-      const int scale = 1024;
-      string[] orders = new string[] { "GB", "MB", "KB", "Bytes" };
-      long max = (long)Math.Pow(scale, orders.Length - 1);
+        const int scale = 1024;
+        string[] orders = new string[] { "GB", "MB", "KB", "Bytes" };
+        long max = (long)Math.Pow(scale, orders.Length - 1);
 
-      foreach (string order in orders)
-      {
-        if ( bytes > max )
-          return string.Format("{0:##.##} {1}", decimal.Divide( bytes, max ), order);
+        foreach (string order in orders)
+        {
+            if ( bytes > max )
+                return string.Format("{0:##.##} {1}", decimal.Divide( bytes, max ), order);
 
-        max /= scale;
-      }
-      return "0 Bytes";
+            max /= scale;
+        }
+        return "0 Bytes";
     }
-}
+    }
