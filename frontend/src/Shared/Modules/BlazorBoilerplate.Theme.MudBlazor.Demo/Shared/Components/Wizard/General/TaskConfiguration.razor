@@ -190,7 +190,39 @@
             {
                 _availableParameters = apiResponse.Result.AutoMlParameters;
                 _parameterValues.Clear();
-                foreach (AutoMlParameterDto param in _availableParameters)
+                var broaderParams = _availableParameters.Select(p => p.BroaderIri).Distinct();
+                foreach (var broaderIri in broaderParams)
+                {
+                    var valueIrisBySolution = _availableParameters
+                        .Where(p => p.BroaderIri == broaderIri)
+                        .Select(p => (pIri: p.ParamIri, vIri: p.ValueIri))
+                        .GroupBy(p => p.pIri)
+                        .Select(g => g.Select(p => p.vIri)
+                        .ToList());
+                    var intersectedValueIris = valueIrisBySolution
+                        .Skip(1)
+                        .Aggregate(
+                            new HashSet<string>(valueIrisBySolution.First()),
+                            (h, e) => { h.IntersectWith(e); return h; }
+                        );
+
+                    var firstParamWithBroader = _availableParameters.First(p => p.BroaderIri == broaderIri);
+                    _parameterValues.Add(broaderIri, new ParameterObject
+                    {
+                        ParameterIri = broaderIri,
+                        ParameterLabel = firstParamWithBroader.BroaderLabel,
+                        ParameterType = firstParamWithBroader.ParamType,
+                        ParameterValues = intersectedValueIris
+                            .Select(v => _availableParameters.First(p => p.ValueIri == v))
+                            .Select(p => new ParameterValueViewModel
+                            {
+                                ValueIri = p.ValueIri,
+                                ValueLabel = p.ValueLabel
+                            })
+                            .ToList()
+                    });
+                }
+                foreach (AutoMlParameterDto param in _availableParameters.Where(p => string.IsNullOrEmpty(p.BroaderIri)))
                 {
                     ParameterObject parameterObj;
                     if(_parameterValues.ContainsKey(param.ParamIri))
