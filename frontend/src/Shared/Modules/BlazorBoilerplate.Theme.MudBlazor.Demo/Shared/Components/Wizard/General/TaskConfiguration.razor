@@ -193,28 +193,27 @@
                 foreach (AutoMlParameterDto param in _availableParameters)
                 {
                     ParameterObject parameterObj;
-                    ParameterValueViewModel parameterVal;
                     if(_parameterValues.ContainsKey(param.ParamIri))
                     {
-                        _parameterValues.TryGetValue(param.ParamIri, out parameterObj);
-                        parameterVal = new ParameterValueViewModel();
-                        parameterVal.valueIri = param.ValueIri;
-                        parameterVal.valueLabel = param.ValueLabel;
-                        parameterObj.parameterValue.Add(parameterVal);
-                        _parameterValues[param.ParamIri] = parameterObj;
-                    } else
+                        parameterObj = _parameterValues[param.ParamIri];
+                    }
+                    else
                     {
-                        parameterObj = new ParameterObject();
-                        parameterObj.parameterIri = param.ParamIri;
-                        parameterObj.parameterLabel = param.ParamLabel;
-                        parameterObj.parameterType = param.ParamType;
-                        parameterObj.parameterValue = new List<ParameterValueViewModel>();
-                        parameterVal = new ParameterValueViewModel();
-                        parameterVal.valueIri = param.ValueIri;
-                        parameterVal.valueLabel = param.ValueLabel;
-                        parameterObj.parameterValue.Add(parameterVal);
+                        parameterObj = new ParameterObject
+                        {
+                            parameterIri = param.ParamIri,
+                            parameterLabel = param.ParamLabel,
+                            parameterType = param.ParamType,
+                            parameterValue = new List<ParameterValueViewModel>()
+                        };
                         _parameterValues.Add(param.ParamIri, parameterObj);
                     }
+
+                    parameterObj.parameterValue.Add(
+                        new ParameterValueViewModel {
+                            valueIri = param.ValueIri,
+                            valueLabel = param.ValueLabel,
+                        });
                 }
             },
             errorMessageKey: "Fetching available parameters failed");
