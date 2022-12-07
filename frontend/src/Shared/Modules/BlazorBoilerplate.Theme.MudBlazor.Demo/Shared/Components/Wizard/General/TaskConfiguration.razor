@@ -75,22 +75,22 @@
 
                 @foreach (var param in _parameterValues)
                 {
-                    <MudText Typo="Typo.body2" Class="mt-4">@param.Value.parameterLabel</MudText>
-                    @if (param.Value.parameterType == "http://h-da.de/ml-ontology/single_value")
+                    <MudText Typo="Typo.body2" Class="mt-4">@param.Value.ParameterLabel</MudText>
+                    @if (param.Value.ParameterType == "http://h-da.de/ml-ontology/single_value")
                     {
-                            <MudSelect Label="@param.Value.parameterLabel" T="string">
-                                @foreach (var paramValue in param.Value.parameterValue)
+                            <MudSelect Label="@param.Value.ParameterLabel" T="string">
+                                @foreach (var paramValue in param.Value.ParameterValues)
                                 {
-                                <MudSelectItem Value="@paramValue.valueIri">@paramValue.valueLabel</MudSelectItem>
+                                <MudSelectItem Value="@paramValue.ValueIri">@paramValue.ValueLabel</MudSelectItem>
                                 }
                             </MudSelect>
                     }
-                    @if (param.Value.parameterType == "http://h-da.de/ml-ontology/list")
+                    @if (param.Value.ParameterType == "http://h-da.de/ml-ontology/list")
                     {
-                        <MudSelect Label="@param.Value.parameterLabel" T="string" MultiSelection="true" SelectAll="true" SelectedValues="@param.Value.parameterValue.Where(pv => pv.IsSelected).Select(v => v.valueIri)">
-                            @foreach (var paramValue in param.Value.parameterValue)
+                        <MudSelect Label="@param.Value.ParameterLabel" T="string" MultiSelection="true" SelectAll="true" SelectedValues="@param.Value.ParameterValues.Where(pv => pv.IsSelected).Select(v => v.ValueIri)">
+                            @foreach (var paramValue in param.Value.ParameterValues)
                             {
-                                <MudSelectItem Value="@paramValue.valueIri">@paramValue.valueLabel</MudSelectItem>
+                                <MudSelectItem Value="@paramValue.ValueIri">@paramValue.ValueLabel</MudSelectItem>
                             }
                         </MudSelect>
                     }
@@ -201,18 +201,17 @@
                     {
                         parameterObj = new ParameterObject
                         {
-                            parameterIri = param.ParamIri,
-                            parameterLabel = param.ParamLabel,
-                            parameterType = param.ParamType,
-                            parameterValue = new List<ParameterValueViewModel>()
+                            ParameterIri = param.ParamIri,
+                            ParameterLabel = param.ParamLabel,
+                            ParameterType = param.ParamType,
                         };
                         _parameterValues.Add(param.ParamIri, parameterObj);
                     }
 
-                    parameterObj.parameterValue.Add(
+                    parameterObj.ParameterValues.Add(
                         new ParameterValueViewModel {
-                            valueIri = param.ValueIri,
-                            valueLabel = param.ValueLabel,
+                            ValueIri = param.ValueIri,
+                            ValueLabel = param.ValueLabel,
                         });
                 }
             },
@@ -340,16 +339,16 @@
 
     public class ParameterValueViewModel
     {
-        public string valueIri { get; set; }
-        public string valueLabel { get; set; }
+        public string ValueIri { get; set; }
+        public string ValueLabel { get; set; }
         public bool IsSelected { get; set; } = true;
     }
 
     public class ParameterObject
     {
-        public string parameterIri { get; set; }
-        public string parameterLabel { get; set; }
-        public string parameterType { get; set; }
-        public List<ParameterValueViewModel> parameterValue { get; set; }
+        public string ParameterIri { get; set; }
+        public string ParameterLabel { get; set; }
+        public string ParameterType { get; set; }
+        public List<ParameterValueViewModel> ParameterValues { get; set; } = new();
     }
 }
