@@ -6,11 +6,13 @@ public class AutoMlParameterDto
     public string ParamIri { get; set; }
     public string ParamLabel { get; set; }
     public string ParamType { get; set; }
+    public string BroaderIri { get; set; }
+    public string BroaderLabel { get; set; }
     public string ValueIri { get; set; }
     public string ValueLabel { get; set; }
 }
 
-public class GetAutoMlParametersResponseDto 
+public class GetAutoMlParametersResponseDto
 {
     public List<AutoMlParameterDto> AutoMlParameters { get; set; }
 }

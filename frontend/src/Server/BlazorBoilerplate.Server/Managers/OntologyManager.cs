@@ -133,6 +133,8 @@ namespace BlazorBoilerplate.Server.Managers
                         ParamIri = p.ParamIri,
                         ParamLabel = p.ParamLabel,
                         ParamType = p.ParamType,
+                        BroaderIri = p.BroaderIri,
+                        BroaderLabel = p.BroaderLabel,
                         ValueIri = p.ValueIri,
                         ValueLabel = p.ValueLabel
                     }).ToList();

@@ -800,7 +800,7 @@ class GetAutoMlSolutionsForConfigurationRequest(betterproto.Message):
     )
     """
     Dictonary holding the current user configuration of the training
-    wizardexample: {"task": ":tabular_classification","library": [":keras_lib",
+    wizardexample:{"task": ":tabular_classification","library": [":keras_lib",
     ":tensorflow_lib"],}
     """
 
@@ -870,7 +870,7 @@ class GetAvailableStrategiesRequest(betterproto.Message):
     )
     """
     Dictonary holding the current user configuration of the training
-    wizardexample: {"task": ":tabular_classification","library": [":keras_lib",
+    wizardexample:{"task": ":tabular_classification","library": [":keras_lib",
     ":tensorflow_lib"],}
     """
 
@@ -906,7 +906,7 @@ class Strategy(betterproto.Message):
 class GetObjectsInformationRequest(betterproto.Message):
     ids: List[str] = betterproto.string_field(1)
     """
-    List of ontology IRI to retrieve the complete information from. example:
+    List of ontology IRI to retrieve the complete information from.example:
     [":tabular_classification",”:autokeras”]
     """
 
@@ -970,19 +970,22 @@ class AutoMlParameter(betterproto.Message):
     """
     Parameter for an auto ml solutionexample:{autoMlIri: ":autokeras",paramIri:
     ":metric_autokeras_regression",paramLabel: "metric autokeras
-    regression",paramType: ":list",valueIri:
-    ":median_absolute_error",valueLabel: "median absolute error",}
+    regression",paramType: ":list",broaderIri: ":metric",broaderLabel:
+    "metric",valueIri: ":median_absolute_error",valueLabel: "median absolute
+    error",}
     """
 
     auto_ml_iri: str = betterproto.string_field(1)
     param_iri: str = betterproto.string_field(2)
     param_label: str = betterproto.string_field(3)
     param_type: str = betterproto.string_field(4)
+    broader_iri: str = betterproto.string_field(5)
+    broader_label: str = betterproto.string_field(6)
     value_iri: Optional[str] = betterproto.string_field(
-        5, optional=True, group="_valueIri"
+        7, optional=True, group="_valueIri"
     )
     value_label: Optional[str] = betterproto.string_field(
-        6, optional=True, group="_valueLabel"
+        8, optional=True, group="_valueLabel"
     )
 
 

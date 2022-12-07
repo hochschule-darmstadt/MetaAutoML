@@ -50,18 +50,18 @@ ONTOLOGY_QUERY_GET_TASKS_FOR_DATASET_TYPE = """
                         :supported_by_oma_ml "True" .
             }
             """
-            
+
 """
 SPARQL query to retrieve all dataset type IRIs
-"""     
+"""
 ONTOLOGY_QUERY_GET_DATASET_TYPES = """
-            PREFIX : <http://h-da.de/ml-ontology/> 
+            PREFIX : <http://h-da.de/ml-ontology/>
             SELECT ?type
             WHERE {
                     ?type a :Enum ;
                             :category ?dataset_type ;
                             :supported_by_oma_ml "True" .
-            } 
+            }
             """
 
 """
@@ -89,7 +89,7 @@ SPARQL query to retrieve all configuration options with their corresponding valu
 ONTOLOGY_QUERY_GET_CONFIGURATION_BY_AUTOML_ID_AND_TASK_ID = """
         PREFIX : <http://h-da.de/ml-ontology/>
 
-        SELECT ?param_iri ?param_label ?param_type ?value_iri ?value_label
+        SELECT ?param_iri ?param_label ?param_type ?broader_iri ?broader_label ?value_iri ?value_label
         WHERE {
                 ?ci a :Configuration_item ;
                         :category :task_configuration ;
@@ -98,7 +98,9 @@ ONTOLOGY_QUERY_GET_CONFIGURATION_BY_AUTOML_ID_AND_TASK_ID = """
                         :parameter_value ?param_iri .
                 ?param_iri :parameter_value ?value_iri ;
                         skos:prefLabel ?param_label ;
+						skos:broader ?broader_iri ;
                         :has_datatype ?param_type .
                 ?value_iri skos:prefLabel ?value_label .
+				?broader_iri skos:prefLabel ?broader_label .
         }
         """

@@ -26,7 +26,7 @@ class OntologyManager(object):
     Ontology Manager provides functionality to interact with the ML Ontology
     """
 
-    def __init__(self):        
+    def __init__(self):
         """Initiate a new OntologyManager instance
         """
         with MeasureDuration() as m:
@@ -69,8 +69,8 @@ class OntologyManager(object):
         if "task" not in request.configuration or (len(request.configuration["task"]) == 0):  # Check if task parameter is contained, we require it for a successful query
             self.__log.error("get_auto_ml_solutions_for_configuration: Task parameter not set or is empty")
             raise grpclib.GRPCError(grpclib.Status.NOT_FOUND, "Task parameter not set or is empty")
-        
-        
+
+
         task = self.__iri_to_uri_ref(request.configuration["task"])
         #task = rdflib.Literal(request.configuration["task"])
         if "library" not in request.configuration or (len(request.configuration["library"]) == 0): # if libraries list is empty we do not query for library filter
@@ -89,13 +89,13 @@ class OntologyManager(object):
                 q = prepareQuery(Queries.ONTOLOGY_QUERY_GET_COMPATIBLE_AUTO_ML_SOLUTIONS_FOR_TASK_AND_LIBRARIES,
                             initNs={"skos": SKOS})
                 queryResult = self.__execute_query(q, {"task": task, "lib": library})
-                
+
                 for row in queryResult:
                     solution = row.automl.replace(ML_ONTOLOGY_NAMESPACE, ":")
                     if solution not in result.auto_ml_solutions:
                         result.auto_ml_solutions.append(solution)
             return result
-        
+
 
         # TODO add more parameter to query
         # task = rdflib.Literal(u'binary classification')
@@ -110,7 +110,7 @@ class OntologyManager(object):
         self.__log.debug("get_dataset_types: get all dataset types")
         q = prepareQuery(Queries.ONTOLOGY_QUERY_GET_DATASET_TYPES,
                         initNs={"skos": SKOS})
-        
+
         queryResult = self.__execute_query(q)
         for row in queryResult:
             result.dataset_types.append(row.type.replace(ML_ONTOLOGY_NAMESPACE, ":"))
@@ -118,7 +118,7 @@ class OntologyManager(object):
 
 
     def get_ml_libraries_for_task(self, request: GetMlLibrariesForTaskRequest) -> GetMlLibrariesForTaskResponse:
-        """Get ML libraries for a specific task 
+        """Get ML libraries for a specific task
 
         Args:
             request (GetMlLibrariesForTaskRequest): The GPRC request message holding task IRI
@@ -219,7 +219,7 @@ class OntologyManager(object):
             for param in params:
                 result.auto_ml_parameters.append(param)
         return result
-            
+
 
     # TODO: Define return value
     # TODO: Add doc string
@@ -238,6 +238,8 @@ class OntologyManager(object):
             rowInstance.param_type = row.param_type
             rowInstance.value_iri = self.__normalize_iri_to_colon(row.value_iri)
             rowInstance.value_label = row.value_label
+            rowInstance.broader_iri = self.__normalize_iri_to_colon(row.broader_iri)
+            rowInstance.broader_label = row.broader_label
             result.append(rowInstance)
 
         return result
