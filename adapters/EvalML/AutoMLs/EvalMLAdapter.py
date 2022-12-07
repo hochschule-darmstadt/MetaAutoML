@@ -2,6 +2,7 @@ import os
 
 from AbstractAdapter import AbstractAdapter
 from AdapterUtils import export_model, prepare_tabular_dataset, data_loader
+from AdapterUtils import *
 from JsonUtil import get_config_property
 
 import evalml
@@ -11,6 +12,7 @@ from evalml.objectives import FraudCost
 import pandas as pd
 from predict_time_sources import feature_preparation, DataType, SplitMethod
 
+import json
 
 # TODO implement
 class EvalMLAdapter(AbstractAdapter):
@@ -62,32 +64,21 @@ class EvalMLAdapter(AbstractAdapter):
         automl.search()
         automl.describe_pipeline(3)
         best_pipeline_tobe_export = automl.best_pipeline
+        """
+        #it works here without error 
+        result = X.to_json(orient="split")
+        parsed = json.loads(result)
+        df = pd.DataFrame(data=json.loads(json.dumps(parsed['data'])), columns=X.columns)
+        df = df.astype(dtype=dict(zip(X.columns, X.dtypes.values)))
+        res = best_pipeline_tobe_export.predict_proba (df.head(5))
+        print(res)
+        """
         export_model(best_pipeline_tobe_export, self._configuration["result_folder_location"], 'evalml.p')
-        ### test model
-        """
-        target = self._configuration["configuration"]["target"]
-        features =  self._configuration["dataset_configuration"]["column_datatypes"]
-        features.pop(target, None)
-        features = features.items()
-        delimiters = {
-                "comma":        ",",
-                "semicolon":    ";",
-                "space":        " ",
-                "tab":          "\t",
-            }
+        with open(self._configuration["result_folder_location"] + '/evalml.p', 'rb') as file:
+            automl = dill.load(file)
+        res = automl.predict_proba(X.head(70))
+        print(res)
 
-        X = pd.read_csv('C:\\Users\\Hung\\Personal\\Sem1\\MetaAutoML\\controller\\app-data/datasets\\a6971d82-571a-40ac-96e5-8dcb7f5d6b0c\\63742aa4f1dbbe586eb62911\\titanic_train.csv', delimiter=delimiters[self._configuration["dataset_configuration"]['file_configuration']['delimiter']], escapechar=self._configuration["dataset_configuration"]['file_configuration']['escape_character'], decimal=self._configuration["dataset_configuration"]['file_configuration']['decimal_character']).drop(target, axis=1, errors='ignore')
-
-        # split training set
-        X = X.iloc[:]
-
-        X = feature_preparation(X, features)
-        predicted_y = best_pipeline_tobe_export.predict(X)
-        print(predicted_y)
-        """
-
-
-    
     def __regression(self):
         """Execute the tabular regression task and export the found model"""
 

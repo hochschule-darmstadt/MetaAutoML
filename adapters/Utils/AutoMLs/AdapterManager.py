@@ -144,9 +144,18 @@ class AdapterManager(Thread):
 
             # Reassemble dataset with the datatypes and column names from the preprocessed data and the content of the
             # transmitted data.
-            df = pd.DataFrame(data=json.loads(explain_auto_ml_request.data), columns=self._dataframeX.columns)
-            df = df.astype(dtype=dict(zip(self._dataframeX.columns, self._dataframeX.dtypes.values)))
+            # dirty quck fix, but there is still a bug :)
+            df2 = pd.DataFrame(data=json.loads(explain_auto_ml_request.data), columns=self._dataframeX.columns)
+            df2 = df2.astype(dtype=dict(zip(self._dataframeX.columns, self._dataframeX.dtypes.values)))
 
+            result = self._dataframeX.to_json(orient="split")
+            parsed = json.loads(result)
+            df = pd.DataFrame(data=json.loads(json.dumps(parsed['data'])), columns=self._dataframeX.columns)
+            df = df.astype(dtype=dict(zip(self._dataframeX.columns, self._dataframeX.dtypes.values)))
+            # df = pd.concat([df, df2], sort=False)
+            # uncomment this code a bug will be occured
+            # df = df[-df2.shape[0]:]
+            df = df.head(25)
             probabilities = self._load_model_and_make_probabilities(config_json, result_folder_location, df)
 
             return ExplainModelResponse(probabilities=probabilities)
