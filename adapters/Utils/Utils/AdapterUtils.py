@@ -475,7 +475,7 @@ def prepare_tabular_dataset(df: pd.DataFrame, json_configuration: dict) -> Tuple
         tuple[pd.DataFrame, pd.Series]: tuple holding the dataset dataframe without the target column, and a Series holding the Target column tuple[(X_dataframe, y_series)]
     """
     df = feature_preparation(df, json_configuration["dataset_configuration"]["column_datatypes"].items())
-    if json_configuration["dataset_configuration"]["ignored_samples"]:
+    if "ignored_samples" in json_configuration["dataset_configuration"]:
         df = df.drop(json_configuration["dataset_configuration"]["ignored_samples"])
     df = cast_dataframe_column(df, json_configuration["configuration"]["target"], json_configuration["dataset_configuration"]["column_datatypes"][json_configuration["configuration"]["target"]])
     X = df.drop(json_configuration["configuration"]["target"], axis=1)
