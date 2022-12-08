@@ -165,7 +165,7 @@ msgstr "Read clients data"
 
 msgctxt "Global"
 msgid "ReadRolePermission"
-msgstr "Read roles data (permissions, etc.\")"
+msgstr "Read roles data (permissions, etc.")"
 
 msgctxt "Global"
 msgid "ReadUserPermission"
@@ -1617,7 +1617,7 @@ msgstr "Target: {0}"
 
 msgctxt "Global"
 msgid "Selected Ml libraries"
-msgstr "Selected Ml libraries"
+msgstr "Selected ML libraries"
 
 msgctxt "Global"
 msgid "Selected AutoMl solutions"
@@ -1653,7 +1653,7 @@ msgstr "Task"
 
 msgctxt "Global"
 msgid "Dataset not redable"
-msgstr "Dataset couln�t be read, if the dataset was uploaded recently you need to wait a bit for our analysises to end. If that is not the case use the preview config option to reconfigure the dataset."
+msgstr "Dataset couldn't be read. If the dataset was uploaded recently you need to wait a bit for our analysises to end. If that is not the case use the preview config option to reconfigure the dataset."
 
 msgctxt "Global"
 msgid "Start: {0}"
