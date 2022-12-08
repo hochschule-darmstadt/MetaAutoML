@@ -1,4 +1,4 @@
-﻿@inject IStringLocalizer<Global> L
+@inject IStringLocalizer<Global> L
 @inject IApiClient apiClient
 @inject IViewNotifier viewNotifier
 @using Newtonsoft.Json
@@ -76,21 +76,21 @@
                 @foreach (var param in _parameterValues)
                 {
                     <MudText Typo="Typo.body2" Class="mt-4">@param.Value.ParameterLabel</MudText>
-                    @if (param.Value.ParameterType == "http://h-da.de/ml-ontology/single_value")
+                    @if (param.Value.ParameterType == ":single_value")
                     {
-                            <MudSelect Label="@param.Value.ParameterLabel" T="string">
+                        <MudSelect Label="@param.Value.ParameterLabel" T="string" Variant="Variant.Outlined">
                                 @foreach (var paramValue in param.Value.ParameterValues)
                                 {
                                 <MudSelectItem Value="@paramValue.ValueIri">@paramValue.ValueLabel</MudSelectItem>
                                 }
                             </MudSelect>
                     }
-                    @if (param.Value.ParameterType == "http://h-da.de/ml-ontology/list")
+                    @if (param.Value.ParameterType == ":list")
                     {
-                        <MudSelect Label="@param.Value.ParameterLabel" T="string" MultiSelection="true" SelectAll="true" SelectedValues="@param.Value.ParameterValues.Where(pv => pv.IsSelected).Select(v => v.ValueIri)">
+                        <MudSelect T="ParameterValueViewModel" MultiSelection="true" SelectAll="true" SelectedValues="@param.Value.ParameterValues.Where(pv => pv.IsSelected)" ToStringFunc="p => p.ValueLabel" Variant="Variant.Outlined">
                             @foreach (var paramValue in param.Value.ParameterValues)
                             {
-                                <MudSelectItem Value="@paramValue.ValueIri">@paramValue.ValueLabel</MudSelectItem>
+                                <MudSelectItem Value="@paramValue" onselect="">@paramValue.ValueLabel</MudSelectItem>
                             }
                         </MudSelect>
                     }

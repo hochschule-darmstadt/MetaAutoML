@@ -235,7 +235,7 @@ class OntologyManager(object):
             rowInstance.auto_ml_iri = auto_ml_iri
             rowInstance.param_iri = self.__normalize_iri_to_colon(row.param_iri)
             rowInstance.param_label = row.param_label
-            rowInstance.param_type = row.param_type
+            rowInstance.param_type = self.__normalize_iri_to_colon(row.param_type)
             rowInstance.value_iri = self.__normalize_iri_to_colon(row.value_iri)
             rowInstance.value_label = row.value_label
             rowInstance.broader_iri = self.__normalize_iri_to_colon(row.broader_iri)
