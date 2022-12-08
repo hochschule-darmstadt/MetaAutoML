@@ -9,7 +9,7 @@ from typing import Any
 import dill
 import numpy as np
 import pandas as pd
-from predict_time_sources import DataType, SplitMethod, feature_preparation, sample_preparation
+from predict_time_sources import DataType, SplitMethod, feature_preparation
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, mean_squared_error
 from sklearn.metrics import classification_report
