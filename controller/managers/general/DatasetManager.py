@@ -36,7 +36,7 @@ class DatasetManager:
             CreateDatasetResponse: The empty GRPC response message
         """
         self.__log.debug(f"create_dataset: saving new dataset {create_dataset_request.dataset_name} for user {create_dataset_request.user_id}, with filename {create_dataset_request.file_name}, with dataset type {create_dataset_request.dataset_type}")
-        dataset_id: str = self.__data_storage.create_dataset(create_dataset_request.user_id, create_dataset_request.file_name, create_dataset_request.dataset_type, create_dataset_request.dataset_name)
+        dataset_id: str = self.__data_storage.create_dataset(create_dataset_request.user_id, create_dataset_request.file_name, create_dataset_request.dataset_type, create_dataset_request.dataset_name, create_dataset_request.encoding)
         self.__log.debug(f"create_dataset: new dataset saved id: {dataset_id}")
         # If the dataset is a certain type the dataset can be analyzed.
         self.__log.debug("create_dataset: executing dataset analysis...")
@@ -58,12 +58,22 @@ class DatasetManager:
         Returns:
             Dataset: The GRPC dataset object generated from the dictonary
         """
+        
+        backend_frontend_encoding_conversion_table = {
+            "ascii": "ascii",
+            "utf_8": "utf-8",
+            "utf_16": "utf-16",
+            "utf_32": "utf-32",
+            "cp1252" : "windows-1252"
+        }
+
         try:
             dataset_detail = Dataset()
             dataset_detail.id = str(dataset["_id"])
             dataset_detail.name = dataset["name"]
             dataset_detail.type = dataset['type']
             dataset_detail.path = dataset["path"]
+            dataset["file_configuration"]["encoding"] = backend_frontend_encoding_conversion_table[dataset["file_configuration"]["encoding"]]
             dataset_detail.file_configuration = json.dumps(dataset["file_configuration"])
             dataset_detail.training_ids = dataset['training_ids']
             dataset_detail.analysis = json.dumps(dataset['analysis'])

@@ -86,6 +86,9 @@ namespace BlazorBoilerplate.Server.Managers
                     grpcRequest.DatasetName = request.DatasetName;
 
                     grpcRequest.DatasetType = request.DatasetType;
+                    //TODO detect encoding
+
+                    grpcRequest.Encoding = "utf-8";
                     var reply = _client.CreateDataset(grpcRequest);
                     return new ApiResponse(Status200OK, null, "");
                 }
