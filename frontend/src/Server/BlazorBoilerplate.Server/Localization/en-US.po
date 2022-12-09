@@ -1649,7 +1649,7 @@ msgstr "Task"
 
 msgctxt "Global"
 msgid "Dataset not redable"
-msgstr "Dataset couln´t be read, if the dataset was uploaded recently you need to wait a bit for our analysises to end. If that is not the case use the preview config option to reconfigure the dataset."
+msgstr "Dataset coulnÂ´t be read, if the dataset was uploaded recently you need to wait a bit for our analysises to end. If that is not the case use the preview config option to reconfigure the dataset."
 
 msgctxt "Global"
 msgid "Start: {0}"
@@ -1815,3 +1815,23 @@ msgstr "4 hours"
 msgctxt "Global"
 msgid "AffinityCookieDescription"
 msgstr "This cookie saves the sticky session id, used for correct routing."
+
+msgctxt "Global"
+msgid "UTF-8"
+msgstr "UTF-8"
+
+msgctxt "Global"
+msgid "latin-1"
+msgstr "latin-1"
+
+msgctxt "Global"
+msgid "UTF-16"
+msgstr "UTF-16"
+
+msgctxt "Global"
+msgid "UTF-32"
+msgstr "UTF-32"
+
+msgctxt "Global"
+msgid "Encoding"
+msgstr "Encoding"

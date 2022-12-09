@@ -136,15 +136,9 @@ class DataStorage:
             #previewDf = pd.read_csv(filename_dest)
             #previewDf.head(50).to_csv(filename_dest.replace(".csv", "_preview.csv"), index=False)
             #causes error with different delimiters use normal string division
-            self.__log.debug("create_dataset: dataset is of CSV type: creating subset preview file, and generating csv file configuration...")
-            with open(filename_dest, encoding="utf8") as file:
-                lines = file.readlines()
-            with open(filename_dest.replace(".csv", "_preview.csv"), "x") as preview:
-                preview_line = lines[:51]
-                for line in preview_line:
-                    preview.write(line)
-                    # preview.write("\n")
-            file_configuration = {"use_header": True, "start_row":1, "delimiter":"comma", "escape_character":"\\", "decimal_character":"."}
+            self.__log.debug("create_dataset: dataset is of CSV type: generating csv file configuration...")
+          
+            file_configuration = {"use_header": True, "start_row":1, "delimiter":"comma", "escape_character":"\\", "decimal_character":".", "encoding":"utf-8"}
 
         if type == ":time_series_longitudinal":
             self.__log.debug("create_dataset: dataset is of TS nature: creating subset preview file, and generating csv file configuration...")
@@ -188,7 +182,7 @@ class DataStorage:
             # Save the new dataframe as a csv file
             df_preview_filename = filename_dest.replace(".ts", "_preview.csv")
             pd.DataFrame(df_dict).to_csv(df_preview_filename, index=False)
-            file_configuration = {"use_header": True, "start_row":1, "delimiter":"comma", "escape_character":"\\", "decimal_character":"."}
+            file_configuration = {"use_header": True, "start_row":1, "delimiter":"comma", "escape_character":"\\", "decimal_character":".", "encoding":"utf-8"}
 
         success = self.__mongo.update_dataset(user_id, dataset_id, {
             "path": filename_dest,

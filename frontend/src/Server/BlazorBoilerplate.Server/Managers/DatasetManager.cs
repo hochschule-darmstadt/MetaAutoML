@@ -8,17 +8,20 @@ using BlazorBoilerplate.Storage;
 using Grpc.Core;
 using Grpc.Net.Client;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.Analysis;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using UtfUnknown;
 using static Microsoft.AspNetCore.Http.StatusCodes;
 
 namespace BlazorBoilerplate.Server.Managers
@@ -190,6 +193,12 @@ namespace BlazorBoilerplate.Server.Managers
                         }
                         break;
                     case ":text":
+                        using (FileStream fs = new FileStream(datasetLocation, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                        {
+                            var result = CharsetDetector.DetectFromStream(fs);
+                            Console.WriteLine(result);
+                       
+                        }
                         response.DatasetPreview = File.ReadAllText(datasetLocation.Replace(".csv", "_preview.csv"));
                         break;
                     case ":time_series":
