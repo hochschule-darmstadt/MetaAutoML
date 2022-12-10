@@ -35,9 +35,9 @@ class DataStorage:
             "utf-16le": "utf_16_le",
             "utf-16be": "utf_16_be", 
             "utf-32": "utf_32",
-            #"windows-1252" : "cp1252",
-            #"iso-8859-1": "latin-1",
-            #"latin-1": "latin-1"
+            "windows-1252" : "cp1252",
+            "iso-8859-1": "latin-1",
+            "latin-1": "latin-1"
         }
 
     ####################################
@@ -149,13 +149,6 @@ class DataStorage:
             #previewDf.head(50).to_csv(filename_dest.replace(".csv", "_preview.csv"), index=False)
             #causes error with different delimiters use normal string division
             self.__log.debug("create_dataset: dataset is of CSV type: generating csv file configuration...")
-            with open(filename_dest, errors='ignore') as file:
-                lines = file.readlines()
-            with open(filename_dest.replace(".csv", "_preview.csv"), "x") as preview:
-                preview_line = lines[:51]
-                for line in preview_line:
-                    preview.write(line)
-                    # preview.write("\n")
             file_configuration = {"use_header": True, "start_row":1, "delimiter":"comma", "escape_character":"\\", "decimal_character":".", "encoding": self.__frontend_backend_encoding_conversion_table[encoding]}
 
         if type == ":time_series_longitudinal":

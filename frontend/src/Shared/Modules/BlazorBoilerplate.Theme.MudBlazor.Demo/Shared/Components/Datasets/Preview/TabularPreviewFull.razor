@@ -2,7 +2,6 @@
 @inject IStringLocalizer<Global> L
 @inject IApiClient apiClient
 @inject IDatasetPreviewWorker previewWorker
-@using Deedle
 @using Microsoft.Data.Analysis
 
 @if ((_datasetFrame == null) && (_datasetReadError == false))
@@ -158,8 +157,8 @@ else
                 Dataset.Dataset.FileConfiguration["start_row"] = value;
                 _index = 1;
             }
-            
-            
+
+
         } 
     }
 
@@ -226,7 +225,7 @@ else
                 ReloadDataFrame();
             }
         }
-        
+
     }
     private string searchString = "";
 
@@ -238,6 +237,7 @@ else
         {
             if (DatasetData != null)
             {
+
                 // convert string to stream
                 byte[] byteArray = Encoding.ASCII.GetBytes(DatasetData);
                 MemoryStream stream = new MemoryStream(byteArray);
@@ -250,7 +250,8 @@ else
                     _isSavingAllowed = true;
                     _datasetReadError = false;
                 }
-                
+
+
                 StateHasChanged();
             }
         }
@@ -273,4 +274,5 @@ else
         }
         previewWorker.UpdateDatasetFileConfiguration(Dataset);
     }
+
 }

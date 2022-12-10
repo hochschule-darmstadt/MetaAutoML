@@ -36,6 +36,8 @@ namespace BlazorBoilerplate.Server.Managers
         private readonly ControllerService.ControllerServiceClient _client;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ICacheManager _cacheManager;
+        private readonly int _numberOfLines = 20;
+        private string _fileText = "";
         public DatasetManager(ApplicationDbContext dbContext, ILogger<EmailManager> logger, ControllerService.ControllerServiceClient client, IHttpContextAccessor httpContextAccessor, ICacheManager cacheManager)
         {
             _dbContext = dbContext;
@@ -180,7 +182,15 @@ namespace BlazorBoilerplate.Server.Managers
                 switch (reply.Dataset.Type)
                 {
                     case ":tabular":
-                        response.DatasetPreview = File.ReadAllText(datasetLocation.Replace(".csv", "_preview.csv"));
+                      
+                        using (StreamReader inputFile = new StreamReader(datasetLocation))
+                        {
+                            for (int i = 1; i < _numberOfLines; i++)
+                            {
+                                _fileText += inputFile.ReadLine() + "\n";
+                            }
+                        }
+                        response.DatasetPreview = _fileText;
 
                         break;
                     case ":image":
@@ -202,13 +212,36 @@ namespace BlazorBoilerplate.Server.Managers
                         break;
                     case ":text":
                         
-                        response.DatasetPreview = File.ReadAllText(datasetLocation.Replace(".csv", "_preview.csv"));
+                        using (StreamReader inputFile = new StreamReader(datasetLocation))
+                        {      
+                            for (int i = 1; i < _numberOfLines; i++)
+                            {
+                                _fileText += inputFile.ReadLine() + "\n";
+                            }
+                        }
+                        response.DatasetPreview = _fileText;
                         break;
                     case ":time_series":
-                        response.DatasetPreview = File.ReadAllText(datasetLocation.Replace(".csv", "_preview.csv"));
+                        
+                        using (StreamReader inputFile = new StreamReader(datasetLocation))
+                        {
+                            for (int i = 1; i < _numberOfLines; i++)
+                            {
+                                _fileText += inputFile.ReadLine() + "\n";
+                            }
+                        }
+                        response.DatasetPreview = _fileText;
                         break;
                     case ":time_series_longitudinal":
-                        response.DatasetPreview = File.ReadAllText(datasetLocation.Replace(".ts", "_preview.csv"));
+                       
+                        using (StreamReader inputFile = new StreamReader(datasetLocation))
+                        {
+                            for (int i = 1; i < _numberOfLines; i++)
+                            {
+                                _fileText += inputFile.ReadLine() + "\n";
+                            }
+                        }
+                        response.DatasetPreview = _fileText;
                         break;
                     default:
                         break;
