@@ -87,8 +87,13 @@ namespace BlazorBoilerplate.Server.Managers
 
                     grpcRequest.DatasetType = request.DatasetType;
                     //TODO detect encoding
-
-                    grpcRequest.Encoding = "utf-8";
+                    DetectionResult result;
+                    using (FileStream fs1 = new FileStream(Path.Combine(path, trustedFileNameForDisplay), FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                    {
+                        result = CharsetDetector.DetectFromStream(fs1);
+  
+                    }
+                    grpcRequest.Encoding = result.Detected.EncodingName.ToString();
                     var reply = _client.CreateDataset(grpcRequest);
                     return new ApiResponse(Status200OK, null, "");
                 }
@@ -196,12 +201,7 @@ namespace BlazorBoilerplate.Server.Managers
                         }
                         break;
                     case ":text":
-                        using (FileStream fs = new FileStream(datasetLocation, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-                        {
-                            var result = CharsetDetector.DetectFromStream(fs);
-                            Console.WriteLine(result);
-                       
-                        }
+                        
                         response.DatasetPreview = File.ReadAllText(datasetLocation.Replace(".csv", "_preview.csv"));
                         break;
                     case ":time_series":

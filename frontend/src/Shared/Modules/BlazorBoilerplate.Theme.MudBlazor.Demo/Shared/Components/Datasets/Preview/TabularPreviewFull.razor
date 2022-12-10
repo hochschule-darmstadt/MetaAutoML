@@ -241,15 +241,8 @@ else
                 // convert string to stream
                 byte[] byteArray = Encoding.ASCII.GetBytes(DatasetData);
                 MemoryStream stream = new MemoryStream(byteArray);
-                _datasetFrame =  DataFrame.LoadCsv(stream, separator: Dataset.Dataset.GetDelimiter(), encoding : Dataset.Dataset.GetEncoding(), numberOfRowsToRead: 50);//Frame.ReadCsv(stream, separators: Dataset.Dataset.GetDelimiterStr());//, encoding: Dataset.Dataset.GetEncodingStr());
-                //PrimitiveDataFrameColumn<int> indexes = new PrimitiveDataFrameColumn<int>("Index");
+                _datasetFrame =  DataFrame.LoadCsv(stream, separator: Dataset.Dataset.GetDelimiter(), encoding : Dataset.Dataset.GetEncoding(), numberOfRowsToRead: 50);
                 _datasetFrame.FillNulls("NaN", true);
-                //for (int i = 1; i <= _datasetFrame.Rows.Count(); i++)
-                //{
-                  //  indexes.Append(i);
-                //}
-                //Series<int, int?> indexSeries = indexes.ToOrdinalSeries();
-               // _datasetFrame["index"] = indexes;
                 if(_datasetFrame.Rows.Count == 0){
                     _isSavingAllowed = false;
                     _datasetReadError = true;

@@ -18,7 +18,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.Data.Analysis" Version="0.19.1" />
+    <PackageReference Include="Microsoft.Data.Analysis" Version="0.20.0" />
   </ItemGroup>
 	<ItemGroup>
 		<Protobuf Include="Protos/ControllerService.proto" GrpcServices="Client" ProtoRoot="Protos\" />
