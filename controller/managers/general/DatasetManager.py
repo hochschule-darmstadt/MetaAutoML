@@ -64,7 +64,16 @@ class DatasetManager:
             "utf_8": "utf-8",
             "utf_16": "utf-16",
             "utf_32": "utf-32",
-            "cp1252" : "windows-1252"
+            "cp1252" : "windows-1252",
+            "utf-8": "utf-8",
+            "utf-16": "utf-16",
+            "utf-32": "utf-32",
+            "utf-16-le": "utf-16le",
+            "utf-16le": "utf-16-le",
+            "utf-16be": "utf_16_be", 
+            "utf_16_be": "utf-16le",
+            "utf_16_be": "utf-16be",
+            "latin-1": "latin-1"
         }
 
         try:

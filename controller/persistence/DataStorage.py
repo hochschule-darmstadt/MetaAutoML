@@ -35,9 +35,9 @@ class DataStorage:
             "utf-16le": "utf_16_le",
             "utf-16be": "utf_16_be", 
             "utf-32": "utf_32",
-            "windows-1252" : "cp1252",
-            "iso-8859-1": "latin-1",
-            "latin-1": "latin-1"
+            #"windows-1252" : "cp1252",
+            #"iso-8859-1": "latin-1",
+            #"latin-1": "latin-1"
         }
 
     ####################################
