@@ -191,7 +191,7 @@
     }
 
     private (string id, string label, string toolTip) ConvertObjectInfoToChip(ObjectInfomationDto objectInfo) =>
-        (objectInfo.ID, objectInfo.Properties.GetValueOrDefault("skos:prefLabel"), null);
+        (objectInfo.ID, objectInfo.Properties.GetValueOrDefault("skos:prefLabel"), objectInfo.Properties.GetValueOrDefault("rdfs:seeAlso") );
 
     private async Task OnMlLibrarySelectionChanged()
     {
