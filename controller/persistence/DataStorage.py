@@ -37,7 +37,8 @@ class DataStorage:
             "utf-32": "utf_32",
             "windows-1252" : "cp1252",
             "iso-8859-1": "latin-1",
-            "latin-1": "latin-1"
+            "latin-1": "latin-1",
+            "": ""
         }
 
     ####################################

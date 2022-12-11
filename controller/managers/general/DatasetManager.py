@@ -73,7 +73,8 @@ class DatasetManager:
             "utf-16be": "utf_16_be", 
             "utf_16_be": "utf-16le",
             "utf_16_be": "utf-16be",
-            "latin-1": "latin-1"
+            "latin-1": "latin-1",
+            "": ""
         }
 
         try:
@@ -82,7 +83,8 @@ class DatasetManager:
             dataset_detail.name = dataset["name"]
             dataset_detail.type = dataset['type']
             dataset_detail.path = dataset["path"]
-            dataset["file_configuration"]["encoding"] = backend_frontend_encoding_conversion_table[dataset["file_configuration"]["encoding"]]
+            if dataset['type'] in [':text', ':tabular', ':time_series', ':time_series_longitudinal']:
+                dataset["file_configuration"]["encoding"] = backend_frontend_encoding_conversion_table[dataset["file_configuration"]["encoding"]]
             dataset_detail.file_configuration = json.dumps(dataset["file_configuration"])
             dataset_detail.training_ids = dataset['training_ids']
             dataset_detail.analysis = json.dumps(dataset['analysis'])

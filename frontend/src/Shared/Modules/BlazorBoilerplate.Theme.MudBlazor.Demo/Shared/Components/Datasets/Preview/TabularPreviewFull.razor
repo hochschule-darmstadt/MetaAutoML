@@ -237,7 +237,6 @@ else
         {
             if (DatasetData != null)
             {
-                // convert string to stream
               
                 _datasetFrame = DataFrame.LoadCsv(DatasetData, separator: Dataset.Dataset.GetDelimiter(), encoding: Dataset.Dataset.GetEncoding(), numRows: 20);
                 _datasetFrame.FillNulls("NaN", true);

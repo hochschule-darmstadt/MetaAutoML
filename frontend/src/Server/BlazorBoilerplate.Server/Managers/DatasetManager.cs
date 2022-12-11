@@ -87,14 +87,19 @@ namespace BlazorBoilerplate.Server.Managers
                     grpcRequest.DatasetName = request.DatasetName;
 
                     grpcRequest.DatasetType = request.DatasetType;
-                    //TODO detect encoding
                     DetectionResult result;
-                    using (FileStream fs1 = new FileStream(Path.Combine(path, trustedFileNameForDisplay), FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                    if (grpcRequest.DatasetType == ":text" || grpcRequest.DatasetType == ":tabular" || grpcRequest.DatasetType == ":time_series" || grpcRequest.DatasetType == ":time_series_longitudinal")
                     {
-                        result = CharsetDetector.DetectFromStream(fs1);
-  
+                        using (FileStream fs1 = new FileStream(Path.Combine(path, trustedFileNameForDisplay), FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                        {
+                            result = CharsetDetector.DetectFromStream(fs1);
+
+                        }
+                        grpcRequest.Encoding = result.Detected.EncodingName.ToString();
+                    } else
+                    {
+                        grpcRequest.Encoding = "";
                     }
-                    grpcRequest.Encoding = result.Detected.EncodingName.ToString();
                     var reply = _client.CreateDataset(grpcRequest);
                     return new ApiResponse(Status200OK, null, "");
                 }
