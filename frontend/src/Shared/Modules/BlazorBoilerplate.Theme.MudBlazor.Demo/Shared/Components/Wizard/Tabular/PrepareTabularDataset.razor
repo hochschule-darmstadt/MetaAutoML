@@ -2,6 +2,7 @@
 @using System
 @inject IApiClient apiClient
 @inject IViewNotifier viewNotifier
+@using Microsoft.Data.Analysis
 
 @if (_columns == null)
 {
@@ -19,15 +20,13 @@ else
             </MudTimelineItem>
         </MudTimeline>
 
-        <MudTable Items="@_datasetFrame.Rows.ValuesAll" style="width:stretch" class="mat-elevation-z5" FixedHeader="true" CustomHeader="true">
+        <MudTable Items="@_datasetFrame.Rows" style="width:stretch" class="mat-elevation-z5" FixedHeader="true" CustomHeader="true">
             <HeaderContent>
                 <MudTHeadRow>
-                    @foreach (var item in _datasetFrame.Rows.ValuesAll)
+                    @foreach (var item in _datasetFrame.Columns)
                     {
-                        foreach (var ite in item.Keys)
-                        {
-                                <MudTh>@ite</MudTh>
-                        }
+                        
+                        <MudTh>@item.Name</MudTh>
                         break;
                     }
                 </MudTHeadRow>
@@ -47,9 +46,9 @@ else
                 </MudTHeadRow>
             </HeaderContent>
             <RowTemplate>
-                @foreach (var item in context.Keys)
+                @foreach (var item in context)
                 {
-                        <MudTd>@context[item]</MudTd>
+                        <MudTd>@item</MudTd>
                 }
             </RowTemplate>
             <PagerContent>
@@ -69,7 +68,7 @@ else
     [Parameter]
     public EventCallback<CreateTrainingRequestDto> StartAutoMlRequestChanged { get; set; }
     private bool isPreviewRequestRunning = false;
-    private Frame<int, string> _datasetFrame;
+    private DataFrame _datasetFrame;
     private GetDatasetPreviewResponseDto _datasetPreview;
 
     async Task UpdateStartAutoMlRequest()
@@ -177,19 +176,11 @@ else
                     }
                 }).ToList();
                 // convert string to stream
-                byte[] byteArray = Encoding.ASCII.GetBytes(_datasetPreview.DatasetPreview);
-                MemoryStream stream = new MemoryStream(byteArray);
-                _datasetFrame = Frame.ReadCsv(stream, separators: Dataset.Dataset.GetDelimiterStr());
-                foreach (var item in _datasetFrame.ColumnKeys)
-                {
-                    var newcolumn = _datasetFrame.Columns[item].FillMissing(st =>
-                    {
-                        return "NaN";
-                    });
-                    _datasetFrame.ReplaceColumn(item, newcolumn);
-                }
-                //_tabularDataset = DataFrame.LoadCsvFromString(_datasetPreview.DatasetPreview, columnNames: columnNames.ToArray(), dataTypes: columnTypes.ToArray());
-                StateHasChanged();
+                //byte[] byteArray = Encoding.ASCII.GetBytes(_datasetPreview.DatasetPreview);
+                //MemoryStream stream = new MemoryStream(byteArray);
+                _datasetFrame = DataFrame.LoadCsv(_datasetPreview.DatasetPreview, separator: Dataset.Dataset.GetDelimiter(), encoding: Dataset.Dataset.GetEncoding(), numRows: 20);
+                _datasetFrame.FillNulls("NaN", true);
+                
                 viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
             }
             else

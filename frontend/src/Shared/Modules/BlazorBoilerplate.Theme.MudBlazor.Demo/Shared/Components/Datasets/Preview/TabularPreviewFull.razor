@@ -237,11 +237,9 @@ else
         {
             if (DatasetData != null)
             {
-
                 // convert string to stream
-                byte[] byteArray = Encoding.ASCII.GetBytes(DatasetData);
-                MemoryStream stream = new MemoryStream(byteArray);
-                _datasetFrame =  DataFrame.LoadCsv(stream, separator: Dataset.Dataset.GetDelimiter(), encoding : Dataset.Dataset.GetEncoding(), numberOfRowsToRead: 50);
+              
+                _datasetFrame = DataFrame.LoadCsv(DatasetData, separator: Dataset.Dataset.GetDelimiter(), encoding: Dataset.Dataset.GetEncoding(), numRows: 20);
                 _datasetFrame.FillNulls("NaN", true);
                 if(_datasetFrame.Rows.Count == 0){
                     _isSavingAllowed = false;
@@ -250,7 +248,6 @@ else
                     _isSavingAllowed = true;
                     _datasetReadError = false;
                 }
-
 
                 StateHasChanged();
             }
@@ -274,5 +271,4 @@ else
         }
         previewWorker.UpdateDatasetFileConfiguration(Dataset);
     }
-
 }

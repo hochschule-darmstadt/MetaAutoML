@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.Analysis;
 using Microsoft.Extensions.Logging;
+using MudBlazor.Charts;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -36,8 +37,6 @@ namespace BlazorBoilerplate.Server.Managers
         private readonly ControllerService.ControllerServiceClient _client;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ICacheManager _cacheManager;
-        private readonly int _numberOfLines = 20;
-        private string _fileText = "";
         public DatasetManager(ApplicationDbContext dbContext, ILogger<EmailManager> logger, ControllerService.ControllerServiceClient client, IHttpContextAccessor httpContextAccessor, ICacheManager cacheManager)
         {
             _dbContext = dbContext;
@@ -182,15 +181,8 @@ namespace BlazorBoilerplate.Server.Managers
                 switch (reply.Dataset.Type)
                 {
                     case ":tabular":
-                      
-                        using (StreamReader inputFile = new StreamReader(datasetLocation))
-                        {
-                            for (int i = 1; i < _numberOfLines; i++)
-                            {
-                                _fileText += inputFile.ReadLine() + "\n";
-                            }
-                        }
-                        response.DatasetPreview = _fileText;
+                     
+                        response.DatasetPreview = datasetLocation;
 
                         break;
                     case ":image":
@@ -211,37 +203,16 @@ namespace BlazorBoilerplate.Server.Managers
                         }
                         break;
                     case ":text":
-                        
-                        using (StreamReader inputFile = new StreamReader(datasetLocation))
-                        {      
-                            for (int i = 1; i < _numberOfLines; i++)
-                            {
-                                _fileText += inputFile.ReadLine() + "\n";
-                            }
-                        }
-                        response.DatasetPreview = _fileText;
+
+                        response.DatasetPreview = datasetLocation; 
                         break;
                     case ":time_series":
-                        
-                        using (StreamReader inputFile = new StreamReader(datasetLocation))
-                        {
-                            for (int i = 1; i < _numberOfLines; i++)
-                            {
-                                _fileText += inputFile.ReadLine() + "\n";
-                            }
-                        }
-                        response.DatasetPreview = _fileText;
+                      
+                        response.DatasetPreview = datasetLocation;
                         break;
                     case ":time_series_longitudinal":
                        
-                        using (StreamReader inputFile = new StreamReader(datasetLocation))
-                        {
-                            for (int i = 1; i < _numberOfLines; i++)
-                            {
-                                _fileText += inputFile.ReadLine() + "\n";
-                            }
-                        }
-                        response.DatasetPreview = _fileText;
+                        response.DatasetPreview = datasetLocation;
                         break;
                     default:
                         break;
