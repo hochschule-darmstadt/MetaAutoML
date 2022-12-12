@@ -9,7 +9,7 @@ import pandas as pd
 from AdapterBGRPC import StartAutoMlRequest
 from AutoKerasAdapterManager import AutoKerasAdapterManager
 
-from controller.ControllerBGRPC import DataType
+from ControllerBGRPC import DataType
 
 
 def load_titanic_dataset():
