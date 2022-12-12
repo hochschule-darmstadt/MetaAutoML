@@ -2,8 +2,9 @@
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
-	<RootNamespace>BlazorBoilerplate.Theme.Material.Admin</RootNamespace>
-	<ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>BlazorBoilerplate.Theme.Material.Admin</RootNamespace>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <DebugType>Portable</DebugType>
   </PropertyGroup>
 
   <ItemGroup>

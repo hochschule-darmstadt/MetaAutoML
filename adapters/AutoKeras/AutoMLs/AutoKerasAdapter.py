@@ -102,7 +102,10 @@ class AutoKerasAdapter(AbstractAdapter):
         X, y = prepare_tabular_dataset(self.df, self._configuration)
 
         reg = ak.TextClassifier(overwrite=True, 
-                                          max_trials=3,
+                                # NOTE: bert models will fail with out of memory errors
+                                #   even with 32GB GB RAM
+                                # the first model is a non-bert transformer  
+                                max_trials=1,
                                 # metric=self._configuration['metric'],
                                 seed=42,
                                 directory=self._configuration["model_folder_location"])

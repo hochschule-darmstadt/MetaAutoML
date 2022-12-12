@@ -129,14 +129,10 @@ def data_loader(config: "StartAutoMlRequest") -> Any:
         Any: Depending on the dataset type: CSV data: tuple[DataFrame (Train), DataFrame (Test)], image data: tuple[DataFrame (X_train), DataFrame (y_train), DataFrame (X_test), DataFrame (y_test)]
     """
 
-    train_data = None
-    test_data = None
-
-    if config["configuration"]["task"] in [":tabular_classification", ":tabular_regression", ":text_classification", ":time_series_forecasting", ":time_series_classification"]:
-        return read_tabular_dataset_training_data(config)
-    elif config["configuration"]["task"] in [":image_classification", ":image_regression"]:
+    if config["configuration"]["task"] in [":image_classification", ":image_regression"]:
         return read_image_dataset(config)
-    return train_data, test_data
+    else:
+        return read_tabular_dataset_training_data(config)
 
 
 def export_model(model: Any, path: str, file_name: str):

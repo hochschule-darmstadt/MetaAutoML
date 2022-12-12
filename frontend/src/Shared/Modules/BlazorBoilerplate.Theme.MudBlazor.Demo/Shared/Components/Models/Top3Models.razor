@@ -28,7 +28,7 @@
             }
             else
             {
-                <MudTable Items="@_top3Models.Models">
+                <MudTable Items="@_top3Models.Models" FixedHeader="true" style="width:stretch" class="mat-elevation-z5" AllowSelection="false" Dense="true" Height="220px">
                     <HeaderContent>
                         <MudTh>@L["Name"]</MudTh>
                         <MudTh>@L["Model"]</MudTh>
