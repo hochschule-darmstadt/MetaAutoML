@@ -10,7 +10,7 @@ from AutoKerasAdapterManager import AutoKerasAdapterManager
 from pandas import DataFrame
 from sklearn.datasets import load_files
 
-from controller.ControllerBGRPC import DataType
+from ControllerBGRPC import DataType
 
 
 def load_aclImdb_dataset() -> str:
