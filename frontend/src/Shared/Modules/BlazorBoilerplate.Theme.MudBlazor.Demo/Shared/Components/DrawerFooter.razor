@@ -1,4 +1,4 @@
-﻿@implements IDynamicComponent
+@implements IDynamicComponent
 @inject IStringLocalizer<Global> L
 @inject IFileUploader fileUploader
 @inject IDialogService DialogService
@@ -16,7 +16,7 @@
 
 <MudDialog @bind-IsVisible="fileUploader.IsUploadDatasetDialogOpen">
     <DialogContent>
-        <MudPaper Height="180px" Width="300px"  Elevation="0">
+        <MudPaper Height="250px" Width="300px"  Elevation="0">
             @if (_datasetTypes == null)
             {
             
@@ -334,7 +334,7 @@
             }
             else
             {
-                fileUploader.UploadDatasetRequest.FileName = e.File.Name;
+                fileUploader.UploadDatasetRequest.FileNameOrURL = e.File.Name;
                 fileUploader.UploadDatasetRequest.DatasetName = e.File.Name;
             }
 
@@ -371,7 +371,7 @@
                     viewNotifier.Show(L["Please select a dataset type first!"], ViewNotifierType.Error, L["Operation Failed"]);
                     return;
                 }
-                if (string.IsNullOrEmpty(fileUploader.UploadDatasetRequest.FileName))
+                if (string.IsNullOrEmpty(fileUploader.UploadDatasetRequest.FileNameOrURL))
                 {
                     viewNotifier.Show(L["Please select a file first!"], ViewNotifierType.Error, L["Operation Failed"]);
                     return;
