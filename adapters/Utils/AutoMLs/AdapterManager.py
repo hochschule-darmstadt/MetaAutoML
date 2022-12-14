@@ -1,6 +1,7 @@
 import json
 import os
 import time, asyncio
+import queue
 from AdapterUtils import *
 from AdapterBGRPC import *
 from threading import *
@@ -20,7 +21,7 @@ class AdapterManager(Thread):
         super(AdapterManager, self).__init__()
         self.__session_id = ""
         self.__start_auto_ml_running = False
-        self.__auto_ml_status_messages = []
+        self.__auto_ml_status_messages = queue.Queue()
         self.__start_auto_ml_request: StartAutoMlRequest = None
         self.__on_explain_finished_callback = ""
         self.__on_prediction_finished_callback = ""
@@ -61,9 +62,24 @@ class AdapterManager(Thread):
             self.__start_auto_ml_running = True
             # saving AutoML configuration JSON
             config = setup_run_environment(self.__start_auto_ml_request, self._adapter_name)
+
+            # start training process
             process = start_automl_process(config)
-            for response in capture_process_output(process, False):
-                self.__auto_ml_status_messages.append(response)
+            
+            # read the processes output line by line and push them onto the event queue
+            for line in process.stdout:
+                status_update = GetAutoMlStatusResponse()
+                # if return Code is ADAPTER_RETURN_CODE_STATUS_UPDATE we do not have score values yet
+                status_update.return_code = AdapterReturnCode.ADAPTER_RETURN_CODE_STATUS_UPDATE
+                status_update.status_update = line
+
+                # write line to this processes stdout
+                sys.stdout.write(line)
+                sys.stdout.flush()
+
+                self.__auto_ml_status_messages.put(status_update)
+
+            process.stdout.close()
             process.wait()
 
             generate_script(config)
@@ -71,8 +87,9 @@ class AdapterManager(Thread):
             #AutoKeras only produces keras based ANN
             library, model = self._get_ml_model_and_lib(config)
             # TODO: fix evaluation (does not work with image datasets)
-            # test_score, prediction_time = evaluate(config, os.path.join(config.job_folder_location, get_config_property("job-file-name")))
-            # self.__auto_ml_status_messages.append(get_response(output_json, test_score, prediction_time, library, model))
+            test_score, prediction_time = evaluate(config, os.path.join(config.job_folder_location, get_config_property("job-file-name")))
+            self.__auto_ml_status_messages.put(get_response(output_json, test_score, prediction_time, library, model))
+
             print(f'{get_config_property("adapter-name")} job finished')
             self.__start_auto_ml_running = False
 
@@ -84,7 +101,9 @@ class AdapterManager(Thread):
             else:
                 # do not crash in prodution environment
                 self.__start_auto_ml_running = False
-                self.__auto_ml_status_messages.append(get_except_response(e))
+                status_update = GetAutoMlStatusResponse()
+                status_update.return_code = AdapterReturnCode.ADAPTER_RETURN_CODE_ERROR
+                self.__auto_ml_status_messages.put(status_update)
 
 
     def get_auto_ml_status(self) -> "GetAutoMlStatusResponse":
@@ -96,14 +115,19 @@ class AdapterManager(Thread):
         Returns:
             GetAutoMlStatusResponse: return a GetAutoMlStatusResponse message holding the current AutoML solution training state
         """
-        if (len(self.__auto_ml_status_messages) == 0) and self.__start_auto_ml_running == False:
-            raise grpclib.GRPCError(grpclib.Status.NOT_FOUND, f"Adapter session {self.__session_id} endded and no messages are left!")
-        if (len(self.__auto_ml_status_messages) == 0) and self.__start_auto_ml_running == True:
-            response = GetAutoMlStatusResponse()
-            response.return_code = AdapterReturnCode.ADAPTER_RETURN_CODE_PENDING
-            return response
-        len(self.__auto_ml_status_messages)
-        return self.__auto_ml_status_messages.pop(0)
+        try:
+            # try to fetch the first message in the queue
+            return self.__auto_ml_status_messages.get_nowait()
+        # will be raised when there is no message in the queue
+        except queue.Empty:
+            if self.__start_auto_ml_running:
+                # no update, but training is ongoing
+                response = GetAutoMlStatusResponse()
+                response.return_code = AdapterReturnCode.ADAPTER_RETURN_CODE_PENDING
+                return response
+            else:
+                # invalid request: no updates and training is not running
+                raise grpclib.GRPCError(grpclib.Status.NOT_FOUND, f"Adapter session {self.__session_id} endded and no messages are left!")
 
     def _load_model_and_make_probabilities(self, config: "StartAutoMlRequest", result_folder_location: str, dataframe: pd.DataFrame):
         """Must be overwriten! Load the found model, and execute a prediction using the provided data to calculate the probability metric used by the ExplanableAI module inside the controller
