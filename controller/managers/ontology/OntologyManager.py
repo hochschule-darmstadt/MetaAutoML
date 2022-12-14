@@ -232,7 +232,7 @@ class OntologyManager(object):
         # replace namespace in response with colon
         for row in queryResult:
             rowInstance = AutoMlParameter()
-            rowInstance.auto_ml_iri = auto_ml_iri
+            rowInstance.auto_ml_iri = self.__normalize_iri_to_colon(auto_ml_iri)
             rowInstance.param_iri = self.__normalize_iri_to_colon(row.param_iri)
             rowInstance.param_label = row.param_label
             rowInstance.param_type = self.__normalize_iri_to_colon(row.param_type)

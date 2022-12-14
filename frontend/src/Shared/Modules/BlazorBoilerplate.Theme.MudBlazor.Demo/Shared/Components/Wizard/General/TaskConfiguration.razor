@@ -95,6 +95,20 @@
                         </MudSelect>
                     }
                 }
+
+                @if (_individualParams.Any())
+                {
+                    <MudText Typo="Typo.subtitle2" Class="mt-4">Individual Parameters</MudText>
+
+                    @foreach (var solution in _individualParams)
+                    {
+                        <MudText Typo="Typo.subtitle2" Class="mt-4">@solution.autoMlLabel</MudText>
+                        @foreach (var param in solution.parameters)
+                        {
+                            <MudText Typo="Typo.body2" Class="mt-4">@param.ParameterLabel</MudText>
+                        }
+                    }
+                }
             }
             else
             {
@@ -123,6 +137,7 @@
     private GetTasksForDatasetTypeResponseDto _compatibleTasks;
     private List<AutoMlParameterDto> _availableParameters;
     private List<ParameterObject> _intersectedParams = new();
+    private List<(string autoMlLabel, List<ParameterObject> parameters)> _individualParams = new();
     private List<string> _columnNames;
 
     private readonly ChipSet.ChipSetViewModel _mlLibsViewModel = new();
@@ -197,27 +212,46 @@
             {
                 _availableParameters = apiResponse.Result.AutoMlParameters;
                 _intersectedParams = _intersector.GetIntersectedParameters(_autoMlSolutionsViewModel.SelectedIds).ToList();
-/*
-                foreach (AutoMlParameterDto param in _availableParameters.Where(p => string.IsNullOrEmpty(p.BroaderIri)))
-                {
-                    ParameterObject parameterObj = _intersectedParams.SingleOrDefault(v => v.ParameterIri == param.ParamIri);
-                    if(parameterObj == null)
-                    {
-                        parameterObj = new ParameterObject
-                        {
-                            ParameterIri = param.ParamIri,
-                            ParameterLabel = param.ParamLabel,
-                            ParameterType = param.ParamType,
-                        };
-                        _intersectedParams.Add(parameterObj);
-                    }
 
-                    parameterObj.ParameterValues.Add(
-                        new ParameterValueViewModel {
-                            ValueIri = param.ValueIri,
-                            ValueLabel = param.ValueLabel,
-                        });
-                }*/
+                var paramsGroupedBySolution = _availableParameters
+                    // all params that are either not included in the intersected params, or have a broader type
+                    .Where(p => _intersectedParams.All(i => i.ParameterIri != p.GetBroadestIri() || i.ParameterType != p.ParamType))
+                    .GroupBy(p => p.AutoMlIri);
+
+                _individualParams.Clear();
+                foreach (var group in paramsGroupedBySolution)
+                {
+                    var autoMlLabel = _autoMlSolutionsViewModel.AvailableChips.Single(c => c.Id == group.Key).Label;
+                    // TODO: Refactor this insane statement. If a one liner has to span almost 30 lines, it should not be a one liner.
+                    _individualParams.Add(
+                        (
+                            autoMlLabel,
+                            group
+                                .GroupBy(param => param.ParamIri)
+                                .Select(g =>
+                                {
+                                    var firstInstanceWithIri = g.First();
+                                    List<ParameterValueViewModel> values = null;
+                                    if (firstInstanceWithIri.ValueIri != null)
+                                    {
+                                        values = g.Select(param => new ParameterValueViewModel
+                                        {
+                                            ValueIri = param.ValueIri,
+                                            ValueLabel = param.ValueLabel
+                                        }).ToList();
+                                    }
+                                    return new ParameterObject
+                                    {
+                                        ParameterIri = g.Key,
+                                        ParameterLabel = firstInstanceWithIri.ParamLabel,
+                                        ParameterType = firstInstanceWithIri.ParamType,
+                                        ParameterValues = values
+                                    };
+                                })
+                                .ToList()
+                        )
+                    );
+                }
             },
             errorMessageKey: "Fetching available parameters failed");
     }
