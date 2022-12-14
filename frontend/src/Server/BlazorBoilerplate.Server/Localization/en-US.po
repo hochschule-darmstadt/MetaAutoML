@@ -165,7 +165,7 @@ msgstr "Read clients data"
 
 msgctxt "Global"
 msgid "ReadRolePermission"
-msgstr "Read roles data (permissions, etc.")"
+msgstr "Read roles data (permissions, etc.)"
 
 msgctxt "Global"
 msgid "ReadUserPermission"
