@@ -4,11 +4,12 @@
     <TargetFramework>net6.0</TargetFramework>
     <Title>BlazorBoilerplate Server</Title>
     <PublishWithAspNetCoreTargetManifest>false</PublishWithAspNetCoreTargetManifest>
-	<ImplicitUsings>enable</ImplicitUsings>
+	  <ImplicitUsings>enable</ImplicitUsings>
     <DockerfileFile>$(SolutionDir)/Utils/Docker/Dockerfile</DockerfileFile>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <DockerComposeProjectPath>$(SolutionDir)/Utils/Docker/docker-compose.dcproj</DockerComposeProjectPath>
     <UserSecretsId>dccf98cd-91ea-4e92-b852-ad056fc2b6bf</UserSecretsId>
+    <DebugType>Portable</DebugType>
   </PropertyGroup>
 
   <ItemGroup>

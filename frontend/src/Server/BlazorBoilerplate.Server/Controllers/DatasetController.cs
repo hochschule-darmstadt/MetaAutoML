@@ -36,6 +36,7 @@ namespace BlazorBoilerplate.Server.Controllers
         [ProducesResponseType(Status200OK)]
         [ProducesResponseType(Status400BadRequest)]
         [ProducesResponseType(Status404NotFound)]
+        [ProducesResponseType(Status406NotAcceptable)]
         public async Task<ApiResponse> UploadDataset(UploadDatasetRequestDto request)
             => ModelState.IsValid ?
                 await _datasetManager.UploadDataset(request) :
