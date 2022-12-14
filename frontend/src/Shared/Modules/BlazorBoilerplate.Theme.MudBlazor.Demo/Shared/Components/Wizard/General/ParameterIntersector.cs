@@ -35,28 +35,96 @@ public class ParameterIntersector
         var broaderParams = GetBroaderIrisSupportedByAllSolutions(selectedAutoMlSolutionIris);
         foreach (var broaderIri in broaderParams)
         {
-            var intersectedValueIris = Parameters
+            var parametersForBroader = Parameters
                 .Where(p => p.BroaderIri == broaderIri)
-                .GroupBy(p => p.ParamIri)
-                .Select(g => g.Select(p => p.ValueIri))
-                .IntersectAll();
+                .ToList();
 
-            var firstParamWithBroader = Parameters.First(p => p.BroaderIri == broaderIri);
+            if (!AreTypesCompatible(parametersForBroader))
+            {
+                // The types mismatch. Therefore an intersection is not possible
+                continue;
+            }
+
+            List<string> intersectedValueIris = null;
+            if (IsParameterListType(parametersForBroader.First().ParamType))
+            {
+                intersectedValueIris = GetIntersectedValues(parametersForBroader);
+
+                if (!intersectedValueIris.Any())
+                {
+                    // There are no selectable values => intersected parameter cannot be filled.
+                    continue;
+                }
+            }
+            var parameterType = GetMostRestrictiveTypeIri(parametersForBroader);
+
             yield return new TaskConfiguration.ParameterObject
             {
                 ParameterIri = broaderIri,
-                ParameterLabel = firstParamWithBroader.BroaderLabel,
-                ParameterType = firstParamWithBroader.ParamType,
-                ParameterValues = intersectedValueIris
-                    .Select(v => Parameters.First(p => p.ValueIri == v))
-                    .Select(p => new TaskConfiguration.ParameterValueViewModel
-                    {
-                        ValueIri = p.ValueIri,
-                        ValueLabel = p.ValueLabel
-                    })
-                    .ToList()
+                ParameterLabel = parametersForBroader.First().BroaderLabel,
+                ParameterType = parameterType,
+                ParameterValues = intersectedValueIris?.Select(ValueIriToValueViewModel).ToList()
             };
         }
+    }
+
+    private bool IsParameterListType(string typeIri)
+    {
+        return typeIri == ":single_value" || typeIri == ":list";
+    }
+
+    private List<string> GetIntersectedValues(IEnumerable<AutoMlParameterDto> parameters)
+    {
+        return parameters
+            .GroupBy(p => p.ParamIri)
+            .Select(g => g.Select(p => p.ValueIri))
+            .IntersectAll()
+            .ToList();
+    }
+
+    private bool AreTypesCompatible(IEnumerable<AutoMlParameterDto> parameters)
+    {
+        string getMostRestrictiveSupportedParameterType(string paramType) =>
+            paramType switch
+            {
+                ":list" => ":single_value",
+                _ => paramType
+            };
+
+        return parameters.DistinctBy(p => getMostRestrictiveSupportedParameterType(p.ParamType)).Count() == 1;
+    }
+
+    private string GetMostRestrictiveTypeIri(IEnumerable<AutoMlParameterDto> parameters)
+    {
+        return parameters.Select(p => p.ParamType).Min(new ParamTypeComparer());
+    }
+
+    private TaskConfiguration.ParameterValueViewModel ValueIriToValueViewModel(string iri)
+    {
+        var parameterWithValue = Parameters.First(p => p.ValueIri == iri);
+        return new TaskConfiguration.ParameterValueViewModel
+        {
+            ValueIri = iri,
+            ValueLabel = parameterWithValue.ValueLabel
+        };
+    }
+
+}
+
+/// <summary>
+/// Comparer that orders parameter types by their restrictiveness.
+/// :single_value < :list
+/// </summary>
+public class ParamTypeComparer : IComparer<string>
+{
+    public int Compare(string x, string y)
+    {
+        if (x == y)
+        {
+            return 0;
+        }
+        // single value is always the most restrictive
+        return x == ":single_value" ? -1 : +1;
     }
 }
 
