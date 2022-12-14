@@ -1,4 +1,4 @@
-@inject IStringLocalizer<Global> L
+﻿@inject IStringLocalizer<Global> L
 @inject IApiClient apiClient
 @inject IViewNotifier viewNotifier
 @using Newtonsoft.Json
@@ -190,7 +190,10 @@
             {
                 _availableParameters = apiResponse.Result.AutoMlParameters;
                 _parameterValues.Clear();
-                var broaderParams = _availableParameters.Select(p => p.BroaderIri).Distinct();
+                var broaderParams = _availableParameters
+                    .GroupBy(p => p.BroaderIri)
+                    .Where(g => g.Select(p => p.AutoMlIri).Distinct().Count() == selectedAutoMls.Count)
+                    .Select(g => g.Key);
                 foreach (var broaderIri in broaderParams)
                 {
                     var valueIrisBySolution = _availableParameters
