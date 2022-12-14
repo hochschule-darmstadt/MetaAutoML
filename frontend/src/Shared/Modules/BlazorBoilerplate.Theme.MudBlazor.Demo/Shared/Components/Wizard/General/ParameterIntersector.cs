@@ -25,7 +25,7 @@ public class ParameterIntersector
     private IEnumerable<string> GetBroaderIrisSupportedByAllSolutions(IEnumerable<string> selectedAutoMlSolutionIris)
     {
         return Parameters
-            .GroupBy(p => p.BroaderIri)
+            .GroupBy(p => p.GetBroadestIri())
             .Where(g => g.Select(p => p.AutoMlIri).Distinct().Count() == selectedAutoMlSolutionIris.Count())
             .Select(g => g.Key);
     }
@@ -36,7 +36,7 @@ public class ParameterIntersector
         foreach (var broaderIri in broaderParams)
         {
             var parametersForBroader = Parameters
-                .Where(p => p.BroaderIri == broaderIri)
+                .Where(p => p.GetBroadestIri() == broaderIri)
                 .ToList();
 
             if (!AreTypesCompatible(parametersForBroader))
@@ -61,7 +61,7 @@ public class ParameterIntersector
             yield return new TaskConfiguration.ParameterObject
             {
                 ParameterIri = broaderIri,
-                ParameterLabel = parametersForBroader.First().BroaderLabel,
+                ParameterLabel = parametersForBroader.First().GetBroadestLabel(),
                 ParameterType = parameterType,
                 ParameterValues = intersectedValueIris?.Select(ValueIriToValueViewModel).ToList()
             };
@@ -148,4 +148,13 @@ public static class EnumerableExtensions
                 (h, e) => { h.IntersectWith(e); return h; }
             );
     }
+}
+
+/// <summary>
+/// Class containing extension methods for Dtos
+/// </summary>
+public static class DtoExtensions
+{
+    public static string GetBroadestIri(this AutoMlParameterDto parameterDto) => !string.IsNullOrWhiteSpace(parameterDto.BroaderIri) ? parameterDto.BroaderIri : parameterDto.ParamIri;
+    public static string GetBroadestLabel(this AutoMlParameterDto parameterDto) => !string.IsNullOrWhiteSpace(parameterDto.BroaderIri) ? parameterDto.BroaderLabel : parameterDto.ParamLabel;
 }

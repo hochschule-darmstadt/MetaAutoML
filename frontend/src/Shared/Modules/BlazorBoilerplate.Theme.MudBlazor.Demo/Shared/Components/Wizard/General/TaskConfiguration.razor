@@ -68,12 +68,12 @@
             <ChipSet ViewModel="@_mlLibsViewModel" Label="@L["ML libraries"]" />
             <ChipSet ViewModel="@_autoMlSolutionsViewModel" Label="@L["AutoML solutions"]" />
             <ChipSet ViewModel="@_strategiesViewModel" Label="@L["Enabled strategies"]" />
-            @if (_parameterValues != null)
+            @if (_intersectedParams != null)
             {
                 <MudText Typo="Typo.subtitle2" Class="mt-4">Available parameters</MudText>
 
 
-                @foreach (var param in _parameterValues)
+                @foreach (var param in _intersectedParams)
                 {
                     <MudText Typo="Typo.body2" Class="mt-4">@param.ParameterLabel</MudText>
                     @if (param.ParameterType == ":single_value")
@@ -122,7 +122,7 @@
 
     private GetTasksForDatasetTypeResponseDto _compatibleTasks;
     private List<AutoMlParameterDto> _availableParameters;
-    private List<ParameterObject> _parameterValues = new();
+    private List<ParameterObject> _intersectedParams = new();
     private List<string> _columnNames;
 
     private readonly ChipSet.ChipSetViewModel _mlLibsViewModel = new();
@@ -196,11 +196,11 @@
             () =>
             {
                 _availableParameters = apiResponse.Result.AutoMlParameters;
-                _parameterValues = _intersector.GetIntersectedParameters(_autoMlSolutionsViewModel.SelectedIds).ToList();
-
+                _intersectedParams = _intersector.GetIntersectedParameters(_autoMlSolutionsViewModel.SelectedIds).ToList();
+/*
                 foreach (AutoMlParameterDto param in _availableParameters.Where(p => string.IsNullOrEmpty(p.BroaderIri)))
                 {
-                    ParameterObject parameterObj = _parameterValues.SingleOrDefault(v => v.ParameterIri == param.ParamIri);
+                    ParameterObject parameterObj = _intersectedParams.SingleOrDefault(v => v.ParameterIri == param.ParamIri);
                     if(parameterObj == null)
                     {
                         parameterObj = new ParameterObject
@@ -209,7 +209,7 @@
                             ParameterLabel = param.ParamLabel,
                             ParameterType = param.ParamType,
                         };
-                        _parameterValues.Add(parameterObj);
+                        _intersectedParams.Add(parameterObj);
                     }
 
                     parameterObj.ParameterValues.Add(
@@ -217,7 +217,7 @@
                             ValueIri = param.ValueIri,
                             ValueLabel = param.ValueLabel,
                         });
-                }
+                }*/
             },
             errorMessageKey: "Fetching available parameters failed");
     }

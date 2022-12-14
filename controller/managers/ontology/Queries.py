@@ -96,11 +96,15 @@ ONTOLOGY_QUERY_GET_CONFIGURATION_BY_AUTOML_ID_AND_TASK_ID = """
                         :automl_solution ?auto_ml_iri ;
                         :ml_task ?task_iri ;
                         :parameter_value ?param_iri .
-                ?param_iri :parameter_value ?value_iri ;
-                        skos:prefLabel ?param_label ;
-						skos:broader ?broader_iri ;
-                        :has_datatype ?param_type .
-                ?value_iri skos:prefLabel ?value_label .
-				?broader_iri skos:prefLabel ?broader_label .
+                ?param_iri :has_datatype ?param_type ;
+                        skos:prefLabel ?param_label .
+                OPTIONAL {
+                        ?param_iri :parameter_value ?value_iri .
+                        ?value_iri skos:prefLabel ?value_label
+                }
+                OPTIONAL {
+                        ?param_iri skos:broader ?broader_iri .
+                        ?broader_iri skos:prefLabel ?broader_label
+                }
         }
         """

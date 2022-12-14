@@ -245,7 +245,9 @@ class OntologyManager(object):
         return result
 
     def __normalize_iri_to_colon(self, iri: str) -> str:
-        return iri.replace(ML_ONTOLOGY_NAMESPACE, ":")
+        if iri is not None:
+            return iri.replace(ML_ONTOLOGY_NAMESPACE, ":")
+        return None
 
     def __iri_to_uri_ref(self, iri: str) -> str:
         return rdflib.URIRef(ML_ONTOLOGY_NAMESPACE + iri.replace(":", ""))
