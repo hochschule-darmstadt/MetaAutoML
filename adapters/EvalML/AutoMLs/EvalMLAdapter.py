@@ -13,6 +13,7 @@ import pandas as pd
 from predict_time_sources import feature_preparation, DataType, SplitMethod
 
 import json
+import pickle
 
 # TODO implement
 class EvalMLAdapter(AbstractAdapter):
@@ -32,7 +33,6 @@ class EvalMLAdapter(AbstractAdapter):
 
     def start(self):
         """Start the correct ML task functionality of EvalML"""
-        # why do we need True here ?
         if True:
             if self._configuration["configuration"]["task"] == ":tabular_classification":
                 self.__classification()
@@ -45,17 +45,21 @@ class EvalMLAdapter(AbstractAdapter):
 
     def __classification(self):
         """Execute the tabular classification task and export the found model"""
-        #TODO add implmentation for multiclassification
+
         self.df, test = data_loader(self._configuration)
         X, y = prepare_tabular_dataset(self.df, self._configuration)
         classification_type = "binary" if y.nunique() == 2 else "multiclass"
         print(classification_type)
         print(type(X))
         print(X)
+        train_data, test_data, train_target, test_target = train_test_split(
+            X, y, test_size=0.02, random_state=42, stratify=y
+        )
+
         # parameters must be set correctly
         automl = AutoMLSearch(
-                    X_train=X,
-                    y_train=y,
+                    X_train=train_data,
+                    y_train=train_target,
                     problem_type=classification_type,
                     objective="auto",
                     max_batches=3,
@@ -64,20 +68,9 @@ class EvalMLAdapter(AbstractAdapter):
         automl.search()
         automl.describe_pipeline(3)
         best_pipeline_tobe_export = automl.best_pipeline
-        """
-        #it works here without error 
-        result = X.to_json(orient="split")
-        parsed = json.loads(result)
-        df = pd.DataFrame(data=json.loads(json.dumps(parsed['data'])), columns=X.columns)
-        df = df.astype(dtype=dict(zip(X.columns, X.dtypes.values)))
-        res = best_pipeline_tobe_export.predict_proba (df.head(5))
-        print(res)
-        """
+        
         export_model(best_pipeline_tobe_export, self._configuration["result_folder_location"], 'evalml.p')
-        with open(self._configuration["result_folder_location"] + '/evalml.p', 'rb') as file:
-            automl = dill.load(file)
-        res = automl.predict_proba(X.head(70))
-        print(res)
+        
 
     def __regression(self):
         """Execute the tabular regression task and export the found model"""

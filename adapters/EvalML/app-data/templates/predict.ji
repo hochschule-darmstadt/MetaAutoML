@@ -41,10 +41,9 @@ if __name__ == '__main__':
         loaded_model = dill.load(file)
         
     print(type(X))
-    print(X)
     predicted_y = loaded_model.predict((X))
-    #print(X)
-    #print(predicted_y)
+
+
     df = (predicted_y.to_frame())
     df.columns = [ 'predicted']
     df.to_csv(save_path)
