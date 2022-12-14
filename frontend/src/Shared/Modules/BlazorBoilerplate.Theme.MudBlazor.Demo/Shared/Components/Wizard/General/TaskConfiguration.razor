@@ -125,9 +125,16 @@
     private Dictionary<String, ParameterObject> _parameterValues = new Dictionary<string, ParameterObject>();
     private List<string> _columnNames;
 
-    private ChipSet.ChipSetViewModel _mlLibsViewModel = new();
-    private ChipSet.ChipSetViewModel _autoMlSolutionsViewModel = new();
-    private ChipSet.ChipSetViewModel _strategiesViewModel = new();
+    private readonly ChipSet.ChipSetViewModel _mlLibsViewModel = new();
+    private readonly ChipSet.ChipSetViewModel _autoMlSolutionsViewModel = new();
+    private readonly ChipSet.ChipSetViewModel _strategiesViewModel = new();
+
+    private readonly ParameterIntersector _intersector;
+
+    public TaskConfiguration()
+    {
+        _intersector = new ParameterIntersector(() => _availableParameters);
+    }
 
     protected async override void OnInitialized()
     {
@@ -190,24 +197,14 @@
             {
                 _availableParameters = apiResponse.Result.AutoMlParameters;
                 _parameterValues.Clear();
-                var broaderParams = _availableParameters
-                    .GroupBy(p => p.BroaderIri)
-                    .Where(g => g.Select(p => p.AutoMlIri).Distinct().Count() == selectedAutoMls.Count)
-                    .Select(g => g.Key);
+                var broaderParams = _intersector.GetBroaderIrisSupportedByAllSolutions(_autoMlSolutionsViewModel.SelectedIds);
                 foreach (var broaderIri in broaderParams)
                 {
-                    var valueIrisBySolution = _availableParameters
+                    var listsOfParameterValueIris = _availableParameters
                         .Where(p => p.BroaderIri == broaderIri)
-                        .Select(p => (pIri: p.ParamIri, vIri: p.ValueIri))
-                        .GroupBy(p => p.pIri)
-                        .Select(g => g.Select(p => p.vIri)
-                        .ToList());
-                    var intersectedValueIris = valueIrisBySolution
-                        .Skip(1)
-                        .Aggregate(
-                            new HashSet<string>(valueIrisBySolution.First()),
-                            (h, e) => { h.IntersectWith(e); return h; }
-                        );
+                        .GroupBy(p => p.ParamIri)
+                        .Select(g => g.Select(p => p.ValueIri));
+                    var intersectedValueIris = listsOfParameterValueIris.IntersectAll();
 
                     var firstParamWithBroader = _availableParameters.First(p => p.BroaderIri == broaderIri);
                     _parameterValues.Add(broaderIri, new ParameterObject
