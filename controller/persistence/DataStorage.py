@@ -28,6 +28,18 @@ class DataStorage:
         #self.__mongo_db_url = mongo_db_url
         self.__mongo: MongoDbClient = mongo_db
         self.__lock = Lock()
+        self.__frontend_backend_encoding_conversion_table = {
+            "ascii": "ascii",
+            "utf-8": "utf_8",
+            "utf-16": "utf_16",
+            "utf-16le": "utf_16_le",
+            "utf-16be": "utf_16_be", 
+            "utf-32": "utf_32",
+            "windows-1252" : "cp1252",
+            "iso-8859-1": "latin-1",
+            "latin-1": "latin-1",
+            "": ""
+        }
 
     ####################################
     ## MISC DATASTORAGE OPERATIONS
@@ -77,7 +89,7 @@ class DataStorage:
     ####################################
 #region 
 
-    def create_dataset(self, user_id: str, file_name: str, type: str, name: str) -> str:
+    def create_dataset(self, user_id: str, file_name: str, type: str, name: str, encoding: str) -> str:
         """Create new dataset record and move dataset from upload folder to final path
 
         Args:
@@ -85,6 +97,7 @@ class DataStorage:
             file_name (str): Uploaded file name within the users upload folder
             type (str): The selected dataset type
             name (str): User defined name used when displaying the dataset
+            encoding (str): Automatically detected encoding
 
         Returns:
             str: The new dataset record id
@@ -136,15 +149,8 @@ class DataStorage:
             #previewDf = pd.read_csv(filename_dest)
             #previewDf.head(50).to_csv(filename_dest.replace(".csv", "_preview.csv"), index=False)
             #causes error with different delimiters use normal string division
-            self.__log.debug("create_dataset: dataset is of CSV type: creating subset preview file, and generating csv file configuration...")
-            with open(filename_dest, encoding="utf8") as file:
-                lines = file.readlines()
-            with open(filename_dest.replace(".csv", "_preview.csv"), "x") as preview:
-                preview_line = lines[:51]
-                for line in preview_line:
-                    preview.write(line)
-                    # preview.write("\n")
-            file_configuration = {"use_header": True, "start_row":1, "delimiter":"comma", "escape_character":"\\", "decimal_character":"."}
+            self.__log.debug("create_dataset: dataset is of CSV type: generating csv file configuration...")
+            file_configuration = {"use_header": True, "start_row":1, "delimiter":"comma", "escape_character":"\\", "decimal_character":".", "encoding": self.__frontend_backend_encoding_conversion_table[encoding]}
 
         if type == ":time_series_longitudinal":
             self.__log.debug("create_dataset: dataset is of TS nature: creating subset preview file, and generating csv file configuration...")
@@ -188,7 +194,7 @@ class DataStorage:
             # Save the new dataframe as a csv file
             df_preview_filename = filename_dest.replace(".ts", "_preview.csv")
             pd.DataFrame(df_dict).to_csv(df_preview_filename, index=False)
-            file_configuration = {"use_header": True, "start_row":1, "delimiter":"comma", "escape_character":"\\", "decimal_character":"."}
+            file_configuration = {"use_header": True, "start_row":1, "delimiter":"comma", "escape_character":"\\", "decimal_character":".", "encoding": self.__frontend_backend_encoding_conversion_table[encoding]}
 
         success = self.__mongo.update_dataset(user_id, dataset_id, {
             "path": filename_dest,

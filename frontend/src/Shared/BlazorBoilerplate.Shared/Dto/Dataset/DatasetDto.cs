@@ -71,5 +71,23 @@ namespace BlazorBoilerplate.Shared.Dto.Dataset
                     return ",";
             }
         }
+
+    
+        public Encoding GetEncoding()
+        {
+            switch (this.FileConfiguration["encoding"])
+            {
+                case "utf-8":
+                    return Encoding.UTF8;
+                case "latin-1":
+                    return Encoding.Latin1;
+                case "utf-32":
+                    return Encoding.UTF32;
+                case "utf-16":
+                    return Encoding.BigEndianUnicode;
+                default:
+                    return Encoding.UTF8;
+            }
+        }
     }
 }

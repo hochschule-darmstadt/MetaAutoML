@@ -128,6 +128,11 @@ message CreateDatasetRequest {
     example: ":tabular"
   */
   string datasetType = 4;
+  /*
+    The detected encoding
+    example: "windows-1052"
+  */
+  string encoding = 5;
   }
   
 message CreateDatasetResponse {
