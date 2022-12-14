@@ -197,30 +197,9 @@
             {
                 _availableParameters = apiResponse.Result.AutoMlParameters;
                 _parameterValues.Clear();
-                var broaderParams = _intersector.GetBroaderIrisSupportedByAllSolutions(_autoMlSolutionsViewModel.SelectedIds);
-                foreach (var broaderIri in broaderParams)
+                foreach (var (iri, instance) in _intersector.GetIntersectedParameters(_autoMlSolutionsViewModel.SelectedIds))
                 {
-                    var listsOfParameterValueIris = _availableParameters
-                        .Where(p => p.BroaderIri == broaderIri)
-                        .GroupBy(p => p.ParamIri)
-                        .Select(g => g.Select(p => p.ValueIri));
-                    var intersectedValueIris = listsOfParameterValueIris.IntersectAll();
-
-                    var firstParamWithBroader = _availableParameters.First(p => p.BroaderIri == broaderIri);
-                    _parameterValues.Add(broaderIri, new ParameterObject
-                    {
-                        ParameterIri = broaderIri,
-                        ParameterLabel = firstParamWithBroader.BroaderLabel,
-                        ParameterType = firstParamWithBroader.ParamType,
-                        ParameterValues = intersectedValueIris
-                            .Select(v => _availableParameters.First(p => p.ValueIri == v))
-                            .Select(p => new ParameterValueViewModel
-                            {
-                                ValueIri = p.ValueIri,
-                                ValueLabel = p.ValueLabel
-                            })
-                            .ToList()
-                    });
+                    _parameterValues.Add(iri, instance);
                 }
                 foreach (AutoMlParameterDto param in _availableParameters.Where(p => string.IsNullOrEmpty(p.BroaderIri)))
                 {
