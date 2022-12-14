@@ -52,7 +52,9 @@ class DataSetAnalysisManager(Thread):
                                              escapechar=file_config['escape_character'],
                                              decimal=file_config['decimal_character'],
                                              engine="python",
-                                             index_col=False)
+                                             index_col=False,
+                                             encoding=file_config['encoding'],
+                                             encoding_errors='ignore')
             except pd.errors.ParserError as e:
                 # As the pandas python parsing engine sometimes fails: Retry with standard (c) parser engine.
                 self.__dataset_df = pd.read_csv(self.__dataset["path"],

@@ -111,7 +111,7 @@ class CsvManager:
             "tab":          "\t",
         }
         response = GetTabularDatasetColumnResponse()
-        dataset = pd.read_csv(path, delimiter=delimiters[fileConfiguration['delimiter']], skiprows=(fileConfiguration['start_row']-1), escapechar=fileConfiguration['escape_character'], decimal=fileConfiguration['decimal_character'])
+        dataset = pd.read_csv(path, delimiter=delimiters[fileConfiguration['delimiter']], skiprows=(fileConfiguration['start_row']-1), escapechar=fileConfiguration['escape_character'], decimal=fileConfiguration['decimal_character'], encoding=fileConfiguration['encoding'])
     
         for col in dataset.columns:
             table_column = TableColumn()

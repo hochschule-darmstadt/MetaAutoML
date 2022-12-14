@@ -46,7 +46,7 @@ class AutoKerasAdapter(AbstractAdapter):
                                           directory=self._configuration["model_folder_location"],
                                           seed=42)
                                           
-        clf.fit(x=X, y=y)
+        clf.fit(x=X, y=y, epochs=1)
         export_model(clf, self._configuration["result_folder_location"], 'model_keras.p')
 
     def __tabular_regression(self):
@@ -61,7 +61,7 @@ class AutoKerasAdapter(AbstractAdapter):
                                          directory=self._configuration["model_folder_location"],
                                          seed=42)
         
-        reg.fit(x=X, y=y)
+        reg.fit(x=X, y=y, epochs=1)
         export_model(reg, self._configuration["result_folder_location"], 'model_keras.p')
 
     def __image_classification(self):
@@ -91,7 +91,7 @@ class AutoKerasAdapter(AbstractAdapter):
                                 seed=42,
                                 directory=self._configuration["model_folder_location"])
                                 
-        reg.fit(x = X_train, y = y_train)
+        reg.fit(x = X_train, y = y_train, epochs=1)
 
         export_model(reg, self._configuration["result_folder_location"], 'model_keras.p')
 
@@ -102,12 +102,15 @@ class AutoKerasAdapter(AbstractAdapter):
         X, y = prepare_tabular_dataset(self.df, self._configuration)
 
         reg = ak.TextClassifier(overwrite=True, 
-                                          max_trials=3,
+                                # NOTE: bert models will fail with out of memory errors
+                                #   even with 32GB GB RAM
+                                # the first model is a non-bert transformer  
+                                max_trials=1,
                                 # metric=self._configuration['metric'],
                                 seed=42,
                                 directory=self._configuration["model_folder_location"])
                                 
-        reg.fit(x = np.array(X), y = np.array(y), epochs=1)
+        reg.fit(x = np.array(X).astype(np.unicode_), y = np.array(y), epochs=1)
 
         export_model(reg, self._configuration["result_folder_location"], 'model_keras.p')
 
@@ -123,7 +126,7 @@ class AutoKerasAdapter(AbstractAdapter):
                                 seed=42,
                                 directory=self._configuration["model_folder_location"])
                                 
-        reg.fit(x = np.array(X), y = np.array(y))
+        reg.fit(x = np.array(X), y = np.array(y), epochs=1)
 
         export_model(reg, self._configuration["result_folder_location"], 'model_keras.p')
 
@@ -139,6 +142,6 @@ class AutoKerasAdapter(AbstractAdapter):
                                 seed=42,
                                 directory=self._configuration["model_folder_location"])
                                 
-        reg.fit(x = np.array(X), y = np.array(y))
+        reg.fit(x = np.array(X), y = np.array(y), epochs=1)
 
         export_model(reg, self._configuration["result_folder_location"], 'model_keras.p')
