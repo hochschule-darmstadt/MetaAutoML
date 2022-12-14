@@ -153,27 +153,27 @@ namespace BlazorBoilerplate.Shared.Services
         #endregion
 
         #region OMA-ML ONTOLOGY MESSAGES
-        public async Task<ApiResponseDto> GetAutoMlSolutionsForConfiguration(GetAutoMlSolutionsForConfigurationRequestDto request)
+        public Task<ApiResponseDto<GetAutoMlSolutionsForConfigurationResponseDto>> GetAutoMlSolutionsForConfiguration(GetAutoMlSolutionsForConfigurationRequestDto request)
         {
-            return await httpClient.PostJsonAsync<ApiResponseDto>("api/Ontology/GetAutoMlSolutionsForConfiguration", request);
+            return httpClient.PostJsonAsync<ApiResponseDto<GetAutoMlSolutionsForConfigurationResponseDto>>("api/Ontology/GetAutoMlSolutionsForConfiguration", request);
         }
-        public async Task<ApiResponseDto> GetTasksForDatasetType(GetTasksForDatasetTypeRequestDto request)
+        public Task<ApiResponseDto<GetTasksForDatasetTypeResponseDto>> GetTasksForDatasetType(GetTasksForDatasetTypeRequestDto request)
         {
-            return await httpClient.PostJsonAsync<ApiResponseDto>("api/Ontology/GetTasksForDatasetType", request);
+            return httpClient.PostJsonAsync<ApiResponseDto<GetTasksForDatasetTypeResponseDto>>("api/Ontology/GetTasksForDatasetType", request);
         }
         public async Task<ApiResponseDto> GetDatasetTypes()
         {
             return await httpClient.GetJsonAsync<ApiResponseDto>("api/Ontology/GetDatasetTypes");
         }
 
-        public async Task<ApiResponseDto> GetMlLibrariesForTask(GetMlLibrariesForTaskRequestDto request)
+        public Task<ApiResponseDto<GetMlLibrariesForTaskResponseDto>> GetMlLibrariesForTask(GetMlLibrariesForTaskRequestDto request)
         {
-            return await httpClient.PostJsonAsync<ApiResponseDto>("api/Ontology/GetMlLibrariesForTask", request);
+            return httpClient.PostJsonAsync<ApiResponseDto<GetMlLibrariesForTaskResponseDto>>("api/Ontology/GetMlLibrariesForTask", request);
         }
 
-        public async Task<ApiResponseDto> GetAvailableStrategies(GetAvailableStrategiesRequestDto request)
+        public Task<ApiResponseDto<GetAvailableStrategiesResponseDto>> GetAvailableStrategies(GetAvailableStrategiesRequestDto request)
         {
-            return await httpClient.PostJsonAsync<ApiResponseDto>("api/Ontology/GetAvailableStrategies", request);
+            return httpClient.PostJsonAsync<ApiResponseDto<GetAvailableStrategiesResponseDto>>("api/Ontology/GetAvailableStrategies", request);
         }
         #endregion
 

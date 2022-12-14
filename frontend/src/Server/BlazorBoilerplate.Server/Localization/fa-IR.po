@@ -369,3 +369,5 @@ msgstr "حساب کاربر قفل نیست."
 msgid "UserNotInRole"
 msgstr "کاربر در نقش '{0}' نیست."
 
+msgid "FolderStructureNotCorrectErrorMessage"
+msgstr "ساختار پوشه فایل فشرده الزامات را برآورده نمی کند."
