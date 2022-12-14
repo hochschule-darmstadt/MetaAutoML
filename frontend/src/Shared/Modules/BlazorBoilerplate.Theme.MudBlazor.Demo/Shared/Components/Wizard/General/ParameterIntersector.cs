@@ -30,7 +30,7 @@ public class ParameterIntersector
             .Select(g => g.Key);
     }
 
-    public IEnumerable<(string iri, TaskConfiguration.ParameterObject instance)> GetIntersectedParameters(IEnumerable<string> selectedAutoMlSolutionIris)
+    public IEnumerable<TaskConfiguration.ParameterObject> GetIntersectedParameters(IEnumerable<string> selectedAutoMlSolutionIris)
     {
         var broaderParams = GetBroaderIrisSupportedByAllSolutions(selectedAutoMlSolutionIris);
         foreach (var broaderIri in broaderParams)
@@ -42,7 +42,7 @@ public class ParameterIntersector
                 .IntersectAll();
 
             var firstParamWithBroader = Parameters.First(p => p.BroaderIri == broaderIri);
-            yield return (broaderIri, new TaskConfiguration.ParameterObject
+            yield return new TaskConfiguration.ParameterObject
             {
                 ParameterIri = broaderIri,
                 ParameterLabel = firstParamWithBroader.BroaderLabel,
@@ -55,7 +55,7 @@ public class ParameterIntersector
                         ValueLabel = p.ValueLabel
                     })
                     .ToList()
-            });
+            };
         }
     }
 }

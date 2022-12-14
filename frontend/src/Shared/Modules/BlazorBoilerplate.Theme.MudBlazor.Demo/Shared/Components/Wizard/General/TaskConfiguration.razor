@@ -75,20 +75,20 @@
 
                 @foreach (var param in _parameterValues)
                 {
-                    <MudText Typo="Typo.body2" Class="mt-4">@param.Value.ParameterLabel</MudText>
-                    @if (param.Value.ParameterType == ":single_value")
+                    <MudText Typo="Typo.body2" Class="mt-4">@param.ParameterLabel</MudText>
+                    @if (param.ParameterType == ":single_value")
                     {
-                        <MudSelect Label="@param.Value.ParameterLabel" T="string" Variant="Variant.Outlined">
-                                @foreach (var paramValue in param.Value.ParameterValues)
+                        <MudSelect Label="@param.ParameterLabel" T="string" Variant="Variant.Outlined">
+                                @foreach (var paramValue in param.ParameterValues)
                                 {
                                 <MudSelectItem Value="@paramValue.ValueIri">@paramValue.ValueLabel</MudSelectItem>
                                 }
                             </MudSelect>
                     }
-                    @if (param.Value.ParameterType == ":list")
+                    @if (param.ParameterType == ":list")
                     {
-                        <MudSelect T="ParameterValueViewModel" MultiSelection="true" SelectAll="true" SelectedValues="@param.Value.ParameterValues.Where(pv => pv.IsSelected)" ToStringFunc="p => p.ValueLabel" Variant="Variant.Outlined">
-                            @foreach (var paramValue in param.Value.ParameterValues)
+                        <MudSelect T="ParameterValueViewModel" MultiSelection="true" SelectAll="true" SelectedValues="@param.ParameterValues.Where(pv => pv.IsSelected)" ToStringFunc="p => p.ValueLabel" Variant="Variant.Outlined">
+                            @foreach (var paramValue in param.ParameterValues)
                             {
                                 <MudSelectItem Value="@paramValue" onselect="">@paramValue.ValueLabel</MudSelectItem>
                             }
@@ -122,7 +122,7 @@
 
     private GetTasksForDatasetTypeResponseDto _compatibleTasks;
     private List<AutoMlParameterDto> _availableParameters;
-    private Dictionary<String, ParameterObject> _parameterValues = new Dictionary<string, ParameterObject>();
+    private List<ParameterObject> _parameterValues = new();
     private List<string> _columnNames;
 
     private readonly ChipSet.ChipSetViewModel _mlLibsViewModel = new();
@@ -196,19 +196,12 @@
             () =>
             {
                 _availableParameters = apiResponse.Result.AutoMlParameters;
-                _parameterValues.Clear();
-                foreach (var (iri, instance) in _intersector.GetIntersectedParameters(_autoMlSolutionsViewModel.SelectedIds))
-                {
-                    _parameterValues.Add(iri, instance);
-                }
+                _parameterValues = _intersector.GetIntersectedParameters(_autoMlSolutionsViewModel.SelectedIds).ToList();
+
                 foreach (AutoMlParameterDto param in _availableParameters.Where(p => string.IsNullOrEmpty(p.BroaderIri)))
                 {
-                    ParameterObject parameterObj;
-                    if(_parameterValues.ContainsKey(param.ParamIri))
-                    {
-                        parameterObj = _parameterValues[param.ParamIri];
-                    }
-                    else
+                    ParameterObject parameterObj = _parameterValues.SingleOrDefault(v => v.ParameterIri == param.ParamIri);
+                    if(parameterObj == null)
                     {
                         parameterObj = new ParameterObject
                         {
@@ -216,7 +209,7 @@
                             ParameterLabel = param.ParamLabel,
                             ParameterType = param.ParamType,
                         };
-                        _parameterValues.Add(param.ParamIri, parameterObj);
+                        _parameterValues.Add(parameterObj);
                     }
 
                     parameterObj.ParameterValues.Add(
