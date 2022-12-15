@@ -49,6 +49,11 @@ class AdapterManager(Thread):
         self.__ml_library = ""
         self.__model_id = self.__create_new_model_entry()
 
+    def set_request(self, request: "CreateTrainingRequest"):
+        """Set the training request object
+        """
+        self.__request = request
+
     def get_automl_name(self) -> str:
         """Get the AutoML adapter name
 

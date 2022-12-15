@@ -68,7 +68,9 @@ class DataPreparationStrategyController(IAbstractStrategy):
             dataset_configuration['features'][column_b] = GrpcDataType.DATATYPE_IGNORE
             ignored_columns.append(column_b)
 
-        agent.get_adapter_runtime_manager().get_training_request().dataset_configuration = json.dumps(dataset_configuration) 
+        training_request = agent.get_adapter_runtime_manager().get_training_request()
+        training_request.dataset_configuration = json.dumps(dataset_configuration)
+        agent.get_adapter_runtime_manager().set_training_request(training_request)
         
         # IDEA: Update dataset analysis accordingly (may not be neccessary)
         blackboard.update_state('dataset_analysis', { 'duplicate_columns': [] }, True)
@@ -83,7 +85,7 @@ class DataPreparationStrategyController(IAbstractStrategy):
 
         ignored_samples = []
 
-        agent: AdapterRuntimeManagerAgent = controller.blackboard.get_agent('training-runtime')
+        agent: AdapterRuntimeManagerAgent = controller.get_blackboard().get_agent('training-runtime')
         if not agent or not agent.get_adapter_runtime_manager():
             raise RuntimeError('Could not access Adapter Runtime Manager Agent!')
         dataset_configuration = json.loads(agent.get_adapter_runtime_manager().get_training_request().dataset_configuration)
@@ -95,8 +97,10 @@ class DataPreparationStrategyController(IAbstractStrategy):
         
         dataset_configuration['ignored_samples'] = ignored_samples
 
-        agent.get_adapter_runtime_manager().get_training_request().dataset_configuration = json.dumps(dataset_configuration) 
-        
+        training_request = agent.get_adapter_runtime_manager().get_training_request()
+        training_request.dataset_configuration = json.dumps(dataset_configuration)
+        agent.get_adapter_runtime_manager().set_training_request(training_request)
+
         # IDEA: Update dataset analysis accordingly (may not be neccessary)
         blackboard.update_state('dataset_analysis', { 'duplicate_rows': [] }, True)
 
