@@ -1246,7 +1246,7 @@
 :pytorch_lib a :ML_library ;
     skos:prefLabel "Pytorch lib" ;
     skos:altLabel "Pytorch" ;
-    rdfs:seeAlso <https://www.wikidata.org/wiki/Q47509047> .
+    rdfs:seeAlso <https://www.wikidata.org/entity/Q47509047> .
 :scikit_learn_lib a :ML_library ;
     skos:prefLabel "Scikit-learn lib" ;
     skos:altLabel "Scikit-learn" , "sklearn" .

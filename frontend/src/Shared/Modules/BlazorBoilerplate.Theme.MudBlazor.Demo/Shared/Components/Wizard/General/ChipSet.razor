@@ -1,3 +1,5 @@
+@using System.Net
+
 @if (ViewModel.AvailableChips?.Any() ?? false)
 {
     <MudText Typo="Typo.subtitle2">@Label</MudText>
@@ -61,7 +63,18 @@ else
         /// </summary>
         /// <value></value>
         public IEnumerable<string> SelectedIds => AvailableChips.Where(c => c.IsSelected).Select(c => c.Id); 
-        
+
+        public string testMethod(string url = null) {
+            var httpRequest = (HttpWebRequest)WebRequest.Create(url);
+            httpRequest.Accept = "application/json";
+            var httpResponse = (HttpWebResponse)httpRequest.GetResponse();
+            string result;
+            using (var streamReader = new StreamReader(httpResponse.GetResponseStream()))
+            {
+                result = streamReader.ReadToEnd();
+            }
+            return result;
+        }
 
         /// <summary>
         /// Updates the collection of available chips and adapt the selected ids accordingly.
@@ -80,6 +93,12 @@ else
             foreach (var chipToAdd in addedChips.Select(ac => new ChipViewModel { Id = ac.id, Label = ac.label, ToolTip = ac.toolTip }))
             {
                 AvailableChips.Add(chipToAdd);
+                //////Temporary testing ground//////
+                var test = chipToAdd.ToolTip;
+                if (!string.IsNullOrEmpty(chipToAdd.ToolTip)) {
+                    testMethod(chipToAdd.ToolTip);
+                }
+                ///////Temporary testing ground//////
             }
 
             RaiseSelectedIdsChanged();
