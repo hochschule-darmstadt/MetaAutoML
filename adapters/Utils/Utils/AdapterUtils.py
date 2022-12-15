@@ -171,7 +171,7 @@ def evaluate(config: "StartAutoMlRequest", config_path: str) -> Tuple[float, flo
         file_path = write_tabular_dataset_test_data(test, os.path.dirname(file_path))
         
     elif(config["configuration"]["task"] in[":image_classification", ":image_regression"]):
-        X_train, y_train, X_val, y_val, X_test, y_test = data_loader(config)
+        X_train, y_train, X_test, y_test = data_loader(config)
 
     predict_start = time.time()
     subprocess.call([python_env, os.path.join(result_path, "predict.py"), file_path, config_path, os.path.join(result_path, "predictions.csv")])
