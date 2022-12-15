@@ -41,6 +41,20 @@ class EvalMLAdapterManager(AdapterManager):
 
 
     def _load_model_and_make_probabilities(self, config: "StartAutoMlRequest", result_folder_location: str, dataframe: pd.DataFrame):
+        """Must be overwriten! Load the found model, and execute a prediction using the provided data to calculate the probability metric used by the ExplanableAI module inside the controller
+        Dummy implementation to avoid error in controller (becasue there is a bug with expoted model)
+
+        Args:
+            config (StartAutoMlRequest): extended Start AutoMlRequest holding the training configuration and local training paths
+            result_folder_location (str): The absolute path leading to the model result location
+            dataframe (DataFrame): The dataframe holding the dataset to execute a new prediction on
+        
+        Rerturn:
+            probalities as json
+        """
+        dfLen = len(dataframe.index)
+        probabilities = json.dumps([[0.5, 0.5]]*dfLen)
+        return probabilities
         if self._loaded_training_id != config["training_id"]:
             print(f"ExplainModel: Model not already loaded; Loading model")
             with open(result_folder_location + '/evalml.p', 'rb') as file:
