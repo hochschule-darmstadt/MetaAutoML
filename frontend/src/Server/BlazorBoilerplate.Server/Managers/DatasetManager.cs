@@ -8,8 +8,10 @@ using BlazorBoilerplate.Storage;
 using Grpc.Core;
 using Grpc.Net.Client;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.Analysis;
 using Microsoft.Extensions.Logging;
+using MudBlazor.Charts;
 using Newtonsoft.Json;
 using Serilog.Core;
 using System;
@@ -21,6 +23,7 @@ using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using UtfUnknown;
 using static Microsoft.AspNetCore.Http.StatusCodes;
 using System.IO.Compression;
 using System.Runtime.CompilerServices;
@@ -87,6 +90,20 @@ namespace BlazorBoilerplate.Server.Managers
                 {
                     fs.Dispose();
 
+                    grpcRequest.DatasetType = request.DatasetType;
+                    DetectionResult result;
+                    if (grpcRequest.DatasetType == ":text" || grpcRequest.DatasetType == ":tabular" || grpcRequest.DatasetType == ":time_series" || grpcRequest.DatasetType == ":time_series_longitudinal")
+                    {
+                        using (FileStream fs1 = new FileStream(Path.Combine(path, trustedFileNameForDisplay), FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                        {
+                            result = CharsetDetector.DetectFromStream(fs1);
+
+                        }
+                        grpcRequest.Encoding = result.Detected.EncodingName.ToString();
+                    } else
+                    {
+                        grpcRequest.Encoding = "";
+                    }
                     bool correctStrukture = CheckUploadStructure(filePath);
 
                     if (correctStrukture == true)
@@ -184,7 +201,8 @@ namespace BlazorBoilerplate.Server.Managers
                 switch (reply.Dataset.Type)
                 {
                     case ":tabular":
-                        response.DatasetPreview = File.ReadAllText(datasetLocation.Replace(".csv", "_preview.csv"));
+                     
+                        response.DatasetPreview = datasetLocation;
 
                         break;
                     case ":image":
@@ -205,13 +223,16 @@ namespace BlazorBoilerplate.Server.Managers
                         }
                         break;
                     case ":text":
-                        response.DatasetPreview = File.ReadAllText(datasetLocation.Replace(".csv", "_preview.csv"));
+
+                        response.DatasetPreview = datasetLocation; 
                         break;
                     case ":time_series":
-                        response.DatasetPreview = File.ReadAllText(datasetLocation.Replace(".csv", "_preview.csv"));
+                      
+                        response.DatasetPreview = datasetLocation;
                         break;
                     case ":time_series_longitudinal":
-                        response.DatasetPreview = File.ReadAllText(datasetLocation.Replace(".ts", "_preview.csv"));
+                       
+                        response.DatasetPreview = datasetLocation;
                         break;
                     default:
                         break;

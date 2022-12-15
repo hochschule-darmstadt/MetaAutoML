@@ -34,3 +34,6 @@ class AdapterRuntimeManagerAgent(IAbstractBlackboardAgent):
             raise StopIteration('Training session inactive, stopping..')
 
         return session_status
+
+    def get_adapter_runtime_manager(self) -> "AdapterRuntimeManager":
+        return self.__adapter_runtime_manager
