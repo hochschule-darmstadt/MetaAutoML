@@ -67,7 +67,7 @@ class AutoKerasTextTaskTest(unittest.TestCase):
         os.chdir(autokeras_dir)
 
     def tearDown(self):
-        # reset the working directory before starting this test
+        # reset the working directory before finishing this test
         os.chdir(os.path.join("..", ".."))
 
     def test_text_classification(self):
@@ -93,7 +93,8 @@ class AutoKerasTextTaskTest(unittest.TestCase):
                 "start_row": 1,
                 "delimiter": "comma",
                 "escape_character": "\\",
-                "decimal_character": "."
+                "decimal_character": ".",
+                "encoding": ""
             }
         })
 
@@ -106,7 +107,7 @@ class AutoKerasTextTaskTest(unittest.TestCase):
         out_dir = os.path.join("app-data", "training",
                                req.user_id, req.dataset_id, req.training_id)
         path_to_model = os.path.join(out_dir, "export", "keras-export.zip")
-        self.assertTrue(os.path.exists(path_to_model))
+        self.assertTrue(os.path.exists(path_to_model), f"path to model: '{path_to_model}' does not exist")
 
         # clean up
         shutil.rmtree(out_dir)
@@ -134,7 +135,8 @@ class AutoKerasTextTaskTest(unittest.TestCase):
                 "start_row": 1,
                 "delimiter": "comma",
                 "escape_character": "\\",
-                "decimal_character": "."
+                "decimal_character": ".",
+                "encoding": ""
             }
         })
 
@@ -147,7 +149,7 @@ class AutoKerasTextTaskTest(unittest.TestCase):
         out_dir = os.path.join("app-data", "training",
                                req.user_id, req.dataset_id, req.training_id)
         path_to_model = os.path.join(out_dir, "export", "keras-export.zip")
-        self.assertTrue(os.path.exists(path_to_model))
+        self.assertTrue(os.path.exists(path_to_model), f"path to model: '{path_to_model}' does not exist")
 
         # clean up
         shutil.rmtree(out_dir)
