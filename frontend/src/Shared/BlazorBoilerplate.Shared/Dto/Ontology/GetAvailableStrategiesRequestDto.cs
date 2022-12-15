@@ -9,5 +9,6 @@ namespace BlazorBoilerplate.Shared.Dto.Ontology
     public class GetAvailableStrategiesRequestDto
     {
         public Dictionary<string, string> Configuration { get; set; }
+        public String DatasetId { get; set; }
     }
 }

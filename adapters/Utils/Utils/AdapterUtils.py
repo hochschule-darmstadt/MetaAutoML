@@ -26,65 +26,6 @@ from typing import Tuple
 
 #region
 
-def get_except_response(e: Exception) -> "GetAutoMlStatusResponse":
-    """Generate a GRPC status message holding the raised exception informations
-
-    Args:
-        e (Exception): The raised exception
-
-    Returns:
-        GetAutoMlStatusResponse: The GRPC response message
-    """
-    print(e)
-    response = GetAutoMlStatusResponse()
-    response.return_code = AdapterReturnCode.ADAPTER_RETURN_CODE_ERROR
-    return response
-
-
-def capture_process_output(process: subprocess.Popen, use_error: bool):
-    """Read the console log from the AutoML subprocess until no new text is produced by the subprocess, and yield AutoML status messages
-
-    Args:
-        process (subprocess.Popen): The AutoML subprocess instance
-        use_error (bool): If instead of the STD OUT the STD ERR is used as input to capture from
-
-    Yields:
-        Iterator[GetAutoMlStatusResponse]: The latest Grpc response message generated from reading the subprocess console
-    """
-    s = ""
-    capture = ""
-    if(use_error == False):
-        s = process.stdout.read(1)
-    else:
-        s = process.stderr.read(1)
-    capture += s
-    # Run until no more output is produced by the subprocess
-    while len(s) > 0:
-        if capture[len(capture) - 1] == '\n':
-            process_update = GetAutoMlStatusResponse()
-            process_update.return_code = AdapterReturnCode.ADAPTER_RETURN_CODE_STATUS_UPDATE
-            process_update.status_update = capture
-            # if return Code is ADAPTER_RETURN_CODE_STATUS_UPDATE we do not have score values yet
-            process_update.test_score = 0.0
-            process_update.prediction_time = 0.0
-            process_update.ml_library = ""
-            process_update.ml_model_type = ""
-            yield process_update
-
-            sys.stdout.write(capture)
-            sys.stdout.flush()
-            capture = ""
-        if(use_error == False):
-            s = process.stdout.read(1)
-        else:
-            s = process.stderr.read(1)
-        capture += s
-
-    if use_error:
-        process.stderr.close()
-    else:
-        process.stdout.close()
-
 def get_response(config: "StartAutoMlRequest", test_score: float, prediction_time: float, library: str, model: str) -> "GetAutoMlStatusResponse":
     """Generate the final GRPC AutoML status message
 
@@ -129,14 +70,10 @@ def data_loader(config: "StartAutoMlRequest") -> Any:
         Any: Depending on the dataset type: CSV data: tuple[DataFrame (Train), DataFrame (Test)], image data: tuple[DataFrame (X_train), DataFrame (y_train), DataFrame (X_test), DataFrame (y_test)]
     """
 
-    train_data = None
-    test_data = None
-
-    if config["configuration"]["task"] in [":tabular_classification", ":tabular_regression", ":text_classification", ":time_series_forecasting", ":time_series_classification"]:
-        return read_tabular_dataset_training_data(config)
-    elif config["configuration"]["task"] in [":image_classification", ":image_regression"]:
+    if config["configuration"]["task"] in [":image_classification", ":image_regression"]:
         return read_image_dataset(config)
-    return train_data, test_data
+    else:
+        return read_tabular_dataset_training_data(config)
 
 
 def export_model(model: Any, path: str, file_name: str):
@@ -430,7 +367,7 @@ def read_tabular_dataset_training_data(config: "StartAutoMlRequest") -> Tuple[pd
     }
 
 
-    data = pd.read_csv(os.path.join(config["dataset_path"]), delimiter=delimiters[config["dataset_configuration"]['file_configuration']['delimiter']], skiprows=(config["dataset_configuration"]['file_configuration']['start_row']-1), escapechar=config["dataset_configuration"]['file_configuration']['escape_character'], decimal=config["dataset_configuration"]['file_configuration']['decimal_character'])
+    data = pd.read_csv(os.path.join(config["dataset_path"]), delimiter=delimiters[config["dataset_configuration"]['file_configuration']['delimiter']], skiprows=(config["dataset_configuration"]['file_configuration']['start_row']-1), escapechar=config["dataset_configuration"]['file_configuration']['escape_character'], decimal=config["dataset_configuration"]['file_configuration']['decimal_character'], encoding=config["dataset_configuration"]['file_configuration']['encoding'])
 
     # convert all object columns to categories, because autosklearn only supports numerical,
     # bool and categorical features
@@ -528,7 +465,7 @@ def read_image_dataset(config: "StartAutoMlRequest") -> Tuple[pd.DataFrame, pd.D
 
         local_dir_path = os.path.dirname(local_file_path)
     """
-    data_dir = config.file_location
+    data_dir = config["dataset_path"]
     train_df_list =[]
     test_df_list =[]
 
@@ -536,7 +473,7 @@ def read_image_dataset(config: "StartAutoMlRequest") -> Tuple[pd.DataFrame, pd.D
         files = []
         df = []
         for folder in os.listdir(os.path.join(data_dir, sub_folder_type)):
-            files.append(glob.glob(os.path.join(data_dir, sub_folder_type, folder, "*.jpeg")))
+            files.append(glob.glob(os.path.join(data_dir, sub_folder_type, folder, "*.jp*g")))
 
         df_list =[]
         for i in range(len(files)):

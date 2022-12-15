@@ -1,8 +1,8 @@
-﻿@inject IViewNotifier viewNotifier
+@inject IViewNotifier viewNotifier
 @inject IStringLocalizer<Global> L
 @inject IApiClient apiClient
 @inject IDatasetPreviewWorker previewWorker
-@using Deedle
+@using Microsoft.Data.Analysis
 
 @if ((_datasetFrame == null) && (_datasetReadError == false))
 {
@@ -23,6 +23,12 @@ else
                     <MudSelectItem Value="@("space")">@(L["Space"])</MudSelectItem>
                     <MudSelectItem Value="@("tab")">@(L["Tab"])</MudSelectItem>
                 </MudSelect>
+                <MudSelect T="string" Label="@L["Encoding"]" AnchorOrigin="Origin.BottomCenter" @bind-Value="@DatasetEncoding">
+                    <MudSelectItem Value="@("utf-8")" >@(L["UTF-8"])</MudSelectItem>
+                    <MudSelectItem Value="@("latin-1")" >@(L["latin-1"])</MudSelectItem>
+                    <MudSelectItem Value="@("utf-16")" >@(L["UTF-16"])</MudSelectItem>
+                    <MudSelectItem Value="@("utf-32")" >@(L["UTF-32"])</MudSelectItem>
+                </MudSelect>
             </MudItem>
             <MudItem xs="3" sm="3" md="3">
                 <MudTextField Mask="@(new RegexMask(@"^.{1,1}$"))" Label="@L["Escape character"]" @bind-Value="@EscapeCharacter"  Variant="@Variant.Text" />
@@ -38,37 +44,42 @@ else
         }
         else
         {
-            <MudTable Items="@_datasetFrame.Rows.ValuesAll" style="width:stretch" class="mat-elevation-z5" FixedHeader="true" Dense="true">
+             <MudTable Items="@_datasetFrame.Rows" style="width:stretch" class="mat-elevation-z5" FixedHeader="true" Dense="true">
                 <HeaderContent>
-                    @foreach (var item in _datasetFrame.Rows.ValuesAll)
+                    @foreach (var item in _datasetFrame.Columns)
                     {
-                        foreach (var ite in item.Keys)
+                       
+                        @if (UseHeader == true)
                         {
-                            @if (UseHeader == true)
-                            {
-                                <MudTh>@ite</MudTh>
-                            }
-                            else
-                            {
-                                <MudTh Style="background-color: gray">@ite</MudTh>
-                            }
-                        }
-                        break;
-                    }
-                    <MudTh></MudTh>   
-                </HeaderContent>
-                <RowTemplate>
-                    @foreach (var item in context.Keys)
-                    {
-                        @if ((int)context["index"] < StartRow)
-                        {
-                            <MudTd Style="background-color: gray">@context[item]</MudTd>
+                            <MudTh>@item.Name</MudTh>
                         }
                         else
                         {
-                            <MudTd>@context[item]</MudTd>
+                            <MudTh Style="background-color: gray">@item.Name</MudTh>
                         }
+
                     }
+                    <MudTh></MudTh>
+                </HeaderContent>
+                <RowTemplate>
+
+                    @if (true) 
+                    {
+                        @foreach (var item in context)
+                        {
+                            @if (_index < StartRow)
+                            {
+                                <MudTd Style="background-color: gray"> @item </MudTd>
+                            }
+                            else
+                            {
+                                <MudTd>@item</MudTd>
+                            }
+
+                        }
+                        IncreaseIndex();
+                    }
+   
                 </RowTemplate>
             </MudTable>
         }
@@ -77,6 +88,12 @@ else
 }
 
 @code {
+
+    public void IncreaseIndex()
+    {
+        _index++;
+    }
+
     [Parameter]
     public string DatasetData
     {
@@ -92,7 +109,9 @@ else
     }
     private string _datasetData;
 
-    private Frame<int, string> _datasetFrame;
+
+    private DataFrame _datasetFrame;
+    private int _index = 1;
 
     [Parameter]
     public GetDatasetResponseDto Dataset
@@ -120,6 +139,7 @@ else
             if (value != null)
             {
                 Dataset.Dataset.FileConfiguration["use_header"] = value;
+                _index = 1;
             }
         } 
     }
@@ -135,8 +155,10 @@ else
             if (value != null)
             {
                 Dataset.Dataset.FileConfiguration["start_row"] = value;
-                _rowIndex = 0;
+                _index = 1;
             }
+
+
         } 
     }
 
@@ -152,6 +174,7 @@ else
             {
                 Dataset.Dataset.FileConfiguration["delimiter"] = value;
                 _rowIndex = 0;
+                _index = 1;
                 ReloadDataFrame();
             }
         } 
@@ -187,6 +210,23 @@ else
             }
         } 
     }
+
+    public string DatasetEncoding
+    {
+        get
+        {
+            return Dataset.Dataset.FileConfiguration["encoding"];
+        }
+        set
+        {
+            if (value != null)
+            {
+                Dataset.Dataset.FileConfiguration["encoding"] = value;
+                ReloadDataFrame();
+            }
+        }
+
+    }
     private string searchString = "";
 
     private bool _isSavingAllowed = true;
@@ -197,34 +237,17 @@ else
         {
             if (DatasetData != null)
             {
-                // convert string to stream
-                byte[] byteArray = Encoding.ASCII.GetBytes(DatasetData);
-                MemoryStream stream = new MemoryStream(byteArray);
-                _datasetFrame = Frame.ReadCsv(stream, separators: Dataset.Dataset.GetDelimiterStr());
-                PrimitiveDataFrameColumn<int> indexes = new PrimitiveDataFrameColumn<int>("Index");
-
-                foreach (var item in _datasetFrame.ColumnKeys)
-                {
-                    var newcolumn = _datasetFrame.Columns[item].FillMissing(st =>
-                    {
-                        return "NaN";
-                    });
-                    _datasetFrame.ReplaceColumn(item, newcolumn);
+              
+                _datasetFrame = DataFrame.LoadCsv(DatasetData, separator: Dataset.Dataset.GetDelimiter(), encoding: Dataset.Dataset.GetEncoding(), numRows: 20);
+                _datasetFrame.FillNulls("NaN", true);
+                if(_datasetFrame.Rows.Count == 0){
+                    _isSavingAllowed = false;
+                    _datasetReadError = true;
+                } else {
+                    _isSavingAllowed = true;
+                    _datasetReadError = false;
                 }
-                for (int i = 1; i <= _datasetFrame.Rows.ValuesAll.Count(); i++)
-                {
-                    indexes.Append(i);
-                }
-                Series<int, int?> indexSeries = indexes.ToOrdinalSeries();
-                var keys = _datasetFrame.ColumnKeys;
-                var newOrder = new List<string>() { "index" };
-                newOrder.AddRange(keys.ToArray());
-                _datasetFrame.AddColumn("index", indexSeries);
 
-                _datasetFrame = Frame.FromColumns(_datasetFrame.Columns.Realign(newOrder));
-                //_datasetFrame = _datasetFrame[[]];
-                _isSavingAllowed = true;
-                _datasetReadError = false;
                 StateHasChanged();
             }
         }
@@ -234,14 +257,15 @@ else
             _isSavingAllowed = false;
             StateHasChanged();
             viewNotifier.Show("Data can´t be read using column delimiter:" + ex.Message, ViewNotifierType.Error, L["Operation Failed"]);
-        }     
+        }    
+        
     }
 
     private async void SaveConfiguration()
     {
         if (_isSavingAllowed == false)
         {
-            viewNotifier.Show(L["File configuration can not be saved, incompatible delimiter"], ViewNotifierType.Error, L["Operation Failed"]);
+            viewNotifier.Show(L["File configuration can not be saved, incompatible delimiter or encoding"], ViewNotifierType.Error, L["Operation Failed"]);
             return;
         }
         previewWorker.UpdateDatasetFileConfiguration(Dataset);
