@@ -105,9 +105,11 @@
         await LoadData();
     }
 
-    private void OnRuntimeValueChanged(int e)
+    private async void OnRuntimeValueChanged(int e)
     {
         StartAutoMlRequest.Configuration.RuntimeLimit = e;
+
+        await OnMlLibrarySelectionChanged();
     }
 
     private async void SetupStartAutoMLConfiguration()
@@ -178,7 +180,7 @@
             GetMlLibrariesForTaskRequestDto supportedMlLibrariesRequest = new GetMlLibrariesForTaskRequestDto { Task = StartAutoMlRequest.Configuration.Task };
             var apiResponse = await apiClient.GetMlLibrariesForTask(supportedMlLibrariesRequest);
 
-            HandleApiResponseWrapper(apiResponse, () => 
+            HandleApiResponseWrapper(apiResponse, () =>
                  _mlLibsViewModel.SetAvailableChips(
                     apiResponse.Result.MlLibraries
                         .Select(ConvertObjectInfoToChip)),
@@ -199,7 +201,8 @@
         {
             Dictionary<string, string> dictionary = new Dictionary<string, string>
             {
-                { "task", StartAutoMlRequest.Configuration.Task }
+                { "task", StartAutoMlRequest.Configuration.Task },
+                { "runtimeLimit", StartAutoMlRequest.Configuration.RuntimeLimit.ToString() }
             };
 
             List<string> libraries = _mlLibsViewModel.SelectedIds.ToList();
@@ -213,21 +216,27 @@
             GetAutoMlSolutionsForConfigurationRequestDto compatibleAutoMlRequest = new GetAutoMlSolutionsForConfigurationRequestDto { Configuration = dictionary };
             var apiResponse = await apiClient.GetAutoMlSolutionsForConfiguration(compatibleAutoMlRequest);
 
-            HandleApiResponseWrapper(apiResponse, () => 
+            HandleApiResponseWrapper(apiResponse, () =>
                 _autoMlSolutionsViewModel.SetAvailableChips(apiResponse.Result.AutoMlSolutions.Select(ConvertObjectInfoToChip))
             );
 
-            GetAvailableStrategiesRequestDto availableStrategiesRequest = new GetAvailableStrategiesRequestDto { Configuration = dictionary };
-            var availableStrategiesResponse = await apiClient.GetAvailableStrategies(availableStrategiesRequest);
-
-            HandleApiResponseWrapper(availableStrategiesResponse, () =>
-                _strategiesViewModel.SetAvailableChips(availableStrategiesResponse.Result.Strategies.Select(s => (s.Id, s.Title, s.Description)))
-            );
+            await UpdateAvailableStrategies(dictionary);
         }
         catch (Exception ex)
         {
             viewNotifier.Show(ex.GetBaseException().Message, ViewNotifierType.Error, L["Operation Failed"]);
-        } 
+        }
+    }
+
+    private async Task UpdateAvailableStrategies(Dictionary<string, string> dictionary)
+    {
+        int runtime_limit = StartAutoMlRequest.Configuration.RuntimeLimit;
+        GetAvailableStrategiesRequestDto availableStrategiesRequest = new GetAvailableStrategiesRequestDto { Configuration = dictionary, DatasetId = Dataset.Dataset.Id };
+        var availableStrategiesResponse = await apiClient.GetAvailableStrategies(availableStrategiesRequest);
+
+        HandleApiResponseWrapper(availableStrategiesResponse, () =>
+            _strategiesViewModel.SetAvailableChips(availableStrategiesResponse.Result.Strategies.Select(s => (s.Id, s.Title, s.Description)))
+        );
     }
 
     private void HandleApiResponseWrapper<T>(ApiResponseDto<T> apiResponse, Action successAction, string errorMessageKey = "Operation Failed", string successMessageKey = "Operation Successful")
@@ -261,5 +270,5 @@
     {
         StartAutoMlRequest.Configuration.Target = value;
         await UpdateStartAutoMlRequest();
-    }    
+    }
 }

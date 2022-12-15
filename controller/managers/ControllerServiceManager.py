@@ -13,6 +13,7 @@ from JsonUtil import get_config_property
 from concurrent.futures.process import ProcessPoolExecutor
 from dependency_injector.wiring import inject, Provide
 from MeasureDuration import MeasureDuration
+from DataStorage import DataStorage
 
 ROOT_PATH = os.path.dirname(os.path.abspath(__file__))
 
@@ -286,28 +287,49 @@ class ControllerServiceManager(ControllerServiceBase):
     @inject
     async def get_available_strategies(
         self, get_available_strategies_request: "GetAvailableStrategiesRequest",
-        ontology_manager: OntologyManager=Provide[Application.ressources.ontology_manager]
+        ontology_manager: OntologyManager=Provide[Application.ressources.ontology_manager],
+        data_storage: DataStorage=Provide[Application.ressources.data_storage]
     ) -> "GetAvailableStrategiesResponse":
+
+        found, dataset = data_storage.get_dataset(get_available_strategies_request.user_id, get_available_strategies_request.dataset_id)
+
+        if not found:
+            self.__log.error(f"get_available_strategies: dataset {get_available_strategies_request.dataset_id} for user {get_available_strategies_request.user_id} not found")
+
         #TODO add to ontology and RdfManager
         with MeasureDuration() as m:
             result = GetAvailableStrategiesResponse()
-            result.strategies = [
-                Strategy(
+            result.strategies = []
+
+            if (not found) or (len(dataset['analysis']['duplicate_columns']) != 0):
+                result.strategies.append(
+                    Strategy(
                     'data_preparation.ignore_redundant_features',
                     'Ignore redundant features',
                     'This strategy ignores certain dataset columns if they have been flagged as duplicate in the dataset analysis.'
-                ),
-                Strategy(
+                    )
+                )
+            
+            if (not found) or (len(dataset['analysis']['duplicate_rows']) != 0):
+                result.strategies.append(
+                    Strategy(
                     'data_preparation.ignore_redundant_samples',
                     'Ignore redundant samples',
                     'This strategy ignores certain dataset rows if they have been flagged as duplicate in the dataset analysis.'
-                ),
-                Strategy(
+                    )
+                )
+            
+            size_time_ratio = dataset['analysis']['size_bytes'] / int(get_available_strategies_request.configuration['runtimeLimit'])
+            
+            if (not found) or (size_time_ratio > 20000):
+                result.strategies.append(
+                    Strategy(
                     'data_preparation.split_large_datasets',
                     'Split large datasets',
                     'This strategy truncates the training data if the time limit is relatively short for the size of the dataset.'
-                ),
-            ]
+                    )
+            )
+            
         return result
 
     @inject
