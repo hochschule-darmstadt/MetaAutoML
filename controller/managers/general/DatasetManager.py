@@ -58,7 +58,7 @@ class DatasetManager:
         Returns:
             Dataset: The GRPC dataset object generated from the dictonary
         """
-        
+
         backend_frontend_encoding_conversion_table = {
             "ascii": "ascii",
             "utf_8": "utf-8",
@@ -70,7 +70,7 @@ class DatasetManager:
             "utf-32": "utf-32",
             "utf-16-le": "utf-16le",
             "utf-16le": "utf-16-le",
-            "utf-16be": "utf_16_be", 
+            "utf-16be": "utf_16_be",
             "utf_16_be": "utf-16le",
             "utf_16_be": "utf-16be",
             "latin-1": "latin-1",
@@ -108,7 +108,7 @@ class DatasetManager:
         response = GetDatasetsResponse()
         self.__log.debug(f"get_datasets: get all datasets for user {get_datasets_request.user_id}")
         all_datasets: list[dict[str, object]] = self.__data_storage.get_datasets(get_datasets_request.user_id)
-        
+
         self.__log.debug(f"get_datasets: found {all_datasets.count} datasets for user {get_datasets_request.user_id}")
         for dataset in all_datasets:
             response.datasets.append(self.__dataset_object_to_rpc_object(get_datasets_request.user_id, dataset))
@@ -159,7 +159,8 @@ class DatasetManager:
 
         if dataset["type"] == ":tabular" or dataset["type"] == ":time_series" or dataset["type"] == ":text":
             self.__log.debug(f"get_tabular_dataset_column: dataset {get_tabular_dataset_column_request.dataset_id} for user {get_tabular_dataset_column_request.user_id} has CSV type, using CSVManager")
-            return CsvManager.get_columns(dataset["path"], dataset["file_configuration"])
+            #TODO
+			#return CsvManager.get_columns(dataset["path"], dataset["file_configuration"])
         elif dataset["type"] == ":time_series_longitudinal":
             self.__log.debug(f"get_tabular_dataset_column: dataset {get_tabular_dataset_column_request.dataset_id} for user {get_tabular_dataset_column_request.user_id} has TS type, using LongitudinalDataManager")
             return LongitudinalDataManager.read_dimension_names(dataset["path"])
