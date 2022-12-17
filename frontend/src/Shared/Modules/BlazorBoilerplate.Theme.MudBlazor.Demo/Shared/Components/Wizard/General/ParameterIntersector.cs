@@ -10,33 +10,40 @@ namespace BlazorBoilerplate.Theme.Material.Demo.Shared.Components.Wizard.General
 public class ParameterIntersector
 {
     private readonly Func<IEnumerable<AutoMlParameterDto>> _parameterGetter;
+    private readonly Func<int> _numberOfSelectedSolutionsGetter;
 
     private IEnumerable<AutoMlParameterDto> Parameters => _parameterGetter();
+    private int NumberOfSelectedSolutions => _numberOfSelectedSolutionsGetter();
 
     /// <summary>
     /// Creates a new instance of this class.
     /// </summary>
     /// <param name="parameterGetter">A function returning the current list of parameters</param>
-    public ParameterIntersector(Func<IEnumerable<AutoMlParameterDto>> parameterGetter)
+    public ParameterIntersector(Func<IEnumerable<AutoMlParameterDto>> parameterGetter, Func<int> numberOfSelectedSolutionsGetter)
     {
         _parameterGetter = parameterGetter;
+        _numberOfSelectedSolutionsGetter = numberOfSelectedSolutionsGetter;
     }
 
-    private IEnumerable<string> GetBroaderIrisSupportedByAllSolutions(IEnumerable<string> selectedAutoMlSolutionIris)
+    private IEnumerable<string> GetBroaderIrisSupportedByAllSolutions()
     {
         return Parameters
-            .GroupBy(p => p.GetBroadestIri())
-            .Where(g => g.Select(p => p.AutoMlIri).Distinct().Count() == selectedAutoMlSolutionIris.Count())
+            .GroupBy(p => p.BroadestIri)
+            .Where(g => g.Select(p => p.AutoMlIri).Distinct().Count() == NumberOfSelectedSolutions)
             .Select(g => g.Key);
     }
 
-    public IEnumerable<TaskConfiguration.ParameterObject> GetIntersectedParameters(IEnumerable<string> selectedAutoMlSolutionIris)
+    /// <summary>
+    /// Calculates an intersection of all parameters to determine parameters that are supported by all selected auto ml solutions.
+    /// </summary>
+    /// <returns></returns>
+    public IEnumerable<TaskConfiguration.ParameterObject> GetIntersectedParameters()
     {
-        var broaderParams = GetBroaderIrisSupportedByAllSolutions(selectedAutoMlSolutionIris);
+        var broaderParams = GetBroaderIrisSupportedByAllSolutions();
         foreach (var broaderIri in broaderParams)
         {
             var parametersForBroader = Parameters
-                .Where(p => p.GetBroadestIri() == broaderIri)
+                .Where(p => p.BroadestIri == broaderIri)
                 .ToList();
 
             if (!AreTypesCompatible(parametersForBroader))
@@ -61,7 +68,7 @@ public class ParameterIntersector
             yield return new TaskConfiguration.ParameterObject
             {
                 ParameterIri = broaderIri,
-                ParameterLabel = parametersForBroader.First().GetBroadestLabel(),
+                ParameterLabel = parametersForBroader.First().BroadestLabel,
                 ParameterType = parameterType,
                 ParameterValues = intersectedValueIris?.Select(ValueIriToValueViewModel).ToList()
             };
@@ -148,13 +155,4 @@ public static class EnumerableExtensions
                 (h, e) => { h.IntersectWith(e); return h; }
             );
     }
-}
-
-/// <summary>
-/// Class containing extension methods for Dtos
-/// </summary>
-public static class DtoExtensions
-{
-    public static string GetBroadestIri(this AutoMlParameterDto parameterDto) => !string.IsNullOrWhiteSpace(parameterDto.BroaderIri) ? parameterDto.BroaderIri : parameterDto.ParamIri;
-    public static string GetBroadestLabel(this AutoMlParameterDto parameterDto) => !string.IsNullOrWhiteSpace(parameterDto.BroaderIri) ? parameterDto.BroaderLabel : parameterDto.ParamLabel;
 }

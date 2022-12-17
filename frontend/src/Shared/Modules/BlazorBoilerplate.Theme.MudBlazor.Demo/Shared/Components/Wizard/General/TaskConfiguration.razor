@@ -148,16 +148,16 @@
 
     public TaskConfiguration()
     {
-        _intersector = new ParameterIntersector(() => _availableParameters);
+        _intersector = new ParameterIntersector(() => _availableParameters, _autoMlSolutionsViewModel.SelectedIds.Count);
     }
 
     protected async override void OnInitialized()
     {
         base.OnInitialized();
         SetupStartAutoMLConfiguration();
-        _mlLibsViewModel.SelectedIdsChanged += async (_, __) => await OnMlLibrarySelectionChanged();
-        _autoMlSolutionsViewModel.SelectedIdsChanged += async (_, __) => await OnAutoMlSolutionSelectionChanged();
-        _strategiesViewModel.SelectedIdsChanged += async (_, __) => await OnStrategySelectionChanged();
+        _mlLibsViewModel.SelectedIdsChanged += async (_, _) => await OnMlLibrarySelectionChanged();
+        _autoMlSolutionsViewModel.SelectedIdsChanged += async (_, _) => await OnAutoMlSolutionSelectionChanged();
+        _strategiesViewModel.SelectedIdsChanged += async (_, _) => await OnStrategySelectionChanged();
         await LoadData();
     }
 
@@ -211,49 +211,50 @@
             () =>
             {
                 _availableParameters = apiResponse.Result.AutoMlParameters;
-                _intersectedParams = _intersector.GetIntersectedParameters(_autoMlSolutionsViewModel.SelectedIds).ToList();
+                _intersectedParams = _intersector.GetIntersectedParameters().ToList();
 
                 var paramsGroupedBySolution = _availableParameters
-                    // all params that are either not included in the intersected params, or have a broader type
-                    .Where(p => _intersectedParams.All(i => i.ParameterIri != p.GetBroadestIri() || i.ParameterType != p.ParamType))
+                    // all params that are either not included in the intersected params, or have a less restrictive type
+                    .Where(p => _intersectedParams.All(i => i.ParameterIri != p.BroadestIri || i.ParameterType != p.ParamType))
                     .GroupBy(p => p.AutoMlIri);
 
                 _individualParams.Clear();
                 foreach (var group in paramsGroupedBySolution)
                 {
                     var autoMlLabel = _autoMlSolutionsViewModel.AvailableChips.Single(c => c.Id == group.Key).Label;
-                    // TODO: Refactor this insane statement. If a one liner has to span almost 30 lines, it should not be a one liner.
                     _individualParams.Add(
                         (
                             autoMlLabel,
                             group
                                 .GroupBy(param => param.ParamIri)
-                                .Select(g =>
-                                {
-                                    var firstInstanceWithIri = g.First();
-                                    List<ParameterValueViewModel> values = null;
-                                    if (firstInstanceWithIri.ValueIri != null)
-                                    {
-                                        values = g.Select(param => new ParameterValueViewModel
-                                        {
-                                            ValueIri = param.ValueIri,
-                                            ValueLabel = param.ValueLabel
-                                        }).ToList();
-                                    }
-                                    return new ParameterObject
-                                    {
-                                        ParameterIri = g.Key,
-                                        ParameterLabel = firstInstanceWithIri.ParamLabel,
-                                        ParameterType = firstInstanceWithIri.ParamType,
-                                        ParameterValues = values
-                                    };
-                                })
+                                .Select(CreateParameterObjectFromGroupedParameterDto)
                                 .ToList()
                         )
                     );
                 }
             },
             errorMessageKey: "Fetching available parameters failed");
+    }
+
+    private ParameterObject CreateParameterObjectFromGroupedParameterDto(IGrouping<string, AutoMlParameterDto> parameterGroup)
+    {
+        var firstInstanceWithIri = parameterGroup.First();
+        var result = new ParameterObject
+        {
+            ParameterIri = parameterGroup.Key,
+            ParameterLabel = firstInstanceWithIri.ParamLabel,
+            ParameterType = firstInstanceWithIri.ParamType,
+        };
+
+        if (!firstInstanceWithIri.IsScalar)
+        {
+            result.ParameterValues = parameterGroup.Select(param => new ParameterValueViewModel
+            {
+                ValueIri = param.ValueIri,
+                ValueLabel = param.ValueLabel
+            }).ToList();
+        }
+        return result;
     }
 
     private async void OnMlTaskSelectionChanged(string task)
