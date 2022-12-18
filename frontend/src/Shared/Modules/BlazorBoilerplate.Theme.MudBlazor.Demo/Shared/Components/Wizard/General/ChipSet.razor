@@ -1,5 +1,7 @@
 @using System.Net
 
+@using static Services.WikiDataGrabber
+
 @if (ViewModel.AvailableChips?.Any() ?? false)
 {
     <MudText Typo="Typo.subtitle2">@Label</MudText>
@@ -64,18 +66,6 @@ else
         /// <value></value>
         public IEnumerable<string> SelectedIds => AvailableChips.Where(c => c.IsSelected).Select(c => c.Id); 
 
-        public string testMethod(string url = null) {
-            var httpRequest = (HttpWebRequest)WebRequest.Create(url);
-            httpRequest.Accept = "application/json";
-            var httpResponse = (HttpWebResponse)httpRequest.GetResponse();
-            string result;
-            using (var streamReader = new StreamReader(httpResponse.GetResponseStream()))
-            {
-                result = streamReader.ReadToEnd();
-            }
-            return result;
-        }
-
         /// <summary>
         /// Updates the collection of available chips and adapt the selected ids accordingly.
         /// Newly available options are selected by default.
@@ -96,8 +86,10 @@ else
                 //////Temporary testing ground//////
                 var test = chipToAdd.ToolTip;
                 if (!string.IsNullOrEmpty(chipToAdd.ToolTip)) {
-                    testMethod(chipToAdd.ToolTip);
+                    WikiDataGrabber wiki = new WikiDataGrabber();
+                    string test2 = wiki.getDataFromLink(chipToAdd.ToolTip);
                 }
+                
                 ///////Temporary testing ground//////
             }
 
