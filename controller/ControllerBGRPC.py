@@ -666,8 +666,8 @@ class Training(betterproto.Message):
 
     dataset_configuration: str = betterproto.string_field(6)
     """
-    The current dataset configuration used to open the dataset as a JSON string
-    example: '{"use_header": true,"start_row": 1,"delimiter":
+    The current dataset configuration used to open the dataset as a JSON
+    stringexample: '{"use_header": true,"start_row": 1,"delimiter":
     "comma","escape_character": "\\","decimal_character": "."}'
     """
 
@@ -721,6 +721,9 @@ class Configuration(betterproto.Message):
     List of ML libraries selected during the wizard configurationexample:
     [":keras_lib", ":sklearn_lib"]
     """
+
+    parameters: List["ParameterValue"] = betterproto.message_field(8)
+    """List of additional parameters"""
 
 
 @dataclass(eq=False, repr=False)
@@ -778,8 +781,8 @@ class CreateTrainingRequest(betterproto.Message):
 
     dataset_configuration: str = betterproto.string_field(4)
     """
-    The current dataset configuration used to open the dataset as a JSON string
-    example: '{"use_header": true,"start_row": 1,"delimiter":
+    The current dataset configuration used to open the dataset as a JSON
+    stringexample: '{"use_header": true,"start_row": 1,"delimiter":
     "comma","escape_character": "\\","decimal_character": "."}'
     """
 
@@ -790,6 +793,19 @@ class CreateTrainingResponse(betterproto.Message):
     """
     Unique training id generated when inserting a new training document into
     MongoDBexample: '63515c86b10d04d230dc1482'
+    """
+
+
+@dataclass(eq=False, repr=False)
+class ParameterValue(betterproto.Message):
+    iri: str = betterproto.string_field(1)
+    """The iri of the parameter"""
+
+    value: List[str] = betterproto.string_field(2)
+    """
+    The value(s) selected for the parameter.examples:single_value:
+    ['some_iri']list: ['some_iri', 'other_iri']string: ['hello world']number:
+    ['16.8']
     """
 
 

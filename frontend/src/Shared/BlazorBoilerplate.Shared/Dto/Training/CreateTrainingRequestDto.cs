@@ -24,16 +24,11 @@ namespace BlazorBoilerplate.Shared.Dto.Training
 
         public string Task { get; set; }
         public string Target { get; set; }
-        public List<string> EnabledStrategies { get; set; }
+        public List<string> EnabledStrategies { get; set; } = new();
         public int RuntimeLimit { get; set; }
         public string Metric { get; set; }
-        public List<string> SelectedAutoMlSolutions { get; set; }
-        public List<string> SelecctedMlLibraries { get; set; }
-        public CreateTrainingConfigurationDto()
-        {
-            EnabledStrategies = new List<string>();
-            SelecctedMlLibraries = new List<string>();
-            SelectedAutoMlSolutions = new List<string>();
-        }
+        public List<string> SelectedAutoMlSolutions { get; set; } = new();
+        public List<string> SelecctedMlLibraries { get; set; } = new();
+        public List<(string iri, List<string> values)> Parameters { get; set; } = new();
     }
 }

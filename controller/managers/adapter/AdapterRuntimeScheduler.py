@@ -24,7 +24,7 @@ class AdapterRuntimeScheduler:
         self.__explainable_lock = explainable_lock
         return
 
-    def create_new_training(self, request: "CreateTrainingRequest", training_id: str, dataset):
+    def create_new_training(self, request: CreateTrainingRequest, training_id: str, dataset):
         """Create a new training session and add it to the running training list
 
         Args:
@@ -35,7 +35,7 @@ class AdapterRuntimeScheduler:
         adapter_runtime_manager: AdapterRuntimeManager = AdapterRuntimeManager(self.__data_storage, request, training_id, dataset, self.__explainable_lock)
         adapter_runtime_manager.create_new_training()
         self.__running_trainings[training_id] = adapter_runtime_manager
-        
+
     def create_new_prediction(self, user_id: str, prediction_id: str):
         """Create a new prediction session and add it to the running prediction list
 

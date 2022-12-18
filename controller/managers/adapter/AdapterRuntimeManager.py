@@ -16,7 +16,7 @@ class AdapterRuntimeManager:
     """The AdapterRuntimeManager represent a single training session started by a user and manages it
     """
 
-    def __init__(self, data_storage: DataStorage, request: "CreateTrainingRequest", training_id: str, dataset, explainable_lock: ThreadLock) -> None:
+    def __init__(self, data_storage: DataStorage, request: CreateTrainingRequest, training_id: str, dataset, explainable_lock: ThreadLock) -> None:
         """Initialize a new AdapterRuntimeManager instance
 
         Args:
@@ -27,7 +27,7 @@ class AdapterRuntimeManager:
             explainable_lock (ThreadLock): The explainable lock instance to protect from multiple thread using critical parts of the ExplainableAIManager module
         """
         self.__data_storage: DataStorage = data_storage
-        self.__request: "CreateTrainingRequest" = request
+        self.__request: CreateTrainingRequest = request
         self.__training_id = training_id
         self.__dataset = dataset
         self.__explainable_lock = explainable_lock
@@ -86,7 +86,7 @@ class AdapterRuntimeManager:
             if dataset["type"] in  [":tabular", ":text", ":time_series"]:
                 ExplainableAIManager(self.__data_storage, adapter_manager, self.__explainable_lock).explain(user_id, model_id)
                 return
-    
+
     def get_training_id(self) -> str:
         """Get the training id to which the found model is linked too
 
@@ -146,7 +146,7 @@ class AdapterRuntimeManager:
             self.__log.debug(f"start_new_training: creating new adapter manager and adapter manager agent")
             adapter_training = AdapterManager(self.__data_storage, self.__request, automl, self.__training_id, self.__dataset, host, port, self.__blackboard, self.__strategy_controller, self.__adapter_finished_callback)
             self.__adapters.append(adapter_training)
-        
+
         self.__strategy_controller.on_event('phase_updated', self.blackboard_phase_update_handler)
         self.__strategy_controller.set_phase('preprocessing')
         self.__strategy_controller.start_timer()

@@ -48,7 +48,7 @@
         <DataLoaderSpinner />
     }
 
-    @if (((Dataset.Dataset.Type.ID == ":tabular") || (Dataset.Dataset.Type.ID == ":text") || (Dataset.Dataset.Type.ID == ":time_series")) || (Dataset.Dataset.Type.ID == ":time_series_longitudinal") && (!string.IsNullOrEmpty(StartAutoMlRequest.Configuration.Task)))
+    @if (((Dataset.Dataset.Type.ID == ":tabular") || (Dataset.Dataset.Type.ID == ":text") || (Dataset.Dataset.Type.ID == ":time_series")) || (Dataset.Dataset.Type.ID == ":time_series_longitudinal") && (!string.IsNullOrEmpty(StartTrainingDto.Configuration.Task)))
 
     {
         <MudSelect Label="@L["Target"]" T="string" ValueChanged="@OnTargetChanged">
@@ -61,7 +61,7 @@
             }
         </MudSelect>
     }
-    <MudNumericField ValueChanged="@OnRuntimeValueChanged" T="int" Label="@L["Runtime"]" Variant="Variant.Text" Min="3" Max="180" Value="@StartAutoMlRequest.Configuration.RuntimeLimit" />
+    <MudNumericField ValueChanged="@OnRuntimeValueChanged" T="int" Label="@L["Runtime"]" Variant="Variant.Text" Min="3" Max="180" Value="@StartTrainingDto.Configuration.RuntimeLimit" />
 
     <MudExpansionPanels>
         <MudExpansionPanel Text="@L["Details"]">
@@ -96,6 +96,7 @@
                     }
                 }
 
+                @* TODO: The input fields are not here yet. Once all input fields exist in the intersected part, all of that can be extracted into a component and reused here. *@
                 @if (_individualParams.Any())
                 {
                     <MudText Typo="Typo.subtitle2" Class="mt-4">Individual Parameters</MudText>
@@ -125,13 +126,13 @@
     public GetDatasetResponseDto Dataset { get; set; }
 
     [Parameter]
-    public CreateTrainingRequestDto StartAutoMlRequest { get; set; }
+    public CreateTrainingRequestDto StartTrainingDto { get; set; }
     [Parameter]
-    public EventCallback<CreateTrainingRequestDto> StartAutoMlRequestChanged { get; set; }
+    public EventCallback<CreateTrainingRequestDto> StartTrainingDtoChanged { get; set; }
 
-    async Task UpdateStartAutoMlRequest()
+    async Task UpdateStartTrainingDto()
     {
-        await StartAutoMlRequestChanged.InvokeAsync(StartAutoMlRequest);
+        await StartTrainingDtoChanged.InvokeAsync(StartTrainingDto);
     }
 
     private GetTasksForDatasetTypeResponseDto _compatibleTasks;
@@ -163,7 +164,7 @@
 
     private void OnRuntimeValueChanged(int e)
     {
-        StartAutoMlRequest.Configuration.RuntimeLimit = e;
+        StartTrainingDto.Configuration.RuntimeLimit = e;
     }
 
     private async void SetupStartAutoMLConfiguration()
@@ -172,7 +173,7 @@
 
         if ((Dataset.Dataset.Type.ID == ":tabular") || (Dataset.Dataset.Type.ID == ":text") || (Dataset.Dataset.Type.ID == ":time_series") || (Dataset.Dataset.Type.ID == ":time_series_longitudinal"))
         {
-            foreach (KeyValuePair<string, dynamic> pair in StartAutoMlRequest.DatasetConfiguration["column_datatypes"])
+            foreach (KeyValuePair<string, dynamic> pair in StartTrainingDto.DatasetConfiguration["column_datatypes"])
             {
                 // TODO: Document what this magic number means and extract it into a constant
                 if ((int)pair.Value != 7)
@@ -181,9 +182,9 @@
                 }
             }
         }
-        StartAutoMlRequest.Configuration.RuntimeLimit = 3;
-        StartAutoMlRequest.Configuration.Metric = ":accuracy";
-        await UpdateStartAutoMlRequest();
+        StartTrainingDto.Configuration.RuntimeLimit = 3;
+        StartTrainingDto.Configuration.Metric = ":accuracy";
+        await UpdateStartTrainingDto();
     }
 
     private async Task LoadData()
@@ -203,8 +204,8 @@
 
     private async Task RefreshParameters()
     {
-        var taskIri = StartAutoMlRequest.Configuration.Task;
-        var selectedAutoMls = StartAutoMlRequest.Configuration.SelectedAutoMlSolutions;
+        var taskIri = StartTrainingDto.Configuration.Task;
+        var selectedAutoMls = StartTrainingDto.Configuration.SelectedAutoMlSolutions;
         var apiResponse = await apiClient.GetAutoMlParameters(new GetAutoMlParametersRequestDto { AutoMls = selectedAutoMls, TaskIri = taskIri });
         HandleApiResponseWrapper(
             apiResponse,
@@ -263,14 +264,14 @@
         {
             return;
         }
-        StartAutoMlRequest.Configuration.Task = task;
+        StartTrainingDto.Configuration.Task = task;
         try
         {
             Dictionary<string, string> dictionary = new Dictionary<string, string>
             {
-                { "task", StartAutoMlRequest.Configuration.Task }
+                { "task", StartTrainingDto.Configuration.Task }
             };
-            await UpdateStartAutoMlRequest();
+            await UpdateStartTrainingDto();
             /** Configuration = dictionary is currently dummy */
             //GetCompatibleAutoMlSolutionsRequestDto compatibleAutoMlRequest = new GetCompatibleAutoMlSolutionsRequestDto { Configuration = dictionary };
 
@@ -287,7 +288,7 @@
             //    viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["AutoMlSolution Operation Failed"]);
             //}
 
-            GetMlLibrariesForTaskRequestDto supportedMlLibrariesRequest = new GetMlLibrariesForTaskRequestDto { Task = StartAutoMlRequest.Configuration.Task };
+            GetMlLibrariesForTaskRequestDto supportedMlLibrariesRequest = new GetMlLibrariesForTaskRequestDto { Task = StartTrainingDto.Configuration.Task };
             var apiResponse = await apiClient.GetMlLibrariesForTask(supportedMlLibrariesRequest);
 
             HandleApiResponseWrapper(apiResponse, () =>
@@ -311,13 +312,13 @@
         {
             Dictionary<string, string> dictionary = new Dictionary<string, string>
             {
-                { "task", StartAutoMlRequest.Configuration.Task }
+                { "task", StartTrainingDto.Configuration.Task }
             };
 
             List<string> libraries = _mlLibsViewModel.SelectedIds.ToList();
-            StartAutoMlRequest.Configuration.SelecctedMlLibraries = _mlLibsViewModel.SelectedIds.ToList();
+            StartTrainingDto.Configuration.SelecctedMlLibraries = _mlLibsViewModel.SelectedIds.ToList();
 
-            await UpdateStartAutoMlRequest();
+            await UpdateStartTrainingDto();
             if (libraries.Any())
             {
                 dictionary.Add("library", JsonConvert.SerializeObject(libraries));
@@ -358,22 +359,22 @@
 
     private async Task OnAutoMlSolutionSelectionChanged()
     {
-        StartAutoMlRequest.Configuration.SelectedAutoMlSolutions = _autoMlSolutionsViewModel.SelectedIds.ToList();
+        StartTrainingDto.Configuration.SelectedAutoMlSolutions = _autoMlSolutionsViewModel.SelectedIds.ToList();
 
-        await UpdateStartAutoMlRequest();
+        await UpdateStartTrainingDto();
         await RefreshParameters();
     }
 
     private Task OnStrategySelectionChanged()
     {
-        StartAutoMlRequest.Configuration.EnabledStrategies = _strategiesViewModel.SelectedIds.ToList();
-        return UpdateStartAutoMlRequest();
+        StartTrainingDto.Configuration.EnabledStrategies = _strategiesViewModel.SelectedIds.ToList();
+        return UpdateStartTrainingDto();
     }
 
     private async void OnTargetChanged(string value)
     {
-        StartAutoMlRequest.Configuration.Target = value;
-        await UpdateStartAutoMlRequest();
+        StartTrainingDto.Configuration.Target = value;
+        await UpdateStartTrainingDto();
     }
 
     public class ParameterValueViewModel

@@ -17,7 +17,7 @@ from MeasureDuration import MeasureDuration
 ROOT_PATH = os.path.dirname(os.path.abspath(__file__))
 
 class ControllerServiceManager(ControllerServiceBase):
-    """Service class that implements GRPC controller interface, all inbound calls are received within this class. 
+    """Service class that implements GRPC controller interface, all inbound calls are received within this class.
 
     Args:
         ControllerServiceBase (ControllerServiceBase): Automatically generated GRPC server stub base class
@@ -53,7 +53,7 @@ class ControllerServiceManager(ControllerServiceBase):
     async def get_home_overview_information(
         self, get_home_overview_information_request: "GetHomeOverviewInformationRequest",
         user_manager: UserManager=Provide[Application.managers.user_manager]
-    ) -> "GetHomeOverviewInformationResponse":  
+    ) -> "GetHomeOverviewInformationResponse":
         with MeasureDuration() as m:
             response = user_manager.get_home_overview_information(get_home_overview_information_request)
         #response = await self.__loop.run_in_executor(
@@ -68,7 +68,7 @@ class ControllerServiceManager(ControllerServiceBase):
     ####################################
     ## DATASET RELATED OPERATIONS
     ####################################
-#region 
+#region
 
     @inject
     async def create_dataset(
@@ -161,9 +161,9 @@ class ControllerServiceManager(ControllerServiceBase):
 
     @inject
     async def create_training(
-        self, create_training_request: "CreateTrainingRequest",
+        self, create_training_request: CreateTrainingRequest,
         training_manager: TrainingManager=Provide[Application.managers.training_manager]
-    ) -> "CreateTrainingResponse":
+    ) -> CreateTrainingResponse:
         with MeasureDuration() as m:
             response = await training_manager.create_training(create_training_request)
         #response = await self.__loop.run_in_executor(
@@ -422,5 +422,5 @@ class ControllerServiceManager(ControllerServiceBase):
             response = predictionManager.delete_prediction(delete_prediction_request)
         self.__log.warn("delete_prediction: executed")
         return response
-        
+
 #endregion

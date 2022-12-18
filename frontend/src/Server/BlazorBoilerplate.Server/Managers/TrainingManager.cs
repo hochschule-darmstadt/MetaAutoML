@@ -36,16 +36,24 @@ namespace BlazorBoilerplate.Server.Managers
             {
                 createTrainingRequest.UserId = username;
                 createTrainingRequest.DatasetId = request.DatasetId;
-                createTrainingRequest.Configuration = new Configuration();
-                createTrainingRequest.Configuration.Task = request.Configuration.Task;
-                createTrainingRequest.Configuration.Target = request.Configuration.Target;
-                createTrainingRequest.Configuration.EnabledStrategies.AddRange(request.Configuration.EnabledStrategies);
-                createTrainingRequest.Configuration.RuntimeLimit = request.Configuration.RuntimeLimit;
-                createTrainingRequest.Configuration.Metric = request.Configuration.Metric;
+                createTrainingRequest.Configuration = new Configuration
+                {
+                    Task = request.Configuration.Task,
+                    Target = request.Configuration.Target,
+                    RuntimeLimit = request.Configuration.RuntimeLimit,
+                    Metric = request.Configuration.Metric,
+                };
                 createTrainingRequest.Configuration.SelectedAutoMlSolutions.AddRange(request.Configuration.SelectedAutoMlSolutions);
                 createTrainingRequest.Configuration.SelectedMlLibraries.AddRange(request.Configuration.SelecctedMlLibraries);
+                createTrainingRequest.Configuration.EnabledStrategies.AddRange(request.Configuration.EnabledStrategies);
+                createTrainingRequest.Configuration.Parameters.AddRange(request.Configuration.Parameters.Select(p =>
+                {
+                    var result = new ParameterValue {Iri = p.iri};
+                    result.Value.AddRange(p.values);
+                    return result;
+                }));
                 createTrainingRequest.DatasetConfiguration = JsonConvert.SerializeObject(request.DatasetConfiguration);
-                var reply = _client.CreateTraining(createTrainingRequest);
+                var reply = await _client.CreateTrainingAsync(createTrainingRequest);
                 return new ApiResponse(Status200OK, null, new CreateTrainingResponseDto(reply.TrainingId));
 
             }
@@ -89,7 +97,7 @@ namespace BlazorBoilerplate.Server.Managers
 
                     foreach (var model in training.Models)
                     {
-                        ModelDto modelDto = new ModelDto(model, 
+                        ModelDto modelDto = new ModelDto(model,
                             (model.MlModelType == "" ? new Shared.Dto.Ontology.ObjectInfomationDto() :  await _cacheManager.GetObjectInformation(model.MlModelType)),
                             (model.MlLibrary == "" ? new Shared.Dto.Ontology.ObjectInfomationDto() : await _cacheManager.GetObjectInformation(model.MlLibrary)),
                             (model.AutoMlSolution == "" ? new Shared.Dto.Ontology.ObjectInfomationDto() : await _cacheManager.GetObjectInformation(model.AutoMlSolution)));
