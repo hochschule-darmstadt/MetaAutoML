@@ -14,12 +14,17 @@
     </MudStack>
 }
 
+
+
+
+
+
 <MudDialog @bind-IsVisible="fileUploader.IsUploadDatasetDialogOpen">
     <DialogContent>
-        <MudPaper Height="250px" Width="300px"  Elevation="0">
+        <MudCard Height="auto" Width="300px" Elevation="0">
             @if (_datasetTypes == null)
             {
-            
+
             }
             else if (fileUploader.IsUploading == true)
             {
@@ -30,136 +35,69 @@
             }
             else
             {
-                <MudStack>
-                    <MudSelect Label="@L["Select the data format of your dataset"]" T="string" ValueChanged="@OnDatasetTypeSelectChanged" Style="width: 150px">
-                        @foreach (var item in _datasetTypes.DatasetTypes)
-                        {
-                            
-                            <MudSelectItem Value="@item.ID">
-                                <MudTooltip Text="@item.Properties["rdfs:comment"]" Style="z-index: 1600">
-                                    <MudText Typo="Typo.body2">@L[item.Properties.ContainsKey("skos:prefLabel") ? item.Properties["skos:prefLabel"] : ""]</MudText>
-                                </MudTooltip>
-                            </MudSelectItem>
-                        }
-                    </MudSelect>
-                    <InputFile id="fileInput" OnChange="@FilesReady" hidden accept="@AcceptedFileType" />
-                    <MudButton HtmlTag="label"
-                                Variant="Variant.Filled"
-                                Color="Color.Secondary"
-                                StartIcon="@Icons.Filled.CloudUpload"
-                                for="fileInput"
-                                Class="mt-1"
-                                Disabled="IsSelectFileDisabled">
-                        @L["Select Dataset"]
-                    </MudButton>
-                    <MudTextField @bind-Value="@fileUploader.UploadDatasetRequest.DatasetName" Label="@L["Dataset Name"]" Class="mt-1"></MudTextField>
-                    @if (_isLoaderClosed == false)
-                    {
-                        <MudProgressLinear Color="Color.Secondary" Indeterminate="true"/>
-                    }
-                </MudStack>
-            }
-        </MudPaper>
-    </DialogContent>
-    <DialogActions>
-        <MudButton Color="Color.Secondary" OnClick="Close">@L["Close"]</MudButton>
-        @if (fileUploader.IsUploading == false)
-        {
-            <MudButton StartIcon="@Icons.Filled.CloudUpload" Color="Color.Secondary" Disabled="@_uploadReady" OnClick="@Upload">@L["Upload"]</MudButton>
-        }
-    </DialogActions>
-</MudDialog>
+        <MudCardHeader Style="margin-left:-16px;">
+            <CardHeaderContent>
+                <MudText Typo="Typo.h6">@L["Upload"]</MudText>
+            </CardHeaderContent>
+        </MudCardHeader>
+        <MudStack>
+            <MudStack Row="true">
+
+                <MudButton Variant="Variant.Filled"
+                           Color="Color.Secondary"
+                           Size="Size.Small"
+                           Disabled="_fileUpload"
+                           OnClick="FileOrUrlSwitch"
+                           Style="margin-top: 8px; width:50%">@L["File"]</MudButton>
+                        <MudButton Variant="Variant.Filled"
+                                   Color="Color.Secondary"
+                                   Size="Size.Small"
+                                   Disabled="!_fileUpload"
+                                   OnClick="FileOrUrlSwitch"
+                                   Style="margin-top: 8px; width:50%">@L["URL"]</MudButton>
+                            </MudStack>
+                            @if (_fileUpload)
+                            {
 
 
-<MudDialog @bind-IsVisible="fileUploader.IsUploadPredictionDatasetDialogOpen">
-    <DialogContent>
-        @if (fileUploader.IsUploading == true)
-        {
-        <MudStack Class="mt-4">
-            <MudText Typo="Typo.body2">@UploadText</MudText>
-            <MudProgressLinear Color="Color.Secondary" Value="@Progress" Class="my-7" />
-        </MudStack>
-        }
-        else
-        {
-        <MudPaper Height="180px" Width="300px"  Elevation="0">
-            <MudStack>
-                <InputFile id="fileInput" OnChange="@FilesReady" hidden accept="@AcceptedFileType" />
-                <MudButton HtmlTag="label"
-                            Variant="Variant.Filled"
-                            Color="Color.Secondary"
-                            StartIcon="@Icons.Filled.CloudUpload"
-                            for="fileInput"
-                            Class="mt-1">
-                    @L["Select Dataset"]
-                </MudButton>
-                <MudTextField @bind-Value="@fileUploader.UploadPredictionRequest.FileName" Label="@L["Dataset Name"]" Class="mt-1" Disabled="true"></MudTextField>
-                @if (_isLoaderClosed == false)
-                {
-                    <MudProgressLinear Color="Color.Secondary" Indeterminate="true"/>
-                }
-            </MudStack>
-        </MudPaper>
-        }
-    </DialogContent>
-    <DialogActions>
-        <MudButton Color="Color.Secondary" OnClick="Close">@L["Close"]</MudButton>
-        @if (fileUploader.IsUploading == false)
-        {
-            <MudButton StartIcon="@Icons.Filled.CloudUpload" Color="Color.Secondary" Disabled="@_uploadReady" OnClick="@Upload">@L["Upload"]</MudButton>
-        }
-    </DialogActions>
-</MudDialog>
+                                <MudSelect Label="@L["Select the data format of your dataset"]" T="string" ValueChanged="@OnDatasetTypeSelectChanged" Style="width: 150px">
+                                    @foreach (var item in _datasetTypes.DatasetTypes)
+                                    {
+
+                                        <MudSelectItem Value="@item.ID">
+                                            <MudTooltip Text="@item.Properties["rdfs:comment"]" Style="z-index: 1600">
+                                                <MudText Typo="Typo.body2">@L[item.Properties.ContainsKey("skos:prefLabel") ? item.Properties["skos:prefLabel"] : ""]</MudText>
+                                            </MudTooltip>
+                                        </MudSelectItem>
+                                    }
+
+                                </MudSelect>
+                                <InputFile id="fileInput" OnChange="@FilesReady" hidden accept="@AcceptedFileType" />
+                                <MudButton HtmlTag="label"
+                                           Variant="Variant.Filled"
+                                           Color="Color.Secondary"
+                                           StartIcon="@Icons.Filled.CloudUpload"
+                                           for="fileInput"
+                                           Class="mt-1"
+                                           Disabled="IsSelectFileDisabled">
+                                    @L["Select Dataset"]
+                                </MudButton>
+                                <MudTextField @bind-Value="@fileUploader.UploadDatasetRequest.DatasetName" Label="@L["Dataset Name"]" Class="mt-1"></MudTextField>
+                            }
+                            else
+                            {
+                                <MudTextField TextChanged="DisableUpload" @bind-Value="@Url" Label="@L["URL"]" Class="mt-1"></MudTextField>
+                            }
 
 
 
-
-<MudDialog @bind-IsVisible="fileUploader.IsUploadDatasetDialogOpen">
-    <DialogContent>
-        <MudPaper Height="180px" Width="300px"  Elevation="0">
-            @if (_datasetTypes == null)
-            {
-            
-            }
-            else if (fileUploader.IsUploading == true)
-            {
-                <MudStack Class="mt-4">
-                    <MudText Typo="Typo.body2">@UploadText</MudText>
-                    <MudProgressLinear Color="Color.Secondary" Value="@Progress" Class="my-7" />
-                </MudStack>
-            }
-            else
-            {
-                <MudStack>
-                    <MudSelect Label="@L["Select the data format of your dataset"]" T="string" ValueChanged="@OnDatasetTypeSelectChanged" Style="width: 150px">
-                        @foreach (var item in _datasetTypes.DatasetTypes)
-                        {
-                            
-                            <MudSelectItem Value="@item.ID">
-                                <MudTooltip Text="@item.Properties["rdfs:comment"]" Style="z-index: 1600">
-                                    <MudText Typo="Typo.body2">@L[item.Properties.ContainsKey("skos:prefLabel") ? item.Properties["skos:prefLabel"] : ""]</MudText>
-                                </MudTooltip>
-                            </MudSelectItem>
-                        }
-                    </MudSelect>
-                    <InputFile id="fileInput" OnChange="@FilesReady" hidden accept="@AcceptedFileType" />
-                    <MudButton HtmlTag="label"
-                                Variant="Variant.Filled"
-                                Color="Color.Secondary"
-                                StartIcon="@Icons.Filled.CloudUpload"
-                                for="fileInput"
-                                Class="mt-1"
-                                Disabled="IsSelectFileDisabled">
-                        @L["Select Dataset"]
-                    </MudButton>
-                    <MudTextField @bind-Value="@fileUploader.UploadDatasetRequest.DatasetName" Label="@L["Dataset Name"]" Class="mt-1"></MudTextField>
-                    @if (_isLoaderClosed == false)
-                    {
-                        <MudProgressLinear Color="Color.Secondary" Indeterminate="true"/>
-                    }
-                </MudStack>
-            }
-        </MudPaper>
+                            @if (_isLoaderClosed == false)
+                            {
+                                <MudProgressLinear Color="Color.Secondary" Indeterminate="true" />
+                            }
+                        </MudStack>
+                            }
+        </MudCard>
     </DialogContent>
     <DialogActions>
         <MudButton Color="Color.Secondary" OnClick="Close">@L["Close"]</MudButton>
@@ -172,6 +110,8 @@
 
 
 @code {
+    public string Url;
+    private bool _fileUpload = true;
 
     [Parameter]
     public EventCallback OnUploadCompletedCallback { get; set; }
@@ -187,11 +127,29 @@
     private bool _uploadReady = true;
     private bool _isLoaderClosed = true;
 
+    private void FileOrUrlSwitch()
+    {
+        _fileUpload = (!_fileUpload);
+        _uploadReady = true;
+
+    }
+
+    private void DisableUpload()
+    {
+        //TODO validate URL and then set _uploadReady false
+        if(Url.Length!=0){
+            _uploadReady = false;
+        }
+        else { _uploadReady = true; }
+
+
+    }
+
     private void UpdateProgress()
     {
         if(fileUploader.IsPredictionDatasetToUpload == true)
         {
-            
+
             //Reset FileUploader after completing upload, (+1 to total to compensate to loop offset)
             if ((fileUploader.UploadPredictionRequest.ChunkNumber == (fileUploader.UploadPredictionRequest.TotalChunkNumber + 1)) && (fileUploader.IsUploading == false))
             {
@@ -327,7 +285,7 @@
         {
             _isLoaderClosed = false;
             StateHasChanged();
-                fileUploader.UploadFileContent = e.File;
+            fileUploader.UploadFileContent = e.File;
             if (fileUploader.IsPredictionDatasetToUpload == true)
             {
                 fileUploader.UploadPredictionRequest.FileName = e.File.Name;
