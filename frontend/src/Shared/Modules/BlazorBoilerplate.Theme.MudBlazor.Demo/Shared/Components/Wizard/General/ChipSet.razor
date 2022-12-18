@@ -82,15 +82,18 @@ else
 
             foreach (var chipToAdd in addedChips.Select(ac => new ChipViewModel { Id = ac.id, Label = ac.label, ToolTip = ac.toolTip }))
             {
-                AvailableChips.Add(chipToAdd);
+
                 //////Temporary testing ground//////
                 var test = chipToAdd.ToolTip;
                 if (!string.IsNullOrEmpty(chipToAdd.ToolTip)) {
                     WikiDataGrabber wiki = new WikiDataGrabber();
                     string test2 = wiki.getDataFromLink(chipToAdd.ToolTip);
+                    chipToAdd.ToolTip = test2;
                 }
-                
+
                 ///////Temporary testing ground//////
+                var asdf = chipToAdd;
+                AvailableChips.Add(chipToAdd);
             }
 
             RaiseSelectedIdsChanged();

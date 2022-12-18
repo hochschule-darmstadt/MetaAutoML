@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using Newtonsoft.Json;
+using System.Net;
 
 namespace BlazorBoilerplate.Theme.Material.Services
 {
@@ -14,7 +15,20 @@ namespace BlazorBoilerplate.Theme.Material.Services
             {
                 result = streamReader.ReadToEnd();
             }
-            return result;
+
+            dynamic stuff = JsonConvert.DeserializeObject(result);
+
+            var test1 = stuff.entities; // access element entities
+
+            var test3 = url.Split('/').Last(); // extract uri from url
+
+            var test4 = stuff.entities[test3]; // access elements/uri-which-is-just-a-string
+
+
+            string description = stuff.entities[test3].descriptions.en.value;
+
+
+            return description;
         }
     }
 }
