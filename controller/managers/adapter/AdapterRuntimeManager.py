@@ -58,6 +58,13 @@ class AdapterRuntimeManager:
         found, dataset = self.__data_storage.get_dataset(self.__request.user_id, self.__request.dataset_id)
         self.__dataset = dataset
         self.__log.debug(f"__create_training_record: generating training details")
+
+        dataset_configuration = {}
+        if dataset["type"] in [":tabular", ":text", ":time_series"]:
+             dataset_configuration = {
+                "column_datatypes": json.loads(self.__request.dataset_configuration)["column_datatypes"],
+                "file_configuration": dataset["file_configuration"]
+            },
         config = {
             "dataset_id": str(dataset["_id"]),
             "model_ids": [],
@@ -71,10 +78,7 @@ class AdapterRuntimeManager:
                 "selected_auto_ml_solutions": self.__request.configuration.selected_auto_ml_solutions,
                 "selected_ml_libraries": self.__request.configuration.selected_ml_libraries
             },
-            "dataset_configuration": {
-                "column_datatypes": json.loads(self.__request.dataset_configuration)["column_datatypes"],
-                "file_configuration": dataset["file_configuration"]
-            },
+            "dataset_configuration": dataset_configuration,
             "runtime_profile": {
                 "start_time": datetime.now(),
                 "events": [],
@@ -82,7 +86,7 @@ class AdapterRuntimeManager:
             },
             "lifecycle_state": "active"
         }
-        
+
         training_id = self.__data_storage.create_training(self.__request.user_id, config)
         self.__log.debug(f"__create_training_record: inserted new training: {training_id}")
         self.__data_storage.update_dataset(self.__request.user_id, self.__request.dataset_id, { "training_ids": dataset["training_ids"] + [training_id] })
@@ -129,7 +133,7 @@ class AdapterRuntimeManager:
             if dataset["type"] in  [":tabular", ":text", ":time_series"]:
                 ExplainableAIManager(self.__data_storage, adapter_manager, self.__explainable_lock).explain(user_id, model_id)
                 return
-    
+
     def get_training_id(self) -> str:
         """Get the training id to which the found model is linked too
 

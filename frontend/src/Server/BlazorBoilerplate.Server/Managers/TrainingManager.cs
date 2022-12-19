@@ -1,4 +1,4 @@
-﻿using BlazorBoilerplate.Infrastructure.Server;
+using BlazorBoilerplate.Infrastructure.Server;
 using BlazorBoilerplate.Infrastructure.Server.Models;
 using BlazorBoilerplate.Shared.Dto.Model;
 using BlazorBoilerplate.Shared.Dto.Training;
@@ -38,7 +38,7 @@ namespace BlazorBoilerplate.Server.Managers
                 createTrainingRequest.DatasetId = request.DatasetId;
                 createTrainingRequest.Configuration = new Configuration();
                 createTrainingRequest.Configuration.Task = request.Configuration.Task;
-                createTrainingRequest.Configuration.Target = request.Configuration.Target;
+                createTrainingRequest.Configuration.Target = request.Configuration.Target != null ? request.Configuration.Target : "";
                 createTrainingRequest.Configuration.EnabledStrategies.AddRange(request.Configuration.EnabledStrategies);
                 createTrainingRequest.Configuration.RuntimeLimit = request.Configuration.RuntimeLimit;
                 createTrainingRequest.Configuration.Metric = request.Configuration.Metric;
