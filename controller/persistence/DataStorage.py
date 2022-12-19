@@ -112,9 +112,7 @@ class DataStorage:
             "name": name,
             "type": type,
             "path": "",
-            "file_configuration": {},
-			"column_datatypes": {},
-			"column_roles": {},
+            "schema": {},
             "training_ids": [],
             "analysis": {
                 "creation_date": 0,
@@ -154,7 +152,7 @@ class DataStorage:
             #causes error with different delimiters use normal string division
             self.__log.debug("create_dataset: dataset is of CSV type: generating csv file configuration...")
             file_configuration = {"use_header": True, "start_row":1, "delimiter":"comma", "escape_character":"\\", "decimal_character":".", "encoding": self.__frontend_backend_encoding_conversion_table[encoding]}
-            column_roles, column_datatypes = CsvManager.get_default_column_datatypes_and_roles(filename_dest, file_configuration)
+            schema = CsvManager.get_default_dataset_schema(filename_dest, file_configuration)
 
         if type == ":time_series_longitudinal":
             self.__log.debug("create_dataset: dataset is of TS nature: creating subset preview file, and generating csv file configuration...")
@@ -203,8 +201,7 @@ class DataStorage:
         success = self.__mongo.update_dataset(user_id, dataset_id, {
             "path": filename_dest,
             "file_configuration": file_configuration,
-			"column_datatypes": column_datatypes,
-			"column_roles": column_roles
+			"schema": schema
         })
         assert success, f"cannot update dataset with id {dataset_id}"
 

@@ -18,7 +18,7 @@ from DataStorage import DataStorage
 ROOT_PATH = os.path.dirname(os.path.abspath(__file__))
 
 class ControllerServiceManager(ControllerServiceBase):
-    """Service class that implements GRPC controller interface, all inbound calls are received within this class. 
+    """Service class that implements GRPC controller interface, all inbound calls are received within this class.
 
     Args:
         ControllerServiceBase (ControllerServiceBase): Automatically generated GRPC server stub base class
@@ -54,7 +54,7 @@ class ControllerServiceManager(ControllerServiceBase):
     async def get_home_overview_information(
         self, get_home_overview_information_request: "GetHomeOverviewInformationRequest",
         user_manager: UserManager=Provide[Application.managers.user_manager]
-    ) -> "GetHomeOverviewInformationResponse":  
+    ) -> "GetHomeOverviewInformationResponse":
         with MeasureDuration() as m:
             response = user_manager.get_home_overview_information(get_home_overview_information_request)
         #response = await self.__loop.run_in_executor(
@@ -69,7 +69,7 @@ class ControllerServiceManager(ControllerServiceBase):
     ####################################
     ## DATASET RELATED OPERATIONS
     ####################################
-#region 
+#region
 
     @inject
     async def create_dataset(
@@ -137,11 +137,11 @@ class ControllerServiceManager(ControllerServiceBase):
         return response
 
     @inject
-    async def set_dataset_file_configuration(
+    async def set_dataset_configuration(
         self,
-        set_dataset_file_configuration_request: "SetDatasetFileConfigurationRequest",
+        set_dataset_file_configuration_request: "SetDatasetConfigurationRequest",
         dataset_manager: DatasetManager=Provide[Application.managers.dataset_manager]
-    ) -> "SetDatasetFileConfigurationResponse":
+    ) -> "SetDatasetConfigurationResponse":
         with MeasureDuration() as m:
             response = dataset_manager.set_dataset_file_configuration(set_dataset_file_configuration_request)
         #response = await self.__loop.run_in_executor(
@@ -309,7 +309,7 @@ class ControllerServiceManager(ControllerServiceBase):
                     'This strategy ignores certain dataset columns if they have been flagged as duplicate in the dataset analysis.'
                     )
                 )
-            
+
             if (not found) or (len(dataset['analysis']['duplicate_rows']) != 0):
                 result.strategies.append(
                     Strategy(
@@ -318,9 +318,9 @@ class ControllerServiceManager(ControllerServiceBase):
                     'This strategy ignores certain dataset rows if they have been flagged as duplicate in the dataset analysis.'
                     )
                 )
-            
+
             size_time_ratio = dataset['analysis']['size_bytes'] / int(get_available_strategies_request.configuration['runtimeLimit'])
-            
+
             if (not found) or (size_time_ratio > 20000):
                 result.strategies.append(
                     Strategy(
@@ -329,7 +329,7 @@ class ControllerServiceManager(ControllerServiceBase):
                     'This strategy truncates the training data if the time limit is relatively short for the size of the dataset.'
                     )
             )
-            
+
         return result
 
     @inject
@@ -432,5 +432,5 @@ class ControllerServiceManager(ControllerServiceBase):
             response = predictionManager.delete_prediction(delete_prediction_request)
         self.__log.warn("delete_prediction: executed")
         return response
-        
+
 #endregion

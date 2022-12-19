@@ -88,6 +88,12 @@ class DatasetManager:
             dataset_detail.file_configuration = json.dumps(dataset["file_configuration"])
             dataset_detail.training_ids = dataset['training_ids']
             dataset_detail.analysis = json.dumps(dataset['analysis'])
+            for column in dataset["schema"]:
+                dataset_detail.schema.update({column: ColumnSchema(dataset["schema"][column]["datatype_detected"],
+                                                                            dataset["schema"][column]["datatypes_compatible"],
+                                                                            dataset["schema"][column].get("datatype_selected", ""),
+                                                                            dataset["schema"][column]["roles_compatible"],
+                                                                            dataset["schema"][column].get("role_selected", ""))})
             return dataset_detail
         except Exception as e:
             self.__log.error(f"__dataset_object_to_rpc_object: Error while reading parameter for dataset {str(dataset['_id'])} for user {user_id}")
@@ -182,21 +188,28 @@ class DatasetManager:
         self.__log.debug(f"delete_dataset: {str(result)} datasets deleted")
         return DeleteDatasetResponse()
 
-    def set_dataset_file_configuration(
+    def set_dataset_configuration(
         self,
-        set_dataset_file_configuration_request: "SetDatasetFileConfigurationRequest",
-    ) -> "SetDatasetFileConfigurationResponse":
+        set_dataset_configuration_request: "SetDatasetConfigurationRequest",
+    ) -> "SetDatasetConfigurationResponse":
         """Persist new dataset file configuration in MongoDB for the dataset
 
         Args:
-            set_dataset_file_configuration_request (SetDatasetFileConfigurationRequest): The GRPC request object containing the user id, dataset id, and new file configuration
+            set_dataset_configuration_request (SetDatasetConfigurationRequest): The GRPC request object containing the user id, dataset id, and new file configuration
 
         Returns:
-            SetDatasetFileConfigurationResponse: The empty GRPC response
+            SetDatasetConfigurationResponse: The empty GRPC response
         """
-        self.__log.debug(f"set_dataset_file_configuration: setting new file configuration new configuration {set_dataset_file_configuration_request.file_configuration}, for dataset {set_dataset_file_configuration_request.dataset_id}, of user {set_dataset_file_configuration_request.user_id}")
-        self.__data_storage.update_dataset(set_dataset_file_configuration_request.user_id, set_dataset_file_configuration_request.dataset_id, { "file_configuration": json.loads(set_dataset_file_configuration_request.file_configuration) })
-        self.__log.debug(f"set_dataset_file_configuration: executing dataset analysis for dataset: {set_dataset_file_configuration_request.dataset_id} for user {set_dataset_file_configuration_request.user_id}")
-        dataset_analysis = DataSetAnalysisManager(set_dataset_file_configuration_request.dataset_id, set_dataset_file_configuration_request.user_id, self.__data_storage, self.__dataset_analysis_lock)
+        self.__log.debug(f"set_dataset_file_configuration: setting new file configuration new configuration {set_dataset_configuration_request.file_configuration}, for dataset {set_dataset_configuration_request.dataset_id}, of user {set_dataset_configuration_request.user_id}")
+        found, dataset = self.__data_storage.get_dataset(set_dataset_configuration_request.user_id, set_dataset_configuration_request.dataset_id)
+        dataset_schema = dataset["schema"]
+        for column in set_dataset_configuration_request.column_configuration:
+            if set_dataset_configuration_request.column_configuration[column].datatype_selected != "":
+                dataset_schema[column].update({"datatype_selected": set_dataset_configuration_request.column_configuration[column].datatype_selected})
+            if set_dataset_configuration_request.column_configuration[column].role_selected != "":
+                dataset_schema[column].update({"role_selected": set_dataset_configuration_request.column_configuration[column].role_selected})
+        self.__data_storage.update_dataset(set_dataset_configuration_request.user_id, set_dataset_configuration_request.dataset_id, { "file_configuration": json.loads(set_dataset_configuration_request.file_configuration) })
+        self.__log.debug(f"set_dataset_file_configuration: executing dataset analysis for dataset: {set_dataset_configuration_request.dataset_id} for user {set_dataset_configuration_request.user_id}")
+        dataset_analysis = DataSetAnalysisManager(set_dataset_configuration_request.dataset_id, set_dataset_configuration_request.user_id, self.__data_storage, self.__dataset_analysis_lock)
         dataset_analysis.start()
-        return SetDatasetFileConfigurationResponse()
+        return SetDatasetConfigurationResponse()

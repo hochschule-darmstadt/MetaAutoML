@@ -1,4 +1,4 @@
-﻿using Azure;
+using Azure;
 using BlazorBoilerplate.Constants;
 using BlazorBoilerplate.Infrastructure.Server;
 using BlazorBoilerplate.Infrastructure.Server.Models;
@@ -29,6 +29,7 @@ using System.IO.Compression;
 using System.Runtime.CompilerServices;
 using Karambolo.Common;
 using System.Diagnostics;
+using static MudBlazor.CategoryTypes;
 
 namespace BlazorBoilerplate.Server.Managers
 {
@@ -142,7 +143,17 @@ namespace BlazorBoilerplate.Server.Managers
                 var reply = _client.GetDatasets(getDatasetsRequest);
                 foreach (Dataset item in reply.Datasets)
                 {
-                    response.Datasets.Add(new DatasetDto(item, await _cacheManager.GetObjectInformation(item.Type)));
+                    Dictionary<string, Shared.Dto.Dataset.ColumnSchema> schema = new Dictionary<string, Shared.Dto.Dataset.ColumnSchema>();
+                    foreach (var column in item.Schema)
+                    {
+                        schema.Add(column.Key, new Shared.Dto.Dataset.ColumnSchema(
+                            await _cacheManager.GetObjectInformation(column.Value.DatatypeDetected),
+                            await _cacheManager.GetObjectInformationList(column.Value.DatatypesCompatible.ToList()),
+                            column.Value.DatatypeSelected == "" ? new ObjectInfomationDto() : await _cacheManager.GetObjectInformation(column.Value.DatatypeSelected),
+                            await _cacheManager.GetObjectInformationList(column.Value.RolesCompatible.ToList()),
+                            column.Value.RoleSelected == "" ? new ObjectInfomationDto() : await _cacheManager.GetObjectInformation(column.Value.RoleSelected)));
+                    }
+                    response.Datasets.Add(new DatasetDto(item, await _cacheManager.GetObjectInformation(item.Type), schema));
                 }
                 return new ApiResponse(Status200OK, null, response);
 
@@ -170,7 +181,17 @@ namespace BlazorBoilerplate.Server.Managers
                 getDatasetRequest.UserId = username;
                 getDatasetRequest.DatasetId = request.DatasetId;
                 var reply = _client.GetDataset(getDatasetRequest);
-                response = new GetDatasetResponseDto(new DatasetDto(reply, await _cacheManager.GetObjectInformation(reply.Dataset.Type)));
+                Dictionary<string, Shared.Dto.Dataset.ColumnSchema> schema = new Dictionary<string, Shared.Dto.Dataset.ColumnSchema>();
+                foreach (var column in reply.Dataset.Schema)
+                {
+                    schema.Add(column.Key, new Shared.Dto.Dataset.ColumnSchema(
+                        await _cacheManager.GetObjectInformation(column.Value.DatatypeDetected),
+                        await _cacheManager.GetObjectInformationList(column.Value.DatatypesCompatible.ToList()),
+                        column.Value.DatatypeSelected == "" ? new ObjectInfomationDto() : await _cacheManager.GetObjectInformation(column.Value.DatatypeSelected),
+                        await _cacheManager.GetObjectInformationList(column.Value.RolesCompatible.ToList()),
+                        column.Value.RoleSelected == "" ? new ObjectInfomationDto() : await _cacheManager.GetObjectInformation(column.Value.RoleSelected)));
+                }
+                response = new GetDatasetResponseDto(new DatasetDto(reply, await _cacheManager.GetObjectInformation(reply.Dataset.Type), schema));
 
                 return new ApiResponse(Status200OK, null, response);
 
@@ -283,14 +304,18 @@ namespace BlazorBoilerplate.Server.Managers
 
         public async Task<ApiResponse> SetDatasetFileConfiguration(SetDatasetFileConfigurationRequestDto request)
         {
-            SetDatasetFileConfigurationRequest grpcRequest = new SetDatasetFileConfigurationRequest();
+            SetDatasetConfigurationRequest grpcRequest = new SetDatasetConfigurationRequest();
             var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
             try
             {
                 grpcRequest.UserId = username;
                 grpcRequest.DatasetId = request.DatasetId;
                 grpcRequest.FileConfiguration = JsonConvert.SerializeObject(request.Configuration);
-                var reply = _client.SetDatasetFileConfiguration(grpcRequest);
+                foreach (var column in request.ColumnsConfiugration)
+                {
+                    grpcRequest.ColumnConfiguration.Add(column.Key, new ColumnConfiguration() { DatatypeSelected = column.Value.DataTypeSelected, RoleSelected = column.Value.RoleSelected });
+                }
+                var reply = _client.SetDatasetConfiguration(grpcRequest);
                 return new ApiResponse(Status200OK, null, "");
 
             }

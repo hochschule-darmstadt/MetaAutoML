@@ -35,7 +35,7 @@ service ControllerService {
   rpc DeleteDataset(DeleteDatasetRequest) returns (DeleteDatasetResponse) {}
 
   /*update the dataset file configuration and execute the dataset analysis again*/
-  rpc SetDatasetFileConfiguration(SetDatasetFileConfigurationRequest) returns (SetDatasetFileConfigurationResponse) {}
+  rpc SetDatasetConfiguration(SetDatasetConfigurationRequest) returns (SetDatasetConfigurationResponse) {}
 
 
   /*OMA-ML TRAINING MESSAGES*/
@@ -78,11 +78,11 @@ service ControllerService {
 
   /*return all information fields of an object*/
   rpc GetObjectsInformation(GetObjectsInformationRequest) returns (GetObjectsInformationResponse) {}
-  
+
   /*return all supported AutoML tasks*/
   rpc GetTasksForDatasetType(GetTasksForDatasetTypeRequest) returns (GetTasksForDatasetTypeResponse) {}
 
-  
+
   /*OMA-ML PREDICTION MESSAGES*/
   /* create a new Prediction record in MongoDB and start the a new prediction session */
   rpc CreatePrediction(CreatePredictionRequest) returns (CreatePredictionResponse) {}

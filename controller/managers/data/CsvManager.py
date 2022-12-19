@@ -47,7 +47,7 @@ class CsvManager:
 
 
     @staticmethod
-    def __get_datatype(numpy_datatype: np.dtype, column: pd.Series):
+    def __get_datatype_for_column(numpy_datatype: np.dtype, column: pd.Series):
         """
         Identify the np datatype and mark correct OMAML datatype
         ---
@@ -57,27 +57,48 @@ class CsvManager:
         ---
         Return DataType.DATATYPE of the passed value + List of convertible datatypes
         """
-        if numpy_datatype == np.dtype(np.object):
-            return ":string"
-        elif numpy_datatype == np.dtype(np.unicode_):
-            return ":string"
+
+        compatible_casting_datatypes = {
+			":string": [":string", ":categorical"],
+            ":integer": [":integer", ":categorical"],
+            ":boolean": [":boolean", ":integer", ":categorical"],
+            ":float": [":float", ":integer", ":categorical"],
+            ":datetime": [":datetime", ":categorical"],
+		}
+
+        if numpy_datatype == np.dtype(np.unicode_) or numpy_datatype == np.dtype(np.object):
+            return ":string", compatible_casting_datatypes[":string"]
         elif numpy_datatype == np.dtype(np.int64):
-            if "id" in str.lower(str(column.name)) and column.nunique() == column.size:
-                return ":integer"
-            elif column.nunique() <= 2:
-                return ":boolean"
-            return ":integer"
+            if column.nunique() <= 2:
+                return ":boolean", compatible_casting_datatypes[":boolean"]
+            return ":integer", compatible_casting_datatypes[":integer"]
         elif numpy_datatype == np.dtype(np.float_):
-            return ":float"
+            return ":float", compatible_casting_datatypes[":float"]
         elif numpy_datatype == np.dtype(np.bool_):
-            return ":boolean"
+            return ":boolean", compatible_casting_datatypes[":boolean"]
         elif numpy_datatype == np.dtype(np.datetime64):
-            return ":datetime"
+            return ":datetime", compatible_casting_datatypes[":datetime"]
         else:
-            return ":string"
+            return ":string", compatible_casting_datatypes[":string"]
 
     @staticmethod
-    def get_default_column_datatypes_and_roles(path: str, fileConfiguration: dict) -> tuple[dict, dict]:
+    def __get_compatible_roles_for_column(column: pd.Series) -> list[str]:
+        """Get the compatible roles for a given series
+
+        Args:
+            column (pd.Series): One column from the dataframe
+
+        Returns:
+            list[str]: IRIs list of compatible roles
+        """
+        roles = [":target", ":ignore"]
+
+        if column.nunique() == column.size:
+            roles.append(":index")
+        return roles
+
+    @staticmethod
+    def get_default_dataset_schema(path: str, fileConfiguration: dict) -> tuple[dict, dict]:
         """Get the default datatypes of all columns for a CSV based dataset (tabular, text, time series)
 
 		Args:
@@ -93,15 +114,19 @@ class CsvManager:
             "space":        " ",
             "tab":          "\t",
         }
-        datatypes = {}
-        roles = {}
+        schema = {}
         dataset = pd.read_csv(path, delimiter=delimiters[fileConfiguration['delimiter']], skiprows=(fileConfiguration['start_row']-1), escapechar=fileConfiguration['escape_character'], decimal=fileConfiguration['decimal_character'], encoding=fileConfiguration['encoding'])
 
         for col in dataset.columns:
-            roles.update({col: ":none"})
             numpy_datatype = dataset[col].dtype.name
-            datatypes.update({col: CsvManager.__get_datatype(numpy_datatype, dataset[col])})
-        return roles, datatypes
+            datatype_detected, datatypes_compatible = CsvManager.__get_datatype_for_column(numpy_datatype, dataset[col])
+            roles_compatible = CsvManager.__get_compatible_roles_for_column(dataset[col])
+            schema.update({col: {
+                "datatype_detected": datatype_detected,
+                "datatypes_compatible": datatypes_compatible,
+                "roles_compatible": roles_compatible
+             }})
+        return schema
 
     @staticmethod
     def copy_default_dataset(username):
