@@ -1,5 +1,4 @@
 @using System.Net
-
 @using static Services.WikiDataGrabber
 
 @if (ViewModel.AvailableChips?.Any() ?? false)
@@ -82,17 +81,12 @@ else
 
             foreach (var chipToAdd in addedChips.Select(ac => new ChipViewModel { Id = ac.id, Label = ac.label, ToolTip = ac.toolTip }))
             {
-
-                //////Temporary testing ground//////
-                var test = chipToAdd.ToolTip;
+                // Newly created chip may contain a Wikidata-Link in its attribute ToolTip. If that's the case, turn it into a Wiki-Entry-Info
                 if (!string.IsNullOrEmpty(chipToAdd.ToolTip)) {
                     WikiDataGrabber wiki = new WikiDataGrabber();
-                    string test2 = wiki.getDataFromLink(chipToAdd.ToolTip);
-                    chipToAdd.ToolTip = test2;
+                    string wikiTooltip = wiki.getDataFromUrl(chipToAdd.ToolTip);
+                    chipToAdd.ToolTip = wikiTooltip;
                 }
-
-                ///////Temporary testing ground//////
-                var asdf = chipToAdd;
                 AvailableChips.Add(chipToAdd);
             }
 
