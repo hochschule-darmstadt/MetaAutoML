@@ -4,7 +4,7 @@ from ControllerBGRPC import *
 from AdapterManager import AdapterManager
 from ExplainableAIManager import ExplainableAIManager
 from ThreadLock import ThreadLock
-
+import json
 
 
 class AdapterRuntimeManager:
@@ -177,6 +177,29 @@ class AdapterRuntimeManager:
             CreateTrainingRequest: The training request object
         """
         return self.__request
+
+    def set_training_request(self, request: "CreateTrainingRequest"):
+        """Set the training request object in self and for each adapter manager and update data storage
+        """
+        self.__request = request
+        for adapter in self.__adapters:
+            adapter.set_request(request)
+
+        found, training = self.__data_storage.get_training(self.__request.user_id, self.__training_id)
+        data_storage_dataset_configuration = training["dataset_configuration"]
+        request_dataset_configuration = json.loads(self.__request.dataset_configuration)
+
+        for key, value in request_dataset_configuration.items():
+            if key not in data_storage_dataset_configuration:
+                data_storage_dataset_configuration[key] = value
+
+        training_details = {
+                    "dataset_configuration": data_storage_dataset_configuration
+                }
+        
+        self.__data_storage.update_training(self.__request.user_id, self.__training_id, training_details)
+
+        
 
     def get_dataset(self):
         """Get the dataset record used by the training
