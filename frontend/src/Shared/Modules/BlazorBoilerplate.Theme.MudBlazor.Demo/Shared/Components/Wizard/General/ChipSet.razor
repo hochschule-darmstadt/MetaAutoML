@@ -84,7 +84,7 @@ else
                 // Newly created chip may contain a Wikidata-Link in its attribute ToolTip. If that's the case, turn it into a Wiki-Entry-Info
                 if (!string.IsNullOrEmpty(chipToAdd.ToolTip)) {
                     WikiDataGrabber wiki = new WikiDataGrabber();
-                    string wikiTooltip = wiki.getDataFromUrl(chipToAdd.ToolTip);
+                    string wikiTooltip = wiki.GetDataFromUrl(chipToAdd.ToolTip);
                     chipToAdd.ToolTip = wikiTooltip;
                 }
                 AvailableChips.Add(chipToAdd);
