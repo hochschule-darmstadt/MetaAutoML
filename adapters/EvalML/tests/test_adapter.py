@@ -41,7 +41,7 @@ class TestAdapter(IsolatedAsyncioTestCase):
         start_automl_request.configuration.target = 'Survived'
         start_automl_request.configuration.runtime_limit = 3
         start_automl_request.configuration.metric = ':accuracy'
-        start_automl_request.dataset_configuration = '{"column_datatypes": {"PassengerId": 2, "Survived": 5, "Pclass": 2, "Name": 1, "Sex": 1, "Age": 3, "SibSp": 2, "Parch": 2, "Ticket": 1, "Fare": 3, "Cabin": 1, "Embarked": 1}, "file_configuration": {"use_header": true, "start_row": 1, "delimiter": "comma", "escape_character": "\\\\", "decimal_character": "."}}'
+        start_automl_request.dataset_configuration = '{"column_datatypes": {"PassengerId": 2, "Survived": 5, "Pclass": 2, "Name": 1, "Sex": 1, "Age": 3, "SibSp": 2, "Parch": 2, "Ticket": 1, "Fare": 3, "Cabin": 1, "Embarked": 1}, "file_configuration": {"use_header": true, "start_row": 1, "delimiter": "comma", "escape_character": "\\\\", "decimal_character": ".","encoding":""}}'
         
         self.__adapter_manager.start_auto_ml(start_automl_request, self.__session_id)
         self.__adapter_manager.start()

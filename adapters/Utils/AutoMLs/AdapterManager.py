@@ -158,6 +158,7 @@ class AdapterManager(Thread):
             ExplainModelResponse: The ExplainModelResponse message holding the prediction probabilities
         """
         try:
+            print("adapatermanager explain")
             config_json = json.loads(explain_auto_ml_request.process_json)
             result_folder_location = os.path.join(get_config_property("training-path"),
                                                   config_json["user_id"],
