@@ -41,9 +41,18 @@ class EvalMLAdapterManager(AdapterManager):
         return library, model
     
     async def explain_model(self, explain_auto_ml_request: "ExplainModelRequest") -> ExplainModelResponse:
-       
+        """override explain model function for evalml to specify the woodword structure for test data set.
+
+        Args:
+            explain_auto_ml_request (ExplainModelRequest): _description_
+
+        Raises:
+            grpclib.GRPCError: _description_
+
+        Returns:
+            ExplainModelResponse: _description_
+        """
         try:
-            print("override explain")
             config_json = json.loads(explain_auto_ml_request.process_json)
             result_folder_location = os.path.join(get_config_property("training-path"),
                                                   config_json["user_id"],
@@ -51,25 +60,15 @@ class EvalMLAdapterManager(AdapterManager):
                                                   config_json["training_id"],
                                                   get_config_property("result-folder-name"))
 
+            if self._loaded_training_id != config_json["training_id"]:
+                df, test = data_loader(config_json)
+                self._dataframeX, y = prepare_tabular_dataset(df, config_json)
 
-            df, test = data_loader(config_json)
-            dfX, y = prepare_tabular_dataset(df, config_json)
-            classification_type = "binary" if y.nunique() == 2 else "multiclass"
-
-
-            
-
-            train_data, test_data, train_target, test_target = evalml.preprocessing.split_data(dfX, y, problem_type=classification_type,test_size=0.1)
-            # todo correctly change data to data from request
-            df = pd.DataFrame(data=json.loads(explain_auto_ml_request.data), columns=dfX.columns)
-            df = df.astype(dtype=dict(zip(dfX.columns, dfX.dtypes.values)))
-            dfX.ww.init(name="train")
-
-            df.ww.init(logical_types=dfX.ww.logical_types,semantic_tags=dfX.ww.semantic_tags )
-            print(dfX.ww)
-            print("--------------------")
-            print(df.ww)
-            #probabilities = self._load_model_and_make_probabilities(config_json, result_folder_location, train_data.ww.iloc[0:len(df)])
+            df = pd.DataFrame(data=json.loads(explain_auto_ml_request.data), columns=self._dataframeX.columns)
+            df = df.astype(dtype=dict(zip(self._dataframeX.columns, self._dataframeX.dtypes.values)))
+            # apply ww strurture into test data
+            self._dataframeX.ww.init(name="train")
+            df.ww.init(logical_types=self._dataframeX.ww.logical_types,semantic_tags=self._dataframeX.ww.semantic_tags )
             probabilities = self._load_model_and_make_probabilities(config_json, result_folder_location,df)
             return ExplainModelResponse(probabilities=probabilities)
 
@@ -89,9 +88,7 @@ class EvalMLAdapterManager(AdapterManager):
         Rerturn:
             probalities as json
         """
-        #dfLen = len(dataframe.index)
-        #probabilities = json.dumps([[0.5, 0.5]]*dfLen)
-        #return probabilities
+
         if self._loaded_training_id != config["training_id"]:
             print(f"ExplainModel: Model not already loaded; Loading model")
             with open(result_folder_location + '/evalml.p', 'rb') as file:

@@ -49,30 +49,10 @@ class EvalMLAdapter(AbstractAdapter):
         self.df, test = data_loader(self._configuration)
         X, y = prepare_tabular_dataset(self.df, self._configuration)
         classification_type = "binary" if y.nunique() == 2 else "multiclass"
-        """
-        X.ww.init(name="train")
-        print(X.ww.logical_types)
-        print(X.ww.physical_types)
-        print(X.ww.semantic_tags)
-        """
-        # evalml use wood work to save the structure of df, therenore  evalml.preprocessing.split_data has to be used
-        # otherwise ridiculous problems will be occured
-        train_data, test_data, train_target, test_target = evalml.preprocessing.split_data(X, y, problem_type=classification_type,test_size=0.002)
-        """
-        test_data = X.head(1)
-        test_data.ww.init(name="test")
-        test_data.ww.set_types(
-            logical_types=X.ww.logical_types
-        )
-        print(test_data.ww.logical_types)
-        print(test_data.ww.physical_types)
-        print(test_data.ww.semantic_tags)
-        print("test")
-        """
         # parameters must be set correctly
         automl = AutoMLSearch(
-                    X_train=train_data,
-                    y_train=train_target,
+                    X_train=X,
+                    y_train=y,
                     problem_type=classification_type,
                     objective="auto",
                     max_batches=3,
@@ -81,9 +61,6 @@ class EvalMLAdapter(AbstractAdapter):
         automl.search()
         automl.describe_pipeline(3)
         best_pipeline_tobe_export = automl.best_pipeline
-        testy =  best_pipeline_tobe_export.predict(test_data)
-        print(testy)
-        #export_model(best_pipeline_tobe_export,"C:\\Users\\Hung\\Personal\\Sem1\\text mining\\Coding\\automl_test\\expotedModel", 'evalml2.p')
         export_model(best_pipeline_tobe_export, self._configuration["result_folder_location"], 'evalml.p')
         
 
