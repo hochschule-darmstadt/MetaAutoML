@@ -65,12 +65,14 @@ public class ParameterIntersector
             }
             var parameterType = GetMostRestrictiveTypeIri(parametersForBroader);
 
+            var intersectedValueViewModels = intersectedValueIris?.Select(ValueIriToValueViewModel).ToList();
             yield return new TaskConfiguration.ParameterObject
             {
                 ParameterIri = broaderIri,
                 ParameterLabel = parametersForBroader.First().BroadestLabel,
                 ParameterType = parameterType,
-                ParameterValues = intersectedValueIris?.Select(ValueIriToValueViewModel).ToList()
+                ParameterValues = intersectedValueViewModels,
+                SelectedValues = intersectedValueViewModels
             };
         }
     }

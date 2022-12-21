@@ -78,21 +78,25 @@
                     <MudText Typo="Typo.body2" Class="mt-4">@param.ParameterLabel</MudText>
                     @if (param.ParameterType == ":single_value")
                     {
-                        <MudSelect Label="@param.ParameterLabel" T="string" Variant="Variant.Outlined">
-                                @foreach (var paramValue in param.ParameterValues)
-                                {
-                                <MudSelectItem Value="@paramValue.ValueIri">@paramValue.ValueLabel</MudSelectItem>
-                                }
-                            </MudSelect>
+                        <MudSelect T="ParameterValueViewModel" Label="@param.ParameterLabel" Variant="Variant.Outlined" @bind-SelectedValues="param.SelectedValues" ValueChanged="@UpdateParemetersInRequest" ToStringFunc="p => p?.ValueLabel">
+                            @foreach (var paramValue in param.ParameterValues)
+                            {
+                                <MudSelectItem Value="@paramValue">@paramValue.ValueLabel</MudSelectItem>
+                            }
+                        </MudSelect>
                     }
                     @if (param.ParameterType == ":list")
                     {
-                        <MudSelect T="ParameterValueViewModel" MultiSelection="true" SelectAll="true" SelectedValues="@param.ParameterValues.Where(pv => pv.IsSelected)" ToStringFunc="p => p.ValueLabel" Variant="Variant.Outlined">
+                        <MudSelect T="ParameterValueViewModel" MultiSelection="true" SelectAll="true" @bind-SelectedValues="param.SelectedValues" ValueChanged="@UpdateParemetersInRequest" ToStringFunc="p => p?.ValueLabel" Variant="Variant.Outlined">
                             @foreach (var paramValue in param.ParameterValues)
                             {
-                                <MudSelectItem Value="@paramValue" onselect="">@paramValue.ValueLabel</MudSelectItem>
+                                <MudSelectItem Value="@paramValue">@paramValue.ValueLabel</MudSelectItem>
                             }
                         </MudSelect>
+                    }
+                    else if(param.ParameterType == ":integer")
+                    {
+                        <MudNumericField @bind-Value="@param.IntegerValue"/>
                     }
                 }
 
@@ -165,6 +169,21 @@
     private void OnRuntimeValueChanged(int e)
     {
         StartTrainingDto.Configuration.RuntimeLimit = e;
+    }
+
+    private async void UpdateParemetersInRequest()
+    {
+        StartTrainingDto.Configuration.Parameters = _intersectedParams
+            .Select(p => new ParameterDto
+            {
+            Iri = p.ParameterIri,
+            Values = p.ParameterValues != null
+                ? p.SelectedValues.Select(v => v.ValueIri).ToList()
+                : new List<string>{ p.IntegerValue.ToString() }
+            })
+            .ToList();
+
+        await UpdateStartTrainingDto();
     }
 
     private async void SetupStartAutoMLConfiguration()
@@ -254,6 +273,7 @@
                 ValueIri = param.ValueIri,
                 ValueLabel = param.ValueLabel
             }).ToList();
+            result.SelectedValues = result.ParameterValues;
         }
         return result;
     }
@@ -381,7 +401,6 @@
     {
         public string ValueIri { get; set; }
         public string ValueLabel { get; set; }
-        public bool IsSelected { get; set; } = true;
     }
 
     public class ParameterObject
@@ -390,5 +409,7 @@
         public string ParameterLabel { get; set; }
         public string ParameterType { get; set; }
         public List<ParameterValueViewModel> ParameterValues { get; set; } = new();
+        public IEnumerable<ParameterValueViewModel> SelectedValues { get; set; }
+        public int IntegerValue { get; set; }
     }
 }
