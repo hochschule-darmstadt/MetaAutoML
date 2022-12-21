@@ -1,4 +1,4 @@
-﻿@inject IStringLocalizer<Global> L
+@inject IStringLocalizer<Global> L
 @inject IApiClient apiClient
 @inject IViewNotifier viewNotifier
 @using Newtonsoft.Json
@@ -68,7 +68,7 @@
             <ChipSet ViewModel="@_mlLibsViewModel" Label="@L["ML libraries"]" />
             <ChipSet ViewModel="@_autoMlSolutionsViewModel" Label="@L["AutoML solutions"]" />
             <ChipSet ViewModel="@_strategiesViewModel" Label="@L["Enabled strategies"]" />
-            @if (_intersectedParams != null)
+            @if (_intersectedParams.Any())
             {
                 <MudText Typo="Typo.subtitle2" Class="mt-4">Available parameters</MudText>
 
@@ -79,35 +79,35 @@
                     @if (param.ParameterType == ":single_value")
                     {
                         <MudSelect Label="@param.ParameterLabel" T="string" Variant="Variant.Outlined">
-                                @foreach (var paramValue in param.ParameterValues)
-                                {
+                            @foreach (var paramValue in param.ParameterValues)
+                            {
                                 <MudSelectItem Value="@paramValue.ValueIri">@paramValue.ValueLabel</MudSelectItem>
-                                }
-                            </MudSelect>
+                            }
+                        </MudSelect>
                     }
                     @if (param.ParameterType == ":list")
                     {
                         <MudSelect T="ParameterValueViewModel" MultiSelection="true" SelectAll="true" SelectedValues="@param.ParameterValues.Where(pv => pv.IsSelected)" ToStringFunc="p => p.ValueLabel" Variant="Variant.Outlined">
                             @foreach (var paramValue in param.ParameterValues)
                             {
-                                <MudSelectItem Value="@paramValue" onselect="">@paramValue.ValueLabel</MudSelectItem>
+                                <MudSelectItem Value="@paramValue">@paramValue.ValueLabel</MudSelectItem>
                             }
                         </MudSelect>
                     }
                 }
+            }
 
-                @* TODO: The input fields are not here yet. Once all input fields exist in the intersected part, all of that can be extracted into a component and reused here. *@
-                @if (_individualParams.Any())
+            @* TODO: The input fields are not here yet. Once all input fields exist in the intersected part, all of that can be extracted into a component and reused here. *@
+            @if (_individualParams.Any())
+            {
+                <MudText Typo="Typo.subtitle2" Class="mt-4">Individual Parameters</MudText>
+
+                @foreach (var solution in _individualParams)
                 {
-                    <MudText Typo="Typo.subtitle2" Class="mt-4">Individual Parameters</MudText>
-
-                    @foreach (var solution in _individualParams)
+                    <MudText Typo="Typo.subtitle2" Class="mt-4">@solution.autoMlLabel</MudText>
+                    @foreach (var param in solution.parameters)
                     {
-                        <MudText Typo="Typo.subtitle2" Class="mt-4">@solution.autoMlLabel</MudText>
-                        @foreach (var param in solution.parameters)
-                        {
-                            <MudText Typo="Typo.body2" Class="mt-4">@param.ParameterLabel</MudText>
-                        }
+                        <MudText Typo="Typo.body2" Class="mt-4">@param.ParameterLabel</MudText>
                     }
                 }
             }
@@ -212,7 +212,8 @@
             () =>
             {
                 _availableParameters = apiResponse.Result.AutoMlParameters;
-                _intersectedParams = _intersector.GetIntersectedParameters().ToList();
+                _intersectedParams = ReplaceIntersectedParameter(_intersector.GetIntersectedParameters().ToList());
+
 
                 var paramsGroupedBySolution = _availableParameters
                     // all params that are either not included in the intersected params, or have a less restrictive type
@@ -375,6 +376,21 @@
     {
         StartTrainingDto.Configuration.Target = value;
         await UpdateStartTrainingDto();
+    }
+
+    private List<ParameterObject> ReplaceIntersectedParameter(List<ParameterObject> intersectedParamsNew)
+    {
+        foreach (ParameterObject intersectedParam in intersectedParamsNew)
+        {
+            foreach (ParameterValueViewModel IntersectedParamValue in intersectedParam.ParameterValues)
+            {
+                if (_intersectedParams.Exists(p => p.ParameterIri == intersectedParam.ParameterIri) && _intersectedParams.Find(p => p.ParameterIri == intersectedParam.ParameterIri).ParameterValues.Exists(pv => pv.ValueIri == IntersectedParamValue.ValueIri))
+                {
+                    IntersectedParamValue.IsSelected = _intersectedParams.Find(p => p.ParameterIri == intersectedParam.ParameterIri).ParameterValues.Find(pv => pv.ValueIri == IntersectedParamValue.ValueIri).IsSelected;
+                }
+            }
+        }
+        return intersectedParamsNew;
     }
 
     public class ParameterValueViewModel
