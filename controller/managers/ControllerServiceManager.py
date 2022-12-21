@@ -329,6 +329,14 @@ class ControllerServiceManager(ControllerServiceBase):
                     'This strategy truncates the training data if the time limit is relatively short for the size of the dataset.'
                     )
             )
+
+            result.strategies.append(
+                Strategy(
+                'data_preparation.data_encoding_for_categories',
+                'Data encoding for categories',
+                'To be done'
+                )
+            )
             
         return result
 

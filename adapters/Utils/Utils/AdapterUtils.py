@@ -414,6 +414,8 @@ def prepare_tabular_dataset(df: pd.DataFrame, json_configuration: dict) -> Tuple
     df = feature_preparation(df, json_configuration["dataset_configuration"]["column_datatypes"].items())
     if "ignored_samples" in json_configuration["dataset_configuration"]:
         df = df.drop(json_configuration["dataset_configuration"]["ignored_samples"])
+    if "encoded_columns" in json_configuration["dataset_configuration"]:
+        df = pd.get_dummies(data=df, columns=json_configuration["dataset_configuration"]["encoded_columns"])
     df = cast_dataframe_column(df, json_configuration["configuration"]["target"], json_configuration["dataset_configuration"]["column_datatypes"][json_configuration["configuration"]["target"]])
     X = df.drop(json_configuration["configuration"]["target"], axis=1)
     y = df[json_configuration["configuration"]["target"]]
