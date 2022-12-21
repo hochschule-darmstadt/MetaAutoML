@@ -5,12 +5,10 @@ import unittest
 from unittest import IsolatedAsyncioTestCase
 import uuid
 
-import evalml
 import pandas as pd
 from EvalMLAdapterManager import EvalMLAdapterManager
 from Container import *
 from AdapterBGRPC import *
-import evalml.preprocessing
 
 def load_titanic_dataset():
     """download titanic dataset
@@ -31,7 +29,7 @@ def load_titanic_dataset():
     return dataset_path
 
 class TestAdapter(IsolatedAsyncioTestCase):
-    
+
     async def test_tabular_classification(self):
         dataset_path = load_titanic_dataset()
         # setup request as it is coming in from controller
