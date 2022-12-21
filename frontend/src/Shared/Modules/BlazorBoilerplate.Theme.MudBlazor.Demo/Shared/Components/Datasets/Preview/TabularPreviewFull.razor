@@ -44,22 +44,51 @@ else
         }
         else
         {
-             <MudTable Items="@_datasetFrame.Rows" style="width:stretch" class="mat-elevation-z5" FixedHeader="true" Dense="true">
+             <MudTable Items="@_datasetFrame.Rows" style="width:stretch" class="mat-elevation-z5" FixedHeader="true" Dense="true" CustomHeader="true">
                 <HeaderContent>
-                    @foreach (var item in _datasetFrame.Columns)
-                    {
-                       
-                        @if (UseHeader == true)
+                    <MudTHeadRow>
+                        @foreach (var item in _datasetFrame.Columns)
                         {
-                            <MudTh>@item.Name</MudTh>
+                            @if (UseHeader == true)
+                            {
+                                <MudTh>@item.Name</MudTh>
+                            }
+                            else
+                            {
+                                <MudTh Style="background-color: gray">@item.Name</MudTh>
+                            }
                         }
-                        else
+                    </MudTHeadRow>
+                    <MudTHeadRow>
+                        @foreach (var item in _datasetFrame.Columns)
                         {
-                            <MudTh Style="background-color: gray">@item.Name</MudTh>
+                            <MudTh>
+                                <MudSelect T="string" Value="@(_dataset.Dataset.Schema[item.Name].DatatypeSelected.ID == null ? _dataset.Dataset.Schema[item.Name].DatatypeDetected.ID : _dataset.Dataset.Schema[item.Name].DatatypeSelected.ID)" ValueChanged="@((e) => { _dataset.Dataset.Schema[item.Name].DatatypeSelected.ID = e; })">
+                                    @foreach (var datatype in _dataset.Dataset.Schema[item.Name].DatatypesCompatible)
+                                    {
+                                        <MudSelectItem Value="@datatype.ID">
+                                            <MudText Typo="Typo.body2">@L[datatype.Properties.ContainsKey("skos:prefLabel") ? datatype.Properties["skos:prefLabel"] : ""]</MudText>
+                                        </MudSelectItem>
+                                    }
+                                </MudSelect>
+                            </MudTh>
                         }
-
-                    }
-                    <MudTh></MudTh>
+                    </MudTHeadRow>
+                    <MudTHeadRow>
+                        @foreach (var item in _datasetFrame.Columns)
+                        {
+                            <MudTh>
+                                <MudSelect T="string" Value="@(_dataset.Dataset.Schema[item.Name].RoleSelected.ID == null ? "" : _dataset.Dataset.Schema[item.Name].RoleSelected.ID)" ValueChanged="@((e) => { _dataset.Dataset.Schema[item.Name].RoleSelected.ID = e; })">
+                                    @foreach (var role in _dataset.Dataset.Schema[item.Name].RolesCompatible)
+                                    {
+                                        <MudSelectItem Value="@role.ID">
+                                                <MudText Typo="Typo.body2">@L[role.Properties.ContainsKey("skos:prefLabel") ? role.Properties["skos:prefLabel"] : ""]</MudText>
+                                        </MudSelectItem>
+                                    }
+                                </MudSelect>
+                            </MudTh>
+                        }
+                    </MudTHeadRow>
                 </HeaderContent>
                 <RowTemplate>
 
@@ -231,6 +260,7 @@ else
 
     private bool _isSavingAllowed = true;
     private bool _datasetReadError = false;
+
     private void ReloadDataFrame()
     {
         try
