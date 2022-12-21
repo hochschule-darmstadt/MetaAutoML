@@ -1,10 +1,10 @@
 FROM --platform=linux/amd64 python:3.7.11-slim-buster AS base
-EXPOSE 50061
+EXPOSE 50062
 
 RUN apt-get update && apt-get install -y libgomp1 \
-    && apt-get install -y git 
+    && apt-get install -y git
 
-COPY ./FLAML/requirements.txt .
+COPY ./EvalML/requirements.txt .
 # Install dependencies
 RUN pip install -r requirements.txt
 # put all files in a directory called app
