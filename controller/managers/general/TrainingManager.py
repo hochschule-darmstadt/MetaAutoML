@@ -77,7 +77,7 @@ class TrainingManager:
                 "metric": create_training_request.configuration.metric,
                 "selected_auto_ml_solutions": create_training_request.configuration.selected_auto_ml_solutions,
                 "selected_ml_libraries": create_training_request.configuration.selected_ml_libraries,
-                "parameters": create_training_request.configuration.parameters
+                "parameters": [{"iri": p.iri, "value": p.value} for p in create_training_request.configuration.parameters]
             },
             "dataset_configuration": {
                 "column_datatypes": json.loads(create_training_request.dataset_configuration)["column_datatypes"],

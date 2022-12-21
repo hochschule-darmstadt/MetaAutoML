@@ -48,8 +48,8 @@ namespace BlazorBoilerplate.Server.Managers
                 createTrainingRequest.Configuration.EnabledStrategies.AddRange(request.Configuration.EnabledStrategies);
                 createTrainingRequest.Configuration.Parameters.AddRange(request.Configuration.Parameters.Select(p =>
                 {
-                    var result = new ParameterValue {Iri = p.iri};
-                    result.Value.AddRange(p.values);
+                    var result = new ParameterValue {Iri = p.Iri};
+                    result.Value.AddRange(p.Values);
                     return result;
                 }));
                 createTrainingRequest.DatasetConfiguration = JsonConvert.SerializeObject(request.DatasetConfiguration);
