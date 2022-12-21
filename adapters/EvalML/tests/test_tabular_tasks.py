@@ -25,7 +25,6 @@ def load_titanic_dataset():
     titanic = titanic[["age", "sex", "survived"]]
 
     dataset_path = os.path.join(cache_dir, "titanic.csv")
-    print(dataset_path)
     with open(dataset_path, "w+") as outfp:
         pd.DataFrame.to_csv(titanic, outfp, index=False)
 
@@ -33,7 +32,7 @@ def load_titanic_dataset():
 
 class TestAdapter(IsolatedAsyncioTestCase):
     
-    async def test_start_automl_process(self):
+    async def test_tabular_classification(self):
         dataset_path = load_titanic_dataset()
         # setup request as it is coming in from controller
         req = StartAutoMlRequest()
@@ -42,6 +41,49 @@ class TestAdapter(IsolatedAsyncioTestCase):
         req.user_id = "test"
         req.dataset_path = dataset_path
         req.configuration.task = ':tabular_classification'
+        req.configuration.target = "survived"
+        req.configuration.runtime_limit = 3
+        req.configuration.metric = ':accuracy'
+        req.dataset_configuration = json.dumps({
+            "column_datatypes": {
+                "age": 2,
+                "sex": 1,
+                "survived": 2 ,
+            },
+            "file_configuration": {
+                "use_header": True,
+                "start_row": 1,
+                "delimiter": "comma",
+                "escape_character": "\\",
+                "decimal_character": ".",
+                "encoding": ""
+            }
+        })
+
+        # start training
+        adapter_manager = EvalMLAdapterManager()
+        adapter_manager.start_auto_ml(req, uuid.uuid4())
+        adapter_manager.start()
+        adapter_manager.join()
+
+        # check if model archive exists
+        out_dir = os.path.join("app-data", "training",
+                               req.user_id, req.dataset_id, req.training_id)
+        path_to_model = os.path.join(out_dir, "export", "evalml-export.zip")
+        self.assertTrue(os.path.exists(path_to_model), f"path to model: '{path_to_model}' does not exist")
+
+        # clean up
+        shutil.rmtree(out_dir)
+    
+    async def test_tabular_regression(self):
+        dataset_path = load_titanic_dataset()
+        # setup request as it is coming in from controller
+        req = StartAutoMlRequest()
+        req.training_id = "test"
+        req.dataset_id = "test"
+        req.user_id = "test"
+        req.dataset_path = dataset_path
+        req.configuration.task = ':tabular_regression'
         req.configuration.target = "survived"
         req.configuration.runtime_limit = 3
         req.configuration.metric = ':accuracy'
