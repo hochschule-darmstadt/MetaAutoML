@@ -9,7 +9,7 @@ from typing import Any
 import dill
 import numpy as np
 import pandas as pd
-from predict_time_sources import DataType, SplitMethod, feature_preparation
+from predict_time_sources import DataType, SplitMethod, feature_preparation, encode_category_columns
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, mean_squared_error
 from sklearn.metrics import classification_report
@@ -379,6 +379,21 @@ def read_tabular_dataset_training_data(config: "StartAutoMlRequest") -> Tuple[pd
     #    train = data.sample(random_state=json_configuration["test_configuration"]["random_state"], frac=1)
     #    test = data.sample(random_state=json_configuration["test_configuration"]["random_state"], frac=1)
     #else:
+
+
+    #remove redundant samples
+    if "ignored_samples" in config["dataset_configuration"]:
+        data = data.drop(config["dataset_configuration"]["ignored_samples"])
+
+    #gather all column types including one hot encoding results on categories
+    if "encoded_columns" in config["dataset_configuration"]:
+        encoded_columns = config["dataset_configuration"]["encoded_columns"]
+        for key in encoded_columns:
+            unique_values = data[key].unique()
+            encoded_columns[key] = []
+            for value in unique_values:
+                encoded_columns[key].append(str(key) + "_" + str(value))
+
     train = data.iloc[:int(data.shape[0] * 0.8)]
     test = data.iloc[int(data.shape[0] * 0.8):]
 
@@ -412,10 +427,7 @@ def prepare_tabular_dataset(df: pd.DataFrame, json_configuration: dict) -> Tuple
         tuple[pd.DataFrame, pd.Series]: tuple holding the dataset dataframe without the target column, and a Series holding the Target column tuple[(X_dataframe, y_series)]
     """
     df = feature_preparation(df, json_configuration["dataset_configuration"]["column_datatypes"].items())
-    if "ignored_samples" in json_configuration["dataset_configuration"]:
-        df = df.drop(json_configuration["dataset_configuration"]["ignored_samples"])
-    if "encoded_columns" in json_configuration["dataset_configuration"]:
-        df = pd.get_dummies(data=df, columns=json_configuration["dataset_configuration"]["encoded_columns"])
+    df = encode_category_columns(df, json_configuration)
     df = cast_dataframe_column(df, json_configuration["configuration"]["target"], json_configuration["dataset_configuration"]["column_datatypes"][json_configuration["configuration"]["target"]])
     X = df.drop(json_configuration["configuration"]["target"], axis=1)
     y = df[json_configuration["configuration"]["target"]]

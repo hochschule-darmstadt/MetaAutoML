@@ -134,7 +134,7 @@ class DataPreparationStrategyController(IAbstractStrategy):
 
     def do_data_encoding_for_categories(self, state: dict, blackboard: Blackboard, controller: StrategyController):
         column_datatypes = json.loads(state.get("training_runtime", {}).get("configuration", {}).get("datasetConfiguration", str))["column_datatypes"]
-        encoded_columns = []
+        encoded_columns = {}
 
         agent: AdapterRuntimeManagerAgent = controller.get_blackboard().get_agent('training-runtime')
         if not agent or not agent.get_adapter_runtime_manager():
@@ -145,14 +145,14 @@ class DataPreparationStrategyController(IAbstractStrategy):
         for key, column_datatype in column_datatypes.items():
             if column_datatype == 4:
                 self._log.info(f'do_data_encoding_for_categories: Add "{key}" to encoded_columns.')
-                encoded_columns.append(key)
+                encoded_columns[key] = []
 
             dataset_configuration['encoded_columns'] = encoded_columns
 
         training_request = agent.get_adapter_runtime_manager().get_training_request()
         training_request.dataset_configuration = json.dumps(dataset_configuration)
         agent.get_adapter_runtime_manager().set_training_request(training_request)
-        
+
         # Finished action (should only run once, therefore disable the strategy rule)
         controller.disable_strategy('data_preparation.data_encoding_for_categories')
 
