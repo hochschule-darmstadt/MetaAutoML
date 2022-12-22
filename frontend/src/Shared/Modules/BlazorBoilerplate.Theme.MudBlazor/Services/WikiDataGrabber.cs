@@ -5,7 +5,7 @@ using System.Text.RegularExpressions;
 
 namespace BlazorBoilerplate.Theme.Material.Services
 {
-    public class WikiDataGrabber
+    public static class WikiDataGrabber
     {
         /// <summary>
         /// Gets data from a Wikidata URL and extracts required data from there. Currently only gets the
@@ -105,6 +105,11 @@ namespace BlazorBoilerplate.Theme.Material.Services
                 return true;
             }
             return false;
+        }
+
+        public string GetWikipediaText(string url, string language = "en") {
+            string adjustedUrl = Regex.Replace(url, "/wiki/", "/w/api.php?format=json&action=query&prop=extracts&explaintext=1&titles=");
+            
         }
     }
 }
