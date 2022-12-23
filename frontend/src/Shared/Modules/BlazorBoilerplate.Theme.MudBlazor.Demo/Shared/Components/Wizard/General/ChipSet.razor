@@ -9,7 +9,7 @@
         {
             @if (chip.ToolTip != null)
             {
-                <MudTooltip Text="@chip.ToolTip" Delay="600" Arrow="true" Placement="Placement.Bottom" Class="strategy-description-tooltip">
+                <MudTooltip Text="@chip.ToolTip" Delay="600" Arrow="true" Placement="Placement.Top" Class="strategy-description-tooltip">
                     <MudChip Value="@chip.Id" Text="@chip.Label" Variant="Variant.Text" Color="Color.Secondary" @onclick="() => ToggleChip(chip)" />
                 </MudTooltip>
             }
@@ -63,7 +63,7 @@ else
         /// List of selected elements in the ChipSet.
         /// </summary>
         /// <value></value>
-        public IEnumerable<string> SelectedIds => AvailableChips.Where(c => c.IsSelected).Select(c => c.Id); 
+        public IEnumerable<string> SelectedIds => AvailableChips.Where(c => c.IsSelected).Select(c => c.Id);
 
         /// <summary>
         /// Updates the collection of available chips and adapt the selected ids accordingly.
@@ -84,7 +84,7 @@ else
                 // Newly created chip may contain a Wikidata-Link in its attribute ToolTip. If that's the case, turn it into a Wiki-Entry-Info
                 if (!string.IsNullOrEmpty(chipToAdd.ToolTip)) {
                     WikiDataGrabber wiki = new WikiDataGrabber();
-                    string wikiTooltip = wiki.GetDataFromUrl(chipToAdd.ToolTip);
+                    string wikiTooltip = wiki.GetDataFrom(chipToAdd.ToolTip);
                     chipToAdd.ToolTip = wikiTooltip;
                 }
                 AvailableChips.Add(chipToAdd);
@@ -92,7 +92,9 @@ else
 
             RaiseSelectedIdsChanged();
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
         public void RaiseSelectedIdsChanged()
         {
             SelectedIdsChanged(this, EventArgs.Empty);

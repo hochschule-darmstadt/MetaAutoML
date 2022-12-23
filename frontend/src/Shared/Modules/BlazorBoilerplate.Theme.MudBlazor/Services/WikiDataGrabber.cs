@@ -1,11 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
 
 namespace BlazorBoilerplate.Theme.Material.Services
 {
-    public static class WikiDataGrabber
+    public class WikiDataGrabber
     {
         /// <summary>
         /// Gets data from a Wikidata URL and extracts required data from there. Currently only gets the
@@ -13,18 +14,35 @@ namespace BlazorBoilerplate.Theme.Material.Services
         /// into separate methods might be advisable, like one for getting Wikidata description and another
         /// to get Wikipedia text.
         /// </summary>
-        /// <param name="url"></param> URL to Wikidata. If it's something else, the method immediately returns the content of url
+        /// <param name="wikiDataUrl"></param> URL to Wikidata. If it's something else, the method immediately returns the content of url
         /// <param name="language"></param> Optional, as it defaults to english (en). You can choose which laguage your desired data should be returned in
         /// <returns></returns> Either the Wikidata description (currently) or the content of url if it's a non-url-string
-        public string GetDataFromUrl(string url, string language = "en")
+        public string GetDataFrom(string wikiDataUrl, string language = "en")
         {
-            if(!IsWikiDatalink(url))
+            if(!IsWikiDatalink(wikiDataUrl))
             {
-                return url;
+                return wikiDataUrl;
             }
             
-            url = AdjustUrl(url);
+            wikiDataUrl = AdjustUrl(wikiDataUrl);
 
+            dynamic wikiDataJsonFile = GetDataFromUrl(wikiDataUrl);
+            string uri = ExtractUri(wikiDataUrl);
+            string description = GetWikidataDescription(wikiDataJsonFile, uri);
+            string wikipediaLink = GetWikipediaUrl(wikiDataJsonFile, uri, language);
+            wikipediaLink = AdjustWikipediaLink(wikipediaLink);
+            JObject wikipediaJsonFile = GetDataFromUrl(wikipediaLink)["query"]["pages"];
+            string pageId = wikipediaJsonFile.Properties().First().Name;
+            //Splitting the string, because it would show every section and we only want the first description
+            string extract = wikipediaJsonFile[pageId]["extract"].ToString().Split("\n\n\n==")[0];
+
+           
+            return extract;
+        }
+
+ 
+        public static dynamic GetDataFromUrl(string url)
+        {
             var httpRequest = (HttpWebRequest)WebRequest.Create(url);
             httpRequest.Accept = "application/json";
             var httpResponse = (HttpWebResponse)httpRequest.GetResponse();
@@ -33,22 +51,9 @@ namespace BlazorBoilerplate.Theme.Material.Services
             {
                 result = streamReader.ReadToEnd();
             }
+            dynamic jsonObj = JsonConvert.DeserializeObject(result);
+            return jsonObj;
 
-            dynamic jsonObject = StringToJsonObject(result);
-            string uri = ExtractUri(url);
-            string description = GetWikidataDescription(jsonObject, uri);
-
-            return description;
-        }
-        /// <summary>
-        /// Deserialize the JSON String to a JSON Object
-        /// </summary>
-        /// <param name="data"></param>JSON as a String
-        /// <returns></returns>JSON as a (dynamically created) object
-        public dynamic StringToJsonObject(string data)
-        {
-            dynamic jsonObject = JsonConvert.DeserializeObject(data);
-            return jsonObject;
         }
 
         /// <summary>
@@ -72,8 +77,13 @@ namespace BlazorBoilerplate.Theme.Material.Services
         public string GetWikidataDescription(dynamic jsonObject, string uri, string language = "en")
         {
             string description = jsonObject.entities[uri].descriptions[language].value;
-
             return description;
+        }
+
+        public string GetWikipediaUrl(dynamic jsonObject, string uri, string language = "en")
+        {
+            string wikipediaUrl = jsonObject.entities[uri].sitelinks[language + "wiki"].url;
+            return wikipediaUrl;
         }
 
         /// <summary>
@@ -106,10 +116,14 @@ namespace BlazorBoilerplate.Theme.Material.Services
             }
             return false;
         }
-
-        public string GetWikipediaText(string url, string language = "en") {
+        /// <summary>
+        /// Adjusts Wikipedia Link which we got from Wikidata
+        /// </summary>
+        /// <param name="url"></param>
+        /// <returns></returns>
+        public static string AdjustWikipediaLink(string url) {
             string adjustedUrl = Regex.Replace(url, "/wiki/", "/w/api.php?format=json&action=query&prop=extracts&explaintext=1&titles=");
-            
+            return adjustedUrl;
         }
     }
 }
