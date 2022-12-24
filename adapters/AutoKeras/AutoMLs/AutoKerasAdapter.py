@@ -115,7 +115,7 @@ class AutoKerasAdapter(AbstractAdapter):
                                 directory=self._configuration["model_folder_location"])
 
         reg.fit(x = np.array(X).astype(np.unicode_), y = np.array(y), epochs=1)
-        print(self._configuration['dataset_configuration']['column_datatypes'])
+        self.save_configuration_in_json()
         export_model(reg, self._configuration["result_folder_location"], 'model_keras.p')
 
 
@@ -123,8 +123,9 @@ class AutoKerasAdapter(AbstractAdapter):
         """Execute text regression task and export the found model"""
 
         self.df, test = data_loader(self._configuration)
+        self.get_column_with_largest_amout_of_text(X)
         X, y = prepare_tabular_dataset(self.df, self._configuration)
-        X = self.get_column_with_largest_amout_of_text(X)
+
         reg = ak.TextClassifier(overwrite=True,
                                           max_trials=3,
                                 # metric=self._configuration['metric'],
@@ -132,8 +133,9 @@ class AutoKerasAdapter(AbstractAdapter):
                                 directory=self._configuration["model_folder_location"])
 
         reg.fit(x = np.array(X), y = np.array(y), epochs=1)
-
+        self.save_configuration_in_json()
         export_model(reg, self._configuration["result_folder_location"], 'model_keras.p')
+
 
     def __time_series_forecasting(self):
         """Execute time series forecasting task and export the found model"""
@@ -148,7 +150,6 @@ class AutoKerasAdapter(AbstractAdapter):
                                 directory=self._configuration["model_folder_location"])
 
         reg.fit(x = np.array(X), y = np.array(y), epochs=1)
-
         export_model(reg, self._configuration["result_folder_location"], 'model_keras.p')
 
     def get_column_with_largest_amout_of_text(self, df: pd.DataFrame):
@@ -173,11 +174,14 @@ class AutoKerasAdapter(AbstractAdapter):
 
         column_names_to_ignore = column_names.drop(max_value)
         for column_name in column_names_to_ignore:
-            self._configuration['dataset_configuration']['column_datatypes'][column_name] = 7 #DataType.DATATYPE_IGNORE
-    #'C:/Users/pfriehe/Documents/Studium/WiSe2022/PSE/MetaAutoML/adapters/AutoKeras/app-data/training\\fcc66cd1-d166-4d1e-8510-7d93015d83f6\\639f602e684fd91d4fad739f\\63a315022cf2f82c7c7ac41b\\job\\keras-job.json'
-        #with open(os.path.join(self._configuration['job_folder_location'],'keras-job.json'), 'w') as outfile:
-         #   outfile.write(str(self._configuration))
+            #TODO Change 7 to new Datatype Igorne
+            self._configuration['dataset_configuration']['column_datatypes'][column_name] = 7
 
+
+    def save_configuration_in_json(self):
+        """ serialize dataset_configuration to json string and save the the complete configuration in json file
+            to habe the right datatypes available for the evaluation
+        """
+        self._configuration['dataset_configuration'] = json.dumps(self._configuration['dataset_configuration'])
         with open(os.path.join(self._configuration['job_folder_location'], get_config_property("job-file-name")), "w+") as f:
             json.dump(self._configuration, f)
-
