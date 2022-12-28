@@ -10,7 +10,22 @@
             @if (chip.ToolTip != null)
             {
                 <MudTooltip Text="@chip.ToolTip" Delay="600" Arrow="true" Placement="Placement.Top" Class="strategy-description-tooltip">
-                    <MudChip Value="@chip.Id" Text="@chip.Label" Variant="Variant.Text" Color="Color.Secondary" @onclick="() => ToggleChip(chip)" />
+                    <ChildContent>
+                        <MudChip Value="@chip.Id" Text="@chip.Label" Variant="Variant.Text" Color="Color.Secondary" @onclick="() => ToggleChip(chip)" />
+                    </ChildContent>
+                    <TooltipContent>
+                        <MudGrid>
+                            <MudItem xs="12">
+                                <MudPaper Class="d-flex align-center justify-center mud-width-full py-8"> <MudImage Src="@wikipediaImageUrl" Alt="Mony the dog" Elevation="25" /></MudPaper>
+                            </MudItem>
+                            <MudItem xs="12">
+                                <MudText Style="font-size:inherit">@chip.ToolTip</MudText>
+                            </MudItem>
+                        </MudGrid>
+                           
+                            
+
+                    </TooltipContent>
                 </MudTooltip>
             }
             else
@@ -32,6 +47,7 @@ else
 
     [Parameter]
     public string Label { get; set; }
+    public static string wikipediaImageUrl { get; set; }
 
     private ICollection<object> SelectedValues => ViewModel.SelectedIds.Cast<object>().ToList();
 
@@ -59,6 +75,7 @@ else
         /// <returns></returns>
         public ICollection<ChipViewModel> AvailableChips { get; } = new List<ChipViewModel>();
 
+
         /// <summary>
         /// List of selected elements in the ChipSet.
         /// </summary>
@@ -84,8 +101,10 @@ else
                 // Newly created chip may contain a Wikidata-Link in its attribute ToolTip. If that's the case, turn it into a Wiki-Entry-Info
                 if (!string.IsNullOrEmpty(chipToAdd.ToolTip)) {
                     WikiDataGrabber wiki = new WikiDataGrabber();
-                    string wikiTooltip = wiki.GetDataFrom(chipToAdd.ToolTip);
-                    chipToAdd.ToolTip = wikiTooltip;
+                    List<string> wikiTooltip = wiki.GetDataFrom(chipToAdd.ToolTip);
+                    if (wikiTooltip != null) { chipToAdd.ToolTip = wikiTooltip[0]; wikipediaImageUrl = wikiTooltip[1]; }
+
+
                 }
                 AvailableChips.Add(chipToAdd);
             }

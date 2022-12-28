@@ -3,6 +3,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
+using static MudBlazor.CategoryTypes;
 
 namespace BlazorBoilerplate.Theme.Material.Services
 {
@@ -17,12 +18,13 @@ namespace BlazorBoilerplate.Theme.Material.Services
         /// <param name="wikiDataUrl"></param> URL to Wikidata. If it's something else, the method immediately returns the content of url
         /// <param name="language"></param> Optional, as it defaults to english (en). You can choose which laguage your desired data should be returned in
         /// <returns></returns> Either the Wikidata description (currently) or the content of url if it's a non-url-string
-        public string GetDataFrom(string wikiDataUrl, string language = "en")
+        public List<string> GetDataFrom(string wikiDataUrl, string language = "en")
         {
-            if(!IsWikiDatalink(wikiDataUrl))
+            List<string> wikipediaContent = new List<string>();
+          /*  if(!IsWikiDatalink(wikiDataUrl))
             {
-                return wikiDataUrl;
-            }
+                return wikipediaContent;
+            }*/
             
             wikiDataUrl = AdjustUrl(wikiDataUrl);
 
@@ -35,9 +37,20 @@ namespace BlazorBoilerplate.Theme.Material.Services
             string pageId = wikipediaJsonFile.Properties().First().Name;
             //Splitting the string, because it would show every section and we only want the first description
             string extract = wikipediaJsonFile[pageId]["extract"].ToString().Split("\n\n\n==")[0];
-
+            wikipediaContent.Add(extract);
+            string imageUrl = GetPictureUrlFromWikipedia(wikipediaLink);
+            wikipediaContent.Add(imageUrl);
            
-            return extract;
+            return wikipediaContent;
+        }
+
+        public string GetPictureUrlFromWikipedia(string adjustedUrl)
+        {
+            adjustedUrl += "&prop=pageimages&format=json&pithumbsize=200";
+            JObject wikipediaJsonResponse = GetDataFromUrl(adjustedUrl)["query"]["pages"];
+            string pageId = wikipediaJsonResponse.Properties().First().Name;
+            string imageUrl = wikipediaJsonResponse[pageId]["thumbnail"]["source"].ToString();
+            return imageUrl;
         }
 
  
