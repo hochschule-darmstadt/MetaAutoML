@@ -38,7 +38,7 @@ def read_image_dataset(json_configuration):
 
     def img_preprocess(img):
         """
-        Opens the image and does some preprocessing 
+        Opens the image and does some preprocessing
         such as converting to RGB, resize and converting to array
         """
         img = Image.open(img)
@@ -72,7 +72,7 @@ if __name__ == '__main__':
             "space":        " ",
             "tab":          "\t",
         }
-        X = pd.read_csv(filepath, delimiter=delimiters[config_json["dataset_configuration"]['file_configuration']['delimiter']], escapechar=config_json["dataset_configuration"]['file_configuration']['escape_character'], decimal=config_json["dataset_configuration"]['file_configuration']['decimal_character']).drop(target, axis=1, errors='ignore')
+        X = pd.read_csv(filepath, delimiter=delimiters[config_json["dataset_configuration"]['file_configuration']['delimiter']], escapechar=config_json["dataset_configuration"]['file_configuration']['escape_character'], decimal=config_json["dataset_configuration"]['file_configuration']['decimal_character'], encoding = config_json["dataset_configuration"]['file_configuration']['encoding']).drop(target, axis=1, errors='ignore')
 
         X = X.iloc[:]
 
@@ -84,11 +84,11 @@ if __name__ == '__main__':
     with open(sys.path[0] + '/model_keras.p', 'rb') as file:
         loaded_model = dill.load(file)
     if config_json["configuration"]["task"] in [":text_classification", ":text_regression"]:
-        
+
         predicted_y = loaded_model.predict(np.array(X))
         #predicted_y = [np.round(y[0],0) for y in predicted_y]
     else:
         predicted_y = loaded_model.predict(X)
         #predicted_y = [np.round(y[0],0) for y in predicted_y]
-    
+
     pd.DataFrame(data=predicted_y, columns=["predicted"]).to_csv(save_path)
