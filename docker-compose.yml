@@ -37,7 +37,7 @@ services:
       #- PYTORCH_SERVICE_PORT=50059
       #- ALPHAD3M_SERVICE_HOST=alphad3m
       #- ALPHAD3M_SERVICE_PORT=50060
-      - EVALML_SERVICE_HOST=gluon
+      - EVALML_SERVICE_HOST=evalml
       - EVALML_SERVICE_PORT=50062
       - PERSISTENCE_LOGGING_LEVEL=DEBUG
       - SERVER_LOGGING_LEVEL=DEBUG
@@ -130,17 +130,6 @@ services:
     volumes:
       - datasets:/app/app-data/datasets
       - training-flaml:/app/app-data/training
-
-  gluon:
-    build:
-      context: ./adapters
-      dockerfile: ./AutoGluon/Dockerfile
-    container_name: gluon
-    environment:
-      - GRPC_SERVER_PORT=50057
-    volumes:
-      - datasets:/app/app-data/datasets
-      - training-gluon:/app/app-data/training
 
   #autocve:
   #  build:
