@@ -188,7 +188,7 @@ class ExplainableAIManager:
         self.__threads.append(thread)
         self.__data_storage.update_model(user_id, model_id, {"explanation": {"status": "started"}})
         return
-        
+
 
 
     def explain_shap(self, user_id, model_id, callback, number_of_samples=25):
@@ -197,7 +197,7 @@ class ExplainableAIManager:
         dataset_path = self.__data_storage.get_dataset(user_id, training["dataset_id"])[1]["path"]
 
         print(f"[ExplainableAIManager]: Initializing new shap explanation. AutoML: {model['auto_ml_solution'].replace(':', '')} | Training ID: {model['training_id']} | Dataset: {training['dataset_id']}")
-        
+
         training["file_location"], training["file_name"] = os.path.split(dataset_path)
         output_path = os.path.join(os.getcwd(), "app-data", "training", model["auto_ml_solution"].replace(":", ""), user_id, training["dataset_id"], model["training_id"], "result")
         os.makedirs(output_path, exist_ok=True)
@@ -210,8 +210,8 @@ class ExplainableAIManager:
             "tab":          "\t",
         }
 
-        
-        dataset = pd.read_csv(dataset_path, delimiter=delimiters[training["dataset_configuration"]['file_configuration']['delimiter']], skiprows=(training["dataset_configuration"]['file_configuration']['start_row']-1), escapechar=training["dataset_configuration"]['file_configuration']['escape_character'], decimal=training["dataset_configuration"]['file_configuration']['decimal_character'])
+
+        dataset = pd.read_csv(dataset_path, delimiter=delimiters[training["dataset_configuration"]['file_configuration']['delimiter']], skiprows=(training["dataset_configuration"]['file_configuration']['start_row']-1), escapechar=training["dataset_configuration"]['file_configuration']['escape_character'], decimal=training["dataset_configuration"]['file_configuration']['decimal_character'], encoding=training["dataset_configuration"]['file_configuration']['encoding'])
         dataset = feature_preparation(dataset, training["dataset_configuration"]["column_datatypes"].items())
         dataset_X = dataset.drop(training["configuration"]["target"], axis=1)
         dataset_Y = dataset[training["configuration"]["target"]]
