@@ -1327,6 +1327,7 @@
 :evalml a :AutoML_solution ;
     skos:prefLabel "EvalML" ;
     :used_for :scikit_learn_lib , :catboost_lib , :lightgbm_lib , :xgboost_lib ;
+    :supported_by_oma_ml "True" ;
     :can_perform :tabular_classification , :tabular_regression , :time_series_forecasting , :text_classification .
 :flaml a :AutoML_solution ;
     skos:prefLabel "FLAML" ;
