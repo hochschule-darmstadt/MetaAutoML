@@ -131,7 +131,7 @@ services:
       - datasets:/app/app-data/datasets
       - training-flaml:/app/app-data/training
 
-gluon:
+  gluon:
     build:
       context: ./adapters
       dockerfile: ./AutoGluon/Dockerfile
