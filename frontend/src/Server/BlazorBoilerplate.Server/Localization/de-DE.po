@@ -898,3 +898,68 @@ msgstr "4 Stunden"
 msgid "AffinityCookieDescription"
 msgstr "Dieses Cookie speichert die aktuelle Sticky Sitzungs id, wird für das korrekte Routing verwendet."
 
+msgid "ASCII"
+msgstr "ASCII"
+
+msgid "UTF-8"
+msgstr "UTF-8"
+
+msgid "latin-1"
+msgstr "latin-1"
+
+msgid "UTF-16"
+msgstr "UTF-16"
+
+msgid "UTF-32"
+msgstr "UTF-32"
+
+msgid "integer"
+msgstr "Integer"
+
+msgid "float"
+msgstr "Float"
+
+msgid "boolean"
+msgstr "Boolescher Wert"
+
+msgid "string"
+msgstr "String"
+
+msgid "categorical"
+msgstr "Kategorien"
+
+
+msgid "datetime"
+msgstr "Datetime"
+
+
+msgid "time_delta"
+msgstr "Time Delta"
+
+
+msgid "list"
+msgstr "Liste"
+
+msgid "single_value"
+msgstr "Single"
+
+msgid "index"
+msgstr "Index"
+
+msgid "target"
+msgstr "Target"
+
+msgid "ignore"
+msgstr "Ignorieren"
+
+msgid "none"
+msgstr "Nichts"
+
+msgid "Datatype"
+msgstr "Datentype"
+
+msgid "Datatype analysis incompatible with current dataset configuration, save current configuration to start new analysis"
+msgstr "Datentypenanalysis ist nicht mit der aktuellen Konfiguration kompatible. Durch das speichern der aktuellen Konfiguration wird eine neue Analysis gestartet."
+
+msgid "Roles analysis incompatible with current dataset configuration, save current configuration to start new analysis"
+msgstr "Rollenanalysis ist nicht mit der aktuellen Konfiguration kompatible. Durch das speichern der aktuellen Konfiguration wird eine neue Analysis gestartet."

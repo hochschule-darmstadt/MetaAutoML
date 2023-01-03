@@ -188,7 +188,7 @@ class DatasetManager:
         self.__log.debug(f"delete_dataset: {str(result)} datasets deleted")
         return DeleteDatasetResponse()
 
-    def set_dataset_configuration(
+    def set_dataset_file_configuration(
         self,
         set_dataset_configuration_request: "SetDatasetConfigurationRequest",
     ) -> "SetDatasetConfigurationResponse":
@@ -200,16 +200,44 @@ class DatasetManager:
         Returns:
             SetDatasetConfigurationResponse: The empty GRPC response
         """
-        self.__log.debug(f"set_dataset_file_configuration: setting new file configuration new configuration {set_dataset_configuration_request.file_configuration}, for dataset {set_dataset_configuration_request.dataset_id}, of user {set_dataset_configuration_request.user_id}")
-        found, dataset = self.__data_storage.get_dataset(set_dataset_configuration_request.user_id, set_dataset_configuration_request.dataset_id)
-        dataset_schema = dataset["schema"]
-        for column in set_dataset_configuration_request.column_configuration:
-            if set_dataset_configuration_request.column_configuration[column].datatype_selected != "":
-                dataset_schema[column].update({"datatype_selected": set_dataset_configuration_request.column_configuration[column].datatype_selected})
-            if set_dataset_configuration_request.column_configuration[column].role_selected != "":
-                dataset_schema[column].update({"role_selected": set_dataset_configuration_request.column_configuration[column].role_selected})
+        self.__log.debug(f"set_dataset_file_configuration: setting new file configuration {set_dataset_configuration_request.file_configuration}, for dataset {set_dataset_configuration_request.dataset_id}, of user {set_dataset_configuration_request.user_id}")
         self.__data_storage.update_dataset(set_dataset_configuration_request.user_id, set_dataset_configuration_request.dataset_id, { "file_configuration": json.loads(set_dataset_configuration_request.file_configuration) })
         self.__log.debug(f"set_dataset_file_configuration: executing dataset analysis for dataset: {set_dataset_configuration_request.dataset_id} for user {set_dataset_configuration_request.user_id}")
         dataset_analysis = DataSetAnalysisManager(set_dataset_configuration_request.dataset_id, set_dataset_configuration_request.user_id, self.__data_storage, self.__dataset_analysis_lock)
         dataset_analysis.start()
         return SetDatasetConfigurationResponse()
+
+    def set_dataset_column_schema_configuration(
+        self,
+        set_dataset_column_schema_configuration_request: "SetDatasetColumnSchemaConfigurationRequest"
+    ) -> "SetDatasetColumnSchemaConfigurationResponse":
+        """Persist new column schema configuration in MongoDB for a specific column
+
+        Args:
+            set_dataset_column_schema_configuration_request (SetDatasetColumnSchemaConfigurationRequest): The GRPC request object containing the column key, and schema configuration
+
+        Returns:
+            SetDatasetColumnSchemaConfigurationResponse: The empty GRPC response
+        """
+        self.__log.debug(f"set_dataset_column_schema_configuration: setting new column selected datatype {set_dataset_column_schema_configuration_request.datatype_selected}, selected role {set_dataset_column_schema_configuration_request.role_selected} for column {set_dataset_column_schema_configuration_request.column}, of user {set_dataset_column_schema_configuration_request.user_id}")
+        found, dataset = self.__data_storage.get_dataset(set_dataset_column_schema_configuration_request.user_id, set_dataset_column_schema_configuration_request.dataset_id)
+        dataset_schema = dataset["schema"]
+        if set_dataset_column_schema_configuration_request.datatype_selected  in [":none", ""]:
+            try:
+                del dataset_schema[set_dataset_column_schema_configuration_request.column]["datatype_selected"]
+            except KeyError:
+                pass
+
+        else:
+            dataset_schema[set_dataset_column_schema_configuration_request.column].update({"datatype_selected": set_dataset_column_schema_configuration_request.datatype_selected})
+
+        if set_dataset_column_schema_configuration_request.role_selected in [":none", ""]:
+            try:
+                del dataset_schema[set_dataset_column_schema_configuration_request.column]["role_selected"]
+            except KeyError:
+                pass
+        else:
+            dataset_schema[set_dataset_column_schema_configuration_request.column].update({"role_selected": set_dataset_column_schema_configuration_request.role_selected})
+        self.__data_storage.update_dataset(set_dataset_column_schema_configuration_request.user_id, set_dataset_column_schema_configuration_request.dataset_id, { "schema": dataset_schema })
+
+        return SetDatasetColumnSchemaConfigurationResponse()

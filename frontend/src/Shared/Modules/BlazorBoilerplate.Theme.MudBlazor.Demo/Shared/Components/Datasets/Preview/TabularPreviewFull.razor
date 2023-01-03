@@ -47,6 +47,7 @@ else
              <MudTable Items="@_datasetFrame.Rows" style="width:stretch" class="mat-elevation-z5" FixedHeader="true" Dense="true" CustomHeader="true">
                 <HeaderContent>
                     <MudTHeadRow>
+                        <MudTh></MudTh>
                         @foreach (var item in _datasetFrame.Columns)
                         {
                             @if (UseHeader == true)
@@ -60,33 +61,53 @@ else
                         }
                     </MudTHeadRow>
                     <MudTHeadRow>
-                        @foreach (var item in _datasetFrame.Columns)
+                        <MudTh>@L["Datatype"]</MudTh>
+                        @if (_datasetFrame.Columns.Count == _dataset.Dataset.Schema.Count)
                         {
-                            <MudTh>
-                                <MudSelect T="string" Value="@(_dataset.Dataset.Schema[item.Name].DatatypeSelected.ID == null ? _dataset.Dataset.Schema[item.Name].DatatypeDetected.ID : _dataset.Dataset.Schema[item.Name].DatatypeSelected.ID)" ValueChanged="@((e) => { _dataset.Dataset.Schema[item.Name].DatatypeSelected.ID = e; })">
-                                    @foreach (var datatype in _dataset.Dataset.Schema[item.Name].DatatypesCompatible)
-                                    {
-                                        <MudSelectItem Value="@datatype.ID">
-                                            <MudText Typo="Typo.body2">@L[datatype.Properties.ContainsKey("skos:prefLabel") ? datatype.Properties["skos:prefLabel"] : ""]</MudText>
-                                        </MudSelectItem>
-                                    }
-                                </MudSelect>
-                            </MudTh>
+                            @foreach (var item in _datasetFrame.Columns)
+                                {
+                                    <MudTh>
+                                    <MudSelect T="string" Value="@(_dataset.Dataset.Schema[item.Name].DatatypeSelected.ID == null ? _dataset.Dataset.Schema[item.Name].DatatypeDetected.ID : _dataset.Dataset.Schema[item.Name].DatatypeSelected.ID)" ValueChanged="@((e) => { _dataset.Dataset.Schema[item.Name].DatatypeSelected.ID = e; SaveColumnConfiguration(item.Name, _dataset.Dataset.Schema[item.Name].RoleSelected.ID, e); })">
+                                            @foreach (var datatype in _dataset.Dataset.Schema[item.Name].DatatypesCompatible)
+                                            {
+                                                <MudSelectItem Value="@datatype.ID">
+                                                    <MudText Typo="Typo.body2">@L[datatype.Properties.ContainsKey("skos:prefLabel") ? datatype.Properties["skos:prefLabel"] : ""]</MudText>
+                                                </MudSelectItem>
+                                            }
+                                        </MudSelect>
+                                    </MudTh>
+                                }
+                        }
+                        else
+                        {
+                            <MudText Typo="Typo.body2">@L["Datatype analysis incompatible with current dataset configuration, save current configuration to start new analysis"]</MudText>
                         }
                     </MudTHeadRow>
                     <MudTHeadRow>
-                        @foreach (var item in _datasetFrame.Columns)
+                        <MudTh>@L["Role"]</MudTh>
+                        @if (_datasetFrame.Columns.Count == _dataset.Dataset.Schema.Count)
                         {
-                            <MudTh>
-                                <MudSelect T="string" Value="@(_dataset.Dataset.Schema[item.Name].RoleSelected.ID == null ? "" : _dataset.Dataset.Schema[item.Name].RoleSelected.ID)" ValueChanged="@((e) => { _dataset.Dataset.Schema[item.Name].RoleSelected.ID = e; })">
-                                    @foreach (var role in _dataset.Dataset.Schema[item.Name].RolesCompatible)
-                                    {
-                                        <MudSelectItem Value="@role.ID">
-                                                <MudText Typo="Typo.body2">@L[role.Properties.ContainsKey("skos:prefLabel") ? role.Properties["skos:prefLabel"] : ""]</MudText>
+                            @foreach (var item in _datasetFrame.Columns)
+                            {
+                                <MudTh>
+                                    <MudSelect T="string" Value="@(_dataset.Dataset.Schema[item.Name].RoleSelected.ID == null ? ":none" : _dataset.Dataset.Schema[item.Name].RoleSelected.ID)" ValueChanged="@((e) => { _dataset.Dataset.Schema[item.Name].RoleSelected.ID = e == ":none" ?  null : e; SaveColumnConfiguration(item.Name, e, _dataset.Dataset.Schema[item.Name].DatatypeSelected.ID); })">
+                                    
+                                        <MudSelectItem Value="@(":none")">
+                                            <MudText Typo="Typo.body2">@L["none"]</MudText>
                                         </MudSelectItem>
-                                    }
-                                </MudSelect>
-                            </MudTh>
+                                        @foreach (var role in _dataset.Dataset.Schema[item.Name].RolesCompatible)
+                                        {
+                                            <MudSelectItem Value="@role.ID">
+                                                <MudText Typo="Typo.body2">@L[role.Properties.ContainsKey("skos:prefLabel") ? role.Properties["skos:prefLabel"] : ""]</MudText>
+                                            </MudSelectItem>
+                                        }
+                                    </MudSelect>
+                                </MudTh>
+                            }
+                        }
+                        else
+                        {
+                            <MudText Typo="Typo.body2">@L["Roles analysis incompatible with current dataset configuration, save current configuration to start new analysis"]</MudText>
                         }
                     </MudTHeadRow>
                 </HeaderContent>
@@ -94,6 +115,7 @@ else
 
                     @if (true) 
                     {
+                        <MudTd></MudTd>
                         @foreach (var item in context)
                         {
                             @if (_index < StartRow)
@@ -299,5 +321,14 @@ else
             return;
         }
         previewWorker.UpdateDatasetFileConfiguration(Dataset);
+    }
+    private async void SaveColumnConfiguration(string column, string role, string datatype)
+    {
+        previewWorker.UpdateDatasetColumnSchemaConfiguration(new SetDatasetColumnSchemaConfigurationRequestDto() {
+            DatasetId = Dataset.Dataset.Id,
+            Column = column,
+            SelectedDatatype = datatype,
+            SelectedRole = role
+        });
     }
 }

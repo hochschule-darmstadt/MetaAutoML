@@ -37,6 +37,8 @@ service ControllerService {
   /*update the dataset file configuration and execute the dataset analysis again*/
   rpc SetDatasetConfiguration(SetDatasetConfigurationRequest) returns (SetDatasetConfigurationResponse) {}
 
+  /*update a dataset column schema configuration*/
+  rpc SetDatasetColumnSchemaConfiguration(SetDatasetColumnSchemaConfigurationRequest) returns (SetDatasetColumnSchemaConfigurationResponse) {}
 
   /*OMA-ML TRAINING MESSAGES*/
   /*create a new Training record in MongoDB and start the a new training session*/

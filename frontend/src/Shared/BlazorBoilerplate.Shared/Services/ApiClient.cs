@@ -1,4 +1,4 @@
-﻿using BlazorBoilerplate.Shared.Dto;
+using BlazorBoilerplate.Shared.Dto;
 using BlazorBoilerplate.Shared.Dto.Dataset;
 using BlazorBoilerplate.Shared.Dto.Db;
 using BlazorBoilerplate.Shared.Dto.Email;
@@ -94,6 +94,11 @@ namespace BlazorBoilerplate.Shared.Services
         public async Task<ApiResponseDto> SetDatasetFileConfiguration(SetDatasetFileConfigurationRequestDto request)
         {
             return await httpClient.PostJsonAsync<ApiResponseDto>("api/Dataset/SetDatasetFileConfiguration", request);
+        }
+
+        public async Task<ApiResponseDto> SetDatasetColumnSchemaConfiguration(SetDatasetColumnSchemaConfigurationRequestDto request)
+        {
+            return await httpClient.PostJsonAsync<ApiResponseDto>("api/Dataset/SetDatasetColumnSchemaConfiguration", request);
         }
         public async Task<ApiResponseDto> GetDatasetAnalysis(GetDatasetAnalysisRequestDto request)
         {

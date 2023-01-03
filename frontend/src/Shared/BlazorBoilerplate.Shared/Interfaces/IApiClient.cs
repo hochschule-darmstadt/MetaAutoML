@@ -1,4 +1,4 @@
-﻿using BlazorBoilerplate.Shared.Dto;
+using BlazorBoilerplate.Shared.Dto;
 using BlazorBoilerplate.Shared.Dto.Dataset;
 using BlazorBoilerplate.Shared.Dto.Db;
 using BlazorBoilerplate.Shared.Dto.Email;
@@ -41,6 +41,7 @@ namespace BlazorBoilerplate.Shared.Interfaces
         Task<ApiResponseDto> GetDatasetPreview(GetDatasetPreviewRequestDto request);
         Task<ApiResponseDto> GetTabularDatasetColumn(GetTabularDatasetColumnRequestDto request);
         Task<ApiResponseDto> SetDatasetFileConfiguration(SetDatasetFileConfigurationRequestDto request);
+        Task<ApiResponseDto> SetDatasetColumnSchemaConfiguration(SetDatasetColumnSchemaConfigurationRequestDto request);
         Task<ApiResponseDto> GetDatasetAnalysis(GetDatasetAnalysisRequestDto request);
         Task<ApiResponseDto> DeleteDataset(DeleteDatasetRequestDto request);
         #endregion

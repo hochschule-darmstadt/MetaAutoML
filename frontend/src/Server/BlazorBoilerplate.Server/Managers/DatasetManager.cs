@@ -311,11 +311,28 @@ namespace BlazorBoilerplate.Server.Managers
                 grpcRequest.UserId = username;
                 grpcRequest.DatasetId = request.DatasetId;
                 grpcRequest.FileConfiguration = JsonConvert.SerializeObject(request.Configuration);
-                foreach (var column in request.ColumnsConfiugration)
-                {
-                    grpcRequest.ColumnConfiguration.Add(column.Key, new ColumnConfiguration() { DatatypeSelected = column.Value.DataTypeSelected, RoleSelected = column.Value.RoleSelected });
-                }
                 var reply = _client.SetDatasetConfiguration(grpcRequest);
+                return new ApiResponse(Status200OK, null, "");
+
+            }
+            catch (Exception ex)
+            {
+                return new ApiResponse(Status404NotFound, ex.Message);
+            }
+        }
+
+        public async Task<ApiResponse> SetDatasetColumnSchemaConfiguration(SetDatasetColumnSchemaConfigurationRequestDto request)
+        {
+            SetDatasetColumnSchemaConfigurationRequest grpcRequest = new SetDatasetColumnSchemaConfigurationRequest();
+            var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
+            try
+            {
+                grpcRequest.UserId = username;
+                grpcRequest.DatasetId = request.DatasetId;
+                grpcRequest.DatatypeSelected = request.SelectedDatatype == null ? "" : request.SelectedDatatype;
+                grpcRequest.RoleSelected = request.SelectedRole == null ? "" : request.SelectedRole;
+                grpcRequest.Column = request.Column;
+                var reply = _client.SetDatasetColumnSchemaConfiguration(grpcRequest);
                 return new ApiResponse(Status200OK, null, "");
 
             }

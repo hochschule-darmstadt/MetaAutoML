@@ -1,4 +1,4 @@
-﻿using BlazorBoilerplate.Infrastructure.Server.Models;
+using BlazorBoilerplate.Infrastructure.Server.Models;
 using BlazorBoilerplate.Shared.Dto.Dataset;
 using Microsoft.AspNetCore.Http;
 using System;
@@ -17,6 +17,7 @@ namespace BlazorBoilerplate.Infrastructure.Server
         Task<ApiResponse> GetDatasetPreview(GetDatasetPreviewRequestDto dataset);
         Task<ApiResponse> GetTabularDatasetColumn(GetTabularDatasetColumnRequestDto dataset);
         Task<ApiResponse> SetDatasetFileConfiguration(SetDatasetFileConfigurationRequestDto dataset);
+        Task<ApiResponse> SetDatasetColumnSchemaConfiguration(SetDatasetColumnSchemaConfigurationRequestDto dataset);
         Task<ApiResponse> GetDatasetAnalysis(GetDatasetAnalysisRequestDto dataset);
         Task<ApiResponse> DeleteDataset(DeleteDatasetRequestDto request);
     }

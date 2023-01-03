@@ -1822,6 +1822,10 @@ msgid "AffinityCookieDescription"
 msgstr "This cookie saves the sticky session id, used for correct routing."
 
 msgctxt "Global"
+msgid "ASCII"
+msgstr "ASCII"
+
+msgctxt "Global"
 msgid "UTF-8"
 msgstr "UTF-8"
 
@@ -1840,3 +1844,67 @@ msgstr "UTF-32"
 msgctxt "Global"
 msgid "Encoding"
 msgstr "Encoding"
+
+msgctxt "Global"
+msgid "integer"
+msgstr "Integer"
+
+msgctxt "Global"
+msgid "float"
+msgstr "Float"
+
+msgctxt "Global"
+msgid "boolean"
+msgstr "Boolean"
+
+msgctxt "Global"
+msgid "string"
+msgstr "String"
+
+msgctxt "Global"
+msgid "categorical"
+msgstr "Categorical"
+
+msgctxt "Global"
+msgid "datetime"
+msgstr "Datetime"
+
+msgctxt "Global"
+msgid "time_delta"
+msgstr "Time Delta"
+
+msgctxt "Global"
+msgid "list"
+msgstr "List"
+
+msgctxt "Global"
+msgid "single_value"
+msgstr "Single"
+
+msgctxt "Global"
+msgid "ignore"
+msgstr "Ignore"
+
+msgctxt "Global"
+msgid "none"
+msgstr "None"
+
+
+msgctxt "Global"
+msgid "target"
+msgstr "Target"
+
+
+msgctxt "Global"
+msgid "Datatype"
+msgstr "Datatype"
+
+
+msgctxt "Global"
+msgid "Datatype analysis incompatible with current dataset configuration, save current configuration to start new analysis"
+msgstr "Datatype analysis incompatible with current dataset configuration, save current configuration to start new analysis."
+
+
+msgctxt "Global"
+msgid "Roles analysis incompatible with current dataset configuration, save current configuration to start new analysis"
+msgstr "Roles analysis incompatible with current dataset configuration, save current configuration to start new analysis."

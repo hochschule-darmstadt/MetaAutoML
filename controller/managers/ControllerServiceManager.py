@@ -151,6 +151,16 @@ class ControllerServiceManager(ControllerServiceBase):
         return response
 
 
+    @inject
+    async def set_dataset_column_schema_configuration(
+        self,
+        set_dataset_column_schema_configuration_request: "SetDatasetColumnSchemaConfigurationRequest",
+        dataset_manager: DatasetManager=Provide[Application.managers.dataset_manager]
+    ) -> "SetDatasetColumnSchemaConfigurationResponse":
+        with MeasureDuration() as m:
+            response = dataset_manager.set_dataset_column_schema_configuration(set_dataset_column_schema_configuration_request)
+        return response
+
 #endregion
 
     ####################################
