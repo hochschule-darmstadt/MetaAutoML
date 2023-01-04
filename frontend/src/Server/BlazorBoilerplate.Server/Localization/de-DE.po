@@ -898,6 +898,9 @@ msgstr "4 Stunden"
 msgid "AffinityCookieDescription"
 msgstr "Dieses Cookie speichert die aktuelle Sticky Sitzungs id, wird für das korrekte Routing verwendet."
 
+msgid "Encoding"
+msgstr "Codierung"
+
 msgid "ASCII"
 msgstr "ASCII"
 
@@ -963,3 +966,19 @@ msgstr "Datentypenanalysis ist nicht mit der aktuellen Konfiguration kompatible.
 
 msgid "Roles analysis incompatible with current dataset configuration, save current configuration to start new analysis"
 msgstr "Rollenanalysis ist nicht mit der aktuellen Konfiguration kompatible. Durch das speichern der aktuellen Konfiguration wird eine neue Analysis gestartet."
+
+
+msgid "Thousand seperator"
+msgstr "Tausendertrennzeichen"
+
+msgid "Datetime format"
+msgstr "Datetime Format"
+
+msgid "Column {0} could not be casted to datetime"
+msgstr "Spalte {0} konnte nicht zum datentypen Datetype konvertiert werden."
+
+msgid "Datetime columns could not be converted to new datetime format"
+msgstr "Datetime Spalten konnten nicht in das neue Datetime format konvertiert werden."
+
+msgid "File configuration can not be saved, datetime columns could not be converted to new datetime format"
+msgstr "Datenset konfiguration konnte nicht gespeichert werden, Datetime Spalten konnten nicht in das neue Datetime format konvertiert werden."

@@ -15,35 +15,50 @@ class CsvManager:
     Static CSV Manager class to interact with the local file system
     """
 
+    @staticmethod
+    def read_dataset(path: str, file_configuration: dict, schema: dict) -> pd.DataFrame:
+        """Read a csv dataset from disk
 
-    def read_dataset(path) -> GetDatasetResponse:
+        Args:
+            path (str): disk path to dataset
+            file_configuration (dict): dataset file configuration to read the dataset
+            schema (dict): dataset column schema
+
+        Returns:
+            pd.DataFrame: the read dataset as a DataFrame
         """
-        Read a dataset from the disk
-        ---
-        Parameter
-        1. path of the file to read
-        ---
-        Return a GetDatasetResponse object representing the dataset
-        """
-        response = GetDatasetResponse()
-        dataset = pd.read_csv(path)
+        delimiters = {
+            "comma":        ",",
+            "semicolon":    ";",
+            "space":        " ",
+            "tab":          "\t",
+        }
 
-        for col in dataset.columns:
-            table_column = TableColumn()
-            table_column.name = col
-            numpy_datatype = dataset[col].dtype.name
-            datatype, convertible_types = CsvManager.__get_datatype(numpy_datatype, dataset[col])
+        configuration = {
+            "filepath_or_buffer": path,
+            "delimiter": delimiters[file_configuration['delimiter']],
+            "skiprows": (file_configuration['start_row']-1),
+            "decimal": file_configuration['decimal_character'],
+            "escapechar": file_configuration['escape_character'],
+            "encoding": file_configuration['encoding'],
+        }
+        if file_configuration['thousands_seperator'] != "":
+           configuration["thousands"] = file_configuration['thousands_seperator']
 
-            table_column.type = datatype
-            for convertible_type in convertible_types:
-                table_column.convertible_types.append(convertible_type)
+        dataset = pd.read_csv(**configuration)
 
-            for item in dataset[col].head(FIRST_ROW_AMOUNT).tolist():
-                table_column.first_entries.append(str(item))
-
-            response.columns.append(table_column)
-
-        return response
+        for key, values in schema.items():
+            try:
+                if values["datatype_selected"] != ":datetime":
+                    continue
+            except KeyError:
+                if values["datatype_detected"] != ":datetime":
+                    continue
+            try:
+                dataset[key] = pd.to_datetime(dataset[key], format=file_configuration['datetime_format'])
+            except:
+                print("datetime conversion failed!")#TODO logging
+        return dataset
 
 
     @staticmethod
@@ -59,7 +74,7 @@ class CsvManager:
         """
 
         compatible_casting_datatypes = {
-			":string": [":string", ":categorical"],
+			":string": [":string", ":categorical", ":datetime"],
             ":integer": [":integer", ":categorical"],
             ":boolean": [":boolean", ":integer", ":categorical"],
             ":float": [":float", ":integer", ":categorical"],
@@ -108,15 +123,8 @@ class CsvManager:
 		Returns:
 			tuple[dict, dict]: Tuple of dictonaries. First dict is the dict of column names and their found default datatype, second dict is the dict of column names and their default roles
 		"""
-        delimiters = {
-            "comma":        ",",
-            "semicolon":    ";",
-            "space":        " ",
-            "tab":          "\t",
-        }
         schema = {}
-        dataset = pd.read_csv(path, delimiter=delimiters[fileConfiguration['delimiter']], skiprows=(fileConfiguration['start_row']-1), escapechar=fileConfiguration['escape_character'], decimal=fileConfiguration['decimal_character'], encoding=fileConfiguration['encoding'])
-
+        dataset = CsvManager.read_dataset(path, fileConfiguration, schema)
         for col in dataset.columns:
             numpy_datatype = dataset[col].dtype.name
             datatype_detected, datatypes_compatible = CsvManager.__get_datatype_for_column(numpy_datatype, dataset[col])

@@ -1908,3 +1908,22 @@ msgstr "Datatype analysis incompatible with current dataset configuration, save 
 msgctxt "Global"
 msgid "Roles analysis incompatible with current dataset configuration, save current configuration to start new analysis"
 msgstr "Roles analysis incompatible with current dataset configuration, save current configuration to start new analysis."
+
+msgctxt "Global"
+msgid "Thousand seperator"
+msgstr "Thousand seperator"
+
+msgctxt "Global"
+msgid "Datetime format"
+msgstr "Datetime format"
+
+msgctxt "Global"
+msgid "Column {0} could not be casted to datetime"
+msgstr "Column {0} could not be casted to datetype datetime."
+
+msgctxt "Global"
+msgid "Datetime columns could not be converted to new datetime format"
+msgstr "Datetime columns could not be converted to new datetime format."
+
+msgid "File configuration can not be saved, datetime columns could not be converted to new datetime format"
+msgstr "File configuration can not be saved, datetime columns could not be converted to new datetime format."

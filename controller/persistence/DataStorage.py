@@ -143,6 +143,13 @@ class DataStorage:
             os.remove(filename_dest)
             filename_dest = filename_dest.replace(".zip", "")
             fileName = file_name.replace(".zip", "")
+        if type == ":tabular" or type == ":text" or type == ":time_series":
+            #generate preview of tabular and text dataset
+            #previewDf = pd.read_csv(filename_dest)
+            #previewDf.head(50).to_csv(filename_dest.replace(".csv", "_preview.csv"), index=False)
+            #causes error with different delimiters use normal string division
+            self.__log.debug("create_dataset: dataset is of CSV type: generating csv file configuration...")
+            file_configuration = {"use_header": True, "start_row":1, "delimiter":"comma", "escape_character":"\\", "decimal_character":".", "encoding": self.__frontend_backend_encoding_conversion_table[encoding], "thousands_seperator": "", "datetime_format": "%Y-%m-%d  %H:%M:%S"}
 
         if type == ":time_series_longitudinal":
             self.__log.debug("create_dataset: dataset is of TS nature: creating subset preview file, and generating csv file configuration...")
@@ -186,7 +193,7 @@ class DataStorage:
             # Save the new dataframe as a csv file
             df_preview_filename = filename_dest.replace(".ts", "_preview.csv")
             pd.DataFrame(df_dict).to_csv(df_preview_filename, index=False)
-            file_configuration = {"use_header": True, "start_row":1, "delimiter":"comma", "escape_character":"\\", "decimal_character":".", "encoding": self.__frontend_backend_encoding_conversion_table[encoding]}
+            file_configuration = {"use_header": True, "start_row":1, "delimiter":"comma", "escape_character":"\\", "decimal_character":".", "encoding": self.__frontend_backend_encoding_conversion_table[encoding], "thousands_seperator": "", "datetime_format": "%Y-%m-%d  %H:%M:%S"}
 
         success = self.__mongo.update_dataset(user_id, dataset_id, {
             "path": filename_dest,

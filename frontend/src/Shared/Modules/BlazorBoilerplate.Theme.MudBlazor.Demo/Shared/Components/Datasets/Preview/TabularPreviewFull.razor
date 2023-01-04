@@ -15,6 +15,7 @@ else
             <MudItem xs="3" sm="3" md="3">
                 <MudCheckBox @bind-Checked="@UseHeader" Label="@L["Use header"]"></MudCheckBox>
                 <MudNumericField @bind-Value="@StartRow" Label="@L["Start row"]" Variant="Variant.Text" Min="1" />
+                    <MudButton Variant="Variant.Filled" Color="Color.Secondary" OnClick="@SaveConfiguration">@L["Save"]</MudButton>
             </MudItem>
             <MudItem xs="3" sm="3" md="3">
                 <MudSelect T="string" Label="@L["Column seperator"]" AnchorOrigin="Origin.BottomCenter" @bind-Value="@Delimiter">
@@ -28,14 +29,13 @@ else
                     <MudSelectItem Value="@("latin-1")" >@(L["latin-1"])</MudSelectItem>
                     <MudSelectItem Value="@("utf-16")" >@(L["UTF-16"])</MudSelectItem>
                     <MudSelectItem Value="@("utf-32")" >@(L["UTF-32"])</MudSelectItem>
-                </MudSelect>
+                    </MudSelect>
+                    <MudTextField Label="@L["Datetime format"]" @bind-Value="@DatetimeFormat" Variant="@Variant.Text" />
             </MudItem>
             <MudItem xs="3" sm="3" md="3">
                 <MudTextField Mask="@(new RegexMask(@"^.{1,1}$"))" Label="@L["Escape character"]" @bind-Value="@EscapeCharacter"  Variant="@Variant.Text" />
-                    <MudTextField Mask="@(new RegexMask(@"^.{1,1}$"))" Label="@L["Decimal character"]" @bind-Value="@DecimalCharacter" Variant="@Variant.Text" />
-            </MudItem>
-            <MudItem xs="3" sm="3" md="3">
-                    <MudButton Variant="Variant.Filled" Color="Color.Secondary" OnClick="@SaveConfiguration">@L["Save"]</MudButton>
+                <MudTextField Mask="@(new RegexMask(@"^.{1,1}$"))" Label="@L["Decimal character"]" @bind-Value="@DecimalCharacter" Variant="@Variant.Text" />
+                    <MudTextField Mask="@(new RegexMask(@"^.{0,1}$"))" Label="@L["Thousand seperator"]" @bind-Value="@ThousandsSeperator" Variant="@Variant.Text" />
             </MudItem>
         </MudGrid>
         @if (_datasetReadError == true)
@@ -246,6 +246,46 @@ else
             }
         } 
     }
+    public string ThousandsSeperator
+    { 
+        get
+        {
+            return Dataset.Dataset.FileConfiguration["thousands_seperator"];
+        } 
+        set
+        {
+            if (value != null)
+            {
+                Dataset.Dataset.FileConfiguration["thousands_seperator"] = value;
+            }
+        } 
+    }
+    public string DateTimeFormatHelperText { get; set; }
+    public bool DatetimeFormatAccepted { get; set; } = true;
+    public string DatetimeFormat
+    {
+        get
+        {
+            return Dataset.Dataset.FileConfiguration["datetime_format"];
+        }
+        set
+        {
+            if (value != null)
+            {
+                Dataset.Dataset.FileConfiguration["datetime_format"] = value;
+                if (TestConvertToDatetime("", true) == false)
+                {
+                    DateTimeFormatHelperText = L["Datetime columns could not be converted to new datetime format"];
+                    DatetimeFormatAccepted = false;
+                }
+                else
+                {
+                    DatetimeFormatAccepted = true;
+                    DateTimeFormatHelperText = "";
+                }
+            }
+        }
+    }
 
     public string DecimalCharacter
     { 
@@ -289,7 +329,7 @@ else
         {
             if (DatasetData != null)
             {
-              
+
                 _datasetFrame = DataFrame.LoadCsv(DatasetData, separator: Dataset.Dataset.GetDelimiter(), encoding: Dataset.Dataset.GetEncoding(), numRows: 20);
                 _datasetFrame.FillNulls("NaN", true);
                 if(_datasetFrame.Rows.Count == 0){
@@ -310,7 +350,65 @@ else
             StateHasChanged();
             viewNotifier.Show("Data can´t be read using column delimiter:" + ex.Message, ViewNotifierType.Error, L["Operation Failed"]);
         }    
-        
+
+    }
+
+    private bool TestConvertToDatetime(string column, bool all)
+    {
+        try
+        {
+            bool convertionSuccessfull = false;
+            //"%Y-%m-%d  %H:%M:%S";
+            string format = DatetimeFormat;
+            format = format.Replace("%d", "dd");
+            format = format.Replace("%m", "MM");
+            format = format.Replace("%Y", "yyyy");
+            format = format.Replace("%y", "yy");
+            format = format.Replace("%H", "HH");
+            format = format.Replace("%M", "mm");
+            format = format.Replace("%S", "ss");
+
+            //Check if all columns are compatible with new format
+            if (all == true)
+            {
+                foreach (var item in _dataset.Dataset.Schema)
+                {
+                    if (item.Value.DatatypeSelected.ID == ":datetime")
+                    {
+                        foreach (var row in _datasetFrame.Columns[item.Key])
+                        {
+                            //Only string rows can be casted to datetime
+                            if (format.Length == ((string)row).Length)
+                            {
+                                //If last cast fails we will assume none worked
+                                DateTime dt;
+                                convertionSuccessfull = DateTime.TryParseExact((string)row, format, null, DateTimeStyles.None, out dt);
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                //Check a specific column
+                foreach (var row in _datasetFrame.Columns[column])
+                {
+                    //Only string rows can be casted to datetime
+                    if (format.Length == ((string)row).Length)
+                    {
+                        //If last cast fails we will assume none worked
+                        DateTime dt;
+                        convertionSuccessfull = DateTime.TryParseExact((string)row, format, null, DateTimeStyles.None, out dt);
+                    }
+                }
+            }
+            return convertionSuccessfull;
+        }
+        catch (Exception)
+        {
+            return false;
+            throw;
+        }
     }
 
     private async void SaveConfiguration()
@@ -320,10 +418,25 @@ else
             viewNotifier.Show(L["File configuration can not be saved, incompatible delimiter or encoding"], ViewNotifierType.Error, L["Operation Failed"]);
             return;
         }
+        if (DatetimeFormatAccepted == false)
+        {
+            viewNotifier.Show(L["File configuration can not be saved, datetime columns could not be converted to new datetime format"], ViewNotifierType.Error, L["Operation Failed"]);
+            return;
+        }
         previewWorker.UpdateDatasetFileConfiguration(Dataset);
     }
+
     private async void SaveColumnConfiguration(string column, string role, string datatype)
     {
+        if (datatype == ":datetime")
+        {
+            if (TestConvertToDatetime(column, false) != true)
+            {
+                viewNotifier.Show(L["Column {0} could not be casted to datetime", column], ViewNotifierType.Error, L["Operation Failed"]);
+                return;
+            }
+        }
+
         previewWorker.UpdateDatasetColumnSchemaConfiguration(new SetDatasetColumnSchemaConfigurationRequestDto() {
             DatasetId = Dataset.Dataset.Id,
             Column = column,

@@ -73,7 +73,8 @@ class AdapterRuntimeManager:
             },
             "dataset_configuration": {
                 "column_datatypes": json.loads(self.__request.dataset_configuration)["column_datatypes"],
-                "file_configuration": dataset["file_configuration"]
+                "file_configuration": dataset["file_configuration"],
+                "schema": dataset["schema"]
             },
             "runtime_profile": {
                 "start_time": datetime.now(),
@@ -82,7 +83,7 @@ class AdapterRuntimeManager:
             },
             "lifecycle_state": "active"
         }
-        
+
         training_id = self.__data_storage.create_training(self.__request.user_id, config)
         self.__log.debug(f"__create_training_record: inserted new training: {training_id}")
         self.__data_storage.update_dataset(self.__request.user_id, self.__request.dataset_id, { "training_ids": dataset["training_ids"] + [training_id] })
@@ -129,7 +130,7 @@ class AdapterRuntimeManager:
             if dataset["type"] in  [":tabular", ":text", ":time_series"]:
                 ExplainableAIManager(self.__data_storage, adapter_manager, self.__explainable_lock).explain(user_id, model_id)
                 return
-    
+
     def get_training_id(self) -> str:
         """Get the training id to which the found model is linked too
 
