@@ -67,7 +67,7 @@ else
                             @foreach (var item in _datasetFrame.Columns)
                                 {
                                     <MudTh>
-                                    <MudSelect T="string" Value="@(_dataset.Dataset.Schema[item.Name].DatatypeSelected.ID == null ? _dataset.Dataset.Schema[item.Name].DatatypeDetected.ID : _dataset.Dataset.Schema[item.Name].DatatypeSelected.ID)" ValueChanged="@((e) => { _dataset.Dataset.Schema[item.Name].DatatypeSelected.ID = e; SaveColumnConfiguration(item.Name, _dataset.Dataset.Schema[item.Name].RoleSelected.ID, e); })">
+                                    <MudSelect T="string" Value="@(_dataset.Dataset.Schema[item.Name].DatatypeSelected.ID == null ? _dataset.Dataset.Schema[item.Name].DatatypeDetected.ID : _dataset.Dataset.Schema[item.Name].DatatypeSelected.ID)" ValueChanged="@((e) => {  OnSelectedDatetypeChanged(item.Name, _dataset.Dataset.Schema[item.Name].RoleSelected.ID, e); })">
                                             @foreach (var datatype in _dataset.Dataset.Schema[item.Name].DatatypesCompatible)
                                             {
                                                 <MudSelectItem Value="@datatype.ID">
@@ -426,17 +426,22 @@ else
         previewWorker.UpdateDatasetFileConfiguration(Dataset);
     }
 
-    private async void SaveColumnConfiguration(string column, string role, string datatype)
+    private void OnSelectedDatetypeChanged(string columnName, string role, string datatype)
     {
         if (datatype == ":datetime")
         {
-            if (TestConvertToDatetime(column, false) != true)
+            if (TestConvertToDatetime(columnName, false) != true)
             {
-                viewNotifier.Show(L["Column {0} could not be casted to datetime", column], ViewNotifierType.Error, L["Operation Failed"]);
+                viewNotifier.Show(L["Column {0} could not be casted to datetime", columnName], ViewNotifierType.Error, L["Operation Failed"]);
                 return;
             }
         }
+        _dataset.Dataset.Schema[columnName].DatatypeSelected.ID = datatype;
+        SaveColumnConfiguration(columnName, role, datatype);
+    }
 
+    private async void SaveColumnConfiguration(string column, string role, string datatype)
+    {
         previewWorker.UpdateDatasetColumnSchemaConfiguration(new SetDatasetColumnSchemaConfigurationRequestDto() {
             DatasetId = Dataset.Dataset.Id,
             Column = column,
