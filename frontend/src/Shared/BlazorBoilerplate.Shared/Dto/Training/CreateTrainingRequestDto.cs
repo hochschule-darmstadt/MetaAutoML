@@ -1,4 +1,4 @@
-﻿using BlazorBoilerplate.Shared.Dto.Dataset;
+using BlazorBoilerplate.Shared.Dto.Dataset;
 using BlazorBoilerplate.Shared.Dto.Ontology;
 using System;
 using System.Collections.Generic;
@@ -12,11 +12,11 @@ namespace BlazorBoilerplate.Shared.Dto.Training
     {
         public string DatasetId { get; set; }
         public CreateTrainingConfigurationDto Configuration { get; set; }
-        public Dictionary<string, dynamic> DatasetConfiguration { get; set; }
+        public Dictionary<string, ColumnSchema> Schema { get; set; }
         public CreateTrainingRequestDto()
         {
             Configuration = new CreateTrainingConfigurationDto();
-            DatasetConfiguration = new Dictionary<string, dynamic>();
+            Schema = new Dictionary<string, ColumnSchema>();
         }
     }
     public class CreateTrainingConfigurationDto

@@ -1,4 +1,4 @@
-﻿@inject IStringLocalizer<Global> L
+@inject IStringLocalizer<Global> L
 @inject IApiClient apiClient
 @inject IViewNotifier viewNotifier
 @using Newtonsoft.Json
@@ -51,7 +51,7 @@
     @if (((Dataset.Dataset.Type.ID == ":tabular") || (Dataset.Dataset.Type.ID == ":text") || (Dataset.Dataset.Type.ID == ":time_series")) || (Dataset.Dataset.Type.ID == ":time_series_longitudinal") && (!string.IsNullOrEmpty(StartAutoMlRequest.Configuration.Task)))
 
     {
-        <MudSelect Label="@L["Target"]" T="string" ValueChanged="@OnTargetChanged">
+        <MudSelect Label="@L["Target"]" T="string" @bind-SelectedValues="SelectedTargets" MultiSelection="true">
             @if (_columnNames != null)
             {
                 @foreach (var column in _columnNames)
@@ -95,6 +95,20 @@
     private ChipSet.ChipSetViewModel _autoMlSolutionsViewModel = new();
     private ChipSet.ChipSetViewModel _strategiesViewModel = new();
 
+    public IEnumerable<string> SelectedTargets
+    {
+        get
+        {
+            return _selectedTargets;
+        }
+        set
+        {
+            _selectedTargets = value;
+        }
+    }
+
+    private IEnumerable<string> _selectedTargets;
+
     protected async override void OnInitialized()
     {
         base.OnInitialized();
@@ -118,14 +132,19 @@
 
         if ((Dataset.Dataset.Type.ID == ":tabular") || (Dataset.Dataset.Type.ID == ":text") || (Dataset.Dataset.Type.ID == ":time_series") || (Dataset.Dataset.Type.ID == ":time_series_longitudinal"))
         {
-            foreach (KeyValuePair<string, dynamic> pair in StartAutoMlRequest.DatasetConfiguration["column_datatypes"])
+            List<string> targets = new List<string>();
+            foreach (KeyValuePair<string, ColumnSchema> pair in StartAutoMlRequest.Schema)
             {
-                // TODO: Document what this magic number means and extract it into a constant
-                if ((int)pair.Value != 7)
+                if (string.IsNullOrEmpty(pair.Value.RoleSelected.ID) || (pair.Value.RoleSelected.ID != ":ignore") || (pair.Value.RoleSelected.ID != ":index"))
                 {
                     _columnNames.Add(pair.Key);
                 }
+                if (pair.Value.RoleSelected.ID == ":target")
+                {
+                    targets.Add(pair.Key);
+                }
             }
+            SelectedTargets = new HashSet<string>(targets);
         }
         StartAutoMlRequest.Configuration.RuntimeLimit = 3;
         StartAutoMlRequest.Configuration.Metric = ":accuracy";
@@ -266,9 +285,10 @@
         return UpdateStartAutoMlRequest();
     }
 
-    private async void OnTargetChanged(string value)
+    private async void OnTargetChanged(HashSet<string> values)
     {
-        StartAutoMlRequest.Configuration.Target = value;
+        _selectedTargets = values;
+        //StartAutoMlRequest.Configuration.Target = value;
         await UpdateStartAutoMlRequest();
     }
 }
