@@ -12,18 +12,19 @@ namespace BlazorBoilerplate.Shared.Dto.Training
     {
         public string DatasetId { get; set; }
         public CreateTrainingConfigurationDto Configuration { get; set; }
-        public Dictionary<string, ColumnSchema> Schema { get; set; }
+        public Dictionary<string, ColumnSchemaDto> Schema { get; set; }
+        public bool SaveSchema { get; set; }
         public CreateTrainingRequestDto()
         {
             Configuration = new CreateTrainingConfigurationDto();
-            Schema = new Dictionary<string, ColumnSchema>();
+            Schema = new Dictionary<string, ColumnSchemaDto>();
+            SaveSchema = true;
         }
     }
     public class CreateTrainingConfigurationDto
     {
 
         public string Task { get; set; }
-        public string Target { get; set; }
         public List<string> EnabledStrategies { get; set; }
         public int RuntimeLimit { get; set; }
         public string Metric { get; set; }

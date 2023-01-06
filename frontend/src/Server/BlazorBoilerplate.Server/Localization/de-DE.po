@@ -982,3 +982,6 @@ msgstr "Datetime Spalten konnten nicht in das neue Datetime format konvertiert w
 
 msgid "File configuration can not be saved, datetime columns could not be converted to new datetime format"
 msgstr "Datenset konfiguration konnte nicht gespeichert werden, Datetime Spalten konnten nicht in das neue Datetime format konvertiert werden."
+
+msgid "Save Schema"
+msgstr "Schema speichern"

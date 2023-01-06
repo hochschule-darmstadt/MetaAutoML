@@ -87,10 +87,6 @@ namespace BlazorBoilerplate.Shared.Services
         {
             return await httpClient.PostJsonAsync<ApiResponseDto>("api/Dataset/GetDatasetPreview", request);
         }
-        public async Task<ApiResponseDto> GetTabularDatasetColumn(GetTabularDatasetColumnRequestDto request)
-        {
-            return await httpClient.PostJsonAsync<ApiResponseDto>("api/Dataset/GetTabularDatasetColumn", request);
-        }
         public async Task<ApiResponseDto> SetDatasetFileConfiguration(SetDatasetFileConfigurationRequestDto request)
         {
             return await httpClient.PostJsonAsync<ApiResponseDto>("api/Dataset/SetDatasetFileConfiguration", request);

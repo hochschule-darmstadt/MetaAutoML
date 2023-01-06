@@ -143,10 +143,10 @@ namespace BlazorBoilerplate.Server.Managers
                 var reply = _client.GetDatasets(getDatasetsRequest);
                 foreach (Dataset item in reply.Datasets)
                 {
-                    Dictionary<string, Shared.Dto.Dataset.ColumnSchema> schema = new Dictionary<string, Shared.Dto.Dataset.ColumnSchema>();
+                    Dictionary<string, Shared.Dto.Dataset.ColumnSchemaDto> schema = new Dictionary<string, Shared.Dto.Dataset.ColumnSchemaDto>();
                     foreach (var column in item.Schema)
                     {
-                        schema.Add(column.Key, new Shared.Dto.Dataset.ColumnSchema(
+                        schema.Add(column.Key, new Shared.Dto.Dataset.ColumnSchemaDto(
                             await _cacheManager.GetObjectInformation(column.Value.DatatypeDetected),
                             await _cacheManager.GetObjectInformationList(column.Value.DatatypesCompatible.ToList()),
                             column.Value.DatatypeSelected == "" ? new ObjectInfomationDto() : await _cacheManager.GetObjectInformation(column.Value.DatatypeSelected),
@@ -181,10 +181,10 @@ namespace BlazorBoilerplate.Server.Managers
                 getDatasetRequest.UserId = username;
                 getDatasetRequest.DatasetId = request.DatasetId;
                 var reply = _client.GetDataset(getDatasetRequest);
-                Dictionary<string, Shared.Dto.Dataset.ColumnSchema> schema = new Dictionary<string, Shared.Dto.Dataset.ColumnSchema>();
+                Dictionary<string, Shared.Dto.Dataset.ColumnSchemaDto> schema = new Dictionary<string, Shared.Dto.Dataset.ColumnSchemaDto>();
                 foreach (var column in reply.Dataset.Schema)
                 {
-                    schema.Add(column.Key, new Shared.Dto.Dataset.ColumnSchema(
+                    schema.Add(column.Key, new Shared.Dto.Dataset.ColumnSchemaDto(
                         await _cacheManager.GetObjectInformation(column.Value.DatatypeDetected),
                         await _cacheManager.GetObjectInformationList(column.Value.DatatypesCompatible.ToList()),
                         column.Value.DatatypeSelected == "" ? new ObjectInfomationDto() : await _cacheManager.GetObjectInformation(column.Value.DatatypeSelected),
@@ -268,40 +268,6 @@ namespace BlazorBoilerplate.Server.Managers
                 return new ApiResponse(Status404NotFound, ex.Message);
             }
         }
-        /// <summary>
-        /// Helper function, get all column names of a structured data dataset
-        /// </summary>
-        /// <param name="dataset"></param>
-        /// <returns></returns>
-        public async Task<ApiResponse> GetTabularDatasetColumn(GetTabularDatasetColumnRequestDto request)
-        {
-            GetTabularDatasetColumnResponseDto response = new GetTabularDatasetColumnResponseDto();
-            GetTabularDatasetColumnRequest getColumnNamesRequest = new GetTabularDatasetColumnRequest();
-            var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
-            try
-            {
-                getColumnNamesRequest.UserId = username;
-                getColumnNamesRequest.DatasetId = request.DatasetId;
-                var reply = _client.GetTabularDatasetColumn(getColumnNamesRequest);
-                foreach (var item in reply.Columns.ToList())
-                {
-                    response.Columns.Add(new ColumnsDto
-                    {
-                        Name = item.Name,
-                        Type = item.Type,
-                        ConvertibleTypes = item.ConvertibleTypes.ToList(),
-                    });
-                }
-                return new ApiResponse(Status200OK, null, response);
-
-            }
-            catch (Exception ex)
-            {
-
-                return new ApiResponse(Status404NotFound, ex.Message);
-            }
-        }
-
         public async Task<ApiResponse> SetDatasetFileConfiguration(SetDatasetFileConfigurationRequestDto request)
         {
             SetDatasetConfigurationRequest grpcRequest = new SetDatasetConfigurationRequest();

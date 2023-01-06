@@ -28,9 +28,6 @@ service ControllerService {
   /*return a Dataset record by user id and dataset id*/
   rpc GetDataset(GetDatasetRequest) returns (GetDatasetResponse) {}
 
-  /*return all the column names of a tabular dataset*/
-  rpc GetTabularDatasetColumn(GetTabularDatasetColumnRequest) returns (GetTabularDatasetColumnResponse) {}
-
   /*delete a Dataset record and every related object inside MongoDB and files on disc (Trainings, Models, Predictions)*/
   rpc DeleteDataset(DeleteDatasetRequest) returns (DeleteDatasetResponse) {}
 

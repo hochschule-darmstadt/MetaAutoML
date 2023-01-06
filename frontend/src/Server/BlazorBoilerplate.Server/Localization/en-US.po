@@ -1925,5 +1925,10 @@ msgctxt "Global"
 msgid "Datetime columns could not be converted to new datetime format"
 msgstr "Datetime columns could not be converted to new datetime format."
 
+msgctxt "Global"
 msgid "File configuration can not be saved, datetime columns could not be converted to new datetime format"
 msgstr "File configuration can not be saved, datetime columns could not be converted to new datetime format."
+
+msgctxt "Global"
+msgid "Save Schema"
+msgstr "Save Schema"

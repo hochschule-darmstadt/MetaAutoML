@@ -69,16 +69,6 @@ namespace BlazorBoilerplate.Server.Controllers
                 await _datasetManager.GetDatasetPreview(request) :
                 new ApiResponse(Status400BadRequest, L["InvalidData"]);
 
-
-        [HttpPost]
-        [ProducesResponseType(Status200OK)]
-        [ProducesResponseType(Status400BadRequest)]
-        [ProducesResponseType(Status404NotFound)]
-        public async Task<ApiResponse> GetTabularDatasetColumn(GetTabularDatasetColumnRequestDto request)
-            => ModelState.IsValid ?
-                await _datasetManager.GetTabularDatasetColumn(request) :
-                new ApiResponse(Status400BadRequest, L["InvalidData"]);
-
         [HttpPost]
         [ProducesResponseType(Status200OK)]
         [ProducesResponseType(Status400BadRequest)]

@@ -110,18 +110,6 @@ class ControllerServiceManager(ControllerServiceBase):
         self.__log.warn("get_dataset: executed")
         return response
 
-    @inject
-    async def get_tabular_dataset_column(
-        self, get_tabular_dataset_column_request: "GetTabularDatasetColumnRequest",
-        dataset_manager: DatasetManager=Provide[Application.managers.dataset_manager]
-    ) -> "GetTabularDatasetColumnResponse":
-        with MeasureDuration() as m:
-            response = dataset_manager.get_tabular_dataset_column(get_tabular_dataset_column_request)
-        #response = await self.__loop.run_in_executor(
-        #    self.__executor, dataset_manager.get_tabular_dataset_column, get_tabular_dataset_column_request
-        #)
-        self.__log.warn("get_tabular_dataset_column: executed")
-        return response
 
     @inject
     async def delete_dataset(

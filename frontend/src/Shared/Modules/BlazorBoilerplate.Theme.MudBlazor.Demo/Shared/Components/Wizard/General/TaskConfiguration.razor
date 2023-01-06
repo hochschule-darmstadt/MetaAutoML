@@ -104,6 +104,7 @@
         set
         {
             _selectedTargets = value;
+            OnTargetChanged((HashSet<string>)_selectedTargets);
         }
     }
 
@@ -133,9 +134,9 @@
         if ((Dataset.Dataset.Type.ID == ":tabular") || (Dataset.Dataset.Type.ID == ":text") || (Dataset.Dataset.Type.ID == ":time_series") || (Dataset.Dataset.Type.ID == ":time_series_longitudinal"))
         {
             List<string> targets = new List<string>();
-            foreach (KeyValuePair<string, ColumnSchema> pair in StartAutoMlRequest.Schema)
+            foreach (KeyValuePair<string, ColumnSchemaDto> pair in StartAutoMlRequest.Schema)
             {
-                if (string.IsNullOrEmpty(pair.Value.RoleSelected.ID) || (pair.Value.RoleSelected.ID != ":ignore") || (pair.Value.RoleSelected.ID != ":index"))
+                if (string.IsNullOrEmpty(pair.Value.RoleSelected.ID) || (pair.Value.RoleSelected.ID != ":ignore") && (pair.Value.RoleSelected.ID != ":index"))
                 {
                     _columnNames.Add(pair.Key);
                 }
@@ -287,8 +288,21 @@
 
     private async void OnTargetChanged(HashSet<string> values)
     {
-        _selectedTargets = values;
-        //StartAutoMlRequest.Configuration.Target = value;
+        //We need to update the schema configuration with appropriated target values
+        foreach (var item in StartAutoMlRequest.Schema)
+        {
+            if (values.Contains(item.Key))
+            {
+                item.Value.RoleSelected.ID = ":target";
+            }
+            else
+            {
+                if ((!string.IsNullOrEmpty(item.Value.RoleSelected.ID)) && (item.Value.RoleSelected.ID == ":target"))
+                {
+                    item.Value.RoleSelected.ID = null;
+                }
+            }
+        }
         await UpdateStartAutoMlRequest();
     }
 }

@@ -144,33 +144,6 @@ class DatasetManager:
         response.dataset = self.__dataset_object_to_rpc_object(get_dataset_request.user_id, dataset)
         return response
 
-    def get_tabular_dataset_column(
-        self, get_tabular_dataset_column_request: "GetTabularDatasetColumnRequest"
-    ) -> "GetTabularDatasetColumnResponse":
-        """Get column names for a specific tabular dataset
-
-        Args:
-            get_tabular_dataset_column_request (GetTabularDatasetColumnRequest): The GRPC request holding the user and dataset ids
-
-        Raises:
-            grpclib.GRPCError: grpclib.Status.NOT_FOUND, raised when no dataset was found for the requested informations
-
-        Returns:
-            GetTabularDatasetColumnResponse: The GRPC response holding the list of columns of a tabular dataset
-        """
-        found, dataset = self.__data_storage.get_dataset(get_tabular_dataset_column_request.user_id, get_tabular_dataset_column_request.dataset_id)
-        if not found:
-            self.__log.error(f"get_tabular_dataset_column: dataset {get_tabular_dataset_column_request.dataset_id} for user {get_tabular_dataset_column_request.user_id} not found")
-            raise grpclib.GRPCError(grpclib.Status.NOT_FOUND, f"Dataset {get_tabular_dataset_column_request.dataset_id} for user {get_tabular_dataset_column_request.user_id} not found, wrong id?")
-
-        if dataset["type"] == ":tabular" or dataset["type"] == ":time_series" or dataset["type"] == ":text":
-            self.__log.debug(f"get_tabular_dataset_column: dataset {get_tabular_dataset_column_request.dataset_id} for user {get_tabular_dataset_column_request.user_id} has CSV type, using CSVManager")
-            #TODO
-			#return CsvManager.get_columns(dataset["path"], dataset["file_configuration"])
-        elif dataset["type"] == ":time_series_longitudinal":
-            self.__log.debug(f"get_tabular_dataset_column: dataset {get_tabular_dataset_column_request.dataset_id} for user {get_tabular_dataset_column_request.user_id} has TS type, using LongitudinalDataManager")
-            return LongitudinalDataManager.read_dimension_names(dataset["path"])
-
 
     def delete_dataset(
         self, delete_dataset_request: "DeleteDatasetRequest"

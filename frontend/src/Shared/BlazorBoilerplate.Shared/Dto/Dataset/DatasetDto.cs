@@ -17,12 +17,12 @@ namespace BlazorBoilerplate.Shared.Dto.Dataset
         public ObjectInfomationDto Type { get; set; }
         public Dictionary<string, dynamic> FileConfiguration { get; set; }
         public Dictionary<string, dynamic> Analysis { get; set; }
-        public Dictionary<string, ColumnSchema> Schema { get; set; }
+        public Dictionary<string, ColumnSchemaDto> Schema { get; set; }
         public DatasetDto()
         {
             Analysis = new Dictionary<string, dynamic>();
         }
-        public DatasetDto(GetDatasetResponse grpcObject, ObjectInfomationDto type, Dictionary<string, ColumnSchema> schema)
+        public DatasetDto(GetDatasetResponse grpcObject, ObjectInfomationDto type, Dictionary<string, ColumnSchemaDto> schema)
         {
             Id = grpcObject.Dataset.Id;
             Name = grpcObject.Dataset.Name;
@@ -32,7 +32,7 @@ namespace BlazorBoilerplate.Shared.Dto.Dataset
             Analysis["creation_date"] = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc).AddSeconds(Analysis["creation_date"]);
             Schema = schema;
         }
-        public DatasetDto(Server.Dataset grpcObject, ObjectInfomationDto type, Dictionary<string, ColumnSchema> schema)
+        public DatasetDto(Server.Dataset grpcObject, ObjectInfomationDto type, Dictionary<string, ColumnSchemaDto> schema)
         {
             Id = grpcObject.Id;
             Name = grpcObject.Name;
@@ -94,9 +94,9 @@ namespace BlazorBoilerplate.Shared.Dto.Dataset
             }
         }
     }
-    public class ColumnSchema
+    public class ColumnSchemaDto
     {
-        public ColumnSchema(ObjectInfomationDto datatypeDetected, List<ObjectInfomationDto> datatypesCompatible, ObjectInfomationDto datatypeSelected, List<ObjectInfomationDto> rolesCompatible, ObjectInfomationDto roleSelected)
+        public ColumnSchemaDto(ObjectInfomationDto datatypeDetected, List<ObjectInfomationDto> datatypesCompatible, ObjectInfomationDto datatypeSelected, List<ObjectInfomationDto> rolesCompatible, ObjectInfomationDto roleSelected)
         {
             DatatypeDetected = datatypeDetected;
             DatatypesCompatible = datatypesCompatible;
