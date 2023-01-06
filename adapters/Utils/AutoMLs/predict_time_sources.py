@@ -1,16 +1,6 @@
 from enum import Enum, unique
+import pandas as pd
 
-
-@unique
-class DataType(Enum):
-    DATATYPE_UNKNOW = 0
-    DATATYPE_STRING = 1
-    DATATYPE_INT = 2
-    DATATYPE_FLOAT = 3
-    DATATYPE_CATEGORY = 4
-    DATATYPE_BOOLEAN = 5
-    DATATYPE_DATETIME = 6
-    DATATYPE_IGNORE = 7
 
 
 @unique
@@ -19,16 +9,35 @@ class SplitMethod(Enum):
     SPLIT_METHOD_END = 1
 
 
-def feature_preparation(X, features):
+def feature_preparation(X, features, datetime_format):
+    targets = []
     for column, dt in features:
-        if DataType(dt) is DataType.DATATYPE_IGNORE:
+
+        #Check if column is to be droped either its role is ignore or index
+        if dt.get("role_selected", "") == ":ignore" or dt.get("role_selected", "") == ":index":
             X.drop(column, axis=1, inplace=True)
-        elif DataType(dt) is DataType.DATATYPE_CATEGORY:
+            continue
+        #Get column datatype
+        datatype = dt.get("datatype_selected", "")
+        if datatype == "":
+            datatype = dt["datatype_detected"]
+
+        if datatype == ":categorical":
             X[column] = X[column].astype('category')
-        elif DataType(dt) is DataType.DATATYPE_BOOLEAN:
+        elif datatype == ":boolean":
             X[column] = X[column].astype('bool')
-        elif DataType(dt) is DataType.DATATYPE_INT:
+        elif datatype == ":integer":
             X[column] = X[column].astype('int')
-        elif DataType(dt) is DataType.DATATYPE_FLOAT:
+        elif datatype == ":float":
             X[column] = X[column].astype('float')
-    return X
+        elif datatype == ":datetime":
+            X[column] = pd.to_datetime(X[column], format=datetime_format)
+        elif datatype == ":string":
+            X[column] = X[column].astype('str')
+
+        #Get target columns list
+        if dt.get("role_selected", "") == ":target":
+            targets.append(column)
+    y = X[targets]
+    X.drop(targets, axis=1, inplace=True)
+    return X, y

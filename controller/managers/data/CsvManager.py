@@ -75,14 +75,26 @@ class CsvManager:
 
         compatible_casting_datatypes = {
 			":string": [":string", ":categorical", ":datetime"],
-            ":integer": [":integer", ":categorical"],
-            ":boolean": [":boolean", ":integer", ":categorical"],
-            ":float": [":float", ":integer", ":categorical"],
-            ":datetime": [":datetime", ":categorical"],
+            ":integer": [":integer", ":float", ":categorical", ":string"],
+            ":boolean": [":boolean", ":integer", ":categorical", ":string"],
+            ":float": [":float", ":integer", ":categorical", ":string"],
+            ":datetime": [":datetime", ":categorical", ":string"],
 		}
 
         if numpy_datatype == np.dtype(np.unicode_) or numpy_datatype == np.dtype(np.object):
-            return ":string", compatible_casting_datatypes[":string"]
+            #Fallback if something isnt recognized automatically
+            try:
+                pd.to_numeric(column, downcast="float64")
+                return ":float", compatible_casting_datatypes[":float"]
+            except:
+                try:
+                    pd.to_numeric(column, downcast="int64")
+                    if column.nunique() <= 2:
+                        return ":boolean", compatible_casting_datatypes[":boolean"]
+                    else:
+                        return ":integer", compatible_casting_datatypes[":integer"]
+                except:
+                    return ":string", compatible_casting_datatypes[":string"]
         elif numpy_datatype == np.dtype(np.int64):
             if column.nunique() <= 2:
                 return ":boolean", compatible_casting_datatypes[":boolean"]

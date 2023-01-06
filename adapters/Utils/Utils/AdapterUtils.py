@@ -9,7 +9,7 @@ from typing import Any
 import dill
 import numpy as np
 import pandas as pd
-from predict_time_sources import DataType, SplitMethod, feature_preparation
+from predict_time_sources import SplitMethod, feature_preparation
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, mean_squared_error
 from sklearn.metrics import classification_report
@@ -163,13 +163,18 @@ def evaluate(config: "StartAutoMlRequest", config_path: str) -> Tuple[float, flo
     # predict
     os.chmod(os.path.join(result_path, "predict.py"), 0o777)
     python_env = os.getenv("PYTHON_ENV", default="PYTHON_ENV_UNSET")
+    targets = []
+    for key in config["dataset_configuration"]["schema"]:
+        #Get target columns list
+        if config["dataset_configuration"]["schema"][key].get("role_selected", "") == ":target":
+            targets.append(key)
 
     if(config["configuration"]["task"] in [":tabular_classification", ":tabular_regression", ":text_regression", ":text_classification"]):
         train, test = data_loader(config)
-        target = config["configuration"]["target"]
+        target = targets[0]
         # override file_path to path to test file
         file_path = write_tabular_dataset_test_data(test, os.path.dirname(file_path))
-        
+
     elif(config["configuration"]["task"] in[":image_classification", ":image_regression"]):
         X_train, y_train, X_val, y_val, X_test, y_test = data_loader(config)
 
@@ -249,7 +254,7 @@ def predict(config: dict, config_path: str, automl: str) -> Tuple[float, str]:
     subprocess.call([python_env, os.path.join(result_folder_location, "predict.py"), config["live_dataset_path"], config_path, result_prediction_path])
     predict_time = time.time() - predict_start
 
-    
+
     return predict_time, result_prediction_path
 
 def setup_run_environment(request: "StartAutoMlRequest", adapter_name: str) -> "StartAutoMlRequest":
@@ -318,7 +323,7 @@ def setup_run_environment(request: "StartAutoMlRequest", adapter_name: str) -> "
     #Save job file
     with open(os.path.join(job_folder_location, get_config_property("job-file-name")), "w+") as f:
         json.dump(request_dict, f)
-        
+
     return request
 
 #endregion
@@ -328,27 +333,6 @@ def setup_run_environment(request: "StartAutoMlRequest", adapter_name: str) -> "
 ######################################################################
 
 #region
-
-def cast_dataframe_column(dataframe: pd.DataFrame, column_index: Any, datatype: Any) -> pd.DataFrame:
-    """Cast a specific column to a new data type
-
-    Args:
-        dataframe (pd.DataFrame): The dataset dataframe
-        column_index (Any): The column index which will be casted to a new data type
-        datatype (Any): The new data type for the column
-
-    Returns:
-        pd.DataFrame: The new dataset dataframe with the casted column
-    """
-    if DataType(datatype) is DataType.DATATYPE_CATEGORY:
-        dataframe[column_index] = dataframe[column_index].astype('category')
-    elif DataType(datatype) is DataType.DATATYPE_BOOLEAN:
-        dataframe[column_index] = dataframe[column_index].astype('bool')
-    elif DataType(datatype) is DataType.DATATYPE_INT:
-        dataframe[column_index] = dataframe[column_index].astype('int')
-    elif DataType(datatype) is DataType.DATATYPE_FLOAT:
-        dataframe[column_index] = dataframe[column_index].astype('float')
-    return dataframe
 
 def read_tabular_dataset_training_data(config: "StartAutoMlRequest") -> Tuple[pd.DataFrame, pd.DataFrame]:
     """Read a CSV dataset into train and test dataframes
@@ -366,13 +350,24 @@ def read_tabular_dataset_training_data(config: "StartAutoMlRequest") -> Tuple[pd
         "tab":          "\t",
     }
 
+    configuration = {
+        "filepath_or_buffer": os.path.join(config["dataset_path"]),
+        "delimiter": delimiters[config['dataset_configuration']['file_configuration']['delimiter']],
+        "skiprows": (config['dataset_configuration']['file_configuration']['start_row']-1),
+        "decimal": config['dataset_configuration']['file_configuration']['decimal_character'],
+        "escapechar": config['dataset_configuration']['file_configuration']['escape_character'],
+        "encoding": config['dataset_configuration']['file_configuration']['encoding'],
+    }
+    if config['dataset_configuration']['file_configuration']['thousands_seperator'] != "":
+        configuration["thousands"] = config['dataset_configuration']['file_configuration']['thousands_seperator']
 
-    data = pd.read_csv(os.path.join(config["dataset_path"]), delimiter=delimiters[config["dataset_configuration"]['file_configuration']['delimiter']], skiprows=(config["dataset_configuration"]['file_configuration']['start_row']-1), escapechar=config["dataset_configuration"]['file_configuration']['escape_character'], decimal=config["dataset_configuration"]['file_configuration']['decimal_character'], encoding=config["dataset_configuration"]['file_configuration']['encoding'])
+
+    data = pd.read_csv(**configuration)
 
     # convert all object columns to categories, because autosklearn only supports numerical,
     # bool and categorical features
     #TODO: change to ontology based preprocessing
-    data[data.select_dtypes(['object']).columns] = data.select_dtypes(['object']).apply(lambda x: x.astype('category'))
+    #data[data.select_dtypes(['object']).columns] = data.select_dtypes(['object']).apply(lambda x: x.astype('category'))
 
     # split training set
     #if SplitMethod.SPLIT_METHOD_RANDOM.value == json_configuration["test_configuration"]["method"]:
@@ -401,7 +396,7 @@ def write_tabular_dataset_test_data(df: pd.DataFrame, dir_name: str) -> str:
     return file_path
 
 
-def prepare_tabular_dataset(df: pd.DataFrame, json_configuration: dict) -> Tuple[pd.DataFrame, pd.Series]:
+def prepare_tabular_dataset(df: pd.DataFrame, json_configuration: dict) -> Tuple[pd.DataFrame, object]:
     """Prepare tabular dataset, perform feature preparation and data type casting
 
     Args:
@@ -409,12 +404,9 @@ def prepare_tabular_dataset(df: pd.DataFrame, json_configuration: dict) -> Tuple
         json_configuration (dict): the training configuration dictonary
 
     Returns:
-        tuple[pd.DataFrame, pd.Series]: tuple holding the dataset dataframe without the target column, and a Series holding the Target column tuple[(X_dataframe, y_series)]
+        tuple[pd.DataFrame, object]: tuple holding the dataset dataframe without the target column, and a Series or Dataframe holding the Target column(s) tuple[(X_dataframe, y)]
     """
-    df = feature_preparation(df, json_configuration["dataset_configuration"]["column_datatypes"].items())
-    df = cast_dataframe_column(df, json_configuration["configuration"]["target"], json_configuration["dataset_configuration"]["column_datatypes"][json_configuration["configuration"]["target"]])
-    X = df.drop(json_configuration["configuration"]["target"], axis=1)
-    y = df[json_configuration["configuration"]["target"]]
+    X, y = feature_preparation(df, json_configuration["dataset_configuration"]["schema"].items(), json_configuration["dataset_configuration"]["file_configuration"]["datetime_format"])
     return X, y
 
 def convert_X_and_y_dataframe_to_numpy(X: pd.DataFrame, y: pd.Series) -> Tuple[np.ndarray, np.ndarray]:
@@ -455,9 +447,9 @@ def read_image_dataset(config: "StartAutoMlRequest") -> Tuple[pd.DataFrame, pd.D
     """
     if not (os.path.exists(os.path.join(local_dir_path, json_configuration["file_name"]))):
         local_file_path = tf.keras.utils.get_file(
-            origin=json_configuration["file_location"], 
-            fname="image_data", 
-            cache_dir=os.path.abspath(os.path.join("app-data")), 
+            origin=json_configuration["file_location"],
+            fname="image_data",
+            cache_dir=os.path.abspath(os.path.join("app-data")),
             extract=True
         )
 
@@ -489,7 +481,7 @@ def read_image_dataset(config: "StartAutoMlRequest") -> Tuple[pd.DataFrame, pd.D
 
     def img_preprocess(img):
         """
-        Opens the image and does some preprocessing 
+        Opens the image and does some preprocessing
         such as converting to RGB, resize and converting to array
         """
         img = Image.open(img)
@@ -503,7 +495,7 @@ def read_image_dataset(config: "StartAutoMlRequest") -> Tuple[pd.DataFrame, pd.D
     X_test = np.array([img_preprocess(p) for p in test_data.name.values])
     y_test = test_data.outcome.values
     return X_train, y_train, X_test, y_test
-    
+
 #endregion
 
 
@@ -540,7 +532,7 @@ def split_dataset(dataset: Any, json_configuration: dict):
     Returns:
         _type_: tuple of training and test dataset
     """
-    
+
     split_method = json_configuration["test_configuration"]["method"]
     split_ratio = json_configuration["test_configuration"]["split_ratio"]
     random_state = json_configuration["test_configuration"]["random_state"]

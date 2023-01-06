@@ -1,10 +1,9 @@
 import autokeras as ak
 import numpy as np
-from AbstractAdapter import AbstractAdapter
 from AdapterUtils import data_loader, export_model, prepare_tabular_dataset
 
 
-class AutoKerasAdapter(AbstractAdapter):
+class AutoKerasAdapter:
     """
     Implementation of the AutoML functionality for AutoKeras
     """
@@ -14,7 +13,11 @@ class AutoKerasAdapter(AbstractAdapter):
         Args:
             configuration (dict): Dictonary holding the training configuration
         """
-        super(AutoKerasAdapter, self).__init__(configuration)
+        self._configuration = configuration
+        if self._configuration["configuration"]["runtime_limit"] > 0:
+            self._time_limit = self._configuration["configuration"]["runtime_limit"]
+        else:
+            self._time_limit = 30
 
     def start(self):
         """Start the correct ML task functionality of AutoKeras"""
@@ -45,7 +48,7 @@ class AutoKerasAdapter(AbstractAdapter):
                                           # metric=self._configuration['metric'],
                                           directory=self._configuration["model_folder_location"],
                                           seed=42)
-                                          
+
         clf.fit(x=X, y=y, epochs=1)
         export_model(clf, self._configuration["result_folder_location"], 'model_keras.p')
 
@@ -60,7 +63,7 @@ class AutoKerasAdapter(AbstractAdapter):
                                          # metric=self._configuration['metric'],
                                          directory=self._configuration["model_folder_location"],
                                          seed=42)
-        
+
         reg.fit(x=X, y=y, epochs=1)
         export_model(reg, self._configuration["result_folder_location"], 'model_keras.p')
 
@@ -69,7 +72,7 @@ class AutoKerasAdapter(AbstractAdapter):
 
         X_train, y_train, X_test, y_test = data_loader(self._configuration)
 
-        clf = ak.ImageClassifier(overwrite=True, 
+        clf = ak.ImageClassifier(overwrite=True,
                                           max_trials=3,
                                 # metric=self._configuration['metric'],
                                 seed=42,
@@ -85,12 +88,12 @@ class AutoKerasAdapter(AbstractAdapter):
 
         X_train, y_train, X_val, y_val = data_loader(self._configuration)
 
-        reg = ak.ImageRegressor(overwrite=True, 
+        reg = ak.ImageRegressor(overwrite=True,
                                           max_trials=3,
                                 # metric=self._configuration['metric'],
                                 seed=42,
                                 directory=self._configuration["model_folder_location"])
-                                
+
         reg.fit(x = X_train, y = y_train, epochs=1)
 
         export_model(reg, self._configuration["result_folder_location"], 'model_keras.p')
@@ -101,15 +104,15 @@ class AutoKerasAdapter(AbstractAdapter):
         self.df, test = data_loader(self._configuration)
         X, y = prepare_tabular_dataset(self.df, self._configuration)
 
-        reg = ak.TextClassifier(overwrite=True, 
+        reg = ak.TextClassifier(overwrite=True,
                                 # NOTE: bert models will fail with out of memory errors
                                 #   even with 32GB GB RAM
-                                # the first model is a non-bert transformer  
+                                # the first model is a non-bert transformer
                                 max_trials=1,
                                 # metric=self._configuration['metric'],
                                 seed=42,
                                 directory=self._configuration["model_folder_location"])
-                                
+
         reg.fit(x = np.array(X).astype(np.unicode_), y = np.array(y), epochs=1)
 
         export_model(reg, self._configuration["result_folder_location"], 'model_keras.p')
@@ -120,12 +123,12 @@ class AutoKerasAdapter(AbstractAdapter):
         self.df, test = data_loader(self._configuration)
         X, y = prepare_tabular_dataset(self.df, self._configuration)
 
-        reg = ak.TextClassifier(overwrite=True, 
+        reg = ak.TextClassifier(overwrite=True,
                                           max_trials=3,
                                 # metric=self._configuration['metric'],
                                 seed=42,
                                 directory=self._configuration["model_folder_location"])
-                                
+
         reg.fit(x = np.array(X), y = np.array(y), epochs=1)
 
         export_model(reg, self._configuration["result_folder_location"], 'model_keras.p')
@@ -136,12 +139,12 @@ class AutoKerasAdapter(AbstractAdapter):
         self.df, test = data_loader(self._configuration)
         X, y = prepare_tabular_dataset(self.df, self._configuration)
 
-        reg = ak.TimeseriesForecaster(overwrite=True, 
+        reg = ak.TimeseriesForecaster(overwrite=True,
                                           max_trials=3,
+                                          lookback=3,
                                 # metric=self._configuration['metric'],
                                 seed=42,
                                 directory=self._configuration["model_folder_location"])
-                                
-        reg.fit(x = np.array(X), y = np.array(y), epochs=1)
+        reg.fit(x = X, y = y, epochs=1)
 
         export_model(reg, self._configuration["result_folder_location"], 'model_keras.p')
