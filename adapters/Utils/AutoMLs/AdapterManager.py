@@ -158,6 +158,7 @@ class AdapterManager(Thread):
             ExplainModelResponse: The ExplainModelResponse message holding the prediction probabilities
         """
         try:
+            print("adapatermanager explain")
             config_json = json.loads(explain_auto_ml_request.process_json)
             config_json["dataset_configuration"] = json.loads(config_json["dataset_configuration"])
             result_folder_location = os.path.join(get_config_property("training-path"),
@@ -203,6 +204,13 @@ class AdapterManager(Thread):
                                         config_json["training_id"],
                                         get_config_property("job-folder-name"),
                                         get_config_property("job-file-name"))
+
+            #load old dataset_configuration and save it to config json in case the dataset types have been changed in the
+            #AutoKeras adapter for TextClassification
+            with open(job_file_location) as file:
+                config_json_old_dataset_configuation = json.load(file)
+
+            config_json['dataset_configuration'] = config_json_old_dataset_configuation['dataset_configuration']
 
             # saving AutoML configuration JSON
             with open(job_file_location, "w+") as f:

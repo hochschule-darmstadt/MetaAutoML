@@ -74,6 +74,7 @@ if __name__ == '__main__':
             "space":        " ",
             "tab":          "\t",
         }
+        
         configuration = {
             "filepath_or_buffer": filepath,
             "delimiter": delimiters[config_json['dataset_configuration']['file_configuration']['delimiter']],

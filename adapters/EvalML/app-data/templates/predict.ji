@@ -5,7 +5,9 @@ from predict_time_sources import feature_preparation, SplitMethod
 
 import pandas as pd
 import numpy as np
-from flaml import AutoML
+import evalml
+from evalml import AutoMLSearch
+
 
 if __name__ == '__main__':
     filepath = sys.argv[1]
@@ -41,8 +43,6 @@ if __name__ == '__main__':
     if config_json['dataset_configuration']['file_configuration']['thousands_seperator'] != "":
         configuration["thousands"] = config_json['dataset_configuration']['file_configuration']['thousands_seperator']
 
-
-
     X = pd.read_csv(**configuration)
 
     # split training set
@@ -50,9 +50,13 @@ if __name__ == '__main__':
 
     X, y = feature_preparation(X, config_json["dataset_configuration"]["schema"].items(), config_json["dataset_configuration"]["file_configuration"]["datetime_format"])
 
-    with open(sys.path[0] + '/model_flaml.p', 'rb') as file:
-        automl2 = dill.load(file)
+    with open(sys.path[0] + '/evalml.p', 'rb') as file:
+        loaded_model = dill.load(file)
+        
+    print(type(X))
+    predicted_y = loaded_model.predict((X))
 
-    predicted_y = automl2.predict(X)
-    predicted_y = np.reshape(predicted_y, (-1, 1))
-    pd.DataFrame(data=predicted_y, columns=["predicted"]).to_csv(save_path)
+
+    df = (predicted_y.to_frame())
+    df.columns = [ 'predicted']
+    df.to_csv(save_path)

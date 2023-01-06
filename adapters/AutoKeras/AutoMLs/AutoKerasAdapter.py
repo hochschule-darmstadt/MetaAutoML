@@ -1,7 +1,11 @@
 import autokeras as ak
 import numpy as np
 from AdapterUtils import data_loader, export_model, prepare_tabular_dataset
-
+import pandas as pd
+from predict_time_sources import DataType
+import json
+import os
+from JsonUtil import get_config_property
 
 class AutoKerasAdapter:
     """
@@ -102,8 +106,9 @@ class AutoKerasAdapter:
         """Execute text classifiction task and export the found model"""
 
         self.df, test = data_loader(self._configuration)
+        self.get_column_with_largest_amout_of_text(self.df)
         X, y = prepare_tabular_dataset(self.df, self._configuration)
-
+        
         reg = ak.TextClassifier(overwrite=True,
                                 # NOTE: bert models will fail with out of memory errors
                                 #   even with 32GB GB RAM
@@ -112,15 +117,18 @@ class AutoKerasAdapter:
                                 # metric=self._configuration['metric'],
                                 seed=42,
                                 directory=self._configuration["model_folder_location"])
+                               
 
         reg.fit(x = np.array(X).astype(np.unicode_), y = np.array(y), epochs=1)
-
+        self.save_configuration_in_json()
         export_model(reg, self._configuration["result_folder_location"], 'model_keras.p')
+
 
     def __text_regression(self):
         """Execute text regression task and export the found model"""
 
         self.df, test = data_loader(self._configuration)
+        self.get_column_with_largest_amout_of_text(X)
         X, y = prepare_tabular_dataset(self.df, self._configuration)
 
         reg = ak.TextClassifier(overwrite=True,
@@ -128,10 +136,11 @@ class AutoKerasAdapter:
                                 # metric=self._configuration['metric'],
                                 seed=42,
                                 directory=self._configuration["model_folder_location"])
-
+                                
         reg.fit(x = np.array(X), y = np.array(y), epochs=1)
-
+        self.save_configuration_in_json()
         export_model(reg, self._configuration["result_folder_location"], 'model_keras.p')
+
 
     def __time_series_forecasting(self):
         """Execute time series forecasting task and export the found model"""
@@ -145,6 +154,41 @@ class AutoKerasAdapter:
                                 # metric=self._configuration['metric'],
                                 seed=42,
                                 directory=self._configuration["model_folder_location"])
+                                
         reg.fit(x = X, y = y, epochs=1)
-
+        
         export_model(reg, self._configuration["result_folder_location"], 'model_keras.p')
+
+    def get_column_with_largest_amout_of_text(self, df: pd.DataFrame):
+        """
+        Find the column with the most text inside,
+        because AutoKeras only supports training with one feature
+        Args:
+            X (pd.DataFrame): The current X Dataframe
+
+        Returns:
+            pd.Dataframe: Returns a pandas Dataframe with the column with the most text inside
+        """
+        newdf = df
+        X = newdf.drop(self._configuration["configuration"]["target"], axis=1)
+        column_names = X.columns
+        dict_with_string_length = {}
+        for column_name in column_names:
+            if(type(X[column_name][1]) == str):
+                newlength = X[column_name].str.len().mean()
+                dict_with_string_length[column_name] = newlength
+        max_value = max(dict_with_string_length, key=dict_with_string_length.get)
+
+        column_names_to_ignore = column_names.drop(max_value)
+        for column_name in column_names_to_ignore:
+            #TODO Change 7 to new Datatype Igorne
+            self._configuration['dataset_configuration']['column_datatypes'][column_name] = 7
+
+
+    def save_configuration_in_json(self):
+        """ serialize dataset_configuration to json string and save the the complete configuration in json file
+            to habe the right datatypes available for the evaluation
+        """
+        self._configuration['dataset_configuration'] = json.dumps(self._configuration['dataset_configuration'])
+        with open(os.path.join(self._configuration['job_folder_location'], get_config_property("job-file-name")), "w+") as f:
+            json.dump(self._configuration, f)
