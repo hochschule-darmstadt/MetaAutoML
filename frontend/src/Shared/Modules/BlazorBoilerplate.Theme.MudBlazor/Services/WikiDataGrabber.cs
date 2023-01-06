@@ -21,10 +21,10 @@ namespace BlazorBoilerplate.Theme.Material.Services
         public List<string> GetDataFrom(string wikiDataUrl, string language = "en")
         {
             List<string> wikipediaContent = new List<string>();
-          /*  if(!IsWikiDatalink(wikiDataUrl))
+            if(!IsWikiDatalink(wikiDataUrl))
             {
                 return wikipediaContent;
-            }*/
+            }
             
             wikiDataUrl = AdjustUrl(wikiDataUrl);
 

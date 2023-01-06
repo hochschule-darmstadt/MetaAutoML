@@ -102,7 +102,7 @@ else
                 if (!string.IsNullOrEmpty(chipToAdd.ToolTip)) {
                     WikiDataGrabber wiki = new WikiDataGrabber();
                     List<string> wikiTooltip = wiki.GetDataFrom(chipToAdd.ToolTip);
-                    if (wikiTooltip != null) { chipToAdd.ToolTip = wikiTooltip[0]; wikipediaImageUrl = wikiTooltip[1]; }
+                    if (wikiTooltip.Count != 0) { chipToAdd.ToolTip = wikiTooltip[0]; wikipediaImageUrl = wikiTooltip[1]; }
 
 
                 }
