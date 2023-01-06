@@ -28,15 +28,14 @@ service ControllerService {
   /*return a Dataset record by user id and dataset id*/
   rpc GetDataset(GetDatasetRequest) returns (GetDatasetResponse) {}
 
-  /*return all the column names of a tabular dataset*/
-  rpc GetTabularDatasetColumn(GetTabularDatasetColumnRequest) returns (GetTabularDatasetColumnResponse) {}
-
   /*delete a Dataset record and every related object inside MongoDB and files on disc (Trainings, Models, Predictions)*/
   rpc DeleteDataset(DeleteDatasetRequest) returns (DeleteDatasetResponse) {}
 
   /*update the dataset file configuration and execute the dataset analysis again*/
-  rpc SetDatasetFileConfiguration(SetDatasetFileConfigurationRequest) returns (SetDatasetFileConfigurationResponse) {}
+  rpc SetDatasetConfiguration(SetDatasetConfigurationRequest) returns (SetDatasetConfigurationResponse) {}
 
+  /*update a dataset column schema configuration*/
+  rpc SetDatasetColumnSchemaConfiguration(SetDatasetColumnSchemaConfigurationRequest) returns (SetDatasetColumnSchemaConfigurationResponse) {}
 
   /*OMA-ML TRAINING MESSAGES*/
   /*create a new Training record in MongoDB and start the a new training session*/
@@ -78,11 +77,11 @@ service ControllerService {
 
   /*return all information fields of an object*/
   rpc GetObjectsInformation(GetObjectsInformationRequest) returns (GetObjectsInformationResponse) {}
-  
+
   /*return all supported AutoML tasks*/
   rpc GetTasksForDatasetType(GetTasksForDatasetTypeRequest) returns (GetTasksForDatasetTypeResponse) {}
 
-  
+
   /*OMA-ML PREDICTION MESSAGES*/
   /* create a new Prediction record in MongoDB and start the a new prediction session */
   rpc CreatePrediction(CreatePredictionRequest) returns (CreatePredictionResponse) {}

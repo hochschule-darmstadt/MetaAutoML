@@ -160,6 +160,7 @@ class AdapterManager(Thread):
         try:
             print("adapatermanager explain")
             config_json = json.loads(explain_auto_ml_request.process_json)
+            config_json["dataset_configuration"] = json.loads(config_json["dataset_configuration"])
             result_folder_location = os.path.join(get_config_property("training-path"),
                                                   config_json["user_id"],
                                                   config_json["dataset_id"],

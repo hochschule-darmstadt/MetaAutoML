@@ -50,6 +50,36 @@ class AdapterRuntimeManager:
             self.__adapters.append(adapter_training)
         return
 
+    def __build_dataset_schema(self) -> str:
+        """Build the dataset schema using the dataset document and add changes from the wizzard process
+
+        Returns:
+            str: the dataset schema for this training session
+        """
+        with self.__data_storage.lock():
+            found, dataset = self.__data_storage.get_dataset(self.__request.user_id, self.__request.dataset_id)
+            current_schema = dataset["schema"]
+            training_schema = json.loads(self.__request.dataset_configuration)
+            #We only need to update the selected values if selected datatype and role as the rest is set by the backend
+            for key in current_schema:
+                #Update selected role
+                selected_role = training_schema[key].get("RoleSelected", "")
+                if selected_role != "":
+                    current_schema[key]["role_selected"] = selected_role
+                else:
+                    current_schema[key].pop("role_selected", None)
+                #Update selected datatype
+                selected_datatype = training_schema[key].get("DatatypeSelected", "")
+                if selected_datatype != "":
+                    current_schema[key]["datatype_selected"] = selected_datatype
+                else:
+                    current_schema[key].pop("datatype_selected", None)
+
+            if self.__request.save_schema == True:
+                self.__data_storage.update_dataset(self.__request.user_id, self.__request.dataset_id, {"schema": current_schema})
+            return current_schema
+
+
     def __create_training_record(self) -> str:
         """Create a new training record for this training inside MongoDB
 
@@ -65,7 +95,6 @@ class AdapterRuntimeManager:
             "status": "busy",
             "configuration": {
                 "task": self.__request.configuration.task,
-                "target": self.__request.configuration.target,
                 "enabled_strategies": self.__request.configuration.enabled_strategies,
                 "runtime_limit": self.__request.configuration.runtime_limit,
                 "metric": self.__request.configuration.metric,
@@ -73,8 +102,8 @@ class AdapterRuntimeManager:
                 "selected_ml_libraries": self.__request.configuration.selected_ml_libraries
             },
             "dataset_configuration": {
-                "column_datatypes": json.loads(self.__request.dataset_configuration)["column_datatypes"],
-                "file_configuration": dataset["file_configuration"]
+                "file_configuration": dataset["file_configuration"],
+                "schema": self.__build_dataset_schema()
             },
             "runtime_profile": {
                 "start_time": datetime.now(),
@@ -83,7 +112,7 @@ class AdapterRuntimeManager:
             },
             "lifecycle_state": "active"
         }
-        
+
         training_id = self.__data_storage.create_training(self.__request.user_id, config)
         self.__log.debug(f"__create_training_record: inserted new training: {training_id}")
         self.__data_storage.update_dataset(self.__request.user_id, self.__request.dataset_id, { "training_ids": dataset["training_ids"] + [training_id] })
@@ -130,7 +159,7 @@ class AdapterRuntimeManager:
             if dataset["type"] in  [":tabular", ":text", ":time_series"]:
                 ExplainableAIManager(self.__data_storage, adapter_manager, self.__explainable_lock).explain(user_id, model_id)
                 return
-    
+
     def get_training_id(self) -> str:
         """Get the training id to which the found model is linked too
 

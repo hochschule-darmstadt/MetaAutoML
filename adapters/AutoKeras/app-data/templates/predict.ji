@@ -11,7 +11,7 @@ import os
 import glob
 from PIL import Image
 
-from predict_time_sources import feature_preparation, DataType, SplitMethod
+from predict_time_sources import feature_preparation, SplitMethod
 
 def read_image_dataset(json_configuration):
 
@@ -62,21 +62,34 @@ if __name__ == '__main__':
 
     config_json["dataset_configuration"] = json.loads(config_json["dataset_configuration"])
     if config_json["configuration"]["task"] in [":tabular_classification", ":tabular_regression", ":text_classification", ":text_regression", ":time_series"]:
-        target = config_json["configuration"]["target"]
-        features = config_json["dataset_configuration"]["column_datatypes"]
-        features.pop(target, None)
-        features = features.items()
+        targets = []
+        for key in config_json["dataset_configuration"]["schema"]:
+            #Get target columns list
+            if config_json["dataset_configuration"]["schema"][key].get("role_selected", "") == ":target":
+                targets.append(key)
+        target = targets[0]
         delimiters = {
             "comma":        ",",
             "semicolon":    ";",
             "space":        " ",
             "tab":          "\t",
         }
-        X = pd.read_csv(filepath, delimiter=delimiters[config_json["dataset_configuration"]['file_configuration']['delimiter']], escapechar=config_json["dataset_configuration"]['file_configuration']['escape_character'], decimal=config_json["dataset_configuration"]['file_configuration']['decimal_character'], encoding = config_json["dataset_configuration"]['file_configuration']['encoding']).drop(target, axis=1, errors='ignore')
+        
+        configuration = {
+            "filepath_or_buffer": filepath,
+            "delimiter": delimiters[config_json['dataset_configuration']['file_configuration']['delimiter']],
+            "skiprows": (config_json['dataset_configuration']['file_configuration']['start_row']-1),
+            "decimal": config_json['dataset_configuration']['file_configuration']['decimal_character'],
+            "escapechar": config_json['dataset_configuration']['file_configuration']['escape_character'],
+            "encoding": config_json['dataset_configuration']['file_configuration']['encoding'],
+        }
+        if config_json['dataset_configuration']['file_configuration']['thousands_seperator'] != "":
+            configuration["thousands"] = config_json['dataset_configuration']['file_configuration']['thousands_seperator']
 
-        X = X.iloc[:]
 
-        X = feature_preparation(X, features)
+        X = pd.read_csv(**configuration)
+
+        X, y = feature_preparation(X, config_json["dataset_configuration"]["schema"].items(), config_json["dataset_configuration"]["file_configuration"]["datetime_format"])
 
     elif config_json["configuration"]["task"] in [":image_classification",  ":image_regression"]:
         X, y = read_image_dataset(config_json)

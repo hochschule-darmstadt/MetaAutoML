@@ -1,12 +1,10 @@
 import os
 
-from AbstractAdapter import AbstractAdapter
 from AdapterUtils import export_model, prepare_tabular_dataset, data_loader
 from flaml import AutoML
-from JsonUtil import get_config_property
+import numpy as np
 
-
-class FLAMLAdapter(AbstractAdapter):
+class FLAMLAdapter:
     """
     Implementation of the AutoML functionality for FLAML
     """
@@ -17,7 +15,11 @@ class FLAMLAdapter(AbstractAdapter):
         Args:
             configuration (dict): Dictonary holding the training configuration
         """
-        super(FLAMLAdapter, self).__init__(configuration)
+        self._configuration = configuration
+        if self._configuration["configuration"]["runtime_limit"] > 0:
+            self._time_limit = self._configuration["configuration"]["runtime_limit"]
+        else:
+            self._time_limit = 30
         self._result_path = configuration["model_folder_location"]
         self._log_file_path = os.path.join(self._result_path, "flaml.log")
 
@@ -52,7 +54,7 @@ class FLAMLAdapter(AbstractAdapter):
             "log_file_name": self._log_file_path,
         })
 
-        automl.fit(X_train=X, y_train=y, **automl_settings)
+        automl.fit(X_train=np.array(X), y_train=np.array(y), **automl_settings)
         export_model(automl, self._configuration["result_folder_location"], 'model_flaml.p')
 
     def __tabular_regression(self):
@@ -68,5 +70,5 @@ class FLAMLAdapter(AbstractAdapter):
             "log_file_name": self._log_file_path,
         })
 
-        automl.fit(X_train=X, y_train=y, **automl_settings)
+        automl.fit(X_train=np.array(X), y_train=np.array(y), **automl_settings)
         export_model(automl, self._configuration["result_folder_location"], 'model_flaml.p')

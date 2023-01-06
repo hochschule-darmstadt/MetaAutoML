@@ -22,7 +22,7 @@ class UserManager:
         self.__dataset_analysis_lock = dataset_analysis_lock
         self.__log = logging.getLogger('UserManager')
         self.__log.setLevel(logging.getLevelName(os.getenv("SERVER_LOGGING_LEVEL")))
-        
+
     def create_new_user(
         self, create_new_user_request: "CreateNewUserRequest"
     ) -> "CreateNewUserResponse":

@@ -1,4 +1,4 @@
-﻿@page "/datasets/{id}/train"
+@page "/datasets/{id}/train"
 @inject IStringLocalizer<Global> L
 @inject ISnackbar Snackbar
 @inject IApiClient apiClient
@@ -30,7 +30,7 @@ else
         case ":text":
         case ":tabular":
         case ":time_series_longitudinal":
-            <MuddyWizard WizardFinished="@OnWizardFinished">
+            <MuddyWizard WizardFinished="@OnWizardFinished" DisplaySaveSchemaCheckbox="true" @bind-SaveSchema="_automlRequest.SaveSchema">
                 <MuddyWizardPanel Title="@L["Dataset preparation"]">
                     <PrepareTabularDataset Dataset="@_dataset" @bind-StartAutoMlRequest="@_automlRequest" />
                 </MuddyWizardPanel>
@@ -40,7 +40,7 @@ else
             </MuddyWizard>
             break;
         case ":image":
-            <MuddyWizard WizardFinished="@OnWizardFinished">
+            <MuddyWizard WizardFinished="@OnWizardFinished"DisplaySaveSchemaCheckbox="false">
                 <MuddyWizardPanel Title="@L["Configuration"]">
                     <TaskConfiguration Dataset="@_dataset" @bind-StartAutoMlRequest="@_automlRequest" />
                 </MuddyWizardPanel>
@@ -63,6 +63,10 @@ else
         _automlRequest = new CreateTrainingRequestDto();
         _automlRequest.DatasetId = Id;
         await LoadDataset();
+        if (_dataset.Dataset.Type.ID == ":image")
+        {
+            _automlRequest.SaveSchema = false;
+        }
         _breadcrumbs.Add(new BreadcrumbItem(L["Home"], "/", false, Icons.Filled.Home));
         _breadcrumbs.Add(new BreadcrumbItem(L["Datasets"], "/datasets", false, Icons.Filled.ListAlt));
         _breadcrumbs.Add(new BreadcrumbItem(_datasetTitle, "/datasets/" + _dataset.Dataset.Id, false, Icons.Filled.ListAlt));
@@ -75,15 +79,16 @@ else
         try
         {
             GetDatasetRequestDto datasetRequest = new GetDatasetRequestDto()
-                {
-                    DatasetId = Id
-                };
+            {
+                DatasetId = Id
+            };
             ApiResponseDto apiResponse = await apiClient.GetDataset(datasetRequest);
 
             if (apiResponse.IsSuccessStatusCode)
             {
                 _dataset = Newtonsoft.Json.JsonConvert.DeserializeObject<GetDatasetResponseDto>(apiResponse.Result.ToString());
                 _datasetTitle = L["Dataset {0}", _dataset.Dataset.Name];
+                _automlRequest.Schema = _dataset.Dataset.Schema;
                 viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
             }
             else
@@ -96,6 +101,19 @@ else
             viewNotifier.Show(ex.GetBaseException().Message, ViewNotifierType.Error, L["Operation Failed"]);
         }
     }
+
+    private bool IsTargetSet()
+    {
+        foreach (var item in _automlRequest.Schema)
+        {
+            if (item.Value.RoleSelected.ID == ":target")
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private async void OnWizardFinished()
     {
         try
@@ -105,7 +123,7 @@ else
                 viewNotifier.Show("No task selected", ViewNotifierType.Error, L["Operation Failed"]);
                 return;
             }
-            if (((_dataset.Dataset.Type.ID == ":tabular") || (_dataset.Dataset.Type.ID == ":test") || (_dataset.Dataset.Type.ID == ":time_series") || (_dataset.Dataset.Type.ID == ":time_series_longitudinal")) && string.IsNullOrEmpty(_automlRequest.Configuration.Target))
+            if (((_dataset.Dataset.Type.ID == ":tabular") || (_dataset.Dataset.Type.ID == ":test") || (_dataset.Dataset.Type.ID == ":time_series") || (_dataset.Dataset.Type.ID == ":time_series_longitudinal")) && !IsTargetSet())
             {
                 viewNotifier.Show("No target selected", ViewNotifierType.Error, L["Operation Failed"]);
                 return;

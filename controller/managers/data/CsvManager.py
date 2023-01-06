@@ -15,38 +15,54 @@ class CsvManager:
     Static CSV Manager class to interact with the local file system
     """
 
-    
-    def read_dataset(path) -> GetDatasetResponse:
+    @staticmethod
+    def read_dataset(path: str, file_configuration: dict, schema: dict) -> pd.DataFrame:
+        """Read a csv dataset from disk
+
+        Args:
+            path (str): disk path to dataset
+            file_configuration (dict): dataset file configuration to read the dataset
+            schema (dict): dataset column schema
+
+        Returns:
+            pd.DataFrame: the read dataset as a DataFrame
         """
-        Read a dataset from the disk
-        ---
-        Parameter
-        1. path of the file to read
-        ---
-        Return a GetDatasetResponse object representing the dataset
-        """
-        response = GetDatasetResponse()
-        dataset = pd.read_csv(path)
-    
-        for col in dataset.columns:
-            table_column = TableColumn()
-            table_column.name = col
-            numpy_datatype = dataset[col].dtype.name
-            datatype, convertible_types = CsvManager.__get_datatype(numpy_datatype, dataset[col])
+        delimiters = {
+            "comma":        ",",
+            "semicolon":    ";",
+            "space":        " ",
+            "tab":          "\t",
+        }
 
-            table_column.type = datatype
-            for convertible_type in convertible_types:
-                table_column.convertible_types.append(convertible_type)
+        configuration = {
+            "filepath_or_buffer": path,
+            "delimiter": delimiters[file_configuration['delimiter']],
+            "skiprows": (file_configuration['start_row']-1),
+            "decimal": file_configuration['decimal_character'],
+            "escapechar": file_configuration['escape_character'],
+            "encoding": file_configuration['encoding'],
+        }
+        if file_configuration['thousands_seperator'] != "":
+           configuration["thousands"] = file_configuration['thousands_seperator']
 
-            for item in dataset[col].head(FIRST_ROW_AMOUNT).tolist():
-                table_column.first_entries.append(str(item))
+        dataset = pd.read_csv(**configuration)
 
-            response.columns.append(table_column)
+        for key, values in schema.items():
+            try:
+                if values["datatype_selected"] != ":datetime":
+                    continue
+            except KeyError:
+                if values["datatype_detected"] != ":datetime":
+                    continue
+            try:
+                dataset[key] = pd.to_datetime(dataset[key], format=file_configuration['datetime_format'])
+            except:
+                print("datetime conversion failed!")#TODO logging
+        return dataset
 
-        return response
 
     @staticmethod
-    def __get_datatype(numpy_datatype: np.dtype, column: pd.Series):
+    def __get_datatype_for_column(numpy_datatype: np.dtype, column: pd.Series):
         """
         Identify the np datatype and mark correct OMAML datatype
         ---
@@ -56,91 +72,86 @@ class CsvManager:
         ---
         Return DataType.DATATYPE of the passed value + List of convertible datatypes
         """
-        if numpy_datatype == np.dtype(np.object):
-            #if column.nunique() < column.size/10:
-            #    if column.nunique() <= 2:
-            #        return DataType.DATATYPE_BOOLEAN, [DataType.DATATYPE_IGNORE,
-            #                                                 DataType.DATATYPE_CATEGORY]
-            #    return DataType.DATATYPE_CATEGORY, [DataType.DATATYPE_IGNORE]
-            return DataType.DATATYPE_STRING, [DataType.DATATYPE_CATEGORY, DataType.DATATYPE_IGNORE]
-        elif numpy_datatype == np.dtype(np.unicode_):
-            return DataType.DATATYPE_STRING, [DataType.DATATYPE_CATEGORY, DataType.DATATYPE_IGNORE]
+
+        compatible_casting_datatypes = {
+			":string": [":string", ":categorical", ":datetime"],
+            ":integer": [":integer", ":float", ":categorical", ":string"],
+            ":boolean": [":boolean", ":integer", ":categorical", ":string"],
+            ":float": [":float", ":integer", ":categorical", ":string"],
+            ":datetime": [":datetime", ":categorical", ":string"],
+		}
+
+        if numpy_datatype == np.dtype(np.unicode_) or numpy_datatype == np.dtype(np.object):
+            #Fallback if something isnt recognized automatically
+            try:
+                pd.to_numeric(column, downcast="float64")
+                return ":float", compatible_casting_datatypes[":float"]
+            except:
+                try:
+                    pd.to_numeric(column, downcast="int64")
+                    if column.nunique() <= 2:
+                        return ":boolean", compatible_casting_datatypes[":boolean"]
+                    else:
+                        return ":integer", compatible_casting_datatypes[":integer"]
+                except:
+                    return ":string", compatible_casting_datatypes[":string"]
         elif numpy_datatype == np.dtype(np.int64):
-            if "id" in str.lower(str(column.name)) and column.nunique() == column.size:
-                return DataType.DATATYPE_INT, [DataType.DATATYPE_CATEGORY, DataType.DATATYPE_IGNORE]
-            elif column.nunique() <= 2:
-                return DataType.DATATYPE_BOOLEAN, [DataType.DATATYPE_IGNORE,
-                                                         DataType.DATATYPE_CATEGORY,
-                                                         DataType.DATATYPE_INT]
-            #if column.nunique() < 10:
-            #    return DataType.DATATYPE_CATEGORY, [DataType.DATATYPE_IGNORE,
-            #                                              DataType.DATATYPE_INT]
-            return DataType.DATATYPE_INT, [DataType.DATATYPE_IGNORE,
-                                                 DataType.DATATYPE_CATEGORY]
+            if column.nunique() <= 2:
+                return ":boolean", compatible_casting_datatypes[":boolean"]
+            return ":integer", compatible_casting_datatypes[":integer"]
         elif numpy_datatype == np.dtype(np.float_):
-            return DataType.DATATYPE_FLOAT, [DataType.DATATYPE_IGNORE,
-                                                   DataType.DATATYPE_CATEGORY,
-                                                   DataType.DATATYPE_INT]
+            return ":float", compatible_casting_datatypes[":float"]
         elif numpy_datatype == np.dtype(np.bool_):
-            return DataType.DATATYPE_BOOLEAN, [DataType.DATATYPE_IGNORE,
-                                                     DataType.DATATYPE_CATEGORY,
-                                                     DataType.DATATYPE_INT,
-                                                     DataType.DATATYPE_FLOAT]
+            return ":boolean", compatible_casting_datatypes[":boolean"]
         elif numpy_datatype == np.dtype(np.datetime64):
-            return DataType.DATATYPE_DATETIME, [DataType.DATATYPE_IGNORE,
-                                                      DataType.DATATYPE_CATEGORY]
+            return ":datetime", compatible_casting_datatypes[":datetime"]
         else:
-            return DataType.DATATYPE_UNKNOW, [DataType.DATATYPE_IGNORE,
-                                                    DataType.DATATYPE_CATEGORY,
-                                                    DataType.DATATYPE_BOOLEAN]
+            return ":string", compatible_casting_datatypes[":string"]
 
     @staticmethod
-    def get_columns(path, fileConfiguration) -> GetTabularDatasetColumnResponse:
+    def __get_compatible_roles_for_column(column: pd.Series) -> list[str]:
+        """Get the compatible roles for a given series
+
+        Args:
+            column (pd.Series): One column from the dataframe
+
+        Returns:
+            list[str]: IRIs list of compatible roles
         """
-        Read only the column names of a dataset
-        ---
-        Parameter
-        1. path to the dataset to read
-        ---
-        Return the column names as GetTabularDatasetColumnNamesResponse
-        """
-        delimiters = {
-            "comma":        ",",
-            "semicolon":    ";",
-            "space":        " ",
-            "tab":          "\t",
-        }
-        response = GetTabularDatasetColumnResponse()
-        dataset = pd.read_csv(path, delimiter=delimiters[fileConfiguration['delimiter']], skiprows=(fileConfiguration['start_row']-1), escapechar=fileConfiguration['escape_character'], decimal=fileConfiguration['decimal_character'], encoding=fileConfiguration['encoding'])
-    
+        roles = [":target", ":ignore"]
+
+        if column.nunique() == column.size:
+            roles.append(":index")
+        return roles
+
+    @staticmethod
+    def get_default_dataset_schema(path: str, fileConfiguration: dict) -> tuple[dict, dict]:
+        """Get the default datatypes of all columns for a CSV based dataset (tabular, text, time series)
+
+		Args:
+			path (str): File path to the csv dataset file
+			fileConfiguration (dict): The datasets file configuration
+
+		Returns:
+			tuple[dict, dict]: Tuple of dictonaries. First dict is the dict of column names and their found default datatype, second dict is the dict of column names and their default roles
+		"""
+        schema = {}
+        dataset = CsvManager.read_dataset(path, fileConfiguration, schema)
         for col in dataset.columns:
-            table_column = TableColumn()
-            table_column.name = col
             numpy_datatype = dataset[col].dtype.name
-            datatype, convertible_types = CsvManager.__get_datatype(numpy_datatype, dataset[col])
-
-            table_column.type = datatype
-            for convertible_type in convertible_types:
-                table_column.convertible_types.append(convertible_type)
-
-            response.columns.append(table_column)
-        return response
+            datatype_detected, datatypes_compatible = CsvManager.__get_datatype_for_column(numpy_datatype, dataset[col])
+            roles_compatible = CsvManager.__get_compatible_roles_for_column(dataset[col])
+            schema.update({col: {
+                "datatype_detected": datatype_detected,
+                "datatypes_compatible": datatypes_compatible,
+                "roles_compatible": roles_compatible
+             }})
+        return schema
 
     @staticmethod
     def copy_default_dataset(username):
         upload_folder = os.path.join(os.path.dirname(os.path.abspath(sys.modules['__main__'].__file__)), get_config_property("datasets-path"), username, "uploads")
         default_file = os.path.join(os.path.dirname(os.path.abspath(sys.modules['__main__'].__file__)), "config", "defaults", "titanic_train.csv")
-        #Replace for windows
-        #upload_folder = upload_folder.replace("\\managers", "")
-        #default_file = default_file.replace("\\managers", "")
-        #Replace for UNIX
-        #upload_folder = upload_folder.replace("/managers", "")
-        #default_file = default_file.replace("/managers", "")
-        #if os.getenv("MONGO_DB_DEBUG") != "YES":
-            #Within docker we do not want to add the app section, as this leads to broken links
-            #upload_folder = upload_folder.replace("/app/", "")
-            #default_file = default_file.replace("/app/", "")
-        # make sure directory exists in case it's the first upload from this user
         os.makedirs(upload_folder, exist_ok=True)
         shutil.copy(default_file, os.path.join(upload_folder, "titanic_train.csv"))
-        return 
+        return

@@ -1,6 +1,5 @@
 import os
 
-from AbstractAdapter import AbstractAdapter
 from AdapterUtils import export_model, prepare_tabular_dataset, data_loader
 from AdapterUtils import *
 from JsonUtil import get_config_property
@@ -16,7 +15,7 @@ import json
 import pickle
 
 # TODO implement
-class EvalMLAdapter(AbstractAdapter):
+class EvalMLAdapter:
     """Implementation of the AutoML functionality for EvalML
 
     Args:
@@ -29,7 +28,11 @@ class EvalMLAdapter(AbstractAdapter):
         Args:
             configuration (dict): Dictonary holding the training configuration
         """
-        super(EvalMLAdapter, self).__init__(configuration)
+        self._configuration = configuration
+        if self._configuration["configuration"]["runtime_limit"] > 0:
+            self._time_limit = self._configuration["configuration"]["runtime_limit"]
+        else:
+            self._time_limit = 30
 
     def start(self):
         """Start the correct ML task functionality of EvalML"""
