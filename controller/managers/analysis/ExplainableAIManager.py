@@ -148,6 +148,15 @@ def feature_preparation(X, features):
             X[column] = X[column].astype('float')
     return X
 
+def encode_category_columns(X, dataset_configuration):
+    if "encoded_columns" in dataset_configuration:
+        encoded_columns = dataset_configuration["encoded_columns"]
+        try:
+            X = pd.get_dummies(data=X, columns=encoded_columns.keys())
+        except Exception:
+            pass
+    return X
+
 
 class ExplainableAIManager:
     def __init__(self, data_storage: DataStorage, adapter_manager: AdapterManager, explainable_lock: ThreadLock):
@@ -213,6 +222,7 @@ class ExplainableAIManager:
         
         dataset = pd.read_csv(dataset_path, delimiter=delimiters[training["dataset_configuration"]['file_configuration']['delimiter']], skiprows=(training["dataset_configuration"]['file_configuration']['start_row']-1), escapechar=training["dataset_configuration"]['file_configuration']['escape_character'], decimal=training["dataset_configuration"]['file_configuration']['decimal_character'])
         dataset = feature_preparation(dataset, training["dataset_configuration"]["column_datatypes"].items())
+        dataset = encode_category_columns(dataset, training["dataset_configuration"])
         dataset_X = dataset.drop(training["configuration"]["target"], axis=1)
         dataset_Y = dataset[training["configuration"]["target"]]
         sampled_dataset_X = dataset_X.iloc[0:number_of_samples, :]

@@ -36,14 +36,24 @@ def feature_preparation(X, features):
 def encode_category_columns(X, json_configuration):
     if "encoded_columns" in json_configuration["dataset_configuration"]:
         encoded_columns = json_configuration["dataset_configuration"]["encoded_columns"]
-        X = pd.get_dummies(data=X, columns=encoded_columns)
+
+        #only generate encoding if all columns are present in dataframe
+        try:
+            X = pd.get_dummies(data=X, columns=encoded_columns.keys())
+        except Exception:
+            pass
 
         #create list of final columns
         final_columns = []
         final_columns.extend(json_configuration["dataset_configuration"]["column_datatypes"].keys())
         for key in encoded_columns:
-            final_columns.extend(encoded_columns[key])
-            final_columns.remove(key)
+            if key in final_columns:
+                final_columns.extend(encoded_columns[key])
+                final_columns.remove(key)
+
+                for new_column in encoded_columns[key]:
+                    json_configuration["dataset_configuration"]["column_datatypes"][new_column] = 2
+                json_configuration["dataset_configuration"]["column_datatypes"].pop(key)
 
         #initialize new columns that are created due to one hot encoding with 0
         for column_name in final_columns:

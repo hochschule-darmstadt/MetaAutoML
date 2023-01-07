@@ -77,7 +77,7 @@ if __name__ == '__main__':
         X = X.iloc[:]
 
         X = feature_preparation(X, features)
-        X = encode_category_columns(X, config_json["dataset_configuration"])
+        X = encode_category_columns(X, config_json)
 
     elif config_json["configuration"]["task"] in [":image_classification",  ":image_regression"]:
         X, y = read_image_dataset(config_json)

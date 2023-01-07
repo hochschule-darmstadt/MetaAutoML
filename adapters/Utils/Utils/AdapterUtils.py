@@ -166,6 +166,9 @@ def evaluate(config: "StartAutoMlRequest", config_path: str) -> Tuple[float, flo
 
     if(config["configuration"]["task"] in [":tabular_classification", ":tabular_regression", ":text_regression", ":text_classification"]):
         train, test = data_loader(config)
+        X, y = prepare_tabular_dataset(test, config)
+        test = pd.concat([X, y], axis=1)
+
         target = config["configuration"]["target"]
         # override file_path to path to test file
         file_path = write_tabular_dataset_test_data(test, os.path.dirname(file_path))
@@ -195,6 +198,8 @@ def evaluate(config: "StartAutoMlRequest", config_path: str) -> Tuple[float, flo
                (predict_time * 1000) / y_test.shape[0]
     elif config["configuration"]["task"] == ":time_series_classification":
         train, test = data_loader(config)
+        X, y = prepare_tabular_dataset(test, config)
+        test = pd.concat([X, y], axis=1)
         target = config["configuration"]["target"]
 
         test_target = test[target].astype("string")
@@ -392,7 +397,8 @@ def read_tabular_dataset_training_data(config: "StartAutoMlRequest") -> Tuple[pd
             unique_values = data[key].unique()
             encoded_columns[key] = []
             for value in unique_values:
-                encoded_columns[key].append(str(key) + "_" + str(value))
+                new_column = str(key) + "_" + str(value)
+                encoded_columns[key].append(new_column)
 
     train = data.iloc[:int(data.shape[0] * 0.8)]
     test = data.iloc[int(data.shape[0] * 0.8):]
@@ -429,6 +435,13 @@ def prepare_tabular_dataset(df: pd.DataFrame, json_configuration: dict) -> Tuple
     df = feature_preparation(df, json_configuration["dataset_configuration"]["column_datatypes"].items())
     df = encode_category_columns(df, json_configuration)
     df = cast_dataframe_column(df, json_configuration["configuration"]["target"], json_configuration["dataset_configuration"]["column_datatypes"][json_configuration["configuration"]["target"]])
+    
+    #write json_configuration to file if possible
+    if 'job_folder_location' in json_configuration:
+        json_configuration['dataset_configuration'] = json.dumps(json_configuration['dataset_configuration'])
+        with open(os.path.join(json_configuration['job_folder_location'], get_config_property("job-file-name")), "w+") as f:
+            json.dump(json_configuration, f)
+
     X = df.drop(json_configuration["configuration"]["target"], axis=1)
     y = df[json_configuration["configuration"]["target"]]
     return X, y
