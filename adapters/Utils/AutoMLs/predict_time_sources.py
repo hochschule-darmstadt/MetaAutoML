@@ -9,8 +9,8 @@ class SplitMethod(Enum):
     SPLIT_METHOD_END = 1
 
 
-def feature_preparation(X, features, datetime_format):
-    targets = []
+def feature_preparation(X, features, datetime_format, is_prediction=False):
+    target = ""
     for column, dt in features:
 
         #Check if column is to be droped either its role is ignore or index
@@ -21,6 +21,10 @@ def feature_preparation(X, features, datetime_format):
         datatype = dt.get("datatype_selected", "")
         if datatype == "":
             datatype = dt["datatype_detected"]
+
+        #during predicitons we dont have a target column and must avoid casting it
+        if dt.get("role_selected", "") == ":target" and is_prediction == True:
+            continue
 
         if datatype == ":categorical":
             X[column] = X[column].astype('category')
@@ -35,9 +39,14 @@ def feature_preparation(X, features, datetime_format):
         elif datatype == ":string":
             X[column] = X[column].astype('str')
 
-        #Get target columns list
+        #Get target column
         if dt.get("role_selected", "") == ":target":
-            targets.append(column)
-    y = X[targets]
-    X.drop(targets, axis=1, inplace=True)
+            target = column
+
+    if is_prediction == True:
+        y = pd.Series()
+    else:
+        y = X[target]
+        X.drop(target, axis=1, inplace=True)
+
     return X, y

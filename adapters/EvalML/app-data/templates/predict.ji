@@ -48,14 +48,13 @@ if __name__ == '__main__':
     # split training set
     X = X.iloc[:]
 
-    X, y = feature_preparation(X, config_json["dataset_configuration"]["schema"].items(), config_json["dataset_configuration"]["file_configuration"]["datetime_format"])
+    X, y = feature_preparation(X, config_json["dataset_configuration"]["schema"].items(), config_json["dataset_configuration"]["file_configuration"]["datetime_format"], is_prediction=True)
 
     with open(sys.path[0] + '/evalml.p', 'rb') as file:
         loaded_model = dill.load(file)
-        
+
     print(type(X))
     predicted_y = loaded_model.predict((X))
-
 
     df = (predicted_y.to_frame())
     df.columns = [ 'predicted']

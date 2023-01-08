@@ -2,7 +2,6 @@ import autokeras as ak
 import numpy as np
 from AdapterUtils import data_loader, export_model, prepare_tabular_dataset
 import pandas as pd
-from predict_time_sources import DataType
 import json
 import os
 from JsonUtil import get_config_property
@@ -154,7 +153,7 @@ class AutoKerasAdapter:
                                 # metric=self._configuration['metric'],
                                 seed=42,
                                 directory=self._configuration["model_folder_location"])
-                                
+
         reg.fit(x = X, y = y, epochs=1)
         
         export_model(reg, self._configuration["result_folder_location"], 'model_keras.p')

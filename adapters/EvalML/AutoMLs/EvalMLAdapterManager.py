@@ -75,6 +75,42 @@ class EvalMLAdapterManager(AdapterManager):
         except Exception as e:
             raise grpclib.GRPCError(grpclib.Status.UNAVAILABLE, f"Error while generating probabilities {e}")
 
+    async def explain_model(self, explain_auto_ml_request: "ExplainModelRequest") -> ExplainModelResponse:
+        """override explain model function for evalml to specify the woodword structure for test data set.
+
+        Args:
+            explain_auto_ml_request (ExplainModelRequest): _description_
+
+        Raises:
+            grpclib.GRPCError: _description_
+
+        Returns:
+            ExplainModelResponse: _description_
+        """
+        try:
+            config_json = json.loads(explain_auto_ml_request.process_json)
+            config_json["dataset_configuration"] = json.loads(config_json["dataset_configuration"])
+            result_folder_location = os.path.join(get_config_property("training-path"),
+                                                  config_json["user_id"],
+                                                  config_json["dataset_id"],
+                                                  config_json["training_id"],
+                                                  get_config_property("result-folder-name"))
+
+            if self._loaded_training_id != config_json["training_id"]:
+                df, test = data_loader(config_json)
+                self._dataframeX, y = prepare_tabular_dataset(df, config_json)
+
+            df = pd.DataFrame(data=json.loads(explain_auto_ml_request.data), columns=self._dataframeX.columns)
+            df = df.astype(dtype=dict(zip(self._dataframeX.columns, self._dataframeX.dtypes.values)))
+            # apply ww strurture into test data
+            self._dataframeX.ww.init(name="train")
+            df.ww.init(logical_types=self._dataframeX.ww.logical_types,semantic_tags=self._dataframeX.ww.semantic_tags )
+            probabilities = self._load_model_and_make_probabilities(config_json, result_folder_location,df)
+            return ExplainModelResponse(probabilities=probabilities)
+
+        except Exception as e:
+            raise grpclib.GRPCError(grpclib.Status.UNAVAILABLE, f"Error while generating probabilities {e}")
+
 
     def _load_model_and_make_probabilities(self, config: "StartAutoMlRequest", result_folder_location: str, dataframe: pd.DataFrame):
         """Must be overwriten! Load the found model, and execute a prediction using the provided data to calculate the probability metric used by the ExplanableAI module inside the controller
@@ -84,7 +120,7 @@ class EvalMLAdapterManager(AdapterManager):
             config (StartAutoMlRequest): extended Start AutoMlRequest holding the training configuration and local training paths
             result_folder_location (str): The absolute path leading to the model result location
             dataframe (DataFrame): The dataframe holding the dataset to execute a new prediction on
-        
+
         Rerturn:
             probalities as json
         """
@@ -100,4 +136,3 @@ class EvalMLAdapterManager(AdapterManager):
             raise(e)
         return probabilities
 
-    

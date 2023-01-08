@@ -71,8 +71,8 @@ class AutoGluonAdapter:
         self.df, test = data_loader(self._configuration)
         X, y = prepare_tabular_dataset(self.df, self._configuration)
         data = X
-        data[y.columns.values[0]] = y
-        model = TabularPredictor(label=y.columns.values[0],
+        data[y.name] = y
+        model = TabularPredictor(label=y.name,
                                  problem_type="multiclass",
                                  path=self._result_path).fit(
             data,
@@ -85,8 +85,8 @@ class AutoGluonAdapter:
         self.df, test = data_loader(self._configuration)
         X, y = prepare_tabular_dataset(self.df, self._configuration)
         data = X
-        data[y.columns.values[0]] = y
-        model = TabularPredictor(label=y.columns.values[0],
+        data[y.name] = y
+        model = TabularPredictor(label=y.name,
                                  problem_type="regression",
                                  path=self._result_path).fit(
             data,
