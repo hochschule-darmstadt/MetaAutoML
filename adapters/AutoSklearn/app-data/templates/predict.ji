@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 import sys
 import json
-from predict_time_sources import DataType, feature_preparation
+from predict_time_sources import feature_preparation
 
 if __name__ == '__main__':
     filepath = sys.argv[1]
@@ -39,7 +39,7 @@ if __name__ == '__main__':
     if config_json['dataset_configuration']['file_configuration']['thousands_seperator'] != "":
         configuration["thousands"] = config_json['dataset_configuration']['file_configuration']['thousands_seperator']
     X = pd.read_csv(**configuration)
-    X, y = feature_preparation(X, config_json["dataset_configuration"]["schema"].items(), config_json["dataset_configuration"]["file_configuration"]["datetime_format"])
+    X, y = feature_preparation(X, config_json["dataset_configuration"]["schema"].items(), config_json["dataset_configuration"]["file_configuration"]["datetime_format"], is_prediction=True)
 
     # convert all object columns to categories, because autosklearn only supports numerical, bool and categorical features
     X[X.select_dtypes(['object']).columns] = X.select_dtypes(['object']) \

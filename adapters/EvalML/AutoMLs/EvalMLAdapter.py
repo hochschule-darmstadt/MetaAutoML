@@ -9,7 +9,8 @@ from evalml import AutoMLSearch
 from evalml.objectives import FraudCost
 
 import pandas as pd
-from predict_time_sources import feature_preparation, DataType, SplitMethod
+import numpy as np
+from predict_time_sources import feature_preparation, SplitMethod
 
 import json
 import pickle
@@ -51,7 +52,10 @@ class EvalMLAdapter:
 
         self.df, test = data_loader(self._configuration)
         X, y = prepare_tabular_dataset(self.df, self._configuration)
-        classification_type = "binary" if y.nunique() == 2 else "multiclass"
+        if len(y.unique()) == 2:
+            classification_type = "binary"
+        else:
+            classification_type =  "multiclass"
         # parameters must be set correctly
         automl = AutoMLSearch(
                     X_train=X,
@@ -65,7 +69,7 @@ class EvalMLAdapter:
         automl.describe_pipeline(3)
         best_pipeline_tobe_export = automl.best_pipeline
         export_model(best_pipeline_tobe_export, self._configuration["result_folder_location"], 'evalml.p')
-        
+
 
     def __regression(self):
         """Execute the tabular regression task and export the found model"""

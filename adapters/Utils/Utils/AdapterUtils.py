@@ -172,8 +172,8 @@ def evaluate(config: "StartAutoMlRequest", config_path: str) -> Tuple[float, flo
     if(config["configuration"]["task"] in [":tabular_classification", ":tabular_regression", ":text_regression", ":text_classification"]):
         train, test = data_loader(config)
         target = targets[0]
-        # override file_path to path to test file
-        file_path = write_tabular_dataset_test_data(test, os.path.dirname(file_path))
+        # override file_path to path to test file and drop target column
+        file_path = write_tabular_dataset_test_data(test.drop(target, axis=1), os.path.dirname(file_path))
 
     elif(config["configuration"]["task"] in[":image_classification", ":image_regression"]):
         X_train, y_train, X_val, y_val, X_test, y_test = data_loader(config)
@@ -396,7 +396,7 @@ def write_tabular_dataset_test_data(df: pd.DataFrame, dir_name: str) -> str:
     return file_path
 
 
-def prepare_tabular_dataset(df: pd.DataFrame, json_configuration: dict) -> Tuple[pd.DataFrame, object]:
+def prepare_tabular_dataset(df: pd.DataFrame, json_configuration: dict) -> Tuple[pd.DataFrame, pd.Series]:
     """Prepare tabular dataset, perform feature preparation and data type casting
 
     Args:

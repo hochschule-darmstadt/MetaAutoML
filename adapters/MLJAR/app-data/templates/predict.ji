@@ -47,7 +47,7 @@ if __name__ == '__main__':
     X = pd.read_csv(**configuration)
 
 
-    X, y = feature_preparation(X, config_json["dataset_configuration"]["schema"].items(), config_json["dataset_configuration"]["file_configuration"]["datetime_format"])
+    X, y = feature_preparation(X, config_json["dataset_configuration"]["schema"].items(), config_json["dataset_configuration"]["file_configuration"]["datetime_format"], is_prediction=True)
 
     automl = AutoML(results_path=os.path.join(os.path.dirname(__file__), "Models"))
 

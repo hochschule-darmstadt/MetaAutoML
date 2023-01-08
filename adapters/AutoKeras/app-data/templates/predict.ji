@@ -74,7 +74,7 @@ if __name__ == '__main__':
             "space":        " ",
             "tab":          "\t",
         }
-        
+
         configuration = {
             "filepath_or_buffer": filepath,
             "delimiter": delimiters[config_json['dataset_configuration']['file_configuration']['delimiter']],
@@ -89,7 +89,7 @@ if __name__ == '__main__':
 
         X = pd.read_csv(**configuration)
 
-        X, y = feature_preparation(X, config_json["dataset_configuration"]["schema"].items(), config_json["dataset_configuration"]["file_configuration"]["datetime_format"])
+        X, y = feature_preparation(X, config_json["dataset_configuration"]["schema"].items(), config_json["dataset_configuration"]["file_configuration"]["datetime_format"], is_prediction=True)
 
     elif config_json["configuration"]["task"] in [":image_classification",  ":image_regression"]:
         X, y = read_image_dataset(config_json)

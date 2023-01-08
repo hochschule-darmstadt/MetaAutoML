@@ -2,7 +2,6 @@ import autokeras as ak
 import numpy as np
 from AdapterUtils import data_loader, export_model, prepare_tabular_dataset
 import pandas as pd
-from predict_time_sources import DataType
 import json
 import os
 from JsonUtil import get_config_property
@@ -108,7 +107,7 @@ class AutoKerasAdapter:
         self.df, test = data_loader(self._configuration)
         self.get_column_with_largest_amout_of_text(self.df)
         X, y = prepare_tabular_dataset(self.df, self._configuration)
-        
+
         reg = ak.TextClassifier(overwrite=True,
                                 # NOTE: bert models will fail with out of memory errors
                                 #   even with 32GB GB RAM
@@ -117,7 +116,7 @@ class AutoKerasAdapter:
                                 # metric=self._configuration['metric'],
                                 seed=42,
                                 directory=self._configuration["model_folder_location"])
-                               
+
 
         reg.fit(x = np.array(X).astype(np.unicode_), y = np.array(y), epochs=1)
         self.save_configuration_in_json()
@@ -136,7 +135,7 @@ class AutoKerasAdapter:
                                 # metric=self._configuration['metric'],
                                 seed=42,
                                 directory=self._configuration["model_folder_location"])
-                                
+
         reg.fit(x = np.array(X), y = np.array(y), epochs=1)
         self.save_configuration_in_json()
         export_model(reg, self._configuration["result_folder_location"], 'model_keras.p')
@@ -154,9 +153,9 @@ class AutoKerasAdapter:
                                 # metric=self._configuration['metric'],
                                 seed=42,
                                 directory=self._configuration["model_folder_location"])
-                                
+
         reg.fit(x = X, y = y, epochs=1)
-        
+
         export_model(reg, self._configuration["result_folder_location"], 'model_keras.p')
 
     def get_column_with_largest_amout_of_text(self, df: pd.DataFrame):

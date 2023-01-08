@@ -39,7 +39,7 @@ class EvalMLAdapterManager(AdapterManager):
         library = ":lightgbm_lib"
         model = ":light_gradient_boosting_machine"
         return library, model
-    
+
     async def explain_model(self, explain_auto_ml_request: "ExplainModelRequest") -> ExplainModelResponse:
         """override explain model function for evalml to specify the woodword structure for test data set.
 
@@ -54,6 +54,7 @@ class EvalMLAdapterManager(AdapterManager):
         """
         try:
             config_json = json.loads(explain_auto_ml_request.process_json)
+            config_json["dataset_configuration"] = json.loads(config_json["dataset_configuration"])
             result_folder_location = os.path.join(get_config_property("training-path"),
                                                   config_json["user_id"],
                                                   config_json["dataset_id"],
@@ -84,7 +85,7 @@ class EvalMLAdapterManager(AdapterManager):
             config (StartAutoMlRequest): extended Start AutoMlRequest holding the training configuration and local training paths
             result_folder_location (str): The absolute path leading to the model result location
             dataframe (DataFrame): The dataframe holding the dataset to execute a new prediction on
-        
+
         Rerturn:
             probalities as json
         """
@@ -100,4 +101,3 @@ class EvalMLAdapterManager(AdapterManager):
             raise(e)
         return probabilities
 
-    
