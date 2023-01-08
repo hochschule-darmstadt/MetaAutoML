@@ -56,7 +56,6 @@ if __name__ == '__main__':
     print(type(X))
     predicted_y = loaded_model.predict((X))
 
-
     df = (predicted_y.to_frame())
     df.columns = [ 'predicted']
     df.to_csv(save_path)

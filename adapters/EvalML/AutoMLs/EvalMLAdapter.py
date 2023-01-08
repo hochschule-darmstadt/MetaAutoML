@@ -52,6 +52,7 @@ class EvalMLAdapter:
 
         self.df, test = data_loader(self._configuration)
         X, y = prepare_tabular_dataset(self.df, self._configuration)
+        
         if len(y.unique()) == 2:
             classification_type = "binary"
         else:
