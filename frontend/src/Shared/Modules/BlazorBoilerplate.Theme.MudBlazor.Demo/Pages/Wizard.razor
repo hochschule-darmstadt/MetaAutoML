@@ -114,18 +114,36 @@ else
         return false;
     }
 
+    private bool IsOnlyOneTargetSet()
+    {
+        int count = 0;
+        foreach (var item in _automlRequest.Schema)
+        {
+            if (item.Value.RoleSelected.ID == ":target")
+            {
+                count++;
+            }
+        }
+        return count == 1 ? true : false;
+    }
+
     private async void OnWizardFinished()
     {
         try
         {
             if (string.IsNullOrEmpty(_automlRequest.Configuration.Task))
             {
-                viewNotifier.Show("No task selected", ViewNotifierType.Error, L["Operation Failed"]);
+                viewNotifier.Show(L["No task selected"], ViewNotifierType.Error, L["Operation Failed"]);
                 return;
             }
             if (((_dataset.Dataset.Type.ID == ":tabular") || (_dataset.Dataset.Type.ID == ":test") || (_dataset.Dataset.Type.ID == ":time_series") || (_dataset.Dataset.Type.ID == ":time_series_longitudinal")) && !IsTargetSet())
             {
-                viewNotifier.Show("No target selected", ViewNotifierType.Error, L["Operation Failed"]);
+                viewNotifier.Show(L["No target selected"], ViewNotifierType.Error, L["Operation Failed"]);
+                return;
+            }
+            if (((_dataset.Dataset.Type.ID == ":tabular") || (_dataset.Dataset.Type.ID == ":test") || (_dataset.Dataset.Type.ID == ":time_series") || (_dataset.Dataset.Type.ID == ":time_series_longitudinal")) && !IsOnlyOneTargetSet())
+            {
+                viewNotifier.Show(L["More than one target selected"], ViewNotifierType.Error, L["Operation Failed"]);
                 return;
             }
             CreateTrainingResponseDto automlResponse;

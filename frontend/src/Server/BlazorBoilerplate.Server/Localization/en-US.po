@@ -1932,3 +1932,15 @@ msgstr "File configuration can not be saved, datetime columns could not be conve
 msgctxt "Global"
 msgid "Save Schema"
 msgstr "Save Schema"
+
+msgctxt "Global"
+msgid "More than one target selected"
+msgstr "More than one target was selected."
+
+msgctxt "Global"
+msgid "No target selected"
+msgstr "No target was selected."
+
+msgctxt "Global"
+msgid "No task selected"
+msgstr "No ML task was selected."

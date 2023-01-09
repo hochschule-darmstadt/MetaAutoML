@@ -81,7 +81,7 @@ def plot_tabular_classification(dataset_X, dataset_Y, target, no_samples, explai
     """
     plots = []
     dataset_X[dataset_X.select_dtypes(['bool']).columns] = dataset_X[dataset_X.select_dtypes(['bool']).columns].astype(str)
-    classlist = list(val for val in dataset_Y[target].unique())
+    classlist = list(val for val in dataset_Y.unique())
 
     filename = make_svg_summary_plot(shap_values, dataset_X, classlist, plot_path)
     plots.append({"type": "summary_plot",
@@ -257,7 +257,7 @@ class ExplainableAIManager:
                 print("[ExplainableAIManager]: ENTERING LOCK.")
                 plots = plot_tabular_classification(sampled_dataset_X,
                                                             dataset_Y,
-                                                            dataset_Y.columns.values[0],
+                                                            dataset_Y.name,
                                                             number_of_samples,
                                                             explainer,
                                                             shap_values,

@@ -985,3 +985,12 @@ msgstr "Datenset konfiguration konnte nicht gespeichert werden, Datetime Spalten
 
 msgid "Save Schema"
 msgstr "Schema speichern"
+
+msgid "More than one target selected"
+msgstr "Mehr als ein Target wurde ausgewählt."
+
+msgid "No target selected"
+msgstr "Kein Target wurde ausgewählt."
+
+msgid "No task selected"
+msgstr "Kein ML Task wurde ausgewählt."
