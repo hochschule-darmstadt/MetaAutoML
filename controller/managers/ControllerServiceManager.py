@@ -298,35 +298,35 @@ class ControllerServiceManager(ControllerServiceBase):
         with MeasureDuration() as m:
             result = GetAvailableStrategiesResponse()
             result.strategies = []
+            if dataset["type"] in [":tabular", ":text", ":time_series"]:
+                if (not found) or (len(dataset['analysis']['duplicate_columns']) != 0):
+                    result.strategies.append(
+						Strategy(
+						'data_preparation.ignore_redundant_features',
+						'Ignore redundant features',
+						'This strategy ignores certain dataset columns if they have been flagged as duplicate in the dataset analysis.'
+						)
+					)
 
-            if (not found) or (len(dataset['analysis']['duplicate_columns']) != 0):
-                result.strategies.append(
-                    Strategy(
-                    'data_preparation.ignore_redundant_features',
-                    'Ignore redundant features',
-                    'This strategy ignores certain dataset columns if they have been flagged as duplicate in the dataset analysis.'
-                    )
-                )
+                if (not found) or (len(dataset['analysis']['duplicate_rows']) != 0):
+                    result.strategies.append(
+                        Strategy(
+						'data_preparation.ignore_redundant_samples',
+						'Ignore redundant samples',
+						'This strategy ignores certain dataset rows if they have been flagged as duplicate in the dataset analysis.'
+						)
+					)
 
-            if (not found) or (len(dataset['analysis']['duplicate_rows']) != 0):
-                result.strategies.append(
-                    Strategy(
-                    'data_preparation.ignore_redundant_samples',
-                    'Ignore redundant samples',
-                    'This strategy ignores certain dataset rows if they have been flagged as duplicate in the dataset analysis.'
-                    )
-                )
+                size_time_ratio = dataset['analysis']['size_bytes'] / int(get_available_strategies_request.configuration['runtimeLimit'])
 
-            size_time_ratio = dataset['analysis']['size_bytes'] / int(get_available_strategies_request.configuration['runtimeLimit'])
-
-            if (not found) or (size_time_ratio > 20000):
-                result.strategies.append(
-                    Strategy(
-                    'data_preparation.split_large_datasets',
-                    'Split large datasets',
-                    'This strategy truncates the training data if the time limit is relatively short for the size of the dataset.'
-                    )
-            )
+                if (not found) or (size_time_ratio > 20000):
+                    result.strategies.append(
+						Strategy(
+						'data_preparation.split_large_datasets',
+						'Split large datasets',
+						'This strategy truncates the training data if the time limit is relatively short for the size of the dataset.'
+						)
+				)
 
         return result
 

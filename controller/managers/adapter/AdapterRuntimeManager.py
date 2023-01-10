@@ -89,6 +89,13 @@ class AdapterRuntimeManager:
         found, dataset = self.__data_storage.get_dataset(self.__request.user_id, self.__request.dataset_id)
         self.__dataset = dataset
         self.__log.debug(f"__create_training_record: generating training details")
+
+        dataset_configuration = {}
+        if dataset["type"] in [":tabular", ":text", ":time_series"]:
+             dataset_configuration = {
+                "column_datatypes": json.loads(self.__request.dataset_configuration)["column_datatypes"],
+                "file_configuration": dataset["file_configuration"]
+            },
         config = {
             "dataset_id": str(dataset["_id"]),
             "model_ids": [],
