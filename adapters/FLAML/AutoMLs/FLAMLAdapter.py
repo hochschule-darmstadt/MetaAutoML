@@ -3,6 +3,7 @@ import os
 from AdapterUtils import export_model, prepare_tabular_dataset, data_loader
 from flaml import AutoML
 import numpy as np
+from sklearn.impute import SimpleImputer
 
 class FLAMLAdapter:
     """
@@ -51,7 +52,7 @@ class FLAMLAdapter:
             #"metric": self._configuration["configuration"]["metric"] if self._configuration["configuration"]["metric"] != "" else 'accuracy',
             "metric": 'accuracy',
             "task": 'classification',
-            "log_file_name": self._log_file_path,
+            "log_file_name": self._log_file_path
         })
 
         automl.fit(X_train=np.array(X), y_train=np.array(y), **automl_settings)
@@ -67,7 +68,7 @@ class FLAMLAdapter:
             #"metric": self._configuration["configuration"]["metric"] if self._configuration["configuration"]["metric"] != "" else 'accuracy',
             "metric": 'mse',
             "task": 'regression',
-            "log_file_name": self._log_file_path,
+            "log_file_name": self._log_file_path
         })
 
         automl.fit(X_train=np.array(X), y_train=np.array(y), **automl_settings)

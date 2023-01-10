@@ -19,6 +19,7 @@ import glob
 from PIL import Image
 from AdapterBGRPC import *
 from typing import Tuple
+import re
 
 ######################################################################
 ## GRPC HELPER FUNCTIONS
@@ -363,6 +364,10 @@ def read_tabular_dataset_training_data(config: "StartAutoMlRequest") -> Tuple[pd
 
 
     data = pd.read_csv(**configuration)
+    #Rename untitled columns to correct name
+    for column in data:
+        if re.match(r"Unnamed: [0-9]+", column):
+            data.rename(columns={column: f"Column{data.columns.get_loc(column)}"}, inplace=True)
 
     # convert all object columns to categories, because autosklearn only supports numerical,
     # bool and categorical features

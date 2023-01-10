@@ -10,6 +10,7 @@ import autokeras as ak
 import os
 import glob
 from PIL import Image
+import re
 
 from predict_time_sources import feature_preparation, SplitMethod
 
@@ -88,6 +89,10 @@ if __name__ == '__main__':
 
 
         X = pd.read_csv(**configuration)
+        #Rename untitled columns to correct name
+        for column in X:
+            if re.match(r"Unnamed: [0-9]+", column):
+                X.rename(columns={column: f"Column{X.columns.get_loc(column)}"}, inplace=True)
 
         X, y = feature_preparation(X, config_json["dataset_configuration"]["schema"].items(), config_json["dataset_configuration"]["file_configuration"]["datetime_format"], is_prediction=True)
 

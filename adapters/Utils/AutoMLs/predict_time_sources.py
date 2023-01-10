@@ -1,6 +1,6 @@
 from enum import Enum, unique
 import pandas as pd
-
+import re
 
 
 @unique
@@ -11,7 +11,14 @@ class SplitMethod(Enum):
 
 def feature_preparation(X, features, datetime_format, is_prediction=False):
     target = ""
+    is_target_found = False
     for column, dt in features:
+        #During the prediction process no target column was read, so unnamed column names will be off by -1 index,
+        #if they are located after the target column within the training set, their index must be adjusted
+        if re.match(r"Column[0-9]+", column) and is_target_found == True and is_prediction == True:
+            column_index = re.findall('[0-9]+', column)
+            column_index = int(column_index[0])
+            X.rename(columns={f"Column{column_index-1}": column}, inplace=True)
 
         #Check if column is to be droped either its role is ignore or index
         if dt.get("role_selected", "") == ":ignore" or dt.get("role_selected", "") == ":index":
@@ -24,6 +31,7 @@ def feature_preparation(X, features, datetime_format, is_prediction=False):
 
         #during predicitons we dont have a target column and must avoid casting it
         if dt.get("role_selected", "") == ":target" and is_prediction == True:
+            is_target_found = True
             continue
 
         if datatype == ":categorical":
@@ -42,6 +50,7 @@ def feature_preparation(X, features, datetime_format, is_prediction=False):
         #Get target column
         if dt.get("role_selected", "") == ":target":
             target = column
+            is_target_found = True
 
     if is_prediction == True:
         y = pd.Series()

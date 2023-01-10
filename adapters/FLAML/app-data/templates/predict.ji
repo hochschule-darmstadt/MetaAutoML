@@ -6,6 +6,7 @@ from predict_time_sources import feature_preparation, SplitMethod
 import pandas as pd
 import numpy as np
 from flaml import AutoML
+import re
 
 if __name__ == '__main__':
     filepath = sys.argv[1]
@@ -42,6 +43,10 @@ if __name__ == '__main__':
 
 
     X = pd.read_csv(**configuration)
+    #Rename untitled columns to correct name
+    for column in X:
+        if re.match(r"Unnamed: [0-9]+", column):
+            X.rename(columns={column: f"Column{X.columns.get_loc(column)}"}, inplace=True)
 
     X, y = feature_preparation(X, config_json["dataset_configuration"]["schema"].items(), config_json["dataset_configuration"]["file_configuration"]["datetime_format"], is_prediction=True)
 

@@ -7,6 +7,7 @@ import pandas as pd
 import numpy as np
 import evalml
 from evalml import AutoMLSearch
+import re
 
 
 if __name__ == '__main__':
@@ -44,6 +45,10 @@ if __name__ == '__main__':
         configuration["thousands"] = config_json['dataset_configuration']['file_configuration']['thousands_seperator']
 
     X = pd.read_csv(**configuration)
+    #Rename untitled columns to correct name
+    for column in X:
+        if re.match(r"Unnamed: [0-9]+", column):
+            X.rename(columns={column: f"Column{X.columns.get_loc(column)}"}, inplace=True)
 
     # split training set
     X = X.iloc[:]

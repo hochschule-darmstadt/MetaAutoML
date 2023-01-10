@@ -6,6 +6,7 @@ import sys
 
 import shutil
 import os
+import re
 
 FIRST_ROW_AMOUNT = 50
 
@@ -46,6 +47,11 @@ class CsvManager:
            configuration["thousands"] = file_configuration['thousands_seperator']
 
         dataset = pd.read_csv(**configuration)
+
+        #Rename untitled columns to correct name
+        for column in dataset:
+            if re.match(r"Unnamed: [0-9]+", column):
+                dataset.rename(columns={column: f"Column{dataset.columns.get_loc(column)}"}, inplace=True)
 
         for key, values in schema.items():
             try:

@@ -329,9 +329,28 @@ else
         {
             if (DatasetData != null)
             {
-
+                List<object> nanDatatypesValuesPerColumn = new List<object>();
                 _datasetFrame = DataFrame.LoadCsv(DatasetData, separator: Dataset.Dataset.GetDelimiter(), encoding: Dataset.Dataset.GetEncoding(), numRows: 20);
-                _datasetFrame.FillNulls("NaN", true);
+
+                foreach (var item in _datasetFrame.Columns)
+                {
+                    switch (item.DataType.Name)
+                    {
+                        case "String":
+                            nanDatatypesValuesPerColumn.Add("NaN");
+                            break;
+                        case "Single":
+                            nanDatatypesValuesPerColumn.Add(0);
+                            break;
+                        case "DateTime":
+                            nanDatatypesValuesPerColumn.Add(DateTime.Now);
+                            break;
+                        default:
+                            nanDatatypesValuesPerColumn.Add("NaN");
+                            break;
+                    }
+                }
+                _datasetFrame.FillNulls(nanDatatypesValuesPerColumn, true);
                 if(_datasetFrame.Rows.Count == 0){
                     _isSavingAllowed = false;
                     _datasetReadError = true;

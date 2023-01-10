@@ -157,8 +157,27 @@ else
                 // convert string to stream
                 //byte[] byteArray = Encoding.ASCII.GetBytes(_datasetPreview.DatasetPreview);
                 //MemoryStream stream = new MemoryStream(byteArray);
+                List<object> nanDatatypesValuesPerColumn = new List<object>();
                 _datasetFrame = DataFrame.LoadCsv(_datasetPreview.DatasetPreview, separator: Dataset.Dataset.GetDelimiter(), encoding: Dataset.Dataset.GetEncoding(), numRows: 20);
-                _datasetFrame.FillNulls("NaN", true);
+                foreach (var item in _datasetFrame.Columns)
+                {
+                    switch (item.DataType.Name)
+                    {
+                        case "String":
+                            nanDatatypesValuesPerColumn.Add("NaN");
+                            break;
+                        case "Single":
+                            nanDatatypesValuesPerColumn.Add(0);
+                            break;
+                        case "DateTime":
+                            nanDatatypesValuesPerColumn.Add(DateTime.Now);
+                            break;
+                        default:
+                            nanDatatypesValuesPerColumn.Add("NaN");
+                            break;
+                    }
+                }
+                _datasetFrame.FillNulls(nanDatatypesValuesPerColumn, true);
                 
                 viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
             }
