@@ -29,6 +29,12 @@ namespace BlazorBoilerplate.Shared.Dto.Training
         public string Metric { get; set; }
         public List<string> SelectedAutoMlSolutions { get; set; } = new();
         public List<string> SelecctedMlLibraries { get; set; } = new();
-        public List<(string iri, List<string> values)> Parameters { get; set; } = new();
+        public List<ParameterDto> Parameters { get; set; } = new();
+    }
+
+    public class ParameterDto
+    {
+        public string Iri { get; set; }
+        public List<string> Values { get; set; }
     }
 }

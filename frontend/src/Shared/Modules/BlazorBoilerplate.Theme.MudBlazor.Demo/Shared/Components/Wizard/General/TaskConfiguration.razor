@@ -78,21 +78,25 @@
                     <MudText Typo="Typo.body2" Class="mt-4">@param.ParameterLabel</MudText>
                     @if (param.ParameterType == ":single_value")
                     {
-                        <MudSelect Label="@param.ParameterLabel" T="string" Variant="Variant.Outlined">
-                            @foreach (var paramValue in param.ParameterValues)
-                            {
-                                <MudSelectItem Value="@paramValue.ValueIri">@paramValue.ValueLabel</MudSelectItem>
-                            }
-                        </MudSelect>
-                    }
-                    @if (param.ParameterType == ":list")
-                    {
-                        <MudSelect T="ParameterValueViewModel" MultiSelection="true" SelectAll="true" SelectedValues="@param.ParameterValues.Where(pv => pv.IsSelected)" ToStringFunc="p => p.ValueLabel" Variant="Variant.Outlined">
+                        <MudSelect T="ParameterValueViewModel" Label="@param.ParameterLabel" Variant="Variant.Outlined" @bind-SelectedValues="param.SelectedValues" ValueChanged="@UpdateParemetersInRequest" ToStringFunc="p => p?.ValueLabel">
                             @foreach (var paramValue in param.ParameterValues)
                             {
                                 <MudSelectItem Value="@paramValue">@paramValue.ValueLabel</MudSelectItem>
                             }
                         </MudSelect>
+                    }
+                    @if (param.ParameterType == ":list")
+                    {
+                        <MudSelect T="ParameterValueViewModel" MultiSelection="true" SelectAll="true" @bind-SelectedValues="param.SelectedValues" ToStringFunc="p => p?.ValueLabel" Variant="Variant.Outlined">
+                            @foreach (var paramValue in param.ParameterValues)
+                            {
+                                <MudSelectItem Value="@paramValue">@paramValue.ValueLabel</MudSelectItem>
+                            }
+                        </MudSelect>
+                    }
+                    else if(param.ParameterType == ":integer")
+                    {
+                        <MudNumericField @bind-Value="@param.IntegerValue"/>
                     }
                 }
             }
@@ -167,6 +171,21 @@
         StartTrainingDto.Configuration.RuntimeLimit = e;
     }
 
+    private async void UpdateParemetersInRequest()
+    {
+        StartTrainingDto.Configuration.Parameters = _intersectedParams
+            .Select(p => new ParameterDto
+            {
+                Iri = p.ParameterIri,
+                Values = p.ParameterValues != null
+                    ? p.SelectedValues.Select(v => v.ValueIri).ToList()
+                    : new List<string>{ p.IntegerValue.ToString() }
+            })
+            .ToList();
+
+        await UpdateStartTrainingDto();
+    }
+
     private async void SetupStartAutoMLConfiguration()
     {
         _columnNames = new List<string>();
@@ -212,7 +231,11 @@
             () =>
             {
                 _availableParameters = apiResponse.Result.AutoMlParameters;
-                _intersectedParams = ReplaceIntersectedParameter(_intersector.GetIntersectedParameters().ToList());
+                _intersectedParams = _intersector.GetIntersectedParameters().ToList();
+                foreach (var param in _intersectedParams)
+                {
+                    param.SelectedValuesChanged += (_,_) => UpdateParemetersInRequest();
+                }
 
 
                 var paramsGroupedBySolution = _availableParameters
@@ -255,6 +278,7 @@
                 ValueIri = param.ValueIri,
                 ValueLabel = param.ValueLabel
             }).ToList();
+            result.SelectedValues = result.ParameterValues;
         }
         return result;
     }
@@ -378,6 +402,7 @@
         await UpdateStartTrainingDto();
     }
 
+    /*
     private List<ParameterObject> ReplaceIntersectedParameter(List<ParameterObject> intersectedParamsNew)
     {
         foreach (ParameterObject intersectedParam in intersectedParamsNew)
@@ -392,19 +417,32 @@
         }
         return intersectedParamsNew;
     }
+    */
 
     public class ParameterValueViewModel
     {
         public string ValueIri { get; set; }
         public string ValueLabel { get; set; }
-        public bool IsSelected { get; set; } = true;
     }
 
     public class ParameterObject
     {
+        public event EventHandler SelectedValuesChanged;
         public string ParameterIri { get; set; }
         public string ParameterLabel { get; set; }
         public string ParameterType { get; set; }
         public List<ParameterValueViewModel> ParameterValues { get; set; } = new();
+        private IEnumerable<ParameterValueViewModel> _selectedValues = new List<ParameterValueViewModel>();
+        public IEnumerable<ParameterValueViewModel> SelectedValues
+        {
+            get => _selectedValues;
+            set
+            {
+                _selectedValues = value;
+                SelectedValuesChanged?.Invoke(this, EventArgs.Empty);
+            }
+        }
+
+        public int IntegerValue { get; set; }
     }
 }
