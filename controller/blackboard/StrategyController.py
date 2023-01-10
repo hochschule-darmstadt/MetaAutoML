@@ -74,6 +74,9 @@ class StrategyController(object):
         """
         return self.__adapter_runtime_manager.get_training_id()
 
+    def get_blackboard(self) -> Blackboard:
+        return self.__blackboard
+
     def get_phase(self) -> str:
         return self.__blackboard.get_state('phase')
 

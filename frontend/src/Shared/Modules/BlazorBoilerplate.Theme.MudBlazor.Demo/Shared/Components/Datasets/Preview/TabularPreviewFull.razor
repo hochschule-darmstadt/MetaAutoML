@@ -15,6 +15,7 @@ else
             <MudItem xs="3" sm="3" md="3">
                 <MudCheckBox @bind-Checked="@UseHeader" Label="@L["Use header"]"></MudCheckBox>
                 <MudNumericField @bind-Value="@StartRow" Label="@L["Start row"]" Variant="Variant.Text" Min="1" />
+                    <MudButton Variant="Variant.Filled" Color="Color.Secondary" OnClick="@SaveConfiguration">@L["Save"]</MudButton>
             </MudItem>
             <MudItem xs="3" sm="3" md="3">
                 <MudSelect T="string" Label="@L["Column seperator"]" AnchorOrigin="Origin.BottomCenter" @bind-Value="@Delimiter">
@@ -28,14 +29,13 @@ else
                     <MudSelectItem Value="@("latin-1")" >@(L["latin-1"])</MudSelectItem>
                     <MudSelectItem Value="@("utf-16")" >@(L["UTF-16"])</MudSelectItem>
                     <MudSelectItem Value="@("utf-32")" >@(L["UTF-32"])</MudSelectItem>
-                </MudSelect>
+                    </MudSelect>
+                    <MudTextField Label="@L["Datetime format"]" @bind-Value="@DatetimeFormat" Variant="@Variant.Text" />
             </MudItem>
             <MudItem xs="3" sm="3" md="3">
                 <MudTextField Mask="@(new RegexMask(@"^.{1,1}$"))" Label="@L["Escape character"]" @bind-Value="@EscapeCharacter"  Variant="@Variant.Text" />
-                    <MudTextField Mask="@(new RegexMask(@"^.{1,1}$"))" Label="@L["Decimal character"]" @bind-Value="@DecimalCharacter" Variant="@Variant.Text" />
-            </MudItem>
-            <MudItem xs="3" sm="3" md="3">
-                    <MudButton Variant="Variant.Filled" Color="Color.Secondary" OnClick="@SaveConfiguration">@L["Save"]</MudButton>
+                <MudTextField Mask="@(new RegexMask(@"^.{1,1}$"))" Label="@L["Decimal character"]" @bind-Value="@DecimalCharacter" Variant="@Variant.Text" />
+                    <MudTextField Mask="@(new RegexMask(@"^.{0,1}$"))" Label="@L["Thousand seperator"]" @bind-Value="@ThousandsSeperator" Variant="@Variant.Text" />
             </MudItem>
         </MudGrid>
         @if (_datasetReadError == true)
@@ -44,27 +44,78 @@ else
         }
         else
         {
-             <MudTable Items="@_datasetFrame.Rows" style="width:stretch" class="mat-elevation-z5" FixedHeader="true" Dense="true">
+             <MudTable Items="@_datasetFrame.Rows" style="width:stretch" class="mat-elevation-z5" FixedHeader="true" Dense="true" CustomHeader="true">
                 <HeaderContent>
-                    @foreach (var item in _datasetFrame.Columns)
-                    {
-                       
-                        @if (UseHeader == true)
+                    <MudTHeadRow>
+                        <MudTh></MudTh>
+                        @foreach (var item in _datasetFrame.Columns)
                         {
-                            <MudTh>@item.Name</MudTh>
+                            @if (UseHeader == true)
+                            {
+                                <MudTh>@item.Name</MudTh>
+                            }
+                            else
+                            {
+                                <MudTh Style="background-color: gray">@item.Name</MudTh>
+                            }
+                        }
+                    </MudTHeadRow>
+                    <MudTHeadRow>
+                        <MudTh>@L["Datatype"]</MudTh>
+                        @if (_datasetFrame.Columns.Count == _dataset.Dataset.Schema.Count)
+                        {
+                            @foreach (var item in _datasetFrame.Columns)
+                                {
+                                    <MudTh>
+                                    <MudSelect T="string" Value="@(_dataset.Dataset.Schema[item.Name].DatatypeSelected.ID == null ? _dataset.Dataset.Schema[item.Name].DatatypeDetected.ID : _dataset.Dataset.Schema[item.Name].DatatypeSelected.ID)" ValueChanged="@((e) => {  OnSelectedDatetypeChanged(item.Name, _dataset.Dataset.Schema[item.Name].RoleSelected.ID, e); })">
+                                            @foreach (var datatype in _dataset.Dataset.Schema[item.Name].DatatypesCompatible)
+                                            {
+                                                <MudSelectItem Value="@datatype.ID">
+                                                    <MudText Typo="Typo.body2">@L[datatype.Properties.ContainsKey("skos:prefLabel") ? datatype.Properties["skos:prefLabel"] : ""]</MudText>
+                                                </MudSelectItem>
+                                            }
+                                        </MudSelect>
+                                    </MudTh>
+                                }
                         }
                         else
                         {
-                            <MudTh Style="background-color: gray">@item.Name</MudTh>
+                            <MudText Typo="Typo.body2">@L["Datatype analysis incompatible with current dataset configuration, save current configuration to start new analysis"]</MudText>
                         }
-
-                    }
-                    <MudTh></MudTh>
+                    </MudTHeadRow>
+                    <MudTHeadRow>
+                        <MudTh>@L["Role"]</MudTh>
+                        @if (_datasetFrame.Columns.Count == _dataset.Dataset.Schema.Count)
+                        {
+                            @foreach (var item in _datasetFrame.Columns)
+                            {
+                                <MudTh>
+                                    <MudSelect T="string" Value="@(_dataset.Dataset.Schema[item.Name].RoleSelected.ID == null ? ":none" : _dataset.Dataset.Schema[item.Name].RoleSelected.ID)" ValueChanged="@((e) => { _dataset.Dataset.Schema[item.Name].RoleSelected.ID = e == ":none" ?  null : e; SaveColumnConfiguration(item.Name, e, _dataset.Dataset.Schema[item.Name].DatatypeSelected.ID); })">
+                                    
+                                        <MudSelectItem Value="@(":none")">
+                                            <MudText Typo="Typo.body2">@L["none"]</MudText>
+                                        </MudSelectItem>
+                                        @foreach (var role in _dataset.Dataset.Schema[item.Name].RolesCompatible)
+                                        {
+                                            <MudSelectItem Value="@role.ID">
+                                                <MudText Typo="Typo.body2">@L[role.Properties.ContainsKey("skos:prefLabel") ? role.Properties["skos:prefLabel"] : ""]</MudText>
+                                            </MudSelectItem>
+                                        }
+                                    </MudSelect>
+                                </MudTh>
+                            }
+                        }
+                        else
+                        {
+                            <MudText Typo="Typo.body2">@L["Roles analysis incompatible with current dataset configuration, save current configuration to start new analysis"]</MudText>
+                        }
+                    </MudTHeadRow>
                 </HeaderContent>
                 <RowTemplate>
 
                     @if (true) 
                     {
+                        <MudTd></MudTd>
                         @foreach (var item in context)
                         {
                             @if (_index < StartRow)
@@ -195,6 +246,46 @@ else
             }
         } 
     }
+    public string ThousandsSeperator
+    { 
+        get
+        {
+            return Dataset.Dataset.FileConfiguration["thousands_seperator"];
+        } 
+        set
+        {
+            if (value != null)
+            {
+                Dataset.Dataset.FileConfiguration["thousands_seperator"] = value;
+            }
+        } 
+    }
+    public string DateTimeFormatHelperText { get; set; }
+    public bool DatetimeFormatAccepted { get; set; } = true;
+    public string DatetimeFormat
+    {
+        get
+        {
+            return Dataset.Dataset.FileConfiguration["datetime_format"];
+        }
+        set
+        {
+            if (value != null)
+            {
+                Dataset.Dataset.FileConfiguration["datetime_format"] = value;
+                if (TestConvertToDatetime("", true) == false)
+                {
+                    DateTimeFormatHelperText = L["Datetime columns could not be converted to new datetime format"];
+                    DatetimeFormatAccepted = false;
+                }
+                else
+                {
+                    DatetimeFormatAccepted = true;
+                    DateTimeFormatHelperText = "";
+                }
+            }
+        }
+    }
 
     public string DecimalCharacter
     { 
@@ -231,15 +322,35 @@ else
 
     private bool _isSavingAllowed = true;
     private bool _datasetReadError = false;
+
     private void ReloadDataFrame()
     {
         try
         {
             if (DatasetData != null)
             {
-              
+                List<object> nanDatatypesValuesPerColumn = new List<object>();
                 _datasetFrame = DataFrame.LoadCsv(DatasetData, separator: Dataset.Dataset.GetDelimiter(), encoding: Dataset.Dataset.GetEncoding(), numRows: 20);
-                _datasetFrame.FillNulls("NaN", true);
+
+                foreach (var item in _datasetFrame.Columns)
+                {
+                    switch (item.DataType.Name)
+                    {
+                        case "String":
+                            nanDatatypesValuesPerColumn.Add("NaN");
+                            break;
+                        case "Single":
+                            nanDatatypesValuesPerColumn.Add(0);
+                            break;
+                        case "DateTime":
+                            nanDatatypesValuesPerColumn.Add(DateTime.Now);
+                            break;
+                        default:
+                            nanDatatypesValuesPerColumn.Add("NaN");
+                            break;
+                    }
+                }
+                _datasetFrame.FillNulls(nanDatatypesValuesPerColumn, true);
                 if(_datasetFrame.Rows.Count == 0){
                     _isSavingAllowed = false;
                     _datasetReadError = true;
@@ -258,7 +369,65 @@ else
             StateHasChanged();
             viewNotifier.Show("Data can´t be read using column delimiter:" + ex.Message, ViewNotifierType.Error, L["Operation Failed"]);
         }    
-        
+
+    }
+
+    private bool TestConvertToDatetime(string column, bool all)
+    {
+        try
+        {
+            bool convertionSuccessfull = false;
+            //"%Y-%m-%d  %H:%M:%S";
+            string format = DatetimeFormat;
+            format = format.Replace("%d", "dd");
+            format = format.Replace("%m", "MM");
+            format = format.Replace("%Y", "yyyy");
+            format = format.Replace("%y", "yy");
+            format = format.Replace("%H", "HH");
+            format = format.Replace("%M", "mm");
+            format = format.Replace("%S", "ss");
+
+            //Check if all columns are compatible with new format
+            if (all == true)
+            {
+                foreach (var item in _dataset.Dataset.Schema)
+                {
+                    if (item.Value.DatatypeSelected.ID == ":datetime")
+                    {
+                        foreach (var row in _datasetFrame.Columns[item.Key])
+                        {
+                            //Only string rows can be casted to datetime
+                            if (format.Length == ((string)row).Length)
+                            {
+                                //If last cast fails we will assume none worked
+                                DateTime dt;
+                                convertionSuccessfull = DateTime.TryParseExact((string)row, format, null, DateTimeStyles.None, out dt);
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                //Check a specific column
+                foreach (var row in _datasetFrame.Columns[column])
+                {
+                    //Only string rows can be casted to datetime
+                    if (format.Length == ((string)row).Length)
+                    {
+                        //If last cast fails we will assume none worked
+                        DateTime dt;
+                        convertionSuccessfull = DateTime.TryParseExact((string)row, format, null, DateTimeStyles.None, out dt);
+                    }
+                }
+            }
+            return convertionSuccessfull;
+        }
+        catch (Exception)
+        {
+            return false;
+            throw;
+        }
     }
 
     private async void SaveConfiguration()
@@ -268,6 +437,35 @@ else
             viewNotifier.Show(L["File configuration can not be saved, incompatible delimiter or encoding"], ViewNotifierType.Error, L["Operation Failed"]);
             return;
         }
+        if (DatetimeFormatAccepted == false)
+        {
+            viewNotifier.Show(L["File configuration can not be saved, datetime columns could not be converted to new datetime format"], ViewNotifierType.Error, L["Operation Failed"]);
+            return;
+        }
         previewWorker.UpdateDatasetFileConfiguration(Dataset);
+    }
+
+    private void OnSelectedDatetypeChanged(string columnName, string role, string datatype)
+    {
+        if (datatype == ":datetime")
+        {
+            if (TestConvertToDatetime(columnName, false) != true)
+            {
+                viewNotifier.Show(L["Column {0} could not be casted to datetime", columnName], ViewNotifierType.Error, L["Operation Failed"]);
+                return;
+            }
+        }
+        _dataset.Dataset.Schema[columnName].DatatypeSelected.ID = datatype;
+        SaveColumnConfiguration(columnName, role, datatype);
+    }
+
+    private async void SaveColumnConfiguration(string column, string role, string datatype)
+    {
+        previewWorker.UpdateDatasetColumnSchemaConfiguration(new SetDatasetColumnSchemaConfigurationRequestDto() {
+            DatasetId = Dataset.Dataset.Id,
+            Column = column,
+            SelectedDatatype = datatype,
+            SelectedRole = role
+        });
     }
 }

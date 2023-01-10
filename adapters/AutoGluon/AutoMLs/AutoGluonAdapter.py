@@ -1,17 +1,15 @@
 import os
 
-from AbstractAdapter import AbstractAdapter
 from AdapterUtils import export_model, prepare_tabular_dataset, data_loader
 from autogluon.tabular import TabularDataset, TabularPredictor
-from JsonUtil import get_config_property#
-from AbstractAdapter import AbstractAdapter
+from JsonUtil import get_config_property
 from AdapterUtils import read_tabular_dataset_training_data, prepare_tabular_dataset, export_model
 from AutoGluonServer import data_loader
 import shutil
 
 from autogluon.vision import ImagePredictor, ImageDataset
 
-class AutoGluonAdapter(AbstractAdapter):
+class AutoGluonAdapter:
     """
     Implementation of the AutoML functionality for AutoGluon
     """
@@ -21,7 +19,11 @@ class AutoGluonAdapter(AbstractAdapter):
         Args:
             configuration (dict): Dictonary holding the training configuration
         """
-        super().__init__(configuration)
+        self._configuration = configuration
+        if self._configuration["configuration"]["runtime_limit"] > 0:
+            self._time_limit = self._configuration["configuration"]["runtime_limit"]
+        else:
+            self._time_limit = 30
 
 
         """
@@ -67,8 +69,8 @@ class AutoGluonAdapter(AbstractAdapter):
         self.df, test = data_loader(self._configuration)
         X, y = prepare_tabular_dataset(self.df, self._configuration)
         data = X
-        data[self._target] = y
-        model = TabularPredictor(label=self._target,
+        data[y.name] = y
+        model = TabularPredictor(label=y.name,
                                  problem_type="multiclass",
                                  path=self._result_path).fit(
             data,
@@ -81,8 +83,8 @@ class AutoGluonAdapter(AbstractAdapter):
         self.df, test = data_loader(self._configuration)
         X, y = prepare_tabular_dataset(self.df, self._configuration)
         data = X
-        data[self._target] = y
-        model = TabularPredictor(label=self._target,
+        data[y.name] = y
+        model = TabularPredictor(label=y.name,
                                  problem_type="regression",
                                  path=self._result_path).fit(
             data,
@@ -92,21 +94,20 @@ class AutoGluonAdapter(AbstractAdapter):
     def __image_classification(self):
         """"Execute image classification task and export the found model"""
 
-        # Daten Laden 
+        # Daten Laden
         train , test = data_loader(self._configuration)
-        
-        # Einteilen 
-        set_hyperparameters={ 
-            'batch_size': self._configuration["test_configuration"]["batch_size"], 
-            'epochs': self._configuration["runtime_constraints"]["epochs"] 
+
+        # Einteilen
+        set_hyperparameters={
+            'batch_size': self._configuration["test_configuration"]["batch_size"],
+            'epochs': self._configuration["runtime_constraints"]["epochs"]
             }
-        
+
         model = ImagePredictor(
-            label=self._target,
             path=self._result_path)
-        
-         # Trainieren 
+
+         # Trainieren
         model.fit(
-            train , 
-            #hyperparameters=set_hyperparameters , 
-            time_limit=self._time_limit  ) 
+            train ,
+            #hyperparameters=set_hyperparameters ,
+            time_limit=self._time_limit  )

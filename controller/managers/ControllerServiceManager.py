@@ -110,18 +110,6 @@ class ControllerServiceManager(ControllerServiceBase):
         self.__log.warn("get_dataset: executed")
         return response
 
-    @inject
-    async def get_tabular_dataset_column(
-        self, get_tabular_dataset_column_request: "GetTabularDatasetColumnRequest",
-        dataset_manager: DatasetManager=Provide[Application.managers.dataset_manager]
-    ) -> "GetTabularDatasetColumnResponse":
-        with MeasureDuration() as m:
-            response = dataset_manager.get_tabular_dataset_column(get_tabular_dataset_column_request)
-        #response = await self.__loop.run_in_executor(
-        #    self.__executor, dataset_manager.get_tabular_dataset_column, get_tabular_dataset_column_request
-        #)
-        self.__log.warn("get_tabular_dataset_column: executed")
-        return response
 
     @inject
     async def delete_dataset(
@@ -137,11 +125,11 @@ class ControllerServiceManager(ControllerServiceBase):
         return response
 
     @inject
-    async def set_dataset_file_configuration(
+    async def set_dataset_configuration(
         self,
-        set_dataset_file_configuration_request: "SetDatasetFileConfigurationRequest",
+        set_dataset_file_configuration_request: "SetDatasetConfigurationRequest",
         dataset_manager: DatasetManager=Provide[Application.managers.dataset_manager]
-    ) -> "SetDatasetFileConfigurationResponse":
+    ) -> "SetDatasetConfigurationResponse":
         with MeasureDuration() as m:
             response = dataset_manager.set_dataset_file_configuration(set_dataset_file_configuration_request)
         #response = await self.__loop.run_in_executor(
@@ -150,6 +138,16 @@ class ControllerServiceManager(ControllerServiceBase):
         self.__log.warn("delete_dataset: set_dataset_file_configuration")
         return response
 
+
+    @inject
+    async def set_dataset_column_schema_configuration(
+        self,
+        set_dataset_column_schema_configuration_request: "SetDatasetColumnSchemaConfigurationRequest",
+        dataset_manager: DatasetManager=Provide[Application.managers.dataset_manager]
+    ) -> "SetDatasetColumnSchemaConfigurationResponse":
+        with MeasureDuration() as m:
+            response = dataset_manager.set_dataset_column_schema_configuration(set_dataset_column_schema_configuration_request)
+        return response
 
 #endregion
 

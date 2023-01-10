@@ -6,7 +6,7 @@ scikit-learn
 scipy
 tensorflow
 h5py
-mcfly
+mcfly==3.1.0
 pillow
 betterproto @ git+https://github.com/danielgtaylor/python-betterproto.git@496eba27506a2fe18df409c4cd34a47d8ce04ffe
 dependency-injector==4.40.0

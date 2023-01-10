@@ -1,10 +1,12 @@
-FROM --platform=linux/amd64 python:3.7.11-slim-buster AS base
+FROM --platform=linux/amd64 python:3.9.11-slim-buster AS base
 EXPOSE 50053
 
 RUN python -m pip install --upgrade pip
 RUN apt update && \
     apt install -y build-essential \
-    && apt-get install -y git 
+    && apt-get install -y git
+
+RUN apt install -y font-manager
 
 COPY ./MLJAR/requirements.txt .
 # Install dependencies

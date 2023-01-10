@@ -4,7 +4,7 @@ from ControllerBGRPC import *
 from AdapterManager import AdapterManager
 from ExplainableAIManager import ExplainableAIManager
 from ThreadLock import ThreadLock
-
+import json
 
 
 class AdapterRuntimeManager:
@@ -37,6 +37,7 @@ class AdapterRuntimeManager:
             ":mljar":           ["MLJAR_SERVICE_HOST",     "MLJAR_SERVICE_PORT"],
             ":alphad3m":        ["ALPHAD3M_SERVICE_HOST",  "ALPHAD3M_SERVICE_PORT"],
             ":mcfly":           ["MCFLY_SERVICE_HOST", "MCFLY_SERVICE_PORT"],
+            ":evalml":          ["EVALML_SERVICE_HOST", "EVALML_SERVICE_PORT"],
         }
         self.__adapters: list[AdapterManager] = []
         self.__log.debug("start_new_training: creating new blackboard and strategy controller for training")
@@ -48,6 +49,36 @@ class AdapterRuntimeManager:
             adapter_training = AdapterManager(self.__data_storage, self.__request, automl, self.__training_id, self.__dataset, host, port, self.__adapter_finished_callback)
             self.__adapters.append(adapter_training)
         return
+
+    def __build_dataset_schema(self) -> str:
+        """Build the dataset schema using the dataset document and add changes from the wizzard process
+
+        Returns:
+            str: the dataset schema for this training session
+        """
+        with self.__data_storage.lock():
+            found, dataset = self.__data_storage.get_dataset(self.__request.user_id, self.__request.dataset_id)
+            current_schema = dataset["schema"]
+            training_schema = json.loads(self.__request.dataset_configuration)
+            #We only need to update the selected values if selected datatype and role as the rest is set by the backend
+            for key in current_schema:
+                #Update selected role
+                selected_role = training_schema[key].get("RoleSelected", "")
+                if selected_role != "":
+                    current_schema[key]["role_selected"] = selected_role
+                else:
+                    current_schema[key].pop("role_selected", None)
+                #Update selected datatype
+                selected_datatype = training_schema[key].get("DatatypeSelected", "")
+                if selected_datatype != "":
+                    current_schema[key]["datatype_selected"] = selected_datatype
+                else:
+                    current_schema[key].pop("datatype_selected", None)
+
+            if self.__request.save_schema == True:
+                self.__data_storage.update_dataset(self.__request.user_id, self.__request.dataset_id, {"schema": current_schema})
+            return current_schema
+
 
     def __create_training_record(self) -> str:
         """Create a new training record for this training inside MongoDB
@@ -71,14 +102,16 @@ class AdapterRuntimeManager:
             "status": "busy",
             "configuration": {
                 "task": self.__request.configuration.task,
-                "target": self.__request.configuration.target,
                 "enabled_strategies": self.__request.configuration.enabled_strategies,
                 "runtime_limit": self.__request.configuration.runtime_limit,
                 "metric": self.__request.configuration.metric,
                 "selected_auto_ml_solutions": self.__request.configuration.selected_auto_ml_solutions,
                 "selected_ml_libraries": self.__request.configuration.selected_ml_libraries
             },
-            "dataset_configuration": dataset_configuration,
+            "dataset_configuration": {
+                "file_configuration": dataset["file_configuration"],
+                "schema": self.__build_dataset_schema()
+            },
             "runtime_profile": {
                 "start_time": datetime.now(),
                 "events": [],
@@ -181,6 +214,29 @@ class AdapterRuntimeManager:
             CreateTrainingRequest: The training request object
         """
         return self.__request
+
+    def set_training_request(self, request: "CreateTrainingRequest"):
+        """Set the training request object in self and for each adapter manager and update data storage
+        """
+        self.__request = request
+        for adapter in self.__adapters:
+            adapter.set_request(request)
+
+        found, training = self.__data_storage.get_training(self.__request.user_id, self.__training_id)
+        data_storage_dataset_configuration = training["dataset_configuration"]
+        request_dataset_configuration = json.loads(self.__request.dataset_configuration)
+
+        for key, value in request_dataset_configuration.items():
+            if key not in data_storage_dataset_configuration:
+                data_storage_dataset_configuration[key] = value
+
+        training_details = {
+                    "dataset_configuration": data_storage_dataset_configuration
+                }
+        
+        self.__data_storage.update_training(self.__request.user_id, self.__training_id, training_details)
+
+        
 
     def get_dataset(self):
         """Get the dataset record used by the training

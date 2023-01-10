@@ -1,10 +1,10 @@
-﻿@inject IStringLocalizer<Global> L
+@inject IStringLocalizer<Global> L
 @using System
 @inject IApiClient apiClient
 @inject IViewNotifier viewNotifier
 @using Microsoft.Data.Analysis
 
-@if (_columns == null)
+@if (_datasetFrame == null)
 {
     
 }
@@ -23,6 +23,7 @@ else
         <MudTable Items="@_datasetFrame.Rows" style="width:stretch" class="mat-elevation-z5" FixedHeader="true" CustomHeader="true">
             <HeaderContent>
                 <MudTHeadRow>
+                        <MudTh></MudTh>
                     @foreach (var item in _datasetFrame.Columns)
                     {
                         
@@ -30,21 +31,58 @@ else
                     }
                 </MudTHeadRow>
                 <MudTHeadRow>
-                    @foreach (var (col, index) in _columns.Columns.Select((v, i) => (v, i)))
+                    <MudTh>@L["Datatype"]</MudTh>
+                    @if (_datasetFrame.Columns.Count == StartAutoMlRequest.Schema.Count)
                     {
-                        <MudTh>
-                            <MudSelect  T="int" Value="@(_dataTypeList[index])" ValueChanged="@((e) => { _dataTypeList[index] = e; ChangeValue(); })">
-                                <MudSelectItem  T="int" Value="@((int)col.Type)">@Enum.GetName(typeof(ColumnType), (int)col.Type)</MudSelectItem>
-                                @foreach (int val in col.ConvertibleTypes)
-                                {
-                                    <MudSelectItem  T="int" Value="@((int) val)">@Enum.GetName(typeof(ColumnType), val)</MudSelectItem>
-                                }
-                            </MudSelect>
-                        </MudTh>
+                        @foreach (var item in _datasetFrame.Columns)
+                        {
+                            <MudTh>
+                                <MudSelect T="string" Value="@(StartAutoMlRequest.Schema[item.Name].DatatypeSelected.ID == null ? StartAutoMlRequest.Schema[item.Name].DatatypeDetected.ID : StartAutoMlRequest.Schema[item.Name].DatatypeSelected.ID)" ValueChanged="@((e) => {  OnSelectedDatetypeChanged(item.Name, e); })">
+                                    @foreach (var datatype in StartAutoMlRequest.Schema[item.Name].DatatypesCompatible)
+                                    {
+                                        <MudSelectItem Value="@datatype.ID">
+                                            <MudText Typo="Typo.body2">@L[datatype.Properties.ContainsKey("skos:prefLabel") ? datatype.Properties["skos:prefLabel"] : ""]</MudText>
+                                        </MudSelectItem>
+                                    }
+                                </MudSelect>
+                            </MudTh>
+                        }
+                    }
+                    else
+                    {
+                        <MudText Typo="Typo.body2">@L["Datatype analysis incompatible with current dataset configuration, save current configuration to start new analysis"]</MudText>
+                    }
+                </MudTHeadRow>
+                <MudTHeadRow>
+                    <MudTh>@L["Role"]</MudTh>
+                    @if (_datasetFrame.Columns.Count == StartAutoMlRequest.Schema.Count)
+                    {
+                        @foreach (var item in _datasetFrame.Columns)
+                        {
+                            <MudTh>
+                                <MudSelect T="string" Value="@(StartAutoMlRequest.Schema[item.Name].RoleSelected.ID == null ? ":none" : StartAutoMlRequest.Schema[item.Name].RoleSelected.ID)" ValueChanged="@((e) => { OnSelectedRoleChanged(item.Name, e);  })">
+
+                                    <MudSelectItem Value="@(":none")">
+                                        <MudText Typo="Typo.body2">@L["none"]</MudText>
+                                    </MudSelectItem>
+                                    @foreach (var role in StartAutoMlRequest.Schema[item.Name].RolesCompatible)
+                                    {
+                                        <MudSelectItem Value="@role.ID">
+                                            <MudText Typo="Typo.body2">@L[role.Properties.ContainsKey("skos:prefLabel") ? role.Properties["skos:prefLabel"] : ""]</MudText>
+                                        </MudSelectItem>
+                                    }
+                                </MudSelect>
+                            </MudTh>
+                        }
+                    }
+                    else
+                    {
+                        <MudText Typo="Typo.body2">@L["Roles analysis incompatible with current dataset configuration, save current configuration to start new analysis"]</MudText>
                     }
                 </MudTHeadRow>
             </HeaderContent>
             <RowTemplate>
+                <MudTd></MudTd>
                 @foreach (var item in context)
                 {
                         <MudTd>@item</MudTd>
@@ -60,8 +98,19 @@ else
 }
 
 @code {
+    private GetDatasetResponseDto _dataset;
     [Parameter]
-    public GetDatasetResponseDto Dataset { get; set; }
+    public GetDatasetResponseDto Dataset
+    {
+        get
+        {
+            return _dataset;
+        }
+        set
+        {
+            _dataset = value;
+        }
+    }
     [Parameter]
     public CreateTrainingRequestDto StartAutoMlRequest { get; set; }
     [Parameter]
@@ -74,61 +123,12 @@ else
     {
         await StartAutoMlRequestChanged.InvokeAsync(StartAutoMlRequest);
     }
-
-    private GetTabularDatasetColumnResponseDto _columns;
-    // store all data type as list so we can bind in to our value onpurpose
-    // i have to do that because i cant bind value to _dataset[i].type
-    private List<int> _dataTypeList;
-    // function call to synchronize changed column typed
-    public async void ChangeValue()
-    {
-        Dictionary<string, dynamic> features = new Dictionary<string, dynamic>();
-        for (int i = 0; i < (_dataTypeList).Count; i++)
-        {
-            features.Add(_columns.Columns[i].Name, (Server.DataType)_dataTypeList[i]);
-        }
-        StartAutoMlRequest.DatasetConfiguration["column_datatypes"] = features;
-        await UpdateStartAutoMlRequest();
-    }
-
     protected override async void OnInitialized()
     {
         try
         {
-            ApiResponseDto apiResponse = await apiClient.GetTabularDatasetColumn(new GetTabularDatasetColumnRequestDto { DatasetId = Dataset.Dataset.Id });
-
-            if (apiResponse.IsSuccessStatusCode)
-            {
-                _columns = Newtonsoft.Json.JsonConvert.DeserializeObject<GetTabularDatasetColumnResponseDto>(apiResponse.Result.ToString());
-                _dataTypeList = new List<int>();
-                // add feature for manipulating and steps3
-                Dictionary<string, dynamic> features = new Dictionary<string, dynamic>();
-
-                if (StartAutoMlRequest.DatasetConfiguration.Count != 0)
-                {
-                    _dataTypeList = new List<int>();
-                    foreach (var item in StartAutoMlRequest.DatasetConfiguration["column_datatypes"])
-                    {
-                        _dataTypeList.Add((int)item.Value);
-                    }
-                }
-                else
-                {
-                    for (int i = 0; i < (_columns.Columns).Count; i++)
-                    {
-                        _dataTypeList.Add((int)_columns.Columns[i].Type);
-                        features.Add(_columns.Columns[i].Name, (Server.DataType)_dataTypeList[i]);
-                    }
-                    StartAutoMlRequest.DatasetConfiguration.Add("column_datatypes", features);
-                }
-                StartAutoMlRequest.DatasetId = Dataset.Dataset.Id;
-                await LoadDatasetPreview();
-                await UpdateStartAutoMlRequest();
-            }
-            else
-            {
-                viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
-            }
+            await LoadDatasetPreview();
+            await UpdateStartAutoMlRequest();
         }
         catch (Exception ex)
         {
@@ -154,31 +154,30 @@ else
             if (apiResponse.IsSuccessStatusCode)
             {
                 _datasetPreview = Newtonsoft.Json.JsonConvert.DeserializeObject<GetDatasetPreviewResponseDto>(apiResponse.Result.ToString());
-                List<string> columnNames = _columns.Columns.Select(x => x.Name).ToList();
-                List<Type> columnTypes = _columns.Columns.Select(x =>
-                {
-                    switch (x.Type)
-                    {
-                        case Server.DataType.String:
-                            return typeof(string);
-                        case Server.DataType.Int:
-                            return typeof(int);
-                        case Server.DataType.Float:
-                            return typeof(string);  //Float value are currently not really supported somehow, maybe in next release of the analytic package. To avoid casting to wrong type use string
-                        case Server.DataType.Boolean:
-                            return typeof(int);
-                        case Server.DataType.Datetime:
-                            return typeof(DateTime);
-                        default:
-                            return typeof(string);
-
-                    }
-                }).ToList();
                 // convert string to stream
                 //byte[] byteArray = Encoding.ASCII.GetBytes(_datasetPreview.DatasetPreview);
                 //MemoryStream stream = new MemoryStream(byteArray);
+                List<object> nanDatatypesValuesPerColumn = new List<object>();
                 _datasetFrame = DataFrame.LoadCsv(_datasetPreview.DatasetPreview, separator: Dataset.Dataset.GetDelimiter(), encoding: Dataset.Dataset.GetEncoding(), numRows: 20);
-                _datasetFrame.FillNulls("NaN", true);
+                foreach (var item in _datasetFrame.Columns)
+                {
+                    switch (item.DataType.Name)
+                    {
+                        case "String":
+                            nanDatatypesValuesPerColumn.Add("NaN");
+                            break;
+                        case "Single":
+                            nanDatatypesValuesPerColumn.Add(0);
+                            break;
+                        case "DateTime":
+                            nanDatatypesValuesPerColumn.Add(DateTime.Now);
+                            break;
+                        default:
+                            nanDatatypesValuesPerColumn.Add("NaN");
+                            break;
+                    }
+                }
+                _datasetFrame.FillNulls(nanDatatypesValuesPerColumn, true);
                 
                 viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
             }
@@ -192,5 +191,82 @@ else
             viewNotifier.Show(ex.GetBaseException().Message, ViewNotifierType.Error, L["Operation Failed"]);
         }
         isPreviewRequestRunning = false;
+    }
+
+    private bool TestConvertToDatetime(string column, bool all)
+    {
+        try
+        {
+            bool convertionSuccessfull = false;
+            //"%Y-%m-%d  %H:%M:%S";
+            string format = Dataset.Dataset.FileConfiguration["datetime_format"];
+            format = format.Replace("%d", "dd");
+            format = format.Replace("%m", "MM");
+            format = format.Replace("%Y", "yyyy");
+            format = format.Replace("%y", "yy");
+            format = format.Replace("%H", "HH");
+            format = format.Replace("%M", "mm");
+            format = format.Replace("%S", "ss");
+
+            //Check if all columns are compatible with new format
+            if (all == true)
+            {
+                foreach (var item in _dataset.Dataset.Schema)
+                {
+                    if (item.Value.DatatypeSelected.ID == ":datetime")
+                    {
+                        foreach (var row in _datasetFrame.Columns[item.Key])
+                        {
+                            //Only string rows can be casted to datetime
+                            if (format.Length == ((string)row).Length)
+                            {
+                                //If last cast fails we will assume none worked
+                                DateTime dt;
+                                convertionSuccessfull = DateTime.TryParseExact((string)row, format, null, DateTimeStyles.None, out dt);
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                //Check a specific column
+                foreach (var row in _datasetFrame.Columns[column])
+                {
+                    //Only string rows can be casted to datetime
+                    if (format.Length == ((string)row).Length)
+                    {
+                        //If last cast fails we will assume none worked
+                        DateTime dt;
+                        convertionSuccessfull = DateTime.TryParseExact((string)row, format, null, DateTimeStyles.None, out dt);
+                    }
+                }
+            }
+            return convertionSuccessfull;
+        }
+        catch (Exception)
+        {
+            return false;
+            throw;
+        }
+    }
+
+    private async void OnSelectedDatetypeChanged(string columnName, string datatype)
+    {
+        if (datatype == ":datetime")
+        {
+            if (TestConvertToDatetime(columnName, false) != true)
+            {
+                viewNotifier.Show(L["Column {0} could not be casted to datetime", columnName], ViewNotifierType.Error, L["Operation Failed"]);
+                return;
+            }
+        }
+        StartAutoMlRequest.Schema[columnName].DatatypeSelected.ID = datatype;
+        await UpdateStartAutoMlRequest();
+    }
+    private async void OnSelectedRoleChanged(string columnName, string role)
+    {
+        StartAutoMlRequest.Schema[columnName].RoleSelected.ID = role == ":none" ? null : role;
+        await UpdateStartAutoMlRequest();
     }
 }
