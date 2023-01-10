@@ -85,6 +85,7 @@ class AutoKerasAdapter:
         clf.fit(x = X_train, y = y_train, epochs=1)
 
         export_model(clf, self._configuration["result_folder_location"], 'model_keras.p')
+        export_model(reg, self._configuration["result_folder_location"], 'model_keras.p')
 
     def __image_regression(self):
         """Execute image regression task and export the found model"""
@@ -105,9 +106,9 @@ class AutoKerasAdapter:
         """Execute text classifiction task and export the found model"""
 
         self.df, test = data_loader(self._configuration)
-        self.get_column_with_largest_amout_of_text(self.df)
-        X, y = prepare_tabular_dataset(self.df, self._configuration)
-        
+        X = self.get_column_with_largest_amout_of_text(self.df)
+        X, y = prepare_tabular_dataset(X, self._configuration)
+
         reg = ak.TextClassifier(overwrite=True,
                                 # NOTE: bert models will fail with out of memory errors
                                 #   even with 32GB GB RAM
@@ -116,7 +117,7 @@ class AutoKerasAdapter:
                                 # metric=self._configuration['metric'],
                                 seed=42,
                                 directory=self._configuration["model_folder_location"])
-                               
+
 
         reg.fit(x = np.array(X).astype(np.unicode_), y = np.array(y), epochs=1)
         self.save_configuration_in_json()
@@ -127,15 +128,15 @@ class AutoKerasAdapter:
         """Execute text regression task and export the found model"""
 
         self.df, test = data_loader(self._configuration)
-        self.get_column_with_largest_amout_of_text(X)
-        X, y = prepare_tabular_dataset(self.df, self._configuration)
+        X = self.get_column_with_largest_amout_of_text(self.df)
+        X, y = prepare_tabular_dataset(X, self._configuration)
 
         reg = ak.TextClassifier(overwrite=True,
                                           max_trials=3,
                                 # metric=self._configuration['metric'],
                                 seed=42,
                                 directory=self._configuration["model_folder_location"])
-                                
+
         reg.fit(x = np.array(X), y = np.array(y), epochs=1)
         self.save_configuration_in_json()
         export_model(reg, self._configuration["result_folder_location"], 'model_keras.p')
@@ -155,10 +156,10 @@ class AutoKerasAdapter:
                                 directory=self._configuration["model_folder_location"])
 
         reg.fit(x = X, y = y, epochs=1)
-        
+
         export_model(reg, self._configuration["result_folder_location"], 'model_keras.p')
 
-    def get_column_with_largest_amout_of_text(self, df: pd.DataFrame):
+    def get_column_with_largest_amout_of_text(self, X: pd.DataFrame):
         """
         Find the column with the most text inside,
         because AutoKeras only supports training with one feature
@@ -168,20 +169,29 @@ class AutoKerasAdapter:
         Returns:
             pd.Dataframe: Returns a pandas Dataframe with the column with the most text inside
         """
-        newdf = df
-        X = newdf.drop(self._configuration["configuration"]["target"], axis=1)
-        column_names = X.columns
+        column_names = []
+        target = ""
         dict_with_string_length = {}
+
+        #First get only columns that will be used during training
+        for column, dt in self._configuration["dataset_configuration"]["schema"].items():
+            if dt.get("role_selected", "") == ":ignore" or dt.get("role_selected", "") == ":index" or dt.get("role_selected", "") == ":target":
+                continue
+            column_names.append(column)
+
+        #Check the used columns by dtype object (== string type) and get mean len to get column with longest text
         for column_name in column_names:
-            if(type(X[column_name][1]) == str):
+            if(X.dtypes[column_name] == object):
                 newlength = X[column_name].str.len().mean()
                 dict_with_string_length[column_name] = newlength
         max_value = max(dict_with_string_length, key=dict_with_string_length.get)
 
-        column_names_to_ignore = column_names.drop(max_value)
-        for column_name in column_names_to_ignore:
-            #TODO Change 7 to new Datatype Igorne
-            self._configuration['dataset_configuration']['column_datatypes'][column_name] = 7
+        #Remove the to be used text column from the list of used columns and set role ignore as Autokeras can only use one input column for text tasks
+        column_names.remove(max_value)
+        for column_name in column_names:
+            self._configuration["dataset_configuration"]["schema"][column_name]["role_selected"] = ":ignore"
+
+        return X
 
 
     def save_configuration_in_json(self):

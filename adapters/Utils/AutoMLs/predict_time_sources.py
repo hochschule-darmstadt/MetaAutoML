@@ -45,7 +45,7 @@ def feature_preparation(X, features, datetime_format, is_prediction=False):
         elif datatype == ":datetime":
             X[column] = pd.to_datetime(X[column], format=datetime_format)
         elif datatype == ":string":
-            X[column] = X[column].astype('str')
+            X[column] = X[column].astype('object')
 
         #Get target column
         if dt.get("role_selected", "") == ":target":
