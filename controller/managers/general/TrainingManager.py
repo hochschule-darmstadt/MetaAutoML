@@ -76,7 +76,7 @@ class TrainingManager:
                 "runtime_limit": create_training_request.configuration.runtime_limit,
                 "selected_auto_ml_solutions": create_training_request.configuration.selected_auto_ml_solutions,
                 "selected_ml_libraries": create_training_request.configuration.selected_ml_libraries,
-                "parameters": create_training_request.configuration.parameters
+                "parameters": {iri: {"values": value.values} for iri, value in create_training_request.configuration.parameters.items()}
             },
             "dataset_configuration": {
                 "column_datatypes": json.loads(create_training_request.dataset_configuration)["column_datatypes"],
