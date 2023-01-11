@@ -74,6 +74,7 @@ class TrainingManager:
                 "target": create_training_request.configuration.target,
                 "enabled_strategies": create_training_request.configuration.enabled_strategies,
                 "runtime_limit": create_training_request.configuration.runtime_limit,
+                "metric": create_training_request.configuration.metric,
                 "selected_auto_ml_solutions": create_training_request.configuration.selected_auto_ml_solutions,
                 "selected_ml_libraries": create_training_request.configuration.selected_ml_libraries,
                 "parameters": {iri: {"values": value.values} for iri, value in create_training_request.configuration.parameters.items()}
@@ -153,7 +154,8 @@ class TrainingManager:
             training_configuration.target = training["configuration"]["target"]
             training_configuration.enabled_strategies = training["configuration"]["enabled_strategies"]
             training_configuration.runtime_limit = training["configuration"]["runtime_limit"]
-            training_configuration.parameters = training["configuration"]["parameters"]
+            training_configuration.metric = training["configuration"]["metric"]
+            # training_configuration.parameters = training["configuration"]["parameters"]
             training_configuration.selected_auto_ml_solutions = training["configuration"]["selected_auto_ml_solutions"]
             training_configuration.selected_ml_libraries = training["configuration"]["selected_ml_libraries"]
             training_item.configuration = training_configuration

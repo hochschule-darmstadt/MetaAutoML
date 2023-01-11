@@ -114,8 +114,13 @@ class StartAutoMlConfiguration(betterproto.Message):
     cancelation set during the wizard configurationexample: 5
     """
 
+    metric: str = betterproto.string_field(5)
+    """
+    The ML metric selected during the wizard configurationexample: ":accuracy"
+    """
+
     parameters: Dict[str, "DynamicParameterValue"] = betterproto.map_field(
-        5, betterproto.TYPE_STRING, betterproto.TYPE_MESSAGE
+        6, betterproto.TYPE_STRING, betterproto.TYPE_MESSAGE
     )
     """
     Map of additional parametersexamples:{":use_approach": { "values":

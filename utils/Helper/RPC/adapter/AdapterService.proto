@@ -75,6 +75,11 @@ message StartAutoMlConfiguration {
   */
   int32 runtimeLimit = 4;
   /*
+    The ML metric selected during the wizard configuration
+    example: ":accuracy"
+  */
+  string metric = 5;
+  /*
     Map of additional parameters
     examples:
     {
@@ -83,7 +88,7 @@ message StartAutoMlConfiguration {
       ":some_int": { "values": ["17"]}
     }
   */
-  map<string, DynamicParameterValue> parameters = 5;
+  map<string, DynamicParameterValue> parameters = 6;
 }
 
 message StartAutoMlResponse {

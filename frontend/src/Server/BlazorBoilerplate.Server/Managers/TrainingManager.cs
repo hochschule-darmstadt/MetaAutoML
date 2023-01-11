@@ -41,6 +41,7 @@ namespace BlazorBoilerplate.Server.Managers
                     Task = request.Configuration.Task,
                     Target = request.Configuration.Target,
                     RuntimeLimit = request.Configuration.RuntimeLimit,
+                    Metric = request.Configuration.Metric
                 };
                 createTrainingRequest.Configuration.SelectedAutoMlSolutions.AddRange(request.Configuration.SelectedAutoMlSolutions);
                 createTrainingRequest.Configuration.SelectedMlLibraries.AddRange(request.Configuration.SelecctedMlLibraries);
@@ -99,16 +100,7 @@ namespace BlazorBoilerplate.Server.Managers
             trainingDto.Configuration.Target = training.Configuration.Target;
             trainingDto.Configuration.EnabledStrategies.AddRange(training.Configuration.EnabledStrategies);
             trainingDto.Configuration.RuntimeLimit = training.Configuration.RuntimeLimit;
-            var selectedMetrics = training.Configuration.Parameters.GetValueOrDefault(":metric")?.Values.ToList();
-            if (selectedMetrics.Count == 1)
-            {
-                trainingDto.Configuration.Metric = await _cacheManager.GetObjectInformation(selectedMetrics.Single());
-            }
-            else
-            {
-                // TODO: Question: Throw exception or handle the unexpected value (for more than 1 metric, the first one could be used, for 0 a dummy value could be used).
-                throw new IndexOutOfRangeException("Multiple or no selected metrics were found, but exactly 1 was expected");
-            }
+            trainingDto.Configuration.Metric = await _cacheManager.GetObjectInformation(training.Configuration.Metric);
             foreach (var item in training.Configuration.SelectedAutoMlSolutions)
             {
                 trainingDto.Configuration.SelectedAutoMlSolutions.Add(await _cacheManager.GetObjectInformation(item));

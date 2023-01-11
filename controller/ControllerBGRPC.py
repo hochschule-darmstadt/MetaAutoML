@@ -705,20 +705,25 @@ class Configuration(betterproto.Message):
     cancelation set during the wizard configurationexample: 5
     """
 
-    selected_auto_ml_solutions: List[str] = betterproto.string_field(5)
+    metric: str = betterproto.string_field(5)
+    """
+    The ML metric selected during the wizard configurationexample: ":accuracy"
+    """
+
+    selected_auto_ml_solutions: List[str] = betterproto.string_field(6)
     """
     List of AutoML solutions selected during the wizard configurationexample:
     [":autokeras", ":mljar"]
     """
 
-    selected_ml_libraries: List[str] = betterproto.string_field(6)
+    selected_ml_libraries: List[str] = betterproto.string_field(7)
     """
     List of ML libraries selected during the wizard configurationexample:
     [":keras_lib", ":sklearn_lib"]
     """
 
     parameters: Dict[str, "DynamicParameterValue"] = betterproto.map_field(
-        7, betterproto.TYPE_STRING, betterproto.TYPE_MESSAGE
+        8, betterproto.TYPE_STRING, betterproto.TYPE_MESSAGE
     )
     """
     Map of additional parametersexamples:{":use_approach": { "values":

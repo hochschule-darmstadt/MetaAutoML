@@ -126,15 +126,20 @@ message Configuration {
   */
   int32 runtimeLimit = 4;
   /*
+    The ML metric selected during the wizard configuration
+    example: ":accuracy"
+  */
+  string metric = 5;
+  /*
     List of AutoML solutions selected during the wizard configuration
     example: [":autokeras", ":mljar"]
   */
-  repeated string selectedAutoMlSolutions = 5;
+  repeated string selectedAutoMlSolutions = 6;
   /*
     List of ML libraries selected during the wizard configuration
     example: [":keras_lib", ":sklearn_lib"]
   */
-  repeated string selectedMlLibraries = 6;
+  repeated string selectedMlLibraries = 7;
   /*
     Map of additional parameters
     examples:
@@ -144,7 +149,7 @@ message Configuration {
       ":some_int": { "values": ["17"]}
     }
   */
-  map<string, DynamicParameterValue> parameters = 7;
+  map<string, DynamicParameterValue> parameters = 8;
 }
 
 message TrainingRuntimeProfile {
