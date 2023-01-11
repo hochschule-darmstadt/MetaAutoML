@@ -13,7 +13,7 @@
             "justMyCode": true,
             "env": {
                 "PYTHONPATH": ".;dependency-injection;AutoMLs;Utils;../Utils/Utils;../Utils/AutoMLs;../GRPC/Adapter;",
-                "GRPC_SERVER_PORT": "50061",
+                "GRPC_SERVER_PORT": "50062",
                 "PYTHON_ENV": ".venv/Scripts/python",
                 "USE_DEV_CONFIG": "YES"
             },
@@ -27,10 +27,26 @@
             "justMyCode": true,
             "env": {
                 "PYTHONPATH": ".:dependency-injection:AutoMLs:Utils:../Utils/Utils:../Utils/AutoMLs:../GRPC/Adapter:",
-                "GRPC_SERVER_PORT": "50061",
-                "PYTHON_ENV": ".venv/bin/python",
+                "GRPC_SERVER_PORT": "50062",
+                "PYTHON_ENV": ".venv/Scripts/python",
                 "USE_DEV_CONFIG": "YES"
             },
-        }
+        },
+        {
+            "name": "WIN EvalML Adapter Test",
+            "type": "python",
+            "request": "launch",
+            "purpose": ["debug-test"],
+            "program": "tests/test_adapter.py",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "env": {
+                "PYTHONPATH": ".;dependency-injection;AutoMLs;Utils;../Utils/Utils;../Utils/AutoMLs;../GRPC/Adapter;",
+                "GRPC_SERVER_PORT": "50062",
+                "PYTHON_ENV": ".venv/Scripts/python",
+                "USE_DEV_CONFIG": "YES",
+                "PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION": "python"
+            },
+        },
     ]
 }

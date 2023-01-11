@@ -1,4 +1,4 @@
-﻿using Azure;
+using Azure;
 using BlazorBoilerplate.Constants;
 using BlazorBoilerplate.Infrastructure.Server;
 using BlazorBoilerplate.Infrastructure.Server.Models;
@@ -29,6 +29,7 @@ using System.IO.Compression;
 using System.Runtime.CompilerServices;
 using Karambolo.Common;
 using System.Diagnostics;
+using static MudBlazor.CategoryTypes;
 
 namespace BlazorBoilerplate.Server.Managers
 {
@@ -142,7 +143,17 @@ namespace BlazorBoilerplate.Server.Managers
                 var reply = _client.GetDatasets(getDatasetsRequest);
                 foreach (Dataset item in reply.Datasets)
                 {
-                    response.Datasets.Add(new DatasetDto(item, await _cacheManager.GetObjectInformation(item.Type)));
+                    Dictionary<string, Shared.Dto.Dataset.ColumnSchemaDto> schema = new Dictionary<string, Shared.Dto.Dataset.ColumnSchemaDto>();
+                    foreach (var column in item.Schema)
+                    {
+                        schema.Add(column.Key, new Shared.Dto.Dataset.ColumnSchemaDto(
+                            await _cacheManager.GetObjectInformation(column.Value.DatatypeDetected),
+                            await _cacheManager.GetObjectInformationList(column.Value.DatatypesCompatible.ToList()),
+                            column.Value.DatatypeSelected == "" ? new ObjectInfomationDto() : await _cacheManager.GetObjectInformation(column.Value.DatatypeSelected),
+                            await _cacheManager.GetObjectInformationList(column.Value.RolesCompatible.ToList()),
+                            column.Value.RoleSelected == "" ? new ObjectInfomationDto() : await _cacheManager.GetObjectInformation(column.Value.RoleSelected)));
+                    }
+                    response.Datasets.Add(new DatasetDto(item, await _cacheManager.GetObjectInformation(item.Type), schema));
                 }
                 return new ApiResponse(Status200OK, null, response);
 
@@ -170,7 +181,17 @@ namespace BlazorBoilerplate.Server.Managers
                 getDatasetRequest.UserId = username;
                 getDatasetRequest.DatasetId = request.DatasetId;
                 var reply = _client.GetDataset(getDatasetRequest);
-                response = new GetDatasetResponseDto(new DatasetDto(reply, await _cacheManager.GetObjectInformation(reply.Dataset.Type)));
+                Dictionary<string, Shared.Dto.Dataset.ColumnSchemaDto> schema = new Dictionary<string, Shared.Dto.Dataset.ColumnSchemaDto>();
+                foreach (var column in reply.Dataset.Schema)
+                {
+                    schema.Add(column.Key, new Shared.Dto.Dataset.ColumnSchemaDto(
+                        await _cacheManager.GetObjectInformation(column.Value.DatatypeDetected),
+                        await _cacheManager.GetObjectInformationList(column.Value.DatatypesCompatible.ToList()),
+                        column.Value.DatatypeSelected == "" ? new ObjectInfomationDto() : await _cacheManager.GetObjectInformation(column.Value.DatatypeSelected),
+                        await _cacheManager.GetObjectInformationList(column.Value.RolesCompatible.ToList()),
+                        column.Value.RoleSelected == "" ? new ObjectInfomationDto() : await _cacheManager.GetObjectInformation(column.Value.RoleSelected)));
+                }
+                response = new GetDatasetResponseDto(new DatasetDto(reply, await _cacheManager.GetObjectInformation(reply.Dataset.Type), schema));
 
                 return new ApiResponse(Status200OK, null, response);
 
@@ -247,50 +268,37 @@ namespace BlazorBoilerplate.Server.Managers
                 return new ApiResponse(Status404NotFound, ex.Message);
             }
         }
-        /// <summary>
-        /// Helper function, get all column names of a structured data dataset
-        /// </summary>
-        /// <param name="dataset"></param>
-        /// <returns></returns>
-        public async Task<ApiResponse> GetTabularDatasetColumn(GetTabularDatasetColumnRequestDto request)
-        {
-            GetTabularDatasetColumnResponseDto response = new GetTabularDatasetColumnResponseDto();
-            GetTabularDatasetColumnRequest getColumnNamesRequest = new GetTabularDatasetColumnRequest();
-            var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
-            try
-            {
-                getColumnNamesRequest.UserId = username;
-                getColumnNamesRequest.DatasetId = request.DatasetId;
-                var reply = _client.GetTabularDatasetColumn(getColumnNamesRequest);
-                foreach (var item in reply.Columns.ToList())
-                {
-                    response.Columns.Add(new ColumnsDto
-                    {
-                        Name = item.Name,
-                        Type = item.Type,
-                        ConvertibleTypes = item.ConvertibleTypes.ToList(),
-                    });
-                }
-                return new ApiResponse(Status200OK, null, response);
-
-            }
-            catch (Exception ex)
-            {
-
-                return new ApiResponse(Status404NotFound, ex.Message);
-            }
-        }
-
         public async Task<ApiResponse> SetDatasetFileConfiguration(SetDatasetFileConfigurationRequestDto request)
         {
-            SetDatasetFileConfigurationRequest grpcRequest = new SetDatasetFileConfigurationRequest();
+            SetDatasetConfigurationRequest grpcRequest = new SetDatasetConfigurationRequest();
             var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
             try
             {
                 grpcRequest.UserId = username;
                 grpcRequest.DatasetId = request.DatasetId;
                 grpcRequest.FileConfiguration = JsonConvert.SerializeObject(request.Configuration);
-                var reply = _client.SetDatasetFileConfiguration(grpcRequest);
+                var reply = _client.SetDatasetConfiguration(grpcRequest);
+                return new ApiResponse(Status200OK, null, "");
+
+            }
+            catch (Exception ex)
+            {
+                return new ApiResponse(Status404NotFound, ex.Message);
+            }
+        }
+
+        public async Task<ApiResponse> SetDatasetColumnSchemaConfiguration(SetDatasetColumnSchemaConfigurationRequestDto request)
+        {
+            SetDatasetColumnSchemaConfigurationRequest grpcRequest = new SetDatasetColumnSchemaConfigurationRequest();
+            var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
+            try
+            {
+                grpcRequest.UserId = username;
+                grpcRequest.DatasetId = request.DatasetId;
+                grpcRequest.DatatypeSelected = request.SelectedDatatype == null ? "" : request.SelectedDatatype;
+                grpcRequest.RoleSelected = request.SelectedRole == null ? "" : request.SelectedRole;
+                grpcRequest.Column = request.Column;
+                var reply = _client.SetDatasetColumnSchemaConfiguration(grpcRequest);
                 return new ApiResponse(Status200OK, null, "");
 
             }

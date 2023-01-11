@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components;
 using MudBlazor;
 using MudBlazor.Utilities;
 using System;
@@ -56,6 +56,12 @@ namespace BlazorBoilerplate.Theme.Material.Demo.Shared.Components.Wizard
         /// </summary>
         [Parameter]
         public EventCallback WizardCancelled { get; set; }
+
+        /// <summary>
+        /// This event is raised whenever the save schema checkbox value is changed
+        /// </summary>
+        [Parameter]
+        public EventCallback<bool> SaveSchemaChanged { get; set; }
 
         #endregion
 
@@ -239,6 +245,18 @@ namespace BlazorBoilerplate.Theme.Material.Demo.Shared.Components.Wizard
         /// </summary>
         [Parameter]
         public Typo TitleTypo { get; set; }
+
+        /// <summary>
+        /// This property contains the flag if the save schema checkbox is to be displayed
+        /// </summary>
+        [Parameter]
+        public bool DisplaySaveSchemaCheckbox { get; set; }
+
+        /// <summary>
+        /// This property contains the value of the save schema checkbox
+        /// </summary>
+        [Parameter]
+        public bool SaveSchema { get; set; }
 
         /// <summary>
         /// This property indicates whether the previous button should be
@@ -560,6 +578,19 @@ namespace BlazorBoilerplate.Theme.Material.Demo.Shared.Components.Wizard
             GC.SuppressFinalize(this);
 
             return ValueTask.CompletedTask;
+        }
+
+        // *******************************************************************
+
+        /// <summary>
+        /// This method is called when the save schema checkbox value has changed.
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns>A task to perform the operation.</returns>
+        protected async Task OnSaveSchemaCheckedChanged(bool value)
+        {
+            SaveSchema = value;
+            await SaveSchemaChanged.InvokeAsync(SaveSchema);
         }
 
         #endregion

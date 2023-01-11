@@ -1,16 +1,7 @@
 from enum import Enum, unique
 import pandas as pd
+import re
 
-@unique
-class DataType(Enum):
-    DATATYPE_UNKNOW = 0
-    DATATYPE_STRING = 1
-    DATATYPE_INT = 2
-    DATATYPE_FLOAT = 3
-    DATATYPE_CATEGORY = 4
-    DATATYPE_BOOLEAN = 5
-    DATATYPE_DATETIME = 6
-    DATATYPE_IGNORE = 7
 
 
 @unique
@@ -19,47 +10,53 @@ class SplitMethod(Enum):
     SPLIT_METHOD_END = 1
 
 
-def feature_preparation(X, features):
+def feature_preparation(X, features, datetime_format, is_prediction=False):
+    target = ""
+    is_target_found = False
     for column, dt in features:
-        if DataType(dt) is DataType.DATATYPE_IGNORE:
+        #During the prediction process no target column was read, so unnamed column names will be off by -1 index,
+        #if they are located after the target column within the training set, their index must be adjusted
+        if re.match(r"Column[0-9]+", column) and is_target_found == True and is_prediction == True:
+            column_index = re.findall('[0-9]+', column)
+            column_index = int(column_index[0])
+            X.rename(columns={f"Column{column_index-1}": column}, inplace=True)
+
+        #Check if column is to be droped either its role is ignore or index
+        if dt.get("role_selected", "") == ":ignore" or dt.get("role_selected", "") == ":index":
             X.drop(column, axis=1, inplace=True)
-        elif DataType(dt) is DataType.DATATYPE_CATEGORY:
+            continue
+        #Get column datatype
+        datatype = dt.get("datatype_selected", "")
+        if datatype == "":
+            datatype = dt["datatype_detected"]
+
+        #during predicitons we dont have a target column and must avoid casting it
+        if dt.get("role_selected", "") == ":target" and is_prediction == True:
+            is_target_found = True
+            continue
+
+        if datatype == ":categorical":
             X[column] = X[column].astype('category')
-        elif DataType(dt) is DataType.DATATYPE_BOOLEAN:
+        elif datatype == ":boolean":
             X[column] = X[column].astype('bool')
-        elif DataType(dt) is DataType.DATATYPE_INT:
+        elif datatype == ":integer":
             X[column] = X[column].astype('int')
-        elif DataType(dt) is DataType.DATATYPE_FLOAT:
+        elif datatype == ":float":
             X[column] = X[column].astype('float')
-    return X
+        elif datatype == ":datetime":
+            X[column] = pd.to_datetime(X[column], format=datetime_format)
+        elif datatype == ":string":
+            X[column] = X[column].astype('object')
 
-def encode_category_columns(X, json_configuration):
-    if "encoded_columns" in json_configuration["dataset_configuration"]:
-        encoded_columns = json_configuration["dataset_configuration"]["encoded_columns"]
+        #Get target column
+        if dt.get("role_selected", "") == ":target":
+            target = column
+            is_target_found = True
 
-        #only generate encoding if all columns are present in dataframe
-        try:
-            X = pd.get_dummies(data=X, columns=encoded_columns.keys())
-        except Exception:
-            pass
+    if is_prediction == True:
+        y = pd.Series()
+    else:
+        y = X[target]
+        X.drop(target, axis=1, inplace=True)
 
-        #create list of final columns
-        final_columns = []
-        final_columns.extend(json_configuration["dataset_configuration"]["column_datatypes"].keys())
-        for key in encoded_columns:
-            if key in final_columns:
-                final_columns.extend(encoded_columns[key])
-                final_columns.remove(key)
-
-                for new_column in encoded_columns[key]:
-                    json_configuration["dataset_configuration"]["column_datatypes"][new_column] = 2
-                json_configuration["dataset_configuration"]["column_datatypes"].pop(key)
-
-        #initialize new columns that are created due to one hot encoding with 0
-        for column_name in final_columns:
-            if column_name not in X:
-                X[column_name] = 0
-
-        #drop columns that were not in the training data
-        X = X[X.columns.intersection(final_columns)]
-    return X
+    return X, y

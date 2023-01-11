@@ -1,5 +1,6 @@
-﻿using BlazorBoilerplate.Infrastructure.Server;
+using BlazorBoilerplate.Infrastructure.Server;
 using BlazorBoilerplate.Infrastructure.Server.Models;
+using BlazorBoilerplate.Shared.Dto.Dataset;
 using BlazorBoilerplate.Shared.Dto.Model;
 using BlazorBoilerplate.Shared.Dto.Training;
 using BlazorBoilerplate.Theme.Material.Demo.Pages;
@@ -23,6 +24,23 @@ namespace BlazorBoilerplate.Server.Managers
             _httpContextAccessor = httpContextAccessor;
             _cacheManager = cacheManager;
         }
+
+        private string ConvertDatasetSchemaToString(Dictionary<string, ColumnSchemaDto> schema)
+        {
+            Dictionary<string, ColumnSchema> columns = new Dictionary<string, ColumnSchema>();
+            foreach (var column in schema)
+            {
+                ColumnSchema columnSchema = new ColumnSchema();
+                columnSchema.DatatypeDetected = column.Value.DatatypeDetected.ID;
+                columnSchema.DatatypesCompatible.AddRange(column.Value.DatatypesCompatible.Select(a => a.ID).ToArray());
+                columnSchema.DatatypeSelected = column.Value.DatatypeSelected.ID == null ? "" : column.Value.DatatypeSelected.ID;
+                columnSchema.RolesCompatible.AddRange(column.Value.RolesCompatible.Select(a => a.ID).ToArray());
+                columnSchema.RoleSelected = column.Value.RoleSelected.ID == null ? "" : column.Value.RoleSelected.ID;
+                columns[column.Key] = columnSchema;
+            }
+            return JsonConvert.SerializeObject(columns);
+        }
+
         /// <summary>
         /// Start the OMAML process to search for a model
         /// </summary>
@@ -38,13 +56,13 @@ namespace BlazorBoilerplate.Server.Managers
                 createTrainingRequest.DatasetId = request.DatasetId;
                 createTrainingRequest.Configuration = new Configuration();
                 createTrainingRequest.Configuration.Task = request.Configuration.Task;
-                createTrainingRequest.Configuration.Target = request.Configuration.Target;
                 createTrainingRequest.Configuration.EnabledStrategies.AddRange(request.Configuration.EnabledStrategies);
                 createTrainingRequest.Configuration.RuntimeLimit = request.Configuration.RuntimeLimit;
                 createTrainingRequest.Configuration.Metric = request.Configuration.Metric;
                 createTrainingRequest.Configuration.SelectedAutoMlSolutions.AddRange(request.Configuration.SelectedAutoMlSolutions);
                 createTrainingRequest.Configuration.SelectedMlLibraries.AddRange(request.Configuration.SelecctedMlLibraries);
-                createTrainingRequest.DatasetConfiguration = JsonConvert.SerializeObject(request.DatasetConfiguration);
+                createTrainingRequest.DatasetConfiguration = ConvertDatasetSchemaToString(request.Schema);
+                createTrainingRequest.SaveSchema = request.SaveSchema;
                 var reply = _client.CreateTraining(createTrainingRequest);
                 return new ApiResponse(Status200OK, null, new CreateTrainingResponseDto(reply.TrainingId));
 

@@ -1,4 +1,4 @@
-﻿@namespace BlazorBoilerplate.Theme.Material.Demo.Shared.Components.Wizard
+@namespace BlazorBoilerplate.Theme.Material.Demo.Shared.Components.Wizard
 @using Microsoft.AspNetCore.Components
 @using MudBlazor
 @inject IStringLocalizer<Global> L
@@ -61,6 +61,10 @@
                 <CardHeaderActions>
                     <span style="display: flex; margin-left: auto">
                         <MudStack Row="true">
+                            @if (@DisplaySaveSchemaCheckbox)
+                            {
+                                <MudCheckBox Checked="@SaveSchema" T="bool" CheckedChanged="OnSaveSchemaCheckedChanged" Label="@L["Save Schema"]"></MudCheckBox>
+                            }
                             <MudButton OnClick="OnPrevious"
                                    Disabled="@IsPreviousDisabled"
                                    Color="Color.Secondary"

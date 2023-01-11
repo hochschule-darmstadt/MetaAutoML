@@ -32,7 +32,7 @@ class AdapterManager(Thread):
         """Start the AutoML solution as a background process
         """
         asyncio.run(self.__background_start_auto_ml())
-    
+
     def start_auto_ml(self, start_auto_ml_request: "StartAutoMlRequest", session_id: str):
         """Initiate the new AutoML search process
 
@@ -55,7 +55,7 @@ class AdapterManager(Thread):
         raise Exception("_get_ml_model_and_lib has to be implemented in sub class")
 
     async def __background_start_auto_ml(self):
-        """Sets up the training run environment and start the background AutoML solution process. While the AutoML solution is running, collect all console messages and create the result messages. 
+        """Sets up the training run environment and start the background AutoML solution process. While the AutoML solution is running, collect all console messages and create the result messages.
         After the process concludes create the result archive and test the found model with the test set.
         """
         try:
@@ -65,7 +65,7 @@ class AdapterManager(Thread):
 
             # start training process
             process = start_automl_process(config)
-            
+
             # read the processes output line by line and push them onto the event queue
             for line in process.stdout:
                 status_update = GetAutoMlStatusResponse()
@@ -158,13 +158,15 @@ class AdapterManager(Thread):
             ExplainModelResponse: The ExplainModelResponse message holding the prediction probabilities
         """
         try:
+            print("adapatermanager explain")
             config_json = json.loads(explain_auto_ml_request.process_json)
+            config_json["dataset_configuration"] = json.loads(config_json["dataset_configuration"])
             result_folder_location = os.path.join(get_config_property("training-path"),
                                                   config_json["user_id"],
                                                   config_json["dataset_id"],
                                                   config_json["training_id"],
                                                   get_config_property("result-folder-name"))
-                                                  
+
             if self._loaded_training_id != config_json["training_id"]:
                 df, test = data_loader(config_json)
                 self._dataframeX, y = prepare_tabular_dataset(df, config_json)
@@ -203,6 +205,13 @@ class AdapterManager(Thread):
                                         get_config_property("job-folder-name"),
                                         get_config_property("job-file-name"))
 
+            #load old dataset_configuration and save it to config json in case the dataset types have been changed in the
+            #AutoKeras adapter for TextClassification
+            with open(job_file_location) as file:
+                config_json_old_dataset_configuation = json.load(file)
+
+            config_json['dataset_configuration'] = config_json_old_dataset_configuation['dataset_configuration']
+
             # saving AutoML configuration JSON
             with open(job_file_location, "w+") as f:
                 json.dump(config_json, f)
@@ -214,7 +223,7 @@ class AdapterManager(Thread):
 
         except Exception as e:
             raise grpclib.GRPCError(grpclib.Status.UNAVAILABLE, f"Error while generating probabilities {e}")
-            
+
     def get_start_auto_ml_request(self) -> StartAutoMlRequest:
         return self.__start_auto_ml_request
 

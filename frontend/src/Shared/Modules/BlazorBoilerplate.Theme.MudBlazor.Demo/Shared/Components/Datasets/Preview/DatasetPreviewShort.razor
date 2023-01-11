@@ -1,4 +1,4 @@
-﻿
+
 @using System 
 @using System.IO
 @using Microsoft.AspNetCore.Hosting
@@ -138,9 +138,28 @@
                     case ":time_series":
                     case ":text":
                     case ":tabular":
-                        
+
+                        List<object> nanDatatypesValuesPerColumn = new List<object>();
                         _datasetFrame = DataFrame.LoadCsv(_datasetPreview.DatasetPreview, separator: Dataset.Dataset.GetDelimiter(), encoding: Dataset.Dataset.GetEncoding(), numRows: 3);//Frame.ReadCsv(stream, separators: Dataset.Dataset.GetDelimiterStr());
-                        _datasetFrame.FillNulls("NaN", true);
+                        foreach (var item in _datasetFrame.Columns)
+                        {
+                            switch (item.DataType.Name)
+                            {
+                                case "String":
+                                    nanDatatypesValuesPerColumn.Add("NaN");
+                                    break;
+                                case "Single":
+                                    nanDatatypesValuesPerColumn.Add(0);
+                                    break;
+                                case "DateTime":
+                                    nanDatatypesValuesPerColumn.Add(DateTime.Now);
+                                    break;
+                                default:
+                                    nanDatatypesValuesPerColumn.Add("NaN");
+                                    break;
+                            }
+                        }
+                        _datasetFrame.FillNulls(nanDatatypesValuesPerColumn, true);
 
                         ReadDatasetFailed = false;
                         await ReadDatasetFailedChanged.InvokeAsync(ReadDatasetFailed);
