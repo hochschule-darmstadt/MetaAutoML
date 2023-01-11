@@ -78,39 +78,7 @@ namespace BlazorBoilerplate.Server.Managers
                 var reply = _client.GetTrainings(getTrainings);
                 foreach (var training in reply.Trainings)
                 {
-                    GetDatasetResponse dataset = _client.GetDataset(new GetDatasetRequest { DatasetId = training.DatasetId, UserId = username });
-                    TrainingDto trainingDto = new TrainingDto(training, dataset.Dataset.Name);
-                    trainingDto.Configuration.Task = await _cacheManager.GetObjectInformation(training.Configuration.Task);
-                    trainingDto.Configuration.Target = training.Configuration.Target;
-                    trainingDto.Configuration.EnabledStrategies.AddRange(training.Configuration.EnabledStrategies);
-                    trainingDto.Configuration.RuntimeLimit = training.Configuration.RuntimeLimit;
-                    var selectedMetrics = training.Configuration.Parameters.GetValueOrDefault(":metric")?.Values.ToList();
-                    if (selectedMetrics.Count == 1)
-                    {
-                        trainingDto.Configuration.Metric = await _cacheManager.GetObjectInformation(selectedMetrics.Single());
-                    }
-                    else
-                    {
-                        // TODO: Question: Throw exception or handle the unexpected value (for more than 1 metric, the first one could be used, for 0 a dummy value could be used).
-                        throw new IndexOutOfRangeException("Multiple or no selected metrics were found, but exactly 1 was expected");
-                    }
-                    foreach (var item in training.Configuration.SelectedAutoMlSolutions)
-                    {
-                        trainingDto.Configuration.SelectedAutoMlSolutions.Add(await _cacheManager.GetObjectInformation(item));
-                    }
-                    foreach (var item in training.Configuration.SelectedMlLibraries)
-                    {
-                        trainingDto.Configuration.SelecctedMlLibraries.Add(await _cacheManager.GetObjectInformation(item));
-                    }
-
-                    foreach (var model in training.Models)
-                    {
-                        ModelDto modelDto = new ModelDto(model,
-                            (model.MlModelType == "" ? new Shared.Dto.Ontology.ObjectInfomationDto() :  await _cacheManager.GetObjectInformation(model.MlModelType)),
-                            (model.MlLibrary == "" ? new Shared.Dto.Ontology.ObjectInfomationDto() : await _cacheManager.GetObjectInformation(model.MlLibrary)),
-                            (model.AutoMlSolution == "" ? new Shared.Dto.Ontology.ObjectInfomationDto() : await _cacheManager.GetObjectInformation(model.AutoMlSolution)));
-                        trainingDto.models.Add(modelDto);
-                    }
+                    TrainingDto trainingDto = await CreateTrainingDtoFromTraining(username, training);
                     response.Trainings.Add(trainingDto);
                 }
                 return new ApiResponse(Status200OK, null, response);
@@ -122,6 +90,46 @@ namespace BlazorBoilerplate.Server.Managers
                 return new ApiResponse(Status404NotFound, ex.Message);
             }
         }
+
+        private async Task<TrainingDto> CreateTrainingDtoFromTraining(string username, Training training)
+        {
+            GetDatasetResponse dataset = _client.GetDataset(new GetDatasetRequest { DatasetId = training.DatasetId, UserId = username });
+            TrainingDto trainingDto = new TrainingDto(training, dataset.Dataset.Name);
+            trainingDto.Configuration.Task = await _cacheManager.GetObjectInformation(training.Configuration.Task);
+            trainingDto.Configuration.Target = training.Configuration.Target;
+            trainingDto.Configuration.EnabledStrategies.AddRange(training.Configuration.EnabledStrategies);
+            trainingDto.Configuration.RuntimeLimit = training.Configuration.RuntimeLimit;
+            var selectedMetrics = training.Configuration.Parameters.GetValueOrDefault(":metric")?.Values.ToList();
+            if (selectedMetrics.Count == 1)
+            {
+                trainingDto.Configuration.Metric = await _cacheManager.GetObjectInformation(selectedMetrics.Single());
+            }
+            else
+            {
+                // TODO: Question: Throw exception or handle the unexpected value (for more than 1 metric, the first one could be used, for 0 a dummy value could be used).
+                throw new IndexOutOfRangeException("Multiple or no selected metrics were found, but exactly 1 was expected");
+            }
+            foreach (var item in training.Configuration.SelectedAutoMlSolutions)
+            {
+                trainingDto.Configuration.SelectedAutoMlSolutions.Add(await _cacheManager.GetObjectInformation(item));
+            }
+            foreach (var item in training.Configuration.SelectedMlLibraries)
+            {
+                trainingDto.Configuration.SelecctedMlLibraries.Add(await _cacheManager.GetObjectInformation(item));
+            }
+
+            foreach (var model in training.Models)
+            {
+                ModelDto modelDto = new ModelDto(model,
+                    (model.MlModelType == "" ? new Shared.Dto.Ontology.ObjectInfomationDto() : await _cacheManager.GetObjectInformation(model.MlModelType)),
+                    (model.MlLibrary == "" ? new Shared.Dto.Ontology.ObjectInfomationDto() : await _cacheManager.GetObjectInformation(model.MlLibrary)),
+                    (model.AutoMlSolution == "" ? new Shared.Dto.Ontology.ObjectInfomationDto() : await _cacheManager.GetObjectInformation(model.AutoMlSolution)));
+                trainingDto.models.Add(modelDto);
+            }
+
+            return trainingDto;
+        }
+
         /// <summary>
         /// Get informations about a specific session
         /// </summary>
@@ -139,39 +147,7 @@ namespace BlazorBoilerplate.Server.Managers
                 GetTrainingResponse reply = _client.GetTraining(getTrainingRequest);
                 Training training = reply.Training;
 
-                GetDatasetResponse dataset = _client.GetDataset(new GetDatasetRequest { DatasetId = training.DatasetId, UserId = username });
-                TrainingDto trainingDto = new TrainingDto(training, dataset.Dataset.Name);
-                trainingDto.Configuration.Task = await _cacheManager.GetObjectInformation(training.Configuration.Task);
-                trainingDto.Configuration.Target = training.Configuration.Target;
-                trainingDto.Configuration.EnabledStrategies.AddRange(training.Configuration.EnabledStrategies);
-                trainingDto.Configuration.RuntimeLimit = training.Configuration.RuntimeLimit;
-                var selectedMetrics = training.Configuration.Parameters.GetValueOrDefault(":metric")?.Values.ToList();
-                if (selectedMetrics.Count == 1)
-                {
-                    trainingDto.Configuration.Metric = await _cacheManager.GetObjectInformation(selectedMetrics.Single());
-                }
-                else
-                {
-                    // TODO: Question: Throw exception or handle the unexpected value (for more than 1 metric, the first one could be used, for 0 a dummy value could be used).
-                    throw new IndexOutOfRangeException("Multiple or no selected metrics were found, but exactly 1 was expected");
-                }
-                foreach (var item in training.Configuration.SelectedAutoMlSolutions)
-                {
-                    trainingDto.Configuration.SelectedAutoMlSolutions.Add(await _cacheManager.GetObjectInformation(item));
-                }
-                foreach (var item in training.Configuration.SelectedMlLibraries)
-                {
-                    trainingDto.Configuration.SelecctedMlLibraries.Add(await _cacheManager.GetObjectInformation(item));
-                }
-
-                foreach (var model in training.Models)
-                {
-                    ModelDto modelDto = new ModelDto(model,
-                        (model.MlModelType == "" ? new Shared.Dto.Ontology.ObjectInfomationDto() : await _cacheManager.GetObjectInformation(model.MlModelType)),
-                        (model.MlLibrary == "" ? new Shared.Dto.Ontology.ObjectInfomationDto() : await _cacheManager.GetObjectInformation(model.MlLibrary)),
-                        (model.AutoMlSolution == "" ? new Shared.Dto.Ontology.ObjectInfomationDto() : await _cacheManager.GetObjectInformation(model.AutoMlSolution)));
-                    trainingDto.models.Add(modelDto);
-                }
+                TrainingDto trainingDto = await CreateTrainingDtoFromTraining(username, training);
                 response = new GetTrainingResponseDto(trainingDto);
                 return new ApiResponse(Status200OK, null, response);
 
