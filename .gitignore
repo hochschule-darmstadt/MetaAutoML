@@ -211,4 +211,4 @@ controller/app-data/training/*
 controller/tests/datasets/*
 
 #Authentification files
-auth/*
+auth/*.json

@@ -54,9 +54,10 @@ namespace SystemTest
             mockIStringLocalizer["Operation Failed"].Returns(new LocalizedString("Operation Failed", "Operation Failed"));
             
             
-            await using FileStream fs = new(String.Format($"{_dataDir}\\titanic"), FileMode.Open);            
+            await using FileStream fs = new(String.Format($"{_dataDir}\\titanic\\train.csv"), FileMode.Open);            
             FileUploader uploader = new(mockClient, mockNotifier, mockIStringLocalizer);
             //TODO: somehow set uploader.UploadFileContent to the titanic dataset
+            uploader.UploadFileContent = ;
 
             Task testedMethod = uploader.UploadDataset();
             await testedMethod;
