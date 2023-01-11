@@ -57,7 +57,7 @@ class DataPreparationStrategyController(IAbstractStrategy):
         duplicate_columns = state.get("dataset_analysis", {}).get("duplicate_columns", [])
         ignored_columns = []
 
-        agent: AdapterRuntimeManagerAgent = controller.blackboard.get_agent('training-runtime')
+        agent: AdapterRuntimeManagerAgent = controller.get_blackboard().get_agent('training-runtime')
         if not agent or not agent.get_adapter_runtime_manager():
             raise RuntimeError('Could not access Adapter Runtime Manager Agent!')
         dataset_configuration = json.loads(agent.get_adapter_runtime_manager().get_training_request().dataset_configuration)
@@ -71,7 +71,7 @@ class DataPreparationStrategyController(IAbstractStrategy):
         training_request = agent.get_adapter_runtime_manager().get_training_request()
         training_request.dataset_configuration = json.dumps(dataset_configuration)
         agent.get_adapter_runtime_manager().set_training_request(training_request)
-        
+
         # IDEA: Update dataset analysis accordingly (may not be neccessary)
         blackboard.update_state('dataset_analysis', { 'duplicate_columns': [] }, True)
 
@@ -94,7 +94,7 @@ class DataPreparationStrategyController(IAbstractStrategy):
         for row_a, row_b in duplicate_rows:
             self._log.info(f'do_ignore_redundant_samples: Encountered redundant sample "{row_a}" (same as "{row_b}"), ingoring the sample.')
             ignored_samples.append(row_b)
-        
+
         dataset_configuration['ignored_samples'] = ignored_samples
 
         training_request = agent.get_adapter_runtime_manager().get_training_request()

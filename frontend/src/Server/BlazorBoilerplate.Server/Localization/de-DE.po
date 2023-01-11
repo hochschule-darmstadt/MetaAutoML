@@ -994,3 +994,10 @@ msgstr "Kein Target wurde ausgewählt."
 
 msgid "No task selected"
 msgstr "Kein ML Task wurde ausgewählt."
+
+msgid "No index selected"
+msgstr "Keine Index Spalte wurde gesetzt."
+
+msgid "No datetime index selected"
+msgstr "Keine oder mehrere Index Spalte mit Datentyp Datetime wurde gesetzt. Es darf nur eine Index Spalte mit Datentyp Datetime im Datensatz existieren."
+

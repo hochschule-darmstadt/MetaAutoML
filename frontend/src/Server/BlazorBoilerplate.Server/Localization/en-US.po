@@ -1944,3 +1944,11 @@ msgstr "No target was selected."
 msgctxt "Global"
 msgid "No task selected"
 msgstr "No ML task was selected."
+
+msgctxt "Global"
+msgid "No index selected"
+msgstr "No index column was set."
+
+msgctxt "Global"
+msgid "No datetime index selected"
+msgstr "No or multiple index column with datatype datetime was set. Only one index column with datatype datetime is allowed."
