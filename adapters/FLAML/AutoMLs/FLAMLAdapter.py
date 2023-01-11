@@ -57,7 +57,8 @@ class FLAMLAdapter:
             "log_file_name": self._log_file_path
         })
 
-        automl.fit(X_train=np.array(X), y_train=np.array(y), **automl_settings)
+        X[y.name] = y.values
+        automl.fit(dataframe=X, label=y.name, **automl_settings)
         export_model(automl, self._configuration["result_folder_location"], 'model_flaml.p')
 
     def __tabular_regression(self):
@@ -73,7 +74,8 @@ class FLAMLAdapter:
             "log_file_name": self._log_file_path
         })
 
-        automl.fit(X_train=np.array(X), y_train=np.array(y), **automl_settings)
+        X[y.name] = y.values
+        automl.fit(dataframe=X, label=y.name, **automl_settings)
         export_model(automl, self._configuration["result_folder_location"], 'model_flaml.p')
 
 
@@ -92,7 +94,8 @@ class FLAMLAdapter:
             "period": 1,
             "eval_method": "holdout"
         })
-        x_shape = X.shape[-1]
-        y_shape = y.shape[-1]
-        automl.fit(X_train=X, y_train=y, **automl_settings)
+        X[y.name] = y.values
+        X.reset_index(inplace=True)
+        X = X.bfill().ffill()  # makes sure there are no missing values
+        automl.fit(dataframe=X, label=y.name, **automl_settings)
         export_model(automl, self._configuration["result_folder_location"], 'model_flaml.p')

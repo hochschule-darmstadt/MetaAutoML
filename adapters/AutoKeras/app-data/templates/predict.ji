@@ -62,7 +62,7 @@ if __name__ == '__main__':
         config_json = json.load(file)
 
     config_json["dataset_configuration"] = json.loads(config_json["dataset_configuration"])
-    if config_json["configuration"]["task"] in [":tabular_classification", ":tabular_regression", ":text_classification", ":text_regression", ":time_series"]:
+    if config_json["configuration"]["task"] in [":tabular_classification", ":tabular_regression", ":text_classification", ":text_regression", ":time_series_forecasting"]:
         targets = []
         for key in config_json["dataset_configuration"]["schema"]:
             #Get target columns list

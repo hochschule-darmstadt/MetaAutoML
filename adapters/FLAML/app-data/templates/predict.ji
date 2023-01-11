@@ -50,10 +50,13 @@ if __name__ == '__main__':
 
     X, y = feature_preparation(X, config_json["dataset_configuration"]["schema"].items(), config_json["dataset_configuration"]["file_configuration"]["datetime_format"], is_prediction=True)
 
+    if config_json["configuration"]["task"] == ":time_series_forecasting":
+        #Time series need to remove indexes
+        X.reset_index(inplace=True)
 
     with open(sys.path[0] + '/model_flaml.p', 'rb') as file:
         automl2 = dill.load(file)
 
-    predicted_y = automl2.predict(np.array(X))
+    predicted_y = automl2.predict(X)
     predicted_y = np.reshape(predicted_y, (-1, 1))
     pd.DataFrame(data=predicted_y, columns=["predicted"]).to_csv(save_path)

@@ -63,7 +63,8 @@ def feature_preparation(X, features, datetime_format, is_prediction=False):
         y = X[target]
         X.drop(target, axis=1, inplace=True)
 
-    #Set index columns
-    X.set_index(index_columns)
+    if len(index_columns) > 0:
+        #Set index columns
+        X.set_index(index_columns, inplace=True)
 
     return X, y

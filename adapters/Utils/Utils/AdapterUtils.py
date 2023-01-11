@@ -13,6 +13,7 @@ from predict_time_sources import SplitMethod, feature_preparation
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, mean_squared_error
 from sklearn.metrics import classification_report
+from sklearn.metrics import mean_absolute_percentage_error
 from JsonUtil import get_config_property
 from TemplateGenerator import TemplateGenerator
 import glob
@@ -170,11 +171,11 @@ def evaluate(config: "StartAutoMlRequest", config_path: str) -> Tuple[float, flo
         if config["dataset_configuration"]["schema"][key].get("role_selected", "") == ":target":
             targets.append(key)
 
-    if(config["configuration"]["task"] in [":tabular_classification", ":tabular_regression", ":text_regression", ":text_classification"]):
+    if(config["configuration"]["task"] in [":tabular_classification", ":tabular_regression", ":text_regression", ":text_classification", ":time_series_forecasting"]):
         train, test = data_loader(config)
         target = targets[0]
         # override file_path to path to test file and drop target column
-        file_path = write_tabular_dataset_test_data(test.drop(target, axis=1), os.path.dirname(file_path))
+        file_path = write_tabular_dataset_test_data(test.drop(target, axis=1), os.path.dirname(file_path), config)
 
     elif(config["configuration"]["task"] in[":image_classification", ":image_regression"]):
         X_train, y_train, X_test, y_test = data_loader(config)
@@ -211,7 +212,9 @@ def evaluate(config: "StartAutoMlRequest", config_path: str) -> Tuple[float, flo
               classification_report(test_target, predicted_target,zero_division=0)
               )
         return acc_score, (predict_time * 1000) / test.shape[0]
-
+    elif config["configuration"]["task"] == ":time_series_forecasting":
+        return mean_absolute_percentage_error(test[target], predictions["predicted"]), \
+               (predict_time * 1000) / test.shape[0]
     elif config["configuration"]["task"] == ":text_classification":
         return accuracy_score(test[target], predictions["predicted"]), (predict_time * 1000) / test.shape[0]
 
@@ -384,7 +387,7 @@ def read_tabular_dataset_training_data(config: "StartAutoMlRequest") -> Tuple[pd
 
     return train, test
 
-def write_tabular_dataset_test_data(df: pd.DataFrame, dir_name: str) -> str:
+def write_tabular_dataset_test_data(df: pd.DataFrame, dir_name: str, config) -> str:
     """Writes dataframe into a csv file.
 
     Args:
@@ -394,9 +397,25 @@ def write_tabular_dataset_test_data(df: pd.DataFrame, dir_name: str) -> str:
     Returns:
         file_path (str): file path to output file "test.csv"
     """
+    delimiters = {
+        "comma":        ",",
+        "semicolon":    ";",
+        "space":        " ",
+        "tab":          "\t",
+    }
+
     file_path = os.path.join(dir_name, "test.csv")
+    configuration = {
+        "path_or_buf": file_path,
+        "sep": delimiters[config["dataset_configuration"]["file_configuration"]['delimiter']],
+        "decimal": config["dataset_configuration"]["file_configuration"]['decimal_character'],
+        "escapechar": config["dataset_configuration"]["file_configuration"]['escape_character'],
+        "encoding": config["dataset_configuration"]["file_configuration"]['encoding'],
+        "index": False
+    }
+
     #np.reshape(df, (-1, 1))
-    pd.DataFrame(data=df, columns=df.columns).to_csv(file_path, index=False)
+    pd.DataFrame(data=df, columns=df.columns).to_csv(**configuration)
     os.chmod(file_path, 0o744)
     return file_path
 
