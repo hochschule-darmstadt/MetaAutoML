@@ -16,10 +16,10 @@
 </MudStack>
 
 <MudGrid>
-    <MudItem xs="12" sm="12" md="12">
+    <MudItem xs="9" sm="9" md="9">
         <MudCard Elevation="5">
             <MudCardHeader Style="border-bottom-style: inset; border-bottom-width: 1px;">
-                <CardHeaderContent >
+                <CardHeaderContent>
                     <MudText Typo="Typo.h6">@L["Overview"]</MudText>
                 </CardHeaderContent>
             </MudCardHeader>
@@ -60,8 +60,6 @@
                                     }
                                 }
                             </MudItem>
-                            <MudItem xs="3" sm="3" md="3">
-                            </MudItem>
                         </MudGrid>
                     }
                 </MudPaper>
@@ -69,27 +67,31 @@
         </MudCard>
     </MudItem>
     <MudItem xs="3" sm="3" md="3">
-        @if (_dataset != null)
-        {
-            @if ((_readDatasetFailed == false) && (_dataset.Dataset.Analysis["size_bytes"] != 0))
+     
+            @if (_dataset != null)
             {
-                <NewTraining Dataset="@_dataset" />
+                @if ((_readDatasetFailed == false) && (_dataset.Dataset.Analysis["size_bytes"] != 0))
+                {
+                    <NewTraining Dataset="@_dataset" />
+                }
+                else
+                {
+                    <NewTrainingDatasetNotReadable />
+                }
             }
-            else
-            {
-                <NewTrainingDatasetNotReadable />
-            }
-        }
+    
+    </MudItem>
+    <MudItem xs="12" sm="12" md="12">
+            <DatasetPreviewShort @bind-ReadDatasetFailed="@_readDatasetFailed" Dataset="@_dataset" /> 
+    </MudItem>
+    <MudItem xs="3" sm="3" md="3">
+        <DatasetAnalysisShort Dataset="_dataset" />
     </MudItem>
     <MudItem xs="9" sm="9" md="9">
-        <Top3Models Dataset="_dataset"/>
+        <Top3Models Dataset="_dataset" />
     </MudItem>
-    <MudItem xs="6" sm="6" md="6">
-        <DatasetAnalysisShort Dataset="_dataset"/>
-    </MudItem>
-    <MudItem xs="6" sm="6" md="6">
-        <DatasetPreviewShort @bind-ReadDatasetFailed="@_readDatasetFailed" Dataset="@_dataset" />
-    </MudItem>
+
+
 </MudGrid>
 
 
