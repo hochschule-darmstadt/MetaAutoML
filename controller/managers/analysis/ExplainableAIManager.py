@@ -190,6 +190,15 @@ def feature_preparation(X, features, datetime_format, is_prediction=False):
 
 
 
+def encode_category_columns(X, dataset_configuration):
+    if "encoded_columns" in dataset_configuration:
+        encoded_columns = dataset_configuration["encoded_columns"]
+        try:
+            X = pd.get_dummies(data=X, columns=encoded_columns.keys())
+        except Exception:
+            pass
+    return X
+
 
 class ExplainableAIManager:
     def __init__(self, data_storage: DataStorage, adapter_manager: AdapterManager, explainable_lock: ThreadLock):
@@ -248,8 +257,6 @@ class ExplainableAIManager:
 
         dataset = CsvManager.read_dataset(dataset_path, training["dataset_configuration"]['file_configuration'], training["dataset_configuration"]['schema'])
         dataset_X, dataset_Y = feature_preparation(dataset, training["dataset_configuration"]["schema"].items(), training["dataset_configuration"]["file_configuration"]["datetime_format"])
-
-
         sampled_dataset_X = dataset_X.iloc[0:number_of_samples, :]
 
         print(f"[ExplainableAIManager]: Output is saved to {output_path}")

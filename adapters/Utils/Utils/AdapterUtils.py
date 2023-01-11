@@ -201,6 +201,8 @@ def evaluate(config: "StartAutoMlRequest", config_path: str) -> Tuple[float, flo
                (predict_time * 1000) / y_test.shape[0]
     elif config["configuration"]["task"] == ":time_series_classification":
         train, test = data_loader(config)
+        X, y = prepare_tabular_dataset(test, config)
+        test = pd.concat([X, y], axis=1)
         target = config["configuration"]["target"]
 
         test_target = test[target].astype("string")
@@ -379,6 +381,22 @@ def read_tabular_dataset_training_data(config: "StartAutoMlRequest") -> Tuple[pd
     #    train = data.sample(random_state=json_configuration["test_configuration"]["random_state"], frac=1)
     #    test = data.sample(random_state=json_configuration["test_configuration"]["random_state"], frac=1)
     #else:
+
+
+    #remove redundant samples
+    if "ignored_samples" in config["dataset_configuration"]:
+        data = data.drop(config["dataset_configuration"]["ignored_samples"])
+
+    #gather all column types including one hot encoding results on categories
+    if "encoded_columns" in config["dataset_configuration"]:
+        encoded_columns = config["dataset_configuration"]["encoded_columns"]
+        for key in encoded_columns:
+            unique_values = data[key].unique()
+            encoded_columns[key] = []
+            for value in unique_values:
+                new_column = str(key) + "_" + str(value)
+                encoded_columns[key].append(new_column)
+
     train = data.iloc[:int(data.shape[0] * 0.8)]
     test = data.iloc[int(data.shape[0] * 0.8):]
 
@@ -412,6 +430,13 @@ def prepare_tabular_dataset(df: pd.DataFrame, json_configuration: dict) -> Tuple
         tuple[pd.DataFrame, object]: tuple holding the dataset dataframe without the target column, and a Series or Dataframe holding the Target column(s) tuple[(X_dataframe, y)]
     """
     X, y = feature_preparation(df, json_configuration["dataset_configuration"]["schema"].items(), json_configuration["dataset_configuration"]["file_configuration"]["datetime_format"])
+
+    #write json_configuration to file if possible
+    if 'job_folder_location' in json_configuration:
+        json_configuration['dataset_configuration'] = json.dumps(json_configuration['dataset_configuration'])
+        with open(os.path.join(json_configuration['job_folder_location'], get_config_property("job-file-name")), "w+") as f:
+            json.dump(json_configuration, f)
+
     return X, y
 
 def convert_X_and_y_dataframe_to_numpy(X: pd.DataFrame, y: pd.Series) -> Tuple[np.ndarray, np.ndarray]:

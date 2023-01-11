@@ -3,6 +3,7 @@ import pandas as pd
 import re
 
 
+
 @unique
 class SplitMethod(Enum):
     SPLIT_METHOD_RANDOM = 0
