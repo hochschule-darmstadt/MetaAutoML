@@ -114,13 +114,14 @@ class StartAutoMlConfiguration(betterproto.Message):
     cancelation set during the wizard configurationexample: 5
     """
 
-    metric: str = betterproto.string_field(5)
+    parameters: Dict[str, "DynamicParameterValue"] = betterproto.map_field(
+        5, betterproto.TYPE_STRING, betterproto.TYPE_MESSAGE
+    )
     """
-    The ML metric selected during the wizard configurationexample: ":accuracy"
+    Map of additional parametersexamples:{":use_approach": { "values":
+    [":adaboost", ":decision_tree"]},":metric": { "values":
+    [":accuracy"]},":some_int": { "values": ["17"]}}
     """
-
-    parameters: List["ParameterValue"] = betterproto.message_field(6)
-    """List of additional parameters"""
 
 
 @dataclass(eq=False, repr=False)
@@ -252,15 +253,16 @@ class PredictModelResponse(betterproto.Message):
 
 
 @dataclass(eq=False, repr=False)
-class ParameterValue(betterproto.Message):
-    iri: str = betterproto.string_field(1)
-    """The iri of the parameter"""
-
-    value: List[str] = betterproto.string_field(2)
+class DynamicParameterValue(betterproto.Message):
     """
-    The value(s) selected for the parameter.examples:single_value:
-    ['some_iri']list: ['some_iri', 'other_iri']string: ['hello world']number:
-    ['16.8']
+    Value type for dynamic training parameters for the auto ml solutions.This
+    type is needed, because map<> does not supported "repeated" in the value.
+    """
+
+    values: List[str] = betterproto.string_field(1)
+    """
+    List of values for a parameterexamples:- int: ["17"]- single_value:
+    [":accuracy"]- list: [":adaboost", ":decision_tree"]
     """
 
 

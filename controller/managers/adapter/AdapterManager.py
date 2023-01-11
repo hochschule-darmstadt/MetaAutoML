@@ -128,7 +128,6 @@ class AdapterManager(Thread):
         configuration.task = self.__request.configuration.task
         configuration.target = self.__request.configuration.target
         configuration.runtime_limit = self.__request.configuration.runtime_limit
-        configuration.metric = self.__request.configuration.metric
         configuration.parameters = self.__request.configuration.parameters
 
         request.configuration = configuration

@@ -126,25 +126,25 @@ message Configuration {
   */
   int32 runtimeLimit = 4;
   /*
-    The ML metric selected during the wizard configuration
-    example: ":accuracy"
-  */
-  string metric = 5;
-  /*
     List of AutoML solutions selected during the wizard configuration
     example: [":autokeras", ":mljar"]
   */
-  repeated string selectedAutoMlSolutions = 6;
+  repeated string selectedAutoMlSolutions = 5;
   /*
     List of ML libraries selected during the wizard configuration
     example: [":keras_lib", ":sklearn_lib"]
   */
-  repeated string selectedMlLibraries = 7;
-
+  repeated string selectedMlLibraries = 6;
   /*
-    List of additional parameters
+    Map of additional parameters
+    examples:
+    {
+      ":use_approach": { "values": [":adaboost", ":decision_tree"]},
+      ":metric": { "values": [":accuracy"]},
+      ":some_int": { "values": ["17"]}
+    }
   */
-  repeated ParameterValue parameters = 8;
+  map<string, DynamicParameterValue> parameters = 7;
 }
 
 message TrainingRuntimeProfile {
@@ -227,18 +227,17 @@ message CreateTrainingResponse {
   string trainingId = 1;
 }
 
-message ParameterValue {
+/*
+  Value type for dynamic training parameters for the auto ml solutions.
+  This type is needed, because map<> does not supported "repeated" in the value.
+*/
+message DynamicParameterValue {
   /*
-    The iri of the parameter
-  */
-  string iri = 1;
-  /*
-    The value(s) selected for the parameter.
+    List of values for a parameter
     examples:
-      single_value: ['some_iri']
-      list: ['some_iri', 'other_iri']
-      string: ['hello world']
-      number: ['16.8']
+    - int: ["17"]
+    - single_value: [":accuracy"]
+    - list: [":adaboost", ":decision_tree"]
   */
-  repeated string value = 2;
+  repeated string values = 1;
 }

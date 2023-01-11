@@ -75,14 +75,15 @@ message StartAutoMlConfiguration {
   */
   int32 runtimeLimit = 4;
   /*
-    The ML metric selected during the wizard configuration
-    example: ":accuracy"
+    Map of additional parameters
+    examples:
+    {
+      ":use_approach": { "values": [":adaboost", ":decision_tree"]},
+      ":metric": { "values": [":accuracy"]},
+      ":some_int": { "values": ["17"]}
+    }
   */
-  string metric = 5;
-  /*
-    List of additional parameters
-  */
-  repeated ParameterValue parameters = 6;
+  map<string, DynamicParameterValue> parameters = 5;
 }
 
 message StartAutoMlResponse {
@@ -227,18 +228,17 @@ enum AdapterReturnCode {
 	ADAPTER_RETURN_CODE_ERROR = 100;
 }
 
-message ParameterValue {
+/*
+  Value type for dynamic training parameters for the auto ml solutions.
+  This type is needed, because map<> does not supported "repeated" in the value.
+*/
+message DynamicParameterValue {
   /*
-    The iri of the parameter
-  */
-  string iri = 1;
-  /*
-    The value(s) selected for the parameter.
+    List of values for a parameter
     examples:
-      single_value: ['some_iri']
-      list: ['some_iri', 'other_iri']
-      string: ['hello world']
-      number: ['16.8']
+    - int: ["17"]
+    - single_value: [":accuracy"]
+    - list: [":adaboost", ":decision_tree"]
   */
-  repeated string value = 2;
+  repeated string values = 1;
 }

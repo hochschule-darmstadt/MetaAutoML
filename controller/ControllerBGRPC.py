@@ -705,25 +705,26 @@ class Configuration(betterproto.Message):
     cancelation set during the wizard configurationexample: 5
     """
 
-    metric: str = betterproto.string_field(5)
-    """
-    The ML metric selected during the wizard configurationexample: ":accuracy"
-    """
-
-    selected_auto_ml_solutions: List[str] = betterproto.string_field(6)
+    selected_auto_ml_solutions: List[str] = betterproto.string_field(5)
     """
     List of AutoML solutions selected during the wizard configurationexample:
     [":autokeras", ":mljar"]
     """
 
-    selected_ml_libraries: List[str] = betterproto.string_field(7)
+    selected_ml_libraries: List[str] = betterproto.string_field(6)
     """
     List of ML libraries selected during the wizard configurationexample:
     [":keras_lib", ":sklearn_lib"]
     """
 
-    parameters: List["ParameterValue"] = betterproto.message_field(8)
-    """List of additional parameters"""
+    parameters: Dict[str, "DynamicParameterValue"] = betterproto.map_field(
+        7, betterproto.TYPE_STRING, betterproto.TYPE_MESSAGE
+    )
+    """
+    Map of additional parametersexamples:{":use_approach": { "values":
+    [":adaboost", ":decision_tree"]},":metric": { "values":
+    [":accuracy"]},":some_int": { "values": ["17"]}}
+    """
 
 
 @dataclass(eq=False, repr=False)
@@ -797,15 +798,16 @@ class CreateTrainingResponse(betterproto.Message):
 
 
 @dataclass(eq=False, repr=False)
-class ParameterValue(betterproto.Message):
-    iri: str = betterproto.string_field(1)
-    """The iri of the parameter"""
-
-    value: List[str] = betterproto.string_field(2)
+class DynamicParameterValue(betterproto.Message):
     """
-    The value(s) selected for the parameter.examples:single_value:
-    ['some_iri']list: ['some_iri', 'other_iri']string: ['hello world']number:
-    ['16.8']
+    Value type for dynamic training parameters for the auto ml solutions.This
+    type is needed, because map<> does not supported "repeated" in the value.
+    """
+
+    values: List[str] = betterproto.string_field(1)
+    """
+    List of values for a parameterexamples:- int: ["17"]- single_value:
+    [":accuracy"]- list: [":adaboost", ":decision_tree"]
     """
 
 
