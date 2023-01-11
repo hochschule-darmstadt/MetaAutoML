@@ -85,7 +85,6 @@ class AutoKerasAdapter:
         clf.fit(x = X_train, y = y_train, epochs=1)
 
         export_model(clf, self._configuration["result_folder_location"], 'model_keras.p')
-        export_model(reg, self._configuration["result_folder_location"], 'model_keras.p')
 
     def __image_regression(self):
         """Execute image regression task and export the found model"""
