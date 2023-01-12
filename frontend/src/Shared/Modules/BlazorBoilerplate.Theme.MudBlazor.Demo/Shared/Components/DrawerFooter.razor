@@ -43,13 +43,15 @@
         <MudStack>
             <MudStack Row="true">
 
-                <MudButton Variant="Variant.Filled"
+                <MudButton
+                           Variant="Variant.Filled"
                            Color="Color.Secondary"
                            Size="Size.Small"
                            Disabled="_fileUpload"
                            OnClick="FileOrUrlSwitch"
                            Style="margin-top: 8px; width:50%">@L["File"]</MudButton>
-                        <MudButton Variant="Variant.Filled"
+                        <MudButton
+                                   Variant="Variant.Filled"
                                    Color="Color.Secondary"
                                    Size="Size.Small"
                                    Disabled="!_fileUpload"
@@ -333,6 +335,14 @@
                 {
                     viewNotifier.Show(L["Please select a file first!"], ViewNotifierType.Error, L["Operation Failed"]);
                     return;
+                }
+
+                if (_fileUpload)
+                {
+                    fileUploader.UploadDatasetRequest.FileSource = "Local";
+                } else if (!_fileUpload)
+                {
+                    fileUploader.UploadDatasetRequest.FileSource = "URL";
                 }
             }
 
