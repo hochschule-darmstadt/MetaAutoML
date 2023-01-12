@@ -16,6 +16,10 @@ class DataPreparationStrategyController(IAbstractStrategy):
                 'dataset_analysis': DataType.MAPPING(
                     key_type=DataType.STRING,
                     value_type=DataType.UNDEFINED
+                ),
+                'training_runtime': DataType.MAPPING(
+                    key_type=DataType.STRING,
+                    value_type=DataType.UNDEFINED
                 )
             })
         )
@@ -31,11 +35,23 @@ class DataPreparationStrategyController(IAbstractStrategy):
             Rule("phase == 'preprocessing' and not (dataset_type == ':image') and not dataset_analysis['duplicate_rows'].is_empty", context=data_preparation_context),
             self.do_ignore_redundant_samples
         )
+        
+        self.register_rule(
+            'data_preparation.multi_fidelity_optimization',
+            Rule("phase == 'preprocessing'", context=data_preparation_context),
+            self.multi_fidelity_optimization
+        )
 
         self.register_rule(
             'data_preparation.split_large_datasets',
             Rule("phase == 'preprocessing' and not (dataset_type == ':image') and dataset_analysis['number_of_rows'] > 10000", context=data_preparation_context),
             self.do_split_large_datasets
+        )
+
+        self.register_rule(
+            'data_preparation.data_encoding_for_categories',
+            Rule("phase == 'preprocessing' and ('\"DatatypeSelected\": \":categorical\"' in training_runtime['configuration']['datasetConfiguration'])", context=data_preparation_context),
+            self.do_data_encoding_for_categories
         )
 
         self.register_rule(
@@ -53,6 +69,15 @@ class DataPreparationStrategyController(IAbstractStrategy):
         # Force enable this strategy to ensure preprocessing always finishes
         self.controller.enable_strategy('data_preparation.finish_preprocessing')
 
+    def multi_fidelity_optimization(self, state: dict, blackboard: Blackboard, controller: StrategyController):
+        # disable Strategy 
+        controller.disable_strategy('data_preparation.multi_fidelity_optimization')
+        ##TODO
+
+        
+
+        #return { 'ignored_columns': ignored_columns }
+    
     def do_ignore_redundant_features(self, state: dict, blackboard: Blackboard, controller: StrategyController):
         duplicate_columns = state.get("dataset_analysis", {}).get("duplicate_columns", [])
         ignored_columns = []
@@ -121,6 +146,32 @@ class DataPreparationStrategyController(IAbstractStrategy):
 
         # Finished action (should only run once, therefore disable the strategy rule)
         controller.disable_strategy('data_preparation.split_large_datasets')
+
+    def do_data_encoding_for_categories(self, state: dict, blackboard: Blackboard, controller: StrategyController):
+        column_datatypes = json.loads(state.get("training_runtime", {}).get("configuration", {}).get("datasetConfiguration", str))["column_datatypes"]
+        encoded_columns = {}
+
+        agent: AdapterRuntimeManagerAgent = controller.get_blackboard().get_agent('training-runtime')
+        if not agent or not agent.get_adapter_runtime_manager():
+            raise RuntimeError('Could not access Adapter Runtime Manager Agent!')
+        dataset_configuration = json.loads(agent.get_adapter_runtime_manager().get_training_request().dataset_configuration)
+
+        dataset_configuration['encoded_columns'] = {}
+        for key, column_datatype in column_datatypes.items():
+            if column_datatype == 4:
+                self._log.info(f'do_data_encoding_for_categories: Add "{key}" to encoded_columns.')
+                encoded_columns[key] = []
+
+            dataset_configuration['encoded_columns'] = encoded_columns
+
+        training_request = agent.get_adapter_runtime_manager().get_training_request()
+        training_request.dataset_configuration = json.dumps(dataset_configuration)
+        agent.get_adapter_runtime_manager().set_training_request(training_request)
+
+        # Finished action (should only run once, therefore disable the strategy rule)
+        controller.disable_strategy('data_preparation.data_encoding_for_categories')
+
+        return { 'encoded_columns': encoded_columns }
 
     def do_finish_preprocessing(self, state: dict, blackboard: Blackboard, controller: StrategyController):
         self._log.info(f'do_finish_preprocessing: Finished data preparation, advancing to phase "running"..')

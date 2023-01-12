@@ -61,7 +61,7 @@ class AdapterRuntimeManager:
             current_schema = dataset["schema"]
             training_schema = json.loads(self.__request.dataset_configuration)
             #We only need to update the selected values if selected datatype and role as the rest is set by the backend
-            for key in current_schema:
+            for key in current_schema: 
                 #Update selected role
                 selected_role = training_schema[key].get("RoleSelected", "")
                 if selected_role != "":
@@ -70,10 +70,14 @@ class AdapterRuntimeManager:
                     current_schema[key].pop("role_selected", None)
                 #Update selected datatype
                 selected_datatype = training_schema[key].get("DatatypeSelected", "")
+                #TODO wenn datatype = Kategorie -> onehotencoding
+                
                 if selected_datatype != "":
                     current_schema[key]["datatype_selected"] = selected_datatype
                 else:
                     current_schema[key].pop("datatype_selected", None)
+                if selected_datatype == ":categorical":
+                    pass
 
             if self.__request.save_schema == True:
                 self.__data_storage.update_dataset(self.__request.user_id, self.__request.dataset_id, {"schema": current_schema})
