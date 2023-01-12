@@ -202,6 +202,8 @@ class DatasetManager:
                 pass
 
         else:
+            #TODO One hot encoding
+            #csvmanager 
             dataset_schema[set_dataset_column_schema_configuration_request.column].update({"datatype_selected": set_dataset_column_schema_configuration_request.datatype_selected})
 
         if set_dataset_column_schema_configuration_request.role_selected in [":none", ""]:

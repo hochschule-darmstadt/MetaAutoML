@@ -12,6 +12,7 @@
     <DebugType>Portable</DebugType>
   </PropertyGroup>
 
+  <PropertyGroup Condition=" '$(RunConfiguration)' == 'Kestrel' " />
   <ItemGroup>
     <Compile Remove="logs\**" />
     <Content Remove="logs\**" />
@@ -116,7 +117,7 @@
     <Folder Include="Themes\" />
   </ItemGroup>
   <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(BuildingInsideVisualStudio)' == 'true'">
-    <Exec Command="if exist &quot;$(ProjectDir)Logs\*.*&quot; del &quot;$(ProjectDir)Logs\*.*&quot; /q" />
+    <!--<Exec Command="if exist &quot;$(ProjectDir)Logs\*.*&quot; del &quot;$(ProjectDir)Logs\*.*&quot; /q" />-->
   </Target>
 
 </Project>
