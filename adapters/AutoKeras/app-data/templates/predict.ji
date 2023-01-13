@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 
 import tensorflow as tf
+from tensorflow import keras
 import autokeras as ak
 import os
 import glob
@@ -99,14 +100,21 @@ if __name__ == '__main__':
     elif config_json["configuration"]["task"] in [":image_classification",  ":image_regression"]:
         X, y = read_image_dataset(config_json)
 
-    with open(sys.path[0] + '/model_keras.p', 'rb') as file:
-        loaded_model = dill.load(file)
-    if config_json["configuration"]["task"] in [":text_classification", ":text_regression"]:
 
+    try:
+        loaded_model = keras.models.load_model(sys.path[0] + '/model_keras', custom_objects=ak.CUSTOM_OBJECTS)
+    except Exception:
+        with open(sys.path[0] + '/model_keras.p', 'rb') as file:
+            loaded_model = dill.load(file)
+
+
+
+
+    if config_json["configuration"]["task"] in [":text_classification", ":text_regression"]:
         predicted_y = loaded_model.predict(np.array(X))
-        #predicted_y = [np.round(y[0],0) for y in predicted_y]
+    elif config_json["configuration"]["task"] == ":time_series_forecasting":
+        predicted_y = loaded_model.predict(tf.expand_dims(X, -1))
     else:
         predicted_y = loaded_model.predict(X)
-        #predicted_y = [np.round(y[0],0) for y in predicted_y]
 
     pd.DataFrame(data=predicted_y, columns=["predicted"]).to_csv(save_path)
