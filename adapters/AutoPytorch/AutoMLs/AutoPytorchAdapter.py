@@ -13,15 +13,14 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 import pickle
 
 import pandas as pd
-from AbstractAdapter import AbstractAdapter
 from AdapterUtils import export_model, prepare_tabular_dataset, data_loader
 from autoPyTorch.api.tabular_classification import TabularClassificationTask
 from autoPyTorch.api.tabular_regression import TabularRegressionTask
 from JsonUtil import get_config_property
-from predict_time_sources import DataType, SplitMethod, feature_preparation
+from predict_time_sources import SplitMethod, feature_preparation
 
 
-class AutoPytorchAdapter(AbstractAdapter):
+class AutoPytorchAdapter:
     """
     Implementation of the AutoML functionality fo structured data a.k.a. tabular data
     """
@@ -34,25 +33,33 @@ class AutoPytorchAdapter(AbstractAdapter):
         1. Configuration JSON of type dictionary
         """
         # set either a runtime limit or an iter limit, preferring runtime over iterations.
-        
-        super().__init__(configuration)
-        
-        if self._configuration["runtime_constraints"]["runtime_limit"] > 0:
+
+        self._configuration = configuration
+        if self._configuration["configuration"]["runtime_limit"] > 0:
             self._time_limit = self._configuration["runtime_constraints"]["runtime_limit"]
             self._iter_limit = None
-        elif self._configuration["runtime_constraints"]["max_iter"] > 0:
+        elif self._configuration["configuration"]["max_iter"] > 0:
             self._time_limit = None
             self._iter_limit = self._configuration["runtime_constraints"]["max_iter"]
         else:
             self._time_limit = 30
             self._iter_limit = None
 
-        if self._configuration["metric"] == "" and self._configuration["task"] == ":tabular_classification":
+        # self._configuration["metric"] == "" and self._configuration["task"] == ":tabular_classification":
             # handle empty metric field, 'accuracy' should be the default metric parameter for AutoPytorch classification
-            self._configuration["metric"] = 'accuracy'
-        elif self._configuration["metric"] == "" and self._configuration["task"] == ":tabular_regression":
+            #self._configuration["metric"] = 'accuracy'
+        #elif self._configuration["metric"] == "" and self._configuration["task"] == ":tabular_regression":
             # handle empty metric field, 'r2' should be the default metric parameter for AutoPytorch regression
-            self._configuration["metric"] = 'r2'
+            #self._configuration["metric"] = 'r2'
+
+    def start(self):
+        """
+        Execute the ML task
+        """
+        if self._configuration["configuration"]["task"] == ":tabular_classification":
+            self.__tabular_classification()
+        elif self._configuration["configuration"]["task"] == ":tabular_regression":
+            self.__tabular_regression()
 
     def __tabular_classification(self):
         """
@@ -66,14 +73,14 @@ class AutoPytorchAdapter(AbstractAdapter):
             auto_cls.search(
                 X_train=X,
                 y_train=y,
-                optimize_metric=self._configuration["metric"],
+                #optimize_metric=self._configuration["metric"],
                 total_walltime_limit=self._time_limit*60
             )
         else:
             auto_cls.search(
                 X_train=X,
                 y_train=y,
-                optimize_metric=self._configuration["metric"],
+                #optimize_metric=self._configuration["metric"],
                 budget_type='epochs',
                 max_budget=self._iter_limit
             )
@@ -98,25 +105,16 @@ class AutoPytorchAdapter(AbstractAdapter):
             auto_reg.search(
                 X_train=X,
                 y_train=y,
-                optimize_metric=self._configuration["metric"],
+                #optimize_metric=self._configuration["metric"],
                 total_walltime_limit=self._time_limit
             )
         else:
             auto_reg.search(
                 X_train=X,
                 y_train=y,
-                optimize_metric=self._configuration["metric"],
+                #optimize_metric=self._configuration["metric"],
                 budget_type='epochs',
                 max_budget=self._iter_limit
             )
 
         export_model(auto_reg, self._configuration["result_folder_location"], "model_pytorch.p")
-
-    def start(self):
-        """
-        Execute the ML task
-        """
-        if self._configuration["task"] == ":tabular_classification":
-            self.__tabular_classification()
-        elif self._configuration["task"] == ":tabular_regression":
-            self.__tabular_regression()

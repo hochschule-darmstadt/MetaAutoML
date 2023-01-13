@@ -76,7 +76,7 @@ class AutoKerasAdapter:
         X_train, y_train, X_test, y_test = data_loader(self._configuration)
 
         clf = ak.ImageClassifier(overwrite=True,
-                                          max_trials=3,
+                                          max_trials=1,
                                 # metric=self._configuration['metric'],
                                 seed=42,
                                 directory=self._configuration["model_folder_location"])

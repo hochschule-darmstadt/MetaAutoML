@@ -5,33 +5,55 @@ import sys
 import pandas as pd
 import numpy as np
 
-from predict_time_sources import feature_preparation, DataType, SplitMethod
+from predict_time_sources import feature_preparation, SplitMethod
 
 
 if __name__ == '__main__':
     filepath = sys.argv[1]
-    configpath = sys.argv[2]
+    config_path = sys.argv[2]
+    save_path = sys.argv[3]
+    X = None
 
     with open(configpath) as file:
         config_json = json.load(file)
 
-    target = config_json["configuration"]["target"]["target"]
-    features = config_json["dataset_configuration"]["features"]
-    X = pd.read_csv(filepath).drop(target, axis=1, errors='ignore')
-    features.pop(target, None)
-    features = features.items()
+   config_json["dataset_configuration"] = json.loads(config_json["dataset_configuration"])
+    targets = []
+    for key in config_json["dataset_configuration"]["schema"]:
+        #Get target columns list
+        if config_json["dataset_configuration"]["schema"][key].get("role_selected", "") == ":target":
+            targets.append(key)
+    target = targets[0]
+    delimiters = {
+        "comma":        ",",
+        "semicolon":    ";",
+        "space":        " ",
+        "tab":          "\t",
+    }
+    configuration = {
+        "filepath_or_buffer": filepath,
+        "delimiter": delimiters[config_json['dataset_configuration']['file_configuration']['delimiter']],
+        "skiprows": (config_json['dataset_configuration']['file_configuration']['start_row']-1),
+        "decimal": config_json['dataset_configuration']['file_configuration']['decimal_character'],
+        "escapechar": config_json['dataset_configuration']['file_configuration']['escape_character'],
+        "encoding": config_json['dataset_configuration']['file_configuration']['encoding'],
+    }
+    if config_json['dataset_configuration']['file_configuration']['thousands_seperator'] != "":
+        configuration["thousands"] = config_json['dataset_configuration']['file_configuration']['thousands_seperator']
 
-    # split training set
-    if SplitMethod.SPLIT_METHOD_RANDOM.value == config_json["test_configuration"]["method"]:
-        X = X.sample(random_state=config_json["test_configuration"]["random_state"], frac=1)
-    else:
-        X = X.iloc[int(X.shape[0] * config_json["test_configuration"]["split_ratio"]):]
 
-    X = feature_preparation(X, features)
+    X = pd.read_csv(**configuration)
+
+    #Rename untitled columns to correct name
+    for column in X:
+        if re.match(r"Unnamed: [0-9]+", column):
+            X.rename(columns={column: f"Column{X.columns.get_loc(column)}"}, inplace=True)
+
+    X, y = feature_preparation(X, config_json["dataset_configuration"]["schema"].items(), config_json["dataset_configuration"]["file_configuration"]["datetime_format"], is_prediction=True)
 
 
     with open(sys.path[0] + '/model_pytorch.p', 'rb') as file:
-        automl = pickle.load(file)
+        automl = dill.load(file)
 
     predicted_y = automl.predict(X)
     predicted_y = np.reshape(predicted_y, (-1, 1))
