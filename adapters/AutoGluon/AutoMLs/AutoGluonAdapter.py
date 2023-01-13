@@ -2,6 +2,7 @@ import os
 
 from AdapterUtils import export_model, prepare_tabular_dataset, data_loader
 from autogluon.tabular import TabularDataset, TabularPredictor
+from autogluon.timeseries import TimeSeriesDataFrame, TimeSeriesPredictor
 from JsonUtil import get_config_property
 from AdapterUtils import read_tabular_dataset_training_data, prepare_tabular_dataset, export_model
 from AutoGluonServer import data_loader
@@ -63,6 +64,8 @@ class AutoGluonAdapter:
             self.__tabular_regression()
         elif self._configuration["configuration"]["task"] == ":image_classification":
             self.__image_classification()
+        elif self._configuration["configuration"]["task"] == ":time_series_forecasting":
+            self.__time_series_forecasting()
 
     def __tabular_classification(self):
         """Execute the tabular classification task and export the found model"""
@@ -70,8 +73,13 @@ class AutoGluonAdapter:
         X, y = prepare_tabular_dataset(self.df, self._configuration)
         data = X
         data[y.name] = y
+        classification_type = ""
+        if len(y.unique()) == 2:
+            classification_type = "binary"
+        else:
+            classification_type =  "multiclass"
         model = TabularPredictor(label=y.name,
-                                 problem_type="multiclass",
+                                 problem_type=classification_type,
                                  path=self._result_path).fit(
             data,
             time_limit=self._time_limit)
@@ -111,3 +119,27 @@ class AutoGluonAdapter:
             train ,
             #hyperparameters=set_hyperparameters ,
             time_limit=self._time_limit  )
+
+    def __time_series_forecasting(self):
+
+        self.df, test = data_loader(self._configuration)
+        X, y = prepare_tabular_dataset(self.df, self._configuration)
+        data = X
+        data[y.name] = y
+        timestamp_column = ""
+        #First get the datetime index column
+        for column, dt in self._configuration["dataset_configuration"]["schema"].items():
+            datatype = dt.get("datatype_selected", "")
+            if datatype == "":
+                datatype = dt["datatype_detected"]
+            if dt.get("role_selected", "") == ":index" and datatype == ":datetime":
+                timestamp_column = column
+                break
+
+        ts_dataframe = TimeSeriesDataFrame.from_data_frame(data, id_column=y.name, timestamp_column=timestamp_column)
+        model = TimeSeriesPredictor(label=y.name,
+                                 path=self._result_path).fit(
+            ts_dataframe,
+            time_limit=self._time_limit)
+        #Fit methode already saves the model
+

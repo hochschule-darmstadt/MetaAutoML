@@ -12,6 +12,7 @@ class SplitMethod(Enum):
 def feature_preparation(X, features, datetime_format, is_prediction=False):
     target = ""
     is_target_found = False
+    index_columns = []
     for column, dt in features:
         #During the prediction process no target column was read, so unnamed column names will be off by -1 index,
         #if they are located after the target column within the training set, their index must be adjusted
@@ -20,8 +21,8 @@ def feature_preparation(X, features, datetime_format, is_prediction=False):
             column_index = int(column_index[0])
             X.rename(columns={f"Column{column_index-1}": column}, inplace=True)
 
-        #Check if column is to be droped either its role is ignore or index
-        if dt.get("role_selected", "") == ":ignore" or dt.get("role_selected", "") == ":index":
+        #Check if column is to be droped, when its role is ignore
+        if dt.get("role_selected", "") == ":ignore":
             X.drop(column, axis=1, inplace=True)
             continue
         #Get column datatype
@@ -39,9 +40,9 @@ def feature_preparation(X, features, datetime_format, is_prediction=False):
         elif datatype == ":boolean":
             X[column] = X[column].astype('bool')
         elif datatype == ":integer":
-            X[column] = X[column].astype('int')
+            X[column] = X[column].astype('int64')
         elif datatype == ":float":
-            X[column] = X[column].astype('float')
+            X[column] = X[column].astype('float64')
         elif datatype == ":datetime":
             X[column] = pd.to_datetime(X[column], format=datetime_format)
         elif datatype == ":string":
@@ -52,10 +53,18 @@ def feature_preparation(X, features, datetime_format, is_prediction=False):
             target = column
             is_target_found = True
 
+        if dt.get("role_selected", "") == ":index":
+            index_columns.append(column)
+
+    #Handle target column appropriately depending on runtime
     if is_prediction == True:
         y = pd.Series()
     else:
         y = X[target]
         X.drop(target, axis=1, inplace=True)
+
+    if len(index_columns) > 0:
+        #Set index columns
+        X.set_index(index_columns, inplace=True)
 
     return X, y
