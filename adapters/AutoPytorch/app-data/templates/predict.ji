@@ -1,10 +1,10 @@
-import pickle
+import dill
 import json
 import sys
 
 import pandas as pd
 import numpy as np
-
+import re
 from predict_time_sources import feature_preparation, SplitMethod
 
 
@@ -14,10 +14,10 @@ if __name__ == '__main__':
     save_path = sys.argv[3]
     X = None
 
-    with open(configpath) as file:
+    with open(config_path) as file:
         config_json = json.load(file)
 
-   config_json["dataset_configuration"] = json.loads(config_json["dataset_configuration"])
+    config_json["dataset_configuration"] = json.loads(config_json["dataset_configuration"])
     targets = []
     for key in config_json["dataset_configuration"]["schema"]:
         #Get target columns list

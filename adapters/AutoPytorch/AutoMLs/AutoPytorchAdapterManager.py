@@ -19,7 +19,7 @@ class AutoPytorchAdapterManager(AdapterManager):
     def __init__(self) -> None:
         """Initialize a new AutokerasAdapterManager setting AutoML adapter specific variables
         """
-        super(AutoKerasAdapterManager, self).__init__()
+        super(AutoPytorchAdapterManager, self).__init__()
         self.__automl = None
         self.__loaded_training_id = None
         self._adapter_name = "autokeras"
