@@ -7,6 +7,8 @@ from StrategyController import StrategyController
 from Blackboard import Blackboard
 
 class DataPreparationStrategyController(IAbstractStrategy):
+    global_multi_fidelity_level = 1
+
     def register_rules(self):
         data_preparation_context = Context(
             type_resolver=type_resolver_from_dict({
@@ -35,12 +37,6 @@ class DataPreparationStrategyController(IAbstractStrategy):
             Rule("phase == 'preprocessing' and not (dataset_type == ':image') and not dataset_analysis['duplicate_rows'].is_empty", context=data_preparation_context),
             self.do_ignore_redundant_samples
         )
-        
-        self.register_rule(
-            'data_preparation.multi_fidelity_optimization',
-            Rule("phase == 'preprocessing'", context=data_preparation_context),
-            self.multi_fidelity_optimization
-        )
 
         self.register_rule(
             'data_preparation.split_large_datasets',
@@ -49,9 +45,9 @@ class DataPreparationStrategyController(IAbstractStrategy):
         )
 
         self.register_rule(
-            'data_preparation.data_encoding_for_categories',
-            Rule("phase == 'preprocessing' and ('\"DatatypeSelected\": \":categorical\"' in training_runtime['configuration']['datasetConfiguration'])", context=data_preparation_context),
-            self.do_data_encoding_for_categories
+            'data_preparation.multi_fidelity_optimization',
+            Rule("phase == 'preprocessing'", context=data_preparation_context),
+            self.multi_fidelity_optimization
         )
 
         self.register_rule(
@@ -69,14 +65,35 @@ class DataPreparationStrategyController(IAbstractStrategy):
         # Force enable this strategy to ensure preprocessing always finishes
         self.controller.enable_strategy('data_preparation.finish_preprocessing')
 
+    def multi_fidelity_callback(self, model_list):
+        model_list.sort(key=lambda model: model.get('test_score'))
+
+        relevant_auto_ml_solutions = []
+        relevant_auto_ml_libraries = []
+        for model in model_list[-3:]:
+            if model.get('status') == 'completed':
+                relevant_auto_ml_solutions.append(model.get('auto_ml_solution'))
+                relevant_auto_ml_libraries.append(model.get('ml_library'))
+
+        relevant_auto_ml_solutions = list(set(relevant_auto_ml_solutions))
+        relevant_auto_ml_libraries = list(set(relevant_auto_ml_libraries))
+        self.controller.get_request().configuration.selected_auto_ml_solutions = relevant_auto_ml_solutions
+        self.controller.get_request().configuration.selected_ml_libraries = relevant_auto_ml_libraries
+
+        self._log.info(f'do_finish_preprocessing: Finished data preparation, advancing to phase "running"..')
+        self.controller.set_phase('running')
+
+        return
+
     def multi_fidelity_optimization(self, state: dict, blackboard: Blackboard, controller: StrategyController):
-        # disable Strategy 
+        if self.global_multi_fidelity_level == 1:
+            self.global_multi_fidelity_level = 0
+        #disable Multi-Fidelity-Strategy
         controller.disable_strategy('data_preparation.multi_fidelity_optimization')
-        ##TODO
 
-        
-
-        #return { 'ignored_columns': ignored_columns }
+        #start new training
+        strategy_controller = StrategyController(controller.get_data_storage(), controller.get_request(), controller.get_explainable_lock(), multi_fidelity_callback=self.multi_fidelity_callback, multi_fidelity_level=1)
+        return
     
     def do_ignore_redundant_features(self, state: dict, blackboard: Blackboard, controller: StrategyController):
         duplicate_columns = state.get("dataset_analysis", {}).get("duplicate_columns", [])
@@ -147,33 +164,8 @@ class DataPreparationStrategyController(IAbstractStrategy):
         # Finished action (should only run once, therefore disable the strategy rule)
         controller.disable_strategy('data_preparation.split_large_datasets')
 
-    def do_data_encoding_for_categories(self, state: dict, blackboard: Blackboard, controller: StrategyController):
-        column_datatypes = json.loads(state.get("training_runtime", {}).get("configuration", {}).get("datasetConfiguration", str))["column_datatypes"]
-        encoded_columns = {}
-
-        agent: AdapterRuntimeManagerAgent = controller.get_blackboard().get_agent('training-runtime')
-        if not agent or not agent.get_adapter_runtime_manager():
-            raise RuntimeError('Could not access Adapter Runtime Manager Agent!')
-        dataset_configuration = json.loads(agent.get_adapter_runtime_manager().get_training_request().dataset_configuration)
-
-        dataset_configuration['encoded_columns'] = {}
-        for key, column_datatype in column_datatypes.items():
-            if column_datatype == 4:
-                self._log.info(f'do_data_encoding_for_categories: Add "{key}" to encoded_columns.')
-                encoded_columns[key] = []
-
-            dataset_configuration['encoded_columns'] = encoded_columns
-
-        training_request = agent.get_adapter_runtime_manager().get_training_request()
-        training_request.dataset_configuration = json.dumps(dataset_configuration)
-        agent.get_adapter_runtime_manager().set_training_request(training_request)
-
-        # Finished action (should only run once, therefore disable the strategy rule)
-        controller.disable_strategy('data_preparation.data_encoding_for_categories')
-
-        return { 'encoded_columns': encoded_columns }
-
     def do_finish_preprocessing(self, state: dict, blackboard: Blackboard, controller: StrategyController):
-        self._log.info(f'do_finish_preprocessing: Finished data preparation, advancing to phase "running"..')
-        controller.set_phase('running')
-        controller.disable_strategy('data_preparation.finish_preprocessing')
+        if self.global_multi_fidelity_level != 0:
+            self._log.info(f'do_finish_preprocessing: Finished data preparation, advancing to phase "running"..')
+            controller.set_phase('running')
+            controller.disable_strategy('data_preparation.finish_preprocessing')

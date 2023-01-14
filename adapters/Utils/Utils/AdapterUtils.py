@@ -20,6 +20,7 @@ from PIL import Image
 from AdapterBGRPC import *
 from typing import Tuple
 import re
+import random
 
 ######################################################################
 ## GRPC HELPER FUNCTIONS
@@ -364,6 +365,10 @@ def read_tabular_dataset_training_data(config: "StartAutoMlRequest") -> Tuple[pd
 
 
     data = pd.read_csv(**configuration)
+
+    if config['dataset_configuration']['multi_fidelity_level'] != 0:
+        data.sample(frac=0.1, replace=True, random_state=1)
+    
     #Rename untitled columns to correct name
     for column in data:
         if re.match(r"Unnamed: [0-9]+", column):
@@ -471,6 +476,10 @@ def read_image_dataset(config: "StartAutoMlRequest") -> Tuple[pd.DataFrame, pd.D
             files.append(glob.glob(os.path.join(data_dir, sub_folder_type, folder, "*.jp*g")))
 
         df_list =[]
+
+        if config['dataset_configuration']['multi_fidelity_level'] != 0:
+            df_list = random.choices(df_list, k=int(len(files)*0.1))
+
         for i in range(len(files)):
             df = pd.DataFrame()
             df["name"] = [x for x in files[i]]

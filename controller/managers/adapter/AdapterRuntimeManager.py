@@ -11,7 +11,7 @@ class AdapterRuntimeManager:
     """The AdapterRuntimeManager represent a single training session started by a user and manages it
     """
 
-    def __init__(self, data_storage: DataStorage, request: "CreateTrainingRequest", explainable_lock: ThreadLock) -> None:
+    def __init__(self, data_storage: DataStorage, request: "CreateTrainingRequest", explainable_lock: ThreadLock, multi_fidelity_callback = None, multi_fidelity_level = 0) -> None:
         """Initialize a new AdapterRuntimeManager instance
 
         Args:
@@ -24,6 +24,8 @@ class AdapterRuntimeManager:
         self.__data_storage: DataStorage = data_storage
         self.__request: "CreateTrainingRequest" = request
         self.__explainable_lock = explainable_lock
+        self.__multi_fidelity_callback = multi_fidelity_callback
+        self.__multi_fidelity_level = multi_fidelity_level
         self.__log = logging.getLogger('AdapterRuntimeManager')
         self.__log.setLevel(logging.getLevelName(os.getenv("SERVER_LOGGING_LEVEL")))
         self.__training_id = self.__create_training_record()
@@ -70,14 +72,11 @@ class AdapterRuntimeManager:
                     current_schema[key].pop("role_selected", None)
                 #Update selected datatype
                 selected_datatype = training_schema[key].get("DatatypeSelected", "")
-                #TODO wenn datatype = Kategorie -> onehotencoding
                 
                 if selected_datatype != "":
                     current_schema[key]["datatype_selected"] = selected_datatype
                 else:
                     current_schema[key].pop("datatype_selected", None)
-                if selected_datatype == ":categorical":
-                    pass
 
             if self.__request.save_schema == True:
                 self.__data_storage.update_dataset(self.__request.user_id, self.__request.dataset_id, {"schema": current_schema})
@@ -108,7 +107,8 @@ class AdapterRuntimeManager:
             },
             "dataset_configuration": {
                 "file_configuration": dataset["file_configuration"],
-                "schema": self.__build_dataset_schema()
+                "schema": self.__build_dataset_schema(),
+                "multi_fidelity_level": self.__multi_fidelity_level
             },
             "runtime_profile": {
                 "start_time": datetime.now(),
@@ -155,6 +155,9 @@ class AdapterRuntimeManager:
                 }
                 training_details["runtime_profile"]["end_time"] = datetime.datetime.now()
                 self.__data_storage.update_training(user_id, training_id, training_details)
+
+                if self.__multi_fidelity_level != 0:
+                    self.__multi_fidelity_callback(model_list)
             else:
                 self.__data_storage.update_training(user_id, training_id, {
                     "model_ids": training["model_ids"] + [model_id]

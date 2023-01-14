@@ -20,7 +20,7 @@ class StrategyController(object):
     """
     Strategy controller which supervises the blackboard.
     """, 
-    def __init__(self, data_storage:DataStorage, request: "CreateTrainingRequest", explainable_lock: ThreadLock, timer_interval: int = 1) -> None:
+    def __init__(self, data_storage:DataStorage, request: "CreateTrainingRequest", explainable_lock: ThreadLock, timer_interval: int = 1, multi_fidelity_callback = None, multi_fidelity_level = 0) -> None:
         self._log = logging.getLogger('StrategyController')
         self._log.setLevel(logging.getLevelName(os.getenv("BLACKBOARD_LOGGING_LEVEL")))
         self.__is_running = False
@@ -32,7 +32,7 @@ class StrategyController(object):
         self.__request: "CreateTrainingRequest" = request
         self.__explainable_lock = explainable_lock
         #Init training session
-        self.__adapter_runtime_manager = AdapterRuntimeManager(self.__data_storage, self.__request, self.__explainable_lock) 
+        self.__adapter_runtime_manager = AdapterRuntimeManager(self.__data_storage, self.__request, self.__explainable_lock, multi_fidelity_callback = multi_fidelity_callback, multi_fidelity_level = multi_fidelity_level) 
         #Init Agents  
         for adapter_manager in self.__adapter_runtime_manager.get_adapter_managers():
             AdapterManagerAgent(self.__blackboard, self, adapter_manager)
@@ -65,6 +65,30 @@ class StrategyController(object):
         self.on_event('phase_updated', self.__adapter_runtime_manager.blackboard_phase_update_handler)
         self.set_phase('preprocessing')
         self.start_timer()
+    
+    def get_explainable_lock(self) -> ThreadLock:
+        """get the __explainable_lock object of this session
+
+        Returns:
+            ThreadLock: The __explainable_lock object
+        """
+        return self.__explainable_lock
+
+    def get_data_storage(self) -> DataStorage:
+        """get the data_storage object of this session
+
+        Returns:
+            DataStorage: The data_storage object
+        """
+        return self.__data_storage
+
+    def get_request(self) -> "CreateTrainingRequest":
+        """get the request object of this session
+
+        Returns:
+            "CreateTrainingRequest": The request object
+        """
+        return self.__request
 
     def get_training_id(self) -> str:
         """get the training id of this session
