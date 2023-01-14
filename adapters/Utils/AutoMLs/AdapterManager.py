@@ -213,6 +213,14 @@ class AdapterManager(Thread):
 
             #load old dataset_configuration and save it to config json in case the dataset types have been changed in the
             #AutoKeras adapter for TextClassification
+
+            #For WSL users we need to adjust the path prefix for the dataset location to windows path
+            if get_config_property("local_execution") == "YES":
+                if get_config_property("running_in_wsl") == "YES":
+                    config_json["live_dataset_path"] = re.sub("[a-zA-Z]:/([A-Za-z0-9]+(/[A-Za-z0-9]+)+)/MetaAutoML", get_config_property("wsl_metaautoml_path"), config_json["live_dataset_path"])
+                    config_json["live_dataset_path"] = config_json["live_dataset_path"].replace("\\", "/")
+                    
+                    
             with open(job_file_location) as file:
                 config_json_old_dataset_configuation = json.load(file)
 
