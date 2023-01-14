@@ -62,4 +62,4 @@ if __name__ == '__main__':
     else:
         predicted_y = automl.predict(X)
     predicted_y = np.reshape(predicted_y, (-1, 1))
-    pd.DataFrame(data=predicted_y, columns=["predicted"]).to_csv(sys.path[0] +"/predictions.csv")
+    pd.DataFrame(data=predicted_y, columns=["predicted"]).to_csv(save_path)
