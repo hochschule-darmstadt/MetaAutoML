@@ -19,7 +19,7 @@ class AutoPytorchAdapterManager(AdapterManager):
     def __init__(self) -> None:
         """Initialize a new AutokerasAdapterManager setting AutoML adapter specific variables
         """
-        super(AutoKerasAdapterManager, self).__init__()
+        super(AutoPytorchAdapterManager, self).__init__()
         self.__automl = None
         self.__loaded_training_id = None
         self._adapter_name = "autokeras"
@@ -67,7 +67,16 @@ class AutoPytorchAdapterManager(AdapterManager):
                 self.__automl = dill.load(file)
             self._loaded_training_id = config["training_id"]
         # Get prediction probabilities and send them back.
-        probabilities = self.__automl.predict_proba(dataframe)
-        probabilities = probabilities.tolist()
+        if dataframe.shape[0] == 1:
+            #AutoPytorch has an issue when only one row is passed for a prediction, to avoid this we duplicate the single entry and predict it twice
+            #WHile only returning the probabilities for one.
+            #Note we take a slight probabilities difference between both prediction but it is in the 0.xxxx1 range
+            dataframe = pd.concat([dataframe]*2, ignore_index=True) # Ignores the index
+            probabilities = self.__automl.predict_proba(dataframe, batch_size=1)
+            probabilities = probabilities.tolist()
+            probabilities = [probabilities[0]]
+        else:
+            probabilities = self.__automl.predict_proba(dataframe)
+            probabilities = probabilities.tolist()
         probabilities = json.dumps(probabilities)
         return probabilities
