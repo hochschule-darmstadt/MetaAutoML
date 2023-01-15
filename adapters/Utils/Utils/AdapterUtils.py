@@ -70,7 +70,7 @@ def data_loader(config: "StartAutoMlRequest") -> Any:
 
     Returns:
         Any: Depending on the dataset type: CSV data: tuple[DataFrame (Train), DataFrame (Test)], image data: tuple[DataFrame (X_train), DataFrame (y_train), DataFrame (X_test), DataFrame (y_test)]
-    """
+    """    
 
     if config["configuration"]["task"] in [":image_classification", ":image_regression"]:
         return read_image_dataset(config)
@@ -305,6 +305,17 @@ def setup_run_environment(request: "StartAutoMlRequest", adapter_name: str) -> "
                                         request.training_id,
                                         get_config_property("export-folder-name"))
 
+    #For WSL users we need to adjust the path prefix for the dataset location to windows path
+    if get_config_property("local_execution") == "YES":
+        if get_config_property("running_in_wsl") == "YES":
+            request.dataset_path = re.sub("[a-zA-Z]:/([A-Za-z0-9]+(/[A-Za-z0-9]+)+)/MetaAutoML", get_config_property("wsl_metaautoml_path"), request.dataset_path)
+            request.dataset_path = request.dataset_path.replace("\\", "/")
+            job_folder_location = job_folder_location.replace("\\", "/")
+            model_folder_location = model_folder_location.replace("\\", "/")
+            export_folder_location = export_folder_location.replace("\\", "/")
+            result_folder_location = result_folder_location.replace("\\", "/")
+            controller_export_folder_location = controller_export_folder_location.replace("\\", "/")
+    
     request.job_folder_location = job_folder_location
     request.model_folder_location = model_folder_location
     request.export_folder_location = export_folder_location

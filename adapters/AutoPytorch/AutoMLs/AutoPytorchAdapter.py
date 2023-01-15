@@ -1,6 +1,7 @@
 import os
 import tempfile as tmp
 import warnings
+import re
 
 os.environ['JOBLIB_TEMP_FOLDER'] = tmp.gettempdir()
 os.environ['OMP_NUM_THREADS'] = '1'
@@ -35,12 +36,14 @@ class AutoPytorchAdapter:
         # set either a runtime limit or an iter limit, preferring runtime over iterations.
 
         self._configuration = configuration
+
+
         if self._configuration["configuration"]["runtime_limit"] > 0:
-            self._time_limit = self._configuration["runtime_constraints"]["runtime_limit"]
+            self._time_limit = self._configuration["configuration"]["runtime_limit"]
             self._iter_limit = None
         elif self._configuration["configuration"]["max_iter"] > 0:
             self._time_limit = None
-            self._iter_limit = self._configuration["runtime_constraints"]["max_iter"]
+            self._iter_limit = self._configuration["configuration"]["max_iter"]
         else:
             self._time_limit = 30
             self._iter_limit = None
@@ -67,20 +70,20 @@ class AutoPytorchAdapter:
         """
         self.df, test = data_loader(self._configuration)
         X, y = prepare_tabular_dataset(self.df, self._configuration)
-
-        auto_cls = TabularClassificationTask()
+    
+        auto_cls = TabularClassificationTask(temporary_directory=self._configuration["model_folder_location"] + "/tmp", output_directory=self._configuration["model_folder_location"] + "/output", delete_output_folder_after_terminate=False, delete_tmp_folder_after_terminate=False)
         if self._time_limit is not None:
             auto_cls.search(
                 X_train=X,
                 y_train=y,
-                #optimize_metric=self._configuration["metric"],
+                optimize_metric='accuracy',
                 total_walltime_limit=self._time_limit*60
             )
         else:
             auto_cls.search(
                 X_train=X,
                 y_train=y,
-                #optimize_metric=self._configuration["metric"],
+                optimize_metric='accuracy',
                 budget_type='epochs',
                 max_budget=self._iter_limit
             )
@@ -105,14 +108,14 @@ class AutoPytorchAdapter:
             auto_reg.search(
                 X_train=X,
                 y_train=y,
-                #optimize_metric=self._configuration["metric"],
+                optimize_metric='root_mean_squared_error',
                 total_walltime_limit=self._time_limit
             )
         else:
             auto_reg.search(
                 X_train=X,
                 y_train=y,
-                #optimize_metric=self._configuration["metric"],
+                optimize_metric='root_mean_squared_error',
                 budget_type='epochs',
                 max_budget=self._iter_limit
             )
