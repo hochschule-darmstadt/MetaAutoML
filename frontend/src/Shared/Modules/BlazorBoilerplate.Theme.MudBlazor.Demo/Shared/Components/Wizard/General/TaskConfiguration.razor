@@ -1,4 +1,4 @@
-@inject IStringLocalizer<Global> L
+﻿@inject IStringLocalizer<Global> L
 @inject IApiClient apiClient
 @inject IViewNotifier viewNotifier
 @using Newtonsoft.Json
@@ -51,7 +51,7 @@
     @if (((Dataset.Dataset.Type.ID == ":tabular") || (Dataset.Dataset.Type.ID == ":text") || (Dataset.Dataset.Type.ID == ":time_series")) || (Dataset.Dataset.Type.ID == ":time_series_longitudinal") && (!string.IsNullOrEmpty(StartTrainingDto.Configuration.Task)))
 
     {
-        <MudSelect Label="@L["Target"]" T="string" ValueChanged="@OnTargetChanged">
+        <MudSelect Label="@L["Target"]" T="string" @bind-SelectedValues="SelectedTargets" MultiSelection="true">
             @if (_columnNames != null)
             {
                 @foreach (var column in _columnNames)
@@ -156,6 +156,21 @@
         _intersector = new ParameterIntersector(() => _availableParameters, _autoMlSolutionsViewModel.SelectedIds.Count);
     }
 
+    public IEnumerable<string> SelectedTargets
+    {
+        get
+        {
+            return _selectedTargets;
+        }
+        set
+        {
+            _selectedTargets = value;
+            OnTargetChanged((HashSet<string>)_selectedTargets);
+        }
+    }
+
+    private IEnumerable<string> _selectedTargets;
+
     protected async override void OnInitialized()
     {
         base.OnInitialized();
@@ -166,9 +181,11 @@
         await LoadData();
     }
 
-    private void OnRuntimeValueChanged(int e)
+    private async void OnRuntimeValueChanged(int e)
     {
         StartTrainingDto.Configuration.RuntimeLimit = e;
+
+        await OnMlLibrarySelectionChanged();
     }
 
     private async void UpdateParemetersInRequest()
@@ -192,14 +209,19 @@
 
         if ((Dataset.Dataset.Type.ID == ":tabular") || (Dataset.Dataset.Type.ID == ":text") || (Dataset.Dataset.Type.ID == ":time_series") || (Dataset.Dataset.Type.ID == ":time_series_longitudinal"))
         {
-            foreach (KeyValuePair<string, dynamic> pair in StartTrainingDto.DatasetConfiguration["column_datatypes"])
+            List<string> targets = new List<string>();
+            foreach (KeyValuePair<string, ColumnSchemaDto> pair in StartTrainingDto.Schema)
             {
-                // TODO: Document what this magic number means and extract it into a constant
-                if ((int)pair.Value != 7)
+                if (string.IsNullOrEmpty(pair.Value.RoleSelected.ID) || (pair.Value.RoleSelected.ID != ":ignore") && (pair.Value.RoleSelected.ID != ":index"))
                 {
                     _columnNames.Add(pair.Key);
                 }
+                if (pair.Value.RoleSelected.ID == ":target")
+                {
+                    targets.Add(pair.Key);
+                }
             }
+            SelectedTargets = new HashSet<string>(targets);
         }
         StartTrainingDto.Configuration.RuntimeLimit = 3;
         StartTrainingDto.Configuration.Metric = ":accuracy";
@@ -337,7 +359,8 @@
         {
             Dictionary<string, string> dictionary = new Dictionary<string, string>
             {
-                { "task", StartTrainingDto.Configuration.Task }
+                { "task", StartTrainingDto.Configuration.Task },
+                { "runtimeLimit", StartTrainingDto.Configuration.RuntimeLimit.ToString() }
             };
 
             List<string> libraries = _mlLibsViewModel.SelectedIds.ToList();
@@ -355,17 +378,23 @@
                 _autoMlSolutionsViewModel.SetAvailableChips(apiResponse.Result.AutoMlSolutions.Select(ConvertObjectInfoToChip))
             );
 
-            GetAvailableStrategiesRequestDto availableStrategiesRequest = new GetAvailableStrategiesRequestDto { Configuration = dictionary };
-            var availableStrategiesResponse = await apiClient.GetAvailableStrategies(availableStrategiesRequest);
-
-            HandleApiResponseWrapper(availableStrategiesResponse, () =>
-                _strategiesViewModel.SetAvailableChips(availableStrategiesResponse.Result.Strategies.Select(s => (s.Id, s.Title, s.Description)))
-            );
+            await UpdateAvailableStrategies(dictionary);
         }
         catch (Exception ex)
         {
             viewNotifier.Show(ex.GetBaseException().Message, ViewNotifierType.Error, L["Operation Failed"]);
         }
+    }
+
+    private async Task UpdateAvailableStrategies(Dictionary<string, string> dictionary)
+    {
+        int runtime_limit = StartTrainingDto.Configuration.RuntimeLimit;
+        GetAvailableStrategiesRequestDto availableStrategiesRequest = new GetAvailableStrategiesRequestDto { Configuration = dictionary, DatasetId = Dataset.Dataset.Id };
+        var availableStrategiesResponse = await apiClient.GetAvailableStrategies(availableStrategiesRequest);
+
+        HandleApiResponseWrapper(availableStrategiesResponse, () =>
+            _strategiesViewModel.SetAvailableChips(availableStrategiesResponse.Result.Strategies.Select(s => (s.Id, s.Title, s.Description)))
+        );
     }
 
     private void HandleApiResponseWrapper<T>(ApiResponseDto<T> apiResponse, Action successAction, string errorMessageKey = "Operation Failed", string successMessageKey = "Operation Successful")
@@ -396,9 +425,23 @@
         return UpdateStartTrainingDto();
     }
 
-    private async void OnTargetChanged(string value)
+    private async void OnTargetChanged(HashSet<string> values)
     {
-        StartTrainingDto.Configuration.Target = value;
+        //We need to update the schema configuration with appropriated target values
+        foreach (var item in StartTrainingDto.Schema)
+        {
+            if (values.Contains(item.Key))
+            {
+                item.Value.RoleSelected.ID = ":target";
+            }
+            else
+            {
+                if ((!string.IsNullOrEmpty(item.Value.RoleSelected.ID)) && (item.Value.RoleSelected.ID == ":target"))
+                {
+                    item.Value.RoleSelected.ID = null;
+                }
+            }
+        }
         await UpdateStartTrainingDto();
     }
 

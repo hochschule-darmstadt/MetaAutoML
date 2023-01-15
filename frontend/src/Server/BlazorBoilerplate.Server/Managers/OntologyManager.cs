@@ -104,6 +104,7 @@ namespace BlazorBoilerplate.Server.Managers
             try
             {
                 requestGrpc.UserId = username;
+                requestGrpc.DatasetId = request.DatasetId;
                 requestGrpc.Configuration.Add(request.Configuration);
                 var reply = _client.GetAvailableStrategies(requestGrpc);
                 response.Strategies = new List<StrategyControllerStrategyDto>();

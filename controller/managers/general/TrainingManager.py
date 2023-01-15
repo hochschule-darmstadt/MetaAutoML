@@ -63,39 +63,7 @@ class TrainingManager:
         #   frontend sends dataset name ("titanic_train_1.csv"),
         #   but datasets on disk are saved as dataset_id ("629e323a9290ff0cf5a5d4a9")
        # create_training_request.dataset = dataset_filename
-
-        self.__log.debug(f"create_training: generating training details")
-        config = {
-            "dataset_id": str(dataset["_id"]),
-            "model_ids": [],
-            "status": "busy",
-            "configuration": {
-                "task": create_training_request.configuration.task,
-                "target": create_training_request.configuration.target,
-                "enabled_strategies": create_training_request.configuration.enabled_strategies,
-                "runtime_limit": create_training_request.configuration.runtime_limit,
-                "metric": create_training_request.configuration.metric,
-                "selected_auto_ml_solutions": create_training_request.configuration.selected_auto_ml_solutions,
-                "selected_ml_libraries": create_training_request.configuration.selected_ml_libraries,
-                "parameters": {iri: {"values": value.values} for iri, value in create_training_request.configuration.parameters.items()}
-            },
-            "dataset_configuration": {
-                "column_datatypes": json.loads(create_training_request.dataset_configuration)["column_datatypes"],
-                "file_configuration": dataset["file_configuration"]
-            },
-            "runtime_profile": {
-                "start_time": datetime.datetime.now(),
-                "events": [],
-                "end_time": datetime.datetime.now()
-            },
-            "lifecycle_state": "active"
-        }
-
-        training_id = self.__data_storage.create_training(create_training_request.user_id, config)
-        self.__log.debug(f"create_training: inserted new training: {training_id}")
-        self.__data_storage.update_dataset(create_training_request.user_id, create_training_request.dataset_id, { "training_ids": dataset["training_ids"] + [training_id] })
-        self.__adapter_runtime_scheduler.create_new_training(create_training_request, training_id, dataset)
-        response.training_id = training_id
+        response.training_id = self.__adapter_runtime_scheduler.create_new_training(create_training_request)
         return response
 
     def __training_object_rpc_object(self, user_id: str, training: dict) -> Training:
@@ -151,7 +119,6 @@ class TrainingManager:
 
             training_configuration = Configuration()
             training_configuration.task = training["configuration"]["task"]
-            training_configuration.target = training["configuration"]["target"]
             training_configuration.enabled_strategies = training["configuration"]["enabled_strategies"]
             training_configuration.runtime_limit = training["configuration"]["runtime_limit"]
             training_configuration.metric = training["configuration"]["metric"]

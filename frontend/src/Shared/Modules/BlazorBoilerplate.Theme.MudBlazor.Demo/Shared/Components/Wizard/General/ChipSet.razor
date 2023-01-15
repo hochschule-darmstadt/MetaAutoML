@@ -1,6 +1,7 @@
 @if (ViewModel.AvailableChips?.Any() ?? false)
 {
     <MudText Typo="Typo.subtitle2">@Label</MudText>
+
     <MudChipSet Filter="true" MultiSelection="true" SelectedValues="SelectedValues">
         @foreach (var chip in ViewModel.AvailableChips)
         {
@@ -19,7 +20,8 @@
 }
 else
 {
-    <DataLoaderSpinner />
+    <MudText Typo="Typo.subtitle2">@Label</MudText>
+    <MudText Typo="Typo.subtitle2">-</MudText>
 }
 
 @code
@@ -60,8 +62,8 @@ else
         /// List of selected elements in the ChipSet.
         /// </summary>
         /// <value></value>
-        public IEnumerable<string> SelectedIds => AvailableChips.Where(c => c.IsSelected).Select(c => c.Id); 
-        
+        public IEnumerable<string> SelectedIds => AvailableChips.Where(c => c.IsSelected).Select(c => c.Id);
+
 
         /// <summary>
         /// Updates the collection of available chips and adapt the selected ids accordingly.

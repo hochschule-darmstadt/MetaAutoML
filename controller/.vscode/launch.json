@@ -32,6 +32,8 @@
                 "ALPHAD3M_SERVICE_PORT": "50060",
                 "MCFLY_SERVICE_HOST": "localhost",
                 "MCFLY_SERVICE_PORT": "50061",
+                "EVALML_SERVICE_HOST": "localhost",
+                "EVALML_SERVICE_PORT": "50062",
                 "MONGO_DB_DEBUG": "YES",                        //Use the locally installed MongoDB
                 "MONGO_DB_DOCKER_DEBUG": "NO",                  //Use the development docker-compose MongoDB
                 "MONGO_CLUSTER": "NO",                          //Use the MongoDB inside the cluster
@@ -72,6 +74,8 @@
                 "ALPHAD3M_SERVICE_PORT": "50060",
                 "MCFLY_SERVICE_HOST": "localhost",
                 "MCFLY_SERVICE_PORT": "50061",
+                "EVALML_SERVICE_HOST": "localhost",
+                "EVALML_SERVICE_PORT": "50062",
                 "MONGO_DB_DEBUG": "NO",                         //Use the locally installed MongoDB
                 "MONGO_DB_DOCKER_DEBUG": "YES",                 //Use the development docker-compose MongoDB
                 "MONGO_CLUSTER": "NO",                          //Use the MongoDB inside the cluster

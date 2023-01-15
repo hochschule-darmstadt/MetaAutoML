@@ -1,7 +1,7 @@
-FROM --platform=linux/amd64 python:3.7.11-slim-buster AS base
+FROM --platform=linux/amd64 python:3.9.11-slim-buster AS base
 EXPOSE 50052
 
-RUN apt-get update && apt-get install -y git 
+RUN apt-get update && apt-get install -y git
 
 COPY ./Mcfly/requirements.txt .
 # Install dependencies

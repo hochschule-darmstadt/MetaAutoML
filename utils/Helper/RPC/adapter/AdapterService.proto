@@ -46,39 +46,47 @@ message StartAutoMlRequest {
     */
     StartAutoMlConfiguration configuration = 5;
     /*
-      The current file configuration used to open the dataset as a JSON string
+      The current dataset configuration used to open the dataset and column schema for tabular datasets as a JSON string
       example: '{
-      "use_header": true,
-      "start_row": 1,
-      "delimiter": "comma",
-      "escape_character": "\\",
-      "decimal_character": "."
+		"file_configuration": {
+			"use_header": true,
+			"start_row": 1,
+			"delimiter": "semicolon",
+			"escape_character": "\\",
+			"decimal_character": ".",
+			"encoding": "ascii",
+			"thousands_seperator": "",
+			"datetime_format": "%d/%m/%Y %H.%M.%S"
+		},
+		"schema": {
+			"DateTime": {
+				"datatype_detected": ":string",
+				"datatypes_compatible": [":string", ":categorical", ":datetime"],
+				"roles_compatible": [":target", ":ignore", ":index"],
+				"datatype_selected": ":datetime",
+				"role_selected": ":index"
+			}
     }'
     */
     string datasetConfiguration = 6;
 }
 
 message StartAutoMlConfiguration {
-  /*
-    The selected ML task set during the wizard configuration
-    example: ":tabular_classification"
-  */
-  string task = 1;
-  /*
-    The dataset target, if required by ML task set during the wizard configuration
-    example: "Survived"
-  */
-  string target = 2;
-  /*
-    The maximum amount of time in minute the training can run before cancelation set during the wizard configuration
-    example: 5
-  */
-  int32 runtimeLimit = 4;
-  /*
-    The ML metric selected during the wizard configuration
-    example: ":accuracy"
-  */
-  string metric = 5;
+    /*
+      The selected ML task set during the wizard configuration
+      example: ":tabular_classification"
+    */
+    string task = 1;
+    /*
+      The maximum amount of time in minute the training can run before cancelation set during the wizard configuration
+      example: 5
+    */
+    int32 runtimeLimit = 2;
+    /*
+      The ML metric selected during the wizard configuration
+      example: ":accuracy"
+    */
+    string metric = 3;
   /*
     Map of additional parameters
     examples:
@@ -88,7 +96,7 @@ message StartAutoMlConfiguration {
       ":some_int": { "values": ["17"]}
     }
   */
-  map<string, DynamicParameterValue> parameters = 6;
+  map<string, DynamicParameterValue> parameters = 4;
 }
 
 message StartAutoMlResponse {

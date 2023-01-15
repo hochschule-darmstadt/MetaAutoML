@@ -1,5 +1,3 @@
-
-from AdapterManagerAgent import AdapterManagerAgent
 from ControllerBGRPC import *
 import json, logging, os, datetime
 from threading import *
@@ -15,7 +13,7 @@ class AdapterManager(Thread):
         Thread (_type_): _description_
     """
 
-    def __init__(self, data_storage: DataStorage, request: CreateTrainingRequest, automl:str, training_id: str, dataset, host: str, port: int, blackboard, strategy_controller, adapter_finished_callback) -> None:
+    def __init__(self, data_storage: DataStorage, request: CreateTrainingRequest, automl:str, training_id: str, dataset, host: str, port: int, adapter_finished_callback) -> None:
         """Initialize a new AdapterManager
 
         Args:
@@ -49,11 +47,12 @@ class AdapterManager(Thread):
         self.__prediction_time = 0
         self.__ml_model_type = ""
         self.__ml_library = ""
-        self.__blackboard = blackboard
-        self.__strategy_controller = strategy_controller
         self.__model_id = self.__create_new_model_entry()
 
-        self.__adapter_agent = AdapterManagerAgent(self.__blackboard, self.__strategy_controller, self)
+    def set_request(self, request: "CreateTrainingRequest"):
+        """Set the training request object
+        """
+        self.__request = request
 
     def get_automl_name(self) -> str:
         """Get the AutoML adapter name
@@ -126,7 +125,6 @@ class AdapterManager(Thread):
 
         configuration = StartAutoMlConfiguration()
         configuration.task = self.__request.configuration.task
-        configuration.target = self.__request.configuration.target
         configuration.runtime_limit = self.__request.configuration.runtime_limit
         configuration.metric = self.__request.configuration.metric
         configuration.parameters = self.__request.configuration.parameters
@@ -238,7 +236,8 @@ class AdapterManager(Thread):
         Returns:
             dict: AutoML explanation configuration
         """
-        return {
+        found, training = self.__data_storage.get_training(self.__request.user_id, self.__training_id)
+        test_json = {
             "training_id": self.__training_id,
             "user_id": self.__request.user_id,
             "dataset_id": str(self.__dataset["_id"]),
@@ -246,12 +245,10 @@ class AdapterManager(Thread):
                 "task": self.__request.configuration.task,
                 "target": self.__request.configuration.target
             },
-            "dataset_configuration": {
-                "column_datatypes": json.loads(self.__request.dataset_configuration)["column_datatypes"],
-                "file_configuration": self.__dataset["file_configuration"],
-            },
+            "dataset_configuration": json.dumps(training["dataset_configuration"]),
             "dataset_path": self.__dataset["path"]
         }
+        return test_json
 
 
     def explain_model(self, data):

@@ -88,9 +88,15 @@ class StartAutoMlRequest(betterproto.Message):
 
     dataset_configuration: str = betterproto.string_field(6)
     """
-    The current file configuration used to open the dataset as a JSON
-    stringexample: '{"use_header": true,"start_row": 1,"delimiter":
-    "comma","escape_character": "\\","decimal_character": "."}'
+    The current dataset configuration used to open the dataset and column
+    schema for tabular datasets as a JSON stringexample:
+    '{"file_configuration": {"use_header": true,"start_row": 1,"delimiter":
+    "semicolon","escape_character": "\\","decimal_character": ".","encoding":
+    "ascii","thousands_seperator": "","datetime_format": "%d/%m/%Y
+    %H.%M.%S"},"schema": {"DateTime": {"datatype_detected":
+    ":string","datatypes_compatible": [":string", ":categorical",
+    ":datetime"],"roles_compatible": [":target", ":ignore",
+    ":index"],"datatype_selected": ":datetime","role_selected": ":index"}}'
     """
 
 
@@ -102,25 +108,19 @@ class StartAutoMlConfiguration(betterproto.Message):
     ":tabular_classification"
     """
 
-    target: str = betterproto.string_field(2)
-    """
-    The dataset target, if required by ML task set during the wizard
-    configurationexample: "Survived"
-    """
-
-    runtime_limit: int = betterproto.int32_field(4)
+    runtime_limit: int = betterproto.int32_field(2)
     """
     The maximum amount of time in minute the training can run before
     cancelation set during the wizard configurationexample: 5
     """
 
-    metric: str = betterproto.string_field(5)
+    metric: str = betterproto.string_field(3)
     """
     The ML metric selected during the wizard configurationexample: ":accuracy"
     """
 
     parameters: Dict[str, "DynamicParameterValue"] = betterproto.map_field(
-        6, betterproto.TYPE_STRING, betterproto.TYPE_MESSAGE
+        4, betterproto.TYPE_STRING, betterproto.TYPE_MESSAGE
     )
     """
     Map of additional parametersexamples:{":use_approach": { "values":

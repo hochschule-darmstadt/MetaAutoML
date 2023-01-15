@@ -1,2 +1,2 @@
-autokeras==1.0.15
-tensorflow==2.5.0
+autoPyTorch==0.2.1
+autoPyTorch[forecasting]==0.2.1
