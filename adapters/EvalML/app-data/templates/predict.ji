@@ -1,11 +1,14 @@
 import sys
 import dill
 import json
-from predict_time_sources import feature_preparation, DataType, SplitMethod
+from predict_time_sources import feature_preparation, SplitMethod
 
 import pandas as pd
 import numpy as np
-from flaml import AutoML
+import evalml
+from evalml import AutoMLSearch
+import re
+
 
 if __name__ == '__main__':
     filepath = sys.argv[1]
@@ -17,27 +20,47 @@ if __name__ == '__main__':
         config_json = json.load(file)
 
     config_json["dataset_configuration"] = json.loads(config_json["dataset_configuration"])
-    target = config_json["configuration"]["target"]
-    features = config_json["dataset_configuration"]["column_datatypes"]
-    features.pop(target, None)
-    features = features.items()
+    targets = []
+    for key in config_json["dataset_configuration"]["schema"]:
+        #Get target columns list
+        if config_json["dataset_configuration"]["schema"][key].get("role_selected", "") == ":target":
+            targets.append(key)
+    target = targets[0]
+
     delimiters = {
             "comma":        ",",
             "semicolon":    ";",
             "space":        " ",
             "tab":          "\t",
         }
+    configuration = {
+        "filepath_or_buffer": filepath,
+        "delimiter": delimiters[config_json['dataset_configuration']['file_configuration']['delimiter']],
+        "skiprows": (config_json['dataset_configuration']['file_configuration']['start_row']-1),
+        "decimal": config_json['dataset_configuration']['file_configuration']['decimal_character'],
+        "escapechar": config_json['dataset_configuration']['file_configuration']['escape_character'],
+        "encoding": config_json['dataset_configuration']['file_configuration']['encoding'],
+    }
+    if config_json['dataset_configuration']['file_configuration']['thousands_seperator'] != "":
+        configuration["thousands"] = config_json['dataset_configuration']['file_configuration']['thousands_seperator']
 
-    X = pd.read_csv(filepath, delimiter=delimiters[config_json["dataset_configuration"]['file_configuration']['delimiter']], escapechar=config_json["dataset_configuration"]['file_configuration']['escape_character'], decimal=config_json["dataset_configuration"]['file_configuration']['decimal_character']).drop(target, axis=1, errors='ignore')
+    X = pd.read_csv(**configuration)
+    #Rename untitled columns to correct name
+    for column in X:
+        if re.match(r"Unnamed: [0-9]+", column):
+            X.rename(columns={column: f"Column{X.columns.get_loc(column)}"}, inplace=True)
 
     # split training set
     X = X.iloc[:]
 
-    X = feature_preparation(X, features)
+    X, y = feature_preparation(X, config_json["dataset_configuration"]["schema"].items(), config_json["dataset_configuration"]["file_configuration"]["datetime_format"], is_prediction=True)
 
-    with open(sys.path[0] + '/model_flaml.p', 'rb') as file:
-        automl2 = dill.load(file)
+    with open(sys.path[0] + '/evalml.p', 'rb') as file:
+        loaded_model = dill.load(file)
 
-    predicted_y = automl2.predict(X)
-    predicted_y = np.reshape(predicted_y, (-1, 1))
-    pd.DataFrame(data=predicted_y, columns=["predicted"]).to_csv(save_path)
+    print(type(X))
+    predicted_y = loaded_model.predict(X)
+
+    df = (predicted_y.to_frame())
+    df.columns = [ 'predicted']
+    df.to_csv(save_path)

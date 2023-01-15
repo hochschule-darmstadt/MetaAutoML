@@ -61,7 +61,8 @@ class FLAMLAdapterManager(AdapterManager):
                 self.__automl = dill.load(file)
             self._loaded_training_id = config["training_id"]
         # Get prediction probabilities and send them back.
-        probabilities = json.dumps(self.__automl.predict_proba(dataframe).tolist())
+        probabilities = self.__automl.predict_proba(dataframe)
+        probabilities = probabilities.tolist()
+        probabilities = json.dumps(probabilities)
         return probabilities
 
-    

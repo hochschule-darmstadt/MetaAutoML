@@ -1,22 +1,17 @@
-
-from enum import auto
-from AdapterRuntimeManagerAgent import AdapterRuntimeManagerAgent
-from DataAnalysisAgent import DataAnalysisAgent
 from DataStorage import DataStorage
-import logging, os
+import logging, os, json, datetime
 from ControllerBGRPC import *
 from AdapterManager import AdapterManager
-import Blackboard
-import StrategyController
 from ExplainableAIManager import ExplainableAIManager
 from ThreadLock import ThreadLock
+import json
 
 
 class AdapterRuntimeManager:
     """The AdapterRuntimeManager represent a single training session started by a user and manages it
     """
 
-    def __init__(self, data_storage: DataStorage, request: "CreateTrainingRequest", training_id: str, dataset, explainable_lock: ThreadLock) -> None:
+    def __init__(self, data_storage: DataStorage, request: "CreateTrainingRequest", explainable_lock: ThreadLock) -> None:
         """Initialize a new AdapterRuntimeManager instance
 
         Args:
@@ -28,11 +23,10 @@ class AdapterRuntimeManager:
         """
         self.__data_storage: DataStorage = data_storage
         self.__request: "CreateTrainingRequest" = request
-        self.__training_id = training_id
-        self.__dataset = dataset
         self.__explainable_lock = explainable_lock
         self.__log = logging.getLogger('AdapterRuntimeManager')
         self.__log.setLevel(logging.getLevelName(os.getenv("SERVER_LOGGING_LEVEL")))
+        self.__training_id = self.__create_training_record()
         self.__automl_addresses = {
             ":autokeras":       ["AUTOKERAS_SERVICE_HOST", "AUTOKERAS_SERVICE_PORT"],
             ":flaml":           ["FLAML_SERVICE_HOST",     "FLAML_SERVICE_PORT"],
@@ -43,13 +37,93 @@ class AdapterRuntimeManager:
             ":mljar":           ["MLJAR_SERVICE_HOST",     "MLJAR_SERVICE_PORT"],
             ":alphad3m":        ["ALPHAD3M_SERVICE_HOST",  "ALPHAD3M_SERVICE_PORT"],
             ":mcfly":           ["MCFLY_SERVICE_HOST", "MCFLY_SERVICE_PORT"],
+            ":evalml":          ["EVALML_SERVICE_HOST", "EVALML_SERVICE_PORT"],
         }
         self.__adapters: list[AdapterManager] = []
-        self.__blackboard = Blackboard.Blackboard()
-        self.__strategy_controller = StrategyController.StrategyController(self.__blackboard, self, self.__data_storage)
-        AdapterRuntimeManagerAgent(self.__blackboard, self.__strategy_controller, self)
-        DataAnalysisAgent(self.__blackboard, self.__strategy_controller, self.__dataset)
+        self.__log.debug("start_new_training: creating new blackboard and strategy controller for training")
+        for automl in self.__request.configuration.selected_auto_ml_solutions:
+            self.__log.debug(f"start_new_training: getting adapter endpoint information for automl {automl}")
+            host, port = map(os.getenv, self.__automl_addresses[automl.lower()])
+            port = int(port)
+            self.__log.debug(f"start_new_training: creating new adapter manager and adapter manager agent")
+            adapter_training = AdapterManager(self.__data_storage, self.__request, automl, self.__training_id, self.__dataset, host, port, self.__adapter_finished_callback)
+            self.__adapters.append(adapter_training)
         return
+
+    def __build_dataset_schema(self) -> str:
+        """Build the dataset schema using the dataset document and add changes from the wizzard process
+
+        Returns:
+            str: the dataset schema for this training session
+        """
+        with self.__data_storage.lock():
+            found, dataset = self.__data_storage.get_dataset(self.__request.user_id, self.__request.dataset_id)
+            current_schema = dataset["schema"]
+            training_schema = json.loads(self.__request.dataset_configuration)
+            #We only need to update the selected values if selected datatype and role as the rest is set by the backend
+            for key in current_schema:
+                #Update selected role
+                selected_role = training_schema[key].get("RoleSelected", "")
+                if selected_role != "":
+                    current_schema[key]["role_selected"] = selected_role
+                else:
+                    current_schema[key].pop("role_selected", None)
+                #Update selected datatype
+                selected_datatype = training_schema[key].get("DatatypeSelected", "")
+                if selected_datatype != "":
+                    current_schema[key]["datatype_selected"] = selected_datatype
+                else:
+                    current_schema[key].pop("datatype_selected", None)
+
+            if self.__request.save_schema == True:
+                self.__data_storage.update_dataset(self.__request.user_id, self.__request.dataset_id, {"schema": current_schema})
+            return current_schema
+
+
+    def __create_training_record(self) -> str:
+        """Create a new training record for this training inside MongoDB
+
+        Returns:
+            str: The training id which identify the new training session
+        """
+        found, dataset = self.__data_storage.get_dataset(self.__request.user_id, self.__request.dataset_id)
+        self.__dataset = dataset
+        self.__log.debug(f"__create_training_record: generating training details")
+
+        config = {
+            "dataset_id": str(dataset["_id"]),
+            "model_ids": [],
+            "status": "busy",
+            "configuration": {
+                "task": self.__request.configuration.task,
+                "enabled_strategies": self.__request.configuration.enabled_strategies,
+                "runtime_limit": self.__request.configuration.runtime_limit,
+                "metric": self.__request.configuration.metric,
+                "selected_auto_ml_solutions": self.__request.configuration.selected_auto_ml_solutions,
+                "selected_ml_libraries": self.__request.configuration.selected_ml_libraries
+            },
+            "dataset_configuration": {
+                "file_configuration": dataset["file_configuration"],
+                "schema": self.__build_dataset_schema()
+            },
+            "runtime_profile": {
+                "start_time": datetime.now(),
+                "events": [],
+                "end_time": datetime.now()
+            },
+            "lifecycle_state": "active"
+        }
+
+        training_id = self.__data_storage.create_training(self.__request.user_id, config)
+        self.__log.debug(f"__create_training_record: inserted new training: {training_id}")
+        self.__data_storage.update_dataset(self.__request.user_id, self.__request.dataset_id, { "training_ids": dataset["training_ids"] + [training_id] })
+        return training_id
+
+    def get_dataset(self) -> str:
+        return self.__dataset
+
+    def get_training_id(self) -> str:
+        return self.__training_id
 
     def __adapter_finished_callback(self, training_id, user_id, model_id, model_details: 'dict[str, object]', adapter_manager: AdapterManager):
         """persists the AutoML adapter training session results
@@ -86,7 +160,7 @@ class AdapterRuntimeManager:
             if dataset["type"] in  [":tabular", ":text", ":time_series"]:
                 ExplainableAIManager(self.__data_storage, adapter_manager, self.__explainable_lock).explain(user_id, model_id)
                 return
-    
+
     def get_training_id(self) -> str:
         """Get the training id to which the found model is linked too
 
@@ -119,6 +193,14 @@ class AdapterRuntimeManager:
             'configuration': self.__request.to_dict(),
         }
 
+    def get_adapter_managers(self) -> list[AdapterManager]:
+        """Get adapter manager list
+
+        Returns:
+            list[AdapterManager]: list of all adapter managers
+        """
+        return self.__adapters
+
     def get_training_request(self) -> "CreateTrainingRequest":
         """Get the training request object
 
@@ -127,6 +209,29 @@ class AdapterRuntimeManager:
         """
         return self.__request
 
+    def set_training_request(self, request: "CreateTrainingRequest"):
+        """Set the training request object in self and for each adapter manager and update data storage
+        """
+        self.__request = request
+        for adapter in self.__adapters:
+            adapter.set_request(request)
+
+        found, training = self.__data_storage.get_training(self.__request.user_id, self.__training_id)
+        data_storage_dataset_configuration = training["dataset_configuration"]
+        request_dataset_configuration = json.loads(self.__request.dataset_configuration)
+
+        for key, value in request_dataset_configuration.items():
+            if key not in data_storage_dataset_configuration:
+                data_storage_dataset_configuration[key] = value
+
+        training_details = {
+                    "dataset_configuration": data_storage_dataset_configuration
+                }
+
+        self.__data_storage.update_training(self.__request.user_id, self.__training_id, training_details)
+
+
+
     def get_dataset(self):
         """Get the dataset record used by the training
 
@@ -134,22 +239,6 @@ class AdapterRuntimeManager:
             _type_: The dataset record
         """
         return self.__dataset
-
-    def create_new_training(self):
-        """Initialize the required AdapterManager for this training session and kick off strategy controller timer to begin training process
-        """
-        self.__log.debug("start_new_training: creating new blackboard and strategy controller for training")
-        for automl in self.__request.configuration.selected_auto_ml_solutions:
-            self.__log.debug(f"start_new_training: getting adapter endpoint information for automl {automl}")
-            host, port = map(os.getenv, self.__automl_addresses[automl.lower()])
-            port = int(port)
-            self.__log.debug(f"start_new_training: creating new adapter manager and adapter manager agent")
-            adapter_training = AdapterManager(self.__data_storage, self.__request, automl, self.__training_id, self.__dataset, host, port, self.__blackboard, self.__strategy_controller, self.__adapter_finished_callback)
-            self.__adapters.append(adapter_training)
-        
-        self.__strategy_controller.on_event('phase_updated', self.blackboard_phase_update_handler)
-        self.__strategy_controller.set_phase('preprocessing')
-        self.__strategy_controller.start_timer()
 
     def blackboard_phase_update_handler(self, meta, controller):
         """Handles phase updates throughout the session (caused by the strategy controller)

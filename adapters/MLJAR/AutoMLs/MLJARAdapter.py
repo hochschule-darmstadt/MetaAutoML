@@ -1,13 +1,12 @@
 import os
 import shutil
 
-from AbstractAdapter import AbstractAdapter
 from AdapterUtils import export_model, prepare_tabular_dataset, data_loader
 from JsonUtil import get_config_property
 from supervised.automl import AutoML
 
 
-class MLJARAdapter(AbstractAdapter):
+class MLJARAdapter:
     """
     Implementation of the AutoML functionality for MLJAR
     """
@@ -18,9 +17,13 @@ class MLJARAdapter(AbstractAdapter):
         Args:
             configuration (dict): Dictonary holding the training configuration
         """
-        super(MLJARAdapter, self).__init__(configuration)
+        self._configuration = configuration
+        if self._configuration["configuration"]["runtime_limit"] > 0:
+            self._time_limit = self._configuration["configuration"]["runtime_limit"]
+        else:
+            self._time_limit = 30
         #Create correct output folder for current training
-        
+
 
     def start(self):
         """Start the correct ML task functionality of AutoKeras"""

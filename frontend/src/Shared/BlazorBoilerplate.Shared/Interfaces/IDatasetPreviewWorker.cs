@@ -1,4 +1,4 @@
-﻿using BlazorBoilerplate.Shared.Dto.Dataset;
+using BlazorBoilerplate.Shared.Dto.Dataset;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,5 +10,6 @@ namespace BlazorBoilerplate.Shared.Interfaces
     public interface IDatasetPreviewWorker
     {
         Task UpdateDatasetFileConfiguration(GetDatasetResponseDto dataset);
+        Task UpdateDatasetColumnSchemaConfiguration(SetDatasetColumnSchemaConfigurationRequestDto request);
     }
 }

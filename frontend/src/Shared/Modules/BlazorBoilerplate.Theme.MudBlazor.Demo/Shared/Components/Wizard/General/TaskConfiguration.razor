@@ -1,4 +1,4 @@
-﻿@inject IStringLocalizer<Global> L
+@inject IStringLocalizer<Global> L
 @inject IApiClient apiClient
 @inject IViewNotifier viewNotifier
 @using Newtonsoft.Json
@@ -51,7 +51,7 @@
     @if (((Dataset.Dataset.Type.ID == ":tabular") || (Dataset.Dataset.Type.ID == ":text") || (Dataset.Dataset.Type.ID == ":time_series")) || (Dataset.Dataset.Type.ID == ":time_series_longitudinal") && (!string.IsNullOrEmpty(StartAutoMlRequest.Configuration.Task)))
 
     {
-        <MudSelect Label="@L["Target"]" T="string" ValueChanged="@OnTargetChanged">
+        <MudSelect Label="@L["Target"]" T="string" @bind-SelectedValues="SelectedTargets" MultiSelection="true">
             @if (_columnNames != null)
             {
                 @foreach (var column in _columnNames)
@@ -172,6 +172,21 @@
     }
     private MudChip[] _selectedMlLibChips;
 
+    public IEnumerable<string> SelectedTargets
+    {
+        get
+        {
+            return _selectedTargets;
+        }
+        set
+        {
+            _selectedTargets = value;
+            OnTargetChanged((HashSet<string>)_selectedTargets);
+        }
+    }
+
+    private IEnumerable<string> _selectedTargets;
+
     protected async override void OnInitialized()
     {
         base.OnInitialized();
@@ -179,9 +194,11 @@
         await LoadData();
     }
 
-    private void OnRuntimeValueChanged(int e)
+    private async void OnRuntimeValueChanged(int e)
     {
         StartAutoMlRequest.Configuration.RuntimeLimit = e;
+
+        await OnMlLibrarySelectionChanged();
     }
 
     private async void SetupStartAutoMLConfiguration()
@@ -190,13 +207,19 @@
 
         if ((Dataset.Dataset.Type.ID == ":tabular") || (Dataset.Dataset.Type.ID == ":text") || (Dataset.Dataset.Type.ID == ":time_series") || (Dataset.Dataset.Type.ID == ":time_series_longitudinal"))
         {
-            foreach (KeyValuePair<string, dynamic> pair in StartAutoMlRequest.DatasetConfiguration["column_datatypes"])
+            List<string> targets = new List<string>();
+            foreach (KeyValuePair<string, ColumnSchemaDto> pair in StartAutoMlRequest.Schema)
             {
-                if((int)pair.Value != 7)
+                if (string.IsNullOrEmpty(pair.Value.RoleSelected.ID) || (pair.Value.RoleSelected.ID != ":ignore") && (pair.Value.RoleSelected.ID != ":index"))
                 {
                     _columnNames.Add(pair.Key);
                 }
+                if (pair.Value.RoleSelected.ID == ":target")
+                {
+                    targets.Add(pair.Key);
+                }
             }
+            SelectedTargets = new HashSet<string>(targets);
         }
         StartAutoMlRequest.Configuration.RuntimeLimit = 3;
         StartAutoMlRequest.Configuration.Metric = ":accuracy";
@@ -258,20 +281,11 @@
             GetMlLibrariesForTaskRequestDto supportedMlLibrariesRequest = new GetMlLibrariesForTaskRequestDto { Task = StartAutoMlRequest.Configuration.Task };
             ApiResponseDto apiResponse = await apiClient.GetMlLibrariesForTask(supportedMlLibrariesRequest);
 
-            if (apiResponse.IsSuccessStatusCode)
-            {
-                _supportedMlLibraries = Newtonsoft.Json.JsonConvert.DeserializeObject<GetMlLibrariesForTaskResponseDto>(apiResponse.Result.ToString());
-                StateHasChanged();
-                viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
-                //quick and dirty way to avoid inconsistent automl solution polling
-                await Task.Delay(1000);
-                IsLibPolled = true;
-                OnMlLibrarySelectionChanged(SelectedMlLibsChips);
-            }
-            else
-            {
-                viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["SupportedMlLibraries Operation Failed"]);
-            }
+            HandleApiResponseWrapper(apiResponse, () =>
+                 _mlLibsViewModel.SetAvailableChips(
+                    apiResponse.Result.MlLibraries
+                        .Select(ConvertObjectInfoToChip)),
+            errorMessageKey: "SupportedMlLibraries Operation Failed");
         }
         catch (Exception ex)
         {
@@ -296,9 +310,9 @@
             StartAutoMlRequest.Configuration.SelecctedMlLibraries = new List<string>();
             foreach (var chip in libs)
             {
-                StartAutoMlRequest.Configuration.SelecctedMlLibraries.Add((string)chip.Value);
-                libraries.Add((string)chip.Value);
-            }
+                { "task", StartAutoMlRequest.Configuration.Task },
+                { "runtimeLimit", StartAutoMlRequest.Configuration.RuntimeLimit.ToString() }
+            };
 
 
 
@@ -312,38 +326,30 @@
             GetAutoMlSolutionsForConfigurationRequestDto compatibleAutoMlRequest = new GetAutoMlSolutionsForConfigurationRequestDto { Configuration = dictionary };
             ApiResponseDto apiResponse = await apiClient.GetAutoMlSolutionsForConfiguration(compatibleAutoMlRequest);
 
-            if (apiResponse.IsSuccessStatusCode)
-            {
-                _compatibleAutoMls = Newtonsoft.Json.JsonConvert.DeserializeObject<GetAutoMlSolutionsForConfigurationResponseDto>(apiResponse.Result.ToString());
-                StateHasChanged();
-                viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
-            }
-            else
-            {
-                viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
-            }
+            HandleApiResponseWrapper(apiResponse, () =>
+                _autoMlSolutionsViewModel.SetAvailableChips(apiResponse.Result.AutoMlSolutions.Select(ConvertObjectInfoToChip))
+            );
 
-            GetAvailableStrategiesRequestDto availableStrategiesRequest = new GetAvailableStrategiesRequestDto { Configuration = dictionary };
-            ApiResponseDto availableStrategiesResponse = await apiClient.GetAvailableStrategies(availableStrategiesRequest);
-
-            if (apiResponse.IsSuccessStatusCode)
-            {
-                _availableStrategies = Newtonsoft.Json.JsonConvert.DeserializeObject<GetAvailableStrategiesResponseDto>(availableStrategiesResponse.Result.ToString());
-                StateHasChanged();
-                viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
-            }
-            else
-            {
-                viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
-            }
+            await UpdateAvailableStrategies(dictionary);
         }
         catch (Exception ex)
         {
             viewNotifier.Show(ex.GetBaseException().Message, ViewNotifierType.Error, L["Operation Failed"]);
-        } 
+        }
     }
 
-    private async void OnAutoMlSolutionSelectionChanged(MudChip[] automls)
+    private async Task UpdateAvailableStrategies(Dictionary<string, string> dictionary)
+    {
+        int runtime_limit = StartAutoMlRequest.Configuration.RuntimeLimit;
+        GetAvailableStrategiesRequestDto availableStrategiesRequest = new GetAvailableStrategiesRequestDto { Configuration = dictionary, DatasetId = Dataset.Dataset.Id };
+        var availableStrategiesResponse = await apiClient.GetAvailableStrategies(availableStrategiesRequest);
+
+        HandleApiResponseWrapper(availableStrategiesResponse, () =>
+            _strategiesViewModel.SetAvailableChips(availableStrategiesResponse.Result.Strategies.Select(s => (s.Id, s.Title, s.Description)))
+        );
+    }
+
+    private void HandleApiResponseWrapper<T>(ApiResponseDto<T> apiResponse, Action successAction, string errorMessageKey = "Operation Failed", string successMessageKey = "Operation Successful")
     {
         StartAutoMlRequest.Configuration.SelectedAutoMlSolutions = new List<string>();
         foreach (var chip in automls)
@@ -363,9 +369,29 @@
         await UpdateStartAutoMlRequest();
     }
 
-    private async void OnTargetChanged(string value)
+    private Task OnStrategySelectionChanged()
     {
-        StartAutoMlRequest.Configuration.Target = value;
+        StartAutoMlRequest.Configuration.EnabledStrategies = _strategiesViewModel.SelectedIds.ToList();
+        return UpdateStartAutoMlRequest();
+    }
+
+    private async void OnTargetChanged(HashSet<string> values)
+    {
+        //We need to update the schema configuration with appropriated target values
+        foreach (var item in StartAutoMlRequest.Schema)
+        {
+            if (values.Contains(item.Key))
+            {
+                item.Value.RoleSelected.ID = ":target";
+            }
+            else
+            {
+                if ((!string.IsNullOrEmpty(item.Value.RoleSelected.ID)) && (item.Value.RoleSelected.ID == ":target"))
+                {
+                    item.Value.RoleSelected.ID = null;
+                }
+            }
+        }
         await UpdateStartAutoMlRequest();
     }
 }

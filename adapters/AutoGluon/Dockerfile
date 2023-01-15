@@ -1,4 +1,4 @@
-FROM --platform=linux/amd64 python:3.7.11-slim-buster AS base
+FROM --platform=linux/amd64  python:3.9.13-slim-buster AS base
 EXPOSE 50057
 
 RUN apt-get update && apt-get install -y \
@@ -8,8 +8,8 @@ RUN apt-get update && apt-get install -y \
     libsm6 \
     libxext6  \
     gcc \
-    && apt-get install -y git 
-    
+    && apt-get install -y git
+
 RUN python3 -m pip install --upgrade "mxnet<2.0.0"
 
 COPY ./AutoGluon/requirements.txt .
