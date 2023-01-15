@@ -78,7 +78,7 @@
                     <MudText Typo="Typo.body2" Class="mt-4">@param.ParameterLabel</MudText>
                     @if (param.ParameterType == ":single_value")
                     {
-                        <MudSelect T="ParameterValueViewModel" Label="@param.ParameterLabel" Variant="Variant.Outlined" @bind-SelectedValues="param.SelectedValues" ValueChanged="@UpdateParemetersInRequest" ToStringFunc="p => p?.ValueLabel">
+                        <MudSelect T="ParameterValueViewModel" Label="@param.ParameterLabel" Variant="Variant.Outlined" @bind-SelectedValues="param.SelectedValues" ToStringFunc="p => p?.ValueLabel">
                             @foreach (var paramValue in param.ParameterValues)
                             {
                                 <MudSelectItem Value="@paramValue">@paramValue.ValueLabel</MudSelectItem>
@@ -96,7 +96,7 @@
                     }
                     else if(param.ParameterType == ":integer")
                     {
-                        <MudNumericField @bind-Value="@param.IntegerValue"/>
+                        <MudNumericField @bind-Value="@param.IntegerValue" />
                     }
                 }
             }
@@ -486,6 +486,19 @@
             }
         }
 
-        public int IntegerValue { get; set; }
+        private int _integerValue;
+        public int IntegerValue
+        {
+            get => _integerValue;
+            set
+            {
+                if (_integerValue == value)
+                {
+                    return;
+                }
+                _integerValue = value;
+                SelectedValuesChanged?.Invoke(this, EventArgs.Empty);
+            }
+        }
     }
 }
