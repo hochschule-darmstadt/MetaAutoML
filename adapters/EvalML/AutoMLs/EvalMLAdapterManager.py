@@ -39,7 +39,7 @@ class EvalMLAdapterManager(AdapterManager):
         library = ":lightgbm_lib"
         model = ":light_gradient_boosting_machine"
         return library, model
-    
+
     async def explain_model(self, explain_auto_ml_request: "ExplainModelRequest") -> ExplainModelResponse:
         """override explain model function for evalml to specify the woodword structure for test data set.
 
