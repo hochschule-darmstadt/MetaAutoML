@@ -94,14 +94,7 @@ class AdapterRuntimeManager:
             "dataset_id": str(dataset["_id"]),
             "model_ids": [],
             "status": "busy",
-            "configuration": {
-                "task": self.__request.configuration.task,
-                "enabled_strategies": self.__request.configuration.enabled_strategies,
-                "runtime_limit": self.__request.configuration.runtime_limit,
-                "metric": self.__request.configuration.metric,
-                "selected_auto_ml_solutions": self.__request.configuration.selected_auto_ml_solutions,
-                "selected_ml_libraries": self.__request.configuration.selected_ml_libraries
-            },
+            "configuration": self.__request.configuration.to_dict(casing=betterproto.Casing.SNAKE),
             "dataset_configuration": {
                 "file_configuration": dataset["file_configuration"],
                 "schema": self.__build_dataset_schema()
