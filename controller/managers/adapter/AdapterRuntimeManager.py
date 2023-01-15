@@ -163,7 +163,7 @@ class AdapterRuntimeManager:
                     "model_ids": training["model_ids"] + [model_id]
                 })
 
-        if model_details["status"] == "completed":
+        if model_details["status"] == "completed" and self.__multi_fidelity_level == 0:
             if dataset["type"] in  [":tabular", ":text", ":time_series"]:
                 ExplainableAIManager(self.__data_storage, adapter_manager, self.__explainable_lock).explain(user_id, model_id)
                 return

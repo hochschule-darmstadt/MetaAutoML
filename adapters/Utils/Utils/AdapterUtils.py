@@ -367,7 +367,7 @@ def read_tabular_dataset_training_data(config: "StartAutoMlRequest") -> Tuple[pd
     data = pd.read_csv(**configuration)
 
     if config['dataset_configuration']['multi_fidelity_level'] != 0:
-        data.sample(frac=0.1, replace=True, random_state=1)
+        data = data.sample(frac=0.1, random_state=1)
     
     #Rename untitled columns to correct name
     for column in data:
