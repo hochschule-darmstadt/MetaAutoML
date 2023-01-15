@@ -59,7 +59,7 @@ if __name__ == '__main__':
         loaded_model = dill.load(file)
 
     print(type(X))
-    predicted_y = loaded_model.predict((X))
+    predicted_y = loaded_model.predict(X)
 
     df = (predicted_y.to_frame())
     df.columns = [ 'predicted']
