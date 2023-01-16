@@ -70,7 +70,7 @@ def data_loader(config: "StartAutoMlRequest") -> Any:
 
     Returns:
         Any: Depending on the dataset type: CSV data: tuple[DataFrame (Train), DataFrame (Test)], image data: tuple[DataFrame (X_train), DataFrame (y_train), DataFrame (X_test), DataFrame (y_test)]
-    """    
+    """
 
     if config["configuration"]["task"] in [":image_classification", ":image_regression"]:
         return read_image_dataset(config)
@@ -128,8 +128,8 @@ def zip_script(config: "StartAutoMlRequest"):
     zip_file_name = get_config_property("export-zip-file-name")
     output_path = config.export_folder_location
     result_path = config.result_folder_location
-    shutil.copy(get_config_property("predict-time-sources-path"),
-                result_path)
+    #shutil.copy(get_config_property("predict-time-sources-path"),
+    #            result_path)
 
     shutil.make_archive(os.path.join(output_path, zip_file_name),
                         'zip',
@@ -159,7 +159,7 @@ def evaluate(config: "StartAutoMlRequest", config_path: str) -> Tuple[float, flo
         tuple[float, float]: tuple holding the test score, prediction time metrics
     """
     config = config.__dict__
-    config["dataset_configuration"] = json.loads(config["dataset_configuration"])
+    config["dataset_configuration"] = config["dataset_configuration"]
     file_path = config["dataset_path"]
     result_path = config["result_folder_location"]
     # predict
@@ -181,7 +181,7 @@ def evaluate(config: "StartAutoMlRequest", config_path: str) -> Tuple[float, flo
         X_train, y_train, X_test, y_test = data_loader(config)
 
     predict_start = time.time()
-    subprocess.call([python_env, os.path.join(result_path, "predict.py"), file_path, config_path, os.path.join(result_path, "predictions.csv")])
+    subprocess.call([python_env, os.path.join(result_path, "predict.py"), file_path, os.path.join(result_path, "predictions.csv")])
     predict_time = time.time() - predict_start
 
     predictions = pd.read_csv(os.path.join(result_path, "predictions.csv"))
@@ -255,7 +255,7 @@ def predict(config: dict, config_path: str, automl: str) -> Tuple[float, str]:
     file_path = config["prediction_id"] + "_" + automl + ".csv"
     result_prediction_path = os.path.join(os.path.dirname(config["live_dataset_path"]), file_path)
     predict_start = time.time()
-    subprocess.call([python_env, os.path.join(result_folder_location, "predict.py"), config["live_dataset_path"], config_path, result_prediction_path])
+    subprocess.call([python_env, os.path.join(result_folder_location, "predict.py"), config["live_dataset_path"], result_prediction_path])
     predict_time = time.time() - predict_start
 
 
@@ -315,7 +315,7 @@ def setup_run_environment(request: "StartAutoMlRequest", adapter_name: str) -> "
             export_folder_location = export_folder_location.replace("\\", "/")
             result_folder_location = result_folder_location.replace("\\", "/")
             controller_export_folder_location = controller_export_folder_location.replace("\\", "/")
-    
+
     request.job_folder_location = job_folder_location
     request.model_folder_location = model_folder_location
     request.export_folder_location = export_folder_location

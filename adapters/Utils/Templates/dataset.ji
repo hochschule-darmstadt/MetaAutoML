@@ -1,0 +1,80 @@
+import json
+import pandas as pd
+import os
+import glob
+from PIL import Image
+import numpy as np
+
+{% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression", ":text_classification", ":text_regression", ":time_series_forecasting"] %}
+def read_csv_dataset(path: str) -> pd.DataFrame:
+    {% set targets = [] %}
+    {% for key in configuration.dataset_configuration["schema"] %}
+        {% if configuration.dataset_configuration["schema"][key].get("role_selected", "") == ":target" %}
+        {% set targets = targets.append(key) %}
+        {% endif %}
+    {% endfor %}
+    target = "{{targets[0]}}"
+
+    delimiters = {
+        "comma":        ",",
+        "semicolon":    ";",
+        "space":        " ",
+        "tab":          "\t",
+    }
+
+    configuration = {
+        "filepath_or_buffer": path,
+        "delimiter": delimiters["{{configuration.dataset_configuration['file_configuration']['delimiter']}}"],
+        "skiprows": ({{configuration.dataset_configuration['file_configuration']['start_row']}}-1),
+        "decimal": "{{configuration.dataset_configuration['file_configuration']['decimal_character']}}",
+        {% if configuration.dataset_configuration['file_configuration']['escape_character'] == "\\" %}
+        "escapechar": "{{'\\\\'}}",
+        {% else %}
+        "escapechar": "{{configuration.dataset_configuration['file_configuration']['escape_character']}}",
+        {% endif %}
+        "encoding": "{{configuration.dataset_configuration['file_configuration']['encoding']}}",
+    }
+
+    {% if configuration.dataset_configuration['file_configuration']['thousands_seperator'] != "" %}
+    configuration["thousands"] = "{{configuration.dataset_configuration['file_configuration']['thousands_seperator']}}"
+    {% endif %}
+    return pd.read_csv(**configuration)
+{% else %}
+def read_image_dataset_folder(path):
+
+    data_dir = path
+    test_df_list =[]
+
+    def read_image_dataset_folder(sub_folder_type):
+        files = []
+        df = []
+        for folder in os.listdir(os.path.join(data_dir, sub_folder_type)):
+            files.append(glob.glob(os.path.join(data_dir, sub_folder_type, folder, "*.jp*g")))
+
+        df_list =[]
+        for i in range(len(files)):
+            df = pd.DataFrame()
+            df["name"] = [x for x in files[i]]
+            df['outcome'] = i
+            df_list.append(df)
+        return df_list
+
+    test_df_list = read_image_dataset_folder("test")
+
+    test_data = pd.concat(test_df_list, axis=0,ignore_index=True)
+
+    def img_preprocess(img):
+        """
+        Opens the image and does some preprocessing
+        such as converting to RGB, resize and converting to array
+        """
+        img = Image.open(img)
+        img = img.convert('RGB')
+        img = img.resize((256,256))
+        img = np.asarray(img)/255
+        return img
+
+    X_test = np.array([img_preprocess(p) for p in test_data.name.values])
+    y_test = test_data.outcome.values
+    return X_test, y_test
+{% endif %}
