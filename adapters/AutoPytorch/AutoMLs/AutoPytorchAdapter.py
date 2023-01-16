@@ -18,7 +18,7 @@ from AdapterUtils import export_model, prepare_tabular_dataset, data_loader
 from autoPyTorch.api.tabular_classification import TabularClassificationTask
 from autoPyTorch.api.tabular_regression import TabularRegressionTask
 from JsonUtil import get_config_property
-from predict_time_sources import SplitMethod, feature_preparation
+from predict_time_sources import feature_preparation
 
 
 class AutoPytorchAdapter:
@@ -70,7 +70,7 @@ class AutoPytorchAdapter:
         """
         self.df, test = data_loader(self._configuration)
         X, y = prepare_tabular_dataset(self.df, self._configuration)
-    
+
         auto_cls = TabularClassificationTask(temporary_directory=self._configuration["model_folder_location"] + "/tmp", output_directory=self._configuration["model_folder_location"] + "/output", delete_output_folder_after_terminate=False, delete_tmp_folder_after_terminate=False)
         if self._time_limit is not None:
             auto_cls.search(

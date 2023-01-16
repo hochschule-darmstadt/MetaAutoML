@@ -10,7 +10,7 @@ from evalml.objectives import FraudCost
 
 import pandas as pd
 import numpy as np
-from predict_time_sources import feature_preparation, SplitMethod
+from predict_time_sources import feature_preparation
 
 import json
 import pickle
