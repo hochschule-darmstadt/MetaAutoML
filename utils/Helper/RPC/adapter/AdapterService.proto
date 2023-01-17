@@ -141,6 +141,91 @@ message GetAutoMlStatusResponse {
         example: ":artificial_neural_network"
     */
     string mlModelType = 7;
+    /*
+      The emission produced by the training of the model
+      example: see message Carbon Emission
+    */
+    CarbonEmission emissionProfile = 8;
+}
+
+message CarbonEmission{
+    /*
+        The emissions produced by the training of this model as kg of CO2-eq
+        example: 0.23232
+    */
+    double emissions = 1;
+    /*
+        The emissions rate measured in kg of CO2 emitted per MWh
+        example: 0.23232
+    */
+    double emissionsRate = 2;
+    /*
+        Total of consumed energy by all hardware components
+        example: 0.23232
+    */
+    double energyConsumed = 3;
+    /*
+        Duration during which emessions are tracked (in our case purely the training)
+        example: 0.23232
+    */
+    double duration = 4;
+    /*
+        Count of CPUs used by the process
+        example: 16
+    */
+    int32 cpuCount = 5;
+    /*
+        Total consumed energy by the CPUs
+        example: 0.23232
+    */
+    double cpuEnergy = 6;
+    /*
+        CPU model name
+        example: "AMD Ryzen 7 ......""
+    */
+    string cpuModel = 7;
+    /*
+        Power consumed by the CPUs
+        example: 27.0
+    */
+    double cpuPower = 8;
+    /*
+        Count of GPUs used by the process
+        example: 1
+    */
+    int32 gpuCount = 9;
+    /*
+        Total consumed energy by the GPUs
+        example: 0.23232
+    */
+    double gpuEnergy = 10;
+    /*
+        GPU model name
+        example: "1 x NVIDIA Geforce RTX 3070 .....""
+    */
+    string gpuModel = 11;
+    /*
+        Power consumed by the GPUs
+        example: 27.0
+    */
+    double gpuPower = 12;
+    /*
+        Total consumed energy by the RAM
+        example: 0.23232
+    */
+    double ramEnergy = 13;
+    /*
+        Power consumed by the RAM
+        example: 27.0
+    */
+    double ramPower = 14;
+    /*
+        Total RAM size in GB
+        example: 15.34
+    */
+    double ramTotalSize = 15;
+
+
 }
 
 message ExplainModelRequest {
