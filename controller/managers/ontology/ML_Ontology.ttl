@@ -1223,7 +1223,8 @@
 
 :catboost_lib a :ML_library ;
     skos:prefLabel "Catboost lib" ;
-    skos:altLabel "Catboost" .
+    skos:altLabel "Catboost" ;
+    rdfs:seeAlso <https://www.wikidata.org/wiki/Q47509047> .
 :fastai_lib a :ML_library ;
     skos:prefLabel "Fastai lib" ;
     skos:altLabel "Fastai" .
@@ -1232,6 +1233,7 @@
     skos:altLabel "H2O" .
 :keras_lib a :ML_library ;
     skos:prefLabel "Keras lib" ;
+    #rdfs:comment "Thats a test!" ;
     skos:altLabel "Keras" ;
     skos:broader :tensorflow_lib .
 :lightgbm_lib a :ML_library ;

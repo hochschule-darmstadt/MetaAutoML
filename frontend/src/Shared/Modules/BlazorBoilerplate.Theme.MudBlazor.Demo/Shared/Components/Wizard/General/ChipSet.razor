@@ -6,19 +6,19 @@
     <MudText Typo="Typo.subtitle2">@Label</MudText>
     <MudChipSet Filter="true" MultiSelection="true" SelectedValues="SelectedValues">
         @foreach (var chip in ViewModel.AvailableChips)
-        {//ab hier
-            <MudChip Value="@chip.Id" Text="@chip.Label" Variant="Variant.Text" Color="Color.Secondary" @onclick="() => ToggleChip(chip)">
-                @if (chip.ToolTip != "")
-                {
-                    <WikiTooltip SeeAlso="@chip.ToolTip" Comment="@chip.Comment" Label="@chip.Label">
-
-                    </WikiTooltip>
-                }
-                <!--   else
-       {
-           <MudChip Value="@chip.Id" Text="@chip.Label" Variant="Variant.Text" Color="Color.Secondary" @onclick="() => ToggleChip(chip)" />
-       }-->
-            </MudChip>
+        {
+            @if (!string.IsNullOrEmpty(chip.ToolTip) || !string.IsNullOrEmpty(chip.Comment))
+            {
+                <WikiTooltip SeeAlso="@chip.ToolTip" Comment="@chip.Comment" Label="@chip.Label">
+                    <MudChip Value="@chip.Id" Text="@chip.Label" Variant="Variant.Text" Color="Color.Secondary" @onclick="() => ToggleChip(chip)" />
+                <!-- <MudTooltip Text="@chip.ToolTip" Delay="600" Arrow="true" Placement="Placement.Bottom" Class="strategy-description-tooltip"> -->
+                <!-- </MudTooltip> -->
+                </WikiTooltip>
+            }
+            else
+            {
+                <MudChip Value="@chip.Id" Text="@chip.Label" Variant="Variant.Text" Color="Color.Secondary" @onclick="() => ToggleChip(chip)" />
+            }
         }
     </MudChipSet>
 }
@@ -83,7 +83,7 @@ else
                 AvailableChips.Remove(chipToRemove);
             }
 
-            foreach (var chipToAdd in addedChips.Select(ac => new ChipViewModel { Id = ac.id, Label = ac.label, ToolTip = ac.toolTip, ImageUrl = ac.imageUrl }))
+            foreach (var chipToAdd in addedChips.Select(ac => new ChipViewModel { Id = ac.id, Label = ac.label, ToolTip = ac.toolTip, ImageUrl = ac.imageUrl, Comment = ac.comment }))
             {
                 /*  // Newly created chip may contain a Wikidata-Link in its attribute ToolTip. If that's the case, turn it into a Wiki-Entry-Info
                   if (!string.IsNullOrEmpty(chipToAdd.ToolTip)) {
