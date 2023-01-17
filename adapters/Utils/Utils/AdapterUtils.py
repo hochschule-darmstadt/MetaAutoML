@@ -21,6 +21,7 @@ from PIL import Image
 from AdapterBGRPC import *
 from typing import Tuple
 import re
+from codecarbon.output import EmissionsData
 
 ######################################################################
 ## GRPC HELPER FUNCTIONS
@@ -28,7 +29,7 @@ import re
 
 #region
 
-def get_response(config: "StartAutoMlRequest", test_score: float, prediction_time: float, library: str, model: str) -> "GetAutoMlStatusResponse":
+def get_response(config: "StartAutoMlRequest", test_score: float, prediction_time: float, library: str, model: str, emissions: EmissionsData) -> "GetAutoMlStatusResponse":
     """Generate the final GRPC AutoML status message
 
     Args:
@@ -51,6 +52,26 @@ def get_response(config: "StartAutoMlRequest", test_score: float, prediction_tim
     response.prediction_time = prediction_time
     response.ml_library = library
     response.ml_model_type = model
+
+    #Add emission profile
+    emission_profile = CarbonEmission()
+    emission_profile.emissions = emissions.emissions
+    emission_profile.emissions_rate = emissions.emissions_rate
+    emission_profile.energy_consumed = emissions.energy_consumed
+    emission_profile.duration = emissions.duration
+    emission_profile.cpu_count = emissions.cpu_count
+    emission_profile.cpu_energy = emissions.cpu_energy
+    emission_profile.cpu_model = emissions.cpu_model
+    emission_profile.cpu_power = emissions.cpu_power
+    emission_profile.gpu_count = emissions.gpu_count
+    emission_profile.gpu_energy = emissions.gpu_energy
+    emission_profile.gpu_model = emissions.gpu_model
+    emission_profile.gpu_power = emissions.gpu_power
+    emission_profile.ram_energy = emissions.ram_energy
+    emission_profile.ram_power = emissions.ram_power
+    emission_profile.ram_total_size = emissions.ram_total_size
+
+    response.emission_profile = emission_profile
     return response
 
 
