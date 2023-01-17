@@ -101,24 +101,6 @@
                 }
             }
 
-            @* TODO: The input fields are not here yet. Once all input fields exist in the intersected part, all of that can be extracted into a component and reused here. *@
-            @if (_individualParams.Any())
-            {
-                <MudText Typo="Typo.subtitle2" Class="mt-4">Individual Parameters</MudText>
-
-                @foreach (var solution in _individualParams)
-                {
-                    <MudText Typo="Typo.subtitle2" Class="mt-4">@solution.autoMlLabel</MudText>
-                    @foreach (var param in solution.parameters)
-                    {
-                        <MudText Typo="Typo.body2" Class="mt-4">@param.ParameterLabel</MudText>
-                    }
-                }
-            }
-            else
-            {
-                <DataLoaderSpinner />
-            }
         </MudExpansionPanel>
     </MudExpansionPanels>
 
@@ -253,7 +235,7 @@
             () =>
             {
                 _availableParameters = apiResponse.Result.AutoMlParameters;
-                _intersectedParams = _intersector.GetIntersectedParameters().ToList();
+                _intersectedParams = ReplaceIntersectedParameter(_intersector.GetIntersectedParameters().ToList());
                 foreach (var param in _intersectedParams)
                 {
                     param.SelectedValuesChanged += (_,_) => UpdateParemetersInRequest();
@@ -445,22 +427,17 @@
         await UpdateStartTrainingDto();
     }
 
-    /*
     private List<ParameterObject> ReplaceIntersectedParameter(List<ParameterObject> intersectedParamsNew)
     {
         foreach (ParameterObject intersectedParam in intersectedParamsNew)
         {
-            foreach (ParameterValueViewModel IntersectedParamValue in intersectedParam.ParameterValues)
+            if(_intersectedParams.Where(p => p.ParameterIri == intersectedParam.ParameterIri).Any())
             {
-                if (_intersectedParams.Exists(p => p.ParameterIri == intersectedParam.ParameterIri) && _intersectedParams.Find(p => p.ParameterIri == intersectedParam.ParameterIri).ParameterValues.Exists(pv => pv.ValueIri == IntersectedParamValue.ValueIri))
-                {
-                    IntersectedParamValue.IsSelected = _intersectedParams.Find(p => p.ParameterIri == intersectedParam.ParameterIri).ParameterValues.Find(pv => pv.ValueIri == IntersectedParamValue.ValueIri).IsSelected;
-                }
+            intersectedParam.SelectedValues = _intersectedParams.Where(p => p.ParameterIri == intersectedParam.ParameterIri).First().SelectedValues.Where(s => intersectedParam.ParameterValues.Where( pv => pv.ValueIri == s.ValueIri).Any());
             }
         }
         return intersectedParamsNew;
     }
-    */
 
     public class ParameterValueViewModel
     {
