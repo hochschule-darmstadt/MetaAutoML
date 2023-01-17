@@ -1,0 +1,75 @@
+﻿@if (!string.IsNullOrEmpty((SetTooltips(SeeAlso, Comment).Text)))
+{
+    <MudTooltip Text="SeeAlso" Delay="600" Arrow="true" Placement="Placement.Top" Class="strategy-description-tooltip">
+        <ChildContent>
+            <MudText>@Label</MudText>
+        </ChildContent>
+
+        <TooltipContent>
+            <MudGrid>
+                @if (!string.IsNullOrEmpty((SetTooltips(SeeAlso, Comment).ImageUrl)))
+                {
+                    <MudItem xs="12">
+                        <MudPaper Class="d-flex align-center justify-center mud-width-full py-8"> <MudImage Src="@SetTooltips(SeeAlso, Comment).ImageUrl" Elevation="25" /></MudPaper>
+                    </MudItem>
+                }
+
+                <MudItem xs="12">
+                    <MudText Style="font-size:inherit">@SetTooltips(SeeAlso, Comment).Text</MudText>
+                </MudItem>
+
+
+            </MudGrid>
+
+
+
+        </TooltipContent>
+    </MudTooltip>
+}
+else
+{
+    <MudText>@Label</MudText>
+}
+
+@code {
+    [Parameter]
+    public string SeeAlso { get; set; }
+
+    [Parameter]
+    public string Comment { get; set; }
+
+    [Parameter]
+    public string Label { get; set; }
+
+
+    public WikipediaTooltip CurrentWikipediaTooltip = new WikipediaTooltip();
+
+
+    public WikipediaTooltip SetTooltips(string seeAlso, string comment)
+    {
+        WikipediaTooltip result = new WikipediaTooltip();
+
+        if (string.IsNullOrEmpty(seeAlso))
+        {
+            result.Text = comment;
+        }
+        else
+        {
+            WikiDataGrabber wiki = new WikiDataGrabber();
+            List<string> wikipediaData = wiki.GetDataFrom(seeAlso);
+            if (wikipediaData.Count != 0) { result.Text = wikipediaData[0]; result.ImageUrl = wikipediaData[1]; } else { result.Text = comment; }
+        }
+        return result;
+
+
+    }
+
+
+    public class WikipediaTooltip
+    {
+        public string Text { get; set; }
+        public string ImageUrl { get; set; }
+    }
+
+}
+

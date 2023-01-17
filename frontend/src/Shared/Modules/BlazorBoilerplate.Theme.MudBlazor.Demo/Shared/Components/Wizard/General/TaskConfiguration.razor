@@ -190,8 +190,8 @@
         }
     }
 
-    private (string id, string label, string toolTip, string imageUrl) ConvertObjectInfoToChip(ObjectInfomationDto objectInfo) =>
-        (objectInfo.ID, objectInfo.Properties.GetValueOrDefault("skos:prefLabel"), objectInfo.Properties.GetValueOrDefault("rdfs:seeAlso"), "" );
+    private (string id, string label, string toolTip, string comment, string imageUrl) ConvertObjectInfoToChip(ObjectInfomationDto objectInfo) =>
+        (objectInfo.ID, objectInfo.Properties.GetValueOrDefault("skos:prefLabel"), objectInfo.Properties.GetValueOrDefault("rdfs:seeAlso"), objectInfo.Properties.GetValueOrDefault("rdfs:comment"), "" );
 
     private async Task OnMlLibrarySelectionChanged()
     {
@@ -221,7 +221,7 @@
             var availableStrategiesResponse = await apiClient.GetAvailableStrategies(availableStrategiesRequest);
 
             HandleApiResponseWrapper(availableStrategiesResponse, () =>
-                _strategiesViewModel.SetAvailableChips(availableStrategiesResponse.Result.Strategies.Select(s => (s.Id, s.Title, s.Description, "")))
+                _strategiesViewModel.SetAvailableChips(availableStrategiesResponse.Result.Strategies.Select(s => (s.Id, s.Title, s.Description, "", "")))
             );
         }
         catch (Exception ex)

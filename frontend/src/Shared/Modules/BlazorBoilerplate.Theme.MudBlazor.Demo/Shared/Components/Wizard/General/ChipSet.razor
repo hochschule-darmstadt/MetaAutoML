@@ -6,36 +6,19 @@
     <MudText Typo="Typo.subtitle2">@Label</MudText>
     <MudChipSet Filter="true" MultiSelection="true" SelectedValues="SelectedValues">
         @foreach (var chip in ViewModel.AvailableChips)
-        {
-            @if (chip.ToolTip != "")
-            {
-                <MudTooltip Text="@chip.ToolTip" Delay="600" Arrow="true" Placement="Placement.Top" Class="strategy-description-tooltip">
-                    <ChildContent>
-                        <MudChip Value="@chip.Id" Text="@chip.Label" Variant="Variant.Text" Color="Color.Secondary" @onclick="() => ToggleChip(chip)" />
-                    </ChildContent>
-                    <TooltipContent>
-                        <MudGrid>
-                            @if (!string.IsNullOrEmpty(chip.ImageUrl))
-                            {
-                                <MudItem xs="12">
-                                    <MudPaper Class="d-flex align-center justify-center mud-width-full py-8"> <MudImage Src="@chip.ImageUrl" Elevation="25" /></MudPaper>
-                                </MudItem>
-                            }
+        {//ab hier
+            <MudChip Value="@chip.Id" Text="@chip.Label" Variant="Variant.Text" Color="Color.Secondary" @onclick="() => ToggleChip(chip)">
+                @if (chip.ToolTip != "")
+                {
+                    <WikiTooltip SeeAlso="@chip.ToolTip" Comment="@chip.Comment" Label="@chip.Label">
 
-                            <MudItem xs="12">
-                                <MudText Style="font-size:inherit">@chip.ToolTip</MudText>
-                            </MudItem>
-                        </MudGrid>
-                           
-                            
-
-                    </TooltipContent>
-                </MudTooltip>
-            }
-            else
-            {
-                <MudChip Value="@chip.Id" Text="@chip.Label" Variant="Variant.Text" Color="Color.Secondary" @onclick="() => ToggleChip(chip)" />
-            }
+                    </WikiTooltip>
+                }
+                <!--   else
+       {
+           <MudChip Value="@chip.Id" Text="@chip.Label" Variant="Variant.Text" Color="Color.Secondary" @onclick="() => ToggleChip(chip)" />
+       }-->
+            </MudChip>
         }
     </MudChipSet>
 }
@@ -91,7 +74,7 @@ else
         /// Newly available options are selected by default.
         /// </summary>
         /// <param name="availableChips">Collection of tuples that contain an id, a label and a tooltip. (Each one is shown as a chip)</param>
-        public void SetAvailableChips(IEnumerable<(string id, string label, string toolTip, string imageUrl)> availableChips)
+        public void SetAvailableChips(IEnumerable<(string id, string label, string toolTip, string comment, string imageUrl)> availableChips)
         {
             var addedChips = availableChips.Where(ac => AvailableChips.All(c => c.Id != ac.id)).ToList();
             var removedChips = AvailableChips.Where(c => availableChips.All(ac => ac.id != c.Id)).ToList();
@@ -102,14 +85,16 @@ else
 
             foreach (var chipToAdd in addedChips.Select(ac => new ChipViewModel { Id = ac.id, Label = ac.label, ToolTip = ac.toolTip, ImageUrl = ac.imageUrl }))
             {
-                // Newly created chip may contain a Wikidata-Link in its attribute ToolTip. If that's the case, turn it into a Wiki-Entry-Info
-                if (!string.IsNullOrEmpty(chipToAdd.ToolTip)) {
-                    WikiDataGrabber wiki = new WikiDataGrabber();
-                    List<string> wikiTooltip = wiki.GetDataFrom(chipToAdd.ToolTip);
-                    if (wikiTooltip.Count != 0) { chipToAdd.ToolTip = wikiTooltip[0]; chipToAdd.ImageUrl = wikiTooltip[1]; }
+                /*  // Newly created chip may contain a Wikidata-Link in its attribute ToolTip. If that's the case, turn it into a Wiki-Entry-Info
+                  if (!string.IsNullOrEmpty(chipToAdd.ToolTip)) {
+                      WikiDataGrabber wiki = new WikiDataGrabber();
+                      List<string> wikiTooltip = wiki.GetDataFrom(chipToAdd.ToolTip);
+                      if (wikiTooltip.Count != 0) { chipToAdd.ToolTip = wikiTooltip[0]; chipToAdd.ImageUrl = wikiTooltip[1]; }
 
 
-                }
+                  }*/
+
+
                 AvailableChips.Add(chipToAdd);
             }
 
@@ -128,6 +113,7 @@ else
     {
         public string Id { get; set; }
         public string Label { get; set; }
+        public string Comment { get; set; }
         public string ToolTip { get; set; }
         public string ImageUrl { get; set; }
         public bool IsSelected { get; set; } = true;
