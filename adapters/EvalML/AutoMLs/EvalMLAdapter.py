@@ -101,7 +101,7 @@ class EvalMLAdapter:
         self.df, test = data_loader(self._configuration)
         X, y = prepare_tabular_dataset(self.df, self._configuration)
 
-        problem_config = {"gap": 0, "max_delay": 10, "forecast_horizon": 1, "time_index": "DateTime"}
+        problem_config = {"gap": 0, "max_delay": 10, "forecast_horizon": 1, "time_index": "Date"}
         # parameters must be set correctly
         automl = AutoMLSearch(
                     X_train=X,

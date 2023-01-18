@@ -59,8 +59,17 @@ if __name__ == '__main__':
         loaded_model = dill.load(file)
 
     print(type(X))
-    predicted_y = loaded_model.predict((X))
+    if (config_json['configuration']['task'] == ":time_series_forecasting"):
+        # currently its just dummy value
+        # TODO: change parameters
+        predicted_y = loaded_model.predict(X,X_train=X,y_train=y)
 
-    df = (predicted_y.to_frame())
-    df.columns = [ 'predicted']
-    df.to_csv(save_path)
+        df = (predicted_y.to_frame())
+        df.columns = [ 'predicted']
+        df.to_csv(save_path)
+    else:
+        predicted_y = loaded_model.predict((X))
+
+        df = (predicted_y.to_frame())
+        df.columns = [ 'predicted']
+        df.to_csv(save_path)

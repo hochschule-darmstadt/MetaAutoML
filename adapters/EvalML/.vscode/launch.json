@@ -37,7 +37,7 @@
             "type": "python",
             "request": "launch",
             "purpose": ["debug-test"],
-            "program": "tests/test_adapter.py",
+            "program": "tests/test_time_series_tasks.py",
             "console": "integratedTerminal",
             "justMyCode": false,
             "env": {
