@@ -22,7 +22,7 @@ class UserManager:
         self.__dataset_analysis_lock = dataset_analysis_lock
         self.__log = logging.getLogger('UserManager')
         self.__log.setLevel(logging.getLevelName(os.getenv("SERVER_LOGGING_LEVEL")))
-        
+
     def create_new_user(
         self, create_new_user_request: "CreateNewUserRequest"
     ) -> "CreateNewUserResponse":
@@ -45,7 +45,7 @@ class UserManager:
         else:
             self.__log.debug(f"create_new_user: copying default dataset for a new user {user_id}")
             CsvManager.copy_default_dataset(user_id)
-            dataset_id: str = self.__data_storage.create_dataset(user_id, "titanic_train.csv", ":tabular", "Titanic")
+            dataset_id: str = self.__data_storage.create_dataset(user_id, "titanic_train.csv", ":tabular", "Titanic", "utf-8")
             self.__log.debug("create_dataset: executing dataset analysis...")
             dataset_analysis = DataSetAnalysisManager(dataset_id, user_id, self.__data_storage, self.__dataset_analysis_lock)
             dataset_analysis.start()

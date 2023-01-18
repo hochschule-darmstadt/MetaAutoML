@@ -112,32 +112,3 @@ class LongitudinalDataManager:
                                               DataType.DATATYPE_CATEGORY,
                                               DataType.DATATYPE_BOOLEAN]
 
-    @staticmethod
-    def read_dimension_names(path) -> GetTabularDatasetColumnResponse:
-        """
-        Read only the dimension (column) names of the given dataset
-        ---
-        Parameter
-        1. path to the dataset to read
-        ---
-        Return the column names as GetTabularDatasetColumnNamesResponse
-        """
-        response = GetTabularDatasetColumnResponse()
-        X, y = load_from_tsfile(path)
-        df_x = convert_to(X, to_type=PD_MULTI_INDEX)
-        df_y = pd.DataFrame(y, columns=[TARGET_COL])
-        # Merge the panel data and labels into a single long format pandas dataset
-        dataset = df_x.merge(df_y, left_on=INSTANCES_COL, right_index=True)
-
-        for col in dataset.columns:
-            table_column = TableColumn()
-            table_column.name = col
-            numpy_datatype = dataset[col].dtype.name
-            datatype, convertible_types = LongitudinalDataManager.__get_datatype(numpy_datatype, dataset[col])
-
-            table_column.type = datatype
-            for convertible_type in convertible_types:
-                table_column.convertible_types.append(convertible_type)
-
-            response.columns.append(table_column)
-        return response

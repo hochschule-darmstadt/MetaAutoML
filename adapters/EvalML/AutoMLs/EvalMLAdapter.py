@@ -1,11 +1,22 @@
 import os
 
-from AbstractAdapter import AbstractAdapter
 from AdapterUtils import export_model, prepare_tabular_dataset, data_loader
+from AdapterUtils import *
 from JsonUtil import get_config_property
 
+import evalml
+from evalml import AutoMLSearch
+from evalml.objectives import FraudCost
+
+import pandas as pd
+import numpy as np
+from predict_time_sources import feature_preparation
+
+import json
+import pickle
+
 # TODO implement
-class EvalMLAdapter(AbstractAdapter):
+class EvalMLAdapter:
     """Implementation of the AutoML functionality for EvalML
 
     Args:
@@ -18,8 +29,94 @@ class EvalMLAdapter(AbstractAdapter):
         Args:
             configuration (dict): Dictonary holding the training configuration
         """
-        super(EvalMLAdapter, self).__init__(configuration)
+        self._configuration = configuration
+        if self._configuration["configuration"]["runtime_limit"] > 0:
+            self._time_limit = self._configuration["configuration"]["runtime_limit"]
+        else:
+            self._time_limit = 30
 
     def start(self):
         """Start the correct ML task functionality of EvalML"""
-        raise NotImplementedError("Correct ML task should be implemented!")
+        if True:
+            if self._configuration["configuration"]["task"] == ":tabular_classification":
+                self.__classification()
+            elif self._configuration["configuration"]["task"] == ":tabular_regression":
+                self.__regression()
+            elif self._configuration["configuration"]["task"] == ":text_classification":
+                self.__classification()
+            elif self._configuration["configuration"]["task"] == ":text_regression":
+                self.__regression()
+            elif self._configuration["configuration"]["task"] == ":time_series_forecasting":
+                self.__time_series_forecasting()
+
+    def __classification(self):
+        """Execute the tabular classification task and export the found model"""
+
+        self.df, test = data_loader(self._configuration)
+        X, y = prepare_tabular_dataset(self.df, self._configuration)
+
+        if len(y.unique()) == 2:
+            classification_type = "binary"
+        else:
+            classification_type =  "multiclass"
+        # parameters must be set correctly
+        automl = AutoMLSearch(
+                    X_train=X,
+                    y_train=y,
+                    problem_type=classification_type,
+                    objective="auto",
+                    max_batches=3,
+                    verbose=False,
+                )
+        automl.search()
+        automl.describe_pipeline(3)
+        best_pipeline_tobe_export = automl.best_pipeline
+        export_model(best_pipeline_tobe_export, self._configuration["result_folder_location"], 'evalml.p')
+
+
+    def __regression(self):
+        """Execute the tabular regression task and export the found model"""
+
+        self.df, test = data_loader(self._configuration)
+        X, y = prepare_tabular_dataset(self.df, self._configuration)
+        print(type(X))
+        problem_type = "REGRESSION"
+        # parameters must be set correctly
+        automl = AutoMLSearch(
+                    X_train=X,
+                    y_train=y,
+                    problem_type=problem_type,
+                    objective="auto",
+                    max_batches=3,
+                    verbose=False,
+                )
+        automl.search()
+        automl.describe_pipeline(3)
+        best_pipeline_tobe_export = automl.best_pipeline
+        export_model(best_pipeline_tobe_export, self._configuration["result_folder_location"], 'evalml.p')
+
+    def __time_series_forecasting(self):
+        """Execute the tabular classification task and export the found model"""
+
+        self.df, test = data_loader(self._configuration)
+        X, y = prepare_tabular_dataset(self.df, self._configuration)
+
+        problem_config = {"gap": 0, "max_delay": 10, "forecast_horizon": 1, "time_index": "DateTime"}
+        # parameters must be set correctly
+        automl = AutoMLSearch(
+                    X_train=X,
+                    y_train=y,
+                    problem_type="time series regression",
+                    max_batches=3,
+                    verbose=False,
+                    problem_configuration=problem_config,
+                    allowed_model_families=[
+                        "xgboost",
+                    ],
+                )
+        automl.search()
+        automl.describe_pipeline(3)
+        best_pipeline_tobe_export = automl.best_pipeline
+        export_model(best_pipeline_tobe_export, self._configuration["result_folder_location"], 'evalml.p')
+
+

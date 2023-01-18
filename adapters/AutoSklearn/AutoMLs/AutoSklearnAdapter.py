@@ -3,13 +3,11 @@ import os
 import autosklearn.classification
 import autosklearn.regression
 import pandas as pd
-from AbstractAdapter import AbstractAdapter
 from AdapterUtils import export_model, prepare_tabular_dataset, data_loader
 from JsonUtil import get_config_property
-from predict_time_sources import SplitMethod
 
 
-class AutoSklearnAdapter(AbstractAdapter):
+class AutoSklearnAdapter:
     """
     Implementation of the AutoML functionality for AutoSklearnAdapter
     """
@@ -20,7 +18,11 @@ class AutoSklearnAdapter(AbstractAdapter):
         Args:
             configuration (dict): Dictonary holding the training configuration
         """
-        super().__init__(configuration)
+        self._configuration = configuration
+        if self._configuration["configuration"]["runtime_limit"] > 0:
+            self._time_limit = self._configuration["configuration"]["runtime_limit"]
+        else:
+            self._time_limit = 30
 
         if self._configuration["configuration"]["metric"] == "":
             # handle empty metric field, None is the default metric parameter for AutoSklearn
@@ -52,6 +54,9 @@ class AutoSklearnAdapter(AbstractAdapter):
         """Execute the tabular classification task and export the found model"""
         self.df, test = data_loader(self._configuration)
         X, y = prepare_tabular_dataset(self.df, self._configuration)
+        # convert all object columns to categories, because autosklearn only supports numerical, bool and categorical features
+        X[X.select_dtypes(['object']).columns] = X.select_dtypes(['object']) \
+        .apply(lambda x: x.astype('category'))
 
         automl_settings = self.__generate_settings()
         auto_cls = autosklearn.classification.AutoSklearnClassifier(**automl_settings)
@@ -63,6 +68,9 @@ class AutoSklearnAdapter(AbstractAdapter):
         """Execute the tabular regression task and export the found model"""
         self.df, test = data_loader(self._configuration)
         X, y = prepare_tabular_dataset(self.df, self._configuration)
+        # convert all object columns to categories, because autosklearn only supports numerical, bool and categorical features
+        X[X.select_dtypes(['object']).columns] = X.select_dtypes(['object']) \
+        .apply(lambda x: x.astype('category'))
 
         automl_settings = self.__generate_settings()
         auto_reg = autosklearn.regression.AutoSklearnRegressor(**automl_settings)
@@ -71,7 +79,7 @@ class AutoSklearnAdapter(AbstractAdapter):
         export_model(auto_reg, self._configuration["result_folder_location"], "model_sklearn.p")
 
     def __get_logging_config(self) -> dict:
-        """Generate the logging configuration dict for autosklearn 
+        """Generate the logging configuration dict for autosklearn
 
         Returns:
             dict: logging configuration dict
