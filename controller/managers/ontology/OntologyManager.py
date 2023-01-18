@@ -26,7 +26,7 @@ class OntologyManager(object):
     Ontology Manager provides functionality to interact with the ML Ontology
     """
 
-    def __init__(self):        
+    def __init__(self):
         """Initiate a new OntologyManager instance
         """
         with MeasureDuration() as m:
@@ -69,9 +69,9 @@ class OntologyManager(object):
         if "task" not in request.configuration or (len(request.configuration["task"]) == 0):  # Check if task parameter is contained, we require it for a successful query
             self.__log.error("get_auto_ml_solutions_for_configuration: Task parameter not set or is empty")
             raise grpclib.GRPCError(grpclib.Status.NOT_FOUND, "Task parameter not set or is empty")
-        
-        
-        task = rdflib.URIRef(ML_ONTOLOGY_NAMESPACE + request.configuration["task"].replace(":", ""))
+
+
+        task = self.__iri_to_uri_ref(request.configuration["task"])
         #task = rdflib.Literal(request.configuration["task"])
         if "library" not in request.configuration or (len(request.configuration["library"]) == 0): # if libraries list is empty we do not query for library filter
             self.__log.debug(f'get_auto_ml_solutions_for_configuration: querying for task only {request.configuration["task"]}')
@@ -84,18 +84,18 @@ class OntologyManager(object):
         else:
             self.__log.debug(f'get_auto_ml_solutions_for_configuration: querying for task {request.configuration["task"]} and libraries {request.configuration["library"]}')
             for lib in json.loads(request.configuration["library"]):
-                library = rdflib.URIRef(ML_ONTOLOGY_NAMESPACE + lib.replace(":", ""))
+                library = self.__iri_to_uri_ref(lib)
                 #library = rdflib.Literal(request.configuration["library"])
                 q = prepareQuery(Queries.ONTOLOGY_QUERY_GET_COMPATIBLE_AUTO_ML_SOLUTIONS_FOR_TASK_AND_LIBRARIES,
                             initNs={"skos": SKOS})
                 queryResult = self.__execute_query(q, {"task": task, "lib": library})
-                
+
                 for row in queryResult:
                     solution = row.automl.replace(ML_ONTOLOGY_NAMESPACE, ":")
                     if solution not in result.auto_ml_solutions:
                         result.auto_ml_solutions.append(solution)
             return result
-        
+
 
         # TODO add more parameter to query
         # task = rdflib.Literal(u'binary classification')
@@ -110,7 +110,7 @@ class OntologyManager(object):
         self.__log.debug("get_dataset_types: get all dataset types")
         q = prepareQuery(Queries.ONTOLOGY_QUERY_GET_DATASET_TYPES,
                         initNs={"skos": SKOS})
-        
+
         queryResult = self.__execute_query(q)
         for row in queryResult:
             result.dataset_types.append(row.type.replace(ML_ONTOLOGY_NAMESPACE, ":"))
@@ -118,7 +118,7 @@ class OntologyManager(object):
 
 
     def get_ml_libraries_for_task(self, request: GetMlLibrariesForTaskRequest) -> GetMlLibrariesForTaskResponse:
-        """Get ML libraries for a specific task 
+        """Get ML libraries for a specific task
 
         Args:
             request (GetMlLibrariesForTaskRequest): The GPRC request message holding task IRI
@@ -135,7 +135,7 @@ class OntologyManager(object):
             raise grpclib.GRPCError(grpclib.Status.NOT_FOUND, "Task parameter is empty")
 
         self.__log.debug(f"get_ml_libraries_for_task: querying for task {request.task}")
-        task = rdflib.URIRef(ML_ONTOLOGY_NAMESPACE + request.task.replace(":", ""))
+        task = self.__iri_to_uri_ref(request.task)
         #task = rdflib.Literal(request.task)
         q = prepareQuery(Queries.ONTOLOGY_QUERY_GET_SUPPORTED_ML_LIBRARIES_FOR_TASK,
                         initNs={"skos": SKOS})
@@ -160,7 +160,7 @@ class OntologyManager(object):
             current_object = ObjectInformation()
             q = prepareQuery(Queries.ONTOLOGY_QUERY_GET_ALL_DETAILS_BY_ID)
 
-            object_id = rdflib.URIRef(ML_ONTOLOGY_NAMESPACE + id.replace(":", ""))
+            object_id = self.__iri_to_uri_ref(id)
             queryResult = self.__execute_query(q, {"s": object_id})
             current_object.id = id
             for row in queryResult:
@@ -199,7 +199,7 @@ class OntologyManager(object):
 
         self.__log.debug(f"get_tasks_for_dataset_type: querying for dataset type {request.dataset_type}")
         # dataset = rdflib.Literal(u"tabular data")
-        dataset_type = rdflib.URIRef(ML_ONTOLOGY_NAMESPACE + request.dataset_type.replace(":", ""))
+        dataset_type = self.__iri_to_uri_ref(request.dataset_type)
         #dataset_type = rdflib.Literal(datasetType)
         q = prepareQuery(Queries.ONTOLOGY_QUERY_GET_TASKS_FOR_DATASET_TYPE,
                         initNs={"skos": SKOS})
@@ -208,3 +208,46 @@ class OntologyManager(object):
         for row in queryResult:
             result.tasks.append(row.task.replace(ML_ONTOLOGY_NAMESPACE, ":"))
         return result
+
+    # TODO: Add doc
+    def get_auto_ml_parameters(self, request: GetAutoMlParametersRequest) -> GetAutoMlParametersResponse:
+        result = GetAutoMlParametersResponse()
+        task_iri = self.__iri_to_uri_ref(request.task_iri)
+        for autoMl in request.auto_mls:
+            auto_ml_iri = self.__iri_to_uri_ref(autoMl)
+            params = self.__get_configuration_options_by_automl_and_task(auto_ml_iri, task_iri)
+            for param in params:
+                result.auto_ml_parameters.append(param)
+        return result
+
+
+    # TODO: Define return value
+    # TODO: Add doc string
+    def __get_configuration_options_by_automl_and_task(self, auto_ml_iri: str, task_iri: str) -> List[AutoMlParameter]:
+        result: List[AutoMlParameter] = []
+        q = prepareQuery(Queries.ONTOLOGY_QUERY_GET_CONFIGURATION_BY_AUTOML_ID_AND_TASK_ID,
+                        initNs={"skos": SKOS})
+        queryResult = self.__execute_query(q, {"auto_ml_iri": auto_ml_iri, "task_iri": task_iri})
+
+        # replace namespace in response with colon
+        for row in queryResult:
+            rowInstance = AutoMlParameter()
+            rowInstance.auto_ml_iri = self.__normalize_iri_to_colon(auto_ml_iri)
+            rowInstance.param_iri = self.__normalize_iri_to_colon(row.param_iri)
+            rowInstance.param_label = row.param_label
+            rowInstance.param_type = self.__normalize_iri_to_colon(row.param_type)
+            rowInstance.value_iri = self.__normalize_iri_to_colon(row.value_iri)
+            rowInstance.value_label = row.value_label
+            rowInstance.broader_iri = self.__normalize_iri_to_colon(row.broader_iri)
+            rowInstance.broader_label = row.broader_label
+            result.append(rowInstance)
+
+        return result
+
+    def __normalize_iri_to_colon(self, iri: str) -> str:
+        if iri is not None:
+            return iri.replace(ML_ONTOLOGY_NAMESPACE, ":")
+        return None
+
+    def __iri_to_uri_ref(self, iri: str) -> str:
+        return rdflib.URIRef(ML_ONTOLOGY_NAMESPACE + iri.replace(":", ""))

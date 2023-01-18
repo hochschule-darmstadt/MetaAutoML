@@ -87,6 +87,16 @@ message StartAutoMlConfiguration {
       example: ":accuracy"
     */
     string metric = 3;
+  /*
+    Map of additional parameters
+    examples:
+    {
+      ":use_approach": { "values": [":adaboost", ":decision_tree"]},
+      ":metric": { "values": [":accuracy"]},
+      ":some_int": { "values": ["17"]}
+    }
+  */
+  map<string, DynamicParameterValue> parameters = 4;
 }
 
 message StartAutoMlResponse {
@@ -314,4 +324,19 @@ enum AdapterReturnCode {
         Return code for error behaviors
     */
 	ADAPTER_RETURN_CODE_ERROR = 100;
+}
+
+/*
+  Value type for dynamic training parameters for the auto ml solutions.
+  This type is needed, because map<> does not supported "repeated" in the value.
+*/
+message DynamicParameterValue {
+  /*
+    List of values for a parameter
+    examples:
+    - int: ["17"]
+    - single_value: [":accuracy"]
+    - list: [":adaboost", ":decision_tree"]
+  */
+  repeated string values = 1;
 }

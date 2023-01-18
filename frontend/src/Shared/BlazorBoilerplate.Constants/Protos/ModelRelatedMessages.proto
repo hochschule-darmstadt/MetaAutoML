@@ -12,11 +12,11 @@ message DeleteModelRequest {
     example: '4a7af128-ac3d-4e3d-89fe-b70f7bfe0c3b'
   */
   string userId = 1;
-  /*
+  /*  
     Unique model ids generated when inserting a new model document into MongoDB
     example: '63525870394eff35ee175bc2'
   */
-  string modelId = 2;
+  string modelId = 2;      
 }
 
 message DeleteModelResponse {
@@ -41,7 +41,7 @@ message GetModelsResponse {
     List of model records from MongoDB (see Model for more detals)
     example: [Model, Model]
   */
-  repeated Model models = 1;
+  repeated Model models = 1; 
 }
 
 message GetModelRequest {
@@ -50,7 +50,7 @@ message GetModelRequest {
     example: '4a7af128-ac3d-4e3d-89fe-b70f7bfe0c3b'
   */
   string userId = 1;
-  /*
+  /*  
     Unique model ids generated when inserting a new model document into MongoDB
     example: '63525870394eff35ee175bc2'
   */
@@ -66,7 +66,7 @@ message GetModelResponse {
 }
 
 message Model {
-  /*
+  /*  
     Unique model ids generated when inserting a new model document into MongoDB
     example: '63525870394eff35ee175bc2'
   */
@@ -87,7 +87,7 @@ message Model {
   */
   string status = 4;
   /*
-    Ontology URI of the used AutoML Solution
+    Ontology URI of the used AutoML Solution 
     example: ":autokeras"
   */
   string autoMlSolution = 5;
