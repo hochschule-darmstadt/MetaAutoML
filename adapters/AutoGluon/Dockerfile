@@ -20,6 +20,7 @@ WORKDIR /app
 COPY ./AutoGluon .
 COPY ./Utils/Utils ./Utils
 COPY ./Utils/AutoMLs ./AutoMLs
+COPY ./Utils/Templates ./app-data/templates
 COPY ./GRPC/Adapter ./
 
 # this should already be created, but sometimes there is a bug in docker which causes that the directory is not copied

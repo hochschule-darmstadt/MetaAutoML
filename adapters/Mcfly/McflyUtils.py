@@ -10,7 +10,6 @@ from sklearn.model_selection import train_test_split
 from sktime.datatypes import convert_to
 from sktime.datasets import load_from_tsfile_to_dataframe
 from sktime.datasets import load_from_tsfile
-from predict_time_sources import SplitMethod
 
 ######################################################################
 ## LONGITUDINAL DATASET HELPER FUNCTIONS

@@ -2,7 +2,7 @@ FROM --platform=linux/amd64 python:3.7.11-slim-buster AS base
 EXPOSE 50056
 
 RUN apt-get update && apt-get install -y libgomp1 \
-    && apt-get install -y git 
+    && apt-get install -y git
 
 COPY ./FLAML/requirements.txt .
 # Install dependencies
@@ -12,6 +12,7 @@ WORKDIR /app
 COPY ./FLAML .
 COPY ./Utils/Utils ./Utils
 COPY ./Utils/AutoMLs ./AutoMLs
+COPY ./Utils/Templates ./app-data/templates
 COPY ./GRPC/Adapter ./
 
 # this should already be created, but sometimes there is a bug in docker which causes that the directory is not copied
