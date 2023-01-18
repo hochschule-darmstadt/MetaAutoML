@@ -6,6 +6,10 @@ namespace SystemTest
     {
         private string _dataDir = "";
 
+        /// <summary>
+        /// Inialization of test enviroment by downloading test datasets.
+        /// </summary>
+        /// <returns>asynchrous task</returns>
         [TestInitialize]
         public async Task InitializeTestsAsync()
         {

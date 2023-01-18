@@ -20,8 +20,16 @@ IMAGE_DATA_NAMES = ["petfinder-pawpularity-score"]
 
 
 class TestDataUpload(IsolatedAsyncioTestCase):
-
+    """
+    Test class dedicated to testing the upload of datasets.
+    Args:
+        IsolatedAsyncioTestCase (_type_): asynchronous test case
+    """
+    
     def setUp(self) -> None:
+        """
+        Sets up the test enviroment by getting needed file paths, downloading test data and initializing the DataStorage and DatasetManager.
+        """
         base_path = dirname(__file__)
         self.__test_data_path = f"{base_path}\\datasets"#DATASET_NAME
         base_path = os.path.normpath(os.path.join(base_path, '..'))
@@ -55,6 +63,10 @@ class TestDataUpload(IsolatedAsyncioTestCase):
 
 
     async def test_tabular_upload(self):
+        """
+        Tests 'creation' of tabular datasets within the system by invoking the create_dataset() method 
+        of DatasetManager for each dataset within the tabular folder created in the setup
+        """
         tabular_test_data_dir = f"{self.__test_data_path}\\tabular\\"
         for file in os.listdir(os.fsencode(tabular_test_data_dir)):
             filename = os.fsdecode(file)
@@ -68,6 +80,10 @@ class TestDataUpload(IsolatedAsyncioTestCase):
             self.assertIsInstance(create_respone,CreateDatasetResponse)
             
     async def test_imgae_upload(self):
+        """
+        Tests 'creation' of image datasets within the system by invoking the create_dataset() method 
+        of DatasetManager for each dataset within the image folder created in the setup
+        """
         image_test_data_dir = f"{self.__test_data_path}\\image\\"
         for file in os.listdir(os.fsencode(image_test_data_dir)):
             filename = os.fsdecode(file)
