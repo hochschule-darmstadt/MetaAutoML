@@ -1,0 +1,7 @@
+{
+    "recommendations": [
+        "ms-dotnettools.csharp",
+        "k--kato.docomment",
+        "tintoy.msbuild-project-tools"
+    ]
+}

@@ -1,4 +1,4 @@
-﻿using BlazorBoilerplate.Shared.Dto.Dataset;
+using BlazorBoilerplate.Shared.Dto.Dataset;
 using BlazorBoilerplate.Shared.Dto;
 using BlazorBoilerplate.Shared.Interfaces;
 using BlazorBoilerplate.Shared.Localizer;
@@ -23,6 +23,28 @@ namespace BlazorBoilerplate.Theme.Material.Services
             _notifier = notifier;
             L = l;
         }
+
+        public async Task UpdateDatasetColumnSchemaConfiguration(SetDatasetColumnSchemaConfigurationRequestDto request)
+        {
+            try
+            {
+                ApiResponseDto apiResponse = await _client.SetDatasetColumnSchemaConfiguration(request);
+
+                if (apiResponse.IsSuccessStatusCode)
+                {
+                    _notifier.Show("Column updated", ViewNotifierType.Success, L["Operation Successful"]);
+                }
+                else
+                {
+                    _notifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
+                }
+            }
+            catch (Exception ex)
+            {
+                _notifier.Show(ex.GetBaseException().Message, ViewNotifierType.Error, L["Operation Failed"]);
+            }
+        }
+
         public async Task UpdateDatasetFileConfiguration(GetDatasetResponseDto dataset)
         {
             try

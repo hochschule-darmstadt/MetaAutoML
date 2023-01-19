@@ -12,6 +12,14 @@ class AdapterRuntimeManagerAgent(IAbstractBlackboardAgent):
         super().__init__(blackboard, strategy_controller, 'training-runtime')
         self.__adapter_runtime_manager = adapter_runtime_manager
 
+    def get_adapter_runtime_manager(self) -> "AdapterRuntimeManager":
+        """Get the adapter runtime manager
+
+        Returns:
+            str: the adapter runtime manager
+        """
+        return self.__adapter_runtime_manager
+
     def can_contribute(self) -> bool:
         return self.get_state() != self.__adapter_runtime_manager.get_status_for_blackboard()
         
@@ -26,3 +34,6 @@ class AdapterRuntimeManagerAgent(IAbstractBlackboardAgent):
             raise StopIteration('Training session inactive, stopping..')
 
         return session_status
+
+    def get_adapter_runtime_manager(self) -> "AdapterRuntimeManager":
+        return self.__adapter_runtime_manager

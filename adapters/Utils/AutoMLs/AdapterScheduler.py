@@ -10,7 +10,7 @@ class AdapterScheduler:
     def __init__(self) -> None:
         """Initialize a new AdapterScheduler, is managed by dependency injection"""
         self.__adapter_managers: dict[str, AdapterManager] = {}
-        return 
+        return
 
     @inject
     async def start_auto_ml(self, start_auto_ml_request: "StartAutoMlRequest", adapter_manager: AdapterManager = Provide["managers.adapter_manager"]) -> "StartAutoMlResponse":
@@ -30,7 +30,7 @@ class AdapterScheduler:
         response = StartAutoMlResponse()
         response.session_id = new_session_id
         return response
-        
+
     async def get_auto_ml_status(self, start_auto_ml_request: "GetAutoMlStatusRequest") -> "GetAutoMlStatusResponse":
         """Retrieve an available status messages about a specific training session
 

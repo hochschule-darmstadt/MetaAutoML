@@ -1,6 +1,8 @@
 FROM --platform=linux/amd64 python:3.7.11-slim-buster AS base
 EXPOSE 50059
 
+RUN apt-get update && apt-get install -y git
+
 RUN python -m pip install --upgrade pip
 
 COPY ./AutoPytorch/requirements.txt .
@@ -9,7 +11,7 @@ RUN pip install -r requirements.txt
 # put all files in a directory called app
 
 # libs required by the automl
-RUN apt-get update && apt-get install -y \
+RUN apt-get install -y \
     libgl1-mesa-glx \
     libglib2.0-0 \
     libsm6 \
@@ -20,6 +22,7 @@ WORKDIR /app
 COPY ./AutoPytorch .
 COPY ./Utils/Utils ./Utils
 COPY ./Utils/AutoMLs ./AutoMLs
+COPY ./Utils/Templates ./app-data/templates
 COPY ./GRPC/Adapter ./
 
 # this should already be created, but sometimes there is a bug in docker which causes that the directory is not copied
@@ -27,6 +30,6 @@ RUN mkdir -p /app/app-data/output/tmp
 
 ENV RUNTIME=DOCKER
 ENV PYTHONUNBUFFERED=1
-ENV PYTHONPATH "AutoMLs:Utils"
+ENV PYTHONPATH ".:dependency-injection:AutoMLs:Utils"
 ENV PYTHON_ENV "python"
 ENTRYPOINT ["python", "AutoPytorchServer.py"]
