@@ -37,10 +37,6 @@ message GetModelsRequest {
 }
 
 message GetModelsResponse {
-  /*
-    List of model records from MongoDB (see Model for more detals)
-    example: [Model, Model]
-  */
   repeated Model models = 1;
 }
 
@@ -86,10 +82,6 @@ message Model {
     example: "busy"
   */
   string status = 4;
-  /*
-    Ontology URI of the used AutoML Solution
-    example: ":autokeras"
-  */
   string autoMlSolution = 5;
   /*
     Ontology URI of the used ML model type

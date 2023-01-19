@@ -7,21 +7,21 @@ import "Enumerations.proto";
 message GetAutoMlSolutionsForConfigurationRequest {
   /*
     Dictonary holding the current user configuration of the training wizard
-    example: 
+    example:
     {
       "task": ":tabular_classification",
       "library": [":keras_lib", ":tensorflow_lib"],
     }
   */
-    map<string, string> configuration = 1;       
+    map<string, string> configuration = 1;
   }
-  
+
 message GetAutoMlSolutionsForConfigurationResponse {
   /*
     List of AutoML solution IRIs from the ontology compatible with the current wizard configuration
     example: [":autokeras", ":mljar"]
   */
-    repeated string AutoMlSolutions = 1;          
+    repeated string AutoMlSolutions = 1;
   }
 
 message GetTasksForDatasetTypeRequest {
@@ -31,7 +31,7 @@ message GetTasksForDatasetTypeRequest {
   */
     string datasetType = 1;
   }
-  
+
 message GetTasksForDatasetTypeResponse {
   /*
     List of ML task IRIs from the ontology compatible with the request dataset type
@@ -39,7 +39,7 @@ message GetTasksForDatasetTypeResponse {
   */
     repeated string tasks = 1;
   }
-  
+
 message GetMlLibrariesForTaskRequest {
   /*
     The task IRI selected by the user in the training wizard
@@ -47,13 +47,13 @@ message GetMlLibrariesForTaskRequest {
   */
     string task = 1;
   }
-  
+
 message GetMlLibrariesForTaskResponse {
     /*
       List of ML library IRIs from the ontology supporting the requested ML task
       example: [":keras_lib", ":tensorflow_lib"]
     */
-    repeated string MlLibraries = 1;     
+    repeated string MlLibraries = 1;
   }
 
 message GetAvailableStrategiesRequest {
@@ -69,21 +69,21 @@ message GetAvailableStrategiesRequest {
   string datasetId = 2;
   /*
     Dictonary holding the current user configuration of the training wizard
-    example: 
+    example:
     {
       "task": ":tabular_classification",
       "library": [":keras_lib", ":tensorflow_lib"],
     }
   */
-  map<string, string> configuration = 3;  
+  map<string, string> configuration = 3;
   }
-  
+
 message GetAvailableStrategiesResponse {
   /*
     List of Strategy objects (see Strategy for more detals)
     example: [Strategy, Strategy]
   */
-    repeated Strategy Strategies = 1;                 
+    repeated Strategy Strategies = 1;
   }
 
 message Strategy {
@@ -91,26 +91,26 @@ message Strategy {
     Unique strategy id to identify a blackboard strategy
     example: 'data_preparation.ignore_redundant_features'
   */
-    string id = 1;                                    
+    string id = 1;
     /*
       The strategy title
       example: 'Ignore redundant features'
     */
-    string title = 2; 
+    string title = 2;
     /*
       The strategy description
       example: 'This strategy ignores certain dataset columns if they have been flagged as duplicate in the dataset analysis.'
     */
-    string description = 3;                           
+    string description = 3;
   }
-  
+
 
 message GetObjectsInformationRequest {
   /*
-    List of ontology IRI to retrieve the complete information from. 
+    List of ontology IRI to retrieve the complete information from.
     example: [":tabular_classification",”:autokeras”]
   */
-  repeated string Ids = 1;                          
+  repeated string Ids = 1;
 }
 
 message GetObjectsInformationResponse {
@@ -151,4 +151,43 @@ message GetDatasetTypesResponse {
     example: [":tabular", ":image"]
   */
   repeated string datasetTypes = 1;
+}
+
+message GetAutoMlParametersRequest {
+  /*Iri of the auto ml task. Example: :tabular_classification*/
+  string taskIri = 1;
+  /*List of auto ml iris. Example: [":autokeras", ":mljar"]*/
+  repeated string autoMls = 2;
+}
+
+message GetAutoMlParametersResponse {
+  /*
+    List of available auto ml parameters
+  */
+  repeated AutoMlParameter autoMlParameters = 1;
+}
+
+/*
+  Parameter for an auto ml solution
+  example:
+  {
+    autoMlIri: ":autokeras",
+    paramIri: ":metric_autokeras_regression",
+    paramLabel: "metric autokeras regression",
+    paramType: ":list",
+    broaderIri: ":metric",
+    broaderLabel: "metric",
+    valueIri: ":median_absolute_error",
+    valueLabel: "median absolute error",
+  }
+*/
+message AutoMlParameter {
+  string autoMlIri =1;
+  string paramIri = 2;
+  string paramLabel = 3;
+  string paramType = 4;
+  string broaderIri = 5;
+  string broaderLabel = 6;
+  optional string valueIri = 7;
+  optional string valueLabel = 8;
 }

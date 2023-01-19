@@ -160,9 +160,9 @@ class ControllerServiceManager(ControllerServiceBase):
 
     @inject
     async def create_training(
-        self, create_training_request: "CreateTrainingRequest",
+        self, create_training_request: CreateTrainingRequest,
         training_manager: TrainingManager=Provide[Application.managers.training_manager]
-    ) -> "CreateTrainingResponse":
+    ) -> CreateTrainingResponse:
         with MeasureDuration() as m:
             response = await training_manager.create_training(create_training_request)
         #response = await self.__loop.run_in_executor(
@@ -382,6 +382,18 @@ class ControllerServiceManager(ControllerServiceBase):
         self.__log.warn("get_tasks_for_dataset_type: executed")
         return response
 
+    @inject
+    async def get_auto_ml_parameters(
+        self, get_auto_ml_parameters_request: GetAutoMlParametersRequest,
+        ontology_manager: OntologyManager=Provide[Application.ressources.ontology_manager]
+    ) -> GetAutoMlParametersResponse:
+        with MeasureDuration() as m:
+            response = ontology_manager.get_auto_ml_parameters(get_auto_ml_parameters_request)
+        #response = await self.__loop.run_in_executor(
+        #    self.__executor, ontology_manager.get_tasks_for_dataset_type, get_tasks_for_dataset_type_request
+        #)
+        self.__log.warn("get_auto_ml_parameters: executed")
+        return response
 
 #endregion
 

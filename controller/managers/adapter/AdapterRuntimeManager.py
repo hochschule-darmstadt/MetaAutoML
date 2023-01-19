@@ -11,7 +11,7 @@ class AdapterRuntimeManager:
     """The AdapterRuntimeManager represent a single training session started by a user and manages it
     """
 
-    def __init__(self, data_storage: DataStorage, request: "CreateTrainingRequest", explainable_lock: ThreadLock) -> None:
+    def __init__(self, data_storage: DataStorage, request: CreateTrainingRequest, explainable_lock: ThreadLock) -> None:
         """Initialize a new AdapterRuntimeManager instance
 
         Args:
@@ -22,7 +22,7 @@ class AdapterRuntimeManager:
             explainable_lock (ThreadLock): The explainable lock instance to protect from multiple thread using critical parts of the ExplainableAIManager module
         """
         self.__data_storage: DataStorage = data_storage
-        self.__request: "CreateTrainingRequest" = request
+        self.__request: CreateTrainingRequest = request
         self.__explainable_lock = explainable_lock
         self.__log = logging.getLogger('AdapterRuntimeManager')
         self.__log.setLevel(logging.getLevelName(os.getenv("SERVER_LOGGING_LEVEL")))
@@ -94,14 +94,7 @@ class AdapterRuntimeManager:
             "dataset_id": str(dataset["_id"]),
             "model_ids": [],
             "status": "busy",
-            "configuration": {
-                "task": self.__request.configuration.task,
-                "enabled_strategies": self.__request.configuration.enabled_strategies,
-                "runtime_limit": self.__request.configuration.runtime_limit,
-                "metric": self.__request.configuration.metric,
-                "selected_auto_ml_solutions": self.__request.configuration.selected_auto_ml_solutions,
-                "selected_ml_libraries": self.__request.configuration.selected_ml_libraries
-            },
+            "configuration": self.__request.configuration.to_dict(casing=betterproto.Casing.SNAKE),
             "dataset_configuration": {
                 "file_configuration": dataset["file_configuration"],
                 "schema": self.__build_dataset_schema()

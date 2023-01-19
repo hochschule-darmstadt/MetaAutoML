@@ -141,6 +141,16 @@ message Configuration {
     example: [":keras_lib", ":sklearn_lib"]
   */
   repeated string selectedMlLibraries = 7;
+  /*
+    Map of additional parameters
+    examples:
+    {
+      ":use_approach": { "values": [":adaboost", ":decision_tree"]},
+      ":metric": { "values": [":accuracy"]},
+      ":some_int": { "values": ["17"]}
+    }
+  */
+  map<string, DynamicParameterValue> parameters = 8;
 }
 
 message TrainingRuntimeProfile {
@@ -226,4 +236,19 @@ message CreateTrainingResponse {
     example: '63515c86b10d04d230dc1482'
   */
   string trainingId = 1;
+}
+
+/*
+  Value type for dynamic training parameters for the auto ml solutions.
+  This type is needed, because map<> does not supported "repeated" in the value.
+*/
+message DynamicParameterValue {
+  /*
+    List of values for a parameter
+    examples:
+    - int: ["17"]
+    - single_value: [":accuracy"]
+    - list: [":adaboost", ":decision_tree"]
+  */
+  repeated string values = 1;
 }

@@ -25,7 +25,7 @@ class AdapterRuntimeScheduler:
         self.__explainable_lock = explainable_lock
         return
 
-    def create_new_training(self, request: "CreateTrainingRequest") -> str:
+    def create_new_training(self, request: CreateTrainingRequest) -> str:
         """Create a new training session and add it to the running training list
 
         Args:

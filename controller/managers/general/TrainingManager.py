@@ -22,8 +22,8 @@ class TrainingManager:
         self.__adapter_runtime_scheduler = adapter_runtime_scheduler
 
     async def create_training(
-        self, create_training_request: "CreateTrainingRequest"
-    ) -> "CreateTrainingResponse":
+        self, create_training_request: CreateTrainingRequest
+    ) -> CreateTrainingResponse:
         """Create a new training record and start the training process
 
         Args:
@@ -118,14 +118,7 @@ class TrainingManager:
 
             training_item.status = training["status"]
 
-            training_configuration = Configuration()
-            training_configuration.task = training["configuration"]["task"]
-            training_configuration.enabled_strategies = training["configuration"]["enabled_strategies"]
-            training_configuration.runtime_limit = training["configuration"]["runtime_limit"]
-            training_configuration.metric = training["configuration"]["metric"]
-            training_configuration.selected_auto_ml_solutions = training["configuration"]["selected_auto_ml_solutions"]
-            training_configuration.selected_ml_libraries = training["configuration"]["selected_ml_libraries"]
-            training_item.configuration = training_configuration
+            training_item.configuration = Configuration().from_dict(training["configuration"])
 
             training_item.dataset_configuration = json.dumps(training["dataset_configuration"])
 

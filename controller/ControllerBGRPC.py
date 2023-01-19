@@ -750,6 +750,15 @@ class Configuration(betterproto.Message):
     [":keras_lib", ":sklearn_lib"]
     """
 
+    parameters: Dict[str, "DynamicParameterValue"] = betterproto.map_field(
+        8, betterproto.TYPE_STRING, betterproto.TYPE_MESSAGE
+    )
+    """
+    Map of additional parametersexamples:{":use_approach": { "values":
+    [":adaboost", ":decision_tree"]},":metric": { "values":
+    [":accuracy"]},":some_int": { "values": ["17"]}}
+    """
+
 
 @dataclass(eq=False, repr=False)
 class TrainingRuntimeProfile(betterproto.Message):
@@ -827,13 +836,27 @@ class CreateTrainingResponse(betterproto.Message):
 
 
 @dataclass(eq=False, repr=False)
+class DynamicParameterValue(betterproto.Message):
+    """
+    Value type for dynamic training parameters for the auto ml solutions.This
+    type is needed, because map<> does not supported "repeated" in the value.
+    """
+
+    values: List[str] = betterproto.string_field(1)
+    """
+    List of values for a parameterexamples:- int: ["17"]- single_value:
+    [":accuracy"]- list: [":adaboost", ":decision_tree"]
+    """
+
+
+@dataclass(eq=False, repr=False)
 class GetAutoMlSolutionsForConfigurationRequest(betterproto.Message):
     configuration: Dict[str, str] = betterproto.map_field(
         1, betterproto.TYPE_STRING, betterproto.TYPE_STRING
     )
     """
     Dictonary holding the current user configuration of the training
-    wizardexample: {"task": ":tabular_classification","library": [":keras_lib",
+    wizardexample:{"task": ":tabular_classification","library": [":keras_lib",
     ":tensorflow_lib"],}
     """
 
@@ -903,7 +926,7 @@ class GetAvailableStrategiesRequest(betterproto.Message):
     )
     """
     Dictonary holding the current user configuration of the training
-    wizardexample: {"task": ":tabular_classification","library": [":keras_lib",
+    wizardexample:{"task": ":tabular_classification","library": [":keras_lib",
     ":tensorflow_lib"],}
     """
 
@@ -939,7 +962,7 @@ class Strategy(betterproto.Message):
 class GetObjectsInformationRequest(betterproto.Message):
     ids: List[str] = betterproto.string_field(1)
     """
-    List of ontology IRI to retrieve the complete information from. example:
+    List of ontology IRI to retrieve the complete information from.example:
     [":tabular_classification",”:autokeras”]
     """
 
@@ -981,6 +1004,45 @@ class GetDatasetTypesResponse(betterproto.Message):
     List of supported dataset type IRIs by OMA-MLexample: [":tabular",
     ":image"]
     """
+
+
+@dataclass(eq=False, repr=False)
+class GetAutoMlParametersRequest(betterproto.Message):
+    task_iri: str = betterproto.string_field(1)
+    """Iri of the auto ml task. Example: :tabular_classification"""
+
+    auto_mls: List[str] = betterproto.string_field(2)
+    """List of auto ml iris. Example: [":autokeras", ":mljar"]"""
+
+
+@dataclass(eq=False, repr=False)
+class GetAutoMlParametersResponse(betterproto.Message):
+    auto_ml_parameters: List["AutoMlParameter"] = betterproto.message_field(1)
+    """List of available auto ml parameters"""
+
+
+@dataclass(eq=False, repr=False)
+class AutoMlParameter(betterproto.Message):
+    """
+    Parameter for an auto ml solutionexample:{autoMlIri: ":autokeras",paramIri:
+    ":metric_autokeras_regression",paramLabel: "metric autokeras
+    regression",paramType: ":list",broaderIri: ":metric",broaderLabel:
+    "metric",valueIri: ":median_absolute_error",valueLabel: "median absolute
+    error",}
+    """
+
+    auto_ml_iri: str = betterproto.string_field(1)
+    param_iri: str = betterproto.string_field(2)
+    param_label: str = betterproto.string_field(3)
+    param_type: str = betterproto.string_field(4)
+    broader_iri: str = betterproto.string_field(5)
+    broader_label: str = betterproto.string_field(6)
+    value_iri: Optional[str] = betterproto.string_field(
+        7, optional=True, group="_valueIri"
+    )
+    value_label: Optional[str] = betterproto.string_field(
+        8, optional=True, group="_valueLabel"
+    )
 
 
 @dataclass(eq=False, repr=False)
@@ -1381,6 +1443,23 @@ class ControllerServiceStub(betterproto.ServiceStub):
             metadata=metadata,
         )
 
+    async def get_auto_ml_parameters(
+        self,
+        get_auto_ml_parameters_request: "GetAutoMlParametersRequest",
+        *,
+        timeout: Optional[float] = None,
+        deadline: Optional["Deadline"] = None,
+        metadata: Optional["MetadataLike"] = None
+    ) -> "GetAutoMlParametersResponse":
+        return await self._unary_unary(
+            "/ControllerService/GetAutoMlParameters",
+            get_auto_ml_parameters_request,
+            GetAutoMlParametersResponse,
+            timeout=timeout,
+            deadline=deadline,
+            metadata=metadata,
+        )
+
     async def create_prediction(
         self,
         create_prediction_request: "CreatePredictionRequest",
@@ -1556,6 +1635,11 @@ class ControllerServiceBase(ServiceBase):
     async def get_tasks_for_dataset_type(
         self, get_tasks_for_dataset_type_request: "GetTasksForDatasetTypeRequest"
     ) -> "GetTasksForDatasetTypeResponse":
+        raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
+
+    async def get_auto_ml_parameters(
+        self, get_auto_ml_parameters_request: "GetAutoMlParametersRequest"
+    ) -> "GetAutoMlParametersResponse":
         raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
 
     async def create_prediction(
@@ -1739,6 +1823,14 @@ class ControllerServiceBase(ServiceBase):
         response = await self.get_tasks_for_dataset_type(request)
         await stream.send_message(response)
 
+    async def __rpc_get_auto_ml_parameters(
+        self,
+        stream: "grpclib.server.Stream[GetAutoMlParametersRequest, GetAutoMlParametersResponse]",
+    ) -> None:
+        request = await stream.recv_message()
+        response = await self.get_auto_ml_parameters(request)
+        await stream.send_message(response)
+
     async def __rpc_create_prediction(
         self,
         stream: "grpclib.server.Stream[CreatePredictionRequest, CreatePredictionResponse]",
@@ -1898,6 +1990,12 @@ class ControllerServiceBase(ServiceBase):
                 grpclib.const.Cardinality.UNARY_UNARY,
                 GetTasksForDatasetTypeRequest,
                 GetTasksForDatasetTypeResponse,
+            ),
+            "/ControllerService/GetAutoMlParameters": grpclib.const.Handler(
+                self.__rpc_get_auto_ml_parameters,
+                grpclib.const.Cardinality.UNARY_UNARY,
+                GetAutoMlParametersRequest,
+                GetAutoMlParametersResponse,
             ),
             "/ControllerService/CreatePrediction": grpclib.const.Handler(
                 self.__rpc_create_prediction,
