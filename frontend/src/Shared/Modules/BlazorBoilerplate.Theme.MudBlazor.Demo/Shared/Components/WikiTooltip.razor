@@ -1,4 +1,4 @@
-﻿@if (!string.IsNullOrEmpty((SetTooltips(SeeAlso, Comment).Text)))
+﻿@if (!string.IsNullOrEmpty(InfoText))
 {
     <MudTooltip Text="SeeAlso" Delay="600" Arrow="true" Placement="Placement.Top" Class="strategy-description-tooltip">
         <ChildContent>
@@ -44,36 +44,27 @@ else
     public string ImageUrl;
     public string InfoText;
 
-    protected async override void OnInitialized()
+    protected override void OnInitialized()
     {
-        InfoText = SetTooltips(SeeAlso, Comment).Text;
-        ImageUrl = SetTooltips(SeeAlso, Comment).ImageUrl;
-
-    }
-
-
-    public WikipediaTooltip CurrentWikipediaTooltip = new WikipediaTooltip();
-
-
-    public WikipediaTooltip SetTooltips(string seeAlso, string comment)
-    {
-        WikipediaTooltip result = new WikipediaTooltip();
-
-        if (string.IsNullOrEmpty(seeAlso))
+        if (string.IsNullOrEmpty(SeeAlso))
         {
-            result.Text = comment;
+            InfoText = Comment;
         }
         else
         {
             WikiDataGrabber wiki = new WikiDataGrabber();
-            List<string> wikipediaData = wiki.GetDataFrom(seeAlso);
-            if (wikipediaData.Count != 0) { result.Text = wikipediaData[0]; result.ImageUrl = wikipediaData[1]; } else { result.Text = comment; }
-        }
-        return result;
+            List<string> wikipediaData = wiki.GetDataFrom(SeeAlso);
+            if (wikipediaData.Count != 0) { InfoText = wikipediaData[0]; ImageUrl = wikipediaData[1]; } else { InfoText = Comment; }
 
+        }
+
+
+        
 
     }
 
+
+   
 
     public class WikipediaTooltip
     {
