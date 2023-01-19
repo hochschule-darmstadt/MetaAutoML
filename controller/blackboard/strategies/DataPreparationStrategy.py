@@ -45,9 +45,9 @@ class DataPreparationStrategyController(IAbstractStrategy):
         )
 
         self.register_rule(
-            'data_preparation.multi_fidelity_optimization',
+            'data_preparation.top_3_models',
             Rule("phase == 'preprocessing'", context=data_preparation_context),
-            self.multi_fidelity_optimization
+            self.top_3_models
         )
 
         self.register_rule(
@@ -85,11 +85,11 @@ class DataPreparationStrategyController(IAbstractStrategy):
 
         return
 
-    def multi_fidelity_optimization(self, state: dict, blackboard: Blackboard, controller: StrategyController):
+    def top_3_models(self, state: dict, blackboard: Blackboard, controller: StrategyController):
         if self.global_multi_fidelity_level == 1:
             self.global_multi_fidelity_level = 0
         #disable Multi-Fidelity-Strategy
-        controller.disable_strategy('data_preparation.multi_fidelity_optimization')
+        controller.disable_strategy('data_preparation.top_3_models')
 
         #start new training
         strategy_controller = StrategyController(controller.get_data_storage(), controller.get_request(), controller.get_explainable_lock(), multi_fidelity_callback=self.multi_fidelity_callback, multi_fidelity_level=1)

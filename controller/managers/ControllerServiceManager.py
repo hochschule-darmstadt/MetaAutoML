@@ -329,9 +329,9 @@ class ControllerServiceManager(ControllerServiceBase):
 				)
             result.strategies.append(
                 Strategy(
-                'data_preparation.multi_fidelity_optimization',
-                'Multi Fidelity Optimization',
-                'This strategy will run all adapters with only a small part of the data. Then it will train the best solutions with the full data again.'
+                'data_preparation.top_3_models',
+                'Top 3 Models',
+                'This strategy will run all adapters with only a small part of the data. Then it will train the 3 best solutions with the full data again.'
                 )
             )
 
