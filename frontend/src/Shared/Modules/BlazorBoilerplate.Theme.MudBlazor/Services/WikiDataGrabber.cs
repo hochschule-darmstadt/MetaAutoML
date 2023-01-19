@@ -95,7 +95,19 @@ namespace BlazorBoilerplate.Theme.Material.Services
 
         public string GetWikipediaUrl(dynamic jsonObject, string uri, string language = "en")
         {
-            string wikipediaUrl = jsonObject.entities[uri].sitelinks[language + "wiki"].url;
+            string wikipediaUrl;
+            try {
+                wikipediaUrl = jsonObject.entities[uri].sitelinks[language + "wiki"].url;
+            }
+            // If no wikipediaURL available, try to get the description text. If there is not even a description text, say "sorry"
+            catch {
+                try {
+                    wikipediaUrl = jsonObject.entities[uri].descriptions[language].value;
+                }
+                catch {
+                    wikipediaUrl = "No Data available, sorry.";
+                }
+            }
             return wikipediaUrl;
         }
 
