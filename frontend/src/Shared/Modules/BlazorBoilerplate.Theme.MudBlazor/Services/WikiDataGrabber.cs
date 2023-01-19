@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Net;
@@ -20,10 +20,10 @@ namespace BlazorBoilerplate.Theme.Material.Services
         /// <returns></returns> Either the Wikidata description (currently) or the content of url if it's a non-url-string
         public List<string> GetDataFrom(string wikiDataUrl, string language = "en")
         {
-            List<string> wikipediaContent = new List<string>();
+            List<string> toolTipContent = new List<string>();
             if(!IsWikiDatalink(wikiDataUrl))
             {
-                return wikipediaContent;
+                return toolTipContent;
             }
             
             wikiDataUrl = AdjustUrl(wikiDataUrl);
@@ -31,29 +31,62 @@ namespace BlazorBoilerplate.Theme.Material.Services
             dynamic wikiDataJsonFile = GetDataFromUrl(wikiDataUrl);
             string uri = ExtractUri(wikiDataUrl);
             string description = GetWikidataDescription(wikiDataJsonFile, uri);
+            // If there is no Wikipedia URL for given WikiData entry...
             string wikipediaLink = GetWikipediaUrl(wikiDataJsonFile, uri, language);
-            wikipediaLink = AdjustWikipediaLink(wikipediaLink);
-            JObject wikipediaJsonFile = GetDataFromUrl(wikipediaLink)["query"]["pages"];
-            string pageId = wikipediaJsonFile.Properties().First().Name;
-            //Splitting the string, because it would show every section and we only want the first description
-            string extract = wikipediaJsonFile[pageId]["extract"].ToString().Split("\n\n\n==")[0];
-            wikipediaContent.Add(extract);
-            string imageUrl = GetPictureUrlFromWikipedia(wikipediaLink);
-            wikipediaContent.Add(imageUrl);
-           
-            return wikipediaContent;
+            if(wikipediaLink==null)
+            {
+                // ...try to get the description instead...
+                string descriptionFailsafe = GetWikidataDescription(wikiDataJsonFile, uri);
+                if(descriptionFailsafe==null)
+                {
+                    //...and if there isn't even a description, just enter an empty string.
+                    toolTipContent.Add("");
+                }
+                else
+                {
+                    toolTipContent.Add(descriptionFailsafe);
+                }
+                // TODO @Anna: As the toolTipContent List NEEDS to have two entries (at least that's how I understand it)
+                // a pointless dummy entry needs to be added in the end here as well. A more elegant failsafe than this
+                // would probably be more suitable.
+                toolTipContent.Add("asdf");
+            }
+            else
+            {
+                wikipediaLink = AdjustWikipediaLink(wikipediaLink);
+                JObject wikipediaJsonFile = GetDataFromUrl(wikipediaLink)["query"]["pages"];
+                string pageId = wikipediaJsonFile.Properties().First().Name;
+                //Splitting the string, because it would show every section and we only want the first description
+                string extract = wikipediaJsonFile[pageId]["extract"].ToString().Split("\n\n\n==")[0];
+                toolTipContent.Add(extract);
+                string imageUrl = GetPictureUrlFromWikipedia(wikipediaLink);
+                toolTipContent.Add(imageUrl);
+            }
+            return toolTipContent;
         }
 
+        /// <summary>
+        /// TODO (I think you can describe better than me what exactly happens here @Anna)
+        /// </summary>
+        /// <param name="adjustedUrl"></param>
+        /// <returns></returns>
         public string GetPictureUrlFromWikipedia(string adjustedUrl)
         {
             adjustedUrl += "&prop=pageimages&format=json&pithumbsize=200";
             JObject wikipediaJsonResponse = GetDataFromUrl(adjustedUrl)["query"]["pages"];
             string pageId = wikipediaJsonResponse.Properties().First().Name;
-            string imageUrl = wikipediaJsonResponse[pageId]["thumbnail"]["source"].ToString();
+            // TODO @Anna: It seems like sometimes it can't grab the picture (LightGBM, surprisingly it has one)
+            // but there will also be cases where just will be plain Text. The "asdf" is here for now so that the
+            // program doesn't crash. Of course remove this pointless string later.
+            string imageUrl = "asdf"; //wikipediaJsonResponse[pageId]["thumbnail"]["source"].ToString();
             return imageUrl;
         }
 
- 
+        /// <summary>
+        /// TODO (Same as above @Anna)
+        /// </summary>
+        /// <param name="url"></param>
+        /// <returns></returns>
         public static dynamic GetDataFromUrl(string url)
         {
             var httpRequest = (HttpWebRequest)WebRequest.Create(url);
@@ -81,32 +114,43 @@ namespace BlazorBoilerplate.Theme.Material.Services
         }
 
         /// <summary>
-        /// if not stated otherwise, take the english description
+        /// If not stated otherwise, take the english description
         /// </summary>
         /// <param name="jsonObject"></param> JSON Object with data from Wikidata Entry
         /// <param name="uri"></param> URI of the above mentioned Wikidata Entry
         /// <param name="language"></param> Optional, as it defaults to english (en). You can choose which laguage the description should be in
-        /// <returns></returns> The description of the Wikidata Entry (directly from Wikidata, not Wikipedia)
+        /// <returns></returns> The description of the Wikidata Entry (directly from Wikidata, not Wikipedia), if none available - null
         public string GetWikidataDescription(dynamic jsonObject, string uri, string language = "en")
         {
-            string description = jsonObject.entities[uri].descriptions[language].value;
+            string description;
+            try
+            {
+                description = jsonObject.entities[uri].descriptions[language].value;
+            }
+            catch
+            {
+                description = null;
+            }
             return description;
         }
 
+        /// <summary>
+        /// If not stated otherwise, take the english Wikipedia link
+        /// </summary>
+        /// <param name="jsonObject"></param> JSON Object with data from Wikidata Entry
+        /// <param name="uri"></param> URI of the previously mentioned Wikidata Entry
+        /// <param name="language"></param> Optional, as it defaults to english (en). You can choose which laguage the Wikipedia Entry should be in
+        /// <returns></returns> The Wikipedia URL, if none available - null
         public string GetWikipediaUrl(dynamic jsonObject, string uri, string language = "en")
         {
             string wikipediaUrl;
-            try {
+            try
+            {
                 wikipediaUrl = jsonObject.entities[uri].sitelinks[language + "wiki"].url;
             }
-            // If no wikipediaURL available, try to get the description text. If there is not even a description text, say "sorry"
-            catch {
-                try {
-                    wikipediaUrl = jsonObject.entities[uri].descriptions[language].value;
-                }
-                catch {
-                    wikipediaUrl = "No Data available, sorry.";
-                }
+            catch
+            {
+                wikipediaUrl = null;
             }
             return wikipediaUrl;
         }
