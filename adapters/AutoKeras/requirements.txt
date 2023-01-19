@@ -6,3 +6,4 @@ dill
 Jinja2
 Pillow
 scikit-learn
+codecarbon==2.1.4

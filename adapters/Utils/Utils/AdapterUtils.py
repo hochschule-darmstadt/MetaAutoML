@@ -13,6 +13,7 @@ from predict_time_sources import SplitMethod, feature_preparation
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, mean_squared_error
 from sklearn.metrics import classification_report
+from sklearn.metrics import mean_absolute_percentage_error
 from JsonUtil import get_config_property
 from TemplateGenerator import TemplateGenerator
 import glob
@@ -20,15 +21,15 @@ from PIL import Image
 from AdapterBGRPC import *
 from typing import Tuple
 import re
+from codecarbon.output import EmissionsData
 import random
-
 ######################################################################
 ## GRPC HELPER FUNCTIONS
 ######################################################################
 
 #region
 
-def get_response(config: "StartAutoMlRequest", test_score: float, prediction_time: float, library: str, model: str) -> "GetAutoMlStatusResponse":
+def get_response(config: "StartAutoMlRequest", test_score: float, prediction_time: float, library: str, model: str, emissions: EmissionsData) -> "GetAutoMlStatusResponse":
     """Generate the final GRPC AutoML status message
 
     Args:
@@ -51,6 +52,26 @@ def get_response(config: "StartAutoMlRequest", test_score: float, prediction_tim
     response.prediction_time = prediction_time
     response.ml_library = library
     response.ml_model_type = model
+
+    #Add emission profile
+    emission_profile = CarbonEmission()
+    emission_profile.emissions = emissions.emissions
+    emission_profile.emissions_rate = emissions.emissions_rate
+    emission_profile.energy_consumed = emissions.energy_consumed
+    emission_profile.duration = emissions.duration
+    emission_profile.cpu_count = emissions.cpu_count
+    emission_profile.cpu_energy = emissions.cpu_energy
+    emission_profile.cpu_model = emissions.cpu_model
+    emission_profile.cpu_power = emissions.cpu_power
+    emission_profile.gpu_count = emissions.gpu_count
+    emission_profile.gpu_energy = emissions.gpu_energy
+    emission_profile.gpu_model = emissions.gpu_model
+    emission_profile.gpu_power = emissions.gpu_power
+    emission_profile.ram_energy = emissions.ram_energy
+    emission_profile.ram_power = emissions.ram_power
+    emission_profile.ram_total_size = emissions.ram_total_size
+
+    response.emission_profile = emission_profile
     return response
 
 
@@ -128,8 +149,8 @@ def zip_script(config: "StartAutoMlRequest"):
     zip_file_name = get_config_property("export-zip-file-name")
     output_path = config.export_folder_location
     result_path = config.result_folder_location
-    shutil.copy(get_config_property("predict-time-sources-path"),
-                result_path)
+    #shutil.copy(get_config_property("predict-time-sources-path"),
+    #            result_path)
 
     shutil.make_archive(os.path.join(output_path, zip_file_name),
                         'zip',
@@ -159,7 +180,7 @@ def evaluate(config: "StartAutoMlRequest", config_path: str) -> Tuple[float, flo
         tuple[float, float]: tuple holding the test score, prediction time metrics
     """
     config = config.__dict__
-    config["dataset_configuration"] = json.loads(config["dataset_configuration"])
+    config["dataset_configuration"] = config["dataset_configuration"]
     file_path = config["dataset_path"]
     result_path = config["result_folder_location"]
     # predict
@@ -171,17 +192,17 @@ def evaluate(config: "StartAutoMlRequest", config_path: str) -> Tuple[float, flo
         if config["dataset_configuration"]["schema"][key].get("role_selected", "") == ":target":
             targets.append(key)
 
-    if(config["configuration"]["task"] in [":tabular_classification", ":tabular_regression", ":text_regression", ":text_classification"]):
+    if(config["configuration"]["task"] in [":tabular_classification", ":tabular_regression", ":text_regression", ":text_classification", ":time_series_forecasting"]):
         train, test = data_loader(config)
         target = targets[0]
         # override file_path to path to test file and drop target column
-        file_path = write_tabular_dataset_test_data(test.drop(target, axis=1), os.path.dirname(file_path))
+        file_path = write_tabular_dataset_test_data(test.drop(target, axis=1), os.path.dirname(file_path), config)
 
     elif(config["configuration"]["task"] in[":image_classification", ":image_regression"]):
         X_train, y_train, X_test, y_test = data_loader(config)
 
     predict_start = time.time()
-    subprocess.call([python_env, os.path.join(result_path, "predict.py"), file_path, config_path, os.path.join(result_path, "predictions.csv")])
+    subprocess.call([python_env, os.path.join(result_path, "predict.py"), file_path, os.path.join(result_path, "predictions.csv")])
     predict_time = time.time() - predict_start
 
     predictions = pd.read_csv(os.path.join(result_path, "predictions.csv"))
@@ -212,7 +233,9 @@ def evaluate(config: "StartAutoMlRequest", config_path: str) -> Tuple[float, flo
               classification_report(test_target, predicted_target,zero_division=0)
               )
         return acc_score, (predict_time * 1000) / test.shape[0]
-
+    elif config["configuration"]["task"] == ":time_series_forecasting":
+        return mean_absolute_percentage_error(test[target], predictions["predicted"]), \
+               (predict_time * 1000) / test.shape[0]
     elif config["configuration"]["task"] == ":text_classification":
         return accuracy_score(test[target], predictions["predicted"]), (predict_time * 1000) / test.shape[0]
 
@@ -253,7 +276,7 @@ def predict(config: dict, config_path: str, automl: str) -> Tuple[float, str]:
     file_path = config["prediction_id"] + "_" + automl + ".csv"
     result_prediction_path = os.path.join(os.path.dirname(config["live_dataset_path"]), file_path)
     predict_start = time.time()
-    subprocess.call([python_env, os.path.join(result_folder_location, "predict.py"), config["live_dataset_path"], config_path, result_prediction_path])
+    subprocess.call([python_env, os.path.join(result_folder_location, "predict.py"), config["live_dataset_path"], result_prediction_path])
     predict_time = time.time() - predict_start
 
 
@@ -302,6 +325,17 @@ def setup_run_environment(request: "StartAutoMlRequest", adapter_name: str) -> "
                                         request.dataset_id,
                                         request.training_id,
                                         get_config_property("export-folder-name"))
+
+    #For WSL users we need to adjust the path prefix for the dataset location to windows path
+    if get_config_property("local_execution") == "YES":
+        if get_config_property("running_in_wsl") == "YES":
+            request.dataset_path = re.sub("[a-zA-Z]:/([A-Za-z0-9]+(/[A-Za-z0-9]+)+)/MetaAutoML", get_config_property("wsl_metaautoml_path"), request.dataset_path)
+            request.dataset_path = request.dataset_path.replace("\\", "/")
+            job_folder_location = job_folder_location.replace("\\", "/")
+            model_folder_location = model_folder_location.replace("\\", "/")
+            export_folder_location = export_folder_location.replace("\\", "/")
+            result_folder_location = result_folder_location.replace("\\", "/")
+            controller_export_folder_location = controller_export_folder_location.replace("\\", "/")
 
     request.job_folder_location = job_folder_location
     request.model_folder_location = model_folder_location
@@ -389,7 +423,7 @@ def read_tabular_dataset_training_data(config: "StartAutoMlRequest") -> Tuple[pd
 
     return train, test
 
-def write_tabular_dataset_test_data(df: pd.DataFrame, dir_name: str) -> str:
+def write_tabular_dataset_test_data(df: pd.DataFrame, dir_name: str, config) -> str:
     """Writes dataframe into a csv file.
 
     Args:
@@ -399,9 +433,25 @@ def write_tabular_dataset_test_data(df: pd.DataFrame, dir_name: str) -> str:
     Returns:
         file_path (str): file path to output file "test.csv"
     """
+    delimiters = {
+        "comma":        ",",
+        "semicolon":    ";",
+        "space":        " ",
+        "tab":          "\t",
+    }
+
     file_path = os.path.join(dir_name, "test.csv")
+    configuration = {
+        "path_or_buf": file_path,
+        "sep": delimiters[config["dataset_configuration"]["file_configuration"]['delimiter']],
+        "decimal": config["dataset_configuration"]["file_configuration"]['decimal_character'],
+        "escapechar": config["dataset_configuration"]["file_configuration"]['escape_character'],
+        "encoding": config["dataset_configuration"]["file_configuration"]['encoding'],
+        "index": False
+    }
+
     #np.reshape(df, (-1, 1))
-    pd.DataFrame(data=df, columns=df.columns).to_csv(file_path, index=False)
+    pd.DataFrame(data=df, columns=df.columns).to_csv(**configuration)
     os.chmod(file_path, 0o744)
     return file_path
 

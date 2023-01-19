@@ -76,7 +76,7 @@ class AutoKerasAdapter:
         X_train, y_train, X_test, y_test = data_loader(self._configuration)
 
         clf = ak.ImageClassifier(overwrite=True,
-                                          max_trials=3,
+                                          max_trials=1,
                                 # metric=self._configuration['metric'],
                                 seed=42,
                                 directory=self._configuration["model_folder_location"])
@@ -85,7 +85,6 @@ class AutoKerasAdapter:
         clf.fit(x = X_train, y = y_train, epochs=1)
 
         export_model(clf, self._configuration["result_folder_location"], 'model_keras.p')
-        export_model(reg, self._configuration["result_folder_location"], 'model_keras.p')
 
     def __image_regression(self):
         """Execute image regression task and export the found model"""
@@ -148,16 +147,22 @@ class AutoKerasAdapter:
         self.df, test = data_loader(self._configuration)
         X, y = prepare_tabular_dataset(self.df, self._configuration)
 
+        #TODO convert dataframe to float
+
         reg = ak.TimeseriesForecaster(overwrite=True,
-                                          max_trials=3,
-                                          lookback=3,
-                                # metric=self._configuration['metric'],
+                                          max_trials=1,
+                                          lookback=1,
+                                metrics=["mean_absolute_percentage_error"],
                                 seed=42,
                                 directory=self._configuration["model_folder_location"])
 
-        reg.fit(x = X, y = y, epochs=1)
-
-        export_model(reg, self._configuration["result_folder_location"], 'model_keras.p')
+        X = X.bfill().ffill()  # makes sure there are no missing values
+        y = y.bfill().ffill()  # makes sure there are no missing values
+        #Loopback must be dividable by batch_size else time seires will crash
+        reg.fit(x = X, y = y, epochs=1, batch_size=1)
+        model = reg.export_model()
+        model.save(os.path.join(self._configuration["result_folder_location"], 'model_keras'), save_format="tf")
+        #export_model(reg, self._configuration["result_folder_location"], 'model_keras.p')
 
     def get_column_with_largest_amout_of_text(self, X: pd.DataFrame):
         """

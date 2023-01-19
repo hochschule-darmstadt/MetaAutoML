@@ -1,4 +1,4 @@
-﻿using BlazorBoilerplate.Server;
+using BlazorBoilerplate.Server;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -25,6 +25,7 @@ namespace BlazorBoilerplate.Shared.Dto.Model
         public ModelRuntimeProfile RuntimeProfile { get; set; }
         public List<string> StatusMessages { get; set; }
         public Dictionary<string, dynamic> Explanation { get; set; }
+        public double Emissions { get; set; }
         public ModelDto()
         {
 
@@ -47,6 +48,7 @@ namespace BlazorBoilerplate.Shared.Dto.Model
             RuntimeProfile = new ModelRuntimeProfile(model.RuntimeProfile);
             StatusMessages = model.StatusMessages.ToList();
             Explanation = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(model.Explanation);
+            Emissions = model.Emission;
         }
     }
 }

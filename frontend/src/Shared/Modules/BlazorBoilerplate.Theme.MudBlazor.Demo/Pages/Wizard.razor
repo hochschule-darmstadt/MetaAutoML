@@ -127,6 +127,43 @@ else
         return count == 1 ? true : false;
     }
 
+    private bool IsIndexSet()
+    {
+        int count = 0;
+        foreach (var item in _automlRequest.Schema)
+        {
+            if (item.Value.RoleSelected.ID == ":index")
+            {
+                count++;
+            }
+        }
+        return count >= 1 ? true : false;
+    }
+
+    private bool IsDatetimeIndexSet()
+    {
+        int count = 0;
+        foreach (var item in _automlRequest.Schema)
+        {
+            if ((item.Value.DatatypeSelected.ID != ""))
+            {
+                if ((item.Value.RoleSelected.ID == ":index") && (item.Value.DatatypeSelected.ID == ":datetime"))
+                {
+                    count++;
+                }
+            }
+            else
+            {
+                if ((item.Value.RoleSelected.ID == ":index") && (item.Value.DatatypeDetected.ID == ":datetime"))
+                {
+                    count++;
+                }
+            }
+        }
+        return count == 1 ? true : false;
+    }
+
+
     private async void OnWizardFinished()
     {
         try
@@ -144,6 +181,16 @@ else
             if (((_dataset.Dataset.Type.ID == ":tabular") || (_dataset.Dataset.Type.ID == ":test") || (_dataset.Dataset.Type.ID == ":time_series") || (_dataset.Dataset.Type.ID == ":time_series_longitudinal")) && !IsOnlyOneTargetSet())
             {
                 viewNotifier.Show(L["More than one target selected"], ViewNotifierType.Error, L["Operation Failed"]);
+                return;
+            }
+            if ((_automlRequest.Configuration.Task == ":time_series_forecasting") && (_dataset.Dataset.Type.ID == ":time_series") && !IsIndexSet())
+            {
+                viewNotifier.Show(L["No index selected"], ViewNotifierType.Error, L["Operation Failed"]);
+                return;
+            }
+            if ((_automlRequest.Configuration.Task == ":time_series_forecasting") && (_dataset.Dataset.Type.ID == ":time_series") && !IsDatetimeIndexSet())
+            {
+                viewNotifier.Show(L["No datetime index selected"], ViewNotifierType.Error, L["Operation Failed"]);
                 return;
             }
             CreateTrainingResponseDto automlResponse;

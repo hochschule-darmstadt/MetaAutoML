@@ -1,12 +1,13 @@
-from enum import Enum, unique
 import pandas as pd
 import re
 
-
-@unique
-class SplitMethod(Enum):
-    SPLIT_METHOD_RANDOM = 0
-    SPLIT_METHOD_END = 1
+{% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression", ":text_classification", ":text_regression", ":time_series_forecasting"] %}
+def rename_unnamed_columns(X: pd.DataFrame) -> pd.DataFrame:
+    #Rename untitled columns to correct name
+    for column in X:
+        if re.match(r"Unnamed: [0-9]+", column):
+            X.rename(columns={column: f"Column{X.columns.get_loc(column)}"}, inplace=True)
+    return X
 
 
 def feature_preparation(X, features, datetime_format, is_prediction=False):
@@ -68,3 +69,5 @@ def feature_preparation(X, features, datetime_format, is_prediction=False):
         X.set_index(index_columns, inplace=True)
 
     return X, y
+
+{% endif %}
