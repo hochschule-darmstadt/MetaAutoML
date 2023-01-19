@@ -1,4 +1,4 @@
-﻿@if (!string.IsNullOrEmpty((SetTooltips(SeeAlso, Comment).Text)))
+﻿@if (!string.IsNullOrEmpty(InfoText))
 {
     <MudTooltip Text="SeeAlso" Delay="600" Arrow="true" Placement="Placement.Top" Class="strategy-description-tooltip">
         <ChildContent>
@@ -7,15 +7,15 @@
 
         <TooltipContent>
             <MudGrid>
-                @if (!string.IsNullOrEmpty((SetTooltips(SeeAlso, Comment).ImageUrl)))
+                @if (!string.IsNullOrEmpty(ImageUrl))
                 {
                     <MudItem xs="12">
-                        <MudPaper Class="d-flex align-center justify-center mud-width-full py-8"> <MudImage Src="@SetTooltips(SeeAlso, Comment).ImageUrl" Elevation="25" /></MudPaper>
+                        <MudPaper Class="d-flex align-center justify-center mud-width-full py-8"> <MudImage Src="@ImageUrl" Elevation="25" /></MudPaper>
                     </MudItem>
                 }
 
                 <MudItem xs="12">
-                    <MudText Style="font-size:inherit">@SetTooltips(SeeAlso, Comment).Text</MudText>
+                    <MudText Style="font-size:inherit">@InfoText</MudText>
                 </MudItem>
 
 
@@ -41,29 +41,30 @@ else
     [Parameter]
     public string Label { get; set; }
 
+    public string ImageUrl;
+    public string InfoText;
 
-    public WikipediaTooltip CurrentWikipediaTooltip = new WikipediaTooltip();
-
-
-    public WikipediaTooltip SetTooltips(string seeAlso, string comment)
+    protected override void OnInitialized()
     {
-        WikipediaTooltip result = new WikipediaTooltip();
-
-        if (string.IsNullOrEmpty(seeAlso))
+        if (string.IsNullOrEmpty(SeeAlso))
         {
-            result.Text = comment;
+            InfoText = Comment;
         }
         else
         {
             WikiDataGrabber wiki = new WikiDataGrabber();
-            List<string> wikipediaData = wiki.GetDataFrom(seeAlso);
-            if (wikipediaData.Count != 0) { result.Text = wikipediaData[0]; result.ImageUrl = wikipediaData[1]; } else { result.Text = comment; }
-        }
-        return result;
+            List<string> wikipediaData = wiki.GetDataFrom(SeeAlso);
+            if (wikipediaData.Count != 0) { InfoText = wikipediaData[0]; ImageUrl = wikipediaData[1]; } else { InfoText = Comment; }
 
+        }
+
+
+        
 
     }
 
+
+   
 
     public class WikipediaTooltip
     {

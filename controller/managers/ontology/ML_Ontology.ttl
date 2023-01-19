@@ -1224,7 +1224,7 @@
 :catboost_lib a :ML_library ;
     skos:prefLabel "Catboost lib" ;
     skos:altLabel "Catboost" ;
-    rdfs:seeAlso <https://www.wikidata.org/wiki/Q47509047> .
+    rdfs:seeAlso <https://www.wikidata.org/wiki/Q55656976> .
 :fastai_lib a :ML_library ;
     skos:prefLabel "Fastai lib" ;
     skos:altLabel "Fastai" .
