@@ -1,9 +1,7 @@
-@using System.Net
-@using static Services.WikiDataGrabber
-
 @if (ViewModel.AvailableChips?.Any() ?? false)
 {
     <MudText Typo="Typo.subtitle2">@Label</MudText>
+
     <MudChipSet Filter="true" MultiSelection="true" SelectedValues="SelectedValues">
         @foreach (var chip in ViewModel.AvailableChips)
         {
@@ -14,11 +12,11 @@
                     <WikiTooltip SeeAlso="@chip.ToolTip" Comment="@chip.Comment" Label="@chip.Label">
 
                     </WikiTooltip>
-                    
+
                     <!--   else
-                {
-                    <MudChip Value="@chip.Id" Text="@chip.Label" Variant="Variant.Text" Color="Color.Secondary" @onclick="() => ToggleChip(chip)" />
-                }-->
+                    {
+                        <MudChip Value="@chip.Id" Text="@chip.Label" Variant="Variant.Text" Color="Color.Secondary" @onclick="() => ToggleChip(chip)" />
+                    }-->
                 </MudChip>
             }
             else
@@ -30,7 +28,8 @@
 }
 else
 {
-    <DataLoaderSpinner />
+    <MudText Typo="Typo.subtitle2">@Label</MudText>
+    <MudText Typo="Typo.subtitle2">-</MudText>
 }
 
 @code
@@ -40,7 +39,6 @@ else
 
     [Parameter]
     public string Label { get; set; }
-    public static string wikipediaImageUrl { get; set; }
 
     private ICollection<object> SelectedValues => ViewModel.SelectedIds.Cast<object>().ToList();
 
@@ -68,12 +66,12 @@ else
         /// <returns></returns>
         public ICollection<ChipViewModel> AvailableChips { get; } = new List<ChipViewModel>();
 
-
         /// <summary>
         /// List of selected elements in the ChipSet.
         /// </summary>
         /// <value></value>
         public IEnumerable<string> SelectedIds => AvailableChips.Where(c => c.IsSelected).Select(c => c.Id);
+
 
         /// <summary>
         /// Updates the collection of available chips and adapt the selected ids accordingly.
@@ -91,24 +89,12 @@ else
 
             foreach (var chipToAdd in addedChips.Select(ac => new ChipViewModel { Id = ac.id, Label = ac.label, ToolTip = ac.toolTip, ImageUrl = ac.imageUrl, Comment = ac.comment }))
             {
-                /*  // Newly created chip may contain a Wikidata-Link in its attribute ToolTip. If that's the case, turn it into a Wiki-Entry-Info
-                  if (!string.IsNullOrEmpty(chipToAdd.ToolTip)) {
-                      WikiDataGrabber wiki = new WikiDataGrabber();
-                      List<string> wikiTooltip = wiki.GetDataFrom(chipToAdd.ToolTip);
-                      if (wikiTooltip.Count != 0) { chipToAdd.ToolTip = wikiTooltip[0]; chipToAdd.ImageUrl = wikiTooltip[1]; }
-
-
-                  }*/
-
-
                 AvailableChips.Add(chipToAdd);
             }
 
             RaiseSelectedIdsChanged();
         }
-        /// <summary>
-        /// 
-        /// </summary>
+
         public void RaiseSelectedIdsChanged()
         {
             SelectedIdsChanged(this, EventArgs.Empty);
