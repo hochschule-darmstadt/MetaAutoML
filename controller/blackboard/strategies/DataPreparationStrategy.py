@@ -66,21 +66,19 @@ class DataPreparationStrategyController(IAbstractStrategy):
         self.controller.enable_strategy('data_preparation.finish_preprocessing')
 
     def multi_fidelity_callback(self, model_list):
-        model_list.sort(key=lambda model: model.get('test_score'))
+        model_list.sort(key=lambda model: model.get('test_score'), reverse=True)
+
+
 
         relevant_auto_ml_solutions = []
-        for model in model_list[-3:]:
+        for model in model_list[0:2]:
+            #Only add max 3 Adapters
             if model.get('status') == 'completed':
                 relevant_auto_ml_solutions.append(model.get('auto_ml_solution'))
 
         relevant_auto_ml_solutions = list(set(relevant_auto_ml_solutions))
-        to_be_removed = []
-        for i, adapter in enumerate(self.controller.get_adapter_runtime_manager().get_adapters()):
-            if adapter.get_automl_name() not in relevant_auto_ml_solutions:
-                to_be_removed.append(i)
+        self.controller.get_adapter_runtime_manager().update_adapter_manager_list(relevant_auto_ml_solutions)
 
-        for i in reversed(to_be_removed):
-            self.controller.get_adapter_runtime_manager().get_adapters().remove(self.controller.get_adapter_runtime_manager().get_adapters()[i])
 
         self._log.info(f'do_finish_preprocessing: Finished data preparation, advancing to phase "running"..')
         self.controller.set_phase('running')
@@ -96,7 +94,7 @@ class DataPreparationStrategyController(IAbstractStrategy):
         #start new training
         strategy_controller = StrategyController(controller.get_data_storage(), controller.get_request(), controller.get_explainable_lock(), multi_fidelity_callback=self.multi_fidelity_callback, multi_fidelity_level=1)
         return
-    
+
     def do_ignore_redundant_features(self, state: dict, blackboard: Blackboard, controller: StrategyController):
         duplicate_columns = state.get("dataset_analysis", {}).get("duplicate_columns", [])
         ignored_columns = []
@@ -115,7 +113,7 @@ class DataPreparationStrategyController(IAbstractStrategy):
         training_request = agent.get_adapter_runtime_manager().get_training_request()
         training_request.dataset_configuration = json.dumps(dataset_configuration)
         agent.get_adapter_runtime_manager().set_training_request(training_request)
-        
+
         # IDEA: Update dataset analysis accordingly (may not be neccessary)
         blackboard.update_state('dataset_analysis', { 'duplicate_columns': [] }, True)
 
@@ -138,7 +136,7 @@ class DataPreparationStrategyController(IAbstractStrategy):
         for row_a, row_b in duplicate_rows:
             self._log.info(f'do_ignore_redundant_samples: Encountered redundant sample "{row_a}" (same as "{row_b}"), ingoring the sample.')
             ignored_samples.append(row_b)
-        
+
         dataset_configuration['ignored_samples'] = ignored_samples
 
         training_request = agent.get_adapter_runtime_manager().get_training_request()

@@ -52,6 +52,12 @@ class AdapterRuntimeManager:
             self.__adapters.append(adapter_training)
         return
 
+    def update_adapter_manager_list(self, adapter_manager_to_keep: list):
+        for i, adapter in enumerate(self.__adapters):
+            if adapter.get_automl_name() not in adapter_manager_to_keep:
+                adapter.cancel_adapter()
+                self.__adapters.remove(self.__adapters[i])
+
     def __build_dataset_schema(self) -> str:
         """Build the dataset schema using the dataset document and add changes from the wizzard process
 
@@ -63,7 +69,7 @@ class AdapterRuntimeManager:
             current_schema = dataset["schema"]
             training_schema = json.loads(self.__request.dataset_configuration)
             #We only need to update the selected values if selected datatype and role as the rest is set by the backend
-            for key in current_schema: 
+            for key in current_schema:
                 #Update selected role
                 selected_role = training_schema[key].get("RoleSelected", "")
                 if selected_role != "":
@@ -72,7 +78,7 @@ class AdapterRuntimeManager:
                     current_schema[key].pop("role_selected", None)
                 #Update selected datatype
                 selected_datatype = training_schema[key].get("DatatypeSelected", "")
-                
+
                 if selected_datatype != "":
                     current_schema[key]["datatype_selected"] = selected_datatype
                 else:
@@ -81,7 +87,6 @@ class AdapterRuntimeManager:
             if self.__request.save_schema == True:
                 self.__data_storage.update_dataset(self.__request.user_id, self.__request.dataset_id, {"schema": current_schema})
             return current_schema
-
 
     def __create_training_record(self) -> str:
         """Create a new training record for this training inside MongoDB
@@ -156,12 +161,14 @@ class AdapterRuntimeManager:
                 training_details["runtime_profile"]["end_time"] = datetime.datetime.now()
                 self.__data_storage.update_training(user_id, training_id, training_details)
 
-                if self.__multi_fidelity_level != 0:
-                    self.__multi_fidelity_callback(model_list)
             else:
                 self.__data_storage.update_training(user_id, training_id, {
                     "model_ids": training["model_ids"] + [model_id]
                 })
+        #Finish sub training and return outside of lock or else we deadlock us
+        if len(training["model_ids"]) == len(model_list)-1:
+            if self.__multi_fidelity_level != 0:
+                self.__multi_fidelity_callback(model_list)
 
         if model_details["status"] == "completed" and self.__multi_fidelity_level == 0:
             if dataset["type"] in  [":tabular", ":text", ":time_series"]:
@@ -244,8 +251,6 @@ class AdapterRuntimeManager:
                 }
 
         self.__data_storage.update_training(self.__request.user_id, self.__training_id, training_details)
-
-
 
     def get_dataset(self):
         """Get the dataset record used by the training
