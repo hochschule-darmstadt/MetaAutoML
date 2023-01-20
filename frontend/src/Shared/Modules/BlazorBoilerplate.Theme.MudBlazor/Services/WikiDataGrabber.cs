@@ -46,10 +46,6 @@ namespace BlazorBoilerplate.Theme.Material.Services
                 {
                     toolTipContent.Add(descriptionFailsafe);
                 }
-                // TODO @Anna: As the toolTipContent List NEEDS to have two entries (at least that's how I understand it)
-                // a pointless dummy entry needs to be added in the end here as well. A more elegant failsafe than this
-                // would probably be more suitable.
-             //   toolTipContent.Add("asdf");
             }
             else
             {

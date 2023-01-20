@@ -1,4 +1,4 @@
-﻿@if (!string.IsNullOrEmpty(InfoText))
+@if (!string.IsNullOrEmpty(InfoText))
 {
     <MudTooltip Text="SeeAlso" Delay="600" Arrow="true" Placement="Placement.Top" Class="strategy-description-tooltip">
         <ChildContent>
@@ -54,17 +54,19 @@ else
         {
             WikiDataGrabber wiki = new WikiDataGrabber();
             List<string> wikipediaData = wiki.GetDataFrom(SeeAlso);
-            if (wikipediaData.Count != 0) { InfoText = wikipediaData[0]; ImageUrl = wikipediaData[1]; } else { InfoText = Comment; }
-
+            if (wikipediaData.Count != 0) {
+                InfoText = wikipediaData[0];
+                if (wikipediaData.Count > 1)
+                {
+                    ImageUrl = wikipediaData[1];
+                }
+            }
+            else {
+                InfoText = Comment;
+            }
         }
-
-
-        
-
     }
 
-
-   
 
     public class WikipediaTooltip
     {
