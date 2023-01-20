@@ -75,14 +75,12 @@ class DataPreparationStrategyController(IAbstractStrategy):
 
         relevant_auto_ml_solutions = list(set(relevant_auto_ml_solutions))
         to_be_removed = []
-        for i, adapter in self.controller.get_adapter_runtime_manager().get_adapters():
+        for i, adapter in enumerate(self.controller.get_adapter_runtime_manager().get_adapters()):
             if adapter.get_automl_name() not in relevant_auto_ml_solutions:
                 to_be_removed.append(i)
 
-
-        for i in adapter in self.controller.get_adapter_runtime_manager().get_adapters():
-            del self.controller.get_adapter_runtime_manager().get_adapters()[i]
-
+        for i in reversed(to_be_removed):
+            self.controller.get_adapter_runtime_manager().get_adapters().remove(self.controller.get_adapter_runtime_manager().get_adapters()[i])
 
         self._log.info(f'do_finish_preprocessing: Finished data preparation, advancing to phase "running"..')
         self.controller.set_phase('running')
