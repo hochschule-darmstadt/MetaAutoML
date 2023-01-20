@@ -58,16 +58,16 @@ def load_mnist_image_dataset() -> str:
 
 class AutoKerasImageTaskTest(unittest.TestCase):
 
-    def setUp(self):
-        # NOTE: we are running the test in the reposroot directory.
-        #       the application is expected to start inside the adapter solution,
-        #       so we need to change working directories
-        autokeras_dir = os.path.join("adapters", "AutoKeras")
-        os.chdir(autokeras_dir)
+    # def setUp(self):
+    #     # NOTE: we are running the test in the reposroot directory.
+    #     #       the application is expected to start inside the adapter solution,
+    #     #       so we need to change working directories
+    #     autokeras_dir = os.path.join("adapters", "AutoKeras")
+    #     os.chdir(autokeras_dir)
 
-    def tearDown(self):
-        # reset the working directory before finishing this test
-        os.chdir(os.path.join("..", ".."))
+    # def tearDown(self):
+    #     # reset the working directory before finishing this test
+    #     os.chdir(os.path.join("..", ".."))
 
     def test_image_regression(self):
 
@@ -84,6 +84,7 @@ class AutoKerasImageTaskTest(unittest.TestCase):
         req.configuration.target = ""
         req.configuration.runtime_limit = 1
         req.configuration.metric = ':accuracy'
+        req.configuration.parameters = '{":metric": {"values": [":mean_sqared_error"]}}'
         # we do not need a dataset configuration
         req.dataset_configuration = json.dumps({})
 
@@ -116,6 +117,40 @@ class AutoKerasImageTaskTest(unittest.TestCase):
         req.configuration.target = ""
         req.configuration.runtime_limit = 1
         req.configuration.metric = ':accuracy'
+        req.configuration.parameters = '{":metric": {"values": [":accuracy"]}}'
+        # we do not need a dataset configuration
+        req.dataset_configuration = json.dumps({})
+
+        adapter_manager = AutoKerasAdapterManager()
+        adapter_manager.start_auto_ml(req, uuid.uuid4())
+        adapter_manager.start()
+        adapter_manager.join()
+
+        # check if model archive exists
+        out_dir = os.path.join("app-data", "training",
+                               req.user_id, req.dataset_id, req.training_id)
+        path_to_model = os.path.join(out_dir, "export", "keras-export.zip")
+        self.assertTrue(os.path.exists(path_to_model), f"path to model: '{path_to_model}' does not exist")
+
+        # clean up
+        shutil.rmtree(out_dir)
+
+    def test_parameters_image_classification(self):
+
+        dataset_path = load_mnist_image_dataset()
+
+        req = StartAutoMlRequest()
+        req.training_id = "test"
+        req.dataset_id = "test"
+        req.user_id = "test"
+        req.dataset_path = dataset_path
+        req.configuration.task = ':image_classification'
+        # we do not need a target, it will be ignored,
+        #   the default is None, which will raise an error
+        req.configuration.target = ""
+        req.configuration.runtime_limit = 1
+        req.configuration.metric = ':accuracy'
+        req.configuration.parameters = '{":metric": {"values": [":average_precision_score"]}}'
         # we do not need a dataset configuration
         req.dataset_configuration = json.dumps({})
 
