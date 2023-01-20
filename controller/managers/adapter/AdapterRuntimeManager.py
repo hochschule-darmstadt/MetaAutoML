@@ -168,6 +168,14 @@ class AdapterRuntimeManager:
                 ExplainableAIManager(self.__data_storage, adapter_manager, self.__explainable_lock).explain(user_id, model_id)
                 return
 
+    def get_adapters(self) -> list[AdapterManager]:
+        """get the __adapters object of this session
+
+        Returns:
+            list[AdapterManager]: The __adapters object
+        """
+        return self.__adapters
+
     def get_training_id(self) -> str:
         """Get the training id to which the found model is linked too
 

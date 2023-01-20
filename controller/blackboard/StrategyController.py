@@ -66,6 +66,14 @@ class StrategyController(object):
         self.set_phase('preprocessing')
         self.start_timer()
     
+    def get_adapter_runtime_manager(self) -> AdapterRuntimeManager:
+        """get the __adapter_runtime_manager object of this session
+
+        Returns:
+            AdapterRuntimeManager: The __adapter_runtime_manager object
+        """
+        return self.__adapter_runtime_manager
+
     def get_explainable_lock(self) -> ThreadLock:
         """get the __explainable_lock object of this session
 

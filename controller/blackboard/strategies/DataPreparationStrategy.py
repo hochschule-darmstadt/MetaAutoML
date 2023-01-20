@@ -69,16 +69,20 @@ class DataPreparationStrategyController(IAbstractStrategy):
         model_list.sort(key=lambda model: model.get('test_score'))
 
         relevant_auto_ml_solutions = []
-        relevant_auto_ml_libraries = []
         for model in model_list[-3:]:
             if model.get('status') == 'completed':
                 relevant_auto_ml_solutions.append(model.get('auto_ml_solution'))
-                relevant_auto_ml_libraries.append(model.get('ml_library'))
 
         relevant_auto_ml_solutions = list(set(relevant_auto_ml_solutions))
-        relevant_auto_ml_libraries = list(set(relevant_auto_ml_libraries))
-        self.controller.get_request().configuration.selected_auto_ml_solutions = relevant_auto_ml_solutions
-        self.controller.get_request().configuration.selected_ml_libraries = relevant_auto_ml_libraries
+        to_be_removed = []
+        for i, adapter in self.controller.get_adapter_runtime_manager().get_adapters():
+            if adapter.get_automl_name() not in relevant_auto_ml_solutions:
+                to_be_removed.append(i)
+
+
+        for i in adapter in self.controller.get_adapter_runtime_manager().get_adapters():
+            del self.controller.get_adapter_runtime_manager().get_adapters()[i]
+
 
         self._log.info(f'do_finish_preprocessing: Finished data preparation, advancing to phase "running"..')
         self.controller.set_phase('running')
