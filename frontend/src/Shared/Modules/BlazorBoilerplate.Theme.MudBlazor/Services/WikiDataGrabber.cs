@@ -49,7 +49,7 @@ namespace BlazorBoilerplate.Theme.Material.Services
                 // TODO @Anna: As the toolTipContent List NEEDS to have two entries (at least that's how I understand it)
                 // a pointless dummy entry needs to be added in the end here as well. A more elegant failsafe than this
                 // would probably be more suitable.
-                toolTipContent.Add("asdf");
+             //   toolTipContent.Add("asdf");
             }
             else
             {
@@ -66,7 +66,7 @@ namespace BlazorBoilerplate.Theme.Material.Services
         }
 
         /// <summary>
-        /// TODO (I think you can describe better than me what exactly happens here @Anna)
+        /// Modifies the wikipedia link to get the image url 
         /// </summary>
         /// <param name="adjustedUrl"></param>
         /// <returns></returns>
@@ -75,15 +75,12 @@ namespace BlazorBoilerplate.Theme.Material.Services
             adjustedUrl += "&prop=pageimages&format=json&pithumbsize=200";
             JObject wikipediaJsonResponse = GetDataFromUrl(adjustedUrl)["query"]["pages"];
             string pageId = wikipediaJsonResponse.Properties().First().Name;
-            // TODO @Anna: It seems like sometimes it can't grab the picture (LightGBM, surprisingly it has one)
-            // but there will also be cases where just will be plain Text. The "asdf" is here for now so that the
-            // program doesn't crash. Of course remove this pointless string later.
-            string imageUrl = "asdf"; //wikipediaJsonResponse[pageId]["thumbnail"]["source"].ToString();
-            return imageUrl;
+            string imageUrl = wikipediaJsonResponse[pageId].ToString();
+            return imageUrl.Contains("thumbnail") ? wikipediaJsonResponse[pageId]["thumbnail"]["source"].ToString() : "";
         }
 
         /// <summary>
-        /// TODO (Same as above @Anna)
+        /// Gets Data from the url as a json object 
         /// </summary>
         /// <param name="url"></param>
         /// <returns></returns>
