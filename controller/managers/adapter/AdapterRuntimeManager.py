@@ -53,10 +53,15 @@ class AdapterRuntimeManager:
         return
 
     def update_adapter_manager_list(self, adapter_manager_to_keep: list):
-        for i, adapter in enumerate(self.__adapters):
-            if adapter.get_automl_name() not in adapter_manager_to_keep:
+        new_adapter_list = []
+        for i in range(0, len(self.__adapters)):
+            adapter = self.__adapters.pop()
+            if adapter.get_automl_name() in adapter_manager_to_keep:
+                new_adapter_list.append(adapter)
+            else:
                 adapter.cancel_adapter()
-                self.__adapters.remove(self.__adapters[i])
+
+        self.__adapters = new_adapter_list
 
     def __build_dataset_schema(self) -> str:
         """Build the dataset schema using the dataset document and add changes from the wizzard process

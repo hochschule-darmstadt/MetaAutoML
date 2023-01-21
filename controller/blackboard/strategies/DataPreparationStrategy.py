@@ -71,7 +71,7 @@ class DataPreparationStrategyController(IAbstractStrategy):
 
 
         relevant_auto_ml_solutions = []
-        for model in model_list[0:2]:
+        for model in model_list[0:3]:
             #Only add max 3 Adapters
             if model.get('status') == 'completed':
                 relevant_auto_ml_solutions.append(model.get('auto_ml_solution'))
