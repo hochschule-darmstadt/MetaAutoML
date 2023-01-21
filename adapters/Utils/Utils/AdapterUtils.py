@@ -158,10 +158,12 @@ def evaluate(config: "StartAutoMlRequest", config_path: str) -> Tuple[float, flo
     Returns:
         tuple[float, float]: tuple holding the test score, prediction time metrics
     """
-    config = config.__dict__
+    non_dict_config = config
+    config = config.to_dict(betterproto.Casing.SNAKE)
     config["dataset_configuration"] = json.loads(config["dataset_configuration"])
     file_path = config["dataset_path"]
-    result_path = config["result_folder_location"]
+    # use non_dict_config, because to_dict() ignores all values that are not specified in the .proto definition and result_folder_location was added as metadata to the config object in a previous step
+    result_path = non_dict_config.result_folder_location
     # predict
     os.chmod(os.path.join(result_path, "predict.py"), 0o777)
     python_env = os.getenv("PYTHON_ENV", default="PYTHON_ENV_UNSET")
