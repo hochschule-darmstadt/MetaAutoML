@@ -42,6 +42,9 @@ class TestAdapter(IsolatedAsyncioTestCase):
         req.configuration.target = "survived"
         req.configuration.runtime_limit = 3
         req.configuration.metric = ':accuracy'
+        req.configuration.parameters = json.dumps({
+            "metric": ':accuracy',
+        })
         req.dataset_configuration = json.dumps({
             "multi_fidelity_level": 1,
             "column_datatypes": {

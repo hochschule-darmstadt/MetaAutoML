@@ -64,7 +64,7 @@ class EvalMLAdapter:
                     X_train=X,
                     y_train=y,
                     problem_type=classification_type,
-                    objective="auto",
+                    objective=self.__get_metric(),
                     max_batches=3,
                     verbose=False,
                 )
@@ -142,6 +142,18 @@ class EvalMLAdapter:
                 print(column)
                 return column
         return None #
+    
+    def __get_metric(self):
+        metrics_dict = {
+            ':binary_accuracy' : "Accuracy Binary",
+            ':balanced_accuracy' : "Balanced Accuracy Binary",
+            ':accuracy' : "Accuracy Multiclass",
+        }
+        try:
+            return metrics_dict[self._configuration['configuration']['parameters'][':metric']]
+        except:
+            print("no metric param")
+        return "auto" 
 
 
 
