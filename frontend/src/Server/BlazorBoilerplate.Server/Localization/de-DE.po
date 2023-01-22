@@ -1007,3 +1007,6 @@ msgstr "Emissionsen in kg/CO2-eq"
 msgid "Emissions: {0} kg/CO2-eq"
 msgstr "Emissionen: {0} kg/CO2-eq"
 
+msgid "aborted"
+msgstr "Abgebrochen"
+

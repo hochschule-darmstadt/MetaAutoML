@@ -1,9 +1,12 @@
 import os
 
-from AdapterUtils import export_model, prepare_tabular_dataset, data_loader
+from AdapterUtils import export_model, prepare_tabular_dataset, data_loader, get_column_with_largest_amout_of_text
 from flaml import AutoML
 import numpy as np
 from sklearn.impute import SimpleImputer
+import pandas as pd
+import json
+from JsonUtil import get_config_property
 
 class FLAMLAdapter:
     """
@@ -32,6 +35,8 @@ class FLAMLAdapter:
             self.__tabular_regression()
         elif self._configuration["configuration"]["task"] == ":time_series_forecasting":
             self.__time_series_forecasting()
+        elif self._configuration["configuration"]["task"] == ":text_classification":
+            self.__text_classification()
 
     def __generate_settings(self) -> dict:
         """Generate the settings dictionary for FLAML
@@ -97,5 +102,29 @@ class FLAMLAdapter:
         X[y.name] = y.values
         X.reset_index(inplace=True)
         X = X.bfill().ffill()  # makes sure there are no missing values
+        automl.fit(dataframe=X, label=y.name, **automl_settings)
+        export_model(automl, self._configuration["result_folder_location"], 'model_flaml.p')
+
+    def __text_classification(self):
+        """Execute the tabular classification task and export the found model"""
+        self.df, test = data_loader(self._configuration)
+        X, self._configuration = get_column_with_largest_amout_of_text(self.df, self._configuration)
+        X, y = prepare_tabular_dataset(X, self._configuration)
+        automl = AutoML()
+        automl_settings = self.__generate_settings()
+        automl_settings.update({
+            #"metric": self._configuration["configuration"]["metric"] if self._configuration["configuration"]["metric"] != "" else 'accuracy',
+            "metric": 'accuracy',
+            "task": 'seq-classification',
+            "fit_kwargs_by_estimator": {
+                "transformer": {
+                    "output_dir": self._configuration["model_folder_location"],   # setting the output directory
+                }
+            },
+            "log_file_name": self._log_file_path,
+            "fp16": False
+        })
+
+        X[y.name] = y.values
         automl.fit(dataframe=X, label=y.name, **automl_settings)
         export_model(automl, self._configuration["result_folder_location"], 'model_flaml.p')

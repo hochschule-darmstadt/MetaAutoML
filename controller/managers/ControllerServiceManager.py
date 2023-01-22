@@ -327,6 +327,13 @@ class ControllerServiceManager(ControllerServiceBase):
 						'This strategy truncates the training data if the time limit is relatively short for the size of the dataset.'
 						)
 				)
+            result.strategies.append(
+                Strategy(
+                'data_preparation.top_3_models',
+                'Top 3 Models',
+                'This strategy will run all adapters with only a small part of the data. Then it will train the 3 best solutions with the full data again.'
+                )
+            )
 
         return result
 

@@ -1961,3 +1961,7 @@ msgctxt "Global"
 msgid "Emissions: {0} kg/CO2-eq"
 msgstr "Emissions: {0} kg/CO2-eq"
 
+msgctxt "Global"
+msgid "aborted"
+msgstr "Aborted"
+
