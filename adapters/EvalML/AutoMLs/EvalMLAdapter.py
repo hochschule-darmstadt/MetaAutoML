@@ -10,7 +10,7 @@ from evalml.objectives import FraudCost
 
 import pandas as pd
 import numpy as np
-from predict_time_sources import feature_preparation, SplitMethod
+from predict_time_sources import feature_preparation
 
 import json
 import pickle
@@ -130,5 +130,6 @@ class EvalMLAdapter:
             print("Dir already existed")
         file_path = write_tabular_dataset_test_data(test, os.path.dirname(file_path), self._configuration)
         print(file_path)
+
 
 

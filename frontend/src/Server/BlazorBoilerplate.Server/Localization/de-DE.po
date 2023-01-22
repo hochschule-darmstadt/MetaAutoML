@@ -1001,3 +1001,14 @@ msgstr "Keine Index Spalte wurde gesetzt."
 msgid "No datetime index selected"
 msgstr "Keine oder mehrere Index Spalte mit Datentyp Datetime wurde gesetzt. Es darf nur eine Index Spalte mit Datentyp Datetime im Datensatz existieren."
 
+
+msgid "Emissions kg/CO2-eq"
+msgstr "Emissionsen in kg/CO2-eq"
+
+msgid "Emissions: {0} kg/CO2-eq"
+msgstr "Emissionen: {0} kg/CO2-eq"
+
+msgid "aborted"
+msgstr "Abgebrochen"
+
+

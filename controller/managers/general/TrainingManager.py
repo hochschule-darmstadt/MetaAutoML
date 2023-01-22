@@ -109,6 +109,7 @@ class TrainingManager:
                     model_detail.runtime_profile = model_runtime
                     model_detail.status_messages[:] =  model["status_messages"]
                     model_detail.explanation = json.dumps(model["explanation"])
+                    model_detail.emission = model["carbon_footprint"].get("emissions", 0)
                     training_item.models.append(model_detail)
                 except Exception as e:
                     self.__log.error(f"__training_object_rpc_object: Error while reading parameter for model")

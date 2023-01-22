@@ -1952,3 +1952,17 @@ msgstr "No index column was set."
 msgctxt "Global"
 msgid "No datetime index selected"
 msgstr "No or multiple index column with datatype datetime was set. Only one index column with datatype datetime is allowed."
+
+
+msgctxt "Global"
+msgid "Emissions kg/CO2-eq"
+msgstr "Emissions kg/CO2-eq"
+
+msgctxt "Global"
+msgid "Emissions: {0} kg/CO2-eq"
+msgstr "Emissions: {0} kg/CO2-eq"
+
+msgctxt "Global"
+msgid "aborted"
+msgstr "Aborted"
+

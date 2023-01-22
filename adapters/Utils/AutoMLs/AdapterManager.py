@@ -8,6 +8,8 @@ from threading import *
 from JsonUtil import get_config_property
 import pandas as pd
 from typing import Tuple
+import re
+from codecarbon import OfflineEmissionsTracker
 
 class AdapterManager(Thread):
     """The base adapter manager object providing the shared functionality between all adapters
@@ -60,9 +62,11 @@ class AdapterManager(Thread):
         """
         try:
             self.__start_auto_ml_running = True
+            carbon_tracker = OfflineEmissionsTracker(country_iso_code="DEU", tracking_mode="process")
             # saving AutoML configuration JSON
             config = setup_run_environment(self.__start_auto_ml_request, self._adapter_name)
-
+            #Start carbon recording
+            carbon_tracker.start()
             # start training process
             process = start_automl_process(config)
 
@@ -72,7 +76,7 @@ class AdapterManager(Thread):
                 # if return Code is ADAPTER_RETURN_CODE_STATUS_UPDATE we do not have score values yet
                 status_update.return_code = AdapterReturnCode.ADAPTER_RETURN_CODE_STATUS_UPDATE
                 status_update.status_update = line
-
+                status_update.emission_profile = CarbonEmission()
                 # write line to this processes stdout
                 sys.stdout.write(line)
                 sys.stdout.flush()
@@ -81,14 +85,19 @@ class AdapterManager(Thread):
 
             process.stdout.close()
             process.wait()
-
+            #End carbon recording
+            carbon_tracker.stop()
+            #Read config configuration again as it might have been changed during the subprocess
+            with open(os.path.join(config.job_folder_location, get_config_property("job-file-name"))) as file:
+                updated_process_configuration = json.load(file)
+            config.dataset_configuration = updated_process_configuration["dataset_configuration"]
             generate_script(config)
             output_json = zip_script(config)
             #AutoKeras only produces keras based ANN
             library, model = self._get_ml_model_and_lib(config)
             # TODO: fix evaluation (does not work with image datasets)
             test_score, prediction_time = evaluate(config, os.path.join(config.job_folder_location, get_config_property("job-file-name")))
-            self.__auto_ml_status_messages.put(get_response(output_json, test_score, prediction_time, library, model))
+            self.__auto_ml_status_messages.put(get_response(output_json, test_score, prediction_time, library, model, carbon_tracker.final_emissions_data))
 
             print(f'{get_config_property("adapter-name")} job finished')
             self.__start_auto_ml_running = False
@@ -167,6 +176,14 @@ class AdapterManager(Thread):
                                                   config_json["training_id"],
                                                   get_config_property("result-folder-name"))
 
+            #For WSL users we need to adjust the path prefix for the dataset location to windows path
+            if get_config_property("local_execution") == "YES":
+                if get_config_property("running_in_wsl") == "YES":
+                    config_json["dataset_path"] = re.sub("[a-zA-Z]:/([A-Za-z0-9]+(/[A-Za-z0-9]+)+)/MetaAutoML", get_config_property("wsl_metaautoml_path"), config_json["dataset_path"])
+                    config_json["dataset_path"] = config_json["dataset_path"].replace("\\", "/")
+
+
+
             if self._loaded_training_id != config_json["training_id"]:
                 df, test = data_loader(config_json)
                 self._dataframeX, y = prepare_tabular_dataset(df, config_json)
@@ -207,6 +224,12 @@ class AdapterManager(Thread):
 
             #load old dataset_configuration and save it to config json in case the dataset types have been changed in the
             #AutoKeras adapter for TextClassification
+            #For WSL users we need to adjust the path prefix for the dataset location to windows path
+            if get_config_property("local_execution") == "YES":
+                if get_config_property("running_in_wsl") == "YES":
+                    config_json["live_dataset_path"] = re.sub("[a-zA-Z]:/([A-Za-z0-9]+(/[A-Za-z0-9]+)+)/MetaAutoML", get_config_property("wsl_metaautoml_path"), config_json["live_dataset_path"])
+                    config_json["live_dataset_path"] = config_json["live_dataset_path"].replace("\\", "/")
+
             with open(job_file_location) as file:
                 config_json_old_dataset_configuation = json.load(file)
 
