@@ -87,7 +87,6 @@ else
                 AvailableChips.Remove(chipToRemove);
             }
             foreach (var chipToAdd in addedChips.Select(ac => new ChipViewModel { Id = ac.id, Label = ac.label, ToolTip = ac.toolTip, IsSelected = ac.isSelected, ImageUrl = ac.imageUrl, Comment = ac.comment }))
-
             {
                 AvailableChips.Add(chipToAdd);
             }

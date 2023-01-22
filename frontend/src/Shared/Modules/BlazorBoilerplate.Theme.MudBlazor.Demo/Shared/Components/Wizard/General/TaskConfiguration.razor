@@ -215,6 +215,7 @@
     private (string id, string label, string toolTip, bool isSelected, string comment, string imageUrl) ConvertObjectInfoToChip(ObjectInfomationDto objectInfo) =>
         (objectInfo.ID, objectInfo.Properties.GetValueOrDefault("skos:prefLabel"), objectInfo.Properties.GetValueOrDefault("rdfs:seeAlso"), true, objectInfo.Properties.GetValueOrDefault("rdfs:comment"), "");
 
+
     private async Task OnMlLibrarySelectionChanged()
     {
         try
@@ -256,6 +257,7 @@
 
         HandleApiResponseWrapper(availableStrategiesResponse, () =>
             _strategiesViewModel.SetAvailableChips(availableStrategiesResponse.Result.Strategies.Select(s => (s.Id, s.Title, s.Description, false, "", "")))
+
         );
     }
 
