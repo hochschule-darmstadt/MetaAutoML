@@ -211,9 +211,9 @@
             viewNotifier.Show(ex.GetBaseException().Message, ViewNotifierType.Error, L["Operation Failed"]);
         }
     }
-
-    private (string id, string label, string toolTip, bool isSelected) ConvertObjectInfoToChip(ObjectInfomationDto objectInfo) =>
-        (objectInfo.ID, objectInfo.Properties.GetValueOrDefault("skos:prefLabel"), null, true);
+    
+    private (string id, string label, string toolTip, bool isSelected, string comment, string imageUrl) ConvertObjectInfoToChip(ObjectInfomationDto objectInfo) =>
+        (objectInfo.ID, objectInfo.Properties.GetValueOrDefault("skos:prefLabel"), objectInfo.Properties.GetValueOrDefault("rdfs:seeAlso"), true, objectInfo.Properties.GetValueOrDefault("rdfs:comment"), "");
 
     private async Task OnMlLibrarySelectionChanged()
     {
@@ -255,7 +255,7 @@
         var availableStrategiesResponse = await apiClient.GetAvailableStrategies(availableStrategiesRequest);
 
         HandleApiResponseWrapper(availableStrategiesResponse, () =>
-            _strategiesViewModel.SetAvailableChips(availableStrategiesResponse.Result.Strategies.Select(s => (s.Id, s.Title, s.Description, false)))
+            _strategiesViewModel.SetAvailableChips(availableStrategiesResponse.Result.Strategies.Select(s => (s.Id, s.Title, s.Description, false, "", "")))
         );
     }
 
