@@ -402,7 +402,7 @@ def read_tabular_dataset_training_data(config: "StartAutoMlRequest") -> Tuple[pd
 
     if config['dataset_configuration']['multi_fidelity_level'] != 0:
         data = data.sample(frac=0.1, random_state=1)
-    
+
     #Rename untitled columns to correct name
     for column in data:
         if re.match(r"Unnamed: [0-9]+", column):
@@ -483,6 +483,56 @@ def convert_X_and_y_dataframe_to_numpy(X: pd.DataFrame, y: pd.Series) -> Tuple[n
     X = np.nan_to_num(X, 0)
     y = y.to_numpy()
     return X, y
+
+def get_column_with_largest_amout_of_text(X: pd.DataFrame, configuration: dict) -> Tuple[pd.DataFrame, dict]:
+    """
+    Find the column with the most text inside,
+    because some adapters only supports training with one feature
+    Args:
+        X (pd.DataFrame): The current X Dataframe
+        configuration (dict): hold the current adapter process configuration
+
+    Returns:
+        Tuple(pd.DataFrame, dict): pd.Dataframe: Returns a pandas Dataframe with the column with the most text inside, the dict is the updated configuraiton dict
+    """
+    column_names = []
+    target = ""
+    dict_with_string_length = {}
+
+    #First get only columns that will be used during training
+    for column, dt in configuration["dataset_configuration"]["schema"].items():
+        if dt.get("role_selected", "") == ":ignore" or dt.get("role_selected", "") == ":index" or dt.get("role_selected", "") == ":target":
+            continue
+        column_names.append(column)
+
+    #Check the used columns by dtype object (== string type) and get mean len to get column with longest text
+    for column_name in column_names:
+        if(X.dtypes[column_name] == object):
+            newlength = X[column_name].str.len().mean()
+            dict_with_string_length[column_name] = newlength
+    max_value = max(dict_with_string_length, key=dict_with_string_length.get)
+
+    #Remove the to be used text column from the list of used columns and set role ignore as Autokeras can only use one input column for text tasks
+    column_names.remove(max_value)
+    for column_name in column_names:
+        configuration["dataset_configuration"]["schema"][column_name]["role_selected"] = ":ignore"
+
+    save_configuration_in_json(configuration)
+    return X, configuration
+
+
+def save_configuration_in_json(configuration: dict):
+    """
+    serialize dataset_configuration to json string and save the the complete configuration in json file
+    to habe the right datatypes available for the evaluation
+    Args:
+        configuration (dict): The current adapter process configuration
+    """
+    configuration['dataset_configuration'] = json.dumps(configuration['dataset_configuration'])
+    with open(os.path.join(configuration['job_folder_location'], get_config_property("job-file-name")), "w+") as f:
+        json.dump(configuration, f)
+    configuration["dataset_configuration"] = json.loads(configuration["dataset_configuration"])
+
 
 #endregion
 
