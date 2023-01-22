@@ -62,8 +62,6 @@ namespace BlazorBoilerplate.Server.Managers
                 string controllerDatasetPath = Environment.GetEnvironmentVariable("CONTROLLER_DATASET_FOLDER_PATH");
                 var path = Path.Combine(controllerDatasetPath, username, "uploads");
 
-                if (request.FileSource == "Local")
-                {
                     if (request.ChunkNumber == 1)
                     {
                         var dir = new DirectoryInfo(path);
@@ -106,33 +104,6 @@ namespace BlazorBoilerplate.Server.Managers
                         }
                     }
                     return new ApiResponse(Status200OK, null, "");
-                }
-                else if (request.FileSource == "URL")
-                {
-                    using var client = new HttpClient();
-                    using var s = await client.GetStreamAsync(trustedFileNameForDisplay);
-                    using var fs = new FileStream(path, FileMode.OpenOrCreate);
-                    await s.CopyToAsync(fs);
-
-                    // get the complete file path before fs is released
-                    string filePath = path + "/" + Path.GetFileName(fs.Name);
-                    bool correctStrukture = CheckUploadStructure(filePath);
-
-                    if (correctStrukture == true)
-                    {
-                        grpcRequest.UserId = username;
-                        grpcRequest.FileName = trustedFileNameForDisplay;
-                        grpcRequest.DatasetName = request.DatasetName;
-                        grpcRequest.DatasetType = request.DatasetType;
-                        var reply = _client.CreateDataset(grpcRequest);
-                        return new ApiResponse(Status200OK, null, "");
-                    }
-                    else
-                    {
-                        return new ApiResponse(Status406NotAcceptable, "FolderStructureNotCorrectErrorMessage");
-                    }
-                }
-                return new ApiResponse(Status404NotFound, "Wrong Input type given");
             }
             catch (Exception ex)
             {
