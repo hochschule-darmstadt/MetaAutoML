@@ -20,7 +20,7 @@ def load_dataset():
     cache_dir = os.path.join("tests", "datasets")
     os.makedirs(cache_dir, exist_ok=True)
     #print(X_new['Temp'])
-    dataset_path = os.path.join(cache_dir, "weather_data_set.csv")
+    dataset_path = os.path.join(cache_dir, "test.csv")
     with open(dataset_path, "w+") as outfp:
         pd.DataFrame.to_csv(X_new, outfp, index=False)
 
@@ -61,7 +61,7 @@ class TestAdapter(IsolatedAsyncioTestCase):
                 "escape_character": "\\",
                 "decimal_character": ".",
                 "encoding": "ascii",
-                "thousands_seperator": " ",
+                "thousands_seperator": "",
                 "datetime_format": '%Y-%m-%d'
             }
         })

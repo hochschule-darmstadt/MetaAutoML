@@ -99,15 +99,16 @@ class EvalMLAdapter:
         """Execute the tabular classification task and export the found model"""
 
         self.df, test = data_loader(self._configuration)
+        #print(self.df)
         X, y = prepare_tabular_dataset(self.df, self._configuration)
 
-        problem_config = {"gap": 0, "max_delay": 10, "forecast_horizon": 1, "time_index": "Date"}
+        problem_config = {"gap": 0, "max_delay": 7, "forecast_horizon": 7, "time_index": "Date"}
         # parameters must be set correctly
         automl = AutoMLSearch(
                     X_train=X,
                     y_train=y,
                     problem_type="time series regression",
-                    max_batches=3,
+                    max_batches=1,
                     verbose=False,
                     problem_configuration=problem_config,
                     allowed_model_families=[
@@ -117,6 +118,17 @@ class EvalMLAdapter:
         automl.search()
         automl.describe_pipeline(3)
         best_pipeline_tobe_export = automl.best_pipeline
+        #self._configuration['dataset_configuration']['TESTTTTT'] ="BABCBABC"
         export_model(best_pipeline_tobe_export, self._configuration["result_folder_location"], 'evalml.p')
+        # bug: filepath contain no target column.
+        file_path = self._configuration["dataset_path"][:-4] + "timeseries\\"
+        print(file_path)
+        # create dir for time series test dataset
+        try:
+            os.mkdir(file_path)
+        except:
+            print("Dir already existed")
+        file_path = write_tabular_dataset_test_data(test, os.path.dirname(file_path), self._configuration)
+        print(file_path)
 
 

@@ -48,13 +48,21 @@ class TestAdapter(IsolatedAsyncioTestCase):
                 "sex": 1,
                 "survived": 2 ,
             },
-            "file_configuration": {
+             "file_configuration": {
                 "use_header": True,
                 "start_row": 1,
                 "delimiter": "comma",
                 "escape_character": "\\",
                 "decimal_character": ".",
+                "thousands_seperator": ",",
+                "datetime_format": "",
                 "encoding": ""
+            },
+            "schema": {
+                "survived": {
+                    "datatype_detected": ":boolean",
+                    "role_selected": ":target"
+                }
             }
         })
 
@@ -91,13 +99,21 @@ class TestAdapter(IsolatedAsyncioTestCase):
                 "sex": 1,
                 "survived": 2 ,
             },
-            "file_configuration": {
+             "file_configuration": {
                 "use_header": True,
                 "start_row": 1,
                 "delimiter": "comma",
                 "escape_character": "\\",
                 "decimal_character": ".",
+                "thousands_seperator": ",",
+                "datetime_format": "",
                 "encoding": ""
+            },
+            "schema": {
+                "survived": {
+                    "datatype_detected": ":integer",
+                    "role_selected": ":target"
+                }
             }
         })
 
