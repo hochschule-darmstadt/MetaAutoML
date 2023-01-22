@@ -16,10 +16,30 @@ if __name__ == '__main__':
     save_path = sys.argv[2]
     X = None
 
-    with open(config_path) as file:
-        config_json = json.load(file)
+    {% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression", ":text_classification", ":text_regression", ":time_series_forecasting"] %}
+    X = read_csv_dataset(filepath)
+    X = rename_unnamed_columns(X)
+    X, y = feature_preparation(X, {{configuration.dataset_configuration["schema"]}}.items(), "{{configuration.dataset_configuration["file_configuration"]["datetime_format"]}}",  is_prediction=True)
+    {% endif %}
 
-    config_json["dataset_configuration"] = json.loads(config_json["dataset_configuration"])
+    with open(sys.path[0] + '/evalml.p', 'rb') as file:
+        loaded_model = dill.load(file)
+
+    print(type(X))
+    predicted_y = loaded_model.predict(X)
+
+    df = (predicted_y.to_frame())
+    df.columns = [ 'predicted']
+    df.to_csv(save_path)
+"""
+if __name__ == '__main__':
+    filepath = sys.argv[1]
+    save_path = sys.argv[2]
+    X = None
+
+    config_json = {{configuration}}
+
+    config_json["dataset_configuration"] = {{configuration.dataset_configuration}}
 
     delimiters = {
             "comma":        ",",
@@ -75,3 +95,4 @@ if __name__ == '__main__':
         df = (predicted_y.to_frame())
         df.columns = [ 'predicted']
         df.to_csv(save_path)
+"""

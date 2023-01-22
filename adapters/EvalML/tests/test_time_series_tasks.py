@@ -17,6 +17,7 @@ from evalml.demos import load_weather
 def load_dataset():
     X, y = load_weather()
     X_new = X.merge(y,left_index=True, right_index=True)
+    X_new['dummy'] = 0
     cache_dir = os.path.join("tests", "datasets")
     os.makedirs(cache_dir, exist_ok=True)
     #print(X_new['Temp'])
@@ -40,12 +41,13 @@ class TestAdapter(IsolatedAsyncioTestCase):
         req.configuration.runtime_limit = 3
         req.configuration.metric = ':accuracy'
         req.dataset_configuration = json.dumps({
+            "multi_fidelity_level": 0,
             "schema": {
                 "Date":{
                     'datatype_detected':':datetime',
                     'datatype_compatible':[':datetime'],
                     'roles_compatible':[':index'],
-                    'roles_selected':':index',
+                    'role_selected':':index',
                 },
                 "Temp":{
                     'datatype_detected':':float',
