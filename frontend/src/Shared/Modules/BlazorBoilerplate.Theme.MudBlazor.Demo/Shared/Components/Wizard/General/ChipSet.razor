@@ -78,7 +78,7 @@ else
         /// Newly available options are selected by default.
         /// </summary>
         /// <param name="availableChips">Collection of tuples that contain an id, a label and a tooltip. (Each one is shown as a chip)</param>
-        public void SetAvailableChips(IEnumerable<(string id, string label, string toolTip, string comment, string imageUrl)> availableChips)
+        public void SetAvailableChips(IEnumerable<(string id, string label, string toolTip, bool isSelected, string comment, string imageUrl)> availableChips)
         {
             var addedChips = availableChips.Where(ac => AvailableChips.All(c => c.Id != ac.id)).ToList();
             var removedChips = AvailableChips.Where(c => availableChips.All(ac => ac.id != c.Id)).ToList();
@@ -86,8 +86,8 @@ else
             {
                 AvailableChips.Remove(chipToRemove);
             }
+            foreach (var chipToAdd in addedChips.Select(ac => new ChipViewModel { Id = ac.id, Label = ac.label, ToolTip = ac.toolTip, IsSelected = ac.isSelected, ImageUrl = ac.imageUrl, Comment = ac.comment }))
 
-            foreach (var chipToAdd in addedChips.Select(ac => new ChipViewModel { Id = ac.id, Label = ac.label, ToolTip = ac.toolTip, ImageUrl = ac.imageUrl, Comment = ac.comment }))
             {
                 AvailableChips.Add(chipToAdd);
             }
@@ -107,6 +107,7 @@ else
         public string Label { get; set; }
         public string Comment { get; set; }
         public string ToolTip { get; set; }
+        public bool IsSelected { get; set; }
         public string ImageUrl { get; set; }
         public bool IsSelected { get; set; } = true;
     }
