@@ -10,17 +10,44 @@ from dataset import read_csv_dataset
 from preprocessing import rename_unnamed_columns, feature_preparation
 {% endif %}
 
+def get_index_column():
+    for column, dt in {{configuration.dataset_configuration["schema"]}}.items():
+        if dt.get("role_selected", "") == ":index":
+            print(column)
+            return column
+    return None #
 
 if __name__ == '__main__':
     filepath = sys.argv[1]
     save_path = sys.argv[2]
     X = None
+    {% if configuration.configuration["task"] in [":time_series_forecasting"] %}
+    filepath = filepath[:-4]+"timeseries\\test.csv"
+    print(filepath)
+    X = read_csv_dataset(filepath)
+    X = rename_unnamed_columns(X)
+    index_column_name = get_index_column() 
+    index_column_copy_name = index_column_name + 'copy'
+    X[index_column_copy_name] = X[index_column_name]
+    X, y = feature_preparation(X, {{configuration.dataset_configuration["schema"]}}.items(), "{{configuration.dataset_configuration["file_configuration"]["datetime_format"]}}",  is_prediction=False)
 
-    {% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression", ":text_classification", ":text_regression", ":time_series_forecasting"] %}
+    with open(sys.path[0] + '/evalml.p', 'rb') as file:
+        loaded_model = dill.load(file)
+
+    print(type(X))
+    predicted_y = loaded_model.predict_in_sample(X, y,X_train=X,y_train=y)
+
+    df = (predicted_y.to_frame())
+    df.columns = [ 'predicted']
+    df.to_csv(save_path)
+
+    {% endif %}
+    
+    {% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression", ":text_classification", ":text_regression"] %}
     X = read_csv_dataset(filepath)
     X = rename_unnamed_columns(X)
     X, y = feature_preparation(X, {{configuration.dataset_configuration["schema"]}}.items(), "{{configuration.dataset_configuration["file_configuration"]["datetime_format"]}}",  is_prediction=True)
-    {% endif %}
+
 
     with open(sys.path[0] + '/evalml.p', 'rb') as file:
         loaded_model = dill.load(file)
@@ -31,6 +58,10 @@ if __name__ == '__main__':
     df = (predicted_y.to_frame())
     df.columns = [ 'predicted']
     df.to_csv(save_path)
+    {% endif %}
+
+
+
 """
 if __name__ == '__main__':
     filepath = sys.argv[1]

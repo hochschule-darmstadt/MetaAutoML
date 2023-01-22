@@ -99,17 +99,22 @@ class EvalMLAdapter:
         """Execute the tabular classification task and export the found model"""
 
         self.df, test = data_loader(self._configuration)
-        #print(self.df)
+        index_column_name = self.__get_index_column() 
+        index_column_copy_name = index_column_name + 'copy'
+        self.df[index_column_copy_name] = self.df[index_column_name]
         X, y = prepare_tabular_dataset(self.df, self._configuration)
+        # in oder to fix this bug : 
+        # bug: X.set_index(index_columns, inplace=True) => if indexcolumn is setted, evalml can not run auto ml search
+        # i create a copy column for index column
         print(X)
         #problem_config = {"gap": 0, "max_delay": 7, "forecast_horizon": 7, "time_index": self.__get_index_column()}
-        problem_config = {"gap": 0, "max_delay": 7, "forecast_horizon": 7, "time_index": "Date"}
+        problem_config = {"gap": 0, "max_delay": 7, "forecast_horizon": 7, "time_index": index_column_copy_name}
         # parameters must be set correctly
         automl = AutoMLSearch(
                     X_train=X,
                     y_train=y,
                     problem_type="time series regression",
-                    max_batches=3,
+                    max_batches=1,
                     verbose=False,
                     problem_configuration=problem_config,
                     allowed_model_families=[
@@ -120,7 +125,7 @@ class EvalMLAdapter:
         best_pipeline_tobe_export = automl.best_pipeline
         #self._configuration['dataset_configuration']['TESTTTTT'] ="BABCBABC"
         export_model(best_pipeline_tobe_export, self._configuration["result_folder_location"], 'evalml.p')
-        # bug: filepath contain no target column.
+        
         file_path = self._configuration["dataset_path"][:-4] + "timeseries\\"
         print(file_path)
         # create dir for time series test dataset

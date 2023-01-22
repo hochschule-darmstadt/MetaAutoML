@@ -17,7 +17,7 @@ from evalml.demos import load_weather
 def load_dataset():
     X, y = load_weather()
     X_new = X.merge(y,left_index=True, right_index=True)
-    X_new['dummy'] = 0
+    #X_new['DateTime'] = X_new['Date']
     cache_dir = os.path.join("tests", "datasets")
     os.makedirs(cache_dir, exist_ok=True)
     #print(X_new['Temp'])
