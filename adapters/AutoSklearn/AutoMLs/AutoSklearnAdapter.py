@@ -6,6 +6,9 @@ import pandas as pd
 from AdapterUtils import export_model, prepare_tabular_dataset, data_loader
 from JsonUtil import get_config_property
 
+import autosklearn.metrics
+
+
 
 class AutoSklearnAdapter:
     """
@@ -47,7 +50,13 @@ class AutoSklearnAdapter:
         if self._configuration["configuration"]["runtime_limit"] != 0:
             automl_settings.update(
                 {"time_left_for_this_task": (self._configuration["configuration"]["runtime_limit"] * 60)}) #convert into seconds
-        automl_settings.update({"metric": None})
+
+        metric = None
+        if ":metric" in self._configuration["configuration"]["parameters"]:
+            metric_name = self._configuration["configuration"]["parameters"][":metric"]["values"][0]
+            metric = AutoSklearnAdapter.__get_classification_metric_from_ontology(metric_name)
+        automl_settings.update({"metric": metric})
+
         return automl_settings
 
     def __tabular_classification(self):
@@ -115,3 +124,31 @@ class AutoSklearnAdapter:
                 },
             },
         }
+
+    def __get_classification_metric_from_ontology(ontology_name: str):
+        {
+            ":accuracy": autosklearn.metrics.accuracy,
+            ":balanced_accuracy": autosklearn.metrics.balanced_accuracy,
+            ":f1": autosklearn.metrics.f1,
+            ":f1_macro": autosklearn.metrics.CLASSIFICATION_METRICS["f1_macro"],
+            ":f1_micro": autosklearn.metrics.CLASSIFICATION_METRICS["f1_micro"],
+            ":f1_samples": autosklearn.metrics.CLASSIFICATION_METRICS["f1_samples"],
+            ":f1_weighted": autosklearn.metrics.CLASSIFICATION_METRICS["f1_weighted"],
+            ":area_under_roc_curve": autosklearn.metrics.roc_auc,
+            ":precision": autosklearn.metrics.precision,
+            ":precision_macro": autosklearn.metrics.CLASSIFICATION_METRICS["recall_macro"],
+            ":precision_micro": autosklearn.metrics.CLASSIFICATION_METRICS["recall_macro"],
+            ":precision_samples": autosklearn.metrics.CLASSIFICATION_METRICS["recall_macro"],
+            ":precision_weighted": autosklearn.metrics.CLASSIFICATION_METRICS["recall_macro"],
+            ":average_precision_score": autosklearn.metrics.average_precision,
+            ":recall": autosklearn.metrics.recall,
+            ":recall_macro": autosklearn.metrics.CLASSIFICATION_METRICS["recall_macro"],
+            ":recall_micro": autosklearn.metrics.CLASSIFICATION_METRICS["recall_micro"],
+            ":recall_samples": autosklearn.metrics.CLASSIFICATION_METRICS["recall_samples"],
+            ":recall_weighted": autosklearn.metrics.CLASSIFICATION_METRICS["recall_weighted"],
+            ":log_loss": autosklearn.metrics.log_loss,
+            ":r2": autosklearn.metrics.r2,
+            ":mean_squared_error": autosklearn.metrics.mean_squared_error,
+            ":mean_absolute_error": autosklearn.metrics.mean_absolute_error,
+            ":median_absolute_error": autosklearn.metrics.median_absolute_error
+        }[ontology_name]

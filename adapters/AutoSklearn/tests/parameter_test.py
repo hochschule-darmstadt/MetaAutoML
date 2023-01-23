@@ -64,7 +64,7 @@ class Test(unittest.TestCase):
         req.configuration.runtime_limit = 3
         req.configuration.metric = ':accuracy'
         req.configuration.parameters = {
-            ":metric": { "values": [":average_precision_score"] }
+            ":metric": { "values": [ ":average_precision_score" ] }
         }
         req.dataset_configuration = json.dumps({
             "column_datatypes": {
