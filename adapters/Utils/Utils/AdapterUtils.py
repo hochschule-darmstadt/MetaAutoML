@@ -179,12 +179,10 @@ def evaluate(config: "StartAutoMlRequest", config_path: str) -> Tuple[float, flo
     Returns:
         tuple[float, float]: tuple holding the test score, prediction time metrics
     """
-    non_dict_config = config
-    config = config.to_dict(betterproto.Casing.SNAKE)
+    config = config.__dict__
     config["dataset_configuration"] = config["dataset_configuration"]
     file_path = config["dataset_path"]
-    # use non_dict_config, because to_dict() ignores all values that are not specified in the .proto definition and result_folder_location was added as metadata to the config object in a previous step
-    result_path = non_dict_config.result_folder_location
+    result_path = config["result_folder_location"]
     # predict
     os.chmod(os.path.join(result_path, "predict.py"), 0o777)
     python_env = os.getenv("PYTHON_ENV", default="PYTHON_ENV_UNSET")
@@ -346,6 +344,7 @@ def setup_run_environment(request: "StartAutoMlRequest", adapter_name: str) -> "
     request_dict["result_folder_location"] = result_folder_location
     request_dict["controller_export_folder_location"] = controller_export_folder_location
 
+    # TODO: Refactor AdapterManager and AdapterUtils to not rely on a proto object that some fields have been added to at runtime
     # also add values to request object (the values are used in subsequent requests)
     request.dataset_path = request_dict["dataset_path"]
     request.job_folder_location = request_dict["job_folder_location"]
@@ -353,6 +352,10 @@ def setup_run_environment(request: "StartAutoMlRequest", adapter_name: str) -> "
     request.export_folder_location = export_folder_location
     request.result_folder_location = result_folder_location
     request.controller_export_folder_location = controller_export_folder_location
+
+    # TODO: Remove this and fix all places that access the configuration object as a dictionary
+    # replace configuration object with dictionary
+    request.configuration = request_dict["configuration"]
 
     #Make sure job folders exists
     os.makedirs(job_folder_location, exist_ok=True)
