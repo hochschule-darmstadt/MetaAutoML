@@ -26,7 +26,7 @@ class TestDataUpload(unittest.TestCase):
     Args:
         IsolatedAsyncioTestCase (_type_): asynchronous test case
     """
-    
+
     @classmethod
     def setUpClass(self) -> None:
         """
@@ -43,7 +43,6 @@ class TestDataUpload(unittest.TestCase):
         self.__data_storage = DataStorage(data_storage_dir=base_path,mongo_db=mongo)
         self.__dataset_manager = DatasetManager(self.__data_storage, ThreadLock())
 
-
     def test_tabular_upload(self):
         """
         Tests creation of tabular datasets within the system by invoking the create_dataset() method of DatasetManager for each dataset within the tabular folder created in the setup
@@ -51,7 +50,7 @@ class TestDataUpload(unittest.TestCase):
         tabular_test_data_dir =  f"{self.__test_data_path}\\tabular\\"
         for competition in TABULAR_DATA_NAMES:
             try:
-                kaggle.api.authenticate() 
+                kaggle.api.authenticate()
                 if (not os.path.exists(tabular_test_data_dir + competition + ".csv")):
                     kaggle.api.competition_download_file(competition, "train.csv", path=tabular_test_data_dir)
                     os.rename(tabular_test_data_dir + "train.csv", tabular_test_data_dir + competition + ".csv")
@@ -70,9 +69,8 @@ class TestDataUpload(unittest.TestCase):
             self.assertIsInstance(create_respone,CreateDatasetResponse)
 
         shutil.rmtree(dirname(f"{self.__test_data_path}\\tabular\\"))
-            
 
-    def test_imgae_upload(self):
+    def test_image_upload(self):
         """
         Tests creation of image datasets within the system by invoking the create_dataset() method of DatasetManager for each dataset within the image folder created in the setup
         """
@@ -81,8 +79,8 @@ class TestDataUpload(unittest.TestCase):
             competitionDir = f"{image_test_data_dir}\\{competition}"
             try:
                 if (not os.path.exists(competitionDir)):
-                    kaggle.api.authenticate() 
-                    kaggle.api.competition_download_files(competition, path=image_test_data_dir)          
+                    kaggle.api.authenticate()
+                    kaggle.api.competition_download_files(competition, path=image_test_data_dir)
             except Exception as ex:
                 print(f"Could not download {competition} data. Exception: {str(ex)}")
 
@@ -95,8 +93,8 @@ class TestDataUpload(unittest.TestCase):
             create_request.dataset_name= filename
             create_request.dataset_type=":image"
             create_respone = self.__dataset_manager.create_dataset(create_request)
-            self.assertIsInstance(create_respone,CreateDatasetResponse)     
-            
+            self.assertIsInstance(create_respone,CreateDatasetResponse)
+
         shutil.rmtree(dirname(f"{self.__test_data_path}\\image\\"))
 
 
@@ -104,7 +102,7 @@ class TestDataUpload(unittest.TestCase):
     def tearDownClass(self):
         time.sleep(60) #wait for async dataset analysis before deleting directory
         shutil.rmtree(dirname(self.__upload_file_path))
-       
+
 
 if __name__ == '__main__':
     unittest.main()

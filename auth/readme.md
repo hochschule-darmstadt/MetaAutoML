@@ -9,3 +9,5 @@ To run automated unit tests, follow the steps below:
 4. Save the downloaded file (kaggle.json) in the "auth" folder, next to this readme.
 
 Note: Make sure that you do not accidentally push this into git, as it contains sensitive information.
+
+Note: Make sure your account is verified or else you will get Error 403 Permission denied while downloading
