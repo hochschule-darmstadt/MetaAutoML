@@ -99,16 +99,21 @@ class EvalMLAdapter:
         """Execute the tabular classification task and export the found model"""
 
         self.df, test = data_loader(self._configuration)
-        index_column_name = self.__get_index_column() 
-        index_column_copy_name = index_column_name + 'copy'
-        self.df[index_column_copy_name] = self.df[index_column_name]
+        index_column_name = self.__get_index_column()
+        #index_column_copy_name = index_column_name + 'copy'
+        #self.df[index_column_copy_name] = self.df[index_column_name]
+        #We must persist the training time series to make predictions
+        file_path = self._configuration["result_folder_location"]
+        file_path = write_tabular_dataset_data(self.df, file_path, self._configuration, "train.csv")
+
         X, y = prepare_tabular_dataset(self.df, self._configuration)
-        # in oder to fix this bug : 
+        X.reset_index(inplace=True)
+        # in oder to fix this bug :
         # bug: X.set_index(index_columns, inplace=True) => if indexcolumn is setted, evalml can not run auto ml search
         # i create a copy column for index column
         print(X)
         #problem_config = {"gap": 0, "max_delay": 7, "forecast_horizon": 7, "time_index": self.__get_index_column()}
-        problem_config = {"gap": 0, "max_delay": 7, "forecast_horizon": 7, "time_index": index_column_copy_name}
+        problem_config = {"gap": 0, "max_delay": 7, "forecast_horizon": 7, "time_index": self.__get_index_column()}
         # parameters must be set correctly
         automl = AutoMLSearch(
                     X_train=X,
@@ -123,17 +128,8 @@ class EvalMLAdapter:
                 )
         automl.search()
         best_pipeline_tobe_export = automl.best_pipeline
-        #self._configuration['dataset_configuration']['TESTTTTT'] ="BABCBABC"
         export_model(best_pipeline_tobe_export, self._configuration["result_folder_location"], 'evalml.p')
-        
-        file_path = self._configuration["dataset_path"][:-4] + "timeseries\\"
-        print(file_path)
-        # create dir for time series test dataset
-        try:
-            os.mkdir(file_path)
-        except:
-            print("Dir already existed")
-        file_path = write_tabular_dataset_test_data(test, os.path.dirname(file_path), self._configuration)
+
         print(file_path)
 
     def __get_index_column(self):
@@ -142,7 +138,7 @@ class EvalMLAdapter:
                 print(column)
                 return column
         return None #
-    
+
     def __get_metric(self):
         metrics_dict = {
             ':binary_accuracy' : "Accuracy Binary",
@@ -153,7 +149,7 @@ class EvalMLAdapter:
             return metrics_dict[self._configuration['configuration']['parameters'][':metric']]
         except:
             print("no metric param")
-        return "auto" 
+        return "auto"
 
 
 

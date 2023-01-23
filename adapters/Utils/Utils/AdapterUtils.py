@@ -196,7 +196,7 @@ def evaluate(config: "StartAutoMlRequest", config_path: str) -> Tuple[float, flo
         train, test = data_loader(config)
         target = targets[0]
         # override file_path to path to test file and drop target column
-        file_path = write_tabular_dataset_test_data(test.drop(target, axis=1), os.path.dirname(file_path), config)
+        file_path = write_tabular_dataset_data(test.drop(target, axis=1), os.path.dirname(file_path), config)
 
     elif(config["configuration"]["task"] in[":image_classification", ":image_regression"]):
         X_train, y_train, X_test, y_test = data_loader(config)
@@ -423,12 +423,14 @@ def read_tabular_dataset_training_data(config: "StartAutoMlRequest") -> Tuple[pd
 
     return train, test
 
-def write_tabular_dataset_test_data(df: pd.DataFrame, dir_name: str, config) -> str:
+def write_tabular_dataset_data(df: pd.DataFrame, dir_name: str, config, file_name: str = "test.csv") -> str:
     """Writes dataframe into a csv file.
 
     Args:
         df (pd.DataFrame): The dataset dataframe
         dir_name (str): path of output directory
+        config (dict): the adapter process configuration
+        file_name (str): file name
 
     Returns:
         file_path (str): file path to output file "test.csv"
@@ -440,13 +442,14 @@ def write_tabular_dataset_test_data(df: pd.DataFrame, dir_name: str, config) -> 
         "tab":          "\t",
     }
 
-    file_path = os.path.join(dir_name, "test.csv")
+    file_path = os.path.join(dir_name, file_name)
     configuration = {
         "path_or_buf": file_path,
         "sep": delimiters[config["dataset_configuration"]["file_configuration"]['delimiter']],
         "decimal": config["dataset_configuration"]["file_configuration"]['decimal_character'],
         "escapechar": config["dataset_configuration"]["file_configuration"]['escape_character'],
         "encoding": config["dataset_configuration"]["file_configuration"]['encoding'],
+        "date_format": config["dataset_configuration"]["file_configuration"]["datetime_format"],
         "index": False
     }
 

@@ -149,7 +149,7 @@ class DataStorage:
             #previewDf.head(50).to_csv(filename_dest.replace(".csv", "_preview.csv"), index=False)
             #causes error with different delimiters use normal string division
             self.__log.debug("create_dataset: dataset is of CSV type: generating csv file configuration...")
-            file_configuration = {"use_header": True, "start_row":1, "delimiter":"comma", "escape_character":"\\", "decimal_character":".", "encoding": self.__frontend_backend_encoding_conversion_table[encoding], "thousands_seperator": "", "datetime_format": "%Y-%m-%d  %H:%M:%S"}
+            file_configuration = {"use_header": True, "start_row":1, "delimiter":"comma", "escape_character":"\\", "decimal_character":".", "encoding": self.__frontend_backend_encoding_conversion_table[encoding], "thousands_seperator": "", "datetime_format": "%d-%m-%Y %H:%M:%S"}
 
         if type == ":time_series_longitudinal":
             self.__log.debug("create_dataset: dataset is of TS nature: creating subset preview file, and generating csv file configuration...")
