@@ -42,19 +42,31 @@ class TestAdapter(IsolatedAsyncioTestCase):
         req.configuration.target = "survived"
         req.configuration.runtime_limit = 3
         req.configuration.metric = ':accuracy'
+        req.configuration.parameters = json.dumps({
+            "metric": ':accuracy',
+        })
         req.dataset_configuration = json.dumps({
+            "multi_fidelity_level": 1,
             "column_datatypes": {
                 "age": 2,
                 "sex": 1,
                 "survived": 2 ,
             },
-            "file_configuration": {
+             "file_configuration": {
                 "use_header": True,
                 "start_row": 1,
                 "delimiter": "comma",
                 "escape_character": "\\",
                 "decimal_character": ".",
+                "thousands_seperator": ",",
+                "datetime_format": "",
                 "encoding": ""
+            },
+            "schema": {
+                "survived": {
+                    "datatype_detected": ":boolean",
+                    "role_selected": ":target"
+                }
             }
         })
 
@@ -86,18 +98,27 @@ class TestAdapter(IsolatedAsyncioTestCase):
         req.configuration.runtime_limit = 3
         req.configuration.metric = ':accuracy'
         req.dataset_configuration = json.dumps({
+            "multi_fidelity_level": 1,
             "column_datatypes": {
                 "age": 2,
                 "sex": 1,
                 "survived": 2 ,
             },
-            "file_configuration": {
+             "file_configuration": {
                 "use_header": True,
                 "start_row": 1,
                 "delimiter": "comma",
                 "escape_character": "\\",
                 "decimal_character": ".",
+                "thousands_seperator": ",",
+                "datetime_format": "",
                 "encoding": ""
+            },
+            "schema": {
+                "survived": {
+                    "datatype_detected": ":integer",
+                    "role_selected": ":target"
+                }
             }
         })
 

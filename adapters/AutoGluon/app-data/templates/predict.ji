@@ -3,8 +3,11 @@ import os.path
 import sys
 import pickle
 import json
-from predict_time_sources import feature_preparation, SplitMethod
 from autogluon.tabular import TabularDataset, TabularPredictor
+{% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression", ":text_classification", ":text_regression", ":time_series_forecasting"] %}
+from dataset import read_csv_dataset
+from preprocessing import rename_unnamed_columns, feature_preparation
+{% endif %}
 
 import pandas as pd
 import numpy as np
@@ -12,48 +15,15 @@ import re
 
 if __name__ == '__main__':
     filepath = sys.argv[1]
-    config_path = sys.argv[2]
-    save_path = sys.argv[3]
+    save_path = sys.argv[2]
     X = None
 
-    with open(config_path) as file:
-        config_json = json.load(file)
+    {% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression", ":text_classification", ":text_regression", ":time_series_forecasting"] %}
+    X = read_csv_dataset(filepath)
+    X = rename_unnamed_columns(X)
+    X, y = feature_preparation(X, {{configuration.dataset_configuration["schema"]}}.items(), "{{configuration.dataset_configuration["file_configuration"]["datetime_format"]}}",  is_prediction=True)
+    {% endif %}
 
-    config_json["dataset_configuration"] = json.loads(config_json["dataset_configuration"])
-    targets = []
-    for key in config_json["dataset_configuration"]["schema"]:
-        #Get target columns list
-        if config_json["dataset_configuration"]["schema"][key].get("role_selected", "") == ":target":
-            targets.append(key)
-    target = targets[0]
-
-    delimiters = {
-        "comma":        ",",
-        "semicolon":    ";",
-        "space":        " ",
-        "tab":          "\t",
-    }
-    configuration = {
-        "filepath_or_buffer": filepath,
-        "delimiter": delimiters[config_json['dataset_configuration']['file_configuration']['delimiter']],
-        "skiprows": (config_json['dataset_configuration']['file_configuration']['start_row']-1),
-        "decimal": config_json['dataset_configuration']['file_configuration']['decimal_character'],
-        "escapechar": config_json['dataset_configuration']['file_configuration']['escape_character'],
-        "encoding": config_json['dataset_configuration']['file_configuration']['encoding'],
-    }
-    if config_json['dataset_configuration']['file_configuration']['thousands_seperator'] != "":
-        configuration["thousands"] = config_json['dataset_configuration']['file_configuration']['thousands_seperator']
-
-    X = pd.read_csv(**configuration)
-    #Rename untitled columns to correct name
-    for column in X:
-        if re.match(r"Unnamed: [0-9]+", column):
-            X.rename(columns={column: f"Column{X.columns.get_loc(column)}"}, inplace=True)
-
-    X, y = feature_preparation(X, config_json["dataset_configuration"]["schema"].items(), config_json["dataset_configuration"]["file_configuration"]["datetime_format"], is_prediction=True)
-
-    # load model and make predictions
-    print("starting to load model")
     automl = TabularPredictor.load(os.path.join(sys.path[0], 'model_gluon.gluon'))
 
     predicted_y = automl.predict(X, as_pandas=False)

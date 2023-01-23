@@ -14,9 +14,6 @@ import re
 from enum import Enum, unique
 
 
-class SplitMethod(Enum):
-    SPLIT_METHOD_RANDOM = 0
-    SPLIT_METHOD_END = 1
 
 
 def split_dataset(dataset, json_configuration):

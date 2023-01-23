@@ -1,4 +1,4 @@
-﻿@inject IStringLocalizer<Global> L
+@inject IStringLocalizer<Global> L
 @inject IApiClient apiClient
 @inject IViewNotifier viewNotifier
 @inject NavigationManager NavManager
@@ -21,14 +21,14 @@
         </CardHeaderActions>
     </MudCardHeader>
     <MudCardContent>
-        <MudPaper Height="215px" Elevation="0">
+        <MudPaper Height="250px" Elevation="0">
             @if (_top3Models == null)
             {
                 <DataLoaderSpinner />
             }
             else
             {
-                <MudTable Items="@_top3Models.Models" FixedHeader="true" style="width:stretch" class="mat-elevation-z5" AllowSelection="false" Dense="true" Height="220px">
+                <MudTable Items="@_top3Models.Models" FixedHeader="true" style="width:stretch" class="mat-elevation-z5" AllowSelection="false" Dense="true" Height="245px">
                     <HeaderContent>
                         <MudTh>@L["Name"]</MudTh>
                         <MudTh>@L["Model"]</MudTh>

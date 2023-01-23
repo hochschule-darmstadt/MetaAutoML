@@ -520,7 +520,7 @@ class Model(betterproto.Message):
     """
 
     auto_ml_solution: str = betterproto.string_field(5)
-    """Ontology URI of the used AutoML Solution example: ":autokeras"""
+    """Ontology URI of the used AutoML Solutionexample: ":autokeras"""
 
     ml_model_type: str = betterproto.string_field(6)
     """
@@ -574,6 +574,12 @@ class Model(betterproto.Message):
     towards one color the values of this feature are only important when
     deciding for the one corresponding class.","path": "\\app-
     data\\training\\flaml\\.....\\result\\plots\\summary_bar.svg"},.....]}]}
+    """
+
+    emission: float = betterproto.double_field(14)
+    """
+    Amount of kg of CO2-eq produced during the model trainingexample:
+    ["starting search..", "epoch 1...."]
     """
 
 

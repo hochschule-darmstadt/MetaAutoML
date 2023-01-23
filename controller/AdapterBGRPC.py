@@ -191,6 +191,68 @@ class GetAutoMlStatusResponse(betterproto.Message):
     ":artificial_neural_network"
     """
 
+    emission_profile: "CarbonEmission" = betterproto.message_field(8)
+    """
+    The emission produced by the training of the modelexample: see message
+    Carbon Emission
+    """
+
+
+@dataclass(eq=False, repr=False)
+class CarbonEmission(betterproto.Message):
+    emissions: float = betterproto.double_field(1)
+    """
+    The emissions produced by the training of this model as kg of
+    CO2-eqexample: 0.23232
+    """
+
+    emissions_rate: float = betterproto.double_field(2)
+    """
+    The emissions rate measured in kg of CO2 emitted per MWhexample: 0.23232
+    """
+
+    energy_consumed: float = betterproto.double_field(3)
+    """Total of consumed energy by all hardware componentsexample: 0.23232"""
+
+    duration: float = betterproto.double_field(4)
+    """
+    Duration during which emessions are tracked (in our case purely the
+    training)example: 0.23232
+    """
+
+    cpu_count: int = betterproto.int32_field(5)
+    """Count of CPUs used by the processexample: 16"""
+
+    cpu_energy: float = betterproto.double_field(6)
+    """Total consumed energy by the CPUsexample: 0.23232"""
+
+    cpu_model: str = betterproto.string_field(7)
+    """CPU model nameexample: "AMD Ryzen 7 ......"""
+
+    cpu_power: float = betterproto.double_field(8)
+    """Power consumed by the CPUsexample: 27.0"""
+
+    gpu_count: int = betterproto.int32_field(9)
+    """Count of GPUs used by the processexample: 1"""
+
+    gpu_energy: float = betterproto.double_field(10)
+    """Total consumed energy by the GPUsexample: 0.23232"""
+
+    gpu_model: str = betterproto.string_field(11)
+    """GPU model nameexample: "1 x NVIDIA Geforce RTX 3070 ....."""
+
+    gpu_power: float = betterproto.double_field(12)
+    """Power consumed by the GPUsexample: 27.0"""
+
+    ram_energy: float = betterproto.double_field(13)
+    """Total consumed energy by the RAMexample: 0.23232"""
+
+    ram_power: float = betterproto.double_field(14)
+    """Power consumed by the RAMexample: 27.0"""
+
+    ram_total_size: float = betterproto.double_field(15)
+    """Total RAM size in GBexample: 15.34"""
+
 
 @dataclass(eq=False, repr=False)
 class ExplainModelRequest(betterproto.Message):

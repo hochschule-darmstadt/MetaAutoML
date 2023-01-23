@@ -1,4 +1,4 @@
-﻿@page "/datasets/{datasetId}/models/{id}"
+@page "/datasets/{datasetId}/models/{id}"
 @page "/trainings/{trainingId}/models/{id}"
 @page "/datasets/{datasetId}/modelsview/{listId}"
 @inject IStringLocalizer<Global> L
@@ -8,13 +8,16 @@
 @inject NavigationManager NavManager
 @attribute [Authorize]
 
-
 <TopSection>
-    <MudBreadcrumbs Items="_breadcrumbs">
+    <MudBreadcrumbs Items="_breadcrumbs" style="
+    position: fixed!important;
+    top: 65px;
+    z-index: 999!important;
+    width: 100%;">
     </MudBreadcrumbs>
 </TopSection>
 
-<MudStack AlignItems="AlignItems.Center" Row="true" Class="mb-2">
+<MudStack AlignItems="AlignItems.Center" Row="true" Class="mb-2" style="padding-top:30px">
     <MudIcon Size="Size.Large" Icon="@Icons.Filled.Lightbulb" />
     @if (_model != null)
     {
@@ -60,6 +63,7 @@
                             <MudItem xs="3" sm="3" md="3">
                                 <MudText Typo="Typo.body1">@L["Metric score: {0}", String.Format("{0:0.00}", _model.Model.TestScore)]</MudText>
                                 <MudText Typo="Typo.body1">@L["Prediction time per sample: {0}", String.Format("{0:0}", _model.Model.PredictionTime)]</MudText>
+                                <MudText Typo="Typo.body1">@L["Emissions: {0} kg/CO2-eq", String.Format("{0:0.00000}", _model.Model.Emissions)]</MudText>
                             </MudItem>
                             <MudItem xs="3" sm="3" md="3">
                             </MudItem>

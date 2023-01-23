@@ -21,14 +21,15 @@ from PIL import Image
 from AdapterBGRPC import *
 from typing import Tuple
 import re
-
+from codecarbon.output import EmissionsData
+import random
 ######################################################################
 ## GRPC HELPER FUNCTIONS
 ######################################################################
 
 #region
 
-def get_response(config: "StartAutoMlRequest", test_score: float, prediction_time: float, library: str, model: str) -> "GetAutoMlStatusResponse":
+def get_response(config: "StartAutoMlRequest", test_score: float, prediction_time: float, library: str, model: str, emissions: EmissionsData) -> "GetAutoMlStatusResponse":
     """Generate the final GRPC AutoML status message
 
     Args:
@@ -51,6 +52,26 @@ def get_response(config: "StartAutoMlRequest", test_score: float, prediction_tim
     response.prediction_time = prediction_time
     response.ml_library = library
     response.ml_model_type = model
+
+    #Add emission profile
+    emission_profile = CarbonEmission()
+    emission_profile.emissions = emissions.emissions
+    emission_profile.emissions_rate = emissions.emissions_rate
+    emission_profile.energy_consumed = emissions.energy_consumed
+    emission_profile.duration = emissions.duration
+    emission_profile.cpu_count = emissions.cpu_count
+    emission_profile.cpu_energy = emissions.cpu_energy
+    emission_profile.cpu_model = emissions.cpu_model
+    emission_profile.cpu_power = emissions.cpu_power
+    emission_profile.gpu_count = emissions.gpu_count
+    emission_profile.gpu_energy = emissions.gpu_energy
+    emission_profile.gpu_model = emissions.gpu_model
+    emission_profile.gpu_power = emissions.gpu_power
+    emission_profile.ram_energy = emissions.ram_energy
+    emission_profile.ram_power = emissions.ram_power
+    emission_profile.ram_total_size = emissions.ram_total_size
+
+    response.emission_profile = emission_profile
     return response
 
 
@@ -128,8 +149,8 @@ def zip_script(config: "StartAutoMlRequest"):
     zip_file_name = get_config_property("export-zip-file-name")
     output_path = config.export_folder_location
     result_path = config.result_folder_location
-    shutil.copy(get_config_property("predict-time-sources-path"),
-                result_path)
+    #shutil.copy(get_config_property("predict-time-sources-path"),
+    #            result_path)
 
     shutil.make_archive(os.path.join(output_path, zip_file_name),
                         'zip',
@@ -160,7 +181,7 @@ def evaluate(config: "StartAutoMlRequest", config_path: str) -> Tuple[float, flo
     """
     non_dict_config = config
     config = config.to_dict(betterproto.Casing.SNAKE)
-    config["dataset_configuration"] = json.loads(config["dataset_configuration"])
+    config["dataset_configuration"] = config["dataset_configuration"]
     file_path = config["dataset_path"]
     # use non_dict_config, because to_dict() ignores all values that are not specified in the .proto definition and result_folder_location was added as metadata to the config object in a previous step
     result_path = non_dict_config.result_folder_location
@@ -177,13 +198,13 @@ def evaluate(config: "StartAutoMlRequest", config_path: str) -> Tuple[float, flo
         train, test = data_loader(config)
         target = targets[0]
         # override file_path to path to test file and drop target column
-        file_path = write_tabular_dataset_test_data(test.drop(target, axis=1), os.path.dirname(file_path), config)
+        file_path = write_tabular_dataset_data(test.drop(target, axis=1), os.path.dirname(file_path), config)
 
     elif(config["configuration"]["task"] in[":image_classification", ":image_regression"]):
         X_train, y_train, X_test, y_test = data_loader(config)
 
     predict_start = time.time()
-    subprocess.call([python_env, os.path.join(result_path, "predict.py"), file_path, config_path, os.path.join(result_path, "predictions.csv")])
+    subprocess.call([python_env, os.path.join(result_path, "predict.py"), file_path, os.path.join(result_path, "predictions.csv")])
     predict_time = time.time() - predict_start
 
     predictions = pd.read_csv(os.path.join(result_path, "predictions.csv"))
@@ -257,7 +278,7 @@ def predict(config: dict, config_path: str, automl: str) -> Tuple[float, str]:
     file_path = config["prediction_id"] + "_" + automl + ".csv"
     result_prediction_path = os.path.join(os.path.dirname(config["live_dataset_path"]), file_path)
     predict_start = time.time()
-    subprocess.call([python_env, os.path.join(result_folder_location, "predict.py"), config["live_dataset_path"], config_path, result_prediction_path])
+    subprocess.call([python_env, os.path.join(result_folder_location, "predict.py"), config["live_dataset_path"], result_prediction_path])
     predict_time = time.time() - predict_start
 
 
@@ -382,6 +403,10 @@ def read_tabular_dataset_training_data(config: "StartAutoMlRequest") -> Tuple[pd
 
 
     data = pd.read_csv(**configuration)
+
+    if config['dataset_configuration']['multi_fidelity_level'] != 0:
+        data = data.sample(frac=0.1, random_state=1)
+
     #Rename untitled columns to correct name
     for column in data:
         if re.match(r"Unnamed: [0-9]+", column):
@@ -402,12 +427,14 @@ def read_tabular_dataset_training_data(config: "StartAutoMlRequest") -> Tuple[pd
 
     return train, test
 
-def write_tabular_dataset_test_data(df: pd.DataFrame, dir_name: str, config) -> str:
+def write_tabular_dataset_data(df: pd.DataFrame, dir_name: str, config, file_name: str = "test.csv") -> str:
     """Writes dataframe into a csv file.
 
     Args:
         df (pd.DataFrame): The dataset dataframe
         dir_name (str): path of output directory
+        config (dict): the adapter process configuration
+        file_name (str): file name
 
     Returns:
         file_path (str): file path to output file "test.csv"
@@ -419,13 +446,14 @@ def write_tabular_dataset_test_data(df: pd.DataFrame, dir_name: str, config) -> 
         "tab":          "\t",
     }
 
-    file_path = os.path.join(dir_name, "test.csv")
+    file_path = os.path.join(dir_name, file_name)
     configuration = {
         "path_or_buf": file_path,
         "sep": delimiters[config["dataset_configuration"]["file_configuration"]['delimiter']],
         "decimal": config["dataset_configuration"]["file_configuration"]['decimal_character'],
         "escapechar": config["dataset_configuration"]["file_configuration"]['escape_character'],
         "encoding": config["dataset_configuration"]["file_configuration"]['encoding'],
+        "date_format": config["dataset_configuration"]["file_configuration"]["datetime_format"],
         "index": False
     }
 
@@ -462,6 +490,56 @@ def convert_X_and_y_dataframe_to_numpy(X: pd.DataFrame, y: pd.Series) -> Tuple[n
     X = np.nan_to_num(X, 0)
     y = y.to_numpy()
     return X, y
+
+def get_column_with_largest_amout_of_text(X: pd.DataFrame, configuration: dict) -> Tuple[pd.DataFrame, dict]:
+    """
+    Find the column with the most text inside,
+    because some adapters only supports training with one feature
+    Args:
+        X (pd.DataFrame): The current X Dataframe
+        configuration (dict): hold the current adapter process configuration
+
+    Returns:
+        Tuple(pd.DataFrame, dict): pd.Dataframe: Returns a pandas Dataframe with the column with the most text inside, the dict is the updated configuraiton dict
+    """
+    column_names = []
+    target = ""
+    dict_with_string_length = {}
+
+    #First get only columns that will be used during training
+    for column, dt in configuration["dataset_configuration"]["schema"].items():
+        if dt.get("role_selected", "") == ":ignore" or dt.get("role_selected", "") == ":index" or dt.get("role_selected", "") == ":target":
+            continue
+        column_names.append(column)
+
+    #Check the used columns by dtype object (== string type) and get mean len to get column with longest text
+    for column_name in column_names:
+        if(X.dtypes[column_name] == object):
+            newlength = X[column_name].str.len().mean()
+            dict_with_string_length[column_name] = newlength
+    max_value = max(dict_with_string_length, key=dict_with_string_length.get)
+
+    #Remove the to be used text column from the list of used columns and set role ignore as Autokeras can only use one input column for text tasks
+    column_names.remove(max_value)
+    for column_name in column_names:
+        configuration["dataset_configuration"]["schema"][column_name]["role_selected"] = ":ignore"
+
+    save_configuration_in_json(configuration)
+    return X, configuration
+
+
+def save_configuration_in_json(configuration: dict):
+    """
+    serialize dataset_configuration to json string and save the the complete configuration in json file
+    to habe the right datatypes available for the evaluation
+    Args:
+        configuration (dict): The current adapter process configuration
+    """
+    configuration['dataset_configuration'] = json.dumps(configuration['dataset_configuration'])
+    with open(os.path.join(configuration['job_folder_location'], get_config_property("job-file-name")), "w+") as f:
+        json.dump(configuration, f)
+    configuration["dataset_configuration"] = json.loads(configuration["dataset_configuration"])
+
 
 #endregion
 
@@ -505,6 +583,10 @@ def read_image_dataset(config: "StartAutoMlRequest") -> Tuple[pd.DataFrame, pd.D
             files.append(glob.glob(os.path.join(data_dir, sub_folder_type, folder, "*.jp*g")))
 
         df_list =[]
+
+        if config['dataset_configuration']['multi_fidelity_level'] != 0:
+            df_list = random.choices(df_list, k=int(len(files)*0.1))
+
         for i in range(len(files)):
             df = pd.DataFrame()
             df["name"] = [x for x in files[i]]

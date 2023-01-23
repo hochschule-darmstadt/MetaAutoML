@@ -11,7 +11,7 @@ class AdapterRuntimeManager:
     """The AdapterRuntimeManager represent a single training session started by a user and manages it
     """
 
-    def __init__(self, data_storage: DataStorage, request: CreateTrainingRequest, explainable_lock: ThreadLock) -> None:
+    def __init__(self, data_storage: DataStorage, request: "CreateTrainingRequest", explainable_lock: ThreadLock, multi_fidelity_callback = None, multi_fidelity_level = 0) -> None:
         """Initialize a new AdapterRuntimeManager instance
 
         Args:
@@ -24,6 +24,8 @@ class AdapterRuntimeManager:
         self.__data_storage: DataStorage = data_storage
         self.__request: CreateTrainingRequest = request
         self.__explainable_lock = explainable_lock
+        self.__multi_fidelity_callback = multi_fidelity_callback
+        self.__multi_fidelity_level = multi_fidelity_level
         self.__log = logging.getLogger('AdapterRuntimeManager')
         self.__log.setLevel(logging.getLevelName(os.getenv("SERVER_LOGGING_LEVEL")))
         self.__training_id = self.__create_training_record()
@@ -50,6 +52,17 @@ class AdapterRuntimeManager:
             self.__adapters.append(adapter_training)
         return
 
+    def update_adapter_manager_list(self, adapter_manager_to_keep: list):
+        new_adapter_list = []
+        for i in range(0, len(self.__adapters)):
+            adapter = self.__adapters.pop()
+            if adapter.get_automl_name() in adapter_manager_to_keep:
+                new_adapter_list.append(adapter)
+            else:
+                adapter.cancel_adapter()
+
+        self.__adapters = new_adapter_list
+
     def __build_dataset_schema(self) -> str:
         """Build the dataset schema using the dataset document and add changes from the wizzard process
 
@@ -70,6 +83,7 @@ class AdapterRuntimeManager:
                     current_schema[key].pop("role_selected", None)
                 #Update selected datatype
                 selected_datatype = training_schema[key].get("DatatypeSelected", "")
+
                 if selected_datatype != "":
                     current_schema[key]["datatype_selected"] = selected_datatype
                 else:
@@ -78,7 +92,6 @@ class AdapterRuntimeManager:
             if self.__request.save_schema == True:
                 self.__data_storage.update_dataset(self.__request.user_id, self.__request.dataset_id, {"schema": current_schema})
             return current_schema
-
 
     def __create_training_record(self) -> str:
         """Create a new training record for this training inside MongoDB
@@ -97,7 +110,8 @@ class AdapterRuntimeManager:
             "configuration": self.__request.configuration.to_dict(casing=betterproto.Casing.SNAKE),
             "dataset_configuration": {
                 "file_configuration": dataset["file_configuration"],
-                "schema": self.__build_dataset_schema()
+                "schema": self.__build_dataset_schema(),
+                "multi_fidelity_level": self.__multi_fidelity_level
             },
             "runtime_profile": {
                 "start_time": datetime.now(),
@@ -144,15 +158,28 @@ class AdapterRuntimeManager:
                 }
                 training_details["runtime_profile"]["end_time"] = datetime.datetime.now()
                 self.__data_storage.update_training(user_id, training_id, training_details)
+
             else:
                 self.__data_storage.update_training(user_id, training_id, {
                     "model_ids": training["model_ids"] + [model_id]
                 })
+        #Finish sub training and return outside of lock or else we deadlock us
+        if len(training["model_ids"]) == len(model_list)-1:
+            if self.__multi_fidelity_level != 0:
+                self.__multi_fidelity_callback(model_list)
 
-        if model_details["status"] == "completed":
+        if model_details["status"] == "completed" and self.__multi_fidelity_level == 0:
             if dataset["type"] in  [":tabular", ":text", ":time_series"]:
                 ExplainableAIManager(self.__data_storage, adapter_manager, self.__explainable_lock).explain(user_id, model_id)
                 return
+
+    def get_adapters(self) -> list[AdapterManager]:
+        """get the __adapters object of this session
+
+        Returns:
+            list[AdapterManager]: The __adapters object
+        """
+        return self.__adapters
 
     def get_training_id(self) -> str:
         """Get the training id to which the found model is linked too
@@ -222,8 +249,6 @@ class AdapterRuntimeManager:
                 }
 
         self.__data_storage.update_training(self.__request.user_id, self.__training_id, training_details)
-
-
 
     def get_dataset(self):
         """Get the dataset record used by the training
