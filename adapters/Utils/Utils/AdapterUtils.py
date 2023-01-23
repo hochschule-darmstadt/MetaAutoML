@@ -121,7 +121,7 @@ def start_automl_process(config: "StartAutoMlRequest") -> subprocess.Popen:
         subprocess.Popen: The AutoML subprocess instance
     """
     python_env = os.getenv("PYTHON_ENV", default="PYTHON_ENV_UNSET")
-
+    print("reached start")
     return subprocess.Popen([python_env, "AutoML.py", config.job_folder_location],
                             stdout=subprocess.PIPE,
                             universal_newlines=True)
@@ -179,10 +179,12 @@ def evaluate(config: "StartAutoMlRequest", config_path: str) -> Tuple[float, flo
     Returns:
         tuple[float, float]: tuple holding the test score, prediction time metrics
     """
-    config = config.__dict__
-    config["dataset_configuration"] = config["dataset_configuration"]
+    non_dict_config = config
+    config = config.to_dict(betterproto.Casing.SNAKE)
+    config["dataset_configuration"] = json.loads(config["dataset_configuration"])
     file_path = config["dataset_path"]
-    result_path = config["result_folder_location"]
+    # use non_dict_config, because to_dict() ignores all values that are not specified in the .proto definition and result_folder_location was added as metadata to the config object in a previous step
+    result_path = non_dict_config.result_folder_location
     # predict
     os.chmod(os.path.join(result_path, "predict.py"), 0o777)
     python_env = os.getenv("PYTHON_ENV", default="PYTHON_ENV_UNSET")
@@ -292,7 +294,6 @@ def setup_run_environment(request: "StartAutoMlRequest", adapter_name: str) -> "
     Returns:
         StartAutoMlRequest: The extended training request configuration holding the training paths
     """
-
     #folder location for job related files
     job_folder_location = os.path.join(get_config_property("training-path"),
                                         request.user_id,
@@ -326,18 +327,28 @@ def setup_run_environment(request: "StartAutoMlRequest", adapter_name: str) -> "
                                         request.training_id,
                                         get_config_property("export-folder-name"))
 
+    request_dict = request.to_dict(casing=betterproto.Casing.SNAKE)
     #For WSL users we need to adjust the path prefix for the dataset location to windows path
     if get_config_property("local_execution") == "YES":
         if get_config_property("running_in_wsl") == "YES":
-            request.dataset_path = re.sub("[a-zA-Z]:/([A-Za-z0-9]+(/[A-Za-z0-9]+)+)/MetaAutoML", get_config_property("wsl_metaautoml_path"), request.dataset_path)
-            request.dataset_path = request.dataset_path.replace("\\", "/")
+            request_dict["dataset_path"] = re.sub("[a-zA-Z]:/([A-Za-z0-9]+(/[A-Za-z0-9]+)+)/MetaAutoML", get_config_property("wsl_metaautoml_path"), request_dict["dataset_path"])
+            request_dict["dataset_path"] = request_dict["dataset_path"].replace("\\", "/")
             job_folder_location = job_folder_location.replace("\\", "/")
             model_folder_location = model_folder_location.replace("\\", "/")
             export_folder_location = export_folder_location.replace("\\", "/")
             result_folder_location = result_folder_location.replace("\\", "/")
             controller_export_folder_location = controller_export_folder_location.replace("\\", "/")
+    print("before assigning folder locations")
 
-    request.job_folder_location = job_folder_location
+    request_dict["job_folder_location"] = job_folder_location
+    request_dict["model_folder_location"] = model_folder_location
+    request_dict["export_folder_location"] = export_folder_location
+    request_dict["result_folder_location"] = result_folder_location
+    request_dict["controller_export_folder_location"] = controller_export_folder_location
+
+    # also add values to request object (the values are used in subsequent requests)
+    request.dataset_path = request_dict["dataset_path"]
+    request.job_folder_location = request_dict["job_folder_location"]
     request.model_folder_location = model_folder_location
     request.export_folder_location = export_folder_location
     request.result_folder_location = result_folder_location
@@ -348,18 +359,11 @@ def setup_run_environment(request: "StartAutoMlRequest", adapter_name: str) -> "
     os.makedirs(model_folder_location, exist_ok=True)
     os.makedirs(export_folder_location, exist_ok=True)
     os.makedirs(result_folder_location, exist_ok=True)
-    request_dict = request.__dict__
-    request_dict.pop("_serialized_on_wire")
-    request_dict.pop("_unknown_fields")
-    request_dict.pop("_group_current")
-    request_dict.update({"configuration": request_dict["configuration"].__dict__})
-    request_dict["configuration"].pop("_serialized_on_wire")
-    request_dict["configuration"].pop("_unknown_fields")
-    request_dict["configuration"].pop("_group_current")
     #Save job file
+    print("before file")
     with open(os.path.join(job_folder_location, get_config_property("job-file-name")), "w+") as f:
         json.dump(request_dict, f)
-
+    print("after file")
     return request
 
 #endregion

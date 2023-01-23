@@ -209,8 +209,15 @@ class OntologyManager(object):
             result.tasks.append(row.task.replace(ML_ONTOLOGY_NAMESPACE, ":"))
         return result
 
-    # TODO: Add doc
     def get_auto_ml_parameters(self, request: GetAutoMlParametersRequest) -> GetAutoMlParametersResponse:
+        """Get parameters that are available for the selected task and AutoMls from the ontology
+
+        Args:
+            request (GetAutoMlParametersRequest): The grpc request dto
+
+        Returns:
+            GetAutoMlParametersResponse: The grpc response dto containing the parameters
+        """
         result = GetAutoMlParametersResponse()
         task_iri = self.__iri_to_uri_ref(request.task_iri)
         for autoMl in request.auto_mls:
@@ -221,9 +228,16 @@ class OntologyManager(object):
         return result
 
 
-    # TODO: Define return value
-    # TODO: Add doc string
     def __get_configuration_options_by_automl_and_task(self, auto_ml_iri: str, task_iri: str) -> List[AutoMlParameter]:
+        """Get available parameters for one AutoMl
+
+        Args:
+            auto_ml_iri (str): iri of the AutoMl
+            task_iri (str): iri of the task
+
+        Returns:
+            List[AutoMlParameter]: List of parameters for the AutoMl
+        """
         result: List[AutoMlParameter] = []
         q = prepareQuery(Queries.ONTOLOGY_QUERY_GET_CONFIGURATION_BY_AUTOML_ID_AND_TASK_ID,
                         initNs={"skos": SKOS})
