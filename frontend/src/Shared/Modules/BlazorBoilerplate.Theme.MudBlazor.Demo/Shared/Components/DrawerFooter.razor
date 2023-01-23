@@ -124,6 +124,48 @@
 </MudDialog>
 
 
+
+<MudDialog @bind-IsVisible="fileUploader.IsUploadPredictionDatasetDialogOpen">
+    <DialogContent>
+        @if (fileUploader.IsUploading == true)
+        {
+        <MudStack Class="mt-4">
+            <MudText Typo="Typo.body2">@UploadText</MudText>
+            <MudProgressLinear Color="Color.Secondary" Value="@Progress" Class="my-7" />
+        </MudStack>
+        }
+        else
+        {
+        <MudPaper Height="180px" Width="300px"  Elevation="0">
+            <MudStack>
+                <InputFile id="fileInput" OnChange="@FilesReady" hidden accept="@AcceptedFileType" />
+                <MudButton HtmlTag="label"
+                            Variant="Variant.Filled"
+                            Color="Color.Secondary"
+                            StartIcon="@Icons.Filled.CloudUpload"
+                            for="fileInput"
+                            Class="mt-1">
+                    @L["Select Dataset"]
+                </MudButton>
+                <MudTextField @bind-Value="@fileUploader.UploadPredictionRequest.FileName" Label="@L["Dataset Name"]" Class="mt-1" Disabled="true"></MudTextField>
+                @if (_isLoaderClosed == false)
+                {
+                    <MudProgressLinear Color="Color.Secondary" Indeterminate="true"/>
+                }
+            </MudStack>
+        </MudPaper>
+        }
+    </DialogContent>
+    <DialogActions>
+        <MudButton Color="Color.Secondary" OnClick="Close">@L["Close"]</MudButton>
+        @if (fileUploader.IsUploading == false)
+        {
+            <MudButton StartIcon="@Icons.Filled.CloudUpload" Color="Color.Secondary" Disabled="@_uploadReady" OnClick="@Upload">@L["Upload"]</MudButton>
+        }
+    </DialogActions>
+</MudDialog>
+
+
 @code {
     public string Url;
     private bool _fileUpload = true;
