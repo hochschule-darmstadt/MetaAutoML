@@ -1,14 +1,23 @@
 @if (ViewModel.AvailableChips?.Any() ?? false)
 {
     <MudText Typo="Typo.subtitle2">@Label</MudText>
+
     <MudChipSet Filter="true" MultiSelection="true" SelectedValues="SelectedValues">
         @foreach (var chip in ViewModel.AvailableChips)
         {
-            @if (chip.ToolTip != null)
+            @if (!string.IsNullOrEmpty(chip.ToolTip) || !string.IsNullOrEmpty(chip.Comment))
             {
-                <MudTooltip Text="@chip.ToolTip" Delay="600" Arrow="true" Placement="Placement.Bottom" Class="strategy-description-tooltip">
-                    <MudChip Value="@chip.Id" Text="@chip.Label" Variant="Variant.Text" Color="Color.Secondary" @onclick="() => ToggleChip(chip)" />
-                </MudTooltip>
+                <MudChip Value="@chip.Id" Text="@chip.Label" Variant="Variant.Text" Color="Color.Secondary" @onclick="() => ToggleChip(chip)">
+
+                    <WikiTooltip SeeAlso="@chip.ToolTip" Comment="@chip.Comment" Label="@chip.Label">
+
+                    </WikiTooltip>
+
+                    <!--   else
+                    {
+                        <MudChip Value="@chip.Id" Text="@chip.Label" Variant="Variant.Text" Color="Color.Secondary" @onclick="() => ToggleChip(chip)" />
+                    }-->
+                </MudChip>
             }
             else
             {
@@ -19,7 +28,8 @@
 }
 else
 {
-    <DataLoaderSpinner />
+    <MudText Typo="Typo.subtitle2">@Label</MudText>
+    <MudText Typo="Typo.subtitle2">-</MudText>
 }
 
 @code
@@ -60,15 +70,15 @@ else
         /// List of selected elements in the ChipSet.
         /// </summary>
         /// <value></value>
-        public IEnumerable<string> SelectedIds => AvailableChips.Where(c => c.IsSelected).Select(c => c.Id); 
-        
+        public IEnumerable<string> SelectedIds => AvailableChips.Where(c => c.IsSelected).Select(c => c.Id);
+
 
         /// <summary>
         /// Updates the collection of available chips and adapt the selected ids accordingly.
         /// Newly available options are selected by default.
         /// </summary>
         /// <param name="availableChips">Collection of tuples that contain an id, a label and a tooltip. (Each one is shown as a chip)</param>
-        public void SetAvailableChips(IEnumerable<(string id, string label, string toolTip)> availableChips)
+        public void SetAvailableChips(IEnumerable<(string id, string label, string toolTip, bool isSelected, string comment, string imageUrl)> availableChips)
         {
             var addedChips = availableChips.Where(ac => AvailableChips.All(c => c.Id != ac.id)).ToList();
             var removedChips = AvailableChips.Where(c => availableChips.All(ac => ac.id != c.Id)).ToList();
@@ -76,8 +86,7 @@ else
             {
                 AvailableChips.Remove(chipToRemove);
             }
-
-            foreach (var chipToAdd in addedChips.Select(ac => new ChipViewModel { Id = ac.id, Label = ac.label, ToolTip = ac.toolTip }))
+            foreach (var chipToAdd in addedChips.Select(ac => new ChipViewModel { Id = ac.id, Label = ac.label, ToolTip = ac.toolTip, IsSelected = ac.isSelected, ImageUrl = ac.imageUrl, Comment = ac.comment }))
             {
                 AvailableChips.Add(chipToAdd);
             }
@@ -95,7 +104,9 @@ else
     {
         public string Id { get; set; }
         public string Label { get; set; }
+        public string Comment { get; set; }
         public string ToolTip { get; set; }
         public bool IsSelected { get; set; } = true;
+        public string ImageUrl { get; set; }
     }
 }

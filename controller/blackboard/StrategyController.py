@@ -2,11 +2,14 @@ import logging, time, json, os
 from threading import Timer
 from typing import Callable
 from datetime import datetime
-from typing import TYPE_CHECKING
-if TYPE_CHECKING:
-    from AdapterRuntimeManager import AdapterRuntimeManager
 from DataStorage import DataStorage
-import Blackboard
+from Blackboard import Blackboard
+from ThreadLock import ThreadLock
+from ControllerBGRPC import *
+from AdapterRuntimeManagerAgent import AdapterRuntimeManagerAgent
+from DataAnalysisAgent import DataAnalysisAgent
+from AdapterRuntimeManager import AdapterRuntimeManager
+from AdapterManagerAgent import AdapterManagerAgent
 
 class RepeatTimer(Timer):
     def run(self):
@@ -16,18 +19,26 @@ class RepeatTimer(Timer):
 class StrategyController(object):
     """
     Strategy controller which supervises the blackboard.
-    """
-    def __init__(self, blackboard: Blackboard.Blackboard, adapter_runtime_manager: "AdapterRuntimeManager", data_storage:DataStorage, timer_interval: int = 1) -> None:
+    """, 
+    def __init__(self, data_storage:DataStorage, request: "CreateTrainingRequest", explainable_lock: ThreadLock, timer_interval: int = 1, multi_fidelity_callback = None, multi_fidelity_level = 0) -> None:
         self._log = logging.getLogger('StrategyController')
         self._log.setLevel(logging.getLevelName(os.getenv("BLACKBOARD_LOGGING_LEVEL")))
         self.__is_running = False
         self.__timer_interval = timer_interval
         self.__timer = None
         self.__update_phase_next_run = None
-        self.blackboard = blackboard
-        self.__adapter_runtime_manager = adapter_runtime_manager
-        self.__data_storage = data_storage
-        self._log.debug(f'Attached controller to the blackboard, current agents: {len(self.blackboard.agents)}')
+        self.__blackboard = Blackboard()
+        self.__data_storage: DataStorage = data_storage
+        self.__request: "CreateTrainingRequest" = request
+        self.__explainable_lock = explainable_lock
+        #Init training session
+        self.__adapter_runtime_manager = AdapterRuntimeManager(self.__data_storage, self.__request, self.__explainable_lock, multi_fidelity_callback = multi_fidelity_callback, multi_fidelity_level = multi_fidelity_level) 
+        #Init Agents  
+        for adapter_manager in self.__adapter_runtime_manager.get_adapter_managers():
+            AdapterManagerAgent(self.__blackboard, self, adapter_manager)
+        AdapterRuntimeManagerAgent(self.__blackboard, self, self.__adapter_runtime_manager)
+        DataAnalysisAgent(self.__blackboard, self, self.__adapter_runtime_manager.get_dataset())
+        self._log.debug(f'Attached controller to the blackboard, current agents: {len(self.__blackboard.agents)}')
 
         try:
             session_config = self.__adapter_runtime_manager.get_training_request().configuration
@@ -38,7 +49,7 @@ class StrategyController(object):
             self._log.exception(e)
             session_enabled_strategies = []
 
-        self.blackboard.common_state.update({
+        self.__blackboard.common_state.update({
             'phase': None,
             'dataset_type': self.__adapter_runtime_manager.get_dataset()['type'],
             'events': [],
@@ -51,13 +62,60 @@ class StrategyController(object):
         from blackboard.strategies.DataPreparationStrategy import DataPreparationStrategyController
         self.strategies.append(DataPreparationStrategyController(self))
 
+        self.on_event('phase_updated', self.__adapter_runtime_manager.blackboard_phase_update_handler)
+        self.set_phase('preprocessing')
+        self.start_timer()
+    
+    def get_adapter_runtime_manager(self) -> AdapterRuntimeManager:
+        """get the __adapter_runtime_manager object of this session
+
+        Returns:
+            AdapterRuntimeManager: The __adapter_runtime_manager object
+        """
+        return self.__adapter_runtime_manager
+
+    def get_explainable_lock(self) -> ThreadLock:
+        """get the __explainable_lock object of this session
+
+        Returns:
+            ThreadLock: The __explainable_lock object
+        """
+        return self.__explainable_lock
+
+    def get_data_storage(self) -> DataStorage:
+        """get the data_storage object of this session
+
+        Returns:
+            DataStorage: The data_storage object
+        """
+        return self.__data_storage
+
+    def get_request(self) -> "CreateTrainingRequest":
+        """get the request object of this session
+
+        Returns:
+            "CreateTrainingRequest": The request object
+        """
+        return self.__request
+
+    def get_training_id(self) -> str:
+        """get the training id of this session
+
+        Returns:
+            str: The training id which identify this training session
+        """
+        return self.__adapter_runtime_manager.get_training_id()
+
+    def get_blackboard(self) -> Blackboard:
+        return self.__blackboard
+
     def get_phase(self) -> str:
-        return self.blackboard.get_state('phase')
+        return self.__blackboard.get_state('phase')
 
     def set_phase(self, phase: str, force: bool = False) -> None:
         if force:
             old_phase = self.get_phase()
-            self.blackboard.update_state('phase', phase)
+            self.__blackboard.update_state('phase', phase)
             self.log_event('phase_updated', { 'old_phase': old_phase, 'new_phase': phase })
         else:
             # Update the phase in the next controller loop iteration
@@ -90,7 +148,7 @@ class StrategyController(object):
         if self.__update_phase_next_run is not None:
             self.set_phase(self.__update_phase_next_run, force=True)
             self.__update_phase_next_run = None
-        for agent in list(self.blackboard.agents.values()):
+        for agent in list(self.__blackboard.agents.values()):
             if agent.can_contribute():
                 self._log.debug(f'run_loop: Executing contribution by agent: {agent.agent_id}')
                 try:
@@ -111,20 +169,20 @@ class StrategyController(object):
             self.stop_timer()
 
     def is_strategy_enabled(self, strategy_name: str) -> bool:
-        return strategy_name in self.blackboard.get_state('enabled_strategies', [])
+        return strategy_name in self.__blackboard.get_state('enabled_strategies', [])
 
     def enable_strategy(self, strategy_name: str) -> None:
-        enabled_strategies = self.blackboard.get_state('enabled_strategies', [])
+        enabled_strategies = self.__blackboard.get_state('enabled_strategies', [])
         if not strategy_name in enabled_strategies:
             enabled_strategies.append(strategy_name)
-            self.blackboard.update_state('enabled_strategies', enabled_strategies)
+            self.__blackboard.update_state('enabled_strategies', enabled_strategies)
         self._log.debug(f'enable_strategy: Enabled strategy: {strategy_name}')
 
     def disable_strategy(self, strategy_name: str) -> None:
-        enabled_strategies = self.blackboard.get_state('enabled_strategies', [])
+        enabled_strategies = self.__blackboard.get_state('enabled_strategies', [])
         if strategy_name in enabled_strategies:
             enabled_strategies.remove(strategy_name)
-            self.blackboard.update_state('enabled_strategies', enabled_strategies)
+            self.__blackboard.update_state('enabled_strategies', enabled_strategies)
         self._log.debug(f'disable_strategy: Disabled strategy: {strategy_name}')
 
     def evaluate_strategy(self) -> None:
@@ -134,10 +192,10 @@ class StrategyController(object):
             for rule_name, (rule, action) in strategy.rules.items():
                 if self.is_strategy_enabled(rule_name):
                     try:
-                        state = self.blackboard.get_state()
+                        state = self.__blackboard.get_state()
                         if rule.matches(state):
                             try:
-                                result = action(state, self.blackboard, self)
+                                result = action(state, self.__blackboard, self)
                                 self.log_event('strategy_action', { 'rule_name': rule_name, 'result': result })
                             except Exception as err:
                                 self._log.error(f'evaluate_strategy: Could not execute strategy action for rule "{rule_name}".')
@@ -152,9 +210,9 @@ class StrategyController(object):
             'meta': meta,
             'timestamp': timestamp if timestamp is not None else datetime.now()
         }
-        events = self.blackboard.get_state('events')
+        events = self.__blackboard.get_state('events')
         events.append(event)
-        self.blackboard.update_state('events', events)
+        self.__blackboard.update_state('events', events)
         self._log.info(f'Encountered event "{event_type}": {meta}')
         for callback in (self.event_listeners.get('*', []) + self.event_listeners.get(event_type, [])):
             self._log.debug(f'Dispatching event callback for "{event_type}": {callback}')

@@ -6,7 +6,7 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "CONTROLLER_SERVICE_HOST": "localhost",
-        "CONTROLLER_DATASET_FOLDER_PATH": "C:\\GitRepos\\MetaAutoML\\controller\\app-data\\datasets",
+        "CONTROLLER_DATASET_FOLDER_PATH": "C:\\Users\\alex\\Desktop\\MetaAutoML\\controller\\app-data\\datasets",
         "CONTROLLER_SERVICE_PORT": "5001",
         "no_proxy": "localhost",
         "REDIS_SERVICE_HOST": "localhost",
@@ -43,7 +43,7 @@
     "windowsAuthentication": false,
     "anonymousAuthentication": true,
     "iisExpress": {
-      "applicationUrl": "http://localhost:54414/",
+      "applicationUrl": "http://localhost:56464/",
       "sslPort": 0
     }
   }

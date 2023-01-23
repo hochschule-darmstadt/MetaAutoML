@@ -1,10 +1,12 @@
 import autokeras as ak
 import numpy as np
-from AbstractAdapter import AbstractAdapter
-from AdapterUtils import data_loader, export_model, prepare_tabular_dataset
+from AdapterUtils import data_loader, export_model, prepare_tabular_dataset, get_column_with_largest_amout_of_text
+import pandas as pd
+import json
+import os
+from JsonUtil import get_config_property
 
-
-class AutoKerasAdapter(AbstractAdapter):
+class AutoKerasAdapter:
     """
     Implementation of the AutoML functionality for AutoKeras
     """
@@ -14,7 +16,11 @@ class AutoKerasAdapter(AbstractAdapter):
         Args:
             configuration (dict): Dictonary holding the training configuration
         """
-        super(AutoKerasAdapter, self).__init__(configuration)
+        self._configuration = configuration
+        if self._configuration["configuration"]["runtime_limit"] > 0:
+            self._time_limit = self._configuration["configuration"]["runtime_limit"]
+        else:
+            self._time_limit = 30
 
     def start(self):
         """Start the correct ML task functionality of AutoKeras"""
@@ -45,8 +51,8 @@ class AutoKerasAdapter(AbstractAdapter):
                                           # metric=self._configuration['metric'],
                                           directory=self._configuration["model_folder_location"],
                                           seed=42)
-                                          
-        clf.fit(x=X, y=y)
+
+        clf.fit(x=X, y=y, epochs=1)
         export_model(clf, self._configuration["result_folder_location"], 'model_keras.p')
 
     def __tabular_regression(self):
@@ -60,8 +66,8 @@ class AutoKerasAdapter(AbstractAdapter):
                                          # metric=self._configuration['metric'],
                                          directory=self._configuration["model_folder_location"],
                                          seed=42)
-        
-        reg.fit(x=X, y=y)
+
+        reg.fit(x=X, y=y, epochs=1)
         export_model(reg, self._configuration["result_folder_location"], 'model_keras.p')
 
     def __image_classification(self):
@@ -69,8 +75,8 @@ class AutoKerasAdapter(AbstractAdapter):
 
         X_train, y_train, X_test, y_test = data_loader(self._configuration)
 
-        clf = ak.ImageClassifier(overwrite=True, 
-                                          max_trials=3,
+        clf = ak.ImageClassifier(overwrite=True,
+                                          max_trials=1,
                                 # metric=self._configuration['metric'],
                                 seed=42,
                                 directory=self._configuration["model_folder_location"])
@@ -85,13 +91,13 @@ class AutoKerasAdapter(AbstractAdapter):
 
         X_train, y_train, X_val, y_val = data_loader(self._configuration)
 
-        reg = ak.ImageRegressor(overwrite=True, 
+        reg = ak.ImageRegressor(overwrite=True,
                                           max_trials=3,
                                 # metric=self._configuration['metric'],
                                 seed=42,
                                 directory=self._configuration["model_folder_location"])
-                                
-        reg.fit(x = X_train, y = y_train)
+
+        reg.fit(x = X_train, y = y_train, epochs=1)
 
         export_model(reg, self._configuration["result_folder_location"], 'model_keras.p')
 
@@ -99,33 +105,39 @@ class AutoKerasAdapter(AbstractAdapter):
         """Execute text classifiction task and export the found model"""
 
         self.df, test = data_loader(self._configuration)
-        X, y = prepare_tabular_dataset(self.df, self._configuration)
+        X, self._configuration = get_column_with_largest_amout_of_text(self.df, self._configuration)
+        X, y = prepare_tabular_dataset(X, self._configuration)
 
-        reg = ak.TextClassifier(overwrite=True, 
-                                          max_trials=3,
+        reg = ak.TextClassifier(overwrite=True,
+                                # NOTE: bert models will fail with out of memory errors
+                                #   even with 32GB GB RAM
+                                # the first model is a non-bert transformer
+                                max_trials=1,
                                 # metric=self._configuration['metric'],
                                 seed=42,
                                 directory=self._configuration["model_folder_location"])
-                                
-        reg.fit(x = np.array(X), y = np.array(y), epochs=1)
 
+
+        reg.fit(x = np.array(X).astype(np.unicode_), y = np.array(y), epochs=1)
         export_model(reg, self._configuration["result_folder_location"], 'model_keras.p')
+
 
     def __text_regression(self):
         """Execute text regression task and export the found model"""
 
         self.df, test = data_loader(self._configuration)
-        X, y = prepare_tabular_dataset(self.df, self._configuration)
+        X, self._configuration = get_column_with_largest_amout_of_text(self.df, self._configuration)
+        X, y = prepare_tabular_dataset(X, self._configuration)
 
-        reg = ak.TextClassifier(overwrite=True, 
+        reg = ak.TextClassifier(overwrite=True,
                                           max_trials=3,
                                 # metric=self._configuration['metric'],
                                 seed=42,
                                 directory=self._configuration["model_folder_location"])
-                                
-        reg.fit(x = np.array(X), y = np.array(y))
 
+        reg.fit(x = np.array(X), y = np.array(y), epochs=1)
         export_model(reg, self._configuration["result_folder_location"], 'model_keras.p')
+
 
     def __time_series_forecasting(self):
         """Execute time series forecasting task and export the found model"""
@@ -133,12 +145,19 @@ class AutoKerasAdapter(AbstractAdapter):
         self.df, test = data_loader(self._configuration)
         X, y = prepare_tabular_dataset(self.df, self._configuration)
 
-        reg = ak.TimeseriesForecaster(overwrite=True, 
-                                          max_trials=3,
-                                # metric=self._configuration['metric'],
+        #TODO convert dataframe to float
+
+        reg = ak.TimeseriesForecaster(overwrite=True,
+                                          max_trials=1,
+                                          lookback=1,
+                                metrics=["mean_absolute_percentage_error"],
                                 seed=42,
                                 directory=self._configuration["model_folder_location"])
-                                
-        reg.fit(x = np.array(X), y = np.array(y))
 
-        export_model(reg, self._configuration["result_folder_location"], 'model_keras.p')
+        X = X.bfill().ffill()  # makes sure there are no missing values
+        y = y.bfill().ffill()  # makes sure there are no missing values
+        #Loopback must be dividable by batch_size else time seires will crash
+        reg.fit(x = X, y = y, epochs=1, batch_size=1)
+        model = reg.export_model()
+        model.save(os.path.join(self._configuration["result_folder_location"], 'model_keras'), save_format="tf")
+        #export_model(reg, self._configuration["result_folder_location"], 'model_keras.p')

@@ -2,7 +2,7 @@
   "adapter-name": "alphad3m",
   "job-file-name": "alphad3m-job.json",
   "env-varname-cluster": "RUNTIME",
-  "grpc-server-address": "127.0.0.1",     
+  "grpc-server-address": "127.0.0.1",
   "export-zip-file-name": "alphad3m-export",
   "training-path": "/home/alex/Desktop/MetaAutoML/adapters/AlphaD3M/app-data/training",
   "job-folder-name": "job",
@@ -11,5 +11,7 @@
   "result-folder-name": "result",
   "templates-path": "app-data/templates",
   "predict-time-sources-path": "../Utils/AutoMLs/predict_time_sources.py",
-  "local_execution": "YES"
+  "local_execution": "YES",
+  "running_in_wsl": "YES",
+  "wsl_metaautoml_path": "/mnt/c/Users/alex/Desktop/MetaAutoML"
 }

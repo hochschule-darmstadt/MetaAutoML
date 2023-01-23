@@ -1,15 +1,17 @@
-﻿
+
 @using System 
 @using System.IO
 @using Microsoft.AspNetCore.Hosting
 @using Microsoft.Extensions.Logging
 @using System.Net.Http.Headers
+@using Microsoft.Data.Analysis
 @inject IApiClient apiClient
 @inject IViewNotifier viewNotifier
 @inject IJSRuntime JS
 @inject IStringLocalizer<Global> L
 @inject IHttpClientFactory ClientFactory
 @inject NavigationManager NavManager
+
 
 <MudCard Elevation="5">
     <MudCardHeader Style="border-bottom-style: inset; border-bottom-width: 1px;">
@@ -91,7 +93,7 @@
     private GetDatasetResponseDto _dataset;
     private GetDatasetPreviewResponseDto _datasetPreview;
     private bool isPreviewRequestRunning = false;
-    private Frame<int, string> _datasetFrame;
+    private DataFrame _datasetFrame;
     private List<ImagePreviewDto> _imageDataset;
 
     [Parameter]
@@ -136,19 +138,28 @@
                     case ":time_series":
                     case ":text":
                     case ":tabular":
-                        // convert string to stream
-                        byte[] byteArray = Encoding.ASCII.GetBytes(_datasetPreview.DatasetPreview);
-                        MemoryStream stream = new MemoryStream(byteArray);
-                        _datasetFrame = Frame.ReadCsv(stream, separators: Dataset.Dataset.GetDelimiterStr());
 
-                        foreach (var item in _datasetFrame.ColumnKeys)
+                        List<object> nanDatatypesValuesPerColumn = new List<object>();
+                        _datasetFrame = DataFrame.LoadCsv(_datasetPreview.DatasetPreview, separator: Dataset.Dataset.GetDelimiter(), encoding: Dataset.Dataset.GetEncoding(), numRows: 3);//Frame.ReadCsv(stream, separators: Dataset.Dataset.GetDelimiterStr());
+                        foreach (var item in _datasetFrame.Columns)
                         {
-                            var newcolumn = _datasetFrame.Columns[item].FillMissing(st =>
+                            switch (item.DataType.Name)
                             {
-                                return "NaN";
-                            });
-                            _datasetFrame.ReplaceColumn(item, newcolumn);
+                                case "String":
+                                    nanDatatypesValuesPerColumn.Add("NaN");
+                                    break;
+                                case "Single":
+                                    nanDatatypesValuesPerColumn.Add(0);
+                                    break;
+                                case "DateTime":
+                                    nanDatatypesValuesPerColumn.Add(DateTime.Now);
+                                    break;
+                                default:
+                                    nanDatatypesValuesPerColumn.Add("NaN");
+                                    break;
+                            }
                         }
+                        _datasetFrame.FillNulls(nanDatatypesValuesPerColumn, true);
 
                         ReadDatasetFailed = false;
                         await ReadDatasetFailedChanged.InvokeAsync(ReadDatasetFailed);

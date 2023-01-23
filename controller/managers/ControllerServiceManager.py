@@ -13,11 +13,12 @@ from JsonUtil import get_config_property
 from concurrent.futures.process import ProcessPoolExecutor
 from dependency_injector.wiring import inject, Provide
 from MeasureDuration import MeasureDuration
+from DataStorage import DataStorage
 
 ROOT_PATH = os.path.dirname(os.path.abspath(__file__))
 
 class ControllerServiceManager(ControllerServiceBase):
-    """Service class that implements GRPC controller interface, all inbound calls are received within this class. 
+    """Service class that implements GRPC controller interface, all inbound calls are received within this class.
 
     Args:
         ControllerServiceBase (ControllerServiceBase): Automatically generated GRPC server stub base class
@@ -53,7 +54,7 @@ class ControllerServiceManager(ControllerServiceBase):
     async def get_home_overview_information(
         self, get_home_overview_information_request: "GetHomeOverviewInformationRequest",
         user_manager: UserManager=Provide[Application.managers.user_manager]
-    ) -> "GetHomeOverviewInformationResponse":  
+    ) -> "GetHomeOverviewInformationResponse":
         with MeasureDuration() as m:
             response = user_manager.get_home_overview_information(get_home_overview_information_request)
         #response = await self.__loop.run_in_executor(
@@ -68,7 +69,7 @@ class ControllerServiceManager(ControllerServiceBase):
     ####################################
     ## DATASET RELATED OPERATIONS
     ####################################
-#region 
+#region
 
     @inject
     async def create_dataset(
@@ -109,18 +110,6 @@ class ControllerServiceManager(ControllerServiceBase):
         self.__log.warn("get_dataset: executed")
         return response
 
-    @inject
-    async def get_tabular_dataset_column(
-        self, get_tabular_dataset_column_request: "GetTabularDatasetColumnRequest",
-        dataset_manager: DatasetManager=Provide[Application.managers.dataset_manager]
-    ) -> "GetTabularDatasetColumnResponse":
-        with MeasureDuration() as m:
-            response = dataset_manager.get_tabular_dataset_column(get_tabular_dataset_column_request)
-        #response = await self.__loop.run_in_executor(
-        #    self.__executor, dataset_manager.get_tabular_dataset_column, get_tabular_dataset_column_request
-        #)
-        self.__log.warn("get_tabular_dataset_column: executed")
-        return response
 
     @inject
     async def delete_dataset(
@@ -136,11 +125,11 @@ class ControllerServiceManager(ControllerServiceBase):
         return response
 
     @inject
-    async def set_dataset_file_configuration(
+    async def set_dataset_configuration(
         self,
-        set_dataset_file_configuration_request: "SetDatasetFileConfigurationRequest",
+        set_dataset_file_configuration_request: "SetDatasetConfigurationRequest",
         dataset_manager: DatasetManager=Provide[Application.managers.dataset_manager]
-    ) -> "SetDatasetFileConfigurationResponse":
+    ) -> "SetDatasetConfigurationResponse":
         with MeasureDuration() as m:
             response = dataset_manager.set_dataset_file_configuration(set_dataset_file_configuration_request)
         #response = await self.__loop.run_in_executor(
@@ -149,6 +138,16 @@ class ControllerServiceManager(ControllerServiceBase):
         self.__log.warn("delete_dataset: set_dataset_file_configuration")
         return response
 
+
+    @inject
+    async def set_dataset_column_schema_configuration(
+        self,
+        set_dataset_column_schema_configuration_request: "SetDatasetColumnSchemaConfigurationRequest",
+        dataset_manager: DatasetManager=Provide[Application.managers.dataset_manager]
+    ) -> "SetDatasetColumnSchemaConfigurationResponse":
+        with MeasureDuration() as m:
+            response = dataset_manager.set_dataset_column_schema_configuration(set_dataset_column_schema_configuration_request)
+        return response
 
 #endregion
 
@@ -286,28 +285,56 @@ class ControllerServiceManager(ControllerServiceBase):
     @inject
     async def get_available_strategies(
         self, get_available_strategies_request: "GetAvailableStrategiesRequest",
-        ontology_manager: OntologyManager=Provide[Application.ressources.ontology_manager]
+        ontology_manager: OntologyManager=Provide[Application.ressources.ontology_manager],
+        data_storage: DataStorage=Provide[Application.ressources.data_storage]
     ) -> "GetAvailableStrategiesResponse":
+
+        found, dataset = data_storage.get_dataset(get_available_strategies_request.user_id, get_available_strategies_request.dataset_id)
+
+        if not found:
+            self.__log.error(f"get_available_strategies: dataset {get_available_strategies_request.dataset_id} for user {get_available_strategies_request.user_id} not found")
+
         #TODO add to ontology and RdfManager
         with MeasureDuration() as m:
             result = GetAvailableStrategiesResponse()
-            result.strategies = [
+            result.strategies = []
+            if dataset["type"] in [":tabular", ":text", ":time_series"]:
+                if (not found) or (len(dataset['analysis']['duplicate_columns']) != 0):
+                    result.strategies.append(
+						Strategy(
+						'data_preparation.ignore_redundant_features',
+						'Ignore redundant features',
+						'This strategy ignores certain dataset columns if they have been flagged as duplicate in the dataset analysis.'
+						)
+					)
+
+                if (not found) or (len(dataset['analysis']['duplicate_rows']) != 0):
+                    result.strategies.append(
+                        Strategy(
+						'data_preparation.ignore_redundant_samples',
+						'Ignore redundant samples',
+						'This strategy ignores certain dataset rows if they have been flagged as duplicate in the dataset analysis.'
+						)
+					)
+
+                size_time_ratio = dataset['analysis']['size_bytes'] / int(get_available_strategies_request.configuration['runtimeLimit'])
+
+                if (not found) or (size_time_ratio > 20000):
+                    result.strategies.append(
+						Strategy(
+						'data_preparation.split_large_datasets',
+						'Split large datasets',
+						'This strategy truncates the training data if the time limit is relatively short for the size of the dataset.'
+						)
+				)
+            result.strategies.append(
                 Strategy(
-                    'data_preparation.ignore_redundant_features',
-                    'Ignore redundant features',
-                    'This strategy ignores certain dataset columns if they have been flagged as duplicate in the dataset analysis.'
-                ),
-                Strategy(
-                    'data_preparation.ignore_redundant_samples',
-                    'Ignore redundant samples',
-                    'This strategy ignores certain dataset rows if they have been flagged as duplicate in the dataset analysis.'
-                ),
-                Strategy(
-                    'data_preparation.split_large_datasets',
-                    'Split large datasets',
-                    'This strategy truncates the training data if the time limit is relatively short for the size of the dataset.'
-                ),
-            ]
+                'data_preparation.top_3_models',
+                'Top 3 Models',
+                'This strategy will run all adapters with only a small part of the data. Then it will train the 3 best solutions with the full data again.'
+                )
+            )
+
         return result
 
     @inject
@@ -410,5 +437,5 @@ class ControllerServiceManager(ControllerServiceBase):
             response = predictionManager.delete_prediction(delete_prediction_request)
         self.__log.warn("delete_prediction: executed")
         return response
-        
+
 #endregion
