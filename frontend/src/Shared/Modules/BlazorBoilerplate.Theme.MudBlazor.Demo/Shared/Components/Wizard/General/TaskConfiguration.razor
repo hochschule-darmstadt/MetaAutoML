@@ -433,7 +433,8 @@
         {
             if(_intersectedParams.Where(p => p.ParameterIri == intersectedParam.ParameterIri).Any())
             {
-            intersectedParam.SelectedValues = _intersectedParams.Where(p => p.ParameterIri == intersectedParam.ParameterIri).First().SelectedValues.Where(s => intersectedParam.ParameterValues.Where( pv => pv.ValueIri == s.ValueIri).Any());
+            List<ParameterValueViewModel> selectedValueList = _intersectedParams.Where(p => p.ParameterIri == intersectedParam.ParameterIri).First().SelectedValues.Where(s => intersectedParam.ParameterValues.Where( pv => pv.ValueIri == s.ValueIri).Any()).ToList();
+            intersectedParam.SelectedValues = intersectedParam.ParameterValues.Where(p=> selectedValueList.Where(s => s.ValueIri == p.ValueIri).Any());
             }
         }
         return intersectedParamsNew;
