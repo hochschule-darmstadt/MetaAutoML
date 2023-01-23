@@ -99,7 +99,7 @@ class DataPreparationStrategyController(IAbstractStrategy):
         duplicate_columns = state.get("dataset_analysis", {}).get("duplicate_columns", [])
         ignored_columns = []
 
-        agent: AdapterRuntimeManagerAgent = controller.blackboard.get_agent('training-runtime')
+        agent: AdapterRuntimeManagerAgent = controller.get_blackboard().get_agent('training-runtime')
         if not agent or not agent.get_adapter_runtime_manager():
             raise RuntimeError('Could not access Adapter Runtime Manager Agent!')
         dataset_configuration = json.loads(agent.get_adapter_runtime_manager().get_training_request().dataset_configuration)
@@ -169,3 +169,4 @@ class DataPreparationStrategyController(IAbstractStrategy):
             self._log.info(f'do_finish_preprocessing: Finished data preparation, advancing to phase "running"..')
             controller.set_phase('running')
             controller.disable_strategy('data_preparation.finish_preprocessing')
+

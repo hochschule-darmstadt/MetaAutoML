@@ -103,6 +103,7 @@ class FLAMLAdapter:
         X.reset_index(inplace=True)
         X = X.bfill().ffill()  # makes sure there are no missing values
         automl.fit(dataframe=X, label=y.name, **automl_settings)
+
         export_model(automl, self._configuration["result_folder_location"], 'model_flaml.p')
 
     def __text_classification(self):
@@ -127,4 +128,5 @@ class FLAMLAdapter:
 
         X[y.name] = y.values
         automl.fit(dataframe=X, label=y.name, **automl_settings)
+
         export_model(automl, self._configuration["result_folder_location"], 'model_flaml.p')
