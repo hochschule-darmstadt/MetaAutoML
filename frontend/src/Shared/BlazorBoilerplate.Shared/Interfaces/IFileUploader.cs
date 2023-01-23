@@ -1,4 +1,4 @@
-using BlazorBoilerplate.Shared.Dto.Dataset;
+﻿using BlazorBoilerplate.Shared.Dto.Dataset;
 using BlazorBoilerplate.Shared.Dto.Prediction;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
@@ -12,8 +12,7 @@ namespace BlazorBoilerplate.Shared.Interfaces
 {
     public interface IFileUploader
     {
-        Task UploadDatasetFromLocal();
-        Task UploadDatasetFromURL(string url, string fileType);
+        Task UploadDataset();
         UploadDatasetRequestDto UploadDatasetRequest { get; set; }
         UploadPredictionRequestDto UploadPredictionRequest { get; set; }
         IBrowserFile UploadFileContent { get; set; }

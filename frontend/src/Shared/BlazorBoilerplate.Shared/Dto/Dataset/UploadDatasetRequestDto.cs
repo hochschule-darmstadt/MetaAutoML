@@ -1,4 +1,4 @@
-using BlazorBoilerplate.Shared.Interfaces;
+﻿using BlazorBoilerplate.Shared.Interfaces;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Http;
 using System;
@@ -12,10 +12,9 @@ namespace BlazorBoilerplate.Shared.Dto.Dataset
 {
     public class UploadDatasetRequestDto
     {
-        public string FileNameOrURL { get; set; }
+        public string FileName { get; set; }
         public string DatasetName { get; set; }
         public string DatasetType { get; set; }
-        public string FileSource { get; set; }
         public byte[] Content { get; set; }
         public int ChunkNumber { get; set; }
         public int TotalChunkNumber { get; set; }
