@@ -63,7 +63,7 @@ class AutoKerasTabularTaskTest(unittest.TestCase):
         req.configuration.target = "survived"
         req.configuration.runtime_limit = 3
         req.configuration.metric = ':accuracy'
-        req.configuration.parameters = '{":metric": {"values": [":accuracy"]}}'
+        req.configuration.parameters = {":metric": {"values": [":accuracy"]}}
         req.dataset_configuration = json.dumps({
             "column_datatypes": {
                 "age": DataType.DATATYPE_INT,
@@ -117,7 +117,7 @@ class AutoKerasTabularTaskTest(unittest.TestCase):
         req.configuration.target = "survived"
         req.configuration.runtime_limit = 3
         req.configuration.metric = ":accuracy"
-        req.configuration.parameters = '{":metric": {"values": [":mean_sqared_error"]}}'
+        req.configuration.parameters = {":metric": {"values": [":mean_sqared_error"]}}
         req.dataset_configuration = json.dumps({
             "column_datatypes": {
                 "age": DataType.DATATYPE_INT,
@@ -171,7 +171,7 @@ class AutoKerasTabularTaskTest(unittest.TestCase):
         req.configuration.target = "survived"
         req.configuration.runtime_limit = 3
         req.configuration.metric = ':accuracy'
-        req.configuration.parameters = '{":metric": {"values": [":accuracy"]}}'#average_precision_score
+        req.configuration.parameters = {":metric": {"values": [":accuracy"]}}#average_precision_score
         req.dataset_configuration = json.dumps({
             "column_datatypes": {
                 "age": DataType.DATATYPE_INT,

@@ -83,7 +83,7 @@ class AutoKerasTextTaskTest(unittest.TestCase):
         req.configuration.target = "target"
         req.configuration.runtime_limit = 3
         req.configuration.metric = ':accuracy'
-        req.configuration.parameters = '{":metric": {"values": [":accuracy"]}}'
+        req.configuration.parameters = {":metric": {"values": [":accuracy"]}}
         req.dataset_configuration = json.dumps({
             "column_datatypes": {
                 "text": DataType.DATATYPE_STRING,
@@ -138,7 +138,7 @@ class AutoKerasTextTaskTest(unittest.TestCase):
         req.configuration.target = "target"
         req.configuration.runtime_limit = 3
         req.configuration.metric = ':accuracy'
-        req.configuration.parameters = '{":metric": {"values": [":mean_sqared_error"]}}'
+        req.configuration.parameters = {":metric": {"values": [":mean_sqared_error"]}}
         req.dataset_configuration = json.dumps({
             "column_datatypes": {
                 "text": DataType.DATATYPE_STRING,
@@ -193,7 +193,7 @@ class AutoKerasTextTaskTest(unittest.TestCase):
         req.configuration.target = "target"
         req.configuration.runtime_limit = 3
         req.configuration.metric = ':accuracy'
-        req.configuration.parameters = '{":metric": {"values": [":average_precision_score"]}}'
+        req.configuration.parameters = {":metric": {"values": [":average_precision_score"]}}
         req.dataset_configuration = json.dumps({
             "column_datatypes": {
                 "text": DataType.DATATYPE_STRING,

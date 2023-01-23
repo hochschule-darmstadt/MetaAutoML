@@ -118,6 +118,9 @@ class TrainingManager:
 
             training_item.status = training["status"]
 
+            # parameters were added later, existing documents don't have it yet. If such a record is encountered, the key is added to the dictionary here.
+            if not "parameters" in training["configuration"]:
+                training["configuration"]["parameters"] = {}
             training_item.configuration = Configuration().from_dict(training["configuration"])
 
             training_item.dataset_configuration = json.dumps(training["dataset_configuration"])

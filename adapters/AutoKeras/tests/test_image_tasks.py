@@ -84,7 +84,7 @@ class AutoKerasImageTaskTest(unittest.TestCase):
         req.configuration.target = ""
         req.configuration.runtime_limit = 1
         req.configuration.metric = ':accuracy'
-        req.configuration.parameters = '{":metric": {"values": [":mean_sqared_error"]}}'
+        req.configuration.parameters = {":metric": {"values": [":mean_sqared_error"]}}
         # we do not need a dataset configuration
         req.dataset_configuration = json.dumps({})
 
@@ -117,7 +117,7 @@ class AutoKerasImageTaskTest(unittest.TestCase):
         req.configuration.target = ""
         req.configuration.runtime_limit = 1
         req.configuration.metric = ':accuracy'
-        req.configuration.parameters = '{":metric": {"values": [":accuracy"]}}'
+        req.configuration.parameters = {":metric": {"values": [":accuracy"]}}
         # we do not need a dataset configuration
         req.dataset_configuration = json.dumps({})
 
@@ -150,7 +150,7 @@ class AutoKerasImageTaskTest(unittest.TestCase):
         req.configuration.target = ""
         req.configuration.runtime_limit = 1
         req.configuration.metric = ':accuracy'
-        req.configuration.parameters = '{":metric": {"values": [":average_precision_score"]}}'
+        req.configuration.parameters = {":metric": {"values": [":average_precision_score"]}}
         # we do not need a dataset configuration
         req.dataset_configuration = json.dumps({})
 

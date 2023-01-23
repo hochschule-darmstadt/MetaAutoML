@@ -190,7 +190,6 @@ class AutoKerasAdapter:
 
     def __text_regression(self):
         """Execute text regression task and export the found model"""
-        #TODO add parameters from config
         self.df, test = data_loader(self._configuration)
         X = self.get_column_with_largest_amout_of_text(self.df)
         X, y = prepare_tabular_dataset(X, self._configuration)
@@ -281,7 +280,6 @@ class AutoKerasAdapter:
 
     def translate(self):
         parameters = self._configuration["configuration"]['parameters']
-        parameters = json.loads(parameters)
         metrics = []
         #try to get the metric values from configuration, if not available use accuracy
         try:
