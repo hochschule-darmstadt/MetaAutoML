@@ -62,34 +62,34 @@ namespace BlazorBoilerplate.Server.Managers
                 string controllerDatasetPath = Environment.GetEnvironmentVariable("CONTROLLER_DATASET_FOLDER_PATH");
                 var path = Path.Combine(controllerDatasetPath, username, "uploads");
 
-                    if (request.ChunkNumber == 1)
-                    {
-                        var dir = new DirectoryInfo(path);
+                if (request.ChunkNumber == 1)
+                {
+                    var dir = new DirectoryInfo(path);
 
-                        foreach (var info in dir.GetFiles())
-                        {
-                            info.Delete();
-                        }
+                    foreach (var info in dir.GetFiles())
+                    {
+                        info.Delete();
                     }
+                }
 
-                    if (!Directory.Exists(path))
-                    {
-                        Directory.CreateDirectory(path);
-                    }
+                if (!Directory.Exists(path))
+                {
+                    Directory.CreateDirectory(path);
+                }
 
-                    await using FileStream fs = new(Path.Combine(path, trustedFileNameForDisplay), FileMode.Append);
-                    fs.Write(request.Content, 0, request.Content.Length);
+                await using FileStream fs = new(Path.Combine(path, trustedFileNameForDisplay), FileMode.Append);
+                fs.Write(request.Content, 0, request.Content.Length);
 
-                    // get the complete file path before fs is released
-                    string filePath = path + "/" + Path.GetFileName(fs.Name);
+                // get the complete file path before fs is released
+                string filePath = path + "/" + Path.GetFileName(fs.Name);
 
-                    if (request.ChunkNumber == request.TotalChunkNumber)
-                    {
-                        fs.Dispose();
+                if (request.ChunkNumber == request.TotalChunkNumber)
+                {
+                    fs.Dispose();
 
-                        bool correctStrukture = CheckUploadStructure(filePath);
+                    bool correctStrukture = CheckUploadStructure(filePath);
 
-                        if (correctStrukture == true)
+                    if (correctStrukture == true)
                         {
                             grpcRequest.UserId = username;
                             grpcRequest.FileName = trustedFileNameForDisplay;
@@ -97,13 +97,13 @@ namespace BlazorBoilerplate.Server.Managers
                             grpcRequest.DatasetType = request.DatasetType;
                             var reply = _client.CreateDataset(grpcRequest);
                             return new ApiResponse(Status200OK, null, "");
-                        }
-                        else
-                        {
-                            return new ApiResponse(Status406NotAcceptable, "FolderStructureNotCorrectErrorMessage");
-                        }
                     }
-                    return new ApiResponse(Status200OK, null, "");
+                    else
+                    {
+                        return new ApiResponse(Status406NotAcceptable, "FolderStructureNotCorrectErrorMessage");
+                    }
+                }
+                return new ApiResponse(Status200OK, null, "");
             }
             catch (Exception ex)
             {

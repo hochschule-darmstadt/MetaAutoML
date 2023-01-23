@@ -177,14 +177,12 @@ namespace BlazorBoilerplate.Theme.Material.Services
                 _notifier.Show(ex.Message, ViewNotifierType.Error, _l["Operation Failed"]);
             }
 
-
             MemoryStream ms = new MemoryStream();
             StreamReader reader = new StreamReader("localfile" + fileType);
             await reader.BaseStream.CopyToAsync(ms);
             ms.Seek(0, SeekOrigin.Begin);
 
-           UploadDatasetRequest.DatasetName = UploadDatasetRequest.DatasetName + fileType;
-           UploadDatasetRequest.FileNameOrURL = UploadDatasetRequest.DatasetName;
+            UploadDatasetRequest.FileNameOrURL = UploadDatasetRequest.DatasetName + fileType;
 
             if ((ms.Length % chunkSize) == 0) //no extra chunk
             {
@@ -279,6 +277,10 @@ namespace BlazorBoilerplate.Theme.Material.Services
             if (OnUploadCompletedCallback != null)
             {
                 await OnUploadCompletedCallback();
+            }
+            if (File.Exists("localfile" + fileType))
+            {
+                File.Delete("localfile" + fileType);
             }
         }
     }

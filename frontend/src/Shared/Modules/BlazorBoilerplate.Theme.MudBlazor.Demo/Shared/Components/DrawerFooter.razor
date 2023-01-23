@@ -101,6 +101,7 @@
 
                                 </MudSelect>
                                 <MudTextField TextChanged="DisableUpload" @bind-Value="@Url" Label="@L["URL"]" Class="mt-1"></MudTextField>
+                                <MudTextField @bind-Value="@fileUploader.UploadDatasetRequest.DatasetName" Label="@L["Dataset Name"]" Class="mt-1"></MudTextField>
                             }
 
 
@@ -325,7 +326,7 @@
     {
         if (!_fileUpload)
         {
-            fileUploader.UploadDatasetRequest.DatasetName = "Placeholder";
+
             fileUploader.UploadDatasetRequest.FileNameOrURL = Url;
             fileUploader.UploadDatasetRequest.FileSource = "URL";
         } else
