@@ -109,6 +109,8 @@ class TrainingManager:
                     model_detail.runtime_profile = model_runtime
                     model_detail.status_messages[:] =  model["status_messages"]
                     model_detail.explanation = json.dumps(model["explanation"])
+                    if not "carbon_footprint" in model:
+                        model["carbon_footprint"] = {"emissions": 0}
                     model_detail.emission = model["carbon_footprint"].get("emissions", 0)
                     training_item.models.append(model_detail)
                 except Exception as e:
