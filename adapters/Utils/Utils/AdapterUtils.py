@@ -121,7 +121,6 @@ def start_automl_process(config: "StartAutoMlRequest") -> subprocess.Popen:
         subprocess.Popen: The AutoML subprocess instance
     """
     python_env = os.getenv("PYTHON_ENV", default="PYTHON_ENV_UNSET")
-    print("reached start")
     return subprocess.Popen([python_env, "AutoML.py", config.job_folder_location],
                             stdout=subprocess.PIPE,
                             universal_newlines=True)
@@ -336,7 +335,6 @@ def setup_run_environment(request: "StartAutoMlRequest", adapter_name: str) -> "
             export_folder_location = export_folder_location.replace("\\", "/")
             result_folder_location = result_folder_location.replace("\\", "/")
             controller_export_folder_location = controller_export_folder_location.replace("\\", "/")
-    print("before assigning folder locations")
 
     request_dict["job_folder_location"] = job_folder_location
     request_dict["model_folder_location"] = model_folder_location
@@ -363,10 +361,8 @@ def setup_run_environment(request: "StartAutoMlRequest", adapter_name: str) -> "
     os.makedirs(export_folder_location, exist_ok=True)
     os.makedirs(result_folder_location, exist_ok=True)
     #Save job file
-    print("before file")
     with open(os.path.join(job_folder_location, get_config_property("job-file-name")), "w+") as f:
         json.dump(request_dict, f)
-    print("after file")
     return request
 
 #endregion
