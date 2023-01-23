@@ -62,7 +62,7 @@ namespace BlazorBoilerplate.Server.Managers
             try
             {
                 var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
-                string trustedFileNameForDisplay = WebUtility.HtmlEncode(request.FileName);
+                string trustedFileNameForDisplay = WebUtility.HtmlEncode(request.FileNameOrURL);
                 string controllerDatasetPath = Environment.GetEnvironmentVariable("CONTROLLER_DATASET_FOLDER_PATH");
                 var path = Path.Combine(controllerDatasetPath, username, "uploads");
 
@@ -108,14 +108,16 @@ namespace BlazorBoilerplate.Server.Managers
                     bool correctStrukture = CheckUploadStructure(filePath);
 
                     if (correctStrukture == true)
+                        {
+                            grpcRequest.UserId = username;
+                            grpcRequest.FileName = trustedFileNameForDisplay;
+                            grpcRequest.DatasetName = request.DatasetName;
+                            grpcRequest.DatasetType = request.DatasetType;
+                            var reply = _client.CreateDataset(grpcRequest);
+                            return new ApiResponse(Status200OK, null, "");
+                    }
+                    else
                     {
-                        grpcRequest.UserId = username;
-                        grpcRequest.FileName = trustedFileNameForDisplay;
-                        grpcRequest.DatasetName = request.DatasetName;
-                        grpcRequest.DatasetType = request.DatasetType;
-                        var reply = _client.CreateDataset(grpcRequest);
-                        return new ApiResponse(Status200OK, null, "");
-                    } else {
                         return new ApiResponse(Status406NotAcceptable, "FolderStructureNotCorrectErrorMessage");
                     }
                 }
@@ -123,9 +125,8 @@ namespace BlazorBoilerplate.Server.Managers
             }
             catch (Exception ex)
             {
-
                 return new ApiResponse(Status404NotFound, ex.Message);
-            }
+            }     
         }
         /// <summary>
         /// Get a list of all Datasets
