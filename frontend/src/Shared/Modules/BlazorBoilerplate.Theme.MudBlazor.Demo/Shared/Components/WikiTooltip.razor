@@ -44,7 +44,7 @@ else
     public string ImageUrl;
     public string InfoText;
 
-    protected override void OnInitialized()
+    protected override async void OnInitialized()
     {
         if (string.IsNullOrEmpty(SeeAlso))
         {
@@ -52,18 +52,24 @@ else
         }
         else
         {
-            WikiDataGrabber wiki = new WikiDataGrabber();
-            List<string> wikipediaData = wiki.GetDataFrom(SeeAlso);
-            if (wikipediaData.Count != 0) {
-                InfoText = wikipediaData[0];
-                if (wikipediaData.Count > 1)
+            await Task.Run(() =>
+            {
+                WikiDataGrabber wiki = new WikiDataGrabber();
+                List<string> wikipediaData = wiki.GetDataFrom(SeeAlso);
+                if (wikipediaData.Count != 0)
                 {
-                    ImageUrl = wikipediaData[1];
+                    InfoText = wikipediaData[0];
+                    if (wikipediaData.Count > 1)
+                    {
+                        ImageUrl = wikipediaData[1];
+                    }
                 }
-            }
-            else {
-                InfoText = Comment;
-            }
+                else
+                {
+                    InfoText = Comment;
+                }
+            });
+            StateHasChanged();
         }
     }
 

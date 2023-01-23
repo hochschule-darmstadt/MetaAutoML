@@ -282,10 +282,10 @@
         await UpdateStartAutoMlRequest();
     }
 
-    private Task OnStrategySelectionChanged()
+    private async Task OnStrategySelectionChanged()
     {
         StartAutoMlRequest.Configuration.EnabledStrategies = _strategiesViewModel.SelectedIds.ToList();
-        return UpdateStartAutoMlRequest();
+        await UpdateStartAutoMlRequest();
     }
 
     private async void OnTargetChanged(HashSet<string> values)
