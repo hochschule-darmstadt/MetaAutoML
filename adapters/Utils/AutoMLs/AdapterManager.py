@@ -108,11 +108,15 @@ class AdapterManager(Thread):
                 # reraise exception above to crash
                 raise e
             else:
-                # do not crash in prodution environment
+                # do not crash in production environment
                 self.__start_auto_ml_running = False
                 status_update = GetAutoMlStatusResponse()
                 status_update.return_code = AdapterReturnCode.ADAPTER_RETURN_CODE_ERROR
                 self.__auto_ml_status_messages.put(status_update)
+                if hasattr(e, "message"):
+                    print(e.message)
+                else:
+                    print(e)
 
 
     def get_auto_ml_status(self) -> "GetAutoMlStatusResponse":
