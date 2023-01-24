@@ -47,6 +47,10 @@ class AutoSklearnAdapter:
                 {"time_left_for_this_task": (self._configuration["configuration"]["runtime_limit"] * 60)}) #convert into seconds
 
         metric = None
+        parameters = self._configuration["configuration"].get('parameters', {})
+        #First check if any parameter is set
+        if parameters == {}:
+            return automl_settings
         if ":metric" in self._configuration["configuration"]["parameters"]:
             metric_name = self._configuration["configuration"]["parameters"][":metric"]["values"][0]
             metric = AutoSklearnAdapter.__get_classification_metric_from_ontology(metric_name)

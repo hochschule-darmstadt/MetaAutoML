@@ -31,7 +31,7 @@ class PyCaretAdapterManager(AdapterManager):
         super(PyCaretAdapterManager, self).__init__()
         self.__automl = None
         self.__loaded_training_id = None
-        self._adapter_name = "flaml"
+        self._adapter_name = "pycaret"
 
     def _get_ml_model_and_lib(self, config: "StartAutoMlRequest") -> Tuple[str, str]:
         """Get the ML model type and ml library used by the result model

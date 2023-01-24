@@ -190,6 +190,17 @@ services:
       - datasets:/app/app-data/datasets
       - training-evalml:/app/app-data/training
 
+  pycaret:
+    build:
+      context: ./adapters
+      dockerfile: ./PyCaret/Dockerfile
+    container_name: pycaret
+    environment:
+      - GRPC_SERVER_PORT=50063
+    volumes:
+      - datasets:/app/app-data/datasets
+      - training-pycaret:/app/app-data/training
+
 volumes:
   datasets: # shared volume between controller, adapters and frontend/dummy to transfer datasets
    # shared volumes between controller and adapters to transfer training files e.g. *.zip file
