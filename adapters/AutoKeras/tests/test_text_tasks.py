@@ -59,16 +59,16 @@ def load_aclImdb_dataset() -> str:
 
 class AutoKerasTextTaskTest(unittest.TestCase):
 
-    def setUp(self):
-        # NOTE: we are running the test in the repos root directory.
-        #       the application is expected to start inside the adapter solution,
-        #       so we need to change working directories
-        autokeras_dir = os.path.join("adapters", "AutoKeras")
-        os.chdir(autokeras_dir)
+    # def setUp(self):
+    #     # NOTE: we are running the test in the repos root directory.
+    #     #       the application is expected to start inside the adapter solution,
+    #     #       so we need to change working directories
+    #     autokeras_dir = os.path.join("adapters", "AutoKeras")
+    #     os.chdir(autokeras_dir)
 
-    def tearDown(self):
-        # reset the working directory before finishing this test
-        os.chdir(os.path.join("..", ".."))
+    # def tearDown(self):
+    #     # reset the working directory before finishing this test
+    #     os.chdir(os.path.join("..", ".."))
 
     def test_text_classification(self):
 
@@ -83,6 +83,7 @@ class AutoKerasTextTaskTest(unittest.TestCase):
         req.configuration.target = "target"
         req.configuration.runtime_limit = 3
         req.configuration.metric = ':accuracy'
+        req.configuration.parameters = {":metric": {"values": [":accuracy"]}}
         req.dataset_configuration = json.dumps({
             "column_datatypes": {
                 "text": DataType.DATATYPE_STRING,
@@ -94,8 +95,21 @@ class AutoKerasTextTaskTest(unittest.TestCase):
                 "delimiter": "comma",
                 "escape_character": "\\",
                 "decimal_character": ".",
+                "thousands_seperator": ",",
+                "datetime_format": "",
                 "encoding": ""
-            }
+            },
+            "schema": {
+                "target": {
+                    "datatype_detected": ":int",
+                    "role_selected": ":target"
+                },
+                "text": {
+                    "datatype_detected": ":string",
+                    "role_selected": ":none"
+                }
+            },
+            "multi_fidelity_level": 0
         })
 
         adapter_manager = AutoKerasAdapterManager()
@@ -125,6 +139,7 @@ class AutoKerasTextTaskTest(unittest.TestCase):
         req.configuration.target = "target"
         req.configuration.runtime_limit = 3
         req.configuration.metric = ':accuracy'
+        req.configuration.parameters = {":metric": {"values": [":mean_sqared_error"]}}
         req.dataset_configuration = json.dumps({
             "column_datatypes": {
                 "text": DataType.DATATYPE_STRING,
@@ -136,8 +151,21 @@ class AutoKerasTextTaskTest(unittest.TestCase):
                 "delimiter": "comma",
                 "escape_character": "\\",
                 "decimal_character": ".",
+                "thousands_seperator": ",",
+                "datetime_format": "",
                 "encoding": ""
-            }
+            },
+            "schema": {
+                "target": {
+                    "datatype_detected": ":int",
+                    "role_selected": ":target"
+                },
+                "text": {
+                    "datatype_detected": ":string",
+                    "role_selected": ":none"
+                }
+            },
+            "multi_fidelity_level": 0
         })
 
         adapter_manager = AutoKerasAdapterManager()
@@ -153,6 +181,63 @@ class AutoKerasTextTaskTest(unittest.TestCase):
 
         # clean up
         shutil.rmtree(out_dir)
+
+    def test_parameters_text_classification(self):
+
+        dataset_path = load_aclImdb_dataset()
+
+        req = StartAutoMlRequest()
+        req.training_id = "test"
+        req.dataset_id = "test"
+        req.user_id = "test"
+        req.dataset_path = dataset_path
+        req.configuration.task = ':text_classification'
+        req.configuration.target = "target"
+        req.configuration.runtime_limit = 3
+        req.configuration.metric = ':accuracy'
+        req.configuration.parameters = {":metric": {"values": [":average_precision_score"]}}
+        req.dataset_configuration = json.dumps({
+            "column_datatypes": {
+                "text": DataType.DATATYPE_STRING,
+                "target": DataType.DATATYPE_STRING
+            },
+            "file_configuration": {
+                "use_header": True,
+                "start_row": 1,
+                "delimiter": "comma",
+                "escape_character": "\\",
+                "decimal_character": ".",
+                "thousands_seperator": ",",
+                "datetime_format": "",
+                "encoding": ""
+            },
+            "schema": {
+                "target": {
+                    "datatype_detected": ":int",
+                    "role_selected": ":target"
+                },
+                "text": {
+                    "datatype_detected": ":string",
+                    "role_selected": ":none"
+                }
+            },
+            "multi_fidelity_level": 0
+        })
+
+        adapter_manager = AutoKerasAdapterManager()
+        adapter_manager.start_auto_ml(req, uuid.uuid4())
+        adapter_manager.start()
+        adapter_manager.join()
+
+        # check if model archive exists
+        out_dir = os.path.join("app-data", "training",
+                               req.user_id, req.dataset_id, req.training_id)
+        path_to_model = os.path.join(out_dir, "export", "keras-export.zip")
+        self.assertTrue(os.path.exists(path_to_model), f"path to model: '{path_to_model}' does not exist")
+
+        # clean up
+        shutil.rmtree(out_dir)
+
 
 
 if __name__ == '__main__':
