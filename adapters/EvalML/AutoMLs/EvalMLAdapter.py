@@ -95,6 +95,7 @@ class EvalMLAdapter:
                     max_batches=3,
                     verbose=False,
                     tuner_class=self.__get_tuner(),
+                    allowed_model_families= self.__get_use_approaches(),
                 )
         automl.search()
         automl.describe_pipeline(3)
@@ -122,9 +123,9 @@ class EvalMLAdapter:
                     max_batches=1,
                     verbose=False,
                     problem_configuration=problem_config,
-                    allowed_model_families=[
-                        "xgboost",
-                    ],
+                    objective= self.__get_metric(),
+                    tuner_class=self.__get_tuner(),
+                    allowed_model_families= self.__get_use_approaches(),
                 )
         automl.search()
         best_pipeline_tobe_export = automl.best_pipeline
