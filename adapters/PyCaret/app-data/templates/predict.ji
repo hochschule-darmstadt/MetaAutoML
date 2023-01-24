@@ -28,4 +28,4 @@ if __name__ == '__main__':
     #out["predicted"] = predicted_y["prediction_label"]
     predicted_y["predicted"] = predicted_y["prediction_label"]
     #predicted_y = np.reshape(predicted_y, (-1, 1))
-    pd.DataFrame(data=predicted_y["prediction_label"], columns=["predicted"]).to_csv(save_path)
+    pd.DataFrame(data=predicted_y, columns=["predicted"]).to_csv(save_path)

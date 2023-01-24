@@ -1,9 +1,9 @@
 {
-  "adapter-name": "flaml",
-  "job-file-name": "flaml-job.json",
+  "adapter-name": "pycaret",
+  "job-file-name": "pycaret-job.json",
   "env-varname-cluster": "RUNTIME",
   "grpc-server-address": "0.0.0.0",
-  "export-zip-file-name": "flaml-export",
+  "export-zip-file-name": "pycaret-export",
   "training-path": "app-data/training",
   "job-folder-name": "job",
   "model-folder-name": "model",

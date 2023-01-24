@@ -4,12 +4,12 @@ EXPOSE 50056
 RUN apt-get update && apt-get install -y libgomp1 \
     && apt-get install -y git
 
-COPY ./FLAML/requirements.txt .
+COPY ./PyCaret/requirements.txt .
 # Install dependencies
 RUN pip install -r requirements.txt
 # put all files in a directory called app
 WORKDIR /app
-COPY ./FLAML .
+COPY ./PyCaret .
 COPY ./Utils/Utils ./Utils
 COPY ./Utils/AutoMLs ./AutoMLs
 COPY ./Utils/Templates ./app-data/templates
@@ -22,4 +22,4 @@ ENV RUNTIME=DOCKER
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONPATH ".:dependency-injection:AutoMLs:Utils"
 ENV PYTHON_ENV "python"
-ENTRYPOINT ["python", "FlamlServer.py"]
+ENTRYPOINT ["python", "PyCaretServer.py"]

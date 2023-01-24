@@ -16,6 +16,7 @@ from sklearn.ensemble import *
 from xgboost import XGBClassifier
 from sklearn.neighbors import *
 from sklearn.tree import *
+from sklearn.utils.extmath import softmax
 
 class PyCaretAdapterManager(AdapterManager):
     """The AutoML solution specific functionality implementation of the AdapterManager class
@@ -97,8 +98,13 @@ class PyCaretAdapterManager(AdapterManager):
             self.__automl = load_model(os.path.join(result_folder_location, "model_pycaret"))
             self._loaded_training_id = config["training_id"]
         # Get prediction probabilities and send them back.
-        predicted_y = predict_model( self.__automl, dataframe)
-        probabilities = self.__automl.predict_proba(dataframe)
+        if isinstance(self.__automl.named_steps.actual_estimator, RidgeClassifier) or isinstance(self.__automl.named_steps.actual_estimator, LogisticRegression):
+            #Linear regression models do not have predict_proba method, requires softmax conversion
+            d = self.__automl.decision_function(dataframe)
+            d_2d = np.c_[-d, d]
+            probabilities = softmax(d_2d)
+        else:
+            probabilities = self.__automl.predict_proba(dataframe)
         probabilities = probabilities.tolist()
         probabilities = json.dumps(probabilities)
         return probabilities
