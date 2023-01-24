@@ -1522,7 +1522,6 @@ msgctxt "Global"
 msgid "completed"
 msgstr "completed"
 
-
 msgctxt "Global"
 msgid "ended"
 msgstr "ended"
@@ -1596,8 +1595,8 @@ msgid "Download result CSV"
 msgstr "Download result CSV"
 
 msgctxt "Global"
-msgid "Download ML pipeline"
-msgstr "Download ML pipeline"
+msgid "Download Machine Learning pipeline"
+msgstr "Download Machine Learning pipeline"
 
 msgctxt "Global"
 msgid "Download model"
@@ -1654,7 +1653,6 @@ msgstr "Task"
 msgctxt "Global"
 msgid "Dataset not redable"
 msgstr "Dataset couln´t be read, if the dataset was uploaded recently you need to wait a bit for our analysises to end. If that is not the case use the preview config option to reconfigure the dataset."
-
 
 msgctxt "Global"
 msgid "Start: {0}"
@@ -1735,7 +1733,6 @@ msgstr "Could not read dataset successfully, change configuration."
 msgctxt "Global"
 msgid "Search by name, status, lib or AutoML system"
 msgstr "Search by name, status, lib, AutoML system"
-
 
 msgctxt "Global"
 msgid "CookieName"
@@ -1889,21 +1886,17 @@ msgctxt "Global"
 msgid "none"
 msgstr "None"
 
-
 msgctxt "Global"
 msgid "target"
 msgstr "Target"
-
 
 msgctxt "Global"
 msgid "Datatype"
 msgstr "Datatype"
 
-
 msgctxt "Global"
 msgid "Datatype analysis incompatible with current dataset configuration, save current configuration to start new analysis"
 msgstr "Datatype analysis incompatible with current dataset configuration, save current configuration to start new analysis."
-
 
 msgctxt "Global"
 msgid "Roles analysis incompatible with current dataset configuration, save current configuration to start new analysis"
@@ -1919,7 +1912,7 @@ msgstr "Datetime format"
 
 msgctxt "Global"
 msgid "Column {0} could not be casted to datetime"
-msgstr "Column {0} could not be casted to datetype datetime."
+msgstr "Column {0} could not be casted to datatype datetime."
 
 msgctxt "Global"
 msgid "Datetime columns could not be converted to new datetime format"
@@ -1953,6 +1946,7 @@ msgctxt "Global"
 msgid "No datetime index selected"
 msgstr "No or multiple index column with datatype datetime was set. Only one index column with datatype datetime is allowed."
 
+
 msgctxt "Global"
 msgid "Emissions kg/CO2-eq"
 msgstr "Emissions kg/CO2-eq"
@@ -1960,4 +1954,8 @@ msgstr "Emissions kg/CO2-eq"
 msgctxt "Global"
 msgid "Emissions: {0} kg/CO2-eq"
 msgstr "Emissions: {0} kg/CO2-eq"
+
+msgctxt "Global"
+msgid "aborted"
+msgstr "Aborted"
 

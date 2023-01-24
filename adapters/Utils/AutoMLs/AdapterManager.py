@@ -87,6 +87,10 @@ class AdapterManager(Thread):
             process.wait()
             #End carbon recording
             carbon_tracker.stop()
+            #Read config configuration again as it might have been changed during the subprocess
+            with open(os.path.join(config.job_folder_location, get_config_property("job-file-name"))) as file:
+                updated_process_configuration = json.load(file)
+            config.dataset_configuration = updated_process_configuration["dataset_configuration"]
             generate_script(config)
             output_json = zip_script(config)
             #AutoKeras only produces keras based ANN

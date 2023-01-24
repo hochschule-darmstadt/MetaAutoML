@@ -1,6 +1,6 @@
 import autokeras as ak
 import numpy as np
-from AdapterUtils import data_loader, export_model, prepare_tabular_dataset
+from AdapterUtils import data_loader, export_model, prepare_tabular_dataset, get_column_with_largest_amout_of_text
 import pandas as pd
 import json
 import os
@@ -167,7 +167,7 @@ class AutoKerasAdapter:
         """Execute text classifiction task and export the found model"""
 
         self.df, test = data_loader(self._configuration)
-        X = self.get_column_with_largest_amout_of_text(self.df)
+        X, self._configuration = get_column_with_largest_amout_of_text(self.df, self._configuration)
         X, y = prepare_tabular_dataset(X, self._configuration)
         metrics, losses, max_trials, tuners, max_model_size = self.translate()
         reg = ak.TextClassifier(overwrite=True,
@@ -184,14 +184,13 @@ class AutoKerasAdapter:
 
 
         reg.fit(x = np.array(X).astype(np.unicode_), y = np.array(y), epochs=1)
-        self.save_configuration_in_json()
         export_model(reg, self._configuration["result_folder_location"], 'model_keras.p')
 
 
     def __text_regression(self):
         """Execute text regression task and export the found model"""
         self.df, test = data_loader(self._configuration)
-        X = self.get_column_with_largest_amout_of_text(self.df)
+        X, self._configuration = get_column_with_largest_amout_of_text(self.df, self._configuration)
         X, y = prepare_tabular_dataset(X, self._configuration)
         metrics, losses, max_trials, tuners, max_model_size = self.translate()
         reg = ak.TextClassifier(overwrite=True,
@@ -204,7 +203,6 @@ class AutoKerasAdapter:
                                 directory=self._configuration["model_folder_location"])
 
         reg.fit(x = np.array(X), y = np.array(y), epochs=1)
-        self.save_configuration_in_json()
         export_model(reg, self._configuration["result_folder_location"], 'model_keras.p')
 
 

@@ -38,11 +38,16 @@ class FLAMLAdapterManager(AdapterManager):
         with open(os.path.join(working_dir, "model_flaml.p"), 'rb') as file:
             automl = dill.load(file)
             model = automl.best_estimator
-            library = automl.model.estimator.__module__.split(".")[0]
+            if config.configuration["task"] == ":text_classification":
+                library = model
+                library = ":transformer"
+                model = ":transformer"
+            else:
+                library = automl.model.estimator.__module__.split(".")[0]
 
-        #TODO ADD CORRECT lib and model display
-        library = ":lightgbm_lib"
-        model = ":light_gradient_boosting_machine"
+                #TODO ADD CORRECT lib and model display
+                library = ":lightgbm_lib"
+                model = ":light_gradient_boosting_machine"
         return library, model
 
 

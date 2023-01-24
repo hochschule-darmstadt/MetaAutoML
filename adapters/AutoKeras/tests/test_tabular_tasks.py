@@ -78,7 +78,15 @@ class AutoKerasTabularTaskTest(unittest.TestCase):
                 "decimal_character": ".",
                 "thousands_seperator": ",",
                 "datetime_format": "",
+                "thousands_seperator": ",",
+                "datetime_format": "",
                 "encoding": ""
+            },
+            "schema": {
+                "survived": {
+                    "datatype_detected": ":boolean",
+                    "role_selected": ":target"
+                }
             },
             "schema": {
                 "survived": {
@@ -184,6 +192,8 @@ class AutoKerasTabularTaskTest(unittest.TestCase):
                 "delimiter": "comma",
                 "escape_character": "\\",
                 "decimal_character": ".",
+                "thousands_seperator": ",",
+                "datetime_format": "",
                 "thousands_seperator": ",",
                 "datetime_format": "",
                 "encoding": ""

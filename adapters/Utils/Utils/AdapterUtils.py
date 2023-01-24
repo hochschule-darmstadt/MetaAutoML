@@ -22,7 +22,7 @@ from AdapterBGRPC import *
 from typing import Tuple
 import re
 from codecarbon.output import EmissionsData
-
+import random
 ######################################################################
 ## GRPC HELPER FUNCTIONS
 ######################################################################
@@ -121,7 +121,6 @@ def start_automl_process(config: "StartAutoMlRequest") -> subprocess.Popen:
         subprocess.Popen: The AutoML subprocess instance
     """
     python_env = os.getenv("PYTHON_ENV", default="PYTHON_ENV_UNSET")
-    print("reached start")
     return subprocess.Popen([python_env, "AutoML.py", config.job_folder_location],
                             stdout=subprocess.PIPE,
                             universal_newlines=True)
@@ -179,12 +178,10 @@ def evaluate(config: "StartAutoMlRequest", config_path: str) -> Tuple[float, flo
     Returns:
         tuple[float, float]: tuple holding the test score, prediction time metrics
     """
-    non_dict_config = config
-    config = config.to_dict(betterproto.Casing.SNAKE)
+    config = config.__dict__
     config["dataset_configuration"] = config["dataset_configuration"]
     file_path = config["dataset_path"]
-    # use non_dict_config, because to_dict() ignores all values that are not specified in the .proto definition and result_folder_location was added as metadata to the config object in a previous step
-    result_path = non_dict_config.result_folder_location
+    result_path = config["result_folder_location"]
     # predict
     os.chmod(os.path.join(result_path, "predict.py"), 0o777)
     python_env = os.getenv("PYTHON_ENV", default="PYTHON_ENV_UNSET")
@@ -198,7 +195,7 @@ def evaluate(config: "StartAutoMlRequest", config_path: str) -> Tuple[float, flo
         train, test = data_loader(config)
         target = targets[0]
         # override file_path to path to test file and drop target column
-        file_path = write_tabular_dataset_test_data(test.drop(target, axis=1), os.path.dirname(file_path), config)
+        file_path = write_tabular_dataset_data(test.drop(target, axis=1), os.path.dirname(file_path), config)
 
     elif(config["configuration"]["task"] in[":image_classification", ":image_regression"]):
         X_train, y_train, X_test, y_test = data_loader(config)
@@ -338,7 +335,6 @@ def setup_run_environment(request: "StartAutoMlRequest", adapter_name: str) -> "
             export_folder_location = export_folder_location.replace("\\", "/")
             result_folder_location = result_folder_location.replace("\\", "/")
             controller_export_folder_location = controller_export_folder_location.replace("\\", "/")
-    print("before assigning folder locations")
 
     request_dict["job_folder_location"] = job_folder_location
     request_dict["model_folder_location"] = model_folder_location
@@ -346,15 +342,18 @@ def setup_run_environment(request: "StartAutoMlRequest", adapter_name: str) -> "
     request_dict["result_folder_location"] = result_folder_location
     request_dict["controller_export_folder_location"] = controller_export_folder_location
 
+    # TODO: Refactor AdapterManager and AdapterUtils to not rely on a proto object that some fields have been added to at runtime
     # also add values to request object (the values are used in subsequent requests)
     request.dataset_path = request_dict["dataset_path"]
     request.job_folder_location = request_dict["job_folder_location"]
-
-    request.job_folder_location = job_folder_location
     request.model_folder_location = model_folder_location
     request.export_folder_location = export_folder_location
     request.result_folder_location = result_folder_location
     request.controller_export_folder_location = controller_export_folder_location
+
+    # TODO: Remove this and fix all places that access the configuration object as a dictionary
+    # replace configuration object with dictionary
+    request.configuration = request_dict["configuration"]
 
     #Make sure job folders exists
     os.makedirs(job_folder_location, exist_ok=True)
@@ -362,10 +361,8 @@ def setup_run_environment(request: "StartAutoMlRequest", adapter_name: str) -> "
     os.makedirs(export_folder_location, exist_ok=True)
     os.makedirs(result_folder_location, exist_ok=True)
     #Save job file
-    print("before file")
     with open(os.path.join(job_folder_location, get_config_property("job-file-name")), "w+") as f:
         json.dump(request_dict, f)
-    print("after file")
     return request
 
 #endregion
@@ -405,6 +402,10 @@ def read_tabular_dataset_training_data(config: "StartAutoMlRequest") -> Tuple[pd
 
 
     data = pd.read_csv(**configuration)
+
+    if config['dataset_configuration']['multi_fidelity_level'] != 0:
+        data = data.sample(frac=0.1, random_state=1)
+
     #Rename untitled columns to correct name
     for column in data:
         if re.match(r"Unnamed: [0-9]+", column):
@@ -425,12 +426,14 @@ def read_tabular_dataset_training_data(config: "StartAutoMlRequest") -> Tuple[pd
 
     return train, test
 
-def write_tabular_dataset_test_data(df: pd.DataFrame, dir_name: str, config) -> str:
+def write_tabular_dataset_data(df: pd.DataFrame, dir_name: str, config, file_name: str = "test.csv") -> str:
     """Writes dataframe into a csv file.
 
     Args:
         df (pd.DataFrame): The dataset dataframe
         dir_name (str): path of output directory
+        config (dict): the adapter process configuration
+        file_name (str): file name
 
     Returns:
         file_path (str): file path to output file "test.csv"
@@ -442,13 +445,14 @@ def write_tabular_dataset_test_data(df: pd.DataFrame, dir_name: str, config) -> 
         "tab":          "\t",
     }
 
-    file_path = os.path.join(dir_name, "test.csv")
+    file_path = os.path.join(dir_name, file_name)
     configuration = {
         "path_or_buf": file_path,
         "sep": delimiters[config["dataset_configuration"]["file_configuration"]['delimiter']],
         "decimal": config["dataset_configuration"]["file_configuration"]['decimal_character'],
         "escapechar": config["dataset_configuration"]["file_configuration"]['escape_character'],
         "encoding": config["dataset_configuration"]["file_configuration"]['encoding'],
+        "date_format": config["dataset_configuration"]["file_configuration"]["datetime_format"],
         "index": False
     }
 
@@ -485,6 +489,56 @@ def convert_X_and_y_dataframe_to_numpy(X: pd.DataFrame, y: pd.Series) -> Tuple[n
     X = np.nan_to_num(X, 0)
     y = y.to_numpy()
     return X, y
+
+def get_column_with_largest_amout_of_text(X: pd.DataFrame, configuration: dict) -> Tuple[pd.DataFrame, dict]:
+    """
+    Find the column with the most text inside,
+    because some adapters only supports training with one feature
+    Args:
+        X (pd.DataFrame): The current X Dataframe
+        configuration (dict): hold the current adapter process configuration
+
+    Returns:
+        Tuple(pd.DataFrame, dict): pd.Dataframe: Returns a pandas Dataframe with the column with the most text inside, the dict is the updated configuraiton dict
+    """
+    column_names = []
+    target = ""
+    dict_with_string_length = {}
+
+    #First get only columns that will be used during training
+    for column, dt in configuration["dataset_configuration"]["schema"].items():
+        if dt.get("role_selected", "") == ":ignore" or dt.get("role_selected", "") == ":index" or dt.get("role_selected", "") == ":target":
+            continue
+        column_names.append(column)
+
+    #Check the used columns by dtype object (== string type) and get mean len to get column with longest text
+    for column_name in column_names:
+        if(X.dtypes[column_name] == object):
+            newlength = X[column_name].str.len().mean()
+            dict_with_string_length[column_name] = newlength
+    max_value = max(dict_with_string_length, key=dict_with_string_length.get)
+
+    #Remove the to be used text column from the list of used columns and set role ignore as Autokeras can only use one input column for text tasks
+    column_names.remove(max_value)
+    for column_name in column_names:
+        configuration["dataset_configuration"]["schema"][column_name]["role_selected"] = ":ignore"
+
+    save_configuration_in_json(configuration)
+    return X, configuration
+
+
+def save_configuration_in_json(configuration: dict):
+    """
+    serialize dataset_configuration to json string and save the the complete configuration in json file
+    to habe the right datatypes available for the evaluation
+    Args:
+        configuration (dict): The current adapter process configuration
+    """
+    configuration['dataset_configuration'] = json.dumps(configuration['dataset_configuration'])
+    with open(os.path.join(configuration['job_folder_location'], get_config_property("job-file-name")), "w+") as f:
+        json.dump(configuration, f)
+    configuration["dataset_configuration"] = json.loads(configuration["dataset_configuration"])
+
 
 #endregion
 
@@ -528,6 +582,10 @@ def read_image_dataset(config: "StartAutoMlRequest") -> Tuple[pd.DataFrame, pd.D
             files.append(glob.glob(os.path.join(data_dir, sub_folder_type, folder, "*.jp*g")))
 
         df_list =[]
+
+        if config['dataset_configuration']['multi_fidelity_level'] != 0:
+            df_list = random.choices(df_list, k=int(len(files)*0.1))
+
         for i in range(len(files)):
             df = pd.DataFrame()
             df["name"] = [x for x in files[i]]

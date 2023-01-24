@@ -4,30 +4,53 @@ import json
 import pandas as pd
 import numpy as np
 import evalml
+import os
 from evalml import AutoMLSearch
 {% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression", ":text_classification", ":text_regression", ":time_series_forecasting"] %}
 from dataset import read_csv_dataset
 from preprocessing import rename_unnamed_columns, feature_preparation
 {% endif %}
 
+def get_index_column():
+    for column, dt in {{configuration.dataset_configuration["schema"]}}.items():
+        if dt.get("role_selected", "") == ":index":
+            print(column)
+            return column
+    return None #
 
 if __name__ == '__main__':
     filepath = sys.argv[1]
     save_path = sys.argv[2]
     X = None
+    {% if configuration.configuration["task"] in [":time_series_forecasting"] %}
+    #Load dataset used for training
+    train_set_path = os.path.join(os.path.dirname(__file__), "train.csv")
+    train_X = read_csv_dataset(train_set_path)
+    train_X = rename_unnamed_columns(train_X)
+    train_X, train_y = feature_preparation(train_X, {{configuration.dataset_configuration["schema"]}}.items(), "{{configuration.dataset_configuration["file_configuration"]["datetime_format"]}}",  is_prediction=False)
+    train_X.reset_index(inplace=True)
+    {% endif %}
 
-    {% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression", ":text_classification", ":text_regression", ":time_series_forecasting"] %}
+    #Load live dataset
     X = read_csv_dataset(filepath)
     X = rename_unnamed_columns(X)
     X, y = feature_preparation(X, {{configuration.dataset_configuration["schema"]}}.items(), "{{configuration.dataset_configuration["file_configuration"]["datetime_format"]}}",  is_prediction=True)
+    {% if configuration.configuration["task"] in [":time_series_forecasting"] %}
+    #reset index
+    X.reset_index(inplace=True)
     {% endif %}
 
     with open(sys.path[0] + '/evalml.p', 'rb') as file:
         loaded_model = dill.load(file)
 
-    print(type(X))
+    {% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression", ":text_classification", ":text_regression"] %}
     predicted_y = loaded_model.predict(X)
+    {% else %}
+    predicted_y = loaded_model.predict(X, X_train=train_X,y_train=train_y)
+    {% endif %}
 
     df = (predicted_y.to_frame())
     df.columns = [ 'predicted']
     df.to_csv(save_path)
+
+

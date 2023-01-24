@@ -64,7 +64,7 @@ class EvalMLAdapter:
                     X_train=X,
                     y_train=y,
                     problem_type=classification_type,
-                    objective="auto",
+                    objective=self.__get_metric(),
                     max_batches=3,
                     verbose=False,
                 )
@@ -99,15 +99,27 @@ class EvalMLAdapter:
         """Execute the tabular classification task and export the found model"""
 
         self.df, test = data_loader(self._configuration)
-        X, y = prepare_tabular_dataset(self.df, self._configuration)
+        index_column_name = self.__get_index_column()
+        #index_column_copy_name = index_column_name + 'copy'
+        #self.df[index_column_copy_name] = self.df[index_column_name]
+        #We must persist the training time series to make predictions
+        file_path = self._configuration["result_folder_location"]
+        file_path = write_tabular_dataset_data(self.df, file_path, self._configuration, "train.csv")
 
-        problem_config = {"gap": 0, "max_delay": 10, "forecast_horizon": 1, "time_index": "DateTime"}
+        X, y = prepare_tabular_dataset(self.df, self._configuration)
+        X.reset_index(inplace=True)
+        # in oder to fix this bug :
+        # bug: X.set_index(index_columns, inplace=True) => if indexcolumn is setted, evalml can not run auto ml search
+        # i create a copy column for index column
+        print(X)
+        #problem_config = {"gap": 0, "max_delay": 7, "forecast_horizon": 7, "time_index": self.__get_index_column()}
+        problem_config = {"gap": 0, "max_delay": 7, "forecast_horizon": 7, "time_index": self.__get_index_column()}
         # parameters must be set correctly
         automl = AutoMLSearch(
                     X_train=X,
                     y_train=y,
                     problem_type="time series regression",
-                    max_batches=3,
+                    max_batches=1,
                     verbose=False,
                     problem_configuration=problem_config,
                     allowed_model_families=[
@@ -115,8 +127,29 @@ class EvalMLAdapter:
                     ],
                 )
         automl.search()
-        automl.describe_pipeline(3)
         best_pipeline_tobe_export = automl.best_pipeline
         export_model(best_pipeline_tobe_export, self._configuration["result_folder_location"], 'evalml.p')
+
+        print(file_path)
+
+    def __get_index_column(self):
+        for column, dt in self._configuration['dataset_configuration']['schema'].items():
+            if dt.get("role_selected", "") == ":index":
+                print(column)
+                return column
+        return None #
+
+    def __get_metric(self):
+        metrics_dict = {
+            ':binary_accuracy' : "Accuracy Binary",
+            ':balanced_accuracy' : "Balanced Accuracy Binary",
+            ':accuracy' : "Accuracy Multiclass",
+        }
+        try:
+            return metrics_dict[self._configuration['configuration']['parameters'][':metric']]
+        except:
+            print("no metric param")
+        return "auto"
+
 
 
