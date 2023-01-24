@@ -69,6 +69,8 @@ class ModelManager:
 
             model_info.status_messages[:] =  model["status_messages"]
             model_info.explanation = json.dumps(model["explanation"])
+            if not "carbon_footprint" in model:
+                        model["carbon_footprint"] = {"emissions": 0}
             model_info.emission = model["carbon_footprint"].get("emissions", 0)
             return model_info
         except Exception as e:
