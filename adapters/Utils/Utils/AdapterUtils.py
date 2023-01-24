@@ -326,7 +326,7 @@ def setup_run_environment(request: "StartAutoMlRequest", adapter_name: str) -> "
                                         request.dataset_id,
                                         request.training_id,
                                         get_config_property("export-folder-name"))
-    print(request)
+
     request_dict = request.to_dict(casing=betterproto.Casing.SNAKE)
     #For WSL users we need to adjust the path prefix for the dataset location to windows path
     if get_config_property("local_execution") == "YES":
