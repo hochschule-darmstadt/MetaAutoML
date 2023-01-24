@@ -14,6 +14,7 @@ if __name__ == '__main__':
     save_path = sys.argv[2]
     X = None
 
+
     {% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression", ":text_classification", ":text_regression", ":time_series_forecasting"] %}
     X = read_csv_dataset(filepath)
     X = rename_unnamed_columns(X)
@@ -24,8 +25,10 @@ if __name__ == '__main__':
     {% endif %}
     {% endif %}
 
+
     with open(sys.path[0] + '/model_flaml.p', 'rb') as file:
         automl = dill.load(file)
+
 
     predicted_y = automl.predict(X)
     predicted_y = np.reshape(predicted_y, (-1, 1))

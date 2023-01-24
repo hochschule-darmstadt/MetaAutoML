@@ -331,9 +331,10 @@
             viewNotifier.Show(ex.GetBaseException().Message, ViewNotifierType.Error, L["Operation Failed"]);
         }
     }
+    
+    private (string id, string label, string toolTip, bool isSelected, string comment, string imageUrl) ConvertObjectInfoToChip(ObjectInfomationDto objectInfo) =>
+        (objectInfo.ID, objectInfo.Properties.GetValueOrDefault("skos:prefLabel"), objectInfo.Properties.GetValueOrDefault("rdfs:seeAlso"), true, objectInfo.Properties.GetValueOrDefault("rdfs:comment"), "");
 
-    private (string id, string label, string toolTip) ConvertObjectInfoToChip(ObjectInfomationDto objectInfo) =>
-        (objectInfo.ID, objectInfo.Properties.GetValueOrDefault("skos:prefLabel"), null);
 
     private async Task OnMlLibrarySelectionChanged()
     {
@@ -375,7 +376,8 @@
         var availableStrategiesResponse = await apiClient.GetAvailableStrategies(availableStrategiesRequest);
 
         HandleApiResponseWrapper(availableStrategiesResponse, () =>
-            _strategiesViewModel.SetAvailableChips(availableStrategiesResponse.Result.Strategies.Select(s => (s.Id, s.Title, s.Description)))
+            _strategiesViewModel.SetAvailableChips(availableStrategiesResponse.Result.Strategies.Select(s => (s.Id, s.Title, s.Description, false, "", "")))
+
         );
     }
 
@@ -433,7 +435,20 @@
         {
             if(_intersectedParams.Where(p => p.ParameterIri == intersectedParam.ParameterIri).Any())
             {
-            intersectedParam.SelectedValues = _intersectedParams.Where(p => p.ParameterIri == intersectedParam.ParameterIri).First().SelectedValues.Where(s => intersectedParam.ParameterValues.Where( pv => pv.ValueIri == s.ValueIri).Any());
+                try
+                {
+                    //TODO watch out for int values, does this pose an issue for intersections?
+                    List<ParameterValueViewModel> selectedValueList = _intersectedParams.Where(p => p.ParameterIri == intersectedParam.ParameterIri).First().SelectedValues.Where(s => intersectedParam.ParameterValues.Where( pv => pv.ValueIri == s.ValueIri).Any()).ToList();
+                    if (intersectedParam.ParameterValues != null)
+                    {
+                        intersectedParam.SelectedValues = intersectedParam.ParameterValues.Where(p => selectedValueList.Where(s => s.ValueIri == p.ValueIri).Any());
+                    }
+                }
+                catch (Exception e)
+                {
+                    
+                    throw;
+                }
             }
         }
         return intersectedParamsNew;

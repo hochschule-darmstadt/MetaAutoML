@@ -1,4 +1,4 @@
-﻿@page "/datasets/{id}/models"
+@page "/datasets/{id}/models"
 @inject IStringLocalizer<Global> L
 @inject ISnackbar Snackbar
 @inject IApiClient apiClient
@@ -6,12 +6,16 @@
 @attribute [Authorize]
 
 <TopSection>
-    <MudBreadcrumbs Items="_breadcrumbs">
+    <MudBreadcrumbs Items="_breadcrumbs" style="
+    position: fixed!important;
+    top: 65px;
+    z-index: 999!important;
+    width: 100%;">
     </MudBreadcrumbs>
 </TopSection>
 
 
-<MudStack AlignItems="AlignItems.Center" Row="true" Class="mb-2">
+<MudStack AlignItems="AlignItems.Center" Row="true" Class="mb-2" style="padding-top:30px">
     <MudIcon Size="Size.Large" Icon="@Icons.Filled.Lightbulb" />
     <MudText Typo="Typo.h4">Models</MudText>
 </MudStack>

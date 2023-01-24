@@ -41,10 +41,11 @@ services:
       - training-flaml:/app/app-data/training/flaml
       - training-gluon:/app/app-data/training/gluon
       #- training-autocve:/app/app-data/training/autocve
-      #- training-pytorch:/app/app-data/training/pytorch
+      - training-pytorch:/app/app-data/training/pytorch
       #- training-alphad3m:/app/app-data/training/alphad3m
       - training-mcfly:/app/app-data/training/mcfly
       - training-evalml:/app/app-data/training/evalml
+      - training-pycaret:/app/app-data/training/pycaret
     extra_hosts:
       - "docker.host.internal:host-gateway"
 

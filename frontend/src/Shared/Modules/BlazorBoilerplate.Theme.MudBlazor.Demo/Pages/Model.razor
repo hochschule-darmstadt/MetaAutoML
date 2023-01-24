@@ -8,13 +8,16 @@
 @inject NavigationManager NavManager
 @attribute [Authorize]
 
-
 <TopSection>
-    <MudBreadcrumbs Items="_breadcrumbs">
+    <MudBreadcrumbs Items="_breadcrumbs" style="
+    position: fixed!important;
+    top: 65px;
+    z-index: 999!important;
+    width: 100%;">
     </MudBreadcrumbs>
 </TopSection>
 
-<MudStack AlignItems="AlignItems.Center" Row="true" Class="mb-2">
+<MudStack AlignItems="AlignItems.Center" Row="true" Class="mb-2" style="padding-top:30px">
     <MudIcon Size="Size.Large" Icon="@Icons.Filled.Lightbulb" />
     @if (_model != null)
     {
@@ -79,13 +82,13 @@
     <MudItem xs="6" sm="6" md="6">
         <DownloadMlPipeline Model="_model"/>
     </MudItem>
-    <MudItem xs="6" sm="6" md="6">
+    <MudItem xs="3" sm="3" md="3">
         <ModelExplanationShort Model="_model" ExplanationPagePath="@_explanationPagePath" />
     </MudItem>
     <MudItem xs="3" sm="3" md="3">
         <ModelConfiguration Training="_training" Model="_model" Dataset="_dataset"/>
     </MudItem>
-    <MudItem xs="3" sm="3" md="3">
+    <MudItem xs="6" sm="6" md="6">
         <ModelDetail Model="_model"/>
     </MudItem>
 </MudGrid>

@@ -39,6 +39,8 @@ services:
       #- ALPHAD3M_SERVICE_PORT=50060
       - EVALML_SERVICE_HOST=evalml
       - EVALML_SERVICE_PORT=50062
+      - PYCARET_SERVICE_HOST=pycaret
+      - PYCARET_SERVICE_PORT=50063
       - PERSISTENCE_LOGGING_LEVEL=DEBUG
       - SERVER_LOGGING_LEVEL=DEBUG
       - ONTOLOGY_LOGGING_LEVEL=DEBUG
@@ -57,6 +59,7 @@ services:
       #- training-alphad3m:/app/app-data/training/alphad3m
       - training-mcfly:/app/app-data/training/mcfly
       - training-evalml:/app/app-data/training/evalml
+      - training-pycaret:/app/app-data/training/pycaret
 
   mongo:
     image: mongo
@@ -200,6 +203,7 @@ volumes:
   #training-alphad3m:
   training-mcfly:
   training-evalml:
+  training-pycaret:
 
   # shared volume between controller and frontend / dummy to transfer training
   training:
