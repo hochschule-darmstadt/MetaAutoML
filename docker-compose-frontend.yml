@@ -45,6 +45,7 @@ services:
       #- training-alphad3m:/app/app-data/training/alphad3m
       - training-mcfly:/app/app-data/training/mcfly
       - training-evalml:/app/app-data/training/evalml
+      - training-pycaret:/app/app-data/training/pycaret
     extra_hosts:
       - "docker.host.internal:host-gateway"
 
