@@ -35,7 +35,7 @@ autokeras_metrics = {
     ":sum":tf.keras.metrics.Sum(),
     ":top_k_categorical_accuracy":tf.keras.metrics.TopKCategoricalAccuracy(),
     ":true_negatives": tf.keras.metrics.TrueNegatives(),
-    ":true_positves": tf.keras.metrics.TruePositives(),
+    ":true_positives": tf.keras.metrics.TruePositives(),
     ":mean_sqared_error": tf.keras.metrics.MeanSquaredError(),
     ":mean_absolute_error": tf.keras.metrics.MeanAbsoluteError()
 }
@@ -277,7 +277,7 @@ class AutoKerasAdapter:
             json.dump(self._configuration, f)
 
     def translate(self):
-        parameters = self._configuration["configuration"]['parameters']
+        parameters = self._configuration["configuration"].get('parameters', {})
         metrics = []
         #try to get the metric values from configuration, if not available use accuracy
         try:
@@ -301,20 +301,21 @@ class AutoKerasAdapter:
                 loss = 'mean_squared_error'
         #try to get the max_trial from configuration, if not available use 3
         try:
-            max_trials_parameter = parameters[':max_trials']['values'][0]
+            max_trials_parameter = int(parameters[':max_trials_autokeras']['values'][0])
         except:
             max_trials_parameter = 3
 
         #try to get the tuner from configuration, if not available use None
         try:
-            tuner_parameters = parameters[':tuner']['values']
+            tuner_parameters = parameters[':tuner_autokeras']['values']
             tuner = autokeras_tuner.get(tuner_parameters[0], None)
         except:
             tuner = None
 
         #try to get the max_model_size from configuration, if not available use None
         try:
-            max_model_size_parameter = parameters[':max_model_size']['values'][0]
+            #Set max model size to None if it is 0, requires a high number to work correctly NOT FOR BEGINNERS
+            max_model_size_parameter = int(parameters[':max_model_size_autokeras']['values'][0]) if int(parameters[':max_model_size_autokeras']['values'][0]) > 0 else None
         except:
             max_model_size_parameter = None
 
