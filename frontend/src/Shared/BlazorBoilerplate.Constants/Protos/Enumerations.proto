@@ -1,6 +1,9 @@
 syntax = "proto3";
 option csharp_namespace = "BlazorBoilerplate.Server";
 
+/*
+  enum describing data types
+*/
 enum DataType {
     DATATYPE_UNKNOW = 0;
     DATATYPE_STRING = 1;

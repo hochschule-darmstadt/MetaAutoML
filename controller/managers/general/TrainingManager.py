@@ -22,8 +22,8 @@ class TrainingManager:
         self.__adapter_runtime_scheduler = adapter_runtime_scheduler
 
     async def create_training(
-        self, create_training_request: "CreateTrainingRequest"
-    ) -> "CreateTrainingResponse":
+        self, create_training_request: CreateTrainingRequest
+    ) -> CreateTrainingResponse:
         """Create a new training record and start the training process
 
         Args:
@@ -109,6 +109,8 @@ class TrainingManager:
                     model_detail.runtime_profile = model_runtime
                     model_detail.status_messages[:] =  model["status_messages"]
                     model_detail.explanation = json.dumps(model["explanation"])
+                    if not "carbon_footprint" in model:
+                        model["carbon_footprint"] = {"emissions": 0}
                     model_detail.emission = model["carbon_footprint"].get("emissions", 0)
                     training_item.models.append(model_detail)
                 except Exception as e:
@@ -118,14 +120,10 @@ class TrainingManager:
 
             training_item.status = training["status"]
 
-            training_configuration = Configuration()
-            training_configuration.task = training["configuration"]["task"]
-            training_configuration.enabled_strategies = training["configuration"]["enabled_strategies"]
-            training_configuration.runtime_limit = training["configuration"]["runtime_limit"]
-            training_configuration.metric = training["configuration"]["metric"]
-            training_configuration.selected_auto_ml_solutions = training["configuration"]["selected_auto_ml_solutions"]
-            training_configuration.selected_ml_libraries = training["configuration"]["selected_ml_libraries"]
-            training_item.configuration = training_configuration
+            # parameters were added later, existing documents don't have it yet. If such a record is encountered, the key is added to the dictionary here.
+            if not "parameters" in training["configuration"]:
+                training["configuration"]["parameters"] = {}
+            training_item.configuration = Configuration().from_dict(training["configuration"])
 
             training_item.dataset_configuration = json.dumps(training["dataset_configuration"])
 

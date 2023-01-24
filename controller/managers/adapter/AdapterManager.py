@@ -13,7 +13,7 @@ class AdapterManager(Thread):
         Thread (_type_): _description_
     """
 
-    def __init__(self, data_storage: DataStorage, request: "CreateTrainingRequest", automl:str, training_id: str, dataset, host: str, port: int, adapter_finished_callback) -> None:
+    def __init__(self, data_storage: DataStorage, request: CreateTrainingRequest, automl:str, training_id: str, dataset, host: str, port: int, adapter_finished_callback) -> None:
         """Initialize a new AdapterManager
 
         Args:
@@ -111,7 +111,7 @@ class AdapterManager(Thread):
         return
 
 
-    def __generate_process_request(self) -> "StartAutoMlRequest":
+    def __generate_process_request(self) -> StartAutoMlRequest:
         """Generate AutoML training configuration
 
         Returns:
@@ -127,6 +127,7 @@ class AdapterManager(Thread):
         configuration.task = self.__request.configuration.task
         configuration.runtime_limit = self.__request.configuration.runtime_limit
         configuration.metric = self.__request.configuration.metric
+        configuration.parameters = self.__request.configuration.parameters
 
         request.configuration = configuration
         found, training = self.__data_storage.get_training(self.__request.user_id, self.__training_id)

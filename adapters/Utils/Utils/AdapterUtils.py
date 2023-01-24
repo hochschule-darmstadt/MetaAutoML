@@ -121,7 +121,6 @@ def start_automl_process(config: "StartAutoMlRequest") -> subprocess.Popen:
         subprocess.Popen: The AutoML subprocess instance
     """
     python_env = os.getenv("PYTHON_ENV", default="PYTHON_ENV_UNSET")
-
     return subprocess.Popen([python_env, "AutoML.py", config.job_folder_location],
                             stdout=subprocess.PIPE,
                             universal_newlines=True)
@@ -292,7 +291,6 @@ def setup_run_environment(request: "StartAutoMlRequest", adapter_name: str) -> "
     Returns:
         StartAutoMlRequest: The extended training request configuration holding the training paths
     """
-
     #folder location for job related files
     job_folder_location = os.path.join(get_config_property("training-path"),
                                         request.user_id,
@@ -326,40 +324,45 @@ def setup_run_environment(request: "StartAutoMlRequest", adapter_name: str) -> "
                                         request.training_id,
                                         get_config_property("export-folder-name"))
 
+    request_dict = request.to_dict(casing=betterproto.Casing.SNAKE)
     #For WSL users we need to adjust the path prefix for the dataset location to windows path
     if get_config_property("local_execution") == "YES":
         if get_config_property("running_in_wsl") == "YES":
-            request.dataset_path = re.sub("[a-zA-Z]:/([A-Za-z0-9]+(/[A-Za-z0-9]+)+)/MetaAutoML", get_config_property("wsl_metaautoml_path"), request.dataset_path)
-            request.dataset_path = request.dataset_path.replace("\\", "/")
+            request_dict["dataset_path"] = re.sub("[a-zA-Z]:/([A-Za-z0-9]+(/[A-Za-z0-9]+)+)/MetaAutoML", get_config_property("wsl_metaautoml_path"), request_dict["dataset_path"])
+            request_dict["dataset_path"] = request_dict["dataset_path"].replace("\\", "/")
             job_folder_location = job_folder_location.replace("\\", "/")
             model_folder_location = model_folder_location.replace("\\", "/")
             export_folder_location = export_folder_location.replace("\\", "/")
             result_folder_location = result_folder_location.replace("\\", "/")
             controller_export_folder_location = controller_export_folder_location.replace("\\", "/")
 
-    request.job_folder_location = job_folder_location
+    request_dict["job_folder_location"] = job_folder_location
+    request_dict["model_folder_location"] = model_folder_location
+    request_dict["export_folder_location"] = export_folder_location
+    request_dict["result_folder_location"] = result_folder_location
+    request_dict["controller_export_folder_location"] = controller_export_folder_location
+
+    # TODO: Refactor AdapterManager and AdapterUtils to not rely on a proto object that some fields have been added to at runtime
+    # also add values to request object (the values are used in subsequent requests)
+    request.dataset_path = request_dict["dataset_path"]
+    request.job_folder_location = request_dict["job_folder_location"]
     request.model_folder_location = model_folder_location
     request.export_folder_location = export_folder_location
     request.result_folder_location = result_folder_location
     request.controller_export_folder_location = controller_export_folder_location
+
+    # TODO: Remove this and fix all places that access the configuration object as a dictionary
+    # replace configuration object with dictionary
+    request.configuration = request_dict["configuration"]
 
     #Make sure job folders exists
     os.makedirs(job_folder_location, exist_ok=True)
     os.makedirs(model_folder_location, exist_ok=True)
     os.makedirs(export_folder_location, exist_ok=True)
     os.makedirs(result_folder_location, exist_ok=True)
-    request_dict = request.__dict__
-    request_dict.pop("_serialized_on_wire")
-    request_dict.pop("_unknown_fields")
-    request_dict.pop("_group_current")
-    request_dict.update({"configuration": request_dict["configuration"].__dict__})
-    request_dict["configuration"].pop("_serialized_on_wire")
-    request_dict["configuration"].pop("_unknown_fields")
-    request_dict["configuration"].pop("_group_current")
     #Save job file
     with open(os.path.join(job_folder_location, get_config_property("job-file-name")), "w+") as f:
         json.dump(request_dict, f)
-
     return request
 
 #endregion

@@ -2,7 +2,14 @@
 {
     <MudTooltip Text="SeeAlso" Delay="600" Arrow="true" Placement="Placement.Top" Class="strategy-description-tooltip">
         <ChildContent>
-            <MudText>@Label</MudText>
+            @if (ChildContent != null)
+            {
+                @ChildContent
+            }
+            else
+            {
+                <MudText>@Label</MudText>
+            }
         </ChildContent>
 
         <TooltipContent>
@@ -17,18 +24,20 @@
                 <MudItem xs="12">
                     <MudText Style="font-size:inherit">@InfoText</MudText>
                 </MudItem>
-
-
             </MudGrid>
-
-
-
         </TooltipContent>
     </MudTooltip>
 }
 else
 {
-    <MudText>@Label</MudText>
+    @if (ChildContent != null)
+    {
+        @ChildContent
+    }
+    else
+    {
+        <MudText>@Label</MudText>
+    }
 }
 
 @code {
@@ -40,6 +49,9 @@ else
 
     [Parameter]
     public string Label { get; set; }
+
+    [Parameter]
+    public RenderFragment ChildContent { get; set; }
 
     public string ImageUrl;
     public string InfoText;
@@ -79,6 +91,4 @@ else
         public string Text { get; set; }
         public string ImageUrl { get; set; }
     }
-
 }
-
