@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from typing import (
     TYPE_CHECKING,
     Dict,
+    List,
     Optional,
 )
 
@@ -116,6 +117,15 @@ class StartAutoMlConfiguration(betterproto.Message):
     metric: str = betterproto.string_field(3)
     """
     The ML metric selected during the wizard configurationexample: ":accuracy"
+    """
+
+    parameters: Dict[str, "DynamicParameterValue"] = betterproto.map_field(
+        4, betterproto.TYPE_STRING, betterproto.TYPE_MESSAGE
+    )
+    """
+    Map of additional parametersexamples:{":use_approach": { "values":
+    [":adaboost", ":decision_tree"]},":metric": { "values":
+    [":accuracy"]},":some_int": { "values": ["17"]}}
     """
 
 
@@ -258,11 +268,11 @@ class ExplainModelRequest(betterproto.Message):
     useexample:{"training_id": "63525870394eff35ee175bc2","dataset_id":
     "635255a4394eff35ee175bb4","user_id":
     "b84eadcc-765c-43ea-8b7b-c0f8d2fbc6ed","dataset_path": "app-data\\datasets\
-    \b84eadcc-765c-43ea-8b7b-c0f8d2fbc6ed\\635255a4394eff35ee175bb4\\Train.csv"
-    ,"configuration": {"task": ":tabular_regression", "target":
-    "TARGET(PRICE_IN_LACS)", "runtime_limit": 3, "metric":
-    ":accuracy"},"dataset_configuration": "SEE Training schema in WIKI for more
-    information https://github.com/hochschule-
+    \b84eadcc-765c-43ea-8b7b-
+    c0f8d2fbc6ed\\635255a4394eff35ee175bb4\\Train.csv","configuration":
+    {"task": ":tabular_regression", "target": "TARGET(PRICE_IN_LACS)",
+    "runtime_limit": 3, "metric": ":accuracy"},"dataset_configuration": "SEE
+    Training schema in WIKI for more information https://github.com/hochschule-
     darmstadt/MetaAutoML/wiki/2.-System-Architecture#training-record"}
     """
 
@@ -291,11 +301,11 @@ class PredictModelRequest(betterproto.Message):
     useexample:{"training_id": "63525870394eff35ee175bc2","dataset_id":
     "635255a4394eff35ee175bb4","user_id":
     "b84eadcc-765c-43ea-8b7b-c0f8d2fbc6ed","dataset_path": "app-data\\datasets\
-    \b84eadcc-765c-43ea-8b7b-c0f8d2fbc6ed\\635255a4394eff35ee175bb4\\Train.csv"
-    ,"configuration": {"task": ":tabular_regression", "target":
-    "TARGET(PRICE_IN_LACS)", "runtime_limit": 3, "metric":
-    ":accuracy"},"dataset_configuration": "SEE Training schema in WIKI for more
-    information https://github.com/hochschule-
+    \b84eadcc-765c-43ea-8b7b-
+    c0f8d2fbc6ed\\635255a4394eff35ee175bb4\\Train.csv","configuration":
+    {"task": ":tabular_regression", "target": "TARGET(PRICE_IN_LACS)",
+    "runtime_limit": 3, "metric": ":accuracy"},"dataset_configuration": "SEE
+    Training schema in WIKI for more information https://github.com/hochschule-
     darmstadt/MetaAutoML/wiki/2.-System-Architecture#training-record"}
     """
 
@@ -306,6 +316,20 @@ class PredictModelResponse(betterproto.Message):
     """
     The absolute path where the prediction results are persistedexample:
     "app/app-data/datasets/..../predictions/..../autokeras_xxxx.csv"
+    """
+
+
+@dataclass(eq=False, repr=False)
+class DynamicParameterValue(betterproto.Message):
+    """
+    Value type for dynamic training parameters for the auto ml solutions.This
+    type is needed, because map<> does not supported "repeated" in the value.
+    """
+
+    values: List[str] = betterproto.string_field(1)
+    """
+    List of values for a parameterexamples:- int: ["17"]- single_value:
+    [":accuracy"]- list: [":adaboost", ":decision_tree"]
     """
 
 

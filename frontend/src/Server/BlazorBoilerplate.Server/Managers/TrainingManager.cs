@@ -1,4 +1,4 @@
-using BlazorBoilerplate.Infrastructure.Server;
+﻿using BlazorBoilerplate.Infrastructure.Server;
 using BlazorBoilerplate.Infrastructure.Server.Models;
 using BlazorBoilerplate.Shared.Dto.Dataset;
 using BlazorBoilerplate.Shared.Dto.Model;
@@ -54,16 +54,24 @@ namespace BlazorBoilerplate.Server.Managers
             {
                 createTrainingRequest.UserId = username;
                 createTrainingRequest.DatasetId = request.DatasetId;
-                createTrainingRequest.Configuration = new Configuration();
-                createTrainingRequest.Configuration.Task = request.Configuration.Task;
-                createTrainingRequest.Configuration.EnabledStrategies.AddRange(request.Configuration.EnabledStrategies);
-                createTrainingRequest.Configuration.RuntimeLimit = request.Configuration.RuntimeLimit;
-                createTrainingRequest.Configuration.Metric = request.Configuration.Metric;
+                createTrainingRequest.Configuration = new Configuration
+                {
+                    Task = request.Configuration.Task,
+                    RuntimeLimit = request.Configuration.RuntimeLimit,
+                    Metric = request.Configuration.Metric
+                };
                 createTrainingRequest.Configuration.SelectedAutoMlSolutions.AddRange(request.Configuration.SelectedAutoMlSolutions);
                 createTrainingRequest.Configuration.SelectedMlLibraries.AddRange(request.Configuration.SelecctedMlLibraries);
+                createTrainingRequest.Configuration.EnabledStrategies.AddRange(request.Configuration.EnabledStrategies);
+                foreach (var param in request.Configuration.Parameters)
+                {
+                    var dynamicParameterValue = new DynamicParameterValue();
+                    dynamicParameterValue.Values.AddRange(param.Values);
+                    createTrainingRequest.Configuration.Parameters.Add(param.Iri, dynamicParameterValue);
+                }
                 createTrainingRequest.DatasetConfiguration = ConvertDatasetSchemaToString(request.Schema);
                 createTrainingRequest.SaveSchema = request.SaveSchema;
-                var reply = _client.CreateTraining(createTrainingRequest);
+                var reply = await _client.CreateTrainingAsync(createTrainingRequest);
                 return new ApiResponse(Status200OK, null, new CreateTrainingResponseDto(reply.TrainingId));
 
             }
@@ -89,30 +97,7 @@ namespace BlazorBoilerplate.Server.Managers
                 var reply = _client.GetTrainings(getTrainings);
                 foreach (var training in reply.Trainings)
                 {
-                    GetDatasetResponse dataset = _client.GetDataset(new GetDatasetRequest { DatasetId = training.DatasetId, UserId = username });
-                    TrainingDto trainingDto = new TrainingDto(training, dataset.Dataset.Name);
-                    trainingDto.Configuration.Task = await _cacheManager.GetObjectInformation(training.Configuration.Task);
-                    trainingDto.Configuration.Target = training.Configuration.Target;
-                    trainingDto.Configuration.EnabledStrategies.AddRange(training.Configuration.EnabledStrategies);
-                    trainingDto.Configuration.RuntimeLimit = training.Configuration.RuntimeLimit;
-                    trainingDto.Configuration.Metric = await _cacheManager.GetObjectInformation(training.Configuration.Metric);
-                    foreach (var item in training.Configuration.SelectedAutoMlSolutions)
-                    {
-                        trainingDto.Configuration.SelectedAutoMlSolutions.Add(await _cacheManager.GetObjectInformation(item));
-                    }
-                    foreach (var item in training.Configuration.SelectedMlLibraries)
-                    {
-                        trainingDto.Configuration.SelecctedMlLibraries.Add(await _cacheManager.GetObjectInformation(item));
-                    }
-
-                    foreach (var model in training.Models)
-                    {
-                        ModelDto modelDto = new ModelDto(model, 
-                            (model.MlModelType == "" ? new Shared.Dto.Ontology.ObjectInfomationDto() :  await _cacheManager.GetObjectInformation(model.MlModelType)),
-                            (model.MlLibrary == "" ? new Shared.Dto.Ontology.ObjectInfomationDto() : await _cacheManager.GetObjectInformation(model.MlLibrary)),
-                            (model.AutoMlSolution == "" ? new Shared.Dto.Ontology.ObjectInfomationDto() : await _cacheManager.GetObjectInformation(model.AutoMlSolution)));
-                        trainingDto.models.Add(modelDto);
-                    }
+                    TrainingDto trainingDto = await CreateTrainingDtoFromTraining(username, training);
                     response.Trainings.Add(trainingDto);
                 }
                 return new ApiResponse(Status200OK, null, response);
@@ -124,6 +109,37 @@ namespace BlazorBoilerplate.Server.Managers
                 return new ApiResponse(Status404NotFound, ex.Message);
             }
         }
+
+        private async Task<TrainingDto> CreateTrainingDtoFromTraining(string username, Training training)
+        {
+            GetDatasetResponse dataset = _client.GetDataset(new GetDatasetRequest { DatasetId = training.DatasetId, UserId = username });
+            TrainingDto trainingDto = new TrainingDto(training, dataset.Dataset.Name);
+            trainingDto.Configuration.Task = await _cacheManager.GetObjectInformation(training.Configuration.Task);
+            trainingDto.Configuration.Target = training.Configuration.Target;
+            trainingDto.Configuration.EnabledStrategies.AddRange(training.Configuration.EnabledStrategies);
+            trainingDto.Configuration.RuntimeLimit = training.Configuration.RuntimeLimit;
+            trainingDto.Configuration.Metric = await _cacheManager.GetObjectInformation(training.Configuration.Metric);
+            foreach (var item in training.Configuration.SelectedAutoMlSolutions)
+            {
+                trainingDto.Configuration.SelectedAutoMlSolutions.Add(await _cacheManager.GetObjectInformation(item));
+            }
+            foreach (var item in training.Configuration.SelectedMlLibraries)
+            {
+                trainingDto.Configuration.SelecctedMlLibraries.Add(await _cacheManager.GetObjectInformation(item));
+            }
+
+            foreach (var model in training.Models)
+            {
+                ModelDto modelDto = new ModelDto(model,
+                    (model.MlModelType == "" ? new Shared.Dto.Ontology.ObjectInfomationDto() : await _cacheManager.GetObjectInformation(model.MlModelType)),
+                    (model.MlLibrary == "" ? new Shared.Dto.Ontology.ObjectInfomationDto() : await _cacheManager.GetObjectInformation(model.MlLibrary)),
+                    (model.AutoMlSolution == "" ? new Shared.Dto.Ontology.ObjectInfomationDto() : await _cacheManager.GetObjectInformation(model.AutoMlSolution)));
+                trainingDto.models.Add(modelDto);
+            }
+
+            return trainingDto;
+        }
+
         /// <summary>
         /// Get informations about a specific session
         /// </summary>
@@ -139,31 +155,9 @@ namespace BlazorBoilerplate.Server.Managers
                 getTrainingRequest.UserId = username;
                 getTrainingRequest.TrainingId = request.TrainingId;
                 GetTrainingResponse reply = _client.GetTraining(getTrainingRequest);
+                Training training = reply.Training;
 
-                GetDatasetResponse dataset = _client.GetDataset(new GetDatasetRequest { DatasetId = reply.Training.DatasetId, UserId = username });
-                TrainingDto trainingDto = new TrainingDto(reply.Training, dataset.Dataset.Name);
-                trainingDto.Configuration.Task = await _cacheManager.GetObjectInformation(reply.Training.Configuration.Task);
-                trainingDto.Configuration.Target = reply.Training.Configuration.Target;
-                trainingDto.Configuration.EnabledStrategies.AddRange(reply.Training.Configuration.EnabledStrategies);
-                trainingDto.Configuration.RuntimeLimit = reply.Training.Configuration.RuntimeLimit;
-                trainingDto.Configuration.Metric = await _cacheManager.GetObjectInformation(reply.Training.Configuration.Metric);
-                foreach (var item in reply.Training.Configuration.SelectedAutoMlSolutions)
-                {
-                    trainingDto.Configuration.SelectedAutoMlSolutions.Add(await _cacheManager.GetObjectInformation(item));
-                }
-                foreach (var item in reply.Training.Configuration.SelectedMlLibraries)
-                {
-                    trainingDto.Configuration.SelecctedMlLibraries.Add(await _cacheManager.GetObjectInformation(item));
-                }
-
-                foreach (var model in reply.Training.Models)
-                {
-                    ModelDto modelDto = new ModelDto(model,
-                        (model.MlModelType == "" ? new Shared.Dto.Ontology.ObjectInfomationDto() : await _cacheManager.GetObjectInformation(model.MlModelType)),
-                        (model.MlLibrary == "" ? new Shared.Dto.Ontology.ObjectInfomationDto() : await _cacheManager.GetObjectInformation(model.MlLibrary)),
-                        (model.AutoMlSolution == "" ? new Shared.Dto.Ontology.ObjectInfomationDto() : await _cacheManager.GetObjectInformation(model.AutoMlSolution)));
-                    trainingDto.models.Add(modelDto);
-                }
+                TrainingDto trainingDto = await CreateTrainingDtoFromTraining(username, training);
                 response = new GetTrainingResponseDto(trainingDto);
                 return new ApiResponse(Status200OK, null, response);
 
