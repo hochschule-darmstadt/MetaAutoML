@@ -96,23 +96,17 @@ class EvalMLAdapter:
         export_model(best_pipeline_tobe_export, self._configuration["result_folder_location"], 'evalml.p')
 
     def __time_series_forecasting(self):
-        """Execute the tabular classification task and export the found model"""
+        """Execute the time series forcasting/regression task and export the found model"""
 
         self.df, test = data_loader(self._configuration)
         index_column_name = self.__get_index_column()
-        #index_column_copy_name = index_column_name + 'copy'
-        #self.df[index_column_copy_name] = self.df[index_column_name]
         #We must persist the training time series to make predictions
         file_path = self._configuration["result_folder_location"]
         file_path = write_tabular_dataset_data(self.df, file_path, self._configuration, "train.csv")
 
         X, y = prepare_tabular_dataset(self.df, self._configuration)
-        X.reset_index(inplace=True)
-        # in oder to fix this bug :
-        # bug: X.set_index(index_columns, inplace=True) => if indexcolumn is setted, evalml can not run auto ml search
-        # i create a copy column for index column
-        print(X)
-        #problem_config = {"gap": 0, "max_delay": 7, "forecast_horizon": 7, "time_index": self.__get_index_column()}
+        X.reset_index(inplace=True) 
+
         problem_config = {"gap": 0, "max_delay": 7, "forecast_horizon": 7, "time_index": self.__get_index_column()}
         # parameters must be set correctly
         automl = AutoMLSearch(
@@ -130,16 +124,24 @@ class EvalMLAdapter:
         best_pipeline_tobe_export = automl.best_pipeline
         export_model(best_pipeline_tobe_export, self._configuration["result_folder_location"], 'evalml.p')
 
-        print(file_path)
-
     def __get_index_column(self):
+        """get name of index column
+
+        Returns:
+            string: column name
+        """
         for column, dt in self._configuration['dataset_configuration']['schema'].items():
             if dt.get("role_selected", "") == ":index":
-                print(column)
                 return column
         return None #
 
     def __get_metric(self):
+        """get accuracy metric (objective) from automl request
+            return auto when no metric is provided
+        Returns:
+            string: metric name
+        """
+        # TODO: add all metrics from ontology to here
         metrics_dict = {
             ':binary_accuracy' : "Accuracy Binary",
             ':balanced_accuracy' : "Balanced Accuracy Binary",
