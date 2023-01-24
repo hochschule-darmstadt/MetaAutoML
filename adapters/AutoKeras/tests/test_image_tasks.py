@@ -86,7 +86,7 @@ class AutoKerasImageTaskTest(unittest.TestCase):
         req.configuration.metric = ':accuracy'
         req.configuration.parameters = {":metric": {"values": [":mean_sqared_error"]}}
         # we do not need a dataset configuration
-        req.dataset_configuration = json.dumps({})
+        req.dataset_configuration = json.dumps({"multi_fidelity_level": 0})
 
         adapter_manager = AutoKerasAdapterManager()
         adapter_manager.start_auto_ml(req, uuid.uuid4())
@@ -119,7 +119,7 @@ class AutoKerasImageTaskTest(unittest.TestCase):
         req.configuration.metric = ':accuracy'
         req.configuration.parameters = {":metric": {"values": [":accuracy"]}}
         # we do not need a dataset configuration
-        req.dataset_configuration = json.dumps({})
+        req.dataset_configuration = json.dumps({"multi_fidelity_level": 0})
 
         adapter_manager = AutoKerasAdapterManager()
         adapter_manager.start_auto_ml(req, uuid.uuid4())
@@ -152,7 +152,7 @@ class AutoKerasImageTaskTest(unittest.TestCase):
         req.configuration.metric = ':accuracy'
         req.configuration.parameters = {":metric": {"values": [":average_precision_score"]}}
         # we do not need a dataset configuration
-        req.dataset_configuration = json.dumps({})
+        req.dataset_configuration = json.dumps({"multi_fidelity_level": 0})
 
         adapter_manager = AutoKerasAdapterManager()
         adapter_manager.start_auto_ml(req, uuid.uuid4())
