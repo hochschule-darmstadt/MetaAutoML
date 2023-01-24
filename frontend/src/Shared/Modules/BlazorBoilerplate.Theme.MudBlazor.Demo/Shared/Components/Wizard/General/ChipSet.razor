@@ -7,9 +7,9 @@
         {
             @if (!string.IsNullOrEmpty(chip.ToolTip) || !string.IsNullOrEmpty(chip.Comment))
             {
-                <MudChip Value="@chip.Id" Text="@chip.Label" Variant="Variant.Text" Color="Color.Secondary" @onclick="() => ToggleChip(chip)">
-                    <WikiTooltip SeeAlso="@chip.ToolTip" Comment="@chip.Comment" Label="@chip.Label" />
-                </MudChip>
+                <WikiTooltip SeeAlso="@chip.ToolTip" Comment="@chip.Comment">
+                    <MudChip Value="@chip.Id" Text="@chip.Label" Variant="Variant.Text" Color="Color.Secondary" @onclick="() => ToggleChip(chip)" />
+                </WikiTooltip>
             }
             else
             {
