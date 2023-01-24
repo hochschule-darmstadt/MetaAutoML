@@ -1,5 +1,5 @@
-### Ontology file generated from ML_Ontology (1).xlsx.
-### 2023-01-23 18:26:01.154910
+### Ontology file generated from ML_Ontology.xlsx.
+### 2023-01-24 16:39:18.894762
 
 
 # PREFIXES
@@ -969,6 +969,15 @@
     :performance :accurate , :explainable ;
     rdfs:comment "scalable machine learning system for tree boosting" ;
     rdfs:seeAlso <https://www.wikidata.org/entity/Q23793561> .
+:ridge_classifier a :ML_approach ;
+    skos:prefLabel "Ridge Classifier" ;
+    :used_for :classification .
+:linear_discriminant_analysis a :ML_approach ;
+    skos:prefLabel "Linear Discriminant Analysis" ;
+    :used_for :classification .
+:quadratic_discriminant_analysis a :ML_approach ;
+    skos:prefLabel "Quadratic Discriminant Analysis" ;
+    :used_for :classification .
 
 
 # Preprocessing_approach
@@ -2100,7 +2109,7 @@
     :category :parameter ;
     skos:broader :use_approach ;
     :has_datatype :list ;
-    :parameter_value :auto_regressive_integrated_moving_average , :caboost , :decision_tree , :exponential_smoothing , :extra_tree , :k_nearest_neighbor , :linear_regression , :random_forest , :xgboost .
+    :parameter_value :auto_regressive_integrated_moving_average , :catboost , :decision_tree , :exponential_smoothing , :extra_tree , :k_nearest_neighbor , :linear_regression , :random_forest , :xgboost .
 :use_approach_evalml_time_series_classification a :Configuration_item ;
     skos:prefLabel "use approach EvalML time series classification" ;
     :category :parameter ;
