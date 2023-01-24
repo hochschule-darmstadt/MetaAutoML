@@ -6,6 +6,7 @@ from JsonUtil import get_config_property
 
 import evalml
 from evalml import AutoMLSearch
+from evalml import objectives
 from evalml.objectives import FraudCost
 
 import pandas as pd
@@ -86,7 +87,7 @@ class EvalMLAdapter:
                     X_train=X,
                     y_train=y,
                     problem_type=problem_type,
-                    objective="auto",
+                    objective= self.__get_metric(),
                     max_batches=3,
                     verbose=False,
                 )
@@ -139,13 +140,40 @@ class EvalMLAdapter:
         """get accuracy metric (objective) from automl request
             return auto when no metric is provided
         Returns:
-            string: metric name
+            obj of Objective base: metric name
         """
-        # TODO: add all metrics from ontology to here
+        # TODO: add log loss and matthews_correlation_coefficient for bianry in ontology
         metrics_dict = {
-            ':binary_accuracy' : "Accuracy Binary",
-            ':balanced_accuracy' : "Balanced Accuracy Binary",
-            ':accuracy' : "Accuracy Multiclass",
+            ':binary_accuracy' : objectives.AccuracyBinary(),
+            ':balanced_accuracy' : objectives.BalancedAccuracyMulticlass(),
+            ':f_measure' : objectives.F1(),
+            ':f_measure_micro' : objectives.F1Micro(),
+            ':f_measure_macro' : objectives.F1Macro(),
+            ':f_measure_weighted' : objectives.F1Weighted(),
+            ':precision' : objectives.Precision(),
+            ':precision_macro' : objectives.PrecisionMacro(),
+            ':precision_micro' : objectives.PrecisionMicro(),
+            ':precision_weighted' : objectives.PrecisionWeighted(),
+            ':recall' : objectives.Recall(),
+            ':recall_micro' : objectives.RecallMicro(),
+            ':recall_macro' : objectives.RecallMacro(),
+            ':recall_weighted' : objectives.RecallWeighted(),
+            ':area_under_roc_curve' : objectives.AUC(),
+            ':area_under_roc_curve_micro' : objectives.AUCMicro(),
+            ':area_under_roc_curve_macro' : objectives.AUCMacro(),
+            ':gini' : objectives.Gini(),
+            ':log_loss' : objectives.LogLossMulticlass(),
+            ':matthews_correlation_coefficient' : objectives.MCCMulticlass(),
+            ':rooted_mean_squared_error' : objectives.RootMeanSquaredError(),
+            ':mean_squared_log_error' : objectives.MeanSquaredLogError(),
+            ':rooted_mean_squared_log_error' : objectives.RootMeanSquaredLogError(),
+            ':coefficient_of_determination' : objectives.R2(),
+            ':mean_absolute_error' : objectives.MAE(),
+            ':mean_squared_error' : objectives.MSE(),
+            ':median_absolute_error' : objectives.MAE(),
+            ':max_error' : objectives.MaxError(),
+            ':explained_variance' : objectives.ExpVariance(),
+            ':mean_absolute_percentage_error' : objectives.MAPE(),
         }
         try:
             return metrics_dict[self._configuration['configuration']['parameters'][':metric']]

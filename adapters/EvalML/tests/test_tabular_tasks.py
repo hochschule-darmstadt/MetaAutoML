@@ -43,7 +43,7 @@ class TestAdapter(IsolatedAsyncioTestCase):
         req.configuration.runtime_limit = 3
         req.configuration.metric = ':accuracy'
         req.configuration.parameters = json.dumps({
-            "metric": ':accuracy',
+            "metric":  ':f_measure_macro',
         })
         req.dataset_configuration = json.dumps({
             "multi_fidelity_level": 1,
