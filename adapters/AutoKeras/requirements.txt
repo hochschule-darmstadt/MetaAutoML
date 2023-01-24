@@ -7,3 +7,4 @@ Jinja2
 Pillow
 scikit-learn
 codecarbon==2.1.4
+tensorflow==2.10.1
