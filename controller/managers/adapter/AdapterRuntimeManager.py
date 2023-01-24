@@ -40,6 +40,7 @@ class AdapterRuntimeManager:
             ":alphad3m":        ["ALPHAD3M_SERVICE_HOST",  "ALPHAD3M_SERVICE_PORT"],
             ":mcfly":           ["MCFLY_SERVICE_HOST", "MCFLY_SERVICE_PORT"],
             ":evalml":          ["EVALML_SERVICE_HOST", "EVALML_SERVICE_PORT"],
+            ":pycaret":          ["PYCARET_SERVICE_HOST", "PYCARET_SERVICE_PORT"],
         }
         self.__adapters: list[AdapterManager] = []
         self.__log.debug("start_new_training: creating new blackboard and strategy controller for training")

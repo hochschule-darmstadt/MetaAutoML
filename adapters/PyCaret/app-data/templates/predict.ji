@@ -1,0 +1,31 @@
+import sys
+import dill
+import json
+import pandas as pd
+import numpy as np
+import os
+{% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression", ":text_classification", ":text_regression", ":time_series_forecasting"] %}
+from pycaret.classification import *
+from dataset import read_csv_dataset
+from preprocessing import rename_unnamed_columns, feature_preparation
+{% endif %}
+
+if __name__ == '__main__':
+    filepath = sys.argv[1]
+    save_path = sys.argv[2]
+    X = None
+
+
+    {% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression", ":text_classification", ":text_regression", ":time_series_forecasting"] %}
+    X = read_csv_dataset(filepath)
+    X = rename_unnamed_columns(X)
+    X, y = feature_preparation(X, {{configuration.dataset_configuration["schema"]}}.items(), "{{configuration.dataset_configuration["file_configuration"]["datetime_format"]}}",  is_prediction=True)
+    {% endif %}
+
+    model = load_model(os.path.join(os.path.dirname(__file__), "model_pycaret"))
+    predicted_y = predict_model(model, X)
+
+    #out["predicted"] = predicted_y["prediction_label"]
+    predicted_y["predicted"] = predicted_y["prediction_label"]
+    #predicted_y = np.reshape(predicted_y, (-1, 1))
+    pd.DataFrame(data=predicted_y, columns=["predicted"]).to_csv(save_path)

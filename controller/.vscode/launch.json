@@ -4,7 +4,7 @@
     // Weitere Informationen finden Sie unter https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
-        
+
         {
             "name": "WIN Controller Debug",
             "type": "python",
@@ -34,6 +34,8 @@
                 "MCFLY_SERVICE_PORT": "50061",
                 "EVALML_SERVICE_HOST": "localhost",
                 "EVALML_SERVICE_PORT": "50062",
+                "PYCARET_SERVICE_HOST": "localhost",
+                "PYCARET_SERVICE_PORT": "50063",
                 "MONGO_DB_DEBUG": "YES",                        //Use the locally installed MongoDB
                 "MONGO_DB_DOCKER_DEBUG": "NO",                  //Use the development docker-compose MongoDB
                 "MONGO_CLUSTER": "NO",                          //Use the MongoDB inside the cluster
