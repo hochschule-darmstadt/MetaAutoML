@@ -42,10 +42,17 @@ class TestAdapter(IsolatedAsyncioTestCase):
         req.configuration.target = "survived"
         req.configuration.runtime_limit = 3
         req.configuration.metric = ':accuracy'
+        # can not dump json obj here 
         req.configuration.parameters = json.dumps({
-            "metric": ':accuracy',
+            ":metric":  ':f_measure_macro',
+            ":tuner_class_evalml":  ':random',
+            ":use_approach": [':xgboost', ':catboost'],
         })
+        # testing as the params come from dataset_configuration
         req.dataset_configuration = json.dumps({
+            ":metric":  ':f_measure_macro',
+            ":tuner_class_evalml":  ':random',
+            ":use_approach": [':xgboost', ':catboost'],
             "multi_fidelity_level": 1,
             "column_datatypes": {
                 "age": 2,

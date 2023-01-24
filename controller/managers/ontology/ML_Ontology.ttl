@@ -1,5 +1,5 @@
-### Ontology file generated from ML_Ontology.xlsx.
-### 2023-01-16 19:41:12.094089
+### Ontology file generated from ML_Ontology (1).xlsx.
+### 2023-01-23 18:26:01.154910
 
 
 # PREFIXES
@@ -1348,6 +1348,10 @@
     skos:prefLabel "true positives" ;
     skos:altLabel "TP" ;
     :used_for :classification .
+:r2 a :Metric ;
+    skos:prefLabel "r2" ;
+    skos:altLabel "R2 scrore" ;
+    :used_for :regression .
 
 
 # ML_library
@@ -1559,6 +1563,11 @@
     skos:prefLabel "TransmogrifAI" ;
     :used_for :spark_mllib ;
     :can_perform :tabular_classification , :tabular_regression .
+:pycaret a :AutoML_solution ;
+    skos:prefLabel "Pycaret" ;
+    :used_for :scikit_learn_lib , :catboost_lib , :lightgbm_lib , :xgboost_lib ;
+    :supported_by_oma_ml "True" ;
+    :can_perform :tabular_classification , :tabular_regression , :clustering , :anomaly_detection , :time_series_forecasting .
 
 
 # Enum
@@ -1771,7 +1780,7 @@
     :category :task_configuration ;
     :automl_solution :autosklearn ;
     :ml_task :tabular_classification ;
-    :parameter_value :time_limit , :time_limit_per_run , :configuration_via_metalearning , :ensemble_size , :ensemble_nbest , :use_approach_autosklearn_classification , :metric_autosklearn_classification , :exclude_preprocessor_autosklearn .
+    :parameter_value :time_limit_autosklearn , :time_limit_per_run_autosklearn , :ensemble_size_autosklearn , :ensemble_nbest_autosklearn , :use_approach_autosklearn_classification , :metric_autosklearn_classification , :exclude_preprocessor_autosklearn .
 :tabular_regression_in_autosklearn a :Configuration_item ;
     skos:prefLabel "tabular regression in Autosklearn" ;
     :category :task_configuration ;
@@ -1938,8 +1947,16 @@
     skos:prefLabel "ensemble_nbest" ;
     :category :parameter ;
     :has_datatype :integer .
+:ensemble_nbest_autosklearn a :Configuration_item ;
+    skos:prefLabel "ensemble nbest autosklearn" ;
+    :category :parameter ;
+    :has_datatype :integer .
 :ensemble_size a :Configuration_item ;
     skos:prefLabel "ensemble size" ;
+    :category :parameter ;
+    :has_datatype :integer .
+:ensemble_size_autosklearn a :Configuration_item ;
+    skos:prefLabel "ensemble size autosklearn" ;
     :category :parameter ;
     :has_datatype :integer .
 :use_approach a :Configuration_item ;
@@ -2111,13 +2128,13 @@
     :category :parameter ;
     skos:broader :metric ;
     :has_datatype :single_value ;
-    :parameter_value :accuracy , :balanced_accuracy , :f_measure , :receiver_operating_characteristic_curve , :average_precision_score , :log_loss , :precision , :recall .
+    :parameter_value :accuracy , :balanced_accuracy , :roc_auc , :average_precision , :log_loss , :precision_macro , :precision_micro , :precision_samples , :precision_weighted , :recall_macro , :recall_micro , :recall_samples , :recall_weighted , :f1_macro , :f1_micro , :f1_samples , :f1_weighted .
 :metric_autokeras_classification a :Configuration_item ;
     skos:prefLabel "metric autokeras classification" ;
     :category :parameter ;
     skos:broader :metric ;
     :has_datatype :list ;
-    :parameter_value :accuracy , :area_under_roc_curve , :binary_accuracy , :binary_cross_entropy , :categorical_accuracy , :categorical_cross_entropy , :false_negatives , :false_positives , :hinge , :kullback_leibler_divergence , :mean , :mean_metric_wrapper , :mean_tensor , :metric , :poission , :precision , :precision_at_recall , :recall , :recall_at_precision , :sensitifity_at_specifiticity , :sparse_categorical_accuracy , :sparce_top_k_categorical_accuracy , :specificity_at_sensitivity , :squared_hinge , :sum , :top_k_categorical_accuracy , :true_negatives , :true_positives .
+    :parameter_value :accuracy , :area_under_roc_curve , :binary_accuracy , :binary_cross_entropy , :categorical_accuracy , :categorical_cross_entropy , :false_negatives , :false_positives , :hinge , :kullback_leibler_divergence , :mean , :mean_tensor , :poission , :precision , :recall , :sparse_categorical_accuracy , :sparce_top_k_categorical_accuracy , :squared_hinge , :sum , :top_k_categorical_accuracy , :true_negatives , :true_positives .
 :metric_flaml_classification a :Configuration_item ;
     skos:prefLabel "metric FLAML classification" ;
     :category :parameter ;
@@ -2129,12 +2146,13 @@
     :category :parameter ;
     skos:broader :metric ;
     :has_datatype :single_value ;
-    :parameter_value :mean_squared_error , :mean_absolute_error , :median_absolute_error , :coefficient_of_determination , :rooted_mean_squared_error , :mean_squared_log_error .
+    :parameter_value :mean_absolute_error , :mean_squared_error , :root_mean_squared_error , :mean_squared_log_error , :median_absolute_error , :r2 .
 :metric_autokeras_regression a :Configuration_item ;
     skos:prefLabel "metric autokeras regression" ;
     :category :parameter ;
     skos:broader :metric ;
-    :has_datatype :list .
+    :has_datatype :list ;
+    :parameter_value :cosine_similarity , :mean_squared_error , :mean_absolute_error , :log_cosh_error , :mean_absolute_percentage_error , :mean_squared_log_error , :root_mean_squared_error .
 :metric_flaml_regression a :Configuration_item ;
     skos:prefLabel "metric FLAML regression" ;
     :category :parameter ;
@@ -2211,18 +2229,18 @@
     skos:prefLabel "metric AutoKeras image classification" ;
     :category :parameter ;
     skos:broader :metric ;
-    :parameter_value :accuracy , :area_under_roc_curve , :binary_accuracy , :binary_cross_entropy , :binary_intersection_over_union , :categorical_accuracy , :categorical_cross_entropy , :cosine_similarity , :false_negatives , :false_positives , :hinge , :intersection_over_union , :kullback_leibler_divergence , :log_cosh_error , :mean , :mean_absolut_percentage_error , :mean_intersection_over_union , :mean_metric_wrapper , :mean_relative_error , :mean_squared_log_error , :mean_tensor , :metric , :one_hot_intersection_over_union , :one_hot_mean_intersection_over_union , :poission , :precision , :precision_at_recall , :recall , :recall_at_precision , :root_mean_squared_error , :sensitifity_at_specifiticity , :sparse_categorical_accuracy , :sparse_top_k_categorical_accuracy , :specificity_at_sensitivity , :squared_hinge , :sum , :top_k_categorical_accuracy , :true_negatives , :true_positves , :mean_sqared_error , :mean_absolute_error .
+    :parameter_value :accuracy , :area_under_roc_curve , :binary_accuracy , :binary_cross_entropy , :categorical_accuracy , :categorical_cross_entropy , :false_negatives , :false_positives , :hinge , :kullback_leibler_divergence , :mean , :mean_tensor , :poission , :precision , :recall , :sparse_categorical_accuracy , :sparse_top_k_categorical_accuracy , :squared_hinge , :sum , :top_k_categorical_accuracy , :true_negatives , :true_positves .
 :metric_autokeras_text_classification a :Configuration_item ;
     skos:prefLabel "metric AutoKeras text classification" ;
     :category :parameter ;
     skos:broader :metric ;
-    :parameter_value :accuracy , :area_under_roc_curve , :binary_accuracy , :binary_cross_entropy , :categorical_accuracy , :categorical_cross_entropy , :false_negatives , :false_positives , :hinge , :kullback_leibler_divergence , :mean , :mean_metric_wrapper , :mean_tensor , :metric , :poission , :precision , :precision_at_recall , :recall , :recall_at_precision , :sensitifity_at_specifiticity , :sparse_categorical_accuracy , :sparce_top_k_categorical_accuracy , :specificity_at_sensitivity , :squared_hinge , :sum , :top_k_categorical_accuracy , :true_negatives , :true_positives .
+    :parameter_value :accuracy , :area_under_roc_curve , :binary_accuracy , :binary_cross_entropy , :categorical_accuracy , :categorical_cross_entropy , :false_negatives , :false_positives , :hinge , :kullback_leibler_divergence , :mean , :mean_tensor , :poission , :precision , :recall , :sparse_categorical_accuracy , :sparce_top_k_categorical_accuracy , :squared_hinge , :sum , :top_k_categorical_accuracy , :true_negatives , :true_positives .
 :metric_evalml_classification a :Configuration_item ;
     skos:prefLabel "metric EvalML classification" ;
     :category :parameter ;
     skos:broader :metric ;
     :has_datatype :single_value ;
-    :parameter_value :binary_accuracy , :accuracy , :balacned_accuracy , :f_measure , :f_measure_micro , :f_measure_macro , :f_measure_weighted , :precision , :precision_macro , :precision_micro , :precision_weighted , :recall , :recall_micro , :recall_macro , :recall_weighted , :area_under_roc_curve , :area_under_roc_curve_micro , :area_under_roc_curve_macro , :gini , :log_loss , :matthews_correlation_coefficient .
+    :parameter_value :binary_accuracy , :accuracy , :balanced_accuracy , :f_measure , :f_measure_micro , :f_measure_macro , :f_measure_weighted , :precision , :precision_macro , :precision_micro , :precision_weighted , :recall , :recall_micro , :recall_macro , :recall_weighted , :area_under_roc_curve , :area_under_roc_curve_micro , :area_under_roc_curve_macro , :gini , :log_loss , :matthews_correlation_coefficient .
 :metric_evalml_regression a :Configuration_item ;
     skos:prefLabel "metric EvalML regression" ;
     :category :parameter ;
@@ -2239,8 +2257,16 @@
     skos:prefLabel "time limit" ;
     :category :parameter ;
     :has_datatype :integer .
+:time_limit_autosklearn a :Configuration_item ;
+    skos:prefLabel "time limit autosklearn" ;
+    :category :parameter ;
+    :has_datatype :integer .
 :time_limit_per_run a :Configuration_item ;
     skos:prefLabel "time limit per run" ;
+    :category :parameter ;
+    :has_datatype :integer .
+:time_limit_per_run_autosklearn a :Configuration_item ;
+    skos:prefLabel "time limit per run autosklearn" ;
     :category :parameter ;
     :has_datatype :integer .
 :max_model_size a :Configuration_item ;
@@ -2271,7 +2297,7 @@
 :tuner_class_evalml a :Configuration_item ;
     skos:prefLabel "tuner class evalml" ;
     :category :parameter ;
-    :has_datatype :tuner_approach ;
+    :has_datatype :single_value ;
     :parameter_value :random , :grid_search , :skopt .
 :loss a :Configuration_item ;
     skos:prefLabel "loss" ;
