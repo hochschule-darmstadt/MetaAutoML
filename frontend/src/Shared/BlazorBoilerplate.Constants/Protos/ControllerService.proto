@@ -81,7 +81,9 @@ service ControllerService {
   /*return all supported AutoML tasks*/
   rpc GetTasksForDatasetType(GetTasksForDatasetTypeRequest) returns (GetTasksForDatasetTypeResponse) {}
 
-
+  /*return all parameters available for the current configuration*/
+  rpc GetAutoMlParameters(GetAutoMlParametersRequest) returns (GetAutoMlParametersResponse) {}
+  
   /*OMA-ML PREDICTION MESSAGES*/
   /* create a new Prediction record in MongoDB and start the a new prediction session */
   rpc CreatePrediction(CreatePredictionRequest) returns (CreatePredictionResponse) {}

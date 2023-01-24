@@ -38,14 +38,14 @@ else
                     <PrepareTabularDataset Dataset="@_dataset" @bind-StartAutoMlRequest="@_automlRequest" />
                 </MuddyWizardPanel>
                 <MuddyWizardPanel Title="@L["Configuration"]">
-                    <TaskConfiguration Dataset="@_dataset" @bind-StartAutoMlRequest="@_automlRequest" />
+                    <TaskConfiguration Dataset="@_dataset" @bind-StartTrainingDto="@_automlRequest" />
                 </MuddyWizardPanel>
             </MuddyWizard>
             break;
         case ":image":
             <MuddyWizard WizardFinished="@OnWizardFinished"DisplaySaveSchemaCheckbox="false">
                 <MuddyWizardPanel Title="@L["Configuration"]">
-                    <TaskConfiguration Dataset="@_dataset" @bind-StartAutoMlRequest="@_automlRequest" />
+                    <TaskConfiguration Dataset="@_dataset" @bind-StartTrainingDto="@_automlRequest" />
                 </MuddyWizardPanel>
             </MuddyWizard>
             break;
