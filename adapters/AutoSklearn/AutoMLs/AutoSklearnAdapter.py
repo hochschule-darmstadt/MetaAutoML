@@ -6,6 +6,7 @@ import pandas as pd
 from AdapterUtils import export_model, prepare_tabular_dataset, data_loader
 from JsonUtil import get_config_property
 
+import autosklearn.metrics
 
 class AutoSklearnAdapter:
     """
@@ -24,9 +25,6 @@ class AutoSklearnAdapter:
         else:
             self._time_limit = 30
 
-        if self._configuration["configuration"]["metric"] == "":
-            # handle empty metric field, None is the default metric parameter for AutoSklearn
-            self._configuration["configuration"]["metric"] = None
         self._result_path = self._configuration["model_folder_location"]
         return
 
@@ -47,7 +45,13 @@ class AutoSklearnAdapter:
         if self._configuration["configuration"]["runtime_limit"] != 0:
             automl_settings.update(
                 {"time_left_for_this_task": (self._configuration["configuration"]["runtime_limit"] * 60)}) #convert into seconds
-        automl_settings.update({"metric": None})
+
+        metric = None
+        if ":metric" in self._configuration["configuration"]["parameters"]:
+            metric_name = self._configuration["configuration"]["parameters"][":metric"]["values"][0]
+            metric = AutoSklearnAdapter.__get_classification_metric_from_ontology(metric_name)
+        automl_settings.update({"metric": metric})
+
         return automl_settings
 
     def __tabular_classification(self):
@@ -115,3 +119,19 @@ class AutoSklearnAdapter:
                 },
             },
         }
+
+    def __get_classification_metric_from_ontology(ontology_name: str):
+        return {
+            ":accuracy": autosklearn.metrics.accuracy,
+            ":area_under_roc_curve": autosklearn.metrics.roc_auc,
+            ":balanced_accuracy": autosklearn.metrics.balanced_accuracy,
+            ":f_measure": autosklearn.metrics.f1,
+            ":precision": autosklearn.metrics.precision,
+            ":average_precision_score": autosklearn.metrics.average_precision,
+            ":recall": autosklearn.metrics.recall,
+            ":log_loss": autosklearn.metrics.log_loss,
+            ":r2": autosklearn.metrics.r2,
+            ":mean_squared_error": autosklearn.metrics.mean_squared_error,
+            ":mean_absolute_error": autosklearn.metrics.mean_absolute_error,
+            ":median_absolute_error": autosklearn.metrics.median_absolute_error
+        }[ontology_name]
