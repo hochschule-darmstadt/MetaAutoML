@@ -67,6 +67,7 @@ class Test(unittest.TestCase):
             ":metric": { "values": [ ":average_precision_score" ] }
         }
         req.dataset_configuration = json.dumps({
+            "multi_fidelity_level": 0,
             "column_datatypes": {
                 "age": DataType.DATATYPE_INT,
                 "sex": DataType.DATATYPE_STRING,
@@ -104,52 +105,6 @@ class Test(unittest.TestCase):
 
         # clean up
         shutil.rmtree(out_dir)
-
-    # def test_tabular_regression(self):
-
-    #     dataset_path = load_titanic_dataset()
-
-    #     # setup request as it is coming in from controller
-    #     req = StartAutoMlRequest()
-    #     req.training_id = "test"
-    #     req.dataset_id = "test"
-    #     req.user_id = "test"
-    #     req.dataset_path = dataset_path
-    #     req.configuration.task = ":tabular_regression"
-    #     req.configuration.target = "survived"
-    #     req.configuration.runtime_limit = 3
-    #     req.configuration.metric = ":accuracy"
-    #     req.dataset_configuration = json.dumps({
-    #         "column_datatypes": {
-    #             "age": DataType.DATATYPE_INT,
-    #             "sex": DataType.DATATYPE_STRING,
-    #             "survived": DataType.DATATYPE_INT,
-    #         },
-    #         "file_configuration": {
-    #             "use_header": True,
-    #             "start_row": 1,
-    #             "delimiter": "comma",
-    #             "escape_character": "\\",
-    #             "decimal_character": ".",
-    #             "encoding": ""
-    #         }
-    #     })
-
-    #     # start training
-    #     adapter_manager = AutoSklearnAdapterManager()
-    #     adapter_manager.start_auto_ml(req, uuid.uuid4())
-    #     adapter_manager.start()
-    #     adapter_manager.join()
-
-    #     # check if model archive exists
-    #     out_dir = os.path.join("app-data", "training",
-    #                            req.user_id, req.dataset_id, req.training_id)
-    #     path_to_model = os.path.join(out_dir, "export", "keras-export.zip")
-    #     self.assertTrue(os.path.exists(path_to_model), f"path to model: '{path_to_model}' does not exist")
-
-    #     # clean up
-    #     shutil.rmtree(out_dir)
-
 
 if __name__ == '__main__':
     unittest.main()

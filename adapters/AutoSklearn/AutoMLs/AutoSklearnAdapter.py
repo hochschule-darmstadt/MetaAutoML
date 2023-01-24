@@ -27,9 +27,6 @@ class AutoSklearnAdapter:
         else:
             self._time_limit = 30
 
-        if self._configuration["configuration"]["metric"] == "":
-            # handle empty metric field, None is the default metric parameter for AutoSklearn
-            self._configuration["configuration"]["metric"] = None
         self._result_path = self._configuration["model_folder_location"]
         return
 
@@ -126,7 +123,7 @@ class AutoSklearnAdapter:
         }
 
     def __get_classification_metric_from_ontology(ontology_name: str):
-        {
+        return {
             ":accuracy": autosklearn.metrics.accuracy,
             ":area_under_roc_curve": autosklearn.metrics.roc_auc,
             ":balanced_accuracy": autosklearn.metrics.balanced_accuracy,
