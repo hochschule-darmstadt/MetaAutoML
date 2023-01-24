@@ -7,6 +7,8 @@ from JsonUtil import get_config_property
 import evalml
 from evalml import AutoMLSearch
 from evalml import objectives
+from evalml import tuners
+from evalml import model_family
 from evalml.objectives import FraudCost
 
 import pandas as pd
@@ -68,6 +70,8 @@ class EvalMLAdapter:
                     objective=self.__get_metric(),
                     max_batches=3,
                     verbose=False,
+                    tuner_class=self.__get_tuner(),
+                    allowed_model_families= self.__get_use_approaches(),
                 )
         automl.search()
         automl.describe_pipeline(3)
@@ -90,6 +94,7 @@ class EvalMLAdapter:
                     objective= self.__get_metric(),
                     max_batches=3,
                     verbose=False,
+                    tuner_class=self.__get_tuner(),
                 )
         automl.search()
         automl.describe_pipeline(3)
@@ -180,6 +185,55 @@ class EvalMLAdapter:
         except:
             print("no metric param")
         return "auto"
+
+    def __get_tuner(self):
+        """get tuner class
+        return none when not setted
+
+        Returns:
+            tuner class object: tuner obj
+        """
+        tuner_dict = {
+            ':random' : tuners.RandomSearchTuner ,
+            ':grid_search' : tuners.GridSearchTuner ,
+            ':skopt' : tuners.SKOptTuner ,
+        }
+        try:
+            return tuner_dict[self._configuration['configuration']['parameters'][':tuner_class_evalml']]
+        except:
+            print("no tuner param")
+
+        return None
+
+    
+    def __get_use_approaches(self):
+        use_approaches_dict = {
+            ':catboost' : model_family.ModelFamily.CATBOOST,
+            ':decision_tree' : model_family.ModelFamily.DECISION_TREE,
+            ':extra_tree' : model_family.ModelFamily.EXTRA_TREES,
+            ':light_gradient_boosting_machine' : model_family.ModelFamily.LIGHTGBM,
+            ':linear_regression' : model_family.ModelFamily.LINEAR_MODEL,
+            ':random_forest' : model_family.ModelFamily.RANDOM_FOREST,
+            ':xgboost' : model_family.ModelFamily.XGBOOST,
+            ':auto_regressive_integrated_moving_average' : model_family.ModelFamily.ARIMA,
+            ':exponential_smoothing' : model_family.ModelFamily.EXPONENTIAL_SMOOTHING,
+            ':k_nearest_neighbor' : model_family.ModelFamily.K_NEIGHBORS,
+        }
+        try:
+            """
+            print(self._configuration['configuration']['parameters'][':use_approach'])
+            print ( use_approaches_dict[self._configuration['configuration']['parameters'][':use_approach']])
+            return use_approaches_dict[self._configuration['configuration']['parameters'][':use_approach']]
+    	    """
+            res = []
+            for i in (self._configuration['dataset_configuration'][':use_approach']):
+                res.append(use_approaches_dict[i])
+            print ( res)
+            return res
+        except:
+            print("no use approaches param")
+
+        return None
 
 
 
