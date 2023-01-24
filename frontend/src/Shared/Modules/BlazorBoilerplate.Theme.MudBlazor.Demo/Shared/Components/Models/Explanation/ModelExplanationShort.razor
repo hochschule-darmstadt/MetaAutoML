@@ -1,4 +1,4 @@
-﻿
+
 @using System 
 @using System.IO
 @using Microsoft.AspNetCore.Hosting
@@ -40,9 +40,11 @@
             }
             else
             {
-                <MudItem xs="12" Style="display: grid; justify-content: center;">
-                    <MudImage Src="@GetImage(_explanation.AnalysisCategories[0].Analyses[0].Content)" Style="height:220px;" />
-                </MudItem>
+                <MudButton Href="@NavManager.ToAbsoluteUri(ExplanationPagePath).AbsoluteUri">
+                    <MudItem xs="12" Style="display: grid; justify-content: center;">
+                        <MudImage Src="@GetImage(_explanation.AnalysisCategories[0].Analyses[0].Content)" Style="height:250px;" />
+                    </MudItem>
+                </MudButton>
             }
         </MudPaper>
     </MudCardContent>
