@@ -88,12 +88,7 @@ class AutoKerasTabularTaskTest(unittest.TestCase):
                     "role_selected": ":target"
                 }
             },
-            "schema": {
-                "survived": {
-                    "datatype_detected": ":boolean",
-                    "role_selected": ":target"
-                }
-            }
+            "multi_fidelity_level": 0
         })
 
         # start training
@@ -147,7 +142,8 @@ class AutoKerasTabularTaskTest(unittest.TestCase):
                     "datatype_detected": ":boolean",
                     "role_selected": ":target"
                 }
-            }
+            },
+            "multi_fidelity_level": 0
         })
 
         # start training
@@ -203,7 +199,8 @@ class AutoKerasTabularTaskTest(unittest.TestCase):
                     "datatype_detected": ":boolean",
                     "role_selected": ":target"
                 }
-            }
+            },
+            "multi_fidelity_level": 0
         })
 
         # start training

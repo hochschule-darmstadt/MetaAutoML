@@ -108,7 +108,8 @@ class AutoKerasTextTaskTest(unittest.TestCase):
                     "datatype_detected": ":string",
                     "role_selected": ":none"
                 }
-            }
+            },
+            "multi_fidelity_level": 0
         })
 
         adapter_manager = AutoKerasAdapterManager()
@@ -163,7 +164,8 @@ class AutoKerasTextTaskTest(unittest.TestCase):
                     "datatype_detected": ":string",
                     "role_selected": ":none"
                 }
-            }
+            },
+            "multi_fidelity_level": 0
         })
 
         adapter_manager = AutoKerasAdapterManager()
@@ -218,7 +220,8 @@ class AutoKerasTextTaskTest(unittest.TestCase):
                     "datatype_detected": ":string",
                     "role_selected": ":none"
                 }
-            }
+            },
+            "multi_fidelity_level": 0
         })
 
         adapter_manager = AutoKerasAdapterManager()
