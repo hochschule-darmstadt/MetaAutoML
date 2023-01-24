@@ -181,7 +181,8 @@ class EvalMLAdapter:
             ':mean_absolute_percentage_error' : objectives.MAPE(),
         }
         try:
-            return metrics_dict[self._configuration['configuration']['parameters'][':metric']]
+            #print(self._configuration['configuration']['parameters'][':metric']['values'][0])
+            return metrics_dict[self._configuration['configuration']['parameters'][':metric']['values'][0]]
         except:
             print("no metric param")
         return "auto"
@@ -199,7 +200,7 @@ class EvalMLAdapter:
             ':skopt' : tuners.SKOptTuner ,
         }
         try:
-            return tuner_dict[self._configuration['configuration']['parameters'][':tuner_class_evalml']]
+            return tuner_dict[self._configuration['configuration']['parameters'][':tuner_class_evalml']['values'][0]]
         except:
             print("no tuner param")
 
@@ -226,7 +227,7 @@ class EvalMLAdapter:
             return use_approaches_dict[self._configuration['configuration']['parameters'][':use_approach']]
     	    """
             res = []
-            for i in (self._configuration['dataset_configuration'][':use_approach']):
+            for i in (self._configuration['configuration']['parameters'][':use_approach']['values']):
                 res.append(use_approaches_dict[i])
             print ( res)
             return res
