@@ -19,3 +19,5 @@ This repository implements the MetaAutoML-Adapter for the AutoML library EvalML 
 The Woodwork schema will be auto generated from dataframe, data series, etc.. With different numbers of data rows, the generated schema could also be diffrent (inconsistent).
 Therefore in oder to make prediction, wood work schema from training and testing data set have to be identical. We can make it either using split data function from evalml
 or init the testing set with schema of training set (see the explain model function).
+- For time Series tasks, we must persist time(or date, datetime,..) column by reset index. Test data sete also have to include target column.
+- For local debugging in Windows, set the desire Test file in lauch.json and debbug.
