@@ -1,6 +1,6 @@
-# MetaAutoML-Adapter-FLAML
+# MetaAutoML-Adapter-EvalML
 
-This repository implements the MetaAutoML-Adapter for the AutoML library EvalML (https://github.com/microsoft/FLAML).
+
 
 ## ENVIRONTMENT VARIABLES
 ### PYTHONPATH
