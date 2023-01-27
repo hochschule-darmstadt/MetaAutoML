@@ -37,17 +37,30 @@ class FLAMLAdapterManager(AdapterManager):
         # extract additional information from automl
         with open(os.path.join(working_dir, "model_flaml.p"), 'rb') as file:
             automl = dill.load(file)
-            model = automl.best_estimator
             if config.configuration["task"] == ":text_classification":
                 library = model
                 library = ":transformer"
                 model = ":transformer"
             else:
+                model = automl.best_estimator
+                if model == "lgbm":
+                    library = ":lightgbm_lib"
+                    model = ":light_gradient_boosting_machine"
+                elif model == "extra_tree":
+                    library = ":scikit_learn_lib"
+                    model = ":extra_tree"
+                elif model == "rf":
+                    library = ":scikit_learn_lib"
+                    model = ":random_forest"
+                elif model == "xgboost":
+                    library = ":xgboost_lib"
+                    model = ":xgboost"
+                elif model == "xgb_limitdepth":
+                    library = ":xgboost_lib"
+                    model = ":xgboost"
                 library = automl.model.estimator.__module__.split(".")[0]
 
                 #TODO ADD CORRECT lib and model display
-                library = ":lightgbm_lib"
-                model = ":light_gradient_boosting_machine"
         return library, model
 
 
