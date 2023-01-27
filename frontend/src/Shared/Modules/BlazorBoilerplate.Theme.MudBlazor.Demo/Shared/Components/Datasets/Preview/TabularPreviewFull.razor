@@ -331,7 +331,14 @@ else
             {
                 List<object> nanDatatypesValuesPerColumn = new List<object>();
                 _datasetFrame = DataFrame.LoadCsv(DatasetData, separator: Dataset.Dataset.GetDelimiter(), encoding: Dataset.Dataset.GetEncoding(), numRows: 20);
-
+                //Re-read dataframe but with all columns as string to avoid cut off of dome datatypes by the MS dataframe
+                //Wait for Microsoft updates TODO
+                Type[] stringArray = new Type[_datasetFrame.Columns.Count];
+                for (int i = 0; i < _datasetFrame.Columns.Count; i++)
+                {
+                    stringArray[i] = typeof(String);
+                }
+                _datasetFrame = DataFrame.LoadCsv(DatasetData, dataTypes: stringArray, separator: Dataset.Dataset.GetDelimiter(), encoding: Dataset.Dataset.GetEncoding(), numRows: 20);
                 foreach (var item in _datasetFrame.Columns)
                 {
                     switch (item.DataType.Name)
@@ -386,6 +393,7 @@ else
             format = format.Replace("%H", "HH");
             format = format.Replace("%M", "mm");
             format = format.Replace("%S", "ss");
+            format = format.Replace("%f", "ffffff");
 
             //Check if all columns are compatible with new format
             if (all == true)

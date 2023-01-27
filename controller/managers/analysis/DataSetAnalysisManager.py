@@ -255,7 +255,9 @@ class DataSetAnalysisManager(Thread):
                 Q1 = dataset[column_name].quantile(0.25)
                 Q3 = dataset[column_name].quantile(0.75)
                 IQR = Q3 - Q1
-                filter = (dataset[column_name] <= (Q1 - 2 * IQR)) | (dataset[column_name] >= (Q3 + 2 * IQR))
+                #filter = (dataset[column_name] <= (Q1 - 2 * IQR)) | (dataset[column_name] >= (Q3 + 2 * IQR))
+                #outlier_indices = dataset[column_name].loc[filter].index.tolist()
+                filter = (dataset[column_name] < (Q1 - 1.5 * IQR)) | (dataset[column_name] > (Q3 + 1.5 * IQR))
                 outlier_indices = dataset[column_name].loc[filter].index.tolist()
                 outlier_columns.append({column_name: outlier_indices})
 
