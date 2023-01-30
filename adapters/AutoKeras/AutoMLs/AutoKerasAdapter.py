@@ -276,6 +276,26 @@ class AutoKerasAdapter:
         with open(os.path.join(self._configuration['job_folder_location'], get_config_property("job-file-name")), "w+") as f:
             json.dump(self._configuration, f)
 
+
+    def __read_parameter(self, intersect_parameter, automl_parameter, default=[None]):
+        parameters = self._configuration["configuration"].get('parameters', {})
+        value = list()
+        try:
+            value = parameters[intersect_parameter]['values']
+        except:
+            pass
+        try:
+            values2 = parameters[automl_parameter]['values']
+            for para in values2:
+                if para not in value:
+                    value.append(para)
+        except:
+            pass
+        if len(value) == 0:
+            return default
+        else:
+            return value
+
     def translate(self):
         parameters = self._configuration["configuration"].get('parameters', {})
         metrics = []
