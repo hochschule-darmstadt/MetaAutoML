@@ -295,38 +295,42 @@
                 }
 
 
-                var paramsGroupedBySolution = _availableParameters
-                    // all params that are either not included in the intersected params, or have a less restrictive type
-                    .Where(p => _intersectedParams.Where(i => i.ParameterType != ":integer").All(i => i.ParameterValues.All(v => v.ValueIri != p.ValueIri))
-                    && _intersectedParams.Where(i => i.ParameterType == ":integer").All(v => v.ParameterIri != p.ParamIri))
-                    .GroupBy(p => p.AutoMlIri);
+                var paramsGroupedBySolution = _availableParameters.GroupBy(p => p.AutoMlIri);
 
-                _individualParams.Clear();
-                foreach (var group in paramsGroupedBySolution)
+                var newIndividualParams = new List<(string, List<ParameterObject>)>();
+                if (paramsGroupedBySolution.Count() > 0)
                 {
-                    var autoMlLabel = _autoMlSolutionsViewModel.AvailableChips.Single(c => c.Id == group.Key).Label;
-                    _individualParams.Add(
-                        (
-                            autoMlLabel,
-                            group
-                                .GroupBy(param => param.ParamIri)
-                                .Select(CreateParameterObjectFromGroupedParameterDto)
-                                .ToList()
-                        )
-                    );
-                }
-                foreach (var individualParam in _individualParams)
-                {
-                    foreach (var param in individualParam.parameters)
+                    foreach (var group in paramsGroupedBySolution)
                     {
-                        param.SelectedValuesChanged += (_,_) => UpdateParemetersInRequest();
+                        var autoMlLabel = _autoMlSolutionsViewModel.AvailableChips.Single(c => c.Id == group.Key).Label;
+                        newIndividualParams.Add(
+                            (
+                                autoMlLabel,
+                                group
+                                    .GroupBy(param => param.ParamIri)
+                                    .Select(p => CreateParameterObjectFromGroupedParameterDto(p, autoMlLabel))
+                                    .ToList()
+                            )
+                        );
+                    }_individualParams.Clear();
+                    if (paramsGroupedBySolution.Count() > 1)
+                    {
+                    _individualParams = new List<(string, List<ParameterObject>)>(newIndividualParams);
+                    }
+                    newIndividualParams = null;
+                    foreach (var individualParam in _individualParams)
+                    {
+                        foreach (var param in individualParam.parameters)
+                        {
+                            param.SelectedValuesChanged += (_,_) => UpdateParemetersInRequest();
+                        }
                     }
                 }
             },
             errorMessageKey: "Fetching available parameters failed");
     }
 
-    private ParameterObject CreateParameterObjectFromGroupedParameterDto(IGrouping<string, AutoMlParameterDto> parameterGroup)
+    private ParameterObject CreateParameterObjectFromGroupedParameterDto(IGrouping<string, AutoMlParameterDto> parameterGroup, string autoMlLabel)
     {
         var firstInstanceWithIri = parameterGroup.First();
         var result = new ParameterObject
@@ -343,7 +347,12 @@
                 ValueIri = param.ValueIri,
                 ValueLabel = param.ValueLabel
             }).ToList();
-            //result.SelectedValues = result.ParameterValues;
+            if (_individualParams.Any() && _individualParams.Where(i => i.autoMlLabel == autoMlLabel).Any())
+            {
+                var individualParamsList = _individualParams.Where(i => i.autoMlLabel == autoMlLabel).Select(p => p.parameters).First();
+                var selectedValues = individualParamsList.Where(p => p.ParameterIri == parameterGroup.Key).Select(p => p.SelectedValues).First();
+                result.SelectedValues = new List<ParameterValueViewModel>(result.ParameterValues.Where(p => selectedValues.Where(s => s.ValueIri == p.ValueIri).Any()).ToList());
+            }
         }
         return result;
     }
