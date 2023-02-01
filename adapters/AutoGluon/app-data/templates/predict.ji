@@ -3,7 +3,16 @@ import os.path
 import sys
 import pickle
 import json
-from autogluon.tabular import TabularDataset, TabularPredictor
+{% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression"]%}
+from autogluon.tabular import TabularPredictor
+{% endif %}
+{% if configuration.configuration["task"] in [":text_classification", ":text_regression"]%}
+from autogluon.text import TextPredictor
+{% endif %}
+{% if configuration.configuration["task"] in [":image_classification"]%}
+from autogluon.vision import ImageDataset
+from autogluon.multimodal import MultiModalPredictor
+{% endif %}
 {% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression", ":text_classification", ":text_regression", ":time_series_forecasting"] %}
 from dataset import read_csv_dataset
 from preprocessing import rename_unnamed_columns, feature_preparation
@@ -23,8 +32,19 @@ if __name__ == '__main__':
     X = rename_unnamed_columns(X)
     X, y = feature_preparation(X, {{configuration.dataset_configuration["schema"]}}.items(), "{{configuration.dataset_configuration["file_configuration"]["datetime_format"]}}",  is_prediction=True)
     {% endif %}
+    {% if configuration.configuration["task"] in [":image_classification"]%}
+    X, y = read_image_dataset_folder(filepath)
+    {% endif %}
 
+    {% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression"]%}
     automl = TabularPredictor.load(os.path.join(sys.path[0], 'model_gluon.gluon'))
+    {% endif %}
+    {% if configuration.configuration["task"] in [":text_classification", ":text_regression"]%}
+    automl = TextPredictor.load(os.path.join(sys.path[0], 'model_gluon.gluon'))
+    {% endif %}
+    {% if configuration.configuration["task"] in [":image_classification"]%}
+    automl = MultiModalPredictor.load(os.path.join(sys.path[0], 'model_gluon.gluon'))
+    {% endif %}
 
     predicted_y = automl.predict(X, as_pandas=False)
     predicted_y = np.reshape(predicted_y, (-1, 1))

@@ -110,21 +110,6 @@ def export_model(model: Any, path: str, file_name: str):
     with open(os.path.join(path, file_name), 'wb+') as file:
         dill.dump(model, file)
 
-
-def start_automl_process(config: "StartAutoMlRequest") -> subprocess.Popen:
-    """Start the AutoML subprocess
-
-    Args:
-        config (StartAutoMlRequest): The StartAutoMlRequest request, extended with the trainings folder paths
-
-    Returns:
-        subprocess.Popen: The AutoML subprocess instance
-    """
-    python_env = os.getenv("PYTHON_ENV", default="PYTHON_ENV_UNSET")
-    return subprocess.Popen([python_env, "AutoML.py", config.job_folder_location],
-                            stdout=subprocess.PIPE,
-                            universal_newlines=True)
-
 def generate_script(config: "StartAutoMlRequest") -> None:
     """Generate the Python script allowing the independent execution of the model
 

@@ -10,6 +10,7 @@ import pandas as pd
 from typing import Tuple
 import re
 from codecarbon import OfflineEmissionsTracker
+from subprocess import Popen, PIPE, CalledProcessError
 
 class AdapterManager(Thread):
     """The base adapter manager object providing the shared functionality between all adapters
@@ -68,7 +69,10 @@ class AdapterManager(Thread):
             #Start carbon recording
             carbon_tracker.start()
             # start training process
-            process = start_automl_process(config)
+            python_env = os.getenv("PYTHON_ENV", default="PYTHON_ENV_UNSET")
+            process = Popen([python_env, "AutoML.py", config.job_folder_location],
+                                    stdout=subprocess.PIPE, stderr=PIPE,
+                                    universal_newlines=True)
 
             # read the processes output line by line and push them onto the event queue
             for line in process.stdout:
