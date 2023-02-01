@@ -1,4 +1,4 @@
-@inject IStringLocalizer<Global> L
+﻿@inject IStringLocalizer<Global> L
 @inject IApiClient apiClient
 @inject IViewNotifier viewNotifier
 @using Newtonsoft.Json
@@ -101,6 +101,44 @@
                 }
             }
 
+            @if (_individualParams.Any())
+            {
+                <MudText Typo="Typo.subtitle2" Class="mt-4">Individual Parameters</MudText>
+                @foreach (var individualParam in _individualParams)
+                {
+                <MudExpansionPanels>
+                    <MudExpansionPanel Text="@individualParam.autoMlLabel">
+                    @foreach (var param in individualParam.parameters)
+                    {
+                        <MudText Typo="Typo.body2" Class="mt-4">@param.ParameterLabel</MudText>
+                        @if (param.ParameterType == ":single_value")
+                        {
+                            <MudSelect T="ParameterValueViewModel" Label="@param.ParameterLabel" Variant="Variant.Outlined" @bind-SelectedValues="param.SelectedValues" ToStringFunc="p => p?.ValueLabel">
+                                @foreach (var paramValue in param.ParameterValues)
+                                {
+                                    <MudSelectItem Value="@paramValue">@paramValue.ValueLabel</MudSelectItem>
+                                }
+                            </MudSelect>
+                        }
+                        @if (param.ParameterType == ":list")
+                        {
+                            <MudSelect T="ParameterValueViewModel" MultiSelection="true" SelectAll="true" @bind-SelectedValues="param.SelectedValues" ToStringFunc="p => p?.ValueLabel" Variant="Variant.Outlined">
+                                @foreach (var paramValue in param.ParameterValues)
+                                {
+                                    <MudSelectItem Value="@paramValue">@paramValue.ValueLabel</MudSelectItem>
+                                }
+                            </MudSelect>
+                        }
+                        else if(param.ParameterType == ":integer")
+                        {
+                            <MudNumericField @bind-Value="@param.IntegerValue" />
+                        }
+                    }
+                    </MudExpansionPanel>
+                </MudExpansionPanels>
+                }
+            }
+
         </MudExpansionPanel>
     </MudExpansionPanels>
 
@@ -172,7 +210,7 @@
 
     private async void UpdateParemetersInRequest()
     {
-        StartTrainingDto.Configuration.Parameters = _intersectedParams
+        var paramList = _intersectedParams
             .Select(p => new ParameterDto
             {
                 Iri = p.ParameterIri,
@@ -181,6 +219,21 @@
                     : new List<string>{ p.IntegerValue.ToString() }
             })
             .ToList();
+
+        var individualParamsList = _individualParams
+        .Select(ip => ip.parameters.Select(p => new ParameterDto
+            {
+                Iri = p.ParameterIri,
+                Values = p.ParameterValues != null
+                    ? p.SelectedValues.Select(v => v.ValueIri).ToList()
+                    : new List<string>{ p.IntegerValue.ToString() }
+            }).ToList()).ToList();
+
+        foreach(List<ParameterDto> individualParamItem in individualParamsList)
+        {
+            paramList.AddRange(individualParamItem);
+        }
+        StartTrainingDto.Configuration.Parameters = paramList;
 
         await UpdateStartTrainingDto();
     }
@@ -244,7 +297,8 @@
 
                 var paramsGroupedBySolution = _availableParameters
                     // all params that are either not included in the intersected params, or have a less restrictive type
-                    .Where(p => _intersectedParams.All(i => i.ParameterIri != p.BroadestIri || i.ParameterType != p.ParamType))
+                    .Where(p => _intersectedParams.Where(i => i.ParameterType != ":integer").All(i => i.ParameterValues.All(v => v.ValueIri != p.ValueIri))
+                    && _intersectedParams.Where(i => i.ParameterType == ":integer").All(v => v.ParameterIri != p.ParamIri))
                     .GroupBy(p => p.AutoMlIri);
 
                 _individualParams.Clear();
@@ -260,6 +314,13 @@
                                 .ToList()
                         )
                     );
+                }
+                foreach (var individualParam in _individualParams)
+                {
+                    foreach (var param in individualParam.parameters)
+                    {
+                        param.SelectedValuesChanged += (_,_) => UpdateParemetersInRequest();
+                    }
                 }
             },
             errorMessageKey: "Fetching available parameters failed");
@@ -282,7 +343,7 @@
                 ValueIri = param.ValueIri,
                 ValueLabel = param.ValueLabel
             }).ToList();
-            result.SelectedValues = result.ParameterValues;
+            //result.SelectedValues = result.ParameterValues;
         }
         return result;
     }
@@ -331,7 +392,7 @@
             viewNotifier.Show(ex.GetBaseException().Message, ViewNotifierType.Error, L["Operation Failed"]);
         }
     }
-    
+
     private (string id, string label, string toolTip, bool isSelected, string comment, string imageUrl) ConvertObjectInfoToChip(ObjectInfomationDto objectInfo) =>
         (objectInfo.ID, objectInfo.Properties.GetValueOrDefault("skos:prefLabel"), objectInfo.Properties.GetValueOrDefault("rdfs:seeAlso"), true, objectInfo.Properties.GetValueOrDefault("rdfs:comment"), "");
 
@@ -446,7 +507,7 @@
                 }
                 catch (Exception e)
                 {
-                    
+
                     throw;
                 }
             }
