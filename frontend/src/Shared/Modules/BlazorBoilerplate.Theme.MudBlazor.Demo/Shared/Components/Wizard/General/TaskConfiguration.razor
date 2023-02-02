@@ -312,8 +312,10 @@
                                     .ToList()
                             )
                         );
-                    }_individualParams.Clear();
-                    if (paramsGroupedBySolution.Count() > 1)
+                    }
+                    _individualParams.Clear();
+                    var selectedAutoMls = _autoMlSolutionsViewModel.AvailableChips.Where(c => c.IsSelected);
+                    if (paramsGroupedBySolution.Count() > 1 || (selectedAutoMls.Count() > 1 && paramsGroupedBySolution.Count() == 1))
                     {
                     _individualParams = new List<(string, List<ParameterObject>)>(newIndividualParams);
                     }
