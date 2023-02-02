@@ -1,4 +1,4 @@
-﻿@inject IStringLocalizer<Global> L
+@inject IStringLocalizer<Global> L
 @inject NavigationManager NavManager
 @inject IFileUploader fileUploader
 
@@ -71,7 +71,7 @@
 
             if (_datasets != null)
             {
-                _datasets.Datasets = _datasets.Datasets.OrderByDescending(x => x.Analysis["creation_date"]).Take(6).ToList();
+                _datasets.Datasets = _datasets.Datasets.OrderByDescending(x => x.Analysis["creation_date"]).ToList();
                 StateHasChanged();
 
             }
