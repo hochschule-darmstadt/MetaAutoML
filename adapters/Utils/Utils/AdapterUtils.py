@@ -83,18 +83,19 @@ def get_response(config: "StartAutoMlRequest", test_score: float, prediction_tim
 
 #region
 
-def data_loader(config: "StartAutoMlRequest") -> Any:
+def data_loader(config: "StartAutoMlRequest", image_test_folder=False) -> Any:
     """Load the dataframes for the requested dataset, by loading them into different DataFrames. See Returns section for more information.
 
     Args:
         config (StartAutoMlRequest): The StartAutoMlRequest request, extended with the trainings folder paths
+        image_test_folder (Boolean): Used for image datasets, if the test folder should be loaded. Default is, read the train folder
 
     Returns:
         Any: Depending on the dataset type: CSV data: tuple[DataFrame (Train), DataFrame (Test)], image data: tuple[DataFrame (X_train), DataFrame (y_train), DataFrame (X_test), DataFrame (y_test)]
     """
 
     if config["configuration"]["task"] in [":image_classification", ":image_regression"]:
-        return read_image_dataset(config)
+        return read_image_dataset(config, image_test_folder)
     else:
         return read_tabular_dataset_training_data(config)
 
@@ -166,6 +167,9 @@ def evaluate(config: "StartAutoMlRequest", config_path: str) -> Tuple[float, flo
     config = config.__dict__
     config["dataset_configuration"] = config["dataset_configuration"]
     file_path = config["dataset_path"]
+    if config["configuration"]["task"] in[":image_classification", ":image_regression"]:
+        #for image data we need to redirect to the test folder
+        file_path = os.path.join(file_path, "test")
     result_path = config["result_folder_location"]
     # predict
     os.chmod(os.path.join(result_path, "predict.py"), 0o777)
@@ -183,7 +187,7 @@ def evaluate(config: "StartAutoMlRequest", config_path: str) -> Tuple[float, flo
         file_path = write_tabular_dataset_data(test.drop(target, axis=1), os.path.dirname(file_path), config)
 
     elif(config["configuration"]["task"] in[":image_classification", ":image_regression"]):
-        X_train, y_train, X_test, y_test = data_loader(config)
+        X_test, y_test = data_loader(config, image_test_folder=True)
 
     predict_start = time.time()
     subprocess.call([python_env, os.path.join(result_path, "predict.py"), file_path, os.path.join(result_path, "predictions.csv")])
@@ -533,7 +537,7 @@ def save_configuration_in_json(configuration: dict):
 
 #region
 
-def read_image_dataset(config: "StartAutoMlRequest") -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+def read_image_dataset(config: "StartAutoMlRequest", image_test_folder=False) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     """Read image dataset and create training and test dataframes
 
     Args:
@@ -557,14 +561,17 @@ def read_image_dataset(config: "StartAutoMlRequest") -> Tuple[pd.DataFrame, pd.D
         local_dir_path = os.path.dirname(local_file_path)
     """
     data_dir = config["dataset_path"]
+    if image_test_folder == True:
+        data_dir = os.path.join(data_dir, "test")
+    else:
+        data_dir = os.path.join(data_dir, "train")
     train_df_list =[]
-    test_df_list =[]
 
-    def read_image_dataset_folder(sub_folder_type):
+    def read_image_dataset_folder():
         files = []
         df = []
-        for folder in os.listdir(os.path.join(data_dir, sub_folder_type)):
-            files.append(glob.glob(os.path.join(data_dir, sub_folder_type, folder, "*.jp*g")))
+        for folder in os.listdir(os.path.join(data_dir)):
+            files.append(glob.glob(os.path.join(data_dir, folder, "*.jp*g")))
 
         df_list =[]
 
@@ -578,11 +585,9 @@ def read_image_dataset(config: "StartAutoMlRequest") -> Tuple[pd.DataFrame, pd.D
             df_list.append(df)
         return df_list
 
-    train_df_list = read_image_dataset_folder("train")
-    test_df_list = read_image_dataset_folder("test")
+    train_df_list = read_image_dataset_folder()
 
     train_data = pd.concat(train_df_list, axis=0,ignore_index=True)
-    test_data = pd.concat(test_df_list, axis=0,ignore_index=True)
 
     def img_preprocess(img):
         """
@@ -597,9 +602,7 @@ def read_image_dataset(config: "StartAutoMlRequest") -> Tuple[pd.DataFrame, pd.D
 
     X_train = np.array([img_preprocess(p) for p in train_data.name.values])
     y_train = train_data.outcome.values
-    X_test = np.array([img_preprocess(p) for p in test_data.name.values])
-    y_test = test_data.outcome.values
-    return X_train, y_train, X_test, y_test
+    return X_train, y_train
 
 #endregion
 

@@ -148,7 +148,7 @@ class AutoGluonAdapter:
         self.df, test = data_loader(self._configuration)
         X, y = prepare_tabular_dataset(self.df, self._configuration)
         data = X
-        data[y.name] = y
+        data[y.name] = y.values
         timestamp_column = ""
         #First get the datetime index column
         for column, dt in self._configuration["dataset_configuration"]["schema"].items():
@@ -159,8 +159,13 @@ class AutoGluonAdapter:
                 timestamp_column = column
                 break
 
-        ts_dataframe = TimeSeriesDataFrame.from_data_frame(data, id_column=y.name, timestamp_column=timestamp_column)
+        data.reset_index(inplace=True)
+        data = data.assign(timeseries_id=1)
+        data = data.bfill().ffill()  # makes sure there are no missing values
+
+        ts_dataframe = TimeSeriesDataFrame.from_data_frame(data, id_column="timeseries_id", timestamp_column=timestamp_column)
         model = TimeSeriesPredictor(label=y.name,
+                                eval_metric="sMAPE",    
                                  path=self._result_path).fit(
             ts_dataframe,
             time_limit=self._time_limit*60)

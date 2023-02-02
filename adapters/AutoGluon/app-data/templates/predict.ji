@@ -32,8 +32,15 @@ if __name__ == '__main__':
     X = rename_unnamed_columns(X)
     X, y = feature_preparation(X, {{configuration.dataset_configuration["schema"]}}.items(), "{{configuration.dataset_configuration["file_configuration"]["datetime_format"]}}",  is_prediction=True)
     {% endif %}
+    {% if configuration.configuration["task"] == ":time_series_forecasting" %}
+    #Time series need to remove indexes
+    X.reset_index(inplace=True)
+    {% endif %}
     {% if configuration.configuration["task"] in [":image_classification"]%}
-    X, y = read_image_dataset_folder(filepath)
+    X = ImageDataset.from_folder(filepath)
+    print(X.head())
+    #X.reset_index(inplace=True)
+    #X.drop(['label'], inplace=True)
     {% endif %}
 
     {% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression"]%}

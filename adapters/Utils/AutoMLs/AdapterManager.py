@@ -63,7 +63,7 @@ class AdapterManager(Thread):
         """
         try:
             self.__start_auto_ml_running = True
-            carbon_tracker = OfflineEmissionsTracker(country_iso_code="DEU", tracking_mode="process")
+            carbon_tracker = OfflineEmissionsTracker(country_iso_code="DEU", tracking_mode="process", log_level="error")
             # saving AutoML configuration JSON
             config = setup_run_environment(self.__start_auto_ml_request, self._adapter_name)
             #Start carbon recording
