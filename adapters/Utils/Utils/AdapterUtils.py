@@ -560,6 +560,9 @@ def read_image_dataset(config: "StartAutoMlRequest", image_test_folder=False) ->
 
         local_dir_path = os.path.dirname(local_file_path)
     """
+
+    #we need to access the train sub folder for training
+    config["dataset_path"] = os.path.join(config["dataset_path"], "train")
     data_dir = config["dataset_path"]
     if image_test_folder == True:
         data_dir = os.path.join(data_dir, "test")

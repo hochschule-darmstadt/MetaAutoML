@@ -128,8 +128,7 @@ class AutoKerasAdapter:
 
     def __image_classification(self):
         """"Execute image classification task and export the found model"""
-
-        X_train, y_train, X_test, y_test = data_loader(self._configuration)
+        X_train, y_train = data_loader(self._configuration)
         metrics, losses, max_trials, tuners, max_model_size = self.translate()
         clf = ak.ImageClassifier(overwrite=True,
                                           max_trials=max_trials,
@@ -147,8 +146,7 @@ class AutoKerasAdapter:
 
     def __image_regression(self):
         """Execute image regression task and export the found model"""
-
-        X_train, y_train, X_val, y_val = data_loader(self._configuration)
+        X_train, y_train = data_loader(self._configuration)
         metrics, losses, max_trials, tuners, max_model_size = self.translate()
         reg = ak.ImageRegressor(overwrite=True,
                                           max_trials=max_trials,

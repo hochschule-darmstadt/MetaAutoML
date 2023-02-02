@@ -1,5 +1,5 @@
 ### Ontology file generated from ML_Ontology.xlsx.
-### 2023-01-24 16:39:18.894762
+### 2023-02-02 11:16:12.942829
 
 
 # PREFIXES
@@ -1478,7 +1478,7 @@
     skos:prefLabel "Autogluon" ;
     :used_for :scikit_learn_lib , :catboost_lib , :lightgbm_lib , :xgboost_lib , :pytorch_lib , :mxnet_lib ;
     :supported_by_oma_ml "True" ;
-    :can_perform :tabular_classification , :tabular_regression , :text_classification , :text_regression , :sentiment_analysis , :sentence_similarity , :image_classification , :object_detection , :video_classification , :video_object_tracking , :action_recognition .
+    :can_perform :tabular_classification , :tabular_regression , :text_classification , :text_regression , :sentiment_analysis , :sentence_similarity , :image_classification , :object_detection , :video_classification , :video_object_tracking , :action_recognition , :time_series_forecasting .
 :autokeras a :AutoML_solution ;
     skos:prefLabel "Autokeras" ;
     :used_for :keras_lib ;
@@ -2238,11 +2238,13 @@
     skos:prefLabel "metric AutoKeras image classification" ;
     :category :parameter ;
     skos:broader :metric ;
+    :has_datatype :list ;
     :parameter_value :accuracy , :area_under_roc_curve , :binary_accuracy , :binary_cross_entropy , :categorical_accuracy , :categorical_cross_entropy , :false_negatives , :false_positives , :hinge , :kullback_leibler_divergence , :mean , :mean_tensor , :poission , :precision , :recall , :sparse_categorical_accuracy , :sparse_top_k_categorical_accuracy , :squared_hinge , :sum , :top_k_categorical_accuracy , :true_negatives , :true_positves .
 :metric_autokeras_text_classification a :Configuration_item ;
     skos:prefLabel "metric AutoKeras text classification" ;
     :category :parameter ;
     skos:broader :metric ;
+    :has_datatype :list ;
     :parameter_value :accuracy , :area_under_roc_curve , :binary_accuracy , :binary_cross_entropy , :categorical_accuracy , :categorical_cross_entropy , :false_negatives , :false_positives , :hinge , :kullback_leibler_divergence , :mean , :mean_tensor , :poission , :precision , :recall , :sparse_categorical_accuracy , :sparce_top_k_categorical_accuracy , :squared_hinge , :sum , :top_k_categorical_accuracy , :true_negatives , :true_positives .
 :metric_evalml_classification a :Configuration_item ;
     skos:prefLabel "metric EvalML classification" ;
@@ -2297,15 +2299,22 @@
 :max_trials_autokeras a :Configuration_item ;
     skos:prefLabel "max_trials_autokeras" ;
     :category :parameter ;
+    skos:broader :max_trials ;
     :has_datatype :integer .
+:tuner a :Configuration_item ;
+    skos:prefLabel "tuner" ;
+    :category :parameter ;
+    :has_datatype :single_value .
 :tuner_autokeras a :Configuration_item ;
     skos:prefLabel "tuner autokeras" ;
     :category :parameter ;
+    skos:broader :tuner ;
     :has_datatype :single_value ;
     :parameter_value :greedy , :bayesian , :random , :hyperband .
 :tuner_class_evalml a :Configuration_item ;
     skos:prefLabel "tuner class evalml" ;
     :category :parameter ;
+    skos:broader :tuner ;
     :has_datatype :single_value ;
     :parameter_value :random , :grid_search , :skopt .
 :loss a :Configuration_item ;
