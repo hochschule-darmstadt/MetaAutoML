@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using BlazorBoilerplate.Shared.Dto.Ontology;
 using BlazorBoilerplate.Shared.Dto.Prediction;
+using Newtonsoft.Json.Linq;
 
 namespace BlazorBoilerplate.Shared.Dto.Model
 {
@@ -20,7 +21,7 @@ namespace BlazorBoilerplate.Shared.Dto.Model
         public ObjectInfomationDto AutoMlSolution { get; set; }
         public ObjectInfomationDto MlModelType { get; set; }
         public ObjectInfomationDto MlLibrary { get; set; }
-        public double TestScore { get; set; }
+        public dynamic TestScore { get; set; }
         public double PredictionTime { get; set; }
         public ModelRuntimeProfile RuntimeProfile { get; set; }
         public List<string> StatusMessages { get; set; }
@@ -43,7 +44,7 @@ namespace BlazorBoilerplate.Shared.Dto.Model
             AutoMlSolution = autoMl;
             MlModelType = mlModelType;
             MlLibrary = mlLibrary;
-            TestScore = model.TestScore;
+            TestScore = JObject.Parse(model.TestScore);
             PredictionTime = model.PredictionTime;
             RuntimeProfile = new ModelRuntimeProfile(model.RuntimeProfile);
             StatusMessages = model.StatusMessages.ToList();
