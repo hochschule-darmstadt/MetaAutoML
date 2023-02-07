@@ -196,23 +196,13 @@ def evaluate(config: "StartAutoMlRequest", config_path: str) -> Tuple[float, flo
     predictions = pd.read_csv(os.path.join(result_path, "predictions.csv"))
     os.remove(os.path.join(result_path, "predictions.csv"))
 
-    if config["configuration"]["task"] in [":tabular_classification", ":text_classification", ":image_classification"]:
+    if config["configuration"]["task"] in [":tabular_classification", ":text_classification", ":image_classification", ":time_series_classification"]:
         return compute_classification_metrics(test[target], predictions["predicted"]), (predict_time * 1000) / test.shape[0]
+    elif config["configuration"]["task"] in [":tabular_regression", ":text_regression", ":image_regression", ":time_series_forecasting"]:
+        return compute_regression_metrics(test[target], predictions["predicted"]), (predict_time * 1000) / test.shape[0]
 
-    if config["configuration"]["task"] == ":tabular_classification":
-        return accuracy_score(test[target], predictions["predicted"]), (predict_time * 1000) / test.shape[0]
 
-    elif config["configuration"]["task"] == ":tabular_regression":
-        return mean_squared_error(test[target], predictions["predicted"], squared=False), \
-               (predict_time * 1000) / test.shape[0]
-
-    elif config["configuration"]["task"] == ":image_classification":
-        return accuracy_score(y_test, predictions["predicted"]), (predict_time * 1000) / y_test.shape[0]
-
-    elif config["configuration"]["task"] == ":image_regression":
-        return mean_squared_error(y_test, predictions["predicted"], squared=False), \
-               (predict_time * 1000) / y_test.shape[0]
-    elif config["configuration"]["task"] == ":time_series_classification":
+    if config["configuration"]["task"] == ":time_series_classification":
         train, test = data_loader(config)
         target = config["configuration"]["target"]
 
@@ -224,15 +214,6 @@ def evaluate(config: "StartAutoMlRequest", config_path: str) -> Tuple[float, flo
               classification_report(test_target, predicted_target,zero_division=0)
               )
         return acc_score, (predict_time * 1000) / test.shape[0]
-    elif config["configuration"]["task"] == ":time_series_forecasting":
-        return mean_absolute_percentage_error(test[target], predictions["predicted"]), \
-               (predict_time * 1000) / test.shape[0]
-    elif config["configuration"]["task"] == ":text_classification":
-        return accuracy_score(test[target], predictions["predicted"]), (predict_time * 1000) / test.shape[0]
-
-    elif config["configuration"]["task"] == ":text_regression":
-        return mean_squared_error(test[target], predictions["predicted"], squared=False), \
-               (predict_time * 1000) / test.shape[0]
 
 def compute_classification_metrics(y_should: pd.Series, y_is):
     score = {
@@ -272,6 +253,28 @@ def compute_classification_metrics(y_should: pd.Series, y_is):
         })
     return score
 
+def compute_regression_metrics(y_should: pd.Series, y_is):
+    score = {
+        ":explained_variance": float(explained_variance_score(y_should, y_is)),
+        ":max_error": float(max_error(y_should, y_is)),
+        ":mean_absolute_error": float(mean_absolute_error(y_should, y_is)),
+        ":mean_squared_error": float(mean_squared_error(y_should, y_is, squared=True)),
+        ":rooted_mean_squared_error": float(mean_squared_error(y_should, y_is, squared=False)),
+        ":median_absolute_error": float(median_absolute_error(y_should, y_is)),
+        ":r2": float(r2_score(y_should, y_is)),
+        ":mean_absolute_percentage_error": float(mean_absolute_percentage_error(y_should, y_is)),
+        ":d2_absolute_error": float(d2_absolute_error_score(y_should, y_is)),
+        ":d2_pinball_score": float(d2_pinball_score(y_should, y_is)),
+        ":d2_tweedie_score": float(d2_tweedie_score(y_should, y_is)),
+    }
+    if all(val > 0 for val in y_is) or all(val > 0 for val in y_should):
+        score.update({
+        ":mean_poisson_deviance": float(mean_poisson_deviance(y_should, y_is)),
+        ":mean_gamma_deviance": float(mean_gamma_deviance(y_should, y_is)),
+        ":mean_squared_log_error": float(mean_squared_log_error(y_should, y_is, squared=True)),
+        ":rooted_mean_squared_log_error": float(mean_squared_log_error(y_should, y_is, squared=False))
+        })
+    return score
 
 def predict(config: dict, config_path: str, automl: str) -> Tuple[float, str]:
     """Execute a prediction on an uploaded live dataset
