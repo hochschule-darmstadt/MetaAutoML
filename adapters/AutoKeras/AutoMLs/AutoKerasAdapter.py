@@ -1,116 +1,14 @@
 import autokeras as ak
 import numpy as np
-from AdapterUtils import data_loader, export_model, prepare_tabular_dataset, get_column_with_largest_amout_of_text
+from AdapterUtils import data_loader, export_model, prepare_tabular_dataset, get_column_with_largest_amout_of_text, translate_parameters
 import pandas as pd
 import json
 import os
 from JsonUtil import get_config_property
 import tensorflow as tf
+import keras_tuner
+import AutoKerasParameterConfig as akpc
 
-autokeras_metrics = {
-    ":accuracy": tf.keras.metrics.Accuracy(),
-    ":area_under_roc_curve": tf.keras.metrics.AUC(),
-    ":binary_accuracy": tf.keras.metrics.BinaryAccuracy(),
-    ":binary_cross_entropy": tf.keras.metrics.BinaryCrossentropy() ,
-    ":binary_intersection_over_union": tf.keras.metrics.BinaryIoU(),
-    ":categorical_accuracy": tf.keras.metrics.CategoricalAccuracy(),
-    ":categorical_cross_entropy": tf.keras.metrics.CategoricalCrossentropy(),
-    ":cosine_similarity": tf.keras.metrics.CosineSimilarity(),
-    ":false_negatives": tf.keras.metrics.FalseNegatives(),
-    ":false_positives": tf.keras.metrics.FalsePositives(),
-    ":hinge": tf.keras.metrics.Hinge(),
-    ":kullback_leibler_divergence": tf.keras.metrics.KLDivergence(),
-    ":log_cosh_error": tf.keras.metrics.LogCoshError(),
-    ":mean": tf.keras.metrics.Mean(),
-    ":mean_absolut_percentage_error": tf.keras.metrics.MeanAbsolutePercentageError(),
-    ":mean_squared_log_error": tf.keras.metrics.MeanSquaredLogarithmicError(),
-    ":mean_tensor": tf.keras.metrics.MeanTensor(),
-    ":poission": tf.keras.metrics.Poisson(),
-    ":precision": tf.keras.metrics.Precision(),
-    ":recall": tf.keras.metrics.Recall(),
-    ":root_mean_squared_error": tf.keras.metrics.RootMeanSquaredError(),
-    ":sparse_categorical_accuracy": tf.keras.metrics.SparseCategoricalAccuracy(),
-    ":sparse_top_k_categorical_accuracy": tf.keras.metrics.SparseTopKCategoricalAccuracy(),
-    ":squared_hinge": tf.keras.metrics.SquaredHinge(),
-    ":sum":tf.keras.metrics.Sum(),
-    ":top_k_categorical_accuracy":tf.keras.metrics.TopKCategoricalAccuracy(),
-    ":true_negatives": tf.keras.metrics.TrueNegatives(),
-    ":true_positives": tf.keras.metrics.TruePositives(),
-    ":mean_sqared_error": tf.keras.metrics.MeanSquaredError(),
-    ":mean_absolute_error": tf.keras.metrics.MeanAbsoluteError()
-}
-
-autokeras_loss_classification = {
-    ":binary_cross_entropy": tf.keras.losses.BinaryCrossentropy(),
-    ":categorical_cross_entropy": tf.keras.losses.CategoricalCrossentropy()
-}
-autokeras_loss_regression = {
-    ":mean_squared_error": "mean_squared_error",
-}
-
-autokeras_tuner = {
-    ":greedy": "greedy",
-    ":bayesian":"bayesian",
-    ":random": "random",
-    ":hyperband": "hyperband"
-}
-
-#[broader_type, specific_type, default, expected parameter 'count', converting type, lookup dictionary, used name by autoML]
-tabular_classification_config = [
-    [":max_trials", ":max_trials_autokeras", None, "single_value", "integer", "", "max_trials"],
-    [":metric", ":metric_autokeras_classification", [], "list", "dict", autokeras_metrics, "metrics"],
-    [":tuner", ":tuner_autokeras", None, "single_value", "dict", autokeras_tuner, "tuner"],
-    [":loss", ":loss_autokeras_classification", None, "single_value", "dict", autokeras_loss_classification, "loss"],
-    [":max_model_size_autokeras", ":max_model_size_autokeras", None, "single_value", "integer", "", "max_model_size"]
-]
-
-tabular_regression_config = [
-    [":max_trials", ":max_trials_autokeras", None, "single_value", "integer", "", "max_trials"],
-    [":metric", ":metric_autokeras_regression", [], "list", "dict", autokeras_metrics, "metrics"],
-    [":tuner", ":tuner_autokeras", None, "single_value", "dict", autokeras_tuner, "tuner"],
-    [":loss", ":loss_autokeras_regression", None, "single_value", "dict", autokeras_loss_regression, "loss"],
-    [":max_model_size_autokeras", ":max_model_size_autokeras", None, "single_value", "integer", "", "max_model_size"]
-]
-
-image_classification_config = [
-    [":max_trials", ":max_trials_autokeras", None, "single_value", "integer", "", "max_trials"],
-    [":metric", ":metric_autokeras_image_classification", [], "list", "dict", autokeras_metrics, "metrics"],
-    [":tuner", ":tuner_autokeras", None, "single_value", "dict", autokeras_tuner, "tuner"],
-    [":loss", ":loss_autokeras_classification", None, "single_value", "dict", autokeras_loss_classification, "loss"],
-    [":max_model_size_autokeras", ":max_model_size_autokeras", None, "single_value", "integer", "", "max_model_size"]
-]
-
-image_regression_config = [
-    [":max_trials", ":max_trials_autokeras", None, "single_value", "integer", "", "max_trials"],
-    [":metric", ":", [], "list", "dict", autokeras_metrics, "metrics"],  #missing metric in ontology
-    [":tuner", ":tuner_autokeras", None, "single_value", "dict", autokeras_tuner, "tuner"],
-    [":loss", ":loss_autokeras_regression", None, "single_value", "dict", autokeras_loss_regression, "loss"],
-    [":max_model_size_autokeras", ":max_model_size_autokeras", None, "single_value", "integer", "", "max_model_size"]
-]
-
-text_classification_config = [
-    [":max_trials", ":max_trials_autokeras", None, "single_value", "integer", "", "max_trials"],
-    [":metric", ":metric_autokeras_text_classification", [], "list", "dict", autokeras_metrics, "metrics"],
-    [":tuner", ":tuner_autokeras", None, "single_value", "dict", autokeras_tuner, "tuner"],
-    [":loss", ":loss_autokeras_classification", None, "single_value", "dict", autokeras_loss_classification, "loss"],
-    [":max_model_size_autokeras", ":max_model_size_autokeras", None, "single_value", "integer", "", "max_model_size"]
-]
-
-text_regression_config = [
-    [":max_trials", ":max_trials_autokeras", None, "single_value", "integer", "", "max_trials"],
-    [":metric", ":", [], "list", "dict", autokeras_metrics, "metrics"], #missing metric in ontology
-    [":tuner", ":tuner_autokeras", None, "single_value", "dict", autokeras_tuner, "tuner"],
-    [":loss", ":loss_autokeras_regression", None, "single_value", "dict", autokeras_loss_regression, "loss"],
-    [":max_model_size_autokeras", ":max_model_size_autokeras", None, "single_value", "integer", "", "max_model_size"]
-]
-
-time_series_forecasting_config = [
-    [":max_trials", ":max_trials_autokeras", None, "single_value", "integer", "", "max_trials"],
-    [":metric", ":", [], "list", "dict", autokeras_metrics, "metrics"], #missing metric in ontology
-    [":tuner", ":tuner_autokeras", None, "single_value", "dict", autokeras_tuner, "tuner"],
-    [":loss", ":", None, "single_value", "dict", autokeras_loss_regression, "loss"], #missing metric in ontology
-    [":max_model_size_autokeras", ":max_model_size_autokeras", None, "single_value", "integer", "", "max_model_size"]
-]
 
 class AutoKerasAdapter:
     """
@@ -151,13 +49,9 @@ class AutoKerasAdapter:
 
         self.df, test = data_loader(self._configuration)
         X, y = prepare_tabular_dataset(self.df, self._configuration)
-        metrics, losses, max_trials, tuners, max_model_size = self.translate()
+        parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), akpc.task_config)
         clf = ak.StructuredDataClassifier(overwrite=True,
-                                         max_trials=max_trials,
-                                         metrics=metrics,
-                                         tuner=tuners,
-                                         loss=losses,
-                                         max_model_size=max_model_size,
+                                          **parameters,
                                           directory=self._configuration["model_folder_location"],
                                           seed=42)
 
@@ -169,13 +63,9 @@ class AutoKerasAdapter:
 
         self.df, test = data_loader(self._configuration)
         X, y = prepare_tabular_dataset(self.df, self._configuration)
-        metrics, losses, max_trials, tuners, max_model_size = self.translate()
+        parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), akpc.task_config)
         reg = ak.StructuredDataRegressor(overwrite=True,
-                                          max_trials=max_trials,
-                                         metrics=metrics,
-                                         tuner=tuners,
-                                         loss=losses,
-                                         max_model_size= max_model_size,
+                                          **parameters,
                                          directory=self._configuration["model_folder_location"],
                                          seed=42)
 
@@ -186,13 +76,9 @@ class AutoKerasAdapter:
         """"Execute image classification task and export the found model"""
 
         X_train, y_train, X_test, y_test = data_loader(self._configuration)
-        metrics, losses, max_trials, tuners, max_model_size = self.translate()
+        parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), akpc.task_config)
         clf = ak.ImageClassifier(overwrite=True,
-                                          max_trials=max_trials,
-                                         metrics=metrics,
-                                         tuner=tuners,
-                                         loss=losses,
-                                         max_model_size=max_model_size,
+                                          **parameters,
                                         seed=42,
                                         directory=self._configuration["model_folder_location"])
 
@@ -205,13 +91,9 @@ class AutoKerasAdapter:
         """Execute image regression task and export the found model"""
 
         X_train, y_train, X_val, y_val = data_loader(self._configuration)
-        metrics, losses, max_trials, tuners, max_model_size = self.translate()
+        parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), akpc.task_config)
         reg = ak.ImageRegressor(overwrite=True,
-                                          max_trials=max_trials,
-                                         metrics=metrics,
-                                         tuner=tuners,
-                                         loss=losses,
-                                         max_model_size=max_model_size,
+                                          **parameters,
                                         seed=42,
                                         directory=self._configuration["model_folder_location"])
 
@@ -225,16 +107,12 @@ class AutoKerasAdapter:
         self.df, test = data_loader(self._configuration)
         X, self._configuration = get_column_with_largest_amout_of_text(self.df, self._configuration)
         X, y = prepare_tabular_dataset(X, self._configuration)
-        metrics, losses, max_trials, tuners, max_model_size = self.translate()
+        parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), akpc.task_config)
         reg = ak.TextClassifier(overwrite=True,
                                 # NOTE: bert models will fail with out of memory errors
                                 #   even with 32GB GB RAM
                                 # the first model is a non-bert transformer
-                                max_trials=max_trials,
-                                metrics=metrics,
-                                tuner=tuners,
-                                loss=losses,
-                                max_model_size= max_model_size,
+                                **parameters,
                                 seed=42,
                                 directory=self._configuration["model_folder_location"])
 
@@ -248,13 +126,9 @@ class AutoKerasAdapter:
         self.df, test = data_loader(self._configuration)
         X, self._configuration = get_column_with_largest_amout_of_text(self.df, self._configuration)
         X, y = prepare_tabular_dataset(X, self._configuration)
-        metrics, losses, max_trials, tuners, max_model_size = self.translate()
+        parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), akpc.task_config)
         reg = ak.TextClassifier(overwrite=True,
-                                          max_trials=max_trials,
-                                         metrics=metrics,
-                                         tuner=tuners,
-                                         loss=losses,
-                                         max_model_size=max_model_size,
+                                **parameters,
                                 seed=42,
                                 directory=self._configuration["model_folder_location"])
 
@@ -269,15 +143,10 @@ class AutoKerasAdapter:
         X, y = prepare_tabular_dataset(self.df, self._configuration)
 
         #TODO convert dataframe to float
-        metrics, losses, max_trials, tuners, max_model_size = self.translate()
+        parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), akpc.task_config)
         reg = ak.TimeseriesForecaster(overwrite=True,
-                                          max_trials=max_trials,
-                                         metrics=metrics,
-                                         tuner=tuners,
-                                         loss=losses,
-                                         max_model_size=max_model_size,
+                                          **parameters,
                                           lookback=1,
-
                                 seed=42,
                                 directory=self._configuration["model_folder_location"])
 
@@ -331,69 +200,3 @@ class AutoKerasAdapter:
         self._configuration['dataset_configuration'] = json.dumps(self._configuration['dataset_configuration'])
         with open(os.path.join(self._configuration['job_folder_location'], get_config_property("job-file-name")), "w+") as f:
             json.dump(self._configuration, f)
-
-
-    def __read_parameter(self, intersect_parameter, automl_parameter, default=[None]):
-        parameters = self._configuration["configuration"].get('parameters', {})
-        value = list()
-        try:
-            value = parameters[intersect_parameter]['values']
-        except:
-            pass
-        try:
-            values2 = parameters[automl_parameter]['values']
-            for para in values2:
-                if para not in value:
-                    value.append(para)
-        except:
-            pass
-        if len(value) == 0:
-            return default
-        else:
-            return value
-
-    def translate(self):
-        parameters = self._configuration["configuration"].get('parameters', {})
-        metrics = []
-        #try to get the metric values from configuration, if not available use accuracy
-        try:
-            metric_parameters = parameters[':metric']['values']
-            for metric_parameter in metric_parameters:
-                metrics.append(autokeras_metrics.get(metric_parameter, 'accuracy'))
-        except:
-            metrics = ['accuracy']
-
-        #try to get the loss values from configuration, if not available use binary_crossentropy for classification and mean_squared_error for regression
-        try:
-            loss_parameters = parameters[':loss']['values']
-            if self._configuration['configuration']['task'] == ":text_classification" or self._configuration['configuration']['task'] == ":tabular_classification" or self._configuration['configuration']['task'] == ":image_classification" :
-                loss = autokeras_loss_classification.get(loss_parameters[0], 'binary_cross_entropy')
-            if self._configuration['configuration']['task'] == ":tabular_regression" or self._configuration['configuration']['task'] == ":text_regression" or self._configuration['configuration']['task'] == ":image_regression"  :
-                loss = autokeras_loss_regression.get(loss_parameters[0], 'mean_squared_error')
-        except:
-            if self._configuration['configuration']['task'] == ":text_classification" or self._configuration['configuration']['task'] == ":tabular_classification" or self._configuration['configuration']['task'] == ":image_classification" :
-                loss = 'binary_crossentropy'
-            if self._configuration['configuration']['task'] == ":tabular_regression" or self._configuration['configuration']['task'] == ":text_regression" or self._configuration['configuration']['task'] == ":image_regression"  :
-                loss = 'mean_squared_error'
-        #try to get the max_trial from configuration, if not available use 3
-        try:
-            max_trials_parameter = int(parameters[':max_trials_autokeras']['values'][0])
-        except:
-            max_trials_parameter = 3
-
-        #try to get the tuner from configuration, if not available use None
-        try:
-            tuner_parameters = parameters[':tuner_autokeras']['values']
-            tuner = autokeras_tuner.get(tuner_parameters[0], None)
-        except:
-            tuner = None
-
-        #try to get the max_model_size from configuration, if not available use None
-        try:
-            #Set max model size to None if it is 0, requires a high number to work correctly NOT FOR BEGINNERS
-            max_model_size_parameter = int(parameters[':max_model_size_autokeras']['values'][0]) if int(parameters[':max_model_size_autokeras']['values'][0]) > 0 else None
-        except:
-            max_model_size_parameter = None
-
-
-        return metrics, loss, max_trials_parameter, tuner, max_model_size_parameter
