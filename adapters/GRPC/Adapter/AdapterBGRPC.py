@@ -170,10 +170,10 @@ class GetAutoMlStatusResponse(betterproto.Message):
     data/trainings/USER_ID/DATASET_ID/TRAINING_ID/export/autokeras.zip"
     """
 
-    test_score: float = betterproto.float_field(4)
+    test_score: str = betterproto.string_field(4)
     """
-    The test score computed by testing the model with the test datasetexample:
-    0.89
+    Json string of the test scores computed by testing the model with the test
+    dataset.example: {":precision": 0.222,":f_measure": 0.9.....}
     """
 
     prediction_time: float = betterproto.float_field(5)
@@ -268,11 +268,11 @@ class ExplainModelRequest(betterproto.Message):
     useexample:{"training_id": "63525870394eff35ee175bc2","dataset_id":
     "635255a4394eff35ee175bb4","user_id":
     "b84eadcc-765c-43ea-8b7b-c0f8d2fbc6ed","dataset_path": "app-data\\datasets\
-    \b84eadcc-765c-43ea-8b7b-
-    c0f8d2fbc6ed\\635255a4394eff35ee175bb4\\Train.csv","configuration":
-    {"task": ":tabular_regression", "target": "TARGET(PRICE_IN_LACS)",
-    "runtime_limit": 3, "metric": ":accuracy"},"dataset_configuration": "SEE
-    Training schema in WIKI for more information https://github.com/hochschule-
+    \b84eadcc-765c-43ea-8b7b-c0f8d2fbc6ed\\635255a4394eff35ee175bb4\\Train.csv"
+    ,"configuration": {"task": ":tabular_regression", "target":
+    "TARGET(PRICE_IN_LACS)", "runtime_limit": 3, "metric":
+    ":accuracy"},"dataset_configuration": "SEE Training schema in WIKI for more
+    information https://github.com/hochschule-
     darmstadt/MetaAutoML/wiki/2.-System-Architecture#training-record"}
     """
 
@@ -301,11 +301,11 @@ class PredictModelRequest(betterproto.Message):
     useexample:{"training_id": "63525870394eff35ee175bc2","dataset_id":
     "635255a4394eff35ee175bb4","user_id":
     "b84eadcc-765c-43ea-8b7b-c0f8d2fbc6ed","dataset_path": "app-data\\datasets\
-    \b84eadcc-765c-43ea-8b7b-
-    c0f8d2fbc6ed\\635255a4394eff35ee175bb4\\Train.csv","configuration":
-    {"task": ":tabular_regression", "target": "TARGET(PRICE_IN_LACS)",
-    "runtime_limit": 3, "metric": ":accuracy"},"dataset_configuration": "SEE
-    Training schema in WIKI for more information https://github.com/hochschule-
+    \b84eadcc-765c-43ea-8b7b-c0f8d2fbc6ed\\635255a4394eff35ee175bb4\\Train.csv"
+    ,"configuration": {"task": ":tabular_regression", "target":
+    "TARGET(PRICE_IN_LACS)", "runtime_limit": 3, "metric":
+    ":accuracy"},"dataset_configuration": "SEE Training schema in WIKI for more
+    information https://github.com/hochschule-
     darmstadt/MetaAutoML/wiki/2.-System-Architecture#training-record"}
     """
 

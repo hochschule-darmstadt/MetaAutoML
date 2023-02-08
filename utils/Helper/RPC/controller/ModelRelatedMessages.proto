@@ -107,10 +107,13 @@ message Model {
   */
   string path = 8;
   /*
-    The computed test score using the metric defined in the training record
-    example: 0.99
+      Json string of the test scores computed by testing the model with the test dataset.
+      example: {
+          ":precision": 0.222,
+          ":f_measure": 0.9.....
+      }
   */
-  float testScore = 9;
+  string testScore = 9;
   /*
     Time in ms it takes on average to make on prediction with this model
     example: 23.9999

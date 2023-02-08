@@ -12,7 +12,7 @@ import pandas as pd
 from predict_time_sources import SplitMethod, feature_preparation
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, mean_squared_error
-from sklearn.metrics import classification_report
+from sklearn.metrics import *
 from sklearn.metrics import mean_absolute_percentage_error
 from JsonUtil import get_config_property
 from TemplateGenerator import TemplateGenerator
@@ -196,20 +196,20 @@ def evaluate(config: "StartAutoMlRequest", config_path: str) -> Tuple[float, flo
     predictions = pd.read_csv(os.path.join(result_path, "predictions.csv"))
     os.remove(os.path.join(result_path, "predictions.csv"))
 
-    if config["configuration"]["task"] == ":tabular_classification":
-        return accuracy_score(test[target], predictions["predicted"]), (predict_time * 1000) / test.shape[0]
+    if config["configuration"]["task"] in [":tabular_classification", ":text_classification", ":image_classification", ":time_series_classification"]:
+        if config["configuration"]["task"] == ":image_classification":
+            return compute_classification_metrics(pd.Series(y_test), predictions["predicted"]), (predict_time * 1000) / pd.Series(y_test).shape[0]
+        else:
+            return compute_classification_metrics(test[target], predictions["predicted"]), (predict_time * 1000) / test.shape[0]
+    elif config["configuration"]["task"] in [":tabular_regression", ":text_regression", ":image_regression", ":time_series_forecasting"]:
+        if config["configuration"]["task"] == ":image_regression":
+            return compute_regression_metrics(pd.Series(y_test), predictions["predicted"]), (predict_time * 1000) / pd.Series(y_test).shape[0]
+        else:
+            return compute_regression_metrics(test[target], predictions["predicted"]), (predict_time * 1000) / test.shape[0]
 
-    elif config["configuration"]["task"] == ":tabular_regression":
-        return mean_squared_error(test[target], predictions["predicted"], squared=False), \
-               (predict_time * 1000) / test.shape[0]
 
-    elif config["configuration"]["task"] == ":image_classification":
-        return accuracy_score(y_test, predictions["predicted"]), (predict_time * 1000) / y_test.shape[0]
 
-    elif config["configuration"]["task"] == ":image_regression":
-        return mean_squared_error(y_test, predictions["predicted"], squared=False), \
-               (predict_time * 1000) / y_test.shape[0]
-    elif config["configuration"]["task"] == ":time_series_classification":
+    if config["configuration"]["task"] == ":time_series_classification":
         train, test = data_loader(config)
         target = config["configuration"]["target"]
 
@@ -221,16 +221,72 @@ def evaluate(config: "StartAutoMlRequest", config_path: str) -> Tuple[float, flo
               classification_report(test_target, predicted_target,zero_division=0)
               )
         return acc_score, (predict_time * 1000) / test.shape[0]
-    elif config["configuration"]["task"] == ":time_series_forecasting":
-        return mean_absolute_percentage_error(test[target], predictions["predicted"]), \
-               (predict_time * 1000) / test.shape[0]
-    elif config["configuration"]["task"] == ":text_classification":
-        return accuracy_score(test[target], predictions["predicted"]), (predict_time * 1000) / test.shape[0]
 
-    elif config["configuration"]["task"] == ":text_regression":
-        return mean_squared_error(test[target], predictions["predicted"], squared=False), \
-               (predict_time * 1000) / test.shape[0]
+def compute_classification_metrics(y_should: pd.Series, y_is):
+    score = {
+        ":accuracy": float(accuracy_score(y_should, y_is)),
+        ":balanced_accuracy": float(balanced_accuracy_score(y_should, y_is)),
+        ":average_precision": float(average_precision_score(y_should, y_is)),
+        ":brier": float(brier_score_loss(y_should, y_is)),
+    }
+    if len(y_should.unique()) == 2:
+        #Metrics only for binary classification
+        tn, fp, fn, tp = confusion_matrix(y_should, y_is).ravel()
+        score.update({
+        ":true_positive": float(tp),
+        ":false_positive": float(fp),
+        ":true_negative": float(tn),
+        ":false_negative": float(fn),
+        ":f_measure": float(f1_score(y_should, y_is)),
+        ":precision": float(precision_score(y_should, y_is)),
+        ":recall": float(recall_score(y_should, y_is))
+        })
+    else:
+        #Metrics only for multiclass classification
+        score.update({
 
+        ":f_measure": float(f1_score(y_should, y_is, average=None)),
+        ":f_measure_micro": float(f1_score(y_should, y_is, average='micro')),
+        ":f_measure_macro": float(f1_score(y_should, y_is, average='macro')),
+        ":f_measure_weighted": float(f1_score(y_should, y_is, average='weighted')),
+        ":precision": float(precision_score(y_should, y_is, average=None)),
+        ":precision_micro": float(precision_score(y_should, y_is, average='micro')),
+        ":precision_macro": float(precision_score(y_should, y_is, average='macro')),
+        ":precision_weighted": float(precision_score(y_should, y_is, average='weighted')),
+        ":recall": float(recall_score(y_should, y_is, average=None)),
+        ":recall_micro": float(recall_score(y_should, y_is, average='micro')),
+        ":recall_macro": float(recall_score(y_should, y_is, average='macro')),
+        ":recall_weighted": float(recall_score(y_should, y_is, average='weighted'))
+        })
+    return score
+
+def compute_regression_metrics(y_should: pd.Series, y_is):
+    score = {
+        ":explained_variance": float(explained_variance_score(y_should, y_is)),
+        ":max_error": float(max_error(y_should, y_is)),
+        ":mean_absolute_error": float(mean_absolute_error(y_should, y_is)),
+        ":mean_squared_error": float(mean_squared_error(y_should, y_is, squared=True)),
+        ":rooted_mean_squared_error": float(mean_squared_error(y_should, y_is, squared=False)),
+        ":median_absolute_error": float(median_absolute_error(y_should, y_is)),
+        ":r2": float(r2_score(y_should, y_is)),
+        ":mean_absolute_percentage_error": float(mean_absolute_percentage_error(y_should, y_is)),
+    }
+    try:
+        score.update({
+        ":d2_absolute_error": float(d2_absolute_error_score(y_should, y_is)),
+        ":d2_pinball_score": float(d2_pinball_score(y_should, y_is)),
+        ":d2_tweedie_score": float(d2_tweedie_score(y_should, y_is))
+        })
+    except Exception as e:
+        print("computing D2 scores failed:" + e)
+    if all(val > 0 for val in y_is) or all(val > 0 for val in y_should):
+        score.update({
+        ":mean_poisson_deviance": float(mean_poisson_deviance(y_should, y_is)),
+        ":mean_gamma_deviance": float(mean_gamma_deviance(y_should, y_is)),
+        ":mean_squared_log_error": float(mean_squared_log_error(y_should, y_is, squared=True)),
+        ":rooted_mean_squared_log_error": float(mean_squared_log_error(y_should, y_is, squared=False))
+        })
+    return score
 
 def predict(config: dict, config_path: str, automl: str) -> Tuple[float, str]:
     """Execute a prediction on an uploaded live dataset
@@ -562,7 +618,6 @@ def read_image_dataset(config: "StartAutoMlRequest", image_test_folder=False) ->
     """
 
     #we need to access the train sub folder for training
-    config["dataset_path"] = os.path.join(config["dataset_path"], "train")
     data_dir = config["dataset_path"]
     if image_test_folder == True:
         data_dir = os.path.join(data_dir, "test")

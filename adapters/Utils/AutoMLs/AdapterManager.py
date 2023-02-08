@@ -101,7 +101,7 @@ class AdapterManager(Thread):
             library, model = self._get_ml_model_and_lib(config)
             # TODO: fix evaluation (does not work with image datasets)
             test_score, prediction_time = evaluate(config, os.path.join(config.job_folder_location, get_config_property("job-file-name")))
-            self.__auto_ml_status_messages.put(get_response(output_json, test_score, prediction_time, library, model, carbon_tracker.final_emissions_data))
+            self.__auto_ml_status_messages.put(get_response(output_json, json.dumps(test_score), prediction_time, library, model, carbon_tracker.final_emissions_data))
 
             print(f'{get_config_property("adapter-name")} job finished')
             self.__start_auto_ml_running = False

@@ -149,7 +149,7 @@ class AdapterManager(Thread):
             "ml_model_type": "",
             "ml_library": "",
             "path": "",
-            "test_score": 0,
+            "test_score": {},
             "prediction_time": 0,
             "runtime_profile": {
                 "start_time": datetime.datetime.now(),
@@ -210,7 +210,7 @@ class AdapterManager(Thread):
                         "ml_library": self.__ml_library,
                         "path": self.__path,
                         "prediction_time": self.__prediction_time,
-                        "test_score": self.__testScore,
+                        "test_score": json.loads(self.__testScore),
                         "runtime_profile": model["runtime_profile"],
                         "carbon_footprint": self.__carbon_footprint
                     }

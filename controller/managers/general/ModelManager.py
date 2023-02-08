@@ -59,7 +59,7 @@ class ModelManager:
             model_info.ml_model_type = model["ml_model_type"]
             model_info.ml_library =  model["ml_library"]
             model_info.path = model["path"]
-            model_info.test_score = model["test_score"]
+            model_info.test_score = json.dumps(model["test_score"])
             model_info.prediction_time =  model["prediction_time"]
 
             model_runtime_profile = ModelruntimeProfile()
