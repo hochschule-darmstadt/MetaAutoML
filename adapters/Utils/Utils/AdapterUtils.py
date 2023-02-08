@@ -222,7 +222,16 @@ def evaluate(config: "StartAutoMlRequest", config_path: str) -> Tuple[float, flo
               )
         return acc_score, (predict_time * 1000) / test.shape[0]
 
-def compute_classification_metrics(y_should: pd.Series, y_is):
+def compute_classification_metrics(y_should: pd.Series, y_is: pd.Series) -> dict:
+    """Compute the metrics collection for classification tasks
+
+    Args:
+        y_should (pd.Series): The series of the label for the test set
+        y_is (pd.Series): The series of the label of the model predictions for the test set
+
+    Returns:
+        dict: Dictionary containing the computed metrics, key is ontology IRI for the metric and value is the value
+    """
     score = {
         ":accuracy": float(accuracy_score(y_should, y_is)),
         ":balanced_accuracy": float(balanced_accuracy_score(y_should, y_is)),
@@ -260,7 +269,16 @@ def compute_classification_metrics(y_should: pd.Series, y_is):
         })
     return score
 
-def compute_regression_metrics(y_should: pd.Series, y_is):
+def compute_regression_metrics(y_should: pd.Series, y_is: pd.Series) -> dict:
+    """Compute the metrics collection for regression tasks
+
+    Args:
+        y_should (pd.Series): The series of the label for the test set
+        y_is (pd.Series): The series of the label of the model predictions for the test set
+
+    Returns:
+        dict: Dictionary containing the computed metrics, key is ontology IRI for the metric and value is the value
+    """
     score = {
         ":explained_variance": float(explained_variance_score(y_should, y_is)),
         ":max_error": float(max_error(y_should, y_is)),
