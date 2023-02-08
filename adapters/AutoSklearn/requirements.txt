@@ -6,3 +6,4 @@ betterproto @ git+https://github.com/danielgtaylor/python-betterproto.git@496eba
 dependency-injector==4.40.0
 pickle5
 codecarbon==2.1.4
+scikit-learn

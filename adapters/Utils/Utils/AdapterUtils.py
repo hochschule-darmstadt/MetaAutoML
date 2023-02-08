@@ -197,9 +197,16 @@ def evaluate(config: "StartAutoMlRequest", config_path: str) -> Tuple[float, flo
     os.remove(os.path.join(result_path, "predictions.csv"))
 
     if config["configuration"]["task"] in [":tabular_classification", ":text_classification", ":image_classification", ":time_series_classification"]:
-        return compute_classification_metrics(test[target], predictions["predicted"]), (predict_time * 1000) / test.shape[0]
+        if config["configuration"]["task"] == ":image_classification":
+            return compute_classification_metrics(pd.Series(y_test), predictions["predicted"]), (predict_time * 1000) / pd.Series(y_test).shape[0]
+        else:
+            return compute_classification_metrics(test[target], predictions["predicted"]), (predict_time * 1000) / test.shape[0]
     elif config["configuration"]["task"] in [":tabular_regression", ":text_regression", ":image_regression", ":time_series_forecasting"]:
-        return compute_regression_metrics(test[target], predictions["predicted"]), (predict_time * 1000) / test.shape[0]
+        if config["configuration"]["task"] == ":image_regression":
+            return compute_regression_metrics(pd.Series(y_test), predictions["predicted"]), (predict_time * 1000) / pd.Series(y_test).shape[0]
+        else:
+            return compute_regression_metrics(test[target], predictions["predicted"]), (predict_time * 1000) / test.shape[0]
+
 
 
     if config["configuration"]["task"] == ":time_series_classification":
@@ -263,10 +270,15 @@ def compute_regression_metrics(y_should: pd.Series, y_is):
         ":median_absolute_error": float(median_absolute_error(y_should, y_is)),
         ":r2": float(r2_score(y_should, y_is)),
         ":mean_absolute_percentage_error": float(mean_absolute_percentage_error(y_should, y_is)),
+    }
+    try:
+        score.update({
         ":d2_absolute_error": float(d2_absolute_error_score(y_should, y_is)),
         ":d2_pinball_score": float(d2_pinball_score(y_should, y_is)),
-        ":d2_tweedie_score": float(d2_tweedie_score(y_should, y_is)),
-    }
+        ":d2_tweedie_score": float(d2_tweedie_score(y_should, y_is))
+        })
+    except Exception as e:
+        print("computing D2 scores failed:" + e)
     if all(val > 0 for val in y_is) or all(val > 0 for val in y_should):
         score.update({
         ":mean_poisson_deviance": float(mean_poisson_deviance(y_should, y_is)),
@@ -606,7 +618,6 @@ def read_image_dataset(config: "StartAutoMlRequest", image_test_folder=False) ->
     """
 
     #we need to access the train sub folder for training
-    config["dataset_path"] = os.path.join(config["dataset_path"], "train")
     data_dir = config["dataset_path"]
     if image_test_folder == True:
         data_dir = os.path.join(data_dir, "test")
