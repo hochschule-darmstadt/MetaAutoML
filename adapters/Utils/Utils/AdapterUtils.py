@@ -198,29 +198,14 @@ def evaluate(config: "StartAutoMlRequest", config_path: str) -> Tuple[float, flo
 
     if config["configuration"]["task"] in [":tabular_classification", ":text_classification", ":image_classification", ":time_series_classification"]:
         if config["configuration"]["task"] == ":image_classification":
-            return compute_classification_metrics(pd.Series(y_test), predictions["predicted"]), (predict_time * 1000) / pd.Series(y_test).shape[0]
+            return compute_classification_metrics(y_test, predictions["predicted"]), (predict_time * 1000) / pd.Series(y_test).shape[0]
         else:
-            return compute_classification_metrics(test[target], predictions["predicted"]), (predict_time * 1000) / test.shape[0]
+            return compute_classification_metrics(pd.Series(test[target]), predictions["predicted"]), (predict_time * 1000) / test.shape[0]
     elif config["configuration"]["task"] in [":tabular_regression", ":text_regression", ":image_regression", ":time_series_forecasting"]:
         if config["configuration"]["task"] == ":image_regression":
-            return compute_regression_metrics(pd.Series(y_test), predictions["predicted"]), (predict_time * 1000) / pd.Series(y_test).shape[0]
+            return compute_regression_metrics(y_test, predictions["predicted"]), (predict_time * 1000) / pd.Series(y_test).shape[0]
         else:
-            return compute_regression_metrics(test[target], predictions["predicted"]), (predict_time * 1000) / test.shape[0]
-
-
-
-    if config["configuration"]["task"] == ":time_series_classification":
-        train, test = data_loader(config)
-        target = config["configuration"]["target"]
-
-        test_target = test[target].astype("string")
-        predicted_target = predictions["predicted"].astype("string")
-        acc_score = accuracy_score(test_target, predicted_target)
-        print("accuracy", acc_score)
-        print("Classification Report \n",
-              classification_report(test_target, predicted_target,zero_division=0)
-              )
-        return acc_score, (predict_time * 1000) / test.shape[0]
+            return compute_regression_metrics(pd.Series(test[target]), predictions["predicted"]), (predict_time * 1000) / test.shape[0]
 
 def compute_classification_metrics(y_should: pd.Series, y_is: pd.Series) -> dict:
     """Compute the metrics collection for classification tasks
@@ -232,16 +217,24 @@ def compute_classification_metrics(y_should: pd.Series, y_is: pd.Series) -> dict
     Returns:
         dict: Dictionary containing the computed metrics, key is ontology IRI for the metric and value is the value
     """
+    from sklearn.preprocessing import LabelEncoder
+
+    if y_is.dtype == object:
+        #If the label is string based, we need to convert it to int values or else some metric wont compute correctly
+        enc = LabelEncoder()
+        enc.fit(y_should.unique())
+        y_should = pd.Series(enc.transform(y_should))
+        y_is = pd.Series(enc.transform(y_is))
     score = {
         ":accuracy": float(accuracy_score(y_should, y_is)),
         ":balanced_accuracy": float(balanced_accuracy_score(y_should, y_is)),
-        ":average_precision": float(average_precision_score(y_should, y_is)),
         ":brier": float(brier_score_loss(y_should, y_is)),
     }
     if len(y_should.unique()) == 2:
         #Metrics only for binary classification
         tn, fp, fn, tp = confusion_matrix(y_should, y_is).ravel()
         score.update({
+        ":average_precision": float(average_precision_score(y_should, y_is, average='weighted')),
         ":true_positive": float(tp),
         ":false_positive": float(fp),
         ":true_negative": float(tn),
@@ -297,7 +290,7 @@ def compute_regression_metrics(y_should: pd.Series, y_is: pd.Series) -> dict:
         })
     except Exception as e:
         print("computing D2 scores failed:" + e)
-    if all(val > 0 for val in y_is) or all(val > 0 for val in y_should):
+    if all(val > 0 for val in y_is) and all(val > 0 for val in y_should):
         score.update({
         ":mean_poisson_deviance": float(mean_poisson_deviance(y_should, y_is)),
         ":mean_gamma_deviance": float(mean_gamma_deviance(y_should, y_is)),
