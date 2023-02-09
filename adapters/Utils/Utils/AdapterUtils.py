@@ -235,10 +235,10 @@ def compute_classification_metrics(y_should: pd.Series, y_is: pd.Series) -> dict
         tn, fp, fn, tp = confusion_matrix(y_should, y_is).ravel()
         score.update({
         ":average_precision": float(average_precision_score(y_should, y_is, average='weighted')),
-        ":true_positive": float(tp),
-        ":false_positive": float(fp),
-        ":true_negative": float(tn),
-        ":false_negative": float(fn),
+        ":true_positives": float(tp),
+        ":false_positives": float(fp),
+        ":true_negatives": float(tn),
+        ":false_negatives": float(fn),
         ":f_measure": float(f1_score(y_should, y_is)),
         ":precision": float(precision_score(y_should, y_is)),
         ":recall": float(recall_score(y_should, y_is))

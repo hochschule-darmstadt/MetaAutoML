@@ -92,7 +92,11 @@ class ModelManager:
         """
         response = GetModelsResponse()
         def GetScore(e):
-            return e["test_score"]
+            score_list = list(e["test_score"].values())
+            if len(score_list) == 0:
+                return 0
+            #we will always use the first score for comparision
+            return score_list[0]
 
         self.__log.debug(f"get_models: get all models for dataset {get_models_request.dataset_id} for user {get_models_request.user_id}")
         all_models: list[dict[str, object]] = self.__data_storage.get_models(get_models_request.user_id, dataset_id=get_models_request.dataset_id)

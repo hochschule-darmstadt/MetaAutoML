@@ -1,10 +1,11 @@
-﻿using BlazorBoilerplate.Infrastructure.Server;
+using BlazorBoilerplate.Infrastructure.Server;
 using BlazorBoilerplate.Infrastructure.Server.Models;
 using BlazorBoilerplate.Shared.Dto.Dataset;
 using BlazorBoilerplate.Shared.Dto.Model;
 using BlazorBoilerplate.Shared.Dto.Training;
 using BlazorBoilerplate.Theme.Material.Demo.Pages;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Org.BouncyCastle.Tls;
 using static Microsoft.AspNetCore.Http.StatusCodes;
 
@@ -130,10 +131,17 @@ namespace BlazorBoilerplate.Server.Managers
 
             foreach (var model in training.Models)
             {
+                List<Metric> metrics = new List<Metric>();
+                foreach (var metric in JObject.Parse(model.TestScore))
+                {
+                    metrics.Add(new Metric() { Name = await _cacheManager.GetObjectInformation(metric.Key), Score = (float)metric.Value });
+
+                }
                 ModelDto modelDto = new ModelDto(model,
                     (model.MlModelType == "" ? new Shared.Dto.Ontology.ObjectInfomationDto() : await _cacheManager.GetObjectInformation(model.MlModelType)),
                     (model.MlLibrary == "" ? new Shared.Dto.Ontology.ObjectInfomationDto() : await _cacheManager.GetObjectInformation(model.MlLibrary)),
-                    (model.AutoMlSolution == "" ? new Shared.Dto.Ontology.ObjectInfomationDto() : await _cacheManager.GetObjectInformation(model.AutoMlSolution)));
+                    (model.AutoMlSolution == "" ? new Shared.Dto.Ontology.ObjectInfomationDto() : await _cacheManager.GetObjectInformation(model.AutoMlSolution)),
+                    metrics);
                 trainingDto.models.Add(modelDto);
             }
 
