@@ -1,14 +1,15 @@
 import os
 
 from AdapterUtils import export_model, prepare_tabular_dataset, data_loader
-from autogluon.tabular import TabularDataset, TabularPredictor
+from autogluon.tabular import TabularPredictor
 from autogluon.timeseries import TimeSeriesDataFrame, TimeSeriesPredictor
-from JsonUtil import get_config_property
-from AdapterUtils import read_tabular_dataset_training_data, prepare_tabular_dataset, export_model
+from autogluon.text import TextPredictor
+from autogluon.vision import ImageDataset
+from autogluon.multimodal import MultiModalPredictor
+from AdapterUtils import prepare_tabular_dataset
 from AutoGluonServer import data_loader
 import shutil
-
-from autogluon.vision import ImagePredictor, ImageDataset
+import pandas as pd
 
 class AutoGluonAdapter:
     """
@@ -60,6 +61,8 @@ class AutoGluonAdapter:
         """
         if self._configuration["configuration"]["task"] == ":tabular_classification":
             self.__tabular_classification()
+        elif self._configuration["configuration"]["task"] == ":text_classification":
+            self.__text_classification()
         elif self._configuration["configuration"]["task"] == ":tabular_regression":
             self.__tabular_regression()
         elif self._configuration["configuration"]["task"] == ":image_classification":
@@ -82,7 +85,7 @@ class AutoGluonAdapter:
                                  problem_type=classification_type,
                                  path=self._result_path).fit(
             data,
-            time_limit=self._time_limit)
+            time_limit=self._time_limit*60)
         #Fit methode already saves the model
 
     def __tabular_regression(self):
@@ -96,36 +99,56 @@ class AutoGluonAdapter:
                                  problem_type="regression",
                                  path=self._result_path).fit(
             data,
-            time_limit=self._time_limit)
+            time_limit=self._time_limit*60)
+        #Fit methode already saves the model
+
+    def __text_classification(self):
+        """Execute the tabular classification task and export the found model"""
+        self.df, test = data_loader(self._configuration)
+        X, y = prepare_tabular_dataset(self.df, self._configuration)
+        data = X
+        data[y.name] = y
+        classification_type = ""
+        if len(y.unique()) == 2:
+            classification_type = "binary"
+        else:
+            classification_type =  "multiclass"
+        #Disable multi worker else training takes a while or doesnt complete
+        #https://github.com/autogluon/autogluon/issues/2756
+        hyperparameters = {"env.num_workers": 0}
+        model = TextPredictor(label=y.name,
+                                 problem_type=classification_type,
+                                 path=self._result_path).fit(
+            data,
+            time_limit=self._time_limit*60, hyperparameters=hyperparameters)
         #Fit methode already saves the model
 
     def __image_classification(self):
         """"Execute image classification task and export the found model"""
 
         # Daten Laden
-        train , test = data_loader(self._configuration)
+        #X_train, y_train, X_test, y_test = data_loader(self._configuration)
 
         # Einteilen
-        set_hyperparameters={
-            'batch_size': self._configuration["test_configuration"]["batch_size"],
-            'epochs': self._configuration["runtime_constraints"]["epochs"]
-            }
-
-        model = ImagePredictor(
-            path=self._result_path)
-
-         # Trainieren
-        model.fit(
-            train ,
-            #hyperparameters=set_hyperparameters ,
-            time_limit=self._time_limit  )
+        data =  ImageDataset.from_folder(os.path.join(self._configuration['dataset_path'], 'train'))
+        if len(data['label'].unique()) == 2:
+            classification_type = "binary"
+        else:
+            classification_type =  "multiclass"
+        #Disable multi worker else training takes a while or doesnt complete
+        #https://github.com/autogluon/autogluon/issues/2756
+        hyperparameters = {"env.num_workers": 0}
+        model = MultiModalPredictor(label='label',problem_type=classification_type, path=self._result_path).fit(
+            data,
+            time_limit=self._time_limit*60, hyperparameters=hyperparameters)
+        #Fit methode already saves the model
 
     def __time_series_forecasting(self):
 
         self.df, test = data_loader(self._configuration)
         X, y = prepare_tabular_dataset(self.df, self._configuration)
         data = X
-        data[y.name] = y
+        data[y.name] = y.values
         timestamp_column = ""
         #First get the datetime index column
         for column, dt in self._configuration["dataset_configuration"]["schema"].items():
@@ -136,10 +159,15 @@ class AutoGluonAdapter:
                 timestamp_column = column
                 break
 
-        ts_dataframe = TimeSeriesDataFrame.from_data_frame(data, id_column=y.name, timestamp_column=timestamp_column)
+        data.reset_index(inplace=True)
+        data = data.assign(timeseries_id=1)
+        data = data.bfill().ffill()  # makes sure there are no missing values
+
+        ts_dataframe = TimeSeriesDataFrame.from_data_frame(data, id_column="timeseries_id", timestamp_column=timestamp_column)
         model = TimeSeriesPredictor(label=y.name,
+                                eval_metric="sMAPE",    
                                  path=self._result_path).fit(
             ts_dataframe,
-            time_limit=self._time_limit)
+            time_limit=self._time_limit*60)
         #Fit methode already saves the model
 

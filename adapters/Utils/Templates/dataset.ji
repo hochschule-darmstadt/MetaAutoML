@@ -45,11 +45,11 @@ def read_image_dataset_folder(path):
     data_dir = path
     test_df_list =[]
 
-    def read_image_dataset_folder(sub_folder_type):
+    def read_image_dataset_folder():
         files = []
         df = []
-        for folder in os.listdir(os.path.join(data_dir, sub_folder_type)):
-            files.append(glob.glob(os.path.join(data_dir, sub_folder_type, folder, "*.jp*g")))
+        for folder in os.listdir(os.path.join(data_dir)):
+            files.append(glob.glob(os.path.join(data_dir, folder, "*.jp*g")))
 
         df_list =[]
         for i in range(len(files)):
@@ -59,7 +59,7 @@ def read_image_dataset_folder(path):
             df_list.append(df)
         return df_list
 
-    test_df_list = read_image_dataset_folder("test")
+    test_df_list = read_image_dataset_folder()
 
     test_data = pd.concat(test_df_list, axis=0,ignore_index=True)
 

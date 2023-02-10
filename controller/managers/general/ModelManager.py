@@ -59,7 +59,7 @@ class ModelManager:
             model_info.ml_model_type = model["ml_model_type"]
             model_info.ml_library =  model["ml_library"]
             model_info.path = model["path"]
-            model_info.test_score = model["test_score"]
+            model_info.test_score = json.dumps(model["test_score"])
             model_info.prediction_time =  model["prediction_time"]
 
             model_runtime_profile = ModelruntimeProfile()
@@ -92,7 +92,11 @@ class ModelManager:
         """
         response = GetModelsResponse()
         def GetScore(e):
-            return e["test_score"]
+            score_list = list(e["test_score"].values())
+            if len(score_list) == 0:
+                return 0
+            #we will always use the first score for comparision
+            return score_list[0]
 
         self.__log.debug(f"get_models: get all models for dataset {get_models_request.dataset_id} for user {get_models_request.user_id}")
         all_models: list[dict[str, object]] = self.__data_storage.get_models(get_models_request.user_id, dataset_id=get_models_request.dataset_id)

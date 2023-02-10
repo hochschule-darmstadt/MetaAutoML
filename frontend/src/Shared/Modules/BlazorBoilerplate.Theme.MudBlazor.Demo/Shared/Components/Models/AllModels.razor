@@ -1,4 +1,4 @@
-﻿@inject IStringLocalizer<Global> L
+@inject IStringLocalizer<Global> L
 @inject NavigationManager NavManager
 
 
@@ -15,19 +15,39 @@
         }
         else
         {
-            <MudTable Items="@Models.Models" style="width:stretch" class="mat-elevation-z5" AllowSelection="false" Dense="true" Filter="new Func<ModelDto,bool>(FilterFunc)">                
+            <MudTable Items="@Models.Models" style="width:stretch" class="mat-elevation-z5" AllowSelection="false" Dense="true" Filter="new Func<ModelDto,bool>(FilterFunc)" CustomHeader="true">
                 <ToolBarContent>
                     <MudTextField @bind-Value="searchString" Placeholder="@L["Search by name, status, lib or AutoML system"]" Adornment="Adornment.Start"
                                     AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
                 </ToolBarContent>
                 <HeaderContent>
-                    <MudTh><MudTableSortLabel SortBy="@(new Func<ModelDto, object>(x=>x.MlModelType.Properties["skos:prefLabel"]))">@L["Name"]</MudTableSortLabel></MudTh>
-                    <MudTh><MudTableSortLabel SortBy="new Func<ModelDto, object>(x=>x.Status)">@L["Status"]</MudTableSortLabel></MudTh>
-                    <MudTh><MudTableSortLabel SortBy="@(new Func<ModelDto, object>(x=>x.MlLibrary.Properties[" skos:prefLabel"]))">@L["Library"]</MudTableSortLabel></MudTh>
-                    <MudTh><MudTableSortLabel SortBy="@(new Func<ModelDto, object>(x=>x.AutoMlSolution.Properties[" skos:prefLabel"]))">@L["AutoML solution"]</MudTableSortLabel></MudTh>
-                    <MudTh><MudTableSortLabel SortBy="new Func<ModelDto, object>(x=>x.TestScore)">@L["Test score"]</MudTableSortLabel></MudTh>
-                    <MudTh><MudTableSortLabel SortBy="new Func<ModelDto, object>(x=>x.RuntimeProfile)">@L["Runtime"]</MudTableSortLabel></MudTh>
-                    <MudTh><MudTableSortLabel SortBy="new Func<ModelDto, object>(x=>x.PredictionTime)">@L["Prediction time"]</MudTableSortLabel></MudTh>
+                    <MudTHeadRow>
+                        <MudTh><MudTableSortLabel SortBy="@(new Func<ModelDto, object>(x=>x.MlModelType.Properties["skos:prefLabel"]))">@L["Name"]</MudTableSortLabel></MudTh>
+                        <MudTh><MudTableSortLabel SortBy="new Func<ModelDto, object>(x=>x.Status)">@L["Status"]</MudTableSortLabel></MudTh>
+                        <MudTh><MudTableSortLabel SortBy="@(new Func<ModelDto, object>(x=>x.MlLibrary.Properties[" skos:prefLabel"]))">@L["Library"]</MudTableSortLabel></MudTh>
+                        <MudTh><MudTableSortLabel SortBy="@(new Func<ModelDto, object>(x=>x.AutoMlSolution.Properties[" skos:prefLabel"]))">@L["AutoML solution"]</MudTableSortLabel></MudTh>
+                        <MudTh><MudTableSortLabel SortBy="new Func<ModelDto, object>(x=>x.Metrics)">@L["Metric"]</MudTableSortLabel></MudTh>
+                        <MudTh><MudTableSortLabel SortBy="new Func<ModelDto, object>(x=>x.RuntimeProfile)">@L["Runtime"]</MudTableSortLabel></MudTh>
+                        <MudTh><MudTableSortLabel SortBy="new Func<ModelDto, object>(x=>x.PredictionTime)">@L["Prediction time"]</MudTableSortLabel></MudTh>
+                    </MudTHeadRow>
+                        <MudTHeadRow>
+                            <MudTh></MudTh>
+                            <MudTh></MudTh>
+                            <MudTh></MudTh>
+                            <MudTh></MudTh>
+                            <MudTh>
+                                <MudSelect T="string" @bind-Value=SelectedMetric>
+                                    @foreach (var metric in _metrics)
+                                    {
+                                        <MudSelectItem Value="@metric.Name.ID">
+                                            <MudText Typo="Typo.body2">@metric.Name.Properties["skos:prefLabel"]</MudText>
+                                        </MudSelectItem>
+                                    }
+                                </MudSelect>
+                            </MudTh>
+                            <MudTh></MudTh>
+                            <MudTh></MudTh>
+                        </MudTHeadRow>
                 </HeaderContent>
                 <RowTemplate>
                     <MudTd >
@@ -43,7 +63,15 @@
                     <MudTd>
                         @(context.AutoMlSolution.Properties.ContainsKey("skos:prefLabel") ? context.AutoMlSolution.Properties["skos:prefLabel"] : "")
                     </MudTd>
-                    <MudTd>@String.Format("{0:0.00}", context.TestScore)</MudTd>
+                    <MudTd>
+                        @if (!String.IsNullOrEmpty(SelectedMetric))
+                        {
+                            @if (context.Metrics.Where(x => x.Name.ID == SelectedMetric).Count() == 1)
+                            {
+                                @(String.Format("{0:0.00}", context.Metrics.Where(x => x.Name.ID == SelectedMetric).First().Score))
+                            }
+                        }
+                    </MudTd>
                     <MudTd>
                         @if (context.Status == "busy")
                             {
@@ -83,13 +111,30 @@
             _models = value;
             if(_models != null)
             {
+                UpdateMetricsList();
                 StateHasChanged();
             }
         } 
     }
     private string searchString = "";
     private GetModelsResponseDto _models;
+    private List<Metric> _metrics = new List<Metric>();
+    private string SelectedMetric { get; set; } = "";
 
+    private void UpdateMetricsList()
+    {
+        foreach (var model in _models.Models)
+        {
+            foreach (var metric in model.Metrics)
+            {
+                if (_metrics.Where(x => x.Name.Properties["skos:prefLabel"] == metric.Name.Properties["skos:prefLabel"]).Count() == 0)
+                {
+                    _metrics.Add(metric);
+                }
+            }
+        }
+        _metrics = _metrics.OrderBy(x => x.Name.Properties["skos:prefLabel"]).ToList();
+    }
     private bool FilterFunc(ModelDto element)
     {
         if (string.IsNullOrWhiteSpace(searchString))

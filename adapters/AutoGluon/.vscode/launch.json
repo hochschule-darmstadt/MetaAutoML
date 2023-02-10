@@ -24,7 +24,7 @@
             "request": "launch",
             "program": "AutoGluonServer.py",
             "console": "integratedTerminal",
-            "justMyCode": true,
+            "justMyCode": false,
             "env": {
                 "PYTHONPATH": ".:dependency-injection:AutoMLs:Utils:../Utils/Utils:../Utils/AutoMLs:../GRPC/Adapter:",
                 "GRPC_SERVER_PORT": "50057",

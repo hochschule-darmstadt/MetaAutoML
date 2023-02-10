@@ -132,10 +132,13 @@ message GetAutoMlStatusResponse {
     */
 	string path = 3;
     /*
-        The test score computed by testing the model with the test dataset
-        example: 0.89
+        Json string of the test scores computed by testing the model with the test dataset.
+        example: {
+            ":precision": 0.222,
+            ":f_measure": 0.9.....
+        }
     */
-	float testScore = 4;
+	string testScore = 4;
     /*
         The prediction time in milliseconds is the average time the model takes to make one prediction
         example: 12

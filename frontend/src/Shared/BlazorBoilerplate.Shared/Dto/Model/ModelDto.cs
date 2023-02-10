@@ -7,9 +7,15 @@ using System.Text;
 using System.Threading.Tasks;
 using BlazorBoilerplate.Shared.Dto.Ontology;
 using BlazorBoilerplate.Shared.Dto.Prediction;
+using Newtonsoft.Json.Linq;
 
 namespace BlazorBoilerplate.Shared.Dto.Model
 {
+    public class Metric
+    {
+        public ObjectInfomationDto Name { get; set; }
+        public float Score { get; set; }
+    }
 
     public class ModelDto
     {
@@ -20,7 +26,7 @@ namespace BlazorBoilerplate.Shared.Dto.Model
         public ObjectInfomationDto AutoMlSolution { get; set; }
         public ObjectInfomationDto MlModelType { get; set; }
         public ObjectInfomationDto MlLibrary { get; set; }
-        public double TestScore { get; set; }
+        public List<Metric> Metrics { get; set; }
         public double PredictionTime { get; set; }
         public ModelRuntimeProfile RuntimeProfile { get; set; }
         public List<string> StatusMessages { get; set; }
@@ -30,7 +36,7 @@ namespace BlazorBoilerplate.Shared.Dto.Model
         {
 
         }
-        public ModelDto(Server.Model model, ObjectInfomationDto mlModelType, ObjectInfomationDto mlLibrary, ObjectInfomationDto autoMl)
+        public ModelDto(Server.Model model, ObjectInfomationDto mlModelType, ObjectInfomationDto mlLibrary, ObjectInfomationDto autoMl, List<Metric> metrics)
         {
             Id = model.Id;
             TrainingId = model.TrainingId;
@@ -43,7 +49,7 @@ namespace BlazorBoilerplate.Shared.Dto.Model
             AutoMlSolution = autoMl;
             MlModelType = mlModelType;
             MlLibrary = mlLibrary;
-            TestScore = model.TestScore;
+            Metrics = metrics;
             PredictionTime = model.PredictionTime;
             RuntimeProfile = new ModelRuntimeProfile(model.RuntimeProfile);
             StatusMessages = model.StatusMessages.ToList();

@@ -536,10 +536,10 @@ class Model(betterproto.Message):
     app/app-data/....../result/keras_model.zip
     """
 
-    test_score: float = betterproto.float_field(9)
+    test_score: str = betterproto.string_field(9)
     """
-    The computed test score using the metric defined in the training
-    recordexample: 0.99
+    Json string of the test scores computed by testing the model with the test
+    dataset.example: {":precision": 0.222,":f_measure": 0.9.....}
     """
 
     prediction_time: float = betterproto.float_field(10)

@@ -10,6 +10,7 @@ import pandas as pd
 from typing import Tuple
 import re
 from codecarbon import OfflineEmissionsTracker
+from subprocess import Popen, PIPE, CalledProcessError
 
 class AdapterManager(Thread):
     """The base adapter manager object providing the shared functionality between all adapters
@@ -62,13 +63,16 @@ class AdapterManager(Thread):
         """
         try:
             self.__start_auto_ml_running = True
-            carbon_tracker = OfflineEmissionsTracker(country_iso_code="DEU", tracking_mode="process")
+            carbon_tracker = OfflineEmissionsTracker(country_iso_code="DEU", tracking_mode="process", log_level="error")
             # saving AutoML configuration JSON
             config = setup_run_environment(self.__start_auto_ml_request, self._adapter_name)
             #Start carbon recording
             carbon_tracker.start()
             # start training process
-            process = start_automl_process(config)
+            python_env = os.getenv("PYTHON_ENV", default="PYTHON_ENV_UNSET")
+            process = Popen([python_env, "AutoML.py", config.job_folder_location],
+                                    stdout=subprocess.PIPE, stderr=PIPE,
+                                    universal_newlines=True)
 
             # read the processes output line by line and push them onto the event queue
             for line in process.stdout:
@@ -97,7 +101,7 @@ class AdapterManager(Thread):
             library, model = self._get_ml_model_and_lib(config)
             # TODO: fix evaluation (does not work with image datasets)
             test_score, prediction_time = evaluate(config, os.path.join(config.job_folder_location, get_config_property("job-file-name")))
-            self.__auto_ml_status_messages.put(get_response(output_json, test_score, prediction_time, library, model, carbon_tracker.final_emissions_data))
+            self.__auto_ml_status_messages.put(get_response(output_json, json.dumps(test_score), prediction_time, library, model, carbon_tracker.final_emissions_data))
 
             print(f'{get_config_property("adapter-name")} job finished')
             self.__start_auto_ml_running = False
@@ -183,7 +187,7 @@ class AdapterManager(Thread):
             #For WSL users we need to adjust the path prefix for the dataset location to windows path
             if get_config_property("local_execution") == "YES":
                 if get_config_property("running_in_wsl") == "YES":
-                    config_json["dataset_path"] = re.sub("[a-zA-Z]:/([A-Za-z0-9]+(/[A-Za-z0-9]+)+)/MetaAutoML", get_config_property("wsl_metaautoml_path"), config_json["dataset_path"])
+                    config_json["dataset_path"] = re.sub("[a-zA-Z]:\\\\([A-Za-z0-9]+(\\\\[A-Za-z0-9]+)+)\\\\MetaAutoML", get_config_property("wsl_metaautoml_path"), config_json["dataset_path"])
                     config_json["dataset_path"] = config_json["dataset_path"].replace("\\", "/")
 
 

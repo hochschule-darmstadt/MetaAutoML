@@ -92,6 +92,7 @@ class AutoKerasAdapter:
 
         X_train, y_train, X_val, y_val = data_loader(self._configuration)
         parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), akpc.task_config)
+
         reg = ak.ImageRegressor(overwrite=True,
                                           **parameters,
                                         seed=42,

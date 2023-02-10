@@ -79,8 +79,9 @@ class DataSetAnalysisManager(Thread):
         analysis = {}
         with self.__dataset_analysis_lock.lock():
             print("[DataSetAnalysisManager]: ENTERING LOCK.")
+            schema = self.__dataset_schema_analysis()
             if self.__basic_analysis:
-                analysis.update(self.basic_analysis())
+                analysis.update(self.basic_analysis(schema))
 
             if self.__advanced_analysis:
                 analysis.update({ "plots": self.advanced_analysis()})
@@ -88,7 +89,6 @@ class DataSetAnalysisManager(Thread):
             found, dataset = self.__data_storage.get_dataset(self.__user_id, self.__dataset_id)
             analysis_details = dataset["analysis"]
             analysis_details.update(analysis)
-            schema = self.__dataset_schema_analysis()
             self.__data_storage.update_dataset(self.__user_id, self.__dataset_id, { "analysis": analysis_details, "schema": schema})
             print("[DataSetAnalysisManager]: EXITING LOCK.")
 
@@ -103,7 +103,7 @@ class DataSetAnalysisManager(Thread):
             return CsvManager.get_default_dataset_schema(self.__dataset["path"], self.__dataset["file_configuration"])
         return {}
 
-    def basic_analysis(self) -> dict:
+    def basic_analysis(self, schema) -> dict:
         """
         Basic analysis, results are returned as dict
         Analyzed are:
@@ -135,10 +135,9 @@ class DataSetAnalysisManager(Thread):
                 "number_of_rows": self.__dataset_df.shape[0],
                 "missings_per_column": dict(self.__dataset_df.isna().sum().items()),
                 "missings_per_row": DataSetAnalysisManager.__missing_values_rows(self.__dataset_df),
-                "outlier": DataSetAnalysisManager.__detect_outliers(self.__dataset_df),
+                "outlier": DataSetAnalysisManager.__detect_outliers(self.__dataset_df, schema),
                 "duplicate_columns": DataSetAnalysisManager.__detect_duplicate_columns(self.__dataset_df),
-                "duplicate_rows": DataSetAnalysisManager.__detect_duplicate_rows(self.__dataset_df),
-                "columns_datatype": DataSetAnalysisManager.__get_dataset_datatypes(self.__dataset_df)
+                "duplicate_rows": DataSetAnalysisManager.__detect_duplicate_rows(self.__dataset_df)
             })
         elif self.__dataset["type"] == ":image":
             pass
@@ -236,7 +235,7 @@ class DataSetAnalysisManager(Thread):
         return missing_rows_indices
 
     @staticmethod
-    def __detect_outliers(dataset) -> 'list[dict]':
+    def __detect_outliers(dataset, schema) -> 'dict':
         """
         Detects outliers in all columns in a dataset containing floats.
         Outliers are determined using the inter quartile range (IQR) with an outlier being classified as being above
@@ -249,17 +248,31 @@ class DataSetAnalysisManager(Thread):
         """
         import pandas as pd
 
-        outlier_columns = []
-        for column_name in dataset:
-            if pd.api.types.is_numeric_dtype(dataset[column_name]):
+        outlier_columns = {}
+
+        for column_name, dt in schema.items():
+            if dt['datatype_detected'] in [':integer', ':float']:
                 Q1 = dataset[column_name].quantile(0.25)
                 Q3 = dataset[column_name].quantile(0.75)
                 IQR = Q3 - Q1
-                #filter = (dataset[column_name] <= (Q1 - 2 * IQR)) | (dataset[column_name] >= (Q3 + 2 * IQR))
-                #outlier_indices = dataset[column_name].loc[filter].index.tolist()
-                filter = (dataset[column_name] < (Q1 - 1.5 * IQR)) | (dataset[column_name] > (Q3 + 1.5 * IQR))
+                filter = (dataset[column_name] < (Q1 - 2 * IQR)) | (dataset[column_name] > (Q3 + 2 * IQR))
                 outlier_indices = dataset[column_name].loc[filter].index.tolist()
-                outlier_columns.append({column_name: outlier_indices})
+                #Only count first 100 indexes and only add columns that have outliers to avoid empty lists
+                if len(outlier_indices) == 0:
+                    continue
+                elif len(outlier_indices) > 100:
+                    outlier_columns.update({column_name: outlier_indices[0:99]})
+                else:
+                    outlier_columns.update({column_name: outlier_indices})
+
+        #for column_name in dataset:
+        #    if pd.api.types.is_numeric_dtype(dataset[column_name]):
+        #        Q1 = dataset[column_name].quantile(0.25)
+        #        Q3 = dataset[column_name].quantile(0.75)
+        #        IQR = Q3 - Q1
+        #        filter = (dataset[column_name] < (Q1 - 2 * IQR)) | (dataset[column_name] > (Q3 + 2 * IQR))
+        #        outlier_indices = dataset[column_name].loc[filter].index.tolist()
+        #       outlier_columns.append({column_name: outlier_indices})
 
         return outlier_columns
 
@@ -318,32 +331,6 @@ class DataSetAnalysisManager(Thread):
                         total_size += os.path.getsize(fp)
 
         return total_size
-
-    @staticmethod
-    def __get_dataset_datatypes(dataset):
-        dataset_datatypes = {}
-
-        def get_datatype(numpy_datatype):
-            if numpy_datatype == np.dtype(np.object):
-                return ":string"
-            elif numpy_datatype == np.dtype(np.unicode_):
-                return ":string"
-            elif numpy_datatype == np.dtype(np.int64):
-                return ":integer"
-            elif numpy_datatype == np.dtype(np.float_):
-                return ":float"
-            elif numpy_datatype == np.dtype(np.bool_):
-                return ":boolean"
-            elif numpy_datatype == np.dtype(np.datetime64):
-                return ":datetime"
-            else:
-                return ":string"
-
-        for column in dataset.columns:
-            numpy_datatype = dataset[column].dtype.name
-            dataset_datatypes.update({ column: get_datatype(numpy_datatype)})
-
-        return dataset_datatypes
 
     def __process_categorical_columns(self):
         """

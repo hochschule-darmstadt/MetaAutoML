@@ -12,7 +12,7 @@ import pandas as pd
 from predict_time_sources import SplitMethod, feature_preparation
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, mean_squared_error
-from sklearn.metrics import classification_report
+from sklearn.metrics import *
 from sklearn.metrics import mean_absolute_percentage_error
 from JsonUtil import get_config_property
 from TemplateGenerator import TemplateGenerator
@@ -83,18 +83,19 @@ def get_response(config: "StartAutoMlRequest", test_score: float, prediction_tim
 
 #region
 
-def data_loader(config: "StartAutoMlRequest") -> Any:
+def data_loader(config: "StartAutoMlRequest", image_test_folder=False) -> Any:
     """Load the dataframes for the requested dataset, by loading them into different DataFrames. See Returns section for more information.
 
     Args:
         config (StartAutoMlRequest): The StartAutoMlRequest request, extended with the trainings folder paths
+        image_test_folder (Boolean): Used for image datasets, if the test folder should be loaded. Default is, read the train folder
 
     Returns:
         Any: Depending on the dataset type: CSV data: tuple[DataFrame (Train), DataFrame (Test)], image data: tuple[DataFrame (X_train), DataFrame (y_train), DataFrame (X_test), DataFrame (y_test)]
     """
 
     if config["configuration"]["task"] in [":image_classification", ":image_regression"]:
-        return read_image_dataset(config)
+        return read_image_dataset(config, image_test_folder)
     else:
         return read_tabular_dataset_training_data(config)
 
@@ -109,21 +110,6 @@ def export_model(model: Any, path: str, file_name: str):
     """
     with open(os.path.join(path, file_name), 'wb+') as file:
         dill.dump(model, file)
-
-
-def start_automl_process(config: "StartAutoMlRequest") -> subprocess.Popen:
-    """Start the AutoML subprocess
-
-    Args:
-        config (StartAutoMlRequest): The StartAutoMlRequest request, extended with the trainings folder paths
-
-    Returns:
-        subprocess.Popen: The AutoML subprocess instance
-    """
-    python_env = os.getenv("PYTHON_ENV", default="PYTHON_ENV_UNSET")
-    return subprocess.Popen([python_env, "AutoML.py", config.job_folder_location],
-                            stdout=subprocess.PIPE,
-                            universal_newlines=True)
 
 def generate_script(config: "StartAutoMlRequest") -> None:
     """Generate the Python script allowing the independent execution of the model
@@ -181,6 +167,9 @@ def evaluate(config: "StartAutoMlRequest", config_path: str) -> Tuple[float, flo
     config = config.__dict__
     config["dataset_configuration"] = config["dataset_configuration"]
     file_path = config["dataset_path"]
+    if config["configuration"]["task"] in[":image_classification", ":image_regression"]:
+        #for image data we need to redirect to the test folder
+        file_path = os.path.join(file_path, "test")
     result_path = config["result_folder_location"]
     # predict
     os.chmod(os.path.join(result_path, "predict.py"), 0o777)
@@ -198,7 +187,7 @@ def evaluate(config: "StartAutoMlRequest", config_path: str) -> Tuple[float, flo
         file_path = write_tabular_dataset_data(test.drop(target, axis=1), os.path.dirname(file_path), config)
 
     elif(config["configuration"]["task"] in[":image_classification", ":image_regression"]):
-        X_train, y_train, X_test, y_test = data_loader(config)
+        X_test, y_test = data_loader(config, image_test_folder=True)
 
     predict_start = time.time()
     subprocess.call([python_env, os.path.join(result_path, "predict.py"), file_path, os.path.join(result_path, "predictions.csv")])
@@ -207,41 +196,108 @@ def evaluate(config: "StartAutoMlRequest", config_path: str) -> Tuple[float, flo
     predictions = pd.read_csv(os.path.join(result_path, "predictions.csv"))
     os.remove(os.path.join(result_path, "predictions.csv"))
 
-    if config["configuration"]["task"] == ":tabular_classification":
-        return accuracy_score(test[target], predictions["predicted"]), (predict_time * 1000) / test.shape[0]
+    if config["configuration"]["task"] in [":tabular_classification", ":text_classification", ":image_classification", ":time_series_classification"]:
+        if config["configuration"]["task"] == ":image_classification":
+            return compute_classification_metrics(y_test, predictions["predicted"]), (predict_time * 1000) / pd.Series(y_test).shape[0]
+        else:
+            return compute_classification_metrics(pd.Series(test[target]), predictions["predicted"]), (predict_time * 1000) / test.shape[0]
+    elif config["configuration"]["task"] in [":tabular_regression", ":text_regression", ":image_regression", ":time_series_forecasting"]:
+        if config["configuration"]["task"] == ":image_regression":
+            return compute_regression_metrics(y_test, predictions["predicted"]), (predict_time * 1000) / pd.Series(y_test).shape[0]
+        else:
+            return compute_regression_metrics(pd.Series(test[target]), predictions["predicted"]), (predict_time * 1000) / test.shape[0]
 
-    elif config["configuration"]["task"] == ":tabular_regression":
-        return mean_squared_error(test[target], predictions["predicted"], squared=False), \
-               (predict_time * 1000) / test.shape[0]
+def compute_classification_metrics(y_should: pd.Series, y_is: pd.Series) -> dict:
+    """Compute the metrics collection for classification tasks
 
-    elif config["configuration"]["task"] == ":image_classification":
-        return accuracy_score(y_test, predictions["predicted"]), (predict_time * 1000) / y_test.shape[0]
+    Args:
+        y_should (pd.Series): The series of the label for the test set
+        y_is (pd.Series): The series of the label of the model predictions for the test set
 
-    elif config["configuration"]["task"] == ":image_regression":
-        return mean_squared_error(y_test, predictions["predicted"], squared=False), \
-               (predict_time * 1000) / y_test.shape[0]
-    elif config["configuration"]["task"] == ":time_series_classification":
-        train, test = data_loader(config)
-        target = config["configuration"]["target"]
+    Returns:
+        dict: Dictionary containing the computed metrics, key is ontology IRI for the metric and value is the value
+    """
+    from sklearn.preprocessing import LabelEncoder
 
-        test_target = test[target].astype("string")
-        predicted_target = predictions["predicted"].astype("string")
-        acc_score = accuracy_score(test_target, predicted_target)
-        print("accuracy", acc_score)
-        print("Classification Report \n",
-              classification_report(test_target, predicted_target,zero_division=0)
-              )
-        return acc_score, (predict_time * 1000) / test.shape[0]
-    elif config["configuration"]["task"] == ":time_series_forecasting":
-        return mean_absolute_percentage_error(test[target], predictions["predicted"]), \
-               (predict_time * 1000) / test.shape[0]
-    elif config["configuration"]["task"] == ":text_classification":
-        return accuracy_score(test[target], predictions["predicted"]), (predict_time * 1000) / test.shape[0]
+    if y_is.dtype == object:
+        #If the label is string based, we need to convert it to int values or else some metric wont compute correctly
+        enc = LabelEncoder()
+        enc.fit(y_should.unique())
+        y_should = pd.Series(enc.transform(y_should))
+        y_is = pd.Series(enc.transform(y_is))
+    score = {
+        ":accuracy": float(accuracy_score(y_should, y_is)),
+        ":balanced_accuracy": float(balanced_accuracy_score(y_should, y_is)),
+        ":brier": float(brier_score_loss(y_should, y_is)),
+    }
+    if len(y_should.unique()) == 2:
+        #Metrics only for binary classification
+        tn, fp, fn, tp = confusion_matrix(y_should, y_is).ravel()
+        score.update({
+        ":average_precision": float(average_precision_score(y_should, y_is, average='weighted')),
+        ":true_positives": float(tp),
+        ":false_positives": float(fp),
+        ":true_negatives": float(tn),
+        ":false_negatives": float(fn),
+        ":f_measure": float(f1_score(y_should, y_is)),
+        ":precision": float(precision_score(y_should, y_is)),
+        ":recall": float(recall_score(y_should, y_is))
+        })
+    else:
+        #Metrics only for multiclass classification
+        score.update({
 
-    elif config["configuration"]["task"] == ":text_regression":
-        return mean_squared_error(test[target], predictions["predicted"], squared=False), \
-               (predict_time * 1000) / test.shape[0]
+        ":f_measure": float(f1_score(y_should, y_is, average=None)),
+        ":f_measure_micro": float(f1_score(y_should, y_is, average='micro')),
+        ":f_measure_macro": float(f1_score(y_should, y_is, average='macro')),
+        ":f_measure_weighted": float(f1_score(y_should, y_is, average='weighted')),
+        ":precision": float(precision_score(y_should, y_is, average=None)),
+        ":precision_micro": float(precision_score(y_should, y_is, average='micro')),
+        ":precision_macro": float(precision_score(y_should, y_is, average='macro')),
+        ":precision_weighted": float(precision_score(y_should, y_is, average='weighted')),
+        ":recall": float(recall_score(y_should, y_is, average=None)),
+        ":recall_micro": float(recall_score(y_should, y_is, average='micro')),
+        ":recall_macro": float(recall_score(y_should, y_is, average='macro')),
+        ":recall_weighted": float(recall_score(y_should, y_is, average='weighted'))
+        })
+    return score
 
+def compute_regression_metrics(y_should: pd.Series, y_is: pd.Series) -> dict:
+    """Compute the metrics collection for regression tasks
+
+    Args:
+        y_should (pd.Series): The series of the label for the test set
+        y_is (pd.Series): The series of the label of the model predictions for the test set
+
+    Returns:
+        dict: Dictionary containing the computed metrics, key is ontology IRI for the metric and value is the value
+    """
+    score = {
+        ":explained_variance": float(explained_variance_score(y_should, y_is)),
+        ":max_error": float(max_error(y_should, y_is)),
+        ":mean_absolute_error": float(mean_absolute_error(y_should, y_is)),
+        ":mean_squared_error": float(mean_squared_error(y_should, y_is, squared=True)),
+        ":rooted_mean_squared_error": float(mean_squared_error(y_should, y_is, squared=False)),
+        ":median_absolute_error": float(median_absolute_error(y_should, y_is)),
+        ":r2": float(r2_score(y_should, y_is)),
+        ":mean_absolute_percentage_error": float(mean_absolute_percentage_error(y_should, y_is)),
+    }
+    try:
+        score.update({
+        ":d2_absolute_error": float(d2_absolute_error_score(y_should, y_is)),
+        ":d2_pinball_score": float(d2_pinball_score(y_should, y_is)),
+        ":d2_tweedie_score": float(d2_tweedie_score(y_should, y_is))
+        })
+    except Exception as e:
+        print("computing D2 scores failed:" + e)
+    if all(val > 0 for val in y_is) and all(val > 0 for val in y_should):
+        score.update({
+        ":mean_poisson_deviance": float(mean_poisson_deviance(y_should, y_is)),
+        ":mean_gamma_deviance": float(mean_gamma_deviance(y_should, y_is)),
+        ":mean_squared_log_error": float(mean_squared_log_error(y_should, y_is, squared=True)),
+        ":rooted_mean_squared_log_error": float(mean_squared_log_error(y_should, y_is, squared=False))
+        })
+    return score
 
 def predict(config: dict, config_path: str, automl: str) -> Tuple[float, str]:
     """Execute a prediction on an uploaded live dataset
@@ -328,7 +384,7 @@ def setup_run_environment(request: "StartAutoMlRequest", adapter_name: str) -> "
     #For WSL users we need to adjust the path prefix for the dataset location to windows path
     if get_config_property("local_execution") == "YES":
         if get_config_property("running_in_wsl") == "YES":
-            request_dict["dataset_path"] = re.sub("[a-zA-Z]:/([A-Za-z0-9]+(/[A-Za-z0-9]+)+)/MetaAutoML", get_config_property("wsl_metaautoml_path"), request_dict["dataset_path"])
+            request_dict["dataset_path"] = re.sub("[a-zA-Z]:\\\\([A-Za-z0-9]+(\\\\[A-Za-z0-9]+)+)\\\\MetaAutoML", get_config_property("wsl_metaautoml_path"), request_dict["dataset_path"])
             request_dict["dataset_path"] = request_dict["dataset_path"].replace("\\", "/")
             job_folder_location = job_folder_location.replace("\\", "/")
             model_folder_location = model_folder_location.replace("\\", "/")
@@ -548,7 +604,7 @@ def save_configuration_in_json(configuration: dict):
 
 #region
 
-def read_image_dataset(config: "StartAutoMlRequest") -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+def read_image_dataset(config: "StartAutoMlRequest", image_test_folder=False) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     """Read image dataset and create training and test dataframes
 
     Args:
@@ -571,15 +627,20 @@ def read_image_dataset(config: "StartAutoMlRequest") -> Tuple[pd.DataFrame, pd.D
 
         local_dir_path = os.path.dirname(local_file_path)
     """
-    data_dir = config["dataset_path"]
-    train_df_list =[]
-    test_df_list =[]
 
-    def read_image_dataset_folder(sub_folder_type):
+    #we need to access the train sub folder for training
+    data_dir = config["dataset_path"]
+    if image_test_folder == True:
+        data_dir = os.path.join(data_dir, "test")
+    else:
+        data_dir = os.path.join(data_dir, "train")
+    train_df_list =[]
+
+    def read_image_dataset_folder():
         files = []
         df = []
-        for folder in os.listdir(os.path.join(data_dir, sub_folder_type)):
-            files.append(glob.glob(os.path.join(data_dir, sub_folder_type, folder, "*.jp*g")))
+        for folder in os.listdir(os.path.join(data_dir)):
+            files.append(glob.glob(os.path.join(data_dir, folder, "*.jp*g")))
 
         df_list =[]
 
@@ -593,11 +654,9 @@ def read_image_dataset(config: "StartAutoMlRequest") -> Tuple[pd.DataFrame, pd.D
             df_list.append(df)
         return df_list
 
-    train_df_list = read_image_dataset_folder("train")
-    test_df_list = read_image_dataset_folder("test")
+    train_df_list = read_image_dataset_folder()
 
     train_data = pd.concat(train_df_list, axis=0,ignore_index=True)
-    test_data = pd.concat(test_df_list, axis=0,ignore_index=True)
 
     def img_preprocess(img):
         """
@@ -612,9 +671,7 @@ def read_image_dataset(config: "StartAutoMlRequest") -> Tuple[pd.DataFrame, pd.D
 
     X_train = np.array([img_preprocess(p) for p in train_data.name.values])
     y_train = train_data.outcome.values
-    X_test = np.array([img_preprocess(p) for p in test_data.name.values])
-    y_test = test_data.outcome.values
-    return X_train, y_train, X_test, y_test
+    return X_train, y_train
 
 #endregion
 

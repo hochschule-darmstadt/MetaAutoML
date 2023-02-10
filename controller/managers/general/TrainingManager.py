@@ -100,7 +100,7 @@ class TrainingManager:
                     model_detail.ml_model_type =  model["ml_model_type"]
                     model_detail.ml_library =  model["ml_library"]
                     model_detail.path = model["path"]
-                    model_detail.test_score =  model["test_score"]
+                    model_detail.test_score =  json.dumps(model["test_score"])
                     model_detail.prediction_time =  model["prediction_time"]
 
                     model_runtime = ModelruntimeProfile()
