@@ -1,5 +1,5 @@
 ### Ontology file generated from ML_Ontology.xlsx.
-### 2023-01-24 16:39:18.894762
+### 2023-02-10 08:58:01.843926
 
 
 # PREFIXES
@@ -363,6 +363,12 @@
     skos:broader :regression ;
     :belongs_to :supervised_learning ;
     :has_dataset_type :video .
+:association_rule_learning a :ML_task ;
+    skos:prefLabel "association rule learning" ;
+    :belongs_to :supervised_learning ;
+    :has_dataset_type :tabular ;
+    rdfs:comment "Association rule learning is a rule-based machine learning method for discovering interesting relations between variables in large databases. It is intended to identify strong rules discovered in databases using some measures of interestingness." ;
+    rdfs:seeAlso <https://www.wikidata.org/wiki/Q386780> .
 
 
 # ML_approach
@@ -1041,8 +1047,8 @@
     skos:prefLabel "area under roc curve weighted" ;
     skos:altLabel "AUC weighted" ;
     rdfs:comment "AUC score for multiclass classification using weighted averaging." .
-:average_precision_score a :Metric ;
-    skos:prefLabel "average precision score" ;
+:average_precision a :Metric ;
+    skos:prefLabel "average precision" ;
     skos:altLabel "AP" ;
     :used_for :classification .
 :balanced_accuracy a :Metric ;
@@ -1246,8 +1252,8 @@
     :used_for :regression ;
     rdfs:comment "type of coefficient" ;
     rdfs:seeAlso <https://www.wikidata.org/entity/Q1136628> .
-:poission a :Metric ;
-    skos:prefLabel "poission" .
+:poisson a :Metric ;
+    skos:prefLabel "poisson" .
 :precision a :Metric ;
     skos:prefLabel "precision" ;
     skos:altLabel "positive predictive value" , "PPV" ;
@@ -1360,6 +1366,24 @@
 :r2 a :Metric ;
     skos:prefLabel "r2" ;
     skos:altLabel "R2 scrore" ;
+    :used_for :regression .
+:brier a :Metric ;
+    skos:prefLabel "brier" ;
+    :used_for :classification .
+:mean_poisson_deviance a :Metric ;
+    skos:prefLabel "mean poisson deviance" ;
+    :used_for :regression .
+:mean_gamma_deviance a :Metric ;
+    skos:prefLabel "mean gamma deviance" ;
+    :used_for :regression .
+:d2_absolute_error a :Metric ;
+    skos:prefLabel "d2 absolute error" ;
+    :used_for :regression .
+:d2_pinball_score a :Metric ;
+    skos:prefLabel "d2 pinball score" ;
+    :used_for :regression .
+:d2_tweedie_score a :Metric ;
+    skos:prefLabel "d2 tweedie score" ;
     :used_for :regression .
 
 
@@ -1478,7 +1502,7 @@
     skos:prefLabel "Autogluon" ;
     :used_for :scikit_learn_lib , :catboost_lib , :lightgbm_lib , :xgboost_lib , :pytorch_lib , :mxnet_lib ;
     :supported_by_oma_ml "True" ;
-    :can_perform :tabular_classification , :tabular_regression , :text_classification , :text_regression , :sentiment_analysis , :sentence_similarity , :image_classification , :object_detection , :video_classification , :video_object_tracking , :action_recognition .
+    :can_perform :tabular_classification , :tabular_regression , :text_classification , :text_regression , :sentiment_analysis , :sentence_similarity , :image_classification , :object_detection , :video_classification , :video_object_tracking , :action_recognition , :time_series_forecasting .
 :autokeras a :AutoML_solution ;
     skos:prefLabel "Autokeras" ;
     :used_for :keras_lib ;
@@ -1796,18 +1820,18 @@
     :automl_solution :autosklearn ;
     :ml_task :tabular_regression ;
     :parameter_value :metric_autosklearn_regression , :exclude_preprocessor_autosklearn .
-:tabular_classification_in_auto_keras a :Configuration_item ;
-    skos:prefLabel "tabular classification in Auto-Keras" ;
+:tabular_classification_in_autokeras a :Configuration_item ;
+    skos:prefLabel "tabular classification in AutoKeras" ;
     :category :task_configuration ;
     :automl_solution :autokeras ;
     :ml_task :tabular_classification ;
-    :parameter_value :metric_autokeras_classification , :loss_autokeras_classification , :max_trials_autokeras , :tuner_autokeras , :max_model_size_autokeras .
-:tabular_regression_in_auto_keras a :Configuration_item ;
-    skos:prefLabel "tabular regression in Auto-Keras" ;
+    :parameter_value :metric_autokeras_tabular_classification , :loss_autokeras_tabular_classification , :max_trials_autokeras , :tuner_autokeras_tabular_classification , :max_model_size_autokeras .
+:tabular_regression_in_autokeras a :Configuration_item ;
+    skos:prefLabel "tabular regression in AutoKeras" ;
     :category :task_configuration ;
     :automl_solution :autokeras ;
     :ml_task :tabular_regression ;
-    :parameter_value :metric_autokeras_regression , :loss_autokeras_regression , :max_trials_autokeras , :tuner_autokeras , :max_model_size_autokeras .
+    :parameter_value :metric_autokeras_tabular_regression , :loss_autokeras_tabular_regression , :max_trials_autokeras , :tuner_autokeras_tabular_regression , :max_model_size_autokeras .
 :tabular_classification_in_flaml a :Configuration_item ;
     skos:prefLabel "tabular classification in FLAML" ;
     :category :task_configuration ;
@@ -1909,13 +1933,25 @@
     :category :task_configuration ;
     :automl_solution :autokeras ;
     :ml_task :image_classification ;
-    :parameter_value :metric_autokeras_image_classification , :loss_autokeras_classification , :max_trials_autokeras , :tuner_autokeras , :max_model_size_autokeras .
+    :parameter_value :metric_autokeras_image_classification , :loss_autokeras_image_classification , :max_trials_autokeras , :tuner_autokeras_image_classification , :max_model_size_autokeras .
+:image_regression_in_autokeras a :Configuration_item ;
+    skos:prefLabel "image regression in AutoKeras" ;
+    :category :task_configuration ;
+    :automl_solution :autokeras ;
+    :ml_task :image_regression ;
+    :parameter_value :metric_autokeras_image_regression , :loss_autokeras_image_regression , :max_trials_autokeras , :tuner_autokeras_image_regression , :max_model_size_autokeras .
 :text_classification_in_autokeras a :Configuration_item ;
     skos:prefLabel "text classification in AutoKeras" ;
     :category :task_configuration ;
     :automl_solution :autokeras ;
     :ml_task :text_classification ;
-    :parameter_value :metric_autokeras_text_classification , :loss_autokeras_classification , :max_trials_autokeras , :tuner_autokeras , :max_model_size_autokeras .
+    :parameter_value :metric_autokeras_text_classification , :loss_autokeras_text_classification , :max_trials_autokeras , :tuner_autokeras_text_classification , :max_model_size_autokeras .
+:text_regression_in_autokeras a :Configuration_item ;
+    skos:prefLabel "text regression in AutoKeras" ;
+    :category :task_configuration ;
+    :automl_solution :autokeras ;
+    :ml_task :text_regression ;
+    :parameter_value :metric_autokeras_text_regression , :loss_autokeras_text_regression , :max_trials_autokeras , :tuner_autokeras_text_regression , :max_model_size_autokeras .
 :tabular_classification_in_evalml a :Configuration_item ;
     skos:prefLabel "tabular classification in EvalML" ;
     :category :task_configuration ;
@@ -1952,6 +1988,12 @@
     :automl_solution :evalml ;
     :ml_task :time_series_forecasting ;
     :parameter_value :use_approach_evalml_time_series_regression , :metric_evalml_time_series_regression , :tuner_class_evalml .
+:time_series_forecasting_in_autokeras a :Configuration_item ;
+    skos:prefLabel "time series forecasting in AutoKeras" ;
+    :category :task_configuration ;
+    :automl_solution :autokeras ;
+    :ml_task :time_series_forecasting ;
+    :parameter_value :metric_autokeras_time_series_forecasting , :loss_autokeras_time_series_forecasting , :max_trials_autokeras , :tuner_autokeras_time_series_forecasting , :max_model_size_autokeras .
 :ensemble_nbest a :Configuration_item ;
     skos:prefLabel "ensemble_nbest" ;
     :category :parameter ;
@@ -1977,11 +2019,20 @@
     skos:broader :use_approach ;
     :has_datatype :list ;
     :parameter_value :adaboost , :decision_tree , :extra_tree , :gradient_boosting_tree , :k_nearest_neighbor , :linear_svm , :multilayer_perceptron , :random_forest , :gaussian_naives_bayes .
-:use_approach_autokeras_classification a :Configuration_item ;
-    skos:prefLabel "use approach AutoKeras classification" ;
+:use_approach_autokeras_tabular_classification a :Configuration_item ;
+    skos:prefLabel "use approach AutoKeras tabular classification" ;
     :category :parameter ;
     skos:broader :use_approach ;
     :has_datatype :list .
+:use_approach_autokeras_text_classification a :Configuration_item ;
+    skos:prefLabel "use approach AutoKeras text classification" ;
+    :category :parameter ;
+    skos:broader :use_approach ;
+    :has_datatype :list .
+:use_approach_autokeras_image_classification a :Configuration_item ;
+    skos:prefLabel "use approach AutoKeras image classification" ;
+    :category :parameter ;
+    skos:broader :use_approach .
 :use_approach_flaml_classification a :Configuration_item ;
     skos:prefLabel "use approach FLAML classification" ;
     :category :parameter ;
@@ -1994,8 +2045,23 @@
     skos:broader :use_approach ;
     :has_datatype :list ;
     :parameter_value :adaboost , :bayesian_linear_regression , :decision_tree , :extra_tree , :gaussian_process , :gradient_boosting_tree , :k_nearest_neighbor , :linear_svm , :multilayer_perceptron , :random_forest .
-:use_approach_autokeras_regression a :Configuration_item ;
-    skos:prefLabel "use approach AutoKeras regression" ;
+:use_approach_autokeras_tabular_regression a :Configuration_item ;
+    skos:prefLabel "use approach AutoKeras tabular regression" ;
+    :category :parameter ;
+    skos:broader :use_approach ;
+    :has_datatype :list .
+:use_approach_autokeras_text_regression a :Configuration_item ;
+    skos:prefLabel "use approach AutoKeras text regression" ;
+    :category :parameter ;
+    skos:broader :use_approach ;
+    :has_datatype :list .
+:use_approach_autokeras_image_regression a :Configuration_item ;
+    skos:prefLabel "use approach AutoKeras image regression" ;
+    :category :parameter ;
+    skos:broader :use_approach ;
+    :has_datatype :list .
+:use_approach_autokeras_time_series_forecasting a :Configuration_item ;
+    skos:prefLabel "use approach AutoKeras time series forecasting" ;
     :category :parameter ;
     skos:broader :use_approach ;
     :has_datatype :list .
@@ -2088,10 +2154,6 @@
     skos:broader :use_approach ;
     :has_datatype :list ;
     :parameter_value :inception_time , :residual_neural_network , :deep_convolutional_lstm , :convolutional_neural_network .
-:use_approach_autokeras_image_classification a :Configuration_item ;
-    skos:prefLabel "use approach AutoKeras image classification" ;
-    :category :parameter ;
-    skos:broader :use_approach .
 :use_approach_evalml_tabular_classification a :Configuration_item ;
     skos:prefLabel "use approach EvalML tabular classification" ;
     :category :parameter ;
@@ -2138,12 +2200,12 @@
     skos:broader :metric ;
     :has_datatype :single_value ;
     :parameter_value :accuracy , :balanced_accuracy , :roc_auc , :average_precision , :log_loss , :precision_macro , :precision_micro , :precision_samples , :precision_weighted , :recall_macro , :recall_micro , :recall_samples , :recall_weighted , :f1_macro , :f1_micro , :f1_samples , :f1_weighted .
-:metric_autokeras_classification a :Configuration_item ;
-    skos:prefLabel "metric autokeras classification" ;
+:metric_autokeras_tabular_classification a :Configuration_item ;
+    skos:prefLabel "metric autokeras tabular classification" ;
     :category :parameter ;
     skos:broader :metric ;
-    :has_datatype :list ;
-    :parameter_value :accuracy , :area_under_roc_curve , :binary_accuracy , :binary_cross_entropy , :categorical_accuracy , :categorical_cross_entropy , :false_negatives , :false_positives , :hinge , :kullback_leibler_divergence , :mean , :mean_tensor , :poission , :precision , :recall , :sparse_categorical_accuracy , :sparce_top_k_categorical_accuracy , :squared_hinge , :sum , :top_k_categorical_accuracy , :true_negatives , :true_positives .
+    :has_datatype :single_value ;
+    :parameter_value :accuracy , :binary_accuracy , :categorical_accuracy , :sparse_categorical_accuracy , :top_k_categorical_accuracy , :sparse_top_k_categorical_accuracy , :binary_cross_entropy , :categorical_cross_entropy , :poisson , :area_under_roc_curve , :precision , :recall , :true_positives , :true_negatives , :false_positives , :false_negatives , :hinge , :squared_hinge , :categorical_hinge .
 :metric_flaml_classification a :Configuration_item ;
     skos:prefLabel "metric FLAML classification" ;
     :category :parameter ;
@@ -2156,12 +2218,12 @@
     skos:broader :metric ;
     :has_datatype :single_value ;
     :parameter_value :mean_absolute_error , :mean_squared_error , :root_mean_squared_error , :mean_squared_log_error , :median_absolute_error , :r2 .
-:metric_autokeras_regression a :Configuration_item ;
-    skos:prefLabel "metric autokeras regression" ;
+:metric_autokeras_tabular_regression a :Configuration_item ;
+    skos:prefLabel "metric autokeras tabular regression" ;
     :category :parameter ;
     skos:broader :metric ;
-    :has_datatype :list ;
-    :parameter_value :cosine_similarity , :mean_squared_error , :mean_absolute_error , :log_cosh_error , :mean_absolute_percentage_error , :mean_squared_log_error , :root_mean_squared_error .
+    :has_datatype :single_value ;
+    :parameter_value :mean_squared_error , :root_mean_squared_error , :mean_absolute_error , :mean_absolute_percentage_error , :mean_squared_log_error , :cosine_similarity , :log_cosh_error .
 :metric_flaml_regression a :Configuration_item ;
     skos:prefLabel "metric FLAML regression" ;
     :category :parameter ;
@@ -2238,12 +2300,32 @@
     skos:prefLabel "metric AutoKeras image classification" ;
     :category :parameter ;
     skos:broader :metric ;
-    :parameter_value :accuracy , :area_under_roc_curve , :binary_accuracy , :binary_cross_entropy , :categorical_accuracy , :categorical_cross_entropy , :false_negatives , :false_positives , :hinge , :kullback_leibler_divergence , :mean , :mean_tensor , :poission , :precision , :recall , :sparse_categorical_accuracy , :sparse_top_k_categorical_accuracy , :squared_hinge , :sum , :top_k_categorical_accuracy , :true_negatives , :true_positves .
+    :has_datatype :single_value ;
+    :parameter_value :accuracy , :binary_accuracy , :categorical_accuracy , :sparse_categorical_accuracy , :top_k_categorical_accuracy , :sparse_top_k_categorical_accuracy , :binary_cross_entropy , :categorical_cross_entropy , :poisson , :area_under_roc_curve , :precision , :recall , :true_positives , :true_negatives , :false_positives , :false_negatives , :hinge , :squared_hinge , :categorical_hinge .
 :metric_autokeras_text_classification a :Configuration_item ;
     skos:prefLabel "metric AutoKeras text classification" ;
     :category :parameter ;
     skos:broader :metric ;
-    :parameter_value :accuracy , :area_under_roc_curve , :binary_accuracy , :binary_cross_entropy , :categorical_accuracy , :categorical_cross_entropy , :false_negatives , :false_positives , :hinge , :kullback_leibler_divergence , :mean , :mean_tensor , :poission , :precision , :recall , :sparse_categorical_accuracy , :sparce_top_k_categorical_accuracy , :squared_hinge , :sum , :top_k_categorical_accuracy , :true_negatives , :true_positives .
+    :has_datatype :single_value ;
+    :parameter_value :accuracy , :binary_accuracy , :categorical_accuracy , :sparse_categorical_accuracy , :top_k_categorical_accuracy , :sparse_top_k_categorical_accuracy , :binary_cross_entropy , :categorical_cross_entropy , :poisson , :area_under_roc_curve , :precision , :recall , :true_positives , :true_negatives , :false_positives , :false_negatives , :hinge , :squared_hinge , :categorical_hinge .
+:metric_autokeras_image_regression a :Configuration_item ;
+    skos:prefLabel "metric AutoKeras image regression" ;
+    :category :parameter ;
+    skos:broader :metric ;
+    :has_datatype :single_value ;
+    :parameter_value :mean_squared_error , :root_mean_squared_error , :mean_absolute_error , :mean_absolute_percentage_error , :mean_squared_log_error , :cosine_similarity , :log_cosh_error .
+:metric_autokeras_text_regression a :Configuration_item ;
+    skos:prefLabel "metric AutoKeras text regression" ;
+    :category :parameter ;
+    skos:broader :metric ;
+    :has_datatype :single_value ;
+    :parameter_value :mean_squared_error , :root_mean_squared_error , :mean_absolute_error , :mean_absolute_percentage_error , :mean_squared_log_error , :cosine_similarity , :log_cosh_error .
+:metric_autokeras_time_series_forecasting a :Configuration_item ;
+    skos:prefLabel "metric AutoKeras time series forecasting" ;
+    :category :parameter ;
+    skos:broader :metric ;
+    :has_datatype :single_value ;
+    :parameter_value :mean_squared_error , :root_mean_squared_error , :mean_absolute_error , :mean_absolute_percentage_error , :mean_squared_log_error , :cosine_similarity , :log_cosh_error .
 :metric_evalml_classification a :Configuration_item ;
     skos:prefLabel "metric EvalML classification" ;
     :category :parameter ;
@@ -2297,32 +2379,105 @@
 :max_trials_autokeras a :Configuration_item ;
     skos:prefLabel "max_trials_autokeras" ;
     :category :parameter ;
+    skos:broader :max_trials ;
     :has_datatype :integer .
-:tuner_autokeras a :Configuration_item ;
-    skos:prefLabel "tuner autokeras" ;
+:tuner a :Configuration_item ;
+    skos:prefLabel "tuner" ;
     :category :parameter ;
+    :has_datatype :single_value .
+:tuner_autokeras_tabular_regression a :Configuration_item ;
+    skos:prefLabel "tuner autokeras tabular regression" ;
+    :category :parameter ;
+    skos:broader :tuner ;
+    :has_datatype :single_value ;
+    :parameter_value :greedy , :bayesian , :random , :hyperband .
+:tuner_autokeras_tabular_classification a :Configuration_item ;
+    skos:prefLabel "tuner autokeras tabular classification" ;
+    :category :parameter ;
+    skos:broader :tuner ;
+    :has_datatype :single_value ;
+    :parameter_value :greedy , :bayesian , :random , :hyperband .
+:tuner_autokeras_image_regression a :Configuration_item ;
+    skos:prefLabel "tuner autokeras image regression" ;
+    :category :parameter ;
+    skos:broader :tuner ;
+    :has_datatype :single_value ;
+    :parameter_value :greedy , :bayesian , :random , :hyperband .
+:tuner_autokeras_image_classification a :Configuration_item ;
+    skos:prefLabel "tuner autokeras image classification" ;
+    :category :parameter ;
+    skos:broader :tuner ;
+    :has_datatype :single_value ;
+    :parameter_value :greedy , :bayesian , :random , :hyperband .
+:tuner_autokeras_text_regression a :Configuration_item ;
+    skos:prefLabel "tuner autokeras text regression" ;
+    :category :parameter ;
+    skos:broader :tuner ;
+    :has_datatype :single_value ;
+    :parameter_value :greedy , :bayesian , :random , :hyperband .
+:tuner_autokeras_text_classification a :Configuration_item ;
+    skos:prefLabel "tuner autokeras text classification" ;
+    :category :parameter ;
+    skos:broader :tuner ;
+    :has_datatype :single_value ;
+    :parameter_value :greedy , :bayesian , :random , :hyperband .
+:tuner_autokeras_time_series_forecasting a :Configuration_item ;
+    skos:prefLabel "tuner autokeras time series forecasting" ;
+    :category :parameter ;
+    skos:broader :tuner ;
     :has_datatype :single_value ;
     :parameter_value :greedy , :bayesian , :random , :hyperband .
 :tuner_class_evalml a :Configuration_item ;
     skos:prefLabel "tuner class evalml" ;
     :category :parameter ;
+    skos:broader :tuner ;
     :has_datatype :single_value ;
     :parameter_value :random , :grid_search , :skopt .
 :loss a :Configuration_item ;
     skos:prefLabel "loss" ;
     :category :parameter .
-:loss_autokeras_regression a :Configuration_item ;
-    skos:prefLabel "loss autokeras regression" ;
+:loss_autokeras_tabular_regression a :Configuration_item ;
+    skos:prefLabel "loss autokeras tabular regression" ;
     :category :parameter ;
     skos:broader :loss ;
     :has_datatype :single_value ;
-    :parameter_value :mean_squared_error .
-:loss_autokeras_classification a :Configuration_item ;
-    skos:prefLabel "loss autokeras classification" ;
+    :parameter_value :mean_squared_error , :root_mean_squared_error , :mean_absolute_error , :mean_absolute_percentage_error , :mean_squared_log_error , :cosine_similarity , :log_cosh_error .
+:loss_autokeras_tabular_classification a :Configuration_item ;
+    skos:prefLabel "loss autokeras tabular classification" ;
     :category :parameter ;
     skos:broader :loss ;
     :has_datatype :single_value ;
     :parameter_value :binary_cross_entropy , :categorical_cross_entropy .
+:loss_autokeras_image_regression a :Configuration_item ;
+    skos:prefLabel "loss autokeras image regression" ;
+    :category :parameter ;
+    skos:broader :loss ;
+    :has_datatype :single_value ;
+    :parameter_value :mean_squared_error .
+:loss_autokeras_image_classification a :Configuration_item ;
+    skos:prefLabel "loss autokeras image classification" ;
+    :category :parameter ;
+    skos:broader :loss ;
+    :has_datatype :single_value ;
+    :parameter_value :binary_cross_entropy , :categorical_cross_entropy .
+:loss_autokeras_text_regression a :Configuration_item ;
+    skos:prefLabel "loss autokeras text regression" ;
+    :category :parameter ;
+    skos:broader :loss ;
+    :has_datatype :single_value ;
+    :parameter_value :mean_squared_error .
+:loss_autokeras_text_classification a :Configuration_item ;
+    skos:prefLabel "loss autokeras text classification" ;
+    :category :parameter ;
+    skos:broader :loss ;
+    :has_datatype :single_value ;
+    :parameter_value :binary_cross_entropy , :categorical_cross_entropy .
+:loss_autokeras_time_series_forecasting a :Configuration_item ;
+    skos:prefLabel "loss autokeras time series forecasting" ;
+    :category :parameter ;
+    skos:broader :loss ;
+    :has_datatype :single_value ;
+    :parameter_value :mean_squared_error .
 :loss_mcfly_time_series_classification a :Configuration_item ;
     skos:prefLabel "loss mcfly time series classification" ;
     :category :parameter ;
