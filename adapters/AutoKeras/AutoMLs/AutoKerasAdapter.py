@@ -128,7 +128,7 @@ class AutoKerasAdapter:
         X, self._configuration = get_column_with_largest_amout_of_text(self.df, self._configuration)
         X, y = prepare_tabular_dataset(X, self._configuration)
         parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), akpc.task_config)
-        reg = ak.TextClassifier(overwrite=True,
+        reg = ak.TextRegressor(overwrite=True,
                                 **parameters,
                                 seed=42,
                                 directory=self._configuration["model_folder_location"])
