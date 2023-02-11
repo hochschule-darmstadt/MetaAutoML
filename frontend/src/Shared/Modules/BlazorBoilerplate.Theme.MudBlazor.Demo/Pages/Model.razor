@@ -61,11 +61,27 @@
                                 <MudText Typo="Typo.body1" Style=" display: flex;">@L["Training: "]<MudLink Href="@NavManager.ToAbsoluteUri("trainings/" + @_training.Training.Id).AbsoluteUri" Style="cursor: pointer; display: flex;"><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.ModelTraining" Style="margin-right: 4px;" />@_training.Training.RuntimeProfile.StartTime.ToString("dd/MM/yyy")</MudLink></MudText>
                             </MudItem>
                             <MudItem xs="3" sm="3" md="3">
-                                <MudText Typo="Typo.body1">@L["Metric score: {0}", String.Format("{0:0.00}", _model.Model.Metrics[0])]</MudText>
                                 <MudText Typo="Typo.body1">@L["Prediction time per sample: {0}", String.Format("{0:0}", _model.Model.PredictionTime)]</MudText>
                                 <MudText Typo="Typo.body1">@L["Emissions: {0} kg/CO2-eq", String.Format("{0:0.00000}", _model.Model.Emissions)]</MudText>
                             </MudItem>
                             <MudItem xs="3" sm="3" md="3">
+                                <MudSelect Label="@L["Metric"]" T="string" @bind-Value=SelectedMetric>
+                                        @foreach (var metric in _model.Model.Metrics)
+                                        {
+                                            <MudSelectItem Value="@metric.Name.ID">
+                                                <MudText Typo="Typo.body2">@metric.Name.Properties["skos:prefLabel"]</MudText>
+                                            </MudSelectItem>
+                                        }
+                                </MudSelect>
+                                <MudText Typo="Typo.body1">
+                                    @if (!String.IsNullOrEmpty(SelectedMetric))
+                                    {
+                                        @if (_model.Model.Metrics.Where(x => x.Name.ID == SelectedMetric).Count() == 1)
+                                        {
+                                            @(String.Format("{0:0.00}", _model.Model.Metrics.Where(x => x.Name.ID == SelectedMetric).First().Score))
+                                        }
+                                    }
+                                </MudText>
                             </MudItem>
                         </MudGrid>
                     }
@@ -104,6 +120,7 @@
     [Parameter]
     public string ListId { get; set; }
 
+    private string SelectedMetric { get; set; } = "";
     private string _explanationPagePath = "";
     private string _pageTitle = "Model";
     private DownloadModelResponseDto _downloadModel;
