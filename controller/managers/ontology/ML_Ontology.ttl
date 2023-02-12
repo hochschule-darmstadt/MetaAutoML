@@ -1,5 +1,5 @@
 ### Ontology file generated from ML_Ontology.xlsx.
-### 2023-02-10 08:58:01.843926
+### 2023-02-13 00:14:10.246679
 
 
 # PREFIXES
@@ -952,6 +952,10 @@
 :transformer a :ML_approach ;
     skos:prefLabel "transformer" ;
     skos:broader :artificial_neural_network .
+:temporal_fusion_transformer a :ML_approach ;
+    skos:prefLabel "temporal fusion transformer" ;
+    skos:broader :transformer ;
+    :used_for :time_series_forecasting .
 :variational_bayesian_gaussian_mixture_model a :ML_approach ;
     skos:prefLabel "variational Bayesian Gaussian mixture model" ;
     skos:altLabel "VB-GMM" ;
@@ -1994,6 +1998,18 @@
     :automl_solution :autokeras ;
     :ml_task :time_series_forecasting ;
     :parameter_value :metric_autokeras_time_series_forecasting , :loss_autokeras_time_series_forecasting , :max_trials_autokeras , :tuner_autokeras_time_series_forecasting , :max_model_size_autokeras .
+:tabular_classification_mljar a :Configuration_item ;
+    skos:prefLabel "tabular classification MLJAR" ;
+    :category :task_configuration ;
+    :automl_solution :mljar ;
+    :ml_task :tabular_classification ;
+    :parameter_value :metric_mljar_tabular_classification .
+:tabular_regression_mljar a :Configuration_item ;
+    skos:prefLabel "tabular regression MLJAR" ;
+    :category :task_configuration ;
+    :automl_solution :mljar ;
+    :ml_task :tabular_regression ;
+    :parameter_value :metric_mljar_tabular_regression .
 :ensemble_nbest a :Configuration_item ;
     skos:prefLabel "ensemble_nbest" ;
     :category :parameter ;
@@ -2019,20 +2035,6 @@
     skos:broader :use_approach ;
     :has_datatype :list ;
     :parameter_value :adaboost , :decision_tree , :extra_tree , :gradient_boosting_tree , :k_nearest_neighbor , :linear_svm , :multilayer_perceptron , :random_forest , :gaussian_naives_bayes .
-:use_approach_autokeras_tabular_classification a :Configuration_item ;
-    skos:prefLabel "use approach AutoKeras tabular classification" ;
-    :category :parameter ;
-    skos:broader :use_approach ;
-    :has_datatype :list .
-:use_approach_autokeras_text_classification a :Configuration_item ;
-    skos:prefLabel "use approach AutoKeras text classification" ;
-    :category :parameter ;
-    skos:broader :use_approach ;
-    :has_datatype :list .
-:use_approach_autokeras_image_classification a :Configuration_item ;
-    skos:prefLabel "use approach AutoKeras image classification" ;
-    :category :parameter ;
-    skos:broader :use_approach .
 :use_approach_flaml_classification a :Configuration_item ;
     skos:prefLabel "use approach FLAML classification" ;
     :category :parameter ;
@@ -2045,26 +2047,6 @@
     skos:broader :use_approach ;
     :has_datatype :list ;
     :parameter_value :adaboost , :bayesian_linear_regression , :decision_tree , :extra_tree , :gaussian_process , :gradient_boosting_tree , :k_nearest_neighbor , :linear_svm , :multilayer_perceptron , :random_forest .
-:use_approach_autokeras_tabular_regression a :Configuration_item ;
-    skos:prefLabel "use approach AutoKeras tabular regression" ;
-    :category :parameter ;
-    skos:broader :use_approach ;
-    :has_datatype :list .
-:use_approach_autokeras_text_regression a :Configuration_item ;
-    skos:prefLabel "use approach AutoKeras text regression" ;
-    :category :parameter ;
-    skos:broader :use_approach ;
-    :has_datatype :list .
-:use_approach_autokeras_image_regression a :Configuration_item ;
-    skos:prefLabel "use approach AutoKeras image regression" ;
-    :category :parameter ;
-    skos:broader :use_approach ;
-    :has_datatype :list .
-:use_approach_autokeras_time_series_forecasting a :Configuration_item ;
-    skos:prefLabel "use approach AutoKeras time series forecasting" ;
-    :category :parameter ;
-    skos:broader :use_approach ;
-    :has_datatype :list .
 :use_approach_flaml_regression a :Configuration_item ;
     skos:prefLabel "use approach FLAML regression" ;
     :category :parameter ;
@@ -2344,6 +2326,18 @@
     skos:broader :metric ;
     :has_datatype :single_value ;
     :parameter_value :mean_absolute_percentage_error .
+:metric_mljar_tabular_classification a :Configuration_item ;
+    skos:prefLabel "metric MLJAR tabular classification" ;
+    :category :parameter ;
+    skos:broader :metric ;
+    :has_datatype :single_value ;
+    :parameter_value :log_loss , :area_under_roc_curve , :f_measure , :accuracy , :precision , :recall , :matthews_correlation_coefficient .
+:metric_mljar_tabular_regression a :Configuration_item ;
+    skos:prefLabel "metric MLJAR tabular regression" ;
+    :category :parameter ;
+    skos:broader :metric ;
+    :has_datatype :single_value ;
+    :parameter_value :mean_absolute_error , :mean_squared_error , :rooted_mean_squared_error , :r2 , :mean_absolute_percentage_error .
 :time_limit a :Configuration_item ;
     skos:prefLabel "time limit" ;
     :category :parameter ;
@@ -2441,7 +2435,7 @@
     :category :parameter ;
     skos:broader :loss ;
     :has_datatype :single_value ;
-    :parameter_value :mean_squared_error , :root_mean_squared_error , :mean_absolute_error , :mean_absolute_percentage_error , :mean_squared_log_error , :cosine_similarity , :log_cosh_error .
+    :parameter_value :mean_squared_error .
 :loss_autokeras_tabular_classification a :Configuration_item ;
     skos:prefLabel "loss autokeras tabular classification" ;
     :category :parameter ;
