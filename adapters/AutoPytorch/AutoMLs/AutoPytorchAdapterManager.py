@@ -37,20 +37,19 @@ class AutoPytorchAdapterManager(AdapterManager):
         # extract additional information from automl
         with open(os.path.join(working_dir, 'model_pytorch.p'), 'rb') as file:
             automl = dill.load(file)
-            librarylist = set()
+            librarylist = list()
             for model in automl.models_.values():
                 if type(model.config) == str:
                     if model.config == "catboost":
-                        librarylist.add(":catboost_lib")
+                        librarylist.append(":catboost_lib")
                     elif model.config == "lgb":
-                        librarylist.add(":lightgbm_lib")
+                        librarylist.append(":lightgbm_lib")
                     else:
-                        librarylist.add(":scikit_learn_lib")
+                        librarylist.append(":scikit_learn_lib")
                 else:
-                    librarylist.add(":pytorch_lib")
-            model = ":ensemble"
-            library = " + ".join(librarylist)
-        return librarylist.pop(), model
+                    librarylist.append(":pytorch_lib")
+            model = [":ensemble"]
+        return librarylist, model
 
     def _load_model_and_make_probabilities(self, config: "StartAutoMlRequest", result_folder_location: str, dataframe: pd.DataFrame):
         """Must be overwriten! Load the found model, and execute a prediction using the provided data to calculate the probability metric used by the ExplanableAI module inside the controller

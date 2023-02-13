@@ -75,7 +75,7 @@ class AutoKerasAdapter:
     def __image_classification(self):
         """"Execute image classification task and export the found model"""
 
-        X_train, y_train, X_test, y_test = data_loader(self._configuration)
+        X_train, y_train = data_loader(self._configuration)
         parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), akpc.task_config)
         clf = ak.ImageClassifier(overwrite=True,
                                           **parameters,
@@ -90,7 +90,7 @@ class AutoKerasAdapter:
     def __image_regression(self):
         """Execute image regression task and export the found model"""
 
-        X_train, y_train, X_val, y_val = data_loader(self._configuration)
+        X_train, y_train = data_loader(self._configuration)
         parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), akpc.task_config)
 
         reg = ak.ImageRegressor(overwrite=True,

@@ -47,18 +47,11 @@
                         <MudTd>
                             <MudLink Href="@NavManager.ToAbsoluteUri("datasets/" + Dataset.Dataset.Id + "/models/" + @context.Id).AbsoluteUri" Style="cursor: pointer; display: flex">
                                 <MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.ModelTraining" Style="margin-right: 4px;" />
-                                @if (context.MlModelType.Properties.ContainsKey("skos:prefLabel"))
-                                {
-                                    @context.MlModelType.Properties["skos:prefLabel"]
-                                }
-                                
+                                @context.GetMlModelString()
                                 </MudLink>
                         </MudTd>
                         <MudTd>
-                            @if (context.MlLibrary.Properties.ContainsKey("skos:prefLabel"))
-                            {
-                                <MudText>@context.MlLibrary.Properties["skos:prefLabel"]</MudText>
-                            }
+                             <MudText>@context.GetMlLibraryString()</MudText>
                         </MudTd>
                         <MudTd >@String.Format("{0:0.00}", context.Metrics)</MudTd>
                         <MudTd >@String.Format("{0:0}", context.PredictionTime) ms</MudTd>

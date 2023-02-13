@@ -24,8 +24,8 @@ namespace BlazorBoilerplate.Shared.Dto.Model
         public List<PredictionDto> Predictions { get; set; }
         public string Status { get; set; }
         public ObjectInfomationDto AutoMlSolution { get; set; }
-        public ObjectInfomationDto MlModelType { get; set; }
-        public ObjectInfomationDto MlLibrary { get; set; }
+        public List<ObjectInfomationDto> MlModelType { get; set; }
+        public List<ObjectInfomationDto> MlLibrary { get; set; }
         public List<Metric> Metrics { get; set; }
         public double PredictionTime { get; set; }
         public ModelRuntimeProfile RuntimeProfile { get; set; }
@@ -36,7 +36,7 @@ namespace BlazorBoilerplate.Shared.Dto.Model
         {
 
         }
-        public ModelDto(Server.Model model, ObjectInfomationDto mlModelType, ObjectInfomationDto mlLibrary, ObjectInfomationDto autoMl, List<Metric> metrics)
+        public ModelDto(Server.Model model, List<ObjectInfomationDto> mlModelType, List<ObjectInfomationDto> mlLibrary, ObjectInfomationDto autoMl, List<Metric> metrics)
         {
             Id = model.Id;
             TrainingId = model.TrainingId;
@@ -55,6 +55,34 @@ namespace BlazorBoilerplate.Shared.Dto.Model
             StatusMessages = model.StatusMessages.ToList();
             Explanation = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(model.Explanation);
             Emissions = model.Emission;
+        }
+        public string GetMlLibraryString()
+        {
+            string libraries = "";
+            foreach (var lib in MlLibrary)
+            {
+                libraries += lib.Properties["skos:prefLabel"] + ", ";
+            }
+            //When no library was set yet return the empty string, else remove the alst comma
+            if (libraries.Length == 0)
+            {
+                return libraries;
+            }
+            return libraries.Remove(libraries.Length - 1);
+        }
+        public string GetMlModelString()
+        {
+            string models = "";
+            foreach (var model in MlModelType)
+            {
+                models += model.Properties["skos:prefLabel"] + ", ";
+            }
+            //When no ml model type was set yet return the empty string, else remove the alst comma
+            if (models.Length == 0)
+            {
+                return models;
+            }
+            return models.Remove(models.Length - 1);
         }
     }
 }

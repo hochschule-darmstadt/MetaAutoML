@@ -30,8 +30,8 @@
                         <MudTHeadRow>
                             <MudTh><MudTableSortLabel SortBy="@(new Func<ModelDto, object>(x=>x.AutoMlSolution.Properties["skos:prefLabel"]))">@L["AutoML solution"]</MudTableSortLabel></MudTh>
                             <MudTh><MudTableSortLabel SortBy="new Func<ModelDto, object>(x=>x.Status)">@L["Status"]</MudTableSortLabel></MudTh>
-                            <MudTh><MudTableSortLabel SortBy="@(new Func<ModelDto, object>(x=>x.MlModelType.Properties["skos:prefLabel"]))">@L["Model"]</MudTableSortLabel></MudTh>
-                            <MudTh><MudTableSortLabel SortBy="@(new Func<ModelDto, object>(x=>x.MlLibrary.Properties["skos:prefLabel"]))">@L["Library"]</MudTableSortLabel></MudTh>
+                            <MudTh><MudTableSortLabel SortBy="@(new Func<ModelDto, object>(x=>x.GetMlModelString()))">@L["Model"]</MudTableSortLabel></MudTh>
+                            <MudTh><MudTableSortLabel SortBy="@(new Func<ModelDto, object>(x=>x.GetMlLibraryString()))">@L["Library"]</MudTableSortLabel></MudTh>
                             <MudTh><MudTableSortLabel SortBy="new Func<ModelDto, object>(x=>x.Metrics)">@L["Metric"]</MudTableSortLabel></MudTh>
                             <MudTh><MudTableSortLabel SortBy="new Func<ModelDto, object>(x=>x.PredictionTime)">@L["Prediction time per sample"]</MudTableSortLabel></MudTh>
                             <MudTh><MudTableSortLabel SortBy="new Func<ModelDto, object>(x=>x.RuntimeProfile)">@L["Total training time"]</MudTableSortLabel></MudTh>
@@ -74,9 +74,9 @@
                             }
                         </MudTd>
                         <MudTd>
-                            <MudLink Href="@NavManager.ToAbsoluteUri("trainings/" + Training.Training.Id + "/models/" + @models.Id).AbsoluteUri" Style="cursor: pointer; display: flex;"><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.Lightbulb" Style="margin-right: 4px;" />@(models.MlModelType.Properties.ContainsKey("skos:prefLabel") ? models.MlModelType.Properties["skos:prefLabel"] : "")</MudLink>
+                            <MudLink Href="@NavManager.ToAbsoluteUri("trainings/" + Training.Training.Id + "/models/" + @models.Id).AbsoluteUri" Style="cursor: pointer; display: flex;"><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.Lightbulb" Style="margin-right: 4px;" />@(models.GetMlModelString())</MudLink>
                         </MudTd>
-                            <MudTd>@(models.MlLibrary.Properties.ContainsKey("skos:prefLabel") ? models.MlLibrary.Properties["skos:prefLabel"] : "")</MudTd>
+                            <MudTd>@(models.GetMlLibraryString())</MudTd>
                         <MudTd>
                             @if (!String.IsNullOrEmpty(SelectedMetric))
                             {
@@ -157,9 +157,9 @@
             return true;
         if (element.Status.Contains(searchString, StringComparison.OrdinalIgnoreCase))
             return true;
-        if (element.MlLibrary.Properties["skos:prefLabel"].Contains(searchString, StringComparison.OrdinalIgnoreCase))
+        if (element.GetMlLibraryString().Contains(searchString, StringComparison.OrdinalIgnoreCase))
             return true;
-        if (element.MlModelType.Properties["skos:prefLabel"].Contains(searchString, StringComparison.OrdinalIgnoreCase))
+        if (element.GetMlModelString().Contains(searchString, StringComparison.OrdinalIgnoreCase))
             return true;
         return false;
     } 

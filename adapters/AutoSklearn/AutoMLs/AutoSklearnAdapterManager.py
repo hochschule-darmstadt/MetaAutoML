@@ -37,7 +37,7 @@ class AutoSklearnAdapterManager(AdapterManager):
         """
         # AutoSklearn uses an ensemble of up to 50 different models we are not able to show them all in our current GUI
         # autosklearn always uses only sklearn
-        return ":scikit_learn_lib", ":ensemble"
+        return [":scikit_learn_lib"], [":ensemble"]
 
     def _load_model_and_make_probabilities(self, config: "StartAutoMlRequest", result_folder_location: str, dataframe: pd.DataFrame):
         """Must be overwriten! Load the found model, and execute a prediction using the provided data to calculate the probability metric used by the ExplanableAI module inside the controller

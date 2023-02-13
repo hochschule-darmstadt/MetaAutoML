@@ -81,7 +81,7 @@ class PyCaretAdapterManager(AdapterManager):
         if isinstance(automl.named_steps.actual_estimator, DecisionTreeClassifier):
             library = ":scikit_learn_lib"
             model = ":decision_tree"
-        return library, model
+        return [library], [model]
 
 
     def _load_model_and_make_probabilities(self, config: "StartAutoMlRequest", result_folder_location: str, dataframe: pd.DataFrame):

@@ -92,15 +92,15 @@ message Model {
   */
   string autoMlSolution = 5;
   /*
-    Ontology URI of the used ML model type
+    list of Ontology URI of the used ML model type
     example: ":artificial_neural_network"
   */
-  string mlModelType = 6;
+  repeated string mlModelType = 6;
   /*
-    Ontology URI of the used ML library
-    example: ":Keras_lib"
+   List of Ontology URI of the used ML library
+    example: [":Keras_lib"]
   */
-  string mlLibrary = 7;
+  repeated string mlLibrary = 7;
   /*
     Absolute system path where the final model pipeline zip is located
     example: app/app-data/....../result/keras_model.zip

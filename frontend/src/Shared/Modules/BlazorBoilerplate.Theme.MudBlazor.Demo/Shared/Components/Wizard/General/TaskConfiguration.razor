@@ -1,4 +1,4 @@
-﻿@inject IStringLocalizer<Global> L
+@inject IStringLocalizer<Global> L
 @inject IApiClient apiClient
 @inject IViewNotifier viewNotifier
 @using Newtonsoft.Json
@@ -90,13 +90,14 @@
                         <MudSelect T="ParameterValueViewModel" MultiSelection="true" SelectAll="true" @bind-SelectedValues="param.SelectedValues" ToStringFunc="p => p?.ValueLabel" Variant="Variant.Outlined">
                             @foreach (var paramValue in param.ParameterValues)
                             {
+
                                 <MudSelectItem Value="@paramValue">@paramValue.ValueLabel</MudSelectItem>
                             }
                         </MudSelect>
                     }
                     else if(param.ParameterType == ":integer")
                     {
-                        <MudNumericField @bind-Value="@param.IntegerValue" />
+                        <MudNumericField T="int?" @bind-Value="@param.IntegerValue" />
                     }
                 }
             }
@@ -131,7 +132,7 @@
                         }
                         else if(param.ParameterType == ":integer")
                         {
-                            <MudNumericField @bind-Value="@param.IntegerValue" />
+                            <MudNumericField T="int?" @bind-Value="@param.IntegerValue" />
                         }
                     }
                     </MudExpansionPanel>
@@ -214,9 +215,9 @@
             .Select(p => new ParameterDto
             {
                 Iri = p.ParameterIri,
-                Values = p.ParameterValues != null
-                    ? p.SelectedValues.Select(v => v.ValueIri).ToList()
-                    : new List<string>{ p.IntegerValue.ToString() }
+                Values = p.IntegerValue != null
+                        ? new List<string> { p.IntegerValue.ToString() }
+                            : p.SelectedValues.Select(v => v.ValueIri).ToList()
             })
             .ToList();
 
@@ -224,9 +225,9 @@
         .Select(ip => ip.parameters.Select(p => new ParameterDto
             {
                 Iri = p.ParameterIri,
-                Values = p.ParameterValues != null
-                    ? p.SelectedValues.Select(v => v.ValueIri).ToList()
-                    : new List<string>{ p.IntegerValue.ToString() }
+                Values = p.IntegerValue != null
+                            ? new List<string> { p.IntegerValue.ToString() }
+                                    : p.SelectedValues.Select(v => v.ValueIri).ToList()
             }).ToList()).ToList();
 
         foreach(List<ParameterDto> individualParamItem in individualParamsList)
@@ -513,7 +514,7 @@
                     List<ParameterValueViewModel> selectedValueList = _intersectedParams.Where(p => p.ParameterIri == intersectedParam.ParameterIri).First().SelectedValues.Where(s => intersectedParam.ParameterValues.Where( pv => pv.ValueIri == s.ValueIri).Any()).ToList();
                     if (intersectedParam.ParameterValues != null)
                     {
-                        intersectedParam.SelectedValues = intersectedParam.ParameterValues.Where(p => selectedValueList.Where(s => s.ValueIri == p.ValueIri).Any());
+                        intersectedParam.SelectedValues = intersectedParam.ParameterValues.Where(p => selectedValueList.Where(s => s.ValueIri == p.ValueIri).Any()).ToList();
                     }
                 }
                 catch (Exception e)
@@ -550,8 +551,8 @@
             }
         }
 
-        private int _integerValue;
-        public int IntegerValue
+        private int? _integerValue;
+        public int? IntegerValue
         {
             get => _integerValue;
             set

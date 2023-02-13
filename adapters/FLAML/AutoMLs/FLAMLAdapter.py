@@ -46,7 +46,7 @@ class FLAMLAdapter:
         """
         automl_settings = {"log_file_name": 'flaml.log'}
         if self._configuration["configuration"]["runtime_limit"] != 0:
-            automl_settings.update({"time_budget": self._configuration["configuration"]["runtime_limit"]})
+            automl_settings.update({"time_budget": self._configuration["configuration"]["runtime_limit"] * 60})
         return automl_settings
 
     def __tabular_classification(self):
@@ -59,6 +59,7 @@ class FLAMLAdapter:
             #"metric": self._configuration["configuration"]["metric"] if self._configuration["configuration"]["metric"] != "" else 'accuracy',
             "metric": 'accuracy',
             "task": 'classification',
+            "ensemble": True,
             "log_file_name": self._log_file_path
         })
 
@@ -76,6 +77,7 @@ class FLAMLAdapter:
             #"metric": self._configuration["configuration"]["metric"] if self._configuration["configuration"]["metric"] != "" else 'accuracy',
             "metric": 'mse',
             "task": 'regression',
+            "ensemble": True,
             "log_file_name": self._log_file_path
         })
 
@@ -95,6 +97,7 @@ class FLAMLAdapter:
             #"metric": self._configuration["configuration"]["metric"] if self._configuration["configuration"]["metric"] != "" else 'accuracy',
             "metric": 'mape',
             "task": 'ts_forecast',
+            "ensemble": True,
             "log_file_name": self._log_file_path,
             "period": 1,
             "eval_method": "holdout"
@@ -117,6 +120,7 @@ class FLAMLAdapter:
             #"metric": self._configuration["configuration"]["metric"] if self._configuration["configuration"]["metric"] != "" else 'accuracy',
             "metric": 'accuracy',
             "task": 'seq-classification',
+            "ensemble": True,
             "fit_kwargs_by_estimator": {
                 "transformer": {
                     "output_dir": self._configuration["model_folder_location"],   # setting the output directory

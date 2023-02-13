@@ -36,8 +36,8 @@ class EvalMLAdapterManager(AdapterManager):
             tuple[str, str]: Tuple returning the ontology IRI of the Ml model type, and ontology IRI of the ML library
         """
         #TODO ADD CORRECT lib and model display
-        library = ":lightgbm_lib"
-        model = ":light_gradient_boosting_machine"
+        library = [":lightgbm_lib"]
+        model = [":light_gradient_boosting_machine"]
         return library, model
 
     async def explain_model(self, explain_auto_ml_request: "ExplainModelRequest") -> ExplainModelResponse:
