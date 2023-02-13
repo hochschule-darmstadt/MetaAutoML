@@ -522,13 +522,14 @@ class Model(betterproto.Message):
     auto_ml_solution: str = betterproto.string_field(5)
     """Ontology URI of the used AutoML Solutionexample: ":autokeras"""
 
-    ml_model_type: str = betterproto.string_field(6)
+    ml_model_type: List[str] = betterproto.string_field(6)
     """
-    Ontology URI of the used ML model typeexample: ":artificial_neural_network"
+    list of Ontology URI of the used ML model typeexample:
+    ":artificial_neural_network"
     """
 
-    ml_library: str = betterproto.string_field(7)
-    """Ontology URI of the used ML libraryexample: ":Keras_lib"""
+    ml_library: List[str] = betterproto.string_field(7)
+    """List of Ontology URI of the used ML libraryexample: [":Keras_lib"]"""
 
     path: str = betterproto.string_field(8)
     """

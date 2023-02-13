@@ -138,8 +138,8 @@ namespace BlazorBoilerplate.Server.Managers
 
                 }
                 ModelDto modelDto = new ModelDto(model,
-                    (model.MlModelType == "" ? new Shared.Dto.Ontology.ObjectInfomationDto() : await _cacheManager.GetObjectInformation(model.MlModelType)),
-                    (model.MlLibrary == "" ? new Shared.Dto.Ontology.ObjectInfomationDto() : await _cacheManager.GetObjectInformation(model.MlLibrary)),
+                    (model.MlModelType.Count() == 0 ? new List<Shared.Dto.Ontology.ObjectInfomationDto>() : await _cacheManager.GetObjectInformationList(model.MlModelType.ToList())),
+                    (model.MlLibrary.Count() == 0 ? new List<Shared.Dto.Ontology.ObjectInfomationDto>() : await _cacheManager.GetObjectInformationList(model.MlLibrary.ToList())),
                     (model.AutoMlSolution == "" ? new Shared.Dto.Ontology.ObjectInfomationDto() : await _cacheManager.GetObjectInformation(model.AutoMlSolution)),
                     metrics);
                 trainingDto.models.Add(modelDto);

@@ -42,18 +42,18 @@ class AutoGluonAdapterManager(AdapterManager):
         if config.configuration['task'] in [":tabular_classification", ":tabular_regression"]:
             #We load the model to check it is intact
             automl = TabularPredictor.load(os.path.join(os.path.join(working_dir, 'model_gluon.gluon')))
-            model = ":ensemble"
+            model = [":ensemble"]
             #TODO correct read and array handling
-            return (':lightgbm_lib', model)
+            return ([':lightgbm_lib'], model)
         elif config.configuration['task'] in [":text_classification", ":text_regression"]:
             #We load the model to check it is intact
             automl = TextPredictor.load(os.path.join(os.path.join(working_dir, 'model_gluon.gluon')))
-            return (":pytorch_lib", ":transformer")
+            return ([":pytorch_lib"], [":transformer"])
         else:
             #We load the model to check it is intact
             automl = MultiModalPredictor.load(os.path.join(os.path.join(working_dir, 'model_gluon.gluon')))
-            return (":pytorch_lib", ":artificial_neural_network")
-        
+            return ([":pytorch_lib"], [":artificial_neural_network"])
+
 
     def _load_model_and_make_probabilities(self, config: "StartAutoMlRequest", result_folder_location: str, dataframe: pd.DataFrame):
         """Must be overwriten! Load the found model, and execute a prediction using the provided data to calculate the probability metric used by the ExplanableAI module inside the controller

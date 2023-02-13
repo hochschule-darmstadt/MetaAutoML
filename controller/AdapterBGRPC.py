@@ -182,13 +182,13 @@ class GetAutoMlStatusResponse(betterproto.Message):
     make one predictionexample: 12
     """
 
-    ml_library: str = betterproto.string_field(6)
-    """The ML library used by the found modelexample: ":keras_lib"""
+    ml_library: List[str] = betterproto.string_field(6)
+    """List of ML library used by the found modelexample: [":keras_lib"]"""
 
-    ml_model_type: str = betterproto.string_field(7)
+    ml_model_type: List[str] = betterproto.string_field(7)
     """
-    The ML model type that the found model is composed offexample:
-    ":artificial_neural_network"
+    List of ML model type that the found model is composed offexample:
+    [":artificial_neural_network"]
     """
 
     emission_profile: "CarbonEmission" = betterproto.message_field(8)

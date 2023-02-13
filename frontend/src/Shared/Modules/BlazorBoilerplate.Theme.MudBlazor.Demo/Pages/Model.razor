@@ -22,7 +22,7 @@
     @if (_model != null)
     {
         <MudText Typo="Typo.h4">
-            @L["Model {0}", _model.Model.MlModelType.Properties.ContainsKey("skos:prefLabel") ? _model.Model.MlModelType.Properties["skos:prefLabel"] : ""]
+            @L["Model {0}", _model.Model.GetMlModelString()]
         </MudText>
     }
 </MudStack>
@@ -56,8 +56,8 @@
                             </MudItem>
                             <MudItem xs="3" sm="3" md="3">
                                 <MudText Typo="Typo.body1">@L["AutoML solution: {0}", _model.Model.AutoMlSolution.Properties.ContainsKey("skos:prefLabel") ? _model.Model.AutoMlSolution.Properties["skos:prefLabel"] : ""]</MudText>
-                                <MudText Typo="Typo.body1">@L["ML library: {0}", _model.Model.MlLibrary.Properties.ContainsKey("skos:prefLabel") ? _model.Model.MlLibrary.Properties["skos:prefLabel"] : ""]</MudText>
-                                <MudText Typo="Typo.body1">@L["Model: {0}", _model.Model.MlModelType.Properties.ContainsKey("skos:prefLabel") ? _model.Model.MlModelType.Properties["skos:prefLabel"] : ""]</MudText>
+                                <MudText Typo="Typo.body1">@L["ML library: {0}", _model.Model.GetMlLibraryString()]</MudText>
+                                <MudText Typo="Typo.body1">@L["Model: {0}", _model.Model.GetMlModelString()]</MudText>
                                 <MudText Typo="Typo.body1" Style=" display: flex;">@L["Training: "]<MudLink Href="@NavManager.ToAbsoluteUri("trainings/" + @_training.Training.Id).AbsoluteUri" Style="cursor: pointer; display: flex;"><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.ModelTraining" Style="margin-right: 4px;" />@_training.Training.RuntimeProfile.StartTime.ToString("dd/MM/yyy")</MudLink></MudText>
                             </MudItem>
                             <MudItem xs="3" sm="3" md="3">
@@ -152,14 +152,7 @@
             _breadcrumbs.Add(new BreadcrumbItem(L["Dataset {0}", _dataset.Dataset.Name], "/datasets/" + _dataset.Dataset.Id, false, Icons.Filled.ListAlt));
             _explanationPagePath = "/datasets/" + DatasetId + "/models/" + Id + "/explanation";
         }
-        @if (_model.Model.MlModelType.Properties.ContainsKey("skos:prefLabel"))
-        {
-            _breadcrumbs.Add(new BreadcrumbItem(L["Model {0}", _model.Model.MlModelType.Properties.ContainsKey("skos:prefLabel") ? _model.Model.MlModelType.Properties["skos:prefLabel"] : ""], null, true, Icons.Filled.Lightbulb));
-        }
-        else
-        {
-            _breadcrumbs.Add(new BreadcrumbItem(L["Model {0}", ""], null, true, Icons.Filled.Lightbulb));
-        }
+        _breadcrumbs.Add(new BreadcrumbItem(L["Model {0}", _model.Model.GetMlModelString()], null, true, Icons.Filled.Lightbulb));
         fileUploader.OnUploadCompletedCallback = LoadModel;
         StateHasChanged();
     }

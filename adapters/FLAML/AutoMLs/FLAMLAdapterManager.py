@@ -34,34 +34,50 @@ class FLAMLAdapterManager(AdapterManager):
             tuple[str, str]: Tuple returning the ontology IRI of the Ml model type, and ontology IRI of the ML library
         """
         working_dir = config.result_folder_location
+        models = list()
+        libraries = list()
         # extract additional information from automl
         with open(os.path.join(working_dir, "model_flaml.p"), 'rb') as file:
             automl = dill.load(file)
             if config.configuration["task"] == ":text_classification":
-                library = model
-                library = ":transformer"
-                model = ":transformer"
+                models.append(":transformer")
+                libraries.append(":torch")
             else:
-                model = automl.best_estimator
-                if model == "lgbm":
-                    library = ":lightgbm_lib"
-                    model = ":light_gradient_boosting_machine"
-                elif model == "extra_tree":
-                    library = ":scikit_learn_lib"
-                    model = ":extra_tree"
-                elif model == "rf":
-                    library = ":scikit_learn_lib"
-                    model = ":random_forest"
-                elif model == "xgboost":
-                    library = ":xgboost_lib"
-                    model = ":xgboost"
-                elif model == "xgb_limitdepth":
-                    library = ":xgboost_lib"
-                    model = ":xgboost"
-                library = automl.model.estimator.__module__.split(".")[0]
-
-                #TODO ADD CORRECT lib and model display
-        return library, model
+                for model in automl.model.estimators:
+                    if model[0] == "lgbm":
+                        libraries.append(":lightgbm_lib")
+                        models.append(":light_gradient_boosting_machine")
+                    elif model[0] == "extra_tree":
+                        libraries.append(":scikit_learn_lib")
+                        models.append(":extra_tree")
+                    elif model[0] == "rf":
+                        libraries.append(":scikit_learn_lib")
+                        models.append(":random_forest")
+                    elif model[0] == "xgboost":
+                        libraries.append(":xgboost_lib")
+                        models.append(":xgboost")
+                    elif model[0] == "xgb_limitdepth":
+                        libraries.append(":xgboost_lib")
+                        models.append(":xgboost")
+                    elif model[0] == "lrl1":
+                        libraries.append(":scikit_learn_lib")
+                        models.append(":logistic_regression")
+                    elif model[0] == "lrl2":
+                        libraries.append(":scikit_learn_lib")
+                        models.append(":logistic_regression")
+                    elif model[0] == "tft":
+                        libraries.append(":pytorch_lib")
+                        models.append(":temporal_fusion_transformer")
+                    elif model[0] == "prophet":
+                        libraries.append(":prophet_lib")
+                        models.append(":prophet")
+                    elif model[0] == "arima":
+                        libraries.append(":pyflux_lib")
+                        models.append(":autoregressive_integrated_moving_average")
+                    elif model[0] == "sarimax":
+                        libraries.append(":pyflux_lib")
+                        models.append(":seasonal_autoregressive_integrated_moving_average_exogenous")
+        return libraries, models
 
 
     def _load_model_and_make_probabilities(self, config: "StartAutoMlRequest", result_folder_location: str, dataframe: pd.DataFrame):

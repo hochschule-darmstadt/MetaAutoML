@@ -145,15 +145,15 @@ message GetAutoMlStatusResponse {
     */
     float predictionTime = 5;
     /*
-        The ML library used by the found model
-        example: ":keras_lib"
+        List of ML library used by the found model
+        example: [":keras_lib"]
     */
-    string mlLibrary = 6;
+    repeated string mlLibrary = 6;
     /*
-        The ML model type that the found model is composed off
-        example: ":artificial_neural_network"
+        List of ML model type that the found model is composed off
+        example: [":artificial_neural_network"]
     */
-    string mlModelType = 7;
+    repeated string mlModelType = 7;
     /*
       The emission produced by the training of the model
       example: see message Carbon Emission

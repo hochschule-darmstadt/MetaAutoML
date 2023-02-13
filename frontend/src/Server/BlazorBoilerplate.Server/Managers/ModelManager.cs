@@ -50,8 +50,8 @@ namespace BlazorBoilerplate.Server.Managers
                         metrics.Add(new Metric() { Name = await _cacheManager.GetObjectInformation(metric.Key), Score = (float)metric.Value });
 
                     }
-                    ModelDto modelDto = new ModelDto(model, await _cacheManager.GetObjectInformation(model.MlModelType),
-                        await _cacheManager.GetObjectInformation(model.MlLibrary),
+                    ModelDto modelDto = new ModelDto(model, await _cacheManager.GetObjectInformationList(model.MlModelType.ToList()),
+                        await _cacheManager.GetObjectInformationList(model.MlLibrary.ToList()),
                         await _cacheManager.GetObjectInformation(model.AutoMlSolution), metrics);
                     response.Models.Add(modelDto);
                     top3Counter++;
@@ -83,8 +83,8 @@ namespace BlazorBoilerplate.Server.Managers
                     metrics.Add(new Metric() { Name = await _cacheManager.GetObjectInformation(metric.Key), Score = (float)metric.Value });
 
                 }
-                response.Model = new ModelDto(reply.Model, await _cacheManager.GetObjectInformation(reply.Model.MlModelType),
-                    await _cacheManager.GetObjectInformation(reply.Model.MlLibrary),
+                response.Model = new ModelDto(reply.Model, await _cacheManager.GetObjectInformationList(reply.Model.MlModelType.ToList()),
+                    await _cacheManager.GetObjectInformationList(reply.Model.MlLibrary.ToList()),
                     await _cacheManager.GetObjectInformation(reply.Model.AutoMlSolution), metrics);
                 return new ApiResponse(Status200OK, null, response);
 
