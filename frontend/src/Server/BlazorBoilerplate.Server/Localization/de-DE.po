@@ -620,8 +620,8 @@ msgstr "Konfiguration"
 msgid "Details"
 msgstr "Details"
 
-msgid "Target"
-msgstr "Target"
+msgid "ML task"
+msgstr "ML task"
 
 msgid "Machine Learning task"
 msgstr "ML Task"
@@ -703,6 +703,9 @@ msgstr "Training: "
 
 msgid "Metric score: {0}"
 msgstr "Metric Ergebnis: {0}"
+
+msgid "Metric"
+msgstr "Metric"
 
 msgid "Prediction time per sample: {0}"
 msgstr "Zeit pro Vorhersage: {0} ms"
@@ -942,7 +945,7 @@ msgid "ignore"
 msgstr "Ignorieren"
 
 msgid "none"
-msgstr "Nichts"
+msgstr "Keine"
 
 msgid "Datatype"
 msgstr "Datentyp"

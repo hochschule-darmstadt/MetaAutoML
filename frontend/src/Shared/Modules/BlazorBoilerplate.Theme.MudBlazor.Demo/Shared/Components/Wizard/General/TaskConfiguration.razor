@@ -51,7 +51,7 @@
     @if (((Dataset.Dataset.Type.ID == ":tabular") || (Dataset.Dataset.Type.ID == ":text") || (Dataset.Dataset.Type.ID == ":time_series")) || (Dataset.Dataset.Type.ID == ":time_series_longitudinal") && (!string.IsNullOrEmpty(StartTrainingDto.Configuration.Task)))
 
     {
-        <MudSelect Label="@L["Target"]" T="string" @bind-SelectedValues="SelectedTargets" MultiSelection="true">
+        <MudSelect Label="@L["target"]" T="string" @bind-SelectedValues="SelectedTargets" MultiSelection="true">
             @if (_columnNames != null)
             {
                 @foreach (var column in _columnNames)

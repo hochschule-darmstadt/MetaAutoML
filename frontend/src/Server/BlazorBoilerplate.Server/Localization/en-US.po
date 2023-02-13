@@ -1074,7 +1074,7 @@ msgid "Plural"
 msgstr "Plural"
 
 msgctxt "Global"
-msgid "Index"
+msgid "index"
 msgstr "Index"
 
 msgctxt "Global"
@@ -1471,10 +1471,6 @@ msgid "Details"
 msgstr "Details"
 
 msgctxt "Global"
-msgid "Target"
-msgstr "Target"
-
-msgctxt "Global"
 msgid "ML task"
 msgstr "ML task"
 
@@ -1577,6 +1573,10 @@ msgstr "Training: "
 msgctxt "Global"
 msgid "Metric score: {0}"
 msgstr "Metric score: {0}"
+
+msgctxt "Global"
+msgid "Metric"
+msgstr "Metric"
 
 msgctxt "Global"
 msgid "Prediction time per sample: {0}"
