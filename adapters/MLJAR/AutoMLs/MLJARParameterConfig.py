@@ -18,7 +18,7 @@ mljar_metrics = {
     ":mean_absolute_percentage_error": "MAPE"
 }
 
-#configs for the different tasks that can be executed with autokeras
+#configs for the different tasks that can be executed with mljar
 #each parameter has its own line that contains:
 #the broader type of the parameter(broader id); the autoML specific parameter id; the default value in case no parameter-value is selected;
 #the expected amount of the parameters(single_value/list); the type to which it should be converted (integer/dictionary); the lookup dictionary which includes the converting types;
