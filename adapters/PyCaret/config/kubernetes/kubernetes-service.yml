@@ -1,15 +1,15 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: flaml
+  name: pycaret
 spec:
   type: ClusterIP
   ports:
-  - name: "50056"
-    port: 50056
+  - name: "50063"
+    port: 50063
     protocol: TCP
-    targetPort: 50056
+    targetPort: 50063
   selector:
-    io.kompose.service: flaml
+    io.kompose.service: pycaret
 status:
   loadBalancer: {}
