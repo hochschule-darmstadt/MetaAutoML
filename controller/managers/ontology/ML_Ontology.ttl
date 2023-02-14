@@ -1,5 +1,5 @@
 ### Ontology file generated from ML_Ontology.xlsx.
-### 2023-02-13 08:37:04.178212
+### 2023-02-14 00:58:53.689494
 
 
 # PREFIXES
@@ -1841,13 +1841,13 @@
     :category :task_configuration ;
     :automl_solution :flaml ;
     :ml_task :tabular_classification ;
-    :parameter_value :use_approach_flaml_classification , :metric_flaml_classification .
+    :parameter_value :use_approach_flaml_tabular_classification , :metric_flaml_tabular_classification .
 :tabular_regression_in_flaml a :Configuration_item ;
     skos:prefLabel "tabular regression in FLAML" ;
     :category :task_configuration ;
     :automl_solution :flaml ;
     :ml_task :tabular_regression ;
-    :parameter_value :use_approach_flaml_regression , :metric_flaml_regression .
+    :parameter_value :use_approach_flaml_tabular_regression , :metric_flaml_tabular_regression .
 :ranking_in_flaml a :Configuration_item ;
     skos:prefLabel "ranking in FLAML" ;
     :category :task_configuration ;
@@ -1865,13 +1865,13 @@
     :category :task_configuration ;
     :automl_solution :flaml ;
     :ml_task :text_classification ;
-    :parameter_value :use_approach_flaml_text_classification , :metric_flaml_classification .
+    :parameter_value :use_approach_flaml_text_classification , :metric_flaml_text_classification .
 :text_regression_in_flaml a :Configuration_item ;
     skos:prefLabel "text regression in FLAML" ;
     :category :task_configuration ;
     :automl_solution :flaml ;
     :ml_task :text_regression ;
-    :parameter_value :use_approach_flaml_text_regression , :metric_flaml_regression .
+    :parameter_value :use_approach_flaml_text_regression , :metric_flaml_text_regression .
 :tabular_classification_in_auto_pytorch a :Configuration_item ;
     skos:prefLabel "tabular classification in Auto-PyTorch" ;
     :category :task_configuration ;
@@ -2035,8 +2035,8 @@
     skos:broader :use_approach ;
     :has_datatype :list ;
     :parameter_value :adaboost , :decision_tree , :extra_tree , :gradient_boosting_tree , :k_nearest_neighbor , :linear_svm , :multilayer_perceptron , :random_forest , :gaussian_naives_bayes .
-:use_approach_flaml_classification a :Configuration_item ;
-    skos:prefLabel "use approach FLAML classification" ;
+:use_approach_flaml_tabular_classification a :Configuration_item ;
+    skos:prefLabel "use approach FLAML tabular classification" ;
     :category :parameter ;
     skos:broader :use_approach ;
     :has_datatype :list ;
@@ -2047,8 +2047,8 @@
     skos:broader :use_approach ;
     :has_datatype :list ;
     :parameter_value :adaboost , :bayesian_linear_regression , :decision_tree , :extra_tree , :gaussian_process , :gradient_boosting_tree , :k_nearest_neighbor , :linear_svm , :multilayer_perceptron , :random_forest .
-:use_approach_flaml_regression a :Configuration_item ;
-    skos:prefLabel "use approach FLAML regression" ;
+:use_approach_flaml_tabular_regression a :Configuration_item ;
+    skos:prefLabel "use approach FLAML tabular regression" ;
     :category :parameter ;
     skos:broader :use_approach ;
     :has_datatype :list ;
@@ -2188,12 +2188,12 @@
     skos:broader :metric ;
     :has_datatype :single_value ;
     :parameter_value :accuracy , :binary_accuracy , :categorical_accuracy , :sparse_categorical_accuracy , :top_k_categorical_accuracy , :sparse_top_k_categorical_accuracy , :binary_cross_entropy , :categorical_cross_entropy , :poisson , :area_under_roc_curve , :precision , :recall , :true_positives , :true_negatives , :false_positives , :false_negatives , :hinge , :squared_hinge , :categorical_hinge .
-:metric_flaml_classification a :Configuration_item ;
-    skos:prefLabel "metric FLAML classification" ;
+:metric_flaml_tabular_classification a :Configuration_item ;
+    skos:prefLabel "metric FLAML tabular classification" ;
     :category :parameter ;
     skos:broader :metric ;
     :has_datatype :single_value ;
-    :parameter_value :accuracy , :receiver_operating_characteristic_curve , :receiver_operating_characteristic_curve_one_vs_rest , :log_loss , :receiver_operating_characteristic_curve_one_vs_one , :average_precision_score , :f_measure , :f_measure_micro , :f_measure_macro .
+    :parameter_value :accuracy , :receiver_operating_characteristic_curve , :receiver_operating_characteristic_curve_one_vs_rest , :log_loss , :receiver_operating_characteristic_curve_one_vs_one , :average_precision_score , :f_measure , :f_measure_micro , :f_measure_macro , :area_under_roc_curve_weighted .
 :metric_autosklearn_regression a :Configuration_item ;
     skos:prefLabel "metric Autosklearn regression" ;
     :category :parameter ;
@@ -2206,12 +2206,24 @@
     skos:broader :metric ;
     :has_datatype :single_value ;
     :parameter_value :mean_squared_error , :root_mean_squared_error , :mean_absolute_error , :mean_absolute_percentage_error , :mean_squared_log_error , :cosine_similarity , :log_cosh_error .
-:metric_flaml_regression a :Configuration_item ;
-    skos:prefLabel "metric FLAML regression" ;
+:metric_flaml_tabular_regression a :Configuration_item ;
+    skos:prefLabel "metric FLAML tabular regression" ;
     :category :parameter ;
     skos:broader :metric ;
     :has_datatype :single_value ;
-    :parameter_value :coefficient_of_determination , :mean_squared_error , :rooted_mean_squared_error , :mean_absolute_error , :receiver_operating_characteristic_curve_one_vs_rest , :receiver_operating_characteristic_curve_one_vs_one , :receiver_operating_characteristic_curve , :mean_absolute_percentage_error .
+    :parameter_value :coefficient_of_determination , :mean_squared_error , :rooted_mean_squared_error , :mean_absolute_error , :receiver_operating_characteristic_curve_one_vs_rest , :receiver_operating_characteristic_curve_one_vs_one , :receiver_operating_characteristic_curve , :mean_absolute_percentage_error , :r2 , :area_under_roc_curve_weighted .
+:metric_flaml_text_classification a :Configuration_item ;
+    skos:prefLabel "metric FLAML text classification" ;
+    :category :parameter ;
+    skos:broader :metric ;
+    :has_datatype :single_value ;
+    :parameter_value :accuracy , :receiver_operating_characteristic_curve , :receiver_operating_characteristic_curve_one_vs_rest , :log_loss , :receiver_operating_characteristic_curve_one_vs_one , :average_precision_score , :f_measure , :f_measure_micro , :f_measure_macro , :area_under_roc_curve_weighted .
+:metric_flaml_text_regression a :Configuration_item ;
+    skos:prefLabel "metric FLAML text regression" ;
+    :category :parameter ;
+    skos:broader :metric ;
+    :has_datatype :single_value ;
+    :parameter_value :coefficient_of_determination , :mean_squared_error , :rooted_mean_squared_error , :mean_absolute_error , :receiver_operating_characteristic_curve_one_vs_rest , :receiver_operating_characteristic_curve_one_vs_one , :receiver_operating_characteristic_curve , :mean_absolute_percentage_error , :r2 , :area_under_roc_curve_weighted .
 :metric_flaml_ranking a :Configuration_item ;
     skos:prefLabel "metric FLAML ranking" ;
     :category :parameter ;
