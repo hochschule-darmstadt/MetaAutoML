@@ -46,12 +46,12 @@ tabular_regression_config = [
     [":metric", ":metric_flaml_tabular_regression", [":r2"], "single_value", "dict", flaml_metrics, "metric"]
 ]
 
-#config for the tabular classification
+#config for the time series forecasting
 time_series_forecasting_config = [
     [":metric", ":metric_flaml_time_series_forecasting", [":log_loss"], "single_value", "dict", flaml_metrics, "metric"]
 ]
 
-#config for the tabular classification
+#config for the text classification
 text_classification_config = [
     [":metric", ":metric_flaml_text_classification", [":log_loss"], "single_value", "dict", flaml_metrics, "metric"]
 ]

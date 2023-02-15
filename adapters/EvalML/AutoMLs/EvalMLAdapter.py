@@ -1,6 +1,6 @@
 import os
 
-from AdapterUtils import export_model, prepare_tabular_dataset, data_loader
+from AdapterUtils import export_model, prepare_tabular_dataset, data_loader, translate_parameters
 from AdapterUtils import *
 from JsonUtil import get_config_property
 
@@ -14,6 +14,8 @@ from evalml.objectives import FraudCost
 import pandas as pd
 import numpy as np
 from predict_time_sources import feature_preparation
+
+import EvalMLParameterConfig as epc
 
 import json
 import pickle
@@ -60,14 +62,16 @@ class EvalMLAdapter:
 
         if len(y.unique()) == 2:
             classification_type = "binary"
+            parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), epc.task_config_binary_metric)
         else:
             classification_type =  "multiclass"
+            parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), epc.task_config)
         # parameters must be set correctly
         automl = AutoMLSearch(
                     X_train=X,
                     y_train=y,
                     problem_type=classification_type,
-                    objective=self.__get_metric(),
+                    **parameters,
                     max_batches=3,
                     verbose=False,
                     tuner_class=self.__get_tuner(),
@@ -85,13 +89,14 @@ class EvalMLAdapter:
         self.df, test = data_loader(self._configuration)
         X, y = prepare_tabular_dataset(self.df, self._configuration)
         print(type(X))
+        parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), epc.task_config)
         problem_type = "REGRESSION"
         # parameters must be set correctly
         automl = AutoMLSearch(
                     X_train=X,
                     y_train=y,
                     problem_type=problem_type,
-                    objective= self.__get_metric(),
+                    **parameters,
                     max_batches=3,
                     verbose=False,
                     tuner_class=self.__get_tuner(),
@@ -112,7 +117,8 @@ class EvalMLAdapter:
         file_path = write_tabular_dataset_data(self.df, file_path, self._configuration, "train.csv")
 
         X, y = prepare_tabular_dataset(self.df, self._configuration)
-        X.reset_index(inplace=True) 
+        X.reset_index(inplace=True)
+        parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), epc.task_config)
 
         problem_config = {"gap": 0, "max_delay": 7, "forecast_horizon": 7, "time_index": self.__get_index_column()}
         # parameters must be set correctly
@@ -123,7 +129,7 @@ class EvalMLAdapter:
                     max_batches=1,
                     verbose=False,
                     problem_configuration=problem_config,
-                    objective= self.__get_metric(),
+                    **parameters,
                     tuner_class=self.__get_tuner(),
                     allowed_model_families= self.__get_use_approaches(),
                 )
@@ -142,52 +148,7 @@ class EvalMLAdapter:
                 return column
         return None #
 
-    def __get_metric(self):
-        """get accuracy metric (objective) from automl request
-            return auto when no metric is provided
-        Returns:
-            obj of Objective base: metric name
-        """
-        # TODO: add log loss and matthews_correlation_coefficient for bianry in ontology
-        metrics_dict = {
-            ':binary_accuracy' : objectives.AccuracyBinary(),
-            ':balanced_accuracy' : objectives.BalancedAccuracyMulticlass(),
-            ':f_measure' : objectives.F1(),
-            ':f_measure_micro' : objectives.F1Micro(),
-            ':f_measure_macro' : objectives.F1Macro(),
-            ':f_measure_weighted' : objectives.F1Weighted(),
-            ':precision' : objectives.Precision(),
-            ':precision_macro' : objectives.PrecisionMacro(),
-            ':precision_micro' : objectives.PrecisionMicro(),
-            ':precision_weighted' : objectives.PrecisionWeighted(),
-            ':recall' : objectives.Recall(),
-            ':recall_micro' : objectives.RecallMicro(),
-            ':recall_macro' : objectives.RecallMacro(),
-            ':recall_weighted' : objectives.RecallWeighted(),
-            ':area_under_roc_curve' : objectives.AUC(),
-            ':area_under_roc_curve_micro' : objectives.AUCMicro(),
-            ':area_under_roc_curve_macro' : objectives.AUCMacro(),
-            ':gini' : objectives.Gini(),
-            ':log_loss' : objectives.LogLossMulticlass(),
-            ':matthews_correlation_coefficient' : objectives.MCCMulticlass(),
-            ':rooted_mean_squared_error' : objectives.RootMeanSquaredError(),
-            ':mean_squared_log_error' : objectives.MeanSquaredLogError(),
-            ':rooted_mean_squared_log_error' : objectives.RootMeanSquaredLogError(),
-            ':coefficient_of_determination' : objectives.R2(),
-            ':mean_absolute_error' : objectives.MAE(),
-            ':mean_squared_error' : objectives.MSE(),
-            ':median_absolute_error' : objectives.MAE(),
-            ':max_error' : objectives.MaxError(),
-            ':explained_variance' : objectives.ExpVariance(),
-            ':mean_absolute_percentage_error' : objectives.MAPE(),
-        }
-        try:
-            #print(self._configuration['configuration']['parameters'][':metric']['values'][0])
-            return metrics_dict[self._configuration['configuration']['parameters'][':metric']['values'][0]]
-        except:
-            print("no metric param")
-        return "auto"
-
+#can be deleted after tuner gets added to parameter config
     def __get_tuner(self):
         """get tuner class
         return none when not setted
@@ -207,7 +168,8 @@ class EvalMLAdapter:
 
         return None
 
-    
+
+#can be deleted after use approach gets added to parameter config
     def __get_use_approaches(self):
         use_approaches_dict = {
             ':catboost' : model_family.ModelFamily.CATBOOST,

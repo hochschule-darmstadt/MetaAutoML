@@ -1,5 +1,5 @@
 ### Ontology file generated from ML_Ontology.xlsx.
-### 2023-02-14 00:58:53.689494
+### 2023-02-15 23:01:00.462440
 
 
 # PREFIXES
@@ -1037,19 +1037,23 @@
 :area_under_roc_curve a :Metric ;
     skos:prefLabel "area under roc curve" ;
     skos:altLabel "AUC" ;
+    :used_for :classification ;
     rdfs:comment "A Simple Generalisation of the Area Under the ROC Curve for Multiple Class Classification Problems" ;
     rdfs:seeAlso <https://www.wikidata.org/entity/Q55878266> .
 :area_under_roc_curve_macro a :Metric ;
     skos:prefLabel "area under roc curve macro" ;
     skos:altLabel "AUC macro" ;
+    :used_for :classification ;
     rdfs:comment "AUC score for multiclass classification using macro averaging." .
 :area_under_roc_curve_micro a :Metric ;
     skos:prefLabel "area under roc curve micro" ;
     skos:altLabel "AUC micro" ;
+    :used_for :classification ;
     rdfs:comment "AUC score for multiclass classification using micro averaging." .
 :area_under_roc_curve_weighted a :Metric ;
     skos:prefLabel "area under roc curve weighted" ;
     skos:altLabel "AUC weighted" ;
+    :used_for :classification ;
     rdfs:comment "AUC score for multiclass classification using weighted averaging." .
 :average_precision a :Metric ;
     skos:prefLabel "average precision" ;
@@ -1961,25 +1965,25 @@
     :category :task_configuration ;
     :automl_solution :evalml ;
     :ml_task :tabular_classification ;
-    :parameter_value :use_approach_evalml_tabular_classification , :metric_evalml_classification , :tuner_class_evalml .
+    :parameter_value :use_approach_evalml_tabular_classification , :metric_evalml_tabular_classification , :tuner_class_evalml .
 :tabular_regression_in_evalml a :Configuration_item ;
     skos:prefLabel "tabular regression in EvalML" ;
     :category :task_configuration ;
     :automl_solution :evalml ;
     :ml_task :tabular_regression ;
-    :parameter_value :use_approach_evalml_tabular_regression , :metric_evalml_regression , :tuner_class_evalml .
+    :parameter_value :use_approach_evalml_tabular_regression , :metric_evalml_tabular_regression , :tuner_class_evalml .
 :text_classification_in_evalml a :Configuration_item ;
     skos:prefLabel "text classification in EvalML" ;
     :category :task_configuration ;
     :automl_solution :evalml ;
     :ml_task :text_classification ;
-    :parameter_value :use_approach_evalml_tabular_classification , :metric_evalml_classification , :tuner_class_evalml .
+    :parameter_value :use_approach_evalml_tabular_classification , :metric_evalml_text_classification , :tuner_class_evalml .
 :text_regression_in_evalml a :Configuration_item ;
     skos:prefLabel "text regression in EvalML" ;
     :category :task_configuration ;
     :automl_solution :evalml ;
     :ml_task :text_regression ;
-    :parameter_value :use_approach_evalml_tabular_regression , :metric_evalml_regression , :tuner_class_evalml .
+    :parameter_value :use_approach_evalml_tabular_regression , :metric_evalml_text_regression , :tuner_class_evalml .
 :time_series_classification_in_evalml a :Configuration_item ;
     skos:prefLabel "time series classification in EvalML" ;
     :category :task_configuration ;
@@ -2320,18 +2324,30 @@
     skos:broader :metric ;
     :has_datatype :single_value ;
     :parameter_value :mean_squared_error , :root_mean_squared_error , :mean_absolute_error , :mean_absolute_percentage_error , :mean_squared_log_error , :cosine_similarity , :log_cosh_error .
-:metric_evalml_classification a :Configuration_item ;
-    skos:prefLabel "metric EvalML classification" ;
+:metric_evalml_tabular_classification a :Configuration_item ;
+    skos:prefLabel "metric EvalML tabular classification" ;
     :category :parameter ;
     skos:broader :metric ;
     :has_datatype :single_value ;
-    :parameter_value :binary_accuracy , :accuracy , :balanced_accuracy , :f_measure , :f_measure_micro , :f_measure_macro , :f_measure_weighted , :precision , :precision_macro , :precision_micro , :precision_weighted , :recall , :recall_micro , :recall_macro , :recall_weighted , :area_under_roc_curve , :area_under_roc_curve_micro , :area_under_roc_curve_macro , :gini , :log_loss , :matthews_correlation_coefficient .
-:metric_evalml_regression a :Configuration_item ;
-    skos:prefLabel "metric EvalML regression" ;
+    :parameter_value :accuracy , :balanced_accuracy , :f_measure , :f_measure_micro , :f_measure_macro , :f_measure_weighted , :precision , :precision_macro , :precision_micro , :precision_weighted , :recall , :recall_micro , :recall_macro , :recall_weighted , :area_under_roc_curve , :area_under_roc_curve_micro , :area_under_roc_curve_macro , :area_under_roc_curve_weighted , :gini , :log_loss , :matthews_correlation_coefficient .
+:metric_evalml_tabular_regression a :Configuration_item ;
+    skos:prefLabel "metric EvalML tabular regression" ;
     :category :parameter ;
     skos:broader :metric ;
     :has_datatype :single_value ;
-    :parameter_value :rooted_mean_squared_error , :mean_squared_log_error , :rooted_mean_squared_log_error , :coefficient_of_determination , :mean_absolute_error , :mean_squared_error , :median_absolute_error , :max_error , :explained_variance .
+    :parameter_value :rooted_mean_squared_error , :mean_squared_log_error , :rooted_mean_squared_log_error , :r2 , :mean_absolute_error , :mean_squared_error , :median_absolute_error , :max_error , :explained_variance .
+:metric_evalml_text_classification a :Configuration_item ;
+    skos:prefLabel "metric EvalML text classification" ;
+    :category :parameter ;
+    skos:broader :metric ;
+    :has_datatype :single_value ;
+    :parameter_value :accuracy , :balanced_accuracy , :f_measure , :f_measure_micro , :f_measure_macro , :f_measure_weighted , :precision , :precision_macro , :precision_micro , :precision_weighted , :recall , :recall_micro , :recall_macro , :recall_weighted , :area_under_roc_curve , :area_under_roc_curve_micro , :area_under_roc_curve_macro , :area_under_roc_curve_weighted , :gini , :log_loss , :matthews_correlation_coefficient .
+:metric_evalml_text_regression a :Configuration_item ;
+    skos:prefLabel "metric EvalML text regression" ;
+    :category :parameter ;
+    skos:broader :metric ;
+    :has_datatype :single_value ;
+    :parameter_value :rooted_mean_squared_error , :mean_squared_log_error , :rooted_mean_squared_log_error , :r2 , :mean_absolute_error , :mean_squared_error , :median_absolute_error , :max_error , :explained_variance .
 :metric_evalml_time_series_regression a :Configuration_item ;
     skos:prefLabel "metric EvalML time series regression" ;
     :category :parameter ;
