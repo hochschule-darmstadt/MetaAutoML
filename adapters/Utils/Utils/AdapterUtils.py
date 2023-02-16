@@ -286,16 +286,16 @@ def compute_regression_metrics(y_should: pd.Series, y_is: pd.Series) -> dict:
         score.update({
         ":d2_absolute_error": float(d2_absolute_error_score(y_should, y_is)),
         ":d2_pinball_score": float(d2_pinball_score(y_should, y_is)),
-        ":d2_tweedie_score": float(d2_tweedie_score(y_should, y_is))
+        ":d2_tweedie_score": float(d2_tweedie_score(y_should, y_is)),
+        ":mean_squared_log_error": float(mean_squared_log_error(y_should, y_is, squared=True)),
+        ":rooted_mean_squared_log_error": float(mean_squared_log_error(y_should, y_is, squared=False))
         })
     except Exception as e:
-        print("computing D2 scores failed:" + e)
+        print("computing D2 scores failed")
     if all(val > 0 for val in y_is) and all(val > 0 for val in y_should):
         score.update({
         ":mean_poisson_deviance": float(mean_poisson_deviance(y_should, y_is)),
-        ":mean_gamma_deviance": float(mean_gamma_deviance(y_should, y_is)),
-        ":mean_squared_log_error": float(mean_squared_log_error(y_should, y_is, squared=True)),
-        ":rooted_mean_squared_log_error": float(mean_squared_log_error(y_should, y_is, squared=False))
+        ":mean_gamma_deviance": float(mean_gamma_deviance(y_should, y_is))
         })
     return score
 

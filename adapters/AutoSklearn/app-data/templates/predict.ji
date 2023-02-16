@@ -17,10 +17,6 @@ if __name__ == '__main__':
     X = read_csv_dataset(filepath)
     X = rename_unnamed_columns(X)
     X, y = feature_preparation(X, {{configuration.dataset_configuration["schema"]}}.items(), "{{configuration.dataset_configuration["file_configuration"]["datetime_format"]}}",  is_prediction=True)
-    {% if configuration.configuration["task"] == ":time_series_forecasting" %}
-    # convert all object columns to categories, because autosklearn only supports numerical, bool and categorical features
-    X[X.select_dtypes(['object']).columns] = X.select_dtypes(['object']).apply(lambda x: x.astype('category'))
-    {% endif %}
     {% endif %}
 
     with open(sys.path[0] + '/model_sklearn.p', 'rb') as file:
