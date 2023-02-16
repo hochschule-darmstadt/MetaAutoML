@@ -1,12 +1,13 @@
 import os
 
-from AdapterUtils import export_model, prepare_tabular_dataset, data_loader, get_column_with_largest_amout_of_text
-from pycaret.classification import *
+from AdapterUtils import export_model, prepare_tabular_dataset, data_loader, get_column_with_largest_amout_of_text, translate_parameters
+from pycaret import classification, regression, time_series
 import numpy as np
 from sklearn.impute import SimpleImputer
 import pandas as pd
 import json
 from JsonUtil import get_config_property
+import PyCaretParameterConfig as ppc
 
 class PyCaretAdapter:
     """
@@ -41,50 +42,42 @@ class PyCaretAdapter:
         self.df, test = data_loader(self._configuration)
         X, y = prepare_tabular_dataset(self.df, self._configuration)
         X[y.name] = y
-        automl = setup(data = X, target = y.name)
-        best = compare_models()
-        dt = create_model(best)
-        tuned_dt = tune_model(dt)
-        final_dt = finalize_model(tuned_dt)
-        save_model(final_dt, os.path.join(self._configuration["result_folder_location"], 'model_pycaret'))
+        parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), ppc.task_config)
+        automl = classification.setup(data = X, target = y.name)
+        best = classification.compare_models()
+        dt = classification.create_model(best)
+        tuned_dt = classification.tune_model(dt, **parameters)
+        final_dt = classification.finalize_model(tuned_dt)
+        classification.save_model(final_dt, os.path.join(self._configuration["result_folder_location"], 'model_pycaret'))
         #export_model(automl, self._configuration["result_folder_location"], 'model_pycaret.p')
 
     def __tabular_regression(self):
+        #most likely not working, looks like a copy of the flaml adapter
         """Execute the tabular regression task and export the found model"""
         self.df, test = data_loader(self._configuration)
         X, y = prepare_tabular_dataset(self.df, self._configuration)
-        automl = AutoML()
-        automl_settings = self.__generate_settings()
-        automl_settings.update({
-            #"metric": self._configuration["configuration"]["metric"] if self._configuration["configuration"]["metric"] != "" else 'accuracy',
-            "metric": 'mse',
-            "task": 'regression',
-            "log_file_name": self._log_file_path
-        })
-
-        X[y.name] = y.values
-        automl.fit(dataframe=X, label=y.name, **automl_settings)
-        export_model(automl, self._configuration["result_folder_location"], 'model_pycaret.p')
+        X[y.name] = y
+        parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), ppc.task_config)
+        automl = regression.setup(data = X, target = y.name)
+        best = regression.compare_models()
+        dt = regression.create_model(best)
+        tuned_dt = regression.tune_model(dt, **parameters)
+        final_dt = regression.finalize_model(tuned_dt)
+        regression.save_model(final_dt, os.path.join(self._configuration["result_folder_location"], 'model_pycaret'))
+        #export_model(automl, self._configuration["result_folder_location"], 'model_pycaret.p')
 
 
     def __time_series_forecasting(self):
+        #most likely not working, looks like a copy of the flaml adapter
         """Execute the tabular classification task and export the found model"""
         self.df, test = data_loader(self._configuration)
         X, y = prepare_tabular_dataset(self.df, self._configuration)
-        #TODO ensure ts first column is datetime
-        automl = AutoML()
-        automl_settings = self.__generate_settings()
-        automl_settings.update({
-            #"metric": self._configuration["configuration"]["metric"] if self._configuration["configuration"]["metric"] != "" else 'accuracy',
-            "metric": 'mape',
-            "task": 'ts_forecast',
-            "log_file_name": self._log_file_path,
-            "period": 1,
-            "eval_method": "holdout"
-        })
-        X[y.name] = y.values
-        X.reset_index(inplace=True)
-        X = X.bfill().ffill()  # makes sure there are no missing values
-        automl.fit(dataframe=X, label=y.name, **automl_settings)
-
-        export_model(automl, self._configuration["result_folder_location"], 'model_pycaret.p')
+        X[y.name] = y
+        parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), ppc.task_config)
+        automl = time_series.setup(data = X, target = y.name)
+        best = time_series.compare_models()
+        dt = time_series.create_model(best)
+        tuned_dt = time_series.tune_model(dt, **parameters)
+        final_dt = time_series.finalize_model(tuned_dt)
+        time_series.save_model(final_dt, os.path.join(self._configuration["result_folder_location"], 'model_pycaret'))
+        #export_model(automl, self._configuration["result_folder_location"], 'model_pycaret.p')

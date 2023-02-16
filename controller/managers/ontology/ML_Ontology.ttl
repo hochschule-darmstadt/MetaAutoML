@@ -1,5 +1,5 @@
 ### Ontology file generated from ML_Ontology.xlsx.
-### 2023-02-15 23:01:00.462440
+### 2023-02-16 22:52:39.402934
 
 
 # PREFIXES
@@ -1208,6 +1208,16 @@
     :used_for :regression , :time_series_forecasting ;
     rdfs:comment "measure of prediction accuracy of a forecast" ;
     rdfs:seeAlso <https://www.wikidata.org/entity/Q6803607> .
+:symmetric_mean_absolute_percentage_error a :Metric ;
+    skos:prefLabel "symmetric mean absolute percentage error" ;
+    skos:altLabel "SMAPE" ;
+    :used_for :time_series_forecasting .
+:mean_absolute_scaled_error a :Metric ;
+    skos:prefLabel "mean absolute scaled error" ;
+    skos:altLabel "MASE" ;
+    :used_for :time_series_forecasting ;
+    rdfs:comment "measure of forecasting quality" ;
+    rdfs:seeAlso <https://www.wikidata.org/wiki/Q6803610> .
 :mean_intersection_over_union a :Metric ;
     skos:prefLabel "mean intersection-over-union" ;
     skos:altLabel "mean intersection-over-union" ;
@@ -1328,6 +1338,10 @@
     skos:prefLabel "rooted mean squared log error" ;
     skos:altLabel "RMSLE" ;
     :used_for :regression .
+:rooted_mean_squared_scaled_error a :Metric ;
+    skos:prefLabel "rooted mean squared scaled error" ;
+    skos:altLabel "RMSSE" ;
+    :used_for :time_series_forecasting .
 :sensitifity_at_specificity a :Metric ;
     skos:prefLabel "sensitifity at specificity" ;
     :used_for :classification .
@@ -1393,6 +1407,10 @@
 :d2_tweedie_score a :Metric ;
     skos:prefLabel "d2 tweedie score" ;
     :used_for :regression .
+:coverage a :Metric ;
+    skos:prefLabel "Coverage" ;
+    :used_for :time_series_forecasting ;
+    rdfs:comment "Percentage of actual values that are within the prediction intervall" .
 
 
 # ML_library
@@ -2014,6 +2032,24 @@
     :automl_solution :mljar ;
     :ml_task :tabular_regression ;
     :parameter_value :metric_mljar_tabular_regression .
+:tabular_classification_pycaret a :Configuration_item ;
+    skos:prefLabel "tabular classification PyCaret" ;
+    :category :task_configuration ;
+    :automl_solution :pycaret ;
+    :ml_task :tabular_classification ;
+    :parameter_value :metric_pycaret_tabular_classification .
+:tabular_regression_pycaret a :Configuration_item ;
+    skos:prefLabel "tabular regression PyCaret" ;
+    :category :task_configuration ;
+    :automl_solution :pycaret ;
+    :ml_task :tabular_regression ;
+    :parameter_value :metric_pycaret_tabular_regression .
+:time_series_forecasting__pycaret a :Configuration_item ;
+    skos:prefLabel "time series forecasting  PyCaret" ;
+    :category :task_configuration ;
+    :automl_solution :pycaret ;
+    :ml_task :time_series_forecasting ;
+    :parameter_value :metric_pycaret_time_series_forecasting .
 :ensemble_nbest a :Configuration_item ;
     skos:prefLabel "ensemble_nbest" ;
     :category :parameter ;
@@ -2366,6 +2402,24 @@
     skos:broader :metric ;
     :has_datatype :single_value ;
     :parameter_value :mean_absolute_error , :mean_squared_error , :rooted_mean_squared_error , :r2 , :mean_absolute_percentage_error .
+:metric_pycaret_tabular_classification a :Configuration_item ;
+    skos:prefLabel "metric PyCaret tabular classification" ;
+    :category :parameter ;
+    skos:broader :metric ;
+    :has_datatype :single_value ;
+    :parameter_value :accuracy , :area_under_roc_curve , :recall , :precision , :f_measure , :cohens_kappa , :matthews_correlation_coefficient .
+:metric_pycaret_tabular_regression a :Configuration_item ;
+    skos:prefLabel "metric PyCaret tabular regression" ;
+    :category :parameter ;
+    skos:broader :metric ;
+    :has_datatype :single_value ;
+    :parameter_value :mean_absolute_error , :mean_squared_error , :rooted_mean_squared_error , :r2 , :rooted_mean_squared_log_error , :mean_absolute_percentage_error .
+:metric_pycaret_time_series_forecasting a :Configuration_item ;
+    skos:prefLabel "metric PyCaret time series forecasting" ;
+    :category :parameter ;
+    skos:broader :metric ;
+    :has_datatype :single_value ;
+    :parameter_value :mean_absolute_scaled_error , :rooted_mean_squared_scaled_error , :symmetric_mean_absolute_percentage_error , :coverage , :mean_absolute_error , :rooted_mean_squared_error , :mean_absolute_percentage_error , :r2 .
 :time_limit a :Configuration_item ;
     skos:prefLabel "time limit" ;
     :category :parameter ;
