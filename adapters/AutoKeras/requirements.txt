@@ -1,5 +1,4 @@
-numpy==1.23.5
-autokeras==1.0.20
+autokeras==1.1.0
 betterproto @ git+https://github.com/danielgtaylor/python-betterproto.git@496eba27506a2fe18df409c4cd34a47d8ce04ffe
 dependency-injector==4.40.0
 dill

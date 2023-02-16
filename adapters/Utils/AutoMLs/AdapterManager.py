@@ -71,7 +71,7 @@ class AdapterManager(Thread):
             # start training process
             python_env = os.getenv("PYTHON_ENV", default="PYTHON_ENV_UNSET")
             process = Popen([python_env, "AutoML.py", config.job_folder_location],
-                                    stdout=subprocess.PIPE, stderr=PIPE,
+                                    stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                                     universal_newlines=True)
 
             # read the processes output line by line and push them onto the event queue
