@@ -1,0 +1,24 @@
+env
+.git
+.vs
+__pycache__
+.gitignore
+.vscode/
+.venv/
+structured_data_classifier/
+*.md
+.idea/
+*.sln
+
+*-deployment.yaml
+*-service.yaml
+adapters/*/AutoMLs/prediction_time_sources.py
+app-data/training/
+.gitkeep
+
+# datasets are mapped into the volume by controller, not by automl adapter, so ignore files if they are present
+app-data/datasets/*
+
+# all generated files in the folder of the specific automl
+app-data/output/*/*
+app-data/jobs/*/*
