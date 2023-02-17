@@ -36,6 +36,8 @@
                 "EVALML_SERVICE_PORT": "50062",
                 "PYCARET_SERVICE_HOST": "localhost",
                 "PYCARET_SERVICE_PORT": "50063",
+                "TPOT_SERVICE_HOST": "localhost",
+                "TPOT_SERVICE_PORT": "50064",
                 "MONGO_DB_DEBUG": "YES",                        //Use the locally installed MongoDB
                 "MONGO_DB_DOCKER_DEBUG": "NO",                  //Use the development docker-compose MongoDB
                 "MONGO_CLUSTER": "NO",                          //Use the MongoDB inside the cluster
