@@ -6,7 +6,12 @@ import numpy as np
 import os
 {% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression"] %}
 from dataset import read_csv_dataset
-from preprocessing import rename_unnamed_columns, feature_preparation
+from preprocessing import rename_unnamed_columns, feature_preparation  
+{% if configuration.configuration["task"] in [":tabular_classification"] %}
+from tpot import TPOTClassifier  
+{% else %}
+from tpot import TPOTRegressor  
+{% endif %}
 {% endif %}
 
 
@@ -20,13 +25,19 @@ if __name__ == '__main__':
     X = rename_unnamed_columns(X)
     X, y = feature_preparation(X, {{configuration.dataset_configuration["schema"]}}.items(), "{{configuration.dataset_configuration["file_configuration"]["datetime_format"]}}",  is_prediction=True)
 
-    with open(sys.path[0] + '/evalml.p', 'rb') as file:
+    with open(sys.path[0] + '/model_TPOT.p', 'rb') as file:
         loaded_model = dill.load(file)
 
+    {% if configuration.configuration["task"] in [":tabular_classification"] %}
+    model = TPOTClassifier()
+    {% else %}
+    model = TPOTRegressor()
+    {% endif %}
+    model.fitted_pipeline_ = loaded_model
     predicted_y = loaded_model.predict(X)
 
-    df = (predicted_y.to_frame())
-    df.columns = [ 'predicted']
-    df.to_csv(save_path)
+    predicted_y = np.reshape(predicted_y, (-1, 1))
+    pd.DataFrame(data=predicted_y, columns=["predicted"]).to_csv(save_path)
+
 
 
