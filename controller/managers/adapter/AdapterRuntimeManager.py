@@ -267,7 +267,7 @@ class AdapterRuntimeManager:
             meta (_type_): The event meta (contains a dict holding the "old_phase" and "new_phase")
             controller (_type_): The strategy controller instance that caused the event
         """
-        if meta.get('old_phase') == 'preprocessing' and meta.get('new_phase') == 'running':
+        if meta.get('old_phase') == 'pre_training' and meta.get('new_phase') == 'running':
             # Preprocessing finished, start the AutoML training
             self.__phase_start_automl_training()
 
