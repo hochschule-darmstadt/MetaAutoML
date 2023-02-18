@@ -151,7 +151,7 @@ class CsvManager:
                 "datatype_detected": datatype_detected,
                 "datatypes_compatible": datatypes_compatible,
                 "roles_compatible": roles_compatible,
-                "preprocessing": []
+                "preprocessing": {}
              }})
         return schema
 
