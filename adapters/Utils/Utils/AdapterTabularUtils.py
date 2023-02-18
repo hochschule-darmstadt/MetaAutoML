@@ -1,3 +1,16 @@
+import pandas as pd
+from typing import Tuple
+from sklearn.preprocessing import OrdinalEncoder
+from sklearn.preprocessing import OneHotEncoder
+from _collections_abc import dict_items
+from JsonUtil import get_config_property
+from AdapterBGRPC import *
+import os
+import re
+import json
+import numpy as np
+
+
 def read_tabular_dataset_training_data(config: "StartAutoMlRequest") -> Tuple[pd.DataFrame, pd.DataFrame]:
     """Read a CSV dataset into train and test dataframes
 
@@ -86,42 +99,18 @@ def write_tabular_dataset_data(df: pd.DataFrame, dir_name: str, config, file_nam
     os.chmod(file_path, 0o744)
     return file_path
 
+def feature_preparation(X: pd.DataFrame, features: dict_items, datetime_format: str, is_prediction:bool=False) -> Tuple[pd.DataFrame, pd.Series]:
+    """Prepare the dataset by applying to every column the correct datatype and role
 
-def get_column_with_largest_amout_of_text(config, X: pd.DataFrame):
-    """
-    Find the column with the most text inside,
-    because AutoKeras only supports training with one feature
     Args:
-        X (pd.DataFrame): The current X Dataframe
+        X (pd.DataFrame): The read dataset as a dataframe
+        features (dict_items): The dataset schema dictonary as an iterable dict (dict.items())
+        datetime_format (str): The string datetime format to use for datetime columns
+        is_prediction (bool, optional): Whether or not we are doing a training or prediction run. Defaults to False.
 
     Returns:
-        pd.Dataframe: Returns a pandas Dataframe with the column with the most text inside
+        Tuple[pd.DataFrame, pd.Series]: Tuple of the prepared feature dataframe (X) and label series (y) 
     """
-    column_names = []
-    target = ""
-    dict_with_string_length = {}
-
-    #First get only columns that will be used during training
-    for column, dt in config["dataset_configuration"]["schema"].items():
-        if dt.get("role_selected", "") == ":ignore" or dt.get("role_selected", "") == ":index" or dt.get("role_selected", "") == ":target":
-            continue
-        column_names.append(column)
-
-    #Check the used columns by dtype object (== string type) and get mean len to get column with longest text
-    for column_name in column_names:
-        if(X.dtypes[column_name] == object):
-            newlength = X[column_name].str.len().mean()
-            dict_with_string_length[column_name] = newlength
-    max_value = max(dict_with_string_length, key=dict_with_string_length.get)
-
-    #Remove the to be used text column from the list of used columns and set role ignore as Autokeras can only use one input column for text tasks
-    column_names.remove(max_value)
-    for column_name in column_names:
-        config["dataset_configuration"]["schema"][column_name]["role_selected"] = ":ignore"
-
-    return X
-
-def feature_preparation(X, features, datetime_format, is_prediction=False):
     target = ""
     is_target_found = False
     index_columns = []
@@ -182,29 +171,41 @@ def feature_preparation(X, features, datetime_format, is_prediction=False):
     return X, y
 
 
-def string_feature_encoding(X, y, features):
-    for column, dt in features:
-        print("")
-        if dt.get("preprocessing", "") == "":
-            #Check preprocessing block exists, backwards compability
-            dt["preprocessing"] = {}
-        if dt["preprocessing"].get("encoding", "") == "":
-            continue
-        elif dt["preprocessing"]["encoding"]["type"] == "ordinal_encoding":
-            ord_enc = OrdinalEncoder(dtype='int64')
-            ord_enc.fit(dt["preprocessing"]["encoding"]["values"])
-            X[column] = ord_enc.transform(X[[column]])
-        elif dt["preprocessing"]["encoding"]["type"] == "one_hot_encoding":
-            one_hot_enc = OneHotEncoder(dtype='int64', sparse_output=False).set_output(transform="pandas")
-            one_hot_enc.fit(dt["preprocessing"]["encoding"]["values"])
-            result = one_hot_enc.transform(X[[column]])
-            for col in result.columns:
-                result = result.rename(columns={ col : col.replace("x0", column)})
-            X = pd.concat([X, result], axis=1).drop(columns=[column])
-        else:
-            continue
+def get_column_with_largest_amout_of_text(X: pd.DataFrame, configuration: dict) -> Tuple[pd.DataFrame, dict]:
+    """
+    Find the column with the most text inside,
+    because some adapters only supports training with one feature
+    Args:
+        X (pd.DataFrame): The current X Dataframe
+        configuration (dict): hold the current adapter process configuration
 
-    return X, y
+    Returns:
+        Tuple(pd.DataFrame, dict): pd.Dataframe: Returns a pandas Dataframe with the column with the most text inside, the dict is the updated configuraiton dict
+    """
+    column_names = []
+    target = ""
+    dict_with_string_length = {}
+
+    #First get only columns that will be used during training
+    for column, dt in configuration["dataset_configuration"]["schema"].items():
+        if dt.get("role_selected", "") == ":ignore" or dt.get("role_selected", "") == ":index" or dt.get("role_selected", "") == ":target":
+            continue
+        column_names.append(column)
+
+    #Check the used columns by dtype object (== string type) and get mean len to get column with longest text
+    for column_name in column_names:
+        if(X.dtypes[column_name] == object):
+            newlength = X[column_name].str.len().mean()
+            dict_with_string_length[column_name] = newlength
+    max_value = max(dict_with_string_length, key=dict_with_string_length.get)
+
+    #Remove the to be used text column from the list of used columns and set role ignore as Autokeras can only use one input column for text tasks
+    column_names.remove(max_value)
+    for column_name in column_names:
+        configuration["dataset_configuration"]["schema"][column_name]["role_selected"] = ":ignore"
+
+    save_configuration_in_json(configuration)
+    return X, configuration
 
 def set_encoding_for_string_columns(config, X: pd.DataFrame, also_categorical=False):
     """Set encoding for string columns to ordinal if 2 or less unique values else one hot encoding
@@ -244,14 +245,38 @@ def set_encoding_for_string_columns(config, X: pd.DataFrame, also_categorical=Fa
     return config, reload
 
 
-def save_configuration_in_json(self, config):
-    """ serialize dataset_configuration to json string and save the the complete configuration in json file
-        to habe the right datatypes available for the evaluation
-    """
-    config['dataset_configuration'] = json.dumps(config['dataset_configuration'])
-    with open(os.path.join(config['job_folder_location'], get_config_property("job-file-name")), "w+") as f:
-        json.dump(config, f)
+def string_feature_encoding(X: pd.DataFrame, y: pd.Series, features: dict_items) -> Tuple[pd.DataFrame, pd.Series]:
+    """Apply string feature encoding (One hot, ordinal, label encoding) by the column preparation configuration
 
+    Args:
+        X (pd.DataFrame): The feature dataframe (X)
+        y (pd.Series): The label series (y)
+        features (dict_items): The dataset schema dictonary as an iterable dict (dict.items())
+
+    Returns:
+        Tuple[pd.DataFrame, pd.Series]: Tuple of the prepared feature dataframe (X) and label series (y) 
+    """
+    for column, dt in features:
+        if dt.get("preprocessing", "") == "":
+            #Check preprocessing block exists, backwards compability
+            dt["preprocessing"] = {}
+        if dt["preprocessing"].get("encoding", "") == "":
+            continue
+        elif dt["preprocessing"]["encoding"]["type"] == "ordinal_encoding":
+            ord_enc = OrdinalEncoder(dtype='int64')
+            ord_enc.fit(dt["preprocessing"]["encoding"]["values"])
+            X[column] = ord_enc.transform(X[[column]])
+        elif dt["preprocessing"]["encoding"]["type"] == "one_hot_encoding":
+            one_hot_enc = OneHotEncoder(dtype='int64', sparse_output=False).set_output(transform="pandas")
+            one_hot_enc.fit(dt["preprocessing"]["encoding"]["values"])
+            result = one_hot_enc.transform(X[[column]])
+            for col in result.columns:
+                result = result.rename(columns={ col : col.replace("x0", column)})
+            X = pd.concat([X, result], axis=1).drop(columns=[column])
+        else:
+            continue
+
+    return X, y
 
 def prepare_tabular_dataset(df: pd.DataFrame, json_configuration: dict) -> Tuple[pd.DataFrame, pd.Series]:
     """Prepare tabular dataset, perform feature preparation and data type casting
@@ -281,42 +306,6 @@ def convert_X_and_y_dataframe_to_numpy(X: pd.DataFrame, y: pd.Series) -> Tuple[n
     X = np.nan_to_num(X, 0)
     y = y.to_numpy()
     return X, y
-
-def get_column_with_largest_amout_of_text(X: pd.DataFrame, configuration: dict) -> Tuple[pd.DataFrame, dict]:
-    """
-    Find the column with the most text inside,
-    because some adapters only supports training with one feature
-    Args:
-        X (pd.DataFrame): The current X Dataframe
-        configuration (dict): hold the current adapter process configuration
-
-    Returns:
-        Tuple(pd.DataFrame, dict): pd.Dataframe: Returns a pandas Dataframe with the column with the most text inside, the dict is the updated configuraiton dict
-    """
-    column_names = []
-    target = ""
-    dict_with_string_length = {}
-
-    #First get only columns that will be used during training
-    for column, dt in configuration["dataset_configuration"]["schema"].items():
-        if dt.get("role_selected", "") == ":ignore" or dt.get("role_selected", "") == ":index" or dt.get("role_selected", "") == ":target":
-            continue
-        column_names.append(column)
-
-    #Check the used columns by dtype object (== string type) and get mean len to get column with longest text
-    for column_name in column_names:
-        if(X.dtypes[column_name] == object):
-            newlength = X[column_name].str.len().mean()
-            dict_with_string_length[column_name] = newlength
-    max_value = max(dict_with_string_length, key=dict_with_string_length.get)
-
-    #Remove the to be used text column from the list of used columns and set role ignore as Autokeras can only use one input column for text tasks
-    column_names.remove(max_value)
-    for column_name in column_names:
-        configuration["dataset_configuration"]["schema"][column_name]["role_selected"] = ":ignore"
-
-    save_configuration_in_json(configuration)
-    return X, configuration
 
 
 def save_configuration_in_json(configuration: dict):

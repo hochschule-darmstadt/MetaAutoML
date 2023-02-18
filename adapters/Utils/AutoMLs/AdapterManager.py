@@ -1,8 +1,14 @@
 import json
 import os
-import time, asyncio
+import asyncio
+from typing import Tuple
 import queue
+import sys
+from codecarbon.output import EmissionsData
 from AdapterUtils import *
+from AdapterImageUtils import *
+from AdapterLongitudinalUtils import *
+from AdapterTabularUtils import *
 from AdapterBGRPC import *
 from threading import *
 from JsonUtil import get_config_property
@@ -10,7 +16,7 @@ import pandas as pd
 from typing import Tuple
 import re
 from codecarbon import OfflineEmissionsTracker
-from subprocess import Popen, PIPE, CalledProcessError
+from subprocess import Popen
 
 class AdapterManager(Thread):
     """The base adapter manager object providing the shared functionality between all adapters

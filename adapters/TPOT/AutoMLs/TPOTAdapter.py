@@ -1,4 +1,6 @@
+
 from AdapterUtils import *
+from AdapterTabularUtils import *
 from tpot import TPOTClassifier, TPOTRegressor
 
 
