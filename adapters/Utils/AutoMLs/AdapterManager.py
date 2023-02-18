@@ -101,7 +101,7 @@ class AdapterManager(Thread):
             library, model = self._get_ml_model_and_lib(config)
             # TODO: fix evaluation (does not work with image datasets)
             test_score, prediction_time = evaluate(config, os.path.join(config.job_folder_location, get_config_property("job-file-name")))
-            self.__auto_ml_status_messages.put(get_response(output_json, json.dumps(test_score), prediction_time, library, model, carbon_tracker.final_emissions_data))
+            self.__auto_ml_status_messages.put(self.get_response(output_json, json.dumps(test_score), prediction_time, library, model, carbon_tracker.final_emissions_data))
 
             print(f'{get_config_property("adapter-name")} job finished')
             self.__start_auto_ml_running = False
@@ -122,6 +122,50 @@ class AdapterManager(Thread):
                 else:
                     print(e)
 
+    def get_response(self, config: "StartAutoMlRequest", test_score: float, prediction_time: float, library: str, model: str, emissions: EmissionsData) -> "GetAutoMlStatusResponse":
+        """Generate the final GRPC AutoML status message
+
+        Args:
+            config (StartAutoMlRequest): The StartAutoMlRequest request, extended with the trainings folder paths
+            test_score (float): The test score archieve by the model
+            prediction_time (float): The passed time to make one prediction using the model
+            library (str): The ML library the model is based upon
+            model (str): The ML model type the model is composed off
+
+        Returns:
+            GetAutoMlStatusResponse: The GRPS AutoML status messages
+        """
+        response = GetAutoMlStatusResponse()
+        response.return_code = AdapterReturnCode.ADAPTER_RETURN_CODE_SUCCESS
+        if get_config_property("local_execution") == "NO":
+            response.path = os.path.join(config.controller_export_folder_location, config.file_name)
+        else:
+            response.path = os.path.join(config.file_location, config.file_name)
+        response.test_score = test_score
+        response.prediction_time = prediction_time
+        response.ml_library = library
+        response.ml_model_type = model
+
+        #Add emission profile
+        emission_profile = CarbonEmission()
+        emission_profile.emissions = emissions.emissions
+        emission_profile.emissions_rate = emissions.emissions_rate
+        emission_profile.energy_consumed = emissions.energy_consumed
+        emission_profile.duration = emissions.duration
+        emission_profile.cpu_count = emissions.cpu_count
+        emission_profile.cpu_energy = emissions.cpu_energy
+        emission_profile.cpu_model = emissions.cpu_model
+        emission_profile.cpu_power = emissions.cpu_power
+        emission_profile.gpu_count = emissions.gpu_count
+        emission_profile.gpu_energy = emissions.gpu_energy
+        emission_profile.gpu_model = emissions.gpu_model
+        emission_profile.gpu_power = emissions.gpu_power
+        emission_profile.ram_energy = emissions.ram_energy
+        emission_profile.ram_power = emissions.ram_power
+        emission_profile.ram_total_size = emissions.ram_total_size
+
+        response.emission_profile = emission_profile
+        return response
 
     def get_auto_ml_status(self) -> "GetAutoMlStatusResponse":
         """Retrive the latest status message created by the AutoML solution subprocess if one is available. If no new message is available while the process is running, a message will be return with the status code set to PENDING

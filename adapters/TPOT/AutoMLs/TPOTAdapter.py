@@ -1,8 +1,5 @@
-import numpy as np
-from AdapterUtils import export_model, prepare_tabular_dataset, data_loader
+from AdapterUtils import *
 from tpot import TPOTClassifier, TPOTRegressor
-from sklearn.datasets import load_digits
-from sklearn.model_selection import train_test_split
 
 
 class TPOTAdapter:
@@ -29,8 +26,14 @@ class TPOTAdapter:
                 self.__tabular_regression()
 
     def __tabular_classification(self):
-        self.df, test = data_loader(self._configuration)
-        X, y = prepare_tabular_dataset(self.df, self._configuration)
+        train, test = data_loader(self._configuration)
+        X, y = prepare_tabular_dataset(train, self._configuration)
+        #Apply encoding to string
+        self._configuration, reload = set_encoding_for_string_columns(self._configuration, X, also_categorical=True)
+        if reload:
+            train, test = data_loader(self._configuration)
+            #reload dataset to load changed data
+            X, y = prepare_tabular_dataset(train, self._configuration)
 
         pipeline_optimizer = TPOTClassifier(generations=5, population_size=20, cv=5,
                                             random_state=42, verbosity=2, max_time_mins=self._configuration["configuration"]["runtime_limit"]*60)
@@ -39,10 +42,15 @@ class TPOTAdapter:
 
 
     def __tabular_regression(self):
-        self.df, test = data_loader(self._configuration)
-        X, y = prepare_tabular_dataset(self.df, self._configuration)
+        train, test = data_loader(self._configuration)
+        X, y = prepare_tabular_dataset(train, self._configuration)
+        #Apply encoding to string
+        self._configuration, reload = set_encoding_for_string_columns(self._configuration, X, also_categorical=True)
+        if reload:
+            train, test = data_loader(self._configuration)
+            #reload dataset to load changed data
+            X, y = prepare_tabular_dataset(train, self._configuration)
 
-        pipeline_optimizer = TPOTRegressor(generations=5, population_size=20, cv=5,
-                                            random_state=42, verbosity=2, max_time_mins=self._configuration["configuration"]["runtime_limit"]*60)
+        pipeline_optimizer = TPOTRegressor(verbosity=2, max_time_mins=self._configuration["configuration"]["runtime_limit"]*60)
         pipeline_optimizer.fit(X, y)
         export_model(pipeline_optimizer, self._configuration["result_folder_location"], 'model_TPOT.p')

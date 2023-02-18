@@ -1,7 +1,8 @@
 from enum import Enum, unique
 import pandas as pd
 import re
-
+from sklearn.preprocessing import OrdinalEncoder
+from sklearn.preprocessing import OneHotEncoder
 
 @unique
 class SplitMethod(Enum):
@@ -66,5 +67,30 @@ def feature_preparation(X, features, datetime_format, is_prediction=False):
     if len(index_columns) > 0:
         #Set index columns
         X.set_index(index_columns, inplace=True)
+
+    return X, y
+
+
+def string_feature_encoding(X, y, features):
+    for column, dt in features:
+        print("")
+        if dt.get("preprocessing", "") == "":
+            #Check preprocessing block exists, backwards compability
+            dt["preprocessing"] = {}
+        if dt["preprocessing"].get("encoding", "") == "":
+            continue
+        elif dt["preprocessing"]["encoding"]["type"] == "ordinal_encoding":
+            ord_enc = OrdinalEncoder(dtype='int64')
+            ord_enc.fit(dt["preprocessing"]["encoding"]["values"])
+            X[column] = ord_enc.transform(X[[column]])
+        elif dt["preprocessing"]["encoding"]["type"] == "one_hot_encoding":
+            one_hot_enc = OneHotEncoder(dtype='int64', sparse_output=False).set_output(transform="pandas")
+            one_hot_enc.fit(dt["preprocessing"]["encoding"]["values"])
+            result = one_hot_enc.transform(X[[column]])
+            for col in result.columns:
+                result = result.rename(columns={ col : col.replace("x0", column)})
+            X = pd.concat([X, result], axis=1).drop(columns=[column])
+        else:
+            continue
 
     return X, y

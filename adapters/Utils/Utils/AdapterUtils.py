@@ -9,7 +9,7 @@ from typing import Any
 import dill
 import numpy as np
 import pandas as pd
-from predict_time_sources import SplitMethod, feature_preparation
+from predict_time_sources import *
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, mean_squared_error
 from sklearn.metrics import *
@@ -23,60 +23,11 @@ from typing import Tuple
 import re
 from codecarbon.output import EmissionsData
 import random
-######################################################################
-## GRPC HELPER FUNCTIONS
-######################################################################
-
-#region
-
-def get_response(config: "StartAutoMlRequest", test_score: float, prediction_time: float, library: str, model: str, emissions: EmissionsData) -> "GetAutoMlStatusResponse":
-    """Generate the final GRPC AutoML status message
-
-    Args:
-        config (StartAutoMlRequest): The StartAutoMlRequest request, extended with the trainings folder paths
-        test_score (float): The test score archieve by the model
-        prediction_time (float): The passed time to make one prediction using the model
-        library (str): The ML library the model is based upon
-        model (str): The ML model type the model is composed off
-
-    Returns:
-        GetAutoMlStatusResponse: The GRPS AutoML status messages
-    """
-    response = GetAutoMlStatusResponse()
-    response.return_code = AdapterReturnCode.ADAPTER_RETURN_CODE_SUCCESS
-    if get_config_property("local_execution") == "NO":
-        response.path = os.path.join(config.controller_export_folder_location, config.file_name)
-    else:
-        response.path = os.path.join(config.file_location, config.file_name)
-    response.test_score = test_score
-    response.prediction_time = prediction_time
-    response.ml_library = library
-    response.ml_model_type = model
-
-    #Add emission profile
-    emission_profile = CarbonEmission()
-    emission_profile.emissions = emissions.emissions
-    emission_profile.emissions_rate = emissions.emissions_rate
-    emission_profile.energy_consumed = emissions.energy_consumed
-    emission_profile.duration = emissions.duration
-    emission_profile.cpu_count = emissions.cpu_count
-    emission_profile.cpu_energy = emissions.cpu_energy
-    emission_profile.cpu_model = emissions.cpu_model
-    emission_profile.cpu_power = emissions.cpu_power
-    emission_profile.gpu_count = emissions.gpu_count
-    emission_profile.gpu_energy = emissions.gpu_energy
-    emission_profile.gpu_model = emissions.gpu_model
-    emission_profile.gpu_power = emissions.gpu_power
-    emission_profile.ram_energy = emissions.ram_energy
-    emission_profile.ram_power = emissions.ram_power
-    emission_profile.ram_total_size = emissions.ram_total_size
-
-    response.emission_profile = emission_profile
-    return response
-
-
-#endregion
-
+from sklearn.preprocessing import OrdinalEncoder
+from sklearn.preprocessing import OneHotEncoder
+from AdapterImageUtils import *
+from AdapterLongitudinalUtils import *
+from AdapterTabularUtils import *
 ######################################################################
 ## GENERAL HELPER FUNCTIONS
 ######################################################################
@@ -518,6 +469,172 @@ def write_tabular_dataset_data(df: pd.DataFrame, dir_name: str, config, file_nam
     return file_path
 
 
+def get_column_with_largest_amout_of_text(config, X: pd.DataFrame):
+    """
+    Find the column with the most text inside,
+    because AutoKeras only supports training with one feature
+    Args:
+        X (pd.DataFrame): The current X Dataframe
+
+    Returns:
+        pd.Dataframe: Returns a pandas Dataframe with the column with the most text inside
+    """
+    column_names = []
+    target = ""
+    dict_with_string_length = {}
+
+    #First get only columns that will be used during training
+    for column, dt in config["dataset_configuration"]["schema"].items():
+        if dt.get("role_selected", "") == ":ignore" or dt.get("role_selected", "") == ":index" or dt.get("role_selected", "") == ":target":
+            continue
+        column_names.append(column)
+
+    #Check the used columns by dtype object (== string type) and get mean len to get column with longest text
+    for column_name in column_names:
+        if(X.dtypes[column_name] == object):
+            newlength = X[column_name].str.len().mean()
+            dict_with_string_length[column_name] = newlength
+    max_value = max(dict_with_string_length, key=dict_with_string_length.get)
+
+    #Remove the to be used text column from the list of used columns and set role ignore as Autokeras can only use one input column for text tasks
+    column_names.remove(max_value)
+    for column_name in column_names:
+        config["dataset_configuration"]["schema"][column_name]["role_selected"] = ":ignore"
+
+    return X
+
+def feature_preparation(X, features, datetime_format, is_prediction=False):
+    target = ""
+    is_target_found = False
+    index_columns = []
+    for column, dt in features:
+        #During the prediction process no target column was read, so unnamed column names will be off by -1 index,
+        #if they are located after the target column within the training set, their index must be adjusted
+        if re.match(r"Column[0-9]+", column) and is_target_found == True and is_prediction == True:
+            column_index = re.findall('[0-9]+', column)
+            column_index = int(column_index[0])
+            X.rename(columns={f"Column{column_index-1}": column}, inplace=True)
+
+        #Check if column is to be droped, when its role is ignore
+        if dt.get("role_selected", "") == ":ignore":
+            X.drop(column, axis=1, inplace=True)
+            continue
+        #Get column datatype
+        datatype = dt.get("datatype_selected", "")
+        if datatype == "":
+            datatype = dt["datatype_detected"]
+
+        #during predicitons we dont have a target column and must avoid casting it
+        if dt.get("role_selected", "") == ":target" and is_prediction == True:
+            is_target_found = True
+            continue
+
+        if datatype == ":categorical":
+            X[column] = X[column].astype('category')
+        elif datatype == ":boolean":
+            X[column] = X[column].astype('bool')
+        elif datatype == ":integer":
+            X[column] = X[column].astype('int64')
+        elif datatype == ":float":
+            X[column] = X[column].astype('float64')
+        elif datatype == ":datetime":
+            X[column] = pd.to_datetime(X[column], format=datetime_format)
+        elif datatype == ":string":
+            X[column] = X[column].astype('object')
+
+        #Get target column
+        if dt.get("role_selected", "") == ":target":
+            target = column
+            is_target_found = True
+
+        if dt.get("role_selected", "") == ":index":
+            index_columns.append(column)
+
+    #Handle target column appropriately depending on runtime
+    if is_prediction == True:
+        y = pd.Series()
+    else:
+        y = X[target]
+        X.drop(target, axis=1, inplace=True)
+
+    if len(index_columns) > 0:
+        #Set index columns
+        X.set_index(index_columns, inplace=True)
+
+    return X, y
+
+
+def string_feature_encoding(X, y, features):
+    for column, dt in features:
+        print("")
+        if dt.get("preprocessing", "") == "":
+            #Check preprocessing block exists, backwards compability
+            dt["preprocessing"] = {}
+        if dt["preprocessing"].get("encoding", "") == "":
+            continue
+        elif dt["preprocessing"]["encoding"]["type"] == "ordinal_encoding":
+            ord_enc = OrdinalEncoder(dtype='int64')
+            ord_enc.fit(dt["preprocessing"]["encoding"]["values"])
+            X[column] = ord_enc.transform(X[[column]])
+        elif dt["preprocessing"]["encoding"]["type"] == "one_hot_encoding":
+            one_hot_enc = OneHotEncoder(dtype='int64', sparse_output=False).set_output(transform="pandas")
+            one_hot_enc.fit(dt["preprocessing"]["encoding"]["values"])
+            result = one_hot_enc.transform(X[[column]])
+            for col in result.columns:
+                result = result.rename(columns={ col : col.replace("x0", column)})
+            X = pd.concat([X, result], axis=1).drop(columns=[column])
+        else:
+            continue
+
+    return X, y
+
+def set_encoding_for_string_columns(config, X: pd.DataFrame, also_categorical=False):
+    """Set encoding for string columns to ordinal if 2 or less unique values else one hot encoding
+
+    Args:
+        config (_type_): The training configuration
+        X (pd.DataFrame): the training data
+        also_categorical (bool, optional): If also categorical set columns are adjusted. Defaults to False.
+
+    Returns:
+        _type_: the updated training configuration
+    """
+    reload = False
+    for column, dt in config["dataset_configuration"]["schema"].items():
+        if (dt.get("role_selected", "") != ":ignore" 
+        and (dt.get("datatype_selected", "") == ":string" or dt.get("datatype_selected", "") == ":categorical" and also_categorical==True) 
+        or (dt.get("datatype_detected", "") == ":string" and dt.get("datatype_selected", "") == "" or dt.get("datatype_detected", "") == ":categorical" and dt.get("datatype_selected", "") == "" and also_categorical==True)):
+            #Only update columns that are either selected or auto detected as sting and categorial (if also_categorical==True)
+            if dt["preprocessing"].get("encoding", "") == "":
+                #Only update the preprocessing if no previews ending block exists
+                values = X[column].unique().reshape(-1, 1)
+                if dt.get("role_selected", "") != ":target":
+                    #if column is target we use label encoding
+                    encoding = ":label_encoding"
+                elif len(values) == len(X[column]):
+                    #elif len is equal to column, it means every row has a unique string, ordinal endoding as this is an index value
+                    encoding = ":ordinal_encoding"
+                elif len(values) > 2:
+                    #elif more than two unique values default to one hot encoding
+                    encoding = ":one_hot_encoding"
+                else:
+                    #If 2 or less default to ordinal encoding
+                    encoding = ":ordinal_encoding"
+                config["dataset_configuration"]["schema"][column]["preprocessing"].update({"encoding": {"type": encoding, "values": values}})
+                reload = True
+
+    return config, reload
+
+
+def save_configuration_in_json(self, config):
+    """ serialize dataset_configuration to json string and save the the complete configuration in json file
+        to habe the right datatypes available for the evaluation
+    """
+    config['dataset_configuration'] = json.dumps(config['dataset_configuration'])
+    with open(os.path.join(config['job_folder_location'], get_config_property("job-file-name")), "w+") as f:
+        json.dump(config, f)
+
+
 def prepare_tabular_dataset(df: pd.DataFrame, json_configuration: dict) -> Tuple[pd.DataFrame, pd.Series]:
     """Prepare tabular dataset, perform feature preparation and data type casting
 
@@ -529,6 +646,7 @@ def prepare_tabular_dataset(df: pd.DataFrame, json_configuration: dict) -> Tuple
         tuple[pd.DataFrame, object]: tuple holding the dataset dataframe without the target column, and a Series or Dataframe holding the Target column(s) tuple[(X_dataframe, y)]
     """
     X, y = feature_preparation(df, json_configuration["dataset_configuration"]["schema"].items(), json_configuration["dataset_configuration"]["file_configuration"]["datetime_format"])
+    X, y = string_feature_encoding(X, y, json_configuration["dataset_configuration"]["schema"].items())
     return X, y
 
 def convert_X_and_y_dataframe_to_numpy(X: pd.DataFrame, y: pd.Series) -> Tuple[np.ndarray, np.ndarray]:
