@@ -302,7 +302,7 @@ class ControllerServiceManager(ControllerServiceBase):
                 if (not found) or (len(dataset['analysis']['duplicate_columns']) != 0):
                     result.strategies.append(
 						Strategy(
-						'data_preparation.ignore_redundant_features',
+						'preprocessing.ignore_redundant_features',
 						'Ignore redundant features',
 						'This strategy ignores certain dataset columns if they have been flagged as duplicate in the dataset analysis.'
 						)
@@ -311,7 +311,7 @@ class ControllerServiceManager(ControllerServiceBase):
                 if (not found) or (len(dataset['analysis']['duplicate_rows']) != 0):
                     result.strategies.append(
                         Strategy(
-						'data_preparation.ignore_redundant_samples',
+						'preprocessing.ignore_redundant_samples',
 						'Ignore redundant samples',
 						'This strategy ignores certain dataset rows if they have been flagged as duplicate in the dataset analysis.'
 						)
@@ -322,14 +322,14 @@ class ControllerServiceManager(ControllerServiceBase):
                 if (not found) or (size_time_ratio > 20000):
                     result.strategies.append(
 						Strategy(
-						'data_preparation.split_large_datasets',
+						'preprocessing.split_large_datasets',
 						'Split large datasets',
 						'This strategy truncates the training data if the time limit is relatively short for the size of the dataset.'
 						)
 				)
             result.strategies.append(
                 Strategy(
-                'data_preparation.top_3_models',
+                'pre_training.top_3_models',
                 'Top 3 Models',
                 'This strategy will run all adapters with only a small part of the data. Then it will train the 3 best solutions with the full data again.'
                 )

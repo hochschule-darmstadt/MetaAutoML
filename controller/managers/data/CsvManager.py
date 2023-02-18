@@ -150,7 +150,8 @@ class CsvManager:
             schema.update({col: {
                 "datatype_detected": datatype_detected,
                 "datatypes_compatible": datatypes_compatible,
-                "roles_compatible": roles_compatible
+                "roles_compatible": roles_compatible,
+                "preprocessing": {}
              }})
         return schema
 
