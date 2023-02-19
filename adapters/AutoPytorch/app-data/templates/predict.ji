@@ -5,7 +5,6 @@ import sys
 import pandas as pd
 import numpy as np
 {% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression", ":text_classification", ":text_regression", ":time_series_forecasting"] %}
-from dataset import read_csv_dataset
 from preprocessing import dataset_preparation
 {% endif %}
 

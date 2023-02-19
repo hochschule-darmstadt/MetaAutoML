@@ -4,8 +4,7 @@ import numpy as np
 import sys
 import json
 {% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression", ":text_classification", ":text_regression", ":time_series_forecasting"] %}
-from dataset import read_csv_dataset
-from preprocessing import rename_unnamed_columns, feature_preparation
+from preprocessing import dataset_preparation
 {% endif %}
 
 if __name__ == '__main__':
