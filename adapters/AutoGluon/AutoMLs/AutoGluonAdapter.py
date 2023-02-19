@@ -144,11 +144,8 @@ class AutoGluonAdapter:
         #Fit methode already saves the model
 
     def __time_series_forecasting(self):
-
-        self.df, test = data_loader(self._configuration)
-        X, y = prepare_tabular_dataset(self.df, self._configuration)
-        data = X
-        data[y.name] = y.values
+        train, test = data_loader(self._configuration, perform_splitting=False)
+        X, y = prepare_tabular_dataset(train, self._configuration)
         timestamp_column = ""
         #First get the datetime index column
         for column, dt in self._configuration["dataset_configuration"]["schema"].items():
@@ -158,14 +155,20 @@ class AutoGluonAdapter:
             if dt.get("role_selected", "") == ":index" and datatype == ":datetime":
                 timestamp_column = column
                 break
+        #Reset any index and imputation
+        self._configuration = reset_index_role(self._configuration)
+        self._configuration = set_imputation_for_numerical_columns(self._configuration, X)
+        train, test = data_loader(self._configuration)
+        #reload dataset to load changed data
+        X, y = prepare_tabular_dataset(train, self._configuration)
+        data = X
+        data[y.name] = y.values
 
-        data.reset_index(inplace=True)
-        data = data.assign(timeseries_id=1)
-        data = data.bfill().ffill()  # makes sure there are no missing values
+        #data = data.assign(timeseries_id=1)
 
         ts_dataframe = TimeSeriesDataFrame.from_data_frame(data, id_column="timeseries_id", timestamp_column=timestamp_column)
         model = TimeSeriesPredictor(label=y.name,
-                                eval_metric="sMAPE",    
+                                eval_metric="sMAPE",
                                  path=self._result_path).fit(
             ts_dataframe,
             time_limit=self._time_limit*60)

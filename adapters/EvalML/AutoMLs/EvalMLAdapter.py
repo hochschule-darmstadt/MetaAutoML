@@ -104,17 +104,23 @@ class EvalMLAdapter:
 
     def __time_series_forecasting(self):
         """Execute the time series forcasting/regression task and export the found model"""
-
-        self.df, test = data_loader(self._configuration)
+        train, test = data_loader(self._configuration, perform_splitting=False)
+        X, y = prepare_tabular_dataset(train, self._configuration)
         index_column_name = self.__get_index_column()
+        #Reset any index and imputation
+        self._configuration = reset_index_role(self._configuration)
+        train, test = data_loader(self._configuration)
+        #reload dataset to load changed data
+        X, y = prepare_tabular_dataset(train, self._configuration)
+
         #We must persist the training time series to make predictions
         file_path = self._configuration["result_folder_location"]
         file_path = write_tabular_dataset_data(self.df, file_path, self._configuration, "train.csv")
 
         X, y = prepare_tabular_dataset(self.df, self._configuration)
-        X.reset_index(inplace=True) 
+        X.reset_index(inplace=True)
 
-        problem_config = {"gap": 0, "max_delay": 7, "forecast_horizon": 7, "time_index": self.__get_index_column()}
+        problem_config = {"gap": 0, "max_delay": 7, "forecast_horizon": 7, "time_index": index_column_name}
         # parameters must be set correctly
         automl = AutoMLSearch(
                     X_train=X,
@@ -207,7 +213,7 @@ class EvalMLAdapter:
 
         return None
 
-    
+
     def __get_use_approaches(self):
         use_approaches_dict = {
             ':catboost' : model_family.ModelFamily.CATBOOST,

@@ -9,7 +9,7 @@ import tensorflow as tf
 from tensorflow import keras
 import autokeras as ak
 {% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression", ":text_classification", ":text_regression", ":time_series_forecasting"] %}
-from preprocessing import dataset_preparation, prediction_postprocessing
+from preprocessing import dataset_preparation
 {% else %}
 from dataset import read_image_dataset_folder
 {% endif %}

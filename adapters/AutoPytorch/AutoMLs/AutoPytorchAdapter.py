@@ -72,20 +72,11 @@ class AutoPytorchAdapter:
         X, y = prepare_tabular_dataset(self.df, self._configuration)
 
         auto_cls = TabularClassificationTask(temporary_directory=self._configuration["model_folder_location"] + "/tmp", output_directory=self._configuration["model_folder_location"] + "/output", delete_output_folder_after_terminate=False, delete_tmp_folder_after_terminate=False)
-        if self._time_limit is not None:
-            auto_cls.search(
+        auto_cls.search(
                 X_train=X,
                 y_train=y,
                 optimize_metric='accuracy',
                 total_walltime_limit=self._time_limit*60
-            )
-        else:
-            auto_cls.search(
-                X_train=X,
-                y_train=y,
-                optimize_metric='accuracy',
-                budget_type='epochs',
-                max_budget=self._iter_limit
             )
 
         export_model(auto_cls, self._configuration["result_folder_location"], "model_pytorch.p")
@@ -96,28 +87,13 @@ class AutoPytorchAdapter:
         """
         self.df, test = data_loader(self._configuration)
         X, y = prepare_tabular_dataset(self.df, self._configuration)
-        ############################################################################
-        # Build and fit a regressor
-        # ==========================
-        auto_reg = TabularRegressionTask()
 
-        ############################################################################
-        # Search for an ensemble of machine learning algorithms
-        # =====================================================
-        if self._time_limit is not None:
-            auto_reg.search(
+        auto_reg = TabularRegressionTask()
+        auto_reg.search(
                 X_train=X,
                 y_train=y,
                 optimize_metric='root_mean_squared_error',
-                total_walltime_limit=self._time_limit
-            )
-        else:
-            auto_reg.search(
-                X_train=X,
-                y_train=y,
-                optimize_metric='root_mean_squared_error',
-                budget_type='epochs',
-                max_budget=self._iter_limit
+                total_walltime_limit=self._time_limit*60
             )
 
         export_model(auto_reg, self._configuration["result_folder_location"], "model_pytorch.p")
