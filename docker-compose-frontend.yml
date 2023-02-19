@@ -46,6 +46,7 @@ services:
       - training-mcfly:/app/app-data/training/mcfly
       - training-evalml:/app/app-data/training/evalml
       - training-pycaret:/app/app-data/training/pycaret
+      - training-tpot:/app/app-data/training/tpot
     extra_hosts:
       - "docker.host.internal:host-gateway"
 
