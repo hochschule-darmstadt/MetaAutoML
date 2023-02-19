@@ -233,25 +233,28 @@ class AdapterManager(Thread):
                                                   config_json["dataset_id"],
                                                   config_json["training_id"],
                                                   get_config_property("result-folder-name"))
-
-            #For WSL users we need to adjust the path prefix for the dataset location to windows path
-            if get_config_property("local_execution") == "YES":
-                if get_config_property("running_in_wsl") == "YES":
-                    config_json["dataset_path"] = re.sub("[a-zA-Z]:\\\\([A-Za-z0-9]+(\\\\[A-Za-z0-9]+)+)\\\\MetaAutoML", get_config_property("wsl_metaautoml_path"), config_json["dataset_path"])
-                    config_json["dataset_path"] = config_json["dataset_path"].replace("\\", "/")
-
-
-
-            if self._loaded_training_id != config_json["training_id"]:
-                df, test = data_loader(config_json)
-                self._dataframeX, y = prepare_tabular_dataset(df, config_json)
+            job_file_location = os.path.join(get_config_property("training-path"),
+                                                  config_json["user_id"],
+                                                  config_json["dataset_id"],
+                                                  config_json["training_id"],
+                                                  get_config_property("job-folder-name"), 
+                                                  get_config_property("job-file-name"))
+            #Read dataset configuration
+            with open(job_file_location) as file:
+                updated_process_configuration = json.load(file)
+            config_json["dataset_configuration"] = json.loads(updated_process_configuration["dataset_configuration"])
 
             # Reassemble dataset with the datatypes and column names from the preprocessed data and the content of the
             # transmitted data.
-            df = pd.DataFrame(data=json.loads(explain_auto_ml_request.data), columns=self._dataframeX.columns)
-            df = df.astype(dtype=dict(zip(self._dataframeX.columns, self._dataframeX.dtypes.values)))
+            features = []
+            for column, dt in config_json["dataset_configuration"]["schema"].items():
+                if dt.get("role_selected", "") != ":target":
+                    features.append(column)
+            X = pd.DataFrame(data=json.loads(explain_auto_ml_request.data), columns=features)
+            X, y = prepare_tabular_dataset(X, config_json,  is_prediction=True)
 
-            probabilities = self._load_model_and_make_probabilities(config_json, result_folder_location, df)
+
+            probabilities = self._load_model_and_make_probabilities(config_json, result_folder_location, X)
 
             return ExplainModelResponse(probabilities=probabilities)
 

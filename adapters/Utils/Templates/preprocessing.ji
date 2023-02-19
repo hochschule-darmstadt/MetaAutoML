@@ -1,16 +1,78 @@
 import pandas as pd
+import numpy as np
 import re
+from _collections_abc import dict_items
+from typing import Tuple
+{% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression"] %}
+from dataset import read_csv_dataset
+from numpy import nan
+from sklearn.preprocessing import OrdinalEncoder
+from sklearn.preprocessing import OneHotEncoder
+from sklearn.preprocessing import LabelEncoder
+from sklearn.impute import SimpleImputer
+{% endif %} 
 
 {% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression", ":text_classification", ":text_regression", ":time_series_forecasting"] %}
 def rename_unnamed_columns(X: pd.DataFrame) -> pd.DataFrame:
-    #Rename untitled columns to correct name
+    """Rename unnamed column to oma-ml naming convention
+
+    Args:
+        X (pd.DataFrame): Dataset (X and y) dataframe
+
+    Returns:
+        pd.DataFrame: Dataset (X and y) dataframe with renamed unnamed columns
+    """
     for column in X:
         if re.match(r"Unnamed: [0-9]+", column):
             X.rename(columns={column: f"Column{X.columns.get_loc(column)}"}, inplace=True)
     return X
 
+def dataset_preparation(filepath: str) -> Tuple[pd.DataFrame, pd.Series]:
+    """Read and prepare the dataset
 
-def feature_preparation(X, features, datetime_format, is_prediction=False):
+    Args:
+        filepath (str): Path to dataset
+
+    Returns:
+        Tuple[pd.DataFrame, pd.Series]: Tuple of dataset dataframe X and series y
+    """
+    X = read_csv_dataset(filepath)
+    X = rename_unnamed_columns(X)
+    X, y = feature_preparation(X, feature_configuration.items(), "%d-%m-%Y %H:%M:%S",  is_prediction=True)
+    X, y = string_feature_encoding(X, y, feature_configuration.items(),  is_prediction=True)
+    X= numerical_feature_imputation(X, feature_configuration.items())
+    return X, y
+
+def prediction_postprocessing(y: np.array) -> np.array:
+    """Postprocess the prediction result in case a reverse label encoding is required
+
+    Args:
+        y (np.array): Array of prediction results
+
+    Returns:
+        np.array: Postprocessed prediction result array
+    """
+    for column, dt in feature_configuration.items():
+        if dt.get("role_selected", "") == ":target":
+            if dt["preprocessing"].get("encoding", "") != "":
+                if dt["preprocessing"]["encoding"]["type"] == ":label_encoding":
+                    enc = LabelEncoder()
+                    enc.fit(dt["preprocessing"]["encoding"]["values"])
+                    y = enc.inverse_transform(y)
+    return y
+
+def feature_preparation(X: pd.DataFrame, features: dict_items, datetime_format: str, is_prediction:bool=False) -> Tuple[pd.DataFrame, pd.Series]:
+    """Prepare the dataset by applying to every column the correct datatype and role
+
+    Args:
+        X (pd.DataFrame): The read dataset as a dataframe
+        features (dict_items): The dataset schema dictonary as an iterable dict (dict.items())
+        datetime_format (str): The string datetime format to use for datetime columns
+        is_prediction (bool, optional): Whether or not we are doing a training or prediction run. Defaults to False.
+
+    Returns:
+        Tuple[pd.DataFrame, pd.Series]: Tuple of the prepared feature dataframe (X) and label series (y) 
+    """
     target = ""
     is_target_found = False
     index_columns = []
@@ -69,5 +131,67 @@ def feature_preparation(X, features, datetime_format, is_prediction=False):
         X.set_index(index_columns, inplace=True)
 
     return X, y
+
+def string_feature_encoding(X: pd.DataFrame, y: pd.Series, features: dict_items,  is_prediction:bool=True) -> Tuple[pd.DataFrame, pd.Series]:
+    """Apply string feature encoding (One hot, ordinal, label encoding) by the column preparation configuration
+
+    Args:
+        X (pd.DataFrame): The feature dataframe (X)
+        y (pd.Series): The label series (y)
+        features (dict_items): The dataset schema dictonary as an iterable dict (dict.items())
+        is_prediction (bool, optional): Whether or not we are doing a training or prediction run. Defaults to False.
+
+    Returns:
+        Tuple[pd.DataFrame, pd.Series]: Tuple of the prepared feature dataframe (X) and label series (y) 
+    """
+    for column, dt in features:
+        if dt.get("preprocessing", "") == "":
+            #Check preprocessing block exists, backwards compability
+            dt["preprocessing"] = {}
+        if dt["preprocessing"].get("encoding", "") == "":
+            continue
+        elif dt["preprocessing"]["encoding"]["type"] == ":ordinal_encoding":
+            ord_enc = OrdinalEncoder(dtype='int64')
+            ord_enc.fit(dt["preprocessing"]["encoding"]["values"])
+            X[column] = ord_enc.transform(X[[column]])
+        elif dt["preprocessing"]["encoding"]["type"] == ":one_hot_encoding":
+            one_hot_enc = OneHotEncoder(dtype='int64', sparse_output=False).set_output(transform="pandas")
+            one_hot_enc.fit(dt["preprocessing"]["encoding"]["values"])
+            result = one_hot_enc.transform(X[[column]])
+            for col in result.columns:
+                result = result.rename(columns={ col : col.replace("x0", column)})
+            X = pd.concat([X, result], axis=1).drop(columns=[column])
+        elif dt["preprocessing"]["encoding"]["type"] == ":label_encoding" and is_prediction == False:
+            label_enc = LabelEncoder()
+            label_enc.fit(dt["preprocessing"]["encoding"]["values"])
+            y[y.name] = label_enc.transform(X[[column]])
+        else:
+            continue
+    return X, y
+
+
+def numerical_feature_imputation(X: pd.DataFrame, features: dict_items) -> Tuple[pd.DataFrame, pd.Series]:
+    """Apply numerical feature imputation  by the column preprocessing configuration
+
+    Args:
+        X (pd.DataFrame): The feature dataframe (X)
+        features (dict_items): The dataset schema dictonary as an iterable dict (dict.items())
+
+    Returns:
+        Tuple[pd.DataFrame, pd.Series]: Tuple of the prepared feature dataframe (X) and label series (y) 
+    """
+    for column, dt in features:
+        if dt.get("preprocessing", "") == "":
+            #Check preprocessing block exists, backwards compability
+            dt["preprocessing"] = {}
+        if dt["preprocessing"].get("imputation", "") == "":
+            continue
+        elif dt["preprocessing"]["imputation"]["type"] == ":simple_imputer":
+            simp_impu = SimpleImputer(**dt["preprocessing"]["imputation"]["configuration"])
+            simp_impu.fit(np.array(dt["preprocessing"]["imputation"]["values"]).reshape(-1, 1))
+            X[column] = simp_impu.transform(X[[column]])
+    return X
+
+feature_configuration = {{configuration.dataset_configuration["schema"]}}
 
 {% endif %}

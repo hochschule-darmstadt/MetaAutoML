@@ -2,6 +2,8 @@ import pandas as pd
 from typing import Tuple
 from sklearn.preprocessing import OrdinalEncoder
 from sklearn.preprocessing import OneHotEncoder
+from sklearn.preprocessing import LabelEncoder
+from sklearn.impute import SimpleImputer
 from _collections_abc import dict_items
 from JsonUtil import get_config_property
 from AdapterBGRPC import *
@@ -11,14 +13,15 @@ import json
 import numpy as np
 
 
-def read_tabular_dataset_training_data(config: "StartAutoMlRequest") -> Tuple[pd.DataFrame, pd.DataFrame]:
+def read_tabular_dataset_training_data(config: "StartAutoMlRequest", perform_splitting: bool) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """Read a CSV dataset into train and test dataframes
 
     Args:
         config (StartAutoMlRequest): The extended training request configuration holding the training paths
+        perform_splitting (bool): if the dataset should be divided into 80 /20
 
     Returns:
-        tuple[pd.DataFrame, pd.DataFrame]: Dataframe tuples holding the training and test datasets tuple[(train), (test)]
+        Tuple[pd.DataFrame, pd.DataFrame]: Dataframes tuple holding the training and test datasets
     """
     delimiters = {
         "comma":        ",",
@@ -59,9 +62,13 @@ def read_tabular_dataset_training_data(config: "StartAutoMlRequest") -> Tuple[pd
     #    train = data.sample(random_state=json_configuration["test_configuration"]["random_state"], frac=1)
     #    test = data.sample(random_state=json_configuration["test_configuration"]["random_state"], frac=1)
     #else:
-    train = data.iloc[:int(data.shape[0] * 0.8)]
-    test = data.iloc[int(data.shape[0] * 0.8):]
-
+    
+    if perform_splitting == True:
+        train = data.iloc[:int(data.shape[0] * 0.8)]
+        test = data.iloc[int(data.shape[0] * 0.8):]
+    else:
+        train = data
+        test = pd.DataFrame()
     return train, test
 
 def write_tabular_dataset_data(df: pd.DataFrame, dir_name: str, config, file_name: str = "test.csv") -> str:
@@ -170,7 +177,6 @@ def feature_preparation(X: pd.DataFrame, features: dict_items, datetime_format: 
 
     return X, y
 
-
 def get_column_with_largest_amout_of_text(X: pd.DataFrame, configuration: dict) -> Tuple[pd.DataFrame, dict]:
     """
     Find the column with the most text inside,
@@ -207,7 +213,7 @@ def get_column_with_largest_amout_of_text(X: pd.DataFrame, configuration: dict) 
     save_configuration_in_json(configuration)
     return X, configuration
 
-def set_encoding_for_string_columns(config, X: pd.DataFrame, also_categorical=False):
+def set_encoding_for_string_columns(config, X: pd.DataFrame, y: pd.Series, also_categorical=False):
     """Set encoding for string columns to ordinal if 2 or less unique values else one hot encoding
 
     Args:
@@ -218,7 +224,7 @@ def set_encoding_for_string_columns(config, X: pd.DataFrame, also_categorical=Fa
     Returns:
         _type_: the updated training configuration
     """
-    reload = False
+    X[y.name] = y.values
     for column, dt in config["dataset_configuration"]["schema"].items():
         if (dt.get("role_selected", "") != ":ignore" 
         and (dt.get("datatype_selected", "") == ":string" or dt.get("datatype_selected", "") == ":categorical" and also_categorical==True) 
@@ -227,7 +233,7 @@ def set_encoding_for_string_columns(config, X: pd.DataFrame, also_categorical=Fa
             if dt["preprocessing"].get("encoding", "") == "":
                 #Only update the preprocessing if no previews ending block exists
                 values = X[column].unique().reshape(-1, 1)
-                if dt.get("role_selected", "") != ":target":
+                if dt.get("role_selected", "") == ":target":
                     #if column is target we use label encoding
                     encoding = ":label_encoding"
                 elif len(values) == len(X[column]):
@@ -239,11 +245,41 @@ def set_encoding_for_string_columns(config, X: pd.DataFrame, also_categorical=Fa
                 else:
                     #If 2 or less default to ordinal encoding
                     encoding = ":ordinal_encoding"
-                config["dataset_configuration"]["schema"][column]["preprocessing"].update({"encoding": {"type": encoding, "values": values}})
-                reload = True
+                config["dataset_configuration"]["schema"][column]["preprocessing"].update({"encoding": {"type": encoding, "values": values.tolist()}})
 
-    return config, reload
+    save_configuration_in_json(config)
+    return config
 
+def set_imputation_for_numerical_columns(config, X: pd.DataFrame):
+    """Set imputation for numerical columns to ordinal if simple imputer
+
+    Args:
+        config (_type_): The training configuration
+        X (pd.DataFrame): the training data
+
+    Returns:
+        _type_: the updated training configuration
+    """
+    for column, dt in config["dataset_configuration"]["schema"].items():
+        if dt.get("role_selected", "") != ":ignore" and dt.get("role_selected", "") != ":target":
+            if X[column].isnull().values.any():
+                #Only update the preprocessing if no previews ending block exists
+                if dt["preprocessing"].get("imputation", "") == "":
+                    if dt.get("datatype_selected", "") == ":integer" or dt.get("datatype_detected", "") == ":integer" and dt.get("datatype_selected", "") == "":
+                        imputation = ":simple_imputer"
+                        imp_config = { "strategy": "mean"}
+                        config["dataset_configuration"]["schema"][column]["preprocessing"].update({"imputation": {"type": imputation, "configuration": imp_config, "values": X[column].iloc[:25].tolist()}})
+                    elif dt.get("datatype_selected", "") == ":float" or dt.get("datatype_detected", "") == ":float" and dt.get("datatype_selected", "") == "":
+                        imputation = ":simple_imputer"
+                        imp_config = { "strategy": "mean"}
+                        config["dataset_configuration"]["schema"][column]["preprocessing"].update({"imputation": {"type": imputation, "configuration": imp_config, "values": X[column].iloc[:25].tolist()}})
+                    elif dt.get("datatype_selected", "") == ":boolean" or dt.get("datatype_detected", "") == ":boolean" and dt.get("datatype_selected", "") == "":
+                        imputation = ":simple_imputer"
+                        imp_config = { "strategy": "most_frequent"}
+                        config["dataset_configuration"]["schema"][column]["preprocessing"].update({"imputation": {"type": imputation, "configuration": imp_config, "values": X[column].iloc[:25].tolist()}})
+
+    save_configuration_in_json(config)
+    return config
 
 def string_feature_encoding(X: pd.DataFrame, y: pd.Series, features: dict_items) -> Tuple[pd.DataFrame, pd.Series]:
     """Apply string feature encoding (One hot, ordinal, label encoding) by the column preparation configuration
@@ -262,34 +298,61 @@ def string_feature_encoding(X: pd.DataFrame, y: pd.Series, features: dict_items)
             dt["preprocessing"] = {}
         if dt["preprocessing"].get("encoding", "") == "":
             continue
-        elif dt["preprocessing"]["encoding"]["type"] == "ordinal_encoding":
+        elif dt["preprocessing"]["encoding"]["type"] == ":ordinal_encoding":
             ord_enc = OrdinalEncoder(dtype='int64')
             ord_enc.fit(dt["preprocessing"]["encoding"]["values"])
             X[column] = ord_enc.transform(X[[column]])
-        elif dt["preprocessing"]["encoding"]["type"] == "one_hot_encoding":
+        elif dt["preprocessing"]["encoding"]["type"] == ":one_hot_encoding":
             one_hot_enc = OneHotEncoder(dtype='int64', sparse_output=False).set_output(transform="pandas")
             one_hot_enc.fit(dt["preprocessing"]["encoding"]["values"])
             result = one_hot_enc.transform(X[[column]])
             for col in result.columns:
                 result = result.rename(columns={ col : col.replace("x0", column)})
             X = pd.concat([X, result], axis=1).drop(columns=[column])
+        elif dt["preprocessing"]["encoding"]["type"] == ":label_encoding":
+            label_enc = LabelEncoder()
+            label_enc.fit(dt["preprocessing"]["encoding"]["values"])
+            y = pd.Series(label_enc.transform(y.values), name=y.name)
         else:
             continue
-
     return X, y
 
-def prepare_tabular_dataset(df: pd.DataFrame, json_configuration: dict) -> Tuple[pd.DataFrame, pd.Series]:
+def numerical_feature_imputation(X: pd.DataFrame, features: dict_items) -> Tuple[pd.DataFrame, pd.Series]:
+    """Apply numerical feature imputation  by the column preprocessing configuration
+
+    Args:
+        X (pd.DataFrame): The feature dataframe (X)
+        features (dict_items): The dataset schema dictonary as an iterable dict (dict.items())
+
+    Returns:
+        Tuple[pd.DataFrame, pd.Series]: Tuple of the prepared feature dataframe (X) and label series (y) 
+    """
+    for column, dt in features:
+        if dt.get("preprocessing", "") == "":
+            #Check preprocessing block exists, backwards compability
+            dt["preprocessing"] = {}
+        if dt["preprocessing"].get("imputation", "") == "":
+            continue
+        elif dt["preprocessing"]["imputation"]["type"] == ":simple_imputer":
+            simp_impu = SimpleImputer(**dt["preprocessing"]["imputation"]["configuration"])
+            simp_impu.fit(np.array(dt["preprocessing"]["imputation"]["values"]).reshape(-1, 1))
+            X[column] = simp_impu.transform(X[[column]])
+    return X
+
+def prepare_tabular_dataset(df: pd.DataFrame, json_configuration: dict, is_prediction:bool=False) -> Tuple[pd.DataFrame, pd.Series]:
     """Prepare tabular dataset, perform feature preparation and data type casting
 
     Args:
         df (pd.DataFrame): The dataset dataframe
         json_configuration (dict): the training configuration dictonary
+        is_prediction (bool): if the label will be processed
 
     Returns:
         tuple[pd.DataFrame, object]: tuple holding the dataset dataframe without the target column, and a Series or Dataframe holding the Target column(s) tuple[(X_dataframe, y)]
     """
-    X, y = feature_preparation(df, json_configuration["dataset_configuration"]["schema"].items(), json_configuration["dataset_configuration"]["file_configuration"]["datetime_format"])
+    X, y = feature_preparation(df, json_configuration["dataset_configuration"]["schema"].items(), json_configuration["dataset_configuration"]["file_configuration"]["datetime_format"], is_prediction)
     X, y = string_feature_encoding(X, y, json_configuration["dataset_configuration"]["schema"].items())
+    X = numerical_feature_imputation(X, json_configuration["dataset_configuration"]["schema"].items())
     return X, y
 
 def convert_X_and_y_dataframe_to_numpy(X: pd.DataFrame, y: pd.Series) -> Tuple[np.ndarray, np.ndarray]:
@@ -306,7 +369,6 @@ def convert_X_and_y_dataframe_to_numpy(X: pd.DataFrame, y: pd.Series) -> Tuple[n
     X = np.nan_to_num(X, 0)
     y = y.to_numpy()
     return X, y
-
 
 def save_configuration_in_json(configuration: dict):
     """

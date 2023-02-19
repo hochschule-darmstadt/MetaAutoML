@@ -6,6 +6,8 @@ import pandas as pd
 import numpy as np
 import dill
 from typing import Tuple
+import os
+from tpot import TPOTRegressor, TPOTClassifier
 
 class TPOTAdapterManager(AdapterManager):
     """The AutoML solution specific functionality implementation of the AdapterManager class
@@ -31,7 +33,88 @@ class TPOTAdapterManager(AdapterManager):
         Returns:
             tuple[str, str]: Tuple returning the ontology IRI of the Ml model type, and ontology IRI of the ML library
         """
-        return (":keras_lib", ":artificial_neural_network")
+        working_dir = config.result_folder_location
+        models = list()
+        libraries = list()
+        with open(os.path.join(working_dir, "model_TPOT.p"), 'rb') as file:
+            automl = dill.load(file)
+            if config.configuration["task"] == ":tabular_regression":
+                for model in automl.steps:
+                    if model[0] == "extratreesregressor":
+                        libraries.append(":scikit_learn_lib")
+                        models.append(":extra_tree")
+                    elif model[0] == "gradientboostingregressor":
+                        libraries.append(":scikit_learn_lib")
+                        models.append(":boosted_decision_tree")
+                    elif model[0] == "adaboostregressor":
+                        libraries.append(":scikit_learn_lib")
+                        models.append(":adaboost")
+                    elif model[0] == "decisiontreeregressor":
+                        libraries.append(":scikit_learn_lib")
+                        models.append(":decision_tree")
+                    elif model[0] == "kneighborsregressor":
+                        libraries.append(":scikit_learn_lib")
+                        models.append(":k_nearest_neighbor")
+                    elif model[0] == "lassolarscv":
+                        libraries.append(":scikit_learn_lib")
+                        models.append(":lasso_regression")
+                    elif model[0] == "linearsvr":
+                        libraries.append(":scikit_learn_lib")
+                        models.append(":linear_svm")
+                    elif model[0] == "randomforestregressor":
+                        libraries.append(":scikit_learn_lib")
+                        models.append(":random_forest")
+                    elif model[0] == "ridgecv":
+                        libraries.append(":scikit_learn_lib")
+                        models.append(":ridge_regression")
+                    elif model[0] == "xgbregressor":
+                        libraries.append(":xgboost")
+                        models.append(":gradient_boosting_tree")
+                    elif model[0] == "sgdregressor":
+                        libraries.append(":scikit_learn_lib")
+                        models.append(":stochastic_gradient_descent")
+            if config.configuration["task"] == ":tabular_classification":
+                for model in automl.steps:
+                    if model[0] == "gaussiannb":
+                        libraries.append(":scikit_learn_lib")
+                        models.append(":gaussian_naives_bayes")
+                    elif model[0] == "bernoullinb":
+                        libraries.append(":scikit_learn_lib")
+                        models.append(":bernoulli_naive_bayes")
+                    elif model[0] == "multinomialnb":
+                        libraries.append(":scikit_learn_lib")
+                        models.append(":multinominal_naive_bayes")
+                    elif model[0] == "decisiontreeclassifier":
+                        libraries.append(":scikit_learn_lib")
+                        models.append(":decision_tree")
+                    elif model[0] == "extratreesclassifier":
+                        libraries.append(":scikit_learn_lib")
+                        models.append(":extra_tree")
+                    elif model[0] == "randomforestclassifier":
+                        libraries.append(":scikit_learn_lib")
+                        models.append(":random_forest")
+                    elif model[0] == "gradientboostingclassifier":
+                        libraries.append(":scikit_learn_lib")
+                        models.append(":gradient_boosting_tree")
+                    elif model[0] == "kneighborsclassifier":
+                        libraries.append(":scikit_learn_lib")
+                        models.append(":k_nearest_neighbor")
+                    elif model[0] == "linearsvc":
+                        libraries.append(":scikit_learn_lib")
+                        models.append(":linear_svc")
+                    elif model[0] == "logisticregression":
+                        libraries.append(":scikit_learn_lib")
+                        models.append(":logistic_regression")
+                    elif model[0] == "xgbclassifier":
+                        libraries.append(":xgboost")
+                        models.append(":gradient_boosting_tree")
+                    elif model[0] == "sgdclassifier":
+                        libraries.append(":scikit_learn_lib")
+                        models.append(":stochastic_gradient_descent")
+                    elif model[0] == "mlpclassifier":
+                        libraries.append(":scikit_learn_lib")
+                        models.append(":artificial_neural_network")
+        return libraries, models
 
     def _load_model_and_make_probabilities(self, config: "StartAutoMlRequest", result_folder_location: str, dataframe: pd.DataFrame):
         """Must be overwriten! Load the found model, and execute a prediction using the provided data to calculate the probability metric used by the ExplanableAI module inside the controller
@@ -41,22 +124,14 @@ class TPOTAdapterManager(AdapterManager):
             result_folder_location (str): The absolute path leading to the model result location
             dataframe (DataFrame): The dataframe holding the dataset to execute a new prediction on
         """
-        # Check if the requested training is already loaded. If not: Load model and load & prep dataset.
+
         if self._loaded_training_id != config["training_id"]:
             print(f"ExplainModel: Model not already loaded; Loading model")
-            with open(result_folder_location + '/model_keras.p', 'rb') as file:
+            with open(result_folder_location + '/model_TPOT.p', 'rb') as file:
                 self.__automl = dill.load(file)
-                # Export model as AutoKeras does not provide the prediction probability.
-                self.__automl = self.__automl.export_model()
             self._loaded_training_id = config["training_id"]
-            # Get prediction probabilities and send them back.
-        probabilities = self.__automl.predict(np.array(dataframe.values.tolist()))
-        # Keras is strange as it does not provide a predict_proba() function to get the class probabilities.
-        # Instead, it returns these probabilities (in case there is a binary classification) when calling predict
-        # but only as a one dimensional array. Shap however requires the probabilities in the format
-        # [[prob class 0, prob class 1], [...]]. So to return the proper format we have to process the results of
-        # predict().
-        if probabilities.shape[1] == 1:
-            probabilities = [[1 - prob[0], prob[0]] for prob in probabilities.tolist()]
-        probabilities = json.dumps(probabilities)
+        try:
+            probabilities = json.dumps(self.__automl.predict_proba(dataframe).tolist())
+        except Exception as e:
+            raise(e)
         return probabilities

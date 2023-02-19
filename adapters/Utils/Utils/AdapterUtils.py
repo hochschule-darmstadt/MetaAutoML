@@ -19,7 +19,7 @@ from AdapterTabularUtils import *
 
 
 
-def data_loader(config: "StartAutoMlRequest", image_test_folder=False) -> Any:
+def data_loader(config: "StartAutoMlRequest", image_test_folder=False, perform_splitting=True) -> Any:
     """Load the dataframes for the requested dataset, by loading them into different DataFrames. See Returns section for more information.
 
     Args:
@@ -33,7 +33,7 @@ def data_loader(config: "StartAutoMlRequest", image_test_folder=False) -> Any:
     if config["configuration"]["task"] in [":image_classification", ":image_regression"]:
         return read_image_dataset(config, image_test_folder)
     else:
-        return read_tabular_dataset_training_data(config)
+        return read_tabular_dataset_training_data(config, perform_splitting)
 
 
 def export_model(model: Any, path: str, file_name: str):
@@ -164,7 +164,6 @@ def compute_classification_metrics(y_should: pd.Series, y_is: pd.Series) -> dict
     score = {
         ":accuracy": float(accuracy_score(y_should, y_is)),
         ":balanced_accuracy": float(balanced_accuracy_score(y_should, y_is)),
-        ":brier": float(brier_score_loss(y_should, y_is)),
     }
     if len(y_should.unique()) == 2:
         #Metrics only for binary classification
@@ -177,24 +176,22 @@ def compute_classification_metrics(y_should: pd.Series, y_is: pd.Series) -> dict
         ":false_negatives": float(fn),
         ":f_measure": float(f1_score(y_should, y_is)),
         ":precision": float(precision_score(y_should, y_is)),
-        ":recall": float(recall_score(y_should, y_is))
+        ":recall": float(recall_score(y_should, y_is)),
+        ":brier": float(brier_score_loss(y_should, y_is)),
         })
     else:
         #Metrics only for multiclass classification
         score.update({
 
-        ":f_measure": float(f1_score(y_should, y_is, average=None)),
         ":f_measure_micro": float(f1_score(y_should, y_is, average='micro')),
         ":f_measure_macro": float(f1_score(y_should, y_is, average='macro')),
         ":f_measure_weighted": float(f1_score(y_should, y_is, average='weighted')),
-        ":precision": float(precision_score(y_should, y_is, average=None)),
         ":precision_micro": float(precision_score(y_should, y_is, average='micro')),
         ":precision_macro": float(precision_score(y_should, y_is, average='macro')),
         ":precision_weighted": float(precision_score(y_should, y_is, average='weighted')),
-        ":recall": float(recall_score(y_should, y_is, average=None)),
         ":recall_micro": float(recall_score(y_should, y_is, average='micro')),
         ":recall_macro": float(recall_score(y_should, y_is, average='macro')),
-        ":recall_weighted": float(recall_score(y_should, y_is, average='weighted'))
+        ":recall_weighted": float(recall_score(y_should, y_is, average='weighted')),
         })
     return score
 
