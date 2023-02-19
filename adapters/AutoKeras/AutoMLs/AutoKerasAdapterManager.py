@@ -58,6 +58,7 @@ class AutoKerasAdapterManager(AdapterManager):
         # but only as a one dimensional array. Shap however requires the probabilities in the format
         # [[prob class 0, prob class 1], [...]]. So to return the proper format we have to process the results of
         # predict().
+        #TODO multiclass shape missing
         if probabilities.shape[1] == 1:
             probabilities = [[1 - prob[0], prob[0]] for prob in probabilities.tolist()]
         probabilities = json.dumps(probabilities)

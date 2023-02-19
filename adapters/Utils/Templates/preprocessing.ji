@@ -10,7 +10,7 @@ from sklearn.preprocessing import OrdinalEncoder
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.preprocessing import LabelEncoder
 from sklearn.impute import SimpleImputer
-{% endif %} 
+{% endif %}
 
 {% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression", ":text_classification", ":text_regression", ":time_series_forecasting"] %}
 def rename_unnamed_columns(X: pd.DataFrame) -> pd.DataFrame:
@@ -71,7 +71,7 @@ def feature_preparation(X: pd.DataFrame, features: dict_items, datetime_format: 
         is_prediction (bool, optional): Whether or not we are doing a training or prediction run. Defaults to False.
 
     Returns:
-        Tuple[pd.DataFrame, pd.Series]: Tuple of the prepared feature dataframe (X) and label series (y) 
+        Tuple[pd.DataFrame, pd.Series]: Tuple of the prepared feature dataframe (X) and label series (y)
     """
     target = ""
     is_target_found = False
@@ -142,7 +142,7 @@ def string_feature_encoding(X: pd.DataFrame, y: pd.Series, features: dict_items,
         is_prediction (bool, optional): Whether or not we are doing a training or prediction run. Defaults to False.
 
     Returns:
-        Tuple[pd.DataFrame, pd.Series]: Tuple of the prepared feature dataframe (X) and label series (y) 
+        Tuple[pd.DataFrame, pd.Series]: Tuple of the prepared feature dataframe (X) and label series (y)
     """
     for column, dt in features:
         if dt.get("preprocessing", "") == "":
@@ -170,6 +170,22 @@ def string_feature_encoding(X: pd.DataFrame, y: pd.Series, features: dict_items,
     return X, y
 
 
+def replace_forbidden_json_utf8_characters(X: pd.DataFrame) -> pd.DataFrame:
+    """Replace forbidden json UTF8 characters in feature names
+
+    Args:
+        X (pd.DataFrame): The feature dataframe (X)
+
+    Returns:
+        pd.DataFrame: column renamed dataframe (X)
+    """
+    for column in X.columns:
+        new_column_name = column.translate({ 91 : None, 93 : None, 123 : None, 125 : None, 44 : None, 58 : None, 34 : None})
+        X.rename(columns = { column : new_column_name}, inplace=True)
+
+    return X
+
+
 def numerical_feature_imputation(X: pd.DataFrame, features: dict_items) -> Tuple[pd.DataFrame, pd.Series]:
     """Apply numerical feature imputation  by the column preprocessing configuration
 
@@ -178,7 +194,7 @@ def numerical_feature_imputation(X: pd.DataFrame, features: dict_items) -> Tuple
         features (dict_items): The dataset schema dictonary as an iterable dict (dict.items())
 
     Returns:
-        Tuple[pd.DataFrame, pd.Series]: Tuple of the prepared feature dataframe (X) and label series (y) 
+        Tuple[pd.DataFrame, pd.Series]: Tuple of the prepared feature dataframe (X) and label series (y)
     """
     for column, dt in features:
         if dt.get("preprocessing", "") == "":

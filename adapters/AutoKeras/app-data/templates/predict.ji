@@ -9,8 +9,7 @@ import tensorflow as tf
 from tensorflow import keras
 import autokeras as ak
 {% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression", ":text_classification", ":text_regression", ":time_series_forecasting"] %}
-from dataset import read_csv_dataset
-from preprocessing import rename_unnamed_columns, feature_preparation
+from preprocessing import dataset_preparation, prediction_postprocessing
 {% else %}
 from dataset import read_image_dataset_folder
 {% endif %}
@@ -24,9 +23,7 @@ if __name__ == '__main__':
     X = None
 
     {% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression", ":text_classification", ":text_regression", ":time_series_forecasting"] %}
-    X = read_csv_dataset(filepath)
-    X = rename_unnamed_columns(X)
-    X, y = feature_preparation(X, {{configuration.dataset_configuration["schema"]}}.items(), "{{configuration.dataset_configuration["file_configuration"]["datetime_format"]}}",  is_prediction=True)
+    X, y = dataset_preparation(filepath)
     {% else %}
     X, y = read_image_dataset_folder(filepath)
     {% endif %}

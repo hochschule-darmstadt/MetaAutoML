@@ -1,6 +1,6 @@
 import os
-
-from AdapterUtils import export_model, prepare_tabular_dataset, data_loader, get_column_with_largest_amout_of_text
+from AdapterUtils import *
+from AdapterTabularUtils import *
 from flaml import AutoML
 import numpy as np
 from sklearn.impute import SimpleImputer
@@ -53,6 +53,7 @@ class FLAMLAdapter:
         """Execute the tabular classification task and export the found model"""
         self.df, test = data_loader(self._configuration)
         X, y = prepare_tabular_dataset(self.df, self._configuration)
+        X, y = replace_forbidden_json_utf8_characters(X, y)
         automl = AutoML()
         automl_settings = self.__generate_settings()
         automl_settings.update({
@@ -71,6 +72,7 @@ class FLAMLAdapter:
         """Execute the tabular regression task and export the found model"""
         self.df, test = data_loader(self._configuration)
         X, y = prepare_tabular_dataset(self.df, self._configuration)
+        X, y = replace_forbidden_json_utf8_characters(X, y)
         automl = AutoML()
         automl_settings = self.__generate_settings()
         automl_settings.update({
@@ -88,8 +90,14 @@ class FLAMLAdapter:
 
     def __time_series_forecasting(self):
         """Execute the tabular classification task and export the found model"""
-        self.df, test = data_loader(self._configuration)
-        X, y = prepare_tabular_dataset(self.df, self._configuration)
+        train, test = data_loader(self._configuration, perform_splitting=False)
+        X, y = prepare_tabular_dataset(train, self._configuration)
+        #Reset any index and imputation
+        self._configuration = reset_index_role(self._configuration)
+        self._configuration = set_imputation_for_numerical_columns(self._configuration, X)
+        train, test = data_loader(self._configuration)
+        #reload dataset to load changed data
+        X, y = prepare_tabular_dataset(train, self._configuration)
         #TODO ensure ts first column is datetime
         automl = AutoML()
         automl_settings = self.__generate_settings()
@@ -103,8 +111,8 @@ class FLAMLAdapter:
             "eval_method": "holdout"
         })
         X[y.name] = y.values
-        X.reset_index(inplace=True)
-        X = X.bfill().ffill()  # makes sure there are no missing values
+        #X.reset_index(inplace=True)
+        #X = X.bfill().ffill()  # makes sure there are no missing values
         automl.fit(dataframe=X, label=y.name, **automl_settings)
 
         export_model(automl, self._configuration["result_folder_location"], 'model_flaml.p')

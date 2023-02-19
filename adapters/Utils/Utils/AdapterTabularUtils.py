@@ -62,7 +62,7 @@ def read_tabular_dataset_training_data(config: "StartAutoMlRequest", perform_spl
     #    train = data.sample(random_state=json_configuration["test_configuration"]["random_state"], frac=1)
     #    test = data.sample(random_state=json_configuration["test_configuration"]["random_state"], frac=1)
     #else:
-    
+
     if perform_splitting == True:
         train = data.iloc[:int(data.shape[0] * 0.8)]
         test = data.iloc[int(data.shape[0] * 0.8):]
@@ -116,7 +116,7 @@ def feature_preparation(X: pd.DataFrame, features: dict_items, datetime_format: 
         is_prediction (bool, optional): Whether or not we are doing a training or prediction run. Defaults to False.
 
     Returns:
-        Tuple[pd.DataFrame, pd.Series]: Tuple of the prepared feature dataframe (X) and label series (y) 
+        Tuple[pd.DataFrame, pd.Series]: Tuple of the prepared feature dataframe (X) and label series (y)
     """
     target = ""
     is_target_found = False
@@ -213,6 +213,21 @@ def get_column_with_largest_amout_of_text(X: pd.DataFrame, configuration: dict) 
     save_configuration_in_json(configuration)
     return X, configuration
 
+def reset_index_role(config):
+    """reset the index role for index columns
+
+    Args:
+        config (_type_): The training configuration
+
+    Returns:
+        _type_: the updated training configuration
+    """
+    for column, dt in config["dataset_configuration"]["schema"].items():
+        if dt.get("role_selected", "") == ":index":
+            del config["dataset_configuration"]["schema"][column]["role_selected"]
+    save_configuration_in_json(config)
+    return config
+
 def set_encoding_for_string_columns(config, X: pd.DataFrame, y: pd.Series, also_categorical=False):
     """Set encoding for string columns to ordinal if 2 or less unique values else one hot encoding
 
@@ -226,8 +241,8 @@ def set_encoding_for_string_columns(config, X: pd.DataFrame, y: pd.Series, also_
     """
     X[y.name] = y.values
     for column, dt in config["dataset_configuration"]["schema"].items():
-        if (dt.get("role_selected", "") != ":ignore" 
-        and (dt.get("datatype_selected", "") == ":string" or dt.get("datatype_selected", "") == ":categorical" and also_categorical==True) 
+        if (dt.get("role_selected", "") != ":ignore"
+        and (dt.get("datatype_selected", "") == ":string" or dt.get("datatype_selected", "") == ":categorical" and also_categorical==True)
         or (dt.get("datatype_detected", "") == ":string" and dt.get("datatype_selected", "") == "" or dt.get("datatype_detected", "") == ":categorical" and dt.get("datatype_selected", "") == "" and also_categorical==True)):
             #Only update columns that are either selected or auto detected as sting and categorial (if also_categorical==True)
             if dt["preprocessing"].get("encoding", "") == "":
@@ -281,6 +296,23 @@ def set_imputation_for_numerical_columns(config, X: pd.DataFrame):
     save_configuration_in_json(config)
     return config
 
+def replace_forbidden_json_utf8_characters(X: pd.DataFrame, y: pd.Series) -> Tuple[pd.DataFrame, pd.Series]:
+    """Replace forbidden json UTF8 characters in feature names
+
+    Args:
+        X (pd.DataFrame): The feature dataframe (X)
+        y (pd.Series): The label series (y)
+
+    Returns:
+        Tuple[pd.DataFrame, pd.Series]: Tuple of the prepared feature dataframe (X) and label series (y)
+    """
+    for column in X.columns:
+        new_column_name = column.translate({ 91 : None, 93 : None, 123 : None, 125 : None, 44 : None, 58 : None, 34 : None})
+        X.rename(columns = { column : new_column_name}, inplace=True)
+
+    y.rename(y.name.translate({ 91 : None, 93 : None, 123 : None, 125 : None, 44 : None, 58 : None, 34 : None}), inplace=True)
+    return X, y
+
 def string_feature_encoding(X: pd.DataFrame, y: pd.Series, features: dict_items) -> Tuple[pd.DataFrame, pd.Series]:
     """Apply string feature encoding (One hot, ordinal, label encoding) by the column preparation configuration
 
@@ -290,7 +322,7 @@ def string_feature_encoding(X: pd.DataFrame, y: pd.Series, features: dict_items)
         features (dict_items): The dataset schema dictonary as an iterable dict (dict.items())
 
     Returns:
-        Tuple[pd.DataFrame, pd.Series]: Tuple of the prepared feature dataframe (X) and label series (y) 
+        Tuple[pd.DataFrame, pd.Series]: Tuple of the prepared feature dataframe (X) and label series (y)
     """
     for column, dt in features:
         if dt.get("preprocessing", "") == "":
@@ -325,7 +357,7 @@ def numerical_feature_imputation(X: pd.DataFrame, features: dict_items) -> Tuple
         features (dict_items): The dataset schema dictonary as an iterable dict (dict.items())
 
     Returns:
-        Tuple[pd.DataFrame, pd.Series]: Tuple of the prepared feature dataframe (X) and label series (y) 
+        Tuple[pd.DataFrame, pd.Series]: Tuple of the prepared feature dataframe (X) and label series (y)
     """
     for column, dt in features:
         if dt.get("preprocessing", "") == "":

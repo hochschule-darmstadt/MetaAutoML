@@ -158,7 +158,9 @@ def compute_classification_metrics(y_should: pd.Series, y_is: pd.Series) -> dict
     if y_is.dtype == object:
         #If the label is string based, we need to convert it to int values or else some metric wont compute correctly
         enc = LabelEncoder()
-        enc.fit(y_should.unique())
+        labels = [value for value in y_should.unique() if value not in y_is.unique()]
+        labels = np.append(y_is.unique(), labels)
+        enc.fit(labels)
         y_should = pd.Series(enc.transform(y_should))
         y_is = pd.Series(enc.transform(y_is))
     score = {
