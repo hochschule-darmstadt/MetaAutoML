@@ -70,11 +70,11 @@ class EvalMLAdapter:
                     objective=self.__get_metric(),
                     max_batches=3,
                     verbose=False,
+                    max_time=self._configuration["configuration"]["runtime_limit"]*60,
                     tuner_class=self.__get_tuner(),
                     allowed_model_families= self.__get_use_approaches(),
                 )
         automl.search()
-        automl.describe_pipeline(3)
         best_pipeline_tobe_export = automl.best_pipeline
         export_model(best_pipeline_tobe_export, self._configuration["result_folder_location"], 'evalml.p')
 
@@ -94,11 +94,11 @@ class EvalMLAdapter:
                     objective= self.__get_metric(),
                     max_batches=3,
                     verbose=False,
+                    max_time=self._configuration["configuration"]["runtime_limit"]*60,
                     tuner_class=self.__get_tuner(),
                     allowed_model_families= self.__get_use_approaches(),
                 )
         automl.search()
-        automl.describe_pipeline(3)
         best_pipeline_tobe_export = automl.best_pipeline
         export_model(best_pipeline_tobe_export, self._configuration["result_folder_location"], 'evalml.p')
 
@@ -128,6 +128,7 @@ class EvalMLAdapter:
                     problem_type="time series regression",
                     max_batches=1,
                     verbose=False,
+                    max_time=self._configuration["configuration"]["runtime_limit"]*60,
                     problem_configuration=problem_config,
                     objective= self.__get_metric(),
                     tuner_class=self.__get_tuner(),
