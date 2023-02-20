@@ -27,19 +27,19 @@ def rename_unnamed_columns(X: pd.DataFrame) -> pd.DataFrame:
             X.rename(columns={column: f"Column{X.columns.get_loc(column)}"}, inplace=True)
     return X
 
-def dataset_preparation(filepath: str) -> Tuple[pd.DataFrame, pd.Series]:
+def dataset_preparation(filepath: str,  is_prediction=True) -> Tuple[pd.DataFrame, pd.Series]:
     """Read and prepare the dataset
 
     Args:
         filepath (str): Path to dataset
-
+        is_prediction (bool): if this is a prediction run or training
     Returns:
         Tuple[pd.DataFrame, pd.Series]: Tuple of dataset dataframe X and series y
     """
     X = read_csv_dataset(filepath)
     X = rename_unnamed_columns(X)
-    X, y = feature_preparation(X, feature_configuration.items(), "{{configuration.dataset_configuration["file_configuration"]["datetime_format"]}}",  is_prediction=True)
-    X, y = string_feature_encoding(X, y, feature_configuration.items(),  is_prediction=True)
+    X, y = feature_preparation(X, feature_configuration.items(), "{{configuration.dataset_configuration["file_configuration"]["datetime_format"]}}",  is_prediction)
+    X, y = string_feature_encoding(X, y, feature_configuration.items(),  is_prediction)
     X= numerical_feature_imputation(X, feature_configuration.items())
     return X, y
 
