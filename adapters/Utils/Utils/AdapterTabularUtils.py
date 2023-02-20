@@ -277,7 +277,10 @@ def set_imputation_for_numerical_columns(config, X: pd.DataFrame):
     """
     for column, dt in config["dataset_configuration"]["schema"].items():
         if dt.get("role_selected", "") != ":ignore" and dt.get("role_selected", "") != ":target":
-            if X[column].isnull().values.any():
+            if X[column].isnull().all():
+                #If the entire column is nan we cant impute and will set it to ignore
+                dt["role_selected"] = ":ignore"
+            elif X[column].isnull().values.any():
                 #Only update the preprocessing if no previews ending block exists
                 if dt["preprocessing"].get("imputation", "") == "":
                     if dt.get("datatype_selected", "") == ":integer" or dt.get("datatype_detected", "") == ":integer" and dt.get("datatype_selected", "") == "":

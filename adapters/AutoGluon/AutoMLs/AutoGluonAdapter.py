@@ -166,7 +166,8 @@ class AutoGluonAdapter:
         data = X
         data[y.name] = y.values
 
-        #data = data.assign(timeseries_id=1)
+        #Assign timeseries id
+        data = data.assign(timeseries_id=1)
 
         ts_dataframe = TimeSeriesDataFrame.from_data_frame(data, id_column="timeseries_id", timestamp_column=timestamp_column)
         model = TimeSeriesPredictor(label=y.name,
