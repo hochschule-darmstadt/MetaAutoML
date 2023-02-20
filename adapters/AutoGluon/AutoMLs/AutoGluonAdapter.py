@@ -1,6 +1,7 @@
 import os
 
-from AdapterUtils import export_model, prepare_tabular_dataset, data_loader
+from AdapterUtils import *
+from AdapterTabularUtils import *
 from autogluon.tabular import TabularPredictor
 from autogluon.timeseries import TimeSeriesDataFrame, TimeSeriesPredictor
 from autogluon.text import TextPredictor
@@ -157,6 +158,7 @@ class AutoGluonAdapter:
                 break
         #Reset any index and imputation
         self._configuration = reset_index_role(self._configuration)
+        X.reset_index(inplace = True)
         self._configuration = set_imputation_for_numerical_columns(self._configuration, X)
         train, test = data_loader(self._configuration)
         #reload dataset to load changed data
