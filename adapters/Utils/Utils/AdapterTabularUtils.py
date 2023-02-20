@@ -177,16 +177,16 @@ def feature_preparation(X: pd.DataFrame, features: dict_items, datetime_format: 
 
     return X, y
 
-def get_column_with_largest_amout_of_text(X: pd.DataFrame, configuration: dict) -> Tuple[pd.DataFrame, dict]:
+def set_column_with_largest_amout_of_text(X: pd.DataFrame, configuration: dict) -> dict:
     """
     Find the column with the most text inside,
-    because some adapters only supports training with one feature
+    because some adapters only supports text training with one feature
     Args:
         X (pd.DataFrame): The current X Dataframe
         configuration (dict): hold the current adapter process configuration
 
     Returns:
-        Tuple(pd.DataFrame, dict): pd.Dataframe: Returns a pandas Dataframe with the column with the most text inside, the dict is the updated configuraiton dict
+        dict: Returns a the dict is the updated configuraiton dict
     """
     column_names = []
     target = ""
@@ -201,7 +201,7 @@ def get_column_with_largest_amout_of_text(X: pd.DataFrame, configuration: dict) 
     #Check the used columns by dtype object (== string type) and get mean len to get column with longest text
     for column_name in column_names:
         if(X.dtypes[column_name] == object):
-            newlength = X[column_name].str.len().mean()
+            newlength = X[column_name].astype(str).str.len().mean()
             dict_with_string_length[column_name] = newlength
     max_value = max(dict_with_string_length, key=dict_with_string_length.get)
 
@@ -211,7 +211,7 @@ def get_column_with_largest_amout_of_text(X: pd.DataFrame, configuration: dict) 
         configuration["dataset_configuration"]["schema"][column_name]["role_selected"] = ":ignore"
 
     save_configuration_in_json(configuration)
-    return X, configuration
+    return configuration
 
 def reset_index_role(config):
     """reset the index role for index columns

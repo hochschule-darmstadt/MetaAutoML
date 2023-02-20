@@ -9,6 +9,20 @@ from JsonUtil import get_config_property
 import pandas as pd
 from typing import Tuple
 
+flaml_estimators = {
+    "lgbm" : (":lightgbm_lib", ":light_gradient_boosting_machine"),
+    "extra_tree" : (":scikit_learn_lib", ":extra_tree"),
+    "rf" : (":scikit_learn_lib", ":random_forest"),
+    "xgboost" : (":xgboost_lib", ":xgboost"),
+    "xgb_limitdepth" : (":xgboost_lib", ":xgboost"),
+    "lrl1" : (":scikit_learn_lib", ":logistic_regression"),
+    "lrl2" : (":scikit_learn_lib", ":logistic_regression"),
+    "tft" : (":pytorch_lib", ":temporal_fusion_transformer"),
+    "prophet" : (":prophet_lib", ":prophet"),
+    "arima" : (":pyflux_lib", ":autoregressive_integrated_moving_average"),
+    "sarimax" : (":pyflux_lib", ":seasonal_autoregressive_integrated_moving_average_exogenous")
+}
+
 class FLAMLAdapterManager(AdapterManager):
     """The AutoML solution specific functionality implementation of the AdapterManager class
 
@@ -43,40 +57,15 @@ class FLAMLAdapterManager(AdapterManager):
                 models.append(":transformer")
                 libraries.append(":torch")
             else:
-                for model in automl.model.estimators:
-                    if model[0] == "lgbm":
-                        libraries.append(":lightgbm_lib")
-                        models.append(":light_gradient_boosting_machine")
-                    elif model[0] == "extra_tree":
-                        libraries.append(":scikit_learn_lib")
-                        models.append(":extra_tree")
-                    elif model[0] == "rf":
-                        libraries.append(":scikit_learn_lib")
-                        models.append(":random_forest")
-                    elif model[0] == "xgboost":
-                        libraries.append(":xgboost_lib")
-                        models.append(":xgboost")
-                    elif model[0] == "xgb_limitdepth":
-                        libraries.append(":xgboost_lib")
-                        models.append(":xgboost")
-                    elif model[0] == "lrl1":
-                        libraries.append(":scikit_learn_lib")
-                        models.append(":logistic_regression")
-                    elif model[0] == "lrl2":
-                        libraries.append(":scikit_learn_lib")
-                        models.append(":logistic_regression")
-                    elif model[0] == "tft":
-                        libraries.append(":pytorch_lib")
-                        models.append(":temporal_fusion_transformer")
-                    elif model[0] == "prophet":
-                        libraries.append(":prophet_lib")
-                        models.append(":prophet")
-                    elif model[0] == "arima":
-                        libraries.append(":pyflux_lib")
-                        models.append(":autoregressive_integrated_moving_average")
-                    elif model[0] == "sarimax":
-                        libraries.append(":pyflux_lib")
-                        models.append(":seasonal_autoregressive_integrated_moving_average_exogenous")
+                if hasattr(automl.model, "estimators"):
+                    for model in automl.model.estimators:
+                        lib, model = flaml_estimators[model[0]]
+                        libraries.append(lib)
+                        models.append(model)
+                else:
+                    lib, model = flaml_estimators[automl._best_estimator]
+                    libraries.append(lib)
+                    models.append(model)
         return libraries, models
 
 

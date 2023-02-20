@@ -119,9 +119,14 @@ class FLAMLAdapter:
 
     def __text_classification(self):
         """Execute the tabular classification task and export the found model"""
-        self.df, test = data_loader(self._configuration)
-        X, self._configuration = get_column_with_largest_amout_of_text(self.df, self._configuration)
-        X, y = prepare_tabular_dataset(X, self._configuration)
+        train, test = data_loader(self._configuration, perform_splitting=False)
+        X, y = prepare_tabular_dataset(train, self._configuration)
+        #Reset any index and imputation
+        self._configuration = set_column_with_largest_amout_of_text(X, self._configuration)
+        train, test = data_loader(self._configuration)
+        #reload dataset to load changed data
+        X, y = prepare_tabular_dataset(train, self._configuration)
+        X, y = replace_forbidden_json_utf8_characters(X, y)
         automl = AutoML()
         automl_settings = self.__generate_settings()
         automl_settings.update({
