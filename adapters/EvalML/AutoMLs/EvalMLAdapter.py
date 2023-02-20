@@ -109,6 +109,7 @@ class EvalMLAdapter:
         index_column_name = self.__get_index_column()
         #Reset any index and imputation
         self._configuration = reset_index_role(self._configuration)
+        X.reset_index(inplace=True)
         train, test = data_loader(self._configuration)
         #reload dataset to load changed data
         X, y = prepare_tabular_dataset(train, self._configuration)
@@ -116,9 +117,6 @@ class EvalMLAdapter:
         #We must persist the training time series to make predictions
         file_path = self._configuration["result_folder_location"]
         file_path = write_tabular_dataset_data(self.df, file_path, self._configuration, "train.csv")
-
-        X, y = prepare_tabular_dataset(self.df, self._configuration)
-        X.reset_index(inplace=True)
 
         problem_config = {"gap": 0, "max_delay": 7, "forecast_horizon": 7, "time_index": index_column_name}
         # parameters must be set correctly
