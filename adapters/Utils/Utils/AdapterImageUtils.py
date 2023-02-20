@@ -9,14 +9,14 @@ import os
 import random
 
 
-def read_image_dataset(config: "StartAutoMlRequest", image_test_folder=False) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+def read_image_dataset(config: "StartAutoMlRequest", image_test_folder=False, as_dataframe=False) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """Read image dataset and create training and test dataframes
 
     Args:
         config (StartAutoMlRequest): The extended training request configuration holding the training paths
 
     Returns:
-        tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]: Dataframe tuples holding the different datasets: tuple[(X_train), (y_train), (X_test), (y_test)]
+        tuple[pd.DataFrame, pd.DataFrame]: Dataframe tuples holding the different datasets: tuple[(X_train), (y_train)]
     """
     # Treat file location like URL if it does not exist as dir. URL/Filename need to be specified.
     # Mainly used for testing purposes in the hard coded json for the job
@@ -41,39 +41,61 @@ def read_image_dataset(config: "StartAutoMlRequest", image_test_folder=False) ->
         data_dir = os.path.join(data_dir, "train")
     train_df_list =[]
 
-    def read_image_dataset_folder():
-        files = []
-        df = []
-        for folder in os.listdir(os.path.join(data_dir)):
-            files.append(glob.glob(os.path.join(data_dir, folder, "*.jp*g")))
+    if as_dataframe == True:
+        root = os.path.abspath(os.path.expanduser(root))
+        synsets = []
+        exts=('.jpg', '.jpeg', '.png')
+        items = {'image': [], 'label': []}
+        for folder in sorted(os.listdir(root)):
+            path = os.path.join(root, folder)
+            if not os.path.isdir(path):
+                continue
+            label = len(synsets)
+            synsets.append(folder)
+            for filename in sorted(os.listdir(path)):
+                filename = os.path.join(path, filename)
+                ext = os.path.splitext(filename)[1]
+                if ext.lower() not in exts:
+                    continue
+                items['image'].append(filename)
+                items['label'].append(label)
+            df = pd.DataFrame(items)
+            y_train = df["label"]
+            X_train = df.drop("label")
+    else:
+        def read_image_dataset_folder():
+            files = []
+            df = []
+            for folder in os.listdir(os.path.join(data_dir)):
+                files.append(glob.glob(os.path.join(data_dir, folder, "*.jp*g")))
 
-        df_list =[]
+            df_list =[]
 
-        if config['dataset_configuration']['multi_fidelity_level'] != 0:
-            df_list = random.choices(df_list, k=int(len(files)*0.1))
+            if config['dataset_configuration']['multi_fidelity_level'] != 0:
+                df_list = random.choices(df_list, k=int(len(files)*0.1))
 
-        for i in range(len(files)):
-            df = pd.DataFrame()
-            df["name"] = [x for x in files[i]]
-            df['outcome'] = i
-            df_list.append(df)
-        return df_list
+            for i in range(len(files)):
+                df = pd.DataFrame()
+                df["name"] = [x for x in files[i]]
+                df['outcome'] = i
+                df_list.append(df)
+            return df_list
 
-    train_df_list = read_image_dataset_folder()
+        train_df_list = read_image_dataset_folder()
 
-    train_data = pd.concat(train_df_list, axis=0,ignore_index=True)
+        train_data = pd.concat(train_df_list, axis=0,ignore_index=True)
 
-    def img_preprocess(img):
-        """
-        Opens the image and does some preprocessing
-        such as converting to RGB, resize and converting to array
-        """
-        img = Image.open(img)
-        img = img.convert('RGB')
-        img = img.resize((256,256))
-        img = np.asarray(img)/255
-        return img
+        def img_preprocess(img):
+            """
+            Opens the image and does some preprocessing
+            such as converting to RGB, resize and converting to array
+            """
+            img = Image.open(img)
+            img = img.convert('RGB')
+            img = img.resize((256,256))
+            img = np.asarray(img)/255
+            return img
 
-    X_train = np.array([img_preprocess(p) for p in train_data.name.values])
-    y_train = train_data.outcome.values
+        X_train = np.array([img_preprocess(p) for p in train_data.name.values])
+        y_train = train_data.outcome.values
     return X_train, y_train

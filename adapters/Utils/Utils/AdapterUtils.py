@@ -19,7 +19,7 @@ from AdapterTabularUtils import *
 
 
 
-def data_loader(config: "StartAutoMlRequest", image_test_folder=False, perform_splitting=True) -> Any:
+def data_loader(config: "StartAutoMlRequest", image_test_folder=False, perform_splitting=True, as_dataframe=False) -> Any:
     """Load the dataframes for the requested dataset, by loading them into different DataFrames. See Returns section for more information.
 
     Args:
@@ -31,7 +31,7 @@ def data_loader(config: "StartAutoMlRequest", image_test_folder=False, perform_s
     """
 
     if config["configuration"]["task"] in [":image_classification", ":image_regression"]:
-        return read_image_dataset(config, image_test_folder)
+        return read_image_dataset(config, image_test_folder, as_dataframe)
     else:
         return read_tabular_dataset_training_data(config, perform_splitting)
 

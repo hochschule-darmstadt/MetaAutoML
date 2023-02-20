@@ -4,13 +4,9 @@ from AdapterUtils import *
 from AdapterTabularUtils import *
 from autogluon.tabular import TabularPredictor
 from autogluon.timeseries import TimeSeriesDataFrame, TimeSeriesPredictor
-from autogluon.text import TextPredictor
-from autogluon.vision import ImageDataset
 from autogluon.multimodal import MultiModalPredictor
 from AdapterUtils import prepare_tabular_dataset
 from AutoGluonServer import data_loader
-import shutil
-import pandas as pd
 
 class AutoGluonAdapter:
     """
@@ -117,7 +113,7 @@ class AutoGluonAdapter:
         #Disable multi worker else training takes a while or doesnt complete
         #https://github.com/autogluon/autogluon/issues/2756
         hyperparameters = {"env.num_workers": 0}
-        model = TextPredictor(label=y.name,
+        model = MultiModalPredictor(label=y.name,
                                  problem_type=classification_type,
                                  path=self._result_path).fit(
             data,
@@ -131,8 +127,9 @@ class AutoGluonAdapter:
         #X_train, y_train, X_test, y_test = data_loader(self._configuration)
 
         # Einteilen
-        data =  ImageDataset.from_folder(os.path.join(self._configuration['dataset_path'], 'train'))
-        if len(data['label'].unique()) == 2:
+        X, y =  data_loader(self._configuration, as_dataframe=True)
+        X[y.name] = y.values
+        if len(X['label'].unique()) == 2:
             classification_type = "binary"
         else:
             classification_type =  "multiclass"
@@ -140,7 +137,7 @@ class AutoGluonAdapter:
         #https://github.com/autogluon/autogluon/issues/2756
         hyperparameters = {"env.num_workers": 0}
         model = MultiModalPredictor(label='label',problem_type=classification_type, path=self._result_path).fit(
-            data,
+            X,
             time_limit=self._time_limit*60, hyperparameters=hyperparameters)
         #Fit methode already saves the model
 

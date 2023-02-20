@@ -39,11 +39,11 @@ if __name__ == '__main__':
     {% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression"]%}
     automl = TabularPredictor.load(os.path.join(sys.path[0], 'model_gluon.gluon'))
     {% endif %}
-    {% if configuration.configuration["task"] in [":text_classification", ":text_regression"]%}
-    automl = TextPredictor.load(os.path.join(sys.path[0], 'model_gluon.gluon'))
-    {% endif %}
-    {% if configuration.configuration["task"] in [":image_classification"]%}
+    {% if configuration.configuration["task"] in [":text_classification", ":text_regression", ":image_classification"]%}
     automl = MultiModalPredictor.load(os.path.join(sys.path[0], 'model_gluon.gluon'))
+    {% endif %}
+    {% if configuration.configuration["task"] in [":time_series_forecasting"]%}
+    automl = TimeSeriesPredictor.load(os.path.join(sys.path[0], 'model_gluon.gluon'))
     {% endif %}
 
     predicted_y = automl.predict(X, as_pandas=False)
