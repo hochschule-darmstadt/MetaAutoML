@@ -10,7 +10,7 @@ import pandas as pd
 from typing import Tuple
 
 flaml_estimators = {
-    "transformer" : (":torch", ":transformer"),
+    "transformer" : (":pytorch_lib", ":transformer"),
     "lgbm" : (":lightgbm_lib", ":light_gradient_boosting_machine"),
     "extra_tree" : (":scikit_learn_lib", ":extra_tree"),
     "rf" : (":scikit_learn_lib", ":random_forest"),
