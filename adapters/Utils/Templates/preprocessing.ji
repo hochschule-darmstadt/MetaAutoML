@@ -3,7 +3,7 @@ import numpy as np
 import re
 from _collections_abc import dict_items
 from typing import Tuple
-{% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression"] %}
+{% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression", ":text_classification", ":text_regression", ":time_series_forecasting"] %}
 from dataset import read_csv_dataset
 from numpy import nan
 from sklearn.preprocessing import OrdinalEncoder
