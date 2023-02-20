@@ -52,7 +52,7 @@ if __name__ == '__main__':
             datatype = dt["datatype_detected"]
         if dt.get("role_selected", "") == ":index" and datatype == ":datetime":
             timestamp_column = column
-        if dt.get("role_selected", "") == ":target"
+        if dt.get("role_selected", "") == ":target":
             target = column
     X[target] = np.nan
     X = X.assign(timeseries_id=1)
