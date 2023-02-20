@@ -38,7 +38,7 @@ def dataset_preparation(filepath: str) -> Tuple[pd.DataFrame, pd.Series]:
     """
     X = read_csv_dataset(filepath)
     X = rename_unnamed_columns(X)
-    X, y = feature_preparation(X, feature_configuration.items(), {configuration.dataset_configuration["file_configuration"]["datetime_format"]},  is_prediction=True)
+    X, y = feature_preparation(X, feature_configuration.items(), {{configuration.dataset_configuration["file_configuration"]["datetime_format"]}},  is_prediction=True)
     X, y = string_feature_encoding(X, y, feature_configuration.items(),  is_prediction=True)
     X= numerical_feature_imputation(X, feature_configuration.items())
     return X, y
