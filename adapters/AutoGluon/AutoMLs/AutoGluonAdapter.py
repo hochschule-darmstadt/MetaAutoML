@@ -154,7 +154,6 @@ class AutoGluonAdapter:
                 timestamp_column = column
                 break
         #Reset any index and imputation
-        self._configuration = reset_index_role(self._configuration)
         X.reset_index(inplace = True)
         self._configuration = set_imputation_for_numerical_columns(self._configuration, X)
         train, test = data_loader(self._configuration)
@@ -162,6 +161,7 @@ class AutoGluonAdapter:
         X, y = prepare_tabular_dataset(train, self._configuration)
         data = X
         data[y.name] = y.values
+        X.reset_index(inplace = True)
 
         #Assign timeseries id
         data = data.assign(timeseries_id=1)

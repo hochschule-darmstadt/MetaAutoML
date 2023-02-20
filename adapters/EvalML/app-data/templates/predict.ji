@@ -17,7 +17,7 @@ if __name__ == '__main__':
     {% if configuration.configuration["task"] in [":time_series_forecasting"] %}
     #Load dataset used for training
     train_set_path = os.path.join(os.path.dirname(__file__), "train.csv")
-    train_X, train_y = dataset_preparation(train_set_path)
+    train_X, train_y = dataset_preparation(train_set_path, is_prediction=False)
     {% endif %}
 
     #Load live dataset

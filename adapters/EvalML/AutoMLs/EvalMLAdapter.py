@@ -113,11 +113,11 @@ class EvalMLAdapter:
         train, test = data_loader(self._configuration)
         #reload dataset to load changed data
         X, y = prepare_tabular_dataset(train, self._configuration)
-
+        X[y.name] = y.values
         #We must persist the training time series to make predictions
         file_path = self._configuration["result_folder_location"]
         file_path = write_tabular_dataset_data(X, file_path, self._configuration, "train.csv")
-
+        X.drop(y.name, axis=1, inplace=True)
         problem_config = {"gap": 0, "max_delay": 7, "forecast_horizon": 7, "time_index": index_column_name}
         # parameters must be set correctly
         automl = AutoMLSearch(
