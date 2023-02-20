@@ -35,9 +35,12 @@ class EvalMLAdapterManager(AdapterManager):
         Returns:
             tuple[str, str]: Tuple returning the ontology IRI of the Ml model type, and ontology IRI of the ML library
         """
+        working_dir = config.result_folder_location
         #TODO ADD CORRECT lib and model display
         library = [":lightgbm_lib"]
         model = [":light_gradient_boosting_machine"]
+        with open(os.path.join(os.path.join(working_dir, 'evalml.p'))) as file:
+            loaded_model = dill.load(file)
         return library, model
 
     async def explain_model(self, explain_auto_ml_request: "ExplainModelRequest") -> ExplainModelResponse:

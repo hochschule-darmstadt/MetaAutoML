@@ -82,7 +82,7 @@ def feature_preparation(X: pd.DataFrame, features: dict_items, datetime_format: 
         if re.match(r"Column[0-9]+", column) and is_target_found == True and is_prediction == True:
             column_index = re.findall('[0-9]+', column)
             column_index = int(column_index[0])
-            X.rename(columns={f"Column{column_index-1}": column}, inplace=True)
+            X.rename(columns={f"Column{column_index}": column}, inplace=True)
 
         #Check if column is to be droped, when its role is ignore
         if dt.get("role_selected", "") == ":ignore":
