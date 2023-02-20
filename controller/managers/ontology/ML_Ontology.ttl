@@ -1,5 +1,5 @@
 ### Ontology file generated from ML_Ontology.xlsx.
-### 2023-02-16 22:52:39.402934
+### 2023-02-17 14:34:47.237325
 
 
 # PREFIXES
@@ -1617,6 +1617,7 @@
 :tpot a :AutoML_solution ;
     skos:prefLabel "TPOT" ;
     :used_for :scikit_learn_lib , :pytorch_lib ;
+    :supported_by_oma_ml "True" ;
     :can_perform :tabular_classification , :tabular_regression .
 :transmogrifai a :AutoML_solution ;
     skos:prefLabel "TransmogrifAI" ;
@@ -1911,13 +1912,13 @@
     :category :task_configuration ;
     :automl_solution :autogluon ;
     :ml_task :tabular_classification ;
-    :parameter_value :use_approach_autogluon_classification , :metric_autogluon_classification .
+    :parameter_value :use_approach_autogluon_classification , :metric_autogluon_tabular_classification .
 :tabular_regression_in_autogluon a :Configuration_item ;
     skos:prefLabel "tabular regression in AutoGluon" ;
     :category :task_configuration ;
     :automl_solution :autogluon ;
     :ml_task :tabular_regression ;
-    :parameter_value :use_approach_autogluon_regression , :metric_autogluon_regression .
+    :parameter_value :use_approach_autogluon_regression , :metric_autogluon_tabular_regression .
 :image_classification_in_autogluon a :Configuration_item ;
     skos:prefLabel "image classification in AutoGluon" ;
     :category :task_configuration ;
@@ -1942,6 +1943,12 @@
     :automl_solution :autogluon ;
     :ml_task :object_detection ;
     :parameter_value :use_approach_autogluon_object_detection .
+:time_series_forecasting_in_autogluon a :Configuration_item ;
+    skos:prefLabel "time series forecasting in AutoGluon" ;
+    :category :task_configuration ;
+    :automl_solution :autogluon ;
+    :ml_task :time_series_forecasting ;
+    :parameter_value :metric_autogluon_time_series_forecasting .
 :tabular_classification_in_autocve a :Configuration_item ;
     skos:prefLabel "tabular classification in AutoCVE" ;
     :category :task_configuration ;
@@ -2276,14 +2283,14 @@
     skos:broader :metric ;
     :has_datatype :single_value ;
     :parameter_value :mean_absolute_percentage_error .
-:metric_autogluon_regression a :Configuration_item ;
-    skos:prefLabel "metric AutoGluon regression" ;
+:metric_autogluon_tabular_regression a :Configuration_item ;
+    skos:prefLabel "metric AutoGluon tabular regression" ;
     :category :parameter ;
     skos:broader :metric ;
     :has_datatype :single_value ;
-    :parameter_value :rooted_mean_squared_error , :mean_squared_error , :mean_absolute_error , :median_absolute_error , :coefficient_of_determination .
-:metric_autogluon_classification a :Configuration_item ;
-    skos:prefLabel "metric AutoGluon classification" ;
+    :parameter_value :rooted_mean_squared_error , :mean_squared_error , :mean_absolute_error , :median_absolute_error , :mean_absolute_percentage_error , :r2 .
+:metric_autogluon_tabular_classification a :Configuration_item ;
+    skos:prefLabel "metric AutoGluon tabular classification" ;
     :category :parameter ;
     skos:broader :metric ;
     :has_datatype :single_value ;
@@ -2299,13 +2306,18 @@
     :category :parameter ;
     skos:broader :metric ;
     :has_datatype :single_value ;
-    :parameter_value :rooted_mean_squared_error , :mean_squared_error , :mean_absolute_error , :median_absolute_error , :coefficient_of_determination , :spearman_rank_correlation_coefficient , :pearson_correlation_coefficient .
+    :parameter_value :rooted_mean_squared_error , :mean_squared_error , :mean_absolute_error , :median_absolute_error , :r2 , :spearman_rank_correlation_coefficient , :pearson_correlation_coefficient .
 :metric_autogluon_image_classification a :Configuration_item ;
     skos:prefLabel "metric AutoGluon image classification" ;
     :category :parameter ;
     skos:broader :metric ;
     :has_datatype :single_value ;
     :parameter_value :accuracy .
+:metric_autogluon_time_series_forecasting a :Configuration_item ;
+    skos:prefLabel "metric AutoGluon time series forecasting" ;
+    :category :parameter ;
+    skos:broader :metric ;
+    :parameter_value :mean_absolute_percentage_error , :symmetric_mean_absolute_percentage_error , :mean_absolute_scaled_error , :mean_squared_error , :rooted_mean_squared_error .
 :metric_auto_pytorch_classification a :Configuration_item ;
     skos:prefLabel "metric Auto Pytorch classification" ;
     :category :parameter ;
