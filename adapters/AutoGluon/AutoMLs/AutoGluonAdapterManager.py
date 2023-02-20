@@ -10,6 +10,7 @@ from JsonUtil import get_config_property
 from autogluon.tabular import TabularPredictor
 from autogluon.text import TextPredictor
 from autogluon.multimodal import MultiModalPredictor
+from autogluon.timeseries import TimeSeriesPredictor
 from typing import Tuple
 
 class AutoGluonAdapterManager(AdapterManager):
@@ -48,6 +49,10 @@ class AutoGluonAdapterManager(AdapterManager):
         elif config.configuration['task'] in [":text_classification", ":text_regression"]:
             #We load the model to check it is intact
             automl = TextPredictor.load(os.path.join(os.path.join(working_dir, 'model_gluon.gluon')))
+            return ([":pytorch_lib"], [":transformer"])
+        elif config.configuration['task'] in [":time_series_forecasting"]:
+            #We load the model to check it is intact
+            automl = TimeSeriesPredictor.load(os.path.join(os.path.join(working_dir, 'model_gluon.gluon')))
             return ([":pytorch_lib"], [":transformer"])
         else:
             #We load the model to check it is intact
