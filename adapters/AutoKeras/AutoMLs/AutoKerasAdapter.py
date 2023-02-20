@@ -1,6 +1,6 @@
 import autokeras as ak
 import numpy as np
-from AdapterUtils import data_loader, export_model, prepare_tabular_dataset, get_column_with_largest_amout_of_text, translate_parameters
+from AdapterUtils import data_loader, export_model, prepare_tabular_dataset, set_column_with_largest_amout_of_text, translate_parameters, set_imputation_for_numerical_columns
 import pandas as pd
 import json
 import os
@@ -104,10 +104,12 @@ class AutoKerasAdapter:
 
     def __text_classification(self):
         """Execute text classifiction task and export the found model"""
-
-        self.df, test = data_loader(self._configuration)
-        X, self._configuration = get_column_with_largest_amout_of_text(self.df, self._configuration)
-        X, y = prepare_tabular_dataset(X, self._configuration)
+        train, test = data_loader(self._configuration, perform_splitting=False)
+        X, y = prepare_tabular_dataset(train, self._configuration)
+        self._configuration = set_column_with_largest_amout_of_text(X, self._configuration)
+        train, test = data_loader(self._configuration)
+        #reload dataset to load changed data
+        X, y = prepare_tabular_dataset(train, self._configuration)
         parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), akpc.task_config)
         reg = ak.TextClassifier(overwrite=True,
                                 # NOTE: bert models will fail with out of memory errors
@@ -124,9 +126,12 @@ class AutoKerasAdapter:
 
     def __text_regression(self):
         """Execute text regression task and export the found model"""
-        self.df, test = data_loader(self._configuration)
-        X, self._configuration = get_column_with_largest_amout_of_text(self.df, self._configuration)
-        X, y = prepare_tabular_dataset(X, self._configuration)
+        train, test = data_loader(self._configuration, perform_splitting=False)
+        X, y = prepare_tabular_dataset(train, self._configuration)
+        self._configuration = set_column_with_largest_amout_of_text(X, self._configuration)
+        train, test = data_loader(self._configuration)
+        #reload dataset to load changed data
+        X, y = prepare_tabular_dataset(train, self._configuration)
         parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), akpc.task_config)
         reg = ak.TextRegressor(overwrite=True,
                                 **parameters,
@@ -139,9 +144,12 @@ class AutoKerasAdapter:
 
     def __time_series_forecasting(self):
         """Execute time series forecasting task and export the found model"""
-
-        self.df, test = data_loader(self._configuration)
-        X, y = prepare_tabular_dataset(self.df, self._configuration)
+        train, test = data_loader(self._configuration, perform_splitting=False)
+        X, y = prepare_tabular_dataset(train, self._configuration)
+        self._configuration = set_imputation_for_numerical_columns(self._configuration, X)
+        train, test = data_loader(self._configuration)
+        #reload dataset to load changed data
+        X, y = prepare_tabular_dataset(train, self._configuration)
 
         #TODO convert dataframe to float
         parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), akpc.task_config)
@@ -150,54 +158,9 @@ class AutoKerasAdapter:
                                           lookback=1,
                                 seed=42,
                                 directory=self._configuration["model_folder_location"])
-
-        X = X.bfill().ffill()  # makes sure there are no missing values
-        y = y.bfill().ffill()  # makes sure there are no missing values
         #Loopback must be dividable by batch_size else time seires will crash
         reg.fit(x = X, y = y, epochs=1, batch_size=1)
         model = reg.export_model()
         model.save(os.path.join(self._configuration["result_folder_location"], 'model_keras'), save_format="tf")
         #export_model(reg, self._configuration["result_folder_location"], 'model_keras.p')
 
-    def get_column_with_largest_amout_of_text(self, X: pd.DataFrame):
-        """
-        Find the column with the most text inside,
-        because AutoKeras only supports training with one feature
-        Args:
-            X (pd.DataFrame): The current X Dataframe
-
-        Returns:
-            pd.Dataframe: Returns a pandas Dataframe with the column with the most text inside
-        """
-        column_names = []
-        target = ""
-        dict_with_string_length = {}
-
-        #First get only columns that will be used during training
-        for column, dt in self._configuration["dataset_configuration"]["schema"].items():
-            if dt.get("role_selected", "") == ":ignore" or dt.get("role_selected", "") == ":index" or dt.get("role_selected", "") == ":target":
-                continue
-            column_names.append(column)
-
-        #Check the used columns by dtype object (== string type) and get mean len to get column with longest text
-        for column_name in column_names:
-            if(X.dtypes[column_name] == object):
-                newlength = X[column_name].str.len().mean()
-                dict_with_string_length[column_name] = newlength
-        max_value = max(dict_with_string_length, key=dict_with_string_length.get)
-
-        #Remove the to be used text column from the list of used columns and set role ignore as Autokeras can only use one input column for text tasks
-        column_names.remove(max_value)
-        for column_name in column_names:
-            self._configuration["dataset_configuration"]["schema"][column_name]["role_selected"] = ":ignore"
-
-        return X
-
-
-    def save_configuration_in_json(self):
-        """ serialize dataset_configuration to json string and save the the complete configuration in json file
-            to habe the right datatypes available for the evaluation
-        """
-        self._configuration['dataset_configuration'] = json.dumps(self._configuration['dataset_configuration'])
-        with open(os.path.join(self._configuration['job_folder_location'], get_config_property("job-file-name")), "w+") as f:
-            json.dump(self._configuration, f)
