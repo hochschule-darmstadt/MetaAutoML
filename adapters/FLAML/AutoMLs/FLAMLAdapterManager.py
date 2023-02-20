@@ -10,6 +10,7 @@ import pandas as pd
 from typing import Tuple
 
 flaml_estimators = {
+    "transformer" : (":torch", ":transformer"),
     "lgbm" : (":lightgbm_lib", ":light_gradient_boosting_machine"),
     "extra_tree" : (":scikit_learn_lib", ":extra_tree"),
     "rf" : (":scikit_learn_lib", ":random_forest"),
@@ -53,19 +54,15 @@ class FLAMLAdapterManager(AdapterManager):
         # extract additional information from automl
         with open(os.path.join(working_dir, "model_flaml.p"), 'rb') as file:
             automl = dill.load(file)
-            if config.configuration["task"] == ":text_classification":
-                models.append(":transformer")
-                libraries.append(":torch")
-            else:
-                if hasattr(automl.model, "estimators"):
-                    for model in automl.model.estimators:
-                        lib, model = flaml_estimators[model[0]]
-                        libraries.append(lib)
-                        models.append(model)
-                else:
-                    lib, model = flaml_estimators[automl._best_estimator]
+            if hasattr(automl.model, "estimators"):
+                for model in automl.model.estimators:
+                    lib, model = flaml_estimators[model[0]]
                     libraries.append(lib)
                     models.append(model)
+            else:
+                lib, model = flaml_estimators[automl._best_estimator]
+                libraries.append(lib)
+                models.append(model)
         return libraries, models
 
 
