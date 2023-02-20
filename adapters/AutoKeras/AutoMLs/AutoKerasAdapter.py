@@ -1,6 +1,7 @@
 import autokeras as ak
 import numpy as np
-from AdapterUtils import data_loader, export_model, prepare_tabular_dataset, set_column_with_largest_amout_of_text, translate_parameters, set_imputation_for_numerical_columns
+from AdapterUtils import *
+from AdapterTabularUtils import *
 import pandas as pd
 import json
 import os

@@ -2,7 +2,8 @@ import os
 import shutil
 import MLJARParameterConfig as mjpc
 
-from AdapterUtils import export_model, prepare_tabular_dataset, data_loader, translate_parameters
+from AdapterUtils import *
+from AdapterTabularUtils import *
 from JsonUtil import get_config_property
 from supervised.automl import AutoML
 

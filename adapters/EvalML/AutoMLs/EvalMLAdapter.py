@@ -1,7 +1,7 @@
 import os
 
-from AdapterUtils import export_model, prepare_tabular_dataset, data_loader
 from AdapterUtils import *
+from AdapterTabularUtils import *
 from JsonUtil import get_config_property
 
 import evalml

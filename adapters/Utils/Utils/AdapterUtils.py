@@ -17,6 +17,44 @@ from AdapterImageUtils import *
 from AdapterLongitudinalUtils import *
 from AdapterTabularUtils import *
 
+def translate_parameters(task, parameter, task_config):
+    """_summary_
+
+    Args:
+        task (_type_): AutoML task (e.g tabular_classification)
+        parameter (_type_): List of all selected parameters
+        task_config (_type_): config for all tasks. includes the translation to the autoML specific types and values
+
+    Returns:
+        _type_: returns a dictionary. The key is given by the task config. The values are set with the read_parameters function
+    """
+    final_dict = {}
+    final_value = None
+    for para in task_config[task]:
+        values = read_parameter(parameter, para[0], para[1], para[2])
+        if para[3] == "list":
+            final_value = list()
+            for value in values:
+                if para[4] == "dict":
+                    translateList = para[5]
+                    final_value.append(translateList.get(value, None))
+                elif para[4] == "integer":
+                    final_value.append(int(value))
+        else:
+            if para[4] == "dict":
+                if values[0] == None:
+                    final_value = None
+                else:
+                    final_value = para[5][values[-1]]
+            elif para[4] == "integer":
+                if values[0] == None:
+                    final_value = None
+                else:
+                    final_value = int(values[len(values) - 1])
+        final_dict.update({ para[6]: final_value})
+
+    return final_dict
+
 
 
 def data_loader(config: "StartAutoMlRequest", image_test_folder=False, perform_splitting=True, as_dataframe=False) -> Any:

@@ -3,7 +3,8 @@ import os
 import autosklearn.classification
 import autosklearn.regression
 import pandas as pd
-from AdapterUtils import export_model, prepare_tabular_dataset, data_loader
+from AdapterUtils import *
+from AdapterTabularUtils import *
 from JsonUtil import get_config_property
 
 import autosklearn.metrics

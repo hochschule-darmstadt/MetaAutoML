@@ -137,8 +137,8 @@ tabular_classification_config = [
 #config for the tabular regression
 tabular_regression_config = [
     [":max_trials", ":max_trials_autokeras", [3], "single_value", "integer", "", "max_trials"],
-    [":metric", ":metric_autokeras_tabular_regression", [":accuracy"], "single_value", "dict", autokeras_metrics, "metrics"],
-    [":metric", ":metric_autokeras_tabular_regression", [":accuracy"], "single_value", "dict", autokeras_objectives, "objective"],
+    [":metric", ":metric_autokeras_tabular_regression", [":mean_squared_error"], "single_value", "dict", autokeras_metrics, "metrics"],
+    [":metric", ":metric_autokeras_tabular_regression", [":mean_squared_error"], "single_value", "dict", autokeras_objectives, "objective"],
     [":tuner", ":tuner_autokeras_tabular_regression", [None], "single_value", "dict", autokeras_tuner, "tuner"],
     [":loss", ":loss_autokeras_tabular_regression", [":mean_squared_error"], "single_value", "dict", autokeras_loss_regression, "loss"],
     [":max_model_size_autokeras", ":max_model_size_autokeras", [None], "single_value", "integer", "", "max_model_size"]
@@ -157,8 +157,8 @@ image_classification_config = [
 #config for the image regression
 image_regression_config = [
     [":max_trials", ":max_trials_autokeras", [3], "single_value", "integer", "", "max_trials"],
-    [":metric", ":metric_autokeras_image_regression", [":accuracy"], "single_value", "dict", autokeras_metrics, "metrics"],  #missing metric in ontology
-    [":metric", ":metric_autokeras_image_regression", [":accuracy"], "single_value", "dict", autokeras_objectives, "objective"],  #missing metric in ontology
+    [":metric", ":metric_autokeras_image_regression", [":mean_squared_error"], "single_value", "dict", autokeras_metrics, "metrics"],  #missing metric in ontology
+    [":metric", ":metric_autokeras_image_regression", [":mean_squared_error"], "single_value", "dict", autokeras_objectives, "objective"],  #missing metric in ontology
     [":tuner", ":tuner_autokeras_image_regression", [None], "single_value", "dict", autokeras_tuner, "tuner"],
     [":loss", ":loss_autokeras_image_regression", [":mean_squared_error"], "single_value", "dict", autokeras_loss_regression, "loss"],
     [":max_model_size_autokeras", ":max_model_size_autokeras", [None], "single_value", "integer", "", "max_model_size"]
@@ -177,8 +177,8 @@ text_classification_config = [
 #config for the text regression
 text_regression_config = [
     [":max_trials", ":max_trials_autokeras", [3], "single_value", "integer", "", "max_trials"],
-    [":metric", ":metric_autokeras_text_regression", [":accuracy"], "single_value", "dict", autokeras_metrics, "metrics"], #missing metric in ontology
-    [":metric", ":metric_autokeras_text_regression", [":accuracy"], "single_value", "dict", autokeras_objectives, "objective"], #missing metric in ontology
+    [":metric", ":metric_autokeras_text_regression", [":mean_squared_error"], "single_value", "dict", autokeras_metrics, "metrics"], #missing metric in ontology
+    [":metric", ":metric_autokeras_text_regression", [":mean_squared_error"], "single_value", "dict", autokeras_objectives, "objective"], #missing metric in ontology
     [":tuner", ":tuner_autokeras_text_regression", [None], "single_value", "dict", autokeras_tuner, "tuner"],
     [":loss", ":loss_autokeras_text_regression", [":mean_squared_error"], "single_value", "dict", autokeras_loss_regression, "loss"],
     [":max_model_size_autokeras", ":max_model_size_autokeras", [None], "single_value", "integer", "", "max_model_size"]
@@ -187,10 +187,10 @@ text_regression_config = [
 # config for time series forcasting
 time_series_forecasting_config = [
     [":max_trials", ":max_trials_autokeras", [3], "single_value", "integer", "", "max_trials"],
-    [":metric", "::metric_autokeras_time_series_forecasting", [":accuracy"], "single_value", "dict", autokeras_metrics, "metrics"], #missing metric in ontology
-    [":metric", "::metric_autokeras_time_series_forecasting", [":accuracy"], "single_value", "dict", autokeras_objectives, "objective"], #missing metric in ontology
+    [":metric", "::metric_autokeras_time_series_forecasting", [":mean_squared_error"], "single_value", "dict", autokeras_metrics, "metrics"], #missing metric in ontology
+    [":metric", "::metric_autokeras_time_series_forecasting", [":mean_squared_error"], "single_value", "dict", autokeras_objectives, "objective"], #missing metric in ontology
     [":tuner", ":tuner_autokeras_time_series_forecasting", [None], "single_value", "dict", autokeras_tuner, "tuner"],
-    [":loss", ":loss_autokeras_time_series_forecasting", [None], "single_value", "dict", autokeras_loss_regression, "loss"], #missing loss in ontology
+    [":loss", ":loss_autokeras_time_series_forecasting", [":mean_squared_error"], "single_value", "dict", autokeras_loss_regression, "loss"], #missing loss in ontology
     [":max_model_size_autokeras", ":max_model_size_autokeras", [None], "single_value", "integer", "", "max_model_size"]
 ]
 

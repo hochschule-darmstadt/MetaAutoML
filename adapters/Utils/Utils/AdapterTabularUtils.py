@@ -276,7 +276,7 @@ def set_imputation_for_numerical_columns(config, X: pd.DataFrame):
         _type_: the updated training configuration
     """
     for column, dt in config["dataset_configuration"]["schema"].items():
-        if dt.get("role_selected", "") != ":ignore" and dt.get("role_selected", "") != ":target":
+        if dt.get("role_selected", "") != ":ignore" and dt.get("role_selected", "") != ":target" and dt.get("role_selected", "") != ":index":
             if X[column].isnull().all():
                 #If the entire column is nan we cant impute and will set it to ignore
                 dt["role_selected"] = ":ignore"
