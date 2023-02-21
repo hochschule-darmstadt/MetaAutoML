@@ -106,7 +106,7 @@ class PyCaretAdapterManager(AdapterManager):
             library = ":xgboost"
             model = ":gradient_boosting_tree"
         if isinstance(automl.named_steps.trained_model, LGBMClassifier):
-            library = ":Lightgbm_lib"
+            library = ":lightgbm_lib"
             model = ":light_gradient_boosting_machine"
         if isinstance(automl.named_steps.trained_model, CatBoostClassifier):
             library = ":catboost_lib"
