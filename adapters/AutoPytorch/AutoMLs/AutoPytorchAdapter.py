@@ -14,11 +14,13 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 import pickle
 
 import pandas as pd
-from AdapterUtils import export_model, prepare_tabular_dataset, data_loader
+from AdapterUtils import export_model, prepare_tabular_dataset, data_loader, translate_parameters
 from autoPyTorch.api.tabular_classification import TabularClassificationTask
 from autoPyTorch.api.tabular_regression import TabularRegressionTask
 from JsonUtil import get_config_property
 from predict_time_sources import feature_preparation
+
+import AutoPytorchParameterConfig as appc
 
 
 class AutoPytorchAdapter:
@@ -70,20 +72,21 @@ class AutoPytorchAdapter:
         """
         self.df, test = data_loader(self._configuration)
         X, y = prepare_tabular_dataset(self.df, self._configuration)
+        parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), appc.task_config)
 
         auto_cls = TabularClassificationTask(temporary_directory=self._configuration["model_folder_location"] + "/tmp", output_directory=self._configuration["model_folder_location"] + "/output", delete_output_folder_after_terminate=False, delete_tmp_folder_after_terminate=False)
         if self._time_limit is not None:
             auto_cls.search(
                 X_train=X,
                 y_train=y,
-                optimize_metric='accuracy',
+                **parameters,
                 total_walltime_limit=self._time_limit*60
             )
         else:
             auto_cls.search(
                 X_train=X,
                 y_train=y,
-                optimize_metric='accuracy',
+                **parameters,
                 budget_type='epochs',
                 max_budget=self._iter_limit
             )
@@ -96,6 +99,7 @@ class AutoPytorchAdapter:
         """
         self.df, test = data_loader(self._configuration)
         X, y = prepare_tabular_dataset(self.df, self._configuration)
+        parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), appc.task_config)
         ############################################################################
         # Build and fit a regressor
         # ==========================
@@ -108,14 +112,14 @@ class AutoPytorchAdapter:
             auto_reg.search(
                 X_train=X,
                 y_train=y,
-                optimize_metric='root_mean_squared_error',
+                **parameters,
                 total_walltime_limit=self._time_limit
             )
         else:
             auto_reg.search(
                 X_train=X,
                 y_train=y,
-                optimize_metric='root_mean_squared_error',
+                **parameters,
                 budget_type='epochs',
                 max_budget=self._iter_limit
             )
