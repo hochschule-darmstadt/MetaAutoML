@@ -27,6 +27,99 @@ from sklearn.kernel_ridge import KernelRidge
 from sklearn.utils.extmath import softmax
 from lightgbm import LGBMClassifier
 
+def get_lib_model_names(instance):    
+    if isinstance(instance, LogisticRegression):
+        return ":scikit_learn_lib", ":logistic_regression"
+    if isinstance(instance, KNeighborsClassifier):
+        return ":scikit_learn_lib", ":k_nearest_neighbor"
+    if isinstance(instance, GaussianNB):
+        return ":scikit_learn_lib", ":gaussian_naives_bayes"
+    if isinstance(instance, DecisionTreeClassifier):
+        return ":scikit_learn_lib", ":decision_tree"
+    if isinstance(instance, SGDClassifier):
+        return ":scikit_learn_lib", ":support_vector_machine"
+    if isinstance(instance, SVC):
+        return ":scikit_learn_lib", ":support_vector_machine"
+    if isinstance(instance, GaussianProcessClassifier):
+        return ":scikit_learn_lib", ":gaussian_process"
+    if isinstance(instance, MLPClassifier):
+        return ":scikit_learn_lib", ":artificial_neural_network"
+    if isinstance(instance, TunableMLPClassifier):
+        return ":scikit_learn_lib", ":artificial_neural_network"
+    if isinstance(instance, RidgeClassifier):
+        return ":scikit_learn_lib", ":ridge_classifier"
+    if isinstance(instance, RandomForestClassifier):
+        return ":scikit_learn_lib", ":random_forest"
+    if isinstance(instance, QuadraticDiscriminantAnalysis):
+        return ":scikit_learn_lib", ":quadratic_discriminant_analysis"
+    if isinstance(instance, AdaBoostClassifier):
+        return ":scikit_learn_lib", ":adaboost"
+    if isinstance(instance, GradientBoostingClassifier):
+        return ":scikit_learn_lib", ":gradient_boosting_tree"
+    if isinstance(instance, LinearDiscriminantAnalysis):
+        return ":scikit_learn_lib", ":linear_discriminant_analysis"
+    if isinstance(instance, ExtraTreesClassifier):
+        return ":scikit_learn_lib", ":extra_tree"
+    if isinstance(instance, XGBClassifier):
+        return ":xgboost", ":gradient_boosting_tree"
+    if isinstance(instance, LGBMClassifier):
+        return ":lightgbm_lib", ":light_gradient_boosting_machine"
+    if isinstance(instance, CatBoostClassifier):
+        return ":catboost_lib", ":catboost"
+    if isinstance(instance, Lasso):
+        return ":scikit_learn_lib", ":linear_regression"
+    if isinstance(instance, Ridge):
+        return ":scikit_learn_lib", ":kernel_ridge_regression"
+    if isinstance(instance, ElasticNet):
+        return ":scikit_learn_lib", ":linear_regression"
+    if isinstance(instance, Lars):
+        return ":scikit_learn_lib", ":lasso_regression"
+    if isinstance(instance, LassoLars):
+        return ":scikit_learn_lib", ":lasso_regression"
+    if isinstance(instance, OrthogonalMatchingPursuit):
+        return ":scikit_learn_lib", ":orthogonal_matching_pursuit"
+    if isinstance(instance, BayesianRidge):
+        return ":scikit_learn_lib", ":bayesian_linear_regression"
+    if isinstance(instance, ARDRegression):
+        return ":scikit_learn_lib", ":bayesian_linear_regression"
+    if isinstance(instance, PassiveAggressiveRegressor):
+        return ":scikit_learn_lib", ":passive_aggressive"
+    if isinstance(instance, RANSACRegressor):
+        return ":scikit_learn_lib", ":random_sample_consensus"
+    if isinstance(instance, TheilSenRegressor):
+        return ":scikit_learn_lib", ":multivariate_regression"
+    if isinstance(instance, HuberRegressor):
+        return ":scikit_learn_lib", ":linear_regression"
+    if isinstance(instance, KernelRidge):
+        return ":scikit_learn_lib", ":kernel_ridge_regression"
+    if isinstance(instance, SVR):
+        return ":scikit_learn_lib", ":support_vector_regression"
+    if isinstance(instance, KNeighborsRegressor):
+        return ":scikit_learn_lib", ":k_nearest_neighbor"
+    if isinstance(instance, DecisionTreeRegressor):
+        return ":scikit_learn_lib", ":decision_tree"
+    if isinstance(instance, RandomForestRegressor):
+        return ":scikit_learn_lib", ":random_forest"
+    if isinstance(instance, ExtraTreeRegressor):
+        return ":scikit_learn_lib", ":extra_tree"
+    if isinstance(instance, AdaBoostRegressor):
+        return ":scikit_learn_lib", ":adaboost"
+    if isinstance(instance, GradientBoostingRegressor):
+        return ":scikit_learn_lib", ":gradient_boosting_tree"
+    if isinstance(instance, MLPRegressor):
+        return ":Lightgbm_lib", ":artificial_neural_network"
+    if isinstance(instance, TunableMLPRegressor):
+        return ":scikit_learn_lib", ":artificial_neural_network"
+    if isinstance(instance, XGBRegressor):
+        return ":xgboost", ":gradient_boosting_tree"
+    if isinstance(instance, LGBMRegressor):
+        return ":Lightgbm_lib", ":light_gradient_boosting_machine"
+    if isinstance(instance, CatBoostRegressor):
+        return ":catboost_lib", ":catboost"
+    else:
+        return ":scikit_learn_lib", ":logistic_regression"
+
+
 class PyCaretAdapterManager(AdapterManager):
     """The AutoML solution specific functionality implementation of the AdapterManager class
 
@@ -56,100 +149,14 @@ class PyCaretAdapterManager(AdapterManager):
         working_dir = config.result_folder_location
         # extract additional information from automl
         automl = load_model(os.path.join(working_dir, 'model_pycaret'))
-        lib, model = get_lib_model_names(automl.named_steps.trained_model)
+        try:
+            lib, model = get_lib_model_names(automl.named_steps.trained_model)
+        except:
+            lib, model = get_lib_model_names(automl)
         libraries.append(lib)
         models.append(model)
-        def get_lib_model_names(instance):    
-            if isinstance(instance, LogisticRegression):
-                return ":scikit_learn_lib", ":logistic_regression"
-            if isinstance(instance, KNeighborsClassifier):
-                return ":scikit_learn_lib", ":k_nearest_neighbor"
-            if isinstance(instance, GaussianNB):
-                return ":scikit_learn_lib", ":gaussian_naives_bayes"
-            if isinstance(instance, DecisionTreeClassifier):
-                return ":scikit_learn_lib", ":decision_tree"
-            if isinstance(instance, SGDClassifier):
-                return ":scikit_learn_lib", ":support_vector_machine"
-            if isinstance(instance, SVC):
-                return ":scikit_learn_lib", ":support_vector_machine"
-            if isinstance(instance, GaussianProcessClassifier):
-                return ":scikit_learn_lib", ":gaussian_process"
-            if isinstance(instance, MLPClassifier):
-                return ":scikit_learn_lib", ":artificial_neural_network"
-            if isinstance(instance, TunableMLPClassifier):
-                return ":scikit_learn_lib", ":artificial_neural_network"
-            if isinstance(instance, RidgeClassifier):
-                return ":scikit_learn_lib", ":ridge_classifier"
-            if isinstance(instance, RandomForestClassifier):
-                return ":scikit_learn_lib", ":random_forest"
-            if isinstance(instance, QuadraticDiscriminantAnalysis):
-                return ":scikit_learn_lib", ":quadratic_discriminant_analysis"
-            if isinstance(instance, AdaBoostClassifier):
-                return ":scikit_learn_lib", ":adaboost"
-            if isinstance(instance, GradientBoostingClassifier):
-                return ":scikit_learn_lib", ":gradient_boosting_tree"
-            if isinstance(instance, LinearDiscriminantAnalysis):
-                return ":scikit_learn_lib", ":linear_discriminant_analysis"
-            if isinstance(instance, ExtraTreesClassifier):
-                return ":scikit_learn_lib", ":extra_tree"
-            if isinstance(instance, XGBClassifier):
-                return ":xgboost", ":gradient_boosting_tree"
-            if isinstance(instance, LGBMClassifier):
-                return ":lightgbm_lib", ":light_gradient_boosting_machine"
-            if isinstance(instance, CatBoostClassifier):
-                return ":catboost_lib", ":catboost"
-            if isinstance(instance, Lasso):
-                return ":scikit_learn_lib", ":linear_regression"
-            if isinstance(instance, Ridge):
-                return ":scikit_learn_lib", ":kernel_ridge_regression"
-            if isinstance(instance, ElasticNet):
-                return ":scikit_learn_lib", ":linear_regression"
-            if isinstance(instance, Lars):
-                return ":scikit_learn_lib", ":lasso_regression"
-            if isinstance(instance, LassoLars):
-                return ":scikit_learn_lib", ":lasso_regression"
-            if isinstance(instance, OrthogonalMatchingPursuit):
-                return ":scikit_learn_lib", ":orthogonal_matching_pursuit"
-            if isinstance(instance, BayesianRidge):
-                return ":scikit_learn_lib", ":bayesian_linear_regression"
-            if isinstance(instance, ARDRegression):
-                return ":scikit_learn_lib", ":bayesian_linear_regression"
-            if isinstance(instance, PassiveAggressiveRegressor):
-                return ":scikit_learn_lib", ":passive_aggressive"
-            if isinstance(instance, RANSACRegressor):
-                return ":scikit_learn_lib", ":random_sample_consensus"
-            if isinstance(instance, TheilSenRegressor):
-                return ":scikit_learn_lib", ":multivariate_regression"
-            if isinstance(instance, HuberRegressor):
-                return ":scikit_learn_lib", ":linear_regression"
-            if isinstance(instance, KernelRidge):
-                return ":scikit_learn_lib", ":kernel_ridge_regression"
-            if isinstance(instance, SVR):
-                return ":scikit_learn_lib", ":support_vector_regression"
-            if isinstance(instance, KNeighborsRegressor):
-                return ":scikit_learn_lib", ":k_nearest_neighbor"
-            if isinstance(instance, DecisionTreeRegressor):
-                return ":scikit_learn_lib", ":decision_tree"
-            if isinstance(instance, RandomForestRegressor):
-                return ":scikit_learn_lib", ":random_forest"
-            if isinstance(instance, ExtraTreeRegressor):
-                return ":scikit_learn_lib", ":extra_tree"
-            if isinstance(instance, AdaBoostRegressor):
-                return ":scikit_learn_lib", ":adaboost"
-            if isinstance(instance, GradientBoostingRegressor):
-                return ":scikit_learn_lib", ":gradient_boosting_tree"
-            if isinstance(instance, MLPRegressor):
-                return ":Lightgbm_lib", ":artificial_neural_network"
-            if isinstance(instance, TunableMLPRegressor):
-                return ":scikit_learn_lib", ":artificial_neural_network"
-            if isinstance(instance, XGBRegressor):
-                return ":xgboost", ":gradient_boosting_tree"
-            if isinstance(instance, LGBMRegressor):
-                return ":Lightgbm_lib", ":light_gradient_boosting_machine"
-            if isinstance(instance, CatBoostRegressor):
-                return ":catboost_lib", ":catboost"
-        return libraries, models
-
+        return libraries, models        
+        
 
     def _load_model_and_make_probabilities(self, config: "StartAutoMlRequest", result_folder_location: str, dataframe: pd.DataFrame):
         """Must be overwriten! Load the found model, and execute a prediction using the provided data to calculate the probability metric used by the ExplanableAI module inside the controller

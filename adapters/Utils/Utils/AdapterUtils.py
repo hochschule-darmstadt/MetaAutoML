@@ -149,16 +149,29 @@ def evaluate(config: "StartAutoMlRequest", config_path: str) -> Tuple[float, flo
     os.chmod(os.path.join(result_path, "predict.py"), 0o777)
     python_env = os.getenv("PYTHON_ENV", default="PYTHON_ENV_UNSET")
     targets = []
+    index = []
     for key in config["dataset_configuration"]["schema"]:
         #Get target columns list
         if config["dataset_configuration"]["schema"][key].get("role_selected", "") == ":target":
             targets.append(key)
+        if config["dataset_configuration"]["schema"][key].get("role_selected", "") == ":index":
+            index.append(key)
 
-    if(config["configuration"]["task"] in [":tabular_classification", ":tabular_regression", ":text_regression", ":text_classification", ":time_series_forecasting"]):
+    if(config["configuration"]["task"] in [":tabular_classification", ":tabular_regression", ":text_regression", ":text_classification"]):
         train, test = data_loader(config)
         target = targets[0]
         # override file_path to path to test file and drop target column
         file_path = write_tabular_dataset_data(test.drop(target, axis=1), os.path.dirname(file_path), config)
+
+    elif(config["configuration"]["task"] in[":time_series_forecasting"]):
+        train, test = data_loader(config)
+        target = targets[0]
+        # override file_path to path to test file and drop target column
+        #TODO must set dynamic future prediction length
+
+        #y_actual = test.iloc[-12:][target]
+        #test.drop(test.tail(12).index, inplace=True)
+        file_path = write_tabular_dataset_data(test, os.path.dirname(file_path), config)
 
     elif(config["configuration"]["task"] in[":image_classification", ":image_regression"]):
         X_test, y_test = data_loader(config, image_test_folder=True)
@@ -178,6 +191,9 @@ def evaluate(config: "StartAutoMlRequest", config_path: str) -> Tuple[float, flo
     elif config["configuration"]["task"] in [":tabular_regression", ":text_regression", ":image_regression", ":time_series_forecasting"]:
         if config["configuration"]["task"] == ":image_regression":
             return compute_regression_metrics(pd.Series(y_test), predictions["predicted"]), (predict_time * 1000) / pd.Series(y_test).shape[0]
+        elif config["configuration"]["task"] == ":time_series_forecasting":
+            #TODO add dynamic future prediction
+            return compute_regression_metrics(pd.Series(test.iloc[-12:][target]), predictions["predicted"]), (predict_time * 1000) / test.shape[0]
         else:
             return compute_regression_metrics(pd.Series(test[target]), predictions["predicted"]), (predict_time * 1000) / test.shape[0]
 

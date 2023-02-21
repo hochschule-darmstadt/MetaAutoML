@@ -46,8 +46,7 @@ class FLAMLAdapter:
             dict: Settings configuration for FLAML
         """
         automl_settings = {"log_file_name": 'flaml.log'}
-        if self._configuration["configuration"]["runtime_limit"] != 0:
-            automl_settings.update({"time_budget": self._configuration["configuration"]["runtime_limit"] * 60})
+        automl_settings.update({"time_budget": self._configuration["configuration"]["runtime_limit"] * 60})
 
         parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), fpc.task_config)
         automl_settings.update(parameters)
@@ -100,19 +99,19 @@ class FLAMLAdapter:
         #reload dataset to load changed data
         X, y = prepare_tabular_dataset(train, self._configuration)
         #TODO ensure ts first column is datetime
+        #TODO add dynamic periode
         automl = AutoML()
         automl_settings = self.__generate_settings()
         automl_settings.update({
             "task": 'ts_forecast',
             "ensemble": True,
             "log_file_name": self._log_file_path,
-            "period": 1,
+            "period": 12,
             "eval_method": "holdout"
         })
-        X[y.name] = y.values
         #X.reset_index(inplace=True)
         #X = X.bfill().ffill()  # makes sure there are no missing values
-        automl.fit(dataframe=X, label=y.name, **automl_settings)
+        automl.fit(X_train=X, y_train=y, **automl_settings)
 
         export_model(automl, self._configuration["result_folder_location"], 'model_flaml.p')
 

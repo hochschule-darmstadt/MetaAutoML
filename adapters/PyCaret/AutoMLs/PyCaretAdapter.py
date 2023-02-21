@@ -45,6 +45,7 @@ class PyCaretAdapter:
         X, y = prepare_tabular_dataset(self.df, self._configuration)
         X[y.name] = y
         #TODO If index is set, index is somehow removed within pycaret and added as empty dataframe which crashes
+        #Issue https://github.com/pycaret/pycaret/issues/3324
 
         parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), ppc.task_config)
         automl = setup(data = X, target = y.name)
@@ -75,7 +76,7 @@ class PyCaretAdapter:
         X, y = prepare_tabular_dataset(self.df, self._configuration)
         X[y.name] = y
         parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), ppc.task_config)
-        automl = setup(data = X, target = y.name)
-        best = compare_models()
+        automl = setup(data = X, target = y.name, fh=12) #TODO add dynamic future horizon
+        best = compare_models(budget_time=self._configuration["configuration"]["runtime_limit"])
         save_model(best, os.path.join(self._configuration["result_folder_location"], 'model_pycaret'))
         #export_model(automl, self._configuration["result_folder_location"], 'model_pycaret.p')

@@ -48,7 +48,7 @@ tabular_regression_config = [
 
 #config for the time series forecasting
 time_series_forecasting_config = [
-    [":metric", ":metric_flaml_time_series_forecasting", [":log_loss"], "single_value", "dict", flaml_metrics, "metric"]
+    [":metric", ":metric_flaml_time_series_forecasting", [":mean_squared_error"], "single_value", "dict", flaml_metrics, "metric"]
 ]
 
 #config for the text classification

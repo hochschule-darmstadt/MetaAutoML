@@ -13,7 +13,7 @@ from autogluon.timeseries import TimeSeriesPredictor, TimeSeriesDataFrame
 from autogluon.multimodal import MultiModalPredictor
 {% endif %}
 {% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression", ":text_classification", ":text_regression", ":time_series_forecasting"] %}
-from preprocessing import dataset_preparation, feature_configuration
+from preprocessing import dataset_preparation, feature_configuration, seperate_time_series_dataframe
 {% endif %}
 
 import pandas as pd
@@ -25,8 +25,22 @@ if __name__ == '__main__':
     save_path = sys.argv[2]
     X = None
 
-    {% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression", ":text_classification", ":text_regression", ":time_series_forecasting"] %}
+    {% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression", ":text_classification", ":text_regression"] %}
     X, y = dataset_preparation(filepath)
+    {% endif %}
+    {% if configuration.configuration["task"] in [":time_series_forecasting"] %}
+    #We need current observations
+    X, y = dataset_preparation(filepath, is_prediction=False)
+    timestamp_column = ""
+    #First get the datetime index column
+    for column, dt in feature_configuration.items():
+        datatype = dt.get("datatype_selected", "")
+        if datatype == "":
+            datatype = dt["datatype_detected"]
+        if dt.get("role_selected", "") == ":index" and datatype == ":datetime":
+            timestamp_column = column
+            break
+
     {% endif %}
     {% if configuration.configuration["task"] in [":image_classification"]%}
     X = ImageDataset.from_folder(filepath)
@@ -42,31 +56,22 @@ if __name__ == '__main__':
     automl = MultiModalPredictor.load(os.path.join(sys.path[0], 'model_gluon.gluon'))
     {% endif %}
     {% if configuration.configuration["task"] in [":time_series_forecasting"]%}
-    #Load dataset used for training
-    train_set_path = os.path.join(os.path.dirname(__file__), "train.csv")
-    train, train_y = dataset_preparation(train_set_path, is_prediction=False)
-    train[train_y.name] = train_y.values
-    train = train.assign(timeseries_id=1)
-    train.reset_index(inplace = True)
     #Load model
     automl = TimeSeriesPredictor.load(os.path.join(sys.path[0], 'model_gluon.gluon'))
-    timestamp_column = ""
-    #Get information
-    for column, dt in feature_configuration.items():
-        datatype = dt.get("datatype_selected", "")
-        if datatype == "":
-            datatype = dt["datatype_detected"]
-        if dt.get("role_selected", "") == ":index" and datatype == ":datetime":
-            timestamp_column = column
+    X[y.name] = y.values
     X = X.assign(timeseries_id=1)
     X.reset_index(inplace = True)
+
+    previous_ts, exogenous_ts = seperate_time_series_dataframe(X)
     #Build TS dataframes
-    train = TimeSeriesDataFrame.from_data_frame(train, id_column="timeseries_id", timestamp_column=timestamp_column)
-    future_known_covariates = TimeSeriesDataFrame.from_data_frame(X, id_column="timeseries_id", timestamp_column=timestamp_column)
-    #Predict
-    predicted_y = automl.predict(train, known_covariates=future_known_covariates, as_pandas=False)
-    {% endif %}
-    {% if configuration.configuration["task"] in [":text_classification", ":text_regression", ":image_classification", ":tabular_classification", ":tabular_regression"]%}
+    previous_ts = TimeSeriesDataFrame.from_data_frame(previous_ts, id_column="timeseries_id", timestamp_column=timestamp_column)
+    exogenous_ts = TimeSeriesDataFrame.from_data_frame(exogenous_ts, id_column="timeseries_id", timestamp_column=timestamp_column)
+    predicted_y = automl.predict(previous_ts, known_covariates=exogenous_ts, as_pandas=False)
+    predicted_y = predicted_y["mean"]
+    
+    predicted_y = predicted_y.reset_index(drop=True).to_numpy()
+    {% endif %}    
+    {% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression", ":text_classification", ":text_regression"] %}
     predicted_y = automl.predict(X, as_pandas=False)
     {% endif %}
     predicted_y = np.reshape(predicted_y, (-1, 1))

@@ -176,20 +176,35 @@ def string_feature_encoding(X: pd.DataFrame, y: pd.Series, features: dict_items,
     return X, y
 
 
-def replace_forbidden_json_utf8_characters(X: pd.DataFrame) -> pd.DataFrame:
+def seperate_time_series_dataframe(X: pd.DataFrame):
+    exogenous_ts = X.iloc[-12:]
+    previous_ts = X.drop(X.tail(12).index)
+    try:
+        for column, dt in feature_configuration.items():
+            if dt.get("role_selected", "") == ":target":
+                exogenous_ts.drop(column, axis=1, inplace=True)
+    except:
+        #do nothing, we just want to ensure the future doesnt have a target
+        pass
+    
+    return previous_ts, exogenous_ts
+
+def replace_forbidden_json_utf8_characters(X: pd.DataFrame, y: pd.Series=None) -> Tuple[pd.DataFrame, pd.Series]:
     """Replace forbidden json UTF8 characters in feature names
 
     Args:
         X (pd.DataFrame): The feature dataframe (X)
+        y (pd.Series): The label series (y)
 
     Returns:
-        pd.DataFrame: column renamed dataframe (X)
+        Tuple[pd.DataFrame, pd.Series]: Tuple of the prepared feature dataframe (X) and label series (y)
     """
     for column in X.columns:
         new_column_name = column.translate({ 91 : None, 93 : None, 123 : None, 125 : None, 44 : None, 58 : None, 34 : None})
         X.rename(columns = { column : new_column_name}, inplace=True)
-
-    return X
+    if isinstance(y, pd.Series):
+        y.rename(y.name.translate({ 91 : None, 93 : None, 123 : None, 125 : None, 44 : None, 58 : None, 34 : None}), inplace=True)
+    return X, y
 
 
 def numerical_feature_imputation(X: pd.DataFrame, features: dict_items) -> Tuple[pd.DataFrame, pd.Series]:
