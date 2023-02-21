@@ -357,7 +357,7 @@ def setup_run_environment(request: "StartAutoMlRequest", adapter_name: str) -> "
     #For WSL users we need to adjust the path prefix for the dataset location to windows path
     if get_config_property("local_execution") == "YES":
         if get_config_property("running_in_wsl") == "YES":
-            request_dict["dataset_path"] = re.sub("[a-zA-Z]:\\\\([A-Za-z0-9]+(\\\\[A-Za-z0-9]+)+)\\\\MetaAutoML", get_config_property("wsl_metaautoml_path"), request_dict["dataset_path"])
+            request_dict["dataset_path"] = re.sub("[a-zA-Z]:\\\\([A-Za-z0-9_]+(\\\\[A-Za-z0-9_]+)+)\\\\MetaAutoML", get_config_property("wsl_metaautoml_path"), request_dict["dataset_path"])
             request_dict["dataset_path"] = request_dict["dataset_path"].replace("\\", "/")
             job_folder_location = job_folder_location.replace("\\", "/")
             model_folder_location = model_folder_location.replace("\\", "/")

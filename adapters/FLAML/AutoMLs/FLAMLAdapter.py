@@ -7,6 +7,7 @@ from sklearn.impute import SimpleImputer
 import pandas as pd
 import json
 from JsonUtil import get_config_property
+import FLAMLParameterConfig as fpc
 
 class FLAMLAdapter:
     """
@@ -47,6 +48,9 @@ class FLAMLAdapter:
         automl_settings = {"log_file_name": 'flaml.log'}
         if self._configuration["configuration"]["runtime_limit"] != 0:
             automl_settings.update({"time_budget": self._configuration["configuration"]["runtime_limit"] * 60})
+
+        parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), fpc.task_config)
+        automl_settings.update(parameters)
         return automl_settings
 
     def __tabular_classification(self):
@@ -57,8 +61,6 @@ class FLAMLAdapter:
         automl = AutoML()
         automl_settings = self.__generate_settings()
         automl_settings.update({
-            #"metric": self._configuration["configuration"]["metric"] if self._configuration["configuration"]["metric"] != "" else 'accuracy',
-            "metric": 'accuracy',
             "task": 'classification',
             "ensemble": True,
             "log_file_name": self._log_file_path
@@ -76,8 +78,6 @@ class FLAMLAdapter:
         automl = AutoML()
         automl_settings = self.__generate_settings()
         automl_settings.update({
-            #"metric": self._configuration["configuration"]["metric"] if self._configuration["configuration"]["metric"] != "" else 'accuracy',
-            "metric": 'mse',
             "task": 'regression',
             "ensemble": True,
             "log_file_name": self._log_file_path
@@ -103,8 +103,6 @@ class FLAMLAdapter:
         automl = AutoML()
         automl_settings = self.__generate_settings()
         automl_settings.update({
-            #"metric": self._configuration["configuration"]["metric"] if self._configuration["configuration"]["metric"] != "" else 'accuracy',
-            "metric": 'mape',
             "task": 'ts_forecast',
             "ensemble": True,
             "log_file_name": self._log_file_path,
@@ -131,8 +129,6 @@ class FLAMLAdapter:
         automl = AutoML()
         automl_settings = self.__generate_settings()
         automl_settings.update({
-            #"metric": self._configuration["configuration"]["metric"] if self._configuration["configuration"]["metric"] != "" else 'accuracy',
-            "metric": 'accuracy',
             "task": 'seq-classification',
             "ensemble": True,
             "fit_kwargs_by_estimator": {

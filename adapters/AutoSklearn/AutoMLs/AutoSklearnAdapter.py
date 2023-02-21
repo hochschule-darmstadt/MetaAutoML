@@ -7,7 +7,8 @@ from AdapterUtils import *
 from AdapterTabularUtils import *
 from JsonUtil import get_config_property
 
-import autosklearn.metrics
+import AutoSklearnParameterConfig as aspc
+
 
 class AutoSklearnAdapter:
     """
@@ -41,15 +42,8 @@ class AutoSklearnAdapter:
             automl_settings.update(
                 {"time_left_for_this_task": (self._configuration["configuration"]["runtime_limit"] * 60)}) #convert into seconds
 
-        metric = None
-        parameters = self._configuration["configuration"].get('parameters', {})
-        #First check if any parameter is set
-        if parameters == {}:
-            return automl_settings
-        if ":metric" in self._configuration["configuration"]["parameters"]:
-            metric_name = self._configuration["configuration"]["parameters"][":metric"]["values"][0]
-            metric = AutoSklearnAdapter.__get_classification_metric_from_ontology(metric_name)
-        automl_settings.update({"metric": metric})
+        parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), aspc.task_config)
+        automl_settings.update(parameters)
 
         return automl_settings
 
@@ -115,19 +109,3 @@ class AutoSklearnAdapter:
                 },
             },
         }
-
-    def __get_classification_metric_from_ontology(ontology_name: str):
-        return {
-            ":accuracy": autosklearn.metrics.accuracy,
-            ":area_under_roc_curve": autosklearn.metrics.roc_auc,
-            ":balanced_accuracy": autosklearn.metrics.balanced_accuracy,
-            ":f_measure": autosklearn.metrics.f1,
-            ":precision": autosklearn.metrics.precision,
-            ":average_precision_score": autosklearn.metrics.average_precision,
-            ":recall": autosklearn.metrics.recall,
-            ":log_loss": autosklearn.metrics.log_loss,
-            ":r2": autosklearn.metrics.r2,
-            ":mean_squared_error": autosklearn.metrics.mean_squared_error,
-            ":mean_absolute_error": autosklearn.metrics.mean_absolute_error,
-            ":median_absolute_error": autosklearn.metrics.median_absolute_error
-        }[ontology_name]
