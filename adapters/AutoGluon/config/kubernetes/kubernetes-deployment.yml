@@ -26,8 +26,8 @@ spec:
         name: autogluon
         resources:
           limits:
-            cpu: "1"
-            memory: "1097152e3"
+            cpu: "2"
+            memory: "2097152e3"
         volumeMounts:
         - name: datasets
           mountPath: /app/app-data/datasets
@@ -41,4 +41,4 @@ spec:
           claimName: datasets-claim
       - name: output-autogluon
         persistentVolumeClaim:
-          claimName: output-gluon-claim
+          claimName: output-autogluon-claim

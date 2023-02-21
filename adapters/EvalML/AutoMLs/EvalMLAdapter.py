@@ -1,7 +1,7 @@
 import os
 
-from AdapterUtils import export_model, prepare_tabular_dataset, data_loader, translate_parameters
 from AdapterUtils import *
+from AdapterTabularUtils import *
 from JsonUtil import get_config_property
 
 import evalml
@@ -74,11 +74,11 @@ class EvalMLAdapter:
                     **parameters,
                     max_batches=3,
                     verbose=False,
+                    max_time=self._configuration["configuration"]["runtime_limit"]*60,
                     tuner_class=self.__get_tuner(),
                     allowed_model_families= self.__get_use_approaches(),
                 )
         automl.search()
-        automl.describe_pipeline(3)
         best_pipeline_tobe_export = automl.best_pipeline
         export_model(best_pipeline_tobe_export, self._configuration["result_folder_location"], 'evalml.p')
 
@@ -99,28 +99,34 @@ class EvalMLAdapter:
                     **parameters,
                     max_batches=3,
                     verbose=False,
+                    max_time=self._configuration["configuration"]["runtime_limit"]*60,
                     tuner_class=self.__get_tuner(),
                     allowed_model_families= self.__get_use_approaches(),
                 )
         automl.search()
-        automl.describe_pipeline(3)
         best_pipeline_tobe_export = automl.best_pipeline
         export_model(best_pipeline_tobe_export, self._configuration["result_folder_location"], 'evalml.p')
 
     def __time_series_forecasting(self):
         """Execute the time series forcasting/regression task and export the found model"""
-
-        self.df, test = data_loader(self._configuration)
+        train, test = data_loader(self._configuration, perform_splitting=False)
+        X, y = prepare_tabular_dataset(train, self._configuration)
         index_column_name = self.__get_index_column()
+        #Reset any index and imputation
+        self._configuration = reset_index_role(self._configuration)
+        X.reset_index(inplace=True)
+        train, test = data_loader(self._configuration)
+        #reload dataset to load changed data
+        X, y = prepare_tabular_dataset(train, self._configuration)
+        X[y.name] = y.values
         #We must persist the training time series to make predictions
         file_path = self._configuration["result_folder_location"]
-        file_path = write_tabular_dataset_data(self.df, file_path, self._configuration, "train.csv")
-
-        X, y = prepare_tabular_dataset(self.df, self._configuration)
-        X.reset_index(inplace=True)
+        
+        file_path = write_tabular_dataset_data(X, file_path, self._configuration, "train.csv")
+        X.drop(y.name, axis=1, inplace=True)
         parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), epc.task_config)
+        problem_config = {"gap": 0, "max_delay": 7, "forecast_horizon": 7, "time_index": index_column_name}
 
-        problem_config = {"gap": 0, "max_delay": 7, "forecast_horizon": 7, "time_index": self.__get_index_column()}
         # parameters must be set correctly
         automl = AutoMLSearch(
                     X_train=X,
@@ -128,6 +134,7 @@ class EvalMLAdapter:
                     problem_type="time series regression",
                     max_batches=1,
                     verbose=False,
+                    max_time=self._configuration["configuration"]["runtime_limit"]*60,
                     problem_configuration=problem_config,
                     **parameters,
                     tuner_class=self.__get_tuner(),

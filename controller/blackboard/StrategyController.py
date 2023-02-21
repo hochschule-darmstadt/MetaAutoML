@@ -19,7 +19,7 @@ class RepeatTimer(Timer):
 class StrategyController(object):
     """
     Strategy controller which supervises the blackboard.
-    """, 
+    """,
     def __init__(self, data_storage:DataStorage, request: "CreateTrainingRequest", explainable_lock: ThreadLock, timer_interval: int = 1, multi_fidelity_callback = None, multi_fidelity_level = 0) -> None:
         self._log = logging.getLogger('StrategyController')
         self._log.setLevel(logging.getLevelName(os.getenv("BLACKBOARD_LOGGING_LEVEL")))
@@ -32,8 +32,8 @@ class StrategyController(object):
         self.__request: "CreateTrainingRequest" = request
         self.__explainable_lock = explainable_lock
         #Init training session
-        self.__adapter_runtime_manager = AdapterRuntimeManager(self.__data_storage, self.__request, self.__explainable_lock, multi_fidelity_callback = multi_fidelity_callback, multi_fidelity_level = multi_fidelity_level) 
-        #Init Agents  
+        self.__adapter_runtime_manager = AdapterRuntimeManager(self.__data_storage, self.__request, self.__explainable_lock, multi_fidelity_callback = multi_fidelity_callback, multi_fidelity_level = multi_fidelity_level)
+        #Init Agents
         for adapter_manager in self.__adapter_runtime_manager.get_adapter_managers():
             AdapterManagerAgent(self.__blackboard, self, adapter_manager)
         AdapterRuntimeManagerAgent(self.__blackboard, self, self.__adapter_runtime_manager)
@@ -59,13 +59,14 @@ class StrategyController(object):
         self.event_listeners = {}
         self.strategies = []
 
-        from blackboard.strategies.DataPreparationStrategy import DataPreparationStrategyController
-        self.strategies.append(DataPreparationStrategyController(self))
-
+        from PreprocessingStrategy import PreprocessingStrategyController
+        from blackboard.strategies.PreTrainingStrategy import PreTrainingStrategyController
+        self.strategies.append(PreprocessingStrategyController(self))
+        self.strategies.append(PreTrainingStrategyController(self))
         self.on_event('phase_updated', self.__adapter_runtime_manager.blackboard_phase_update_handler)
         self.set_phase('preprocessing')
         self.start_timer()
-    
+
     def get_adapter_runtime_manager(self) -> AdapterRuntimeManager:
         """get the __adapter_runtime_manager object of this session
 
@@ -126,7 +127,7 @@ class StrategyController(object):
             time.sleep(1)
             self._log.info(f'Waiting for phase: "{phase}" (current: "{self.get_phase()}")')
         self._log.info(f'Waiting finished for phase: {phase}')
-      
+
     def start_timer(self) -> None:
         if not self.__is_running:
             self.__timer = RepeatTimer(interval=self.__timer_interval, function=self.run_loop)
@@ -147,6 +148,7 @@ class StrategyController(object):
         state_changed = False
         if self.__update_phase_next_run is not None:
             self.set_phase(self.__update_phase_next_run, force=True)
+            state_changed = True #Phase change changes state
             self.__update_phase_next_run = None
         for agent in list(self.__blackboard.agents.values()):
             if agent.can_contribute():

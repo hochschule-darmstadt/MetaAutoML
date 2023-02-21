@@ -41,6 +41,8 @@ services:
       - EVALML_SERVICE_PORT=50062
       - PYCARET_SERVICE_HOST=pycaret
       - PYCARET_SERVICE_PORT=50063
+      - TPOT_SERVICE_HOST=tpot
+      - TPOT_SERVICE_PORT=50064
       - PERSISTENCE_LOGGING_LEVEL=DEBUG
       - SERVER_LOGGING_LEVEL=DEBUG
       - ONTOLOGY_LOGGING_LEVEL=DEBUG
@@ -60,6 +62,7 @@ services:
       - training-mcfly:/app/app-data/training/mcfly
       - training-evalml:/app/app-data/training/evalml
       - training-pycaret:/app/app-data/training/pycaret
+      - training-tpot:/app/app-data/training/tpot
 
   mongo:
     image: mongo
@@ -201,6 +204,17 @@ services:
       - datasets:/app/app-data/datasets
       - training-pycaret:/app/app-data/training
 
+  tpot:
+    build:
+      context: ./adapters
+      dockerfile: ./TPOT/Dockerfile
+    container_name: tpot
+    environment:
+      - GRPC_SERVER_PORT=50064
+    volumes:
+      - datasets:/app/app-data/datasets
+      - training-tpot:/app/app-data/training
+
 volumes:
   datasets: # shared volume between controller, adapters and frontend/dummy to transfer datasets
    # shared volumes between controller and adapters to transfer training files e.g. *.zip file
@@ -215,6 +229,7 @@ volumes:
   training-mcfly:
   training-evalml:
   training-pycaret:
+  training-tpot:
 
   # shared volume between controller and frontend / dummy to transfer training
   training:

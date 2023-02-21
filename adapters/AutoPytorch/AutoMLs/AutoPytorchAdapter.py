@@ -14,7 +14,8 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 import pickle
 
 import pandas as pd
-from AdapterUtils import export_model, prepare_tabular_dataset, data_loader, translate_parameters
+from AdapterUtils import *
+from AdapterTabularUtils import *
 from autoPyTorch.api.tabular_classification import TabularClassificationTask
 from autoPyTorch.api.tabular_regression import TabularRegressionTask
 from JsonUtil import get_config_property
@@ -70,25 +71,21 @@ class AutoPytorchAdapter:
         """
         Execute the classification task
         """
-        self.df, test = data_loader(self._configuration)
-        X, y = prepare_tabular_dataset(self.df, self._configuration)
+        train, test = data_loader(self._configuration, perform_splitting=False)
+        X, y = prepare_tabular_dataset(train, self._configuration)
+        #Apply encoding to string
+        self._configuration = set_encoding_for_string_columns(self._configuration, X, y, also_categorical=True)
+        train, test = data_loader(self._configuration)
+        #reload dataset to load changed data
+        X, y = prepare_tabular_dataset(train, self._configuration)
         parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), appc.task_config)
 
         auto_cls = TabularClassificationTask(temporary_directory=self._configuration["model_folder_location"] + "/tmp", output_directory=self._configuration["model_folder_location"] + "/output", delete_output_folder_after_terminate=False, delete_tmp_folder_after_terminate=False)
-        if self._time_limit is not None:
-            auto_cls.search(
+        auto_cls.search(
                 X_train=X,
                 y_train=y,
                 **parameters,
                 total_walltime_limit=self._time_limit*60
-            )
-        else:
-            auto_cls.search(
-                X_train=X,
-                y_train=y,
-                **parameters,
-                budget_type='epochs',
-                max_budget=self._iter_limit
             )
 
         export_model(auto_cls, self._configuration["result_folder_location"], "model_pytorch.p")
@@ -97,31 +94,21 @@ class AutoPytorchAdapter:
         """
         Execute the regression task
         """
-        self.df, test = data_loader(self._configuration)
-        X, y = prepare_tabular_dataset(self.df, self._configuration)
-        parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), appc.task_config)
-        ############################################################################
-        # Build and fit a regressor
-        # ==========================
-        auto_reg = TabularRegressionTask()
+        train, test = data_loader(self._configuration, perform_splitting=False)
+        X, y = prepare_tabular_dataset(train, self._configuration)
+        #Apply encoding to string
+        self._configuration = set_encoding_for_string_columns(self._configuration, X, y, also_categorical=True)
+        train, test = data_loader(self._configuration)
+        #reload dataset to load changed data
+        X, y = prepare_tabular_dataset(train, self._configuration)
 
-        ############################################################################
-        # Search for an ensemble of machine learning algorithms
-        # =====================================================
-        if self._time_limit is not None:
-            auto_reg.search(
+        parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), appc.task_config)
+        auto_reg = TabularRegressionTask(temporary_directory=self._configuration["model_folder_location"] + "/tmp", output_directory=self._configuration["model_folder_location"] + "/output", delete_output_folder_after_terminate=False, delete_tmp_folder_after_terminate=False)
+        auto_reg.search(
                 X_train=X,
                 y_train=y,
                 **parameters,
-                total_walltime_limit=self._time_limit
-            )
-        else:
-            auto_reg.search(
-                X_train=X,
-                y_train=y,
-                **parameters,
-                budget_type='epochs',
-                max_budget=self._iter_limit
+                total_walltime_limit=self._time_limit*60
             )
 
         export_model(auto_reg, self._configuration["result_folder_location"], "model_pytorch.p")

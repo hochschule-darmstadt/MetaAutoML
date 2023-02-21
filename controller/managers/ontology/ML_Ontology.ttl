@@ -1,7 +1,6 @@
 ### Ontology file generated from ML_Ontology.xlsx.
 ### 2023-02-21 10:01:55.641549
 
-
 # PREFIXES
 
 @prefix : <http://h-da.de/ml-ontology/> .

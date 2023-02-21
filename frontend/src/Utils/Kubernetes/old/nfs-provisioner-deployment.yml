@@ -1,3 +1,5 @@
+#DEPRECATED replaced with csi provider https://microk8s.io/docs/nfs
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -18,6 +20,15 @@ spec:
       labels:
         app: nfs-client-provisioner
     spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: kubernetes.io/hostname
+                operator: In
+                values:
+                - oma-ml-1
       serviceAccountName: nfs-client-provisioner
       containers:
         - name: nfs-client-provisioner
@@ -29,11 +40,11 @@ spec:
             - name: PROVISIONER_NAME
               value: fuseim.pri/ifs
             - name: NFS_SERVER
-              value: 10.1.98.192
+              value: 10.192.23.239
             - name: NFS_PATH
-              value: /var/nfs/general
+              value: /media/drive2/nfs
       volumes:
         - name: nfs-client-root
           nfs:
-            server: 10.1.98.192
-            path: /var/nfs/general
+            server: 10.192.23.239
+            path: /media/drive2/nfs

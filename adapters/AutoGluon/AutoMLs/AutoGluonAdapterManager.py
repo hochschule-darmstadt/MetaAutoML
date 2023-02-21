@@ -8,9 +8,34 @@ from AdapterBGRPC import *
 from threading import *
 from JsonUtil import get_config_property
 from autogluon.tabular import TabularPredictor
-from autogluon.text import TextPredictor
 from autogluon.multimodal import MultiModalPredictor
+from autogluon.timeseries import TimeSeriesPredictor
 from typing import Tuple
+
+#TODO do all estimators https://github.com/autogluon/autogluon/tree/master/tabular/src/autogluon/tabular/models
+autogluon_estimators ={
+    'Naive' : (":baseline", ":baseline"),
+    'SeasonalNaive' : (":baseline", ":baseline"),
+    'ETS' : (":sktime_lib", ":exponential_smoothing"),
+    'Theta' : (":sktime_lib", ":theta_method"),
+    'ARIMA' : (":sktime_lib", ":autoregressive_integrated_moving_average"),
+    'AutoETS' : (":sktime_lib", ":exponential_smoothing"),
+    'AutoGluonTabular' : (":as", ":as"),
+    'WeightedEnsemble' : (":ensemble", ":ensemble"),
+    'StackerEnsemble' : (":ensemble", ":ensemble"),
+    'BaggedEnsemble' : (":ensemble",":ensemble"),
+    'GreedyWeightedEnsemble' : (":ensemble",":ensemble"),
+    'DeepAR' : (":pytorch_lib",":artificial_neural_network"),
+    'SimpleFeedForward' : (":pytorch_lib",":artificial_neural_network"),
+    'TemporalFusionTransformer' : (":pytorch_lib",":transformer"),
+    'GreedyWeightedEnsemble' : ("",""),
+    'GreedyWeightedEnsemble' : ("",""),
+    'GreedyWeightedEnsemble' : ("",""),
+    'GreedyWeightedEnsemble' : ("",""),
+    'GreedyWeightedEnsemble' : ("",""),
+    'GreedyWeightedEnsemble' : ("",""),
+    'GreedyWeightedEnsemble' : ("",""),
+}
 
 class AutoGluonAdapterManager(AdapterManager):
     """The AutoML solution specific functionality implementation of the AdapterManager class
@@ -47,7 +72,13 @@ class AutoGluonAdapterManager(AdapterManager):
             return ([':lightgbm_lib'], model)
         elif config.configuration['task'] in [":text_classification", ":text_regression"]:
             #We load the model to check it is intact
-            automl = TextPredictor.load(os.path.join(os.path.join(working_dir, 'model_gluon.gluon')))
+            automl = MultiModalPredictor.load(os.path.join(os.path.join(working_dir, 'model_gluon.gluon')))
+            return ([":pytorch_lib"], [":transformer"])
+        elif config.configuration['task'] in [":time_series_forecasting"]:
+            #We load the model to check it is intact
+            automl = TimeSeriesPredictor.load(os.path.join(os.path.join(working_dir, 'model_gluon.gluon')))
+            m1 = automl.get_model_best()
+            asd = automl.get_model_names()
             return ([":pytorch_lib"], [":transformer"])
         else:
             #We load the model to check it is intact

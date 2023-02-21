@@ -5,8 +5,7 @@ import sys
 import pandas as pd
 import numpy as np
 {% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression", ":text_classification", ":text_regression", ":time_series_forecasting"] %}
-from dataset import read_csv_dataset
-from preprocessing import rename_unnamed_columns, feature_preparation
+from preprocessing import dataset_preparation
 {% endif %}
 
 
@@ -16,13 +15,7 @@ if __name__ == '__main__':
     X = None
 
     {% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression", ":text_classification", ":text_regression", ":time_series_forecasting"] %}
-    X = read_csv_dataset(filepath)
-    X = rename_unnamed_columns(X)
-    X, y = feature_preparation(X, {{configuration.dataset_configuration["schema"]}}.items(), "{{configuration.dataset_configuration["file_configuration"]["datetime_format"]}}",  is_prediction=True)
-    {% if configuration.configuration["task"] == ":time_series_forecasting" %}
-    #Time series need to remove indexes
-    X.reset_index(inplace=True)
-    {% endif %}
+    X, y = dataset_preparation(filepath)
     {% endif %}
 
     with open(sys.path[0] + '/model_pytorch.p', 'rb') as file:

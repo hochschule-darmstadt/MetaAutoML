@@ -1,7 +1,9 @@
 import os
 import shutil
+import MLJARParameterConfig as mjpc
 
-from AdapterUtils import export_model, prepare_tabular_dataset, data_loader
+from AdapterUtils import *
+from AdapterTabularUtils import *
 from JsonUtil import get_config_property
 from supervised.automl import AutoML
 
@@ -38,7 +40,8 @@ class MLJARAdapter:
         result_path = self._configuration["model_folder_location"]
         self.df, test = data_loader(self._configuration)
         X, y = prepare_tabular_dataset(self.df, self._configuration)
-        automl = AutoML(total_time_limit=self._configuration["configuration"]["runtime_limit"], mode="Compete", results_path=result_path)
+        parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), mjpc.task_config)
+        automl = AutoML(total_time_limit=self._configuration["configuration"]["runtime_limit"], mode="Compete", **parameters, results_path=result_path)
         automl.fit(X, y)
         shutil.copytree(self._configuration["model_folder_location"], os.path.join(self._configuration["result_folder_location"], "Models"))
 

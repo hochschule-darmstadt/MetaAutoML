@@ -6,4 +6,5 @@ dependency-injector==4.40.0
 codecarbon==2.1.4
 pycaret==3.0.0rc8
 xgboost
+catboost
 scikit-learn

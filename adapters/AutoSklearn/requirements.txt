@@ -1,4 +1,4 @@
-auto-sklearn
+auto-sklearn==0.15.0
 dill
 jinja2
 pillow

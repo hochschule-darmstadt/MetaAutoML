@@ -35,6 +35,7 @@ class AdapterRuntimePredictionManager:
             ":mcfly":           ["MCFLY_SERVICE_HOST", 	   "MCFLY_SERVICE_PORT"],
             ":evalml":          ["EVALML_SERVICE_HOST",    "EVALML_SERVICE_PORT"],
             ":pycaret":          ["PYCARET_SERVICE_HOST", "PYCARET_SERVICE_PORT"],
+            ":tpot":          ["TPOT_SERVICE_HOST", "TPOT_SERVICE_PORT"],
         }
         self.__adapters: list[AdapterPredictionManager] = []
         return

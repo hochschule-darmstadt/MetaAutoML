@@ -1,14 +1,12 @@
 import os
 
-from AdapterUtils import export_model, prepare_tabular_dataset, data_loader, translate_parameters
+from AdapterUtils import *
+from AdapterTabularUtils import *
 from autogluon.tabular import TabularPredictor
 from autogluon.timeseries import TimeSeriesDataFrame, TimeSeriesPredictor
-from autogluon.text import TextPredictor
-from autogluon.vision import ImageDataset
 from autogluon.multimodal import MultiModalPredictor
 from AdapterUtils import prepare_tabular_dataset
 from AutoGluonServer import data_loader
-import shutil
 import pandas as pd
 import AutoGluonParameterConfig as agpc
 
@@ -121,7 +119,7 @@ class AutoGluonAdapter:
         #https://github.com/autogluon/autogluon/issues/2756
         hyperparameters = {"env.num_workers": 0}
         parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), agpc.task_config)
-        model = TextPredictor(label=y.name,
+        model = MultiModalPredictor(label=y.name,
                                  problem_type=classification_type,
                                  **parameters,
                                  path=self._result_path).fit(
@@ -136,8 +134,9 @@ class AutoGluonAdapter:
         #X_train, y_train, X_test, y_test = data_loader(self._configuration)
 
         # Einteilen
-        data =  ImageDataset.from_folder(os.path.join(self._configuration['dataset_path'], 'train'))
-        if len(data['label'].unique()) == 2:
+        X, y =  data_loader(self._configuration, as_dataframe=True)
+        X[y.name] = y.values
+        if len(X['label'].unique()) == 2:
             classification_type = "binary"
         else:
             classification_type =  "multiclass"
@@ -146,20 +145,14 @@ class AutoGluonAdapter:
         #https://github.com/autogluon/autogluon/issues/2756
         hyperparameters = {"env.num_workers": 0}
         parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), agpc.task_config)
-        model = MultiModalPredictor(label='label',
-                                    problem_type=classification_type,
-                                    **parameters,
-                                    path=self._result_path).fit(
-            data,
+        model = MultiModalPredictor(label='label',problem_type=classification_type, **parameters, path=self._result_path).fit(
+            X,
             time_limit=self._time_limit*60, hyperparameters=hyperparameters)
         #Fit methode already saves the model
 
     def __time_series_forecasting(self):
-
-        self.df, test = data_loader(self._configuration)
-        X, y = prepare_tabular_dataset(self.df, self._configuration)
-        data = X
-        data[y.name] = y.values
+        train, test = data_loader(self._configuration, perform_splitting=False)
+        X, y = prepare_tabular_dataset(train, self._configuration)
         timestamp_column = ""
         #First get the datetime index column
         for column, dt in self._configuration["dataset_configuration"]["schema"].items():
@@ -169,16 +162,33 @@ class AutoGluonAdapter:
             if dt.get("role_selected", "") == ":index" and datatype == ":datetime":
                 timestamp_column = column
                 break
+        #Reset any index and imputation
+        X.reset_index(inplace = True)
+        self._configuration = set_imputation_for_numerical_columns(self._configuration, X)
+        train, test = data_loader(self._configuration)
+        #reload dataset to load changed data
+        X, y = prepare_tabular_dataset(train, self._configuration)
+        #Autogluon wants the existing variables per time step everything except target and time series indexes (id and datetime)
+        known_future_covariates = X.columns
+        X.reset_index(inplace = True)
+        X[y.name] = y.values
+        #We must persist the training time series to make predictions
+        file_path = self._configuration["result_folder_location"]
+        file_path = write_tabular_dataset_data(X, file_path, self._configuration, "train.csv")
+        X.drop(y.name, axis=1, inplace=True)
+        data = X
+        data[y.name] = y.values
 
-        data.reset_index(inplace=True)
+        #Assign timeseries id
         data = data.assign(timeseries_id=1)
-        data = data.bfill().ffill()  # makes sure there are no missing values
 
+        #TODO in prediction we need the correct amount of future points
         ts_dataframe = TimeSeriesDataFrame.from_data_frame(data, id_column="timeseries_id", timestamp_column=timestamp_column)
         parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), agpc.task_config)
         model = TimeSeriesPredictor(label=y.name,
                                 **parameters,
-                                 path=self._result_path).fit(
+                                 path=self._result_path,
+                                 known_covariates_names=known_future_covariates).fit(
             ts_dataframe,
             time_limit=self._time_limit*60)
         #Fit methode already saves the model

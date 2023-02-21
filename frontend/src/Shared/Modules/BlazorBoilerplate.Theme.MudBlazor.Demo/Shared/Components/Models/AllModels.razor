@@ -26,7 +26,11 @@
                         <MudTh><MudTableSortLabel SortBy="new Func<ModelDto, object>(x=>x.Status)">@L["Status"]</MudTableSortLabel></MudTh>
                         <MudTh><MudTableSortLabel SortBy="@(new Func<ModelDto, object>(x=>x.GetMlModelString()))">@L["Model"]</MudTableSortLabel></MudTh>
                         <MudTh><MudTableSortLabel SortBy="@(new Func<ModelDto, object>(x=>x.GetMlLibraryString()))">@L["Library"]</MudTableSortLabel></MudTh>
-                        <MudTh><MudTableSortLabel SortBy="new Func<ModelDto, object>(x=>x.Metrics)">@L["Metric"]</MudTableSortLabel></MudTh>
+                        <MudTh><MudTableSortLabel SortBy="@(new Func<ModelDto, object>(x=> SelectedMetric != "" ?
+                                                                                                    x.Metrics.Count() > 0 ?
+                                                                                                        x.Metrics.Where(y => y.Name.ID == SelectedMetric).First().Score.ToString()
+                                                                                                        : ""
+                                                                                                    : ""))">@L["Metric"]</MudTableSortLabel></MudTh>
                         <MudTh><MudTableSortLabel SortBy="new Func<ModelDto, object>(x=>x.PredictionTime)">@L["Prediction time per sample"]</MudTableSortLabel></MudTh>
                         <MudTh><MudTableSortLabel SortBy="new Func<ModelDto, object>(x=>x.RuntimeProfile)">@L["Total training time"]</MudTableSortLabel></MudTh>
                         <MudTh><MudTableSortLabel SortBy="new Func<ModelDto, object>(x=>x.Emissions)">@L["Emissions kg/CO2-eq"]</MudTableSortLabel></MudTh>

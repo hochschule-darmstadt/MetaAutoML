@@ -6,16 +6,14 @@ import json
 {% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression"]%}
 from autogluon.tabular import TabularPredictor
 {% endif %}
-{% if configuration.configuration["task"] in [":text_classification", ":text_regression"]%}
-from autogluon.text import TextPredictor
+{% if configuration.configuration["task"] in [":time_series_forecasting"]%}
+from autogluon.timeseries import TimeSeriesPredictor, TimeSeriesDataFrame
 {% endif %}
-{% if configuration.configuration["task"] in [":image_classification"]%}
-from autogluon.vision import ImageDataset
+{% if configuration.configuration["task"] in [":image_classification", ":text_classification", ":text_regression"]%}
 from autogluon.multimodal import MultiModalPredictor
 {% endif %}
 {% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression", ":text_classification", ":text_regression", ":time_series_forecasting"] %}
-from dataset import read_csv_dataset
-from preprocessing import rename_unnamed_columns, feature_preparation
+from preprocessing import dataset_preparation, feature_configuration
 {% endif %}
 
 import pandas as pd
@@ -28,13 +26,7 @@ if __name__ == '__main__':
     X = None
 
     {% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression", ":text_classification", ":text_regression", ":time_series_forecasting"] %}
-    X = read_csv_dataset(filepath)
-    X = rename_unnamed_columns(X)
-    X, y = feature_preparation(X, {{configuration.dataset_configuration["schema"]}}.items(), "{{configuration.dataset_configuration["file_configuration"]["datetime_format"]}}",  is_prediction=True)
-    {% endif %}
-    {% if configuration.configuration["task"] == ":time_series_forecasting" %}
-    #Time series need to remove indexes
-    X.reset_index(inplace=True)
+    X, y = dataset_preparation(filepath)
     {% endif %}
     {% if configuration.configuration["task"] in [":image_classification"]%}
     X = ImageDataset.from_folder(filepath)
@@ -46,13 +38,36 @@ if __name__ == '__main__':
     {% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression"]%}
     automl = TabularPredictor.load(os.path.join(sys.path[0], 'model_gluon.gluon'))
     {% endif %}
-    {% if configuration.configuration["task"] in [":text_classification", ":text_regression"]%}
-    automl = TextPredictor.load(os.path.join(sys.path[0], 'model_gluon.gluon'))
-    {% endif %}
-    {% if configuration.configuration["task"] in [":image_classification"]%}
+    {% if configuration.configuration["task"] in [":text_classification", ":text_regression", ":image_classification"]%}
     automl = MultiModalPredictor.load(os.path.join(sys.path[0], 'model_gluon.gluon'))
     {% endif %}
-
-    predicted_y = automl.predict(X, as_pandas=False)
+    {% if configuration.configuration["task"] in [":time_series_forecasting"]%}
+    #Load dataset used for training
+    train_set_path = os.path.join(os.path.dirname(__file__), "train.csv")
+    train, train_y = dataset_preparation(train_set_path, is_prediction=False)
+    train[train_y.name] = train_y.values
+    train = train.assign(timeseries_id=1)
+    train.reset_index(inplace = True)
+    #Load model
+    automl = TimeSeriesPredictor.load(os.path.join(sys.path[0], 'model_gluon.gluon'))
+    timestamp_column = ""
+    #Get information
+    for column, dt in feature_configuration.items():
+        datatype = dt.get("datatype_selected", "")
+        if datatype == "":
+            datatype = dt["datatype_detected"]
+        if dt.get("role_selected", "") == ":index" and datatype == ":datetime":
+            timestamp_column = column
+    X = X.assign(timeseries_id=1)
+    X.reset_index(inplace = True)
+    #Build TS dataframes
+    train = TimeSeriesDataFrame.from_data_frame(train, id_column="timeseries_id", timestamp_column=timestamp_column)
+    future_known_covariates = TimeSeriesDataFrame.from_data_frame(X, id_column="timeseries_id", timestamp_column=timestamp_column)
+    #Predict
+    predicted_y = automl.predict(train, known_covariates=future_known_covariates, as_pandas=False)
+    {% endif %}
+    {% if configuration.configuration["task"] in [":text_classification", ":text_regression", ":image_classification", ":tabular_classification", ":tabular_regression"]%}
+    predicted_y = automl.predict(train, as_pandas=False)
+    {% endif %}
     predicted_y = np.reshape(predicted_y, (-1, 1))
     pd.DataFrame(data=predicted_y, columns=["predicted"]).to_csv(save_path)

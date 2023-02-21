@@ -3,7 +3,8 @@ import os
 import autosklearn.classification
 import autosklearn.regression
 import pandas as pd
-from AdapterUtils import export_model, prepare_tabular_dataset, data_loader, translate_parameters
+from AdapterUtils import *
+from AdapterTabularUtils import *
 from JsonUtil import get_config_property
 
 import AutoSklearnParameterConfig as aspc
@@ -21,12 +22,6 @@ class AutoSklearnAdapter:
             configuration (dict): Dictonary holding the training configuration
         """
         self._configuration = configuration
-        if self._configuration["configuration"]["runtime_limit"] > 0:
-            self._time_limit = self._configuration["configuration"]["runtime_limit"]
-        else:
-            self._time_limit = 30
-
-        self._result_path = self._configuration["model_folder_location"]
         return
 
     def start(self):
@@ -56,9 +51,6 @@ class AutoSklearnAdapter:
         """Execute the tabular classification task and export the found model"""
         self.df, test = data_loader(self._configuration)
         X, y = prepare_tabular_dataset(self.df, self._configuration)
-        # convert all object columns to categories, because autosklearn only supports numerical, bool and categorical features
-        X[X.select_dtypes(['object']).columns] = X.select_dtypes(['object']) \
-        .apply(lambda x: x.astype('category'))
 
         automl_settings = self.__generate_settings()
         auto_cls = autosklearn.classification.AutoSklearnClassifier(**automl_settings)

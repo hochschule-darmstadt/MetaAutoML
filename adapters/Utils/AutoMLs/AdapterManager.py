@@ -1,8 +1,14 @@
 import json
 import os
-import time, asyncio
+import asyncio
+from typing import Tuple
 import queue
+import sys
+from codecarbon.output import EmissionsData
 from AdapterUtils import *
+from AdapterImageUtils import *
+from AdapterLongitudinalUtils import *
+from AdapterTabularUtils import *
 from AdapterBGRPC import *
 from threading import *
 from JsonUtil import get_config_property
@@ -10,7 +16,7 @@ import pandas as pd
 from typing import Tuple
 import re
 from codecarbon import OfflineEmissionsTracker
-from subprocess import Popen, PIPE, CalledProcessError
+from subprocess import Popen
 
 class AdapterManager(Thread):
     """The base adapter manager object providing the shared functionality between all adapters
@@ -71,7 +77,7 @@ class AdapterManager(Thread):
             # start training process
             python_env = os.getenv("PYTHON_ENV", default="PYTHON_ENV_UNSET")
             process = Popen([python_env, "AutoML.py", config.job_folder_location],
-                                    stdout=subprocess.PIPE, stderr=PIPE,
+                                    stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                                     universal_newlines=True)
 
             # read the processes output line by line and push them onto the event queue
@@ -101,7 +107,7 @@ class AdapterManager(Thread):
             library, model = self._get_ml_model_and_lib(config)
             # TODO: fix evaluation (does not work with image datasets)
             test_score, prediction_time = evaluate(config, os.path.join(config.job_folder_location, get_config_property("job-file-name")))
-            self.__auto_ml_status_messages.put(get_response(output_json, json.dumps(test_score), prediction_time, library, model, carbon_tracker.final_emissions_data))
+            self.__auto_ml_status_messages.put(self.get_response(output_json, json.dumps(test_score), prediction_time, library, model, carbon_tracker.final_emissions_data))
 
             print(f'{get_config_property("adapter-name")} job finished')
             self.__start_auto_ml_running = False
@@ -122,6 +128,50 @@ class AdapterManager(Thread):
                 else:
                     print(e)
 
+    def get_response(self, config: "StartAutoMlRequest", test_score: float, prediction_time: float, library: str, model: str, emissions: EmissionsData) -> "GetAutoMlStatusResponse":
+        """Generate the final GRPC AutoML status message
+
+        Args:
+            config (StartAutoMlRequest): The StartAutoMlRequest request, extended with the trainings folder paths
+            test_score (float): The test score archieve by the model
+            prediction_time (float): The passed time to make one prediction using the model
+            library (str): The ML library the model is based upon
+            model (str): The ML model type the model is composed off
+
+        Returns:
+            GetAutoMlStatusResponse: The GRPS AutoML status messages
+        """
+        response = GetAutoMlStatusResponse()
+        response.return_code = AdapterReturnCode.ADAPTER_RETURN_CODE_SUCCESS
+        if get_config_property("local_execution") == "NO":
+            response.path = os.path.join(config.controller_export_folder_location, config.file_name)
+        else:
+            response.path = os.path.join(config.file_location, config.file_name)
+        response.test_score = test_score
+        response.prediction_time = prediction_time
+        response.ml_library = library
+        response.ml_model_type = model
+
+        #Add emission profile
+        emission_profile = CarbonEmission()
+        emission_profile.emissions = emissions.emissions
+        emission_profile.emissions_rate = emissions.emissions_rate
+        emission_profile.energy_consumed = emissions.energy_consumed
+        emission_profile.duration = emissions.duration
+        emission_profile.cpu_count = emissions.cpu_count
+        emission_profile.cpu_energy = emissions.cpu_energy
+        emission_profile.cpu_model = emissions.cpu_model
+        emission_profile.cpu_power = emissions.cpu_power
+        emission_profile.gpu_count = emissions.gpu_count
+        emission_profile.gpu_energy = emissions.gpu_energy
+        emission_profile.gpu_model = emissions.gpu_model
+        emission_profile.gpu_power = emissions.gpu_power
+        emission_profile.ram_energy = emissions.ram_energy
+        emission_profile.ram_power = emissions.ram_power
+        emission_profile.ram_total_size = emissions.ram_total_size
+
+        response.emission_profile = emission_profile
+        return response
 
     def get_auto_ml_status(self) -> "GetAutoMlStatusResponse":
         """Retrive the latest status message created by the AutoML solution subprocess if one is available. If no new message is available while the process is running, a message will be return with the status code set to PENDING
@@ -183,25 +233,28 @@ class AdapterManager(Thread):
                                                   config_json["dataset_id"],
                                                   config_json["training_id"],
                                                   get_config_property("result-folder-name"))
-
-            #For WSL users we need to adjust the path prefix for the dataset location to windows path
-            if get_config_property("local_execution") == "YES":
-                if get_config_property("running_in_wsl") == "YES":
-                    config_json["dataset_path"] = re.sub("[a-zA-Z]:\\\\([A-Za-z0-9]+(\\\\[A-Za-z0-9]+)+)\\\\MetaAutoML", get_config_property("wsl_metaautoml_path"), config_json["dataset_path"])
-                    config_json["dataset_path"] = config_json["dataset_path"].replace("\\", "/")
-
-
-
-            if self._loaded_training_id != config_json["training_id"]:
-                df, test = data_loader(config_json)
-                self._dataframeX, y = prepare_tabular_dataset(df, config_json)
+            job_file_location = os.path.join(get_config_property("training-path"),
+                                                  config_json["user_id"],
+                                                  config_json["dataset_id"],
+                                                  config_json["training_id"],
+                                                  get_config_property("job-folder-name"), 
+                                                  get_config_property("job-file-name"))
+            #Read dataset configuration
+            with open(job_file_location) as file:
+                updated_process_configuration = json.load(file)
+            config_json["dataset_configuration"] = json.loads(updated_process_configuration["dataset_configuration"])
 
             # Reassemble dataset with the datatypes and column names from the preprocessed data and the content of the
             # transmitted data.
-            df = pd.DataFrame(data=json.loads(explain_auto_ml_request.data), columns=self._dataframeX.columns)
-            df = df.astype(dtype=dict(zip(self._dataframeX.columns, self._dataframeX.dtypes.values)))
+            features = []
+            for column, dt in config_json["dataset_configuration"]["schema"].items():
+                if dt.get("role_selected", "") != ":target":
+                    features.append(column)
+            X = pd.DataFrame(data=json.loads(explain_auto_ml_request.data), columns=features)
+            X, y = prepare_tabular_dataset(X, config_json,  is_prediction=True)
 
-            probabilities = self._load_model_and_make_probabilities(config_json, result_folder_location, df)
+
+            probabilities = self._load_model_and_make_probabilities(config_json, result_folder_location, X)
 
             return ExplainModelResponse(probabilities=probabilities)
 

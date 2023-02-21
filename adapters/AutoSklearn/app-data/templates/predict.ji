@@ -4,8 +4,7 @@ import numpy as np
 import sys
 import json
 {% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression", ":text_classification", ":text_regression", ":time_series_forecasting"] %}
-from dataset import read_csv_dataset
-from preprocessing import rename_unnamed_columns, feature_preparation
+from preprocessing import dataset_preparation
 {% endif %}
 
 if __name__ == '__main__':
@@ -14,13 +13,7 @@ if __name__ == '__main__':
     X = None
 
     {% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression", ":text_classification", ":text_regression", ":time_series_forecasting"] %}
-    X = read_csv_dataset(filepath)
-    X = rename_unnamed_columns(X)
-    X, y = feature_preparation(X, {{configuration.dataset_configuration["schema"]}}.items(), "{{configuration.dataset_configuration["file_configuration"]["datetime_format"]}}",  is_prediction=True)
-    {% if configuration.configuration["task"] == ":time_series_forecasting" %}
-    # convert all object columns to categories, because autosklearn only supports numerical, bool and categorical features
-    X[X.select_dtypes(['object']).columns] = X.select_dtypes(['object']).apply(lambda x: x.astype('category'))
-    {% endif %}
+    X, y = dataset_preparation(filepath)
     {% endif %}
 
     with open(sys.path[0] + '/model_sklearn.p', 'rb') as file:

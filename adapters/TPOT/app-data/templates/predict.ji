@@ -1,0 +1,26 @@
+import sys
+import dill
+import json
+import pandas as pd
+import numpy as np
+import os
+from preprocessing import dataset_preparation, prediction_postprocessing
+
+if __name__ == '__main__':
+    filepath = sys.argv[1]
+    save_path = sys.argv[2]
+    X = None
+
+    #Load live dataset
+    X, y = dataset_preparation(filepath)
+
+    with open(sys.path[0] + '/model_TPOT.p', 'rb') as file:
+        loaded_model = dill.load(file)
+
+    predicted_y = loaded_model.predict(X)
+    predicted_y = prediction_postprocessing(predicted_y)
+    predicted_y = np.reshape(predicted_y, (-1, 1))
+    pd.DataFrame(data=predicted_y, columns=["predicted"]).to_csv(save_path)
+
+
+
