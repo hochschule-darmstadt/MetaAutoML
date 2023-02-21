@@ -177,6 +177,7 @@ class EvalMLAdapter:
 
 
 #can be deleted after use approach gets added to parameter config
+
     def __get_use_approaches(self):
         use_approaches_dict = {
             ':catboost' : model_family.ModelFamily.CATBOOST,

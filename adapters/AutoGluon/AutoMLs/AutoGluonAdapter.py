@@ -119,6 +119,7 @@ class AutoGluonAdapter:
         #https://github.com/autogluon/autogluon/issues/2756
         hyperparameters = {"env.num_workers": 0}
         parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), agpc.task_config)
+
         model = MultiModalPredictor(label=y.name,
                                  problem_type=classification_type,
                                  **parameters,
@@ -146,6 +147,7 @@ class AutoGluonAdapter:
         hyperparameters = {"env.num_workers": 0}
         parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), agpc.task_config)
         model = MultiModalPredictor(label='label',problem_type=classification_type, **parameters, path=self._result_path).fit(
+
             X,
             time_limit=self._time_limit*60, hyperparameters=hyperparameters)
         #Fit methode already saves the model

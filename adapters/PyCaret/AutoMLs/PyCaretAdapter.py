@@ -1,7 +1,7 @@
 import os
 
 from AdapterUtils import *
-from AdapterTabularUtils import 
+from AdapterTabularUtils import *
 import numpy as np
 from sklearn.impute import SimpleImputer
 import pandas as pd
@@ -59,6 +59,7 @@ class PyCaretAdapter:
     def __tabular_regression(self):
         #most likely not working, looks like a copy of the flaml adapter
         """Execute the tabular regression task and export the found model"""
+
         from pycaret.regression import *
         self.df, test = data_loader(self._configuration)
         X, y = prepare_tabular_dataset(self.df, self._configuration)
@@ -70,8 +71,6 @@ class PyCaretAdapter:
         tuned_dt = tune_model(dt, **parameters)
         final_dt = finalize_model(tuned_dt)
         save_model(final_dt, os.path.join(self._configuration["result_folder_location"], 'model_pycaret'))
-
-
 
     def __time_series_forecasting(self):
         #most likely not working, looks like a copy of the flaml adapter
