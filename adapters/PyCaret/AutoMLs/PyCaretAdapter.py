@@ -44,6 +44,8 @@ class PyCaretAdapter:
         self.df, test = data_loader(self._configuration)
         X, y = prepare_tabular_dataset(self.df, self._configuration)
         X[y.name] = y
+        #TODO If index is set, index is somehow removed within pycaret and added as empty dataframe which crashes
+        
         automl = setup(data = X, target = y.name)
         best = compare_models(budget_time=self._configuration["configuration"]["runtime_limit"] * 60)
         save_model(best, os.path.join(self._configuration["result_folder_location"], 'model_pycaret'))

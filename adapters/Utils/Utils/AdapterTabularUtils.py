@@ -164,6 +164,9 @@ def feature_preparation(X: pd.DataFrame, features: dict_items, datetime_format: 
         if dt.get("role_selected", "") == ":index":
             index_columns.append(column)
 
+    if len(index_columns) > 0:
+        #Set index columns
+        X.set_index(index_columns, inplace=True)
     #Handle target column appropriately depending on runtime
     if is_prediction == True:
         y = pd.Series()
@@ -171,9 +174,6 @@ def feature_preparation(X: pd.DataFrame, features: dict_items, datetime_format: 
         y = X[target]
         X.drop(target, axis=1, inplace=True)
 
-    if len(index_columns) > 0:
-        #Set index columns
-        X.set_index(index_columns, inplace=True)
 
     return X, y
 
