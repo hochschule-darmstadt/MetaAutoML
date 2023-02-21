@@ -42,9 +42,15 @@ if __name__ == '__main__':
     automl = MultiModalPredictor.load(os.path.join(sys.path[0], 'model_gluon.gluon'))
     {% endif %}
     {% if configuration.configuration["task"] in [":time_series_forecasting"]%}
+    #Load dataset used for training
+    train_set_path = os.path.join(os.path.dirname(__file__), "train.csv")
+    train, train_y = dataset_preparation(train_set_path, is_prediction=False)
+    train[train_y.name] = train_y.values
+    train = train.assign(timeseries_id=1)
+    train.reset_index(inplace = True)
+    #Load model
     automl = TimeSeriesPredictor.load(os.path.join(sys.path[0], 'model_gluon.gluon'))
     timestamp_column = ""
-    target = ""
     #Get information
     for column, dt in feature_configuration.items():
         datatype = dt.get("datatype_selected", "")
@@ -52,15 +58,16 @@ if __name__ == '__main__':
             datatype = dt["datatype_detected"]
         if dt.get("role_selected", "") == ":index" and datatype == ":datetime":
             timestamp_column = column
-        if dt.get("role_selected", "") == ":target":
-            target = column
-    X[target] = np.nan
     X = X.assign(timeseries_id=1)
     X.reset_index(inplace = True)
-
-    X = TimeSeriesDataFrame.from_data_frame(X, id_column="timeseries_id", timestamp_column=timestamp_column)
+    #Build TS dataframes
+    train = TimeSeriesDataFrame.from_data_frame(train, id_column="timeseries_id", timestamp_column=timestamp_column)
+    future_known_covariates = TimeSeriesDataFrame.from_data_frame(X, id_column="timeseries_id", timestamp_column=timestamp_column)
+    #Predict
+    predicted_y = automl.predict(train, known_covariates=future_known_covariates, as_pandas=False)
     {% endif %}
-
-    predicted_y = automl.predict(X, as_pandas=False)
+    {% if configuration.configuration["task"] in [":text_classification", ":text_regression", ":image_classification", ":tabular_classification", ":tabular_regression"]%}
+    predicted_y = automl.predict(train, as_pandas=False)
+    {% endif %}
     predicted_y = np.reshape(predicted_y, (-1, 1))
     pd.DataFrame(data=predicted_y, columns=["predicted"]).to_csv(save_path)

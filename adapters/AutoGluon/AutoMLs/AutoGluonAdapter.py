@@ -159,17 +159,26 @@ class AutoGluonAdapter:
         train, test = data_loader(self._configuration)
         #reload dataset to load changed data
         X, y = prepare_tabular_dataset(train, self._configuration)
+        #Autogluon wants the existing variables per time step everything except target and time series indexes (id and datetime)
+        known_future_covariates = X.columns
+        X.reset_index(inplace = True)
+        X[y.name] = y.values
+        #We must persist the training time series to make predictions
+        file_path = self._configuration["result_folder_location"]
+        file_path = write_tabular_dataset_data(X, file_path, self._configuration, "train.csv")
+        X.drop(y.name, axis=1, inplace=True)
         data = X
         data[y.name] = y.values
-        X.reset_index(inplace = True)
 
         #Assign timeseries id
         data = data.assign(timeseries_id=1)
 
+        #TODO in prediction we need the correct amount of future points
         ts_dataframe = TimeSeriesDataFrame.from_data_frame(data, id_column="timeseries_id", timestamp_column=timestamp_column)
         model = TimeSeriesPredictor(label=y.name,
                                 eval_metric="sMAPE",
-                                 path=self._result_path).fit(
+                                 path=self._result_path,
+                                 known_covariates_names=known_future_covariates).fit(
             ts_dataframe,
             time_limit=self._time_limit*60)
         #Fit methode already saves the model
