@@ -39,7 +39,7 @@ class PyCaretAdapter:
 
     def __tabular_classification(self):
         """Execute the tabular classification task and export the found model"""
-        from pycaret.classification import setup, compare_models, create_model, tune_model, finalize_model, save_model
+        from pycaret.classification import setup, compare_models, save_model
 
         self.df, test = data_loader(self._configuration)
         X, y = prepare_tabular_dataset(self.df, self._configuration)
@@ -49,17 +49,14 @@ class PyCaretAdapter:
         parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), ppc.task_config)
         automl = setup(data = X, target = y.name)
         best = compare_models(budget_time=self._configuration["configuration"]["runtime_limit"] * 60)
-        dt = create_model(best)
-        tuned_dt = tune_model(dt, **parameters)
-        final_dt = finalize_model(tuned_dt)
-        save_model(final_dt, os.path.join(self._configuration["result_folder_location"], 'model_pycaret'))
+        save_model(best, os.path.join(self._configuration["result_folder_location"], 'model_pycaret'))
 
         #export_model(automl, self._configuration["result_folder_location"], 'model_pycaret.p')
 
     def __tabular_regression(self):
         #most likely not working, looks like a copy of the flaml adapter
         """Execute the tabular regression task and export the found model"""
-        from pycaret.regression import setup, compare_models, create_model, tune_model, finalize_model, save_model
+        from pycaret.regression import setup, compare_models, save_model
 
         self.df, test = data_loader(self._configuration)
         X, y = prepare_tabular_dataset(self.df, self._configuration)
@@ -67,15 +64,12 @@ class PyCaretAdapter:
         parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), ppc.task_config)
         automl = setup(data = X, target = y.name)
         best = compare_models(budget_time=self._configuration["configuration"]["runtime_limit"] * 60)
-        dt = create_model(best)
-        tuned_dt = tune_model(dt, **parameters)
-        final_dt = finalize_model(tuned_dt)
-        save_model(final_dt, os.path.join(self._configuration["result_folder_location"], 'model_pycaret'))
+        save_model(best, os.path.join(self._configuration["result_folder_location"], 'model_pycaret'))
 
     def __time_series_forecasting(self):
         #most likely not working, looks like a copy of the flaml adapter
         """Execute the tabular classification task and export the found model"""
-        from pycaret.time_series import setup, compare_models, create_model, tune_model, finalize_model, save_model
+        from pycaret.time_series import setup, compare_models, save_model
 
         self.df, test = data_loader(self._configuration)
         X, y = prepare_tabular_dataset(self.df, self._configuration)
@@ -83,8 +77,5 @@ class PyCaretAdapter:
         parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), ppc.task_config)
         automl = setup(data = X, target = y.name)
         best = compare_models()
-        dt = create_model(best)
-        tuned_dt = tune_model(dt, **parameters)
-        final_dt = finalize_model(tuned_dt)
-        save_model(final_dt, os.path.join(self._configuration["result_folder_location"], 'model_pycaret'))
+        save_model(best, os.path.join(self._configuration["result_folder_location"], 'model_pycaret'))
         #export_model(automl, self._configuration["result_folder_location"], 'model_pycaret.p')

@@ -67,7 +67,7 @@ if __name__ == '__main__':
     predicted_y = automl.predict(train, known_covariates=future_known_covariates, as_pandas=False)
     {% endif %}
     {% if configuration.configuration["task"] in [":text_classification", ":text_regression", ":image_classification", ":tabular_classification", ":tabular_regression"]%}
-    predicted_y = automl.predict(train, as_pandas=False)
+    predicted_y = automl.predict(X, as_pandas=False)
     {% endif %}
     predicted_y = np.reshape(predicted_y, (-1, 1))
     pd.DataFrame(data=predicted_y, columns=["predicted"]).to_csv(save_path)
