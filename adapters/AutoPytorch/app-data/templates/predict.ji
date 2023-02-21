@@ -4,8 +4,8 @@ import sys
 
 import pandas as pd
 import numpy as np
-{% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression", ":text_classification", ":text_regression", ":time_series_forecasting"] %}
-from preprocessing import dataset_preparation
+{% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression", ":time_series_forecasting"] %}
+from preprocessing import dataset_preparation, seperate_time_series_dataframe
 {% endif %}
 
 
@@ -14,8 +14,14 @@ if __name__ == '__main__':
     save_path = sys.argv[2]
     X = None
 
-    {% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression", ":text_classification", ":text_regression", ":time_series_forecasting"] %}
+    {% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression"] %}
     X, y = dataset_preparation(filepath)
+    {% endif %}
+    {% if configuration.configuration["task"] in [":time_series_forecasting"] %}
+    #We need current observations
+    X, y = dataset_preparation(filepath, is_prediction=False)
+    X[y.name] = y.values
+    previous_ts, X = seperate_time_series_dataframe(X)
     {% endif %}
 
     with open(sys.path[0] + '/model_pytorch.p', 'rb') as file:
