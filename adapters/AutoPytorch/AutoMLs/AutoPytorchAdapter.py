@@ -61,6 +61,7 @@ class AutoPytorchAdapter:
         X, y = prepare_tabular_dataset(train, self._configuration)
         #Apply encoding to string
         self._configuration = set_encoding_for_string_columns(self._configuration, X, y, also_categorical=True)
+        self._configuration = set_imputation_for_numerical_columns(self._configuration, X)
         train, test = data_loader(self._configuration)
         #reload dataset to load changed data
         X, y = prepare_tabular_dataset(train, self._configuration)
@@ -85,6 +86,7 @@ class AutoPytorchAdapter:
         X, y = prepare_tabular_dataset(train, self._configuration)
         #Apply encoding to string
         self._configuration = set_encoding_for_string_columns(self._configuration, X, y, also_categorical=True)
+        self._configuration = set_imputation_for_numerical_columns(self._configuration, X)
         train, test = data_loader(self._configuration)
         #reload dataset to load changed data
         X, y = prepare_tabular_dataset(train, self._configuration)
@@ -127,7 +129,7 @@ class AutoPytorchAdapter:
         auto_reg.search(
                 X_train=X_train,
                 y_train=y_train,
-                X_test=X_test, 
+                X_test=X_test,
                 n_prediction_steps=12,
                 freq ='1H', #TODO we need variable or else this will crash in big dataset as they need to know the correct time frame
                 start_times=start_times,
