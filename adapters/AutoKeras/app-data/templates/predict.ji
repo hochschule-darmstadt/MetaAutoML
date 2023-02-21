@@ -9,7 +9,7 @@ import tensorflow as tf
 from tensorflow import keras
 import autokeras as ak
 {% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression", ":text_classification", ":text_regression", ":time_series_forecasting"] %}
-from preprocessing import dataset_preparation
+from preprocessing import dataset_preparation, seperate_time_series_dataframe
 {% else %}
 from dataset import read_image_dataset_folder
 {% endif %}
@@ -22,9 +22,15 @@ if __name__ == '__main__':
     save_path = sys.argv[2]
     X = None
 
-    {% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression", ":text_classification", ":text_regression", ":time_series_forecasting"] %}
+    {% if configuration.configuration["task"] in [":time_series_forecasting"] %}
+    X, y = dataset_preparation(filepath, is_prediction=False)
+    X[y.name] = y.values
+    previous_ts, X = seperate_time_series_dataframe(X)
+    {% endif %}
+    {% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression", ":text_classification", ":text_regression"] %}
     X, y = dataset_preparation(filepath)
-    {% else %}
+    {% endif %}
+    {% if configuration.configuration["task"] in [":image_classification", ":image_regression"] %}
     X, y = read_image_dataset_folder(filepath)
     {% endif %}
 
@@ -37,7 +43,7 @@ if __name__ == '__main__':
     {% if configuration.configuration["task"] in [":text_classification", ":text_regression"] %}
     predicted_y = loaded_model.predict(np.array(X))
     {% elif configuration.configuration["task"] == ":time_series_forecasting" %}
-    predicted_y = loaded_model.predict(tf.expand_dims(X, -1))
+    predicted_y = loaded_model.predict(tf.expand_dims(X, 1))
     {% else %}
     predicted_y = loaded_model.predict(X)
     {% endif %}
