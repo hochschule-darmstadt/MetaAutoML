@@ -1,5 +1,5 @@
 ### Ontology file generated from ML_Ontology.xlsx.
-### 2023-02-17 14:34:47.237325
+### 2023-02-21 10:01:55.641549
 
 
 # PREFIXES
@@ -375,7 +375,7 @@
 
 :adaboost a :ML_approach ;
     skos:prefLabel "adaboost" ;
-    :used_for :classification ;
+    :used_for :classification , :regression ;
     rdfs:seeAlso <https://www.wikidata.org/entity/Q2823869> .
 :agglomerative_clustering a :ML_approach ;
     skos:prefLabel "agglomerative clustering" ;
@@ -550,7 +550,7 @@
 :extra_tree a :ML_approach ;
     skos:prefLabel "extra tree" ;
     skos:broader :decision_tree ;
-    :used_for :classification ;
+    :used_for :classification , :regression ;
     rdfs:comment "ensemble learning technique which aggregates the results of multiple de-correlated decision trees collected in a “forest” to output it’s classification result" .
 :feed_forward_neural_network a :ML_approach ;
     skos:prefLabel "feed-forward neural network" ;
@@ -793,8 +793,8 @@
     skos:prefLabel "ordering points to identify the clustering structure" ;
     skos:altLabel "OPTICS" ;
     :used_for :clustering .
-:passive_aggressive_classifier a :ML_approach ;
-    skos:prefLabel "passive aggressive classifier" ;
+:passive_aggressive a :ML_approach ;
+    skos:prefLabel "passive aggressive" ;
     :used_for :classification ;
     rdfs:comment "The passive-aggressive algorithms are a family of algorithms for large-scale learning. They are similar to the Perceptron in that they do not require a learning rate. However, contrary to the Perceptron, they include a regularization parameter C." .
 :perceptron a :ML_approach ;
@@ -988,6 +988,22 @@
 :quadratic_discriminant_analysis a :ML_approach ;
     skos:prefLabel "Quadratic Discriminant Analysis" ;
     :used_for :classification .
+:kernel_ridge_regression a :ML_approach ;
+    skos:prefLabel "Kernel ridge regression" ;
+    skos:broader :ridge_regression ;
+    :used_for :regression .
+:multivariate_regression a :ML_approach ;
+    skos:prefLabel "multivariate regression" ;
+    :used_for :regression .
+:random_sample_consensus a :ML_approach ;
+    skos:prefLabel "RANdom SAmple Consensus" ;
+    skos:altLabel "RANSAC" ;
+    :used_for :regression .
+:orthogonal_matching_pursuit a :ML_approach ;
+    skos:prefLabel "Orthogonal Matching Pursuit" .
+:theta_method a :ML_approach ;
+    skos:prefLabel "Theta method" ;
+    :used_for :time_series_forecasting .
 
 
 # Preprocessing_approach
@@ -1840,13 +1856,13 @@
     :category :task_configuration ;
     :automl_solution :autosklearn ;
     :ml_task :tabular_classification ;
-    :parameter_value :time_limit_autosklearn , :time_limit_per_run_autosklearn , :ensemble_size_autosklearn , :ensemble_nbest_autosklearn , :use_approach_autosklearn_classification , :metric_autosklearn_classification , :exclude_preprocessor_autosklearn .
+    :parameter_value :time_limit_autosklearn , :time_limit_per_run_autosklearn , :ensemble_size_autosklearn , :ensemble_nbest_autosklearn , :use_approach_autosklearn_classification , :metric_autosklearn_tabular_classification , :exclude_preprocessor_autosklearn .
 :tabular_regression_in_autosklearn a :Configuration_item ;
     skos:prefLabel "tabular regression in Autosklearn" ;
     :category :task_configuration ;
     :automl_solution :autosklearn ;
     :ml_task :tabular_regression ;
-    :parameter_value :metric_autosklearn_regression , :exclude_preprocessor_autosklearn .
+    :parameter_value :metric_autosklearn_tabular_regression , :exclude_preprocessor_autosklearn .
 :tabular_classification_in_autokeras a :Configuration_item ;
     skos:prefLabel "tabular classification in AutoKeras" ;
     :category :task_configuration ;
@@ -1900,13 +1916,13 @@
     :category :task_configuration ;
     :automl_solution :autopytorch ;
     :ml_task :tabular_classification ;
-    :parameter_value :use_approach_auto_pytorch_classification , :metric_auto_pytorch_classification .
+    :parameter_value :use_approach_auto_pytorch_classification , :metric_autopytorch_tabular_classification .
 :tabular_regression_in_auto_pytorch a :Configuration_item ;
     skos:prefLabel "tabular regression in Auto-PyTorch" ;
     :category :task_configuration ;
     :automl_solution :autopytorch ;
     :ml_task :tabular_regression ;
-    :parameter_value :use_approach_auto_pytorch_regression , :metric_auto_pytorch_regression .
+    :parameter_value :use_approach_auto_pytorch_regression , :metric_autopytorch_tabular_regression .
 :tabular_classification_in_autogluon a :Configuration_item ;
     skos:prefLabel "tabular classification in AutoGluon" ;
     :category :task_configuration ;
@@ -2223,12 +2239,12 @@
 :metric a :Configuration_item ;
     skos:prefLabel "metric" ;
     :category :parameter .
-:metric_autosklearn_classification a :Configuration_item ;
-    skos:prefLabel "metric Autosklearn classification" ;
+:metric_autosklearn_tabular_classification a :Configuration_item ;
+    skos:prefLabel "metric Autosklearn tabular classification" ;
     :category :parameter ;
     skos:broader :metric ;
     :has_datatype :single_value ;
-    :parameter_value :accuracy , :balanced_accuracy , :roc_auc , :average_precision , :log_loss , :precision_macro , :precision_micro , :precision_samples , :precision_weighted , :recall_macro , :recall_micro , :recall_samples , :recall_weighted , :f1_macro , :f1_micro , :f1_samples , :f1_weighted .
+    :parameter_value :accuracy , :balanced_accuracy , :f_measure , :f1_macro , :f1_micro , :f1_samples , :f1_weighted , :receiver_operating_characteristic_curve , :precision , :precision_macro , :precision_micro , :precision_samples , :precision_weighted , :average_precision , :recall , :recall_macro , :recall_micro , :recall_samples , :recall_weighted , :log_loss .
 :metric_autokeras_tabular_classification a :Configuration_item ;
     skos:prefLabel "metric autokeras tabular classification" ;
     :category :parameter ;
@@ -2241,12 +2257,12 @@
     skos:broader :metric ;
     :has_datatype :single_value ;
     :parameter_value :accuracy , :receiver_operating_characteristic_curve , :receiver_operating_characteristic_curve_one_vs_rest , :log_loss , :receiver_operating_characteristic_curve_one_vs_one , :average_precision_score , :f_measure , :f_measure_micro , :f_measure_macro , :area_under_roc_curve_weighted .
-:metric_autosklearn_regression a :Configuration_item ;
-    skos:prefLabel "metric Autosklearn regression" ;
+:metric_autosklearn_tabular_regression a :Configuration_item ;
+    skos:prefLabel "metric Autosklearn tabular regression" ;
     :category :parameter ;
     skos:broader :metric ;
     :has_datatype :single_value ;
-    :parameter_value :mean_absolute_error , :mean_squared_error , :root_mean_squared_error , :mean_squared_log_error , :median_absolute_error , :r2 .
+    :parameter_value :r2 , :mean_squared_error , :mean_absolute_error , :median_absolute_error .
 :metric_autokeras_tabular_regression a :Configuration_item ;
     skos:prefLabel "metric autokeras tabular regression" ;
     :category :parameter ;
@@ -2318,18 +2334,18 @@
     :category :parameter ;
     skos:broader :metric ;
     :parameter_value :mean_absolute_percentage_error , :symmetric_mean_absolute_percentage_error , :mean_absolute_scaled_error , :mean_squared_error , :rooted_mean_squared_error .
-:metric_auto_pytorch_classification a :Configuration_item ;
-    skos:prefLabel "metric Auto Pytorch classification" ;
+:metric_autopytorch_tabular_classification a :Configuration_item ;
+    skos:prefLabel "metric AutoPytorch tabular classification" ;
     :category :parameter ;
     skos:broader :metric ;
-    :has_datatype :list ;
-    :parameter_value :accuracy , :balanced_accuracy , :f_measure , :f_measure_macro , :f_measure_micro , :f_measure_weighted , :f_measure_samples , :receiver_operating_characteristic_curve , :average_precision_score , :log_loss , :precision , :precision_macro , :precision_micro , :precision_weighted , :precision_samples , :recall , :recall_macro , :recall_micro , :recall_weighted , :recall_samples .
-:metric_auto_pytorch_regression a :Configuration_item ;
-    skos:prefLabel "metric Auto Pytorch regression" ;
+    :has_datatype :single_value ;
+    :parameter_value :accuracy , :balanced_accuracy , :f_measure , :receiver_operating_characteristic_curve , :average_precision_score , :precision , :recall , :log_loss .
+:metric_autopytorch_tabular_regression a :Configuration_item ;
+    skos:prefLabel "metric AutoPytorch tabular regression" ;
     :category :parameter ;
     skos:broader :metric ;
-    :has_datatype :list ;
-    :parameter_value :rooted_mean_squared_error , :mean_squared_error , :mean_absolute_error , :median_absolute_error , :coefficient_of_determination , :mean_squared_log_error .
+    :has_datatype :single_value ;
+    :parameter_value :mean_absolute_error , :mean_squared_error , :rooted_mean_squared_error , :mean_squared_log_error , :median_absolute_error , :r2 .
 :metric_autocve_classification a :Configuration_item ;
     skos:prefLabel "metric AutoCVE classification" ;
     :category :parameter ;
