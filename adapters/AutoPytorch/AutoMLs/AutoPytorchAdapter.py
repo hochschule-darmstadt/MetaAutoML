@@ -18,6 +18,8 @@ from AdapterUtils import *
 from AdapterTabularUtils import *
 from autoPyTorch.api.tabular_classification import TabularClassificationTask
 from autoPyTorch.api.tabular_regression import TabularRegressionTask
+from autoPyTorch.api.time_series_forecasting import TimeSeriesForecastingTask
+
 from JsonUtil import get_config_property
 from predict_time_sources import feature_preparation
 
@@ -40,24 +42,6 @@ class AutoPytorchAdapter:
 
         self._configuration = configuration
 
-
-        if self._configuration["configuration"]["runtime_limit"] > 0:
-            self._time_limit = self._configuration["configuration"]["runtime_limit"]
-            self._iter_limit = None
-        elif self._configuration["configuration"]["max_iter"] > 0:
-            self._time_limit = None
-            self._iter_limit = self._configuration["configuration"]["max_iter"]
-        else:
-            self._time_limit = 30
-            self._iter_limit = None
-
-        # self._configuration["metric"] == "" and self._configuration["task"] == ":tabular_classification":
-            # handle empty metric field, 'accuracy' should be the default metric parameter for AutoPytorch classification
-            #self._configuration["metric"] = 'accuracy'
-        #elif self._configuration["metric"] == "" and self._configuration["task"] == ":tabular_regression":
-            # handle empty metric field, 'r2' should be the default metric parameter for AutoPytorch regression
-            #self._configuration["metric"] = 'r2'
-
     def start(self):
         """
         Execute the ML task
@@ -66,6 +50,8 @@ class AutoPytorchAdapter:
             self.__tabular_classification()
         elif self._configuration["configuration"]["task"] == ":tabular_regression":
             self.__tabular_regression()
+        elif self._configuration["configuration"]["task"] == ":time_series_forecasting":
+            self.__time_series_forecasting()
 
     def __tabular_classification(self):
         """
@@ -86,7 +72,7 @@ class AutoPytorchAdapter:
                 X_train=X,
                 y_train=y,
                 **parameters,
-                total_walltime_limit=self._time_limit*60
+                total_walltime_limit=self._configuration["configuration"]["runtime_limit"]*60
             )
 
         export_model(auto_cls, self._configuration["result_folder_location"], "model_pytorch.p")
@@ -110,7 +96,44 @@ class AutoPytorchAdapter:
                 X_train=X,
                 y_train=y,
                 **parameters,
-                total_walltime_limit=self._time_limit*60
+                total_walltime_limit=self._configuration["configuration"]["runtime_limit"]*60
+            )
+
+        export_model(auto_reg, self._configuration["result_folder_location"], "model_pytorch.p")
+
+    def __time_series_forecasting(self):
+        """
+        Execute the regression task
+        """
+        train, test = data_loader(self._configuration, perform_splitting=False)
+        X, y = prepare_tabular_dataset(train, self._configuration)
+        #Apply encoding to string
+        self._configuration = set_encoding_for_string_columns(self._configuration, X, y, also_categorical=True)
+        train, test = data_loader(self._configuration)
+        #reload dataset to load changed data
+        X, y = prepare_tabular_dataset(train, self._configuration)
+        #TODO add dynamic forcasting horizon
+        y_train = [y[: -12]]
+        y_test = [y[-12:]]
+        X_train = [X[: -12]]
+        known_future_features = list(X.columns)
+        X_test = [X[-12:]]
+
+        start_times = [X.index[0]]
+
+        parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), appc.task_config)
+
+        auto_reg = TimeSeriesForecastingTask(temporary_directory=self._configuration["model_folder_location"] + "/tmp", output_directory=self._configuration["model_folder_location"] + "/output", delete_output_folder_after_terminate=False, delete_tmp_folder_after_terminate=False)
+        auto_reg.search(
+                X_train=X_train,
+                y_train=y_train,
+                X_test=X_test, 
+                n_prediction_steps=12,
+                freq ='1H', #TODO we need variable or else this will crash in big dataset as they need to know the correct time frame
+                start_times=start_times,
+    optimize_metric='mean_MAPE_forecasting',
+                total_walltime_limit=self._configuration["configuration"]["runtime_limit"]*60,
+                known_future_features=known_future_features,
             )
 
         export_model(auto_reg, self._configuration["result_folder_location"], "model_pytorch.p")

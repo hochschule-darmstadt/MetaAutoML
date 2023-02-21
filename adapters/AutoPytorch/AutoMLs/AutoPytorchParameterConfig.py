@@ -12,9 +12,9 @@ autopytorch_metrics = {
     ":log_loss": "log_loss",
 
     #regression
-    ":mean_absolute_error ": "mean_absolute_error",
-    ":mean_squared_error ": "mean_squared_error",
-    ":rooted_mean_squared_error ": "root_mean_squared_error",
+    ":mean_absolute_error": "mean_absolute_error",
+    ":mean_squared_error": "mean_squared_error",
+    ":rooted_mean_squared_error": "root_mean_squared_error",
     ":mean_squared_log_error ": "mean_squared_log_error",
     ":median_absolute_error ": "median_absolute_error",
     ":r2": "r2"
@@ -37,8 +37,14 @@ tabular_regression_config = [
     [":metric", ":metric_autopytorch_tabular_regression", [":r2"], "single_value", "dict", autopytorch_metrics, "optimize_metric"]
 ]
 
+#config for the tabular regression
+time_series_forcasting_config = [
+    [":metric", ":metric_autopytorch_time_series_forcasting", [":mean_squared_error"], "single_value", "dict", autopytorch_metrics, "optimize_metric"]
+]
+
 # dictionary for mapping the selected task to the appropriate config
 task_config = {
     ":tabular_classification": tabular_classification_config,
-    ":tabular_regression": tabular_regression_config
+    ":tabular_regression": tabular_regression_config,
+    ":time_series_forecasting": time_series_forcasting_config
 }

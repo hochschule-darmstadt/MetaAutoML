@@ -213,7 +213,7 @@ def set_column_with_largest_amout_of_text(X: pd.DataFrame, configuration: dict) 
     save_configuration_in_json(configuration)
     return configuration
 
-def reset_index_role(config):
+def reset_index_role(config, ignore_index=False):
     """reset the index role for index columns
 
     Args:
@@ -224,7 +224,10 @@ def reset_index_role(config):
     """
     for column, dt in config["dataset_configuration"]["schema"].items():
         if dt.get("role_selected", "") == ":index":
-            del config["dataset_configuration"]["schema"][column]["role_selected"]
+            if ignore_index == True:
+                config["dataset_configuration"]["schema"][column]["role_selected"] = ":ignore"
+            else:
+                del config["dataset_configuration"]["schema"][column]["role_selected"]
     save_configuration_in_json(config)
     return config
 
