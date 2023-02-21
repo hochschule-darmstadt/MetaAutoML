@@ -7,6 +7,8 @@ from autogluon.timeseries import TimeSeriesDataFrame, TimeSeriesPredictor
 from autogluon.multimodal import MultiModalPredictor
 from AdapterUtils import prepare_tabular_dataset
 from AutoGluonServer import data_loader
+import pandas as pd
+import AutoGluonParameterConfig as agpc
 
 class AutoGluonAdapter:
     """
@@ -78,8 +80,10 @@ class AutoGluonAdapter:
             classification_type = "binary"
         else:
             classification_type =  "multiclass"
+        parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), agpc.task_config)
         model = TabularPredictor(label=y.name,
                                  problem_type=classification_type,
+                                 **parameters,
                                  path=self._result_path).fit(
             data,
             time_limit=self._time_limit*60)
@@ -87,13 +91,14 @@ class AutoGluonAdapter:
 
     def __tabular_regression(self):
         """Execute the tabular regression task and export the found model"""
-
         self.df, test = data_loader(self._configuration)
         X, y = prepare_tabular_dataset(self.df, self._configuration)
         data = X
         data[y.name] = y
+        parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), agpc.task_config)
         model = TabularPredictor(label=y.name,
                                  problem_type="regression",
+                                 **parameters,
                                  path=self._result_path).fit(
             data,
             time_limit=self._time_limit*60)
@@ -113,8 +118,11 @@ class AutoGluonAdapter:
         #Disable multi worker else training takes a while or doesnt complete
         #https://github.com/autogluon/autogluon/issues/2756
         hyperparameters = {"env.num_workers": 0}
+        parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), agpc.task_config)
+
         model = MultiModalPredictor(label=y.name,
                                  problem_type=classification_type,
+                                 **parameters,
                                  path=self._result_path).fit(
             data,
             time_limit=self._time_limit*60, hyperparameters=hyperparameters)
@@ -133,10 +141,13 @@ class AutoGluonAdapter:
             classification_type = "binary"
         else:
             classification_type =  "multiclass"
+
         #Disable multi worker else training takes a while or doesnt complete
         #https://github.com/autogluon/autogluon/issues/2756
         hyperparameters = {"env.num_workers": 0}
-        model = MultiModalPredictor(label='label',problem_type=classification_type, path=self._result_path).fit(
+        parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), agpc.task_config)
+        model = MultiModalPredictor(label='label',problem_type=classification_type, **parameters, path=self._result_path).fit(
+
             X,
             time_limit=self._time_limit*60, hyperparameters=hyperparameters)
         #Fit methode already saves the model
@@ -175,8 +186,9 @@ class AutoGluonAdapter:
 
         #TODO in prediction we need the correct amount of future points
         ts_dataframe = TimeSeriesDataFrame.from_data_frame(data, id_column="timeseries_id", timestamp_column=timestamp_column)
+        parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), agpc.task_config)
         model = TimeSeriesPredictor(label=y.name,
-                                eval_metric="sMAPE",
+                                **parameters,
                                  path=self._result_path,
                                  known_covariates_names=known_future_covariates).fit(
             ts_dataframe,
