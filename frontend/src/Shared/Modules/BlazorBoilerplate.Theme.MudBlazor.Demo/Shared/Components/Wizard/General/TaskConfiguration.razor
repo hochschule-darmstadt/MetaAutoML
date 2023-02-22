@@ -353,7 +353,11 @@
             if (_individualParams.Any() && _individualParams.Where(i => i.autoMlLabel == autoMlLabel).Any())
             {
                 var individualParamsList = _individualParams.Where(i => i.autoMlLabel == autoMlLabel).Select(p => p.parameters).First();
-                var selectedValues = individualParamsList.Where(p => p.ParameterIri == parameterGroup.Key).Select(p => p.SelectedValues).First();
+                IEnumerable<ParameterValueViewModel> selectedValues = new List<ParameterValueViewModel>();
+                if (individualParamsList.Where(p => p.ParameterIri == parameterGroup.Key).Select(p => p.SelectedValues).Any())
+                {
+                    selectedValues = individualParamsList.Where(p => p.ParameterIri == parameterGroup.Key).Select(p => p.SelectedValues).First();
+                }
                 result.SelectedValues = new List<ParameterValueViewModel>(result.ParameterValues.Where(p => selectedValues.Where(s => s.ValueIri == p.ValueIri).Any()).ToList());
             }
         }
