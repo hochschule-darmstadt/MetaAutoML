@@ -67,10 +67,10 @@ class PyCaretAdapter:
         X[y.name] = y
         parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), ppc.task_config)
         automl = setup(data = X, target = y.name)
-        best = automl.compare_models(budget_time=self._configuration["configuration"]["runtime_limit"] * 60 / 3) #Setup for max 1/3 of time
-        model = automl.create_model(best)
-        tuned = automl.tune_model(model)
-        fn_model = automl.finalize_model(tuned)
+        best = compare_models(budget_time=self._configuration["configuration"]["runtime_limit"] * 60 / 3) #Setup for max 1/3 of time
+        model = create_model(best)
+        tuned = tune_model(model)
+        fn_model = finalize_model(tuned)
         save_model(fn_model, os.path.join(self._configuration["result_folder_location"], 'model_pycaret'))
 
     def __time_series_forecasting(self):
