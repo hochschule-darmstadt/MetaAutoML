@@ -88,10 +88,8 @@ class EvalMLAdapter:
 
         self.df, test = data_loader(self._configuration)
         X, y = prepare_tabular_dataset(self.df, self._configuration)
-        print(type(X))
         parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), epc.task_config)
         problem_type = "REGRESSION"
-        print(X.columns)
         # parameters must be set correctly
         automl = AutoMLSearch(
                     X_train=X,
