@@ -91,6 +91,7 @@ class EvalMLAdapter:
         print(type(X))
         parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), epc.task_config)
         problem_type = "REGRESSION"
+        print(X.columns)
         # parameters must be set correctly
         automl = AutoMLSearch(
                     X_train=X,
@@ -105,6 +106,7 @@ class EvalMLAdapter:
                 )
         automl.search()
         best_pipeline_tobe_export = automl.best_pipeline
+        #best_pipeline_tobe_export.save(os.path.join(self._configuration["result_folder_location"], 'evalml.p'))
         export_model(best_pipeline_tobe_export, self._configuration["result_folder_location"], 'evalml.p')
 
     def __time_series_forecasting(self):
@@ -125,7 +127,7 @@ class EvalMLAdapter:
         file_path = write_tabular_dataset_data(X, file_path, self._configuration, "train.csv")
         X.drop(y.name, axis=1, inplace=True)
         parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), epc.task_config)
-        problem_config = {"gap": 0, "max_delay": 7, "forecast_horizon": 7, "time_index": index_column_name}
+        problem_config = {"gap": 0, "max_delay": 12, "forecast_horizon": 12, "time_index": index_column_name}
 
         # parameters must be set correctly
         automl = AutoMLSearch(

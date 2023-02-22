@@ -15,12 +15,10 @@ from sklearn.naive_bayes import *
 from sklearn.ensemble import *
 from sklearn.gaussian_process import *
 from sklearn.svm import *
-from xgboost import *
 from sklearn.neighbors import *
 from sklearn.tree import *
 from sklearn.neural_network import *
 from pycaret.internal.tunable import *
-from catboost import *
 from lightgbm import *
 from pycaret.internal.tunable import TunableMLPRegressor
 from sklearn.kernel_ridge import KernelRidge
@@ -60,12 +58,12 @@ def get_lib_model_names(instance):
         return ":scikit_learn_lib", ":linear_discriminant_analysis"
     if isinstance(instance, ExtraTreesClassifier):
         return ":scikit_learn_lib", ":extra_tree"
-    if isinstance(instance, XGBClassifier):
-        return ":xgboost", ":gradient_boosting_tree"
+    #if isinstance(instance, XGBClassifier):
+    #    return ":xgboost", ":gradient_boosting_tree"
     if isinstance(instance, LGBMClassifier):
         return ":lightgbm_lib", ":light_gradient_boosting_machine"
-    if isinstance(instance, CatBoostClassifier):
-        return ":catboost_lib", ":catboost"
+    #if isinstance(instance, CatBoostClassifier):
+    #    return ":catboost_lib", ":catboost"
     if isinstance(instance, Lasso):
         return ":scikit_learn_lib", ":linear_regression"
     if isinstance(instance, Ridge):
@@ -110,12 +108,12 @@ def get_lib_model_names(instance):
         return ":Lightgbm_lib", ":artificial_neural_network"
     if isinstance(instance, TunableMLPRegressor):
         return ":scikit_learn_lib", ":artificial_neural_network"
-    if isinstance(instance, XGBRegressor):
-        return ":xgboost", ":gradient_boosting_tree"
+    #if isinstance(instance, XGBRegressor):
+    #    return ":xgboost", ":gradient_boosting_tree"
     if isinstance(instance, LGBMRegressor):
         return ":Lightgbm_lib", ":light_gradient_boosting_machine"
-    if isinstance(instance, CatBoostRegressor):
-        return ":catboost_lib", ":catboost"
+    #if isinstance(instance, CatBoostRegressor):
+    #    return ":catboost_lib", ":catboost"
     else:
         return ":scikit_learn_lib", ":logistic_regression"
 
