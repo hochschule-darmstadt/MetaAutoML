@@ -55,7 +55,7 @@ tabular_classification_config = [
 
 #config for the tabular regression
 tabular_regression_config = [
-    [":metric", ":metric_tpot_tabular_regression", [":r2"], "single_value", "dict", tpot_metrics, "scoring"] #default: neg_mean_squared_error
+    [":metric", ":metric_tpot_tabular_regression", [":negative_mean_squared_error"], "single_value", "dict", tpot_metrics, "scoring"]
 ]
 
 # dictionary for mapping the selected task to the appropriate config
