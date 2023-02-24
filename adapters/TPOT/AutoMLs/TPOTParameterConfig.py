@@ -12,7 +12,7 @@ tpot_metrics = {
     ":f_measure_micro": "f1_micro",
     ":f_measure_samples": "f1_samples",
     ":f_measure_weighted": "f1_weighted",
-    ":negative_log_loss": "neg_log_loss",
+    ":log_loss": "neg_log_loss",
     ":precision": "precision",
     ":precision_macro": "precision_macro",
     ":precision_micro": "precision_micro",
@@ -35,9 +35,9 @@ tpot_metrics = {
     ":receiver_operating_characteristic_curve_one_vs_one_weighted": "roc_auc_ovo_weighted",
 
     #regression
-    ":negative_median_absolute_error": "neg_median_absolute_error",
-    ":negative_mean_absolute_error": "neg_mean_absolute_error",
-    ":negative_mean_squared_error": "neg_mean_squared_error",
+    ":median_absolute_error": "neg_median_absolute_error",
+    ":mean_absolute_error": "neg_mean_absolute_error",
+    ":mean_squared_error": "neg_mean_squared_error",
     ":r2": "r2"
 }
 
@@ -55,7 +55,7 @@ tabular_classification_config = [
 
 #config for the tabular regression
 tabular_regression_config = [
-    [":metric", ":metric_tpot_tabular_regression", [":negative_mean_squared_error"], "single_value", "dict", tpot_metrics, "scoring"]
+    [":metric", ":metric_tpot_tabular_regression", [":mean_squared_error"], "single_value", "dict", tpot_metrics, "scoring"]
 ]
 
 # dictionary for mapping the selected task to the appropriate config
