@@ -1,5 +1,5 @@
 ### Ontology file generated from ML_Ontology.xlsx.
-### 2023-02-23 21:22:51.912218
+### 2023-02-28 23:18:06.598046
 
 
 # PREFIXES
@@ -1432,9 +1432,6 @@
     skos:altLabel "ARI" , "Adjusted Rand Index" ;
     :used_for :classification ;
     rdfs:comment "measure of the similarity between two data clusterings" .
-:negative_log_loss a :Metric ;
-    skos:prefLabel "Negative Log Loss" ;
-    :used_for :classification .
 :jaccard a :Metric ;
     skos:prefLabel "Jaccard" ;
     skos:altLabel "Jaccard Index" , "Jaccard distance" ;
@@ -1460,18 +1457,6 @@
     skos:prefLabel "receiver operating characteristic curve one vs one weighted" ;
     skos:altLabel "ROC AUC OVO weighted" ;
     :used_for :classification .
-:negative_median_absolute_error a :Metric ;
-    skos:prefLabel "negative median absolute error" ;
-    skos:altLabel "neg Median AE" ;
-    :used_for :regression .
-:negative_mean_absolute_error a :Metric ;
-    skos:prefLabel "negative mean absolute error" ;
-    skos:altLabel "neg MAE" ;
-    :used_for :regression .
-:negative_mean_squared_error a :Metric ;
-    skos:prefLabel "negative mean squared error" ;
-    skos:altLabel "neg MSE" ;
-    :used_for :regression .
 
 
 # ML_library
@@ -2162,7 +2147,7 @@
     :category :parameter ;
     skos:broader :use_approach ;
     :has_datatype :list ;
-    :parameter_value :gradient_boosting_tree , :random_forest , :extra_tree , :logistic_regression , :k_nearest_neighbor .
+    :parameter_value :light_gradient_boosting_machine , :xgboost , :random_forest , :extra_tree , :logistic_regression , :catboost , :k_nearest_neighbor .
 :use_approach_autosklearn_regression a :Configuration_item ;
     skos:prefLabel "use approach Autosklearn regression" ;
     :category :parameter ;
@@ -2174,18 +2159,18 @@
     :category :parameter ;
     skos:broader :use_approach ;
     :has_datatype :list ;
-    :parameter_value :gradient_boosting_tree , :random_forest , :extra_tree , :k_nearest_neighbor .
+    :parameter_value :light_gradient_boosting_machine , :xgboost , :random_forest , :extra_tree , :logistic_regression , :catboost , :k_nearest_neighbor .
 :use_approach_flaml_time_series_analysis a :Configuration_item ;
     skos:prefLabel "use approach FLAML time series analysis" ;
     :category :parameter ;
     skos:broader :use_approach ;
     :has_datatype :list ;
-    :parameter_value :prophet , :auto_regressive_integrated_moving_average , :autoregressive_integrated_moving_average .
+    :parameter_value :light_gradient_boosting_machine , :xgboost , :random_forest , :extra_tree , :prophet , :auto_regressive_integrated_moving_average , :seasonal_autoregressive_integrated_moving_average_exogenous .
 :use_approach_flaml_ranking a :Configuration_item ;
     skos:prefLabel "use approach FLAML ranking" ;
     :category :parameter ;
     skos:broader :use_approach ;
-    :parameter_value :logistic_regression , :gradient_boosting_tree .
+    :parameter_value :light_gradient_boosting_machine , :xgboost .
 :use_approach_flaml_text_classification a :Configuration_item ;
     skos:prefLabel "use approach FLAML text classification" ;
     :category :parameter ;
@@ -2512,13 +2497,13 @@
     :category :parameter ;
     skos:broader :metric ;
     :has_datatype :single_value ;
-    :parameter_value :accuracy , :average_precision , :adjusted_rand_score , :balanced_accuracy , :f_measure , :f_measure_macro , :f_measure_micro , :f_measure_samples , :f_measure_weighted , :negative_log_loss , :precision , :precision_macro , :precision_micro , :precision_samples , :precision_weighted , :recall , :recall_macro , :recall_micro , :recall_samples , :recall_weighted , :jaccard , :jaccard_macro , :jaccard_micro , :jaccard_samples , :jaccard_weighted , :receiver_operating_characteristic_curve , :receiver_operating_characteristic_curve_one_vs_rest , :receiver_operating_characteristic_curve_one_vs_one , :receiver_operating_characteristic_curve_one_vs_rest_weighted , :receiver_operating_characteristic_curve_one_vs_one_weighted .
+    :parameter_value :accuracy , :average_precision , :adjusted_rand_score , :balanced_accuracy , :f_measure , :f_measure_macro , :f_measure_micro , :f_measure_samples , :f_measure_weighted , :log_loss , :precision , :precision_macro , :precision_micro , :precision_samples , :precision_weighted , :recall , :recall_macro , :recall_micro , :recall_samples , :recall_weighted , :jaccard , :jaccard_macro , :jaccard_micro , :jaccard_samples , :jaccard_weighted , :receiver_operating_characteristic_curve , :receiver_operating_characteristic_curve_one_vs_rest , :receiver_operating_characteristic_curve_one_vs_one , :receiver_operating_characteristic_curve_one_vs_rest_weighted , :receiver_operating_characteristic_curve_one_vs_one_weighted .
 :metric_tpot_tabular_regression a :Configuration_item ;
     skos:prefLabel "metric TPOT tabular regression" ;
     :category :parameter ;
     skos:broader :metric ;
     :has_datatype :single_value ;
-    :parameter_value :negative_median_absolute_error , :negative_mean_absolute_error , :negative_mean_squared_error , :r2 .
+    :parameter_value :median_absolute_error , :mean_absolute_error , :mean_squared_error , :r2 .
 :time_limit a :Configuration_item ;
     skos:prefLabel "time limit" ;
     :category :parameter ;
