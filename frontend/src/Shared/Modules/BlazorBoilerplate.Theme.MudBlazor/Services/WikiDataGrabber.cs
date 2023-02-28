@@ -25,7 +25,7 @@ namespace BlazorBoilerplate.Theme.Material.Services
             {
                 return toolTipContent;
             }
-            
+
             wikiDataUrl = AdjustUrl(wikiDataUrl);
 
             dynamic wikiDataJsonFile = GetDataFromUrl(wikiDataUrl);
@@ -50,19 +50,27 @@ namespace BlazorBoilerplate.Theme.Material.Services
             else
             {
                 wikipediaLink = AdjustWikipediaLink(wikipediaLink);
-                JObject wikipediaJsonFile = GetDataFromUrl(wikipediaLink)["query"]["pages"];
-                string pageId = wikipediaJsonFile.Properties().First().Name;
-                //Splitting the string, because it would show every section and we only want the first description
-                string extract = wikipediaJsonFile[pageId]["extract"].ToString().Split("\n\n\n==")[0];
-                toolTipContent.Add(extract);
-                string imageUrl = GetPictureUrlFromWikipedia(wikipediaLink);
-                toolTipContent.Add(imageUrl);
+                try
+                {
+                    JObject wikipediaJsonFile = GetDataFromUrl(wikipediaLink)["query"]["pages"];
+                    string pageId = wikipediaJsonFile.Properties().First().Name;
+                    //Splitting the string, because it would show every section and we only want the first description
+                    string extract = wikipediaJsonFile[pageId]["extract"].ToString().Split("\n\n\n==")[0];
+                    toolTipContent.Add(extract);
+                    string imageUrl = GetPictureUrlFromWikipedia(wikipediaLink);
+                    toolTipContent.Add(imageUrl);
+                }
+                catch (System.Exception)
+                {
+
+                }
+
             }
             return toolTipContent;
         }
 
         /// <summary>
-        /// Modifies the wikipedia link to get the image url 
+        /// Modifies the wikipedia link to get the image url
         /// </summary>
         /// <param name="adjustedUrl"></param>
         /// <returns></returns>
@@ -76,7 +84,7 @@ namespace BlazorBoilerplate.Theme.Material.Services
         }
 
         /// <summary>
-        /// Gets Data from the url as a json object 
+        /// Gets Data from the url as a json object
         /// </summary>
         /// <param name="url"></param>
         /// <returns></returns>
@@ -150,7 +158,7 @@ namespace BlazorBoilerplate.Theme.Material.Services
 
         /// <summary>
         /// Simple Regex - if the url is already correct, nothing bad will happen. Wikidata Url needs to contain
-        /// /entity/ instead of /wiki/ to return a JSON 
+        /// /entity/ instead of /wiki/ to return a JSON
         /// </summary>
         /// <param name="url"></param> URL to the Wikidata Entry
         /// <returns></returns> Modified URL as described in summary
