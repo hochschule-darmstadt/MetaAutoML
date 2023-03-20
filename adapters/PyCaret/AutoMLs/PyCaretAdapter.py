@@ -51,7 +51,7 @@ class PyCaretAdapter:
         automl = setup(data = X, target = y.name)
         best = compare_models(budget_time=self._configuration["configuration"]["runtime_limit"] * 60 / 3) #Setup for max 1/3 of time
         model = create_model(best)
-        tuned = tune_model(model)
+        tuned = tune_model(model, **parameters)
         fn_model = finalize_model(tuned)
         save_model(fn_model, os.path.join(self._configuration["result_folder_location"], 'model_pycaret'))
 
@@ -69,7 +69,7 @@ class PyCaretAdapter:
         automl = setup(data = X, target = y.name)
         best = compare_models(budget_time=self._configuration["configuration"]["runtime_limit"] * 60 / 3) #Setup for max 1/3 of time
         model = create_model(best)
-        tuned = tune_model(model)
+        tuned = tune_model(model, **parameters)
         fn_model = finalize_model(tuned)
         save_model(fn_model, os.path.join(self._configuration["result_folder_location"], 'model_pycaret'))
 
@@ -85,7 +85,7 @@ class PyCaretAdapter:
         automl = setup(data = X, target = y.name, fh=12) #TODO add dynamic future horizon
         best = compare_models(budget_time=self._configuration["configuration"]["runtime_limit"] * 60 / 3) #Setup for max 1/3 of time
         model = create_model(best)
-        tuned = tune_model(model)
+        tuned = tune_model(model, **parameters)
         fn_model = finalize_model(tuned)
         save_model(fn_model, os.path.join(self._configuration["result_folder_location"], 'model_pycaret'))
         #export_model(automl, self._configuration["result_folder_location"], 'model_pycaret.p')

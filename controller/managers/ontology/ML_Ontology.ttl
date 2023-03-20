@@ -1,5 +1,6 @@
 ### Ontology file generated from ML_Ontology.xlsx.
-### 2023-02-21 10:01:55.641549
+### 2023-02-28 23:18:06.598046
+
 
 # PREFIXES
 
@@ -1426,6 +1427,36 @@
     skos:prefLabel "Coverage" ;
     :used_for :time_series_forecasting ;
     rdfs:comment "Percentage of actual values that are within the prediction intervall" .
+:adjusted_rand_score a :Metric ;
+    skos:prefLabel "Adjusted Rand Score" ;
+    skos:altLabel "ARI" , "Adjusted Rand Index" ;
+    :used_for :classification ;
+    rdfs:comment "measure of the similarity between two data clusterings" .
+:jaccard a :Metric ;
+    skos:prefLabel "Jaccard" ;
+    skos:altLabel "Jaccard Index" , "Jaccard distance" ;
+    :used_for :classification ;
+    rdfs:seeAlso <https://www.wikidata.org/wiki/Q865360> .
+:jaccard_macro a :Metric ;
+    skos:prefLabel "Jaccard macro" ;
+    :used_for :classification .
+:jaccard_micro a :Metric ;
+    skos:prefLabel "Jaccard micro" ;
+    :used_for :classification .
+:jaccard_samples a :Metric ;
+    skos:prefLabel "Jaccard samples" ;
+    :used_for :classification .
+:jaccard_weighted a :Metric ;
+    skos:prefLabel "Jaccard weighted" ;
+    :used_for :classification .
+:receiver_operating_characteristic_curve_one_vs_rest_weighted a :Metric ;
+    skos:prefLabel "receiver operating characteristic curve one vs rest weighted" ;
+    skos:altLabel "ROC AUC OVR weighted" ;
+    :used_for :classification .
+:receiver_operating_characteristic_curve_one_vs_one_weighted a :Metric ;
+    skos:prefLabel "receiver operating characteristic curve one vs one weighted" ;
+    skos:altLabel "ROC AUC OVO weighted" ;
+    :used_for :classification .
 
 
 # ML_library
@@ -2072,6 +2103,18 @@
     :automl_solution :pycaret ;
     :ml_task :time_series_forecasting ;
     :parameter_value :metric_pycaret_time_series_forecasting .
+:tabular_classification_tpot a :Configuration_item ;
+    skos:prefLabel "tabular classification TPOT" ;
+    :category :task_configuration ;
+    :automl_solution :tpot ;
+    :ml_task :tabular_classification ;
+    :parameter_value :metric_tpot_tabular_classification .
+:tabular_regression_tpot a :Configuration_item ;
+    skos:prefLabel "tabular regression TPOT" ;
+    :category :task_configuration ;
+    :automl_solution :tpot ;
+    :ml_task :tabular_regression ;
+    :parameter_value :metric_tpot_tabular_regression .
 :ensemble_nbest a :Configuration_item ;
     skos:prefLabel "ensemble_nbest" ;
     :category :parameter ;
@@ -2079,6 +2122,7 @@
 :ensemble_nbest_autosklearn a :Configuration_item ;
     skos:prefLabel "ensemble nbest autosklearn" ;
     :category :parameter ;
+    skos:broader :ensemble_nbest ;
     :has_datatype :integer .
 :ensemble_size a :Configuration_item ;
     skos:prefLabel "ensemble size" ;
@@ -2087,6 +2131,7 @@
 :ensemble_size_autosklearn a :Configuration_item ;
     skos:prefLabel "ensemble size autosklearn" ;
     :category :parameter ;
+    skos:broader :ensemble_size ;
     :has_datatype :integer .
 :use_approach a :Configuration_item ;
     skos:prefLabel "use approach" ;
@@ -2102,7 +2147,7 @@
     :category :parameter ;
     skos:broader :use_approach ;
     :has_datatype :list ;
-    :parameter_value :gradient_boosting_tree , :random_forest , :extra_tree , :logistic_regression , :k_nearest_neighbor .
+    :parameter_value :light_gradient_boosting_machine , :xgboost , :random_forest , :extra_tree , :logistic_regression , :catboost , :k_nearest_neighbor .
 :use_approach_autosklearn_regression a :Configuration_item ;
     skos:prefLabel "use approach Autosklearn regression" ;
     :category :parameter ;
@@ -2114,18 +2159,18 @@
     :category :parameter ;
     skos:broader :use_approach ;
     :has_datatype :list ;
-    :parameter_value :gradient_boosting_tree , :random_forest , :extra_tree , :k_nearest_neighbor .
+    :parameter_value :light_gradient_boosting_machine , :xgboost , :random_forest , :extra_tree , :logistic_regression , :catboost , :k_nearest_neighbor .
 :use_approach_flaml_time_series_analysis a :Configuration_item ;
     skos:prefLabel "use approach FLAML time series analysis" ;
     :category :parameter ;
     skos:broader :use_approach ;
     :has_datatype :list ;
-    :parameter_value :prophet , :auto_regressive_integrated_moving_average , :autoregressive_integrated_moving_average .
+    :parameter_value :light_gradient_boosting_machine , :xgboost , :random_forest , :extra_tree , :prophet , :auto_regressive_integrated_moving_average , :seasonal_autoregressive_integrated_moving_average_exogenous .
 :use_approach_flaml_ranking a :Configuration_item ;
     skos:prefLabel "use approach FLAML ranking" ;
     :category :parameter ;
     skos:broader :use_approach ;
-    :parameter_value :logistic_regression , :gradient_boosting_tree .
+    :parameter_value :light_gradient_boosting_machine , :xgboost .
 :use_approach_flaml_text_classification a :Configuration_item ;
     skos:prefLabel "use approach FLAML text classification" ;
     :category :parameter ;
@@ -2255,7 +2300,7 @@
     :category :parameter ;
     skos:broader :metric ;
     :has_datatype :single_value ;
-    :parameter_value :accuracy , :receiver_operating_characteristic_curve , :receiver_operating_characteristic_curve_one_vs_rest , :log_loss , :receiver_operating_characteristic_curve_one_vs_one , :average_precision_score , :f_measure , :f_measure_micro , :f_measure_macro , :area_under_roc_curve_weighted .
+    :parameter_value :accuracy , :receiver_operating_characteristic_curve , :receiver_operating_characteristic_curve_one_vs_rest , :log_loss , :receiver_operating_characteristic_curve_one_vs_one , :average_precision_score , :f_measure , :f_measure_micro , :f_measure_macro , :area_under_roc_curve_weighted , :receiver_operating_characteristic_curve_one_vs_rest_weighted , :receiver_operating_characteristic_curve_one_vs_one_weighted .
 :metric_autosklearn_tabular_regression a :Configuration_item ;
     skos:prefLabel "metric Autosklearn tabular regression" ;
     :category :parameter ;
@@ -2273,19 +2318,19 @@
     :category :parameter ;
     skos:broader :metric ;
     :has_datatype :single_value ;
-    :parameter_value :coefficient_of_determination , :mean_squared_error , :rooted_mean_squared_error , :mean_absolute_error , :receiver_operating_characteristic_curve_one_vs_rest , :receiver_operating_characteristic_curve_one_vs_one , :receiver_operating_characteristic_curve , :mean_absolute_percentage_error , :r2 , :area_under_roc_curve_weighted .
+    :parameter_value :mean_squared_error , :rooted_mean_squared_error , :mean_absolute_error , :receiver_operating_characteristic_curve_one_vs_rest , :receiver_operating_characteristic_curve_one_vs_one , :receiver_operating_characteristic_curve , :mean_absolute_percentage_error , :r2 , :area_under_roc_curve_weighted , :receiver_operating_characteristic_curve_one_vs_rest_weighted , :receiver_operating_characteristic_curve_one_vs_one_weighted .
 :metric_flaml_text_classification a :Configuration_item ;
     skos:prefLabel "metric FLAML text classification" ;
     :category :parameter ;
     skos:broader :metric ;
     :has_datatype :single_value ;
-    :parameter_value :accuracy , :receiver_operating_characteristic_curve , :receiver_operating_characteristic_curve_one_vs_rest , :log_loss , :receiver_operating_characteristic_curve_one_vs_one , :average_precision_score , :f_measure , :f_measure_micro , :f_measure_macro , :area_under_roc_curve_weighted .
+    :parameter_value :accuracy , :receiver_operating_characteristic_curve , :receiver_operating_characteristic_curve_one_vs_rest , :log_loss , :receiver_operating_characteristic_curve_one_vs_one , :average_precision_score , :f_measure , :f_measure_micro , :f_measure_macro , :area_under_roc_curve_weighted , :receiver_operating_characteristic_curve_one_vs_rest_weighted , :receiver_operating_characteristic_curve_one_vs_one_weighted .
 :metric_flaml_text_regression a :Configuration_item ;
     skos:prefLabel "metric FLAML text regression" ;
     :category :parameter ;
     skos:broader :metric ;
     :has_datatype :single_value ;
-    :parameter_value :coefficient_of_determination , :mean_squared_error , :rooted_mean_squared_error , :mean_absolute_error , :receiver_operating_characteristic_curve_one_vs_rest , :receiver_operating_characteristic_curve_one_vs_one , :receiver_operating_characteristic_curve , :mean_absolute_percentage_error , :r2 , :area_under_roc_curve_weighted .
+    :parameter_value :mean_squared_error , :rooted_mean_squared_error , :mean_absolute_error , :receiver_operating_characteristic_curve_one_vs_rest , :receiver_operating_characteristic_curve_one_vs_one , :receiver_operating_characteristic_curve , :mean_absolute_percentage_error , :r2 , :area_under_roc_curve_weighted , :receiver_operating_characteristic_curve_one_vs_rest_weighted , :receiver_operating_characteristic_curve_one_vs_one_weighted .
 :metric_flaml_ranking a :Configuration_item ;
     skos:prefLabel "metric FLAML ranking" ;
     :category :parameter ;
@@ -2447,6 +2492,18 @@
     skos:broader :metric ;
     :has_datatype :single_value ;
     :parameter_value :mean_absolute_scaled_error , :rooted_mean_squared_scaled_error , :symmetric_mean_absolute_percentage_error , :coverage , :mean_absolute_error , :rooted_mean_squared_error , :mean_absolute_percentage_error , :r2 .
+:metric_tpot_tabular_classification a :Configuration_item ;
+    skos:prefLabel "metric TPOT tabular classification" ;
+    :category :parameter ;
+    skos:broader :metric ;
+    :has_datatype :single_value ;
+    :parameter_value :accuracy , :average_precision , :adjusted_rand_score , :balanced_accuracy , :f_measure , :f_measure_macro , :f_measure_micro , :f_measure_samples , :f_measure_weighted , :log_loss , :precision , :precision_macro , :precision_micro , :precision_samples , :precision_weighted , :recall , :recall_macro , :recall_micro , :recall_samples , :recall_weighted , :jaccard , :jaccard_macro , :jaccard_micro , :jaccard_samples , :jaccard_weighted , :receiver_operating_characteristic_curve , :receiver_operating_characteristic_curve_one_vs_rest , :receiver_operating_characteristic_curve_one_vs_one , :receiver_operating_characteristic_curve_one_vs_rest_weighted , :receiver_operating_characteristic_curve_one_vs_one_weighted .
+:metric_tpot_tabular_regression a :Configuration_item ;
+    skos:prefLabel "metric TPOT tabular regression" ;
+    :category :parameter ;
+    skos:broader :metric ;
+    :has_datatype :single_value ;
+    :parameter_value :median_absolute_error , :mean_absolute_error , :mean_squared_error , :r2 .
 :time_limit a :Configuration_item ;
     skos:prefLabel "time limit" ;
     :category :parameter ;
@@ -2454,6 +2511,7 @@
 :time_limit_autosklearn a :Configuration_item ;
     skos:prefLabel "time limit autosklearn" ;
     :category :parameter ;
+    skos:broader :time_limit ;
     :has_datatype :integer .
 :time_limit_per_run a :Configuration_item ;
     skos:prefLabel "time limit per run" ;
@@ -2462,6 +2520,7 @@
 :time_limit_per_run_autosklearn a :Configuration_item ;
     skos:prefLabel "time limit per run autosklearn" ;
     :category :parameter ;
+    skos:broader :time_limit_per_run ;
     :has_datatype :integer .
 :max_model_size a :Configuration_item ;
     skos:prefLabel "max_model_size" ;
@@ -2470,6 +2529,7 @@
 :max_model_size_autokeras a :Configuration_item ;
     skos:prefLabel "max_model_size_autokeras" ;
     :category :parameter ;
+    skos:broader :max_model_size ;
     :has_datatype :integer .
 :epochs a :Configuration_item ;
     skos:prefLabel "epochs" ;

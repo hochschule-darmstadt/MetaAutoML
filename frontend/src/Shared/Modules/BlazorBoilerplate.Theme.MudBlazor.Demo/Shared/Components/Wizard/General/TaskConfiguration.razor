@@ -70,15 +70,14 @@
             <ChipSet ViewModel="@_strategiesViewModel" Label="@L["Enabled strategies"]" />
             @if (_intersectedParams.Any())
             {
-                <MudText Typo="Typo.subtitle2" Class="mt-4">Available parameters</MudText>
+                <MudText Typo="Typo.subtitle2" Class="mt-4">Parameter available for all AutoML solutions</MudText>
 
 
                 @foreach (var param in _intersectedParams)
                 {
-                    <MudText Typo="Typo.body2" Class="mt-4">@param.ParameterLabel</MudText>
                     @if (param.ParameterType == ":single_value")
                     {
-                        <MudSelect T="ParameterValueViewModel" Label="@param.ParameterLabel" Variant="Variant.Outlined" @bind-SelectedValues="param.SelectedValues" ToStringFunc="p => p?.ValueLabel">
+                        <MudSelect T="ParameterValueViewModel" Class="ml-2" Label="@param.ParameterLabel" Variant="Variant.Outlined" @bind-SelectedValues="param.SelectedValues" ToStringFunc="p => p?.ValueLabel">
                             @foreach (var paramValue in param.ParameterValues)
                             {
                                 <MudSelectItem Value="@paramValue">@paramValue.ValueLabel</MudSelectItem>
@@ -87,7 +86,7 @@
                     }
                     @if (param.ParameterType == ":list")
                     {
-                        <MudSelect T="ParameterValueViewModel" MultiSelection="true" SelectAll="true" @bind-SelectedValues="param.SelectedValues" ToStringFunc="p => p?.ValueLabel" Variant="Variant.Outlined">
+                        <MudSelect T="ParameterValueViewModel" Class="ml-2" Label="@param.ParameterLabel" MultiSelection="true" SelectAll="true" @bind-SelectedValues="param.SelectedValues" ToStringFunc="p => p?.ValueLabel" Variant="Variant.Outlined">
                             @foreach (var paramValue in param.ParameterValues)
                             {
 
@@ -97,44 +96,48 @@
                     }
                     else if(param.ParameterType == ":integer")
                     {
-                        <MudNumericField T="int?" @bind-Value="@param.IntegerValue" />
+                        <MudNumericField T="int?" Class="ml-2" Label="@param.ParameterLabel" Variant="Variant.Outlined" @bind-Value="@param.IntegerValue" />
                     }
                 }
             }
 
             @if (_individualParams.Any())
             {
-                <MudText Typo="Typo.subtitle2" Class="mt-4">Individual Parameters</MudText>
+                <MudText Typo="Typo.subtitle2" Class="mt-4">Parameter available for individual AutoML solution only</MudText>
                 @foreach (var individualParam in _individualParams)
                 {
                 <MudExpansionPanels>
-                    <MudExpansionPanel Text="@individualParam.autoMlLabel">
-                    @foreach (var param in individualParam.parameters)
-                    {
-                        <MudText Typo="Typo.body2" Class="mt-4">@param.ParameterLabel</MudText>
-                        @if (param.ParameterType == ":single_value")
-                        {
-                            <MudSelect T="ParameterValueViewModel" Label="@param.ParameterLabel" Variant="Variant.Outlined" @bind-SelectedValues="param.SelectedValues" ToStringFunc="p => p?.ValueLabel">
-                                @foreach (var paramValue in param.ParameterValues)
+                    <MudExpansionPanel Class="mt-2">
+                        <TitleContent>
+                            <MudText Typo="Typo.subtitle2">@individualParam.autoMlLabel</MudText>
+                        </TitleContent>
+                        <ChildContent>
+                            @foreach (var param in individualParam.parameters)
+                            {
+                                @if (param.ParameterType == ":single_value")
                                 {
-                                    <MudSelectItem Value="@paramValue">@paramValue.ValueLabel</MudSelectItem>
+                                    <MudSelect T="ParameterValueViewModel" Class="ml-2" Label="@param.BroaderParameterLabel" Variant="Variant.Outlined" @bind-SelectedValues="param.SelectedValues" ToStringFunc="p => p?.ValueLabel">
+                                        @foreach (var paramValue in param.ParameterValues)
+                                        {
+                                            <MudSelectItem Value="@paramValue">@paramValue.ValueLabel</MudSelectItem>
+                                        }
+                                    </MudSelect>
                                 }
-                            </MudSelect>
-                        }
-                        @if (param.ParameterType == ":list")
-                        {
-                            <MudSelect T="ParameterValueViewModel" MultiSelection="true" SelectAll="true" @bind-SelectedValues="param.SelectedValues" ToStringFunc="p => p?.ValueLabel" Variant="Variant.Outlined">
-                                @foreach (var paramValue in param.ParameterValues)
+                                @if (param.ParameterType == ":list")
                                 {
-                                    <MudSelectItem Value="@paramValue">@paramValue.ValueLabel</MudSelectItem>
+                                    <MudSelect T="ParameterValueViewModel" Class="ml-2" MultiSelection="true" Label="@param.BroaderParameterLabel" SelectAll="true" @bind-SelectedValues="param.SelectedValues" ToStringFunc="p => p?.ValueLabel" Variant="Variant.Outlined">
+                                        @foreach (var paramValue in param.ParameterValues)
+                                        {
+                                            <MudSelectItem Value="@paramValue">@paramValue.ValueLabel</MudSelectItem>
+                                        }
+                                    </MudSelect>
                                 }
-                            </MudSelect>
-                        }
-                        else if(param.ParameterType == ":integer")
-                        {
-                            <MudNumericField T="int?" @bind-Value="@param.IntegerValue" />
-                        }
-                    }
+                                else if(param.ParameterType == ":integer")
+                                {
+                                    <MudNumericField T="int?" Class="ml-2" Label="@param.BroaderParameterLabel" Variant="Variant.Outlined" @bind-Value="@param.IntegerValue" />
+                                }
+                            }
+                        </ChildContent>
                     </MudExpansionPanel>
                 </MudExpansionPanels>
                 }
@@ -209,6 +212,7 @@
         await OnMlLibrarySelectionChanged();
     }
 
+//Updates the Parameters in the Configuration when the selected values are changed in the frontend.
     private async void UpdateParemetersInRequest()
     {
         var paramList = _intersectedParams
@@ -239,6 +243,10 @@
         await UpdateStartTrainingDto();
     }
 
+/*
+Gets triggered when the wizard is initialized.
+Initial setup of the configuration.
+*/
     private async void SetupStartAutoMLConfiguration()
     {
         _columnNames = new List<string>();
@@ -264,6 +272,10 @@
         await UpdateStartTrainingDto();
     }
 
+/*
+Gets triggered on the initial start of the wizard.
+Loads the possible Tasks for the according data.
+*/
     private async Task LoadData()
     {
         try
@@ -279,6 +291,10 @@
         }
     }
 
+/*
+Task thet gets triggered when the auto ML solutions are changed.
+Refreshes the intersected & individual parameters.
+*/
     private async Task RefreshParameters()
     {
         var taskIri = StartTrainingDto.Configuration.Task;
@@ -333,11 +349,16 @@
             errorMessageKey: "Fetching available parameters failed");
     }
 
+/*
+Creation of the parameter objects from the the data received from the ontology.
+Mainly restructuring of the data.
+*/
     private ParameterObject CreateParameterObjectFromGroupedParameterDto(IGrouping<string, AutoMlParameterDto> parameterGroup, string autoMlLabel)
     {
         var firstInstanceWithIri = parameterGroup.First();
         var result = new ParameterObject
         {
+            BroaderParameterLabel = firstInstanceWithIri.BroaderLabel,
             ParameterIri = parameterGroup.Key,
             ParameterLabel = firstInstanceWithIri.ParamLabel,
             ParameterType = firstInstanceWithIri.ParamType,
@@ -364,6 +385,11 @@
         return result;
     }
 
+/*
+Function that gets triggered when the selection of the ML Task gets changed.
+Set the task in the configuration.
+Load ML libs for the fitting task and set the data for the chipsets.
+*/
     private async void OnMlTaskSelectionChanged(string task)
     {
         if (string.IsNullOrEmpty(task))
@@ -413,6 +439,12 @@
         (objectInfo.ID, objectInfo.Properties.GetValueOrDefault("skos:prefLabel"), objectInfo.Properties.GetValueOrDefault("rdfs:seeAlso"), true, objectInfo.Properties.GetValueOrDefault("rdfs:comment"), "");
 
 
+/*
+Task that gets triggered when the ML Library selection changes.
+ Set the selected ML libs in the configuration.
+ Get the available ML solutions with the according ML libs.
+ Trigger the event to update the available strategies.
+*/
     private async Task OnMlLibrarySelectionChanged()
     {
         try
@@ -446,6 +478,10 @@
         }
     }
 
+/*
+Task that gets triggered when the ML Library selection gets changed.
+Updates the available strategies for the selected libraries.
+*/
     private async Task UpdateAvailableStrategies(Dictionary<string, string> dictionary)
     {
         int runtime_limit = StartTrainingDto.Configuration.RuntimeLimit;
@@ -472,6 +508,11 @@
         }
     }
 
+/*
+Task that gets triggered when the selection of the AuotML gets changed.
+Sets the selected AutoMLs in the configuration to the in the frontend selected AutoMLs.
+Triggers the refresh of the available parameters.
+*/
     private async Task OnAutoMlSolutionSelectionChanged()
     {
         StartTrainingDto.Configuration.SelectedAutoMlSolutions = _autoMlSolutionsViewModel.SelectedIds.ToList();
@@ -480,12 +521,20 @@
         await RefreshParameters();
     }
 
+/*
+Task that gets triggered when the strategy gets changed.
+Set the enabled strategies to the in the frontend selected strategies.
+*/
     private Task OnStrategySelectionChanged()
     {
         StartTrainingDto.Configuration.EnabledStrategies = _strategiesViewModel.SelectedIds.ToList();
         return UpdateStartTrainingDto();
     }
 
+/*
+Function that gets triggered when the target column of the dataset gets changed.
+Sets the target to the in the frontend selected values
+*/
     private async void OnTargetChanged(HashSet<string> values)
     {
         //We need to update the schema configuration with appropriated target values
@@ -506,6 +555,12 @@
         await UpdateStartTrainingDto();
     }
 
+/*
+Set the selectedValues of the intersected parameter because the intersected parameter list got replaced and therefore the selection of the parameter got reseted
+- intersectedParamsNew: List of the intersected parameters
+returns:
+- List of the intersected parameters with the already selected values
+*/
     private List<ParameterObject> ReplaceIntersectedParameter(List<ParameterObject> intersectedParamsNew)
     {
         foreach (ParameterObject intersectedParam in intersectedParamsNew)
@@ -531,15 +586,34 @@
         return intersectedParamsNew;
     }
 
+/*
+Class for the parameter values
+- ValueIri: Iri of the stored parameter value
+- ValueLabel: Label of the stored parameter value
+Example: ValueIri -> ":accuracy" | ValueLabel -> "accuracy"
+*/
     public class ParameterValueViewModel
     {
         public string ValueIri { get; set; }
         public string ValueLabel { get; set; }
     }
 
+/*
+Class that contains all informations about a parameter.
+- BroaderParameterLabel: Label of the broader parameter type (e.g. parameter label: "metric autokeras" -> broader label: "metric")
+- ParameterIri: Iri of the parameter
+- ParameterLabel: Label of the parameter
+- ParameterType: Type of the parameter
+- ParameterValues: List of Values that the parameter can have
+- _selectedValues: private list of the selected parameter values
+- SelectedValues: public visibility of the selected parameter values
+- _integerValue: private integer value that the parameter has
+- IntegerValue: public visibility of the selected integer value
+*/
     public class ParameterObject
     {
         public event EventHandler SelectedValuesChanged;
+        public string BroaderParameterLabel { get; set; }
         public string ParameterIri { get; set; }
         public string ParameterLabel { get; set; }
         public string ParameterType { get; set; }
