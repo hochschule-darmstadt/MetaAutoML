@@ -54,32 +54,3 @@ def split_dataset(dataset: Any, json_configuration: dict):
         )
 
 
-def read_parameter(parameters, intersect_parameter, automl_parameter, default=[None]):
-    """Checks if the intersected parameter or if the individual parameter is set
-
-    Args:
-        parameters (_type_): all parameters from the config
-        intersect_parameter (_type_): common parameter name (broader id)
-        automl_parameter (_type_): individual parameter for the automl
-        default (list, optional): Default value if none of the above is set. Defaults to [None].
-
-    Returns:
-        _type_: Returns all parameter values that are selected (intersected + individual), if none the default value is taken
-    """
-    value = list()
-    try:
-        value = parameters[intersect_parameter]['values']
-    except:
-        pass
-    try:
-        values2 = parameters[automl_parameter]['values']
-        for para in values2:
-            if para not in value:
-                value.append(para)
-    except:
-        pass
-    if len(value) == 0:
-        return default
-    else:
-        return value
-

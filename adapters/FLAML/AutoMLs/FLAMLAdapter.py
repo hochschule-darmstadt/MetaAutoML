@@ -49,7 +49,13 @@ class FLAMLAdapter:
         automl_settings.update({"time_budget": self._configuration["configuration"]["runtime_limit"] * 60})
 
         parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), fpc.task_config)
+        if parameters.get('estimator_list', None) != None:
+            if parameters['estimator_list'] == ['auto']:
+                parameters['estimator_list'] = 'auto'
         automl_settings.update(parameters)
+
+
+
         return automl_settings
 
     def __tabular_classification(self):
