@@ -128,12 +128,6 @@ class StartAutoMlConfiguration(betterproto.Message):
     [":accuracy"]},":some_int": { "values": ["17"]}}
     """
 
-    forcasting_horizon: int = betterproto.int32_field(5)
-    """
-    Number of predtions to make into the futureOnly for time series forcasting,
-    not within parameters as this is a required special parameter as target
-    """
-
 
 @dataclass(eq=False, repr=False)
 class StartAutoMlResponse(betterproto.Message):

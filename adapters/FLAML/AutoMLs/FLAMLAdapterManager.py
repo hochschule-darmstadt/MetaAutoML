@@ -15,7 +15,6 @@ flaml_estimators = {
     "extra_tree" : (":scikit_learn_lib", ":extra_tree"),
     "rf" : (":scikit_learn_lib", ":random_forest"),
     "xgboost" : (":xgboost_lib", ":xgboost"),
-    "catboost" : (":catboost_lib", ":catboost"),
     "xgb_limitdepth" : (":xgboost_lib", ":xgboost"),
     "lrl1" : (":scikit_learn_lib", ":logistic_regression"),
     "lrl2" : (":scikit_learn_lib", ":logistic_regression"),
