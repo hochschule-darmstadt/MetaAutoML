@@ -151,6 +151,11 @@ message Configuration {
     }
   */
   map<string, DynamicParameterValue> parameters = 8;
+  /*
+    Number of predtions to make into the future
+    Only for time series forcasting, not within parameters as this is a required special parameter as target
+  */
+  int32 forcasting_horizon = 9;
 }
 
 message TrainingRuntimeProfile {

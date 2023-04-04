@@ -97,6 +97,11 @@ message StartAutoMlConfiguration {
     }
   */
   map<string, DynamicParameterValue> parameters = 4;
+  /*
+    Number of predtions to make into the future
+    Only for time series forcasting, not within parameters as this is a required special parameter as target
+  */
+  int32 forcasting_horizon = 5;
 }
 
 message StartAutoMlResponse {
