@@ -1,5 +1,5 @@
 ### Ontology file generated from ML_Ontology.xlsx.
-### 2023-02-28 23:18:06.598046
+### 2023-04-05 14:17:06.918037
 
 
 # PREFIXES
@@ -1215,15 +1215,23 @@
 :mean_absolute_error a :Metric ;
     skos:prefLabel "mean absolute error" ;
     skos:altLabel "MAE" ;
-    :used_for :regression ;
+    :used_for :regression , :time_series_forecasting ;
     rdfs:comment "measure of difference between two continuous variables" ;
     rdfs:seeAlso <https://www.wikidata.org/entity/Q6803609> .
+:median_absolute_error a :Metric ;
+    skos:prefLabel "median absolute error" ;
+    skos:altLabel "MAE" ;
+    :used_for :regression , :time_series_forecasting .
 :mean_absolute_percentage_error a :Metric ;
     skos:prefLabel "mean absolute percentage error" ;
     skos:altLabel "MAPE" ;
     :used_for :regression , :time_series_forecasting ;
     rdfs:comment "measure of prediction accuracy of a forecast" ;
     rdfs:seeAlso <https://www.wikidata.org/entity/Q6803607> .
+:median_absolute_percentage_error a :Metric ;
+    skos:prefLabel "median absolute percentage error" ;
+    skos:altLabel "MAPE" ;
+    :used_for :regression , :time_series_forecasting .
 :symmetric_mean_absolute_percentage_error a :Metric ;
     skos:prefLabel "symmetric mean absolute percentage error" ;
     skos:altLabel "SMAPE" ;
@@ -1234,6 +1242,10 @@
     :used_for :time_series_forecasting ;
     rdfs:comment "measure of forecasting quality" ;
     rdfs:seeAlso <https://www.wikidata.org/wiki/Q6803610> .
+:median_absolute_scaled_error a :Metric ;
+    skos:prefLabel "median absolute scaled error" ;
+    skos:altLabel "MASE" ;
+    :used_for :time_series_forecasting .
 :mean_intersection_over_union a :Metric ;
     skos:prefLabel "mean intersection-over-union" ;
     skos:altLabel "mean intersection-over-union" ;
@@ -1249,6 +1261,10 @@
     :used_for :regression ;
     rdfs:comment "Average of the squares of the errors between estimated and actual values" ;
     rdfs:seeAlso <https://www.wikidata.org/entity/Q1940696> .
+:median_squared_error a :Metric ;
+    skos:prefLabel "median squared error" ;
+    skos:altLabel "MSE" ;
+    :used_for :regression , :time_series_forecasting .
 :mean_squared_log_error a :Metric ;
     skos:prefLabel "mean squared log error" ;
     :used_for :regression .
@@ -1905,6 +1921,36 @@
     :automl_solution :autokeras ;
     :ml_task :tabular_regression ;
     :parameter_value :metric_autokeras_tabular_regression , :loss_autokeras_tabular_regression , :max_trials_autokeras , :tuner_autokeras_tabular_regression , :max_model_size_autokeras .
+:time_series_forecasting_in_autokeras a :Configuration_item ;
+    skos:prefLabel "time series forecasting in AutoKeras" ;
+    :category :task_configuration ;
+    :automl_solution :autokeras ;
+    :ml_task :time_series_forecasting ;
+    :parameter_value :metric_autokeras_time_series_forecasting , :loss_autokeras_time_series_forecasting , :max_trials_autokeras , :tuner_autokeras_time_series_forecasting , :max_model_size_autokeras , :forecasting_horizon_autokeras_time_series_forcasting , :lookback_autokeras_time_series_forecasting .
+:image_classification_in_autokeras a :Configuration_item ;
+    skos:prefLabel "image classification in AutoKeras" ;
+    :category :task_configuration ;
+    :automl_solution :autokeras ;
+    :ml_task :image_classification ;
+    :parameter_value :metric_autokeras_image_classification , :loss_autokeras_image_classification , :max_trials_autokeras , :tuner_autokeras_image_classification , :max_model_size_autokeras , :gap_autokeras_time_series_forecasting .
+:image_regression_in_autokeras a :Configuration_item ;
+    skos:prefLabel "image regression in AutoKeras" ;
+    :category :task_configuration ;
+    :automl_solution :autokeras ;
+    :ml_task :image_regression ;
+    :parameter_value :metric_autokeras_image_regression , :loss_autokeras_image_regression , :max_trials_autokeras , :tuner_autokeras_image_regression , :max_model_size_autokeras .
+:text_classification_in_autokeras a :Configuration_item ;
+    skos:prefLabel "text classification in AutoKeras" ;
+    :category :task_configuration ;
+    :automl_solution :autokeras ;
+    :ml_task :text_classification ;
+    :parameter_value :metric_autokeras_text_classification , :loss_autokeras_text_classification , :max_trials_autokeras , :tuner_autokeras_text_classification , :max_model_size_autokeras .
+:text_regression_in_autokeras a :Configuration_item ;
+    skos:prefLabel "text regression in AutoKeras" ;
+    :category :task_configuration ;
+    :automl_solution :autokeras ;
+    :ml_task :text_regression ;
+    :parameter_value :metric_autokeras_text_regression , :loss_autokeras_text_regression , :max_trials_autokeras , :tuner_autokeras_text_regression , :max_model_size_autokeras .
 :tabular_classification_in_flaml a :Configuration_item ;
     skos:prefLabel "tabular classification in FLAML" ;
     :category :task_configuration ;
@@ -1927,8 +1973,8 @@
     skos:prefLabel "time series analysis in FLAML" ;
     :category :task_configuration ;
     :automl_solution :flaml ;
-    :ml_task :time_series_analysis ;
-    :parameter_value :use_approach_flaml_time_series_analysis , :metric_flaml_time_series_analysis .
+    :ml_task :time_series_forecasting ;
+    :parameter_value :use_approach_flaml_time_series_analysis , :metric_flaml_time_series_analysis , :forecasting_horizon_flaml_time_series_forcasting .
 :text_classification_in_flaml a :Configuration_item ;
     skos:prefLabel "text classification in FLAML" ;
     :category :task_configuration ;
@@ -1953,6 +1999,12 @@
     :automl_solution :autopytorch ;
     :ml_task :tabular_regression ;
     :parameter_value :use_approach_auto_pytorch_regression , :metric_autopytorch_tabular_regression .
+:time_series_forecasting_in_auto_pytorch a :Configuration_item ;
+    skos:prefLabel "time series forecasting in Auto-PyTorch" ;
+    :category :task_configuration ;
+    :automl_solution :autopytorch ;
+    :ml_task :time_series_forecasting ;
+    :parameter_value :metric_autopytorch_time_series_forecasting , :forecasting_horizon_autopytorch_time_series_forcasting .
 :tabular_classification_in_autogluon a :Configuration_item ;
     skos:prefLabel "tabular classification in AutoGluon" ;
     :category :task_configuration ;
@@ -1965,12 +2017,24 @@
     :automl_solution :autogluon ;
     :ml_task :tabular_regression ;
     :parameter_value :use_approach_autogluon_regression , :metric_autogluon_tabular_regression .
+:time_series_forecasting_in_autogluon a :Configuration_item ;
+    skos:prefLabel "time series forecasting in AutoGluon" ;
+    :category :task_configuration ;
+    :automl_solution :autogluon ;
+    :ml_task :time_series_forecasting ;
+    :parameter_value :metric_autogluon_time_series_forecasting , :forecasting_horizon_autogluon_time_series_forcasting .
 :image_classification_in_autogluon a :Configuration_item ;
     skos:prefLabel "image classification in AutoGluon" ;
     :category :task_configuration ;
     :automl_solution :autogluon ;
     :ml_task :image_classification ;
     :parameter_value :use_approach_autogluon_image_classification , :metric_autogluon_image_classification .
+:object_detection_in_autogluon a :Configuration_item ;
+    skos:prefLabel "object detection in AutoGluon" ;
+    :category :task_configuration ;
+    :automl_solution :autogluon ;
+    :ml_task :object_detection ;
+    :parameter_value :use_approach_autogluon_object_detection .
 :text_classification_in_autogluon a :Configuration_item ;
     skos:prefLabel "text classification in AutoGluon" ;
     :category :task_configuration ;
@@ -1983,54 +2047,6 @@
     :automl_solution :autogluon ;
     :ml_task :text_regression ;
     :parameter_value :use_approach_autogluon_text_regression , :metric_autogluon_text_regression .
-:object_detection_in_autogluon a :Configuration_item ;
-    skos:prefLabel "object detection in AutoGluon" ;
-    :category :task_configuration ;
-    :automl_solution :autogluon ;
-    :ml_task :object_detection ;
-    :parameter_value :use_approach_autogluon_object_detection .
-:time_series_forecasting_in_autogluon a :Configuration_item ;
-    skos:prefLabel "time series forecasting in AutoGluon" ;
-    :category :task_configuration ;
-    :automl_solution :autogluon ;
-    :ml_task :time_series_forecasting ;
-    :parameter_value :metric_autogluon_time_series_forecasting .
-:tabular_classification_in_autocve a :Configuration_item ;
-    skos:prefLabel "tabular classification in AutoCVE" ;
-    :category :task_configuration ;
-    :automl_solution :autocve ;
-    :ml_task :tabular_classification ;
-    :parameter_value :use_approach_autocve_classification , :metric_autocve_classification .
-:time_series_classification_in_mcfly a :Configuration_item ;
-    skos:prefLabel "time series classification in mcfly" ;
-    :category :task_configuration ;
-    :automl_solution :mcfly ;
-    :ml_task :time_series_classification ;
-    :parameter_value :use_approach_mcfly_time_series_classification , :metric_mcfly_time_series_classification .
-:image_classification_in_autokeras a :Configuration_item ;
-    skos:prefLabel "image classification in AutoKeras" ;
-    :category :task_configuration ;
-    :automl_solution :autokeras ;
-    :ml_task :image_classification ;
-    :parameter_value :metric_autokeras_image_classification , :loss_autokeras_image_classification , :max_trials_autokeras , :tuner_autokeras_image_classification , :max_model_size_autokeras .
-:image_regression_in_autokeras a :Configuration_item ;
-    skos:prefLabel "image regression in AutoKeras" ;
-    :category :task_configuration ;
-    :automl_solution :autokeras ;
-    :ml_task :image_regression ;
-    :parameter_value :metric_autokeras_image_regression , :loss_autokeras_image_regression , :max_trials_autokeras , :tuner_autokeras_image_regression , :max_model_size_autokeras .
-:text_classification_in_autokeras a :Configuration_item ;
-    skos:prefLabel "text classification in AutoKeras" ;
-    :category :task_configuration ;
-    :automl_solution :autokeras ;
-    :ml_task :text_classification ;
-    :parameter_value :metric_autokeras_text_classification , :loss_autokeras_text_classification , :max_trials_autokeras , :tuner_autokeras_text_classification , :max_model_size_autokeras .
-:text_regression_in_autokeras a :Configuration_item ;
-    skos:prefLabel "text regression in AutoKeras" ;
-    :category :task_configuration ;
-    :automl_solution :autokeras ;
-    :ml_task :text_regression ;
-    :parameter_value :metric_autokeras_text_regression , :loss_autokeras_text_regression , :max_trials_autokeras , :tuner_autokeras_text_regression , :max_model_size_autokeras .
 :tabular_classification_in_evalml a :Configuration_item ;
     skos:prefLabel "tabular classification in EvalML" ;
     :category :task_configuration ;
@@ -2043,6 +2059,18 @@
     :automl_solution :evalml ;
     :ml_task :tabular_regression ;
     :parameter_value :use_approach_evalml_tabular_regression , :metric_evalml_tabular_regression , :tuner_class_evalml .
+:time_series_regression_in_evalml a :Configuration_item ;
+    skos:prefLabel "time series regression in EvalML" ;
+    :category :task_configuration ;
+    :automl_solution :evalml ;
+    :ml_task :time_series_forecasting ;
+    :parameter_value :use_approach_evalml_time_series_regression , :metric_evalml_time_series_regression , :tuner_class_evalml , :forecasting_horizon_evalml_time_series_forcasting , :lookback_evalml_time_series_forecasting , :gap_evalml_time_series_forecasting .
+:time_series_classification_in_evalml a :Configuration_item ;
+    skos:prefLabel "time series classification in EvalML" ;
+    :category :task_configuration ;
+    :automl_solution :evalml ;
+    :ml_task :time_series_classification ;
+    :parameter_value :use_approach_evalml_time_series_classification , :metric_evalml_classification , :tuner_class_evalml .
 :text_classification_in_evalml a :Configuration_item ;
     skos:prefLabel "text classification in EvalML" ;
     :category :task_configuration ;
@@ -2055,24 +2083,6 @@
     :automl_solution :evalml ;
     :ml_task :text_regression ;
     :parameter_value :use_approach_evalml_tabular_regression , :metric_evalml_text_regression , :tuner_class_evalml .
-:time_series_classification_in_evalml a :Configuration_item ;
-    skos:prefLabel "time series classification in EvalML" ;
-    :category :task_configuration ;
-    :automl_solution :evalml ;
-    :ml_task :time_series_classification ;
-    :parameter_value :use_approach_evalml_time_series_classification , :metric_evalml_classification , :tuner_class_evalml .
-:time_series_regression_in_evalml a :Configuration_item ;
-    skos:prefLabel "time series regression in EvalML" ;
-    :category :task_configuration ;
-    :automl_solution :evalml ;
-    :ml_task :time_series_forecasting ;
-    :parameter_value :use_approach_evalml_time_series_regression , :metric_evalml_time_series_regression , :tuner_class_evalml .
-:time_series_forecasting_in_autokeras a :Configuration_item ;
-    skos:prefLabel "time series forecasting in AutoKeras" ;
-    :category :task_configuration ;
-    :automl_solution :autokeras ;
-    :ml_task :time_series_forecasting ;
-    :parameter_value :metric_autokeras_time_series_forecasting , :loss_autokeras_time_series_forecasting , :max_trials_autokeras , :tuner_autokeras_time_series_forecasting , :max_model_size_autokeras .
 :tabular_classification_mljar a :Configuration_item ;
     skos:prefLabel "tabular classification MLJAR" ;
     :category :task_configuration ;
@@ -2102,7 +2112,7 @@
     :category :task_configuration ;
     :automl_solution :pycaret ;
     :ml_task :time_series_forecasting ;
-    :parameter_value :metric_pycaret_time_series_forecasting .
+    :parameter_value :metric_pycaret_time_series_forecasting , :forecasting_horizon_pycaret_time_series_forcasting .
 :tabular_classification_tpot a :Configuration_item ;
     skos:prefLabel "tabular classification TPOT" ;
     :category :task_configuration ;
@@ -2115,6 +2125,18 @@
     :automl_solution :tpot ;
     :ml_task :tabular_regression ;
     :parameter_value :metric_tpot_tabular_regression .
+:tabular_classification_in_autocve a :Configuration_item ;
+    skos:prefLabel "tabular classification in AutoCVE" ;
+    :category :task_configuration ;
+    :automl_solution :autocve ;
+    :ml_task :tabular_classification ;
+    :parameter_value :use_approach_autocve_classification , :metric_autocve_classification .
+:time_series_classification_in_mcfly a :Configuration_item ;
+    skos:prefLabel "time series classification in mcfly" ;
+    :category :task_configuration ;
+    :automl_solution :mcfly ;
+    :ml_task :time_series_classification ;
+    :parameter_value :use_approach_mcfly_time_series_classification , :metric_mcfly_time_series_classification .
 :ensemble_nbest a :Configuration_item ;
     skos:prefLabel "ensemble_nbest" ;
     :category :parameter ;
@@ -2377,6 +2399,7 @@
     skos:prefLabel "metric AutoGluon time series forecasting" ;
     :category :parameter ;
     skos:broader :metric ;
+    :has_datatype :single_value ;
     :parameter_value :mean_absolute_percentage_error , :symmetric_mean_absolute_percentage_error , :mean_absolute_scaled_error , :mean_squared_error , :rooted_mean_squared_error .
 :metric_autopytorch_tabular_classification a :Configuration_item ;
     skos:prefLabel "metric AutoPytorch tabular classification" ;
@@ -2384,6 +2407,12 @@
     skos:broader :metric ;
     :has_datatype :single_value ;
     :parameter_value :accuracy , :balanced_accuracy , :f_measure , :receiver_operating_characteristic_curve , :average_precision_score , :precision , :recall , :log_loss .
+:metric_autopytorch_time_series_forecasting a :Configuration_item ;
+    skos:prefLabel "metric AutoPytorch time series forecasting" ;
+    :category :parameter ;
+    skos:broader :metric ;
+    :has_datatype :single_value ;
+    :parameter_value :mean_absolute_scaled_error , :median_absolute_scaled_error , :mean_absolute_error , :median_absolute_error , :mean_absolute_percentage_error , :median_absolute_percentage_error , :mean_squared_error , :median_squared_error .
 :metric_autopytorch_tabular_regression a :Configuration_item ;
     skos:prefLabel "metric AutoPytorch tabular regression" ;
     :category :parameter ;
@@ -2647,6 +2676,65 @@
     skos:broader :loss ;
     :has_datatype :single_value ;
     :parameter_value :categorical_cross_entropy .
+:forecasting_horizon a :Configuration_item ;
+    skos:prefLabel "forecasting horizon" ;
+    :category :parameter .
+:forecasting_horizon_autokeras_time_series_forcasting a :Configuration_item ;
+    skos:prefLabel "forecasting horizon autokeras time series forcasting" ;
+    :category :parameter ;
+    skos:broader :forecasting_horizon ;
+    :has_datatype :integer .
+:forecasting_horizon_autogluon_time_series_forcasting a :Configuration_item ;
+    skos:prefLabel "forecasting horizon autogluon time series forcasting" ;
+    :category :parameter ;
+    skos:broader :forecasting_horizon ;
+    :has_datatype :integer .
+:forecasting_horizon_evalml_time_series_forcasting a :Configuration_item ;
+    skos:prefLabel "forecasting horizon evalml time series forcasting" ;
+    :category :parameter ;
+    skos:broader :forecasting_horizon ;
+    :has_datatype :integer .
+:forecasting_horizon_flaml_time_series_forcasting a :Configuration_item ;
+    skos:prefLabel "forecasting horizon flaml time series forcasting" ;
+    :category :parameter ;
+    skos:broader :forecasting_horizon ;
+    :has_datatype :integer .
+:forecasting_horizon_pycaret_time_series_forcasting a :Configuration_item ;
+    skos:prefLabel "forecasting horizon pycaret time series forcasting" ;
+    :category :parameter ;
+    skos:broader :forecasting_horizon ;
+    :has_datatype :integer .
+:forecasting_horizon_autopytorch_time_series_forcasting a :Configuration_item ;
+    skos:prefLabel "forecasting horizon autopytorch time series forcasting" ;
+    :category :parameter ;
+    skos:broader :forecasting_horizon ;
+    :has_datatype :integer .
+:lookback a :Configuration_item ;
+    skos:prefLabel "lookback" ;
+    :category :parameter .
+:lookback_autokeras_time_series_forecasting a :Configuration_item ;
+    skos:prefLabel "lookback autokeras time series forecasting" ;
+    :category :parameter ;
+    skos:broader :lookback ;
+    :has_datatype :integer .
+:lookback_evalml_time_series_forecasting a :Configuration_item ;
+    skos:prefLabel "lookback evalml time series forecasting" ;
+    :category :parameter ;
+    skos:broader :lookback ;
+    :has_datatype :integer .
+:gap a :Configuration_item ;
+    skos:prefLabel "gap" ;
+    :category :parameter .
+:gap_autokeras_time_series_forecasting a :Configuration_item ;
+    skos:prefLabel "gap autokeras time series forecasting" ;
+    :category :parameter ;
+    skos:broader :gap ;
+    :has_datatype :integer .
+:gap_evalml_time_series_forecasting a :Configuration_item ;
+    skos:prefLabel "gap evalml time series forecasting" ;
+    :category :parameter ;
+    skos:broader :gap ;
+    :has_datatype :integer .
 
 
 # Sheet34
