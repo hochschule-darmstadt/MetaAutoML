@@ -39,7 +39,8 @@ tabular_regression_config = [
 
 #config for the tabular regression
 time_series_forcasting_config = [
-    [":metric", ":metric_autopytorch_time_series_forcasting", [":mean_squared_error"], "single_value", "dict", autopytorch_metrics, "optimize_metric"]
+    [":metric", ":metric_autopytorch_time_series_forcasting", [":mean_squared_error"], "single_value", "dict", autopytorch_metrics, "optimize_metric"],
+    [":forecasting_horizon", ":forecasting_horizon_autopytorch_time_series_forcasting", [1], "single_value", "integer", "", "n_prediction_steps"]
 ]
 
 # dictionary for mapping the selected task to the appropriate config

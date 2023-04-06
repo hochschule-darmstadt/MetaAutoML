@@ -148,15 +148,21 @@ class AutoKerasAdapter:
         train, test = data_loader(self._configuration, perform_splitting=False)
         X, y = prepare_tabular_dataset(train, self._configuration)
         self._configuration = set_imputation_for_numerical_columns(self._configuration, X)
-        train, test = data_loader(self._configuration)
         #reload dataset to load changed data
+        train, test = data_loader(self._configuration)
+
+        parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), akpc.task_config)
+        #oma-ml uses gab as shared parameter which is similar to predict from but has an offset of -1
+        # gap = 0 is equal to predict_from  = 1
+        parameters["predict_from"] = parameters["predict_from"] + 1
+        self._configuration["forecasting_horizon"] = parameters["predict_until"]
+        save_configuration_in_json(self._configuration)
+        
         X, y = prepare_tabular_dataset(train, self._configuration)
 
         #TODO convert dataframe to float
-        parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), akpc.task_config)
         reg = ak.TimeseriesForecaster(overwrite=True,
                                           **parameters,
-                                          lookback=1,
                                 seed=42,
                                 directory=self._configuration["model_folder_location"])
         #Loopback must be dividable by batch_size else time seires will crash

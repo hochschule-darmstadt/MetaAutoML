@@ -101,6 +101,10 @@ class AdapterManager(Thread):
             with open(os.path.join(config.job_folder_location, get_config_property("job-file-name"))) as file:
                 updated_process_configuration = json.load(file)
             config.dataset_configuration = updated_process_configuration["dataset_configuration"]
+            #incase of timeseries forcasting we need to extract the forecast horizon
+            if config.configuration["task"] == ":time_series_forecasting":
+                config.forecasting_horizon = updated_process_configuration["forecasting_horizon"]
+
             generate_script(config)
             output_json = zip_script(config)
             #AutoKeras only produces keras based ANN

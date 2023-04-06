@@ -114,7 +114,10 @@ text_regression_config = [
 
 #config for the time series forecasting
 time_series_forecasting_config = [
-    [":metric", ":metric_evalml_time_series_regression", [":mean_squared_error"], "single_value", "dict", eval_metrics, "objective"]
+    [":metric", ":metric_evalml_time_series_regression", [":mean_squared_error"], "single_value", "dict", eval_metrics, "objective"],
+    [":forecasting_horizon", ":forecasting_horizon_evalml_time_series_forcasting", [1], "single_value", "integer", "", "forecast_horizon"],
+    [":lookback", ":lookback_evalml_time_series_forecasting", [1], "single_value", "integer", "", "max_delay"],
+    [":gap", ":gap_evalml_time_series_forecasting", [1], "single_value", "integer", "", "gap"]
 ]
 
 # dictionary for mapping the selected task to the appropriate config

@@ -74,7 +74,8 @@ image_classification_config = [
 
 #config for the time series forecasting
 time_series_forecasting_config = [
-    [":metric", ":metric_autogluon_time_series_forecasting", [None], "single_value", "dict", autogluon_time_series_metrics, "eval_metric"]    #std: mean_wQuantileLoss
+    [":metric", ":metric_autogluon_time_series_forecasting", [None], "single_value", "dict", autogluon_time_series_metrics, "eval_metric"],    #std: mean_wQuantileLoss
+    [":forecasting_horizon", ":forecasting_horizon_autogluon_time_series_forcasting", [1], "single_value", "integer", "", "prediction_length"]
 ]
 
 

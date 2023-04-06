@@ -198,11 +198,12 @@ def evaluate(config: "StartAutoMlRequest", config_path: str) -> Tuple[float, flo
         target = targets[0]
         # override file_path to path to test file and drop target column
         #TODO must set dynamic future prediction length
+        #test = pd.read_csv(os.path.join(os.path.dirname(file_path), "test_expected_result.csv"))
 
         #y_actual = test.iloc[-12:][target]
         #test.drop(test.tail(12).index, inplace=True)
-        file_path = write_tabular_dataset_data(test, os.path.dirname(file_path), config)
-
+        #file_path = write_tabular_dataset_data(test, os.path.dirname(file_path), config)
+        
     elif(config["configuration"]["task"] in[":image_classification", ":image_regression"]):
         X_test, y_test = data_loader(config, image_test_folder=True)
 
@@ -223,7 +224,7 @@ def evaluate(config: "StartAutoMlRequest", config_path: str) -> Tuple[float, flo
             return compute_regression_metrics(pd.Series(y_test), predictions["predicted"]), (predict_time * 1000) / pd.Series(y_test).shape[0]
         elif config["configuration"]["task"] == ":time_series_forecasting":
             #TODO add dynamic future prediction
-            return compute_regression_metrics(pd.Series(test.iloc[-12:][target]), predictions["predicted"]), (predict_time * 1000) / test.shape[0]
+            return compute_regression_metrics(pd.Series(test.iloc[-config["forecasting_horizon"]:][target]), predictions["predicted"]), (predict_time * 1000) / test.shape[0]
         else:
             return compute_regression_metrics(pd.Series(test[target]), predictions["predicted"]), (predict_time * 1000) / test.shape[0]
 

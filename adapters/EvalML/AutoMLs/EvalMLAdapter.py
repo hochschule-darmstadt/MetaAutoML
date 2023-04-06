@@ -117,6 +117,11 @@ class EvalMLAdapter:
         X.reset_index(inplace=True)
         train, test = data_loader(self._configuration)
         #reload dataset to load changed data
+
+        parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), epc.task_config)
+        self._configuration["forecasting_horizon"] = parameters["forecast_horizon"]
+        save_configuration_in_json(self._configuration)
+
         X, y = prepare_tabular_dataset(train, self._configuration)
         X[y.name] = y.values
         #We must persist the training time series to make predictions
@@ -124,9 +129,10 @@ class EvalMLAdapter:
         
         file_path = write_tabular_dataset_data(X, file_path, self._configuration, "train.csv")
         X.drop(y.name, axis=1, inplace=True)
-        parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), epc.task_config)
-        problem_config = {"gap": 0, "max_delay": 12, "forecast_horizon": 12, "time_index": index_column_name}
-
+        problem_config = {"gap": parameters["gap"], "max_delay": 12, "forecast_horizon": parameters["forecast_horizon"], "time_index": index_column_name}
+        #delete from dic as those parameter are used seperately
+        del parameters["forecast_horizon"]
+        del parameters["gap"]
         # parameters must be set correctly
         automl = AutoMLSearch(
                     X_train=X,

@@ -177,8 +177,8 @@ def string_feature_encoding(X: pd.DataFrame, y: pd.Series, features: dict_items,
 
 
 def seperate_time_series_dataframe(X: pd.DataFrame):
-    exogenous_ts = X.iloc[-12:]
-    previous_ts = X.drop(X.tail(12).index)
+    exogenous_ts = X.iloc[-{{configuration["forecasting_horizon"]}}:]
+    previous_ts = X.drop(X.tail({{configuration["forecasting_horizon"]}}).index)
     try:
         for column, dt in feature_configuration.items():
             if dt.get("role_selected", "") == ":target":

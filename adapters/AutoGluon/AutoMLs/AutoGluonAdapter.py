@@ -168,6 +168,12 @@ class AutoGluonAdapter:
         X.reset_index(inplace = True)
         self._configuration = set_imputation_for_numerical_columns(self._configuration, X)
         train, test = data_loader(self._configuration)
+
+
+        parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), agpc.task_config)
+        self._configuration["forecasting_horizon"] = parameters["prediction_length"]
+        save_configuration_in_json(self._configuration)
+
         #reload dataset to load changed data
         X, y = prepare_tabular_dataset(train, self._configuration)
         #Autogluon wants the existing variables per time step everything except target and time series indexes (id and datetime)
@@ -180,11 +186,9 @@ class AutoGluonAdapter:
 
         #TODO in prediction we need the correct amount of future points
         ts_dataframe = TimeSeriesDataFrame.from_data_frame(data, id_column="timeseries_id", timestamp_column=timestamp_column)
-        parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), agpc.task_config)
         model = TimeSeriesPredictor(label=y.name,
                                 **parameters,
-                                 path=self._result_path,
-                                 prediction_length=12).fit(
+                                 path=self._result_path).fit(
             ts_dataframe,
             time_limit=self._time_limit*60)
         #Fit methode already saves the model

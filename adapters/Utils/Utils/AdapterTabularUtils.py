@@ -12,7 +12,6 @@ import re
 import json
 import numpy as np
 
-
 def read_tabular_dataset_training_data(config: "StartAutoMlRequest", perform_splitting: bool) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """Read a CSV dataset into train and test dataframes
 

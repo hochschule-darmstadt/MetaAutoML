@@ -24,7 +24,7 @@ autokeras_metrics = {
     ":mean_squared_error": "mean_squared_error",
     ":root_mean_squared_error": "RootMeanSquaredError",
     ":mean_absolute_error": "mean_absolute_error",
-    ":mean_absolut_percentage_error": "mean_absolute_percentage_error",
+    ":mean_absolute_percentage_error": "mean_absolute_percentage_error",
     ":mean_squared_log_error": "mean_squared_logarithmic_error",
     ":cosine_similarity": "cosine_similarity",
     ":log_cosh_error": "logcosh",
@@ -72,7 +72,7 @@ autokeras_objectives = {
     ":mean_squared_error": "mean_squared_error",
     ":root_mean_squared_error": keras_tuner.Objective("val_root_mean_squared_error", direction="min"),
     ":mean_absolute_error": "mean_absolute_error",
-    ":mean_absolut_percentage_error": "mean_absolute_percentage_error",
+    ":mean_absolute_percentage_error": "mean_absolute_percentage_error",
     ":mean_squared_log_error": "mean_squared_logarithmic_error",
     ":cosine_similarity": "cosine_similarity",
     ":log_cosh_error": "logcosh",
@@ -191,7 +191,10 @@ time_series_forecasting_config = [
     [":metric", "::metric_autokeras_time_series_forecasting", [":mean_squared_error"], "single_value", "dict", autokeras_objectives, "objective"], #missing metric in ontology
     [":tuner", ":tuner_autokeras_time_series_forecasting", [None], "single_value", "dict", autokeras_tuner, "tuner"],
     [":loss", ":loss_autokeras_time_series_forecasting", [":mean_squared_error"], "single_value", "dict", autokeras_loss_regression, "loss"], #missing loss in ontology
-    [":max_model_size_autokeras", ":max_model_size_autokeras", [None], "single_value", "integer", "", "max_model_size"]
+    [":max_model_size_autokeras", ":max_model_size_autokeras", [None], "single_value", "integer", "", "max_model_size"],
+    [":forecasting_horizon", ":forecasting_horizon_autokeras_time_series_forcasting", [1], "single_value", "integer", "", "predict_until"],
+    [":gap", ":gap_autokeras_time_series_forecasting", [0], "single_value", "integer", "", "predict_from"],
+    [":lookback", ":lookback_autokeras_time_series_forecasting", [1], "single_value", "integer", "", "lookback"]
 ]
 
 # dictionary for mapping the selected task to the appropriate config

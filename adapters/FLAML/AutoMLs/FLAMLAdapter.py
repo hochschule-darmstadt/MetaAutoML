@@ -102,12 +102,17 @@ class FLAMLAdapter:
         X.reset_index(inplace = True)
         self._configuration = set_imputation_for_numerical_columns(self._configuration, X)
         train, test = data_loader(self._configuration)
+
+        automl_settings = self.__generate_settings()
+
+        self._configuration["forecasting_horizon"] = automl_settings["period"]
+        save_configuration_in_json(self._configuration)
+        
         #reload dataset to load changed data
         X, y = prepare_tabular_dataset(train, self._configuration)
         #TODO ensure ts first column is datetime
-        #TODO add dynamic periode
         automl = AutoML()
-        automl_settings = self.__generate_settings()
+        
         automl_settings.update({
             "task": 'ts_forecast',
             "ensemble": True,

@@ -112,28 +112,32 @@ class AutoPytorchAdapter:
         #Apply encoding to string
         self._configuration = set_encoding_for_string_columns(self._configuration, X, y, also_categorical=True)
         train, test = data_loader(self._configuration)
-        #reload dataset to load changed data
-        X, y = prepare_tabular_dataset(train, self._configuration)
-        #TODO add dynamic forcasting horizon
-        y_train = [y[: -12]]
-        y_test = [y[-12:]]
-        X_train = [X[: -12]]
-        known_future_features = list(X.columns)
-        X_test = [X[-12:]]
-
-        start_times = [X.index[0]]
+        
 
         parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), appc.task_config)
+        self._configuration["forecasting_horizon"] = parameters["n_prediction_steps"]
+        save_configuration_in_json(self._configuration)
+
+
+        #reload dataset to load changed data
+        X, y = prepare_tabular_dataset(train, self._configuration)
+        
+        y_train = [y[: -self._configuration["forecasting_horizon"]]]
+        y_test = [y[-self._configuration["forecasting_horizon"]:]]
+        X_train = [X[: -self._configuration["forecasting_horizon"]]]
+        known_future_features = list(X.columns)
+        X_test = [X[-self._configuration["forecasting_horizon"]:]]
+
+        start_times = [X.index[0]]
 
         auto_reg = TimeSeriesForecastingTask(temporary_directory=self._configuration["model_folder_location"] + "/tmp", output_directory=self._configuration["model_folder_location"] + "/output", delete_output_folder_after_terminate=False, delete_tmp_folder_after_terminate=False)
         auto_reg.search(
                 X_train=X_train,
                 y_train=y_train,
                 X_test=X_test,
-                n_prediction_steps=12,
+                **parameters,
                 freq ='1H', #TODO we need variable or else this will crash in big dataset as they need to know the correct time frame
                 start_times=start_times,
-    optimize_metric='mean_MAPE_forecasting',
                 total_walltime_limit=self._configuration["configuration"]["runtime_limit"]*60,
                 known_future_features=known_future_features,
             )

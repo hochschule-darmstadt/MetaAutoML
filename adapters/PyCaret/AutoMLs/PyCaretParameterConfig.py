@@ -46,7 +46,8 @@ tabular_regression_config = [
 
 #config for the time series forecasting
 time_series_forecasting_config = [
-    [":metric", ":metric_pycaret_time_series_forecasting", [":mean_squared_error"], "single_value", "dict", pycaret_metrics, "optimize"]
+    [":metric", ":metric_pycaret_time_series_forecasting", [":mean_squared_error"], "single_value", "dict", pycaret_metrics, "optimize"],
+    [":forecasting_horizon", ":forecasting_horizon_pycaret_time_series_forcasting", [1], "single_value", "integer", "", "fh"],
 ]
 
 # dictionary for mapping the selected task to the appropriate config
