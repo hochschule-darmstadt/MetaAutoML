@@ -86,7 +86,7 @@ class PyCaretAdapter:
 
         X, y = prepare_tabular_dataset(self.df, self._configuration)
         X[y.name] = y
-        automl = setup(data = X, target = y.name, parameters["fh"])
+        automl = setup(data = X, target = y.name, fh=parameters["fh"])
         del parameters["fh"]
         best = compare_models(budget_time=self._configuration["configuration"]["runtime_limit"] * 60 / 3) #Setup for max 1/3 of time
         model = create_model(best)
