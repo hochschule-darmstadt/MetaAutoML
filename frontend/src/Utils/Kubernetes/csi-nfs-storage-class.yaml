@@ -1,0 +1,14 @@
+﻿apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: nfs-csi
+  namespace: omaml
+provisioner: nfs.csi.k8s.io
+parameters:
+  server: 10.192.23.239
+  share: /media/drive2/nfs
+reclaimPolicy: Delete
+volumeBindingMode: Immediate
+mountOptions:
+  - hard
+  - nfsvers=4.1

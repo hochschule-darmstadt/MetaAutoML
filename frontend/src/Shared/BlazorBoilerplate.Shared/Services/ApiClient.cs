@@ -1,4 +1,4 @@
-﻿using BlazorBoilerplate.Shared.Dto;
+using BlazorBoilerplate.Shared.Dto;
 using BlazorBoilerplate.Shared.Dto.Dataset;
 using BlazorBoilerplate.Shared.Dto.Db;
 using BlazorBoilerplate.Shared.Dto.Email;
@@ -87,13 +87,14 @@ namespace BlazorBoilerplate.Shared.Services
         {
             return await httpClient.PostJsonAsync<ApiResponseDto>("api/Dataset/GetDatasetPreview", request);
         }
-        public async Task<ApiResponseDto> GetTabularDatasetColumn(GetTabularDatasetColumnRequestDto request)
-        {
-            return await httpClient.PostJsonAsync<ApiResponseDto>("api/Dataset/GetTabularDatasetColumn", request);
-        }
         public async Task<ApiResponseDto> SetDatasetFileConfiguration(SetDatasetFileConfigurationRequestDto request)
         {
             return await httpClient.PostJsonAsync<ApiResponseDto>("api/Dataset/SetDatasetFileConfiguration", request);
+        }
+
+        public async Task<ApiResponseDto> SetDatasetColumnSchemaConfiguration(SetDatasetColumnSchemaConfigurationRequestDto request)
+        {
+            return await httpClient.PostJsonAsync<ApiResponseDto>("api/Dataset/SetDatasetColumnSchemaConfiguration", request);
         }
         public async Task<ApiResponseDto> GetDatasetAnalysis(GetDatasetAnalysisRequestDto request)
         {
@@ -153,27 +154,32 @@ namespace BlazorBoilerplate.Shared.Services
         #endregion
 
         #region OMA-ML ONTOLOGY MESSAGES
-        public async Task<ApiResponseDto> GetAutoMlSolutionsForConfiguration(GetAutoMlSolutionsForConfigurationRequestDto request)
+        public Task<ApiResponseDto<GetAutoMlSolutionsForConfigurationResponseDto>> GetAutoMlSolutionsForConfiguration(GetAutoMlSolutionsForConfigurationRequestDto request)
         {
-            return await httpClient.PostJsonAsync<ApiResponseDto>("api/Ontology/GetAutoMlSolutionsForConfiguration", request);
+            return httpClient.PostJsonAsync<ApiResponseDto<GetAutoMlSolutionsForConfigurationResponseDto>>("api/Ontology/GetAutoMlSolutionsForConfiguration", request);
         }
-        public async Task<ApiResponseDto> GetTasksForDatasetType(GetTasksForDatasetTypeRequestDto request)
+        public Task<ApiResponseDto<GetTasksForDatasetTypeResponseDto>> GetTasksForDatasetType(GetTasksForDatasetTypeRequestDto request)
         {
-            return await httpClient.PostJsonAsync<ApiResponseDto>("api/Ontology/GetTasksForDatasetType", request);
+            return httpClient.PostJsonAsync<ApiResponseDto<GetTasksForDatasetTypeResponseDto>>("api/Ontology/GetTasksForDatasetType", request);
         }
         public async Task<ApiResponseDto> GetDatasetTypes()
         {
             return await httpClient.GetJsonAsync<ApiResponseDto>("api/Ontology/GetDatasetTypes");
         }
 
-        public async Task<ApiResponseDto> GetMlLibrariesForTask(GetMlLibrariesForTaskRequestDto request)
+        public Task<ApiResponseDto<GetMlLibrariesForTaskResponseDto>> GetMlLibrariesForTask(GetMlLibrariesForTaskRequestDto request)
         {
-            return await httpClient.PostJsonAsync<ApiResponseDto>("api/Ontology/GetMlLibrariesForTask", request);
+            return httpClient.PostJsonAsync<ApiResponseDto<GetMlLibrariesForTaskResponseDto>>("api/Ontology/GetMlLibrariesForTask", request);
         }
 
-        public async Task<ApiResponseDto> GetAvailableStrategies(GetAvailableStrategiesRequestDto request)
+        public Task<ApiResponseDto<GetAvailableStrategiesResponseDto>> GetAvailableStrategies(GetAvailableStrategiesRequestDto request)
         {
-            return await httpClient.PostJsonAsync<ApiResponseDto>("api/Ontology/GetAvailableStrategies", request);
+            return httpClient.PostJsonAsync<ApiResponseDto<GetAvailableStrategiesResponseDto>>("api/Ontology/GetAvailableStrategies", request);
+        }
+
+        public Task<ApiResponseDto<GetAutoMlParametersResponseDto>> GetAutoMlParameters(GetAutoMlParametersRequestDto request)
+        {
+            return httpClient.PostJsonAsync<ApiResponseDto<GetAutoMlParametersResponseDto>>("api/Ontology/GetAutoMlParameters", request);
         }
         #endregion
 

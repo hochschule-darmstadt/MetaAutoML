@@ -152,7 +152,7 @@ msgid "Role {0} created"
 msgstr "Rolle {0} erstellt"
 
 msgid "Role {0} already exists"
-msgstr "Rolle {0} existiert bereits "
+msgstr "Rolle {0} existiert bereits"
 
 msgid "The role {0} doesn't exist"
 msgstr "Die Rolle {0} existiert nicht."
@@ -212,7 +212,7 @@ msgid "Sign in with"
 msgstr "Anmelden mit"
 
 msgid "Sign up"
-msgstr "Anmelden"
+msgstr "Registrieren"
 
 msgid "Keep me logged in"
 msgstr "Eingeloggt bleiben"
@@ -434,7 +434,6 @@ msgctxt "TrainingTimeline"
 msgid "automl_run_finished_{0}"
 msgstr "AutoML abgeschlossen: {0}"
 
-
 msgid "Required"
 msgstr "Erforderlich"
 
@@ -479,6 +478,9 @@ msgstr "Größe"
 
 msgid "Date"
 msgstr "Datum"
+
+msgid "Time"
+msgstr "Uhrzeit"
 
 msgid "tabular"
 msgstr "Tabellarisch"
@@ -595,7 +597,7 @@ msgid "Start row"
 msgstr "Start Reihe"
 
 msgid "Column seperator"
-msgstr "Spalten seperator"
+msgstr "Spalten separator"
 
 msgid "Escape character"
 msgstr "Escapezeichen"
@@ -618,17 +620,17 @@ msgstr "Konfiguration"
 msgid "Details"
 msgstr "Details"
 
-msgid "Target"
-msgstr "Target"
-
 msgid "ML task"
+msgstr "ML task"
+
+msgid "Machine Learning task"
 msgstr "ML Task"
 
 msgid "AutoML solutions"
 msgstr "AutoML Systeme"
 
-msgid "ML libraries"
-msgstr "ML Bibliothek"
+msgid "Machine Learning libraries"
+msgstr "Machine Learning Bibliothek"
 
 msgid "Enabled strategies"
 msgstr "Aktivierte Strategien"
@@ -693,14 +695,17 @@ msgstr "Gesamte Trainingszeit: {0} s"
 msgid "AutoML solution: {0}"
 msgstr "AutoML System: {0}"
 
-msgid "ML library: {0}"
-msgstr "ML Bibliothek: {0}"
+msgid "Machine Learning library: {0}"
+msgstr "Machine Learning Bibliothek: {0}"
 
 msgid "Training: "
 msgstr "Training: "
 
 msgid "Metric score: {0}"
 msgstr "Metric Ergebnis: {0}"
+
+msgid "Metric"
+msgstr "Metric"
 
 msgid "Prediction time per sample: {0}"
 msgstr "Zeit pro Vorhersage: {0} ms"
@@ -714,8 +719,8 @@ msgstr "Datei hochladen"
 msgid "Download result CSV"
 msgstr "CSV Ergebnis herunterladen"
 
-msgid "Download ML pipeline"
-msgstr "ML Pipeline herunterladen"
+msgid "Download Machine Learning pipeline"
+msgstr "Machine Learning Pipeline herunterladen"
 
 msgid "Download model"
 msgstr "Model herunterladen"
@@ -729,8 +734,8 @@ msgstr "Task: {0}"
 msgid "Target: {0}"
 msgstr "Target: {0}"
 
-msgid "Selected Ml libraries"
-msgstr "Ausgewählte Ml Bibliothek"
+msgid "Selected Machine learning libraries"
+msgstr "Ausgewählte Machine learning Bibliothek"
 
 msgid "Selected AutoMl solutions"
 msgstr "Ausgewählte AutoML Systeme"
@@ -757,9 +762,7 @@ msgid "Task"
 msgstr "Task"
 
 msgid "Dataset not redable"
-msgstr "Datenset konnte nicht gelessen werden! Wenn das Datenset gerade hochgeladen wurde muss noch etwas gewartet werden bevor dieses bereitsteht. Ansonsten stimmt die Datenset Konfigurierung nicht, diese kann durch die Vorschau Konfiguration new konfiguriert werden"
-
-
+msgstr "Datenset konnte nicht gelessen werden! Wenn das Datenset gerade hochgeladen wurde muss noch etwas gewartet werden bevor dieses bereitsteht. Ansonsten stimmt die Datenset Konfiguration nicht, diese kann durch die Vorschau Konfiguration neu konfiguriert werden"
 
 msgid "Start: {0}"
 msgstr "Start: {0}"
@@ -813,7 +816,7 @@ msgid "text classification"
 msgstr "Text Klassifikation"
 
 msgid "File configuration can not be saved, incompatible delimiter"
-msgstr "Datei Konfiguration konnte nicht gespeichert werden, Spalten seperator incompatible."
+msgstr "Datei Konfiguration konnte nicht gespeichert werden, Spaltenseparator inkompatibel."
 
 msgid "Could not read dataset successfully, change configuration"
 msgstr "Datenset konnte nicht gelessen werden, ändern Sie die Konfiguration."
@@ -830,7 +833,6 @@ msgstr "Gültigkeit"
 msgid "CookieDescription"
 msgstr "Beschreibung"
 
-
 msgid "AntiforgeryCookieName"
 msgstr ".AspNetCore.Antiforgery"
 
@@ -838,9 +840,7 @@ msgid "AntiforgeryCookieLifecycle"
 msgstr "Sitzung"
 
 msgid "AntiforgeryCookieDescription"
-msgstr "Diese Cookie speichert den Anti Forgery Token ab, wird zum Schutz vor Cross-Site-Request-Forgery-Attack verwendet."
-
-
+msgstr "Dieses Cookie speichert den Anti Forgery Token ab, wird zum Schutz vor Cross-Site-Request-Forgery-Attack verwendet."
 
 msgid "CultureCookieName"
 msgstr ".AspNetCore.Culture"
@@ -849,9 +849,7 @@ msgid "CultureCookieLifecycle"
 msgstr "1 Monat"
 
 msgid "CultureCookieDescription"
-msgstr "Diese Cookie speichert die Sprachauswahl, wird zur Darstellung der richtige Sprache verwendet."
-
-
+msgstr "Dieses Cookie speichert die Sprachauswahl, wird zur Darstellung der richtigen Sprache verwendet."
 
 msgid "CookieConsentCookieName"
 msgstr ".AspNet.CookieConsent"
@@ -862,8 +860,6 @@ msgstr "6 Monate"
 msgid "CookieConsentCookieDescription"
 msgstr "Dieses Cookie speichert die vom User erlaubten Cookies ab."
 
-
-
 msgid "IdentityApplicationCookieName"
 msgstr ".AspNetCore.Identity.Application"
 
@@ -871,8 +867,7 @@ msgid "IdentityApplicationCookieLifecycle"
 msgstr "Sitzung"
 
 msgid "IdentityApplicationCookieDescription"
-msgstr "Diese Cookie ermöglicht die Cookie basierte Nutzer autorisierung, wird für das Nutzer Management verwendet."
-
+msgstr "Dieses Cookie ermöglicht die Cookie basierte Nutzerautorisierung, wird für das Nutzermanagement verwendet."
 
 msgid "IdsrvSessionCookieName"
 msgstr "idsrv.session"
@@ -881,4 +876,126 @@ msgid "IdsrvSessionCookieLifecycle"
 msgstr "Sitzung"
 
 msgid "IdsrvSessionCookieDescription"
-msgstr "Dieses Cookie speichert die aktuelle Sitzungs id, wird für das Nutzer Management verwendet."
+msgstr "Dieses Cookie speichert die aktuelle Sitzungs id, wird für das Nutzermanagement verwendet."
+
+msgid "FolderStructureNotCorrectErrorMessage"
+msgstr "Die Ordnerstruktur der Zip-Datei entspricht nicht den Anforderungen."
+
+msgid "AffinityCookieName"
+msgstr "affinity"
+
+msgid "AffinityCookieLifecycle"
+msgstr "4 Stunden"
+
+msgid "AffinityCookieDescription"
+msgstr "Dieses Cookie speichert die aktuelle Sticky Sitzungs id, wird für das korrekte Routing verwendet."
+
+msgid "Encoding"
+msgstr "Codierung"
+
+msgid "ASCII"
+msgstr "ASCII"
+
+msgid "UTF-8"
+msgstr "UTF-8"
+
+msgid "latin-1"
+msgstr "latin-1"
+
+msgid "UTF-16"
+msgstr "UTF-16"
+
+msgid "UTF-32"
+msgstr "UTF-32"
+
+msgid "integer"
+msgstr "Integer"
+
+msgid "float"
+msgstr "Float"
+
+msgid "boolean"
+msgstr "Boolescher Wert"
+
+msgid "string"
+msgstr "String"
+
+msgid "categorical"
+msgstr "Kategorien"
+
+msgid "datetime"
+msgstr "Datetime"
+
+msgid "time_delta"
+msgstr "Time Delta"
+
+msgid "list"
+msgstr "Liste"
+
+msgid "single_value"
+msgstr "Single"
+
+msgid "index"
+msgstr "Index"
+
+msgid "target"
+msgstr "Target"
+
+msgid "ignore"
+msgstr "Ignorieren"
+
+msgid "none"
+msgstr "Keine"
+
+msgid "Datatype"
+msgstr "Datentyp"
+
+msgid "Datatype analysis incompatible with current dataset configuration, save current configuration to start new analysis"
+msgstr "Datentypenanalyse ist nicht mit der aktuellen Konfiguration kompatibel. Durch das Speichern der aktuellen Konfiguration wird eine neue Analyse gestartet."
+
+msgid "Roles analysis incompatible with current dataset configuration, save current configuration to start new analysis"
+msgstr "Rollenanalyse ist nicht mit der aktuellen Konfiguration kompatibel. Durch das Speichern der aktuellen Konfiguration wird eine neue Analyse gestartet."
+
+msgid "Thousand seperator"
+msgstr "Tausendertrennzeichen"
+
+msgid "Datetime format"
+msgstr "Datetime Format"
+
+msgid "Column {0} could not be casted to datetime"
+msgstr "Spalte {0} konnte nicht zum Datentypen Datetype konvertiert werden."
+
+msgid "Datetime columns could not be converted to new datetime format"
+msgstr "Datetime Spalten konnten nicht in das neue Datetime format konvertiert werden."
+
+msgid "File configuration can not be saved, datetime columns could not be converted to new datetime format"
+msgstr "Datenset-konfiguration konnte nicht gespeichert werden, Datetime Spalten konnten nicht in das neue Datetime Format konvertiert werden."
+
+msgid "Save Schema"
+msgstr "Schema speichern"
+
+msgid "More than one target selected"
+msgstr "Mehr als ein Target wurde ausgewählt."
+
+msgid "No target selected"
+msgstr "Kein Target wurde ausgewählt."
+
+msgid "No task selected"
+msgstr "Kein Machine Learning Task wurde ausgewählt."
+
+msgid "No index selected"
+msgstr "Keine Index Spalte wurde gesetzt."
+
+msgid "No datetime index selected"
+msgstr "Keine oder mehrere Index Spalte mit Datentyp Datetime wurde gesetzt. Es darf nur eine Index Spalte mit Datentyp Datetime im Datensatz existieren."
+
+
+msgid "Emissions kg/CO2-eq"
+msgstr "Emissionen in kg/CO2-eq"
+
+msgid "Emissions: {0} kg/CO2-eq"
+msgstr "Emissionen: {0} kg/CO2-eq"
+
+msgid "aborted"
+msgstr "Abgebrochen"
+

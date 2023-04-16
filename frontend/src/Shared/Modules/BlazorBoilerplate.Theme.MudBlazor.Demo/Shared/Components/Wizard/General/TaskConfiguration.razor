@@ -1,4 +1,4 @@
-﻿@inject IStringLocalizer<Global> L
+@inject IStringLocalizer<Global> L
 @inject IApiClient apiClient
 @inject IViewNotifier viewNotifier
 @using Newtonsoft.Json
@@ -34,10 +34,10 @@
             break;
     }
 
-    @if (_compatibletasks != null)
+    @if (_compatibleTasks != null)
     {
         <MudSelect Label="@L["ML task"]" T="string" ValueChanged="@OnMlTaskSelectionChanged">
-            @foreach (var task in _compatibletasks.Tasks)
+            @foreach (var task in _compatibleTasks.Tasks)
             {
                 <MudSelectItem Value="@task.ID">@L[task.Properties.ContainsKey("skos:prefLabel") ? task.Properties["skos:prefLabel"] : ""]</MudSelectItem>
             }
@@ -48,10 +48,10 @@
         <DataLoaderSpinner />
     }
 
-    @if (((Dataset.Dataset.Type.ID == ":tabular") || (Dataset.Dataset.Type.ID == ":text") || (Dataset.Dataset.Type.ID == ":time_series")) || (Dataset.Dataset.Type.ID == ":time_series_longitudinal") && (!string.IsNullOrEmpty(StartAutoMlRequest.Configuration.Task)))
+    @if (((Dataset.Dataset.Type.ID == ":tabular") || (Dataset.Dataset.Type.ID == ":text") || (Dataset.Dataset.Type.ID == ":time_series")) || (Dataset.Dataset.Type.ID == ":time_series_longitudinal") && (!string.IsNullOrEmpty(StartTrainingDto.Configuration.Task)))
 
     {
-        <MudSelect Label="@L["Target"]" T="string" ValueChanged="@OnTargetChanged">
+        <MudSelect Label="@L["target"]" T="string" @bind-SelectedValues="SelectedTargets" MultiSelection="true">
             @if (_columnNames != null)
             {
                 @foreach (var column in _columnNames)
@@ -61,165 +61,229 @@
             }
         </MudSelect>
     }
-    <MudNumericField ValueChanged="@OnRuntimeValueChanged" T="int" Label="@L["Runtime"]" Variant="Variant.Text" Min="3" Max="180" Value="@StartAutoMlRequest.Configuration.RuntimeLimit" />
+    <MudNumericField ValueChanged="@OnRuntimeValueChanged" T="int" Label="@L["Runtime"]" Variant="Variant.Text" Min="3" Max="180" Value="@StartTrainingDto.Configuration.RuntimeLimit" />
 
     <MudExpansionPanels>
         <MudExpansionPanel Text="@L["Details"]">
-            @if (_supportedMlLibraries != null)
+            <ChipSet ViewModel="@_mlLibsViewModel" Label="@L["ML libraries"]" />
+            <ChipSet ViewModel="@_autoMlSolutionsViewModel" Label="@L["AutoML solutions"]" />
+            <ChipSet ViewModel="@_strategiesViewModel" Label="@L["Enabled strategies"]" />
+            @if (_intersectedParams.Any())
             {
-                <MudText Typo="Typo.subtitle2">@L["ML libraries"]</MudText>
-                <MudChipSet Filter="true" MultiSelection="true" @bind-SelectedChips="SelectedMlLibsChips">
-                    @if (_supportedMlLibraries != null)
+                <MudText Typo="Typo.subtitle2" Class="mt-4">Parameter available for all AutoML solutions</MudText>
+
+
+                @foreach (var param in _intersectedParams)
+                {
+                    @if (param.ParameterType == ":single_value")
                     {
-                        @foreach (var lib in _supportedMlLibraries.MlLibraries)
-                        {
-                            <MudChip Value="@lib.ID" Text="@(lib.Properties.ContainsKey("skos:prefLabel") ? lib.Properties["skos:prefLabel"] : "")" Default="true" Variant="Variant.Text" Color="Color.Secondary" />
-                        }
+                        <MudSelect T="ParameterValueViewModel" Class="ml-2" Label="@param.ParameterLabel" Variant="Variant.Outlined" @bind-SelectedValues="param.SelectedValues" ToStringFunc="p => p?.ValueLabel">
+                            @foreach (var paramValue in param.ParameterValues)
+                            {
+                                <MudSelectItem Value="@paramValue">@paramValue.ValueLabel</MudSelectItem>
+                            }
+                        </MudSelect>
                     }
-                </MudChipSet>
-            }
-            else
-            {
-                <DataLoaderSpinner />
-            }
-            @if (_compatibleAutoMls != null)
-            {
-                <MudText Typo="Typo.subtitle2" Class="mt-4">@L["AutoML solutions"]</MudText>
-                <MudChipSet SelectedChipsChanged="OnAutoMlSolutionSelectionChanged" Filter="true" MultiSelection="true" >
-                    @if (_compatibleAutoMls != null)
+                    @if (param.ParameterType == ":list")
                     {
-                        @foreach (var lib in _compatibleAutoMls.AutoMlSolutions)
-                        {
-                            <MudChip Value="@lib.ID" Text="@(lib.Properties.ContainsKey("skos:prefLabel") ? lib.Properties["skos:prefLabel"] : "")" Default="true" Variant="Variant.Text" Color="Color.Secondary" />
-                        }
+                        <MudSelect T="ParameterValueViewModel" Class="ml-2" Label="@param.ParameterLabel" MultiSelection="true" SelectAll="true" @bind-SelectedValues="param.SelectedValues" ToStringFunc="p => p?.ValueLabel" Variant="Variant.Outlined">
+                            @foreach (var paramValue in param.ParameterValues)
+                            {
+
+                                <MudSelectItem Value="@paramValue">@paramValue.ValueLabel</MudSelectItem>
+                            }
+                        </MudSelect>
                     }
-                </MudChipSet>
-            }
-            else
-            {
-                <DataLoaderSpinner />
-            }
-            @if (_availableStrategies != null)
-            {
-                <MudText Typo="Typo.subtitle2" Class="mt-4">@L["Enabled strategies"]</MudText>
-                <MudChipSet
-                    SelectedChipsChanged="OnStrategySelectionChanged"
-                    Filter="true"
-                    MultiSelection="true"
-                >
-                    @if (_availableStrategies != null)
+                    else if(param.ParameterType == ":integer")
                     {
-                        @foreach (var strategy in _availableStrategies.Strategies)
-                        {
-                            <MudTooltip Text="@strategy.Description" Delay="600" Arrow="true" Placement="Placement.Bottom" Class="strategy-description-tooltip">
-                                <MudChip
-                                    Value="@strategy.Id"
-                                    Text="@strategy.Title"
-                                    Default="true"
-                                    Variant="Variant.Text"
-                                    Color="Color.Secondary"
-                                />
-                            </MudTooltip>
-                        }
+                        <MudNumericField T="int?" Class="ml-2" Label="@param.ParameterLabel" Variant="Variant.Outlined" @bind-Value="@param.IntegerValue" />
                     }
-                </MudChipSet>
+                }
             }
-            else
+
+            @if (_individualParams.Any())
             {
-                <DataLoaderSpinner />
+                <MudText Typo="Typo.subtitle2" Class="mt-4">Parameter available for individual AutoML solution only</MudText>
+                @foreach (var individualParam in _individualParams)
+                {
+                <MudExpansionPanels>
+                    <MudExpansionPanel Class="mt-2">
+                        <TitleContent>
+                            <MudText Typo="Typo.subtitle2">@individualParam.autoMlLabel</MudText>
+                        </TitleContent>
+                        <ChildContent>
+                            @foreach (var param in individualParam.parameters)
+                            {
+                                @if (param.ParameterType == ":single_value")
+                                {
+                                    <MudSelect T="ParameterValueViewModel" Class="ml-2" Label="@param.BroaderParameterLabel" Variant="Variant.Outlined" @bind-SelectedValues="param.SelectedValues" ToStringFunc="p => p?.ValueLabel">
+                                        @foreach (var paramValue in param.ParameterValues)
+                                        {
+                                            <MudSelectItem Value="@paramValue">@paramValue.ValueLabel</MudSelectItem>
+                                        }
+                                    </MudSelect>
+                                }
+                                @if (param.ParameterType == ":list")
+                                {
+                                    <MudSelect T="ParameterValueViewModel" Class="ml-2" MultiSelection="true" Label="@param.BroaderParameterLabel" SelectAll="true" @bind-SelectedValues="param.SelectedValues" ToStringFunc="p => p?.ValueLabel" Variant="Variant.Outlined">
+                                        @foreach (var paramValue in param.ParameterValues)
+                                        {
+                                            <MudSelectItem Value="@paramValue">@paramValue.ValueLabel</MudSelectItem>
+                                        }
+                                    </MudSelect>
+                                }
+                                else if(param.ParameterType == ":integer")
+                                {
+                                    <MudNumericField T="int?" Class="ml-2" Label="@param.BroaderParameterLabel" Variant="Variant.Outlined" @bind-Value="@param.IntegerValue" />
+                                }
+                            }
+                        </ChildContent>
+                    </MudExpansionPanel>
+                </MudExpansionPanels>
+                }
             }
+
         </MudExpansionPanel>
     </MudExpansionPanels>
 
 </MudStack>
 
-@code {
+@code
+{
     [Parameter]
     public GetDatasetResponseDto Dataset { get; set; }
 
     [Parameter]
-    public CreateTrainingRequestDto StartAutoMlRequest { get; set; }
-
+    public CreateTrainingRequestDto StartTrainingDto { get; set; }
     [Parameter]
-    public EventCallback<CreateTrainingRequestDto> StartAutoMlRequestChanged { get; set; }
+    public EventCallback<CreateTrainingRequestDto> StartTrainingDtoChanged { get; set; }
 
-    async Task UpdateStartAutoMlRequest()
+    async Task UpdateStartTrainingDto()
     {
-        await StartAutoMlRequestChanged.InvokeAsync(StartAutoMlRequest);
+        await StartTrainingDtoChanged.InvokeAsync(StartTrainingDto);
     }
 
-    private GetTasksForDatasetTypeResponseDto _compatibletasks;
-    private GetMlLibrariesForTaskResponseDto _supportedMlLibraries;
-    private GetAutoMlSolutionsForConfigurationResponseDto _compatibleAutoMls;
-    private GetAvailableStrategiesResponseDto _availableStrategies;
-    private List<String> _columnNames;
-    private bool IsLibPolled = false;
+    private GetTasksForDatasetTypeResponseDto _compatibleTasks;
+    private List<AutoMlParameterDto> _availableParameters;
+    private List<ParameterObject> _intersectedParams = new();
+    private List<(string autoMlLabel, List<ParameterObject> parameters)> _individualParams = new();
+    private List<string> _columnNames;
 
-    public MudChip[] SelectedMlLibsChips 
-    { 
+    private readonly ChipSet.ChipSetViewModel _mlLibsViewModel = new();
+    private readonly ChipSet.ChipSetViewModel _autoMlSolutionsViewModel = new();
+    private readonly ChipSet.ChipSetViewModel _strategiesViewModel = new();
+
+    private readonly ParameterIntersector _intersector;
+
+    public TaskConfiguration()
+    {
+        _intersector = new ParameterIntersector(() => _availableParameters, _autoMlSolutionsViewModel.SelectedIds.Count);
+    }
+
+    public IEnumerable<string> SelectedTargets
+    {
         get
         {
-            return _selectedMlLibChips;
-        } 
+            return _selectedTargets;
+        }
         set
         {
-            _selectedMlLibChips = value;
-            if (_selectedMlLibChips != null)
-            {
-                OnMlLibrarySelectionChanged(SelectedMlLibsChips);
-            }
+            _selectedTargets = value;
+            OnTargetChanged((HashSet<string>)_selectedTargets);
         }
     }
-    private MudChip[] _selectedMlLibChips;
+
+    private IEnumerable<string> _selectedTargets;
 
     protected async override void OnInitialized()
     {
         base.OnInitialized();
         SetupStartAutoMLConfiguration();
+        _mlLibsViewModel.SelectedIdsChanged += async (_, _) => await OnMlLibrarySelectionChanged();
+        _autoMlSolutionsViewModel.SelectedIdsChanged += async (_, _) => await OnAutoMlSolutionSelectionChanged();
+        _strategiesViewModel.SelectedIdsChanged += async (_, _) => await OnStrategySelectionChanged();
         await LoadData();
     }
 
-    private void OnRuntimeValueChanged(int e)
+    private async void OnRuntimeValueChanged(int e)
     {
-        StartAutoMlRequest.Configuration.RuntimeLimit = e;
+        StartTrainingDto.Configuration.RuntimeLimit = e;
+
+        await OnMlLibrarySelectionChanged();
     }
 
+//Updates the Parameters in the Configuration when the selected values are changed in the frontend.
+    private async void UpdateParemetersInRequest()
+    {
+        var paramList = _intersectedParams
+            .Select(p => new ParameterDto
+            {
+                Iri = p.ParameterIri,
+                Values = p.IntegerValue != null
+                        ? new List<string> { p.IntegerValue.ToString() }
+                            : p.SelectedValues.Select(v => v.ValueIri).ToList()
+            })
+            .ToList();
+
+        var individualParamsList = _individualParams
+        .Select(ip => ip.parameters.Select(p => new ParameterDto
+            {
+                Iri = p.ParameterIri,
+                Values = p.IntegerValue != null
+                            ? new List<string> { p.IntegerValue.ToString() }
+                                    : p.SelectedValues.Select(v => v.ValueIri).ToList()
+            }).ToList()).ToList();
+
+        foreach(List<ParameterDto> individualParamItem in individualParamsList)
+        {
+            paramList.AddRange(individualParamItem);
+        }
+        StartTrainingDto.Configuration.Parameters = paramList;
+
+        await UpdateStartTrainingDto();
+    }
+
+/*
+Gets triggered when the wizard is initialized.
+Initial setup of the configuration.
+*/
     private async void SetupStartAutoMLConfiguration()
     {
         _columnNames = new List<string>();
 
         if ((Dataset.Dataset.Type.ID == ":tabular") || (Dataset.Dataset.Type.ID == ":text") || (Dataset.Dataset.Type.ID == ":time_series") || (Dataset.Dataset.Type.ID == ":time_series_longitudinal"))
         {
-            foreach (KeyValuePair<string, dynamic> pair in StartAutoMlRequest.DatasetConfiguration["column_datatypes"])
+            List<string> targets = new List<string>();
+            foreach (KeyValuePair<string, ColumnSchemaDto> pair in StartTrainingDto.Schema)
             {
-                if((int)pair.Value != 7)
+                if (string.IsNullOrEmpty(pair.Value.RoleSelected.ID) || (pair.Value.RoleSelected.ID != ":ignore") && (pair.Value.RoleSelected.ID != ":index"))
                 {
                     _columnNames.Add(pair.Key);
                 }
+                if (pair.Value.RoleSelected.ID == ":target")
+                {
+                    targets.Add(pair.Key);
+                }
             }
+            SelectedTargets = new HashSet<string>(targets);
         }
-        StartAutoMlRequest.Configuration.RuntimeLimit = 3;
-        StartAutoMlRequest.Configuration.Metric = ":accuracy";
-        await UpdateStartAutoMlRequest();
+        StartTrainingDto.Configuration.RuntimeLimit = 3;
+        StartTrainingDto.Configuration.Metric = ":accuracy";
+        await UpdateStartTrainingDto();
     }
 
+/*
+Gets triggered on the initial start of the wizard.
+Loads the possible Tasks for the according data.
+*/
     private async Task LoadData()
     {
         try
         {
             GetTasksForDatasetTypeRequestDto taskRequest = new GetTasksForDatasetTypeRequestDto { DatasetType = Dataset.Dataset.Type.ID };
-            ApiResponseDto apiResponse = await apiClient.GetTasksForDatasetType(taskRequest);
+            var apiResponse = await apiClient.GetTasksForDatasetType(taskRequest);
 
-            if (apiResponse.IsSuccessStatusCode)
-            {
-                _compatibletasks = Newtonsoft.Json.JsonConvert.DeserializeObject<GetTasksForDatasetTypeResponseDto>(apiResponse.Result.ToString());
-                StateHasChanged();
-                viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
-            }
-            else
-            {
-                viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
-            }
+            HandleApiResponseWrapper(apiResponse, () => _compatibleTasks = apiResponse.Result);
         }
         catch (Exception ex)
         {
@@ -227,18 +291,119 @@
         }
     }
 
+/*
+Task thet gets triggered when the auto ML solutions are changed.
+Refreshes the intersected & individual parameters.
+*/
+    private async Task RefreshParameters()
+    {
+        var taskIri = StartTrainingDto.Configuration.Task;
+        var selectedAutoMls = StartTrainingDto.Configuration.SelectedAutoMlSolutions;
+        var apiResponse = await apiClient.GetAutoMlParameters(new GetAutoMlParametersRequestDto { AutoMls = selectedAutoMls, TaskIri = taskIri });
+        HandleApiResponseWrapper(
+            apiResponse,
+            () =>
+            {
+                _availableParameters = apiResponse.Result.AutoMlParameters;
+                _intersectedParams = ReplaceIntersectedParameter(_intersector.GetIntersectedParameters().ToList());
+                foreach (var param in _intersectedParams)
+                {
+                    param.SelectedValuesChanged += (_,_) => UpdateParemetersInRequest();
+                }
+
+
+                var paramsGroupedBySolution = _availableParameters.GroupBy(p => p.AutoMlIri);
+
+                var newIndividualParams = new List<(string, List<ParameterObject>)>();
+                if (paramsGroupedBySolution.Count() > 0)
+                {
+                    foreach (var group in paramsGroupedBySolution)
+                    {
+                        var autoMlLabel = _autoMlSolutionsViewModel.AvailableChips.Single(c => c.Id == group.Key).Label;
+                        newIndividualParams.Add(
+                            (
+                                autoMlLabel,
+                                group
+                                    .GroupBy(param => param.ParamIri)
+                                    .Select(p => CreateParameterObjectFromGroupedParameterDto(p, autoMlLabel))
+                                    .ToList()
+                            )
+                        );
+                    }
+                    _individualParams.Clear();
+                    var selectedAutoMls = _autoMlSolutionsViewModel.AvailableChips.Where(c => c.IsSelected);
+                    if (paramsGroupedBySolution.Count() > 1 || (selectedAutoMls.Count() > 1 && paramsGroupedBySolution.Count() == 1))
+                    {
+                    _individualParams = new List<(string, List<ParameterObject>)>(newIndividualParams);
+                    }
+                    newIndividualParams = null;
+                    foreach (var individualParam in _individualParams)
+                    {
+                        foreach (var param in individualParam.parameters)
+                        {
+                            param.SelectedValuesChanged += (_,_) => UpdateParemetersInRequest();
+                        }
+                    }
+                }
+            },
+            errorMessageKey: "Fetching available parameters failed");
+    }
+
+/*
+Creation of the parameter objects from the the data received from the ontology.
+Mainly restructuring of the data.
+*/
+    private ParameterObject CreateParameterObjectFromGroupedParameterDto(IGrouping<string, AutoMlParameterDto> parameterGroup, string autoMlLabel)
+    {
+        var firstInstanceWithIri = parameterGroup.First();
+        var result = new ParameterObject
+        {
+            BroaderParameterLabel = firstInstanceWithIri.BroaderLabel,
+            ParameterIri = parameterGroup.Key,
+            ParameterLabel = firstInstanceWithIri.ParamLabel,
+            ParameterType = firstInstanceWithIri.ParamType,
+        };
+
+        if (!firstInstanceWithIri.IsScalar)
+        {
+            result.ParameterValues = parameterGroup.Select(param => new ParameterValueViewModel
+            {
+                ValueIri = param.ValueIri,
+                ValueLabel = param.ValueLabel
+            }).ToList();
+            if (_individualParams.Any() && _individualParams.Where(i => i.autoMlLabel == autoMlLabel).Any())
+            {
+                var individualParamsList = _individualParams.Where(i => i.autoMlLabel == autoMlLabel).Select(p => p.parameters).First();
+                IEnumerable<ParameterValueViewModel> selectedValues = new List<ParameterValueViewModel>();
+                if (individualParamsList.Where(p => p.ParameterIri == parameterGroup.Key).Select(p => p.SelectedValues).Any())
+                {
+                    selectedValues = individualParamsList.Where(p => p.ParameterIri == parameterGroup.Key).Select(p => p.SelectedValues).First();
+                }
+                result.SelectedValues = new List<ParameterValueViewModel>(result.ParameterValues.Where(p => selectedValues.Where(s => s.ValueIri == p.ValueIri).Any()).ToList());
+            }
+        }
+        return result;
+    }
+
+/*
+Function that gets triggered when the selection of the ML Task gets changed.
+Set the task in the configuration.
+Load ML libs for the fitting task and set the data for the chipsets.
+*/
     private async void OnMlTaskSelectionChanged(string task)
     {
         if (string.IsNullOrEmpty(task))
         {
             return;
         }
-        StartAutoMlRequest.Configuration.Task = task;
+        StartTrainingDto.Configuration.Task = task;
         try
         {
-            Dictionary<string, string> dictionary = new Dictionary<string, string>();
-            dictionary.Add("task", StartAutoMlRequest.Configuration.Task);
-            await UpdateStartAutoMlRequest();
+            Dictionary<string, string> dictionary = new Dictionary<string, string>
+            {
+                { "task", StartTrainingDto.Configuration.Task }
+            };
+            await UpdateStartTrainingDto();
             /** Configuration = dictionary is currently dummy */
             //GetCompatibleAutoMlSolutionsRequestDto compatibleAutoMlRequest = new GetCompatibleAutoMlSolutionsRequestDto { Configuration = dictionary };
 
@@ -255,23 +420,14 @@
             //    viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["AutoMlSolution Operation Failed"]);
             //}
 
-            GetMlLibrariesForTaskRequestDto supportedMlLibrariesRequest = new GetMlLibrariesForTaskRequestDto { Task = StartAutoMlRequest.Configuration.Task };
-            ApiResponseDto apiResponse = await apiClient.GetMlLibrariesForTask(supportedMlLibrariesRequest);
+            GetMlLibrariesForTaskRequestDto supportedMlLibrariesRequest = new GetMlLibrariesForTaskRequestDto { Task = StartTrainingDto.Configuration.Task };
+            var apiResponse = await apiClient.GetMlLibrariesForTask(supportedMlLibrariesRequest);
 
-            if (apiResponse.IsSuccessStatusCode)
-            {
-                _supportedMlLibraries = Newtonsoft.Json.JsonConvert.DeserializeObject<GetMlLibrariesForTaskResponseDto>(apiResponse.Result.ToString());
-                StateHasChanged();
-                viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
-                //quick and dirty way to avoid inconsistent automl solution polling
-                await Task.Delay(1000);
-                IsLibPolled = true;
-                OnMlLibrarySelectionChanged(SelectedMlLibsChips);
-            }
-            else
-            {
-                viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["SupportedMlLibraries Operation Failed"]);
-            }
+            HandleApiResponseWrapper(apiResponse, () =>
+                 _mlLibsViewModel.SetAvailableChips(
+                    apiResponse.Result.MlLibraries
+                        .Select(ConvertObjectInfoToChip)),
+            errorMessageKey: "SupportedMlLibraries Operation Failed");
         }
         catch (Exception ex)
         {
@@ -279,93 +435,213 @@
         }
     }
 
-    private async void OnMlLibrarySelectionChanged(MudChip[] libs)
+    private (string id, string label, string toolTip, bool isSelected, string comment, string imageUrl) ConvertObjectInfoToChip(ObjectInfomationDto objectInfo) =>
+        (objectInfo.ID, objectInfo.Properties.GetValueOrDefault("skos:prefLabel"), objectInfo.Properties.GetValueOrDefault("rdfs:seeAlso"), true, objectInfo.Properties.GetValueOrDefault("rdfs:comment"), "");
+
+
+/*
+Task that gets triggered when the ML Library selection changes.
+ Set the selected ML libs in the configuration.
+ Get the available ML solutions with the according ML libs.
+ Trigger the event to update the available strategies.
+*/
+    private async Task OnMlLibrarySelectionChanged()
     {
-        if (IsLibPolled == false)
-        {
-            return;
-        }
         try
         {
-            Dictionary<string, string> dictionary = new Dictionary<string, string>();
-            dictionary.Add("task", StartAutoMlRequest.Configuration.Task);
-            List<string> libraries = new List<string>();
-
-
-
-            StartAutoMlRequest.Configuration.SelecctedMlLibraries = new List<string>();
-            foreach (var chip in libs)
+            Dictionary<string, string> dictionary = new Dictionary<string, string>
             {
-                StartAutoMlRequest.Configuration.SelecctedMlLibraries.Add((string)chip.Value);
-                libraries.Add((string)chip.Value);
-            }
+                { "task", StartTrainingDto.Configuration.Task },
+                { "runtimeLimit", StartTrainingDto.Configuration.RuntimeLimit.ToString() }
+            };
 
+            List<string> libraries = _mlLibsViewModel.SelectedIds.ToList();
+            StartTrainingDto.Configuration.SelecctedMlLibraries = _mlLibsViewModel.SelectedIds.ToList();
 
-
-
-
-            await UpdateStartAutoMlRequest();
-            if (libraries.Count != 0)
+            await UpdateStartTrainingDto();
+            if (libraries.Any())
             {
                 dictionary.Add("library", JsonConvert.SerializeObject(libraries));
             }
             GetAutoMlSolutionsForConfigurationRequestDto compatibleAutoMlRequest = new GetAutoMlSolutionsForConfigurationRequestDto { Configuration = dictionary };
-            ApiResponseDto apiResponse = await apiClient.GetAutoMlSolutionsForConfiguration(compatibleAutoMlRequest);
+            var apiResponse = await apiClient.GetAutoMlSolutionsForConfiguration(compatibleAutoMlRequest);
 
-            if (apiResponse.IsSuccessStatusCode)
-            {
-                _compatibleAutoMls = Newtonsoft.Json.JsonConvert.DeserializeObject<GetAutoMlSolutionsForConfigurationResponseDto>(apiResponse.Result.ToString());
-                StateHasChanged();
-                viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
-            }
-            else
-            {
-                viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
-            }
+            HandleApiResponseWrapper(apiResponse, () =>
+                _autoMlSolutionsViewModel.SetAvailableChips(apiResponse.Result.AutoMlSolutions.Select(ConvertObjectInfoToChip))
+            );
 
-            GetAvailableStrategiesRequestDto availableStrategiesRequest = new GetAvailableStrategiesRequestDto { Configuration = dictionary };
-            ApiResponseDto availableStrategiesResponse = await apiClient.GetAvailableStrategies(availableStrategiesRequest);
-
-            if (apiResponse.IsSuccessStatusCode)
-            {
-                _availableStrategies = Newtonsoft.Json.JsonConvert.DeserializeObject<GetAvailableStrategiesResponseDto>(availableStrategiesResponse.Result.ToString());
-                StateHasChanged();
-                viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
-            }
-            else
-            {
-                viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
-            }
+            await UpdateAvailableStrategies(dictionary);
         }
         catch (Exception ex)
         {
             viewNotifier.Show(ex.GetBaseException().Message, ViewNotifierType.Error, L["Operation Failed"]);
-        } 
-    }
-
-    private async void OnAutoMlSolutionSelectionChanged(MudChip[] automls)
-    {
-        StartAutoMlRequest.Configuration.SelectedAutoMlSolutions = new List<string>();
-        foreach (var chip in automls)
-        {
-            StartAutoMlRequest.Configuration.SelectedAutoMlSolutions.Add(chip.Value.ToString());
         }
-        await UpdateStartAutoMlRequest();
     }
 
-    private async void OnStrategySelectionChanged(MudChip[] strategies)
+/*
+Task that gets triggered when the ML Library selection gets changed.
+Updates the available strategies for the selected libraries.
+*/
+    private async Task UpdateAvailableStrategies(Dictionary<string, string> dictionary)
     {
-        StartAutoMlRequest.Configuration.EnabledStrategies = new List<string>();
-        foreach (var chip in strategies)
+        int runtime_limit = StartTrainingDto.Configuration.RuntimeLimit;
+        GetAvailableStrategiesRequestDto availableStrategiesRequest = new GetAvailableStrategiesRequestDto { Configuration = dictionary, DatasetId = Dataset.Dataset.Id };
+        var availableStrategiesResponse = await apiClient.GetAvailableStrategies(availableStrategiesRequest);
+
+        HandleApiResponseWrapper(availableStrategiesResponse, () =>
+            _strategiesViewModel.SetAvailableChips(availableStrategiesResponse.Result.Strategies.Select(s => (s.Id, s.Title, s.Description, false, "", "")))
+
+        );
+    }
+
+    private void HandleApiResponseWrapper<T>(ApiResponseDto<T> apiResponse, Action successAction, string errorMessageKey = "Operation Failed", string successMessageKey = "Operation Successful")
+    {
+        if (apiResponse.IsSuccessStatusCode)
         {
-            StartAutoMlRequest.Configuration.EnabledStrategies.Add(chip.Value.ToString());
+            successAction();
+            StateHasChanged();
+            viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L[successMessageKey]);
         }
-        await UpdateStartAutoMlRequest();
+        else
+        {
+            viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L[errorMessageKey]);
+        }
     }
 
-    private async void OnTargetChanged(string value)
+/*
+Task that gets triggered when the selection of the AuotML gets changed.
+Sets the selected AutoMLs in the configuration to the in the frontend selected AutoMLs.
+Triggers the refresh of the available parameters.
+*/
+    private async Task OnAutoMlSolutionSelectionChanged()
     {
-        StartAutoMlRequest.Configuration.Target = value;
-        await UpdateStartAutoMlRequest();
+        StartTrainingDto.Configuration.SelectedAutoMlSolutions = _autoMlSolutionsViewModel.SelectedIds.ToList();
+
+        await UpdateStartTrainingDto();
+        await RefreshParameters();
+    }
+
+/*
+Task that gets triggered when the strategy gets changed.
+Set the enabled strategies to the in the frontend selected strategies.
+*/
+    private Task OnStrategySelectionChanged()
+    {
+        StartTrainingDto.Configuration.EnabledStrategies = _strategiesViewModel.SelectedIds.ToList();
+        return UpdateStartTrainingDto();
+    }
+
+/*
+Function that gets triggered when the target column of the dataset gets changed.
+Sets the target to the in the frontend selected values
+*/
+    private async void OnTargetChanged(HashSet<string> values)
+    {
+        //We need to update the schema configuration with appropriated target values
+        foreach (var item in StartTrainingDto.Schema)
+        {
+            if (values.Contains(item.Key))
+            {
+                item.Value.RoleSelected.ID = ":target";
+            }
+            else
+            {
+                if ((!string.IsNullOrEmpty(item.Value.RoleSelected.ID)) && (item.Value.RoleSelected.ID == ":target"))
+                {
+                    item.Value.RoleSelected.ID = null;
+                }
+            }
+        }
+        await UpdateStartTrainingDto();
+    }
+
+/*
+Set the selectedValues of the intersected parameter because the intersected parameter list got replaced and therefore the selection of the parameter got reseted
+- intersectedParamsNew: List of the intersected parameters
+returns:
+- List of the intersected parameters with the already selected values
+*/
+    private List<ParameterObject> ReplaceIntersectedParameter(List<ParameterObject> intersectedParamsNew)
+    {
+        foreach (ParameterObject intersectedParam in intersectedParamsNew)
+        {
+            if(_intersectedParams.Where(p => p.ParameterIri == intersectedParam.ParameterIri).Any())
+            {
+                try
+                {
+                    //TODO watch out for int values, does this pose an issue for intersections?
+                    List<ParameterValueViewModel> selectedValueList = _intersectedParams.Where(p => p.ParameterIri == intersectedParam.ParameterIri).First().SelectedValues.Where(s => intersectedParam.ParameterValues.Where( pv => pv.ValueIri == s.ValueIri).Any()).ToList();
+                    if (intersectedParam.ParameterValues != null)
+                    {
+                        intersectedParam.SelectedValues = intersectedParam.ParameterValues.Where(p => selectedValueList.Where(s => s.ValueIri == p.ValueIri).Any()).ToList();
+                    }
+                }
+                catch (Exception e)
+                {
+
+                    throw;
+                }
+            }
+        }
+        return intersectedParamsNew;
+    }
+
+/*
+Class for the parameter values
+- ValueIri: Iri of the stored parameter value
+- ValueLabel: Label of the stored parameter value
+Example: ValueIri -> ":accuracy" | ValueLabel -> "accuracy"
+*/
+    public class ParameterValueViewModel
+    {
+        public string ValueIri { get; set; }
+        public string ValueLabel { get; set; }
+    }
+
+/*
+Class that contains all informations about a parameter.
+- BroaderParameterLabel: Label of the broader parameter type (e.g. parameter label: "metric autokeras" -> broader label: "metric")
+- ParameterIri: Iri of the parameter
+- ParameterLabel: Label of the parameter
+- ParameterType: Type of the parameter
+- ParameterValues: List of Values that the parameter can have
+- _selectedValues: private list of the selected parameter values
+- SelectedValues: public visibility of the selected parameter values
+- _integerValue: private integer value that the parameter has
+- IntegerValue: public visibility of the selected integer value
+*/
+    public class ParameterObject
+    {
+        public event EventHandler SelectedValuesChanged;
+        public string BroaderParameterLabel { get; set; }
+        public string ParameterIri { get; set; }
+        public string ParameterLabel { get; set; }
+        public string ParameterType { get; set; }
+        public List<ParameterValueViewModel> ParameterValues { get; set; } = new();
+        private IEnumerable<ParameterValueViewModel> _selectedValues = new List<ParameterValueViewModel>();
+        public IEnumerable<ParameterValueViewModel> SelectedValues
+        {
+            get => _selectedValues;
+            set
+            {
+                _selectedValues = value;
+                SelectedValuesChanged?.Invoke(this, EventArgs.Empty);
+            }
+        }
+
+        private int? _integerValue;
+        public int? IntegerValue
+        {
+            get => _integerValue;
+            set
+            {
+                if (_integerValue == value)
+                {
+                    return;
+                }
+                _integerValue = value;
+                SelectedValuesChanged?.Invoke(this, EventArgs.Empty);
+            }
+        }
     }
 }

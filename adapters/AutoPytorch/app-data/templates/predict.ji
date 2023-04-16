@@ -1,38 +1,42 @@
-import pickle
+import dill
 import json
 import sys
 
 import pandas as pd
 import numpy as np
-
-from predict_time_sources import feature_preparation, DataType, SplitMethod
+{% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression", ":time_series_forecasting"] %}
+from preprocessing import dataset_preparation, seperate_time_series_dataframe
+{% endif %}
 
 
 if __name__ == '__main__':
     filepath = sys.argv[1]
-    configpath = sys.argv[2]
+    save_path = sys.argv[2]
+    X = None
 
-    with open(configpath) as file:
-        config_json = json.load(file)
-
-    target = config_json["configuration"]["target"]["target"]
-    features = config_json["dataset_configuration"]["features"]
-    X = pd.read_csv(filepath).drop(target, axis=1, errors='ignore')
-    features.pop(target, None)
-    features = features.items()
-
-    # split training set
-    if SplitMethod.SPLIT_METHOD_RANDOM.value == config_json["test_configuration"]["method"]:
-        X = X.sample(random_state=config_json["test_configuration"]["random_state"], frac=1)
-    else:
-        X = X.iloc[int(X.shape[0] * config_json["test_configuration"]["split_ratio"]):]
-
-    X = feature_preparation(X, features)
-
+    {% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression"] %}
+    X, y = dataset_preparation(filepath)
+    {% endif %}
+    {% if configuration.configuration["task"] in [":time_series_forecasting"] %}
+    #We need current observations
+    X, y = dataset_preparation(filepath, is_prediction=False)
+    X[y.name] = y.values
+    previous_ts, X = seperate_time_series_dataframe(X)
+    {% endif %}
 
     with open(sys.path[0] + '/model_pytorch.p', 'rb') as file:
-        automl = pickle.load(file)
+        automl = dill.load(file)
 
+    {% if configuration.configuration["task"] in [":time_series_forecasting"] %}
     predicted_y = automl.predict(X)
+    {% endif %}
+    {% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression"] %}
+    if X.shape[0] == 1:
+        X = pd.concat([X]*2, ignore_index=True) # Ignores the index
+        predicted_y =  automl.predict(X)
+        predicted_y = predicted_y[:-1]
+    else:
+        predicted_y = automl.predict(X)
+    {% endif %}
     predicted_y = np.reshape(predicted_y, (-1, 1))
-    pd.DataFrame(data=predicted_y, columns=["predicted"]).to_csv(sys.path[0] +"/predictions.csv")
+    pd.DataFrame(data=predicted_y, columns=["predicted"]).to_csv(save_path)

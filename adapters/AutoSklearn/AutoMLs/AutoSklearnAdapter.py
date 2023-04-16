@@ -3,13 +3,14 @@ import os
 import autosklearn.classification
 import autosklearn.regression
 import pandas as pd
-from AbstractAdapter import AbstractAdapter
-from AdapterUtils import export_model, prepare_tabular_dataset, data_loader
+from AdapterUtils import *
+from AdapterTabularUtils import *
 from JsonUtil import get_config_property
-from predict_time_sources import SplitMethod
+
+import AutoSklearnParameterConfig as aspc
 
 
-class AutoSklearnAdapter(AbstractAdapter):
+class AutoSklearnAdapter:
     """
     Implementation of the AutoML functionality for AutoSklearnAdapter
     """
@@ -20,12 +21,7 @@ class AutoSklearnAdapter(AbstractAdapter):
         Args:
             configuration (dict): Dictonary holding the training configuration
         """
-        super().__init__(configuration)
-
-        if self._configuration["configuration"]["metric"] == "":
-            # handle empty metric field, None is the default metric parameter for AutoSklearn
-            self._configuration["configuration"]["metric"] = None
-        self._result_path = self._configuration["model_folder_location"]
+        self._configuration = configuration
         return
 
     def start(self):
@@ -45,7 +41,10 @@ class AutoSklearnAdapter(AbstractAdapter):
         if self._configuration["configuration"]["runtime_limit"] != 0:
             automl_settings.update(
                 {"time_left_for_this_task": (self._configuration["configuration"]["runtime_limit"] * 60)}) #convert into seconds
-        automl_settings.update({"metric": None})
+
+        parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), aspc.task_config)
+        automl_settings.update(parameters)
+
         return automl_settings
 
     def __tabular_classification(self):
@@ -63,6 +62,9 @@ class AutoSklearnAdapter(AbstractAdapter):
         """Execute the tabular regression task and export the found model"""
         self.df, test = data_loader(self._configuration)
         X, y = prepare_tabular_dataset(self.df, self._configuration)
+        # convert all object columns to categories, because autosklearn only supports numerical, bool and categorical features
+        X[X.select_dtypes(['object']).columns] = X.select_dtypes(['object']) \
+        .apply(lambda x: x.astype('category'))
 
         automl_settings = self.__generate_settings()
         auto_reg = autosklearn.regression.AutoSklearnRegressor(**automl_settings)
@@ -71,7 +73,7 @@ class AutoSklearnAdapter(AbstractAdapter):
         export_model(auto_reg, self._configuration["result_folder_location"], "model_sklearn.p")
 
     def __get_logging_config(self) -> dict:
-        """Generate the logging configuration dict for autosklearn 
+        """Generate the logging configuration dict for autosklearn
 
         Returns:
             dict: logging configuration dict

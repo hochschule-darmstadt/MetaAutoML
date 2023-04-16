@@ -1,0 +1,10 @@
+{
+    "recommendations": [
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "ms-azuretools.vscode-docker",
+        "njpwerner.autodocstring",
+        "stardog-union.stardog-rdf-grammars",
+        "EditorConfig.EditorConfig"
+    ]
+}

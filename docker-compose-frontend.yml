@@ -7,8 +7,8 @@ services:
       # the below path is relative to the build context
       dockerfile: ./src/Utils/Docker/Dockerfile
     ports:
-      - 53415:80
-      - 53443:443
+      - 54415:80
+      - 54443:443
     depends_on:
       - sqlserver
       - controller
@@ -41,9 +41,12 @@ services:
       - training-flaml:/app/app-data/training/flaml
       - training-gluon:/app/app-data/training/gluon
       #- training-autocve:/app/app-data/training/autocve
-      #- training-pytorch:/app/app-data/training/pytorch
+      - training-pytorch:/app/app-data/training/pytorch
       #- training-alphad3m:/app/app-data/training/alphad3m
       - training-mcfly:/app/app-data/training/mcfly
+      - training-evalml:/app/app-data/training/evalml
+      - training-pycaret:/app/app-data/training/pycaret
+      - training-tpot:/app/app-data/training/tpot
     extra_hosts:
       - "docker.host.internal:host-gateway"
 

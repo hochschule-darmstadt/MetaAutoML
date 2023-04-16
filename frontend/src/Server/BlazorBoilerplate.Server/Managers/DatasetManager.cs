@@ -1,4 +1,4 @@
-﻿using Azure;
+using Azure;
 using BlazorBoilerplate.Constants;
 using BlazorBoilerplate.Infrastructure.Server;
 using BlazorBoilerplate.Infrastructure.Server.Models;
@@ -8,18 +8,28 @@ using BlazorBoilerplate.Storage;
 using Grpc.Core;
 using Grpc.Net.Client;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.Analysis;
 using Microsoft.Extensions.Logging;
+using MudBlazor.Charts;
 using Newtonsoft.Json;
+using Serilog.Core;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using UtfUnknown;
 using static Microsoft.AspNetCore.Http.StatusCodes;
+using System.IO.Compression;
+using System.Runtime.CompilerServices;
+using Karambolo.Common;
+using System.Diagnostics;
+using static MudBlazor.CategoryTypes;
 
 namespace BlazorBoilerplate.Server.Managers
 {
@@ -52,7 +62,7 @@ namespace BlazorBoilerplate.Server.Managers
             try
             {
                 var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
-                string trustedFileNameForDisplay = WebUtility.HtmlEncode(request.FileName);
+                string trustedFileNameForDisplay = WebUtility.HtmlEncode(request.FileNameOrURL);
                 string controllerDatasetPath = Environment.GetEnvironmentVariable("CONTROLLER_DATASET_FOLDER_PATH");
                 var path = Path.Combine(controllerDatasetPath, username, "uploads");
 
@@ -74,25 +84,49 @@ namespace BlazorBoilerplate.Server.Managers
                 await using FileStream fs = new(Path.Combine(path, trustedFileNameForDisplay), FileMode.Append);
                 fs.Write(request.Content, 0, request.Content.Length);
 
-                //We uploaded everything, send grpc request to controller to persist
+                // get the complete file path before fs is released
+                string filePath = path + "/" + Path.GetFileName(fs.Name);
+
                 if (request.ChunkNumber == request.TotalChunkNumber)
                 {
                     fs.Dispose();
-                    grpcRequest.UserId = username;
-                    grpcRequest.FileName = trustedFileNameForDisplay;
-                    grpcRequest.DatasetName = request.DatasetName;
 
                     grpcRequest.DatasetType = request.DatasetType;
-                    var reply = _client.CreateDataset(grpcRequest);
-                    return new ApiResponse(Status200OK, null, "");
+                    DetectionResult result;
+                    if (grpcRequest.DatasetType == ":text" || grpcRequest.DatasetType == ":tabular" || grpcRequest.DatasetType == ":time_series" || grpcRequest.DatasetType == ":time_series_longitudinal")
+                    {
+                        using (FileStream fs1 = new FileStream(Path.Combine(path, trustedFileNameForDisplay), FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                        {
+                            result = CharsetDetector.DetectFromStream(fs1);
+
+                        }
+                        grpcRequest.Encoding = result.Detected.EncodingName.ToString();
+                    } else
+                    {
+                        grpcRequest.Encoding = "";
+                    }
+                    bool correctStrukture = CheckUploadStructure(filePath);
+
+                    if (correctStrukture == true)
+                        {
+                            grpcRequest.UserId = username;
+                            grpcRequest.FileName = trustedFileNameForDisplay;
+                            grpcRequest.DatasetName = request.DatasetName;
+                            grpcRequest.DatasetType = request.DatasetType;
+                            var reply = _client.CreateDataset(grpcRequest);
+                            return new ApiResponse(Status200OK, null, "");
+                    }
+                    else
+                    {
+                        return new ApiResponse(Status406NotAcceptable, "FolderStructureNotCorrectErrorMessage");
+                    }
                 }
-                return new ApiResponse(Status200OK, null, 0);
+                return new ApiResponse(Status200OK, null, "");
             }
             catch (Exception ex)
             {
-
                 return new ApiResponse(Status404NotFound, ex.Message);
-            }
+            }     
         }
         /// <summary>
         /// Get a list of all Datasets
@@ -110,7 +144,17 @@ namespace BlazorBoilerplate.Server.Managers
                 var reply = _client.GetDatasets(getDatasetsRequest);
                 foreach (Dataset item in reply.Datasets)
                 {
-                    response.Datasets.Add(new DatasetDto(item, await _cacheManager.GetObjectInformation(item.Type)));
+                    Dictionary<string, Shared.Dto.Dataset.ColumnSchemaDto> schema = new Dictionary<string, Shared.Dto.Dataset.ColumnSchemaDto>();
+                    foreach (var column in item.Schema)
+                    {
+                        schema.Add(column.Key, new Shared.Dto.Dataset.ColumnSchemaDto(
+                            await _cacheManager.GetObjectInformation(column.Value.DatatypeDetected),
+                            await _cacheManager.GetObjectInformationList(column.Value.DatatypesCompatible.ToList()),
+                            column.Value.DatatypeSelected == "" ? new ObjectInfomationDto() : await _cacheManager.GetObjectInformation(column.Value.DatatypeSelected),
+                            await _cacheManager.GetObjectInformationList(column.Value.RolesCompatible.ToList()),
+                            column.Value.RoleSelected == "" ? new ObjectInfomationDto() : await _cacheManager.GetObjectInformation(column.Value.RoleSelected)));
+                    }
+                    response.Datasets.Add(new DatasetDto(item, await _cacheManager.GetObjectInformation(item.Type), schema));
                 }
                 return new ApiResponse(Status200OK, null, response);
 
@@ -138,7 +182,17 @@ namespace BlazorBoilerplate.Server.Managers
                 getDatasetRequest.UserId = username;
                 getDatasetRequest.DatasetId = request.DatasetId;
                 var reply = _client.GetDataset(getDatasetRequest);
-                response = new GetDatasetResponseDto(new DatasetDto(reply, await _cacheManager.GetObjectInformation(reply.Dataset.Type)));
+                Dictionary<string, Shared.Dto.Dataset.ColumnSchemaDto> schema = new Dictionary<string, Shared.Dto.Dataset.ColumnSchemaDto>();
+                foreach (var column in reply.Dataset.Schema)
+                {
+                    schema.Add(column.Key, new Shared.Dto.Dataset.ColumnSchemaDto(
+                        await _cacheManager.GetObjectInformation(column.Value.DatatypeDetected),
+                        await _cacheManager.GetObjectInformationList(column.Value.DatatypesCompatible.ToList()),
+                        column.Value.DatatypeSelected == "" ? new ObjectInfomationDto() : await _cacheManager.GetObjectInformation(column.Value.DatatypeSelected),
+                        await _cacheManager.GetObjectInformationList(column.Value.RolesCompatible.ToList()),
+                        column.Value.RoleSelected == "" ? new ObjectInfomationDto() : await _cacheManager.GetObjectInformation(column.Value.RoleSelected)));
+                }
+                response = new GetDatasetResponseDto(new DatasetDto(reply, await _cacheManager.GetObjectInformation(reply.Dataset.Type), schema));
 
                 return new ApiResponse(Status200OK, null, response);
 
@@ -169,7 +223,8 @@ namespace BlazorBoilerplate.Server.Managers
                 switch (reply.Dataset.Type)
                 {
                     case ":tabular":
-                        response.DatasetPreview = File.ReadAllText(datasetLocation.Replace(".csv", "_preview.csv"));
+                     
+                        response.DatasetPreview = datasetLocation;
 
                         break;
                     case ":image":
@@ -190,13 +245,16 @@ namespace BlazorBoilerplate.Server.Managers
                         }
                         break;
                     case ":text":
-                        response.DatasetPreview = File.ReadAllText(datasetLocation.Replace(".csv", "_preview.csv"));
+
+                        response.DatasetPreview = datasetLocation; 
                         break;
                     case ":time_series":
-                        response.DatasetPreview = File.ReadAllText(datasetLocation.Replace(".csv", "_preview.csv"));
+                      
+                        response.DatasetPreview = datasetLocation;
                         break;
                     case ":time_series_longitudinal":
-                        response.DatasetPreview = File.ReadAllText(datasetLocation.Replace(".ts", "_preview.csv"));
+                       
+                        response.DatasetPreview = datasetLocation;
                         break;
                     default:
                         break;
@@ -211,50 +269,37 @@ namespace BlazorBoilerplate.Server.Managers
                 return new ApiResponse(Status404NotFound, ex.Message);
             }
         }
-        /// <summary>
-        /// Helper function, get all column names of a structured data dataset
-        /// </summary>
-        /// <param name="dataset"></param>
-        /// <returns></returns>
-        public async Task<ApiResponse> GetTabularDatasetColumn(GetTabularDatasetColumnRequestDto request)
-        {
-            GetTabularDatasetColumnResponseDto response = new GetTabularDatasetColumnResponseDto();
-            GetTabularDatasetColumnRequest getColumnNamesRequest = new GetTabularDatasetColumnRequest();
-            var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
-            try
-            {
-                getColumnNamesRequest.UserId = username;
-                getColumnNamesRequest.DatasetId = request.DatasetId;
-                var reply = _client.GetTabularDatasetColumn(getColumnNamesRequest);
-                foreach (var item in reply.Columns.ToList())
-                {
-                    response.Columns.Add(new ColumnsDto
-                    {
-                        Name = item.Name,
-                        Type = item.Type,
-                        ConvertibleTypes = item.ConvertibleTypes.ToList(),
-                    });
-                }
-                return new ApiResponse(Status200OK, null, response);
-
-            }
-            catch (Exception ex)
-            {
-
-                return new ApiResponse(Status404NotFound, ex.Message);
-            }
-        }
-
         public async Task<ApiResponse> SetDatasetFileConfiguration(SetDatasetFileConfigurationRequestDto request)
         {
-            SetDatasetFileConfigurationRequest grpcRequest = new SetDatasetFileConfigurationRequest();
+            SetDatasetConfigurationRequest grpcRequest = new SetDatasetConfigurationRequest();
             var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
             try
             {
                 grpcRequest.UserId = username;
                 grpcRequest.DatasetId = request.DatasetId;
                 grpcRequest.FileConfiguration = JsonConvert.SerializeObject(request.Configuration);
-                var reply = _client.SetDatasetFileConfiguration(grpcRequest);
+                var reply = _client.SetDatasetConfiguration(grpcRequest);
+                return new ApiResponse(Status200OK, null, "");
+
+            }
+            catch (Exception ex)
+            {
+                return new ApiResponse(Status404NotFound, ex.Message);
+            }
+        }
+
+        public async Task<ApiResponse> SetDatasetColumnSchemaConfiguration(SetDatasetColumnSchemaConfigurationRequestDto request)
+        {
+            SetDatasetColumnSchemaConfigurationRequest grpcRequest = new SetDatasetColumnSchemaConfigurationRequest();
+            var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
+            try
+            {
+                grpcRequest.UserId = username;
+                grpcRequest.DatasetId = request.DatasetId;
+                grpcRequest.DatatypeSelected = request.SelectedDatatype == null ? "" : request.SelectedDatatype;
+                grpcRequest.RoleSelected = request.SelectedRole == null ? "" : request.SelectedRole;
+                grpcRequest.Column = request.Column;
+                var reply = _client.SetDatasetColumnSchemaConfiguration(grpcRequest);
                 return new ApiResponse(Status200OK, null, "");
 
             }
@@ -317,6 +362,38 @@ namespace BlazorBoilerplate.Server.Managers
                 Console.WriteLine(ex.Message);
                 return new ApiResponse(Status404NotFound, ex.Message);
             }
+        }
+
+        private bool CheckUploadStructure(string filePath)
+        {
+            string fileExt = filePath.Substring(filePath.Length - 4);
+            List<string> zipEntries = new List<string>();
+
+            if (fileExt == ".csv")
+            {
+                // .csv does not need validation at the moment
+                return true; 
+            }
+            else if (fileExt == ".zip")
+            {
+                using (ZipArchive archive = ZipFile.OpenRead(filePath))
+                {
+                    foreach (ZipArchiveEntry entry in archive.Entries)
+                    {
+                        // take only top level folders, look for test and train
+                        if (entry.FullName.EndsWith("/train/") || entry.FullName.EndsWith("/test/"))
+                        {
+                            zipEntries.Add(entry.FullName);
+                        }
+                    }
+                }
+                // if test and train are found, return true
+                if (zipEntries.Count == 2)
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         private byte[] GetImageAsBytes(string path)

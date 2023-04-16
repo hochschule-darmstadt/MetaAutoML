@@ -15,7 +15,7 @@ class DataStorage:
     """
     def __init__(self, data_storage_dir: str, mongo_db: MongoDbClient = None):
         """Initialize a new DataStorage instance.
-        
+
         Args:
             data_storage_dir (str): Directory path which the data storage uses as base to save data
             mongo_db (MongoDbClient, optional): Mongodb client used to interact with the mongodb. Defaults to None.
@@ -28,6 +28,18 @@ class DataStorage:
         #self.__mongo_db_url = mongo_db_url
         self.__mongo: MongoDbClient = mongo_db
         self.__lock = Lock()
+        self.__frontend_backend_encoding_conversion_table = {
+            "ascii": "ascii",
+            "utf-8": "utf_8",
+            "utf-16": "utf_16",
+            "utf-16le": "utf_16_le",
+            "utf-16be": "utf_16_be",
+            "utf-32": "utf_32",
+            "windows-1252" : "cp1252",
+            "iso-8859-1": "latin-1",
+            "latin-1": "latin-1",
+            "": ""
+        }
 
     ####################################
     ## MISC DATASTORAGE OPERATIONS
@@ -65,7 +77,7 @@ class DataStorage:
         state = self.__dict__.copy()
         del state['_DataStorage__mongo']
         return state
-    
+
     def __setstate__(self, state):
         self.__dict__.update(state)
         self.__mongo: MongoDbClient = MongoDbClient(self.__mongo_db_url)
@@ -75,9 +87,9 @@ class DataStorage:
     ####################################
     ## DATASET RELATED OPERATIONS
     ####################################
-#region 
+#region
 
-    def create_dataset(self, user_id: str, file_name: str, type: str, name: str) -> str:
+    def create_dataset(self, user_id: str, file_name: str, type: str, name: str, encoding: str) -> str:
         """Create new dataset record and move dataset from upload folder to final path
 
         Args:
@@ -85,6 +97,7 @@ class DataStorage:
             file_name (str): Uploaded file name within the users upload folder
             type (str): The selected dataset type
             name (str): User defined name used when displaying the dataset
+            encoding (str): Automatically detected encoding
 
         Returns:
             str: The new dataset record id
@@ -98,7 +111,7 @@ class DataStorage:
             "name": name,
             "type": type,
             "path": "",
-            "file_configuration": {},
+            "schema": {},
             "training_ids": [],
             "analysis": {
                 "creation_date": 0,
@@ -114,7 +127,7 @@ class DataStorage:
 
         upload_file = os.path.join(self.__storage_dir, user_id, "uploads", file_name)
         self.__log.debug(f"create_dataset: upload location is: {upload_file}")
-        
+
         filename_dest = os.path.join(self.__storage_dir, user_id, dataset_id, file_name)
         self.__log.debug(f"create_dataset: final persistence location is: {filename_dest}")
 
@@ -130,21 +143,13 @@ class DataStorage:
             os.remove(filename_dest)
             filename_dest = filename_dest.replace(".zip", "")
             fileName = file_name.replace(".zip", "")
-
         if type == ":tabular" or type == ":text" or type == ":time_series":
             #generate preview of tabular and text dataset
             #previewDf = pd.read_csv(filename_dest)
             #previewDf.head(50).to_csv(filename_dest.replace(".csv", "_preview.csv"), index=False)
             #causes error with different delimiters use normal string division
-            self.__log.debug("create_dataset: dataset is of CSV type: creating subset preview file, and generating csv file configuration...")
-            with open(filename_dest, encoding="utf8") as file:
-                lines = file.readlines()
-            with open(filename_dest.replace(".csv", "_preview.csv"), "x") as preview:
-                preview_line = lines[:51]
-                for line in preview_line:
-                    preview.write(line)
-                    # preview.write("\n")
-            file_configuration = {"use_header": True, "start_row":1, "delimiter":"comma", "escape_character":"\\", "decimal_character":"."}
+            self.__log.debug("create_dataset: dataset is of CSV type: generating csv file configuration...")
+            file_configuration = {"use_header": True, "start_row":1, "delimiter":"comma", "escape_character":"\\", "decimal_character":".", "encoding": self.__frontend_backend_encoding_conversion_table[encoding], "thousands_seperator": "", "datetime_format": "%d-%m-%Y %H:%M:%S"}
 
         if type == ":time_series_longitudinal":
             self.__log.debug("create_dataset: dataset is of TS nature: creating subset preview file, and generating csv file configuration...")
@@ -188,7 +193,7 @@ class DataStorage:
             # Save the new dataframe as a csv file
             df_preview_filename = filename_dest.replace(".ts", "_preview.csv")
             pd.DataFrame(df_dict).to_csv(df_preview_filename, index=False)
-            file_configuration = {"use_header": True, "start_row":1, "delimiter":"comma", "escape_character":"\\", "decimal_character":"."}
+            file_configuration = {"use_header": True, "start_row":1, "delimiter":"comma", "escape_character":"\\", "decimal_character":".", "encoding": self.__frontend_backend_encoding_conversion_table[encoding], "thousands_seperator": "", "datetime_format": "%Y-%m-%d  %H:%M:%S"}
 
         success = self.__mongo.update_dataset(user_id, dataset_id, {
             "path": filename_dest,
@@ -197,7 +202,7 @@ class DataStorage:
         assert success, f"cannot update dataset with id {dataset_id}"
 
         return dataset_id
-               
+
     def update_dataset(self, user_id: str, dataset_id: str, new_values: 'dict[str, object]') -> bool:
         """Update single dataset record with new values
         Args:
@@ -238,7 +243,7 @@ class DataStorage:
             list[dict[str, object]]: List of all available dataset records
         """
         return [ds for ds in self.__mongo.get_datasets(user_id, {"lifecycle_state": "active"})]
-        
+
     def delete_dataset(self, user_id: str, dataset_id: str) -> int:
         """Delete a dataset record by id from a user databse. (all related record and files will also be deleted (Trainings, Models, Predictions))
 
@@ -375,7 +380,7 @@ class DataStorage:
                 path = path.replace("\\export\\alphad3m-export.zip", "")
             else:
                 path = path.replace("/export/alphad3m-export.zip", "")
-            
+
         elif model["auto_ml_solution"] == ":autocve":
             if os.getenv("WIN_DEV_MACHINE") == "YES":
                 path = path.replace("\\export\\autocve-export.zip", "")
@@ -501,7 +506,7 @@ class DataStorage:
             return [sess for sess in self.__mongo.get_trainings(user_id, {"lifecycle_state": "active"})]
         else:
             return [sess for sess in self.__mongo.get_trainings(user_id, {"dataset_id": dataset_id, "lifecycle_state": "active"})]
-        
+
     def delete_training(self, user_id: bool, training_id: str) -> int:
         """Delete a training record by id from a user databse. (all related record and files will also be deleted (Models, Predictions))
 
@@ -533,13 +538,13 @@ class DataStorage:
         amount_deleted_trainings_result = self.__mongo.delete_training(user_id, training_id)
         self.__log.debug(f"delete_training: documents deleted within training: {amount_deleted_trainings_result}")
         return amount_deleted_trainings_result
-   
+
 #endregion
 
     ####################################
     ## PREDICTION RELATED OPERATIONS
     ####################################
-#region 
+#region
 
     def create_prediction(self, user_id: str, live_dataset_file_name: str, prediction_details: 'dict[str, object]') -> str:
         """Create new prediction record inside MongoDB
@@ -582,7 +587,7 @@ class DataStorage:
 
         upload_file = os.path.join(self.__storage_dir, user_id, "uploads", live_dataset_file_name)
         self.__log.debug(f"create_prediction: upload location is: {upload_file}")
-        
+
         filename_dest = os.path.join(self.__storage_dir, user_id, str(dataset["_id"]), "predictions", prediction_id, live_dataset_file_name)
         self.__log.debug(f"create_prediction: final persistence location is: {filename_dest}")
 
@@ -687,7 +692,7 @@ class DataStorage:
 #endregion
 
 
-    
+
 
     class __DbLock():
         """
@@ -695,9 +700,9 @@ class DataStorage:
         """
         def __init__(self, inner: Lock):
             self.__inner = inner
-            
+
         def __enter__(self):
             self.__inner.acquire()
-            
+
         def __exit__(self, type, value, traceback):
             self.__inner.release()

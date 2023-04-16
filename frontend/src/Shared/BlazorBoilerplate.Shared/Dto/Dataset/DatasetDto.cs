@@ -1,4 +1,5 @@
-﻿using BlazorBoilerplate.Server;
+using Apache.Arrow;
+using BlazorBoilerplate.Server;
 using BlazorBoilerplate.Shared.Dto.Ontology;
 using Newtonsoft.Json;
 using System;
@@ -16,11 +17,12 @@ namespace BlazorBoilerplate.Shared.Dto.Dataset
         public ObjectInfomationDto Type { get; set; }
         public Dictionary<string, dynamic> FileConfiguration { get; set; }
         public Dictionary<string, dynamic> Analysis { get; set; }
+        public Dictionary<string, ColumnSchemaDto> Schema { get; set; }
         public DatasetDto()
         {
             Analysis = new Dictionary<string, dynamic>();
         }
-        public DatasetDto(GetDatasetResponse grpcObject, ObjectInfomationDto type)
+        public DatasetDto(GetDatasetResponse grpcObject, ObjectInfomationDto type, Dictionary<string, ColumnSchemaDto> schema)
         {
             Id = grpcObject.Dataset.Id;
             Name = grpcObject.Dataset.Name;
@@ -28,8 +30,9 @@ namespace BlazorBoilerplate.Shared.Dto.Dataset
             FileConfiguration = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(grpcObject.Dataset.FileConfiguration);
             Analysis = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(grpcObject.Dataset.Analysis);
             Analysis["creation_date"] = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc).AddSeconds(Analysis["creation_date"]);
+            Schema = schema;
         }
-        public DatasetDto(Server.Dataset grpcObject, ObjectInfomationDto type)
+        public DatasetDto(Server.Dataset grpcObject, ObjectInfomationDto type, Dictionary<string, ColumnSchemaDto> schema)
         {
             Id = grpcObject.Id;
             Name = grpcObject.Name;
@@ -37,6 +40,7 @@ namespace BlazorBoilerplate.Shared.Dto.Dataset
             FileConfiguration = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(grpcObject.FileConfiguration);
             Analysis = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(grpcObject.Analysis);
             Analysis["creation_date"] = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc).AddSeconds(Analysis["creation_date"]);
+            Schema = schema;
         }
 
         public char GetDelimiter()
@@ -71,5 +75,39 @@ namespace BlazorBoilerplate.Shared.Dto.Dataset
                     return ",";
             }
         }
+        public Encoding GetEncoding()
+        {
+            switch (this.FileConfiguration["encoding"])
+            {
+                case "ascii":
+                    return Encoding.ASCII;
+                case "utf-8":
+                    return Encoding.UTF8;
+                case "latin-1":
+                    return Encoding.Latin1;
+                case "utf-32":
+                    return Encoding.UTF32;
+                case "utf-16":
+                    return Encoding.BigEndianUnicode;
+                default:
+                    return Encoding.UTF8;
+            }
+        }
+    }
+    public class ColumnSchemaDto
+    {
+        public ColumnSchemaDto(ObjectInfomationDto datatypeDetected, List<ObjectInfomationDto> datatypesCompatible, ObjectInfomationDto datatypeSelected, List<ObjectInfomationDto> rolesCompatible, ObjectInfomationDto roleSelected)
+        {
+            DatatypeDetected = datatypeDetected;
+            DatatypesCompatible = datatypesCompatible;
+            DatatypeSelected = datatypeSelected;
+            RolesCompatible = rolesCompatible;
+            RoleSelected = roleSelected;
+        }
+        public ObjectInfomationDto DatatypeDetected { get; set; }
+        public List<ObjectInfomationDto> DatatypesCompatible { get; set; }
+        public ObjectInfomationDto DatatypeSelected { get; set; }
+        public List<ObjectInfomationDto> RolesCompatible { get; set; }
+        public ObjectInfomationDto RoleSelected { get; set; }
     }
 }

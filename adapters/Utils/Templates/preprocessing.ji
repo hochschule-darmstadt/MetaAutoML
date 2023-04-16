@@ -1,0 +1,234 @@
+import pandas as pd
+import numpy as np
+import re
+from _collections_abc import dict_items
+from typing import Tuple
+{% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression", ":text_classification", ":text_regression", ":time_series_forecasting"] %}
+from dataset import read_csv_dataset
+from numpy import nan
+from sklearn.preprocessing import OrdinalEncoder
+from sklearn.preprocessing import OneHotEncoder
+from sklearn.preprocessing import LabelEncoder
+from sklearn.impute import SimpleImputer
+{% endif %}
+
+{% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression", ":text_classification", ":text_regression", ":time_series_forecasting"] %}
+def rename_unnamed_columns(X: pd.DataFrame) -> pd.DataFrame:
+    """Rename unnamed column to oma-ml naming convention
+
+    Args:
+        X (pd.DataFrame): Dataset (X and y) dataframe
+
+    Returns:
+        pd.DataFrame: Dataset (X and y) dataframe with renamed unnamed columns
+    """
+    for column in X:
+        if re.match(r"Unnamed: [0-9]+", column):
+            X.rename(columns={column: f"Column{X.columns.get_loc(column)}"}, inplace=True)
+    return X
+
+def dataset_preparation(filepath: str,  is_prediction=True) -> Tuple[pd.DataFrame, pd.Series]:
+    """Read and prepare the dataset
+
+    Args:
+        filepath (str): Path to dataset
+        is_prediction (bool): if this is a prediction run or training
+    Returns:
+        Tuple[pd.DataFrame, pd.Series]: Tuple of dataset dataframe X and series y
+    """
+    X = read_csv_dataset(filepath)
+    X = rename_unnamed_columns(X)
+    X, y = feature_preparation(X, feature_configuration.items(), "{{configuration.dataset_configuration["file_configuration"]["datetime_format"]}}",  is_prediction)
+    X, y = string_feature_encoding(X, y, feature_configuration.items(),  is_prediction)
+    X= numerical_feature_imputation(X, feature_configuration.items())
+    return X, y
+
+def prediction_postprocessing(y: np.array) -> np.array:
+    """Postprocess the prediction result in case a reverse label encoding is required
+
+    Args:
+        y (np.array): Array of prediction results
+
+    Returns:
+        np.array: Postprocessed prediction result array
+    """
+    for column, dt in feature_configuration.items():
+        if dt.get("role_selected", "") == ":target":
+            if dt["preprocessing"].get("encoding", "") != "":
+                if dt["preprocessing"]["encoding"]["type"] == ":label_encoding":
+                    enc = LabelEncoder()
+                    enc.fit(dt["preprocessing"]["encoding"]["values"])
+                    y = enc.inverse_transform(y)
+    return y
+
+def feature_preparation(X: pd.DataFrame, features: dict_items, datetime_format: str, is_prediction:bool=False) -> Tuple[pd.DataFrame, pd.Series]:
+    """Prepare the dataset by applying to every column the correct datatype and role
+
+    Args:
+        X (pd.DataFrame): The read dataset as a dataframe
+        features (dict_items): The dataset schema dictonary as an iterable dict (dict.items())
+        datetime_format (str): The string datetime format to use for datetime columns
+        is_prediction (bool, optional): Whether or not we are doing a training or prediction run. Defaults to False.
+
+    Returns:
+        Tuple[pd.DataFrame, pd.Series]: Tuple of the prepared feature dataframe (X) and label series (y)
+    """
+    target = ""
+    is_target_found = False
+    index_columns = []
+    for column, dt in features:
+        #During the prediction process no target column was read, so unnamed column names will be off by -1 index,
+        #if they are located after the target column within the training set, their index must be adjusted
+        if re.match(r"Column[0-9]+", column) and is_target_found == True and is_prediction == True:
+            column_index = re.findall('[0-9]+', column)
+            column_index = int(column_index[0])
+            X.rename(columns={f"Column{column_index}": column}, inplace=True)
+
+        #Check if column is to be droped, when its role is ignore
+        if dt.get("role_selected", "") == ":ignore":
+            X.drop(column, axis=1, inplace=True)
+            continue
+        #Get column datatype
+        datatype = dt.get("datatype_selected", "")
+        if datatype == "":
+            datatype = dt["datatype_detected"]
+
+        #during predicitons we dont have a target column and must avoid casting it
+        if dt.get("role_selected", "") == ":target" and is_prediction == True:
+            is_target_found = True
+            continue
+
+        if datatype == ":categorical":
+            X[column] = X[column].astype('category')
+        elif datatype == ":boolean":
+            X[column] = X[column].astype('bool')
+        elif datatype == ":integer":
+            X[column] = X[column].astype('int64')
+        elif datatype == ":float":
+            X[column] = X[column].astype('float64')
+        elif datatype == ":datetime":
+            X[column] = pd.to_datetime(X[column], format=datetime_format)
+        elif datatype == ":string":
+            X[column] = X[column].astype('object')
+
+        #Get target column
+        if dt.get("role_selected", "") == ":target":
+            target = column
+            is_target_found = True
+
+        if dt.get("role_selected", "") == ":index":
+            index_columns.append(column)
+
+    if len(index_columns) > 0:
+        #Set index columns
+        X.set_index(index_columns, inplace=True)
+
+    #Handle target column appropriately depending on runtime
+    if is_prediction == True:
+        y = pd.Series()
+    else:
+        y = X[target]
+        X.drop(target, axis=1, inplace=True)
+
+    return X, y
+
+def string_feature_encoding(X: pd.DataFrame, y: pd.Series, features: dict_items,  is_prediction:bool=True) -> Tuple[pd.DataFrame, pd.Series]:
+    """Apply string feature encoding (One hot, ordinal, label encoding) by the column preparation configuration
+
+    Args:
+        X (pd.DataFrame): The feature dataframe (X)
+        y (pd.Series): The label series (y)
+        features (dict_items): The dataset schema dictonary as an iterable dict (dict.items())
+        is_prediction (bool, optional): Whether or not we are doing a training or prediction run. Defaults to False.
+
+    Returns:
+        Tuple[pd.DataFrame, pd.Series]: Tuple of the prepared feature dataframe (X) and label series (y)
+    """
+    for column, dt in features:
+        if dt.get("preprocessing", "") == "":
+            #Check preprocessing block exists, backwards compability
+            dt["preprocessing"] = {}
+        if dt["preprocessing"].get("encoding", "") == "":
+            continue
+        elif dt["preprocessing"]["encoding"]["type"] == ":ordinal_encoding":
+            ord_enc = OrdinalEncoder(dtype='int64')
+            ord_enc.fit(dt["preprocessing"]["encoding"]["values"])
+            X[column] = ord_enc.transform(X[[column]])
+        elif dt["preprocessing"]["encoding"]["type"] == ":one_hot_encoding":
+            try:
+                one_hot_enc = OneHotEncoder(dtype='int64', sparse_output=False).set_output(transform="pandas")
+                one_hot_enc.fit(dt["preprocessing"]["encoding"]["values"])
+                result = one_hot_enc.transform(X[[column]])
+            except:
+                #some automl use old sklearn versions we need to check for this
+                one_hot_enc = OneHotEncoder(dtype='int64', sparse=False)
+                one_hot_enc.fit(dt["preprocessing"]["encoding"]["values"])
+                result = pd.DataFrame(columns=one_hot_enc.get_feature_names(), data=one_hot_enc.transform(X[[column]]))
+            for col in result.columns:
+                result = result.rename(columns={ col : col.replace("x0", column)})
+            X = pd.concat([X, result], axis=1).drop(columns=[column])
+        elif dt["preprocessing"]["encoding"]["type"] == ":label_encoding" and is_prediction == False:
+            label_enc = LabelEncoder()
+            label_enc.fit(dt["preprocessing"]["encoding"]["values"])
+            y[y.name] = label_enc.transform(X[[column]])
+        else:
+            continue
+    return X, y
+
+
+def seperate_time_series_dataframe(X: pd.DataFrame):
+    exogenous_ts = X.iloc[-{{configuration["forecasting_horizon"]}}:]
+    previous_ts = X.drop(X.tail({{configuration["forecasting_horizon"]}}).index)
+    try:
+        for column, dt in feature_configuration.items():
+            if dt.get("role_selected", "") == ":target":
+                exogenous_ts.drop(column, axis=1, inplace=True)
+    except:
+        #do nothing, we just want to ensure the future doesnt have a target
+        pass
+    
+    return previous_ts, exogenous_ts
+
+def replace_forbidden_json_utf8_characters(X: pd.DataFrame, y: pd.Series=None) -> Tuple[pd.DataFrame, pd.Series]:
+    """Replace forbidden json UTF8 characters in feature names
+
+    Args:
+        X (pd.DataFrame): The feature dataframe (X)
+        y (pd.Series): The label series (y)
+
+    Returns:
+        Tuple[pd.DataFrame, pd.Series]: Tuple of the prepared feature dataframe (X) and label series (y)
+    """
+    for column in X.columns:
+        new_column_name = column.translate({ 91 : None, 93 : None, 123 : None, 125 : None, 44 : None, 58 : None, 34 : None})
+        X.rename(columns = { column : new_column_name}, inplace=True)
+    if isinstance(y, pd.Series):
+        y.rename(y.name.translate({ 91 : None, 93 : None, 123 : None, 125 : None, 44 : None, 58 : None, 34 : None}), inplace=True)
+    return X, y
+
+
+def numerical_feature_imputation(X: pd.DataFrame, features: dict_items) -> Tuple[pd.DataFrame, pd.Series]:
+    """Apply numerical feature imputation  by the column preprocessing configuration
+
+    Args:
+        X (pd.DataFrame): The feature dataframe (X)
+        features (dict_items): The dataset schema dictonary as an iterable dict (dict.items())
+
+    Returns:
+        Tuple[pd.DataFrame, pd.Series]: Tuple of the prepared feature dataframe (X) and label series (y)
+    """
+    for column, dt in features:
+        if dt.get("preprocessing", "") == "":
+            #Check preprocessing block exists, backwards compability
+            dt["preprocessing"] = {}
+        if dt["preprocessing"].get("imputation", "") == "":
+            continue
+        elif dt["preprocessing"]["imputation"]["type"] == ":simple_imputer":
+            simp_impu = SimpleImputer(**dt["preprocessing"]["imputation"]["configuration"])
+            simp_impu.fit(np.array(dt["preprocessing"]["imputation"]["values"]).reshape(-1, 1))
+            X[column] = simp_impu.transform(X[[column]])
+    return X
+
+feature_configuration = {{configuration.dataset_configuration["schema"]}}
+
+{% endif %}

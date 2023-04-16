@@ -1,10 +1,17 @@
-import numpy as np
 import autokeras as ak
-from AbstractAdapter import AbstractAdapter
-from AdapterUtils import export_model, prepare_tabular_dataset, data_loader
+import numpy as np
+from AdapterUtils import *
+from AdapterTabularUtils import *
+import pandas as pd
+import json
+import os
+from JsonUtil import get_config_property
+import tensorflow as tf
+import keras_tuner
+import AutoKerasParameterConfig as akpc
 
 
-class AutoKerasAdapter(AbstractAdapter):
+class AutoKerasAdapter:
     """
     Implementation of the AutoML functionality for AutoKeras
     """
@@ -14,7 +21,11 @@ class AutoKerasAdapter(AbstractAdapter):
         Args:
             configuration (dict): Dictonary holding the training configuration
         """
-        super(AutoKerasAdapter, self).__init__(configuration)
+        self._configuration = configuration
+        if self._configuration["configuration"]["runtime_limit"] > 0:
+            self._time_limit = self._configuration["configuration"]["runtime_limit"]
+        else:
+            self._time_limit = 30
 
     def start(self):
         """Start the correct ML task functionality of AutoKeras"""
@@ -39,14 +50,13 @@ class AutoKerasAdapter(AbstractAdapter):
 
         self.df, test = data_loader(self._configuration)
         X, y = prepare_tabular_dataset(self.df, self._configuration)
-
+        parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), akpc.task_config)
         clf = ak.StructuredDataClassifier(overwrite=True,
-                                          max_trials=3,
-                                          # metric=self._configuration['metric'],
+                                          **parameters,
                                           directory=self._configuration["model_folder_location"],
                                           seed=42)
-                                          
-        clf.fit(x=X, y=y)
+
+        clf.fit(x=X, y=y, epochs=1)
         export_model(clf, self._configuration["result_folder_location"], 'model_keras.p')
 
     def __tabular_regression(self):
@@ -54,26 +64,24 @@ class AutoKerasAdapter(AbstractAdapter):
 
         self.df, test = data_loader(self._configuration)
         X, y = prepare_tabular_dataset(self.df, self._configuration)
-
+        parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), akpc.task_config)
         reg = ak.StructuredDataRegressor(overwrite=True,
-                                          max_trials=3,
-                                         # metric=self._configuration['metric'],
+                                          **parameters,
                                          directory=self._configuration["model_folder_location"],
                                          seed=42)
-        
-        reg.fit(x=X, y=y)
+
+        reg.fit(x=X, y=y, epochs=1)
         export_model(reg, self._configuration["result_folder_location"], 'model_keras.p')
 
     def __image_classification(self):
         """"Execute image classification task and export the found model"""
 
-        X_train, y_train, X_test, y_test = data_loader(self._configuration)
-
-        clf = ak.ImageClassifier(overwrite=True, 
-                                          max_trials=3,
-                                # metric=self._configuration['metric'],
-                                seed=42,
-                                directory=self._configuration["model_folder_location"])
+        X_train, y_train = data_loader(self._configuration)
+        parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), akpc.task_config)
+        clf = ak.ImageClassifier(overwrite=True,
+                                          **parameters,
+                                        seed=42,
+                                        directory=self._configuration["model_folder_location"])
 
         #clf.fit(train_data, epochs=self._configuration["runtime_constraints"]["epochs"])
         clf.fit(x = X_train, y = y_train, epochs=1)
@@ -83,62 +91,83 @@ class AutoKerasAdapter(AbstractAdapter):
     def __image_regression(self):
         """Execute image regression task and export the found model"""
 
-        X_train, y_train, X_val, y_val = data_loader(self._configuration)
+        X_train, y_train = data_loader(self._configuration)
+        parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), akpc.task_config)
 
-        reg = ak.ImageRegressor(overwrite=True, 
-                                          max_trials=3,
-                                # metric=self._configuration['metric'],
-                                seed=42,
-                                directory=self._configuration["model_folder_location"])
-                                
-        reg.fit(x = X_train, y = y_train)
+        reg = ak.ImageRegressor(overwrite=True,
+                                          **parameters,
+                                        seed=42,
+                                        directory=self._configuration["model_folder_location"])
+
+        reg.fit(x = X_train, y = y_train, epochs=1)
 
         export_model(reg, self._configuration["result_folder_location"], 'model_keras.p')
 
     def __text_classification(self):
         """Execute text classifiction task and export the found model"""
-
-        self.df, test = data_loader(self._configuration)
-        X, y = prepare_tabular_dataset(self.df, self._configuration)
-
-        reg = ak.TextClassifier(overwrite=True, 
-                                          max_trials=3,
-                                # metric=self._configuration['metric'],
+        train, test = data_loader(self._configuration, perform_splitting=False)
+        X, y = prepare_tabular_dataset(train, self._configuration)
+        self._configuration = set_column_with_largest_amout_of_text(X, self._configuration)
+        train, test = data_loader(self._configuration)
+        #reload dataset to load changed data
+        X, y = prepare_tabular_dataset(train, self._configuration)
+        parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), akpc.task_config)
+        reg = ak.TextClassifier(overwrite=True,
+                                # NOTE: bert models will fail with out of memory errors
+                                #   even with 32GB GB RAM
+                                # the first model is a non-bert transformer
+                                **parameters,
                                 seed=42,
                                 directory=self._configuration["model_folder_location"])
-                                
-        reg.fit(x = np.array(X), y = np.array(y), epochs=1)
 
+
+        reg.fit(x = np.array(X).astype(np.unicode_), y = np.array(y), epochs=1)
         export_model(reg, self._configuration["result_folder_location"], 'model_keras.p')
+
 
     def __text_regression(self):
         """Execute text regression task and export the found model"""
-
-        self.df, test = data_loader(self._configuration)
-        X, y = prepare_tabular_dataset(self.df, self._configuration)
-
-        reg = ak.TextClassifier(overwrite=True, 
-                                          max_trials=3,
-                                # metric=self._configuration['metric'],
+        train, test = data_loader(self._configuration, perform_splitting=False)
+        X, y = prepare_tabular_dataset(train, self._configuration)
+        self._configuration = set_column_with_largest_amout_of_text(X, self._configuration)
+        train, test = data_loader(self._configuration)
+        #reload dataset to load changed data
+        X, y = prepare_tabular_dataset(train, self._configuration)
+        parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), akpc.task_config)
+        reg = ak.TextRegressor(overwrite=True,
+                                **parameters,
                                 seed=42,
                                 directory=self._configuration["model_folder_location"])
-                                
-        reg.fit(x = np.array(X), y = np.array(y))
 
+        reg.fit(x = np.array(X), y = np.array(y), epochs=1)
         export_model(reg, self._configuration["result_folder_location"], 'model_keras.p')
+
 
     def __time_series_forecasting(self):
         """Execute time series forecasting task and export the found model"""
+        train, test = data_loader(self._configuration, perform_splitting=False)
+        X, y = prepare_tabular_dataset(train, self._configuration)
+        self._configuration = set_imputation_for_numerical_columns(self._configuration, X)
+        #reload dataset to load changed data
+        train, test = data_loader(self._configuration)
 
-        self.df, test = data_loader(self._configuration)
-        X, y = prepare_tabular_dataset(self.df, self._configuration)
+        parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), akpc.task_config)
+        #oma-ml uses gab as shared parameter which is similar to predict from but has an offset of -1
+        # gap = 0 is equal to predict_from  = 1
+        parameters["predict_from"] = parameters["predict_from"] + 1
+        self._configuration["forecasting_horizon"] = parameters["predict_until"]
+        save_configuration_in_json(self._configuration)
+        
+        X, y = prepare_tabular_dataset(train, self._configuration)
 
-        reg = ak.TimeseriesForecaster(overwrite=True, 
-                                          max_trials=3,
-                                # metric=self._configuration['metric'],
+        #TODO convert dataframe to float
+        reg = ak.TimeseriesForecaster(overwrite=True,
+                                          **parameters,
                                 seed=42,
                                 directory=self._configuration["model_folder_location"])
-                                
-        reg.fit(x = np.array(X), y = np.array(y))
+        #Loopback must be dividable by batch_size else time seires will crash
+        reg.fit(x = X, y = y, epochs=1, batch_size=1)
+        model = reg.export_model()
+        model.save(os.path.join(self._configuration["result_folder_location"], 'model_keras'), save_format="tf")
+        #export_model(reg, self._configuration["result_folder_location"], 'model_keras.p')
 
-        export_model(reg, self._configuration["result_folder_location"], 'model_keras.p')

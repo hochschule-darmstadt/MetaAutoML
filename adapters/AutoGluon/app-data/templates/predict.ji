@@ -3,43 +3,76 @@ import os.path
 import sys
 import pickle
 import json
-from predict_time_sources import feature_preparation, DataType, SplitMethod
-from autogluon.tabular import TabularDataset, TabularPredictor
+{% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression"]%}
+from autogluon.tabular import TabularPredictor
+{% endif %}
+{% if configuration.configuration["task"] in [":time_series_forecasting"]%}
+from autogluon.timeseries import TimeSeriesPredictor, TimeSeriesDataFrame
+{% endif %}
+{% if configuration.configuration["task"] in [":image_classification", ":text_classification", ":text_regression"]%}
+from autogluon.multimodal import MultiModalPredictor
+{% endif %}
+{% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression", ":text_classification", ":text_regression", ":time_series_forecasting"] %}
+from preprocessing import dataset_preparation, feature_configuration, seperate_time_series_dataframe
+{% endif %}
 
 import pandas as pd
 import numpy as np
+import re
 
 if __name__ == '__main__':
     filepath = sys.argv[1]
-    config_path = sys.argv[2]
-    save_path = sys.argv[3]
+    save_path = sys.argv[2]
     X = None
 
-    with open(config_path) as file:
-        config_json = json.load(file)
+    {% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression", ":text_classification", ":text_regression"] %}
+    X, y = dataset_preparation(filepath)
+    {% endif %}
+    {% if configuration.configuration["task"] in [":time_series_forecasting"] %}
+    #We need current observations
+    X, y = dataset_preparation(filepath, is_prediction=False)
+    timestamp_column = ""
+    #First get the datetime index column
+    for column, dt in feature_configuration.items():
+        datatype = dt.get("datatype_selected", "")
+        if datatype == "":
+            datatype = dt["datatype_detected"]
+        if dt.get("role_selected", "") == ":index" and datatype == ":datetime":
+            timestamp_column = column
+            break
 
-    config_json["dataset_configuration"] = json.loads(config_json["dataset_configuration"])
-    target = config_json["configuration"]["target"]
-    features = config_json["dataset_configuration"]["column_datatypes"]
-    features.pop(target, None)
-    features = features.items()
-    delimiters = {
-        "comma":        ",",
-        "semicolon":    ";",
-        "space":        " ",
-        "tab":          "\t",
-    }
+    {% endif %}
+    {% if configuration.configuration["task"] in [":image_classification"]%}
+    X = ImageDataset.from_folder(filepath)
+    print(X.head())
+    #X.reset_index(inplace=True)
+    #X.drop(['label'], inplace=True)
+    {% endif %}
 
-    X = pd.read_csv(filepath, delimiter=delimiters[config_json["dataset_configuration"]['file_configuration']['delimiter']], escapechar=config_json["dataset_configuration"]['file_configuration']['escape_character'], decimal=config_json["dataset_configuration"]['file_configuration']['decimal_character']).drop(target, axis=1, errors='ignore')
-    # split training set
-    X = X.iloc[int(X.shape[0] * 0.2):]
-
-    X = feature_preparation(X, features)
-
-    # load model and make predictions
-    print("starting to load model")
+    {% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression"]%}
     automl = TabularPredictor.load(os.path.join(sys.path[0], 'model_gluon.gluon'))
+    {% endif %}
+    {% if configuration.configuration["task"] in [":text_classification", ":text_regression", ":image_classification"]%}
+    automl = MultiModalPredictor.load(os.path.join(sys.path[0], 'model_gluon.gluon'))
+    {% endif %}
+    {% if configuration.configuration["task"] in [":time_series_forecasting"]%}
+    #Load model
+    automl = TimeSeriesPredictor.load(os.path.join(sys.path[0], 'model_gluon.gluon'))
+    X[y.name] = y.values
+    X = X.assign(timeseries_id=1)
+    X.reset_index(inplace = True)
 
+    previous_ts, exogenous_ts = seperate_time_series_dataframe(X)
+    #Build TS dataframes
+    previous_ts = TimeSeriesDataFrame.from_data_frame(previous_ts, id_column="timeseries_id", timestamp_column=timestamp_column)
+    exogenous_ts = TimeSeriesDataFrame.from_data_frame(exogenous_ts, id_column="timeseries_id", timestamp_column=timestamp_column)
+    predicted_y = automl.predict(previous_ts, known_covariates=exogenous_ts, as_pandas=False)
+    predicted_y = predicted_y["mean"]
+    
+    predicted_y = predicted_y.reset_index(drop=True).to_numpy()
+    {% endif %}    
+    {% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression", ":text_classification", ":text_regression"] %}
     predicted_y = automl.predict(X, as_pandas=False)
+    {% endif %}
     predicted_y = np.reshape(predicted_y, (-1, 1))
     pd.DataFrame(data=predicted_y, columns=["predicted"]).to_csv(save_path)

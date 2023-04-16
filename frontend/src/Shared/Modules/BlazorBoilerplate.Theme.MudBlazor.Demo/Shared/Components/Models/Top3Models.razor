@@ -1,4 +1,4 @@
-﻿@inject IStringLocalizer<Global> L
+@inject IStringLocalizer<Global> L
 @inject IApiClient apiClient
 @inject IViewNotifier viewNotifier
 @inject NavigationManager NavManager
@@ -21,19 +21,19 @@
         </CardHeaderActions>
     </MudCardHeader>
     <MudCardContent>
-        <MudPaper Height="215px" Elevation="0">
+        <MudPaper Height="250px" Elevation="0">
             @if (_top3Models == null)
             {
                 <DataLoaderSpinner />
             }
             else
             {
-                <MudTable Items="@_top3Models.Models">
+                <MudTable Items="@_top3Models.Models" FixedHeader="true" style="width:stretch" class="mat-elevation-z5" AllowSelection="false" Dense="true" Height="245px">
                     <HeaderContent>
                         <MudTh>@L["Name"]</MudTh>
                         <MudTh>@L["Model"]</MudTh>
                         <MudTh>@L["Library"]</MudTh>
-                        <MudTh>@L["Test score"]</MudTh>
+                        <MudTh>@L["Metric"]</MudTh>
                         <MudTh>@L["Prediction time per sample"]</MudTh>
                         <MudTh>@L["Total training time"]</MudTh>
                     </HeaderContent>
@@ -47,20 +47,13 @@
                         <MudTd>
                             <MudLink Href="@NavManager.ToAbsoluteUri("datasets/" + Dataset.Dataset.Id + "/models/" + @context.Id).AbsoluteUri" Style="cursor: pointer; display: flex">
                                 <MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.ModelTraining" Style="margin-right: 4px;" />
-                                @if (context.MlModelType.Properties.ContainsKey("skos:prefLabel"))
-                                {
-                                    @context.MlModelType.Properties["skos:prefLabel"]
-                                }
-                                
+                                @context.GetMlModelString()
                                 </MudLink>
                         </MudTd>
                         <MudTd>
-                            @if (context.MlLibrary.Properties.ContainsKey("skos:prefLabel"))
-                            {
-                                <MudText>@context.MlLibrary.Properties["skos:prefLabel"]</MudText>
-                            }
+                             <MudText>@context.GetMlLibraryString()</MudText>
                         </MudTd>
-                        <MudTd >@String.Format("{0:0.00}", context.TestScore)</MudTd>
+                        <MudTd >@String.Format("{0:0.00}", context.Metrics)</MudTd>
                         <MudTd >@String.Format("{0:0}", context.PredictionTime) ms</MudTd>
                         <MudTd>@(context.RuntimeProfile.EndTime.Subtract(context.RuntimeProfile.StartTime).TotalSeconds.ToString("0 s"))</MudTd>
                     </RowTemplate>

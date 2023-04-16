@@ -33,7 +33,7 @@ class AutoKerasAdapterManager(AdapterManager):
         Returns:
             tuple[str, str]: Tuple returning the ontology IRI of the Ml model type, and ontology IRI of the ML library
         """
-        return (":keras_lib", ":artificial_neural_network")
+        return ([":keras_lib"], [":artificial_neural_network"])
 
     def _load_model_and_make_probabilities(self, config: "StartAutoMlRequest", result_folder_location: str, dataframe: pd.DataFrame):
         """Must be overwriten! Load the found model, and execute a prediction using the provided data to calculate the probability metric used by the ExplanableAI module inside the controller
@@ -58,6 +58,7 @@ class AutoKerasAdapterManager(AdapterManager):
         # but only as a one dimensional array. Shap however requires the probabilities in the format
         # [[prob class 0, prob class 1], [...]]. So to return the proper format we have to process the results of
         # predict().
+        #TODO multiclass shape missing
         if probabilities.shape[1] == 1:
             probabilities = [[1 - prob[0], prob[0]] for prob in probabilities.tolist()]
         probabilities = json.dumps(probabilities)

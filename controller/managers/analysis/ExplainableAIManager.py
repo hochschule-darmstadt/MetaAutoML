@@ -9,6 +9,8 @@ from AdapterManager import AdapterManager
 from ControllerBGRPC import *
 from DataStorage import DataStorage
 from ThreadLock import ThreadLock
+from CsvManager import CsvManager
+import re
 
 def make_svg_waterfall_plot(base_value, shap_values, X, path, filename_detail):
     import shap
@@ -134,19 +136,59 @@ def plot_tabular_classification(dataset_X, dataset_Y, target, no_samples, explai
     return plots
 
 
-def feature_preparation(X, features):
+def feature_preparation(X, features, datetime_format, is_prediction=False):
+    target = ""
+    is_target_found = False
     for column, dt in features:
-        if DataType(dt) is DataType.DATATYPE_IGNORE:
+        #During the prediction process no target column was read, so unnamed column names will be off by -1 index,
+        #if they are located after the target column within the training set, their index must be adjusted
+        if re.match(r"Column[0-9]+", column) and is_target_found == True and is_prediction == True:
+            column_index = re.findall('[0-9]+', column)
+            column_index = int(column_index[0])
+            X.rename(columns={f"Column{column_index-1}": column}, inplace=True)
+
+        #Check if column is to be droped either its role is ignore or index
+        if dt.get("role_selected", "") == ":ignore" or dt.get("role_selected", "") == ":index":
             X.drop(column, axis=1, inplace=True)
-        elif DataType(dt) is DataType.DATATYPE_CATEGORY:
+            continue
+        #Get column datatype
+        datatype = dt.get("datatype_selected", "")
+        if datatype == "":
+            datatype = dt["datatype_detected"]
+
+        #during predicitons we dont have a target column and must avoid casting it
+        if dt.get("role_selected", "") == ":target" and is_prediction == True:
+            is_target_found = True
+            continue
+
+        if datatype == ":categorical":
             X[column] = X[column].astype('category')
-        elif DataType(dt) is DataType.DATATYPE_BOOLEAN:
+        elif datatype == ":boolean":
             X[column] = X[column].astype('bool')
-        elif DataType(dt) is DataType.DATATYPE_INT:
+        elif datatype == ":integer":
             X[column] = X[column].astype('int')
-        elif DataType(dt) is DataType.DATATYPE_FLOAT:
+        elif datatype == ":float":
             X[column] = X[column].astype('float')
-    return X
+        elif datatype == ":datetime":
+            X[column] = pd.to_datetime(X[column], format=datetime_format)
+        elif datatype == ":string":
+            X[column] = X[column].astype('object')
+
+        #Get target column
+        if dt.get("role_selected", "") == ":target":
+            target = column
+            is_target_found = True
+
+    if is_prediction == True:
+        y = pd.Series()
+    else:
+        y = X[target]
+        X.drop(target, axis=1, inplace=True)
+
+    return X, y
+
+
+
 
 
 class ExplainableAIManager:
@@ -188,7 +230,7 @@ class ExplainableAIManager:
         self.__threads.append(thread)
         self.__data_storage.update_model(user_id, model_id, {"explanation": {"status": "started"}})
         return
-        
+
 
 
     def explain_shap(self, user_id, model_id, callback, number_of_samples=25):
@@ -197,24 +239,17 @@ class ExplainableAIManager:
         dataset_path = self.__data_storage.get_dataset(user_id, training["dataset_id"])[1]["path"]
 
         print(f"[ExplainableAIManager]: Initializing new shap explanation. AutoML: {model['auto_ml_solution'].replace(':', '')} | Training ID: {model['training_id']} | Dataset: {training['dataset_id']}")
-        
+
         training["file_location"], training["file_name"] = os.path.split(dataset_path)
         output_path = os.path.join(os.getcwd(), "app-data", "training", model["auto_ml_solution"].replace(":", ""), user_id, training["dataset_id"], model["training_id"], "result")
         os.makedirs(output_path, exist_ok=True)
         plot_path = os.path.join(output_path, "plots")
         os.makedirs(plot_path, exist_ok=True)
-        delimiters = {
-            "comma":        ",",
-            "semicolon":    ";",
-            "space":        " ",
-            "tab":          "\t",
-        }
 
-        
-        dataset = pd.read_csv(dataset_path, delimiter=delimiters[training["dataset_configuration"]['file_configuration']['delimiter']], skiprows=(training["dataset_configuration"]['file_configuration']['start_row']-1), escapechar=training["dataset_configuration"]['file_configuration']['escape_character'], decimal=training["dataset_configuration"]['file_configuration']['decimal_character'])
-        dataset = feature_preparation(dataset, training["dataset_configuration"]["column_datatypes"].items())
-        dataset_X = dataset.drop(training["configuration"]["target"], axis=1)
-        dataset_Y = dataset[training["configuration"]["target"]]
+        dataset = CsvManager.read_dataset(dataset_path, training["dataset_configuration"]['file_configuration'], training["dataset_configuration"]['schema'])
+        dataset_X, dataset_Y = feature_preparation(dataset, training["dataset_configuration"]["schema"].items(), training["dataset_configuration"]["file_configuration"]["datetime_format"])
+
+
         sampled_dataset_X = dataset_X.iloc[0:number_of_samples, :]
 
         print(f"[ExplainableAIManager]: Output is saved to {output_path}")
@@ -233,7 +268,7 @@ class ExplainableAIManager:
                 print("[ExplainableAIManager]: ENTERING LOCK.")
                 plots = plot_tabular_classification(sampled_dataset_X,
                                                             dataset_Y,
-                                                            training["configuration"]["target"],
+                                                            dataset_Y.name,
                                                             number_of_samples,
                                                             explainer,
                                                             shap_values,

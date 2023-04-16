@@ -1,0 +1,46 @@
+import sys
+import dill
+import json
+import pandas as pd
+import numpy as np
+import os
+{% if configuration.configuration["task"] in [":tabular_classification", ":text_classification"] %}
+from pycaret.classification import *
+from preprocessing import dataset_preparation
+{% endif %}
+{% if configuration.configuration["task"] in [":tabular_regression", ":text_regression"] %}
+from pycaret.regression import *
+from preprocessing import dataset_preparation
+{% endif %}
+{% if configuration.configuration["task"] in [":time_series_forecasting"] %}
+from pycaret.time_series import *
+from preprocessing import dataset_preparation, seperate_time_series_dataframe
+{% endif %}
+
+if __name__ == '__main__':
+    filepath = sys.argv[1]
+    save_path = sys.argv[2]
+    X = None
+
+
+    {% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression", ":text_classification", ":text_regression"] %}
+    X, y = dataset_preparation(filepath)
+    {% endif %}
+    model = load_model(os.path.join(os.path.dirname(__file__), "model_pycaret"))
+    {% if configuration.configuration["task"] in [":time_series_forecasting"] %}
+    #We need current observations
+    X, y = dataset_preparation(filepath, is_prediction=False)
+    X[y.name] = y.values
+    previous_ts, X = seperate_time_series_dataframe(X)
+    predicted_y = predict_model(model, X=X)
+    pd.DataFrame(data=predicted_y["y_pred"].values, columns=["predicted"]).to_csv(save_path)
+    {% endif %}
+
+    {% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression", ":text_classification", ":text_regression"] %}
+    predicted_y = predict_model(model, X)
+    #out["predicted"] = predicted_y["prediction_label"]
+    predicted_y["predicted"] = predicted_y["prediction_label"]
+    #predicted_y = np.reshape(predicted_y, (-1, 1))
+    pd.DataFrame(data=predicted_y, columns=["predicted"]).to_csv(save_path)
+    {% endif %}
+

@@ -22,15 +22,6 @@ spec:
       labels:
         io.kompose.service: blazorboilerplate
     spec:
-      affinity:
-        nodeAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            nodeSelectorTerms:
-            - matchExpressions:
-              - key: kubernetes.io/hostname
-                operator: In
-                values:
-                - cai-omaml-main
       containers:
       - env:
         - name: ASPNETCORE_ENVIRONMENT
@@ -42,6 +33,8 @@ spec:
         - name: ASPNETCORE_URLS
           value: https://+:443;http://+80
         - name: BlazorBoilerplate__ApplicationUrl
+          value: blazorboilerplate
+        - name: BlazorBoilerplate__IS4ApplicationUrl
           value: blazorboilerplate
         - name: BlazorBoilerplate__CertificatePassword
           value: Admin123
@@ -64,18 +57,20 @@ spec:
           mountPath: /app/app-data/training/autokeras
         - name: mljar-output
           mountPath: /app/app-data/training/mljar
-        - name: autocve-output
-          mountPath: /app/app-data/training/autocve
-        - name: gluon-output
+        - name: autogluon-output
           mountPath: /app/app-data/training/gluon
-        - name: pytorch-output
+        - name: autopytorch-output
           mountPath: /app/app-data/training/autopytorch
         - name: flaml-output
           mountPath: /app/app-data/training/flaml
-        - name: sklearn-output
+        - name: autosklearn-output
           mountPath: /app/app-data/training/autosklearn
         - name: mcfly-output
           mountPath: /app/app-data/training/mcfly
+        - name: pycaret-output
+          mountPath: /app/app-data/training/pycaret
+        - name: evalml-output
+          mountPath: /app/app-data/training/evaml
         image: alexhda/omaml-frontend:latest
         name: blazorboilerplate
         ports:
@@ -86,6 +81,10 @@ spec:
             cpu: "2"
             memory: "2194304e3"
       restartPolicy: Always
+      hostAliases:
+      - ip: "127.0.0.1"
+        hostnames:
+        - "dev.oma-ml.ai"
       volumes:
       - name: datasets
         persistentVolumeClaim:
@@ -99,22 +98,25 @@ spec:
       - name: mljar-output
         persistentVolumeClaim:
           claimName: output-mljar-claim
-      - name: autocve-output
+      - name: autogluon-output
         persistentVolumeClaim:
-          claimName: output-autocve-claim
-      - name: gluon-output
+          claimName: output-autogluon-claim
+      - name: autopytorch-output
         persistentVolumeClaim:
-          claimName: output-gluon-claim
-      - name: pytorch-output
-        persistentVolumeClaim:
-          claimName: output-pytorch-claim
+          claimName: output-autopytorch-claim
       - name: flaml-output
         persistentVolumeClaim:
           claimName: output-flaml-claim
-      - name: sklearn-output
+      - name: autosklearn-output
         persistentVolumeClaim:
-          claimName: output-sklearn-claim
+          claimName: output-autosklearn-claim
       - name: mcfly-output
         persistentVolumeClaim:
           claimName: output-mcfly-claim
+      - name: evalml-output
+        persistentVolumeClaim:
+          claimName: output-evalml-claim
+      - name: pycaret-output
+        persistentVolumeClaim:
+          claimName: output-pycaret-claim
 status: {}

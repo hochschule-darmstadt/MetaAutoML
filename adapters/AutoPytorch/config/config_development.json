@@ -4,12 +4,14 @@
   "env-varname-cluster": "RUNTIME",
   "grpc-server-address": "127.0.0.1",
   "export-zip-file-name": "pytorch-export",
-  "training-path": "/home/alex/Desktop/MetaAutoML/adapters/AutoPytorch/app-data/training",
+  "training-path": "app-data/training",
   "job-folder-name": "job",
   "model-folder-name": "model",
   "export-folder-name": "export",
   "result-folder-name": "result",
   "templates-path": "app-data/templates",
   "predict-time-sources-path": "../Utils/AutoMLs/predict_time_sources.py",
-  "local_execution": "YES"
+  "local_execution": "YES",
+  "running_in_wsl": "YES",
+  "wsl_metaautoml_path": "/mnt/c/Users/alex/Desktop/MetaAutoML"
 }

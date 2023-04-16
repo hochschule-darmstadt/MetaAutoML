@@ -1,4 +1,4 @@
-FROM --platform=linux/amd64 python:3.7.11-slim-buster AS base
+FROM --platform=linux/amd64  python:3.9.13-slim-buster AS base
 EXPOSE 50057
 
 RUN apt-get update && apt-get install -y \
@@ -7,8 +7,9 @@ RUN apt-get update && apt-get install -y \
     ffmpeg \
     libsm6 \
     libxext6  \
-    && apt-get install -y git 
-    
+    gcc \
+    && apt-get install -y git
+
 RUN python3 -m pip install --upgrade "mxnet<2.0.0"
 
 COPY ./AutoGluon/requirements.txt .
@@ -19,6 +20,7 @@ WORKDIR /app
 COPY ./AutoGluon .
 COPY ./Utils/Utils ./Utils
 COPY ./Utils/AutoMLs ./AutoMLs
+COPY ./Utils/Templates ./app-data/templates
 COPY ./GRPC/Adapter ./
 
 # this should already be created, but sometimes there is a bug in docker which causes that the directory is not copied

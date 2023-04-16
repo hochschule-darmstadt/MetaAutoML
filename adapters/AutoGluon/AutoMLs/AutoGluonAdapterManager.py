@@ -8,7 +8,34 @@ from AdapterBGRPC import *
 from threading import *
 from JsonUtil import get_config_property
 from autogluon.tabular import TabularPredictor
+from autogluon.multimodal import MultiModalPredictor
+from autogluon.timeseries import TimeSeriesPredictor
 from typing import Tuple
+
+#TODO do all estimators https://github.com/autogluon/autogluon/tree/master/tabular/src/autogluon/tabular/models
+autogluon_estimators ={
+    'Naive' : (":baseline", ":baseline"),
+    'SeasonalNaive' : (":baseline", ":baseline"),
+    'ETS' : (":sktime_lib", ":exponential_smoothing"),
+    'Theta' : (":sktime_lib", ":theta_method"),
+    'ARIMA' : (":sktime_lib", ":autoregressive_integrated_moving_average"),
+    'AutoETS' : (":sktime_lib", ":exponential_smoothing"),
+    'AutoGluonTabular' : (":as", ":as"),
+    'WeightedEnsemble' : (":ensemble", ":ensemble"),
+    'StackerEnsemble' : (":ensemble", ":ensemble"),
+    'BaggedEnsemble' : (":ensemble",":ensemble"),
+    'GreedyWeightedEnsemble' : (":ensemble",":ensemble"),
+    'DeepAR' : (":pytorch_lib",":artificial_neural_network"),
+    'SimpleFeedForward' : (":pytorch_lib",":artificial_neural_network"),
+    'TemporalFusionTransformer' : (":pytorch_lib",":transformer"),
+    'GreedyWeightedEnsemble' : ("",""),
+    'GreedyWeightedEnsemble' : ("",""),
+    'GreedyWeightedEnsemble' : ("",""),
+    'GreedyWeightedEnsemble' : ("",""),
+    'GreedyWeightedEnsemble' : ("",""),
+    'GreedyWeightedEnsemble' : ("",""),
+    'GreedyWeightedEnsemble' : ("",""),
+}
 
 class AutoGluonAdapterManager(AdapterManager):
     """The AutoML solution specific functionality implementation of the AdapterManager class
@@ -37,27 +64,27 @@ class AutoGluonAdapterManager(AdapterManager):
         """
         working_dir = config.result_folder_location
         # extract additional information from automl
-        automl = TabularPredictor.load(os.path.join(os.path.join(working_dir, 'model_gluon.gluon')))
-        automl_info = automl._learner.get_info(include_model_info=True)
-        librarylist = set()
-        #model = automl_info['best_model']
-        model = ":ensemble"
-        for model_info in automl_info['model_info']:
-            if model_info == model:
-                pass
-            elif model_info in ('LightGBM', 'LightGBMXT'):
-                librarylist.add(":lightgbm_lib")
-            elif model_info == 'XGBoost':
-                librarylist.add(":xgboost_lib")
-            elif model_info == 'CatBoost':
-                librarylist.add(":catboost_lib")
-            elif model_info == 'NeuralNetFastAI':
-                librarylist.add(":pytorch_lib")
-            else:
-                librarylist.add(":scikit_learn_lib")
-        library = " + ".join(librarylist)
-        #TODO correct read and array handling
-        return (librarylist.pop(), model)
+        if config.configuration['task'] in [":tabular_classification", ":tabular_regression"]:
+            #We load the model to check it is intact
+            automl = TabularPredictor.load(os.path.join(os.path.join(working_dir, 'model_gluon.gluon')))
+            model = [":ensemble"]
+            #TODO correct read and array handling
+            return ([':lightgbm_lib'], model)
+        elif config.configuration['task'] in [":text_classification", ":text_regression"]:
+            #We load the model to check it is intact
+            automl = MultiModalPredictor.load(os.path.join(os.path.join(working_dir, 'model_gluon.gluon')))
+            return ([":pytorch_lib"], [":transformer"])
+        elif config.configuration['task'] in [":time_series_forecasting"]:
+            #We load the model to check it is intact
+            automl = TimeSeriesPredictor.load(os.path.join(os.path.join(working_dir, 'model_gluon.gluon')))
+            m1 = automl.get_model_best()
+            asd = automl.get_model_names()
+            return ([":pytorch_lib"], [":transformer"])
+        else:
+            #We load the model to check it is intact
+            automl = MultiModalPredictor.load(os.path.join(os.path.join(working_dir, 'model_gluon.gluon')))
+            return ([":pytorch_lib"], [":artificial_neural_network"])
+
 
     def _load_model_and_make_probabilities(self, config: "StartAutoMlRequest", result_folder_location: str, dataframe: pd.DataFrame):
         """Must be overwriten! Load the found model, and execute a prediction using the provided data to calculate the probability metric used by the ExplanableAI module inside the controller

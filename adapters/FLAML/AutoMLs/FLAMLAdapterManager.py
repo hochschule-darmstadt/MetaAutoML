@@ -9,6 +9,22 @@ from JsonUtil import get_config_property
 import pandas as pd
 from typing import Tuple
 
+flaml_estimators = {
+    "transformer" : (":pytorch_lib", ":transformer"),
+    "lgbm" : (":lightgbm_lib", ":light_gradient_boosting_machine"),
+    "extra_tree" : (":scikit_learn_lib", ":extra_tree"),
+    "rf" : (":scikit_learn_lib", ":random_forest"),
+    "xgboost" : (":xgboost_lib", ":xgboost"),
+    "catboost" : (":catboost_lib", ":catboost"),
+    "xgb_limitdepth" : (":xgboost_lib", ":xgboost"),
+    "lrl1" : (":scikit_learn_lib", ":logistic_regression"),
+    "lrl2" : (":scikit_learn_lib", ":logistic_regression"),
+    "tft" : (":pytorch_lib", ":temporal_fusion_transformer"),
+    "prophet" : (":prophet_lib", ":prophet"),
+    "arima" : (":pyflux_lib", ":autoregressive_integrated_moving_average"),
+    "sarimax" : (":pyflux_lib", ":seasonal_autoregressive_integrated_moving_average_exogenous")
+}
+
 class FLAMLAdapterManager(AdapterManager):
     """The AutoML solution specific functionality implementation of the AdapterManager class
 
@@ -34,16 +50,21 @@ class FLAMLAdapterManager(AdapterManager):
             tuple[str, str]: Tuple returning the ontology IRI of the Ml model type, and ontology IRI of the ML library
         """
         working_dir = config.result_folder_location
+        models = list()
+        libraries = list()
         # extract additional information from automl
         with open(os.path.join(working_dir, "model_flaml.p"), 'rb') as file:
             automl = dill.load(file)
-            model = automl.best_estimator
-            library = automl.model.estimator.__module__.split(".")[0]
-
-        #TODO ADD CORRECT lib and model display
-        library = ":lightgbm_lib"
-        model = ":light_gradient_boosting_machine"
-        return library, model
+            if hasattr(automl.model, "estimators"):
+                for model in automl.model.estimators:
+                    lib, model = flaml_estimators[model[0]]
+                    libraries.append(lib)
+                    models.append(model)
+            else:
+                lib, model = flaml_estimators[automl._best_estimator]
+                libraries.append(lib)
+                models.append(model)
+        return libraries, models
 
 
     def _load_model_and_make_probabilities(self, config: "StartAutoMlRequest", result_folder_location: str, dataframe: pd.DataFrame):
@@ -61,7 +82,8 @@ class FLAMLAdapterManager(AdapterManager):
                 self.__automl = dill.load(file)
             self._loaded_training_id = config["training_id"]
         # Get prediction probabilities and send them back.
-        probabilities = json.dumps(self.__automl.predict_proba(dataframe).tolist())
+        probabilities = self.__automl.predict_proba(dataframe)
+        probabilities = probabilities.tolist()
+        probabilities = json.dumps(probabilities)
         return probabilities
 
-    

@@ -7,7 +7,7 @@ using static Microsoft.AspNetCore.Http.StatusCodes;
 namespace BlazorBoilerplate.Server.Managers
 {
     /// <summary>
-    /// Manages all RPC calls which are connected to requests for knowledge from the Ontologie
+    /// Manages all RPC calls which are connected to requests for knowledge from the Ontology
     /// </summary>
     public class OntologyManager : IOntologyManager
     {
@@ -59,7 +59,7 @@ namespace BlazorBoilerplate.Server.Managers
 
 
         /// <summary>
-        /// Retrive all Dataset Types
+        /// Retrieve all Dataset Types
         /// </summary>
         /// <returns></returns>
         public async Task<ApiResponse> GetDatasetTypes()
@@ -104,6 +104,7 @@ namespace BlazorBoilerplate.Server.Managers
             try
             {
                 requestGrpc.UserId = username;
+                requestGrpc.DatasetId = request.DatasetId;
                 requestGrpc.Configuration.Add(request.Configuration);
                 var reply = _client.GetAvailableStrategies(requestGrpc);
                 response.Strategies = new List<StrategyControllerStrategyDto>();
@@ -111,6 +112,33 @@ namespace BlazorBoilerplate.Server.Managers
                     StrategyControllerStrategyDto strategyDto = new StrategyControllerStrategyDto(strategy);
                     response.Strategies.Add(strategyDto);
                 }
+                return new ApiResponse(Status200OK, null, response);
+            }
+            catch (Exception ex)
+            {
+                return new ApiResponse(Status404NotFound, ex.Message);
+            }
+        }
+
+        public async Task<ApiResponse> GetAutoMlParameters(GetAutoMlParametersRequestDto request)
+        {
+            var requestParams = new GetAutoMlParametersRequest { TaskIri = request.TaskIri };
+            requestParams.AutoMls.AddRange(request.AutoMls);
+            var response = new GetAutoMlParametersResponseDto();
+            try
+            {
+                var grpcResponse = await _client.GetAutoMlParametersAsync(requestParams);
+                response.AutoMlParameters = grpcResponse.AutoMlParameters.Select(p => new AutoMlParameterDto
+                    {
+                        AutoMlIri = p.AutoMlIri,
+                        ParamIri = p.ParamIri,
+                        ParamLabel = p.ParamLabel,
+                        ParamType = p.ParamType,
+                        BroaderIri = p.BroaderIri,
+                        BroaderLabel = p.BroaderLabel,
+                        ValueIri = p.ValueIri,
+                        ValueLabel = p.ValueLabel
+                    }).ToList();
                 return new ApiResponse(Status200OK, null, response);
             }
             catch (Exception ex)
