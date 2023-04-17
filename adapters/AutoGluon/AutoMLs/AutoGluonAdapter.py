@@ -1,13 +1,10 @@
 import os
 
-from AbstractAdapter import AbstractAdapter
-from AdapterUtils import export_model, prepare_tabular_dataset, data_loader
-from autogluon.tabular import TabularDataset, TabularPredictor
-from JsonUtil import get_config_property#
-from AbstractAdapter import AbstractAdapter
-from AdapterUtils import read_tabular_dataset_training_data, prepare_tabular_dataset, export_model
+from AdapterUtils import *
+from autogluon.tabular import TabularPredictor
+from autogluon.multimodal import  MultiModalPredictor
+from AdapterUtils import *
 from AutoGluonServer import data_loader
-import pandas as pd
 import AutoGluonParameterConfig as agpc
 
 class AutoGluonAdapter:
@@ -125,8 +122,8 @@ class AutoGluonAdapter:
         parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), agpc.task_config)
 
         model = MultiModalPredictor(label=y.name,
-                                 problem_type=classification_type,
                                  **parameters,
+                                 problem_type=classification_type,
                                  path=self._result_path).fit(
             data,
             time_limit=self._time_limit*60, hyperparameters=hyperparameters)
@@ -197,29 +194,3 @@ class AutoGluonAdapter:
             time_limit=self._time_limit*60)
         #Fit methode already saves the model
 
-
-    def __text_classification(self):
-        """Execute the text classification task and export the found model"""
-        self.df, test = data_loader(self._configuration)
-        X, y = prepare_tabular_dataset(self.df, self._configuration)
-        data = X
-        data[self._target] = y
-        model = MultiModalPredictor(label=self._target,
-                                 #problem_type="multiclass",
-                                 path=self._result_path).fit(
-            data,
-            time_limit=self._time_limit)
-        #Fit methode already saves the model
-
-    def __text_regression(self):
-        """Execute the text regression task and export the found model"""
-        self.df, test = data_loader(self._configuration)
-        X, y = prepare_tabular_dataset(self.df, self._configuration)
-        data = X
-        data[self._target] = y
-        model = MultiModalPredictor(label=self._target,
-                                 #problem_type="regression",
-                                 path=self._result_path).fit(
-            data,
-            time_limit=self._time_limit)
-        #Fit methode already saves the model

@@ -78,7 +78,7 @@ class AdapterManager(Thread):
             python_env = os.getenv("PYTHON_ENV", default="PYTHON_ENV_UNSET")
             process = Popen([python_env, "AutoML.py", config.job_folder_location],
                                     stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-                                    universal_newlines=True)
+                                    universal_newlines=True, encoding=json.loads(self.__start_auto_ml_request.dataset_configuration)["file_configuration"]["encoding"])
 
             # read the processes output line by line and push them onto the event queue
             for line in process.stdout:
@@ -241,7 +241,7 @@ class AdapterManager(Thread):
                                                   config_json["user_id"],
                                                   config_json["dataset_id"],
                                                   config_json["training_id"],
-                                                  get_config_property("job-folder-name"), 
+                                                  get_config_property("job-folder-name"),
                                                   get_config_property("job-file-name"))
             #Read dataset configuration
             with open(job_file_location) as file:
