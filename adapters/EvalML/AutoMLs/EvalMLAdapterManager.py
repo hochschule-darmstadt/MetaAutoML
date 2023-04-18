@@ -105,6 +105,13 @@ class EvalMLAdapterManager(AdapterManager):
                                                   get_config_property("result-folder-name"))
 
             if self._loaded_training_id != config_json["training_id"]:
+                
+                #For WSL users we need to adjust the path prefix for the dataset location to windows path
+                if get_config_property("local_execution") == "YES":
+                    if get_config_property("running_in_wsl") == "YES":
+                        config_json["dataset_path"] = re.sub("[a-zA-Z]:\\\\([A-Za-z0-9_]+(\\\\[A-Za-z0-9_]+)+)\\\\MetaAutoML", get_config_property("wsl_metaautoml_path"), config_json["dataset_path"])
+                        config_json["dataset_path"] = config_json["dataset_path"].replace("\\", "/")
+
                 df, test = data_loader(config_json)
                 self._dataframeX, y = prepare_tabular_dataset(df, config_json)
 

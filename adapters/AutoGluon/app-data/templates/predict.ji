@@ -12,7 +12,10 @@ from autogluon.timeseries import TimeSeriesPredictor, TimeSeriesDataFrame
 {% if configuration.configuration["task"] in [":image_classification", ":text_classification", ":text_regression"]%}
 from autogluon.multimodal import MultiModalPredictor
 {% endif %}
-{% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression", ":text_classification", ":text_regression", ":time_series_forecasting"] %}
+{% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression", ":text_classification", ":text_regression"] %}
+from preprocessing import dataset_preparation, feature_configuration
+{% endif %}
+{% if configuration.configuration["task"] in [":time_series_forecasting"] %}
 from preprocessing import dataset_preparation, feature_configuration, seperate_time_series_dataframe
 {% endif %}
 

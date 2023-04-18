@@ -170,7 +170,7 @@ class PyCaretAdapterManager(AdapterManager):
             self.__automl = load_model(os.path.join(result_folder_location, "model_pycaret"))
             self._loaded_training_id = config["training_id"]
         # Get prediction probabilities and send them back.
-        if isinstance(self.__instance, RidgeClassifier) or isinstance(self.__instance, LogisticRegression):
+        if isinstance(self.__automl, RidgeClassifier) or isinstance(self.__automl, LogisticRegression):
             #Linear regression models do not have predict_proba method, requires softmax conversion
             d = self.__automl.decision_function(dataframe)
             d_2d = np.c_[-d, d]
