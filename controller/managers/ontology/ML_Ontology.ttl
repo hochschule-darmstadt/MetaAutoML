@@ -1,5 +1,5 @@
 ### Ontology file generated from ML_Ontology.xlsx.
-### 2023-04-05 14:17:06.918037
+### 2023-04-18 15:46:27.060104
 
 
 # PREFIXES
@@ -1589,23 +1589,23 @@
 :autogluon a :AutoML_solution ;
     skos:prefLabel "Autogluon" ;
     :used_for :scikit_learn_lib , :catboost_lib , :lightgbm_lib , :xgboost_lib , :pytorch_lib , :mxnet_lib ;
-    :supported_by_oma_ml "True" ;
-    :can_perform :tabular_classification , :tabular_regression , :text_classification , :text_regression , :sentiment_analysis , :sentence_similarity , :image_classification , :object_detection , :video_classification , :video_object_tracking , :action_recognition , :time_series_forecasting .
+    :can_perform :tabular_classification , :tabular_regression , :text_classification , :text_regression , :sentiment_analysis , :sentence_similarity , :image_classification , :object_detection , :video_classification , :video_object_tracking , :action_recognition , :time_series_forecasting ;
+    :supported_by_oma_ml "True" .
 :autokeras a :AutoML_solution ;
     skos:prefLabel "Autokeras" ;
     :used_for :keras_lib ;
-    :supported_by_oma_ml "True" ;
-    :can_perform :tabular_classification , :tabular_regression , :time_series_forecasting , :text_classification , :text_regression , :image_classification , :image_regression .
+    :can_perform :tabular_classification , :tabular_regression , :time_series_forecasting , :text_classification , :text_regression , :image_classification , :image_regression ;
+    :supported_by_oma_ml "True" .
 :autopytorch a :AutoML_solution ;
     skos:prefLabel "Autopytorch" ;
     :used_for :pytorch_lib , :pytorch_forecasting_lib ;
-    :supported_by_oma_ml "True" ;
-    :can_perform :tabular_classification , :tabular_regression , :image_classification , :time_series_forecasting .
+    :can_perform :tabular_classification , :tabular_regression , :image_classification , :time_series_forecasting ;
+    :supported_by_oma_ml "True" .
 :autosklearn a :AutoML_solution ;
     skos:prefLabel "Autosklearn" ;
     :used_for :scikit_learn_lib ;
-    :supported_by_oma_ml "True" ;
-    :can_perform :tabular_classification , :tabular_regression .
+    :can_perform :tabular_classification , :tabular_regression ;
+    :supported_by_oma_ml "True" .
 :autots a :AutoML_solution ;
     skos:prefLabel "AutoTS" ;
     :used_for :prophet_lib , :pytorch_lib , :gluonts_lib , :pmdarima_lib , :tensorflow_lib ;
@@ -1628,8 +1628,8 @@
 :evalml a :AutoML_solution ;
     skos:prefLabel "EvalML" ;
     :used_for :scikit_learn_lib , :catboost_lib , :lightgbm_lib , :xgboost_lib ;
-    :supported_by_oma_ml "True" ;
-    :can_perform :tabular_classification , :tabular_regression , :time_series_forecasting , :time_series_classification , :text_classification , :text_regression .
+    :can_perform :tabular_classification , :tabular_regression , :time_series_forecasting , :time_series_classification , :text_classification , :text_regression ;
+    :supported_by_oma_ml "True" .
 :fedot a :AutoML_solution ;
     skos:prefLabel "FEDOT" ;
     :used_for :scikit_learn_lib , :statsmodel_lib ;
@@ -1637,8 +1637,8 @@
 :flaml a :AutoML_solution ;
     skos:prefLabel "FLAML" ;
     :used_for :scikit_learn_lib , :catboost_lib , :lightgbm_lib , :xgboost_lib , :prophet_lib ;
-    :supported_by_oma_ml "True" ;
-    :can_perform :tabular_classification , :tabular_regression , :ranking , :time_series_forecasting , :text_classification .
+    :can_perform :tabular_classification , :tabular_regression , :ranking , :time_series_forecasting , :text_classification ;
+    :supported_by_oma_ml "True" .
 :google_automl a :AutoML_solution ;
     skos:prefLabel "Google AutoML" ;
     :used_for :tensorflow_lib ;
@@ -1654,8 +1654,8 @@
 :mcfly a :AutoML_solution ;
     skos:prefLabel "Mcfly" ;
     :used_for :tensorflow_lib ;
-    :supported_by_oma_ml "True" ;
-    :can_perform :time_series_classification .
+    :can_perform :time_series_classification ;
+    :supported_by_oma_ml "True" .
 :merlion a :AutoML_solution ;
     skos:prefLabel "Merlion" ;
     :used_for :lightgbm_lib , :prophet_lib , :scikit_learn_lib , :statsmodel_lib , :greykite_lib , :kats_lib ;
@@ -1667,8 +1667,8 @@
 :mljar a :AutoML_solution ;
     skos:prefLabel "MLJAR" ;
     :used_for :scikit_learn_lib , :catboost_lib , :lightgbm_lib , :xgboost_lib ;
-    :supported_by_oma_ml "True" ;
-    :can_perform :tabular_classification , :tabular_regression .
+    :can_perform :tabular_classification , :tabular_regression ;
+    :supported_by_oma_ml "True" .
 :rapidminer a :AutoML_solution ;
     skos:prefLabel "Rapidminer" ;
     :used_for :weka_lib , :h2o_lib ;
@@ -1679,8 +1679,8 @@
 :tpot a :AutoML_solution ;
     skos:prefLabel "TPOT" ;
     :used_for :scikit_learn_lib , :pytorch_lib ;
-    :supported_by_oma_ml "True" ;
-    :can_perform :tabular_classification , :tabular_regression .
+    :can_perform :tabular_classification , :tabular_regression ;
+    :supported_by_oma_ml "True" .
 :transmogrifai a :AutoML_solution ;
     skos:prefLabel "TransmogrifAI" ;
     :used_for :spark_mllib ;
@@ -1688,8 +1688,8 @@
 :pycaret a :AutoML_solution ;
     skos:prefLabel "Pycaret" ;
     :used_for :scikit_learn_lib , :catboost_lib , :lightgbm_lib , :xgboost_lib ;
-    :supported_by_oma_ml "True" ;
-    :can_perform :tabular_classification , :tabular_regression , :clustering , :anomaly_detection , :time_series_forecasting .
+    :can_perform :tabular_classification , :tabular_regression , :clustering , :anomaly_detection , :time_series_forecasting ;
+    :supported_by_oma_ml "True" .
 
 
 # Enum
@@ -2164,18 +2164,18 @@
     skos:broader :use_approach ;
     :has_datatype :list ;
     :parameter_value :adaboost , :decision_tree , :extra_tree , :gradient_boosting_tree , :k_nearest_neighbor , :linear_svm , :multilayer_perceptron , :random_forest , :gaussian_naives_bayes .
-:use_approach_flaml_tabular_classification a :Configuration_item ;
-    skos:prefLabel "use approach FLAML tabular classification" ;
-    :category :parameter ;
-    skos:broader :use_approach ;
-    :has_datatype :list ;
-    :parameter_value :light_gradient_boosting_machine , :xgboost , :random_forest , :extra_tree , :logistic_regression , :catboost , :k_nearest_neighbor .
 :use_approach_autosklearn_regression a :Configuration_item ;
     skos:prefLabel "use approach Autosklearn regression" ;
     :category :parameter ;
     skos:broader :use_approach ;
     :has_datatype :list ;
     :parameter_value :adaboost , :bayesian_linear_regression , :decision_tree , :extra_tree , :gaussian_process , :gradient_boosting_tree , :k_nearest_neighbor , :linear_svm , :multilayer_perceptron , :random_forest .
+:use_approach_flaml_tabular_classification a :Configuration_item ;
+    skos:prefLabel "use approach FLAML tabular classification" ;
+    :category :parameter ;
+    skos:broader :use_approach ;
+    :has_datatype :list ;
+    :parameter_value :light_gradient_boosting_machine , :xgboost , :random_forest , :extra_tree , :logistic_regression , :catboost , :k_nearest_neighbor .
 :use_approach_flaml_tabular_regression a :Configuration_item ;
     skos:prefLabel "use approach FLAML tabular regression" ;
     :category :parameter ;
