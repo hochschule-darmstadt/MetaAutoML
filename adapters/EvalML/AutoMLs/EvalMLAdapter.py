@@ -126,11 +126,12 @@ class EvalMLAdapter:
         X[y.name] = y.values
         #We must persist the training time series to make predictions
         file_path = self._configuration["result_folder_location"]
-        
+
         file_path = write_tabular_dataset_data(X, file_path, self._configuration, "train.csv")
         X.drop(y.name, axis=1, inplace=True)
-        problem_config = {"gap": parameters["gap"], "max_delay": 12, "forecast_horizon": parameters["forecast_horizon"], "time_index": index_column_name}
+        problem_config = {"gap": parameters["gap"], "max_delay": parameters["max_delay"], "forecast_horizon": parameters["forecast_horizon"], "time_index": index_column_name}
         #delete from dic as those parameter are used seperately
+        del parameters["max_delay"]
         del parameters["forecast_horizon"]
         del parameters["gap"]
         # parameters must be set correctly

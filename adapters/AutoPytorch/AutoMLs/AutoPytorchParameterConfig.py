@@ -20,6 +20,16 @@ autopytorch_metrics = {
     ":r2": "r2"
 }
 
+#Autopytorch reuses the normal regression metrics but renamed them for forecasting
+autopytorch_ts_forecasting_metrics = {
+    #regression TS forecasting
+    ":mean_absolute_error": "mean_MAE_forecasting",
+    ":median_absolute_error": "median_MAE_forecasting",
+    ":mean_absolute_percentage_error": "mean_MAPE_forecasting",
+    ":median_absolute_percentage_error": "median_MAPE_forecasting",
+    ":mean_squared_error": "mean_MSE_forecasting",
+    ":median_squared_error": "median_MSE_forecasting"
+}
 #configs for the different tasks that can be executed with AutoPytorch
 #each parameter has its own line that contains:
 #the broader type of the parameter(broader id); the autoML specific parameter id; the default value in case no parameter-value is selected;
@@ -39,7 +49,7 @@ tabular_regression_config = [
 
 #config for the tabular regression
 time_series_forcasting_config = [
-    [":metric", ":metric_autopytorch_time_series_forcasting", [":mean_squared_error"], "single_value", "dict", autopytorch_metrics, "optimize_metric"],
+    [":metric", ":metric_autopytorch_time_series_forcasting", [":mean_squared_error"], "single_value", "dict", autopytorch_ts_forecasting_metrics, "optimize_metric"],
     [":forecasting_horizon", ":forecasting_horizon_autopytorch_time_series_forcasting", [1], "single_value", "integer", "", "n_prediction_steps"]
 ]
 
