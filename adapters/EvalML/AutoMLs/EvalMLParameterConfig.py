@@ -1,6 +1,9 @@
 #lookup dictionary for EvalML metrics values
 #https://evalml.alteryx.com/en/stable/autoapi/evalml/objectives/index.html
 #https://github.com/alteryx/evalml/blob/main/evalml/objectives/standard_metrics.py
+
+from evalml import tuners
+
 eval_metrics = {
     #classification
     ":accuracy": "Accuracy Multiclass",
@@ -79,6 +82,13 @@ eval_metrics_binary = {
     ":mean_absolute_percentage_error": "Mean Absolute Percentage Error"
 }
 
+
+eval_tuners = {
+    ':random' : tuners.RandomSearchTuner ,
+    ':grid_search' : tuners.GridSearchTuner ,
+    ':skopt' : tuners.SKOptTuner ,
+}
+
 #configs for the different tasks that can be executed with EvalML
 #each parameter has its own line that contains:
 #the broader type of the parameter(broader id); the autoML specific parameter id; the default value in case no parameter-value is selected;
@@ -88,10 +98,12 @@ eval_metrics_binary = {
 
 #config for the tabular classification
 tabular_classification_config = [
-    [":metric", ":metric_evalml_tabular_classification", [":log_loss"], "single_value", "dict", eval_metrics, "objective"]
+    [":metric", ":metric_evalml_tabular_classification", [":log_loss"], "single_value", "dict", eval_metrics, "objective"],
+    [":tuner", ":tuner_class_evalml", [None], "single_value", "dict", eval_tuners, "tuner_class"],
 ]
 tabular_classification_config_binary_metrics = [
-    [":metric", ":metric_evalml_tabular_classification", [":log_loss"], "single_value", "dict", eval_metrics_binary, "objective"]
+    [":metric", ":metric_evalml_tabular_classification", [":log_loss"], "single_value", "dict", eval_metrics_binary, "objective"],
+    [":tuner", ":tuner_class_evalml", [None], "single_value", "dict", eval_tuners, "tuner_class"],
 ]
 
 #config for the tabular regression
