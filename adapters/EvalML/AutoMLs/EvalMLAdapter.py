@@ -8,7 +8,7 @@ import evalml
 from evalml import AutoMLSearch
 from evalml import objectives
 from evalml import tuners
-from evalml import model_family
+from evalml.model_family import ModelFamily
 from evalml.objectives import FraudCost
 
 import pandas as pd
@@ -75,9 +75,9 @@ class EvalMLAdapter:
                     max_batches=3,
                     verbose=False,
                     max_time=self._configuration["configuration"]["runtime_limit"]*60,
-                    tuner_class=self.__get_tuner(),
-                    allowed_model_families= self.__get_use_approaches(),
+                    allowed_model_families= [ModelFamily.LINEAR_MODEL],#self.__get_use_approaches(),
                 )
+        print(evalml.pipelines.components.utils.allowed_model_families("binary") )
         automl.search()
         best_pipeline_tobe_export = automl.best_pipeline
         export_model(best_pipeline_tobe_export, self._configuration["result_folder_location"], 'evalml.p')
@@ -186,16 +186,16 @@ class EvalMLAdapter:
 
     def __get_use_approaches(self):
         use_approaches_dict = {
-            ':catboost' : model_family.ModelFamily.CATBOOST,
-            ':decision_tree' : model_family.ModelFamily.DECISION_TREE,
-            ':extra_tree' : model_family.ModelFamily.EXTRA_TREES,
-            ':light_gradient_boosting_machine' : model_family.ModelFamily.LIGHTGBM,
-            ':linear_regression' : model_family.ModelFamily.LINEAR_MODEL,
-            ':random_forest' : model_family.ModelFamily.RANDOM_FOREST,
-            ':xgboost' : model_family.ModelFamily.XGBOOST,
-            ':auto_regressive_integrated_moving_average' : model_family.ModelFamily.ARIMA,
-            ':exponential_smoothing' : model_family.ModelFamily.EXPONENTIAL_SMOOTHING,
-            ':k_nearest_neighbor' : model_family.ModelFamily.K_NEIGHBORS,
+            ':catboost' : "catboost",
+            ':decision_tree' : "decision_tree",
+            ':extra_tree' : "extra_trees",
+            ':light_gradient_boosting_machine' : "lightgbm",
+            ':linear_regression' :"linear_model",
+            ':random_forest' :"random_forest",
+            ':xgboost' :"xgboost",
+            ':auto_regressive_integrated_moving_average' : "arima",
+            ':exponential_smoothing' :"exponential_smoothing",
+            ':k_nearest_neighbor' : "k_neighbors",
         }
         try:
             """
@@ -209,7 +209,7 @@ class EvalMLAdapter:
             print ( res)
             return res
         except:
-            print("no use approaches param")
+            print("no use approaches param")    
 
         return None
 

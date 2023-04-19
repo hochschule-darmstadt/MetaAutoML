@@ -4,6 +4,8 @@
 
 from evalml import tuners
 
+from evalml import model_family
+
 eval_metrics = {
     #classification
     ":accuracy": "Accuracy Multiclass",
@@ -84,9 +86,22 @@ eval_metrics_binary = {
 
 
 eval_tuners = {
-    ':random' : tuners.RandomSearchTuner ,
-    ':grid_search' : tuners.GridSearchTuner ,
-    ':skopt' : tuners.SKOptTuner ,
+    ':random' : "RandomSearchTuner" ,
+    ':grid_search' : "GridSearchTuner" ,
+    ':skopt' : "SKOptTuner" ,
+}
+
+use_approach_evalml = {
+    ':catboost' : "ModelFamily.CATBOOST",
+    ':decision_tree' :       "ModelFamily.DECISION_TREE",
+    ':extra_tree' :" ModelFamily.EXTRA_TREES",
+    ':light_gradient_boosting_machine' :  "ModelFamily.LIGHTGBM",
+    ':linear_regression' :  "ModelFamily.LINEAR_MODEL",
+    ':random_forest' :   "ModelFamily.RANDOM_FOREST",
+    ':xgboost' :     "ModelFamily.XGBOOST",
+    ':auto_regressive_integrated_moving_average' :     "ModelFamily.ARIMA",
+    ':exponential_smoothing' :      "ModelFamily.EXPONENTIAL_SMOOTHING",
+    ':k_nearest_neighbor' :       "ModelFamily.K_NEIGHBORS",
 }
 
 #configs for the different tasks that can be executed with EvalML
@@ -100,28 +115,34 @@ eval_tuners = {
 tabular_classification_config = [
     [":metric", ":metric_evalml_tabular_classification", [":log_loss"], "single_value", "dict", eval_metrics, "objective"],
     [":tuner", ":tuner_class_evalml", [None], "single_value", "dict", eval_tuners, "tuner_class"],
+    #[":use_approach", ":use_approach_evalml_tabular_classification", [None], "list", "dict", use_approach_evalml, "allowed_model_families"],
 ]
 tabular_classification_config_binary_metrics = [
     [":metric", ":metric_evalml_tabular_classification", [":log_loss"], "single_value", "dict", eval_metrics_binary, "objective"],
     [":tuner", ":tuner_class_evalml", [None], "single_value", "dict", eval_tuners, "tuner_class"],
+    #[":use_approach", ":use_approach_evalml_tabular_classification", [None], "list", "dict", use_approach_evalml, "allowed_model_families"],
 ]
 
 #config for the tabular regression
 tabular_regression_config = [
-    [":metric", ":metric_evalml_tabular_regression", [":r2"], "single_value", "dict", eval_metrics, "objective"]
+    [":metric", ":metric_evalml_tabular_regression", [":r2"], "single_value", "dict", eval_metrics, "objective"],
+    [":tuner", ":tuner_class_evalml", [None], "single_value", "dict", eval_tuners, "tuner_class"],
 ]
 
 #config for the text classification
 text_classification_config = [
-    [":metric", ":metric_evalml_text_classification", [":log_loss"], "single_value", "dict", eval_metrics, "objective"]
+    [":metric", ":metric_evalml_text_classification", [":log_loss"], "single_value", "dict", eval_metrics, "objective"],
+    [":tuner", ":tuner_class_evalml", [None], "single_value", "dict", eval_tuners, "tuner_class"],
 ]
 text_classification_config_binary_metrics = [
-    [":metric", ":metric_evalml_text_classification", [":log_loss"], "single_value", "dict", eval_metrics_binary, "objective"]
+    [":metric", ":metric_evalml_text_classification", [":log_loss"], "single_value", "dict", eval_metrics_binary, "objective"],
+    [":tuner", ":tuner_class_evalml", [None], "single_value", "dict", eval_tuners, "tuner_class"],
 ]
 
 #config for the text regression
 text_regression_config = [
-    [":metric", ":metric_evalml_text_regression", [":log_loss"], "single_value", "dict", eval_metrics, "objective"]
+    [":metric", ":metric_evalml_text_regression", [":log_loss"], "single_value", "dict", eval_metrics, "objective"],
+    [":tuner", ":tuner_class_evalml", [None], "single_value", "dict", eval_tuners, "tuner_class"],
 ]
 
 #config for the time series forecasting
@@ -129,7 +150,8 @@ time_series_forecasting_config = [
     [":metric", ":metric_evalml_time_series_regression", [":mean_squared_error"], "single_value", "dict", eval_metrics, "objective"],
     [":forecasting_horizon", ":forecasting_horizon_evalml_time_series_forcasting", [1], "single_value", "integer", "", "forecast_horizon"],
     [":lookback", ":lookback_evalml_time_series_forecasting", [1], "single_value", "integer", "", "max_delay"],
-    [":gap", ":gap_evalml_time_series_forecasting", [1], "single_value", "integer", "", "gap"]
+    [":gap", ":gap_evalml_time_series_forecasting", [1], "single_value", "integer", "", "gap"],
+    [":tuner", ":tuner_class_evalml", [None], "single_value", "dict", eval_tuners, "tuner_class"],
 ]
 
 # dictionary for mapping the selected task to the appropriate config
