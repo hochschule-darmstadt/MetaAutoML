@@ -1,9 +1,9 @@
 absl-py==0.13.0
 astunparse==1.6.3
-flaml==1.1.1
-flaml[ts_forecast]==1.1.1
-flaml[nlp]==1.1.1
-flaml[blendsearch]==1.1.1
+flaml==1.2.0
+flaml[ts_forecast]==1.2.0
+flaml[nlp]==1.2.0
+flaml[blendsearch]==1.2.0
 pandas==1.3.4
 Jinja2==3.0.1
 dill

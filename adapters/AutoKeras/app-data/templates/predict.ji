@@ -8,9 +8,14 @@ import pandas as pd
 import tensorflow as tf
 from tensorflow import keras
 import autokeras as ak
-{% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression", ":text_classification", ":text_regression", ":time_series_forecasting"] %}
+{% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression", ":text_classification", ":text_regression"] %}
+from preprocessing import dataset_preparation
+{% endif %}
+{% if configuration.configuration["task"] in [":time_series_forecasting"] %}
 from preprocessing import dataset_preparation, seperate_time_series_dataframe
-{% else %}
+{% endif %}
+
+{% if configuration.configuration["task"] not in [":tabular_classification", ":tabular_regression", ":text_classification", ":text_regression", ":time_series_forecasting"] %}
 from dataset import read_image_dataset_folder
 {% endif %}
 
