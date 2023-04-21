@@ -16,9 +16,9 @@ import re
 from AdapterImageUtils import *
 from AdapterLongitudinalUtils import *
 from AdapterTabularUtils import *
+from OntologyManager import *
 
-
-def read_parameter(parameters, intersect_parameter, automl_parameter, default=[None]):
+def read_parameter(parameters, intersect_parameter, automl_parameter, ):
     """Checks if the intersected parameter or if the individual parameter is set
 
     Args:
@@ -43,11 +43,11 @@ def read_parameter(parameters, intersect_parameter, automl_parameter, default=[N
     except:
         pass
     if len(value) == 0:
-        return default
+        return None
     else:
         return value
-        
-def translate_parameters(task, parameter, task_config):
+
+def translate_parameters(automl, task, parameter, config_items):
     """_summary_
 
     Args:
@@ -58,30 +58,47 @@ def translate_parameters(task, parameter, task_config):
     Returns:
         _type_: returns a dictionary. The key is given by the task config. The values are set with the read_parameters function
     """
+    task_dict = {}
     final_dict = {}
     final_value = None
-    for para in task_config[task]:
-        values = read_parameter(parameter, para[0], para[1], para[2])
-        if para[3] == "list":
+    ontology = OntologyManager()
+    #Get configuration list for task
+    task_config_items = ontology.get_config_item_by_automl_and_task(automl, task)
+    #Create task specific parameter dict
+    for config_item in task_config_items:
+        broader, datatype = ontology.get_broader_type_and_datatype_for_config_item(config_item)
+        task_dict[config_item] = config_items[config_item]
+        task_dict[config_item]["broader"] = broader
+        task_dict[config_item]["datatype"] = datatype
+
+    for key, val in task_dict.items():
+        values = read_parameter(parameter, val["broader"], key)
+        if values == None:
+            if val.get("default", None) == None:
+                #No default value was set, ignore parameter
+                continue
+            else:
+                values = val["default"]
+        if val["datatype"] == "list":
             final_value = list()
             for value in values:
-                if para[4] == "dict":
-                    translateList = para[5]
+                if val.get("lookup_dict", None) != None:
+                    translateList = val["lookup_dict"]
                     final_value.append(translateList.get(value, None))
-                elif para[4] == "integer":
+                else:
                     final_value.append(int(value))
         else:
-            if para[4] == "dict":
+            if val.get("lookup_dict", None) != None:
                 if values[0] == None:
                     final_value = None
                 else:
-                    final_value = para[5][values[-1]]
-            elif para[4] == "integer":
+                    final_value = val["lookup_dict"][values[-1]]
+            else:
                 if values[0] == None:
                     final_value = None
                 else:
                     final_value = int(values[len(values) - 1])
-        final_dict.update({ para[6]: final_value})
+        final_dict.update({ val["parameter_name"]: final_value})
 
     return final_dict
 
@@ -203,7 +220,7 @@ def evaluate(config: "StartAutoMlRequest", config_path: str) -> Tuple[float, flo
         #y_actual = test.iloc[-12:][target]
         #test.drop(test.tail(12).index, inplace=True)
         #file_path = write_tabular_dataset_data(test, os.path.dirname(file_path), config)
-        
+
     elif(config["configuration"]["task"] in[":image_classification", ":image_regression"]):
         X_test, y_test = data_loader(config, image_test_folder=True)
 

@@ -7,3 +7,4 @@ Pillow
 scikit-learn
 codecarbon==2.1.4
 tensorflow==2.10.1
+rdflib==6.2.0

@@ -50,7 +50,7 @@ class AutoKerasAdapter:
 
         self.df, test = data_loader(self._configuration)
         X, y = prepare_tabular_dataset(self.df, self._configuration)
-        parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), akpc.task_config)
+        parameters = translate_parameters(":autokeras", self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), akpc.parameters)
         clf = ak.StructuredDataClassifier(overwrite=True,
                                           **parameters,
                                           directory=self._configuration["model_folder_location"],
@@ -157,7 +157,7 @@ class AutoKerasAdapter:
         parameters["predict_from"] = parameters["predict_from"] + 1
         self._configuration["forecasting_horizon"] = parameters["predict_until"]
         save_configuration_in_json(self._configuration)
-        
+
         X, y = prepare_tabular_dataset(train, self._configuration)
 
         #TODO convert dataframe to float

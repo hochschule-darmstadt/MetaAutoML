@@ -124,6 +124,32 @@ autokeras_tuner = {
 #the autoML function parameter names
 #[broader_type, specific_type, default, expected parameter 'count', converting type, lookup dictionary, used name by autoML]
 
+
+
+parameters = {
+    ":max_trials_autokeras_tabular_classification": {
+                                                    "parameter_name": "max_trials",
+                                                    "default": [1]
+                                                },
+    ":metric_autokeras_tabular_classification": {
+                                                    "parameter_name": "objective",
+                                                    "lookup_dict": autokeras_objectives
+                                                },
+    ":tuner_autokeras_tabular_classification": {
+                                                    "parameter_name": "tuner",
+                                                    "lookup_dict": autokeras_tuner
+                                                },
+    ":loss_autokeras_tabular_classification": {
+                                                    "parameter_name": "loss",
+                                                    "lookup_dict": autokeras_loss_classification
+                                                },
+    ":max_model_size_autokeras_tabular_classification": {
+                                                    "parameter_name": "max_model_size"
+                                                },
+    ":forecasting_horizon_autokeras_time_series_forcasting": ("predict_until", 1)
+}
+
+
 #config for the tabular classification
 tabular_classification_config = [
     [":max_trials", ":max_trials_autokeras", [3], "single_value", "integer", "", "max_trials"],

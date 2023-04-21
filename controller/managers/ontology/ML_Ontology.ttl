@@ -1,5 +1,5 @@
 ### Ontology file generated from ML_Ontology.xlsx.
-### 2023-04-18 15:46:27.060104
+### 2023-04-20 16:58:34.499403
 
 
 # PREFIXES
@@ -109,12 +109,12 @@
 :supervised_learning a :ML_area ;
     skos:prefLabel "supervised learning" ;
     skos:altLabel "SL" ;
-    rdfs:comment "Supervised learning (SL) is the machine learning task of learning a function that maps an input to an output based on example input-output pairs." ;
+    rdfs:comment "Supervised learning (SL) is the machine learning area of learning a function that maps an input to an output based on example input-output pairs." ;
     rdfs:seeAlso <https://www.wikidata.org/entity/Q334384> .
 :unsupervised_learning a :ML_area ;
     skos:prefLabel "unsupervised learning" ;
     skos:altLabel "UL" ;
-    rdfs:comment "Unsupervised learning (UL) is a type of algorithm that learns patterns from untagged data." ;
+    rdfs:comment "Unsupervised learning (UL) is the machine learning area for learning patterns from unlabeled data." ;
     rdfs:seeAlso <https://www.wikidata.org/entity/Q1152135> .
 :reinforcement_learning a :ML_area ;
     skos:prefLabel "reinforcement learning" ;
@@ -1914,7 +1914,7 @@
     :category :task_configuration ;
     :automl_solution :autokeras ;
     :ml_task :tabular_classification ;
-    :parameter_value :metric_autokeras_tabular_classification , :loss_autokeras_tabular_classification , :max_trials_autokeras , :tuner_autokeras_tabular_classification , :max_model_size_autokeras .
+    :parameter_value :metric_autokeras_tabular_classification , :loss_autokeras_tabular_classification , :max_trials_autokeras_tabular_classification , :tuner_autokeras_tabular_classification , :max_model_size_autokeras_tabular_classification .
 :tabular_regression_in_autokeras a :Configuration_item ;
     skos:prefLabel "tabular regression in AutoKeras" ;
     :category :task_configuration ;
@@ -2555,8 +2555,8 @@
     skos:prefLabel "max_model_size" ;
     :category :parameter ;
     :has_datatype :integer .
-:max_model_size_autokeras a :Configuration_item ;
-    skos:prefLabel "max_model_size_autokeras" ;
+:max_model_size_autokeras_tabular_classification a :Configuration_item ;
+    skos:prefLabel "max model size autokeras tabular classification" ;
     :category :parameter ;
     skos:broader :max_model_size ;
     :has_datatype :integer .
@@ -2568,8 +2568,8 @@
     skos:prefLabel "max_trials" ;
     :category :parameter ;
     :has_datatype :integer .
-:max_trials_autokeras a :Configuration_item ;
-    skos:prefLabel "max_trials_autokeras" ;
+:max_trials_autokeras_tabular_classification a :Configuration_item ;
+    skos:prefLabel "max trials autokeras tabular classification" ;
     :category :parameter ;
     skos:broader :max_trials ;
     :has_datatype :integer .
