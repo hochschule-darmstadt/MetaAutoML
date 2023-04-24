@@ -1,8 +1,10 @@
 import os
+import unittest
 
 from AdapterUtils import *
 from autogluon.tabular import TabularPredictor
 from autogluon.multimodal import  MultiModalPredictor
+from autogluon.timeseries import TimeSeriesDataFrame, TimeSeriesPredictor
 from AdapterUtils import *
 from AutoGluonServer import data_loader
 import AutoGluonParameterConfig as agpc
@@ -65,8 +67,8 @@ class AutoGluonAdapter:
             self.__image_classification()
         elif self._configuration["configuration"]["task"] == ":text_classification":
             self.__text_classification()
-        elif self._configuration["configuration"]["task"] == ":text_regression":
-            self.__text_regression()
+        elif self._configuration["configuration"]["task"] == ":named_entity_recognition":
+            self.__text_named_entity_recognition()
         elif self._configuration["configuration"]["task"] == ":time_series_forecasting":
             self.__time_series_forecasting()
 
@@ -124,6 +126,26 @@ class AutoGluonAdapter:
         model = MultiModalPredictor(label=y.name,
                                  **parameters,
                                  problem_type=classification_type,
+                                 path=self._result_path).fit(
+            data,
+            time_limit=self._time_limit*60, hyperparameters=hyperparameters)
+        #Fit methode already saves the model
+
+    def __text_named_entity_recognition(self):
+        """Execute the tabular regression task and export the found model"""
+        self.df, test = data_loader(self._configuration)
+        X, y = prepare_tabular_dataset(self.df, self._configuration)
+        data = X
+        data[y.name] = y
+        #Disable multi worker else training takes a while or doesnt complete
+        #https://github.com/autogluon/autogluon/issues/2756
+        # set checkpoint for ner
+        hyperparameters = {"env.num_workers": 0, 'model.ner_text.checkpoint_name':'google/electra-small-discriminator'}
+        parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), agpc.task_config)
+
+        model = MultiModalPredictor(label=y.name,
+                                 **parameters,
+                                 problem_type='ner',
                                  path=self._result_path).fit(
             data,
             time_limit=self._time_limit*60, hyperparameters=hyperparameters)
@@ -194,3 +216,5 @@ class AutoGluonAdapter:
             time_limit=self._time_limit*60)
         #Fit methode already saves the model
 
+if __name__ == '__main__':
+    unittest.main()
