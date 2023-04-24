@@ -761,6 +761,9 @@ msgstr "Nach Status, Start Datum oder Datenset Typ suchen"
 msgid "Task"
 msgstr "Task"
 
+msgid "TwoFactorAuthentication"
+msgstr "Zwei Faktor Authentifizierung"
+
 msgid "Dataset not redable"
 msgstr "Datenset konnte nicht gelessen werden! Wenn das Datenset gerade hochgeladen wurde muss noch etwas gewartet werden bevor dieses bereitsteht. Ansonsten stimmt die Datenset Konfiguration nicht, diese kann durch die Vorschau Konfiguration neu konfiguriert werden"
 
@@ -820,6 +823,36 @@ msgstr "Datei Konfiguration konnte nicht gespeichert werden, Spaltenseparator in
 
 msgid "Could not read dataset successfully, change configuration"
 msgstr "Datenset konnte nicht gelessen werden, ändern Sie die Konfiguration."
+
+msgid "Change Password"
+msgstr "Passwort ändern"
+
+msgid "EnableAuthenticatorInstructions"
+msgstr ""
+"<p>"
+"Laden Sie eine Zwei-Faktor-Authentifizierungs-App wie Microsoft Authenticator oder Google Authenticator herunter."
+"</p>"
+"<p>Sannen Sie den QR Code oder den Schlüssel <kbd>{0}</kbd> in Ihrer Zwei-Faktor-Authentifizierungs-App. Leerzeichen sowie Groß- und Kleinschreibung sind nicht relevant.</p>"
+"<img src=\"{1}\" style=\"width: 200px\" />"
+"<p>"
+"Sobald Sie den QR Code gescannt oder den obigen Schlüssel eingegeben haben, bietet Ihnen die App zur Zwei-Faktor-Authentifizierung folgende Informationen "
+"mit einem einmaligen Code. Geben Sie den Code in das Bestätigungsfeld unten ein und bestätigen Sie."
+"</p>"
+
+msgid "Code"
+msgstr "Code"
+
+msgid "LastName"
+msgstr "Nachname"
+
+msgid "FirstName"
+msgstr "Vorname"
+
+msgid "VerifyCode"
+msgstr "Code überprüfen"
+
+msgid "ResetAuthenticator"
+msgstr "Authentifikator zurücksetzen"
 
 msgid "Search by name, status, lib or AutoML system"
 msgstr "Nach Name, Status, Bibliothek oder AutoML System suchen"
