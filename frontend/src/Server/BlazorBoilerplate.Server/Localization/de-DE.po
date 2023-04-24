@@ -536,6 +536,9 @@ msgstr "Alle Datensets"
 msgid "Name: {0}"
 msgstr "Name: {0}"
 
+msgid "Rows per page"
+msgstr "Zeilen pro Seite"
+
 msgid "Dataset type: {0}"
 msgstr "Datenset Typ: {0}"
 
@@ -749,11 +752,20 @@ msgstr "Laufzeitbeschränkung"
 msgid "Explanation"
 msgstr "Explanation"
 
+msgid "Correlation Matrix"
+msgstr "Korrelationsmatrix"
+
+msgid "Correlation analysis"
+msgstr "Korrelationsanalyse"
+
+msgid "Column analysis"
+msgstr "Säulenanalyse"
+
 msgid "Models"
 msgstr "Modelle"
 
 msgid "Past training"
-msgstr "Vergange Trainings"
+msgstr "Vergangene Trainings"
 
 msgid "Search for status, task or dataset type"
 msgstr "Nach Status, Start Datum oder Datenset Typ suchen"
@@ -841,6 +853,9 @@ msgstr ""
 
 msgid "Code"
 msgstr "Code"
+
+msgid "ENTER URL"
+msgstr "URL eingeben"
 
 msgid "LastName"
 msgstr "Nachname"

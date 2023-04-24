@@ -1146,6 +1146,10 @@ msgid "Data not available."
 msgstr "Data not available."
 
 msgctxt "Global"
+msgid "ENTER URL"
+msgstr "Enter URL"
+
+msgctxt "Global"
 msgid "Company"
 msgstr "Company"
 
@@ -1753,6 +1757,19 @@ msgstr ".AspNetCore.Antiforgery"
 msgctxt "Global"
 msgid "AntiforgeryCookieLifecycle"
 msgstr "Session"
+
+msgctxt "Global"
+msgid "Correlation Matrix"
+msgstr "Correlation Matrix"
+
+msgctxt "Global"
+msgid "Correlation analysis"
+msgstr "Correlation Analysis"
+
+msgctxt "Global"
+msgid "Column analysis"
+msgstr "Column Analysis"
+
 
 msgctxt "Global"
 msgid "AntiforgeryCookieDescription"
