@@ -1,6 +1,6 @@
 from dependency_injector import containers, providers
 from AdapterScheduler import *
-from GAMAAdapterManager import EvalMLAdapterManager
+from GAMAAdapterManager import GAMAAdapterManager
 
 
 class Managers(containers.DeclarativeContainer):
@@ -14,7 +14,7 @@ class Managers(containers.DeclarativeContainer):
         AdapterScheduler,
     )
     adapter_manager = providers.Factory(
-        EvalMLAdapterManager,
+        GAMAAdapterManager,
     )
 
 class Application(containers.DeclarativeContainer):
