@@ -1,0 +1,16 @@
+{
+    "python.analysis.typeCheckingMode": "strict",
+    "python.formatting.provider": "black",
+    "python.linting.lintOnSave": true,
+    "python.linting.flake8Enabled": false,
+    "python.linting.pylintEnabled": false,
+    "editor.formatOnSave": true,
+    "[python]": {
+        "diffEditor.ignoreTrimWhitespace": false,
+        "editor.wordBasedSuggestions": false,
+        "editor.defaultFormatter": "ms-python.python"
+    },
+    "pylint.args": [
+        "--rcfile=${workspaceFolder}/pylint.cfg"
+    ]
+}
