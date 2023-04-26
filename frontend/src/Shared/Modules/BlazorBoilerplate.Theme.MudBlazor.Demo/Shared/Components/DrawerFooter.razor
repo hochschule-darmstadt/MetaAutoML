@@ -64,14 +64,14 @@
                                                StartIcon="@Icons.Filled.CloudUpload"
                                                for="fileInput"
                                                Class="mt-1"
-                                               Disabled="IsSelectFileDisabled"
+                                               Disabled="@IsSelectFileDisabled"
                                                OnClick="setLocalUploadTrue">
                                         @L["Select Dataset"]
                                     </MudButton>
                                     <MudText Style="padding:5%">or</MudText>
-                                    <MudTextField Style=" font-weight: bold; font-size: 12pt;" Variant="Variant.Outlined" TextChanged="setURLUploadTrue" Disabled="IsSelectFileDisabled" @bind-Value="@Url" Label="@L["ENTER URL"]" ></MudTextField>
+                                    <MudTextField Style=" font-weight: bold; font-size: 12pt;" Variant="Variant.Outlined" TextChanged="setURLUploadTrue" Disabled="@IsURLDisabled" @bind-Value="@Url" Label="@L["ENTER URL"]" ></MudTextField>
                                 </MudStack>
-                                <MudTextField @bind-Value="@fileUploader.UploadDatasetRequest.DatasetName" Disabled="IsSelectFileDisabled" Label="@L["Dataset Name"]" Class="mt-1"></MudTextField>
+                                <MudTextField @bind-Value="@fileUploader.UploadDatasetRequest.DatasetName" Disabled="@(_uploadReady)" Label="@L["Dataset Name"]" Class="mt-1"></MudTextField>
           
                             @if (_isLoaderClosed == false)
                             {
@@ -82,7 +82,7 @@
         </MudCard>
     </DialogContent>
     <DialogActions>
-        <MudButton Color="Color.Secondary" OnClick="Close">@L["Close"]</MudButton>
+        <MudButton Color="Color.Secondary" OnClick="@Close">@L["Close"]</MudButton>
         @if (fileUploader.IsUploading == false)
         {
             <MudButton StartIcon="@Icons.Filled.CloudUpload" Color="Color.Secondary" Disabled="@_uploadReady" OnClick="@Upload">@L["Upload"]</MudButton>
@@ -140,6 +140,7 @@
     [Parameter]
     public EventCallback OnUploadCompletedCallback { get; set; }
     public bool IsSelectFileDisabled { get; set; } = true;
+    public bool IsURLDisabled { get; set; } = true;
     public string AcceptedFileType { get; set; } = "";
     public int Progress { get; set; }
     public string UploadText { get; set; } = "";
@@ -151,22 +152,18 @@
     private bool _uploadReady = true;
     private bool _isLoaderClosed = true;
 
-    private void FileOrUrlSwitch()
-    {
-        _fileUpload = (!_fileUpload);
-        _uploadReady = true;
-
-    }
 
     private void setURLUploadTrue()
     {
         _fileUpload = false;
+        IsSelectFileDisabled = true;
         DisableUpload();
     }
 
     private void setLocalUploadTrue()
     {
         _fileUpload = true;
+        IsURLDisabled = true;
         _uploadReady = true;
 
     }
@@ -194,6 +191,7 @@
             {
                 fileUploader.UploadPredictionRequest = new UploadPredictionRequestDto();
                 IsSelectFileDisabled = true;
+                IsURLDisabled = true;
                 _uploadReady = true;
             }
             else
@@ -218,6 +216,7 @@
             {
                 fileUploader.UploadDatasetRequest = new UploadDatasetRequestDto();
                 IsSelectFileDisabled = true;
+                IsURLDisabled = true;
                 _uploadReady = true;
             }
             else
@@ -281,6 +280,7 @@
         if (string.IsNullOrEmpty(value))
         {
             IsSelectFileDisabled = true;
+            IsURLDisabled = true;
         }
         else
         {
@@ -289,22 +289,27 @@
                 case ":tabular":
                     AcceptedFileType = ".csv";
                     IsSelectFileDisabled = false;
+                    IsURLDisabled = false;
                     break;
                 case ":image":
                     AcceptedFileType = ".zip";
                     IsSelectFileDisabled = false;
+                    IsURLDisabled = false;
                     break;
                 case ":text":
                     AcceptedFileType = ".csv";
                     IsSelectFileDisabled = false;
+                    IsURLDisabled = false;
                     break;
                 case ":time_series":
                     AcceptedFileType = ".csv";
                     IsSelectFileDisabled = false;
+                    IsURLDisabled = false;
                     break;
                 case ":time_series_longitudinal":
                     AcceptedFileType = ".ts";
                     IsSelectFileDisabled = false;
+                    IsURLDisabled = false;
                     break;
             }
         }
@@ -317,6 +322,7 @@
         fileUploader.IsUploadDatasetDialogOpen = false;
         fileUploader.IsUploadPredictionDatasetDialogOpen = false;
         IsSelectFileDisabled = true;
+        IsURLDisabled = true;
         Url = "";
         RefreshComponent();
     }
