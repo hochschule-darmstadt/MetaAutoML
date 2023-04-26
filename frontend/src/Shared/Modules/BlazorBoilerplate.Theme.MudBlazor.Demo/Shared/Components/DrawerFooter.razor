@@ -156,7 +156,13 @@
     private void setURLUploadTrue()
     {
         _fileUpload = false;
-        IsSelectFileDisabled = true;
+        if (String.IsNullOrEmpty(Url)){
+            IsSelectFileDisabled = false;
+        }
+        else{
+            IsSelectFileDisabled = true;
+        }
+
         DisableUpload();
     }
 
