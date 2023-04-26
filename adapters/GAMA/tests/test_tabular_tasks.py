@@ -6,7 +6,7 @@ from unittest import IsolatedAsyncioTestCase
 import uuid
 
 import pandas as pd
-from EvalMLAdapterManager import EvalMLAdapterManager
+from GAMAAdapterManager import EvalMLAdapterManager
 from Container import *
 from AdapterBGRPC import *
 

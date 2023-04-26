@@ -9,14 +9,14 @@ from JsonUtil import get_config_property
 import pandas as pd
 from typing import Tuple
 from predict_time_sources import feature_preparation
-import evalml
+import gama
 
-#TODO evalml estimators
-evalml_estimators = {
+#TODO GAMA estimators
+GAMA_estimators = {
     'Time Series Baseline Regression Pipeline' : (":baseline", ":baseline")
 }
 
-class EvalMLAdapterManager(AdapterManager):
+class GAMAAdapterManager(AdapterManager):
     """The AutoML solution specific functionality implementation of the AdapterManager class
 
     Args:
@@ -24,12 +24,12 @@ class EvalMLAdapterManager(AdapterManager):
     """
 
     def __init__(self) -> None:
-        """Initialize a new FLAMLAdapterManager setting AutoML adapter specific variables
+        """Initialize a new GAMAAdapterManager setting AutoML adapter specific variables
         """
-        super(EvalMLAdapterManager, self).__init__()
+        super(GAMAAdapterManager, self).__init__()
         self.__automl = None
         self.__loaded_training_id = None
-        self._adapter_name = "evalml"
+        self._adapter_name = "GAMA"
 
     def _get_ml_model_and_lib(self, config: "StartAutoMlRequest") -> Tuple[str, str]:
         """Get the ML model type and ml library used by the result model
@@ -44,12 +44,12 @@ class EvalMLAdapterManager(AdapterManager):
         #TODO ADD CORRECT lib and model display
         library = [":lightgbm_lib"]
         model = [":light_gradient_boosting_machine"]
-        with open(os.path.join(os.path.join(working_dir, 'evalml.p')), 'rb') as file:
+        with open(os.path.join(os.path.join(working_dir, 'GAMA.p')), 'rb') as file:
             loaded_model = dill.load(file)
         return library, model
 
     async def explain_model(self, explain_auto_ml_request: "ExplainModelRequest") -> ExplainModelResponse:
-        """override explain model function for evalml to specify the woodword structure for test data set.
+        """override explain model function for GAMA to specify the woodword structure for test data set.
 
         Args:
             explain_auto_ml_request (ExplainModelRequest): _description_
@@ -84,7 +84,7 @@ class EvalMLAdapterManager(AdapterManager):
             raise grpclib.GRPCError(grpclib.Status.UNAVAILABLE, f"Error while generating probabilities {e}")
 
     async def explain_model(self, explain_auto_ml_request: "ExplainModelRequest") -> ExplainModelResponse:
-        """override explain model function for evalml to specify the woodword structure for test data set.
+        """override explain model function for GAMA to specify the woodword structure for test data set.
 
         Args:
             explain_auto_ml_request (ExplainModelRequest): _description_
@@ -142,7 +142,7 @@ class EvalMLAdapterManager(AdapterManager):
 
         if self._loaded_training_id != config["training_id"]:
             print(f"ExplainModel: Model not already loaded; Loading model")
-            with open(result_folder_location + '/evalml.p', 'rb') as file:
+            with open(result_folder_location + '/GAMA.p', 'rb') as file:
                 self.__automl = dill.load(file)
             self._loaded_training_id = config["training_id"]
         try:
