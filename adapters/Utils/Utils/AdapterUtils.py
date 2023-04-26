@@ -46,7 +46,7 @@ def read_parameter(parameters, intersect_parameter, automl_parameter, default=[N
         return default
     else:
         return value
-        
+
 def translate_parameters(task, parameter, task_config):
     """_summary_
 
@@ -203,7 +203,7 @@ def evaluate(config: "StartAutoMlRequest", config_path: str) -> Tuple[float, flo
         #y_actual = test.iloc[-12:][target]
         #test.drop(test.tail(12).index, inplace=True)
         #file_path = write_tabular_dataset_data(test, os.path.dirname(file_path), config)
-        
+
     elif(config["configuration"]["task"] in[":image_classification", ":image_regression"]):
         X_test, y_test = data_loader(config, image_test_folder=True)
 
@@ -216,9 +216,13 @@ def evaluate(config: "StartAutoMlRequest", config_path: str) -> Tuple[float, flo
 
     if config["configuration"]["task"] in [":tabular_classification", ":text_classification", ":image_classification", ":time_series_classification"]:
         if config["configuration"]["task"] == ":image_classification":
-            return compute_classification_metrics(pd.Series(y_test), predictions["predicted"]), (predict_time * 1000) / pd.Series(y_test).shape[0]
+            #clalculate number of clases with y_test because the training target is not available here
+            number_of_classes = y_test.unique()
+            return compute_classification_metrics(pd.Series(y_test), predictions["predicted"], number_of_classes), (predict_time * 1000) / pd.Series(y_test).shape[0]
         else:
-            return compute_classification_metrics(pd.Series(test[target]), predictions["predicted"]), (predict_time * 1000) / test.shape[0]
+            #calculate number of classes because in the training set are sometime not all classes available
+            number_of_classes = train[target].nunique()
+            return compute_classification_metrics(pd.Series(test[target]), predictions["predicted"], number_of_classes), (predict_time * 1000) / test.shape[0]
     elif config["configuration"]["task"] in [":tabular_regression", ":text_regression", ":image_regression", ":time_series_forecasting"]:
         if config["configuration"]["task"] == ":image_regression":
             return compute_regression_metrics(pd.Series(y_test), predictions["predicted"]), (predict_time * 1000) / pd.Series(y_test).shape[0]
@@ -228,7 +232,7 @@ def evaluate(config: "StartAutoMlRequest", config_path: str) -> Tuple[float, flo
         else:
             return compute_regression_metrics(pd.Series(test[target]), predictions["predicted"]), (predict_time * 1000) / test.shape[0]
 
-def compute_classification_metrics(y_should: pd.Series, y_is: pd.Series) -> dict:
+def compute_classification_metrics(y_should: pd.Series, y_is: pd.Series, number_of_classes: int) -> dict:
     """Compute the metrics collection for classification tasks
 
     Args:
@@ -252,7 +256,7 @@ def compute_classification_metrics(y_should: pd.Series, y_is: pd.Series) -> dict
         ":accuracy": float(accuracy_score(y_should, y_is)),
         ":balanced_accuracy": float(balanced_accuracy_score(y_should, y_is)),
     }
-    if len(y_should.unique()) == 2:
+    if number_of_classes == 2:
         #Metrics only for binary classification
         tn, fp, fn, tp = confusion_matrix(y_should, y_is).ravel()
         score.update({
