@@ -7,7 +7,7 @@ ONTOLOGY_QUERY_GET_SUPPORTED_ML_LIBRARIES_FOR_TASK = """
             WHERE {
             ?automl a :AutoML_solution ;
                        :can_perform ?task ;
-                       :supported_by_oma_ml "True" ;
+                       :supported_by_oma_ml "true" ;
                        :used_for ?lib .
             }
             """
@@ -21,7 +21,7 @@ ONTOLOGY_QUERY_GET_COMPATIBLE_AUTO_ML_SOLUTIONS_FOR_TASK_AND_LIBRARIES = """
             WHERE {
             ?automl a :AutoML_solution ;
                        :can_perform ?task ;
-                       :supported_by_oma_ml "True" ;
+                       :supported_by_oma_ml "true" ;
                        :used_for ?lib .
             }
             """
@@ -34,7 +34,7 @@ ONTOLOGY_QUERY_GET_COMPATIBLE_AUTO_ML_SOLUTIONS_FOR_TASK = """
             WHERE {
             ?automl a :AutoML_solution ;
                        :can_perform ?task ;
-                       :supported_by_oma_ml "True" .
+                       :supported_by_oma_ml "true" .
             }
             """
 
@@ -47,7 +47,7 @@ ONTOLOGY_QUERY_GET_TASKS_FOR_DATASET_TYPE = """
             WHERE {
             ?task a :ML_task ;
                         :has_dataset_type ?dataset_type ;
-                        :supported_by_oma_ml "True" .
+                        :supported_by_oma_ml "true" .
             }
             """
 
@@ -60,7 +60,7 @@ ONTOLOGY_QUERY_GET_DATASET_TYPES = """
             WHERE {
                     ?type a :Enum ;
                             :category ?dataset_type ;
-                            :supported_by_oma_ml "True" .
+                            :supported_by_oma_ml "true" .
             }
             """
 
