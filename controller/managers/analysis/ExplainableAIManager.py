@@ -10,6 +10,7 @@ from ControllerBGRPC import *
 from DataStorage import DataStorage
 from ThreadLock import ThreadLock
 from CsvManager import CsvManager
+from explainerdashboard import ClassifierExplainer, ExplainerDashboard
 import re
 
 def make_svg_waterfall_plot(base_value, shap_values, X, path, filename_detail):
@@ -249,6 +250,7 @@ class ExplainableAIManager:
         dataset = CsvManager.read_dataset(dataset_path, training["dataset_configuration"]['file_configuration'], training["dataset_configuration"]['schema'])
         dataset_X, dataset_Y = feature_preparation(dataset, training["dataset_configuration"]["schema"].items(), training["dataset_configuration"]["file_configuration"]["datetime_format"])
 
+        createExplainerDashboard(model, dataset_X, dataset_Y)
 
         sampled_dataset_X = dataset_X.iloc[0:number_of_samples, :]
 
@@ -315,5 +317,16 @@ class ExplainableAIManager:
             return pd.DataFrame(probabilities)
         import shap
         return shap.KernelExplainer(prediction_probability, sampled_dataset_x)
+    
+def createExplainerDashboard(model, x_test, y_test):
+    dashboard = ExplainerDashboard(ClassifierExplainer(model, x_test, y_test))
+    dashboard.save_html("./binary_dashboard.html")
+    dashboard.explainer.dump("./binary_dashboard.dill")
+    runExplainerDashboard()
+
+def runExplainerDashboard():
+    dashboard = ExplainerDashboard(ClassifierExplainer.from_file("./binary_dashboard.dill"))
+    dashboard.run(8045)
+
 
 
