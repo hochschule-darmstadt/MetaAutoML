@@ -5,7 +5,7 @@ import glob
 from PIL import Image
 import numpy as np
 
-{% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression", ":text_classification", ":text_regression", ":time_series_forecasting"] %}
+{% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression", ":text_classification", ":text_regression", ":named_entity_recognition", ":time_series_forecasting"] %}
 def read_csv_dataset(path: str) -> pd.DataFrame:
     {% set targets = [] %}
     {% for key in configuration.dataset_configuration["schema"] %}
