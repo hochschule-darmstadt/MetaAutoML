@@ -1,5 +1,5 @@
 ### Ontology file generated from ML_Ontology.xlsx.
-### 2023-04-27 09:00:54.089592
+### 2023-04-27 15:40:41.498018
 
 
 # PREFIXES
@@ -205,7 +205,7 @@
     :has_dataset_type :image ;
     rdfs:comment "set of methods to group images" ;
     rdfs:seeAlso <https://www.wikidata.org/entity/Q98526763> ;
-    :supported_by_oma_ml "True" .
+    :supported_by_oma_ml "true"^^xsd:boolean .
 :image_object_tracking a :ML_task ;
     skos:prefLabel "image object tracking" ;
     :belongs_to :supervised_learning ;
@@ -284,14 +284,14 @@
     :belongs_to :supervised_learning ;
     :has_dataset_type :tabular ;
     rdfs:comment "classification of data rows of a table" ;
-    :supported_by_oma_ml "True" .
+    :supported_by_oma_ml "true"^^xsd:boolean .
 :tabular_regression a :ML_task ;
     skos:prefLabel "tabular regression" ;
     skos:broader :regression ;
     :belongs_to :supervised_learning ;
     :has_dataset_type :tabular ;
     rdfs:comment "prediction of continuous values for rows in a table" ;
-    :supported_by_oma_ml "True" .
+    :supported_by_oma_ml "true"^^xsd:boolean .
 :text_analytics a :ML_task ;
     skos:prefLabel "text analytics" ;
     :belongs_to :supervised_learning , :unsupervised_learning ;
@@ -304,7 +304,7 @@
     :has_dataset_type :text ;
     rdfs:comment "classification of texts" ;
     rdfs:seeAlso <https://www.wikidata.org/entity/Q102190569> ;
-    :supported_by_oma_ml "True" .
+    :supported_by_oma_ml "true"^^xsd:boolean .
 :text_regression a :ML_task ;
     skos:prefLabel "text regression" ;
     skos:broader :regression ;
@@ -323,13 +323,13 @@
     :belongs_to :supervised_learning ;
     :has_dataset_type :time_series_longitudinal ;
     rdfs:comment "Classification of time series" ;
-    :supported_by_oma_ml "True" .
+    :supported_by_oma_ml "true"^^xsd:boolean .
 :time_series_forecasting a :ML_task ;
     skos:prefLabel "time series forecasting" ;
     :belongs_to :supervised_learning ;
     :has_dataset_type :time_series ;
     rdfs:comment "The prediction of events through a sequenc of time" ;
-    :supported_by_oma_ml "True" .
+    :supported_by_oma_ml "true"^^xsd:boolean .
 :topic_modeling a :ML_task ;
     skos:prefLabel "topic modeling" ;
     :belongs_to :unsupervised_learning ;
@@ -375,7 +375,7 @@
     :belongs_to :supervised_learning ;
     :has_dataset_type :text ;
     rdfs:comment "Extract entites from text" ;
-    :supported_by_oma_ml "True" .
+    :supported_by_oma_ml "true"^^xsd:boolean .
 
 
 # ML_approach
@@ -389,12 +389,6 @@
     skos:broader :hierarchical_clustering ;
     :used_for :clustering ;
     rdfs:comment "A bottom up clustering method where clusters have subclusters, where these subclusters can also have subclusters" .
-:arsenal_ensemble a :ML_approach ;
-    skos:prefLabel "Arsenal ensemble" ;
-    skos:altLabel "Arsenal" ;
-    skos:broader :ensemble_classifier ;
-    :used_for :time_series_classification ;
-    rdfs:comment "Arsenal ensemble." .
 :artificial_neural_network a :ML_approach ;
     skos:prefLabel "artificial neural network" ;
     skos:altLabel "ANN" , "neural network" ;
@@ -416,12 +410,6 @@
     :used_for :time_series_analysis ;
     rdfs:comment "statistical model used in time series analysis" ;
     rdfs:seeAlso <https://www.wikidata.org/entity/Q2566298> .
-:bag_of_sfa_symbols a :ML_approach ;
-    skos:prefLabel "Bag-of-SFA-Symbols" ;
-    skos:altLabel "BOSS" ;
-    skos:broader :ensemble_classifier ;
-    :used_for :time_series_classification ;
-    rdfs:comment "Ensemble of bag of Symbolic Fourier Approximation Symbols" .
 :bayesian_linear_regression a :ML_approach ;
     skos:prefLabel "Bayesian linear regression" ;
     skos:broader :linear_regression ;
@@ -458,16 +446,6 @@
     :possible_if :numerical_features ;
     rdfs:comment "way of inferring information from cross-covariance matrices" ;
     rdfs:seeAlso <https://www.wikidata.org/entity/Q115542> .
-:canonical_interval_forest a :ML_approach ;
-    skos:prefLabel "Canonical Interval Forest" ;
-    skos:altLabel "CIF" ;
-    :used_for :time_series_classification ;
-    rdfs:comment "Canonical Interval Forest Classifier" .
-:canonical_time_series_characteristics a :ML_approach ;
-    skos:prefLabel "Canonical Time-series Characteristics" ;
-    skos:altLabel "catch22" ;
-    :used_for :time_series_classification ;
-    rdfs:comment "Canonical Time-series Characteristics (catch22) classifier." .
 :catboost a :ML_approach ;
     skos:prefLabel "catboost" ;
     skos:broader :gradient_boosting_tree ;
@@ -495,12 +473,6 @@
     :used_for :time_series_analysis ;
     rdfs:comment "class of statistical modeling method applied in pattern recognition and machine learning and used for structured prediction" ;
     rdfs:seeAlso <https://www.wikidata.org/entity/Q1124538> .
-:contractable_boss a :ML_approach ;
-    skos:prefLabel "Contractable BOSS" ;
-    skos:altLabel "cBOSS" ;
-    skos:broader :ensemble_classifier ;
-    :used_for :time_series_classification ;
-    rdfs:comment "Contractable Bag of Symbolic Fourier Approximation Symbols" .
 :convolutional_neural_network a :ML_approach ;
     skos:prefLabel "convolutional neural network" ;
     skos:altLabel "CNN" ;
@@ -531,18 +503,6 @@
     :used_for :clustering ;
     rdfs:comment "data clustering algorithm" ;
     rdfs:seeAlso <https://www.wikidata.org/entity/Q1114630> .
-:diverse_representation_canonical_interval_forest a :ML_approach ;
-    skos:prefLabel "Diverse Representation Canonical Interval Forest" ;
-    skos:altLabel "DrCIF" ;
-    :used_for :time_series_classification ;
-    rdfs:comment "Diverse Representation Canonical Interval Forest Classifier (DrCIF)." .
-:elastic_ensemble a :ML_approach ;
-    skos:prefLabel "Elastic Ensemble" ;
-    skos:altLabel "EE" ;
-    skos:broader :ensemble_classifier ;
-    :used_for :time_series_classification ;
-    :performance :long_training_time ;
-    rdfs:comment "EE is an ensemble of elastic nearest neighbor classifiers" .
 :ensemble skos:prefLabel "ensemble" ;
     :used_for :tabular_classification , :tabular_regression .
 :expectation_maximization_clustering a :ML_approach ;
@@ -565,10 +525,6 @@
     skos:broader :artificial_neural_network ;
     rdfs:comment "artificial neural network wherein connections between the nodes do not form a cycle" ;
     rdfs:seeAlso <https://www.wikidata.org/entity/Q5441227> .
-:fresh_prince a :ML_approach ;
-    skos:prefLabel "Fresh PRINCE" ;
-    :used_for :time_series_classification ;
-    rdfs:comment "Fresh Pipeline with RotatIoN forest Classifier." .
 :gated_recurrent_unit a :ML_approach ;
     skos:prefLabel "gated recurrent unit" ;
     skos:altLabel "GRU" ;
@@ -628,25 +584,6 @@
     :used_for :clustering ;
     rdfs:comment "method of cluster analysis which seeks to build a hierarchy of clusters" ;
     rdfs:seeAlso <https://www.wikidata.org/entity/Q1277447> .
-:hierarchical_vote_collective_of_transformation_based_ensembles_v1 a :ML_approach ;
-    skos:prefLabel "Hierarchical Vote Collective of Transformation-based Ensembles V1" ;
-    skos:altLabel "HIVE-COTE V1" ;
-    skos:broader :ensemble_classifier ;
-    :used_for :time_series_classification ;
-    :performance :long_training_time , :accurate ;
-    rdfs:comment "Hierarchical Vote Collective of Transformation-based Ensembles (HIVE-COTE) V1." .
-:hierarchical_vote_collective_of_transformation_based_ensembles_v2 a :ML_approach ;
-    skos:prefLabel "Hierarchical Vote Collective of Transformation-based Ensembles V2" ;
-    skos:altLabel "HIVE-COTE V2" ;
-    skos:broader :ensemble_classifier ;
-    :used_for :time_series_classification ;
-    :performance :long_training_time , :accurate ;
-    rdfs:comment "Hierarchical Vote Collective of Transformation-based Ensembles (HIVE-COTE) V2" .
-:inception_fully_convolutional_network a :ML_approach ;
-    skos:prefLabel "Inception Fully Convolutional Network" ;
-    skos:altLabel "InceptionFCN" ;
-    skos:broader :artificial_neural_network ;
-    :used_for :time_series_classification .
 :inception_time a :ML_approach ;
     skos:prefLabel "Inception Time" ;
     skos:altLabel "InceptionTime" ;
@@ -661,18 +598,6 @@
     :possible_if :numerical_features ;
     rdfs:comment "in signal processing, a computational method" ;
     rdfs:seeAlso <https://www.wikidata.org/entity/Q1259145> .
-:individual_boss a :ML_approach ;
-    skos:prefLabel "Individual BOSS" ;
-    skos:altLabel "IndividualBOSS" ;
-    skos:broader :ensemble_classifier ;
-    :used_for :time_series_classification ;
-    rdfs:comment "Single bag of Symbolic Fourier Approximation Symbols" .
-:individual_temporal_dictionary_ensemble a :ML_approach ;
-    skos:prefLabel "Individual Temporal Dictionary Ensemble" ;
-    skos:altLabel "IndividualTDE" ;
-    skos:broader :ensemble_classifier ;
-    :used_for :time_series_classification ;
-    rdfs:comment "Single TDE classifier, an extension of the Bag of SFA Symbols (BOSS) model." .
 :k_means a :ML_approach ;
     skos:prefLabel "k-means" ;
     :used_for :clustering ;
@@ -761,23 +686,11 @@
     skos:altLabel "MM" ;
     rdfs:comment "probability tool" ;
     rdfs:seeAlso <https://www.wikidata.org/entity/Q6771326> .
-:martrix_profile a :ML_approach ;
-    skos:prefLabel "Martrix Profile" ;
-    skos:altLabel "MP" ;
-    :used_for :time_series_classification ;
-    rdfs:comment "Martrix Profile (MP) classifier" .
 :maximum_entropy_markov_model a :ML_approach ;
     skos:prefLabel "maximum entropy Markov model" ;
     skos:altLabel "MEMM" ;
     skos:broader :markov_model ;
     rdfs:seeAlso <https://www.wikidata.org/entity/Q6795829> .
-:multi_scale_convolutional_neural_networks a :ML_approach ;
-    skos:prefLabel "Multi-Scale Convolutional Neural Networks" ;
-    skos:altLabel "MCNN" ;
-    skos:broader :artificial_neural_network ;
-    :used_for :time_series_classification ;
-    :performance :scalable ;
-    rdfs:comment "A novel end-to-end neural network model, MCNN, incorporates feature extraction and classification in a single framework." .
 :multilayer_perceptron a :ML_approach ;
     skos:prefLabel "multilayer perceptron" ;
     skos:altLabel "MLP" ;
@@ -791,11 +704,6 @@
     :performance :fast_training ;
     rdfs:comment "classification algorithm" ;
     rdfs:seeAlso <https://www.wikidata.org/entity/Q812530> .
-:multivariate_symbolic_extension a :ML_approach ;
-    skos:prefLabel "MUltivariate Symbolic Extension" ;
-    skos:altLabel "MUSE" ;
-    :used_for :time_series_classification ;
-    rdfs:comment "MUltivariate Symbolic Extension" .
 :ordering_points_to_identify_the_clustering_structure a :ML_approach ;
     skos:prefLabel "ordering points to identify the clustering structure" ;
     skos:altLabel "OPTICS" ;
@@ -822,22 +730,6 @@
 :prophet a :ML_approach ;
     skos:prefLabel "prophet" ;
     :used_for :time_series_analysis .
-:proximity_forest a :ML_approach ;
-    skos:prefLabel "Proximity Forest" ;
-    skos:altLabel "PF" ;
-    skos:broader :ensemble_classifier ;
-    :used_for :time_series_classification ;
-    rdfs:comment "Proximity Forest classifier models a decision tree forest which uses distance measures to partition data" .
-:proximity_stump a :ML_approach ;
-    skos:prefLabel "Proximity Stump" ;
-    skos:broader :decision_stump ;
-    :used_for :time_series_classification ;
-    rdfs:comment "Proximity Stump classifier models a decision stump which uses a distance measure to partition data." .
-:proximity_tree a :ML_approach ;
-    skos:prefLabel "Proximity Tree" ;
-    skos:broader :decision_tree ;
-    :used_for :time_series_classification ;
-    rdfs:comment "A decision tree which uses distance measures to partition data" .
 :random_forest a :ML_approach ;
     skos:prefLabel "random forest" ;
     skos:broader :decision_tree ;
@@ -845,15 +737,6 @@
     :performance :fast_training , :accurate ;
     rdfs:comment "statistical algorithm that is used to cluster points of data in functional groups" ;
     rdfs:seeAlso <https://www.wikidata.org/entity/Q245748> .
-:random_interval a :ML_approach ;
-    skos:prefLabel "Random Interval" ;
-    :used_for :time_series_classification ;
-    rdfs:comment "Random Interval Classifier." .
-:random_interval_spectral_ensemble a :ML_approach ;
-    skos:prefLabel "Random Interval Spectral Ensemble" ;
-    skos:altLabel "RISE" ;
-    :used_for :time_series_classification ;
-    rdfs:comment "Random Interval Spectral Ensemble" .
 :random_kitchen_sinks_sampler a :ML_approach ;
     skos:prefLabel "random kitchen sinks sampler" ;
     rdfs:comment "Approximate a RBF kernel feature map using random Fourier features." .
@@ -890,15 +773,6 @@
     skos:prefLabel "self-organizing tree algorithm" ;
     skos:altLabel "SOTA" ;
     :used_for :clustering , :anomaly_detection .
-:shapelet_transform_classifier a :ML_approach ;
-    skos:prefLabel "Shapelet Transform Classifier" ;
-    :used_for :time_series_classification ;
-    :performance :long_training_time ;
-    rdfs:comment "Shapelet Transform Classifier." .
-:signature_classifier a :ML_approach ;
-    skos:prefLabel "Signature Classifier" ;
-    :used_for :time_series_classification ;
-    rdfs:comment "Classification module using signature-based features." .
 :singular_value_decomposition a :ML_approach ;
     skos:prefLabel "singular value decomposition" ;
     skos:altLabel "SVD" ;
@@ -916,16 +790,6 @@
     :used_for :classification , :regression ;
     rdfs:comment "optimization algorithm" ;
     rdfs:seeAlso <https://www.wikidata.org/entity/Q7617819> .
-:summary_statistic a :ML_approach ;
-    skos:prefLabel "Summary statistic" ;
-    :used_for :time_series_classification ;
-    rdfs:comment "Summary statistic classifier." .
-:supervised_time_series_forest a :ML_approach ;
-    skos:prefLabel "Supervised Time Series Forest" ;
-    skos:altLabel "STSF" ;
-    :used_for :time_series_classification ;
-    :performance :fast_training , :explainable , :scalable ;
-    rdfs:comment "Supervised Time Series Forest (STSF)" .
 :support_vector_machine a :ML_approach ;
     skos:prefLabel "support vector machine" ;
     skos:altLabel "SVM" ;
@@ -938,24 +802,6 @@
     skos:broader :linear_regression ;
     :used_for :regression ;
     rdfs:seeAlso <https://www.wikidata.org/entity/Q57534282> .
-:temporal_dictionary_ensemble a :ML_approach ;
-    skos:prefLabel "Temporal Dictionary Ensemble" ;
-    skos:altLabel "TDE" ;
-    skos:broader :ensemble_classifier ;
-    :used_for :time_series_classification ;
-    rdfs:comment "Temporal Dictionary Ensemble" .
-:time_series_combination_of_heterogeneous_and_integrated_embedding_forest a :ML_approach ;
-    skos:prefLabel "Time Series Combination of Heterogeneous and Integrated Embedding Forest" ;
-    skos:altLabel "TS-CHIEF" ;
-    :used_for :time_series_classification ;
-    :performance :long_training_time ;
-    rdfs:comment "Time Series Combination of Heterogeneous and Integrated Embedding Forest" .
-:time_series_forest a :ML_approach ;
-    skos:prefLabel "Time series forest" ;
-    skos:altLabel "TSF" ;
-    :used_for :time_series_classification ;
-    :performance :fast_training , :explainable , :scalable ;
-    rdfs:comment "Time series forest (TSF) classifier." .
 :transformer a :ML_approach ;
     skos:prefLabel "transformer" ;
     skos:broader :artificial_neural_network .
@@ -970,11 +816,6 @@
     :used_for :clustering ;
     rdfs:comment "Screening of miRNA target genes in coronary artery disease by variational Bayesian Gaussian mixture model" ;
     rdfs:seeAlso <https://www.wikidata.org/entity/Q64233346> .
-:word_extraction_for_time_series_classification a :ML_approach ;
-    skos:prefLabel "Word Extraction for Time Series Classification" ;
-    skos:altLabel "WEASEL" ;
-    :used_for :time_series_classification ;
-    rdfs:comment "Word Extraction for Time Series Classification" .
 :word2vector a :ML_approach ;
     skos:prefLabel "word2vector" ;
     :used_for :text_analytics .
@@ -1609,22 +1450,22 @@
     skos:prefLabel "Autogluon" ;
     :used_for :scikit_learn_lib , :catboost_lib , :lightgbm_lib , :xgboost_lib , :pytorch_lib , :mxnet_lib ;
     :can_perform :tabular_classification , :tabular_regression , :text_classification , :text_regression , :sentiment_analysis , :sentence_similarity , :image_classification , :object_detection , :video_classification , :video_object_tracking , :action_recognition , :time_series_forecasting ;
-    :supported_by_oma_ml "True" .
+    :supported_by_oma_ml "true"^^xsd:boolean .
 :autokeras a :AutoML_solution ;
     skos:prefLabel "Autokeras" ;
     :used_for :keras_lib ;
     :can_perform :tabular_classification , :tabular_regression , :time_series_forecasting , :text_classification , :text_regression , :image_classification , :image_regression ;
-    :supported_by_oma_ml "True" .
+    :supported_by_oma_ml "true"^^xsd:boolean .
 :autopytorch a :AutoML_solution ;
     skos:prefLabel "Autopytorch" ;
     :used_for :pytorch_lib , :pytorch_forecasting_lib ;
     :can_perform :tabular_classification , :tabular_regression , :image_classification , :time_series_forecasting ;
-    :supported_by_oma_ml "True" .
+    :supported_by_oma_ml "true"^^xsd:boolean .
 :autosklearn a :AutoML_solution ;
     skos:prefLabel "Autosklearn" ;
     :used_for :scikit_learn_lib ;
     :can_perform :tabular_classification , :tabular_regression ;
-    :supported_by_oma_ml "True" .
+    :supported_by_oma_ml "true"^^xsd:boolean .
 :autots a :AutoML_solution ;
     skos:prefLabel "AutoTS" ;
     :used_for :prophet_lib , :pytorch_lib , :gluonts_lib , :pmdarima_lib , :tensorflow_lib ;
@@ -1648,7 +1489,7 @@
     skos:prefLabel "EvalML" ;
     :used_for :scikit_learn_lib , :catboost_lib , :lightgbm_lib , :xgboost_lib ;
     :can_perform :tabular_classification , :tabular_regression , :time_series_forecasting , :time_series_classification , :text_classification , :text_regression ;
-    :supported_by_oma_ml "True" .
+    :supported_by_oma_ml "true"^^xsd:boolean .
 :fedot a :AutoML_solution ;
     skos:prefLabel "FEDOT" ;
     :used_for :scikit_learn_lib , :statsmodel_lib ;
@@ -1657,7 +1498,7 @@
     skos:prefLabel "FLAML" ;
     :used_for :scikit_learn_lib , :catboost_lib , :lightgbm_lib , :xgboost_lib , :prophet_lib ;
     :can_perform :tabular_classification , :tabular_regression , :ranking , :time_series_forecasting , :text_classification ;
-    :supported_by_oma_ml "True" .
+    :supported_by_oma_ml "true"^^xsd:boolean .
 :google_automl a :AutoML_solution ;
     skos:prefLabel "Google AutoML" ;
     :used_for :tensorflow_lib ;
@@ -1674,7 +1515,7 @@
     skos:prefLabel "Mcfly" ;
     :used_for :tensorflow_lib ;
     :can_perform :time_series_classification ;
-    :supported_by_oma_ml "True" .
+    :supported_by_oma_ml "true"^^xsd:boolean .
 :merlion a :AutoML_solution ;
     skos:prefLabel "Merlion" ;
     :used_for :lightgbm_lib , :prophet_lib , :scikit_learn_lib , :statsmodel_lib , :greykite_lib , :kats_lib ;
@@ -1687,7 +1528,7 @@
     skos:prefLabel "MLJAR" ;
     :used_for :scikit_learn_lib , :catboost_lib , :lightgbm_lib , :xgboost_lib ;
     :can_perform :tabular_classification , :tabular_regression ;
-    :supported_by_oma_ml "True" .
+    :supported_by_oma_ml "true"^^xsd:boolean .
 :rapidminer a :AutoML_solution ;
     skos:prefLabel "Rapidminer" ;
     :used_for :weka_lib , :h2o_lib ;
@@ -1699,7 +1540,7 @@
     skos:prefLabel "TPOT" ;
     :used_for :scikit_learn_lib , :pytorch_lib ;
     :can_perform :tabular_classification , :tabular_regression ;
-    :supported_by_oma_ml "True" .
+    :supported_by_oma_ml "true"^^xsd:boolean .
 :transmogrifai a :AutoML_solution ;
     skos:prefLabel "TransmogrifAI" ;
     :used_for :spark_mllib ;
@@ -1708,7 +1549,7 @@
     skos:prefLabel "Pycaret" ;
     :used_for :scikit_learn_lib , :catboost_lib , :lightgbm_lib , :xgboost_lib ;
     :can_perform :tabular_classification , :tabular_regression , :clustering , :anomaly_detection , :time_series_forecasting ;
-    :supported_by_oma_ml "True" .
+    :supported_by_oma_ml "true"^^xsd:boolean .
 
 
 # Enum
@@ -1856,39 +1697,39 @@
     skos:prefLabel "tabular" ;
     :category :dataset_type ;
     rdfs:comment "A dataset presented in a tabular (table with rows and columns) form (CSV file)?=?.csv?=?Additional-Info-About-File-Structure" ;
-    :supported_by_oma_ml "true" .
+    :supported_by_oma_ml "true"^^xsd:boolean .
 :text a :Enum ;
     skos:prefLabel "text" ;
     :category :dataset_type ;
     rdfs:comment "A dataset presented in a tabular (table with rows and columns) form (CSV file)?=?.csv?=?Additional-Info-About-File-Structure" ;
-    :supported_by_oma_ml "true" .
+    :supported_by_oma_ml "true"^^xsd:boolean .
 :image a :Enum ;
     skos:prefLabel "image" ;
     :category :dataset_type ;
     rdfs:comment "A dataset presented in a folder structure of image files ordered by label form (ZIP file)?=?.zip?=?Additional-Info-About-File-Structure" ;
-    :supported_by_oma_ml "true" .
+    :supported_by_oma_ml "true"^^xsd:boolean .
 :video a :Enum ;
     skos:prefLabel "video" ;
     :category :dataset_type ;
-    :supported_by_oma_ml "false" .
+    :supported_by_oma_ml "false"^^xsd:boolean .
 :audio a :Enum ;
     skos:prefLabel "audio" ;
     :category :dataset_type ;
-    :supported_by_oma_ml "false" .
+    :supported_by_oma_ml "false"^^xsd:boolean .
 :graph a :Enum ;
     skos:prefLabel "graph" ;
     :category :dataset_type ;
-    :supported_by_oma_ml "false" .
+    :supported_by_oma_ml "false"^^xsd:boolean .
 :time_series_longitudinal a :Enum ;
     skos:prefLabel "time series longitudinal" ;
     :category :dataset_type ;
     rdfs:comment "Longitudinal data - also called panel data - for time series classification, which has 3 dimensions: (num_samples, num_features, num_timesteps)?=?.ts?=?Additional-Info-About-File-Structure" ;
-    :supported_by_oma_ml "true" .
+    :supported_by_oma_ml "true"^^xsd:boolean .
 :time_series a :Enum ;
     skos:prefLabel "time series" ;
     :category :dataset_type ;
     rdfs:comment "A dataset presented in a tabular (table with rows and columns) form (CSV file)?=?.csv?=?Additional-Info-About-File-Structure" ;
-    :supported_by_oma_ml "true" .
+    :supported_by_oma_ml "true"^^xsd:boolean .
 :greedy a :Enum ;
     skos:prefLabel "greedy" ;
     :category :tuner_approach ;
@@ -2743,7 +2584,7 @@
 :forecasting_horizon a :Configuration_item ;
     skos:prefLabel "forecasting horizon" ;
     :category :parameter ;
-    :required "true" .
+    :required "true"^^xsd:boolean .
 :forecasting_horizon_autokeras_time_series_forcasting a :Configuration_item ;
     skos:prefLabel "forecasting horizon autokeras time series forcasting" ;
     :category :parameter ;
@@ -2787,7 +2628,7 @@
     :category :parameter ;
     skos:broader :lookback ;
     :has_datatype :integer ;
-    :required "true" .
+    :required "true"^^xsd:boolean .
 :gap a :Configuration_item ;
     skos:prefLabel "gap" ;
     :category :parameter .
@@ -2801,7 +2642,7 @@
     :category :parameter ;
     skos:broader :gap ;
     :has_datatype :integer ;
-    :required "true" .
+    :required "true"^^xsd:boolean .
 
 
 # Sheet34
