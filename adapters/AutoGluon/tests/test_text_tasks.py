@@ -69,6 +69,7 @@ class AutoGluonTextTaskTest(unittest.TestCase):
     #     # reset the working directory before finishing this test
     #     os.chdir(os.path.join("..", ".."))
 
+
     def test_text_classification(self):
 
         dataset_path = load_sentiment_dataset()
