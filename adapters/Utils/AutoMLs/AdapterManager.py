@@ -74,11 +74,18 @@ class AdapterManager(Thread):
             config = setup_run_environment(self.__start_auto_ml_request, self._adapter_name)
             #Start carbon recording
             carbon_tracker.start()
+
+            #set encoding for the stream
+            #because it occurs errors with windows-1252 set it to latin-1
+            encoding = json.loads(self.__start_auto_ml_request.dataset_configuration)["file_configuration"]["encoding"]
+            if encoding == "windows-1252" or encoding == "cp1252":
+                encoding = "latin-1"
+
             # start training process
             python_env = os.getenv("PYTHON_ENV", default="PYTHON_ENV_UNSET")
             process = Popen([python_env, "AutoML.py", config.job_folder_location],
                                     stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-                                    universal_newlines=True, encoding=json.loads(self.__start_auto_ml_request.dataset_configuration)["file_configuration"]["encoding"])
+                                    universal_newlines=True, encoding=encoding)
 
             # read the processes output line by line and push them onto the event queue
             for line in process.stdout:

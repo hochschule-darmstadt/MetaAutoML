@@ -3,12 +3,14 @@ import os
 import shutil
 import unittest
 import uuid
+import urllib
+import tarfile
 
 from autogluon.core.utils.loaders import load_pd
 from AdapterBGRPC import StartAutoMlRequest
 from AutoGluonAdapterManager import AutoGluonAdapterManager
 from autogluon.core.utils.loaders import load_pd
-import pandas as pd
+from pandas import DataFrame
 from sklearn.datasets import load_files
 
 
@@ -16,11 +18,27 @@ def load_sentiment_dataset() -> str:
     """download sentiment dataset and build csv file, return csv path"""
 
     #load dataset
-    #train_data = load_pd.load('https://autogluon-text.s3-accelerate.amazonaws.com/glue/sst/train.parquet')
+    filename, headers = urllib.request.urlretrieve("http://ai.stanford.edu/~amaas/data/sentiment/aclImdb_v1.tar.gz")
+    cache_dir = os.path.join("tests", "datasets")
+    os.makedirs(cache_dir, exist_ok=True)
+    # Extractder .tar.gz-File
+    with tarfile.open(filename, 'r:gz') as tar:
+        tar.extractall(cache_dir)
 
-    # save dataset to file
-    #os.makedirs(os.path.join("tests", "datasets"), exist_ok=True)
-    file_path = os.path.join("tests", "datasets", "SPAM_HAM.csv")
+    train_data = load_files(
+        os.path.join(os.path.join("tests", "datasets", "aclImdb"), "train"),
+        shuffle=True
+    )
+
+    df = DataFrame.from_dict({
+        # take only a small subset for this test
+        # the text is in binary, so we need to decode it to utf-8 first
+        "text": map(lambda x: x.decode("utf-8"), train_data.data[:500]),
+        "target": train_data.target[:500]
+        })
+
+    file_path = os.path.join("tests", "datasets", "aclImdb.csv")
+    df.to_csv(file_path, index=False)
 
     #train_data.to_csv(file_path, index=False)
     return file_path
@@ -40,16 +58,17 @@ def load_named_entity_dataset() -> str:
 
 class AutoGluonTextTaskTest(unittest.TestCase):
 
-    def setUp(self):
-        # NOTE: we are running the test in the repos root directory.
-        #       the application is expected to start inside the adapter solution,
-        #       so we need to change working directories
-        autogluon_dir = os.path.join("adapters", "AutoGluon")
-        os.chdir(autogluon_dir)
+    # def setUp(self):
+    #     # NOTE: we are running the test in the repos root directory.
+    #     #       the application is expected to start inside the adapter solution,
+    #     #       so we need to change working directories
+    #     autogluon_dir = os.path.join("adapters", "AutoGluon")
+    #     os.chdir(autogluon_dir)
 
-    def tearDown(self):
-        # reset the working directory before finishing this test
-        os.chdir(os.path.join("..", ".."))
+    # def tearDown(self):
+    #     # reset the working directory before finishing this test
+    #     os.chdir(os.path.join("..", ".."))
+
 
     def test_text_classification(self):
 
@@ -61,14 +80,14 @@ class AutoGluonTextTaskTest(unittest.TestCase):
         req.user_id = "test"
         req.dataset_path = dataset_path
         req.configuration.task = ':text_classification'
-        req.configuration.target = "Category"
+        req.configuration.target = "target"
         req.configuration.runtime_limit = 3
         req.configuration.metric = ':accuracy'
         req.configuration.parameters = {":metric": {"values": [":accuracy"]}}
         req.dataset_configuration = json.dumps({
             "column_datatypes": {
-                "Message": ":string",
-                "Category":":string"
+                "text": ":string",
+                "target":":string"
             },
             "file_configuration": {
                 "use_header": True,
@@ -81,11 +100,11 @@ class AutoGluonTextTaskTest(unittest.TestCase):
                 "encoding": "latin-1"
             },
             "schema": {
-                "Category": {
+                "target": {
                     "datatype_detected": ":string",
                     "role_selected": ":target"
                 },
-                "Message": {
+                "text": {
                     "datatype_detected": ":string",
                     "role_selected": ":none"
                 }
