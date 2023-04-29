@@ -168,7 +168,7 @@ class AdapterRuntimeManager:
         #Finish sub training and return outside of lock or else we deadlock us
         if len(training["model_ids"]) == len(model_list)-1:
             if self.__multi_fidelity_level != 0:
-                self.__multi_fidelity_callback(model_list)
+                self.__multi_fidelity_callback(model_list, self.__multi_fidelity_level)
 
         if model_details["status"] == "completed" and self.__multi_fidelity_level == 0:
             if dataset["type"] in  [":tabular", ":text", ":time_series"]:
