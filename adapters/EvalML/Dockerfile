@@ -4,10 +4,10 @@ EXPOSE 50062
 RUN apt-get update && apt-get install -y git && apt-get install libgomp1
 
 COPY ./EvalML/requirements.txt .
-COPY ./EvalML/core-requirements.txt .
+#COPY ./EvalML/core-requirements.txt .
 # Install dependencies
 RUN pip install -r requirements.txt
-RUN pip install -r core-requirements.txt
+#RUN pip install -r core-requirements.txt
 # put all files in a directory called app
 WORKDIR /app
 COPY ./EvalML .
