@@ -335,6 +335,14 @@ class ControllerServiceManager(ControllerServiceBase):
                 )
             )
 
+            result.strategies.append(
+                Strategy(
+                'pre_training.multi_fidelity',
+                'Multi Fidelity',
+                'This strategy will run all adapters with only a small part of the data. Then it will train the best half solutions with more data again and so on, until one last adapter is trained with the full data.'
+                )
+            )
+
         return result
 
     @inject
