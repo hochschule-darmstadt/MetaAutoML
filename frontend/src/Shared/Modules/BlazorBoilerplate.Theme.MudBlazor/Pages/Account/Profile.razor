@@ -65,7 +65,7 @@
             <h3>@L["TwoFactorAuthentication"]</h3>
             @L["EnableAuthenticatorInstructions", userViewModel.SharedKey, $"https://chart.googleapis.com/chart?chs=200x200&chld=M|0&cht=qr&chl={userViewModel.AuthenticatorUri}"].ToMarkup()
             <MudTextField @bind-Value="@authenticatorVerificationCodeViewModel.Code" Label=@L["Code"] FullWidth="true"></MudTextField>
-            <MudButton OnClick="@EnableAuthenticator">@L["VerifyCode"]</MudButton>
+            <MudButton OnClick="@EnableAuthenticator" Style="margin-bottom:5%; margin-top:2%">@L["VerifyCode"]</MudButton>
     }
     <SelectCulture />
 
