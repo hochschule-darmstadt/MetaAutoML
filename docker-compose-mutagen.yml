@@ -1,54 +1,54 @@
 # supplementary docker-compose file
 version: "3.7"
 services:
-  blazorboilerplate:
-    build:
-      context: frontend
-      # the below path is relative to the build context
-      dockerfile: ./src/Utils/Docker/Dockerfile
-    ports:
-      - 54415:80
-      - 54443:443
-    depends_on:
-      - sqlserver
-      - controller
-      - redis
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Development #Consider changing this in Production
-      - Serilog__MinimumLevel__Default=Debug #Consider changing this in Production
-      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=blazor_boilerplate;Trusted_Connection=True;MultipleActiveResultSets=true;User=sa;Password=yourVeryStrong(!)Password;Integrated Security=false;Encrypt=False;
-      - BlazorBoilerplate__UseSqlServer=true
-      - BlazorBoilerplate__ApplicationUrl=blazorboilerplate
-      - BlazorBoilerplate__IS4ApplicationUrl=blazorboilerplate
-      - BlazorBoilerplate__CertificatePassword=Admin123
-      - ASPNETCORE_URLS=https://+:443;http://+80
-      - ASPNETCORE_Kestrel__Certificates__Default__Password=Admin123
-      - ASPNETCORE_Kestrel__Certificates__Default__Path=aspnetapp.pfx
-      - CONTROLLER_SERVICE_HOST=controller
-      - CONTROLLER_SERVICE_PORT=5001
-      - REDIS_SERVICE_HOST=redis
-      - REDIS_SERVICE_PORT=6379
-      - CONTROLLER_DATASET_FOLDER_PATH=/app/app-data/datasets
-      - REGISTRATION_ALLOWED=false
-    restart: on-failure
-    volumes:
+  #blazorboilerplate:
+  #  build:
+  #    context: frontend
+  #    # the below path is relative to the build context
+  #    dockerfile: ./src/Utils/Docker/Dockerfile
+  #  ports:
+  #    - 54415:80
+  #    - 54443:443
+  #  depends_on:
+  #    - sqlserver
+  #    - controller
+  #    - redis
+  #  environment:
+  #    - ASPNETCORE_ENVIRONMENT=Development #Consider changing this in Production
+  #    - Serilog__MinimumLevel__Default=Debug #Consider changing this in Production
+  #    - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=blazor_boilerplate;Trusted_Connection=True;MultipleActiveResultSets=true;User=sa;Password=yourVeryStrong(!)Password;Integrated Security=false;Encrypt=False;
+  #    - BlazorBoilerplate__UseSqlServer=true
+  #    - BlazorBoilerplate__ApplicationUrl=blazorboilerplate
+  #    - BlazorBoilerplate__IS4ApplicationUrl=blazorboilerplate
+  #    - BlazorBoilerplate__CertificatePassword=Admin123
+  #    - ASPNETCORE_URLS=https://+:443;http://+80
+  #    - ASPNETCORE_Kestrel__Certificates__Default__Password=Admin123
+  #    - ASPNETCORE_Kestrel__Certificates__Default__Path=aspnetapp.pfx
+  #    - CONTROLLER_SERVICE_HOST=controller
+  #    - CONTROLLER_SERVICE_PORT=5001
+  #    - REDIS_SERVICE_HOST=redis
+  #    - REDIS_SERVICE_PORT=6379
+  #    - CONTROLLER_DATASET_FOLDER_PATH=/app/app-data/datasets
+  #    - REGISTRATION_ALLOWED=false
+  #  restart: on-failure
+  #  volumes:
       # shared volumes between frontend and controller
-      - datasets:/app/app-data/datasets
-      - training:/app/app-data/training
-      - training-autokeras:/app/app-data/training/autokeras
-      - training-mljar:/app/app-data/training/mljar
-      - training-sklearn:/app/app-data/training/sklearn
-      - training-flaml:/app/app-data/training/flaml
-      - training-gluon:/app/app-data/training/gluon
+  #    - datasets:/app/app-data/datasets
+  #    - training:/app/app-data/training
+  #    - training-autokeras:/app/app-data/training/autokeras
+  #    - training-mljar:/app/app-data/training/mljar
+  #    - training-sklearn:/app/app-data/training/sklearn
+  #    - training-flaml:/app/app-data/training/flaml
+  #    - training-gluon:/app/app-data/training/gluon
       #- training-autocve:/app/app-data/training/autocve
-      - training-pytorch:/app/app-data/training/pytorch
+  #    - training-pytorch:/app/app-data/training/pytorch
       #- training-alphad3m:/app/app-data/training/alphad3m
-      - training-mcfly:/app/app-data/training/mcfly
-      - training-evalml:/app/app-data/training/evalml
-      - training-pycaret:/app/app-data/training/pycaret
-      - training-tpot:/app/app-data/training/tpot
-    extra_hosts:
-      - "docker.host.internal:host-gateway"
+      #- training-mcfly:/app/app-data/training/mcfly
+  #    - training-evalml:/app/app-data/training/evalml
+  #    - training-pycaret:/app/app-data/training/pycaret
+  #    - training-tpot:/app/app-data/training/tpot
+  #  extra_hosts:
+  #    - "docker.host.internal:host-gateway"
 
   sqlserver:
     image: mcr.microsoft.com/azure-sql-edge:latest
@@ -92,8 +92,8 @@ services:
       - AUTOKERAS_SERVICE_PORT=50052
       - MLJAR_SERVICE_HOST=mljar
       - MLJAR_SERVICE_PORT=50053
-      - MCFLY_SERVICE_HOST=mcfly
-      - MCFLY_SERVICE_PORT=50054
+      #- MCFLY_SERVICE_HOST=mcfly
+      #- MCFLY_SERVICE_PORT=50054
       - SKLEARN_SERVICE_HOST=sklearn
       - SKLEARN_SERVICE_PORT=50055
       - FLAML_SERVICE_HOST=flaml
@@ -128,7 +128,7 @@ services:
       #- training-autocve:/app/app-data/training/autocve
       - training-pytorch:/app/app-data/training/pytorch
       #- training-alphad3m:/app/app-data/training/alphad3m
-      - training-mcfly:/app/app-data/training/mcfly
+      #- training-mcfly:/app/app-data/training/mcfly
       - training-evalml:/app/app-data/training/evalml
       - training-pycaret:/app/app-data/training/pycaret
       - training-tpot:/app/app-data/training/tpot
@@ -173,16 +173,16 @@ services:
       - datasets:/app/app-data/datasets
       - training-mljar:/app/app-data/training
 
-  mcfly:
-    build:
-      context: ./adapters
-      dockerfile: ./Mcfly/Dockerfile
-    container_name: mcfly
-    environment:
-      - GRPC_SERVER_PORT=50054
-    volumes:
-      - datasets:/app/app-data/datasets
-      - training-mcfly:/app/app-data/training
+  #mcfly:
+  #  build:
+  #    context: ./adapters
+  #    dockerfile: ./Mcfly/Dockerfile
+  #  container_name: mcfly
+  #  environment:
+  #    - GRPC_SERVER_PORT=50054
+  #  volumes:
+  #    - datasets:/app/app-data/datasets
+  #    - training-mcfly:/app/app-data/training
 
   sklearn:
     build:
@@ -313,6 +313,6 @@ x-mutagen:
       ignore:
         vcs: true
     datasets:
-      alpha: "."
+      alpha: "./mutagen_datasets"
       beta: "volume://datasets"
       mode: "two-way-resolved"
