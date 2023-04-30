@@ -210,6 +210,9 @@ namespace BlazorBoilerplate.Server.Managers
         /// <returns></returns>
         public async Task<ApiResponse> GetDatasetPreview(GetDatasetPreviewRequestDto request)
         {
+            var is_mutagen_setup = Environment.GetEnvironmentVariable("IS_MUTAGEN_SETUP");
+            var mutagen_dataset_folder_path = Environment.GetEnvironmentVariable("MUTAGEN_DATASET_FOLDER_PATH");
+            var mutagen_docker_ataset_folder_path = Environment.GetEnvironmentVariable("MUTAGEN_DOCKER_DATASET_FOLDER_PATH");
             GetDatasetPreviewResponseDto response = new GetDatasetPreviewResponseDto();
             GetDatasetRequest getDatasetRequest = new GetDatasetRequest();
             var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
@@ -220,6 +223,10 @@ namespace BlazorBoilerplate.Server.Managers
                 getDatasetRequest.DatasetId = request.DatasetId;
                 var reply = _client.GetDataset(getDatasetRequest);
                 string datasetLocation = reply.Dataset.Path;
+                if (is_mutagen_setup == "YES")
+                {
+                    datasetLocation = datasetLocation.Replace(mutagen_docker_ataset_folder_path, mutagen_dataset_folder_path);
+                }
                 switch (reply.Dataset.Type)
                 {
                     case ":tabular":
@@ -310,6 +317,9 @@ namespace BlazorBoilerplate.Server.Managers
         }
         public async Task<ApiResponse> GetDatasetAnalysis(GetDatasetAnalysisRequestDto request)
         {
+            var is_mutagen_setup = Environment.GetEnvironmentVariable("IS_MUTAGEN_SETUP");
+            var mutagen_dataset_folder_path = Environment.GetEnvironmentVariable("MUTAGEN_DATASET_FOLDER_PATH");
+            var mutagen_docker_ataset_folder_path = Environment.GetEnvironmentVariable("MUTAGEN_DOCKER_DATASET_FOLDER_PATH");
             GetDatasetAnalysisResponseDto response = new GetDatasetAnalysisResponseDto();
             GetDatasetRequest getDatasetRequest = new GetDatasetRequest();
             var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
@@ -321,6 +331,7 @@ namespace BlazorBoilerplate.Server.Managers
                 var reply = _client.GetDataset(getDatasetRequest);
                 var analysis = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(reply.Dataset.Analysis);
                 int index = 0;
+                string graph_path = "";
                 if (analysis != null)
                 {
                     if (analysis.Count != 0)
@@ -339,12 +350,17 @@ namespace BlazorBoilerplate.Server.Managers
                                     {
                                         break;
                                     }
+                                    graph_path = item.SelectToken("path").ToString();
+                                    if (is_mutagen_setup == "YES")
+                                    {
+                                        graph_path = graph_path.Replace(mutagen_docker_ataset_folder_path, mutagen_dataset_folder_path);
+                                    }
                                     DatasetAnalysis datasetAnalysis = new DatasetAnalysis()
                                     {
                                         Title = item.SelectToken("title").ToString(),
                                         Type = item.SelectToken("type").ToString(),
                                         Description = item.SelectToken("description").ToString(),
-                                        Content = GetImageAsBytes(item.SelectToken("path").ToString())
+                                        Content = GetImageAsBytes(graph_path)
                                     };
                                     datasetAnalysisCategory.Analyses.Add(datasetAnalysis);
                                 }
