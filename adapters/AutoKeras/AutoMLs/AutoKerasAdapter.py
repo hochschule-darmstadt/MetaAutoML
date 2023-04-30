@@ -107,6 +107,11 @@ class AutoKerasAdapter:
         """Execute text classifiction task and export the found model"""
         train, test = data_loader(self._configuration, perform_splitting=False)
         X, y = prepare_tabular_dataset(train, self._configuration)
+
+        #change encoding
+        self._configuration = set_encoding_for_string_columns(self._configuration,X,y)
+        train, test = data_loader(self._configuration, perform_splitting=False)
+
         self._configuration = set_column_with_largest_amout_of_text(X, self._configuration)
         train, test = data_loader(self._configuration)
         #reload dataset to load changed data
@@ -157,7 +162,7 @@ class AutoKerasAdapter:
         parameters["predict_from"] = parameters["predict_from"] + 1
         self._configuration["forecasting_horizon"] = parameters["predict_until"]
         save_configuration_in_json(self._configuration)
-        
+
         X, y = prepare_tabular_dataset(train, self._configuration)
 
         #TODO convert dataframe to float
