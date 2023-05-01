@@ -31,7 +31,14 @@ autogluon_metrics = {
     ":mean_absolute_percentage_error": "mean_absolute_percentage_error",
     ":r2": "r2",
     ":spearman_rank_correlation_coefficient": "spearmanr",
-    ":pearson_correlation_coefficient": "pearsonr"
+    ":pearson_correlation_coefficient": "pearsonr",
+
+
+    #named entity recognition
+    ":overall_recall": "overall_recall",
+    ":overall_precision": "overall_precision",
+    ":overall_f1": "overall_f1",
+    ":overall_accuracy": "overall_accuracy"
 }
 
 #extra dictionary for time series because they changed the acronym which they want for the metric -.-
@@ -67,6 +74,11 @@ text_classification_config = [
     [":metric", ":metric_autogluon_text_classification", [":accuracy"], "single_value", "dict", autogluon_metrics, "eval_metric"]
 ]
 
+#config for the text classification
+named_entity_recognition_config = [
+    [":metric", ":metric_autogluon_named_entity_recognition", [":overall_accuracy"], "single_value", "dict", autogluon_metrics, "eval_metric"]
+]
+
 #config for the image classification
 image_classification_config = [
     [":metric", ":metric_autogluon_image_classification", [":accuracy"], "single_value", "dict", autogluon_metrics, "eval_metric"]
@@ -84,6 +96,7 @@ task_config = {
     ":tabular_classification": tabular_classification_config,
     ":tabular_regression": tabular_regression_config,
     ":text_classification": text_classification_config,
+    ":named_entity_recognition": named_entity_recognition_config,
     ":image_classification": image_classification_config,
     ":time_series_forecasting" :time_series_forecasting_config
 }

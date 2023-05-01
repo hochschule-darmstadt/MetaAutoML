@@ -1,9 +1,9 @@
-FROM mcr.microsoft.com/dotnet/aspnet:6.0.7-bullseye-slim-amd64 AS base
+FROM mcr.microsoft.com/dotnet/aspnet:6.0.16-jammy-amd64 AS base
 WORKDIR /
 EXPOSE 443
 EXPOSE 80
 
-FROM mcr.microsoft.com/dotnet/sdk:6.0.302-bullseye-slim-amd64 AS build
+FROM mcr.microsoft.com/dotnet/sdk:6.0.408-jammy-amd64 AS build
 WORKDIR /
 COPY . .
 RUN dotnet restore "src/Server/BlazorBoilerplate.Server/BlazorBoilerplate.Server.csproj"

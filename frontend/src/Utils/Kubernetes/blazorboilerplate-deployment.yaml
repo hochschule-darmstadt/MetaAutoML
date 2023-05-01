@@ -71,6 +71,8 @@ spec:
           mountPath: /app/app-data/training/pycaret
         - name: evalml-output
           mountPath: /app/app-data/training/evaml
+        - name: tpot-output
+          mountPath: /app/app-data/training/tpot
         image: alexhda/omaml-frontend:latest
         name: blazorboilerplate
         ports:
@@ -119,4 +121,7 @@ spec:
       - name: pycaret-output
         persistentVolumeClaim:
           claimName: output-pycaret-claim
+      - name: tpot-output
+        persistentVolumeClaim:
+          claimName: output-tpot-claim
 status: {}
