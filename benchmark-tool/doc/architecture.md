@@ -23,17 +23,22 @@ See the folder [README](../README.md).
 4. External dependencies are encapsulated and only accessed through adapters (Dependency Inversion Principle). This allows changes in external dependencies with minimal code adaptions.
 5. The existing gRPC interface of the controller is used to communicate with OMAML.
 
+<!--
 ## Building Block View
+(May contain diagrams showing the functionality of specific features)
 
 ## Runtime View
-
+(May contain information about runtime behaviour (e.g. order of events))
+-->
 ## Deployment View
 
 The benchmark tool is a console program that is not part of the regular deployment of OMAML. It is expected that the tool is always executed manually. The option of running it inside the production cluster should remain available though.
 
+<!--
 ## Architectural Decisions
 
 ## Quality Requirements
+-->
 
 ## Risks & Technical Debt
 
