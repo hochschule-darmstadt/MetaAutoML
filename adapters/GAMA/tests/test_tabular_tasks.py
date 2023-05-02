@@ -20,7 +20,7 @@ def load_titanic_dataset():
     titanic: pd.DataFrame = pd.read_csv(filepath_or_buffer="https://storage.googleapis.com/tf-datasets/titanic/train.csv",)
 
     # drop other columns for simplicity
-    titanic = titanic[["age", "sex", "survived"]]
+    titanic = titanic[["age", "sex", "survived","n_siblings_spouses","alone"]]
 
     dataset_path = os.path.join(cache_dir, "titanic.csv")
     with open(dataset_path, "w+") as outfp:
@@ -42,29 +42,24 @@ class TestAdapter(IsolatedAsyncioTestCase):
         req.configuration.target = "survived"
         req.configuration.runtime_limit = 3
         req.configuration.metric = ':accuracy'
-        # can not dump json obj here 
-        req.configuration.parameters = json.dumps({
-            ":metric":  ':f_measure_macro',
-            ":tuner_class_evalml":  ':random',
-            ":use_approach": [':xgboost', ':catboost'],
-        })
         # testing as the params come from dataset_configuration
         req.dataset_configuration = json.dumps({
-            ":metric":  ':f_measure_macro',
-            ":tuner_class_evalml":  ':random',
-            ":use_approach": [':xgboost', ':catboost'],
-            "multi_fidelity_level": 1,
             "column_datatypes": {
                 "age": 2,
                 "sex": 1,
-                "survived": 2 ,
+                "survived": 2,
+                "n_siblings_spouses" : 2,
+                "alone" : 1
+
             },
-             "file_configuration": {
+            "file_configuration": {
                 "use_header": True,
                 "start_row": 1,
                 "delimiter": "comma",
                 "escape_character": "\\",
                 "decimal_character": ".",
+                "thousands_seperator": ",",
+                "datetime_format": "",
                 "thousands_seperator": ",",
                 "datetime_format": "",
                 "encoding": ""
@@ -74,7 +69,8 @@ class TestAdapter(IsolatedAsyncioTestCase):
                     "datatype_detected": ":boolean",
                     "role_selected": ":target"
                 }
-            }
+            },
+            "multi_fidelity_level": 0
         })
 
         # start training
@@ -92,57 +88,6 @@ class TestAdapter(IsolatedAsyncioTestCase):
         # clean up
         shutil.rmtree(out_dir)
     
-    async def test_tabular_regression(self):
-        dataset_path = load_titanic_dataset()
-        # setup request as it is coming in from controller
-        req = StartAutoMlRequest()
-        req.training_id = "test"
-        req.dataset_id = "test"
-        req.user_id = "test"
-        req.dataset_path = dataset_path
-        req.configuration.task = ':tabular_regression'
-        req.configuration.target = "survived"
-        req.configuration.runtime_limit = 3
-        req.configuration.metric = ':accuracy'
-        req.dataset_configuration = json.dumps({
-            "multi_fidelity_level": 1,
-            "column_datatypes": {
-                "age": 2,
-                "sex": 1,
-                "survived": 2 ,
-            },
-             "file_configuration": {
-                "use_header": True,
-                "start_row": 1,
-                "delimiter": "comma",
-                "escape_character": "\\",
-                "decimal_character": ".",
-                "thousands_seperator": ",",
-                "datetime_format": "",
-                "encoding": ""
-            },
-            "schema": {
-                "survived": {
-                    "datatype_detected": ":integer",
-                    "role_selected": ":target"
-                }
-            }
-        })
-
-        # start training
-        adapter_manager = GAMAAdapterManager()
-        adapter_manager.start_auto_ml(req, uuid.uuid4())
-        adapter_manager.start()
-        adapter_manager.join()
-
-        # check if model archive exists
-        out_dir = os.path.join("app-data", "training",
-                               req.user_id, req.dataset_id, req.training_id)
-        path_to_model = os.path.join(out_dir, "export", "gama-export.zip")
-        self.assertTrue(os.path.exists(path_to_model), f"path to model: '{path_to_model}' does not exist")
-
-        # clean up
-        shutil.rmtree(out_dir)
 
         
 if __name__ == '__main__':

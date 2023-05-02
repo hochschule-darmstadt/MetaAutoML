@@ -5,10 +5,10 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "WIN GRAMMAR Adapter",
+            "name": "WIN GAMA Adapter",
             "type": "python",
             "request": "launch",
-            "program": "EvalMLServer.py",
+            "program": "GAMAServer.py",
             "console": "integratedTerminal",
             "justMyCode": false,
             "env": {
@@ -19,10 +19,10 @@
             },
         },
         {
-            "name": "UNIX GRAMMAR Adapter",
+            "name": "UNIX GAMA Adapter",
             "type": "python",
             "request": "launch",
-            "program": "EvalMLServer.py",
+            "program": "GAMAServer.py",
             "console": "integratedTerminal",
             "justMyCode": true,
             "env": {
@@ -33,7 +33,7 @@
             },
         },
         {
-            "name": "WIN GRAMMAR Adapter Test",
+            "name": "WIN GAMA Adapter Test",
             "type": "python",
             "request": "launch",
             "purpose": ["debug-test"],
