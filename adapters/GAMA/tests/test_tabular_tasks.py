@@ -6,7 +6,7 @@ from unittest import IsolatedAsyncioTestCase
 import uuid
 
 import pandas as pd
-from GAMAAdapterManager import EvalMLAdapterManager
+from GAMAAdapterManager import GAMAAdapterManager
 from Container import *
 from AdapterBGRPC import *
 
@@ -78,7 +78,7 @@ class TestAdapter(IsolatedAsyncioTestCase):
         })
 
         # start training
-        adapter_manager = EvalMLAdapterManager()
+        adapter_manager = GAMAAdapterManager()
         adapter_manager.start_auto_ml(req, uuid.uuid4())
         adapter_manager.start()
         adapter_manager.join()
@@ -86,7 +86,7 @@ class TestAdapter(IsolatedAsyncioTestCase):
         # check if model archive exists
         out_dir = os.path.join("app-data", "training",
                                req.user_id, req.dataset_id, req.training_id)
-        path_to_model = os.path.join(out_dir, "export", "evalml-export.zip")
+        path_to_model = os.path.join(out_dir, "export", "gama-export.zip")
         self.assertTrue(os.path.exists(path_to_model), f"path to model: '{path_to_model}' does not exist")
 
         # clean up
@@ -130,7 +130,7 @@ class TestAdapter(IsolatedAsyncioTestCase):
         })
 
         # start training
-        adapter_manager = EvalMLAdapterManager()
+        adapter_manager = GAMAAdapterManager()
         adapter_manager.start_auto_ml(req, uuid.uuid4())
         adapter_manager.start()
         adapter_manager.join()
@@ -138,7 +138,7 @@ class TestAdapter(IsolatedAsyncioTestCase):
         # check if model archive exists
         out_dir = os.path.join("app-data", "training",
                                req.user_id, req.dataset_id, req.training_id)
-        path_to_model = os.path.join(out_dir, "export", "evalml-export.zip")
+        path_to_model = os.path.join(out_dir, "export", "gama-export.zip")
         self.assertTrue(os.path.exists(path_to_model), f"path to model: '{path_to_model}' does not exist")
 
         # clean up

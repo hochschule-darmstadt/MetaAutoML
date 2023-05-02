@@ -9,7 +9,7 @@ from predict_time_sources import feature_preparation
 
 import json
 import pickle
-from gama import GamaClassifier
+from gama import GamaClassifier,GamaRegressor
 
 # TODO implement
 class GAMAAdapter:
@@ -44,6 +44,20 @@ class GAMAAdapter:
 
         # TODO: add params
         automl = GamaClassifier(max_total_time=180, store="nothing", n_jobs=1)
+        automl.fit(X, y)
+
+        export_model(automl, self._configuration["result_folder_location"], 'GAMA.p')
+
+
+        return
+    
+    def __regression(self):
+        """Execute the tabular classification task and export the found model"""
+        self.df, test = data_loader(self._configuration)
+        X, y = prepare_tabular_dataset(self.df, self._configuration)
+
+        # TODO: add params
+        automl = GamaRegressor(max_total_time=180, store="nothing", n_jobs=1)
         automl.fit(X, y)
 
         export_model(automl, self._configuration["result_folder_location"], 'GAMA.p')
