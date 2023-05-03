@@ -77,7 +77,10 @@ class AdapterManager(Thread):
 
             #set encoding for the stream
             #because it occurs errors with windows-1252 set it to latin-1
-            encoding = json.loads(self.__start_auto_ml_request.dataset_configuration)["file_configuration"]["encoding"]
+            if "encoding" in json.loads(self.__start_auto_ml_request.dataset_configuration)["file_configuration"]:
+                encoding = json.loads(self.__start_auto_ml_request.dataset_configuration)["file_configuration"]["encoding"]
+            else:
+                encoding = "latin-1"
             if encoding == "windows-1252" or encoding == "cp1252":
                 encoding = "latin-1"
 
