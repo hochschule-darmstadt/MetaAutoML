@@ -7,25 +7,12 @@
 @inject NavigationManager NavManager
 @attribute [Authorize]
 
-<TopSection>
-    <MudBreadcrumbs Items="_breadcrumbs" style="
-    position: fixed!important;
-    top: 65px;
-    z-index: 999!important;
-    width: 100%;">
-    </MudBreadcrumbs>
-</TopSection>
-
 <MudStack AlignItems="AlignItems.Center" Row="true" Class="mb-2" style="padding-top:30px">
     <MudIcon Size="Size.Large" Icon="@Icons.Filled.Lightbulb" />
     <MudText Typo="Typo.h4">@L["Analysis"]</MudText>
 </MudStack>
 
-<MudGrid>
-    <MudItem xs="12" sm="12" md="12">
-        <ModelExplanationFull Model="_model"/>
-    </MudItem>
-</MudGrid>
+<iframe style="height:100%; width:100%" src="//192.168.0.227:8045"> </iframe>
 
 
 @code {
@@ -37,6 +24,7 @@
     public string TrainingId { get; set; }
     [Parameter]
     public string ListId { get; set; }
+    private GetModelResponseDto dashboardAddress;
     private GetModelResponseDto _model;
     private GetTrainingResponseDto _training;
     private List<BreadcrumbItem> _breadcrumbs = new List<BreadcrumbItem>();
