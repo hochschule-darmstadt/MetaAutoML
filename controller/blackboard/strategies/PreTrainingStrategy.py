@@ -88,8 +88,13 @@ class PreTrainingStrategyController(IAbstractStrategy):
     def do_multi_fidelity_callback(self, model_list, old_multi_fidelity_level):
         model_list.sort(key=lambda model: self.get_score(model), reverse=True)
 
+        completed_model_list = []
+        for model in model_list:
+            if model.get('status') == 'completed':
+                completed_model_list.append(model)
+
         relevant_auto_ml_solutions = []
-        for model in model_list[0:int(len(model_list)/2)+1]:
+        for model in completed_model_list[0:int(len(completed_model_list)/2)]:
             #Only add max half of all adapters
             if model.get('status') == 'completed':
                 relevant_auto_ml_solutions.append(model.get('auto_ml_solution'))
@@ -101,7 +106,13 @@ class PreTrainingStrategyController(IAbstractStrategy):
             self._log.info(f'do_finish_pre_training: Finished data preparation, advancing to phase "running"..')
             self.controller.set_phase('running')
         else:
-            strategy_controller = StrategyController(self.controller.get_data_storage(), self.controller.get_request(), self.controller.get_explainable_lock(), multi_fidelity_callback=self.do_multi_fidelity_callback, multi_fidelity_level=old_multi_fidelity_level*2)
+            #adjust request object for multi fidelity
+            configuration = self.controller.get_request().configuration
+            configuration.selected_auto_ml_solutions = relevant_auto_ml_solutions
+            request = self.controller.get_request()
+            request.configuration = configuration
+
+            strategy_controller = StrategyController(self.controller.get_data_storage(), request, self.controller.get_explainable_lock(), multi_fidelity_callback=self.do_multi_fidelity_callback, multi_fidelity_level=old_multi_fidelity_level*2)
 
         return
 
