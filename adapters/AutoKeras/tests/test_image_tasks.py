@@ -51,7 +51,7 @@ def load_mnist_image_dataset() -> str:
     # take only a small subset for this test
     # NOTE: train dataset cannot be too small, otherwise Keras will complain
     save_subset(train_dir, x_train[:100], y_train[:100])
-    save_subset(test_dir, x_test[:1], y_test[:1])
+    save_subset(test_dir, x_test[:5], y_test[:5])
 
     return dataset_folder
 
