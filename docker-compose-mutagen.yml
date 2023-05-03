@@ -1,0 +1,318 @@
+# supplementary docker-compose file
+version: "3.7"
+services:
+  #blazorboilerplate:
+  #  build:
+  #    context: frontend
+  #    # the below path is relative to the build context
+  #    dockerfile: ./src/Utils/Docker/Dockerfile
+  #  ports:
+  #    - 54415:80
+  #    - 54443:443
+  #  depends_on:
+  #    - sqlserver
+  #    - controller
+  #    - redis
+  #  environment:
+  #    - ASPNETCORE_ENVIRONMENT=Development #Consider changing this in Production
+  #    - Serilog__MinimumLevel__Default=Debug #Consider changing this in Production
+  #    - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=blazor_boilerplate;Trusted_Connection=True;MultipleActiveResultSets=true;User=sa;Password=yourVeryStrong(!)Password;Integrated Security=false;Encrypt=False;
+  #    - BlazorBoilerplate__UseSqlServer=true
+  #    - BlazorBoilerplate__ApplicationUrl=blazorboilerplate
+  #    - BlazorBoilerplate__IS4ApplicationUrl=blazorboilerplate
+  #    - BlazorBoilerplate__CertificatePassword=Admin123
+  #    - ASPNETCORE_URLS=https://+:443;http://+80
+  #    - ASPNETCORE_Kestrel__Certificates__Default__Password=Admin123
+  #    - ASPNETCORE_Kestrel__Certificates__Default__Path=aspnetapp.pfx
+  #    - CONTROLLER_SERVICE_HOST=controller
+  #    - CONTROLLER_SERVICE_PORT=5001
+  #    - REDIS_SERVICE_HOST=redis
+  #    - REDIS_SERVICE_PORT=6379
+  #    - CONTROLLER_DATASET_FOLDER_PATH=/app/app-data/datasets
+  #    - REGISTRATION_ALLOWED=false
+  #  restart: on-failure
+  #  volumes:
+      # shared volumes between frontend and controller
+  #    - datasets:/app/app-data/datasets
+  #    - training:/app/app-data/training
+  #    - training-autokeras:/app/app-data/training/autokeras
+  #    - training-mljar:/app/app-data/training/mljar
+  #    - training-sklearn:/app/app-data/training/sklearn
+  #    - training-flaml:/app/app-data/training/flaml
+  #    - training-gluon:/app/app-data/training/gluon
+      #- training-autocve:/app/app-data/training/autocve
+  #    - training-pytorch:/app/app-data/training/pytorch
+      #- training-alphad3m:/app/app-data/training/alphad3m
+      #- training-mcfly:/app/app-data/training/mcfly
+  #    - training-evalml:/app/app-data/training/evalml
+  #    - training-pycaret:/app/app-data/training/pycaret
+  #    - training-tpot:/app/app-data/training/tpot
+  #  extra_hosts:
+  #    - "docker.host.internal:host-gateway"
+
+  sqlserver:
+    image: mcr.microsoft.com/azure-sql-edge:latest
+    volumes:
+      - dbdata:/var/opt/mssql
+    environment:
+      - MSSQL_SA_PASSWORD=yourVeryStrong(!)Password
+      - ACCEPT_EULA=Y
+    ports:
+      - 1533:1433 #expose port, so can connect to it using host: 'localhost,1533' | user: sa, password: yourVeryStrong(!)Password
+
+  redis:
+    image: "redis:alpine"
+    volumes:
+      - redisdata:/data
+      - redisdata:/var/lib/redis
+      - redisdata:/usr/local/etc/redis/redis.conf
+    ports:
+      - "6379:6379"
+
+# sometimes when building the controller it does not copy the contents of the datasets folder.
+  # This is probably a caching docker caching issue, which can be fixed with:
+  # 'make clean-hard'
+  controller:
+    build:
+      context: ./
+      dockerfile: ./controller/Dockerfile
+    container_name: controller
+    depends_on:
+      - mongo
+    # we map the port of the controller to the host.
+    # This way we can either connect locally with localhost:5001
+    # or from a docker container that accesses host.docker.internal:5001
+    ports:
+      - "5001:5001"
+    environment:
+      # The environment variables are set manually here in docker-compose.
+      # But in kubernetes the environment variables are set as <SERVICE_NAME>_SERVICE_HOST and <SERVICE_NAME>_SERVICE_PORT
+      # Therefore the services must be named accordingly in the kubernetes files.
+      - AUTOKERAS_SERVICE_HOST=autokeras
+      - AUTOKERAS_SERVICE_PORT=50052
+      - MLJAR_SERVICE_HOST=mljar
+      - MLJAR_SERVICE_PORT=50053
+      #- MCFLY_SERVICE_HOST=mcfly
+      #- MCFLY_SERVICE_PORT=50054
+      - SKLEARN_SERVICE_HOST=sklearn
+      - SKLEARN_SERVICE_PORT=50055
+      - FLAML_SERVICE_HOST=flaml
+      - FLAML_SERVICE_PORT=50056
+      - AUTOGLUON_SERVICE_HOST=gluon
+      - AUTOGLUON_SERVICE_PORT=50057
+      #- AUTOCVE_SERVICE_HOST=autocve
+      #- AUTOCVE_SERVICE_PORT=50058
+      - PYTORCH_SERVICE_HOST=pytorch
+      - PYTORCH_SERVICE_PORT=50059
+      #- ALPHAD3M_SERVICE_HOST=alphad3m
+      #- ALPHAD3M_SERVICE_PORT=50060
+      - EVALML_SERVICE_HOST=evalml
+      - EVALML_SERVICE_PORT=50062
+      - PYCARET_SERVICE_HOST=pycaret
+      - PYCARET_SERVICE_PORT=50063
+      - TPOT_SERVICE_HOST=tpot
+      - TPOT_SERVICE_PORT=50064
+      - PERSISTENCE_LOGGING_LEVEL=DEBUG
+      - SERVER_LOGGING_LEVEL=DEBUG
+      - ONTOLOGY_LOGGING_LEVEL=DEBUG
+      - BLACKBOARD_LOGGING_LEVEL=DEBUG
+      - WIN_DEV_MACHINE=NO
+    volumes:
+      - datasets:/app/app-data/datasets
+      - training:/app/app-data/training
+      - training-autokeras:/app/app-data/training/autokeras
+      - training-mljar:/app/app-data/training/mljar
+      - training-sklearn:/app/app-data/training/sklearn
+      - training-flaml:/app/app-data/training/flaml
+      - training-gluon:/app/app-data/training/gluon
+      #- training-autocve:/app/app-data/training/autocve
+      - training-pytorch:/app/app-data/training/pytorch
+      #- training-alphad3m:/app/app-data/training/alphad3m
+      #- training-mcfly:/app/app-data/training/mcfly
+      - training-evalml:/app/app-data/training/evalml
+      - training-pycaret:/app/app-data/training/pycaret
+      - training-tpot:/app/app-data/training/tpot
+
+  mongo:
+    image: mongo
+    container_name: mongo
+    ports:
+      - "27017:27017"
+
+    # limit log verbosity
+    command: --quiet --logpath /dev/null
+
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+    volumes:
+      - mongodata:/data/configdb
+      - mongodata:/data/db
+
+#     adapters do not need to be available from the host machine -> no port mappings
+
+  autokeras:
+    build:
+      context: ./adapters
+      dockerfile: ./AutoKeras/Dockerfile
+    container_name: autokeras
+    environment:
+      - GRPC_SERVER_PORT=50052
+    volumes:
+      - datasets:/app/app-data/datasets
+      - training-autokeras:/app/app-data/training
+
+  mljar:
+    build:
+      context: ./adapters
+      dockerfile: ./MLJAR/Dockerfile
+    container_name: mljar
+    environment:
+      - GRPC_SERVER_PORT=50053
+    volumes:
+      - datasets:/app/app-data/datasets
+      - training-mljar:/app/app-data/training
+
+  #mcfly:
+  #  build:
+  #    context: ./adapters
+  #    dockerfile: ./Mcfly/Dockerfile
+  #  container_name: mcfly
+  #  environment:
+  #    - GRPC_SERVER_PORT=50054
+  #  volumes:
+  #    - datasets:/app/app-data/datasets
+  #    - training-mcfly:/app/app-data/training
+
+  sklearn:
+    build:
+      context: ./adapters
+      dockerfile: ./AutoSklearn/Dockerfile
+    container_name: sklearn
+    environment:
+      - GRPC_SERVER_PORT=50055
+    volumes:
+      - datasets:/app/app-data/datasets
+      - training-sklearn:/app/app-data/training
+
+  flaml:
+    build:
+      context: ./adapters
+      dockerfile: ./FLAML/Dockerfile
+    container_name: flaml
+    environment:
+      - GRPC_SERVER_PORT=50056
+    volumes:
+      - datasets:/app/app-data/datasets
+      - training-flaml:/app/app-data/training
+
+  gluon:
+    build:
+      context: ./adapters
+      dockerfile: ./AutoGluon/Dockerfile
+    container_name: gluon
+    environment:
+      - GRPC_SERVER_PORT=50057
+    volumes:
+      - datasets:/app/app-data/datasets
+      - training-gluon:/app/app-data/training
+
+  #autocve:
+  #  build:
+  #    context: ./adapters
+  #    dockerfile: ./AutoCVE/Dockerfile
+  #  container_name: autocve
+  #  environment:
+  #    - GRPC_SERVER_PORT=50058
+  #  volumes:
+  #    - datasets:/app/app-data/datasets
+  #    - training-autocve:/app/app-data/training
+
+  pytorch:
+    build:
+      context: ./adapters
+      dockerfile: ./AutoPytorch/Dockerfile
+    container_name: pytorch
+    environment:
+      - GRPC_SERVER_PORT=50059
+    volumes:
+      - datasets:/app/app-data/datasets
+      - training-pytorch:/app/app-data/training
+
+  #alphad3m:
+  #  build:
+  #    context: ./adapters
+  #    dockerfile: ./AlphaD3M/Dockerfile
+  #  container_name: alphad3m
+  #  environment:
+  #    - GRPC_SERVER_PORT=50060
+  #  volumes:
+  #    - datasets:/app/app-data/datasets
+  #    - training-alphad3m:/app/app-data/training
+
+
+  evalml:
+    build:
+      context: ./adapters
+      dockerfile: ./EvalML/Dockerfile
+    container_name: evalml
+    environment:
+      - GRPC_SERVER_PORT=50062
+    volumes:
+      - datasets:/app/app-data/datasets
+      - training-evalml:/app/app-data/training
+
+  pycaret:
+    build:
+      context: ./adapters
+      dockerfile: ./PyCaret/Dockerfile
+    container_name: pycaret
+    environment:
+      - GRPC_SERVER_PORT=50063
+    volumes:
+      - datasets:/app/app-data/datasets
+      - training-pycaret:/app/app-data/training
+
+  tpot:
+    build:
+      context: ./adapters
+      dockerfile: ./TPOT/Dockerfile
+    container_name: tpot
+    environment:
+      - GRPC_SERVER_PORT=50064
+    volumes:
+      - datasets:/app/app-data/datasets
+      - training-tpot:/app/app-data/training
+
+volumes:
+  datasets: # shared volume between controller, adapters and frontend/dummy to transfer datasets
+   # shared volumes between controller and adapters to transfer training files e.g. *.zip file
+
+  training-autokeras:
+  training-sklearn:
+  training-flaml:
+  training-gluon:
+  training-pytorch:
+  #training-autocve:
+  training-mljar:
+  #training-alphad3m:
+  training-mcfly:
+  training-evalml:
+  training-pycaret:
+  training-tpot:
+
+  # shared volume between controller and frontend / dummy to transfer training
+  training:
+  mongodata:
+  dbdata:
+  redisdata:
+
+x-mutagen:
+  sync:
+    defaults:
+      ignore:
+        vcs: true
+    datasets:
+      alpha: "./mutagen_datasets"
+      beta: "volume://datasets"
+      mode: "two-way-resolved"

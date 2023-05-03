@@ -12,6 +12,7 @@ metadata:
     nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
     nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
     nginx.ingress.kubernetes.io/send-timeout: "3600"
+    cert-manager.io/cluster-issuer: lets-encrypt-oma-ml
 spec:
   tls:
   - hosts:

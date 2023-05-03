@@ -46,7 +46,7 @@ def read_parameter(parameters, intersect_parameter, automl_parameter, default=[N
         return default
     else:
         return value
-        
+
 def translate_parameters(task, parameter, task_config):
     """_summary_
 
@@ -187,7 +187,7 @@ def evaluate(config: "StartAutoMlRequest", config_path: str) -> Tuple[float, flo
         if config["dataset_configuration"]["schema"][key].get("role_selected", "") == ":index":
             index.append(key)
 
-    if(config["configuration"]["task"] in [":tabular_classification", ":tabular_regression", ":text_regression", ":text_classification"]):
+    if(config["configuration"]["task"] in [":tabular_classification", ":tabular_regression", ":text_regression", ":named_entity_recognition", ":text_classification"]):
         train, test = data_loader(config)
         target = targets[0]
         # override file_path to path to test file and drop target column
@@ -203,7 +203,7 @@ def evaluate(config: "StartAutoMlRequest", config_path: str) -> Tuple[float, flo
         #y_actual = test.iloc[-12:][target]
         #test.drop(test.tail(12).index, inplace=True)
         #file_path = write_tabular_dataset_data(test, os.path.dirname(file_path), config)
-        
+
     elif(config["configuration"]["task"] in[":image_classification", ":image_regression"]):
         X_test, y_test = data_loader(config, image_test_folder=True)
 
@@ -216,9 +216,13 @@ def evaluate(config: "StartAutoMlRequest", config_path: str) -> Tuple[float, flo
 
     if config["configuration"]["task"] in [":tabular_classification", ":text_classification", ":image_classification", ":time_series_classification"]:
         if config["configuration"]["task"] == ":image_classification":
-            return compute_classification_metrics(pd.Series(y_test), predictions["predicted"]), (predict_time * 1000) / pd.Series(y_test).shape[0]
+            #clalculate number of clases with y_test because the training target is not available here
+            number_of_classes = y_test.unique()
+            return compute_classification_metrics(pd.Series(y_test), predictions["predicted"], number_of_classes), (predict_time * 1000) / pd.Series(y_test).shape[0]
         else:
-            return compute_classification_metrics(pd.Series(test[target]), predictions["predicted"]), (predict_time * 1000) / test.shape[0]
+            #calculate number of classes because in the training set are sometime not all classes available
+            number_of_classes = train[target].nunique()
+            return compute_classification_metrics(pd.Series(test[target]), predictions["predicted"], number_of_classes), (predict_time * 1000) / test.shape[0]
     elif config["configuration"]["task"] in [":tabular_regression", ":text_regression", ":image_regression", ":time_series_forecasting"]:
         if config["configuration"]["task"] == ":image_regression":
             return compute_regression_metrics(pd.Series(y_test), predictions["predicted"]), (predict_time * 1000) / pd.Series(y_test).shape[0]
@@ -227,8 +231,10 @@ def evaluate(config: "StartAutoMlRequest", config_path: str) -> Tuple[float, flo
             return compute_regression_metrics(pd.Series(test.iloc[-config["forecasting_horizon"]:][target]), predictions["predicted"]), (predict_time * 1000) / test.shape[0]
         else:
             return compute_regression_metrics(pd.Series(test[target]), predictions["predicted"]), (predict_time * 1000) / test.shape[0]
+    elif config["configuration"]["task"] == ":named_entity_recognition":
+        return compute_named_entity_recognition_metrics(pd.Series(test[target]), predictions["predicted"]), (predict_time * 1000) / pd.Series(test[target]).shape[0]
 
-def compute_classification_metrics(y_should: pd.Series, y_is: pd.Series) -> dict:
+def compute_classification_metrics(y_should: pd.Series, y_is: pd.Series, number_of_classes: int) -> dict:
     """Compute the metrics collection for classification tasks
 
     Args:
@@ -252,7 +258,7 @@ def compute_classification_metrics(y_should: pd.Series, y_is: pd.Series) -> dict
         ":accuracy": float(accuracy_score(y_should, y_is)),
         ":balanced_accuracy": float(balanced_accuracy_score(y_should, y_is)),
     }
-    if len(y_should.unique()) == 2:
+    if number_of_classes == 2:
         #Metrics only for binary classification
         tn, fp, fn, tp = confusion_matrix(y_should, y_is).ravel()
         score.update({
@@ -317,6 +323,24 @@ def compute_regression_metrics(y_should: pd.Series, y_is: pd.Series) -> dict:
         ":mean_poisson_deviance": float(mean_poisson_deviance(y_should, y_is)),
         ":mean_gamma_deviance": float(mean_gamma_deviance(y_should, y_is))
         })
+    return score
+
+def compute_named_entity_recognition_metrics(y_should: pd.Series, y_is: pd.Series) -> dict:
+    """Compute the metrics collection for named entity recognition tasks
+
+    Args:
+        y_should (pd.Series): The series of the label for the test set
+        y_is (pd.Series): The series of the label of the model predictions for the test set
+
+    Returns:
+        dict: Dictionary containing the computed metrics, key is ontology IRI for the metric and value is the value
+    """
+    score = {
+        ":overall_recall": float(recall_score(y_should, y_is, average="micro")),
+        ":overall_precision": float(precision_score(y_should, y_is, average="micro")),
+        ":overall_f1": float(f1_score(y_should, y_is, average="micro")),
+        ":overall_accuracy": float(accuracy_score(y_should, y_is)),
+    }
     return score
 
 def predict(config: dict, config_path: str, automl: str) -> Tuple[float, str]:
