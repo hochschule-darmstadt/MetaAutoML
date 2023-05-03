@@ -97,7 +97,7 @@ class AutoKerasTextTaskTest(unittest.TestCase):
                 "decimal_character": ".",
                 "thousands_seperator": ",",
                 "datetime_format": "",
-                "encoding": "utf-8"
+                "encoding": "iso8859_2"
             },
             "schema": {
                 "target": {
@@ -139,7 +139,7 @@ class AutoKerasTextTaskTest(unittest.TestCase):
         req.configuration.target = "target"
         req.configuration.runtime_limit = 3
         req.configuration.metric = ':accuracy'
-        req.configuration.parameters = {":metric": {"values": [":mean_sqared_error"]}}
+        req.configuration.parameters = {":metric": {"values": [":mean_squared_error"]}}
         req.dataset_configuration = json.dumps({
             "column_datatypes": {
                 "text": DataType.DATATYPE_STRING,
@@ -153,7 +153,7 @@ class AutoKerasTextTaskTest(unittest.TestCase):
                 "decimal_character": ".",
                 "thousands_seperator": ",",
                 "datetime_format": "",
-                "encoding": "utf-8"
+                "encoding": "iso8859_2"
             },
             "schema": {
                 "target": {
