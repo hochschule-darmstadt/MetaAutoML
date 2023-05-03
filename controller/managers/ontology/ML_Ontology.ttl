@@ -1,5 +1,5 @@
 ### Ontology file generated from ML_Ontology.xlsx.
-### 2023-04-18 15:46:27.060104
+### 2023-04-27 16:44:04.905185
 
 
 # PREFIXES
@@ -109,12 +109,12 @@
 :supervised_learning a :ML_area ;
     skos:prefLabel "supervised learning" ;
     skos:altLabel "SL" ;
-    rdfs:comment "Supervised learning (SL) is the machine learning task of learning a function that maps an input to an output based on example input-output pairs." ;
+    rdfs:comment "Supervised learning (SL) is the machine learning area of learning a function that maps an input to an output based on example input-output pairs." ;
     rdfs:seeAlso <https://www.wikidata.org/entity/Q334384> .
 :unsupervised_learning a :ML_area ;
     skos:prefLabel "unsupervised learning" ;
     skos:altLabel "UL" ;
-    rdfs:comment "Unsupervised learning (UL) is a type of algorithm that learns patterns from untagged data." ;
+    rdfs:comment "Unsupervised learning (UL) is the machine learning area for learning patterns from unlabeled data." ;
     rdfs:seeAlso <https://www.wikidata.org/entity/Q1152135> .
 :reinforcement_learning a :ML_area ;
     skos:prefLabel "reinforcement learning" ;
@@ -205,7 +205,7 @@
     :has_dataset_type :image ;
     rdfs:comment "set of methods to group images" ;
     rdfs:seeAlso <https://www.wikidata.org/entity/Q98526763> ;
-    :supported_by_oma_ml "True" .
+    :supported_by_oma_ml "true"^^xsd:boolean .
 :image_object_tracking a :ML_task ;
     skos:prefLabel "image object tracking" ;
     :belongs_to :supervised_learning ;
@@ -284,14 +284,14 @@
     :belongs_to :supervised_learning ;
     :has_dataset_type :tabular ;
     rdfs:comment "classification of data rows of a table" ;
-    :supported_by_oma_ml "True" .
+    :supported_by_oma_ml "true"^^xsd:boolean .
 :tabular_regression a :ML_task ;
     skos:prefLabel "tabular regression" ;
     skos:broader :regression ;
     :belongs_to :supervised_learning ;
     :has_dataset_type :tabular ;
     rdfs:comment "prediction of continuous values for rows in a table" ;
-    :supported_by_oma_ml "True" .
+    :supported_by_oma_ml "true"^^xsd:boolean .
 :text_analytics a :ML_task ;
     skos:prefLabel "text analytics" ;
     :belongs_to :supervised_learning , :unsupervised_learning ;
@@ -304,7 +304,7 @@
     :has_dataset_type :text ;
     rdfs:comment "classification of texts" ;
     rdfs:seeAlso <https://www.wikidata.org/entity/Q102190569> ;
-    :supported_by_oma_ml "True" .
+    :supported_by_oma_ml "true"^^xsd:boolean .
 :text_regression a :ML_task ;
     skos:prefLabel "text regression" ;
     skos:broader :regression ;
@@ -323,13 +323,13 @@
     :belongs_to :supervised_learning ;
     :has_dataset_type :time_series_longitudinal ;
     rdfs:comment "Classification of time series" ;
-    :supported_by_oma_ml "True" .
+    :supported_by_oma_ml "true"^^xsd:boolean .
 :time_series_forecasting a :ML_task ;
     skos:prefLabel "time series forecasting" ;
     :belongs_to :supervised_learning ;
     :has_dataset_type :time_series ;
     rdfs:comment "The prediction of events through a sequenc of time" ;
-    :supported_by_oma_ml "True" .
+    :supported_by_oma_ml "true"^^xsd:boolean .
 :topic_modeling a :ML_task ;
     skos:prefLabel "topic modeling" ;
     :belongs_to :unsupervised_learning ;
@@ -369,6 +369,13 @@
     :has_dataset_type :tabular ;
     rdfs:comment "Association rule learning is a rule-based machine learning method for discovering interesting relations between variables in large databases. It is intended to identify strong rules discovered in databases using some measures of interestingness." ;
     rdfs:seeAlso <https://www.wikidata.org/wiki/Q386780> .
+:named_entity_recognition a :ML_task ;
+    skos:prefLabel "named entity recognition" ;
+    skos:broader :classification ;
+    :belongs_to :supervised_learning ;
+    :has_dataset_type :text ;
+    rdfs:comment "Extract entites from text" ;
+    :supported_by_oma_ml "true"^^xsd:boolean .
 
 
 # ML_approach
@@ -1473,6 +1480,18 @@
     skos:prefLabel "receiver operating characteristic curve one vs one weighted" ;
     skos:altLabel "ROC AUC OVO weighted" ;
     :used_for :classification .
+:overall_recall a :Metric ;
+    skos:prefLabel "overall recall" ;
+    :used_for :classification .
+:overall_precision a :Metric ;
+    skos:prefLabel "overall precision" ;
+    :used_for :classification .
+:overall_f1 a :Metric ;
+    skos:prefLabel "overall f1" ;
+    :used_for :classification .
+:overall_accuracy a :Metric ;
+    skos:prefLabel "overall accuracy" ;
+    :used_for :classification .
 
 
 # ML_library
@@ -1589,23 +1608,23 @@
 :autogluon a :AutoML_solution ;
     skos:prefLabel "Autogluon" ;
     :used_for :scikit_learn_lib , :catboost_lib , :lightgbm_lib , :xgboost_lib , :pytorch_lib , :mxnet_lib ;
-    :can_perform :tabular_classification , :tabular_regression , :text_classification , :text_regression , :sentiment_analysis , :sentence_similarity , :image_classification , :object_detection , :video_classification , :video_object_tracking , :action_recognition , :time_series_forecasting ;
-    :supported_by_oma_ml "True" .
+    :can_perform :tabular_classification , :tabular_regression , :text_classification , :text_regression , :sentiment_analysis , :sentence_similarity , :image_classification , :object_detection , :video_classification , :video_object_tracking , :action_recognition , :time_series_forecasting , :named_entity_recognition ;
+    :supported_by_oma_ml "true"^^xsd:boolean .
 :autokeras a :AutoML_solution ;
     skos:prefLabel "Autokeras" ;
     :used_for :keras_lib ;
     :can_perform :tabular_classification , :tabular_regression , :time_series_forecasting , :text_classification , :text_regression , :image_classification , :image_regression ;
-    :supported_by_oma_ml "True" .
+    :supported_by_oma_ml "true"^^xsd:boolean .
 :autopytorch a :AutoML_solution ;
     skos:prefLabel "Autopytorch" ;
     :used_for :pytorch_lib , :pytorch_forecasting_lib ;
     :can_perform :tabular_classification , :tabular_regression , :image_classification , :time_series_forecasting ;
-    :supported_by_oma_ml "True" .
+    :supported_by_oma_ml "true"^^xsd:boolean .
 :autosklearn a :AutoML_solution ;
     skos:prefLabel "Autosklearn" ;
     :used_for :scikit_learn_lib ;
     :can_perform :tabular_classification , :tabular_regression ;
-    :supported_by_oma_ml "True" .
+    :supported_by_oma_ml "true"^^xsd:boolean .
 :autots a :AutoML_solution ;
     skos:prefLabel "AutoTS" ;
     :used_for :prophet_lib , :pytorch_lib , :gluonts_lib , :pmdarima_lib , :tensorflow_lib ;
@@ -1629,7 +1648,7 @@
     skos:prefLabel "EvalML" ;
     :used_for :scikit_learn_lib , :catboost_lib , :lightgbm_lib , :xgboost_lib ;
     :can_perform :tabular_classification , :tabular_regression , :time_series_forecasting , :time_series_classification , :text_classification , :text_regression ;
-    :supported_by_oma_ml "True" .
+    :supported_by_oma_ml "true"^^xsd:boolean .
 :fedot a :AutoML_solution ;
     skos:prefLabel "FEDOT" ;
     :used_for :scikit_learn_lib , :statsmodel_lib ;
@@ -1638,7 +1657,7 @@
     skos:prefLabel "FLAML" ;
     :used_for :scikit_learn_lib , :catboost_lib , :lightgbm_lib , :xgboost_lib , :prophet_lib ;
     :can_perform :tabular_classification , :tabular_regression , :ranking , :time_series_forecasting , :text_classification ;
-    :supported_by_oma_ml "True" .
+    :supported_by_oma_ml "true"^^xsd:boolean .
 :google_automl a :AutoML_solution ;
     skos:prefLabel "Google AutoML" ;
     :used_for :tensorflow_lib ;
@@ -1655,7 +1674,7 @@
     skos:prefLabel "Mcfly" ;
     :used_for :tensorflow_lib ;
     :can_perform :time_series_classification ;
-    :supported_by_oma_ml "True" .
+    :supported_by_oma_ml "true"^^xsd:boolean .
 :merlion a :AutoML_solution ;
     skos:prefLabel "Merlion" ;
     :used_for :lightgbm_lib , :prophet_lib , :scikit_learn_lib , :statsmodel_lib , :greykite_lib , :kats_lib ;
@@ -1668,7 +1687,7 @@
     skos:prefLabel "MLJAR" ;
     :used_for :scikit_learn_lib , :catboost_lib , :lightgbm_lib , :xgboost_lib ;
     :can_perform :tabular_classification , :tabular_regression ;
-    :supported_by_oma_ml "True" .
+    :supported_by_oma_ml "true"^^xsd:boolean .
 :rapidminer a :AutoML_solution ;
     skos:prefLabel "Rapidminer" ;
     :used_for :weka_lib , :h2o_lib ;
@@ -1680,7 +1699,7 @@
     skos:prefLabel "TPOT" ;
     :used_for :scikit_learn_lib , :pytorch_lib ;
     :can_perform :tabular_classification , :tabular_regression ;
-    :supported_by_oma_ml "True" .
+    :supported_by_oma_ml "true"^^xsd:boolean .
 :transmogrifai a :AutoML_solution ;
     skos:prefLabel "TransmogrifAI" ;
     :used_for :spark_mllib ;
@@ -1689,7 +1708,7 @@
     skos:prefLabel "Pycaret" ;
     :used_for :scikit_learn_lib , :catboost_lib , :lightgbm_lib , :xgboost_lib ;
     :can_perform :tabular_classification , :tabular_regression , :clustering , :anomaly_detection , :time_series_forecasting ;
-    :supported_by_oma_ml "True" .
+    :supported_by_oma_ml "true"^^xsd:boolean .
 
 
 # Enum
@@ -1837,39 +1856,39 @@
     skos:prefLabel "tabular" ;
     :category :dataset_type ;
     rdfs:comment "A dataset presented in a tabular (table with rows and columns) form (CSV file)?=?.csv?=?Additional-Info-About-File-Structure" ;
-    :supported_by_oma_ml "True" .
+    :supported_by_oma_ml "true"^^xsd:boolean .
 :text a :Enum ;
     skos:prefLabel "text" ;
     :category :dataset_type ;
     rdfs:comment "A dataset presented in a tabular (table with rows and columns) form (CSV file)?=?.csv?=?Additional-Info-About-File-Structure" ;
-    :supported_by_oma_ml "True" .
+    :supported_by_oma_ml "true"^^xsd:boolean .
 :image a :Enum ;
     skos:prefLabel "image" ;
     :category :dataset_type ;
     rdfs:comment "A dataset presented in a folder structure of image files ordered by label form (ZIP file)?=?.zip?=?Additional-Info-About-File-Structure" ;
-    :supported_by_oma_ml "True" .
+    :supported_by_oma_ml "true"^^xsd:boolean .
 :video a :Enum ;
     skos:prefLabel "video" ;
     :category :dataset_type ;
-    :supported_by_oma_ml "false" .
+    :supported_by_oma_ml "false"^^xsd:boolean .
 :audio a :Enum ;
     skos:prefLabel "audio" ;
     :category :dataset_type ;
-    :supported_by_oma_ml "false" .
+    :supported_by_oma_ml "false"^^xsd:boolean .
 :graph a :Enum ;
     skos:prefLabel "graph" ;
     :category :dataset_type ;
-    :supported_by_oma_ml "false" .
+    :supported_by_oma_ml "false"^^xsd:boolean .
 :time_series_longitudinal a :Enum ;
     skos:prefLabel "time series longitudinal" ;
     :category :dataset_type ;
     rdfs:comment "Longitudinal data - also called panel data - for time series classification, which has 3 dimensions: (num_samples, num_features, num_timesteps)?=?.ts?=?Additional-Info-About-File-Structure" ;
-    :supported_by_oma_ml "True" .
+    :supported_by_oma_ml "true"^^xsd:boolean .
 :time_series a :Enum ;
     skos:prefLabel "time series" ;
     :category :dataset_type ;
     rdfs:comment "A dataset presented in a tabular (table with rows and columns) form (CSV file)?=?.csv?=?Additional-Info-About-File-Structure" ;
-    :supported_by_oma_ml "True" .
+    :supported_by_oma_ml "true"^^xsd:boolean .
 :greedy a :Enum ;
     skos:prefLabel "greedy" ;
     :category :tuner_approach ;
@@ -1914,7 +1933,7 @@
     :category :task_configuration ;
     :automl_solution :autokeras ;
     :ml_task :tabular_classification ;
-    :parameter_value :metric_autokeras_tabular_classification , :loss_autokeras_tabular_classification , :max_trials_autokeras , :tuner_autokeras_tabular_classification , :max_model_size_autokeras .
+    :parameter_value :metric_autokeras_tabular_classification , :loss_autokeras_tabular_classification , :max_trials_autokeras_tabular_classification , :tuner_autokeras_tabular_classification , :max_model_size_autokeras_tabular_classification .
 :tabular_regression_in_autokeras a :Configuration_item ;
     skos:prefLabel "tabular regression in AutoKeras" ;
     :category :task_configuration ;
@@ -2041,6 +2060,12 @@
     :automl_solution :autogluon ;
     :ml_task :text_classification ;
     :parameter_value :use_approach_autogluon_text_classification , :metric_autogluon_text_classification .
+:named_entity_recognition_in_autogluon a :Configuration_item ;
+    skos:prefLabel "named entity recognition in AutoGluon" ;
+    :category :task_configuration ;
+    :automl_solution :autogluon ;
+    :ml_task :named_entity_recognition ;
+    :parameter_value :use_approach_autogluon_named_entity_recognition , :metric_auto_gluon_named_entity_recognition .
 :text_regression_in_autogluon a :Configuration_item ;
     skos:prefLabel "text regression in AutoGluon" ;
     :category :task_configuration ;
@@ -2253,6 +2278,12 @@
     skos:broader :use_approach ;
     :has_datatype :list ;
     :parameter_value :multilayer_perceptron .
+:use_approach_autogluon_named_entity_recognition a :Configuration_item ;
+    skos:prefLabel "use approach AutoGluon named entity recognition" ;
+    :category :parameter ;
+    skos:broader :use_approach ;
+    :has_datatype :list ;
+    :parameter_value :multilayer_perceptron .
 :use_approach_autogluon_text_regression a :Configuration_item ;
     skos:prefLabel "use approach AutoGluon text regression" ;
     :category :parameter ;
@@ -2289,6 +2320,15 @@
     skos:broader :use_approach ;
     :has_datatype :list ;
     :parameter_value :caboost , :decision_tree , :extra_tree , :k_nearest_neighbor , :linear_regression , :random_forest , :xgboost .
+:include_preprocessor a :Configuration_item ;
+    skos:prefLabel "include preprocessor" ;
+    :category :parameter .
+:include_preprocessor_autosklearn a :Configuration_item ;
+    skos:prefLabel "include preprocessor Autosklearn" ;
+    :category :parameter ;
+    skos:broader :include_preprocessor ;
+    :has_datatype :list ;
+    :parameter_value :kernel_principal_component_analysis , :radial_basis_function_kernel , :nystroem_kernel_approximation .
 :exclude_preprocessor a :Configuration_item ;
     skos:prefLabel "exclude preprocessor" ;
     :category :parameter .
@@ -2383,6 +2423,12 @@
     skos:broader :metric ;
     :has_datatype :single_value ;
     :parameter_value :accuracy , :balanced_accuracy , :f_measure , :f_measure_macro , :f_measure_micro , :f_measure_weighted , :receiver_operating_characteristic_curve , :receiver_operating_characteristic_curve_one_vs_one , :average_precision_score , :precision , :precision_macro , :precision_micro , :precision_weighted , :recall , :recall_macro , :recall_micro , :recall_weighted , :log_loss , :pac_score .
+:metric_autogluon_named_entity_recognition a :Configuration_item ;
+    skos:prefLabel "metric AutoGluon named entity recognition" ;
+    :category :parameter ;
+    skos:broader :metric ;
+    :has_datatype :single_value ;
+    :parameter_value :overall_recall , :overall_precision , :overall_f1 , :overall_accuracy .
 :metric_autogluon_text_regression a :Configuration_item ;
     skos:prefLabel "metric AutoGluon text regression" ;
     :category :parameter ;
@@ -2555,11 +2601,29 @@
     skos:prefLabel "max_model_size" ;
     :category :parameter ;
     :has_datatype :integer .
-:max_model_size_autokeras a :Configuration_item ;
-    skos:prefLabel "max_model_size_autokeras" ;
+:max_model_size_autokeras_tabular_classification a :Configuration_item ;
+    skos:prefLabel "max model size autokeras tabular classification" ;
     :category :parameter ;
     skos:broader :max_model_size ;
     :has_datatype :integer .
+:include_approach a :Configuration_item ;
+    skos:prefLabel "include approach" ;
+    :category :parameter ;
+    :has_datatype :list .
+:include_approach_autosklearn a :Configuration_item ;
+    skos:prefLabel "include approach autosklearn" ;
+    :category :parameter ;
+    skos:broader :include_approach ;
+    :has_datatype :list .
+:exclude_approach a :Configuration_item ;
+    skos:prefLabel "exclude approach" ;
+    :category :parameter ;
+    :has_datatype :list .
+:exclude_approach_autosklearn a :Configuration_item ;
+    skos:prefLabel "exclude approach autosklearn" ;
+    :category :parameter ;
+    skos:broader :exclude_approach ;
+    :has_datatype :list .
 :epochs a :Configuration_item ;
     skos:prefLabel "epochs" ;
     :category :parameter ;
@@ -2568,8 +2632,8 @@
     skos:prefLabel "max_trials" ;
     :category :parameter ;
     :has_datatype :integer .
-:max_trials_autokeras a :Configuration_item ;
-    skos:prefLabel "max_trials_autokeras" ;
+:max_trials_autokeras_tabular_classification a :Configuration_item ;
+    skos:prefLabel "max trials autokeras tabular classification" ;
     :category :parameter ;
     skos:broader :max_trials ;
     :has_datatype :integer .
@@ -2678,7 +2742,8 @@
     :parameter_value :categorical_cross_entropy .
 :forecasting_horizon a :Configuration_item ;
     skos:prefLabel "forecasting horizon" ;
-    :category :parameter .
+    :category :parameter ;
+    :required "true"^^xsd:boolean .
 :forecasting_horizon_autokeras_time_series_forcasting a :Configuration_item ;
     skos:prefLabel "forecasting horizon autokeras time series forcasting" ;
     :category :parameter ;
@@ -2721,7 +2786,8 @@
     skos:prefLabel "lookback evalml time series forecasting" ;
     :category :parameter ;
     skos:broader :lookback ;
-    :has_datatype :integer .
+    :has_datatype :integer ;
+    :required "true"^^xsd:boolean .
 :gap a :Configuration_item ;
     skos:prefLabel "gap" ;
     :category :parameter .
@@ -2734,7 +2800,8 @@
     skos:prefLabel "gap evalml time series forecasting" ;
     :category :parameter ;
     skos:broader :gap ;
-    :has_datatype :integer .
+    :has_datatype :integer ;
+    :required "true"^^xsd:boolean .
 
 
 # Sheet34
