@@ -317,16 +317,14 @@ class ExplainableAIManager:
             return pd.DataFrame(probabilities)
         import shap
         return shap.KernelExplainer(prediction_probability, sampled_dataset_x)
-    
-def createExplainerDashboard(model, x_test, y_test):
-    dashboard = ExplainerDashboard(ClassifierExplainer(model, x_test, y_test))
-    dashboard.save_html("./binary_dashboard.html")
-    dashboard.explainer.dump("./binary_dashboard.dill")
-    runExplainerDashboard()
 
-def runExplainerDashboard():
-    dashboard = ExplainerDashboard(ClassifierExplainer.from_file("./binary_dashboard.dill"))
+def startExplainerDashboard(path):
+    filepath = os.path.join(path, "binary_dashboard.dill")
+    dashboard = ExplainerDashboard(ClassifierExplainer.from_file(filepath))
     dashboard.run(8045)
+
+#def stopExplainerDashboard():
+
 
 
 
