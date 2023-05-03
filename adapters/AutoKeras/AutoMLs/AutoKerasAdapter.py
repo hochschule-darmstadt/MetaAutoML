@@ -109,8 +109,8 @@ class AutoKerasAdapter:
         X, y = prepare_tabular_dataset(train, self._configuration)
 
         #change encoding
-        self._configuration = set_encoding_for_string_columns(self._configuration,X,y)
-        train, test = data_loader(self._configuration, perform_splitting=False)
+        #self._configuration = set_encoding_for_string_columns(self._configuration,X,y)
+        #train, test = data_loader(self._configuration, perform_splitting=False)
 
         self._configuration = set_column_with_largest_amout_of_text(X, self._configuration)
         train, test = data_loader(self._configuration)
