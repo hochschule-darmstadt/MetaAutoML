@@ -157,7 +157,7 @@ class AutoKerasAdapter:
         parameters["predict_from"] = parameters["predict_from"] + 1
         self._configuration["forecasting_horizon"] = parameters["predict_until"]
         save_configuration_in_json(self._configuration)
-        
+
         X, y = prepare_tabular_dataset(train, self._configuration)
 
         #TODO convert dataframe to float
