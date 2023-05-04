@@ -1,11 +1,17 @@
 from uuid import UUID
 
+from grpc_omaml.client import create_omaml_client
+from grpc_omaml import CreateNewUserRequest
 
-def create_user() -> UUID:
+
+async def create_user() -> UUID:
     """Creates a new user and returns its id.
 
     Returns:
         UUID: The id of the user
     """
-    raise NotImplementedError()
-    # return UUID("00000000-0000-0000-0000-000000000000")
+    client = create_omaml_client()
+    response = await client.create_new_user(
+        create_new_user_request=CreateNewUserRequest()
+    )
+    return UUID(response.user_id)
