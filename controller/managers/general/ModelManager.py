@@ -32,7 +32,7 @@ class ModelManager:
         Returns:
             Model: The GRPC model object generated from the dictonary
         """
-        try:        
+        try:
             self.__log.debug("__model_object_to_rpc_object: get all predictions for model")
             model_predictions = self.__data_storage.get_predictions(user_id, str(model["_id"]))
             self.__log.debug(f"__model_object_to_rpc_object: found {model_predictions.count} predictions")
@@ -59,7 +59,7 @@ class ModelManager:
             model_info.ml_model_type = model["ml_model_type"]
             model_info.ml_library =  model["ml_library"]
             model_info.path = model["path"]
-            model_info.test_score = model["test_score"]
+            model_info.test_score = json.dumps(model["test_score"])
             model_info.prediction_time =  model["prediction_time"]
 
             model_runtime_profile = ModelruntimeProfile()
@@ -69,12 +69,15 @@ class ModelManager:
 
             model_info.status_messages[:] =  model["status_messages"]
             model_info.explanation = json.dumps(model["explanation"])
+            if not "carbon_footprint" in model:
+                        model["carbon_footprint"] = {"emissions": 0}
+            model_info.emission = model["carbon_footprint"].get("emissions", 0)
             return model_info
         except Exception as e:
             self.__log.error(f"__model_object_to_rpc_object: Error while reading parameter for model {model.model_id}")
             self.__log.error(f"__model_object_to_rpc_object: exception: {e}")
             raise grpclib.GRPCError(grpclib.Status.UNAVAILABLE, f"Error while retrieving Model {model.model_id}")
-            
+
 
     def get_models(
         self, get_models_request: "GetModelsRequest"
@@ -89,14 +92,18 @@ class ModelManager:
         """
         response = GetModelsResponse()
         def GetScore(e):
-            return e["test_score"]
+            score_list = list(e["test_score"].values())
+            if len(score_list) == 0:
+                return 0
+            #we will always use the first score for comparision
+            return score_list[0]
 
         self.__log.debug(f"get_models: get all models for dataset {get_models_request.dataset_id} for user {get_models_request.user_id}")
         all_models: list[dict[str, object]] = self.__data_storage.get_models(get_models_request.user_id, dataset_id=get_models_request.dataset_id)
         self.__log.debug(f"get_models: found {all_models.count} models for dataset {get_models_request.dataset_id} for user {get_models_request.user_id}")
-        
+
         all_models.sort(key=GetScore, reverse=True)
-        
+
         for model in all_models:
             response.models.append(self.__model_object_to_rpc_object(get_models_request.user_id, model))
 
@@ -121,7 +128,7 @@ class ModelManager:
         if not found:
             self.__log.error(f"get_training: model {get_model_request.model_id} for user {get_model_request.user_id} not found")
             raise grpclib.GRPCError(grpclib.Status.NOT_FOUND, f"Model {get_model_request.model_id} for user {get_model_request.user_id} not found, already deleted?")
-        
+
         response.model = self.__model_object_to_rpc_object(get_model_request.user_id, model)
         return response
 

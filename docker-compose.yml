@@ -4,7 +4,7 @@ services:
   # This is probably a caching docker caching issue, which can be fixed with:
   # 'make clean-hard'
   controller:
-    build: 
+    build:
       context: ./
       dockerfile: ./controller/Dockerfile
     container_name: controller
@@ -33,10 +33,16 @@ services:
       - AUTOGLUON_SERVICE_PORT=50057
       #- AUTOCVE_SERVICE_HOST=autocve
       #- AUTOCVE_SERVICE_PORT=50058
-      #- PYTORCH_SERVICE_HOST=pytorch
-      #- PYTORCH_SERVICE_PORT=50059
+      - PYTORCH_SERVICE_HOST=pytorch
+      - PYTORCH_SERVICE_PORT=50059
       #- ALPHAD3M_SERVICE_HOST=alphad3m
       #- ALPHAD3M_SERVICE_PORT=50060
+      - EVALML_SERVICE_HOST=evalml
+      - EVALML_SERVICE_PORT=50062
+      - PYCARET_SERVICE_HOST=pycaret
+      - PYCARET_SERVICE_PORT=50063
+      - TPOT_SERVICE_HOST=tpot
+      - TPOT_SERVICE_PORT=50064
       - PERSISTENCE_LOGGING_LEVEL=DEBUG
       - SERVER_LOGGING_LEVEL=DEBUG
       - ONTOLOGY_LOGGING_LEVEL=DEBUG
@@ -51,9 +57,12 @@ services:
       - training-flaml:/app/app-data/training/flaml
       - training-gluon:/app/app-data/training/gluon
       #- training-autocve:/app/app-data/training/autocve
-      #- training-pytorch:/app/app-data/training/pytorch
+      - training-pytorch:/app/app-data/training/pytorch
       #- training-alphad3m:/app/app-data/training/alphad3m
       - training-mcfly:/app/app-data/training/mcfly
+      - training-evalml:/app/app-data/training/evalml
+      - training-pycaret:/app/app-data/training/pycaret
+      - training-tpot:/app/app-data/training/tpot
 
   mongo:
     image: mongo
@@ -62,7 +71,7 @@ services:
       - "27017:27017"
 
     # limit log verbosity
-    command: --quiet --logpath /dev/null 
+    command: --quiet --logpath /dev/null
 
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
@@ -74,7 +83,7 @@ services:
 #     adapters do not need to be available from the host machine -> no port mappings
 
   autokeras:
-    build: 
+    build:
       context: ./adapters
       dockerfile: ./AutoKeras/Dockerfile
     container_name: autokeras
@@ -85,7 +94,7 @@ services:
       - training-autokeras:/app/app-data/training
 
   mljar:
-    build: 
+    build:
       context: ./adapters
       dockerfile: ./MLJAR/Dockerfile
     container_name: mljar
@@ -107,7 +116,7 @@ services:
       - training-mcfly:/app/app-data/training
 
   sklearn:
-    build: 
+    build:
       context: ./adapters
       dockerfile: ./AutoSklearn/Dockerfile
     container_name: sklearn
@@ -118,7 +127,7 @@ services:
       - training-sklearn:/app/app-data/training
 
   flaml:
-    build: 
+    build:
       context: ./adapters
       dockerfile: ./FLAML/Dockerfile
     container_name: flaml
@@ -129,7 +138,7 @@ services:
       - training-flaml:/app/app-data/training
 
   gluon:
-    build: 
+    build:
       context: ./adapters
       dockerfile: ./AutoGluon/Dockerfile
     container_name: gluon
@@ -140,7 +149,7 @@ services:
       - training-gluon:/app/app-data/training
 
   #autocve:
-  #  build: 
+  #  build:
   #    context: ./adapters
   #    dockerfile: ./AutoCVE/Dockerfile
   #  container_name: autocve
@@ -150,16 +159,16 @@ services:
   #    - datasets:/app/app-data/datasets
   #    - training-autocve:/app/app-data/training
 
-  #pytorch:
-  #  build: 
-  #    context: ./adapters
-  #    dockerfile: ./AutoPytorch/Dockerfile
-  #  container_name: pytorch
-  #  environment:
-  #    - GRPC_SERVER_PORT=50059
-  #  volumes:
-  #    - datasets:/app/app-data/datasets
-  #    - training-pytorch:/app/app-data/training
+  pytorch:
+    build:
+      context: ./adapters
+      dockerfile: ./AutoPytorch/Dockerfile
+    container_name: pytorch
+    environment:
+      - GRPC_SERVER_PORT=50059
+    volumes:
+      - datasets:/app/app-data/datasets
+      - training-pytorch:/app/app-data/training
 
   #alphad3m:
   #  build:
@@ -172,6 +181,40 @@ services:
   #    - datasets:/app/app-data/datasets
   #    - training-alphad3m:/app/app-data/training
 
+
+  evalml:
+    build:
+      context: ./adapters
+      dockerfile: ./EvalML/Dockerfile
+    container_name: evalml
+    environment:
+      - GRPC_SERVER_PORT=50062
+    volumes:
+      - datasets:/app/app-data/datasets
+      - training-evalml:/app/app-data/training
+
+  pycaret:
+    build:
+      context: ./adapters
+      dockerfile: ./PyCaret/Dockerfile
+    container_name: pycaret
+    environment:
+      - GRPC_SERVER_PORT=50063
+    volumes:
+      - datasets:/app/app-data/datasets
+      - training-pycaret:/app/app-data/training
+
+  tpot:
+    build:
+      context: ./adapters
+      dockerfile: ./TPOT/Dockerfile
+    container_name: tpot
+    environment:
+      - GRPC_SERVER_PORT=50064
+    volumes:
+      - datasets:/app/app-data/datasets
+      - training-tpot:/app/app-data/training
+
 volumes:
   datasets: # shared volume between controller, adapters and frontend/dummy to transfer datasets
    # shared volumes between controller and adapters to transfer training files e.g. *.zip file
@@ -179,11 +222,14 @@ volumes:
   training-sklearn:
   training-flaml:
   training-gluon:
-  #training-pytorch:
+  training-pytorch:
   #training-autocve:
   training-mljar:
   #training-alphad3m:
   training-mcfly:
+  training-evalml:
+  training-pycaret:
+  training-tpot:
 
   # shared volume between controller and frontend / dummy to transfer training
   training:

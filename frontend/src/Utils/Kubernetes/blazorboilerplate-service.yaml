@@ -2,8 +2,8 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    io.kompose.service: blazorboilerplate
-  name: blazorboilerplate
+    io.kompose.service: blazorboilerplate-node
+  name: blazorboilerplate-node
 spec:
   externalTrafficPolicy: Cluster
   type: NodePort

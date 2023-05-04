@@ -10,6 +10,7 @@ from scipy.stats import spearmanr
 from sktime.datasets import load_from_tsfile_to_dataframe
 from DataStorage import DataStorage
 from ThreadLock import ThreadLock
+from CsvManager import CsvManager
 ##TODO REFACTORING
 
 # Config for matplotlib plot sizing. These values are interpreted as pixels / 100.
@@ -31,12 +32,12 @@ class DataSetAnalysisManager(Thread):
         found, dataset = data_storage.get_dataset(user_id, dataset_id)
         file_config = dataset["file_configuration"]
         self.__dataset = dataset
-        delimiters = {
-            "comma":        ",",
-            "semicolon":    ";",
-            "space":        " ",
-            "tab":          "\t",
-        }
+        #delimiters = {
+        #    "comma":        ",",
+        #    "semicolon":    ";",
+        #    "space":        " ",
+        #    "tab":          "\t",
+        #}
         self.__data_storage = data_storage
         self.__dataset_analysis_lock = dataset_analysis_lock
         self.__basic_analysis = basic_analysis
@@ -46,21 +47,26 @@ class DataSetAnalysisManager(Thread):
             self.__dataset_df = load_from_tsfile_to_dataframe(self.__dataset["path"], return_separate_X_and_y=False)
         elif self.__dataset["type"] in [":tabular", ":text", ":time_series"]:
             try:
-                self.__dataset_df = pd.read_csv(self.__dataset["path"],
-                                             delimiter=delimiters[file_config['delimiter']],
-                                             skiprows=(file_config['start_row'] - 1),
-                                             escapechar=file_config['escape_character'],
-                                             decimal=file_config['decimal_character'],
-                                             engine="python",
-                                             index_col=False)
+                self.__dataset_df = CsvManager.read_dataset(self.__dataset["path"], dataset["file_configuration"], dataset["schema"])
+                #self.__dataset_df = pd.read_csv(self.__dataset["path"],
+                #                             delimiter=delimiters[file_config['delimiter']],
+                #                             skiprows=(file_config['start_row'] - 1),
+                #                             escapechar=file_config['escape_character'],
+                #                             decimal=file_config['decimal_character'],
+                #                             engine="python",
+                #                             index_col=False,
+                #                             encoding=file_config['encoding'],
+                #                             encoding_errors='ignore')
             except pd.errors.ParserError as e:
                 # As the pandas python parsing engine sometimes fails: Retry with standard (c) parser engine.
-                self.__dataset_df = pd.read_csv(self.__dataset["path"],
-                                             delimiter=delimiters[file_config['delimiter']],
-                                             skiprows=(file_config['start_row'] - 1),
-                                             escapechar=file_config['escape_character'],
-                                             decimal=file_config['decimal_character'],
-                                             index_col=False)
+                self.__dataset_df = CsvManager.read_dataset(self.__dataset["path"], dataset["file_configuration"], dataset["schema"])
+                #TODO still necessary. since we use frontend encoding detection
+                #pd.read_csv(self.__dataset["path"],
+                #                             delimiter=delimiters[file_config['delimiter']],
+                #                             skiprows=(file_config['start_row'] - 1),
+                #                             escapechar=file_config['escape_character'],
+                #                             decimal=file_config['decimal_character'],
+                #                             index_col=False)
         else:
             pass
 
@@ -73,19 +79,31 @@ class DataSetAnalysisManager(Thread):
         analysis = {}
         with self.__dataset_analysis_lock.lock():
             print("[DataSetAnalysisManager]: ENTERING LOCK.")
+            schema = self.__dataset_schema_analysis()
             if self.__basic_analysis:
-                analysis.update(self.basic_analysis())
-                    
+                analysis.update(self.basic_analysis(schema))
+
             if self.__advanced_analysis:
                 analysis.update({ "plots": self.advanced_analysis()})
-            
+
             found, dataset = self.__data_storage.get_dataset(self.__user_id, self.__dataset_id)
             analysis_details = dataset["analysis"]
             analysis_details.update(analysis)
-            self.__data_storage.update_dataset(self.__user_id, self.__dataset_id, { "analysis": analysis_details})
+            self.__data_storage.update_dataset(self.__user_id, self.__dataset_id, { "analysis": analysis_details, "schema": schema})
             print("[DataSetAnalysisManager]: EXITING LOCK.")
 
-    def basic_analysis(self) -> dict:
+    def __dataset_schema_analysis(self) -> dict:
+
+        if self.__dataset["type"] in [":tabular", ":text", ":time_series"]:
+            #generate preview of tabular and text dataset
+            #previewDf = pd.read_csv(filename_dest)
+            #previewDf.head(50).to_csv(filename_dest.replace(".csv", "_preview.csv"), index=False)
+            #causes error with different delimiters use normal string division
+            #self.__log.debug("__dataset_schema_analysis: dataset is of CSV type: generating csv file configuration...")
+            return CsvManager.get_default_dataset_schema(self.__dataset["path"], self.__dataset["file_configuration"])
+        return {}
+
+    def basic_analysis(self, schema) -> dict:
         """
         Basic analysis, results are returned as dict
         Analyzed are:
@@ -117,10 +135,9 @@ class DataSetAnalysisManager(Thread):
                 "number_of_rows": self.__dataset_df.shape[0],
                 "missings_per_column": dict(self.__dataset_df.isna().sum().items()),
                 "missings_per_row": DataSetAnalysisManager.__missing_values_rows(self.__dataset_df),
-                "outlier": DataSetAnalysisManager.__detect_outliers(self.__dataset_df),
+                "outlier": DataSetAnalysisManager.__detect_outliers(self.__dataset_df, schema),
                 "duplicate_columns": DataSetAnalysisManager.__detect_duplicate_columns(self.__dataset_df),
-                "duplicate_rows": DataSetAnalysisManager.__detect_duplicate_rows(self.__dataset_df),
-                "columns_datatype": DataSetAnalysisManager.__get_dataset_datatypes(self.__dataset_df)
+                "duplicate_rows": DataSetAnalysisManager.__detect_duplicate_rows(self.__dataset_df)
             })
         elif self.__dataset["type"] == ":image":
             pass
@@ -142,57 +159,60 @@ class DataSetAnalysisManager(Thread):
         Returns: Array of plot filenames
         """
         # Turn off io of matplotlib as the plots are saved, not displayed
-        import matplotlib
-        matplotlib.use('SVG')
-        import matplotlib.pyplot as plt
-        plt.ioff()
-        print("[DatasetAnalysisManager]: Starting advanced dataset analysis")
-        if self.__dataset["type"] in [":image"]:
-            return
-        # Convert all "object" columns to category
-        self.__dataset_df.loc[:, self.__dataset_df.dtypes == 'object'] = self.__dataset_df.select_dtypes(['object']).apply(lambda x: x.astype('category'))
+        try:
+            import matplotlib
+            matplotlib.use('SVG')
+            import matplotlib.pyplot as plt
+            plt.ioff()
+            print("[DatasetAnalysisManager]: Starting advanced dataset analysis")
+            if self.__dataset["type"] in [":image"]:
+                return
+            # Convert all "object" columns to category
+            self.__dataset_df.loc[:, self.__dataset_df.dtypes == 'object'] = self.__dataset_df.select_dtypes(['object']).apply(lambda x: x.astype('category'))
 
-        # Get processed version of dataset to make calculation of feature correlation using scipy spearmanr possible
-        proc_dataset = self.__process_categorical_columns()
-        proc_dataset = self.__fill_nan_values(proc_dataset)
-        ## TODO consider to add more analysis feature in case of text, image,...
-        if self.__dataset["type"] in [":text"]:
-            return
-        # Get correlations using spearmanr
-        corr = spearmanr(proc_dataset).correlation
-        # Make correlation plot
-        print("[DatasetAnalysisManager]: Plotting correlation matrix")
-        filename = self.__make_correlation_matrix_plot(corr, self.__dataset_df.columns, self.plot_filepath)
-        self.__plots.append({"title": "Correlation Matrix", "items": [filename]})
-        # Get indices of correlations ordered desc
-        indices = self.__largest_indices(corr, (len(proc_dataset.columns) * len(proc_dataset.columns)))
+            # Get processed version of dataset to make calculation of feature correlation using scipy spearmanr possible
+            proc_dataset = self.__process_categorical_columns()
+            proc_dataset = self.__fill_nan_values(proc_dataset)
+            ## TODO consider to add more analysis feature in case of text, image,...
+            if self.__dataset["type"] in [":text"]:
+                return
+            # Get correlations using spearmanr
+            corr = spearmanr(proc_dataset).correlation
+            # Make correlation plot
+            print("[DatasetAnalysisManager]: Plotting correlation matrix")
+            filename = self.__make_correlation_matrix_plot(corr, self.__dataset_df.columns, self.plot_filepath)
+            self.__plots.append({"title": "Correlation Matrix", "items": [filename]})
+            # Get indices of correlations ordered desc
+            indices = self.__largest_indices(corr, (len(proc_dataset.columns) * len(proc_dataset.columns)))
 
-        # Plot features with the highest correlation
-        print(f"[DatasetAnalysisManager]: Plotting top 10 feature imbalance plots")
-        plotted_indices = []
-        category = {"title": "Correlation analysis", "items": []}
-        for first_col_idx, second_col_index in zip(indices[0], indices[1]):
-            # Only plot top 5
-            if len(plotted_indices) == 6:
-                break
-            # If the correlation isn't a col with itself or has already been plotted the other way around -> plot it
-            if first_col_idx != second_col_index and [second_col_index, first_col_idx] not in plotted_indices:
-                category["items"].append(self.__make_feature_imbalance_plot(self.__dataset_df.columns[first_col_idx],
-                                                                            self.__dataset_df.columns[second_col_index],
-                                                                            corr[second_col_index, first_col_idx],
-                                                                            self.plot_filepath))
-                plotted_indices.append([first_col_idx, second_col_index])
-        self.__plots.append(category)
+            # Plot features with the highest correlation
+            print(f"[DatasetAnalysisManager]: Plotting top 10 feature imbalance plots")
+            plotted_indices = []
+            category = {"title": "Correlation analysis", "items": []}
+            for first_col_idx, second_col_index in zip(indices[0], indices[1]):
+                # Only plot top 5
+                if len(plotted_indices) == 6:
+                    break
+                # If the correlation isn't a col with itself or has already been plotted the other way around -> plot it
+                if first_col_idx != second_col_index and [second_col_index, first_col_idx] not in plotted_indices:
+                    category["items"].append(self.__make_feature_imbalance_plot(self.__dataset_df.columns[first_col_idx],
+                                                                                self.__dataset_df.columns[second_col_index],
+                                                                                corr[second_col_index, first_col_idx],
+                                                                                self.plot_filepath))
+                    plotted_indices.append([first_col_idx, second_col_index])
+            self.__plots.append(category)
 
-        # Plot distributions of all columns
-        print(f"[DatasetAnalysisManager]: Plotting {len(self.__dataset_df.columns)} columns")
-        category = {"title": "Column analysis", "items": []}
-        for i, col in enumerate(list(self.__dataset_df.columns)):
-            category["items"].append(self.__make_column_plot(col, self.plot_filepath))
-        self.__plots.append(category)
+            # Plot distributions of all columns
+            print(f"[DatasetAnalysisManager]: Plotting {len(self.__dataset_df.columns)} columns")
+            category = {"title": "Column analysis", "items": []}
+            for i, col in enumerate(list(self.__dataset_df.columns)):
+                category["items"].append(self.__make_column_plot(col, self.plot_filepath))
+            self.__plots.append(category)
 
-        print(f"[DatasetAnalysisManager]: Dataset analysis finished, saved {sum(len(x['items']) for x in self.__plots)} plots")
-        return self.__plots
+            print(f"[DatasetAnalysisManager]: Dataset analysis finished, saved {sum(len(x['items']) for x in self.__plots)} plots")
+            return self.__plots
+        except:
+            return {}
 
 
     @staticmethod
@@ -215,7 +235,7 @@ class DataSetAnalysisManager(Thread):
         return missing_rows_indices
 
     @staticmethod
-    def __detect_outliers(dataset) -> 'list[dict]':
+    def __detect_outliers(dataset, schema) -> 'dict':
         """
         Detects outliers in all columns in a dataset containing floats.
         Outliers are determined using the inter quartile range (IQR) with an outlier being classified as being above
@@ -228,15 +248,31 @@ class DataSetAnalysisManager(Thread):
         """
         import pandas as pd
 
-        outlier_columns = []
-        for column_name in dataset:
-            if pd.api.types.is_numeric_dtype(dataset[column_name]):
+        outlier_columns = {}
+
+        for column_name, dt in schema.items():
+            if dt['datatype_detected'] in [':integer', ':float']:
                 Q1 = dataset[column_name].quantile(0.25)
                 Q3 = dataset[column_name].quantile(0.75)
                 IQR = Q3 - Q1
-                filter = (dataset[column_name] <= (Q1 - 2 * IQR)) | (dataset[column_name] >= (Q3 + 2 * IQR))
+                filter = (dataset[column_name] < (Q1 - 2 * IQR)) | (dataset[column_name] > (Q3 + 2 * IQR))
                 outlier_indices = dataset[column_name].loc[filter].index.tolist()
-                outlier_columns.append({column_name: outlier_indices})
+                #Only count first 100 indexes and only add columns that have outliers to avoid empty lists
+                if len(outlier_indices) == 0:
+                    continue
+                elif len(outlier_indices) > 100:
+                    outlier_columns.update({column_name: outlier_indices[0:99]})
+                else:
+                    outlier_columns.update({column_name: outlier_indices})
+
+        #for column_name in dataset:
+        #    if pd.api.types.is_numeric_dtype(dataset[column_name]):
+        #        Q1 = dataset[column_name].quantile(0.25)
+        #        Q3 = dataset[column_name].quantile(0.75)
+        #        IQR = Q3 - Q1
+        #        filter = (dataset[column_name] < (Q1 - 2 * IQR)) | (dataset[column_name] > (Q3 + 2 * IQR))
+        #        outlier_indices = dataset[column_name].loc[filter].index.tolist()
+        #       outlier_columns.append({column_name: outlier_indices})
 
         return outlier_columns
 
@@ -296,32 +332,6 @@ class DataSetAnalysisManager(Thread):
 
         return total_size
 
-    @staticmethod
-    def __get_dataset_datatypes(dataset):
-        dataset_datatypes = {}
-
-        def get_datatype(numpy_datatype):
-            if numpy_datatype == np.dtype(np.object):
-                return ":string"
-            elif numpy_datatype == np.dtype(np.unicode_):
-                return ":string"
-            elif numpy_datatype == np.dtype(np.int64):
-                return ":integer"
-            elif numpy_datatype == np.dtype(np.float_):
-                return ":float"
-            elif numpy_datatype == np.dtype(np.bool_):
-                return ":boolean"
-            elif numpy_datatype == np.dtype(np.datetime64):
-                return ":datetime"
-            else:
-                return ":string"
-
-        for column in dataset.columns:
-            numpy_datatype = dataset[column].dtype.name
-            dataset_datatypes.update({ column: get_datatype(numpy_datatype)})
-        
-        return dataset_datatypes
-
     def __process_categorical_columns(self):
         """
         Process categories.
@@ -356,7 +366,7 @@ class DataSetAnalysisManager(Thread):
         Return dataset: Dataset with filled nan values
         """
         # TODO refactoring
-        # handle in case most of the data are not numeric 
+        # handle in case most of the data are not numeric
         # consider using this function only where numerical values are avaialbe
         max_value = dataset.max(numeric_only=True).max() # max value in data set
         if pd.isna(max_value):
@@ -403,7 +413,7 @@ class DataSetAnalysisManager(Thread):
             # Above that: double the size for every 50 extra values up to a factor of 2x
             factor = min(math.ceil(df.shape[0] / 50), 2)
             # If there are too many
-            if df.shape[0] < 100:                
+            if df.shape[0] < 100:
                 df.plot(kind='bar',
                         figsize=(factor * PLT_XVALUE, PLT_YVALUE),
                         xlabel=f"Value of {colname}",

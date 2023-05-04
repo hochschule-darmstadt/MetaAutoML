@@ -10,9 +10,9 @@ def get_config_property(property_name: str):
     Returns:
         _type_: The property value
     """
-    config_path = "./config/config.json" 
+    config_path = "./config/config.json"
     if os.getenv("USE_DEV_CONFIG") == "YES":
-        config_path = "./config/config_development.json" 
+        config_path = "./config/config_development.json"
     with open(config_path, "r") as config_file:
         data = json.load(config_file)
 

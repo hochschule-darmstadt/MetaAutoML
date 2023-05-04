@@ -45,7 +45,7 @@ class MLJARAdapterManager(AdapterManager):
         else:
             model = ":ensemble"
             library = ":scikit_learn_lib"
-        return library, model
+        return [library], [model]
 
     def _load_model_and_make_probabilities(self, config: "StartAutoMlRequest", result_folder_location: str, dataframe: pd.DataFrame):
         """Must be overwriten! Load the found model, and execute a prediction using the provided data to calculate the probability metric used by the ExplanableAI module inside the controller
@@ -64,4 +64,3 @@ class MLJARAdapterManager(AdapterManager):
         probabilities = json.dumps(self._automl.predict_proba(dataframe).tolist())
         return probabilities
 
-   

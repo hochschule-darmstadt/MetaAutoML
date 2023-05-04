@@ -31,7 +31,7 @@ spec:
         volumeMounts:
         - name: datasets
           mountPath: /app/app-data/datasets
-        - name: output-pytorch
+        - name: output-autopytorch
           mountPath: /app/app-data/training
       restartPolicy: Always
       serviceAccountName: ""
@@ -39,6 +39,6 @@ spec:
       - name: datasets
         persistentVolumeClaim:
           claimName: datasets-claim
-      - name: output-pytorch
+      - name: output-autopytorch
         persistentVolumeClaim:
-          claimName: output-pytorch-claim
+          claimName: output-autopytorch-claim

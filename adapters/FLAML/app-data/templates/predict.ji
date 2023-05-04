@@ -1,43 +1,38 @@
 import sys
 import dill
 import json
-from predict_time_sources import feature_preparation, DataType, SplitMethod
-
 import pandas as pd
 import numpy as np
 from flaml import AutoML
+{% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression", ":text_classification", ":text_regression"] %}
+from preprocessing import dataset_preparation, replace_forbidden_json_utf8_characters
+{% endif %}
+{% if configuration.configuration["task"] in [":time_series_forecasting"] %}
+from preprocessing import dataset_preparation, replace_forbidden_json_utf8_characters, seperate_time_series_dataframe
+{% endif %}
 
 if __name__ == '__main__':
     filepath = sys.argv[1]
-    config_path = sys.argv[2]
-    save_path = sys.argv[3]
+    save_path = sys.argv[2]
     X = None
 
-    with open(config_path) as file:
-        config_json = json.load(file)
 
-    config_json["dataset_configuration"] = json.loads(config_json["dataset_configuration"])
-    target = config_json["configuration"]["target"]
-    features = config_json["dataset_configuration"]["column_datatypes"]
-    features.pop(target, None)
-    features = features.items()
-    delimiters = {
-            "comma":        ",",
-            "semicolon":    ";",
-            "space":        " ",
-            "tab":          "\t",
-        }
-
-    X = pd.read_csv(filepath, delimiter=delimiters[config_json["dataset_configuration"]['file_configuration']['delimiter']], escapechar=config_json["dataset_configuration"]['file_configuration']['escape_character'], decimal=config_json["dataset_configuration"]['file_configuration']['decimal_character']).drop(target, axis=1, errors='ignore')
-
-    # split training set
-    X = X.iloc[int(X.shape[0] * 0.2):]
-
-    X = feature_preparation(X, features)
+    {% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression", ":text_classification", ":text_regression"] %}
+    X, y = dataset_preparation(filepath)
+    X, y = replace_forbidden_json_utf8_characters(X)
+    {% endif %}
+    {% if configuration.configuration["task"] in [":time_series_forecasting"] %}
+    #We need current observations
+    X, y = dataset_preparation(filepath, is_prediction=False)
+    X, y = replace_forbidden_json_utf8_characters(X, y)
+    X[y.name] = y.values
+    previous_ts, X = seperate_time_series_dataframe(X)
+    {% endif %}
 
     with open(sys.path[0] + '/model_flaml.p', 'rb') as file:
-        automl2 = dill.load(file)
+        automl = dill.load(file)
 
-    predicted_y = automl2.predict(X)
+
+    predicted_y = automl.predict(X)
     predicted_y = np.reshape(predicted_y, (-1, 1))
     pd.DataFrame(data=predicted_y, columns=["predicted"]).to_csv(save_path)

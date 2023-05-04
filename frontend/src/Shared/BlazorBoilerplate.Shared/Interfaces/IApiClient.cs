@@ -1,4 +1,4 @@
-﻿using BlazorBoilerplate.Shared.Dto;
+using BlazorBoilerplate.Shared.Dto;
 using BlazorBoilerplate.Shared.Dto.Dataset;
 using BlazorBoilerplate.Shared.Dto.Db;
 using BlazorBoilerplate.Shared.Dto.Email;
@@ -39,8 +39,8 @@ namespace BlazorBoilerplate.Shared.Interfaces
         Task<ApiResponseDto> GetDatasets();
         Task<ApiResponseDto> GetDataset(GetDatasetRequestDto request);
         Task<ApiResponseDto> GetDatasetPreview(GetDatasetPreviewRequestDto request);
-        Task<ApiResponseDto> GetTabularDatasetColumn(GetTabularDatasetColumnRequestDto request);
         Task<ApiResponseDto> SetDatasetFileConfiguration(SetDatasetFileConfigurationRequestDto request);
+        Task<ApiResponseDto> SetDatasetColumnSchemaConfiguration(SetDatasetColumnSchemaConfigurationRequestDto request);
         Task<ApiResponseDto> GetDatasetAnalysis(GetDatasetAnalysisRequestDto request);
         Task<ApiResponseDto> DeleteDataset(DeleteDatasetRequestDto request);
         #endregion
@@ -64,11 +64,12 @@ namespace BlazorBoilerplate.Shared.Interfaces
         #endregion
 
         #region OMA-ML ONTOLOGY MESSAGES
-        Task<ApiResponseDto> GetAutoMlSolutionsForConfiguration(GetAutoMlSolutionsForConfigurationRequestDto request);
-        Task<ApiResponseDto> GetTasksForDatasetType(GetTasksForDatasetTypeRequestDto request);
+        Task<ApiResponseDto<GetAutoMlSolutionsForConfigurationResponseDto>> GetAutoMlSolutionsForConfiguration(GetAutoMlSolutionsForConfigurationRequestDto request);
+        Task<ApiResponseDto<GetTasksForDatasetTypeResponseDto>> GetTasksForDatasetType(GetTasksForDatasetTypeRequestDto request);
         Task<ApiResponseDto> GetDatasetTypes();
-        Task<ApiResponseDto> GetMlLibrariesForTask(GetMlLibrariesForTaskRequestDto request);
-        Task<ApiResponseDto> GetAvailableStrategies(GetAvailableStrategiesRequestDto request);
+        Task<ApiResponseDto<GetMlLibrariesForTaskResponseDto>> GetMlLibrariesForTask(GetMlLibrariesForTaskRequestDto request);
+        Task<ApiResponseDto<GetAvailableStrategiesResponseDto>> GetAvailableStrategies(GetAvailableStrategiesRequestDto request);
+        Task<ApiResponseDto<GetAutoMlParametersResponseDto>> GetAutoMlParameters(GetAutoMlParametersRequestDto request);
         #endregion
 
         #region OMA-ML PREDICTION MESSAGES

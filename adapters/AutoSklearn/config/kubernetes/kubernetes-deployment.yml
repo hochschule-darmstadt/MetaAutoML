@@ -31,7 +31,7 @@ spec:
         volumeMounts:
         - name: datasets
           mountPath: /app/app-data/datasets
-        - name: output-sklearn
+        - name: output-autosklearn
           mountPath: /app/app-data/training
       restartPolicy: Always
       serviceAccountName: ""
@@ -39,6 +39,6 @@ spec:
       - name: datasets
         persistentVolumeClaim:
           claimName: datasets-claim
-      - name: output-sklearn
+      - name: output-autosklearn
         persistentVolumeClaim:
-          claimName: output-sklearn-claim
+          claimName: output-autosklearn-claim

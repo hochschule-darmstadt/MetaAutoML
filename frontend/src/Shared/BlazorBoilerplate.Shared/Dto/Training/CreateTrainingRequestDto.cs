@@ -1,4 +1,4 @@
-﻿using BlazorBoilerplate.Shared.Dto.Dataset;
+using BlazorBoilerplate.Shared.Dto.Dataset;
 using BlazorBoilerplate.Shared.Dto.Ontology;
 using System;
 using System.Collections.Generic;
@@ -12,28 +12,30 @@ namespace BlazorBoilerplate.Shared.Dto.Training
     {
         public string DatasetId { get; set; }
         public CreateTrainingConfigurationDto Configuration { get; set; }
-        public Dictionary<string, dynamic> DatasetConfiguration { get; set; }
+        public Dictionary<string, ColumnSchemaDto> Schema { get; set; }
+        public bool SaveSchema { get; set; }
         public CreateTrainingRequestDto()
         {
             Configuration = new CreateTrainingConfigurationDto();
-            DatasetConfiguration = new Dictionary<string, dynamic>();
+            Schema = new Dictionary<string, ColumnSchemaDto>();
+            SaveSchema = true;
         }
     }
     public class CreateTrainingConfigurationDto
     {
 
         public string Task { get; set; }
-        public string Target { get; set; }
-        public List<string> EnabledStrategies { get; set; }
+        public List<string> EnabledStrategies { get; set; } = new();
         public int RuntimeLimit { get; set; }
         public string Metric { get; set; }
-        public List<string> SelectedAutoMlSolutions { get; set; }
-        public List<string> SelecctedMlLibraries { get; set; }
-        public CreateTrainingConfigurationDto()
-        {
-            EnabledStrategies = new List<string>();
-            SelecctedMlLibraries = new List<string>();
-            SelectedAutoMlSolutions = new List<string>();
-        }
+        public List<string> SelectedAutoMlSolutions { get; set; } = new();
+        public List<string> SelecctedMlLibraries { get; set; } = new();
+        public List<ParameterDto> Parameters { get; set; } = new();
+    }
+
+    public class ParameterDto
+    {
+        public string Iri { get; set; }
+        public List<string> Values { get; set; }
     }
 }

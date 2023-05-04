@@ -1,9 +1,10 @@
-﻿using BlazorBoilerplate.Infrastructure.Server;
+using BlazorBoilerplate.Infrastructure.Server;
 using BlazorBoilerplate.Infrastructure.Server.Models;
 using BlazorBoilerplate.Shared.Dto.Dataset;
 using BlazorBoilerplate.Shared.Dto.Model;
 using BlazorBoilerplate.Storage;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using static Microsoft.AspNetCore.Http.StatusCodes;
 using static MudBlazor.CategoryTypes;
 
@@ -43,7 +44,15 @@ namespace BlazorBoilerplate.Server.Managers
                     {
                         break;
                     }
-                    ModelDto modelDto = new ModelDto(model, await _cacheManager.GetObjectInformation(model.MlModelType), await _cacheManager.GetObjectInformation(model.MlLibrary), await _cacheManager.GetObjectInformation(model.AutoMlSolution));
+                    List<Metric> metrics = new List<Metric>();
+                    foreach (var metric in JObject.Parse(model.TestScore))
+                    {
+                        metrics.Add(new Metric() { Name = await _cacheManager.GetObjectInformation(metric.Key), Score = (float)metric.Value });
+
+                    }
+                    ModelDto modelDto = new ModelDto(model, await _cacheManager.GetObjectInformationList(model.MlModelType.ToList()),
+                        await _cacheManager.GetObjectInformationList(model.MlLibrary.ToList()),
+                        await _cacheManager.GetObjectInformation(model.AutoMlSolution), metrics);
                     response.Models.Add(modelDto);
                     top3Counter++;
                 }
@@ -68,7 +77,15 @@ namespace BlazorBoilerplate.Server.Managers
                 getmodelRequest.ModelId = request.ModelId;
                 var reply = _client.GetModel(getmodelRequest);
 
-                response.Model = new ModelDto(reply.Model, await _cacheManager.GetObjectInformation(reply.Model.MlModelType), await _cacheManager.GetObjectInformation(reply.Model.MlLibrary), await _cacheManager.GetObjectInformation(reply.Model.AutoMlSolution));
+                List<Metric> metrics = new List<Metric>();
+                foreach (var metric in JObject.Parse(reply.Model.TestScore))
+                {
+                    metrics.Add(new Metric() { Name = await _cacheManager.GetObjectInformation(metric.Key), Score = (float)metric.Value });
+
+                }
+                response.Model = new ModelDto(reply.Model, await _cacheManager.GetObjectInformationList(reply.Model.MlModelType.ToList()),
+                    await _cacheManager.GetObjectInformationList(reply.Model.MlLibrary.ToList()),
+                    await _cacheManager.GetObjectInformation(reply.Model.AutoMlSolution), metrics);
                 return new ApiResponse(Status200OK, null, response);
 
             }
@@ -80,6 +97,9 @@ namespace BlazorBoilerplate.Server.Managers
         }
         public async Task<ApiResponse> GetModelExplanation(GetModelExplanationRequestDto request)
         {
+            var is_mutagen_setup = Environment.GetEnvironmentVariable("IS_MUTAGEN_SETUP");
+            var mutagen_dataset_folder_path = Environment.GetEnvironmentVariable("MUTAGEN_DATASET_FOLDER_PATH");
+            var mutagen_docker_ataset_folder_path = Environment.GetEnvironmentVariable("MUTAGEN_DOCKER_DATASET_FOLDER_PATH");
             GetModelExplanationResponseDto response = new GetModelExplanationResponseDto();
             GetModelRequest getModelRequest = new GetModelRequest();
             var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
@@ -91,6 +111,7 @@ namespace BlazorBoilerplate.Server.Managers
                 var reply = _client.GetModel(getModelRequest);
                 var explanation = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(reply.Model.Explanation);
                 int index = 0;
+                string graph_path = "";
                 if (explanation == null)
                 {
                     response.Status = "";
@@ -124,12 +145,17 @@ namespace BlazorBoilerplate.Server.Managers
                                     break;
                                 }
                             }
+                            graph_path = item.SelectToken("path").ToString();
+                            if (is_mutagen_setup == "YES")
+                            {
+                                graph_path = graph_path.Replace(mutagen_docker_ataset_folder_path, mutagen_dataset_folder_path);
+                            }
                             ModelExplanation modelExplanation = new ModelExplanation()
                             {
                                 Title = item.SelectToken("title").ToString(),
                                 Type = item.SelectToken("type").ToString(),
                                 Description = item.SelectToken("description").ToString(),
-                                Content = GetImageAsBytes(item.SelectToken("path").ToString())
+                                Content = GetImageAsBytes(graph_path)
                             };
                             modelExplanationCategory.Analyses.Add(modelExplanation);
                         }
@@ -165,6 +191,9 @@ namespace BlazorBoilerplate.Server.Managers
         /// <returns>Returns an ApiResponse containing the DownloadModelResponseDto object that holds the ML model</returns>
         public async Task<ApiResponse> DownloadModel(DownloadModelRequestDto request)
         {
+            var is_mutagen_setup = Environment.GetEnvironmentVariable("IS_MUTAGEN_SETUP");
+            var mutagen_dataset_folder_path = Environment.GetEnvironmentVariable("MUTAGEN_DATASET_FOLDER_PATH");
+            var mutagen_docker_ataset_folder_path = Environment.GetEnvironmentVariable("MUTAGEN_DOCKER_DATASET_FOLDER_PATH");
             DownloadModelResponseDto response = new DownloadModelResponseDto();
             GetModelRequest getmodelRequest = new GetModelRequest();
             var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
@@ -176,6 +205,10 @@ namespace BlazorBoilerplate.Server.Managers
                 //TODO NEW DOWNLOAD FUNCTIONALITY IMPLEMENTATION
 
                 var resultPath = reply.Model.Path;
+                if (is_mutagen_setup == "YES")
+                {
+                    resultPath = resultPath.Replace(mutagen_docker_ataset_folder_path, mutagen_dataset_folder_path);
+                }
                 byte[] resultFile = File.ReadAllBytes(resultPath);
                 response.Content = resultFile;
                 response.Name = Path.GetFileName(resultPath);

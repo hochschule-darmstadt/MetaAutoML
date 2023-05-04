@@ -7,8 +7,8 @@ services:
       # the below path is relative to the build context
       dockerfile: ./src/Utils/Docker/Dockerfile
     ports:
-      - 53415:80
-      - 53443:443
+      - 54415:80
+      - 54443:443
     depends_on:
       - sqlserver
       - controller
@@ -16,7 +16,7 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development #Consider changing this in Production
       - Serilog__MinimumLevel__Default=Debug #Consider changing this in Production
-      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=blazor_boilerplate;Trusted_Connection=True;MultipleActiveResultSets=true;User=sa;Password=yourVeryStrong(!)Password;Integrated Security=false
+      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=blazor_boilerplate;Trusted_Connection=True;MultipleActiveResultSets=true;User=sa;Password=yourVeryStrong(!)Password;Integrated Security=false;Encrypt=False;
       - BlazorBoilerplate__UseSqlServer=true
       - BlazorBoilerplate__ApplicationUrl=blazorboilerplate
       - BlazorBoilerplate__IS4ApplicationUrl=blazorboilerplate
@@ -41,9 +41,12 @@ services:
       - training-flaml:/app/app-data/training/flaml
       - training-gluon:/app/app-data/training/gluon
       #- training-autocve:/app/app-data/training/autocve
-      #- training-pytorch:/app/app-data/training/pytorch
+      - training-pytorch:/app/app-data/training/pytorch
       #- training-alphad3m:/app/app-data/training/alphad3m
       - training-mcfly:/app/app-data/training/mcfly
+      - training-evalml:/app/app-data/training/evalml
+      - training-pycaret:/app/app-data/training/pycaret
+      - training-tpot:/app/app-data/training/tpot
     extra_hosts:
       - "docker.host.internal:host-gateway"
 

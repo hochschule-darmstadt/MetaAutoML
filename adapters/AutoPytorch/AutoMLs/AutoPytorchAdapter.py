@@ -1,6 +1,7 @@
 import os
 import tempfile as tmp
 import warnings
+import re
 
 os.environ['JOBLIB_TEMP_FOLDER'] = tmp.gettempdir()
 os.environ['OMP_NUM_THREADS'] = '1'
@@ -13,15 +14,19 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 import pickle
 
 import pandas as pd
-from AbstractAdapter import AbstractAdapter
-from AdapterUtils import export_model, prepare_tabular_dataset, data_loader
+from AdapterUtils import *
+from AdapterTabularUtils import *
 from autoPyTorch.api.tabular_classification import TabularClassificationTask
 from autoPyTorch.api.tabular_regression import TabularRegressionTask
+from autoPyTorch.api.time_series_forecasting import TimeSeriesForecastingTask
+
 from JsonUtil import get_config_property
-from predict_time_sources import DataType, SplitMethod, feature_preparation
+from predict_time_sources import feature_preparation
+
+import AutoPytorchParameterConfig as appc
 
 
-class AutoPytorchAdapter(AbstractAdapter):
+class AutoPytorchAdapter:
     """
     Implementation of the AutoML functionality fo structured data a.k.a. tabular data
     """
@@ -34,48 +39,41 @@ class AutoPytorchAdapter(AbstractAdapter):
         1. Configuration JSON of type dictionary
         """
         # set either a runtime limit or an iter limit, preferring runtime over iterations.
-        
-        super().__init__(configuration)
-        
-        if self._configuration["runtime_constraints"]["runtime_limit"] > 0:
-            self._time_limit = self._configuration["runtime_constraints"]["runtime_limit"]
-            self._iter_limit = None
-        elif self._configuration["runtime_constraints"]["max_iter"] > 0:
-            self._time_limit = None
-            self._iter_limit = self._configuration["runtime_constraints"]["max_iter"]
-        else:
-            self._time_limit = 30
-            self._iter_limit = None
 
-        if self._configuration["metric"] == "" and self._configuration["task"] == ":tabular_classification":
-            # handle empty metric field, 'accuracy' should be the default metric parameter for AutoPytorch classification
-            self._configuration["metric"] = 'accuracy'
-        elif self._configuration["metric"] == "" and self._configuration["task"] == ":tabular_regression":
-            # handle empty metric field, 'r2' should be the default metric parameter for AutoPytorch regression
-            self._configuration["metric"] = 'r2'
+        self._configuration = configuration
+
+    def start(self):
+        """
+        Execute the ML task
+        """
+        if self._configuration["configuration"]["task"] == ":tabular_classification":
+            self.__tabular_classification()
+        elif self._configuration["configuration"]["task"] == ":tabular_regression":
+            self.__tabular_regression()
+        elif self._configuration["configuration"]["task"] == ":time_series_forecasting":
+            self.__time_series_forecasting()
 
     def __tabular_classification(self):
         """
         Execute the classification task
         """
-        self.df, test = data_loader(self._configuration)
-        X, y = prepare_tabular_dataset(self.df, self._configuration)
+        train, test = data_loader(self._configuration, perform_splitting=False)
+        X, y = prepare_tabular_dataset(train, self._configuration)
+        #Apply encoding to string
+        self._configuration = set_encoding_for_string_columns(self._configuration, X, y, also_categorical=True)
+        self._configuration = set_imputation_for_numerical_columns(self._configuration, X)
+        train, test = data_loader(self._configuration)
+        #reload dataset to load changed data
+        X, y = prepare_tabular_dataset(train, self._configuration)
+        parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), appc.task_config)
 
-        auto_cls = TabularClassificationTask()
-        if self._time_limit is not None:
-            auto_cls.search(
+
+        auto_cls = TabularClassificationTask(temporary_directory=self._configuration["model_folder_location"] + "/tmp", output_directory=self._configuration["model_folder_location"] + "/output", delete_output_folder_after_terminate=False, delete_tmp_folder_after_terminate=False)
+        auto_cls.search(
                 X_train=X,
                 y_train=y,
-                optimize_metric=self._configuration["metric"],
-                total_walltime_limit=self._time_limit*60
-            )
-        else:
-            auto_cls.search(
-                X_train=X,
-                y_train=y,
-                optimize_metric=self._configuration["metric"],
-                budget_type='epochs',
-                max_budget=self._iter_limit
+                **parameters,
+                total_walltime_limit=self._configuration["configuration"]["runtime_limit"]*60
             )
 
         export_model(auto_cls, self._configuration["result_folder_location"], "model_pytorch.p")
@@ -84,39 +82,64 @@ class AutoPytorchAdapter(AbstractAdapter):
         """
         Execute the regression task
         """
-        self.df, test = data_loader(self._configuration)
-        X, y = prepare_tabular_dataset(self.df, self._configuration)
-        ############################################################################
-        # Build and fit a regressor
-        # ==========================
-        auto_reg = TabularRegressionTask()
+        train, test = data_loader(self._configuration, perform_splitting=False)
+        X, y = prepare_tabular_dataset(train, self._configuration)
+        #Apply encoding to string
+        self._configuration = set_encoding_for_string_columns(self._configuration, X, y, also_categorical=True)
+        self._configuration = set_imputation_for_numerical_columns(self._configuration, X)
+        train, test = data_loader(self._configuration)
+        #reload dataset to load changed data
+        X, y = prepare_tabular_dataset(train, self._configuration)
 
-        ############################################################################
-        # Search for an ensemble of machine learning algorithms
-        # =====================================================
-        if self._time_limit is not None:
-            auto_reg.search(
+        parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), appc.task_config)
+
+        auto_reg = TabularRegressionTask(temporary_directory=self._configuration["model_folder_location"] + "/tmp", output_directory=self._configuration["model_folder_location"] + "/output", delete_output_folder_after_terminate=False, delete_tmp_folder_after_terminate=False)
+        auto_reg.search(
                 X_train=X,
                 y_train=y,
-                optimize_metric=self._configuration["metric"],
-                total_walltime_limit=self._time_limit
-            )
-        else:
-            auto_reg.search(
-                X_train=X,
-                y_train=y,
-                optimize_metric=self._configuration["metric"],
-                budget_type='epochs',
-                max_budget=self._iter_limit
+                **parameters,
+                total_walltime_limit=self._configuration["configuration"]["runtime_limit"]*60
             )
 
         export_model(auto_reg, self._configuration["result_folder_location"], "model_pytorch.p")
 
-    def start(self):
+    def __time_series_forecasting(self):
         """
-        Execute the ML task
+        Execute the regression task
         """
-        if self._configuration["task"] == ":tabular_classification":
-            self.__tabular_classification()
-        elif self._configuration["task"] == ":tabular_regression":
-            self.__tabular_regression()
+        train, test = data_loader(self._configuration, perform_splitting=False)
+        X, y = prepare_tabular_dataset(train, self._configuration)
+        #Apply encoding to string
+        self._configuration = set_encoding_for_string_columns(self._configuration, X, y, also_categorical=True)
+        train, test = data_loader(self._configuration)
+        
+
+        parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), appc.task_config)
+        self._configuration["forecasting_horizon"] = parameters["n_prediction_steps"]
+        save_configuration_in_json(self._configuration)
+
+
+        #reload dataset to load changed data
+        X, y = prepare_tabular_dataset(train, self._configuration)
+        
+        y_train = [y[: -self._configuration["forecasting_horizon"]]]
+        y_test = [y[-self._configuration["forecasting_horizon"]:]]
+        X_train = [X[: -self._configuration["forecasting_horizon"]]]
+        known_future_features = list(X.columns)
+        X_test = [X[-self._configuration["forecasting_horizon"]:]]
+
+        start_times = [X.index[0]]
+
+        auto_reg = TimeSeriesForecastingTask(temporary_directory=self._configuration["model_folder_location"] + "/tmp", output_directory=self._configuration["model_folder_location"] + "/output", delete_output_folder_after_terminate=False, delete_tmp_folder_after_terminate=False)
+        auto_reg.search(
+                X_train=X_train,
+                y_train=y_train,
+                X_test=X_test,
+                **parameters,
+                freq ='1H', #TODO we need variable or else this will crash in big dataset as they need to know the correct time frame
+                start_times=start_times,
+                total_walltime_limit=self._configuration["configuration"]["runtime_limit"]*60,
+                known_future_features=known_future_features,
+            )
+
+        export_model(auto_reg, self._configuration["result_folder_location"], "model_pytorch.p")

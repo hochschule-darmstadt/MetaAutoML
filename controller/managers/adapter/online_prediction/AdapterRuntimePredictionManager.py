@@ -32,11 +32,14 @@ class AdapterRuntimePredictionManager:
             ":autopytorch":     ["PYTORCH_SERVICE_HOST",   "PYTORCH_SERVICE_PORT"],
             ":mljar":           ["MLJAR_SERVICE_HOST",     "MLJAR_SERVICE_PORT"],
             ":alphad3m":        ["ALPHAD3M_SERVICE_HOST",  "ALPHAD3M_SERVICE_PORT"],
-            ":mcfly":           ["MCFLY_SERVICE_HOST", "MCFLY_SERVICE_PORT"],
+            ":mcfly":           ["MCFLY_SERVICE_HOST", 	   "MCFLY_SERVICE_PORT"],
+            ":evalml":          ["EVALML_SERVICE_HOST",    "EVALML_SERVICE_PORT"],
+            ":pycaret":          ["PYCARET_SERVICE_HOST", "PYCARET_SERVICE_PORT"],
+            ":tpot":          ["TPOT_SERVICE_HOST", "TPOT_SERVICE_PORT"],
         }
         self.__adapters: list[AdapterPredictionManager] = []
         return
-        
+
 
     def create_new_prediction(self):
         """Create a new AdapterPredictionManager responsible to connect to the AutoML adapter and kick off the prediction process
@@ -56,7 +59,7 @@ class AdapterRuntimePredictionManager:
         }
 
         self.__log.debug("create_new_prediction: creating new blackboard and strategy controller for training")
-        
+
         self.__log.debug(f"create_new_prediction: getting adapter endpoint information for automl {model['auto_ml_solution']}")
         host, port = map(os.getenv, self.__automl_addresses[model["auto_ml_solution"].lower()])
         port = int(port)

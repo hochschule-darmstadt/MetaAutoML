@@ -5,6 +5,9 @@ __pycache__
 .gitignore
 docs
 
+app-data/datasets
+app-data/training
+
 *.md
 .idea
 *.sln

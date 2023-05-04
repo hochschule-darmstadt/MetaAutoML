@@ -12,15 +12,15 @@ message DeleteModelRequest {
     example: '4a7af128-ac3d-4e3d-89fe-b70f7bfe0c3b'
   */
   string userId = 1;
-  /*  
+  /*
     Unique model ids generated when inserting a new model document into MongoDB
     example: '63525870394eff35ee175bc2'
   */
-  string modelId = 2;      
+  string modelId = 2;
 }
 
 message DeleteModelResponse {
-  
+
 }
 
 message GetModelsRequest {
@@ -41,7 +41,7 @@ message GetModelsResponse {
     List of model records from MongoDB (see Model for more detals)
     example: [Model, Model]
   */
-  repeated Model models = 1; 
+  repeated Model models = 1;
 }
 
 message GetModelRequest {
@@ -50,7 +50,7 @@ message GetModelRequest {
     example: '4a7af128-ac3d-4e3d-89fe-b70f7bfe0c3b'
   */
   string userId = 1;
-  /*  
+  /*
     Unique model ids generated when inserting a new model document into MongoDB
     example: '63525870394eff35ee175bc2'
   */
@@ -66,7 +66,7 @@ message GetModelResponse {
 }
 
 message Model {
-  /*  
+  /*
     Unique model ids generated when inserting a new model document into MongoDB
     example: '63525870394eff35ee175bc2'
   */
@@ -87,30 +87,33 @@ message Model {
   */
   string status = 4;
   /*
-    Ontology URI of the used AutoML Solution 
+    Ontology URI of the used AutoML Solution
     example: ":autokeras"
   */
   string autoMlSolution = 5;
   /*
-    Ontology URI of the used ML model type
+    list of Ontology URI of the used ML model type
     example: ":artificial_neural_network"
   */
-  string mlModelType = 6;
+  repeated string mlModelType = 6;
   /*
-    Ontology URI of the used ML library
-    example: ":Keras_lib"
+   List of Ontology URI of the used ML library
+    example: [":Keras_lib"]
   */
-  string mlLibrary = 7;
+  repeated string mlLibrary = 7;
   /*
     Absolute system path where the final model pipeline zip is located
     example: app/app-data/....../result/keras_model.zip
   */
   string path = 8;
   /*
-    The computed test score using the metric defined in the training record
-    example: 0.99
+      Json string of the test scores computed by testing the model with the test dataset.
+      example: {
+          ":precision": 0.222,
+          ":f_measure": 0.9.....
+      }
   */
-  float testScore = 9;
+  string testScore = 9;
   /*
     Time in ms it takes on average to make on prediction with this model
     example: 23.9999
@@ -147,6 +150,11 @@ message Model {
   }
   */
   string explanation = 13;
+  /*
+    Amount of kg of CO2-eq produced during the model training
+    example: ["starting search..", "epoch 1...."]
+  */
+  double emission = 14;
 }
 
 message ModelruntimeProfile {

@@ -1,4 +1,4 @@
-﻿@using Newtonsoft.Json.Linq
+@using Newtonsoft.Json.Linq
 @inject IStringLocalizer<Global> L
 
 <MudCard Elevation="5">
@@ -53,9 +53,9 @@
                                 @if ((_training.Training.Configuration.Task.Properties[":has_dataset_type"] == ":tabular") || (_training.Training.Configuration.Task.Properties[":has_dataset_type"] == ":time_series_longitudinal"))
                                 {
                                     <MudStack>
-                                        @foreach (JToken item in Training.Training.DatasetConfiguration["column_datatypes"])
+                                        @foreach (JToken item in Training.Training.DatasetConfiguration["schema"])
                                         {
-                                            <MudText Typo="Typo.body1">@item.Path: @((Server.DataType)((int)item.First))</MudText>
+                                            <MudText Typo="Typo.body1">@item.Path: @(item.First))</MudText>
                                         }
                                     </MudStack>
                                 }

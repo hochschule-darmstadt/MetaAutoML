@@ -3,136 +3,105 @@ import json
 import os
 import shutil
 import subprocess
-import sys
-import time, datetime
+import time
 from typing import Any
 import dill
-import numpy as np
 import pandas as pd
-from predict_time_sources import DataType, SplitMethod, feature_preparation
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score, mean_squared_error
-from sklearn.metrics import classification_report
+from sklearn.metrics import *
 from JsonUtil import get_config_property
 from TemplateGenerator import TemplateGenerator
-import glob
-from PIL import Image
 from AdapterBGRPC import *
 from typing import Tuple
+import re
+from AdapterImageUtils import *
+from AdapterLongitudinalUtils import *
+from AdapterTabularUtils import *
 
-######################################################################
-## GRPC HELPER FUNCTIONS
-######################################################################
 
-#region
-
-def get_except_response(e: Exception) -> "GetAutoMlStatusResponse":
-    """Generate a GRPC status message holding the raised exception informations
+def read_parameter(parameters, intersect_parameter, automl_parameter, default=[None]):
+    """Checks if the intersected parameter or if the individual parameter is set
 
     Args:
-        e (Exception): The raised exception
+        parameters (_type_): all parameters from the config
+        intersect_parameter (_type_): common parameter name (broader id)
+        automl_parameter (_type_): individual parameter for the automl
+        default (list, optional): Default value if none of the above is set. Defaults to [None].
 
     Returns:
-        GetAutoMlStatusResponse: The GRPC response message
+        _type_: Returns all parameter values that are selected (intersected + individual), if none the default value is taken
     """
-    print(e)
-    response = GetAutoMlStatusResponse()
-    response.return_code = AdapterReturnCode.ADAPTER_RETURN_CODE_ERROR
-    return response
+    value = list()
+    try:
+        value = parameters[intersect_parameter]['values']
+    except:
+        pass
+    try:
+        values2 = parameters[automl_parameter]['values']
+        for para in values2:
+            if para not in value:
+                value.append(para)
+    except:
+        pass
+    if len(value) == 0:
+        return default
+    else:
+        return value
 
-
-def capture_process_output(process: subprocess.Popen, use_error: bool):
-    """Read the console log from the AutoML subprocess until no new text is produced by the subprocess, and yield AutoML status messages
+def translate_parameters(task, parameter, task_config):
+    """_summary_
 
     Args:
-        process (subprocess.Popen): The AutoML subprocess instance
-        use_error (bool): If instead of the STD OUT the STD ERR is used as input to capture from
+        task (_type_): AutoML task (e.g tabular_classification)
+        parameter (_type_): List of all selected parameters
+        task_config (_type_): config for all tasks. includes the translation to the autoML specific types and values
 
-    Yields:
-        Iterator[GetAutoMlStatusResponse]: The latest Grpc response message generated from reading the subprocess console
+    Returns:
+        _type_: returns a dictionary. The key is given by the task config. The values are set with the read_parameters function
     """
-    s = ""
-    capture = ""
-    if(use_error == False):
-        s = process.stdout.read(1)
-    else:
-        s = process.stderr.read(1)
-    capture += s
-    # Run until no more output is produced by the subprocess
-    while len(s) > 0:
-        if capture[len(capture) - 1] == '\n':
-            process_update = GetAutoMlStatusResponse()
-            process_update.return_code = AdapterReturnCode.ADAPTER_RETURN_CODE_STATUS_UPDATE
-            process_update.status_update = capture
-            # if return Code is ADAPTER_RETURN_CODE_STATUS_UPDATE we do not have score values yet
-            process_update.test_score = 0.0
-            process_update.prediction_time = 0.0
-            process_update.ml_library = ""
-            process_update.ml_model_type = ""
-            yield process_update
-
-            sys.stdout.write(capture)
-            sys.stdout.flush()
-            capture = ""
-        if(use_error == False):
-            s = process.stdout.read(1)
+    final_dict = {}
+    final_value = None
+    for para in task_config[task]:
+        values = read_parameter(parameter, para[0], para[1], para[2])
+        if para[3] == "list":
+            final_value = list()
+            for value in values:
+                if para[4] == "dict":
+                    translateList = para[5]
+                    final_value.append(translateList.get(value, None))
+                elif para[4] == "integer":
+                    final_value.append(int(value))
         else:
-            s = process.stderr.read(1)
-        capture += s
+            if para[4] == "dict":
+                if values[0] == None:
+                    final_value = None
+                else:
+                    final_value = para[5][values[-1]]
+            elif para[4] == "integer":
+                if values[0] == None:
+                    final_value = None
+                else:
+                    final_value = int(values[len(values) - 1])
+        final_dict.update({ para[6]: final_value})
+
+    return final_dict
 
 
-def get_response(config: "StartAutoMlRequest", test_score: float, prediction_time: float, library: str, model: str) -> "GetAutoMlStatusResponse":
-    """Generate the final GRPC AutoML status message
 
-    Args:
-        config (StartAutoMlRequest): The StartAutoMlRequest request, extended with the trainings folder paths
-        test_score (float): The test score archieve by the model
-        prediction_time (float): The passed time to make one prediction using the model
-        library (str): The ML library the model is based upon
-        model (str): The ML model type the model is composed off
-
-    Returns:
-        GetAutoMlStatusResponse: The GRPS AutoML status messages
-    """
-    response = GetAutoMlStatusResponse()
-    response.return_code = AdapterReturnCode.ADAPTER_RETURN_CODE_SUCCESS
-    if get_config_property("local_execution") == "NO":
-        response.path = os.path.join(config.controller_export_folder_location, config.file_name)
-    else:
-        response.path = os.path.join(config.file_location, config.file_name)
-    response.test_score = test_score
-    response.prediction_time = prediction_time
-    response.ml_library = library
-    response.ml_model_type = model
-    return response
-
-
-#endregion
-
-######################################################################
-## GENERAL HELPER FUNCTIONS
-######################################################################
-
-#region
-
-def data_loader(config: "StartAutoMlRequest") -> Any:
+def data_loader(config: "StartAutoMlRequest", image_test_folder=False, perform_splitting=True, as_dataframe=False) -> Any:
     """Load the dataframes for the requested dataset, by loading them into different DataFrames. See Returns section for more information.
 
     Args:
         config (StartAutoMlRequest): The StartAutoMlRequest request, extended with the trainings folder paths
+        image_test_folder (Boolean): Used for image datasets, if the test folder should be loaded. Default is, read the train folder
 
     Returns:
         Any: Depending on the dataset type: CSV data: tuple[DataFrame (Train), DataFrame (Test)], image data: tuple[DataFrame (X_train), DataFrame (y_train), DataFrame (X_test), DataFrame (y_test)]
     """
 
-    train_data = None
-    test_data = None
-
-    if config["configuration"]["task"] in [":tabular_classification", ":tabular_regression", ":text_classification", ":time_series_forecasting", ":time_series_classification"]:
-        return read_tabular_dataset_training_data(config)
-    elif config["configuration"]["task"] in [":image_classification", ":image_regression"]:
-        return read_image_dataset(config)
-    return train_data, test_data
+    if config["configuration"]["task"] in [":image_classification", ":image_regression"]:
+        return read_image_dataset(config, image_test_folder, as_dataframe)
+    else:
+        return read_tabular_dataset_training_data(config, perform_splitting)
 
 
 def export_model(model: Any, path: str, file_name: str):
@@ -145,22 +114,6 @@ def export_model(model: Any, path: str, file_name: str):
     """
     with open(os.path.join(path, file_name), 'wb+') as file:
         dill.dump(model, file)
-
-
-def start_automl_process(config: "StartAutoMlRequest") -> subprocess.Popen:
-    """Start the AutoML subprocess
-
-    Args:
-        config (StartAutoMlRequest): The StartAutoMlRequest request, extended with the trainings folder paths
-
-    Returns:
-        subprocess.Popen: The AutoML subprocess instance
-    """
-    python_env = os.getenv("PYTHON_ENV", default="PYTHON_ENV_UNSET")
-
-    return subprocess.Popen([python_env, "AutoML.py", config.job_folder_location],
-                            stdout=subprocess.PIPE,
-                            universal_newlines=True)
 
 def generate_script(config: "StartAutoMlRequest") -> None:
     """Generate the Python script allowing the independent execution of the model
@@ -185,8 +138,8 @@ def zip_script(config: "StartAutoMlRequest"):
     zip_file_name = get_config_property("export-zip-file-name")
     output_path = config.export_folder_location
     result_path = config.result_folder_location
-    shutil.copy(get_config_property("predict-time-sources-path"),
-                result_path)
+    #shutil.copy(get_config_property("predict-time-sources-path"),
+    #            result_path)
 
     shutil.make_archive(os.path.join(output_path, zip_file_name),
                         'zip',
@@ -216,59 +169,175 @@ def evaluate(config: "StartAutoMlRequest", config_path: str) -> Tuple[float, flo
         tuple[float, float]: tuple holding the test score, prediction time metrics
     """
     config = config.__dict__
-    config["dataset_configuration"] = json.loads(config["dataset_configuration"])
+    config["dataset_configuration"] = config["dataset_configuration"]
     file_path = config["dataset_path"]
+    if config["configuration"]["task"] in[":image_classification", ":image_regression"]:
+        #for image data we need to redirect to the test folder
+        file_path = os.path.join(file_path, "test")
     result_path = config["result_folder_location"]
     # predict
     os.chmod(os.path.join(result_path, "predict.py"), 0o777)
     python_env = os.getenv("PYTHON_ENV", default="PYTHON_ENV_UNSET")
+    targets = []
+    index = []
+    for key in config["dataset_configuration"]["schema"]:
+        #Get target columns list
+        if config["dataset_configuration"]["schema"][key].get("role_selected", "") == ":target":
+            targets.append(key)
+        if config["dataset_configuration"]["schema"][key].get("role_selected", "") == ":index":
+            index.append(key)
+
+    if(config["configuration"]["task"] in [":tabular_classification", ":tabular_regression", ":text_regression", ":named_entity_recognition", ":text_classification"]):
+        train, test = data_loader(config)
+        target = targets[0]
+        # override file_path to path to test file and drop target column
+        file_path = write_tabular_dataset_data(test.drop(target, axis=1), os.path.dirname(file_path), config)
+
+    elif(config["configuration"]["task"] in[":time_series_forecasting"]):
+        train, test = data_loader(config)
+        target = targets[0]
+        # override file_path to path to test file and drop target column
+        #TODO must set dynamic future prediction length
+        #test = pd.read_csv(os.path.join(os.path.dirname(file_path), "test_expected_result.csv"))
+
+        #y_actual = test.iloc[-12:][target]
+        #test.drop(test.tail(12).index, inplace=True)
+        #file_path = write_tabular_dataset_data(test, os.path.dirname(file_path), config)
+
+    elif(config["configuration"]["task"] in[":image_classification", ":image_regression"]):
+        X_test, y_test = data_loader(config, image_test_folder=True)
 
     predict_start = time.time()
-    subprocess.call([python_env, os.path.join(result_path, "predict.py"), file_path, config_path, os.path.join(result_path, "predictions.csv")])
+    subprocess.call([python_env, os.path.join(result_path, "predict.py"), file_path, os.path.join(result_path, "predictions.csv")])
     predict_time = time.time() - predict_start
-
-    if(config["configuration"]["task"] in [":tabular_classification", ":tabular_regression", ":text_regression", ":text_classification"]):
-        train, test = data_loader(config)
-        target = config["configuration"]["target"]
-    elif(config["configuration"]["task"] in[":image_classification", ":image_regression"]):
-        X_train, y_train, X_val, y_val, X_test, y_test = data_loader(config)
 
     predictions = pd.read_csv(os.path.join(result_path, "predictions.csv"))
     os.remove(os.path.join(result_path, "predictions.csv"))
 
-    if config["configuration"]["task"] == ":tabular_classification":
-        return accuracy_score(test[target], predictions["predicted"]), (predict_time * 1000) / test.shape[0]
+    if config["configuration"]["task"] in [":tabular_classification", ":text_classification", ":image_classification", ":time_series_classification"]:
+        if config["configuration"]["task"] == ":image_classification":
+            return compute_classification_metrics(pd.Series(y_test), predictions["predicted"]), (predict_time * 1000) / pd.Series(y_test).shape[0]
+        else:
+            return compute_classification_metrics(pd.Series(test[target]), predictions["predicted"]), (predict_time * 1000) / test.shape[0]
+    elif config["configuration"]["task"] in [":tabular_regression", ":text_regression", ":image_regression", ":time_series_forecasting"]:
+        if config["configuration"]["task"] == ":image_regression":
+            return compute_regression_metrics(pd.Series(y_test), predictions["predicted"]), (predict_time * 1000) / pd.Series(y_test).shape[0]
+        elif config["configuration"]["task"] == ":time_series_forecasting":
+            #TODO add dynamic future prediction
+            return compute_regression_metrics(pd.Series(test.iloc[-config["forecasting_horizon"]:][target]), predictions["predicted"]), (predict_time * 1000) / test.shape[0]
+        else:
+            return compute_regression_metrics(pd.Series(test[target]), predictions["predicted"]), (predict_time * 1000) / test.shape[0]
+    elif config["configuration"]["task"] == ":named_entity_recognition":
+        return compute_named_entity_recognition_metrics(pd.Series(test[target]), predictions["predicted"]), (predict_time * 1000) / pd.Series(test[target]).shape[0]
 
-    elif config["configuration"]["task"] == ":tabular_regression":
-        return mean_squared_error(test[target], predictions["predicted"], squared=False), \
-               (predict_time * 1000) / test.shape[0]
+def compute_classification_metrics(y_should: pd.Series, y_is: pd.Series) -> dict:
+    """Compute the metrics collection for classification tasks
 
-    elif config["configuration"]["task"] == ":image_classification":
-        return accuracy_score(y_test, predictions["predicted"]), (predict_time * 1000) / y_test.shape[0]
+    Args:
+        y_should (pd.Series): The series of the label for the test set
+        y_is (pd.Series): The series of the label of the model predictions for the test set
 
-    elif config["configuration"]["task"] == ":image_regression":
-        return mean_squared_error(y_test, predictions["predicted"], squared=False), \
-               (predict_time * 1000) / y_test.shape[0]
-    elif config["configuration"]["task"] == ":time_series_classification":
-        train, test = data_loader(config)
-        target = config["configuration"]["target"]
+    Returns:
+        dict: Dictionary containing the computed metrics, key is ontology IRI for the metric and value is the value
+    """
+    from sklearn.preprocessing import LabelEncoder
 
-        test_target = test[target].astype("string")
-        predicted_target = predictions["predicted"].astype("string")
-        acc_score = accuracy_score(test_target, predicted_target)
-        print("accuracy", acc_score)
-        print("Classification Report \n",
-              classification_report(test_target, predicted_target,zero_division=0)
-              )
-        return acc_score, (predict_time * 1000) / test.shape[0]
+    if y_is.dtype == object:
+        #If the label is string based, we need to convert it to int values or else some metric wont compute correctly
+        enc = LabelEncoder()
+        labels = [value for value in y_should.unique() if value not in y_is.unique()]
+        labels = np.append(y_is.unique(), labels)
+        enc.fit(labels)
+        y_should = pd.Series(enc.transform(y_should))
+        y_is = pd.Series(enc.transform(y_is))
+    score = {
+        ":accuracy": float(accuracy_score(y_should, y_is)),
+        ":balanced_accuracy": float(balanced_accuracy_score(y_should, y_is)),
+    }
+    if len(y_should.unique()) == 2:
+        #Metrics only for binary classification
+        tn, fp, fn, tp = confusion_matrix(y_should, y_is).ravel()
+        score.update({
+        ":average_precision": float(average_precision_score(y_should, y_is, average='weighted')),
+        ":true_positives": float(tp),
+        ":false_positives": float(fp),
+        ":true_negatives": float(tn),
+        ":false_negatives": float(fn),
+        ":f_measure": float(f1_score(y_should, y_is)),
+        ":precision": float(precision_score(y_should, y_is)),
+        ":recall": float(recall_score(y_should, y_is)),
+        ":brier": float(brier_score_loss(y_should, y_is)),
+        })
+    else:
+        #Metrics only for multiclass classification
+        score.update({
 
-    elif config["configuration"]["task"] == ":text_classification":
-        return accuracy_score(test[target], predictions["predicted"]), (predict_time * 1000) / test.shape[0]
+        ":f_measure_micro": float(f1_score(y_should, y_is, average='micro')),
+        ":f_measure_macro": float(f1_score(y_should, y_is, average='macro')),
+        ":f_measure_weighted": float(f1_score(y_should, y_is, average='weighted')),
+        ":precision_micro": float(precision_score(y_should, y_is, average='micro')),
+        ":precision_macro": float(precision_score(y_should, y_is, average='macro')),
+        ":precision_weighted": float(precision_score(y_should, y_is, average='weighted')),
+        ":recall_micro": float(recall_score(y_should, y_is, average='micro')),
+        ":recall_macro": float(recall_score(y_should, y_is, average='macro')),
+        ":recall_weighted": float(recall_score(y_should, y_is, average='weighted')),
+        })
+    return score
 
-    elif config["configuration"]["task"] == ":text_regression":
-        return mean_squared_error(test[target], predictions["predicted"], squared=False), \
-               (predict_time * 1000) / test.shape[0]
+def compute_regression_metrics(y_should: pd.Series, y_is: pd.Series) -> dict:
+    """Compute the metrics collection for regression tasks
 
+    Args:
+        y_should (pd.Series): The series of the label for the test set
+        y_is (pd.Series): The series of the label of the model predictions for the test set
+
+    Returns:
+        dict: Dictionary containing the computed metrics, key is ontology IRI for the metric and value is the value
+    """
+    score = {
+        ":explained_variance": float(explained_variance_score(y_should, y_is)),
+        ":max_error": float(max_error(y_should, y_is)),
+        ":mean_absolute_error": float(mean_absolute_error(y_should, y_is)),
+        ":mean_squared_error": float(mean_squared_error(y_should, y_is, squared=True)),
+        ":rooted_mean_squared_error": float(mean_squared_error(y_should, y_is, squared=False)),
+        ":median_absolute_error": float(median_absolute_error(y_should, y_is)),
+        ":r2": float(r2_score(y_should, y_is)),
+        ":mean_absolute_percentage_error": float(mean_absolute_percentage_error(y_should, y_is)),
+    }
+    try:
+        score.update({
+        ":d2_absolute_error": float(d2_absolute_error_score(y_should, y_is)),
+        ":d2_pinball_score": float(d2_pinball_score(y_should, y_is)),
+        ":d2_tweedie_score": float(d2_tweedie_score(y_should, y_is)),
+        ":mean_squared_log_error": float(mean_squared_log_error(y_should, y_is, squared=True)),
+        ":rooted_mean_squared_log_error": float(mean_squared_log_error(y_should, y_is, squared=False))
+        })
+    except Exception as e:
+        print("computing D2 scores failed")
+    if all(val > 0 for val in y_is) and all(val > 0 for val in y_should):
+        score.update({
+        ":mean_poisson_deviance": float(mean_poisson_deviance(y_should, y_is)),
+        ":mean_gamma_deviance": float(mean_gamma_deviance(y_should, y_is))
+        })
+    return score
+
+def compute_named_entity_recognition_metrics(y_should: pd.Series, y_is: pd.Series) -> dict:
+    """Compute the metrics collection for named entity recognition tasks
+
+    Args:
+        y_should (pd.Series): The series of the label for the test set
+        y_is (pd.Series): The series of the label of the model predictions for the test set
+
+    Returns:
+        dict: Dictionary containing the computed metrics, key is ontology IRI for the metric and value is the value
+    """
+    score = {
+        ":overall_recall": float(recall_score(y_should, y_is, average="micro")),
+        ":overall_precision": float(precision_score(y_should, y_is, average="micro")),
+        ":overall_f1": float(f1_score(y_should, y_is, average="micro")),
+        ":overall_accuracy": float(accuracy_score(y_should, y_is)),
+    }
+    return score
 
 def predict(config: dict, config_path: str, automl: str) -> Tuple[float, str]:
     """Execute a prediction on an uploaded live dataset
@@ -302,10 +371,10 @@ def predict(config: dict, config_path: str, automl: str) -> Tuple[float, str]:
     file_path = config["prediction_id"] + "_" + automl + ".csv"
     result_prediction_path = os.path.join(os.path.dirname(config["live_dataset_path"]), file_path)
     predict_start = time.time()
-    subprocess.call([python_env, os.path.join(result_folder_location, "predict.py"), config["live_dataset_path"], config_path, result_prediction_path])
+    subprocess.call([python_env, os.path.join(result_folder_location, "predict.py"), config["live_dataset_path"], result_prediction_path])
     predict_time = time.time() - predict_start
 
-    
+
     return predict_time, result_prediction_path
 
 def setup_run_environment(request: "StartAutoMlRequest", adapter_name: str) -> "StartAutoMlRequest":
@@ -318,7 +387,6 @@ def setup_run_environment(request: "StartAutoMlRequest", adapter_name: str) -> "
     Returns:
         StartAutoMlRequest: The extended training request configuration holding the training paths
     """
-
     #folder location for job related files
     job_folder_location = os.path.join(get_config_property("training-path"),
                                         request.user_id,
@@ -352,252 +420,43 @@ def setup_run_environment(request: "StartAutoMlRequest", adapter_name: str) -> "
                                         request.training_id,
                                         get_config_property("export-folder-name"))
 
-    request.job_folder_location = job_folder_location
+    request_dict = request.to_dict(casing=betterproto.Casing.SNAKE)
+    #For WSL users we need to adjust the path prefix for the dataset location to windows path
+    if get_config_property("local_execution") == "YES":
+        if get_config_property("running_in_wsl") == "YES":
+            request_dict["dataset_path"] = re.sub("[a-zA-Z]:\\\\([A-Za-z0-9_]+(\\\\[A-Za-z0-9_]+)+)\\\\MetaAutoML", get_config_property("wsl_metaautoml_path"), request_dict["dataset_path"])
+            request_dict["dataset_path"] = request_dict["dataset_path"].replace("\\", "/")
+            job_folder_location = job_folder_location.replace("\\", "/")
+            model_folder_location = model_folder_location.replace("\\", "/")
+            export_folder_location = export_folder_location.replace("\\", "/")
+            result_folder_location = result_folder_location.replace("\\", "/")
+            controller_export_folder_location = controller_export_folder_location.replace("\\", "/")
+
+    request_dict["job_folder_location"] = job_folder_location
+    request_dict["model_folder_location"] = model_folder_location
+    request_dict["export_folder_location"] = export_folder_location
+    request_dict["result_folder_location"] = result_folder_location
+    request_dict["controller_export_folder_location"] = controller_export_folder_location
+
+    # TODO: Refactor AdapterManager and AdapterUtils to not rely on a proto object that some fields have been added to at runtime
+    # also add values to request object (the values are used in subsequent requests)
+    request.dataset_path = request_dict["dataset_path"]
+    request.job_folder_location = request_dict["job_folder_location"]
     request.model_folder_location = model_folder_location
     request.export_folder_location = export_folder_location
     request.result_folder_location = result_folder_location
     request.controller_export_folder_location = controller_export_folder_location
+
+    # TODO: Remove this and fix all places that access the configuration object as a dictionary
+    # replace configuration object with dictionary
+    request.configuration = request_dict["configuration"]
 
     #Make sure job folders exists
     os.makedirs(job_folder_location, exist_ok=True)
     os.makedirs(model_folder_location, exist_ok=True)
     os.makedirs(export_folder_location, exist_ok=True)
     os.makedirs(result_folder_location, exist_ok=True)
-    request_dict = request.__dict__
-    request_dict.pop("_serialized_on_wire")
-    request_dict.pop("_unknown_fields")
-    request_dict.pop("_group_current")
-    request_dict.update({"configuration": request_dict["configuration"].__dict__})
-    request_dict["configuration"].pop("_serialized_on_wire")
-    request_dict["configuration"].pop("_unknown_fields")
-    request_dict["configuration"].pop("_group_current")
     #Save job file
     with open(os.path.join(job_folder_location, get_config_property("job-file-name")), "w+") as f:
         json.dump(request_dict, f)
-        
     return request
-
-#endregion
-
-######################################################################
-## TABULAR DATASET HELPER FUNCTIONS
-######################################################################
-
-#region
-
-def cast_dataframe_column(dataframe: pd.DataFrame, column_index: Any, datatype: Any) -> pd.DataFrame:
-    """Cast a specific column to a new data type
-
-    Args:
-        dataframe (pd.DataFrame): The dataset dataframe
-        column_index (Any): The column index which will be casted to a new data type
-        datatype (Any): The new data type for the column
-
-    Returns:
-        pd.DataFrame: The new dataset dataframe with the casted column
-    """
-    if DataType(datatype) is DataType.DATATYPE_CATEGORY:
-        dataframe[column_index] = dataframe[column_index].astype('category')
-    elif DataType(datatype) is DataType.DATATYPE_BOOLEAN:
-        dataframe[column_index] = dataframe[column_index].astype('bool')
-    elif DataType(datatype) is DataType.DATATYPE_INT:
-        dataframe[column_index] = dataframe[column_index].astype('int')
-    elif DataType(datatype) is DataType.DATATYPE_FLOAT:
-        dataframe[column_index] = dataframe[column_index].astype('float')
-    return dataframe
-
-def read_tabular_dataset_training_data(config: "StartAutoMlRequest") -> Tuple[pd.DataFrame, pd.DataFrame]:
-    """Read a CSV dataset into train and test dataframes
-
-    Args:
-        config (StartAutoMlRequest): The extended training request configuration holding the training paths
-
-    Returns:
-        tuple[pd.DataFrame, pd.DataFrame]: Dataframe tuples holding the training and test datasets tuple[(train), (test)]
-    """
-    delimiters = {
-        "comma":        ",",
-        "semicolon":    ";",
-        "space":        " ",
-        "tab":          "\t",
-    }
-
-
-    data = pd.read_csv(os.path.join(config["dataset_path"]), delimiter=delimiters[config["dataset_configuration"]['file_configuration']['delimiter']], skiprows=(config["dataset_configuration"]['file_configuration']['start_row']-1), escapechar=config["dataset_configuration"]['file_configuration']['escape_character'], decimal=config["dataset_configuration"]['file_configuration']['decimal_character'])
-
-    # convert all object columns to categories, because autosklearn only supports numerical,
-    # bool and categorical features
-    #TODO: change to ontology based preprocessing
-    data[data.select_dtypes(['object']).columns] = data.select_dtypes(['object']).apply(lambda x: x.astype('category'))
-
-    # split training set
-    #if SplitMethod.SPLIT_METHOD_RANDOM.value == json_configuration["test_configuration"]["method"]:
-    #    train = data.sample(random_state=json_configuration["test_configuration"]["random_state"], frac=1)
-    #    test = data.sample(random_state=json_configuration["test_configuration"]["random_state"], frac=1)
-    #else:
-    train = data.iloc[:int(data.shape[0] * 0.8)]
-    test = data.iloc[int(data.shape[0] * 0.2):]
-
-    return train, test
-
-def prepare_tabular_dataset(df: pd.DataFrame, json_configuration: dict) -> Tuple[pd.DataFrame, pd.Series]:
-    """Prepare tabular dataset, perform feature preparation and data type casting
-
-    Args:
-        df (pd.DataFrame): The dataset dataframe
-        json_configuration (dict): the training configuration dictonary
-
-    Returns:
-        tuple[pd.DataFrame, pd.Series]: tuple holding the dataset dataframe without the target column, and a Series holding the Target column tuple[(X_dataframe, y_series)]
-    """
-    df = feature_preparation(df, json_configuration["dataset_configuration"]["column_datatypes"].items())
-    df = cast_dataframe_column(df, json_configuration["configuration"]["target"], json_configuration["dataset_configuration"]["column_datatypes"][json_configuration["configuration"]["target"]])
-    X = df.drop(json_configuration["configuration"]["target"], axis=1)
-    y = df[json_configuration["configuration"]["target"]]
-    return X, y
-
-def convert_X_and_y_dataframe_to_numpy(X: pd.DataFrame, y: pd.Series) -> Tuple[np.ndarray, np.ndarray]:
-    """Convert the X and y dataframes to numpy datatypes and fill up nans
-
-    Args:
-        X (pd.DataFrame): The dataset dataframe holding the features without target
-        y (pd.Series): The dataset series holding only the target
-
-    Returns:
-        tuple[np.ndarray, np.ndarray]: Tuple holding numpy array versions of the dataset, and target variable tuple[dataset, target]
-    """
-    X = X.to_numpy()
-    X = np.nan_to_num(X, 0)
-    y = y.to_numpy()
-    return X, y
-
-#endregion
-
-######################################################################
-## IMAGE DATASET HELPER FUNCTIONS
-######################################################################
-
-#region
-
-def read_image_dataset(config: "StartAutoMlRequest") -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
-    """Read image dataset and create training and test dataframes
-
-    Args:
-        config (StartAutoMlRequest): The extended training request configuration holding the training paths
-
-    Returns:
-        tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]: Dataframe tuples holding the different datasets: tuple[(X_train), (y_train), (X_test), (y_test)]
-    """
-    # Treat file location like URL if it does not exist as dir. URL/Filename need to be specified.
-    # Mainly used for testing purposes in the hard coded json for the job
-    # Example: app-data/datasets vs https://storage.googleapis.com/download.tensorflow.org/example_images/flower_photos.tgz
-    """
-    if not (os.path.exists(os.path.join(local_dir_path, json_configuration["file_name"]))):
-        local_file_path = tf.keras.utils.get_file(
-            origin=json_configuration["file_location"], 
-            fname="image_data", 
-            cache_dir=os.path.abspath(os.path.join("app-data")), 
-            extract=True
-        )
-
-        local_dir_path = os.path.dirname(local_file_path)
-    """
-    data_dir = config.file_location
-    train_df_list =[]
-    test_df_list =[]
-
-    def read_image_dataset_folder(sub_folder_type):
-        files = []
-        df = []
-        for folder in os.listdir(os.path.join(data_dir, sub_folder_type)):
-            files.append(glob.glob(os.path.join(data_dir, sub_folder_type, folder, "*.jpeg")))
-
-        df_list =[]
-        for i in range(len(files)):
-            df = pd.DataFrame()
-            df["name"] = [x for x in files[i]]
-            df['outcome'] = i
-            df_list.append(df)
-        return df_list
-
-    train_df_list = read_image_dataset_folder("train")
-    test_df_list = read_image_dataset_folder("test")
-
-    train_data = pd.concat(train_df_list, axis=0,ignore_index=True)
-    test_data = pd.concat(test_df_list, axis=0,ignore_index=True)
-
-    def img_preprocess(img):
-        """
-        Opens the image and does some preprocessing 
-        such as converting to RGB, resize and converting to array
-        """
-        img = Image.open(img)
-        img = img.convert('RGB')
-        img = img.resize((256,256))
-        img = np.asarray(img)/255
-        return img
-
-    X_train = np.array([img_preprocess(p) for p in train_data.name.values])
-    y_train = train_data.outcome.values
-    X_test = np.array([img_preprocess(p) for p in test_data.name.values])
-    y_test = test_data.outcome.values
-    return X_train, y_train, X_test, y_test
-    
-#endregion
-
-
-######################################################################
-## LONGITUDINAL DATASET HELPER FUNCTIONS
-######################################################################
-
-#region
-
-def read_longitudinal_dataset(json_configuration: dict):
-    """Read longitudinal data from the `.ts` file and generate training and test datasets
-
-    Args:
-        json_configuration (dict): The training configuration dictionary
-
-    Returns:
-        Any: tuple of training and test dataset
-    """
-    from sktime.datasets import load_from_tsfile_to_dataframe
-
-    file_path = os.path.join(json_configuration["file_location"], json_configuration["file_name"])
-    dataset = load_from_tsfile_to_dataframe(file_path, return_separate_X_and_y=False)
-    dataset = dataset.rename(columns={"class_vals": "target"})
-    return split_dataset(dataset, json_configuration)
-
-
-def split_dataset(dataset: Any, json_configuration: dict):
-    """Split the given dataset into train and test subsets
-
-    Args:
-        dataset (Any): The loaded TS dataset
-        json_configuration (dict): The training configuration dictionary
-
-    Returns:
-        _type_: tuple of training and test dataset
-    """
-    
-    split_method = json_configuration["test_configuration"]["method"]
-    split_ratio = json_configuration["test_configuration"]["split_ratio"]
-    random_state = json_configuration["test_configuration"]["random_state"]
-    np.random.seed(random_state)
-
-    if int(SplitMethod.SPLIT_METHOD_RANDOM.value) == split_method:
-        return train_test_split(
-            dataset,
-            train_size=split_ratio,
-            random_state=random_state,
-            shuffle=True,
-            stratify=dataset["target"]
-        )
-    else:
-        return train_test_split(
-            dataset,
-            train_size=split_ratio,
-            shuffle=False,
-            stratify=dataset["target"]
-        )
-#endregion

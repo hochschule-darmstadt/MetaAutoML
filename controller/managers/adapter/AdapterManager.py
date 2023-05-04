@@ -1,5 +1,3 @@
-
-from AdapterManagerAgent import AdapterManagerAgent
 from ControllerBGRPC import *
 import json, logging, os, datetime
 from threading import *
@@ -15,7 +13,7 @@ class AdapterManager(Thread):
         Thread (_type_): _description_
     """
 
-    def __init__(self, data_storage: DataStorage, request: "CreateTrainingRequest", automl:str, training_id: str, dataset, host: str, port: int, blackboard, strategy_controller, adapter_finished_callback) -> None:
+    def __init__(self, data_storage: DataStorage, request: CreateTrainingRequest, automl:str, training_id: str, dataset, host: str, port: int, adapter_finished_callback) -> None:
         """Initialize a new AdapterManager
 
         Args:
@@ -25,7 +23,7 @@ class AdapterManager(Thread):
             training_id (str): The training id to which the found model is linked too
             dataset (_type_): The Dataset record used by this training
             host (str): The AutoML adapter ip address
-            port (int): The AutoML adapter port 
+            port (int): The AutoML adapter port
             blackboard (_type_): The blackboard instance for this training session
             strategy_controller (_type_): The Blackboard instance for this training session
             adapter_finished_callback (_type_): The callback function to execute when the training finishes
@@ -49,11 +47,12 @@ class AdapterManager(Thread):
         self.__prediction_time = 0
         self.__ml_model_type = ""
         self.__ml_library = ""
-        self.__blackboard = blackboard 
-        self.__strategy_controller = strategy_controller
         self.__model_id = self.__create_new_model_entry()
 
-        self.__adapter_agent = AdapterManagerAgent(self.__blackboard, self.__strategy_controller, self)
+    def set_request(self, request: "CreateTrainingRequest"):
+        """Set the training request object
+        """
+        self.__request = request
 
     def get_automl_name(self) -> str:
         """Get the AutoML adapter name
@@ -112,8 +111,8 @@ class AdapterManager(Thread):
         return
 
 
-    def __generate_process_request(self) -> "StartAutoMlRequest":
-        """Generate AutoML training configuration 
+    def __generate_process_request(self) -> StartAutoMlRequest:
+        """Generate AutoML training configuration
 
         Returns:
             StartAutoMlRequest: The GRPC request message holding the training configuration
@@ -126,9 +125,9 @@ class AdapterManager(Thread):
 
         configuration = StartAutoMlConfiguration()
         configuration.task = self.__request.configuration.task
-        configuration.target = self.__request.configuration.target
         configuration.runtime_limit = self.__request.configuration.runtime_limit
         configuration.metric = self.__request.configuration.metric
+        configuration.parameters = self.__request.configuration.parameters
 
         request.configuration = configuration
         found, training = self.__data_storage.get_training(self.__request.user_id, self.__training_id)
@@ -147,10 +146,10 @@ class AdapterManager(Thread):
             "prediction_ids": [],
             "status": self.__status,
             "auto_ml_solution": self.__automl,
-            "ml_model_type": "",
-            "ml_library": "", 
+            "ml_model_type": [],
+            "ml_library": [],
             "path": "",
-            "test_score": 0,
+            "test_score": {},
             "prediction_time": 0,
             "runtime_profile": {
                 "start_time": datetime.datetime.now(),
@@ -158,10 +157,19 @@ class AdapterManager(Thread):
             },
             "status_messages": [],
             "explanation": {},
-            "lifecycle_state": "active"
+            "lifecycle_state": "active",
+            "carbon_footprint": {}
             }
         return self.__data_storage.create_model(self.__request.user_id, model_details)
-    
+
+    def cancel_adapter(self):
+        print("canceling me")
+        model_details = {
+            "status": "aborted"
+        }
+        self.__adapter_finished_callback(self.__training_id, self.__request.user_id, self.__model_id, model_details, self)
+        return
+
     async def __read_grpc_connection(self):
         """Open a new connection to the AutoML adapter and start the training process and read all Status messages until the process concludes
         """
@@ -194,6 +202,7 @@ class AdapterManager(Thread):
                     self.__prediction_time = response.prediction_time
                     self.__ml_model_type = response.ml_model_type
                     self.__ml_library = response.ml_library
+                    self.__carbon_footprint = response.emission_profile.to_dict(casing=betterproto.Casing.SNAKE)
                     found, model = self.__data_storage.get_model(self.__request.user_id, self.__model_id)
                     model_details = {
                         "status": self.__status,
@@ -201,11 +210,12 @@ class AdapterManager(Thread):
                         "ml_library": self.__ml_library,
                         "path": self.__path,
                         "prediction_time": self.__prediction_time,
-                        "test_score": self.__testScore,
-                        "runtime_profile": model["runtime_profile"]
+                        "test_score": json.loads(self.__testScore),
+                        "runtime_profile": model["runtime_profile"],
+                        "carbon_footprint": self.__carbon_footprint
                     }
                     model_details["runtime_profile"]["end_time"] = datetime.datetime.now()
-                        
+
                     self.__adapter_finished_callback(self.__training_id, self.__request.user_id, self.__model_id, model_details, self)
                     return
 
@@ -220,7 +230,7 @@ class AdapterManager(Thread):
                 }
             self.__adapter_finished_callback(self.__training_id, self.__request.user_id, self.__model_id, model_details, self)
 
-    
+
     def run(self):
         """Listen to the started AutoML process until termination
         """
@@ -237,7 +247,8 @@ class AdapterManager(Thread):
         Returns:
             dict: AutoML explanation configuration
         """
-        return {
+        found, training = self.__data_storage.get_training(self.__request.user_id, self.__training_id)
+        test_json = {
             "training_id": self.__training_id,
             "user_id": self.__request.user_id,
             "dataset_id": str(self.__dataset["_id"]),
@@ -245,12 +256,10 @@ class AdapterManager(Thread):
                 "task": self.__request.configuration.task,
                 "target": self.__request.configuration.target
             },
-            "dataset_configuration": {
-                "column_datatypes": json.loads(self.__request.dataset_configuration)["column_datatypes"],
-                "file_configuration": self.__dataset["file_configuration"],
-            },
+            "dataset_configuration": json.dumps(training["dataset_configuration"]),
             "dataset_path": self.__dataset["path"]
         }
+        return test_json
 
 
     def explain_model(self, data):
