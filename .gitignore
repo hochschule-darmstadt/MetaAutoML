@@ -12,7 +12,7 @@ adapters/*/app-data/output/tmp
 adapters/AutoKeras/structured_data_classifier
 
 
-./mutagen_datasets/*
+mutagen_datasets/*
 
 #VS
 *.suo

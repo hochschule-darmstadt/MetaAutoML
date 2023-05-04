@@ -1,4 +1,5 @@
 import json, time
+import math
 from rule_engine import Rule, Context, DataType, type_resolver_from_dict
 from AdapterRuntimeManagerAgent import AdapterRuntimeManagerAgent
 from ControllerBGRPC import DataType as GrpcDataType
@@ -8,6 +9,8 @@ from Blackboard import Blackboard
 
 class PreTrainingStrategyController(IAbstractStrategy):
     global_multi_fidelity_level = 1
+    total_runtime_limit = 0
+    sum_dataset_all = 0
 
     def register_rules(self):
         training_context = Context(
@@ -102,17 +105,19 @@ class PreTrainingStrategyController(IAbstractStrategy):
         relevant_auto_ml_solutions = list(set(relevant_auto_ml_solutions))
         self.controller.get_adapter_runtime_manager().update_adapter_manager_list(relevant_auto_ml_solutions)
 
-        if len(relevant_auto_ml_solutions) == 1:
+        if len(relevant_auto_ml_solutions) <= 1:
             self._log.info(f'do_finish_pre_training: Finished data preparation, advancing to phase "running"..')
             self.controller.set_phase('running')
         else:
             #adjust request object for multi fidelity
             configuration = self.controller.get_request().configuration
             configuration.selected_auto_ml_solutions = relevant_auto_ml_solutions
+            new_dataset_size = old_multi_fidelity_level*2
+            configuration.runtime_limit = int(self.total_runtime_limit * (new_dataset_size / self.sum_dataset_all))
             request = self.controller.get_request()
             request.configuration = configuration
 
-            strategy_controller = StrategyController(self.controller.get_data_storage(), request, self.controller.get_explainable_lock(), multi_fidelity_callback=self.do_multi_fidelity_callback, multi_fidelity_level=old_multi_fidelity_level*2)
+            strategy_controller = StrategyController(self.controller.get_data_storage(), request, self.controller.get_explainable_lock(), multi_fidelity_callback=self.do_multi_fidelity_callback, multi_fidelity_level=new_dataset_size)
 
         return
 
@@ -122,8 +127,17 @@ class PreTrainingStrategyController(IAbstractStrategy):
         #disable Multi-Fidelity-Strategy
         controller.disable_strategy('pre_training.multi_fidelity')
 
+        configuration = self.controller.get_request().configuration
+        amount_ml_solutions = len(configuration.selected_auto_ml_solutions)
+
+        self.total_runtime_limit = configuration.runtime_limit
+        amount_iterations = int(math.log(amount_ml_solutions, 2))
+        dataset_size_begin = 100 * 0.5**amount_iterations * 0.01
+        for i in range(0, amount_iterations+1):
+            self.sum_dataset_all += 100 * 0.5**i * 0.01
+
         #start new training
-        strategy_controller = StrategyController(controller.get_data_storage(), controller.get_request(), controller.get_explainable_lock(), multi_fidelity_callback=self.do_multi_fidelity_callback, multi_fidelity_level=0.1)
+        strategy_controller = StrategyController(controller.get_data_storage(), controller.get_request(), controller.get_explainable_lock(), multi_fidelity_callback=self.do_multi_fidelity_callback, multi_fidelity_level=dataset_size_begin)
         return
 
     def do_finish_pre_training(self, state: dict, blackboard: Blackboard, controller: StrategyController):
