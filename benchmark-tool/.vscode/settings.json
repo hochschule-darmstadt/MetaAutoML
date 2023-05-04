@@ -1,6 +1,6 @@
 {
     "python.analysis.typeCheckingMode": "strict",
-    "python.formatting.provider": "black",
+    "python.formatting.provider": "none",
     "python.linting.lintOnSave": true,
     "python.linting.flake8Enabled": false,
     "python.linting.pylintEnabled": false,
@@ -12,6 +12,6 @@
         "editor.formatOnSave": true,
         "diffEditor.ignoreTrimWhitespace": false,
         "editor.wordBasedSuggestions": false,
-        "editor.defaultFormatter": "ms-python.python"
+        "editor.defaultFormatter": "ms-python.black-formatter"
     }
 }
