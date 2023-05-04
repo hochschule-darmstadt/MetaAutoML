@@ -1,12 +1,21 @@
-from types import ModuleType
 from unittest.mock import MagicMock
 from sys import modules
+from collections.abc import Callable
 
 
 class MockingHelper:
     """Class that makes the mocking tools from python easier to use"""
 
-    __module_backup: dict[str, ModuleType | None] = {}
+    __main_modules: list[str] = []
+
+    def add_main_module(self, module_name: str):
+        """Adds a module to the list of modules that should be restored after each test.
+        This is useful for modules that are imported in the test file itself.
+
+        Args:
+            moduleName (str): The name of the module to be restored after each test
+        """
+        self.__main_modules.append(module_name)
 
     def mock_import(self, module_name: str, mock: MagicMock | None = None):
         """Mocks an import statement.
@@ -21,14 +30,21 @@ class MockingHelper:
         if mock is None:
             actual_mock = MagicMock()
 
-        self.__module_backup[module_name] = modules.get(module_name)
         modules[module_name] = actual_mock
 
     def reset_mocks(self):
         # for each module that was mocked, restore the original module
-        for module_name, module in self.__module_backup.items():
-            if module is None:
-                del modules[module_name]
-            else:
-                modules[module_name] = module
-        self.__module_backup.clear()
+        for module_name in self.__main_modules:
+            del modules[module_name]
+        self.__main_modules.clear()
+
+
+def async_lambda(fun: Callable[[], object]):
+    """Wraps a function into an async lambda function.
+    This is useful for mocking async functions.
+    """
+
+    async def wrapper():
+        return fun()
+
+    return wrapper
