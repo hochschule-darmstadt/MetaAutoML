@@ -97,7 +97,7 @@ class PreTrainingStrategyController(IAbstractStrategy):
                 completed_model_list.append(model)
 
         relevant_auto_ml_solutions = []
-        for model in completed_model_list[0:int(len(completed_model_list)/2)]:
+        for model in completed_model_list[0:max(int(len(completed_model_list)/2), 1)]:
             #Only add max half of all adapters
             if model.get('status') == 'completed':
                 relevant_auto_ml_solutions.append(model.get('auto_ml_solution'))
@@ -106,6 +106,15 @@ class PreTrainingStrategyController(IAbstractStrategy):
         self.controller.get_adapter_runtime_manager().update_adapter_manager_list(relevant_auto_ml_solutions)
 
         if len(relevant_auto_ml_solutions) <= 1:
+            configuration = self.controller.get_request().configuration
+            new_dataset_size = old_multi_fidelity_level*2
+            not_used_runtime = 0
+            while len(relevant_auto_ml_solutions) < (1 / new_dataset_size):
+                not_used_runtime += int(self.total_runtime_limit * (new_dataset_size / self.sum_dataset_all))
+                new_dataset_size *= 2
+            configuration.runtime_limit = int(self.total_runtime_limit * (new_dataset_size / self.sum_dataset_all)) + not_used_runtime
+            request = self.controller.get_request()
+            request.configuration = configuration
             self._log.info(f'do_finish_pre_training: Finished data preparation, advancing to phase "running"..')
             self.controller.set_phase('running')
         else:
@@ -113,7 +122,11 @@ class PreTrainingStrategyController(IAbstractStrategy):
             configuration = self.controller.get_request().configuration
             configuration.selected_auto_ml_solutions = relevant_auto_ml_solutions
             new_dataset_size = old_multi_fidelity_level*2
-            configuration.runtime_limit = int(self.total_runtime_limit * (new_dataset_size / self.sum_dataset_all))
+            not_used_runtime = 0
+            while len(relevant_auto_ml_solutions) < (1 / new_dataset_size):
+                not_used_runtime += int(self.total_runtime_limit * (new_dataset_size / self.sum_dataset_all))
+                new_dataset_size *= 2
+            configuration.runtime_limit = int(self.total_runtime_limit * (new_dataset_size / self.sum_dataset_all)) + not_used_runtime
             request = self.controller.get_request()
             request.configuration = configuration
 
@@ -135,6 +148,11 @@ class PreTrainingStrategyController(IAbstractStrategy):
         dataset_size_begin = 100 * 0.5**amount_iterations * 0.01
         for i in range(0, amount_iterations+1):
             self.sum_dataset_all += 100 * 0.5**i * 0.01
+
+        #adjust time limit for first training
+        configuration.runtime_limit = int(self.total_runtime_limit * (dataset_size_begin / self.sum_dataset_all))
+        request = self.controller.get_request()
+        request.configuration = configuration
 
         #start new training
         strategy_controller = StrategyController(controller.get_data_storage(), controller.get_request(), controller.get_explainable_lock(), multi_fidelity_callback=self.do_multi_fidelity_callback, multi_fidelity_level=dataset_size_begin)
