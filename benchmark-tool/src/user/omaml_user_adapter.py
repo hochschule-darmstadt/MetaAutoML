@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from grpc_omaml.client import create_omaml_client
+from grpc_omaml.client_factory import create_omaml_client
 from grpc_omaml import CreateNewUserRequest
 
 
