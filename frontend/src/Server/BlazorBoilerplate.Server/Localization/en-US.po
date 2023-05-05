@@ -1050,6 +1050,14 @@ msgid "Export"
 msgstr "Export"
 
 msgctxt "Global"
+msgid "File"
+msgstr "File"
+
+msgctxt "Global"
+msgid "URL"
+msgstr "URL"
+
+msgctxt "Global"
 msgid "Import PO file"
 msgstr "Import PO file"
 
