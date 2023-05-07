@@ -1,0 +1,33 @@
+<style>
+    .tooltip .tooltiptext {
+        visibility: hidden;
+        display: block;
+        text-align: center;
+        position: absolute;
+       
+    }
+
+    .tooltip:hover .tooltiptext {
+        visibility: visible;
+        background-color: grey;
+        opacity: 50%;
+    }
+
+    }
+</style>
+<MudText Typo="Typo.body1" class="tooltip">
+    @Label
+    <MudLink Href="@URL" Class="mud-tooltip mud-tooltip-default tooltiptext" Style="opacity: 100%!important; color:white!important;">
+        Go to homepage Link
+    </MudLink>
+</MudText>
+
+@code {
+    [Parameter]
+    public string Label { get; set; }
+    [Parameter]
+    public string URL { get; set; }
+
+
+}
+
