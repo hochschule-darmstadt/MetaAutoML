@@ -5,9 +5,18 @@
 
 <MudCard Elevation="5">
     <MudCardHeader Style="border-bottom-style: inset; border-bottom-width: 1px;">
-        <CardHeaderContent >
-            <MudText Typo="Typo.h6">@L["Recent datasets"]</MudText>
-            <HoverTooltip Label=@L["Recent datasets"] URL="#"></HoverTooltip>
+        <CardHeaderContent>
+            <div style="display:inline!important;float: left;">
+                <MudText Typo="Typo.h6">@L["Recent datasets"]</MudText>
+                <HoverTooltip>
+                    <MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.Info" Style="opacity:70%"></MudIcon>
+
+                </HoverTooltip>
+            </div>
+
+            <!-- <InfoButton Label=@L["Recent datasets"] URL="#"></InfoButton>-->
+
+
         </CardHeaderContent>
         <CardHeaderActions>
             <MudStack Row="true" Class="align-content-center" Style="margin-top: 8px">

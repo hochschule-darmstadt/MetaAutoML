@@ -11,16 +11,16 @@
         visibility: visible;
         background-color: grey;
         opacity: 50%;
-    }
 
     }
+
 </style>
-<MudText Typo="Typo.body1" class="tooltip">
-    @Label
-    <MudLink Href="@URL" Class="mud-tooltip mud-tooltip-default tooltiptext" Style="opacity: 100%!important; color:white!important;">
-        Go to homepage Link
-    </MudLink>
-</MudText>
+    <MudText Typo="Typo.body1" class="tooltip">
+        @ChildContent
+        <MudLink Href="@URL" Class="mud-tooltip mud-tooltip-default tooltiptext" Style="opacity: 100%!important; color:white!important;">
+            Go to homepage Link
+        </MudLink>
+    </MudText>
 
 @code {
     [Parameter]
@@ -28,6 +28,8 @@
     [Parameter]
     public string URL { get; set; }
 
+    [Parameter]
+    public RenderFragment ChildContent { get; set; }
 
 }
 
