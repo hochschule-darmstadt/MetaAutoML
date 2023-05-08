@@ -4,8 +4,20 @@
         display: block;
         text-align: center;
         position: absolute;
-       
+        bottom: 63%;
+        right: 70.2%;
     }
+        .tooltip .tooltiptext::after {
+            content: " ";
+            position: absolute;
+            top: 100%; /* At the bottom of the tooltip */
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: grey transparent transparent transparent;
+        }
+      
 
     .tooltip:hover .tooltiptext {
         visibility: visible;
@@ -17,6 +29,7 @@
 </style>
     <MudText Typo="Typo.body1" class="tooltip">
         @ChildContent
+       
         <MudLink Href="@URL" Class="mud-tooltip mud-tooltip-default tooltiptext" Style="opacity: 100%!important; color:white!important;">
             Go to homepage Link
         </MudLink>
