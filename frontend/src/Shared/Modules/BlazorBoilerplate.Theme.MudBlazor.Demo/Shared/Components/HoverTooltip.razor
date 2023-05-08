@@ -5,7 +5,7 @@
         text-align: center;
         position: absolute;
         bottom: 63%;
-        right: 70.2%;
+        right: 64.6%;
     }
         .tooltip .tooltiptext::after {
             content: " ";
@@ -30,9 +30,17 @@
     <MudText Typo="Typo.body1" class="tooltip">
         @ChildContent
        
-        <MudLink Href="@URL" Class="mud-tooltip mud-tooltip-default tooltiptext" Style="opacity: 100%!important; color:white!important;">
-            Go to homepage Link
-        </MudLink>
+        <MudText Class="mud-tooltip mud-tooltip-default tooltiptext" Style="opacity: 100%!important; color:white!important;">
+            @if (lines != null)
+                for (int i = 0; i < lines.Length; i++)
+                {
+                    @lines[i];
+                    <br />
+                }
+            <MudLink Style="color:white!important" Href="@URL">
+                MORE...
+            </MudLink>
+        </MudText>
     </MudText>
 
 @code {
@@ -43,6 +51,12 @@
 
     [Parameter]
     public RenderFragment ChildContent { get; set; }
+
+    string[] lines;
+    protected override void OnParametersSet()
+    {
+        lines = Label?.Split('\n');
+    }
 
 }
 
