@@ -13,7 +13,8 @@
                 "PYTHONPATH": "${workspaceFolder}/src",
                 "OMAML_SERVER_HOST": "localhost",
                 "OMAML_SERVER_PORT": "5001",
-                // "BENCHMARK_USERID": "00000000-0000-0000-0000-000000000000"
+                // "BENCHMARK_USERID": "00000000-0000-0000-0000-000000000000",
+                "DISABLE_CERTIFICATE_CHECK": "True",
             }
         }
     ]
