@@ -41,29 +41,13 @@ class GAMAAdapter:
 
     def __classification(self):
         """Execute the tabular classification task and export the found model"""
-        """
-        X, y = load_breast_cancer(return_X_y=True)
-        X_train, X_test, y_train, y_test = train_test_split(
-            X, y, stratify=y, random_state=0
-        )
-
-        automl = GamaClassifier(max_total_time=180, store="nothing", n_jobs=1)
-        print("Starting `fit` which will take roughly 3 minutes.")
-        automl.fit(X_train, y_train)
-
-        label_predictions = automl.predict(X_test)
-        probability_predictions = automl.predict_proba(X_test)
-
-        print("accuracy:", accuracy_score(y_test, label_predictions))
-        print("log loss:", log_loss(y_test, probability_predictions))
-        """
         self.df, test = data_loader(self._configuration)
         X, y = prepare_tabular_dataset(self.df, self._configuration)
         set_encoding_for_string_columns(self._configuration, X, y)
         self.df, test = data_loader(self._configuration)
         X, y = prepare_tabular_dataset(self.df, self._configuration)
         # TODO: add params
-        automl = GamaClassifier(max_total_time=180, store="nothing", n_jobs=1)
+        automl = GamaClassifier(max_total_time=80, store="nothing", n_jobs=1)
         automl.fit(X, y)
 
         export_model(automl, self._configuration["result_folder_location"], 'GAMA.p')

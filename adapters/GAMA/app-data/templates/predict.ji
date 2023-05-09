@@ -3,9 +3,9 @@ import dill
 import json
 import pandas as pd
 import numpy as np
-import evalml
 import os
-from evalml import AutoMLSearch
+from AdapterTabularUtils import *
+
 {% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression", ":text_classification", ":text_regression"] %}
 from preprocessing import dataset_preparation
 {% endif %}
@@ -24,7 +24,7 @@ if __name__ == '__main__':
     {% endif %}
 
 
-    with open(sys.path[0] + '/evalml.p', 'rb') as file:
+    with open(sys.path[0] + '/GAMA.p', 'rb') as file:
         loaded_model = dill.load(file)
 
     {% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression", ":text_classification", ":text_regression"] %}
