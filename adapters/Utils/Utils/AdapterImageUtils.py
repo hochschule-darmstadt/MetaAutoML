@@ -42,7 +42,7 @@ def read_image_dataset(config: "StartAutoMlRequest", image_test_folder=False, as
     train_df_list =[]
 
     if as_dataframe == True:
-        root = os.path.abspath(os.path.expanduser(root))
+        root = os.path.abspath(os.path.expanduser(data_dir))
         synsets = []
         exts=('.jpg', '.jpeg', '.png')
         items = {'image': [], 'label': []}
@@ -61,7 +61,7 @@ def read_image_dataset(config: "StartAutoMlRequest", image_test_folder=False, as
                 items['label'].append(label)
             df = pd.DataFrame(items)
             y_train = df["label"]
-            X_train = df.drop("label")
+            X_train = df.drop("label", axis=1)
     else:
         def read_image_dataset_folder():
             files = []

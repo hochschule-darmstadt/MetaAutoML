@@ -18,6 +18,9 @@ from preprocessing import dataset_preparation, feature_configuration
 {% if configuration.configuration["task"] in [":time_series_forecasting"] %}
 from preprocessing import dataset_preparation, feature_configuration, seperate_time_series_dataframe
 {% endif %}
+{% if configuration.configuration["task"] not in [":tabular_classification", ":tabular_regression", ":text_classification", ":text_regression", ":time_series_forecasting"] %}
+from dataset import read_image_dataset_folder
+{% endif %}
 
 import pandas as pd
 import numpy as np
@@ -46,8 +49,7 @@ if __name__ == '__main__':
 
     {% endif %}
     {% if configuration.configuration["task"] in [":image_classification"]%}
-    X = ImageDataset.from_folder(filepath)
-    print(X.head())
+    X,y = read_image_dataset_folder(filepath, as_dataframe=True)
     #X.reset_index(inplace=True)
     #X.drop(['label'], inplace=True)
     {% endif %}
@@ -74,7 +76,7 @@ if __name__ == '__main__':
 
     predicted_y = predicted_y.reset_index(drop=True).to_numpy()
     {% endif %}
-    {% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression", ":text_classification", ":text_regression", ":named_entity_recognition"] %}
+    {% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression", ":text_classification", ":text_regression", ":named_entity_recognition", ":image_classification"] %}
     predicted_y = automl.predict(X, as_pandas=False)
     {% endif %}
     predicted_y = np.reshape(predicted_y, (-1, 1))
