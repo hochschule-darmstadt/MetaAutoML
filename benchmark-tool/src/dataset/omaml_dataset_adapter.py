@@ -1,8 +1,4 @@
-from enum import Enum
-
-
-class DatasetType(Enum):
-    TABULAR = 1
+from dataset.dataset_type import DatasetType
 
 
 async def create_dataset(

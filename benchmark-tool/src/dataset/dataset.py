@@ -1,4 +1,5 @@
-from dataset.omaml_dataset_adapter import create_dataset, DatasetType
+from dataset.dataset_type import DatasetType
+from dataset.omaml_dataset_adapter import create_dataset
 
 
 async def upload_dataset():
