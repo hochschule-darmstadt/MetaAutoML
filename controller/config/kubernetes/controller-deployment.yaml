@@ -40,7 +40,7 @@ spec:
         resources:
           limits:
             cpu: "2"
-            memory: "2097152e3"
+            memory: "4097152e3"
         volumeMounts:
         - name: datasets
           mountPath: /app/app-data/datasets

@@ -164,6 +164,10 @@ msgid "ReadClientPermission"
 msgstr "Read clients data"
 
 msgctxt "Global"
+msgid "Language"
+msgstr "Language"
+
+msgctxt "Global"
 msgid "ReadRolePermission"
 msgstr "Read roles data (permissions, etc.)"
 
@@ -1046,6 +1050,14 @@ msgid "Export"
 msgstr "Export"
 
 msgctxt "Global"
+msgid "File"
+msgstr "File"
+
+msgctxt "Global"
+msgid "URL"
+msgstr "URL"
+
+msgctxt "Global"
 msgid "Import PO file"
 msgstr "Import PO file"
 
@@ -1144,6 +1156,10 @@ msgstr "Please enter a minimum of 2 characters to perform a search."
 msgctxt "Global"
 msgid "Data not available."
 msgstr "Data not available."
+
+msgctxt "Global"
+msgid "ENTER URL"
+msgstr "Enter URL"
 
 msgctxt "Global"
 msgid "Company"
@@ -1753,6 +1769,19 @@ msgstr ".AspNetCore.Antiforgery"
 msgctxt "Global"
 msgid "AntiforgeryCookieLifecycle"
 msgstr "Session"
+
+msgctxt "Global"
+msgid "Correlation Matrix"
+msgstr "Correlation Matrix"
+
+msgctxt "Global"
+msgid "Correlation analysis"
+msgstr "Correlation Analysis"
+
+msgctxt "Global"
+msgid "Column analysis"
+msgstr "Column Analysis"
+
 
 msgctxt "Global"
 msgid "AntiforgeryCookieDescription"
