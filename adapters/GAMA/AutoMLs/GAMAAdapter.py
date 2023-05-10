@@ -41,14 +41,14 @@ class GAMAAdapter:
 
     def __classification(self):
         """Execute the tabular classification task and export the found model"""
-        self.df, test = data_loader(self._configuration)
+        self.df, test = data_loader(self._configuration, perform_splitting=False)
         X, y = prepare_tabular_dataset(self.df, self._configuration)
-        self._configuration = set_encoding_for_string_columns(self._configuration, X, y, also_categorical=True)
+        self._configuration = set_encoding_for_string_columns(self._configuration, X, y)
         
         self.df, test = data_loader(self._configuration)
         X, y = prepare_tabular_dataset(self.df, self._configuration)
         # TODO: add params
-        automl = GamaClassifier(max_total_time=80, store="nothing", n_jobs=1)
+        automl = GamaClassifier(max_total_time=80, store="nothing", n_jobs=1,)
         automl.fit(X, y)
 
         export_model(automl, self._configuration["result_folder_location"], 'GAMA.p')
