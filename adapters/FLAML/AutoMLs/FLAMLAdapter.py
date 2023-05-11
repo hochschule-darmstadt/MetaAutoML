@@ -75,6 +75,7 @@ class FLAMLAdapter:
         X[y.name] = y.values
         automl.fit(dataframe=X, label=y.name, **automl_settings)
         export_model(automl, self._configuration["result_folder_location"], 'model_flaml.p')
+        self.__create_explainer_dashboard(X, y)
 
     def __tabular_regression(self):
         """Execute the tabular regression task and export the found model"""
@@ -156,19 +157,21 @@ class FLAMLAdapter:
 
         export_model(automl, self._configuration["result_folder_location"], 'model_flaml.p')
 
-    def __create_explainer_dashboard(self):
+    def __create_explainer_dashboard(self, X, y):
         """Creates the ExplainerDashboard based on the generated model""" 
-        train, test = data_loader(self._configuration, perform_splitting=False)
-        X, y = prepare_tabular_dataset(test, self._configuration)
+      #  train, test = data_loader(self._configuration, perform_splitting=False)
+      #  X, y = prepare_tabular_dataset(test, self._configuration)
+      #  X, y = replace_forbidden_json_utf8_characters(X, y)
 
         with open(os.path.join(self._configuration["result_folder_location"], "model_flaml.p"), 'rb') as file:
             model = dill.load(file)
 
         if self._configuration["configuration"]["task"] == ":tabular_classification" or self._configuration["configuration"]["task"] == ":text_classification" :
-            dashboard = ExplainerDashboard(ClassifierExplainer(model, X, y))
+            explainer = ClassifierExplainer(model, X, y, target=y.name)
         else :
-            dashboard = ExplainerDashboard(RegressionExplainer(model, X, y))
+            explainer = RegressionExplainer(model, X, y)
 
+        dashboard = ExplainerDashboard(explainer)
         dash_path = os.path.abspath(os.path.join(self._configuration["result_folder_location"], os.pardir))
         os.makedirs(os.path.join(dash_path, "dashboard"), exist_ok=True)
         dash_path = os.path.join(dash_path, "dashboard")
