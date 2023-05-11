@@ -40,41 +40,62 @@ def read_csv_dataset(path: str) -> pd.DataFrame:
     {% endif %}
     return pd.read_csv(**configuration)
 {% else %}
-def read_image_dataset_folder(path):
+def read_image_dataset_folder(path,as_dataframe=False):
 
     data_dir = path
     test_df_list =[]
+    if as_dataframe == True:
+        root = os.path.abspath(os.path.expanduser(data_dir))
+        synsets = []
+        exts=('.jpg', '.jpeg', '.png')
+        items = {'image': [], 'label': []}
+        for folder in sorted(os.listdir(root)):
+            path = os.path.join(root, folder)
+            if not os.path.isdir(path):
+                continue
+            label = len(synsets)
+            synsets.append(folder)
+            for filename in sorted(os.listdir(path)):
+                filename = os.path.join(path, filename)
+                ext = os.path.splitext(filename)[1]
+                if ext.lower() not in exts:
+                    continue
+                items['image'].append(filename)
+                items['label'].append(label)
+            df = pd.DataFrame(items)
+            y_test = df["label"]
+            X_test = df.drop("label", axis=1)
+    else:
+        def read_image_dataset_folder():
+            files = []
+            df = []
+            for folder in os.listdir(os.path.join(data_dir)):
+                files.append(glob.glob(os.path.join(data_dir, folder, "*.jp*g")))
 
-    def read_image_dataset_folder():
-        files = []
-        df = []
-        for folder in os.listdir(os.path.join(data_dir)):
-            files.append(glob.glob(os.path.join(data_dir, folder, "*.jp*g")))
+            df_list =[]
+            for i in range(len(files)):
+                df = pd.DataFrame()
+                df["name"] = [x for x in files[i]]
+                df['outcome'] = i
+                df_list.append(df)
+            return df_list
 
-        df_list =[]
-        for i in range(len(files)):
-            df = pd.DataFrame()
-            df["name"] = [x for x in files[i]]
-            df['outcome'] = i
-            df_list.append(df)
-        return df_list
+        test_df_list = read_image_dataset_folder()
 
-    test_df_list = read_image_dataset_folder()
+        test_data = pd.concat(test_df_list, axis=0,ignore_index=True)
 
-    test_data = pd.concat(test_df_list, axis=0,ignore_index=True)
+        def img_preprocess(img):
+            """
+            Opens the image and does some preprocessing
+            such as converting to RGB, resize and converting to array
+            """
+            img = Image.open(img)
+            img = img.convert('RGB')
+            img = img.resize((256,256))
+            img = np.asarray(img)/255
+            return img
 
-    def img_preprocess(img):
-        """
-        Opens the image and does some preprocessing
-        such as converting to RGB, resize and converting to array
-        """
-        img = Image.open(img)
-        img = img.convert('RGB')
-        img = img.resize((256,256))
-        img = np.asarray(img)/255
-        return img
-
-    X_test = np.array([img_preprocess(p) for p in test_data.name.values])
-    y_test = test_data.outcome.values
+        X_test = np.array([img_preprocess(p) for p in test_data.name.values])
+        y_test = test_data.outcome.values
     return X_test, y_test
 {% endif %}

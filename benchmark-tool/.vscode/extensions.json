@@ -2,6 +2,9 @@
     "recommendations": [
         "ms-python.python",
         "ms-python.pylint",
-        "EditorConfig.EditorConfig"
+        "ms-python.pylance",
+        "ms-python.black-formatter",
+        "EditorConfig.EditorConfig",
+        "theumletteam.umlet"
     ]
 }
