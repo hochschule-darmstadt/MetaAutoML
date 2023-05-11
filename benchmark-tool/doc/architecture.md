@@ -23,10 +23,15 @@ See the folder [README](../README.md).
 4. External dependencies are encapsulated and only accessed through adapters (Dependency Inversion Principle). This allows changes in external dependencies with minimal code adaptions.
 5. The existing gRPC interface of the controller is used to communicate with OMAML.
 
-<!--
 ## Building Block View
-(May contain diagrams showing the functionality of specific features)
 
+### Interaction with OMAML
+
+The following diagram shows how OMAML is kept at the edge of the program on the example of the user initialization. The omaml_user_adapter defines how the benchmark wants to use the target system and takes care to translate this desired interface to the actual grpc interface.
+
+![diagram showing the interaction with omaml](./diagrams/omaml-interaction.png)
+
+<!--
 ## Runtime View
 (May contain information about runtime behaviour (e.g. order of events))
 -->
@@ -45,6 +50,7 @@ The benchmark tool is a console program that is not part of the regular deployme
 ### Risks
 
 - If the benchmark should run against the production cluster eventually then the gRPC interface must be reachable. That would require authentication however.
+- The user component creates a new user in OMAML, if no guid was passed in configuration. This user is not visible in the OMAML frontend though. Technically that is fine, because the OMAML UI is not actually needed, but when run against a production system, this is probably undesired.
 
 ### Technical Debt
 
