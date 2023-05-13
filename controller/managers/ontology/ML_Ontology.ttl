@@ -1,5 +1,5 @@
 ### Ontology file generated from ML_Ontology.xlsx.
-### 2023-04-27 16:44:04.905185
+### 2023-05-11 14:19:15.280266
 
 
 # PREFIXES
@@ -1698,7 +1698,7 @@
 :tpot a :AutoML_solution ;
     skos:prefLabel "TPOT" ;
     :used_for :scikit_learn_lib , :pytorch_lib ;
-    :can_perform :tabular_classification , :tabular_regression ;
+    :can_perform :tabular_classification , :tabular_regression , :image_classification ;
     :supported_by_oma_ml "true"^^xsd:boolean .
 :transmogrifai a :AutoML_solution ;
     skos:prefLabel "TransmogrifAI" ;
@@ -2150,6 +2150,12 @@
     :automl_solution :tpot ;
     :ml_task :tabular_regression ;
     :parameter_value :metric_tpot_tabular_regression .
+:image_classification_tpot a :Configuration_item ;
+    skos:prefLabel "image classification TPOT" ;
+    :category :task_configuration ;
+    :automl_solution :tpot ;
+    :ml_task :image_classification ;
+    :parameter_value :metric_tpot_image_classification .
 :tabular_classification_in_autocve a :Configuration_item ;
     skos:prefLabel "tabular classification in AutoCVE" ;
     :category :task_configuration ;
@@ -2579,6 +2585,12 @@
     skos:broader :metric ;
     :has_datatype :single_value ;
     :parameter_value :median_absolute_error , :mean_absolute_error , :mean_squared_error , :r2 .
+:metric_tpot_image_classification a :Configuration_item ;
+    skos:prefLabel "metric TPOT image classification" ;
+    :category :parameter ;
+    skos:broader :metric ;
+    :has_datatype :single_value ;
+    :parameter_value :accuracy , :average_precision , :adjusted_rand_score , :balanced_accuracy , :f_measure , :f_measure_macro , :f_measure_micro , :f_measure_samples , :f_measure_weighted , :log_loss , :precision , :precision_macro , :precision_micro , :precision_samples , :precision_weighted , :recall , :recall_macro , :recall_micro , :recall_samples , :recall_weighted , :jaccard , :jaccard_macro , :jaccard_micro , :jaccard_samples , :jaccard_weighted , :receiver_operating_characteristic_curve , :receiver_operating_characteristic_curve_one_vs_rest , :receiver_operating_characteristic_curve_one_vs_one , :receiver_operating_characteristic_curve_one_vs_rest_weighted , :receiver_operating_characteristic_curve_one_vs_one_weighted .
 :time_limit a :Configuration_item ;
     skos:prefLabel "time limit" ;
     :category :parameter ;
