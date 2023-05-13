@@ -27,6 +27,8 @@ class TPOTAdapter:
                 self.__tabular_classification()
             elif self._configuration["configuration"]["task"] == ":tabular_regression":
                 self.__tabular_regression()
+            elif self._configuration["configuration"]["task"] == ":image_classification":
+                self.__image_classification()
 
     def __tabular_classification(self):
         train, test = data_loader(self._configuration, perform_splitting=False)
@@ -59,3 +61,13 @@ class TPOTAdapter:
                                             random_state=42, verbosity=2, max_time_mins=self._configuration["configuration"]["runtime_limit"]*60)
         pipeline_optimizer.fit(X, y)
         export_model(pipeline_optimizer.fitted_pipeline_, self._configuration["result_folder_location"], 'model_TPOT.p')
+
+    def __image_classification(self):
+        X, y = data_loader(self._configuration, perform_splitting=False, as_2darray=True)
+
+        parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), tpc.task_config)
+        pipeline_optimizer = TPOTClassifier(generations=1, population_size=40, **parameters,
+                                            random_state=42, verbosity=2, max_time_mins=self._configuration["configuration"]["runtime_limit"]*60)
+        pipeline_optimizer.fit(X, y)
+        export_model(pipeline_optimizer.fitted_pipeline_, self._configuration["result_folder_location"], 'model_TPOT.p')
+
