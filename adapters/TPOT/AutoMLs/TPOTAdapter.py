@@ -67,7 +67,7 @@ class TPOTAdapter:
 
         parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), tpc.task_config)
         pipeline_optimizer = TPOTClassifier(generations=1, population_size=40, **parameters,
-                                            random_state=42, verbosity=2, max_time_mins=self._configuration["configuration"]["runtime_limit"]*60)
+                                            random_state=42, verbosity=2, max_time_mins=self._configuration["configuration"]["runtime_limit"])
         pipeline_optimizer.fit(X, y)
         export_model(pipeline_optimizer.fitted_pipeline_, self._configuration["result_folder_location"], 'model_TPOT.p')
 
