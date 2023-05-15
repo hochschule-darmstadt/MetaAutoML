@@ -87,7 +87,7 @@ class TPOTImageTaskTest(unittest.TestCase):
         req.dataset_path = dataset_path
         req.configuration.task = ':image_classification'
         req.configuration.target = "target"
-        req.configuration.runtime_limit = 3
+        req.configuration.runtime_limit = 10
         req.configuration.metric = ':accuracy'
         req.configuration.parameters = {":metric": {"values": [":accuracy"]}}
         req.dataset_configuration = json.dumps({
