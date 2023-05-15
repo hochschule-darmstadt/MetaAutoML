@@ -24,14 +24,14 @@ def load_iris_dataset() -> str:
     return file_path
 
 
-class AutoGluonTextTaskTest(unittest.TestCase):
+class TPOTTabularTaskTest(unittest.TestCase):
 
     # def setUp(self):
     #     # NOTE: we are running the test in the repos root directory.
     #     #       the application is expected to start inside the adapter solution,
     #     #       so we need to change working directories
-    #     autogluon_dir = os.path.join("adapters", "AutoGluon")
-    #     os.chdir(autogluon_dir)
+    #     tpot_dir = os.path.join("adapters", "TPOT")
+    #     os.chdir(tpot_dir)
 
     # def tearDown(self):
     #     # reset the working directory before finishing this test

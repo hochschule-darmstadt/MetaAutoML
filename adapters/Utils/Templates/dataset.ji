@@ -40,7 +40,7 @@ def read_csv_dataset(path: str) -> pd.DataFrame:
     {% endif %}
     return pd.read_csv(**configuration)
 {% else %}
-def read_image_dataset_folder(path,as_dataframe=False):
+def read_image_dataset_folder(path,as_dataframe=False,as_2darray=False):
 
     data_dir = path
     test_df_list =[]
@@ -97,5 +97,8 @@ def read_image_dataset_folder(path,as_dataframe=False):
 
         X_test = np.array([img_preprocess(p) for p in test_data.name.values])
         y_test = test_data.outcome.values
+        if as_2darray == True:
+            #reshape array to 2D-Array
+            X_test = X_test.reshape(-1, 256 * 256 * 3)
     return X_test, y_test
 {% endif %}
