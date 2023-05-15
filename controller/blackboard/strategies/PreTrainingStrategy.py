@@ -6,6 +6,7 @@ from ControllerBGRPC import DataType as GrpcDataType
 from IAbstractStrategy import IAbstractStrategy
 from StrategyController import StrategyController
 from Blackboard import Blackboard
+import copy
 
 class PreTrainingStrategyController(IAbstractStrategy):
     global_multi_fidelity_level = 1
@@ -61,7 +62,10 @@ class PreTrainingStrategyController(IAbstractStrategy):
             return 0.0
 
     def do_top_3_models_callback(self, model_list, _):
+        multi_fidelity_dataset_percentage = 0.1
         model_list.sort(key=lambda model: self.get_score(model), reverse=True)
+
+        self.controller.get_request().configuration.runtime_limit = self.controller.get_request().configuration.runtime_limit - int(self.controller.get_request().configuration.runtime_limit * multi_fidelity_dataset_percentage)
 
         relevant_auto_ml_solutions = []
         for model in model_list[0:3]:
@@ -79,15 +83,18 @@ class PreTrainingStrategyController(IAbstractStrategy):
         return
 
     def do_top_3_models(self, state: dict, blackboard: Blackboard, controller: StrategyController):
+        multi_fidelity_dataset_percentage = 0.1
         if self.global_multi_fidelity_level == 1:
             self.global_multi_fidelity_level = 0
         #disable Multi-Fidelity-Strategy
         controller.disable_strategy('pre_training.top_3_models')
-
+        request = self.controller.get_request()
+        request_copy = copy.deepcopy(request)
+        request_copy.configuration.runtime_limit = int(request_copy.configuration.runtime_limit * multi_fidelity_dataset_percentage)
         #start new training
-        strategy_controller = StrategyController(controller.get_data_storage(), controller.get_request(), controller.get_explainable_lock(), multi_fidelity_callback=self.do_top_3_models_callback, multi_fidelity_level=0.1)
+        strategy_controller = StrategyController(controller.get_data_storage(), request_copy, controller.get_explainable_lock(), multi_fidelity_callback=self.do_top_3_models_callback, multi_fidelity_level=multi_fidelity_dataset_percentage)
         return
-    
+
     def do_multi_fidelity_callback(self, model_list, old_multi_fidelity_level):
         model_list.sort(key=lambda model: self.get_score(model), reverse=True)
 
