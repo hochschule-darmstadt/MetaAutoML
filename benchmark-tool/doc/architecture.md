@@ -54,7 +54,7 @@ The benchmark tool is a console program that is not part of the regular deployme
 
 ### Technical Debt
 
-- None (so far)
+- Since the storing of the dataset in OMAML is handled by the frontend server, the benchmark tool has to the dataset the same way the frontend server does. This is not ideal, because it means that the benchmark tool has to know about the internals of the frontend server. The alternative would be to remove the interaction between frontend and backend via the file system or to create a separate endpoint or service that handles the dataset storage.
 
 ## Glossary
 
