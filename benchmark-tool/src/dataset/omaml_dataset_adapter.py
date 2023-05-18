@@ -3,12 +3,7 @@ from dataset.dataset_type import DatasetType, type_to_omaml_id
 from config.config_accessor import get_omaml_dataset_location
 from grpc_omaml.client_factory import create_omaml_client
 from grpc_omaml import CreateDatasetRequest
-
-
-class OmamlError(Exception):
-    """Exception raised when an error occurs while communicating with the omaml server"""
-
-    pass
+from grpc_omaml.omaml_error import OmamlError
 
 
 async def create_dataset(
