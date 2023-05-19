@@ -7,10 +7,10 @@ This document explains, how the unit testing framework [pytest](https://docs.pyt
 1. Create a file in the `test` folder prefixed with `test_` (e.g. `test_sample.py`)
 2. Define a function prefixed with `test_` and use `assert` inside it. Example:
 
-    ```python
-        def test_plus_should_return_6_when_given_2_and_4():
-        assert 2 + 4 == 6
-    ```
+   ```python
+       def test_plus_should_return_6_when_given_2_and_4():
+       assert 2 + 4 == 6
+   ```
 
 ### async tests
 
@@ -56,6 +56,7 @@ __mocker = MockingHelper()
 @pytest.fixture(autouse=True)
 def setup_function():
     """resets all mocks after each test"""
+    __mocker.add_main_module("module.under.test")
     yield
     __mocker.reset_mocks()
 ```
@@ -69,7 +70,6 @@ Before calling the module under test:
 ```python
 def call_tested_function():
     from mdoule.under.test import tested_function
-    __mocker.add_main_module("module.under.test")
     return tested_function()
 ```
 

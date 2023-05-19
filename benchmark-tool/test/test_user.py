@@ -10,6 +10,7 @@ __mocker = MockingHelper()
 @pytest.fixture(autouse=True)
 def setup_function():
     """resets all mocks after each test"""
+    __mocker.add_main_module("user.user")
     yield
     __mocker.reset_mocks()
 
@@ -21,7 +22,6 @@ config_user_id = "00000000-0000-0000-0000-000000000000"
 def call_init_user():
     from user.user import init_user
 
-    __mocker.add_main_module("user.user")
     return init_user()
 
 
