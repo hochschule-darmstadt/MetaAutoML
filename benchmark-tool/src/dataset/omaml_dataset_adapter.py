@@ -1,6 +1,6 @@
 import os
 from uuid import UUID
-from external.file_system import move_file_to_folder, get_filename_from_path
+from external.file_system import copy_file_to_folder
 from dataset.dataset_type import DatasetType, type_to_omaml_id
 from config.config_accessor import get_omaml_dataset_location
 from grpc_omaml.client_factory import create_omaml_client
@@ -24,8 +24,8 @@ async def create_dataset(
     """
     __file_upload(file_location, user_id)
 
+    filename = os.path.basename(file_location)
     client = create_omaml_client()
-    filename = get_filename_from_path(file_location)
 
     try:
         await client.create_dataset(
@@ -44,7 +44,7 @@ async def create_dataset(
 # currently this function mimics the behaviour of the frontend server when uploading files.
 def __file_upload(file_location: str, user_id: UUID):
     omaml_dataset_folder = get_omaml_dataset_location()
-    move_file_to_folder(
+    copy_file_to_folder(
         file_location, os.path.join(omaml_dataset_folder, str(user_id), "uploads")
     )
 
