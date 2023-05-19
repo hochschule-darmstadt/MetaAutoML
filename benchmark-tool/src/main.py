@@ -2,6 +2,7 @@ from user.user import init_user
 from dataset.dataset import upload_dataset
 from config.config_validator import validate_config_values
 from asyncio import run
+from grpc_omaml.omaml_client import OmamlClient
 
 
 async def main():
@@ -9,8 +10,9 @@ async def main():
     if configError is not None:
         print(configError)
         return
-    userId = await init_user()
-    await upload_dataset(userId)
+    with OmamlClient() as client:
+        userId = await init_user(client)
+        await upload_dataset(client, userId)
 
 
 if __name__ == "__main__":
