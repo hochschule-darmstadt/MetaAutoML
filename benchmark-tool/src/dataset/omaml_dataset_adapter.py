@@ -1,3 +1,4 @@
+import os
 from uuid import UUID
 from external.file_system import move_file_to_folder, get_filename_from_path
 from dataset.dataset_type import DatasetType, type_to_omaml_id
@@ -29,8 +30,11 @@ async def create_dataset(
         raise OmamlError("Error while creating dataset: ") from e
 
 
-def __file_upload(file_location: str):
-    move_file_to_folder(file_location, get_omaml_dataset_location())
+def __file_upload(file_location: str, user_id: UUID):
+    omaml_dataset_folder = get_omaml_dataset_location()
+    move_file_to_folder(
+        file_location, os.path.join(omaml_dataset_folder, str(user_id), "uploads")
+    )
 
 
 # todo: function that returns whether a dataset already exists

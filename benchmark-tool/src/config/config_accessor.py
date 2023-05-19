@@ -1,4 +1,5 @@
 from config.config_adapter import get_config_value as __get_config_value
+from os.path import normpath as __normpath
 
 
 def get_userid():
@@ -62,4 +63,6 @@ def get_omaml_dataset_location():
     location = __get_config_value("OMAML_DATASET_LOCATION")
     if location is None:
         raise ValueError("OMAML_DATASET_LOCATION is not set")
-    return location
+    return __normpath(
+        location
+    )  # normpath is used to make sure that the path is valid on the current operating system

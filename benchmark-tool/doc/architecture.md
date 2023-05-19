@@ -35,6 +35,7 @@ The following diagram shows how OMAML is kept at the edge of the program on the 
 ## Runtime View
 (May contain information about runtime behaviour (e.g. order of events))
 -->
+
 ## Deployment View
 
 The benchmark tool is a console program that is not part of the regular deployment of OMAML. It is expected that the tool is always executed manually. The option of running it inside the production cluster should remain available though.
@@ -55,6 +56,7 @@ The benchmark tool is a console program that is not part of the regular deployme
 ### Technical Debt
 
 - Since the storing of the dataset in OMAML is handled by the frontend server, the benchmark tool has to the dataset the same way the frontend server does. This is not ideal, because it means that the benchmark tool has to know about the internals of the frontend server. The alternative would be to remove the interaction between frontend and backend via the file system or to create a separate endpoint or service that handles the dataset storage.
+- launch.json is only configured for Windows where OMAML runs in docker. If the benchmark tool should be run on Linux or Mac, the launch.json has to be adapted.
 
 ## Glossary
 

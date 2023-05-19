@@ -1,4 +1,5 @@
 from user.user import init_user
+from dataset.dataset import upload_dataset
 from config.config_validator import validate_config_values
 from asyncio import run
 
@@ -9,7 +10,7 @@ async def main():
         print(configError)
         return
     userId = await init_user()
-    print(userId)
+    await upload_dataset(userId)
 
 
 if __name__ == "__main__":
