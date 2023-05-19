@@ -2,6 +2,7 @@ from unittest.mock import MagicMock
 import pytest
 from dataset.dataset_type import DatasetType
 from mocking_helpers.mocking_helper import MockingHelper, async_lambda
+from uuid import UUID
 
 pytest_plugins = ["pytest_asyncio"]
 __mocker = MockingHelper()
@@ -31,4 +32,4 @@ async def call_upload_dataset():
     from dataset.dataset import upload_dataset
 
     __mocker.add_main_module("dataset.dataset")
-    await upload_dataset()
+    await upload_dataset(UUID("00000000-0000-0000-0000-000000000000"))
