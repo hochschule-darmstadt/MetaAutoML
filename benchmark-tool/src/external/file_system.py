@@ -1,3 +1,5 @@
+"""Adapter for file system operations. This is needed to mock file system operations in unit tests"""
+
 import os
 from shutil import copy
 

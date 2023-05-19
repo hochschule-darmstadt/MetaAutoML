@@ -11,6 +11,17 @@ from grpc_omaml.omaml_error import OmamlError
 async def create_dataset(
     name: str, file_location: str, dataset_type: DatasetType, user_id: UUID
 ) -> None:
+    """Uploads a dataset from a given path to omaml
+
+    Args:
+        name (str): The name of the dataset
+        file_location (str): Path to the dataset file
+        dataset_type (DatasetType): The type of the dataset (e.g. tabular)
+        user_id (UUID): The id of the user that the dataset is associated with
+
+    Raises:
+        OmamlError: if the dataset could not be created
+    """
     __file_upload(file_location, user_id)
 
     client = create_omaml_client()
@@ -30,6 +41,7 @@ async def create_dataset(
         raise OmamlError("Error while creating dataset: ") from e
 
 
+# currently this function mimics the behaviour of the frontend server when uploading files.
 def __file_upload(file_location: str, user_id: UUID):
     omaml_dataset_folder = get_omaml_dataset_location()
     move_file_to_folder(

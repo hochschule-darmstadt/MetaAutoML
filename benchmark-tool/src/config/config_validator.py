@@ -3,6 +3,11 @@ from external.file_system import is_dir
 
 
 def validate_config_values() -> str | None:
+    """Validates whether all configuration values are valid.
+
+    Returns:
+        str | None: The validation error. None if no error.
+    """
     try:
         config_accessor.get_omaml_server_host()
         config_accessor.get_omaml_server_port()

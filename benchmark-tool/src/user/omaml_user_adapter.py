@@ -8,6 +8,9 @@ from grpc_omaml.omaml_error import OmamlError
 async def create_user() -> UUID:
     """Creates a new user and returns its id.
 
+    Raises:
+        OmamlError: When an error occurs while creating the user
+
     Returns:
         UUID: The id of the user
     """
