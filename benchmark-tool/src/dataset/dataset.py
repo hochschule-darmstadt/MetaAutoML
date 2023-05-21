@@ -9,8 +9,13 @@ async def upload_dataset(client: OmamlClient, user_id: UUID):
     Args:
         user_id (UUID): The id of the user that the dataset is associated with
     """
+    dataset_name = "titanic"
+
+    if await client.dataset_exists(dataset_name, user_id):
+        return
+
     await client.create_dataset(
-        name="titanic",
+        name=dataset_name,
         file_location="../resources/titanic_train.csv",
         dataset_type=DatasetType.TABULAR,
         user_id=user_id,

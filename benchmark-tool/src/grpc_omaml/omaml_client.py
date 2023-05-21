@@ -2,7 +2,12 @@ import os
 from uuid import UUID
 from dataset.dataset_type import DatasetType, type_to_omaml_id
 from external.file_system import copy_file_to_folder
-from grpc_omaml import ControllerServiceStub, CreateDatasetRequest, CreateNewUserRequest
+from grpc_omaml import (
+    ControllerServiceStub,
+    CreateDatasetRequest,
+    CreateNewUserRequest,
+    GetDatasetsRequest,
+)
 from grpclib.client import Channel
 from config.config_accessor import (
     get_omaml_dataset_location,
@@ -100,3 +105,26 @@ class OmamlClient:
         copy_file_to_folder(
             file_location, os.path.join(omaml_dataset_folder, str(user_id), "uploads")
         )
+
+    async def dataset_exists(self, dataset_name: str, user_id: UUID) -> bool:
+        """Checks if a dataset with the given name exists for the given user
+
+        Args:
+            dataset_name (str): The name of the dataset
+            user_id (UUID): The id of the user that the dataset is associated with
+
+        Raises:
+            OmamlError: if the datasets could not be fetched for the current user
+
+        Returns:
+            bool: True if the dataset exists, False otherwise
+        """
+        try:
+            result = await self.__grpc_client.get_datasets(
+                GetDatasetsRequest(user_id=str(user_id))
+            )
+            return any(
+                map(lambda dataset: dataset.name == dataset_name, result.datasets)
+            )
+        except Exception as e:
+            raise OmamlError("Error while checking if dataset exists: ") from e
