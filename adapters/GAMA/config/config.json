@@ -1,9 +1,9 @@
 {
-  "adapter-name": "evalml",
-  "job-file-name": "evalml-job.json",
+  "adapter-name": "gama",
+  "job-file-name": "gama-job.json",
   "env-varname-cluster": "RUNTIME",
   "grpc-server-address": "0.0.0.0",
-  "export-zip-file-name": "evalml-export",
+  "export-zip-file-name": "gama-export",
   "training-path": "app-data/training",
   "job-folder-name": "job",
   "model-folder-name": "model",
