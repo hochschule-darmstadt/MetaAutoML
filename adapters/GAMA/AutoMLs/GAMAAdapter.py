@@ -97,6 +97,6 @@ class GAMAAdapter:
         except:
             print("no tuner param")
 
-        return None
+        return AsyncEA() #default
 
 
