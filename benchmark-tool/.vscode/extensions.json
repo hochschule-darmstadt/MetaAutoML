@@ -1,0 +1,10 @@
+{
+    "recommendations": [
+        "ms-python.python",
+        "ms-python.pylint",
+        "ms-python.pylance",
+        "ms-python.black-formatter",
+        "EditorConfig.EditorConfig",
+        "theumletteam.umlet"
+    ]
+}

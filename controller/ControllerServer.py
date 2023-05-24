@@ -8,6 +8,7 @@ from ControllerBGRPC import *
 from ControllerServiceManager import ControllerServiceManager
 from Container import Application
 import nest_asyncio
+from grpclib.config import Configuration
 
 ROOT_PATH = os.path.dirname(os.path.abspath(__file__))
 
@@ -54,7 +55,11 @@ async def main():
     """The controller main function starting the controller GRPC server and waiting on incoming requests of the frontend
     """
     #with ProcessPoolExecutor(max_workers=40) as executor:
-    server = Server([ControllerServiceManager()])
+    config = Configuration(
+        http2_connection_window_size= 2000 * 1024 * 1024,  # 1 MiB
+        http2_stream_window_size= 2000 * 1024 * 1024,  # 1 MiB
+    )
+    server = Server([ControllerServiceManager()], config=config)
     context = SSLContext(protocol=ssl.PROTOCOL_TLSv1_2)
     context.load_cert_chain(certfile="certificate/server.crt", keyfile='certificate/server.key')
     await server.start(get_config_property('controller-server-adress'), get_config_property('controller-server-port'), ssl=create_secure_context())

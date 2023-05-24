@@ -6,12 +6,15 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "CONTROLLER_SERVICE_HOST": "localhost",
-        "CONTROLLER_DATASET_FOLDER_PATH": "C:\\Users\\alex\\Desktop\\MetaAutoML\\controller\\app-data\\datasets",
+        "CONTROLLER_DATASET_FOLDER_PATH": "C:\\\\Users\\\\alex\\\\Desktop\\\\MetaAutoML\\\\controller\\\\app-data\\\\datasets",
         "CONTROLLER_SERVICE_PORT": "5001",
         "no_proxy": "localhost",
         "REDIS_SERVICE_HOST": "localhost",
         "REDIS_SERVICE_PORT": "6379",
-        "REGISTRATION_ALLOWED": "false"
+        "REGISTRATION_ALLOWED": "false",
+        "IS_MUTAGEN_SETUP": "NO",
+        "MUTAGEN_DATASET_FOLDER_PATH": "C:\\\\Users\\\\alex\\\\Desktop\\\\MetaAutoML\\\\mutagen_datasets",
+        "MUTAGEN_DOCKER_DATASET_FOLDER_PATH": "/app/app-data/datasets"
       },
       "inspectUri": "{wsProtocol}://{url.hostname}:{url.port}/_framework/debug/ws-proxy?browser={browserInspectUri}",
       "sqlDebugging": false
@@ -27,7 +30,10 @@
         "no_proxy": "localhost",
         "REDIS_SERVICE_HOST": "localhost",
         "REDIS_SERVICE_PORT": "6379",
-        "REGISTRATION_ALLOWED": "false"
+        "REGISTRATION_ALLOWED": "false",
+        "IS_MUTAGEN_SETUP": "NO",
+        "MUTAGEN_DATASET_FOLDER_PATH": "C:\\\\Users\\\\alex\\\\Desktop\\\\MetaAutoML\\\\mutagen_datasets",
+        "MUTAGEN_DOCKER_DATASET_FOLDER_PATH": "/app/app-data/datasets"
       },
       "inspectUri": "{wsProtocol}://{url.hostname}:{url.port}/_framework/debug/ws-proxy?browser={browserInspectUri}",
       "applicationUrl": "http://localhost:53416/"

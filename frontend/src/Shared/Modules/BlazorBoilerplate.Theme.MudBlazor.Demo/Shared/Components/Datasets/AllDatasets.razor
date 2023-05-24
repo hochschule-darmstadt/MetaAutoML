@@ -6,7 +6,7 @@
 <MudCard Elevation="5">
     <MudCardHeader Style="border-bottom-style: inset; border-bottom-width: 1px;">
         <CardHeaderContent >
-            <MudText Typo="Typo.h6">All datasets</MudText>
+            <MudText Typo="Typo.h6">@L["All datasets"]</MudText>
         </CardHeaderContent>
         <CardHeaderActions>
             <MudStack Row="true" Class="align-content-center" Style="margin-top: 8px">
@@ -50,7 +50,7 @@
                     <MudTd><DatasetMenu Dataset="@context" OnDeleteCompleted="@OnDeleteDatasetCompleted" /></MudTd>
                 </RowTemplate>
                 <PagerContent>
-                    <MudTablePager />
+                    <MudTablePager RowsPerPageString=@L["Rows per page"]/>
                 </PagerContent>
             </MudTable>
         }

@@ -1,0 +1,17 @@
+{
+    "python.analysis.typeCheckingMode": "strict",
+    "python.formatting.provider": "none",
+    "python.linting.lintOnSave": true,
+    "python.linting.flake8Enabled": false,
+    "python.linting.pylintEnabled": false,
+    "python.testing.pytestEnabled": true,
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestArgs": ["test"],
+    "pylint.args": ["--rcfile=${workspaceFolder}/pylint.cfg"],
+    "[python]": {
+        "editor.formatOnSave": true,
+        "diffEditor.ignoreTrimWhitespace": false,
+        "editor.wordBasedSuggestions": false,
+        "editor.defaultFormatter": "ms-python.black-formatter"
+    }
+}

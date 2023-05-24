@@ -9,14 +9,17 @@ from autogluon.tabular import TabularPredictor
 {% if configuration.configuration["task"] in [":time_series_forecasting"]%}
 from autogluon.timeseries import TimeSeriesPredictor, TimeSeriesDataFrame
 {% endif %}
-{% if configuration.configuration["task"] in [":image_classification", ":text_classification", ":text_regression"]%}
+{% if configuration.configuration["task"] in [":image_classification", ":text_classification", ":text_regression", ":named_entity_recognition"]%}
 from autogluon.multimodal import MultiModalPredictor
 {% endif %}
-{% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression", ":text_classification", ":text_regression"] %}
+{% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression", ":text_classification", ":text_regression", ":named_entity_recognition"] %}
 from preprocessing import dataset_preparation, feature_configuration
 {% endif %}
 {% if configuration.configuration["task"] in [":time_series_forecasting"] %}
 from preprocessing import dataset_preparation, feature_configuration, seperate_time_series_dataframe
+{% endif %}
+{% if configuration.configuration["task"] not in [":tabular_classification", ":tabular_regression", ":text_classification", ":text_regression", ":time_series_forecasting"] %}
+from dataset import read_image_dataset_folder
 {% endif %}
 
 import pandas as pd
@@ -28,7 +31,7 @@ if __name__ == '__main__':
     save_path = sys.argv[2]
     X = None
 
-    {% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression", ":text_classification", ":text_regression"] %}
+    {% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression", ":text_classification", ":text_regression", ":named_entity_recognition"] %}
     X, y = dataset_preparation(filepath)
     {% endif %}
     {% if configuration.configuration["task"] in [":time_series_forecasting"] %}
@@ -46,8 +49,7 @@ if __name__ == '__main__':
 
     {% endif %}
     {% if configuration.configuration["task"] in [":image_classification"]%}
-    X = ImageDataset.from_folder(filepath)
-    print(X.head())
+    X,y = read_image_dataset_folder(filepath, as_dataframe=True)
     #X.reset_index(inplace=True)
     #X.drop(['label'], inplace=True)
     {% endif %}
@@ -55,7 +57,7 @@ if __name__ == '__main__':
     {% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression"]%}
     automl = TabularPredictor.load(os.path.join(sys.path[0], 'model_gluon.gluon'))
     {% endif %}
-    {% if configuration.configuration["task"] in [":text_classification", ":text_regression", ":image_classification"]%}
+    {% if configuration.configuration["task"] in [":text_classification", ":text_regression", ":named_entity_recognition", ":image_classification"]%}
     automl = MultiModalPredictor.load(os.path.join(sys.path[0], 'model_gluon.gluon'))
     {% endif %}
     {% if configuration.configuration["task"] in [":time_series_forecasting"]%}
@@ -71,10 +73,10 @@ if __name__ == '__main__':
     exogenous_ts = TimeSeriesDataFrame.from_data_frame(exogenous_ts, id_column="timeseries_id", timestamp_column=timestamp_column)
     predicted_y = automl.predict(previous_ts, known_covariates=exogenous_ts, as_pandas=False)
     predicted_y = predicted_y["mean"]
-    
+
     predicted_y = predicted_y.reset_index(drop=True).to_numpy()
-    {% endif %}    
-    {% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression", ":text_classification", ":text_regression"] %}
+    {% endif %}
+    {% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression", ":text_classification", ":text_regression", ":named_entity_recognition", ":image_classification"] %}
     predicted_y = automl.predict(X, as_pandas=False)
     {% endif %}
     predicted_y = np.reshape(predicted_y, (-1, 1))

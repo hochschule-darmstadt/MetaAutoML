@@ -16,7 +16,7 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development #Consider changing this in Production
       - Serilog__MinimumLevel__Default=Debug #Consider changing this in Production
-      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=blazor_boilerplate;Trusted_Connection=True;MultipleActiveResultSets=true;User=sa;Password=yourVeryStrong(!)Password;Integrated Security=false
+      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=blazor_boilerplate;Trusted_Connection=True;MultipleActiveResultSets=true;User=sa;Password=yourVeryStrong(!)Password;Integrated Security=false;Encrypt=False;
       - BlazorBoilerplate__UseSqlServer=true
       - BlazorBoilerplate__ApplicationUrl=blazorboilerplate
       - BlazorBoilerplate__IS4ApplicationUrl=blazorboilerplate
@@ -47,6 +47,7 @@ services:
       - training-evalml:/app/app-data/training/evalml
       - training-pycaret:/app/app-data/training/pycaret
       - training-tpot:/app/app-data/training/tpot
+      - training-gama:/app/app-data/training/gama
     extra_hosts:
       - "docker.host.internal:host-gateway"
 

@@ -1,13 +1,11 @@
 import os
+import unittest
 
 from AdapterUtils import *
-from AdapterTabularUtils import *
 from autogluon.tabular import TabularPredictor
+from autogluon.multimodal import  MultiModalPredictor
 from autogluon.timeseries import TimeSeriesDataFrame, TimeSeriesPredictor
-from autogluon.multimodal import MultiModalPredictor
-from AdapterUtils import prepare_tabular_dataset
 from AutoGluonServer import data_loader
-import pandas as pd
 import AutoGluonParameterConfig as agpc
 
 class AutoGluonAdapter:
@@ -66,6 +64,10 @@ class AutoGluonAdapter:
             self.__tabular_regression()
         elif self._configuration["configuration"]["task"] == ":image_classification":
             self.__image_classification()
+        elif self._configuration["configuration"]["task"] == ":text_classification":
+            self.__text_classification()
+        elif self._configuration["configuration"]["task"] == ":named_entity_recognition":
+            self.__text_named_entity_recognition()
         elif self._configuration["configuration"]["task"] == ":time_series_forecasting":
             self.__time_series_forecasting()
 
@@ -121,8 +123,28 @@ class AutoGluonAdapter:
         parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), agpc.task_config)
 
         model = MultiModalPredictor(label=y.name,
-                                 problem_type=classification_type,
                                  **parameters,
+                                 problem_type=classification_type,
+                                 path=self._result_path).fit(
+            data,
+            time_limit=self._time_limit*60, hyperparameters=hyperparameters)
+        #Fit methode already saves the model
+
+    def __text_named_entity_recognition(self):
+        """Execute the tabular regression task and export the found model"""
+        self.df, test = data_loader(self._configuration)
+        X, y = prepare_tabular_dataset(self.df, self._configuration)
+        data = X
+        data[y.name] = y
+        #Disable multi worker else training takes a while or doesnt complete
+        #https://github.com/autogluon/autogluon/issues/2756
+        # set checkpoint for ner
+        hyperparameters = {"env.num_workers": 0, 'model.ner_text.checkpoint_name':'google/electra-small-discriminator'}
+        parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), agpc.task_config)
+
+        model = MultiModalPredictor(label=y.name,
+                                 **parameters,
+                                 problem_type='ner',
                                  path=self._result_path).fit(
             data,
             time_limit=self._time_limit*60, hyperparameters=hyperparameters)
@@ -136,8 +158,9 @@ class AutoGluonAdapter:
 
         # Einteilen
         X, y =  data_loader(self._configuration, as_dataframe=True)
-        X[y.name] = y.values
-        if len(X['label'].unique()) == 2:
+        data = X
+        data[y.name] = y
+        if len(data[y.name].unique()) == 2:
             classification_type = "binary"
         else:
             classification_type =  "multiclass"
@@ -146,9 +169,12 @@ class AutoGluonAdapter:
         #https://github.com/autogluon/autogluon/issues/2756
         hyperparameters = {"env.num_workers": 0}
         parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), agpc.task_config)
-        model = MultiModalPredictor(label='label',problem_type=classification_type, **parameters, path=self._result_path).fit(
+        model = MultiModalPredictor(label=y.name,
+                                    problem_type=classification_type,
+                                    **parameters,
+                                    path=self._result_path).fit(
 
-            X,
+            data,
             time_limit=self._time_limit*60, hyperparameters=hyperparameters)
         #Fit methode already saves the model
 
@@ -193,3 +219,5 @@ class AutoGluonAdapter:
             time_limit=self._time_limit*60)
         #Fit methode already saves the model
 
+if __name__ == '__main__':
+    unittest.main()

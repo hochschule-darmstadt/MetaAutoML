@@ -28,8 +28,8 @@ spec:
         - containerPort: 1433
         resources:
           limits:
-            cpu: "1"
-            memory: "2097152e3"
+            cpu: "0.5"
+            memory: "1097152e3"
         volumeMounts:
         - mountPath: /var/opt/mssql
           name: dbdata
