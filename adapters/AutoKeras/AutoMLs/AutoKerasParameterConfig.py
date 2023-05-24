@@ -166,7 +166,7 @@ image_regression_config = [
 
 #config for the text classification
 text_classification_config = [
-    [":max_trials", ":max_trials_autokeras", [3], "single_value", "integer", "", "max_trials"],
+    [":max_trials", ":max_trials_autokeras", [1], "single_value", "integer", "", "max_trials"],
     [":metric", ":metric_autokeras_text_classification", [":accuracy"], "single_value", "dict", autokeras_metrics, "metrics"],
     [":metric", ":metric_autokeras_text_classification", [":accuracy"], "single_value", "dict", autokeras_objectives, "objective"],
     [":tuner", ":tuner_autokeras_text_classification", [None], "single_value", "dict", autokeras_tuner, "tuner"],
@@ -176,7 +176,7 @@ text_classification_config = [
 
 #config for the text regression
 text_regression_config = [
-    [":max_trials", ":max_trials_autokeras", [3], "single_value", "integer", "", "max_trials"],
+    [":max_trials", ":max_trials_autokeras", [1], "single_value", "integer", "", "max_trials"],
     [":metric", ":metric_autokeras_text_regression", [":mean_squared_error"], "single_value", "dict", autokeras_metrics, "metrics"], #missing metric in ontology
     [":metric", ":metric_autokeras_text_regression", [":mean_squared_error"], "single_value", "dict", autokeras_objectives, "objective"], #missing metric in ontology
     [":tuner", ":tuner_autokeras_text_regression", [None], "single_value", "dict", autokeras_tuner, "tuner"],
