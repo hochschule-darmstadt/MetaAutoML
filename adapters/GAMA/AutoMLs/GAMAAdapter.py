@@ -7,10 +7,9 @@ from JsonUtil import get_config_property
 
 from predict_time_sources import feature_preparation
 
-import json
-import pickle
 from gama import GamaClassifier,GamaRegressor
-from sklearn.datasets import load_breast_cancer
+from gama.search_methods import AsynchronousSuccessiveHalving, AsyncEA, RandomSearch
+import GAMAParameterConfig as gpc
 
 # TODO implement
 class GAMAAdapter:
@@ -49,8 +48,9 @@ class GAMAAdapter:
         
         self.df, test = data_loader(self._configuration)
         X, y = prepare_tabular_dataset(self.df, self._configuration)
-        # TODO: add params
-        automl = GamaClassifier(max_total_time=80, store="nothing", n_jobs=1,)
+
+        parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), gpc.task_config)
+        automl = GamaClassifier(max_total_time=80, store="nothing", n_jobs=1, **parameters,search=self.__get_search_method())
         automl.fit(X, y)
 
         export_model(automl, self._configuration["result_folder_location"], 'GAMA.p')
@@ -68,8 +68,9 @@ class GAMAAdapter:
         self.df, test = data_loader(self._configuration)
         X, y = prepare_tabular_dataset(self.df, self._configuration)
 
-        # TODO: add params
-        automl = GamaRegressor(max_total_time=180, store="nothing", n_jobs=1)
+        parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), gpc.task_config)
+
+        automl = GamaRegressor(max_total_time=180, store="nothing", n_jobs=1, **parameters, search=self.__get_search_method())
         automl.fit(X, y)
 
         export_model(automl, self._configuration["result_folder_location"], 'GAMA.p')
@@ -77,5 +78,25 @@ class GAMAAdapter:
 
         return
 
+    def __get_search_method(self):
+        """get tuner class or search method in gama
+        return none when not setted
+        !important: i could not do it in the same way as metrics because in docu from gama :
+        "Search method to use to find good pipelines. Should be instantiated."
+
+        Returns:
+            tuner class object: tuner obj
+        """
+        tuner_dict = {
+            ':random' : RandomSearch() ,
+            ':async_ea' : AsyncEA() ,
+            ':async_successive_halving' : AsynchronousSuccessiveHalving() ,
+        }
+        try:
+            return tuner_dict[self._configuration['configuration']['parameters'][':tuner_class_gama']['values'][0]]
+        except:
+            print("no tuner param")
+
+        return None
 
 
