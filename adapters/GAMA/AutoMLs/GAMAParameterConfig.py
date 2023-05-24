@@ -1,7 +1,6 @@
 #lookup dictionary for EvalML metrics values
 # https://openml-labs.github.io/gama/master/api/index.html
 gama_metrics = {
-#TODO: bug accuracy raise error in gama
 #classification
     ":accuracy": "accuracy",
     ":average_precision": "average_precision",

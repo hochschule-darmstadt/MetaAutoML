@@ -11,7 +11,7 @@ from gama import GamaClassifier,GamaRegressor
 from gama.search_methods import AsynchronousSuccessiveHalving, AsyncEA, RandomSearch
 import GAMAParameterConfig as gpc
 
-# TODO implement
+
 class GAMAAdapter:
     """Implementation of the AutoML functionality for GAMA
 
@@ -60,7 +60,7 @@ class GAMAAdapter:
         return
 
     def __regression(self):
-        """Execute the tabular classification task and export the found model"""
+        """Execute the tabular regression task and export the found model"""
         self.df, test = data_loader(self._configuration, perform_splitting=False)
         X, y = prepare_tabular_dataset(self.df, self._configuration)
         self._configuration = set_encoding_for_string_columns(self._configuration, X, y)

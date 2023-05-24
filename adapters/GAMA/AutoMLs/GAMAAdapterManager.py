@@ -9,13 +9,8 @@ from JsonUtil import get_config_property
 import pandas as pd
 from typing import Tuple
 from predict_time_sources import feature_preparation
-import gama
 
 
-#TODO GAMA estimators
-GAMA_estimators = {
-    'Time Series Baseline Regression Pipeline' : (":baseline", ":baseline")
-}
 
 class GAMAAdapterManager(AdapterManager):
     """The AutoML solution specific functionality implementation of the AdapterManager class
