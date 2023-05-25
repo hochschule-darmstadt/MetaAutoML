@@ -2190,7 +2190,7 @@
     :category :task_configuration ;
     :automl_solution :gama ;
     :ml_task :tabular_classification ;
-    :parameter_value :tuner_class_gama , :metric_gama_tabular_classfication .
+    :parameter_value :tuner_class_gama , :metric_gama_tabular_classification .
 :tabular_regression_in_gama a :Configuration_item ;
     skos:prefLabel "tabular regression in GAMA" ;
     :category :task_configuration ;
