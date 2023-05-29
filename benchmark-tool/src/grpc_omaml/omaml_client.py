@@ -106,7 +106,7 @@ class OmamlClient:
             file_location, os.path.join(omaml_dataset_folder, str(user_id), "uploads")
         )
 
-    async def dataset_exists(self, dataset_name: str, user_id: UUID) -> bool:
+    async def get_dataset_by_name(self, dataset_name: str, user_id: UUID) -> str | None:
         """Checks if a dataset with the given name exists for the given user
 
         Args:
@@ -123,8 +123,16 @@ class OmamlClient:
             result = await self.__grpc_client.get_datasets(
                 GetDatasetsRequest(user_id=str(user_id))
             )
-            return any(
-                map(lambda dataset: dataset.name == dataset_name, result.datasets)
+
+            # return single element from list that has the same name as the dataset_name
+            return next(
+                (
+                    dataset.id
+                    for dataset in result.datasets
+                    if dataset.name == dataset_name
+                ),
+                None,
             )
+
         except Exception as e:
             raise OmamlError("Error while checking if dataset exists: ") from e
