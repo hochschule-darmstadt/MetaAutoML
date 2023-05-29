@@ -1,0 +1,55 @@
+# yaml-language-server: $schema=https://json-schema.org/draft/2020-12/schema
+title: Dataset
+description: Schema definition for datasets to be used in the benchmark
+type: object
+properties:
+  datasets:
+    type: array
+    description: List of datasets
+    items:
+      type: object
+      properties:
+        name_id:
+          type: string
+          description: Name of the dataset
+        file_location:
+          type: string
+          description: Location of the dataset
+        dataset_type:
+          type: string
+          description: Type of the dataset
+          enum:
+            - ':tabular'
+            - ':text'
+            - ':image'
+            - ':video'
+            - ':audio'
+            - ':graph'
+            - ':time_series'
+            - ':time_series_longitudinal'
+        columns:
+          type: array
+          description: List of columns in the dataset
+          items:
+            type: object
+            properties:
+              index:
+                type: integer
+                description: Index of the column
+              column_role:
+                type: string
+                description: Role of the column
+                enum:
+                  - ':index'
+                  - ':target'
+                  - ':ignore'
+              column_type:
+                type: string
+                description: Type of the column
+                enum:
+                  - ':integer'
+                  - ':float'
+                  - ':boolean'
+                  - ':string'
+                  - ':categorical'
+                  - ':datetime'
