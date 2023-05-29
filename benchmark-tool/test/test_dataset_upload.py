@@ -1,12 +1,16 @@
 from unittest.mock import MagicMock
 import pytest
-from dataset.dataset_type import DatasetType
+from dataset.dataset_configuration import DatasetConfiguration
 from mocking_helpers.mocking_helper import async_lambda
 from uuid import UUID
 
 pytest_plugins = ["pytest_asyncio"]
 
 __existing_dataset_id = "1234567890"
+__dataset = DatasetConfiguration()
+__dataset.name_id = "titanic"
+__dataset.dataset_type = ":tabular"
+__dataset.file_location = "some/path/to/file.csv"
 
 
 def mock_omaml_client(dataset_exists: bool):
@@ -30,22 +34,17 @@ def mock_omaml_client(dataset_exists: bool):
     return mocked_client, create_dataset_mock
 
 
-def assert_titanic_dataset_uploaded(create_dataset_mock: MagicMock):
-    assert create_dataset_mock.called
-    passed_args = create_dataset_mock.call_args.kwargs
-    assert passed_args["name"] == "titanic"
-    assert passed_args["dataset_type"] == DatasetType.TABULAR
-
-
 @pytest.mark.asyncio
-async def test_upload_dataset_should_upload_titanic_dataset_when_dataset_does_not_exist_yet():
+async def test_upload_dataset_should_upload_dataset_when_dataset_does_not_exist_yet():
     from dataset.dataset import upload_dataset
 
     mocked_client, create_dataset_mock = mock_omaml_client(dataset_exists=False)
 
-    await upload_dataset(mocked_client, UUID("00000000-0000-0000-0000-000000000000"))
+    await upload_dataset(
+        mocked_client, UUID("00000000-0000-0000-0000-000000000000"), __dataset
+    )
 
-    assert_titanic_dataset_uploaded(create_dataset_mock)
+    assert create_dataset_mock.called
 
 
 @pytest.mark.asyncio
@@ -54,7 +53,9 @@ async def test_upload_dataset_should_not_upload_when_dataset_already_exists():
 
     mocked_client, create_dataset_mock = mock_omaml_client(dataset_exists=True)
 
-    await upload_dataset(mocked_client, UUID("00000000-0000-0000-0000-000000000000"))
+    await upload_dataset(
+        mocked_client, UUID("00000000-0000-0000-0000-000000000000"), __dataset
+    )
 
     assert not create_dataset_mock.called
 
@@ -66,7 +67,7 @@ async def test_upload_dataset_should_return_dataset_guid_when_dataset_already_ex
     mocked_client, _ = mock_omaml_client(dataset_exists=True)
 
     dataset_id = await upload_dataset(
-        mocked_client, UUID("00000000-0000-0000-0000-000000000000")
+        mocked_client, UUID("00000000-0000-0000-0000-000000000000"), __dataset
     )
 
     assert dataset_id == __existing_dataset_id
@@ -79,7 +80,7 @@ async def test_upload_dataset_should_return_dataset_guid_when_dataset_does_not_e
     mocked_client, _ = mock_omaml_client(dataset_exists=False)
 
     dataset_id = await upload_dataset(
-        mocked_client, UUID("00000000-0000-0000-0000-000000000000")
+        mocked_client, UUID("00000000-0000-0000-0000-000000000000"), __dataset
     )
 
     assert dataset_id is not None

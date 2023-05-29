@@ -1,6 +1,6 @@
 import os
 from uuid import UUID
-from dataset.dataset_type import DatasetType, type_to_omaml_id
+from dataset.dataset_configuration import DatasetConfiguration
 from external.file_system import copy_file_to_folder
 from grpc_omaml import (
     ControllerServiceStub,
@@ -70,7 +70,7 @@ class OmamlClient:
             raise OmamlError("Error while creating user: ") from e
 
     async def create_dataset(
-        self, name: str, file_location: str, dataset_type: DatasetType, user_id: UUID
+        self, dataset: DatasetConfiguration, user_id: UUID
     ) -> None:
         """Uploads a dataset from a given path to omaml
 
@@ -83,15 +83,15 @@ class OmamlClient:
         Raises:
             OmamlError: if the dataset could not be created
         """
-        self.__file_upload(file_location, user_id)
+        self.__file_upload(dataset.file_location, user_id)
 
-        filename = os.path.basename(file_location)
+        filename = os.path.basename(dataset.file_location)
         try:
             await self.__grpc_client.create_dataset(
                 CreateDatasetRequest(
                     file_name=filename,
-                    dataset_name=name,
-                    dataset_type=type_to_omaml_id(dataset_type),
+                    dataset_name=dataset.name_id,
+                    dataset_type=dataset.dataset_type,
                     user_id=str(user_id),
                     encoding="utf-8",
                 )
