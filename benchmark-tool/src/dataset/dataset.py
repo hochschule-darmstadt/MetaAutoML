@@ -7,6 +7,7 @@ async def upload_dataset(client: OmamlClient, user_id: UUID):
     """Uploads a dataset to omaml for the given user. For now the dataset is hardcoded.
 
     Args:
+        client (OmamlClient): The omaml client to use
         user_id (UUID): The id of the user that the dataset is associated with
     """
     dataset_name = "titanic"
