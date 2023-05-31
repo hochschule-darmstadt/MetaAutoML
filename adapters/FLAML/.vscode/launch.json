@@ -32,22 +32,6 @@
                 "USE_DEV_CONFIG": "YES"
             },
         },
-        {  
-            "name": "WIN FLAML Adapter Test",
-            "type": "python",
-            "request": "launch",
-            "purpose": ["debug-test"],
-            "program": "tests/test_text_tasks.py",
-            "console": "integratedTerminal",
-            "justMyCode": false,
-            "env": {
-                "PYTHONPATH": ".;dependency-injection;AutoMLs;Utils;../Utils/Utils;../Utils/AutoMLs;../GRPC/Adapter;",
-                "GRPC_SERVER_PORT": "50062",
-                "PYTHON_ENV": ".venv/Scripts/python",
-                "USE_DEV_CONFIG": "YES",
-                "PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION": "python"
-            },
-        },    
         {
             "name": "WIN FLAML Explainerdashboard Test",
             "type": "python",
@@ -57,11 +41,11 @@
             "console": "integratedTerminal",
             "justMyCode": false,
             "env": {
-                    "PYTHONPATH": ".;./dependency-injection;./AutoMLs;./Utils;./../Utils/Utils;./../Utils/AutoMLs;./../GRPC/Adapter;./../../controller;",
-                    "GRPC_SERVER_PORT": "50052",
-                    "PYTHON_ENV": ".venv/Scripts/python",
-                    "USE_DEV_CONFIG": "YES",
-                    "PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION": "python"
+                "PYTHONPATH": ".;./dependency-injection;./AutoMLs;./Utils;./../Utils/Utils;./../Utils/AutoMLs;./../GRPC/Adapter;./../../controller;",
+                "GRPC_SERVER_PORT": "50052",
+                "PYTHON_ENV": ".venv/Scripts/python",
+                "USE_DEV_CONFIG": "YES",
+                "PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION": "python"
             },
         },
         {
