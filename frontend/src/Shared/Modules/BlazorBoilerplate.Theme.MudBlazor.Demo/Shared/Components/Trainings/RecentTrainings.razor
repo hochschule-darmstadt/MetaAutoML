@@ -8,8 +8,17 @@
 
 <MudCard Elevation="5">
     <MudCardHeader Style="border-bottom-style: inset; border-bottom-width: 1px;">
-        <CardHeaderContent >
-            <MudText Typo="Typo.h6">@L["Recent trainings"]</MudText>
+        <CardHeaderContent>
+            <MudStack Row="true" Class="align-content-center">
+                <MudText Typo="Typo.h6">@L["Recent trainings"]</MudText>
+                <HoverTooltip Height="60%" Right="16.5%" Label="These are the ML training sessions you have
+                          started recently. By clicking on one training (indicated by date and time)
+                          you can inspect and use the ML models that have been trained.
+">
+                    <MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.Info" Style="opacity:70%; align-self:center;margin-top:20%"></MudIcon>
+
+                </HoverTooltip>
+                </MudStack>
         </CardHeaderContent>
         <CardHeaderActions>
             <MudButton Href="@("/trainings")"
