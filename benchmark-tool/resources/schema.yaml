@@ -33,7 +33,7 @@ properties:
           items:
             type: object
             properties:
-              index:
+              idx:
                 type: integer
                 description: Index of the column
               column_role:
@@ -53,3 +53,11 @@ properties:
                   - ':string'
                   - ':categorical'
                   - ':datetime'
+            required:
+              - idx
+              - column_type
+      required:
+        - name_id
+        - file_location
+        - dataset_type
+        - columns

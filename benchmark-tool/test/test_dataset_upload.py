@@ -7,10 +7,9 @@ from uuid import UUID
 pytest_plugins = ["pytest_asyncio"]
 
 __existing_dataset_id = "1234567890"
-__dataset = DatasetConfiguration()
-__dataset.name_id = "titanic"
-__dataset.dataset_type = ":tabular"
-__dataset.file_location = "some/path/to/file.csv"
+__dataset = DatasetConfiguration(
+    name_id="titanic", dataset_type=":tabular", file_location="some/path/to/file.csv"
+)
 
 
 def mock_omaml_client(dataset_exists: bool):

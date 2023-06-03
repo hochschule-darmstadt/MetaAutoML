@@ -16,10 +16,11 @@ async def main():
 
         # the dataset configuration is hardcoded for now.
         # Will be read from yaml in the near future.
-        dataset_config = DatasetConfiguration()
-        dataset_config.name_id = "titanic"
-        dataset_config.dataset_type = ":tabular"
-        dataset_config.file_location = "../resources/titanic.csv"
+        dataset_config = DatasetConfiguration(
+            name_id="titanic",
+            dataset_type=":tabular",
+            file_location="../resources/titanic.csv",
+        )
         await upload_dataset(client, userId, dataset_config)
 
 

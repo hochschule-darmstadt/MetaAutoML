@@ -1,21 +1,25 @@
 """Type definitions for dataset related things.
 """
 
-from typing import List, NamedTuple
+from typing import List
+from dataclasses import dataclass
 
 
-class DatasetColumnConfiguration(NamedTuple):
-    index: int
-    column_role: str
+@dataclass
+class DatasetColumnConfiguration:
+    idx: int
     column_type: str
+    column_role: str | None = None
 
 
-class DatasetConfiguration(NamedTuple):
+@dataclass
+class DatasetConfiguration:
     name_id: str
     dataset_type: str
     file_location: str
     columns: List[DatasetColumnConfiguration] = []
 
 
-class DatasetConfigurationHolder(NamedTuple):
+@dataclass
+class DatasetConfigurationHolder:
     datasets: List[DatasetConfiguration]

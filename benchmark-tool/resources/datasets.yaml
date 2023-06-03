@@ -4,29 +4,29 @@ datasets:
     dataset_type: :tabular
     file_location: ../resources/titanic_train.csv
     columns:
-      - index: 0
+      - idx: 0
         column_role: :index
         column_type: :integer
-      - index: 1
+      - idx: 1
         column_role: :target
         column_type: :boolean
-      - index: 2
+      - idx: 2
         column_type: :categorical
-      - index: 3
+      - idx: 3
         column_type: :string
-      - index: 4
+      - idx: 4
         column_type: :categorical
-      - index: 5
+      - idx: 5
         column_type: :integer
-      - index: 6
+      - idx: 6
         column_type: :integer
-      - index: 7
+      - idx: 7
         column_type: :categorical
-      - index: 8
+      - idx: 8
         column_type: :string
-      - index: 9
+      - idx: 9
         column_type: :float
-      - index: 10
+      - idx: 10
         column_type: :string
-      - index: 11
+      - idx: 11
         column_type: :categorical
