@@ -1,5 +1,5 @@
-from dataset.dataset_configuration import DatasetConfiguration
 from user.user import init_user
+from dataset.dataset_configuration_reader import read_dataset_configuration
 from dataset.dataset import upload_dataset
 from config.config_validator import validate_config_values
 from asyncio import run
@@ -13,15 +13,11 @@ async def main():
         return
     with OmamlClient() as client:
         userId = await init_user(client)
+        dataset_configurations = read_dataset_configuration()
 
-        # the dataset configuration is hardcoded for now.
-        # Will be read from yaml in the near future.
-        dataset_config = DatasetConfiguration(
-            name_id="titanic",
-            dataset_type=":tabular",
-            file_location="../resources/titanic.csv",
-        )
-        await upload_dataset(client, userId, dataset_config)
+        # TODO: parallelize
+        for dataset_config in dataset_configurations:
+            await upload_dataset(client, userId, dataset_config)
 
 
 if __name__ == "__main__":
