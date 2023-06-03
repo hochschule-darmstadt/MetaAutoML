@@ -17,6 +17,11 @@ __dict_type = Dict[str, str | int | List[Dict[str, Any]]]
 
 
 def read_dataset_configuration() -> List[DatasetConfiguration]:
+    """Reads the dataset configurations from the yaml file.
+
+    Returns:
+        List[DatasetConfiguration]: The dataset configurations.
+    """
     datasetsPath = path.join(resource_directory, "datasets.yaml")
     with open(datasetsPath, "r") as file:
         datasetHolderDict: __dict_type = yaml.safe_load(file)
@@ -29,7 +34,7 @@ def __dict_to_dataset_configuration_holder(
 ) -> DatasetConfigurationHolder:
     return cast(
         DatasetConfigurationHolder,
-        __create_namedtuple_from_dict(datasetHolderDict, DatasetConfigurationHolder),
+        __create_data_object_from_dict(datasetHolderDict, DatasetConfigurationHolder),
     )
 
 
@@ -38,7 +43,7 @@ __dataset_configuration_type = (
 )
 
 
-def __create_namedtuple_from_dict(
+def __create_data_object_from_dict(
     obj: Any, targetType: type | None
 ) -> __dataset_configuration_type | List[__dataset_configuration_type]:
     if isinstance(obj, dict):
@@ -51,7 +56,7 @@ def __create_namedtuple_from_dict(
                 str(field),
                 cast(
                     str | int | __dataset_configuration_type,
-                    __create_namedtuple_from_dict(
+                    __create_data_object_from_dict(
                         castedObj[field], __get_next_type(targetType)
                     ),
                 ),
@@ -67,7 +72,7 @@ def __create_namedtuple_from_dict(
         return cast(
             List[__dataset_configuration_type],
             [
-                __create_namedtuple_from_dict(item, targetType)
+                __create_data_object_from_dict(item, targetType)
                 for item in cast(List[__dict_type], obj)
             ],
         )
