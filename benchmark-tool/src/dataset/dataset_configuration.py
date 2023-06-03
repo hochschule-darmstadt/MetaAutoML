@@ -2,7 +2,7 @@
 """
 
 from typing import List
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 
 @dataclass
@@ -17,7 +17,7 @@ class DatasetConfiguration:
     name_id: str
     dataset_type: str
     file_location: str
-    columns: List[DatasetColumnConfiguration] = []
+    columns: List[DatasetColumnConfiguration] = field(default_factory=list)
 
 
 @dataclass
