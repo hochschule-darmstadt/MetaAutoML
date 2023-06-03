@@ -1,6 +1,5 @@
 from collections import OrderedDict
 from typing import Any, Dict, List
-from jsonschema import validate
 from os import path
 from typing import cast
 import yaml
@@ -12,22 +11,17 @@ from dataset.dataset_configuration import (
 )
 
 from config.constants import resource_directory
+from external.yaml_schema_validator import validate_dataset_config
+
+__dict_type = Dict[str, str | int | List[Dict[str, Any]]]
 
 
 def read_dataset_configuration() -> List[DatasetConfiguration]:
-    schema: Any
-    datasetHolderDict: Dict[Any, Any]
-    schemaPath = path.join(resource_directory, "schema.yaml")
     datasetsPath = path.join(resource_directory, "datasets.yaml")
-    with open(schemaPath, "r") as schemafile:
-        schema = yaml.safe_load(schemafile)
     with open(datasetsPath, "r") as file:
-        datasetHolderDict = yaml.safe_load(file)
-    validate(datasetHolderDict, schema)
-    return __dict_to_dataset_configuration_holder(datasetHolderDict).datasets
-
-
-__dict_type = Dict[str, str | int | List[Dict[Any, Any]]]
+        datasetHolderDict: __dict_type = yaml.safe_load(file)
+        validate_dataset_config(datasetHolderDict)
+        return __dict_to_dataset_configuration_holder(datasetHolderDict).datasets
 
 
 def __dict_to_dataset_configuration_holder(
@@ -39,48 +33,53 @@ def __dict_to_dataset_configuration_holder(
     )
 
 
-__named_tuple_type = (
+__dataset_configuration_type = (
     DatasetConfigurationHolder | DatasetConfiguration | DatasetColumnConfiguration
 )
 
 
 def __create_namedtuple_from_dict(
-    obj: Any, tupleType: type | None
-) -> __named_tuple_type | List[__named_tuple_type]:
+    obj: Any, targetType: type | None
+) -> __dataset_configuration_type | List[__dataset_configuration_type]:
     if isinstance(obj, dict):
-        if tupleType is None:
-            raise ValueError("tupleType must not be None if obj is a dict")
-        nextType: type | None
-        if tupleType == DatasetConfigurationHolder:
-            nextType = DatasetConfiguration
-        elif tupleType == DatasetConfiguration:
-            nextType = DatasetColumnConfiguration
-        else:
-            nextType = None
+        if targetType is None:
+            raise ValueError("targetType must not be None if obj is a dict")
         castedObj = cast(__dict_type, obj)
         fields = sorted(castedObj.keys())
         field_value_pairs = OrderedDict(
             (
                 str(field),
                 cast(
-                    str | int | __named_tuple_type,
-                    __create_namedtuple_from_dict(castedObj[field], nextType),
+                    str | int | __dataset_configuration_type,
+                    __create_namedtuple_from_dict(
+                        castedObj[field], __get_next_type(targetType)
+                    ),
                 ),
             )
             for field in fields
         )
-        return tupleType(**field_value_pairs)
-    elif isinstance(obj, (list, set, tuple, frozenset)):
-        if tupleType is None:
+        return targetType(**field_value_pairs)
+    elif isinstance(obj, list):
+        if targetType is None:
             raise ValueError(
-                "nextType must not be None if obj is a list (assuming, that there are only lists of objects and never lists of primitive types)"
+                "targetType must not be None if obj is a list (assuming, that there are only lists of objects and never lists of primitive types)"
             )
         return cast(
-            List[__named_tuple_type],
+            List[__dataset_configuration_type],
             [
-                __create_namedtuple_from_dict(item, tupleType)
+                __create_namedtuple_from_dict(item, targetType)
                 for item in cast(List[__dict_type], obj)
             ],
         )
     else:
         return obj
+
+
+def __get_next_type(targetType: type):
+    if targetType == DatasetConfigurationHolder:
+        nextType = DatasetConfiguration
+    elif targetType == DatasetConfiguration:
+        nextType = DatasetColumnConfiguration
+    else:
+        nextType = None
+    return nextType

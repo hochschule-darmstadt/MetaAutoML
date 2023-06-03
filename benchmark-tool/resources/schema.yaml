@@ -61,3 +61,5 @@ properties:
         - file_location
         - dataset_type
         - columns
+required:
+  - datasets

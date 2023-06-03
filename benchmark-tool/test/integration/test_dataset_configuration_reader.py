@@ -14,13 +14,12 @@ __mocker = MockingHelper()
 def setup_function():
     """resets all mocks after each test"""
     __mocker.add_main_module("dataset.dataset_configuration_reader")
+    __mocker.mock_import("config.constants", MagicMock(resource_directory="resources"))
     yield
     __mocker.reset_mocks()
 
 
 def test_read_dataset_configuration_should_return_valid_configuration():
-    __mocker.mock_import("config.constants", MagicMock(resource_directory="resources"))
-
     from dataset.dataset_configuration_reader import read_dataset_configuration
 
     result = read_dataset_configuration()
