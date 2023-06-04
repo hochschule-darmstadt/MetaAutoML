@@ -5,12 +5,15 @@ from grpc_omaml.omaml_client import OmamlClient
 
 async def upload_dataset(
     client: OmamlClient, user_id: UUID, dataset: DatasetConfiguration
-):
+) -> str:
     """Uploads a dataset to omaml for the given user. For now the dataset is hardcoded.
 
     Args:
         client (OmamlClient): The omaml client to use
         user_id (UUID): The id of the user that the dataset is associated with
+
+    Returns:
+        str: The id of the uploaded dataset
     """
     existing_dataset = await client.get_dataset_by_name(dataset.name_id, user_id)
     if existing_dataset is not None:
@@ -21,7 +24,10 @@ async def upload_dataset(
         user_id=user_id,
     )
 
-    return await client.get_dataset_by_name(dataset.name_id, user_id)
+    datasetId = await client.get_dataset_by_name(dataset.name_id, user_id)
+    if datasetId is None:
+        raise Exception("Dataset was not uploaded correctly")
+    return datasetId
 
 
 async def configure_dataset(client: OmamlClient, user_id: UUID):
