@@ -4,29 +4,29 @@ datasets:
     dataset_type: :tabular
     file_location: ../resources/titanic_train.csv
     columns:
-      - idx: 0
+      - column_name: PassengerId
         column_role: :index
         column_type: :integer
-      - idx: 1
+      - column_name: Survived
         column_role: :target
         column_type: :boolean
-      - idx: 2
+      - column_name: Pclass
         column_type: :categorical
-      - idx: 3
+      - column_name: Name
         column_type: :string
-      - idx: 4
+      - column_name: Sex
         column_type: :categorical
-      - idx: 5
+      - column_name: Age
         column_type: :integer
-      - idx: 6
+      - column_name: SibSp
         column_type: :integer
-      - idx: 7
+      - column_name: Parch
         column_type: :categorical
-      - idx: 8
+      - column_name: Ticket
         column_type: :string
-      - idx: 9
+      - column_name: Fare
         column_type: :float
-      - idx: 10
+      - column_name: Cabin
         column_type: :string
-      - idx: 11
+      - column_name: Embarked
         column_type: :categorical

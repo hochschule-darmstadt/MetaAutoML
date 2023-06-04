@@ -33,9 +33,9 @@ properties:
           items:
             type: object
             properties:
-              idx:
-                type: integer
-                description: Index of the column
+              column_name:
+                type: string
+                description: header of the column
               column_role:
                 type: string
                 description: Role of the column
@@ -43,6 +43,8 @@ properties:
                   - ':index'
                   - ':target'
                   - ':ignore'
+                  - ':none' # default
+                  - '' # same as :none
               column_type:
                 type: string
                 description: Type of the column
@@ -54,7 +56,7 @@ properties:
                   - ':categorical'
                   - ':datetime'
             required:
-              - idx
+              - column_name
               - column_type
       required:
         - name_id

@@ -7,9 +7,9 @@ from dataclasses import dataclass, field
 
 @dataclass
 class DatasetColumnConfiguration:
-    idx: int
+    column_name: str
     column_type: str
-    column_role: str | None = None
+    column_role: str = ""
 
 
 @dataclass
