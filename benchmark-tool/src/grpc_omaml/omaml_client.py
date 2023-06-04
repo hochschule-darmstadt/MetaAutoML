@@ -1,12 +1,16 @@
 import os
 from uuid import UUID
-from dataset.dataset_configuration import DatasetConfiguration
+from dataset.dataset_configuration import (
+    DatasetConfiguration,
+    DatasetColumnConfiguration,
+)
 from external.file_system import copy_file_to_folder
 from grpc_omaml import (
     ControllerServiceStub,
     CreateDatasetRequest,
     CreateNewUserRequest,
     GetDatasetsRequest,
+    SetDatasetColumnSchemaConfigurationRequest,
 )
 from grpclib.client import Channel
 from config.config_accessor import (
@@ -117,7 +121,7 @@ class OmamlClient:
             OmamlError: if the datasets could not be fetched for the current user
 
         Returns:
-            bool: True if the dataset exists, False otherwise
+            bool: The id of the dataset if it exists, None otherwise
         """
         try:
             result = await self.__grpc_client.get_datasets(
@@ -136,3 +140,29 @@ class OmamlClient:
 
         except Exception as e:
             raise OmamlError("Error while checking if dataset exists: ") from e
+
+    async def set_dataset_column_schema(
+        self,
+        user_id: UUID,
+        dataset_id: str,
+        dataset_column: DatasetColumnConfiguration,
+    ):
+        """Sets the column schema for a dataset
+
+        Args:
+            user_id (UUID): The id of the user that the dataset is associated with
+            dataset_id (str): The id of the dataset
+            dataset_configuration (DatasetConfiguration): The dataset configuration
+        """
+        try:
+            await self.__grpc_client.set_dataset_column_schema_configuration(
+                SetDatasetColumnSchemaConfigurationRequest(
+                    str(user_id),
+                    dataset_id,
+                    dataset_column.column_name,
+                    dataset_column.column_type,
+                    dataset_column.column_role,
+                )
+            )
+        except Exception as e:
+            raise OmamlError("Error while setting column schema: ") from e

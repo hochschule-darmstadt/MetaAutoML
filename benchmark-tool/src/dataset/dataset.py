@@ -30,5 +30,20 @@ async def upload_dataset(
     return datasetId
 
 
-async def configure_dataset(client: OmamlClient, user_id: UUID):
-    pass
+async def configure_dataset(
+    client: OmamlClient, user_id: UUID, dataset_id: str, dataset: DatasetConfiguration
+):
+    """Configures a dataset in omaml for the given user
+
+    Args:
+        client (OmamlClient): The omaml client to use
+        user_id (UUID): The id of the user that the dataset is associated with
+        dataset_id (str): The id of the dataset
+        dataset_configuration (DatasetConfiguration): The dataset configuration
+    """
+    for column in dataset.columns:
+        await client.set_dataset_column_schema(
+            user_id=user_id,
+            dataset_id=dataset_id,
+            dataset_column=column,
+        )
