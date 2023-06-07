@@ -127,9 +127,15 @@ namespace BlazorBoilerplate.Server
             ////////////////////////////////////////////////////////////////////////////////////////////////////////
             //GRPC CONTROLLER FACTORY
             ///////////////////////////////////////////////////////////////////////////////////////////////////////
+            ///
             services.AddGrpcClient<ControllerService.ControllerServiceClient>(o =>
             {
                 o.Address = new Uri(grpcEndpoint);
+            })
+            .ConfigureChannel(o =>
+            {
+                o.MaxReceiveMessageSize = 2000 * 1024 * 1024; // 2 MB
+                o.MaxSendMessageSize = 2000 * 1024 * 1024; // 5 MB
             })
             .ConfigurePrimaryHttpMessageHandler(() =>
             {

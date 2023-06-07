@@ -1,5 +1,5 @@
 ### Ontology file generated from ML_Ontology.xlsx.
-### 2023-04-27 16:44:04.905185
+### 2023-05-11 14:19:15.280266
 
 
 # PREFIXES
@@ -1202,6 +1202,12 @@
     :used_for :classification ;
     rdfs:comment "average cross-entropy between the distribution of the true labels and the predictions" ;
     rdfs:seeAlso <https://www.wikidata.org/entity/Q22667762> .
+:neg_log_loss a :Metric ;
+    skos:prefLabel "neg log loss" ;
+    skos:altLabel "Neg Log loss" ;
+    :used_for :classification ;
+    rdfs:comment "average cross-entropy between the distribution of the true labels and the predictions" ;
+    rdfs:seeAlso <https://www.wikidata.org/entity/Q22667762> .
 :markedness a :Metric ;
     skos:prefLabel "markedness" ;
     skos:altLabel "MK" , "deltaP" ;
@@ -1698,7 +1704,7 @@
 :tpot a :AutoML_solution ;
     skos:prefLabel "TPOT" ;
     :used_for :scikit_learn_lib , :pytorch_lib ;
-    :can_perform :tabular_classification , :tabular_regression ;
+    :can_perform :tabular_classification , :tabular_regression , :image_classification ;
     :supported_by_oma_ml "true"^^xsd:boolean .
 :transmogrifai a :AutoML_solution ;
     skos:prefLabel "TransmogrifAI" ;
@@ -1708,6 +1714,11 @@
     skos:prefLabel "Pycaret" ;
     :used_for :scikit_learn_lib , :catboost_lib , :lightgbm_lib , :xgboost_lib ;
     :can_perform :tabular_classification , :tabular_regression , :clustering , :anomaly_detection , :time_series_forecasting ;
+    :supported_by_oma_ml "true"^^xsd:boolean .
+:gama a :AutoML_solution ;
+    skos:prefLabel "GAMA" ;
+    :used_for :scikit_learn_lib ;
+    :can_perform :tabular_classification , :tabular_regression ;
     :supported_by_oma_ml "true"^^xsd:boolean .
 
 
@@ -1908,6 +1919,12 @@
     :category :tuner_approach .
 :skopt a :Enum ;
     skos:prefLabel "skopt" ;
+    :category :tuner_approach .
+:async_successive_halving a :Enum ;
+    skos:prefLabel "async successive halving" ;
+    :category :tuner_approach .
+:async_ea a :Enum ;
+    skos:prefLabel "async ea" ;
     :category :tuner_approach .
 :broader_inherited a :Enum ;
     skos:prefLabel "broader inherited" ;
@@ -2150,6 +2167,12 @@
     :automl_solution :tpot ;
     :ml_task :tabular_regression ;
     :parameter_value :metric_tpot_tabular_regression .
+:image_classification_tpot a :Configuration_item ;
+    skos:prefLabel "image classification TPOT" ;
+    :category :task_configuration ;
+    :automl_solution :tpot ;
+    :ml_task :image_classification ;
+    :parameter_value :metric_tpot_image_classification .
 :tabular_classification_in_autocve a :Configuration_item ;
     skos:prefLabel "tabular classification in AutoCVE" ;
     :category :task_configuration ;
@@ -2162,6 +2185,18 @@
     :automl_solution :mcfly ;
     :ml_task :time_series_classification ;
     :parameter_value :use_approach_mcfly_time_series_classification , :metric_mcfly_time_series_classification .
+:tabular_classification_in_gama a :Configuration_item ;
+    skos:prefLabel "tabular classification in GAMA" ;
+    :category :task_configuration ;
+    :automl_solution :gama ;
+    :ml_task :tabular_classification ;
+    :parameter_value :tuner_class_gama , :metric_gama_tabular_classification .
+:tabular_regression_in_gama a :Configuration_item ;
+    skos:prefLabel "tabular regression in GAMA" ;
+    :category :task_configuration ;
+    :automl_solution :gama ;
+    :ml_task :tabular_regression ;
+    :parameter_value :tuner_class_gama , :metric_gama_tabular_regression .
 :ensemble_nbest a :Configuration_item ;
     skos:prefLabel "ensemble_nbest" ;
     :category :parameter ;
@@ -2329,18 +2364,14 @@
     skos:broader :include_preprocessor ;
     :has_datatype :list ;
     :parameter_value :kernel_principal_component_analysis , :radial_basis_function_kernel , :nystroem_kernel_approximation .
-:exclude_preprocessor a :Configuration_item ;
-    skos:prefLabel "exclude preprocessor" ;
-    :category :parameter .
-:exclude_preprocessor_autosklearn a :Configuration_item ;
-    skos:prefLabel "exclude preprocessor Autosklearn" ;
-    :category :parameter ;
-    skos:broader :exclude_preprocessor ;
-    :has_datatype :list ;
-    :parameter_value :kernel_principal_component_analysis , :radial_basis_function_kernel , :nystroem_kernel_approximation .
 :configuration_via_metalearning a :Configuration_item ;
     skos:prefLabel "configuration via metalearning" ;
     :category :parameter ;
+    :has_datatype :integer .
+:configuration_via_metalearning_autosklearn a :Configuration_item ;
+    skos:prefLabel "configuration via metalearning autosklearn" ;
+    :category :parameter ;
+    skos:broader :configuration_via_metalearning ;
     :has_datatype :integer .
 :metric a :Configuration_item ;
     skos:prefLabel "metric" ;
@@ -2579,6 +2610,24 @@
     skos:broader :metric ;
     :has_datatype :single_value ;
     :parameter_value :median_absolute_error , :mean_absolute_error , :mean_squared_error , :r2 .
+:metric_tpot_image_classification a :Configuration_item ;
+    skos:prefLabel "metric TPOT image classification" ;
+    :category :parameter ;
+    skos:broader :metric ;
+    :has_datatype :single_value ;
+    :parameter_value :accuracy , :average_precision , :adjusted_rand_score , :balanced_accuracy , :f_measure , :f_measure_macro , :f_measure_micro , :f_measure_samples , :f_measure_weighted , :log_loss , :precision , :precision_macro , :precision_micro , :precision_samples , :precision_weighted , :recall , :recall_macro , :recall_micro , :recall_samples , :recall_weighted , :jaccard , :jaccard_macro , :jaccard_micro , :jaccard_samples , :jaccard_weighted , :receiver_operating_characteristic_curve , :receiver_operating_characteristic_curve_one_vs_rest , :receiver_operating_characteristic_curve_one_vs_one , :receiver_operating_characteristic_curve_one_vs_rest_weighted , :receiver_operating_characteristic_curve_one_vs_one_weighted .
+:metric_gama_tabular_classification a :Configuration_item ;
+    skos:prefLabel "metric GAMA tabular classification" ;
+    :category :parameter ;
+    skos:broader :metric ;
+    :has_datatype :list ;
+    :parameter_value :accuracy , :average_precision , :receiver_operating_characteristic_curve , :neg_log_loss , :f_measure_macro , :f_measure_micro , :f_measure_samples , :f_measure_weighted , :precision_macro , :precision_micro , :precision_samples , :precision_weighted , :recall_macro , :recall_micro , :recall_samples , :recall_weighted .
+:metric_gama_tabular_regression a :Configuration_item ;
+    skos:prefLabel "metric GAMA tabular regression" ;
+    :category :parameter ;
+    skos:broader :metric ;
+    :has_datatype :list ;
+    :parameter_value :explained_variance , :r2 , :mean_absolut_error , :median_absolute_error , :mean_squared_error , :mean_squared_log_error .
 :time_limit a :Configuration_item ;
     skos:prefLabel "time limit" ;
     :category :parameter ;
@@ -2614,15 +2663,6 @@
     skos:prefLabel "include approach autosklearn" ;
     :category :parameter ;
     skos:broader :include_approach ;
-    :has_datatype :list .
-:exclude_approach a :Configuration_item ;
-    skos:prefLabel "exclude approach" ;
-    :category :parameter ;
-    :has_datatype :list .
-:exclude_approach_autosklearn a :Configuration_item ;
-    skos:prefLabel "exclude approach autosklearn" ;
-    :category :parameter ;
-    skos:broader :exclude_approach ;
     :has_datatype :list .
 :epochs a :Configuration_item ;
     skos:prefLabel "epochs" ;
@@ -2689,55 +2729,61 @@
     skos:broader :tuner ;
     :has_datatype :single_value ;
     :parameter_value :random , :grid_search , :skopt .
-:loss a :Configuration_item ;
-    skos:prefLabel "loss" ;
+:tuner_class_gama a :Configuration_item ;
+    skos:prefLabel "tuner class GAMA" ;
+    :category :task_configuration ;
+    skos:broader :tuner ;
+    :has_datatype :single_value ;
+    :parameter_value :random , :async_ea , :async_successive_halving .
+:loss_function a :Configuration_item ;
+    skos:prefLabel "loss function" ;
     :category :parameter .
-:loss_autokeras_tabular_regression a :Configuration_item ;
-    skos:prefLabel "loss autokeras tabular regression" ;
+:loss_function_autokeras_tabular_regression a :Configuration_item ;
+    skos:prefLabel "loss function autokeras tabular regression" ;
     :category :parameter ;
-    skos:broader :loss ;
+    skos:broader :loss_function ;
     :has_datatype :single_value ;
     :parameter_value :mean_squared_error .
-:loss_autokeras_tabular_classification a :Configuration_item ;
-    skos:prefLabel "loss autokeras tabular classification" ;
+:loss_function_autokeras_tabular_classification a :Configuration_item ;
+    skos:prefLabel "loss function autokeras tabular classification" ;
     :category :parameter ;
-    skos:broader :loss ;
+    skos:broader :loss_function ;
     :has_datatype :single_value ;
     :parameter_value :binary_cross_entropy , :categorical_cross_entropy .
-:loss_autokeras_image_regression a :Configuration_item ;
-    skos:prefLabel "loss autokeras image regression" ;
+:loss_function_autokeras_image_regression a :Configuration_item ;
+    skos:prefLabel "loss function autokeras image regression" ;
     :category :parameter ;
-    skos:broader :loss ;
+    skos:broader :loss_function ;
     :has_datatype :single_value ;
     :parameter_value :mean_squared_error .
-:loss_autokeras_image_classification a :Configuration_item ;
-    skos:prefLabel "loss autokeras image classification" ;
+:loss_function_autokeras_image_classification a :Configuration_item ;
+    skos:prefLabel "loss function autokeras image classification" ;
     :category :parameter ;
-    skos:broader :loss ;
+    skos:broader :loss_function ;
     :has_datatype :single_value ;
     :parameter_value :binary_cross_entropy , :categorical_cross_entropy .
-:loss_autokeras_text_regression a :Configuration_item ;
-    skos:prefLabel "loss autokeras text regression" ;
+:loss_function_autokeras_text_regression a :Configuration_item ;
+    skos:prefLabel "loss function autokeras text regression" ;
     :category :parameter ;
-    skos:broader :loss ;
+    skos:broader :loss_function ;
     :has_datatype :single_value ;
     :parameter_value :mean_squared_error .
-:loss_autokeras_text_classification a :Configuration_item ;
-    skos:prefLabel "loss autokeras text classification" ;
+:loss_function_autokeras_text_classification a :Configuration_item ;
+    skos:prefLabel "loss function autokeras text classification" ;
     :category :parameter ;
-    skos:broader :loss ;
+    skos:broader :loss_function ;
     :has_datatype :single_value ;
     :parameter_value :binary_cross_entropy , :categorical_cross_entropy .
-:loss_autokeras_time_series_forecasting a :Configuration_item ;
-    skos:prefLabel "loss autokeras time series forecasting" ;
+:loss_function_autokeras_time_series_forecasting a :Configuration_item ;
+    skos:prefLabel "loss function autokeras time series forecasting" ;
     :category :parameter ;
-    skos:broader :loss ;
+    skos:broader :loss_function ;
     :has_datatype :single_value ;
     :parameter_value :mean_squared_error .
-:loss_mcfly_time_series_classification a :Configuration_item ;
-    skos:prefLabel "loss mcfly time series classification" ;
+:loss_function_mcfly_time_series_classification a :Configuration_item ;
+    skos:prefLabel "loss function mcfly time series classification" ;
     :category :parameter ;
-    skos:broader :loss ;
+    skos:broader :loss_function ;
     :has_datatype :single_value ;
     :parameter_value :categorical_cross_entropy .
 :forecasting_horizon a :Configuration_item ;
@@ -2802,6 +2848,29 @@
     skos:broader :gap ;
     :has_datatype :integer ;
     :required "true"^^xsd:boolean .
+:validation_split a :Configuration_item ;
+    skos:prefLabel "validation split" ;
+    :category :parameter ;
+    :has_datatype :integer .
+:validation_split_autokeras a :Configuration_item ;
+    skos:prefLabel "validation split autokeras" ;
+    :category :parameter ;
+    skos:broader :validation_split ;
+    :has_datatype :integer .
+:validation_split_flaml a :Configuration_item ;
+    skos:prefLabel "validation split flaml" ;
+    :category :parameter ;
+    skos:broader :validation_split ;
+    :has_datatype :integer .
+:eval_method a :Configuration_item ;
+    skos:prefLabel "eval method" ;
+    :category :parameter .
+:eval_method_flaml a :Configuration_item ;
+    skos:prefLabel "eval method Flaml" ;
+    :category :parameter ;
+    skos:broader :eval_method ;
+    :has_datatype :single_value ;
+    :parameter_value :auto , :cv , :holdout .
 
 
 # Sheet34

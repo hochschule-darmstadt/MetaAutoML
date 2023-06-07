@@ -9,7 +9,7 @@ import os
 import random
 
 
-def read_image_dataset(config: "StartAutoMlRequest", image_test_folder=False, as_dataframe=False) -> Tuple[pd.DataFrame, pd.DataFrame]:
+def read_image_dataset(config: "StartAutoMlRequest", image_test_folder=False, as_dataframe=False, as_2darray=False) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """Read image dataset and create training and test dataframes
 
     Args:
@@ -98,4 +98,7 @@ def read_image_dataset(config: "StartAutoMlRequest", image_test_folder=False, as
 
         X_train = np.array([img_preprocess(p) for p in train_data.name.values])
         y_train = train_data.outcome.values
+        if as_2darray == True:
+            #reshape array to 2D-Array
+            X_train = X_train.reshape(-1, 256 * 256 * 3)
     return X_train, y_train
