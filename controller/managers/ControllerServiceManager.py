@@ -327,6 +327,7 @@ class ControllerServiceManager(ControllerServiceBase):
 						'This strategy truncates the training data if the time limit is relatively short for the size of the dataset.'
 						)
 				)
+            
             result.strategies.append(
                 Strategy(
                 'pre_training.top_3_models',
@@ -340,6 +341,14 @@ class ControllerServiceManager(ControllerServiceBase):
                 'pre_training.multi_fidelity',
                 'Multi Fidelity',
                 'This strategy will run all adapters with only a small part of the data. Then it will train the best half solutions with more data again and so on, until one last adapter is trained with the full data.'
+                )
+            )
+
+            result.strategies.append(
+                Strategy(
+                'preprocessing.feature_selection',
+                'Feature selection',
+                'This strategy will analyse the dataset for irrelevant dimensionality and reduces it to decrease complexity.'
                 )
             )
 
