@@ -1,17 +1,38 @@
 <style>
-    element{
-        --height: @Height;
+    .position {
+        bottom: 60%;
+        /*bottom:62.5%;*/
+        right: 2%;
+    }
+    .position-recentTrainings{
+        bottom:60%;
+        right:18.7%;
+    }
+
+    .position-recentDatasets-upload {
+        bottom: 60%;
+        right: 43.4%;
+    }
+    .position-recentDatasets {
+        bottom: 60%;
+        right: 66.3%;
+    }
+    .position-recentDatasets-more{
+        bottom: 60%;
+        right: 38%
+    }
+    .position-recentTrainings-more {
+        bottom: 60%;
+        right: 4%
     }
     .tooltip .tooltiptext {
         visibility: hidden;
         display: block;
         text-align: center;
         position: absolute;
-      /*  bottom: 63.5%;*/
-        bottom: @Height;
-      /*bottom:62.5%;*/
-        right: @Right;
+        /*  bottom: 63.5%;*/
     }
+
         .tooltip .tooltiptext::after {
             content: " ";
             position: absolute;
@@ -22,36 +43,35 @@
             border-style: solid;
             border-color: grey transparent transparent transparent;
         }
-      
+
 
     .tooltip:hover .tooltiptext {
         visibility: visible;
         background-color: grey;
         opacity: 50%;
-
     }
 
 </style>
-    <MudText Typo="Typo.body1" class="tooltip private-scope">
-        @ChildContent
-       
-        <MudText Class="mud-tooltip mud-tooltip-default tooltiptext" Style="opacity: 100%!important; color:white!important;">
-            @if (lines != null)
-                for (int i = 0; i < lines.Length; i++)
-                {
-                    @lines[i];
-                    <br />
-                }
-            @if (!string.IsNullOrEmpty(URL))
-{
-<MudLink Style="color:white!important" Href="@URL">
-    more...
-</MudLink>
-}
-            
+<MudText Typo="Typo.body1" class="tooltip position private-scope">
+    @ChildContent
 
-        </MudText>
+    <MudText Class="@Position" Style="opacity: 100%!important; color:white!important;">
+        @if (lines != null)
+            for (int i = 0; i < lines.Length; i++)
+            {
+                @lines[i];
+                <br />
+            }
+        @if (!string.IsNullOrEmpty(URL))
+        {
+            <MudLink Style="color:white!important" Href="@URL">
+                more...
+            </MudLink>
+        }
+
+
     </MudText>
+</MudText>
 
 @code {
     [Parameter]
@@ -62,12 +82,9 @@
     [Parameter]
     public RenderFragment ChildContent { get; set; }
 
+    
     [Parameter]
-    public string Height { get; set; }
-
-    [Parameter]
-    public string Right { get; set; }
-
+    public string Position { get; set; }
 
 
     string[] lines;

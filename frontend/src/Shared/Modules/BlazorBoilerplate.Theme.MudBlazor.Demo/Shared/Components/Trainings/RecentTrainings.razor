@@ -11,7 +11,7 @@
         <CardHeaderContent>
             <MudStack Row="true" Class="align-content-center">
                 <MudText Typo="Typo.h6">@L["Recent trainings"]</MudText>
-                <HoverTooltip Height="60%" Right="16.5%" Label="These are the ML training sessions you have
+                <HoverTooltip Position="mud-tooltip mud-tooltip-default tooltiptext position-recentTrainings" Label="These are the ML training sessions you have
                           started recently. By clicking on one training (indicated by date and time)
                           you can inspect and use the ML models that have been trained.
 ">
@@ -21,13 +21,15 @@
                 </MudStack>
         </CardHeaderContent>
         <CardHeaderActions>
-            <MudButton Href="@("/trainings")"
-                Variant="Variant.Filled" 
-                EndIcon="@Icons.Filled.ArrowForward" 
-                Color="Color.Secondary"
-                Size="Size.Small"
-                Style="margin-top: 8px">@L["Details"]</MudButton>
-        </CardHeaderActions>
+            <HoverTooltip Position="mud-tooltip mud-tooltip-default tooltiptext position-recentTrainings-more" Label="Click here.">
+                <MudButton Href="@("/trainings")"
+                           Variant="Variant.Filled"
+                           EndIcon="@Icons.Filled.ArrowForward"
+                           Color="Color.Secondary"
+                           Size="Size.Small"
+                           Style="margin-top: 8px">@L["More"]</MudButton>
+                </HoverTooltip>
+                </CardHeaderActions>
     </MudCardHeader>
     <MudCardContent>
         <MudPaper Height="250px" Elevation="0">

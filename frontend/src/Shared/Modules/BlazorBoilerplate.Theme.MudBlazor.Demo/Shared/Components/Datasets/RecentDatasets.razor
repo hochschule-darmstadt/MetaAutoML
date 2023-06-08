@@ -8,7 +8,7 @@
         <CardHeaderContent>
             <MudStack Row="true" Class="align-content-center">
                 <MudText Typo="Typo.h6">@L["Recent datasets"]</MudText>
-                <HoverTooltip Height="60%" Right="2%" Label="Datasets are files that you upload to the OMA-ML
+                <HoverTooltip Position="mud-tooltip mud-tooltip-default tooltiptext position-recentDatasets" Label="Datasets are files that you upload to the OMA-ML
 platform to perform machine learning.">
                     <MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.Info" Style="opacity:70%; align-self:center;margin-top:20%"></MudIcon>
 
@@ -22,19 +22,24 @@ platform to perform machine learning.">
         <CardHeaderActions>
             <MudStack Row="true" Class="align-content-center" Style="margin-top: 8px">
                 @*<UploadDataset OnUploadCompletedCallback="@OnUploadCompletedCallback"/>*@
-                <HoverTooltip URL="#" Label="xy">
+                <HoverTooltip URL="#" Label="Click here to upload a new dataset to OMA-ML
+                              from your disk or from the internet." Position="mud-tooltip mud-tooltip-default tooltiptext position-recentDatasets-upload">
                     <MudButton OnClick="OnOpenUpload"
                                Variant="Variant.Filled"
                                Color="Color.Secondary"
                                EndIcon="@Icons.Filled.AddBox"
                                Size="Size.Small">@L["Upload"]</MudButton>
                         </HoverTooltip>
-                <MudButton Href="@("/datasets")"
-                    Variant="Variant.Filled" 
-                    Color="Color.Secondary"
-                    EndIcon="@Icons.Filled.ArrowForward"
-                        Size="Size.Small">@L["More"]</MudButton>
-            </MudStack>
+                        <HoverTooltip URL="#" Label="Click here to navigate to all datasets you have
+                                      uploaded to the OMA-ML platform so far." Position="mud-tooltip mud-tooltip-default tooltiptext position-recentDatasets-more">
+
+                            <MudButton Href="@("/datasets")"
+                                       Variant="Variant.Filled"
+                                       Color="Color.Secondary"
+                                       EndIcon="@Icons.Filled.ArrowForward"
+                                       Size="Size.Small">@L["More"]</MudButton>
+                            </HoverTooltip>
+                            </MudStack>
         </CardHeaderActions>
     </MudCardHeader>
     <MudCardContent>
