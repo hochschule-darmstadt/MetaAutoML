@@ -1,29 +1,29 @@
 <style>
     .position {
-        bottom: 60%;
+        bottom: 61%;
         /*bottom:62.5%;*/
         right: 2%;
     }
     .position-recentTrainings{
-        bottom:60%;
-        right:18.7%;
+        bottom:59%;
+        right:19.6%;
     }
 
     .position-recentDatasets-upload {
-        bottom: 60%;
-        right: 43.4%;
+        bottom: 59%;
+        right: 44.1%;
     }
     .position-recentDatasets {
-        bottom: 60%;
-        right: 66.3%;
+        bottom: 59%;
+        right: 66.9%;
     }
     .position-recentDatasets-more{
-        bottom: 60%;
-        right: 38%
+        bottom: 59%;
+        right: 38.5%
     }
     .position-recentTrainings-more {
-        bottom: 60%;
-        right: 4%
+        bottom: 59%;
+        right: 0.5%
     }
     .tooltip .tooltiptext {
         visibility: hidden;
@@ -36,7 +36,7 @@
         .tooltip .tooltiptext::after {
             content: " ";
             position: absolute;
-            top: 100%; /* At the bottom of the tooltip  scoped css???*/
+            top: 100%;
             left: 50%;
             margin-left: -5px;
             border-width: 5px;
@@ -55,7 +55,7 @@
 <MudText Typo="Typo.body1" class="tooltip position private-scope">
     @ChildContent
 
-    <MudText Class="@Position" Style="opacity: 100%!important; color:white!important;">
+    <MudText Class="@Position" Style="opacity: 100%!important; color:white!important;font-size:11pt;">
         @if (lines != null)
             for (int i = 0; i < lines.Length; i++)
             {
