@@ -131,7 +131,6 @@ class PreprocessingStrategyController(IAbstractStrategy):
 
     def do_feature_selection(self, state: dict, blackboard: Blackboard, controller: StrategyController):
         irrelevant_features = state.get("dataset_analysis", {}).get("irrelevant_features", [])
-        ignored_columns = []
 
         agent: AdapterRuntimeManagerAgent = controller.get_blackboard().get_agent('training-runtime')
         if not agent or not agent.get_adapter_runtime_manager():
@@ -146,10 +145,6 @@ class PreprocessingStrategyController(IAbstractStrategy):
         training_request.dataset_configuration = json.dumps(dataset_configuration)
         agent.get_adapter_runtime_manager().set_training_request(training_request)
 
-        # Finished action (should only run once, therefore disable the strategy rule)
-        controller.disable_strategy('preprocessing.ignore_redundant_features')
-
-        return { 'ignored_columns': ignored_columns }
         # Finished action (should only run once, therefore disable the strategy rule)
         controller.disable_strategy('preprocessing.feature_selection')
 
