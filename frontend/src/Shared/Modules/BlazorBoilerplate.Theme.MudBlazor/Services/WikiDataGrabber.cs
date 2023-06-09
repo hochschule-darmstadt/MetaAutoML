@@ -156,13 +156,29 @@ namespace BlazorBoilerplate.Theme.Material.Services
             return wikipediaUrl;
         }
 
-        /// <summary>
-        /// Simple Regex - if the url is already correct, nothing bad will happen. Wikidata Url needs to contain
-        /// /entity/ instead of /wiki/ to return a JSON
-        /// </summary>
-        /// <param name="url"></param> URL to the Wikidata Entry
-        /// <returns></returns> Modified URL as described in summary
-        public string AdjustUrl(string url)
+        public string GetWikipediaUrlForMore(string wikiDataUrl, string language = "en")
+        {
+            if (!IsWikiDatalink(wikiDataUrl))
+            {
+                return null;
+            }
+
+            wikiDataUrl = AdjustUrl(wikiDataUrl);
+
+            dynamic wikiDataJsonFile = GetDataFromUrl(wikiDataUrl);
+            string uri = ExtractUri(wikiDataUrl);
+            string description = GetWikidataDescription(wikiDataJsonFile, uri);
+            // If there is no Wikipedia URL for given WikiData entry...
+            return GetWikipediaUrl(wikiDataJsonFile, uri, language);
+        }
+
+            /// <summary>
+            /// Simple Regex - if the url is already correct, nothing bad will happen. Wikidata Url needs to contain
+            /// /entity/ instead of /wiki/ to return a JSON
+            /// </summary>
+            /// <param name="url"></param> URL to the Wikidata Entry
+            /// <returns></returns> Modified URL as described in summary
+            public string AdjustUrl(string url)
         {
             string adjustedUrl = Regex.Replace(url, "/wiki/", "/entity/");
             return adjustedUrl;
