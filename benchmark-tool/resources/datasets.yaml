@@ -1,6 +1,6 @@
 # yaml-language-server: $schema=./schema.yaml
 datasets:
-  - name_id: Titanic
+  - name_id: TitanicBenchmark
     dataset_type: :tabular
     file_location: ../resources/titanic_train.csv
     columns:
