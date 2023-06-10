@@ -2,6 +2,7 @@ from unittest.mock import MagicMock
 from dataset.dataset_configuration import (
     DatasetConfiguration,
     DatasetColumnConfiguration,
+    TrainingConfiguration,
 )
 from mocking_helpers.mocking_helper import async_lambda
 import pytest
@@ -14,10 +15,12 @@ async def test_configure_dataset_should_call_adapter_for_each_column_when_multip
     set_schema_mock = MagicMock()
     mocked_adapter = MagicMock(set_dataset_column_schema=async_lambda(set_schema_mock))
 
+    dummy_training_config = TrainingConfiguration("test", "test", "test")
     dataset_config = DatasetConfiguration(
         "test",
         ":tabular",
         "test",
+        dummy_training_config,
         [
             DatasetColumnConfiguration("abc", ":integer"),
             DatasetColumnConfiguration("def", ":integer"),

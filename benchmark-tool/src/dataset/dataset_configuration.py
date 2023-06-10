@@ -13,10 +13,26 @@ class DatasetColumnConfiguration:
 
 
 @dataclass
+class TrainingParameter:
+    values: list[str] = field(default_factory=list)
+
+
+@dataclass
+class TrainingConfiguration:
+    task: str
+    target: str
+    metric: str
+    enabled_strategies: List[str] = field(default_factory=list)
+    runtime_limit: int | None = None
+    parameters: dict[str, TrainingParameter] = field(default_factory=dict)
+
+
+@dataclass
 class DatasetConfiguration:
     name_id: str
     dataset_type: str
     file_location: str
+    training: TrainingConfiguration
     columns: List[DatasetColumnConfiguration] = field(default_factory=list)
 
 

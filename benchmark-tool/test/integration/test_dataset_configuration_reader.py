@@ -28,3 +28,4 @@ def test_read_dataset_configuration_should_return_valid_configuration():
     assert result[0].dataset_type != ""
     assert result[0].file_location != ""
     assert len(result[0].columns) > 0
+    assert result[0].training.task != ""

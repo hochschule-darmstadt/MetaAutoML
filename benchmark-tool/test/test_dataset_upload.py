@@ -1,6 +1,6 @@
 from unittest.mock import MagicMock
 import pytest
-from dataset.dataset_configuration import DatasetConfiguration
+from dataset.dataset_configuration import DatasetConfiguration, TrainingConfiguration
 from mocking_helpers.mocking_helper import async_lambda
 from uuid import UUID
 
@@ -8,7 +8,12 @@ pytest_plugins = ["pytest_asyncio"]
 
 __existing_dataset_id = "1234567890"
 __dataset = DatasetConfiguration(
-    name_id="titanic", dataset_type=":tabular", file_location="some/path/to/file.csv"
+    name_id="titanic",
+    dataset_type=":tabular",
+    file_location="some/path/to/file.csv",
+    training=TrainingConfiguration(
+        "test", "test", "test"
+    ),  # training config does not matter for this test
 )
 
 

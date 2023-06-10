@@ -29,6 +29,11 @@ def __create_valid_dataset_config() -> Dict[str, Any]:
                 "name_id": "test",
                 "dataset_type": ":tabular",
                 "file_location": "test",
+                "training": {
+                    "task": ":tabular_classification",
+                    "target": "test",
+                    "metric": ":accuracy",
+                },
                 "columns": [
                     {
                         "idx": 0,

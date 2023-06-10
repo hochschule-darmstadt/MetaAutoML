@@ -30,3 +30,7 @@ datasets:
         column_type: :string
       - column_name: Embarked
         column_type: :categorical
+    training:
+      task: :tabular_classification
+      target: Survived
+      metric: :accuracy

@@ -8,6 +8,8 @@ from dataset.dataset_configuration import (
     DatasetColumnConfiguration,
     DatasetConfigurationHolder,
     DatasetConfiguration,
+    TrainingConfiguration,
+    TrainingParameter,
 )
 
 from config.constants import resource_directory
@@ -34,7 +36,7 @@ def __dict_to_dataset_configuration_holder(
 ) -> DatasetConfigurationHolder:
     return cast(
         DatasetConfigurationHolder,
-        __create_data_object_from_dict(datasetHolderDict, DatasetConfigurationHolder),
+        __create_data_object_from_dict(datasetHolderDict, [DatasetConfigurationHolder]),
     )
 
 
@@ -44,10 +46,10 @@ __dataset_configuration_type = (
 
 
 def __create_data_object_from_dict(
-    obj: Any, targetType: type | None
+    obj: Any, targetTypes: List[type] | None
 ) -> __dataset_configuration_type | List[__dataset_configuration_type]:
     if isinstance(obj, dict):
-        if targetType is None:
+        if targetTypes is None:
             raise ValueError("targetType must not be None if obj is a dict")
         castedObj = cast(__dict_type, obj)
         fields = sorted(castedObj.keys())
@@ -57,22 +59,27 @@ def __create_data_object_from_dict(
                 cast(
                     str | int | __dataset_configuration_type,
                     __create_data_object_from_dict(
-                        castedObj[field], __get_next_type(targetType)
+                        castedObj[field], __get_next_type(targetTypes)
                     ),
                 ),
             )
             for field in fields
         )
-        return targetType(**field_value_pairs)
+        for targetType in targetTypes:
+            try:
+                return targetType(**field_value_pairs)
+            except TypeError:
+                pass
+        raise TypeError("No matching type found for dict")
     elif isinstance(obj, list):
-        if targetType is None:
+        if targetTypes is None:
             raise ValueError(
                 "targetType must not be None if obj is a list (assuming, that there are only lists of objects and never lists of primitive types)"
             )
         return cast(
             List[__dataset_configuration_type],
             [
-                __create_data_object_from_dict(item, targetType)
+                __create_data_object_from_dict(item, targetTypes)
                 for item in cast(List[__dict_type], obj)
             ],
         )
@@ -80,11 +87,13 @@ def __create_data_object_from_dict(
         return obj
 
 
-def __get_next_type(targetType: type):
-    if targetType == DatasetConfigurationHolder:
-        nextType = DatasetConfiguration
-    elif targetType == DatasetConfiguration:
-        nextType = DatasetColumnConfiguration
-    else:
-        nextType = None
-    return nextType
+def __get_next_type(targetType: List[type]) -> List[type] | None:
+    types: List[type] = []
+    if DatasetConfigurationHolder in targetType:
+        types.append(DatasetConfiguration)
+    elif DatasetConfiguration in targetType:
+        types.append(DatasetColumnConfiguration)
+        types.append(TrainingConfiguration)
+    elif TrainingConfiguration in targetType:
+        types.append(TrainingParameter)
+    return types if len(types) > 0 else None
