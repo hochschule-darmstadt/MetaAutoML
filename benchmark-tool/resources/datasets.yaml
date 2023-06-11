@@ -35,4 +35,5 @@ datasets:
       target: Survived
       metric: :accuracy
       auto_mls:
+        - :autokeras
         - :flaml
