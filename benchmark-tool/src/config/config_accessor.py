@@ -69,7 +69,7 @@ def get_omaml_dataset_location():
 
 
 def get_training_runtime_limit():
-    """Gets the value of the configuration option that contains the maximum runtime of a training in seconds.
+    """Gets the value of the configuration option that contains the maximum runtime of a training in minutes.
 
     Raises:
         ValueError: When the configuration option is not set
@@ -81,3 +81,18 @@ def get_training_runtime_limit():
     if runtime is None:
         raise ValueError("TRAINING_RUNTIME_LIMIT is not set")
     return int(runtime)
+
+
+def get_dataset_analysis_timeout_seconds():
+    """Gets the value of the configuration option that contains the timeout for dataset analysis in seconds.
+
+    Raises:
+        ValueError: When the configuration option is not set
+
+    Returns:
+        int: The timeout for dataset analysis in seconds
+    """
+    timeout = __get_config_value("DATASET_ANALYSIS_TIMEOUT_SECONDS")
+    if timeout is None:
+        raise ValueError("DATASET_ANALYSIS_TIMEOUT_SECONDS is not set")
+    return int(timeout)

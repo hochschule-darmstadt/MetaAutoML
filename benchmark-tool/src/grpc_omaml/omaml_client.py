@@ -11,6 +11,7 @@ from grpc_omaml import (
     CreateDatasetRequest,
     CreateNewUserRequest,
     CreateTrainingRequest,
+    GetDatasetRequest,
     GetDatasetsRequest,
     SetDatasetColumnSchemaConfigurationRequest,
 )
@@ -197,3 +198,20 @@ class OmamlClient:
             ).training_id
         except Exception as e:
             raise OmamlError("Error while starting training: ") from e
+
+    async def verify_dataset_ready(self, user_id: UUID, dataset_id: str) -> bool:
+        """Checks if a dataset is ready for training
+
+        Args:
+            user_id (UUID): The id of the user that the dataset is associated with
+            dataset_id (str): The id of the dataset
+        """
+        try:
+            dataset = (
+                await self.__grpc_client.get_dataset(
+                    GetDatasetRequest(str(user_id), dataset_id)
+                )
+            ).dataset
+            return "number_of_columns" in dataset.analysis
+        except Exception as e:
+            raise OmamlError("Error while verifying dataset ready: ") from e

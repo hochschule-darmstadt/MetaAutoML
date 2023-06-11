@@ -17,7 +17,8 @@
                 "DISABLE_CERTIFICATE_CHECK": "True",
                 // this is the position of the dataset volume, when the controller was started using the docker-compose file
                 "OMAML_DATASET_LOCATION": "//wsl.localhost/docker-desktop-data/version-pack-data/community/docker/volumes/metaautoml_datasets/_data/",
-                "TRAINING_RUNTIME_LIMIT": "3"
+                "TRAINING_RUNTIME_LIMIT": "3",
+                "DATASET_ANALYSIS_TIMEOUT_SECONDS": "10",
             }
         }
     ]

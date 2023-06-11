@@ -1,6 +1,8 @@
 from uuid import UUID
 from dataset.dataset_configuration import DatasetConfiguration
 from grpc_omaml.omaml_client import OmamlClient
+from config.config_accessor import get_dataset_analysis_timeout_seconds
+from asyncio import sleep
 
 
 async def upload_dataset(
@@ -27,6 +29,12 @@ async def upload_dataset(
     datasetId = await client.get_dataset_by_name(dataset.name_id, user_id)
     if datasetId is None:
         raise Exception("Dataset was not uploaded correctly")
+
+    timeout = get_dataset_analysis_timeout_seconds() * 10
+    for _ in range(timeout):
+        if await client.verify_dataset_ready(user_id, datasetId):
+            break
+        await sleep(0.1)
     return datasetId
 
 
