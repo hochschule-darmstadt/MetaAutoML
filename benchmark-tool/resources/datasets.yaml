@@ -34,3 +34,5 @@ datasets:
       task: :tabular_classification
       target: Survived
       metric: :accuracy
+      auto_mls:
+        - :flaml

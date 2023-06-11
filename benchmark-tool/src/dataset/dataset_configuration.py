@@ -22,6 +22,7 @@ class TrainingConfiguration:
     task: str
     target: str
     metric: str
+    auto_mls: List[str]
     enabled_strategies: List[str] = field(default_factory=list)
     runtime_limit: int | None = None
     parameters: dict[str, TrainingParameter] = field(default_factory=dict)

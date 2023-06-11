@@ -26,11 +26,7 @@ def __setup_training_time_limit_config():
 
 
 def __create_minimal_training_configuration():
-    return TrainingConfiguration(
-        "task",
-        "target",
-        "metric",
-    )
+    return TrainingConfiguration("task", "target", "metric", ["automl1", "automl2"])
 
 
 def test_training_configuration_to_omaml_config_should_return_correct_config_when_only_scalar_values_are_filled():
@@ -116,3 +112,26 @@ def test_training_configuration_to_omaml_config_should_add_metric_to_parameters(
     assert config.parameters["param1"].values == ["val1"]
     assert config.parameters["param2"].values == ["val2", "val3"]
     assert config.parameters[":metric"].values == [training_config.metric]
+
+
+def test_training_configuration_to_omaml_config_should_set_automls():
+    from grpc_omaml.omaml_typing_adapter import (
+        training_configuration_to_omaml_config,
+    )
+
+    training_config = __create_minimal_training_configuration()
+    config = training_configuration_to_omaml_config(training_config)
+
+    assert config.selected_auto_ml_solutions == training_config.auto_mls
+
+
+def test_training_configuration_to_omaml_configuration_should_set_selected_auto_ml_libraries_to_all():
+    from grpc_omaml.omaml_typing_adapter import (
+        training_configuration_to_omaml_config,
+        all_libs,
+    )
+
+    training_config = __create_minimal_training_configuration()
+    config = training_configuration_to_omaml_config(training_config)
+
+    assert config.selected_ml_libraries == all_libs

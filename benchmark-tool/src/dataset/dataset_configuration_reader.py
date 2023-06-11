@@ -41,7 +41,11 @@ def __dict_to_dataset_configuration_holder(
 
 
 __dataset_configuration_type = (
-    DatasetConfigurationHolder | DatasetConfiguration | DatasetColumnConfiguration
+    DatasetConfigurationHolder
+    | DatasetConfiguration
+    | DatasetColumnConfiguration
+    | TrainingConfiguration
+    | TrainingParameter
 )
 
 

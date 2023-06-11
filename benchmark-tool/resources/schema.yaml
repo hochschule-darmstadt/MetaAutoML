@@ -30,6 +30,8 @@ properties:
         columns:
           type: array
           description: List of columns in the dataset
+          contains:
+            type: object
           items:
             type: object
             properties:
@@ -86,7 +88,7 @@ properties:
             metric:
               type: string
               description: Metric to be used for evaluation. Choosing a metric that is not compatible with the task or any AutoML solution will result in an error.
-              enum: # all metrics listed in the ontology
+              enum: # all values listed in the ontology
                 - :accuracy
                 - :adjusted_rand_score
                 - :area_under_roc_curve
@@ -201,6 +203,25 @@ properties:
                 - :top_k_categorical_accuracy
                 - :true_negatives
                 - :true_positives
+            auto_mls:
+              type: array
+              description: List of AutoML solutions to be used.
+              contains: # force at least one element
+                type: string
+              items:
+                type: string
+                enum: # all values listed in the ontology
+                  - :autogluon
+                  - :autokeras
+                  - :autopytorch
+                  - :autosklearn
+                  - :evalml
+                  - :flaml
+                  - :gama
+                  - :mcfly
+                  - :mljar
+                  - :pycaret
+                  - :tpot
             parameters:
               type: object
               description: |
@@ -215,6 +236,7 @@ properties:
             - task
             - target
             - metric
+            - auto_mls # mandatory for now, could be improved in the future to let empty list equal to all
       required:
         - name_id
         - file_location

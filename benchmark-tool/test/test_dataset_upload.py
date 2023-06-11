@@ -12,7 +12,7 @@ __dataset = DatasetConfiguration(
     dataset_type=":tabular",
     file_location="some/path/to/file.csv",
     training=TrainingConfiguration(
-        "test", "test", "test"
+        "test", "test", "test", []
     ),  # training config does not matter for this test
 )
 

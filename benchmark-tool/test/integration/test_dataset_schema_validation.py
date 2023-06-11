@@ -33,10 +33,11 @@ def __create_valid_dataset_config() -> Dict[str, Any]:
                     "task": ":tabular_classification",
                     "target": "test",
                     "metric": ":accuracy",
+                    "auto_mls": [":flaml"],
                 },
                 "columns": [
                     {
-                        "idx": 0,
+                        "column_name": "test",
                         "column_type": ":float",
                         "column_role": ":ignore",
                     }
@@ -44,6 +45,13 @@ def __create_valid_dataset_config() -> Dict[str, Any]:
             }
         ]
     }
+
+
+def test_validate_dataset_config_should_not_raise_error_when_config_is_valid():
+    from external.yaml_schema_validator import validate_dataset_config
+
+    config = __create_valid_dataset_config()
+    validate_dataset_config(config)
 
 
 def test_validate_dataset_config_should_raise_error_when_required_prop_is_missing():
@@ -72,4 +80,26 @@ def test_validate_dataset_config_should_raise_error_when_has_no_datasets():
     with pytest.raises(ValidationError, match=".*'datasets' is a required property.*"):
         config = __create_valid_dataset_config()
         del config["datasets"]
+        validate_dataset_config(config)
+
+
+def test_validate_dataset_config_should_raise_error_when_has_no_columns():
+    from external.yaml_schema_validator import validate_dataset_config
+
+    with pytest.raises(
+        ValidationError, match=".*does not contain items matching the given schema.*"
+    ):
+        config = __create_valid_dataset_config()
+        config["datasets"][0]["columns"].clear()
+        validate_dataset_config(config)
+
+
+def test_validate_dataset_config_should_raise_error_when_training_has_no_automls():
+    from external.yaml_schema_validator import validate_dataset_config
+
+    with pytest.raises(
+        ValidationError, match=".*does not contain items matching the given schema.*"
+    ):
+        config = __create_valid_dataset_config()
+        config["datasets"][0]["training"]["auto_mls"].clear()
         validate_dataset_config(config)
