@@ -17,7 +17,7 @@ datasets:
       - column_name: Sex
         column_type: :categorical
       - column_name: Age
-        column_type: :integer
+        column_type: :float
       - column_name: SibSp
         column_type: :integer
       - column_name: Parch
