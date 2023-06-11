@@ -82,7 +82,7 @@ properties:
                 type: string
             runtime_limit:
               type: integer
-              description: Maximum time in minutes to run the benchmark. Defaults to the value of the DATASET_RUNTIME_LIMIT environment variable.
+              description: Maximum time in minutes to run the benchmark. Defaults to the value of the TRAINING_RUNTIME_LIMIT environment variable.
             metric:
               type: string
               description: Metric to be used for evaluation. Choosing a metric that is not compatible with the task or any AutoML solution will result in an error.

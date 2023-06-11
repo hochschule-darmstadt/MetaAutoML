@@ -66,3 +66,18 @@ def get_omaml_dataset_location():
     return __normpath(
         location
     )  # normpath is used to make sure that the path is valid on the current operating system
+
+
+def get_training_runtime_limit():
+    """Gets the value of the configuration option that contains the maximum runtime of a training in seconds.
+
+    Raises:
+        ValueError: When the configuration option is not set
+
+    Returns:
+        int: The maximum runtime of a training in minutes
+    """
+    runtime = __get_config_value("TRAINING_RUNTIME_LIMIT")
+    if runtime is None:
+        raise ValueError("TRAINING_RUNTIME_LIMIT is not set")
+    return int(runtime)

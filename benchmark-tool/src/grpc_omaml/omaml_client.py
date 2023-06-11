@@ -3,12 +3,14 @@ from uuid import UUID
 from dataset.dataset_configuration import (
     DatasetConfiguration,
     DatasetColumnConfiguration,
+    TrainingConfiguration,
 )
 from external.file_system import copy_file_to_folder
 from grpc_omaml import (
     ControllerServiceStub,
     CreateDatasetRequest,
     CreateNewUserRequest,
+    CreateTrainingRequest,
     GetDatasetsRequest,
     SetDatasetColumnSchemaConfigurationRequest,
 )
@@ -21,6 +23,7 @@ from config.config_accessor import (
 from ssl import SSLContext, PROTOCOL_TLSv1_2, CERT_NONE
 from config.config_accessor import get_disable_certificate_check
 from grpc_omaml.omaml_error import OmamlError
+import grpc_omaml.omaml_typing_adapter as omaml_typing_adapter
 
 
 class OmamlClient:
@@ -166,3 +169,31 @@ class OmamlClient:
             )
         except Exception as e:
             raise OmamlError("Error while setting column schema: ") from e
+
+    async def start_training(
+        self, user_id: UUID, dataset_id: str, training_config: TrainingConfiguration
+    ) -> str:
+        """Starts the training of a dataset
+
+        Args:
+            user_id (UUID): The id of the user that the dataset is associated with
+            dataset_id (str): The id of the dataset
+            training_config (TrainingConfiguration): The training configuration
+
+        Raises:
+            OmamlError: if the training could not be started
+
+        Returns:
+            str: The id of the training
+        """
+        config = omaml_typing_adapter.training_configuration_to_omaml_config(
+            training_config
+        )
+        try:
+            return (
+                await self.__grpc_client.create_training(
+                    CreateTrainingRequest(str(user_id), dataset_id, config, "", False)
+                )
+            ).training_id
+        except Exception as e:
+            raise OmamlError("Error while starting training: ") from e
