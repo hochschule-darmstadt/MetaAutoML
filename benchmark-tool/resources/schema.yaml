@@ -60,7 +60,7 @@ properties:
             required:
               - column_name
               - column_type
-        training: # todo: currently selected auto ml solutions and selected ml libraries cannot be entered. This is a todo for the future.
+        training:
           type: object
           description: Training parameters
           properties:
