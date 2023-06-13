@@ -1,4 +1,5 @@
 from config.config_adapter import get_config_value as __get_config_value
+from os.path import normpath as __normpath
 
 
 def get_userid():
@@ -48,3 +49,20 @@ def get_disable_certificate_check():
         bool: Whether the certificate check should be disabled
     """
     return __get_config_value("DISABLE_CERTIFICATE_CHECK") == "True"
+
+
+def get_omaml_dataset_location():
+    """Gets the value of the configuration option that contains the location where the omaml controller expects the dataset file to be located.
+
+    Raises:
+        ValueError: When the configuration option is not set
+
+    Returns:
+        str: The location of the omaml dataset
+    """
+    location = __get_config_value("OMAML_DATASET_LOCATION")
+    if location is None:
+        raise ValueError("OMAML_DATASET_LOCATION is not set")
+    return __normpath(
+        location
+    )  # normpath is used to make sure that the path is valid on the current operating system

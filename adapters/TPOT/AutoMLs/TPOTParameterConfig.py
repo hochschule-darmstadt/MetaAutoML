@@ -58,8 +58,14 @@ tabular_regression_config = [
     [":metric", ":metric_tpot_tabular_regression", [":mean_squared_error"], "single_value", "dict", tpot_metrics, "scoring"]
 ]
 
+#config for the image classification
+image_classification_config = [
+    [":metric", ":metric_tpot_image_classification", [":accuracy"], "single_value", "dict", tpot_metrics, "scoring"]
+]
+
 # dictionary for mapping the selected task to the appropriate config
 task_config = {
     ":tabular_classification": tabular_classification_config,
-    ":tabular_regression": tabular_regression_config
+    ":tabular_regression": tabular_regression_config,
+    ":image_classification": image_classification_config
 }

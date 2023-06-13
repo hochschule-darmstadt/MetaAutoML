@@ -87,7 +87,7 @@ def translate_parameters(task, parameter, task_config):
 
 
 
-def data_loader(config: "StartAutoMlRequest", image_test_folder=False, perform_splitting=True, as_dataframe=False) -> Any:
+def data_loader(config: "StartAutoMlRequest", image_test_folder=False, perform_splitting=True, as_dataframe=False,as_2darray=False) -> Any:
     """Load the dataframes for the requested dataset, by loading them into different DataFrames. See Returns section for more information.
 
     Args:
@@ -99,7 +99,7 @@ def data_loader(config: "StartAutoMlRequest", image_test_folder=False, perform_s
     """
 
     if config["configuration"]["task"] in [":image_classification", ":image_regression"]:
-        return read_image_dataset(config, image_test_folder, as_dataframe)
+        return read_image_dataset(config, image_test_folder, as_dataframe,as_2darray)
     else:
         return read_tabular_dataset_training_data(config, perform_splitting)
 

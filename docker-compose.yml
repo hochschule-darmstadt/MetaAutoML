@@ -43,6 +43,8 @@ services:
       - PYCARET_SERVICE_PORT=50063
       - TPOT_SERVICE_HOST=tpot
       - TPOT_SERVICE_PORT=50064
+      - GAMA_SERVICE_HOST=gama
+      - GAMA_SERVICE_PORT=50065
       - PERSISTENCE_LOGGING_LEVEL=DEBUG
       - SERVER_LOGGING_LEVEL=DEBUG
       - ONTOLOGY_LOGGING_LEVEL=DEBUG
@@ -63,6 +65,7 @@ services:
       - training-evalml:/app/app-data/training/evalml
       - training-pycaret:/app/app-data/training/pycaret
       - training-tpot:/app/app-data/training/tpot
+      - training-gama:/app/app-data/training/gama
 
   mongo:
     image: mongo
@@ -215,6 +218,17 @@ services:
       - datasets:/app/app-data/datasets
       - training-tpot:/app/app-data/training
 
+  gama:
+    build:
+      context: ./adapters
+      dockerfile: ./GAMA/Dockerfile
+    container_name: gama
+    environment:
+      - GRPC_SERVER_PORT=50065
+    volumes:
+      - datasets:/app/app-data/datasets
+      - training-gama:/app/app-data/training
+
 volumes:
   datasets: # shared volume between controller, adapters and frontend/dummy to transfer datasets
    # shared volumes between controller and adapters to transfer training files e.g. *.zip file
@@ -230,6 +244,7 @@ volumes:
   training-evalml:
   training-pycaret:
   training-tpot:
+  training-gama:
 
   # shared volume between controller and frontend / dummy to transfer training
   training:
