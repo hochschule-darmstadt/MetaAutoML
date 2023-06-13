@@ -7,6 +7,9 @@ async def init_user(client: OmamlClient) -> UUID:
     """Initializes a user with configured id.
     If no id was configured, a new user is created and the id is returned.
 
+    Args:
+        client (OmamlClient): The omaml client to use
+
     Returns:
         UUID: The id of the user
     """

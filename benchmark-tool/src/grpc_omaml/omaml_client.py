@@ -1,12 +1,19 @@
 import os
 from uuid import UUID
-from dataset.dataset_type import DatasetType, type_to_omaml_id
+from dataset.dataset_configuration import (
+    DatasetConfiguration,
+    DatasetColumnConfiguration,
+    TrainingConfiguration,
+)
 from external.file_system import copy_file_to_folder
 from grpc_omaml import (
     ControllerServiceStub,
     CreateDatasetRequest,
     CreateNewUserRequest,
+    CreateTrainingRequest,
+    GetDatasetRequest,
     GetDatasetsRequest,
+    SetDatasetColumnSchemaConfigurationRequest,
 )
 from grpclib.client import Channel
 from config.config_accessor import (
@@ -17,6 +24,7 @@ from config.config_accessor import (
 from ssl import SSLContext, PROTOCOL_TLSv1_2, CERT_NONE
 from config.config_accessor import get_disable_certificate_check
 from grpc_omaml.omaml_error import OmamlError
+import grpc_omaml.omaml_typing_adapter as omaml_typing_adapter
 
 
 class OmamlClient:
@@ -70,7 +78,7 @@ class OmamlClient:
             raise OmamlError("Error while creating user: ") from e
 
     async def create_dataset(
-        self, name: str, file_location: str, dataset_type: DatasetType, user_id: UUID
+        self, dataset: DatasetConfiguration, user_id: UUID
     ) -> None:
         """Uploads a dataset from a given path to omaml
 
@@ -83,15 +91,15 @@ class OmamlClient:
         Raises:
             OmamlError: if the dataset could not be created
         """
-        self.__file_upload(file_location, user_id)
+        self.__file_upload(dataset.file_location, user_id)
 
-        filename = os.path.basename(file_location)
+        filename = os.path.basename(dataset.file_location)
         try:
             await self.__grpc_client.create_dataset(
                 CreateDatasetRequest(
                     file_name=filename,
-                    dataset_name=name,
-                    dataset_type=type_to_omaml_id(dataset_type),
+                    dataset_name=dataset.name_id,
+                    dataset_type=dataset.dataset_type,
                     user_id=str(user_id),
                     encoding="utf-8",
                 )
@@ -106,7 +114,7 @@ class OmamlClient:
             file_location, os.path.join(omaml_dataset_folder, str(user_id), "uploads")
         )
 
-    async def dataset_exists(self, dataset_name: str, user_id: UUID) -> bool:
+    async def get_dataset_by_name(self, dataset_name: str, user_id: UUID) -> str | None:
         """Checks if a dataset with the given name exists for the given user
 
         Args:
@@ -117,14 +125,93 @@ class OmamlClient:
             OmamlError: if the datasets could not be fetched for the current user
 
         Returns:
-            bool: True if the dataset exists, False otherwise
+            bool: The id of the dataset if it exists, None otherwise
         """
         try:
             result = await self.__grpc_client.get_datasets(
                 GetDatasetsRequest(user_id=str(user_id))
             )
-            return any(
-                map(lambda dataset: dataset.name == dataset_name, result.datasets)
+
+            # return single element from list that has the same name as the dataset_name
+            return next(
+                (
+                    dataset.id
+                    for dataset in result.datasets
+                    if dataset.name == dataset_name
+                ),
+                None,
             )
+
         except Exception as e:
             raise OmamlError("Error while checking if dataset exists: ") from e
+
+    async def set_dataset_column_schema(
+        self,
+        user_id: UUID,
+        dataset_id: str,
+        dataset_column: DatasetColumnConfiguration,
+    ):
+        """Sets the column schema for a dataset
+
+        Args:
+            user_id (UUID): The id of the user that the dataset is associated with
+            dataset_id (str): The id of the dataset
+            dataset_configuration (DatasetConfiguration): The dataset configuration
+        """
+        try:
+            await self.__grpc_client.set_dataset_column_schema_configuration(
+                SetDatasetColumnSchemaConfigurationRequest(
+                    str(user_id),
+                    dataset_id,
+                    dataset_column.column_name,
+                    dataset_column.column_type,
+                    dataset_column.column_role,
+                )
+            )
+        except Exception as e:
+            raise OmamlError("Error while setting column schema: ") from e
+
+    async def start_training(
+        self, user_id: UUID, dataset_id: str, training_config: TrainingConfiguration
+    ) -> str:
+        """Starts the training of a dataset
+
+        Args:
+            user_id (UUID): The id of the user that the dataset is associated with
+            dataset_id (str): The id of the dataset
+            training_config (TrainingConfiguration): The training configuration
+
+        Raises:
+            OmamlError: if the training could not be started
+
+        Returns:
+            str: The id of the training
+        """
+        config = omaml_typing_adapter.training_configuration_to_omaml_config(
+            training_config
+        )
+        try:
+            return (
+                await self.__grpc_client.create_training(
+                    CreateTrainingRequest(str(user_id), dataset_id, config, "", False)
+                )
+            ).training_id
+        except Exception as e:
+            raise OmamlError("Error while starting training: ") from e
+
+    async def verify_dataset_ready(self, user_id: UUID, dataset_id: str) -> bool:
+        """Checks if a dataset is ready for training
+
+        Args:
+            user_id (UUID): The id of the user that the dataset is associated with
+            dataset_id (str): The id of the dataset
+        """
+        try:
+            dataset = (
+                await self.__grpc_client.get_dataset(
+                    GetDatasetRequest(str(user_id), dataset_id)
+                )
+            ).dataset
+            return "number_of_columns" in dataset.analysis
+        except Exception as e:
+            raise OmamlError("Error while verifying dataset ready: ") from e
