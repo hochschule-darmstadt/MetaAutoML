@@ -7,6 +7,7 @@ from sklearn.impute import SimpleImputer
 from _collections_abc import dict_items
 from JsonUtil import get_config_property
 from AdapterBGRPC import *
+from sklearn.model_selection import train_test_split
 import os
 import re
 import json
@@ -43,8 +44,9 @@ def read_tabular_dataset_training_data(config: "StartAutoMlRequest", perform_spl
 
     data = pd.read_csv(**configuration)
 
-    if config['dataset_configuration']['multi_fidelity_level'] != 0:
-        data = data.sample(frac=0.1, random_state=1)
+    mfl = config['dataset_configuration']['multi_fidelity_level']
+    if mfl != 0 and mfl < 1.0:
+        data = data.sample(frac=mfl, random_state=1)
 
     #Rename untitled columns to correct name
     for column in data:
@@ -63,8 +65,12 @@ def read_tabular_dataset_training_data(config: "StartAutoMlRequest", perform_spl
     #else:
 
     if perform_splitting == True:
-        train = data.iloc[:int(data.shape[0] * 0.8)]
-        test = data.iloc[int(data.shape[0] * 0.8):]
+        # get target for stratify the train_test_split
+        schema = config["dataset_configuration"]["schema"]
+        for column_name in schema:
+            if schema[column_name].get("role_selected", "") == ":target":
+                target = column_name
+        train, test = train_test_split(data, test_size=0.2,random_state=42, stratify=data[target])
     else:
         train = data
         test = pd.DataFrame()

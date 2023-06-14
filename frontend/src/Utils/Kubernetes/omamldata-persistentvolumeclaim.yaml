@@ -192,3 +192,17 @@ spec:
     requests:
       storage: 20Gi
   storageClassName: nfs-csi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: output-tpot-claim
+  namespace: omaml
+spec:
+  accessModes:
+  - ReadWriteMany
+  resources:
+    requests:
+      storage: 20Gi
+  storageClassName: nfs-csi
+

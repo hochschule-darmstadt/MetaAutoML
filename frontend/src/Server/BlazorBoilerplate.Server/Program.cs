@@ -1,4 +1,4 @@
-﻿using BlazorBoilerplate.Server.Services;
+﻿using BlazorBoilerplate.Server.Services; 
 using Serilog;
 
 namespace BlazorBoilerplate.Server

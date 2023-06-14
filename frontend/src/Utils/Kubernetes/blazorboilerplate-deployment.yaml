@@ -41,7 +41,7 @@ spec:
         - name: BlazorBoilerplate__UseSqlServer
           value: "true"
         - name: ConnectionStrings__DefaultConnection
-          value: "Server=sqlserver;Database=omaml;Trusted_Connection=True;MultipleActiveResultSets=true;User=sa;Password=yourVeryStrong(!)Password;Integrated Security=false"
+          value: "Server=sqlserver;Database=omaml;Trusted_Connection=True;MultipleActiveResultSets=true;User=sa;Password=yourVeryStrong(!)Password;Integrated Security=false;Encrypt=False;"
         - name: Serilog__MinimumLevel__Default
           value: Debug
         - name: CONTROLLER_DATASET_FOLDER_PATH
@@ -71,6 +71,8 @@ spec:
           mountPath: /app/app-data/training/pycaret
         - name: evalml-output
           mountPath: /app/app-data/training/evaml
+        - name: tpot-output
+          mountPath: /app/app-data/training/tpot
         image: alexhda/omaml-frontend:latest
         name: blazorboilerplate
         ports:
@@ -78,8 +80,8 @@ spec:
         - containerPort: 443
         resources:
           limits:
-            cpu: "2"
-            memory: "2194304e3"
+            cpu: "1"
+            memory: "4194304e3"
       restartPolicy: Always
       hostAliases:
       - ip: "127.0.0.1"
@@ -119,4 +121,7 @@ spec:
       - name: pycaret-output
         persistentVolumeClaim:
           claimName: output-pycaret-claim
+      - name: tpot-output
+        persistentVolumeClaim:
+          claimName: output-tpot-claim
 status: {}

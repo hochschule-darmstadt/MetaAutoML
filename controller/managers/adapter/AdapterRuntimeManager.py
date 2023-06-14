@@ -40,8 +40,9 @@ class AdapterRuntimeManager:
             ":alphad3m":        ["ALPHAD3M_SERVICE_HOST",  "ALPHAD3M_SERVICE_PORT"],
             ":mcfly":           ["MCFLY_SERVICE_HOST", "MCFLY_SERVICE_PORT"],
             ":evalml":          ["EVALML_SERVICE_HOST", "EVALML_SERVICE_PORT"],
-            ":pycaret":          ["PYCARET_SERVICE_HOST", "PYCARET_SERVICE_PORT"],
-            ":tpot":          ["TPOT_SERVICE_HOST", "TPOT_SERVICE_PORT"],
+            ":pycaret":         ["PYCARET_SERVICE_HOST", "PYCARET_SERVICE_PORT"],
+            ":tpot":            ["TPOT_SERVICE_HOST", "TPOT_SERVICE_PORT"],
+            ":gama":            ["GAMA_SERVICE_HOST", "GAMA_SERVICE_PORT"],
         }
         self.__adapters: list[AdapterManager] = []
         self.__log.debug("start_new_training: creating new blackboard and strategy controller for training")
@@ -168,7 +169,7 @@ class AdapterRuntimeManager:
         #Finish sub training and return outside of lock or else we deadlock us
         if len(training["model_ids"]) == len(model_list)-1:
             if self.__multi_fidelity_level != 0:
-                self.__multi_fidelity_callback(model_list)
+                self.__multi_fidelity_callback(model_list, self.__multi_fidelity_level)
 
         if model_details["status"] == "completed" and self.__multi_fidelity_level == 0:
             if dataset["type"] in  [":tabular", ":text", ":time_series"]:

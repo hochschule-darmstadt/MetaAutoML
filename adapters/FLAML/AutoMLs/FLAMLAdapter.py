@@ -2,6 +2,7 @@ import os
 from AdapterUtils import *
 from AdapterTabularUtils import *
 from explainerdashboard import ClassifierExplainer, RegressionExplainer, ExplainerDashboard
+from explainerdashboard import ClassifierExplainer, RegressionExplainer, ExplainerDashboard
 from flaml import AutoML
 import numpy as np
 from sklearn.impute import SimpleImputer
@@ -75,6 +76,7 @@ class FLAMLAdapter:
         X[y.name] = y.values
         automl.fit(dataframe=X, label=y.name, **automl_settings)
         export_model(automl, self._configuration["result_folder_location"], 'model_flaml.p')
+        self.__create_explainer_dashboard(X, y)
 
     def __tabular_regression(self):
         """Execute the tabular regression task and export the found model"""
