@@ -120,8 +120,11 @@ class FLAMLAdapter:
             "ensemble": True,
             "log_file_name": self._log_file_path,
             "period": 12,
-            "eval_method": "holdout"
+            "eval_method": "holdout",
+            #set because there are issues with holt-winters
+            "estimator_list": ["lgbm", "xgboost", "xgb_limitdepth", "rf", "extra_tree", "prophet", "arima", "sarimax"]
         })
+
         #X.reset_index(inplace=True)
         #X = X.bfill().ffill()  # makes sure there are no missing values
         automl.fit(X_train=X, y_train=y, **automl_settings)
