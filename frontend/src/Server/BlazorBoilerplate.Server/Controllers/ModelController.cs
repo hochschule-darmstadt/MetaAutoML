@@ -1,4 +1,4 @@
-﻿using BlazorBoilerplate.Infrastructure.Server;
+using BlazorBoilerplate.Infrastructure.Server;
 using BlazorBoilerplate.Infrastructure.Server.Models;
 using BlazorBoilerplate.Server.Aop;
 using BlazorBoilerplate.Server.Managers;
@@ -73,6 +73,15 @@ namespace BlazorBoilerplate.Server.Controllers
         public async Task<ApiResponse> DeleteModel(DeleteModelRequestDto request)
         => ModelState.IsValid ?
                 await _modelManager.DeleteModel(request) :
+                new ApiResponse(Status400BadRequest, L["InvalidData"]);
+
+        [HttpPost]
+        [ProducesResponseType(Status200OK)]
+        [ProducesResponseType(Status400BadRequest)]
+        [ProducesResponseType(Status404NotFound)]
+        public async Task<ApiResponse> StartExplainablerDashboard(StartDashboardRequestDto request)
+        => ModelState.IsValid ?
+                await _modelManager.StartExplainerDashboard(request) :
                 new ApiResponse(Status400BadRequest, L["InvalidData"]);
 
     }

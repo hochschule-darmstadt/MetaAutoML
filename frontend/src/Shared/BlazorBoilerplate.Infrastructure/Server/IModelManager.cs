@@ -1,4 +1,5 @@
-﻿using BlazorBoilerplate.Infrastructure.Server.Models;
+using BlazorBoilerplate.Infrastructure.Server.Models;
+using BlazorBoilerplate.Shared.Dto;
 using BlazorBoilerplate.Shared.Dto.Model;
 
 namespace BlazorBoilerplate.Infrastructure.Server
@@ -10,5 +11,6 @@ namespace BlazorBoilerplate.Infrastructure.Server
         Task<ApiResponse> GetModelExplanation(GetModelExplanationRequestDto request);
         Task<ApiResponse> DownloadModel(DownloadModelRequestDto request);
         Task<ApiResponse> DeleteModel(DeleteModelRequestDto request);
+        Task<ApiResponse> StartExplainerDashboard(StartDashboardRequestDto request);
     }
 }
