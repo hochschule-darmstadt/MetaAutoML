@@ -1,8 +1,6 @@
 import os
 from AdapterUtils import *
 from AdapterTabularUtils import *
-from explainerdashboard import ClassifierExplainer, RegressionExplainer, ExplainerDashboard
-from explainerdashboard import ClassifierExplainer, RegressionExplainer, ExplainerDashboard
 from flaml import AutoML
 import numpy as np
 from sklearn.impute import SimpleImputer
@@ -156,24 +154,3 @@ class FLAMLAdapter:
         automl.fit(dataframe=X, label=y.name, **automl_settings)
 
         export_model(automl, self._configuration["result_folder_location"], 'model_flaml.p')
-
-    def __create_explainer_dashboard(self):
-        """Creates the ExplainerDashboard based on the generated model""" 
-        train, test = data_loader(self._configuration, perform_splitting=False)
-        X, y = prepare_tabular_dataset(test, self._configuration)
-        X, y = replace_forbidden_json_utf8_characters(X, y)
-
-        with open(os.path.join(self._configuration["result_folder_location"], "model_flaml.p"), 'rb') as file:
-            model = dill.load(file)
-
-        if self._configuration["configuration"]["task"] == ":tabular_classification" or self._configuration["configuration"]["task"] == ":text_classification" :
-            dashboard = ExplainerDashboard(ClassifierExplainer(model, X, y))
-        else :
-            dashboard = ExplainerDashboard(RegressionExplainer(model, X, y))
-
-        dash_path = os.path.abspath(os.path.join(self._configuration["result_folder_location"], os.pardir))
-        os.makedirs(os.path.join(dash_path, "dashboard"), exist_ok=True)
-        dash_path = os.path.join(dash_path, "dashboard")
-
-        dashboard.save_html(os.path.join(dash_path, "binary_dashboard.html"))
-        dashboard.explainer.dump(os.path.join(dash_path, "binary_dashboard.dill"))

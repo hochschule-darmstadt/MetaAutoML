@@ -8,6 +8,7 @@ from threading import *
 from JsonUtil import get_config_property
 import pandas as pd
 from typing import Tuple
+from explainerdashboard import ClassifierExplainer, RegressionExplainer, ExplainerDashboard
 
 flaml_estimators = {
     "transformer" : (":pytorch_lib", ":transformer"),
@@ -87,3 +88,31 @@ class FLAMLAdapterManager(AdapterManager):
         probabilities = json.dumps(probabilities)
         return probabilities
 
+    def _create_explainer_dashboard(self, config: "StartAutoMlRequest"):
+        """Creates the ExplainerDashboard based on the generated model""" 
+
+        if self._loaded_training_id != config["training_id"]:
+            print(f"ExplainModel: Model not already loaded; Loading model")
+            with open(config["result_folder_location"] + '/model_flaml.p', 'rb') as file:
+                model = dill.load(file)
+            self._loaded_training_id = config["training_id"]
+
+        train, test = data_loader(config)
+        X, y = prepare_tabular_dataset(test, config)
+        X, y = replace_forbidden_json_utf8_characters(X, y)
+
+        if config["configuration"]["task"] == ":tabular_classification" or config["configuration"]["task"] == ":text_classification" :
+            dashboard = ExplainerDashboard(ClassifierExplainer(model, X, y))
+        else :
+            dashboard = ExplainerDashboard(RegressionExplainer(model, X, y))
+
+        dash_path = os.path.abspath(os.path.join(config["result_folder_location"], os.pardir))
+        os.makedirs(os.path.join(dash_path, "dashboard"), exist_ok=True)
+        dash_path = os.path.join(dash_path, "dashboard")
+
+        dashboard.save_html(os.path.join(dash_path, "binary_dashboard.html"))
+        dashboard.explainer.dump(os.path.join(dash_path, "binary_dashboard.dill"))
+
+        status_update = CreateExplainerDashboardResponse()
+        status_update.return_code = AdapterReturnCode.ADAPTER_RETURN_CODE_SUCCESS
+        return status_update
