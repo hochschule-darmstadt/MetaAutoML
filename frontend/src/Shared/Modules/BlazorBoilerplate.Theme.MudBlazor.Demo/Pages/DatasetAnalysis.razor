@@ -37,33 +37,9 @@
     protected async override void OnInitialized()
     {
         await LoadDataset();
-        await StartExplainerDashboard();
         StateHasChanged();
     }
-    private async Task StartExplainerDashboard()
-    {
-        try
-        {
-            GetDatasetRequestDto datasetRequest = new GetDatasetRequestDto()
-                {
-                    DatasetId = Id
-                };
-            ApiResponseDto apiResponse = await apiClient.GetDataset(datasetRequest);
-
-            if (apiResponse.IsSuccessStatusCode)
-            {
-                viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
-            }
-            else
-            {
-                viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
-            }
-        }
-        catch (Exception ex)
-        {
-            viewNotifier.Show(ex.GetBaseException().Message, ViewNotifierType.Error, L["Operation Failed"]);
-        }   
-    }
+ 
     private async Task LoadDataset()
     {
         try
