@@ -43,7 +43,7 @@ flaml_use_approaches = {
 ":k_nearest_neighbor": "kneighbor",
 ":prophet": "prophet",
 ":autoregressive_integrated_moving_average": "arima",
-#":seasonal_autoregressive_integrated_moving_average_exogenous": "sarimax",
+":seasonal_autoregressive_integrated_moving_average_exogenous": "sarimax",
 ":transformer": "transformer",
 ":temporal_fusion_transformer": "temporal_fusion_transformer"
 }

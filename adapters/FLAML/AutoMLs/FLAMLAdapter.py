@@ -119,7 +119,7 @@ class FLAMLAdapter:
             "task": 'ts_forecast',
             "ensemble": True,
             "log_file_name": self._log_file_path,
-            "eval_method": "holdout",
+            "eval_method": "holdout"
         })
         #if estimator-list is auto set maually because there are issues with holt-winters
         if automl_settings['estimator_list'] == 'auto':
