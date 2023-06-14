@@ -256,9 +256,8 @@ namespace BlazorBoilerplate.Server.Managers
             try
             {
                 startDashboardRequest.ModelId = request.ModelId;
-                var reply = _client.DeleteModel(startDashboardRequest);
+                var reply = _client.StartExplainerDashboard(startDashboardRequest);
                 return new ApiResponse(Status200OK, null, "");
-
             }
             catch (Exception ex)
             {

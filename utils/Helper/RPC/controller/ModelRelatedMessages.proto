@@ -13,7 +13,7 @@ message StartDashboardRequest{
   string modelId = 1;
 }
 
-message StartDashboardRespone {
+message StartDashboardResponse {
 
 }
 

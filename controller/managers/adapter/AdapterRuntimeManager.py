@@ -173,7 +173,7 @@ class AdapterRuntimeManager:
 
         if model_details["status"] == "completed" and self.__multi_fidelity_level == 0:
             if dataset["type"] in  [":tabular", ":text", ":time_series"]:
-                ExplainableAIManager(self.__data_storage, adapter_manager, self.__explainable_lock).explain(user_id, model_id)
+                ExplainableAIManager(self.__data_storage,).explain(model_id)
                 return
 
     def get_adapters(self) -> list[AdapterManager]:

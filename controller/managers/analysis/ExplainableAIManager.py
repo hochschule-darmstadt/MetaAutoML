@@ -190,11 +190,10 @@ def feature_preparation(X, features, datetime_format, is_prediction=False):
 
 
 class ExplainableAIManager:
-    def __init__(self, data_storage: DataStorage, adapter_manager: AdapterManager, explainable_lock: ThreadLock):
+    def __init__(self, data_storage: DataStorage):
         self.__data_storage = data_storage
-        self.__adapter_manager = adapter_manager
         self.__threads = []
-        self.__explainable_lock = explainable_lock
+        self.startExplainerDashboard()
 
     def startExplainerDashboard(self):
         def callback(thread):    

@@ -3,6 +3,7 @@ from urllib import request
 from DataStorage import DataStorage
 from ControllerBGRPC import *
 import json, logging, os
+from ExplainableAIManager import ExplainableAIManager
 
 class ModelManager:
     """The ModelManager provides all functionality related to Models objects
@@ -148,4 +149,19 @@ class ModelManager:
         amount_delelted_models = self.__data_storage.delete_model(delete_model_request.user_id, delete_model_request.model_id)
         self.__log.debug(f"delete_model: model deleted {amount_delelted_models}")
         return DeleteModelResponse()
+    
+    def start_explainer_dashboard(
+        self, start_dashboard_request: "StartDashboardRequest"
+    ) -> "StartDashboardResponse":
+        """Start an ExplainerDashboard from disc
 
+        Args:
+            start_dashboard_request (StartDashboardRequest): The GRPC request containing the model id
+
+        Returns:
+            start_dashboard_response: The empty GRPC response
+        """
+        self.__log.debug(f"start_explainer_dashboard: start dashboard of model {start_dashboard_request.model_id}")
+        #amount_delelted_models = self.__data_storage.delete_model(delete_model_request.user_id, start_dashboard_request.model_id)
+        ExplainableAIManager(self.__data_storage).explain(start_dashboard_request.model_id)
+        return StartDashboardResponse()

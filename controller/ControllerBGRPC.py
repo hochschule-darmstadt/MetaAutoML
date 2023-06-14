@@ -431,7 +431,7 @@ class StartDashboardRequest(betterproto.Message):
 
 
 @dataclass(eq=False, repr=False)
-class StartDashboardRespone(betterproto.Message):
+class StartDashboardResponse(betterproto.Message):
     pass
 
 
@@ -1352,6 +1352,23 @@ class ControllerServiceStub(betterproto.ServiceStub):
             deadline=deadline,
             metadata=metadata,
         )
+    
+    async def start_explainer_dashboard(
+        self,
+        start_explainer_dashboard: "StartDashboardRequest",
+        *,
+        timeout: Optional[float] = None,
+        deadline: Optional["Deadline"] = None,
+        metadata: Optional["MetadataLike"] = None
+    ) -> "StartDashboardResponse":
+        return await self._unary_unary(
+            "/ControllerService/StartExplainerDashboard",
+            start_explainer_dashboard,
+            StartDashboardResponse,
+            timeout=timeout,
+            deadline=deadline,
+            metadata=metadata,
+        )
 
     async def get_auto_ml_solutions_for_configuration(
         self,
@@ -1617,6 +1634,11 @@ class ControllerServiceBase(ServiceBase):
         self, delete_model_request: "DeleteModelRequest"
     ) -> "DeleteModelResponse":
         raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
+    
+    async def start_explainer_dashboard(
+        self, start_dashboard_request: "StartDashboardRequest"
+    ) -> "StartDashboardResponse":
+        raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
 
     async def get_auto_ml_solutions_for_configuration(
         self,
@@ -1785,6 +1807,13 @@ class ControllerServiceBase(ServiceBase):
     ) -> None:
         request = await stream.recv_message()
         response = await self.delete_model(request)
+        await stream.send_message(response)
+
+    async def __rpc_start_explainer_dashboard(
+        self, stream: "grpclib.server.Stream[StartDashboardRequest, StartDashboardResponse]"
+    ) -> None:
+        request = await stream.recv_message()
+        response = await self.start_explainer_dashboard(request)
         await stream.send_message(response)
 
     async def __rpc_get_auto_ml_solutions_for_configuration(
@@ -1966,6 +1995,12 @@ class ControllerServiceBase(ServiceBase):
                 grpclib.const.Cardinality.UNARY_UNARY,
                 DeleteModelRequest,
                 DeleteModelResponse,
+            ),
+            "/ControllerService/StartExplainerDashboard": grpclib.const.Handler(
+                self.__rpc_start_explainer_dashboard,
+                grpclib.const.Cardinality.UNARY_UNARY,
+                StartDashboardRequest,
+                StartDashboardResponse,
             ),
             "/ControllerService/GetAutoMlSolutionsForConfiguration": grpclib.const.Handler(
                 self.__rpc_get_auto_ml_solutions_for_configuration,
