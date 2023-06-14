@@ -35,7 +35,7 @@
     protected async override void OnInitialized()
     {
         await LoadModel();
-        
+
         StateHasChanged();
     }
     private async Task LoadModel()
@@ -64,6 +64,11 @@
                 {
                     _training = Newtonsoft.Json.JsonConvert.DeserializeObject<GetTrainingResponseDto>(apiResponse.Result.ToString());
                     viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
+
+                    // Start here
+                    ApiResponseDto apiResponseStartDashboard;
+                    apiResponseStartDashboard = await apiClient.StartExplainerDashboard(new StartDashboardRequestDto() {ModelId = Id});
+                    // test for succ or failure
                 }
                 else
                 {

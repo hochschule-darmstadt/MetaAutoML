@@ -5,6 +5,17 @@ import "Enumerations.proto";
 import "PredictionRelatedMessages.proto";
 import "google/protobuf/timestamp.proto";
 
+message StartDashboardRequest{
+    /*
+    Unique model ids generated when inserting a new model document into MongoDB
+    example: '63525870394eff35ee175bc2'
+  */
+  string modelId = 1;
+}
+
+message StartDashboardRespone {
+
+}
 
 message DeleteModelRequest {
   /*

@@ -151,6 +151,12 @@ namespace BlazorBoilerplate.Shared.Services
         {
             return await httpClient.PostJsonAsync<ApiResponseDto>("api/Model/DeleteModel", request);
         }
+
+        public async Task<ApiResponseDto> StartExplainerDashboard(StartDashboardRequestDto request)
+        {
+            return await httpClient.PostJsonAsync<ApiResponseDto>("api/Model/StartExplainerDashboard", request);
+        }
+
         #endregion
 
         #region OMA-ML ONTOLOGY MESSAGES

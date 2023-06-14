@@ -423,6 +423,17 @@ class PredictionRuntimeProfile(betterproto.Message):
     The timestamp when the prediction process endedexample: 1666283732325
     """
 
+@dataclass(eq=False, repr=False)
+class StartDashboardRequest(betterproto.Message):
+    # Unique model ids generated when inserting a new model document into
+    # MongoDBexample: '63525870394eff35ee175bc2'
+    model_id: str = betterproto.string_field(1)
+
+
+@dataclass(eq=False, repr=False)
+class StartDashboardRespone(betterproto.Message):
+    pass
+
 
 @dataclass(eq=False, repr=False)
 class DeleteModelRequest(betterproto.Message):
