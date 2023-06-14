@@ -65,9 +65,14 @@ def read_tabular_dataset_training_data(config: "StartAutoMlRequest", perform_spl
     #else:
 
     if perform_splitting == True:
-        if config["configuration"]["task"] in ":time_series_forecasting":
+        if config["configuration"]["task"] in ":regression":
             #do not shuffle because time series must be in the correct order
-            train, test = train_test_split(data, test_size=0.2, shuffle=False)
+            train, test = train_test_split(data, test_size=0.2, random_state=42)
+        elif config["configuration"]["task"] in ":time_series_forecasting":
+            #split with help of forcasting_horizon
+            number_of_entries = data.shape[0] - config["forecasting_horizon"]
+            train = data[:number_of_entries]
+            test = data[number_of_entries:]
         else:
             # get target for stratify the train_test_split
             schema = config["dataset_configuration"]["schema"]
