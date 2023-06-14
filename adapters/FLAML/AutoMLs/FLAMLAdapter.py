@@ -76,7 +76,6 @@ class FLAMLAdapter:
         X[y.name] = y.values
         automl.fit(dataframe=X, label=y.name, **automl_settings)
         export_model(automl, self._configuration["result_folder_location"], 'model_flaml.p')
-        self.__create_explainer_dashboard(X, y)
 
     def __tabular_regression(self):
         """Execute the tabular regression task and export the found model"""
@@ -162,6 +161,7 @@ class FLAMLAdapter:
         """Creates the ExplainerDashboard based on the generated model""" 
         train, test = data_loader(self._configuration, perform_splitting=False)
         X, y = prepare_tabular_dataset(test, self._configuration)
+        X, y = replace_forbidden_json_utf8_characters(X, y)
 
         with open(os.path.join(self._configuration["result_folder_location"], "model_flaml.p"), 'rb') as file:
             model = dill.load(file)
