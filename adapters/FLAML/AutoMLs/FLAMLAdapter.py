@@ -119,11 +119,11 @@ class FLAMLAdapter:
             "task": 'ts_forecast',
             "ensemble": True,
             "log_file_name": self._log_file_path,
-            "period": 12,
             "eval_method": "holdout",
-            #set because there are issues with holt-winters
-            "estimator_list": ["lgbm", "xgboost", "xgb_limitdepth", "rf", "extra_tree", "prophet", "arima", "sarimax"]
         })
+        #if estimator-list is auto set maually because there are issues with holt-winters
+        if automl_settings['estimator_list'] == 'auto':
+           automl_settings['estimator_list'] = ["lgbm", "xgboost", "xgb_limitdepth", "rf", "extra_tree", "prophet", "arima","sarimax"]
 
         #X.reset_index(inplace=True)
         #X = X.bfill().ffill()  # makes sure there are no missing values

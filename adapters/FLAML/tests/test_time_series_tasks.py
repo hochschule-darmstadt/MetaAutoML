@@ -40,7 +40,8 @@ class FLAMLTimeSeriesTaskTest(unittest.TestCase):
         req.configuration.target = "target"
         req.configuration.runtime_limit = 3
         req.configuration.metric = ':accuracy'
-        req.configuration.parameters = {":metric": {"values": [":mean_squared_error"]}}
+        req.configuration.period = 3
+        req.configuration.parameters = {":metric": {"values": [":mean_squared_error"]}, ":forecasting_horizon": 3, ":estimator_list": ["lgbm", "xgboost", "xgb_limitdepth", "rf", "extra_tree", "prophet", "arima"]}
         req.dataset_configuration = json.dumps({
             "column_datatypes": {
                 "time_series": ":datetime",
