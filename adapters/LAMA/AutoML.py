@@ -3,7 +3,7 @@ import os
 import logging
 import sys
 
-from GAMAAdapter import GAMAAdapter
+from LAMAAdapter import LAMAAdapter
 from JsonUtil import get_config_property
 
 if __name__ == '__main__':
@@ -20,5 +20,5 @@ if __name__ == '__main__':
         process_json = json.load(file)
 
     process_json["dataset_configuration"] = json.loads(process_json["dataset_configuration"])
-    autoML = GAMAAdapter(process_json)
+    autoML = LAMAAdapter(process_json)
     autoML.start()

@@ -37,7 +37,7 @@
             "type": "python",
             "request": "launch",
             "purpose": ["debug-test"],
-            "program": "tests/test_tabular_tasks.py",
+            "program": "tests/test_tabular_task.py",
             "console": "integratedTerminal",
             "justMyCode": false,
             "env": {

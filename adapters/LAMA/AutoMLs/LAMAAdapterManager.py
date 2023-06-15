@@ -1,10 +1,8 @@
 from AdapterManager import AdapterManager
 import json
 import os
-import time, asyncio
 from AdapterUtils import *
 from AdapterBGRPC import *
-from threading import *
 from JsonUtil import get_config_property
 import pandas as pd
 from typing import Tuple
@@ -12,7 +10,7 @@ from predict_time_sources import feature_preparation
 
 
 
-class GAMAAdapterManager(AdapterManager):
+class LAMAAdapterManager(AdapterManager):
     """The AutoML solution specific functionality implementation of the AdapterManager class
 
     Args:
@@ -22,7 +20,7 @@ class GAMAAdapterManager(AdapterManager):
     def __init__(self) -> None:
         """Initialize a new GAMAAdapterManager setting AutoML adapter specific variables
         """
-        super(GAMAAdapterManager, self).__init__()
+        super(LAMAAdapterManager, self).__init__()
         self.__automl = None
         self.__loaded_training_id = None
         self._adapter_name = "GAMA"
