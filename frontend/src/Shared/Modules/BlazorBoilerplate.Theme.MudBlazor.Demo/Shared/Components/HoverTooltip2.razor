@@ -1,0 +1,52 @@
+<MudTooltip IsVisible=@showTooltip IsVisibleChanged=HandleChange>
+    <ChildContent>
+        <MudText Typo="Typo.body1" @onmouseenter="HandleMouseEnter">Overriding MudToolTip</MudText>
+    </ChildContent>
+    <TooltipContent>
+        <MudLink Href="#" @onmouseleave="HandleMouseLeave" @onmouseenter="HandleMouseEnter"
+                 Class="mud-tooltip mud-tooltip-default">
+            Go to homepage Link
+        </MudLink>
+    </TooltipContent>
+     
+
+       
+
+    </MudTooltip>
+
+    @code {
+        [Parameter]
+        public string Label { get; set; }
+        [Parameter]
+        public string URL { get; set; }
+
+        [Parameter]
+        public RenderFragment ChildContent { get; set; }
+
+
+        [Parameter]
+        public string Position { get; set; }
+
+
+        string[] lines;
+        protected override void OnParametersSet()
+        {
+            lines = Label?.Split('\n');
+        }
+        bool showTooltip = false;
+
+        void HandleChange(bool newValue)
+        {
+            // do nothing to override the default implementation
+            //showTooltip=newValue;
+        }
+        void HandleMouseLeave()
+        {
+            showTooltip = false;
+        }
+        void HandleMouseEnter()
+        {
+            showTooltip = true;
+        }
+
+    }

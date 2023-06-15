@@ -10,7 +10,7 @@
                 <MudText Typo="Typo.h6">@L["Recent datasets"]</MudText>
                 <HoverTooltip Position="mud-tooltip mud-tooltip-default tooltiptext position-recentDatasets" Label="Datasets are files that you upload to the OMA-ML
 platform to perform machine learning.">
-                    <MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.Info" Style="opacity:70%; align-self:center;margin-top:20%"></MudIcon>
+                    <MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.Info" Style="opacity:70%; align-self:center;margin-top:20%; position: relative;"></MudIcon>
 
                 </HoverTooltip>
             </MudStack>
@@ -22,13 +22,14 @@ platform to perform machine learning.">
         <CardHeaderActions>
             <MudStack Row="true" Class="align-content-center" Style="margin-top: 8px">
                 @*<UploadDataset OnUploadCompletedCallback="@OnUploadCompletedCallback"/>*@
+               <!-- <HoverTooltip2></HoverTooltip2>-->
                 <HoverTooltip URL="#" Label="Click here to upload a new dataset to OMA-ML
                               from your disk or from the internet." Position="mud-tooltip mud-tooltip-default tooltiptext position-recentDatasets-upload">
                     <MudButton OnClick="OnOpenUpload"
                                Variant="Variant.Filled"
                                Color="Color.Secondary"
                                EndIcon="@Icons.Filled.AddBox"
-                               Size="Size.Small">@L["Upload"]</MudButton>
+                               Size="Size.Small" Style="position:relative;">@L["Upload"]</MudButton>
                         </HoverTooltip>
                         <HoverTooltip URL="#" Label="Click here to navigate to all datasets you have
                                       uploaded to the OMA-ML platform so far." Position="mud-tooltip mud-tooltip-default tooltiptext position-recentDatasets-more">

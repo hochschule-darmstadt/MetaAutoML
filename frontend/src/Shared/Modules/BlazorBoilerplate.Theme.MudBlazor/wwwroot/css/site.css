@@ -191,3 +191,49 @@ hr {
 /* Large devices (desktops, less than 1200px) */
 @media (max-width: 1199.98px) {
 }
+
+.position {
+    bottom: 61%;
+    /*bottom:62.5%;*/
+    right: 2%;
+}
+
+.tooltip {
+    position: relative;
+}
+
+    .tooltip .tooltiptext {
+        visibility: hidden;
+        text-align: center;
+
+        height: 100%;
+        width: 100%;
+    }
+
+        .tooltip .tooltiptext::after {
+            content: " ";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: grey transparent transparent transparent;
+        }
+
+
+    .tooltip:hover .tooltiptext {
+        visibility: visible;
+        background-color: grey;
+        opacity: 50%;
+    }
+
+    .tooltip:hover .tooltip-positioning {
+        display: block;
+        left: -20rem;
+        right: -20rem;
+    }
+
+    .tooltip .tooltip-positioning {
+        display: none;
+    }
