@@ -328,7 +328,7 @@ class ControllerServiceManager(ControllerServiceBase):
 						)
 				    )
                     
-                if (not found) or (len(dataset['analysis']['irrelevant_features']) != 0):
+                if (not found) or ('irrelevant_features' in dataset['analysis'] and len(dataset['analysis']['irrelevant_features']) != 0):
                     result.strategies.append(
                         Strategy(
                         'preprocessing.feature_selection',
