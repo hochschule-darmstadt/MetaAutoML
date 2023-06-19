@@ -2,10 +2,17 @@
 
 <span style="display:flex">
 <MudText Typo="Typo.h6">@L[Label]</MudText>
-<MudTooltip Text=@Text Placement=Position Arrow="true" Style="word-wrap: break-word;max-width: 20rem;">
-    <div style="align-content:center; padding:20%">
-        <MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.Info" Style="opacity:50%; align-self:center;"></MudIcon>
-    </div>
+<MudTooltip Text=@Text Placement=Position Arrow="true">
+    <ChildContent>
+        <div style="align-content:center; padding:20%">
+            <MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.Info" Style="opacity:50%; align-self:center;"></MudIcon>
+        </div>
+    </ChildContent>
+   <TooltipContent>
+       <MudText Style="word-wrap: break-word;max-width: 20rem;font-size:11pt;">
+           @Text
+       </MudText>
+   </TooltipContent>
     
 </MudTooltip>
                 </span>

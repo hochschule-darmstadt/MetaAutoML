@@ -1,8 +1,12 @@
 @inject IStringLocalizer<Global> L
 
-<span style="display:flex">
-    <MudTooltip Text=@Text Placement=Position Arrow="true" Style="word-wrap: break-word;max-width: 20rem;">
-     @ChildContent
+<span>
+    <MudTooltip Text=@Text Placement=Position Arrow="true" >
+        <ChildContent>@ChildContent</ChildContent>
+        <TooltipContent>
+            <MudText Style="word-wrap: break-word;max-width: 20rem;font-size:11pt;">@Text</MudText>
+        </TooltipContent>
+     
     </MudTooltip>
 </span>
 @code {
