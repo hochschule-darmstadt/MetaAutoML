@@ -1,0 +1,21 @@
+@inject IStringLocalizer<Global> L
+
+<span style="display:flex">
+<MudText Typo="Typo.h6">@L[Label]</MudText>
+<MudTooltip Text=@Text Placement=Position Arrow="true">
+    <div style="align-content:center; padding:20%">
+        <MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.Info" Style="opacity:50%; align-self:center;"></MudIcon>
+    </div>
+    
+</MudTooltip>
+                </span>
+@code {
+    [Parameter]
+    public string Label { get; set; }
+    [Parameter]
+    public string Text { get; set; }
+    [Parameter]
+    public Placement Position { get; set; }
+
+}
+

@@ -5,24 +5,28 @@
 
 <MudCard Elevation="5">
     <MudCardHeader Style="border-bottom-style: inset; border-bottom-width: 1px;">
-        <CardHeaderContent >
-            <MudText Typo="Typo.h6">@L["Recent datasets"]</MudText>
+        <CardHeaderContent>
+            <LabelTooltip Label="Recent datasets" Text="Datasets are files that you upload to the OMA-ML platform to perform machine learning." Position="Placement.Top"></LabelTooltip>
+          
         </CardHeaderContent>
         <CardHeaderActions>
             <MudStack Row="true" Class="align-content-center" Style="margin-top: 8px">
                 @*<UploadDataset OnUploadCompletedCallback="@OnUploadCompletedCallback"/>*@
-                
-                <MudButton OnClick="OnOpenUpload"
-                    Variant="Variant.Filled" 
-                    Color="Color.Secondary"
-                    EndIcon="@Icons.Filled.AddBox"
-                           Size="Size.Small">@L["Upload"]</MudButton>
-                <MudButton Href="@("/datasets")"
-                    Variant="Variant.Filled" 
-                    Color="Color.Secondary"
-                    EndIcon="@Icons.Filled.ArrowForward"
-                        Size="Size.Small">@L["More"]</MudButton>
-            </MudStack>
+                <MudTooltip Text="Click here to upload a new dataset to OMA-ML from your disk or from the internet." Placement="Placement.Top" Arrow="true">
+                    <MudButton OnClick="OnOpenUpload"
+                               Variant="Variant.Filled"
+                               Color="Color.Secondary"
+                               EndIcon="@Icons.Filled.AddBox"
+                               Size="Size.Small">@L["Upload"]</MudButton>
+                        </MudTooltip>
+                        <MudTooltip Text="Click here to navigate to all datasets you have uploaded to the OMA-ML platform so far." Placement="Placement.Top" Arrow="true">
+                            <MudButton Href="@("/datasets")"
+                                       Variant="Variant.Filled"
+                                       Color="Color.Secondary"
+                                       EndIcon="@Icons.Filled.ArrowForward"
+                                       Size="Size.Small">@L["More"]</MudButton>
+                            </MudTooltip>
+                            </MudStack>
         </CardHeaderActions>
     </MudCardHeader>
     <MudCardContent>
