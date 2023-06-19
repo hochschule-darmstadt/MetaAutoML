@@ -115,12 +115,13 @@ class EvalMLAdapter:
         #Reset any index and imputation
         self._configuration = reset_index_role(self._configuration)
         X.reset_index(inplace=True)
-        train, test = data_loader(self._configuration)
-        #reload dataset to load changed data
 
         parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), epc.task_config)
         self._configuration["forecasting_horizon"] = parameters["forecast_horizon"]
         save_configuration_in_json(self._configuration)
+
+        train, test = data_loader(self._configuration)
+        #reload dataset to load changed data
 
         X, y = prepare_tabular_dataset(train, self._configuration)
         X[y.name] = y.values
