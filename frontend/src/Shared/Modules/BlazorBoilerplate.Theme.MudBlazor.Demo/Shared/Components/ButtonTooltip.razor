@@ -1,0 +1,17 @@
+@inject IStringLocalizer<Global> L
+
+<span style="display:flex">
+    <MudTooltip Text=@Text Placement=Position Arrow="true" Style="word-wrap: break-word;max-width: 20rem;">
+     @ChildContent
+    </MudTooltip>
+</span>
+@code {
+    [Parameter]
+    public RenderFragment ChildContent { get; set; }
+    [Parameter]
+    public string Text { get; set; }
+    [Parameter]
+    public Placement Position { get; set; }
+
+}
+
