@@ -79,7 +79,7 @@ namespace BlazorBoilerplate.Server.Controllers
         [ProducesResponseType(Status200OK)]
         [ProducesResponseType(Status400BadRequest)]
         [ProducesResponseType(Status404NotFound)]
-        public async Task<ApiResponse> StartExplainablerDashboard(StartDashboardRequestDto request)
+        public async Task<ApiResponse> StartExplainerDashboard(StartDashboardRequestDto request)
         => ModelState.IsValid ?
                 await _modelManager.StartExplainerDashboard(request) :
                 new ApiResponse(Status400BadRequest, L["InvalidData"]);

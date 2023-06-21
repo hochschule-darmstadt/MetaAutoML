@@ -155,6 +155,7 @@ namespace BlazorBoilerplate.Shared.Services
         public async Task<ApiResponseDto> StartExplainerDashboard(StartDashboardRequestDto request)
         {
             return await httpClient.PostJsonAsync<ApiResponseDto>("api/Model/StartExplainerDashboard", request);
+
         }
 
         #endregion
