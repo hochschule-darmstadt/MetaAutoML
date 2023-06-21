@@ -195,6 +195,7 @@ class AdapterManager(Thread):
                     self.__status_messages.append(response.status_update)
                     self.__data_storage.update_model(self.__request.user_id, self.__model_id, {"status_messages": self.__status_messages})
                 elif response.return_code == AdapterReturnCode.ADAPTER_RETURN_CODE_SUCCESS:
+                    exlpainer_response: CreateExplainerDashboardResponse = await service.create_explainer_dashboard(self.__generate_process_request())
                     channel.close()
                     self.__path = response.path
                     self.__status = "completed"
