@@ -111,17 +111,18 @@ class AutoPytorchAdapter:
         X, y = prepare_tabular_dataset(train, self._configuration)
         #Apply encoding to string
         self._configuration = set_encoding_for_string_columns(self._configuration, X, y, also_categorical=True)
-        train, test = data_loader(self._configuration)
-        
 
         parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), appc.task_config)
         self._configuration["forecasting_horizon"] = parameters["n_prediction_steps"]
+
+        train, test = data_loader(self._configuration)
+
         save_configuration_in_json(self._configuration)
 
 
         #reload dataset to load changed data
         X, y = prepare_tabular_dataset(train, self._configuration)
-        
+
         y_train = [y[: -self._configuration["forecasting_horizon"]]]
         y_test = [y[-self._configuration["forecasting_horizon"]:]]
         X_train = [X[: -self._configuration["forecasting_horizon"]]]

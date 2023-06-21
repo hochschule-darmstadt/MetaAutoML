@@ -193,11 +193,12 @@ class AutoGluonAdapter:
         #Reset any index and imputation
         X.reset_index(inplace = True)
         self._configuration = set_imputation_for_numerical_columns(self._configuration, X)
-        train, test = data_loader(self._configuration)
-
 
         parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), agpc.task_config)
         self._configuration["forecasting_horizon"] = parameters["prediction_length"]
+
+        train, test = data_loader(self._configuration)
+
         save_configuration_in_json(self._configuration)
 
         #reload dataset to load changed data
