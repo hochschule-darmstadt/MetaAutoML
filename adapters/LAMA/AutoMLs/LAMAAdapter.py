@@ -52,8 +52,8 @@ class LAMAAdapter:
         RANDOM_STATE = 42
         TEST_SIZE = 0.2
         TIMEOUT = 300
-        TARGET_NAME = "target"
-        X[TARGET_NAME] = y.columns.values()
+        TARGET_NAME = y.name
+        X[TARGET_NAME] = y
         print(y)
         roles = {
             'target': TARGET_NAME,
