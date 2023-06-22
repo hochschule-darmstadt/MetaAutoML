@@ -78,7 +78,7 @@ message Training {
   */
   repeated Model models = 3;
   /*
-    Current training activity status (busy, completed, failed)
+    Current training activity status (busy, ended)
     example: "busy"
   */
   string status = 4;

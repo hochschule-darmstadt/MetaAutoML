@@ -13,7 +13,9 @@ from grpc_omaml import (
     CreateTrainingRequest,
     GetDatasetRequest,
     GetDatasetsRequest,
+    GetTrainingRequest,
     SetDatasetColumnSchemaConfigurationRequest,
+    Training,
 )
 from grpclib.client import Channel
 from config.config_accessor import (
@@ -23,7 +25,7 @@ from config.config_accessor import (
 )
 from ssl import SSLContext, PROTOCOL_TLSv1_2, CERT_NONE
 from config.config_accessor import get_disable_certificate_check
-from grpc_omaml.omaml_error import OmamlError
+from grpc_omaml.omaml_error import OmamlError, TrainingFailedError
 import grpc_omaml.omaml_typing_adapter as omaml_typing_adapter
 
 
@@ -215,3 +217,34 @@ class OmamlClient:
             return "number_of_columns" in dataset.analysis
         except Exception as e:
             raise OmamlError("Error while verifying dataset ready: ") from e
+
+    async def get_training_completed(self, user_id: UUID, training_id: str) -> bool:
+        """Checks if a training is completed
+
+        Args:
+            user_id (UUID): The id of the user that the dataset is associated with
+            training_id (str): The id of the training
+
+        Raises:
+            OmamlError: if the training could not be fetched
+            OmamlError: if the training failed
+
+        Returns:
+            bool: True if the training is completed, False otherwise
+        """
+        training: Training | None = None
+        try:
+            training = (
+                await self.__grpc_client.get_training(
+                    GetTrainingRequest(str(user_id), training_id)
+                )
+            ).training
+            if training.status == "busy":
+                return False
+        except Exception as e:
+            raise OmamlError("Error while checking if training completed: ") from e
+
+        status_of_adapters = map(lambda m: m.status, training.models)
+        if "failed" in status_of_adapters:
+            raise TrainingFailedError("Training failed for at least one adapter")
+        return True
