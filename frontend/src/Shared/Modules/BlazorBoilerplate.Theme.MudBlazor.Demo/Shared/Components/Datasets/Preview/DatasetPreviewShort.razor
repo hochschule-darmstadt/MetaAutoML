@@ -24,23 +24,25 @@
                 if (_dataset.Dataset.Type.ID == ":image")
                 {
                     <MudButton Href="@NavManager.ToAbsoluteUri("datasets/" + @Dataset.Dataset.Id + "/preview").AbsoluteUri"
-                        Variant="Variant.Filled" 
-                        EndIcon="@Icons.Material.Filled.ReadMore" 
-                        Color="Color.Secondary"
-                        Size="Size.Small"
-                       Style="margin-top: 8px">@L["More"]</MudButton>
-                }
-                else
-                {
-                    <MudButton Href="@NavManager.ToAbsoluteUri("datasets/" + @Dataset.Dataset.Id + "/preview").AbsoluteUri"
-                        Variant="Variant.Filled" 
-                        EndIcon="@Icons.Material.Filled.ReadMore" 
-                        Color="Color.Secondary"
-                        Size="Size.Small"
-                         Style="margin-top: 8px">@L["Configure"]</MudButton>
-                }
-            }
-        </CardHeaderActions>
+                               Variant="Variant.Filled"
+                               EndIcon="@Icons.Material.Filled.ReadMore"
+                               Color="Color.Secondary"
+                               Size="Size.Small"
+                               Style="margin-top: 8px">@L["More"]</MudButton>
+                        }
+                        else
+                        {
+                            <ButtonTooltip Text="Click here to to configure datatypes and roles of the dataset columns. " Position="Placement.Left">
+                                <MudButton Href="@NavManager.ToAbsoluteUri("datasets/" + @Dataset.Dataset.Id + "/preview").AbsoluteUri"
+                                           Variant="Variant.Filled"
+                                           EndIcon="@Icons.Material.Filled.ReadMore"
+                                           Color="Color.Secondary"
+                                           Size="Size.Small"
+                                           Style="margin-top: 8px">@L["Configure"]</MudButton>
+                                </ButtonTooltip>
+                                        }
+                                        }
+                                </CardHeaderActions>
     </MudCardHeader>
     <MudCardContent>
         <MudPaper Height="250px" Elevation="0">

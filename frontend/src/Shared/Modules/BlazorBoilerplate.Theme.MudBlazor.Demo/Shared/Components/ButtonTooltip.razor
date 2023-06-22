@@ -1,7 +1,7 @@
 @inject IStringLocalizer<Global> L
 
 <span>
-    <MudTooltip Text=@Text Placement=Position Arrow="true" >
+    <MudTooltip Text=@Text Placement=Position Arrow="true" ShowOnHover="@ShowOnHover">
         <ChildContent>@ChildContent</ChildContent>
         <TooltipContent>
             <MudText Style="word-wrap: break-word;max-width: 20rem;font-size:11pt;">@Text</MudText>
@@ -16,6 +16,8 @@
     public string Text { get; set; }
     [Parameter]
     public Placement Position { get; set; }
+    [Parameter]
+    public Boolean ShowOnHover { get; set; } = true;
 
 }
 
