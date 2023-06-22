@@ -34,14 +34,25 @@
             break;
     }
 
+<MudGrid>
     @if (_compatibleTasks != null)
     {
-        <MudSelect Label="@L["ML task"]" T="string" ValueChanged="@OnMlTaskSelectionChanged">
-            @foreach (var task in _compatibleTasks.Tasks)
-            {
-                <MudSelectItem Value="@task.ID">@L[task.Properties.ContainsKey("skos:prefLabel") ? task.Properties["skos:prefLabel"] : ""]</MudSelectItem>
-            }
-        </MudSelect>
+        <MudItem xs="12">
+
+            <ButtonTooltip Text="Select the ML task, i.e., what the ML model shall predict, e.g., classes (classification) or values (regression). (Mandatory)" Position="Placement.Top">
+                <div class="d-flex">
+                    <MudSelect Label="@L["ML task"]" T="string" ValueChanged="@OnMlTaskSelectionChanged">
+                        @foreach (var task in _compatibleTasks.Tasks)
+                        {
+                            <MudSelectItem Value="@task.ID">@L[task.Properties.ContainsKey("skos:prefLabel") ? task.Properties["skos:prefLabel"] : ""]</MudSelectItem>
+                        }
+                    </MudSelect>
+                </div>
+
+            </ButtonTooltip>
+        </MudItem>
+
+
     }
     else
     {
@@ -51,102 +62,108 @@
     @if (((Dataset.Dataset.Type.ID == ":tabular") || (Dataset.Dataset.Type.ID == ":text") || (Dataset.Dataset.Type.ID == ":time_series")) || (Dataset.Dataset.Type.ID == ":time_series_longitudinal") && (!string.IsNullOrEmpty(StartTrainingDto.Configuration.Task)))
 
     {
-        <MudSelect Label="@L["target"]" T="string" @bind-SelectedValues="SelectedTargets" MultiSelection="true">
-            @if (_columnNames != null)
-            {
-                @foreach (var column in _columnNames)
+        <MudItem xs="12">
+            <MudSelect Label="@L["target"]" T="string" @bind-SelectedValues="SelectedTargets" MultiSelection="true">
+                @if (_columnNames != null)
                 {
-                    <MudSelectItem Value="@column">@column</MudSelectItem>
+                    @foreach (var column in _columnNames)
+                    {
+                        <MudSelectItem Value="@column">@column</MudSelectItem>
+                    }
                 }
-            }
-        </MudSelect>
+            </MudSelect>
+        </MudItem>
     }
-    <MudNumericField ValueChanged="@OnRuntimeValueChanged" T="int" Label="@L["Runtime"]" Variant="Variant.Text" Min="3" Max="180" Value="@StartTrainingDto.Configuration.RuntimeLimit" />
-
-    <MudExpansionPanels>
-        <MudExpansionPanel Text="@L["Details"]">
-            <ChipSet ViewModel="@_mlLibsViewModel" Label="@L["ML libraries"]" />
-            <ChipSet ViewModel="@_autoMlSolutionsViewModel" Label="@L["AutoML solutions"]" />
-            <ChipSet ViewModel="@_strategiesViewModel" Label="@L["Enabled strategies"]" />
-            @if (_intersectedParams.Any())
-            {
-                <MudText Typo="Typo.subtitle2" Class="mt-4">Parameter available for all AutoML solutions</MudText>
-
-
-                @foreach (var param in _intersectedParams)
+    <MudItem xs="12">
+        <MudNumericField ValueChanged="@OnRuntimeValueChanged" T="int" Label="@L["Runtime"]" Variant="Variant.Text" Min="3" Max="180" Value="@StartTrainingDto.Configuration.RuntimeLimit" />
+    </MudItem>
+    <MudItem xs="12">
+        <MudExpansionPanels>
+            <MudExpansionPanel Text="@L["Details"]">
+                <ChipSet ViewModel="@_mlLibsViewModel" Label="@L["ML libraries"]" />
+                <ChipSet ViewModel="@_autoMlSolutionsViewModel" Label="@L["AutoML solutions"]" />
+                <ChipSet ViewModel="@_strategiesViewModel" Label="@L["Enabled strategies"]" />
+                @if (_intersectedParams.Any())
                 {
-                    @if (param.ParameterType == ":single_value")
-                    {
-                        <MudSelect T="ParameterValueViewModel" Class="ml-2" Label="@param.ParameterLabel" Variant="Variant.Outlined" @bind-SelectedValues="param.SelectedValues" ToStringFunc="p => p?.ValueLabel">
-                            @foreach (var paramValue in param.ParameterValues)
-                            {
-                                <MudSelectItem Value="@paramValue">@paramValue.ValueLabel</MudSelectItem>
-                            }
-                        </MudSelect>
-                    }
-                    @if (param.ParameterType == ":list")
-                    {
-                        <MudSelect T="ParameterValueViewModel" Class="ml-2" Label="@param.ParameterLabel" MultiSelection="true" SelectAll="true" @bind-SelectedValues="param.SelectedValues" ToStringFunc="p => p?.ValueLabel" Variant="Variant.Outlined">
-                            @foreach (var paramValue in param.ParameterValues)
-                            {
+                    <MudText Typo="Typo.subtitle2" Class="mt-4">Parameter available for all AutoML solutions</MudText>
 
-                                <MudSelectItem Value="@paramValue">@paramValue.ValueLabel</MudSelectItem>
-                            }
-                        </MudSelect>
-                    }
-                    else if(param.ParameterType == ":integer")
+
+                    @foreach (var param in _intersectedParams)
                     {
-                        <MudNumericField T="int?" Class="ml-2" Label="@param.ParameterLabel" Variant="Variant.Outlined" @bind-Value="@param.IntegerValue" />
+                        @if (param.ParameterType == ":single_value")
+                        {
+                            <MudSelect T="ParameterValueViewModel" Class="ml-2" Label="@param.ParameterLabel" Variant="Variant.Outlined" @bind-SelectedValues="param.SelectedValues" ToStringFunc="p => p?.ValueLabel">
+                                @foreach (var paramValue in param.ParameterValues)
+                                {
+                                    <MudSelectItem Value="@paramValue">@paramValue.ValueLabel</MudSelectItem>
+                                }
+                            </MudSelect>
+                        }
+                        @if (param.ParameterType == ":list")
+                        {
+                            <MudSelect T="ParameterValueViewModel" Class="ml-2" Label="@param.ParameterLabel" MultiSelection="true" SelectAll="true" @bind-SelectedValues="param.SelectedValues" ToStringFunc="p => p?.ValueLabel" Variant="Variant.Outlined">
+                                @foreach (var paramValue in param.ParameterValues)
+                                {
+
+                                    <MudSelectItem Value="@paramValue">@paramValue.ValueLabel</MudSelectItem>
+                                }
+                            </MudSelect>
+                        }
+                        else if (param.ParameterType == ":integer")
+                        {
+                            <MudNumericField T="int?" Class="ml-2" Label="@param.ParameterLabel" Variant="Variant.Outlined" @bind-Value="@param.IntegerValue" />
+                        }
                     }
                 }
-            }
 
-            @if (_individualParams.Any())
-            {
-                <MudText Typo="Typo.subtitle2" Class="mt-4">Parameter available for individual AutoML solution only</MudText>
-                @foreach (var individualParam in _individualParams)
+                @if (_individualParams.Any())
                 {
-                <MudExpansionPanels>
-                    <MudExpansionPanel Class="mt-2">
-                        <TitleContent>
-                            <MudText Typo="Typo.subtitle2">@individualParam.autoMlLabel</MudText>
-                        </TitleContent>
-                        <ChildContent>
-                            @foreach (var param in individualParam.parameters)
-                            {
-                                @if (param.ParameterType == ":single_value")
-                                {
-                                    <MudSelect T="ParameterValueViewModel" Class="ml-2" Label="@param.BroaderParameterLabel" Variant="Variant.Outlined" @bind-SelectedValues="param.SelectedValues" ToStringFunc="p => p?.ValueLabel">
-                                        @foreach (var paramValue in param.ParameterValues)
+                    <MudText Typo="Typo.subtitle2" Class="mt-4">Parameter available for individual AutoML solution only</MudText>
+                    @foreach (var individualParam in _individualParams)
+                    {
+                        <MudExpansionPanels>
+                            <MudExpansionPanel Class="mt-2">
+                                <TitleContent>
+                                    <MudText Typo="Typo.subtitle2">@individualParam.autoMlLabel</MudText>
+                                </TitleContent>
+                                <ChildContent>
+                                    @foreach (var param in individualParam.parameters)
+                                    {
+                                        @if (param.ParameterType == ":single_value")
                                         {
-                                            <MudSelectItem Value="@paramValue">@paramValue.ValueLabel</MudSelectItem>
+                                            <MudSelect T="ParameterValueViewModel" Class="ml-2" Label="@param.BroaderParameterLabel" Variant="Variant.Outlined" @bind-SelectedValues="param.SelectedValues" ToStringFunc="p => p?.ValueLabel">
+                                                @foreach (var paramValue in param.ParameterValues)
+                                                {
+                                                    <MudSelectItem Value="@paramValue">@paramValue.ValueLabel</MudSelectItem>
+                                                }
+                                            </MudSelect>
                                         }
-                                    </MudSelect>
-                                }
-                                @if (param.ParameterType == ":list")
-                                {
-                                    <MudSelect T="ParameterValueViewModel" Class="ml-2" MultiSelection="true" Label="@param.BroaderParameterLabel" SelectAll="true" @bind-SelectedValues="param.SelectedValues" ToStringFunc="p => p?.ValueLabel" Variant="Variant.Outlined">
-                                        @foreach (var paramValue in param.ParameterValues)
+                                        @if (param.ParameterType == ":list")
                                         {
-                                            <MudSelectItem Value="@paramValue">@paramValue.ValueLabel</MudSelectItem>
+                                            <MudSelect T="ParameterValueViewModel" Class="ml-2" MultiSelection="true" Label="@param.BroaderParameterLabel" SelectAll="true" @bind-SelectedValues="param.SelectedValues" ToStringFunc="p => p?.ValueLabel" Variant="Variant.Outlined">
+                                                @foreach (var paramValue in param.ParameterValues)
+                                                {
+                                                    <MudSelectItem Value="@paramValue">@paramValue.ValueLabel</MudSelectItem>
+                                                }
+                                            </MudSelect>
                                         }
-                                    </MudSelect>
-                                }
-                                else if(param.ParameterType == ":integer")
-                                {
-                                    <MudNumericField T="int?" Class="ml-2" Label="@param.BroaderParameterLabel" Variant="Variant.Outlined" @bind-Value="@param.IntegerValue" />
-                                }
-                            }
-                        </ChildContent>
-                    </MudExpansionPanel>
-                </MudExpansionPanels>
+                                        else if (param.ParameterType == ":integer")
+                                        {
+                                            <MudNumericField T="int?" Class="ml-2" Label="@param.BroaderParameterLabel" Variant="Variant.Outlined" @bind-Value="@param.IntegerValue" />
+                                        }
+                                    }
+                                </ChildContent>
+                            </MudExpansionPanel>
+                        </MudExpansionPanels>
+                    }
                 }
-            }
 
-        </MudExpansionPanel>
-    </MudExpansionPanels>
+            </MudExpansionPanel>
+        </MudExpansionPanels>
+    </MudItem>
+</MudGrid>
 
-</MudStack>
+    </MudStack>
 
 @code
 {
