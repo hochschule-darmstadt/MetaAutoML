@@ -1,4 +1,5 @@
 import os
+from typing import List
 from uuid import UUID
 from dataset.dataset_configuration import (
     DatasetConfiguration,
@@ -27,6 +28,7 @@ from ssl import SSLContext, PROTOCOL_TLSv1_2, CERT_NONE
 from config.config_accessor import get_disable_certificate_check
 from grpc_omaml.omaml_error import OmamlError, TrainingFailedError
 import grpc_omaml.omaml_typing_adapter as omaml_typing_adapter
+from report.benchmark_result import TrainingResult
 
 
 class OmamlClient:
@@ -248,3 +250,31 @@ class OmamlClient:
         if "failed" in status_of_adapters:
             raise TrainingFailedError("Training failed for at least one adapter")
         return True
+
+    async def get_training_score(
+        self, user_id: UUID, training_id: str
+    ) -> List[TrainingResult]:
+        """Gets the training score for a training
+
+        Args:
+            user_id (UUID): The id of the user that the dataset is associated with
+            training_id (str): The id of the training
+
+        Raises:
+            OmamlError: if the training could not be fetched
+
+        Returns:
+            Dict[str, str]: AutoML to achieved score
+        """
+        try:
+            training = (
+                await self.__grpc_client.get_training(
+                    GetTrainingRequest(str(user_id), training_id)
+                )
+            ).training
+            return [
+                TrainingResult(m.auto_ml_solution, m.test_score, m.status == "failed")
+                for m in training.models
+            ]
+        except Exception as e:
+            raise OmamlError("Error while getting training score: ") from e
