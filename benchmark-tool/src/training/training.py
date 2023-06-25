@@ -54,6 +54,7 @@ async def report_training_score(
         user_id (UUID): The id of the user that the dataset is associated with
         training_id (str): The id of the training
         report (Report): The report to write the score to
+        dataset (DatasetConfiguration): The dataset configuration
     """
     auto_ml_to_score = await client.get_training_score(user_id, training_id)
     for training_result in auto_ml_to_score:
