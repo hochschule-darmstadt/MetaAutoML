@@ -38,14 +38,14 @@ class GAMAAdapter:
             if self._configuration["configuration"]["task"] == ":tabular_classification":
                 self.__classification()
             elif self._configuration["configuration"]["task"] == ":tabular_regression":
-                self.__classification()
+                self.__regression()
 
     def __classification(self):
         """Execute the tabular classification task and export the found model"""
         self.df, test = data_loader(self._configuration, perform_splitting=False)
         X, y = prepare_tabular_dataset(self.df, self._configuration)
         self._configuration = set_encoding_for_string_columns(self._configuration, X, y)
-        
+
         self.df, test = data_loader(self._configuration)
         X, y = prepare_tabular_dataset(self.df, self._configuration)
 
@@ -64,7 +64,7 @@ class GAMAAdapter:
         self.df, test = data_loader(self._configuration, perform_splitting=False)
         X, y = prepare_tabular_dataset(self.df, self._configuration)
         self._configuration = set_encoding_for_string_columns(self._configuration, X, y)
-        
+
         self.df, test = data_loader(self._configuration)
         X, y = prepare_tabular_dataset(self.df, self._configuration)
 
