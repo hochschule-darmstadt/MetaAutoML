@@ -1,7 +1,7 @@
-@inject IStringLocalizer<Global> L
+
 
 <span style="display:flex">
-<MudText Typo="Typo.h6">@L[Label]</MudText>
+<MudText Typo=FontSize>@Label</MudText>
 <MudTooltip Text=@Text Placement=Position Arrow="true">
     <ChildContent>
         <div style="align-content:center; padding:20%">
@@ -23,6 +23,8 @@
     public string Text { get; set; }
     [Parameter]
     public Placement Position { get; set; }
+    [Parameter]
+    public Typo FontSize { get; set; } = Typo.h6;
 
 
 
