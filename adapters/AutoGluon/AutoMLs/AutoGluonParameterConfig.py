@@ -37,7 +37,7 @@ autogluon_metrics = {
 #extra dictionary for time series because they changed the acronym which they want for the metric -.-
 autogluon_time_series_metrics = {
     #time series
-    ":": "mean_wQuantileLoss",      #currently no metric in ontology
+    #":": "mean_wQuantileLoss",      #currently no metric in ontology
     ":mean_absolute_percentage_error": "MAPE",
     ":symmetric_mean_absolute_percentage_error": "sMAPE",
     ":mean_absolute_scaled_error": "MASE",
@@ -45,45 +45,63 @@ autogluon_time_series_metrics = {
     ":rooted_mean_squared_error": "RMSE"
 }
 
-#configs for the different tasks that can be executed with AutoGluon
-#each parameter has its own line that contains:
-#the broader type of the parameter(broader id); the autoML specific parameter id; the default value in case no parameter-value is selected;
-#the expected amount of the parameters(single_value/list); the type to which it should be converted (integer/dictionary); the lookup dictionary which includes the converting types;
-#the autoML function parameter names
-#[broader_type, specific_type, default, expected parameter 'count', converting type, lookup dictionary, used name by autoML]
+parameters = {
+#general
+# NOTE_: Not found in documentation of autogluon
+    #":use_approach_autogluon_classification": {
+    #                                                "parameter_name": "",
+    #                                                "lookup_dict":
+    #                                            },
+    #":use_approach_autogluon_regression": {
+    #                                                "parameter_name": "",
+    #                                                "lookup_dict":
+    #                                            },
 
-#config for the tabular classification
-tabular_classification_config = [
-    [":metric", ":metric_autogluon_tabular_classification", [":accuracy"], "single_value", "dict", autogluon_metrics, "eval_metric"]
-]
+    #tabular classification
+    ":metric_autogluon_tabular_classification": {
+                                                    "parameter_name": "eval_metric",
+                                                    "lookup_dict": autogluon_metrics
+                                                },
 
-#config for the tabular regression
-tabular_regression_config = [
-    [":metric", ":metric_autogluon_tabular_regression", [":rooted_mean_squared_error"], "single_value", "dict", autogluon_metrics, "eval_metric"]
-]
+    #tabular regression
+    ":metric_autogluon_tabular_regression": {
+                                                    "parameter_name": "eval_metric",
+                                                    "lookup_dict": autogluon_metrics
+                                                },
 
-#config for the text classification
-text_classification_config = [
-    [":metric", ":metric_autogluon_text_classification", [":accuracy"], "single_value", "dict", autogluon_metrics, "eval_metric"]
-]
+    #time series forecasting
+    ":metric_autogluon_time_series_forecasting": {
+                                                    "parameter_name": "eval_metric",
+                                                    "lookup_dict": autogluon_time_series_metrics
+                                                },
+    ":metric_autogluon_time_series_forecasting": {
+                                                    "parameter_name": "prediction_length",
+                                                    "default": [1]
+                                                },
 
-#config for the image classification
-image_classification_config = [
-    [":metric", ":metric_autogluon_image_classification", [":accuracy"], "single_value", "dict", autogluon_metrics, "eval_metric"]
-]
+    #image classification
+    ":metric_autogluon_image_classification": {
+                                                    "parameter_name": "eval_metric",
+                                                    "lookup_dict": autogluon_metrics
+                                                },
 
-#config for the time series forecasting
-time_series_forecasting_config = [
-    [":metric", ":metric_autogluon_time_series_forecasting", [None], "single_value", "dict", autogluon_time_series_metrics, "eval_metric"],    #std: mean_wQuantileLoss
-    [":forecasting_horizon", ":forecasting_horizon_autogluon_time_series_forcasting", [1], "single_value", "integer", "", "prediction_length"]
-]
+    #text classification
+    ":metric_autogluon_text_classification": {
+                                                    "parameter_name": "eval_metric",
+                                                    "lookup_dict": autogluon_metrics
+                                                },
 
+    #text regression
+    ":metric_autogluon_text_regression": {
+                                                    "parameter_name": "eval_metric",
+                                                    "lookup_dict": autogluon_metrics
+                                                },
 
-# dictionary for mapping the selected task to the appropriate config
-task_config = {
-    ":tabular_classification": tabular_classification_config,
-    ":tabular_regression": tabular_regression_config,
-    ":text_classification": text_classification_config,
-    ":image_classification": image_classification_config,
-    ":time_series_forecasting" :time_series_forecasting_config
+    #named entity recognition
+    ":metric_auto_gluon_named_entity_recognition": {
+                                                    "parameter_name": "eval_metric",
+                                                    "lookup_dict": autogluon_metrics
+                                                },
+
+    #object detection
 }

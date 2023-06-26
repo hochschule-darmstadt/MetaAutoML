@@ -80,7 +80,7 @@ class AutoGluonAdapter:
             classification_type = "binary"
         else:
             classification_type =  "multiclass"
-        parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), agpc.task_config)
+        parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), agpc.parameters)
         model = TabularPredictor(label=y.name,
                                  problem_type=classification_type,
                                  **parameters,
@@ -95,7 +95,7 @@ class AutoGluonAdapter:
         X, y = prepare_tabular_dataset(self.df, self._configuration)
         data = X
         data[y.name] = y
-        parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), agpc.task_config)
+        parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), agpc.parameters)
         model = TabularPredictor(label=y.name,
                                  problem_type="regression",
                                  **parameters,
@@ -118,7 +118,7 @@ class AutoGluonAdapter:
         #Disable multi worker else training takes a while or doesnt complete
         #https://github.com/autogluon/autogluon/issues/2756
         hyperparameters = {"env.num_workers": 0}
-        parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), agpc.task_config)
+        parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), agpc.parameters)
 
         model = MultiModalPredictor(label=y.name,
                                  problem_type=classification_type,
@@ -145,7 +145,7 @@ class AutoGluonAdapter:
         #Disable multi worker else training takes a while or doesnt complete
         #https://github.com/autogluon/autogluon/issues/2756
         hyperparameters = {"env.num_workers": 0}
-        parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), agpc.task_config)
+        parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), agpc.parameters)
         model = MultiModalPredictor(label='label',problem_type=classification_type, **parameters, path=self._result_path).fit(
 
             X,
@@ -170,7 +170,7 @@ class AutoGluonAdapter:
         train, test = data_loader(self._configuration)
 
 
-        parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), agpc.task_config)
+        parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), agpc.parameters)
         self._configuration["forecasting_horizon"] = parameters["prediction_length"]
         save_configuration_in_json(self._configuration)
 

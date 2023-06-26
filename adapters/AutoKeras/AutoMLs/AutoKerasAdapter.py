@@ -64,7 +64,7 @@ class AutoKerasAdapter:
 
         self.df, test = data_loader(self._configuration)
         X, y = prepare_tabular_dataset(self.df, self._configuration)
-        parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), akpc.task_config)
+        parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), akpc.parameters)
         reg = ak.StructuredDataRegressor(overwrite=True,
                                           **parameters,
                                          directory=self._configuration["model_folder_location"],
@@ -77,7 +77,7 @@ class AutoKerasAdapter:
         """"Execute image classification task and export the found model"""
 
         X_train, y_train = data_loader(self._configuration)
-        parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), akpc.task_config)
+        parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), akpc.parameters)
         clf = ak.ImageClassifier(overwrite=True,
                                           **parameters,
                                         seed=42,
@@ -92,7 +92,7 @@ class AutoKerasAdapter:
         """Execute image regression task and export the found model"""
 
         X_train, y_train = data_loader(self._configuration)
-        parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), akpc.task_config)
+        parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), akpc.parameters)
 
         reg = ak.ImageRegressor(overwrite=True,
                                           **parameters,
@@ -111,7 +111,7 @@ class AutoKerasAdapter:
         train, test = data_loader(self._configuration)
         #reload dataset to load changed data
         X, y = prepare_tabular_dataset(train, self._configuration)
-        parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), akpc.task_config)
+        parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), akpc.parameters)
         reg = ak.TextClassifier(overwrite=True,
                                 # NOTE: bert models will fail with out of memory errors
                                 #   even with 32GB GB RAM
@@ -133,7 +133,7 @@ class AutoKerasAdapter:
         train, test = data_loader(self._configuration)
         #reload dataset to load changed data
         X, y = prepare_tabular_dataset(train, self._configuration)
-        parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), akpc.task_config)
+        parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), akpc.parameters)
         reg = ak.TextRegressor(overwrite=True,
                                 **parameters,
                                 seed=42,
@@ -151,7 +151,7 @@ class AutoKerasAdapter:
         #reload dataset to load changed data
         train, test = data_loader(self._configuration)
 
-        parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), akpc.task_config)
+        parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), akpc.parameters)
         #oma-ml uses gab as shared parameter which is similar to predict from but has an offset of -1
         # gap = 0 is equal to predict_from  = 1
         parameters["predict_from"] = parameters["predict_from"] + 1

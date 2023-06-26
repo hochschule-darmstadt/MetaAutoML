@@ -62,10 +62,10 @@ class EvalMLAdapter:
 
         if len(y.unique()) == 2:
             classification_type = "binary"
-            parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), epc.task_config_binary_metric)
+            parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), epc.parameters)
         else:
             classification_type =  "multiclass"
-            parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), epc.task_config)
+            parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), epc.parameters)
         # parameters must be set correctly
         automl = AutoMLSearch(
                     X_train=X,
@@ -88,7 +88,7 @@ class EvalMLAdapter:
 
         self.df, test = data_loader(self._configuration)
         X, y = prepare_tabular_dataset(self.df, self._configuration)
-        parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), epc.task_config)
+        parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), epc.parameters)
         problem_type = "REGRESSION"
         # parameters must be set correctly
         automl = AutoMLSearch(
@@ -118,7 +118,7 @@ class EvalMLAdapter:
         train, test = data_loader(self._configuration)
         #reload dataset to load changed data
 
-        parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), epc.task_config)
+        parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), epc.parameters)
         self._configuration["forecasting_horizon"] = parameters["forecast_horizon"]
         save_configuration_in_json(self._configuration)
 

@@ -33,25 +33,52 @@ autosklearn_metrics = {
     ":median_absolute_error": autosklearn.metrics.median_absolute_error
 }
 
-#configs for the different tasks that can be executed with AutoSklearn
-#each parameter has its own line that contains:
-#the broader type of the parameter(broader id); the autoML specific parameter id; the default value in case no parameter-value is selected;
-#the expected amount of the parameters(single_value/list); the type to which it should be converted (integer/dictionary); the lookup dictionary which includes the converting types;
-#the autoML function parameter names
-#[broader_type, specific_type, default, expected parameter 'count', converting type, lookup dictionary, used name by autoML]
 
-#config for the tabular classification
-tabular_classification_config = [
-    [":metric", ":metric_autosklearn_tabular_classification", [":accuracy"], "single_value", "dict", autosklearn_metrics, "metric"]
-]
-
-#config for the tabular regression
-tabular_regression_config = [
-    [":metric", ":metric_autosklearn_tabular_regression", [":r2"], "single_value", "dict", autosklearn_metrics, "metric"]
-]
-
-# dictionary for mapping the selected task to the appropriate config
-task_config = {
-    ":tabular_classification": tabular_classification_config,
-    ":tabular_regression": tabular_regression_config
+parameters = {
+    #tabular classification
+    ":time_limit_autosklearn_tabular_classification": {
+                                                    "parameter_name": "time_left_for_this_task"
+                                                },
+    ":time_limit_per_run_autosklearn_tabular_classification": {
+                                                    "parameter_name": "per_run_time_limit"
+                                                },
+    ":ensemble_size_autosklearn_tabular_classification": {
+                                                    "parameter_name": "ensemble_size"
+                                                },
+    ":ensemble_nbest_autosklearn_tabular_classification": {
+                                                    "parameter_name": "ensemble_nbest"
+                                                },
+    ":metric_autosklearn_tabular_classification": {
+                                                    "parameter_name": "metric",
+                                                    "lookup_dict": autosklearn_metrics
+                                                },
+    ":use_approach_autosklearn_tabular_classification": {
+                                                    "parameter_name": "include_estimators"
+                                                },
+    ":include_preprocessor_autosklearn_tabular_classification": {
+                                                    "parameter_name": "include_preprocessors"
+                                                },
+    #tabular regression
+    ":time_limit_autosklearn_tabular_regression": {
+                                                    "parameter_name": "time_left_for_this_task"
+                                                },
+    ":time_limit_per_run_autosklearn_tabular_regression": {
+                                                    "parameter_name": "per_run_time_limit"
+                                                },
+    ":ensemble_size_autosklearn_tabular_regression": {
+                                                    "parameter_name": "ensemble_size"
+                                                },
+    ":ensemble_nbest_autosklearn_tabular_regression": {
+                                                    "parameter_name": "ensemble_nbest"
+                                                },
+    ":metric_autosklearn_tabular_regression": {
+                                                    "parameter_name": "metric",
+                                                    "lookup_dict": autosklearn_metrics
+                                                },
+    ":use_approach_autosklearn_tabular_regression": {
+                                                    "parameter_name": "include_estimators"
+                                                },
+    ":include_preprocessor_autosklearn_tabular_regression": {
+                                                    "parameter_name": "include_preprocessors"
+                                                }
 }

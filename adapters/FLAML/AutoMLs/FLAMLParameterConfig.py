@@ -52,47 +52,140 @@ flaml_use_approaches = {
 #lookup dictionary for FLAML tuner values
 #https://microsoft.github.io/FLAML/docs/Use-Cases/Tune-User-Defined-Function/#hyperparameter-optimization-algorithm
 flaml_tuner = {
-":auto": "auto",
-"": "cfo",
-"": "bs"
+":auto_optimization_approach": "auto",
+":frugal_optimization_for_costrelated_hyperparameters": "cfo",
+":blendsearch": "bs"
 }
 
-#configs for the different tasks that can be executed with FLAML
-#each parameter has its own line that contains:
-#the broader type of the parameter(broader id); the autoML specific parameter id; the default value in case no parameter-value is selected;
-#the expected amount of the parameters(single_value/list); the type to which it should be converted (integer/dictionary); the lookup dictionary which includes the converting types;
-#the autoML function parameter names
-#[broader_type, specific_type, default, expected parameter 'count', converting type, lookup dictionary, used name by autoML]
-
-#config for the tabular classification
-tabular_classification_config = [
-    [":metric", ":metric_flaml_tabular_classification", [":log_loss"], "single_value", "dict", flaml_metrics, "metric"],
-    [":use_approach", ":use_approach_flaml_tabular_classification", [":auto"], "list", "dict", flaml_use_approaches, "estimator_list"]
-]
-
-#config for the tabular regression
-tabular_regression_config = [
-    [":metric", ":metric_flaml_tabular_regression", [":r2"], "single_value", "dict", flaml_metrics, "metric"],
-    [":use_approach", ":use_approach_flaml_tabular_regression", [":auto"], "list", "dict", flaml_use_approaches, "estimator_list"]
-]
-
-#config for the time series forecasting
-time_series_forecasting_config = [
-    [":metric", ":metric_flaml_time_series_forecasting", [":mean_squared_error"], "single_value", "dict", flaml_metrics, "metric"],
-    [":use_approach", ":use_approach_flaml_time_series_analysis", [":auto"], "list", "dict", flaml_use_approaches, "estimator_list"],
-    [":forecasting_horizon", ":forecasting_horizon_flaml_time_series_forcasting", [1], "single_value", "integer", "", "period"]
-]
-
-#config for the text classification
-text_classification_config = [
-    [":metric", ":metric_flaml_text_classification", [":log_loss"], "single_value", "dict", flaml_metrics, "metric"],
-    [":use_approach", ":use_approach_flaml_text_classification", [":auto"], "list", "dict", flaml_use_approaches, "estimator_list"]
-]
-
-# dictionary for mapping the selected task to the appropriate config
-task_config = {
-    ":tabular_classification": tabular_classification_config,
-    ":tabular_regression": tabular_regression_config,
-    ":time_series_forecasting" :time_series_forecasting_config,
-    ":text_classification": text_classification_config
+flaml_split_type = {
+":auto_split": "auto",
+":stratified": "stratified",
+":uniform": "uniform",
+":time": "time",
+":group": "group",
 }
+
+flaml_eval_method = {
+":auto_evaluation": "auto",
+":cross_validation": "cv",
+":holdout": "holdout"
+}
+
+parameters = {
+    #tabular classification
+    ":use_approach_flaml_tabular_classification": {
+                                                    "parameter_name": "estimator_list",
+                                                    "lookup_dict": flaml_use_approaches
+                                                },
+    ":metric_flaml_tabular_classification": {
+                                                    "parameter_name": "metric",
+                                                    "lookup_dict": flaml_metrics
+                                                },
+    ":ensemble_flaml_tabular_classification": {
+                                                    "parameter_name": "ensemble"
+                                                },
+    ":eval_method_flaml": {
+                                                    "parameter_name": "eval_method",
+                                                    "lookup_dict": flaml_eval_method
+                                                },
+    ":validation_split_flaml": {
+                                                    "parameter_name": "split_ratio"
+                                                },
+    ":cross_validation_fold_flaml": {
+                                                    "parameter_name": "n_splits"
+                                                },
+    ":split_type_flaml_classification": {
+                                                    "parameter_name": "split_type",
+                                                    "lookup_dict": flaml_split_type
+                                                },
+    ":hyperparameter_optimization_method_flaml": {
+                                                    "parameter_name": "hpo_method",
+                                                    "lookup_dict": flaml_tuner
+                                                },
+
+    #tabular regression
+    ":use_approach_flaml_tabular_regression": {
+                                                    "parameter_name": "estimator_list",
+                                                    "lookup_dict": flaml_use_approaches
+                                                },
+    ":metric_flaml_tabular_regression": {
+                                                    "parameter_name": "metric",
+                                                    "lookup_dict": flaml_metrics
+                                                },
+    ":ensemble_flaml_tabular_regression": {
+                                                    "parameter_name": "ensemble"
+                                                },
+    ":split_type_flaml_regression": {
+                                                    "parameter_name": "split_type",
+                                                    "lookup_dict": flaml_split_type
+                                                },
+    #time series forecasting
+    ":use_approach_flaml_time_series_analysis": {
+                                                    "parameter_name": "estimator_list",
+                                                    "lookup_dict": flaml_use_approaches
+                                                },
+    ":metric_flaml_time_series_analysis": {
+                                                    "parameter_name": "metric",
+                                                    "lookup_dict": flaml_metrics
+                                                },
+    ":ensemble_flaml_time_series_forecasting": {
+                                                    "parameter_name": "ensemble"
+                                                },
+    ":forecasting_horizon_flaml_time_series_forcasting": {
+                                                    "parameter_name": "period",
+                                                    "default": [1]
+                                                },
+    ":split_type_flaml_time_series_forecasting": {
+                                                    "parameter_name": "split_type",
+                                                    "lookup_dict": flaml_split_type
+                                                },
+    #text classification
+    ":use_approach_flaml_text_classification": {
+                                                    "parameter_name": "estimator_list",
+                                                    "lookup_dict": flaml_use_approaches
+                                                },
+    ":metric_flaml_text_classification": {
+                                                    "parameter_name": "metric",
+                                                    "lookup_dict": flaml_metrics
+                                                },
+    ":ensemble_flaml_text_classification": {
+                                                    "parameter_name": "ensemble"
+                                                },
+    ":split_type_flaml_classification": {
+                                                    "parameter_name": "split_type",
+                                                    "lookup_dict": flaml_split_type
+                                                },
+    #text classification
+    ":use_approach_flaml_text_regression": {
+                                                    "parameter_name": "estimator_list",
+                                                    "lookup_dict": flaml_use_approaches
+                                                },
+    ":metric_flaml_text_regression": {
+                                                    "parameter_name": "metric",
+                                                    "lookup_dict": flaml_metrics
+                                                },
+    ":ensemble_flaml_text_regression": {
+                                                    "parameter_name": "ensemble"
+                                                },
+    ":split_type_flaml_regression": {
+                                                    "parameter_name": "split_type",
+                                                    "lookup_dict": flaml_split_type
+                                                },
+    #ranking
+    ":use_approach_flaml_ranking": {
+                                                    "parameter_name": "estimator_list",
+                                                    "lookup_dict": flaml_use_approaches
+                                                },
+    ":metric_flaml_ranking": {
+                                                    "parameter_name": "metric",
+                                                    "lookup_dict": flaml_metrics
+                                                },
+    ":ensemble_flaml_ranking": {
+                                                    "parameter_name": "ensemble"
+                                                },
+    ":split_type_flaml_ranking": {
+                                                    "parameter_name": "split_type",
+                                                    "lookup_dict": flaml_split_type
+                                                },
+}
+

@@ -42,7 +42,7 @@ class AutoSklearnAdapter:
             automl_settings.update(
                 {"time_left_for_this_task": (self._configuration["configuration"]["runtime_limit"] * 60)}) #convert into seconds
 
-        parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), aspc.task_config)
+        parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), aspc.parameters)
         automl_settings.update(parameters)
 
         return automl_settings
