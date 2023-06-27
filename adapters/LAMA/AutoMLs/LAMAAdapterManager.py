@@ -38,7 +38,7 @@ class LAMAAdapterManager(AdapterManager):
         #TODO ADD CORRECT lib and model display
         library = [":lightgbm_lib"]
         model = [":light_gradient_boosting_machine"]
-        with open(os.path.join(os.path.join(working_dir, 'GAMA.p')), 'rb') as file:
+        with open(os.path.join(os.path.join(working_dir, 'model_LAMA.p')), 'rb') as file:
             loaded_model = dill.load(file)
         return library, model
 

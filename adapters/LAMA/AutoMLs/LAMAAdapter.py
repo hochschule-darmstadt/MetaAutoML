@@ -35,7 +35,7 @@ class LAMAAdapter:
             if self._configuration["configuration"]["task"] == ":tabular_classification":
                 self.__classification()
             elif self._configuration["configuration"]["task"] == ":tabular_regression":
-                self.__classification()
+                self.__regression()
 
     def __classification(self):
         train, test = data_loader(self._configuration, perform_splitting=False)
@@ -57,7 +57,6 @@ class LAMAAdapter:
         print(y)
         roles = {
             'target': TARGET_NAME,
-            'drop': ['SK_ID_CURR']
         }
         automl = TabularAutoML(
             task = task,
@@ -66,11 +65,42 @@ class LAMAAdapter:
             reader_params = {'n_jobs': N_THREADS, 'cv': N_FOLDS, 'random_state': RANDOM_STATE}
         )
         automl.fit_predict(X, roles = roles, verbose = 1)
-        #export_model(pipeline_optimizer.fitted_pipeline_, self._configuration["result_folder_location"], 'model_LAMA.p')
+        #inverse_class_mapping = {y: x for x,y in automl.reader.class_mapping.items()}
+        #labels = [inverse_class_mapping[i] for i in range(len(inverse_class_mapping))]
+        export_model(automl, self._configuration["result_folder_location"], 'model_LAMA.p')
 
         return
 
     def __regression(self):
+        train, test = data_loader(self._configuration, perform_splitting=False)
+        X, y = prepare_tabular_dataset(train, self._configuration)
+        #Apply encoding to string
+        self._configuration = set_encoding_for_string_columns(self._configuration, X, y, also_categorical=True)
+        self._configuration = set_imputation_for_numerical_columns(self._configuration, X)
+        train, test = data_loader(self._configuration)
+        #reload dataset to load changed data
+        X, y = prepare_tabular_dataset(train, self._configuration)
+        task = Task('reg')
+        N_THREADS = 4
+        N_FOLDS = 5
+        RANDOM_STATE = 42
+        TEST_SIZE = 0.2
+        TIMEOUT = 300
+        TARGET_NAME = y.name
+        X[TARGET_NAME] = y
+        print(y)
+        roles = {
+            'target': TARGET_NAME,
+        }
+        automl = TabularAutoML(
+            task = task,
+            timeout = TIMEOUT,
+            cpu_limit = N_THREADS,
+            reader_params = {'n_jobs': N_THREADS, 'cv': N_FOLDS, 'random_state': RANDOM_STATE}
+        )
+        automl.fit_predict(X, roles = roles, verbose = 1)
+        export_model(automl, self._configuration["result_folder_location"], 'model_LAMA.p')
+
         return
 
 

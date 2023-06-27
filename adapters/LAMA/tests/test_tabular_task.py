@@ -88,7 +88,7 @@ class LAMATabularTaskTest(unittest.TestCase):
         # check if model archive exists
         out_dir = os.path.join("app-data", "training",
                                req.user_id, req.dataset_id, req.training_id)
-        path_to_model = os.path.join(out_dir, "export", "tpot-export.zip")
+        path_to_model = os.path.join(out_dir, "export", "lama-export.zip")
         self.assertTrue(os.path.exists(path_to_model), f"path to model: '{path_to_model}' exist")
 
         # clean up
