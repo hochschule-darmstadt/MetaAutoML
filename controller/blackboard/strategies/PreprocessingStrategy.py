@@ -51,6 +51,12 @@ class PreprocessingStrategyController(IAbstractStrategy):
         )
 
         self.register_rule(
+            'preprocessing.pca_feature_extraction',
+            Rule("phase == 'preprocessing' and not (dataset_type == ':image')", context=preprocessing_context),
+            self.do_pca_feature_extraction
+        )
+
+        self.register_rule(
             'preprocessing.finish_preprocessing',
             Rule("""
                 phase == 'preprocessing' and
@@ -140,6 +146,22 @@ class PreprocessingStrategyController(IAbstractStrategy):
         for column in irrelevant_features:
             self._log.info(f'do_feature_selection: Encountered irrelevant feature {column}.')
             dataset_configuration[column]['RoleSelected'] = ":ignore"
+
+        training_request = agent.get_adapter_runtime_manager().get_training_request()
+        training_request.dataset_configuration = json.dumps(dataset_configuration)
+        agent.get_adapter_runtime_manager().set_training_request(training_request)
+
+        # Finished action (should only run once, therefore disable the strategy rule)
+        controller.disable_strategy('preprocessing.feature_selection')
+
+    def do_pca_feature_extraction(self, state: dict, blackboard: Blackboard, controller: StrategyController):
+        agent: AdapterRuntimeManagerAgent = controller.get_blackboard().get_agent('training-runtime')
+        if not agent or not agent.get_adapter_runtime_manager():
+            raise RuntimeError('Could not access Adapter Runtime Manager Agent!')
+        dataset_configuration = json.loads(agent.get_adapter_runtime_manager().get_training_request().dataset_configuration)
+
+        for dcc in dataset_configuration:
+            dataset_configuration[dcc]['preprocessing'] = {"pca": True}
 
         training_request = agent.get_adapter_runtime_manager().get_training_request()
         training_request.dataset_configuration = json.dumps(dataset_configuration)
