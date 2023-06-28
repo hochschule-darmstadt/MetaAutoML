@@ -418,11 +418,8 @@ def apply_pca_feature_extraction(X: pd.DataFrame, features: dict) -> Tuple[pd.Da
     categorical_columns = df_pca.select_dtypes(include=['object']).columns
     numeric_columns = df_pca.select_dtypes(include=['float64', 'int64']).columns
 
-    numeric_data = df_pca[numeric_columns].fillna(df_pca.mean()).values
-
-    categorical_data = df_pca[categorical_columns]
-    encoder = OneHotEncoder(sparse=False)
-    encoded_categorical_data = encoder.fit_transform(categorical_data)
+    numeric_data = df_pca[numeric_columns]
+    numeric_data = numeric_data.fillna(numeric_data.mean()).values
 
     scaler = StandardScaler()
     scaled_numeric_data = scaler.fit_transform(numeric_data)
@@ -435,9 +432,10 @@ def apply_pca_feature_extraction(X: pd.DataFrame, features: dict) -> Tuple[pd.Da
         columns=[f"PC{i}" for i in range(1, pca.n_components_ + 1)]
     )
 
+    data = pd.concat([pd.DataFrame(transformed_data).set_index(df_pca.index), pd.DataFrame(df_pca[categorical_columns])], axis=1)
+
     df_no_pca_copy = df_no_pca
-    transformed_data = pd.concat([pd.DataFrame(transformed_data), pd.DataFrame(encoded_categorical_data)], axis=1)
-    df_merged = pd.concat([transformed_data, df_no_pca.reset_index(drop=True)], axis=1).set_index(df_no_pca_copy.index)
+    df_merged = pd.concat([data, df_no_pca], axis=1)
     return df_merged
 
 def prepare_tabular_dataset(df: pd.DataFrame, json_configuration: dict, is_prediction:bool=False) -> Tuple[pd.DataFrame, pd.Series]:
