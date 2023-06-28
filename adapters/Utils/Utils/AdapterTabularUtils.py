@@ -14,6 +14,7 @@ import os
 import re
 import json
 import numpy as np
+import dill
 
 def read_tabular_dataset_training_data(config: "StartAutoMlRequest", perform_splitting: bool) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """Read a CSV dataset into train and test dataframes
@@ -400,7 +401,7 @@ def numerical_feature_imputation(X: pd.DataFrame, features: dict_items) -> Tuple
             X[column] = simp_impu.transform(X[[column]])
     return X
 
-def apply_pca_feature_extraction(X: pd.DataFrame, features: dict) -> Tuple[pd.DataFrame, pd.Series]:
+def apply_pca_feature_extraction(X: pd.DataFrame, features: dict, result_folder_location: str) -> Tuple[pd.DataFrame, pd.Series]:
     pca_features = []
     for item in features:
         try:
@@ -427,6 +428,9 @@ def apply_pca_feature_extraction(X: pd.DataFrame, features: dict) -> Tuple[pd.Da
     pca = PCA(n_components='mle')
     transformed_features = pca.fit_transform(scaled_numeric_data)
 
+    with open(os.path.join(result_folder_location, 'pca_model.dill'), 'wb+') as file:
+        dill.dump(pca, file)
+
     transformed_data = pd.DataFrame(
         data=transformed_features,
         columns=[f"PC{i}" for i in range(1, pca.n_components_ + 1)]
@@ -452,7 +456,7 @@ def prepare_tabular_dataset(df: pd.DataFrame, json_configuration: dict, is_predi
     X, y = feature_preparation(df, json_configuration["dataset_configuration"]["schema"].items(), json_configuration["dataset_configuration"]["file_configuration"]["datetime_format"], is_prediction)
     X, y = string_feature_encoding(X, y, json_configuration["dataset_configuration"]["schema"].items())
     X = numerical_feature_imputation(X, json_configuration["dataset_configuration"]["schema"].items())
-    X = apply_pca_feature_extraction(X, json_configuration["dataset_configuration"])
+    X = apply_pca_feature_extraction(X, json_configuration["dataset_configuration"], json_configuration["result_folder_location"])
     return X, y
 
 def convert_X_and_y_dataframe_to_numpy(X: pd.DataFrame, y: pd.Series) -> Tuple[np.ndarray, np.ndarray]:

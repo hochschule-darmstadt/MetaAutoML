@@ -27,6 +27,45 @@ def rename_unnamed_columns(X: pd.DataFrame) -> pd.DataFrame:
             X.rename(columns={column: f"Column{X.columns.get_loc(column)}"}, inplace=True)
     return X
 
+def apply_pca_feature_extraction(X: pd.DataFrame, features: dict, result_folder_location: str) -> Tuple[pd.DataFrame, pd.Series]:
+    pca_features = []
+    for item in features:
+        try:
+            if features[item]['preprocessing']['pca'] == True and features[item]['RoleSelected'] != ':target':
+                pca_features.append(item)
+        except:
+            pass
+
+    if len(pca_features) == 0:
+        return X
+
+    df_no_pca = X.drop(pca_features, axis=1)
+    df_pca = X[pca_features]
+
+    categorical_columns = df_pca.select_dtypes(include=['object']).columns
+    numeric_columns = df_pca.select_dtypes(include=['float64', 'int64']).columns
+
+    numeric_data = df_pca[numeric_columns]
+    numeric_data = numeric_data.fillna(numeric_data.mean()).values
+
+    scaler = StandardScaler()
+    scaled_numeric_data = scaler.fit_transform(numeric_data)
+
+    with open(os.path.join(result_folder_location, 'pca_model.dill'), 'wb+') as file:
+        pca = dill.load(file)
+    transformed_features = pca.transform(scaled_numeric_data)
+
+    transformed_data = pd.DataFrame(
+        data=transformed_features,
+        columns=[f"PC{i}" for i in range(1, pca.n_components_ + 1)]
+    )
+
+    data = pd.concat([pd.DataFrame(transformed_data).set_index(df_pca.index), pd.DataFrame(df_pca[categorical_columns])], axis=1)
+
+    df_no_pca_copy = df_no_pca
+    df_merged = pd.concat([data, df_no_pca], axis=1)
+    return df_merged
+
 def dataset_preparation(filepath: str,  is_prediction=True) -> Tuple[pd.DataFrame, pd.Series]:
     """Read and prepare the dataset
 
