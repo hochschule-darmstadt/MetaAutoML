@@ -1488,7 +1488,7 @@ msgstr "Details"
 
 msgctxt "Global"
 msgid "ML task"
-msgstr "ML task"
+msgstr "ML task * "
 
 msgctxt "Global"
 msgid "AutoML solutions"
@@ -1504,7 +1504,7 @@ msgstr "Enabled strategies"
 
 msgctxt "Global"
 msgid "Runtime"
-msgstr "Runtime"
+msgstr "Maximum runtime [minutes]"
 
 msgctxt "Global"
 msgid "Previous"
@@ -1917,7 +1917,7 @@ msgstr "None"
 
 msgctxt "Global"
 msgid "target"
-msgstr "Target"
+msgstr "Target *"
 
 msgctxt "Global"
 msgid "Datatype"
