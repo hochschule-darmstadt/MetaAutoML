@@ -8,7 +8,7 @@
             "name": "WIN LAMA Adapter",
             "type": "python",
             "request": "launch",
-            "program": "GAMAServer.py",
+            "program": "LAMAServer.py",
             "console": "integratedTerminal",
             "justMyCode": false,
             "env": {
@@ -22,7 +22,7 @@
             "name": "UNIX LAMA Adapter",
             "type": "python",
             "request": "launch",
-            "program": "GAMAServer.py",
+            "program": "LAMAServer.py",
             "console": "integratedTerminal",
             "justMyCode": true,
             "env": {

@@ -51,7 +51,7 @@ class LAMAAdapter:
         N_FOLDS = 5
         RANDOM_STATE = 42
         TEST_SIZE = 0.2
-        TIMEOUT = 300
+        TIMEOUT = 10
         TARGET_NAME = y.name
         X[TARGET_NAME] = y
         print(y)
@@ -85,7 +85,7 @@ class LAMAAdapter:
         N_FOLDS = 5
         RANDOM_STATE = 42
         TEST_SIZE = 0.2
-        TIMEOUT = 300
+        TIMEOUT = 30
         TARGET_NAME = y.name
         X[TARGET_NAME] = y
         print(y)

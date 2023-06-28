@@ -46,11 +46,12 @@ class LAMAAdapterManager(AdapterManager):
 
         if self._loaded_training_id != config["training_id"]:
             print(f"ExplainModel: Model not already loaded; Loading model")
-            with open(result_folder_location + '/GAMA.p', 'rb') as file:
+            with open(result_folder_location + '/model_LAMA.p', 'rb') as file:
                 self.__automl = dill.load(file)
             self._loaded_training_id = config["training_id"]
         try:
-            probabilities = json.dumps(self.__automl.predict_proba(dataframe).tolist())
+            probabilities = (self.__automl.predict(dataframe))#.tolist()
+            probabilities = json.dumps(probabilities.data.tolist())
         except Exception as e:
             raise(e)
         return probabilities
