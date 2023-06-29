@@ -162,7 +162,6 @@ class ModelManager:
             start_dashboard_response: The empty GRPC response
         """
         self.__log.debug(f"start_explainer_dashboard: start dashboard of model {start_dashboard_request.model_id}")
-        #board = self.__data_storage.delete_model(delete_model_request.user_id, start_dashboard_request.model_id)
-        #ExplainableAIManager.__init__(self, self.__data_storage)
-        ExplainableAIManager.startExplainerDashboard(self)
+        found, model = self.__data_storage.get_model(start_dashboard_request.user_id, start_dashboard_request.model_id)
+        ExplainableAIManager.startExplainerDashboard(self, model["path"])
         return StartDashboardResponse()

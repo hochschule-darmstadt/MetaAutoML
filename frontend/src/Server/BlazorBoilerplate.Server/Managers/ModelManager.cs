@@ -255,6 +255,7 @@ namespace BlazorBoilerplate.Server.Managers
             var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
             try
             {
+                startDashboardRequest.UserId = username;
                 startDashboardRequest.ModelId = request.ModelId;
                 var reply = _client.StartExplainerDashboard(startDashboardRequest);
                 return new ApiResponse(Status200OK, null, "");

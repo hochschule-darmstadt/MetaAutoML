@@ -194,13 +194,14 @@ class ExplainableAIManager:
         self.__threads = []
         self.startExplainerDashboard()
 
-    def startExplainerDashboard(self):
+    def startExplainerDashboard(self, path):
         def callback():    
             filepath = "./binary_dashboard.dill"   # os.path.join(path, "binary_dashboard.dill")
             dashboard = ExplainerDashboard(ClassifierExplainer.from_file(filepath))
             dashboard.run(8045)
             self.__threads.remove(thread)
 
+        path_test = os.getcwd()
         thread = threading.Thread(target=callback)
         thread.start()
         self.__threads.append(thread)
