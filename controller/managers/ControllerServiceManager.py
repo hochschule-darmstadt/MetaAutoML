@@ -270,6 +270,19 @@ class ControllerServiceManager(ControllerServiceBase):
         #)
         self.__log.warn("start_explainer_dashboard: executed")
         return response
+    
+    @inject
+    async def stop_explainer_dashboard(
+        self, stop_dashboard_request: "StopDashboardRequest",
+        model_manager: ModelManager=Provide[Application.managers.model_manager]
+    ) -> "StopDashboardResponse":
+        with MeasureDuration() as m:
+            response = model_manager.stop_explainer_dashboard(stop_dashboard_request)
+        #response = await self.__loop.run_in_executor(
+        #    self.__executor, model_manager.delete_model, delete_model_request
+        #)
+        self.__log.warn("start_explainer_dashboard: executed")
+        return response
 
 
 

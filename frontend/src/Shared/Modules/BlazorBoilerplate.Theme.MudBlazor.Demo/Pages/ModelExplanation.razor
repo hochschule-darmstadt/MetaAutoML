@@ -6,17 +6,28 @@
 @inject IViewNotifier viewNotifier
 @inject NavigationManager NavManager
 @attribute [Authorize]
+@implements IDisposable
 
 <MudStack AlignItems="AlignItems.Center" Row="true" Class="mb-2" style="padding-top:30px">
     <MudIcon Size="Size.Large" Icon="@Icons.Filled.Lightbulb" />
     <MudText Typo="Typo.h4">@L["Analysis"]</MudText>
 </MudStack>
 
-<MudGrid>
-    <MudItem xs="12" sm="12" md="12">
-        <iframe style="height:100%; width:100%" src="//192.168.0.227:8045"> </iframe>
-    </MudItem>
-</MudGrid>
+@if (dashboard_address == null)
+{
+   <MudGrid>
+      <MudItem Class="d-flex align-center justify-center mud-width-full" xs="12">
+      <MudProgressCircular Color="Color.Primary" Indeterminate="true"/>
+      </MudItem>
+   </MudGrid>
+}
+else{ 
+    <MudGrid>
+        <MudItem xs="12" sm="12" md="12">
+            <iframe style="height:100%; width:100%" src=@dashboard_address> </iframe>
+        </MudItem>
+    </MudGrid>
+}
 
 @code {
     [Parameter]
@@ -27,6 +38,7 @@
     public string TrainingId { get; set; }
     [Parameter]
     public string ListId { get; set; }
+    private string dashboard_address;
     private GetModelResponseDto dashboardAddress;
     private GetModelResponseDto _model;
     private GetTrainingResponseDto _training;
@@ -39,6 +51,12 @@
 
         StateHasChanged();
     }
+
+    void IDisposable.Dispose()
+    {
+        StopExplainerDashboard();
+    }
+
     private async Task LoadModel()
     {
         try
@@ -64,7 +82,9 @@
                 if (apiResponse.IsSuccessStatusCode)
                 {
                     _training = Newtonsoft.Json.JsonConvert.DeserializeObject<GetTrainingResponseDto>(apiResponse.Result.ToString());
+                    dashboard_address = "//192.168.0.227:" + (new String(Id.Where(Char.IsDigit).ToArray())).Substring(0,5);
                     viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
+                    StateHasChanged();
                 }
                 else
                 {
@@ -87,6 +107,27 @@
         try
         {
             ApiResponseDto apiResponse = await apiClient.StartExplainerDashboard(new StartDashboardRequestDto { ModelId = _model.Model.Id });
+
+            if (apiResponse.IsSuccessStatusCode)
+            {
+                viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
+            }
+            else
+            {
+                viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
+            }
+        }
+        catch (Exception ex)
+        {
+            viewNotifier.Show(ex.GetBaseException().Message, ViewNotifierType.Error, L["Operation Failed"]);
+        }
+    }
+
+    private async Task StopExplainerDashboard()
+    {
+        try
+        {
+            ApiResponseDto apiResponse = await apiClient.StopExplainerDashboard(new StopDashboardRequestDto { ModelId = _model.Model.Id });
 
             if (apiResponse.IsSuccessStatusCode)
             {

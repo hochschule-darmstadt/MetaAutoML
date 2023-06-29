@@ -190,24 +190,25 @@ def feature_preparation(X, features, datetime_format, is_prediction=False):
 
 
 class ExplainableAIManager:
-    def __init__(self, data_storage: DataStorage):
-        self.__threads = []
-        self.startExplainerDashboard()
-
-    def startExplainerDashboard(self):
-        def callback():    
-            filepath = "./binary_dashboard.dill"   # os.path.join(path, "binary_dashboard.dill")
-            dashboard = ExplainerDashboard(ClassifierExplainer.from_file(filepath))
-            dashboard.run(8045)
-            self.__threads.remove(thread)
-
+    def startExplainerDashboard(self, path, modeltype, id):
+        def callback():
+            basepath = os.getcwd()
+            filepath_first = path[:path.find('training') + 8]
+            filepath_second = path[path.find('training') + 9:path.find("export") - 1]
+            filepath = os.path.join(basepath, filepath_first, modeltype[1:], filepath_second, "result/binary_dashboard.dill")
+            port = (''.join([n for n in id if n.isdigit()]))[0:5]
+            #dashboard = ExplainerDashboard(ClassifierExplainer.from_file(filepath))
+            #dashboard.run(port)
         thread = threading.Thread(target=callback)
+        thread.name = "explainer_dashboard"
         thread.start()
-        self.__threads.append(thread)
 
     def stopExplainerDashboard(self):
-        print("Needs to be implemented!")
-        # kill thread
+        for thread in threading.enumerate(): 
+           if (thread.name == "explainer_dashboard"):
+               thread.join(timeout=0.1)
+
+
 
 
 

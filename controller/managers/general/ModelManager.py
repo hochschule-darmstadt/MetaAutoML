@@ -162,7 +162,22 @@ class ModelManager:
             start_dashboard_response: The empty GRPC response
         """
         self.__log.debug(f"start_explainer_dashboard: start dashboard of model {start_dashboard_request.model_id}")
-        #board = self.__data_storage.delete_model(delete_model_request.user_id, start_dashboard_request.model_id)
-        #ExplainableAIManager.__init__(self, self.__data_storage)
-        ExplainableAIManager.startExplainerDashboard(self)
+        found, model = self.__data_storage.get_model(start_dashboard_request.user_id, start_dashboard_request.model_id)
+        ExplainableAIManager.startExplainerDashboard(self, model["path"], model["auto_ml_solution"], model["training_id"])
         return StartDashboardResponse()
+    
+    def stop_explainer_dashboard(
+        self, stop_dashboard_request: "StopDashboardRequest"
+    ) -> "StopDashboardResponse":
+        """Stop an ExplainerDashboard
+
+        Args:
+            stop_dashboard_request (StioDashboardRequest): The GRPC request containing the model id
+
+        Returns:
+            stop_dashboard_response: The empty GRPC response
+        """
+        self.__log.debug(f"stop_explainer_dashboard: stop dashboard of model {stop_dashboard_request.model_id}")
+        found, model = self.__data_storage.get_model(stop_dashboard_request.user_id, stop_dashboard_request.model_id)
+        ExplainableAIManager.stopExplainerDashboard(self)
+        return StopDashboardResponse()
