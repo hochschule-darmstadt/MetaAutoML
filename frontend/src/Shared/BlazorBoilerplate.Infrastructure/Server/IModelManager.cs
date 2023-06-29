@@ -12,5 +12,6 @@ namespace BlazorBoilerplate.Infrastructure.Server
         Task<ApiResponse> DownloadModel(DownloadModelRequestDto request);
         Task<ApiResponse> DeleteModel(DeleteModelRequestDto request);
         Task<ApiResponse> StartExplainerDashboard(StartDashboardRequestDto request);
+        Task<ApiResponse> StopExplainerDashboard(StopDashboardRequestDto request);
     }
 }
