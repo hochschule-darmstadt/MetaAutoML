@@ -402,10 +402,11 @@ def numerical_feature_imputation(X: pd.DataFrame, features: dict_items) -> Tuple
     return X
 
 def apply_pca_feature_extraction(X: pd.DataFrame, features: dict, result_folder_location: str) -> Tuple[pd.DataFrame, pd.Series]:
+    pca_transformer = {}
     pca_features = []
-    for item in features:
+    for item in features["schema"]:
         try:
-            if features[item]['preprocessing']['pca'] == True and features[item]['RoleSelected'] != ':target':
+            if features["schema"][item]['preprocessing']['pca'] == True and features["schema"][item]['role_selected'] != ':target':
                 pca_features.append(item)
         except:
             pass
@@ -422,18 +423,18 @@ def apply_pca_feature_extraction(X: pd.DataFrame, features: dict, result_folder_
     numeric_data = df_pca[numeric_columns]
     numeric_data = numeric_data.fillna(numeric_data.mean()).values
 
-    scaler = StandardScaler()
-    scaled_numeric_data = scaler.fit_transform(numeric_data)
+    pca_transformer["scaler"] = StandardScaler()
+    scaled_numeric_data = pca_transformer["scaler"].fit_transform(numeric_data)
 
-    pca = PCA(n_components='mle')
-    transformed_features = pca.fit_transform(scaled_numeric_data)
+    pca_transformer["pca"] = PCA(n_components='mle')
+    transformed_features = pca_transformer["pca"].fit_transform(scaled_numeric_data)
 
     with open(os.path.join(result_folder_location, 'pca_model.dill'), 'wb+') as file:
-        dill.dump(pca, file)
+        dill.dump(pca_transformer, file)
 
     transformed_data = pd.DataFrame(
         data=transformed_features,
-        columns=[f"PC{i}" for i in range(1, pca.n_components_ + 1)]
+        columns=[f"PC{i}" for i in range(1, pca_transformer["pca"].n_components_ + 1)]
     )
 
     data = pd.concat([pd.DataFrame(transformed_data).set_index(df_pca.index), pd.DataFrame(df_pca[categorical_columns])], axis=1)

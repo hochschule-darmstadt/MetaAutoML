@@ -81,13 +81,13 @@ class AdapterRuntimeManager:
             #We only need to update the selected values if selected datatype and role as the rest is set by the backend
             for key in current_schema:
                 #Update selected role
-                selected_role = training_schema[key].get("RoleSelected", "")
+                selected_role = training_schema[key].get("role_selected", "")
                 if selected_role != "":
                     current_schema[key]["role_selected"] = selected_role
                 else:
                     current_schema[key].pop("role_selected", None)
                 #Update selected datatype
-                selected_datatype = training_schema[key].get("DatatypeSelected", "")
+                selected_datatype = training_schema[key].get("datatype_selected", "")
 
                 if selected_datatype != "":
                     current_schema[key]["datatype_selected"] = selected_datatype
@@ -245,9 +245,11 @@ class AdapterRuntimeManager:
         data_storage_dataset_configuration = training["dataset_configuration"]
         request_dataset_configuration = json.loads(self.__request.dataset_configuration)
 
-        for key, value in request_dataset_configuration.items():
-            if key not in data_storage_dataset_configuration:
-                data_storage_dataset_configuration[key] = value
+        data_storage_dataset_configuration["schema"] = request_dataset_configuration
+
+        #for key, value in request_dataset_configuration.items():
+        #    if key not in data_storage_dataset_configuration:
+        #        data_storage_dataset_configuration[key] = value
 
         training_details = {
                     "dataset_configuration": data_storage_dataset_configuration

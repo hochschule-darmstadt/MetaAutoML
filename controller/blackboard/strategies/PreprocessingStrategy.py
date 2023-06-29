@@ -82,7 +82,7 @@ class PreprocessingStrategyController(IAbstractStrategy):
 
         for column_a, column_b in duplicate_columns:
             self._log.info(f'do_ignore_redundant_features: Encountered redundant feature "{column_b}" (same as "{column_a}"), ingoring the column.')
-            dataset_configuration[column_b]['RoleSelected'] = ":ignore"
+            dataset_configuration[column_b]['role_selected'] = ":ignore"
 
         training_request = agent.get_adapter_runtime_manager().get_training_request()
         training_request.dataset_configuration = json.dumps(dataset_configuration)
@@ -145,7 +145,7 @@ class PreprocessingStrategyController(IAbstractStrategy):
 
         for column in irrelevant_features:
             self._log.info(f'do_feature_selection: Encountered irrelevant feature {column}.')
-            dataset_configuration[column]['RoleSelected'] = ":ignore"
+            dataset_configuration[column]['role_selected'] = ":ignore"
 
         training_request = agent.get_adapter_runtime_manager().get_training_request()
         training_request.dataset_configuration = json.dumps(dataset_configuration)
