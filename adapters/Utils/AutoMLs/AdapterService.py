@@ -2,6 +2,7 @@ from dependency_injector.wiring import inject, Provide
 from Container import *
 from AdapterBGRPC import *
 from AdapterScheduler import *
+from AdapterManager import *
 
 class AdapterService(AdapterServiceBase):
     def __init__(self):
@@ -31,7 +32,7 @@ class AdapterService(AdapterServiceBase):
     @inject
     async def create_explainer_dashboard(
         self, create_explainer_dashboard_request: "CreateExplainerDashboardRequest",
-        adapter_scheduler: AdapterScheduler=Provide[Application.managers.adapter_scheduler]
+        adapter_manager: AdapterManager=Provide[Application.managers.adapter_manager]
     ) -> "CreateExplainerDashboardResponse":
         return await adapter_manager._create_explainer_dashboard(create_explainer_dashboard_request)
 
