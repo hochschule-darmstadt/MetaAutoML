@@ -426,7 +426,7 @@ class AdapterServiceStub(betterproto.ServiceStub):
 
     async def create_explainer_dashboard(
         self,
-        start_auto_ml_request: "StartAutoMlRequest",
+        create_explainer_dashboard_request: "CreateExplainerDashboardRequest",
         *,
         timeout: Optional[float] = None,
         deadline: Optional["Deadline"] = None,
@@ -434,7 +434,7 @@ class AdapterServiceStub(betterproto.ServiceStub):
     ) -> "CreateExplainerDashboardResponse":
         return await self._unary_unary(
             "/AdapterService/CreateExplainerDashboard",
-            start_auto_ml_request,
+            create_explainer_dashboard_request,
             CreateExplainerDashboardResponse,
             timeout=timeout,
             deadline=deadline,
@@ -476,7 +476,7 @@ class AdapterServiceBase(ServiceBase):
         raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
 
     async def create_explainer_dashboard(
-        self, start_auto_ml_request: "StartAutoMlRequest"
+        self, create_explainer_dashboard_request: "CreateExplainerDashboardRequest"
     ) -> "CreateExplainerDashboardResponse":
         raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
 
@@ -509,7 +509,7 @@ class AdapterServiceBase(ServiceBase):
 
     async def __rpc_create_explainer_dashboard(
         self,
-        stream: "grpclib.server.Stream[StartAutoMlRequest, CreateExplainerDashboardResponse]",
+        stream: "grpclib.server.Stream[CreateExplainerDashboardRequest, CreateExplainerDashboardResponse]",
     ) -> None:
         request = await stream.recv_message()
         response = await self.create_explainer_dashboard(request)
@@ -545,7 +545,7 @@ class AdapterServiceBase(ServiceBase):
             "/AdapterService/CreateExplainerDashboard": grpclib.const.Handler(
                 self.__rpc_create_explainer_dashboard,
                 grpclib.const.Cardinality.UNARY_UNARY,
-                StartAutoMlRequest,
+                CreateExplainerDashboardRequest,
                 CreateExplainerDashboardResponse,
             ),
             "/AdapterService/PredictModel": grpclib.const.Handler(

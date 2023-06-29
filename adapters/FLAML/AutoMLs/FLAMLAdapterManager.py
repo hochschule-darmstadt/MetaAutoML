@@ -88,17 +88,26 @@ class FLAMLAdapterManager(AdapterManager):
         probabilities = json.dumps(probabilities)
         return probabilities
 
-    def _create_explainer_dashboard(self, config: "StartAutoMlRequest"):
+    def _create_explainer_dashboard(self, request: "CreateExplainerDashboardRequest"):
         """Creates the ExplainerDashboard based on the generated model""" 
 
+        print(f"starting creating dashboard")
+
+        config = json.loads(request.process_json)
+        result_folder_location = os.path.join("app-data", "training",
+                               config.user_id, config.dataset_id, config.training_id, "result")
+        #config.dataset_configuration = json.loads(config.dataset_configuration)
+        #config = json.loads(config.to_json())
+        
+        
         if self._loaded_training_id != config["training_id"]:
             print(f"ExplainModel: Model not already loaded; Loading model")
-            with open(config["result_folder_location"] + '/model_flaml.p', 'rb') as file:
+            with open(result_folder_location + '/model_flaml.p', 'rb') as file:
                 model = dill.load(file)
             self._loaded_training_id = config["training_id"]
 
         train, test = data_loader(config)
-        X, y = prepare_tabular_dataset(test, config)
+        X, y = read_tabular_dataset_training_data(test, config)
         X, y = replace_forbidden_json_utf8_characters(X, y)
 
         if config["configuration"]["task"] == ":tabular_classification" or config["configuration"]["task"] == ":text_classification" :
@@ -106,13 +115,15 @@ class FLAMLAdapterManager(AdapterManager):
         else :
             dashboard = ExplainerDashboard(RegressionExplainer(model, X, y))
 
-        dash_path = os.path.abspath(os.path.join(config["result_folder_location"], os.pardir))
+        dash_path = os.path.abspath(os.path.join(result_folder_location, os.pardir))
         os.makedirs(os.path.join(dash_path, "dashboard"), exist_ok=True)
         dash_path = os.path.join(dash_path, "dashboard")
 
         dashboard.save_html(os.path.join(dash_path, "binary_dashboard.html"))
         dashboard.explainer.dump(os.path.join(dash_path, "binary_dashboard.dill"))
 
+        print(f"created dashboard")
+        
         status_update = CreateExplainerDashboardResponse()
         status_update.return_code = AdapterReturnCode.ADAPTER_RETURN_CODE_SUCCESS
         return status_update

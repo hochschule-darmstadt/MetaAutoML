@@ -15,7 +15,7 @@ service AdapterService {
     rpc ExplainModel(ExplainModelRequest) returns (ExplainModelResponse) {}
 
     /* Request the adapter to create a explainable dashboard file on a previously ended training session, using the waiting AdapterManager from the training session */
-    rpc CreateExplainerDashboard(StartAutoMlRequest) returns (CreateExplainerDashboardResponse) {}
+    rpc CreateExplainerDashboard(CreateExplainerDashboardRequest) returns (CreateExplainerDashboardResponse) {}
 
     /* Request the adapter to perform a model prediction using a new uploaded live dataset */
     rpc PredictModel(PredictModelRequest) returns (PredictModelResponse) {}
