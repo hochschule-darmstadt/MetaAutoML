@@ -4,7 +4,15 @@
     <MudTooltip Text=@Text Placement=Position Arrow="true" ShowOnHover="@ShowOnHover">
         <ChildContent>@ChildContent</ChildContent>
         <TooltipContent>
-            <MudText Style="word-wrap: break-word;max-width: 20rem;font-size:11pt;">@Text</MudText>
+            <MudText Style="word-wrap: break-word;max-width: 20rem;font-size:11pt;">
+                @Text
+                @if (!string.IsNullOrEmpty(URL))
+                {
+                    <MudLink Href="@URL" Class="mud-tooltip mud-tooltip-default tooltiptext" Style="opacity: 100%!important; color:white!important;">
+                        More...
+                    </MudLink>
+                }
+            </MudText>
         </TooltipContent>
      
     </MudTooltip>
@@ -18,6 +26,8 @@
     public Placement Position { get; set; }
     [Parameter]
     public Boolean ShowOnHover { get; set; } = true;
+    [Parameter]
+    public string URL { get; set; } = "";
 
 }
 

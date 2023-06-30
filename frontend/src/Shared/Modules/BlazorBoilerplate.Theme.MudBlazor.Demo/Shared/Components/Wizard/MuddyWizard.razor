@@ -63,12 +63,12 @@
                         <MudStack Row="true">
                             @if (@DisplaySaveSchemaCheckbox)
                             {
-                                <ButtonTooltip Text="Select this box if you want your configuration to be saved with the dataset and be re-used for the next training." Position="Placement.Top">
+                                <ButtonTooltip Text="Select this box if you want your configuration to be saved with the dataset and be re-used for the next training." Position="Placement.Bottom">
                                     <MudCheckBox Checked="@SaveSchema" T="bool" CheckedChanged="OnSaveSchemaCheckedChanged" Label="@L["Save Schema"]"></MudCheckBox>
                                 </ButtonTooltip>
                             }
                         <MudStack Row="true">
-                            <ButtonTooltip Text="Click here to get back to the last step of the training configuration wizard." Position="Placement.Top" ShowOnHover="(!IsPreviousDisabled)">
+                            <ButtonTooltip Text="Click here to get back to the last step of the training configuration wizard." Position="Placement.Bottom" ShowOnHover="(!IsPreviousDisabled)">
                                 <MudButton OnClick="OnPrevious"
                                            Disabled="@IsPreviousDisabled"
                                            Color="Color.Secondary"
@@ -80,7 +80,7 @@
                                 @if (@IsFinishVisible)
                                 {
 
-                                    <ButtonTooltip Text="Click here to finish configuration and start training. This may take a while, depending on your maximum runtime configuration." Position="Placement.Top">
+                                    <ButtonTooltip Text="Click here to finish configuration and start training. This may take a while, depending on your maximum runtime configuration." Position="Placement.Bottom">
                                         <MudButton OnClick="OnFinish"
                                                    Color="Color.Secondary"
                                                    Disabled="@DisableNext"

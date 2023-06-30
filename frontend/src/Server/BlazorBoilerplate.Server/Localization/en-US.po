@@ -1212,7 +1212,7 @@ msgstr "You are not authorized to access this page"
 
 msgctxt "TrainingTimeline"
 msgid "started"
-msgstr "Started Experiment"
+msgstr "Training started"
 
 msgctxt "TrainingTimeline"
 msgid "preprocessing"
@@ -1220,11 +1220,11 @@ msgstr "Preprocessing"
 
 msgctxt "TrainingTimeline"
 msgid "running"
-msgstr "Running AutoMLs"
+msgstr "AutoML executing"
 
 msgctxt "TrainingTimeline"
 msgid "stopped"
-msgstr "Finished Experiment"
+msgstr "Training finished"
 
 msgctxt "TrainingTimeline"
 msgid "strategy_action"
@@ -1411,20 +1411,20 @@ msgid "Model"
 msgstr "Model"
 
 msgctxt "Global"
-msgid "Library"
-msgstr "Library"
+msgid "ML Library"
+msgstr "ML Library"
 
 msgctxt "Global"
 msgid "Test score"
 msgstr "Test score"
 
 msgctxt "Global"
-msgid "Prediction time per sample"
-msgstr "Prediction time per sample"
+msgid "Prediction time"
+msgstr "Prediction time"
 
 msgctxt "Global"
-msgid "Total training time"
-msgstr "Total training time"
+msgid "Training time"
+msgstr "Training time"
 
 msgctxt "Global"
 msgid "Top 3 models"
@@ -1551,8 +1551,8 @@ msgid "failed"
 msgstr "failed"
 
 msgctxt "Global"
-msgid "Search by AutoML solution, Status, Model or Library"
-msgstr "Search by AutoML solution, Status, Model or Library"
+msgid "Search by AutoML solution, status, ML model or library"
+msgstr "Search by AutoML solution, status, ML model or library"
 
 msgctxt "Global"
 msgid "Model {0}"
@@ -1977,7 +1977,7 @@ msgstr "No or multiple index column with datatype datetime was set. Only one ind
 
 
 msgctxt "Global"
-msgid "Emissions kg/CO2-eq"
+msgid "Training emissions"
 msgstr "Emissions kg/CO2-eq"
 
 msgctxt "Global"

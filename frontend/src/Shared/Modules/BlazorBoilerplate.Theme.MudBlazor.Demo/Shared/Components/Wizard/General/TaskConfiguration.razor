@@ -42,7 +42,13 @@
 
                 @foreach (var task in _compatibleTasks.Tasks)
                 {
-                    <MudSelectItem Value="@task.ID">@L[task.Properties.ContainsKey("skos:prefLabel") ? task.Properties["skos:prefLabel"] : ""]</MudSelectItem>
+                        <div style="display:block; height:fit-content">
+                            <ButtonTooltip Text=@task.Properties["rdfs:comment"] URL=@(task.Properties.ContainsKey("rdfs:seeAlso") ? task.Properties["rdfs:seeAlso"] : "") Position="Placement.Right">
+                                <MudSelectItem Value="@task.ID">@L[task.Properties.ContainsKey("skos:prefLabel") ? task.Properties["skos:prefLabel"] : ""]</MudSelectItem>
+                            </ButtonTooltip>
+                        </div>
+
+
                 }
             </MudSelect>
         </MudItem>
@@ -64,10 +70,12 @@
                     {
                         @foreach (var column in _columnNames)
                         {
-                            <MudSelectItem Value="@column">@column</MudSelectItem>
-                        }
-                    }
-                </MudSelect>
+                            <div style="display:block; height:fit-content">
+                                <MudSelectItem Value="@column">@column</MudSelectItem>
+                                </div>
+                                }
+                                }
+                        </MudSelect>
             </MudItem>
             <MudItem xs="1">
                 <LabelTooltip FontSize="Typo.h4" Text="Select which column in a tabular dataset is to be predicted by the ML model." Position="Placement.Left"></LabelTooltip>
@@ -103,10 +111,10 @@
                                     <MudSelect T="ParameterValueViewModel" Class="ml-2" Label="@param.ParameterLabel" Variant="Variant.Outlined" @bind-SelectedValues="param.SelectedValues" ToStringFunc="p => p?.ValueLabel">
                                         @foreach (var paramValue in param.ParameterValues)
                                         {
-                                                <!--Hier die wikitooltips?-->
-                                            <MudSelectItem Value="@paramValue">@paramValue.ValueLabel</MudSelectItem>
-                                        }
-                                    </MudSelect>
+                                            <!--Hier Tooltip-->
+                                                <MudSelectItem Value="@paramValue">@paramValue.ValueLabel</MudSelectItem>
+                                                }
+                                        </MudSelect>
                                 }
                                 @if (param.ParameterType == ":list")
                                 {
