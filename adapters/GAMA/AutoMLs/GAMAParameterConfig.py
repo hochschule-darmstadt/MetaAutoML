@@ -46,7 +46,7 @@ tabular_classification_config = [
 
 #config for the tabular regression
 tabular_regression_config = [
-    [":metric", ":metric_evalml_tabular_regression", [":explained_variance"], "list", "dict", gama_metrics, "scoring"]
+    [":metric", ":metric_gama_tabular_regression", [":explained_variance"], "list", "dict", gama_metrics, "scoring"]
 ]
 
 

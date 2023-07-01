@@ -6,11 +6,8 @@ import numpy as np
 import os
 from AdapterTabularUtils import *
 
-{% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression", ":text_classification", ":text_regression"] %}
+{% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression"] %}
 from preprocessing import dataset_preparation
-{% endif %}
-{% if configuration.configuration["task"] in [":time_series_forecasting"] %}
-from preprocessing import dataset_preparation, seperate_time_series_dataframe
 {% endif %}
 
 if __name__ == '__main__':
@@ -25,13 +22,16 @@ if __name__ == '__main__':
     #Load live dataset
     X, y = dataset_preparation(filepath)
     predicted_y = loaded_model.predict(X)
+    {% if configuration.configuration["task"] in [":tabular_classification"] %}
     ind =  np.argmax(predicted_y.data, axis=1)
     inverse_class_mapping = {y: x for x,y in loaded_model.reader.class_mapping.items()}
     labels = [inverse_class_mapping[i] for i in range(len(inverse_class_mapping))]
-    print(ind)
     ind = list(map(inverse_class_mapping.get, ind))
-    print(ind)
     predicted_y = np.reshape(ind, (-1, 1))
+    {% endif %}
+    {% if configuration.configuration["task"] in [":tabular_regression"] %}
+    predicted_y = np.reshape(predicted_y.data, (-1, 1))
+    {% endif %}
     pd.DataFrame(data=predicted_y, columns=["predicted"]).to_csv(save_path)
 
 
