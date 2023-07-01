@@ -76,6 +76,8 @@ class AdapterRuntimeManager:
         with self.__data_storage.lock():
             found, dataset = self.__data_storage.get_dataset(self.__request.user_id, self.__request.dataset_id)
             current_schema = dataset["schema"]
+            if self.__request.dataset_configuration == "":
+                return current_schema
             training_schema = json.loads(self.__request.dataset_configuration)
             #We only need to update the selected values if selected datatype and role as the rest is set by the backend
             for key in current_schema:

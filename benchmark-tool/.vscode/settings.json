@@ -13,5 +13,11 @@
         "diffEditor.ignoreTrimWhitespace": false,
         "editor.wordBasedSuggestions": false,
         "editor.defaultFormatter": "ms-python.black-formatter"
-    }
+    },
+    "python.analysis.diagnosticSeverityOverrides": {
+        "reportUnknownLambdaType": "none"
+    },
+    "cSpell.words": [
+        "omaml"
+    ]
 }

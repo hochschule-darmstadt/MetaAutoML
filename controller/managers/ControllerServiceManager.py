@@ -326,7 +326,17 @@ class ControllerServiceManager(ControllerServiceBase):
 						'Split large datasets',
 						'This strategy truncates the training data if the time limit is relatively short for the size of the dataset.'
 						)
-				)
+				    )
+                    
+                if (not found) or ('irrelevant_features' in dataset['analysis'] and len(dataset['analysis']['irrelevant_features']) != 0):
+                    result.strategies.append(
+                        Strategy(
+                        'preprocessing.feature_selection',
+                        'Feature selection',
+                        'This strategy will analyse the dataset for irrelevant dimensionality and reduces it to decrease complexity.'
+                        )
+                    )
+            
             result.strategies.append(
                 Strategy(
                 'pre_training.top_3_models',

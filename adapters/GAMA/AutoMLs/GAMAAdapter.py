@@ -81,7 +81,6 @@ class GAMAAdapter:
     def __get_search_method(self):
         """get tuner class or search method in gama
         return none when not setted
-
         Returns:
             tuner class object: tuner obj
         """

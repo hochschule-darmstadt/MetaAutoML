@@ -1,0 +1,6 @@
+root = false
+
+[*.md, *.yaml, *.yml]
+indent_size = 2
+tab_width = 2
+

@@ -1,6 +1,9 @@
 from unittest.mock import MagicMock
 from sys import modules
-from collections.abc import Callable
+from typing import Callable
+
+from typing import Any
+from uuid import UUID
 
 
 class MockingHelper:
@@ -39,12 +42,26 @@ class MockingHelper:
         self.__main_modules.clear()
 
 
-def async_lambda(fun: Callable[[], object]):
+def async_lambda(fun: Callable[..., Any] | None = None):
     """Wraps a function into an async lambda function.
     This is useful for mocking async functions.
     """
 
-    async def wrapper():
-        return fun()
+    if fun is None:
 
-    return wrapper
+        async def empty_wrapper(*args: Any, **kwargs: Any):
+            pass
+
+        return empty_wrapper
+    else:
+
+        async def wrapper(*args: Any, **kwargs: Any):
+            if len(args) > 0 or len(kwargs) > 0:
+                return fun(*args, **kwargs)
+            return fun()
+
+        return wrapper
+
+
+dummy_uuid = UUID("00000000-0000-0000-0000-000000000000")
+"""basic uuid that can be used everywhere where a uuid has to be passed to a function that is mocked anyway."""

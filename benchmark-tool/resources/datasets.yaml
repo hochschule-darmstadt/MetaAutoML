@@ -1,0 +1,39 @@
+# yaml-language-server: $schema=./schema.yaml
+datasets:
+  - name_id: TitanicBenchmark
+    dataset_type: :tabular
+    file_location: ../resources/titanic_train.csv
+    columns:
+      - column_name: PassengerId
+        column_role: :index
+        column_type: :integer
+      - column_name: Survived
+        column_role: :target
+        column_type: :boolean
+      - column_name: Pclass
+        column_type: :categorical
+      - column_name: Name
+        column_type: :string
+      - column_name: Sex
+        column_type: :categorical
+      - column_name: Age
+        column_type: :float
+      - column_name: SibSp
+        column_type: :integer
+      - column_name: Parch
+        column_type: :categorical
+      - column_name: Ticket
+        column_type: :string
+      - column_name: Fare
+        column_type: :float
+      - column_name: Cabin
+        column_type: :string
+      - column_name: Embarked
+        column_type: :categorical
+    training:
+      task: :tabular_classification
+      target: Survived
+      metric: :accuracy
+      auto_mls:
+        - :autokeras
+        - :flaml

@@ -25,7 +25,6 @@ def load_iris_dataset() -> str:
 
     train_data.to_csv(file_path, index=False)
     return file_path
-
 def load_titanic_dataset():
     """download titanic dataset
     Returns:
@@ -44,12 +43,11 @@ def load_titanic_dataset():
 
     return dataset_path
 
+
 class GAMATabularTaskTest(unittest.TestCase):
 
     def test_tabular_classification(self):
         dataset_path = load_iris_dataset()
-
-
         req = StartAutoMlRequest()
         req.training_id = "test"
         req.dataset_id = "test"
