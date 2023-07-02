@@ -1029,7 +1029,8 @@ class AutoMlParameter(betterproto.Message):
     ":metric_autokeras_regression",paramLabel: "metric autokeras
     regression",paramType: ":list",broaderIri: ":metric",broaderLabel:
     "metric",valueIri: ":median_absolute_error",valueLabel: "median absolute
-    error",seeAlso: "url",comment: "comment"}
+    error",seeAlso_para: "url",comment_para: "comment",seeAlso_value:
+    "url",comment_value: "comment",}
     """
 
     auto_ml_iri: str = betterproto.string_field(1)
@@ -1051,12 +1052,11 @@ class AutoMlParameter(betterproto.Message):
         10, optional=True, group="_comment_para"
     )
     see_also_value: Optional[str] = betterproto.string_field(
-        9, optional=True, group="_seeAlso_value"
+        11, optional=True, group="_seeAlso_value"
     )
     comment_value: Optional[str] = betterproto.string_field(
-        10, optional=True, group="_comment_value"
+        12, optional=True, group="_comment_value"
     )
-
 
 
 @dataclass(eq=False, repr=False)
