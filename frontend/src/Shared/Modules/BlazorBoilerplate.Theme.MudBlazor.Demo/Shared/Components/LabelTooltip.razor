@@ -11,6 +11,12 @@
    <TooltipContent>
        <MudText Style="word-wrap: break-word;max-width: 20rem;font-size:11pt;">
            @Text
+           @if (!string.IsNullOrEmpty(URL))
+           {
+               <MudLink Href="@URL" Class="mud-tooltip mud-tooltip-default tooltiptext" Style="opacity: 100%!important; color:white!important;">
+                   More...
+               </MudLink>
+           }
        </MudText>
    </TooltipContent>
     
@@ -25,6 +31,8 @@
     public Placement Position { get; set; }
     [Parameter]
     public Typo FontSize { get; set; } = Typo.h6;
+    [Parameter]
+    public string URL { get; set; } = "";
 
 
 

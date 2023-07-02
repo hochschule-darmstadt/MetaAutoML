@@ -140,7 +140,7 @@ namespace BlazorBoilerplate.Server.Managers
                         ValueLabel = p.ValueLabel,
                         SeeAlsoPara = p.SeeAlsoPara,
                         CommentPara = p.CommentPara,
-                        SeeAlsoPara = p.SeeAlsoPara,
+                        SeeAlsoValue = p.SeeAlsoValue,
                         CommentValue = p.CommentValue
 
                 }).ToList();

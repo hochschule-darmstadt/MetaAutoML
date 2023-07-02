@@ -12,7 +12,7 @@ public class AutoMlParameterDto
     public string ValueLabel { get; set; }
     public string SeeAlsoPara { get; set; }
     public string CommentPara { get; set; }
-    public string SeeAlsValue { get; set; }
+    public string SeeAlsoValue { get; set; }
     public string CommentValue { get; set; }
 
 

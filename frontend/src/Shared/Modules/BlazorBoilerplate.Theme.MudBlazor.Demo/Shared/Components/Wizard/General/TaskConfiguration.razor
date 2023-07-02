@@ -42,11 +42,10 @@
 
                 @foreach (var task in _compatibleTasks.Tasks)
                 {
-                        <div style="display:block; height:fit-content">
-                            <ButtonTooltip Text=@task.Properties["rdfs:comment"] URL=@(task.Properties.ContainsKey("rdfs:seeAlso") ? task.Properties["rdfs:seeAlso"] : "") Position="Placement.Right">
-                                <MudSelectItem Value="@task.ID">@L[task.Properties.ContainsKey("skos:prefLabel") ? task.Properties["skos:prefLabel"] : ""]</MudSelectItem>
-                            </ButtonTooltip>
-                        </div>
+                                <MudSelectItem Value="@task.ID">
+                            <ButtonTooltip Text=@task.Properties["rdfs:comment"] URL=@(task.Properties.ContainsKey("rdfs:seeAlso") ? task.Properties["rdfs:seeAlso"] : "") Position="Placement.Right">@L[task.Properties.ContainsKey("skos:prefLabel") ? task.Properties["skos:prefLabel"] : ""]</ButtonTooltip>
+                                </MudSelectItem>
+                          
 
 
                 }
@@ -89,100 +88,111 @@
             </MudItem>
             <MudItem xs="11">
                 <MudExpansionPanels>
-                    <MudExpansionPanel Text="@L["Details"]">
+                    <MudExpansionPanel>
+                        <TitleContent>
+                            <ButtonTooltip Text="Click here to open numerous detail configuration options." Position="Placement.Right">@L["Details"]</ButtonTooltip>
+                        </TitleContent>
+                        <ChildContent>
 
-                        <LabelTooltip Label=@L["ML libraries"] FontSize="Typo.subtitle2" Text="Select or deselect ML libraries for which ML models shall be generated. Initially, all ML libraries that are supported for the selected ML task are selected (indiated by a tick). When changing selections, corresponding AutoML solutions will be adapted automatically." Position="Placement.Right"></LabelTooltip>
+                            <LabelTooltip Label=@L["ML libraries"] FontSize="Typo.subtitle2" Text="Select or deselect ML libraries for which ML models shall be generated. Initially, all ML libraries that are supported for the selected ML task are selected (indiated by a tick). When changing selections, corresponding AutoML solutions will be adapted automatically." Position="Placement.Right"></LabelTooltip>
 
-                        <ChipSet ViewModel="@_mlLibsViewModel" />
-                        <LabelTooltip Label="@L["AutoML solutions"]" FontSize="Typo.subtitle2" Text="AutoML solutions generate ML models for certain ML libraries. Initially, all AutoML solutions are selected that are supported for the selected ML libraries. When changing selections, corresponding ML libraries will be adapted automatically." Position="Placement.Right"></LabelTooltip>
-                        <ChipSet ViewModel="@_autoMlSolutionsViewModel" />
-                        <LabelTooltip Label="@L["Enabled strategies"]" FontSize="Typo.subtitle2" Text="Training strategies are intelligent helpers that perform best practices in data science for you automatically. Select strategies that you want to enable for this training. " Position="Placement.Right"></LabelTooltip>
-                        <ChipSet ViewModel="@_strategiesViewModel" />
-                        @if (_intersectedParams.Any())
-                        {
-                            <LabelTooltip Label="Parameters" FontSize="Typo.subtitle2" Text="All AutoML solutions use default parameters for training. If you want to specify those parameters yourself you can do this here. " Position="Placement.Right"></LabelTooltip>
-
-
-
-                            @foreach (var param in _intersectedParams)
+                            <ChipSet ViewModel="@_mlLibsViewModel" />
+                            <LabelTooltip Label="@L["AutoML solutions"]" FontSize="Typo.subtitle2" Text="AutoML solutions generate ML models for certain ML libraries. Initially, all AutoML solutions are selected that are supported for the selected ML libraries. When changing selections, corresponding ML libraries will be adapted automatically." Position="Placement.Right"></LabelTooltip>
+                            <ChipSet ViewModel="@_autoMlSolutionsViewModel" />
+                            <LabelTooltip Label="@L["Enabled strategies"]" FontSize="Typo.subtitle2" Text="Training strategies are intelligent helpers that perform best practices in data science for you automatically. Select strategies that you want to enable for this training. " Position="Placement.Right"></LabelTooltip>
+                            <ChipSet ViewModel="@_strategiesViewModel" />
+                            @if (_intersectedParams.Any())
                             {
-                                @if (param.ParameterType == ":single_value")
-                                {
-                                    <MudSelect T="ParameterValueViewModel" Class="ml-2" Label="@param.ParameterLabel" Variant="Variant.Outlined" @bind-SelectedValues="param.SelectedValues" ToStringFunc="p => p?.ValueLabel">
-                                        @foreach (var paramValue in param.ParameterValues)
-                                        {
-                                            <!--Hier Tooltip-->
-                                                <MudSelectItem Value="@paramValue">@paramValue.ValueLabel</MudSelectItem>
-                                                }
-                                        </MudSelect>
-                                }
-                                @if (param.ParameterType == ":list")
-                                {
-                                    <MudSelect T="ParameterValueViewModel" Class="ml-2" Label="@param.ParameterLabel" MultiSelection="true" SelectAll="true" @bind-SelectedValues="param.SelectedValues" ToStringFunc="p => p?.ValueLabel" Variant="Variant.Outlined">
-                                        @foreach (var paramValue in param.ParameterValues)
-                                        {
+                                <LabelTooltip Label="Parameters" FontSize="Typo.subtitle2" Text="All AutoML solutions use default parameters for training. If you want to specify those parameters yourself you can do this here. " Position="Placement.Right"></LabelTooltip>
 
-                                            <MudSelectItem Value="@paramValue">@paramValue.ValueLabel</MudSelectItem>
-                                        }
-                                    </MudSelect>
-                                }
-                                else if (param.ParameterType == ":integer")
+
+
+                                @foreach (var param in _intersectedParams)
                                 {
-                                    <MudNumericField T="int?" Class="ml-2" Label="@param.ParameterLabel" Variant="Variant.Outlined" @bind-Value="@param.IntegerValue" />
+                                    @if (param.ParameterType == ":single_value")
+                                    {
+                                        <MudSelect T="ParameterValueViewModel" Class="ml-2" Label="@param.ParameterLabel" Variant="Variant.Outlined" @bind-SelectedValues="param.SelectedValues" ToStringFunc="p => p?.ValueLabel">
+                                            @foreach (var paramValue in param.ParameterValues)
+                                            {
+                                                <!--Hier Tooltip-->
+                                                <MudSelectItem Value="@paramValue">
+                                                    <ButtonTooltip Text=@paramValue.CommentValue URL=@paramValue.SeeAlsoValue Position="Placement.Right">@paramValue.ValueLabel</ButtonTooltip>
+                                                </MudSelectItem>
+                                            }
+                                        </MudSelect>
+                                    }
+                                    @if (param.ParameterType == ":list")
+                                    {
+
+                                        <MudSelect T="ParameterValueViewModel" Class="ml-2" Label="@param.ParameterLabel" MultiSelection="true" SelectAll="true" @bind-SelectedValues="param.SelectedValues" ToStringFunc="p => p?.ValueLabel" Variant="Variant.Outlined">
+                                            @foreach (var paramValue in param.ParameterValues)
+                                            {
+
+                                                <MudSelectItem Value="@paramValue">
+                                                    <ButtonTooltip Text=@paramValue.CommentValue URL=@paramValue.SeeAlsoValue Position="Placement.Right">@paramValue.ValueLabel</ButtonTooltip>
+                                                </MudSelectItem>
+                                            }
+                                        </MudSelect>
+                                    }
+                                    else if (param.ParameterType == ":integer")
+                                    {
+                                        <MudNumericField T="int?" Class="ml-2" Label="@param.ParameterLabel" Variant="Variant.Outlined" @bind-Value="@param.IntegerValue" />
+                                    }
                                 }
                             }
-                        }
 
-                        @if (_individualParams.Any())
-                        {
-                            <LabelTooltip Label="Parameter available for individual AutoML solution only" FontSize="Typo.subtitle2" Text="A number of configuration parameters are specific for individual AutoML solutions. Here you can specify them. If not specified individually, default configurations are used.
+                            @if (_individualParams.Any())
+                            {
+                                <LabelTooltip Label="Parameter available for individual AutoML solution only" FontSize="Typo.subtitle2" Text="A number of configuration parameters are specific for individual AutoML solutions. Here you can specify them. If not specified individually, default configurations are used.
 " Position="Placement.Right"></LabelTooltip>
 
-                            @foreach (var individualParam in _individualParams)
-                            {
-                                <MudExpansionPanels>
-                                    <MudExpansionPanel Class="mt-2">
-                                        <TitleContent>
-                                            <MudText Typo="Typo.subtitle2">@individualParam.autoMlLabel</MudText>
-                                        </TitleContent>
-                                        <ChildContent>
-                                            @foreach (var param in individualParam.parameters)
-                                            {
-                                                @if (param.ParameterType == ":single_value")
+                                @foreach (var individualParam in _individualParams)
+                                {
+                                    <MudExpansionPanels>
+                                        <MudExpansionPanel Class="mt-2">
+                                            <TitleContent>
+                                                <LabelTooltip URL=@individualParam.autoMlSeeALso Label=@individualParam.autoMlLabel FontSize="Typo.subtitle2" Text=@individualParam.autoMlComment Position="Placement.Right"></LabelTooltip>
+                                            </TitleContent>
+                                            <ChildContent>
+                                                @foreach (var param in individualParam.parameters)
                                                 {
-                                                    <MudSelect T="ParameterValueViewModel" Class="ml-2" Label="@param.BroaderParameterLabel" Variant="Variant.Outlined" @bind-SelectedValues="param.SelectedValues" ToStringFunc="p => p?.ValueLabel">
-                                                        @foreach (var paramValue in param.ParameterValues)
-                                                        {
-                                                            <MudSelectItem Value="@paramValue">@paramValue.ValueLabel</MudSelectItem>
-                                                        }
-                                                    </MudSelect>
+                                                    @if (param.ParameterType == ":single_value")
+                                                    {
+                                                        <MudSelect T="ParameterValueViewModel" Class="ml-2" Label="@param.BroaderParameterLabel" Variant="Variant.Outlined" @bind-SelectedValues="param.SelectedValues" ToStringFunc="p => p?.ValueLabel">
+                                                            @foreach (var paramValue in param.ParameterValues)
+                                                            {
+                                                                <MudSelectItem Value="@paramValue">
+                                                                    <ButtonTooltip Text=@paramValue.CommentValue URL=@paramValue.SeeAlsoValue Position="Placement.Right">@paramValue.ValueLabel</ButtonTooltip>
+                                                                </MudSelectItem>
+                                                            }
+                                                        </MudSelect>
+                                                    }
+                                                    @if (param.ParameterType == ":list")
+                                                    {
+                                                        <MudSelect T="ParameterValueViewModel" Class="ml-2" MultiSelection="true" Label="@param.BroaderParameterLabel" SelectAll="true" @bind-SelectedValues="param.SelectedValues" ToStringFunc="p => p?.ValueLabel" Variant="Variant.Outlined">
+                                                            @foreach (var paramValue in param.ParameterValues)
+                                                            {
+                                                                <MudSelectItem Value="@paramValue">
+                                                                    <ButtonTooltip Text=@paramValue.CommentValue URL=@paramValue.SeeAlsoValue Position="Placement.Right">@paramValue.ValueLabel</ButtonTooltip>
+                                                                </MudSelectItem>
+                                                            }
+                                                        </MudSelect>
+                                                    }
+                                                    else if (param.ParameterType == ":integer")
+                                                    {
+                                                        <MudNumericField T="int?" Class="ml-2" Label="@param.BroaderParameterLabel" Variant="Variant.Outlined" @bind-Value="@param.IntegerValue" />
+                                                    }
                                                 }
-                                                @if (param.ParameterType == ":list")
-                                                {
-                                                    <MudSelect T="ParameterValueViewModel" Class="ml-2" MultiSelection="true" Label="@param.BroaderParameterLabel" SelectAll="true" @bind-SelectedValues="param.SelectedValues" ToStringFunc="p => p?.ValueLabel" Variant="Variant.Outlined">
-                                                        @foreach (var paramValue in param.ParameterValues)
-                                                        {
-                                                            <MudSelectItem Value="@paramValue">@paramValue.ValueLabel</MudSelectItem>
-                                                        }
-                                                    </MudSelect>
-                                                }
-                                                else if (param.ParameterType == ":integer")
-                                                {
-                                                    <MudNumericField T="int?" Class="ml-2" Label="@param.BroaderParameterLabel" Variant="Variant.Outlined" @bind-Value="@param.IntegerValue" />
-                                                }
-                                            }
-                                        </ChildContent>
-                                    </MudExpansionPanel>
-                                </MudExpansionPanels>
+                                            </ChildContent>
+                                        </MudExpansionPanel>
+                                    </MudExpansionPanels>
+                                }
                             }
-                        }
-
-                    </MudExpansionPanel>
+                        </ChildContent>
+</MudExpansionPanel>
                 </MudExpansionPanels>
             </MudItem>
-            <MudItem xs="1">
-                <LabelTooltip FontSize="Typo.h4" Text="Click here to open numerous detail configuration options." Position="Placement.Left"></LabelTooltip>
-            </MudItem>
+           
     </MudGrid>
 
     </MudStack>
@@ -205,7 +215,7 @@
     private GetTasksForDatasetTypeResponseDto _compatibleTasks;
     private List<AutoMlParameterDto> _availableParameters;
     private List<ParameterObject> _intersectedParams = new();
-    private List<(string autoMlLabel, List<ParameterObject> parameters)> _individualParams = new();
+    private List<(string autoMlLabel,string autoMlComment, string autoMlSeeALso, List<ParameterObject> parameters)> _individualParams = new();
     private List<string> _columnNames;
 
     private readonly ChipSet.ChipSetViewModel _mlLibsViewModel = new();
@@ -251,7 +261,7 @@
         await OnMlLibrarySelectionChanged();
     }
 
-//Updates the Parameters in the Configuration when the selected values are changed in the frontend.
+    //Updates the Parameters in the Configuration when the selected values are changed in the frontend.
     private async void UpdateParemetersInRequest()
     {
         var paramList = _intersectedParams
@@ -266,12 +276,12 @@
 
         var individualParamsList = _individualParams
         .Select(ip => ip.parameters.Select(p => new ParameterDto
-            {
-                Iri = p.ParameterIri,
-                Values = p.IntegerValue != null
+        {
+            Iri = p.ParameterIri,
+            Values = p.IntegerValue != null
                             ? new List<string> { p.IntegerValue.ToString() }
                                     : p.SelectedValues.Select(v => v.ValueIri).ToList()
-            }).ToList()).ToList();
+        }).ToList()).ToList();
 
         foreach(List<ParameterDto> individualParamItem in individualParamsList)
         {
@@ -282,10 +292,10 @@
         await UpdateStartTrainingDto();
     }
 
-/*
-Gets triggered when the wizard is initialized.
-Initial setup of the configuration.
-*/
+    /*
+    Gets triggered when the wizard is initialized.
+    Initial setup of the configuration.
+    */
     private async void SetupStartAutoMLConfiguration()
     {
         _columnNames = new List<string>();
@@ -311,10 +321,10 @@ Initial setup of the configuration.
         await UpdateStartTrainingDto();
     }
 
-/*
-Gets triggered on the initial start of the wizard.
-Loads the possible Tasks for the according data.
-*/
+    /*
+    Gets triggered on the initial start of the wizard.
+    Loads the possible Tasks for the according data.
+    */
     private async Task LoadData()
     {
         try
@@ -330,10 +340,10 @@ Loads the possible Tasks for the according data.
         }
     }
 
-/*
-Task thet gets triggered when the auto ML solutions are changed.
-Refreshes the intersected & individual parameters.
-*/
+    /*
+    Task thet gets triggered when the auto ML solutions are changed.
+    Refreshes the intersected & individual parameters.
+    */
     private async Task RefreshParameters()
     {
         var taskIri = StartTrainingDto.Configuration.Task;
@@ -353,15 +363,20 @@ Refreshes the intersected & individual parameters.
 
                 var paramsGroupedBySolution = _availableParameters.GroupBy(p => p.AutoMlIri);
 
-                var newIndividualParams = new List<(string, List<ParameterObject>)>();
+                var newIndividualParams = new List<(string,string,string, List<ParameterObject>)>();
                 if (paramsGroupedBySolution.Count() > 0)
                 {
                     foreach (var group in paramsGroupedBySolution)
                     {
                         var autoMlLabel = _autoMlSolutionsViewModel.AvailableChips.Single(c => c.Id == group.Key).Label;
+                        var autoMlComment = _autoMlSolutionsViewModel.AvailableChips.Single(c => c.Id == group.Key).Comment;
+                        var autoMlSeeAlso = _autoMlSolutionsViewModel.AvailableChips.Single(c => c.Id == group.Key).ImageUrl;
+
                         newIndividualParams.Add(
                             (
                                 autoMlLabel,
+                                autoMlComment,
+                                autoMlSeeAlso,
                                 group
                                     .GroupBy(param => param.ParamIri)
                                     .Select(p => CreateParameterObjectFromGroupedParameterDto(p, autoMlLabel))
@@ -373,7 +388,7 @@ Refreshes the intersected & individual parameters.
                     var selectedAutoMls = _autoMlSolutionsViewModel.AvailableChips.Where(c => c.IsSelected);
                     if (paramsGroupedBySolution.Count() > 1 || (selectedAutoMls.Count() > 1 && paramsGroupedBySolution.Count() == 1))
                     {
-                    _individualParams = new List<(string, List<ParameterObject>)>(newIndividualParams);
+                        _individualParams = new List<(string,string, string, List<ParameterObject>)>(newIndividualParams);
                     }
                     newIndividualParams = null;
                     foreach (var individualParam in _individualParams)
@@ -388,10 +403,10 @@ Refreshes the intersected & individual parameters.
             errorMessageKey: "Fetching available parameters failed");
     }
 
-/*
-Creation of the parameter objects from the the data received from the ontology.
-Mainly restructuring of the data.
-*/
+    /*
+    Creation of the parameter objects from the the data received from the ontology.
+    Mainly restructuring of the data.
+    */
     private ParameterObject CreateParameterObjectFromGroupedParameterDto(IGrouping<string, AutoMlParameterDto> parameterGroup, string autoMlLabel)
     {
         var firstInstanceWithIri = parameterGroup.First();
@@ -401,6 +416,8 @@ Mainly restructuring of the data.
             ParameterIri = parameterGroup.Key,
             ParameterLabel = firstInstanceWithIri.ParamLabel,
             ParameterType = firstInstanceWithIri.ParamType,
+            SeeAlsoPara = firstInstanceWithIri.SeeAlsoPara,
+            CommentPara = firstInstanceWithIri.CommentPara
         };
 
         if (!firstInstanceWithIri.IsScalar)
@@ -408,7 +425,9 @@ Mainly restructuring of the data.
             result.ParameterValues = parameterGroup.Select(param => new ParameterValueViewModel
             {
                 ValueIri = param.ValueIri,
-                ValueLabel = param.ValueLabel
+                ValueLabel = param.ValueLabel,
+                CommentValue = param.CommentValue,
+                SeeAlsoValue = param.SeeAlsoValue
             }).ToList();
             if (_individualParams.Any() && _individualParams.Where(i => i.autoMlLabel == autoMlLabel).Any())
             {
@@ -424,11 +443,11 @@ Mainly restructuring of the data.
         return result;
     }
 
-/*
-Function that gets triggered when the selection of the ML Task gets changed.
-Set the task in the configuration.
-Load ML libs for the fitting task and set the data for the chipsets.
-*/
+    /*
+    Function that gets triggered when the selection of the ML Task gets changed.
+    Set the task in the configuration.
+    Load ML libs for the fitting task and set the data for the chipsets.
+    */
     private async void OnMlTaskSelectionChanged(string task)
     {
         if (string.IsNullOrEmpty(task))
@@ -478,12 +497,12 @@ Load ML libs for the fitting task and set the data for the chipsets.
         (objectInfo.ID, objectInfo.Properties.GetValueOrDefault("skos:prefLabel"), objectInfo.Properties.GetValueOrDefault("rdfs:seeAlso"), true, objectInfo.Properties.GetValueOrDefault("rdfs:comment"), "");
 
 
-/*
-Task that gets triggered when the ML Library selection changes.
- Set the selected ML libs in the configuration.
- Get the available ML solutions with the according ML libs.
- Trigger the event to update the available strategies.
-*/
+    /*
+    Task that gets triggered when the ML Library selection changes.
+     Set the selected ML libs in the configuration.
+     Get the available ML solutions with the according ML libs.
+     Trigger the event to update the available strategies.
+    */
     private async Task OnMlLibrarySelectionChanged()
     {
         try
@@ -517,10 +536,10 @@ Task that gets triggered when the ML Library selection changes.
         }
     }
 
-/*
-Task that gets triggered when the ML Library selection gets changed.
-Updates the available strategies for the selected libraries.
-*/
+    /*
+    Task that gets triggered when the ML Library selection gets changed.
+    Updates the available strategies for the selected libraries.
+    */
     private async Task UpdateAvailableStrategies(Dictionary<string, string> dictionary)
     {
         int runtime_limit = StartTrainingDto.Configuration.RuntimeLimit;
@@ -547,11 +566,11 @@ Updates the available strategies for the selected libraries.
         }
     }
 
-/*
-Task that gets triggered when the selection of the AuotML gets changed.
-Sets the selected AutoMLs in the configuration to the in the frontend selected AutoMLs.
-Triggers the refresh of the available parameters.
-*/
+    /*
+    Task that gets triggered when the selection of the AuotML gets changed.
+    Sets the selected AutoMLs in the configuration to the in the frontend selected AutoMLs.
+    Triggers the refresh of the available parameters.
+    */
     private async Task OnAutoMlSolutionSelectionChanged()
     {
         StartTrainingDto.Configuration.SelectedAutoMlSolutions = _autoMlSolutionsViewModel.SelectedIds.ToList();
@@ -560,20 +579,20 @@ Triggers the refresh of the available parameters.
         await RefreshParameters();
     }
 
-/*
-Task that gets triggered when the strategy gets changed.
-Set the enabled strategies to the in the frontend selected strategies.
-*/
+    /*
+    Task that gets triggered when the strategy gets changed.
+    Set the enabled strategies to the in the frontend selected strategies.
+    */
     private Task OnStrategySelectionChanged()
     {
         StartTrainingDto.Configuration.EnabledStrategies = _strategiesViewModel.SelectedIds.ToList();
         return UpdateStartTrainingDto();
     }
 
-/*
-Function that gets triggered when the target column of the dataset gets changed.
-Sets the target to the in the frontend selected values
-*/
+    /*
+    Function that gets triggered when the target column of the dataset gets changed.
+    Sets the target to the in the frontend selected values
+    */
     private async void OnTargetChanged(HashSet<string> values)
     {
         //We need to update the schema configuration with appropriated target values
@@ -594,12 +613,12 @@ Sets the target to the in the frontend selected values
         await UpdateStartTrainingDto();
     }
 
-/*
-Set the selectedValues of the intersected parameter because the intersected parameter list got replaced and therefore the selection of the parameter got reseted
-- intersectedParamsNew: List of the intersected parameters
-returns:
-- List of the intersected parameters with the already selected values
-*/
+    /*
+    Set the selectedValues of the intersected parameter because the intersected parameter list got replaced and therefore the selection of the parameter got reseted
+    - intersectedParamsNew: List of the intersected parameters
+    returns:
+    - List of the intersected parameters with the already selected values
+    */
     private List<ParameterObject> ReplaceIntersectedParameter(List<ParameterObject> intersectedParamsNew)
     {
         foreach (ParameterObject intersectedParam in intersectedParamsNew)
@@ -625,30 +644,32 @@ returns:
         return intersectedParamsNew;
     }
 
-/*
-Class for the parameter values
-- ValueIri: Iri of the stored parameter value
-- ValueLabel: Label of the stored parameter value
-Example: ValueIri -> ":accuracy" | ValueLabel -> "accuracy"
-*/
+    /*
+    Class for the parameter values
+    - ValueIri: Iri of the stored parameter value
+    - ValueLabel: Label of the stored parameter value
+    Example: ValueIri -> ":accuracy" | ValueLabel -> "accuracy"
+    */
     public class ParameterValueViewModel
     {
         public string ValueIri { get; set; }
         public string ValueLabel { get; set; }
+        public string CommentValue { get; set; }
+        public string SeeAlsoValue { get; set; }
     }
 
-/*
-Class that contains all informations about a parameter.
-- BroaderParameterLabel: Label of the broader parameter type (e.g. parameter label: "metric autokeras" -> broader label: "metric")
-- ParameterIri: Iri of the parameter
-- ParameterLabel: Label of the parameter
-- ParameterType: Type of the parameter
-- ParameterValues: List of Values that the parameter can have
-- _selectedValues: private list of the selected parameter values
-- SelectedValues: public visibility of the selected parameter values
-- _integerValue: private integer value that the parameter has
-- IntegerValue: public visibility of the selected integer value
-*/
+    /*
+    Class that contains all informations about a parameter.
+    - BroaderParameterLabel: Label of the broader parameter type (e.g. parameter label: "metric autokeras" -> broader label: "metric")
+    - ParameterIri: Iri of the parameter
+    - ParameterLabel: Label of the parameter
+    - ParameterType: Type of the parameter
+    - ParameterValues: List of Values that the parameter can have
+    - _selectedValues: private list of the selected parameter values
+    - SelectedValues: public visibility of the selected parameter values
+    - _integerValue: private integer value that the parameter has
+    - IntegerValue: public visibility of the selected integer value
+    */
     public class ParameterObject
     {
         public event EventHandler SelectedValuesChanged;
@@ -656,6 +677,8 @@ Class that contains all informations about a parameter.
         public string ParameterIri { get; set; }
         public string ParameterLabel { get; set; }
         public string ParameterType { get; set; }
+        public string CommentPara { get; set; }
+        public string SeeAlsoPara { get; set; }
         public List<ParameterValueViewModel> ParameterValues { get; set; } = new();
         private IEnumerable<ParameterValueViewModel> _selectedValues = new List<ParameterValueViewModel>();
         public IEnumerable<ParameterValueViewModel> SelectedValues
