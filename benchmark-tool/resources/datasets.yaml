@@ -1,5 +1,50 @@
 # yaml-language-server: $schema=./schema.yaml
 datasets:
+  - name_id: TitanicBenchmarkMinConfig
+    dataset_type: :tabular
+    file_location: ../resources/titanic_train.csv
+    columns:
+      - column_name: PassengerId
+        column_role: :index
+        column_type: :integer
+      - column_name: Survived
+        column_role: :target
+        column_type: :boolean
+    training:
+      task: :tabular_classification
+      target: Survived
+      metric: :accuracy
+      auto_mls:
+        - :autokeras
+        - :flaml
+#   - name_id: PredictiveMaintenance # fails during dataset analysis
+#     dataset_type: :tabular
+#     file_location: ../resources/predictive_maintenance.csv
+#     columns:
+#       - column_name: UDI
+#         column_type: :integer
+#         column_role: :index
+#     training:
+#       task: :tabular_classification
+#       target: Target
+#       metric: :accuracy
+#       auto_mls:
+#         - :autokeras
+
+#   - name_id: BostonHousing
+#     dataset_type: :tabular
+#     file_location: ../resources/boston.csv
+#     columns:
+#       - column_name: MEDV
+#         column_type: :float
+#         column_role: :target
+#     training:
+#       task: :tabular_regression
+#       target: MEDV
+#       metric: :mean_squared_error
+#       auto_mls:
+#         - :autokeras
+#         - :flaml
   - name_id: TitanicBenchmark
     dataset_type: :tabular
     file_location: ../resources/titanic_train.csv
@@ -37,3 +82,31 @@ datasets:
       auto_mls:
         - :autokeras
         - :flaml
+  - name_id: WineQuality
+    dataset_type: :tabular
+    file_location: ../resources/winequality-red.csv
+    columns:
+      - column_name: quality
+        column_type: :integer
+        column_role: :target
+    training:
+        task: :tabular_regression
+        target: quality
+        metric: :mean_squared_error
+        auto_mls:
+            - :autokeras
+            - :flaml
+  - name_id: DiabetesBenchmark
+    dataset_type: :tabular
+    file_location: ../resources/diabetes.csv
+    columns:
+      - column_name: Outcome
+        column_type: :boolean
+        column_role: :target
+    training:
+        task: :tabular_classification
+        target: Outcome
+        metric: :accuracy
+        auto_mls:
+            - :autokeras
+            - :flaml
