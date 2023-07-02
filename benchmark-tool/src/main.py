@@ -34,6 +34,7 @@ async def main():
                 )
             except Exception as e:
                 print(f"Training of dataset {dataset_config.name_id} failed: {e}")
+        report.write_report()
 
 
 if __name__ == "__main__":

@@ -1,5 +1,6 @@
 from typing import List
 from report.benchmark_result import BenchmarkResult
+import pandas as pd
 
 
 class Report:
@@ -16,4 +17,6 @@ class Report:
         self.__benchmark_results.append(benchmark_result)
 
     def write_report(self):
-        pass
+        """Writes the report to a csv file"""
+        df = pd.DataFrame(self.__benchmark_results)
+        df.to_csv("report.csv")
