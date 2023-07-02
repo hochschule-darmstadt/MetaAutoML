@@ -80,8 +80,7 @@ namespace BlazorBoilerplate.Shared.Dto.Dataset
             switch (this.FileConfiguration["encoding"])
             {
                 case "ascii":
-                    //return utf8 because otherwise ascii leads to problems in some adapters
-                    return Encoding.UTF8;
+                    return Encoding.ascii;
                 case "utf-8":
                     return Encoding.UTF8;
                 case "latin-1":
