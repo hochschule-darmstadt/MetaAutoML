@@ -22,8 +22,8 @@ If you are on windows and omaml was started with the usual docker compose files:
 
 Otherwise:
 
--   When on mac or linux: Create a new launch configuration by copy pasting the existing one and change the `OMAML_DATASET_LOCATION` environment variable to the location of the docker volume `metaautoml_datasets`
--   When not using docker: Change the `OMAML_DATASET_LOCATION` environment variable to the location of the datasets folder (configured in the launch.json of the controller)
+- When on mac or linux: Create a new launch configuration by copy pasting the existing one and change the `OMAML_DATASET_LOCATION` environment variable to the location of the docker volume `metaautoml_datasets`
+- When not using docker: Change the `OMAML_DATASET_LOCATION` environment variable to the location of the datasets folder (configured in the launch.json of the controller)
 
 ## Seeing actions in OMAML
 
