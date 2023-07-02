@@ -26,7 +26,7 @@ from config.config_accessor import (
 )
 from ssl import SSLContext, PROTOCOL_TLSv1_2, CERT_NONE
 from config.config_accessor import get_disable_certificate_check
-from grpc_omaml.omaml_error import OmamlError, TrainingFailedError
+from grpc_omaml.omaml_error import OmamlError
 import grpc_omaml.omaml_typing_adapter as omaml_typing_adapter
 from report.benchmark_result import TrainingResult
 
@@ -243,13 +243,9 @@ class OmamlClient:
             ).training
             if training.status == "busy":
                 return False
+            return True
         except Exception as e:
             raise OmamlError("Error while checking if training completed: ") from e
-
-        status_of_adapters = map(lambda m: m.status, training.models)
-        if "failed" in status_of_adapters:
-            raise TrainingFailedError("Training failed for at least one adapter")
-        return True
 
     async def get_training_score(
         self, user_id: UUID, training_id: str
