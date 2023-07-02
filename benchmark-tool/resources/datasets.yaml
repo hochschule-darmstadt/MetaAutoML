@@ -24,6 +24,7 @@ datasets:
         - :tpot
 
 #   - name_id: PredictiveMaintenance # fails during dataset analysis
+#     # https://www.kaggle.com/datasets/shivamb/machine-predictive-maintenance-classification
 #     dataset_type: :tabular
 #     file_location: ../resources/predictive_maintenance.csv
 #     columns:
@@ -38,6 +39,7 @@ datasets:
 #         - :autokeras
 
 #   - name_id: BostonHousing
+#     # https://www.kaggle.com/datasets/fedesoriano/the-boston-houseprice-data
 #     dataset_type: :tabular
 #     file_location: ../resources/boston.csv
 #     columns:
@@ -89,6 +91,7 @@ datasets:
         - :autokeras
         - :flaml
   - name_id: WineQuality
+    # https://www.kaggle.com/datasets/uciml/red-wine-quality-cortez-et-al-2009
     dataset_type: :tabular
     file_location: ../resources/winequality-red.csv
     columns:
@@ -108,6 +111,7 @@ datasets:
         - :mljar
         - :tpot
   - name_id: DiabetesBenchmark
+    # https://www.kaggle.com/datasets/mathchi/diabetes-data-set
     dataset_type: :tabular
     file_location: ../resources/diabetes.csv
     columns:
