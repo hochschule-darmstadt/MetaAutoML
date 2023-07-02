@@ -1,4 +1,4 @@
-﻿@inject IStringLocalizer<Global> L
+@inject IStringLocalizer<Global> L
 @inject NavigationManager NavManager
 @using System.Linq
 @using System.Timers
@@ -21,7 +21,7 @@
         </CardHeaderActions>
     </MudCardHeader>
     <MudCardContent>
-        <MudPaper Height="250px" Elevation="0">
+        <MudPaper Height="20rem" Elevation="0">
             @if (Trainings == null)
             {
                  <DataLoaderSpinner />
