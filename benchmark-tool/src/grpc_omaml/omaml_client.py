@@ -129,7 +129,7 @@ class OmamlClient:
             OmamlError: if the datasets could not be fetched for the current user
 
         Returns:
-            bool: The id of the dataset if it exists, None otherwise
+            str: The id of the dataset if it exists, None otherwise
         """
         try:
             result = await self.__grpc_client.get_datasets(
