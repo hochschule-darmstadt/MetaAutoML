@@ -15,8 +15,14 @@ datasets:
       target: Survived
       metric: :accuracy
       auto_mls:
+        - :autogluon
         - :autokeras
+        - :autosklearn
+        - :evalml
         - :flaml
+        - :mljar
+        - :tpot
+
 #   - name_id: PredictiveMaintenance # fails during dataset analysis
 #     dataset_type: :tabular
 #     file_location: ../resources/predictive_maintenance.csv
@@ -94,8 +100,13 @@ datasets:
         target: quality
         metric: :mean_squared_error
         auto_mls:
-            - :autokeras
-            - :flaml
+        - :autogluon
+        - :autokeras
+        - :autosklearn
+        - :evalml
+        - :flaml
+        - :mljar
+        - :tpot
   - name_id: DiabetesBenchmark
     dataset_type: :tabular
     file_location: ../resources/diabetes.csv
@@ -108,5 +119,10 @@ datasets:
         target: Outcome
         metric: :accuracy
         auto_mls:
-            - :autokeras
-            - :flaml
+        - :autogluon
+        - :autokeras
+        - :autosklearn
+        - :evalml
+        - :flaml
+        - :mljar
+        - :tpot
