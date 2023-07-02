@@ -1044,12 +1044,19 @@ class AutoMlParameter(betterproto.Message):
     value_label: Optional[str] = betterproto.string_field(
         8, optional=True, group="_valueLabel"
     )
-    see_also: Optional[str] = betterproto.string_field(
-        9, optional=True, group="_seeAlso"
+    see_also_para: Optional[str] = betterproto.string_field(
+        9, optional=True, group="_seeAlso_para"
     )
-    comment: Optional[str] = betterproto.string_field(
-        10, optional=True, group="_comment"
+    comment_para: Optional[str] = betterproto.string_field(
+        10, optional=True, group="_comment_para"
     )
+    see_also_value: Optional[str] = betterproto.string_field(
+        9, optional=True, group="_seeAlso_value"
+    )
+    comment_value: Optional[str] = betterproto.string_field(
+        10, optional=True, group="_comment_value"
+    )
+
 
 
 @dataclass(eq=False, repr=False)

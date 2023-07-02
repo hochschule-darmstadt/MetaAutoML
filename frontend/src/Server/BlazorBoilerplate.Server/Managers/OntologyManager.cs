@@ -138,10 +138,12 @@ namespace BlazorBoilerplate.Server.Managers
                         BroaderLabel = p.BroaderLabel,
                         ValueIri = p.ValueIri,
                         ValueLabel = p.ValueLabel,
-                        SeeAlso = p.SeeAlso,
-                        Comment = p.Comment
+                        SeeAlsoPara = p.SeeAlsoPara,
+                        CommentPara = p.CommentPara,
+                        SeeAlsoPara = p.SeeAlsoPara,
+                        CommentValue = p.CommentValue
 
-                    }).ToList();
+                }).ToList();
                 return new ApiResponse(Status200OK, null, response);
             }
             catch (Exception ex)
