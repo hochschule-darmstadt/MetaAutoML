@@ -10,6 +10,8 @@ public class AutoMlParameterDto
     public string BroaderLabel { get; set; }
     public string ValueIri { get; set; }
     public string ValueLabel { get; set; }
+    public string SeeAlso { get; set; }
+    public string Comment { get; set; }
 
     /// <summary>
     /// Whether the parameter expects a scalar value (e.g. a string or a number)

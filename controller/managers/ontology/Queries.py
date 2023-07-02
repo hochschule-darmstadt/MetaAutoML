@@ -106,5 +106,11 @@ ONTOLOGY_QUERY_GET_CONFIGURATION_BY_AUTOML_ID_AND_TASK_ID = """
                         ?param_iri skos:broader ?broader_iri .
                         ?broader_iri skos:prefLabel ?broader_label
                 }
+                OPTIONAL {
+                        ?param_iri rdfs:seeAlso ?seeAlso .
+                }
+                OPTIONAL {
+                        ?param_iri rdfs:comment ?comment .
+                }
         }
         """

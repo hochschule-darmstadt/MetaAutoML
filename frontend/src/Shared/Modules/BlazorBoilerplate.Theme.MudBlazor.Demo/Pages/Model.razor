@@ -21,9 +21,7 @@
     <MudIcon Size="Size.Large" Icon="@Icons.Filled.Lightbulb" />
     @if (_model != null)
     {
-        <MudText Typo="Typo.h4">
-            @L["Model {0}", _model.Model.GetMlModelString()]
-        </MudText>
+        <LabelTooltip FontSize="Typo.h4" Label=@L["Model {0}", _model.Model.GetMlModelString()] Text="An ML model is the result of ML training and condenses information inherent in the training dataset. It can be used for making predictions on new cases. On this page, you can inspect and use the trained ML model. You may use the model for predicting new cases within the OMA-ML platform without having to install anything (panel center left). Alternatively, you may download the ML model within a pipeline and include it into a custom Python application (panel center right).  There are various ways of getting additional information about the model: an overview (top panel), detailed graphical analyses using Explainable AI (panel bottom left), the configuration that lead to the model (panel bottom center), and detail output of the AutoML solution (panel bottom right)." Position="Placement.Bottom"></LabelTooltip>
     }
 </MudStack>
 
@@ -52,7 +50,7 @@
                                 <MudText Typo="Typo.body1" Style=" display: flex;">@L["Dataset: "] <MudLink Href="@NavManager.ToAbsoluteUri("datasets/" + @_training.Training.DatasetId).AbsoluteUri" Style="cursor: pointer; display: flex;"><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.ListAlt" Style="margin-right: 4px;" />@_dataset.Dataset.Name</MudLink></MudText>
                                 <MudText Typo="Typo.body1">@L["Start: {0}", _training.Training.RuntimeProfile.StartTime.ToString("dd/MM/yyyy HH:mm")]</MudText>
                                 <MudText Typo="Typo.body1">@L["Status: {0}", _model.Model.Status]</MudText>
-                                <MudText Typo="Typo.body1">@L["Total training time: {0}", _model.Model.Status == "busy" ? DateTime.UtcNow.Subtract(_model.Model.RuntimeProfile.StartTime).TotalSeconds.ToString("0") : _model.Model.RuntimeProfile.EndTime.Subtract(_model.Model.RuntimeProfile.StartTime).TotalSeconds.ToString("0")]</MudText>
+                                <MudText Typo="Typo.body1">@L["Training time: {0}", _model.Model.Status == "busy" ? DateTime.UtcNow.Subtract(_model.Model.RuntimeProfile.StartTime).TotalMinutes.ToString("0") : _model.Model.RuntimeProfile.EndTime.Subtract(_model.Model.RuntimeProfile.StartTime).TotalSeconds.ToString("0")]</MudText>
                             </MudItem>
                             <MudItem xs="3" sm="3" md="3">
                                 <MudText Typo="Typo.body1">@L["AutoML solution: {0}", _model.Model.AutoMlSolution.Properties.ContainsKey("skos:prefLabel") ? _model.Model.AutoMlSolution.Properties["skos:prefLabel"] : ""]</MudText>
@@ -61,8 +59,8 @@
                                 <MudText Typo="Typo.body1" Style=" display: flex;">@L["Training: "]<MudLink Href="@NavManager.ToAbsoluteUri("trainings/" + @_training.Training.Id).AbsoluteUri" Style="cursor: pointer; display: flex;"><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.ModelTraining" Style="margin-right: 4px;" />@_training.Training.RuntimeProfile.StartTime.ToString("dd/MM/yyy")</MudLink></MudText>
                             </MudItem>
                             <MudItem xs="3" sm="3" md="3">
-                                <MudText Typo="Typo.body1">@L["Prediction time per sample: {0}", String.Format("{0:0}", _model.Model.PredictionTime)]</MudText>
-                                <MudText Typo="Typo.body1">@L["Emissions: {0} kg/CO2-eq", String.Format("{0:0.00000}", _model.Model.Emissions)]</MudText>
+                                <MudText Typo="Typo.body1">@L["Prediction time: {0}", String.Format("{0:0}", _model.Model.PredictionTime)]</MudText>
+                                <MudText Typo="Typo.body1">@L["Training emissions: {0} kg CO2-eq", String.Format("{0:0.00000}", _model.Model.Emissions)]</MudText>
                             </MudItem>
                             <MudItem xs="3" sm="3" md="3">
                                 <MudSelect Label="@L["Metric"]" T="string" @bind-Value=SelectedMetric>
