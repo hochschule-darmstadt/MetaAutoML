@@ -32,9 +32,9 @@ class AdapterService(AdapterServiceBase):
     @inject
     async def create_explainer_dashboard(
         self, create_explainer_dashboard_request: "CreateExplainerDashboardRequest",
-        adapter_manager: AdapterManager=Provide[Application.managers.adapter_manager]
+        adapter_scheduler: AdapterScheduler=Provide[Application.managers.adapter_scheduler]
     ) -> "CreateExplainerDashboardResponse":
-        return await adapter_manager._create_explainer_dashboard(create_explainer_dashboard_request)
+        return await adapter_scheduler.create_explainer_dashboard(create_explainer_dashboard_request)
 
     @inject
     async def predict_model(

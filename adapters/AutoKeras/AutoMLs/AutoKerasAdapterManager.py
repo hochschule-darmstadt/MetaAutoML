@@ -5,9 +5,12 @@ import time, asyncio
 from AdapterUtils import *
 from AdapterBGRPC import *
 from threading import *
+from AutoKerasWrapper import AutoKerasWrapper
 from JsonUtil import get_config_property
 import pandas as pd
 from typing import Tuple
+from explainerdashboard import ClassifierExplainer, RegressionExplainer, ExplainerDashboard
+
 
 class AutoKerasAdapterManager(AdapterManager):
     """The AutoML solution specific functionality implementation of the AdapterManager class
@@ -63,3 +66,39 @@ class AutoKerasAdapterManager(AdapterManager):
             probabilities = [[1 - prob[0], prob[0]] for prob in probabilities.tolist()]
         probabilities = json.dumps(probabilities)
         return probabilities
+    
+    def _create_explainer_dashboard(self, request: "CreateExplainerDashboardRequest"):
+        """Creates the ExplainerDashboard based on the generated model""" 
+
+        print(f"starting creating dashboard")
+        return_code = CreateExplainerDashboardResponse()
+        try:
+            config = json.loads(request.process_json)
+            result_folder_location = os.path.join("app-data", "training",
+                                config["user_id"], config["dataset_id"], config["training_id"], "result")
+            config["dataset_configuration"] = json.loads(config["dataset_configuration"])
+            
+            if self._loaded_training_id != config["training_id"]:
+                print(f"ExplainModel: Model not already loaded; Loading model")
+                with open(result_folder_location + '/model_flaml.p', 'rb') as file:
+                    model = dill.load(file)
+                self._loaded_training_id = config["training_id"]
+
+            train, test = data_loader(config)
+            X, y = prepare_tabular_dataset(test, config)
+            X, y = replace_forbidden_json_utf8_characters(X, y)
+            wrapper = AutoKerasWrapper(model)
+            if config["configuration"]["task"] == ":tabular_classification" or config["configuration"]["task"] == ":text_classification" :
+                dashboard = ExplainerDashboard(ClassifierExplainer(wrapper, X, y))
+            else :
+                dashboard = ExplainerDashboard(RegressionExplainer(wrapper, X, y))
+
+            dashboard.save_html(os.path.join(result_folder_location, "binary_dashboard.html"))
+            dashboard.explainer.dump(os.path.join(result_folder_location, "binary_dashboard.dill"))
+
+            print(f"created dashboard")
+            return_code.return_code = AdapterReturnCode.ADAPTER_RETURN_CODE_SUCCESS
+        except:
+            return_code.return_code = AdapterReturnCode.ADAPTER_RETURN_CODE_ERROR
+        
+        return return_code

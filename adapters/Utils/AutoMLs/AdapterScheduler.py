@@ -65,8 +65,9 @@ class AdapterScheduler:
             return result
         raise grpclib.GRPCError(grpclib.Status.NOT_FOUND, f"explain_model: Adapter session {explain_auto_ml_request.session_id} does not exist can not get model explanation!")
     
-    async def create_explainer_dashboard(self, create_dashboard_request: "CreateExplainerDashboardRequest") -> "CreateExplainerDashboardResponse":
-         """Request the adapter to perform a probability prediction on a previously ended training session, using the waiting AdapterManager from the training session
+    @inject
+    async def create_explainer_dashboard(self, create_dashboard_request: "CreateExplainerDashboardRequest", adapter_manager: AdapterManager = Provide["managers.adapter_manager"]) -> "CreateExplainerDashboardResponse":
+        """Request the adapter to perform a probability prediction on a previously ended training session, using the waiting AdapterManager from the training session
 
         Args:
             create_dashboard_request (CreateExplainerDashboardRequest): The Grpc request message
@@ -77,10 +78,9 @@ class AdapterScheduler:
         Returns:
             ExplainModelResponse: The Grpc response message
         """
-         if (create_dashboard_request.session_id in self.__adapter_managers.keys()):
-             result = await self.__adapter_managers[create_dashboard_request.session_id].explain_model(create_dashboard_request)
-             return result
-         raise grpclib.GRPCError(grpclib.Status.NOT_FOUND, f"explain_model: Adapter session {create_dashboard_request.session_id} does not exist can not get model explanation!")
+        result = adapter_manager._create_explainer_dashboard(create_dashboard_request)
+        del adapter_manager
+        return result
 
     @inject
     async def predict_model(self, predict_model_request: "PredictModelRequest", adapter_manager: AdapterManager = Provide["managers.adapter_manager"]) -> "PredictModelResponse":

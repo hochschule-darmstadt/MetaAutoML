@@ -321,6 +321,14 @@ class AdapterManager(Thread):
 
         except Exception as e:
             raise grpclib.GRPCError(grpclib.Status.UNAVAILABLE, f"Error while generating probabilities {e}")
+        
+    def _create_explainer_dashboard(self, request: "CreateExplainerDashboardRequest") -> "CreateExplainerDashboardResponse":
+        """Must be overwriten! Creates the Explainerdashboard used by the ExplainableAIManager module inside the controller
+
+        Args:
+            config (CreateExplainerDashboardRequest): the request holding configuration data.
+        """
+        return
 
     def get_start_auto_ml_request(self) -> StartAutoMlRequest:
         return self.__start_auto_ml_request

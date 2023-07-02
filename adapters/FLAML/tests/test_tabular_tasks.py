@@ -4,10 +4,11 @@ import shutil
 import unittest
 import uuid
 
-from AdapterBGRPC import StartAutoMlRequest
+from AdapterBGRPC import StartAutoMlRequest, CreateExplainerDashboardRequest
 from FLAMLAdapterManager import FLAMLAdapterManager
 from sklearn.datasets import load_iris
 import pandas as pd
+import dataclasses
 
 
 def load_iris_dataset() -> str:
@@ -73,12 +74,26 @@ class FLAMLTabularTaskTest(unittest.TestCase):
         adapter_manager.start()
         adapter_manager.join()
 
-        # check if model archive exists
+        ## check if model archive exists
         out_dir = os.path.join("app-data", "training",
                                req.user_id, req.dataset_id, req.training_id)
         path_to_model = os.path.join(out_dir, "export", "flaml-export.zip")
         self.assertTrue(os.path.exists(path_to_model), f"path to model: '{path_to_model}' exist")
 
+
+        #check if explainer dashboard can be created
+        #nmodel has to be unzipped, normally would not yet be zipped at time of method call
+        path_to_result = os.path.join(out_dir, "result")
+        shutil.unpack_archive(path_to_model, path_to_result) 
+        dash_reg = CreateExplainerDashboardRequest()
+        dash_reg.session_id = ""
+        dash_reg.process_json = json.dumps(dataclasses.asdict(req))
+        adapter_manager._create_explainer_dashboard(dash_reg)
+
+        #check if dashboard files exists
+        self.assertTrue(os.path.exists(os.path.join(path_to_result, "binary_dashboard.html")), "file 'binary_dashboard.html' does not exist")
+        self.assertTrue(os.path.exists(os.path.join(path_to_result, "binary_dashboard.dill")), "file 'binary_dashboard.dill' does not exist")
+        
         # clean up
         shutil.rmtree(out_dir)
 
@@ -135,6 +150,19 @@ class FLAMLTabularTaskTest(unittest.TestCase):
         path_to_model = os.path.join(out_dir, "export", "flaml-export.zip")
         self.assertTrue(os.path.exists(path_to_model), f"path to model: '{path_to_model}' exist")
 
+        #check if explainer dashboard can be created
+        #nmodel has to be unzipped, normally would not yet be zipped at time of method call
+        path_to_result = os.path.join(out_dir, "result")
+        shutil.unpack_archive(path_to_model, path_to_result) 
+        dash_reg = CreateExplainerDashboardRequest()
+        dash_reg.session_id = ""
+        dash_reg.process_json = json.dumps(dataclasses.asdict(req))
+        adapter_manager._create_explainer_dashboard(dash_reg)
+
+        #check if dashboard files exists
+        self.assertTrue(os.path.exists(os.path.join(path_to_result, "binary_dashboard.html")), "file 'binary_dashboard.html' does not exist")
+        self.assertTrue(os.path.exists(os.path.join(path_to_result, "binary_dashboard.dill")), "file 'binary_dashboard.dill' does not exist")
+        
         # clean up
         shutil.rmtree(out_dir)
 
