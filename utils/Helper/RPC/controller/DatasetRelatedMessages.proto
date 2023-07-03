@@ -211,7 +211,7 @@ message SetDatasetColumnSchemaConfigurationRequest {
   */
   string datatypeSelected = 4;
   /*
-  The selected role IRI by the user
+  The selected role IRI by the user. Valid options besides the ones defined in the ontology are ":none" and "" (empty string)
   ":index"
   */
   string roleSelected = 5;

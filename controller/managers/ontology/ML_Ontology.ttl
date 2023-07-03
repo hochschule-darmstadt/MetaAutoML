@@ -1,5 +1,5 @@
 ### Ontology file generated from ML_Ontology.xlsx.
-### 2023-06-01 08:23:56.788876
+### 2023-06-22 14:14:40.215109
 
 
 # PREFIXES
@@ -1812,6 +1812,13 @@
     :can_perform :tabular_classification , :tabular_regression ;
     rdfs:comment "End-to-end AutoML library for structured data written in Scala that runs on top of Apache Spark" ;
     rdfs:seeAlso <https://transmogrif.ai> .
+:lama a :AutoML_solution ;
+    skos:prefLabel "LAMA" ;
+    :used_for :pytorch_lib , :lightgbm_lib , :scikit_learn_lib , :catboost_lib ;
+    :can_perform :tabular_classification , :tabular_regression , :binary_classification ;
+    rdfs:comment "LightAutoML - automatic model creation framework" ;
+    rdfs:seeAlso <https://github.com/sb-ai-lab/LightAutoML> ;
+    :supported_by_oma_ml "true"^^xsd:boolean .
 
 
 # Configuration_item
@@ -1893,7 +1900,7 @@
     :category :task_configuration ;
     :automl_solution :flaml ;
     :ml_task :tabular_classification ;
-    :parameter_value :use_approach_flaml_tabular_classification , :metric_flaml_tabular_classification ;
+    :parameter_value :use_approach_flaml_tabular_classification , :metric_flaml_tabular_classification , :ensemble_flaml_tabular_classification , :eval_method_flaml , :validation_split_flaml , :cross_validation_fold_flaml , :split_type_flaml_classification , :hyperparameter_optimization_method_flaml ;
     rdfs:comment "Task configuration for tabular classification in FLAML" ;
     rdfs:seeAlso <https://microsoft.github.io/FLAML/docs/reference/automl/automl> .
 :tabular_regression_in_flaml a :Configuration_item ;
@@ -1901,65 +1908,113 @@
     :category :task_configuration ;
     :automl_solution :flaml ;
     :ml_task :tabular_regression ;
-    :parameter_value :use_approach_flaml_tabular_regression , :metric_flaml_tabular_regression ;
+    :parameter_value :use_approach_flaml_tabular_regression , :metric_flaml_tabular_regression , :ensemble_flaml_tabular_regression , :eval_method_flaml , :validation_split_flaml , :cross_validation_fold_flaml , :split_type_flaml_regression , :hyperparameter_optimization_method_flaml ;
     rdfs:comment "Task configuration for tabular regression in FLAML" ;
     rdfs:seeAlso <https://microsoft.github.io/FLAML/docs/reference/automl/automl> .
-:ranking_in_flaml a :Configuration_item ;
-    skos:prefLabel "ranking in FLAML" ;
-    :category :task_configuration ;
-    :automl_solution :flaml ;
-    :ml_task :ranking ;
-    :parameter_value :use_approach_flaml_ranking , :metric_flaml_ranking ;
-    rdfs:comment "Task configuration for ranking in FLAML" ;
-    rdfs:seeAlso <https://microsoft.github.io/FLAML/docs/reference/automl/automl> .
-:time_series_analysis_in_flaml a :Configuration_item ;
-    skos:prefLabel "time series analysis in FLAML" ;
+:time_series_forecasting_in_flaml a :Configuration_item ;
+    skos:prefLabel "time series forecasting in FLAML" ;
     :category :task_configuration ;
     :automl_solution :flaml ;
     :ml_task :time_series_forecasting ;
-    :parameter_value :use_approach_flaml_time_series_analysis , :metric_flaml_time_series_analysis , :forecasting_horizon_flaml_time_series_forcasting ;
-    rdfs:comment "Task configuration for time series analysis in FLAML" ;
+    :parameter_value :use_approach_flaml_time_series_analysis , :metric_flaml_time_series_analysis , :ensemble_flaml_time_series_forecasting , :eval_method_flaml , :forecasting_horizon_flaml_time_series_forcasting , :validation_split_flaml , :cross_validation_fold_flaml , :split_type_flaml_time_series_forecasting , :hyperparameter_optimization_method_flaml ;
+    rdfs:comment "Task configuration for time series forecasting in FLAML" ;
     rdfs:seeAlso <https://microsoft.github.io/FLAML/docs/reference/automl/automl> .
 :text_classification_in_flaml a :Configuration_item ;
     skos:prefLabel "text classification in FLAML" ;
     :category :task_configuration ;
     :automl_solution :flaml ;
     :ml_task :text_classification ;
-    :parameter_value :use_approach_flaml_text_classification , :metric_flaml_text_classification ;
+    :parameter_value :use_approach_flaml_text_classification , :metric_flaml_text_classification , :ensemble_flaml_text_classification , :eval_method_flaml , :validation_split_flaml , :cross_validation_fold_flaml , :split_type_flaml_classification , :hyperparameter_optimization_method_flaml ;
     rdfs:comment "Task configuration for text classification in FLAML" ;
+    rdfs:seeAlso <https://microsoft.github.io/FLAML/docs/reference/automl/automl> .
+:ranking_in_flaml a :Configuration_item ;
+    skos:prefLabel "ranking in FLAML" ;
+    :category :task_configuration ;
+    :automl_solution :flaml ;
+    :ml_task :ranking ;
+    :parameter_value :use_approach_flaml_ranking , :metric_flaml_ranking , :ensemble_flaml_ranking , :eval_method_flaml , :validation_split_flaml , :cross_validation_fold_flaml , :split_type_flaml_ranking , :hyperparameter_optimization_method_flaml ;
+    rdfs:comment "Task configuration for ranking in FLAML" ;
     rdfs:seeAlso <https://microsoft.github.io/FLAML/docs/reference/automl/automl> .
 :text_regression_in_flaml a :Configuration_item ;
     skos:prefLabel "text regression in FLAML" ;
     :category :task_configuration ;
     :automl_solution :flaml ;
     :ml_task :text_regression ;
-    :parameter_value :use_approach_flaml_text_regression , :metric_flaml_text_regression ;
+    :parameter_value :use_approach_flaml_text_regression , :metric_flaml_text_regression , :ensemble_flaml_text_regression , :eval_method_flaml , :validation_split_flaml , :cross_validation_fold_flaml , :split_type_flaml_regression , :hyperparameter_optimization_method_flaml ;
     rdfs:comment "Task configuration for text regression in FLAML" ;
     rdfs:seeAlso <https://microsoft.github.io/FLAML/docs/reference/automl/automl> .
-:tabular_classification_in_auto_pytorch a :Configuration_item ;
-    skos:prefLabel "tabular classification in Auto-PyTorch" ;
+:tabular_classification_in_evalml a :Configuration_item ;
+    skos:prefLabel "tabular classification in EvalML" ;
     :category :task_configuration ;
-    :automl_solution :autopytorch ;
+    :automl_solution :evalml ;
     :ml_task :tabular_classification ;
-    :parameter_value :use_approach_auto_pytorch_classification , :metric_autopytorch_tabular_classification ;
-    rdfs:comment "Task configuration for tabular classification in Auto-PyTorch" ;
-    rdfs:seeAlso <https://automl.github.io/Auto-PyTorch/development/api.html> .
-:tabular_regression_in_auto_pytorch a :Configuration_item ;
-    skos:prefLabel "tabular regression in Auto-PyTorch" ;
+    :parameter_value :use_approach_evalml_tabular_classification , :metric_evalml_tabular_classification , :tuner_class_evalml , :optimize_thresholds_evalml , :ensembling_evalml , :max_batches_evalml , :allow_long_running_models_evalml , :pipelines_per_batch_evalml , :exclude_featurizers_evalml ;
+    rdfs:comment "Task configuration for tabular classification in EvalML" ;
+    rdfs:seeAlso <https://evalml.alteryx.com/en/stable/api_index.html> .
+:tabular_regression_in_evalml a :Configuration_item ;
+    skos:prefLabel "tabular regression in EvalML" ;
     :category :task_configuration ;
-    :automl_solution :autopytorch ;
+    :automl_solution :evalml ;
     :ml_task :tabular_regression ;
-    :parameter_value :use_approach_auto_pytorch_regression , :metric_autopytorch_tabular_regression ;
-    rdfs:comment "Task configuration for tabular regression in Auto-PyTorch" ;
-    rdfs:seeAlso <https://automl.github.io/Auto-PyTorch/development/api.html> .
-:time_series_forecasting_in_auto_pytorch a :Configuration_item ;
-    skos:prefLabel "time series forecasting in Auto-PyTorch" ;
+    :parameter_value :use_approach_evalml_tabular_regression , :metric_evalml_tabular_regression , :tuner_class_evalml , :optimize_thresholds_evalml , :ensembling_evalml , :max_batches_evalml , :allow_long_running_models_evalml , :pipelines_per_batch_evalml , :exclude_featurizers_evalml ;
+    rdfs:comment "Task configuration for tabular regression in EvalML" ;
+    rdfs:seeAlso <https://evalml.alteryx.com/en/stable/api_index.html> .
+:time_series_regression_in_evalml a :Configuration_item ;
+    skos:prefLabel "time series regression in EvalML" ;
     :category :task_configuration ;
-    :automl_solution :autopytorch ;
+    :automl_solution :evalml ;
     :ml_task :time_series_forecasting ;
-    :parameter_value :metric_autopytorch_time_series_forecasting , :forecasting_horizon_autopytorch_time_series_forcasting ;
-    rdfs:comment "Task configuration for time series forecasting in Auto-PyTorch" ;
-    rdfs:seeAlso <https://automl.github.io/Auto-PyTorch/development/api.html> .
+    :parameter_value :use_approach_evalml_time_series_regression , :metric_evalml_time_series_regression , :tuner_class_evalml , :forecasting_horizon_evalml_time_series_forcasting , :lookback_evalml_time_series_forecasting , :gap_evalml_time_series_forecasting , :optimize_thresholds_evalml , :ensembling_evalml , :max_batches_evalml , :allow_long_running_models_evalml , :pipelines_per_batch_evalml , :exclude_featurizers_evalml ;
+    rdfs:comment "Task configuration for time series regression in EvalML" ;
+    rdfs:seeAlso <https://evalml.alteryx.com/en/stable/api_index.html> .
+:time_series_classification_in_evalml a :Configuration_item ;
+    skos:prefLabel "time series classification in EvalML" ;
+    :category :task_configuration ;
+    :automl_solution :evalml ;
+    :ml_task :time_series_classification ;
+    :parameter_value :use_approach_evalml_time_series_classification , :metric_evalml_classification , :tuner_class_evalml , :optimize_thresholds_evalml , :ensembling_evalml , :max_batches_evalml , :allow_long_running_models_evalml , :pipelines_per_batch_evalml , :exclude_featurizers_evalml ;
+    rdfs:comment "Task configuration for time series classification in EvalML" ;
+    rdfs:seeAlso <https://evalml.alteryx.com/en/stable/api_index.html> .
+:text_classification_in_evalml a :Configuration_item ;
+    skos:prefLabel "text classification in EvalML" ;
+    :category :task_configuration ;
+    :automl_solution :evalml ;
+    :ml_task :text_classification ;
+    :parameter_value :use_approach_evalml_tabular_classification , :metric_evalml_text_classification , :tuner_class_evalml , :optimize_thresholds_evalml , :ensembling_evalml , :max_batches_evalml , :allow_long_running_models_evalml , :pipelines_per_batch_evalml , :exclude_featurizers_evalml ;
+    rdfs:comment "Task configuration for text classification in EvalML" ;
+    rdfs:seeAlso <https://evalml.alteryx.com/en/stable/api_index.html> .
+:text_regression_in_evalml a :Configuration_item ;
+    skos:prefLabel "text regression in EvalML" ;
+    :category :task_configuration ;
+    :automl_solution :evalml ;
+    :ml_task :text_regression ;
+    :parameter_value :use_approach_evalml_tabular_regression , :metric_evalml_text_regression , :tuner_class_evalml , :optimize_thresholds_evalml , :ensembling_evalml , :max_batches_evalml , :allow_long_running_models_evalml , :pipelines_per_batch_evalml , :exclude_featurizers_evalml ;
+    rdfs:comment "Task configuration for text regression in EvalML" ;
+    rdfs:seeAlso <https://evalml.alteryx.com/en/stable/api_index.html> .
+:tabular_classification_pycaret a :Configuration_item ;
+    skos:prefLabel "tabular classification PyCaret" ;
+    :category :task_configuration ;
+    :automl_solution :pycaret ;
+    :ml_task :tabular_classification ;
+    :parameter_value :metric_pycaret_tabular_classification , :cross_validation_fold_pycaret ;
+    rdfs:comment "Task configuration for tabular classification PyCaret" ;
+    rdfs:seeAlso <https://pycaret.readthedocs.io> .
+:tabular_regression_pycaret a :Configuration_item ;
+    skos:prefLabel "tabular regression PyCaret" ;
+    :category :task_configuration ;
+    :automl_solution :pycaret ;
+    :ml_task :tabular_regression ;
+    :parameter_value :metric_pycaret_tabular_regression , :cross_validation_fold_pycaret ;
+    rdfs:comment "Task configuration for tabular regression PyCaret" ;
+    rdfs:seeAlso <https://pycaret.readthedocs.io> .
+:time_series_forecasting__pycaret a :Configuration_item ;
+    skos:prefLabel "time series forecasting  PyCaret" ;
+    :category :task_configuration ;
+    :automl_solution :pycaret ;
+    :ml_task :time_series_forecasting ;
+    :parameter_value :metric_pycaret_time_series_forecasting , :forecasting_horizon_pycaret_time_series_forcasting , :cross_validation_fold_pycaret ;
+    rdfs:comment "Task configuration for time series forecasting  PyCaret" ;
+    rdfs:seeAlso <https://pycaret.readthedocs.io> .
 :tabular_classification_in_autogluon a :Configuration_item ;
     skos:prefLabel "tabular classification in AutoGluon" ;
     :category :task_configuration ;
@@ -2024,54 +2079,38 @@
     :parameter_value :use_approach_autogluon_text_regression , :metric_autogluon_text_regression ;
     rdfs:comment "Task configuration for text regression in AutoGluon" ;
     rdfs:seeAlso <https://auto.gluon.ai> .
-:tabular_classification_in_evalml a :Configuration_item ;
-    skos:prefLabel "tabular classification in EvalML" ;
+:time_series_classification_in_mcfly a :Configuration_item ;
+    skos:prefLabel "time series classification in mcfly" ;
     :category :task_configuration ;
-    :automl_solution :evalml ;
-    :ml_task :tabular_classification ;
-    :parameter_value :use_approach_evalml_tabular_classification , :metric_evalml_tabular_classification , :tuner_class_evalml ;
-    rdfs:comment "Task configuration for tabular classification in EvalML" ;
-    rdfs:seeAlso <https://evalml.alteryx.com/en/stable/api_index.html> .
-:tabular_regression_in_evalml a :Configuration_item ;
-    skos:prefLabel "tabular regression in EvalML" ;
-    :category :task_configuration ;
-    :automl_solution :evalml ;
-    :ml_task :tabular_regression ;
-    :parameter_value :use_approach_evalml_tabular_regression , :metric_evalml_tabular_regression , :tuner_class_evalml ;
-    rdfs:comment "Task configuration for tabular regression in EvalML" ;
-    rdfs:seeAlso <https://evalml.alteryx.com/en/stable/api_index.html> .
-:time_series_regression_in_evalml a :Configuration_item ;
-    skos:prefLabel "time series regression in EvalML" ;
-    :category :task_configuration ;
-    :automl_solution :evalml ;
-    :ml_task :time_series_forecasting ;
-    :parameter_value :use_approach_evalml_time_series_regression , :metric_evalml_time_series_regression , :tuner_class_evalml , :forecasting_horizon_evalml_time_series_forcasting , :lookback_evalml_time_series_forecasting , :gap_evalml_time_series_forecasting ;
-    rdfs:comment "Task configuration for time series regression in EvalML" ;
-    rdfs:seeAlso <https://evalml.alteryx.com/en/stable/api_index.html> .
-:time_series_classification_in_evalml a :Configuration_item ;
-    skos:prefLabel "time series classification in EvalML" ;
-    :category :task_configuration ;
-    :automl_solution :evalml ;
+    :automl_solution :mcfly ;
     :ml_task :time_series_classification ;
-    :parameter_value :use_approach_evalml_time_series_classification , :metric_evalml_classification , :tuner_class_evalml ;
-    rdfs:comment "Task configuration for time series classification in EvalML" ;
-    rdfs:seeAlso <https://evalml.alteryx.com/en/stable/api_index.html> .
-:text_classification_in_evalml a :Configuration_item ;
-    skos:prefLabel "text classification in EvalML" ;
+    :parameter_value :use_approach_mcfly_time_series_classification , :metric_mcfly_time_series_classification , :epochs_mcfly ;
+    rdfs:comment "Task configuration for time series classification in mcfly" ;
+    rdfs:seeAlso <https://mcfly.readthedocs.io/en/latest/reference.html> .
+:tabular_classification_in_auto_pytorch a :Configuration_item ;
+    skos:prefLabel "tabular classification in Auto-PyTorch" ;
     :category :task_configuration ;
-    :automl_solution :evalml ;
-    :ml_task :text_classification ;
-    :parameter_value :use_approach_evalml_tabular_classification , :metric_evalml_text_classification , :tuner_class_evalml ;
-    rdfs:comment "Task configuration for text classification in EvalML" ;
-    rdfs:seeAlso <https://evalml.alteryx.com/en/stable/api_index.html> .
-:text_regression_in_evalml a :Configuration_item ;
-    skos:prefLabel "text regression in EvalML" ;
+    :automl_solution :autopytorch ;
+    :ml_task :tabular_classification ;
+    :parameter_value :use_approach_auto_pytorch_classification , :metric_autopytorch_tabular_classification ;
+    rdfs:comment "Task configuration for tabular classification in Auto-PyTorch" ;
+    rdfs:seeAlso <https://automl.github.io/Auto-PyTorch/development/api.html> .
+:tabular_regression_in_auto_pytorch a :Configuration_item ;
+    skos:prefLabel "tabular regression in Auto-PyTorch" ;
     :category :task_configuration ;
-    :automl_solution :evalml ;
-    :ml_task :text_regression ;
-    :parameter_value :use_approach_evalml_tabular_regression , :metric_evalml_text_regression , :tuner_class_evalml ;
-    rdfs:comment "Task configuration for text regression in EvalML" ;
-    rdfs:seeAlso <https://evalml.alteryx.com/en/stable/api_index.html> .
+    :automl_solution :autopytorch ;
+    :ml_task :tabular_regression ;
+    :parameter_value :use_approach_auto_pytorch_regression , :metric_autopytorch_tabular_regression ;
+    rdfs:comment "Task configuration for tabular regression in Auto-PyTorch" ;
+    rdfs:seeAlso <https://automl.github.io/Auto-PyTorch/development/api.html> .
+:time_series_forecasting_in_auto_pytorch a :Configuration_item ;
+    skos:prefLabel "time series forecasting in Auto-PyTorch" ;
+    :category :task_configuration ;
+    :automl_solution :autopytorch ;
+    :ml_task :time_series_forecasting ;
+    :parameter_value :metric_autopytorch_time_series_forecasting , :forecasting_horizon_autopytorch_time_series_forcasting ;
+    rdfs:comment "Task configuration for time series forecasting in Auto-PyTorch" ;
+    rdfs:seeAlso <https://automl.github.io/Auto-PyTorch/development/api.html> .
 :tabular_classification_mljar a :Configuration_item ;
     skos:prefLabel "tabular classification MLJAR" ;
     :category :task_configuration ;
@@ -2088,30 +2127,6 @@
     :parameter_value :metric_mljar_tabular_regression ;
     rdfs:comment "Task configuration for tabular regression MLJAR" ;
     rdfs:seeAlso <https://supervised.mljar.com/api> .
-:tabular_classification_pycaret a :Configuration_item ;
-    skos:prefLabel "tabular classification PyCaret" ;
-    :category :task_configuration ;
-    :automl_solution :pycaret ;
-    :ml_task :tabular_classification ;
-    :parameter_value :metric_pycaret_tabular_classification ;
-    rdfs:comment "Task configuration for tabular classification PyCaret" ;
-    rdfs:seeAlso <https://pycaret.readthedocs.io> .
-:tabular_regression_pycaret a :Configuration_item ;
-    skos:prefLabel "tabular regression PyCaret" ;
-    :category :task_configuration ;
-    :automl_solution :pycaret ;
-    :ml_task :tabular_regression ;
-    :parameter_value :metric_pycaret_tabular_regression ;
-    rdfs:comment "Task configuration for tabular regression PyCaret" ;
-    rdfs:seeAlso <https://pycaret.readthedocs.io> .
-:time_series_forecasting__pycaret a :Configuration_item ;
-    skos:prefLabel "time series forecasting  PyCaret" ;
-    :category :task_configuration ;
-    :automl_solution :pycaret ;
-    :ml_task :time_series_forecasting ;
-    :parameter_value :metric_pycaret_time_series_forecasting , :forecasting_horizon_pycaret_time_series_forcasting ;
-    rdfs:comment "Task configuration for time series forecasting  PyCaret" ;
-    rdfs:seeAlso <https://pycaret.readthedocs.io> .
 :tabular_classification_tpot a :Configuration_item ;
     skos:prefLabel "tabular classification TPOT" ;
     :category :task_configuration ;
@@ -2144,14 +2159,6 @@
     :parameter_value :use_approach_autocve_classification , :metric_autocve_classification ;
     rdfs:comment "Task configuration for tabular classification in AutoCVE" ;
     rdfs:seeAlso <https://github.com/celiolarcher/AUTOCVE> .
-:time_series_classification_in_mcfly a :Configuration_item ;
-    skos:prefLabel "time series classification in mcfly" ;
-    :category :task_configuration ;
-    :automl_solution :mcfly ;
-    :ml_task :time_series_classification ;
-    :parameter_value :use_approach_mcfly_time_series_classification , :metric_mcfly_time_series_classification ;
-    rdfs:comment "Task configuration for time series classification in mcfly" ;
-    rdfs:seeAlso <https://mcfly.readthedocs.io/en/latest/reference.html> .
 :tabular_classification_in_gama a :Configuration_item ;
     skos:prefLabel "tabular classification in GAMA" ;
     :category :task_configuration ;
@@ -2168,13 +2175,78 @@
     :parameter_value :tuner_class_gama , :metric_gama_tabular_regression ;
     rdfs:comment "Task configuration for tabular regression in GAMA" ;
     rdfs:seeAlso <https://openml-labs.github.io/gama/master/api/index.html> .
+:tabular_classification_in_lama a :Configuration_item ;
+    skos:prefLabel "tabular classification in LAMA" ;
+    :category :task_configuration ;
+    :automl_solution :lama ;
+    :ml_task :tabular_classification ;
+    :parameter_value :loss_function_lama_tabular_classification , :metric_lama_tabular_classification ;
+    rdfs:comment "Task configuration for tabular classification in LAMA" ;
+    rdfs:seeAlso <https://openml-labs.github.io/gama/master/api/index.html> .
+:binary_classification_in_lama a :Configuration_item ;
+    skos:prefLabel "binary classification in LAMA" ;
+    :category :task_configuration ;
+    :automl_solution :lama ;
+    :ml_task :binary_classification ;
+    :parameter_value :loss_function_lama_binary_classification , :metric_lama_binary_classification ;
+    rdfs:comment "Task configuration for binary classification in LAMA" ;
+    rdfs:seeAlso <https://openml-labs.github.io/gama/master/api/index.html> .
+:tabular_regression_in_lama a :Configuration_item ;
+    skos:prefLabel "tabular regression in LAMA" ;
+    :category :task_configuration ;
+    :automl_solution :lama ;
+    :ml_task :tabular_regression ;
+    :parameter_value :loss_function_lama_tabular_regression , :metric_lama_tabular_regression ;
+    rdfs:comment "Task configuration for tabular regression in LAMA" ;
+    rdfs:seeAlso <https://openml-labs.github.io/gama/master/api/index.html> .
+:ensemble a :Configuration_item ;
+    skos:prefLabel "ensemble" ;
+    :category :parameter ;
+    :has_datatype :boolean .
+:ensemble_flaml_tabular_classification a :Configuration_item ;
+    skos:prefLabel "ensemble flaml tabular classification" ;
+    :category :parameter ;
+    skos:broader :ensemble ;
+    :has_datatype :boolean .
+:ensemble_flaml_tabular_regression a :Configuration_item ;
+    skos:prefLabel "ensemble flaml tabular regression" ;
+    :category :parameter ;
+    skos:broader :ensemble ;
+    :has_datatype :boolean .
+:ensemble_flaml_time_series_forecasting a :Configuration_item ;
+    skos:prefLabel "ensemble flaml time series forecasting" ;
+    :category :parameter ;
+    skos:broader :ensemble ;
+    :has_datatype :boolean .
+:ensemble_flaml_text_classification a :Configuration_item ;
+    skos:prefLabel "ensemble flaml text classification" ;
+    :category :parameter ;
+    skos:broader :ensemble ;
+    :has_datatype :boolean .
+:ensemble_flaml_text_regression a :Configuration_item ;
+    skos:prefLabel "ensemble flaml text regression" ;
+    :category :parameter ;
+    skos:broader :ensemble ;
+    :has_datatype :boolean .
+:ensemble_flaml_ranking a :Configuration_item ;
+    skos:prefLabel "ensemble flaml ranking" ;
+    :category :parameter ;
+    skos:broader :ensemble ;
+    :has_datatype :boolean .
 :ensemble_nbest a :Configuration_item ;
     skos:prefLabel "ensemble_nbest" ;
     :category :parameter ;
     :has_datatype :integer ;
     rdfs:comment "Restricting the number of ensemble models" .
-:ensemble_nbest_autosklearn a :Configuration_item ;
-    skos:prefLabel "ensemble nbest autosklearn" ;
+:ensemble_nbest_autosklearn_tabular_classification a :Configuration_item ;
+    skos:prefLabel "ensemble nbest autosklearn tabular classification" ;
+    :category :parameter ;
+    skos:broader :ensemble_nbest ;
+    :has_datatype :integer ;
+    rdfs:comment "Restricting the number of ensemble models" ;
+    rdfs:seeAlso <https://automl.github.io/auto-sklearn/master/api.html#> .
+:ensemble_nbest_autosklearn_tabular_regression a :Configuration_item ;
+    skos:prefLabel "ensemble nbest autosklearn tabular regression" ;
     :category :parameter ;
     skos:broader :ensemble_nbest ;
     :has_datatype :integer ;
@@ -2185,8 +2257,15 @@
     :category :parameter ;
     :has_datatype :integer ;
     rdfs:comment "Restricting the size of ensemble models" .
-:ensemble_size_autosklearn a :Configuration_item ;
-    skos:prefLabel "ensemble size autosklearn" ;
+:ensemble_size_autosklearn_tabular_classification a :Configuration_item ;
+    skos:prefLabel "ensemble size autosklearn tabular classification" ;
+    :category :parameter ;
+    skos:broader :ensemble_size ;
+    :has_datatype :integer ;
+    rdfs:comment "Restricting the size of ensemble models" ;
+    rdfs:seeAlso <https://automl.github.io/auto-sklearn/master/api.html#> .
+:ensemble_size_autosklearn_tabular_regression a :Configuration_item ;
+    skos:prefLabel "ensemble size autosklearn tabular regression" ;
     :category :parameter ;
     skos:broader :ensemble_size ;
     :has_datatype :integer ;
@@ -2196,16 +2275,16 @@
     skos:prefLabel "use approach" ;
     :category :parameter ;
     rdfs:comment "Selecting ML approaches to be used for AutoML" .
-:use_approach_autosklearn_classification a :Configuration_item ;
-    skos:prefLabel "use approach Autosklearn classification" ;
+:use_approach_autosklearn_tabular_classification a :Configuration_item ;
+    skos:prefLabel "use approach Autosklearn tabular classification" ;
     :category :parameter ;
     skos:broader :use_approach ;
     :has_datatype :list ;
     :parameter_value :adaboost , :decision_tree , :extra_tree , :gradient_boosting_tree , :k_nearest_neighbor , :linear_svm , :multilayer_perceptron , :random_forest , :gaussian_naives_bayes ;
     rdfs:comment "Selecting ML approaches to be used for AutoML" ;
     rdfs:seeAlso <https://automl.github.io/auto-sklearn/master/api.html#classification> .
-:use_approach_autosklearn_regression a :Configuration_item ;
-    skos:prefLabel "use approach Autosklearn regression" ;
+:use_approach_autosklearn_tabular_regression a :Configuration_item ;
+    skos:prefLabel "use approach Autosklearn tabular regression" ;
     :category :parameter ;
     skos:broader :use_approach ;
     :has_datatype :list ;
@@ -2259,6 +2338,38 @@
     :parameter_value :transformer ;
     rdfs:comment "Selecting ML approaches to be used for AutoML" ;
     rdfs:seeAlso <https://microsoft.github.io/FLAML/docs/reference/automl/automl> .
+:use_approach_evalml_tabular_classification a :Configuration_item ;
+    skos:prefLabel "use approach EvalML tabular classification" ;
+    :category :parameter ;
+    skos:broader :use_approach ;
+    :has_datatype :list ;
+    :parameter_value :catboost , :decision_tree , :extra_tree , :light_gradient_boosting_machine , :linear_regression , :random_forest , :xgboost ;
+    rdfs:comment "Selecting ML approaches to be used for AutoML" ;
+    rdfs:seeAlso <https://evalml.alteryx.com/en/stable/api_index.html> .
+:use_approach_evalml_tabular_regression a :Configuration_item ;
+    skos:prefLabel "use approach EvalML tabular regression" ;
+    :category :parameter ;
+    skos:broader :use_approach ;
+    :has_datatype :list ;
+    :parameter_value :catboost , :decision_tree , :extra_tree , :light_gradient_boosting_machine , :linear_regression , :random_forest , :xgboost ;
+    rdfs:comment "Selecting ML approaches to be used for AutoML" ;
+    rdfs:seeAlso <https://evalml.alteryx.com/en/stable/api_index.html> .
+:use_approach_evalml_time_series_regression a :Configuration_item ;
+    skos:prefLabel "use approach EvalML time series regression" ;
+    :category :parameter ;
+    skos:broader :use_approach ;
+    :has_datatype :list ;
+    :parameter_value :auto_regressive_integrated_moving_average , :catboost , :decision_tree , :exponential_smoothing , :extra_tree , :k_nearest_neighbor , :linear_regression , :random_forest , :xgboost ;
+    rdfs:comment "Selecting ML approaches to be used for AutoML" ;
+    rdfs:seeAlso <https://evalml.alteryx.com/en/stable/api_index.html> .
+:use_approach_evalml_time_series_classification a :Configuration_item ;
+    skos:prefLabel "use approach EvalML time series classification" ;
+    :category :parameter ;
+    skos:broader :use_approach ;
+    :has_datatype :list ;
+    :parameter_value :caboost , :decision_tree , :extra_tree , :k_nearest_neighbor , :linear_regression , :random_forest , :xgboost ;
+    rdfs:comment "Selecting ML approaches to be used for AutoML" ;
+    rdfs:seeAlso <https://evalml.alteryx.com/en/stable/api_index.html> .
 :use_approach_auto_pytorch_classification a :Configuration_item ;
     skos:prefLabel "use approach Auto-Pytorch classification" ;
     :category :parameter ;
@@ -2347,44 +2458,20 @@
     :parameter_value :inception_time , :residual_neural_network , :deep_convolutional_lstm , :convolutional_neural_network ;
     rdfs:comment "Selecting ML approaches to be used for AutoML" ;
     rdfs:seeAlso <https://mcfly.readthedocs.io/en/latest/reference.html> .
-:use_approach_evalml_tabular_classification a :Configuration_item ;
-    skos:prefLabel "use approach EvalML tabular classification" ;
-    :category :parameter ;
-    skos:broader :use_approach ;
-    :has_datatype :list ;
-    :parameter_value :catboost , :decision_tree , :extra_tree , :light_gradient_boosting_machine , :linear_regression , :random_forest , :xgboost ;
-    rdfs:comment "Selecting ML approaches to be used for AutoML" ;
-    rdfs:seeAlso <https://evalml.alteryx.com/en/stable/api_index.html> .
-:use_approach_evalml_tabular_regression a :Configuration_item ;
-    skos:prefLabel "use approach EvalML tabular regression" ;
-    :category :parameter ;
-    skos:broader :use_approach ;
-    :has_datatype :list ;
-    :parameter_value :catboost , :decision_tree , :extra_tree , :light_gradient_boosting_machine , :linear_regression , :random_forest , :xgboost ;
-    rdfs:comment "Selecting ML approaches to be used for AutoML" ;
-    rdfs:seeAlso <https://evalml.alteryx.com/en/stable/api_index.html> .
-:use_approach_evalml_time_series_regression a :Configuration_item ;
-    skos:prefLabel "use approach EvalML time series regression" ;
-    :category :parameter ;
-    skos:broader :use_approach ;
-    :has_datatype :list ;
-    :parameter_value :auto_regressive_integrated_moving_average , :catboost , :decision_tree , :exponential_smoothing , :extra_tree , :k_nearest_neighbor , :linear_regression , :random_forest , :xgboost ;
-    rdfs:comment "Selecting ML approaches to be used for AutoML" ;
-    rdfs:seeAlso <https://evalml.alteryx.com/en/stable/api_index.html> .
-:use_approach_evalml_time_series_classification a :Configuration_item ;
-    skos:prefLabel "use approach EvalML time series classification" ;
-    :category :parameter ;
-    skos:broader :use_approach ;
-    :has_datatype :list ;
-    :parameter_value :caboost , :decision_tree , :extra_tree , :k_nearest_neighbor , :linear_regression , :random_forest , :xgboost ;
-    rdfs:comment "Selecting ML approaches to be used for AutoML" ;
-    rdfs:seeAlso <https://evalml.alteryx.com/en/stable/api_index.html> .
 :include_preprocessor a :Configuration_item ;
     skos:prefLabel "include preprocessor" ;
     :category :parameter ;
     rdfs:comment "Selecting preprocessing approaches" .
-:include_preprocessor_autosklearn a :Configuration_item ;
-    skos:prefLabel "include preprocessor Autosklearn" ;
+:include_preprocessor_autosklearn_tabular_classification a :Configuration_item ;
+    skos:prefLabel "include preprocessor Autosklearn tabular classification" ;
+    :category :parameter ;
+    skos:broader :include_preprocessor ;
+    :has_datatype :list ;
+    :parameter_value :kernel_principal_component_analysis , :radial_basis_function_kernel , :nystroem_kernel_approximation ;
+    rdfs:comment "Selecting preprocessing approaches" ;
+    rdfs:seeAlso <https://automl.github.io/auto-sklearn/master/api.html#> .
+:include_preprocessor_autosklearn_tabular_regression a :Configuration_item ;
+    skos:prefLabel "include preprocessor Autosklearn tabular regression" ;
     :category :parameter ;
     skos:broader :include_preprocessor ;
     :has_datatype :list ;
@@ -2527,6 +2614,46 @@
     :parameter_value :mean_absolute_percentage_error ;
     rdfs:comment "Selecting the prediction performance metric for which AutoML is optimized" ;
     rdfs:seeAlso <https://microsoft.github.io/FLAML/docs/reference/automl/automl> .
+:metric_evalml_tabular_classification a :Configuration_item ;
+    skos:prefLabel "metric EvalML tabular classification" ;
+    :category :parameter ;
+    skos:broader :metric ;
+    :has_datatype :single_value ;
+    :parameter_value :accuracy , :balanced_accuracy , :f_measure , :f_measure_micro , :f_measure_macro , :f_measure_weighted , :precision , :precision_macro , :precision_micro , :precision_weighted , :recall , :recall_micro , :recall_macro , :recall_weighted , :area_under_roc_curve , :area_under_roc_curve_micro , :area_under_roc_curve_macro , :area_under_roc_curve_weighted , :gini , :log_loss , :matthews_correlation_coefficient ;
+    rdfs:comment "Selecting the prediction performance metric for which AutoML is optimized" ;
+    rdfs:seeAlso <https://evalml.alteryx.com/en/stable/api_index.html> .
+:metric_evalml_tabular_regression a :Configuration_item ;
+    skos:prefLabel "metric EvalML tabular regression" ;
+    :category :parameter ;
+    skos:broader :metric ;
+    :has_datatype :single_value ;
+    :parameter_value :rooted_mean_squared_error , :mean_squared_log_error , :rooted_mean_squared_log_error , :r2 , :mean_absolute_error , :mean_squared_error , :median_absolute_error , :max_error , :explained_variance ;
+    rdfs:comment "Selecting the prediction performance metric for which AutoML is optimized" ;
+    rdfs:seeAlso <https://evalml.alteryx.com/en/stable/api_index.html> .
+:metric_evalml_text_classification a :Configuration_item ;
+    skos:prefLabel "metric EvalML text classification" ;
+    :category :parameter ;
+    skos:broader :metric ;
+    :has_datatype :single_value ;
+    :parameter_value :accuracy , :balanced_accuracy , :f_measure , :f_measure_micro , :f_measure_macro , :f_measure_weighted , :precision , :precision_macro , :precision_micro , :precision_weighted , :recall , :recall_micro , :recall_macro , :recall_weighted , :area_under_roc_curve , :area_under_roc_curve_micro , :area_under_roc_curve_macro , :area_under_roc_curve_weighted , :gini , :log_loss , :matthews_correlation_coefficient ;
+    rdfs:comment "Selecting the prediction performance metric for which AutoML is optimized" ;
+    rdfs:seeAlso <https://evalml.alteryx.com/en/stable/api_index.html> .
+:metric_evalml_text_regression a :Configuration_item ;
+    skos:prefLabel "metric EvalML text regression" ;
+    :category :parameter ;
+    skos:broader :metric ;
+    :has_datatype :single_value ;
+    :parameter_value :rooted_mean_squared_error , :mean_squared_log_error , :rooted_mean_squared_log_error , :r2 , :mean_absolute_error , :mean_squared_error , :median_absolute_error , :max_error , :explained_variance ;
+    rdfs:comment "Selecting the prediction performance metric for which AutoML is optimized" ;
+    rdfs:seeAlso <https://evalml.alteryx.com/en/stable/api_index.html> .
+:metric_evalml_time_series_regression a :Configuration_item ;
+    skos:prefLabel "metric EvalML time series regression" ;
+    :category :parameter ;
+    skos:broader :metric ;
+    :has_datatype :single_value ;
+    :parameter_value :mean_absolute_percentage_error ;
+    rdfs:comment "Selecting the prediction performance metric for which AutoML is optimized" ;
+    rdfs:seeAlso <https://evalml.alteryx.com/en/stable/api_index.html> .
 :metric_autogluon_tabular_regression a :Configuration_item ;
     skos:prefLabel "metric AutoGluon tabular regression" ;
     :category :parameter ;
@@ -2620,46 +2747,6 @@
     :parameter_value :accuracy , :balanced_accuracy , :f_measure , :f_measure_macro , :f_measure_micro , :f_measure_weighted , :f_measure_samples , :receiver_operating_characteristic_curve , :average_precision_score , :log_loss , :precision , :precision_macro , :precision_micro , :precision_weighted , :precision_samples , :recall , :recall_macro , :recall_micro , :recall_weighted , :recall_samples ;
     rdfs:comment "Selecting the prediction performance metric for which AutoML is optimized" ;
     rdfs:seeAlso <https://mcfly.readthedocs.io/en/latest/reference.html> .
-:metric_evalml_tabular_classification a :Configuration_item ;
-    skos:prefLabel "metric EvalML tabular classification" ;
-    :category :parameter ;
-    skos:broader :metric ;
-    :has_datatype :single_value ;
-    :parameter_value :accuracy , :balanced_accuracy , :f_measure , :f_measure_micro , :f_measure_macro , :f_measure_weighted , :precision , :precision_macro , :precision_micro , :precision_weighted , :recall , :recall_micro , :recall_macro , :recall_weighted , :area_under_roc_curve , :area_under_roc_curve_micro , :area_under_roc_curve_macro , :area_under_roc_curve_weighted , :gini , :log_loss , :matthews_correlation_coefficient ;
-    rdfs:comment "Selecting the prediction performance metric for which AutoML is optimized" ;
-    rdfs:seeAlso <https://evalml.alteryx.com/en/stable/api_index.html> .
-:metric_evalml_tabular_regression a :Configuration_item ;
-    skos:prefLabel "metric EvalML tabular regression" ;
-    :category :parameter ;
-    skos:broader :metric ;
-    :has_datatype :single_value ;
-    :parameter_value :rooted_mean_squared_error , :mean_squared_log_error , :rooted_mean_squared_log_error , :r2 , :mean_absolute_error , :mean_squared_error , :median_absolute_error , :max_error , :explained_variance ;
-    rdfs:comment "Selecting the prediction performance metric for which AutoML is optimized" ;
-    rdfs:seeAlso <https://evalml.alteryx.com/en/stable/api_index.html> .
-:metric_evalml_text_classification a :Configuration_item ;
-    skos:prefLabel "metric EvalML text classification" ;
-    :category :parameter ;
-    skos:broader :metric ;
-    :has_datatype :single_value ;
-    :parameter_value :accuracy , :balanced_accuracy , :f_measure , :f_measure_micro , :f_measure_macro , :f_measure_weighted , :precision , :precision_macro , :precision_micro , :precision_weighted , :recall , :recall_micro , :recall_macro , :recall_weighted , :area_under_roc_curve , :area_under_roc_curve_micro , :area_under_roc_curve_macro , :area_under_roc_curve_weighted , :gini , :log_loss , :matthews_correlation_coefficient ;
-    rdfs:comment "Selecting the prediction performance metric for which AutoML is optimized" ;
-    rdfs:seeAlso <https://evalml.alteryx.com/en/stable/api_index.html> .
-:metric_evalml_text_regression a :Configuration_item ;
-    skos:prefLabel "metric EvalML text regression" ;
-    :category :parameter ;
-    skos:broader :metric ;
-    :has_datatype :single_value ;
-    :parameter_value :rooted_mean_squared_error , :mean_squared_log_error , :rooted_mean_squared_log_error , :r2 , :mean_absolute_error , :mean_squared_error , :median_absolute_error , :max_error , :explained_variance ;
-    rdfs:comment "Selecting the prediction performance metric for which AutoML is optimized" ;
-    rdfs:seeAlso <https://evalml.alteryx.com/en/stable/api_index.html> .
-:metric_evalml_time_series_regression a :Configuration_item ;
-    skos:prefLabel "metric EvalML time series regression" ;
-    :category :parameter ;
-    skos:broader :metric ;
-    :has_datatype :single_value ;
-    :parameter_value :mean_absolute_percentage_error ;
-    rdfs:comment "Selecting the prediction performance metric for which AutoML is optimized" ;
-    rdfs:seeAlso <https://evalml.alteryx.com/en/stable/api_index.html> .
 :metric_mljar_tabular_classification a :Configuration_item ;
     skos:prefLabel "metric MLJAR tabular classification" ;
     :category :parameter ;
@@ -2740,13 +2827,44 @@
     :parameter_value :explained_variance , :r2 , :mean_absolut_error , :median_absolute_error , :mean_squared_error , :mean_squared_log_error ;
     rdfs:comment "Selecting the prediction performance metric for which AutoML is optimized" ;
     rdfs:seeAlso <https://openml-labs.github.io/gama/master/api/index.html> .
+:metric_lama_tabular_classification a :Configuration_item ;
+    skos:prefLabel "metric LAMA tabular classification" ;
+    :category :parameter ;
+    skos:broader :metric ;
+    :has_datatype :single_value ;
+    :parameter_value :area_under_roc_curve , :categorical_cross_entropy ;
+    rdfs:comment "Selecting the prediction performance metric for which AutoML is optimized" ;
+    rdfs:seeAlso <https://lightautoml.readthedocs.io/en/latest/pages/modules/generated/lightautoml.tasks.base.Task.html#lightautoml.tasks.base.Task> .
+:metric_lama_binary_classification a :Configuration_item ;
+    skos:prefLabel "metric LAMA binary classification" ;
+    :category :parameter ;
+    skos:broader :metric ;
+    :has_datatype :single_value ;
+    :parameter_value :area_under_roc_curve , :accuracy , :log_loss ;
+    rdfs:comment "Selecting the prediction performance metric for which AutoML is optimized" ;
+    rdfs:seeAlso <https://lightautoml.readthedocs.io/en/latest/pages/modules/generated/lightautoml.tasks.base.Task.html#lightautoml.tasks.base.Task> .
+:metric_lama_tabular_regression a :Configuration_item ;
+    skos:prefLabel "metric LAMA tabular regression" ;
+    :category :parameter ;
+    skos:broader :metric ;
+    :has_datatype :single_value ;
+    :parameter_value :mean_squared_error , :mean_absolute_error , :mean_absolute_percentage_error , :rooted_mean_squared_log_error ;
+    rdfs:comment "Selecting the prediction performance metric for which AutoML is optimized" ;
+    rdfs:seeAlso <https://lightautoml.readthedocs.io/en/latest/pages/modules/generated/lightautoml.tasks.base.Task.html#lightautoml.tasks.base.Task> .
 :time_limit a :Configuration_item ;
     skos:prefLabel "time limit" ;
     :category :parameter ;
     :has_datatype :integer ;
     rdfs:comment "Specifying the maximum runtime of AutoML" .
-:time_limit_autosklearn a :Configuration_item ;
-    skos:prefLabel "time limit autosklearn" ;
+:time_limit_autosklearn_tabular_classification a :Configuration_item ;
+    skos:prefLabel "time limit autosklearn tabular classification" ;
+    :category :parameter ;
+    skos:broader :time_limit ;
+    :has_datatype :integer ;
+    rdfs:comment "Specifying the maximum runtime of AutoML" ;
+    rdfs:seeAlso <https://automl.github.io/auto-sklearn/master/api.html#> .
+:time_limit_autosklearn_tabular_regression a :Configuration_item ;
+    skos:prefLabel "time limit autosklearn tabular regression" ;
     :category :parameter ;
     skos:broader :time_limit ;
     :has_datatype :integer ;
@@ -2757,8 +2875,15 @@
     :category :parameter ;
     :has_datatype :integer ;
     rdfs:comment "Specifying the maximum runtime per AutoML run" .
-:time_limit_per_run_autosklearn a :Configuration_item ;
-    skos:prefLabel "time limit per run autosklearn" ;
+:time_limit_per_run_autosklearn_tabular_classification a :Configuration_item ;
+    skos:prefLabel "time limit per run autosklearn tabular classification" ;
+    :category :parameter ;
+    skos:broader :time_limit_per_run ;
+    :has_datatype :integer ;
+    rdfs:comment "Specifying the maximum runtime per AutoML run" ;
+    rdfs:seeAlso <https://automl.github.io/auto-sklearn/master/api.html#> .
+:time_limit_per_run_autosklearn_tabular_regression a :Configuration_item ;
+    skos:prefLabel "time limit per run autosklearn tabular regression" ;
     :category :parameter ;
     skos:broader :time_limit_per_run ;
     :has_datatype :integer ;
@@ -2831,6 +2956,12 @@
 :epochs a :Configuration_item ;
     skos:prefLabel "epochs" ;
     :category :parameter ;
+    :has_datatype :integer ;
+    rdfs:comment "Specifying the number of epochs for training neural networks, i.e., how often the entire dataset will be used for training" .
+:epochs_mcfly a :Configuration_item ;
+    skos:prefLabel "epochs mcfly" ;
+    :category :parameter ;
+    skos:broader :epochs ;
     :has_datatype :integer ;
     rdfs:comment "Specifying the number of epochs for training neural networks, i.e., how often the entire dataset will be used for training" .
 :max_trials a :Configuration_item ;
@@ -2968,6 +3099,7 @@
 :loss_function a :Configuration_item ;
     skos:prefLabel "loss function" ;
     :category :parameter ;
+    :has_datatype :single_value ;
     rdfs:comment "Selecting the loss function according to which training is optimized" ;
     rdfs:seeAlso <https://autokeras.com> .
 :loss_function_autokeras_tabular_classification a :Configuration_item ;
@@ -3034,9 +3166,34 @@
     :parameter_value :categorical_cross_entropy ;
     rdfs:comment "Selecting the loss function according to which training is optimized" ;
     rdfs:seeAlso <https://mcfly.readthedocs.io/en/latest/reference.html> .
+:loss_function_lama_tabular_classification a :Configuration_item ;
+    skos:prefLabel "loss function lama tabular classification" ;
+    :category :parameter ;
+    skos:broader :loss_function ;
+    :has_datatype :single_value ;
+    :parameter_value :categorical_cross_entropy , :f_measure ;
+    rdfs:comment "Selecting the loss function according to which training is optimized" ;
+    rdfs:seeAlso <https://lightautoml.readthedocs.io/en/latest/pages/modules/generated/lightautoml.tasks.base.Task.html#lightautoml.tasks.base.Task> .
+:loss_function_lama_tabular_regression a :Configuration_item ;
+    skos:prefLabel "loss function lama tabular regression" ;
+    :category :parameter ;
+    skos:broader :loss_function ;
+    :has_datatype :single_value ;
+    :parameter_value :mean_squared_error , :mean_absolute_error , :mean_absolute_percentage_error , :rooted_mean_squared_log_error ;
+    rdfs:comment "Selecting the loss function according to which training is optimized" ;
+    rdfs:seeAlso <https://lightautoml.readthedocs.io/en/latest/pages/modules/generated/lightautoml.tasks.base.Task.html#lightautoml.tasks.base.Task> .
+:loss_function_lama_binary_classification a :Configuration_item ;
+    skos:prefLabel "loss function lama binary classification" ;
+    :category :parameter ;
+    skos:broader :loss_function ;
+    :has_datatype :single_value ;
+    :parameter_value :log_loss ;
+    rdfs:comment "Selecting the loss function according to which training is optimized" ;
+    rdfs:seeAlso <https://lightautoml.readthedocs.io/en/latest/pages/modules/generated/lightautoml.tasks.base.Task.html#lightautoml.tasks.base.Task> .
 :forecasting_horizon a :Configuration_item ;
     skos:prefLabel "forecasting horizon" ;
     :category :parameter ;
+    :has_datatype :integer ;
     :required "true"^^xsd:boolean ;
     rdfs:comment "Specifying the period for which forecasts are generated for a time series" .
 :forecasting_horizon_autokeras_time_series_forcasting a :Configuration_item ;
@@ -3082,7 +3239,8 @@
     rdfs:comment "Specifying the period for which forecasts are generated for a time series" .
 :lookback a :Configuration_item ;
     skos:prefLabel "lookback" ;
-    :category :parameter .
+    :category :parameter ;
+    :has_datatype :integer .
 :lookback_autokeras_time_series_forecasting a :Configuration_item ;
     skos:prefLabel "lookback autokeras time series forecasting" ;
     :category :parameter ;
@@ -3098,7 +3256,8 @@
     rdfs:seeAlso <https://evalml.alteryx.com/en/stable/api_index.html> .
 :gap a :Configuration_item ;
     skos:prefLabel "gap" ;
-    :category :parameter .
+    :category :parameter ;
+    :has_datatype :integer .
 :gap_autokeras_time_series_forecasting a :Configuration_item ;
     skos:prefLabel "gap autokeras time series forecasting" ;
     :category :parameter ;
@@ -3131,15 +3290,122 @@
 :eval_method a :Configuration_item ;
     skos:prefLabel "eval method" ;
     :category :parameter ;
+    :has_datatype :single_value ;
     rdfs:comment "Specifying the method for validating the prediction performance" .
 :eval_method_flaml a :Configuration_item ;
     skos:prefLabel "eval method Flaml" ;
     :category :parameter ;
     skos:broader :eval_method ;
     :has_datatype :single_value ;
-    :parameter_value :auto , :cv , :holdout ;
+    :parameter_value :auto_evaluation , :cross_validation , :holdout ;
     rdfs:comment "Specifying the method for validating the prediction performance" ;
     rdfs:seeAlso <https://microsoft.github.io/FLAML/docs/reference/automl/automl> .
+:cross_validation_fold a :Configuration_item ;
+    skos:prefLabel "cross validation fold" ;
+    :category :parameter ;
+    :has_datatype :integer .
+:cross_validation_fold_flaml a :Configuration_item ;
+    skos:prefLabel "cross validation fold flaml" ;
+    :category :parameter ;
+    skos:broader :cross_validation_fold ;
+    :has_datatype :integer .
+:cross_validation_fold_pycaret a :Configuration_item ;
+    skos:prefLabel "cross validation fold pycaret" ;
+    :category :parameter ;
+    skos:broader :cross_validation_fold ;
+    :has_datatype :integer .
+:split_type a :Configuration_item ;
+    skos:prefLabel "split type" ;
+    :category :parameter ;
+    :has_datatype :single_value .
+:split_type_flaml_classification a :Configuration_item ;
+    skos:prefLabel "split type flaml classification" ;
+    :category :parameter ;
+    skos:broader :split_type ;
+    :has_datatype :single_value ;
+    :parameter_value :auto_split , :stratified , :uniform , :time , :group .
+:split_type_flaml_regression a :Configuration_item ;
+    skos:prefLabel "split type flaml regression" ;
+    :category :parameter ;
+    skos:broader :split_type ;
+    :has_datatype :single_value ;
+    :parameter_value :auto_split , :uniform , :time .
+:split_type_flaml_time_series_forecasting a :Configuration_item ;
+    skos:prefLabel "split type flaml time series forecasting" ;
+    :category :parameter ;
+    skos:broader :split_type ;
+    :has_datatype :single_value ;
+    :parameter_value :auto_split , :time .
+:split_type_flaml_ranking a :Configuration_item ;
+    skos:prefLabel "split type flaml ranking" ;
+    :category :parameter ;
+    skos:broader :split_type ;
+    :has_datatype :single_value ;
+    :parameter_value :auto_split , :group .
+:hyperparameter_optimization_method a :Configuration_item ;
+    skos:prefLabel "hyperparameter optimization method" ;
+    :category :parameter ;
+    :has_datatype :single_value .
+:hyperparameter_optimization_method_flaml a :Configuration_item ;
+    skos:prefLabel "hyperparameter optimization method flaml" ;
+    :category :parameter ;
+    :has_datatype :single_value ;
+    :parameter_value :auto_optimization_approach , :blendsearch , :frugal_optimization_for_costrelated_hyperparameters .
+:optimize_thresholds a :Configuration_item ;
+    skos:prefLabel "optimize thresholds" ;
+    :category :parameter ;
+    :has_datatype :boolean .
+:optimize_thresholds_evalml a :Configuration_item ;
+    skos:prefLabel "optimize thresholds evalml" ;
+    :category :parameter ;
+    skos:broader :optimize_thresholds ;
+    :has_datatype :boolean .
+:ensembling a :Configuration_item ;
+    skos:prefLabel "ensembling" ;
+    :category :parameter ;
+    :has_datatype :boolean .
+:ensembling_evalml a :Configuration_item ;
+    skos:prefLabel "ensembling evalml" ;
+    :category :parameter ;
+    skos:broader :ensembling ;
+    :has_datatype :boolean .
+:max_batches a :Configuration_item ;
+    skos:prefLabel "max batches" ;
+    :category :parameter ;
+    :has_datatype :integer .
+:max_batches_evalml a :Configuration_item ;
+    skos:prefLabel "max batches evalml" ;
+    :category :parameter ;
+    skos:broader :max_batches ;
+    :has_datatype :integer .
+:allow_long_running_models a :Configuration_item ;
+    skos:prefLabel "allow long running models" ;
+    :category :parameter ;
+    :has_datatype :boolean .
+:allow_long_running_models_evalml a :Configuration_item ;
+    skos:prefLabel "allow long running models evalml" ;
+    :category :parameter ;
+    skos:broader :allow_long_running_models ;
+    :has_datatype :boolean .
+:pipelines_per_batch a :Configuration_item ;
+    skos:prefLabel "pipelines per batch" ;
+    :category :parameter ;
+    :has_datatype :integer .
+:pipelines_per_batch_evalml a :Configuration_item ;
+    skos:prefLabel "pipelines per batch evalml" ;
+    :category :parameter ;
+    skos:broader :pipelines_per_batch ;
+    :has_datatype :integer .
+:exclude_featurizers a :Configuration_item ;
+    skos:prefLabel "exclude featurizers" ;
+    :category :parameter ;
+    :has_datatype :list .
+:exclude_featurizers_evalml a :Configuration_item ;
+    skos:prefLabel "exclude featurizers evalml" ;
+    :category :parameter ;
+    skos:broader :exclude_featurizers ;
+    :has_datatype :list ;
+    :parameter_value :datetime_featurizer , :email_featurizer , :url_featurizer , :natural_language_featurizer , :time_series_featurizer .
 
 
 # Enum
@@ -3184,6 +3450,22 @@
     skos:prefLabel "column role" ;
     :category :category_type ;
     rdfs:comment "Category for specifying roles of culumns in a dataset, e.g., prediction target" .
+:evaluation_approach a :Enum ;
+    skos:prefLabel "evaluation approach" ;
+    :category :category_type ;
+    rdfs:comment "Category type for specifying eval methods, to be used in class :Configuration_item" .
+:split_approach a :Enum ;
+    skos:prefLabel "split approach" ;
+    :category :category_type ;
+    rdfs:comment "Category type for specifying split types, to be used in class :Configuration_item" .
+:hyperparameter_optimization_approach a :Enum ;
+    skos:prefLabel "hyperparameter optimization approach" ;
+    :category :category_type ;
+    rdfs:comment "Category type for specifying hyperparameter optimization approaches, to be used in class :Configuration_item" .
+:featurizers a :Enum ;
+    skos:prefLabel "featurizers" ;
+    :category :category_type ;
+    rdfs:comment "Category type for specifying featurizers, to be used in class :Configuration_item" .
 :integer a :Enum ;
     skos:prefLabel "integer" ;
     skos:altLabel "int" ;
@@ -3330,12 +3612,14 @@
 :time_series_longitudinal a :Enum ;
     skos:prefLabel "time series longitudinal" ;
     :category :dataset_type ;
-    rdfs:comment "A dataset of longitudinal data (also called panel data) for time series classification, having 3 dimensions: num_samples, num_features, num_timesteps [filetype: *.ts] ?=?.ts?=?Additional-Info-About-File-Structure" ;
+    rdfs:comment "Longitudinal data are data in which each variable is measured repeatedly over time. A dataset of longitudinal data (also called panel data) for time series classification has 3 dimensions: num_samples, num_features, num_timesteps [filetype: *.ts]" ;
+    rdfs:seeAlso <https://www.stathelp.se/en/xtset_en.html> ;
     :supported_by_oma_ml "true"^^xsd:boolean .
 :time_series a :Enum ;
     skos:prefLabel "time series" ;
     :category :dataset_type ;
-    rdfs:comment "A dataset for time series data, represented as a table with rows and columns ordered according to a timestamp [filetype: *.csv]" ;
+    rdfs:comment "A dataset for time series data, represented as a table with rows and columns ordered according to a timestamp column [filetype: *.csv]" ;
+    rdfs:seeAlso <https://auto.gluon.ai/stable/tutorials/timeseries/forecasting-quick-start.html#loading-time-series-data-as-a-timeseriesdataframe> ;
     :supported_by_oma_ml "true"^^xsd:boolean .
 :greedy a :Enum ;
     skos:prefLabel "greedy" ;
@@ -3373,3 +3657,52 @@
     skos:prefLabel "broader inherited" ;
     :category :inheritance_type ;
     rdfs:comment "Denotes that an RDF object can be inherited via SPARQL inferencing from one RDF subject to another if they are in a skos:broader relationship. Example: :artificial_neural_network :used_for :classification. :convolutional_neural_network skos:broader :artificial_neural_network. => :convolutional_neural_network :used_for :classification." .
+:auto_evaluation a :Enum ;
+    skos:prefLabel "auto evaluation" ;
+    :category :evaluation_approach .
+:cross_validation a :Enum ;
+    skos:prefLabel "cross validation" ;
+    :category :evaluation_approach .
+:holdout a :Enum ;
+    skos:prefLabel "holdout" ;
+    :category :evaluation_approach .
+:auto_split a :Enum ;
+    skos:prefLabel "auto split" ;
+    :category :split_approach .
+:stratified a :Enum ;
+    skos:prefLabel "stratified" ;
+    :category :split_approach .
+:uniform a :Enum ;
+    skos:prefLabel "uniform" ;
+    :category :split_approach .
+:time a :Enum ;
+    skos:prefLabel "time" ;
+    :category :split_approach .
+:group a :Enum ;
+    skos:prefLabel "group" ;
+    :category :split_approach .
+:auto_optimization_approach a :Enum ;
+    skos:prefLabel "auto optimization approach" ;
+    :category :hyperparameter_optimization_approach .
+:blendsearch a :Enum ;
+    skos:prefLabel "BlendSearch" ;
+    :category :hyperparameter_optimization_approach .
+:frugal_optimization_for_costrelated_hyperparameters a :Enum ;
+    skos:prefLabel "Frugal Optimization for Costrelated Hyperparameters" ;
+    skos:altLabel "CFO" ;
+    :category :hyperparameter_optimization_approach .
+:datetime_featurizer a :Enum ;
+    skos:prefLabel "Datetime Featurizer" ;
+    :category :featurizers .
+:email_featurizer a :Enum ;
+    skos:prefLabel "Email Featurizer" ;
+    :category :featurizers .
+:url_featurizer a :Enum ;
+    skos:prefLabel "URL Featurizer" ;
+    :category :featurizers .
+:natural_language_featurizer a :Enum ;
+    skos:prefLabel "Natural Language Featurizer" ;
+    :category :featurizers .
+:time_series_featurizer a :Enum ;
+    skos:prefLabel "Time Series Featurizer" ;
+    :category :featurizers .

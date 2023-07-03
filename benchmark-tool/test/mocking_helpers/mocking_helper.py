@@ -3,6 +3,7 @@ from sys import modules
 from typing import Callable
 
 from typing import Any
+from uuid import UUID
 
 
 class MockingHelper:
@@ -60,3 +61,7 @@ def async_lambda(fun: Callable[..., Any] | None = None):
             return fun()
 
         return wrapper
+
+
+dummy_uuid = UUID("00000000-0000-0000-0000-000000000000")
+"""basic uuid that can be used everywhere where a uuid has to be passed to a function that is mocked anyway."""

@@ -65,12 +65,20 @@ def read_tabular_dataset_training_data(config: "StartAutoMlRequest", perform_spl
     #else:
 
     if perform_splitting == True:
-        # get target for stratify the train_test_split
-        schema = config["dataset_configuration"]["schema"]
-        for column_name in schema:
-            if schema[column_name].get("role_selected", "") == ":target":
-                target = column_name
-        train, test = train_test_split(data, test_size=0.2,random_state=42, stratify=data[target])
+        if config["configuration"]["task"] in ":tabular_regression":
+            train, test = train_test_split(data, test_size=0.2, random_state=42)
+        elif config["configuration"]["task"] in ":time_series_forecasting":
+            #split with help of forcasting_horizon
+            number_of_entries = data.shape[0] - config["forecasting_horizon"]
+            train = data[:number_of_entries]
+            test = data[number_of_entries:]
+        else:
+            # get target for stratify the train_test_split
+            schema = config["dataset_configuration"]["schema"]
+            for column_name in schema:
+                if schema[column_name].get("role_selected", "") == ":target":
+                    target = column_name
+            train, test = train_test_split(data, test_size=0.2,random_state=42, stratify=data[target])
     else:
         train = data
         test = pd.DataFrame()

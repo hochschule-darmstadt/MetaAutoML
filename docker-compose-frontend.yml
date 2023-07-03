@@ -47,6 +47,8 @@ services:
       - training-evalml:/app/app-data/training/evalml
       - training-pycaret:/app/app-data/training/pycaret
       - training-tpot:/app/app-data/training/tpot
+      - training-gama:/app/app-data/training/gama
+      - training-lama:/app/app-data/training/lama
     extra_hosts:
       - "docker.host.internal:host-gateway"
 

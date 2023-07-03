@@ -5,6 +5,7 @@
         "ms-python.pylance",
         "ms-python.black-formatter",
         "EditorConfig.EditorConfig",
-        "theumletteam.umlet"
+        "theumletteam.umlet",
+        "redhat.vscode-yaml"
     ]
 }

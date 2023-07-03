@@ -40,8 +40,10 @@ class AdapterRuntimeManager:
             ":alphad3m":        ["ALPHAD3M_SERVICE_HOST",  "ALPHAD3M_SERVICE_PORT"],
             ":mcfly":           ["MCFLY_SERVICE_HOST", "MCFLY_SERVICE_PORT"],
             ":evalml":          ["EVALML_SERVICE_HOST", "EVALML_SERVICE_PORT"],
-            ":pycaret":          ["PYCARET_SERVICE_HOST", "PYCARET_SERVICE_PORT"],
-            ":tpot":          ["TPOT_SERVICE_HOST", "TPOT_SERVICE_PORT"],
+            ":pycaret":         ["PYCARET_SERVICE_HOST", "PYCARET_SERVICE_PORT"],
+            ":tpot":            ["TPOT_SERVICE_HOST", "TPOT_SERVICE_PORT"],
+            ":gama":            ["GAMA_SERVICE_HOST", "GAMA_SERVICE_PORT"],
+            ":lama":            ["LAMA_SERVICE_HOST", "LAMA_SERVICE_PORT"],
         }
         self.__adapters: list[AdapterManager] = []
         self.__log.debug("start_new_training: creating new blackboard and strategy controller for training")
@@ -74,6 +76,8 @@ class AdapterRuntimeManager:
         with self.__data_storage.lock():
             found, dataset = self.__data_storage.get_dataset(self.__request.user_id, self.__request.dataset_id)
             current_schema = dataset["schema"]
+            if self.__request.dataset_configuration == "":
+                return current_schema
             training_schema = json.loads(self.__request.dataset_configuration)
             #We only need to update the selected values if selected datatype and role as the rest is set by the backend
             for key in current_schema:

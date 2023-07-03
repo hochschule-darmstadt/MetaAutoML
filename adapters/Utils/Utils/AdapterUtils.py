@@ -242,7 +242,7 @@ def compute_classification_metrics(y_should: pd.Series, y_is: pd.Series) -> dict
     """
     from sklearn.preprocessing import LabelEncoder
 
-    if y_is.dtype == object:
+    if y_is.dtype == object or y_should.dtype == object:
         #If the label is string based, we need to convert it to int values or else some metric wont compute correctly
         enc = LabelEncoder()
         labels = [value for value in y_should.unique() if value not in y_is.unique()]
