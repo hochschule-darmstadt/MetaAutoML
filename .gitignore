@@ -210,3 +210,7 @@ controller/tests/datasets/*
 
 #Authentification files
 auth/*.json
+
+#codecarbon
+
+adapter/*/emissions.csv
