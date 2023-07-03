@@ -29,7 +29,7 @@
                 </CardHeaderContent>
             </MudCardHeader>
             <MudCardContent>
-                <MudPaper Height="7.75rem" Elevation="0" Class="text-card-content">
+                <MudPaper Elevation="0" Class="text-card-content mud-full-height">
                     @if ((_model == null) && (_training == null) && (_dataset == null))
                     {
                         <MudGrid>
@@ -40,14 +40,14 @@
                     }
                     else
                     {
-                        <MudGrid Class="mud-full-height">
+                        <MudGrid Class="mud-full-height mud-full-width" Style="height:100%">
                             <MudItem xs="3" sm="3" md="3">
                                 <MudText Typo="Typo.body1" Style=" display: flex;">@L["Dataset: "] <MudLink Href="@NavManager.ToAbsoluteUri("datasets/" + @_training.Training.DatasetId).AbsoluteUri" Style="cursor: pointer; display: flex;"><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.ListAlt" Style="margin-right: 4px;" />@_dataset.Dataset.Name</MudLink></MudText>
                                 <MudText Typo="Typo.body1">@L["Start: {0}", _training.Training.RuntimeProfile.StartTime.ToString("dd/MM/yyyy HH:mm")]</MudText>
                                 <MudText Typo="Typo.body1">@L["Status: {0}", _model.Model.Status]</MudText>
                                 <MudText Typo="Typo.body1">@L["Training time: {0}", _model.Model.Status == "busy" ? DateTime.UtcNow.Subtract(_model.Model.RuntimeProfile.StartTime).TotalMinutes.ToString("0") : _model.Model.RuntimeProfile.EndTime.Subtract(_model.Model.RuntimeProfile.StartTime).TotalSeconds.ToString("0")]</MudText>
                             </MudItem>
-                            <MudItem xs="4" sm="4" md="4">
+                            <MudItem xs="3" sm="3" md="3">
                                 <MudText Typo="Typo.body1" Class="text-card-content">@L["AutoML solution: {0}", _model.Model.AutoMlSolution.Properties.ContainsKey("skos:prefLabel") ? _model.Model.AutoMlSolution.Properties["skos:prefLabel"] : ""]</MudText>
                                 <MudText Typo="Typo.body1" Class="text-card-content">@L["ML library: {0}", _model.Model.GetMlLibraryString()]</MudText>
                                 <MudText Typo="Typo.body1" Class="text-card-content">@L["Model: {0}", _model.Model.GetMlModelString()]</MudText>
@@ -75,8 +75,6 @@
                                         }
                                     }
                                 </MudText>
-                                <MudText Typo="Typo.body1" Class="text-card-content">@L["Prediction time per sample: {0}", String.Format("{0:0}", _model.Model.PredictionTime)]</MudText>
-                                <MudText Typo="Typo.body1" Class="text-card-content">@L["Emissions: {0} kg/CO2-eq", String.Format("{0:0.00000}", _model.Model.Emissions)]</MudText>
                             </MudItem>
                         </MudGrid>
                     }
