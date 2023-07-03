@@ -12,6 +12,7 @@ from ThreadLock import ThreadLock
 from CsvManager import CsvManager
 from explainerdashboard import ClassifierExplainer, ExplainerDashboard
 import re
+import flaml
 
 def make_svg_waterfall_plot(base_value, shap_values, X, path, filename_detail):
     import shap
@@ -197,8 +198,8 @@ class ExplainableAIManager:
             filepath_second = path[path.find('training') + 9:path.find("export") - 1]
             filepath = os.path.join(basepath, filepath_first, modeltype[1:], filepath_second, "result/binary_dashboard.dill")
             port = (''.join([n for n in id if n.isdigit()]))[0:5]
-            #dashboard = ExplainerDashboard(ClassifierExplainer.from_file(filepath))
-            #dashboard.run(port)
+            dashboard = ExplainerDashboard(ClassifierExplainer.from_file(filepath))
+            dashboard.run(port)
         thread = threading.Thread(target=callback)
         thread.name = "explainer_dashboard"
         thread.start()

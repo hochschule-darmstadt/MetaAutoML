@@ -94,33 +94,33 @@ class FLAMLAdapterManager(AdapterManager):
         print(f"starting creating dashboard")
 
         return_code = CreateExplainerDashboardResponse()
-        try:
-            config = json.loads(request.process_json)
-            result_folder_location = os.path.join("app-data", "training",
-                                config["user_id"], config["dataset_id"], config["training_id"], "result")
-            config["dataset_configuration"] = json.loads(config["dataset_configuration"])
+        #try:
+        config = json.loads(request.process_json)
+        result_folder_location = os.path.join("app-data", "training",
+                            config["user_id"], config["dataset_id"], config["training_id"], "result")
+        config["dataset_configuration"] = json.loads(config["dataset_configuration"])
             
-            if self._loaded_training_id != config["training_id"]:
-                print(f"ExplainModel: Model not already loaded; Loading model")
-                with open(result_folder_location + '/model_flaml.p', 'rb') as file:
-                    model = dill.load(file)
-                self._loaded_training_id = config["training_id"]
+        if self._loaded_training_id != config["training_id"]:
+            print(f"ExplainModel: Model not already loaded; Loading model")
+            with open(result_folder_location + '/model_flaml.p', 'rb') as file:
+                model = dill.load(file)
+            self._loaded_training_id = config["training_id"]
 
-            train, test = data_loader(config)
-            X, y = prepare_tabular_dataset(test, config)
-            X, y = replace_forbidden_json_utf8_characters(X, y)
-            if config["configuration"]["task"] == ":tabular_classification" or config["configuration"]["task"] == ":text_classification" :
-                dashboard = ExplainerDashboard(ClassifierExplainer(model, X, y))
-            else :
-                dashboard = ExplainerDashboard(RegressionExplainer(model, X, y))
+        train, test = data_loader(config)
+        X, y = prepare_tabular_dataset(test, config)
+        X, y = replace_forbidden_json_utf8_characters(X, y)
+        if config["configuration"]["task"] == ":tabular_classification" or config["configuration"]["task"] == ":text_classification" :
+            dashboard = ExplainerDashboard(ClassifierExplainer(model, X, y))
+        else :
+            dashboard = ExplainerDashboard(RegressionExplainer(model, X, y))
 
-            dashboard.save_html(os.path.join(result_folder_location, "binary_dashboard.html"))
-            dashboard.explainer.dump(os.path.join(result_folder_location, "binary_dashboard.dill"))
+        dashboard.save_html(os.path.join(result_folder_location, "binary_dashboard.html"))
+        dashboard.explainer.dump(os.path.join(result_folder_location, "binary_dashboard.dill"))
 
-            print(f"created dashboard")
-            return_code.return_code = AdapterReturnCode.ADAPTER_RETURN_CODE_SUCCESS 
-        except:
-            return_code.return_code = AdapterReturnCode.ADAPTER_RETURN_CODE_ERROR
+        print(f"created dashboard")
+        return_code.return_code = AdapterReturnCode.ADAPTER_RETURN_CODE_SUCCESS 
+        #except:
+        #    return_code.return_code = AdapterReturnCode.ADAPTER_RETURN_CODE_ERROR
         
         return return_code
         
