@@ -16,17 +16,18 @@
 
 <MudCard Elevation="5">
     <MudCardHeader Style="border-bottom-style: inset; border-bottom-width: 1px;">
-        <CardHeaderContent >
-            <MudText Typo="Typo.h6">@L["Predict online"]</MudText>
+        <CardHeaderContent>
+            <LabelTooltip FontSize="Typo.h6" Label=@L["Use model for predicting new cases"] Text="You may use the model for predicting new cases within the OMA-ML platform without having to install anything. Simply upload a file with the new cases." Position="Placement.Bottom"></LabelTooltip>
         </CardHeaderContent>
         <CardHeaderActions>
             <MudStack Row="true" Class="align-content-center" Style="margin-top: 8px">
+                <ButtonTooltip Text="Click here to upload a file with new cases to be predicted. Please note: the file must have the identical format as the training dataset." Position="Placement.Bottom">
                 <MudButton OnClick="OnOpenUpload"
-                    Variant="Variant.Filled" 
-                    Color="Color.Secondary"
-                    EndIcon="@Icons.Filled.CloudUpload"
-                           Size="Size.Small">@L["Add Live Dataset"]</MudButton>
-            </MudStack>
+                           Variant="Variant.Filled"
+                           Color="Color.Secondary"
+                           EndIcon="@Icons.Filled.CloudUpload"
+                           Size="Size.Small">@L["Add Live Dataset"]</MudButton></ButtonTooltip>
+                    </MudStack>
         </CardHeaderActions>
     </MudCardHeader>
     <MudCardContent>
@@ -64,11 +65,11 @@
                         <MudTd>
                             @if (context.Status == "completed")
                             {
-                                <MudButton OnClick="@(() => DownlaodPrediction(context))" Variant="Variant.Filled" Color="Color.Secondary" Size="Size.Small">@L["Download result CSV"]</MudButton>
+                                <MudButton OnClick="@(() => DownlaodPrediction(context))" Variant="Variant.Filled" Color="Color.Secondary" Size="Size.Small">@L["Download predictions"]</MudButton>
                             }
                             else
                             {
-                                <MudButton Variant="Variant.Filled" Color="Color.Secondary" Size="Size.Small" Disabled="true">@L["Download result CSV"]</MudButton>
+                                <MudButton Variant="Variant.Filled" Color="Color.Secondary" Size="Size.Small" Disabled="true">@L["Download predictions"]</MudButton>
                             }
                         </MudTd>
                     </RowTemplate>
