@@ -1981,8 +1981,8 @@ msgid "Training emissions"
 msgstr "Emissions kg/CO2-eq"
 
 msgctxt "Global"
-msgid "Training emissions: {0} kg/CO2-eq"
-msgstr "Training emissions: {0} kg/CO2-eq"
+msgid "Training emissions: {0} kg CO2-eq"
+msgstr "Training emissions: {0} kg CO2-eq"
 
 msgctxt "Global"
 msgid "aborted"

@@ -34,7 +34,7 @@
                 </CardHeaderContent>
             </MudCardHeader>
             <MudCardContent>
-                <MudPaper Height="100px" Elevation="0">
+                <MudPaper Height="100%" Elevation="0">
                     @if ((_model == null) && (_training == null) && (_dataset == null))
                     {
                         <MudGrid>
@@ -45,7 +45,7 @@
                     }
                     else
                     {
-                        <MudGrid>
+                        <MudGrid Class="mud-full-height">
                             <MudItem xs="3" sm="3" md="3">
                                 <MudText Typo="Typo.body1" Style=" display: flex;">@L["Dataset: "] <MudLink Href="@NavManager.ToAbsoluteUri("datasets/" + @_training.Training.DatasetId).AbsoluteUri" Style="cursor: pointer; display: flex;"><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.ListAlt" Style="margin-right: 4px;" />@_dataset.Dataset.Name</MudLink></MudText>
                                 <MudText Typo="Typo.body1">@L["Start: {0}", _training.Training.RuntimeProfile.StartTime.ToString("dd/MM/yyyy HH:mm")]</MudText>
