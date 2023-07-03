@@ -68,8 +68,8 @@
                                     @if (context.Status == "completed")
                                     {
                                         <MudButton OnClick="@(() => DownlaodPrediction(context))" Variant="Variant.Filled" Color="Color.Secondary" Size="Size.Small">@L["Download predictions"]</MudButton>
-                                        <MudButton @onclick="OpenPredictionResults" Variant="Variant.Filled" Color="Color.Secondary" Size="Size.Small">
-                                            Open Simple Dialog
+                                        <MudButton OnClick="@(() => OpenPredictionResults(context))" Variant="Variant.Filled" Color="Color.Secondary" Size="Size.Small">
+                                            View predicitons
                                         </MudButton>
                                     }
                                     else
@@ -186,10 +186,41 @@
                 }
             }
 
-            private void OpenPredictionResults()
+            private async void OpenPredictionResults(PredictionDto predictionDataset)
             {
                 var options = new DialogOptions { CloseOnEscapeKey = true };
-                DialogService.Show<PredictionResult>("Predictions", options);
+                var parameters = new DialogParameters();
+
+                try
+                {
+                    ApiResponseDto apiResponse = await apiClient.DownloadPrediction(new DownloadPredictionRequestDto() { PredictionId = predictionDataset.Id });
+                    if (apiResponse.IsSuccessStatusCode)
+                    {
+                        DownloadPredictionResponseDto response = Newtonsoft.Json.JsonConvert.DeserializeObject<DownloadPredictionResponseDto>(apiResponse.Result.ToString());
+
+                        var stream = new MemoryStream(response.Content);
+                        string jsonString = System.Text.Encoding.ASCII.GetString(stream.ToArray());
+
+                        if (!string.IsNullOrEmpty(jsonString))
+                        {
+                            string tableHeader = jsonString.Split("\n")[0];
+                            string[] tableContent = jsonString.Split("\n");
+                            parameters.Add("TableHeader", tableHeader);
+                            parameters.Add("TableContent", tableContent);
+                        }
+
+
+
+
+                        DialogService.Show<PredictionResult>("Predictions", parameters, options);
+
+                    }
+                }
+                catch (Exception ex)
+                {
+                    viewNotifier.Show(ex.GetBaseException().Message, ViewNotifierType.Error, L["Operation Failed"]);
+                }
+
 
             }
 
