@@ -45,7 +45,7 @@ class GAMAAdapter:
         self.df, test = data_loader(self._configuration, perform_splitting=False)
         X, y = prepare_tabular_dataset(self.df, self._configuration)
         self._configuration = set_encoding_for_string_columns(self._configuration, X, y)
-        
+
         self.df, test = data_loader(self._configuration)
         X, y = prepare_tabular_dataset(self.df, self._configuration)
         out_dir = (self._configuration["result_folder_location"] + "\\gama\\")
@@ -64,7 +64,7 @@ class GAMAAdapter:
         self.df, test = data_loader(self._configuration, perform_splitting=False)
         X, y = prepare_tabular_dataset(self.df, self._configuration)
         self._configuration = set_encoding_for_string_columns(self._configuration, X, y)
-        
+
         self.df, test = data_loader(self._configuration)
         X, y = prepare_tabular_dataset(self.df, self._configuration)
 
