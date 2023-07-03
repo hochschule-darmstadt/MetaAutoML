@@ -2,14 +2,11 @@ import json
 import os
 import shutil
 import unittest
-from unittest import IsolatedAsyncioTestCase
 import uuid
 
+from AdapterBGRPC import StartAutoMlRequest
 import pandas as pd
-from GAMAAdapterManager import GAMAAdapterManager
-from Container import *
-from AdapterBGRPC import *
-
+from LAMAAdapterManager import LAMAAdapterManager
 from sklearn.datasets import load_iris
 
 def load_iris_dataset() -> str:
@@ -25,29 +22,15 @@ def load_iris_dataset() -> str:
 
     train_data.to_csv(file_path, index=False)
     return file_path
-def load_titanic_dataset():
-    """download titanic dataset
-    Returns:
-        path of reduced dataset csv
-    """
-    cache_dir = os.path.join("tests", "datasets")
-    os.makedirs(cache_dir, exist_ok=True)
-    titanic: pd.DataFrame = pd.read_csv(filepath_or_buffer="https://storage.googleapis.com/tf-datasets/titanic/train.csv",)
-
-    # drop other columns for simplicity
-    titanic = titanic[["age", "sex", "survived","n_siblings_spouses","alone"]]
-
-    dataset_path = os.path.join(cache_dir, "titanic.csv")
-    with open(dataset_path, "w+") as outfp:
-        pd.DataFrame.to_csv(titanic, outfp, index=False)
-
-    return dataset_path
 
 
-class GAMATabularTaskTest(unittest.TestCase):
+class LAMATabularTaskTest(unittest.TestCase):
 
-    def test_tabular_classification(self):
+    def test_tabulart_classification(self):
+
         dataset_path = load_iris_dataset()
+
+
         req = StartAutoMlRequest()
         req.training_id = "test"
         req.dataset_id = "test"
@@ -86,8 +69,7 @@ class GAMATabularTaskTest(unittest.TestCase):
             "multi_fidelity_level": 0
         })
 
-        # start training
-        adapter_manager = GAMAAdapterManager()
+        adapter_manager = LAMAAdapterManager()
         adapter_manager.start_auto_ml(req, uuid.uuid4())
         adapter_manager.start()
         adapter_manager.join()
@@ -95,13 +77,14 @@ class GAMATabularTaskTest(unittest.TestCase):
         # check if model archive exists
         out_dir = os.path.join("app-data", "training",
                                req.user_id, req.dataset_id, req.training_id)
-        path_to_model = os.path.join(out_dir, "export", "gama-export.zip")
-        self.assertTrue(os.path.exists(path_to_model), f"path to model: '{path_to_model}' does not exist")
+        path_to_model = os.path.join(out_dir, "export", "lama-export.zip")
+        self.assertTrue(os.path.exists(path_to_model), f"path to model: '{path_to_model}' exist")
 
         # clean up
         shutil.rmtree(out_dir)
+    
+    def test_tabulart_regression(self):
 
-    def test_tabular_regression(self):
         dataset_path = load_iris_dataset()
 
 
@@ -143,8 +126,7 @@ class GAMATabularTaskTest(unittest.TestCase):
             "multi_fidelity_level": 0
         })
 
-        # start training
-        adapter_manager = GAMAAdapterManager()
+        adapter_manager = LAMAAdapterManager()
         adapter_manager.start_auto_ml(req, uuid.uuid4())
         adapter_manager.start()
         adapter_manager.join()
@@ -152,14 +134,12 @@ class GAMATabularTaskTest(unittest.TestCase):
         # check if model archive exists
         out_dir = os.path.join("app-data", "training",
                                req.user_id, req.dataset_id, req.training_id)
-        path_to_model = os.path.join(out_dir, "export", "gama-export.zip")
-        self.assertTrue(os.path.exists(path_to_model), f"path to model: '{path_to_model}' does not exist")
+        path_to_model = os.path.join(out_dir, "export", "lama-export.zip")
+        self.assertTrue(os.path.exists(path_to_model), f"path to model: '{path_to_model}' exist")
 
         # clean up
         shutil.rmtree(out_dir)
-    
 
-        
+
 if __name__ == '__main__':
     unittest.main()
-

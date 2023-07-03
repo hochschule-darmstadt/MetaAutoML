@@ -38,7 +38,7 @@ class GAMAAdapter:
             if self._configuration["configuration"]["task"] == ":tabular_classification":
                 self.__classification()
             elif self._configuration["configuration"]["task"] == ":tabular_regression":
-                self.__classification()
+                self.__regression()
 
     def __classification(self):
         """Execute the tabular classification task and export the found model"""
@@ -48,9 +48,9 @@ class GAMAAdapter:
         
         self.df, test = data_loader(self._configuration)
         X, y = prepare_tabular_dataset(self.df, self._configuration)
-
+        out_dir = (self._configuration["result_folder_location"] + "\\gama\\")
         parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), gpc.task_config)
-        automl = GamaClassifier(max_total_time=80, store="nothing", n_jobs=1, **parameters,search=self.__get_search_method())
+        automl = GamaClassifier(max_total_time=80, store="nothing", n_jobs=1, **parameters,output_directory=out_dir ,search=self.__get_search_method())
         automl.fit(X, y)
 
         export_model(automl, self._configuration["result_folder_location"], 'GAMA.p')
@@ -69,8 +69,8 @@ class GAMAAdapter:
         X, y = prepare_tabular_dataset(self.df, self._configuration)
 
         parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), gpc.task_config)
-
-        automl = GamaRegressor(max_total_time=180, store="nothing", n_jobs=1, **parameters, search=self.__get_search_method())
+        out_dir = (self._configuration["result_folder_location"] + "\\gama\\")
+        automl = GamaRegressor(max_total_time=180, store="nothing", n_jobs=1, **parameters,output_directory=out_dir, search=self.__get_search_method())
         automl.fit(X, y)
 
         export_model(automl, self._configuration["result_folder_location"], 'GAMA.p')
@@ -81,9 +81,6 @@ class GAMAAdapter:
     def __get_search_method(self):
         """get tuner class or search method in gama
         return none when not setted
-        !important: i could not do it in the same way as metrics because in docu from gama :
-        "Search method to use to find good pipelines. Should be instantiated."
-
         Returns:
             tuner class object: tuner obj
         """

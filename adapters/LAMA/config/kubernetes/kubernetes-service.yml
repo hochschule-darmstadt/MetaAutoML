@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: evaml
+spec:
+  type: ClusterIP
+  ports:
+  - name: "50062"
+    port: 50062
+    protocol: TCP
+    targetPort: 50062
+  selector:
+    io.kompose.service: evalml
+status:
+  loadBalancer: {}
