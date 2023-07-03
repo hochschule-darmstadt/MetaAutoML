@@ -2,7 +2,8 @@ FROM --platform=linux/amd64 python:3.9.13-slim-buster AS base
 EXPOSE 50066
 
 RUN apt-get update \
-    && apt-get install -y git
+    && apt-get install -y git \
+    && apt-get install libgomp1
 
 COPY ./LAMA/requirements.txt .
 # Install dependencies
