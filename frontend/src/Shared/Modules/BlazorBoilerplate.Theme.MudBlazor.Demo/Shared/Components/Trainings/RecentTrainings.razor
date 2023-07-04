@@ -33,7 +33,7 @@
             {
         <MudTable Items="@_trainings.Trainings" FixedHeader="true" Height="250px" style="width:stretch" class="mat-elevation-z5" AllowSelection="false" Dense="true">
             <HeaderContent>
-                <MudTh><MudTableSortLabel SortBy="new Func<TrainingDto, object>(x=>x.RuntimeProfile.StartTime)">@L["Start datetime"]</MudTableSortLabel></MudTh>
+                <MudTh><MudTableSortLabel SortBy="new Func<TrainingDto, object>(x=>x.RuntimeProfile.StartTime)">@L["start"]</MudTableSortLabel></MudTh>
                 <MudTh><MudTableSortLabel SortBy="new Func<TrainingDto, object>(x=>x.Status)">@L["Status"]</MudTableSortLabel></MudTh>
                 <MudTh><MudTableSortLabel SortBy="new Func<TrainingDto, object>(x=>x.DatasetName)">@L["Dataset"]</MudTableSortLabel></MudTh>
                 <MudTh>Task</MudTh>
