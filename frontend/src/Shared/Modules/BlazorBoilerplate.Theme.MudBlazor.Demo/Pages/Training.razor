@@ -6,17 +6,12 @@
 @attribute [Authorize]
 
 <TopSection>
-    <MudBreadcrumbs Items="_breadcrumbs" style="
-    position: fixed!important;
-    top: 65px;
-    z-index: 999!important;
-    width: 100%;">
-    </MudBreadcrumbs>
+    <MudBreadcrumbs Items="_breadcrumbs" Class="mudbreadcrumbs"></MudBreadcrumbs>
 </TopSection>
 
-<MudStack AlignItems="AlignItems.Center" Row="true" Class="mb-2" style="padding-top:30px">
-    <MudIcon Size="Size.Large" Icon="@Icons.Filled.ModelTraining"/>
-    <MudText Typo="Typo.h4">@_pageTitle</MudText>
+<MudStack AlignItems="AlignItems.Center" Row="true" Class="mb-2" style="padding-top:50px">
+    <MudIcon Size="Size.Large" Icon="@Icons.Filled.ModelTraining" />
+    <LabelTooltip FontSize="Typo.h4" Label=@_pageTitle Text="This page shows the leaderboard for an ML training. During training, various AutoML solutions are executed in parallel. This is indicated by a spinning wheel. Whenever an AutoML solution has terminated, the result is displayed. The top performing models are shown first in the leaderboard." Position="Placement.Bottom"></LabelTooltip>
 </MudStack>
 
 <MudGrid>

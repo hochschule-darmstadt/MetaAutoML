@@ -5,7 +5,8 @@ import asyncio
 from grpclib.client import Channel
 from AdapterBGRPC import *
 from DataStorage import DataStorage
-import dataclasses
+from traceback import print_exc
+import dataclasses+
 
 class AdapterManager(Thread):
     """The AdapterManager provides functionality for the training process to connect to the correct adapter and execute the training
@@ -234,9 +235,9 @@ class AdapterManager(Thread):
                     self.__adapter_finished_callback(self.__training_id, self.__request.user_id, self.__model_id, model_details, self)
                     return
 
-        except Exception as rpc_error:
+        except Exception:
             #print(f"Received unknown RPC error: code={rpc_error.message} message={rpc_error.details()}")
-            print(rpc_error)
+            print_exc()
             channel.close()
             print("Connection failed to adapter")
             self.__status = "failed"

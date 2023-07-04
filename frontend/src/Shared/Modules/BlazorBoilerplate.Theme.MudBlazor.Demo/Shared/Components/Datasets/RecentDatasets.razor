@@ -1,39 +1,42 @@
-﻿@inject IStringLocalizer<Global> L
+@inject IStringLocalizer<Global> L
 @inject NavigationManager NavManager
 @inject IFileUploader fileUploader
 
 
 <MudCard Elevation="5">
     <MudCardHeader Style="border-bottom-style: inset; border-bottom-width: 1px;">
-        <CardHeaderContent >
-            <MudText Typo="Typo.h6">@L["Recent datasets"]</MudText>
+        <CardHeaderContent>
+            <LabelTooltip Label="Recent datasets" Text="Datasets are files that you upload to the OMA-ML platform to perform machine learning." Position="Placement.Top"></LabelTooltip>
         </CardHeaderContent>
         <CardHeaderActions>
             <MudStack Row="true" Class="align-content-center" Style="margin-top: 8px">
                 @*<UploadDataset OnUploadCompletedCallback="@OnUploadCompletedCallback"/>*@
-                
-                <MudButton OnClick="OnOpenUpload"
-                    Variant="Variant.Filled" 
-                    Color="Color.Secondary"
-                    EndIcon="@Icons.Filled.AddBox"
-                           Size="Size.Small">@L["Upload"]</MudButton>
-                <MudButton Href="@("/datasets")"
-                    Variant="Variant.Filled" 
-                    Color="Color.Secondary"
-                    EndIcon="@Icons.Filled.ArrowForward"
-                        Size="Size.Small">@L["More"]</MudButton>
-            </MudStack>
+                <ButtonTooltip Text="Click here to upload a new dataset to OMA-ML from your disk or from the internet." Position="Placement.Top">
+                    <MudButton OnClick="OnOpenUpload"
+                               Variant="Variant.Filled"
+                               Color="Color.Secondary"
+                               EndIcon="@Icons.Filled.AddBox"
+                               Size="Size.Small">@L["Upload"]</MudButton>
+                        </ButtonTooltip>
+                        <ButtonTooltip Text="Click here to navigate to all datasets you have uploaded to the OMA-ML platform so far." Position="Placement.Top">                           
+                                <MudButton Href="@("/datasets")"
+                                           Variant="Variant.Filled"
+                                           Color="Color.Secondary"
+                                           EndIcon="@Icons.Filled.ArrowForward"
+                                           Size="Size.Small">@L["More"]</MudButton>
+                                 </ButtonTooltip>
+                            </MudStack>
         </CardHeaderActions>
     </MudCardHeader>
     <MudCardContent>
-        <MudPaper Height="250px" Elevation="0">
+        <MudPaper Height="20rem" Elevation="0">
             @if (Datasets == null)
             {
                 <DataLoaderSpinner />
             }
             else
             {
-        <MudTable Items="@Datasets.Datasets" FixedHeader="true" Height="250px" style="width:stretch" class="mat-elevation-z5" AllowSelection="false" Dense="true" RowStyleFunc="@RowStyleFunc">
+        <MudTable Items="@Datasets.Datasets" FixedHeader="true" Height="20rem" style="width:stretch" class="mat-elevation-z5" AllowSelection="false" Dense="true" RowStyleFunc="@RowStyleFunc">
             <HeaderContent>
                 <MudTh>@L["Name"]</MudTh>
                 <MudTh>@L["Type"]</MudTh>

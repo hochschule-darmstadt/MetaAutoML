@@ -16,6 +16,8 @@ def validate_config_values() -> str | None:
         datasetLocation = config_accessor.get_omaml_dataset_location()
         if not is_dir(datasetLocation):
             return "OMAML_DATASET_LOCATION is not a directory"
+        config_accessor.get_training_runtime_limit()
+        config_accessor.get_dataset_analysis_timeout_seconds()
     except ValueError as e:
         return str(e)
     return None

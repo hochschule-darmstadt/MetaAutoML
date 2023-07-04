@@ -13,8 +13,8 @@
 
 <MudCard Elevation="5">
     <MudCardHeader Style="border-bottom-style: inset; border-bottom-width: 1px;">
-        <CardHeaderContent >
-            <MudText Typo="Typo.h6">@L["Analysis"]</MudText>
+        <CardHeaderContent>
+            <LabelTooltip FontSize="Typo.h6" Label=@L["Analysis"] Text="Here you get various detailed graphical analyses using Explainable AI (XAI)." Position="Placement.Bottom"></LabelTooltip>
         </CardHeaderContent>
         <CardHeaderActions>
             @if (ExplanationPagePath != null)

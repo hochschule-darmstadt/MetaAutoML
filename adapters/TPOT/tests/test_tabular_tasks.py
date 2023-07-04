@@ -37,7 +37,7 @@ class TPOTTabularTaskTest(unittest.TestCase):
     #     # reset the working directory before finishing this test
     #     os.chdir(os.path.join("..", ".."))
 
-    def test_text_classification(self):
+    def test_tabular_classification(self):
 
         dataset_path = load_iris_dataset()
 
@@ -94,7 +94,7 @@ class TPOTTabularTaskTest(unittest.TestCase):
         # clean up
         shutil.rmtree(out_dir)
 
-    def test_text_regression(self):
+    def test_tabular_regression(self):
 
         dataset_path = load_iris_dataset()
 

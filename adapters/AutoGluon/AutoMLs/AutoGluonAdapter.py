@@ -74,7 +74,7 @@ class AutoGluonAdapter:
     def __tabular_classification(self):
         """Execute the tabular classification task and export the found model"""
         self.df, test = data_loader(self._configuration)
-        X, y = prepare_tabular_dataset(self.df, self._configuration)
+        X, y = prepare_tabular_dataset(self.df, self._configuration, apply_feature_extration=True)
         data = X
         data[y.name] = y
         classification_type = ""
@@ -94,7 +94,7 @@ class AutoGluonAdapter:
     def __tabular_regression(self):
         """Execute the tabular regression task and export the found model"""
         self.df, test = data_loader(self._configuration)
-        X, y = prepare_tabular_dataset(self.df, self._configuration)
+        X, y = prepare_tabular_dataset(self.df, self._configuration, apply_feature_extration=True)
         data = X
         data[y.name] = y
         parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), agpc.task_config)
@@ -109,7 +109,7 @@ class AutoGluonAdapter:
     def __text_classification(self):
         """Execute the tabular classification task and export the found model"""
         self.df, test = data_loader(self._configuration)
-        X, y = prepare_tabular_dataset(self.df, self._configuration)
+        X, y = prepare_tabular_dataset(self.df, self._configuration, apply_feature_extration=True)
         data = X
         data[y.name] = y
         classification_type = ""
@@ -133,7 +133,7 @@ class AutoGluonAdapter:
     def __text_named_entity_recognition(self):
         """Execute the tabular regression task and export the found model"""
         self.df, test = data_loader(self._configuration)
-        X, y = prepare_tabular_dataset(self.df, self._configuration)
+        X, y = prepare_tabular_dataset(self.df, self._configuration, apply_feature_extration=True)
         data = X
         data[y.name] = y
         #Disable multi worker else training takes a while or doesnt complete
@@ -193,15 +193,16 @@ class AutoGluonAdapter:
         #Reset any index and imputation
         X.reset_index(inplace = True)
         self._configuration = set_imputation_for_numerical_columns(self._configuration, X)
-        train, test = data_loader(self._configuration)
-
 
         parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), agpc.task_config)
         self._configuration["forecasting_horizon"] = parameters["prediction_length"]
+
+        train, test = data_loader(self._configuration)
+
         save_configuration_in_json(self._configuration)
 
         #reload dataset to load changed data
-        X, y = prepare_tabular_dataset(train, self._configuration)
+        X, y = prepare_tabular_dataset(train, self._configuration, apply_feature_extration=True)
         #Autogluon wants the existing variables per time step everything except target and time series indexes (id and datetime)
         X.reset_index(inplace = True)
         data = X

@@ -38,7 +38,7 @@ class TPOTAdapter:
         self._configuration = set_imputation_for_numerical_columns(self._configuration, X)
         train, test = data_loader(self._configuration)
         #reload dataset to load changed data
-        X, y = prepare_tabular_dataset(train, self._configuration)
+        X, y = prepare_tabular_dataset(train, self._configuration, apply_feature_extration=True)
         parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), tpc.task_config)
         pipeline_optimizer = TPOTClassifier(**parameters,
                                             random_state=42, verbosity=2, max_time_mins=self._configuration["configuration"]["runtime_limit"])
@@ -54,7 +54,7 @@ class TPOTAdapter:
         self._configuration = set_imputation_for_numerical_columns(self._configuration, X)
         train, test = data_loader(self._configuration)
         #reload dataset to load changed data
-        X, y = prepare_tabular_dataset(train, self._configuration)
+        X, y = prepare_tabular_dataset(train, self._configuration, apply_feature_extration=True)
         parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), tpc.task_config)
 
         pipeline_optimizer = TPOTRegressor(**parameters,

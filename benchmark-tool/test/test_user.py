@@ -27,13 +27,13 @@ def call_init_user(client: MagicMock):
 
 @pytest.mark.asyncio
 async def test_init_user_should_create_user_when_user_id_not_set():
-    mockedClient = setup_missing_user_id()
+    mockedClient = __setup_missing_user_id()
 
     user_id = await call_init_user(mockedClient)
     assert user_id == new_user_id
 
 
-def setup_missing_user_id():
+def __setup_missing_user_id():
     __mocker.mock_import(
         "config.config_accessor",
         MagicMock(get_userid=lambda: None),

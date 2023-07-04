@@ -152,9 +152,9 @@ class PreTrainingStrategyController(IAbstractStrategy):
 
         self.total_runtime_limit = configuration.runtime_limit
         amount_iterations = int(math.log(amount_ml_solutions, 2))
-        dataset_size_begin = 100 * 0.5**amount_iterations * 0.01
+        dataset_size_begin = 0.5**amount_iterations
         for i in range(0, amount_iterations+1):
-            self.sum_dataset_all += 100 * 0.5**i * 0.01
+            self.sum_dataset_all += 0.5**i
 
         #adjust time limit for first training
         configuration.runtime_limit = int(self.total_runtime_limit * (dataset_size_begin / self.sum_dataset_all))
