@@ -43,6 +43,7 @@ class AdapterRuntimeManager:
             ":pycaret":         ["PYCARET_SERVICE_HOST", "PYCARET_SERVICE_PORT"],
             ":tpot":            ["TPOT_SERVICE_HOST", "TPOT_SERVICE_PORT"],
             ":gama":            ["GAMA_SERVICE_HOST", "GAMA_SERVICE_PORT"],
+            ":lama":            ["LAMA_SERVICE_HOST", "LAMA_SERVICE_PORT"],
         }
         self.__adapters: list[AdapterManager] = []
         self.__log.debug("start_new_training: creating new blackboard and strategy controller for training")

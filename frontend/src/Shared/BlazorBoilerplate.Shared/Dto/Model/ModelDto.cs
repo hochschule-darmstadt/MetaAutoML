@@ -73,16 +73,13 @@ namespace BlazorBoilerplate.Shared.Dto.Model
         public string GetMlModelString()
         {
             string models = "";
+            List<string> modelList = new List<string>();
             foreach (var model in MlModelType)
             {
-                models += model.Properties["skos:prefLabel"] + ", ";
+                modelList.Add(model.Properties["skos:prefLabel"]);
             }
-            //When no ml model type was set yet return the empty string, else remove the alst comma
-            if (models.Length == 0)
-            {
-                return models;
-            }
-            return models.Remove(models.Length - 1);
+            models = string.Join(", ", modelList);
+            return models;
         }
     }
 }

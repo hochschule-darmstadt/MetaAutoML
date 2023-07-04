@@ -10,12 +10,14 @@
         </CardHeaderContent>
         <CardHeaderActions>
             <MudStack Row="true" Class="align-content-center" Style="margin-top: 8px">
-                <MudButton OnClick="OnOpenUpload"
-                    Variant="Variant.Filled" 
-                    Color="Color.Secondary"
-                    EndIcon="@Icons.Filled.AddBox"
-                           Size="Size.Small">@L["Upload"]</MudButton>
-            </MudStack>
+                <ButtonTooltip Text="Click here to upload a new dataset from your disk or a website to the OMA-ML platform." Position="Placement.Left">
+                    <MudButton OnClick="OnOpenUpload"
+                               Variant="Variant.Filled"
+                               Color="Color.Secondary"
+                               EndIcon="@Icons.Filled.AddBox"
+                               Size="Size.Small">@L["Upload"]</MudButton>
+                    </ButtonTooltip>
+                    </MudStack>
         </CardHeaderActions>
     </MudCardHeader>
     <MudCardContent>
@@ -36,7 +38,6 @@
                     <MudTh><MudTableSortLabel SortBy="@(new Func<DatasetDto, object>(x=>x.Type.Properties["skos:prefLabel"]))">@L["Type"]</MudTableSortLabel></MudTh>
                     <MudTh><MudTableSortLabel SortBy="@(new Func<DatasetDto, object>(x=>x.Analysis["size_bytes"]))">@L["Size"]</MudTableSortLabel></MudTh>
                     <MudTh><MudTableSortLabel SortBy="@(new Func<DatasetDto, object>(x=>x.Analysis["creation_date"]))">@L["Date"]</MudTableSortLabel></MudTh>
-                    <MudTh><MudTableSortLabel SortBy="@(new Func<DatasetDto, object>(x=>x.Analysis["creation_date"]))">@L["Time"]</MudTableSortLabel></MudTh>
                     <MudTh></MudTh>
                 </HeaderContent>
                 <RowTemplate>
@@ -45,8 +46,7 @@
                     </MudTd>
                     <MudTd>@L[context.Type.Properties.ContainsKey("skos:prefLabel") ? context.Type.Properties["skos:prefLabel"] : ""]</MudTd>
                     <MudTd>@FormatBytes(context.Analysis["size_bytes"])</MudTd>
-                    <MudTd style="white-space:nowrap;">@context.Analysis["creation_date"].ToString("yyyy-MM-dd")</MudTd>
-                    <MudTd style="white-space:nowrap;">@context.Analysis["creation_date"].ToString("HH:mm:ss")</MudTd>
+                    <MudTd style="white-space:nowrap;">@context.Analysis["creation_date"].ToString("yyyy-MM-dd") @context.Analysis["creation_date"].ToString("HH:mm:ss")</MudTd>
                     <MudTd><DatasetMenu Dataset="@context" OnDeleteCompleted="@OnDeleteDatasetCompleted" /></MudTd>
                 </RowTemplate>
                 <PagerContent>

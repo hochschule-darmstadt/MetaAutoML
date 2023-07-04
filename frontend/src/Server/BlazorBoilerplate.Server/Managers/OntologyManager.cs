@@ -137,8 +137,13 @@ namespace BlazorBoilerplate.Server.Managers
                         BroaderIri = p.BroaderIri,
                         BroaderLabel = p.BroaderLabel,
                         ValueIri = p.ValueIri,
-                        ValueLabel = p.ValueLabel
-                    }).ToList();
+                        ValueLabel = p.ValueLabel,
+                        SeeAlsoPara = p.SeeAlsoPara,
+                        CommentPara = p.CommentPara,
+                        SeeAlsoValue = p.SeeAlsoValue,
+                        CommentValue = p.CommentValue
+
+                }).ToList();
                 return new ApiResponse(Status200OK, null, response);
             }
             catch (Exception ex)

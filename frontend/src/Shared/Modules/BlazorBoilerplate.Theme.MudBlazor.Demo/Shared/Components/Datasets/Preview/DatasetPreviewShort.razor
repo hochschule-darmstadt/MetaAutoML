@@ -1,5 +1,5 @@
 
-@using System 
+@using System
 @using System.IO
 @using Microsoft.AspNetCore.Hosting
 @using Microsoft.Extensions.Logging
@@ -24,23 +24,25 @@
                 if (_dataset.Dataset.Type.ID == ":image")
                 {
                     <MudButton Href="@NavManager.ToAbsoluteUri("datasets/" + @Dataset.Dataset.Id + "/preview").AbsoluteUri"
-                        Variant="Variant.Filled" 
-                        EndIcon="@Icons.Material.Filled.ReadMore" 
-                        Color="Color.Secondary"
-                        Size="Size.Small"
-                       Style="margin-top: 8px">@L["More"]</MudButton>
-                }
-                else
-                {
-                    <MudButton Href="@NavManager.ToAbsoluteUri("datasets/" + @Dataset.Dataset.Id + "/preview").AbsoluteUri"
-                        Variant="Variant.Filled" 
-                        EndIcon="@Icons.Material.Filled.ReadMore" 
-                        Color="Color.Secondary"
-                        Size="Size.Small"
-                         Style="margin-top: 8px">@L["Configure"]</MudButton>
-                }
-            }
-        </CardHeaderActions>
+                               Variant="Variant.Filled"
+                               EndIcon="@Icons.Material.Filled.ReadMore"
+                               Color="Color.Secondary"
+                               Size="Size.Small"
+                               Style="margin-top: 8px">@L["More"]</MudButton>
+                        }
+                        else
+                        {
+                            <ButtonTooltip Text="Click here to to configure datatypes and roles of the dataset columns. " Position="Placement.Left">
+                                <MudButton Href="@NavManager.ToAbsoluteUri("datasets/" + @Dataset.Dataset.Id + "/preview").AbsoluteUri"
+                                           Variant="Variant.Filled"
+                                           EndIcon="@Icons.Material.Filled.ReadMore"
+                                           Color="Color.Secondary"
+                                           Size="Size.Small"
+                                           Style="margin-top: 8px">@L["Configure"]</MudButton>
+                                </ButtonTooltip>
+                                        }
+                                        }
+                                </CardHeaderActions>
     </MudCardHeader>
     <MudCardContent>
         <MudPaper Height="250px" Elevation="0">
@@ -75,11 +77,11 @@
 @code {
     [Parameter]
     public GetDatasetResponseDto Dataset
-    { 
+    {
         get
         {
             return _dataset;
-        } 
+        }
         set
         {
             _dataset = value;
@@ -88,7 +90,7 @@
                 LoadDatasetPreview();
             }
             StateHasChanged();
-        } 
+        }
     }
     private GetDatasetResponseDto _dataset;
     private GetDatasetPreviewResponseDto _datasetPreview;
@@ -97,9 +99,9 @@
     private List<ImagePreviewDto> _imageDataset;
 
     [Parameter]
-    public bool ReadDatasetFailed 
+    public bool ReadDatasetFailed
     {
-        get 
+        get
         {
             return _readDatasetFailed;
         }
@@ -171,7 +173,7 @@
 
                         ReadDatasetFailed = false;
                         await ReadDatasetFailedChanged.InvokeAsync(ReadDatasetFailed);
-                        
+
                         break;
                     case ":image":
                         _imageDataset = _datasetPreview.DatasetPreview.ToObject<List<ImagePreviewDto>>();

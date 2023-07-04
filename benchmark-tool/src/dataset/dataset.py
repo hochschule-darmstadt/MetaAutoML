@@ -30,9 +30,11 @@ async def upload_dataset(
     if datasetId is None:
         raise Exception("Dataset was not uploaded correctly")
 
+    print("start waiting for dataset to be ready")
     timeout = get_dataset_analysis_timeout_seconds() * 10
     for _ in range(timeout):
         if await client.verify_dataset_ready(user_id, datasetId):
+            print("dataset is ready")
             break
         await sleep(0.1)
     return datasetId

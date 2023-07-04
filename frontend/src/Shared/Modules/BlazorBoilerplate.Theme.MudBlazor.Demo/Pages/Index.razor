@@ -12,7 +12,8 @@
 
 <MudStack AlignItems="AlignItems.Center" Row="true" Class="mb-2" style="padding-top:50px">
     <MudIcon Size="Size.Large" Icon="@Icons.Filled.Home" />
-    <MudText Typo="Typo.h4">Home</MudText>
+    <LabelTooltip FontSize="Typo.h4" Label=@_pageTitle Text="A dataset contains data that can be used for machine learning. Different dataset types are distinguished, e.g., tabular data, texts or images. This page lists all datasets you have uploaded so far to the OMA-ML platform. By clicking on a dataset, the respective dataset page is opened to inspect the dataset and start new trainings." Position="Placement.Bottom"></LabelTooltip>
+
 </MudStack>
 
 <MudGrid>
@@ -62,11 +63,13 @@
     private GetTrainingsResponseDto _trainings;
     private GetDatasetsResponseDto _datasets;
     private GetHomeOverviewInformationResponseDto _overviewInfos;
+    private string _pageTitle;
     private List<BreadcrumbItem> _breadcrumbs = new List<BreadcrumbItem>();
 
     protected override async Task OnInitializedAsync()
     {
         await LoadTrainings();
+        _pageTitle = L["Home"];
         _breadcrumbs.Add(new BreadcrumbItem(L["Home"], null, true, Icons.Filled.Home));
         fileUploader.OnUploadCompletedCallback = LoadDatasetWithReRendering;
         StateHasChanged();

@@ -85,7 +85,9 @@
         <MudButton Color="Color.Secondary" OnClick="@Close">@L["Close"]</MudButton>
         @if (fileUploader.IsUploading == false)
         {
-            <MudButton StartIcon="@Icons.Filled.CloudUpload" Color="Color.Secondary" Disabled="@_uploadReady" OnClick="@Upload">@L["Upload"]</MudButton>
+                <MudTooltip Text="Click here to upload a new dataset to OMA-ML." Placement="Placement.Top" Arrow="true">
+                    <MudButton StartIcon="@Icons.Filled.CloudUpload" Color="Color.Secondary" Disabled="@_uploadReady" OnClick="@Upload">@L["Upload"]</MudButton>
+                </MudTooltip>
         }
     </DialogActions>
 </MudDialog>
@@ -127,7 +129,9 @@
         <MudButton Color="Color.Secondary" OnClick="Close">@L["Close"]</MudButton>
         @if (fileUploader.IsUploading == false)
         {
-            <MudButton StartIcon="@Icons.Filled.CloudUpload" Color="Color.Secondary" Disabled="@_uploadReady" OnClick="@Upload">@L["Upload"]</MudButton>
+            <MudTooltip Text="Click here to upload a new dataset to OMA-ML." Placement="Placement.Top" Arrow="true">
+                <MudButton StartIcon="@Icons.Filled.CloudUpload" Color="Color.Secondary" Disabled="@_uploadReady" OnClick="@Upload">@L["Upload"]</MudButton>
+            </MudTooltip>
         }
     </DialogActions>
 </MudDialog>

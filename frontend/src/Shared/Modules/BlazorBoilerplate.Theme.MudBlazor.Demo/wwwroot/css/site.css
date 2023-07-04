@@ -87,3 +87,8 @@ a {
     background: white;
     border-bottom: 1px solid lightgrey;
 }
+
+.text-card-content {
+    font-size: clamp(0.7rem, -0.875rem + 2.4vw, 1rem);
+}
+
