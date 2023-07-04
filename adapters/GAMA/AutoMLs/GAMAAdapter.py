@@ -47,7 +47,7 @@ class GAMAAdapter:
         self._configuration = set_encoding_for_string_columns(self._configuration, X, y)
 
         self.df, test = data_loader(self._configuration)
-        X, y = prepare_tabular_dataset(self.df, self._configuration)
+        X, y = prepare_tabular_dataset(self.df, self._configuration, apply_feature_extration=True)
         out_dir = (self._configuration["result_folder_location"] + "\\gama\\")
         parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), gpc.task_config)
         automl = GamaClassifier(max_total_time=80, store="nothing", n_jobs=1, **parameters,output_directory=out_dir ,search=self.__get_search_method())
@@ -66,7 +66,7 @@ class GAMAAdapter:
         self._configuration = set_encoding_for_string_columns(self._configuration, X, y)
 
         self.df, test = data_loader(self._configuration)
-        X, y = prepare_tabular_dataset(self.df, self._configuration)
+        X, y = prepare_tabular_dataset(self.df, self._configuration, apply_feature_extration=True)
 
         parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), gpc.task_config)
         out_dir = (self._configuration["result_folder_location"] + "\\gama\\")

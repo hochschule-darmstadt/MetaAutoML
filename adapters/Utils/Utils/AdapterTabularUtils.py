@@ -442,13 +442,14 @@ def apply_pca_feature_extraction(X: pd.DataFrame, features: dict, result_folder_
     df_merged = pd.concat([data, df_no_pca], axis=1)
     return df_merged
 
-def prepare_tabular_dataset(df: pd.DataFrame, json_configuration: dict, is_prediction:bool=False) -> Tuple[pd.DataFrame, pd.Series]:
+def prepare_tabular_dataset(df: pd.DataFrame, json_configuration: dict, is_prediction:bool=False, apply_feature_extration:bool=False) -> Tuple[pd.DataFrame, pd.Series]:
     """Prepare tabular dataset, perform feature preparation and data type casting
 
     Args:
         df (pd.DataFrame): The dataset dataframe
         json_configuration (dict): the training configuration dictonary
         is_prediction (bool): if the label will be processed
+        apply_feature_extration (bool): if feature extraction is applied
 
     Returns:
         tuple[pd.DataFrame, object]: tuple holding the dataset dataframe without the target column, and a Series or Dataframe holding the Target column(s) tuple[(X_dataframe, y)]
@@ -456,7 +457,8 @@ def prepare_tabular_dataset(df: pd.DataFrame, json_configuration: dict, is_predi
     X, y = feature_preparation(df, json_configuration["dataset_configuration"]["schema"].items(), json_configuration["dataset_configuration"]["file_configuration"]["datetime_format"], is_prediction)
     X, y = string_feature_encoding(X, y, json_configuration["dataset_configuration"]["schema"].items())
     X = numerical_feature_imputation(X, json_configuration["dataset_configuration"]["schema"].items())
-    X = apply_pca_feature_extraction(X, json_configuration["dataset_configuration"], json_configuration["result_folder_location"])
+    if apply_feature_extration == True:
+        X = apply_pca_feature_extraction(X, json_configuration["dataset_configuration"], json_configuration["result_folder_location"])
     return X, y
 
 def convert_X_and_y_dataframe_to_numpy(X: pd.DataFrame, y: pd.Series) -> Tuple[np.ndarray, np.ndarray]:

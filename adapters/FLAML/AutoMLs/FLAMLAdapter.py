@@ -61,7 +61,7 @@ class FLAMLAdapter:
     def __tabular_classification(self):
         """Execute the tabular classification task and export the found model"""
         self.df, test = data_loader(self._configuration)
-        X, y = prepare_tabular_dataset(self.df, self._configuration)
+        X, y = prepare_tabular_dataset(self.df, self._configuration, apply_feature_extration=True)
         X, y = replace_forbidden_json_utf8_characters(X, y)
         automl = AutoML()
         automl_settings = self.__generate_settings()
@@ -78,7 +78,7 @@ class FLAMLAdapter:
     def __tabular_regression(self):
         """Execute the tabular regression task and export the found model"""
         self.df, test = data_loader(self._configuration)
-        X, y = prepare_tabular_dataset(self.df, self._configuration)
+        X, y = prepare_tabular_dataset(self.df, self._configuration, apply_feature_extration=True)
         X, y = replace_forbidden_json_utf8_characters(X, y)
         automl = AutoML()
         automl_settings = self.__generate_settings()
@@ -111,7 +111,7 @@ class FLAMLAdapter:
         save_configuration_in_json(self._configuration)
 
         #reload dataset to load changed data
-        X, y = prepare_tabular_dataset(train, self._configuration)
+        X, y = prepare_tabular_dataset(train, self._configuration, apply_feature_extration=True)
         #TODO ensure ts first column is datetime
         automl = AutoML()
 
@@ -139,7 +139,7 @@ class FLAMLAdapter:
         self._configuration = set_column_with_largest_amout_of_text(X, self._configuration)
         train, test = data_loader(self._configuration)
         #reload dataset to load changed data
-        X, y = prepare_tabular_dataset(train, self._configuration)
+        X, y = prepare_tabular_dataset(train, self._configuration, apply_feature_extration=True)
         X, y = replace_forbidden_json_utf8_characters(X, y)
         automl = AutoML()
         automl_settings = self.__generate_settings()

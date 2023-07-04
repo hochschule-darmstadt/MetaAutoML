@@ -49,7 +49,7 @@ class AutoKerasAdapter:
         """Execute the tabular classification task and export the found model"""
 
         self.df, test = data_loader(self._configuration)
-        X, y = prepare_tabular_dataset(self.df, self._configuration)
+        X, y = prepare_tabular_dataset(self.df, self._configuration, apply_feature_extration=True)
         parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), akpc.task_config)
         parameters["max_trials"] = self._configuration["configuration"]["runtime_limit"]
         clf = ak.StructuredDataClassifier(overwrite=True,
@@ -64,7 +64,7 @@ class AutoKerasAdapter:
         """Execute the tabular regression task and export the found model"""
 
         self.df, test = data_loader(self._configuration)
-        X, y = prepare_tabular_dataset(self.df, self._configuration)
+        X, y = prepare_tabular_dataset(self.df, self._configuration, apply_feature_extration=True)
         parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), akpc.task_config)
         parameters["max_trials"] = self._configuration["configuration"]["runtime_limit"]
         reg = ak.StructuredDataRegressor(overwrite=True,
@@ -115,7 +115,7 @@ class AutoKerasAdapter:
         self._configuration = set_column_with_largest_amout_of_text(X, self._configuration)
         train, test = data_loader(self._configuration)
         #reload dataset to load changed data
-        X, y = prepare_tabular_dataset(train, self._configuration)
+        X, y = prepare_tabular_dataset(train, self._configuration, apply_feature_extration=True)
         parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), akpc.task_config)
         parameters["max_trials"] = self._configuration["configuration"]["runtime_limit"]
         reg = ak.TextClassifier(overwrite=True,
@@ -138,7 +138,7 @@ class AutoKerasAdapter:
         self._configuration = set_column_with_largest_amout_of_text(X, self._configuration)
         train, test = data_loader(self._configuration)
         #reload dataset to load changed data
-        X, y = prepare_tabular_dataset(train, self._configuration)
+        X, y = prepare_tabular_dataset(train, self._configuration, apply_feature_extration=True)
         parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), akpc.task_config)
         parameters["max_trials"] = self._configuration["configuration"]["runtime_limit"]
         reg = ak.TextRegressor(overwrite=True,
@@ -168,7 +168,7 @@ class AutoKerasAdapter:
 
         save_configuration_in_json(self._configuration)
 
-        X, y = prepare_tabular_dataset(train, self._configuration)
+        X, y = prepare_tabular_dataset(train, self._configuration, apply_feature_extration=True)
 
         #TODO convert dataframe to float
         reg = ak.TimeseriesForecaster(overwrite=True,

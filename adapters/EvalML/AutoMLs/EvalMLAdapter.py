@@ -58,7 +58,7 @@ class EvalMLAdapter:
         """Execute the tabular classification task and export the found model"""
 
         self.df, test = data_loader(self._configuration)
-        X, y = prepare_tabular_dataset(self.df, self._configuration)
+        X, y = prepare_tabular_dataset(self.df, self._configuration, apply_feature_extration=True)
 
         if len(y.unique()) == 2:
             classification_type = "binary"
@@ -87,7 +87,7 @@ class EvalMLAdapter:
         """Execute the tabular regression task and export the found model"""
 
         self.df, test = data_loader(self._configuration)
-        X, y = prepare_tabular_dataset(self.df, self._configuration)
+        X, y = prepare_tabular_dataset(self.df, self._configuration, apply_feature_extration=True)
         parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), epc.task_config)
         problem_type = "REGRESSION"
         # parameters must be set correctly
@@ -123,7 +123,7 @@ class EvalMLAdapter:
         train, test = data_loader(self._configuration)
         #reload dataset to load changed data
 
-        X, y = prepare_tabular_dataset(train, self._configuration)
+        X, y = prepare_tabular_dataset(train, self._configuration, apply_feature_extration=True)
         X[y.name] = y.values
         #We must persist the training time series to make predictions
         file_path = self._configuration["result_folder_location"]
