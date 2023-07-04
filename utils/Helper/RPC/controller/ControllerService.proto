@@ -60,7 +60,12 @@ service ControllerService {
 
   /*delete a Model record and every related object inside MongoDB and files on disc (Predictions)*/
   rpc DeleteModel(DeleteModelRequest) returns (DeleteModelResponse) {}
+  
+  /*starts an ExplainerDashboard of a given model*/
+  rpc StartExplainerDashboard(StartDashboardRequest) returns (StartDashboardResponse) {}
 
+  /*stops an ExplainerDashboard of a given model*/
+  rpc StopExplainerDashboard(StopDashboardRequest) returns (StopDashboardResponse) {}
 
   /*OMA-ML ONTOLOGY MESSAGES*/
   /*return a list of AutoML solutions compatible with the current configuration*/

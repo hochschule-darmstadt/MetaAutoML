@@ -247,5 +247,43 @@ namespace BlazorBoilerplate.Server.Managers
                 return new ApiResponse(Status404NotFound, ex.Message);
             }
         }
+
+        public async Task<ApiResponse> StartExplainerDashboard(StartDashboardRequestDto request)
+        {
+            StartDashboardRequestDto response = new StartDashboardRequestDto();
+            StartDashboardRequest startDashboardRequest = new StartDashboardRequest();
+            var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
+            try
+            {
+                startDashboardRequest.UserId = username;
+                startDashboardRequest.ModelId = request.ModelId;
+                var reply = _client.StartExplainerDashboard(startDashboardRequest);
+                return new ApiResponse(Status200OK, null, "");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return new ApiResponse(Status404NotFound, ex.Message);
+            }
+        }
+
+        public async Task<ApiResponse> StopExplainerDashboard(StopDashboardRequestDto request)
+        {
+            StopDashboardRequestDto response = new StopDashboardRequestDto();
+            StopDashboardRequest stopDashboardRequest = new StopDashboardRequest();
+            var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
+            try
+            {
+                stopDashboardRequest.UserId = username;
+                stopDashboardRequest.ModelId = request.ModelId;
+                var reply = _client.StopExplainerDashboard(stopDashboardRequest);
+                return new ApiResponse(Status200OK, null, "");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return new ApiResponse(Status404NotFound, ex.Message);
+            }
+        }
     }
 }

@@ -6,6 +6,7 @@ from grpclib.client import Channel
 from AdapterBGRPC import *
 from DataStorage import DataStorage
 from traceback import print_exc
+import dataclasses+
 
 class AdapterManager(Thread):
     """The AdapterManager provides functionality for the training process to connect to the correct adapter and execute the training
@@ -135,6 +136,17 @@ class AdapterManager(Thread):
         request.dataset_configuration = json.dumps(training["dataset_configuration"])
 
         return request
+    
+    def __generate_dashboard_request(self, session_id: str, process_request: StartAutoMlRequest) -> CreateExplainerDashboardRequest:
+        """Generate ExplainerDashboard generation configuration
+
+        Returns:
+            CreateExplainerDashboardRequest: The GRPC request message holding the generation configuration
+        """
+        request = CreateExplainerDashboardRequest()
+        request.session_id = session_id
+        request.process_json = json.dumps(dataclasses.asdict(process_request))
+        return request
 
     def __create_new_model_entry(self) -> str:
         """Create the model record for this AutoML adapter
@@ -196,6 +208,9 @@ class AdapterManager(Thread):
                     self.__status_messages.append(response.status_update)
                     self.__data_storage.update_model(self.__request.user_id, self.__model_id, {"status_messages": self.__status_messages})
                 elif response.return_code == AdapterReturnCode.ADAPTER_RETURN_CODE_SUCCESS:
+                    exlpainer_response: CreateExplainerDashboardResponse = await service.create_explainer_dashboard(
+                        self.__generate_dashboard_request(request.session_id, self.__generate_process_request())
+                        )
                     channel.close()
                     self.__path = response.path
                     self.__status = "completed"

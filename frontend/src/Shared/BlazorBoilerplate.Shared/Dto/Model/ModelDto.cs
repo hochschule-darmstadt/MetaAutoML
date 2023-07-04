@@ -32,6 +32,7 @@ namespace BlazorBoilerplate.Shared.Dto.Model
         public List<string> StatusMessages { get; set; }
         public Dictionary<string, dynamic> Explanation { get; set; }
         public double Emissions { get; set; }
+        public string ModelAddress { get; }
         public ModelDto()
         {
 
@@ -55,6 +56,11 @@ namespace BlazorBoilerplate.Shared.Dto.Model
             StatusMessages = model.StatusMessages.ToList();
             Explanation = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(model.Explanation);
             Emissions = model.Emission;
+        }
+
+        public string GetModelAddress()
+        {
+            return "192.168.0.227:8045";
         }
         public string GetMlLibraryString()
         {

@@ -6,6 +6,7 @@
 @inject IViewNotifier viewNotifier
 @inject NavigationManager NavManager
 @attribute [Authorize]
+@implements IDisposable
 
 <TopSection>
     <MudBreadcrumbs Items="_breadcrumbs" Class="mudbreadcrumbs"></MudBreadcrumbs>
@@ -16,12 +17,21 @@
     <MudText Typo="Typo.h4">@L["Analysis"]</MudText>
 </MudStack>
 
-<MudGrid>
-    <MudItem xs="12" sm="12" md="12">
-        <ModelExplanationFull Model="_model"/>
-    </MudItem>
-</MudGrid>
-
+@if (dashboard_address == null)
+{
+   <MudGrid>
+      <MudItem Class="d-flex align-center justify-center mud-width-full" xs="12">
+      <MudProgressCircular Color="Color.Primary" Indeterminate="true"/>
+      </MudItem>
+   </MudGrid>
+}
+else{ 
+    <MudGrid AlignItems="AlignItems.Stretch" style="height:700px">
+        <MudItem Class="d-flex align-center justify-center mud-width-full mud-height-full" xs="12">
+            <iframe style="height:100%; width:100%" src=@dashboard_address> </iframe>
+        </MudItem>
+    </MudGrid>
+}
 
 @code {
     [Parameter]
@@ -32,6 +42,8 @@
     public string TrainingId { get; set; }
     [Parameter]
     public string ListId { get; set; }
+    private string dashboard_address;
+    private GetModelResponseDto dashboardAddress;
     private GetModelResponseDto _model;
     private GetTrainingResponseDto _training;
     private List<BreadcrumbItem> _breadcrumbs = new List<BreadcrumbItem>();
@@ -39,29 +51,18 @@
     protected async override void OnInitialized()
     {
         await LoadModel();
-        _breadcrumbs.Add(new BreadcrumbItem(L["Home"], "/", false, Icons.Filled.Home));
-        if (ListId != null)
-        {
-            _breadcrumbs.Add(new BreadcrumbItem(L["Datasets"], "/datasets", false, Icons.Filled.ListAlt));
-            _breadcrumbs.Add(new BreadcrumbItem(L["Dataset {0}", _training.Training.DatasetName], "/datasets/" + _training.Training.DatasetId, false, Icons.Filled.ListAlt));
-            _breadcrumbs.Add(new BreadcrumbItem(L["Models"], "/datasets/" + _training.Training.DatasetId + "/models", false, Icons.Filled.Lightbulb));
-            _breadcrumbs.Add(new BreadcrumbItem(L["Model {0}", _model.Model.GetMlModelString()], "/datasets/" + _training.Training.DatasetId + "/models/" + (_model.Model.GetMlModelString()), false, Icons.Filled.Lightbulb));
-        }
-        else if (TrainingId != null)
-        {
-            _breadcrumbs.Add(new BreadcrumbItem(L["Trainings"], "/trainings", false, Icons.Filled.ModelTraining));
-            _breadcrumbs.Add(new BreadcrumbItem(L["Training {0}", _training.Training.RuntimeProfile.StartTime.ToString("dd/MM/yy HH:mm")], "/trainings/" + _training.Training.Id, false, Icons.Filled.ModelTraining));
-            _breadcrumbs.Add(new BreadcrumbItem(L["Model {0}", _model.Model.GetMlModelString()], "/trainings/" + _training.Training.Id + "/models/" + _model.Model.Id, false, Icons.Filled.Lightbulb));
-        }
-        else if (DatasetId != null)
-        {
-            _breadcrumbs.Add(new BreadcrumbItem(L["Datasets"], "/datasets", false, Icons.Filled.ListAlt));
-            _breadcrumbs.Add(new BreadcrumbItem(L["Dataset {0}", _training.Training.DatasetName], "/datasets/" + _training.Training.DatasetId, false, Icons.Filled.ListAlt));
-            _breadcrumbs.Add(new BreadcrumbItem(L["Model {0}", _model.Model.GetMlModelString()], "/datasets/" + _training.Training.DatasetId + "/modelsview/" + ListId, false, Icons.Filled.Lightbulb));
-        }
-        _breadcrumbs.Add(new BreadcrumbItem(L["Explanation"], null, true, Icons.Filled.Lightbulb));
+        await StartExplainerDashboard();
+
+        Thread.Sleep(3500);
+
         StateHasChanged();
     }
+
+    void IDisposable.Dispose()
+    {
+        StopExplainerDashboard();
+    }
+
     private async Task LoadModel()
     {
         try
@@ -87,12 +88,56 @@
                 if (apiResponse.IsSuccessStatusCode)
                 {
                     _training = Newtonsoft.Json.JsonConvert.DeserializeObject<GetTrainingResponseDto>(apiResponse.Result.ToString());
+                    dashboard_address = "//192.168.0.227:" + (new String(Id.Where(Char.IsDigit).ToArray())).Substring(0,5);
                     viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
+                    StateHasChanged();
                 }
                 else
                 {
                     viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
                 }
+            }
+            else
+            {
+                viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
+            }
+        }
+        catch (Exception ex)
+        {
+            viewNotifier.Show(ex.GetBaseException().Message, ViewNotifierType.Error, L["Operation Failed"]);
+        }
+    }
+
+    private async Task StartExplainerDashboard()
+    {
+        try
+        {
+            ApiResponseDto apiResponse = await apiClient.StartExplainerDashboard(new StartDashboardRequestDto { ModelId = _model.Model.Id });
+
+            if (apiResponse.IsSuccessStatusCode)
+            {
+                viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
+            }
+            else
+            {
+                viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
+            }
+        }
+        catch (Exception ex)
+        {
+            viewNotifier.Show(ex.GetBaseException().Message, ViewNotifierType.Error, L["Operation Failed"]);
+        }
+    }
+
+    private async Task StopExplainerDashboard()
+    {
+        try
+        {
+            ApiResponseDto apiResponse = await apiClient.StopExplainerDashboard(new StopDashboardRequestDto { ModelId = _model.Model.Id });
+
+            if (apiResponse.IsSuccessStatusCode)
+            {
+                viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
             }
             else
             {

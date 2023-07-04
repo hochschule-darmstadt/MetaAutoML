@@ -1,4 +1,4 @@
-﻿using BlazorBoilerplate.Infrastructure.Server;
+using BlazorBoilerplate.Infrastructure.Server;
 using BlazorBoilerplate.Infrastructure.Server.Models;
 using BlazorBoilerplate.Infrastructure.Storage.DataModels;
 using BlazorBoilerplate.Shared.Dto.ExternalAuth;

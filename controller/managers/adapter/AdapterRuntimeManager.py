@@ -174,11 +174,6 @@ class AdapterRuntimeManager:
             if self.__multi_fidelity_level != 0:
                 self.__multi_fidelity_callback(model_list, self.__multi_fidelity_level)
 
-        if model_details["status"] == "completed" and self.__multi_fidelity_level == 0:
-            if dataset["type"] in  [":tabular", ":text", ":time_series"]:
-                ExplainableAIManager(self.__data_storage, adapter_manager, self.__explainable_lock).explain(user_id, model_id)
-                return
-
     def get_adapters(self) -> list[AdapterManager]:
         """get the __adapters object of this session
 

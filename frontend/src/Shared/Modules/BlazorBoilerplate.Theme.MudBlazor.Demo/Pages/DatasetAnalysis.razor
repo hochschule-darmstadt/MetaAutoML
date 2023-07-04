@@ -32,12 +32,9 @@
     protected async override void OnInitialized()
     {
         await LoadDataset();
-        _breadcrumbs.Add(new BreadcrumbItem(L["Home"], "/", false, Icons.Filled.Home));
-        _breadcrumbs.Add(new BreadcrumbItem(L["Datasets"], "/datasets", false, Icons.Filled.ListAlt));
-        _breadcrumbs.Add(new BreadcrumbItem(_pageTitle, "/datasets/" + Id, false, Icons.Filled.ListAlt));
-        _breadcrumbs.Add(new BreadcrumbItem(L["Analysis"], null, true, Icons.Filled.ListAlt));
         StateHasChanged();
     }
+ 
     private async Task LoadDataset()
     {
         try
