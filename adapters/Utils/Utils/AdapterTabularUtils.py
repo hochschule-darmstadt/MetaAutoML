@@ -442,6 +442,7 @@ def apply_pca_feature_extraction(X: pd.DataFrame, features: dict, result_folder_
     df_merged = pd.concat([data, df_no_pca], axis=1)
     return df_merged
 
+  
 def prepare_tabular_dataset(df: pd.DataFrame, json_configuration: dict, is_prediction:bool=False, apply_feature_extration:bool=False) -> Tuple[pd.DataFrame, pd.Series]:
     """Prepare tabular dataset, perform feature preparation and data type casting
 
