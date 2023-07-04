@@ -352,6 +352,14 @@ class ControllerServiceManager(ControllerServiceBase):
                 'This strategy will run all adapters with only a small part of the data. Then it will train the best half solutions with more data again and so on, until one last adapter is trained with the full data.'
                 )
             )
+            
+            result.strategies.append(
+                Strategy(
+                'preprocessing.pca_feature_extraction',
+                'PCA Feature Extraction',
+                '...'
+                )
+            )
 
         return result
 

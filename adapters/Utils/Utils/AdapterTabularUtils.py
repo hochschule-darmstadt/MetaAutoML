@@ -3,6 +3,8 @@ from typing import Tuple
 from sklearn.preprocessing import OrdinalEncoder
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.preprocessing import LabelEncoder
+from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
 from sklearn.impute import SimpleImputer
 from _collections_abc import dict_items
 from JsonUtil import get_config_property
@@ -12,6 +14,7 @@ import os
 import re
 import json
 import numpy as np
+import dill
 
 def read_tabular_dataset_training_data(config: "StartAutoMlRequest", perform_splitting: bool) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """Read a CSV dataset into train and test dataframes
@@ -397,6 +400,48 @@ def numerical_feature_imputation(X: pd.DataFrame, features: dict_items) -> Tuple
             X[column] = simp_impu.transform(X[[column]])
     return X
 
+def apply_pca_feature_extraction(X: pd.DataFrame, features: dict, result_folder_location: str) -> Tuple[pd.DataFrame, pd.Series]:
+    pca_transformer = {}
+    pca_features = []
+    for item in features["schema"]:
+        try:
+            if features["schema"][item]['preprocessing']['pca'] == True and features["schema"][item]['role_selected'] != ':target':
+                pca_features.append(item)
+        except:
+            pass
+
+    if len(pca_features) == 0:
+        return X
+
+    df_no_pca = X.drop(pca_features, axis=1)
+    df_pca = X[pca_features]
+
+    categorical_columns = df_pca.select_dtypes(include=['object']).columns
+    numeric_columns = df_pca.select_dtypes(include=['float64', 'int64']).columns
+
+    numeric_data = df_pca[numeric_columns]
+    numeric_data = numeric_data.fillna(numeric_data.mean()).values
+
+    pca_transformer["scaler"] = StandardScaler()
+    scaled_numeric_data = pca_transformer["scaler"].fit_transform(numeric_data)
+
+    pca_transformer["pca"] = PCA(n_components='mle')
+    transformed_features = pca_transformer["pca"].fit_transform(scaled_numeric_data)
+
+    with open(os.path.join(result_folder_location, 'pca_model.dill'), 'wb+') as file:
+        dill.dump(pca_transformer, file)
+
+    transformed_data = pd.DataFrame(
+        data=transformed_features,
+        columns=[f"PC{i}" for i in range(1, pca_transformer["pca"].n_components_ + 1)]
+    )
+
+    data = pd.concat([pd.DataFrame(transformed_data).set_index(df_pca.index), pd.DataFrame(df_pca[categorical_columns])], axis=1)
+
+    df_no_pca_copy = df_no_pca
+    df_merged = pd.concat([data, df_no_pca], axis=1)
+    return df_merged
+
 def prepare_tabular_dataset(df: pd.DataFrame, json_configuration: dict, is_prediction:bool=False) -> Tuple[pd.DataFrame, pd.Series]:
     """Prepare tabular dataset, perform feature preparation and data type casting
 
@@ -411,6 +456,7 @@ def prepare_tabular_dataset(df: pd.DataFrame, json_configuration: dict, is_predi
     X, y = feature_preparation(df, json_configuration["dataset_configuration"]["schema"].items(), json_configuration["dataset_configuration"]["file_configuration"]["datetime_format"], is_prediction)
     X, y = string_feature_encoding(X, y, json_configuration["dataset_configuration"]["schema"].items())
     X = numerical_feature_imputation(X, json_configuration["dataset_configuration"]["schema"].items())
+    X = apply_pca_feature_extraction(X, json_configuration["dataset_configuration"], json_configuration["result_folder_location"])
     return X, y
 
 def convert_X_and_y_dataframe_to_numpy(X: pd.DataFrame, y: pd.Series) -> Tuple[np.ndarray, np.ndarray]:
