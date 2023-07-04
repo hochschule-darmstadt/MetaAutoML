@@ -89,22 +89,30 @@ SPARQL query to retrieve all configuration options with their corresponding valu
 ONTOLOGY_QUERY_GET_CONFIGURATION_BY_AUTOML_ID_AND_TASK_ID = """
         PREFIX : <http://h-da.de/ml-ontology/>
 
-        SELECT ?param_iri ?param_label ?param_type ?broader_iri ?broader_label ?value_iri ?value_label
-        WHERE {
-                ?ci a :Configuration_item ;
-                        :category :task_configuration ;
-                        :automl_solution ?auto_ml_iri ;
-                        :ml_task ?task_iri ;
-                        :parameter_value ?param_iri .
-                ?param_iri :has_datatype ?param_type ;
-                        skos:prefLabel ?param_label .
-                OPTIONAL {
-                        ?param_iri :parameter_value ?value_iri .
-                        ?value_iri skos:prefLabel ?value_label
-                }
-                OPTIONAL {
-                        ?param_iri skos:broader ?broader_iri .
-                        ?broader_iri skos:prefLabel ?broader_label
-                }
-        }
+SELECT ?param_iri ?param_label ?param_type ?broader_iri ?broader_label ?value_iri ?value_label ?seeAlso_para ?comment_para ?seeAlso_value ?comment_value
+WHERE {
+  ?ci a :Configuration_item ;
+  :category :task_configuration ;
+  :automl_solution ?auto_ml_iri ;
+  :ml_task ?task_iri ;
+  :parameter_value ?param_iri .
+  ?param_iri :has_datatype ?param_type ;
+             skos:prefLabel ?param_label .
+  OPTIONAL {
+    ?param_iri :parameter_value ?value_iri .
+    ?value_iri skos:prefLabel ?value_label
+  }
+  OPTIONAL {
+    ?param_iri skos:broader ?broader_iri .
+    ?broader_iri skos:prefLabel ?broader_label
+  }
+  OPTIONAL {
+    ?broader_iri rdfs:seeAlso ?seeAlso_para
+  }
+  OPTIONAL {
+    ?broader_iri rdfs:comment ?comment_para
+  }
+  ?value_iri rdfs:comment ?comment_value ;
+      rdfs:seeAlso ?seeAlso_value .
+}
         """

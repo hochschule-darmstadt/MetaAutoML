@@ -6,8 +6,9 @@
 
 <MudCard Elevation="5">
     <MudCardHeader Style="border-bottom-style: inset; border-bottom-width: 1px;">
-        <CardHeaderContent >
-            <MudText Typo="Typo.h6">@L["Download Machine Learning pipeline"]</MudText>
+        <CardHeaderContent>
+            <LabelTooltip FontSize="Typo.h6" Label=@L["Download ML model pipeline"] Text="Here you may download a pipeline as Python source code including the generated ML model and pre-processing functions. You may include this code into a custom Python application." Position="Placement.Bottom"></LabelTooltip>
+            <MudText Typo="Typo.h6"></MudText>
         </CardHeaderContent>
     </MudCardHeader>
     <MudCardContent>
@@ -25,7 +26,7 @@
                             Variant="Variant.Filled" 
                             StartIcon="@Icons.Filled.CloudDownload"
                             Color="Color.Secondary">
-                            @L["Download model"]
+                            @L["Download ML model pipeline"]
                         </MudButton>
                     </MudStack>
                 }
@@ -36,7 +37,7 @@
                            Variant="Variant.Filled"
                            StartIcon="@Icons.Filled.CloudDownload"
                            Color="Color.Secondary">
-                            @L["Download model"]
+                            @L["Download ML model pipeline"]
                         </MudButton>
                     </MudStack>
                 }

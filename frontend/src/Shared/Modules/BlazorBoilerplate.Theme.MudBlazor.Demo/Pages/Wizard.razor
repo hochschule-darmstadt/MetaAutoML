@@ -12,8 +12,9 @@
 </TopSection>
 
 <MudStack AlignItems="AlignItems.Center" Row="true" Class="mb-2" style="padding-top:50px">
-    <MudIcon Size="Size.Large" Icon="@Icons.Filled.ModelTraining"/>
-    <MudText Typo="Typo.h4">@L["Train"]</MudText>
+    <MudIcon Size="Size.Large" Icon="@Icons.Filled.ModelTraining" />
+    <LabelTooltip FontSize="Typo.h4" Label=@L["Train"] Text="ML training is the process of condensing implicit information in a dataset into a generated ML model. This is the first step of the training wizard. Here you can modify pre-configured datatypes of columns in tabular datasets. You can also assign roles, in particular whether a column is an ID (and hence be ignored for training) or is the training target." Position="Placement.Bottom"></LabelTooltip>
+
 </MudStack>
 
 @if (_dataset == null)

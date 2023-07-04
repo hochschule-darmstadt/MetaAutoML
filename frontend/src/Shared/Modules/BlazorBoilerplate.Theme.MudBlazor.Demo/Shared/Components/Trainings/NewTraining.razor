@@ -17,14 +17,18 @@
             }
             else
             {
-                <MudStack>
-                    <MudButton OnClick="@(e => { NavManager.NavigateTo("/datasets/" + Dataset.Dataset.Id + "/train"); })" 
-                        Variant="Variant.Filled" 
-                        StartIcon="@Icons.Filled.ModelTraining"
-                        Color="Color.Secondary">
-                        @L["Start Training"]
-                    </MudButton>
-                </MudStack>
+        <ButtonTooltip Text="Click here to initiate a new training sessions." Position="Placement.Top">
+            <MudContainer>
+
+                <MudButton OnClick="@(e => { NavManager.NavigateTo("/datasets/" + Dataset.Dataset.Id + "/train"); })"
+                           Variant="Variant.Filled"
+                           StartIcon="@Icons.Filled.ModelTraining"
+                           Color="Color.Secondary" Style="width:16.3rem; align-self:center">
+                    @L["Start Training"]
+                </MudButton>
+
+            </MudContainer>
+        </ButtonTooltip>
             }
         </MudPaper>
     </MudCardContent>
