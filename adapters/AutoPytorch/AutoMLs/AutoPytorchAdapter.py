@@ -64,7 +64,7 @@ class AutoPytorchAdapter:
         self._configuration = set_imputation_for_numerical_columns(self._configuration, X)
         train, test = data_loader(self._configuration)
         #reload dataset to load changed data
-        X, y = prepare_tabular_dataset(train, self._configuration)
+        X, y = prepare_tabular_dataset(train, self._configuration, apply_feature_extration=True)
         parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), appc.task_config)
 
 
@@ -89,7 +89,7 @@ class AutoPytorchAdapter:
         self._configuration = set_imputation_for_numerical_columns(self._configuration, X)
         train, test = data_loader(self._configuration)
         #reload dataset to load changed data
-        X, y = prepare_tabular_dataset(train, self._configuration)
+        X, y = prepare_tabular_dataset(train, self._configuration, apply_feature_extration=True)
 
         parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), appc.task_config)
 
@@ -121,7 +121,7 @@ class AutoPytorchAdapter:
 
 
         #reload dataset to load changed data
-        X, y = prepare_tabular_dataset(train, self._configuration)
+        X, y = prepare_tabular_dataset(train, self._configuration, apply_feature_extration=True)
 
         y_train = [y[: -self._configuration["forecasting_horizon"]]]
         y_test = [y[-self._configuration["forecasting_horizon"]:]]
