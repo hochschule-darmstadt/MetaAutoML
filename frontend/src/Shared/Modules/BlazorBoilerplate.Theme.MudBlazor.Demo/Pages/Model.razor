@@ -92,7 +92,13 @@
         <DownloadMlPipeline Model="_model"/>
     </MudItem>
     <MudItem xs="12" sm="12" md="4">
-        <ModelExplanationShort Model="_model" ExplanationPagePath="@_explanationPagePath" />
+        @if(_model != null)
+        {
+            @if (_model.Model.DashboardCompatible == true)
+            {
+                <ModelExplanationShort Model="_model" ExplanationPagePath="@_explanationPagePath" />
+            }
+        }
     </MudItem>
     <MudItem xs="12" sm="12" md="4">
         <ModelConfiguration Training="_training" Model="_model" Dataset="_dataset"/>

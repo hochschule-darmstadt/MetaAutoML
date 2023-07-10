@@ -1,6 +1,7 @@
 import uuid
 from AdapterManager import *
 from AdapterBGRPC import *
+from ExplainerDashboardManager import *
 from dependency_injector.wiring import inject, Provide
 
 class AdapterScheduler:
@@ -10,6 +11,9 @@ class AdapterScheduler:
     def __init__(self) -> None:
         """Initialize a new AdapterScheduler, is managed by dependency injection"""
         self.__adapter_managers: dict[str, AdapterManager] = {}
+        self.__explainer_dashboard_managers: dict[str, ExplainerDashboardManager] = {}
+        self.__explainer_dashboard_port_start = os.getenv('EXPLAINER_DASHBOARD_PORT_START')
+        self.__explainer_dashboard_port_end = os.getenv('EXPLAINER_DASHBOARD_PORT_END')
         return
 
     @inject
@@ -64,7 +68,7 @@ class AdapterScheduler:
             result = await self.__adapter_managers[explain_auto_ml_request.session_id].explain_model(explain_auto_ml_request)
             return result
         raise grpclib.GRPCError(grpclib.Status.NOT_FOUND, f"explain_model: Adapter session {explain_auto_ml_request.session_id} does not exist can not get model explanation!")
-    
+
     @inject
     async def create_explainer_dashboard(self, create_dashboard_request: "CreateExplainerDashboardRequest", adapter_manager: AdapterManager = Provide["managers.adapter_manager"]) -> "CreateExplainerDashboardResponse":
         """Request the adapter to perform a probability prediction on a previously ended training session, using the waiting AdapterManager from the training session
@@ -78,9 +82,34 @@ class AdapterScheduler:
         Returns:
             ExplainModelResponse: The Grpc response message
         """
-        result = adapter_manager._create_explainer_dashboard(create_dashboard_request)
+        result = adapter_manager.create_explainer_dashboard(create_dashboard_request)
         del adapter_manager
         return result
+
+    async def start_explainer_dashboard(self, start_explainer_dashboard_request: "StartExplainerDashboardRequest") -> "StartExplainerDashboardResponse":
+        print(f"Requesting start for XAI dashboard {start_explainer_dashboard_request.session_id}")
+        dashboard_port = ""
+        for port in range(int(self.__explainer_dashboard_port_start), int(self.__explainer_dashboard_port_end)):
+            if self.__explainer_dashboard_managers.get(port, "") == "":
+                dashboard_port = port
+        if dashboard_port == "":
+            print("no free port")
+            return StartExplainerDashboardResponse()
+        explainer_dashboard_manager = ExplainerDashboardManager(int(dashboard_port), start_explainer_dashboard_request.session_id)
+        result = explainer_dashboard_manager.start_explainer_dashboard(start_explainer_dashboard_request)
+        explainer_dashboard_manager.start()
+        self.__explainer_dashboard_managers[dashboard_port] = explainer_dashboard_manager
+        return result
+
+    async def stop_explainer_dashboard(self, stop_explainer_dashboard_request: "StopExplainerDashboardRequest") -> "StopExplainerDashboardResponse":
+        print(f"Requesting stop for XAI dashboard {stop_explainer_dashboard_request.session_id}")
+        for key, val in self.__explainer_dashboard_managers.items():
+            if val.get_session_id() == stop_explainer_dashboard_request.session_id:
+                self.__explainer_dashboard_managers[key].terminate()
+                self.__explainer_dashboard_managers[key].join()
+                del self.__explainer_dashboard_managers[key]
+                return StopExplainerDashboardResponse()
+        return StopExplainerDashboardResponse()
 
     @inject
     async def predict_model(self, predict_model_request: "PredictModelRequest", adapter_manager: AdapterManager = Provide["managers.adapter_manager"]) -> "PredictModelResponse":

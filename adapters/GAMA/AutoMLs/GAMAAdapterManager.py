@@ -8,7 +8,6 @@ from threading import *
 from JsonUtil import get_config_property
 import pandas as pd
 from typing import Tuple
-from predict_time_sources import feature_preparation
 
 
 
@@ -56,3 +55,4 @@ class GAMAAdapterManager(AdapterManager):
         except Exception as e:
             raise(e)
         return probabilities
+

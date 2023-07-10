@@ -1,5 +1,5 @@
 ### Ontology file generated from ML_Ontology.xlsx.
-### 2023-06-22 14:14:40.215109
+### 2023-07-07 14:27:23.485217
 
 
 # PREFIXES
@@ -1672,15 +1672,13 @@
     :used_for :pytorch_lib , :pytorch_forecasting_lib ;
     :can_perform :tabular_classification , :tabular_regression , :image_classification , :time_series_forecasting ;
     rdfs:comment "AutoML framework focussing on neural architecture search" ;
-    rdfs:seeAlso <https://github.com/automl/Auto-PyTorch> ;
-    :supported_by_oma_ml "true"^^xsd:boolean .
+    rdfs:seeAlso <https://github.com/automl/Auto-PyTorch> .
 :autosklearn a :AutoML_solution ;
     skos:prefLabel "Autosklearn" ;
     :used_for :scikit_learn_lib ;
     :can_perform :tabular_classification , :tabular_regression ;
     rdfs:comment "AutoML library for Scikit-learn" ;
-    rdfs:seeAlso <https://automl.github.io/auto-sklearn> ;
-    :supported_by_oma_ml "true"^^xsd:boolean .
+    rdfs:seeAlso <https://automl.github.io/auto-sklearn> .
 :autots a :AutoML_solution ;
     skos:prefLabel "AutoTS" ;
     :used_for :prophet_lib , :pytorch_lib , :gluonts_lib , :pmdarima_lib , :tensorflow_lib ;
@@ -1760,8 +1758,7 @@
     :used_for :tensorflow_lib ;
     :can_perform :time_series_classification ;
     rdfs:comment "AutoML library for time series" ;
-    rdfs:seeAlso <https://github.com/NLeSC/mcfly> ;
-    :supported_by_oma_ml "true"^^xsd:boolean .
+    rdfs:seeAlso <https://github.com/NLeSC/mcfly> .
 :merlion a :AutoML_solution ;
     skos:prefLabel "Merlion" ;
     :used_for :lightgbm_lib , :prophet_lib , :scikit_learn_lib , :statsmodel_lib , :greykite_lib , :kats_lib ;
@@ -1980,7 +1977,7 @@
     :category :task_configuration ;
     :automl_solution :evalml ;
     :ml_task :text_classification ;
-    :parameter_value :use_approach_evalml_tabular_classification , :metric_evalml_text_classification , :tuner_class_evalml , :optimize_thresholds_evalml , :ensembling_evalml , :max_batches_evalml , :allow_long_running_models_evalml , :pipelines_per_batch_evalml , :exclude_featurizers_evalml ;
+    :parameter_value :use_approach_evalml_text_classification , :metric_evalml_text_classification , :tuner_class_evalml , :optimize_thresholds_evalml , :ensembling_evalml , :max_batches_evalml , :allow_long_running_models_evalml , :pipelines_per_batch_evalml , :exclude_featurizers_evalml ;
     rdfs:comment "Task configuration for text classification in EvalML" ;
     rdfs:seeAlso <https://evalml.alteryx.com/en/stable/api_index.html> .
 :text_regression_in_evalml a :Configuration_item ;
@@ -1988,7 +1985,7 @@
     :category :task_configuration ;
     :automl_solution :evalml ;
     :ml_task :text_regression ;
-    :parameter_value :use_approach_evalml_tabular_regression , :metric_evalml_text_regression , :tuner_class_evalml , :optimize_thresholds_evalml , :ensembling_evalml , :max_batches_evalml , :allow_long_running_models_evalml , :pipelines_per_batch_evalml , :exclude_featurizers_evalml ;
+    :parameter_value :use_approach_evalml_text_regression , :metric_evalml_text_regression , :tuner_class_evalml , :optimize_thresholds_evalml , :ensembling_evalml , :max_batches_evalml , :allow_long_running_models_evalml , :pipelines_per_batch_evalml , :exclude_featurizers_evalml ;
     rdfs:comment "Task configuration for text regression in EvalML" ;
     rdfs:seeAlso <https://evalml.alteryx.com/en/stable/api_index.html> .
 :tabular_classification_pycaret a :Configuration_item ;
@@ -2348,6 +2345,22 @@
     rdfs:seeAlso <https://evalml.alteryx.com/en/stable/api_index.html> .
 :use_approach_evalml_tabular_regression a :Configuration_item ;
     skos:prefLabel "use approach EvalML tabular regression" ;
+    :category :parameter ;
+    skos:broader :use_approach ;
+    :has_datatype :list ;
+    :parameter_value :catboost , :decision_tree , :extra_tree , :light_gradient_boosting_machine , :linear_regression , :random_forest , :xgboost ;
+    rdfs:comment "Selecting ML approaches to be used for AutoML" ;
+    rdfs:seeAlso <https://evalml.alteryx.com/en/stable/api_index.html> .
+:use_approach_evalml_text_classification a :Configuration_item ;
+    skos:prefLabel "use approach EvalML text classification" ;
+    :category :parameter ;
+    skos:broader :use_approach ;
+    :has_datatype :list ;
+    :parameter_value :catboost , :decision_tree , :extra_tree , :light_gradient_boosting_machine , :linear_regression , :random_forest , :xgboost ;
+    rdfs:comment "Selecting ML approaches to be used for AutoML" ;
+    rdfs:seeAlso <https://evalml.alteryx.com/en/stable/api_index.html> .
+:use_approach_evalml_text_regression a :Configuration_item ;
+    skos:prefLabel "use approach EvalML text regression" ;
     :category :parameter ;
     skos:broader :use_approach ;
     :has_datatype :list ;
@@ -3349,6 +3362,7 @@
 :hyperparameter_optimization_method_flaml a :Configuration_item ;
     skos:prefLabel "hyperparameter optimization method flaml" ;
     :category :parameter ;
+    skos:broader :hyperparameter_optimization_method ;
     :has_datatype :single_value ;
     :parameter_value :auto_optimization_approach , :blendsearch , :frugal_optimization_for_costrelated_hyperparameters .
 :optimize_thresholds a :Configuration_item ;

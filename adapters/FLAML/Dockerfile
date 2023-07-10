@@ -1,5 +1,6 @@
 FROM --platform=linux/amd64 python:3.9.16-slim-buster AS base
 EXPOSE 50056
+EXPOSE 6000-6099
 
 RUN apt-get update && apt-get install -y libgomp1 \
     && apt-get install -y git

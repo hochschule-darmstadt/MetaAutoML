@@ -9,7 +9,7 @@ class AdapterService(AdapterServiceBase):
         """
         These variables are used by the ExplainModel function.
         """
-        
+
     @inject
     async def start_auto_ml(self, start_automl_request: "StartAutoMlRequest",
         adapter_scheduler: AdapterScheduler=Provide[Application.managers.adapter_scheduler]
@@ -28,13 +28,27 @@ class AdapterService(AdapterServiceBase):
         adapter_scheduler: AdapterScheduler=Provide[Application.managers.adapter_scheduler]
     ) -> "ExplainModelResponse":
         return await adapter_scheduler.explain_model(explain_model_request)
-    
+
     @inject
     async def create_explainer_dashboard(
         self, create_explainer_dashboard_request: "CreateExplainerDashboardRequest",
         adapter_scheduler: AdapterScheduler=Provide[Application.managers.adapter_scheduler]
     ) -> "CreateExplainerDashboardResponse":
         return await adapter_scheduler.create_explainer_dashboard(create_explainer_dashboard_request)
+
+    @inject
+    async def start_explainer_dashboard(
+        self, start_explainer_dashboard_request: "StartExplainerDashboardRequest",
+        adapter_scheduler: AdapterScheduler=Provide[Application.managers.adapter_scheduler]
+    ) -> "StartExplainerDashboardResponse":
+        return await adapter_scheduler.start_explainer_dashboard(start_explainer_dashboard_request)
+
+    @inject
+    async def stop_explainer_dashboard(
+        self, stop_explainer_dashboard_request: "StopExplainerDashboardRequest",
+        adapter_scheduler: AdapterScheduler=Provide[Application.managers.adapter_scheduler]
+    ) -> "StopExplainerDashboardResponse":
+        return await adapter_scheduler.stop_explainer_dashboard(stop_explainer_dashboard_request)
 
     @inject
     async def predict_model(

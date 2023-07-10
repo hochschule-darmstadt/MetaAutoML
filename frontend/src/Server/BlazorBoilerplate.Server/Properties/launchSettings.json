@@ -23,7 +23,6 @@
         "ASPNETCORE_ENVIRONMENT": "Development",
         "CONTROLLER_SERVICE_HOST": "localhost",
         "CONTROLLER_DATASET_FOLDER_PATH": "C:\\Users\\Julia\\Uni\\Master-1\\PSE-MLs\\MetaAutoML\\controller\\app-data\\datasets",
-        "CONTROLLER_DATASET_FOLDER_PATH": "C:\\Users\\Julia\\Uni\\Master-1\\PSE-MLs\\MetaAutoML\\controller\\app-data\\datasets",
         "CONTROLLER_SERVICE_PORT": "5001",
         "no_proxy": "localhost",
         "REDIS_SERVICE_HOST": "localhost",

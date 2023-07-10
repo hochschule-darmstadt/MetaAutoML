@@ -2,7 +2,6 @@ from DataStorage import DataStorage
 import logging, os, json, datetime
 from ControllerBGRPC import *
 from AdapterManager import AdapterManager
-from ExplainableAIManager import ExplainableAIManager
 from ThreadLock import ThreadLock
 import json
 
@@ -173,6 +172,10 @@ class AdapterRuntimeManager:
         if len(training["model_ids"]) == len(model_list)-1:
             if self.__multi_fidelity_level != 0:
                 self.__multi_fidelity_callback(model_list, self.__multi_fidelity_level)
+        if model_details["status"] == "completed" and self.__multi_fidelity_level == 0 and model_details["dashboard_compatible"] == True:
+            if dataset["type"] in  [":tabular", ":text", ":time_series"]:
+                #Generate explainer dashboard
+                adapter_manager.generate_explainer_dashboard()
 
     def get_adapters(self) -> list[AdapterManager]:
         """get the __adapters object of this session

@@ -15,7 +15,9 @@
                 "PYTHONPATH": ".;dependency-injection;AutoMLs;Utils;../Utils/Utils;../Utils/AutoMLs;../GRPC/Adapter;",
                 "GRPC_SERVER_PORT": "50056",
                 "PYTHON_ENV": ".venv/Scripts/python",
-                "USE_DEV_CONFIG": "YES"
+                "USE_DEV_CONFIG": "YES",
+                "EXPLAINER_DASHBOARD_PORT_START": "5500",
+                "EXPLAINER_DASHBOARD_PORT_END": "5599"
             },
         },
         {
@@ -29,11 +31,13 @@
                 "PYTHONPATH": ".:dependency-injection:AutoMLs:Utils:../Utils/Utils:../Utils/AutoMLs:../GRPC/Adapter:",
                 "GRPC_SERVER_PORT": "50056",
                 "PYTHON_ENV": ".venv/bin/python",
-                "USE_DEV_CONFIG": "YES"
+                "USE_DEV_CONFIG": "YES",
+                "EXPLAINER_DASHBOARD_PORT_START": "5500",
+                "EXPLAINER_DASHBOARD_PORT_END": "5599"
             },
         },
-        {   
-            
+        {
+
             "name": "WIN FLAML Adapter Test",
             "type": "python",
             "request": "launch",

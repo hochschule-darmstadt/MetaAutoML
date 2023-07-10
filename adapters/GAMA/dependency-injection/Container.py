@@ -2,7 +2,6 @@ from dependency_injector import containers, providers
 from AdapterScheduler import *
 from GAMAAdapterManager import GAMAAdapterManager
 
-
 class Managers(containers.DeclarativeContainer):
     """Dependency injection declarative container object, providing the different manager instances when injected.
     For each individual adapter the correct AdapterManager is injected here

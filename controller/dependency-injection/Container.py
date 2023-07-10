@@ -66,7 +66,8 @@ class Managers(containers.DeclarativeContainer):
     )
     model_manager = providers.Factory(
         ModelManager,
-        data_storage=ressources.data_storage
+        data_storage=ressources.data_storage,
+        adapter_runtime_scheduler=adapter_runtime_scheduler
     )
     user_manager = providers.Factory(
         UserManager,

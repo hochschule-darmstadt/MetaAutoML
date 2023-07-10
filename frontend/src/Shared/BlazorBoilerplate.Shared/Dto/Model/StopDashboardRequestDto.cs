@@ -8,6 +8,6 @@ namespace BlazorBoilerplate.Shared.Dto.Model
 {
     public class StopDashboardRequestDto
     {
-        public string ModelId { get; set; }
+        public string SessionId { get; set; }
     }
 }

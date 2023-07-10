@@ -214,8 +214,6 @@ namespace BlazorBoilerplate.Server.Managers
                 response.Name = Path.GetFileName(resultPath);
                 return new ApiResponse(Status200OK, null, response);
 
-                return new ApiResponse(Status200OK, null, response);
-
             }
             catch (Exception ex)
             {
@@ -250,7 +248,7 @@ namespace BlazorBoilerplate.Server.Managers
 
         public async Task<ApiResponse> StartExplainerDashboard(StartDashboardRequestDto request)
         {
-            StartDashboardRequestDto response = new StartDashboardRequestDto();
+            StartDashboardResponseDto response = new StartDashboardResponseDto();
             StartDashboardRequest startDashboardRequest = new StartDashboardRequest();
             var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
             try
@@ -258,7 +256,9 @@ namespace BlazorBoilerplate.Server.Managers
                 startDashboardRequest.UserId = username;
                 startDashboardRequest.ModelId = request.ModelId;
                 var reply = _client.StartExplainerDashboard(startDashboardRequest);
-                return new ApiResponse(Status200OK, null, "");
+                response.Url = reply.Url;
+                response.SessionId = reply.SessionId;
+                return new ApiResponse(Status200OK, null, response);
             }
             catch (Exception ex)
             {
@@ -274,8 +274,7 @@ namespace BlazorBoilerplate.Server.Managers
             var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
             try
             {
-                stopDashboardRequest.UserId = username;
-                stopDashboardRequest.ModelId = request.ModelId;
+                stopDashboardRequest.SessionId = request.SessionId;
                 var reply = _client.StopExplainerDashboard(stopDashboardRequest);
                 return new ApiResponse(Status200OK, null, "");
             }

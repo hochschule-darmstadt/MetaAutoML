@@ -413,6 +413,12 @@ def setup_run_environment(request: "StartAutoMlRequest", adapter_name: str) -> "
                                         request.training_id,
                                         get_config_property("result-folder-name"))
 
+    dashboard_folder_location = os.path.join(get_config_property("training-path"),
+                                        request.user_id,
+                                        request.dataset_id,
+                                        request.training_id,
+                                        get_config_property("dashboard-folder-name"))
+
     controller_export_folder_location  = os.path.join(get_config_property("training-path"),
                                         adapter_name,
                                         request.user_id,
@@ -430,12 +436,14 @@ def setup_run_environment(request: "StartAutoMlRequest", adapter_name: str) -> "
             model_folder_location = model_folder_location.replace("\\", "/")
             export_folder_location = export_folder_location.replace("\\", "/")
             result_folder_location = result_folder_location.replace("\\", "/")
+            dashboard_folder_location = dashboard_folder_location.replace("\\", "/")
             controller_export_folder_location = controller_export_folder_location.replace("\\", "/")
 
     request_dict["job_folder_location"] = job_folder_location
     request_dict["model_folder_location"] = model_folder_location
     request_dict["export_folder_location"] = export_folder_location
     request_dict["result_folder_location"] = result_folder_location
+    request_dict["dashboard_folder_location"] = dashboard_folder_location
     request_dict["controller_export_folder_location"] = controller_export_folder_location
 
     # TODO: Refactor AdapterManager and AdapterUtils to not rely on a proto object that some fields have been added to at runtime
@@ -445,6 +453,7 @@ def setup_run_environment(request: "StartAutoMlRequest", adapter_name: str) -> "
     request.model_folder_location = model_folder_location
     request.export_folder_location = export_folder_location
     request.result_folder_location = result_folder_location
+    request.dashboard_folder_location = dashboard_folder_location
     request.controller_export_folder_location = controller_export_folder_location
 
     # TODO: Remove this and fix all places that access the configuration object as a dictionary
@@ -456,6 +465,7 @@ def setup_run_environment(request: "StartAutoMlRequest", adapter_name: str) -> "
     os.makedirs(model_folder_location, exist_ok=True)
     os.makedirs(export_folder_location, exist_ok=True)
     os.makedirs(result_folder_location, exist_ok=True)
+    os.makedirs(dashboard_folder_location, exist_ok=True)
     #Save job file
     with open(os.path.join(job_folder_location, get_config_property("job-file-name")), "w+") as f:
         json.dump(request_dict, f)
