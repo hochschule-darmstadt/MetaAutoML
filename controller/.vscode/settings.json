@@ -21,7 +21,7 @@
         "./blackboard",
         "./blackboard/agents",
         "./blackboard/strategies",
-
+        "./kubernetes"
 
     ]
 }

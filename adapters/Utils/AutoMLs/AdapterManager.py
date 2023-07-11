@@ -334,6 +334,9 @@ class AdapterManager(Thread):
 
         try:
             from explainerdashboard import ClassifierExplainer, ExplainerDashboard, RegressionExplainer
+            import sys, importlib
+            importlib.reload(sys.modules['explainerdashboard'])
+            from explainerdashboard import ClassifierExplainer, ExplainerDashboard, RegressionExplainer
             # The library is available
             print("explainerdashboard is installed.")
         except ImportError:

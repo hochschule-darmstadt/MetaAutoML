@@ -4,7 +4,6 @@ from AdapterExplainerDashboardManager import AdapterExplainerDashboardManager
 from DataStorage import DataStorage
 import json, logging, os, asyncio
 from ControllerBGRPC import *
-from AdapterManager import AdapterManager
 
 class AdapterRuntimeExplainerDashboardManager:
     """The AdapterRuntimePredictionManager manages the explainer dashboards
@@ -43,7 +42,7 @@ class AdapterRuntimeExplainerDashboardManager:
         }
         return
 
-    def start_explainer_dashboard(self):
+    def start_explainer_dashboard(self, kubernetes_client):
 
         found, model = self.__data_storage.get_model(self.__user_id, self.__model_id)
 
@@ -56,7 +55,19 @@ class AdapterRuntimeExplainerDashboardManager:
         self.__log.debug(f"create_new_prediction: creating new prediction adapter manager and adapter manager agent")
         adapter_prediction = AdapterExplainerDashboardManager(model["dashboard_path"], self.__session_id, host, port)
         self.__adapter = adapter_prediction
-        return adapter_prediction.start_explainer_dashboard()
+        result = adapter_prediction.start_explainer_dashboard()
 
-    def stop_explainer_dashboard(self):
+        if os.getenv("KUBERNETES_CLUSTER") == "YES":
+            print(f"ADD DASHBOARD PATH: {self.__session_id} URL: {result.url.split(':')[0]}, PORT: {int(result.url.split(':')[1])}")
+            kubernetes_client.add_path(f"{self.__session_id}", result.url.split(":")[0], int(result.url.split(":")[1]))
+            #For the kubernetes redirection to work properly we need to use double session id
+            result.url = "https://" + os.getenv("KUBERNETES_URL") + "/" + self.__session_id + "/" + self.__session_id
+        else:
+            result.url = "http://" + result.url
+        return result
+
+    def stop_explainer_dashboard(self, kubernetes_client):
+        if os.getenv("KUBERNETES_CLUSTER") == "YES":
+            print(f"REMOVE DASHBOARD PATH: {self.__session_id}")
+            kubernetes_client.remove_path(f"{self.__session_id}")
         return self.__adapter.stop_explainer_dashboard()

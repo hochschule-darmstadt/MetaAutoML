@@ -18,6 +18,7 @@ spec:
       labels:
         io.kompose.service: controller
     spec:
+      serviceAccountName: controller-pod-account
       containers:
       - env:
         - name: "MONGO_DB_DEBUG"
@@ -34,6 +35,10 @@ spec:
           value: "DEBUG"
         - name: "BLACKBOARD_LOGGING_LEVEL"
           value: "DEBUG"
+        - name: "KUBERNETES_CLUSTER"
+          value: "YES"
+        - name: "KUBERNETES_URL"
+          value: "kubernetes.docker.internal"
         image: localhost:5000/oma-ml-controller
         imagePullPolicy: ""
         name: controller
@@ -71,7 +76,6 @@ spec:
         - name: lama-output
           mountPath: /app/app-data/training/lama
       restartPolicy: Always
-      serviceAccountName: ""
       volumes:
       - name: datasets
         persistentVolumeClaim:

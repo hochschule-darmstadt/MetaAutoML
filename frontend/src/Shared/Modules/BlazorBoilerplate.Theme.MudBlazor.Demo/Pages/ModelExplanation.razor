@@ -125,7 +125,7 @@ else{
         {
             ApiResponseDto apiResponse = await apiClient.StartExplainerDashboard(new StartDashboardRequestDto { ModelId = _model.Model.Id });
             var resppose = Newtonsoft.Json.JsonConvert.DeserializeObject<StartDashboardResponseDto>(apiResponse.Result.ToString());
-            dashboardUrl = $"//{resppose.Url}";
+            dashboardUrl = resppose.Url;
             dashboardSessionId = resppose.SessionId;
             //if (wasIFrameErrorHandleAdded == false)
             //{

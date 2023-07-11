@@ -7,12 +7,13 @@ from AdapterRuntimePredictionManager import AdapterRuntimePredictionManager
 from AdapterRuntimeExplainerDashboardManager import AdapterRuntimeExplainerDashboardManager
 from ThreadLock import ThreadLock
 import uuid
+from KubernetesClient import KubernetesClient
 
 class AdapterRuntimeScheduler:
     """The AdapterRuntimeScheduler is a singleton object holding the running training and prediction sessions
     """
 
-    def __init__(self, data_storage: DataStorage, explainable_lock: ThreadLock) -> None:
+    def __init__(self, data_storage: DataStorage, explainable_lock: ThreadLock, kubernetes_client: KubernetesClient) -> None:
         """Initialize a new AdapterRuntimeScheduler instance
 
         Args:
@@ -26,6 +27,7 @@ class AdapterRuntimeScheduler:
         self.__running_online_predictions: dict[str, AdapterRuntimeManager] = {}
         self.__running_explainer_dashboards: dict[str, AdapterRuntimeExplainerDashboardManager] = {}
         self.__explainable_lock = explainable_lock
+        self.__kubernetes_client = kubernetes_client
         return
 
     def create_new_training(self, request: CreateTrainingRequest) -> str:
@@ -61,7 +63,7 @@ class AdapterRuntimeScheduler:
                 break
 
         adapter_runtime_manager: AdapterRuntimeExplainerDashboardManager = AdapterRuntimeExplainerDashboardManager(self.__data_storage, user_id, model_id, unique_id)
-        response = adapter_runtime_manager.start_explainer_dashboard()
+        response = adapter_runtime_manager.start_explainer_dashboard(self.__kubernetes_client)
         result.url = response.url
         result.session_id = unique_id
         self.__running_explainer_dashboards[unique_id] = adapter_runtime_manager
@@ -70,6 +72,6 @@ class AdapterRuntimeScheduler:
     def stop_explainer_dashboard(self, session_id):
         result = StopDashboardResponse()
         if self.__running_explainer_dashboards.get(session_id, "") != "":
-            self.__running_explainer_dashboards[session_id].stop_explainer_dashboard()
+            self.__running_explainer_dashboards[session_id].stop_explainer_dashboard(self.__kubernetes_client)
             del self.__running_explainer_dashboards[session_id]
         return result

@@ -23,18 +23,19 @@ class ExplainerDashboardManager(Process):
     def run(self):
         """Start the AutoML solution as a background process
         """
-
         from explainerdashboard import ClassifierExplainer, ExplainerDashboard
-        self.__dashboard = ExplainerDashboard(ClassifierExplainer.from_file(self.__path))
-        self.__dashboard
-        if get_config_property("local_execution") == "YES":
-            self.__dashboard.run(self.__port)
+        import sys, importlib
+        importlib.reload(sys.modules['explainerdashboard'])
+        from explainerdashboard import ClassifierExplainer, ExplainerDashboard
+        if get_config_property("local_execution") == "YES" or os.getenv("DOCKER_COMPOSE") == "YES":
+            self.__dashboard = ExplainerDashboard(ClassifierExplainer.from_file(self.__path))
         else:
-            self.__dashboard.run(self.__port, host=get_config_property('adapter-name'))
+            self.__dashboard = ExplainerDashboard(ClassifierExplainer.from_file(self.__path), url_base_pathname=f"/{self.__session_id}/")
+        self.__dashboard.run(self.__port)
+            #self.__dashboard.run(self.__port, host=get_config_property('adapter-name'))
         print("thread ended")
 
     def start_explainer_dashboard(self, request: "StartExplainerDashboardRequest") -> "StartExplainerDashboardResponse":
-        from explainerdashboard import ClassifierExplainer, ExplainerDashboard
         self.__path = request.path
         result = StartExplainerDashboardResponse()
         result.result = DashboardCode.DASHBOARD_BOOTED_SUCCESSFULLY
