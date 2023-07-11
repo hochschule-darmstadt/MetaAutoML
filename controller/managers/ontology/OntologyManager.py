@@ -254,6 +254,10 @@ class OntologyManager(object):
             rowInstance.value_label = row.value_label
             rowInstance.broader_iri = self.__normalize_iri_to_colon(row.broader_iri)
             rowInstance.broader_label = row.broader_label
+            rowInstance.see_also_para = row.seeAlso_para
+            rowInstance.comment_para = self.__normalize_iri_to_colon(row.comment_para)
+            rowInstance.see_also_value = row.seeAlso_value
+            rowInstance.comment_value = self.__normalize_iri_to_colon(row.comment_value)
             result.append(rowInstance)
 
         return result

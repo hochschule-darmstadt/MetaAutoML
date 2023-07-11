@@ -10,7 +10,9 @@ from ControllerBGRPC import *
 from DataStorage import DataStorage
 from ThreadLock import ThreadLock
 from CsvManager import CsvManager
+from explainerdashboard import ClassifierExplainer, ExplainerDashboard
 import re
+import flaml
 
 def make_svg_waterfall_plot(base_value, shap_values, X, path, filename_detail):
     import shap
@@ -188,132 +190,26 @@ def feature_preparation(X, features, datetime_format, is_prediction=False):
     return X, y
 
 
-
-
-
 class ExplainableAIManager:
-    def __init__(self, data_storage: DataStorage, adapter_manager: AdapterManager, explainable_lock: ThreadLock):
-        self.__data_storage = data_storage
-        self.__adapter_manager = adapter_manager
-        self.__threads = []
-        self.__explainable_lock = explainable_lock
-
-    def explain(self, user_id, model_id):
-        """
-        Start new explanation.
-        This spawns a separate thread which is saved in self.__threads and is removed upon completion.
-        After the thread is finished (or has crashed) the database is updated with the new information.
-        """
-        def callback(thread, user_id, model, status, detail, plots, title):
-            with self.__data_storage.lock():
-                # Add explanation results to model
-                model_data = {"explanation":
-                                  {"status": status,
-                                   "detail": detail,
-                                   "content": [{"title": title, "items": plots}]}}
-                self.__data_storage.update_model(user_id, str(model['_id']), model_data)
-
-                # Add explanation results (only the status) to training
-                found, training = self.__data_storage.get_training(user_id, model['training_id'])
-                if "explanation" in training:
-                    training["explanation"].update({model['auto_ml_solution']: status})
-                else:
-                    training["explanation"] = {model['auto_ml_solution']: status}
-                self.__data_storage.update_training(user_id, model['training_id'], {"explanation": training["explanation"]})
-
-            # Remove tread from thread list
-            self.__threads.remove(thread)
-
-        # Create a new thread for the explanation
-        thread = threading.Thread(target=self.explain_shap, name=f"{user_id}:{model_id}", args=(user_id, model_id, callback))
+    def startExplainerDashboard(self, path, modeltype, id):
+        def callback():
+            basepath = os.getcwd()
+            filepath_first = path[:path.find('training') + 8]
+            filepath_second = path[path.find('training') + 9:path.find("export") - 1]
+            filepath = os.path.join(basepath, filepath_first, modeltype[1:], filepath_second, "result/binary_dashboard.dill")
+            port = (''.join([n for n in id if n.isdigit()]))[0:5]
+            dashboard = ExplainerDashboard(ClassifierExplainer.from_file(filepath))
+            dashboard.run(port)
+        thread = threading.Thread(target=callback)
+        thread.name = "explainer_dashboard"
         thread.start()
-        self.__threads.append(thread)
-        self.__data_storage.update_model(user_id, model_id, {"explanation": {"status": "started"}})
-        return
+
+    def stopExplainerDashboard(self):
+        for thread in threading.enumerate(): 
+           if (thread.name == "explainer_dashboard"):
+               thread.join(timeout=0.1)
 
 
 
-    def explain_shap(self, user_id, model_id, callback, number_of_samples=25):
-        found, model = self.__data_storage.get_model(user_id, model_id)
-        found, training = self.__data_storage.get_training(user_id, model["training_id"])
-        dataset_path = self.__data_storage.get_dataset(user_id, training["dataset_id"])[1]["path"]
-
-        print(f"[ExplainableAIManager]: Initializing new shap explanation. AutoML: {model['auto_ml_solution'].replace(':', '')} | Training ID: {model['training_id']} | Dataset: {training['dataset_id']}")
-
-        training["file_location"], training["file_name"] = os.path.split(dataset_path)
-        output_path = os.path.join(os.getcwd(), "app-data", "training", model["auto_ml_solution"].replace(":", ""), user_id, training["dataset_id"], model["training_id"], "result")
-        os.makedirs(output_path, exist_ok=True)
-        plot_path = os.path.join(output_path, "plots")
-        os.makedirs(plot_path, exist_ok=True)
-
-        dataset = CsvManager.read_dataset(dataset_path, training["dataset_configuration"]['file_configuration'], training["dataset_configuration"]['schema'])
-        dataset_X, dataset_Y = feature_preparation(dataset, training["dataset_configuration"]["schema"].items(), training["dataset_configuration"]["file_configuration"]["datetime_format"])
-
-
-        sampled_dataset_X = dataset_X.iloc[0:number_of_samples, :]
-
-        print(f"[ExplainableAIManager]: Output is saved to {output_path}")
-        print(f"[ExplainableAIManager]: Starting explanation with {number_of_samples} samples. This may take a while.")
-
-        if training["configuration"]["task"] == ":tabular_classification":
-            try:
-                explainer = self.get_shap_explainer(user_id, model, training, sampled_dataset_X)
-            except RuntimeError as e:
-                callback(thread=threading.current_thread(), user_id=user_id, model=model, status="failed", detail=f"exeption: {e}", plots=[], title="SHAP Explanation")
-                return
-            shap_values = explainer.shap_values(sampled_dataset_X)
-
-            print("[ExplainableAIManager]: Explanation finished. Beginning plots.")
-            with self.__explainable_lock.lock():
-                print("[ExplainableAIManager]: ENTERING LOCK.")
-                plots = plot_tabular_classification(sampled_dataset_X,
-                                                            dataset_Y,
-                                                            dataset_Y.name,
-                                                            number_of_samples,
-                                                            explainer,
-                                                            shap_values,
-                                                            plot_path)
-                print("[ExplainableAIManager]: EXITING LOCK.")
-        else:
-            message = "The ML task of the selected training is not tabular classification. This module is only compatible with tabular classification."
-            print("[ExplainableAIManager]:" + message)
-            callback(thread=threading.current_thread(), user_id=user_id, model=model, status="failed", detail=f"incompatible: {message}", plots=[], title="SHAP Explanation")
-            return
-
-        print(f"[ExplainableAIManager]: Plots for {model['auto_ml_solution']} completed")
-        callback(thread=threading.current_thread(), user_id=user_id, model=model, status="finished", detail=f"{len(plots)} plots created", plots=plots, title="SHAP Explanation")
-
-    def get_shap_explainer(self, user_id, model, config, sampled_dataset_x):
-        """
-        Calculate and return the SHAP explainer object.
-        Usually this is a one-liner as with any "normal" ML-model the explainer is passed the model predict_proba (for
-        classification tasks) function.
-        But as here this function is called over gRPC, and it is implemented by AutoMLs, just passing the functions will
-        not work at all.
-        Our new prediction_probability function does several things (on this side and on the adapter side):
-            - Pass the data requested by SHAP to the adapter and return the probabilities (both sides)
-            - Convert the data back to the original Dataframe format (concerning columns and datatypes) while keeping
-                the content requested by SHAP (adapter side)
-            - Chunk the data if the requested data size is too large (this side). This is because gRPC is limited to a
-                certain file size but SHAP (especially with larger sample sizes) often requests very large datasets.
-                If the dataset as a whole is too large it gets requested as several chunks.
-            - Convert the received data back into a dataframe so that SHAP can work with the results.
-        """
-        def prediction_probability(data):
-            # Get number of chunks necessary. The max gRPC msg. size is 4194304.
-            no_chunks = int(sys.getsizeof(json.dumps(data.tolist())) / 4190000) + 1
-            data_chunks = np.array_split(np.array(data), no_chunks)
-            probabilities = []
-            for chunk in data_chunks:
-                # Request the data
-                result = self.__adapter_manager.explain_model(json.dumps(chunk.tolist()))
-                if result is None:
-                    raise RuntimeError(f"Unable to create SHAP values for Automl {model['auto_ml_solution']} | Training_id {model['training_id']}")
-                else:
-                    probabilities = probabilities + json.loads(result.probabilities)
-
-            return pd.DataFrame(probabilities)
-        import shap
-        return shap.KernelExplainer(prediction_probability, sampled_dataset_x)
 
 

@@ -40,8 +40,10 @@ class AdapterRuntimeManager:
             ":alphad3m":        ["ALPHAD3M_SERVICE_HOST",  "ALPHAD3M_SERVICE_PORT"],
             ":mcfly":           ["MCFLY_SERVICE_HOST", "MCFLY_SERVICE_PORT"],
             ":evalml":          ["EVALML_SERVICE_HOST", "EVALML_SERVICE_PORT"],
-            ":pycaret":          ["PYCARET_SERVICE_HOST", "PYCARET_SERVICE_PORT"],
-            ":tpot":          ["TPOT_SERVICE_HOST", "TPOT_SERVICE_PORT"],
+            ":pycaret":         ["PYCARET_SERVICE_HOST", "PYCARET_SERVICE_PORT"],
+            ":tpot":            ["TPOT_SERVICE_HOST", "TPOT_SERVICE_PORT"],
+            ":gama":            ["GAMA_SERVICE_HOST", "GAMA_SERVICE_PORT"],
+            ":lama":            ["LAMA_SERVICE_HOST", "LAMA_SERVICE_PORT"],
         }
         self.__adapters: list[AdapterManager] = []
         self.__log.debug("start_new_training: creating new blackboard and strategy controller for training")
@@ -74,17 +76,19 @@ class AdapterRuntimeManager:
         with self.__data_storage.lock():
             found, dataset = self.__data_storage.get_dataset(self.__request.user_id, self.__request.dataset_id)
             current_schema = dataset["schema"]
+            if self.__request.dataset_configuration == "":
+                return current_schema
             training_schema = json.loads(self.__request.dataset_configuration)
             #We only need to update the selected values if selected datatype and role as the rest is set by the backend
             for key in current_schema:
                 #Update selected role
-                selected_role = training_schema[key].get("RoleSelected", "")
+                selected_role = training_schema[key].get("role_selected", "")
                 if selected_role != "":
                     current_schema[key]["role_selected"] = selected_role
                 else:
                     current_schema[key].pop("role_selected", None)
                 #Update selected datatype
-                selected_datatype = training_schema[key].get("DatatypeSelected", "")
+                selected_datatype = training_schema[key].get("datatype_selected", "")
 
                 if selected_datatype != "":
                     current_schema[key]["datatype_selected"] = selected_datatype
@@ -168,12 +172,7 @@ class AdapterRuntimeManager:
         #Finish sub training and return outside of lock or else we deadlock us
         if len(training["model_ids"]) == len(model_list)-1:
             if self.__multi_fidelity_level != 0:
-                self.__multi_fidelity_callback(model_list)
-
-        if model_details["status"] == "completed" and self.__multi_fidelity_level == 0:
-            if dataset["type"] in  [":tabular", ":text", ":time_series"]:
-                ExplainableAIManager(self.__data_storage, adapter_manager, self.__explainable_lock).explain(user_id, model_id)
-                return
+                self.__multi_fidelity_callback(model_list, self.__multi_fidelity_level)
 
     def get_adapters(self) -> list[AdapterManager]:
         """get the __adapters object of this session
@@ -242,9 +241,11 @@ class AdapterRuntimeManager:
         data_storage_dataset_configuration = training["dataset_configuration"]
         request_dataset_configuration = json.loads(self.__request.dataset_configuration)
 
-        for key, value in request_dataset_configuration.items():
-            if key not in data_storage_dataset_configuration:
-                data_storage_dataset_configuration[key] = value
+        data_storage_dataset_configuration["schema"] = request_dataset_configuration
+
+        #for key, value in request_dataset_configuration.items():
+        #    if key not in data_storage_dataset_configuration:
+        #        data_storage_dataset_configuration[key] = value
 
         training_details = {
                     "dataset_configuration": data_storage_dataset_configuration

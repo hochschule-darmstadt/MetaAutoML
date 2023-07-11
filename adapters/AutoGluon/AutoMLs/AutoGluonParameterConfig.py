@@ -31,7 +31,14 @@ autogluon_metrics = {
     ":mean_absolute_percentage_error": "mean_absolute_percentage_error",
     ":r2": "r2",
     ":spearman_rank_correlation_coefficient": "spearmanr",
-    ":pearson_correlation_coefficient": "pearsonr"
+    ":pearson_correlation_coefficient": "pearsonr",
+
+
+    #named entity recognition
+    ":overall_recall": "overall_recall",
+    ":overall_precision": "overall_precision",
+    ":overall_f1": "overall_f1",
+    ":overall_accuracy": "overall_accuracy"
 }
 
 #extra dictionary for time series because they changed the acronym which they want for the metric -.-
@@ -85,6 +92,12 @@ parameters = {
                                                     "lookup_dict": autogluon_metrics
                                                 },
 
+    #named entity recognition
+    ":metric_autogluon_named_entity_recognition": {
+                                                    "parameter_name": "eval_metric",
+                                                    "lookup_dict": autogluon_metrics
+                                                },
+
     #text classification
     ":metric_autogluon_text_classification": {
                                                     "parameter_name": "eval_metric",
@@ -101,7 +114,6 @@ parameters = {
     ":metric_auto_gluon_named_entity_recognition": {
                                                     "parameter_name": "eval_metric",
                                                     "lookup_dict": autogluon_metrics
-                                                },
+                                                }
 
-    #object detection
 }

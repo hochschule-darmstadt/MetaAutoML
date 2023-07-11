@@ -1,4 +1,4 @@
-﻿@inherits RootLayout
+@inherits RootLayout
 @inject NavigationManager navigationManager
 @inject AppState appState
 @inject IStringLocalizer<Global> L
@@ -8,7 +8,7 @@
         <MudAppBar Elevation="1">
             <MudIconButton Icon="@navMenuIcon" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
             <MudSpacer />
-            <MudText Color="Color.Dark" Typo="Typo.h6">OMA-ML: Effective Machine Learning made easy!</MudText>
+            <MudText Color="Color.Dark" Typo="Typo.h6" Style="font-size: clamp(0.9rem, -0.425rem + 3.4vw, 1.5rem);">OMA-ML: Effective Machine Learning made easy!</MudText>
             <MudSpacer />
             <TopRightBarSection />
         </MudAppBar>

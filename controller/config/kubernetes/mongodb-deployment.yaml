@@ -29,8 +29,8 @@ spec:
           value: "example"
         resources:
           limits:
-            cpu: "1"
-            memory: "2097152e3"
+            cpu: "0.5"
+            memory: "1097152e3"
         volumeMounts:
         - mountPath: /data/db
           name: mongodb

@@ -3,8 +3,8 @@
 
 <MudCard Elevation="5">
     <MudCardHeader Style="border-bottom-style: inset; border-bottom-width: 1px;">
-        <CardHeaderContent >
-            <MudText Typo="Typo.h6">@L["Configuration"]</MudText>
+        <CardHeaderContent>
+            <LabelTooltip FontSize="Typo.h6" Label=@L["Configuration"] Text="Here you can inspect the original configuration that lead to the ML model." Position="Placement.Bottom"></LabelTooltip>
         </CardHeaderContent>
 @*        <CardHeaderActions>
             @if (Model != null)

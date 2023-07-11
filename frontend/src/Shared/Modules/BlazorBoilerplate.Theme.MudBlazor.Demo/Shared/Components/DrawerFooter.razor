@@ -21,7 +21,7 @@
 
 <MudDialog @bind-IsVisible="fileUploader.IsUploadDatasetDialogOpen">
     <DialogContent>
-        <MudCard Height="auto" Width="300px" Elevation="0">
+        <MudCard Height="auto" Width="400px" Elevation="0">
             @if (_datasetTypes == null)
             {
 
@@ -41,25 +41,7 @@
             </CardHeaderContent>
         </MudCardHeader>
         <MudStack>
-            <MudStack Row="true">
-
-                <MudButton
-                           Variant="Variant.Filled"
-                           Color="Color.Secondary"
-                           Size="Size.Small"
-                           Disabled="_fileUpload"
-                           OnClick="FileOrUrlSwitch"
-                           Style="margin-top: 8px; width:50%">@L["File"]</MudButton>
-                        <MudButton
-                                   Variant="Variant.Filled"
-                                   Color="Color.Secondary"
-                                   Size="Size.Small"
-                                   Disabled="!_fileUpload"
-                                   OnClick="FileOrUrlSwitch"
-                                   Style="margin-top: 8px; width:50%">@L["URL"]</MudButton>
-                            </MudStack>
-                            @if (_fileUpload)
-                            {
+           
 
 
                                 <MudSelect Label="@L["Select the data format of your dataset"]" T="string" ValueChanged="@OnDatasetTypeSelectChanged" Style="width: 150px">
@@ -74,38 +56,23 @@
                                     }
 
                                 </MudSelect>
-                                <InputFile id="fileInput" OnChange="@FilesReady" hidden accept="@AcceptedFileType" />
-                                <MudButton HtmlTag="label"
-                                           Variant="Variant.Filled"
-                                           Color="Color.Secondary"
-                                           StartIcon="@Icons.Filled.CloudUpload"
-                                           for="fileInput"
-                                           Class="mt-1"
-                                           Disabled="IsSelectFileDisabled">
-                                    @L["Select Dataset"]
-                                </MudButton>
-                                <MudTextField @bind-Value="@fileUploader.UploadDatasetRequest.DatasetName" Label="@L["Dataset Name"]" Class="mt-1"></MudTextField>
-                            }
-                            else
-                            {
-                                 <MudSelect Label="@L["Select the data format of your dataset"]" T="string" ValueChanged="@OnDatasetTypeSelectChanged" Style="width: 150px">
-                                    @foreach (var item in _datasetTypes.DatasetTypes)
-                                    {
-
-                                        <MudSelectItem Value="@item.ID">
-                                            <MudTooltip Text="@item.Properties["rdfs:comment"]" Style="z-index: 1600">
-                                                <MudText Typo="Typo.body2">@L[item.Properties.ContainsKey("skos:prefLabel") ? item.Properties["skos:prefLabel"] : ""]</MudText>
-                                            </MudTooltip>
-                                        </MudSelectItem>
-                                    }
-
-                                </MudSelect>
-                                <MudTextField TextChanged="DisableUpload" @bind-Value="@Url" Label="@L["URL"]" Class="mt-1"></MudTextField>
-                                <MudTextField @bind-Value="@fileUploader.UploadDatasetRequest.DatasetName" Label="@L["Dataset Name"]" Class="mt-1"></MudTextField>
-                            }
-
-
-
+                                <MudStack Row="true">
+                                    <InputFile id="fileInput" OnChange="@FilesReady" hidden accept="@AcceptedFileType" />
+                                    <MudButton HtmlTag="label"
+                                               Variant="Variant.Outlined"
+                                               
+                                               StartIcon="@Icons.Filled.CloudUpload"
+                                               for="fileInput"
+                                               Class="mt-1"
+                                               Disabled="@IsSelectFileDisabled"
+                                               OnClick="setLocalUploadTrue">
+                                        @L["Select Dataset"]
+                                    </MudButton>
+                                    <MudText Style="padding:5%">or</MudText>
+                                    <MudTextField Style=" font-weight: bold; font-size: 12pt;" Variant="Variant.Outlined" TextChanged="setURLUploadTrue" Disabled="@IsURLDisabled" @bind-Value="@Url" Label="@L["ENTER URL"]" ></MudTextField>
+                                </MudStack>
+                                <MudTextField @bind-Value="@fileUploader.UploadDatasetRequest.DatasetName" Disabled="@(_uploadReady)" Label="@L["Dataset Name"]" Class="mt-1"></MudTextField>
+          
                             @if (_isLoaderClosed == false)
                             {
                                 <MudProgressLinear Color="Color.Secondary" Indeterminate="true" />
@@ -115,10 +82,12 @@
         </MudCard>
     </DialogContent>
     <DialogActions>
-        <MudButton Color="Color.Secondary" OnClick="Close">@L["Close"]</MudButton>
+        <MudButton Color="Color.Secondary" OnClick="@Close">@L["Close"]</MudButton>
         @if (fileUploader.IsUploading == false)
         {
-            <MudButton StartIcon="@Icons.Filled.CloudUpload" Color="Color.Secondary" Disabled="@_uploadReady" OnClick="@Upload">@L["Upload"]</MudButton>
+                <MudTooltip Text="Click here to upload a new dataset to OMA-ML." Placement="Placement.Top" Arrow="true">
+                    <MudButton StartIcon="@Icons.Filled.CloudUpload" Color="Color.Secondary" Disabled="@_uploadReady" OnClick="@Upload">@L["Upload"]</MudButton>
+                </MudTooltip>
         }
     </DialogActions>
 </MudDialog>
@@ -160,7 +129,9 @@
         <MudButton Color="Color.Secondary" OnClick="Close">@L["Close"]</MudButton>
         @if (fileUploader.IsUploading == false)
         {
-            <MudButton StartIcon="@Icons.Filled.CloudUpload" Color="Color.Secondary" Disabled="@_uploadReady" OnClick="@Upload">@L["Upload"]</MudButton>
+            <MudTooltip Text="Click here to upload a new dataset to OMA-ML." Placement="Placement.Top" Arrow="true">
+                <MudButton StartIcon="@Icons.Filled.CloudUpload" Color="Color.Secondary" Disabled="@_uploadReady" OnClick="@Upload">@L["Upload"]</MudButton>
+            </MudTooltip>
         }
     </DialogActions>
 </MudDialog>
@@ -173,6 +144,7 @@
     [Parameter]
     public EventCallback OnUploadCompletedCallback { get; set; }
     public bool IsSelectFileDisabled { get; set; } = true;
+    public bool IsURLDisabled { get; set; } = true;
     public string AcceptedFileType { get; set; } = "";
     public int Progress { get; set; }
     public string UploadText { get; set; } = "";
@@ -184,9 +156,24 @@
     private bool _uploadReady = true;
     private bool _isLoaderClosed = true;
 
-    private void FileOrUrlSwitch()
+
+    private void setURLUploadTrue()
     {
-        _fileUpload = (!_fileUpload);
+        _fileUpload = false;
+        if (String.IsNullOrEmpty(Url)){
+            IsSelectFileDisabled = false;
+        }
+        else{
+            IsSelectFileDisabled = true;
+        }
+
+        DisableUpload();
+    }
+
+    private void setLocalUploadTrue()
+    {
+        _fileUpload = true;
+        IsURLDisabled = true;
         _uploadReady = true;
 
     }
@@ -214,6 +201,7 @@
             {
                 fileUploader.UploadPredictionRequest = new UploadPredictionRequestDto();
                 IsSelectFileDisabled = true;
+                IsURLDisabled = true;
                 _uploadReady = true;
             }
             else
@@ -238,6 +226,7 @@
             {
                 fileUploader.UploadDatasetRequest = new UploadDatasetRequestDto();
                 IsSelectFileDisabled = true;
+                IsURLDisabled = true;
                 _uploadReady = true;
             }
             else
@@ -301,6 +290,7 @@
         if (string.IsNullOrEmpty(value))
         {
             IsSelectFileDisabled = true;
+            IsURLDisabled = true;
         }
         else
         {
@@ -309,22 +299,27 @@
                 case ":tabular":
                     AcceptedFileType = ".csv";
                     IsSelectFileDisabled = false;
+                    IsURLDisabled = false;
                     break;
                 case ":image":
                     AcceptedFileType = ".zip";
                     IsSelectFileDisabled = false;
+                    IsURLDisabled = false;
                     break;
                 case ":text":
                     AcceptedFileType = ".csv";
                     IsSelectFileDisabled = false;
+                    IsURLDisabled = false;
                     break;
                 case ":time_series":
                     AcceptedFileType = ".csv";
                     IsSelectFileDisabled = false;
+                    IsURLDisabled = false;
                     break;
                 case ":time_series_longitudinal":
                     AcceptedFileType = ".ts";
                     IsSelectFileDisabled = false;
+                    IsURLDisabled = false;
                     break;
             }
         }
@@ -336,6 +331,9 @@
     {
         fileUploader.IsUploadDatasetDialogOpen = false;
         fileUploader.IsUploadPredictionDatasetDialogOpen = false;
+        IsSelectFileDisabled = true;
+        IsURLDisabled = true;
+        Url = "";
         RefreshComponent();
     }
     private async Task FilesReady(InputFileChangeEventArgs e)
@@ -408,10 +406,10 @@
             } else if (!_fileUpload)
             {
                 if (string.IsNullOrEmpty(fileUploader.UploadDatasetRequest.DatasetName))
-                    {
-                        viewNotifier.Show(L["Please enter a dataset name first!"], ViewNotifierType.Error, L["Operation Failed"]);
-                        return;
-                    }
+                {
+                    viewNotifier.Show(L["Please enter a dataset name first!"], ViewNotifierType.Error, L["Operation Failed"]);
+                    return;
+                }
             }
 
             _isLoaderClosed = false;
@@ -422,6 +420,7 @@
             if (!_fileUpload)
             {
                 fileUploader.UploadDatasetFromURL(Url, AcceptedFileType);
+                Url = "";
             }
             else
             {
@@ -438,10 +437,6 @@
         }
     }
 
-    // Method currently not in use (anymore), but keeping it for eventual reuse. But feel free to delete it completely if you want. 
-    private string[] SplitComment(string comment) {
-        string[] subcomments = comment.Split(new[] { "?=?" }, StringSplitOptions.None);
-        return subcomments;
-    }
+
 
 }

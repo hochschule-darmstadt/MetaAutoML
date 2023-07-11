@@ -1,18 +1,22 @@
 import pandas as pd
 import numpy as np
 import re
+import dill
+import os
+import sys
 from _collections_abc import dict_items
 from typing import Tuple
-{% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression", ":text_classification", ":text_regression", ":time_series_forecasting"] %}
+{% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression", ":text_classification", ":text_regression", ":named_entity_recognition", ":time_series_forecasting"] %}
 from dataset import read_csv_dataset
 from numpy import nan
 from sklearn.preprocessing import OrdinalEncoder
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.preprocessing import LabelEncoder
 from sklearn.impute import SimpleImputer
+from sklearn.preprocessing import StandardScaler
 {% endif %}
 
-{% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression", ":text_classification", ":text_regression", ":time_series_forecasting"] %}
+{% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression", ":text_classification", ":text_regression", ":named_entity_recognition", ":time_series_forecasting"] %}
 def rename_unnamed_columns(X: pd.DataFrame) -> pd.DataFrame:
     """Rename unnamed column to oma-ml naming convention
 
@@ -27,6 +31,48 @@ def rename_unnamed_columns(X: pd.DataFrame) -> pd.DataFrame:
             X.rename(columns={column: f"Column{X.columns.get_loc(column)}"}, inplace=True)
     return X
 
+def apply_pca_feature_extraction(X: pd.DataFrame, features: dict) -> Tuple[pd.DataFrame, pd.Series]:
+    pca_features = []
+    pca_transformer = {}
+
+    for key, value in features:
+        try:
+            if value['preprocessing']['pca'] == True and value['role_selected'] != ':target':
+                pca_features.append(key)
+        except:
+            pass
+
+    if len(pca_features) == 0:
+        return X
+
+
+    with open(sys.path[0] + '/pca_model.dill', 'rb') as file:
+        pca_transformer = dill.load(file)
+
+    df_no_pca = X.drop(pca_features, axis=1)
+    df_pca = X[pca_features]
+
+    categorical_columns = df_pca.select_dtypes(include=['object']).columns
+    numeric_columns = df_pca.select_dtypes(include=['float64', 'int64']).columns
+
+    numeric_data = df_pca[numeric_columns]
+    numeric_data = numeric_data.fillna(numeric_data.mean()).values
+
+    scaled_numeric_data = pca_transformer["scaler"].transform(numeric_data)
+
+    transformed_features = pca_transformer["pca"].transform(scaled_numeric_data)
+
+    transformed_data = pd.DataFrame(
+        data=transformed_features,
+        columns=[f"PC{i}" for i in range(1, pca_transformer["pca"].n_components_ + 1)]
+    )
+
+    data = pd.concat([pd.DataFrame(transformed_data).set_index(df_pca.index), pd.DataFrame(df_pca[categorical_columns])], axis=1)
+
+    df_no_pca_copy = df_no_pca
+    df_merged = pd.concat([data, df_no_pca], axis=1)
+    return df_merged
+
 def dataset_preparation(filepath: str,  is_prediction=True) -> Tuple[pd.DataFrame, pd.Series]:
     """Read and prepare the dataset
 
@@ -40,7 +86,8 @@ def dataset_preparation(filepath: str,  is_prediction=True) -> Tuple[pd.DataFram
     X = rename_unnamed_columns(X)
     X, y = feature_preparation(X, feature_configuration.items(), "{{configuration.dataset_configuration["file_configuration"]["datetime_format"]}}",  is_prediction)
     X, y = string_feature_encoding(X, y, feature_configuration.items(),  is_prediction)
-    X= numerical_feature_imputation(X, feature_configuration.items())
+    X = numerical_feature_imputation(X, feature_configuration.items())
+    X = apply_pca_feature_extraction(X, feature_configuration.items())
     return X, y
 
 def prediction_postprocessing(y: np.array) -> np.array:
@@ -187,7 +234,7 @@ def seperate_time_series_dataframe(X: pd.DataFrame):
     except:
         #do nothing, we just want to ensure the future doesnt have a target
         pass
-    
+
     return previous_ts, exogenous_ts
 {% endif %}
 

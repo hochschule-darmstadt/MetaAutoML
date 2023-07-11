@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: evaml
+  name: evalml
 spec:
   type: ClusterIP
   ports:

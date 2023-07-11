@@ -179,6 +179,11 @@ message GetAutoMlParametersResponse {
     broaderLabel: "metric",
     valueIri: ":median_absolute_error",
     valueLabel: "median absolute error",
+    seeAlso_para: "url",
+    comment_para: "comment",
+    seeAlso_value: "url",
+    comment_value: "comment",
+
   }
 */
 message AutoMlParameter {
@@ -190,4 +195,8 @@ message AutoMlParameter {
   string broaderLabel = 6;
   optional string valueIri = 7;
   optional string valueLabel = 8;
+  optional string seeAlso_para = 9;
+  optional string comment_para = 10;
+  optional string seeAlso_value = 11;
+  optional string comment_value = 12;
 }
