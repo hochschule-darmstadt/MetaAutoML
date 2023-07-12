@@ -26,7 +26,7 @@ class AutoKerasWrapper:
         self.__model.predict(x=x, **kwargs)
 
     def predict_proba(self, x, **kwargs):
-        
+
         self._check_data_format((x, None), predict=True)
         dataset = self._adapt(x, self.__model.inputs, 32)
         pipeline = self.__model.tuner.get_best_pipeline()

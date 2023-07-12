@@ -6,7 +6,7 @@ from grpclib.client import Channel
 from AdapterBGRPC import *
 from DataStorage import DataStorage
 from traceback import print_exc
-import dataclasses+
+import dataclasses
 
 class AdapterManager(Thread):
     """The AdapterManager provides functionality for the training process to connect to the correct adapter and execute the training
@@ -136,7 +136,7 @@ class AdapterManager(Thread):
         request.dataset_configuration = json.dumps(training["dataset_configuration"])
 
         return request
-    
+
     def __generate_dashboard_request(self, session_id: str, process_request: StartAutoMlRequest) -> CreateExplainerDashboardRequest:
         """Generate ExplainerDashboard generation configuration
 
@@ -208,9 +208,7 @@ class AdapterManager(Thread):
                     self.__status_messages.append(response.status_update)
                     self.__data_storage.update_model(self.__request.user_id, self.__model_id, {"status_messages": self.__status_messages})
                 elif response.return_code == AdapterReturnCode.ADAPTER_RETURN_CODE_SUCCESS:
-                    exlpainer_response: CreateExplainerDashboardResponse = await service.create_explainer_dashboard(
-                        self.__generate_dashboard_request(request.session_id, self.__generate_process_request())
-                        )
+
                     channel.close()
                     self.__path = response.path
                     self.__status = "completed"
@@ -228,7 +226,9 @@ class AdapterManager(Thread):
                         "prediction_time": self.__prediction_time,
                         "test_score": json.loads(self.__testScore),
                         "runtime_profile": model["runtime_profile"],
-                        "carbon_footprint": self.__carbon_footprint
+                        "carbon_footprint": self.__carbon_footprint,
+                        "dashboard_path": "",
+                        "dashboard_compatible": True
                     }
                     model_details["runtime_profile"]["end_time"] = datetime.datetime.now()
 
@@ -277,6 +277,31 @@ class AdapterManager(Thread):
         }
         return test_json
 
+    def generate_explainer_dashboard(self):
+        """Explain a specific model.
+        This loads the model and returns the output of the "predict_proba()" function in case of tabular classification.
+        If the ML task is tabular regression the output of "predict()" is returned instead.
+
+        Args:
+            data (_type_): Data to process to compute probabilities within the AutoML adapter
+
+        Returns:
+            _type_: List of produced outputs
+        """
+        print(f"connecting {self.__host}:{self.__port}")
+        try:
+            asyncio.set_event_loop(asyncio.new_event_loop())
+            loop = asyncio.get_event_loop()
+            channel = Channel(host=self.__host, port=self.__port)
+            service = AdapterServiceStub(channel=channel)
+            response = loop.run_until_complete(service.create_explainer_dashboard(
+                        self.__generate_dashboard_request(self.__session_id, self.__generate_process_request())
+                        ))
+            channel.close()
+            _mdl_id = self.__data_storage.update_model(self.__request.user_id, self.__model_id, { "dashboard_compatible": response.compatible, "dashboard_path": response.path})
+            print("explainer dashboard generation process ended")
+        except grpclib.GRPCError as rpc_error:
+            print(f"Received unknown RPC error: code={rpc_error.message} message={rpc_error.details()}")
 
     def explain_model(self, data):
         """Explain a specific model.

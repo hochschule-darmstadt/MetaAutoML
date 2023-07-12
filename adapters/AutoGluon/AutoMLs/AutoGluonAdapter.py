@@ -2,11 +2,13 @@ import os
 import unittest
 
 from AdapterUtils import *
+from AdapterTabularUtils import *
 from autogluon.tabular import TabularPredictor
 from autogluon.multimodal import  MultiModalPredictor
 from autogluon.timeseries import TimeSeriesDataFrame, TimeSeriesPredictor
 from AutoGluonServer import data_loader
 import AutoGluonParameterConfig as agpc
+from AutoGluonWrapper import AutoGluonWrapper
 
 class AutoGluonAdapter:
     """
@@ -89,6 +91,7 @@ class AutoGluonAdapter:
                                  path=self._result_path).fit(
             data,
             time_limit=self._time_limit*60)
+        export_model(AutoGluonWrapper(model), self._configuration["dashboard_folder_location"], 'dashboard_model.p')
         #Fit methode already saves the model
 
     def __tabular_regression(self):

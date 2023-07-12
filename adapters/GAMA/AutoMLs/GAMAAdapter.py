@@ -6,11 +6,13 @@ from JsonUtil import get_config_property
 
 
 from predict_time_sources import feature_preparation
+from sklearn.pipeline import Pipeline
+from sklearn.compose import ColumnTransformer
 
 from gama import GamaClassifier,GamaRegressor
 from gama.search_methods import AsynchronousSuccessiveHalving, AsyncEA, RandomSearch
 import GAMAParameterConfig as gpc
-
+from GAMAWrapper import GAMAWrapper
 
 class GAMAAdapter:
     """Implementation of the AutoML functionality for GAMA
@@ -47,16 +49,14 @@ class GAMAAdapter:
         self._configuration = set_encoding_for_string_columns(self._configuration, X, y)
 
         self.df, test = data_loader(self._configuration)
-        X, y = prepare_tabular_dataset(self.df, self._configuration, apply_feature_extration=True)
+        X, y, = prepare_tabular_dataset(self.df, self._configuration, apply_feature_extration=True)
         out_dir = (self._configuration["result_folder_location"] + "\\gama\\")
         parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), gpc.task_config)
-        automl = GamaClassifier(max_total_time=80, store="nothing", n_jobs=1, **parameters,output_directory=out_dir ,search=self.__get_search_method())
+        automl = GamaClassifier(max_total_time=10, store="nothing", n_jobs=1, **parameters,output_directory=out_dir ,search=self.__get_search_method())
         automl.fit(X, y)
 
         export_model(automl, self._configuration["result_folder_location"], 'GAMA.p')
-
-
-
+        export_model(automl, self._configuration["dashboard_folder_location"], 'dashboard_model.p')
         return
 
     def __regression(self):

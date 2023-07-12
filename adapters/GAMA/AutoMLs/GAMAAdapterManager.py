@@ -8,7 +8,6 @@ from threading import *
 from JsonUtil import get_config_property
 import pandas as pd
 from typing import Tuple
-from predict_time_sources import feature_preparation
 
 
 
@@ -25,7 +24,7 @@ class GAMAAdapterManager(AdapterManager):
         super(GAMAAdapterManager, self).__init__()
         self.__automl = None
         self.__loaded_training_id = None
-        self._adapter_name = "GAMA"
+        self._adapter_name = "gama"
 
     def _get_ml_model_and_lib(self, config: "StartAutoMlRequest") -> Tuple[str, str]:
         """Get the ML model type and ml library used by the result model
@@ -56,3 +55,4 @@ class GAMAAdapterManager(AdapterManager):
         except Exception as e:
             raise(e)
         return probabilities
+

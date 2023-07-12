@@ -12,6 +12,7 @@ from UserManager import UserManager
 from DataStorage import DataStorage
 from AdapterRuntimeScheduler import AdapterRuntimeScheduler
 from ThreadLock import ThreadLock
+from KubernetesClient import KubernetesClient
 
 class Ressources(containers.DeclarativeContainer):
     if os.getenv("MONGO_DB_DEBUG") == "YES":
@@ -47,12 +48,17 @@ class Ressources(containers.DeclarativeContainer):
         ThreadLock
     )
 
+    kubernetes_client = providers.ThreadSafeSingleton(
+        KubernetesClient
+    )
+
 class Managers(containers.DeclarativeContainer):
     ressources = providers.DependenciesContainer()
     adapter_runtime_scheduler = providers.ThreadSafeSingleton(
         AdapterRuntimeScheduler,
         data_storage=ressources.data_storage,
-        explainable_lock=ressources.explainable_lock
+        explainable_lock=ressources.explainable_lock,
+        kubernetes_client=ressources.kubernetes_client
     )
     dataset_manager = providers.Factory(
         DatasetManager,
@@ -66,7 +72,8 @@ class Managers(containers.DeclarativeContainer):
     )
     model_manager = providers.Factory(
         ModelManager,
-        data_storage=ressources.data_storage
+        data_storage=ressources.data_storage,
+        adapter_runtime_scheduler=adapter_runtime_scheduler
     )
     user_manager = providers.Factory(
         UserManager,

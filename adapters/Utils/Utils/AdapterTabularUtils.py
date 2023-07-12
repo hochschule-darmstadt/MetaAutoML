@@ -260,9 +260,9 @@ def set_encoding_for_string_columns(config, X: pd.DataFrame, y: pd.Series, also_
     """
     X[y.name] = y.values
     for column, dt in config["dataset_configuration"]["schema"].items():
-        if (dt.get("role_selected", "") != ":ignore"
-        and (dt.get("datatype_selected", "") == ":string" or dt.get("datatype_selected", "") == ":categorical" and also_categorical==True)
-        or (dt.get("datatype_detected", "") == ":string" and dt.get("datatype_selected", "") == "" or dt.get("datatype_detected", "") == ":categorical" and dt.get("datatype_selected", "") == "" and also_categorical==True)):
+        if (dt.get("role_selected", "") != ":ignore" and
+        ((dt.get("datatype_selected", "") == ":string" or (dt.get("datatype_selected", "") == ":categorical" and also_categorical==True)) or
+        (dt.get("datatype_detected", "") == ":string" and dt.get("datatype_selected", "") == "" or (dt.get("datatype_detected", "") == ":categorical" and dt.get("datatype_selected", "") == "" and also_categorical==True)))):
             #Only update columns that are either selected or auto detected as sting and categorial (if also_categorical==True)
             if dt["preprocessing"].get("encoding", "") == "":
                 #Only update the preprocessing if no previews ending block exists
@@ -335,14 +335,14 @@ def replace_forbidden_json_utf8_characters(X: pd.DataFrame, y: pd.Series) -> Tup
     y.rename(y.name.translate({ 91 : None, 93 : None, 123 : None, 125 : None, 44 : None, 58 : None, 34 : None}), inplace=True)
     return X, y
 
-def string_feature_encoding(X: pd.DataFrame, y: pd.Series, features: dict_items) -> Tuple[pd.DataFrame, pd.Series]:
+def string_feature_encoding(X: pd.DataFrame, y: pd.Series, features: dict_items) -> Tuple[pd.DataFrame, pd.Series, list[Tuple[str, object, str]]]:
     """Apply string feature encoding (One hot, ordinal, label encoding) by the column preparation configuration
 
     Args:
         X (pd.DataFrame): The feature dataframe (X)
         y (pd.Series): The label series (y)
         features (dict_items): The dataset schema dictonary as an iterable dict (dict.items())
-
+        pipeline: The Sklearn pipeline
     Returns:
         Tuple[pd.DataFrame, pd.Series]: Tuple of the prepared feature dataframe (X) and label series (y)
     """
@@ -403,6 +403,7 @@ def numerical_feature_imputation(X: pd.DataFrame, features: dict_items) -> Tuple
 def apply_pca_feature_extraction(X: pd.DataFrame, features: dict, result_folder_location: str) -> Tuple[pd.DataFrame, pd.Series]:
     pca_transformer = {}
     pca_features = []
+
     for item in features["schema"]:
         try:
             if features["schema"][item]['preprocessing']['pca'] == True and features["schema"][item]['role_selected'] != ':target':
@@ -442,7 +443,7 @@ def apply_pca_feature_extraction(X: pd.DataFrame, features: dict, result_folder_
     df_merged = pd.concat([data, df_no_pca], axis=1)
     return df_merged
 
-  
+
 def prepare_tabular_dataset(df: pd.DataFrame, json_configuration: dict, is_prediction:bool=False, apply_feature_extration:bool=False) -> Tuple[pd.DataFrame, pd.Series]:
     """Prepare tabular dataset, perform feature preparation and data type casting
 
@@ -458,8 +459,10 @@ def prepare_tabular_dataset(df: pd.DataFrame, json_configuration: dict, is_predi
     X, y = feature_preparation(df, json_configuration["dataset_configuration"]["schema"].items(), json_configuration["dataset_configuration"]["file_configuration"]["datetime_format"], is_prediction)
     X, y = string_feature_encoding(X, y, json_configuration["dataset_configuration"]["schema"].items())
     X = numerical_feature_imputation(X, json_configuration["dataset_configuration"]["schema"].items())
+
     if apply_feature_extration == True:
-        X = apply_pca_feature_extraction(X, json_configuration["dataset_configuration"], json_configuration["result_folder_location"])
+        X = apply_pca_feature_extraction(X, json_configuration["dataset_configuration"], json_configuration["result_folder_location"],)
+
     return X, y
 
 def convert_X_and_y_dataframe_to_numpy(X: pd.DataFrame, y: pd.Series) -> Tuple[np.ndarray, np.ndarray]:

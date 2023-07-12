@@ -8,6 +8,7 @@ namespace BlazorBoilerplate.Shared.Dto.Model
 {
     public class StartDashboardResponseDto
     {
-        public int Result { get; set; }
+        public string Url { get; set; }
+        public string SessionId { get; set; }
     }
 }

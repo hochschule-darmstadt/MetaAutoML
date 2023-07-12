@@ -16,7 +16,9 @@
                 "GRPC_SERVER_PORT": "50064",
                 "PYTHON_ENV": ".venv/Scripts/python",
                 "USE_DEV_CONFIG": "YES",
-                "PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION": "python"
+                "PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION": "python",
+                "EXPLAINER_DASHBOARD_PORT_START": "6000",
+                "EXPLAINER_DASHBOARD_PORT_END": "6099"
             },
         },
         {

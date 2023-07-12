@@ -15,7 +15,9 @@
                 "PYTHONPATH": ".;dependency-injection;AutoMLs;Utils;../Utils/Utils;../Utils/AutoMLs;../GRPC/Adapter;",
                 "GRPC_SERVER_PORT": "60065",
                 "PYTHON_ENV": ".venv/Scripts/python",
-                "USE_DEV_CONFIG": "YES"
+                "USE_DEV_CONFIG": "YES",
+                "EXPLAINER_DASHBOARD_PORT_START": "5600",
+                "EXPLAINER_DASHBOARD_PORT_END": "5699"
             },
         },
         {
@@ -29,7 +31,9 @@
                 "PYTHONPATH": ".:dependency-injection:AutoMLs:Utils:../Utils/Utils:../Utils/AutoMLs:../GRPC/Adapter:",
                 "GRPC_SERVER_PORT": "50065",
                 "PYTHON_ENV": ".venv/bin/python",
-                "USE_DEV_CONFIG": "YES"
+                "USE_DEV_CONFIG": "YES",
+                "EXPLAINER_DASHBOARD_PORT_START": "5600",
+                "EXPLAINER_DASHBOARD_PORT_END": "5699"
             },
         },
         {

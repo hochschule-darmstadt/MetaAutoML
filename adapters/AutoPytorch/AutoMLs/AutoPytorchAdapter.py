@@ -77,6 +77,7 @@ class AutoPytorchAdapter:
             )
 
         export_model(auto_cls, self._configuration["result_folder_location"], "model_pytorch.p")
+        export_model(model, self._configuration["dashboard_folder_location"], 'dashboard_model.p')
 
     def __tabular_regression(self):
         """

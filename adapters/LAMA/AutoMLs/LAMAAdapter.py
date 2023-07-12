@@ -8,9 +8,10 @@ from lightautoml.tasks import Task
 
 from predict_time_sources import feature_preparation
 import LAMAConfigParameter as lpc
+from LAMAWrapper import LAMAWrapper
 
 class LAMAAdapter:
-    """Implementation of the AutoML functionality for GAMA
+    """Implementation of the AutoML functionality for LAMA
 
     Args:
         AbstractAdapter (_type_): _description_
@@ -33,7 +34,7 @@ class LAMAAdapter:
     that no model is found
     """
     def start(self):
-        """Start the correct ML task functionality of GAMA"""
+        """Start the correct ML task functionality of LAMA"""
         print("strt auto ml req")
         if True:
             if self._configuration["configuration"]["task"] == ":tabular_classification":
@@ -69,6 +70,7 @@ class LAMAAdapter:
         )
         automl.fit_predict(X, roles = roles, verbose = 1)
         export_model(automl, self._configuration["result_folder_location"], 'model_LAMA.p')
+        export_model(LAMAWrapper(automl), self._configuration["dashboard_folder_location"], 'dashboard_model.p')
 
         return
 
