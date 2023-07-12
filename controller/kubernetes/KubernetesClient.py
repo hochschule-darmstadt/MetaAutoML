@@ -7,15 +7,21 @@ class KubernetesClient:
         self.__sessions = {}
         self.__ingress_name = "explainer-dashboard-dynamics-routes"
         self.__ingress_namespace = "omaml"
+        if os.getenv("KUBERNETES_TYPE") == "local":
+            annotation = {
+                #local cluster
+                "kubernetes.io/ingress.class": "nginx",
+                "cert-manager.io/cluster-issuer": "selfsigned-issuer",
+            }
+        else:
+            annotation = {
+                #local cluster
+                "cert-manager.io/cluster-issuer": "lets-encrypt-oma-ml",
+            }
         self.__ingress_metadata = client.V1ObjectMeta(
             name=self.__ingress_name,
             namespace=self.__ingress_namespace,
-            annotations={
-                "kubernetes.io/ingress.class": "nginx",
-                "cert-manager.io/cluster-issuer": "selfsigned-issuer",
-                # "nginx.ingress.kubernetes.io/ssl-redirect": "false"
-                #"nginx.ingress.kubernetes.io/rewrite-target": "/"
-            }
+            annotations=annotation
         )
 
 

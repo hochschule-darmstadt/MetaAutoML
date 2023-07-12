@@ -4,6 +4,7 @@ metadata:
   labels:
     io.kompose.service: blazorboilerplate
   name: blazorboilerplate
+  namespace: omaml
 spec:
   progressDeadlineSeconds: 600
   replicas: 1
@@ -14,10 +15,6 @@ spec:
     type: Recreate
   template:
     metadata:
-      annotations:
-        kompose.cmd: C:\ProgramData\chocolatey\lib\kubernetes-kompose\tools\kompose.exe
-          convert -f docker-compose.yml
-        kompose.version: 1.21.0 (992df58d8)
       labels:
         io.kompose.service: blazorboilerplate
     spec:
@@ -58,20 +55,18 @@ spec:
           mountPath: /app/app-data/training/mljar
         - name: autogluon-output
           mountPath: /app/app-data/training/gluon
-        - name: autopytorch-output
-          mountPath: /app/app-data/training/autopytorch
         - name: flaml-output
           mountPath: /app/app-data/training/flaml
-        - name: autosklearn-output
-          mountPath: /app/app-data/training/autosklearn
-        - name: mcfly-output
-          mountPath: /app/app-data/training/mcfly
         - name: pycaret-output
           mountPath: /app/app-data/training/pycaret
         - name: evalml-output
-          mountPath: /app/app-data/training/evaml
+          mountPath: /app/app-data/training/evalml
         - name: tpot-output
           mountPath: /app/app-data/training/tpot
+        - name: gama-output
+          mountPath: /app/app-data/training/gama
+        - name: lama-output
+          mountPath: /app/app-data/training/lama
         image: alexhda/omaml-frontend:latest
         name: blazorboilerplate
         ports:
@@ -80,7 +75,7 @@ spec:
         resources:
           limits:
             cpu: "1"
-            memory: "4194304e3"
+            memory: "2194304e3"
       restartPolicy: Always
       hostAliases:
       - ip: "127.0.0.1"
@@ -102,18 +97,9 @@ spec:
       - name: autogluon-output
         persistentVolumeClaim:
           claimName: output-autogluon-claim
-      - name: autopytorch-output
-        persistentVolumeClaim:
-          claimName: output-autopytorch-claim
       - name: flaml-output
         persistentVolumeClaim:
           claimName: output-flaml-claim
-      - name: autosklearn-output
-        persistentVolumeClaim:
-          claimName: output-autosklearn-claim
-      - name: mcfly-output
-        persistentVolumeClaim:
-          claimName: output-mcfly-claim
       - name: evalml-output
         persistentVolumeClaim:
           claimName: output-evalml-claim
@@ -123,4 +109,10 @@ spec:
       - name: tpot-output
         persistentVolumeClaim:
           claimName: output-tpot-claim
+      - name: gama-output
+        persistentVolumeClaim:
+          claimName: output-gama-claim
+      - name: lama-output
+        persistentVolumeClaim:
+          claimName: output-lama-claim
 status: {}
