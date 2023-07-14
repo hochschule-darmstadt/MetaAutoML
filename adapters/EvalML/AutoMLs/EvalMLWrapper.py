@@ -1,7 +1,8 @@
 import numpy as np
+from sklearn.base import BaseEstimator, ClassifierMixin #Need or else dashboard will thing no predict_proba exists, only an issue with evalml and gama
 from BaseWrapper import BaseWrapper
 
-class EvalMLWrapper(BaseWrapper):
+class EvalMLWrapper(BaseEstimator, ClassifierMixin, BaseWrapper):
 
     def __init__(self, model, config) -> None:
         super().__init__(model, config)
