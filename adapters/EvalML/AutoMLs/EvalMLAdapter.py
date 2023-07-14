@@ -82,7 +82,7 @@ class EvalMLAdapter:
         automl.search()
         best_pipeline_tobe_export = automl.best_pipeline
         export_model(best_pipeline_tobe_export, self._configuration["result_folder_location"], 'evalml.p')
-        export_model(EvalMLWrapper(automl, self._configuration), self._configuration["dashboard_folder_location"], 'dashboard_model.p')
+        export_model(EvalMLWrapper(best_pipeline_tobe_export, self._configuration), self._configuration["dashboard_folder_location"], 'dashboard_model.p')
 
 
     def __regression(self):
