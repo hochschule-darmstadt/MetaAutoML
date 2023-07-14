@@ -371,16 +371,20 @@ class AdapterManager(Thread):
             pipeline_model = dill.load(file)
 
         train, test = data_loader(config)
-        X, y = prepare_tabular_dataset(test, config)
+        for column, dt in config["dataset_configuration"]["schema"].items():
+            if dt.get("role_selected", "") == ":target":
+                target = column
+        #X, y = prepare_tabular_dataset(test, config)
         try:
 
             if config["configuration"]["task"] == ":tabular_classification" or config["configuration"]["task"] == ":text_classification" :
-                dashboard = ExplainerDashboard(ClassifierExplainer(pipeline_model, X, y))
+                explainer = ClassifierExplainer(pipeline_model, test.drop(target, axis=1), test[target])
+                dashboard = ExplainerDashboard(explainer)
                 dashboard.save_html(os.path.join(dashboard_folder_location, "binary_dashboard.html"))
                 dashboard.explainer.dump(os.path.join(dashboard_folder_location, "binary_dashboard.dill"))
 
             else :
-                dashboard = ExplainerDashboard(RegressionExplainer(pipeline_model, X, y))
+                dashboard = ExplainerDashboard(RegressionExplainer(pipeline_model, test.drop(target, axis=1), test[target]))
                 dashboard.save_html(os.path.join(dashboard_folder_location, "binary_dashboard.html"))
                 dashboard.explainer.dump(os.path.join(dashboard_folder_location, "binary_dashboard.dill"))
         except Exception as e:

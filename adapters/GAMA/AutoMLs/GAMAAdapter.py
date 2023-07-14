@@ -52,11 +52,11 @@ class GAMAAdapter:
         X, y, = prepare_tabular_dataset(self.df, self._configuration, apply_feature_extration=True)
         out_dir = (self._configuration["result_folder_location"] + "\\gama\\")
         parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), gpc.task_config)
-        automl = GamaClassifier(max_total_time=10, store="nothing", n_jobs=1, **parameters,output_directory=out_dir ,search=self.__get_search_method())
+        automl = GamaClassifier(max_total_time=self._time_limit*60, store="nothing", n_jobs=1, **parameters,output_directory=out_dir ,search=self.__get_search_method())
         automl.fit(X, y)
 
         export_model(automl, self._configuration["result_folder_location"], 'GAMA.p')
-        export_model(automl, self._configuration["dashboard_folder_location"], 'dashboard_model.p')
+        export_model(GAMAWrapper(automl, self._configuration), self._configuration["dashboard_folder_location"], 'dashboard_model.p')
         return
 
     def __regression(self):
@@ -70,7 +70,7 @@ class GAMAAdapter:
 
         parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), gpc.task_config)
         out_dir = (self._configuration["result_folder_location"] + "\\gama\\")
-        automl = GamaRegressor(max_total_time=180, store="nothing", n_jobs=1, **parameters,output_directory=out_dir, search=self.__get_search_method())
+        automl = GamaRegressor(max_total_time=self._time_limit*60, store="nothing", n_jobs=1, **parameters,output_directory=out_dir, search=self.__get_search_method())
         automl.fit(X, y)
 
         export_model(automl, self._configuration["result_folder_location"], 'GAMA.p')

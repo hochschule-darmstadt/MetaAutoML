@@ -161,7 +161,10 @@ class PreprocessingStrategyController(IAbstractStrategy):
         dataset_configuration = json.loads(agent.get_adapter_runtime_manager().get_training_request().dataset_configuration)
 
         for dcc in dataset_configuration:
-            dataset_configuration[dcc]['preprocessing'] = {"pca": True}
+            if dataset_configuration[dcc]['role_selected'] != ":ignore":
+                if dataset_configuration[dcc]['datatype_selected'] != ":string":
+                    if dataset_configuration[dcc]['datatype_selected'] == '' and dataset_configuration[dcc]['datatype_detected'] != ":string":
+                        dataset_configuration[dcc]['preprocessing'] = {"pca": True}
 
         training_request = agent.get_adapter_runtime_manager().get_training_request()
         training_request.dataset_configuration = json.dumps(dataset_configuration)

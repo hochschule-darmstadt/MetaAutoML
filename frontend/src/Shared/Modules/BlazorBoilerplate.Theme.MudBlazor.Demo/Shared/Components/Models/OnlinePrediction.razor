@@ -1,4 +1,4 @@
-﻿
+
 @using System
 @using System.IO
 @using Microsoft.AspNetCore.Hosting
@@ -45,7 +45,7 @@
                                 <MudTh>@L["Name"]</MudTh>
                                 <MudTh>@L["Date"]</MudTh>
                                 <MudTh>@L["Status"]</MudTh>
-                                <MudTh>@L["download"]</MudTh>
+                                <MudTh></MudTh>
                             </HeaderContent>
                             <RowTemplate>
                                 <MudTd>
@@ -67,14 +67,14 @@
                                 <MudTd>
                                     @if (context.Status == "completed")
                                     {
-                                        <MudButton OnClick="@(() => DownlaodPrediction(context))" Variant="Variant.Filled" Color="Color.Secondary" Size="Size.Small">@L["Download predictions"]</MudButton>
-                                        <MudButton OnClick="@(() => OpenPredictionResults(context))" Variant="Variant.Filled" Color="Color.Secondary" Size="Size.Small">
+                                <MudButton StartIcon="@Icons.Filled.CloudDownload" OnClick="@(() => DownlaodPrediction(context))" Variant="Variant.Filled" Color="Color.Secondary" Size="Size.Small">@L["Download predictions"]</MudButton>
+                                <MudButton StartIcon="@Icons.Material.Filled.ViewList" OnClick="@(() => OpenPredictionResults(context))" Variant="Variant.Filled" Color="Color.Secondary" Size="Size.Small">
                                             View predicitons
                                         </MudButton>
                                     }
                                     else
                                     {
-                                        <MudButton Variant="Variant.Filled" Color="Color.Secondary" Size="Size.Small" Disabled="true">@L["Download predictions"]</MudButton>
+                                        <MudButton StartIcon="@Icons.Filled.CloudDownload" Variant="Variant.Filled" Color="Color.Secondary" Size="Size.Small" Disabled="true">@L["Download predictions"]</MudButton>
                                     }
                                 </MudTd>
                             </RowTemplate>

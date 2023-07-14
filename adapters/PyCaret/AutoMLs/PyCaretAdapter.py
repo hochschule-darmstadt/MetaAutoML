@@ -8,6 +8,7 @@ import pandas as pd
 import json
 from JsonUtil import get_config_property
 import PyCaretParameterConfig as ppc
+from PycaretWrapper import PycaretWrapper
 
 class PyCaretAdapter:
     """
@@ -54,7 +55,7 @@ class PyCaretAdapter:
         tuned = tune_model(model, **parameters)
         fn_model = finalize_model(tuned)
         save_model(fn_model, os.path.join(self._configuration["result_folder_location"], 'model_pycaret'))
-        export_model(fn_model, self._configuration["dashboard_folder_location"], 'dashboard_model.p')
+        export_model(PycaretWrapper(fn_model, self._configuration), self._configuration["dashboard_folder_location"], 'dashboard_model.p')
 
         #export_model(automl, self._configuration["result_folder_location"], 'model_pycaret.p')
 

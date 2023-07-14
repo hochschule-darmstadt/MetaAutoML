@@ -1977,12 +1977,16 @@ msgstr "No or multiple index column with datatype datetime was set. Only one ind
 
 msgctxt "Global"
 msgid "Training emissions"
-msgstr "Emissions kg/CO2-eq"
+msgstr "Emissions g/CO2-eq"
 
 msgctxt "Global"
-msgid "Training emissions: {0} kg CO2-eq"
-msgstr "Training emissions: {0} kg CO2-eq"
+msgid "Training emissions: {0} g CO2-eq"
+msgstr "Training emissions: {0} g CO2-eq"
 
 msgctxt "Global"
 msgid "aborted"
 msgstr "Aborted"
+
+msgctxt "Global"
+msgid "Parameters available for individual AutoML solution only"
+msgstr "Parameters available for individual AutoML solution only"

@@ -1,15 +1,18 @@
 import numpy as np
+from BaseWrapper import BaseWrapper
 
-class AutoGluonWrapper:
+class AutoGluonWrapper(BaseWrapper):
 
-    def __init__(self, model) -> None:
-        self.__model = model
+    def __init__(self, model, config) -> None:
+        super().__init__(model, config)
 
-    def predict(self, x, **kwargs):
-        self.__model.predict(x=x, **kwargs)
+    def predict(self, X, **kwargs):
+        X_predict = self._prepare_dataset(X)
+        return self._model.predict(x=X_predict, **kwargs)
 
-    def predict_proba(self, x, **kwargs):
+    def predict_proba(self, X, **kwargs):
+        X_predict = self._prepare_dataset(X)
 
-        probabilities_raw = self.__model.predict_proba(x, **kwargs)
+        probabilities_raw = self._model.predict_proba(X_predict, **kwargs)
         probabilities = np.array(probabilities_raw)
         return probabilities

@@ -1,15 +1,18 @@
 import numpy as np
+from BaseWrapper import BaseWrapper
 
-class LAMAWrapper:
+class LAMAWrapper(BaseWrapper):
 
-    def __init__(self, model) -> None:
-        self.__model = model
+    def __init__(self, model, config) -> None:
+        super().__init__(model, config)
 
-    def predict(self, x, **kwargs):
-        predictions = self.__model.predict(x=x, **kwargs)
-        if self.__model.task.name == "multiclass":
+    def predict(self, X, **kwargs):
+        X_predict = self._prepare_dataset(X)
+
+        predictions = self._model.predict(x=X_predict, **kwargs)
+        if self._model.task.name == "multiclass":
             ind =  np.argmax(predictions.data, axis=1)
-            inverse_class_mapping = {y: x for x,y in self.__model.reader.class_mapping.items()}
+            inverse_class_mapping = {y: x for x,y in self._model.reader.class_mapping.items()}
             labels = [inverse_class_mapping[i] for i in range(len(inverse_class_mapping))]
             ind = list(map(inverse_class_mapping.get, ind))
             predicted_y = np.reshape(ind, (-1, 1))
@@ -18,11 +21,12 @@ class LAMAWrapper:
             predicted_y = np.concatenate(predicted_y)
         return predicted_y
 
-    def predict_proba(self, x, **kwargs):
+    def predict_proba(self, X, **kwargs):
+        X_predict = self._prepare_dataset(X)
 
-        probabilities_raw = self.__model.predict(x, **kwargs)
+        probabilities_raw = self._model.predict(X_predict, **kwargs)
         probabilities = np.array(probabilities_raw.data)
-        if self.__model.task.name == "binary":
+        if self._model.task.name == "binary":
             diff = 1 - probabilities
             probabilities = np.concatenate((probabilities, diff), axis=1)
         return probabilities

@@ -42,9 +42,9 @@
 
                 @foreach (var task in _compatibleTasks.Tasks)
                 {
-                                <MudSelectItem Value="@task.ID">
-                            <ButtonTooltip Text=@task.Properties["rdfs:comment"] URL=@(task.Properties.ContainsKey("rdfs:seeAlso") ? task.Properties["rdfs:seeAlso"] : "") Position="Placement.Right">@L[task.Properties.ContainsKey("skos:prefLabel") ? task.Properties["skos:prefLabel"] : ""]</ButtonTooltip>
-                                </MudSelectItem>
+                    <MudSelectItem Value="@task.ID">
+                        <ButtonTooltip Text=@task.Properties["rdfs:comment"] URL=@(task.Properties.ContainsKey("rdfs:seeAlso") ? task.Properties["rdfs:seeAlso"] : "") Position="Placement.Right">@L[task.Properties.ContainsKey("skos:prefLabel") ? task.Properties["skos:prefLabel"] : ""]</ButtonTooltip>
+                    </MudSelectItem>
                           
 
 
@@ -86,6 +86,8 @@
             <MudItem xs="1">
                 <LabelTooltip FontSize="Typo.h4" Text="Specify the maximum runtime in minutes OMA-ML shall use for training. Longer runtimes tend to produce better models; shorter runtimes are more energy-efficient." Position="Placement.Left"></LabelTooltip>
             </MudItem>
+            @if (!string.IsNullOrEmpty(StartTrainingDto.Configuration.Task) == true) //Only show details panel when task was selelected
+        {
             <MudItem xs="11">
                 <MudExpansionPanels>
                     <MudExpansionPanel>
@@ -104,8 +106,6 @@
                             @if (_intersectedParams.Any())
                             {
                                 <LabelTooltip Label="Parameters" FontSize="Typo.subtitle2" Text="All AutoML solutions use default parameters for training. If you want to specify those parameters yourself you can do this here. " Position="Placement.Right"></LabelTooltip>
-
-
 
                                 @foreach (var param in _intersectedParams)
                                 {
@@ -143,8 +143,7 @@
 
                             @if (_individualParams.Any())
                             {
-                                <LabelTooltip Label="Parameter available for individual AutoML solution only" FontSize="Typo.subtitle2" Text="A number of configuration parameters are specific for individual AutoML solutions. Here you can specify them. If not specified individually, default configurations are used.
-" Position="Placement.Right"></LabelTooltip>
+                                <LabelTooltip Label="@L["Parameters available for individual AutoML solution only"]" FontSize="Typo.subtitle2" Text="A number of configuration parameters are specific for individual AutoML solutions. Here you can specify them. If not specified individually, default configurations are used." Position="Placement.Right"></LabelTooltip>
 
                                 @foreach (var individualParam in _individualParams)
                                 {
@@ -189,10 +188,10 @@
                                 }
                             }
                         </ChildContent>
-</MudExpansionPanel>
+                    </MudExpansionPanel>
                 </MudExpansionPanels>
             </MudItem>
-           
+        }
     </MudGrid>
 
     </MudStack>

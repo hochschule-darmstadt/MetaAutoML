@@ -373,7 +373,7 @@ def string_feature_encoding(X: pd.DataFrame, y: pd.Series, features: dict_items)
         elif dt["preprocessing"]["encoding"]["type"] == ":label_encoding":
             label_enc = LabelEncoder()
             label_enc.fit(dt["preprocessing"]["encoding"]["values"])
-            y = pd.Series(label_enc.transform(y.values), name=y.name)
+            y = pd.Series(label_enc.transform(y.values), name=y.name, index=y.index)
         else:
             continue
     return X, y
@@ -432,6 +432,7 @@ def apply_pca_feature_extraction(X: pd.DataFrame, features: dict, result_folder_
     with open(os.path.join(result_folder_location, 'pca_model.dill'), 'wb+') as file:
         dill.dump(pca_transformer, file)
 
+
     transformed_data = pd.DataFrame(
         data=transformed_features,
         columns=[f"PC{i}" for i in range(1, pca_transformer["pca"].n_components_ + 1)]
@@ -461,7 +462,7 @@ def prepare_tabular_dataset(df: pd.DataFrame, json_configuration: dict, is_predi
     X = numerical_feature_imputation(X, json_configuration["dataset_configuration"]["schema"].items())
 
     if apply_feature_extration == True:
-        X = apply_pca_feature_extraction(X, json_configuration["dataset_configuration"], json_configuration["result_folder_location"],)
+        X = apply_pca_feature_extraction(X, json_configuration["dataset_configuration"], json_configuration["result_folder_location"])
 
     return X, y
 

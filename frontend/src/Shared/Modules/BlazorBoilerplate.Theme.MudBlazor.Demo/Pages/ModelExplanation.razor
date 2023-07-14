@@ -27,11 +27,11 @@
    </MudGrid>
 }
 else{
-    <MudGrid AlignItems="AlignItems.Stretch" style="height:700px">
+    <MudGrid AlignItems="AlignItems.Stretch">
         <MudItem Class="d-flex align-center justify-center mud-width-full" xs="12">
             <MudButton OnClick="@RefreshDashboard">Refresh Dashboard</MudButton>
         </MudItem>
-        <MudItem Class="d-flex align-center justify-center mud-width-full mud-height-full" xs="12">
+        <MudItem Class="d-flex align-center justify-center mud-width-full" Style="height: 100vh;" xs="12">
             <iframe id="dashboard_iframe" style="height:100%; width:100%" frameborder="0" src=@dashboardUrl> </iframe>
         </MudItem>
     </MudGrid>
@@ -50,6 +50,7 @@ else{
     private string dashboardSessionId = "";
     private GetModelResponseDto dashboardAddress;
     private GetModelResponseDto _model;
+    private GetDatasetResponseDto _dataset;
     private GetTrainingResponseDto _training;
     private ElementReference iframeRef;
     private List<BreadcrumbItem> _breadcrumbs = new List<BreadcrumbItem>();
@@ -64,8 +65,30 @@ else{
     {
         await LoadModel();
         await StartExplainerDashboard();
-
         Thread.Sleep(3500);
+        _breadcrumbs.Add(new BreadcrumbItem("Home", "/", false, Icons.Filled.Home));
+        if (ListId != null)
+        {
+            _breadcrumbs.Add(new BreadcrumbItem(L["Datasets"], "/datasets", false, Icons.Filled.ListAlt));
+            _breadcrumbs.Add(new BreadcrumbItem(L["Dataset {0}", _dataset.Dataset.Name], "/datasets/" + _dataset.Dataset.Id, false, Icons.Filled.ListAlt));
+            _breadcrumbs.Add(new BreadcrumbItem(L["Models"], "/datasets/" + _dataset.Dataset.Id + "/models", false, Icons.Filled.Lightbulb));
+            _breadcrumbs.Add(new BreadcrumbItem(L["Explanation"], "/explanation", false, Icons.Filled.Lightbulb));
+        }
+        else if (TrainingId != null)
+        {
+            _breadcrumbs.Add(new BreadcrumbItem(L["Trainings"], "/trainings", false, Icons.Filled.ModelTraining));
+            _breadcrumbs.Add(new BreadcrumbItem(L["Training {0}", _training.Training.RuntimeProfile.StartTime.ToString("dd/MM/yy HH:mm")], "/trainings/" + _training.Training.Id, false, Icons.Filled.ModelTraining));
+            _breadcrumbs.Add(new BreadcrumbItem(L["Explanation"], "/explanation", false, Icons.Filled.Lightbulb));
+        }
+        else if (DatasetId != null)
+        {
+            _breadcrumbs.Add(new BreadcrumbItem(L["Datasets"], "/datasets", false, Icons.Filled.ListAlt));
+            _breadcrumbs.Add(new BreadcrumbItem(L["Dataset {0}", _dataset.Dataset.Name], "/datasets/" + _dataset.Dataset.Id, false, Icons.Filled.ListAlt));
+            _breadcrumbs.Add(new BreadcrumbItem(L["Explanation"], "/explanation", false, Icons.Filled.Lightbulb));
+        }
+        _breadcrumbs.Add(new BreadcrumbItem(L["Model {0}", _model.Model.GetMlModelString()], null, true, Icons.Filled.Lightbulb));
+        await StartExplainerDashboard();
+
 
         StateHasChanged();
     }
@@ -100,8 +123,19 @@ else{
                 if (apiResponse.IsSuccessStatusCode)
                 {
                     _training = Newtonsoft.Json.JsonConvert.DeserializeObject<GetTrainingResponseDto>(apiResponse.Result.ToString());
-                    viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
-                    StateHasChanged();
+
+                    apiResponse = await apiClient.GetDataset(new GetDatasetRequestDto() { DatasetId = _training.Training.DatasetId });
+
+                    if (apiResponse.IsSuccessStatusCode)
+                    {
+                        _dataset = Newtonsoft.Json.JsonConvert.DeserializeObject<GetDatasetResponseDto>(apiResponse.Result.ToString());
+                        viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
+                        StateHasChanged();
+                    }
+                    else
+                    {
+                        viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
+                    }
                 }
                 else
                 {

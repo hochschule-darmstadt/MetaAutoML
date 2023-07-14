@@ -2,35 +2,25 @@ import tensorflow as tf
 from tensorflow import nest
 from autokeras.utils import data_utils
 import numpy as np
+from BaseWrapper import BaseWrapper
 
-class AutoKerasWrapper:
+class AutoKerasWrapper(BaseWrapper):
 
-    def __init__(self, model) -> None:
-        self.__model = model
+    def __init__(self, model, config) -> None:
+        super().__init__(model, config)
 
-    def fit(
-        self,
-        x=None,
-        y=None,
-        batch_size=64,
-        epochs=None,
-        callbacks=None,
-        validation_split=0.2,
-        validation_data=None,
-        verbose=1,
-        **kwargs
-    ):
-        self.__model.fit(x, y)
+    def predict(self, X, **kwargs):
+        X_predict = self._prepare_dataset(X)
 
-    def predict(self, x, **kwargs):
-        self.__model.predict(x=x, **kwargs)
+        return self._model.predict(x=X_predict, **kwargs)
 
-    def predict_proba(self, x, **kwargs):
+    def predict_proba(self, X, **kwargs):
+        X_predict = self._prepare_dataset(X)
 
-        self._check_data_format((x, None), predict=True)
-        dataset = self._adapt(x, self.__model.inputs, 32)
-        pipeline = self.__model.tuner.get_best_pipeline()
-        model = self.__model.tuner.get_best_model()
+        self._check_data_format((X_predict, None), predict=True)
+        dataset = self._adapt(X_predict, self._model.inputs, 32)
+        pipeline = self._model.tuner.get_best_pipeline()
+        model = self._model.tuner.get_best_model()
         dataset = pipeline.transform_x(dataset)
         dataset = tf.data.Dataset.zip((dataset, dataset))
         probabilities = model.predict(dataset, **kwargs)
@@ -87,19 +77,19 @@ class AutoKerasWrapper:
             if not predict:
                 y_shapes = [a.shape for a in nest.flatten(y)]
 
-        if len(x_shapes) != len(self.__model.inputs):
+        if len(x_shapes) != len(self._model.inputs):
             raise ValueError(
                 "Expected x{in_val} to have {input_num} arrays, "
                 "but got {data_num}".format(
-                    in_val=in_val, input_num=len(self.__model.inputs), data_num=len(x_shapes)
+                    in_val=in_val, input_num=len(self._model.inputs), data_num=len(x_shapes)
                 )
             )
-        if not predict and len(y_shapes) != len(self.__model.outputs):
+        if not predict and len(y_shapes) != len(self._model.outputs):
             raise ValueError(
                 "Expected y{in_val} to have {output_num} arrays, "
                 "but got {data_num}".format(
                     in_val=in_val,
-                    output_num=len(self.__model.outputs),
+                    output_num=len(self._model.outputs),
                     data_num=len(y_shapes),
                 )
             )
