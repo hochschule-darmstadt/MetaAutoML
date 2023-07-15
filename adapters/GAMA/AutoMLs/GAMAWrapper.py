@@ -1,5 +1,6 @@
 from sklearn.base import BaseEstimator, ClassifierMixin #Need or else dashboard will thing no predict_proba exists, only an issue with evalml and gama
 from BaseWrapper import BaseWrapper
+import numpy as np
 
 class GAMAWrapper(BaseEstimator, ClassifierMixin, BaseWrapper):
 
@@ -8,8 +9,12 @@ class GAMAWrapper(BaseEstimator, ClassifierMixin, BaseWrapper):
 
     def predict(self, X, **kwargs):
         X_predict = self._prepare_dataset(X)
-        return self._model.predict(X_predict)
+        predictions_raw = self._model.predict(X_predict)
+        predictions = np.array(predictions_raw)
+        return predictions
 
     def predict_proba(self, X, **kwargs):
         X_predict = self._prepare_dataset(X)
-        return self._model.predict_proba(X_predict).tolist()
+        probabilities_raw = self._model.predict_proba(X_predict).tolist()
+        probabilities = np.array(probabilities_raw)
+        return probabilities
