@@ -111,32 +111,52 @@
                                 {
                                     @if (param.ParameterType == ":single_value")
                                     {
-                                        <MudSelect T="ParameterValueViewModel" Class="ml-2" Label="@param.ParameterLabel" Variant="Variant.Outlined" @bind-SelectedValues="param.SelectedValues" ToStringFunc="p => p?.ValueLabel">
-                                            @foreach (var paramValue in param.ParameterValues)
-                                            {
-                                                <!--Hier Tooltip-->
-                                                <MudSelectItem Value="@paramValue">
-                                                    <ButtonTooltip Text=@paramValue.CommentValue URL=@paramValue.SeeAlsoValue Position="Placement.Right">@paramValue.ValueLabel</ButtonTooltip>
-                                                </MudSelectItem>
-                                            }
-                                        </MudSelect>
+                                        <MudGrid>
+                                            <MudItem xs="11">
+                                                <MudSelect T="ParameterValueViewModel" Class="ml-2" Label="@param.ParameterLabel" Variant="Variant.Outlined" @bind-SelectedValues="param.SelectedValues" ToStringFunc="p => p?.ValueLabel">
+                                                    @foreach (var paramValue in param.ParameterValues)
+                                                    {
+                                                        <!--Hier Tooltip-->
+                                                        <MudSelectItem Value="@paramValue">
+                                                            <ButtonTooltip Text=@paramValue.CommentValue URL=@paramValue.SeeAlsoValue Position="Placement.Right">@paramValue.ValueLabel</ButtonTooltip>
+                                                        </MudSelectItem>
+                                                    }
+                                                </MudSelect>
+                                            </MudItem>
+                                            <MudItem xs="1">
+                                                <LabelTooltip FontSize="Typo.h4" Text="@param.CommentPara" Position="Placement.Left"></LabelTooltip>
+                                            </MudItem>
+                                        </MudGrid>
                                     }
                                     @if (param.ParameterType == ":list")
                                     {
+                                        <MudGrid>
+                                            <MudItem xs="11">
+                                                <MudSelect T="ParameterValueViewModel" Class="ml-2" Label="@param.ParameterLabel" MultiSelection="true" SelectAll="true" @bind-SelectedValues="param.SelectedValues" ToStringFunc="p => p?.ValueLabel" Variant="Variant.Outlined">
+                                                    @foreach (var paramValue in param.ParameterValues)
+                                                    {
 
-                                        <MudSelect T="ParameterValueViewModel" Class="ml-2" Label="@param.ParameterLabel" MultiSelection="true" SelectAll="true" @bind-SelectedValues="param.SelectedValues" ToStringFunc="p => p?.ValueLabel" Variant="Variant.Outlined">
-                                            @foreach (var paramValue in param.ParameterValues)
-                                            {
-
-                                                <MudSelectItem Value="@paramValue">
-                                                    <ButtonTooltip Text=@paramValue.CommentValue URL=@paramValue.SeeAlsoValue Position="Placement.Right">@paramValue.ValueLabel</ButtonTooltip>
-                                                </MudSelectItem>
-                                            }
-                                        </MudSelect>
+                                                        <MudSelectItem Value="@paramValue">
+                                                            <ButtonTooltip Text=@paramValue.CommentValue URL=@paramValue.SeeAlsoValue Position="Placement.Right">@paramValue.ValueLabel</ButtonTooltip>
+                                                        </MudSelectItem>
+                                                    }
+                                                </MudSelect>
+                                            </MudItem>
+                                            <MudItem xs="1">
+                                                <LabelTooltip FontSize="Typo.h4" Text="@param.CommentPara" Position="Placement.Left"></LabelTooltip>
+                                            </MudItem>
+                                        </MudGrid>
                                     }
                                     else if (param.ParameterType == ":integer")
                                     {
-                                        <MudNumericField T="int?" Class="ml-2" Label="@param.ParameterLabel" Variant="Variant.Outlined" @bind-Value="@param.IntegerValue" />
+                                        <MudGrid>
+                                            <MudItem xs="11">
+                                                <MudNumericField T="int?" Class="ml-2" Label="@param.ParameterLabel" Variant="Variant.Outlined" @bind-Value="@param.IntegerValue" />
+                                            </MudItem>
+                                            <MudItem xs="1">
+                                                <LabelTooltip FontSize="Typo.h4" Text="@param.CommentPara" Position="Placement.Left"></LabelTooltip>
+                                            </MudItem>
+                                        </MudGrid>
                                     }
                                 }
                             }
@@ -157,17 +177,26 @@
                                                 {
                                                     @if (param.ParameterType == ":single_value")
                                                     {
-                                                        <MudSelect T="ParameterValueViewModel" Class="ml-2" Label="@param.BroaderParameterLabel" Variant="Variant.Outlined" @bind-SelectedValues="param.SelectedValues" ToStringFunc="p => p?.ValueLabel">
-                                                            @foreach (var paramValue in param.ParameterValues)
-                                                            {
-                                                                <MudSelectItem Value="@paramValue">
-                                                                    <ButtonTooltip Text=@paramValue.CommentValue URL=@paramValue.SeeAlsoValue Position="Placement.Right">@paramValue.ValueLabel</ButtonTooltip>
-                                                                </MudSelectItem>
-                                                            }
-                                                        </MudSelect>
+                                                        <MudGrid>
+                                                            <MudItem xs="11">
+                                                                <MudSelect T="ParameterValueViewModel" Class="ml-2" Label="@param.BroaderParameterLabel" Variant="Variant.Outlined" @bind-SelectedValues="param.SelectedValues" ToStringFunc="p => p?.ValueLabel">
+                                                                    @foreach (var paramValue in param.ParameterValues)
+                                                                    {
+                                                                        <MudSelectItem Value="@paramValue">
+                                                                            <ButtonTooltip Text=@paramValue.CommentValue URL=@paramValue.SeeAlsoValue Position="Placement.Right">@paramValue.ValueLabel</ButtonTooltip>
+                                                                        </MudSelectItem>
+                                                                    }
+                                                                </MudSelect>
+                                                            </MudItem>
+                                                            <MudItem xs="1">
+                                                                <LabelTooltip FontSize="Typo.h4" Text="@param.CommentPara" Position="Placement.Left"></LabelTooltip>
+                                                            </MudItem>
+                                                        </MudGrid>
                                                     }
                                                     @if (param.ParameterType == ":list")
                                                     {
+                                                        <MudGrid>
+                                                            <MudItem xs="11">
                                                         <MudSelect T="ParameterValueViewModel" Class="ml-2" MultiSelection="true" Label="@param.BroaderParameterLabel" SelectAll="true" @bind-SelectedValues="param.SelectedValues" ToStringFunc="p => p?.ValueLabel" Variant="Variant.Outlined">
                                                             @foreach (var paramValue in param.ParameterValues)
                                                             {
@@ -176,10 +205,22 @@
                                                                 </MudSelectItem>
                                                             }
                                                         </MudSelect>
+                                                            </MudItem>
+                                                            <MudItem xs="1">
+                                                                <LabelTooltip FontSize="Typo.h4" Text="@param.CommentPara" Position="Placement.Left"></LabelTooltip>
+                                                            </MudItem>
+                                                        </MudGrid>
                                                     }
                                                     else if (param.ParameterType == ":integer")
                                                     {
-                                                        <MudNumericField T="int?" Class="ml-2" Label="@param.BroaderParameterLabel" Variant="Variant.Outlined" @bind-Value="@param.IntegerValue" />
+                                                        <MudGrid>
+                                                            <MudItem xs="11">
+                                                                <MudNumericField T="int?" Class="ml-2" Label="@param.BroaderParameterLabel" Variant="Variant.Outlined" @bind-Value="@param.IntegerValue" />
+	                                                        </MudItem>
+	                                                        <MudItem xs="1">
+		                                                        <LabelTooltip FontSize="Typo.h4" Text="@param.CommentPara" Position="Placement.Left"></LabelTooltip>
+	                                                        </MudItem>
+                                                        </MudGrid>
                                                     }
                                                 }
                                             </ChildContent>
@@ -353,6 +394,10 @@
             () =>
             {
                 _availableParameters = apiResponse.Result.AutoMlParameters;
+                if (_availableParameters.GroupBy(p => p.AutoML.ID) == null)
+                {
+                    return;
+                }
                 _intersectedParams = ReplaceIntersectedParameter(_intersector.GetIntersectedParameters().ToList());
                 foreach (var param in _intersectedParams)
                 {
@@ -360,16 +405,21 @@
                 }
 
 
-                var paramsGroupedBySolution = _availableParameters.GroupBy(p => p.AutoMlIri);
+                var paramsGroupedBySolution = _availableParameters.GroupBy(p => p.AutoML.ID);
 
                 var newIndividualParams = new List<(string,string,string, List<ParameterObject>)>();
                 if (paramsGroupedBySolution.Count() > 0)
                 {
                     foreach (var group in paramsGroupedBySolution)
                     {
-                        var autoMlLabel = _autoMlSolutionsViewModel.AvailableChips.Single(c => c.Id == group.Key).Label;
-                        var autoMlComment = _autoMlSolutionsViewModel.AvailableChips.Single(c => c.Id == group.Key).Comment;
-                        var autoMlSeeAlso = _autoMlSolutionsViewModel.AvailableChips.Single(c => c.Id == group.Key).ImageUrl;
+                        if (_autoMlSolutionsViewModel.AvailableChips.SingleOrDefault(c => c.Id == group.Key) == null)
+                        {
+                            //Sometimes the refresh is slower that the list refresh, exclude a chip if it is not available in the selection
+                            continue;
+                        }
+                        var autoMlLabel = _autoMlSolutionsViewModel.AvailableChips.SingleOrDefault(c => c.Id == group.Key).Label;
+                        var autoMlComment = _autoMlSolutionsViewModel.AvailableChips.SingleOrDefault(c => c.Id == group.Key).Comment;
+                        var autoMlSeeAlso = _autoMlSolutionsViewModel.AvailableChips.SingleOrDefault(c => c.Id == group.Key).ImageUrl;
 
                         newIndividualParams.Add(
                             (
@@ -377,7 +427,7 @@
                                 autoMlComment,
                                 autoMlSeeAlso,
                                 group
-                                    .GroupBy(param => param.ParamIri)
+                                    .GroupBy(param => param.Parameter.ID)
                                     .Select(p => CreateParameterObjectFromGroupedParameterDto(p, autoMlLabel))
                                     .ToList()
                             )
@@ -411,22 +461,22 @@
         var firstInstanceWithIri = parameterGroup.First();
         var result = new ParameterObject
         {
-            BroaderParameterLabel = firstInstanceWithIri.BroaderLabel,
-            ParameterIri = parameterGroup.Key,
-            ParameterLabel = firstInstanceWithIri.ParamLabel,
-            ParameterType = firstInstanceWithIri.ParamType,
-            SeeAlsoPara = firstInstanceWithIri.SeeAlsoPara,
-            CommentPara = firstInstanceWithIri.CommentPara
+                BroaderParameterLabel = firstInstanceWithIri.Broader.Properties["skos:prefLabel"],
+                ParameterIri = parameterGroup.Key,
+                ParameterLabel = firstInstanceWithIri.Parameter.Properties["skos:prefLabel"],
+                ParameterType = firstInstanceWithIri.ParameterType.ID,
+                SeeAlsoPara = firstInstanceWithIri.Parameter.Properties.ContainsKey("rdfs:seeAlso") ? firstInstanceWithIri.Parameter.Properties["rdfs:seeAlso"] : "",
+                CommentPara = firstInstanceWithIri.Parameter.Properties.ContainsKey("rdfs:comment") ? firstInstanceWithIri.Parameter.Properties["rdfs:comment"] : ""
         };
 
         if (!firstInstanceWithIri.IsScalar)
         {
             result.ParameterValues = parameterGroup.Select(param => new ParameterValueViewModel
             {
-                ValueIri = param.ValueIri,
-                ValueLabel = param.ValueLabel,
-                CommentValue = param.CommentValue,
-                SeeAlsoValue = param.SeeAlsoValue
+                ValueIri = param.Value.ID,
+                    ValueLabel = param.Value.Properties["skos:prefLabel"],
+                    CommentValue = param.Parameter.Properties.ContainsKey("rdfs:comment") ? param.Parameter.Properties["rdfs:comment"] : "",
+                    SeeAlsoValue = param.Parameter.Properties.ContainsKey("rdfs:seeAlso") ? param.Parameter.Properties["rdfs:seeAlso"] : ""
             }).ToList();
             if (_individualParams.Any() && _individualParams.Where(i => i.autoMlLabel == autoMlLabel).Any())
             {

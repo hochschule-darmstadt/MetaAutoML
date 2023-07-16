@@ -219,6 +219,7 @@ class OntologyManager(object):
             GetAutoMlParametersResponse: The grpc response dto containing the parameters
         """
         result = GetAutoMlParametersResponse()
+        print(f"automl: {request.auto_mls}")
         task_iri = self.__iri_to_uri_ref(request.task_iri)
         for autoMl in request.auto_mls:
             auto_ml_iri = self.__iri_to_uri_ref(autoMl)
@@ -248,16 +249,9 @@ class OntologyManager(object):
             rowInstance = AutoMlParameter()
             rowInstance.auto_ml_iri = self.__normalize_iri_to_colon(auto_ml_iri)
             rowInstance.param_iri = self.__normalize_iri_to_colon(row.param_iri)
-            rowInstance.param_label = row.param_label
             rowInstance.param_type = self.__normalize_iri_to_colon(row.param_type)
             rowInstance.value_iri = self.__normalize_iri_to_colon(row.value_iri)
-            rowInstance.value_label = row.value_label
             rowInstance.broader_iri = self.__normalize_iri_to_colon(row.broader_iri)
-            rowInstance.broader_label = row.broader_label
-            rowInstance.see_also_para = row.seeAlso_para
-            rowInstance.comment_para = self.__normalize_iri_to_colon(row.comment_para)
-            rowInstance.see_also_value = row.seeAlso_value
-            rowInstance.comment_value = self.__normalize_iri_to_colon(row.comment_value)
             result.append(rowInstance)
 
         return result

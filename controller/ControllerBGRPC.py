@@ -626,6 +626,8 @@ class Model(betterproto.Message):
     dashboard_compatible: bool = betterproto.bool_field(15)
     """If this model is explainer dashboard compatibleexample: True"""
 
+    dashboard_status: str = betterproto.string_field(16)
+
 
 @dataclass(eq=False, repr=False)
 class ModelruntimeProfile(betterproto.Message):
@@ -1078,27 +1080,10 @@ class AutoMlParameter(betterproto.Message):
 
     auto_ml_iri: str = betterproto.string_field(1)
     param_iri: str = betterproto.string_field(2)
-    param_label: str = betterproto.string_field(3)
-    param_type: str = betterproto.string_field(4)
-    broader_iri: str = betterproto.string_field(5)
-    broader_label: str = betterproto.string_field(6)
+    param_type: str = betterproto.string_field(3)
+    broader_iri: str = betterproto.string_field(4)
     value_iri: Optional[str] = betterproto.string_field(
-        7, optional=True, group="_valueIri"
-    )
-    value_label: Optional[str] = betterproto.string_field(
-        8, optional=True, group="_valueLabel"
-    )
-    see_also_para: Optional[str] = betterproto.string_field(
-        9, optional=True, group="_seeAlso_para"
-    )
-    comment_para: Optional[str] = betterproto.string_field(
-        10, optional=True, group="_comment_para"
-    )
-    see_also_value: Optional[str] = betterproto.string_field(
-        11, optional=True, group="_seeAlso_value"
-    )
-    comment_value: Optional[str] = betterproto.string_field(
-        12, optional=True, group="_comment_value"
+        5, optional=True, group="_valueIri"
     )
 
 

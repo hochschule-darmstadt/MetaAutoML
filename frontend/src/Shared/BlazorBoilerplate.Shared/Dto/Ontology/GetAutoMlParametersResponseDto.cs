@@ -1,19 +1,22 @@
+using BlazorBoilerplate.Server;
+
 namespace BlazorBoilerplate.Shared.Dto.Ontology;
 
 public class AutoMlParameterDto
 {
-    public string AutoMlIri { get; set; }
-    public string ParamIri { get; set; }
-    public string ParamLabel { get; set; }
-    public string ParamType { get; set; }
-    public string BroaderIri { get; set; }
-    public string BroaderLabel { get; set; }
-    public string ValueIri { get; set; }
-    public string ValueLabel { get; set; }
-    public string SeeAlsoPara { get; set; }
-    public string CommentPara { get; set; }
-    public string SeeAlsoValue { get; set; }
-    public string CommentValue { get; set; }
+    public AutoMlParameterDto(ObjectInfomationDto automl, ObjectInfomationDto parameter, ObjectInfomationDto parameterType, ObjectInfomationDto broader, ObjectInfomationDto value)
+    {
+        AutoML = automl;
+        Parameter = parameter;
+        ParameterType = parameterType;
+        Broader = broader;
+        Value = value;
+    }
+    public ObjectInfomationDto AutoML { get; set; }
+    public ObjectInfomationDto Parameter { get; set; }
+    public ObjectInfomationDto ParameterType { get; set; }
+    public ObjectInfomationDto Broader { get; set; }
+    public ObjectInfomationDto Value { get; set; }
 
 
     /// <summary>
@@ -22,19 +25,19 @@ public class AutoMlParameterDto
     /// <returns></returns>
     public bool IsScalar =>
         // if value is not set, that means, that this object does not represent an option => It must be a scalar parameter
-        string.IsNullOrWhiteSpace(ValueIri);
+        string.IsNullOrWhiteSpace(Value.ID);
 
     /// <summary>
     /// The iri that identifies the most abstract type for this parameter.
     /// </summary>
     /// <returns></returns>
-    public string BroadestIri => !string.IsNullOrWhiteSpace(BroaderIri) ? BroaderIri : ParamIri;
+    public string BroadestIri => !string.IsNullOrWhiteSpace(Broader.ID) ? Broader.ID : Parameter.ID;
 
     /// <summary>
     /// The label for the most abstract type for this parameter.
     /// </summary>
     /// <returns></returns>
-    public string BroadestLabel => !string.IsNullOrWhiteSpace(BroaderIri) ? BroaderLabel : ParamLabel;
+    public string BroadestLabel => !string.IsNullOrWhiteSpace(Broader.ID) ? Broader.Properties["skos:prefLabel"] : Parameter.Properties["skos:prefLabel"];
 }
 
 public class GetAutoMlParametersResponseDto

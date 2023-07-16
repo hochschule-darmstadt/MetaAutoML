@@ -89,7 +89,7 @@ SPARQL query to retrieve all configuration options with their corresponding valu
 ONTOLOGY_QUERY_GET_CONFIGURATION_BY_AUTOML_ID_AND_TASK_ID = """
         PREFIX : <http://h-da.de/ml-ontology/>
 
-SELECT ?param_iri ?param_label ?param_type ?broader_iri ?broader_label ?value_iri ?value_label ?seeAlso_para ?comment_para ?seeAlso_value ?comment_value
+SELECT ?param_iri ?param_label ?param_type ?broader_iri ?broader_label ?value_iri ?value_label
 WHERE {
   ?ci a :Configuration_item ;
   :category :task_configuration ;
@@ -106,13 +106,5 @@ WHERE {
     ?param_iri skos:broader ?broader_iri .
     ?broader_iri skos:prefLabel ?broader_label
   }
-  OPTIONAL {
-    ?broader_iri rdfs:seeAlso ?seeAlso_para
-  }
-  OPTIONAL {
-    ?broader_iri rdfs:comment ?comment_para
-  }
-  ?value_iri rdfs:comment ?comment_value ;
-      rdfs:seeAlso ?seeAlso_value .
 }
         """
