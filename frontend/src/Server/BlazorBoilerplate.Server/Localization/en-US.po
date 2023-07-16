@@ -1611,6 +1611,10 @@ msgid "Download predictions"
 msgstr "Download predictions"
 
 msgctxt "Global"
+msgid "View predictions"
+msgstr "View predictions"
+
+msgctxt "Global"
 msgid "Download ML model pipeline"
 msgstr "Download ML model pipeline"
 
