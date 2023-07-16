@@ -64,7 +64,7 @@
 
     {
             <MudItem xs="11">
-                <MudSelect Label="@L["target"]" T="string" @bind-SelectedValues="SelectedTargets" MultiSelection="true">
+                <MudSelect Label="@L["target *"]" T="string" @bind-SelectedValues="SelectedTargets" MultiSelection="true">
                     @if (_columnNames != null)
                     {
                         @foreach (var column in _columnNames)

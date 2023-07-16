@@ -1916,8 +1916,11 @@ msgid "none"
 msgstr "None"
 
 msgctxt "Global"
-msgid "target"
+msgid "target *"
 msgstr "Target *"
+msgctxt "Global"
+msgid "target"
+msgstr "Target"
 
 msgctxt "Global"
 msgid "start"
