@@ -213,5 +213,5 @@ auth/*.json
 
 #codecarbon
 
-adapter/*/emissions.csv
 adapter/*/tests/**
+adapters/*/emissions.csv

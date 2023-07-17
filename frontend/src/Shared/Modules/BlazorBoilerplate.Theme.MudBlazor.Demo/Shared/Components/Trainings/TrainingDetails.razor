@@ -196,6 +196,11 @@
             }
         }
         _metrics = _metrics.OrderBy(x => x.Name.Properties["skos:prefLabel"]).ToList();
+        if (_metrics.Count > 0 && SelectedMetric == "")
+        {
+            SelectedMetric = _metrics[0].Name.ID;
+            StateHasChanged();
+        }
     }
 
     SemaphoreSlim timerSemaphore = new SemaphoreSlim(1);
