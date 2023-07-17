@@ -9,7 +9,7 @@ class LAMAWrapper(BaseWrapper):
     def predict(self, X, **kwargs):
         X_predict = self._prepare_dataset(X)
 
-        predictions = self._model.predict(x=X_predict, **kwargs)
+        predictions = self._model.predict(X_predict)
         if self._model.task.name == "multiclass":
             ind =  np.argmax(predictions.data, axis=1)
             inverse_class_mapping = {y: x for x,y in self._model.reader.class_mapping.items()}
@@ -17,7 +17,7 @@ class LAMAWrapper(BaseWrapper):
             ind = list(map(inverse_class_mapping.get, ind))
             predicted_y = np.reshape(ind, (-1, 1))
         else:
-            predicted_y = (np.array(predicted_y.data) >= 0.5).astype(int)
+            predicted_y = (np.array(predictions.data) >= 0.5).astype(int)
             predicted_y = np.concatenate(predicted_y)
         return predicted_y
 

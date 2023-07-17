@@ -47,7 +47,7 @@
                                                                                                 </MudTh>
                                                                                                 <MudTh>
                                                                                                     <MudTableSortLabel SortBy="new Func<ModelDto, object>(x=>x.PredictionTime)">
-                                                                                                        <LabelTooltip Label=@L["Prediction time"] FontSize="Typo.subtitle2" Text="Runtime for predicting one single sample in milliseconds." Position="Placement.Top"></LabelTooltip>
+                                                                                                        <LabelTooltip Label=@L["Prediction time"] FontSize="Typo.subtitle2" Text="Runtime for predicting one single sample in microseconds." Position="Placement.Top"></LabelTooltip>
                                                                                                     </MudTableSortLabel>
                                                                                                 </MudTh>
                                                                                                 <MudTh></MudTh>
@@ -125,7 +125,7 @@
                     </span>
                         }
                     </MudTd>
-                    <MudTd>@(String.Format("{0:0}", context.PredictionTime)) ms</MudTd>
+                    <MudTd>@(String.Format("{0:0}", context.PredictionTime*1000)) µs</MudTd>
                     <MudTd><ModelMenu Model="@context" OnDeleteCompleted="@OnDeleteModelCompleted" /></MudTd>
                 </RowTemplate>
                 <PagerContent>

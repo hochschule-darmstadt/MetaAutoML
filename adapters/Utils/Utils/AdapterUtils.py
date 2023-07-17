@@ -168,6 +168,11 @@ def evaluate(config: "StartAutoMlRequest", config_path: str) -> Tuple[float, flo
     Returns:
         tuple[float, float]: tuple holding the test score, prediction time metrics
     """
+    dashboard_folder_location = os.path.join(get_config_property("training-path"),
+                                        config.user_id,
+                                        config.dataset_id,
+                                        config.training_id,
+                                        get_config_property("dashboard-folder-name"))
     config = config.__dict__
     config["dataset_configuration"] = config["dataset_configuration"]
     file_path = config["dataset_path"]
@@ -204,12 +209,28 @@ def evaluate(config: "StartAutoMlRequest", config_path: str) -> Tuple[float, flo
         #test.drop(test.tail(12).index, inplace=True)
         #file_path = write_tabular_dataset_data(test, os.path.dirname(file_path), config)
 
-    elif(config["configuration"]["task"] in[":image_classification", ":image_regression"]):
+    elif(config["configuration"]["task"] in [":image_classification", ":image_regression"]):
         X_test, y_test = data_loader(config, image_test_folder=True)
 
-    predict_start = time.time()
-    subprocess.call([python_env, os.path.join(result_path, "predict.py"), file_path, os.path.join(result_path, "predictions.csv")])
-    predict_time = time.time() - predict_start
+
+    if config["configuration"]["task"] in [":tabular_classification", ":tabular_regression", ":text_regression", ":named_entity_recognition", ":text_classification"]:
+
+        subprocess.call([python_env, os.path.join(result_path, "predict.py"), file_path, os.path.join(result_path, "predictions.csv")])
+
+
+            #The dashboard model wrapper offers the same functionallity and can be used for making timed predictions
+        with open(dashboard_folder_location + '/dashboard_model.p', 'rb') as file:
+            pipeline_model = dill.load(file)
+
+        predict_start = time.time()
+        pipeline_model.predict(test.drop(target, axis=1))
+        predict_time = (time.time() - predict_start) / test.shape[0]
+    else:
+
+        predict_start = time.time()
+        subprocess.call([python_env, os.path.join(result_path, "predict.py"), file_path, os.path.join(result_path, "predictions.csv")])
+        predict_time = time.time() - predict_start
+
 
     predictions = pd.read_csv(os.path.join(result_path, "predictions.csv"))
     os.remove(os.path.join(result_path, "predictions.csv"))
@@ -370,10 +391,10 @@ def predict(config: dict, config_path: str, automl: str) -> Tuple[float, str]:
     python_env = os.getenv("PYTHON_ENV", default="PYTHON_ENV_UNSET")
     file_path = config["prediction_id"] + "_" + automl + ".csv"
     result_prediction_path = os.path.join(os.path.dirname(config["live_dataset_path"]), file_path)
+
     predict_start = time.time()
     subprocess.call([python_env, os.path.join(result_folder_location, "predict.py"), config["live_dataset_path"], result_prediction_path])
     predict_time = time.time() - predict_start
-
 
     return predict_time, result_prediction_path
 

@@ -1596,7 +1596,7 @@ msgstr "Metric"
 
 msgctxt "Global"
 msgid "Prediction time: {0}"
-msgstr "Prediction time: {0} ms"
+msgstr "Prediction time: {0} µs"
 
 msgctxt "Global"
 msgid "Use model for predicting new cases"

@@ -9,7 +9,7 @@ class PycaretWrapper(BaseWrapper):
     def predict(self, X, **kwargs):
         X_predict = self._prepare_dataset(X)
 
-        return self._model.predict(x=X_predict, **kwargs)
+        return self._model.predict(X_predict)
 
     def predict_proba(self, X, **kwargs):
         X_predict = self._prepare_dataset(X)

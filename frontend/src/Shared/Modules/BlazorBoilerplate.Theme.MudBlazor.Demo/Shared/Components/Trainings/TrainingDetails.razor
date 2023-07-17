@@ -45,7 +45,7 @@
                                        <LabelTooltip Label=@L["Training emissions"] FontSize="Typo.subtitle2" Text="Emissions for training the entire dataset in kg CO2 equivalents." Position="Placement.Top"></LabelTooltip>
                                 </MudTableSortLabel></MudTh>
                              <MudTh><MudTableSortLabel SortBy="new Func<ModelDto, object>(x=>x.PredictionTime)">
-    <LabelTooltip Label=@L["Prediction time"] FontSize="Typo.subtitle2" Text="Runtime for predicting one single sample in milliseconds." Position="Placement.Top"></LabelTooltip>
+    <LabelTooltip Label=@L["Prediction time"] FontSize="Typo.subtitle2" Text="Runtime for predicting one single sample in microseconds." Position="Placement.Top"></LabelTooltip>
                                 </MudTableSortLabel></MudTh>
                             <MudTh></MudTh>
                         </MudTHeadRow>
@@ -121,7 +121,7 @@
                                 </span>
                             }
                         </MudTd>
-                        <MudTd>@(String.Format("{0:0}", models.PredictionTime)) ms</MudTd>
+                        <MudTd>@(String.Format("{0:0}", models.PredictionTime * 1000)) µs</MudTd>
                     </RowTemplate>
                     <PagerContent>
                         <MudTablePager />
