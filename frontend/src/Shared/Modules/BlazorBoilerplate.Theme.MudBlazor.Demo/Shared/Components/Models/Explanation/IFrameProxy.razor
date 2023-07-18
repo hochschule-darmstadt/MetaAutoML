@@ -1,0 +1,15 @@
+@inject IJSRuntime JSRuntime
+
+<iframe id="dashboard_iframe" style="height:100%; width:100%" src=@Src> </iframe>
+
+@code {
+
+    [Parameter]
+    public string Src { get; set; }
+
+    public async void Refresh()
+    {
+        await JSRuntime.InvokeVoidAsync("setTimeout", $"setupErrorHandling('dashboard_iframe')", 0);
+    }
+
+}

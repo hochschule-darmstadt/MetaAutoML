@@ -30,8 +30,9 @@ namespace BlazorBoilerplate.Shared.Dto.Model
         public double PredictionTime { get; set; }
         public ModelRuntimeProfile RuntimeProfile { get; set; }
         public List<string> StatusMessages { get; set; }
-        public Dictionary<string, dynamic> Explanation { get; set; }
+        //public Dictionary<string, dynamic> Explanation { get; set; }
         public double Emissions { get; set; }
+        public bool DashboardCompatible { get; set; }
         public ModelDto()
         {
 
@@ -53,8 +54,9 @@ namespace BlazorBoilerplate.Shared.Dto.Model
             PredictionTime = model.PredictionTime;
             RuntimeProfile = new ModelRuntimeProfile(model.RuntimeProfile);
             StatusMessages = model.StatusMessages.ToList();
-            Explanation = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(model.Explanation);
+            //Explanation = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(model.Explanation);
             Emissions = model.Emission;
+            DashboardCompatible = model.DashboardCompatible;
         }
         public string GetMlLibraryString()
         {

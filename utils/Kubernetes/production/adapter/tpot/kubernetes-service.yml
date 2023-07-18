@@ -1,0 +1,60 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: tpot
+  namespace: omaml
+spec:
+  type: ClusterIP
+  ports:
+  - name: "50064"
+    port: 50064
+    protocol: TCP
+    targetPort: 50064
+  - name: "4000"
+    port: 4000
+    protocol: TCP
+    targetPort: 4000
+  - name: "4001"
+    port: 4001
+    protocol: TCP
+    targetPort: 4001
+  - name: "4002"
+    port: 4002
+    protocol: TCP
+    targetPort: 4002
+  - name: "4003"
+    port: 4003
+    protocol: TCP
+    targetPort: 4003
+  - name: "4004"
+    port: 4004
+    protocol: TCP
+    targetPort: 4004
+  - name: "4005"
+    port: 4005
+    protocol: TCP
+    targetPort: 4005
+  - name: "4006"
+    port: 4006
+    protocol: TCP
+    targetPort: 4006
+  - name: "4007"
+    port: 4007
+    protocol: TCP
+    targetPort: 4007
+  - name: "4008"
+    port: 4008
+    protocol: TCP
+    targetPort: 4008
+  - name: "4009"
+    port: 4009
+    protocol: TCP
+    targetPort: 4009
+  - name: "4010"
+    port: 4010
+    protocol: TCP
+    targetPort: 4010
+  selector:
+    io.kompose.service: tpot
+status:
+  loadBalancer: {}

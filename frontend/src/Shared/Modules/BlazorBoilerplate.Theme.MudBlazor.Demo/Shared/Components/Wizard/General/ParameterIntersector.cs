@@ -29,7 +29,7 @@ public class ParameterIntersector
     {
         return Parameters
             .GroupBy(p => p.BroadestIri)
-            .Where(g => g.Select(p => p.AutoMlIri).Distinct().Count() == NumberOfSelectedSolutions)
+            .Where(g => g.Select(p => p.AutoML.ID).Distinct().Count() == NumberOfSelectedSolutions)
             .Select(g => g.Key);
     }
 
@@ -53,7 +53,7 @@ public class ParameterIntersector
             }
 
             List<string> intersectedValueIris = null;
-            if (IsParameterListType(parametersForBroader.First().ParamType))
+            if (IsParameterListType(parametersForBroader.First().ParameterType.ID))
             {
                 intersectedValueIris = GetIntersectedValues(parametersForBroader);
 
@@ -72,7 +72,9 @@ public class ParameterIntersector
                 ParameterLabel = parametersForBroader.First().BroadestLabel,
                 ParameterType = parameterType,
                 ParameterValues = intersectedValueViewModels,
-                //SelectedValues = intersectedValueViewModels.ToList()
+                //SelectedValues = intersectedValueViewModels.ToList(),
+                CommentPara = parametersForBroader.First().Parameter.Properties.ContainsKey("rdfs:comment") ? parametersForBroader.First().Parameter.Properties["rdfs:comment"] : "",
+                SeeAlsoPara = parametersForBroader.First().Parameter.Properties.ContainsKey("rdfs:seeAlso") ? parametersForBroader.First().Parameter.Properties["rdfs:seeAlso"] : "",
             };
         }
     }
@@ -85,8 +87,8 @@ public class ParameterIntersector
     private List<string> GetIntersectedValues(IEnumerable<AutoMlParameterDto> parameters)
     {
         return parameters
-            .GroupBy(p => p.ParamIri)
-            .Select(g => g.Select(p => p.ValueIri))
+            .GroupBy(p => p.Parameter.ID)
+            .Select(g => g.Select(p => p.Value.ID))
             .IntersectAll()
             .ToList();
     }
@@ -100,21 +102,23 @@ public class ParameterIntersector
                 _ => paramType
             };
 
-        return parameters.DistinctBy(p => getMostRestrictiveSupportedParameterType(p.ParamType)).Count() == 1;
+        return parameters.DistinctBy(p => getMostRestrictiveSupportedParameterType(p.ParameterType.ID)).Count() == 1;
     }
 
     private string GetMostRestrictiveTypeIri(IEnumerable<AutoMlParameterDto> parameters)
     {
-        return parameters.Select(p => p.ParamType).Min(new ParamTypeComparer());
+        return parameters.Select(p => p.ParameterType.ID).Min(new ParamTypeComparer());
     }
 
     private TaskConfiguration.ParameterValueViewModel ValueIriToValueViewModel(string iri)
     {
-        var parameterWithValue = Parameters.First(p => p.ValueIri == iri);
+        var parameterWithValue = Parameters.First(p => p.Value.ID == iri);
         return new TaskConfiguration.ParameterValueViewModel
         {
             ValueIri = iri,
-            ValueLabel = parameterWithValue.ValueLabel
+            ValueLabel = parameterWithValue.Value.Properties["skos:prefLabel"],
+            SeeAlsoValue = parameterWithValue.Parameter.Properties.ContainsKey("rdfs:seeAlso") ? parameterWithValue.Parameter.Properties["rdfs:seeAlso"] : "",
+            CommentValue = parameterWithValue.Parameter.Properties.ContainsKey("rdfs:comment") ? parameterWithValue.Parameter.Properties["rdfs:comment"] : ""
         };
     }
 

@@ -8,6 +8,7 @@ import pandas as pd
 import json
 from JsonUtil import get_config_property
 import FLAMLParameterConfig as fpc
+from FLAMLWrapper import FLAMLWrapper
 
 class FLAMLAdapter:
     """
@@ -74,6 +75,7 @@ class FLAMLAdapter:
         X[y.name] = y.values
         automl.fit(dataframe=X, label=y.name, **automl_settings)
         export_model(automl, self._configuration["result_folder_location"], 'model_flaml.p')
+        export_model(FLAMLWrapper(automl, self._configuration), self._configuration["dashboard_folder_location"], 'dashboard_model.p')
 
     def __tabular_regression(self):
         """Execute the tabular regression task and export the found model"""

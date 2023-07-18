@@ -6,7 +6,7 @@ from AdapterUtils import *
 from AdapterTabularUtils import *
 from JsonUtil import get_config_property
 from supervised.automl import AutoML
-
+from MLJARWrapper import MLJARWrapper
 
 class MLJARAdapter:
     """
@@ -44,6 +44,7 @@ class MLJARAdapter:
         automl = AutoML(total_time_limit=self._configuration["configuration"]["runtime_limit"], mode="Compete", **parameters, results_path=result_path)
         automl.fit(X, y)
         shutil.copytree(self._configuration["model_folder_location"], os.path.join(self._configuration["result_folder_location"], "Models"))
+        export_model(MLJARWrapper(automl, self._configuration), self._configuration["dashboard_folder_location"], 'dashboard_model.p')
 
     def __tabular_regression(self):
         """Execute the tabular regression task and export the found model"""

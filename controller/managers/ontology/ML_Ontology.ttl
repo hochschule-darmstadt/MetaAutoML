@@ -1,5 +1,5 @@
 ### Ontology file generated from ML_Ontology.xlsx.
-### 2023-04-20 16:58:34.499403
+### 2023-07-07 14:27:23.485217
 
 
 # PREFIXES
@@ -1600,12 +1600,14 @@
     skos:prefLabel "Autopytorch" ;
     :used_for :pytorch_lib , :pytorch_forecasting_lib ;
     :can_perform :tabular_classification , :tabular_regression , :image_classification , :time_series_forecasting ;
-    :supported_by_oma_ml "True" .
+    rdfs:comment "AutoML framework focussing on neural architecture search" ;
+    rdfs:seeAlso <https://github.com/automl/Auto-PyTorch> .
 :autosklearn a :AutoML_solution ;
     skos:prefLabel "Autosklearn" ;
     :used_for :scikit_learn_lib ;
     :can_perform :tabular_classification , :tabular_regression ;
-    :supported_by_oma_ml "True" .
+    rdfs:comment "AutoML library for Scikit-learn" ;
+    rdfs:seeAlso <https://automl.github.io/auto-sklearn> .
 :autots a :AutoML_solution ;
     skos:prefLabel "AutoTS" ;
     :used_for :prophet_lib , :pytorch_lib , :gluonts_lib , :pmdarima_lib , :tensorflow_lib ;
@@ -1655,7 +1657,8 @@
     skos:prefLabel "Mcfly" ;
     :used_for :tensorflow_lib ;
     :can_perform :time_series_classification ;
-    :supported_by_oma_ml "True" .
+    rdfs:comment "AutoML library for time series" ;
+    rdfs:seeAlso <https://github.com/NLeSC/mcfly> .
 :merlion a :AutoML_solution ;
     skos:prefLabel "Merlion" ;
     :used_for :lightgbm_lib , :prophet_lib , :scikit_learn_lib , :statsmodel_lib , :greykite_lib , :kats_lib ;
@@ -1689,7 +1692,1644 @@
     skos:prefLabel "Pycaret" ;
     :used_for :scikit_learn_lib , :catboost_lib , :lightgbm_lib , :xgboost_lib ;
     :can_perform :tabular_classification , :tabular_regression , :clustering , :anomaly_detection , :time_series_forecasting ;
-    :supported_by_oma_ml "True" .
+    rdfs:comment "Open-source, low-code machine learning library in Python" ;
+    rdfs:seeAlso <https://github.com/pycaret/pycaret> ;
+    :supported_by_oma_ml "true"^^xsd:boolean .
+:rapidminer a :AutoML_solution ;
+    skos:prefLabel "Rapidminer" ;
+    :used_for :weka_lib , :h2o_lib ;
+    :can_perform :tabular_classification , :tabular_regression , :clustering , :outlier_detection , :time_series_forecasting ;
+    rdfs:comment "Commercial data science platform with AutoModel feature" ;
+    rdfs:seeAlso <https://rapidminer.com> .
+:remi_ai a :AutoML_solution ;
+    skos:prefLabel "Remi AI" ;
+    :can_perform :time_series_forecasting ;
+    rdfs:comment "Commercial data science platform with AutoML feature" ;
+    rdfs:seeAlso <https://www.remi.ai> .
+:tpot a :AutoML_solution ;
+    skos:prefLabel "TPOT" ;
+    :used_for :scikit_learn_lib , :pytorch_lib ;
+    :can_perform :tabular_classification , :tabular_regression , :image_classification ;
+    rdfs:comment "AutoML library for Scikit-learn" ;
+    rdfs:seeAlso <http://automl.info/tpot> ;
+    :supported_by_oma_ml "true"^^xsd:boolean .
+:transmogrifai a :AutoML_solution ;
+    skos:prefLabel "TransmogrifAI" ;
+    :used_for :spark_mllib ;
+    :can_perform :tabular_classification , :tabular_regression ;
+    rdfs:comment "End-to-end AutoML library for structured data written in Scala that runs on top of Apache Spark" ;
+    rdfs:seeAlso <https://transmogrif.ai> .
+:lama a :AutoML_solution ;
+    skos:prefLabel "LAMA" ;
+    :used_for :pytorch_lib , :lightgbm_lib , :scikit_learn_lib , :catboost_lib ;
+    :can_perform :tabular_classification , :tabular_regression , :binary_classification ;
+    rdfs:comment "LightAutoML - automatic model creation framework" ;
+    rdfs:seeAlso <https://github.com/sb-ai-lab/LightAutoML> ;
+    :supported_by_oma_ml "true"^^xsd:boolean .
+
+
+# Configuration_item
+
+:tabular_classification_in_autokeras a :Configuration_item ;
+    skos:prefLabel "tabular classification in AutoKeras" ;
+    :category :task_configuration ;
+    :automl_solution :autokeras ;
+    :ml_task :tabular_classification ;
+    :parameter_value :metric_autokeras_tabular_classification , :loss_function_autokeras_tabular_classification , :max_trials_autokeras_tabular_classification , :tuner_autokeras_tabular_classification , :max_model_size_autokeras_tabular_classification ;
+    rdfs:comment "Task configuration for tabular classification in AutoKeras" ;
+    rdfs:seeAlso <https://autokeras.com> .
+:tabular_regression_in_autokeras a :Configuration_item ;
+    skos:prefLabel "tabular regression in AutoKeras" ;
+    :category :task_configuration ;
+    :automl_solution :autokeras ;
+    :ml_task :tabular_regression ;
+    :parameter_value :metric_autokeras_tabular_regression , :loss_function_autokeras_tabular_regression , :max_trials_autokeras_tabular_regression , :tuner_autokeras_tabular_regression , :max_model_size_autokeras_tabular_regression ;
+    rdfs:comment "Task configuration for tabular regression in AutoKeras" ;
+    rdfs:seeAlso <https://autokeras.com> .
+:image_classification_in_autokeras a :Configuration_item ;
+    skos:prefLabel "image classification in AutoKeras" ;
+    :category :task_configuration ;
+    :automl_solution :autokeras ;
+    :ml_task :image_classification ;
+    :parameter_value :metric_autokeras_image_classification , :loss_function_autokeras_image_classification , :max_trials_autokeras_image_classification , :tuner_autokeras_image_classification , :max_model_size_autokeras_image_classification ;
+    rdfs:comment "Task configuration for image classification in AutoKeras" ;
+    rdfs:seeAlso <https://autokeras.com> .
+:image_regression_in_autokeras a :Configuration_item ;
+    skos:prefLabel "image regression in AutoKeras" ;
+    :category :task_configuration ;
+    :automl_solution :autokeras ;
+    :ml_task :image_regression ;
+    :parameter_value :metric_autokeras_image_regression , :loss_function_autokeras_image_regression , :max_trials_autokeras_image_regression , :tuner_autokeras_image_regression , :max_model_size_autokeras_image_regression ;
+    rdfs:comment "Task configuration for image regression in AutoKeras" ;
+    rdfs:seeAlso <https://autokeras.com> .
+:text_classification_in_autokeras a :Configuration_item ;
+    skos:prefLabel "text classification in AutoKeras" ;
+    :category :task_configuration ;
+    :automl_solution :autokeras ;
+    :ml_task :text_classification ;
+    :parameter_value :metric_autokeras_text_classification , :loss_function_autokeras_text_classification , :max_trials_autokeras_text_classification , :tuner_autokeras_text_classification , :max_model_size_autokeras_text_classification ;
+    rdfs:comment "Task configuration for text classification in AutoKeras" ;
+    rdfs:seeAlso <https://autokeras.com> .
+:text_regression_in_autokeras a :Configuration_item ;
+    skos:prefLabel "text regression in AutoKeras" ;
+    :category :task_configuration ;
+    :automl_solution :autokeras ;
+    :ml_task :text_regression ;
+    :parameter_value :metric_autokeras_text_regression , :loss_function_autokeras_text_regression , :max_trials_autokeras_text_regression , :tuner_autokeras_text_regression , :max_model_size_autokeras_text_regression ;
+    rdfs:comment "Task configuration for text regression in AutoKeras" ;
+    rdfs:seeAlso <https://autokeras.com> .
+:time_series_forecasting_in_autokeras a :Configuration_item ;
+    skos:prefLabel "time series forecasting in AutoKeras" ;
+    :category :task_configuration ;
+    :automl_solution :autokeras ;
+    :ml_task :time_series_forecasting ;
+    :parameter_value :metric_autokeras_time_series_forecasting , :loss_function_autokeras_time_series_forecasting , :max_trials_autokeras_time_series_forecasting , :tuner_autokeras_time_series_forecasting , :max_model_size_autokeras_time_series_forecasting , :lookback_autokeras_time_series_forecasting , :gap_autokeras_time_series_forecasting , :forecasting_horizon_autokeras_time_series_forcasting ;
+    rdfs:comment "Task configuration for time series forecasting in AutoKeras" ;
+    rdfs:seeAlso <https://autokeras.com> .
+:tabular_classification_in_autosklearn a :Configuration_item ;
+    skos:prefLabel "tabular classification in Autosklearn" ;
+    :category :task_configuration ;
+    :automl_solution :autosklearn ;
+    :ml_task :tabular_classification ;
+    :parameter_value :time_limit_autosklearn_tabular_classification , :time_limit_per_run_autosklearn_tabular_classification , :ensemble_size_autosklearn_tabular_classification , :ensemble_nbest_autosklearn_tabular_classification , :metric_autosklearn_tabular_classification , :use_approach_autosklearn_tabular_classification , :include_preprocessor_autosklearn_tabular_classification ;
+    rdfs:comment "Task configuration for tabular classification in Autosklearn" ;
+    rdfs:seeAlso <https://automl.github.io/auto-sklearn/master/api.html#classification> .
+:tabular_regression_in_autosklearn a :Configuration_item ;
+    skos:prefLabel "tabular regression in Autosklearn" ;
+    :category :task_configuration ;
+    :automl_solution :autosklearn ;
+    :ml_task :tabular_regression ;
+    :parameter_value :time_limit_autosklearn_tabular_regression , :time_limit_per_run_autosklearn_tabular_regression , :ensemble_size_autosklearn_tabular_regression , :ensemble_nbest_autosklearn_tabular_regression , :metric_autosklearn_tabular_regression , :use_approach_autosklearn_tabular_regression , :include_preprocessor_autosklearn_tabular_regression ;
+    rdfs:comment "Task configuration for tabular regression in Autosklearn" ;
+    rdfs:seeAlso <https://automl.github.io/auto-sklearn/master/api.html#regression> .
+:tabular_classification_in_flaml a :Configuration_item ;
+    skos:prefLabel "tabular classification in FLAML" ;
+    :category :task_configuration ;
+    :automl_solution :flaml ;
+    :ml_task :tabular_classification ;
+    :parameter_value :use_approach_flaml_tabular_classification , :metric_flaml_tabular_classification , :ensemble_flaml_tabular_classification , :eval_method_flaml , :validation_split_flaml , :cross_validation_fold_flaml , :split_type_flaml_classification , :hyperparameter_optimization_method_flaml ;
+    rdfs:comment "Task configuration for tabular classification in FLAML" ;
+    rdfs:seeAlso <https://microsoft.github.io/FLAML/docs/reference/automl/automl> .
+:tabular_regression_in_flaml a :Configuration_item ;
+    skos:prefLabel "tabular regression in FLAML" ;
+    :category :task_configuration ;
+    :automl_solution :flaml ;
+    :ml_task :tabular_regression ;
+    :parameter_value :use_approach_flaml_tabular_regression , :metric_flaml_tabular_regression , :ensemble_flaml_tabular_regression , :eval_method_flaml , :validation_split_flaml , :cross_validation_fold_flaml , :split_type_flaml_regression , :hyperparameter_optimization_method_flaml ;
+    rdfs:comment "Task configuration for tabular regression in FLAML" ;
+    rdfs:seeAlso <https://microsoft.github.io/FLAML/docs/reference/automl/automl> .
+:time_series_forecasting_in_flaml a :Configuration_item ;
+    skos:prefLabel "time series forecasting in FLAML" ;
+    :category :task_configuration ;
+    :automl_solution :flaml ;
+    :ml_task :time_series_forecasting ;
+    :parameter_value :use_approach_flaml_time_series_analysis , :metric_flaml_time_series_analysis , :ensemble_flaml_time_series_forecasting , :eval_method_flaml , :forecasting_horizon_flaml_time_series_forcasting , :validation_split_flaml , :cross_validation_fold_flaml , :split_type_flaml_time_series_forecasting , :hyperparameter_optimization_method_flaml ;
+    rdfs:comment "Task configuration for time series forecasting in FLAML" ;
+    rdfs:seeAlso <https://microsoft.github.io/FLAML/docs/reference/automl/automl> .
+:text_classification_in_flaml a :Configuration_item ;
+    skos:prefLabel "text classification in FLAML" ;
+    :category :task_configuration ;
+    :automl_solution :flaml ;
+    :ml_task :text_classification ;
+    :parameter_value :use_approach_flaml_text_classification , :metric_flaml_text_classification , :ensemble_flaml_text_classification , :eval_method_flaml , :validation_split_flaml , :cross_validation_fold_flaml , :split_type_flaml_classification , :hyperparameter_optimization_method_flaml ;
+    rdfs:comment "Task configuration for text classification in FLAML" ;
+    rdfs:seeAlso <https://microsoft.github.io/FLAML/docs/reference/automl/automl> .
+:ranking_in_flaml a :Configuration_item ;
+    skos:prefLabel "ranking in FLAML" ;
+    :category :task_configuration ;
+    :automl_solution :flaml ;
+    :ml_task :ranking ;
+    :parameter_value :use_approach_flaml_ranking , :metric_flaml_ranking , :ensemble_flaml_ranking , :eval_method_flaml , :validation_split_flaml , :cross_validation_fold_flaml , :split_type_flaml_ranking , :hyperparameter_optimization_method_flaml ;
+    rdfs:comment "Task configuration for ranking in FLAML" ;
+    rdfs:seeAlso <https://microsoft.github.io/FLAML/docs/reference/automl/automl> .
+:text_regression_in_flaml a :Configuration_item ;
+    skos:prefLabel "text regression in FLAML" ;
+    :category :task_configuration ;
+    :automl_solution :flaml ;
+    :ml_task :text_regression ;
+    :parameter_value :use_approach_flaml_text_regression , :metric_flaml_text_regression , :ensemble_flaml_text_regression , :eval_method_flaml , :validation_split_flaml , :cross_validation_fold_flaml , :split_type_flaml_regression , :hyperparameter_optimization_method_flaml ;
+    rdfs:comment "Task configuration for text regression in FLAML" ;
+    rdfs:seeAlso <https://microsoft.github.io/FLAML/docs/reference/automl/automl> .
+:tabular_classification_in_evalml a :Configuration_item ;
+    skos:prefLabel "tabular classification in EvalML" ;
+    :category :task_configuration ;
+    :automl_solution :evalml ;
+    :ml_task :tabular_classification ;
+    :parameter_value :use_approach_evalml_tabular_classification , :metric_evalml_tabular_classification , :tuner_class_evalml , :optimize_thresholds_evalml , :ensembling_evalml , :max_batches_evalml , :allow_long_running_models_evalml , :pipelines_per_batch_evalml , :exclude_featurizers_evalml ;
+    rdfs:comment "Task configuration for tabular classification in EvalML" ;
+    rdfs:seeAlso <https://evalml.alteryx.com/en/stable/api_index.html> .
+:tabular_regression_in_evalml a :Configuration_item ;
+    skos:prefLabel "tabular regression in EvalML" ;
+    :category :task_configuration ;
+    :automl_solution :evalml ;
+    :ml_task :tabular_regression ;
+    :parameter_value :use_approach_evalml_tabular_regression , :metric_evalml_tabular_regression , :tuner_class_evalml , :optimize_thresholds_evalml , :ensembling_evalml , :max_batches_evalml , :allow_long_running_models_evalml , :pipelines_per_batch_evalml , :exclude_featurizers_evalml ;
+    rdfs:comment "Task configuration for tabular regression in EvalML" ;
+    rdfs:seeAlso <https://evalml.alteryx.com/en/stable/api_index.html> .
+:time_series_regression_in_evalml a :Configuration_item ;
+    skos:prefLabel "time series regression in EvalML" ;
+    :category :task_configuration ;
+    :automl_solution :evalml ;
+    :ml_task :time_series_forecasting ;
+    :parameter_value :use_approach_evalml_time_series_regression , :metric_evalml_time_series_regression , :tuner_class_evalml , :forecasting_horizon_evalml_time_series_forcasting , :lookback_evalml_time_series_forecasting , :gap_evalml_time_series_forecasting , :optimize_thresholds_evalml , :ensembling_evalml , :max_batches_evalml , :allow_long_running_models_evalml , :pipelines_per_batch_evalml , :exclude_featurizers_evalml ;
+    rdfs:comment "Task configuration for time series regression in EvalML" ;
+    rdfs:seeAlso <https://evalml.alteryx.com/en/stable/api_index.html> .
+:time_series_classification_in_evalml a :Configuration_item ;
+    skos:prefLabel "time series classification in EvalML" ;
+    :category :task_configuration ;
+    :automl_solution :evalml ;
+    :ml_task :time_series_classification ;
+    :parameter_value :use_approach_evalml_time_series_classification , :metric_evalml_classification , :tuner_class_evalml , :optimize_thresholds_evalml , :ensembling_evalml , :max_batches_evalml , :allow_long_running_models_evalml , :pipelines_per_batch_evalml , :exclude_featurizers_evalml ;
+    rdfs:comment "Task configuration for time series classification in EvalML" ;
+    rdfs:seeAlso <https://evalml.alteryx.com/en/stable/api_index.html> .
+:text_classification_in_evalml a :Configuration_item ;
+    skos:prefLabel "text classification in EvalML" ;
+    :category :task_configuration ;
+    :automl_solution :evalml ;
+    :ml_task :text_classification ;
+    :parameter_value :use_approach_evalml_text_classification , :metric_evalml_text_classification , :tuner_class_evalml , :optimize_thresholds_evalml , :ensembling_evalml , :max_batches_evalml , :allow_long_running_models_evalml , :pipelines_per_batch_evalml , :exclude_featurizers_evalml ;
+    rdfs:comment "Task configuration for text classification in EvalML" ;
+    rdfs:seeAlso <https://evalml.alteryx.com/en/stable/api_index.html> .
+:text_regression_in_evalml a :Configuration_item ;
+    skos:prefLabel "text regression in EvalML" ;
+    :category :task_configuration ;
+    :automl_solution :evalml ;
+    :ml_task :text_regression ;
+    :parameter_value :use_approach_evalml_text_regression , :metric_evalml_text_regression , :tuner_class_evalml , :optimize_thresholds_evalml , :ensembling_evalml , :max_batches_evalml , :allow_long_running_models_evalml , :pipelines_per_batch_evalml , :exclude_featurizers_evalml ;
+    rdfs:comment "Task configuration for text regression in EvalML" ;
+    rdfs:seeAlso <https://evalml.alteryx.com/en/stable/api_index.html> .
+:tabular_classification_pycaret a :Configuration_item ;
+    skos:prefLabel "tabular classification PyCaret" ;
+    :category :task_configuration ;
+    :automl_solution :pycaret ;
+    :ml_task :tabular_classification ;
+    :parameter_value :metric_pycaret_tabular_classification , :cross_validation_fold_pycaret ;
+    rdfs:comment "Task configuration for tabular classification PyCaret" ;
+    rdfs:seeAlso <https://pycaret.readthedocs.io> .
+:tabular_regression_pycaret a :Configuration_item ;
+    skos:prefLabel "tabular regression PyCaret" ;
+    :category :task_configuration ;
+    :automl_solution :pycaret ;
+    :ml_task :tabular_regression ;
+    :parameter_value :metric_pycaret_tabular_regression , :cross_validation_fold_pycaret ;
+    rdfs:comment "Task configuration for tabular regression PyCaret" ;
+    rdfs:seeAlso <https://pycaret.readthedocs.io> .
+:time_series_forecasting__pycaret a :Configuration_item ;
+    skos:prefLabel "time series forecasting  PyCaret" ;
+    :category :task_configuration ;
+    :automl_solution :pycaret ;
+    :ml_task :time_series_forecasting ;
+    :parameter_value :metric_pycaret_time_series_forecasting , :forecasting_horizon_pycaret_time_series_forcasting , :cross_validation_fold_pycaret ;
+    rdfs:comment "Task configuration for time series forecasting  PyCaret" ;
+    rdfs:seeAlso <https://pycaret.readthedocs.io> .
+:tabular_classification_in_autogluon a :Configuration_item ;
+    skos:prefLabel "tabular classification in AutoGluon" ;
+    :category :task_configuration ;
+    :automl_solution :autogluon ;
+    :ml_task :tabular_classification ;
+    :parameter_value :use_approach_autogluon_classification , :metric_autogluon_tabular_classification ;
+    rdfs:comment "Task configuration for tabular classification in AutoGluon" ;
+    rdfs:seeAlso <https://auto.gluon.ai> .
+:tabular_regression_in_autogluon a :Configuration_item ;
+    skos:prefLabel "tabular regression in AutoGluon" ;
+    :category :task_configuration ;
+    :automl_solution :autogluon ;
+    :ml_task :tabular_regression ;
+    :parameter_value :use_approach_autogluon_regression , :metric_autogluon_tabular_regression ;
+    rdfs:comment "Task configuration for tabular regression in AutoGluon" ;
+    rdfs:seeAlso <https://auto.gluon.ai> .
+:time_series_forecasting_in_autogluon a :Configuration_item ;
+    skos:prefLabel "time series forecasting in AutoGluon" ;
+    :category :task_configuration ;
+    :automl_solution :autogluon ;
+    :ml_task :time_series_forecasting ;
+    :parameter_value :metric_autogluon_time_series_forecasting , :forecasting_horizon_autogluon_time_series_forcasting ;
+    rdfs:comment "Task configuration for time series forecasting in AutoGluon" ;
+    rdfs:seeAlso <https://auto.gluon.ai> .
+:image_classification_in_autogluon a :Configuration_item ;
+    skos:prefLabel "image classification in AutoGluon" ;
+    :category :task_configuration ;
+    :automl_solution :autogluon ;
+    :ml_task :image_classification ;
+    :parameter_value :use_approach_autogluon_image_classification , :metric_autogluon_image_classification ;
+    rdfs:comment "Task configuration for image classification in AutoGluon" ;
+    rdfs:seeAlso <https://auto.gluon.ai> .
+:object_detection_in_autogluon a :Configuration_item ;
+    skos:prefLabel "object detection in AutoGluon" ;
+    :category :task_configuration ;
+    :automl_solution :autogluon ;
+    :ml_task :object_detection ;
+    :parameter_value :use_approach_autogluon_object_detection ;
+    rdfs:comment "Task configuration for object detection in AutoGluon" ;
+    rdfs:seeAlso <https://auto.gluon.ai> .
+:text_classification_in_autogluon a :Configuration_item ;
+    skos:prefLabel "text classification in AutoGluon" ;
+    :category :task_configuration ;
+    :automl_solution :autogluon ;
+    :ml_task :text_classification ;
+    :parameter_value :use_approach_autogluon_text_classification , :metric_autogluon_text_classification ;
+    rdfs:comment "Task configuration for text classification in AutoGluon" ;
+    rdfs:seeAlso <https://auto.gluon.ai> .
+:named_entity_recognition_in_autogluon a :Configuration_item ;
+    skos:prefLabel "named entity recognition in AutoGluon" ;
+    :category :task_configuration ;
+    :automl_solution :autogluon ;
+    :ml_task :named_entity_recognition ;
+    :parameter_value :use_approach_autogluon_named_entity_recognition , :metric_auto_gluon_named_entity_recognition ;
+    rdfs:comment "Task configuration for named entity recognition in AutoGluon" ;
+    rdfs:seeAlso <https://auto.gluon.ai> .
+:text_regression_in_autogluon a :Configuration_item ;
+    skos:prefLabel "text regression in AutoGluon" ;
+    :category :task_configuration ;
+    :automl_solution :autogluon ;
+    :ml_task :text_regression ;
+    :parameter_value :use_approach_autogluon_text_regression , :metric_autogluon_text_regression ;
+    rdfs:comment "Task configuration for text regression in AutoGluon" ;
+    rdfs:seeAlso <https://auto.gluon.ai> .
+:time_series_classification_in_mcfly a :Configuration_item ;
+    skos:prefLabel "time series classification in mcfly" ;
+    :category :task_configuration ;
+    :automl_solution :mcfly ;
+    :ml_task :time_series_classification ;
+    :parameter_value :use_approach_mcfly_time_series_classification , :metric_mcfly_time_series_classification , :epochs_mcfly ;
+    rdfs:comment "Task configuration for time series classification in mcfly" ;
+    rdfs:seeAlso <https://mcfly.readthedocs.io/en/latest/reference.html> .
+:tabular_classification_in_auto_pytorch a :Configuration_item ;
+    skos:prefLabel "tabular classification in Auto-PyTorch" ;
+    :category :task_configuration ;
+    :automl_solution :autopytorch ;
+    :ml_task :tabular_classification ;
+    :parameter_value :use_approach_auto_pytorch_classification , :metric_autopytorch_tabular_classification ;
+    rdfs:comment "Task configuration for tabular classification in Auto-PyTorch" ;
+    rdfs:seeAlso <https://automl.github.io/Auto-PyTorch/development/api.html> .
+:tabular_regression_in_auto_pytorch a :Configuration_item ;
+    skos:prefLabel "tabular regression in Auto-PyTorch" ;
+    :category :task_configuration ;
+    :automl_solution :autopytorch ;
+    :ml_task :tabular_regression ;
+    :parameter_value :use_approach_auto_pytorch_regression , :metric_autopytorch_tabular_regression ;
+    rdfs:comment "Task configuration for tabular regression in Auto-PyTorch" ;
+    rdfs:seeAlso <https://automl.github.io/Auto-PyTorch/development/api.html> .
+:time_series_forecasting_in_auto_pytorch a :Configuration_item ;
+    skos:prefLabel "time series forecasting in Auto-PyTorch" ;
+    :category :task_configuration ;
+    :automl_solution :autopytorch ;
+    :ml_task :time_series_forecasting ;
+    :parameter_value :metric_autopytorch_time_series_forecasting , :forecasting_horizon_autopytorch_time_series_forcasting ;
+    rdfs:comment "Task configuration for time series forecasting in Auto-PyTorch" ;
+    rdfs:seeAlso <https://automl.github.io/Auto-PyTorch/development/api.html> .
+:tabular_classification_mljar a :Configuration_item ;
+    skos:prefLabel "tabular classification MLJAR" ;
+    :category :task_configuration ;
+    :automl_solution :mljar ;
+    :ml_task :tabular_classification ;
+    :parameter_value :metric_mljar_tabular_classification ;
+    rdfs:comment "Task configuration for tabular classification MLJAR" ;
+    rdfs:seeAlso <https://supervised.mljar.com/api> .
+:tabular_regression_mljar a :Configuration_item ;
+    skos:prefLabel "tabular regression MLJAR" ;
+    :category :task_configuration ;
+    :automl_solution :mljar ;
+    :ml_task :tabular_regression ;
+    :parameter_value :metric_mljar_tabular_regression ;
+    rdfs:comment "Task configuration for tabular regression MLJAR" ;
+    rdfs:seeAlso <https://supervised.mljar.com/api> .
+:tabular_classification_tpot a :Configuration_item ;
+    skos:prefLabel "tabular classification TPOT" ;
+    :category :task_configuration ;
+    :automl_solution :tpot ;
+    :ml_task :tabular_classification ;
+    :parameter_value :metric_tpot_tabular_classification ;
+    rdfs:comment "Task configuration for tabular classification TPOT" ;
+    rdfs:seeAlso <http://epistasislab.github.io/tpot/api> .
+:tabular_regression_tpot a :Configuration_item ;
+    skos:prefLabel "tabular regression TPOT" ;
+    :category :task_configuration ;
+    :automl_solution :tpot ;
+    :ml_task :tabular_regression ;
+    :parameter_value :metric_tpot_tabular_regression ;
+    rdfs:comment "Task configuration for tabular regression TPOT" ;
+    rdfs:seeAlso <http://epistasislab.github.io/tpot/api> .
+:image_classification_tpot a :Configuration_item ;
+    skos:prefLabel "image classification TPOT" ;
+    :category :task_configuration ;
+    :automl_solution :tpot ;
+    :ml_task :image_classification ;
+    :parameter_value :metric_tpot_image_classification ;
+    rdfs:comment "Task configuration for image classification TPOT" ;
+    rdfs:seeAlso <http://epistasislab.github.io/tpot/api> .
+:tabular_classification_in_autocve a :Configuration_item ;
+    skos:prefLabel "tabular classification in AutoCVE" ;
+    :category :task_configuration ;
+    :automl_solution :autocve ;
+    :ml_task :tabular_classification ;
+    :parameter_value :use_approach_autocve_classification , :metric_autocve_classification ;
+    rdfs:comment "Task configuration for tabular classification in AutoCVE" ;
+    rdfs:seeAlso <https://github.com/celiolarcher/AUTOCVE> .
+:tabular_classification_in_gama a :Configuration_item ;
+    skos:prefLabel "tabular classification in GAMA" ;
+    :category :task_configuration ;
+    :automl_solution :gama ;
+    :ml_task :tabular_classification ;
+    :parameter_value :tuner_class_gama , :metric_gama_tabular_classification ;
+    rdfs:comment "Task configuration for tabular classification in GAMA" ;
+    rdfs:seeAlso <https://openml-labs.github.io/gama/master/api/index.html> .
+:tabular_regression_in_gama a :Configuration_item ;
+    skos:prefLabel "tabular regression in GAMA" ;
+    :category :task_configuration ;
+    :automl_solution :gama ;
+    :ml_task :tabular_regression ;
+    :parameter_value :tuner_class_gama , :metric_gama_tabular_regression ;
+    rdfs:comment "Task configuration for tabular regression in GAMA" ;
+    rdfs:seeAlso <https://openml-labs.github.io/gama/master/api/index.html> .
+:tabular_classification_in_lama a :Configuration_item ;
+    skos:prefLabel "tabular classification in LAMA" ;
+    :category :task_configuration ;
+    :automl_solution :lama ;
+    :ml_task :tabular_classification ;
+    :parameter_value :loss_function_lama_tabular_classification , :metric_lama_tabular_classification ;
+    rdfs:comment "Task configuration for tabular classification in LAMA" ;
+    rdfs:seeAlso <https://openml-labs.github.io/gama/master/api/index.html> .
+:binary_classification_in_lama a :Configuration_item ;
+    skos:prefLabel "binary classification in LAMA" ;
+    :category :task_configuration ;
+    :automl_solution :lama ;
+    :ml_task :binary_classification ;
+    :parameter_value :loss_function_lama_binary_classification , :metric_lama_binary_classification ;
+    rdfs:comment "Task configuration for binary classification in LAMA" ;
+    rdfs:seeAlso <https://openml-labs.github.io/gama/master/api/index.html> .
+:tabular_regression_in_lama a :Configuration_item ;
+    skos:prefLabel "tabular regression in LAMA" ;
+    :category :task_configuration ;
+    :automl_solution :lama ;
+    :ml_task :tabular_regression ;
+    :parameter_value :loss_function_lama_tabular_regression , :metric_lama_tabular_regression ;
+    rdfs:comment "Task configuration for tabular regression in LAMA" ;
+    rdfs:seeAlso <https://openml-labs.github.io/gama/master/api/index.html> .
+:ensemble a :Configuration_item ;
+    skos:prefLabel "ensemble" ;
+    :category :parameter ;
+    :has_datatype :boolean .
+:ensemble_flaml_tabular_classification a :Configuration_item ;
+    skos:prefLabel "ensemble flaml tabular classification" ;
+    :category :parameter ;
+    skos:broader :ensemble ;
+    :has_datatype :boolean .
+:ensemble_flaml_tabular_regression a :Configuration_item ;
+    skos:prefLabel "ensemble flaml tabular regression" ;
+    :category :parameter ;
+    skos:broader :ensemble ;
+    :has_datatype :boolean .
+:ensemble_flaml_time_series_forecasting a :Configuration_item ;
+    skos:prefLabel "ensemble flaml time series forecasting" ;
+    :category :parameter ;
+    skos:broader :ensemble ;
+    :has_datatype :boolean .
+:ensemble_flaml_text_classification a :Configuration_item ;
+    skos:prefLabel "ensemble flaml text classification" ;
+    :category :parameter ;
+    skos:broader :ensemble ;
+    :has_datatype :boolean .
+:ensemble_flaml_text_regression a :Configuration_item ;
+    skos:prefLabel "ensemble flaml text regression" ;
+    :category :parameter ;
+    skos:broader :ensemble ;
+    :has_datatype :boolean .
+:ensemble_flaml_ranking a :Configuration_item ;
+    skos:prefLabel "ensemble flaml ranking" ;
+    :category :parameter ;
+    skos:broader :ensemble ;
+    :has_datatype :boolean .
+:ensemble_nbest a :Configuration_item ;
+    skos:prefLabel "ensemble_nbest" ;
+    :category :parameter ;
+    :has_datatype :integer ;
+    rdfs:comment "Restricting the number of ensemble models" .
+:ensemble_nbest_autosklearn_tabular_classification a :Configuration_item ;
+    skos:prefLabel "ensemble nbest autosklearn tabular classification" ;
+    :category :parameter ;
+    skos:broader :ensemble_nbest ;
+    :has_datatype :integer ;
+    rdfs:comment "Restricting the number of ensemble models" ;
+    rdfs:seeAlso <https://automl.github.io/auto-sklearn/master/api.html#> .
+:ensemble_nbest_autosklearn_tabular_regression a :Configuration_item ;
+    skos:prefLabel "ensemble nbest autosklearn tabular regression" ;
+    :category :parameter ;
+    skos:broader :ensemble_nbest ;
+    :has_datatype :integer ;
+    rdfs:comment "Restricting the number of ensemble models" ;
+    rdfs:seeAlso <https://automl.github.io/auto-sklearn/master/api.html#> .
+:ensemble_size a :Configuration_item ;
+    skos:prefLabel "ensemble size" ;
+    :category :parameter ;
+    :has_datatype :integer ;
+    rdfs:comment "Restricting the size of ensemble models" .
+:ensemble_size_autosklearn_tabular_classification a :Configuration_item ;
+    skos:prefLabel "ensemble size autosklearn tabular classification" ;
+    :category :parameter ;
+    skos:broader :ensemble_size ;
+    :has_datatype :integer ;
+    rdfs:comment "Restricting the size of ensemble models" ;
+    rdfs:seeAlso <https://automl.github.io/auto-sklearn/master/api.html#> .
+:ensemble_size_autosklearn_tabular_regression a :Configuration_item ;
+    skos:prefLabel "ensemble size autosklearn tabular regression" ;
+    :category :parameter ;
+    skos:broader :ensemble_size ;
+    :has_datatype :integer ;
+    rdfs:comment "Restricting the size of ensemble models" ;
+    rdfs:seeAlso <https://automl.github.io/auto-sklearn/master/api.html#> .
+:use_approach a :Configuration_item ;
+    skos:prefLabel "use approach" ;
+    :category :parameter ;
+    rdfs:comment "Selecting ML approaches to be used for AutoML" .
+:use_approach_autosklearn_tabular_classification a :Configuration_item ;
+    skos:prefLabel "use approach Autosklearn tabular classification" ;
+    :category :parameter ;
+    skos:broader :use_approach ;
+    :has_datatype :list ;
+    :parameter_value :adaboost , :decision_tree , :extra_tree , :gradient_boosting_tree , :k_nearest_neighbor , :linear_svm , :multilayer_perceptron , :random_forest , :gaussian_naives_bayes ;
+    rdfs:comment "Selecting ML approaches to be used for AutoML" ;
+    rdfs:seeAlso <https://automl.github.io/auto-sklearn/master/api.html#classification> .
+:use_approach_autosklearn_tabular_regression a :Configuration_item ;
+    skos:prefLabel "use approach Autosklearn tabular regression" ;
+    :category :parameter ;
+    skos:broader :use_approach ;
+    :has_datatype :list ;
+    :parameter_value :adaboost , :bayesian_linear_regression , :decision_tree , :extra_tree , :gaussian_process , :gradient_boosting_tree , :k_nearest_neighbor , :linear_svm , :multilayer_perceptron , :random_forest ;
+    rdfs:comment "Selecting ML approaches to be used for AutoML" ;
+    rdfs:seeAlso <https://automl.github.io/auto-sklearn/master/api.html#regression> .
+:use_approach_flaml_tabular_classification a :Configuration_item ;
+    skos:prefLabel "use approach FLAML tabular classification" ;
+    :category :parameter ;
+    skos:broader :use_approach ;
+    :has_datatype :list ;
+    :parameter_value :light_gradient_boosting_machine , :xgboost , :random_forest , :extra_tree , :logistic_regression , :catboost , :k_nearest_neighbor ;
+    rdfs:comment "Selecting ML approaches to be used for AutoML" ;
+    rdfs:seeAlso <https://microsoft.github.io/FLAML/docs/reference/automl/automl> .
+:use_approach_flaml_tabular_regression a :Configuration_item ;
+    skos:prefLabel "use approach FLAML tabular regression" ;
+    :category :parameter ;
+    skos:broader :use_approach ;
+    :has_datatype :list ;
+    :parameter_value :light_gradient_boosting_machine , :xgboost , :random_forest , :extra_tree , :logistic_regression , :catboost , :k_nearest_neighbor ;
+    rdfs:comment "Selecting ML approaches to be used for AutoML" ;
+    rdfs:seeAlso <https://microsoft.github.io/FLAML/docs/reference/automl/automl> .
+:use_approach_flaml_time_series_analysis a :Configuration_item ;
+    skos:prefLabel "use approach FLAML time series analysis" ;
+    :category :parameter ;
+    skos:broader :use_approach ;
+    :has_datatype :list ;
+    :parameter_value :light_gradient_boosting_machine , :xgboost , :random_forest , :extra_tree , :prophet , :auto_regressive_integrated_moving_average , :seasonal_autoregressive_integrated_moving_average_exogenous ;
+    rdfs:comment "Selecting ML approaches to be used for AutoML" ;
+    rdfs:seeAlso <https://microsoft.github.io/FLAML/docs/reference/automl/automl> .
+:use_approach_flaml_ranking a :Configuration_item ;
+    skos:prefLabel "use approach FLAML ranking" ;
+    :category :parameter ;
+    skos:broader :use_approach ;
+    :parameter_value :light_gradient_boosting_machine , :xgboost ;
+    rdfs:comment "Selecting ML approaches to be used for AutoML" ;
+    rdfs:seeAlso <https://microsoft.github.io/FLAML/docs/reference/automl/automl> .
+:use_approach_flaml_text_classification a :Configuration_item ;
+    skos:prefLabel "use approach FLAML text classification" ;
+    :category :parameter ;
+    skos:broader :use_approach ;
+    :has_datatype :list ;
+    :parameter_value :transformer ;
+    rdfs:comment "Selecting ML approaches to be used for AutoML" ;
+    rdfs:seeAlso <https://microsoft.github.io/FLAML/docs/reference/automl/automl> .
+:use_approach_flaml_text_regression a :Configuration_item ;
+    skos:prefLabel "use approach FLAML text regression" ;
+    :category :parameter ;
+    skos:broader :use_approach ;
+    :has_datatype :list ;
+    :parameter_value :transformer ;
+    rdfs:comment "Selecting ML approaches to be used for AutoML" ;
+    rdfs:seeAlso <https://microsoft.github.io/FLAML/docs/reference/automl/automl> .
+:use_approach_evalml_tabular_classification a :Configuration_item ;
+    skos:prefLabel "use approach EvalML tabular classification" ;
+    :category :parameter ;
+    skos:broader :use_approach ;
+    :has_datatype :list ;
+    :parameter_value :catboost , :decision_tree , :extra_tree , :light_gradient_boosting_machine , :linear_regression , :random_forest , :xgboost ;
+    rdfs:comment "Selecting ML approaches to be used for AutoML" ;
+    rdfs:seeAlso <https://evalml.alteryx.com/en/stable/api_index.html> .
+:use_approach_evalml_tabular_regression a :Configuration_item ;
+    skos:prefLabel "use approach EvalML tabular regression" ;
+    :category :parameter ;
+    skos:broader :use_approach ;
+    :has_datatype :list ;
+    :parameter_value :catboost , :decision_tree , :extra_tree , :light_gradient_boosting_machine , :linear_regression , :random_forest , :xgboost ;
+    rdfs:comment "Selecting ML approaches to be used for AutoML" ;
+    rdfs:seeAlso <https://evalml.alteryx.com/en/stable/api_index.html> .
+:use_approach_evalml_text_classification a :Configuration_item ;
+    skos:prefLabel "use approach EvalML text classification" ;
+    :category :parameter ;
+    skos:broader :use_approach ;
+    :has_datatype :list ;
+    :parameter_value :catboost , :decision_tree , :extra_tree , :light_gradient_boosting_machine , :linear_regression , :random_forest , :xgboost ;
+    rdfs:comment "Selecting ML approaches to be used for AutoML" ;
+    rdfs:seeAlso <https://evalml.alteryx.com/en/stable/api_index.html> .
+:use_approach_evalml_text_regression a :Configuration_item ;
+    skos:prefLabel "use approach EvalML text regression" ;
+    :category :parameter ;
+    skos:broader :use_approach ;
+    :has_datatype :list ;
+    :parameter_value :catboost , :decision_tree , :extra_tree , :light_gradient_boosting_machine , :linear_regression , :random_forest , :xgboost ;
+    rdfs:comment "Selecting ML approaches to be used for AutoML" ;
+    rdfs:seeAlso <https://evalml.alteryx.com/en/stable/api_index.html> .
+:use_approach_evalml_time_series_regression a :Configuration_item ;
+    skos:prefLabel "use approach EvalML time series regression" ;
+    :category :parameter ;
+    skos:broader :use_approach ;
+    :has_datatype :list ;
+    :parameter_value :auto_regressive_integrated_moving_average , :catboost , :decision_tree , :exponential_smoothing , :extra_tree , :k_nearest_neighbor , :linear_regression , :random_forest , :xgboost ;
+    rdfs:comment "Selecting ML approaches to be used for AutoML" ;
+    rdfs:seeAlso <https://evalml.alteryx.com/en/stable/api_index.html> .
+:use_approach_evalml_time_series_classification a :Configuration_item ;
+    skos:prefLabel "use approach EvalML time series classification" ;
+    :category :parameter ;
+    skos:broader :use_approach ;
+    :has_datatype :list ;
+    :parameter_value :caboost , :decision_tree , :extra_tree , :k_nearest_neighbor , :linear_regression , :random_forest , :xgboost ;
+    rdfs:comment "Selecting ML approaches to be used for AutoML" ;
+    rdfs:seeAlso <https://evalml.alteryx.com/en/stable/api_index.html> .
+:use_approach_auto_pytorch_classification a :Configuration_item ;
+    skos:prefLabel "use approach Auto-Pytorch classification" ;
+    :category :parameter ;
+    skos:broader :use_approach ;
+    :has_datatype :list ;
+    :parameter_value :multilayer_perceptron ;
+    rdfs:comment "Selecting ML approaches to be used for AutoML" ;
+    rdfs:seeAlso <https://automl.github.io/Auto-PyTorch/development/api.html> .
+:use_approach_auto_pytorch_regression a :Configuration_item ;
+    skos:prefLabel "use approach Auto-Pytorch regression" ;
+    :category :parameter ;
+    skos:broader :use_approach ;
+    :has_datatype :list ;
+    :parameter_value :multilayer_perceptron ;
+    rdfs:comment "Selecting ML approaches to be used for AutoML" ;
+    rdfs:seeAlso <https://automl.github.io/Auto-PyTorch/development/api.html> .
+:use_approach_autocve_classification a :Configuration_item ;
+    skos:prefLabel "use approach AutoCVE classification" ;
+    :category :parameter ;
+    skos:broader :use_approach ;
+    :has_datatype :list ;
+    :parameter_value :gradient_boosting_tree , :gaussian_naives_bayes , :decision_tree , :extra_tree , :random_forest , :k_nearest_neighbor , :linear_svm , :logistic_regression , :stochastic_gradient_descent , :multilayer_perceptron ;
+    rdfs:comment "Selecting ML approaches to be used for AutoML" ;
+    rdfs:seeAlso <https://github.com/celiolarcher/AUTOCVE> .
+:use_approach_autogluon_classification a :Configuration_item ;
+    skos:prefLabel "use approach AutoGluon classification" ;
+    :category :parameter ;
+    skos:broader :use_approach ;
+    :has_datatype :list ;
+    :parameter_value :gradient_boosting_tree , :multilayer_perceptron , :k_nearest_neighbor , :random_forest , :extra_tree , :logistic_regression ;
+    rdfs:comment "Selecting ML approaches to be used for AutoML" ;
+    rdfs:seeAlso <https://auto.gluon.ai> .
+:use_approach_autogluon_regression a :Configuration_item ;
+    skos:prefLabel "use approach AutoGluon regression" ;
+    :category :parameter ;
+    skos:broader :use_approach ;
+    :has_datatype :list ;
+    :parameter_value :gradient_boosting_tree , :multilayer_perceptron , :k_nearest_neighbor , :ridge_regression , :random_forest , :extra_tree ;
+    rdfs:comment "Selecting ML approaches to be used for AutoML" ;
+    rdfs:seeAlso <https://auto.gluon.ai> .
+:use_approach_autogluon_image_classification a :Configuration_item ;
+    skos:prefLabel "use approach AutoGluon image classification" ;
+    :category :parameter ;
+    skos:broader :use_approach ;
+    :has_datatype :list ;
+    :parameter_value :multilayer_perceptron ;
+    rdfs:comment "Selecting ML approaches to be used for AutoML" ;
+    rdfs:seeAlso <https://auto.gluon.ai> .
+:use_approach_autogluon_object_detection a :Configuration_item ;
+    skos:prefLabel "use approach AutoGluon object detection" ;
+    :category :parameter ;
+    skos:broader :use_approach ;
+    :has_datatype :list ;
+    :parameter_value :multilayer_perceptron ;
+    rdfs:comment "Selecting ML approaches to be used for AutoML" ;
+    rdfs:seeAlso <https://auto.gluon.ai> .
+:use_approach_autogluon_text_classification a :Configuration_item ;
+    skos:prefLabel "use approach AutoGluon text classification" ;
+    :category :parameter ;
+    skos:broader :use_approach ;
+    :has_datatype :list ;
+    :parameter_value :multilayer_perceptron ;
+    rdfs:comment "Selecting ML approaches to be used for AutoML" ;
+    rdfs:seeAlso <https://auto.gluon.ai> .
+:use_approach_autogluon_named_entity_recognition a :Configuration_item ;
+    skos:prefLabel "use approach AutoGluon named entity recognition" ;
+    :category :parameter ;
+    skos:broader :use_approach ;
+    :has_datatype :list ;
+    :parameter_value :multilayer_perceptron ;
+    rdfs:comment "Selecting ML approaches to be used for AutoML" ;
+    rdfs:seeAlso <https://auto.gluon.ai> .
+:use_approach_autogluon_text_regression a :Configuration_item ;
+    skos:prefLabel "use approach AutoGluon text regression" ;
+    :category :parameter ;
+    skos:broader :use_approach ;
+    :has_datatype :list ;
+    :parameter_value :multilayer_perceptron ;
+    rdfs:comment "Selecting ML approaches to be used for AutoML" ;
+    rdfs:seeAlso <https://auto.gluon.ai> .
+:use_approch_mcfly_time_series_classification a :Configuration_item ;
+    skos:prefLabel "use approch mcfly time series classification" ;
+    :category :parameter ;
+    skos:broader :use_approach ;
+    :has_datatype :list ;
+    :parameter_value :inception_time , :residual_neural_network , :deep_convolutional_lstm , :convolutional_neural_network ;
+    rdfs:comment "Selecting ML approaches to be used for AutoML" ;
+    rdfs:seeAlso <https://mcfly.readthedocs.io/en/latest/reference.html> .
+:include_preprocessor a :Configuration_item ;
+    skos:prefLabel "include preprocessor" ;
+    :category :parameter ;
+    rdfs:comment "Selecting preprocessing approaches" .
+:include_preprocessor_autosklearn_tabular_classification a :Configuration_item ;
+    skos:prefLabel "include preprocessor Autosklearn tabular classification" ;
+    :category :parameter ;
+    skos:broader :include_preprocessor ;
+    :has_datatype :list ;
+    :parameter_value :kernel_principal_component_analysis , :radial_basis_function_kernel , :nystroem_kernel_approximation ;
+    rdfs:comment "Selecting preprocessing approaches" ;
+    rdfs:seeAlso <https://automl.github.io/auto-sklearn/master/api.html#> .
+:include_preprocessor_autosklearn_tabular_regression a :Configuration_item ;
+    skos:prefLabel "include preprocessor Autosklearn tabular regression" ;
+    :category :parameter ;
+    skos:broader :include_preprocessor ;
+    :has_datatype :list ;
+    :parameter_value :kernel_principal_component_analysis , :radial_basis_function_kernel , :nystroem_kernel_approximation ;
+    rdfs:comment "Selecting preprocessing approaches" ;
+    rdfs:seeAlso <https://automl.github.io/auto-sklearn/master/api.html#> .
+:configuration_via_metalearning a :Configuration_item ;
+    skos:prefLabel "configuration via metalearning" ;
+    :category :parameter ;
+    :has_datatype :integer ;
+    rdfs:comment "Configuring meta learning, e.g., learning from hyperparameter settings that worked well in previous trainings" .
+:configuration_via_metalearning_autosklearn a :Configuration_item ;
+    skos:prefLabel "configuration via metalearning autosklearn" ;
+    :category :parameter ;
+    skos:broader :configuration_via_metalearning ;
+    :has_datatype :integer ;
+    rdfs:comment "Configuring meta learning, e.g., learning from hyperparameter settings that worked well in previous trainings" ;
+    rdfs:seeAlso <https://automl.github.io/auto-sklearn/master/api.html#> .
+:metric a :Configuration_item ;
+    skos:prefLabel "metric" ;
+    :category :parameter ;
+    rdfs:comment "Selecting the prediction performance metric for which AutoML is optimized" .
+:metric_autokeras_tabular_classification a :Configuration_item ;
+    skos:prefLabel "metric autokeras tabular classification" ;
+    :category :parameter ;
+    skos:broader :metric ;
+    :has_datatype :single_value ;
+    :parameter_value :accuracy , :binary_accuracy , :categorical_accuracy , :sparse_categorical_accuracy , :top_k_categorical_accuracy , :sparse_top_k_categorical_accuracy , :binary_cross_entropy , :categorical_cross_entropy , :poisson , :area_under_roc_curve , :precision , :recall , :true_positives , :true_negatives , :false_positives , :false_negatives , :hinge , :squared_hinge , :categorical_hinge ;
+    rdfs:comment "Selecting the prediction performance metric for which AutoML is optimized" ;
+    rdfs:seeAlso <https://autokeras.com> .
+:metric_autokeras_tabular_regression a :Configuration_item ;
+    skos:prefLabel "metric autokeras tabular regression" ;
+    :category :parameter ;
+    skos:broader :metric ;
+    :has_datatype :single_value ;
+    :parameter_value :mean_squared_error , :root_mean_squared_error , :mean_absolute_error , :mean_absolute_percentage_error , :mean_squared_log_error , :cosine_similarity , :log_cosh_error ;
+    rdfs:comment "Selecting the prediction performance metric for which AutoML is optimized" ;
+    rdfs:seeAlso <https://autokeras.com> .
+:metric_autokeras_image_classification a :Configuration_item ;
+    skos:prefLabel "metric AutoKeras image classification" ;
+    :category :parameter ;
+    skos:broader :metric ;
+    :has_datatype :single_value ;
+    :parameter_value :accuracy , :binary_accuracy , :categorical_accuracy , :sparse_categorical_accuracy , :top_k_categorical_accuracy , :sparse_top_k_categorical_accuracy , :binary_cross_entropy , :categorical_cross_entropy , :poisson , :area_under_roc_curve , :precision , :recall , :true_positives , :true_negatives , :false_positives , :false_negatives , :hinge , :squared_hinge , :categorical_hinge ;
+    rdfs:comment "Selecting the prediction performance metric for which AutoML is optimized" ;
+    rdfs:seeAlso <https://autokeras.com> .
+:metric_autokeras_image_regression a :Configuration_item ;
+    skos:prefLabel "metric AutoKeras image regression" ;
+    :category :parameter ;
+    skos:broader :metric ;
+    :has_datatype :single_value ;
+    :parameter_value :mean_squared_error , :root_mean_squared_error , :mean_absolute_error , :mean_absolute_percentage_error , :mean_squared_log_error , :cosine_similarity , :log_cosh_error ;
+    rdfs:comment "Selecting the prediction performance metric for which AutoML is optimized" ;
+    rdfs:seeAlso <https://autokeras.com> .
+:metric_autokeras_text_classification a :Configuration_item ;
+    skos:prefLabel "metric AutoKeras text classification" ;
+    :category :parameter ;
+    skos:broader :metric ;
+    :has_datatype :single_value ;
+    :parameter_value :accuracy , :binary_accuracy , :categorical_accuracy , :sparse_categorical_accuracy , :top_k_categorical_accuracy , :sparse_top_k_categorical_accuracy , :binary_cross_entropy , :categorical_cross_entropy , :poisson , :area_under_roc_curve , :precision , :recall , :true_positives , :true_negatives , :false_positives , :false_negatives , :hinge , :squared_hinge , :categorical_hinge ;
+    rdfs:comment "Selecting the prediction performance metric for which AutoML is optimized" ;
+    rdfs:seeAlso <https://autokeras.com> .
+:metric_autokeras_text_regression a :Configuration_item ;
+    skos:prefLabel "metric AutoKeras text regression" ;
+    :category :parameter ;
+    skos:broader :metric ;
+    :has_datatype :single_value ;
+    :parameter_value :mean_squared_error , :root_mean_squared_error , :mean_absolute_error , :mean_absolute_percentage_error , :mean_squared_log_error , :cosine_similarity , :log_cosh_error ;
+    rdfs:comment "Selecting the prediction performance metric for which AutoML is optimized" ;
+    rdfs:seeAlso <https://autokeras.com> .
+:metric_autokeras_time_series_forecasting a :Configuration_item ;
+    skos:prefLabel "metric AutoKeras time series forecasting" ;
+    :category :parameter ;
+    skos:broader :metric ;
+    :has_datatype :single_value ;
+    :parameter_value :mean_squared_error , :root_mean_squared_error , :mean_absolute_error , :mean_absolute_percentage_error , :mean_squared_log_error , :cosine_similarity , :log_cosh_error ;
+    rdfs:comment "Selecting the prediction performance metric for which AutoML is optimized" ;
+    rdfs:seeAlso <https://autokeras.com> .
+:metric_autosklearn_tabular_classification a :Configuration_item ;
+    skos:prefLabel "metric Autosklearn tabular classification" ;
+    :category :parameter ;
+    skos:broader :metric ;
+    :has_datatype :single_value ;
+    :parameter_value :accuracy , :balanced_accuracy , :f_measure , :f1_macro , :f1_micro , :f1_samples , :f1_weighted , :receiver_operating_characteristic_curve , :precision , :precision_macro , :precision_micro , :precision_samples , :precision_weighted , :average_precision , :recall , :recall_macro , :recall_micro , :recall_samples , :recall_weighted , :log_loss ;
+    rdfs:comment "Selecting the prediction performance metric for which AutoML is optimized" ;
+    rdfs:seeAlso <https://automl.github.io/auto-sklearn/master/api.html#classification> .
+:metric_autosklearn_tabular_regression a :Configuration_item ;
+    skos:prefLabel "metric Autosklearn tabular regression" ;
+    :category :parameter ;
+    skos:broader :metric ;
+    :has_datatype :single_value ;
+    :parameter_value :r2 , :mean_squared_error , :mean_absolute_error , :median_absolute_error ;
+    rdfs:comment "Selecting the prediction performance metric for which AutoML is optimized" ;
+    rdfs:seeAlso <https://automl.github.io/auto-sklearn/master/api.html#regression> .
+:metric_flaml_tabular_classification a :Configuration_item ;
+    skos:prefLabel "metric FLAML tabular classification" ;
+    :category :parameter ;
+    skos:broader :metric ;
+    :has_datatype :single_value ;
+    :parameter_value :accuracy , :receiver_operating_characteristic_curve , :receiver_operating_characteristic_curve_one_vs_rest , :log_loss , :receiver_operating_characteristic_curve_one_vs_one , :average_precision_score , :f_measure , :f_measure_micro , :f_measure_macro , :area_under_roc_curve_weighted , :receiver_operating_characteristic_curve_one_vs_rest_weighted , :receiver_operating_characteristic_curve_one_vs_one_weighted ;
+    rdfs:comment "Selecting the prediction performance metric for which AutoML is optimized" ;
+    rdfs:seeAlso <https://microsoft.github.io/FLAML/docs/reference/automl/automl> .
+:metric_flaml_tabular_regression a :Configuration_item ;
+    skos:prefLabel "metric FLAML tabular regression" ;
+    :category :parameter ;
+    skos:broader :metric ;
+    :has_datatype :single_value ;
+    :parameter_value :mean_squared_error , :rooted_mean_squared_error , :mean_absolute_error , :receiver_operating_characteristic_curve_one_vs_rest , :receiver_operating_characteristic_curve_one_vs_one , :receiver_operating_characteristic_curve , :mean_absolute_percentage_error , :r2 , :area_under_roc_curve_weighted , :receiver_operating_characteristic_curve_one_vs_rest_weighted , :receiver_operating_characteristic_curve_one_vs_one_weighted ;
+    rdfs:comment "Selecting the prediction performance metric for which AutoML is optimized" ;
+    rdfs:seeAlso <https://microsoft.github.io/FLAML/docs/reference/automl/automl> .
+:metric_flaml_text_classification a :Configuration_item ;
+    skos:prefLabel "metric FLAML text classification" ;
+    :category :parameter ;
+    skos:broader :metric ;
+    :has_datatype :single_value ;
+    :parameter_value :accuracy , :receiver_operating_characteristic_curve , :receiver_operating_characteristic_curve_one_vs_rest , :log_loss , :receiver_operating_characteristic_curve_one_vs_one , :average_precision_score , :f_measure , :f_measure_micro , :f_measure_macro , :area_under_roc_curve_weighted , :receiver_operating_characteristic_curve_one_vs_rest_weighted , :receiver_operating_characteristic_curve_one_vs_one_weighted ;
+    rdfs:comment "Selecting the prediction performance metric for which AutoML is optimized" ;
+    rdfs:seeAlso <https://microsoft.github.io/FLAML/docs/reference/automl/automl> .
+:metric_flaml_text_regression a :Configuration_item ;
+    skos:prefLabel "metric FLAML text regression" ;
+    :category :parameter ;
+    skos:broader :metric ;
+    :has_datatype :single_value ;
+    :parameter_value :mean_squared_error , :rooted_mean_squared_error , :mean_absolute_error , :receiver_operating_characteristic_curve_one_vs_rest , :receiver_operating_characteristic_curve_one_vs_one , :receiver_operating_characteristic_curve , :mean_absolute_percentage_error , :r2 , :area_under_roc_curve_weighted , :receiver_operating_characteristic_curve_one_vs_rest_weighted , :receiver_operating_characteristic_curve_one_vs_one_weighted ;
+    rdfs:comment "Selecting the prediction performance metric for which AutoML is optimized" ;
+    rdfs:seeAlso <https://microsoft.github.io/FLAML/docs/reference/automl/automl> .
+:metric_flaml_ranking a :Configuration_item ;
+    skos:prefLabel "metric FLAML ranking" ;
+    :category :parameter ;
+    skos:broader :metric ;
+    :has_datatype :single_value ;
+    :parameter_value :normalized_discounted_cumulative_gain ;
+    rdfs:comment "Selecting the prediction performance metric for which AutoML is optimized" ;
+    rdfs:seeAlso <https://microsoft.github.io/FLAML/docs/reference/automl/automl> .
+:metric_flaml_time_series_analysis a :Configuration_item ;
+    skos:prefLabel "metric FLAML time series analysis" ;
+    :category :parameter ;
+    skos:broader :metric ;
+    :has_datatype :single_value ;
+    :parameter_value :mean_absolute_percentage_error ;
+    rdfs:comment "Selecting the prediction performance metric for which AutoML is optimized" ;
+    rdfs:seeAlso <https://microsoft.github.io/FLAML/docs/reference/automl/automl> .
+:metric_evalml_tabular_classification a :Configuration_item ;
+    skos:prefLabel "metric EvalML tabular classification" ;
+    :category :parameter ;
+    skos:broader :metric ;
+    :has_datatype :single_value ;
+    :parameter_value :accuracy , :balanced_accuracy , :f_measure , :f_measure_micro , :f_measure_macro , :f_measure_weighted , :precision , :precision_macro , :precision_micro , :precision_weighted , :recall , :recall_micro , :recall_macro , :recall_weighted , :area_under_roc_curve , :area_under_roc_curve_micro , :area_under_roc_curve_macro , :area_under_roc_curve_weighted , :gini , :log_loss , :matthews_correlation_coefficient ;
+    rdfs:comment "Selecting the prediction performance metric for which AutoML is optimized" ;
+    rdfs:seeAlso <https://evalml.alteryx.com/en/stable/api_index.html> .
+:metric_evalml_tabular_regression a :Configuration_item ;
+    skos:prefLabel "metric EvalML tabular regression" ;
+    :category :parameter ;
+    skos:broader :metric ;
+    :has_datatype :single_value ;
+    :parameter_value :rooted_mean_squared_error , :mean_squared_log_error , :rooted_mean_squared_log_error , :r2 , :mean_absolute_error , :mean_squared_error , :median_absolute_error , :max_error , :explained_variance ;
+    rdfs:comment "Selecting the prediction performance metric for which AutoML is optimized" ;
+    rdfs:seeAlso <https://evalml.alteryx.com/en/stable/api_index.html> .
+:metric_evalml_text_classification a :Configuration_item ;
+    skos:prefLabel "metric EvalML text classification" ;
+    :category :parameter ;
+    skos:broader :metric ;
+    :has_datatype :single_value ;
+    :parameter_value :accuracy , :balanced_accuracy , :f_measure , :f_measure_micro , :f_measure_macro , :f_measure_weighted , :precision , :precision_macro , :precision_micro , :precision_weighted , :recall , :recall_micro , :recall_macro , :recall_weighted , :area_under_roc_curve , :area_under_roc_curve_micro , :area_under_roc_curve_macro , :area_under_roc_curve_weighted , :gini , :log_loss , :matthews_correlation_coefficient ;
+    rdfs:comment "Selecting the prediction performance metric for which AutoML is optimized" ;
+    rdfs:seeAlso <https://evalml.alteryx.com/en/stable/api_index.html> .
+:metric_evalml_text_regression a :Configuration_item ;
+    skos:prefLabel "metric EvalML text regression" ;
+    :category :parameter ;
+    skos:broader :metric ;
+    :has_datatype :single_value ;
+    :parameter_value :rooted_mean_squared_error , :mean_squared_log_error , :rooted_mean_squared_log_error , :r2 , :mean_absolute_error , :mean_squared_error , :median_absolute_error , :max_error , :explained_variance ;
+    rdfs:comment "Selecting the prediction performance metric for which AutoML is optimized" ;
+    rdfs:seeAlso <https://evalml.alteryx.com/en/stable/api_index.html> .
+:metric_evalml_time_series_regression a :Configuration_item ;
+    skos:prefLabel "metric EvalML time series regression" ;
+    :category :parameter ;
+    skos:broader :metric ;
+    :has_datatype :single_value ;
+    :parameter_value :mean_absolute_percentage_error ;
+    rdfs:comment "Selecting the prediction performance metric for which AutoML is optimized" ;
+    rdfs:seeAlso <https://evalml.alteryx.com/en/stable/api_index.html> .
+:metric_autogluon_tabular_regression a :Configuration_item ;
+    skos:prefLabel "metric AutoGluon tabular regression" ;
+    :category :parameter ;
+    skos:broader :metric ;
+    :has_datatype :single_value ;
+    :parameter_value :rooted_mean_squared_error , :mean_squared_error , :mean_absolute_error , :median_absolute_error , :mean_absolute_percentage_error , :r2 ;
+    rdfs:comment "Selecting the prediction performance metric for which AutoML is optimized" ;
+    rdfs:seeAlso <https://auto.gluon.ai> .
+:metric_autogluon_tabular_classification a :Configuration_item ;
+    skos:prefLabel "metric AutoGluon tabular classification" ;
+    :category :parameter ;
+    skos:broader :metric ;
+    :has_datatype :single_value ;
+    :parameter_value :accuracy , :balanced_accuracy , :f_measure , :f_measure_macro , :f_measure_micro , :f_measure_weighted , :receiver_operating_characteristic_curve , :receiver_operating_characteristic_curve_one_vs_one , :average_precision_score , :precision , :precision_macro , :precision_micro , :precision_weighted , :recall , :recall_macro , :recall_micro , :recall_weighted , :log_loss , :pac_score ;
+    rdfs:comment "Selecting the prediction performance metric for which AutoML is optimized" ;
+    rdfs:seeAlso <https://auto.gluon.ai> .
+:metric_autogluon_text_classification a :Configuration_item ;
+    skos:prefLabel "metric AutoGluon text classification" ;
+    :category :parameter ;
+    skos:broader :metric ;
+    :has_datatype :single_value ;
+    :parameter_value :accuracy , :balanced_accuracy , :f_measure , :f_measure_macro , :f_measure_micro , :f_measure_weighted , :receiver_operating_characteristic_curve , :receiver_operating_characteristic_curve_one_vs_one , :average_precision_score , :precision , :precision_macro , :precision_micro , :precision_weighted , :recall , :recall_macro , :recall_micro , :recall_weighted , :log_loss , :pac_score ;
+    rdfs:comment "Selecting the prediction performance metric for which AutoML is optimized" ;
+    rdfs:seeAlso <https://auto.gluon.ai> .
+:metric_autogluon_named_entity_recognition a :Configuration_item ;
+    skos:prefLabel "metric AutoGluon named entity recognition" ;
+    :category :parameter ;
+    skos:broader :metric ;
+    :has_datatype :single_value ;
+    :parameter_value :overall_recall , :overall_precision , :overall_f1 , :overall_accuracy ;
+    rdfs:comment "Selecting the prediction performance metric for which AutoML is optimized" ;
+    rdfs:seeAlso <https://auto.gluon.ai> .
+:metric_autogluon_text_regression a :Configuration_item ;
+    skos:prefLabel "metric AutoGluon text regression" ;
+    :category :parameter ;
+    skos:broader :metric ;
+    :has_datatype :single_value ;
+    :parameter_value :rooted_mean_squared_error , :mean_squared_error , :mean_absolute_error , :median_absolute_error , :r2 , :spearman_rank_correlation_coefficient , :pearson_correlation_coefficient ;
+    rdfs:comment "Selecting the prediction performance metric for which AutoML is optimized" ;
+    rdfs:seeAlso <https://auto.gluon.ai> .
+:metric_autogluon_image_classification a :Configuration_item ;
+    skos:prefLabel "metric AutoGluon image classification" ;
+    :category :parameter ;
+    skos:broader :metric ;
+    :has_datatype :single_value ;
+    :parameter_value :accuracy ;
+    rdfs:comment "Selecting the prediction performance metric for which AutoML is optimized" ;
+    rdfs:seeAlso <https://auto.gluon.ai> .
+:metric_autogluon_time_series_forecasting a :Configuration_item ;
+    skos:prefLabel "metric AutoGluon time series forecasting" ;
+    :category :parameter ;
+    skos:broader :metric ;
+    :has_datatype :single_value ;
+    :parameter_value :mean_absolute_percentage_error , :symmetric_mean_absolute_percentage_error , :mean_absolute_scaled_error , :mean_squared_error , :rooted_mean_squared_error ;
+    rdfs:comment "Selecting the prediction performance metric for which AutoML is optimized" ;
+    rdfs:seeAlso <https://auto.gluon.ai> .
+:metric_autopytorch_tabular_classification a :Configuration_item ;
+    skos:prefLabel "metric AutoPytorch tabular classification" ;
+    :category :parameter ;
+    skos:broader :metric ;
+    :has_datatype :single_value ;
+    :parameter_value :accuracy , :balanced_accuracy , :f_measure , :receiver_operating_characteristic_curve , :average_precision_score , :precision , :recall , :log_loss ;
+    rdfs:comment "Selecting the prediction performance metric for which AutoML is optimized" .
+:metric_autopytorch_time_series_forecasting a :Configuration_item ;
+    skos:prefLabel "metric AutoPytorch time series forecasting" ;
+    :category :parameter ;
+    skos:broader :metric ;
+    :has_datatype :single_value ;
+    :parameter_value :mean_absolute_scaled_error , :median_absolute_scaled_error , :mean_absolute_error , :median_absolute_error , :mean_absolute_percentage_error , :median_absolute_percentage_error , :mean_squared_error , :median_squared_error ;
+    rdfs:comment "Selecting the prediction performance metric for which AutoML is optimized" .
+:metric_autopytorch_tabular_regression a :Configuration_item ;
+    skos:prefLabel "metric AutoPytorch tabular regression" ;
+    :category :parameter ;
+    skos:broader :metric ;
+    :has_datatype :single_value ;
+    :parameter_value :mean_absolute_error , :mean_squared_error , :rooted_mean_squared_error , :mean_squared_log_error , :median_absolute_error , :r2 ;
+    rdfs:comment "Selecting the prediction performance metric for which AutoML is optimized" .
+:metric_autocve_classification a :Configuration_item ;
+    skos:prefLabel "metric AutoCVE classification" ;
+    :category :parameter ;
+    skos:broader :metric ;
+    :has_datatype :single_value ;
+    :parameter_value :accuracy ;
+    rdfs:comment "Selecting the prediction performance metric for which AutoML is optimized" ;
+    rdfs:seeAlso <https://github.com/celiolarcher/AUTOCVE> .
+:metric_mcfly_time_series_classification a :Configuration_item ;
+    skos:prefLabel "metric mcfly time series classification" ;
+    :category :parameter ;
+    skos:broader :metric ;
+    :has_datatype :list ;
+    :parameter_value :accuracy , :balanced_accuracy , :f_measure , :f_measure_macro , :f_measure_micro , :f_measure_weighted , :f_measure_samples , :receiver_operating_characteristic_curve , :average_precision_score , :log_loss , :precision , :precision_macro , :precision_micro , :precision_weighted , :precision_samples , :recall , :recall_macro , :recall_micro , :recall_weighted , :recall_samples ;
+    rdfs:comment "Selecting the prediction performance metric for which AutoML is optimized" ;
+    rdfs:seeAlso <https://mcfly.readthedocs.io/en/latest/reference.html> .
+:metric_mljar_tabular_classification a :Configuration_item ;
+    skos:prefLabel "metric MLJAR tabular classification" ;
+    :category :parameter ;
+    skos:broader :metric ;
+    :has_datatype :single_value ;
+    :parameter_value :log_loss , :area_under_roc_curve , :f_measure , :accuracy , :precision , :recall , :matthews_correlation_coefficient ;
+    rdfs:comment "Selecting the prediction performance metric for which AutoML is optimized" ;
+    rdfs:seeAlso <https://supervised.mljar.com/api> .
+:metric_mljar_tabular_regression a :Configuration_item ;
+    skos:prefLabel "metric MLJAR tabular regression" ;
+    :category :parameter ;
+    skos:broader :metric ;
+    :has_datatype :single_value ;
+    :parameter_value :mean_absolute_error , :mean_squared_error , :rooted_mean_squared_error , :r2 , :mean_absolute_percentage_error ;
+    rdfs:comment "Selecting the prediction performance metric for which AutoML is optimized" ;
+    rdfs:seeAlso <https://supervised.mljar.com/api> .
+:metric_pycaret_tabular_classification a :Configuration_item ;
+    skos:prefLabel "metric PyCaret tabular classification" ;
+    :category :parameter ;
+    skos:broader :metric ;
+    :has_datatype :single_value ;
+    :parameter_value :accuracy , :area_under_roc_curve , :recall , :precision , :f_measure , :cohens_kappa , :matthews_correlation_coefficient ;
+    rdfs:comment "Selecting the prediction performance metric for which AutoML is optimized" ;
+    rdfs:seeAlso <https://pycaret.readthedocs.io> .
+:metric_pycaret_tabular_regression a :Configuration_item ;
+    skos:prefLabel "metric PyCaret tabular regression" ;
+    :category :parameter ;
+    skos:broader :metric ;
+    :has_datatype :single_value ;
+    :parameter_value :mean_absolute_error , :mean_squared_error , :rooted_mean_squared_error , :r2 , :rooted_mean_squared_log_error , :mean_absolute_percentage_error ;
+    rdfs:comment "Selecting the prediction performance metric for which AutoML is optimized" ;
+    rdfs:seeAlso <https://pycaret.readthedocs.io> .
+:metric_pycaret_time_series_forecasting a :Configuration_item ;
+    skos:prefLabel "metric PyCaret time series forecasting" ;
+    :category :parameter ;
+    skos:broader :metric ;
+    :has_datatype :single_value ;
+    :parameter_value :mean_absolute_scaled_error , :rooted_mean_squared_scaled_error , :symmetric_mean_absolute_percentage_error , :coverage , :mean_absolute_error , :rooted_mean_squared_error , :mean_absolute_percentage_error , :r2 ;
+    rdfs:comment "Selecting the prediction performance metric for which AutoML is optimized" ;
+    rdfs:seeAlso <https://pycaret.readthedocs.io> .
+:metric_tpot_tabular_classification a :Configuration_item ;
+    skos:prefLabel "metric TPOT tabular classification" ;
+    :category :parameter ;
+    skos:broader :metric ;
+    :has_datatype :single_value ;
+    :parameter_value :accuracy , :average_precision , :adjusted_rand_score , :balanced_accuracy , :f_measure , :f_measure_macro , :f_measure_micro , :f_measure_samples , :f_measure_weighted , :log_loss , :precision , :precision_macro , :precision_micro , :precision_samples , :precision_weighted , :recall , :recall_macro , :recall_micro , :recall_samples , :recall_weighted , :jaccard , :jaccard_macro , :jaccard_micro , :jaccard_samples , :jaccard_weighted , :receiver_operating_characteristic_curve , :receiver_operating_characteristic_curve_one_vs_rest , :receiver_operating_characteristic_curve_one_vs_one , :receiver_operating_characteristic_curve_one_vs_rest_weighted , :receiver_operating_characteristic_curve_one_vs_one_weighted ;
+    rdfs:comment "Selecting the prediction performance metric for which AutoML is optimized" ;
+    rdfs:seeAlso <http://epistasislab.github.io/tpot/api> .
+:metric_tpot_tabular_regression a :Configuration_item ;
+    skos:prefLabel "metric TPOT tabular regression" ;
+    :category :parameter ;
+    skos:broader :metric ;
+    :has_datatype :single_value ;
+    :parameter_value :median_absolute_error , :mean_absolute_error , :mean_squared_error , :r2 ;
+    rdfs:comment "Selecting the prediction performance metric for which AutoML is optimized" ;
+    rdfs:seeAlso <http://epistasislab.github.io/tpot/api> .
+:metric_tpot_image_classification a :Configuration_item ;
+    skos:prefLabel "metric TPOT image classification" ;
+    :category :parameter ;
+    skos:broader :metric ;
+    :has_datatype :single_value ;
+    :parameter_value :accuracy , :average_precision , :adjusted_rand_score , :balanced_accuracy , :f_measure , :f_measure_macro , :f_measure_micro , :f_measure_samples , :f_measure_weighted , :log_loss , :precision , :precision_macro , :precision_micro , :precision_samples , :precision_weighted , :recall , :recall_macro , :recall_micro , :recall_samples , :recall_weighted , :jaccard , :jaccard_macro , :jaccard_micro , :jaccard_samples , :jaccard_weighted , :receiver_operating_characteristic_curve , :receiver_operating_characteristic_curve_one_vs_rest , :receiver_operating_characteristic_curve_one_vs_one , :receiver_operating_characteristic_curve_one_vs_rest_weighted , :receiver_operating_characteristic_curve_one_vs_one_weighted ;
+    rdfs:comment "Selecting the prediction performance metric for which AutoML is optimized" ;
+    rdfs:seeAlso <http://epistasislab.github.io/tpot/api> .
+:metric_gama_tabular_classification a :Configuration_item ;
+    skos:prefLabel "metric GAMA tabular classification" ;
+    :category :parameter ;
+    skos:broader :metric ;
+    :has_datatype :list ;
+    :parameter_value :accuracy , :average_precision , :receiver_operating_characteristic_curve , :neg_log_loss , :f_measure_macro , :f_measure_micro , :f_measure_samples , :f_measure_weighted , :precision_macro , :precision_micro , :precision_samples , :precision_weighted , :recall_macro , :recall_micro , :recall_samples , :recall_weighted ;
+    rdfs:comment "Selecting the prediction performance metric for which AutoML is optimized" ;
+    rdfs:seeAlso <https://openml-labs.github.io/gama/master/api/index.html> .
+:metric_gama_tabular_regression a :Configuration_item ;
+    skos:prefLabel "metric GAMA tabular regression" ;
+    :category :parameter ;
+    skos:broader :metric ;
+    :has_datatype :list ;
+    :parameter_value :explained_variance , :r2 , :mean_absolut_error , :median_absolute_error , :mean_squared_error , :mean_squared_log_error ;
+    rdfs:comment "Selecting the prediction performance metric for which AutoML is optimized" ;
+    rdfs:seeAlso <https://openml-labs.github.io/gama/master/api/index.html> .
+:metric_lama_tabular_classification a :Configuration_item ;
+    skos:prefLabel "metric LAMA tabular classification" ;
+    :category :parameter ;
+    skos:broader :metric ;
+    :has_datatype :single_value ;
+    :parameter_value :area_under_roc_curve , :categorical_cross_entropy ;
+    rdfs:comment "Selecting the prediction performance metric for which AutoML is optimized" ;
+    rdfs:seeAlso <https://lightautoml.readthedocs.io/en/latest/pages/modules/generated/lightautoml.tasks.base.Task.html#lightautoml.tasks.base.Task> .
+:metric_lama_binary_classification a :Configuration_item ;
+    skos:prefLabel "metric LAMA binary classification" ;
+    :category :parameter ;
+    skos:broader :metric ;
+    :has_datatype :single_value ;
+    :parameter_value :area_under_roc_curve , :accuracy , :log_loss ;
+    rdfs:comment "Selecting the prediction performance metric for which AutoML is optimized" ;
+    rdfs:seeAlso <https://lightautoml.readthedocs.io/en/latest/pages/modules/generated/lightautoml.tasks.base.Task.html#lightautoml.tasks.base.Task> .
+:metric_lama_tabular_regression a :Configuration_item ;
+    skos:prefLabel "metric LAMA tabular regression" ;
+    :category :parameter ;
+    skos:broader :metric ;
+    :has_datatype :single_value ;
+    :parameter_value :mean_squared_error , :mean_absolute_error , :mean_absolute_percentage_error , :rooted_mean_squared_log_error ;
+    rdfs:comment "Selecting the prediction performance metric for which AutoML is optimized" ;
+    rdfs:seeAlso <https://lightautoml.readthedocs.io/en/latest/pages/modules/generated/lightautoml.tasks.base.Task.html#lightautoml.tasks.base.Task> .
+:time_limit a :Configuration_item ;
+    skos:prefLabel "time limit" ;
+    :category :parameter ;
+    :has_datatype :integer ;
+    rdfs:comment "Specifying the maximum runtime of AutoML" .
+:time_limit_autosklearn_tabular_classification a :Configuration_item ;
+    skos:prefLabel "time limit autosklearn tabular classification" ;
+    :category :parameter ;
+    skos:broader :time_limit ;
+    :has_datatype :integer ;
+    rdfs:comment "Specifying the maximum runtime of AutoML" ;
+    rdfs:seeAlso <https://automl.github.io/auto-sklearn/master/api.html#> .
+:time_limit_autosklearn_tabular_regression a :Configuration_item ;
+    skos:prefLabel "time limit autosklearn tabular regression" ;
+    :category :parameter ;
+    skos:broader :time_limit ;
+    :has_datatype :integer ;
+    rdfs:comment "Specifying the maximum runtime of AutoML" ;
+    rdfs:seeAlso <https://automl.github.io/auto-sklearn/master/api.html#> .
+:time_limit_per_run a :Configuration_item ;
+    skos:prefLabel "time limit per run" ;
+    :category :parameter ;
+    :has_datatype :integer ;
+    rdfs:comment "Specifying the maximum runtime per AutoML run" .
+:time_limit_per_run_autosklearn_tabular_classification a :Configuration_item ;
+    skos:prefLabel "time limit per run autosklearn tabular classification" ;
+    :category :parameter ;
+    skos:broader :time_limit_per_run ;
+    :has_datatype :integer ;
+    rdfs:comment "Specifying the maximum runtime per AutoML run" ;
+    rdfs:seeAlso <https://automl.github.io/auto-sklearn/master/api.html#> .
+:time_limit_per_run_autosklearn_tabular_regression a :Configuration_item ;
+    skos:prefLabel "time limit per run autosklearn tabular regression" ;
+    :category :parameter ;
+    skos:broader :time_limit_per_run ;
+    :has_datatype :integer ;
+    rdfs:comment "Specifying the maximum runtime per AutoML run" ;
+    rdfs:seeAlso <https://automl.github.io/auto-sklearn/master/api.html#> .
+:max_model_size a :Configuration_item ;
+    skos:prefLabel "max_model_size" ;
+    :category :parameter ;
+    :has_datatype :integer ;
+    rdfs:comment "Specifying the maximum size of a neural network model" .
+:max_model_size_autokeras_tabular_classification a :Configuration_item ;
+    skos:prefLabel "max model size autokeras tabular classification" ;
+    :category :parameter ;
+    skos:broader :max_model_size ;
+    :has_datatype :integer ;
+    rdfs:comment "Specifying the maximum size of a neural network model" ;
+    rdfs:seeAlso <https://autokeras.com> .
+:max_model_size_autokeras_tabular_regression a :Configuration_item ;
+    skos:prefLabel "max model size autokeras tabular regression" ;
+    :category :parameter ;
+    skos:broader :max_model_size ;
+    :has_datatype :integer ;
+    rdfs:comment "Specifying the maximum size of a neural network model" ;
+    rdfs:seeAlso <https://autokeras.com> .
+:max_model_size_autokeras_image_classification a :Configuration_item ;
+    skos:prefLabel "max model size autokeras image classification" ;
+    :category :parameter ;
+    skos:broader :max_model_size ;
+    :has_datatype :integer ;
+    rdfs:comment "Specifying the maximum size of a neural network model" ;
+    rdfs:seeAlso <https://autokeras.com> .
+:max_model_size_autokeras_image_regression a :Configuration_item ;
+    skos:prefLabel "max model size autokeras image regression" ;
+    :category :parameter ;
+    skos:broader :max_model_size ;
+    :has_datatype :integer ;
+    rdfs:comment "Specifying the maximum size of a neural network model" ;
+    rdfs:seeAlso <https://autokeras.com> .
+:max_model_size_autokeras_text_classification a :Configuration_item ;
+    skos:prefLabel "max model size autokeras text classification" ;
+    :category :parameter ;
+    skos:broader :max_model_size ;
+    :has_datatype :integer ;
+    rdfs:comment "Specifying the maximum size of a neural network model" ;
+    rdfs:seeAlso <https://autokeras.com> .
+:max_model_size_autokeras_text_regression a :Configuration_item ;
+    skos:prefLabel "max model size autokeras text regression" ;
+    :category :parameter ;
+    skos:broader :max_model_size ;
+    :has_datatype :integer ;
+    rdfs:comment "Specifying the maximum size of a neural network model" ;
+    rdfs:seeAlso <https://autokeras.com> .
+:max_model_size_autokeras_time_series_forecasting a :Configuration_item ;
+    skos:prefLabel "max model size autokeras time series forecasting" ;
+    :category :parameter ;
+    skos:broader :max_model_size ;
+    :has_datatype :integer ;
+    rdfs:comment "Specifying the maximum size of a neural network model" ;
+    rdfs:seeAlso <https://autokeras.com> .
+:include_approach a :Configuration_item ;
+    skos:prefLabel "include approach" ;
+    :category :parameter ;
+    :has_datatype :list .
+:include_approach_autosklearn a :Configuration_item ;
+    skos:prefLabel "include approach autosklearn" ;
+    :category :parameter ;
+    skos:broader :include_approach ;
+    :has_datatype :list ;
+    rdfs:seeAlso <https://automl.github.io/auto-sklearn/master/api.html#> .
+:epochs a :Configuration_item ;
+    skos:prefLabel "epochs" ;
+    :category :parameter ;
+    :has_datatype :integer ;
+    rdfs:comment "Specifying the number of epochs for training neural networks, i.e., how often the entire dataset will be used for training" .
+:epochs_mcfly a :Configuration_item ;
+    skos:prefLabel "epochs mcfly" ;
+    :category :parameter ;
+    skos:broader :epochs ;
+    :has_datatype :integer ;
+    rdfs:comment "Specifying the number of epochs for training neural networks, i.e., how often the entire dataset will be used for training" .
+:max_trials a :Configuration_item ;
+    skos:prefLabel "max_trials" ;
+    :category :parameter ;
+    :has_datatype :integer ;
+    rdfs:comment "Specifying the maximum number of different Models to try" .
+:max_trials_autokeras_tabular_classification a :Configuration_item ;
+    skos:prefLabel "max trials autokeras tabular classification" ;
+    :category :parameter ;
+    skos:broader :max_trials ;
+    :has_datatype :integer ;
+    rdfs:comment "Specifying the maximum number of different Models to try" ;
+    rdfs:seeAlso <https://autokeras.com> .
+:max_trials_autokeras_tabular_regression a :Configuration_item ;
+    skos:prefLabel "max trials autokeras tabular regression" ;
+    :category :parameter ;
+    skos:broader :max_trials ;
+    :has_datatype :integer ;
+    rdfs:comment "Specifying the maximum number of different Models to try" ;
+    rdfs:seeAlso <https://autokeras.com> .
+:max_trials_autokeras_image_classification a :Configuration_item ;
+    skos:prefLabel "max trials autokeras image classification" ;
+    :category :parameter ;
+    skos:broader :max_trials ;
+    :has_datatype :integer ;
+    rdfs:comment "Specifying the maximum number of different Models to try" ;
+    rdfs:seeAlso <https://autokeras.com> .
+:max_trials_autokeras_image_regression a :Configuration_item ;
+    skos:prefLabel "max trials autokeras image regression" ;
+    :category :parameter ;
+    skos:broader :max_trials ;
+    :has_datatype :integer ;
+    rdfs:comment "Specifying the maximum number of different Models to try" ;
+    rdfs:seeAlso <https://autokeras.com> .
+:max_trials_autokeras_text_classification a :Configuration_item ;
+    skos:prefLabel "max trials autokeras text classification" ;
+    :category :parameter ;
+    skos:broader :max_trials ;
+    :has_datatype :integer ;
+    rdfs:comment "Specifying the maximum number of different Models to try" ;
+    rdfs:seeAlso <https://autokeras.com> .
+:max_trials_autokeras_text_regression a :Configuration_item ;
+    skos:prefLabel "max trials autokeras text regression" ;
+    :category :parameter ;
+    skos:broader :max_trials ;
+    :has_datatype :integer ;
+    rdfs:comment "Specifying the maximum number of different Models to try" ;
+    rdfs:seeAlso <https://autokeras.com> .
+:max_trials_autokeras_time_series_forecasting a :Configuration_item ;
+    skos:prefLabel "max trials autokeras time series forecasting" ;
+    :category :parameter ;
+    skos:broader :max_trials ;
+    :has_datatype :integer ;
+    rdfs:comment "Specifying the maximum number of different Models to try" ;
+    rdfs:seeAlso <https://autokeras.com> .
+:tuner a :Configuration_item ;
+    skos:prefLabel "tuner" ;
+    :category :parameter ;
+    :has_datatype :single_value ;
+    rdfs:comment "Selecting the tuner approach for training" ;
+    rdfs:seeAlso <https://autokeras.com> .
+:tuner_autokeras_tabular_regression a :Configuration_item ;
+    skos:prefLabel "tuner autokeras tabular regression" ;
+    :category :parameter ;
+    skos:broader :tuner ;
+    :has_datatype :single_value ;
+    :parameter_value :greedy , :bayesian , :random , :hyperband ;
+    rdfs:comment "Selecting the tuner approach for training" ;
+    rdfs:seeAlso <https://autokeras.com> .
+:tuner_autokeras_tabular_classification a :Configuration_item ;
+    skos:prefLabel "tuner autokeras tabular classification" ;
+    :category :parameter ;
+    skos:broader :tuner ;
+    :has_datatype :single_value ;
+    :parameter_value :greedy , :bayesian , :random , :hyperband ;
+    rdfs:comment "Selecting the tuner approach for training" ;
+    rdfs:seeAlso <https://autokeras.com> .
+:tuner_autokeras_image_regression a :Configuration_item ;
+    skos:prefLabel "tuner autokeras image regression" ;
+    :category :parameter ;
+    skos:broader :tuner ;
+    :has_datatype :single_value ;
+    :parameter_value :greedy , :bayesian , :random , :hyperband ;
+    rdfs:comment "Selecting the tuner approach for training" ;
+    rdfs:seeAlso <https://autokeras.com> .
+:tuner_autokeras_image_classification a :Configuration_item ;
+    skos:prefLabel "tuner autokeras image classification" ;
+    :category :parameter ;
+    skos:broader :tuner ;
+    :has_datatype :single_value ;
+    :parameter_value :greedy , :bayesian , :random , :hyperband ;
+    rdfs:comment "Selecting the tuner approach for training" ;
+    rdfs:seeAlso <https://autokeras.com> .
+:tuner_autokeras_text_regression a :Configuration_item ;
+    skos:prefLabel "tuner autokeras text regression" ;
+    :category :parameter ;
+    skos:broader :tuner ;
+    :has_datatype :single_value ;
+    :parameter_value :greedy , :bayesian , :random , :hyperband ;
+    rdfs:comment "Selecting the tuner approach for training" ;
+    rdfs:seeAlso <https://autokeras.com> .
+:tuner_autokeras_text_classification a :Configuration_item ;
+    skos:prefLabel "tuner autokeras text classification" ;
+    :category :parameter ;
+    skos:broader :tuner ;
+    :has_datatype :single_value ;
+    :parameter_value :greedy , :bayesian , :random , :hyperband ;
+    rdfs:comment "Selecting the tuner approach for training" ;
+    rdfs:seeAlso <https://autokeras.com> .
+:tuner_autokeras_time_series_forecasting a :Configuration_item ;
+    skos:prefLabel "tuner autokeras time series forecasting" ;
+    :category :parameter ;
+    skos:broader :tuner ;
+    :has_datatype :single_value ;
+    :parameter_value :greedy , :bayesian , :random , :hyperband ;
+    rdfs:comment "Selecting the tuner approach for training" ;
+    rdfs:seeAlso <https://autokeras.com> .
+:tuner_class_evalml a :Configuration_item ;
+    skos:prefLabel "tuner class evalml" ;
+    :category :parameter ;
+    skos:broader :tuner ;
+    :has_datatype :single_value ;
+    :parameter_value :random , :grid_search , :skopt ;
+    rdfs:comment "Selecting the tuner approach for training" ;
+    rdfs:seeAlso <https://evalml.alteryx.com/en/stable/api_index.html> .
+:tuner_class_gama a :Configuration_item ;
+    skos:prefLabel "tuner class GAMA" ;
+    :category :task_configuration ;
+    skos:broader :tuner ;
+    :has_datatype :single_value ;
+    :parameter_value :random , :async_ea , :async_successive_halving ;
+    rdfs:comment "Selecting the tuner approach for training" ;
+    rdfs:seeAlso <https://openml-labs.github.io/gama/master/api/index.html> .
+:loss_function a :Configuration_item ;
+    skos:prefLabel "loss function" ;
+    :category :parameter ;
+    :has_datatype :single_value ;
+    rdfs:comment "Selecting the loss function according to which training is optimized" ;
+    rdfs:seeAlso <https://autokeras.com> .
+:loss_function_autokeras_tabular_classification a :Configuration_item ;
+    skos:prefLabel "loss function autokeras tabular classification" ;
+    :category :parameter ;
+    skos:broader :loss_function ;
+    :has_datatype :single_value ;
+    :parameter_value :binary_cross_entropy , :categorical_cross_entropy ;
+    rdfs:comment "Selecting the loss function according to which training is optimized" ;
+    rdfs:seeAlso <https://autokeras.com> .
+:loss_function_autokeras_tabular_regression a :Configuration_item ;
+    skos:prefLabel "loss function autokeras tabular regression" ;
+    :category :parameter ;
+    skos:broader :loss_function ;
+    :has_datatype :single_value ;
+    :parameter_value :mean_squared_error ;
+    rdfs:comment "Selecting the loss function according to which training is optimized" ;
+    rdfs:seeAlso <https://autokeras.com> .
+:loss_function_autokeras_image_classification a :Configuration_item ;
+    skos:prefLabel "loss function autokeras image classification" ;
+    :category :parameter ;
+    skos:broader :loss_function ;
+    :has_datatype :single_value ;
+    :parameter_value :binary_cross_entropy , :categorical_cross_entropy ;
+    rdfs:comment "Selecting the loss function according to which training is optimized" ;
+    rdfs:seeAlso <https://autokeras.com> .
+:loss_function_autokeras_image_regression a :Configuration_item ;
+    skos:prefLabel "loss function autokeras image regression" ;
+    :category :parameter ;
+    skos:broader :loss_function ;
+    :has_datatype :single_value ;
+    :parameter_value :mean_squared_error ;
+    rdfs:comment "Selecting the loss function according to which training is optimized" ;
+    rdfs:seeAlso <https://autokeras.com> .
+:loss_function_autokeras_text_classification a :Configuration_item ;
+    skos:prefLabel "loss function autokeras text classification" ;
+    :category :parameter ;
+    skos:broader :loss_function ;
+    :has_datatype :single_value ;
+    :parameter_value :binary_cross_entropy , :categorical_cross_entropy ;
+    rdfs:comment "Selecting the loss function according to which training is optimized" ;
+    rdfs:seeAlso <https://autokeras.com> .
+:loss_function_autokeras_text_regression a :Configuration_item ;
+    skos:prefLabel "loss function autokeras text regression" ;
+    :category :parameter ;
+    skos:broader :loss_function ;
+    :has_datatype :single_value ;
+    :parameter_value :mean_squared_error ;
+    rdfs:comment "Selecting the loss function according to which training is optimized" ;
+    rdfs:seeAlso <https://autokeras.com> .
+:loss_function_autokeras_time_series_forecasting a :Configuration_item ;
+    skos:prefLabel "loss function autokeras time series forecasting" ;
+    :category :parameter ;
+    skos:broader :loss_function ;
+    :has_datatype :single_value ;
+    :parameter_value :mean_squared_error ;
+    rdfs:comment "Selecting the loss function according to which training is optimized" ;
+    rdfs:seeAlso <https://autokeras.com> .
+:loss_function_mcfly_time_series_classification a :Configuration_item ;
+    skos:prefLabel "loss function mcfly time series classification" ;
+    :category :parameter ;
+    skos:broader :loss_function ;
+    :has_datatype :single_value ;
+    :parameter_value :categorical_cross_entropy ;
+    rdfs:comment "Selecting the loss function according to which training is optimized" ;
+    rdfs:seeAlso <https://mcfly.readthedocs.io/en/latest/reference.html> .
+:loss_function_lama_tabular_classification a :Configuration_item ;
+    skos:prefLabel "loss function lama tabular classification" ;
+    :category :parameter ;
+    skos:broader :loss_function ;
+    :has_datatype :single_value ;
+    :parameter_value :categorical_cross_entropy , :f_measure ;
+    rdfs:comment "Selecting the loss function according to which training is optimized" ;
+    rdfs:seeAlso <https://lightautoml.readthedocs.io/en/latest/pages/modules/generated/lightautoml.tasks.base.Task.html#lightautoml.tasks.base.Task> .
+:loss_function_lama_tabular_regression a :Configuration_item ;
+    skos:prefLabel "loss function lama tabular regression" ;
+    :category :parameter ;
+    skos:broader :loss_function ;
+    :has_datatype :single_value ;
+    :parameter_value :mean_squared_error , :mean_absolute_error , :mean_absolute_percentage_error , :rooted_mean_squared_log_error ;
+    rdfs:comment "Selecting the loss function according to which training is optimized" ;
+    rdfs:seeAlso <https://lightautoml.readthedocs.io/en/latest/pages/modules/generated/lightautoml.tasks.base.Task.html#lightautoml.tasks.base.Task> .
+:loss_function_lama_binary_classification a :Configuration_item ;
+    skos:prefLabel "loss function lama binary classification" ;
+    :category :parameter ;
+    skos:broader :loss_function ;
+    :has_datatype :single_value ;
+    :parameter_value :log_loss ;
+    rdfs:comment "Selecting the loss function according to which training is optimized" ;
+    rdfs:seeAlso <https://lightautoml.readthedocs.io/en/latest/pages/modules/generated/lightautoml.tasks.base.Task.html#lightautoml.tasks.base.Task> .
+:forecasting_horizon a :Configuration_item ;
+    skos:prefLabel "forecasting horizon" ;
+    :category :parameter ;
+    :has_datatype :integer ;
+    :required "true"^^xsd:boolean ;
+    rdfs:comment "Specifying the period for which forecasts are generated for a time series" .
+:forecasting_horizon_autokeras_time_series_forcasting a :Configuration_item ;
+    skos:prefLabel "forecasting horizon autokeras time series forcasting" ;
+    :category :parameter ;
+    skos:broader :forecasting_horizon ;
+    :has_datatype :integer ;
+    rdfs:comment "Specifying the period for which forecasts are generated for a time series" ;
+    rdfs:seeAlso <https://autokeras.com> .
+:forecasting_horizon_autogluon_time_series_forcasting a :Configuration_item ;
+    skos:prefLabel "forecasting horizon autogluon time series forcasting" ;
+    :category :parameter ;
+    skos:broader :forecasting_horizon ;
+    :has_datatype :integer ;
+    rdfs:comment "Specifying the period for which forecasts are generated for a time series" ;
+    rdfs:seeAlso <https://auto.gluon.ai> .
+:forecasting_horizon_evalml_time_series_forcasting a :Configuration_item ;
+    skos:prefLabel "forecasting horizon evalml time series forcasting" ;
+    :category :parameter ;
+    skos:broader :forecasting_horizon ;
+    :has_datatype :integer ;
+    rdfs:comment "Specifying the period for which forecasts are generated for a time series" ;
+    rdfs:seeAlso <https://evalml.alteryx.com/en/stable/api_index.html> .
+:forecasting_horizon_flaml_time_series_forcasting a :Configuration_item ;
+    skos:prefLabel "forecasting horizon flaml time series forcasting" ;
+    :category :parameter ;
+    skos:broader :forecasting_horizon ;
+    :has_datatype :integer ;
+    rdfs:comment "Specifying the period for which forecasts are generated for a time series" ;
+    rdfs:seeAlso <https://microsoft.github.io/FLAML/docs/reference/automl/automl> .
+:forecasting_horizon_pycaret_time_series_forcasting a :Configuration_item ;
+    skos:prefLabel "forecasting horizon pycaret time series forcasting" ;
+    :category :parameter ;
+    skos:broader :forecasting_horizon ;
+    :has_datatype :integer ;
+    rdfs:comment "Specifying the period for which forecasts are generated for a time series" ;
+    rdfs:seeAlso <https://pycaret.readthedocs.io> .
+:forecasting_horizon_autopytorch_time_series_forcasting a :Configuration_item ;
+    skos:prefLabel "forecasting horizon autopytorch time series forcasting" ;
+    :category :parameter ;
+    skos:broader :forecasting_horizon ;
+    :has_datatype :integer ;
+    rdfs:comment "Specifying the period for which forecasts are generated for a time series" .
+:lookback a :Configuration_item ;
+    skos:prefLabel "lookback" ;
+    :category :parameter ;
+    :has_datatype :integer .
+:lookback_autokeras_time_series_forecasting a :Configuration_item ;
+    skos:prefLabel "lookback autokeras time series forecasting" ;
+    :category :parameter ;
+    skos:broader :lookback ;
+    :has_datatype :integer ;
+    rdfs:seeAlso <https://autokeras.com> .
+:lookback_evalml_time_series_forecasting a :Configuration_item ;
+    skos:prefLabel "lookback evalml time series forecasting" ;
+    :category :parameter ;
+    skos:broader :lookback ;
+    :has_datatype :integer ;
+    :required "true"^^xsd:boolean ;
+    rdfs:seeAlso <https://evalml.alteryx.com/en/stable/api_index.html> .
+:gap a :Configuration_item ;
+    skos:prefLabel "gap" ;
+    :category :parameter ;
+    :has_datatype :integer .
+:gap_autokeras_time_series_forecasting a :Configuration_item ;
+    skos:prefLabel "gap autokeras time series forecasting" ;
+    :category :parameter ;
+    skos:broader :gap ;
+    :has_datatype :integer ;
+    rdfs:seeAlso <https://autokeras.com> .
+:gap_evalml_time_series_forecasting a :Configuration_item ;
+    skos:prefLabel "gap evalml time series forecasting" ;
+    :category :parameter ;
+    skos:broader :gap ;
+    :has_datatype :integer ;
+    :required "true"^^xsd:boolean ;
+    rdfs:seeAlso <https://evalml.alteryx.com/en/stable/api_index.html> .
+:validation_split a :Configuration_item ;
+    skos:prefLabel "validation split" ;
+    :category :parameter ;
+    :has_datatype :integer .
+:validation_split_autokeras a :Configuration_item ;
+    skos:prefLabel "validation split autokeras" ;
+    :category :parameter ;
+    skos:broader :validation_split ;
+    :has_datatype :integer ;
+    rdfs:seeAlso <https://autokeras.com> .
+:validation_split_flaml a :Configuration_item ;
+    skos:prefLabel "validation split flaml" ;
+    :category :parameter ;
+    skos:broader :validation_split ;
+    :has_datatype :integer ;
+    rdfs:seeAlso <https://microsoft.github.io/FLAML/docs/reference/automl/automl> .
+:eval_method a :Configuration_item ;
+    skos:prefLabel "eval method" ;
+    :category :parameter ;
+    :has_datatype :single_value ;
+    rdfs:comment "Specifying the method for validating the prediction performance" .
+:eval_method_flaml a :Configuration_item ;
+    skos:prefLabel "eval method Flaml" ;
+    :category :parameter ;
+    skos:broader :eval_method ;
+    :has_datatype :single_value ;
+    :parameter_value :auto_evaluation , :cross_validation , :holdout ;
+    rdfs:comment "Specifying the method for validating the prediction performance" ;
+    rdfs:seeAlso <https://microsoft.github.io/FLAML/docs/reference/automl/automl> .
+:cross_validation_fold a :Configuration_item ;
+    skos:prefLabel "cross validation fold" ;
+    :category :parameter ;
+    :has_datatype :integer .
+:cross_validation_fold_flaml a :Configuration_item ;
+    skos:prefLabel "cross validation fold flaml" ;
+    :category :parameter ;
+    skos:broader :cross_validation_fold ;
+    :has_datatype :integer .
+:cross_validation_fold_pycaret a :Configuration_item ;
+    skos:prefLabel "cross validation fold pycaret" ;
+    :category :parameter ;
+    skos:broader :cross_validation_fold ;
+    :has_datatype :integer .
+:split_type a :Configuration_item ;
+    skos:prefLabel "split type" ;
+    :category :parameter ;
+    :has_datatype :single_value .
+:split_type_flaml_classification a :Configuration_item ;
+    skos:prefLabel "split type flaml classification" ;
+    :category :parameter ;
+    skos:broader :split_type ;
+    :has_datatype :single_value ;
+    :parameter_value :auto_split , :stratified , :uniform , :time , :group .
+:split_type_flaml_regression a :Configuration_item ;
+    skos:prefLabel "split type flaml regression" ;
+    :category :parameter ;
+    skos:broader :split_type ;
+    :has_datatype :single_value ;
+    :parameter_value :auto_split , :uniform , :time .
+:split_type_flaml_time_series_forecasting a :Configuration_item ;
+    skos:prefLabel "split type flaml time series forecasting" ;
+    :category :parameter ;
+    skos:broader :split_type ;
+    :has_datatype :single_value ;
+    :parameter_value :auto_split , :time .
+:split_type_flaml_ranking a :Configuration_item ;
+    skos:prefLabel "split type flaml ranking" ;
+    :category :parameter ;
+    skos:broader :split_type ;
+    :has_datatype :single_value ;
+    :parameter_value :auto_split , :group .
+:hyperparameter_optimization_method a :Configuration_item ;
+    skos:prefLabel "hyperparameter optimization method" ;
+    :category :parameter ;
+    :has_datatype :single_value .
+:hyperparameter_optimization_method_flaml a :Configuration_item ;
+    skos:prefLabel "hyperparameter optimization method flaml" ;
+    :category :parameter ;
+    skos:broader :hyperparameter_optimization_method ;
+    :has_datatype :single_value ;
+    :parameter_value :auto_optimization_approach , :blendsearch , :frugal_optimization_for_costrelated_hyperparameters .
+:optimize_thresholds a :Configuration_item ;
+    skos:prefLabel "optimize thresholds" ;
+    :category :parameter ;
+    :has_datatype :boolean .
+:optimize_thresholds_evalml a :Configuration_item ;
+    skos:prefLabel "optimize thresholds evalml" ;
+    :category :parameter ;
+    skos:broader :optimize_thresholds ;
+    :has_datatype :boolean .
+:ensembling a :Configuration_item ;
+    skos:prefLabel "ensembling" ;
+    :category :parameter ;
+    :has_datatype :boolean .
+:ensembling_evalml a :Configuration_item ;
+    skos:prefLabel "ensembling evalml" ;
+    :category :parameter ;
+    skos:broader :ensembling ;
+    :has_datatype :boolean .
+:max_batches a :Configuration_item ;
+    skos:prefLabel "max batches" ;
+    :category :parameter ;
+    :has_datatype :integer .
+:max_batches_evalml a :Configuration_item ;
+    skos:prefLabel "max batches evalml" ;
+    :category :parameter ;
+    skos:broader :max_batches ;
+    :has_datatype :integer .
+:allow_long_running_models a :Configuration_item ;
+    skos:prefLabel "allow long running models" ;
+    :category :parameter ;
+    :has_datatype :boolean .
+:allow_long_running_models_evalml a :Configuration_item ;
+    skos:prefLabel "allow long running models evalml" ;
+    :category :parameter ;
+    skos:broader :allow_long_running_models ;
+    :has_datatype :boolean .
+:pipelines_per_batch a :Configuration_item ;
+    skos:prefLabel "pipelines per batch" ;
+    :category :parameter ;
+    :has_datatype :integer .
+:pipelines_per_batch_evalml a :Configuration_item ;
+    skos:prefLabel "pipelines per batch evalml" ;
+    :category :parameter ;
+    skos:broader :pipelines_per_batch ;
+    :has_datatype :integer .
+:exclude_featurizers a :Configuration_item ;
+    skos:prefLabel "exclude featurizers" ;
+    :category :parameter ;
+    :has_datatype :list .
+:exclude_featurizers_evalml a :Configuration_item ;
+    skos:prefLabel "exclude featurizers evalml" ;
+    :category :parameter ;
+    skos:broader :exclude_featurizers ;
+    :has_datatype :list ;
+    :parameter_value :datetime_featurizer , :email_featurizer , :url_featurizer , :natural_language_featurizer , :time_series_featurizer .
 
 
 # Enum
@@ -1892,849 +3532,54 @@
     :category :tuner_approach .
 :broader_inherited a :Enum ;
     skos:prefLabel "broader inherited" ;
-    :category :inheritance_type .
-
-
-# Configuration_item
-
-:tabular_classification_in_autosklearn a :Configuration_item ;
-    skos:prefLabel "tabular classification in Autosklearn" ;
-    :category :task_configuration ;
-    :automl_solution :autosklearn ;
-    :ml_task :tabular_classification ;
-    :parameter_value :time_limit_autosklearn , :time_limit_per_run_autosklearn , :ensemble_size_autosklearn , :ensemble_nbest_autosklearn , :use_approach_autosklearn_classification , :metric_autosklearn_tabular_classification , :exclude_preprocessor_autosklearn .
-:tabular_regression_in_autosklearn a :Configuration_item ;
-    skos:prefLabel "tabular regression in Autosklearn" ;
-    :category :task_configuration ;
-    :automl_solution :autosklearn ;
-    :ml_task :tabular_regression ;
-    :parameter_value :metric_autosklearn_tabular_regression , :exclude_preprocessor_autosklearn .
-:tabular_classification_in_autokeras a :Configuration_item ;
-    skos:prefLabel "tabular classification in AutoKeras" ;
-    :category :task_configuration ;
-    :automl_solution :autokeras ;
-    :ml_task :tabular_classification ;
-    :parameter_value :metric_autokeras_tabular_classification , :loss_autokeras_tabular_classification , :max_trials_autokeras_tabular_classification , :tuner_autokeras_tabular_classification , :max_model_size_autokeras_tabular_classification .
-:tabular_regression_in_autokeras a :Configuration_item ;
-    skos:prefLabel "tabular regression in AutoKeras" ;
-    :category :task_configuration ;
-    :automl_solution :autokeras ;
-    :ml_task :tabular_regression ;
-    :parameter_value :metric_autokeras_tabular_regression , :loss_autokeras_tabular_regression , :max_trials_autokeras , :tuner_autokeras_tabular_regression , :max_model_size_autokeras .
-:time_series_forecasting_in_autokeras a :Configuration_item ;
-    skos:prefLabel "time series forecasting in AutoKeras" ;
-    :category :task_configuration ;
-    :automl_solution :autokeras ;
-    :ml_task :time_series_forecasting ;
-    :parameter_value :metric_autokeras_time_series_forecasting , :loss_autokeras_time_series_forecasting , :max_trials_autokeras , :tuner_autokeras_time_series_forecasting , :max_model_size_autokeras , :forecasting_horizon_autokeras_time_series_forcasting , :lookback_autokeras_time_series_forecasting .
-:image_classification_in_autokeras a :Configuration_item ;
-    skos:prefLabel "image classification in AutoKeras" ;
-    :category :task_configuration ;
-    :automl_solution :autokeras ;
-    :ml_task :image_classification ;
-    :parameter_value :metric_autokeras_image_classification , :loss_autokeras_image_classification , :max_trials_autokeras , :tuner_autokeras_image_classification , :max_model_size_autokeras , :gap_autokeras_time_series_forecasting .
-:image_regression_in_autokeras a :Configuration_item ;
-    skos:prefLabel "image regression in AutoKeras" ;
-    :category :task_configuration ;
-    :automl_solution :autokeras ;
-    :ml_task :image_regression ;
-    :parameter_value :metric_autokeras_image_regression , :loss_autokeras_image_regression , :max_trials_autokeras , :tuner_autokeras_image_regression , :max_model_size_autokeras .
-:text_classification_in_autokeras a :Configuration_item ;
-    skos:prefLabel "text classification in AutoKeras" ;
-    :category :task_configuration ;
-    :automl_solution :autokeras ;
-    :ml_task :text_classification ;
-    :parameter_value :metric_autokeras_text_classification , :loss_autokeras_text_classification , :max_trials_autokeras , :tuner_autokeras_text_classification , :max_model_size_autokeras .
-:text_regression_in_autokeras a :Configuration_item ;
-    skos:prefLabel "text regression in AutoKeras" ;
-    :category :task_configuration ;
-    :automl_solution :autokeras ;
-    :ml_task :text_regression ;
-    :parameter_value :metric_autokeras_text_regression , :loss_autokeras_text_regression , :max_trials_autokeras , :tuner_autokeras_text_regression , :max_model_size_autokeras .
-:tabular_classification_in_flaml a :Configuration_item ;
-    skos:prefLabel "tabular classification in FLAML" ;
-    :category :task_configuration ;
-    :automl_solution :flaml ;
-    :ml_task :tabular_classification ;
-    :parameter_value :use_approach_flaml_tabular_classification , :metric_flaml_tabular_classification .
-:tabular_regression_in_flaml a :Configuration_item ;
-    skos:prefLabel "tabular regression in FLAML" ;
-    :category :task_configuration ;
-    :automl_solution :flaml ;
-    :ml_task :tabular_regression ;
-    :parameter_value :use_approach_flaml_tabular_regression , :metric_flaml_tabular_regression .
-:ranking_in_flaml a :Configuration_item ;
-    skos:prefLabel "ranking in FLAML" ;
-    :category :task_configuration ;
-    :automl_solution :flaml ;
-    :ml_task :ranking ;
-    :parameter_value :use_approach_flaml_ranking , :metric_flaml_ranking .
-:time_series_analysis_in_flaml a :Configuration_item ;
-    skos:prefLabel "time series analysis in FLAML" ;
-    :category :task_configuration ;
-    :automl_solution :flaml ;
-    :ml_task :time_series_forecasting ;
-    :parameter_value :use_approach_flaml_time_series_analysis , :metric_flaml_time_series_analysis , :forecasting_horizon_flaml_time_series_forcasting .
-:text_classification_in_flaml a :Configuration_item ;
-    skos:prefLabel "text classification in FLAML" ;
-    :category :task_configuration ;
-    :automl_solution :flaml ;
-    :ml_task :text_classification ;
-    :parameter_value :use_approach_flaml_text_classification , :metric_flaml_text_classification .
-:text_regression_in_flaml a :Configuration_item ;
-    skos:prefLabel "text regression in FLAML" ;
-    :category :task_configuration ;
-    :automl_solution :flaml ;
-    :ml_task :text_regression ;
-    :parameter_value :use_approach_flaml_text_regression , :metric_flaml_text_regression .
-:tabular_classification_in_auto_pytorch a :Configuration_item ;
-    skos:prefLabel "tabular classification in Auto-PyTorch" ;
-    :category :task_configuration ;
-    :automl_solution :autopytorch ;
-    :ml_task :tabular_classification ;
-    :parameter_value :use_approach_auto_pytorch_classification , :metric_autopytorch_tabular_classification .
-:tabular_regression_in_auto_pytorch a :Configuration_item ;
-    skos:prefLabel "tabular regression in Auto-PyTorch" ;
-    :category :task_configuration ;
-    :automl_solution :autopytorch ;
-    :ml_task :tabular_regression ;
-    :parameter_value :use_approach_auto_pytorch_regression , :metric_autopytorch_tabular_regression .
-:time_series_forecasting_in_auto_pytorch a :Configuration_item ;
-    skos:prefLabel "time series forecasting in Auto-PyTorch" ;
-    :category :task_configuration ;
-    :automl_solution :autopytorch ;
-    :ml_task :time_series_forecasting ;
-    :parameter_value :metric_autopytorch_time_series_forecasting , :forecasting_horizon_autopytorch_time_series_forcasting .
-:tabular_classification_in_autogluon a :Configuration_item ;
-    skos:prefLabel "tabular classification in AutoGluon" ;
-    :category :task_configuration ;
-    :automl_solution :autogluon ;
-    :ml_task :tabular_classification ;
-    :parameter_value :use_approach_autogluon_classification , :metric_autogluon_tabular_classification .
-:tabular_regression_in_autogluon a :Configuration_item ;
-    skos:prefLabel "tabular regression in AutoGluon" ;
-    :category :task_configuration ;
-    :automl_solution :autogluon ;
-    :ml_task :tabular_regression ;
-    :parameter_value :use_approach_autogluon_regression , :metric_autogluon_tabular_regression .
-:time_series_forecasting_in_autogluon a :Configuration_item ;
-    skos:prefLabel "time series forecasting in AutoGluon" ;
-    :category :task_configuration ;
-    :automl_solution :autogluon ;
-    :ml_task :time_series_forecasting ;
-    :parameter_value :metric_autogluon_time_series_forecasting , :forecasting_horizon_autogluon_time_series_forcasting .
-:image_classification_in_autogluon a :Configuration_item ;
-    skos:prefLabel "image classification in AutoGluon" ;
-    :category :task_configuration ;
-    :automl_solution :autogluon ;
-    :ml_task :image_classification ;
-    :parameter_value :use_approach_autogluon_image_classification , :metric_autogluon_image_classification .
-:object_detection_in_autogluon a :Configuration_item ;
-    skos:prefLabel "object detection in AutoGluon" ;
-    :category :task_configuration ;
-    :automl_solution :autogluon ;
-    :ml_task :object_detection ;
-    :parameter_value :use_approach_autogluon_object_detection .
-:text_classification_in_autogluon a :Configuration_item ;
-    skos:prefLabel "text classification in AutoGluon" ;
-    :category :task_configuration ;
-    :automl_solution :autogluon ;
-    :ml_task :text_classification ;
-    :parameter_value :use_approach_autogluon_text_classification , :metric_autogluon_text_classification .
-:text_regression_in_autogluon a :Configuration_item ;
-    skos:prefLabel "text regression in AutoGluon" ;
-    :category :task_configuration ;
-    :automl_solution :autogluon ;
-    :ml_task :text_regression ;
-    :parameter_value :use_approach_autogluon_text_regression , :metric_autogluon_text_regression .
-:tabular_classification_in_evalml a :Configuration_item ;
-    skos:prefLabel "tabular classification in EvalML" ;
-    :category :task_configuration ;
-    :automl_solution :evalml ;
-    :ml_task :tabular_classification ;
-    :parameter_value :use_approach_evalml_tabular_classification , :metric_evalml_tabular_classification , :tuner_class_evalml .
-:tabular_regression_in_evalml a :Configuration_item ;
-    skos:prefLabel "tabular regression in EvalML" ;
-    :category :task_configuration ;
-    :automl_solution :evalml ;
-    :ml_task :tabular_regression ;
-    :parameter_value :use_approach_evalml_tabular_regression , :metric_evalml_tabular_regression , :tuner_class_evalml .
-:time_series_regression_in_evalml a :Configuration_item ;
-    skos:prefLabel "time series regression in EvalML" ;
-    :category :task_configuration ;
-    :automl_solution :evalml ;
-    :ml_task :time_series_forecasting ;
-    :parameter_value :use_approach_evalml_time_series_regression , :metric_evalml_time_series_regression , :tuner_class_evalml , :forecasting_horizon_evalml_time_series_forcasting , :lookback_evalml_time_series_forecasting , :gap_evalml_time_series_forecasting .
-:time_series_classification_in_evalml a :Configuration_item ;
-    skos:prefLabel "time series classification in EvalML" ;
-    :category :task_configuration ;
-    :automl_solution :evalml ;
-    :ml_task :time_series_classification ;
-    :parameter_value :use_approach_evalml_time_series_classification , :metric_evalml_classification , :tuner_class_evalml .
-:text_classification_in_evalml a :Configuration_item ;
-    skos:prefLabel "text classification in EvalML" ;
-    :category :task_configuration ;
-    :automl_solution :evalml ;
-    :ml_task :text_classification ;
-    :parameter_value :use_approach_evalml_tabular_classification , :metric_evalml_text_classification , :tuner_class_evalml .
-:text_regression_in_evalml a :Configuration_item ;
-    skos:prefLabel "text regression in EvalML" ;
-    :category :task_configuration ;
-    :automl_solution :evalml ;
-    :ml_task :text_regression ;
-    :parameter_value :use_approach_evalml_tabular_regression , :metric_evalml_text_regression , :tuner_class_evalml .
-:tabular_classification_mljar a :Configuration_item ;
-    skos:prefLabel "tabular classification MLJAR" ;
-    :category :task_configuration ;
-    :automl_solution :mljar ;
-    :ml_task :tabular_classification ;
-    :parameter_value :metric_mljar_tabular_classification .
-:tabular_regression_mljar a :Configuration_item ;
-    skos:prefLabel "tabular regression MLJAR" ;
-    :category :task_configuration ;
-    :automl_solution :mljar ;
-    :ml_task :tabular_regression ;
-    :parameter_value :metric_mljar_tabular_regression .
-:tabular_classification_pycaret a :Configuration_item ;
-    skos:prefLabel "tabular classification PyCaret" ;
-    :category :task_configuration ;
-    :automl_solution :pycaret ;
-    :ml_task :tabular_classification ;
-    :parameter_value :metric_pycaret_tabular_classification .
-:tabular_regression_pycaret a :Configuration_item ;
-    skos:prefLabel "tabular regression PyCaret" ;
-    :category :task_configuration ;
-    :automl_solution :pycaret ;
-    :ml_task :tabular_regression ;
-    :parameter_value :metric_pycaret_tabular_regression .
-:time_series_forecasting__pycaret a :Configuration_item ;
-    skos:prefLabel "time series forecasting  PyCaret" ;
-    :category :task_configuration ;
-    :automl_solution :pycaret ;
-    :ml_task :time_series_forecasting ;
-    :parameter_value :metric_pycaret_time_series_forecasting , :forecasting_horizon_pycaret_time_series_forcasting .
-:tabular_classification_tpot a :Configuration_item ;
-    skos:prefLabel "tabular classification TPOT" ;
-    :category :task_configuration ;
-    :automl_solution :tpot ;
-    :ml_task :tabular_classification ;
-    :parameter_value :metric_tpot_tabular_classification .
-:tabular_regression_tpot a :Configuration_item ;
-    skos:prefLabel "tabular regression TPOT" ;
-    :category :task_configuration ;
-    :automl_solution :tpot ;
-    :ml_task :tabular_regression ;
-    :parameter_value :metric_tpot_tabular_regression .
-:tabular_classification_in_autocve a :Configuration_item ;
-    skos:prefLabel "tabular classification in AutoCVE" ;
-    :category :task_configuration ;
-    :automl_solution :autocve ;
-    :ml_task :tabular_classification ;
-    :parameter_value :use_approach_autocve_classification , :metric_autocve_classification .
-:time_series_classification_in_mcfly a :Configuration_item ;
-    skos:prefLabel "time series classification in mcfly" ;
-    :category :task_configuration ;
-    :automl_solution :mcfly ;
-    :ml_task :time_series_classification ;
-    :parameter_value :use_approach_mcfly_time_series_classification , :metric_mcfly_time_series_classification .
-:ensemble_nbest a :Configuration_item ;
-    skos:prefLabel "ensemble_nbest" ;
-    :category :parameter ;
-    :has_datatype :integer .
-:ensemble_nbest_autosklearn a :Configuration_item ;
-    skos:prefLabel "ensemble nbest autosklearn" ;
-    :category :parameter ;
-    skos:broader :ensemble_nbest ;
-    :has_datatype :integer .
-:ensemble_size a :Configuration_item ;
-    skos:prefLabel "ensemble size" ;
-    :category :parameter ;
-    :has_datatype :integer .
-:ensemble_size_autosklearn a :Configuration_item ;
-    skos:prefLabel "ensemble size autosklearn" ;
-    :category :parameter ;
-    skos:broader :ensemble_size ;
-    :has_datatype :integer .
-:use_approach a :Configuration_item ;
-    skos:prefLabel "use approach" ;
-    :category :parameter .
-:use_approach_autosklearn_classification a :Configuration_item ;
-    skos:prefLabel "use approach Autosklearn classification" ;
-    :category :parameter ;
-    skos:broader :use_approach ;
-    :has_datatype :list ;
-    :parameter_value :adaboost , :decision_tree , :extra_tree , :gradient_boosting_tree , :k_nearest_neighbor , :linear_svm , :multilayer_perceptron , :random_forest , :gaussian_naives_bayes .
-:use_approach_autosklearn_regression a :Configuration_item ;
-    skos:prefLabel "use approach Autosklearn regression" ;
-    :category :parameter ;
-    skos:broader :use_approach ;
-    :has_datatype :list ;
-    :parameter_value :adaboost , :bayesian_linear_regression , :decision_tree , :extra_tree , :gaussian_process , :gradient_boosting_tree , :k_nearest_neighbor , :linear_svm , :multilayer_perceptron , :random_forest .
-:use_approach_flaml_tabular_classification a :Configuration_item ;
-    skos:prefLabel "use approach FLAML tabular classification" ;
-    :category :parameter ;
-    skos:broader :use_approach ;
-    :has_datatype :list ;
-    :parameter_value :light_gradient_boosting_machine , :xgboost , :random_forest , :extra_tree , :logistic_regression , :catboost , :k_nearest_neighbor .
-:use_approach_flaml_tabular_regression a :Configuration_item ;
-    skos:prefLabel "use approach FLAML tabular regression" ;
-    :category :parameter ;
-    skos:broader :use_approach ;
-    :has_datatype :list ;
-    :parameter_value :light_gradient_boosting_machine , :xgboost , :random_forest , :extra_tree , :logistic_regression , :catboost , :k_nearest_neighbor .
-:use_approach_flaml_time_series_analysis a :Configuration_item ;
-    skos:prefLabel "use approach FLAML time series analysis" ;
-    :category :parameter ;
-    skos:broader :use_approach ;
-    :has_datatype :list ;
-    :parameter_value :light_gradient_boosting_machine , :xgboost , :random_forest , :extra_tree , :prophet , :auto_regressive_integrated_moving_average , :seasonal_autoregressive_integrated_moving_average_exogenous .
-:use_approach_flaml_ranking a :Configuration_item ;
-    skos:prefLabel "use approach FLAML ranking" ;
-    :category :parameter ;
-    skos:broader :use_approach ;
-    :parameter_value :light_gradient_boosting_machine , :xgboost .
-:use_approach_flaml_text_classification a :Configuration_item ;
-    skos:prefLabel "use approach FLAML text classification" ;
-    :category :parameter ;
-    skos:broader :use_approach ;
-    :has_datatype :list ;
-    :parameter_value :transformer .
-:use_approach_flaml_text_regression a :Configuration_item ;
-    skos:prefLabel "use approach FLAML text regression" ;
-    :category :parameter ;
-    skos:broader :use_approach ;
-    :has_datatype :list ;
-    :parameter_value :transformer .
-:use_approach_auto_pytorch_classification a :Configuration_item ;
-    skos:prefLabel "use approach Auto-Pytorch classification" ;
-    :category :parameter ;
-    skos:broader :use_approach ;
-    :has_datatype :list ;
-    :parameter_value :multilayer_perceptron .
-:use_approach_auto_pytorch_regression a :Configuration_item ;
-    skos:prefLabel "use approach Auto-Pytorch regression" ;
-    :category :parameter ;
-    skos:broader :use_approach ;
-    :has_datatype :list ;
-    :parameter_value :multilayer_perceptron .
-:use_approach_autocve_classification a :Configuration_item ;
-    skos:prefLabel "use approach AutoCVE classification" ;
-    :category :parameter ;
-    skos:broader :use_approach ;
-    :has_datatype :list ;
-    :parameter_value :gradient_boosting_tree , :gaussian_naives_bayes , :decision_tree , :extra_tree , :random_forest , :k_nearest_neighbor , :linear_svm , :logistic_regression , :stochastic_gradient_descent , :multilayer_perceptron .
-:use_approach_autogluon_classification a :Configuration_item ;
-    skos:prefLabel "use approach AutoGluon classification" ;
-    :category :parameter ;
-    skos:broader :use_approach ;
-    :has_datatype :list ;
-    :parameter_value :gradient_boosting_tree , :multilayer_perceptron , :k_nearest_neighbor , :random_forest , :extra_tree , :logistic_regression .
-:use_approach_autogluon_regression a :Configuration_item ;
-    skos:prefLabel "use approach AutoGluon regression" ;
-    :category :parameter ;
-    skos:broader :use_approach ;
-    :has_datatype :list ;
-    :parameter_value :gradient_boosting_tree , :multilayer_perceptron , :k_nearest_neighbor , :ridge_regression , :random_forest , :extra_tree .
-:use_approach_autogluon_image_classification a :Configuration_item ;
-    skos:prefLabel "use approach AutoGluon image classification" ;
-    :category :parameter ;
-    skos:broader :use_approach ;
-    :has_datatype :list ;
-    :parameter_value :multilayer_perceptron .
-:use_approach_autogluon_object_detection a :Configuration_item ;
-    skos:prefLabel "use approach AutoGluon object detection" ;
-    :category :parameter ;
-    skos:broader :use_approach ;
-    :has_datatype :list ;
-    :parameter_value :multilayer_perceptron .
-:use_approach_autogluon_text_classification a :Configuration_item ;
-    skos:prefLabel "use approach AutoGluon text classification" ;
-    :category :parameter ;
-    skos:broader :use_approach ;
-    :has_datatype :list ;
-    :parameter_value :multilayer_perceptron .
-:use_approach_autogluon_text_regression a :Configuration_item ;
-    skos:prefLabel "use approach AutoGluon text regression" ;
-    :category :parameter ;
-    skos:broader :use_approach ;
-    :has_datatype :list ;
-    :parameter_value :multilayer_perceptron .
-:use_approch_mcfly_time_series_classification a :Configuration_item ;
-    skos:prefLabel "use approch mcfly time series classification" ;
-    :category :parameter ;
-    skos:broader :use_approach ;
-    :has_datatype :list ;
-    :parameter_value :inception_time , :residual_neural_network , :deep_convolutional_lstm , :convolutional_neural_network .
-:use_approach_evalml_tabular_classification a :Configuration_item ;
-    skos:prefLabel "use approach EvalML tabular classification" ;
-    :category :parameter ;
-    skos:broader :use_approach ;
-    :has_datatype :list ;
-    :parameter_value :catboost , :decision_tree , :extra_tree , :light_gradient_boosting_machine , :linear_regression , :random_forest , :xgboost .
-:use_approach_evalml_tabular_regression a :Configuration_item ;
-    skos:prefLabel "use approach EvalML tabular regression" ;
-    :category :parameter ;
-    skos:broader :use_approach ;
-    :has_datatype :list ;
-    :parameter_value :catboost , :decision_tree , :extra_tree , :light_gradient_boosting_machine , :linear_regression , :random_forest , :xgboost .
-:use_approach_evalml_time_series_regression a :Configuration_item ;
-    skos:prefLabel "use approach EvalML time series regression" ;
-    :category :parameter ;
-    skos:broader :use_approach ;
-    :has_datatype :list ;
-    :parameter_value :auto_regressive_integrated_moving_average , :catboost , :decision_tree , :exponential_smoothing , :extra_tree , :k_nearest_neighbor , :linear_regression , :random_forest , :xgboost .
-:use_approach_evalml_time_series_classification a :Configuration_item ;
-    skos:prefLabel "use approach EvalML time series classification" ;
-    :category :parameter ;
-    skos:broader :use_approach ;
-    :has_datatype :list ;
-    :parameter_value :caboost , :decision_tree , :extra_tree , :k_nearest_neighbor , :linear_regression , :random_forest , :xgboost .
-:exclude_preprocessor a :Configuration_item ;
-    skos:prefLabel "exclude preprocessor" ;
-    :category :parameter .
-:exclude_preprocessor_autosklearn a :Configuration_item ;
-    skos:prefLabel "exclude preprocessor Autosklearn" ;
-    :category :parameter ;
-    skos:broader :exclude_preprocessor ;
-    :has_datatype :list ;
-    :parameter_value :kernel_principal_component_analysis , :radial_basis_function_kernel , :nystroem_kernel_approximation .
-:configuration_via_metalearning a :Configuration_item ;
-    skos:prefLabel "configuration via metalearning" ;
-    :category :parameter ;
-    :has_datatype :integer .
-:metric a :Configuration_item ;
-    skos:prefLabel "metric" ;
-    :category :parameter .
-:metric_autosklearn_tabular_classification a :Configuration_item ;
-    skos:prefLabel "metric Autosklearn tabular classification" ;
-    :category :parameter ;
-    skos:broader :metric ;
-    :has_datatype :single_value ;
-    :parameter_value :accuracy , :balanced_accuracy , :f_measure , :f1_macro , :f1_micro , :f1_samples , :f1_weighted , :receiver_operating_characteristic_curve , :precision , :precision_macro , :precision_micro , :precision_samples , :precision_weighted , :average_precision , :recall , :recall_macro , :recall_micro , :recall_samples , :recall_weighted , :log_loss .
-:metric_autokeras_tabular_classification a :Configuration_item ;
-    skos:prefLabel "metric autokeras tabular classification" ;
-    :category :parameter ;
-    skos:broader :metric ;
-    :has_datatype :single_value ;
-    :parameter_value :accuracy , :binary_accuracy , :categorical_accuracy , :sparse_categorical_accuracy , :top_k_categorical_accuracy , :sparse_top_k_categorical_accuracy , :binary_cross_entropy , :categorical_cross_entropy , :poisson , :area_under_roc_curve , :precision , :recall , :true_positives , :true_negatives , :false_positives , :false_negatives , :hinge , :squared_hinge , :categorical_hinge .
-:metric_flaml_tabular_classification a :Configuration_item ;
-    skos:prefLabel "metric FLAML tabular classification" ;
-    :category :parameter ;
-    skos:broader :metric ;
-    :has_datatype :single_value ;
-    :parameter_value :accuracy , :receiver_operating_characteristic_curve , :receiver_operating_characteristic_curve_one_vs_rest , :log_loss , :receiver_operating_characteristic_curve_one_vs_one , :average_precision_score , :f_measure , :f_measure_micro , :f_measure_macro , :area_under_roc_curve_weighted , :receiver_operating_characteristic_curve_one_vs_rest_weighted , :receiver_operating_characteristic_curve_one_vs_one_weighted .
-:metric_autosklearn_tabular_regression a :Configuration_item ;
-    skos:prefLabel "metric Autosklearn tabular regression" ;
-    :category :parameter ;
-    skos:broader :metric ;
-    :has_datatype :single_value ;
-    :parameter_value :r2 , :mean_squared_error , :mean_absolute_error , :median_absolute_error .
-:metric_autokeras_tabular_regression a :Configuration_item ;
-    skos:prefLabel "metric autokeras tabular regression" ;
-    :category :parameter ;
-    skos:broader :metric ;
-    :has_datatype :single_value ;
-    :parameter_value :mean_squared_error , :root_mean_squared_error , :mean_absolute_error , :mean_absolute_percentage_error , :mean_squared_log_error , :cosine_similarity , :log_cosh_error .
-:metric_flaml_tabular_regression a :Configuration_item ;
-    skos:prefLabel "metric FLAML tabular regression" ;
-    :category :parameter ;
-    skos:broader :metric ;
-    :has_datatype :single_value ;
-    :parameter_value :mean_squared_error , :rooted_mean_squared_error , :mean_absolute_error , :receiver_operating_characteristic_curve_one_vs_rest , :receiver_operating_characteristic_curve_one_vs_one , :receiver_operating_characteristic_curve , :mean_absolute_percentage_error , :r2 , :area_under_roc_curve_weighted , :receiver_operating_characteristic_curve_one_vs_rest_weighted , :receiver_operating_characteristic_curve_one_vs_one_weighted .
-:metric_flaml_text_classification a :Configuration_item ;
-    skos:prefLabel "metric FLAML text classification" ;
-    :category :parameter ;
-    skos:broader :metric ;
-    :has_datatype :single_value ;
-    :parameter_value :accuracy , :receiver_operating_characteristic_curve , :receiver_operating_characteristic_curve_one_vs_rest , :log_loss , :receiver_operating_characteristic_curve_one_vs_one , :average_precision_score , :f_measure , :f_measure_micro , :f_measure_macro , :area_under_roc_curve_weighted , :receiver_operating_characteristic_curve_one_vs_rest_weighted , :receiver_operating_characteristic_curve_one_vs_one_weighted .
-:metric_flaml_text_regression a :Configuration_item ;
-    skos:prefLabel "metric FLAML text regression" ;
-    :category :parameter ;
-    skos:broader :metric ;
-    :has_datatype :single_value ;
-    :parameter_value :mean_squared_error , :rooted_mean_squared_error , :mean_absolute_error , :receiver_operating_characteristic_curve_one_vs_rest , :receiver_operating_characteristic_curve_one_vs_one , :receiver_operating_characteristic_curve , :mean_absolute_percentage_error , :r2 , :area_under_roc_curve_weighted , :receiver_operating_characteristic_curve_one_vs_rest_weighted , :receiver_operating_characteristic_curve_one_vs_one_weighted .
-:metric_flaml_ranking a :Configuration_item ;
-    skos:prefLabel "metric FLAML ranking" ;
-    :category :parameter ;
-    skos:broader :metric ;
-    :has_datatype :single_value ;
-    :parameter_value :normalized_discounted_cumulative_gain .
-:metric_flaml_time_series_analysis a :Configuration_item ;
-    skos:prefLabel "metric FLAML time series analysis" ;
-    :category :parameter ;
-    skos:broader :metric ;
-    :has_datatype :single_value ;
-    :parameter_value :mean_absolute_percentage_error .
-:metric_autogluon_tabular_regression a :Configuration_item ;
-    skos:prefLabel "metric AutoGluon tabular regression" ;
-    :category :parameter ;
-    skos:broader :metric ;
-    :has_datatype :single_value ;
-    :parameter_value :rooted_mean_squared_error , :mean_squared_error , :mean_absolute_error , :median_absolute_error , :mean_absolute_percentage_error , :r2 .
-:metric_autogluon_tabular_classification a :Configuration_item ;
-    skos:prefLabel "metric AutoGluon tabular classification" ;
-    :category :parameter ;
-    skos:broader :metric ;
-    :has_datatype :single_value ;
-    :parameter_value :accuracy , :balanced_accuracy , :f_measure , :f_measure_macro , :f_measure_micro , :f_measure_weighted , :receiver_operating_characteristic_curve , :receiver_operating_characteristic_curve_one_vs_one , :average_precision_score , :precision , :precision_macro , :precision_micro , :precision_weighted , :recall , :recall_macro , :recall_micro , :recall_weighted , :log_loss , :pac_score .
-:metric_autogluon_text_classification a :Configuration_item ;
-    skos:prefLabel "metric AutoGluon text classification" ;
-    :category :parameter ;
-    skos:broader :metric ;
-    :has_datatype :single_value ;
-    :parameter_value :accuracy , :balanced_accuracy , :f_measure , :f_measure_macro , :f_measure_micro , :f_measure_weighted , :receiver_operating_characteristic_curve , :receiver_operating_characteristic_curve_one_vs_one , :average_precision_score , :precision , :precision_macro , :precision_micro , :precision_weighted , :recall , :recall_macro , :recall_micro , :recall_weighted , :log_loss , :pac_score .
-:metric_autogluon_text_regression a :Configuration_item ;
-    skos:prefLabel "metric AutoGluon text regression" ;
-    :category :parameter ;
-    skos:broader :metric ;
-    :has_datatype :single_value ;
-    :parameter_value :rooted_mean_squared_error , :mean_squared_error , :mean_absolute_error , :median_absolute_error , :r2 , :spearman_rank_correlation_coefficient , :pearson_correlation_coefficient .
-:metric_autogluon_image_classification a :Configuration_item ;
-    skos:prefLabel "metric AutoGluon image classification" ;
-    :category :parameter ;
-    skos:broader :metric ;
-    :has_datatype :single_value ;
-    :parameter_value :accuracy .
-:metric_autogluon_time_series_forecasting a :Configuration_item ;
-    skos:prefLabel "metric AutoGluon time series forecasting" ;
-    :category :parameter ;
-    skos:broader :metric ;
-    :has_datatype :single_value ;
-    :parameter_value :mean_absolute_percentage_error , :symmetric_mean_absolute_percentage_error , :mean_absolute_scaled_error , :mean_squared_error , :rooted_mean_squared_error .
-:metric_autopytorch_tabular_classification a :Configuration_item ;
-    skos:prefLabel "metric AutoPytorch tabular classification" ;
-    :category :parameter ;
-    skos:broader :metric ;
-    :has_datatype :single_value ;
-    :parameter_value :accuracy , :balanced_accuracy , :f_measure , :receiver_operating_characteristic_curve , :average_precision_score , :precision , :recall , :log_loss .
-:metric_autopytorch_time_series_forecasting a :Configuration_item ;
-    skos:prefLabel "metric AutoPytorch time series forecasting" ;
-    :category :parameter ;
-    skos:broader :metric ;
-    :has_datatype :single_value ;
-    :parameter_value :mean_absolute_scaled_error , :median_absolute_scaled_error , :mean_absolute_error , :median_absolute_error , :mean_absolute_percentage_error , :median_absolute_percentage_error , :mean_squared_error , :median_squared_error .
-:metric_autopytorch_tabular_regression a :Configuration_item ;
-    skos:prefLabel "metric AutoPytorch tabular regression" ;
-    :category :parameter ;
-    skos:broader :metric ;
-    :has_datatype :single_value ;
-    :parameter_value :mean_absolute_error , :mean_squared_error , :rooted_mean_squared_error , :mean_squared_log_error , :median_absolute_error , :r2 .
-:metric_autocve_classification a :Configuration_item ;
-    skos:prefLabel "metric AutoCVE classification" ;
-    :category :parameter ;
-    skos:broader :metric ;
-    :has_datatype :single_value ;
-    :parameter_value :accuracy .
-:metric_mcfly_time_series_classification a :Configuration_item ;
-    skos:prefLabel "metric mcfly time series classification" ;
-    :category :parameter ;
-    skos:broader :metric ;
-    :has_datatype :list ;
-    :parameter_value :accuracy , :balanced_accuracy , :f_measure , :f_measure_macro , :f_measure_micro , :f_measure_weighted , :f_measure_samples , :receiver_operating_characteristic_curve , :average_precision_score , :log_loss , :precision , :precision_macro , :precision_micro , :precision_weighted , :precision_samples , :recall , :recall_macro , :recall_micro , :recall_weighted , :recall_samples .
-:metric_autokeras_image_classification a :Configuration_item ;
-    skos:prefLabel "metric AutoKeras image classification" ;
-    :category :parameter ;
-    skos:broader :metric ;
-    :has_datatype :single_value ;
-    :parameter_value :accuracy , :binary_accuracy , :categorical_accuracy , :sparse_categorical_accuracy , :top_k_categorical_accuracy , :sparse_top_k_categorical_accuracy , :binary_cross_entropy , :categorical_cross_entropy , :poisson , :area_under_roc_curve , :precision , :recall , :true_positives , :true_negatives , :false_positives , :false_negatives , :hinge , :squared_hinge , :categorical_hinge .
-:metric_autokeras_text_classification a :Configuration_item ;
-    skos:prefLabel "metric AutoKeras text classification" ;
-    :category :parameter ;
-    skos:broader :metric ;
-    :has_datatype :single_value ;
-    :parameter_value :accuracy , :binary_accuracy , :categorical_accuracy , :sparse_categorical_accuracy , :top_k_categorical_accuracy , :sparse_top_k_categorical_accuracy , :binary_cross_entropy , :categorical_cross_entropy , :poisson , :area_under_roc_curve , :precision , :recall , :true_positives , :true_negatives , :false_positives , :false_negatives , :hinge , :squared_hinge , :categorical_hinge .
-:metric_autokeras_image_regression a :Configuration_item ;
-    skos:prefLabel "metric AutoKeras image regression" ;
-    :category :parameter ;
-    skos:broader :metric ;
-    :has_datatype :single_value ;
-    :parameter_value :mean_squared_error , :root_mean_squared_error , :mean_absolute_error , :mean_absolute_percentage_error , :mean_squared_log_error , :cosine_similarity , :log_cosh_error .
-:metric_autokeras_text_regression a :Configuration_item ;
-    skos:prefLabel "metric AutoKeras text regression" ;
-    :category :parameter ;
-    skos:broader :metric ;
-    :has_datatype :single_value ;
-    :parameter_value :mean_squared_error , :root_mean_squared_error , :mean_absolute_error , :mean_absolute_percentage_error , :mean_squared_log_error , :cosine_similarity , :log_cosh_error .
-:metric_autokeras_time_series_forecasting a :Configuration_item ;
-    skos:prefLabel "metric AutoKeras time series forecasting" ;
-    :category :parameter ;
-    skos:broader :metric ;
-    :has_datatype :single_value ;
-    :parameter_value :mean_squared_error , :root_mean_squared_error , :mean_absolute_error , :mean_absolute_percentage_error , :mean_squared_log_error , :cosine_similarity , :log_cosh_error .
-:metric_evalml_tabular_classification a :Configuration_item ;
-    skos:prefLabel "metric EvalML tabular classification" ;
-    :category :parameter ;
-    skos:broader :metric ;
-    :has_datatype :single_value ;
-    :parameter_value :accuracy , :balanced_accuracy , :f_measure , :f_measure_micro , :f_measure_macro , :f_measure_weighted , :precision , :precision_macro , :precision_micro , :precision_weighted , :recall , :recall_micro , :recall_macro , :recall_weighted , :area_under_roc_curve , :area_under_roc_curve_micro , :area_under_roc_curve_macro , :area_under_roc_curve_weighted , :gini , :log_loss , :matthews_correlation_coefficient .
-:metric_evalml_tabular_regression a :Configuration_item ;
-    skos:prefLabel "metric EvalML tabular regression" ;
-    :category :parameter ;
-    skos:broader :metric ;
-    :has_datatype :single_value ;
-    :parameter_value :rooted_mean_squared_error , :mean_squared_log_error , :rooted_mean_squared_log_error , :r2 , :mean_absolute_error , :mean_squared_error , :median_absolute_error , :max_error , :explained_variance .
-:metric_evalml_text_classification a :Configuration_item ;
-    skos:prefLabel "metric EvalML text classification" ;
-    :category :parameter ;
-    skos:broader :metric ;
-    :has_datatype :single_value ;
-    :parameter_value :accuracy , :balanced_accuracy , :f_measure , :f_measure_micro , :f_measure_macro , :f_measure_weighted , :precision , :precision_macro , :precision_micro , :precision_weighted , :recall , :recall_micro , :recall_macro , :recall_weighted , :area_under_roc_curve , :area_under_roc_curve_micro , :area_under_roc_curve_macro , :area_under_roc_curve_weighted , :gini , :log_loss , :matthews_correlation_coefficient .
-:metric_evalml_text_regression a :Configuration_item ;
-    skos:prefLabel "metric EvalML text regression" ;
-    :category :parameter ;
-    skos:broader :metric ;
-    :has_datatype :single_value ;
-    :parameter_value :rooted_mean_squared_error , :mean_squared_log_error , :rooted_mean_squared_log_error , :r2 , :mean_absolute_error , :mean_squared_error , :median_absolute_error , :max_error , :explained_variance .
-:metric_evalml_time_series_regression a :Configuration_item ;
-    skos:prefLabel "metric EvalML time series regression" ;
-    :category :parameter ;
-    skos:broader :metric ;
-    :has_datatype :single_value ;
-    :parameter_value :mean_absolute_percentage_error .
-:metric_mljar_tabular_classification a :Configuration_item ;
-    skos:prefLabel "metric MLJAR tabular classification" ;
-    :category :parameter ;
-    skos:broader :metric ;
-    :has_datatype :single_value ;
-    :parameter_value :log_loss , :area_under_roc_curve , :f_measure , :accuracy , :precision , :recall , :matthews_correlation_coefficient .
-:metric_mljar_tabular_regression a :Configuration_item ;
-    skos:prefLabel "metric MLJAR tabular regression" ;
-    :category :parameter ;
-    skos:broader :metric ;
-    :has_datatype :single_value ;
-    :parameter_value :mean_absolute_error , :mean_squared_error , :rooted_mean_squared_error , :r2 , :mean_absolute_percentage_error .
-:metric_pycaret_tabular_classification a :Configuration_item ;
-    skos:prefLabel "metric PyCaret tabular classification" ;
-    :category :parameter ;
-    skos:broader :metric ;
-    :has_datatype :single_value ;
-    :parameter_value :accuracy , :area_under_roc_curve , :recall , :precision , :f_measure , :cohens_kappa , :matthews_correlation_coefficient .
-:metric_pycaret_tabular_regression a :Configuration_item ;
-    skos:prefLabel "metric PyCaret tabular regression" ;
-    :category :parameter ;
-    skos:broader :metric ;
-    :has_datatype :single_value ;
-    :parameter_value :mean_absolute_error , :mean_squared_error , :rooted_mean_squared_error , :r2 , :rooted_mean_squared_log_error , :mean_absolute_percentage_error .
-:metric_pycaret_time_series_forecasting a :Configuration_item ;
-    skos:prefLabel "metric PyCaret time series forecasting" ;
-    :category :parameter ;
-    skos:broader :metric ;
-    :has_datatype :single_value ;
-    :parameter_value :mean_absolute_scaled_error , :rooted_mean_squared_scaled_error , :symmetric_mean_absolute_percentage_error , :coverage , :mean_absolute_error , :rooted_mean_squared_error , :mean_absolute_percentage_error , :r2 .
-:metric_tpot_tabular_classification a :Configuration_item ;
-    skos:prefLabel "metric TPOT tabular classification" ;
-    :category :parameter ;
-    skos:broader :metric ;
-    :has_datatype :single_value ;
-    :parameter_value :accuracy , :average_precision , :adjusted_rand_score , :balanced_accuracy , :f_measure , :f_measure_macro , :f_measure_micro , :f_measure_samples , :f_measure_weighted , :log_loss , :precision , :precision_macro , :precision_micro , :precision_samples , :precision_weighted , :recall , :recall_macro , :recall_micro , :recall_samples , :recall_weighted , :jaccard , :jaccard_macro , :jaccard_micro , :jaccard_samples , :jaccard_weighted , :receiver_operating_characteristic_curve , :receiver_operating_characteristic_curve_one_vs_rest , :receiver_operating_characteristic_curve_one_vs_one , :receiver_operating_characteristic_curve_one_vs_rest_weighted , :receiver_operating_characteristic_curve_one_vs_one_weighted .
-:metric_tpot_tabular_regression a :Configuration_item ;
-    skos:prefLabel "metric TPOT tabular regression" ;
-    :category :parameter ;
-    skos:broader :metric ;
-    :has_datatype :single_value ;
-    :parameter_value :median_absolute_error , :mean_absolute_error , :mean_squared_error , :r2 .
-:time_limit a :Configuration_item ;
-    skos:prefLabel "time limit" ;
-    :category :parameter ;
-    :has_datatype :integer .
-:time_limit_autosklearn a :Configuration_item ;
-    skos:prefLabel "time limit autosklearn" ;
-    :category :parameter ;
-    skos:broader :time_limit ;
-    :has_datatype :integer .
-:time_limit_per_run a :Configuration_item ;
-    skos:prefLabel "time limit per run" ;
-    :category :parameter ;
-    :has_datatype :integer .
-:time_limit_per_run_autosklearn a :Configuration_item ;
-    skos:prefLabel "time limit per run autosklearn" ;
-    :category :parameter ;
-    skos:broader :time_limit_per_run ;
-    :has_datatype :integer .
-:max_model_size a :Configuration_item ;
-    skos:prefLabel "max_model_size" ;
-    :category :parameter ;
-    :has_datatype :integer .
-:max_model_size_autokeras_tabular_classification a :Configuration_item ;
-    skos:prefLabel "max model size autokeras tabular classification" ;
-    :category :parameter ;
-    skos:broader :max_model_size ;
-    :has_datatype :integer .
-:epochs a :Configuration_item ;
-    skos:prefLabel "epochs" ;
-    :category :parameter ;
-    :has_datatype :integer .
-:max_trials a :Configuration_item ;
-    skos:prefLabel "max_trials" ;
-    :category :parameter ;
-    :has_datatype :integer .
-:max_trials_autokeras_tabular_classification a :Configuration_item ;
-    skos:prefLabel "max trials autokeras tabular classification" ;
-    :category :parameter ;
-    skos:broader :max_trials ;
-    :has_datatype :integer .
-:tuner a :Configuration_item ;
-    skos:prefLabel "tuner" ;
-    :category :parameter ;
-    :has_datatype :single_value .
-:tuner_autokeras_tabular_regression a :Configuration_item ;
-    skos:prefLabel "tuner autokeras tabular regression" ;
-    :category :parameter ;
-    skos:broader :tuner ;
-    :has_datatype :single_value ;
-    :parameter_value :greedy , :bayesian , :random , :hyperband .
-:tuner_autokeras_tabular_classification a :Configuration_item ;
-    skos:prefLabel "tuner autokeras tabular classification" ;
-    :category :parameter ;
-    skos:broader :tuner ;
-    :has_datatype :single_value ;
-    :parameter_value :greedy , :bayesian , :random , :hyperband .
-:tuner_autokeras_image_regression a :Configuration_item ;
-    skos:prefLabel "tuner autokeras image regression" ;
-    :category :parameter ;
-    skos:broader :tuner ;
-    :has_datatype :single_value ;
-    :parameter_value :greedy , :bayesian , :random , :hyperband .
-:tuner_autokeras_image_classification a :Configuration_item ;
-    skos:prefLabel "tuner autokeras image classification" ;
-    :category :parameter ;
-    skos:broader :tuner ;
-    :has_datatype :single_value ;
-    :parameter_value :greedy , :bayesian , :random , :hyperband .
-:tuner_autokeras_text_regression a :Configuration_item ;
-    skos:prefLabel "tuner autokeras text regression" ;
-    :category :parameter ;
-    skos:broader :tuner ;
-    :has_datatype :single_value ;
-    :parameter_value :greedy , :bayesian , :random , :hyperband .
-:tuner_autokeras_text_classification a :Configuration_item ;
-    skos:prefLabel "tuner autokeras text classification" ;
-    :category :parameter ;
-    skos:broader :tuner ;
-    :has_datatype :single_value ;
-    :parameter_value :greedy , :bayesian , :random , :hyperband .
-:tuner_autokeras_time_series_forecasting a :Configuration_item ;
-    skos:prefLabel "tuner autokeras time series forecasting" ;
-    :category :parameter ;
-    skos:broader :tuner ;
-    :has_datatype :single_value ;
-    :parameter_value :greedy , :bayesian , :random , :hyperband .
-:tuner_class_evalml a :Configuration_item ;
-    skos:prefLabel "tuner class evalml" ;
-    :category :parameter ;
-    skos:broader :tuner ;
-    :has_datatype :single_value ;
-    :parameter_value :random , :grid_search , :skopt .
-:loss a :Configuration_item ;
-    skos:prefLabel "loss" ;
-    :category :parameter .
-:loss_autokeras_tabular_regression a :Configuration_item ;
-    skos:prefLabel "loss autokeras tabular regression" ;
-    :category :parameter ;
-    skos:broader :loss ;
-    :has_datatype :single_value ;
-    :parameter_value :mean_squared_error .
-:loss_autokeras_tabular_classification a :Configuration_item ;
-    skos:prefLabel "loss autokeras tabular classification" ;
-    :category :parameter ;
-    skos:broader :loss ;
-    :has_datatype :single_value ;
-    :parameter_value :binary_cross_entropy , :categorical_cross_entropy .
-:loss_autokeras_image_regression a :Configuration_item ;
-    skos:prefLabel "loss autokeras image regression" ;
-    :category :parameter ;
-    skos:broader :loss ;
-    :has_datatype :single_value ;
-    :parameter_value :mean_squared_error .
-:loss_autokeras_image_classification a :Configuration_item ;
-    skos:prefLabel "loss autokeras image classification" ;
-    :category :parameter ;
-    skos:broader :loss ;
-    :has_datatype :single_value ;
-    :parameter_value :binary_cross_entropy , :categorical_cross_entropy .
-:loss_autokeras_text_regression a :Configuration_item ;
-    skos:prefLabel "loss autokeras text regression" ;
-    :category :parameter ;
-    skos:broader :loss ;
-    :has_datatype :single_value ;
-    :parameter_value :mean_squared_error .
-:loss_autokeras_text_classification a :Configuration_item ;
-    skos:prefLabel "loss autokeras text classification" ;
-    :category :parameter ;
-    skos:broader :loss ;
-    :has_datatype :single_value ;
-    :parameter_value :binary_cross_entropy , :categorical_cross_entropy .
-:loss_autokeras_time_series_forecasting a :Configuration_item ;
-    skos:prefLabel "loss autokeras time series forecasting" ;
-    :category :parameter ;
-    skos:broader :loss ;
-    :has_datatype :single_value ;
-    :parameter_value :mean_squared_error .
-:loss_mcfly_time_series_classification a :Configuration_item ;
-    skos:prefLabel "loss mcfly time series classification" ;
-    :category :parameter ;
-    skos:broader :loss ;
-    :has_datatype :single_value ;
-    :parameter_value :categorical_cross_entropy .
-:forecasting_horizon a :Configuration_item ;
-    skos:prefLabel "forecasting horizon" ;
-    :category :parameter .
-:forecasting_horizon_autokeras_time_series_forcasting a :Configuration_item ;
-    skos:prefLabel "forecasting horizon autokeras time series forcasting" ;
-    :category :parameter ;
-    skos:broader :forecasting_horizon ;
-    :has_datatype :integer .
-:forecasting_horizon_autogluon_time_series_forcasting a :Configuration_item ;
-    skos:prefLabel "forecasting horizon autogluon time series forcasting" ;
-    :category :parameter ;
-    skos:broader :forecasting_horizon ;
-    :has_datatype :integer .
-:forecasting_horizon_evalml_time_series_forcasting a :Configuration_item ;
-    skos:prefLabel "forecasting horizon evalml time series forcasting" ;
-    :category :parameter ;
-    skos:broader :forecasting_horizon ;
-    :has_datatype :integer .
-:forecasting_horizon_flaml_time_series_forcasting a :Configuration_item ;
-    skos:prefLabel "forecasting horizon flaml time series forcasting" ;
-    :category :parameter ;
-    skos:broader :forecasting_horizon ;
-    :has_datatype :integer .
-:forecasting_horizon_pycaret_time_series_forcasting a :Configuration_item ;
-    skos:prefLabel "forecasting horizon pycaret time series forcasting" ;
-    :category :parameter ;
-    skos:broader :forecasting_horizon ;
-    :has_datatype :integer .
-:forecasting_horizon_autopytorch_time_series_forcasting a :Configuration_item ;
-    skos:prefLabel "forecasting horizon autopytorch time series forcasting" ;
-    :category :parameter ;
-    skos:broader :forecasting_horizon ;
-    :has_datatype :integer .
-:lookback a :Configuration_item ;
-    skos:prefLabel "lookback" ;
-    :category :parameter .
-:lookback_autokeras_time_series_forecasting a :Configuration_item ;
-    skos:prefLabel "lookback autokeras time series forecasting" ;
-    :category :parameter ;
-    skos:broader :lookback ;
-    :has_datatype :integer .
-:lookback_evalml_time_series_forecasting a :Configuration_item ;
-    skos:prefLabel "lookback evalml time series forecasting" ;
-    :category :parameter ;
-    skos:broader :lookback ;
-    :has_datatype :integer .
-:gap a :Configuration_item ;
-    skos:prefLabel "gap" ;
-    :category :parameter .
-:gap_autokeras_time_series_forecasting a :Configuration_item ;
-    skos:prefLabel "gap autokeras time series forecasting" ;
-    :category :parameter ;
-    skos:broader :gap ;
-    :has_datatype :integer .
-:gap_evalml_time_series_forecasting a :Configuration_item ;
-    skos:prefLabel "gap evalml time series forecasting" ;
-    :category :parameter ;
-    skos:broader :gap ;
-    :has_datatype :integer .
-
-
-# Sheet34
+    :category :inheritance_type ;
+    rdfs:comment "Denotes that an RDF object can be inherited via SPARQL inferencing from one RDF subject to another if they are in a skos:broader relationship. Example: :artificial_neural_network :used_for :classification. :convolutional_neural_network skos:broader :artificial_neural_network. => :convolutional_neural_network :used_for :classification." .
+:auto_evaluation a :Enum ;
+    skos:prefLabel "auto evaluation" ;
+    :category :evaluation_approach .
+:cross_validation a :Enum ;
+    skos:prefLabel "cross validation" ;
+    :category :evaluation_approach .
+:holdout a :Enum ;
+    skos:prefLabel "holdout" ;
+    :category :evaluation_approach .
+:auto_split a :Enum ;
+    skos:prefLabel "auto split" ;
+    :category :split_approach .
+:stratified a :Enum ;
+    skos:prefLabel "stratified" ;
+    :category :split_approach .
+:uniform a :Enum ;
+    skos:prefLabel "uniform" ;
+    :category :split_approach .
+:time a :Enum ;
+    skos:prefLabel "time" ;
+    :category :split_approach .
+:group a :Enum ;
+    skos:prefLabel "group" ;
+    :category :split_approach .
+:auto_optimization_approach a :Enum ;
+    skos:prefLabel "auto optimization approach" ;
+    :category :hyperparameter_optimization_approach .
+:blendsearch a :Enum ;
+    skos:prefLabel "BlendSearch" ;
+    :category :hyperparameter_optimization_approach .
+:frugal_optimization_for_costrelated_hyperparameters a :Enum ;
+    skos:prefLabel "Frugal Optimization for Costrelated Hyperparameters" ;
+    skos:altLabel "CFO" ;
+    :category :hyperparameter_optimization_approach .
+:datetime_featurizer a :Enum ;
+    skos:prefLabel "Datetime Featurizer" ;
+    :category :featurizers .
+:email_featurizer a :Enum ;
+    skos:prefLabel "Email Featurizer" ;
+    :category :featurizers .
+:url_featurizer a :Enum ;
+    skos:prefLabel "URL Featurizer" ;
+    :category :featurizers .
+:natural_language_featurizer a :Enum ;
+    skos:prefLabel "Natural Language Featurizer" ;
+    :category :featurizers .
+:time_series_featurizer a :Enum ;
+    skos:prefLabel "Time Series Featurizer" ;
+    :category :featurizers .

@@ -17,6 +17,7 @@ from typing import Tuple
 import re
 from codecarbon import OfflineEmissionsTracker
 from subprocess import Popen
+from predict_time_sources import feature_preparation
 
 class AdapterManager(Thread):
     """The base adapter manager object providing the shared functionality between all adapters
@@ -150,7 +151,7 @@ class AdapterManager(Thread):
         if get_config_property("local_execution") == "NO":
             response.path = os.path.join(config.controller_export_folder_location, config.file_name)
         else:
-            response.path = os.path.join(config.file_location, config.file_name)
+            response.path = os.path.abspath(os.path.join(config.file_location, config.file_name))
         response.test_score = test_score
         response.prediction_time = prediction_time
         response.ml_library = library
@@ -265,7 +266,6 @@ class AdapterManager(Thread):
         except Exception as e:
             raise grpclib.GRPCError(grpclib.Status.UNAVAILABLE, f"Error while generating probabilities {e}")
 
-
     async def predict_model(self, predict_model_request: "PredictModelRequest") -> "PredictModelResponse":
         """Load a previously found model to execute a new prediction on it using a live dataset uploaded by the user
 
@@ -311,6 +311,79 @@ class AdapterManager(Thread):
 
         except Exception as e:
             raise grpclib.GRPCError(grpclib.Status.UNAVAILABLE, f"Error while generating probabilities {e}")
+
+    def create_explainer_dashboard(self, request: "CreateExplainerDashboardRequest") -> "CreateExplainerDashboardResponse":
+        """Must be overwriten! Creates the Explainerdashboard used by the ExplainableAIManager module inside the controller
+
+        Args:
+            config (CreateExplainerDashboardRequest): the request holding configuration data.
+        """
+        print(f"starting creating dashboard")
+
+        dashboard_response = CreateExplainerDashboardResponse()
+
+        try:
+            from explainerdashboard import ClassifierExplainer, ExplainerDashboard, RegressionExplainer
+            import sys, importlib
+            importlib.reload(sys.modules['explainerdashboard'])
+            from explainerdashboard import ClassifierExplainer, ExplainerDashboard, RegressionExplainer
+            # The library is available
+            print("explainerdashboard is installed.")
+        except ImportError:
+            # The library is not available
+            print("explainerdashboard is not installed.")
+            dashboard_response.compatible = False
+            dashboard_response.path = ""
+            return dashboard_response
+
+        #try:
+        config = json.loads(request.process_json)
+        result_folder_location = os.path.join("app-data", "training",
+                            config["user_id"], config["dataset_id"], config["training_id"], "result")
+        #Read config configuration again as it might have been changed during the training
+        job_folder_location = os.path.join(get_config_property("training-path"),
+                                            config["user_id"],
+                                            config["dataset_id"],
+                                            config["training_id"],
+                                            get_config_property("job-folder-name"),
+                                            get_config_property("job-file-name"))
+        dashboard_folder_location = os.path.join(get_config_property("training-path"),
+                                            config["user_id"],
+                                            config["dataset_id"],
+                                            config["training_id"],
+                                            get_config_property("dashboard-folder-name"))
+        with open(job_folder_location) as file:
+            updated_process_configuration = json.load(file)
+
+        config["dataset_configuration"] = json.loads(updated_process_configuration["dataset_configuration"])
+
+        with open(dashboard_folder_location + '/dashboard_model.p', 'rb') as file:
+            pipeline_model = dill.load(file)
+
+        train, test = data_loader(config)
+        for column, dt in config["dataset_configuration"]["schema"].items():
+            if dt.get("role_selected", "") == ":target":
+                target = column
+        #X, y = prepare_tabular_dataset(test, config)
+        try:
+
+            if config["configuration"]["task"] == ":tabular_classification" or config["configuration"]["task"] == ":text_classification" :
+                explainer = ClassifierExplainer(pipeline_model, test.drop(target, axis=1), test[target])
+                dashboard = ExplainerDashboard(explainer)
+                dashboard.save_html(os.path.join(dashboard_folder_location, "binary_dashboard.html"))
+                dashboard.explainer.dump(os.path.join(dashboard_folder_location, "binary_dashboard.dill"))
+
+            else :
+                dashboard = ExplainerDashboard(RegressionExplainer(pipeline_model, test.drop(target, axis=1), test[target]))
+                dashboard.save_html(os.path.join(dashboard_folder_location, "binary_dashboard.html"))
+                dashboard.explainer.dump(os.path.join(dashboard_folder_location, "binary_dashboard.dill"))
+        except Exception as e:
+            print(f"error: {e}")
+        print(f"created dashboard")
+        dashboard_response.path = os.path.join(dashboard_folder_location, "binary_dashboard.dill")
+        dashboard_response.compatible = True
+
+        return dashboard_response
 
     def get_start_auto_ml_request(self) -> StartAutoMlRequest:
         return self.__start_auto_ml_request

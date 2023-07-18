@@ -9,6 +9,7 @@ from JsonUtil import get_config_property
 import tensorflow as tf
 import keras_tuner
 import AutoKerasParameterConfig as akpc
+from AutoKerasWrapper import AutoKerasWrapper
 
 
 class AutoKerasAdapter:
@@ -58,6 +59,7 @@ class AutoKerasAdapter:
 
         clf.fit(x=X, y=y, epochs=1)
         export_model(clf, self._configuration["result_folder_location"], 'model_keras.p')
+        export_model(AutoKerasWrapper(clf, self._configuration), self._configuration["dashboard_folder_location"], 'dashboard_model.p')
 
     def __tabular_regression(self):
         """Execute the tabular regression task and export the found model"""

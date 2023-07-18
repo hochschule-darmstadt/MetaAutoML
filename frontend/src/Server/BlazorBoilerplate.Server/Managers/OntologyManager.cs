@@ -1,4 +1,4 @@
-﻿using BlazorBoilerplate.Infrastructure.Server;
+using BlazorBoilerplate.Infrastructure.Server;
 using BlazorBoilerplate.Infrastructure.Server.Models;
 using BlazorBoilerplate.Shared.Dto.Ontology;
 using BlazorBoilerplate.Storage;
@@ -128,17 +128,13 @@ namespace BlazorBoilerplate.Server.Managers
             try
             {
                 var grpcResponse = await _client.GetAutoMlParametersAsync(requestParams);
-                response.AutoMlParameters = grpcResponse.AutoMlParameters.Select(p => new AutoMlParameterDto
-                    {
-                        AutoMlIri = p.AutoMlIri,
-                        ParamIri = p.ParamIri,
-                        ParamLabel = p.ParamLabel,
-                        ParamType = p.ParamType,
-                        BroaderIri = p.BroaderIri,
-                        BroaderLabel = p.BroaderLabel,
-                        ValueIri = p.ValueIri,
-                        ValueLabel = p.ValueLabel
-                    }).ToList();
+                var results = await Task.WhenAll(grpcResponse.AutoMlParameters.Select(async p => new AutoMlParameterDto(
+                    await _cacheManager.GetObjectInformation(p.AutoMlIri),
+                    await _cacheManager.GetObjectInformation(p.ParamIri),
+                    await _cacheManager.GetObjectInformation(p.ParamType),
+                    await _cacheManager.GetObjectInformation(p.BroaderIri),
+                    await _cacheManager.GetObjectInformation(p.ValueIri))));
+                response.AutoMlParameters = results.ToList();
                 return new ApiResponse(Status200OK, null, response);
             }
             catch (Exception ex)

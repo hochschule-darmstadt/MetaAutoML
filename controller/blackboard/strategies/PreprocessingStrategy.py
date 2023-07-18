@@ -122,6 +122,44 @@ class PreprocessingStrategyController(IAbstractStrategy):
         # Finished action (should only run once, therefore disable the strategy rule)
         controller.disable_strategy('preprocessing.split_large_datasets')
 
+    def do_feature_selection(self, state: dict, blackboard: Blackboard, controller: StrategyController):
+        irrelevant_features = state.get("dataset_analysis", {}).get("irrelevant_features", [])
+
+        agent: AdapterRuntimeManagerAgent = controller.get_blackboard().get_agent('training-runtime')
+        if not agent or not agent.get_adapter_runtime_manager():
+            raise RuntimeError('Could not access Adapter Runtime Manager Agent!')
+        dataset_configuration = json.loads(agent.get_adapter_runtime_manager().get_training_request().dataset_configuration)
+
+        for column in irrelevant_features:
+            self._log.info(f'do_feature_selection: Encountered irrelevant feature {column}.')
+            dataset_configuration[column]['role_selected'] = ":ignore"
+
+        training_request = agent.get_adapter_runtime_manager().get_training_request()
+        training_request.dataset_configuration = json.dumps(dataset_configuration)
+        agent.get_adapter_runtime_manager().set_training_request(training_request)
+
+        # Finished action (should only run once, therefore disable the strategy rule)
+        controller.disable_strategy('preprocessing.feature_selection')
+
+    def do_pca_feature_extraction(self, state: dict, blackboard: Blackboard, controller: StrategyController):
+        agent: AdapterRuntimeManagerAgent = controller.get_blackboard().get_agent('training-runtime')
+        if not agent or not agent.get_adapter_runtime_manager():
+            raise RuntimeError('Could not access Adapter Runtime Manager Agent!')
+        dataset_configuration = json.loads(agent.get_adapter_runtime_manager().get_training_request().dataset_configuration)
+
+        for dcc in dataset_configuration:
+            if dataset_configuration[dcc]['role_selected'] != ":ignore":
+                if dataset_configuration[dcc]['datatype_selected'] != ":string":
+                    if dataset_configuration[dcc]['datatype_selected'] == '' and dataset_configuration[dcc]['datatype_detected'] != ":string":
+                        dataset_configuration[dcc]['preprocessing'] = {"pca": True}
+
+        training_request = agent.get_adapter_runtime_manager().get_training_request()
+        training_request.dataset_configuration = json.dumps(dataset_configuration)
+        agent.get_adapter_runtime_manager().set_training_request(training_request)
+
+        # Finished action (should only run once, therefore disable the strategy rule)
+        controller.disable_strategy('preprocessing.feature_selection')
+
     def do_finish_preprocessing(self, state: dict, blackboard: Blackboard, controller: StrategyController):
         if self.global_multi_fidelity_level != 0:
             self._log.info(f'do_finish_preprocessing: Finished data preparation, advancing to phase "running"..')

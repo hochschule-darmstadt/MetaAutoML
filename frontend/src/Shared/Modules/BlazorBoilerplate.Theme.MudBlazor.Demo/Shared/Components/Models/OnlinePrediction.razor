@@ -1,5 +1,5 @@
-﻿
-@using System 
+
+@using System
 @using System.IO
 @using Microsoft.AspNetCore.Hosting
 @using Microsoft.Extensions.Logging
@@ -21,17 +21,71 @@
         </CardHeaderContent>
         <CardHeaderActions>
             <MudStack Row="true" Class="align-content-center" Style="margin-top: 8px">
-                <MudButton OnClick="OnOpenUpload"
-                    Variant="Variant.Filled" 
-                    Color="Color.Secondary"
-                    EndIcon="@Icons.Filled.CloudUpload"
-                           Size="Size.Small">@L["Add Live Dataset"]</MudButton>
-            </MudStack>
-        </CardHeaderActions>
-    </MudCardHeader>
-    <MudCardContent>
-        <MudPaper Height="100px" Elevation="0">
-            @if (_model == null)
+                <ButtonTooltip Text="Click here to upload a file with new cases to be predicted. Please note: the file must have the identical format as the training dataset." Position="Placement.Bottom">
+                    <MudButton OnClick="OnOpenUpload"
+                               Variant="Variant.Filled"
+                               Color="Color.Secondary"
+                               EndIcon="@Icons.Filled.CloudUpload"
+                               Size="Size.Small">@L["Add Live Dataset"]</MudButton>
+                        </ButtonTooltip>
+                    </MudStack>
+                </CardHeaderActions>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudPaper Height="100px" Elevation="0">
+                    @if (_model == null)
+                    {
+                        <DataLoaderSpinner />
+                    }
+                    else
+                    {
+                        <MudTable Items="@_model.Model.Predictions" style="width:stretch" class="mat-elevation-z5" AllowSelection="false" Dense="true">
+                            <HeaderContent>
+                                <MudTh>@L["Name"]</MudTh>
+                                <MudTh>@L["Date"]</MudTh>
+                                <MudTh>@L["Status"]</MudTh>
+                                <MudTh></MudTh>
+                            </HeaderContent>
+                            <RowTemplate>
+                                <MudTd>
+                                    @context.LiveDatasetName
+                                </MudTd>
+                                <MudTd>
+                                    @context.RuntimeProfile.StartTime.ToString("dd/MM/yyyy")
+                                </MudTd>
+                                <MudTd>
+                                    @if (context.Status == "busy")
+                                    {
+                                        <MudProgressCircular Size="Size.Small" Color="Color.Secondary" Indeterminate="true" />
+                                    }
+                                    else
+                                    {
+                                        @L[context.Status];
+                                    }
+                                </MudTd>
+                                <MudTd>
+                                    @if (context.Status == "completed")
+                                    {
+                                <MudButton StartIcon="@Icons.Filled.CloudDownload" OnClick="@(() => DownlaodPrediction(context))" Variant="Variant.Filled" Color="Color.Secondary" Size="Size.Small">@L["Download predictions"]</MudButton>
+                                <MudButton StartIcon="@Icons.Material.Filled.ViewList" OnClick="@(() => OpenPredictionResults(context))" Variant="Variant.Filled" Color="Color.Secondary" Size="Size.Small">
+                                    @L["View predictions"]
+                                        </MudButton>
+                                    }
+                                    else
+                                    {
+                                        <MudButton StartIcon="@Icons.Filled.CloudDownload" Variant="Variant.Filled" Color="Color.Secondary" Size="Size.Small" Disabled="true">@L["Download predictions"]</MudButton>
+                                    }
+                                </MudTd>
+                            </RowTemplate>
+                        </MudTable>
+                    }
+                </MudPaper>
+            </MudCardContent>
+        </MudCard>
+
+        @code {
+            [Parameter]
+            public GetModelResponseDto Model
             {
                 <DataLoaderSpinner />
             }
@@ -46,7 +100,7 @@
                     </HeaderContent>
                     <RowTemplate>
                         <MudTd>
-                             @context.LiveDatasetName 
+                             @context.LiveDatasetName
                         </MudTd>
                         <MudTd>
                             @context.RuntimeProfile.StartTime.ToString("dd/MM/yyyy")
@@ -81,11 +135,11 @@
 @code {
     [Parameter]
     public GetModelResponseDto Model
-    { 
+    {
         get
         {
             return _model;
-        } 
+        }
         set
         {
             _model = value;
@@ -100,7 +154,7 @@
                 _timer.Elapsed += RefreshPredictions;
             }
             StateHasChanged();
-        } 
+        }
     }
     private GetModelResponseDto _model;
 
@@ -141,19 +195,10 @@
                         ApiResponseDto apiResponse = await apiClient.GetPrediction(new GetPredictionRequestDto { PredictionId = _model.Model.Predictions[i].Id });
                         if (apiResponse.IsSuccessStatusCode)
                         {
-                            _model.Model.Predictions[i] = Newtonsoft.Json.JsonConvert.DeserializeObject<GetPredictionResponseDto>(apiResponse.Result.ToString()).Prediction;
-                            StateHasChanged();
-                        }
-                        //Prediction does not exist anymore
-                        else if (apiResponse.StatusCode == 404)
-                        {
-                            _model.Model.Predictions.RemoveAt(i);
-                            DisposeTimer();
-                            return;
-                        }
-                        else
-                        {
-                            viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
+                            string tableHeader = jsonString.Split("\n")[0];
+                            string[] tableContent =jsonString.Split("\n").Skip(1).ToArray();
+                            parameters.Add("TableHeader", tableHeader);
+                            parameters.Add("TableContent", tableContent);
                         }
                     }
                 }

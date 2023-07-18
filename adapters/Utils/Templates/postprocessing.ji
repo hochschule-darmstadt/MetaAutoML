@@ -1,0 +1,33 @@
+{% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression", ":text_classification", ":text_regression", ":named_entity_recognition", ":time_series_forecasting"] %}
+
+import pandas as pd
+from numpy import nan
+
+def post_process_result_dataframe(X_index: pd.DataFrame, y_predicted: pd.DataFrame) -> pd.DataFrame:
+    """Postprocess the result dataframe to add the index columns if necessary
+
+    Args:
+        X_index (pd.DataFrame): The index column of X
+        y_predicted (pd.DataFrame): The prediction result dataframe
+
+    Returns:
+        pd.DataFrame: The final result prediction dataframe
+    """
+    index_columns = []
+    for column, dt in feature_configuration.items():
+        if dt.get("role_selected", "") == ":index":
+            index_columns.append(column)
+        if dt.get("role_selected", "") == ":target":
+            target = column
+
+    if len(index_columns) > 0:
+        final_y_predicted = X_index[index_columns].join(y_predicted[["predicted"]])
+    else:
+        final_y_predicted = y_predicted
+    final_y_predicted.rename(columns={"predicted": target}, inplace=True)
+    return final_y_predicted
+
+
+feature_configuration = {{configuration.dataset_configuration["schema"]}}
+
+{% endif %}

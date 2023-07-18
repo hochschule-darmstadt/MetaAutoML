@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: omaml
+  name: redis
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: redis
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        io.kompose.service: redis
+    spec:
+      containers:
+      - image: redis
+        name: redis
+        command: ['redis-server', '/usr/local/etc/redis/redis.conf']
+        ports:
+        - containerPort: 6379
+          name: rediscontainer
+        resources:
+          limits:
+            cpu: "0.5"
+            memory: "1097152e3"
+        volumeMounts:
+        - mountPath: /data
+          name: redisdata
+        - mountPath: /var/lib/redis
+          name: redisdata
+        - mountPath: /usr/local/etc/redis/redis.conf
+          name: redisdata
+      restartPolicy: Always
+      serviceAccountName: ""
+      volumes:
+      - name: redisdata
+        persistentVolumeClaim:
+          claimName: redisdata-claim

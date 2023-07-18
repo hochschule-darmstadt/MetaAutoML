@@ -18,7 +18,6 @@ spec:
         kompose.cmd: C:\ProgramData\chocolatey\lib\kubernetes-kompose\tools\kompose.exe
           convert -f docker-compose.yml
         kompose.version: 1.21.0 (992df58d8)
-      creationTimestamp: null
       labels:
         io.kompose.service: blazorboilerplate
     spec:

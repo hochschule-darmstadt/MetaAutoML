@@ -1,0 +1,108 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: omaml
+  labels:
+    io.kompose.service: controller
+  name: controller
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: controller
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        io.kompose.service: controller
+    spec:
+      serviceAccountName: controller-pod-account
+      containers:
+      - env:
+        - name: "MONGO_DB_DEBUG"
+          value: "NO"
+        - name: "MONGO_DB_DOCKER_DEBUG"
+          value: "NO"
+        - name: "MONGO_CLUSTER"
+          value: "YES"
+        - name: "PERSISTENCE_LOGGING_LEVEL"
+          value: "DEBUG"
+        - name: "SERVER_LOGGING_LEVEL"
+          value: "DEBUG"
+        - name: "ONTOLOGY_LOGGING_LEVEL"
+          value: "DEBUG"
+        - name: "BLACKBOARD_LOGGING_LEVEL"
+          value: "DEBUG"
+        - name: "KUBERNETES_CLUSTER"
+          value: "YES"
+        - name: "KUBERNETES_URL"
+          value: "dev.oma-ml.ai"
+        - name: "KUBERNETES_TYPE"
+          value: "prod"
+        image: alexhda/omaml-controller
+        imagePullPolicy: ""
+        name: controller
+        resources:
+          limits:
+            cpu: "2"
+            memory: "2097152e3"
+        volumeMounts:
+        - name: datasets
+          mountPath: /app/app-data/datasets
+        - name: training
+          mountPath: /app/app-data/training
+        - name: autokeras-output
+          mountPath: /app/app-data/training/autokeras
+        - name: mljar-output
+          mountPath: /app/app-data/training/mljar
+        - name: autogluon-output
+          mountPath: /app/app-data/training/gluon
+        - name: flaml-output
+          mountPath: /app/app-data/training/flaml
+        - name: pycaret-output
+          mountPath: /app/app-data/training/pycaret
+        - name: evalml-output
+          mountPath: /app/app-data/training/evaml
+        - name: tpot-output
+          mountPath: /app/app-data/training/tpot
+        - name: gama-output
+          mountPath: /app/app-data/training/gama
+        - name: lama-output
+          mountPath: /app/app-data/training/lama
+      restartPolicy: Always
+      volumes:
+      - name: datasets
+        persistentVolumeClaim:
+          claimName: datasets-claim
+      - name: training
+        persistentVolumeClaim:
+          claimName: training-claim
+      - name: autokeras-output
+        persistentVolumeClaim:
+          claimName: output-autokeras-claim
+      - name: mljar-output
+        persistentVolumeClaim:
+          claimName: output-mljar-claim
+      - name: autogluon-output
+        persistentVolumeClaim:
+          claimName: output-autogluon-claim
+      - name: flaml-output
+        persistentVolumeClaim:
+          claimName: output-flaml-claim
+      - name: evalml-output
+        persistentVolumeClaim:
+          claimName: output-evalml-claim
+      - name: pycaret-output
+        persistentVolumeClaim:
+          claimName: output-pycaret-claim
+      - name: tpot-output
+        persistentVolumeClaim:
+          claimName: output-tpot-claim
+      - name: gama-output
+        persistentVolumeClaim:
+          claimName: output-gama-claim
+      - name: lama-output
+        persistentVolumeClaim:
+          claimName: output-lama-claim

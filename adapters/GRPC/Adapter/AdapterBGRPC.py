@@ -20,6 +20,17 @@ if TYPE_CHECKING:
     from grpclib.metadata import Deadline
 
 
+class DashboardCode(betterproto.Enum):
+    DASHBOARD_BOOTED_SUCCESSFULLY = 0
+    """Return code for booting the dashboard successfully"""
+
+    DASHBOARD_BOOTED_FAILED = 1
+    """Return code for failed dashboard boot"""
+
+    DASHBOARD_NOT_FOUND = 2
+    """Return code for unable to find the dashboard"""
+
+
 class AdapterReturnCode(betterproto.Enum):
     ADAPTER_RETURN_CODE_UNKNOWN = 0
     """
@@ -255,6 +266,63 @@ class CarbonEmission(betterproto.Message):
 
 
 @dataclass(eq=False, repr=False)
+class CreateExplainerDashboardRequest(betterproto.Message):
+    process_json: str = betterproto.string_field(1)
+    """
+    The process JSON describing the configuration the model will
+    useexample:{"training_id": "63525870394eff35ee175bc2","dataset_id":
+    "635255a4394eff35ee175bb4","user_id":
+    "b84eadcc-765c-43ea-8b7b-c0f8d2fbc6ed","dataset_path": "app-data\\datasets\
+    \b84eadcc-765c-43ea-8b7b-c0f8d2fbc6ed\\635255a4394eff35ee175bb4\\Train.csv"
+    ,"configuration": {"task": ":tabular_regression", "target":
+    "TARGET(PRICE_IN_LACS)", "runtime_limit": 3, "metric":
+    ":accuracy"},"dataset_configuration": "SEE Training schema in WIKI for more
+    information https://github.com/hochschule-
+    darmstadt/MetaAutoML/wiki/2.-System-Architecture#training-record"}
+    """
+
+
+@dataclass(eq=False, repr=False)
+class CreateExplainerDashboardResponse(betterproto.Message):
+    path: str = betterproto.string_field(1)
+    """Path to dashboardexample: app-data/..../dashboard.dill"""
+
+    compatible: bool = betterproto.bool_field(2)
+    """Is the adapter dashboard compatible"""
+
+
+@dataclass(eq=False, repr=False)
+class StartExplainerDashboardRequest(betterproto.Message):
+    path: str = betterproto.string_field(1)
+    """Path to dashboardexample: app-data/..../dashboard.dill"""
+
+    session_id: str = betterproto.string_field(2)
+    """The Dashboard session Idexample: 12"""
+
+
+@dataclass(eq=False, repr=False)
+class StartExplainerDashboardResponse(betterproto.Message):
+    result: "DashboardCode" = betterproto.enum_field(1)
+    """
+    The Dashboard boot process statusexample: DASHBOARD_BOOTED_SUCCESSFULLY
+    """
+
+    url: str = betterproto.string_field(2)
+    """The Dashboard urlexample: localhost:2313"""
+
+
+@dataclass(eq=False, repr=False)
+class StopExplainerDashboardRequest(betterproto.Message):
+    session_id: str = betterproto.string_field(1)
+    """The Dashboard session Idexample: 12"""
+
+
+@dataclass(eq=False, repr=False)
+class StopExplainerDashboardResponse(betterproto.Message):
+    pass
+
+
+@dataclass(eq=False, repr=False)
 class ExplainModelRequest(betterproto.Message):
     data: str = betterproto.string_field(1)
     """
@@ -385,6 +453,57 @@ class AdapterServiceStub(betterproto.ServiceStub):
             metadata=metadata,
         )
 
+    async def create_explainer_dashboard(
+        self,
+        create_explainer_dashboard_request: "CreateExplainerDashboardRequest",
+        *,
+        timeout: Optional[float] = None,
+        deadline: Optional["Deadline"] = None,
+        metadata: Optional["MetadataLike"] = None
+    ) -> "CreateExplainerDashboardResponse":
+        return await self._unary_unary(
+            "/AdapterService/CreateExplainerDashboard",
+            create_explainer_dashboard_request,
+            CreateExplainerDashboardResponse,
+            timeout=timeout,
+            deadline=deadline,
+            metadata=metadata,
+        )
+
+    async def start_explainer_dashboard(
+        self,
+        start_explainer_dashboard_request: "StartExplainerDashboardRequest",
+        *,
+        timeout: Optional[float] = None,
+        deadline: Optional["Deadline"] = None,
+        metadata: Optional["MetadataLike"] = None
+    ) -> "StartExplainerDashboardResponse":
+        return await self._unary_unary(
+            "/AdapterService/StartExplainerDashboard",
+            start_explainer_dashboard_request,
+            StartExplainerDashboardResponse,
+            timeout=timeout,
+            deadline=deadline,
+            metadata=metadata,
+        )
+
+    async def stop_explainer_dashboard(
+        self,
+        stop_explainer_dashboard_request: "StopExplainerDashboardRequest",
+        *,
+        timeout: Optional[float] = None,
+        deadline: Optional["Deadline"] = None,
+        metadata: Optional["MetadataLike"] = None
+    ) -> "StopExplainerDashboardResponse":
+        return await self._unary_unary(
+            "/AdapterService/StopExplainerDashboard",
+            stop_explainer_dashboard_request,
+            StopExplainerDashboardResponse,
+            timeout=timeout,
+            deadline=deadline,
+            metadata=metadata,
+        )
+
     async def predict_model(
         self,
         predict_model_request: "PredictModelRequest",
@@ -419,6 +538,21 @@ class AdapterServiceBase(ServiceBase):
     ) -> "ExplainModelResponse":
         raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
 
+    async def create_explainer_dashboard(
+        self, create_explainer_dashboard_request: "CreateExplainerDashboardRequest"
+    ) -> "CreateExplainerDashboardResponse":
+        raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
+
+    async def start_explainer_dashboard(
+        self, start_explainer_dashboard_request: "StartExplainerDashboardRequest"
+    ) -> "StartExplainerDashboardResponse":
+        raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
+
+    async def stop_explainer_dashboard(
+        self, stop_explainer_dashboard_request: "StopExplainerDashboardRequest"
+    ) -> "StopExplainerDashboardResponse":
+        raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
+
     async def predict_model(
         self, predict_model_request: "PredictModelRequest"
     ) -> "PredictModelResponse":
@@ -444,6 +578,30 @@ class AdapterServiceBase(ServiceBase):
     ) -> None:
         request = await stream.recv_message()
         response = await self.explain_model(request)
+        await stream.send_message(response)
+
+    async def __rpc_create_explainer_dashboard(
+        self,
+        stream: "grpclib.server.Stream[CreateExplainerDashboardRequest, CreateExplainerDashboardResponse]",
+    ) -> None:
+        request = await stream.recv_message()
+        response = await self.create_explainer_dashboard(request)
+        await stream.send_message(response)
+
+    async def __rpc_start_explainer_dashboard(
+        self,
+        stream: "grpclib.server.Stream[StartExplainerDashboardRequest, StartExplainerDashboardResponse]",
+    ) -> None:
+        request = await stream.recv_message()
+        response = await self.start_explainer_dashboard(request)
+        await stream.send_message(response)
+
+    async def __rpc_stop_explainer_dashboard(
+        self,
+        stream: "grpclib.server.Stream[StopExplainerDashboardRequest, StopExplainerDashboardResponse]",
+    ) -> None:
+        request = await stream.recv_message()
+        response = await self.stop_explainer_dashboard(request)
         await stream.send_message(response)
 
     async def __rpc_predict_model(
@@ -472,6 +630,24 @@ class AdapterServiceBase(ServiceBase):
                 grpclib.const.Cardinality.UNARY_UNARY,
                 ExplainModelRequest,
                 ExplainModelResponse,
+            ),
+            "/AdapterService/CreateExplainerDashboard": grpclib.const.Handler(
+                self.__rpc_create_explainer_dashboard,
+                grpclib.const.Cardinality.UNARY_UNARY,
+                CreateExplainerDashboardRequest,
+                CreateExplainerDashboardResponse,
+            ),
+            "/AdapterService/StartExplainerDashboard": grpclib.const.Handler(
+                self.__rpc_start_explainer_dashboard,
+                grpclib.const.Cardinality.UNARY_UNARY,
+                StartExplainerDashboardRequest,
+                StartExplainerDashboardResponse,
+            ),
+            "/AdapterService/StopExplainerDashboard": grpclib.const.Handler(
+                self.__rpc_stop_explainer_dashboard,
+                grpclib.const.Cardinality.UNARY_UNARY,
+                StopExplainerDashboardRequest,
+                StopExplainerDashboardResponse,
             ),
             "/AdapterService/PredictModel": grpclib.const.Handler(
                 self.__rpc_predict_model,

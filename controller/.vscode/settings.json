@@ -10,6 +10,7 @@
         "./managers/data",
         "./managers/adapter",
         "./managers/adapter/online_prediction",
+        "./managers/adapter/explainer_dashboard",
         "./sessions",
         "./utils",
         "../adapters/GRPC/Controller",
@@ -20,7 +21,7 @@
         "./blackboard",
         "./blackboard/agents",
         "./blackboard/strategies",
-
+        "./kubernetes"
 
     ]
 }

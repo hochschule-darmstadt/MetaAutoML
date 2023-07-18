@@ -1,0 +1,39 @@
+<span style="display:flex">
+<MudText Typo=FontSize>@Label</MudText>
+<MudTooltip Text=@Text Placement=Position Arrow="true">
+    <ChildContent>
+        <div style="padding-left:20%;">
+            <MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.Info" Style="opacity:50%;"></MudIcon>
+        </div>
+    </ChildContent>
+   <TooltipContent>
+       <MudText Style="word-wrap: break-word;max-width: 20rem;font-size:11pt;">
+           @Text
+           @if (!string.IsNullOrEmpty(URL))
+           {
+               <MudLink Href="@URL" Class="mud-tooltip mud-tooltip-default tooltiptext" Style="opacity: 100%!important; color:white!important;">
+                   More...
+               </MudLink>
+           }
+       </MudText>
+   </TooltipContent>
+    
+</MudTooltip>
+</span>
+@code {
+    [Parameter]
+    public string Label { get; set; }
+    [Parameter]
+    public string Text { get; set; }
+    [Parameter]
+    public Placement Position { get; set; }
+    [Parameter]
+    public Typo FontSize { get; set; } = Typo.h6;
+    [Parameter]
+    public string URL { get; set; } = "";
+
+
+
+
+}
+
