@@ -156,22 +156,6 @@ namespace BlazorBoilerplate.Theme.Material.Services
             return wikipediaUrl;
         }
 
-        public string GetWikipediaUrlForMore(string wikiDataUrl, string language = "en")
-        {
-            if (!IsWikiDatalink(wikiDataUrl))
-            {
-                return null;
-            }
-
-            wikiDataUrl = AdjustUrl(wikiDataUrl);
-
-            dynamic wikiDataJsonFile = GetDataFromUrl(wikiDataUrl);
-            string uri = ExtractUri(wikiDataUrl);
-            string description = GetWikidataDescription(wikiDataJsonFile, uri);
-            // If there is no Wikipedia URL for given WikiData entry...
-            return GetWikipediaUrl(wikiDataJsonFile, uri, language);
-        }
-
         /// <summary>
         /// Simple Regex - if the url is already correct, nothing bad will happen. Wikidata Url needs to contain
         /// /entity/ instead of /wiki/ to return a JSON

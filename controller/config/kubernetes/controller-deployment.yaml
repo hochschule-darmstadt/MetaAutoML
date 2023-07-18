@@ -40,7 +40,7 @@ spec:
         resources:
           limits:
             cpu: "2"
-            memory: "4097152e3"
+            memory: "2097152e3"
         volumeMounts:
         - name: datasets
           mountPath: /app/app-data/datasets
@@ -64,8 +64,6 @@ spec:
           mountPath: /app/app-data/training/pycaret
         - name: evalml-output
           mountPath: /app/app-data/training/evaml
-        - name: tpot-output
-          mountPath: /app/app-data/training/tpot
       restartPolicy: Always
       serviceAccountName: ""
       volumes:
@@ -102,6 +100,3 @@ spec:
       - name: pycaret-output
         persistentVolumeClaim:
           claimName: output-pycaret-claim
-      - name: tpot-output
-        persistentVolumeClaim:
-          claimName: output-tpot-claim

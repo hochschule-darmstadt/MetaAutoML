@@ -24,8 +24,8 @@ spec:
           name: rediscontainer
         resources:
           limits:
-            cpu: "0.5"
-            memory: "1097152e3"
+            cpu: "1"
+            memory: "2097152e3"
         volumeMounts:
         - mountPath: /data
           name: redisdata

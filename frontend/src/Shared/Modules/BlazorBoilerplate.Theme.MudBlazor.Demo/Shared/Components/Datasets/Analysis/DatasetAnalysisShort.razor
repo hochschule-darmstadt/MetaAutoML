@@ -18,16 +18,14 @@
         <CardHeaderActions>
             @if (_dataset != null)
             {
-                <ButtonTooltip Text="Click here to to display all analysis diagrams available for this dataset." Position="Placement.Top">
-                    <MudButton Href="@NavManager.ToAbsoluteUri("datasets/" + @Dataset.Dataset.Id + "/analysis").AbsoluteUri"
-                               Variant="Variant.Filled"
-                               EndIcon="@Icons.Material.Filled.ReadMore"
-                               Color="Color.Secondary"
-                               Size="Size.Small"
-                               Style="margin-top: 8px">@L["More"]</MudButton>
-                    </ButtonTooltip>
-                            }
-                    </CardHeaderActions>
+                <MudButton Href="@NavManager.ToAbsoluteUri("datasets/" + @Dataset.Dataset.Id + "/analysis").AbsoluteUri"
+                       Variant="Variant.Filled"
+                       EndIcon="@Icons.Material.Filled.ReadMore"
+                       Color="Color.Secondary"
+                       Size="Size.Small"
+                       Style="margin-top: 8px">@L["More"]</MudButton>
+            }
+        </CardHeaderActions>
     </MudCardHeader>
     <MudCardContent>
         <MudPaper Height="250px" Elevation="0">
@@ -39,7 +37,7 @@
             {
         <MudButton Href="@NavManager.ToAbsoluteUri("datasets/" + @Dataset.Dataset.Id + "/analysis").AbsoluteUri">
             <MudItem xs="12" Style="display: grid; justify-content: center;">
-                <MudImage Src="@GetImage(_analysis.AnalysisCategories[0].Analyses[0].Content)" Style="width:clamp(70px, 100%, 330px); margin-left: auto; margin-right: auto;;" />
+                <MudImage Src="@GetImage(_analysis.AnalysisCategories[0].Analyses[0].Content)" Style="height:245px;" />
             </MudItem>
         </MudButton>
             }

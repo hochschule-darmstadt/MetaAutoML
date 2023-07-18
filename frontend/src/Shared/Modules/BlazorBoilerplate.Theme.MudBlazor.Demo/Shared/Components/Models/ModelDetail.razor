@@ -2,8 +2,8 @@
 
 <MudCard Elevation="5">
     <MudCardHeader Style="border-bottom-style: inset; border-bottom-width: 1px;">
-        <CardHeaderContent>
-            <LabelTooltip FontSize="Typo.h6" Label=@L["Details"] Text="Here you can inspect the detail output of the AutoML solution that has been used for training this ML model." Position="Placement.Bottom"></LabelTooltip>
+        <CardHeaderContent >
+            <MudText Typo="Typo.h6">@L["Details"]</MudText>
         </CardHeaderContent>
 @*        <CardHeaderActions>
             @if (Model != null)

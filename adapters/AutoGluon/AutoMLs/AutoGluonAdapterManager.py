@@ -70,7 +70,7 @@ class AutoGluonAdapterManager(AdapterManager):
             model = [":ensemble"]
             #TODO correct read and array handling
             return ([':lightgbm_lib'], model)
-        elif config.configuration['task'] in [":text_classification", ":text_regression", ":named_entity_recognition"]:
+        elif config.configuration['task'] in [":text_classification", ":text_regression"]:
             #We load the model to check it is intact
             automl = MultiModalPredictor.load(os.path.join(os.path.join(working_dir, 'model_gluon.gluon')))
             return ([":pytorch_lib"], [":transformer"])

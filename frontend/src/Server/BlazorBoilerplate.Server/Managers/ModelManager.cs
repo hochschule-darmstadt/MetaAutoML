@@ -97,9 +97,6 @@ namespace BlazorBoilerplate.Server.Managers
         }
         public async Task<ApiResponse> GetModelExplanation(GetModelExplanationRequestDto request)
         {
-            var is_mutagen_setup = Environment.GetEnvironmentVariable("IS_MUTAGEN_SETUP");
-            var mutagen_dataset_folder_path = Environment.GetEnvironmentVariable("MUTAGEN_DATASET_FOLDER_PATH");
-            var mutagen_docker_ataset_folder_path = Environment.GetEnvironmentVariable("MUTAGEN_DOCKER_DATASET_FOLDER_PATH");
             GetModelExplanationResponseDto response = new GetModelExplanationResponseDto();
             GetModelRequest getModelRequest = new GetModelRequest();
             var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
@@ -111,7 +108,6 @@ namespace BlazorBoilerplate.Server.Managers
                 var reply = _client.GetModel(getModelRequest);
                 var explanation = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(reply.Model.Explanation);
                 int index = 0;
-                string graph_path = "";
                 if (explanation == null)
                 {
                     response.Status = "";
@@ -145,17 +141,12 @@ namespace BlazorBoilerplate.Server.Managers
                                     break;
                                 }
                             }
-                            graph_path = item.SelectToken("path").ToString();
-                            if (is_mutagen_setup == "YES")
-                            {
-                                graph_path = graph_path.Replace(mutagen_docker_ataset_folder_path, mutagen_dataset_folder_path);
-                            }
                             ModelExplanation modelExplanation = new ModelExplanation()
                             {
                                 Title = item.SelectToken("title").ToString(),
                                 Type = item.SelectToken("type").ToString(),
                                 Description = item.SelectToken("description").ToString(),
-                                Content = GetImageAsBytes(graph_path)
+                                Content = GetImageAsBytes(item.SelectToken("path").ToString())
                             };
                             modelExplanationCategory.Analyses.Add(modelExplanation);
                         }
@@ -191,9 +182,6 @@ namespace BlazorBoilerplate.Server.Managers
         /// <returns>Returns an ApiResponse containing the DownloadModelResponseDto object that holds the ML model</returns>
         public async Task<ApiResponse> DownloadModel(DownloadModelRequestDto request)
         {
-            var is_mutagen_setup = Environment.GetEnvironmentVariable("IS_MUTAGEN_SETUP");
-            var mutagen_dataset_folder_path = Environment.GetEnvironmentVariable("MUTAGEN_DATASET_FOLDER_PATH");
-            var mutagen_docker_ataset_folder_path = Environment.GetEnvironmentVariable("MUTAGEN_DOCKER_DATASET_FOLDER_PATH");
             DownloadModelResponseDto response = new DownloadModelResponseDto();
             GetModelRequest getmodelRequest = new GetModelRequest();
             var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
@@ -205,10 +193,6 @@ namespace BlazorBoilerplate.Server.Managers
                 //TODO NEW DOWNLOAD FUNCTIONALITY IMPLEMENTATION
 
                 var resultPath = reply.Model.Path;
-                if (is_mutagen_setup == "YES")
-                {
-                    resultPath = resultPath.Replace(mutagen_docker_ataset_folder_path, mutagen_dataset_folder_path);
-                }
                 byte[] resultFile = File.ReadAllBytes(resultPath);
                 response.Content = resultFile;
                 response.Name = Path.GetFileName(resultPath);
@@ -243,44 +227,6 @@ namespace BlazorBoilerplate.Server.Managers
             catch (Exception ex)
             {
 
-                Console.WriteLine(ex.Message);
-                return new ApiResponse(Status404NotFound, ex.Message);
-            }
-        }
-
-        public async Task<ApiResponse> StartExplainerDashboard(StartDashboardRequestDto request)
-        {
-            StartDashboardRequestDto response = new StartDashboardRequestDto();
-            StartDashboardRequest startDashboardRequest = new StartDashboardRequest();
-            var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
-            try
-            {
-                startDashboardRequest.UserId = username;
-                startDashboardRequest.ModelId = request.ModelId;
-                var reply = _client.StartExplainerDashboard(startDashboardRequest);
-                return new ApiResponse(Status200OK, null, "");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-                return new ApiResponse(Status404NotFound, ex.Message);
-            }
-        }
-
-        public async Task<ApiResponse> StopExplainerDashboard(StopDashboardRequestDto request)
-        {
-            StopDashboardRequestDto response = new StopDashboardRequestDto();
-            StopDashboardRequest stopDashboardRequest = new StopDashboardRequest();
-            var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
-            try
-            {
-                stopDashboardRequest.UserId = username;
-                stopDashboardRequest.ModelId = request.ModelId;
-                var reply = _client.StopExplainerDashboard(stopDashboardRequest);
-                return new ApiResponse(Status200OK, null, "");
-            }
-            catch (Exception ex)
-            {
                 Console.WriteLine(ex.Message);
                 return new ApiResponse(Status404NotFound, ex.Message);
             }

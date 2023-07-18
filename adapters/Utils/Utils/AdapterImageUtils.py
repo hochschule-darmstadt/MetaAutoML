@@ -9,7 +9,7 @@ import os
 import random
 
 
-def read_image_dataset(config: "StartAutoMlRequest", image_test_folder=False, as_dataframe=False, as_2darray=False) -> Tuple[pd.DataFrame, pd.DataFrame]:
+def read_image_dataset(config: "StartAutoMlRequest", image_test_folder=False, as_dataframe=False) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """Read image dataset and create training and test dataframes
 
     Args:
@@ -42,7 +42,7 @@ def read_image_dataset(config: "StartAutoMlRequest", image_test_folder=False, as
     train_df_list =[]
 
     if as_dataframe == True:
-        root = os.path.abspath(os.path.expanduser(data_dir))
+        root = os.path.abspath(os.path.expanduser(root))
         synsets = []
         exts=('.jpg', '.jpeg', '.png')
         items = {'image': [], 'label': []}
@@ -61,7 +61,7 @@ def read_image_dataset(config: "StartAutoMlRequest", image_test_folder=False, as
                 items['label'].append(label)
             df = pd.DataFrame(items)
             y_train = df["label"]
-            X_train = df.drop("label", axis=1)
+            X_train = df.drop("label")
     else:
         def read_image_dataset_folder():
             files = []
@@ -98,7 +98,4 @@ def read_image_dataset(config: "StartAutoMlRequest", image_test_folder=False, as
 
         X_train = np.array([img_preprocess(p) for p in train_data.name.values])
         y_train = train_data.outcome.values
-        if as_2darray == True:
-            #reshape array to 2D-Array
-            X_train = X_train.reshape(-1, 256 * 256 * 3)
     return X_train, y_train

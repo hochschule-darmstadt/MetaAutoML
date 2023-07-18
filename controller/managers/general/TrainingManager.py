@@ -53,25 +53,6 @@ class TrainingManager:
             self.__log.error(f"create_training: user {create_training_request.user_id} started a new run with empty ML library list.")
             raise grpclib.GRPCError(grpclib.Status.CANCELLED, "started a new run with empty ML library list, wizard error?")
 
-        #Change gRPC camel case in schema keys back to snake case
-        dataset_configuration = json.loads(create_training_request.dataset_configuration)
-
-        schema_keys = [
-            ["DatatypeDetected", "datatype_detected"],
-            ["DatatypesCompatible", "datatypes_compatible"],
-            ["DatatypeSelected", "datatype_selected"],
-            ["RolesCompatible", "roles_compatible"],
-            ["RoleSelected", "role_selected"],
-            ["Preprocessing", "preprocessing"]
-        ]
-
-        for column in dataset_configuration:
-            for item in schema_keys:
-                if dataset_configuration[column].get(item[0], None) != None:
-                    dataset_configuration[column][item[1]] = dataset_configuration[column][item[0]]
-                    del dataset_configuration[column][item[0]]
-
-        create_training_request.dataset_configuration = json.dumps(dataset_configuration)
 
         # TODO: rework file access in AutoMLSession
         #       we do not want to make datastore paths public

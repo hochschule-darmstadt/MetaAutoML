@@ -9,14 +9,21 @@
 @attribute [Authorize]
 
 <TopSection>
-    <MudBreadcrumbs Items="_breadcrumbs" Class="mudbreadcrumbs"></MudBreadcrumbs>
+    <MudBreadcrumbs Items="_breadcrumbs" style="
+    position: fixed!important;
+    top: 65px;
+    z-index: 999!important;
+    width: 100%;">
+    </MudBreadcrumbs>
 </TopSection>
 
-<MudStack AlignItems="AlignItems.Center" Row="true" Class="mb-2" style="padding-top:50px">
+<MudStack AlignItems="AlignItems.Center" Row="true" Class="mb-2" style="padding-top:30px">
     <MudIcon Size="Size.Large" Icon="@Icons.Filled.Lightbulb" />
     @if (_model != null)
     {
-        <LabelTooltip FontSize="Typo.h4" Label=@L["Model {0}", _model.Model.GetMlModelString()] Text="An ML model is the result of ML training and condenses information inherent in the training dataset. It can be used for making predictions on new cases. On this page, you can inspect and use the trained ML model. You may use the model for predicting new cases within the OMA-ML platform without having to install anything (panel center left). Alternatively, you may download the ML model within a pipeline and include it into a custom Python application (panel center right).  There are various ways of getting additional information about the model: an overview (top panel), detailed graphical analyses using Explainable AI (panel bottom left), the configuration that lead to the model (panel bottom center), and detail output of the AutoML solution (panel bottom right)." Position="Placement.Bottom"></LabelTooltip>
+        <MudText Typo="Typo.h4">
+            @L["Model {0}", _model.Model.GetMlModelString()]
+        </MudText>
     }
 </MudStack>
 
@@ -29,7 +36,7 @@
                 </CardHeaderContent>
             </MudCardHeader>
             <MudCardContent>
-                <MudPaper Elevation="0" Class="text-card-content mud-full-height">
+                <MudPaper Height="100px" Elevation="0">
                     @if ((_model == null) && (_training == null) && (_dataset == null))
                     {
                         <MudGrid>
@@ -40,22 +47,22 @@
                     }
                     else
                     {
-                        <MudGrid Class="mud-full-height mud-full-width" Style="height:100%">
+                        <MudGrid>
                             <MudItem xs="3" sm="3" md="3">
                                 <MudText Typo="Typo.body1" Style=" display: flex;">@L["Dataset: "] <MudLink Href="@NavManager.ToAbsoluteUri("datasets/" + @_training.Training.DatasetId).AbsoluteUri" Style="cursor: pointer; display: flex;"><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.ListAlt" Style="margin-right: 4px;" />@_dataset.Dataset.Name</MudLink></MudText>
                                 <MudText Typo="Typo.body1">@L["Start: {0}", _training.Training.RuntimeProfile.StartTime.ToString("dd/MM/yyyy HH:mm")]</MudText>
                                 <MudText Typo="Typo.body1">@L["Status: {0}", _model.Model.Status]</MudText>
-                                <MudText Typo="Typo.body1">@L["Training time: {0}", _model.Model.Status == "busy" ? DateTime.UtcNow.Subtract(_model.Model.RuntimeProfile.StartTime).TotalMinutes.ToString("0") : _model.Model.RuntimeProfile.EndTime.Subtract(_model.Model.RuntimeProfile.StartTime).TotalSeconds.ToString("0")]</MudText>
+                                <MudText Typo="Typo.body1">@L["Total training time: {0}", _model.Model.Status == "busy" ? DateTime.UtcNow.Subtract(_model.Model.RuntimeProfile.StartTime).TotalSeconds.ToString("0") : _model.Model.RuntimeProfile.EndTime.Subtract(_model.Model.RuntimeProfile.StartTime).TotalSeconds.ToString("0")]</MudText>
                             </MudItem>
                             <MudItem xs="3" sm="3" md="3">
-                                <MudText Typo="Typo.body1" Class="text-card-content">@L["AutoML solution: {0}", _model.Model.AutoMlSolution.Properties.ContainsKey("skos:prefLabel") ? _model.Model.AutoMlSolution.Properties["skos:prefLabel"] : ""]</MudText>
-                                <MudText Typo="Typo.body1" Class="text-card-content">@L["ML library: {0}", _model.Model.GetMlLibraryString()]</MudText>
-                                <MudText Typo="Typo.body1" Class="text-card-content">@L["Model: {0}", _model.Model.GetMlModelString()]</MudText>
-                                <MudText Typo="Typo.body1" Class="text-card-content" Style=" display: flex;">@L["Training: "]<MudLink Href="@NavManager.ToAbsoluteUri("trainings/" + @_training.Training.Id).AbsoluteUri" Class="text-card-content" Style="cursor: pointer; display: flex;"><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.ModelTraining" Style="margin-right: 4px;" />@_training.Training.RuntimeProfile.StartTime.ToString("dd/MM/yyy")</MudLink></MudText>
+                                <MudText Typo="Typo.body1">@L["AutoML solution: {0}", _model.Model.AutoMlSolution.Properties.ContainsKey("skos:prefLabel") ? _model.Model.AutoMlSolution.Properties["skos:prefLabel"] : ""]</MudText>
+                                <MudText Typo="Typo.body1">@L["ML library: {0}", _model.Model.GetMlLibraryString()]</MudText>
+                                <MudText Typo="Typo.body1">@L["Model: {0}", _model.Model.GetMlModelString()]</MudText>
+                                <MudText Typo="Typo.body1" Style=" display: flex;">@L["Training: "]<MudLink Href="@NavManager.ToAbsoluteUri("trainings/" + @_training.Training.Id).AbsoluteUri" Style="cursor: pointer; display: flex;"><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.ModelTraining" Style="margin-right: 4px;" />@_training.Training.RuntimeProfile.StartTime.ToString("dd/MM/yyy")</MudLink></MudText>
                             </MudItem>
                             <MudItem xs="3" sm="3" md="3">
-                                <MudText Typo="Typo.body1">@L["Prediction time: {0}", String.Format("{0:0}", _model.Model.PredictionTime)]</MudText>
-                                <MudText Typo="Typo.body1">@L["Training emissions: {0} kg CO2-eq", String.Format("{0:0.00000}", _model.Model.Emissions)]</MudText>
+                                <MudText Typo="Typo.body1">@L["Prediction time per sample: {0}", String.Format("{0:0}", _model.Model.PredictionTime)]</MudText>
+                                <MudText Typo="Typo.body1">@L["Emissions: {0} kg/CO2-eq", String.Format("{0:0.00000}", _model.Model.Emissions)]</MudText>
                             </MudItem>
                             <MudItem xs="3" sm="3" md="3">
                                 <MudSelect Label="@L["Metric"]" T="string" @bind-Value=SelectedMetric>
@@ -82,22 +89,22 @@
             </MudCardContent>
         </MudCard>
     </MudItem>
-    <MudItem xs="8">
+    <MudItem xs="6" sm="6" md="6">
         @if (_model != null)
         {
             <OnlinePrediction Model="_model" />
         }
     </MudItem>
-    <MudItem xs="4">
+    <MudItem xs="6" sm="6" md="6">
         <DownloadMlPipeline Model="_model"/>
     </MudItem>
-    <MudItem xs="12" sm="12" md="4">
+    <MudItem xs="4" sm="4" md="4">
         <ModelExplanationShort Model="_model" ExplanationPagePath="@_explanationPagePath" />
     </MudItem>
-    <MudItem xs="12" sm="12" md="4">
+    <MudItem xs="4" sm="4" md="4">
         <ModelConfiguration Training="_training" Model="_model" Dataset="_dataset"/>
     </MudItem>
-    <MudItem xs="12" sm="12" md="4">
+    <MudItem xs="4" sm="4" md="4">
         <ModelDetail Model="_model"/>
     </MudItem>
 </MudGrid>

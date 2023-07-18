@@ -50,7 +50,7 @@ class AutoSklearnAdapter:
     def __tabular_classification(self):
         """Execute the tabular classification task and export the found model"""
         self.df, test = data_loader(self._configuration)
-        X, y = prepare_tabular_dataset(self.df, self._configuration, apply_feature_extration=True)
+        X, y = prepare_tabular_dataset(self.df, self._configuration)
 
         automl_settings = self.__generate_settings()
         auto_cls = autosklearn.classification.AutoSklearnClassifier(**automl_settings)
@@ -61,7 +61,7 @@ class AutoSklearnAdapter:
     def __tabular_regression(self):
         """Execute the tabular regression task and export the found model"""
         self.df, test = data_loader(self._configuration)
-        X, y = prepare_tabular_dataset(self.df, self._configuration, apply_feature_extration=True)
+        X, y = prepare_tabular_dataset(self.df, self._configuration)
         # convert all object columns to categories, because autosklearn only supports numerical, bool and categorical features
         X[X.select_dtypes(['object']).columns] = X.select_dtypes(['object']) \
         .apply(lambda x: x.astype('category'))

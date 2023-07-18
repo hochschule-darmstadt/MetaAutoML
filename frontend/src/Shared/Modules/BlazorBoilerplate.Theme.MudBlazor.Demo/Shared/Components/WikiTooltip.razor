@@ -21,15 +21,9 @@
                     </MudItem>
                 }
 
-            <MudItem xs="12">
-                <MudText Style="font-size:inherit">@InfoText</MudText>
-                @if (!string.IsNullOrEmpty(WikipediaURL))
-                {
-                    <MudLink Style="color: white !important; font-size: inherit" Href="@WikipediaURL">
-                        More...
-                    </MudLink>
-                }
-            </MudItem>
+                <MudItem xs="12">
+                    <MudText Style="font-size:inherit">@InfoText</MudText>
+                </MudItem>
             </MudGrid>
         </TooltipContent>
     </MudTooltip>
@@ -61,7 +55,7 @@ else
 
     public string ImageUrl;
     public string InfoText;
-    public string WikipediaURL;
+
     protected override async void OnInitialized()
     {
         if (string.IsNullOrEmpty(SeeAlso))
@@ -86,7 +80,6 @@ else
                 {
                     InfoText = Comment;
                 }
-                WikipediaURL = wiki.GetWikipediaUrlForMore(SeeAlso);
             });
             StateHasChanged();
         }

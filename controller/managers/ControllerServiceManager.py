@@ -257,32 +257,6 @@ class ControllerServiceManager(ControllerServiceBase):
         #)
         self.__log.warn("delete_model: executed")
         return response
-    
-    @inject
-    async def start_explainer_dashboard(
-        self, start_dashboard_request: "StartDashboardRequest",
-        model_manager: ModelManager=Provide[Application.managers.model_manager]
-    ) -> "StartDashboardResponse":
-        with MeasureDuration() as m:
-            response = model_manager.start_explainer_dashboard(start_dashboard_request)
-        #response = await self.__loop.run_in_executor(
-        #    self.__executor, model_manager.delete_model, delete_model_request
-        #)
-        self.__log.warn("start_explainer_dashboard: executed")
-        return response
-    
-    @inject
-    async def stop_explainer_dashboard(
-        self, stop_dashboard_request: "StopDashboardRequest",
-        model_manager: ModelManager=Provide[Application.managers.model_manager]
-    ) -> "StopDashboardResponse":
-        with MeasureDuration() as m:
-            response = model_manager.stop_explainer_dashboard(stop_dashboard_request)
-        #response = await self.__loop.run_in_executor(
-        #    self.__executor, model_manager.delete_model, delete_model_request
-        #)
-        self.__log.warn("start_explainer_dashboard: executed")
-        return response
 
 
 
@@ -352,38 +326,12 @@ class ControllerServiceManager(ControllerServiceBase):
 						'Split large datasets',
 						'This strategy truncates the training data if the time limit is relatively short for the size of the dataset.'
 						)
-				    )
-                    
-                if (not found) or ('irrelevant_features' in dataset['analysis'] and len(dataset['analysis']['irrelevant_features']) != 0):
-                    result.strategies.append(
-                        Strategy(
-                        'preprocessing.feature_selection',
-                        'Feature selection',
-                        'This strategy will analyse the dataset for irrelevant dimensionality and reduces it to decrease complexity.'
-                        )
-                    )
-            
+				)
             result.strategies.append(
                 Strategy(
                 'pre_training.top_3_models',
                 'Top 3 Models',
                 'This strategy will run all adapters with only a small part of the data. Then it will train the 3 best solutions with the full data again.'
-                )
-            )
-
-            result.strategies.append(
-                Strategy(
-                'pre_training.multi_fidelity',
-                'Multi Fidelity',
-                'This strategy will run all adapters with only a small part of the data. Then it will train the best half solutions with more data again and so on, until one last adapter is trained with the full data.'
-                )
-            )
-            
-            result.strategies.append(
-                Strategy(
-                'preprocessing.pca_feature_extraction',
-                'PCA Feature Extraction',
-                '...'
                 )
             )
 

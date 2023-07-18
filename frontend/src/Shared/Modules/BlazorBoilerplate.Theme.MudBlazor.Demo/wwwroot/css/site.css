@@ -77,18 +77,3 @@ a {
 .mud-overlay.mud-overlay-dialog {
     z-index: 99;
 }
-
-.mudbreadcrumbs {
-    position: fixed !important;
-    top: 3.3rem;
-    z-index: 999 !important;
-    width: 100%;
-    height: 4.3rem;
-    background: white;
-    border-bottom: 1px solid lightgrey;
-}
-
-.text-card-content {
-    font-size: clamp(0.7rem, -0.875rem + 2.4vw, 1rem);
-}
-

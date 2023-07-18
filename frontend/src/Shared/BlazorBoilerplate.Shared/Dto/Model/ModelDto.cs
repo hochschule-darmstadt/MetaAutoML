@@ -32,7 +32,6 @@ namespace BlazorBoilerplate.Shared.Dto.Model
         public List<string> StatusMessages { get; set; }
         public Dictionary<string, dynamic> Explanation { get; set; }
         public double Emissions { get; set; }
-        public string ModelAddress { get; }
         public ModelDto()
         {
 
@@ -57,11 +56,6 @@ namespace BlazorBoilerplate.Shared.Dto.Model
             Explanation = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(model.Explanation);
             Emissions = model.Emission;
         }
-
-        public string GetModelAddress()
-        {
-            return "192.168.0.227:8045";
-        }
         public string GetMlLibraryString()
         {
             string libraries = "";
@@ -79,13 +73,16 @@ namespace BlazorBoilerplate.Shared.Dto.Model
         public string GetMlModelString()
         {
             string models = "";
-            List<string> modelList = new List<string>();
             foreach (var model in MlModelType)
             {
-                modelList.Add(model.Properties["skos:prefLabel"]);
+                models += model.Properties["skos:prefLabel"] + ", ";
             }
-            models = string.Join(", ", modelList);
-            return models;
+            //When no ml model type was set yet return the empty string, else remove the alst comma
+            if (models.Length == 0)
+            {
+                return models;
+            }
+            return models.Remove(models.Length - 1);
         }
     }
 }

@@ -47,7 +47,7 @@ def read_parameter(parameters, intersect_parameter, automl_parameter, ):
     else:
         return value
 
-def translate_parameters(task, parameter, task_config):
+def translate_parameters(automl, task, parameter, config_items):
     """_summary_
 
     Args:
@@ -104,7 +104,7 @@ def translate_parameters(task, parameter, task_config):
 
 
 
-def data_loader(config: "StartAutoMlRequest", image_test_folder=False, perform_splitting=True, as_dataframe=False,as_2darray=False) -> Any:
+def data_loader(config: "StartAutoMlRequest", image_test_folder=False, perform_splitting=True, as_dataframe=False) -> Any:
     """Load the dataframes for the requested dataset, by loading them into different DataFrames. See Returns section for more information.
 
     Args:
@@ -116,7 +116,7 @@ def data_loader(config: "StartAutoMlRequest", image_test_folder=False, perform_s
     """
 
     if config["configuration"]["task"] in [":image_classification", ":image_regression"]:
-        return read_image_dataset(config, image_test_folder, as_dataframe,as_2darray)
+        return read_image_dataset(config, image_test_folder, as_dataframe)
     else:
         return read_tabular_dataset_training_data(config, perform_splitting)
 
@@ -204,7 +204,7 @@ def evaluate(config: "StartAutoMlRequest", config_path: str) -> Tuple[float, flo
         if config["dataset_configuration"]["schema"][key].get("role_selected", "") == ":index":
             index.append(key)
 
-    if(config["configuration"]["task"] in [":tabular_classification", ":tabular_regression", ":text_regression", ":named_entity_recognition", ":text_classification"]):
+    if(config["configuration"]["task"] in [":tabular_classification", ":tabular_regression", ":text_regression", ":text_classification"]):
         train, test = data_loader(config)
         target = targets[0]
         # override file_path to path to test file and drop target column
@@ -244,8 +244,6 @@ def evaluate(config: "StartAutoMlRequest", config_path: str) -> Tuple[float, flo
             return compute_regression_metrics(pd.Series(test.iloc[-config["forecasting_horizon"]:][target]), predictions["predicted"]), (predict_time * 1000) / test.shape[0]
         else:
             return compute_regression_metrics(pd.Series(test[target]), predictions["predicted"]), (predict_time * 1000) / test.shape[0]
-    elif config["configuration"]["task"] == ":named_entity_recognition":
-        return compute_named_entity_recognition_metrics(pd.Series(test[target]), predictions["predicted"]), (predict_time * 1000) / pd.Series(test[target]).shape[0]
 
 def compute_classification_metrics(y_should: pd.Series, y_is: pd.Series) -> dict:
     """Compute the metrics collection for classification tasks
@@ -259,7 +257,7 @@ def compute_classification_metrics(y_should: pd.Series, y_is: pd.Series) -> dict
     """
     from sklearn.preprocessing import LabelEncoder
 
-    if y_is.dtype == object or y_should.dtype == object:
+    if y_is.dtype == object:
         #If the label is string based, we need to convert it to int values or else some metric wont compute correctly
         enc = LabelEncoder()
         labels = [value for value in y_should.unique() if value not in y_is.unique()]
@@ -336,24 +334,6 @@ def compute_regression_metrics(y_should: pd.Series, y_is: pd.Series) -> dict:
         ":mean_poisson_deviance": float(mean_poisson_deviance(y_should, y_is)),
         ":mean_gamma_deviance": float(mean_gamma_deviance(y_should, y_is))
         })
-    return score
-
-def compute_named_entity_recognition_metrics(y_should: pd.Series, y_is: pd.Series) -> dict:
-    """Compute the metrics collection for named entity recognition tasks
-
-    Args:
-        y_should (pd.Series): The series of the label for the test set
-        y_is (pd.Series): The series of the label of the model predictions for the test set
-
-    Returns:
-        dict: Dictionary containing the computed metrics, key is ontology IRI for the metric and value is the value
-    """
-    score = {
-        ":overall_recall": float(recall_score(y_should, y_is, average="micro")),
-        ":overall_precision": float(precision_score(y_should, y_is, average="micro")),
-        ":overall_f1": float(f1_score(y_should, y_is, average="micro")),
-        ":overall_accuracy": float(accuracy_score(y_should, y_is)),
-    }
     return score
 
 def predict(config: dict, config_path: str, automl: str) -> Tuple[float, str]:

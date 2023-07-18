@@ -10,25 +10,21 @@
         </CardHeaderContent>
     </MudCardHeader>
     <MudCardContent>
-        <MudPaper Height="6.25rem" Elevation="0">
+        <MudPaper Height="89px" Elevation="0">
             @if (Dataset == null)
             {
                 <DataLoaderSpinner />
             }
             else
             {
-        <ButtonTooltip Text="Click here to initiate a new training sessions." Position="Placement.Top">
-            <MudContainer>
-
-                <MudButton OnClick="@(e => { NavManager.NavigateTo("/datasets/" + Dataset.Dataset.Id + "/train"); })"
-                           Variant="Variant.Filled"
-                           StartIcon="@Icons.Filled.ModelTraining"
-                           Color="Color.Secondary" Style="width:16.3rem; align-self:center">
-                    @L["Start Training"]
-                </MudButton>
-
-            </MudContainer>
-        </ButtonTooltip>
+                <MudStack>
+                    <MudButton OnClick="@(e => { NavManager.NavigateTo("/datasets/" + Dataset.Dataset.Id + "/train"); })" 
+                        Variant="Variant.Filled" 
+                        StartIcon="@Icons.Filled.ModelTraining"
+                        Color="Color.Secondary">
+                        @L["Start Training"]
+                    </MudButton>
+                </MudStack>
             }
         </MudPaper>
     </MudCardContent>

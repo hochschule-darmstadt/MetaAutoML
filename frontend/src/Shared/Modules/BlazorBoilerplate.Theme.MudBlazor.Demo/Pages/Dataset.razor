@@ -6,16 +6,21 @@
 @attribute [Authorize]
 
 <TopSection>
-    <MudBreadcrumbs Items="_breadcrumbs" Class="mudbreadcrumbs"></MudBreadcrumbs>
+    <MudBreadcrumbs Items="_breadcrumbs" style="
+    position: fixed!important;
+    top: 65px;
+    z-index: 999!important;
+    width: 100%;">
+    </MudBreadcrumbs>
 </TopSection>
 
-<MudStack AlignItems="AlignItems.Center" Row="true" Class="mb-2" style="padding-top:50px">
+<MudStack AlignItems="AlignItems.Center" Row="true" Class="mb-2" style="padding-top:30px">
     <MudIcon Size="Size.Large" Icon="@Icons.Filled.ListAlt" />
-    <LabelTooltip FontSize="Typo.h4" Label=@_pageTitle Text="This is the page for a concrete dataset. In the ‘Overview’ panel you find metadata about the dataset. With ‘New Training’ you can start training new ML models for this dataset. ‘Preview’ shows the columns and first rows of a tabular dataset. ‘Analysis’ shows statistical insights into the dataset. ‘Top 3 models’ show the best performing models that have been trained so far on this dataset." Position="Placement.Bottom"></LabelTooltip>
+    <MudText Typo="Typo.h4">@_pageTitle</MudText>
 </MudStack>
 
 <MudGrid>
-    <MudItem xs="12" sm="9" md="9">
+    <MudItem xs="9" sm="9" md="9">
         <MudCard Elevation="5">
             <MudCardHeader Style="border-bottom-style: inset; border-bottom-width: 1px;">
                 <CardHeaderContent>
@@ -23,7 +28,7 @@
                 </CardHeaderContent>
             </MudCardHeader>
             <MudCardContent>
-                <MudPaper Height="7rem" Elevation="0">
+                <MudPaper Height="100px" Elevation="0">
                     @if (_dataset == null)
                     {
                         <DataLoaderSpinner />
@@ -31,31 +36,31 @@
                     else
                     {
                         <MudGrid>
-                            <MudItem xs="6" sm="4" md="4">
-                                <MudText Typo="Typo.body1" Class="text-card-content">@L["Name: {0}", _dataset.Dataset.Name] </MudText>
-                                <MudText Typo="Typo.body1" Class="text-card-content">@L["Dataset type: {0}", L[_dataset.Dataset.Type.Properties.ContainsKey("skos:prefLabel") ? _dataset.Dataset.Type.Properties["skos:prefLabel"] : ""]]</MudText>
+                            <MudItem xs="3" sm="3" md="3">
+                                <MudText Typo="Typo.body1">@L["Name: {0}", _dataset.Dataset.Name] </MudText>
+                                <MudText Typo="Typo.body1">@L["Dataset type: {0}", L[_dataset.Dataset.Type.Properties.ContainsKey("skos:prefLabel") ? _dataset.Dataset.Type.Properties["skos:prefLabel"] : ""]]</MudText>
                             </MudItem>
-                            <MudItem xs="6" sm="4" md="4">
-                                <MudText Typo="Typo.body1" Class="text-card-content">@L["Date: {0}", _dataset.Dataset.Analysis.ContainsKey("creation_date") ? _dataset.Dataset.Analysis["creation_date"].ToString("yyyy-MM-dd") : ""]</MudText>
-                                <MudText Typo="Typo.body1" Class="text-card-content">@L["File Size: {0}", FormatBytes(_dataset.Dataset.Analysis.ContainsKey("size_bytes") ? _dataset.Dataset.Analysis["size_bytes"] : 0)]</MudText>
+                            <MudItem xs="3" sm="3" md="3">
+                                <MudText Typo="Typo.body1">@L["Date: {0}", _dataset.Dataset.Analysis.ContainsKey("creation_date") ? _dataset.Dataset.Analysis["creation_date"].ToString("yyyy-MM-dd") : ""]</MudText>
                             </MudItem>
-                            <MudItem xs="6" sm="4" md="4">
+                            <MudItem xs="3" sm="3" md="3">
+                                <MudText Typo="Typo.body1">@L["File Size: {0}", FormatBytes(_dataset.Dataset.Analysis.ContainsKey("size_bytes") ? _dataset.Dataset.Analysis["size_bytes"] : 0)]</MudText>
                                 @if ((@_dataset.Dataset.Type.ID == ":tabular") || (@_dataset.Dataset.Type.ID == ":text") || (@_dataset.Dataset.Type.ID == ":time_series") || (@_dataset.Dataset.Type.ID == ":time_series_longitudinal"))
                                 {
                                     if (_dataset.Dataset.Analysis == null)
                                     {
-                                        <MudText Typo="Typo.body1" Class="text-card-content">@L["Number of rows: {0}", "unknown"]</MudText>
-                                        <MudText Typo="Typo.body1" Class="text-card-content">@L["Number of columns: {0}", "unknown"]</MudText>
+                                        <MudText Typo="Typo.body1">@L["Number of rows: {0}", "unknown"]</MudText>
+                                        <MudText Typo="Typo.body1">@L["Number of columns: {0}", "unknown"]</MudText>
                                     }
                                     else if (_dataset.Dataset.Analysis.Count != 0)
                                     {
-                                        <MudText Typo="Typo.body1" Class="text-card-content">@L["Number of rows: {0}", _dataset.Dataset.Analysis.ContainsKey("number_of_rows") ? _dataset.Dataset.Analysis["number_of_rows"] : "0"]</MudText>
-                                        <MudText Typo="Typo.body1" Class="text-card-content">@L["Number of columns: {0}", _dataset.Dataset.Analysis.ContainsKey("number_of_columns") ? _dataset.Dataset.Analysis["number_of_columns"] : "0"]</MudText>
+                                        <MudText Typo="Typo.body1">@L["Number of rows: {0}", _dataset.Dataset.Analysis.ContainsKey("number_of_rows") ? _dataset.Dataset.Analysis["number_of_rows"] : "0"]</MudText>
+                                        <MudText Typo="Typo.body1">@L["Number of columns: {0}", _dataset.Dataset.Analysis.ContainsKey("number_of_columns") ? _dataset.Dataset.Analysis["number_of_columns"] : "0"]</MudText>
                                     }
                                     else
                                     {
-                                        <MudText Typo="Typo.body1" Class="text-card-content">@L["Number of rows: {0}", "unknown"]</MudText>
-                                        <MudText Typo="Typo.body1" Class="text-card-content">@L["Number of columns: {0}", "unknown"]</MudText>
+                                        <MudText Typo="Typo.body1">@L["Number of rows: {0}", "unknown"]</MudText>
+                                        <MudText Typo="Typo.body1">@L["Number of columns: {0}", "unknown"]</MudText>
                                     }
                                 }
                             </MudItem>
@@ -65,8 +70,8 @@
             </MudCardContent>
         </MudCard>
     </MudItem>
-    <MudItem xs="12" sm="3" md="3">
-
+    <MudItem xs="3" sm="3" md="3">
+     
             @if (_dataset != null)
             {
                 @if ((_readDatasetFailed == false) && (_dataset.Dataset.Analysis["size_bytes"] != 0))
@@ -78,15 +83,15 @@
                     <NewTrainingDatasetNotReadable />
                 }
             }
-
+    
     </MudItem>
     <MudItem xs="12" sm="12" md="12">
-            <DatasetPreviewShort @bind-ReadDatasetFailed="@_readDatasetFailed" Dataset="@_dataset" />
+            <DatasetPreviewShort @bind-ReadDatasetFailed="@_readDatasetFailed" Dataset="@_dataset" /> 
     </MudItem>
-    <MudItem xs="12" sm="6" md="4">
-        <DatasetAnalysisShort Dataset="_dataset"/>
+    <MudItem xs="3" sm="3" md="3">
+        <DatasetAnalysisShort Dataset="_dataset" />
     </MudItem>
-    <MudItem xs="12" sm="6" md="8">
+    <MudItem xs="9" sm="9" md="9">
         <Top3Models Dataset="_dataset" />
     </MudItem>
 

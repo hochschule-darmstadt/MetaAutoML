@@ -27,8 +27,6 @@ class TPOTAdapter:
                 self.__tabular_classification()
             elif self._configuration["configuration"]["task"] == ":tabular_regression":
                 self.__tabular_regression()
-            elif self._configuration["configuration"]["task"] == ":image_classification":
-                self.__image_classification()
 
     def __tabular_classification(self):
         train, test = data_loader(self._configuration, perform_splitting=False)
@@ -38,10 +36,10 @@ class TPOTAdapter:
         self._configuration = set_imputation_for_numerical_columns(self._configuration, X)
         train, test = data_loader(self._configuration)
         #reload dataset to load changed data
-        X, y = prepare_tabular_dataset(train, self._configuration, apply_feature_extration=True)
+        X, y = prepare_tabular_dataset(train, self._configuration)
         parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), tpc.task_config)
-        pipeline_optimizer = TPOTClassifier(**parameters,
-                                            random_state=42, verbosity=2, max_time_mins=self._configuration["configuration"]["runtime_limit"])
+        pipeline_optimizer = TPOTClassifier(generations=1, population_size=2, cv=5, **parameters,
+                                            random_state=42, verbosity=2, max_time_mins=self._configuration["configuration"]["runtime_limit"]*60)
         pipeline_optimizer.fit(X, y)
         export_model(pipeline_optimizer.fitted_pipeline_, self._configuration["result_folder_location"], 'model_TPOT.p')
 
@@ -54,20 +52,10 @@ class TPOTAdapter:
         self._configuration = set_imputation_for_numerical_columns(self._configuration, X)
         train, test = data_loader(self._configuration)
         #reload dataset to load changed data
-        X, y = prepare_tabular_dataset(train, self._configuration, apply_feature_extration=True)
+        X, y = prepare_tabular_dataset(train, self._configuration)
         parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), tpc.task_config)
 
-        pipeline_optimizer = TPOTRegressor(**parameters,
-                                            random_state=42, verbosity=2, max_time_mins=self._configuration["configuration"]["runtime_limit"])
+        pipeline_optimizer = TPOTRegressor(generations=5, population_size=5, cv=5, **parameters,
+                                            random_state=42, verbosity=2, max_time_mins=self._configuration["configuration"]["runtime_limit"]*60)
         pipeline_optimizer.fit(X, y)
         export_model(pipeline_optimizer.fitted_pipeline_, self._configuration["result_folder_location"], 'model_TPOT.p')
-
-    def __image_classification(self):
-        X, y = data_loader(self._configuration, perform_splitting=False, as_2darray=True)
-
-        parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), tpc.task_config)
-        pipeline_optimizer = TPOTClassifier(**parameters,
-                                            random_state=42, verbosity=2, max_time_mins=self._configuration["configuration"]["runtime_limit"])
-        pipeline_optimizer.fit(X, y)
-        export_model(pipeline_optimizer.fitted_pipeline_, self._configuration["result_folder_location"], 'model_TPOT.p')
-

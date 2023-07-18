@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using AutoMapper.Configuration;
+﻿using AutoMapper.Configuration;
 using BlazorBoilerplate.Shared.Dto.Admin;
 using BlazorBoilerplate.Shared.Dto.Sample;
 using Finbuckle.MultiTenant;

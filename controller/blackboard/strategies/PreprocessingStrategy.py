@@ -43,19 +43,6 @@ class PreprocessingStrategyController(IAbstractStrategy):
             Rule("phase == 'preprocessing' and not (dataset_type == ':image') and dataset_analysis['number_of_rows'] > 10000", context=preprocessing_context),
             self.do_split_large_datasets
         )
-
-        self.register_rule(
-            'preprocessing.feature_selection',
-            Rule("phase == 'preprocessing' and not (dataset_type == ':image')", context=preprocessing_context),
-            self.do_feature_selection
-        )
-
-        self.register_rule(
-            'preprocessing.pca_feature_extraction',
-            Rule("phase == 'preprocessing' and not (dataset_type == ':image')", context=preprocessing_context),
-            self.do_pca_feature_extraction
-        )
-
         self.register_rule(
             'preprocessing.finish_preprocessing',
             Rule("""
@@ -82,7 +69,7 @@ class PreprocessingStrategyController(IAbstractStrategy):
 
         for column_a, column_b in duplicate_columns:
             self._log.info(f'do_ignore_redundant_features: Encountered redundant feature "{column_b}" (same as "{column_a}"), ingoring the column.')
-            dataset_configuration[column_b]['role_selected'] = ":ignore"
+            dataset_configuration[column_b]['RoleSelected'] = ":ignore"
 
         training_request = agent.get_adapter_runtime_manager().get_training_request()
         training_request.dataset_configuration = json.dumps(dataset_configuration)
@@ -134,41 +121,6 @@ class PreprocessingStrategyController(IAbstractStrategy):
 
         # Finished action (should only run once, therefore disable the strategy rule)
         controller.disable_strategy('preprocessing.split_large_datasets')
-
-    def do_feature_selection(self, state: dict, blackboard: Blackboard, controller: StrategyController):
-        irrelevant_features = state.get("dataset_analysis", {}).get("irrelevant_features", [])
-
-        agent: AdapterRuntimeManagerAgent = controller.get_blackboard().get_agent('training-runtime')
-        if not agent or not agent.get_adapter_runtime_manager():
-            raise RuntimeError('Could not access Adapter Runtime Manager Agent!')
-        dataset_configuration = json.loads(agent.get_adapter_runtime_manager().get_training_request().dataset_configuration)
-
-        for column in irrelevant_features:
-            self._log.info(f'do_feature_selection: Encountered irrelevant feature {column}.')
-            dataset_configuration[column]['role_selected'] = ":ignore"
-
-        training_request = agent.get_adapter_runtime_manager().get_training_request()
-        training_request.dataset_configuration = json.dumps(dataset_configuration)
-        agent.get_adapter_runtime_manager().set_training_request(training_request)
-
-        # Finished action (should only run once, therefore disable the strategy rule)
-        controller.disable_strategy('preprocessing.feature_selection')
-
-    def do_pca_feature_extraction(self, state: dict, blackboard: Blackboard, controller: StrategyController):
-        agent: AdapterRuntimeManagerAgent = controller.get_blackboard().get_agent('training-runtime')
-        if not agent or not agent.get_adapter_runtime_manager():
-            raise RuntimeError('Could not access Adapter Runtime Manager Agent!')
-        dataset_configuration = json.loads(agent.get_adapter_runtime_manager().get_training_request().dataset_configuration)
-
-        for dcc in dataset_configuration:
-            dataset_configuration[dcc]['preprocessing'] = {"pca": True}
-
-        training_request = agent.get_adapter_runtime_manager().get_training_request()
-        training_request.dataset_configuration = json.dumps(dataset_configuration)
-        agent.get_adapter_runtime_manager().set_training_request(training_request)
-
-        # Finished action (should only run once, therefore disable the strategy rule)
-        controller.disable_strategy('preprocessing.feature_selection')
 
     def do_finish_preprocessing(self, state: dict, blackboard: Blackboard, controller: StrategyController):
         if self.global_multi_fidelity_level != 0:

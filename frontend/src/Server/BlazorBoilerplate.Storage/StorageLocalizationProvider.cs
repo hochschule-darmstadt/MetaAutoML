@@ -98,82 +98,50 @@ namespace BlazorBoilerplate.Storage
                 throw new DomainException("PO File without a valid language");
             }
 
-            var catalogCulture = textCatalog.GetCultureName();
-
-            var pluralFormRule = await localizationDbContext.PluralFormRules
-                .SingleOrDefaultAsync(i => i.Language == catalogCulture);
-
-            if (pluralFormRule == null)
+            await localizationDbContext.Upsert(new PluralFormRule()
             {
-                pluralFormRule = new() { Language = catalogCulture };
-
-                localizationDbContext.PluralFormRules.Add(pluralFormRule);
-            }
-
-            pluralFormRule.Count = textCatalog.PluralFormCount;
-            pluralFormRule.Selector = textCatalog.PluralFormSelector;
-
-            await localizationDbContext.SaveChangesAsync();
+                Language = textCatalog.GetCultureName(),
+                Count = textCatalog.PluralFormCount,
+                Selector = textCatalog.PluralFormSelector
+            }).RunAsync();
 
             foreach (var item in textCatalog)
             {
                 if (!string.IsNullOrWhiteSpace(item[0]))
                 {
-                    var contextId = item.Key.ContextId ?? nameof(Global);
-
-                    var localizationRecord = await localizationDbContext.LocalizationRecords
-                            .SingleOrDefaultAsync(l =>
-                            l.MsgId == item.Key.Id &&
-                            l.Culture == catalogCulture &&
-                            l.ContextId == contextId);
-
-                    if (localizationRecord == null)
+                    var localizationRecord = new LocalizationRecord()
                     {
-                        localizationRecord = new()
-                        {
-                            Culture = catalogCulture,
-                            MsgId = item.Key.Id,
-                            ContextId = contextId
-                        };
+                        Culture = textCatalog.GetCultureName(),
+                        MsgId = item.Key.Id,
+                        MsgIdPlural = item.Key.PluralId,
+                        Translation = item[0],
+                        ContextId = item.Key.ContextId ?? nameof(Global)
+                    };
 
-                        localizationDbContext.LocalizationRecords.Add(localizationRecord);
-                    }
-
-
-                    localizationRecord.MsgIdPlural = item.Key.PluralId;
-                    localizationRecord.Translation = item[0];
-
-                    await localizationDbContext.SaveChangesAsync();
+                    await localizationDbContext.Upsert(localizationRecord).On(l => new { l.MsgId, l.Culture, l.ContextId }).RunAsync();
 
                     if (item.Count == textCatalog.PluralFormCount)
                     {
+                        localizationRecord = await localizationDbContext.LocalizationRecords
+                            .SingleAsync(l =>
+                            localizationRecord.MsgId == l.MsgId &&
+                            localizationRecord.Culture == l.Culture &&
+                            localizationRecord.ContextId == l.ContextId);
+
+                        var pluralTranslations = new List<PluralTranslation>();
+
                         var i = 0;
 
                         foreach (var entry in item)
                             if (!string.IsNullOrWhiteSpace(entry))
-                            {
-
-                                var pluralTranslation = await localizationDbContext.PluralTranslations
-                                    .SingleOrDefaultAsync(l =>
-                                    l.LocalizationRecordId == localizationRecord.Id && l.Index == i);
-
-                                if (pluralTranslation == null)
+                                pluralTranslations.Add(new PluralTranslation()
                                 {
-                                    pluralTranslation = new()
-                                    {
-                                        LocalizationRecordId = localizationRecord.Id,
-                                        Index = i
-                                    };
+                                    LocalizationRecordId = localizationRecord.Id,
+                                    Index = i++,
+                                    Translation = entry
+                                });
 
-                                    localizationDbContext.PluralTranslations.Add(pluralTranslation);
-                                }
-
-                                pluralTranslation.Translation = entry;
-
-                                i++;
-                            }
-
-                        await localizationDbContext.SaveChangesAsync();
+                        await localizationDbContext.PluralTranslations.UpsertRange(pluralTranslations).On(l => new { l.LocalizationRecordId, l.Index }).RunAsync();
                     }
                 }
             }

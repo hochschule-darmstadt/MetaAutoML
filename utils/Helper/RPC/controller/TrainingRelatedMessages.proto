@@ -78,7 +78,7 @@ message Training {
   */
   repeated Model models = 3;
   /*
-    Current training activity status (busy, ended)
+    Current training activity status (busy, completed, failed)
     example: "busy"
   */
   string status = 4;
@@ -212,14 +212,14 @@ message CreateTrainingRequest {
   */
   Configuration configuration = 3;
   /*
-    The configuration of all columns. See SetDatasetColumnSchemaConfigurationRequest for more details.
+    The current dataset configuration used to open the dataset as a JSON string
     example: '{
-    "PassengerId": {
-      "RoleSelected": ":index",
-      "DatatypeSelected": ":integer",
-      },
-    }'
-    If "" (empty string) is provided, the currently saved schema is used.
+    "use_header": true,
+    "start_row": 1,
+    "delimiter": "comma",
+    "escape_character": "\\",
+    "decimal_character": "."
+  }'
   */
   string datasetConfiguration = 4;
 

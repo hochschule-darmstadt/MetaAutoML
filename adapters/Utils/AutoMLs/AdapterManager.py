@@ -74,21 +74,11 @@ class AdapterManager(Thread):
             config = setup_run_environment(self.__start_auto_ml_request, self._adapter_name)
             #Start carbon recording
             carbon_tracker.start()
-
-            #set encoding for the stream
-            #because it occurs errors with windows-1252 set it to latin-1
-            if "encoding" in json.loads(self.__start_auto_ml_request.dataset_configuration)["file_configuration"]:
-                encoding = json.loads(self.__start_auto_ml_request.dataset_configuration)["file_configuration"]["encoding"]
-            else:
-                encoding = "latin-1"
-            if encoding == "windows-1252" or encoding == "cp1252":
-                encoding = "latin-1"
-
             # start training process
             python_env = os.getenv("PYTHON_ENV", default="PYTHON_ENV_UNSET")
             process = Popen([python_env, "AutoML.py", config.job_folder_location],
                                     stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-                                    universal_newlines=True, encoding=encoding)
+                                    universal_newlines=True)
 
             # read the processes output line by line and push them onto the event queue
             for line in process.stdout:
@@ -251,7 +241,7 @@ class AdapterManager(Thread):
                                                   config_json["user_id"],
                                                   config_json["dataset_id"],
                                                   config_json["training_id"],
-                                                  get_config_property("job-folder-name"),
+                                                  get_config_property("job-folder-name"), 
                                                   get_config_property("job-file-name"))
             #Read dataset configuration
             with open(job_file_location) as file:
@@ -321,14 +311,6 @@ class AdapterManager(Thread):
 
         except Exception as e:
             raise grpclib.GRPCError(grpclib.Status.UNAVAILABLE, f"Error while generating probabilities {e}")
-        
-    def _create_explainer_dashboard(self, request: "CreateExplainerDashboardRequest") -> "CreateExplainerDashboardResponse":
-        """Must be overwriten! Creates the Explainerdashboard used by the ExplainableAIManager module inside the controller
-
-        Args:
-            config (CreateExplainerDashboardRequest): the request holding configuration data.
-        """
-        return
 
     def get_start_auto_ml_request(self) -> StartAutoMlRequest:
         return self.__start_auto_ml_request

@@ -6,13 +6,18 @@
 @attribute [Authorize]
 
 <TopSection>
-    <MudBreadcrumbs Items="_breadcrumbs" Class="mudbreadcrumbs"></MudBreadcrumbs>
+    <MudBreadcrumbs Items="_breadcrumbs" style="
+    position: fixed!important;
+    top: 65px;
+    z-index: 999!important;
+    width: 100%;">
+    </MudBreadcrumbs>
 </TopSection>
 
 
-<MudStack AlignItems="AlignItems.Center" Row="true" Class="mb-2" style="padding-top:50px">
+<MudStack AlignItems="AlignItems.Center" Row="true" Class="mb-2" style="padding-top:30px">
     <MudIcon Size="Size.Large" Icon="@Icons.Filled.Lightbulb" />
-    <LabelTooltip FontSize="Typo.h4" Label="Models" Text="This page shows all models that have been trained for this dataset so far, potentially in several training sessions." Position="Placement.Right"></LabelTooltip>
+    <MudText Typo="Typo.h4">Models</MudText>
 </MudStack>
 
 <MudGrid>

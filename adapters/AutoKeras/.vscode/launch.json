@@ -39,7 +39,7 @@
             "type": "python",
             "request": "launch",
             "purpose": ["debug-test"],
-            "program": "tests/test_image_tasks.py",
+            "program": "tests/test_text_tasks.py",
             "console": "integratedTerminal",
             "justMyCode": false,
             "env": {

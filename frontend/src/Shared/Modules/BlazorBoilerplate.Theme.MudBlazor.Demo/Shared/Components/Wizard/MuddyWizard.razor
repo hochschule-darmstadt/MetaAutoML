@@ -63,48 +63,33 @@
                         <MudStack Row="true">
                             @if (@DisplaySaveSchemaCheckbox)
                             {
-                                <ButtonTooltip Text="Select this box if you want your configuration to be saved with the dataset and be re-used for the next training." Position="Placement.Bottom">
-                                    <MudCheckBox Checked="@SaveSchema" T="bool" CheckedChanged="OnSaveSchemaCheckedChanged" Label="@L["Save Schema"]"></MudCheckBox>
-                                </ButtonTooltip>
+                                <MudCheckBox Checked="@SaveSchema" T="bool" CheckedChanged="OnSaveSchemaCheckedChanged" Label="@L["Save Schema"]"></MudCheckBox>
                             }
-                        <MudStack Row="true">
-                            <ButtonTooltip Text="Click here to get back to the last step of the training configuration wizard." Position="Placement.Bottom" ShowOnHover="(!IsPreviousDisabled)">
-                                <MudButton OnClick="OnPrevious"
-                                           Disabled="@IsPreviousDisabled"
-                                           Color="Color.Secondary"
-                                           Variant="@ButtonVariant" Style="height:fit-content">
-                                    @L["Previous"]
+                            <MudButton OnClick="OnPrevious"
+                                   Disabled="@IsPreviousDisabled"
+                                   Color="Color.Secondary"
+                                   Variant="@ButtonVariant">
+                                @L["Previous"]
+                            </MudButton>
+                            @if (@IsFinishVisible)
+                            {
+                                <MudButton OnClick="OnFinish"
+                                            Color="Color.Secondary"
+                                            Disabled="@DisableNext"
+                                            Variant="@ButtonVariant">
+                                    @L["Finish"]
                                 </MudButton>
-                                </ButtonTooltip>
-
-                                @if (@IsFinishVisible)
-                                {
-
-                                    <ButtonTooltip Text="Click here to finish configuration and start training. This may take a while, depending on your maximum runtime configuration." Position="Placement.Bottom">
-                                        <MudButton OnClick="OnFinish"
-                                                   Color="Color.Secondary"
-                                                   Disabled="@DisableNext"
-                                                   Variant="@ButtonVariant">
-                                            @L["Finish"]
-                                        </MudButton>
-                                    </ButtonTooltip>
-
-                                }
-                                else
-                                {
-
-                                    <ButtonTooltip Text="Click here to advance to the next step of the training wizard: configuring the training. You can always step back." Position="Placement.Top">
-                                        <MudButton OnClick="OnNext"
-                                                   Disabled="@IsNextDisabled"
-                                                   Color="Color.Secondary"
-                                                   Variant="@ButtonVariant">
-                                            @L["Next"]
-                                        </MudButton>
-                                    </ButtonTooltip>
-
-                                }
+                            }
+                            else
+                            {
+                                <MudButton OnClick="OnNext" 
+                                            Disabled="@IsNextDisabled"
+                                            Color="Color.Secondary"
+                                            Variant="@ButtonVariant">
+                                    @L["Next"]
+                                </MudButton> 
+                            }
                         </MudStack>
-                            </MudStack>
                     </span>
                 </CardHeaderActions>
             </MudCardHeader>

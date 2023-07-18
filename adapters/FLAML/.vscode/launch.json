@@ -31,55 +31,6 @@
                 "PYTHON_ENV": ".venv/bin/python",
                 "USE_DEV_CONFIG": "YES"
             },
-        },
-        {   
-            
-            "name": "WIN FLAML Adapter Test",
-            "type": "python",
-            "request": "launch",
-            "purpose": ["debug-test"],
-            "program": "tests/test_tabular_tasks.py",
-            "console": "integratedTerminal",
-            "justMyCode": false,
-            "env": {
-                "PYTHONPATH": ".;dependency-injection;AutoMLs;Utils;../Utils/Utils;../Utils/AutoMLs;../GRPC/Adapter;",
-                "GRPC_SERVER_PORT": "50062",
-                "PYTHON_ENV": ".venv/Scripts/python",
-                "USE_DEV_CONFIG": "YES",
-                "PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION": "python"
-            },
-        },
-        {
-            "name": "WIN FLAML Explainerdashboard Test",
-            "type": "python",
-            "request": "launch",
-            "purpose": ["debug-test"],
-            "program": "tests/test_text_tasks.py",
-            "console": "integratedTerminal",
-            "justMyCode": false,
-            "env": {
-                "PYTHONPATH": ".;./dependency-injection;./AutoMLs;./Utils;./../Utils/Utils;./../Utils/AutoMLs;./../GRPC/Adapter;./../../controller;",
-                "GRPC_SERVER_PORT": "50052",
-                "PYTHON_ENV": ".venv/Scripts/python",
-                "USE_DEV_CONFIG": "YES",
-                "PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION": "python"
-            },
-        },
-        {
-            "name": "UNIX FLAML Explainerdashboard Test",
-            "type": "python",
-            "request": "launch",
-            "purpose": ["debug-test"],
-            "program": "tests/test_explainer_dashboard.py",
-            "console": "integratedTerminal",
-            "justMyCode": true,
-            "env": {
-                "PYTHONPATH": ".:./dependency-injection:./AutoMLs:./Utils:./../Utils/Utils:./../Utils/AutoMLs:./../GRPC/Adapter:./../../controller:",
-                "GRPC_SERVER_PORT": "50052",
-                "PYTHON_ENV": ".venv/bin/python",
-                "USE_DEV_CONFIG": "YES",
-                "PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION": "python"
-            },
-        },
+        }
     ]
 }

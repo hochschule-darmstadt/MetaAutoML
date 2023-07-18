@@ -11,7 +11,6 @@ from sktime.datasets import load_from_tsfile_to_dataframe
 from DataStorage import DataStorage
 from ThreadLock import ThreadLock
 from CsvManager import CsvManager
-from feature_engine.selection import DropConstantFeatures, DropDuplicateFeatures, SmartCorrelatedSelection
 ##TODO REFACTORING
 
 # Config for matplotlib plot sizing. These values are interpreted as pixels / 100.
@@ -138,8 +137,7 @@ class DataSetAnalysisManager(Thread):
                 "missings_per_row": DataSetAnalysisManager.__missing_values_rows(self.__dataset_df),
                 "outlier": DataSetAnalysisManager.__detect_outliers(self.__dataset_df, schema),
                 "duplicate_columns": DataSetAnalysisManager.__detect_duplicate_columns(self.__dataset_df),
-                "duplicate_rows": DataSetAnalysisManager.__detect_duplicate_rows(self.__dataset_df),
-                "irrelevant_features": DataSetAnalysisManager.__detect_irrelevant_features(self.__dataset_df)
+                "duplicate_rows": DataSetAnalysisManager.__detect_duplicate_rows(self.__dataset_df)
             })
         elif self.__dataset["type"] == ":image":
             pass
@@ -235,35 +233,6 @@ class DataSetAnalysisManager(Thread):
             missing_rows_indices.append(index)
 
         return missing_rows_indices
-
-    @staticmethod
-    def __detect_irrelevant_features(dataset) -> 'list[str]':
-        """
-        Detects irrelevant features in a dataset
-        ---
-        Parameter
-        1. dataset to be analyzed
-        ---
-        Return a list of strings each representing an irrelevant feature.
-        """
-        old_columns_list = dataset.columns.tolist()
-
-        dataframe = dataset
-        dataframe = dataframe.dropna()
-        constant_features = DropConstantFeatures(tol=0.998)  # Standard-Toleranzwert
-        dataframe = constant_features.fit_transform(dataframe)
-        duplicate_features = DropDuplicateFeatures()
-        dataframe = duplicate_features.fit_transform(dataframe)
-        correlated_features = SmartCorrelatedSelection()
-        dataframe = correlated_features.fit_transform(dataframe)
-
-        new_columns_list = dataframe.columns.tolist()
-
-        irrelevant_features = []
-        for element in old_columns_list:
-            if element not in new_columns_list:
-                irrelevant_features.append(element)
-        return irrelevant_features
 
     @staticmethod
     def __detect_outliers(dataset, schema) -> 'dict':
@@ -574,7 +543,6 @@ class DataSetAnalysisManager(Thread):
             "outlier": [],
             "duplicate_columns": [],
             "duplicate_rows": [],
-            "irrelevant_features": [],
         }
 
 

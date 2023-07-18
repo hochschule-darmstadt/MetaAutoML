@@ -60,8 +60,6 @@ namespace BlazorBoilerplate.Shared.Interfaces
         Task<ApiResponseDto> ModelPrediction(ModelPredictionRequestDto request);
         Task<ApiResponseDto> DownloadModel(DownloadModelRequestDto request);
         Task<ApiResponseDto> DeleteModel(DeleteModelRequestDto request);
-        Task<ApiResponseDto> StartExplainerDashboard(StartDashboardRequestDto request);
-        Task<ApiResponseDto> StopExplainerDashboard(StopDashboardRequestDto request);
 
         #endregion
 

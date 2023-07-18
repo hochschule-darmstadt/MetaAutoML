@@ -164,10 +164,6 @@ msgid "ReadClientPermission"
 msgstr "Read clients data"
 
 msgctxt "Global"
-msgid "Language"
-msgstr "Language"
-
-msgctxt "Global"
 msgid "ReadRolePermission"
 msgstr "Read roles data (permissions, etc.)"
 
@@ -1050,14 +1046,6 @@ msgid "Export"
 msgstr "Export"
 
 msgctxt "Global"
-msgid "File"
-msgstr "File"
-
-msgctxt "Global"
-msgid "URL"
-msgstr "URL"
-
-msgctxt "Global"
 msgid "Import PO file"
 msgstr "Import PO file"
 
@@ -1158,10 +1146,6 @@ msgid "Data not available."
 msgstr "Data not available."
 
 msgctxt "Global"
-msgid "ENTER URL"
-msgstr "Enter URL"
-
-msgctxt "Global"
 msgid "Company"
 msgstr "Company"
 
@@ -1212,7 +1196,7 @@ msgstr "You are not authorized to access this page"
 
 msgctxt "TrainingTimeline"
 msgid "started"
-msgstr "Training started"
+msgstr "Started Experiment"
 
 msgctxt "TrainingTimeline"
 msgid "preprocessing"
@@ -1220,11 +1204,11 @@ msgstr "Preprocessing"
 
 msgctxt "TrainingTimeline"
 msgid "running"
-msgstr "AutoML executing"
+msgstr "Running AutoMLs"
 
 msgctxt "TrainingTimeline"
 msgid "stopped"
-msgstr "Training finished"
+msgstr "Finished Experiment"
 
 msgctxt "TrainingTimeline"
 msgid "strategy_action"
@@ -1411,20 +1395,20 @@ msgid "Model"
 msgstr "Model"
 
 msgctxt "Global"
-msgid "ML Library"
-msgstr "ML Library"
+msgid "Library"
+msgstr "Library"
 
 msgctxt "Global"
 msgid "Test score"
 msgstr "Test score"
 
 msgctxt "Global"
-msgid "Prediction time"
-msgstr "Prediction time"
+msgid "Prediction time per sample"
+msgstr "Prediction time per sample"
 
 msgctxt "Global"
-msgid "Training time"
-msgstr "Training time"
+msgid "Total training time"
+msgstr "Total training time"
 
 msgctxt "Global"
 msgid "Top 3 models"
@@ -1488,7 +1472,7 @@ msgstr "Details"
 
 msgctxt "Global"
 msgid "ML task"
-msgstr "ML task * "
+msgstr "ML task"
 
 msgctxt "Global"
 msgid "AutoML solutions"
@@ -1504,7 +1488,7 @@ msgstr "Enabled strategies"
 
 msgctxt "Global"
 msgid "Runtime"
-msgstr "Maximum runtime [minutes]"
+msgstr "Runtime"
 
 msgctxt "Global"
 msgid "Previous"
@@ -1551,8 +1535,8 @@ msgid "failed"
 msgstr "failed"
 
 msgctxt "Global"
-msgid "Search by AutoML solution, status, ML model or library"
-msgstr "Search by AutoML solution, status, ML model or library"
+msgid "Search by AutoML solution, Status, Model or Library"
+msgstr "Search by AutoML solution, Status, Model or Library"
 
 msgctxt "Global"
 msgid "Model {0}"
@@ -1571,8 +1555,8 @@ msgid "Status {0}"
 msgstr "Status {0}"
 
 msgctxt "Global"
-msgid "Training time: {0}"
-msgstr "Training time: {0} s"
+msgid "Total training time: {0}"
+msgstr "Total training time: {0} s"
 
 msgctxt "Global"
 msgid "AutoML solution: {0}"
@@ -1595,24 +1579,28 @@ msgid "Metric"
 msgstr "Metric"
 
 msgctxt "Global"
-msgid "Prediction time: {0}"
-msgstr "Prediction time: {0} ms"
+msgid "Prediction time per sample: {0}"
+msgstr "Prediction time per sample: {0} ms"
 
 msgctxt "Global"
-msgid "Use model for predicting new cases"
-msgstr "Use model for predicting new cases"
+msgid "Predict online"
+msgstr "Predict online"
 
 msgctxt "Global"
 msgid "Upload File"
 msgstr "Upload File"
 
 msgctxt "Global"
-msgid "Download predictions"
-msgstr "Download predictions"
+msgid "Download result CSV"
+msgstr "Download result CSV"
 
 msgctxt "Global"
-msgid "Download ML model pipeline"
-msgstr "Download ML model pipeline"
+msgid "Download Machine Learning pipeline"
+msgstr "Download Machine Learning pipeline"
+
+msgctxt "Global"
+msgid "Download model"
+msgstr "Download model"
 
 msgctxt "Global"
 msgid "Dataset: {0}"
@@ -1767,19 +1755,6 @@ msgid "AntiforgeryCookieLifecycle"
 msgstr "Session"
 
 msgctxt "Global"
-msgid "Correlation Matrix"
-msgstr "Correlation Matrix"
-
-msgctxt "Global"
-msgid "Correlation analysis"
-msgstr "Correlation Analysis"
-
-msgctxt "Global"
-msgid "Column analysis"
-msgstr "Column Analysis"
-
-
-msgctxt "Global"
 msgid "AntiforgeryCookieDescription"
 msgstr "This cookie saves the anti forgery token, used to prevent Cross-Site-Request-Forgery-Attack."
 
@@ -1913,11 +1888,7 @@ msgstr "None"
 
 msgctxt "Global"
 msgid "target"
-msgstr "Target *"
-
-msgctxt "Global"
-msgid "start"
-msgstr "Start"
+msgstr "Target"
 
 msgctxt "Global"
 msgid "Datatype"
@@ -1975,14 +1946,16 @@ msgctxt "Global"
 msgid "No datetime index selected"
 msgstr "No or multiple index column with datatype datetime was set. Only one index column with datatype datetime is allowed."
 
+
 msgctxt "Global"
-msgid "Training emissions"
+msgid "Emissions kg/CO2-eq"
 msgstr "Emissions kg/CO2-eq"
 
 msgctxt "Global"
-msgid "Training emissions: {0} kg CO2-eq"
-msgstr "Training emissions: {0} kg CO2-eq"
+msgid "Emissions: {0} kg/CO2-eq"
+msgstr "Emissions: {0} kg/CO2-eq"
 
 msgctxt "Global"
 msgid "aborted"
 msgstr "Aborted"
+

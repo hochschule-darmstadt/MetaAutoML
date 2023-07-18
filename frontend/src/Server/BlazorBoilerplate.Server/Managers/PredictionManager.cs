@@ -1,4 +1,4 @@
-using BlazorBoilerplate.Infrastructure.Server;
+﻿using BlazorBoilerplate.Infrastructure.Server;
 using BlazorBoilerplate.Infrastructure.Server.Models;
 using BlazorBoilerplate.Shared.Dto.Dataset;
 using BlazorBoilerplate.Shared.Dto.Model;
@@ -52,9 +52,6 @@ namespace BlazorBoilerplate.Server.Managers
 
         async public Task<ApiResponse> DownloadPrediction(DownloadPredictionRequestDto request)
         {
-            var is_mutagen_setup = Environment.GetEnvironmentVariable("IS_MUTAGEN_SETUP");
-            var mutagen_dataset_folder_path = Environment.GetEnvironmentVariable("MUTAGEN_DATASET_FOLDER_PATH");
-            var mutagen_docker_ataset_folder_path = Environment.GetEnvironmentVariable("MUTAGEN_DOCKER_DATASET_FOLDER_PATH");
             DownloadPredictionResponseDto response = new DownloadPredictionResponseDto();
             GetPredictionRequest getPredictionDatasetRequest = new GetPredictionRequest();
             var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
@@ -65,10 +62,6 @@ namespace BlazorBoilerplate.Server.Managers
                 var reply = _client.GetPrediction(getPredictionDatasetRequest);
 
                 var predictionPath = reply.Prediction.PredictionPath;
-                if (is_mutagen_setup == "YES")
-                {
-                    predictionPath = predictionPath.Replace(mutagen_docker_ataset_folder_path, mutagen_dataset_folder_path);
-                }
                 byte[] predictionFile = File.ReadAllBytes(predictionPath);
                 response.Content = predictionFile;
                 response.Name = "predicitons.csv";

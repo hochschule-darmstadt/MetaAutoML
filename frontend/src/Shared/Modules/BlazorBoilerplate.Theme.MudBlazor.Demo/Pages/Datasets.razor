@@ -7,14 +7,17 @@
 @attribute [Authorize]
 
 <TopSection>
-    <MudBreadcrumbs Items="_breadcrumbs" Class="mudbreadcrumbs"></MudBreadcrumbs>
+    <MudBreadcrumbs Items="_breadcrumbs" style="
+    position: fixed!important;
+    top: 65px;
+    z-index: 999!important;
+    width: 100%;">
+    </MudBreadcrumbs>
 </TopSection>
 
-<MudStack AlignItems="AlignItems.Center" Row="true" Class="mb-2" style="padding-top:50px">
+<MudStack AlignItems="AlignItems.Center" Row="true" Class="mb-2" style="padding-top:30px">
     <MudIcon Size="Size.Large" Icon="@Icons.Filled.ListAlt" />
-    <LabelTooltip FontSize="Typo.h4" Label=@L["Datasets"] Text="A dataset contains data that can be used for machine learning. Different dataset types are distinguished, e.g., tabular data, texts or images. 
-This page lists all datasets you have uploaded so far to the OMA-ML platform. By clicking on a dataset, the respective dataset page is opened to inspect the dataset and start new trainings." Position="Placement.Bottom"></LabelTooltip>
-
+    <MudText Typo="Typo.h4">@L["Datasets"]</MudText>
 </MudStack>
 
 <MudGrid>

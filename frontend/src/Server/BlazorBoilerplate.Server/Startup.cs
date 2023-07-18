@@ -125,17 +125,11 @@ namespace BlazorBoilerplate.Server
             string redisEndpoint = $"{redisHost}:{redisPort},connectTimeout=1000,syncTimeout=1000,asyncTimeout=1000";
 
             ////////////////////////////////////////////////////////////////////////////////////////////////////////
-            //GRPC CONTROLLER FACTORY
+            //GRPC CONTROLLER FACTORY 
             ///////////////////////////////////////////////////////////////////////////////////////////////////////
-            ///
             services.AddGrpcClient<ControllerService.ControllerServiceClient>(o =>
             {
                 o.Address = new Uri(grpcEndpoint);
-            })
-            .ConfigureChannel(o =>
-            {
-                o.MaxReceiveMessageSize = 2000 * 1024 * 1024; // 2 MB
-                o.MaxSendMessageSize = 2000 * 1024 * 1024; // 5 MB
             })
             .ConfigurePrimaryHttpMessageHandler(() =>
             {
@@ -147,7 +141,7 @@ namespace BlazorBoilerplate.Server
 
 
             ////////////////////////////////////////////////////////////////////////////////////////////////////////
-            //OMA-ML REDIS CACHE
+            //OMA-ML REDIS CACHE 
             ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
             services.AddStackExchangeRedisCache(options =>
@@ -165,7 +159,7 @@ namespace BlazorBoilerplate.Server
                 o.ConsentModalLayout = ConsentModalLayout.Cloud;
                 o.ConsentSecondaryActionOpensSettings = false;
                 o.PolicyUrl = "/privacy";
-
+                
             });
 
             ////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -223,12 +217,12 @@ namespace BlazorBoilerplate.Server
                 //  "RunningAsDocker": false, // not implemented yet
                 //  "AzureKeyVault": {
                 //      "UsingKeyVault": true,
-                //      "UseManagedAppIdentity": true,
+                //      "UseManagedAppIdentity": true, 
                 //      "AppKey": "", // not implemented yet.
                 //      "AppSecret": "",
                 //      "KeyVaultURI": "https://YOURVAULTNAMEHERE.vault.azure.net/",
                 //      "CertificateIdentifier": "https://YOURVAULTNAMEHERE.vault.azure.net/certificates/BBAUTH/<HEX_VERSION_STRING_HERE>",
-                //      "CertificateName": "BBAUTH",
+                //      "CertificateName": "BBAUTH", 
                 //      "StorageAccountBlobBaseUrl": "https://<YOUR_STORAGE_ACCOUNT_NAME_HERE>.blob.core.windows.net",
                 //      "ContainerName": "blazor-boilerplate-keys",
                 //      "KeysBlobName": "keys.xml"
@@ -240,7 +234,7 @@ namespace BlazorBoilerplate.Server
                         {
                             //https://docs.microsoft.com/en-us/aspnet/core/security/data-protection/configuration/overview
 
-                            // In production environment we have already configured Managed Identity (blazor-boilerplate) using Azure Portal for our app to access Key Vault and Blob Storage.
+                            // In production environment we have already configured Managed Identity (blazor-boilerplate) using Azure Portal for our app to access Key Vault and Blob Storage. 
 
                             // Set up TokenCredential options for production and development environments
                             bool isDeployed = !_environment.IsDevelopment();
@@ -259,8 +253,8 @@ namespace BlazorBoilerplate.Server
                             // In development environment DefaultAzureCredential() will use the shared token credential from the IDE. In Visual Studio this is under Options - Azure Service Authentication.
                             if (_environment.IsDevelopment())
                             {
-                                // credentialOptions.SharedTokenCacheUsername = "<username@abc.onmicrosoft.com>"; // specify user name to use if more than one Azure username is configured in IDE.
-                                // var defaultTenantId = "?????-????-????-????-????????"; // specify AAD tenant to authenticate against (from Azure Portal - AAD - Tenant ID)
+                                // credentialOptions.SharedTokenCacheUsername = "<username@abc.onmicrosoft.com>"; // specify user name to use if more than one Azure username is configured in IDE. 
+                                // var defaultTenantId = "?????-????-????-????-????????"; // specify AAD tenant to authenticate against (from Azure Portal - AAD - Tenant ID) 
                                 // credentialOptions.SharedTokenCacheTenantId = defaultTenantId;
                                 // credentialOptions.VisualStudioCodeTenantId = defaultTenantId;
                                 // credentialOptions.VisualStudioTenantId = defaultTenantId;
@@ -285,7 +279,7 @@ namespace BlazorBoilerplate.Server
                             // 2. Add the call to ProtectKeysWithAzureKeyVault for subsequent runs.so that keys.xml gets created - see the setup doc for more information
                             dataProtectionBuilder.ProtectKeysWithAzureKeyVault(new Uri(certificateIdentifier), tokenCredential);
 
-                            // Azure Key Vault Access Policy must grant the following permissions to the blazor-boilerplate app:
+                            // Azure Key Vault Access Policy must grant the following permissions to the blazor-boilerplate app: 
                             // - Secret Permissions: Get
                             // - Certificate Permissions: Get
 
@@ -306,7 +300,7 @@ namespace BlazorBoilerplate.Server
                 else
                     dataProtectionBuilder.PersistKeysToFileSystem(new DirectoryInfo(keysLocalFolder));
 
-                //TODO this implementation does not consider certificate expiration
+                //TODO this implementation does not consider certificate expiration 
                 if (Convert.ToBoolean(Configuration[$"{projectName}:UseLocalCertStore"]) == true)
                 {
                     var certificateThumbprint = Configuration[$"{projectName}:CertificateThumbprint"];
@@ -499,7 +493,7 @@ namespace BlazorBoilerplate.Server
             #endregion
 
             #region Authorization
-            //Add Policies / Claims / Authorization - https://identityserver4.readthedocs.io/en/latest/topics/add_apis.html#advanced
+            //Add Policies / Claims / Authorization - https://identityserver4.readthedocs.io/en/latest/topics/add_apis.html#advanced 
             services.AddScoped<EntityPermissions>();
             services.AddSingleton<IAuthorizationPolicyProvider, AuthorizationPolicyProvider>();
             services.AddTransient<IAuthorizationHandler, DomainRequirementHandler>();
@@ -548,7 +542,7 @@ namespace BlazorBoilerplate.Server
             //});
 
             services.ConfigureApplicationCookie(options =>
-            {
+            { 
                 options.Cookie.IsEssential = true;
                 options.Cookie.HttpOnly = true;
                 options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
@@ -601,10 +595,7 @@ namespace BlazorBoilerplate.Server
                 {
                     return factory.Create(typeof(Global));
                 };
-            });
-            //.AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<LocalizationRecordValidator>());
-
-            services.AddFluentValidationAutoValidation();
+            }).AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<LocalizationRecordValidator>());
 
             services.AddServerSideBlazor().AddCircuitOptions(o =>
             {
@@ -838,7 +829,7 @@ namespace BlazorBoilerplate.Server
             Program.Sync.Release();
         }
 
-#pragma warning disable CS1998
+#pragma warning disable CS1998 
         private async Task HandleOnRemoteFailure(RemoteFailureContext context)
         {
             var msg = context.Failure.Message.Split(Environment.NewLine).Select(s => s + Environment.NewLine).Aggregate((s1, s2) => s1 + s2);
