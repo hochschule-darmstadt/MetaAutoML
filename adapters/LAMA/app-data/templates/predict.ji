@@ -8,6 +8,7 @@ from AdapterTabularUtils import *
 
 {% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression"] %}
 from preprocessing import dataset_preparation
+from postprocessing import post_process_result_dataframe
 {% endif %}
 
 if __name__ == '__main__':
@@ -21,6 +22,7 @@ if __name__ == '__main__':
 
     #Load live dataset
     X, y = dataset_preparation(filepath)
+    X_index_df = pd.DataFrame(X.index)        #Some AutoML manipulate the index, so we extract it before hands
     predicted_y = loaded_model.predict(X)
     {% if configuration.configuration["task"] in [":tabular_classification"] %}
     if loaded_model.task.name == "multiclass":
@@ -36,6 +38,7 @@ if __name__ == '__main__':
     {% if configuration.configuration["task"] in [":tabular_regression"] %}
     predicted_y = np.reshape(predicted_y.data, (-1, 1))
     {% endif %}
-    pd.DataFrame(data=predicted_y, columns=["predicted"]).to_csv(save_path)
+    predict_df = pd.DataFrame(data=predicted_y, columns=["predicted"])
+    post_process_result_dataframe(X_index_df, predict_df).to_csv(save_path)
 
 

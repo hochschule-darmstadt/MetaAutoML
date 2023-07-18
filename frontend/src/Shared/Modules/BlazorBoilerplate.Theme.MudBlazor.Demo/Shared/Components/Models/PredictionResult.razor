@@ -9,12 +9,10 @@
                     }
                 </HeaderContent>
                 <RowTemplate>
-                    
-                        @if (!string.IsNullOrEmpty(context) && !context.Contains("predicted"))
-                        {
-                                <MudTd>@context.Split(",")[0]</MudTd>
-                        <MudTd>@context.Split(",")[1]</MudTd>
-                        }
+                    @foreach (var column in @context.Split(","))
+                    {
+                        <MudTd>@column</MudTd>
+                    }
                     
                 </RowTemplate>
             </MudTable>

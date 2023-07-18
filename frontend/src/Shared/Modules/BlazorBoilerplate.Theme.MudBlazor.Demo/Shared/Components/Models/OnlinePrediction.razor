@@ -204,7 +204,7 @@
                         if (!string.IsNullOrEmpty(jsonString))
                         {
                             string tableHeader = jsonString.Split("\n")[0];
-                            string[] tableContent = jsonString.Split("\n");
+                            string[] tableContent =jsonString.Split("\n").Skip(1).ToArray();
                             parameters.Add("TableHeader", tableHeader);
                             parameters.Add("TableContent", tableContent);
                         }
