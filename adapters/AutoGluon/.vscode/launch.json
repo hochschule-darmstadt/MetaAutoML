@@ -10,14 +10,12 @@
             "request": "launch",
             "program": "AutoGluonServer.py",
             "console": "integratedTerminal",
-            "justMyCode": false,
+            "justMyCode": true,
             "env": {
                 "PYTHONPATH": ".;dependency-injection;AutoMLs;Utils;../Utils/Utils;../Utils/AutoMLs;../GRPC/Adapter;",
                 "GRPC_SERVER_PORT": "50057",
                 "PYTHON_ENV": ".venv/Scripts/python",
-                "USE_DEV_CONFIG": "YES",
-                "EXPLAINER_DASHBOARD_PORT_START": "5000",
-                "EXPLAINER_DASHBOARD_PORT_END": "5099"
+                "USE_DEV_CONFIG": "YES"
             },
         },
         {
@@ -31,9 +29,7 @@
                 "PYTHONPATH": ".:dependency-injection:AutoMLs:Utils:../Utils/Utils:../Utils/AutoMLs:../GRPC/Adapter:",
                 "GRPC_SERVER_PORT": "50057",
                 "PYTHON_ENV": ".venv/bin/python",
-                "USE_DEV_CONFIG": "YES",
-                "EXPLAINER_DASHBOARD_PORT_START": "5000",
-                "EXPLAINER_DASHBOARD_PORT_END": "5099"
+                "USE_DEV_CONFIG": "YES"
             },
         }
     ]

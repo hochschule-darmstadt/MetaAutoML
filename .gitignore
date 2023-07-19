@@ -12,16 +12,20 @@ adapters/*/app-data/output/tmp
 adapters/AutoKeras/structured_data_classifier
 
 
-mutagen_datasets/*
-
-#VS
+#VS 
 *.suo
 *.proj
+*.csv
 *.pyproj
 .vs/
 
 !titanic_train.csv
 
+#VS Code
+#adapters/*/.vscode/
+adapters/*/.venv/
+controller/.venv/
+#controller/.vscode/
 *.log
 adapters/*/AutoMLs/predict_time_sources.py
 adapters/MLJAR/AutoML_*
@@ -210,8 +214,3 @@ controller/tests/datasets/*
 
 #Authentification files
 auth/*.json
-
-#codecarbon
-
-adapter/*/tests/**
-adapters/*/emissions.csv

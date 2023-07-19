@@ -6,8 +6,6 @@
 @inject IViewNotifier viewNotifier
 @inject NavigationManager NavManager
 @attribute [Authorize]
-@implements IDisposable
-@inject IJSRuntime JSRuntime
 
 <TopSection>
     <MudBreadcrumbs Items="_breadcrumbs" style="
@@ -23,24 +21,12 @@
     <MudText Typo="Typo.h4">@L["Analysis"]</MudText>
 </MudStack>
 
-@if (string.IsNullOrEmpty(dashboardUrl))
-{
-   <MudGrid>
-      <MudItem Class="d-flex align-center justify-center mud-width-full" xs="12">
-      <MudProgressCircular Color="Color.Primary" Indeterminate="true"/>
-      </MudItem>
-   </MudGrid>
-}
-else{
-    <MudGrid AlignItems="AlignItems.Stretch">
-        <MudItem Class="d-flex align-center justify-center mud-width-full" xs="12">
-            <MudButton OnClick="@RefreshDashboard">Refresh Dashboard</MudButton>
-        </MudItem>
-        <MudItem Class="d-flex align-center justify-center mud-width-full" Style="height: 100vh;" xs="12">
-            <iframe id="dashboard_iframe" style="height:100%; width:100%" frameborder="0" src=@dashboardUrl> </iframe>
-        </MudItem>
-    </MudGrid>
-}
+<MudGrid>
+    <MudItem xs="12" sm="12" md="12">
+        <ModelExplanationFull Model="_model"/>
+    </MudItem>
+</MudGrid>
+
 
 @code {
     [Parameter]
@@ -51,50 +37,34 @@ else{
     public string TrainingId { get; set; }
     [Parameter]
     public string ListId { get; set; }
-    private string dashboardUrl = "";
-    private string dashboardSessionId = "";
-    private GetModelResponseDto dashboardAddress;
     private GetModelResponseDto _model;
-    private GetDatasetResponseDto _dataset;
     private GetTrainingResponseDto _training;
-    private ElementReference iframeRef;
     private List<BreadcrumbItem> _breadcrumbs = new List<BreadcrumbItem>();
-    private bool wasIFrameErrorHandleAdded = false;
-
-    private async void RefreshDashboard()
-    {
-        await JSRuntime.InvokeVoidAsync("reloadIframe", "dashboard_iframe");
-    }
 
     protected async override void OnInitialized()
     {
         await LoadModel();
-        await StartExplainerDashboard();
-        Thread.Sleep(3500);
-        _breadcrumbs.Add(new BreadcrumbItem("Home", "/", false, Icons.Filled.Home));
+        _breadcrumbs.Add(new BreadcrumbItem(L["Home"], "/", false, Icons.Filled.Home));
         if (ListId != null)
         {
             _breadcrumbs.Add(new BreadcrumbItem(L["Datasets"], "/datasets", false, Icons.Filled.ListAlt));
-            _breadcrumbs.Add(new BreadcrumbItem(L["Dataset {0}", _dataset.Dataset.Name], "/datasets/" + _dataset.Dataset.Id, false, Icons.Filled.ListAlt));
-            _breadcrumbs.Add(new BreadcrumbItem(L["Models"], "/datasets/" + _dataset.Dataset.Id + "/models", false, Icons.Filled.Lightbulb));
-            _breadcrumbs.Add(new BreadcrumbItem(L["Explanation"], "/explanation", false, Icons.Filled.Lightbulb));
+            _breadcrumbs.Add(new BreadcrumbItem(L["Dataset {0}", _training.Training.DatasetName], "/datasets/" + _training.Training.DatasetId, false, Icons.Filled.ListAlt));
+            _breadcrumbs.Add(new BreadcrumbItem(L["Models"], "/datasets/" + _training.Training.DatasetId + "/models", false, Icons.Filled.Lightbulb));
+            _breadcrumbs.Add(new BreadcrumbItem(L["Model {0}", _model.Model.GetMlModelString()], "/datasets/" + _training.Training.DatasetId + "/models/" + (_model.Model.GetMlModelString()), false, Icons.Filled.Lightbulb));
         }
         else if (TrainingId != null)
         {
             _breadcrumbs.Add(new BreadcrumbItem(L["Trainings"], "/trainings", false, Icons.Filled.ModelTraining));
             _breadcrumbs.Add(new BreadcrumbItem(L["Training {0}", _training.Training.RuntimeProfile.StartTime.ToString("dd/MM/yy HH:mm")], "/trainings/" + _training.Training.Id, false, Icons.Filled.ModelTraining));
-            _breadcrumbs.Add(new BreadcrumbItem(L["Explanation"], "/explanation", false, Icons.Filled.Lightbulb));
+            _breadcrumbs.Add(new BreadcrumbItem(L["Model {0}", _model.Model.GetMlModelString()], "/trainings/" + _training.Training.Id + "/models/" + _model.Model.Id, false, Icons.Filled.Lightbulb));
         }
         else if (DatasetId != null)
         {
             _breadcrumbs.Add(new BreadcrumbItem(L["Datasets"], "/datasets", false, Icons.Filled.ListAlt));
-            _breadcrumbs.Add(new BreadcrumbItem(L["Dataset {0}", _dataset.Dataset.Name], "/datasets/" + _dataset.Dataset.Id, false, Icons.Filled.ListAlt));
-            _breadcrumbs.Add(new BreadcrumbItem(L["Explanation"], "/explanation", false, Icons.Filled.Lightbulb));
+            _breadcrumbs.Add(new BreadcrumbItem(L["Dataset {0}", _training.Training.DatasetName], "/datasets/" + _training.Training.DatasetId, false, Icons.Filled.ListAlt));
+            _breadcrumbs.Add(new BreadcrumbItem(L["Model {0}", _model.Model.GetMlModelString()], "/datasets/" + _training.Training.DatasetId + "/modelsview/" + ListId, false, Icons.Filled.Lightbulb));
         }
-        _breadcrumbs.Add(new BreadcrumbItem(L["Model {0}", _model.Model.GetMlModelString()], null, true, Icons.Filled.Lightbulb));
-        await StartExplainerDashboard();
-
-
+        _breadcrumbs.Add(new BreadcrumbItem(L["Explanation"], null, true, Icons.Filled.Lightbulb));
         StateHasChanged();
     }
     private async Task LoadModel()
@@ -122,76 +92,12 @@ else{
                 if (apiResponse.IsSuccessStatusCode)
                 {
                     _training = Newtonsoft.Json.JsonConvert.DeserializeObject<GetTrainingResponseDto>(apiResponse.Result.ToString());
-
-                    apiResponse = await apiClient.GetDataset(new GetDatasetRequestDto() { DatasetId = _training.Training.DatasetId });
-
-                    if (apiResponse.IsSuccessStatusCode)
-                    {
-                        _dataset = Newtonsoft.Json.JsonConvert.DeserializeObject<GetDatasetResponseDto>(apiResponse.Result.ToString());
-                        viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
-                        StateHasChanged();
-                    }
-                    else
-                    {
-                        viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
-                    }
+                    viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
                 }
                 else
                 {
                     viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
                 }
-            }
-            else
-            {
-                viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
-            }
-        }
-        catch (Exception ex)
-        {
-            viewNotifier.Show(ex.GetBaseException().Message, ViewNotifierType.Error, L["Operation Failed"]);
-        }
-    }
-
-    private async Task StartExplainerDashboard()
-    {
-        try
-        {
-            ApiResponseDto apiResponse = await apiClient.StartExplainerDashboard(new StartDashboardRequestDto { ModelId = _model.Model.Id });
-            var resppose = Newtonsoft.Json.JsonConvert.DeserializeObject<StartDashboardResponseDto>(apiResponse.Result.ToString());
-            dashboardUrl = resppose.Url;
-            dashboardSessionId = resppose.SessionId;
-            //if (wasIFrameErrorHandleAdded == false)
-            //{
-            //    wasIFrameErrorHandleAdded = true;
-            //    StateHasChanged();
-            //    //await JSRuntime.InvokeVoidAsync("setTimeout", $"iframeInterop.addErrorEventListener('dashboard_iframe')", 0);
-            //    await JSRuntime.InvokeVoidAsync("setupErrorHandling", "dashboard_iframe");
-            //}
-
-            if (apiResponse.IsSuccessStatusCode)
-            {
-                viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
-            }
-            else
-            {
-                viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
-            }
-        }
-        catch (Exception ex)
-        {
-            viewNotifier.Show(ex.GetBaseException().Message, ViewNotifierType.Error, L["Operation Failed"]);
-        }
-    }
-
-    private async Task StopExplainerDashboard()
-    {
-        try
-        {
-            ApiResponseDto apiResponse = await apiClient.StopExplainerDashboard(new StopDashboardRequestDto { SessionId = dashboardSessionId });
-
-            if (apiResponse.IsSuccessStatusCode)
-            {
-                viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
             }
             else
             {

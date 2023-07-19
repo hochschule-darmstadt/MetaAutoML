@@ -1579,8 +1579,8 @@ msgid "Metric"
 msgstr "Metric"
 
 msgctxt "Global"
-msgid "Prediction time: {0}"
-msgstr "Prediction time: {0} µs"
+msgid "Prediction time per sample: {0}"
+msgstr "Prediction time per sample: {0} ms"
 
 msgctxt "Global"
 msgid "Predict online"
@@ -1595,12 +1595,12 @@ msgid "Download result CSV"
 msgstr "Download result CSV"
 
 msgctxt "Global"
-msgid "View predictions"
-msgstr "View predictions"
+msgid "Download Machine Learning pipeline"
+msgstr "Download Machine Learning pipeline"
 
 msgctxt "Global"
-msgid "Download ML model pipeline"
-msgstr "Download ML model pipeline"
+msgid "Download model"
+msgstr "Download model"
 
 msgctxt "Global"
 msgid "Dataset: {0}"
@@ -1887,15 +1887,8 @@ msgid "none"
 msgstr "None"
 
 msgctxt "Global"
-msgid "target *"
-msgstr "Target *"
-msgctxt "Global"
 msgid "target"
 msgstr "Target"
-
-msgctxt "Global"
-msgid "start"
-msgstr "Start"
 
 msgctxt "Global"
 msgid "Datatype"
@@ -1955,17 +1948,14 @@ msgstr "No or multiple index column with datatype datetime was set. Only one ind
 
 
 msgctxt "Global"
-msgid "Training emissions"
-msgstr "Emissions g/CO2-eq"
+msgid "Emissions kg/CO2-eq"
+msgstr "Emissions kg/CO2-eq"
 
 msgctxt "Global"
-msgid "Training emissions: {0} g CO2-eq"
-msgstr "Training emissions: {0} g CO2-eq"
+msgid "Emissions: {0} kg/CO2-eq"
+msgstr "Emissions: {0} kg/CO2-eq"
 
 msgctxt "Global"
 msgid "aborted"
 msgstr "Aborted"
 
-msgctxt "Global"
-msgid "Parameters available for individual AutoML solution only"
-msgstr "Parameters available for individual AutoML solution only"

@@ -3,13 +3,12 @@ from urllib import request
 from DataStorage import DataStorage
 from ControllerBGRPC import *
 import json, logging, os
-from AdapterRuntimeScheduler import AdapterRuntimeScheduler
 
 class ModelManager:
     """The ModelManager provides all functionality related to Models objects
     """
 
-    def __init__(self, data_storage: DataStorage, adapter_runtime_scheduler: AdapterRuntimeScheduler) -> None:
+    def __init__(self, data_storage: DataStorage) -> None:
         """Initialize a new ModelManager instance
 
         Args:
@@ -18,7 +17,6 @@ class ModelManager:
         self.__data_storage: DataStorage = data_storage
         self.__log = logging.getLogger('ModelManager')
         self.__log.setLevel(logging.getLevelName(os.getenv("SERVER_LOGGING_LEVEL")))
-        self.__adapter_runtime_scheduler = adapter_runtime_scheduler
 
 
     def __model_object_to_rpc_object(self, user_id: str, model: dict) -> Model:
@@ -70,9 +68,7 @@ class ModelManager:
             model_info.runtime_profile = model_runtime_profile
 
             model_info.status_messages[:] =  model["status_messages"]
-            #model_info.explanation = json.dumps(model["explanation"])
-            model_info.dashboard_compatible = model.get("dashboard_compatible", False)
-
+            model_info.explanation = json.dumps(model["explanation"])
             if not "carbon_footprint" in model:
                         model["carbon_footprint"] = {"emissions": 0}
             model_info.emission = model["carbon_footprint"].get("emissions", 0)
@@ -153,31 +149,3 @@ class ModelManager:
         self.__log.debug(f"delete_model: model deleted {amount_delelted_models}")
         return DeleteModelResponse()
 
-    def start_explainer_dashboard(
-        self, start_dashboard_request: "StartDashboardRequest"
-    ) -> "StartDashboardResponse":
-        """Start an ExplainerDashboard from disc
-
-        Args:
-            start_dashboard_request (StartDashboardRequest): The GRPC request containing the model id
-
-        Returns:
-            start_dashboard_response: The empty GRPC response
-        """
-        self.__log.debug(f"start_explainer_dashboard: start dashboard of model {start_dashboard_request.model_id}")
-        return self.__adapter_runtime_scheduler.start_new_explainer_dashboard(start_dashboard_request.user_id, start_dashboard_request.model_id)
-
-    def stop_explainer_dashboard(
-        self, stop_dashboard_request: "StopDashboardRequest"
-    ) -> "StopDashboardResponse":
-        """Stop an ExplainerDashboard
-
-        Args:
-            stop_dashboard_request (StioDashboardRequest): The GRPC request containing the model id
-
-        Returns:
-            stop_dashboard_response: The empty GRPC response
-        """
-        self.__log.debug(f"stop_explainer_dashboard: stop dashboard of session {stop_dashboard_request.session_id}")
-
-        return self.__adapter_runtime_scheduler.stop_explainer_dashboard(stop_dashboard_request.session_id)

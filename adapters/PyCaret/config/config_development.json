@@ -13,6 +13,5 @@
   "predict-time-sources-path": "../Utils/AutoMLs/predict_time_sources.py",
   "local_execution": "YES",
   "running_in_wsl": "YES",
-  "dashboard-folder-name": "dashboard",
   "wsl_metaautoml_path": "/mnt/c/Users/alex/Desktop/MetaAutoML"
 }

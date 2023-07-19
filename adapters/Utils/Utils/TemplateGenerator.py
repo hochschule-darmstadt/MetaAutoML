@@ -54,9 +54,3 @@ class TemplateGenerator(object):
             template = Template(file.read(), trim_blocks=True, lstrip_blocks=True)
         with open(os.path.join(self.__OUTPUT_PATH, 'dataset.py'), "w") as script_file:
             script_file.write(template.render(configuration=self._configuration))
-
-        # Render Python postprocessing script
-        with open(os.path.join(self.__TEMPLATES_PATH, 'postprocessing.ji')) as file:
-            template = Template(file.read())
-        with open(os.path.join(self.__OUTPUT_PATH, 'postprocessing.py'), "w") as script_file:
-            script_file.write(template.render(configuration=self._configuration))

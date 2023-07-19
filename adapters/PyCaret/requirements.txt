@@ -6,5 +6,3 @@ dependency-injector==4.40.0
 codecarbon==2.1.4
 pycaret[full]==3.0.0
 scikit-learn
-numpy<=1.23.0
-explainerdashboard==0.4.2.2

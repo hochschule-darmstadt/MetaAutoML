@@ -7,5 +7,3 @@ Jinja2
 pillow
 scikit-learn
 codecarbon==2.1.4
-numpy<=1.23.0
-#explainerdashboard==0.4.2.1 Autopytorch required very old sklearn lib that conflics explainer dashboard

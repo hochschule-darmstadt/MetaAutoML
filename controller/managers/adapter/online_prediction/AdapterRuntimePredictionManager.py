@@ -36,8 +36,6 @@ class AdapterRuntimePredictionManager:
             ":evalml":          ["EVALML_SERVICE_HOST",    "EVALML_SERVICE_PORT"],
             ":pycaret":          ["PYCARET_SERVICE_HOST", "PYCARET_SERVICE_PORT"],
             ":tpot":          ["TPOT_SERVICE_HOST", "TPOT_SERVICE_PORT"],
-            ":gama":            ["GAMA_SERVICE_HOST", "GAMA_SERVICE_PORT"],
-            ":lama":            ["LAMA_SERVICE_HOST", "LAMA_SERVICE_PORT"],
         }
         self.__adapters: list[AdapterPredictionManager] = []
         return

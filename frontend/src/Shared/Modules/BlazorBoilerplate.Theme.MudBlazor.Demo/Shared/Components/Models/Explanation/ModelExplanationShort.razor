@@ -4,7 +4,6 @@
 @using Microsoft.AspNetCore.Hosting
 @using Microsoft.Extensions.Logging
 @using System.Net.Http.Headers
-@using BlazorBoilerplate.Theme.Material
 @inject IApiClient apiClient
 @inject IViewNotifier viewNotifier
 @inject IJSRuntime JS
@@ -31,7 +30,7 @@
     </MudCardHeader>
     <MudCardContent>
         <MudPaper Height="250px" Elevation="0">
-@*            @if (_explanation == null)
+            @if (_explanation == null)
             {
                 <DataLoaderSpinner />
             }
@@ -46,12 +45,7 @@
                         <MudImage Src="@GetImage(_explanation.AnalysisCategories[0].Analyses[0].Content)" Style="height:250px;" />
                     </MudItem>
                 </MudButton>
-            }*@
-            <MudButton Href="@NavManager.ToAbsoluteUri(ExplanationPagePath).AbsoluteUri">
-                <MudItem xs="12" Style="display: grid; justify-content: center;">
-                    <MudImage Src="@($"_content/BlazorBoilerplate.Theme.MudBlazor/images/xai.png")" Style="height:250px;" />
-                </MudItem>
-            </MudButton>
+            }
         </MudPaper>
     </MudCardContent>
 </MudCard>
@@ -91,23 +85,23 @@
                 return;
             }
             isPreviewRequestRunning = true;
-            //GetModelExplanationRequestDto modelRequest = new GetModelExplanationRequestDto()
-            //{
-            //    ModelId = _model.Model.Id,
-            //    GetShortPreview = true
-            //};
-            //ApiResponseDto apiResponse = await apiClient.GetModelExplanation(modelRequest);
+            GetModelExplanationRequestDto modelRequest = new GetModelExplanationRequestDto()
+            {
+                ModelId = _model.Model.Id,
+                GetShortPreview = true
+            };
+            ApiResponseDto apiResponse = await apiClient.GetModelExplanation(modelRequest);
 
-            //if (apiResponse.IsSuccessStatusCode)
-            //{
-            //    _explanation = Newtonsoft.Json.JsonConvert.DeserializeObject<GetModelExplanationResponseDto>(apiResponse.Result.ToString());
-            //    StateHasChanged();
-            //    viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
-            //}
-            //else
-            //{
-            //    viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
-            //}
+            if (apiResponse.IsSuccessStatusCode)
+            {
+                _explanation = Newtonsoft.Json.JsonConvert.DeserializeObject<GetModelExplanationResponseDto>(apiResponse.Result.ToString());
+                StateHasChanged();
+                viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
+            }
+            else
+            {
+                viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
+            }
         }
         catch (Exception ex)
         {

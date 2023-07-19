@@ -9,7 +9,6 @@ from AdapterUtils import prepare_tabular_dataset
 from AutoGluonServer import data_loader
 import pandas as pd
 import AutoGluonParameterConfig as agpc
-from AutoGluonWrapper import AutoGluonWrapper
 
 class AutoGluonAdapter:
     """
@@ -88,7 +87,6 @@ class AutoGluonAdapter:
                                  path=self._result_path).fit(
             data,
             time_limit=self._time_limit*60)
-        export_model(AutoGluonWrapper(model, self._configuration), self._configuration["dashboard_folder_location"], 'dashboard_model.p')
         #Fit methode already saves the model
 
     def __tabular_regression(self):

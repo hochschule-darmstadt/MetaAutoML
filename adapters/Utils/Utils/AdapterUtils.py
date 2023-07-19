@@ -185,11 +185,6 @@ def evaluate(config: "StartAutoMlRequest", config_path: str) -> Tuple[float, flo
     Returns:
         tuple[float, float]: tuple holding the test score, prediction time metrics
     """
-    dashboard_folder_location = os.path.join(get_config_property("training-path"),
-                                        config.user_id,
-                                        config.dataset_id,
-                                        config.training_id,
-                                        get_config_property("dashboard-folder-name"))
     config = config.__dict__
     config["dataset_configuration"] = config["dataset_configuration"]
     file_path = config["dataset_path"]
@@ -226,28 +221,12 @@ def evaluate(config: "StartAutoMlRequest", config_path: str) -> Tuple[float, flo
         #test.drop(test.tail(12).index, inplace=True)
         #file_path = write_tabular_dataset_data(test, os.path.dirname(file_path), config)
 
-    elif(config["configuration"]["task"] in [":image_classification", ":image_regression"]):
+    elif(config["configuration"]["task"] in[":image_classification", ":image_regression"]):
         X_test, y_test = data_loader(config, image_test_folder=True)
 
-
-    if config["configuration"]["task"] in [":tabular_classification", ":tabular_regression", ":text_regression", ":named_entity_recognition", ":text_classification"]:
-
-        subprocess.call([python_env, os.path.join(result_path, "predict.py"), file_path, os.path.join(result_path, "predictions.csv")])
-
-
-            #The dashboard model wrapper offers the same functionallity and can be used for making timed predictions
-        with open(dashboard_folder_location + '/dashboard_model.p', 'rb') as file:
-            pipeline_model = dill.load(file)
-
-        predict_start = time.time()
-        pipeline_model.predict(test.drop(target, axis=1))
-        predict_time = (time.time() - predict_start) / test.shape[0]
-    else:
-
-        predict_start = time.time()
-        subprocess.call([python_env, os.path.join(result_path, "predict.py"), file_path, os.path.join(result_path, "predictions.csv")])
-        predict_time = time.time() - predict_start
-
+    predict_start = time.time()
+    subprocess.call([python_env, os.path.join(result_path, "predict.py"), file_path, os.path.join(result_path, "predictions.csv")])
+    predict_time = time.time() - predict_start
 
     predictions = pd.read_csv(os.path.join(result_path, "predictions.csv"))
     os.remove(os.path.join(result_path, "predictions.csv"))
@@ -256,17 +235,15 @@ def evaluate(config: "StartAutoMlRequest", config_path: str) -> Tuple[float, flo
         if config["configuration"]["task"] == ":image_classification":
             return compute_classification_metrics(pd.Series(y_test), predictions["predicted"]), (predict_time * 1000) / pd.Series(y_test).shape[0]
         else:
-            return compute_classification_metrics(pd.Series(test[target]), predictions[target]), (predict_time * 1000) / test.shape[0]
+            return compute_classification_metrics(pd.Series(test[target]), predictions["predicted"]), (predict_time * 1000) / test.shape[0]
     elif config["configuration"]["task"] in [":tabular_regression", ":text_regression", ":image_regression", ":time_series_forecasting"]:
         if config["configuration"]["task"] == ":image_regression":
             return compute_regression_metrics(pd.Series(y_test), predictions["predicted"]), (predict_time * 1000) / pd.Series(y_test).shape[0]
         elif config["configuration"]["task"] == ":time_series_forecasting":
             #TODO add dynamic future prediction
-            return compute_regression_metrics(pd.Series(test.iloc[-config["forecasting_horizon"]:][target]), predictions[target]), (predict_time * 1000) / test.shape[0]
+            return compute_regression_metrics(pd.Series(test.iloc[-config["forecasting_horizon"]:][target]), predictions["predicted"]), (predict_time * 1000) / test.shape[0]
         else:
-            return compute_regression_metrics(pd.Series(test[target]), predictions[target]), (predict_time * 1000) / test.shape[0]
-    elif config["configuration"]["task"] == ":named_entity_recognition":
-        return compute_named_entity_recognition_metrics(pd.Series(test[target]), predictions[target]), (predict_time * 1000) / pd.Series(test[target]).shape[0]
+            return compute_regression_metrics(pd.Series(test[target]), predictions["predicted"]), (predict_time * 1000) / test.shape[0]
 
 def compute_classification_metrics(y_should: pd.Series, y_is: pd.Series) -> dict:
     """Compute the metrics collection for classification tasks
@@ -390,10 +367,10 @@ def predict(config: dict, config_path: str, automl: str) -> Tuple[float, str]:
     python_env = os.getenv("PYTHON_ENV", default="PYTHON_ENV_UNSET")
     file_path = config["prediction_id"] + "_" + automl + ".csv"
     result_prediction_path = os.path.join(os.path.dirname(config["live_dataset_path"]), file_path)
-
     predict_start = time.time()
     subprocess.call([python_env, os.path.join(result_folder_location, "predict.py"), config["live_dataset_path"], result_prediction_path])
     predict_time = time.time() - predict_start
+
 
     return predict_time, result_prediction_path
 
@@ -433,12 +410,6 @@ def setup_run_environment(request: "StartAutoMlRequest", adapter_name: str) -> "
                                         request.training_id,
                                         get_config_property("result-folder-name"))
 
-    dashboard_folder_location = os.path.join(get_config_property("training-path"),
-                                        request.user_id,
-                                        request.dataset_id,
-                                        request.training_id,
-                                        get_config_property("dashboard-folder-name"))
-
     controller_export_folder_location  = os.path.join(get_config_property("training-path"),
                                         adapter_name,
                                         request.user_id,
@@ -456,14 +427,12 @@ def setup_run_environment(request: "StartAutoMlRequest", adapter_name: str) -> "
             model_folder_location = model_folder_location.replace("\\", "/")
             export_folder_location = export_folder_location.replace("\\", "/")
             result_folder_location = result_folder_location.replace("\\", "/")
-            dashboard_folder_location = dashboard_folder_location.replace("\\", "/")
             controller_export_folder_location = controller_export_folder_location.replace("\\", "/")
 
     request_dict["job_folder_location"] = job_folder_location
     request_dict["model_folder_location"] = model_folder_location
     request_dict["export_folder_location"] = export_folder_location
     request_dict["result_folder_location"] = result_folder_location
-    request_dict["dashboard_folder_location"] = dashboard_folder_location
     request_dict["controller_export_folder_location"] = controller_export_folder_location
 
     # TODO: Refactor AdapterManager and AdapterUtils to not rely on a proto object that some fields have been added to at runtime
@@ -473,7 +442,6 @@ def setup_run_environment(request: "StartAutoMlRequest", adapter_name: str) -> "
     request.model_folder_location = model_folder_location
     request.export_folder_location = export_folder_location
     request.result_folder_location = result_folder_location
-    request.dashboard_folder_location = dashboard_folder_location
     request.controller_export_folder_location = controller_export_folder_location
 
     # TODO: Remove this and fix all places that access the configuration object as a dictionary
@@ -485,7 +453,6 @@ def setup_run_environment(request: "StartAutoMlRequest", adapter_name: str) -> "
     os.makedirs(model_folder_location, exist_ok=True)
     os.makedirs(export_folder_location, exist_ok=True)
     os.makedirs(result_folder_location, exist_ok=True)
-    os.makedirs(dashboard_folder_location, exist_ok=True)
     #Save job file
     with open(os.path.join(job_folder_location, get_config_property("job-file-name")), "w+") as f:
         json.dump(request_dict, f)

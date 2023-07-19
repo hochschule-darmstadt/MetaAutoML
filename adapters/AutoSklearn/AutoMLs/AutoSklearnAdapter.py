@@ -57,7 +57,6 @@ class AutoSklearnAdapter:
         auto_cls.fit(X, y)
 
         export_model(auto_cls, self._configuration["result_folder_location"], "model_sklearn.p")
-        export_model(auto_cls, self._configuration["dashboard_folder_location"], 'dashboard_model.p')
 
     def __tabular_regression(self):
         """Execute the tabular regression task and export the found model"""

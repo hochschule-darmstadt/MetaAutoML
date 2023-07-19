@@ -15,9 +15,7 @@
                 "PYTHONPATH": ".:dependency-injection:AutoMLs:Utils:../Utils/Utils:../Utils/AutoMLs:../GRPC/Adapter:",
                 "GRPC_SERVER_PORT": "50055",
                 "PYTHON_ENV": ".venv/bin/python",
-                "USE_DEV_CONFIG": "YES",
-                "EXPLAINER_DASHBOARD_PORT_START": "5300",
-                "EXPLAINER_DASHBOARD_PORT_END": "5399"
+                "USE_DEV_CONFIG": "YES"
             },
         }
     ]

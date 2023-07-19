@@ -30,27 +30,12 @@
                                                                                                     x.Metrics.Count() > 0 ?
                                                                                                         x.Metrics.Where(y => y.Name.ID == SelectedMetric).First().Score.ToString()
                                                                                                         : ""
-                                                                                                    : ""))">@L["Metric"]</MudTableSortLabel>
-                                                                                                </MudTh>
-
-                                                                                                <MudTh>
-                                                                                                    <MudTableSortLabel SortBy="new Func<ModelDto, object>(x=>x.RuntimeProfile)">
-                                                                                                        <LabelTooltip Label=@L["Training time"] FontSize="Typo.subtitle2" Text="Runtime for training the entire dataset in minutes" Position="Placement.Top"></LabelTooltip>
-                                                                                                    </MudTableSortLabel>
-                                                                                                </MudTh>
-                                                                                                <MudTh>
-                                                                                                    <MudTableSortLabel SortBy="new Func<ModelDto, object>(x=>x.Emissions)">
-                                                                                                        <LabelTooltip Label=@L["Training emissions"] FontSize="Typo.subtitle2" Text="Emissions for training the entire dataset in g CO2 equivalents." Position="Placement.Top"></LabelTooltip>
-
-                                                                                                    </MudTableSortLabel>
-                                                                                                </MudTh>
-                                                                                                <MudTh>
-                                                                                                    <MudTableSortLabel SortBy="new Func<ModelDto, object>(x=>x.PredictionTime)">
-                                                                                                        <LabelTooltip Label=@L["Prediction time"] FontSize="Typo.subtitle2" Text="Runtime for predicting one single sample in microseconds." Position="Placement.Top"></LabelTooltip>
-                                                                                                    </MudTableSortLabel>
-                                                                                                </MudTh>
-                                                                                                <MudTh></MudTh>
-                                                                                            </MudTHeadRow>
+                                                                                                    : ""))">@L["Metric"]</MudTableSortLabel></MudTh>
+                        <MudTh><MudTableSortLabel SortBy="new Func<ModelDto, object>(x=>x.PredictionTime)">@L["Prediction time per sample"]</MudTableSortLabel></MudTh>
+                        <MudTh><MudTableSortLabel SortBy="new Func<ModelDto, object>(x=>x.RuntimeProfile)">@L["Total training time"]</MudTableSortLabel></MudTh>
+                        <MudTh><MudTableSortLabel SortBy="new Func<ModelDto, object>(x=>x.Emissions)">@L["Emissions kg/CO2-eq"]</MudTableSortLabel></MudTh>
+                        <MudTh></MudTh>
+                    </MudTHeadRow>
                         <MudTHeadRow>
                             <MudTh></MudTh>
                             <MudTh></MudTh>
@@ -99,32 +84,27 @@
                             }
                         }
                     </MudTd>
-
+                    <MudTd>@(String.Format("{0:0}", context.PredictionTime)) ms</MudTd>
                     <MudTd>
                         @if (context.Status == "busy")
                         {
-                            @(DateTime.UtcNow.Subtract(context.RuntimeProfile.StartTime).TotalMinutes.ToString("0 min"))
+                            @(DateTime.UtcNow.Subtract(context.RuntimeProfile.StartTime).TotalSeconds.ToString("0 s"))
                         }
                         else
                         {
-                            @(context.RuntimeProfile.EndTime.Subtract(context.RuntimeProfile.StartTime).TotalMinutes.ToString("0 min"))
+                            @(context.RuntimeProfile.EndTime.Subtract(context.RuntimeProfile.StartTime).TotalSeconds.ToString("0 s"))
                         }
                     </MudTd>
                     <MudTd>
                         @if (context.Status == "busy")
                         {
-                            <span>
-                                @("0.00") g CO2-eq
-                            </span>
+                            @("0")
                         }
                         else
                         {
-                    <span>
-                        @(String.Format("{0:0.00}", context.Emissions)) g CO2-eq
-                    </span>
+                            @(String.Format("{0:0.00000}", context.Emissions))
                         }
                     </MudTd>
-                    <MudTd>@(String.Format("{0:0}", context.PredictionTime*1000)) µs</MudTd>
                     <MudTd><ModelMenu Model="@context" OnDeleteCompleted="@OnDeleteModelCompleted" /></MudTd>
                 </RowTemplate>
                 <PagerContent>
@@ -142,11 +122,11 @@
     public string DatasetId { get; set; }
     [Parameter]
     public GetModelsResponseDto Models
-    {
+    { 
         get
         {
             return _models;
-        }
+        } 
         set
         {
             _models = value;
@@ -155,7 +135,7 @@
                 UpdateMetricsList();
                 StateHasChanged();
             }
-        }
+        } 
     }
     private string searchString = "";
     private GetModelsResponseDto _models;
@@ -175,11 +155,6 @@
             }
         }
         _metrics = _metrics.OrderBy(x => x.Name.Properties["skos:prefLabel"]).ToList();
-        if (_metrics.Count > 0 && SelectedMetric == "")
-        {
-            SelectedMetric = _metrics[0].Name.ID;
-            StateHasChanged();
-        }
     }
     private bool FilterFunc(ModelDto element)
     {
@@ -194,6 +169,6 @@
         if (element.GetMlModelString().Contains(searchString, StringComparison.OrdinalIgnoreCase))
             return true;
         return false;
-    }
+    } 
 
 }

@@ -173,15 +173,21 @@ message GetAutoMlParametersResponse {
   {
     autoMlIri: ":autokeras",
     paramIri: ":metric_autokeras_regression",
+    paramLabel: "metric autokeras regression",
     paramType: ":list",
     broaderIri: ":metric",
+    broaderLabel: "metric",
     valueIri: ":median_absolute_error",
+    valueLabel: "median absolute error",
   }
 */
 message AutoMlParameter {
-  string autoMlIri = 1;
+  string autoMlIri =1;
   string paramIri = 2;
-  string paramType = 3;
-  string broaderIri = 4;
-  optional string valueIri = 5;
+  string paramLabel = 3;
+  string paramType = 4;
+  string broaderIri = 5;
+  string broaderLabel = 6;
+  optional string valueIri = 7;
+  optional string valueLabel = 8;
 }

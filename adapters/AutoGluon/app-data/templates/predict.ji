@@ -14,11 +14,9 @@ from autogluon.multimodal import MultiModalPredictor
 {% endif %}
 {% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression", ":text_classification", ":text_regression"] %}
 from preprocessing import dataset_preparation, feature_configuration
-from postprocessing import post_process_result_dataframe
 {% endif %}
 {% if configuration.configuration["task"] in [":time_series_forecasting"] %}
 from preprocessing import dataset_preparation, feature_configuration, seperate_time_series_dataframe
-from postprocessing import post_process_result_dataframe
 {% endif %}
 
 import pandas as pd
@@ -32,12 +30,10 @@ if __name__ == '__main__':
 
     {% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression", ":text_classification", ":text_regression"] %}
     X, y = dataset_preparation(filepath)
-    X_index_df = pd.DataFrame(X.index)        #Some AutoML manipulate the index, so we extract it before hands
     {% endif %}
     {% if configuration.configuration["task"] in [":time_series_forecasting"] %}
     #We need current observations
     X, y = dataset_preparation(filepath, is_prediction=False)
-    X_index_df = pd.DataFrame(X.index)        #Some AutoML manipulate the index, so we extract it before hands
     timestamp_column = ""
     #First get the datetime index column
     for column, dt in feature_configuration.items():
@@ -82,9 +78,4 @@ if __name__ == '__main__':
     predicted_y = automl.predict(X, as_pandas=False)
     {% endif %}
     predicted_y = np.reshape(predicted_y, (-1, 1))
-    {% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression", ":text_classification", ":text_regression", ":named_entity_recognition", ":time_series_forecasting"] %}
-    predict_df = pd.DataFrame(data=predicted_y, columns=["predicted"])
-    post_process_result_dataframe(X_index_df, predict_df).to_csv(save_path)
-    {% else %}
     pd.DataFrame(data=predicted_y, columns=["predicted"]).to_csv(save_path)
-    {% endif %}
