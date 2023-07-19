@@ -14,5 +14,6 @@
   "local_execution": "YES",
   "running_in_wsl": "YES",
   "dashboard-folder-name": "dashboard",
-  "wsl_metaautoml_path": "/mnt/c/Users/alex/Desktop/MetaAutoML"
+  "wsl_metaautoml_path": "/mnt/c/Users/alex/Desktop/MetaAutoML",
+  "ontology_path": "../../controller/managers/ontology/ML_Ontology.ttl"
 }

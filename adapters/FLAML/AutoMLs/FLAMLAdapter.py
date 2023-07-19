@@ -49,7 +49,7 @@ class FLAMLAdapter:
         automl_settings = {"log_file_name": 'flaml.log'}
         automl_settings.update({"time_budget": self._configuration["configuration"]["runtime_limit"] * 60})
 
-        parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), fpc.task_config)
+        parameters = translate_parameters(":flaml", self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), fpc.parameters)
         if parameters.get('estimator_list', None) != None:
             if parameters['estimator_list'] == ['auto']:
                 parameters['estimator_list'] = 'auto'

@@ -48,7 +48,7 @@ class PyCaretAdapter:
         #TODO If index is set, index is somehow removed within pycaret and added as empty dataframe which crashes
         #Issue https://github.com/pycaret/pycaret/issues/3324
 
-        parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), ppc.task_config)
+        parameters = translate_parameters(":pycaret", self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), ppc.parameters)
         automl = setup(data = X, target = y.name)
         best = compare_models(budget_time=self._configuration["configuration"]["runtime_limit"] * 60 / 3) #Setup for max 1/3 of time
         model = create_model(best)
@@ -67,7 +67,7 @@ class PyCaretAdapter:
         self.df, test = data_loader(self._configuration)
         X, y = prepare_tabular_dataset(self.df, self._configuration, apply_feature_extration=True)
         X[y.name] = y
-        parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), ppc.task_config)
+        parameters = translate_parameters(":pycaret", self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), ppc.parameters)
         automl = setup(data = X, target = y.name)
         best = compare_models(budget_time=self._configuration["configuration"]["runtime_limit"] * 60 / 3) #Setup for max 1/3 of time
         model = create_model(best)
@@ -82,7 +82,7 @@ class PyCaretAdapter:
 
 
 
-        parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), ppc.task_config)
+        parameters = translate_parameters(":pycaret", self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), ppc.parameters)
         self._configuration["forecasting_horizon"] = parameters["fh"]
         save_configuration_in_json(self._configuration)
 

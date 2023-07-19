@@ -39,7 +39,7 @@ class TPOTAdapter:
         train, test = data_loader(self._configuration)
         #reload dataset to load changed data
         X, y = prepare_tabular_dataset(train, self._configuration, apply_feature_extration=True)
-        parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), tpc.task_config)
+        parameters = translate_parameters(":tpot", self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), tpc.parameters)
         pipeline_optimizer = TPOTClassifier(**parameters,
                                             random_state=42, verbosity=2, max_time_mins=self._configuration["configuration"]["runtime_limit"])
         pipeline_optimizer.fit(X, y)
@@ -56,7 +56,7 @@ class TPOTAdapter:
         train, test = data_loader(self._configuration)
         #reload dataset to load changed data
         X, y = prepare_tabular_dataset(train, self._configuration, apply_feature_extration=True)
-        parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), tpc.task_config)
+        parameters = translate_parameters(":tpot", self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), tpc.parameters)
 
         pipeline_optimizer = TPOTRegressor(**parameters,
                                             random_state=42, verbosity=2, max_time_mins=self._configuration["configuration"]["runtime_limit"])
@@ -66,7 +66,7 @@ class TPOTAdapter:
     def __image_classification(self):
         X, y = data_loader(self._configuration, perform_splitting=False, as_2darray=True)
 
-        parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), tpc.task_config)
+        parameters = translate_parameters(":tpot", self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), tpc.parameters)
         pipeline_optimizer = TPOTClassifier(**parameters,
                                             random_state=42, verbosity=2, max_time_mins=self._configuration["configuration"]["runtime_limit"])
         pipeline_optimizer.fit(X, y)

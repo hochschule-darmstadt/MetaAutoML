@@ -65,7 +65,7 @@ class AutoPytorchAdapter:
         train, test = data_loader(self._configuration)
         #reload dataset to load changed data
         X, y = prepare_tabular_dataset(train, self._configuration, apply_feature_extration=True)
-        parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), appc.task_config)
+        parameters = translate_parameters(":autopytorch", self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), appc.parameters)
 
 
         auto_cls = TabularClassificationTask(temporary_directory=self._configuration["model_folder_location"] + "/tmp", output_directory=self._configuration["model_folder_location"] + "/output", delete_output_folder_after_terminate=False, delete_tmp_folder_after_terminate=False)
@@ -92,7 +92,7 @@ class AutoPytorchAdapter:
         #reload dataset to load changed data
         X, y = prepare_tabular_dataset(train, self._configuration, apply_feature_extration=True)
 
-        parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), appc.task_config)
+        parameters = translate_parameters(":autopytorch", self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), appc.parameters)
 
         auto_reg = TabularRegressionTask(temporary_directory=self._configuration["model_folder_location"] + "/tmp", output_directory=self._configuration["model_folder_location"] + "/output", delete_output_folder_after_terminate=False, delete_tmp_folder_after_terminate=False)
         auto_reg.search(
@@ -113,7 +113,7 @@ class AutoPytorchAdapter:
         #Apply encoding to string
         self._configuration = set_encoding_for_string_columns(self._configuration, X, y, also_categorical=True)
 
-        parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), appc.task_config)
+        parameters = translate_parameters(":autopytorch", self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), appc.parameters)
         self._configuration["forecasting_horizon"] = parameters["n_prediction_steps"]
 
         train, test = data_loader(self._configuration)

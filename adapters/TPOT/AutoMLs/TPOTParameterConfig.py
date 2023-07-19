@@ -41,31 +41,20 @@ tpot_metrics = {
     ":r2": "r2"
 }
 
-#configs for the different tasks that can be executed with TPOT
-#each parameter has its own line that contains:
-#the broader type of the parameter(broader id); the autoML specific parameter id; the default value in case no parameter-value is selected;
-#the expected amount of the parameters(single_value/list); the type to which it should be converted (integer/dictionary); the lookup dictionary which includes the converting types;
-#the autoML function parameter names
-#[broader_type, specific_type, default, expected parameter 'count', converting type, lookup dictionary, used name by autoML]
-
-#config for the tabular classification
-tabular_classification_config = [
-    [":metric", ":metric_tpot_tabular_classification", [":accuracy"], "single_value", "dict", tpot_metrics, "scoring"]
-]
-
-#config for the tabular regression
-tabular_regression_config = [
-    [":metric", ":metric_tpot_tabular_regression", [":mean_squared_error"], "single_value", "dict", tpot_metrics, "scoring"]
-]
-
-#config for the image classification
-image_classification_config = [
-    [":metric", ":metric_tpot_image_classification", [":accuracy"], "single_value", "dict", tpot_metrics, "scoring"]
-]
-
-# dictionary for mapping the selected task to the appropriate config
-task_config = {
-    ":tabular_classification": tabular_classification_config,
-    ":tabular_regression": tabular_regression_config,
-    ":image_classification": image_classification_config
+parameters = {
+    #tabular classification
+    ":metric_tpot_tabular_classification": {
+                                                    "parameter_name": "scoring",
+                                                    "lookup_dict": tpot_metrics
+                                                },
+    #tabular regression
+    ":metric_tpot_tabular_regression": {
+                                                    "parameter_name": "scoring",
+                                                    "lookup_dict": tpot_metrics
+                                                },
+    #image classification
+    ":metric_tpot_image_classification": {
+                                                    "parameter_name": "scoring",
+                                                    "lookup_dict": tpot_metrics
+                                                }
 }
