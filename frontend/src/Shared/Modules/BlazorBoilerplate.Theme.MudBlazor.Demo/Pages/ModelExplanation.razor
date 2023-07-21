@@ -72,19 +72,19 @@ else{
             _breadcrumbs.Add(new BreadcrumbItem(L["Datasets"], "/datasets", false, Icons.Filled.ListAlt));
             _breadcrumbs.Add(new BreadcrumbItem(L["Dataset {0}", _dataset.Dataset.Name], "/datasets/" + _dataset.Dataset.Id, false, Icons.Filled.ListAlt));
             _breadcrumbs.Add(new BreadcrumbItem(L["Models"], "/datasets/" + _dataset.Dataset.Id + "/models", false, Icons.Filled.Lightbulb));
-            _breadcrumbs.Add(new BreadcrumbItem(L["Explanation"], "/explanation", false, Icons.Filled.Lightbulb));
+            _breadcrumbs.Add(new BreadcrumbItem(L["Explanation"], "/datasets/" + DatasetId + "/modelsview/" + ListId + "/explanation", false, Icons.Filled.Lightbulb));
         }
         else if (TrainingId != null)
         {
             _breadcrumbs.Add(new BreadcrumbItem(L["Trainings"], "/trainings", false, Icons.Filled.ModelTraining));
             _breadcrumbs.Add(new BreadcrumbItem(L["Training {0}", _training.Training.RuntimeProfile.StartTime.ToString("dd/MM/yy HH:mm")], "/trainings/" + _training.Training.Id, false, Icons.Filled.ModelTraining));
-            _breadcrumbs.Add(new BreadcrumbItem(L["Explanation"], "/explanation", false, Icons.Filled.Lightbulb));
+            _breadcrumbs.Add(new BreadcrumbItem(L["Explanation"], "/trainings/" + TrainingId + "/models/" + Id + "/explanation", false, Icons.Filled.Lightbulb));
         }
         else if (DatasetId != null)
         {
             _breadcrumbs.Add(new BreadcrumbItem(L["Datasets"], "/datasets", false, Icons.Filled.ListAlt));
             _breadcrumbs.Add(new BreadcrumbItem(L["Dataset {0}", _dataset.Dataset.Name], "/datasets/" + _dataset.Dataset.Id, false, Icons.Filled.ListAlt));
-            _breadcrumbs.Add(new BreadcrumbItem(L["Explanation"], "/explanation", false, Icons.Filled.Lightbulb));
+            _breadcrumbs.Add(new BreadcrumbItem(L["Explanation"], "/datasets/" + DatasetId + "/models/" + Id + "/explanation", false, Icons.Filled.Lightbulb));
         }
         _breadcrumbs.Add(new BreadcrumbItem(L["Model {0}", _model.Model.GetMlModelString()], null, true, Icons.Filled.Lightbulb));
         await StartExplainerDashboard();

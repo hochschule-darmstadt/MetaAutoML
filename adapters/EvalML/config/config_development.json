@@ -13,6 +13,7 @@
   "templates-path": "app-data/templates",
   "predict-time-sources-path": "../Utils/AutoMLs/predict_time_sources.py",
   "local_execution": "YES",
-  "running_in_wsl": "YES",
-  "wsl_metaautoml_path": "/mnt/c/Users/alex/Desktop/MetaAutoML"
+  "running_in_wsl": "NO",
+  "wsl_metaautoml_path": "/mnt/c/Users/alex/Desktop/MetaAutoML",
+  "ontology_path": "../../controller/managers/ontology/ML_Ontology.ttl"
 }

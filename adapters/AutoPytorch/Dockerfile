@@ -5,7 +5,7 @@ RUN apt-get update && apt-get install -y git
 
 RUN python -m pip install --upgrade pip
 
-COPY ./AutoPytorch/requirements.txt .
+COPY ./adapters/AutoPytorch/requirements.txt .
 # Install dependencies
 RUN pip install -r requirements.txt
 # put all files in a directory called app
@@ -19,11 +19,12 @@ RUN apt-get install -y \
     libxext6
 
 WORKDIR /app
-COPY ./AutoPytorch .
-COPY ./Utils/Utils ./Utils
-COPY ./Utils/AutoMLs ./AutoMLs
-COPY ./Utils/Templates ./app-data/templates
-COPY ./GRPC/Adapter ./
+COPY ./adapters/AutoPytorch .
+COPY ./adapters/Utils/Utils ./Utils
+COPY ./adapters/Utils/AutoMLs ./AutoMLs
+COPY ./adapters/Utils/Templates ./app-data/templates
+COPY ./adapters/GRPC/Adapter ./
+COPY ./controller/managers/ontology/ML_Ontology.ttl .
 
 # this should already be created, but sometimes there is a bug in docker which causes that the directory is not copied
 RUN mkdir -p /app/app-data/output/tmp

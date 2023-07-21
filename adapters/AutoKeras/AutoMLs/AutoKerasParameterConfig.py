@@ -117,93 +117,155 @@ autokeras_tuner = {
     ":hyperband": "hyperband"
 }
 
-#configs for the different tasks that can be executed with autokeras
-#each parameter has its own line that contains:
-#the broader type of the parameter(broader id); the autoML specific parameter id; the default value in case no parameter-value is selected;
-#the expected amount of the parameters(single_value/list); the type to which it should be converted (integer/dictionary); the lookup dictionary which includes the converting types;
-#the autoML function parameter names
-#[broader_type, specific_type, default, expected parameter 'count', converting type, lookup dictionary, used name by autoML]
-
-#config for the tabular classification
-tabular_classification_config = [
-    [":max_trials", ":max_trials_autokeras", [3], "single_value", "integer", "", "max_trials"],
-    [":metric", ":metric_autokeras_tabular_classification", [":accuracy"], "single_value", "dict", autokeras_metrics, "metrics"],
-    [":metric", ":metric_autokeras_tabular_classification", [":accuracy"], "single_value", "dict", autokeras_objectives, "objective"],
-    [":tuner", ":tuner_autokeras_tabular_classification", [None], "single_value", "dict", autokeras_tuner, "tuner"],
-    [":loss", ":loss_autokeras_tabular_classification", [":binary_cross_entropy"], "single_value", "dict", autokeras_loss_classification, "loss"],
-    [":max_model_size_autokeras", ":max_model_size_autokeras", [None], "single_value", "integer", "", "max_model_size"]
-]
-
-#config for the tabular regression
-tabular_regression_config = [
-    [":max_trials", ":max_trials_autokeras", [3], "single_value", "integer", "", "max_trials"],
-    [":metric", ":metric_autokeras_tabular_regression", [":mean_squared_error"], "single_value", "dict", autokeras_metrics, "metrics"],
-    [":metric", ":metric_autokeras_tabular_regression", [":mean_squared_error"], "single_value", "dict", autokeras_objectives, "objective"],
-    [":tuner", ":tuner_autokeras_tabular_regression", [None], "single_value", "dict", autokeras_tuner, "tuner"],
-    [":loss", ":loss_autokeras_tabular_regression", [":mean_squared_error"], "single_value", "dict", autokeras_loss_regression, "loss"],
-    [":max_model_size_autokeras", ":max_model_size_autokeras", [None], "single_value", "integer", "", "max_model_size"]
-]
-
-#config for the image classification
-image_classification_config = [
-    [":max_trials", ":max_trials_autokeras", [3], "single_value", "integer", "", "max_trials"],
-    [":metric", ":metric_autokeras_image_classification", [":accuracy"], "single_value", "dict", autokeras_metrics, "metrics"],
-    [":metric", ":metric_autokeras_image_classification", [":accuracy"], "single_value", "dict", autokeras_objectives, "objective"],
-    [":tuner", ":tuner_autokeras_image_classification", [None], "single_value", "dict", autokeras_tuner, "tuner"],
-    [":loss", ":loss_autokeras_image_classification", [":binary_cross_entropy"], "single_value", "dict", autokeras_loss_classification, "loss"],
-    [":max_model_size_autokeras", ":max_model_size_autokeras", [None], "single_value", "integer", "", "max_model_size"]
-]
-
-#config for the image regression
-image_regression_config = [
-    [":max_trials", ":max_trials_autokeras", [3], "single_value", "integer", "", "max_trials"],
-    [":metric", ":metric_autokeras_image_regression", [":mean_squared_error"], "single_value", "dict", autokeras_metrics, "metrics"],  #missing metric in ontology
-    [":metric", ":metric_autokeras_image_regression", [":mean_squared_error"], "single_value", "dict", autokeras_objectives, "objective"],  #missing metric in ontology
-    [":tuner", ":tuner_autokeras_image_regression", [None], "single_value", "dict", autokeras_tuner, "tuner"],
-    [":loss", ":loss_autokeras_image_regression", [":mean_squared_error"], "single_value", "dict", autokeras_loss_regression, "loss"],
-    [":max_model_size_autokeras", ":max_model_size_autokeras", [None], "single_value", "integer", "", "max_model_size"]
-]
-
-#config for the text classification
-text_classification_config = [
-    [":max_trials", ":max_trials_autokeras", [1], "single_value", "integer", "", "max_trials"],
-    [":metric", ":metric_autokeras_text_classification", [":accuracy"], "single_value", "dict", autokeras_metrics, "metrics"],
-    [":metric", ":metric_autokeras_text_classification", [":accuracy"], "single_value", "dict", autokeras_objectives, "objective"],
-    [":tuner", ":tuner_autokeras_text_classification", [None], "single_value", "dict", autokeras_tuner, "tuner"],
-    [":loss", ":loss_autokeras_text_classification", [":binary_cross_entropy"], "single_value", "dict", autokeras_loss_classification, "loss"],
-    [":max_model_size_autokeras", ":max_model_size_autokeras", [None], "single_value", "integer", "", "max_model_size"]
-]
-
-#config for the text regression
-text_regression_config = [
-    [":max_trials", ":max_trials_autokeras", [1], "single_value", "integer", "", "max_trials"],
-    [":metric", ":metric_autokeras_text_regression", [":mean_squared_error"], "single_value", "dict", autokeras_metrics, "metrics"], #missing metric in ontology
-    [":metric", ":metric_autokeras_text_regression", [":mean_squared_error"], "single_value", "dict", autokeras_objectives, "objective"], #missing metric in ontology
-    [":tuner", ":tuner_autokeras_text_regression", [None], "single_value", "dict", autokeras_tuner, "tuner"],
-    [":loss", ":loss_autokeras_text_regression", [":mean_squared_error"], "single_value", "dict", autokeras_loss_regression, "loss"],
-    [":max_model_size_autokeras", ":max_model_size_autokeras", [None], "single_value", "integer", "", "max_model_size"]
-]
-
-# config for time series forcasting
-time_series_forecasting_config = [
-    [":max_trials", ":max_trials_autokeras", [3], "single_value", "integer", "", "max_trials"],
-    [":metric", "::metric_autokeras_time_series_forecasting", [":mean_squared_error"], "single_value", "dict", autokeras_metrics, "metrics"], #missing metric in ontology
-    [":metric", "::metric_autokeras_time_series_forecasting", [":mean_squared_error"], "single_value", "dict", autokeras_objectives, "objective"], #missing metric in ontology
-    [":tuner", ":tuner_autokeras_time_series_forecasting", [None], "single_value", "dict", autokeras_tuner, "tuner"],
-    [":loss", ":loss_autokeras_time_series_forecasting", [":mean_squared_error"], "single_value", "dict", autokeras_loss_regression, "loss"], #missing loss in ontology
-    [":max_model_size_autokeras", ":max_model_size_autokeras", [None], "single_value", "integer", "", "max_model_size"],
-    [":forecasting_horizon", ":forecasting_horizon_autokeras_time_series_forcasting", [1], "single_value", "integer", "", "predict_until"],
-    [":gap", ":gap_autokeras_time_series_forecasting", [0], "single_value", "integer", "", "predict_from"],
-    [":lookback", ":lookback_autokeras_time_series_forecasting", [1], "single_value", "integer", "", "lookback"]
-]
-
-# dictionary for mapping the selected task to the appropriate config
-task_config = {
-    ":tabular_classification": tabular_classification_config,
-    ":tabular_regression": tabular_regression_config,
-    ":image_classification": image_classification_config,
-    ":image_regression": image_regression_config,
-    ":text_classification": text_classification_config,
-    ":text_regression": text_regression_config,
-    ":time_series_forecasting": time_series_forecasting_config
+parameters = {
+    #tabular classification
+    ":metric_autokeras_tabular_classification": {
+                                                    "parameter_name": "objective",
+                                                    "lookup_dict": autokeras_objectives
+                                                },
+    ":loss_function_autokeras_tabular_classification": {
+                                                    "parameter_name": "loss",
+                                                    "lookup_dict": autokeras_loss_classification
+                                                },
+    ":max_trials_autokeras_tabular_classification": {
+                                                    "parameter_name": "max_trials",
+                                                    "default": [1]
+                                                },
+    ":tuner_autokeras_tabular_classification": {
+                                                    "parameter_name": "tuner",
+                                                    "lookup_dict": autokeras_tuner
+                                                },
+    ":max_model_size_autokeras_tabular_classification": {
+                                                    "parameter_name": "max_model_size"
+                                                },
+    # tabular regression
+    ":metric_autokeras_tabular_regression": {
+                                                    "parameter_name": "objective",
+                                                    "lookup_dict": autokeras_objectives
+                                                },
+    ":loss_function_autokeras_tabular_regression": {
+                                                    "parameter_name": "loss",
+                                                    "lookup_dict": autokeras_loss_regression
+                                                },
+    ":max_trials_autokeras_tabular_regression": {
+                                                    "parameter_name": "max_trials",
+                                                    "default": [1]
+                                                },
+    ":tuner_autokeras_tabular_regression": {
+                                                    "parameter_name": "tuner",
+                                                    "lookup_dict": autokeras_tuner
+                                                },
+    ":max_model_size_autokeras_tabular_regression": {
+                                                    "parameter_name": "max_model_size"
+                                                },
+    #image classification
+    ":metric_autokeras_image_classification": {
+                                                    "parameter_name": "objective",
+                                                    "lookup_dict": autokeras_objectives
+                                                },
+    ":loss_function_autokeras_image_classification": {
+                                                    "parameter_name": "loss",
+                                                    "lookup_dict": autokeras_loss_classification
+                                                },
+    ":max_trials_autokeras_image_classification": {
+                                                    "parameter_name": "max_trials",
+                                                    "default": [1]
+                                                },
+    ":tuner_autokeras_image_classification": {
+                                                    "parameter_name": "tuner",
+                                                    "lookup_dict": autokeras_tuner
+                                                },
+    ":max_model_size_autokeras_image_classification": {
+                                                    "parameter_name": "max_model_size"
+                                                },
+    #image regression
+    ":metric_autokeras_image_regression": {
+                                                    "parameter_name": "objective",
+                                                    "lookup_dict": autokeras_objectives
+                                                },
+    ":loss_function_autokeras_image_regression": {
+                                                    "parameter_name": "loss",
+                                                    "lookup_dict": autokeras_loss_regression
+                                                },
+    ":max_trials_autokeras_image_regression": {
+                                                    "parameter_name": "max_trials",
+                                                    "default": [1]
+                                                },
+    ":tuner_autokeras_image_regression": {
+                                                    "parameter_name": "tuner",
+                                                    "lookup_dict": autokeras_tuner
+                                                },
+    ":max_model_size_autokeras_image_regression": {
+                                                    "parameter_name": "max_model_size"
+                                                },
+    #text classification
+    ":metric_autokeras_text_classification": {
+                                                    "parameter_name": "objective",
+                                                    "lookup_dict": autokeras_objectives
+                                                },
+    ":loss_function_autokeras_text_classification": {
+                                                    "parameter_name": "loss",
+                                                    "lookup_dict": autokeras_loss_classification
+                                                },
+    ":max_trials_autokeras_text_classification": {
+                                                    "parameter_name": "max_trials",
+                                                    "default": [1]
+                                                },
+    ":tuner_autokeras_text_classification": {
+                                                    "parameter_name": "tuner",
+                                                    "lookup_dict": autokeras_tuner
+                                                },
+    ":max_model_size_autokeras_text_classification": {
+                                                    "parameter_name": "max_model_size"
+                                                },
+    #text regression
+    ":metric_autokeras_text_regression": {
+                                                    "parameter_name": "objective",
+                                                    "lookup_dict": autokeras_objectives
+                                                },
+    ":loss_function_autokeras_text_regression": {
+                                                    "parameter_name": "loss",
+                                                    "lookup_dict": autokeras_loss_regression
+                                                },
+    ":max_trials_autokeras_text_regression": {
+                                                    "parameter_name": "max_trials",
+                                                    "default": [1]
+                                                },
+    ":tuner_autokeras_text_regression": {
+                                                    "parameter_name": "tuner",
+                                                    "lookup_dict": autokeras_tuner
+                                                },
+    ":max_model_size_autokeras_text_regression": {
+                                                    "parameter_name": "max_model_size"
+                                                },
+    # time series forecasting
+    ":metric_autokeras_time_series_forecasting": {
+                                                    "parameter_name": "objective",
+                                                    "lookup_dict": autokeras_objectives
+                                                },
+    ":loss_function_autokeras_time_series_forecasting": {
+                                                    "parameter_name": "loss",
+                                                    "lookup_dict": autokeras_loss_classification
+                                                },
+    ":max_trials_autokeras_time_series_forecasting": {
+                                                    "parameter_name": "max_trials",
+                                                    "default": [1]
+                                                },
+    ":tuner_autokeras_time_series_forecasting": {
+                                                    "parameter_name": "tuner",
+                                                    "lookup_dict": autokeras_tuner
+                                                },
+    ":max_model_size_autokeras_time_series_forecasting": {
+                                                    "parameter_name": "max_model_size"
+                                                },
+    ":forecasting_horizon_autokeras_time_series_forcasting": {
+                                                    "parameter_name": "predict_until",
+                                                    "default": [1]
+                                                    },
+    ":lookback_autokeras_time_series_forcasting": {
+                                                    "parameter_name": "lookback",
+                                                    },
+    ":gap_autokeras_time_series_forcasting": {
+                                                    "parameter_name": "predict_from",
+                                                    }
 }

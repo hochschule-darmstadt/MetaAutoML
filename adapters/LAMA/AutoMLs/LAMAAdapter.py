@@ -53,13 +53,13 @@ class LAMAAdapter:
         train, test = data_loader(self._configuration)
         #reload dataset to load changed data
         X, y = prepare_tabular_dataset(train, self._configuration, apply_feature_extration=True)
-        parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), lpc.task_config)
+        parameters = translate_parameters(":lama", self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), lpc.parameters)
         if len(y.unique()) == 2:
             #task = Task(name='binary', metric=parameters['metric'], loss=parameters['loss'])
-            task = Task(name='binary')
+            task = Task(name='binary', **parameters)
         else:
             #task = Task(name='multiclass', metric=parameters['metric'], loss=parameters['loss'])
-            task = Task(name='multiclass')
+            task = Task(name='multiclass', **parameters)
         # task = Task(name='multiclass',**parameters)
         RANDOM_STATE = 42
         TIMEOUT = self._time_limit
@@ -91,7 +91,7 @@ class LAMAAdapter:
         train, test = data_loader(self._configuration)
         #reload dataset to load changed data
         X, y = prepare_tabular_dataset(train, self._configuration, apply_feature_extration=True)
-        parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), lpc.task_config)
+        parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), lpc.parameters)
         task = Task(name='reg',**parameters)
         RANDOM_STATE = 42
         TIMEOUT = self._time_limit
@@ -107,6 +107,7 @@ class LAMAAdapter:
         )
         automl.fit_predict(X, roles = roles, verbose = 1)
         export_model(automl, self._configuration["result_folder_location"], 'model_LAMA.p')
+        export_model(LAMAWrapper(automl, self._configuration), self._configuration["dashboard_folder_location"], 'dashboard_model.p')
 
         return
 

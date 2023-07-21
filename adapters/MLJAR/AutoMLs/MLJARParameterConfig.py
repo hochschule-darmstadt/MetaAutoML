@@ -18,25 +18,15 @@ mljar_metrics = {
     ":mean_absolute_percentage_error": "MAPE"
 }
 
-#configs for the different tasks that can be executed with mljar
-#each parameter has its own line that contains:
-#the broader type of the parameter(broader id); the autoML specific parameter id; the default value in case no parameter-value is selected;
-#the expected amount of the parameters(single_value/list); the type to which it should be converted (integer/dictionary); the lookup dictionary which includes the converting types;
-#the autoML function parameter names
-#[broader_type, specific_type, default, expected parameter 'count', converting type, lookup dictionary, used name by autoML]
-
-#config for the tabular classification
-tabular_classification_config = [
-    [":metric", ":metric_mljar_tabular_classification", [":log_loss"], "single_value", "dict", mljar_metrics, "eval_metric"]
-]
-
-#config for the tabular regression
-tabular_regression_config = [
-    [":metric", ":metric_mljar_tabular_regression", [":rooted_mean_squared_error"], "single_value", "dict", mljar_metrics, "eval_metric"]
-]
-
-# dictionary for mapping the selected task to the appropriate config
-task_config = {
-    ":tabular_classification": tabular_classification_config,
-    ":tabular_regression": tabular_regression_config
+parameters = {
+    #tabular classification
+    ":metric_mljar_tabular_classification": {
+                                                    "parameter_name": "eval_metric",
+                                                    "lookup_dict": mljar_metrics
+                                                },
+    #tabular regression
+    ":metric_mljar_tabular_regression": {
+                                                    "parameter_name": "eval_metric",
+                                                    "lookup_dict": mljar_metrics
+                                                }
 }

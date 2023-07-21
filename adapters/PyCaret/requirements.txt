@@ -8,3 +8,4 @@ pycaret[full]==3.0.0
 scikit-learn
 numpy<=1.23.0
 explainerdashboard==0.4.2.2
+rdflib==6.2.0

@@ -84,7 +84,7 @@ class AutoGluonAdapter:
             classification_type = "binary"
         else:
             classification_type =  "multiclass"
-        parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), agpc.task_config)
+        parameters = translate_parameters(":autogluon", self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), agpc.parameters)
         model = TabularPredictor(label=y.name,
                                  problem_type=classification_type,
                                  **parameters,
@@ -100,13 +100,14 @@ class AutoGluonAdapter:
         X, y = prepare_tabular_dataset(self.df, self._configuration, apply_feature_extration=True)
         data = X
         data[y.name] = y
-        parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), agpc.task_config)
+        parameters = translate_parameters(":autogluon", self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), agpc.parameters)
         model = TabularPredictor(label=y.name,
                                  problem_type="regression",
                                  **parameters,
                                  path=self._result_path).fit(
             data,
             time_limit=self._time_limit*60)
+        export_model(AutoGluonWrapper(model, self._configuration), self._configuration["dashboard_folder_location"], 'dashboard_model.p')
         #Fit methode already saves the model
 
     def __text_classification(self):
@@ -123,7 +124,7 @@ class AutoGluonAdapter:
         #Disable multi worker else training takes a while or doesnt complete
         #https://github.com/autogluon/autogluon/issues/2756
         hyperparameters = {"env.num_workers": 0}
-        parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), agpc.task_config)
+        parameters = translate_parameters(":autogluon", self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), agpc.parameters)
 
         model = MultiModalPredictor(label=y.name,
                                  **parameters,
@@ -131,6 +132,7 @@ class AutoGluonAdapter:
                                  path=self._result_path).fit(
             data,
             time_limit=self._time_limit*60, hyperparameters=hyperparameters)
+        export_model(AutoGluonWrapper(model, self._configuration), self._configuration["dashboard_folder_location"], 'dashboard_model.p')
         #Fit methode already saves the model
 
     def __text_named_entity_recognition(self):
@@ -143,7 +145,7 @@ class AutoGluonAdapter:
         #https://github.com/autogluon/autogluon/issues/2756
         # set checkpoint for ner
         hyperparameters = {"env.num_workers": 0, 'model.ner_text.checkpoint_name':'google/electra-small-discriminator'}
-        parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), agpc.task_config)
+        parameters = translate_parameters(":autogluon", self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), agpc.parameters)
 
         model = MultiModalPredictor(label=y.name,
                                  **parameters,
@@ -171,7 +173,7 @@ class AutoGluonAdapter:
         #Disable multi worker else training takes a while or doesnt complete
         #https://github.com/autogluon/autogluon/issues/2756
         hyperparameters = {"env.num_workers": 0}
-        parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), agpc.task_config)
+        parameters = translate_parameters(":autogluon", self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), agpc.parameters)
         model = MultiModalPredictor(label=y.name,
                                     problem_type=classification_type,
                                     **parameters,
@@ -197,7 +199,7 @@ class AutoGluonAdapter:
         X.reset_index(inplace = True)
         self._configuration = set_imputation_for_numerical_columns(self._configuration, X)
 
-        parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), agpc.task_config)
+        parameters = translate_parameters(":autogluon", self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), agpc.parameters)
         self._configuration["forecasting_horizon"] = parameters["prediction_length"]
 
         train, test = data_loader(self._configuration)
@@ -221,6 +223,7 @@ class AutoGluonAdapter:
                                  path=self._result_path).fit(
             ts_dataframe,
             time_limit=self._time_limit*60)
+        export_model(AutoGluonWrapper(model, self._configuration), self._configuration["dashboard_folder_location"], 'dashboard_model.p')
         #Fit methode already saves the model
 
 if __name__ == '__main__':

@@ -30,32 +30,25 @@ autopytorch_ts_forecasting_metrics = {
     ":mean_squared_error": "mean_MSE_forecasting",
     ":median_squared_error": "median_MSE_forecasting"
 }
-#configs for the different tasks that can be executed with AutoPytorch
-#each parameter has its own line that contains:
-#the broader type of the parameter(broader id); the autoML specific parameter id; the default value in case no parameter-value is selected;
-#the expected amount of the parameters(single_value/list); the type to which it should be converted (integer/dictionary); the lookup dictionary which includes the converting types;
-#the autoML function parameter names
-#[broader_type, specific_type, default, expected parameter 'count', converting type, lookup dictionary, used name by autoML]
 
-#config for the tabular classification
-tabular_classification_config = [
-    [":metric", ":metric_autopytorch_tabular_classification", [":accuracy"], "single_value", "dict", autopytorch_metrics, "optimize_metric"]
-]
-
-#config for the tabular regression
-tabular_regression_config = [
-    [":metric", ":metric_autopytorch_tabular_regression", [":r2"], "single_value", "dict", autopytorch_metrics, "optimize_metric"]
-]
-
-#config for the tabular regression
-time_series_forcasting_config = [
-    [":metric", ":metric_autopytorch_time_series_forcasting", [":mean_squared_error"], "single_value", "dict", autopytorch_ts_forecasting_metrics, "optimize_metric"],
-    [":forecasting_horizon", ":forecasting_horizon_autopytorch_time_series_forcasting", [1], "single_value", "integer", "", "n_prediction_steps"]
-]
-
-# dictionary for mapping the selected task to the appropriate config
-task_config = {
-    ":tabular_classification": tabular_classification_config,
-    ":tabular_regression": tabular_regression_config,
-    ":time_series_forecasting": time_series_forcasting_config
+parameters = {
+    #tabular classification
+    ":metric_autopytorch_tabular_classification": {
+                                                    "parameter_name": "optimize_metric",
+                                                    "lookup_dict": autopytorch_metrics
+                                                },
+    #tabular regression
+    ":metric_autopytorch_tabular_regression": {
+                                                    "parameter_name": "optimize_metric",
+                                                    "lookup_dict": autopytorch_metrics
+                                                },
+    #time_series_forcasting
+    ":metric_autopytorch_time_series_forcasting": {
+                                                    "parameter_name": "optimize_metric",
+                                                    "lookup_dict": autopytorch_ts_forecasting_metrics
+                                                },
+    ":forecasting_horizon": {
+                                                    "parameter_name": "n_prediction_steps",
+                                                    "default": [1]
+                                                }
 }

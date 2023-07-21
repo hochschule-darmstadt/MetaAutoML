@@ -4,7 +4,7 @@ lama_metrics = {
 #classification - only multi-tabulaclassification is implemented
     ":categorical_cross_entropy": "crossentropy",
     ":area_under_roc_curve": "auc",
-   
+
     #regression
     ":mean_absolute_percentage_error": "mape",
     ":mean_absolute_error": "mae",
@@ -16,7 +16,7 @@ lama_lossfunction = {
     ":categorical_cross_entropy": "crossentropy",
     ":f_measure": "f1",
 
-   
+
     #regression
     ":mean_absolute_percentage_error": "mape",
     ":mean_absolute_error": "mae",
@@ -34,29 +34,46 @@ lama_lossfunction = {
 #the autoML function parameter names
 #[broader_type, specific_type, default, expected parameter 'count', converting type, lookup dictionary, used name by autoML]
 
-#config for the tabular classification
-tabular_classification_config = [
-    [":metric", ":metric_lama_tabular_classification", [":categorical_cross_entropy"], "single_value", "dict", lama_metrics, "metric"],
-    [":loss", ":loss_lama_tabular_classification", [":categorical_cross_entropy"], "single_value", "dict", lama_lossfunction, "loss"],
-]
+# #config for the tabular classification
+# tabular_classification_config = [
+#     [":metric", ":metric_lama_tabular_classification", [":categorical_cross_entropy"], "single_value", "dict", lama_metrics, "metric"],
+#     [":loss", ":loss_lama_tabular_classification", [":categorical_cross_entropy"], "single_value", "dict", lama_lossfunction, "loss"],
+# ]
 
 
-#config for the tabular regression
-tabular_regression_config = [
-    [":metric", ":metric_lama_tabular_regression", [":mse"], "single_value", "dict", lama_metrics, "metric"],
-    [":loss", ":loss_lama_tabular_regression", [":mse"], "single_value", "dict", lama_lossfunction, "loss"],
-]
+# #config for the tabular regression
+# tabular_regression_config = [
+#     [":metric", ":metric_lama_tabular_regression", [":mse"], "single_value", "dict", lama_metrics, "metric"],
+#     [":loss", ":loss_lama_tabular_regression", [":mse"], "single_value", "dict", lama_lossfunction, "loss"],
+# ]
 
 
 
 
 
-# dictionary for mapping the selected task to the appropriate config
-task_config = {
-    ":tabular_classification": tabular_classification_config,
-    ":tabular_regression": tabular_regression_config,
+# # dictionary for mapping the selected task to the appropriate config
+# task_config = {
+#     ":tabular_classification": tabular_classification_config,
+#     ":tabular_regression": tabular_regression_config,
+# }
+
+
+parameters = {
+    ":metric_lama_tabular_classification" : {
+                                                "parameter_name": "metric",
+                                                "lookup_dict": lama_metrics
+                                            },
+    ":loss_lama_tabular_classification" : {
+                                                "parameter_name": "loss",
+                                                "lookup_dict": lama_lossfunction
+                                            },
+    ":metric_lama_tabular_regression" : {
+                                                "parameter_name": "metric",
+                                                "lookup_dict": lama_metrics
+                                            },
+    ":loss_lama_tabular_regression" : {
+                                                "parameter_name": "loss",
+                                                "lookup_dict": lama_lossfunction
+                                            },
 }
-
-
-
 

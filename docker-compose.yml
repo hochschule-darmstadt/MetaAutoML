@@ -91,8 +91,8 @@ services:
 
   autokeras:
     build:
-      context: ./adapters
-      dockerfile: ./AutoKeras/Dockerfile
+      context: ./
+      dockerfile: ./adapters/AutoKeras/Dockerfile
     container_name: autokeras
     depends_on:
       - mljar
@@ -109,8 +109,8 @@ services:
 
   mljar:
     build:
-      context: ./adapters
-      dockerfile: ./MLJAR/Dockerfile
+      context: ./
+      dockerfile: ./adapters/MLJAR/Dockerfile
     container_name: mljar
     depends_on:
       - flaml
@@ -127,8 +127,8 @@ services:
 
 #   mcfly:
 #     build:
-#       context: ./adapters
-#       dockerfile: ./Mcfly/Dockerfile
+#       context: ./
+#       dockerfile: ./adapters/Mcfly/Dockerfile
 #     container_name: mcfly
 #     environment:
 #       - GRPC_SERVER_PORT=50054
@@ -138,8 +138,8 @@ services:
 
 #   sklearn:
 #     build:
-#       context: ./adapters
-#       dockerfile: ./AutoSklearn/Dockerfile
+#       context: ./
+#       dockerfile: ./adapters/AutoSklearn/Dockerfile
 #     container_name: sklearn
 #     environment:
 #       - GRPC_SERVER_PORT=50055
@@ -153,8 +153,8 @@ services:
 
   flaml:
     build:
-      context: ./adapters
-      dockerfile: ./FLAML/Dockerfile
+      context: ./
+      dockerfile: ./adapters/FLAML/Dockerfile
     container_name: flaml
     depends_on:
       - gluon
@@ -171,8 +171,8 @@ services:
 
   gluon:
     build:
-      context: ./adapters
-      dockerfile: ./AutoGluon/Dockerfile
+      context: ./
+      dockerfile: ./adapters/AutoGluon/Dockerfile
     container_name: gluon
     depends_on:
       - evalml
@@ -189,8 +189,8 @@ services:
 
 #   #autocve:
 #   #  build:
-#   #    context: ./adapters
-#   #    dockerfile: ./AutoCVE/Dockerfile
+#   #    context: ./
+#   #    dockerfile: ./adapters/AutoCVE/Dockerfile
 #   #  container_name: autocve
 #   #  environment:
 #   #    - GRPC_SERVER_PORT=50058
@@ -200,8 +200,8 @@ services:
 
 #   pytorch:
 #     build:
-#       context: ./adapters
-#       dockerfile: ./AutoPytorch/Dockerfile
+#       context: ./
+#       dockerfile: ./adapters/AutoPytorch/Dockerfile
 #     container_name: pytorch
 #     environment:
 #       - GRPC_SERVER_PORT=50059
@@ -215,8 +215,8 @@ services:
 
 #   #alphad3m:
 #   #  build:
-#   #    context: ./adapters
-#   #    dockerfile: ./AlphaD3M/Dockerfile
+#   #    context: ./
+#   #    dockerfile: ./adapters/AlphaD3M/Dockerfile
 #   #  container_name: alphad3m
 #   #  environment:
 #   #    - GRPC_SERVER_PORT=50060
@@ -227,8 +227,8 @@ services:
 
   evalml:
     build:
-      context: ./adapters
-      dockerfile: ./EvalML/Dockerfile
+      context: ./
+      dockerfile: ./adapters/EvalML/Dockerfile
     container_name: evalml
     depends_on:
       - pycaret
@@ -245,8 +245,8 @@ services:
 
   pycaret:
     build:
-      context: ./adapters
-      dockerfile: ./PyCaret/Dockerfile
+      context: ./
+      dockerfile: ./adapters/PyCaret/Dockerfile
     container_name: pycaret
     depends_on:
       - tpot
@@ -263,8 +263,8 @@ services:
 
   tpot:
     build:
-      context: ./adapters
-      dockerfile: ./TPOT/Dockerfile
+      context: ./
+      dockerfile: ./adapters/TPOT/Dockerfile
     container_name: tpot
     depends_on:
       - gama
@@ -281,8 +281,8 @@ services:
 
   gama:
     build:
-      context: ./adapters
-      dockerfile: ./GAMA/Dockerfile
+      context: ./
+      dockerfile: ./adapters/GAMA/Dockerfile
     container_name: gama
     depends_on:
       - lama
@@ -299,8 +299,8 @@ services:
 
   lama:
     build:
-      context: ./adapters
-      dockerfile: ./LAMA/Dockerfile
+      context: ./
+      dockerfile: ./adapters/LAMA/Dockerfile
     container_name: lama
     environment:
       - GRPC_SERVER_PORT=50066

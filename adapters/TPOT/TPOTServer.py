@@ -5,6 +5,7 @@ from JsonUtil import get_config_property
 from AdapterBGRPC import *
 from grpclib.server import Server
 from AdapterService import AdapterService
+from OntologyManager import OntologyManager
 
 async def main():
     """The adapter main function starting the adapter GRPC server and waiting on incoming requests of the controller

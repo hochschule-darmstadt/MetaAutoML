@@ -49,7 +49,7 @@ class FLAMLAdapter:
         automl_settings = {"log_file_name": 'flaml.log'}
         automl_settings.update({"time_budget": self._configuration["configuration"]["runtime_limit"] * 60})
 
-        parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), fpc.task_config)
+        parameters = translate_parameters(":flaml", self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), fpc.parameters)
         if parameters.get('estimator_list', None) != None:
             if parameters['estimator_list'] == ['auto']:
                 parameters['estimator_list'] = 'auto'
@@ -93,6 +93,7 @@ class FLAMLAdapter:
         X[y.name] = y.values
         automl.fit(dataframe=X, label=y.name, **automl_settings)
         export_model(automl, self._configuration["result_folder_location"], 'model_flaml.p')
+        export_model(FLAMLWrapper(automl, self._configuration), self._configuration["dashboard_folder_location"], 'dashboard_model.p')
 
 
     def __time_series_forecasting(self):
@@ -132,6 +133,7 @@ class FLAMLAdapter:
         automl.fit(X_train=X, y_train=y, **automl_settings)
 
         export_model(automl, self._configuration["result_folder_location"], 'model_flaml.p')
+        export_model(FLAMLWrapper(automl, self._configuration), self._configuration["dashboard_folder_location"], 'dashboard_model.p')
 
     def __text_classification(self):
         """Execute the tabular classification task and export the found model"""
@@ -161,3 +163,4 @@ class FLAMLAdapter:
         automl.fit(dataframe=X, label=y.name, **automl_settings)
 
         export_model(automl, self._configuration["result_folder_location"], 'model_flaml.p')
+        export_model(FLAMLWrapper(automl, self._configuration), self._configuration["dashboard_folder_location"], 'dashboard_model.p')

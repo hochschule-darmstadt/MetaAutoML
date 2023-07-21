@@ -79,63 +79,204 @@ eval_metrics_binary = {
     ":mean_absolute_percentage_error": "Mean Absolute Percentage Error"
 }
 
-#configs for the different tasks that can be executed with EvalML
-#each parameter has its own line that contains:
-#the broader type of the parameter(broader id); the autoML specific parameter id; the default value in case no parameter-value is selected;
-#the expected amount of the parameters(single_value/list); the type to which it should be converted (integer/dictionary); the lookup dictionary which includes the converting types;
-#the autoML function parameter names
-#[broader_type, specific_type, default, expected parameter 'count', converting type, lookup dictionary, used name by autoML]
-
-#config for the tabular classification
-tabular_classification_config = [
-    [":metric", ":metric_evalml_tabular_classification", [":log_loss"], "single_value", "dict", eval_metrics, "objective"]
-]
-tabular_classification_config_binary_metrics = [
-    [":metric", ":metric_evalml_tabular_classification", [":log_loss"], "single_value", "dict", eval_metrics_binary, "objective"]
-]
-
-#config for the tabular regression
-tabular_regression_config = [
-    [":metric", ":metric_evalml_tabular_regression", [":r2"], "single_value", "dict", eval_metrics, "objective"]
-]
-
-#config for the text classification
-text_classification_config = [
-    [":metric", ":metric_evalml_text_classification", [":log_loss"], "single_value", "dict", eval_metrics, "objective"]
-]
-text_classification_config_binary_metrics = [
-    [":metric", ":metric_evalml_text_classification", [":log_loss"], "single_value", "dict", eval_metrics_binary, "objective"]
-]
-
-#config for the text regression
-text_regression_config = [
-    [":metric", ":metric_evalml_text_regression", [":log_loss"], "single_value", "dict", eval_metrics, "objective"]
-]
-
-#config for the time series forecasting
-time_series_forecasting_config = [
-    [":metric", ":metric_evalml_time_series_regression", [":mean_squared_error"], "single_value", "dict", eval_metrics, "objective"],
-    [":forecasting_horizon", ":forecasting_horizon_evalml_time_series_forcasting", [1], "single_value", "integer", "", "forecast_horizon"],
-    [":lookback", ":lookback_evalml_time_series_forecasting", [1], "single_value", "integer", "", "max_delay"],
-    [":gap", ":gap_evalml_time_series_forecasting", [1], "single_value", "integer", "", "gap"]
-]
-
-# dictionary for mapping the selected task to the appropriate config
-task_config = {
-    ":tabular_classification": tabular_classification_config,
-    ":tabular_regression": tabular_regression_config,
-    ":text_classification": text_classification_config,
-    ":text_regression": text_regression_config,
-    ":time_series_forecasting" :time_series_forecasting_config
+eval_use_approach = {
+    #":": "BASELINE",
+    ":catboost": "CATBOOST",
+    ":decision_tree": "DECISION_TREE",
+    #":": "ENSEMBLE",
+    ":extra_tree": "EXTRA_TREES",
+    #":": "K_NEIGHBORS",
+    ":light_gradient_boosting_machine": "LIGHTGBM",
+    ":linear_regression": "LINEAR_MODEL",
+    #":": "NONE",
+    ":random_forest": "RANDOM_FOREST",
+    #":": "SVM",
+    ":xgboost": "XGBOOST"
 }
 
-# dictionary for mapping the selected task to the appropriate config
-task_config_binary_metric = {
-    ":tabular_classification": tabular_classification_config_binary_metrics,
-    ":tabular_regression": tabular_regression_config,
-    ":text_classification": text_classification_config_binary_metrics,
-    ":text_regression": text_regression_config,
-    ":time_series_forecasting" :time_series_forecasting_config
+eval_tuner = {
+    ":random": "RandomSearchTuner",
+    ":grid_search": "GridSearchTuner",
+    ":skopt": "SKOptTuner"
+}
+
+eval_featurizers = {
+    ":datetime_featurizer" : "DatetimeFeaturizer",
+    ":email_featurizer" : "EmailFeaturizer",
+    ":url_featurizer" : "URLFeaturizer",
+    ":natural_language_featurizer" : "NaturalLanguageFeaturizer",
+    ":time_series_featurizer" : "TimeSeriesFeaturizer"
 }
 
 
+parameters = {
+#general parameters
+    ":tuner_class_evalml": {
+                                                    "parameter_name": "",
+                                                    "lookup_dict": eval_tuner
+                                                },
+    ":optimize_thresholds_evalml": {
+                                                    "parameter_name": "optimize_thresholds"
+                                                },
+    ":ensembling_evalml": {
+                                                    "parameter_name": "ensembling"
+                                                },
+    ":max_batches_evalml": {
+                                                    "parameter_name": "max_batches"
+                                                },
+    ":allow_long_running_models_evalml": {
+                                                    "parameter_name": "allow_long_running_models"
+                                                },
+    ":pipelines_per_batch_evalml": {
+                                                    "parameter_name": "_pipelines_per_batch"
+                                                },
+    ":exclude_featurizers_evalml": {
+                                                    "parameter_name": "exclude_featurizers",
+                                                    "lookup_dict": eval_featurizers
+                                                },
+    #tabular classification
+    ":use_approach_evalml_tabular_classification": {
+                                                    "parameter_name": "allowed_model_families",
+                                                    "lookup_dict": eval_use_approach
+                                                },
+    ":metric_evalml_tabular_classification": {
+                                                    "parameter_name": "objective",
+                                                    "lookup_dict": eval_metrics
+                                                },
+    #tabular regression
+    ":use_approach_evalml_tabular_regression": {
+                                                    "parameter_name": "allowed_model_families",
+                                                    "lookup_dict": eval_use_approach
+                                                },
+    ":metric_evalml_tabular_regression": {
+                                                    "parameter_name": "objective",
+                                                    "lookup_dict": eval_metrics
+                                                },
+
+    #time series regression
+    ":use_approach_evalml_time_series_regression": {
+                                                    "parameter_name": "allowed_model_families",
+                                                    "lookup_dict": eval_use_approach
+                                                },
+    ":metric_evalml_time_series_regression": {
+                                                    "parameter_name": "objective",
+                                                    "lookup_dict": eval_metrics
+                                                },
+    ":forecasting_horizon_evalml_time_series_forcasting": {
+                                                    "parameter_name": "forecast_horizon",
+                                                    "default": [1]
+                                                },
+    ":lookback_evalml_time_series_forecasting": {
+                                                    "parameter_name": "max_delay",
+                                                    "default": [1]
+                                                },
+    ":gap_evalml_time_series_forecasting": {
+                                                    "parameter_name": "gap",
+                                                    "default": [1]
+                                                },
+
+    #text classification
+    ":use_approach_evalml_text_classification": {
+                                                    "parameter_name": "allowed_model_families",
+                                                    "lookup_dict": eval_use_approach
+                                                },
+    ":metric_evalml_text_classification": {
+                                                    "parameter_name": "objective",
+                                                    "lookup_dict": eval_metrics
+                                                },
+     #text regression
+    ":use_approach_evalml_text_regression": {
+                                                    "parameter_name": "allowed_model_families",
+                                                    "lookup_dict": eval_use_approach
+                                                },
+    ":metric_evalml_text_regression": {
+                                                    "parameter_name": "objective",
+                                                    "lookup_dict": eval_metrics
+                                                }
+}
+
+parametersBinary = {
+#general parameters
+    ":tuner_class_evalml": {
+                                                    "parameter_name": "",
+                                                    "lookup_dict": eval_tuner
+                                                },
+    ":optimize_thresholds_evalml": {
+                                                    "parameter_name": "optimize_thresholds"
+                                                },
+    ":ensembling_evalml": {
+                                                    "parameter_name": "ensembling"
+                                                },
+    ":max_batches_evalml": {
+                                                    "parameter_name": "max_batches"
+                                                },
+    ":allow_long_running_models_evalml": {
+                                                    "parameter_name": "allow_long_running_models"
+                                                },
+    ":pipelines_per_batch_evalml": {
+                                                    "parameter_name": "_pipelines_per_batch"
+                                                },
+    ":exclude_featurizers_evalml": {
+                                                    "parameter_name": "exclude_featurizers",
+                                                    "lookup_dict": eval_featurizers
+                                                },
+    #tabular classification
+    ":use_approach_evalml_tabular_classification": {
+                                                    "parameter_name": "allowed_model_families",
+                                                    "lookup_dict": eval_use_approach
+                                                },
+    ":metric_evalml_tabular_classification": {
+                                                    "parameter_name": "objective",
+                                                    "lookup_dict": eval_metrics_binary
+                                                },
+    #tabular regression
+    ":use_approach_evalml_tabular_regression": {
+                                                    "parameter_name": "allowed_model_families",
+                                                    "lookup_dict": eval_use_approach
+                                                },
+    ":metric_evalml_tabular_regression": {
+                                                    "parameter_name": "objective",
+                                                    "lookup_dict": eval_metrics_binary
+                                                },
+
+    #time series regression
+    ":use_approach_evalml_time_series_regression": {
+                                                    "parameter_name": "allowed_model_families",
+                                                    "lookup_dict": eval_use_approach
+                                                },
+    ":metric_evalml_time_series_regression": {
+                                                    "parameter_name": "objective",
+                                                    "lookup_dict": eval_metrics_binary
+                                                },
+    ":forecasting_horizon_evalml_time_series_forcasting": {
+                                                    "parameter_name": "forecast_horizon",
+                                                    "default": [1]
+                                                },
+    ":lookback_evalml_time_series_forecasting": {
+                                                    "parameter_name": "max_delay",
+                                                    "default": [1]
+                                                },
+    ":gap_evalml_time_series_forecasting": {
+                                                    "parameter_name": "gap",
+                                                    "default": [1]
+                                                },
+
+    #text classification
+    ":use_approach_evalml_text_classification": {
+                                                    "parameter_name": "allowed_model_families",
+                                                    "lookup_dict": eval_use_approach
+                                                },
+    ":metric_evalml_text_classification": {
+                                                    "parameter_name": "objective",
+                                                    "lookup_dict": eval_metrics_binary
+                                                },
+     #text regression
+    ":use_approach_evalml_text_regression": {
+                                                    "parameter_name": "allowed_model_families",
+                                                    "lookup_dict": eval_use_approach
+                                                },
+    ":metric_evalml_text_regression": {
+                                                    "parameter_name": "objective",
+                                                    "lookup_dict": eval_metrics_binary
+                                                }
+}

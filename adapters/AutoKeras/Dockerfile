@@ -5,16 +5,17 @@ EXPOSE 6000-6099
 RUN apt-get update \
     && apt-get install -y git
 
-COPY ./AutoKeras/requirements.txt .
+COPY ./adapters/AutoKeras/requirements.txt .
 # Install dependencies
 RUN pip install -r requirements.txt
 # put all files in a directory called app
 WORKDIR /app
-COPY ./AutoKeras .
-COPY ./Utils/Utils ./Utils
-COPY ./Utils/AutoMLs ./AutoMLs
-COPY ./Utils/Templates ./app-data/templates
-COPY ./GRPC/Adapter ./
+COPY ./adapters/AutoKeras .
+COPY ./adapters/Utils/Utils ./Utils
+COPY ./adapters/Utils/AutoMLs ./AutoMLs
+COPY ./adapters/Utils/Templates ./app-data/templates
+COPY ./adapters/GRPC/Adapter ./
+COPY ./controller/managers/ontology/ML_Ontology.ttl .
 
 # this should already be created, but sometimes there is a bug in docker which causes that the directory is not copied
 RUN mkdir -p /app/app-data/output/tmp

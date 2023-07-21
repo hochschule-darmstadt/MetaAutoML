@@ -9,6 +9,7 @@ from JsonUtil import get_config_property
 from grpclib.server import Server
 from AdapterService import AdapterService
 from Container import *
+from OntologyManager import OntologyManager
 
 
 
