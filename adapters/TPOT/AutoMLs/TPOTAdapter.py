@@ -62,6 +62,7 @@ class TPOTAdapter:
                                             random_state=42, verbosity=2, max_time_mins=self._configuration["configuration"]["runtime_limit"])
         pipeline_optimizer.fit(X, y)
         export_model(pipeline_optimizer.fitted_pipeline_, self._configuration["result_folder_location"], 'model_TPOT.p')
+        export_model(TPOTWrapper(pipeline_optimizer.fitted_pipeline_, self._configuration), self._configuration["dashboard_folder_location"], 'dashboard_model.p')
 
     def __image_classification(self):
         X, y = data_loader(self._configuration, perform_splitting=False, as_2darray=True)

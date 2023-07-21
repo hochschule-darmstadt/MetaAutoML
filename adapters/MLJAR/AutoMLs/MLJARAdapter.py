@@ -55,3 +55,4 @@ class MLJARAdapter:
         automl = AutoML(total_time_limit=self._configuration["configuration"]["runtime_limit"], mode="Compete", **parameters, results_path=result_path)
         automl.fit(X, y)
         shutil.copytree(self._configuration["model_folder_location"], os.path.join(self._configuration["result_folder_location"], "Models"))
+        export_model(MLJARWrapper(automl, self._configuration), self._configuration["dashboard_folder_location"], 'dashboard_model.p')

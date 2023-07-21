@@ -107,6 +107,7 @@ class AutoGluonAdapter:
                                  path=self._result_path).fit(
             data,
             time_limit=self._time_limit*60)
+        export_model(AutoGluonWrapper(model, self._configuration), self._configuration["dashboard_folder_location"], 'dashboard_model.p')
         #Fit methode already saves the model
 
     def __text_classification(self):
@@ -131,6 +132,7 @@ class AutoGluonAdapter:
                                  path=self._result_path).fit(
             data,
             time_limit=self._time_limit*60, hyperparameters=hyperparameters)
+        export_model(AutoGluonWrapper(model, self._configuration), self._configuration["dashboard_folder_location"], 'dashboard_model.p')
         #Fit methode already saves the model
 
     def __text_named_entity_recognition(self):
@@ -221,6 +223,7 @@ class AutoGluonAdapter:
                                  path=self._result_path).fit(
             ts_dataframe,
             time_limit=self._time_limit*60)
+        export_model(AutoGluonWrapper(model, self._configuration), self._configuration["dashboard_folder_location"], 'dashboard_model.p')
         #Fit methode already saves the model
 
 if __name__ == '__main__':

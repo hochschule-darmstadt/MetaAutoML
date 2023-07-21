@@ -18,7 +18,7 @@ gama_metrics = {
     ":recall_samples": "recall_samples",
     ":recall_weighted": "recall_weighted",
     ":receiver_operating_characteristic_curve": "roc_auc",
-   
+
     #regression
     ":explained_variance": "explained_variance",
     ":median_absolute_error": "neg_median_absolute_error",
@@ -39,26 +39,36 @@ gama_metrics = {
 #[broader_type, specific_type, default, expected parameter 'count', converting type, lookup dictionary, used name by autoML]
 
 #config for the tabular classification
-tabular_classification_config = [
-    [":metric", ":metric_gama_tabular_classification", [":neg_log_loss"], "list", "dict", gama_metrics, "scoring"],
-]
+# tabular_classification_config = [
+#     [":metric", ":metric_gama_tabular_classification", [":neg_log_loss"], "list", "dict", gama_metrics, "scoring"],
+# ]
 
 
-#config for the tabular regression
-tabular_regression_config = [
-    [":metric", ":metric_gama_tabular_regression", [":explained_variance"], "list", "dict", gama_metrics, "scoring"]
-]
+# #config for the tabular regression
+# tabular_regression_config = [
+#     [":metric", ":metric_gama_tabular_regression", [":explained_variance"], "list", "dict", gama_metrics, "scoring"]
+# ]
 
 
 
 
 
-# dictionary for mapping the selected task to the appropriate config
-task_config = {
-    ":tabular_classification": tabular_classification_config,
-    ":tabular_regression": tabular_regression_config,
+# # dictionary for mapping the selected task to the appropriate config
+# task_config = {
+#     ":tabular_classification": tabular_classification_config,
+#     ":tabular_regression": tabular_regression_config,
+#}
+
+
+parameters = {
+    ":metric_gama_tabular_classification": {
+                                                    "parameter_name": "scoring",
+                                                    "lookup_dict": gama_metrics
+                                                },
+    ":metric_gama_tabular_regression": {
+                                                    "parameter_name": "scoring",
+                                                    "lookup_dict": gama_metrics
+                                                },
+
 }
-
-
-
 

@@ -76,6 +76,7 @@ class AutoKerasAdapter:
 
         reg.fit(x=X, y=y, epochs=1)
         export_model(reg, self._configuration["result_folder_location"], 'model_keras.p')
+        export_model(AutoKerasWrapper(reg, self._configuration), self._configuration["dashboard_folder_location"], 'dashboard_model.p')
 
     def __image_classification(self):
         """"Execute image classification task and export the found model"""
@@ -120,7 +121,7 @@ class AutoKerasAdapter:
         X, y = prepare_tabular_dataset(train, self._configuration, apply_feature_extration=True)
         parameters = translate_parameters(":autokeras", self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), akpc.parameters)
 
-        reg = ak.TextClassifier(overwrite=True,
+        clf = ak.TextClassifier(overwrite=True,
                                 # NOTE: bert models will fail with out of memory errors
                                 #   even with 32GB GB RAM
                                 # the first model is a non-bert transformer
@@ -129,8 +130,9 @@ class AutoKerasAdapter:
                                 directory=self._configuration["model_folder_location"])
 
 
-        reg.fit(x = np.array(X).astype(np.unicode_), y = np.array(y), epochs=1)
-        export_model(reg, self._configuration["result_folder_location"], 'model_keras.p')
+        clf.fit(x = np.array(X).astype(np.unicode_), y = np.array(y), epochs=1)
+        export_model(clf, self._configuration["result_folder_location"], 'model_keras.p')
+        export_model(AutoKerasWrapper(clf, self._configuration), self._configuration["dashboard_folder_location"], 'dashboard_model.p')
 
 
     def __text_regression(self):
@@ -150,6 +152,7 @@ class AutoKerasAdapter:
 
         reg.fit(x = np.array(X), y = np.array(y), epochs=1)
         export_model(reg, self._configuration["result_folder_location"], 'model_keras.p')
+        export_model(AutoKerasWrapper(reg, self._configuration), self._configuration["dashboard_folder_location"], 'dashboard_model.p')
 
 
     def __time_series_forecasting(self):
@@ -181,5 +184,6 @@ class AutoKerasAdapter:
         reg.fit(x = X, y = y, epochs=1, batch_size=1)
         model = reg.export_model()
         model.save(os.path.join(self._configuration["result_folder_location"], 'model_keras'), save_format="tf")
+        export_model(AutoKerasWrapper(reg, self._configuration), self._configuration["dashboard_folder_location"], 'dashboard_model.p')
         #export_model(reg, self._configuration["result_folder_location"], 'model_keras.p')
 

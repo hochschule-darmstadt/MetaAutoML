@@ -108,6 +108,7 @@ class EvalMLAdapter:
         best_pipeline_tobe_export = automl.best_pipeline
         #best_pipeline_tobe_export.save(os.path.join(self._configuration["result_folder_location"], 'evalml.p'))
         export_model(best_pipeline_tobe_export, self._configuration["result_folder_location"], 'evalml.p')
+        export_model(EvalMLWrapper(best_pipeline_tobe_export, self._configuration), self._configuration["dashboard_folder_location"], 'dashboard_model.p')
 
     def __time_series_forecasting(self):
         """Execute the time series forcasting/regression task and export the found model"""
@@ -153,6 +154,7 @@ class EvalMLAdapter:
         automl.search()
         best_pipeline_tobe_export = automl.best_pipeline
         export_model(best_pipeline_tobe_export, self._configuration["result_folder_location"], 'evalml.p')
+        export_model(EvalMLWrapper(best_pipeline_tobe_export, self._configuration), self._configuration["dashboard_folder_location"], 'dashboard_model.p')
 
     def __get_index_column(self):
         """get name of index column

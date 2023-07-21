@@ -68,6 +68,8 @@ def translate_parameters(automl, task, parameter, config_items):
     #Create task specific parameter dict
     for config_item in task_config_items:
         broader, datatype = ontology.get_broader_type_and_datatype_for_config_item(config_item)
+        if config_items.get(config_item, "") == "":
+            continue
         task_dict[config_item] = config_items[config_item]
         task_dict[config_item]["broader"] = broader
         task_dict[config_item]["datatype"] = datatype

@@ -36,7 +36,12 @@
 
 <MudGrid>
     @if (_compatibleTasks != null)
-    {
+                    {
+        <MudItem xs="12">
+        <MudGrid>
+            <MudItem xs="13">
+                <LabelTooltip FontSize="Typo.h4" Text="Select the ML task, i.e., what the ML model shall predict, e.g., classes (classification) or values (regression)." Position="Placement.Left"></LabelTooltip>
+            </MudItem>
         <MudItem xs="11">
             <MudSelect Label="@L["ML task"]" T="string" ValueChanged="@OnMlTaskSelectionChanged" Class="mud-width-full">
 
@@ -51,9 +56,8 @@
                 }
             </MudSelect>
         </MudItem>
-        <MudItem xs="1">
-            <LabelTooltip FontSize="Typo.h4" Text="Select the ML task, i.e., what the ML model shall predict, e.g., classes (classification) or values (regression)." Position="Placement.Left"></LabelTooltip>
-        </MudItem>
+                </MudGrid>
+            </MudItem>
     }
     else
     {
@@ -63,31 +67,39 @@
     @if (((Dataset.Dataset.Type.ID == ":tabular") || (Dataset.Dataset.Type.ID == ":text") || (Dataset.Dataset.Type.ID == ":time_series")) || (Dataset.Dataset.Type.ID == ":time_series_longitudinal") && (!string.IsNullOrEmpty(StartTrainingDto.Configuration.Task)))
 
     {
-            <MudItem xs="11">
-                <MudSelect Label="@L["target *"]" T="string" @bind-SelectedValues="SelectedTargets" MultiSelection="true">
-                    @if (_columnNames != null)
-                    {
-                        @foreach (var column in _columnNames)
+        <MudItem xs="12">
+            <MudGrid>
+                <MudItem xs="13">
+                    <LabelTooltip FontSize="Typo.h4" Text="Select which column in a tabular dataset is to be predicted by the ML model." Position="Placement.Left"></LabelTooltip>
+                </MudItem>
+                <MudItem xs="11">
+                    <MudSelect Label="@L["target *"]" T="string" @bind-SelectedValues="SelectedTargets" MultiSelection="true">
+                        @if (_columnNames != null)
                         {
-                            <div style="display:block; height:fit-content">
-                                <MudSelectItem Value="@column">@column</MudSelectItem>
-                                </div>
-                                }
-                                }
-                        </MudSelect>
-            </MudItem>
-            <MudItem xs="1">
-                <LabelTooltip FontSize="Typo.h4" Text="Select which column in a tabular dataset is to be predicted by the ML model." Position="Placement.Left"></LabelTooltip>
-            </MudItem>
+                            @foreach (var column in _columnNames)
+                            {
+                                <div style="display:block; height:fit-content">
+                                    <MudSelectItem Value="@column">@column</MudSelectItem>
+                                    </div>
+                                    }
+                                    }
+                            </MudSelect>
+                </MudItem>
+            </MudGrid>
+        </MudItem>
             }
-            <MudItem xs="11">
-                <MudNumericField ValueChanged="@OnRuntimeValueChanged" T="int" Label="@L["Runtime"]" Variant="Variant.Text" Min="3" Max="180" Value="@StartTrainingDto.Configuration.RuntimeLimit" />
-            </MudItem>
-            <MudItem xs="1">
-                <LabelTooltip FontSize="Typo.h4" Text="Specify the maximum runtime in minutes OMA-ML shall use for training. Longer runtimes tend to produce better models; shorter runtimes are more energy-efficient." Position="Placement.Left"></LabelTooltip>
-            </MudItem>
+        <MudItem xs="12">
+            <MudGrid>
+                <MudItem xs="13">
+                    <LabelTooltip FontSize="Typo.h4" Text="Specify the maximum runtime in minutes OMA-ML shall use for training. Longer runtimes tend to produce better models; shorter runtimes are more energy-efficient." Position="Placement.Left"></LabelTooltip>
+                </MudItem>
+                <MudItem xs="11">
+                    <MudNumericField ValueChanged="@OnRuntimeValueChanged" T="int" Label="@L["Runtime"]" Variant="Variant.Text" Min="3" Max="180" Value="@StartTrainingDto.Configuration.RuntimeLimit" />
+                </MudItem>
+            </MudGrid>
+        </MudItem>
             @if (!string.IsNullOrEmpty(StartTrainingDto.Configuration.Task) == true) //Only show details panel when task was selelected
-        {
+                    {
             <MudItem xs="11">
                 <MudExpansionPanels>
                     <MudExpansionPanel>
@@ -112,6 +124,12 @@
                                     @if (param.ParameterType == ":single_value")
                                     {
                                         <MudGrid>
+                                            @if (string.IsNullOrEmpty(param.CommentPara) == false)
+                                            {
+                                            <MudItem xs="13">
+                                                <LabelTooltip FontSize="Typo.h4" Text="@param.CommentPara" Position="Placement.Left"></LabelTooltip>
+                                            </MudItem>
+                                            }
                                             <MudItem xs="11">
                                                 <MudSelect T="ParameterValueViewModel" Class="ml-2" Label="@param.ParameterLabel" Variant="Variant.Outlined" @bind-SelectedValues="param.SelectedValues" ToStringFunc="p => p?.ValueLabel">
                                                     @foreach (var paramValue in param.ParameterValues)
@@ -123,14 +141,17 @@
                                                     }
                                                 </MudSelect>
                                             </MudItem>
-                                            <MudItem xs="1">
-                                                <LabelTooltip FontSize="Typo.h4" Text="@param.CommentPara" Position="Placement.Left"></LabelTooltip>
-                                            </MudItem>
                                         </MudGrid>
                                     }
                                     @if (param.ParameterType == ":list")
                                     {
                                         <MudGrid>
+                                            @if (string.IsNullOrEmpty(param.CommentPara) == false)
+                                            {
+                                                <MudItem xs="13">
+                                                    <LabelTooltip FontSize="Typo.h4" Text="@param.CommentPara" Position="Placement.Left"></LabelTooltip>
+                                                </MudItem>
+                                            }
                                             <MudItem xs="11">
                                                 <MudSelect T="ParameterValueViewModel" Class="ml-2" Label="@param.ParameterLabel" MultiSelection="true" SelectAll="true" @bind-SelectedValues="param.SelectedValues" ToStringFunc="p => p?.ValueLabel" Variant="Variant.Outlined">
                                                     @foreach (var paramValue in param.ParameterValues)
@@ -142,19 +163,19 @@
                                                     }
                                                 </MudSelect>
                                             </MudItem>
-                                            <MudItem xs="1">
-                                                <LabelTooltip FontSize="Typo.h4" Text="@param.CommentPara" Position="Placement.Left"></LabelTooltip>
-                                            </MudItem>
                                         </MudGrid>
                                     }
                                     else if (param.ParameterType == ":integer")
                                     {
                                         <MudGrid>
+                                            @if (string.IsNullOrEmpty(param.CommentPara) == false)
+                                            {
+                                                <MudItem xs="13">
+                                                    <LabelTooltip FontSize="Typo.h4" Text="@param.CommentPara" Position="Placement.Left"></LabelTooltip>
+                                                </MudItem>
+                                            }
                                             <MudItem xs="11">
                                                 <MudNumericField T="int?" Class="ml-2" Label="@param.ParameterLabel" Variant="Variant.Outlined" @bind-Value="@param.IntegerValue" />
-                                            </MudItem>
-                                            <MudItem xs="1">
-                                                <LabelTooltip FontSize="Typo.h4" Text="@param.CommentPara" Position="Placement.Left"></LabelTooltip>
                                             </MudItem>
                                         </MudGrid>
                                     }
@@ -178,6 +199,12 @@
                                                     @if (param.ParameterType == ":single_value")
                                                     {
                                                         <MudGrid>
+                                                            @if (string.IsNullOrEmpty(param.CommentPara) == false)
+                                                            {
+                                                                <MudItem xs="13">
+                                                                    <LabelTooltip FontSize="Typo.h4" Text="@param.CommentPara" Position="Placement.Left"></LabelTooltip>
+                                                                </MudItem>
+                                                            }
                                                             <MudItem xs="11">
                                                                 <MudSelect T="ParameterValueViewModel" Class="ml-2" Label="@param.BroaderParameterLabel" Variant="Variant.Outlined" @bind-SelectedValues="param.SelectedValues" ToStringFunc="p => p?.ValueLabel">
                                                                     @foreach (var paramValue in param.ParameterValues)
@@ -188,14 +215,17 @@
                                                                     }
                                                                 </MudSelect>
                                                             </MudItem>
-                                                            <MudItem xs="1">
-                                                                <LabelTooltip FontSize="Typo.h4" Text="@param.CommentPara" Position="Placement.Left"></LabelTooltip>
-                                                            </MudItem>
                                                         </MudGrid>
                                                     }
                                                     @if (param.ParameterType == ":list")
                                                     {
                                                         <MudGrid>
+                                                            @if (string.IsNullOrEmpty(param.CommentPara) == false)
+                                                            {
+                                                                <MudItem xs="13">
+                                                                    <LabelTooltip FontSize="Typo.h4" Text="@param.CommentPara" Position="Placement.Left"></LabelTooltip>
+                                                                </MudItem>
+                                                            }
                                                             <MudItem xs="11">
                                                         <MudSelect T="ParameterValueViewModel" Class="ml-2" MultiSelection="true" Label="@param.BroaderParameterLabel" SelectAll="true" @bind-SelectedValues="param.SelectedValues" ToStringFunc="p => p?.ValueLabel" Variant="Variant.Outlined">
                                                             @foreach (var paramValue in param.ParameterValues)
@@ -206,19 +236,19 @@
                                                             }
                                                         </MudSelect>
                                                             </MudItem>
-                                                            <MudItem xs="1">
-                                                                <LabelTooltip FontSize="Typo.h4" Text="@param.CommentPara" Position="Placement.Left"></LabelTooltip>
-                                                            </MudItem>
                                                         </MudGrid>
                                                     }
                                                     else if (param.ParameterType == ":integer")
                                                     {
                                                         <MudGrid>
+                                                            @if (string.IsNullOrEmpty(param.CommentPara) == false)
+                                                            {
+                                                                <MudItem xs="13">
+                                                                    <LabelTooltip FontSize="Typo.h4" Text="@param.CommentPara" Position="Placement.Left"></LabelTooltip>
+                                                                </MudItem>
+                                                            }
                                                             <MudItem xs="11">
                                                                 <MudNumericField T="int?" Class="ml-2" Label="@param.BroaderParameterLabel" Variant="Variant.Outlined" @bind-Value="@param.IntegerValue" />
-	                                                        </MudItem>
-	                                                        <MudItem xs="1">
-		                                                        <LabelTooltip FontSize="Typo.h4" Text="@param.CommentPara" Position="Placement.Left"></LabelTooltip>
 	                                                        </MudItem>
                                                         </MudGrid>
                                                     }
