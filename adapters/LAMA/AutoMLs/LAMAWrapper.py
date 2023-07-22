@@ -7,7 +7,7 @@ class LAMAWrapper(BaseWrapper):
         super().__init__(model, config)
 
     def predict(self, X, **kwargs):
-        X_predict = self._prepare_dataset(X)
+        X_predict = self._prepare_dataset(X.copy())
 
         predictions = self._model.predict(X_predict)
         if self._model.task.name == "multiclass":
@@ -22,7 +22,7 @@ class LAMAWrapper(BaseWrapper):
         return predicted_y
 
     def predict_proba(self, X, **kwargs):
-        X_predict = self._prepare_dataset(X)
+        X_predict = self._prepare_dataset(X.copy())
 
         probabilities_raw = self._model.predict(X_predict, **kwargs)
         probabilities = np.array(probabilities_raw.data)

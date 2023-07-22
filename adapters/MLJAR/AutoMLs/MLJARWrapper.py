@@ -7,11 +7,11 @@ class MLJARWrapper(BaseWrapper):
         super().__init__(model, config)
 
     def predict(self, X, **kwargs):
-        X_predict = self._prepare_dataset(X)
+        X_predict = self._prepare_dataset(X.copy())
 
         return self._model.predict(X_predict)
 
     def predict_proba(self, X, **kwargs):
-        X_predict = self._prepare_dataset(X)
+        X_predict = self._prepare_dataset(X.copy())
 
         return self._model.predict_proba(X_predict, **kwargs)

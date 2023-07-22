@@ -8,13 +8,13 @@ class GAMAWrapper(BaseEstimator, ClassifierMixin, BaseWrapper):
         super().__init__(model, config)
 
     def predict(self, X, **kwargs):
-        X_predict = self._prepare_dataset(X)
+        X_predict = self._prepare_dataset(X.copy())
         predictions_raw = self._model.predict(X_predict)
         predictions = np.array(predictions_raw)
         return predictions
 
     def predict_proba(self, X, **kwargs):
-        X_predict = self._prepare_dataset(X)
+        X_predict = self._prepare_dataset(X.copy())
         probabilities_raw = self._model.predict_proba(X_predict).tolist()
         probabilities = np.array(probabilities_raw)
         return probabilities

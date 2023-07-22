@@ -10,12 +10,12 @@ class AutoKerasWrapper(BaseWrapper):
         super().__init__(model, config)
 
     def predict(self, X, **kwargs):
-        X_predict = self._prepare_dataset(X)
+        X_predict = self._prepare_dataset(X.copy())
 
         return self._model.predict(X_predict)
 
     def predict_proba(self, X, **kwargs):
-        X_predict = self._prepare_dataset(X)
+        X_predict = self._prepare_dataset(X.copy())
 
         self._check_data_format((X_predict, None), predict=True)
         dataset = self._adapt(X_predict, self._model.inputs, 32)
