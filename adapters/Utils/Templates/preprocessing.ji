@@ -198,17 +198,17 @@ def string_feature_encoding(X: pd.DataFrame, y: pd.Series, features: dict_items,
         if dt["preprocessing"].get("encoding", "") == "":
             continue
         elif dt["preprocessing"]["encoding"]["type"] == ":ordinal_encoding":
-            ord_enc = OrdinalEncoder(dtype='int64')
+            ord_enc = OrdinalEncoder(dtype='float64', handle_unknown="use_encoded_value", unknown_value=np.nan)
             ord_enc.fit(dt["preprocessing"]["encoding"]["values"])
             X[column] = ord_enc.transform(X[[column]])
         elif dt["preprocessing"]["encoding"]["type"] == ":one_hot_encoding":
             try:
-                one_hot_enc = OneHotEncoder(dtype='int64', sparse_output=False).set_output(transform="pandas")
+                one_hot_enc = OneHotEncoder(dtype='int64', sparse_output=False, handle_unknown="ignore").set_output(transform="pandas")
                 one_hot_enc.fit(dt["preprocessing"]["encoding"]["values"])
                 result = one_hot_enc.transform(X[[column]])
             except:
                 #some automl use old sklearn versions we need to check for this
-                one_hot_enc = OneHotEncoder(dtype='int64', sparse=False)
+                one_hot_enc = OneHotEncoder(dtype='int64', sparse=False, handle_unknown="ignore")
                 one_hot_enc.fit(dt["preprocessing"]["encoding"]["values"])
                 result = pd.DataFrame(columns=one_hot_enc.get_feature_names(), data=one_hot_enc.transform(X[[column]]))
             for col in result.columns:

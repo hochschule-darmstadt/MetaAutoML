@@ -101,7 +101,13 @@ namespace BlazorBoilerplate.Server.Managers
 
                         }
                         grpcRequest.Encoding = result.Detected.EncodingName.ToString();
-                    } else
+                        //ascii data encoding causes some issues with some automl, UTF-8 is a safe encoding that covers all ascii signs
+                        if (grpcRequest.Encoding == "ascii")
+                        {
+                            grpcRequest.Encoding = "utf-8";
+                        }
+                    }
+                    else
                     {
                         grpcRequest.Encoding = "";
                     }

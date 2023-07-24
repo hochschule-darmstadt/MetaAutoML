@@ -68,7 +68,7 @@ class GAMAAdapter:
         self.df, test = data_loader(self._configuration)
         X, y = prepare_tabular_dataset(self.df, self._configuration, apply_feature_extration=True)
 
-        parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), gpc.parameters)
+        parameters = translate_parameters(":gama", self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), gpc.parameters)
         out_dir = (self._configuration["result_folder_location"] + "\\gama\\")
         automl = GamaRegressor(max_total_time=self._time_limit*60, store="nothing", n_jobs=1, **parameters,output_directory=out_dir, search=self.__get_search_method())
         automl.fit(X, y)

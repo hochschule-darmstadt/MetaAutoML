@@ -50,7 +50,7 @@ class PyCaretAdapter:
 
         parameters = translate_parameters(":pycaret", self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), ppc.parameters)
         automl = setup(data = X, target = y.name)
-        best = compare_models(budget_time=self._configuration["configuration"]["runtime_limit"] * 60 / 3) #Setup for max 1/3 of time
+        best = compare_models(budget_time=self._configuration["configuration"]["runtime_limit"] / 3) #Setup for max 1/3 of time
         model = create_model(best)
         tuned = tune_model(model, **parameters)
         fn_model = finalize_model(tuned)
@@ -69,7 +69,7 @@ class PyCaretAdapter:
         X[y.name] = y
         parameters = translate_parameters(":pycaret", self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), ppc.parameters)
         automl = setup(data = X, target = y.name)
-        best = compare_models(budget_time=self._configuration["configuration"]["runtime_limit"] * 60 / 3) #Setup for max 1/3 of time
+        best = compare_models(budget_time=self._configuration["configuration"]["runtime_limit"] / 3) #Setup for max 1/3 of time
         model = create_model(best)
         tuned = tune_model(model, **parameters)
         fn_model = finalize_model(tuned)
@@ -93,7 +93,7 @@ class PyCaretAdapter:
         X[y.name] = y
         automl = setup(data = X, target = y.name, fh=parameters["fh"])
         del parameters["fh"]
-        best = compare_models(budget_time=self._configuration["configuration"]["runtime_limit"] * 60 / 3) #Setup for max 1/3 of time
+        best = compare_models(budget_time=self._configuration["configuration"]["runtime_limit"] / 3) #Setup for max 1/3 of time
         model = create_model(best)
         tuned = tune_model(model, **parameters)
         fn_model = finalize_model(tuned)

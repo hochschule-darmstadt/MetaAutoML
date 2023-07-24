@@ -249,9 +249,14 @@ class DataSetAnalysisManager(Thread):
         old_columns_list = dataset.columns.tolist()
 
         dataframe = dataset
+        #The DropConstantFeatures does not tolerate NaN vales, drop first
+        #If the datadrame is empty we can not use it, and reset the dataframe and only do the other steps
         dataframe = dataframe.dropna()
-        constant_features = DropConstantFeatures(tol=0.998)  # Standard-Toleranzwert
-        dataframe = constant_features.fit_transform(dataframe)
+        if dataframe.empty == False:
+            constant_features = DropConstantFeatures(tol=0.998)  # Standard-Toleranzwert
+            dataframe = constant_features.fit_transform(dataframe)
+        else:
+            dataframe = dataset
         duplicate_features = DropDuplicateFeatures()
         dataframe = duplicate_features.fit_transform(dataframe)
         correlated_features = SmartCorrelatedSelection()

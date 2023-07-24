@@ -91,7 +91,7 @@ class LAMAAdapter:
         train, test = data_loader(self._configuration)
         #reload dataset to load changed data
         X, y = prepare_tabular_dataset(train, self._configuration, apply_feature_extration=True)
-        parameters = translate_parameters(self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), lpc.parameters)
+        parameters = translate_parameters(":lama", self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), lpc.parameters)
         task = Task(name='reg',**parameters)
         RANDOM_STATE = 42
         TIMEOUT = self._time_limit
