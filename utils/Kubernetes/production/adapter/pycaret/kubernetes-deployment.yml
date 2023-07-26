@@ -31,8 +31,8 @@ spec:
         name: pycaret
         resources:
           limits:
-            cpu: "1.5"
-            memory: "2097152e3"
+            cpu: "6"
+            memory: "12097152e3"
         volumeMounts:
         - name: datasets
           mountPath: /app/app-data/datasets

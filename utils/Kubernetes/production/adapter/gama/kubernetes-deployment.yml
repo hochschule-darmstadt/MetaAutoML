@@ -31,8 +31,8 @@ spec:
         name: gama
         resources:
           limits:
-            cpu: "2"
-            memory: "2097152e3"
+            cpu: "6"
+            memory: "12097152e3"
         volumeMounts:
         - name: datasets
           mountPath: /app/app-data/datasets

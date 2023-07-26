@@ -74,8 +74,8 @@ spec:
         - containerPort: 443
         resources:
           limits:
-            cpu: "1"
-            memory: "2194304e3"
+            cpu: "2"
+            memory: "4194304e3"
       restartPolicy: Always
       hostAliases:
       - ip: "127.0.0.1"
