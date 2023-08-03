@@ -32,7 +32,7 @@ namespace BlazorBoilerplate.Shared.Dto.Model
         public List<string> StatusMessages { get; set; }
         //public Dictionary<string, dynamic> Explanation { get; set; }
         public double Emissions { get; set; }
-        public bool DashboardCompatible { get; set; }
+        public string DashboardStatus { get; set; }
         public ModelDto()
         {
 
@@ -56,7 +56,7 @@ namespace BlazorBoilerplate.Shared.Dto.Model
             StatusMessages = model.StatusMessages.ToList();
             //Explanation = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(model.Explanation);
             Emissions = model.Emission;
-            DashboardCompatible = model.DashboardCompatible;
+            DashboardStatus = model.DashboardStatus;
         }
 
         public string GetMlLibraryString()

@@ -90,24 +90,6 @@ def dataset_preparation(filepath: str,  is_prediction=True) -> Tuple[pd.DataFram
     X = apply_pca_feature_extraction(X, feature_configuration.items())
     return X, y
 
-def prediction_postprocessing(y: np.array) -> np.array:
-    """Postprocess the prediction result in case a reverse label encoding is required
-
-    Args:
-        y (np.array): Array of prediction results
-
-    Returns:
-        np.array: Postprocessed prediction result array
-    """
-    for column, dt in feature_configuration.items():
-        if dt.get("role_selected", "") == ":target":
-            if dt["preprocessing"].get("encoding", "") != "":
-                if dt["preprocessing"]["encoding"]["type"] == ":label_encoding":
-                    enc = LabelEncoder()
-                    enc.fit(dt["preprocessing"]["encoding"]["values"])
-                    y = enc.inverse_transform(y)
-    return y
-
 def feature_preparation(X: pd.DataFrame, features: dict_items, datetime_format: str, is_prediction:bool=False) -> Tuple[pd.DataFrame, pd.Series]:
     """Prepare the dataset by applying to every column the correct datatype and role
 
@@ -156,7 +138,7 @@ def feature_preparation(X: pd.DataFrame, features: dict_items, datetime_format: 
         elif datatype == ":datetime":
             X[column] = pd.to_datetime(X[column], format=datetime_format)
         elif datatype == ":string":
-            X[column] = X[column].astype('object')
+            X[column] = X[column].astype('str')
 
         #Get target column
         if dt.get("role_selected", "") == ":target":

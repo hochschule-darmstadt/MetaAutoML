@@ -95,14 +95,14 @@ class CsvManager:
             except:
                 try:
                     pd.to_numeric(column, downcast="int64")
-                    if column.nunique() <= 2:
+                    if set(column.unique()) == {0, 1}:
                         return ":boolean", compatible_casting_datatypes[":boolean"]
                     else:
                         return ":integer", compatible_casting_datatypes[":integer"]
                 except:
                     return ":string", compatible_casting_datatypes[":string"]
         elif numpy_datatype == np.dtype(np.int64):
-            if column.nunique() <= 2:
+            if set(column.unique()) == {0, 1}:
                 return ":boolean", compatible_casting_datatypes[":boolean"]
             return ":integer", compatible_casting_datatypes[":integer"]
         elif numpy_datatype == np.dtype(np.float_):

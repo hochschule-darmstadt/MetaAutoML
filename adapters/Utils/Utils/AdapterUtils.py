@@ -259,7 +259,7 @@ def evaluate(config: "StartAutoMlRequest", config_path: str) -> Tuple[float, flo
         if config["configuration"]["task"] == ":image_classification":
             return compute_classification_metrics(pd.Series(y_test), predictions["predicted"]), (predict_time * 1000) / pd.Series(y_test).shape[0]
         else:
-            return compute_classification_metrics(pd.Series(test[target]), predictions[target]), (predict_time * 1000) / test.shape[0]
+            return compute_classification_metrics(cast_target(pd.Series(test[target]), config["dataset_configuration"]["schema"][key]), cast_target(predictions[target], config["dataset_configuration"]["schema"][key])), (predict_time * 1000) / test.shape[0]
     elif config["configuration"]["task"] in [":tabular_regression", ":text_regression", ":image_regression", ":time_series_forecasting"]:
         if config["configuration"]["task"] == ":image_regression":
             return compute_regression_metrics(pd.Series(y_test), predictions["predicted"]), (predict_time * 1000) / pd.Series(y_test).shape[0]

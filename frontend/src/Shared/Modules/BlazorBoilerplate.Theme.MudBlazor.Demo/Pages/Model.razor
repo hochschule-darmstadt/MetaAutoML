@@ -94,10 +94,7 @@
     <MudItem xs="12" sm="12" md="4">
         @if(_model != null)
         {
-            @if (_model.Model.DashboardCompatible == true)
-            {
-                <ModelExplanationShort Model="_model" ExplanationPagePath="@_explanationPagePath" />
-            }
+            <ModelExplanationShort Model="_model" ExplanationPagePath="@_explanationPagePath" />
         }
     </MudItem>
     <MudItem xs="12" sm="12" md="4">

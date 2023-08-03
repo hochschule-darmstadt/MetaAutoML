@@ -106,8 +106,14 @@ class TrainingManager:
             training_models = self.__data_storage.get_models(user_id, str(training["_id"]))
             self.__log.debug(f"__training_object_rpc_object: found {training_models.count} models")
 
+            self.__log.debug("__training_object_rpc_object: get dataset for training")
+            found, dataset = self.__data_storage.get_dataset(user_id, str(training["dataset_id"]))
+            self.__log.debug(f"__training_object_rpc_object: found {training_models.count} models")
+
             training_item.id = str(training["_id"])
             training_item.dataset_id = training["dataset_id"]
+            training_item.dataset_name = dataset["name"]
+
             for model in training_models:
                 try:
                     model_detail = Model()

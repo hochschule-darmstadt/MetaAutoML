@@ -623,10 +623,10 @@ class Model(betterproto.Message):
     ["starting search..", "epoch 1...."]
     """
 
-    dashboard_compatible: bool = betterproto.bool_field(15)
-    """If this model is explainer dashboard compatibleexample: True"""
-
-    dashboard_status: str = betterproto.string_field(16)
+    dashboard_status: str = betterproto.string_field(15)
+    """
+    The status of the model dashboardexample: created / failed / building
+    """
 
 
 @dataclass(eq=False, repr=False)
@@ -721,29 +721,32 @@ class Training(betterproto.Message):
     MongoDBexample: '63515c86b10d04d230dc1482'
     """
 
-    models: List["Model"] = betterproto.message_field(3)
+    dataset_name: str = betterproto.string_field(3)
+    """Dataset name used for this trainingexample: 'Titanic'"""
+
+    models: List["Model"] = betterproto.message_field(4)
     """
     List of model records from MongoDB (see Model for more detals)example:
     [Model, Model]
     """
 
-    status: str = betterproto.string_field(4)
+    status: str = betterproto.string_field(5)
     """Current training activity status (busy, ended)example: "busy"""
 
-    configuration: "Configuration" = betterproto.message_field(5)
+    configuration: "Configuration" = betterproto.message_field(6)
     """
     Training Configuration object (see Configuration for more detals)example:
     Configuration
     """
 
-    dataset_configuration: str = betterproto.string_field(6)
+    dataset_configuration: str = betterproto.string_field(7)
     """
     The current dataset configuration used to open the dataset as a JSON
     stringexample: '{"use_header": true,"start_row": 1,"delimiter":
     "comma","escape_character": "\\","decimal_character": "."}'
     """
 
-    runtime_profile: "TrainingRuntimeProfile" = betterproto.message_field(7)
+    runtime_profile: "TrainingRuntimeProfile" = betterproto.message_field(8)
     """
     The Training runtime profile object (see TrainingRuntimeProfile for more
     details)example: TrainingRuntimeProfile
@@ -870,6 +873,9 @@ class CreateTrainingRequest(betterproto.Message):
     """
     If the new dataset schema should be persisted within the dataset document
     """
+
+    perform_model_analysis: bool = betterproto.bool_field(6)
+    """If the model should be analysied after the training"""
 
 
 @dataclass(eq=False, repr=False)
@@ -1071,11 +1077,8 @@ class GetAutoMlParametersResponse(betterproto.Message):
 class AutoMlParameter(betterproto.Message):
     """
     Parameter for an auto ml solutionexample:{autoMlIri: ":autokeras",paramIri:
-    ":metric_autokeras_regression",paramLabel: "metric autokeras
-    regression",paramType: ":list",broaderIri: ":metric",broaderLabel:
-    "metric",valueIri: ":median_absolute_error",valueLabel: "median absolute
-    error",seeAlso_para: "url",comment_para: "comment",seeAlso_value:
-    "url",comment_value: "comment",}
+    ":metric_autokeras_regression",paramType: ":list",broaderIri:
+    ":metric",valueIri: ":median_absolute_error",}
     """
 
     auto_ml_iri: str = betterproto.string_field(1)

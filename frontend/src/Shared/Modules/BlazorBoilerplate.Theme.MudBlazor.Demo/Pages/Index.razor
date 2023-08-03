@@ -85,7 +85,6 @@
             {
                 _trainings = Newtonsoft.Json.JsonConvert.DeserializeObject<GetTrainingsResponseDto>(apiResponse.Result.ToString());
 
-                apiResponse = await apiClient.GetDatasets();
                 await LoadDataset();
             }
             else

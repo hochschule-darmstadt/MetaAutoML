@@ -5,7 +5,7 @@ import pandas as pd
 import numpy as np
 import os
 {% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression"] %}
-from preprocessing import dataset_preparation, prediction_postprocessing
+from preprocessing import dataset_preparation
 from postprocessing import post_process_result_dataframe
 {% endif %}
 {% if configuration.configuration["task"] not in [":tabular_classification", ":tabular_regression"] %}
@@ -32,7 +32,6 @@ if __name__ == '__main__':
 
     predicted_y = loaded_model.predict(X)
     {% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression"] %}
-    predicted_y = prediction_postprocessing(predicted_y)
     predicted_y = np.reshape(predicted_y, (-1, 1))
     {% endif %}
 

@@ -1997,3 +1997,7 @@ msgstr "Aborted"
 msgctxt "Global"
 msgid "Parameters available for individual AutoML solution only"
 msgstr "Parameters available for individual AutoML solution only"
+
+msgctxt "Global"
+msgid "Perform model analysis"
+msgstr "Perform model analysis"

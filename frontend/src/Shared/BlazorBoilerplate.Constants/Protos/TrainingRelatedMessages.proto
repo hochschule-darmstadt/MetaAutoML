@@ -73,20 +73,25 @@ message Training {
   */
   string datasetId = 2;
   /*
+    Dataset name used for this training
+    example: 'Titanic'
+  */
+  string datasetName = 3;
+  /*
     List of model records from MongoDB (see Model for more detals)
     example: [Model, Model]
   */
-  repeated Model models = 3;
+  repeated Model models = 4;
   /*
-    Current training activity status (busy, completed, failed)
+    Current training activity status (busy, ended)
     example: "busy"
   */
-  string status = 4;
+  string status = 5;
   /*
     Training Configuration object (see Configuration for more detals)
     example: Configuration
   */
-  Configuration configuration = 5;
+  Configuration configuration = 6;
   /*
     The current dataset configuration used to open the dataset as a JSON string
     example: '{
@@ -97,12 +102,12 @@ message Training {
     "decimal_character": "."
   }'
   */
-  string datasetConfiguration = 6;
+  string datasetConfiguration = 7;
   /*
     The Training runtime profile object (see TrainingRuntimeProfile for more details)
     example: TrainingRuntimeProfile
   */
-  TrainingRuntimeProfile RuntimeProfile = 7;
+  TrainingRuntimeProfile RuntimeProfile = 8;
 }
 
 message Configuration {
@@ -212,14 +217,14 @@ message CreateTrainingRequest {
   */
   Configuration configuration = 3;
   /*
-    The current dataset configuration used to open the dataset as a JSON string
+    The configuration of all columns. See SetDatasetColumnSchemaConfigurationRequest for more details.
     example: '{
-    "use_header": true,
-    "start_row": 1,
-    "delimiter": "comma",
-    "escape_character": "\\",
-    "decimal_character": "."
-  }'
+    "PassengerId": {
+      "RoleSelected": ":index",
+      "DatatypeSelected": ":integer",
+      },
+    }'
+    If "" (empty string) is provided, the currently saved schema is used.
   */
   string datasetConfiguration = 4;
 
@@ -227,6 +232,12 @@ message CreateTrainingRequest {
     If the new dataset schema should be persisted within the dataset document
   */
   bool SaveSchema = 5;
+
+
+  /*
+    If the model should be analysied after the training
+  */
+  bool PerformModelAnalysis = 6;
 }
 
 

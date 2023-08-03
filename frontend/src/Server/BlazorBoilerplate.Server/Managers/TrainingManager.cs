@@ -72,6 +72,7 @@ namespace BlazorBoilerplate.Server.Managers
                 }
                 createTrainingRequest.DatasetConfiguration = ConvertDatasetSchemaToString(request.Schema);
                 createTrainingRequest.SaveSchema = request.SaveSchema;
+                createTrainingRequest.PerformModelAnalysis = request.PerformModelAnalysis;
                 var reply = await _client.CreateTrainingAsync(createTrainingRequest);
                 return new ApiResponse(Status200OK, null, new CreateTrainingResponseDto(reply.TrainingId));
 
@@ -113,8 +114,7 @@ namespace BlazorBoilerplate.Server.Managers
 
         private async Task<TrainingDto> CreateTrainingDtoFromTraining(string username, Training training)
         {
-            GetDatasetResponse dataset = _client.GetDataset(new GetDatasetRequest { DatasetId = training.DatasetId, UserId = username });
-            TrainingDto trainingDto = new TrainingDto(training, dataset.Dataset.Name);
+            TrainingDto trainingDto = new TrainingDto(training, training.DatasetName);
             trainingDto.Configuration.Task = await _cacheManager.GetObjectInformation(training.Configuration.Task);
             trainingDto.Configuration.Target = training.Configuration.Target;
             trainingDto.Configuration.EnabledStrategies.AddRange(training.Configuration.EnabledStrategies);

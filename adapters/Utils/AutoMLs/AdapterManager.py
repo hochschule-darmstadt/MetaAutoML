@@ -376,7 +376,9 @@ class AdapterManager(Thread):
                 target = column
         #X, y = prepare_tabular_dataset(test, config)
         try:
-
+            # we want to limit the amount of rows used by explainer dashboard to avoid long waiting times
+            if test.shape[0] > 100:
+                test = test.head(100)
             if config["configuration"]["task"] == ":tabular_classification" or config["configuration"]["task"] == ":text_classification" :
                 explainer = ClassifierExplainer(pipeline_model, test.drop(target, axis=1), test[target])
                 dashboard = ExplainerDashboard(explainer)

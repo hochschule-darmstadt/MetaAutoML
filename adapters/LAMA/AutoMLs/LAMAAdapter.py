@@ -62,7 +62,6 @@ class LAMAAdapter:
             task = Task(name='multiclass', **parameters)
         # task = Task(name='multiclass',**parameters)
         RANDOM_STATE = 42
-        TIMEOUT = self._time_limit
         TARGET_NAME = y.name
         #X[TARGET_NAME] = y
         X = pd.concat([X, y], axis=1)
@@ -71,7 +70,7 @@ class LAMAAdapter:
         }
         automl = TabularAutoML(
             task = task,
-            timeout = TIMEOUT,
+            timeout = self._configuration["configuration"]["runtime_limit"] * 60,
             reader_params = {'random_state': RANDOM_STATE}
         )
         automl.fit_predict(X, roles = roles, verbose = 1)
@@ -94,7 +93,6 @@ class LAMAAdapter:
         parameters = translate_parameters(":lama", self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), lpc.parameters)
         task = Task(name='reg',**parameters)
         RANDOM_STATE = 42
-        TIMEOUT = self._time_limit
         TARGET_NAME = y.name
         X[TARGET_NAME] = y
         roles = {
@@ -102,7 +100,7 @@ class LAMAAdapter:
         }
         automl = TabularAutoML(
             task = task,
-            timeout = TIMEOUT,
+            timeout = self._configuration["configuration"]["runtime_limit"] * 60,
             reader_params = {'random_state': RANDOM_STATE}
         )
         automl.fit_predict(X, roles = roles, verbose = 1)

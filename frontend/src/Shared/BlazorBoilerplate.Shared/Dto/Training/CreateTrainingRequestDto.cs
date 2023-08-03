@@ -14,6 +14,7 @@ namespace BlazorBoilerplate.Shared.Dto.Training
         public CreateTrainingConfigurationDto Configuration { get; set; }
         public Dictionary<string, ColumnSchemaDto> Schema { get; set; }
         public bool SaveSchema { get; set; }
+        public bool PerformModelAnalysis { get; set; } = true;
         public CreateTrainingRequestDto()
         {
             Configuration = new CreateTrainingConfigurationDto();

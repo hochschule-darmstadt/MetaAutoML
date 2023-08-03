@@ -84,7 +84,7 @@ class DataSetAnalysisManager(Thread):
             if self.__basic_analysis:
                 analysis.update(self.basic_analysis(schema))
 
-            if self.__advanced_analysis:
+            if self.__advanced_analysis and self.__dataset_df.shape[1] < 100:
                 analysis.update({ "plots": self.advanced_analysis()})
 
             found, dataset = self.__data_storage.get_dataset(self.__user_id, self.__dataset_id)
@@ -259,8 +259,11 @@ class DataSetAnalysisManager(Thread):
             dataframe = dataset
         duplicate_features = DropDuplicateFeatures()
         dataframe = duplicate_features.fit_transform(dataframe)
-        correlated_features = SmartCorrelatedSelection()
-        dataframe = correlated_features.fit_transform(dataframe)
+
+        numerical_columns = dataframe.select_dtypes(include=['number']).columns
+        if len(numerical_columns) >= 1:
+            correlated_features = SmartCorrelatedSelection()
+            dataframe = correlated_features.fit_transform(dataframe)
 
         new_columns_list = dataframe.columns.tolist()
 

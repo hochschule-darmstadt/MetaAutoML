@@ -107,7 +107,7 @@
                             <ButtonTooltip Text="Click here to open numerous detail configuration options." Position="Placement.Right">@L["Details"]</ButtonTooltip>
                         </TitleContent>
                         <ChildContent>
-
+                            <MudSwitch @bind-Checked="@StartTrainingDto.PerformModelAnalysis" Label="@L["Perform model analysis"]" Color="Color.Info" />
                             <LabelTooltip Label=@L["ML libraries"] FontSize="Typo.subtitle2" Text="Select or deselect ML libraries for which ML models shall be generated. Initially, all ML libraries that are supported for the selected ML task are selected (indiated by a tick). When changing selections, corresponding AutoML solutions will be adapted automatically." Position="Placement.Right"></LabelTooltip>
 
                             <ChipSet ViewModel="@_mlLibsViewModel" />

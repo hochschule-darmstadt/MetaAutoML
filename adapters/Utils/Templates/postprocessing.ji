@@ -2,9 +2,10 @@
 
 import pandas as pd
 from numpy import nan
+from sklearn.preprocessing import LabelEncoder
 
 def post_process_result_dataframe(X_index: pd.DataFrame, y_predicted: pd.DataFrame) -> pd.DataFrame:
-    """Postprocess the result dataframe to add the index columns if necessary
+    """Postprocess the result dataframe to add the index columns and perform label reverse encoding if necessary
 
     Args:
         X_index (pd.DataFrame): The index column of X
@@ -19,6 +20,12 @@ def post_process_result_dataframe(X_index: pd.DataFrame, y_predicted: pd.DataFra
             index_columns.append(column)
         if dt.get("role_selected", "") == ":target":
             target = column
+            #Postprocessing label back if label encoding took place
+            if dt["preprocessing"].get("encoding", "") != "":
+                if dt["preprocessing"]["encoding"]["type"] == ":label_encoding":
+                    enc = LabelEncoder()
+                    enc.fit(dt["preprocessing"]["encoding"]["values"])
+                    y_predicted = pd.DataFrame(data=enc.inverse_transform(y_predicted), columns=["predicted"])
 
     if len(index_columns) > 0:
         final_y_predicted = X_index[index_columns].join(y_predicted[["predicted"]])

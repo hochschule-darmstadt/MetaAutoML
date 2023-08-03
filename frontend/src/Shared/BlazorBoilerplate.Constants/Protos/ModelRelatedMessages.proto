@@ -186,10 +186,10 @@ message Model {
   */
   double emission = 14;
   /*
-    If this model is explainer dashboard compatible
-    example: True
+    The status of the model dashboard
+    example: created / failed / building
   */
-  bool dashboardCompatible = 15;
+  string dashboardStatus = 15;
 }
 
 message ModelruntimeProfile {

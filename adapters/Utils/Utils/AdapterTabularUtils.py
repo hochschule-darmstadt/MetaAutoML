@@ -16,6 +16,34 @@ import json
 import numpy as np
 import dill
 
+def cast_target(y: pd.Series, column_schema) -> pd.Series:
+    """cast target column to correct datatype in evaluation function, to avoid mistakes during read in of csv files by pandas
+
+    Args:
+        y (np.array): Array of prediction results
+        column_schema: dict of the target column schema information
+
+    Returns:
+        np.array: Postprocessed prediction result array
+    """
+
+    #Get column datatype
+    datatype = column_schema.get("datatype_selected", "")
+    if datatype == "":
+        datatype = column_schema["datatype_detected"]
+    if datatype == ":categorical":
+        y = y.astype('category')
+    elif datatype == ":boolean":
+        y = y.astype('bool')
+    elif datatype == ":integer":
+        y = y.astype('int64')
+    elif datatype == ":float":
+        y = y.astype('float64')
+    elif datatype == ":string":
+        y = y.astype('str')
+    return y
+
+
 def read_tabular_dataset_training_data(config: "StartAutoMlRequest", perform_splitting: bool) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """Read a CSV dataset into train and test dataframes
 
@@ -170,7 +198,7 @@ def feature_preparation(X: pd.DataFrame, features: dict_items, datetime_format: 
         elif datatype == ":datetime":
             X[column] = pd.to_datetime(X[column], format=datetime_format)
         elif datatype == ":string":
-            X[column] = X[column].astype('object')
+            X[column] = X[column].astype('str')
 
         #Get target column
         if dt.get("role_selected", "") == ":target":
