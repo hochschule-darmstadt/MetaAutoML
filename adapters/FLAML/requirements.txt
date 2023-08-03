@@ -12,6 +12,5 @@ betterproto @ git+https://github.com/danielgtaylor/python-betterproto.git@496eba
 dependency-injector==4.40.0
 codecarbon==2.1.4
 scikit-learn
-explainerdashboard==0.4.2.2
-numpy<=1.23.0
+explainerdashboard==0.4.3
 rdflib==6.2.0

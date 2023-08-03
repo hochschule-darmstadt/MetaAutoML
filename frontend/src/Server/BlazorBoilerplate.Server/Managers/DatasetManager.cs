@@ -151,15 +151,15 @@ namespace BlazorBoilerplate.Server.Managers
                 foreach (Dataset item in reply.Datasets)
                 {
                     Dictionary<string, Shared.Dto.Dataset.ColumnSchemaDto> schema = new Dictionary<string, Shared.Dto.Dataset.ColumnSchemaDto>();
-                    foreach (var column in item.Schema)
-                    {
-                        schema.Add(column.Key, new Shared.Dto.Dataset.ColumnSchemaDto(
-                            await _cacheManager.GetObjectInformation(column.Value.DatatypeDetected),
-                            await _cacheManager.GetObjectInformationList(column.Value.DatatypesCompatible.ToList()),
-                            column.Value.DatatypeSelected == "" ? new ObjectInfomationDto() : await _cacheManager.GetObjectInformation(column.Value.DatatypeSelected),
-                            await _cacheManager.GetObjectInformationList(column.Value.RolesCompatible.ToList()),
-                            column.Value.RoleSelected == "" ? new ObjectInfomationDto() : await _cacheManager.GetObjectInformation(column.Value.RoleSelected)));
-                    }
+                    //foreach (var column in item.Schema)
+                    //{
+                    //    schema.Add(column.Key, new Shared.Dto.Dataset.ColumnSchemaDto(
+                    //        await _cacheManager.GetObjectInformation(column.Value.DatatypeDetected),
+                    //        await _cacheManager.GetObjectInformationList(column.Value.DatatypesCompatible.ToList()),
+                    //        column.Value.DatatypeSelected == "" ? new ObjectInfomationDto() : await _cacheManager.GetObjectInformation(column.Value.DatatypeSelected),
+                    //        await _cacheManager.GetObjectInformationList(column.Value.RolesCompatible.ToList()),
+                    //        column.Value.RoleSelected == "" ? new ObjectInfomationDto() : await _cacheManager.GetObjectInformation(column.Value.RoleSelected)));
+                    //}
                     response.Datasets.Add(new DatasetDto(item, await _cacheManager.GetObjectInformation(item.Type), schema));
                 }
                 return new ApiResponse(Status200OK, null, response);

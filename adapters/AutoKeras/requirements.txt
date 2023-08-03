@@ -10,5 +10,4 @@ tensorflow==2.10.1
 rdflib==6.2.0
 pandas>=0.23.3
 regex
-numpy<=1.23.0
-explainerdashboard==0.4.2.2
+explainerdashboard==0.4.3
