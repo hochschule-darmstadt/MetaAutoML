@@ -1,5 +1,5 @@
-### Ontology file generated from ML_Ontology.xlsx.
-### 2023-07-07 14:27:23.485217
+### Ontology file generated from ML_Ontology (1).xlsx.
+### 2023-08-11 15:53:16.996750
 
 
 # PREFIXES
@@ -1425,11 +1425,23 @@
 :receiver_operating_characteristic_curve a :Metric ;
     skos:prefLabel "receiver operating characteristic curve" ;
     skos:altLabel "ROC AUC" ;
-    :used_for :classification , :regression .
+    :used_for :classification .
+:receiver_operating_characteristic_curve_weighted a :Metric ;
+    skos:prefLabel "receiver operating characteristic curve weighted" ;
+    skos:altLabel "ROC AUC weighted" ;
+    :used_for :classification .
+:receiver_operating_characteristic_curve_samples a :Metric ;
+    skos:prefLabel "receiver operating characteristic curve samples" ;
+    skos:altLabel "ROC AUC samples" ;
+    :used_for :classification .
 :receiver_operating_characteristic_curve_one_vs_one a :Metric ;
     skos:prefLabel "receiver operating characteristic curve one vs one" ;
     skos:altLabel "ROC AUC OVO" ;
-    :used_for :classification , :regression .
+    :used_for :classification .
+:receiver_operating_characteristic_curve_one_vs_one_macro a :Metric ;
+    skos:prefLabel "receiver operating characteristic curve one vs one macro" ;
+    skos:altLabel "ROC AUC OVO macro" ;
+    :used_for :classification .
 :receiver_operating_characteristic_curve_one_vs_one_weighted a :Metric ;
     skos:prefLabel "receiver operating characteristic curve one vs one weighted" ;
     skos:altLabel "ROC AUC OVO weighted" ;
@@ -1437,7 +1449,15 @@
 :receiver_operating_characteristic_curve_one_vs_rest a :Metric ;
     skos:prefLabel "receiver operating characteristic curve one vs rest" ;
     skos:altLabel "ROC AUC OVR" ;
-    :used_for :classification , :regression .
+    :used_for :classification .
+:receiver_operating_characteristic_curve_one_vs_rest_micro a :Metric ;
+    skos:prefLabel "receiver operating characteristic curve one vs rest micro" ;
+    skos:altLabel "ROC AUC OVR micro" ;
+    :used_for :classification .
+:receiver_operating_characteristic_curve_one_vs_rest_macro a :Metric ;
+    skos:prefLabel "receiver operating characteristic curve one vs rest macro" ;
+    skos:altLabel "ROC AUC OVR macro" ;
+    :used_for :classification .
 :receiver_operating_characteristic_curve_one_vs_rest_weighted a :Metric ;
     skos:prefLabel "receiver operating characteristic curve one vs rest weighted" ;
     skos:altLabel "ROC AUC OVR weighted" ;
@@ -3627,8 +3647,7 @@
     skos:prefLabel "time series longitudinal" ;
     :category :dataset_type ;
     rdfs:comment "Longitudinal data are data in which each variable is measured repeatedly over time. A dataset of longitudinal data (also called panel data) for time series classification has 3 dimensions: num_samples, num_features, num_timesteps [filetype: *.ts]" ;
-    rdfs:seeAlso <https://www.stathelp.se/en/xtset_en.html> ;
-    :supported_by_oma_ml "true"^^xsd:boolean .
+    rdfs:seeAlso <https://www.stathelp.se/en/xtset_en.html> .
 :time_series a :Enum ;
     skos:prefLabel "time series" ;
     :category :dataset_type ;

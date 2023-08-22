@@ -69,7 +69,8 @@ class FLAMLAdapter:
         automl_settings.update({
             "task": 'classification',
             "ensemble": True,
-            "log_file_name": self._log_file_path
+            "log_file_name": self._log_file_path,
+            "verbose": 2
         })
 
         X[y.name] = y.values

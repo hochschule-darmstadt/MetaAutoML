@@ -15,6 +15,15 @@ spec:
       labels:
         io.kompose.service: redis
     spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: kubernetes.io/hostname
+                operator: In
+                values:
+                - oma-ml-2
       containers:
       - image: redis
         name: redis
@@ -24,8 +33,8 @@ spec:
           name: rediscontainer
         resources:
           limits:
-            cpu: "2"
-            memory: "4097152e3"
+            cpu: "0.5"
+            memory: "2097152e3"
         volumeMounts:
         - mountPath: /data
           name: redisdata

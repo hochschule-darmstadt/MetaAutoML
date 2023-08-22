@@ -94,7 +94,7 @@
                     <LabelTooltip FontSize="Typo.h4" Text="Specify the maximum runtime in minutes OMA-ML shall use for training. Longer runtimes tend to produce better models; shorter runtimes are more energy-efficient." Position="Placement.Left"></LabelTooltip>
                 </MudItem>
                 <MudItem xs="11">
-                    <MudNumericField ValueChanged="@OnRuntimeValueChanged" T="int" Label="@L["Runtime"]" Variant="Variant.Text" Min="3" Max="180" Value="@StartTrainingDto.Configuration.RuntimeLimit" />
+                    <MudNumericField ValueChanged="@OnRuntimeValueChanged" T="int" Label="@L["Runtime"]" Variant="Variant.Text" Min="3" Max="300" Value="@StartTrainingDto.Configuration.RuntimeLimit" />
                 </MudItem>
             </MudGrid>
         </MudItem>

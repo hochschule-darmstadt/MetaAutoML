@@ -1,9 +1,9 @@
 absl-py==0.13.0
 astunparse==1.6.3
-flaml==1.2.0
-flaml[ts_forecast]==1.2.0
-flaml[nlp]==1.2.0
-flaml[blendsearch]==1.2.0
+flaml==1.2.4
+flaml[ts_forecast]==1.2.4
+flaml[nlp]==1.2.4
+flaml[blendsearch]==1.2.4
 pandas==1.4.1
 Jinja2==3.0.1
 dill
@@ -14,3 +14,4 @@ codecarbon==2.1.4
 scikit-learn
 explainerdashboard==0.4.3
 rdflib==6.2.0
+xgboost==1.6.2

@@ -71,7 +71,6 @@ class ModelManager:
 
             model_info.status_messages[:] =  model["status_messages"]
             #model_info.explanation = json.dumps(model["explanation"])
-            model_info.dashboard_compatible = model.get("dashboard_compatible", False)
 
             if not "carbon_footprint" in model:
                         model["carbon_footprint"] = {"emissions": 0}

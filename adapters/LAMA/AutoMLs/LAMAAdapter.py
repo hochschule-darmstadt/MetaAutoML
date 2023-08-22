@@ -54,7 +54,7 @@ class LAMAAdapter:
         #reload dataset to load changed data
         X, y = prepare_tabular_dataset(train, self._configuration, apply_feature_extration=True)
         parameters = translate_parameters(":lama", self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), lpc.parameters)
-        if len(y.unique()) == 2:
+        if len(y.unique()) == 2 and  set(y.unique()) == {0, 1}: #LAMA can only predict 0 and 1 in binary cases, when target is anything else the values wont match later
             #task = Task(name='binary', metric=parameters['metric'], loss=parameters['loss'])
             task = Task(name='binary', **parameters)
         else:

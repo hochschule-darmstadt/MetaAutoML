@@ -18,6 +18,15 @@ spec:
       labels:
         io.kompose.service: tpot
     spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: kubernetes.io/hostname
+                operator: In
+                values:
+                - oma-ml-1
       containers:
       - env:
         - name: GRPC_SERVER_PORT
@@ -30,9 +39,12 @@ spec:
         imagePullPolicy: ""
         name: tpot
         resources:
-          limits:
-            cpu: "6"
-            memory: "12097152e3"
+            requests:
+                memory: "12Gi"
+                cpu: "6"
+            limits:
+                memory: "12Gi"
+                cpu: "6"
         volumeMounts:
         - name: datasets
           mountPath: /app/app-data/datasets

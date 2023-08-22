@@ -15,6 +15,15 @@ spec:
       labels:
         io.kompose.service: sqlserver
     spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: kubernetes.io/hostname
+                operator: In
+                values:
+                - oma-ml-3
       containers:
       - env:
         - name: "ACCEPT_EULA"
@@ -28,10 +37,10 @@ spec:
         - containerPort: 1433
         resources:
           limits:
-            cpu: "2"
-            memory: "4097152e3"
+            cpu: "0.5"
+            memory: "2097152e3"
         volumeMounts:
-        - mountPath: /mssql/data
+        - mountPath: /var/opt/mssql
           name: dbdata
       restartPolicy: Always
       serviceAccountName: ""

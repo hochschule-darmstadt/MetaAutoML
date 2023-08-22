@@ -58,7 +58,7 @@ class AutoKerasAdapter:
                                           directory=self._configuration["model_folder_location"],
                                           seed=42)
 
-        clf.fit(x=X, y=y, epochs=3)
+        clf.fit(x=X, y=y, epochs=1, verbose=2)
         export_model(clf, self._configuration["result_folder_location"], 'model_keras.p')
         export_model(AutoKerasWrapper(clf, self._configuration), self._configuration["dashboard_folder_location"], 'dashboard_model.p')
 
@@ -74,7 +74,7 @@ class AutoKerasAdapter:
                                          directory=self._configuration["model_folder_location"],
                                          seed=42)
 
-        reg.fit(x=X, y=y, epochs=3)
+        reg.fit(x=X, y=y, epochs=1, verbose=2)
         export_model(reg, self._configuration["result_folder_location"], 'model_keras.p')
         export_model(AutoKerasWrapper(reg, self._configuration), self._configuration["dashboard_folder_location"], 'dashboard_model.p')
 
@@ -91,7 +91,7 @@ class AutoKerasAdapter:
 
         #clf.fit(train_data, epochs=self._configuration["runtime_constraints"]["epochs"])
         #setting epochs to two because with one an error occurs
-        clf.fit(x = X_train, y = y_train, epochs=3)
+        clf.fit(x = X_train, y = y_train, epochs=1, verbose=2)
 
         export_model(clf, self._configuration["result_folder_location"], 'model_keras.p')
 
@@ -107,7 +107,7 @@ class AutoKerasAdapter:
                                         seed=42,
                                         directory=self._configuration["model_folder_location"])
 
-        reg.fit(x = X_train, y = y_train, epochs=3)
+        reg.fit(x = X_train, y = y_train, epochs=1, verbose=2)
 
         export_model(reg, self._configuration["result_folder_location"], 'model_keras.p')
 
@@ -130,7 +130,7 @@ class AutoKerasAdapter:
                                 directory=self._configuration["model_folder_location"])
 
 
-        clf.fit(x = np.array(X).astype(np.unicode_), y = np.array(y), epochs=3)
+        clf.fit(x = np.array(X).astype(np.unicode_), y = np.array(y), epochs=1, verbose=2)
         export_model(clf, self._configuration["result_folder_location"], 'model_keras.p')
         export_model(AutoKerasWrapper(clf, self._configuration), self._configuration["dashboard_folder_location"], 'dashboard_model.p')
 
@@ -150,7 +150,7 @@ class AutoKerasAdapter:
                                 seed=42,
                                 directory=self._configuration["model_folder_location"])
 
-        reg.fit(x = np.array(X), y = np.array(y), epochs=3)
+        reg.fit(x = np.array(X), y = np.array(y), epochs=1, verbose=2)
         export_model(reg, self._configuration["result_folder_location"], 'model_keras.p')
         export_model(AutoKerasWrapper(reg, self._configuration), self._configuration["dashboard_folder_location"], 'dashboard_model.p')
 
@@ -181,7 +181,7 @@ class AutoKerasAdapter:
                                 seed=42,
                                 directory=self._configuration["model_folder_location"])
         #Loopback must be dividable by batch_size else time seires will crash
-        reg.fit(x = X, y = y, epochs=3, batch_size=1)
+        reg.fit(x = X, y = y, epochs=1, batch_size=1, verbose=2)
         model = reg.export_model()
         model.save(os.path.join(self._configuration["result_folder_location"], 'model_keras'), save_format="tf")
         export_model(AutoKerasWrapper(reg, self._configuration), self._configuration["dashboard_folder_location"], 'dashboard_model.p')

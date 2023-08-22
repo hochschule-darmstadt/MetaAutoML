@@ -84,7 +84,8 @@ class DataSetAnalysisManager(Thread):
             if self.__basic_analysis:
                 analysis.update(self.basic_analysis(schema))
 
-            if self.__advanced_analysis and self.__dataset_df.shape[1] < 100:
+            #Only perform analysis when dataset has less than 20 columns
+            if self.__advanced_analysis and self.__dataset_df.shape[1] < 20:
                 analysis.update({ "plots": self.advanced_analysis()})
 
             found, dataset = self.__data_storage.get_dataset(self.__user_id, self.__dataset_id)

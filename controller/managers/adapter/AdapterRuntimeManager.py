@@ -172,7 +172,7 @@ class AdapterRuntimeManager:
         if len(training["model_ids"]) == len(model_list)-1:
             if self.__multi_fidelity_level != 0:
                 self.__multi_fidelity_callback(model_list, self.__multi_fidelity_level)
-        if model_details["status"] == "completed" and self.__multi_fidelity_level == 0 and model_details["dashboard_compatible"] == True and self.__request.perform_model_analysis == True:
+        if model_details["status"] == "completed" and self.__multi_fidelity_level == 0 and self.__request.perform_model_analysis == True:
             if dataset["type"] in  [":tabular", ":text", ":time_series"]:
                 #Generate explainer dashboard
                 adapter_manager.generate_explainer_dashboard()

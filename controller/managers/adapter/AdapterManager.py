@@ -227,8 +227,7 @@ class AdapterManager(Thread):
                         "test_score": json.loads(self.__testScore),
                         "runtime_profile": model["runtime_profile"],
                         "carbon_footprint": self.__carbon_footprint,
-                        "dashboard_path": "",
-                        "dashboard_compatible": True
+                        "dashboard_path": ""
                     }
                     model_details["runtime_profile"]["end_time"] = datetime.datetime.now()
 
@@ -240,10 +239,13 @@ class AdapterManager(Thread):
             print_exc()
             channel.close()
             print("Connection failed to adapter")
+            found, model = self.__data_storage.get_model(self.__request.user_id, self.__model_id)
             self.__status = "failed"
             model_details = {
-                "status": self.__status
+                "status": self.__status,
+                "runtime_profile": model["runtime_profile"],
                 }
+            model_details["runtime_profile"]["end_time"] = datetime.datetime.now()
             self.__adapter_finished_callback(self.__training_id, self.__request.user_id, self.__model_id, model_details, self)
 
 
@@ -298,7 +300,6 @@ class AdapterManager(Thread):
                         self.__generate_dashboard_request(self.__session_id, self.__generate_process_request())
                         ))
             channel.close()
-            _mdl_id = self.__data_storage.update_model(self.__request.user_id, self.__model_id, { "dashboard_compatible": response.compatible, "dashboard_path": response.path})
             print("explainer dashboard generation process ended")
         except grpclib.GRPCError as rpc_error:
             print(f"Received unknown RPC error: code={rpc_error.message} message={rpc_error.details()}")

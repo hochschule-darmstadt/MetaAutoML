@@ -1,0 +1,17 @@
+﻿apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: mongodb-ingress
+  namespace: omaml
+spec:
+  rules:
+  - host: mongo.oma-ml.ai
+    mongodb:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: mongodb
+            port:
+              number: 27017

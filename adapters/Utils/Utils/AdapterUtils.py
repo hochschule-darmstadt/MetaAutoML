@@ -188,6 +188,7 @@ def evaluate(config: "StartAutoMlRequest", config_path: str) -> Tuple[float, flo
     Returns:
         tuple[float, float]: tuple holding the test score, prediction time metrics
     """
+    prediction_probabilities = []
     dashboard_folder_location = os.path.join(get_config_property("training-path"),
                                         config.user_id,
                                         config.dataset_id,
@@ -245,6 +246,14 @@ def evaluate(config: "StartAutoMlRequest", config_path: str) -> Tuple[float, flo
         predict_start = time.time()
         pipeline_model.predict(test.drop(target, axis=1))
         predict_time = (time.time() - predict_start) / test.shape[0]
+        if config["configuration"]["task"] in [":tabular_classification", ":text_classification"]:
+            try:
+                #sometimes the model uses ml approaches that do not support predict proba functions.
+                prediction_probabilities = pipeline_model.predict_proba(test.drop(target, axis=1))
+                print("automl model doe")
+            except:
+                print("automl model does not support predict proba functionality")
+                prediction_probabilities = []
     else:
 
         predict_start = time.time()
@@ -257,9 +266,9 @@ def evaluate(config: "StartAutoMlRequest", config_path: str) -> Tuple[float, flo
 
     if config["configuration"]["task"] in [":tabular_classification", ":text_classification", ":image_classification", ":time_series_classification"]:
         if config["configuration"]["task"] == ":image_classification":
-            return compute_classification_metrics(pd.Series(y_test), predictions["predicted"]), (predict_time * 1000) / pd.Series(y_test).shape[0]
+            return compute_classification_metrics(pd.Series(y_test), predictions["predicted"], prediction_probabilities), (predict_time * 1000) / pd.Series(y_test).shape[0]
         else:
-            return compute_classification_metrics(cast_target(pd.Series(test[target]), config["dataset_configuration"]["schema"][key]), cast_target(predictions[target], config["dataset_configuration"]["schema"][key])), (predict_time * 1000) / test.shape[0]
+            return compute_classification_metrics(cast_target(pd.Series(test[target]), config["dataset_configuration"]["schema"][target]), cast_target(predictions[target], config["dataset_configuration"]["schema"][target]), prediction_probabilities), (predict_time * 1000) / test.shape[0]
     elif config["configuration"]["task"] in [":tabular_regression", ":text_regression", ":image_regression", ":time_series_forecasting"]:
         if config["configuration"]["task"] == ":image_regression":
             return compute_regression_metrics(pd.Series(y_test), predictions["predicted"]), (predict_time * 1000) / pd.Series(y_test).shape[0]
@@ -271,7 +280,7 @@ def evaluate(config: "StartAutoMlRequest", config_path: str) -> Tuple[float, flo
     elif config["configuration"]["task"] == ":named_entity_recognition":
         return compute_named_entity_recognition_metrics(pd.Series(test[target]), predictions[target]), (predict_time * 1000) / pd.Series(test[target]).shape[0]
 
-def compute_classification_metrics(y_should: pd.Series, y_is: pd.Series) -> dict:
+def compute_classification_metrics(y_should: pd.Series, y_is: pd.Series, prediction_probabilities) -> dict:
     """Compute the metrics collection for classification tasks
 
     Args:
@@ -307,8 +316,16 @@ def compute_classification_metrics(y_should: pd.Series, y_is: pd.Series) -> dict
         ":f_measure": float(f1_score(y_should, y_is)),
         ":precision": float(precision_score(y_should, y_is)),
         ":recall": float(recall_score(y_should, y_is)),
-        ":brier": float(brier_score_loss(y_should, y_is)),
         })
+        if len(prediction_probabilities) != 0:
+            score.update({
+                ":log_loss": float(log_loss(y_should, prediction_probabilities)),
+                ":brier": float(brier_score_loss(y_should, prediction_probabilities[:, 1])),
+                ":receiver_operating_characteristic_curve": float(roc_auc_score(y_should, prediction_probabilities[:, 1])),
+                #we only pass the score of the "positive" class
+                ":receiver_operating_characteristic_curve_weighted": float(roc_auc_score(y_should, prediction_probabilities[:, 1], average='weighted')),
+                ":receiver_operating_characteristic_curve_samples": float(roc_auc_score(y_should, prediction_probabilities[:, 1], average='samples')),
+            })
     else:
         #Metrics only for multiclass classification
         score.update({
@@ -323,6 +340,17 @@ def compute_classification_metrics(y_should: pd.Series, y_is: pd.Series) -> dict
         ":recall_macro": float(recall_score(y_should, y_is, average='macro')),
         ":recall_weighted": float(recall_score(y_should, y_is, average='weighted')),
         })
+        if len(prediction_probabilities) != 0:
+            score.update({
+                ":log_loss": float(log_loss(y_should, prediction_probabilities)),
+                ":receiver_operating_characteristic_curve_one_vs_rest": float(roc_auc_score(y_should, prediction_probabilities, multi_class="ovr")),
+                ":receiver_operating_characteristic_curve_one_vs_rest_micro": float(roc_auc_score(y_should, prediction_probabilities, multi_class="ovr", average='micro')),
+                ":receiver_operating_characteristic_curve_one_vs_rest_macro": float(roc_auc_score(y_should, prediction_probabilities, multi_class="ovr", average='macro')),
+                ":receiver_operating_characteristic_curve_one_vs_rest_weighted": float(roc_auc_score(y_should, prediction_probabilities, multi_class="ovr", average='weighted')),
+                ":receiver_operating_characteristic_curve_one_vs_one": float(roc_auc_score(y_should, prediction_probabilities, multi_class="ovo")),
+                ":receiver_operating_characteristic_curve_one_vs_one_macro": float(roc_auc_score(y_should, prediction_probabilities, multi_class="ovo", average='macro')),
+                ":receiver_operating_characteristic_curve_one_vs_one_weighted": float(roc_auc_score(y_should, prediction_probabilities, multi_class="ovo", average='weighted')),
+            })
     return score
 
 def compute_regression_metrics(y_should: pd.Series, y_is: pd.Series) -> dict:

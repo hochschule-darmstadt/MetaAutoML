@@ -18,6 +18,15 @@ spec:
       labels:
         io.kompose.service: blazorboilerplate
     spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: kubernetes.io/hostname
+                operator: In
+                values:
+                - oma-ml-3
       containers:
       - env:
         - name: ASPNETCORE_ENVIRONMENT
@@ -75,7 +84,7 @@ spec:
         resources:
           limits:
             cpu: "2"
-            memory: "4194304e3"
+            memory: "4094304e3"
       restartPolicy: Always
       hostAliases:
       - ip: "127.0.0.1"
