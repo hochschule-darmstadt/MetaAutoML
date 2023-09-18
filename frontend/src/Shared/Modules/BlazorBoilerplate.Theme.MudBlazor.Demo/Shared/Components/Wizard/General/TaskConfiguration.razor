@@ -104,7 +104,7 @@
                 <MudExpansionPanels>
                     <MudExpansionPanel>
                         <TitleContent>
-                            <ButtonTooltip Text="Click here to open numerous detail configuration options." Position="Placement.Right">@L["Details"]</ButtonTooltip>
+                            <ButtonTooltip Text="Click here to open numerous detail configuration options." Position="Placement.Right">@L["Details configuration (optional)"]</ButtonTooltip>
                         </TitleContent>
                         <ChildContent>
                             <MudSwitch @bind-Checked="@StartTrainingDto.PerformModelAnalysis" Label="@L["Perform model analysis"]" Color="Color.Info" />
@@ -113,7 +113,7 @@
                             <ChipSet ViewModel="@_mlLibsViewModel" />
                             <LabelTooltip Label="@L["AutoML solutions"]" FontSize="Typo.subtitle2" Text="AutoML solutions generate ML models for certain ML libraries. Initially, all AutoML solutions are selected that are supported for the selected ML libraries. When changing selections, corresponding ML libraries will be adapted automatically." Position="Placement.Right"></LabelTooltip>
                             <ChipSet ViewModel="@_autoMlSolutionsViewModel" />
-                            <LabelTooltip Label="@L["Enabled strategies"]" FontSize="Typo.subtitle2" Text="Training strategies are intelligent helpers that perform best practices in data science for you automatically. Select strategies that you want to enable for this training. " Position="Placement.Right"></LabelTooltip>
+                            <LabelTooltip Label="@L["Training strategies"]" FontSize="Typo.subtitle2" Text="Training strategies are intelligent helpers that perform best practices in data science for you automatically. Select strategies that you want to enable for this training. " Position="Placement.Right"></LabelTooltip>
                             <ChipSet ViewModel="@_strategiesViewModel" />
                             @if (_intersectedParams.Any())
                             {
