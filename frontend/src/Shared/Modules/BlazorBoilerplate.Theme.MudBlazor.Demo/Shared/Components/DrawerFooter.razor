@@ -61,7 +61,7 @@
                                     <MudButton HtmlTag="label"
                                                Variant="Variant.Outlined"
                                                
-                                               StartIcon="@Icons.Filled.CloudUpload"
+                                               StartIcon="@Icons.Material.Filled.Upload"
                                                for="fileInput"
                                                Class="mt-1"
                                                Disabled="@IsSelectFileDisabled"
@@ -86,7 +86,7 @@
         @if (fileUploader.IsUploading == false)
         {
                 <MudTooltip Text="Click here to upload a new dataset to OMA-ML." Placement="Placement.Top" Arrow="true">
-                    <MudButton StartIcon="@Icons.Filled.CloudUpload" Color="Color.Secondary" Disabled="@_uploadReady" OnClick="@Upload">@L["Upload"]</MudButton>
+                    <MudButton StartIcon="@Icons.Material.Filled.Upload" Color="Color.Secondary" Disabled="@_uploadReady" OnClick="@Upload">@L["Upload"]</MudButton>
                 </MudTooltip>
         }
     </DialogActions>
@@ -111,7 +111,7 @@
                 <MudButton HtmlTag="label"
                             Variant="Variant.Filled"
                             Color="Color.Secondary"
-                            StartIcon="@Icons.Filled.CloudUpload"
+                            StartIcon="@Icons.Material.Filled.Upload"
                             for="fileInput"
                             Class="mt-1">
                     @L["Select Dataset"]
@@ -130,7 +130,7 @@
         @if (fileUploader.IsUploading == false)
         {
             <MudTooltip Text="Click here to upload a new dataset to OMA-ML." Placement="Placement.Top" Arrow="true">
-                <MudButton StartIcon="@Icons.Filled.CloudUpload" Color="Color.Secondary" Disabled="@_uploadReady" OnClick="@Upload">@L["Upload"]</MudButton>
+                <MudButton StartIcon="@Icons.Material.Filled.Upload" Color="Color.Secondary" Disabled="@_uploadReady" OnClick="@Upload">@L["Upload"]</MudButton>
             </MudTooltip>
         }
     </DialogActions>

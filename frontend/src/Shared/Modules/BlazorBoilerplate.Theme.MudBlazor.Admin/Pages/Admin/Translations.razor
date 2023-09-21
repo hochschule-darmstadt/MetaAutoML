@@ -30,7 +30,7 @@ else
             <MudButton OnClick="@(e => { navigationManager.NavigateTo("/api/localization/export", true); })" Class="ma-2">@L["Export"]</MudButton>
             <InputFile id="fileInput" OnChange="UploadFiles" hidden multiple accept=".po" />
             <MudButton HtmlTag="label"
-                       StartIcon="@Icons.Filled.CloudUpload"
+                       StartIcon="@Icons.Material.Filled.Upload"
                        Class="ma-2"
                        for="fileInput">
                 @L["Import PO file"]
