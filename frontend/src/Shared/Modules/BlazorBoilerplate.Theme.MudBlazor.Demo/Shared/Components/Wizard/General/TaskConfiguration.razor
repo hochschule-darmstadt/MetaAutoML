@@ -104,7 +104,7 @@
                 <MudExpansionPanels>
                     <MudExpansionPanel>
                         <TitleContent>
-                            <ButtonTooltip Text="Click here to open numerous detail configuration options." Position="Placement.Right">@L["Details configuration (optional)"]</ButtonTooltip>
+                            <ButtonTooltip Text="Click here to open numerous detail configuration options." Position="Placement.Right">@L["Detail configuration (optional)"]</ButtonTooltip>
                         </TitleContent>
                         <ChildContent>
                             <MudSwitch @bind-Checked="@StartTrainingDto.PerformModelAnalysis" Label="@L["Perform model analysis"]" Color="Color.Info" />
@@ -626,7 +626,7 @@
         var availableStrategiesResponse = await apiClient.GetAvailableStrategies(availableStrategiesRequest);
 
         HandleApiResponseWrapper(availableStrategiesResponse, () =>
-            _strategiesViewModel.SetAvailableChips(availableStrategiesResponse.Result.Strategies.Select(s => (s.Id, s.Title, s.Description, false, "", "")))
+            _strategiesViewModel.SetAvailableChips(availableStrategiesResponse.Result.Strategies.Select(s => (s.Id, s.Title, "", false, s.Description, "")))
 
         );
     }

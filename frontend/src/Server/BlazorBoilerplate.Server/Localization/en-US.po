@@ -1483,8 +1483,8 @@ msgid "Configuration"
 msgstr "Configuration"
 
 msgctxt "Global"
-msgid "Details configuration (optional)"
-msgstr "Details configuration (optional)"
+msgid "Detail configuration (optional)"
+msgstr "Detail configuration (optional)"
 
 msgctxt "Global"
 msgid "ML task"
