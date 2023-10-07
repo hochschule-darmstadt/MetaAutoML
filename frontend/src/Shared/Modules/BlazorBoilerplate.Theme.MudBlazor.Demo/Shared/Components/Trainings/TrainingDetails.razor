@@ -23,8 +23,8 @@
                 <MudTable Items="@Training.Training.models" Context="models" Filter="new Func<ModelDto,bool>(FilterFunc)" CustomHeader="true">
                     <ToolBarContent>
                         <MudSpacer />
-                        <MudTextField @bind-Value="searchString" Placeholder="@L["Search by AutoML solution, status, ML model or library"]" Adornment="Adornment.Start"
-                                    AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+                            <MudTextField @bind-Value="searchString" Placeholder="@L["Search by AutoML solution, status, ML model or library"]" Adornment="Adornment.Start"
+                                          AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0" Immediate="true" Clearable="true"></MudTextField>
                     </ToolBarContent>
                     <HeaderContent>
                         <MudTHeadRow>
@@ -135,11 +135,11 @@
 @code {
     [Parameter]
     public GetTrainingResponseDto Training
-    { 
+    {
         get
         {
             return _training;
-        } 
+        }
         set
         {
             _training = value;
@@ -156,7 +156,7 @@
                 _timer.Elapsed += RefreshTraining;
                 StateHasChanged();
             }
-        } 
+        }
     }
     private List<Metric> _metrics = new List<Metric>();
     private string SelectedMetric { get; set; } = "";
@@ -177,7 +177,7 @@
         if (element.GetMlModelString().Contains(searchString, StringComparison.OrdinalIgnoreCase))
             return true;
         return false;
-    } 
+    }
     public void Dispose()
     {
         DisposeTimer();
@@ -220,7 +220,7 @@
                     DisposeTimer();
                     return;
                 }
-                
+
                 ApiResponseDto apiResponse = await apiClient.GetTraining(new GetTrainingRequestDto { TrainingId = Training.Training.Id });
 
                 if (apiResponse.IsSuccessStatusCode)
@@ -239,7 +239,7 @@
                 {
                     viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
                 }
-                
+
             }
             catch (Exception ex)
             {

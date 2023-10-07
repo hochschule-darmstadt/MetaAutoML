@@ -104,7 +104,7 @@
         Active,
         Pending
     }
-    
+
     public class TimelineItem
     {
         public string Title { get; set; }
@@ -116,49 +116,65 @@
 
     private IEnumerable<TimelineItem> RefreshTimeline()
     {
-        var events = Training.Training.RuntimeProfile.Events;
-        var phases = new List<string>() { "started", "preprocessing", "running", "stopped" };
-        _timeline = new List<TimelineItem>();
-        for(int i = 0; i < phases.Count; i++)
+        try
         {
-            string phase = phases[i];
-            string nextPhase = (i+1 < phases.Count) ? phases[i+1] : null;
-            // Find the index of the event when the phase started (became the "new_phase")
-            int phaseStartedEventIdx = events.FindIndex(eventItem => eventItem.Type == "phase_updated" && eventItem.Meta["new_phase"] == phase);
-            // Find the index of the event when the phase ended (became the "old_phase" or the "new_phase" if its the last phase)
-            int phaseCompletedEventIdx = events.FindIndex(eventItem => eventItem.Type == "phase_updated" && (eventItem.Meta["old_phase"] == phase || (nextPhase == null && eventItem.Meta["new_phase"] == phase)));
-            TrainingEventDto phaseStartedEvent = (phaseStartedEventIdx != -1 ? events[phaseStartedEventIdx] : null);
-            var timelineItem = new TimelineItem
+            var events = Training.Training.RuntimeProfile.Events;
+            var phases = new List<string>() { "started", "preprocessing", "running", "stopped" };
+            _timeline = new List<TimelineItem>();
+            for (int i = 0; i < phases.Count; i++)
             {
-                Title = L[phase],
-                Type = TimelineItemType.Major,
-                Status = (phaseCompletedEventIdx != -1 ? TimelineItemStatus.Success : (phaseStartedEventIdx != -1 ? TimelineItemStatus.Active : TimelineItemStatus.Pending)),
-                Timestamp = (phaseStartedEventIdx != -1 ? phaseStartedEvent.Timestamp : null)
-            };
-            _timeline.Add(timelineItem);
-
-            if(phaseStartedEventIdx != -1) {
-                int nextPhaseStartedEventIdx = (nextPhase != null) ? events.FindIndex(eventItem => eventItem.Type == "phase_updated" && eventItem.Meta["new_phase"] == nextPhase) : -1;
-                // Get all events until the start of the next phase (or all remaining if its the last phase)
-                IEnumerable<TrainingEventDto> childEvents = events.Skip(phaseStartedEventIdx + 1).Take((nextPhaseStartedEventIdx != -1 ? (nextPhaseStartedEventIdx - 1) : (events.Count - 1)) - phaseStartedEventIdx);
-                foreach (var childEvent in childEvents)
+                string phase = phases[i];
+                string nextPhase = (i + 1 < phases.Count) ? phases[i + 1] : null;
+                // Find the index of the event when the phase started (became the "new_phase")
+                var abc = events[0].Meta.FirstOrDefault(metaItem => metaItem.Key == "new_phase").Value;
+                int phaseStartedEventIdx = events.FindIndex(eventItem => eventItem.Type == "phase_updated" && eventItem.Meta.FirstOrDefault(metaItem => metaItem.Key=="new_phase").Value.ToString()==phase);
+                // Find the index of the event when the phase ended (became the "old_phase" or the "new_phase" if its the last phase)
+                var xy = events[0].Meta.FirstOrDefault(metaItem => metaItem.Key == "old_phase", new KeyValuePair<string, object>("", "")).Value?.ToString()??"";
+                int phaseCompletedEventIdx = events.FindIndex(eventItem => eventItem.Type == "phase_updated" && ((eventItem.Meta.FirstOrDefault(metaItem => metaItem.Key == "old_phase").Value?.ToString() ?? "") == phase || (nextPhase == null && eventItem.Meta.FirstOrDefault(metaItem => metaItem.Key == "new_phase").Value.ToString() == phase)));
+                TrainingEventDto phaseStartedEvent = (phaseStartedEventIdx != -1 ? events[phaseStartedEventIdx] : null);
+                var timelineItem = new TimelineItem
                 {
-                    var childTimelineItem = new TimelineItem
+                    Title = L[phase],
+                    Type = TimelineItemType.Major,
+                    Status = (phaseCompletedEventIdx != -1 ? TimelineItemStatus.Success : (phaseStartedEventIdx != -1 ? TimelineItemStatus.Active : TimelineItemStatus.Pending)),
+                    Timestamp = (phaseStartedEventIdx != -1 ? phaseStartedEvent.Timestamp : null)
+                };
+                _timeline.Add(timelineItem);
+
+                if (phaseStartedEventIdx != -1)
+                {
+                    int nextPhaseStartedEventIdx = (nextPhase != null) ? events.FindIndex(eventItem => eventItem.Type == "phase_updated" && eventItem.Meta.FirstOrDefault(metaItem => metaItem.Key == "new_phase").Value.ToString() == nextPhase) : -1;
+                    // Get all events until the start of the next phase (or all remaining if its the last phase)
+                    IEnumerable<TrainingEventDto> childEvents = events.Skip(phaseStartedEventIdx + 1).Take((nextPhaseStartedEventIdx != -1 ? (nextPhaseStartedEventIdx - 1) : (events.Count - 1)) - phaseStartedEventIdx);
+                    foreach (var childEvent in childEvents)
                     {
-                        Title = childEvent.Type,
-                        Subtitle = childEvent.Timestamp.ToLocalTime().ToString("dd/MM/yy HH:mm:ss"),
-                        Type = TimelineItemType.Minor,
-                        Status = (phaseCompletedEventIdx != -1 ? TimelineItemStatus.Success : TimelineItemStatus.Active),
-                        Timestamp = childEvent.Timestamp
-                    };
-                    if(childEvent.Type == "strategy_action") childTimelineItem.Title = L[childEvent.Meta["rule_name"]];
-                    else if(childEvent.Type == "automl_run_finished") childTimelineItem.Title = L["automl_run_finished_{0}", childEvent.Meta["name"]];
-                    else continue; // Ignore other event types for the timeline view (should have a title formatter if they are shown)
-                    _timeline.Add(childTimelineItem);
+                        var childTimelineItem = new TimelineItem
+                        {
+                            Title = childEvent.Type,
+                            Subtitle = childEvent.Timestamp.ToLocalTime().ToString("dd/MM/yy HH:mm:ss"),
+                            Type = TimelineItemType.Minor,
+                            Status = (phaseCompletedEventIdx != -1 ? TimelineItemStatus.Success : TimelineItemStatus.Active),
+                            Timestamp = childEvent.Timestamp
+                        };
+                        if (childEvent.Type == "strategy_action") childTimelineItem.Title = L[(string)childEvent.Meta.FirstOrDefault(metaItem => metaItem.Key == "rule_name").Value.ToString()];
+                        else if (childEvent.Type == "automl_run_finished") childTimelineItem.Title = L["automl_run_finished_{0}", childEvent.Meta.FirstOrDefault(metaItem => metaItem.Key == "name").Value.ToString()];
+                        else continue; // Ignore other event types for the timeline view (should have a title formatter if they are shown)
+                        if(childTimelineItem.Title == "TrainingTimeline.pre_training.finish_pre_training")
+                        {
+                            childTimelineItem.Title = "Pretraining";
+                            childTimelineItem.Type = TimelineItemType.Major;
+                            _timeline.Add(childTimelineItem);
+                        }
+                        
+                    }
                 }
             }
-        }
-        StateHasChanged();
-        return _timeline;
+            StateHasChanged();
+            return _timeline;
+
+
+        } catch (Exception ex)
+        { Console.WriteLine(ex); return null; }
     }
-}
+
+    }

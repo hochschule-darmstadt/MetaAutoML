@@ -62,16 +62,13 @@ namespace BlazorBoilerplate.Shared.Dto.Model
         public string GetMlLibraryString()
         {
             string libraries = "";
+            List<string> libraryList = new List<string>();
             foreach (var lib in MlLibrary)
             {
-                libraries += lib.Properties["skos:prefLabel"] + ", ";
+                libraryList.Add(lib.Properties["skos:prefLabel"]);
             }
-            //When no library was set yet return the empty string, else remove the alst comma
-            if (libraries.Length == 0)
-            {
-                return libraries;
-            }
-            return libraries.Remove(libraries.Length - 1);
+            libraries = string.Join(", ", libraryList).TrimEnd(',');
+            return libraries;
         }
         public string GetMlModelString()
         {
@@ -81,7 +78,7 @@ namespace BlazorBoilerplate.Shared.Dto.Model
             {
                 modelList.Add(model.Properties["skos:prefLabel"]);
             }
-            models = string.Join(", ", modelList);
+            models = string.Join(", ", modelList).TrimEnd(',');
             return models;
         }
     }
