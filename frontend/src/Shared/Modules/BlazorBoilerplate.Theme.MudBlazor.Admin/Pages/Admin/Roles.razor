@@ -22,7 +22,7 @@ else
 {
     <MudTable Items="@roles" Striped="true" Bordered="true" Dense="true" Hover="true" Elevation="2">
         <HeaderContent>
-            <MudTh><MudButton StartIcon="@Icons.Filled.Add" OnClick="@(() => OpenUpsertRoleDialog())" Variant="Variant.Filled" Color="Color.Primary">@L["New Role"]</MudButton></MudTh>
+            <MudTh><MudButton StartIcon="@Icons.Filled.Add" OnClick="@(() => OpenUpsertRoleDialog())" Variant="MudBlazor.Variant.Filled" Color="Color.Primary">@L["New Role"]</MudButton></MudTh>
             <MudTh>@L["Name"]</MudTh>
             <MudTh>@L["Permissions"]</MudTh>
         </HeaderContent>
@@ -70,7 +70,7 @@ else
     </DialogContent>
     <DialogActions>
         <MudButton OnClick="@(e => { isUpsertRoleDialogOpen = false; })">@L["Cancel"]</MudButton>
-        <MudButton OnClick="@UpsertRole" Variant="Variant.Filled" Color="Color.Primary">@labelUpsertDialogOkButton</MudButton>
+        <MudButton OnClick="@UpsertRole" Variant="MudBlazor.Variant.Filled" Color="Color.Primary">@labelUpsertDialogOkButton</MudButton>
     </DialogActions>
 </MudDialog>
 
@@ -86,7 +86,7 @@ else
     </DialogContent>
     <DialogActions>
         <MudButton OnClick="@(e => { isDeleteRoleDialogOpen = false; })">@L["Cancel"]</MudButton>
-        <MudButton OnClick="@DeleteRoleAsync" Variant="Variant.Filled" Color="Color.Error">@L["Delete"]</MudButton>
+        <MudButton OnClick="@DeleteRoleAsync" Variant="MudBlazor.Variant.Filled" Color="Color.Error">@L["Delete"]</MudButton>
     </DialogActions>
 </MudDialog>
 

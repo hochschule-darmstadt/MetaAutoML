@@ -4,26 +4,29 @@
 @inject IApiClient apiClient
 @inject IViewNotifier viewNotifier
 @attribute [Authorize]
+@using Radzen.Blazor
+@using Radzen
+@inject TooltipService tooltipService
 
 <TopSection>
     <MudBreadcrumbs Items="_breadcrumbs" Class="mudbreadcrumbs"></MudBreadcrumbs>
 </TopSection>
 
-<MudStack AlignItems="AlignItems.Center" Row="true" Class="mb-2" style="padding-top:50px">
+<MudStack AlignItems="MudBlazor.AlignItems.Center" Row="true" Class="mb-2" style="padding-top:50px">
     <MudIcon Size="Size.Large" Icon="@Icons.Filled.ModelTraining" />
-    <LabelTooltip FontSize="Typo.h4" Label="Trainings" Text="Machine learning consists of two phases: training and prediction. During the training phase, a ML model is generated from a dataset. This page lists all trainings you have performed so far. You can open a past training, select an ML model and use it for predicting new cases." Position="Placement.Bottom"></LabelTooltip>
+    <LabelTooltip FontSize="TextStyle.H4" Label="Trainings" Text="Machine learning consists of two phases: training and prediction. During the training phase, a ML model is generated from a dataset. This page lists all trainings you have performed so far. You can open a past training, select an ML model and use it for predicting new cases." Position="Placement.Bottom"></LabelTooltip>
 </MudStack>
+
 
 <MudGrid>
     <MudItem xs="12" sm="12" md="12">
-        <AllTrainings Trainings="_trainings" OnDeleteTrainingCompleted="@LoadTrainings"/>
+        <AllTrainings Trainings="_trainings" OnDeleteTrainingCompleted="@LoadTrainings" />
     </MudItem>
 </MudGrid>
 
 @code{
-    private GetTrainingsResponseDto _trainings;
-    private List<BreadcrumbItem> _breadcrumbs = new List<BreadcrumbItem>();
-
+private GetTrainingsResponseDto _trainings;
+private List<BreadcrumbItem> _breadcrumbs = new List<BreadcrumbItem>();
     protected override async Task OnInitializedAsync()
     {
         await LoadTrainings();

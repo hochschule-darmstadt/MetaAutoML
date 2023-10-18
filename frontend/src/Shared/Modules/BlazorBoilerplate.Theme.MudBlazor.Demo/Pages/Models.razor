@@ -4,15 +4,17 @@
 @inject IApiClient apiClient
 @inject IViewNotifier viewNotifier
 @attribute [Authorize]
+@using Radzen
+@using Radzen.Blazor
 
 <TopSection>
     <MudBreadcrumbs Items="_breadcrumbs" Class="mudbreadcrumbs"></MudBreadcrumbs>
 </TopSection>
 
 
-<MudStack AlignItems="AlignItems.Center" Row="true" Class="mb-2" style="padding-top:50px">
+<MudStack AlignItems="MudBlazor.AlignItems.Center" Row="true" Class="mb-2" style="padding-top:50px">
     <MudIcon Size="Size.Large" Icon="@Icons.Filled.Lightbulb" />
-    <LabelTooltip FontSize="Typo.h4" Label="Models" Text="This page shows all models that have been trained for this dataset so far, potentially in several training sessions." Position="Placement.Right"></LabelTooltip>
+    <LabelTooltip FontSize="TextStyle.H4" Label="Models" Text="This page shows all models that have been trained for this dataset so far, potentially in several training sessions." Position="Placement.Right"></LabelTooltip>
 </MudStack>
 
 <MudGrid>
@@ -43,12 +45,12 @@
     {
         try
         {
-            ApiResponseDto apiResponse = await apiClient.GetModels(new GetModelsRequestDto() { DatasetId = Id});
+            ApiResponseDto apiResponse = await apiClient.GetModels(new GetModelsRequestDto() { DatasetId = Id });
 
             if (apiResponse.IsSuccessStatusCode)
             {
                 _models = Newtonsoft.Json.JsonConvert.DeserializeObject<GetModelsResponseDto>(apiResponse.Result.ToString());
-                apiResponse = await apiClient.GetDataset(new GetDatasetRequestDto() { DatasetId = Id});
+                apiResponse = await apiClient.GetDataset(new GetDatasetRequestDto() { DatasetId = Id });
 
                 if (apiResponse.IsSuccessStatusCode)
                 {

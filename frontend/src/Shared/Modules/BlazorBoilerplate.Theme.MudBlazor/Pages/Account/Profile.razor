@@ -35,8 +35,8 @@
                 }
             </MudChipSet>
 
-            <MudButton ButtonType="ButtonType.Submit" form="mainForm" Variant="Variant.Filled" Color="Color.Primary">@L["Save"]</MudButton>
-            <MudButton Link="/" form="mainForm" Variant="Variant.Filled" Color="Color.Secondary">@L["Cancel"]</MudButton>
+            <MudButton ButtonType="MudBlazor.ButtonType.Submit" form="mainForm" Variant="MudBlazor.Variant.Filled" Color="Color.Primary">@L["Save"]</MudButton>
+            <MudButton Link="/" form="mainForm" Variant="MudBlazor.Variant.Filled" Color="Color.Secondary">@L["Cancel"]</MudButton>
         </EditForm>
         @if (userViewModel.TwoFactorEnabled)
         {
@@ -90,7 +90,7 @@
         </DialogContent>
         <DialogActions>
             <MudButton OnClick="@(e => { updatePasswordDialogOpen = false; })">@L["Cancel"]</MudButton>
-            <MudButton OnClick="@UpdatePassword" Variant="Variant.Filled" Color="Color.Primary">@L["Update Password"]</MudButton>
+            <MudButton OnClick="@UpdatePassword" Variant="MudBlazor.Variant.Filled" Color="Color.Primary">@L["Update Password"]</MudButton>
         </DialogActions>
     </MudDialog>
 

@@ -4,10 +4,12 @@
 @implements IDisposable
 @inject IViewNotifier viewNotifier
 @inject IApiClient apiClient
+@using Radzen
+@using Radzen.Blazor
 
 <MudCard Elevation="5">
     <MudCardHeader Style="border-bottom-style: inset; border-bottom-width: 1px;">
-        <CardHeaderContent >
+        <CardHeaderContent>
             <MudText Typo="Typo.h6">@L["Leaderboard"]</MudText>
         </CardHeaderContent>
     </MudCardHeader>
@@ -23,8 +25,8 @@
                 <MudTable Items="@Training.Training.models" Context="models" Filter="new Func<ModelDto,bool>(FilterFunc)" CustomHeader="true">
                     <ToolBarContent>
                         <MudSpacer />
-                            <MudTextField @bind-Value="searchString" Placeholder="@L["Search by AutoML solution, status, ML model or library"]" Adornment="Adornment.Start"
-                                          AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0" Immediate="true" Clearable="true"></MudTextField>
+                        <MudTextField @bind-Value="searchString" Placeholder="@L["Search by AutoML solution, status, ML model or library"]" Adornment="Adornment.Start"
+                                      AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0" Immediate="true" Clearable="true"></MudTextField>
                     </ToolBarContent>
                     <HeaderContent>
                         <MudTHeadRow>
@@ -32,102 +34,109 @@
                             <MudTh><MudTableSortLabel SortBy="new Func<ModelDto, object>(x=>x.Status)">@L["Status"]</MudTableSortLabel></MudTh>
                             <MudTh><MudTableSortLabel SortBy="@(new Func<ModelDto, object>(x=>x.GetMlModelString()))">@L["Model"]</MudTableSortLabel></MudTh>
                             <MudTh><MudTableSortLabel SortBy="@(new Func<ModelDto, object>(x=>x.GetMlLibraryString()))">@L["ML Library"]</MudTableSortLabel></MudTh>
-                            <MudTh><MudTableSortLabel SortBy="@(new Func<ModelDto, object>(x=> SelectedMetric != "" ?
+                            <MudTh>
+                                <MudTableSortLabel SortBy="@(new Func<ModelDto, object>(x=> SelectedMetric != "" ?
                                                                                                     x.Metrics.Count() > 0 ?
                                                                                                         x.Metrics.Where(y => y.Name.ID == SelectedMetric).First().Score.ToString()
                                                                                                         : ""
                                                                                                     : ""))">@L["Metric"]</MudTableSortLabel>
-                            </MudTh>
-                            <MudTh><MudTableSortLabel SortBy="new Func<ModelDto, object>(x=>x.RuntimeProfile)">
-    <LabelTooltip Label=@L["Training time"] FontSize="Typo.subtitle2" Text="Runtime for training the entire dataset in minutes" Position="Placement.Top"></LabelTooltip>
-</MudTableSortLabel></MudTh>
-                            <MudTh><MudTableSortLabel SortBy="new Func<ModelDto, object>(x=>x.Emissions)">
-                                       <LabelTooltip Label=@L["Training emissions"] FontSize="Typo.subtitle2" Text="Emissions for training the entire dataset in kg CO2 equivalents." Position="Placement.Top"></LabelTooltip>
-                                </MudTableSortLabel></MudTh>
-                             <MudTh><MudTableSortLabel SortBy="new Func<ModelDto, object>(x=>x.PredictionTime)">
-    <LabelTooltip Label=@L["Prediction time"] FontSize="Typo.subtitle2" Text="Runtime for predicting one single sample in microseconds." Position="Placement.Top"></LabelTooltip>
-                                </MudTableSortLabel></MudTh>
-                            <MudTh></MudTh>
-                        </MudTHeadRow>
-                        <MudTHeadRow>
-                            <MudTh></MudTh>
-                            <MudTh></MudTh>
-                            <MudTh></MudTh>
-                            <MudTh></MudTh>
-                            <MudTh>
-                                <MudSelect T="string" @bind-Value=SelectedMetric>
-                                    @foreach (var metric in _metrics)
-                                    {
-                                        <MudSelectItem Value="@metric.Name.ID">
-                                            <MudText Typo="Typo.body2">@metric.Name.Properties["skos:prefLabel"]</MudText>
-                                        </MudSelectItem>
-                                    }
-                                </MudSelect>
-                            </MudTh>
-                            <MudTh></MudTh>
-                            <MudTh></MudTh>
-                            <MudTh></MudTh>
-                            <MudTh></MudTh>
-                        </MudTHeadRow>
-                    </HeaderContent>
-                    <RowTemplate>
-                        <MudTd>
-                            @(models.AutoMlSolution.Properties.ContainsKey("skos:prefLabel") ? models.AutoMlSolution.Properties["skos:prefLabel"] : "")
-                        </MudTd>
-                        <MudTd>
-                            @if (models.Status == "busy")
-                            {
-                                <MudProgressCircular Size="Size.Small" Color="Color.Secondary" Indeterminate="true" />
-                            }
-                            else
-                            {
-                                @L[models.Status]
-                            }
-                        </MudTd>
-                        <MudTd>
-                            <MudLink Href="@NavManager.ToAbsoluteUri("trainings/" + Training.Training.Id + "/models/" + @models.Id).AbsoluteUri" Style="cursor: pointer; display: flex;"><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.Lightbulb" Style="margin-right: 4px;" />@(models.GetMlModelString())</MudLink>
-                        </MudTd>
-                        <MudTd>@(models.GetMlLibraryString())</MudTd>
-                        <MudTd>
-                            @if (!String.IsNullOrEmpty(SelectedMetric))
-                            {
-                                @if (models.Metrics.Where(x => x.Name.ID == SelectedMetric).Count() == 1)
-                                {
-                                    @(String.Format("{0:0.00}", models.Metrics.Where(x => x.Name.ID == SelectedMetric).First().Score))
-                                }
-                            }
-                        </MudTd>
-                        <MudTd>
-                            @if (models.Status == "busy")
-                            {
-                                @(DateTime.UtcNow.Subtract(models.RuntimeProfile.StartTime).TotalMinutes.ToString("0 min"))
-                            }
-                            else
-                            {
-                                @(models.RuntimeProfile.EndTime.Subtract(models.RuntimeProfile.StartTime).TotalMinutes.ToString("0 min"))
-                            }
-                        </MudTd>
-                        <MudTd>
-                            @if (models.Status == "busy")
-                            {
-                                <span>
-                                    @("0") g CO2-eq
-                                </span>
-                            }
-                            else
-                            {
-                                <span>
-                                    @(String.Format("{0:0.00}", models.Emissions)) g CO2-eq
-                                </span>
-                            }
-                        </MudTd>
-                        <MudTd>@(String.Format("{0:0}", models.PredictionTime * 1000)) µs</MudTd>
-                    </RowTemplate>
-                    <PagerContent>
-                        <MudTablePager />
-                    </PagerContent>
-                </MudTable>
-            }
+                                                                                                </MudTh>
+                                                                                                <MudTh>
+                                                                                                    <MudTableSortLabel SortBy="new Func<ModelDto, object>(x=>x.RuntimeProfile)">
+                                                                                                        <LabelTooltip Label=@L["Training time"] FontSize="TextStyle.Body1" Text="Runtime for training the entire dataset in minutes" Position="Placement.Top"></LabelTooltip>
+                                                                                                    </MudTableSortLabel>
+                                                                                                </MudTh>
+                                                                                                <MudTh>
+                                                                                                    <MudTableSortLabel SortBy="new Func<ModelDto, object>(x=>x.Emissions)">
+                                                                                                        <LabelTooltip Label=@L["Training emissions"] FontSize="TextStyle.Body1" Text="Emissions for training the entire dataset in kg CO2 equivalents." Position="Placement.Top"></LabelTooltip>
+                                                                                                    </MudTableSortLabel>
+                                                                                                </MudTh>
+                                                                                                <MudTh>
+                                                                                                    <MudTableSortLabel SortBy="new Func<ModelDto, object>(x=>x.PredictionTime)">
+                                                                                                        <LabelTooltip Label=@L["Prediction time"] FontSize="TextStyle.Body1" Text="Runtime for predicting one single sample in microseconds." Position="Placement.Top"></LabelTooltip>
+                                                                                                    </MudTableSortLabel>
+                                                                                                </MudTh>
+                                                                                                <MudTh></MudTh>
+                                                                                            </MudTHeadRow>
+                                                                                            <MudTHeadRow>
+                                                                                                <MudTh></MudTh>
+                                                                                                <MudTh></MudTh>
+                                                                                                <MudTh></MudTh>
+                                                                                                <MudTh></MudTh>
+                                                                                                <MudTh>
+                                                                                                    <MudSelect T="string" @bind-Value=SelectedMetric>
+                                                                                                        @foreach (var metric in _metrics)
+                                                                                                        {
+                                                                                                            <MudSelectItem Value="@metric.Name.ID">
+                                                                                                                <MudText Typo="Typo.body2">@metric.Name.Properties["skos:prefLabel"]</MudText>
+                                                                                                            </MudSelectItem>
+                                                                                                        }
+                                                                                                    </MudSelect>
+                                                                                                </MudTh>
+                                                                                                <MudTh></MudTh>
+                                                                                                <MudTh></MudTh>
+                                                                                                <MudTh></MudTh>
+                                                                                                <MudTh></MudTh>
+                                                                                            </MudTHeadRow>
+                                                                                        </HeaderContent>
+                                                                                        <RowTemplate>
+                                                                                            <MudTd>
+                                                                                                @(models.AutoMlSolution.Properties.ContainsKey("skos:prefLabel") ? models.AutoMlSolution.Properties["skos:prefLabel"] : "")
+                                                                                            </MudTd>
+                                                                                            <MudTd>
+                                                                                                @if (models.Status == "busy")
+                                                                                                {
+                                                                                                    <MudProgressCircular Size="Size.Small" Color="Color.Secondary" Indeterminate="true" />
+                                                                                                }
+                                                                                                else
+                                                                                                {
+                                                                                                    @L[models.Status]
+                                                                                                }
+                                                                                            </MudTd>
+                                                                                            <MudTd>
+                                                                                                <MudLink Href="@NavManager.ToAbsoluteUri("trainings/" + Training.Training.Id + "/models/" + @models.Id).AbsoluteUri" Style="cursor: pointer; display: flex;"><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.Lightbulb" Style="margin-right: 4px;" />@(models.GetMlModelString())</MudLink>
+                                                                                            </MudTd>
+                                                                                            <MudTd>@(models.GetMlLibraryString())</MudTd>
+                                                                                            <MudTd>
+                                                                                                @if (!String.IsNullOrEmpty(SelectedMetric))
+                                                                                                {
+                                                                                                    @if (models.Metrics.Where(x => x.Name.ID == SelectedMetric).Count() == 1)
+                                                                                                    {
+                                                                                                        @(String.Format("{0:0.00}", models.Metrics.Where(x => x.Name.ID == SelectedMetric).First().Score))
+                                                                                                    }
+                                                                                                }
+                                                                                            </MudTd>
+                                                                                            <MudTd>
+                                                                                                @if (models.Status == "busy")
+                                                                                                {
+                                                                                                    @(DateTime.UtcNow.Subtract(models.RuntimeProfile.StartTime).TotalMinutes.ToString("0 min"))
+                                                                                                }
+                                                                                                else
+                                                                                                {
+                                                                                                    @(models.RuntimeProfile.EndTime.Subtract(models.RuntimeProfile.StartTime).TotalMinutes.ToString("0 min"))
+                                                                                                }
+                                                                                            </MudTd>
+                                                                                            <MudTd>
+                                                                                                @if (models.Status == "busy")
+                                                                                                {
+                                                                                                    <span>
+                                                                                                        @("0") g CO2-eq
+                                                                                                    </span>
+                                                                                                }
+                                                                                                else
+                                                                                                {
+                                                                                                    <span>
+                                                                                                        @(String.Format("{0:0.00}", models.Emissions)) g CO2-eq
+                                                                                                    </span>
+                                                                                                }
+                                                                                            </MudTd>
+                                                                                            <MudTd>@(String.Format("{0:0}", models.PredictionTime * 1000)) µs</MudTd>
+                                                                                        </RowTemplate>
+                                                                                        <PagerContent>
+                                                                                            <MudTablePager />
+                                                                                        </PagerContent>
+                                                                                    </MudTable>
+                                                                                }
         </MudPaper>
     </MudCardContent>
 </MudCard>
@@ -143,7 +152,7 @@
         set
         {
             _training = value;
-            if(_training != null)
+            if (_training != null)
             {
                 UpdateMetricsList();
                 RefreshTraining(null, null);
@@ -252,8 +261,10 @@
         });
     }
 
-    public void DisposeTimer(){
-        if(_timer!=null){
+    public void DisposeTimer()
+    {
+        if (_timer != null)
+        {
             _timer.Elapsed -= RefreshTraining;
             _timer?.Dispose();
             _timer = null;
