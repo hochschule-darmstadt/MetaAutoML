@@ -42,7 +42,7 @@
             <MudItem xs="12">
                 <MudGrid>
                     <MudItem xs="13">
-                        <LabelTooltip FontSize="TextStyle.H4" Text="Select the ML task, i.e., what the ML model shall predict, e.g., classes (classification) or values (regression)." Position="Placement.Left"></LabelTooltip>
+                        <LabelTooltip FontSize="TextStyle.H4" Text="Select the ML task, i.e., what the ML model shall predict, e.g., classes (classification) or values (regression)." Position="Radzen.TooltipPosition.Left"></LabelTooltip>
                     </MudItem>
                     <MudItem xs="11">
                         <MudSelect Label="@L["ML task"]" T="string" ValueChanged="@OnMlTaskSelectionChanged" Class="mud-width-full">
@@ -72,7 +72,7 @@
             <MudItem xs="12">
                 <MudGrid>
                     <MudItem xs="13">
-                        <LabelTooltip FontSize="TextStyle.H4" Text="Select which column in a tabular dataset is to be predicted by the ML model." Position="Placement.Left"></LabelTooltip>
+                        <LabelTooltip FontSize="TextStyle.H4" Text="Select which column in a tabular dataset is to be predicted by the ML model." Position="Radzen.TooltipPosition.Left"></LabelTooltip>
                     </MudItem>
                     <MudItem xs="11">
                         <MudSelect Label="@L["target *"]" T="string" @bind-SelectedValues="SelectedTargets" MultiSelection="true">
@@ -93,7 +93,7 @@
         <MudItem xs="12">
             <MudGrid>
                 <MudItem xs="13">
-                    <LabelTooltip FontSize="TextStyle.H4" Text="Specify the maximum runtime in minutes OMA-ML shall use for training. Longer runtimes tend to produce better models; shorter runtimes are more energy-efficient." Position="Placement.Left"></LabelTooltip>
+                    <LabelTooltip FontSize="TextStyle.H4" Text="Specify the maximum runtime in minutes OMA-ML shall use for training. Longer runtimes tend to produce better models; shorter runtimes are more energy-efficient." Position="Radzen.TooltipPosition.Left"></LabelTooltip>
                 </MudItem>
                 <MudItem xs="11">
                     <MudNumericField ValueChanged="@OnRuntimeValueChanged" T="int" Label="@L["Runtime"]" Variant="MudBlazor.Variant.Text" Min="3" Max="300" Value="@StartTrainingDto.Configuration.RuntimeLimit" />
@@ -110,16 +110,16 @@
                         </TitleContent>
                         <ChildContent>
                             <MudSwitch @bind-Checked="@StartTrainingDto.PerformModelAnalysis" Label="@L["Perform model analysis"]" Color="Color.Info" />
-                            <LabelTooltip Label=@L["ML libraries"] FontSize="TextStyle.Body1" Text="Select or deselect ML libraries for which ML models shall be generated. Initially, all ML libraries that are supported for the selected ML task are selected (indiated by a tick). When changing selections, corresponding AutoML solutions will be adapted automatically." Position="Placement.Right"></LabelTooltip>
+                            <LabelTooltip Label=@L["ML libraries"] FontSize="TextStyle.Body1" Text="Select or deselect ML libraries for which ML models shall be generated. Initially, all ML libraries that are supported for the selected ML task are selected (indiated by a tick). When changing selections, corresponding AutoML solutions will be adapted automatically." Position="Radzen.TooltipPosition.Right"></LabelTooltip>
 
                             <ChipSet ViewModel="@_mlLibsViewModel" />
-                            <LabelTooltip Label="@L["AutoML solutions"]" FontSize="TextStyle.Body1" Text="AutoML solutions generate ML models for certain ML libraries. Initially, all AutoML solutions are selected that are supported for the selected ML libraries. When changing selections, corresponding ML libraries will be adapted automatically." Position="Placement.Right"></LabelTooltip>
+                            <LabelTooltip Label="@L["AutoML solutions"]" FontSize="TextStyle.Body1" Text="AutoML solutions generate ML models for certain ML libraries. Initially, all AutoML solutions are selected that are supported for the selected ML libraries. When changing selections, corresponding ML libraries will be adapted automatically." Position="Radzen.TooltipPosition.Right"></LabelTooltip>
                             <ChipSet ViewModel="@_autoMlSolutionsViewModel" />
-                            <LabelTooltip Label="@L["Training strategies"]" FontSize="TextStyle.Body1" Text="Training strategies are intelligent helpers that perform best practices in data science for you automatically. Select strategies that you want to enable for this training. " Position="Placement.Right"></LabelTooltip>
+                            <LabelTooltip Label="@L["Training strategies"]" FontSize="TextStyle.Body1" Text="Training strategies are intelligent helpers that perform best practices in data science for you automatically. Select strategies that you want to enable for this training. " Position="Radzen.TooltipPosition.Right"></LabelTooltip>
                             <ChipSet ViewModel="@_strategiesViewModel" />
                             @if (_intersectedParams.Any())
                             {
-                                <LabelTooltip Label="Parameters" FontSize="TextStyle.Body1" Text="All AutoML solutions use default parameters for training. If you want to specify those parameters yourself you can do this here. " Position="Placement.Right"></LabelTooltip>
+                                <LabelTooltip Label="Parameters" FontSize="TextStyle.Body1" Text="All AutoML solutions use default parameters for training. If you want to specify those parameters yourself you can do this here. " Position="Radzen.TooltipPosition.Right"></LabelTooltip>
 
                                 @foreach (var param in _intersectedParams)
                                 {
@@ -129,7 +129,7 @@
                                             @if (string.IsNullOrEmpty(param.CommentPara) == false)
                                             {
                                                 <MudItem xs="13">
-                                                    <LabelTooltip FontSize="TextStyle.H4" Text="@param.CommentPara" Position="Placement.Left"></LabelTooltip>
+                                                    <LabelTooltip FontSize="TextStyle.H4" Text="@param.CommentPara" Position="Radzen.TooltipPosition.Left"></LabelTooltip>
                                                 </MudItem>
                                             }
                                             <MudItem xs="11">
@@ -151,7 +151,7 @@
                                             @if (string.IsNullOrEmpty(param.CommentPara) == false)
                                             {
                                                 <MudItem xs="13">
-                                                    <LabelTooltip FontSize="TextStyle.H4" Text="@param.CommentPara" Position="Placement.Left"></LabelTooltip>
+                                                    <LabelTooltip FontSize="TextStyle.H4" Text="@param.CommentPara" Position="Radzen.TooltipPosition.Left"></LabelTooltip>
                                                 </MudItem>
                                             }
                                             <MudItem xs="11">
@@ -173,7 +173,7 @@
                                             @if (string.IsNullOrEmpty(param.CommentPara) == false)
                                             {
                                                 <MudItem xs="13">
-                                                    <LabelTooltip FontSize="TextStyle.H4" Text="@param.CommentPara" Position="Placement.Left"></LabelTooltip>
+                                                    <LabelTooltip FontSize="TextStyle.H4" Text="@param.CommentPara" Position="Radzen.TooltipPosition.Left"></LabelTooltip>
                                                 </MudItem>
                                             }
                                             <MudItem xs="11">
@@ -186,14 +186,14 @@
 
                             @if (_individualParams.Any())
                             {
-                                <LabelTooltip Label="@L["Parameters available for individual AutoML solution only"]" FontSize="TextStyle.Body1" Text="A number of configuration parameters are specific for individual AutoML solutions. Here you can specify them. If not specified individually, default configurations are used." Position="Placement.Right"></LabelTooltip>
+                                <LabelTooltip Label="@L["Parameters available for individual AutoML solution only"]" FontSize="TextStyle.Body1" Text="A number of configuration parameters are specific for individual AutoML solutions. Here you can specify them. If not specified individually, default configurations are used." Position="Radzen.TooltipPosition.Right"></LabelTooltip>
 
                                 @foreach (var individualParam in _individualParams)
                                 {
                                     <MudExpansionPanels>
                                         <MudExpansionPanel Class="mt-2">
                                             <TitleContent>
-                                                <LabelTooltip URL=@individualParam.autoMlSeeALso Label=@individualParam.autoMlLabel FontSize="TextStyle.Body1" Text=@individualParam.autoMlComment Position="Placement.Right"></LabelTooltip>
+                                                <LabelTooltip URL=@individualParam.autoMlSeeALso Label=@individualParam.autoMlLabel FontSize="TextStyle.Body1" Text=@individualParam.autoMlComment Position="Radzen.TooltipPosition.Right"></LabelTooltip>
                                             </TitleContent>
                                             <ChildContent>
                                                 @foreach (var param in individualParam.parameters)
@@ -204,7 +204,7 @@
                                                             @if (string.IsNullOrEmpty(param.CommentPara) == false)
                                                             {
                                                                 <MudItem xs="13">
-                                                                    <LabelTooltip FontSize="TextStyle.H4" Text="@param.CommentPara" Position="Placement.Left"></LabelTooltip>
+                                                                    <LabelTooltip FontSize="TextStyle.H4" Text="@param.CommentPara" Position="Radzen.TooltipPosition.Left"></LabelTooltip>
                                                                 </MudItem>
                                                             }
                                                             <MudItem xs="11">
@@ -225,7 +225,7 @@
                                                             @if (string.IsNullOrEmpty(param.CommentPara) == false)
                                                             {
                                                                 <MudItem xs="13">
-                                                                    <LabelTooltip FontSize="TextStyle.H4" Text="@param.CommentPara" Position="Placement.Left"></LabelTooltip>
+                                                                    <LabelTooltip FontSize="TextStyle.H4" Text="@param.CommentPara" Position="Radzen.TooltipPosition.Left"></LabelTooltip>
                                                                 </MudItem>
                                                             }
                                                             <MudItem xs="11">
@@ -246,7 +246,7 @@
                                                             @if (string.IsNullOrEmpty(param.CommentPara) == false)
                                                             {
                                                                 <MudItem xs="13">
-                                                                    <LabelTooltip FontSize="TextStyle.H4" Text="@param.CommentPara" Position="Placement.Left"></LabelTooltip>
+                                                                    <LabelTooltip FontSize="TextStyle.H4" Text="@param.CommentPara" Position="Radzen.TooltipPosition.Left"></LabelTooltip>
                                                                 </MudItem>
                                                             }
                                                             <MudItem xs="11">

@@ -19,7 +19,7 @@
 <MudCard Elevation="5">
     <MudCardHeader Style="border-bottom-style: inset; border-bottom-width: 1px;">
         <CardHeaderContent>
-            <LabelTooltip FontSize="TextStyle.H6" Label=@L["Use model for predicting new cases"] Text="You may use the model for predicting new cases within the OMA-ML platform without having to install anything. Simply upload a file with the new cases." Position="Placement.Bottom"></LabelTooltip>
+            <LabelTooltip FontSize="TextStyle.H6" Label=@L["Use model for predicting new cases"] Text="You may use the model for predicting new cases within the OMA-ML platform without having to install anything. Simply upload a file with the new cases." Position="Radzen.TooltipPosition.Bottom"></LabelTooltip>
         </CardHeaderContent>
         <CardHeaderActions>
             <MudStack Row="true" Class="align-content-center" Style="margin-top: 8px">
@@ -27,7 +27,7 @@
                     <MudButton OnClick="OnOpenUpload"
                                Variant="MudBlazor.Variant.Filled"
                                Color="Color.Secondary"
-                               EndIcon="@Icons.Material.Filled.Upload"
+                               StartIcon="@Icons.Material.Filled.Upload"
                                Size="Size.Small">@L["Add Live Dataset"]</MudButton>
                         </ButtonTooltip>
                     </MudStack>
