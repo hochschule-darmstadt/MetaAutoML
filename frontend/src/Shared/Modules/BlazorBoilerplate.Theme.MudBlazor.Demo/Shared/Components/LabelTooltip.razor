@@ -35,7 +35,7 @@ else
     void ShowTooltipWithHtml(ElementReference elementReference, TooltipOptions options = null) => tooltipService.Open(elementReference, ds =>
 @<div class="rz-text-wrap" style="max-width:20rem">
     @Text @if (!string.IsNullOrEmpty(URL))
-    {<a target="_blank" rel="noopener noreferrer" href=@URL style="color:white"><u>More...</u></a>}
+    {<a target="_blank" rel="noopener noreferrer" href=@URL style="color:white"><u> More...</u></a>}
 </div>, options);
 
 

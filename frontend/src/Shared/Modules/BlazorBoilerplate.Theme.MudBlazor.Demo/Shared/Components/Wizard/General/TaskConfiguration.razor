@@ -212,7 +212,7 @@
                                                                     @foreach (var paramValue in param.ParameterValues)
                                                                     {
                                                                         <MudSelectItem Value="@paramValue">
-                                                                            <ButtonTooltip Text=@paramValue.CommentValue URL=@paramValue.SeeAlsoValue Position="Placement.Right">@paramValue.ValueLabel</ButtonTooltip>
+                                                                            <LabelTooltip Icon="false" Text=@paramValue.CommentValue URL=@paramValue.SeeAlsoValue FontSize="TextStyle.Body1" Position="TooltipPosition.Right" Label="@paramValue.ValueLabel"/>
                                                                         </MudSelectItem>
                                                                     }
                                                                 </MudSelect>
@@ -233,7 +233,8 @@
                                                                     @foreach (var paramValue in param.ParameterValues)
                                                                     {
                                                                         <MudSelectItem Value="@paramValue">
-                                                                            <ButtonTooltip Text=@paramValue.CommentValue URL=@paramValue.SeeAlsoValue Position="Placement.Right">@paramValue.ValueLabel</ButtonTooltip>
+                                                                            <LabelTooltip Icon="false" Text=@paramValue.CommentValue URL=@paramValue.SeeAlsoValue FontSize="TextStyle.Body1" Position="TooltipPosition.Right" Label="@paramValue.ValueLabel" />
+
                                                                         </MudSelectItem>
                                                                     }
                                                                 </MudSelect>
