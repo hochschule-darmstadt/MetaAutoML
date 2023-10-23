@@ -1487,6 +1487,10 @@ msgid "Detail configuration (optional)"
 msgstr "Detail configuration (optional)"
 
 msgctxt "Global"
+msgid "Details"
+msgstr "Details"
+
+msgctxt "Global"
 msgid "ML task"
 msgstr "ML task * "
 
@@ -1681,6 +1685,10 @@ msgstr "Status: {0}"
 msgctxt "Global"
 msgid "Model: {0}"
 msgstr "Model: {0}"
+
+msgctxt "Global"
+msgid "Training: {0}"
+msgstr "Training: {0}"
 
 msgctxt "Global"
 msgid "Please enter a dataset name first!"
