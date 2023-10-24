@@ -6,7 +6,7 @@ import pandas as pd
 from bson.objectid import ObjectId
 from ControllerBGRPC import *
 from threading import Lock
-
+from datetime import datetime, timedelta
 
 
 class DataStorage:
@@ -233,7 +233,7 @@ class DataStorage:
 
         return result is not None, result
 
-    def get_datasets(self, user_id: str) -> 'list[dict[str, object]]':
+    def get_datasets(self, user_id: str, only_five_recent:bool=False, pagination:bool=False, page_number:int=1) -> 'list[dict[str, object]]':
         """Get all dataset records from a specific user database
 
         Args:
@@ -242,7 +242,8 @@ class DataStorage:
         Returns:
             list[dict[str, object]]: List of all available dataset records
         """
-        return [ds for ds in self.__mongo.get_datasets(user_id, {"lifecycle_state": "active"})]
+
+        return [ds for ds in self.__mongo.get_datasets(user_id, {"lifecycle_state": "active"}, only_five_recent=only_five_recent, page_number=page_number, pagination=pagination)]
 
     def delete_dataset(self, user_id: str, dataset_id: str) -> int:
         """Delete a dataset record by id from a user databse. (all related record and files will also be deleted (Trainings, Models, Predictions))
@@ -492,20 +493,30 @@ class DataStorage:
 
         return result is not None, result
 
-    def get_trainings(self, user_id: str, dataset_id:str=None) -> 'list[dict[str, object]]':
+    def get_trainings(self, user_id: str, dataset_id:str=None, only_last_day:bool=False, pagination:bool=False, page_number:int=1) -> 'list[dict[str, object]]':
         """Get all training records from a specific user database
 
         Args:
             user_id (str): Unique user id saved within the MS Sql database of the frontend
             dataset_id (str, optional): Set a filter to get training records by dataset id. Defaults to None.
-
+            pagination (bool): If pagination is used
+            page_number (int): the pagination page to retrieve
         Returns:
             list[dict[str, object]]: List of all available training records
         """
-        if dataset_id is None:
-            return [sess for sess in self.__mongo.get_trainings(user_id, {"lifecycle_state": "active"})]
-        else:
-            return [sess for sess in self.__mongo.get_trainings(user_id, {"dataset_id": dataset_id, "lifecycle_state": "active"})]
+        search_filter = {"lifecycle_state": "active"}
+        if dataset_id is not None:
+            search_filter.update({"dataset_id": dataset_id})
+        if only_last_day == True:
+            now = datetime.now()
+            yesteday = now - timedelta(hours=24)
+
+            search_filter.update({
+                "runtime_profile.start_time.$date.$numberLong": {
+                    "$gte": yesteday.timestamp() * 1000  # Convert to milliseconds
+                }
+            })
+        return [sess for sess in self.__mongo.get_trainings(user_id, search_filter, pagination, page_number)]
 
     def delete_training(self, user_id: bool, training_id: str) -> int:
         """Delete a training record by id from a user databse. (all related record and files will also be deleted (Models, Predictions))

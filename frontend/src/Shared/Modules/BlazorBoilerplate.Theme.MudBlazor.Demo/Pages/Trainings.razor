@@ -4,6 +4,7 @@
 @inject IApiClient apiClient
 @inject IViewNotifier viewNotifier
 @attribute [Authorize]
+@implements IDisposable
 
 <TopSection>
     <MudBreadcrumbs Items="_breadcrumbs" Class="mudbreadcrumbs"></MudBreadcrumbs>
@@ -23,6 +24,8 @@
 @code{
     private GetTrainingsResponseDto _trainings;
     private List<BreadcrumbItem> _breadcrumbs = new List<BreadcrumbItem>();
+    private int _pageNumber = 1; //Pagination is 1 based
+    private bool _stopTask = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -32,20 +35,42 @@
         StateHasChanged();
 
     }
+
+    public void Dispose()
+    {
+        _stopTask = true;
+    }
     private async Task LoadTrainings()
     {
         try
         {
-            ApiResponseDto apiResponse = await apiClient.GetTrainings();
+            ApiResponseDto apiResponse;
+            while (_stopTask == false)
+            {
+                apiResponse = await apiClient.GetTrainings(new GetTrainingsRequestDto() { Short = false, Pagination = true, PageNumber = _pageNumber });
 
-            if (apiResponse.IsSuccessStatusCode)
-            {
-                _trainings = Newtonsoft.Json.JsonConvert.DeserializeObject<GetTrainingsResponseDto>(apiResponse.Result.ToString());
-                viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
-            }
-            else
-            {
-                viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
+                if (apiResponse.IsSuccessStatusCode)
+                {
+                    var tmp = Newtonsoft.Json.JsonConvert.DeserializeObject<GetTrainingsResponseDto>(apiResponse.Result.ToString());
+                    if (_trainings == null)
+                    {
+                        _trainings = new GetTrainingsResponseDto();
+                    }
+                    _trainings.Trainings.AddRange(tmp.Trainings);
+                    StateHasChanged();
+                    _pageNumber++;
+                    //Check if we reached end of page
+                    if (tmp.Trainings.Count < 20)
+                    {
+                        viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
+                        break;
+                    }
+                }
+                else
+                {
+                    viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
+                    break;
+                }
             }
         }
         catch (Exception ex)

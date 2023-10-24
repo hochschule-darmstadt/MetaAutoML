@@ -1,4 +1,4 @@
-﻿@inject IStringLocalizer<Global> L
+@inject IStringLocalizer<Global> L
 @inject NavigationManager NavManager
 @using System.Linq
 @using System.Timers
@@ -19,6 +19,8 @@
         }
         else
         {
+
+
     <MudTable Items="@_trainings.Trainings" style="width:stretch" class="mat-elevation-z5" AllowSelection="false" Filter="new Func<TrainingDto,bool>(FilterFunc)">
         <ToolBarContent>
             <MudSpacer />

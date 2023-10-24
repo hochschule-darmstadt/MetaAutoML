@@ -5,6 +5,7 @@
 @inject IViewNotifier viewNotifier
 @inject IFileUploader fileUploader
 @attribute [Authorize]
+@implements IDisposable
 
 <TopSection>
     <MudBreadcrumbs Items="_breadcrumbs" Class="mudbreadcrumbs"></MudBreadcrumbs>
@@ -26,6 +27,8 @@ This page lists all datasets you have uploaded so far to the OMA-ML platform. By
 @code{
     private GetDatasetsResponseDto _datasets;
     private List<BreadcrumbItem> _breadcrumbs = new List<BreadcrumbItem>();
+    private int _pageNumber = 1; //Pagination is 1 based
+    private bool _stopTask = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -35,6 +38,12 @@ This page lists all datasets you have uploaded so far to the OMA-ML platform. By
         _breadcrumbs.Add(new BreadcrumbItem(L["Datasets"], null, true, Icons.Filled.ListAlt));
         StateHasChanged();
     }
+
+    public void Dispose()
+    {
+        _stopTask = true;
+    }
+
     private async Task LoadDatasetsWithReRendering()
     {
         await LoadDatasets();
@@ -44,16 +53,33 @@ This page lists all datasets you have uploaded so far to the OMA-ML platform. By
     {
         try
         {
-            ApiResponseDto apiResponse = await apiClient.GetDatasets();
+            ApiResponseDto apiResponse;
+            while (_stopTask == false)
+            {
+                apiResponse = await apiClient.GetDatasets(new GetDatasetsRequestDto() { Pagination = true, PageNumber = _pageNumber });
 
-            if (apiResponse.IsSuccessStatusCode)
-            {
-                _datasets = Newtonsoft.Json.JsonConvert.DeserializeObject<GetDatasetsResponseDto>(apiResponse.Result.ToString());
-                viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
-            }
-            else
-            {
-                viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
+                if (apiResponse.IsSuccessStatusCode)
+                {
+                    var tmp = Newtonsoft.Json.JsonConvert.DeserializeObject<GetDatasetsResponseDto>(apiResponse.Result.ToString());
+                    if (_datasets == null)
+                    {
+                        _datasets = new GetDatasetsResponseDto();
+                    }
+                    _datasets.Datasets.AddRange(tmp.Datasets);
+                    StateHasChanged();
+                    _pageNumber++;
+                    //Check if we reached end of page
+                    if (tmp.Datasets.Count < 20)
+                    {
+                        viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
+                        break;
+                    }
+                }
+                else
+                {
+                    viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
+                    break;
+                }
             }
         }
         catch (Exception ex)

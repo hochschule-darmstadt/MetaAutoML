@@ -52,7 +52,7 @@
         </MudCard>
     </MudItem>
     <MudItem xs="12" sm="6" md="6">
-        <RecentDatasets Datasets="@_datasets" OnUploadCompletedCallback="@LoadDataset"/>
+        <RecentDatasets Datasets="@_datasets" OnUploadCompletedCallback="@LoadRecentDataset"/>
     </MudItem>
     <MudItem xs="12" sm="6" md="6">
         <RecentTrainings Trainings="@_trainings"/>
@@ -68,24 +68,24 @@
 
     protected override async Task OnInitializedAsync()
     {
-        await LoadTrainings();
+        await LoadRecentTrainings();
         _pageTitle = L["Home"];
         _breadcrumbs.Add(new BreadcrumbItem(L["Home"], null, true, Icons.Filled.Home));
         fileUploader.OnUploadCompletedCallback = LoadDatasetWithReRendering;
         StateHasChanged();
     }
 
-    private async Task LoadTrainings()
+    private async Task LoadRecentTrainings()
     {
         try
         {
-            ApiResponseDto apiResponse = await apiClient.GetTrainings();
+            ApiResponseDto apiResponse = await apiClient.GetTrainings(new GetTrainingsRequestDto() { Short = true, OnlyLastDay= true });
 
             if (apiResponse.IsSuccessStatusCode)
             {
                 _trainings = Newtonsoft.Json.JsonConvert.DeserializeObject<GetTrainingsResponseDto>(apiResponse.Result.ToString());
 
-                await LoadDataset();
+                await LoadRecentDataset();
             }
             else
             {
@@ -100,16 +100,16 @@
 
     private async Task LoadDatasetWithReRendering()
     {
-        await LoadDataset();
+        await LoadRecentDataset();
         StateHasChanged();
     }
 
-    private async Task LoadDataset()
+    private async Task LoadRecentDataset()
     {
         try
         {
-            ApiResponseDto
-            apiResponse = await apiClient.GetDatasets();
+            GetDatasetsRequestDto request = new GetDatasetsRequestDto();
+            ApiResponseDto apiResponse = await apiClient.GetDatasets(new GetDatasetsRequestDto(){ OnlyFiveRecent = true});
 
             if (apiResponse.IsSuccessStatusCode)
             {

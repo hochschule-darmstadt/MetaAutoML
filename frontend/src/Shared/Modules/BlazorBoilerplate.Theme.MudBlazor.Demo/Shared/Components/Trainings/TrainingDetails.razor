@@ -93,7 +93,7 @@
                             {
                                 @if (models.Metrics.Where(x => x.Name.ID == SelectedMetric).Count() == 1)
                                 {
-                                    @(String.Format("{0:0.00}", models.Metrics.Where(x => x.Name.ID == SelectedMetric).First().Score))
+                                    @(String.Format("{0:0.00000}", models.Metrics.Where(x => x.Name.ID == SelectedMetric).First().Score))
                                 }
                             }
                         </MudTd>

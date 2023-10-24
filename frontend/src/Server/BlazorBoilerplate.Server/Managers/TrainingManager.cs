@@ -4,6 +4,7 @@ using BlazorBoilerplate.Shared.Dto.Dataset;
 using BlazorBoilerplate.Shared.Dto.Model;
 using BlazorBoilerplate.Shared.Dto.Training;
 using BlazorBoilerplate.Theme.Material.Demo.Pages;
+using Namotion.Reflection;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Org.BouncyCastle.Tls;
@@ -88,7 +89,7 @@ namespace BlazorBoilerplate.Server.Managers
         /// </summary>
         /// <param name="dataset"></param>
         /// <returns></returns>
-        public async Task<ApiResponse> GetTrainings()
+        public async Task<ApiResponse> GetTrainings(GetTrainingsRequestDto request)
         {
             GetTrainingsRequest getTrainings = new GetTrainingsRequest();
             GetTrainingsResponseDto response = new GetTrainingsResponseDto();
@@ -96,6 +97,10 @@ namespace BlazorBoilerplate.Server.Managers
             try
             {
                 getTrainings.UserId = username;
+                getTrainings.Short = request.Short;
+                getTrainings.Pagination = request.Pagination;
+                getTrainings.PageNumber = request.PageNumber;
+                getTrainings.OnlyLastDay = request.OnlyLastDay;
                 var reply = _client.GetTrainings(getTrainings);
                 foreach (var training in reply.Trainings)
                 {
