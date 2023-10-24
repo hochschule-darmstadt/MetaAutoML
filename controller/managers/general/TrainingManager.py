@@ -156,7 +156,8 @@ class TrainingManager:
 
             training_runtime_profile = TrainingRuntimeProfile()
             training_runtime_profile.start_time = training["runtime_profile"]["start_time"]
-            for event in training["runtime_profile"]['events']:
+            events = training.get('events', [])
+            for event in events:
                 response_event = StrategyControllerEvent()
                 response_event.type = event['type']
                 response_event.meta = json.dumps(event['meta'])
