@@ -136,10 +136,9 @@
                                                 <MudSelect T="ParameterValueViewModel" Class="ml-2" Label="@param.ParameterLabel" Variant="MudBlazor.Variant.Outlined" @bind-SelectedValues="param.SelectedValues" ToStringFunc="p => p?.ValueLabel">
                                                     @foreach (var paramValue in param.ParameterValues)
                                                     {
-                                                        <!--Hier Tooltip-->
-                                                        <MudSelectItem Value="@paramValue">
-                                                            <ButtonTooltip Text=@paramValue.CommentValue URL=@paramValue.SeeAlsoValue Position="Placement.Right">@paramValue.ValueLabel</ButtonTooltip>
-                                                        </MudSelectItem>
+                                                    <MudSelectItem Value="@paramValue">
+                                                        <LabelTooltip FontSize="TextStyle.Body1" Icon="false" URL=@paramValue.SeeAlsoValue Label=@paramValue.ValueLabel Text=@paramValue.CommentValue Position="Radzen.TooltipPosition.Right"></LabelTooltip>
+                                                    </MudSelectItem>
                                                     }
                                                 </MudSelect>
                                             </MudItem>
@@ -160,7 +159,7 @@
                                                     {
 
                                                         <MudSelectItem Value="@paramValue">
-                                                            <ButtonTooltip Text=@paramValue.CommentValue URL=@paramValue.SeeAlsoValue Position="Placement.Right">@paramValue.ValueLabel</ButtonTooltip>
+                                                            <LabelTooltip FontSize="TextStyle.Body1" Icon="false" URL=@paramValue.SeeAlsoValue Label=@paramValue.ValueLabel Text=@paramValue.CommentValue Position="Radzen.TooltipPosition.Right"></LabelTooltip>
                                                         </MudSelectItem>
                                                     }
                                                 </MudSelect>
