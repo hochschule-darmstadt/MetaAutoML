@@ -5,6 +5,7 @@ from mongomock import MongoClient as MongoMockClient
 from bson.objectid import ObjectId
 import logging
 from MeasureDuration import MeasureDuration
+import pymongo
 
 class MongoDbClient:
     """
@@ -47,9 +48,9 @@ class MongoDbClient:
             mongo = MongoClient(server_url, 27017,
                 # timeout to find a database server
                 serverSelectionTimeoutMS=30000)
-            
+
             # we want to fail as fast as possible when the database is not reachable.
-            #   by default pymongo will lazy initialize and waits for the first 'real' database 
+            #   by default pymongo will lazy initialize and waits for the first 'real' database
             #   interaction to connect to MongoDB
             mongo.list_databases()
 
@@ -86,7 +87,7 @@ class MongoDbClient:
             self.__log.debug(f"check_if_user_exists: database {user_id} does not exists")
             return False
 #endregion
-    
+
     ####################################
     ## DATASET MONGO DB OPERATIONS
     ####################################
@@ -121,7 +122,7 @@ class MongoDbClient:
         self.__log.debug(f"get_dataset: documents within dataset: {datasets.count_documents}, filter {filter}")
         return datasets.find_one(filter)
 
-    def get_datasets(self, user_id: str, filter: 'dict[str, object]'={}) -> 'list[dict[str, object]]':
+    def get_datasets(self, user_id: str, filter: 'dict[str, object]'={}, only_five_recent:bool=False, pagination:bool=False, page_number:int=1) -> 'list[dict[str, object]]':
         """Retrieve all dataset records from a user database
 
         Args:
@@ -131,9 +132,18 @@ class MongoDbClient:
         Returns:
             list[dict[str, object]]: List of dictonaries representing dataset records
         """
-        datasets: Collection = self.__mongo[user_id]["datasets"]
-        self.__log.debug(f"get_datasets: documents within dataset: {datasets.count_documents}, filter {filter}")
-        return datasets.find(filter)
+        page_size = 20
+        offset = (page_number - 1) * page_size
+        if only_five_recent == True:
+            page_size = 5
+        if pagination == True:
+            return self.__mongo[user_id]["datasets"].find(filter).sort("analysis.creation_date", pymongo.DESCENDING).skip(offset).limit(page_size)
+        else:
+            if page_size != 5:
+                page_size = 0
+            datasets: Collection = self.__mongo[user_id]["datasets"]
+            self.__log.debug(f"get_datasets: documents within dataset: {datasets.count_documents}, filter {filter}")
+            return datasets.find(filter).sort("analysis.creation_date", pymongo.DESCENDING).limit(page_size)
 
     def update_dataset(self, user_id: str, dataset_id: str, new_values: 'dict[str, object]') -> bool:
         """Update a single dataset record from a user database
@@ -168,7 +178,7 @@ class MongoDbClient:
         self.__log.debug(f"delete_dataset: soft delete for {result.matched_count} documents")
         return result.matched_count
 #endregion
-    
+
     ####################################
     ## MODEL MONGO DB OPERATIONS
     ####################################
@@ -286,19 +296,25 @@ class MongoDbClient:
         self.__log.debug(f"get_training: documents within trainings: {trainings.count_documents}, filter {filter}")
         return trainings.find_one(filter)
 
-    def get_trainings(self, user_id: str, filter: 'dict[str, object]'={}) -> 'list[dict[str, object]]':
+    def get_trainings(self, user_id: str, filter: 'dict[str, object]'={}, pagination:bool=False, page_number:int=1) -> 'list[dict[str, object]]':
         """Retrieve all training records from a user database
 
         Args:
             user_id (str): Unique user id saved within the MS Sql database of the frontend
             filter (dict[str, object], optional): Dictionary of record fields to filter the training records from. Defaults to {}.
-
+            pagination (bool): If pagination is used
+            page_number (int): the pagination page to retrieve
         Returns:
             list[dict[str, object]]: List of dictonaries representing training records
         """
-        trainings: Collection = self.__mongo[user_id]["trainings"]
-        self.__log.debug(f"get_trainings: documents within trainings: {trainings.count_documents}, filter {filter}")
-        return trainings.find(filter)
+        page_size = 20
+        offset = (page_number - 1) * page_size
+        if pagination == True:
+            return self.__mongo[user_id]["trainings"].find(filter).sort("runtime_profile.start_time", pymongo.DESCENDING).skip(offset).limit(page_size)
+        else:
+            trainings: Collection = self.__mongo[user_id]["trainings"]
+            self.__log.debug(f"get_trainings: documents within trainings: {trainings.count_documents}, filter {filter}")
+            return trainings.find(filter).sort("runtime_profile.start_time", pymongo.DESCENDING)
 
     def update_training(self, user_id: str, training_id: str, new_values: 'dict[str, str]') -> bool:
         """Update a single training record from a user database
@@ -415,5 +431,4 @@ class MongoDbClient:
         self.__log.debug(f"delete_prediction: soft delete for {result.matched_count} documents")
         return result.matched_count
 #endregion
-    
-    
+

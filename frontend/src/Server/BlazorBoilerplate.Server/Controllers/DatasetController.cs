@@ -42,13 +42,13 @@ namespace BlazorBoilerplate.Server.Controllers
                 await _datasetManager.UploadDataset(request) :
                 new ApiResponse(Status400BadRequest, L["InvalidData"]);
 
-        [HttpGet]
+        [HttpPost]
         [ProducesResponseType(Status200OK)]
         [ProducesResponseType(Status400BadRequest)]
         [ProducesResponseType(Status404NotFound)]
-        public async Task<ApiResponse> GetDatasets()
+        public async Task<ApiResponse> GetDatasets(GetDatasetsRequestDto request)
             => ModelState.IsValid ?
-                await _datasetManager.GetDatasets() :
+                await _datasetManager.GetDatasets(request) :
                 new ApiResponse(Status400BadRequest, L["InvalidData"]);
 
         [HttpPost]

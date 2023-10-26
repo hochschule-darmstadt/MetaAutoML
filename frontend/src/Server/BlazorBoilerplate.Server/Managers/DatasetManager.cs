@@ -138,7 +138,7 @@ namespace BlazorBoilerplate.Server.Managers
         /// Get a list of all Datasets
         /// </summary>
         /// <returns></returns>
-        public async Task<ApiResponse> GetDatasets()
+        public async Task<ApiResponse> GetDatasets(GetDatasetsRequestDto request)
         {
             GetDatasetsResponseDto response = new GetDatasetsResponseDto();
             GetDatasetsRequest getDatasetsRequest = new GetDatasetsRequest();
@@ -147,6 +147,9 @@ namespace BlazorBoilerplate.Server.Managers
             {
                 getDatasetsRequest.Type = "";
                 getDatasetsRequest.UserId = username;
+                getDatasetsRequest.OnlyFiveRecent = request.OnlyFiveRecent;
+                getDatasetsRequest.Pagination = request.Pagination;
+                getDatasetsRequest.PageNumber = request.PageNumber;
                 var reply = _client.GetDatasets(getDatasetsRequest);
                 foreach (Dataset item in reply.Datasets)
                 {

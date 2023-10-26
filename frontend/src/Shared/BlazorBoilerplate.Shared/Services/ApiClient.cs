@@ -75,9 +75,9 @@ namespace BlazorBoilerplate.Shared.Services
         {
             return await httpClient.PostJsonAsync<ApiResponseDto>("api/Dataset/UploadDataset", request);
         }
-        public async Task<ApiResponseDto> GetDatasets()
+        public async Task<ApiResponseDto> GetDatasets(GetDatasetsRequestDto request)
         {
-            return await httpClient.GetJsonAsync<ApiResponseDto>("api/Dataset/GetDatasets");
+            return await httpClient.PostJsonAsync<ApiResponseDto>("api/Dataset/GetDatasets", request);
         }
         public async Task<ApiResponseDto> GetDataset(GetDatasetRequestDto request)
         {
@@ -111,9 +111,9 @@ namespace BlazorBoilerplate.Shared.Services
         {
             return await httpClient.PostJsonAsync<ApiResponseDto>("api/Training/CreateTraining", request);
         }
-        public async Task<ApiResponseDto> GetTrainings()
+        public async Task<ApiResponseDto> GetTrainings(GetTrainingsRequestDto request)
         {
-            return await httpClient.GetJsonAsync<ApiResponseDto>("api/Training/GetTrainings");
+            return await httpClient.PostJsonAsync<ApiResponseDto>("api/Training/GetTrainings", request);
         }
         public async Task<ApiResponseDto> GetTraining(GetTrainingRequestDto request)
         {

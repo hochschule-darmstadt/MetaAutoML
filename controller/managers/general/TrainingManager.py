@@ -85,13 +85,13 @@ class TrainingManager:
         response.training_id = self.__adapter_runtime_scheduler.create_new_training(create_training_request)
         return response
 
-    def __training_object_rpc_object(self, user_id: str, training: dict) -> Training:
+    def __training_object_rpc_object(self, user_id: str, training: dict, short: bool = False) -> Training:
         """Convert a training record dictionary into the GRPC Training object
 
         Args:
             user_id (str): Unique user id saved within the MS Sql database of the frontend
             training (dict): The retrieved training record dictionary
-
+            short (bool): Should only the trainings without any dataset or model object be retrieved
         Raises:
             grpclib.GRPCError: grpclib.Status.UNAVAILABLE, raised when a dictionary field could not be read
             grpclib.GRPCError: grpclib.Status.UNAVAILABLE, raised when a dictionary field could not be read
@@ -102,47 +102,49 @@ class TrainingManager:
         try:
             training_item = Training()
 
-            self.__log.debug("__training_object_rpc_object: get all models for training")
-            training_models = self.__data_storage.get_models(user_id, str(training["_id"]))
-            self.__log.debug(f"__training_object_rpc_object: found {training_models.count} models")
+            if short == False:
 
-            self.__log.debug("__training_object_rpc_object: get dataset for training")
-            found, dataset = self.__data_storage.get_dataset(user_id, str(training["dataset_id"]))
-            self.__log.debug(f"__training_object_rpc_object: found {training_models.count} models")
+                self.__log.debug("__training_object_rpc_object: get all models for training")
+                training_models = self.__data_storage.get_models(user_id, str(training["_id"]))
+                self.__log.debug(f"__training_object_rpc_object: found {training_models.count} models")
+
+                self.__log.debug("__training_object_rpc_object: get dataset for training")
+                found, dataset = self.__data_storage.get_dataset(user_id, str(training["dataset_id"]))
+                self.__log.debug(f"__training_object_rpc_object: found {training_models.count} models")
+
+                training_item.dataset_name = dataset["name"]
+
+                for model in training_models:
+                    try:
+                        model_detail = Model()
+                        model_detail.id = str(model["_id"])
+                        model_detail.training_id = model["training_id"]
+
+                        model_detail.status = model["status"]
+                        model_detail.auto_ml_solution = model["auto_ml_solution"]
+                        model_detail.ml_model_type =  model["ml_model_type"]
+                        model_detail.ml_library =  model["ml_library"]
+                        model_detail.path = model["path"]
+                        model_detail.test_score =  json.dumps(model["test_score"])
+                        model_detail.prediction_time =  model["prediction_time"]
+
+                        model_runtime = ModelruntimeProfile()
+                        model_runtime.start_time = model["runtime_profile"]["start_time"]
+                        model_runtime.end_time = model["runtime_profile"]["end_time"]
+                        model_detail.runtime_profile = model_runtime
+                        model_detail.status_messages[:] =  model["status_messages"]
+                        model_detail.explanation = json.dumps(model["explanation"])
+                        if not "carbon_footprint" in model:
+                            model["carbon_footprint"] = {"emissions": 0}
+                        model_detail.emission = model["carbon_footprint"].get("emissions", 0)
+                        training_item.models.append(model_detail)
+                    except Exception as e:
+                        self.__log.error(f"__training_object_rpc_object: Error while reading parameter for model")
+                        self.__log.error(f"__training_object_rpc_object: exception: {e}")
+                        raise grpclib.GRPCError(grpclib.Status.UNAVAILABLE, f"Error while retrieving Model")
 
             training_item.id = str(training["_id"])
             training_item.dataset_id = training["dataset_id"]
-            training_item.dataset_name = dataset["name"]
-
-            for model in training_models:
-                try:
-                    model_detail = Model()
-                    model_detail.id = str(model["_id"])
-                    model_detail.training_id = model["training_id"]
-
-                    model_detail.status = model["status"]
-                    model_detail.auto_ml_solution = model["auto_ml_solution"]
-                    model_detail.ml_model_type =  model["ml_model_type"]
-                    model_detail.ml_library =  model["ml_library"]
-                    model_detail.path = model["path"]
-                    model_detail.test_score =  json.dumps(model["test_score"])
-                    model_detail.prediction_time =  model["prediction_time"]
-
-                    model_runtime = ModelruntimeProfile()
-                    model_runtime.start_time = model["runtime_profile"]["start_time"]
-                    model_runtime.end_time = model["runtime_profile"]["end_time"]
-                    model_detail.runtime_profile = model_runtime
-                    model_detail.status_messages[:] =  model["status_messages"]
-                    model_detail.explanation = json.dumps(model["explanation"])
-                    if not "carbon_footprint" in model:
-                        model["carbon_footprint"] = {"emissions": 0}
-                    model_detail.emission = model["carbon_footprint"].get("emissions", 0)
-                    training_item.models.append(model_detail)
-                except Exception as e:
-                    self.__log.error(f"__training_object_rpc_object: Error while reading parameter for model")
-                    self.__log.error(f"__training_object_rpc_object: exception: {e}")
-                    raise grpclib.GRPCError(grpclib.Status.UNAVAILABLE, f"Error while retrieving Model")
-
             training_item.status = training["status"]
 
             # parameters were added later, existing documents don't have it yet. If such a record is encountered, the key is added to the dictionary here.
@@ -185,11 +187,11 @@ class TrainingManager:
         """
         response = GetTrainingsResponse()
         self.__log.debug(f"get_trainings: get all trainings for user {get_trainings_request.user_id}")
-        all_trainings: list[dict[str, object]] = self.__data_storage.get_trainings(get_trainings_request.user_id)
+        all_trainings: list[dict[str, object]] = self.__data_storage.get_trainings(get_trainings_request.user_id, only_last_day=get_trainings_request.only_last_day, pagination=get_trainings_request.pagination, page_number=get_trainings_request.page_number)
         self.__log.debug(f"get_trainings: found {all_trainings.count} trainings for user {get_trainings_request.user_id}")
 
         for training in all_trainings:
-            response.trainings.append(self.__training_object_rpc_object(get_trainings_request.user_id, training))
+            response.trainings.append(self.__training_object_rpc_object(get_trainings_request.user_id, training, get_trainings_request.short))
         return response
 
     def get_training(
