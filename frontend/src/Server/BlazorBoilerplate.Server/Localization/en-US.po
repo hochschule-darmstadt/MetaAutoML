@@ -1487,14 +1487,6 @@ msgid "Detail configuration (optional)"
 msgstr "Detail configuration (optional)"
 
 msgctxt "Global"
-msgid "Detail configuration (optional)"
-msgstr "Detail configuration (optional)"
-
-msgctxt "Global"
-msgid "Detail configuration (optional)"
-msgstr "Detail configuration (optional)"
-
-msgctxt "Global"
 msgid "ML task"
 msgstr "ML task * "
 
@@ -1507,8 +1499,6 @@ msgid "ML libraries"
 msgstr "ML libraries"
 
 msgctxt "Global"
-msgid "Training strategies"
-msgstr "Training strategies"
 msgid "Training strategies"
 msgstr "Training strategies"
 

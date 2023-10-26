@@ -19,7 +19,7 @@
             <MudTable Items="@Models.Models" style="width:stretch" class="mat-elevation-z5" AllowSelection="false" Dense="true" Filter="new Func<ModelDto,bool>(FilterFunc)" CustomHeader="true">
                 <ToolBarContent>
                     <MudTextField @bind-Value="searchString" Placeholder="@L["Search by name, status, lib, AutoML system"]" Adornment="Adornment.Start"
-                                  AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0" Clearable="true"></MudTextField>
+                                    AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0" Clearable="true"></MudTextField>
                 </ToolBarContent>
                 <HeaderContent>
                     <MudTHeadRow>
