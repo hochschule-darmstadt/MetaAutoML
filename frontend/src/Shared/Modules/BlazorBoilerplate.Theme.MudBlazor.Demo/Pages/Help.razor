@@ -1,0 +1,62 @@
+@page "/help"
+@inject IStringLocalizer<Global> L
+@attribute [Authorize]
+
+<TopSection>
+    <MudBreadcrumbs Items="_breadcrumbs" Class="mudbreadcrumbs"></MudBreadcrumbs>
+</TopSection>
+<MudStack AlignItems="AlignItems.Center" Row="true" Class="mb-2" style="padding-top:50px;padding-bottom:1rem;">
+    <MudIcon Size="Size.Large" Icon="@Icons.Material.Filled.HelpOutline" />
+    <LabelTooltip FontSize="Typo.h4" Label="Help" Text="Read how to solve different tasks with OMA-ML or start a guided tour." Position="Placement.Bottom"></LabelTooltip>
+</MudStack>
+<MudGrid>
+    <MudItem xs="12" sm="12" md="12">
+        <MudCard Elevation="5">
+            <MudGrid>
+                <MudItem xs="6">
+                    <MudText Typo="Typo.body1" Style="padding-top:10rem;padding-left:2rem;">Watch the video for a quick start of strat a guided tour</MudText>
+                    <MudButton Style="margin-left:2rem; margin-bottom:10rem;margin-top:1rem;"
+                               Variant="Variant.Filled"
+                               Color="Color.Secondary"
+                               Size="Size.Medium">Start guided tour</MudButton>
+                </MudItem>
+                <MudItem xs="6"></MudItem>
+            </MudGrid>
+        </MudCard>
+    </MudItem>
+    <MudItem xs="12" sm="12" md="12">
+        <MudCard Elevation="5">
+            <MudCardHeader Style="border-bottom-style: inset; border-bottom-width: 1px;">
+                <CardHeaderContent>
+                    <MudText Style="margin-left:2rem;margin-top:2rem;" Typo="Typo.h6">Introduction</MudText>
+                </CardHeaderContent>
+            </MudCardHeader>
+            <MudCardContent>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+</MudGrid>
+
+
+@code {
+
+    private List<BreadcrumbItem> _breadcrumbs = new List<BreadcrumbItem>();
+
+    protected override void OnInitialized()
+    {
+        _breadcrumbs.Add(new BreadcrumbItem(L["Home"], "/", false, Icons.Filled.Home));
+        _breadcrumbs.Add(new BreadcrumbItem(L["Help"], "/help", false, Icons.Material.Filled.HelpOutline));
+        StateHasChanged();
+
+    }
+
+}
+
+
+
+
+
+
+
+
+

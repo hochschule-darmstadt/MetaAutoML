@@ -1679,6 +1679,10 @@ msgid "Status: {0}"
 msgstr "Status: {0}"
 
 msgctxt "Global"
+msgid "Help"
+msgstr "Help"
+
+msgctxt "Global"
 msgid "Model: {0}"
 msgstr "Model: {0}"
 
