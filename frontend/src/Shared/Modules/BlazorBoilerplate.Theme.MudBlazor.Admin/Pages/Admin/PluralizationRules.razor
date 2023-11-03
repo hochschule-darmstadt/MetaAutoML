@@ -16,7 +16,7 @@ else
     <MudTable Items="@PluralFormRules" Striped="true" Bordered="true" Dense="true" Hover="true" Elevation="2" Class="my-4">
         <ToolBarContent>
             <MudButton OnClick="@CancelChanges" Class="ma-2">@L["Cancel"]</MudButton>
-            <MudButton OnClick="@SaveChanges" Variant="Variant.Filled" Color="Color.Primary" Class="ma-2">@L["Save"]</MudButton>
+            <MudButton OnClick="@SaveChanges" Variant="MudBlazor.Variant.Filled" Color="Color.Primary" Class="ma-2">@L["Save"]</MudButton>
         </ToolBarContent>
         <HeaderContent>
             <MudTh></MudTh>
@@ -45,7 +45,7 @@ else
             </MudSelect>
             <MudTextField @bind-Value="@newPluralFormRule.Count" Label=@L["Count"] FullWidth="true" Required="true" RequiredError=@L["Required"]></MudTextField>
             <MudTextField @bind-Value="@newPluralFormRule.Selector" Label=@L["Selector"] FullWidth="true" Required="true" RequiredError=@L["Required"] Class="mb-4"></MudTextField>
-            <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary">@L["Add"]</MudButton>
+            <MudButton ButtonType="MudBlazor.ButtonType.Submit" Variant="MudBlazor.Variant.Filled" Color="Color.Primary">@L["Add"]</MudButton>
         </EditForm>}
 }
 

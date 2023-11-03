@@ -24,8 +24,8 @@ else
     <MudTable ServerData="@(new Func<TableState, Task<TableData<LocalizationRecordKey>>>(ServerReload))" Striped="true" Bordered="true" Dense="true" Hover="true" Elevation="2" Class="mb-4"
               SelectedItemChanged="async (LocalizationRecordKey key) => await LoadLocalizationRecords((LocalizationRecordKey)key)" @ref="table">
         <ToolBarContent>
-            <MudButton StartIcon="@Icons.Filled.Add" OnClick="@OpenNewKeyDialogOpen" Variant="Variant.Filled" Color="Color.Primary" Class="ma-2">@L["NewTranslation"]</MudButton>
-            <MudButton OnClick="@SaveChanges" Variant="Variant.Filled" Color="Color.Primary">@L["Save"]</MudButton>
+            <MudButton StartIcon="@Icons.Filled.Add" OnClick="@OpenNewKeyDialogOpen" Variant="MudBlazor.Variant.Filled" Color="Color.Primary" Class="ma-2">@L["NewTranslation"]</MudButton>
+            <MudButton OnClick="@SaveChanges" Variant="MudBlazor.Variant.Filled" Color="Color.Primary">@L["Save"]</MudButton>
             <MudButton OnClick="@ReloadTranslations" Class="ma-2">@L["ReloadTranslations"]</MudButton>
             <MudButton OnClick="@(e => { navigationManager.NavigateTo("/api/localization/export", true); })" Class="ma-2">@L["Export"]</MudButton>
             <InputFile id="fileInput" OnChange="UploadFiles" hidden multiple accept=".po" />
@@ -71,8 +71,8 @@ else
                                 </MudTd>
                                 <MudTd>
                                     <div>
-                                        <MudButton Style="margin-bottom: 5px; white-space: nowrap" Variant="Variant.Filled" Color="Color.Secondary" OnClick="@(() => OpenEditAsHtmlDialog(row))">@L["Edit as HTML"]</MudButton>
-                                        <MudButton Variant="@(row.PluralTranslations.Count == 0 ? Variant.Outlined : Variant.Filled)" Color="Color.Primary" OnClick="@(() => OpenPluralDialog(row))">@L["Plural"]</MudButton>
+                                        <MudButton Style="margin-bottom: 5px; white-space: nowrap" Variant="MudBlazor.Variant.Filled" Color="Color.Secondary" OnClick="@(() => OpenEditAsHtmlDialog(row))">@L["Edit as HTML"]</MudButton>
+                                        <MudButton Variant="@(row.PluralTranslations.Count == 0 ? MudBlazor.Variant.Outlined : MudBlazor.Variant.Filled)" Color="Color.Primary" OnClick="@(() => OpenPluralDialog(row))">@L["Plural"]</MudButton>
                                     </div>
                                 </MudTd>
                             </RowTemplate>
@@ -92,13 +92,13 @@ else
                                                 }
                                         </MudSelect>
                                         <MudTextField @bind-Value="@newLocalizationRecord.Translation" Label=@L["Translation"] FullWidth="true" Lines="5" Class="mb-4"></MudTextField>
-                                        <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary">@L["Add"]</MudButton>
-                                        <MudButton OnClick="@(() => OpenEditAsHtmlDialog(newLocalizationRecord))" Variant="Variant.Filled" Color="Color.Secondary">@L["Edit as HTML"]</MudButton>
+                                        <MudButton ButtonType="MudBlazor.ButtonType.Submit" Variant="MudBlazor.Variant.Filled" Color="Color.Primary">@L["Add"]</MudButton>
+                                        <MudButton OnClick="@(() => OpenEditAsHtmlDialog(newLocalizationRecord))" Variant="MudBlazor.Variant.Filled" Color="Color.Secondary">@L["Edit as HTML"]</MudButton>
                                     </EditForm>
                                 </MudCardContent>
                                 <MudCardActions>
                                     <MudButton OnClick="@CancelChanges">@L["Cancel"]</MudButton>
-                                    <MudButton OnClick="@SaveChanges" Variant="Variant.Filled" Color="Color.Primary">@L["Save"]</MudButton>
+                                    <MudButton OnClick="@SaveChanges" Variant="MudBlazor.Variant.Filled" Color="Color.Primary">@L["Save"]</MudButton>
                                 </MudCardActions>
                             </MudCard>
                             }
@@ -125,7 +125,7 @@ else
         </DialogContent>
         <DialogActions>
             <MudButton OnClick="@(e => { isEditDialogOpen = false; })">@L["Cancel"]</MudButton>
-            <MudButton OnClick="@(()=>EditLocalizationRecordKey())" Variant="Variant.Filled" Color="Color.Primary">@L["Save"]</MudButton>
+            <MudButton OnClick="@(()=>EditLocalizationRecordKey())" Variant="MudBlazor.Variant.Filled" Color="Color.Primary">@L["Save"]</MudButton>
         </DialogActions>
     </MudDialog>
 
@@ -141,7 +141,7 @@ else
         </DialogContent>
         <DialogActions>
             <MudButton OnClick="@(e => { isDeleteDialogOpen = false; })">@L["Cancel"]</MudButton>
-            <MudButton OnClick="@(()=>DeleteLocalizationRecordKey(currentKey))" Variant="Variant.Filled" Color="Color.Error">@L["Delete"]</MudButton>
+            <MudButton OnClick="@(()=>DeleteLocalizationRecordKey(currentKey))" Variant="MudBlazor.Variant.Filled" Color="Color.Error">@L["Delete"]</MudButton>
         </DialogActions>
     </MudDialog>
 
@@ -167,7 +167,7 @@ else
         </DialogContent>
         <DialogActions>
             <MudButton OnClick="@CancelChanges">@L["Cancel"]</MudButton>
-            <MudButton ButtonType="ButtonType.Submit" form="newKeyForm" Variant="Variant.Filled" Color="Color.Primary">@L["Save"]</MudButton>
+            <MudButton ButtonType="MudBlazor.ButtonType.Submit" form="newKeyForm" Variant="MudBlazor.Variant.Filled" Color="Color.Primary">@L["Save"]</MudButton>
         </DialogActions>
     </MudDialog>
 
@@ -203,12 +203,12 @@ else
                     <MudValidationSummary />
                     <MudTextField @bind-Value="@newPlural.Index" Label=@L["Index"] FullWidth="true"></MudTextField>
                     <MudTextField @bind-Value="@newPlural.Translation" Label=@L["Translation"] FullWidth="true" Lines="5"></MudTextField>
-                    <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="my-2">@L["Add"]</MudButton>
+                    <MudButton ButtonType="MudBlazor.ButtonType.Submit" Variant="MudBlazor.Variant.Filled" Color="Color.Primary" Class="my-2">@L["Add"]</MudButton>
                 </EditForm>}
         </DialogContent>
         <DialogActions>
             <MudButton OnClick="@CancelPluralChanges">@L["Cancel"]</MudButton>
-            <MudButton OnClick="@SavePluralChanges" Variant="Variant.Filled" Color="Color.Primary">@L["Save"]</MudButton>
+            <MudButton OnClick="@SavePluralChanges" Variant="MudBlazor.Variant.Filled" Color="Color.Primary">@L["Save"]</MudButton>
         </DialogActions>
     </MudDialog>
 
@@ -252,7 +252,7 @@ else
             </DialogContent>
             <DialogActions>
                 <MudButton OnClick="@(e => { isEditAsHtmlDialogOpen = false; })">@L["Cancel"]</MudButton>
-                <MudButton OnClick="@(() => SaveLocalizationRecordAsHTML())" Variant="Variant.Filled" Color="Color.Primary">@L["Confirm"]</MudButton>
+                <MudButton OnClick="@(() => SaveLocalizationRecordAsHTML())" Variant="MudBlazor.Variant.Filled" Color="Color.Primary">@L["Confirm"]</MudButton>
             </DialogActions>
         </MudDialog>}
 }

@@ -1,3 +1,6 @@
+@using Radzen.Blazor
+@using Radzen
+@inject TooltipService tooltipService
 @if (ViewModel.AvailableChips?.Any() ?? false)
 {
     <MudText Typo="Typo.subtitle2">@Label</MudText>
@@ -7,13 +10,15 @@
         {
             @if (!string.IsNullOrEmpty(chip.ToolTip) || !string.IsNullOrEmpty(chip.Comment))
             {
-                <WikiTooltip SeeAlso="@chip.ToolTip" Comment="@chip.Comment">
-                    <MudChip Value="@chip.Id" Text="@chip.Label" Variant="Variant.Text" Color="Color.Secondary" @onclick="() => ToggleChip(chip)" />
-                </WikiTooltip>
+                
+                    <MudChip Value="@chip.Id" Variant="MudBlazor.Variant.Text" Color="Color.Secondary" @onclick="() => ToggleChip(chip)">
+                        <WikiTooltip Label="@chip.Label" SeeAlso="@chip.ToolTip" Comment="@chip.Comment" Selected="@chip.IsSelected"/>
+                    </MudChip>
+              
             }
             else
             {
-                <MudChip Value="@chip.Id" Text="@chip.Label" Variant="Variant.Text" Color="Color.Secondary" @onclick="() => ToggleChip(chip)" />
+                <MudChip Value="@chip.Id" Text="@chip.Label" Variant="MudBlazor.Variant.Text" Color="Color.Secondary" @onclick="() => ToggleChip(chip)" />
             }
         }
     </MudChipSet>

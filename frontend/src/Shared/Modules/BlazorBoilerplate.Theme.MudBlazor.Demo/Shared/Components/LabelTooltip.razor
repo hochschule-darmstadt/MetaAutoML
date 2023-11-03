@@ -1,38 +1,42 @@
-<span style="display:flex">
-<MudText Typo=FontSize>@Label</MudText>
-<MudTooltip Text=@Text Placement=Position Arrow="true">
-    <ChildContent>
-        <div style="padding-left:20%;">
-            <MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.Info" Style="opacity:50%;"></MudIcon>
+@using Radzen.Blazor
+@using Radzen
+@inject TooltipService tooltipService
+@if (@Icon)
+{
+    <span style="display:flex">
+        <RadzenText Style="font-family:Arial, Helvetica, sans-serif; font-weight:150; " Text=@Label TextStyle=@FontSize />
+        <div style="padding-left:5pt; align-content:center; margin-top:auto; margin-bottom:auto">
+            <RadzenIcon Icon="info" IconColor="@Radzen.Colors.Black" Style="opacity:50%;" MouseEnter="@(args => ShowTooltipWithHtml(args, new TooltipOptions() { Position = @Position}))" />
         </div>
-    </ChildContent>
-   <TooltipContent>
-       <MudText Style="word-wrap: break-word;max-width: 20rem;font-size:11pt;">
-           @Text
-           @if (!string.IsNullOrEmpty(URL))
-           {
-               <MudLink Href="@URL" Class="mud-tooltip mud-tooltip-default tooltiptext" Style="opacity: 100%!important; color:white!important;">
-                   More...
-               </MudLink>
-           }
-       </MudText>
-   </TooltipContent>
-    
-</MudTooltip>
-</span>
+    </span>
+}
+else
+{
+    <span style="display:flex">
+        <RadzenText MouseEnter="@(args => ShowTooltipWithHtml(args, new TooltipOptions() { Position = @Position}))" Style="font-family:Arial, Helvetica, sans-serif; font-weight:150; " Text=@Label TextStyle=@FontSize />
+    </span>
+}
+
 @code {
     [Parameter]
     public string Label { get; set; }
     [Parameter]
     public string Text { get; set; }
     [Parameter]
-    public Placement Position { get; set; }
+    public TooltipPosition Position { get; set; }
     [Parameter]
-    public Typo FontSize { get; set; } = Typo.h6;
+    public TextStyle FontSize { get; set; } = TextStyle.H6;
     [Parameter]
     public string URL { get; set; } = "";
+    [Parameter]
+    public bool Icon { get; set; } = true;
 
 
+    void ShowTooltipWithHtml(ElementReference elementReference, TooltipOptions options = null) => tooltipService.Open(elementReference, ds =>
+@<div class="rz-text-wrap" style="max-width:20rem">
+    @Text @if (!string.IsNullOrEmpty(URL))
+    {<a target="_blank" rel="noopener noreferrer" href=@URL style="color:white"><u> More...</u></a>}
+</div>, options);
 
 
 }
