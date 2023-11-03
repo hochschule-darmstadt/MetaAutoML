@@ -3,7 +3,7 @@
 
 @foreach (var message in CurrentEditContext.GetValidationMessages())
 {
-    <MudAlert Severity="Severity.Error" Variant="Variant.Filled" Class="ma-1">@message</MudAlert>
+    <MudAlert Severity="Severity.Error" Variant="MudBlazor.Variant.Filled" Class="ma-1">@message</MudAlert>
 }
 
 @code {

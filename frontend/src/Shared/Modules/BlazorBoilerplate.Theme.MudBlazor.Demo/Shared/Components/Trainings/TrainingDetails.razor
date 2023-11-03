@@ -4,10 +4,12 @@
 @implements IDisposable
 @inject IViewNotifier viewNotifier
 @inject IApiClient apiClient
+@using Radzen
+@using Radzen.Blazor
 
 <MudCard Elevation="5">
     <MudCardHeader Style="border-bottom-style: inset; border-bottom-width: 1px;">
-        <CardHeaderContent >
+        <CardHeaderContent>
             <MudText Typo="Typo.h6">@L["Leaderboard"]</MudText>
         </CardHeaderContent>
     </MudCardHeader>
@@ -32,20 +34,21 @@
                             <MudTh><MudTableSortLabel SortBy="new Func<ModelDto, object>(x=>x.Status)">@L["Status"]</MudTableSortLabel></MudTh>
                             <MudTh><MudTableSortLabel SortBy="@(new Func<ModelDto, object>(x=>x.GetMlModelString()))">@L["Model"]</MudTableSortLabel></MudTh>
                             <MudTh><MudTableSortLabel SortBy="@(new Func<ModelDto, object>(x=>x.GetMlLibraryString()))">@L["ML Library"]</MudTableSortLabel></MudTh>
-                            <MudTh><MudTableSortLabel SortBy="@(new Func<ModelDto, object>(x=> SelectedMetric != "" ?
+                            <MudTh>
+                                <MudTableSortLabel SortBy="@(new Func<ModelDto, object>(x=> SelectedMetric != "" ?
                                                                                                     x.Metrics.Count() > 0 ?
                                                                                                         x.Metrics.Where(y => y.Name.ID == SelectedMetric).First().Score.ToString()
                                                                                                         : ""
                                                                                                     : ""))">@L["Metric"]</MudTableSortLabel>
                             </MudTh>
                             <MudTh><MudTableSortLabel SortBy="new Func<ModelDto, object>(x=>x.RuntimeProfile)">
-    <LabelTooltip Label=@L["Training time"] FontSize="Typo.subtitle2" Text="Runtime for training the entire dataset in minutes" Position="Placement.Top"></LabelTooltip>
+    <LabelTooltip Label=@L["Training time"] FontSize="TextStyle.Body1" Text="Runtime for training the entire dataset in minutes" Position="Radzen.TooltipPosition.Top"></LabelTooltip>
 </MudTableSortLabel></MudTh>
                             <MudTh><MudTableSortLabel SortBy="new Func<ModelDto, object>(x=>x.Emissions)">
-                                       <LabelTooltip Label=@L["Training emissions"] FontSize="Typo.subtitle2" Text="Emissions for training the entire dataset in kg CO2 equivalents." Position="Placement.Top"></LabelTooltip>
+                                       <LabelTooltip Label=@L["Training emissions"] FontSize="TextStyle.Body1" Text="Emissions for training the entire dataset in kg CO2 equivalents." Position="Radzen.TooltipPosition.Top"></LabelTooltip>
                                 </MudTableSortLabel></MudTh>
                              <MudTh><MudTableSortLabel SortBy="new Func<ModelDto, object>(x=>x.PredictionTime)">
-    <LabelTooltip Label=@L["Prediction time"] FontSize="Typo.subtitle2" Text="Runtime for predicting one single sample in microseconds." Position="Placement.Top"></LabelTooltip>
+    <LabelTooltip Label=@L["Prediction time"] FontSize="TextStyle.Body1" Text="Runtime for predicting one single sample in microseconds." Position="Radzen.TooltipPosition.Top"></LabelTooltip>
                                 </MudTableSortLabel></MudTh>
                             <MudTh></MudTh>
                         </MudTHeadRow>
@@ -143,7 +146,7 @@
         set
         {
             _training = value;
-            if(_training != null)
+            if (_training != null)
             {
                 UpdateMetricsList();
                 RefreshTraining(null, null);
@@ -252,8 +255,10 @@
         });
     }
 
-    public void DisposeTimer(){
-        if(_timer!=null){
+    public void DisposeTimer()
+    {
+        if (_timer != null)
+        {
             _timer.Elapsed -= RefreshTraining;
             _timer?.Dispose();
             _timer = null;

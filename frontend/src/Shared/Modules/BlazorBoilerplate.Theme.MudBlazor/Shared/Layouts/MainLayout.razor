@@ -2,6 +2,9 @@
 @inject NavigationManager navigationManager
 @inject AppState appState
 @inject IStringLocalizer<Global> L
+@using Radzen
+@using Radzen.Blazor
+
 
 <CascadingValue Value="this">
     <MudLayout>
@@ -38,6 +41,7 @@
         </MudScrollToTop>
     </MudLayout>
 </CascadingValue>
+<RadzenTooltip />
 
 @code {
     bool _navMenuOpened = true;

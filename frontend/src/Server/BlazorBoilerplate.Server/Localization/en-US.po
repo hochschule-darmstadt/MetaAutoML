@@ -1683,6 +1683,10 @@ msgid "Model: {0}"
 msgstr "Model: {0}"
 
 msgctxt "Global"
+msgid "Training: {0}"
+msgstr "Training: {0}"
+
+msgctxt "Global"
 msgid "Please enter a dataset name first!"
 msgstr "Please enter a dataset name first!"
 
