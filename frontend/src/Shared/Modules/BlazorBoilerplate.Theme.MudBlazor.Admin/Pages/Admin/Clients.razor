@@ -22,7 +22,7 @@ else
 {
     <MudTable Items="@clients" Striped="true" Bordered="true" Dense="true" Hover="true" Elevation="2">
         <HeaderContent>
-            <MudTh><MudButton StartIcon="@Icons.Filled.Add" OnClick="@(() => OpenUpsertClientDialog())" Variant="Variant.Filled" Color="Color.Primary">@L["New Client"]</MudButton></MudTh>
+            <MudTh><MudButton StartIcon="@Icons.Filled.Add" OnClick="@(() => OpenUpsertClientDialog())" Variant="MudBlazor.Variant.Filled" Color="Color.Primary">@L["New Client"]</MudButton></MudTh>
             <MudTh>Id</MudTh>
             <MudTh>Enabled</MudTh>
             <MudTh>Access Token Lifetime</MudTh>
@@ -257,7 +257,7 @@ else
     </DialogContent>
     <DialogActions>
         <MudButton OnClick="@CancelChanges">@L["Cancel"]</MudButton>
-        <MudButton OnClick="@UpsertClient" Variant="Variant.Filled" Color="Color.Primary">@labelUpsertDialogOkButton</MudButton>
+        <MudButton OnClick="@UpsertClient" Variant="MudBlazor.Variant.Filled" Color="Color.Primary">@labelUpsertDialogOkButton</MudButton>
     </DialogActions>
 </MudDialog>
 
@@ -273,7 +273,7 @@ else
     </DialogContent>
     <DialogActions>
         <MudButton OnClick="@(e => { isDeleteClientDialogOpen = false; })">@L["Cancel"]</MudButton>
-        <MudButton OnClick="@DeleteClientAsync" Variant="Variant.Filled" Color="Color.Error">@L["Delete"]</MudButton>
+        <MudButton OnClick="@DeleteClientAsync" Variant="MudBlazor.Variant.Filled" Color="Color.Error">@L["Delete"]</MudButton>
     </DialogActions>
 </MudDialog>
 
@@ -289,7 +289,7 @@ else
     </DialogContent>
     <DialogActions>
         <MudButton OnClick="@(e => { isDeleteClientSecretDialogOpen = false; })">@L["Cancel"]</MudButton>
-        <MudButton OnClick="@DeleteClientSecret" Variant="Variant.Filled" Color="Color.Error">@L["Delete"]</MudButton>
+        <MudButton OnClick="@DeleteClientSecret" Variant="MudBlazor.Variant.Filled" Color="Color.Error">@L["Delete"]</MudButton>
     </DialogActions>
 </MudDialog>
 
@@ -317,7 +317,7 @@ else
     </DialogContent>
     <DialogActions>
         <MudButton OnClick="@(e => { isCreateClientSecretDialogOpen = false; })">@L["Cancel"]</MudButton>
-        <MudButton OnClick="@CreateSecret" Variant="Variant.Filled" Color="Color.Primary">Create Client Secret</MudButton>
+        <MudButton OnClick="@CreateSecret" Variant="MudBlazor.Variant.Filled" Color="Color.Primary">Create Client Secret</MudButton>
     </DialogActions>
 </MudDialog>
 

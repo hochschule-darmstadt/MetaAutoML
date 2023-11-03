@@ -23,7 +23,7 @@ else
 {
     <MudTable Items="@apiResources" Striped="true" Bordered="true" Dense="true" Hover="true" Elevation="2">
         <HeaderContent>
-            <MudTh><MudButton StartIcon="@Icons.Filled.Add" OnClick="@(() => OpenUpsertApiResourceDialog())" Variant="Variant.Filled" Color="Color.Primary">@L["New API Resource"]</MudButton></MudTh>
+            <MudTh><MudButton StartIcon="@Icons.Filled.Add" OnClick="@(() => OpenUpsertApiResourceDialog())" Variant="MudBlazor.Variant.Filled" Color="Color.Primary">@L["New API Resource"]</MudButton></MudTh>
             <MudTh>@L["Name"]</MudTh>
             <MudTh>Enabled</MudTh>
             <MudTh>Display Name</MudTh>
@@ -145,7 +145,7 @@ else
     </DialogContent>
     <DialogActions>
         <MudButton OnClick="@CancelChanges">@L["Cancel"]</MudButton>
-        <MudButton OnClick="@UpsertApiResource" Variant="Variant.Filled" Color="Color.Primary">@labelUpsertDialogOkButton</MudButton>
+        <MudButton OnClick="@UpsertApiResource" Variant="MudBlazor.Variant.Filled" Color="Color.Primary">@labelUpsertDialogOkButton</MudButton>
     </DialogActions>
 </MudDialog>
 
@@ -161,7 +161,7 @@ else
     </DialogContent>
     <DialogActions>
         <MudButton OnClick="@(e => { isDeleteApiResourceDialogOpen = false; })">@L["Cancel"]</MudButton>
-        <MudButton OnClick="@DeleteApiResourceAsync" Variant="Variant.Filled" Color="Color.Error">@L["Delete"]</MudButton>
+        <MudButton OnClick="@DeleteApiResourceAsync" Variant="MudBlazor.Variant.Filled" Color="Color.Error">@L["Delete"]</MudButton>
     </DialogActions>
 </MudDialog>
 
@@ -177,7 +177,7 @@ else
     </DialogContent>
     <DialogActions>
         <MudButton OnClick="@(e => { isDeleteApiResourceSecretDialogOpen = false; })">@L["Cancel"]</MudButton>
-        <MudButton OnClick="@DeleteApiResourceSecret" Variant="Variant.Filled" Color="Color.Error">@L["Delete"]</MudButton>
+        <MudButton OnClick="@DeleteApiResourceSecret" Variant="MudBlazor.Variant.Filled" Color="Color.Error">@L["Delete"]</MudButton>
     </DialogActions>
 </MudDialog>
 
@@ -205,7 +205,7 @@ else
     </DialogContent>
     <DialogActions>
         <MudButton OnClick="@(e => { isCreateApiResourceSecretDialogOpen = false; })">@L["Cancel"]</MudButton>
-        <MudButton OnClick="@CreateSecret" Variant="Variant.Filled" Color="Color.Primary">Create API Resource Secret</MudButton>
+        <MudButton OnClick="@CreateSecret" Variant="MudBlazor.Variant.Filled" Color="Color.Primary">Create API Resource Secret</MudButton>
     </DialogActions>
 </MudDialog>
 

@@ -1,22 +1,26 @@
 @inject IStringLocalizer<Global> L
 @inject NavigationManager NavManager
 @inject IFileUploader fileUploader
+@using Radzen
+@using Radzen.Blazor
+@inject TooltipService tooltipService
 
 
 <MudCard Elevation="5">
     <MudCardHeader Style="border-bottom-style: inset; border-bottom-width: 1px;">
-        <CardHeaderContent >
+        <CardHeaderContent>
             <MudText Typo="Typo.h6">@L["All datasets"]</MudText>
         </CardHeaderContent>
         <CardHeaderActions>
             <MudStack Row="true" Class="align-content-center" Style="margin-top: 8px">
                 <ButtonTooltip Text="Click here to upload a new dataset from your disk or a website to the OMA-ML platform." Position="Placement.Left">
                     <MudButton OnClick="OnOpenUpload"
-                               Variant="Variant.Filled"
+                               Variant="MudBlazor.Variant.Filled"
                                Color="Color.Secondary"
-                               EndIcon="@Icons.Filled.AddBox"
+                               StartIcon="@Icons.Filled.AddBox"
                                Size="Size.Small">@L["Upload"]</MudButton>
-                    </ButtonTooltip>
+                        </ButtonTooltip>
+
                     </MudStack>
         </CardHeaderActions>
     </MudCardHeader>
@@ -57,62 +61,64 @@
     </MudCardContent>
 </MudCard>
 
-@code {
-    [Parameter]
-    public GetDatasetsResponseDto Datasets
-    {
-        get
-        {
-            return _datasets;
-        }
-        set
-        {
-            _datasets = value;
-
-            if (_datasets != null)
+        @code {
+            [Parameter]
+            public GetDatasetsResponseDto Datasets
             {
-                _datasets.Datasets = _datasets.Datasets.OrderByDescending(x => x.Analysis["creation_date"]).ToList();
-                StateHasChanged();
+                get
+                {
+                    return _datasets;
+                }
+                set
+                {
+                    _datasets = value;
 
+                    if (_datasets != null)
+                    {
+                        _datasets.Datasets = _datasets.Datasets.OrderByDescending(x => x.Analysis["creation_date"]).ToList();
+                        StateHasChanged();
+
+                    }
+                }
             }
+            private GetDatasetsResponseDto _datasets;
+            [Parameter]
+            public EventCallback OnUploadCompletedCallback { get; set; }
+            [Parameter]
+            public EventCallback OnDeleteDatasetCompleted { get; set; }
+            private string searchString = "";
+
+
+
+  private bool FilterFunc(DatasetDto element)
+  {
+      if (string.IsNullOrWhiteSpace(searchString))
+          return true;
+      if (element.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+          return true;
+      if (element.Type.Properties["skos:prefLabel"].Contains(searchString, StringComparison.OrdinalIgnoreCase))
+          return true;
+      return false;
+  }
+  private void OnOpenUpload()
+  {
+      fileUploader.IsPredictionDatasetToUpload = false;
+      fileUploader.IsUploadDatasetDialogOpen = true;
+      fileUploader.RefreshUploadComponentCallback();
+  }
+  public string FormatBytes(long bytes)
+  {
+      const int scale = 1024;
+      string[] orders = new string[] { "GB", "MB", "KB", "Bytes" };
+      long max = (long)Math.Pow(scale, orders.Length - 1);
+
+      foreach (string order in orders)
+      {
+          if (bytes > max)
+              return string.Format("{0:##.##} {1}", decimal.Divide(bytes, max), order);
+
+          max /= scale;
+      }
+      return "0 Bytes";
+  }
         }
-    }
-    private GetDatasetsResponseDto _datasets;
-    [Parameter]
-    public EventCallback OnUploadCompletedCallback { get; set; }
-    [Parameter]
-    public EventCallback OnDeleteDatasetCompleted { get; set; }
-    private string searchString = "";
-
-    private bool FilterFunc(DatasetDto element)
-    {
-        if (string.IsNullOrWhiteSpace(searchString))
-            return true;
-        if (element.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase))
-            return true;
-        if (element.Type.Properties["skos:prefLabel"].Contains(searchString, StringComparison.OrdinalIgnoreCase))
-            return true;
-        return false;
-    }
-    private void OnOpenUpload()
-    {
-        fileUploader.IsPredictionDatasetToUpload = false;
-        fileUploader.IsUploadDatasetDialogOpen = true;
-        fileUploader.RefreshUploadComponentCallback();
-    }
-    public string FormatBytes(long bytes)
-    {
-        const int scale = 1024;
-        string[] orders = new string[] { "GB", "MB", "KB", "Bytes" };
-        long max = (long)Math.Pow(scale, orders.Length - 1);
-
-        foreach (string order in orders)
-        {
-            if ( bytes > max )
-                return string.Format("{0:##.##} {1}", decimal.Divide( bytes, max ), order);
-
-            max /= scale;
-        }
-        return "0 Bytes";
-    }
-}

@@ -1,5 +1,5 @@
 
-@using System 
+@using System
 @using System.IO
 @using Microsoft.AspNetCore.Hosting
 @using Microsoft.Extensions.Logging
@@ -11,42 +11,44 @@
 @inject IStringLocalizer<Global> L
 @inject IHttpClientFactory ClientFactory
 @inject NavigationManager NavManager
+@using Radzen
+@using Radzen.Blazor
 
 <MudCard Elevation="5">
     <MudCardHeader Style="border-bottom-style: inset; border-bottom-width: 1px;">
         <CardHeaderContent>
-            <LabelTooltip FontSize="Typo.h6" Label=@L["Analysis"] Text="Here you get various detailed graphical analyses using Explainable AI (XAI)." Position="Placement.Bottom"></LabelTooltip>
+            <LabelTooltip FontSize="TextStyle.H6" Label=@L["Analysis"] Text="Here you get various detailed graphical analyses using Explainable AI (XAI)." Position="Radzen.TooltipPosition.Bottom"></LabelTooltip>
         </CardHeaderContent>
         <CardHeaderActions>
             @if (ExplanationPagePath != null)
             {
                 <MudButton Href="@NavManager.ToAbsoluteUri(ExplanationPagePath).AbsoluteUri"
-                       Variant="Variant.Filled"
-                       EndIcon="@Icons.Material.Filled.ReadMore"
-                       Color="Color.Secondary"
-                       Size="Size.Small"
-                       Style="margin-top: 8px">@L["More"]</MudButton>
-            }
+                           Variant="MudBlazor.Variant.Filled"
+                           StartIcon="@Icons.Material.Filled.ReadMore"
+                           Color="Color.Secondary"
+                           Size="Size.Small"
+                           Style="margin-top: 8px">@L["More"]</MudButton>
+                    }
         </CardHeaderActions>
     </MudCardHeader>
     <MudCardContent>
         <MudPaper Height="250px" Elevation="0">
-@*            @if (_explanation == null)
-            {
-                <DataLoaderSpinner />
-            }
-            else if (_explanation.Status != "finished")
-            {
-                <DataLoaderSpinner />
-            }
-            else
-            {
-                <MudButton Href="@NavManager.ToAbsoluteUri(ExplanationPagePath).AbsoluteUri">
-                    <MudItem xs="12" Style="display: grid; justify-content: center;">
-                        <MudImage Src="@GetImage(_explanation.AnalysisCategories[0].Analyses[0].Content)" Style="height:250px;" />
-                    </MudItem>
-                </MudButton>
-            }*@
+            @*            @if (_explanation == null)
+                {
+                    <DataLoaderSpinner />
+                }
+                else if (_explanation.Status != "finished")
+                {
+                    <DataLoaderSpinner />
+                }
+                else
+                {
+                    <MudButton Href="@NavManager.ToAbsoluteUri(ExplanationPagePath).AbsoluteUri">
+                        <MudItem xs="12" Style="display: grid; justify-content: center;">
+                            <MudImage Src="@GetImage(_explanation.AnalysisCategories[0].Analyses[0].Content)" Style="height:250px;" />
+                        </MudItem>
+                    </MudButton>
+                }*@
             <MudButton Href="@NavManager.ToAbsoluteUri(ExplanationPagePath).AbsoluteUri">
                 <MudItem xs="12" Style="display: grid; justify-content: center;">
                     <MudImage Src="@($"_content/BlazorBoilerplate.Theme.MudBlazor/images/xai.png")" Style="height:250px;" />

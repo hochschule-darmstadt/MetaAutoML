@@ -6,7 +6,7 @@
 <MudCard Elevation="5">
     <MudCardHeader Style="border-bottom-style: inset; border-bottom-width: 1px;">
         <CardHeaderContent>
-            <LabelTooltip Label="Recent datasets" Text="Datasets are files that you upload to the OMA-ML platform to perform machine learning." Position="Placement.Top"></LabelTooltip>
+            <LabelTooltip Label="Recent datasets" Text="Datasets are files that you upload to the OMA-ML platform to perform machine learning." Position="Radzen.TooltipPosition.Top"></LabelTooltip>
         </CardHeaderContent>
         <CardHeaderActions>
             <MudStack Row="true" Class="align-content-center" Style="margin-top: 8px">
@@ -15,14 +15,14 @@
                     <MudButton OnClick="OnOpenUpload"
                                Variant="Variant.Filled"
                                Color="Color.Secondary"
-                               EndIcon="@Icons.Material.Filled.Upload"
+                               StartIcon="@Icons.Material.Filled.Upload"
                                Size="Size.Small">@L["Upload"]</MudButton>
                         </ButtonTooltip>
-                        <ButtonTooltip Text="Click here to navigate to all datasets you have uploaded to the OMA-ML platform so far." Position="Placement.Top">                           
+                        <ButtonTooltip Text="Click here to navigate to all datasets you have uploaded to the OMA-ML platform so far." Position="Placement.Top">
                                 <MudButton Href="@("/datasets")"
                                            Variant="Variant.Filled"
                                            Color="Color.Secondary"
-                                           EndIcon="@Icons.Filled.ArrowForward"
+                                           StartIcon="@Icons.Filled.ArrowForward"
                                            Size="Size.Small">@L["More"]</MudButton>
                                  </ButtonTooltip>
                             </MudStack>
@@ -99,9 +99,9 @@
                 return "background-color:rgba(255,148,61,0.25)";
             }
         }
-        
+
             return "background-color:transparent";
-        
+
 
     }
     private GetDatasetsResponseDto _datasets;

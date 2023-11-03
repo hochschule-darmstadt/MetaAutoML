@@ -27,7 +27,7 @@
                 <MudTextField @bind-Value="@confirmEmailViewModel.Token" Label="Token" AdornmentIcon="@Icons.Material.Outlined.Lock" Adornment="Adornment.End" FullWidth="true" Required="true" RequiredError=@L["Required"]></MudTextField>                
             </MudCardContent>
             <MudCardActions>
-                <MudButton ButtonType="ButtonType.Submit" Disabled="@disableConfirmButton" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">@L["Send Confirmation"]</MudButton>
+                <MudButton ButtonType="MudBlazor.ButtonType.Submit" Disabled="@disableConfirmButton" Variant="MudBlazor.Variant.Filled" Color="Color.Primary" Class="ml-auto">@L["Send Confirmation"]</MudButton>
             </MudCardActions>
         </MudCard>
     </EditForm>
