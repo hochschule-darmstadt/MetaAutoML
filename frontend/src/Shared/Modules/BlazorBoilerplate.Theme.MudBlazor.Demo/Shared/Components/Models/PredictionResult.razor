@@ -1,7 +1,7 @@
 <MudDialog>
     <DialogContent>
         <MudPaper>
-            <MudTable Items="@TableContent" style="width:stretch" class="mat-elevation-z5" AllowSelection="false" Dense="true">
+            <MudTable Items="@TableContent" style="width:stretch; height: 70vh; max-height: 700px; overflow-y: scroll" class="mat-elevation-z5" AllowSelection="false" Dense="true">
                 <HeaderContent>
                     @foreach (var column in TableHeader.Split(","))
                     {
