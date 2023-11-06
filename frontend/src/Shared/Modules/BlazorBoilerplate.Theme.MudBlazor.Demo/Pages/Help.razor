@@ -14,13 +14,18 @@
         <MudCard Elevation="5">
             <MudGrid>
                 <MudItem xs="6">
-                    <MudText Typo="Typo.body1" Style="padding-top:10rem;padding-left:2rem;">Watch the video for a quick start of strat a guided tour</MudText>
+                    <MudText Typo="Typo.subtitle1" Style="padding-top:10rem;padding-left:2rem;">Watch the video for a quick start of strat a guided tour</MudText>
                     <MudButton Style="margin-left:2rem; margin-bottom:10rem;margin-top:1rem;"
                                Variant="Variant.Filled"
                                Color="Color.Secondary"
                                Size="Size.Medium">Start guided tour</MudButton>
                 </MudItem>
-                <MudItem xs="6"></MudItem>
+                <MudItem xs="6">
+                            <iframe class="embed-responsive-item" style="width:100%"
+                                    src="@($"_content/BlazorBoilerplate.Theme.MudBlazor/images/TestVideo.mp4")"
+                                    frameborder="1"
+                                    allowfullscreen></iframe>
+                </MudItem>
             </MudGrid>
         </MudCard>
     </MudItem>
@@ -32,6 +37,74 @@
                 </CardHeaderContent>
             </MudCardHeader>
             <MudCardContent>
+                <MudImage Style="margin-left: 8%; max-width: 1200px; height:auto;width:100%; margin-right: 8%; " Src="@($"_content/BlazorBoilerplate.Theme.MudBlazor/images/FlowChart.png")" />
+                <MudGrid>
+                    <MudItem xs="6">
+                       <MudText Style="margin-left: 2rem; padding-top: 10rem; color: #5c78ef;" Typo="Typo.h6">Dataset upload</MudText>
+                        <MudText Style="margin-left:2rem;margin-top:1rem;" Typo="Typo.body2">
+                            Click on UPLOAD to upload a new dataset to OMA-ML from your disk or from the internet. You can upload tabular data, text, images or time series. If you have selected a dataset for the upload you can change the filename in the textfield. By default, the previous filename is used.
+                        </MudText>
+                    </MudItem>
+                    <MudItem xs="6">
+                        <img style=" width: clamp(50px, 40rem, 70rem);margin:3rem;" src="@($"_content/BlazorBoilerplate.Theme.MudBlazor/images/TestGIF.gif")" />
+                    </MudItem>
+                </MudGrid>
+                <MudGrid>
+                    <MudItem xs="6">
+                        <MudText Style="margin-left: 2rem; padding-top: 10rem; color: #6f7bd7" Typo="Typo.h6">Preprocessing</MudText>
+                        <MudText Style="margin-left:2rem;margin-top:1rem;" Typo="Typo.body2">
+                            Preprocessing is a crucial part of data preparation that aims to clean and organize raw data into a suitable format for the training. In this step you can chose column seperator, encoding, datetime format, escape character, decimal character and thousand seperator if necessary. You can also manually chose the datatype and role of the individual columns.
+                        </MudText>
+                    </MudItem>
+                    <MudItem xs="6">
+                        <img style=" width: clamp(50px, 40rem, 70rem);margin:3rem;" src="@($"_content/BlazorBoilerplate.Theme.MudBlazor/images/TestGIF.gif")" />
+                    </MudItem>
+                </MudGrid>
+                <MudGrid>
+                    <MudItem xs="6">
+                        <MudText Style="margin-left: 2rem; padding-top: 10rem; color: #817fc3;" Typo="Typo.h6">Model selection</MudText>
+                        <MudText Style="margin-left:2rem;margin-top:1rem;" Typo="Typo.body2">
+                            An ML model is the result of ML training and condenses information inherent in the training dataset. It can be used for making predictions on new cases. In this step, a machine learning task must first be selected.
+                            Initially, all ML libraries that are supported for the selected ML task are selected. But you can also select the ML libraries for which ML models shall be generated. The AutoML solutions generate ML models for certain ML libraries.
+                        </MudText>
+                    </MudItem>
+                    <MudItem xs="6">
+                        <img style=" width: clamp(50px, 40rem, 70rem);margin:3rem;" src="@($"_content/BlazorBoilerplate.Theme.MudBlazor/images/TestGIF.gif")" />
+                    </MudItem>
+                </MudGrid>
+                <MudGrid>
+                    <MudItem xs="6">
+                        <MudText Style="margin-left: 2rem; padding-top: 10rem; color: #9b84a4" Typo="Typo.h6">Training</MudText>
+                        <MudText Style="margin-left:2rem;margin-top:1rem;" Typo="Typo.body2">
+                            During training, various AutoML solutions are executed in parallel. This is indicated by a spinning wheel. Whenever an AutoML solution has terminated, the result is displayed. The top performing models are shown first in the leaderboard.
+                        </MudText>
+                    </MudItem>
+                    <MudItem xs="6">
+                        <img style=" width: clamp(50px, 40rem, 70rem);margin:3rem;" src="@($"_content/BlazorBoilerplate.Theme.MudBlazor/images/TestGIF.gif")" />
+                    </MudItem>
+                </MudGrid>
+                <MudGrid>
+                    <MudItem xs="6">
+                        <MudText Style="margin-left: 2rem; padding-top: 10rem; color: #b78a85;" Typo="Typo.h6">Deployment</MudText>
+                        <MudText Style="margin-left:2rem;margin-top:1rem;" Typo="Typo.body2">
+                            Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
+                        </MudText>
+                    </MudItem>
+                    <MudItem xs="6">
+                        <img style=" width: clamp(50px, 40rem, 70rem);margin:3rem;" src="@($"_content/BlazorBoilerplate.Theme.MudBlazor/images/TestGIF.gif")" />
+                    </MudItem>
+                </MudGrid>
+                <MudGrid>
+                    <MudItem xs="6">
+                        <MudText Style="margin-left: 2rem; padding-top: 10rem; color: #d59167;" Typo="Typo.h6">Prediction</MudText>
+                        <MudText Style="margin-left:2rem;margin-top:1rem;" Typo="Typo.body2">
+                            On the Model page, you can inspect and use the trained ML model. You may use the model for predicting new cases within the OMA-ML platform without having to install anything (panel center left). Alternatively, you may download the ML model within a pipeline and include it into a custom Python application (panel center right).  There are various ways of getting additional information about the model: an overview (top panel), detailed graphical analyses using Explainable AI (panel bottom left), the configuration that lead to the model (panel bottom center), and detail output of the AutoML solution (panel bottom right). You also may download a pipeline as Python source code including the generated ML model and pre-processing functions and include this code into a custom Python application.
+                        </MudText>
+                    </MudItem>
+                    <MudItem xs="6">
+                        <img style=" width: clamp(50px, 40rem, 70rem);margin:3rem;" src="@($"_content/BlazorBoilerplate.Theme.MudBlazor/images/TestGIF.gif")" />
+                    </MudItem>
+                </MudGrid>
             </MudCardContent>
         </MudCard>
     </MudItem>
