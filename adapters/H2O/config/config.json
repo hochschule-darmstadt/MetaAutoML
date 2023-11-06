@@ -1,0 +1,19 @@
+{
+  "adapter-name": "autokeras",
+  "job-file-name": "keras-job.json",
+  "env-varname-cluster": "RUNTIME",
+  "grpc-server-address": "0.0.0.0",
+  "export-zip-file-name": "keras-export",
+  "training-path": "app-data/training",
+  "job-folder-name": "job",
+  "model-folder-name": "model",
+  "export-folder-name": "export",
+  "result-folder-name": "result",
+  "dashboard-folder-name": "dashboard",
+  "templates-path": "app-data/templates",
+  "predict-time-sources-path": "AutoMLs/predict_time_sources.py",
+  "local_execution": "NO",
+  "running_in_wsl": "NO",
+  "wsl_metaautoml_path": "/mnt/c/Users/alex/Desktop/MetaAutoML",
+  "ontology_path": "ML_Ontology.ttl"
+}

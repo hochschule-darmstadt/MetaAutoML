@@ -89,13 +89,11 @@ services:
 
 #     adapters do not need to be available from the host machine -> no port mappings
 
-  autokeras:
+  h2o:
     build:
       context: ./
-      dockerfile: ./adapters/AutoKeras/Dockerfile
-    container_name: autokeras
-    depends_on:
-      - mljar
+      dockerfile: ./adapters/H2O/Dockerfile
+    container_name: h2o
     environment:
       - GRPC_SERVER_PORT=50052
       - EXPLAINER_DASHBOARD_PORT_START=6000
@@ -107,23 +105,39 @@ services:
     ports:
       - "6000-6009:6000-6009"
 
-  mljar:
-    build:
-      context: ./
-      dockerfile: ./adapters/MLJAR/Dockerfile
-    container_name: mljar
-    depends_on:
-      - flaml
-    environment:
-      - GRPC_SERVER_PORT=50053
-      - EXPLAINER_DASHBOARD_PORT_START=6010
-      - EXPLAINER_DASHBOARD_PORT_END=6019
-      - DOCKER_COMPOSE=YES
-    volumes:
-      - datasets:/app/app-data/datasets
-      - training-mljar:/app/app-data/training
-    ports:
-      - "6010-6019:6010-6019"
+#   autokeras:
+#     build:
+#       context: ./
+#       dockerfile: ./adapters/AutoKeras/Dockerfile
+#     container_name: autokeras
+#     environment:
+#       - GRPC_SERVER_PORT=50052
+#       - EXPLAINER_DASHBOARD_PORT_START=6000
+#       - EXPLAINER_DASHBOARD_PORT_END=6009
+#       - DOCKER_COMPOSE=YES
+#     volumes:
+#       - datasets:/app/app-data/datasets
+#       - training-autokeras:/app/app-data/training
+#     ports:
+#       - "6000-6009:6000-6009"
+
+#   mljar:
+#     build:
+#       context: ./
+#       dockerfile: ./adapters/mljar/dockerfile
+#     container_name: mljar
+#     depends_on:
+#       - flaml
+#     environment:
+#       - grpc_server_port=50053
+#       - explainer_dashboard_port_start=6010
+#       - explainer_dashboard_port_end=6019
+#       - docker_compose=yes
+#     volumes:
+#       - datasets:/app/app-data/datasets
+#       - training-mljar:/app/app-data/training
+#     ports:
+#       - "6010-6019:6010-6019"
 
 #   mcfly:
 #     build:
@@ -151,41 +165,41 @@ services:
 #     ports:
 #       - "6020-6029:6020-6029"
 
-  flaml:
-    build:
-      context: ./
-      dockerfile: ./adapters/FLAML/Dockerfile
-    container_name: flaml
-    depends_on:
-      - gluon
-    environment:
-      - GRPC_SERVER_PORT=50056
-      - EXPLAINER_DASHBOARD_PORT_START=6030
-      - EXPLAINER_DASHBOARD_PORT_END=6039
-      - DOCKER_COMPOSE=YES
-    volumes:
-      - datasets:/app/app-data/datasets
-      - training-flaml:/app/app-data/training
-    ports:
-      - "6030-6039:6030-6039"
+#   flaml:
+#     build:
+#       context: ./
+#       dockerfile: ./adapters/FLAML/Dockerfile
+#     container_name: flaml
+#     depends_on:
+#       - gluon
+#     environment:
+#       - GRPC_SERVER_PORT=50056
+#       - EXPLAINER_DASHBOARD_PORT_START=6030
+#       - EXPLAINER_DASHBOARD_PORT_END=6039
+#       - DOCKER_COMPOSE=YES
+#     volumes:
+#       - datasets:/app/app-data/datasets
+#       - training-flaml:/app/app-data/training
+#     ports:
+#       - "6030-6039:6030-6039"
 
-  gluon:
-    build:
-      context: ./
-      dockerfile: ./adapters/AutoGluon/Dockerfile
-    container_name: gluon
-    depends_on:
-      - evalml
-    environment:
-      - GRPC_SERVER_PORT=50057
-      - EXPLAINER_DASHBOARD_PORT_START=6040
-      - EXPLAINER_DASHBOARD_PORT_END=6049
-      - DOCKER_COMPOSE=YES
-    volumes:
-      - datasets:/app/app-data/datasets
-      - training-gluon:/app/app-data/training
-    ports:
-      - "6040-6049:6040-6049"
+#   gluon:
+#     build:
+#       context: ./
+#       dockerfile: ./adapters/AutoGluon/Dockerfile
+#     container_name: gluon
+#     depends_on:
+#       - evalml
+#     environment:
+#       - GRPC_SERVER_PORT=50057
+#       - EXPLAINER_DASHBOARD_PORT_START=6040
+#       - EXPLAINER_DASHBOARD_PORT_END=6049
+#       - DOCKER_COMPOSE=YES
+#     volumes:
+#       - datasets:/app/app-data/datasets
+#       - training-gluon:/app/app-data/training
+#     ports:
+#       - "6040-6049:6040-6049"
 
 #   #autocve:
 #   #  build:
@@ -225,93 +239,93 @@ services:
 #   #    - training-alphad3m:/app/app-data/training
 
 
-  evalml:
-    build:
-      context: ./
-      dockerfile: ./adapters/EvalML/Dockerfile
-    container_name: evalml
-    depends_on:
-      - pycaret
-    environment:
-      - GRPC_SERVER_PORT=50062
-      - EXPLAINER_DASHBOARD_PORT_START=6060
-      - EXPLAINER_DASHBOARD_PORT_END=6069
-      - DOCKER_COMPOSE=YES
-    volumes:
-      - datasets:/app/app-data/datasets
-      - training-evalml:/app/app-data/training
-    ports:
-      - "6060-6069:6060-6069"
+#   evalml:
+#     build:
+#       context: ./
+#       dockerfile: ./adapters/evalml/dockerfile
+#     container_name: evalml
+#     depends_on:
+#       - pycaret
+#     environment:
+#       - grpc_server_port=50062
+#       - explainer_dashboard_port_start=6060
+#       - explainer_dashboard_port_end=6069
+#       - docker_compose=yes
+#     volumes:
+#       - datasets:/app/app-data/datasets
+#       - training-evalml:/app/app-data/training
+#     ports:
+#       - "6060-6069:6060-6069"
 
-  pycaret:
-    build:
-      context: ./
-      dockerfile: ./adapters/PyCaret/Dockerfile
-    container_name: pycaret
-    depends_on:
-      - tpot
-    environment:
-      - GRPC_SERVER_PORT=50063
-      - EXPLAINER_DASHBOARD_PORT_START=6070
-      - EXPLAINER_DASHBOARD_PORT_END=6079
-      - DOCKER_COMPOSE=YES
-    volumes:
-      - datasets:/app/app-data/datasets
-      - training-pycaret:/app/app-data/training
-    ports:
-      - "6070-6079:6070-6079"
+#   pycaret:
+#     build:
+#       context: ./
+#       dockerfile: ./adapters/PyCaret/Dockerfile
+#     container_name: pycaret
+#     depends_on:
+#       - tpot
+#     environment:
+#       - GRPC_SERVER_PORT=50063
+#       - EXPLAINER_DASHBOARD_PORT_START=6070
+#       - EXPLAINER_DASHBOARD_PORT_END=6079
+#       - DOCKER_COMPOSE=YES
+#     volumes:
+#       - datasets:/app/app-data/datasets
+#       - training-pycaret:/app/app-data/training
+#     ports:
+#       - "6070-6079:6070-6079"
 
-  tpot:
-    build:
-      context: ./
-      dockerfile: ./adapters/TPOT/Dockerfile
-    container_name: tpot
-    depends_on:
-      - gama
-    environment:
-      - GRPC_SERVER_PORT=50064
-      - EXPLAINER_DASHBOARD_PORT_START=6080
-      - EXPLAINER_DASHBOARD_PORT_END=6089
-      - DOCKER_COMPOSE=YES
-    volumes:
-      - datasets:/app/app-data/datasets
-      - training-tpot:/app/app-data/training
-    ports:
-      - "6080-6089:6080-6089"
+#   tpot:
+#     build:
+#       context: ./
+#       dockerfile: ./adapters/TPOT/Dockerfile
+#     container_name: tpot
+#     depends_on:
+#       - gama
+#     environment:
+#       - GRPC_SERVER_PORT=50064
+#       - EXPLAINER_DASHBOARD_PORT_START=6080
+#       - EXPLAINER_DASHBOARD_PORT_END=6089
+#       - DOCKER_COMPOSE=YES
+#     volumes:
+#       - datasets:/app/app-data/datasets
+#       - training-tpot:/app/app-data/training
+#     ports:
+#       - "6080-6089:6080-6089"
 
-  gama:
-    build:
-      context: ./
-      dockerfile: ./adapters/GAMA/Dockerfile
-    container_name: gama
-    depends_on:
-      - lama
-    environment:
-      - GRPC_SERVER_PORT=50065
-      - EXPLAINER_DASHBOARD_PORT_START=6090
-      - EXPLAINER_DASHBOARD_PORT_END=6099
-      - DOCKER_COMPOSE=YES
-    volumes:
-      - datasets:/app/app-data/datasets
-      - training-gama:/app/app-data/training
-    ports:
-      - "6090-6099:6090-6099"
+#   gama:
+#     build:
+#       context: ./
+#       dockerfile: ./adapters/GAMA/Dockerfile
+#     container_name: gama
+#     depends_on:
+#       - lama
+#     environment:
+#       - GRPC_SERVER_PORT=50065
+#       - EXPLAINER_DASHBOARD_PORT_START=6090
+#       - EXPLAINER_DASHBOARD_PORT_END=6099
+#       - DOCKER_COMPOSE=YES
+#     volumes:
+#       - datasets:/app/app-data/datasets
+#       - training-gama:/app/app-data/training
+#     ports:
+#       - "6090-6099:6090-6099"
 
-  lama:
-    build:
-      context: ./
-      dockerfile: ./adapters/LAMA/Dockerfile
-    container_name: lama
-    environment:
-      - GRPC_SERVER_PORT=50066
-      - EXPLAINER_DASHBOARD_PORT_START=6100
-      - EXPLAINER_DASHBOARD_PORT_END=6109
-      - DOCKER_COMPOSE=YES
-    volumes:
-      - datasets:/app/app-data/datasets
-      - training-lama:/app/app-data/training
-    ports:
-      - "6100-6109:6100-6109"
+#   lama:
+#     build:
+#       context: ./
+#       dockerfile: ./adapters/LAMA/Dockerfile
+#     container_name: lama
+#     environment:
+#       - GRPC_SERVER_PORT=50066
+#       - EXPLAINER_DASHBOARD_PORT_START=6100
+#       - EXPLAINER_DASHBOARD_PORT_END=6109
+#       - DOCKER_COMPOSE=YES
+#     volumes:
+#       - datasets:/app/app-data/datasets
+#       - training-lama:/app/app-data/training
+#     ports:
+#       - "6100-6109:6100-6109"
 
 volumes:
   datasets: # shared volume between controller, adapters and frontend/dummy to transfer datasets

@@ -1,0 +1,64 @@
+import sys
+import json
+import dill
+
+import numpy as np
+import pandas as pd
+
+import tensorflow as tf
+from tensorflow import keras
+import autokeras as ak
+{% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression", ":text_classification", ":text_regression"] %}
+from preprocessing import dataset_preparation
+from postprocessing import post_process_result_dataframe
+{% endif %}
+{% if configuration.configuration["task"] in [":time_series_forecasting"] %}
+from preprocessing import dataset_preparation, seperate_time_series_dataframe
+from postprocessing import post_process_result_dataframe
+{% endif %}
+
+{% if configuration.configuration["task"] not in [":tabular_classification", ":tabular_regression", ":text_classification", ":text_regression", ":time_series_forecasting"] %}
+from dataset import read_image_dataset_folder
+{% endif %}
+
+
+
+
+if __name__ == '__main__':
+    filepath = sys.argv[1]
+    save_path = sys.argv[2]
+    X = None
+
+    {% if configuration.configuration["task"] in [":time_series_forecasting"] %}
+    X, y = dataset_preparation(filepath, is_prediction=False)
+    X_index_df = pd.DataFrame(X.index)        #Some AutoML manipulate the index, so we extract it before hands
+    X[y.name] = y.values
+    previous_ts, X = seperate_time_series_dataframe(X)
+    {% endif %}
+    {% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression", ":text_classification", ":text_regression"] %}
+    X, y = dataset_preparation(filepath)
+    X_index_df = pd.DataFrame(X.index)        #Some AutoML manipulate the index, so we extract it before hands
+    {% endif %}
+    {% if configuration.configuration["task"] in [":image_classification", ":image_regression"] %}
+    X, y = read_image_dataset_folder(filepath)
+    {% endif %}
+
+    try:
+        loaded_model = keras.models.load_model(sys.path[0] + '/model_keras', custom_objects=ak.CUSTOM_OBJECTS)
+    except Exception:
+        with open(sys.path[0] + '/model_keras.p', 'rb') as file:
+            loaded_model = dill.load(file)
+
+    {% if configuration.configuration["task"] in [":text_classification", ":text_regression"] %}
+    predicted_y = loaded_model.predict(np.array(X))
+    {% elif configuration.configuration["task"] == ":time_series_forecasting" %}
+    predicted_y = loaded_model.predict(tf.expand_dims(X, 1))
+    {% else %}
+    predicted_y = loaded_model.predict(X)
+    {% endif %}
+    {% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression", ":text_classification", ":text_regression", ":time_series_forecasting"] %}
+    predict_df = pd.DataFrame(data=predicted_y, columns=["predicted"])
+    post_process_result_dataframe(X_index_df, predict_df).to_csv(save_path)
+    {% else %}
+    pd.DataFrame(data=predicted_y, columns=["predicted"]).to_csv(save_path)
+    {% endif %}
