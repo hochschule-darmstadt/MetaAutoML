@@ -1,21 +1,22 @@
 ﻿@inject IStringLocalizer<Global> L
-
+@using Radzen
+@using Radzen.Blazor
 <MudCard Elevation="5">
     <MudCardHeader Style="border-bottom-style: inset; border-bottom-width: 1px;">
         <CardHeaderContent>
-            <LabelTooltip FontSize="Typo.h6" Label=@L["Details"] Text="Here you can inspect the detail output of the AutoML solution that has been used for training this ML model." Position="Placement.Bottom"></LabelTooltip>
+            <LabelTooltip FontSize="TextStyle.H6" Label=@L["Details"] Text="Here you can inspect the detail output of the AutoML solution that has been used for training this ML model." Position="Radzen.TooltipPosition.Bottom"></LabelTooltip>
         </CardHeaderContent>
-@*        <CardHeaderActions>
-            @if (Model != null)
-            {
-                <MudButton Href="@("datasets/" + Model.Model.DatasetId + "/models/" + Model.Model.ID + "/details")"
-                    Variant="Variant.Filled" 
-                    EndIcon="@Icons.Material.Filled.ReadMore" 
-                    Color="Color.Secondary"
-                    Size="Size.Small"
-                       Style="margin-top: 8px">@L["More"]</MudButton>
-            }
-        </CardHeaderActions>*@
+        @*        <CardHeaderActions>
+                @if (Model != null)
+                {
+                    <MudButton Href="@("datasets/" + Model.Model.DatasetId + "/models/" + Model.Model.ID + "/details")"
+                        Variant="Variant.Filled"
+                        EndIcon="@Icons.Material.Filled.ReadMore"
+                        Color="Color.Secondary"
+                        Size="Size.Small"
+                           Style="margin-top: 8px">@L["More"]</MudButton>
+                }
+            </CardHeaderActions>*@
     </MudCardHeader>
     <MudCardContent>
         <MudPaper Height="250px" Elevation="0">
@@ -43,16 +44,16 @@
 @code {
     [Parameter]
     public GetModelResponseDto Model
-    { 
+    {
         get
         {
             return _model;
-        } 
+        }
         set
         {
             _model = value;
             StateHasChanged();
-        } 
+        }
     }
     private GetModelResponseDto _model;
 }

@@ -76,7 +76,7 @@ else
     </EditForm>
 
     <MudButton OnClick="@(()=>apiClient.CancelChanges())">@L["Cancel"]</MudButton>
-    <MudButton OnClick="@SaveChanges" Variant="Variant.Filled" Color="Color.Primary">@L["Save"]</MudButton>
+    <MudButton OnClick="@SaveChanges" Variant="MudBlazor.Variant.Filled" Color="Color.Primary">@L["Save"]</MudButton>
     <MudButton OnClick="@(e => { isSendEmailDialogOpen = true; })">@L["Send test email"]</MudButton>
 
     <MudDialog @bind-IsVisible="@isSendEmailDialogOpen">
@@ -97,7 +97,7 @@ else
         </DialogContent>
         <DialogActions>
             <MudButton OnClick="@(e => { isSendEmailDialogOpen = false; })">@L["Cancel"]</MudButton>
-            <MudButton ButtonType="ButtonType.Submit" form="emailForm" Variant="Variant.Filled" Color="Color.Primary">@L["Send"]</MudButton>
+            <MudButton ButtonType="MudBlazor.ButtonType.Submit" form="emailForm" Variant="MudBlazor.Variant.Filled" Color="Color.Primary">@L["Send"]</MudButton>
         </DialogActions>
     </MudDialog>
 }

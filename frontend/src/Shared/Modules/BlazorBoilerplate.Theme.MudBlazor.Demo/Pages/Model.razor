@@ -7,16 +7,18 @@
 @inject IFileUploader fileUploader
 @inject NavigationManager NavManager
 @attribute [Authorize]
+@using Radzen
+@using Radzen.Blazor
 
 <TopSection>
     <MudBreadcrumbs Items="_breadcrumbs" Class="mudbreadcrumbs"></MudBreadcrumbs>
 </TopSection>
 
-<MudStack AlignItems="AlignItems.Center" Row="true" Class="mb-2" style="padding-top:50px">
+<MudStack AlignItems="MudBlazor.AlignItems.Center" Row="true" Class="mb-2" style="padding-top:50px">
     <MudIcon Size="Size.Large" Icon="@Icons.Filled.Lightbulb" />
     @if (_model != null)
     {
-        <LabelTooltip FontSize="Typo.h4" Label=@L["Model: {0}", _model.Model.GetMlModelString()] Text="An ML model is the result of ML training and condenses information inherent in the training dataset. It can be used for making predictions on new cases. On this page, you can inspect and use the trained ML model. You may use the model for predicting new cases within the OMA-ML platform without having to install anything (panel center left). Alternatively, you may download the ML model within a pipeline and include it into a custom Python application (panel center right).  There are various ways of getting additional information about the model: an overview (top panel), detailed graphical analyses using Explainable AI (panel bottom left), the configuration that lead to the model (panel bottom center), and detail output of the AutoML solution (panel bottom right)." Position="Placement.Bottom"></LabelTooltip>
+        <LabelTooltip FontSize="TextStyle.H4" Label=@L["Model: {0}", _model.Model.GetMlModelString()] Text="An ML model is the result of ML training and condenses information inherent in the training dataset. It can be used for making predictions on new cases. On this page, you can inspect and use the trained ML model. You may use the model for predicting new cases within the OMA-ML platform without having to install anything (panel center left). Alternatively, you may download the ML model within a pipeline and include it into a custom Python application (panel center right).  There are various ways of getting additional information about the model: an overview (top panel), detailed graphical analyses using Explainable AI (panel bottom left), the configuration that lead to the model (panel bottom center), and detail output of the AutoML solution (panel bottom right)." Position="Radzen.TooltipPosition.Left"></LabelTooltip>
     }
 </MudStack>
 
@@ -24,7 +26,7 @@
     <MudItem xs="12" sm="12" md="12">
         <MudCard Elevation="5">
             <MudCardHeader Style="border-bottom-style: inset; border-bottom-width: 1px;">
-                <CardHeaderContent >
+                <CardHeaderContent>
                     <MudText Typo="Typo.h6">@L["Overview"]</MudText>
                 </CardHeaderContent>
             </MudCardHeader>
@@ -34,7 +36,7 @@
                     {
                         <MudGrid>
                             <MudItem Class="d-flex align-center justify-center mud-width-full" xs="12">
-                                <MudProgressCircular Color="Color.Primary" Indeterminate="true"/>
+                                <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
                             </MudItem>
                         </MudGrid>
                     }
@@ -54,17 +56,17 @@
                                 <MudText Typo="Typo.body1" Class="text-card-content" Style=" display: flex;">@L["Training: "]<MudLink Href="@NavManager.ToAbsoluteUri("trainings/" + @_training.Training.Id).AbsoluteUri" Class="text-card-content" Style="cursor: pointer; display: flex;"><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.ModelTraining" Style="margin-right: 4px;" />@_training.Training.RuntimeProfile.StartTime.ToString("dd/MM/yyy")</MudLink></MudText>
                             </MudItem>
                             <MudItem xs="3" sm="3" md="3">
-                                <MudText Typo="Typo.body1">@L["Prediction time: {0}", String.Format("{0:0}", _model.Model.PredictionTime*1000)]</MudText>
+                                <MudText Typo="Typo.body1">@L["Prediction time: {0}", String.Format("{0:0}", _model.Model.PredictionTime * 1000)]</MudText>
                                 <MudText Typo="Typo.body1">@L["Training emissions: {0} g CO2-eq", String.Format("{0:0.00}", _model.Model.Emissions)]</MudText>
                             </MudItem>
                             <MudItem xs="3" sm="3" md="3">
                                 <MudSelect Label="@L["Metric"]" T="string" @bind-Value=SelectedMetric>
-                                        @foreach (var metric in _model.Model.Metrics)
-                                        {
-                                            <MudSelectItem Value="@metric.Name.ID">
-                                                <MudText Typo="Typo.body2">@metric.Name.Properties["skos:prefLabel"]</MudText>
-                                            </MudSelectItem>
-                                        }
+                                    @foreach (var metric in _model.Model.Metrics)
+                                    {
+                                        <MudSelectItem Value="@metric.Name.ID">
+                                            <MudText Typo="Typo.body2">@metric.Name.Properties["skos:prefLabel"]</MudText>
+                                        </MudSelectItem>
+                                    }
                                 </MudSelect>
                                 <MudText Typo="Typo.body1">
                                     @if (!String.IsNullOrEmpty(SelectedMetric))
@@ -89,19 +91,19 @@
         }
     </MudItem>
     <MudItem xs="4">
-        <DownloadMlPipeline Model="_model"/>
+        <DownloadMlPipeline Model="_model" />
     </MudItem>
     <MudItem xs="12" sm="12" md="4">
-        @if(_model != null)
+        @if (_model != null)
         {
             <ModelExplanationShort Model="_model" ExplanationPagePath="@_explanationPagePath" />
         }
     </MudItem>
     <MudItem xs="12" sm="12" md="4">
-        <ModelConfiguration Training="_training" Model="_model" Dataset="_dataset"/>
+        <ModelConfiguration Training="_training" Model="_model" Dataset="_dataset" />
     </MudItem>
     <MudItem xs="12" sm="12" md="4">
-        <ModelDetail Model="_model"/>
+        <ModelDetail Model="_model" />
     </MudItem>
 </MudGrid>
 
