@@ -21,10 +21,10 @@
                                Size="Size.Medium">Start guided tour</MudButton>
                 </MudItem>
                 <MudItem xs="6">
-                            <iframe class="embed-responsive-item" style="width:100%"
-                                    src="@($"_content/BlazorBoilerplate.Theme.MudBlazor/images/TestVideo.mp4")"
-                                    frameborder="1"
-                                    allowfullscreen></iframe>
+                    <iframe class="embed-responsive-item" style="width:100%"
+                            src="@($"_content/BlazorBoilerplate.Theme.MudBlazor/images/TestVideo.mp4")"
+                            frameborder="1"
+                            allowfullscreen></iframe>
                 </MudItem>
             </MudGrid>
         </MudCard>
@@ -40,13 +40,13 @@
                 <MudImage Style="margin-left: 8%; max-width: 1200px; height:auto;width:100%; margin-right: 8%; " Src="@($"_content/BlazorBoilerplate.Theme.MudBlazor/images/FlowChart.png")" />
                 <MudGrid>
                     <MudItem xs="6">
-                       <MudText Style="margin-left: 2rem; padding-top: 10rem; color: #5c78ef;" Typo="Typo.h6">Dataset upload</MudText>
+                        <MudText Style="margin-left: 2rem; padding-top: 10rem; color: #5c78ef;" Typo="Typo.h6">Dataset upload</MudText>
                         <MudText Style="margin-left:2rem;margin-top:1rem;" Typo="Typo.body2">
                             Click on UPLOAD to upload a new dataset to OMA-ML from your disk or from the internet. You can upload tabular data, text, images or time series. If you have selected a dataset for the upload you can change the filename in the textfield. By default, the previous filename is used.
                         </MudText>
                     </MudItem>
                     <MudItem xs="6">
-                        <img style=" width: clamp(50px, 40rem, 70rem);margin:3rem;" src="@($"_content/BlazorBoilerplate.Theme.MudBlazor/images/DatasetUpload.gif")" />
+                        <img style=" width: clamp(50px, 40rem, 70rem);margin:3rem;" src="@($"_content/BlazorBoilerplate.Theme.MudBlazor/images/UploadDataset.gif")" />
                     </MudItem>
                 </MudGrid>
                 <MudGrid>
@@ -64,34 +64,33 @@
                     <MudItem xs="6">
                         <MudText Style="margin-left: 2rem; padding-top: 10rem; color: #817fc3;" Typo="Typo.h6">Model selection</MudText>
                         <MudText Style="margin-left:2rem;margin-top:1rem;" Typo="Typo.body2">
-                            An ML model is the result of ML training and condenses information inherent in the training dataset. It can be used for making predictions on new cases. In this step, a machine learning task must first be selected.
-                            Initially, all ML libraries that are supported for the selected ML task are selected. But you can also select the ML libraries for which ML models shall be generated. The AutoML solutions generate ML models for certain ML libraries.
+                            A ML model is a computational algorithm that learns patterns and relationships within the training dataset in order to make predictions. During the Model selection process the build-in AutoML solutions will use different approaches to evaluate different ML models to determine which ML model is the most suitable for a given training dataset.
                         </MudText>
                     </MudItem>
                     <MudItem xs="6">
-                        <img style=" width: clamp(50px, 40rem, 70rem);margin:3rem;" src="@($"_content/BlazorBoilerplate.Theme.MudBlazor/images/TestGIF.gif")" />
+                        <img style=" width: clamp(50px, 40rem, 70rem);margin:3rem;" src="@($"_content/BlazorBoilerplate.Theme.MudBlazor/images/ModelSelection.gif")" />
                     </MudItem>
                 </MudGrid>
                 <MudGrid>
                     <MudItem xs="6">
                         <MudText Style="margin-left: 2rem; padding-top: 10rem; color: #9b84a4" Typo="Typo.h6">Training</MudText>
                         <MudText Style="margin-left:2rem;margin-top:1rem;" Typo="Typo.body2">
-                            During training, various AutoML solutions are executed in parallel. This is indicated by a spinning wheel. Whenever an AutoML solution has terminated, the result is displayed. The top performing models are shown first in the leaderboard.
+                            In this step, a machine learning task must first be selected. Initially, all ML libraries that are supported for the selected ML task are selected. But you can also select the ML libraries for which ML models shall be generated. The AutoML solutions generate ML models for certain ML libraries. During training, various AutoML solutions are executed in parallel.
                         </MudText>
                     </MudItem>
                     <MudItem xs="6">
-                        <img style=" width: clamp(50px, 40rem, 70rem);margin:3rem;" src="@($"_content/BlazorBoilerplate.Theme.MudBlazor/images/TestGIF.gif")" />
+                        <img style=" width: clamp(50px, 40rem, 70rem);margin:3rem;" src="@($"_content/BlazorBoilerplate.Theme.MudBlazor/images/Training.gif")" />
                     </MudItem>
                 </MudGrid>
                 <MudGrid>
                     <MudItem xs="6">
                         <MudText Style="margin-left: 2rem; padding-top: 10rem; color: #b78a85;" Typo="Typo.h6">Deployment</MudText>
                         <MudText Style="margin-left:2rem;margin-top:1rem;" Typo="Typo.body2">
-                            Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
+                            The settings made in the training configuration are now applied and the training is started.
                         </MudText>
                     </MudItem>
                     <MudItem xs="6">
-                        <img style=" width: clamp(50px, 40rem, 70rem);margin:3rem;" src="@($"_content/BlazorBoilerplate.Theme.MudBlazor/images/TestGIF.gif")" />
+                        <img style=" width: clamp(50px, 40rem, 70rem);margin:3rem;" src="@($"_content/BlazorBoilerplate.Theme.MudBlazor/images/Deployment.gif")" />
                     </MudItem>
                 </MudGrid>
                 <MudGrid>
@@ -102,7 +101,7 @@
                         </MudText>
                     </MudItem>
                     <MudItem xs="6">
-                        <img style=" width: clamp(50px, 40rem, 70rem);margin:3rem;" src="@($"_content/BlazorBoilerplate.Theme.MudBlazor/images/TestGIF.gif")" />
+                        <img style=" width: clamp(50px, 40rem, 70rem);margin:3rem;" src="@($"_content/BlazorBoilerplate.Theme.MudBlazor/images/Prediction.gif")" />
                     </MudItem>
                 </MudGrid>
             </MudCardContent>
