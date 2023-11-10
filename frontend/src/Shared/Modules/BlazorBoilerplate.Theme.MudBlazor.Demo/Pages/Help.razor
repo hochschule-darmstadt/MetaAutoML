@@ -1,7 +1,6 @@
 @page "/help"
 @inject IStringLocalizer<Global> L
 @attribute [Authorize]
-
 <TopSection>
     <MudBreadcrumbs Items="_breadcrumbs" Class="mudbreadcrumbs"></MudBreadcrumbs>
 </TopSection>
@@ -82,7 +81,7 @@
                         <img style=" width: 90%; margin: 3rem; padding-top: 5rem; padding-right: 2rem;" src="@($"_content/BlazorBoilerplate.Theme.MudBlazor/images/Training.gif")" />
                     </MudItem>
                 </MudGrid>
-                <MudGrid>
+                <MudGrid data-form-secondStep>
                     <MudItem xs="6">
                         <MudText Style="margin-left: 2rem; padding-top: 10rem; color: #b78a85;" Typo="Typo.h6">Deployment</MudText>
                         <MudText Style="margin-left:2rem;margin-top:1rem;" Typo="Typo.body2">
@@ -93,7 +92,7 @@
                         <img style=" width: 90%; margin: 3rem; padding-top: 5rem; padding-right: 2rem;" src="@($"_content/BlazorBoilerplate.Theme.MudBlazor/images/Deployment.gif")" />
                     </MudItem>
                 </MudGrid>
-                <MudGrid>
+                <MudGrid data-form-firstStep>
                     <MudItem xs="6">
                         <MudText Style="margin-left: 2rem; padding-top: 10rem; color: #d59167;" Typo="Typo.h6">Prediction</MudText>
                         <MudText Style="margin-left:2rem;margin-top:1rem;" Typo="Typo.body2">
@@ -109,6 +108,10 @@
     </MudItem>
 </MudGrid>
 
+<UserTour></UserTour>
+<MudButton OnClick="@StartTour">StartTour</MudButton>
+
+
 
 @code {
 
@@ -121,6 +124,15 @@
         StateHasChanged();
 
     }
+
+    [Inject]
+    private GTour.Abstractions.IGTourService GTourService { get; set; }
+
+    private async Task StartTour()
+    {
+        await GTourService.StartTour("FormGuidedTour");
+    }
+
 
 }
 

@@ -1,0 +1,45 @@
+@using GTour.Components
+
+<GuidedTour TourId="FormGuidedTour" OverlayEnabled="true" CloseOnOverlayClick="true" OverlayClass="overlay-class">
+    <GuidedTourStep Title="My First Step" StepName="firstStep" TourStepSequence="1"
+                    ElementSelector="[data-form-firstStep]">
+        <span>This is my first step</span>
+    </GuidedTourStep>
+    <GuidedTourStep Title="My second Step" StepName="secondStep" TourStepSequence="2"
+                    ElementSelector="[data-form-secondStep]">
+        <span>This is my 2. step</span>
+    </GuidedTourStep>
+</GuidedTour>
+<style>
+    .element-highlight {
+        border: solid 2px yellow;
+        z-index: 999;
+        position: relative;
+        background-color: white;
+    }
+    .guided-tour-overlay {
+        position: fixed;
+        width: 100vw;
+        height: 100vh;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 2;
+    }
+    .guided-tour-wrapper {
+        z-index: 2;
+        background: white;
+        border-radius: 7%;
+        padding: 1rem;
+    }
+</style>
+
+@code {
+
+
+
+}
+
+
