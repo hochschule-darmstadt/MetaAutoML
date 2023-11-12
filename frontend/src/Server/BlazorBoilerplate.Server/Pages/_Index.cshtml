@@ -32,6 +32,13 @@
     <base href="~/" />
     <link href="manifest.json" rel="manifest" />
     <link href="_content/BlazorBoilerplate.Theme.Material/BlazorBoilerplate.Theme.Material.bundle.scp.css" rel="stylesheet">
+
+    @* Dropbox implementation *@
+    <script type="text/javascript"
+                src="https://www.dropbox.com/static/api/2/dropins.js"
+                id="dropboxjs"
+                data-app-key="pgsnabwt3rtud7u">
+    </script>
 </head>
 <body>
     @{
@@ -104,25 +111,45 @@
         async function downloadFileFromStream(fileName, contentStreamReference) {
           const arrayBuffer = await contentStreamReference.arrayBuffer();
           const blob = new Blob([arrayBuffer]);
- 
+
           const url = URL.createObjectURL(blob);
- 
+
           triggerFileDownload(fileName, url);
- 
+
           URL.revokeObjectURL(url);
         }
- 
+
         function triggerFileDownload(fileName, url) {
           const anchorElement = document.createElement("a");
           anchorElement.href = url;
- 
+
           if (fileName) {
             anchorElement.download = fileName;
           }
- 
+
           anchorElement.click();
           anchorElement.remove();
         }
+    </script>
+
+    @* Dropbox implementation *@
+    <h1>An Example of a Minimal Integration of Dropbox's Chooser</h1>
+    <div id="dropboxContainer"></div>
+    <script>
+        options = {
+            success: function(files){
+                //send_files(files);
+                alert("Here's the file " + files[0].name + ": " + files[0].link);
+        },
+        cancel: function(){
+        },
+        linkType: "direct",
+        multiselect: false,
+        //extensions:['.pdf'],
+    };
+    var button = Dropbox.createChooseButton(options);
+    document.getElementById("dropboxContainer").appendChild(button);
+
     </script>
 </body>
 </html>
