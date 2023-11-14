@@ -176,7 +176,7 @@ class DataSetAnalysisManager(Thread):
         so it can be later displayed in the frontend.
 
         Returns:
-            ProfileReport: A Dataframe with additional parameters
+            Json: the ydataprofiling_report.json
         """
         try:
             from ydata_profiling import ProfileReport
