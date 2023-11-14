@@ -60,7 +60,7 @@
                                 <MudText Typo="Typo.body1">@L["Training emissions: {0} g CO2-eq", String.Format("{0:0.00}", _model.Model.Emissions)]</MudText>
                             </MudItem>
                             <MudItem xs="3" sm="3" md="3">
-                                <MudSelect Label="@L["Metric"]" T="string" @bind-Value=SelectedMetric>
+                                <MudSelect Disabled=@IsDisabled Label="@L["Metric"]" T="string" @bind-Value=SelectedMetric>
                                     @foreach (var metric in _model.Model.Metrics)
                                     {
                                         <MudSelectItem Value="@metric.Name.ID">
@@ -126,6 +126,7 @@
     private GetTrainingResponseDto _training;
     private GetDatasetResponseDto _dataset;
     private List<BreadcrumbItem> _breadcrumbs = new List<BreadcrumbItem>();
+	protected bool IsDisabled { get; set; }
 
     protected async override void OnInitialized()
     {
@@ -156,6 +157,7 @@
     }
     private async Task LoadModel()
     {
+		IsDisabled = true;
         try
         {
             ApiResponseDto apiResponse;
@@ -176,6 +178,7 @@
                 if (_model.Model.Metrics.Count > 0 && SelectedMetric == "")
                 {
                     SelectedMetric = _model.Model.Metrics[0].Name.ID;
+					IsDisabled = false;
                 }
                 //Get Training infos
                 apiResponse = await apiClient.GetTraining(new GetTrainingRequestDto() { TrainingId = _model.Model.TrainingId });

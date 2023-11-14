@@ -1,35 +1,13 @@
-using Azure;
-using BlazorBoilerplate.Constants;
 using BlazorBoilerplate.Infrastructure.Server;
 using BlazorBoilerplate.Infrastructure.Server.Models;
 using BlazorBoilerplate.Shared.Dto.Dataset;
 using BlazorBoilerplate.Shared.Dto.Ontology;
 using BlazorBoilerplate.Storage;
-using Grpc.Core;
-using Grpc.Net.Client;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.Analysis;
-using Microsoft.Extensions.Logging;
-using MudBlazor.Charts;
 using Newtonsoft.Json;
-using Serilog.Core;
-using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.IO;
-using System.Linq;
 using System.Net;
-using System.Net.Http;
-using System.Text;
-using System.Threading.Tasks;
 using UtfUnknown;
 using static Microsoft.AspNetCore.Http.StatusCodes;
 using System.IO.Compression;
-using System.Runtime.CompilerServices;
-using Karambolo.Common;
-using System.Diagnostics;
-using static MudBlazor.CategoryTypes;
 
 namespace BlazorBoilerplate.Server.Managers
 {
