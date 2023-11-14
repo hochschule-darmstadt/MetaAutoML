@@ -25,7 +25,7 @@ class DataSetAnalysisManager(Thread):
     """
     Static DataSetAnalysisManager class to analyze the dataset
     """
-    def __init__(self, dataset_id: str, user_id: str, data_storage: DataStorage, dataset_analysis_lock: ThreadLock, basic_analysis=True, advanced_analysis=True):
+    def __init__(self, dataset_id: str, user_id: str, data_storage: DataStorage, dataset_analysis_lock: ThreadLock, basic_analysis=True, advanced_analysis=True, ydataprofiling_analysis=True):
         super(DataSetAnalysisManager, self).__init__()
         # Setup config
         self.__dataset_id = dataset_id
@@ -43,6 +43,7 @@ class DataSetAnalysisManager(Thread):
         self.__dataset_analysis_lock = dataset_analysis_lock
         self.__basic_analysis = basic_analysis
         self.__advanced_analysis = advanced_analysis
+        self.__ydataprofiling_analysis = ydataprofiling_analysis
         # Load dataset
         if self.__dataset["type"] == ":time_series_longitudinal":
             self.__dataset_df = load_from_tsfile_to_dataframe(self.__dataset["path"], return_separate_X_and_y=False)
@@ -76,6 +77,12 @@ class DataSetAnalysisManager(Thread):
         os.makedirs(self.plot_filepath, exist_ok=True)
         self.__plots = []
 
+        # Create YData filepath for ydata_profiling
+        self.ydata_filepath = os.path.join(os.path.dirname(self.__dataset['path']), "YData")
+        os.makedirs(self.ydata_filepath, exist_ok=True)
+        self.__report = None
+
+
     def run(self):
         analysis = {}
         with self.__dataset_analysis_lock.lock():
@@ -87,6 +94,10 @@ class DataSetAnalysisManager(Thread):
             #Only perform analysis when dataset has less than 20 columns
             if self.__advanced_analysis and self.__dataset_df.shape[1] < 20:
                 analysis.update({ "plots": self.advanced_analysis()})
+            #Only perform YDataProfiling-Report when dataset has less than 80 columns
+            if self.__ydataprofiling_analysis and self.__dataset_df.shape[1] < 80:
+                analysis.update({ "Report": self.ydataprofiling_analysis()})
+
 
             found, dataset = self.__data_storage.get_dataset(self.__user_id, self.__dataset_id)
             analysis_details = dataset["analysis"]
@@ -147,6 +158,39 @@ class DataSetAnalysisManager(Thread):
 
         print("[DatasetAnalysisManager]: Basic dataset analysis finished")
         return analysis
+
+    def ydataprofiling_analysis(self):
+        """
+        Generates a YData-Profiling report for the provided dataset. This report offers a comprehensive overview
+        of the data through detailed statistical analyses and visualizations of each feature in the dataset.
+        It is useful for gaining insights into the data structure, missing values, data types, and potential
+        correlations between various features.
+
+        The report includes:
+            - Summary tables with key statistics for each feature.
+            - Histograms and boxplots to visualize distributions.
+            - Heatmaps for correlations between features.
+            - Detailed information on missing values and their distribution in the dataset.
+
+        The generated report is saved as a json file, and its path is stored in MongoDB under analysis > ydata_profiling_report,
+        so it can be later displayed in the frontend.
+
+        Returns:
+            ProfileReport: A Dataframe with additional parameters
+        """
+        try:
+            from ydata_profiling import ProfileReport
+            print("[DatasetAnalysisManager]: Starting ydata-profiling dataset analysis")
+            report_filename = "YData_Profile_Report.json"
+            report_filepath = os.path.join(self.ydata_filepath, report_filename)
+            profile = ProfileReport(self.__dataset_df, title=self.__dataset["path"], html={'style': {'full_width': True}})
+            profile.to_file(report_filepath, silent=True)
+            print("[DatasetAnalysisManager]: Dataset analysis finished, saved the YData-ProfileReport.")
+            self.__report = profile.to_json()
+            return self.__report
+        except:
+            # error case tbd?
+            return{}
 
     def advanced_analysis(self):
         """
