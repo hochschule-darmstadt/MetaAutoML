@@ -10,7 +10,7 @@ isodate==0.6.1
 joblib==1.2.0
 kiwisolver==1.4.4
 llvmlite==0.39.1
-matplotlib==3.4.2
+matplotlib==3.5.0
 mongomock==4.1.2
 multidict==6.0.2
 nest-asyncio==1.5.6
@@ -41,3 +41,4 @@ tqdm==4.64.1
 wrapt==1.14.1
 feature-engine==1.6.0
 kubernetes
+ydata_profiling==4.6.1
