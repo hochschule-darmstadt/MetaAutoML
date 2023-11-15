@@ -58,7 +58,7 @@
                             <MudTh></MudTh>
                             <MudTh></MudTh>
                             <MudTh>
-                                <MudSelect T="string" @bind-Value=SelectedMetric>
+                                <MudSelect Disabled=@IsDisabled T="string" Label="@L["Metric"]" @bind-Value=SelectedMetric>
                                     @foreach (var metric in _metrics)
                                     {
                                         <MudSelectItem Value="@metric.Name.ID">
@@ -136,75 +136,78 @@
 </MudCard>
 
 @code {
-    [Parameter]
-    public GetTrainingResponseDto Training
-    {
-        get
-        {
-            return _training;
-        }
-        set
-        {
-            _training = value;
-            if (_training != null)
-            {
-                UpdateMetricsList();
-                RefreshTraining(null, null);
-                _timer = new Timer()
+	[Parameter]
+	public GetTrainingResponseDto Training
+	{
+		get
+		{
+			return _training;
+		}
+		set
+		{
+			_training = value;
+			if (_training != null)
+			{
+				UpdateMetricsList();
+				RefreshTraining(null, null);
+				_timer = new Timer()
                 {
                     AutoReset = true,
                     Enabled = true,
                     Interval = 2000
                 };
-                _timer.Elapsed += RefreshTraining;
-                StateHasChanged();
-            }
-        }
-    }
-    private List<Metric> _metrics = new List<Metric>();
-    private string SelectedMetric { get; set; } = "";
-    private GetTrainingResponseDto _training;
-    private Timer _timer;
-    private string searchString = "";
+				_timer.Elapsed += RefreshTraining;
+				StateHasChanged();
+			}
+		}
+	}
+	private List<Metric> _metrics = new List<Metric>();
+	private string SelectedMetric { get; set; } = "";
+	private GetTrainingResponseDto _training;
+	private Timer _timer;
+	private string searchString = "";
+	protected bool IsDisabled { get; set; }
 
-    private bool FilterFunc(ModelDto element)
-    {
-        if (string.IsNullOrWhiteSpace(searchString))
-            return true;
-        if (element.AutoMlSolution.Properties["skos:prefLabel"].Contains(searchString, StringComparison.OrdinalIgnoreCase))
-            return true;
-        if (element.Status.Contains(searchString, StringComparison.OrdinalIgnoreCase))
-            return true;
-        if (element.GetMlLibraryString().Contains(searchString, StringComparison.OrdinalIgnoreCase))
-            return true;
-        if (element.GetMlModelString().Contains(searchString, StringComparison.OrdinalIgnoreCase))
-            return true;
-        return false;
-    }
-    public void Dispose()
-    {
-        DisposeTimer();
-    }
+	private bool FilterFunc(ModelDto element)
+	{
+		if (string.IsNullOrWhiteSpace(searchString))
+			return true;
+		if (element.AutoMlSolution.Properties["skos:prefLabel"].Contains(searchString, StringComparison.OrdinalIgnoreCase))
+			return true;
+		if (element.Status.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+			return true;
+		if (element.GetMlLibraryString().Contains(searchString, StringComparison.OrdinalIgnoreCase))
+			return true;
+		if (element.GetMlModelString().Contains(searchString, StringComparison.OrdinalIgnoreCase))
+			return true;
+		return false;
+	}
+	public void Dispose()
+	{
+		DisposeTimer();
+	}
 
-    private void UpdateMetricsList()
-    {
-        foreach (var model in _training.Training.models)
-        {
-            foreach (var metric in model.Metrics)
-            {
-                if (_metrics.Where(x => x.Name.Properties["skos:prefLabel"] == metric.Name.Properties["skos:prefLabel"]).Count() == 0)
-                {
-                    _metrics.Add(metric);
-                }
-            }
-        }
-        _metrics = _metrics.OrderBy(x => x.Name.Properties["skos:prefLabel"]).ToList();
-        if (_metrics.Count > 0 && SelectedMetric == "")
-        {
-            SelectedMetric = _metrics[0].Name.ID;
-            StateHasChanged();
-        }
-    }
+	private void UpdateMetricsList()
+	{
+		IsDisabled = true;
+		foreach (var model in _training.Training.models)
+		{
+			foreach (var metric in model.Metrics)
+			{
+				if (_metrics.Where(x => x.Name.Properties["skos:prefLabel"] == metric.Name.Properties["skos:prefLabel"]).Count() == 0)
+				{
+					_metrics.Add(metric);
+				}
+			}
+		}
+		_metrics = _metrics.OrderBy(x => x.Name.Properties["skos:prefLabel"]).ToList();
+		if (_metrics.Count > 0 && SelectedMetric == "")
+		{
+			SelectedMetric = _metrics[0].Name.ID;
+			StateHasChanged();
+			IsDisabled = false;
+		}
+	}
 
     SemaphoreSlim timerSemaphore = new SemaphoreSlim(1);
     private async void RefreshTraining(object sender, ElapsedEventArgs e)
