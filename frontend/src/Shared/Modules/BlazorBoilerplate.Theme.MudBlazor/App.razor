@@ -1,4 +1,4 @@
-﻿@using Microsoft.AspNetCore.Components.Routing
+@using Microsoft.AspNetCore.Components.Routing
 @using Microsoft.AspNetCore.Components.WebAssembly.Services
 @inject LazyAssemblyLoader assemblyLoader
 @inject NavigationManager navigationManager
@@ -48,7 +48,7 @@
 {
     MudTheme mudTheme = new MudTheme()
     {
-        Palette = new Palette()
+        Palette = new PaletteLight()
         {
             //Primary = "#5D2E8F",
             Primary = "#5474FC",
@@ -59,8 +59,6 @@
             //Primary = Colors.Orange.Default,
             //Secondary = Colors.BlueGrey.Default,
             //AppbarBackground = Colors.BlueGrey.Default
-
-         
         }
     };
 

@@ -68,14 +68,14 @@
                                 <MudTd>
                                     @if (context.Status == "completed")
                                     {
-                                        <MudButton StartIcon="@Icons.Filled.CloudDownload" OnClick="@(() => DownlaodPrediction(context))" Variant="MudBlazor.Variant.Filled" Color="Color.Secondary" Size="Size.Small">@L["Download predictions"]</MudButton>
+                                        <MudButton StartIcon="@Icons.Material.Filled.CloudDownload" OnClick="@(() => DownlaodPrediction(context))" Variant="MudBlazor.Variant.Filled" Color="Color.Secondary" Size="Size.Small">@L["Download predictions"]</MudButton>
                                         <MudButton StartIcon="@Icons.Material.Filled.ViewList" OnClick="@(() => OpenPredictionResults(context))" Variant="MudBlazor.Variant.Filled" Color="Color.Secondary" Size="Size.Small">
                                             @L["View predictions"]
                                         </MudButton>
                                     }
                                     else
                                     {
-                                        <MudButton StartIcon="@Icons.Filled.CloudDownload" Variant="MudBlazor.Variant.Filled" Color="Color.Secondary" Size="Size.Small" Disabled="true">@L["Download predictions"]</MudButton>
+                                        <MudButton StartIcon="@Icons.Material.Filled.CloudDownload" Variant="MudBlazor.Variant.Filled" Color="Color.Secondary" Size="Size.Small" Disabled="true">@L["Download predictions"]</MudButton>
                                     }
                                 </MudTd>
                             </RowTemplate>
