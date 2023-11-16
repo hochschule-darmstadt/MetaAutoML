@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Grpc.Net.Client;
 using BlazorBoilerplate.Shared.Dto;
@@ -167,11 +168,11 @@ namespace BlazorBoilerplate.Theme.Material.Services
                         using (var fs = new FileStream("localfile" + fileType, FileMode.OpenOrCreate))
                         {
                             s.Result.CopyTo(fs);
-                            
                         }
                     }
                 }
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 _notifier.Show(_l["A file could not be downloaded from this URL!"], ViewNotifierType.Error, _l["Operation Failed"]);
                 _notifier.Show(ex.Message, ViewNotifierType.Error, _l["Operation Failed"]);
@@ -282,6 +283,81 @@ namespace BlazorBoilerplate.Theme.Material.Services
             {
                 File.Delete("localfile" + fileType);
             }
+        }
+        public string GetDownloadUrl(string url)
+        {
+            if (Regex.IsMatch(url, @"(?:drive\.google\.com)"))
+            {
+                return GetGoogleDriveDownloadLink(url);
+            }
+            else if (Regex.IsMatch(url, @"(?:\.dropbox\.com)"))
+            {
+                return GetDropboxDownloadLink(url);
+            }
+            else if (Regex.IsMatch(url, @"(?:1drv\.ms|i\.s!)"))
+            {
+                return GetOnedriveDownloadLink(url);
+            }
+            else if (Regex.IsMatch(url, @"(?:sharepoint\.com)"))
+            {
+                return GetSharepointDownloadLink(url);
+            }
+            else if (Regex.IsMatch(url, @"(?:cloud\.h-da\.de)"))
+            {
+                return GetNextcloudDownloadLink(url);
+            }
+            return url;
+        }
+        private static string GetGoogleDriveDownloadLink(string googleDriveUrl)
+        {
+            var match = Regex.Match(googleDriveUrl, @"/d/([a-zA-Z0-9_-]+)");
+            if (match.Success && match.Groups.Count > 1)
+            {
+                string fileId = match.Groups[1].Value;
+                googleDriveUrl = $"https://drive.google.com/uc?id={fileId}&export=download";
+                return googleDriveUrl;
+            }
+            return googleDriveUrl;
+            //throw new InvalidOperationException("Unable to extract Google Drive file ID from the URL");
+        }
+
+        private static string GetDropboxDownloadLink(string dropboxUrl)
+        {
+            if (dropboxUrl.EndsWith("&dl=0"))
+            {
+                return dropboxUrl.Replace("&dl=0", "&dl=1");
+            }
+            if (!dropboxUrl.EndsWith("&dl=1"))
+            {
+                return dropboxUrl + "&dl=1";
+            }
+            return dropboxUrl;
+        }
+
+        private static string GetOnedriveDownloadLink(string onedriveUrl)
+        {
+            string base64Value = System.Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(onedriveUrl));
+            string encodedUrl = base64Value.TrimEnd('=').Replace('/', '_').Replace('+', '-');
+            onedriveUrl = $"https://api.onedrive.com/v1.0/shares/u!{encodedUrl}/root/content";
+            return onedriveUrl;
+        }
+
+        private static string GetSharepointDownloadLink(string sharepointUrl)
+        {
+            if (sharepointUrl.Contains("&download=1"))
+            {
+                return sharepointUrl;
+            }
+            return sharepointUrl + "&download=1";
+        }
+
+        private static string GetNextcloudDownloadLink(string nextcloudUrl)
+        {
+            if (nextcloudUrl.EndsWith("/download"))
+            {
+                return nextcloudUrl;
+            }
+            return nextcloudUrl + "/download";
         }
     }
 }

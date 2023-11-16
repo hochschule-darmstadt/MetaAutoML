@@ -9,6 +9,8 @@
 @using Radzen
 @using BlazorBoilerplate.Shared.Models.Account
 @using Microsoft.AspNetCore.Components
+@using Microsoft.JSInterop
+@inject IJSRuntime JSRuntime
 
 @if (fileUploader.IsUploading == true)
 {
@@ -54,7 +56,6 @@
                                     <InputFile id="fileInput" OnChange="@FilesReady" hidden accept="@AcceptedFileType" />
                                     <MudButton HtmlTag="label"
                                                Variant="MudBlazor.Variant.Outlined"
-
                                                StartIcon="@Icons.Material.Filled.Upload"
                                                for="fileInput"
                                                Class="mt-1"
@@ -66,7 +67,6 @@
                                     <MudTextField Style=" font-weight: bold; font-size: 12pt;" Variant="MudBlazor.Variant.Outlined" TextChanged="setURLUploadTrue" Disabled="@IsURLDisabled" @bind-Value="@Url" Label="@L["ENTER URL"]" ></MudTextField>
                                 </MudStack>
                                 <MudTextField @bind-Value="@fileUploader.UploadDatasetRequest.DatasetName" Disabled="@(_uploadReady)" Label="@L["Dataset Name"]" Class="mt-1"></MudTextField>
-
                             @if (_isLoaderClosed == false)
                             {
                                 <MudProgressLinear Color="Color.Secondary" Indeterminate="true" />
@@ -424,7 +424,9 @@
 
             if (!_fileUpload)
             {
-                fileUploader.UploadDatasetFromURL(Url, AcceptedFileType);
+                string _downloadUrl = fileUploader.GetDownloadUrl(Url);
+                await JSRuntime.InvokeVoidAsync("console.log", _downloadUrl);
+                fileUploader.UploadDatasetFromURL(_downloadUrl, AcceptedFileType);
                 Url = "";
             }
             else
