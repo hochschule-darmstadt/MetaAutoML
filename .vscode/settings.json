@@ -1,0 +1,7 @@
+{
+    "python.analysis.extraPaths": [
+        "./controller/utils",
+        "./controller/managers/data",
+        "./controller/persistence"
+    ]
+}
