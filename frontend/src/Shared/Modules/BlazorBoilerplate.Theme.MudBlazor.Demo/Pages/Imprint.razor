@@ -1,10 +1,10 @@
-﻿@page "/imprint"
+@page "/imprint"
 @inject IStringLocalizer<Global> L
 @using System
 @inject IApiClient apiClient
 @inject IViewNotifier viewNotifier
 @inject NavigationManager NavManager
-@attribute [Authorize]
+@attribute [AllowAnonymous]
 
 <h1>Impressum (legal notice/imprint, in German)</h1>
 

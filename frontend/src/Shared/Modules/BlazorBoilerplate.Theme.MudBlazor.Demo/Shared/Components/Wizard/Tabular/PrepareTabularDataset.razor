@@ -4,11 +4,7 @@
 @inject IViewNotifier viewNotifier
 @using Microsoft.Data.Analysis
 
-@if (_datasetFrame == null)
-{
-    
-}
-else
+@if (_datasetFrame != null)
 {
     <MudStack>
         <MudTimeline TimelineOrientation="@TimelineOrientation.Horizontal" TimelinePosition="@TimelinePosition.Bottom">
@@ -19,7 +15,6 @@ else
                 <MudText Align="Align.Center" Typo="Typo.body2">@L["Configuration"]</MudText>
             </MudTimelineItem>
         </MudTimeline>
-
         <MudTable Items="@_datasetFrame.Rows" style="width:stretch" class="mat-elevation-z5" FixedHeader="true" CustomHeader="true">
             <HeaderContent>
                 <MudTHeadRow>
@@ -92,29 +87,14 @@ else
                 <MudTablePager HorizontalAlignment="HorizontalAlignment.Left"/>
             </PagerContent>
         </MudTable>
-
     </MudStack>     
-    
 }
 
 @code {
     private GetDatasetResponseDto _dataset;
-    [Parameter]
-    public GetDatasetResponseDto Dataset
-    {
-        get
-        {
-            return _dataset;
-        }
-        set
-        {
-            _dataset = value;
-        }
-    }
-    [Parameter]
-    public CreateTrainingRequestDto StartAutoMlRequest { get; set; }
-    [Parameter]
-    public EventCallback<CreateTrainingRequestDto> StartAutoMlRequestChanged { get; set; }
+	[Parameter] public GetDatasetResponseDto Dataset { get; set; }
+    [Parameter] public CreateTrainingRequestDto StartAutoMlRequest { get; set; }
+    [Parameter] public EventCallback<CreateTrainingRequestDto> StartAutoMlRequestChanged { get; set; }
     private bool isPreviewRequestRunning = false;
     private DataFrame _datasetFrame;
     private GetDatasetPreviewResponseDto _datasetPreview;

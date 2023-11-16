@@ -715,10 +715,9 @@
                         intersectedParam.SelectedValues = intersectedParam.ParameterValues.Where(p => selectedValueList.Where(s => s.ValueIri == p.ValueIri).Any()).ToList();
                     }
                 }
-                catch (Exception e)
+                catch (Exception ex)
                 {
-
-                    throw;
+                    throw ex;
                 }
             }
         }
