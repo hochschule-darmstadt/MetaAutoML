@@ -9,7 +9,7 @@
 <MudButton Size="Size.Small" OnClick="@OnCookiePreferenceClick">Cookie Preferences</MudButton>
 @if (userViewModel == null)
 {
-	<a style="margin-left:8px" href="/imprint">Imprint</a>
+	<MudButton Size="Size.Small" Href="/imprint">Imprint</MudButton>
 }
 
 @code {
