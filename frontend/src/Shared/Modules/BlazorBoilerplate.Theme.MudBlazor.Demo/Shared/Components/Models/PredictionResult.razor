@@ -1,3 +1,7 @@
+@inject IApiClient apiClient
+@inject IViewNotifier viewNotifier
+@inject IJSRuntime JS
+@inject IStringLocalizer<Global> L
 <MudDialog>
     <DialogContent>
         <MudPaper>
@@ -15,13 +19,15 @@
                         <MudTd>@column</MudTd>
                     }
                 </RowTemplate>
-                <PagerContent>
-                    <MudTablePager />
-                </PagerContent>
             </MudTable>
         </MudPaper>
     </DialogContent>
     <DialogActions>
+        @if(TableRowCount > 20)
+        {
+            <MudText>@L["{0} more entries available", (TableRowCount - 20)]</MudText>
+        }
+        <MudButton StartIcon="@Icons.Filled.CloudDownload" OnClick="@(DownlaodPrediction)" Variant="MudBlazor.Variant.Filled" Color="Color.Secondary" Size="Size.Small">@L["Download"]</MudButton>
         <MudButton Variant="Variant.Filled" Color="Color.Secondary" Size="Size.Small" OnClick="Submit">Close</MudButton>
     </DialogActions>
 </MudDialog>
@@ -29,7 +35,35 @@
     [CascadingParameter] MudDialogInstance MudDialog { get; set; }
     [Parameter] public string TableHeader { get; set; }
     [Parameter] public string[] TableContent { get; set; }
+    [Parameter] public long TableRowCount { get; set; }
+    [Parameter] public string PredictionId { get; set; }
 
     void Submit() => MudDialog.Close(DialogResult.Ok(true));
+
+    async void DownlaodPrediction()
+    {
+        try
+        {
+            ApiResponseDto apiResponse = await apiClient.DownloadPrediction(new DownloadPredictionRequestDto() { PredictionId = PredictionId });
+            if (apiResponse.IsSuccessStatusCode)
+            {
+                DownloadPredictionResponseDto response = Newtonsoft.Json.JsonConvert.DeserializeObject<DownloadPredictionResponseDto>(apiResponse.Result.ToString());
+
+                var stream = new MemoryStream(response.Content);
+                using var streamRef = new DotNetStreamReference(stream: stream);
+                await JS.InvokeVoidAsync("downloadFileFromStream", "predictions.csv", streamRef);
+                StateHasChanged();
+                Submit();
+            }
+            else
+            {
+                viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
+            }
+        }
+        catch (Exception ex)
+        {
+            viewNotifier.Show(ex.GetBaseException().Message, ViewNotifierType.Error, L["Operation Failed"]);
+        }
+    }
 
 }
