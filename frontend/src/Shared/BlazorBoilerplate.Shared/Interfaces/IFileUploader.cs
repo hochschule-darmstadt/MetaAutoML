@@ -14,6 +14,7 @@ namespace BlazorBoilerplate.Shared.Interfaces
     {
         Task UploadDatasetFromLocal();
         Task UploadDatasetFromURL(string url, string fileType);
+        string GetDownloadUrl(string url);
         UploadDatasetRequestDto UploadDatasetRequest { get; set; }
         UploadPredictionRequestDto UploadPredictionRequest { get; set; }
         IBrowserFile UploadFileContent { get; set; }
