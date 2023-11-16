@@ -1,14 +1,38 @@
 @using GTour.Components
+@inject NavigationManager navigationManager
 
 <GuidedTour TourId="FormGuidedTour" OverlayEnabled="true" CloseOnOverlayClick="true" OverlayClass="overlay-class">
-    <GuidedTourStep Title="My First Step" StepName="firstStep" TourStepSequence="1"
-                    ElementSelector="[data-form-firstStep]">
-        <span>This is my first step</span>
-    </GuidedTourStep>
-    <GuidedTourStep Title="My second Step" StepName="secondStep" TourStepSequence="2"
-                    ElementSelector="[data-form-secondStep]">
-        <span>This is my 2. step</span>
-    </GuidedTourStep>
+    <ChildContent>
+        <GuidedTourStep Title="My First Step" StepName="firstStep" TourStepSequence="1"
+                        ElementSelector="[data-form-firstStep]" OnNavigateNext="@((tourStep) => { Console.WriteLine("hii"); })">
+            <span>This is my first step</span>
+        </GuidedTourStep>
+        <GuidedTourStep Title="My second Step" StepName="secondStep" TourStepSequence="2"
+                        ElementSelector="[data-form-secondStep]">
+            <span>This is my 2. step</span>
+        </GuidedTourStep>
+        <GuidedTourStep Title="My 3. Step" StepName="thirdStep" TourStepSequence="3"
+                        ElementSelector="[data-form-thirdStep]" OnNavigateNext="@((tourStep) => { Console.WriteLine("hii"); })">
+            <HeaderContent>
+                <span>This is my 3. step</span>
+            </HeaderContent>
+            <ChildContent>
+                <div>Textetwedhuwidhe</div>
+            </ChildContent>
+            <FooterContent>
+                <div>
+                    <button class="btn" @onclick="@(() => context.GoToStep("firstStep"))">First Step</button>
+                    <MudButton OnClick="@(() => context.PreviousStep())">Previous</MudButton>
+                    <MudButton OnClick="@(() => NavigateToNextPage(context))">Next</MudButton>
+                    <button class="btn" @onclick="@(() => context.CompleteTour())">Finish Tour</button>
+                </div>
+            </FooterContent>
+        </GuidedTourStep>
+        <GuidedTourStep Title="My 4. Step" StepName="forthStep" TourStepSequence="4"
+                        ElementSelector="[data-form-forthStep]" OnNavigateNext="@((tourStep) => { Console.WriteLine("hii"); })">
+            <span>This is my 4. step</span>
+        </GuidedTourStep>
+    </ChildContent>
 </GuidedTour>
 <style>
     .element-highlight {
@@ -17,6 +41,7 @@
         position: relative;
         background-color: white;
     }
+
     .guided-tour-overlay {
         position: fixed;
         width: 100vw;
@@ -28,6 +53,7 @@
         background-color: rgba(0, 0, 0, 0.5);
         z-index: 2;
     }
+
     .guided-tour-wrapper {
         z-index: 2;
         background: white;
@@ -37,7 +63,25 @@
 </style>
 
 @code {
+    [Inject]
+    private GTour.Abstractions.IGTourService GTourService { get; set; }
+    private void NavigateToNextPage(GTour.Abstractions.IGTourStep context)
+    {
+        Console.WriteLine("hi");
 
+        var uri = navigationManager.GetUriWithQueryParameter("TourActivated", true);
+        var shouldUri = navigationManager.ToAbsoluteUri(" ").AbsoluteUri;
+        if (shouldUri.EndsWith("/")) { shouldUri = shouldUri.Remove(shouldUri.Length - 1, 1); }
+        var uriBuilder = new UriBuilder(shouldUri);
+        var q = System.Web.HttpUtility.ParseQueryString(uriBuilder.Query);
+        q["TourStep"] = "forthStep";
+        uriBuilder.Query = q.ToString();
+        var newUrl = uriBuilder.ToString();
+        navigationManager.NavigateTo(newUrl);
+        //await context.NextStep();
+        //await GTourService.StartTour("FormGuidedTour", "forthStep");
+
+    }
 
 
 }

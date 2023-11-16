@@ -7,12 +7,13 @@
 @attribute [Authorize]
 @using Radzen
 @using Radzen.Blazor
+@inject NavigationManager navigationManager
 
 <TopSection>
     <MudBreadcrumbs Items="_breadcrumbs" Class="mudbreadcrumbs"></MudBreadcrumbs>
 </TopSection>
 
-<MudStack AlignItems="MudBlazor.AlignItems.Center" Row="true" Class="mb-2" style="padding-top:50px">
+<MudStack data-form-forthStep AlignItems="MudBlazor.AlignItems.Center" Row="true" Class="mb-2" style="padding-top:50px">
     <MudIcon Size="Size.Large" Icon="@Icons.Filled.Home" />
     <LabelTooltip FontSize="TextStyle.H4" Label=@_pageTitle Text="A dataset contains data that can be used for machine learning. Different dataset types are distinguished, e.g., tabular data, texts or images. This page lists all datasets you have uploaded so far to the OMA-ML platform. By clicking on a dataset, the respective dataset page is opened to inspect the dataset and start new trainings." Position="Radzen.TooltipPosition.Bottom"></LabelTooltip>
 
@@ -54,14 +55,35 @@
         </MudCard>
     </MudItem>
     <MudItem xs="12" sm="6" md="6">
-        <RecentDatasets Datasets="@_datasets" OnUploadCompletedCallback="@LoadRecentDataset"/>
+        <RecentDatasets Datasets="@_datasets" OnUploadCompletedCallback="@LoadRecentDataset" />
     </MudItem>
     <MudItem xs="12" sm="6" md="6">
         <RecentTrainings Trainings="@_trainings" />
     </MudItem>
 </MudGrid>
+<UserTour></UserTour>
+<MudButton OnClick="@callStartTour">StartTour</MudButton>
 
 @code {
+    [Inject]
+    private GTour.Abstractions.IGTourService GTourService { get; set; }
+
+    private async Task callStartTour()
+{
+        await this.StartTour("forthStep");
+}
+
+    private async Task StartTour(string step)
+    {
+        await GTourService.StartTour("FormGuidedTour", step);
+    }
+    private string GetQueryParm(string parmName)
+    {
+        var uriBuilder = new UriBuilder(navigationManager.Uri);
+        var q = System.Web.HttpUtility.ParseQueryString(uriBuilder.Query);
+        return q[parmName] ?? "";
+    }
+
     private GetTrainingsResponseDto _trainings;
     private GetDatasetsResponseDto _datasets;
     private GetHomeOverviewInformationResponseDto _overviewInfos;
@@ -75,13 +97,18 @@
         _breadcrumbs.Add(new BreadcrumbItem(L["Home"], null, true, Icons.Filled.Home));
         fileUploader.OnUploadCompletedCallback = LoadDatasetWithReRendering;
         StateHasChanged();
+         string queryParam = this.GetQueryParm("TourStep");
+        if (!string.IsNullOrEmpty(queryParam))
+        {
+            await this.StartTour(queryParam);
+        }
     }
 
     private async Task LoadRecentTrainings()
     {
         try
         {
-            ApiResponseDto apiResponse = await apiClient.GetTrainings(new GetTrainingsRequestDto() { Short = true, OnlyLastDay= true });
+            ApiResponseDto apiResponse = await apiClient.GetTrainings(new GetTrainingsRequestDto() { Short = true, OnlyLastDay = true });
 
             if (apiResponse.IsSuccessStatusCode)
             {
@@ -111,7 +138,7 @@
         try
         {
             GetDatasetsRequestDto request = new GetDatasetsRequestDto();
-            ApiResponseDto apiResponse = await apiClient.GetDatasets(new GetDatasetsRequestDto(){ OnlyFiveRecent = true});
+            ApiResponseDto apiResponse = await apiClient.GetDatasets(new GetDatasetsRequestDto() { OnlyFiveRecent = true });
 
             if (apiResponse.IsSuccessStatusCode)
             {

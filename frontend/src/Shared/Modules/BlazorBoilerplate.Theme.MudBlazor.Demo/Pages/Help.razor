@@ -8,9 +8,9 @@
     <MudIcon Size="Size.Large" Icon="@Icons.Material.Filled.HelpOutline" />
     <LabelTooltip FontSize="Radzen.Blazor.TextStyle.H4" Label="Help" Text="Read how to solve different tasks with OMA-ML or start a guided tour." Position="Radzen.TooltipPosition.Bottom"></LabelTooltip>
 </MudStack>
-<MudGrid>
+<MudGrid data-form-thirdStep>
     <MudItem xs="12" sm="12" md="12">
-        <MudCard Elevation="5">
+        <MudCard Elevation="5" data-form-forthStep>
             <MudGrid>
                 <MudItem xs="6">
                     <MudText Typo="Typo.subtitle1" Style="padding-top:10rem;padding-left:2rem;">Watch the video for a quick start of strat a guided tour</MudText>
@@ -20,7 +20,7 @@
                                Size="Size.Medium">Start guided tour</MudButton>
                 </MudItem>
                 <MudItem xs="6">
-                    <iframe class="embed-responsive-item" style="padding:2rem;"
+                    <iframe class="embed-responsive-item" style="padding:2rem; aspect-ratio:16/9;"
                             src="@($"_content/BlazorBoilerplate.Theme.MudBlazor/images/TestVideo.mp4")"
                             frameborder="1"
                             allowfullscreen></iframe>
@@ -28,84 +28,93 @@
             </MudGrid>
         </MudCard>
     </MudItem>
-    <MudItem xs="12" sm="12" md="12">
-        <MudCard Elevation="5">
-            <MudCardHeader Style="border-bottom-style: inset; border-bottom-width: 1px;">
-                <CardHeaderContent>
-                    <MudText Style="margin-left:2rem;margin-top:2rem;" Typo="Typo.h6">Introduction</MudText>
-                </CardHeaderContent>
-            </MudCardHeader>
-            <MudCardContent>
-                <MudImage Style="width:90%;margin-left:2rem;margin-right;" Src="@($"_content/BlazorBoilerplate.Theme.MudBlazor/images/FlowChart.png")" />
-                <MudGrid>
-                    <MudItem xs="6">
-                        <MudText Style="margin-left: 2rem; padding-top: 10rem; color: #5c78ef;" Typo="Typo.h6">Dataset upload</MudText>
-                        <MudText Style="margin-left:2rem;margin-top:1rem;" Typo="Typo.body2">
-                            Click on UPLOAD to upload a new dataset to OMA-ML from your disk or from the internet. You can upload tabular data, text, images or time series. If you have selected a dataset for the upload you can change the filename in the textfield. By default, the previous filename is used.
-                        </MudText>
-                    </MudItem>
-                    <MudItem xs="6">
-                        <img style=" width: 90%; margin: 3rem; padding-top: 5rem; padding-right: 2rem;" src="@($"_content/BlazorBoilerplate.Theme.MudBlazor/images/UploadDataset.gif")" />
-                    </MudItem>
-                </MudGrid>
-                <MudGrid>
-                    <MudItem xs="6">
-                        <MudText Style="margin-left: 2rem; padding-top: 10rem; color: #6f7bd7" Typo="Typo.h6">Preprocessing</MudText>
-                        <MudText Style="margin-left:2rem;margin-top:1rem;" Typo="Typo.body2">
-                            Preprocessing is a crucial part of data preparation that aims to clean and organize raw data into a suitable format for the training. In this step you can chose column seperator, encoding, datetime format, escape character, decimal character and thousand seperator if necessary. You can also manually chose the datatype and role of the individual columns.
-                        </MudText>
-                    </MudItem>
-                    <MudItem xs="6">
-                        <img style=" width: 90%; margin: 3rem; padding-top: 5rem; padding-right: 2rem;" src="@($"_content/BlazorBoilerplate.Theme.MudBlazor/images/Preprocessing.gif")" />
-                    </MudItem>
-                </MudGrid>
-                <MudGrid>
-                    <MudItem xs="6">
-                        <MudText Style="margin-left: 2rem; padding-top: 10rem; color: #817fc3;" Typo="Typo.h6">Model selection</MudText>
-                        <MudText Style="margin-left:2rem;margin-top:1rem;" Typo="Typo.body2">
-                            A ML model is a computational algorithm that learns patterns and relationships within the training dataset in order to make predictions. During the Model selection process the build-in AutoML solutions will use different approaches to evaluate different ML models to determine which ML model is the most suitable for a given training dataset.
-                        </MudText>
-                    </MudItem>
-                    <MudItem xs="6">
-                        <img style=" width: 90%; margin: 3rem; padding-top: 5rem; padding-right: 2rem;" src="@($"_content/BlazorBoilerplate.Theme.MudBlazor/images/ModelSelection.gif")" />
-                    </MudItem>
-                </MudGrid>
-                <MudGrid>
-                    <MudItem xs="6">
-                        <MudText Style="margin-left: 2rem; padding-top: 10rem; color: #9b84a4" Typo="Typo.h6">Training</MudText>
-                        <MudText Style="margin-left:2rem;margin-top:1rem;" Typo="Typo.body2">
-                            In this step, a machine learning task must first be selected. Initially, all ML libraries that are supported for the selected ML task are selected. But you can also select the ML libraries for which ML models shall be generated. The AutoML solutions generate ML models for certain ML libraries. During training, various AutoML solutions are executed in parallel.
-                        </MudText>
-                    </MudItem>
-                    <MudItem xs="6">
-                        <img style=" width: 90%; margin: 3rem; padding-top: 5rem; padding-right: 2rem;" src="@($"_content/BlazorBoilerplate.Theme.MudBlazor/images/Training.gif")" />
-                    </MudItem>
-                </MudGrid>
-                <MudGrid data-form-secondStep>
-                    <MudItem xs="6">
-                        <MudText Style="margin-left: 2rem; padding-top: 10rem; color: #b78a85;" Typo="Typo.h6">Deployment</MudText>
-                        <MudText Style="margin-left:2rem;margin-top:1rem;" Typo="Typo.body2">
-                            The settings made in the training configuration are now applied and the training is started.
-                        </MudText>
-                    </MudItem>
-                    <MudItem xs="6">
-                        <img style=" width: 90%; margin: 3rem; padding-top: 5rem; padding-right: 2rem;" src="@($"_content/BlazorBoilerplate.Theme.MudBlazor/images/Deployment.gif")" />
-                    </MudItem>
-                </MudGrid>
-                <MudGrid data-form-firstStep>
-                    <MudItem xs="6">
-                        <MudText Style="margin-left: 2rem; padding-top: 10rem; color: #d59167;" Typo="Typo.h6">Prediction</MudText>
-                        <MudText Style="margin-left:2rem;margin-top:1rem;" Typo="Typo.body2">
-                            On the Model page, you can inspect and use the trained ML model. You may use the model for predicting new cases within the OMA-ML platform without having to install anything (panel center left). Alternatively, you may download the ML model within a pipeline and include it into a custom Python application (panel center right).  There are various ways of getting additional information about the model: an overview (top panel), detailed graphical analyses using Explainable AI (panel bottom left), the configuration that lead to the model (panel bottom center), and detail output of the AutoML solution (panel bottom right). You also may download a pipeline as Python source code including the generated ML model and pre-processing functions and include this code into a custom Python application.
-                        </MudText>
-                    </MudItem>
-                    <MudItem xs="6">
-                        <img style=" width: 90%; margin: 3rem; padding-top: 5rem; padding-right: 2rem;" src="@($"_content/BlazorBoilerplate.Theme.MudBlazor/images/Prediction.gif")" />
-                    </MudItem>
-                </MudGrid>
-            </MudCardContent>
-        </MudCard>
-    </MudItem>
+            <MudItem xs="12" sm="12" md="12">
+                <MudCard Elevation="5">
+                    <MudTabs Elevation="2" Rounded="true" ApplyEffectsToContainer="true" PanelClass="pa-6">
+                        <MudTabPanel Text="Introduction">
+                            <MudCardHeader Style="border-bottom-style: inset; border-bottom-width: 1px;">
+                                <CardHeaderContent>
+                                    <MudText Style="margin-left:2rem;margin-top:2rem;" Typo="Typo.h6">Introduction</MudText>
+                                </CardHeaderContent>
+                            </MudCardHeader>
+                            <MudCardContent>
+                                <MudImage Style="width:90%;margin-left:2rem;margin-right;" Src="@($"_content/BlazorBoilerplate.Theme.MudBlazor/images/FlowChart.png")" />
+                                <MudGrid>
+                                    <MudItem xs="6">
+                                        <MudText Style="margin-left: 2rem; padding-top: 10rem; color: #5c78ef;" Typo="Typo.h6">Dataset upload</MudText>
+                                        <MudText Style="margin-left:2rem;margin-top:1rem;" Typo="Typo.body2">
+                                            Click on UPLOAD to upload a new dataset to OMA-ML from your disk or from the internet. You can upload tabular data, text, images or time series. If you have selected a dataset for the upload you can change the filename in the textfield. By default, the previous filename is used.
+                                        </MudText>
+                                    </MudItem>
+                                    <MudItem xs="6">
+                                        <img style=" width: 90%; margin: 3rem; padding-top: 5rem; padding-right: 2rem;" src="@($"_content/BlazorBoilerplate.Theme.MudBlazor/images/UploadDataset.gif")" />
+                                    </MudItem>
+                                </MudGrid>
+                                <MudGrid>
+                                    <MudItem xs="6">
+                                        <MudText Style="margin-left: 2rem; padding-top: 10rem; color: #6f7bd7" Typo="Typo.h6">Preprocessing</MudText>
+                                        <MudText Style="margin-left:2rem;margin-top:1rem;" Typo="Typo.body2">
+                                            Preprocessing is a crucial part of data preparation that aims to clean and organize raw data into a suitable format for the training. In this step you can chose column seperator, encoding, datetime format, escape character, decimal character and thousand seperator if necessary. You can also manually chose the datatype and role of the individual columns.
+                                        </MudText>
+                                    </MudItem>
+                                    <MudItem xs="6">
+                                        <img style=" width: 90%; margin: 3rem; padding-top: 5rem; padding-right: 2rem;" src="@($"_content/BlazorBoilerplate.Theme.MudBlazor/images/Preprocessing.gif")" />
+                                    </MudItem>
+                                </MudGrid>
+                                <MudGrid>
+                                    <MudItem xs="6">
+                                        <MudText Style="margin-left: 2rem; padding-top: 10rem; color: #817fc3;" Typo="Typo.h6">Model selection</MudText>
+                                        <MudText Style="margin-left:2rem;margin-top:1rem;" Typo="Typo.body2">
+                                            A ML model is a computational algorithm that learns patterns and relationships within the training dataset in order to make predictions. During the Model selection process the build-in AutoML solutions will use different approaches to evaluate different ML models to determine which ML model is the most suitable for a given training dataset.
+                                        </MudText>
+                                    </MudItem>
+                                    <MudItem xs="6">
+                                        <img style=" width: 90%; margin: 3rem; padding-top: 5rem; padding-right: 2rem;" src="@($"_content/BlazorBoilerplate.Theme.MudBlazor/images/ModelSelection.gif")" />
+                                    </MudItem>
+                                </MudGrid>
+                                <MudGrid>
+                                    <MudItem xs="6">
+                                        <MudText Style="margin-left: 2rem; padding-top: 10rem; color: #9b84a4" Typo="Typo.h6">Training</MudText>
+                                        <MudText Style="margin-left:2rem;margin-top:1rem;" Typo="Typo.body2">
+                                            In this step, a machine learning task must first be selected. Initially, all ML libraries that are supported for the selected ML task are selected. But you can also select the ML libraries for which ML models shall be generated. The AutoML solutions generate ML models for certain ML libraries. During training, various AutoML solutions are executed in parallel.
+                                        </MudText>
+                                    </MudItem>
+                                    <MudItem xs="6">
+                                        <img style=" width: 90%; margin: 3rem; padding-top: 5rem; padding-right: 2rem;" src="@($"_content/BlazorBoilerplate.Theme.MudBlazor/images/Training.gif")" />
+                                    </MudItem>
+                                </MudGrid>
+                                <MudGrid data-form-secondStep>
+                                    <MudItem xs="6">
+                                        <MudText Style="margin-left: 2rem; padding-top: 10rem; color: #b78a85;" Typo="Typo.h6">Deployment</MudText>
+                                        <MudText Style="margin-left:2rem;margin-top:1rem;" Typo="Typo.body2">
+                                            The settings made in the training configuration are now applied and the training is started.
+                                        </MudText>
+                                    </MudItem>
+                                    <MudItem xs="6">
+                                        <img style=" width: 90%; margin: 3rem; padding-top: 5rem; padding-right: 2rem;" src="@($"_content/BlazorBoilerplate.Theme.MudBlazor/images/Deployment.gif")" />
+                                    </MudItem>
+                                </MudGrid>
+                                <MudGrid data-form-firstStep id="Prediction">
+                                    <MudItem xs="6">
+                                        <MudText Style="margin-left: 2rem; padding-top: 10rem; color: #d59167;" Typo="Typo.h6">Prediction</MudText>
+                                        <MudText Style="margin-left:2rem;margin-top:1rem;" Typo="Typo.body2">
+                                            On the Model page, you can inspect and use the trained ML model. You may use the model for predicting new cases within the OMA-ML platform without having to install anything (panel center left). Alternatively, you may download the ML model within a pipeline and include it into a custom Python application (panel center right).  There are various ways of getting additional information about the model: an overview (top panel), detailed graphical analyses using Explainable AI (panel bottom left), the configuration that lead to the model (panel bottom center), and detail output of the AutoML solution (panel bottom right). You also may download a pipeline as Python source code including the generated ML model and pre-processing functions and include this code into a custom Python application.
+                                        </MudText>
+                                    </MudItem>
+                                    <MudItem xs="6">
+                                        <img style=" width: 90%; margin: 3rem; padding-top: 5rem; padding-right: 2rem;" src="@($"_content/BlazorBoilerplate.Theme.MudBlazor/images/Prediction.gif")" />
+                                    </MudItem>
+                                </MudGrid>
+                            </MudCardContent>
+                        </MudTabPanel>
+                        <MudTabPanel Text="Site Explanation">
+                            xy
+                        </MudTabPanel>
+                    </MudTabs>
+                </MudCard>
+            </MudItem>
+      
+   
 </MudGrid>
 
 <UserTour></UserTour>
