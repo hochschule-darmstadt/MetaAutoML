@@ -38,7 +38,7 @@
                                 </CardHeaderContent>
                             </MudCardHeader>
                             <MudCardContent>
-                                <MudImage Style="width:90%;margin-left:2rem;margin-right;" Src="@($"_content/BlazorBoilerplate.Theme.MudBlazor/images/FlowChart.png")" />
+                                <MudImage Style="width:90%;margin-left:2rem;" Src="@($"_content/BlazorBoilerplate.Theme.MudBlazor/images/FlowChart.png")" />
                                 <MudGrid>
                                     <MudItem xs="6">
                                         <MudText Style="margin-left: 2rem; padding-top: 10rem; color: #5c78ef;" Typo="Typo.h6">Dataset upload</MudText>
@@ -108,13 +108,195 @@
                             </MudCardContent>
                         </MudTabPanel>
                         <MudTabPanel Text="Site Explanation">
-                            xy
+                            <MudText Style="margin-left:2rem;" Typo="Typo.h6">Site Explanation</MudText>
+                            <MudGrid Style="border-bottom-style: inset; border-bottom-width: 1px;padding-bottom:2rem;">
+                                <MudItem xs="6">
+                                    <MudText Style="margin-left: 2rem; padding-top: 2rem;" Color="Color.Secondary" Typo="Typo.h6">Home</MudText>
+                                    <MudText Style="margin-left:2rem;margin-top:0.5rem;" Typo="Typo.body2">
+                                        When you open the website, you first get to the home page. This page already provides an initial overview of previously uploaded datasets and completed trainings.
+                                        <br />
+                                        <br />
+                                        <b>Overview: </b>
+                                        <br />
+                                        In the "Overview" tile, you will find a list of the datasets uploaded so far, the trainings and models.
+                                        <br />
+                                        <br />
+                                        <b>Recent Datasets:</b>
+                                        <br />
+                                        In this area it is possible to upload a new dataset using the "Upload" button. You can also use the "More" button to navigate to the dataset page. The table lists the datasets uploaded so far. If you click on the name of a dataset, you will be directed to the detailed view of the dataset.
+                                        <br />
+                                        <br />
+                                        <b>Recent trainings:</b>
+                                        <br />
+                                        The "Details" button leads you to the training page. Below this button is a table which displays the most recently started trainings.
+                                    </MudText>
+                                </MudItem>
+                                <MudItem xs="6">
+                                    <img style=" width: 90%; margin: 3rem; padding-right: 2rem;" src="@($"_content/BlazorBoilerplate.Theme.MudBlazor/images/UploadDataset.gif")" />
+                                </MudItem>
+                            </MudGrid>
+                            <MudGrid Style="border-bottom-style: inset; border-bottom-width: 1px; padding-bottom: 2rem;">
+                                <MudItem xs="6">
+                                    <MudText Style="margin-left: 2rem; padding-top: 4rem;" Typo="Typo.h6" Color="Color.Secondary">Datasets</MudText>
+                                    <img style=" width: 90%; margin: 2rem; padding-right: 2rem;" src="@($"_content/BlazorBoilerplate.Theme.MudBlazor/images/Preprocessing.gif")" />
+                                </MudItem>
+                                <MudItem xs="6">
+                                    <MudText Style="margin-left:2rem;margin-top:8rem;" Typo="Typo.body2">
+                                        All datasets that have been uploaded so far are listed on the datasets page. There is also the option to upload further datasets.
+                                    </MudText>
+                                </MudItem>
+                            </MudGrid>
+                            <MudGrid Style="border-bottom-style: inset; border-bottom-width: 1px; padding-bottom: 2rem;">
+                                <MudItem xs="6">
+                                    <MudText Style="margin-left: 2rem; padding-top: 4rem;" Typo="Typo.h6" Color="Color.Secondary">Dataset Detail</MudText>
+                                    <MudText Style="margin-left:2rem;margin-top:1rem;" Typo="Typo.body2">
+                                        On this detail page, the uploaded data set can be analyzed and configured more in detail.
+                                        <br />
+                                        <br />
+                                        <b>Overview:</b><br />
+                                        Here you will find information about the dataset, such as name, dataset type, date of upload, file size and the number of rows and columns.
+                                        <br />
+                                        <br />
+                                        <b>New Training:</b><br />
+                                        In the "New Training" tile, a new training session can be started by clicking the button.
+                                        <br />
+                                        <br />
+                                        <b>Preview:</b><br />
+                                        The contents of the dataset can be seen in the preview. At the top right there is a button labeled "Configure" which can be clicked to configure the data set in more detail.
+                                        <br />
+                                        <br />
+                                        <b>Analysis</b><br />
+                                        Clicking on the "More" button or on the image under Analysis takes you to an analysis page that examines the data set in detail and contains diagrams.
+                                        <br />
+                                        <br />
+                                        <b>Top 3 models</b><br />
+                                        Under "Top 3 models" you will find the top 3 models that have been trained so far.
+                                    </MudText>
+                                </MudItem>
+                                <MudItem xs="6">
+                                    <img style=" width: 90%; margin: 3rem; padding-right: 2rem;padding-top:4rem;" src="@($"_content/BlazorBoilerplate.Theme.MudBlazor/images/Training.gif")" />
+                                </MudItem>
+                            </MudGrid>
+                            <MudGrid Style="border-bottom-style: inset; border-bottom-width: 1px; padding-bottom: 2rem;">
+                                <MudItem xs="6">
+                                    <MudText Style="margin-left: 2rem; padding-top: 4rem;" Typo="Typo.h6" Color="Color.Secondary">Dataset Configure</MudText>
+                                    <img style=" width: 90%; margin: 2rem; padding-right: 2rem;" src="@($"_content/BlazorBoilerplate.Theme.MudBlazor/images/Training.gif")" />
+                                </MudItem>
+                                <MudItem xs="6">
+                                    <MudText Style="margin-left:2rem;margin-top:8rem;" Typo="Typo.body2">
+                                        Various adjustments can be made to the dataset in the Dataset Configuration.
+                                        Firstly, the use of the header can be deactivated. In addition, rows can be ignored by changing the number in the "Start row" field. The column separator can be set as a semicolon, space or tab in addition to a comma. The encoding is UTF-8 by default and can also be latin-1, UTF-16 or UTF-32. The datetime format can be adjusted in the corresponding text field. In addition, the escape character, decimal character and thousand separator can be customized. The data type and role for the individual columns can be set in the table directly below the header. The following role options are available: None, Target, Ignore and Index.
+                                    </MudText>
+                                </MudItem>
+                            </MudGrid>
+                            <MudGrid Style="border-bottom-style: inset; border-bottom-width: 1px; padding-bottom: 2rem;">
+                                <MudItem xs="6">
+                                    <MudText Style="margin-left: 2rem; padding-top: 4rem;" Typo="Typo.h6" Color="Color.Secondary">Trainings</MudText>
+                                    <MudText Style="margin-left:2rem;margin-top:1rem;" Typo="Typo.body2">
+                                        The training page lists all training that have been started so far. If you click on the start time of a training, you will be taken to the details page of this training.
+                                    </MudText>
+                                </MudItem>
+                                <MudItem xs="6">
+                                    <img style=" width: 90%; margin: 3rem; padding-right: 2rem;padding-top:4rem;" src="@($"_content/BlazorBoilerplate.Theme.MudBlazor/images/ModelSelection.gif")" />
+                                </MudItem>
+                            </MudGrid>
+                            <MudGrid Style="border-bottom-style: inset; border-bottom-width: 1px; padding-bottom: 2rem;" data-form-secondStep>
+                                <MudItem xs="6">
+                                    <MudText Style="margin-left: 2rem; padding-top: 4rem;" Typo="Typo.h6" Color="Color.Secondary">Train - Dataset preparation</MudText>
+                                    <img style=" width: 90%; margin: 2rem; padding-right: 2rem;" src="@($"_content/BlazorBoilerplate.Theme.MudBlazor/images/Deployment.gif")" />
+                                </MudItem>
+                                <MudItem xs="6">
+                                    <MudText Style="margin-left:2rem;margin-top:8rem;" Typo="Typo.body2">
+                                        ML training is the process of condensing implicit information in a dataset into a generated ML model. This is the first step of the training wizard. Here you can modify pre-configured datatypes of columns in tabular datasets. You can also assign roles, in particular whether a column is an ID (and hence be ignored for training) or is the training target.
+                                    </MudText>
+                                </MudItem>
+                            </MudGrid>
+                            <MudGrid Style="border-bottom-style: inset; border-bottom-width: 1px; padding-bottom: 2rem;" data-form-firstStep id="Prediction">
+                                <MudItem xs="6">
+                                    <MudText Style="margin-left: 2rem; padding-top: 4rem;" Typo="Typo.h6" Color="Color.Secondary">Train - Configuration</MudText>
+                                    <MudText Style="margin-left:2rem;margin-top:1rem;" Typo="Typo.body2">
+                                        This is the second step of the training wizard. Here you can select the ML task, i.e., what the ML model shall predict, e.g., classes (classification) or values (regression). Additionaly you can choose which column in a tabular dataset is to be predicted by the ML model in the dropdown called "Target". Specify the maximum runtime in minutes OMA-ML shall use for training. Longer runtimes tend to produce better models; shorter runtimes are more energy-efficient.
+                                        Under the "Details" dropdown, there are further setting options that can be made, but are not absolutely necessary as default values are already set.
+                                        <br />
+                                        <br />
+                                        <b>ML libraries</b>
+                                        Select or deselect ML libraries for which ML models shall be generated. Initially, all ML libraries that are supported for the selected ML task are selected (indiated by a tick). When changing selections, corresponding AutoML solutions will be adapted automatically.
+                                        <br />
+                                        <br />
+                                        <b>AutoML solutions</b>
+                                        AutoML solutions generate ML models for certain ML libraries. Initially, all AutoML solutions are selected that are supported for the selected ML libraries. When changing selections, corresponding ML libraries will be adapted automatically.
+                                        <br />
+                                        <br />
+                                        <b>Enabled strategies</b>
+                                        Training strategies are intelligent helpers that perform best practices in data science for you automatically. Select strategies that you want to enable for this training.
+                                    </MudText>
+                                </MudItem>
+                                <MudItem xs="6">
+                                    <img style=" width: 90%; margin: 3rem; padding-right: 2rem;padding-top:4rem;" src="@($"_content/BlazorBoilerplate.Theme.MudBlazor/images/Prediction.gif")" />
+                                </MudItem>
+                            </MudGrid>
+                            <MudGrid Style="border-bottom-style: inset; border-bottom-width: 1px; padding-bottom: 2rem;" data-form-firstStep id="Prediction">
+                                <MudItem xs="6">
+                                    <MudText Style="margin-left: 2rem; padding-top: 4rem;" Typo="Typo.h6" Color="Color.Secondary">Training Detail</MudText>
+                                    <img style=" width: 90%; margin: 2rem; padding-right: 2rem;" src="@($"_content/BlazorBoilerplate.Theme.MudBlazor/images/Prediction.gif")" />
+                                </MudItem>
+                                <MudItem xs="6">
+                                    <MudText Style="margin-left:2rem;margin-top:8rem;" Typo="Typo.body2">
+                                        This page shows the leaderboard for an ML training. During training, various AutoML solutions are executed in parallel. This is indicated by a spinning wheel. Whenever an AutoML solution has terminated, the result is displayed. The top performing models are shown first in the leaderboard.
+                                        Clicking on the light bulb in the Model column takes you to the respective model detail view.
+                                    </MudText>
+                                </MudItem>
+                            </MudGrid>
+                            <MudGrid Style="border-bottom-style: inset; border-bottom-width: 1px; padding-bottom: 2rem;" data-form-firstStep id="Prediction">
+                                <MudItem xs="6">
+                                    <MudText Style="margin-left: 2rem; padding-top: 4rem;" Typo="Typo.h6" Color="Color.Secondary">Models</MudText>
+                                    <MudText Style="margin-left:2rem;margin-top:1rem;" Typo="Typo.body2">
+                                        This page shows all models that have been trained for this dataset so far, potentially in several training sessions.
+                                    </MudText>
+                                     </MudItem>
+                                <MudItem xs="6">
+                                    <img style=" width: 90%; margin: 3rem; padding-right: 2rem;padding-top:4rem;" src="@($"_content/BlazorBoilerplate.Theme.MudBlazor/images/Prediction.gif")" />
+                                </MudItem>
+                            </MudGrid>
+                            <MudGrid Style="border-bottom-style: inset; border-bottom-width: 1px; padding-bottom: 2rem;" data-form-firstStep id="Prediction">
+                                <MudItem xs="6">
+                                    <MudText Style="margin-left: 2rem; padding-top: 4rem;" Typo="Typo.h6" Color="Color.Secondary">Model Detail</MudText>
+                                    <img style=" width: 90%; margin: 2rem; padding-right: 2rem;" src="@($"_content/BlazorBoilerplate.Theme.MudBlazor/images/Prediction.gif")" />
+                                </MudItem>
+                                <MudItem xs="6">
+                                    <MudText Style="margin-left:2rem;margin-top:8rem;" Typo="Typo.body2">
+                                        An ML model is the result of ML training and condenses information inherent in the training dataset. It can be used for making predictions on new cases. On the Model page, you can inspect and use the trained ML model.
+                                        <br />
+                                        <br />
+                                        <b>Overview</b><br />
+                                        The overview contains general information about the model, such as the dataset, when the training took place, the status of the training and the training time. The AutoML solutions, ML library and the model are also listed. Clicking on the date next to Training takes you to the corresponding training page. The predction time and emissions are also shown.
+                                        <br />
+                                        <br />
+                                        <b>Predict online</b><br />
+                                        You may use the model for predicting new cases within the OM-ML platform without having to install anything. Simply upload a file with the new cases with the "Add Live Dataset" button. You can also preview or download the result table with the button "View predictions".
+                                        <br />
+                                        <br />
+                                        <b>Download ML model pipeline</b><br />
+                                        Here you may download a pipeline as Python source code including the generated ML model and pre-processing functions. You may include this code into a custom Python application.
+                                        <br />
+                                        <br />
+                                        <b>Analysis</b><br />
+                                        Here you get various detailed graphical analyses using Explainable AI (XAI)
+                                        <br />
+                                        <br />
+                                        <b>Configuration</b><br />
+                                        Here you can inspect the original configuration that lead to the ML model.
+                                        <br />
+                                        <br />
+                                        <b>Details</b><br />
+                                        Here you can inspect the detail output of the AutoML solution that has been used for training this ML model.
+                                    </MudText>
+                                </MudItem>
+                            </MudGrid>
                         </MudTabPanel>
                     </MudTabs>
                 </MudCard>
             </MudItem>
-      
-   
 </MudGrid>
 
 <UserTour></UserTour>
