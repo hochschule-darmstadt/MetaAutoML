@@ -1,13 +1,5 @@
-using BlazorBoilerplate.Server;
-using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using BlazorBoilerplate.Shared.Dto.Ontology;
 using BlazorBoilerplate.Shared.Dto.Prediction;
-using Newtonsoft.Json.Linq;
 
 namespace BlazorBoilerplate.Shared.Dto.Model
 {
@@ -29,14 +21,16 @@ namespace BlazorBoilerplate.Shared.Dto.Model
         public List<Metric> Metrics { get; set; }
         public double PredictionTime { get; set; }
         public ModelRuntimeProfile RuntimeProfile { get; set; }
+        public string Runtime { get; set; }
         public List<string> StatusMessages { get; set; }
-        //public Dictionary<string, dynamic> Explanation { get; set; }
         public double Emissions { get; set; }
         public string DashboardStatus { get; set; }
+
         public ModelDto()
         {
 
         }
+
         public ModelDto(Server.Model model, List<ObjectInfomationDto> mlModelType, List<ObjectInfomationDto> mlLibrary, ObjectInfomationDto autoMl, List<Metric> metrics)
         {
             Id = model.Id;
@@ -53,8 +47,8 @@ namespace BlazorBoilerplate.Shared.Dto.Model
             Metrics = metrics;
             PredictionTime = model.PredictionTime;
             RuntimeProfile = new ModelRuntimeProfile(model.RuntimeProfile);
+            Runtime = RuntimeProfile.ToString();
             StatusMessages = model.StatusMessages.ToList();
-            //Explanation = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(model.Explanation);
             Emissions = model.Emission;
             DashboardStatus = model.DashboardStatus;
         }
@@ -70,6 +64,7 @@ namespace BlazorBoilerplate.Shared.Dto.Model
             libraries = string.Join(", ", libraryList).TrimEnd(',');
             return libraries;
         }
+
         public string GetMlModelString()
         {
             string models = "";
