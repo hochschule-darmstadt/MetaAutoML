@@ -42,3 +42,4 @@ wrapt==1.14.1
 feature-engine==1.6.0
 kubernetes
 ydata_profiling==4.6.1
+pyarrow==14.0.1

@@ -80,11 +80,12 @@ class DataSetAnalysisManager(Thread):
         # Create YData filepath for ydata_profiling
         self.ydata_filepath = os.path.join(os.path.dirname(self.__dataset['path']), "YData")
         os.makedirs(self.ydata_filepath, exist_ok=True)
-        self.__report = None
+        self.__reportpath = None
 
 
     def run(self):
         analysis = {}
+        report_html = ""
         with self.__dataset_analysis_lock.lock():
             print("[DataSetAnalysisManager]: ENTERING LOCK.")
             schema = self.__dataset_schema_analysis()
@@ -96,13 +97,13 @@ class DataSetAnalysisManager(Thread):
                 analysis.update({ "plots": self.advanced_analysis()})
             #Only perform YDataProfiling-Report when dataset has less than 80 columns
             if self.__ydataprofiling_analysis and self.__dataset_df.shape[1] < 80:
-                analysis.update({ "Report": self.ydataprofiling_analysis()})
+                report_html = self.ydataprofiling_analysis()
 
 
             found, dataset = self.__data_storage.get_dataset(self.__user_id, self.__dataset_id)
             analysis_details = dataset["analysis"]
             analysis_details.update(analysis)
-            self.__data_storage.update_dataset(self.__user_id, self.__dataset_id, { "analysis": analysis_details, "schema": schema})
+            self.__data_storage.update_dataset(self.__user_id, self.__dataset_id, { "analysis": analysis_details, "schema": schema, "report_path": report_html})
             print("[DataSetAnalysisManager]: EXITING LOCK.")
 
     def __dataset_schema_analysis(self) -> dict:
@@ -181,13 +182,15 @@ class DataSetAnalysisManager(Thread):
         try:
             from ydata_profiling import ProfileReport
             print("[DatasetAnalysisManager]: Starting ydata-profiling dataset analysis")
-            report_filename = "YData_Profile_Report.json"
+            report_filename = "YData_Profile_Report.html"
             report_filepath = os.path.join(self.ydata_filepath, report_filename)
             profile = ProfileReport(self.__dataset_df, title=self.__dataset["path"], html={'style': {'full_width': True}})
             profile.to_file(report_filepath, silent=True)
             print("[DatasetAnalysisManager]: Dataset analysis finished, saved the YData-ProfileReport.")
-            self.__report = profile.to_json()
-            return self.__report
+            start_path = os.getcwd()
+            relative_report_path = os.path.relpath(report_filepath, start_path)
+            self.__reportpath = relative_report_path
+            return self.__reportpath
         except:
             # error case tbd?
             return{}
