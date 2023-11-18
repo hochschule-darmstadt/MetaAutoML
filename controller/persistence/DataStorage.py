@@ -117,6 +117,7 @@ class DataStorage:
                 "creation_date": 0,
                 "size_bytes": 0
             },
+            "report_path": "",
             "lifecycle_state": "active"
         }
 

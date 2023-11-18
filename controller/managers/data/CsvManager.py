@@ -3,7 +3,7 @@ import numpy as np
 from ControllerBGRPC import *
 from JsonUtil import get_config_property
 import sys
-
+import pyarrow.csv as pv
 import shutil
 import os
 import re
@@ -45,8 +45,33 @@ class CsvManager:
         }
         if file_configuration['thousands_seperator'] != "":
            configuration["thousands"] = file_configuration['thousands_seperator']
+        # old read_csv mechanism
+        #dataset = pd.read_csv(**configuration)
 
-        dataset = pd.read_csv(**configuration)
+        # setup parameters for pyArrow
+        # https://arrow.apache.org/docs/python/generated/pyarrow.csv.read_csv.html#pyarrow.csv.read_csv
+        # Setup ReadOptions
+        read_options = pv.ReadOptions(
+            skip_rows=(file_configuration['start_row'] - 1),
+            encoding=file_configuration['encoding'])
+        # Setup ParseOptions
+        parse_options = pv.ParseOptions(
+            delimiter=delimiters[file_configuration['delimiter']],
+            escape_char=file_configuration['escape_character'])
+        # Setup ConvertOptions
+        convert_options = pv.ConvertOptions(
+            decimal_point=file_configuration['decimal_character'])
+        print("using pyarrow to read the csv-file")
+        # Read CSV
+        table = pv.read_csv(
+            input_file=path,
+            read_options=read_options,
+            parse_options=parse_options,
+            convert_options=convert_options
+        )
+        # convert to pandas
+        dataset = table.to_pandas()
+
 
         #Rename untitled columns to correct name
         for column in dataset:
