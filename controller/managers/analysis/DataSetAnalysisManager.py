@@ -25,7 +25,7 @@ class DataSetAnalysisManager(Thread):
     """
     Static DataSetAnalysisManager class to analyze the dataset
     """
-    def __init__(self, dataset_id: str, user_id: str, data_storage: DataStorage, dataset_analysis_lock: ThreadLock, basic_analysis=True, advanced_analysis=True, ydataprofiling_analysis=True):
+    def __init__(self, dataset_id: str, user_id: str, data_storage: DataStorage, basic_analysis=True, advanced_analysis=True, ydataprofiling_analysis=True):
         super(DataSetAnalysisManager, self).__init__()
         # Setup config
         self.__dataset_id = dataset_id
@@ -40,7 +40,6 @@ class DataSetAnalysisManager(Thread):
         #    "tab":          "\t",
         #}
         self.__data_storage = data_storage
-        self.__dataset_analysis_lock = dataset_analysis_lock
         self.__basic_analysis = basic_analysis
         self.__advanced_analysis = advanced_analysis
         self.__ydataprofiling_analysis = ydataprofiling_analysis
@@ -86,25 +85,21 @@ class DataSetAnalysisManager(Thread):
     def run(self):
         analysis = {}
         report_html = ""
-        with self.__dataset_analysis_lock.lock():
-            print("[DataSetAnalysisManager]: ENTERING LOCK.")
-            schema = self.__dataset_schema_analysis()
-            if self.__basic_analysis:
-                analysis.update(self.basic_analysis(schema))
+        print("[DataSetAnalysisManager]: ENTERING LOCK.")
+        schema = self.__dataset_schema_analysis()
+        if self.__basic_analysis:
+            analysis.update(self.basic_analysis(schema))
 
-            #Only perform analysis when dataset has less than 20 columns
-            if self.__advanced_analysis and self.__dataset_df.shape[1] < 20:
-                analysis.update({ "plots": self.advanced_analysis()})
-            #Only perform YDataProfiling-Report when dataset has less than 80 columns
-            if self.__ydataprofiling_analysis and self.__dataset_df.shape[1] < 80:
-                report_html = self.ydataprofiling_analysis()
+        #Only perform YDataProfiling-Report when dataset has less than 80 columns
+        if self.__ydataprofiling_analysis and self.__dataset_df.shape[1] < 80:
+            report_html = self.ydataprofiling_analysis()
 
 
-            found, dataset = self.__data_storage.get_dataset(self.__user_id, self.__dataset_id)
-            analysis_details = dataset["analysis"]
-            analysis_details.update(analysis)
-            self.__data_storage.update_dataset(self.__user_id, self.__dataset_id, { "analysis": analysis_details, "schema": schema, "report_path": report_html})
-            print("[DataSetAnalysisManager]: EXITING LOCK.")
+        found, dataset = self.__data_storage.get_dataset(self.__user_id, self.__dataset_id)
+        analysis_details = dataset["analysis"]
+        analysis_details.update(analysis)
+        self.__data_storage.update_dataset(self.__user_id, self.__dataset_id, { "analysis": analysis_details, "schema": schema, "report_path": report_html})
+            
 
     def __dataset_schema_analysis(self) -> dict:
 
@@ -194,75 +189,6 @@ class DataSetAnalysisManager(Thread):
         except:
             # error case tbd?
             return{}
-
-    def advanced_analysis(self):
-        """
-        Advanced analysis that produces several plots based on the dataset passed to the DataSetAnalysisManager.
-        The plots are saved in the same folder as the dataset, their paths are saved in the mongodb under
-        analysis > advanced_analysis_plots so that they can be loaded later for display in the frontend.
-
-        Plots produced are:
-            Distribution plots of all features (columns) in the dataset.
-            Correlation matrix indicating the correlation of all features in the dataset
-            Correlation plots of the 5 features with the highest correlation
-
-        Returns: Array of plot filenames
-        """
-        # Turn off io of matplotlib as the plots are saved, not displayed
-        try:
-            import matplotlib
-            matplotlib.use('SVG')
-            import matplotlib.pyplot as plt
-            plt.ioff()
-            print("[DatasetAnalysisManager]: Starting advanced dataset analysis")
-            if self.__dataset["type"] in [":image"]:
-                return
-            # Convert all "object" columns to category
-            self.__dataset_df.loc[:, self.__dataset_df.dtypes == 'object'] = self.__dataset_df.select_dtypes(['object']).apply(lambda x: x.astype('category'))
-
-            # Get processed version of dataset to make calculation of feature correlation using scipy spearmanr possible
-            proc_dataset = self.__process_categorical_columns()
-            proc_dataset = self.__fill_nan_values(proc_dataset)
-            ## TODO consider to add more analysis feature in case of text, image,...
-            if self.__dataset["type"] in [":text"]:
-                return
-            # Get correlations using spearmanr
-            corr = spearmanr(proc_dataset).correlation
-            # Make correlation plot
-            print("[DatasetAnalysisManager]: Plotting correlation matrix")
-            filename = self.__make_correlation_matrix_plot(corr, self.__dataset_df.columns, self.plot_filepath)
-            self.__plots.append({"title": "Correlation Matrix", "items": [filename]})
-            # Get indices of correlations ordered desc
-            indices = self.__largest_indices(corr, (len(proc_dataset.columns) * len(proc_dataset.columns)))
-
-            # Plot features with the highest correlation
-            print(f"[DatasetAnalysisManager]: Plotting top 10 feature imbalance plots")
-            plotted_indices = []
-            category = {"title": "Correlation analysis", "items": []}
-            for first_col_idx, second_col_index in zip(indices[0], indices[1]):
-                # Only plot top 5
-                if len(plotted_indices) == 6:
-                    break
-                # If the correlation isn't a col with itself or has already been plotted the other way around -> plot it
-                if first_col_idx != second_col_index and [second_col_index, first_col_idx] not in plotted_indices:
-                    category["items"].append(self.__make_feature_imbalance_plot(self.__dataset_df.columns[first_col_idx],
-                                                                                self.__dataset_df.columns[second_col_index],
-                                                                                corr[second_col_index, first_col_idx],
-                                                                                self.plot_filepath))
-                    plotted_indices.append([first_col_idx, second_col_index])
-            self.__plots.append(category)
-
-            # Plot distributions of all columns
-            print(f"[DatasetAnalysisManager]: Plotting {len(self.__dataset_df.columns)} columns")
-            category = {"title": "Column analysis", "items": []}
-            for i, col in enumerate(list(self.__dataset_df.columns)):
-                category["items"].append(self.__make_column_plot(col, self.plot_filepath))
-            self.__plots.append(category)
-
-            print(f"[DatasetAnalysisManager]: Dataset analysis finished, saved {sum(len(x['items']) for x in self.__plots)} plots")
-            return self.__plots
-        except:
-            return {}
 
 
     @staticmethod
