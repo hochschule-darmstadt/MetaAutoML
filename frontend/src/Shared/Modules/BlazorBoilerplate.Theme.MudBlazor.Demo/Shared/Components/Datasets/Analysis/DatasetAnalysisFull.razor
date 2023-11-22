@@ -1,4 +1,4 @@
-﻿@using System
+@using System
 @using System.IO
 @using Microsoft.AspNetCore.Hosting
 @using Microsoft.Extensions.Logging
@@ -21,6 +21,8 @@
             @if (_analysis != null)
             {
                 <MudGrid>
+
+                    <iframe src="https://www.wikipedia.org" height="900" width="900"></iframe>
                     @foreach (var category in _analysis.AnalysisCategories)
                     {
 
