@@ -31,17 +31,24 @@
     </MudCardHeader>
     <MudCardContent>
         <MudPaper Height="250px" Elevation="0">
-            @if ((_analysis == null) || (_analysis.AnalysisCategories.Count == 0))
+            @if ((_analysis == null))
             {
                 <DataLoaderSpinner />
             }
             else
             {
-        <MudButton Href="@NavManager.ToAbsoluteUri("datasets/" + @Dataset.Dataset.Id + "/analysis").AbsoluteUri">
-            <MudItem xs="12" Style="display: grid; justify-content: center;">
-                <MudImage Src="@GetImage(_analysis.AnalysisCategories[0].Analyses[0].Content)" Style="width:clamp(70px, 100%, 330px); margin-left: auto; margin-right: auto;;" />
-            </MudItem>
-        </MudButton>
+                if(_analysis.ydataprofilling == null)
+                {
+                    <MudText Typo="Typo.h6">Ydataprofilling is not available for this dataset.</MudText>
+                }
+                else
+                {
+                    <MudButton Href="@NavManager.ToAbsoluteUri("datasets/" + @Dataset.Dataset.Id + "/analysis").AbsoluteUri">
+                        <MudItem xs="12" Style="display: grid; justify-content: center;">
+                            <MudText Typo="Typo.h6">An image should be displayed here</MudText>
+                        </MudItem>
+                    </MudButton>
+                }
             }
         </MudPaper>
     </MudCardContent>
