@@ -93,12 +93,13 @@ class DataSetAnalysisManager(Thread):
         #Only perform YDataProfiling-Report when dataset has less than 80 columns
         if self.__ydataprofiling_analysis and self.__dataset_df.shape[1] < 80:
             report_html = self.ydataprofiling_analysis()
+            analysis.update({"report_path": report_html})
 
 
         found, dataset = self.__data_storage.get_dataset(self.__user_id, self.__dataset_id)
         analysis_details = dataset["analysis"]
         analysis_details.update(analysis)
-        self.__data_storage.update_dataset(self.__user_id, self.__dataset_id, { "analysis": analysis_details, "schema": schema, "report_path": report_html})
+        self.__data_storage.update_dataset(self.__user_id, self.__dataset_id, { "analysis": analysis_details, "schema": schema})
             
 
     def __dataset_schema_analysis(self) -> dict:
