@@ -21,7 +21,7 @@
                         <MudTh></MudTh>
                     @foreach (var item in _datasetFrame.Columns)
                     {
-                        
+
                         <MudTh>@item.Name</MudTh>
                     }
                 </MudTHeadRow>
@@ -87,7 +87,7 @@
                 <MudTablePager HorizontalAlignment="HorizontalAlignment.Left"/>
             </PagerContent>
         </MudTable>
-    </MudStack>     
+    </MudStack>
 }
 
 @code {
@@ -163,8 +163,6 @@
                     }
                 }
                 _datasetFrame.FillNulls(nanDatatypesValuesPerColumn, true);
-                
-                viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
             }
             else
             {

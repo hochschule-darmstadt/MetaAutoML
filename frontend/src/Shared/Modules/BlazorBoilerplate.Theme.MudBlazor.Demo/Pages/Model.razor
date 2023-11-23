@@ -192,7 +192,6 @@
                     if (apiResponse.IsSuccessStatusCode)
                     {
                         _dataset = Newtonsoft.Json.JsonConvert.DeserializeObject<GetDatasetResponseDto>(apiResponse.Result.ToString());
-                        viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
                     }
                     else
                     {

@@ -67,8 +67,8 @@
 
 @code {
     [Parameter]
-    public GetDatasetResponseDto Dataset 
-    { 
+    public GetDatasetResponseDto Dataset
+    {
         get
         {
             return _dataset;
@@ -95,7 +95,6 @@
             {
                 _top3Models = Newtonsoft.Json.JsonConvert.DeserializeObject<GetModelsResponseDto>(apiResponse.Result.ToString());
                 StateHasChanged();
-                viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
             }
             else
             {

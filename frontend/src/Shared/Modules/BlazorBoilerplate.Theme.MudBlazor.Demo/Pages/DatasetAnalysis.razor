@@ -34,7 +34,7 @@
         await LoadDataset();
         StateHasChanged();
     }
- 
+
     private async Task LoadDataset()
     {
         try
@@ -49,7 +49,6 @@
             {
                 _dataset = Newtonsoft.Json.JsonConvert.DeserializeObject<GetDatasetResponseDto>(apiResponse.Result.ToString());
                 _pageTitle = L["Dataset: {0}", _dataset.Dataset.Name];
-                viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
             }
             else
             {
