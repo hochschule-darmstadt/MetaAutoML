@@ -38,7 +38,7 @@
                                 <MudStack>
                                     @foreach (var item in Training.Training.Configuration.SelecctedMlLibraries)
                                     {
-                                        <MudText Typo="Typo.body1">@item.Properties.ContainsKey("skos:prefLabel") ? @item.Properties["skos:prefLabel"] : @("")</MudText>
+                                        <MudText Typo="Typo.body1">@(item.Properties.ContainsKey("skos:prefLabel") ? item.Properties["skos:prefLabel"] : "")</MudText>
                                     }
                                 </MudStack>
                             </MudExpansionPanel>
@@ -46,7 +46,7 @@
                                 <MudStack>
                                     @foreach (var item in Training.Training.Configuration.SelectedAutoMlSolutions)
                                     {
-                                        <MudText Typo="Typo.body1">@item.Properties.ContainsKey("skos:prefLabel") ? @item.Properties["skos:prefLabel"] : @("")</MudText>
+                                        <MudText Typo="Typo.body1">@(item.Properties.ContainsKey("skos:prefLabel") ? item.Properties["skos:prefLabel"] : "")</MudText>
                                     }
                                 </MudStack>
                             </MudExpansionPanel>
