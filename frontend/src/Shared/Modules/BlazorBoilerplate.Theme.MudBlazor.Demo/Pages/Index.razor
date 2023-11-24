@@ -62,27 +62,10 @@
     </MudItem>
 </MudGrid>
 <UserTour></UserTour>
-<MudButton OnClick="@callStartTour">StartTour</MudButton>
 
 @code {
     [Inject]
     private GTour.Abstractions.IGTourService GTourService { get; set; }
-
-    private async Task callStartTour()
-{
-        await this.StartTour("forthStep");
-}
-
-    private async Task StartTour(string step)
-    {
-        await GTourService.StartTour("FormGuidedTour", step);
-    }
-    private string GetQueryParm(string parmName)
-    {
-        var uriBuilder = new UriBuilder(navigationManager.Uri);
-        var q = System.Web.HttpUtility.ParseQueryString(uriBuilder.Query);
-        return q[parmName] ?? "";
-    }
 
     private GetTrainingsResponseDto _trainings;
     private GetDatasetsResponseDto _datasets;
@@ -97,11 +80,8 @@
         _breadcrumbs.Add(new BreadcrumbItem(L["Home"], null, true, Icons.Filled.Home));
         fileUploader.OnUploadCompletedCallback = LoadDatasetWithReRendering;
         StateHasChanged();
-         string queryParam = this.GetQueryParm("TourStep");
-        if (!string.IsNullOrEmpty(queryParam))
-        {
-            await this.StartTour(queryParam);
-        }
+        TourService userTour = new TourService(GTourService);
+        await userTour.checkIfUserTourIsActivated(navigationManager.Uri);
     }
 
     private async Task LoadRecentTrainings()

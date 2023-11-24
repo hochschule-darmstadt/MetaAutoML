@@ -11,7 +11,7 @@ namespace GTour.Themes
         public string GTourStepHeaderWrapper { get; set; }// = "modal-header ";
         public string GTourStepContentWrapper { get; set; } = "modal-body ";
         public string GTourStepFooterWrapper { get; set; } = "modal-footer ";
-        public string GTourStepHeaderTitle { get; set; } = "color: yellow";
+        public string GTourStepHeaderTitle { get; set; } 
         public string GTourStepCancelButton { get; set; } = "mud-button-root mud-button mud-button-filled mud-button-filled-secondary mud-button-filled-size-medium mud-ripple ";
         public string GTourStepPreviousButton { get; set; } = "mud-button-root mud-button mud-button-filled mud-button-filled-secondary mud-button-filled-size-medium mud-ripple";
         public string GTourStepNextButton { get; set; } = "mud-button-root mud-button mud-button-filled mud-button-filled-secondary mud-button-filled-size-medium mud-ripple";

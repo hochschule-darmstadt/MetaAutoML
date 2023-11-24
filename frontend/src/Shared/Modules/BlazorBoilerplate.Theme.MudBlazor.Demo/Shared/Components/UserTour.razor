@@ -3,9 +3,16 @@
 
 <GuidedTour TourId="FormGuidedTour" OverlayEnabled="true" CloseOnOverlayClick="true" OverlayClass="overlay-class">
     <ChildContent>
-        <GuidedTourStep Title="My First Step" StepName="firstStep" TourStepSequence="1"
+        <GuidedTourStep StepName="firstStep" TourStepSequence="1"
                         ElementSelector="[data-form-firstStep]" OnNavigateNext="@((tourStep) => { Console.WriteLine("hii"); })">
-            <span>This is my first step</span>
+            <MudText Style="margin:1rem;" Typo="Typo.h6">Welcome to OMA ML</MudText>
+            <MudText Style="margin:1rem;width: 40rem;" Typo="Typo.body2">
+                Preprocessing is a crucial part of data preparation that aims to clean
+                and organize raw data into a suitable format for the training. In this
+                step you can chose column seperator, encoding, datetime format, escape character,
+                decimal character and thousand seperator if necessary. You can also manually chose
+                the datatype and role of the individual columns.
+            </MudText>
         </GuidedTourStep>
         <GuidedTourStep Title="My second Step" StepName="secondStep" TourStepSequence="2"
                         ElementSelector="[data-form-secondStep]">
@@ -23,20 +30,35 @@
                 <div>
                     <button class="btn" @onclick="@(() => context.GoToStep("firstStep"))">First Step</button>
                     <MudButton OnClick="@(() => context.PreviousStep())">Previous</MudButton>
-                    <MudButton OnClick="@(() => NavigateToNextPage(context))">Next</MudButton>
+                    <MudButton OnClick="@(() => NavigateToNextPage("forthStep", navigationManager.ToAbsoluteUri(" ").AbsoluteUri))">Next</MudButton>
                     <button class="btn" @onclick="@(() => context.CompleteTour())">Finish Tour</button>
                 </div>
             </FooterContent>
         </GuidedTourStep>
-        <GuidedTourStep Title="My 4. Step" StepName="forthStep" TourStepSequence="4"
+        <GuidedTourStep Title="My 3. Step" StepName="forthStep" TourStepSequence="4"
                         ElementSelector="[data-form-forthStep]" OnNavigateNext="@((tourStep) => { Console.WriteLine("hii"); })">
-            <span>This is my 4. step</span>
+            <HeaderContent>
+                <span>This is my 4. step</span>
+            </HeaderContent>
+            <ChildContent>
+                <div>xyz</div>
+            </ChildContent>
+            <FooterContent>
+                <div>
+                    <button class="btn" @onclick="@(() => context.GoToStep("firstStep"))">First Step</button>
+                    <MudButton OnClick="@(() => NavigateToNextPage("thirdStep", navigationManager.ToAbsoluteUri("help").AbsoluteUri))">Previous</MudButton>
+                    <button class="btn" @onclick="@(() => context.CompleteTour())">Finish Tour</button>
+                </div>
+            </FooterContent>
         </GuidedTourStep>
+
     </ChildContent>
 </GuidedTour>
+
+
 <style>
     .element-highlight {
-        border: solid 2px yellow;
+        border: solid white;
         z-index: 999;
         position: relative;
         background-color: white;
@@ -57,24 +79,25 @@
     .guided-tour-wrapper {
         z-index: 2;
         background: white;
-        border-radius: 7%;
         padding: 1rem;
+        padding-bottom: 2rem;
+        margin-bottom: 2rem;
+        border: solid #f8943c;
+        border-width: 4px;
     }
 </style>
 
 @code {
     [Inject]
     private GTour.Abstractions.IGTourService GTourService { get; set; }
-    private void NavigateToNextPage(GTour.Abstractions.IGTourStep context)
+    private void NavigateToNextPage(string step, string uri)
     {
-        Console.WriteLine("hi");
-
-        var uri = navigationManager.GetUriWithQueryParameter("TourActivated", true);
-        var shouldUri = navigationManager.ToAbsoluteUri(" ").AbsoluteUri;
-        if (shouldUri.EndsWith("/")) { shouldUri = shouldUri.Remove(shouldUri.Length - 1, 1); }
-        var uriBuilder = new UriBuilder(shouldUri);
+        // var uri = navigationManager.GetUriWithQueryParameter("TourActivated", true);
+        //var shouldUri = navigationManager.ToAbsoluteUri(" ").AbsoluteUri;
+        if (uri.EndsWith("/")) { uri = uri.Remove(uri.Length - 1, 1); }
+        var uriBuilder = new UriBuilder(uri);
         var q = System.Web.HttpUtility.ParseQueryString(uriBuilder.Query);
-        q["TourStep"] = "forthStep";
+        q["TourStep"] = step;
         uriBuilder.Query = q.ToString();
         var newUrl = uriBuilder.ToString();
         navigationManager.NavigateTo(newUrl);
@@ -82,6 +105,10 @@
         //await GTourService.StartTour("FormGuidedTour", "forthStep");
 
     }
+
+
+
+
 
 
 }
