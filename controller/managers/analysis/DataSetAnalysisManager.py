@@ -84,9 +84,11 @@ class DataSetAnalysisManager(Thread):
             if self.__basic_analysis:
                 analysis.update(self.basic_analysis(schema))
 
-            #Only perform analysis when dataset has less than 20 columns
-            if self.__advanced_analysis and self.__dataset_df.shape[1] < 20:
-                analysis.update({ "plots": self.advanced_analysis()})
+
+            if self.__dataset["type"] not in [":image"]:
+                #Only perform analysis when dataset has less than 20 columns
+                if self.__advanced_analysis and self.__dataset_df.shape[1] < 20:
+                    analysis.update({ "plots": self.advanced_analysis()})
 
             found, dataset = self.__data_storage.get_dataset(self.__user_id, self.__dataset_id)
             analysis_details = dataset["analysis"]
@@ -168,8 +170,6 @@ class DataSetAnalysisManager(Thread):
             import matplotlib.pyplot as plt
             plt.ioff()
             print("[DatasetAnalysisManager]: Starting advanced dataset analysis")
-            if self.__dataset["type"] in [":image"]:
-                return
             # Convert all "object" columns to category
             self.__dataset_df.loc[:, self.__dataset_df.dtypes == 'object'] = self.__dataset_df.select_dtypes(['object']).apply(lambda x: x.astype('category'))
 
