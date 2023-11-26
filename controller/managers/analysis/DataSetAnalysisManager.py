@@ -183,9 +183,9 @@ class DataSetAnalysisManager(Thread):
             profile = ProfileReport(self.__dataset_df, title=self.__dataset["path"], html={'style': {'full_width': True}})
             profile.to_file(report_filepath, silent=True)
             print("[DatasetAnalysisManager]: Dataset analysis finished, saved the YData-ProfileReport.")
-            start_path = os.getcwd()
-            relative_report_path = os.path.relpath(report_filepath, start_path)
-            self.__reportpath = relative_report_path
+            # start_path = os.getcwd()
+            # relative_report_path = os.path.relpath(report_filepath, start_path)
+            self.__reportpath = report_filepath # we want to have the absolut file path
             return self.__reportpath
         except:
             # error case tbd?
