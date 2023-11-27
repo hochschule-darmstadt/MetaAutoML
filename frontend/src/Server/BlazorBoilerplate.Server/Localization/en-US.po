@@ -2005,3 +2005,7 @@ msgstr "Parameters available for individual AutoML solution only"
 msgctxt "Global"
 msgid "Perform model analysis"
 msgstr "Perform model analysis"
+
+msgctxt "Global"
+msgid "{0} more entries available"
+msgstr "{0} more entries available"
