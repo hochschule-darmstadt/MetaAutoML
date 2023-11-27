@@ -24,50 +24,12 @@
         </CardHeaderContent>
     </MudCardHeader>
     <MudCardContent>
-        <MudPaper Elevation="0">
+        <MudPaper Elevation="0" Height="2000px">
             @if (_analysis != null)
             {
                 <MudGrid>
 
-                    <iframe src="https://www.wikipedia.org" class="full-width-height"></iframe>
-                    <iframe src="https://www.wikipedia.org" height="900" width="900"></iframe>
-                    @foreach (var category in _analysis.AnalysisCategories)
-                    {
-
-                        @if (@category.CategoryTitle == "Correlation Matrix")
-                        {
-                            <MudItem xs="12" Style="display: grid; justify-content: center;">
-                                <MudText Typo="Typo.h5">@L[category.CategoryTitle]</MudText>
-                            </MudItem>
-                            <MudItem xs="12" Style="display: grid; justify-content: center;">
-                                <MudImage Src="@GetImage(category.Analyses[0].Content)" Style="height:440px;" />
-                            </MudItem>
-                            <MudItem xs="12" Style="display: grid; justify-content: center; padding: 0 20% 0 20%;">
-                                <MudText Typo="Typo.body2">@category.Analyses[0].Description</MudText>
-                            </MudItem>
-
-                        }
-                        else
-                        {
-                            <MudDivider Class="mud-width-full" Style="margin-top: 40px;" />
-                            <MudItem xs="12" Style="display: grid; justify-content: center;">
-                                <MudText Typo="Typo.h5">@L[category.CategoryTitle]</MudText>
-                            </MudItem>
-                            <MudDivider Class="mud-width-full" Style="margin-bottom: 20px;" />
-                            <MudCarousel Class="mud-width-full" ItemsSource="@category.Analyses" Style="height:560px" AutoCycle="false">
-                                <ItemTemplate>
-                                    <MudGrid>
-                                        <MudItem xs="12" Style="display: grid; justify-content: center;">
-                                            <MudImage Src="@GetImage(context.Content)" Style="height:440px;" />
-                                        </MudItem>
-                                        <MudItem xs="12" Style="display: grid; justify-content: center; padding: 0 20% 0 20%;">
-                                            <MudText Typo="Typo.body2" >@context.Description</MudText>
-                                        </MudItem>
-                                    </MudGrid>
-                                </ItemTemplate>
-                            </MudCarousel>
-                        }
-                    }
+                    <iframe srcdoc="@htmlContent" width="100%" height="2600px"></iframe>
                 </MudGrid>
             }
         </MudPaper>
@@ -96,6 +58,8 @@
     private bool isPreviewRequestRunning = false;
     private GetDatasetAnalysisResponseDto _analysis;
 
+    private MarkupString htmlContent;
+
     private async Task LoadDatasetAnalysis()
     {
         //Due to frontend refreshes it may occur that this is triggered twice, leading to an error while the first request is reading
@@ -116,6 +80,8 @@
             if (apiResponse.IsSuccessStatusCode)
             {
                 _analysis = Newtonsoft.Json.JsonConvert.DeserializeObject<GetDatasetAnalysisResponseDto>(apiResponse.Result.ToString());
+                var fileContent = System.IO.File.ReadAllText(_analysis.ydataprofilling);
+                htmlContent = new MarkupString(fileContent);
                 StateHasChanged();
             }
             else
