@@ -2,6 +2,8 @@
 @inject IStringLocalizer<Global> L
 @attribute [Authorize]
 @inject NavigationManager navigationManager
+@inject IJSRuntime JS
+
 <TopSection>
     <MudBreadcrumbs Items="_breadcrumbs" Class="mudbreadcrumbs"></MudBreadcrumbs>
 </TopSection>
@@ -20,6 +22,7 @@
                                Color="Color.Secondary"
                                Size="Size.Medium"
                                OnClick="@StartTour">Start guided tour</MudButton>
+                    <AnchorLink TargetId="chapter1">Training</AnchorLink>
                 </MudItem>
                 <MudItem xs="6">
                     <iframe class="embed-responsive-item" style="padding:2rem; aspect-ratio:16/9;"
@@ -78,7 +81,7 @@
                                 </MudGrid>
                                 <MudGrid>
                                     <MudItem xs="6">
-                                        <MudText Style="margin-left: 2rem; padding-top: 10rem; color: #9b84a4" Typo="Typo.h6">Training</MudText>
+                                        <MudText id="chapter1" Style="margin-left: 2rem; padding-top: 10rem; color: #9b84a4" Typo="Typo.h6">Training</MudText>
                                         <MudText Style="margin-left:2rem;margin-top:1rem;" Typo="Typo.body2">
                                             In this step, a machine learning task must first be selected. Initially, all ML libraries that are supported for the selected ML task are selected. But you can also select the ML libraries for which ML models shall be generated. The AutoML solutions generate ML models for certain ML libraries. During training, various AutoML solutions are executed in parallel.
                                         </MudText>
@@ -330,26 +333,24 @@
 
     @code {
 
-        private List<BreadcrumbItem> _breadcrumbs = new List<BreadcrumbItem>();
-        [Inject]
-        private GTour.Abstractions.IGTourService GTourService { get; set; }
+    private List<BreadcrumbItem> _breadcrumbs = new List<BreadcrumbItem>();
+    [Inject]
+    private GTour.Abstractions.IGTourService GTourService { get; set; }
 
-        protected override async Task OnInitializedAsync()
-        {
-            _breadcrumbs.Add(new BreadcrumbItem(L["Home"], "/", false, Icons.Filled.Home));
-            _breadcrumbs.Add(new BreadcrumbItem(L["Help"], "/help", false, Icons.Material.Filled.HelpOutline));
-            //StateHasChanged();
-            TourService userTour = new TourService(GTourService);
-            await userTour.checkIfUserTourIsActivated(navigationManager.Uri);
+    protected override async Task OnInitializedAsync()
+    {
+        _breadcrumbs.Add(new BreadcrumbItem(L["Home"], "/", false, Icons.Filled.Home));
+        _breadcrumbs.Add(new BreadcrumbItem(L["Help"], "/help", false, Icons.Material.Filled.HelpOutline));
+        //StateHasChanged();
+        TourService userTour = new TourService(GTourService);
+        await userTour.checkIfUserTourIsActivated(navigationManager.Uri);
 
-        }
+    }
 
-
-
-        private async Task StartTour()
-        {
-            await GTourService.StartTour("FormGuidedTour");
-        }
+    private async Task StartTour()
+    {
+        await GTourService.StartTour("FormGuidedTour");
+    }
 
 
     }
