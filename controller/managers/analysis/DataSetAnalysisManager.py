@@ -180,7 +180,7 @@ class DataSetAnalysisManager(Thread):
             print("[DatasetAnalysisManager]: Starting ydata-profiling dataset analysis")
             report_filename = "YData_Profile_Report.html"
             report_filepath = os.path.join(self.ydata_filepath, report_filename)
-            profile = ProfileReport(self.__dataset_df, title=self.__dataset["path"], html={'style': {'full_width': True}})
+            profile = ProfileReport(self.__dataset_df, title="Advance Analysis", html={'style': {'full_width': True}})
             profile.to_file(report_filepath, silent=True)
             print("[DatasetAnalysisManager]: Dataset analysis finished, saved the YData-ProfileReport.")
             # start_path = os.getcwd()
