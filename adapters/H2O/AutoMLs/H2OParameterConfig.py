@@ -4,50 +4,24 @@
 
 import keras_tuner
 
-#lookup dictionary for autokeras metrics values
-#https://keras.io/api/metrics
-autokeras_metrics = {
-    #accuracy metrics
-    ":accuracy": "accuracy",
-    ":binary_accuracy": "binary_accuracy",
-    ":categorical_accuracy": "categorical_accuracy",
-    ":sparse_categorical_accuracy": "sparse_categorical_accuracy",
-    ":top_k_categorical_accuracy": "top_k_categorical_accuracy",
-    ":sparse_top_k_categorical_accuracy": "sparse_top_k_categorical_accuracy",
-    #probabilistic metrics
-    ":binary_cross_entropy": "binary_crossentropy" ,
-    ":categorical_cross_entropy": "categorical_crossentropy",
-    #":sparse_categorical_cross_entropy": "sparse_categorical_crossentropy",
-    #":kullback_leibler_divergence": "kullback_leibler_divergence",
-    ":poisson": "poisson",
-    #regression metrics
-    ":mean_squared_error": "mean_squared_error",
-    ":root_mean_squared_error": "RootMeanSquaredError",
-    ":mean_absolute_error": "mean_absolute_error",
-    ":mean_absolute_percentage_error": "mean_absolute_percentage_error",
-    ":mean_squared_log_error": "mean_squared_logarithmic_error",
-    ":cosine_similarity": "cosine_similarity",
-    ":log_cosh_error": "logcosh",
-    #classification metrics based on true/false positives & negatives
-    ":area_under_roc_curve": "AUC",
-    ":precision": "Precision",
-    ":recall": "Recall",
-    ":true_positives": "TruePositives",
-    ":true_negatives": "TrueNegatives",
-    ":false_positives": "FalsePositives",
-    ":false_negatives": "FalseNegatives",
-    #":precision_at_recall": "PrecisionAtRecall",
-    #":sensitivity_at_specificity": "SensitivityAtSpecificity",
-    #":sepecificity_at_sensitivity": "SpecificityAtSensitivity",
-    #image segmentation metrics
-    ":mean_iou": "MeanIoU",
-    #hinge metrics for "maximum-margin" classification
-    ":hinge": "hinge",
-    ":squared_hinge": "squared_hinge",
-    ":categorical_hinge": "categorical_hinge"
+#max_runtime_secs
+#max_models
+#stopping_metric
+#sort_metric
+#include_algos/exclude_algos
 
-    #old metric
-    #":binary_intersection_over_union": "binary_intersection_over_union",   not in the keras metrics, for reference: https://keras.io/api/metrics/
+h2o_metrics = {
+    #deviance (mean residual deviance) - not in ontology yet or mean_poisson_deviance? 2x(LL(Saturated Model) - LL(Proposed Model))?
+    ":log_loss": "logloss",
+    ":mean_squared_error": "MSE",
+    ":root_mean_squared_error": "RMSE",
+    ":mean_absolute_error": "MAE",
+    ":root_mean_squared_log_error": "RMSLE",
+    ":area_under_roc_curve": "AUC",
+    ":area_under_precision_recall_curve" : "AUCPR", #AUCPR  (area under the Precision-Recall curve) - not in ontology yet
+    #lift_top_group - not in ontology yet
+    #misclassification - probably :mean_absolute_error or :mean_absolute_percentage_error, but not sure whether its absolute or relative
+    #mean_per_class_error - not in ontology yet
 }
 
 #lookup dictionary for autokeras objectives values
@@ -117,6 +91,11 @@ autokeras_tuner = {
     ":hyperband": "hyperband"
 }
 
+#max_runtime_secs
+#max_models
+#stopping_metric
+#sort_metric
+#include_algos/exclude_algos
 parameters = {
     #tabular classification
     ":metric_autokeras_tabular_classification": {
