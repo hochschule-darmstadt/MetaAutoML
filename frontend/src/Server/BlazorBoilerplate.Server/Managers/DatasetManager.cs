@@ -132,7 +132,7 @@ namespace BlazorBoilerplate.Server.Managers
             catch (Exception ex)
             {
                 return new ApiResponse(Status404NotFound, ex.Message);
-            }     
+            }
         }
         /// <summary>
         /// Get a list of all Datasets
@@ -239,7 +239,7 @@ namespace BlazorBoilerplate.Server.Managers
                 switch (reply.Dataset.Type)
                 {
                     case ":tabular":
-                     
+
                         response.DatasetPreview = datasetLocation;
 
                         break;
@@ -262,14 +262,14 @@ namespace BlazorBoilerplate.Server.Managers
                         break;
                     case ":text":
 
-                        response.DatasetPreview = datasetLocation; 
+                        response.DatasetPreview = datasetLocation;
                         break;
                     case ":time_series":
-                      
+
                         response.DatasetPreview = datasetLocation;
                         break;
                     case ":time_series_longitudinal":
-                       
+
                         response.DatasetPreview = datasetLocation;
                         break;
                     default:
@@ -344,7 +344,7 @@ namespace BlazorBoilerplate.Server.Managers
                 // check if analysis for yprofilling exist, set to the bool in dto
                 if (analysis != null)
                 {
-                    if (analysis.ContainsKey("report_path")) response.ydataprofilling = analysis["report_path"];
+                    if (analysis.ContainsKey("report_html_path")) response.ydataprofilling = analysis["report_html_path"];
                     else response.ydataprofilling = null;
                 }
                 return new ApiResponse(Status200OK, null, response);
@@ -366,7 +366,7 @@ namespace BlazorBoilerplate.Server.Managers
             if (fileExt == ".csv")
             {
                 // .csv does not need validation at the moment
-                return true; 
+                return true;
             }
             else if (fileExt == ".zip")
             {
