@@ -11,19 +11,7 @@
 @inject NavigationManager NavManager
 
 
-<MudCard Elevation="5" Style="min-height: 100vh">
-    <MudCardHeader Style="border-bottom-style: inset; border-bottom-width: 1px;">
-        <CardHeaderContent>
-            <MudText Typo="Typo.h6">@L["Analysis"]</MudText>
-        </CardHeaderContent>
-    </MudCardHeader>
-    <MudCardContent Style="min-height: 100vh">
-            @if (_analysis != null)
-            {
-                <iframe srcdoc="@htmlContent" style="min-height: 100vh"></iframe>
-            }
-    </MudCardContent>
-</MudCard>
+<iframe srcdoc="@htmlContent" />
 
 @code {
     [Parameter]
