@@ -10,31 +10,8 @@
 @inject IHttpClientFactory ClientFactory
 @inject NavigationManager NavManager
 
-<style>
-    .full-width-height {
-        width: 100%;
-        height: 100%;
-    }
-</style>
 
-<MudCard Elevation="5">
-    <MudCardHeader Style="border-bottom-style: inset; border-bottom-width: 1px;">
-        <CardHeaderContent>
-            <MudText Typo="Typo.h6">@L["Analysis"]</MudText>
-        </CardHeaderContent>
-    </MudCardHeader>
-    <MudCardContent>
-        <MudPaper Elevation="0" Height="2000px">
-            @if (_analysis != null)
-            {
-                <MudGrid>
-
-                    <iframe srcdoc="@htmlContent" width="100%" height="2600px"></iframe>
-                </MudGrid>
-            }
-        </MudPaper>
-    </MudCardContent>
-</MudCard>
+<iframe srcdoc="@htmlContent" />
 
 @code {
     [Parameter]
