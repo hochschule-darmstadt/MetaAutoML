@@ -13,17 +13,17 @@
             <MudSpacer />
             <MudText Color="Color.Dark" Typo="Typo.h6" Style="font-size: clamp(0.9rem, -0.425rem + 3.4vw, 1.5rem);">OMA-ML: Effective Machine Learning made easy!</MudText>
             <MudSpacer />
-			<EditForm EditContext="editContext1">
+			<EditForm EditContext="editContext">
 				<DataAnnotationsValidator />
 				<MudAutocomplete Label="Help search ..." @bind-Value="choice.State" Required="true"
 								 SearchFunc="@SearchAsync" Immediate="true" CoerceValue="@coerceValue" ResetValueOnEmptyText="true"
 								 AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Primary"
-								 For="@(() => choice1.State)" />
+								 For="@(() => choice.State)" />
 			</EditForm>
-
-			<MudText Class="mb-n3" Typo="Typo.body2">
-				<MudChip>@(choice1.State ?? "Not selected")</MudChip>
-				</MudText>
+			@if (!string.IsNullOrEmpty(choice.State))
+			{
+				redirectOnSearch();	
+			}
 			<MudSpacer />
             <TopRightBarSection />
         </MudAppBar>
@@ -56,44 +56,40 @@
 <RadzenTooltip />
 
 @code {
-    bool _navMenuOpened = true;
+	bool _navMenuOpened = true;
 	string navMenuIcon = Icons.Material.Filled.Menu;
 
-    [CascadingParameter]
-    Task<AuthenticationState> authenticationStateTask { get; set; }
 
-    protected override async Task OnInitializedAsync()
-    {
-        var user = (await authenticationStateTask).User;
+	[CascadingParameter]
+	Task<AuthenticationState> authenticationStateTask { get; set; }
 
-        if (user.Identity.IsAuthenticated)
-        {
-            var profile = await appState.GetUserProfile();
+	protected override async Task OnInitializedAsync()
+	{
+		var user = (await authenticationStateTask).User;
 
-            _navMenuOpened = profile.IsNavOpen;
+		if (user.Identity.IsAuthenticated)
+		{
+			var profile = await appState.GetUserProfile();
+
+			_navMenuOpened = profile.IsNavOpen;
 		}
-    }
+	}
 
-    private void DrawerToggle()
-    {
-        _navMenuOpened = !_navMenuOpened;
-    }
+	private void DrawerToggle()
+	{
+		_navMenuOpened = !_navMenuOpened;
+	}
 
 	// TODO Replace with the actual content
 	private MudForm form;
 	private bool coerceValue;
-	private bool success1;
-	private bool success2;
-	private Choice choice1 = new();
-	private Choice choice2 = new();
-	private Choice choice3 = new();
-	private EditContext editContext1;
-	private EditContext editContext2;
+	private bool success;
+	private Choice choice = new();
+	private EditContext editContext;
 
 	protected override void OnInitialized()
 	{
-		editContext1 = new EditContext(choice1);
-		editContext2 = new EditContext(choice2);
+		editContext = new EditContext(choice);
 	}
 
 	private static string[] states =
@@ -116,10 +112,6 @@
 
 	private async Task<IEnumerable<string>> SearchAsync(string value)
 	{
-		// In real life use an asynchronous function for fetching data from an api.
-		await Task.Delay(5);
-
-		// if text is null or empty, show complete list
 		if (string.IsNullOrEmpty(value))
 		{
 			return states;
@@ -140,6 +132,12 @@
 		{
 			yield return "This is an incorrect value";
 		}
+	}
+
+	private void redirectOnSearch()
+	{
+		navigationManager.NavigateTo("search/" + choice.State);
+		choice.State = null;
 	}
 
 	public class Choice

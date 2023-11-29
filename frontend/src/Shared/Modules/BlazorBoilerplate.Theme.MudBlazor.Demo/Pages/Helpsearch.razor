@@ -1,11 +1,115 @@
 @page "/search"
+@page "/search/{query}"
+@using System.ComponentModel.DataAnnotations
+@inject NavigationManager navigationManager
 
 <MudGrid>
-	<MudItem xs="12" sm="12" md="12">
-		<p>Test</p>
+	<MudItem xs="12">
+		<MudText Color="Color.Dark" Typo="Typo.h6">Help Search</MudText>
+		<EditForm EditContext="editContext">
+			<DataAnnotationsValidator />
+			<MudAutocomplete Label="Help search ..." @bind-Value="choice.State" Required="true"
+							 SearchFunc="@SearchAsync" Immediate="true" CoerceValue="@coerceValue" ResetValueOnEmptyText="true"
+							 AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Primary"
+							 For="@(() => choice.State)"/>
+		</EditForm>
+	</MudItem>
+	<MudItem xs="3">
+		<MudText Color="Color.Dark" Typo="Typo.h6">Results</MudText>
+		<MudNavMenu Rounded="true" Margin="Margin.Normal" Color="Color.Secondary" Class="pa-2" Style="width:14.2rem">
+			<MudNavLink>Dashboard</MudNavLink>
+			<MudNavLink>Servers</MudNavLink>
+			<MudNavLink>Billing</MudNavLink>
+		</MudNavMenu>
+	</MudItem>
+	<MudItem xs="9">
+		<MudText Color="Color.Dark" Typo="Typo.h6">Result</MudText>
+		Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
 	</MudItem>
 </MudGrid>
 
 @code {
+	[Parameter]
+	public string query { get; set; }
 
+	// TODO Replace with the actual content
+	private MudForm form;
+	private bool coerceValue;
+	private bool success;
+	private Choice choice = new();
+	private EditContext editContext;
+
+	protected override void OnInitialized()
+	{
+		editContext = new EditContext(choice);
+		choice.State = query;
+	}
+
+    private static string[] states =
+    {
+		"Alabama", "Alaska", "American Samoa", "Arizona",
+		"Arkansas", "California", "Colorado", "Connecticut",
+		"Delaware", "District of Columbia", "Federated States of Micronesia",
+		"Florida", "Georgia", "Guam", "Hawaii", "Idaho",
+		"Illinois", "Indiana", "Iowa", "Kansas", "Kentucky",
+		"Louisiana", "Maine", "Marshall Islands", "Maryland",
+		"Massachusetts", "Michigan", "Minnesota", "Mississippi",
+		"Missouri", "Montana", "Nebraska", "Nevada",
+		"New Hampshire", "New Jersey", "New Mexico", "New York",
+		"North Carolina", "North Dakota", "Northern Mariana Islands", "Ohio",
+		"Oklahoma", "Oregon", "Palau", "Pennsylvania", "Puerto Rico",
+		"Rhode Island", "South Carolina", "South Dakota", "Tennessee",
+		"Texas", "Utah", "Vermont", "Virgin Island", "Virginia",
+		"Washington", "West Virginia", "Wisconsin", "Wyoming",
+	};
+
+    private async Task<IEnumerable<string>> SearchAsync(string value)
+    {
+        if (string.IsNullOrEmpty(value))
+        {
+            return states;
+        }
+
+        return states.Where(x => x.Contains(value, StringComparison.InvariantCultureIgnoreCase));
+    }
+
+    private IEnumerable<string> Validate(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            yield return "The State field is required";
+            yield break;
+        }
+
+        if (!states.Contains(value))
+        {
+            yield return "This is an incorrect value";
+        }
+    }
+
+    public class Choice
+    {
+        [Required]
+        [State]
+        public string State { get; set; }
+    }
+
+    [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Parameter)]
+    public sealed class StateAttribute : ValidationAttribute
+    {
+        protected override ValidationResult IsValid(object value, System.ComponentModel.DataAnnotations.ValidationContext validationContext)
+        {
+            if (!states.Contains(value))
+            {
+                return new ValidationResult("This is an incorrect value", new[] { validationContext.MemberName });
+            }
+
+            if (validationContext is null)
+            {
+                throw new ArgumentNullException(nameof(validationContext));
+            }
+
+            return null;
+        }
+	}
 }
