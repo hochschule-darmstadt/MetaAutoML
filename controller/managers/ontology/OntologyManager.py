@@ -256,6 +256,30 @@ class OntologyManager(object):
 
         return result
 
+    def get_search_relevant_entities(self) -> GetSearchRelevantDataResponse:
+        """Get search relevant entities available within the ML Ontology
+
+        Returns:
+            GetSearchRelevantDataResponse: Entities used for frontend search
+        """
+        result = GetSearchRelevantDataResponse()
+        self.__log.debug("get_search_relevant_entities: get all search entities")
+        q = prepareQuery(Queries.ONTOLOGY_QUERY_GET_ALL_SEARCH_ENTITIES,
+                        initNs={"skos": SKOS})
+
+        queryResult = self.__execute_query(q)
+        for row in queryResult:
+            rowInstance = SearchRelevantData()
+            rowInstance.entity = self.__normalize_iri_to_colon(row.entitiy)
+            rowInstance.entity_class = self.__normalize_iri_to_colon(row.entity_class)
+            rowInstance.label = self.__normalize_iri_to_colon(row.label)
+            rowInstance.alt_labels = self.__normalize_iri_to_colon(row.alt_labels)
+            rowInstance.comment = self.__normalize_iri_to_colon(row.comment)
+            rowInstance.link = self.__normalize_iri_to_colon(row.link)
+            result.search_entities.append(rowInstance)
+        return result
+
+
     def __normalize_iri_to_colon(self, iri: str) -> str:
         if iri is not None:
             return iri.replace(ML_ONTOLOGY_NAMESPACE, ":")

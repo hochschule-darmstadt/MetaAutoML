@@ -1172,480 +1172,371 @@ class CreateNewUserResponse(betterproto.Message):
 
 
 class ControllerServiceStub(betterproto.ServiceStub):
-    async def create_new_user(
-        self,
-        create_new_user_request: "CreateNewUserRequest",
-        *,
-        timeout: Optional[float] = None,
-        deadline: Optional["Deadline"] = None,
-        metadata: Optional["MetadataLike"] = None
-    ) -> "CreateNewUserResponse":
+    """includes all gRPC functions available for the client frontend"""
+
+    async def create_new_user(self) -> CreateNewUserResponse:
+        """
+        create a new unique user id that must be persisted inside the frontend
+        database
+        """
+
+        request = CreateNewUserRequest()
+
         return await self._unary_unary(
-            "/ControllerService/CreateNewUser",
-            create_new_user_request,
+            "/.ControllerService/CreateNewUser",
+            request,
             CreateNewUserResponse,
-            timeout=timeout,
-            deadline=deadline,
-            metadata=metadata,
         )
 
-    async def get_home_overview_information(
-        self,
-        get_home_overview_information_request: "GetHomeOverviewInformationRequest",
-        *,
-        timeout: Optional[float] = None,
-        deadline: Optional["Deadline"] = None,
-        metadata: Optional["MetadataLike"] = None
-    ) -> "GetHomeOverviewInformationResponse":
+    async def get_home_overview_information(self) -> GetHomeOverviewInformationResponse:
+        """
+        returns the information displayed on the home page overview component
+        """
+
+        request = GetHomeOverviewInformationRequest()
+
         return await self._unary_unary(
-            "/ControllerService/GetHomeOverviewInformation",
-            get_home_overview_information_request,
+            "/.ControllerService/GetHomeOverviewInformation",
+            request,
             GetHomeOverviewInformationResponse,
-            timeout=timeout,
-            deadline=deadline,
-            metadata=metadata,
         )
 
-    async def create_dataset(
-        self,
-        create_dataset_request: "CreateDatasetRequest",
-        *,
-        timeout: Optional[float] = None,
-        deadline: Optional["Deadline"] = None,
-        metadata: Optional["MetadataLike"] = None
-    ) -> "CreateDatasetResponse":
+    async def create_dataset(self) -> CreateDatasetResponse:
+        """
+        create a new Dataset record in MongoDB and start the dataset analysis
+        """
+
+        request = CreateDatasetRequest()
+
         return await self._unary_unary(
-            "/ControllerService/CreateDataset",
-            create_dataset_request,
+            "/.ControllerService/CreateDataset",
+            request,
             CreateDatasetResponse,
-            timeout=timeout,
-            deadline=deadline,
-            metadata=metadata,
         )
 
-    async def get_datasets(
-        self,
-        get_datasets_request: "GetDatasetsRequest",
-        *,
-        timeout: Optional[float] = None,
-        deadline: Optional["Deadline"] = None,
-        metadata: Optional["MetadataLike"] = None
-    ) -> "GetDatasetsResponse":
+    async def get_datasets(self) -> GetDatasetsResponse:
+        """return a list of all Datasets records for a user id"""
+
+        request = GetDatasetsRequest()
+
         return await self._unary_unary(
-            "/ControllerService/GetDatasets",
-            get_datasets_request,
+            "/.ControllerService/GetDatasets",
+            request,
             GetDatasetsResponse,
-            timeout=timeout,
-            deadline=deadline,
-            metadata=metadata,
         )
 
-    async def get_dataset(
-        self,
-        get_dataset_request: "GetDatasetRequest",
-        *,
-        timeout: Optional[float] = None,
-        deadline: Optional["Deadline"] = None,
-        metadata: Optional["MetadataLike"] = None
-    ) -> "GetDatasetResponse":
+    async def get_dataset(self) -> GetDatasetResponse:
+        """return a Dataset record by user id and dataset id"""
+
+        request = GetDatasetRequest()
+
         return await self._unary_unary(
-            "/ControllerService/GetDataset",
-            get_dataset_request,
+            "/.ControllerService/GetDataset",
+            request,
             GetDatasetResponse,
-            timeout=timeout,
-            deadline=deadline,
-            metadata=metadata,
         )
 
-    async def delete_dataset(
-        self,
-        delete_dataset_request: "DeleteDatasetRequest",
-        *,
-        timeout: Optional[float] = None,
-        deadline: Optional["Deadline"] = None,
-        metadata: Optional["MetadataLike"] = None
-    ) -> "DeleteDatasetResponse":
+    async def delete_dataset(self) -> DeleteDatasetResponse:
+        """
+        delete a Dataset record and every related object inside MongoDB and
+        files on disc (Trainings, Models, Predictions)
+        """
+
+        request = DeleteDatasetRequest()
+
         return await self._unary_unary(
-            "/ControllerService/DeleteDataset",
-            delete_dataset_request,
+            "/.ControllerService/DeleteDataset",
+            request,
             DeleteDatasetResponse,
-            timeout=timeout,
-            deadline=deadline,
-            metadata=metadata,
         )
 
-    async def set_dataset_configuration(
-        self,
-        set_dataset_configuration_request: "SetDatasetConfigurationRequest",
-        *,
-        timeout: Optional[float] = None,
-        deadline: Optional["Deadline"] = None,
-        metadata: Optional["MetadataLike"] = None
-    ) -> "SetDatasetConfigurationResponse":
+    async def set_dataset_configuration(self) -> SetDatasetConfigurationResponse:
+        """
+        update the dataset file configuration and execute the dataset analysis
+        again
+        """
+
+        request = SetDatasetConfigurationRequest()
+
         return await self._unary_unary(
-            "/ControllerService/SetDatasetConfiguration",
-            set_dataset_configuration_request,
+            "/.ControllerService/SetDatasetConfiguration",
+            request,
             SetDatasetConfigurationResponse,
-            timeout=timeout,
-            deadline=deadline,
-            metadata=metadata,
         )
 
     async def set_dataset_column_schema_configuration(
         self,
-        set_dataset_column_schema_configuration_request: "SetDatasetColumnSchemaConfigurationRequest",
-        *,
-        timeout: Optional[float] = None,
-        deadline: Optional["Deadline"] = None,
-        metadata: Optional["MetadataLike"] = None
-    ) -> "SetDatasetColumnSchemaConfigurationResponse":
+    ) -> SetDatasetColumnSchemaConfigurationResponse:
+        """update a dataset column schema configuration"""
+
+        request = SetDatasetColumnSchemaConfigurationRequest()
+
         return await self._unary_unary(
-            "/ControllerService/SetDatasetColumnSchemaConfiguration",
-            set_dataset_column_schema_configuration_request,
+            "/.ControllerService/SetDatasetColumnSchemaConfiguration",
+            request,
             SetDatasetColumnSchemaConfigurationResponse,
-            timeout=timeout,
-            deadline=deadline,
-            metadata=metadata,
         )
 
-    async def create_training(
-        self,
-        create_training_request: "CreateTrainingRequest",
-        *,
-        timeout: Optional[float] = None,
-        deadline: Optional["Deadline"] = None,
-        metadata: Optional["MetadataLike"] = None
-    ) -> "CreateTrainingResponse":
+    async def create_training(self) -> CreateTrainingResponse:
+        """
+        create a new Training record in MongoDB and start the a new training
+        session
+        """
+
+        request = CreateTrainingRequest()
+
         return await self._unary_unary(
-            "/ControllerService/CreateTraining",
-            create_training_request,
+            "/.ControllerService/CreateTraining",
+            request,
             CreateTrainingResponse,
-            timeout=timeout,
-            deadline=deadline,
-            metadata=metadata,
         )
 
-    async def get_trainings(
-        self,
-        get_trainings_request: "GetTrainingsRequest",
-        *,
-        timeout: Optional[float] = None,
-        deadline: Optional["Deadline"] = None,
-        metadata: Optional["MetadataLike"] = None
-    ) -> "GetTrainingsResponse":
+    async def get_trainings(self) -> GetTrainingsResponse:
+        """return a list of all Trainings records for a user id"""
+
+        request = GetTrainingsRequest()
+
         return await self._unary_unary(
-            "/ControllerService/GetTrainings",
-            get_trainings_request,
+            "/.ControllerService/GetTrainings",
+            request,
             GetTrainingsResponse,
-            timeout=timeout,
-            deadline=deadline,
-            metadata=metadata,
         )
 
-    async def get_training(
-        self,
-        get_training_request: "GetTrainingRequest",
-        *,
-        timeout: Optional[float] = None,
-        deadline: Optional["Deadline"] = None,
-        metadata: Optional["MetadataLike"] = None
-    ) -> "GetTrainingResponse":
+    async def get_training(self) -> GetTrainingResponse:
+        """return a Training record by user id and training id"""
+
+        request = GetTrainingRequest()
+
         return await self._unary_unary(
-            "/ControllerService/GetTraining",
-            get_training_request,
+            "/.ControllerService/GetTraining",
+            request,
             GetTrainingResponse,
-            timeout=timeout,
-            deadline=deadline,
-            metadata=metadata,
         )
 
-    async def delete_training(
-        self,
-        delete_training_request: "DeleteTrainingRequest",
-        *,
-        timeout: Optional[float] = None,
-        deadline: Optional["Deadline"] = None,
-        metadata: Optional["MetadataLike"] = None
-    ) -> "DeleteTrainingResponse":
+    async def delete_training(self) -> DeleteTrainingResponse:
+        """
+        delete a Training record and every related object inside MongoDB and
+        files on disc (Models, Predictions)
+        """
+
+        request = DeleteTrainingRequest()
+
         return await self._unary_unary(
-            "/ControllerService/DeleteTraining",
-            delete_training_request,
+            "/.ControllerService/DeleteTraining",
+            request,
             DeleteTrainingResponse,
-            timeout=timeout,
-            deadline=deadline,
-            metadata=metadata,
         )
 
-    async def get_models(
-        self,
-        get_models_request: "GetModelsRequest",
-        *,
-        timeout: Optional[float] = None,
-        deadline: Optional["Deadline"] = None,
-        metadata: Optional["MetadataLike"] = None
-    ) -> "GetModelsResponse":
+    async def get_models(self) -> GetModelsResponse:
+        """
+        return a list of all Models records for a training id or dataset id and
+        user id
+        """
+
+        request = GetModelsRequest()
+
         return await self._unary_unary(
-            "/ControllerService/GetModels",
-            get_models_request,
+            "/.ControllerService/GetModels",
+            request,
             GetModelsResponse,
-            timeout=timeout,
-            deadline=deadline,
-            metadata=metadata,
         )
 
-    async def get_model(
-        self,
-        get_model_request: "GetModelRequest",
-        *,
-        timeout: Optional[float] = None,
-        deadline: Optional["Deadline"] = None,
-        metadata: Optional["MetadataLike"] = None
-    ) -> "GetModelResponse":
+    async def get_model(self) -> GetModelResponse:
+        """return a Model record by user id and training id"""
+
+        request = GetModelRequest()
+
         return await self._unary_unary(
-            "/ControllerService/GetModel",
-            get_model_request,
+            "/.ControllerService/GetModel",
+            request,
             GetModelResponse,
-            timeout=timeout,
-            deadline=deadline,
-            metadata=metadata,
         )
 
-    async def delete_model(
-        self,
-        delete_model_request: "DeleteModelRequest",
-        *,
-        timeout: Optional[float] = None,
-        deadline: Optional["Deadline"] = None,
-        metadata: Optional["MetadataLike"] = None
-    ) -> "DeleteModelResponse":
+    async def delete_model(self) -> DeleteModelResponse:
+        """
+        delete a Model record and every related object inside MongoDB and files
+        on disc (Predictions)
+        """
+
+        request = DeleteModelRequest()
+
         return await self._unary_unary(
-            "/ControllerService/DeleteModel",
-            delete_model_request,
+            "/.ControllerService/DeleteModel",
+            request,
             DeleteModelResponse,
-            timeout=timeout,
-            deadline=deadline,
-            metadata=metadata,
         )
 
-    async def start_explainer_dashboard(
-        self,
-        start_dashboard_request: "StartDashboardRequest",
-        *,
-        timeout: Optional[float] = None,
-        deadline: Optional["Deadline"] = None,
-        metadata: Optional["MetadataLike"] = None
-    ) -> "StartDashboardResponse":
+    async def start_explainer_dashboard(self) -> StartDashboardResponse:
+        """starts an ExplainerDashboard of a given model"""
+
+        request = StartDashboardRequest()
+
         return await self._unary_unary(
-            "/ControllerService/StartExplainerDashboard",
-            start_dashboard_request,
+            "/.ControllerService/StartExplainerDashboard",
+            request,
             StartDashboardResponse,
-            timeout=timeout,
-            deadline=deadline,
-            metadata=metadata,
         )
 
-    async def stop_explainer_dashboard(
-        self,
-        stop_dashboard_request: "StopDashboardRequest",
-        *,
-        timeout: Optional[float] = None,
-        deadline: Optional["Deadline"] = None,
-        metadata: Optional["MetadataLike"] = None
-    ) -> "StopDashboardResponse":
+    async def stop_explainer_dashboard(self) -> StopDashboardResponse:
+        """stops an ExplainerDashboard of a given model"""
+
+        request = StopDashboardRequest()
+
         return await self._unary_unary(
-            "/ControllerService/StopExplainerDashboard",
-            stop_dashboard_request,
+            "/.ControllerService/StopExplainerDashboard",
+            request,
             StopDashboardResponse,
-            timeout=timeout,
-            deadline=deadline,
-            metadata=metadata,
         )
 
     async def get_auto_ml_solutions_for_configuration(
         self,
-        get_auto_ml_solutions_for_configuration_request: "GetAutoMlSolutionsForConfigurationRequest",
-        *,
-        timeout: Optional[float] = None,
-        deadline: Optional["Deadline"] = None,
-        metadata: Optional["MetadataLike"] = None
-    ) -> "GetAutoMlSolutionsForConfigurationResponse":
+    ) -> GetAutoMlSolutionsForConfigurationResponse:
+        """
+        return a list of AutoML solutions compatible with the current
+        configuration
+        """
+
+        request = GetAutoMlSolutionsForConfigurationRequest()
+
         return await self._unary_unary(
-            "/ControllerService/GetAutoMlSolutionsForConfiguration",
-            get_auto_ml_solutions_for_configuration_request,
+            "/.ControllerService/GetAutoMlSolutionsForConfiguration",
+            request,
             GetAutoMlSolutionsForConfigurationResponse,
-            timeout=timeout,
-            deadline=deadline,
-            metadata=metadata,
         )
 
-    async def get_available_strategies(
-        self,
-        get_available_strategies_request: "GetAvailableStrategiesRequest",
-        *,
-        timeout: Optional[float] = None,
-        deadline: Optional["Deadline"] = None,
-        metadata: Optional["MetadataLike"] = None
-    ) -> "GetAvailableStrategiesResponse":
+    async def get_available_strategies(self) -> GetAvailableStrategiesResponse:
+        """
+        return a list of controller strategies available for the current
+        configuration
+        """
+
+        request = GetAvailableStrategiesRequest()
+
         return await self._unary_unary(
-            "/ControllerService/GetAvailableStrategies",
-            get_available_strategies_request,
+            "/.ControllerService/GetAvailableStrategies",
+            request,
             GetAvailableStrategiesResponse,
-            timeout=timeout,
-            deadline=deadline,
-            metadata=metadata,
         )
 
-    async def get_dataset_types(
-        self,
-        get_dataset_types_request: "GetDatasetTypesRequest",
-        *,
-        timeout: Optional[float] = None,
-        deadline: Optional["Deadline"] = None,
-        metadata: Optional["MetadataLike"] = None
-    ) -> "GetDatasetTypesResponse":
+    async def get_dataset_types(self) -> GetDatasetTypesResponse:
+        """return dataset types"""
+
+        request = GetDatasetTypesRequest()
+
         return await self._unary_unary(
-            "/ControllerService/GetDatasetTypes",
-            get_dataset_types_request,
+            "/.ControllerService/GetDatasetTypes",
+            request,
             GetDatasetTypesResponse,
-            timeout=timeout,
-            deadline=deadline,
-            metadata=metadata,
         )
 
-    async def get_ml_libraries_for_task(
-        self,
-        get_ml_libraries_for_task_request: "GetMlLibrariesForTaskRequest",
-        *,
-        timeout: Optional[float] = None,
-        deadline: Optional["Deadline"] = None,
-        metadata: Optional["MetadataLike"] = None
-    ) -> "GetMlLibrariesForTaskResponse":
+    async def get_ml_libraries_for_task(self) -> GetMlLibrariesForTaskResponse:
+        """
+        return all supported machine learning libraries for a specific task (by
+        searching supported AutoML)
+        """
+
+        request = GetMlLibrariesForTaskRequest()
+
         return await self._unary_unary(
-            "/ControllerService/GetMlLibrariesForTask",
-            get_ml_libraries_for_task_request,
+            "/.ControllerService/GetMlLibrariesForTask",
+            request,
             GetMlLibrariesForTaskResponse,
-            timeout=timeout,
-            deadline=deadline,
-            metadata=metadata,
         )
 
-    async def get_objects_information(
-        self,
-        get_objects_information_request: "GetObjectsInformationRequest",
-        *,
-        timeout: Optional[float] = None,
-        deadline: Optional["Deadline"] = None,
-        metadata: Optional["MetadataLike"] = None
-    ) -> "GetObjectsInformationResponse":
+    async def get_objects_information(self) -> GetObjectsInformationResponse:
+        """return all information fields of an object"""
+
+        request = GetObjectsInformationRequest()
+
         return await self._unary_unary(
-            "/ControllerService/GetObjectsInformation",
-            get_objects_information_request,
+            "/.ControllerService/GetObjectsInformation",
+            request,
             GetObjectsInformationResponse,
-            timeout=timeout,
-            deadline=deadline,
-            metadata=metadata,
         )
 
-    async def get_tasks_for_dataset_type(
-        self,
-        get_tasks_for_dataset_type_request: "GetTasksForDatasetTypeRequest",
-        *,
-        timeout: Optional[float] = None,
-        deadline: Optional["Deadline"] = None,
-        metadata: Optional["MetadataLike"] = None
-    ) -> "GetTasksForDatasetTypeResponse":
+    async def get_tasks_for_dataset_type(self) -> GetTasksForDatasetTypeResponse:
+        """return all supported AutoML tasks"""
+
+        request = GetTasksForDatasetTypeRequest()
+
         return await self._unary_unary(
-            "/ControllerService/GetTasksForDatasetType",
-            get_tasks_for_dataset_type_request,
+            "/.ControllerService/GetTasksForDatasetType",
+            request,
             GetTasksForDatasetTypeResponse,
-            timeout=timeout,
-            deadline=deadline,
-            metadata=metadata,
         )
 
-    async def get_auto_ml_parameters(
-        self,
-        get_auto_ml_parameters_request: "GetAutoMlParametersRequest",
-        *,
-        timeout: Optional[float] = None,
-        deadline: Optional["Deadline"] = None,
-        metadata: Optional["MetadataLike"] = None
-    ) -> "GetAutoMlParametersResponse":
+    async def get_auto_ml_parameters(self) -> GetAutoMlParametersResponse:
+        """return all parameters available for the current configuration"""
+
+        request = GetAutoMlParametersRequest()
+
         return await self._unary_unary(
-            "/ControllerService/GetAutoMlParameters",
-            get_auto_ml_parameters_request,
+            "/.ControllerService/GetAutoMlParameters",
+            request,
             GetAutoMlParametersResponse,
-            timeout=timeout,
-            deadline=deadline,
-            metadata=metadata,
         )
 
-    async def create_prediction(
-        self,
-        create_prediction_request: "CreatePredictionRequest",
-        *,
-        timeout: Optional[float] = None,
-        deadline: Optional["Deadline"] = None,
-        metadata: Optional["MetadataLike"] = None
-    ) -> "CreatePredictionResponse":
+    async def create_prediction(self) -> CreatePredictionResponse:
+        """
+        create a new Prediction record in MongoDB and start the a new
+        prediction session
+        """
+
+        request = CreatePredictionRequest()
+
         return await self._unary_unary(
-            "/ControllerService/CreatePrediction",
-            create_prediction_request,
+            "/.ControllerService/CreatePrediction",
+            request,
             CreatePredictionResponse,
-            timeout=timeout,
-            deadline=deadline,
-            metadata=metadata,
         )
 
-    async def get_predictions(
-        self,
-        get_predictions_request: "GetPredictionsRequest",
-        *,
-        timeout: Optional[float] = None,
-        deadline: Optional["Deadline"] = None,
-        metadata: Optional["MetadataLike"] = None
-    ) -> "GetPredictionsResponse":
+    async def get_predictions(self) -> GetPredictionsResponse:
+        """return a list of all Predictions record by model id and user id"""
+
+        request = GetPredictionsRequest()
+
         return await self._unary_unary(
-            "/ControllerService/GetPredictions",
-            get_predictions_request,
+            "/.ControllerService/GetPredictions",
+            request,
             GetPredictionsResponse,
-            timeout=timeout,
-            deadline=deadline,
-            metadata=metadata,
         )
 
-    async def get_prediction(
-        self,
-        get_prediction_request: "GetPredictionRequest",
-        *,
-        timeout: Optional[float] = None,
-        deadline: Optional["Deadline"] = None,
-        metadata: Optional["MetadataLike"] = None
-    ) -> "GetPredictionResponse":
+    async def get_prediction(self) -> GetPredictionResponse:
+        """return a Prediction by prediction id and user id"""
+
+        request = GetPredictionRequest()
+
         return await self._unary_unary(
-            "/ControllerService/GetPrediction",
-            get_prediction_request,
+            "/.ControllerService/GetPrediction",
+            request,
             GetPredictionResponse,
-            timeout=timeout,
-            deadline=deadline,
-            metadata=metadata,
         )
 
-    async def delete_prediction(
-        self,
-        delete_prediction_request: "DeletePredictionRequest",
-        *,
-        timeout: Optional[float] = None,
-        deadline: Optional["Deadline"] = None,
-        metadata: Optional["MetadataLike"] = None
-    ) -> "DeletePredictionResponse":
+    async def delete_prediction(self) -> DeletePredictionResponse:
+        """
+        delete a Prediction and every related object inside MongoDB and files
+        on disc
+        """
+
+        request = DeletePredictionRequest()
+
         return await self._unary_unary(
-            "/ControllerService/DeletePrediction",
-            delete_prediction_request,
+            "/.ControllerService/DeletePrediction",
+            request,
             DeletePredictionResponse,
-            timeout=timeout,
-            deadline=deadline,
-            metadata=metadata,
+        )
+
+    async def get_search_relevant_data(self) -> GetSearchRelevantDataResponse:
+        """
+        return a list of search relevant data available within the ML Ontology
+        """
+
+        request = GetSearchRelevantDataRequest()
+
+        return await self._unary_unary(
+            "/.ControllerService/GetSearchRelevantData",
+            request,
+            GetSearchRelevantDataResponse,
         )
 
 

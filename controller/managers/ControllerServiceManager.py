@@ -257,7 +257,7 @@ class ControllerServiceManager(ControllerServiceBase):
         #)
         self.__log.warn("delete_model: executed")
         return response
-    
+
     @inject
     async def start_explainer_dashboard(
         self, start_dashboard_request: "StartDashboardRequest",
@@ -270,7 +270,7 @@ class ControllerServiceManager(ControllerServiceBase):
         #)
         self.__log.warn("start_explainer_dashboard: executed")
         return response
-    
+
     @inject
     async def stop_explainer_dashboard(
         self, stop_dashboard_request: "StopDashboardRequest",
@@ -353,7 +353,7 @@ class ControllerServiceManager(ControllerServiceBase):
 						'This strategy truncates the training data if the time limit is relatively short for the size of the dataset.'
 						)
 				    )
-                    
+
                 if (not found) or ('irrelevant_features' in dataset['analysis'] and len(dataset['analysis']['irrelevant_features']) != 0):
                     result.strategies.append(
                         Strategy(
@@ -362,7 +362,7 @@ class ControllerServiceManager(ControllerServiceBase):
                         'This strategy will analyse the dataset for irrelevant dimensionality and reduces it to decrease complexity.'
                         )
                     )
-            
+
             result.strategies.append(
                 Strategy(
                 'pre_training.top_3_models',
@@ -378,7 +378,7 @@ class ControllerServiceManager(ControllerServiceBase):
                 'This strategy will run all adapters with only a small part of the data. Then it will train the best half solutions with more data again and so on, until one last adapter is trained with the full data.'
                 )
             )
-            
+
             result.strategies.append(
                 Strategy(
                 'preprocessing.pca_feature_extraction',
@@ -452,6 +452,17 @@ class ControllerServiceManager(ControllerServiceBase):
         #    self.__executor, ontology_manager.get_tasks_for_dataset_type, get_tasks_for_dataset_type_request
         #)
         self.__log.warn("get_auto_ml_parameters: executed")
+        return response
+
+    @inject
+    async def get_search_relevant_entities(
+        self, get_search_relevant_entities_request: "GetSearchRelevantEntitiesRequest",
+        ontology_manager: OntologyManager=Provide[Application.ressources.ontology_manager]
+    ) -> "GetSearchRelevantEntitiesResponse":
+        with MeasureDuration() as m:
+            response = ontology_manager.get_search_relevant_entities()
+
+        self.__log.warn("get_search_relevant_entities: executed")
         return response
 
 #endregion

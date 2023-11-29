@@ -95,6 +95,21 @@ namespace BlazorBoilerplate.Server.Managers
             }
         }
 
+        public async Task<ApiResponse> GetSearchRelevantData()
+        {
+            GetSearchRelevantDataResponseDto response;
+            try
+            {
+                var reply = _client.GetSearchRelevantData(new GetSearchRelevantDataRequestDto());
+                response = new GetSearchRelevantDataResponseDto(await _cacheManager.GetObjectInformationList(reply.SearchEntities.ToList()));
+                return new ApiResponse(Status200OK, null, response);
+            }
+            catch (Exception ex)
+            {
+                return new ApiResponse(Status404NotFound, ex.Message);
+            }
+        }
+
         public async Task<ApiResponse> GetAvailableStrategies(GetAvailableStrategiesRequestDto request)
         {
             // call grpc method
