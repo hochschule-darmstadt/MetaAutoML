@@ -60,7 +60,7 @@ service ControllerService {
 
   /*delete a Model record and every related object inside MongoDB and files on disc (Predictions)*/
   rpc DeleteModel(DeleteModelRequest) returns (DeleteModelResponse) {}
-  
+
   /*starts an ExplainerDashboard of a given model*/
   rpc StartExplainerDashboard(StartDashboardRequest) returns (StartDashboardResponse) {}
 
@@ -88,7 +88,10 @@ service ControllerService {
 
   /*return all parameters available for the current configuration*/
   rpc GetAutoMlParameters(GetAutoMlParametersRequest) returns (GetAutoMlParametersResponse) {}
-  
+
+  /*return a list of search relevant data available within the ML Ontology*/
+  rpc GetSearchRelevantData(GetSearchRelevantDataRequest) returns (GetSearchRelevantDataResponse) {}
+
   /*OMA-ML PREDICTION MESSAGES*/
   /* create a new Prediction record in MongoDB and start the a new prediction session */
   rpc CreatePrediction(CreatePredictionRequest) returns (CreatePredictionResponse) {}

@@ -100,9 +100,10 @@ namespace BlazorBoilerplate.Server.Managers
             GetSearchRelevantDataResponseDto response;
             try
             {
-                var reply = _client.GetSearchRelevantData(new GetSearchRelevantDataRequestDto());
-                response = new GetSearchRelevantDataResponseDto(await _cacheManager.GetObjectInformationList(reply.SearchEntities.ToList()));
-                return new ApiResponse(Status200OK, null, response);
+                var reply = _client.GetSearchRelevantData(new GetSearchRelevantDataRequest());
+                //TODO: use ontology keys to translate them and not whole object
+                //response = new GetSearchRelevantDataResponseDto(await _cacheManager.GetObjectInformationList(reply.SearchEntities.ToList()));
+                return new ApiResponse(Status200OK, null, "");
             }
             catch (Exception ex)
             {
