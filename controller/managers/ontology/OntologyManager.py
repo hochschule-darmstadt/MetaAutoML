@@ -264,14 +264,14 @@ class OntologyManager(object):
         """
         result = GetSearchRelevantDataResponse()
         self.__log.debug("get_search_relevant_data: get all search data")
-        q = prepareQuery(Queries.ONTOLOGY_QUERY_GET_ALL_SEARCH_ENTITIES,
+        q = prepareQuery(Queries.ONTOLOGY_QUERY_GET_ALL_SEARCH_DATA,
                         initNs={"skos": SKOS})
 
         queryResult = self.__execute_query(q)
         for row in queryResult:
             rowInstance = SearchRelevantData()
-            rowInstance.entity = self.__normalize_iri_to_colon(row.entitiy)
-            rowInstance.entity_class = self.__normalize_iri_to_colon(row.entity_class)
+            rowInstance.entity = self.__normalize_iri_to_colon(row.entity)
+            rowInstance.class_ = self.__normalize_iri_to_colon(getattr(row, "class"))
             rowInstance.label = self.__normalize_iri_to_colon(row.label)
             rowInstance.alt_labels = self.__normalize_iri_to_colon(row.alt_labels)
             rowInstance.comment = self.__normalize_iri_to_colon(row.comment)

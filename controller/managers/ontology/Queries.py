@@ -112,12 +112,12 @@ WHERE {
 """
 SPARQL query to retrieve all search relevant entities
 """
-ONTOLOGY_QUERY_GET_ALL_SEARCH_ENTITIES = """
+ONTOLOGY_QUERY_GET_ALL_SEARCH_DATA = """
         PREFIX : <http://h-da.de/ml-ontology/>
         PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
         PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 
-SELECT  ?entity ?class AS ?entity_class ?label (GROUP_CONCAT (?altLabel; separator=' | ') AS ?alt_labels) ?comment ?link
+SELECT  ?entity ?class ?label (GROUP_CONCAT (?altLabel; separator=' | ') AS ?alt_labels) ?comment ?link
 WHERE {
   ?entity a ?class ;
     skos:prefLabel ?label ;
