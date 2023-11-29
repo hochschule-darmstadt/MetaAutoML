@@ -256,14 +256,14 @@ class OntologyManager(object):
 
         return result
 
-    def get_search_relevant_entities(self) -> GetSearchRelevantDataResponse:
-        """Get search relevant entities available within the ML Ontology
+    def get_search_relevant_data(self) -> GetSearchRelevantDataResponse:
+        """Get search relevant data available within the ML Ontology
 
         Returns:
-            GetSearchRelevantDataResponse: Entities used for frontend search
+            GetSearchRelevantDataResponse: data used for frontend search
         """
         result = GetSearchRelevantDataResponse()
-        self.__log.debug("get_search_relevant_entities: get all search entities")
+        self.__log.debug("get_search_relevant_data: get all search data")
         q = prepareQuery(Queries.ONTOLOGY_QUERY_GET_ALL_SEARCH_ENTITIES,
                         initNs={"skos": SKOS})
 

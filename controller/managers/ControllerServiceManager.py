@@ -455,14 +455,14 @@ class ControllerServiceManager(ControllerServiceBase):
         return response
 
     @inject
-    async def get_search_relevant_entities(
-        self, get_search_relevant_entities_request: "GetSearchRelevantEntitiesRequest",
+    async def get_search_relevant_data(
+        self, get_search_relevant_data_request: "GetSearchRelevantDataRequest",
         ontology_manager: OntologyManager=Provide[Application.ressources.ontology_manager]
-    ) -> "GetSearchRelevantEntitiesResponse":
+    ) -> "GetSearchRelevantDataResponse":
         with MeasureDuration() as m:
-            response = ontology_manager.get_search_relevant_entities()
+            response = ontology_manager.get_search_relevant_data()
 
-        self.__log.warn("get_search_relevant_entities: executed")
+        self.__log.warn("get_search_relevant_data: executed")
         return response
 
 #endregion
