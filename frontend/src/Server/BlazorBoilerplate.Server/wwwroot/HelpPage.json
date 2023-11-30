@@ -1,0 +1,56 @@
+[
+    {
+        "PanelHeadline": "Help Panel 1",
+        "IntroductionSections": [
+            {
+                "Headline": "Dataset Upload",
+                "Text": "Lorem ipsum dolor sit amet...",
+                "Subsections": [
+                    {
+                        "SubHeadline": "Overview",
+                        "SubText": "Pellentesque habitant morbi..."
+                    },
+                    {
+                        "SubHeadline": "Details",
+                        "SubText": "Vestibulum tortor quam..."
+                    }
+                ],
+                "GIF": "path/to/gif1",
+                "Anchor": "dataset-upload-anchor"
+            },
+            {
+                "Headline": "Data Analysis",
+                "Text": "Maecenas tempus, tellus eget...",
+                "Subsections": [
+                    {
+                        "SubHeadline": "Charts",
+                        "SubText": "Nam quam nunc, blandit vel..."
+                    },
+                    {
+                        "SubHeadline": "Reports",
+                        "SubText": "Maecenas nec odio et ante..."
+                    }
+                ],
+                "GIF": "path/to/gif2",
+                "Anchor": "data-analysis-anchor"
+            }
+        ]
+    },
+    {
+        "PanelHeadline": "Help Panel 2",
+        "IntroductionSections": [
+            {
+                "Headline": "Another Section",
+                "Text": "Sed posuere consectetur est...",
+                "Subsections": [
+                    {
+                        "SubHeadline": "Intro",
+                        "SubText": "Donec ullamcorper nulla..."
+                    }
+                ],
+                "GIF": "path/to/gif3",
+                "Anchor": "another-section-anchor"
+            }
+        ]
+    }
+]
