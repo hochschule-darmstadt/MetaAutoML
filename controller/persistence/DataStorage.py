@@ -139,10 +139,15 @@ class DataStorage:
 
         if type == ":image":
             self.__log.debug("create_dataset: dataset is of image type: unzipping, deleting zip archive and remove .zip suffix...")
-            shutil.unpack_archive(filename_dest, os.path.join(self.__storage_dir, user_id, dataset_id))
+            dataset_dir = os.path.join(self.__storage_dir, user_id, dataset_id)
+            shutil.unpack_archive(filename_dest, dataset_dir)
             os.remove(filename_dest)
-            filename_dest = filename_dest.replace(".zip", "")
-            fileName = file_name.replace(".zip", "")
+            extracted_items = os.listdir(dataset_dir)
+            if len(extracted_items) == 1 and os.path.isdir(os.path.join(dataset_dir, extracted_items[0])):
+                filename_dest = os.path.join(dataset_dir, extracted_items[0])
+            else:
+                filename_dest = filename_dest.replace(".zip", "")
+
         if type == ":tabular" or type == ":text" or type == ":time_series":
             #generate preview of tabular and text dataset
             #previewDf = pd.read_csv(filename_dest)
