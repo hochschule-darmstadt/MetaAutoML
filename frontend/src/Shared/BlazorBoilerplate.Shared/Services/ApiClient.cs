@@ -193,9 +193,9 @@ namespace BlazorBoilerplate.Shared.Services
             return httpClient.PostJsonAsync<ApiResponseDto<GetAutoMlParametersResponseDto>>("api/Ontology/GetAutoMlParameters", request);
         }
 
-        public Task<ApiResponseDto> GetSearchRelevantData()
+        public Task<ApiResponseDto<GetSearchRelevantDataResponseDto>> GetSearchRelevantData()
         {
-            return httpClient.GetJsonAsync<ApiResponseDto>("api/Ontology/GetSearchRelevantData");
+            return httpClient.GetJsonAsync<ApiResponseDto<GetSearchRelevantDataResponseDto>>("api/Ontology/GetSearchRelevantData");
         }
         #endregion
 
