@@ -54,7 +54,7 @@
                                     <InputFile id="fileInput" OnChange="@FilesReady" hidden accept="@AcceptedFileType" />
                                     <MudButton HtmlTag="label"
                                                Variant="MudBlazor.Variant.Outlined"
-                                               
+
                                                StartIcon="@Icons.Material.Filled.Upload"
                                                for="fileInput"
                                                Class="mt-1"
@@ -66,7 +66,7 @@
                                     <MudTextField Style=" font-weight: bold; font-size: 12pt;" Variant="MudBlazor.Variant.Outlined" TextChanged="setURLUploadTrue" Disabled="@IsURLDisabled" @bind-Value="@Url" Label="@L["ENTER URL"]" ></MudTextField>
                                 </MudStack>
                                 <MudTextField @bind-Value="@fileUploader.UploadDatasetRequest.DatasetName" Disabled="@(_uploadReady)" Label="@L["Dataset Name"]" Class="mt-1"></MudTextField>
-          
+
                             @if (_isLoaderClosed == false)
                             {
                                 <MudProgressLinear Color="Color.Secondary" Indeterminate="true" />
@@ -278,7 +278,6 @@
             {
                 _datasetTypes = Newtonsoft.Json.JsonConvert.DeserializeObject<GetDatasetTypesResponseDto>(apiResponse.Result.ToString());
                 StateHasChanged();
-                viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
             }
             else
             {

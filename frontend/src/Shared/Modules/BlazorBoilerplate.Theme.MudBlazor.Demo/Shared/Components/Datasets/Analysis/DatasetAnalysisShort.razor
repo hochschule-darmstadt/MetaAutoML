@@ -91,7 +91,6 @@
             {
                 _analysis = Newtonsoft.Json.JsonConvert.DeserializeObject<GetDatasetAnalysisResponseDto>(apiResponse.Result.ToString());
                 StateHasChanged();
-                viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
             }
             else
             {

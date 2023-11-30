@@ -101,7 +101,6 @@
             {
                 _explanation = Newtonsoft.Json.JsonConvert.DeserializeObject<GetModelExplanationResponseDto>(apiResponse.Result.ToString());
                 StateHasChanged();
-                viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
             }
             else
             {
