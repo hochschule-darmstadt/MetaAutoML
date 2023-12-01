@@ -1,11 +1,11 @@
 [
     {
         "PanelHeadline": "Introduction",
-        "IntroductionSections": [
+        "Sections": [
             {
                 "Headline": "Dataset upload",
                 "Text": "Click on UPLOAD to upload a new dataset to OMA-ML from your disk or from the internet. You can upload tabular data, text, images or time series. If you have selected a dataset for the upload you can change the filename in the textfield. By default, the previous filename is used.",
-                "GIF": "_content/BlazorBoilerplate.Theme.MudBlazor/images/FlowChart.png",
+                "GIF": "_content/BlazorBoilerplate.Theme.MudBlazor/images/UploadDataset.gif",
                 "Anchor": "datasetUpload"
             },
             {
@@ -19,12 +19,6 @@
                 "Text": "A ML model is a computational algorithm that learns patterns and relationships within the training dataset in order to make predictions. During the Model selection process the build-in AutoML solutions will use different approaches to evaluate different ML models to determine which ML model is the most suitable for a given training dataset.",
                 "GIF": "_content/BlazorBoilerplate.Theme.MudBlazor/images/ModelSelection.gif",
                 "Anchor": "modelselection"
-            },
-            {
-                "Headline": "Preprocessing",
-                "Text": "",
-                "GIF": "_content/BlazorBoilerplate.Theme.MudBlazor/images/Preprocessing.gif",
-                "Anchor": "preprocessing"
             },
             {
                 "Headline": "Training",
@@ -48,7 +42,7 @@
     },
     {
         "PanelHeadline": "Pages",
-        "IntroductionSections": [
+        "Sections": [
             {
                 "Headline": "Home",
                 "Text": "When you open the website, you first get to the home page. This page already provides an initial overview of previously uploaded datasets and completed trainings.",
@@ -72,6 +66,7 @@
             {
                 "Headline": "Datasets",
                 "Text": "All datasets that have been uploaded so far are listed on the datasets page. There is also the option to upload further datasets.",
+                "Subsections": [],
                 "GIF": "_content/BlazorBoilerplate.Theme.MudBlazor/images/Preprocessing.gif",
                 "Anchor": "datasets"
             },
@@ -106,18 +101,21 @@
             {
                 "Headline": "Dataset configure",
                 "Text": "Various adjustments can be made to the dataset in the Dataset Configuration. Firstly, the use of the header can be deactivated. In addition, rows can be ignored by changing the number in the Start row field. The column separator can be set as a semicolon, space or tab in addition to a comma. The encoding is UTF-8 by default and can also be latin-1, UTF-16 or UTF-32. The datetime format can be adjusted in the corresponding text field. In addition, the escape character, decimal character and thousand separator can be customized. The data type and role for the individual columns can be set in the table directly below the header. The following role options are available: None, Target, Ignore and Index.",
+                "Subsections": [],
                 "GIF": "_content/BlazorBoilerplate.Theme.MudBlazor/images/Training.gif",
                 "Anchor": "datasetconfigure"
             },
             {
                 "Headline": "Trainings",
                 "Text": "The training page lists all training that have been started so far. If you click on the start time of a training, you will be taken to the details page of this training.",
+                "Subsections": [],
                 "GIF": "_content/BlazorBoilerplate.Theme.MudBlazor/images/Training.gif",
                 "Anchor": "trainings"
             },
             {
                 "Headline": "Train - Dataset preparation",
                 "Text": "ML training is the process of condensing implicit information in a dataset into a generated ML model. This is the first step of the training wizard. Here you can modify pre-configured datatypes of columns in tabular datasets. You can also assign roles, in particular whether a column is an ID (and hence be ignored for training) or is the training target.",
+                "Subsections": [],
                 "GIF": "_content/BlazorBoilerplate.Theme.MudBlazor/images/Deployment.gif",
                 "Anchor": "traindatasetpreparation"
             },
@@ -144,12 +142,14 @@
             {
                 "Headline": "Training Detail",
                 "Text": "This page shows the leaderboard for an ML training. During training, various AutoML solutions are executed in parallel. This is indicated by a spinning wheel. Whenever an AutoML solution has terminated, the result is displayed. The top performing models are shown first in the leaderboard. Clicking on the light bulb in the Model column takes you to the respective model detail view.",
+                "Subsections": [],
                 "GIF": "_content/BlazorBoilerplate.Theme.MudBlazor/images/Prediction.gif",
                 "Anchor": "trainingdetail"
             },
             {
                 "Headline": "Models",
                 "Text": "This page shows all models that have been trained for this dataset so far, potentially in several training sessions.",
+                "Subsections": [],
                 "GIF": "_content/BlazorBoilerplate.Theme.MudBlazor/images/Prediction.gif",
                 "Anchor": "models"
             },

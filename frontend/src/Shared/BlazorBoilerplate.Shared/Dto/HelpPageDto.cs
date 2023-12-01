@@ -4,7 +4,12 @@ namespace BlazorBoilerplate.Shared.Dto
     public class HelpPageDto
     {
         public string PanelHeadline { get; set; }
-        public List<Section> IntroductionSections { get; set; }
+        public List<Section> Sections { get; set; }
+        public HelpPageDto()
+        {
+            PanelHeadline = "";
+            Sections = new List<Section>();
+        }
     }
     public class Subsection
     {
