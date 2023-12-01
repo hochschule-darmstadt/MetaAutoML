@@ -362,7 +362,7 @@
         //StateHasChanged();
         TourService userTour = new TourService(GTourService);
         await userTour.checkIfUserTourIsActivated(navigationManager.Uri);
-        GetJSONContent();
+        this.helpTabPanelList= await apiClient.GetHelpPageJson();
 
     }
 
@@ -386,12 +386,7 @@
         }
 
     }
-    private async void GetJSONContent()
-    {
-        List<HelpPageDto> apiResponse = await apiClient.GetHelpPageJson();
-        Console.Write(apiResponse);
-       
-    }
+
 
 
 
