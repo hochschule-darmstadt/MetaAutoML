@@ -131,7 +131,12 @@
 
 @code {
 	public string Url;
-	private bool _fileUpload = true;
+    private enum UploadSource
+    {
+        Local,
+        URL
+    }
+    UploadSource _uploadSource = UploadSource.Local;
 
 	[Parameter]
 	public EventCallback OnUploadCompletedCallback { get; set; }
@@ -166,7 +171,7 @@
 
 	private void setURLUploadTrue()
 	{
-		_fileUpload = false;
+        _uploadSource = UploadSource.URL;
 		if (String.IsNullOrEmpty(Url)){
 			IsSelectFileDisabled = false;
 		}
@@ -179,7 +184,7 @@
 
 	private void setLocalUploadTrue()
 	{
-		_fileUpload = true;
+        _uploadSource = UploadSource.Local;
 		IsURLDisabled = true;
 		_uploadReady = true;
 	}
@@ -368,7 +373,7 @@
     }
     private async Task Upload()
     {
-        if (!_fileUpload)
+        if (_uploadSource == UploadSource.URL)
         {
 
             fileUploader.UploadDatasetRequest.FileNameOrURL = Url;
@@ -380,7 +385,7 @@
 
         try
         {
-            if (_fileUpload){
+            if (_uploadSource == UploadSource.Local){
                 if (fileUploader.IsPredictionDatasetToUpload == true)
                 {
                     if (string.IsNullOrEmpty(fileUploader.UploadPredictionRequest.FileName))
@@ -407,7 +412,7 @@
                         return;
                     }
                 }
-            } else if (!_fileUpload)
+            } else if (_uploadSource == UploadSource.URL)
             {
                 if (string.IsNullOrEmpty(fileUploader.UploadDatasetRequest.DatasetName))
                 {
@@ -421,7 +426,7 @@
             UploadText = L["Preparing upload..."];
             StateHasChanged();
 
-            if (!_fileUpload)
+            if (_uploadSource == UploadSource.URL)
             {
                 string _downloadUrl = fileUploader.GetDownloadUrl(Url);
                 fileUploader.UploadDatasetFromURL(_downloadUrl, AcceptedFileType);
