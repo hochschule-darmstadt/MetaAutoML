@@ -95,28 +95,28 @@
                         "SubText": "Under Top 3 models you will find the top 3 models that have been trained so far."
                     }
                 ],
-                "GIF": "_content/BlazorBoilerplate.Theme.MudBlazor/images/Training.gif",
+                "GIF": "_content/BlazorBoilerplate.Theme.MudBlazor/images/DatasetDetail.gif",
                 "Anchor": "datasetdetail"
             },
             {
                 "Headline": "Dataset configure",
                 "Text": "Various adjustments can be made to the dataset in the Dataset Configuration. Firstly, the use of the header can be deactivated. In addition, rows can be ignored by changing the number in the Start row field. The column separator can be set as a semicolon, space or tab in addition to a comma. The encoding is UTF-8 by default and can also be latin-1, UTF-16 or UTF-32. The datetime format can be adjusted in the corresponding text field. In addition, the escape character, decimal character and thousand separator can be customized. The data type and role for the individual columns can be set in the table directly below the header. The following role options are available: None, Target, Ignore and Index.",
                 "Subsections": [],
-                "GIF": "_content/BlazorBoilerplate.Theme.MudBlazor/images/Training.gif",
+                "GIF": "_content/BlazorBoilerplate.Theme.MudBlazor/images/Preprocessing.gif",
                 "Anchor": "datasetconfigure"
             },
             {
                 "Headline": "Trainings",
                 "Text": "The training page lists all training that have been started so far. If you click on the start time of a training, you will be taken to the details page of this training.",
                 "Subsections": [],
-                "GIF": "_content/BlazorBoilerplate.Theme.MudBlazor/images/Training.gif",
+                "GIF": "_content/BlazorBoilerplate.Theme.MudBlazor/images/Trainings.gif",
                 "Anchor": "trainings"
             },
             {
                 "Headline": "Train - Dataset preparation",
                 "Text": "ML training is the process of condensing implicit information in a dataset into a generated ML model. This is the first step of the training wizard. Here you can modify pre-configured datatypes of columns in tabular datasets. You can also assign roles, in particular whether a column is an ID (and hence be ignored for training) or is the training target.",
                 "Subsections": [],
-                "GIF": "_content/BlazorBoilerplate.Theme.MudBlazor/images/Deployment.gif",
+                "GIF": "_content/BlazorBoilerplate.Theme.MudBlazor/images/Train-DatasetPreparation.gif",
                 "Anchor": "traindatasetpreparation"
             },
             {
@@ -136,21 +136,21 @@
                         "SubText": " Training strategies are intelligent helpers that perform best practices in data science for you automatically. Select strategies that you want to enable for this training."
                     }
                 ],
-                "GIF": "_content/BlazorBoilerplate.Theme.MudBlazor/images/Prediction.gif",
+                "GIF": "_content/BlazorBoilerplate.Theme.MudBlazor/images/Train-Configuration.gif",
                 "Anchor": "trainconfiguration"
             },
             {
                 "Headline": "Training Detail",
                 "Text": "This page shows the leaderboard for an ML training. During training, various AutoML solutions are executed in parallel. This is indicated by a spinning wheel. Whenever an AutoML solution has terminated, the result is displayed. The top performing models are shown first in the leaderboard. Clicking on the light bulb in the Model column takes you to the respective model detail view.",
                 "Subsections": [],
-                "GIF": "_content/BlazorBoilerplate.Theme.MudBlazor/images/Prediction.gif",
+                "GIF": "_content/BlazorBoilerplate.Theme.MudBlazor/images/TrainingDetail.gif",
                 "Anchor": "trainingdetail"
             },
             {
                 "Headline": "Models",
                 "Text": "This page shows all models that have been trained for this dataset so far, potentially in several training sessions.",
                 "Subsections": [],
-                "GIF": "_content/BlazorBoilerplate.Theme.MudBlazor/images/Prediction.gif",
+                "GIF": "_content/BlazorBoilerplate.Theme.MudBlazor/images/Models.gif",
                 "Anchor": "models"
             },
             {
@@ -182,7 +182,7 @@
                         "SubText": "Here you can inspect the detail output of the AutoML solution that has been used for training this ML model."
                     }
                 ],
-                "GIF": "_content/BlazorBoilerplate.Theme.MudBlazor/images/Prediction.gif",
+                "GIF": "_content/BlazorBoilerplate.Theme.MudBlazor/images/ModelDetail.gif",
                 "Anchor": "modeldetail"
             }
         ]
