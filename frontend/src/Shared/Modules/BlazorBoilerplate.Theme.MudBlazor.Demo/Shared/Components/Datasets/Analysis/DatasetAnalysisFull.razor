@@ -25,7 +25,7 @@
                     {
 
                         @if (@category.CategoryTitle == "Correlation Matrix")
-                        {   
+                        {
                             <MudItem xs="12" Style="display: grid; justify-content: center;">
                                 <MudText Typo="Typo.h5">@L[category.CategoryTitle]</MudText>
                             </MudItem>
@@ -35,10 +35,10 @@
                             <MudItem xs="12" Style="display: grid; justify-content: center; padding: 0 20% 0 20%;">
                                 <MudText Typo="Typo.body2">@category.Analyses[0].Description</MudText>
                             </MudItem>
-                         
+
                         }
                         else
-                        {   
+                        {
                             <MudDivider Class="mud-width-full" Style="margin-top: 40px;" />
                             <MudItem xs="12" Style="display: grid; justify-content: center;">
                                 <MudText Typo="Typo.h5">@L[category.CategoryTitle]</MudText>
@@ -107,7 +107,6 @@
             {
                 _analysis = Newtonsoft.Json.JsonConvert.DeserializeObject<GetDatasetAnalysisResponseDto>(apiResponse.Result.ToString());
                 StateHasChanged();
-                viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
             }
             else
             {

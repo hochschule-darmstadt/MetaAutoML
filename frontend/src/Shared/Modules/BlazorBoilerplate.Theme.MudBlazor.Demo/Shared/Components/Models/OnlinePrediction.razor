@@ -68,14 +68,14 @@
                                 <MudTd>
                                     @if (context.Status == "completed")
                                     {
-                                        <MudButton StartIcon="@Icons.Filled.CloudDownload" OnClick="@(() => DownlaodPrediction(context))" Variant="MudBlazor.Variant.Filled" Color="Color.Secondary" Size="Size.Small">@L["Download predictions"]</MudButton>
+                                        <MudButton StartIcon="@Icons.Material.Filled.CloudDownload" OnClick="@(() => DownlaodPrediction(context))" Variant="MudBlazor.Variant.Filled" Color="Color.Secondary" Size="Size.Small">@L["Download predictions"]</MudButton>
                                         <MudButton StartIcon="@Icons.Material.Filled.ViewList" OnClick="@(() => OpenPredictionResults(context))" Variant="MudBlazor.Variant.Filled" Color="Color.Secondary" Size="Size.Small">
                                             @L["View predictions"]
                                         </MudButton>
                                     }
                                     else
                                     {
-                                        <MudButton StartIcon="@Icons.Filled.CloudDownload" Variant="MudBlazor.Variant.Filled" Color="Color.Secondary" Size="Size.Small" Disabled="true">@L["Download predictions"]</MudButton>
+                                        <MudButton StartIcon="@Icons.Material.Filled.CloudDownload" Variant="MudBlazor.Variant.Filled" Color="Color.Secondary" Size="Size.Small" Disabled="true">@L["Download predictions"]</MudButton>
                                     }
                                 </MudTd>
                             </RowTemplate>
@@ -205,13 +205,14 @@
                         if (!string.IsNullOrEmpty(jsonString))
                         {
                             string tableHeader = jsonString.Split("\n")[0];
-                            string[] tableContent = jsonString.Split("\n").Skip(1).ToArray();
+                            string[] tableContent = jsonString.Split("\n");
+                            long tableRowCount = tableContent.Length - 1;
+                            tableContent = tableContent.Skip(1).Take(20).ToArray();
                             parameters.Add("TableHeader", tableHeader);
                             parameters.Add("TableContent", tableContent);
+                            parameters.Add("TableRowCount", tableRowCount);
+                            parameters.Add("PredictionId", predictionDataset.Id);
                         }
-
-
-
 
                         DialogService.Show<PredictionResult>("Predictions", parameters, options);
 

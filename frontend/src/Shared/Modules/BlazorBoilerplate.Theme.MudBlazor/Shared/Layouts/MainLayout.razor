@@ -5,11 +5,10 @@
 @using Radzen
 @using Radzen.Blazor
 
-
 <CascadingValue Value="this">
     <MudLayout>
         <MudAppBar Elevation="1">
-            <MudIconButton Icon="@navMenuIcon" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
+			<MudIconButton Icon="@navMenuIcon" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
             <MudSpacer />
             <MudText Color="Color.Dark" Typo="Typo.h6" Style="font-size: clamp(0.9rem, -0.425rem + 3.4vw, 1.5rem);">OMA-ML: Effective Machine Learning made easy!</MudText>
             <MudSpacer />
@@ -18,10 +17,10 @@
         <MudDrawer @bind-Open="@_navMenuOpened" Elevation="2">
             <MudDrawerHeader >
                     <a href="/" title="@appState.AppName Home">
-                <div class="drawer-logo">
-                        <img alt="@appState.AppName" class="logo-img" src=@($"{Module.ContentPath}/images/oma-logo.svg") title="@appState.AppName">
-                        <MudText Typo="Typo.h4" Color="Color.Primary" style="font-family: 'Noto Sans'" Class="docs-brand-text">@appState.AppName</MudText>
-                </div>
+						<div class="drawer-logo">
+							<img alt="@appState.AppName" class="logo-img" src=@($"{Module.ContentPath}/images/oma-logo.svg") title="@appState.AppName">
+							<MudText Typo="Typo.h4" Color="Color.Primary" Class="docs-brand-text">@appState.AppName</MudText>
+						</div>
                     </a>
             </MudDrawerHeader>
             <NavMenu />
@@ -37,7 +36,7 @@
             <Footer />
         </MudMainContent>
         <MudScrollToTop TopOffset="400" Style="z-index:2000;">
-            <MudFab Icon="@Icons.Material.Filled.KeyboardArrowUp" Color="Color.Primary" />
+            <MudFab StartIcon="@Icons.Material.Filled.KeyboardArrowUp" Color="Color.Primary" />
         </MudScrollToTop>
     </MudLayout>
 </CascadingValue>
@@ -45,7 +44,7 @@
 
 @code {
     bool _navMenuOpened = true;
-    string navMenuIcon = Icons.Filled.ArrowBackIos;
+	string navMenuIcon = Icons.Material.Filled.Menu;
 
     [CascadingParameter]
     Task<AuthenticationState> authenticationStateTask { get; set; }
@@ -59,17 +58,11 @@
             var profile = await appState.GetUserProfile();
 
             _navMenuOpened = profile.IsNavOpen;
-        }
+		}
     }
 
     private void DrawerToggle()
     {
         _navMenuOpened = !_navMenuOpened;
-        @if (_navMenuOpened == true) {
-            navMenuIcon = Icons.Filled.ArrowBackIos;
-        }
-        else {
-            navMenuIcon = Icons.Filled.ArrowForwardIos;
-        }
     }
 }

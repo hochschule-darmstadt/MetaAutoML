@@ -5,7 +5,10 @@
 @inject ISnackbar Snackbar
 @inject IApiClient apiClient
 @inject IViewNotifier viewNotifier
+@inject AuthenticationStateProvider authStateProvider
 @using Radzen
+@using BlazorBoilerplate.Shared.Models.Account
+@using Microsoft.AspNetCore.Components
 
 @if (fileUploader.IsUploading == true)
 {
@@ -14,11 +17,6 @@
         <MudProgressLinear Color="Color.Secondary" Value="@Progress" Class="my-7" />
     </MudStack>
 }
-
-
-
-
-
 
 <MudDialog @bind-IsVisible="fileUploader.IsUploadDatasetDialogOpen">
     <DialogContent>
@@ -42,9 +40,6 @@
             </CardHeaderContent>
         </MudCardHeader>
         <MudStack>
-           
-
-
                                 <MudSelect Label="@L["Select the data format of your dataset"]" T="string" ValueChanged="@OnDatasetTypeSelectChanged" Style="width: 150px">
                                     @foreach (var item in _datasetTypes.DatasetTypes)
                                     {
@@ -59,7 +54,7 @@
                                     <InputFile id="fileInput" OnChange="@FilesReady" hidden accept="@AcceptedFileType" />
                                     <MudButton HtmlTag="label"
                                                Variant="MudBlazor.Variant.Outlined"
-                                               
+
                                                StartIcon="@Icons.Material.Filled.Upload"
                                                for="fileInput"
                                                Class="mt-1"
@@ -71,7 +66,7 @@
                                     <MudTextField Style=" font-weight: bold; font-size: 12pt;" Variant="MudBlazor.Variant.Outlined" TextChanged="setURLUploadTrue" Disabled="@IsURLDisabled" @bind-Value="@Url" Label="@L["ENTER URL"]" ></MudTextField>
                                 </MudStack>
                                 <MudTextField @bind-Value="@fileUploader.UploadDatasetRequest.DatasetName" Disabled="@(_uploadReady)" Label="@L["Dataset Name"]" Class="mt-1"></MudTextField>
-          
+
                             @if (_isLoaderClosed == false)
                             {
                                 <MudProgressLinear Color="Color.Secondary" Indeterminate="true" />
@@ -137,129 +132,141 @@
 
 
 @code {
-    public string Url;
-    private bool _fileUpload = true;
+	public string Url;
+	private bool _fileUpload = true;
 
-    [Parameter]
-    public EventCallback OnUploadCompletedCallback { get; set; }
-    public bool IsSelectFileDisabled { get; set; } = true;
-    public bool IsURLDisabled { get; set; } = true;
-    public string AcceptedFileType { get; set; } = "";
-    public int Progress { get; set; }
-    public string UploadText { get; set; } = "";
+	[Parameter]
+	public EventCallback OnUploadCompletedCallback { get; set; }
+	public bool IsSelectFileDisabled { get; set; } = true;
+	public bool IsURLDisabled { get; set; } = true;
+	public string AcceptedFileType { get; set; } = "";
+	public int Progress { get; set; }
+	public string UploadText { get; set; } = "";
 
-    public int Order { get => 1; }
-    public string IntoComponent { get => "DrawerFooter"; }
+	public int Order { get => 1; }
+	public string IntoComponent { get => "DrawerFooter"; }
 
-    private GetDatasetTypesResponseDto _datasetTypes;
-    private bool _uploadReady = true;
-    private bool _isLoaderClosed = true;
+	private GetDatasetTypesResponseDto _datasetTypes;
+	private bool _uploadReady = true;
+	private bool _isLoaderClosed = true;
 
+	[CascadingParameter]
+	Task<AuthenticationState> authenticationStateTask { get; set; }
 
-    private void setURLUploadTrue()
-    {
-        _fileUpload = false;
-        if (String.IsNullOrEmpty(Url)){
-            IsSelectFileDisabled = false;
-        }
-        else{
-            IsSelectFileDisabled = true;
-        }
+	UserViewModel userViewModel;
 
-        DisableUpload();
-    }
+	protected override async Task OnParametersSetAsync()
+	{
+		userViewModel = null;
+		var user = (await authenticationStateTask).User;
 
-    private void setLocalUploadTrue()
-    {
-        _fileUpload = true;
-        IsURLDisabled = true;
-        _uploadReady = true;
+		if (user.Identity.IsAuthenticated){
+			userViewModel = await ((IdentityAuthenticationStateProvider)authStateProvider).GetUserViewModel();
+			LoadData();
+		}
+	}
 
-    }
+	private void setURLUploadTrue()
+	{
+		_fileUpload = false;
+		if (String.IsNullOrEmpty(Url)){
+			IsSelectFileDisabled = false;
+		}
+		else{
+			IsSelectFileDisabled = true;
+		}
 
-    private void DisableUpload()
-    {
-        //TODO validate URL and then set _uploadReady false
-        if(Url.Length!=0){
-            _uploadReady = false;
-        }
-        else {
-            _uploadReady = true;
-        }
+		DisableUpload();
+	}
 
+	private void setLocalUploadTrue()
+	{
+		_fileUpload = true;
+		IsURLDisabled = true;
+		_uploadReady = true;
+	}
 
-    }
+	private void DisableUpload()
+	{
+	//TODO validate URL and then set _uploadReady false
+		if(Url.Length!=0){
+			_uploadReady = false;
+		}
+		else {
+			_uploadReady = true;
+		}
+	}
 
-    private void UpdateProgress()
-    {
-        if(fileUploader.IsPredictionDatasetToUpload == true)
-        {
+	private void UpdateProgress()
+	{
+		if(fileUploader.IsPredictionDatasetToUpload == true)
+		{
 
-            //Reset FileUploader after completing upload, (+1 to total to compensate to loop offset)
-            if ((fileUploader.UploadPredictionRequest.ChunkNumber == (fileUploader.UploadPredictionRequest.TotalChunkNumber + 1)) && (fileUploader.IsUploading == false))
-            {
-                fileUploader.UploadPredictionRequest = new UploadPredictionRequestDto();
-                IsSelectFileDisabled = true;
-                IsURLDisabled = true;
-                _uploadReady = true;
-            }
-            else
-            {
-                float divideResult = (float)fileUploader.UploadPredictionRequest.ChunkNumber / (float)fileUploader.UploadPredictionRequest.TotalChunkNumber;
-                Progress = (int)(divideResult * 100);
-                //if chunk amount is bigger 100 display after decimal percentage
-                if (fileUploader.UploadPredictionRequest.TotalChunkNumber > 100)
-                {
-                    UploadText = L["Uploading {0} {1}", fileUploader.UploadPredictionRequest.FileName, String.Format("{0:0.00}", divideResult * 100)];
-                }
-                else
-                {
-                    UploadText = L["Uploading {0} {1}", fileUploader.UploadPredictionRequest.FileName, String.Format("{0:0}", divideResult * 100)];
-                }
-            }
-        }
-        else
-        {
-            //Reset FileUploader after completing upload, (+1 to total to compensate to loop offset)
-            if ((fileUploader.UploadDatasetRequest.ChunkNumber == (fileUploader.UploadDatasetRequest.TotalChunkNumber + 1)) && (fileUploader.IsUploading == false))
-            {
-                fileUploader.UploadDatasetRequest = new UploadDatasetRequestDto();
-                IsSelectFileDisabled = true;
-                IsURLDisabled = true;
-                _uploadReady = true;
-            }
-            else
-            {
-                float divideResult = (float)fileUploader.UploadDatasetRequest.ChunkNumber / (float)fileUploader.UploadDatasetRequest.TotalChunkNumber;
-                Progress = (int)(divideResult * 100);
-                //if chunk amount is bigger 100 display after decimal percentage
-                if (fileUploader.UploadDatasetRequest.TotalChunkNumber > 100)
-                {
-                    UploadText = L["Uploading {0} {1}", fileUploader.UploadDatasetRequest.DatasetName, String.Format("{0:0.00}", divideResult * 100)];
-                }
-                else
-                {
-                    UploadText = L["Uploading {0} {1}", fileUploader.UploadDatasetRequest.DatasetName, String.Format("{0:0}", divideResult * 100)];
-                }
-            }
-        }
+		//Reset FileUploader after completing upload, (+1 to total to compensate to loop offset)
+			if ((fileUploader.UploadPredictionRequest.ChunkNumber == (fileUploader.UploadPredictionRequest.TotalChunkNumber + 1)) && (fileUploader.IsUploading == false))
+			{
+				fileUploader.UploadPredictionRequest = new UploadPredictionRequestDto();
+				IsSelectFileDisabled = true;
+				IsURLDisabled = true;
+				_uploadReady = true;
+			}
+			else
+			{
+				float divideResult = (float)fileUploader.UploadPredictionRequest.ChunkNumber / (float)fileUploader.UploadPredictionRequest.TotalChunkNumber;
+				Progress = (int)(divideResult * 100);
+				//if chunk amount is bigger 100 display after decimal percentage
+				if (fileUploader.UploadPredictionRequest.TotalChunkNumber > 100)
+				{
+					UploadText = L["Uploading {0} {1}", fileUploader.UploadPredictionRequest.FileName, String.Format("{0:0.00}", divideResult * 100)];
+				}
+				else
+				{
+					UploadText = L["Uploading {0} {1}", fileUploader.UploadPredictionRequest.FileName, String.Format("{0:0}", divideResult * 100)];
+				}
+			}
+		}
+		else
+		{
+		//Reset FileUploader after completing upload, (+1 to total to compensate to loop offset)
+			if ((fileUploader.UploadDatasetRequest.ChunkNumber == (fileUploader.UploadDatasetRequest.TotalChunkNumber + 1)) && (fileUploader.IsUploading == false))
+			{
+				fileUploader.UploadDatasetRequest = new UploadDatasetRequestDto();
+				IsSelectFileDisabled = true;
+				IsURLDisabled = true;
+				_uploadReady = true;
+			}
+			else
+			{
+				float divideResult = (float)fileUploader.UploadDatasetRequest.ChunkNumber / (float)fileUploader.UploadDatasetRequest.TotalChunkNumber;
+				Progress = (int)(divideResult * 100);
+				//if chunk amount is bigger 100 display after decimal percentage
+				if (fileUploader.UploadDatasetRequest.TotalChunkNumber > 100)
+				{
+					UploadText = L["Uploading {0} {1}", fileUploader.UploadDatasetRequest.DatasetName, String.Format("{0:0.00}", divideResult * 100)];
+				}
+				else
+				{
+					UploadText = L["Uploading {0} {1}", fileUploader.UploadDatasetRequest.DatasetName, String.Format("{0:0}", divideResult * 100)];
+				}
+			}
+		}
 
-        RefreshComponent();
-    }
+		RefreshComponent();
+	}
 
-    private void RefreshComponent()
-    {
-        StateHasChanged();
-    }
+	private void RefreshComponent()
+	{
+		StateHasChanged();
+	}
 
-    protected override async void OnInitialized()
-    {
-        fileUploader.UploadDatasetRequest = new UploadDatasetRequestDto();
-        fileUploader.UploadPredictionRequest = new UploadPredictionRequestDto();
-        await LoadDatasetTypes();
-        fileUploader.OnUploadChangedCallback = UpdateProgress;
-        fileUploader.RefreshUploadComponentCallback = RefreshComponent;
-    }
+	private async void LoadData()
+	{
+		fileUploader.UploadDatasetRequest = new UploadDatasetRequestDto();
+		fileUploader.UploadPredictionRequest = new UploadPredictionRequestDto();
+		await LoadDatasetTypes();
+		fileUploader.OnUploadChangedCallback = UpdateProgress;
+		fileUploader.RefreshUploadComponentCallback = RefreshComponent;
+	}
 
     private async Task LoadDatasetTypes()
     {
@@ -271,7 +278,6 @@
             {
                 _datasetTypes = Newtonsoft.Json.JsonConvert.DeserializeObject<GetDatasetTypesResponseDto>(apiResponse.Result.ToString());
                 StateHasChanged();
-                viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
             }
             else
             {
