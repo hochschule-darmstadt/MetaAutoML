@@ -13,16 +13,14 @@ namespace BlazorBoilerplate.Theme.Material.Services
         private readonly IApiClient _client;
         private readonly IViewNotifier _notifier;
         private readonly IStringLocalizer<Global> _l;
-        private List<Server.SearchRelevantData> _ontologyData;
+        private readonly List<HelpSearchEntry> _searchEntries;
 
-        private List<HelpArticle> _helpSiteData;
         public HelpSearch(IApiClient client, IViewNotifier notifier, IStringLocalizer<Global> L)
         {
             _client = client;
             _notifier = notifier;
             _l = L;
-            _ontologyData = new List<Server.SearchRelevantData>();
-            _helpSiteData = new List<HelpArticle>();
+            _searchEntries = [];
         }
 
         /// <summary>
@@ -32,7 +30,7 @@ namespace BlazorBoilerplate.Theme.Material.Services
         public bool IsCacheLoaded {
             get
             {
-            return _ontologyData.Any() && _helpSiteData.Any();
+            return _searchEntries.Any();
             }
         }
 
@@ -48,19 +46,17 @@ namespace BlazorBoilerplate.Theme.Material.Services
         /// <returns></returns>
         public async Task LoadSearchCache()
         {
-            ApiResponseDto<GetSearchRelevantDataResponseDto> apiResponseDto;
-
             try
             {
-                apiResponseDto = await _client.GetSearchRelevantData();
-                _ontologyData = apiResponseDto.Result.SearchData;
+                _searchEntries.Clear();
 
-                //TODO: load Data from Help Site Json here
+                ApiResponseDto<GetSearchRelevantDataResponseDto> apiOntologieResponseDto = await _client.GetSearchRelevantData();
+                _searchEntries.AddRange(apiOntologieResponseDto.Result.SearchData.Select(e => new HelpSearchEntry(e)));
 
-                if(OnSearchCacheLoadedCallback != null)
-                {
-                    OnSearchCacheLoadedCallback();
-                }
+                List<HelpPageDto> apiHelpPageResponseDto = await _client.GetHelpPageJson();
+                _searchEntries.AddRange(apiHelpPageResponseDto.SelectMany(e => e.Sections).Select(e => new HelpSearchEntry(e)));
+
+                OnSearchCacheLoadedCallback?.Invoke();
             }
             catch (Exception ex)
             {
@@ -72,26 +68,36 @@ namespace BlazorBoilerplate.Theme.Material.Services
         /// Get all available auto complete options from search data, may be empty if not loaded yet
         /// </summary>
         /// <returns>List of strings for autocompletion</returns>
-        public List<String> GetAllAutocompleteOptions()
+        public List<string> GetAllAutocompleteOptions()
         {
-            return _ontologyData
-                .SelectMany(e => new[]{ e.Label, e.AltLabels})
-                .Concat(_helpSiteData.SelectMany(e => new[]{ e.Title }))
+            return _searchEntries
+                .SelectMany(e => e.AutocompleteTexts)
                 .Where(label => !string.IsNullOrWhiteSpace(label))
                 .Distinct()
                 .ToList();
         }
 
         /// <summary>
-        ///
+        /// Get all auto complete options filtered by search text
         /// </summary>
-        /// <param name="search"></param>
-        /// <returns></returns>
-        public List<String> GetAutocompleteOptions(string search)
+        /// <param name="search">text to search options</param>
+        /// <returns>List of options matching search</returns>
+        public List<string> GetAutocompleteOptions(string search)
         {
             return GetAllAutocompleteOptions().FindAll(e => e.Contains(search)).ToList();
         }
 
-        //TODO: define generic model for returning ML and Help Page Article Data
+        /// <summary>
+        /// Get all full text search result for search term
+        /// </summary>
+        /// <param name="search">search term</param>
+        /// <returns>List of matched search entries</returns>
+        public List<HelpSearchEntry> GetFulltextSearch(string search) {
+            return _searchEntries
+                .Where(entry => entry.FullSearchTexts
+                    .Where(text => !string.IsNullOrWhiteSpace(text))
+                    .Any(text => text.Contains(search)))
+                .ToList();
+        }
     }
 }
