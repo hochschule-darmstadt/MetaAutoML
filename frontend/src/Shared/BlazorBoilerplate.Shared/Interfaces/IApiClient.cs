@@ -14,6 +14,7 @@ namespace BlazorBoilerplate.Shared.Interfaces
 {
     public interface IApiClient : IBaseApiClient
     {
+        Task<List<HelpPageDto>> GetHelpPageJson();
         Task<UserProfile> GetUserProfile();
 
         Task<QueryResult<TenantSetting>> GetTenantSettings();
