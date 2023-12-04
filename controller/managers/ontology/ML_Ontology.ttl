@@ -1,5 +1,5 @@
 ### Ontology file generated from ML_Ontology (3).xlsx.
-### 2023-11-30 15:19:56.099934
+### 2023-12-04 14:27:17.905647
 
 
 # PREFIXES
@@ -1760,7 +1760,7 @@
     :used_for :h2o_lib , :xgboost_lib ;
     :can_perform :tabular_classification , :tabular_regression ;
     rdfs:comment "H2O's AutoML automates the process of training and tuning a large selection of models, allowing the user to focus on other aspects of the data science and machine learning pipeline such as data pre-processing, feature engineering and model deployment." ;
-    rdfs:seeAlso <https://github.com/h2oai><https://docs.h2o.ai/h2o/latest-stable/h2o-docs/automl.html> ;
+    rdfs:seeAlso <https://docs.h2o.ai/h2o/latest-stable/h2o-docs/automl.html> ;
     :supported_by_oma_ml "true"^^xsd:boolean .
 :ibm_autoai a :AutoML_solution ;
     skos:prefLabel "IBM AutoAI" ;
