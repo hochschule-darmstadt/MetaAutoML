@@ -11,7 +11,9 @@ import keras_tuner
 #include_algos/exclude_algos
 
 h2o_metrics = {
+    # TODO: Check if needed and add to :Metric
     #deviance (mean residual deviance) - not in ontology yet or mean_poisson_deviance? 2x(LL(Saturated Model) - LL(Proposed Model))?
+    #":auto": "AUTO", not in ontology yet This defaults to logloss for classification and deviance for regression.
     ":log_loss": "logloss",
     ":mean_squared_error": "MSE",
     ":root_mean_squared_error": "RMSE",
@@ -26,52 +28,7 @@ h2o_metrics = {
 
 #lookup dictionary for autokeras objectives values
 #objectives means which metric is choosen for optimizing the ML model
-#when there is no default value for name, a new keras_tuner.Objective is created
-#https://keras.io/api/metrics
-# Gibt es in h2o nicht
-# autokeras_objectives = {
-#     #accuracy metrics
-#     ":accuracy": "accuracy",
-#     ":binary_accuracy": "binary_accuracy",
-#     ":categorical_accuracy": "categorical_accuracy",
-#     ":sparse_categorical_accuracy": "sparse_categorical_accuracy",
-#     ":top_k_categorical_accuracy": "top_k_categorical_accuracy",
-#     ":sparse_top_k_categorical_accuracy": "sparse_top_k_categorical_accuracy",
-#     #probabilistic metrics
-#     ":binary_cross_entropy": "binary_crossentropy" ,
-#     ":categorical_cross_entropy": "categorical_crossentropy",
-#     #":sparse_categorical_cross_entropy": "sparse_categorical_crossentropy",    || error: Node: 'SparseSoftmaxCrossEntropyWithLogits/SparseSoftmaxCrossEntropyWithLogits' Received a label value of 1 which is outside the valid range of [0, 1)
-#     #":kullback_leibler_divergence": "kullback_leibler_divergence",        || ValueError: Unable to restore custom object of type _tf_keras_metric. Please make sure that any custom layers are included in the `custom_objects` arg when calling `load_model()` and make sure that all layers implement `get_config` and `from_config`
-#     ":poisson": "poisson",
-#     #regression metrics
-#     ":mean_squared_error": "mean_squared_error",
-#     ":root_mean_squared_error": keras_tuner.Objective("val_root_mean_squared_error", direction="min"),
-#     ":mean_absolute_error": "mean_absolute_error",
-#     ":mean_absolute_percentage_error": "mean_absolute_percentage_error",
-#     ":mean_squared_log_error": "mean_squared_logarithmic_error",
-#     ":cosine_similarity": "cosine_similarity",
-#     ":log_cosh_error": "logcosh",
-#     #classification metrics based on true/false positives & negatives
-#     ":area_under_roc_curve": keras_tuner.Objective("val_auc", direction="max"),
-#     ":precision": keras_tuner.Objective("val_precision", direction="max"),
-#     ":recall": keras_tuner.Objective("val_recall", direction="max"),
-#     ":true_positives": keras_tuner.Objective("val_true_positives", direction="max"),
-#     ":true_negatives": keras_tuner.Objective("val_true_negatives", direction="max"),
-#     ":false_positives": keras_tuner.Objective("val_false_positives", direction="min"),
-#     ":false_negatives": keras_tuner.Objective("val_false_negatives", direction="min"),
-#     #":precision_at_recall": keras_tuner.Objective("precision_at_recall", direction="max"),     | TypeError: __init__() missing 1 required positional argument: 'recall'
-#     #":sensitivity_at_specificity": keras_tuner.Objective("sensitivity_at_specificity", direction="max"),        | TypeError: __init__() missing 1 required positional argument: 'specificity'
-#     #":sepecificity_at_sensitivity": keras_tuner.Objective("sepecificity_at_sensitivity", direction="max"),    | TypeError: __init__() missing 1 required positional argument: 'sensitivity'
-#     #image segmentation metrics
-#     ":mean_iou": keras_tuner.Objective("mean_iou", direction="min"),
-#     #hinge metrics for "maximum-margin" classification
-#     ":hinge": "hinge",
-#     ":squared_hinge": "squared_hinge",
-#     ":categorical_hinge": "categorical_hinge"
-
-#     #old metric
-#     #":binary_intersection_over_union": "binary_intersection_over_union",   not in the keras metrics, for reference: https://keras.io/api/metrics/
-# }
+# -> Gibt es in h2o nicht
 
 #lookup dictionary for autokeras loss classification values
 autokeras_loss_classification = {

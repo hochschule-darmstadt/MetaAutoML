@@ -11,19 +11,19 @@ import h2o
 from h2o.automl import H2OAutoML
 
 
-# Laden Sie Ihre Daten in ein H2O Frame
-df = h2o.import_file("your_data.csv")
+# # Laden Sie Ihre Daten in ein H2O Frame
+# df = h2o.import_file("your_data.csv")
 
-# Für eine Klassifikation: Stellen Sie sicher, dass Ihre Zielvariable als Faktor (also als kategorisch) gesetzt ist, bevor Sie mit dem Training beginnen. Dies können Sie mit der asfactor() Methode tun:
-target = 'your_target_column'
-df[target] = df[target].asfactor()  # Konvertiert die Zielvariable in einen Faktor, wenn es sich um eine Klassifikation handelt
+# # Für eine Klassifikation: Stellen Sie sicher, dass Ihre Zielvariable als Faktor (also als kategorisch) gesetzt ist, bevor Sie mit dem Training beginnen. Dies können Sie mit der asfactor() Methode tun:
+# target = 'your_target_column'
+# df[target] = df[target].asfactor()  # Konvertiert die Zielvariable in einen Faktor, wenn es sich um eine Klassifikation handelt
 
-# Für eine Regression: Stellen Sie sicher, dass Ihre Zielvariable als numerisch gesetzt ist.
-target = 'your_target_column'
-df[target] = df[target].asnumeric() # Konvertiert die Zielvariable in Numeric, wenn es sich um eine Regression handelt
+# # Für eine Regression: Stellen Sie sicher, dass Ihre Zielvariable als numerisch gesetzt ist.
+# target = 'your_target_column'
+# df[target] = df[target].asnumeric() # Konvertiert die Zielvariable in Numeric, wenn es sich um eine Regression handelt
 
-# Konvertieren Sie das Pandas DataFrame in ein H2O Frame
-h2o_df = h2o.H2OFrame(df)
+# # Konvertieren Sie das Pandas DataFrame in ein H2O Frame
+# h2o_df = h2o.H2OFrame(df)
 
 
 class h2oAdapter:
@@ -55,11 +55,12 @@ class h2oAdapter:
     def __tabular_classification(self):
         """Execute the tabular classification task and export the found model"""
 
-        self.df, test = data_loader(self._configuration)
+        self.df, test = h2o.import_file(data_loader(self._configuration))
         features, targets = prepare_tabular_dataset(self.df, self._configuration, apply_feature_extration=True)
+        df[target].asfactor()
         parameters = translate_parameters(":h2o", self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), h2opc.parameters)
         parameters.update({"max_trials": self._configuration["configuration"]["runtime_limit"]})
-        aml = H2OAutoML(max_runtime_secs = 35, seed = 1, stoppingMetric = "logloss")
+        aml = H2OAutoML(max_runtime_secs = 35, seed = 1)
         aml.train(y = h2o.H2OFrame(targets), training_frame = h2o.H2OFrame(features))
         # The leader model is stored here
         # View the AutoML Leaderboard
@@ -73,9 +74,10 @@ class h2oAdapter:
 
         self.df, test = data_loader(self._configuration)
         features, targets = prepare_tabular_dataset(self.df, self._configuration, apply_feature_extration=True)
+        df[target].asfactor()
         parameters = translate_parameters(":h2o", self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), h2opc.parameters)
         parameters.update({"max_trials": self._configuration["configuration"]["runtime_limit"]})
-        aml = H2OAutoML(max_runtime_secs = 35, seed = 1, stoppingMetric = "deviance")
+        aml = H2OAutoML(max_runtime_secs = 35, seed = 1)
         aml.train(y = h2o.H2OFrame(targets), training_frame = h2o.H2OFrame(features))
         # The leader model is stored here
         # View the AutoML Leaderboard
