@@ -5,12 +5,12 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "WIN AutoKeras Adapter",
+            "name": "WIN H2O Adapter",
             "type": "python",
             "request": "launch",
-            "program": "AutoKerasServer.py",
+            "program": "H2OServer.py",
             "console": "integratedTerminal",
-            "justMyCode": false,
+            "justMyCode": true,
             "env": {
                 "PYTHONPATH": ".;dependency-injection;AutoMLs;Utils;../Utils/Utils;../Utils/AutoMLs;../GRPC/Adapter;",
                 "GRPC_SERVER_PORT": "50052",
@@ -22,10 +22,10 @@
             },
         },
         {
-            "name": "UNIX AutoKeras Adapter",
+            "name": "UNIX H2O Adapter",
             "type": "python",
             "request": "launch",
-            "program": "AutoKerasServer.py",
+            "program": "H2OServer.py",
             "console": "integratedTerminal",
             "justMyCode": false,
             "env": {

@@ -11,17 +11,15 @@ import keras_tuner
 #include_algos/exclude_algos
 
 h2o_metrics = {
-    # TODO: Check if needed and add to :Metric
-    #deviance (mean residual deviance) - not in ontology yet or mean_poisson_deviance? 2x(LL(Saturated Model) - LL(Proposed Model))?
-    #":auto": "AUTO", not in ontology yet This defaults to logloss for classification and deviance for regression.
+    #deviance (mean residual deviance) - not in ontology yet or mean_poisson_deviance? 2x(LL(Saturated Model) - LL(Proposed Model))? regression
     ":log_loss": "logloss",
     ":mean_squared_error": "MSE",
     ":root_mean_squared_error": "RMSE",
     ":mean_absolute_error": "MAE",
     ":root_mean_squared_log_error": "RMSLE",
     ":area_under_roc_curve": "AUC",
-    ":area_under_precision_recall_curve" : "AUCPR", #AUCPR  (area under the Precision-Recall curve) - not in ontology yet
-    #lift_top_group - not in ontology yet
+    ":area_under_precision_recall_curve" : "AUCPR",
+    #lift_top_group - not implemented
     #misclassification - probably :mean_absolute_error or :mean_absolute_percentage_error, but not sure whether its absolute or relative
     #mean_per_class_error - not in ontology yet
 }
