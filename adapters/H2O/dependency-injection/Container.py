@@ -1,6 +1,6 @@
 from dependency_injector import containers, providers
 from AdapterScheduler import *
-from AutoKerasAdapterManager import AutoKerasAdapterManager
+from H2OAdapterManager import H2OAdapterManager
 
 
 class Managers(containers.DeclarativeContainer):
@@ -14,7 +14,7 @@ class Managers(containers.DeclarativeContainer):
         AdapterScheduler,
     )
     adapter_manager = providers.Factory(
-        AutoKerasAdapterManager,
+        H2OAdapterManager,
     )
 
 class Application(containers.DeclarativeContainer):

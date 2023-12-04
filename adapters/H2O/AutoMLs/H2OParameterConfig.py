@@ -11,17 +11,22 @@ import keras_tuner
 #include_algos/exclude_algos
 
 h2o_metrics = {
-    #deviance (mean residual deviance) - not in ontology yet or mean_poisson_deviance? 2x(LL(Saturated Model) - LL(Proposed Model))? regression
-    ":log_loss": "logloss",
+    #regression
+    ":mean_absolute_error": "MAE",
+    ":mean_residual_deviance": "deviance",
     ":mean_squared_error": "MSE",
     ":root_mean_squared_error": "RMSE",
-    ":mean_absolute_error": "MAE",
     ":root_mean_squared_log_error": "RMSLE",
+
+    #classification
+    #h2o is using MSE for classification and for regression
+    ":accuracy": "misclassification",
     ":area_under_roc_curve": "AUC",
     ":area_under_precision_recall_curve" : "AUCPR",
+    ":log_loss": "logloss",
+    ":mean_per_class_error": "mean_per_class_error",
+
     #lift_top_group - not implemented
-    #misclassification - probably :mean_absolute_error or :mean_absolute_percentage_error, but not sure whether its absolute or relative
-    #mean_per_class_error - not in ontology yet
 }
 
 #lookup dictionary for autokeras objectives values

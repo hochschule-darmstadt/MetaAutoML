@@ -5,14 +5,14 @@ import time, asyncio
 from AdapterUtils import *
 from AdapterBGRPC import *
 from threading import *
-from AutoKerasWrapper import AutoKerasWrapper
+# from H2OWrapper import H2OWrapper
 from JsonUtil import get_config_property
 import pandas as pd
 from typing import Tuple
 from explainerdashboard import ClassifierExplainer, RegressionExplainer, ExplainerDashboard
 
 
-class AutoKerasAdapterManager(AdapterManager):
+class H2OAdapterManager(AdapterManager):
     """The AutoML solution specific functionality implementation of the AdapterManager class
 
     Args:
@@ -22,7 +22,7 @@ class AutoKerasAdapterManager(AdapterManager):
     def __init__(self) -> None:
         """Initialize a new AutokerasAdapterManager setting AutoML adapter specific variables
         """
-        super(AutoKerasAdapterManager, self).__init__()
+        super(H2OAdapterManager, self).__init__()
         self.__automl = None
         self.__loaded_training_id = None
         self._adapter_name = "autokeras"
