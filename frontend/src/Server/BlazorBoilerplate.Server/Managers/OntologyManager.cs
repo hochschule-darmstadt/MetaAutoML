@@ -67,6 +67,7 @@ namespace BlazorBoilerplate.Server.Managers
             GetDatasetTypesResponseDto response = new GetDatasetTypesResponseDto();
             try
             {
+                GetSearchRelevantData();
                 var reply = _client.GetDatasetTypes(new GetDatasetTypesRequest());
                 response.DatasetTypes = await _cacheManager.GetObjectInformationList(reply.DatasetTypes.ToList());
                 return new ApiResponse(Status200OK, null, response);
@@ -87,6 +88,23 @@ namespace BlazorBoilerplate.Server.Managers
                 requestGrpc.Task = request.Task;
                 var reply = _client.GetMlLibrariesForTask(requestGrpc);
                 response = new GetMlLibrariesForTaskResponseDto(await _cacheManager.GetObjectInformationList(reply.MlLibraries.ToList()));
+                return new ApiResponse(Status200OK, null, response);
+            }
+            catch (Exception ex)
+            {
+                return new ApiResponse(Status404NotFound, ex.Message);
+            }
+        }
+
+        public async Task<ApiResponse> GetSearchRelevantData()
+        {
+            GetSearchRelevantDataResponseDto response;
+            try
+            {
+                var reply = _client.GetSearchRelevantData(new GetSearchRelevantDataRequest());
+                //TODO: use ontology keys to translate them and not whole object
+                //response = new GetSearchRelevantDataResponseDto(await _cacheManager.GetObjectInformationList(reply.SearchEntities.ToList()));
+                response = new GetSearchRelevantDataResponseDto(reply.SearchEntities.ToList());
                 return new ApiResponse(Status200OK, null, response);
             }
             catch (Exception ex)

@@ -19,6 +19,10 @@ namespace BlazorBoilerplate.Shared.Services
     {
         public ApiClient(HttpClient httpClient, ILogger<ApiClient> logger) : base(httpClient, logger)
         { }
+        public async Task<List<HelpPageDto>> GetHelpPageJson()
+        {
+            return await httpClient.GetJsonAsync<List<HelpPageDto>>("/HelpPage.json");
+        }
         public async Task<UserProfile> GetUserProfile()
         {
             return (await entityManager.ExecuteQuery(new EntityQuery<UserProfile>().From("UserProfile"), CancellationToken.None)).SingleOrDefault();
@@ -191,6 +195,11 @@ namespace BlazorBoilerplate.Shared.Services
         public Task<ApiResponseDto<GetAutoMlParametersResponseDto>> GetAutoMlParameters(GetAutoMlParametersRequestDto request)
         {
             return httpClient.PostJsonAsync<ApiResponseDto<GetAutoMlParametersResponseDto>>("api/Ontology/GetAutoMlParameters", request);
+        }
+
+        public Task<ApiResponseDto<GetSearchRelevantDataResponseDto>> GetSearchRelevantData()
+        {
+            return httpClient.GetJsonAsync<ApiResponseDto<GetSearchRelevantDataResponseDto>>("api/Ontology/GetSearchRelevantData");
         }
         #endregion
 

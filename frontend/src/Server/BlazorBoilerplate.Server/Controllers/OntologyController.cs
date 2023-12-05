@@ -32,7 +32,7 @@ namespace BlazorBoilerplate.Server.Controllers
         [HttpPost]
         [ProducesResponseType(Status200OK)]
         [ProducesResponseType(Status400BadRequest)]
-        [ProducesResponseType(Status404NotFound)]   
+        [ProducesResponseType(Status404NotFound)]
         public async Task<ApiResponse> GetAutoMlSolutionsForConfiguration(GetAutoMlSolutionsForConfigurationRequestDto request)
             => ModelState.IsValid ?
                 await _ontologyManager.GetAutoMlSolutionsForConfiguration(request) :
@@ -59,7 +59,7 @@ namespace BlazorBoilerplate.Server.Controllers
         [HttpPost]
         [ProducesResponseType(Status200OK)]
         [ProducesResponseType(Status400BadRequest)]
-        [ProducesResponseType(Status404NotFound)]   
+        [ProducesResponseType(Status404NotFound)]
         public async Task<ApiResponse> GetAvailableStrategies(GetAvailableStrategiesRequestDto request)
             => ModelState.IsValid ?
                 await _ontologyManager.GetAvailableStrategies(request) :
@@ -82,5 +82,14 @@ namespace BlazorBoilerplate.Server.Controllers
             ModelState.IsValid ?
                 _ontologyManager.GetAutoMlParameters(request) :
                 Task.FromResult(new ApiResponse(Status400BadRequest, L["InvalidData"]));
+
+        [HttpGet]
+        [ProducesResponseType(Status200OK)]
+        [ProducesResponseType(Status400BadRequest)]
+        [ProducesResponseType(Status404NotFound)]
+        public async Task<ApiResponse> GetSearchRelevantData()
+        => ModelState.IsValid ?
+                await _ontologyManager.GetSearchRelevantData() :
+                new ApiResponse(Status400BadRequest, L["InvalidData"]);
     }
 }
