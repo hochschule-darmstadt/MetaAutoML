@@ -81,7 +81,7 @@
     {
         try
         {
-            ApiResponseDto apiResponse = await apiClient.GetTrainings(new GetTrainingsRequestDto() { Short = true, OnlyLastDay= true });
+            ApiResponseDto apiResponse = await apiClient.GetTrainings(new GetTrainingsRequestDto() { Short = true, OnlyLastDay = true });
 
             if (apiResponse.IsSuccessStatusCode)
             {
@@ -138,7 +138,6 @@
             if (apiResponse.IsSuccessStatusCode)
             {
                 _overviewInfos = Newtonsoft.Json.JsonConvert.DeserializeObject<GetHomeOverviewInformationResponseDto>(apiResponse.Result.ToString());
-                viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
             }
             else
             {

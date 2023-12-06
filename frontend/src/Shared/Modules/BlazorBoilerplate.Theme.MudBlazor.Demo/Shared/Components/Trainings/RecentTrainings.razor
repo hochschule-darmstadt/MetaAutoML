@@ -31,7 +31,7 @@
             }
             else
             {
-        <MudTable Items="@_trainings.Trainings" FixedHeader="true" Height="250px" style="width:stretch" class="mat-elevation-z5" AllowSelection="false" Dense="true">
+        <MudTable Items="@Trainings.Trainings" FixedHeader="true" Height="20rem" style="width:stretch" class="mat-elevation-z5" AllowSelection="false" Dense="true">
             <HeaderContent>
                 <MudTh><MudTableSortLabel SortBy="new Func<TrainingDto, object>(x=>x.RuntimeProfile.StartTime)">@L["start"]</MudTableSortLabel></MudTh>
                 <MudTh><MudTableSortLabel SortBy="new Func<TrainingDto, object>(x=>x.Status)">@L["Status"]</MudTableSortLabel></MudTh>
@@ -74,7 +74,7 @@
             _trainings = value;
             if(_trainings != null)
             {
-                _trainings.Trainings = _trainings.Trainings.Where(x => x.RuntimeProfile.StartTime > DateTime.Now.AddDays(-1)).Take(6).ToList();
+                _trainings.Trainings = _trainings.Trainings.Take(6).ToList();
                 RefreshRecentTrainings(null, null);
                 _timer = new Timer()
                 {

@@ -176,10 +176,7 @@ class DataSetAnalysisManager(Thread):
 
             report_filename = "YData_Profile_Report.html"
             report_filepath = os.path.join(self.ydata_filepath, report_filename)
-
-            report_filename_json = "YData_Profile_Report.json"
-            report_filepath_json = os.path.join(self.ydata_filepath, report_filename_json)
-            profile = ProfileReport(self.__dataset_df, title="Advance Analysis", html={'style': {'full_width': True}}, minimal=minimal_Opt)
+            profile = ProfileReport(self.__dataset_df, title="Advance Analysis", html={'style': {'full_width': True}})
             profile.to_file(report_filepath, silent=True)
             profile.to_file(report_filepath_json,silent=True)
             print("[DatasetAnalysisManager]: Dataset analysis finished, saved the YData-ProfileReport.")

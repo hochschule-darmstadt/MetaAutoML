@@ -1,4 +1,4 @@
-﻿@inherits PluralizationRulesPage
+@inherits PluralizationRulesPage
 @page "/admin/pluralizationrules"
 @attribute [Authorize(Policies.IsAdmin)]
 @layout AdminLayout
@@ -26,7 +26,7 @@ else
         </HeaderContent>
         <RowTemplate Context="row">
             <MudTd>
-                <MudIconButton Icon="@Icons.Filled.Delete" OnClick="@(() => OpenDelete(row))"></MudIconButton>
+                <MudIconButton Icon="@Icons.Material.Filled.Delete" OnClick="@(() => OpenDelete(row))"></MudIconButton>
             </MudTd>
             <MudTd>@row.Language</MudTd>
             <MudTd><MudTextField @bind-Value="@row.Count" FullWidth="true" Required="true" RequiredError=@L["Required"]></MudTextField></MudTd>
@@ -47,8 +47,4 @@ else
             <MudTextField @bind-Value="@newPluralFormRule.Selector" Label=@L["Selector"] FullWidth="true" Required="true" RequiredError=@L["Required"] Class="mb-4"></MudTextField>
             <MudButton ButtonType="MudBlazor.ButtonType.Submit" Variant="MudBlazor.Variant.Filled" Color="Color.Primary">@L["Add"]</MudButton>
         </EditForm>}
-}
-
-@code {
-
 }

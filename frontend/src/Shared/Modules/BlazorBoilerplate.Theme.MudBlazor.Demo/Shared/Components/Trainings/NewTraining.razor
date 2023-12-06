@@ -1,4 +1,4 @@
-﻿@inject IStringLocalizer<Global> L
+@inject IStringLocalizer<Global> L
 @inject IApiClient apiClient
 @inject IViewNotifier viewNotifier
 @inject NavigationManager NavManager
@@ -10,7 +10,7 @@
         </CardHeaderContent>
     </MudCardHeader>
     <MudCardContent>
-        <MudPaper Height="6.25rem" Elevation="0">
+        <MudPaper Height="6.25rem" Style="text-align:center" Elevation="0">
             @if (Dataset == null)
             {
                 <DataLoaderSpinner />
@@ -23,7 +23,7 @@
                 <MudButton OnClick="@(e => { NavManager.NavigateTo("/datasets/" + Dataset.Dataset.Id + "/train"); })"
                            Variant="Variant.Filled"
                            StartIcon="@Icons.Filled.ModelTraining"
-                           Color="Color.Secondary" Style="width:16.3rem; align-self:center">
+                           Color="Color.Secondary" Style="align-self:center">
                     @L["Start Training"]
                 </MudButton>
 

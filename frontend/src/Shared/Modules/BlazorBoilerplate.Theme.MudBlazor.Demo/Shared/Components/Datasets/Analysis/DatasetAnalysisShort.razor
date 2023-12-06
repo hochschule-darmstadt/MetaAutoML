@@ -21,6 +21,7 @@
                     <MudButton Href="@NavManager.ToAbsoluteUri("datasets/" + @Dataset.Dataset.Id + "/analysis").AbsoluteUri"
                                Variant="Variant.Filled"
                                StartIcon="@Icons.Material.Filled.ReadMore"
+                               StartIcon="@Icons.Material.Filled.ReadMore"
                                Color="Color.Secondary"
                                Size="Size.Small"
                                Style="margin-top: 8px">@L["More"]</MudButton>
@@ -90,7 +91,6 @@
             {
                 _analysis = Newtonsoft.Json.JsonConvert.DeserializeObject<GetDatasetAnalysisResponseDto>(apiResponse.Result.ToString());
                 StateHasChanged();
-                viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
             }
             else
             {

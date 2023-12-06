@@ -85,13 +85,14 @@ class TrainingManager:
         response.training_id = self.__adapter_runtime_scheduler.create_new_training(create_training_request)
         return response
 
-    def __training_object_rpc_object(self, user_id: str, training: dict, short: bool = False) -> Training:
+    def __training_object_rpc_object(self, user_id: str, training: dict, short: bool = False, only_last_day: bool = False) -> Training:
         """Convert a training record dictionary into the GRPC Training object
 
         Args:
             user_id (str): Unique user id saved within the MS Sql database of the frontend
             training (dict): The retrieved training record dictionary
             short (bool): Should only the trainings without any dataset or model object be retrieved
+            only_last_day (bool): Should the dataset name be extracted, only for last 24 hour trainings retrieval
         Raises:
             grpclib.GRPCError: grpclib.Status.UNAVAILABLE, raised when a dictionary field could not be read
             grpclib.GRPCError: grpclib.Status.UNAVAILABLE, raised when a dictionary field could not be read
@@ -102,6 +103,13 @@ class TrainingManager:
         try:
             training_item = Training()
 
+            if only_last_day == True:
+                #To display the last day trainings the dataset name is required, to avoid retriving every model detail we extract it seperately to avoid performance issues
+                self.__log.debug("__training_object_rpc_object: get dataset for training")
+                found, dataset = self.__data_storage.get_dataset(user_id, str(training["dataset_id"]))
+
+                training_item.dataset_name = dataset["name"]
+
             if short == False:
 
                 self.__log.debug("__training_object_rpc_object: get all models for training")
@@ -110,9 +118,9 @@ class TrainingManager:
 
                 self.__log.debug("__training_object_rpc_object: get dataset for training")
                 found, dataset = self.__data_storage.get_dataset(user_id, str(training["dataset_id"]))
-                self.__log.debug(f"__training_object_rpc_object: found {training_models.count} models")
 
                 training_item.dataset_name = dataset["name"]
+
 
                 for model in training_models:
                     try:
@@ -191,7 +199,7 @@ class TrainingManager:
         self.__log.debug(f"get_trainings: found {all_trainings.count} trainings for user {get_trainings_request.user_id}")
 
         for training in all_trainings:
-            response.trainings.append(self.__training_object_rpc_object(get_trainings_request.user_id, training, get_trainings_request.short))
+            response.trainings.append(self.__training_object_rpc_object(get_trainings_request.user_id, training, get_trainings_request.short, get_trainings_request.only_last_day))
         return response
 
     def get_training(

@@ -60,7 +60,6 @@
                 var fileContent = System.IO.File.ReadAllText(_analysis.ydataprofilling);
                 htmlContent = new MarkupString(fileContent);
                 StateHasChanged();
-                viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
             }
             else
             {

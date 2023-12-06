@@ -514,8 +514,12 @@ class DataStorage:
             yesteday = now - timedelta(hours=24)
 
             search_filter.update({
-                "runtime_profile.start_time.$date.$numberLong": {
-                    "$gte": yesteday.timestamp() * 1000  # Convert to milliseconds
+                #"runtime_profile.start_time.$date.$numberLong": {
+                #    "$gte": f"{yesteday.timestamp() * 1000}"  # Convert to milliseconds
+                #}
+                "runtime_profile.start_time": {
+                    "$gte": yesteday,
+                    "$lt": now
                 }
             })
         return [sess for sess in self.__mongo.get_trainings(user_id, search_filter, pagination, page_number)]
