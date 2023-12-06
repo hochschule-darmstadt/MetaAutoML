@@ -20,7 +20,7 @@ namespace BlazorBoilerplate.Theme.Material.Services
             _client = client;
             _notifier = notifier;
             _l = L;
-            _searchEntries = [];
+            _searchEntries = new List<HelpSearchEntry>();
         }
 
         /// <summary>
@@ -56,7 +56,10 @@ namespace BlazorBoilerplate.Theme.Material.Services
                 List<HelpPageDto> apiHelpPageResponseDto = await _client.GetHelpPageJson();
                 _searchEntries.AddRange(apiHelpPageResponseDto.SelectMany(e => e.Sections).Select(e => new HelpSearchEntry(e)));
 
-                OnSearchCacheLoadedCallback?.Invoke();
+                if(OnSearchCacheLoadedCallback != null)
+                {
+                    OnSearchCacheLoadedCallback.Invoke();
+                }
             }
             catch (Exception ex)
             {
