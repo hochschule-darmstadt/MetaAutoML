@@ -41,6 +41,8 @@
                 "GAMA_SERVICE_PORT": "60065",
                 "LAMA_SERVICE_HOST": "localhost",
                 "LAMA_SERVICE_PORT": "60066",
+                "H2O_SERVICE_HOST": "localhost",
+                "H2O_SERVICE_PORT": "50067",
                 "MONGO_DB_DEBUG": "YES",
                 "MONGO_DB_DOCKER_DEBUG": "NO",
                 "MONGO_CLUSTER": "NO",
