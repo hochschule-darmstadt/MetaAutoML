@@ -3,7 +3,6 @@ import numpy as np
 from ControllerBGRPC import *
 from JsonUtil import get_config_property
 import sys
-import pyarrow.csv as pv
 import shutil
 import os
 import re
