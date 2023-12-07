@@ -10,7 +10,6 @@ isodate==0.6.1
 joblib==1.2.0
 kiwisolver==1.4.4
 llvmlite==0.39.1
-matplotlib==3.5.0
 mongomock==4.1.2
 multidict==6.0.2
 nest-asyncio==1.5.6
