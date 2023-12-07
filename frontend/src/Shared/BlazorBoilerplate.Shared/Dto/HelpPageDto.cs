@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 namespace BlazorBoilerplate.Shared.Dto
 {
     public class HelpPageDto
@@ -8,7 +9,7 @@ namespace BlazorBoilerplate.Shared.Dto
         public HelpPageDto()
         {
             PanelHeadline = "";
-            Sections = [];
+            Sections = new List<Section>();
         }
     }
     public class Subsection
