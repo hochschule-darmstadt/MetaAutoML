@@ -1,0 +1,116 @@
+@using System.ComponentModel.DataAnnotations
+@namespace BlazorBoilerplate.Theme.Material.Demo.Shared.Components
+@inject NavigationManager navigationManager
+@inject IHelpSearch helpSearch
+
+<EditForm EditContext="editContext">
+	<DataAnnotationsValidator />
+	<MudAutocomplete Label="Help search ..." @bind-Value="choice.State" Required="false"
+					 SearchFunc="@SearchAsync" Immediate="true" CoerceValue="@coerceValue" ResetValueOnEmptyText="true"
+					 AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Primary"
+					 For="@(() => choice.State)"/>
+</EditForm>
+
+@if (!string.IsNullOrEmpty(choice.State))
+{
+	redirectOnSearch();
+}
+
+@code {
+	[Parameter]
+	public string query { get; set; }
+
+	[Parameter]
+	public bool HelpSite { get; set; }
+
+	[CascadingParameter]
+	Task<AuthenticationState> authenticationStateTask { get; set; }
+
+	// TODO Replace with the actual content
+	private MudForm form;
+	private bool coerceValue;
+	private bool success;
+	private Choice choice = new();
+	private EditContext editContext;
+
+	protected override void OnInitialized()
+	{
+		editContext = new EditContext(choice);
+		choice.State = query;
+	}
+
+	protected override async Task OnInitializedAsync()
+	{
+		var user = (await authenticationStateTask).User;
+
+		if (user.Identity.IsAuthenticated)
+		{
+			await helpSearch.LoadSearchCache();
+			states = helpSearch.GetAllAutocompleteOptions().ToArray();
+		}
+	}
+
+	private void redirectOnSearch()
+	{
+		if (!navigationManager.Uri.Contains("search") & !HelpSite)
+		{
+			query = choice.State;
+			navigationManager.NavigateTo($"search/{query}");
+			choice.State = null;
+		}
+	}
+
+	private static string[] states =
+	{
+		"Loading ..."
+	};
+
+	private async Task<IEnumerable<string>> SearchAsync(string value)
+	{
+		if (string.IsNullOrEmpty(value))
+		{
+			return states;
+		}
+		return states.Where(x => x.Contains(value, StringComparison.InvariantCultureIgnoreCase));
+	}
+
+	private IEnumerable<string> Validate(string value)
+	{
+		if (string.IsNullOrWhiteSpace(value))
+		{
+			yield return "The State field is required";
+			yield break;
+		}
+
+		if (!states.Contains(value))
+		{
+			yield return "This is an incorrect value";
+		}
+	}
+
+	public class Choice
+	{
+		[Required]
+		[State]
+		public string State { get; set; }
+	}
+
+	[AttributeUsage(AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Parameter)]
+	public sealed class StateAttribute : ValidationAttribute
+	{
+		protected override ValidationResult IsValid(object value, System.ComponentModel.DataAnnotations.ValidationContext validationContext)
+		{
+			if (!states.Contains(value))
+			{
+				return new ValidationResult("This is an incorrect value", new[] { validationContext.MemberName });
+			}
+
+			if (validationContext is null)
+			{
+				throw new ArgumentNullException(nameof(validationContext));
+			}
+
+			return null;
+		}
+	}
+}
