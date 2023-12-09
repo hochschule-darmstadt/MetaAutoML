@@ -2,13 +2,22 @@
 @namespace BlazorBoilerplate.Theme.Material.Demo.Shared.Components
 @inject NavigationManager navigationManager
 @inject IHelpSearch helpSearch
+@using MudBlazor
 
 <EditForm EditContext="editContext">
 	<DataAnnotationsValidator />
-	<MudAutocomplete Label="Help search ..." @bind-Value="choice.State" Required="false"
+	<MudAutocomplete Label="Help search ..." @bind-Value="choice.State" Required="false" @bind-Text="@searchInputText"
 					 SearchFunc="@SearchAsync" Immediate="true" CoerceValue="@coerceValue" ResetValueOnEmptyText="true"
 					 AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Primary"
-					 For="@(() => choice.State)"/>
+					 For="@(() => choice.State)">
+					<ItemTemplate Context="e">
+
+			<MudIcon Class="d-inline" Icon="@Icons.Material.Filled.Favorite" Title="Favorite" />
+			<MudText Class="d-inline">
+							<MudHighlighter Text="@e" HighlightedText="@searchInputText" />
+						</MudText>
+					</ItemTemplate>
+				 </MudAutocomplete>
 </EditForm>
 
 @if (!string.IsNullOrEmpty(choice.State))
@@ -17,56 +26,64 @@
 }
 
 @code {
-	[Parameter]
-	public string query { get; set; }
+	private string searchInputText;
+    [Parameter]
+    public string query { get; set; }
+
+    [Parameter]
+    public bool HelpSite { get; set; }
 
 	[Parameter]
-	public bool HelpSite { get; set; }
+	public EventCallback OnStatesChanged { get; set; }
 
-	[CascadingParameter]
-	Task<AuthenticationState> authenticationStateTask { get; set; }
-
-	// TODO Replace with the actual content
-	private MudForm form;
-	private bool coerceValue;
-	private bool success;
-	private Choice choice = new();
-	private EditContext editContext;
-
-	protected override void OnInitialized()
+	private void UpdateStates()
 	{
-		editContext = new EditContext(choice);
-		choice.State = query;
+		OnStatesChanged.InvokeAsync();
 	}
 
-	protected override async Task OnInitializedAsync()
-	{
-		var user = (await authenticationStateTask).User;
+    [CascadingParameter]
+    Task<AuthenticationState> authenticationStateTask { get; set; }
 
-		if (user.Identity.IsAuthenticated)
-		{
-			await helpSearch.LoadSearchCache();
-			states = helpSearch.GetAllAutocompleteOptions().ToArray();
-		}
-	}
+    private MudForm form;
+    private bool coerceValue;
+    private bool success;
+    private Choice choice = new();
+    private EditContext editContext;
 
-	private void redirectOnSearch()
-	{
-		if (!navigationManager.Uri.Contains("search") & !HelpSite)
-		{
-			query = choice.State;
-			navigationManager.NavigateTo($"search/{query}");
-			choice.State = null;
-		}
-	}
+    protected override void OnInitialized()
+    {
+        editContext = new EditContext(choice);
+        choice.State = query;
+    }
 
-	private static string[] states =
-	{
+    protected override async Task OnInitializedAsync()
+    {
+        var user = (await authenticationStateTask).User;
+
+        if (user.Identity.IsAuthenticated)
+        {
+            await helpSearch.LoadSearchCache();
+            states = helpSearch.GetAllAutocompleteOptions().ToArray();
+        }
+    }
+
+    private void redirectOnSearch()
+    {
+        if (!navigationManager.Uri.Contains("search") & !HelpSite)
+        {
+            query = choice.State;
+            navigationManager.NavigateTo($"search/{query}");
+            choice.State = null;
+        }
+    }
+
+    public static string[] states =
+    {
 		"Loading ..."
 	};
 
-	private async Task<IEnumerable<string>> SearchAsync(string value)
-	{
+    private async Task<IEnumerable<string>> SearchAsync(string value)
+    {
 		if (string.IsNullOrEmpty(value))
 		{
 			return states;

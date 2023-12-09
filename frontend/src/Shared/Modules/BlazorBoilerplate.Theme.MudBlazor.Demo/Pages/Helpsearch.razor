@@ -8,16 +8,17 @@
 		<MudGrid>
 	<MudItem xs="12">
 		<div Style="margin: 16px">
-			<HelpSearchComponent query="@query" HelpSite="true"></HelpSearchComponent>
+					<HelpSearchComponent query="@query" HelpSite="true" OnStatesChanged="HandleStatesChanged"></HelpSearchComponent>
 		</div>
 	</MudItem>
 	<MudItem xs="3">
 		<div Style="margin: 16px">
 		<MudText Color="Color.Dark" Typo="Typo.h6">Results</MudText>
 		<MudNavMenu Rounded="true" Margin="Margin.Normal" Color="Color.Secondary" Class="pa-2" Style="width:14.2rem">
-			<MudNavLink>Dashboard</MudNavLink>
-			<MudNavLink>Servers</MudNavLink>
-			<MudNavLink>Billing</MudNavLink>
+			@foreach (var state in HelpSearchComponent.states.Where(x => x.Contains(query, StringComparison.InvariantCultureIgnoreCase)))
+			{
+				<MudNavLink>@state</MudNavLink>
+			}
 		</MudNavMenu>
 		</div>
 	</MudItem>
@@ -37,4 +38,9 @@
 	 */
 	[Parameter]
 	public string query { get; set; }
+
+	private void HandleStatesChanged()
+	{
+		StateHasChanged();
+	}
 }
