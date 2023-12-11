@@ -3,6 +3,8 @@
 @using Microsoft.AspNetCore.Hosting
 @using Microsoft.Extensions.Logging
 @using System.Net.Http.Headers
+@using System.Timers
+@implements IDisposable
 @inject IApiClient apiClient
 @inject IViewNotifier viewNotifier
 @inject IJSRuntime JS
@@ -19,30 +21,28 @@
             {
                 <ButtonTooltip Text="Click here to to display all analysis diagrams available for this dataset." Position="Placement.Top">
                     <MudButton Href="@NavManager.ToAbsoluteUri("datasets/" + @Dataset.Dataset.Id + "/analysis").AbsoluteUri"
-                               Variant="Variant.Filled"
-                               StartIcon="@Icons.Material.Filled.ReadMore"
-                               StartIcon="@Icons.Material.Filled.ReadMore"
-                               Color="Color.Secondary"
-                               Size="Size.Small"
-                               Style="margin-top: 8px">@L["More"]</MudButton>
-                    </ButtonTooltip>
-                            }
-                    </CardHeaderActions>
+                        Variant="Variant.Filled"
+                        Disabled="@(_analysis == null || _analysis.ydataprofilling == "")"
+                        StartIcon="@Icons.Material.Filled.ReadMore"
+                        Color="Color.Secondary"
+                        Size="Size.Small"
+                        Style="margin-top: 8px">@L["More"]</MudButton>
+                </ButtonTooltip>
+            }
+        </CardHeaderActions>
     </MudCardHeader>
 <MudCardContent>
     <MudPaper Height="250px" Elevation="6" Class="d-flex align-items-center justify-content-center">
-        @if (_analysis == null || _analysis.ydataprofilling == "")
-        {
-            <MudTooltip Text="Die erweiterte Analyse läuft im Hintergrund ab, bitte habe einen Moment Geduld.">
-                <MudProgressCircular Color="Color.Primary" Style="height:70px;width:70px;" Indeterminate="true" />
-            </MudTooltip>
-        }
-        else
-        {
-            <MudButton Href="@NavManager.ToAbsoluteUri($"datasets/{_dataset.Dataset.Id}/analysis").AbsoluteUri" Class="d-flex align-items-center justify-content-center">
-                <MudImage Src=@($"_content/BlazorBoilerplate.Theme.MudBlazor/images/data-analysis-preview.PNG") Height="200" Width="400" ObjectFit="ObjectFit.Fill"/>
-            </MudButton>
-        }
+            @if (_analysis == null || _analysis.ydataprofilling == ""){
+                <MudTooltip Text="Die erweiterte Analyse läuft im Hintergrund ab, bitte habe einen Moment Geduld.">
+                    <MudProgressCircular Color="Color.Primary" Style="height:70px;width:70px;" Indeterminate="true" />
+                </MudTooltip>
+            }
+            else {
+                <MudButton Href="@NavManager.ToAbsoluteUri($"datasets/{_dataset.Dataset.Id}/analysis").AbsoluteUri" Class="d-flex align-items-center justify-content-center">
+                    <MudImage Src=@($"_content/BlazorBoilerplate.Theme.MudBlazor/images/data-analysis-preview.PNG") Height="200" Width="400" ObjectFit="ObjectFit.Fill"/>
+                </MudButton>
+            }
     </MudPaper>
 </MudCardContent>
 </MudCard>
@@ -61,14 +61,46 @@
             _dataset = value;
             if (_dataset != null)
             {
+                InitializeTimer();
                 LoadDatasetAnalysis();
             }
             StateHasChanged();
         }
     }
+
+    public void Dispose()
+    {
+        _refreshTimer?.Stop();
+        _refreshTimer?.Dispose();
+    }
+
+    private Timer _refreshTimer;
     private GetDatasetResponseDto _dataset;
     private GetDatasetAnalysisResponseDto _analysis;
     private bool isPreviewRequestRunning = false;
+
+    private void InitializeTimer()
+    {
+        _refreshTimer?.Dispose();
+        _refreshTimer = new Timer(5000); // Überprüft alle 5 Sekunden
+        _refreshTimer.Elapsed += OnTimerElapsed;
+        _refreshTimer.AutoReset = true;
+        _refreshTimer.Start();
+    }
+
+    private void OnTimerElapsed(object sender, ElapsedEventArgs e)
+    {
+        InvokeAsync(async () =>
+        {
+            await LoadDatasetAnalysis();
+            if (_analysis?.ydataprofilling != "")
+            {
+                _refreshTimer.Stop();
+                _refreshTimer.Dispose();
+                StateHasChanged();
+            }
+        });
+    }
 
     private async Task LoadDatasetAnalysis()
     {
