@@ -34,7 +34,7 @@
 <MudCardContent>
     <MudPaper Height="250px" Elevation="6" Class="d-flex align-items-center justify-content-center">
             @if (_analysis == null || _analysis.ydataprofilling == ""){
-                <MudTooltip Text="Die erweiterte Analyse läuft im Hintergrund ab, bitte habe einen Moment Geduld.">
+                <MudTooltip Text="The advanced analysis is running in the background, this might take a moment!">
                     <MudProgressCircular Color="Color.Primary" Style="height:70px;width:70px;" Indeterminate="true" />
                 </MudTooltip>
             }
@@ -82,7 +82,7 @@
     private void InitializeTimer()
     {
         _refreshTimer?.Dispose();
-        _refreshTimer = new Timer(5000); // Überprüft alle 5 Sekunden
+        _refreshTimer = new Timer(5000); // checks every 5 seconds
         _refreshTimer.Elapsed += OnTimerElapsed;
         _refreshTimer.AutoReset = true;
         _refreshTimer.Start();
