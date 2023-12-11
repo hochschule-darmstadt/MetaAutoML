@@ -88,7 +88,9 @@ class DataSetAnalysisManager(Thread):
             # minimal calculation option activated for datasets with more than 80 columns
             report = self.ydataprofiling_analysis(minimal_Opt=True) # tuple (html_path, json_path)
 
-        analysis.update({"report_html_path": report})
+        analysis.update({"report_html_path": report[0]})
+        analysis.update({"report_json_path": report[1]})
+
         found, dataset = self.__data_storage.get_dataset(self.__user_id, self.__dataset_id)
         analysis_details = dataset["analysis"]
         analysis_details.update(analysis)
@@ -166,7 +168,7 @@ class DataSetAnalysisManager(Thread):
         gets extracted from the json file, also safed in the MongoDB (ydata_profiling_json)
 
         Returns:
-            html path for ydataprofiling report
+            html and json path as tuple
         """
         try:
             from ydata_profiling import ProfileReport
@@ -174,10 +176,15 @@ class DataSetAnalysisManager(Thread):
 
             report_filename = "YData_Profile_Report.html"
             report_filepath = os.path.join(self.ydata_filepath, report_filename)
-            profile = ProfileReport(self.__dataset_df, title="Advance Analysis", html={'style': {'full_width': True}})
+
+            report_filename_json = "YData_Profile_Report.json"
+            report_filepath_json = os.path.join(self.ydata_filepath, report_filename_json)
+
+            profile = ProfileReport(self.__dataset_df, title="Advance Analysis", html={'style': {'full_width': True}}, minimal=minimal_Opt)
             profile.to_file(report_filepath, silent=True)
+            profile.to_file(report_filepath_json,silent=True)
             print("[DatasetAnalysisManager]: Dataset analysis finished, saved the YData-ProfileReport.")
-            return report_filepath
+            return (report_filepath, report_filepath_json)
         except:
             return{}
 
