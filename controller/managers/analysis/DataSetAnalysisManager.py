@@ -13,6 +13,12 @@ from ThreadLock import ThreadLock
 from CsvManager import CsvManager
 from feature_engine.selection import DropConstantFeatures, DropDuplicateFeatures, SmartCorrelatedSelection
 
+# according to this issue https://github.com/ydataai/ydata-profiling/issues/373
+# these 2 lines help fix the multi threading problem
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt 
+
 # Config for matplotlib plot sizing. These values are interpreted as pixels / 100.
 # So a Y value of 4 means that the plots will be 400px high.
 # This is configured as vars here because the plots are capable of resizing themselves up to a factor of 3x.
@@ -196,7 +202,9 @@ class DataSetAnalysisManager(Thread):
             profile.to_file(report_filepath_json,silent=True)
             print("[DatasetAnalysisManager]: Dataset analysis finished, saved the YData-ProfileReport.")
             return (report_filepath, report_filepath_json)
-        except:
+        except Exception as err:
+            print(f"Unexpected {err=}, {type(err)=}")
+            print("[DatasetAnalysisManager]: Dataset analysis failed, something bad happen.")
             return{}
 
 
