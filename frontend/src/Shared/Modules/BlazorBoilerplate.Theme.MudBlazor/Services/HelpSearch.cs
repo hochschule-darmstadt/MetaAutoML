@@ -71,11 +71,10 @@ namespace BlazorBoilerplate.Theme.Material.Services
         /// Get all available auto complete options from search data, may be empty if not loaded yet
         /// </summary>
         /// <returns>List of strings for autocompletion</returns>
-        public List<string> GetAllAutocompleteOptions()
+        public List<HelpSearchOption> GetAllAutocompleteOptions()
         {
             return _searchEntries
-                .SelectMany(e => e.AutocompleteTexts)
-                .Where(label => !string.IsNullOrWhiteSpace(label))
+                .SelectMany(e => e.AutocompleteOptions)
                 .Distinct()
                 .ToList();
         }
@@ -85,9 +84,9 @@ namespace BlazorBoilerplate.Theme.Material.Services
         /// </summary>
         /// <param name="search">text to search options</param>
         /// <returns>List of options matching search</returns>
-        public List<string> GetAutocompleteOptions(string search)
+        public List<HelpSearchOption> GetAutocompleteOptions(string search)
         {
-            return GetAllAutocompleteOptions().FindAll(e => e.Contains(search)).ToList();
+            return GetAllAutocompleteOptions().FindAll(e => e.Text.Contains(search, StringComparison.InvariantCultureIgnoreCase)).ToList();
         }
 
         /// <summary>

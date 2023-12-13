@@ -1,4 +1,5 @@
 using BlazorBoilerplate.Shared.Dto;
+using Karambolo.Common;
 
 namespace BlazorBoilerplate.Shared.Models
 {
@@ -20,29 +21,28 @@ namespace BlazorBoilerplate.Shared.Models
         public Section HelpArticleData { get; }
         public Server.SearchRelevantData OntologyData { get; }
 
-        public string[] AutocompleteTexts {
+        public HelpSearchOption[] AutocompleteOptions {
             get {
                 switch(Type)
                 {
                     case HelpSearchResultType.ONTOLOGY:
                     {
-                        return new string[]{OntologyData.Label, OntologyData.AltLabels};
+                        return new HelpSearchOption[]{new HelpSearchOption(Type, OntologyData.Label, OntologyData.AltLabels, OntologyData.Class)};
                     }
                     case HelpSearchResultType.HELP_ARTICLE:
                     {
 
                         if(HelpArticleData.Subsections == null)
                         {
-                            return new string[]{HelpArticleData.Headline};
+                            return new HelpSearchOption[]{new HelpSearchOption(Type, HelpArticleData.Headline)};
                         }
 
-                        return HelpArticleData.Subsections.Select(e => e.SubHeadline)
-                            .Concat(new string[]{HelpArticleData.Headline})
+                        return HelpArticleData.Subsections.Select(e => new HelpSearchOption(Type, e.SubHeadline, HelpArticleData.Headline))
                             .ToArray();
                     }
                     default:
                     {
-                        return new string[]{};
+                        return new HelpSearchOption[]{};
                     }
                 }
             }

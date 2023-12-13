@@ -1,4 +1,5 @@
 @using System.ComponentModel.DataAnnotations
+@using BlazorBoilerplate.Shared.Models
 @namespace BlazorBoilerplate.Theme.Material.Demo.Shared.Components
 @inject NavigationManager navigationManager
 @inject IHelpSearch helpSearch
@@ -8,19 +9,18 @@
 	<DataAnnotationsValidator />
 	<MudAutocomplete Label="Help search ..." @bind-Value="choice.State" Required="false" @bind-Text="@searchInputText"
 					 SearchFunc="@SearchAsync" Immediate="true" CoerceValue="@coerceValue" ResetValueOnEmptyText="true"
-					 AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Primary"
+					 AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Primary" T="HelpSearchOption"
 					 For="@(() => choice.State)">
-					<ItemTemplate Context="e">
-
-			<MudIcon Class="d-inline" Icon="@Icons.Material.Filled.Favorite" Title="Favorite" />
+		<ItemTemplate Context="e">
+			<MudIcon Class="d-inline" Icon="@GetIconOfOrigin(e.OriginType)" Title="Favorite" />
 			<MudText Class="d-inline">
-							<MudHighlighter Text="@e" HighlightedText="@searchInputText" />
-						</MudText>
-					</ItemTemplate>
-				 </MudAutocomplete>
+				<MudHighlighter Text="@e.Text" HighlightedText="@searchInputText" />
+			</MudText>
+		</ItemTemplate>
+	</MudAutocomplete>
 </EditForm>
 
-@if (!string.IsNullOrEmpty(choice.State))
+@if (!string.IsNullOrEmpty(choice.State.Text))
 {
 	redirectOnSearch();
 }
@@ -53,7 +53,7 @@
     protected override void OnInitialized()
     {
         editContext = new EditContext(choice);
-        choice.State = query;
+        choice.State = new HelpSearchOption(HelpSearchResultType.HELP_ARTICLE, query);
     }
 
     protected override async Task OnInitializedAsync()
@@ -71,45 +71,50 @@
     {
         if (!navigationManager.Uri.Contains("search") & !HelpSite)
         {
-            query = choice.State;
+            query = choice.State.Text;
             navigationManager.NavigateTo($"search/{query}");
-            choice.State = null;
+            choice.State = new HelpSearchOption(HelpSearchResultType.HELP_ARTICLE, null);
         }
     }
 
-    public static string[] states =
+    public static HelpSearchOption[] states =
     {
-		"Loading ..."
+		new HelpSearchOption(HelpSearchResultType.HELP_ARTICLE, "Loading ...")
 	};
 
-    private async Task<IEnumerable<string>> SearchAsync(string value)
+    private async Task<IEnumerable<HelpSearchOption>> SearchAsync(string value)
     {
 		if (string.IsNullOrEmpty(value))
 		{
 			return states;
 		}
-		return states.Where(x => x.Contains(value, StringComparison.InvariantCultureIgnoreCase));
+		return states.Where(x => x.Text.Contains(value, StringComparison.InvariantCultureIgnoreCase));
 	}
 
-	private IEnumerable<string> Validate(string value)
-	{
-		if (string.IsNullOrWhiteSpace(value))
-		{
-			yield return "The State field is required";
-			yield break;
-		}
-
-		if (!states.Contains(value))
-		{
-			yield return "This is an incorrect value";
-		}
-	}
+    private string GetIconOfOrigin(HelpSearchResultType origin)
+    {
+        switch (origin)
+        {
+            case HelpSearchResultType.ONTOLOGY:
+            {
+                return Icons.Material.Filled.Web;
+            }
+            case HelpSearchResultType.HELP_ARTICLE:
+            {
+                return Icons.Material.Filled.Article;
+            }
+            default:
+            {
+                return null;
+            }
+        }
+    }
 
 	public class Choice
 	{
 		[Required]
 		[State]
-		public string State { get; set; }
+		public HelpSearchOption State { get; set; }
 	}
 
 	[AttributeUsage(AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Parameter)]
@@ -117,6 +122,11 @@
 	{
 		protected override ValidationResult IsValid(object value, System.ComponentModel.DataAnnotations.ValidationContext validationContext)
 		{
+            if(value == null)
+            {
+                return new ValidationResult("Value is null");
+            }
+
 			if (!states.Contains(value))
 			{
 				return new ValidationResult("This is an incorrect value", new[] { validationContext.MemberName });
