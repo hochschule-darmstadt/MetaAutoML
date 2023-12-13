@@ -40,7 +40,11 @@ class DataSetAnalysisManager(Thread):
         #}
         self.__data_storage = data_storage
         self.__basic_analysis = basic_analysis
-        self.__ydataprofiling_analysis = ydataprofiling_analysis
+        # disable analysis for image data set
+        if self.__dataset["type"] == ":image":
+            self.__ydataprofiling_analysis = False
+        else:
+            self.__ydataprofiling_analysis = ydataprofiling_analysis
         # Load dataset
         if self.__dataset["type"] == ":time_series_longitudinal":
             self.__dataset_df = load_from_tsfile_to_dataframe(self.__dataset["path"], return_separate_X_and_y=False)
@@ -80,16 +84,18 @@ class DataSetAnalysisManager(Thread):
         schema = self.__dataset_schema_analysis()
         if self.__basic_analysis:
             analysis.update(self.basic_analysis(schema))
-
-        #Perform YDataProfiling-Report without minimal option when dataset has less than 80 columns
-        if self.__ydataprofiling_analysis and self.__dataset_df.shape[1] < 80:
-            report = self.ydataprofiling_analysis(minimal_Opt=False) # tuple (html_path, json_path)
-        else:
+        
+        # perform ydataprofilling 
+        if self.__ydataprofiling_analysis:
+            if self.__dataset_df.shape[1] < 80:
+                #Perform YDataProfiling-Report without minimal option when dataset has less than 80 columns
+                report = self.ydataprofiling_analysis(minimal_Opt=False) # tuple (html_path, json_path)
+            else:
             # minimal calculation option activated for datasets with more than 80 columns
-            report = self.ydataprofiling_analysis(minimal_Opt=True) # tuple (html_path, json_path)
+                report = self.ydataprofiling_analysis(minimal_Opt=True) # tuple (html_path, json_path)
+            analysis.update({"report_html_path": report[0]})
+            analysis.update({"report_json_path": report[1]})
 
-        analysis.update({"report_html_path": report[0]})
-        analysis.update({"report_json_path": report[1]})
 
         found, dataset = self.__data_storage.get_dataset(self.__user_id, self.__dataset_id)
         analysis_details = dataset["analysis"]
