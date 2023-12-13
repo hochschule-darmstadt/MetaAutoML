@@ -95,6 +95,11 @@ class DataSetAnalysisManager(Thread):
                 report = self.ydataprofiling_analysis(minimal_Opt=True) # tuple (html_path, json_path)
             analysis.update({"report_html_path": report[0]})
             analysis.update({"report_json_path": report[1]})
+        else:
+            # if there is no analysis available, set to none
+            # bad practice but works for now
+            analysis.update({"report_html_path": "none"})
+            analysis.update({"report_json_path": "none"})
 
 
         found, dataset = self.__data_storage.get_dataset(self.__user_id, self.__dataset_id)

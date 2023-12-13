@@ -22,7 +22,7 @@
                 <ButtonTooltip Text="Click here to to display all analysis diagrams available for this dataset." Position="Placement.Top">
                     <MudButton Href="@NavManager.ToAbsoluteUri("datasets/" + @Dataset.Dataset.Id + "/analysis").AbsoluteUri"
                         Variant="Variant.Filled"
-                        Disabled="@(_analysis == null || _analysis.ydataprofilling == "")"
+                        Disabled="@(_analysis == null || _analysis.ydataprofilling == "" || _analysis.ydataprofilling == "none")"
                         StartIcon="@Icons.Material.Filled.ReadMore"
                         Color="Color.Secondary"
                         Size="Size.Small"
@@ -36,6 +36,12 @@
             @if (_analysis == null || _analysis.ydataprofilling == ""){
                 <MudTooltip Text="The advanced analysis is running in the background, this might take a moment!">
                     <MudProgressCircular Color="Color.Primary" Style="height:70px;width:70px;" Indeterminate="true" />
+                </MudTooltip>
+            }
+            else if (_analysis.ydataprofilling == "none")
+            {
+                <MudTooltip Text="The advanced analysis is not available for this data set!">
+                    <MudText>The advanced analysis is not available for this data set!</MudText>
                 </MudTooltip>
             }
             else {
