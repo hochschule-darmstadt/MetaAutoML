@@ -13,6 +13,8 @@
             "justMyCode": true,
             "env": {
                 "PYTHONPATH": "kubernetes;blackboard;blackboard/agents;blackboard/strategies;dependency-injection;utils;interfaces;managers;managers/adapter/explainer_dashboard;managers/adapter/online_prediction;managers/adapter;managers/analysis;managers/data;managers/general;managers/ontology;persistence;utils;../adapters/GRPC/Controller;../adapters/Utils/Utils;../adapters/GRPC/Adapter;",
+                "H2O_SERVICE_PORT": "50067",
+                "H2O_SERVICE_HOST": "localhost",
                 "AUTOKERAS_SERVICE_PORT": "50052",
                 "AUTOKERAS_SERVICE_HOST": "localhost",
                 "AUTOGLUON_SERVICE_PORT": "50057",
@@ -66,6 +68,8 @@
             "justMyCode": true,
             "env": {
                "PYTHONPATH": "kubernetes:blackboard:blackboard/agents:blackboard/strategies:dependency-injection:utils:interfaces:managers:managers/adapter/explainer_dashboard:managers/adapter/online_prediction:managers/adapter:managers/analysis:managers/data:managers/general:managers/ontology:persistence:utils:../adapters/GRPC/Controller:../adapters/Utils/Utils:../adapters/GRPC/Adapter:",
+                "H2O_SERVICE_PORT": "50067",
+                "H2O_SERVICE_HOST": "localhost",
                 "AUTOKERAS_SERVICE_PORT": "50052",
                 "AUTOKERAS_SERVICE_HOST": "localhost",
                 "AUTOGLUON_SERVICE_PORT": "50057",
@@ -115,6 +119,8 @@
                 "PYTHON_ENV": ".venv/Scripts/python",
                 "PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION": "python",
                 "PYTHONPATH": "blackboard;blackboard/agents;blackboard/strategies;dependency-injection;utils;interfaces;managers;managers/adapter/online_prediction;managers/adapter;managers/analysis;managers/data;managers/general;managers/ontology;persistence;utils;../adapters/GRPC/Controller;../adapters/Utils/Utils;../adapters/GRPC/Adapter;",
+                "H2O_SERVICE_PORT": "50067",
+                "H2O_SERVICE_HOST": "localhost",
                 "AUTOKERAS_SERVICE_PORT": "50052",
                 "AUTOKERAS_SERVICE_HOST": "localhost",
                 "AUTOGLUON_SERVICE_PORT": "50057",
