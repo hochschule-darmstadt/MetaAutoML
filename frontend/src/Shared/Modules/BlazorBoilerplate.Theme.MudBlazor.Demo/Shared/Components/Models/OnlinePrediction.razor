@@ -16,7 +16,7 @@
 @using Radzen
 @using Radzen.Blazor
 
-<MudCard Elevation="5">
+<MudCard Elevation="5" data-form-twelfthStep>
     <MudCardHeader Style="border-bottom-style: inset; border-bottom-width: 1px;">
         <CardHeaderContent>
             <LabelTooltip FontSize="TextStyle.H6" Label=@L["Use model for predicting new cases"] Text="You may use the model for predicting new cases within the OMA-ML platform without having to install anything. Simply upload a file with the new cases." Position="Radzen.TooltipPosition.Bottom"></LabelTooltip>
@@ -24,7 +24,7 @@
         <CardHeaderActions>
             <MudStack Row="true" Class="align-content-center" Style="margin-top: 8px">
                 <ButtonTooltip Text="Click here to upload a file with new cases to be predicted. Please note: the file must have the identical format as the training dataset." Position="Placement.Bottom">
-                    <MudButton OnClick="OnOpenUpload"
+                    <MudButton OnClick="OnOpenUpload" data-form-eleventhStep
                                Variant="MudBlazor.Variant.Filled"
                                Color="Color.Secondary"
                                StartIcon="@Icons.Material.Filled.Upload"

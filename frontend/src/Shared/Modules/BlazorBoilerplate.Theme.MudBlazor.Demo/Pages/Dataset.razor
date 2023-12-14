@@ -91,10 +91,8 @@
     <MudItem xs="12" sm="6" md="8">
         <Top3Models Dataset="_dataset" />
     </MudItem>
-
-
 </MudGrid>
-
+<UserTour></UserTour>
 
 @code{
     [Parameter]
@@ -103,6 +101,8 @@
     private string _pageTitle;
     private GetDatasetResponseDto _dataset;
     private List<BreadcrumbItem> _breadcrumbs = new List<BreadcrumbItem>();
+    [Inject]
+    private GTour.Abstractions.IGTourService GTourService { get; set; }
     protected async override void OnInitialized()
     {
         await LoadDataset();
@@ -110,6 +110,8 @@
         _breadcrumbs.Add(new BreadcrumbItem(L["Datasets"], "/datasets", false, Icons.Filled.ListAlt));
         _breadcrumbs.Add(new BreadcrumbItem(_pageTitle, null, true, Icons.Filled.ListAlt));
         StateHasChanged();
+        TourService userTour = new TourService(GTourService, NavManager);
+        await userTour.checkIfUserTourIsActivatedAndStartTour(NavManager.Uri);
     }
     private async Task LoadDataset()
     {

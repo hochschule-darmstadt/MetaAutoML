@@ -1,57 +1,283 @@
 @using GTour.Components
 @inject NavigationManager navigationManager
+@using GTour.Abstractions.Common
 
 <GuidedTour TourId="FormGuidedTour" OverlayEnabled="true" CloseOnOverlayClick="true" OverlayClass="overlay-class">
     <ChildContent>
-        <GuidedTourStep StepName="firstStep" TourStepSequence="1"
-                        ElementSelector="[data-form-firstStep]" OnNavigateNext="@((tourStep) => { Console.WriteLine("hii"); })">
-            <MudText Style="margin:1rem;" Typo="Typo.h6">Welcome to OMA ML</MudText>
-            <MudText Style="margin:1rem;width: 40rem;" Typo="Typo.body2">
-                Preprocessing is a crucial part of data preparation that aims to clean
-                and organize raw data into a suitable format for the training. In this
-                step you can chose column seperator, encoding, datetime format, escape character,
-                decimal character and thousand seperator if necessary. You can also manually chose
-                the datatype and role of the individual columns.
-            </MudText>
+        <GuidedTourStep StepName="firstStep" TourStepSequence="1" PopupPlacement="PopperPlacement.Top" PopupStrategy="PopperStrategy.Absolute"
+                        ElementSelector="[data-form-firstStep]">
+            <ChildContent>
+                <MudGrid Style="width:min-content">
+                    <MudItem xs="6">
+                        <MudText Style="margin-top:1rem;margin-left:1rem;" Typo="Typo.h6">Upload a dataset</MudText>
+                    </MudItem>
+                    <MudItem xs="1" Class="justify-end" Style="margin: auto 0 auto auto; margin-right:1rem;">
+                        <MudIconButton OnClick="@(() => context.CancelTour())" Icon="@Icons.Material.Filled.Close"></MudIconButton>
+                    </MudItem>
+                    <MudItem xs="6">
+                        <MudText Style="margin-left:1rem;margin-right:1rem;width: 40rem;" Typo="Typo.body2">
+                            Click here to upload a new dataset to OMA-ML from your disk or from the internet. As soon as you have uploaded a dataset, click on Next.
+                        </MudText>
+                    </MudItem>
+                </MudGrid>
+            </ChildContent>
+            <FooterContent>
+                <MudButton Style="margin-left:1rem; margin-top:1rem;"
+                           Variant="Variant.Filled"
+                           Color="Color.Secondary"
+                           Size="Size.Medium"
+                           OnClick="@(() => context.NextStep())">Next</MudButton>
+            </FooterContent>
         </GuidedTourStep>
-        <GuidedTourStep Title="My second Step" StepName="secondStep" TourStepSequence="2"
+        <GuidedTourStep StepName="secondStep" TourStepSequence="2" PopupPlacement="PopperPlacement.Top" PopupStrategy="PopperStrategy.Absolute"
                         ElementSelector="[data-form-secondStep]">
-            <span>This is my 2. step</span>
-        </GuidedTourStep>
-        <GuidedTourStep Title="My 3. Step" StepName="thirdStep" TourStepSequence="3"
-                        ElementSelector="[data-form-thirdStep]" OnNavigateNext="@((tourStep) => { Console.WriteLine("hii"); })">
-            <HeaderContent>
-                <span>This is my 3. step</span>
-            </HeaderContent>
             <ChildContent>
-                <div>Textetwedhuwidhe</div>
+                <MudGrid Style="width:min-content">
+                    <MudItem xs="6">
+                        <MudText Style="margin-top:1rem;margin-left:1rem;" Typo="Typo.h6">Choose a dataset for training</MudText>
+                    </MudItem>
+                    <MudItem xs="1" Class="justify-end" Style="margin: auto 0 auto auto; margin-right:1rem;">
+                        <MudIconButton OnClick="@(() => context.CancelTour())" Icon="@Icons.Material.Filled.Close"></MudIconButton>
+                    </MudItem>
+                    <MudItem xs="6">
+                        <MudText Style="margin-left:1rem;margin-right:1rem;width: 40rem;" Typo="Typo.body2">
+                            In this table you can see all datasets uploaded so far. Click on a name to get to the detailed overview of the dataset.
+                        </MudText>
+                    </MudItem>
+                </MudGrid>
+            </ChildContent>
+            <FooterContent></FooterContent>
+        </GuidedTourStep>
+        <GuidedTourStep StepName="thirdStep" TourStepSequence="3" PopupPlacement="PopperPlacement.Left" PopupStrategy="PopperStrategy.Absolute"
+                        ElementSelector="[data-form-thirdStep]">
+            <ChildContent>
+                <MudGrid Style="width:min-content">
+                    <MudItem xs="6">
+                        <MudText Style="margin-top:1rem;margin-left:1rem;" Typo="Typo.h6">Start a new training</MudText>
+                    </MudItem>
+                    <MudItem xs="1" Class="justify-end" Style="margin: auto 0 auto auto; margin-right:1rem;">
+                        <MudIconButton OnClick="@(() => context.CancelTour())" Icon="@Icons.Material.Filled.Close"></MudIconButton>
+                    </MudItem>
+                    <MudItem xs="6">
+                        <MudText Style="margin-left:1rem;margin-right:1rem;width: 40rem;" Typo="Typo.body2">
+                            On this page you can view the dataset in detail. Click on Start Training to continue and initiate a training session.
+                        </MudText>
+                    </MudItem>
+                </MudGrid>
+            </ChildContent>
+            <FooterContent></FooterContent>
+        </GuidedTourStep>
+        <GuidedTourStep StepName="forthStep" TourStepSequence="4" PopupPlacement="PopperPlacement.Left" PopupStrategy="PopperStrategy.Absolute"
+                        ElementSelector="[data-form-forthStep]">
+            <ChildContent>
+                <MudGrid Style="width:min-content">
+                    <MudItem xs="6">
+                        <MudText Style="margin-top:1rem;margin-left:1rem;" Typo="Typo.h6">Dataset preparation</MudText>
+                    </MudItem>
+                    <MudItem xs="1" Class="justify-end" Style="margin: auto 0 auto auto; margin-right:1rem;">
+                        <MudIconButton OnClick="@(() => context.CancelTour())" Icon="@Icons.Material.Filled.Close"></MudIconButton>
+                    </MudItem>
+                    <MudItem xs="6">
+                        <MudText Style="margin-left:1rem;margin-right:1rem;width: 40rem;" Typo="Typo.body2">
+                            On this page, data types and roles of the individual columns of the dataset can be customized. Click on Next to advance to the next step of the training wizard: configuring the training.
+                        </MudText>
+                    </MudItem>
+                </MudGrid>
+            </ChildContent>
+            <FooterContent></FooterContent>
+        </GuidedTourStep>
+        <GuidedTourStep StepName="fifthStep" TourStepSequence="5" PopupPlacement="PopperPlacement.Top" PopupStrategy="PopperStrategy.Absolute"
+                        ElementSelector="[data-form-fifthStep]">
+            <ChildContent>
+                <MudGrid Style="width:min-content">
+                    <MudItem xs="6">
+                        <MudText Style="margin-top:1rem;margin-left:1rem;" Typo="Typo.h6">Select an ML task</MudText>
+                    </MudItem>
+                    <MudItem xs="1" Class="justify-end" Style="margin: auto 0 auto auto; margin-right:1rem;">
+                        <MudIconButton OnClick="@(() => context.CancelTour())" Icon="@Icons.Material.Filled.Close"></MudIconButton>
+                    </MudItem>
+                    <MudItem xs="6">
+                        <MudText Style="margin-left:1rem;margin-right:1rem;width: 40rem;" Typo="Typo.body2">
+                            Select the ML task via the drop-down menu, i.e., what the ML model shall predict, e.g., classes (classification) or values (regression). This is a mandatory step.
+                        </MudText>
+                    </MudItem>
+                </MudGrid>
             </ChildContent>
             <FooterContent>
-                <div>
-                    <button class="btn" @onclick="@(() => context.GoToStep("firstStep"))">First Step</button>
-                    <MudButton OnClick="@(() => context.PreviousStep())">Previous</MudButton>
-                    <MudButton OnClick="@(() => NavigateToNextPage("forthStep", navigationManager.ToAbsoluteUri(" ").AbsoluteUri))">Next</MudButton>
-                    <button class="btn" @onclick="@(() => context.CompleteTour())">Finish Tour</button>
-                </div>
+                <MudButton Style="margin-left:1rem; margin-top:1rem;"
+                           Variant="Variant.Filled"
+                           Color="Color.Secondary"
+                           Size="Size.Medium"
+                           OnClick="@(() => context.NextStep())">Next</MudButton>
             </FooterContent>
         </GuidedTourStep>
-        <GuidedTourStep Title="My 3. Step" StepName="forthStep" TourStepSequence="4"
-                        ElementSelector="[data-form-forthStep]" OnNavigateNext="@((tourStep) => { Console.WriteLine("hii"); })">
-            <HeaderContent>
-                <span>This is my 4. step</span>
-            </HeaderContent>
+        <GuidedTourStep StepName="sixthStep" TourStepSequence="6" PopupPlacement="PopperPlacement.Top" PopupStrategy="PopperStrategy.Absolute"
+                        ElementSelector="[data-form-sixthStep]">
             <ChildContent>
-                <div>xyz</div>
+                <MudGrid Style="width:min-content">
+                    <MudItem xs="6">
+                        <MudText Style="margin-top:1rem;margin-left:1rem;" Typo="Typo.h6">Select a target</MudText>
+                    </MudItem>
+                    <MudItem xs="1" Class="justify-end" Style="margin: auto 0 auto auto; margin-right:1rem;">
+                        <MudIconButton OnClick="@(() => context.CancelTour())" Icon="@Icons.Material.Filled.Close"></MudIconButton>
+                    </MudItem>
+                    <MudItem xs="6">
+                        <MudText Style="margin-left:1rem;margin-right:1rem;width: 40rem;" Typo="Typo.body2">
+                            Select which column in a tabular dataset is to be predicted by the ML model. This is a mandatory step.
+                        </MudText>
+                    </MudItem>
+                </MudGrid>
             </ChildContent>
             <FooterContent>
-                <div>
-                    <button class="btn" @onclick="@(() => context.GoToStep("firstStep"))">First Step</button>
-                    <MudButton OnClick="@(() => NavigateToNextPage("thirdStep", navigationManager.ToAbsoluteUri("help").AbsoluteUri))">Previous</MudButton>
-                    <button class="btn" @onclick="@(() => context.CompleteTour())">Finish Tour</button>
-                </div>
+                <MudButton Style="margin-left:1rem; margin-top:1rem;"
+                           Variant="Variant.Filled"
+                           Color="Color.Secondary"
+                           Size="Size.Medium"
+                           OnClick="@(() => context.NextStep())">Next</MudButton>
             </FooterContent>
         </GuidedTourStep>
-
+        <GuidedTourStep StepName="seventhStep" TourStepSequence="7" PopupPlacement="PopperPlacement.Top" PopupStrategy="PopperStrategy.Absolute"
+                        ElementSelector="[data-form-seventhStep]">
+            <ChildContent>
+                <MudGrid Style="width:min-content">
+                    <MudItem xs="6">
+                        <MudText Style="margin-top:1rem;margin-left:1rem;" Typo="Typo.h6">Detail configuration options</MudText>
+                    </MudItem>
+                    <MudItem xs="1" Class="justify-end" Style="margin: auto 0 auto auto; margin-right:1rem;">
+                        <MudIconButton OnClick="@(() => context.CancelTour())" Icon="@Icons.Material.Filled.Close"></MudIconButton>
+                    </MudItem>
+                    <MudItem xs="6">
+                        <MudText Style="margin-left:1rem;margin-right:1rem;width: 40rem;" Typo="Typo.body2">
+                            Click on Detail configuration options to open numerous configuration options. <br /><br />
+                            You can select or deselect <b>ML libraries</b> for which ML models shall be generated. Initially, all ML libraries that are supported for the selected ML task are selected (indiated by a tick). When changing selections, corresponding AutoML solutions will be adapted automatically.<br /><br />
+                            <b>AutoML solutions</b> generate ML models for certain ML libraries. Initially, all AutoML solutions are selected that are supported for the selected ML libraries. When changing selections, corresponding ML libraries will be adapted automatically.<br /><br />
+                            <b>Training strategies</b> are intelligent helpers that perform best practices in data science for you automatically. Select strategies that you want to enable for this training.
+                        </MudText>
+                    </MudItem>
+                </MudGrid>
+            </ChildContent>
+            <FooterContent>
+                <MudButton Style="margin-left:1rem; margin-top:1rem;"
+                           Variant="Variant.Filled"
+                           Color="Color.Secondary"
+                           Size="Size.Medium"
+                           OnClick="@(() => context.NextStep())">Next</MudButton>
+            </FooterContent>
+        </GuidedTourStep>
+        <GuidedTourStep StepName="eighthStep" TourStepSequence="8" PopupPlacement="PopperPlacement.Left" PopupStrategy="PopperStrategy.Absolute"
+                        ElementSelector="[data-form-eighthStep]">
+            <ChildContent>
+                <MudGrid Style="width:min-content">
+                    <MudItem xs="6">
+                        <MudText Style="margin-top:1rem;margin-left:1rem;" Typo="Typo.h6">Start the training</MudText>
+                    </MudItem>
+                    <MudItem xs="1" Class="justify-end" Style="margin: auto 0 auto auto; margin-right:1rem;">
+                        <MudIconButton OnClick="@(() => context.CancelTour())" Icon="@Icons.Material.Filled.Close"></MudIconButton>
+                    </MudItem>
+                    <MudItem xs="6">
+                        <MudText Style="margin-left:1rem;margin-right:1rem;width: 40rem;" Typo="Typo.body2">
+                            Click on Finish to leave the configuration and start the training. This may take a while, depending on your maximum runtime configuration.
+                        </MudText>
+                    </MudItem>
+                </MudGrid>
+            </ChildContent>
+            <FooterContent></FooterContent>
+        </GuidedTourStep>
+        <GuidedTourStep StepName="ninthStep" TourStepSequence="9" PopupPlacement="PopperPlacement.Top" PopupStrategy="PopperStrategy.Absolute"
+                        ElementSelector="[data-form-ninthStep]">
+            <ChildContent>
+                <MudGrid Style="width:min-content">
+                    <MudItem xs="6">
+                        <MudText Style="margin-top:1rem;margin-left:1rem;" Typo="Typo.h6">Leaderboard</MudText>
+                    </MudItem>
+                    <MudItem xs="1" Class="justify-end" Style="margin: auto 0 auto auto; margin-right:1rem;">
+                        <MudIconButton OnClick="@(() => context.CancelTour())" Icon="@Icons.Material.Filled.Close"></MudIconButton>
+                    </MudItem>
+                    <MudItem xs="6">
+                        <MudText Style="margin-left:1rem;margin-right:1rem;width: 40rem;" Typo="Typo.body2">
+                            This page shows the leaderboard for an ML training. During training, various AutoML solutions are executed in parallel. This is indicated by a spinning wheel. Whenever an AutoML solution has terminated, the result is displayed. The top performing models are shown first in the leaderboard. Click on next to continue the tour.
+                        </MudText>
+                    </MudItem>
+                </MudGrid>
+            </ChildContent>
+            <FooterContent>
+                <MudButton Style="margin-left:1rem; margin-top:1rem;"
+                           Variant="Variant.Filled"
+                           Color="Color.Secondary"
+                           Size="Size.Medium"
+                           OnClick="@(() => context.NextStep())">Next</MudButton>
+            </FooterContent>
+        </GuidedTourStep>
+        <GuidedTourStep StepName="tenthStep" TourStepSequence="10" PopupPlacement="PopperPlacement.Top" PopupStrategy="PopperStrategy.Absolute"
+                        ElementSelector="[data-form-tenthStep]">
+            <ChildContent>
+                <MudGrid Style="width:min-content">
+                    <MudItem xs="6">
+                        <MudText Style="margin-top:1rem;margin-left:1rem;" Typo="Typo.h6">Get to Model Detail View</MudText>
+                    </MudItem>
+                    <MudItem xs="1" Class="justify-end" Style="margin: auto 0 auto auto; margin-right:1rem;">
+                        <MudIconButton OnClick="@(() => context.CancelTour())" Icon="@Icons.Material.Filled.Close"></MudIconButton>
+                    </MudItem>
+                    <MudItem xs="6">
+                        <MudText Style="margin-left:1rem;margin-right:1rem;width: 40rem;" Typo="Typo.body2">
+                            Click on the first light bulb to see the best performing model.
+                        </MudText>
+                    </MudItem>
+                </MudGrid>
+            </ChildContent>
+            <FooterContent></FooterContent>
+        </GuidedTourStep>
+        <GuidedTourStep StepName="eleventhStep" TourStepSequence="11" PopupPlacement="PopperPlacement.TopStart" PopupStrategy="PopperStrategy.Absolute"
+                        ElementSelector="[data-form-eleventhStep]">
+            <ChildContent>
+                <MudGrid Style="width:min-content">
+                    <MudItem xs="6">
+                        <MudText Style="margin-top:1rem;margin-left:1rem;" Typo="Typo.h6">Add Live Dataset</MudText>
+                    </MudItem>
+                    <MudItem xs="1" Class="justify-end" Style="margin: auto 0 auto auto; margin-right:1rem;">
+                        <MudIconButton OnClick="@(() => context.CancelTour())" Icon="@Icons.Material.Filled.Close"></MudIconButton>
+                    </MudItem>
+                    <MudItem xs="6">
+                        <MudText Style="margin-left:1rem;margin-right:1rem;width: 40rem;" Typo="Typo.body2">
+                            Click on Add Live Dataset to upload a file with new cases to be predicted. Please note: the file must have the identical format as the training dataset. Click on next to continue with the tour.
+                        </MudText>
+                    </MudItem>
+                </MudGrid>
+            </ChildContent>
+            <FooterContent>
+                <MudButton Style="margin-left:1rem; margin-top:1rem;"
+                           Variant="Variant.Filled"
+                           Color="Color.Secondary"
+                           Size="Size.Medium"
+                           OnClick="@(() => context.NextStep())">Next</MudButton>
+            </FooterContent>
+        </GuidedTourStep>
+        <GuidedTourStep StepName="twelfthStep" TourStepSequence="12" PopupPlacement="PopperPlacement.Top" PopupStrategy="PopperStrategy.Absolute"
+                        ElementSelector="[data-form-twelfthStep]">
+            <ChildContent>
+                <MudGrid Style="width:min-content">
+                    <MudItem xs="6">
+                        <MudText Style="margin-top:1rem;margin-left:1rem;" Typo="Typo.h6">Add Live Dataset</MudText>
+                    </MudItem>
+                    <MudItem xs="1" Class="justify-end" Style="margin: auto 0 auto auto; margin-right:1rem;">
+                        <MudIconButton OnClick="@(() => context.CancelTour())" Icon="@Icons.Material.Filled.Close"></MudIconButton>
+                    </MudItem>
+                    <MudItem xs="6">
+                        <MudText Style="margin-left:1rem;margin-right:1rem;width: 40rem;" Typo="Typo.body2">
+                            If a dataset has been uploaded for live predictions, the results can be viewed here.<br /><br />
+                            You have reached the end of the tour. Take a look at the model page in detail or click on Home to start from the beginning and start your own trainings.
+                        </MudText>
+                    </MudItem>
+                </MudGrid>
+            </ChildContent>
+            <FooterContent>
+                <MudButton Style="margin-left:1rem; margin-top:1rem;"
+                           Variant="Variant.Filled"
+                           Color="Color.Secondary"
+                           Size="Size.Medium"
+                           OnClick="@(() => context.CompleteTour())">End Tour</MudButton>
+            </FooterContent>
+        </GuidedTourStep>
     </ChildContent>
 </GuidedTour>
 
@@ -90,6 +316,7 @@
 @code {
     [Inject]
     private GTour.Abstractions.IGTourService GTourService { get; set; }
+
     private void NavigateToNextPage(string step, string uri)
     {
         // var uri = navigationManager.GetUriWithQueryParameter("TourActivated", true);
