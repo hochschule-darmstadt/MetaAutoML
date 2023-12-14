@@ -3,7 +3,7 @@ import os
 import sys
 from JsonUtil import get_config_property
 
-from AutoKerasAdapter import AutoKerasAdapter
+from H2OAdapter import H2OAdapter
 
 if __name__ == '__main__':
     """
@@ -15,5 +15,5 @@ if __name__ == '__main__':
         process_json = json.load(file)
 
     process_json["dataset_configuration"] = json.loads(process_json["dataset_configuration"])
-    adapter = AutoKerasAdapter(process_json)
+    adapter = H2OAdapter(process_json)
     adapter.start()
