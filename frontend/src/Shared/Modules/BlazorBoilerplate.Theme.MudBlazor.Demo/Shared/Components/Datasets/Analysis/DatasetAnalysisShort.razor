@@ -38,6 +38,12 @@
                     <MudProgressCircular Color="Color.Primary" Style="height:70px;width:70px;" Indeterminate="true" />
                 </MudTooltip>
             }
+            else if (_analysis.ydataprofilling == null)
+            {
+                <MudTooltip Text="The advanced analysis is not available for this data set!">
+                    <MudText>For the advance analysis you have to go to configuration page and click saving button</MudText>
+                </MudTooltip>
+            }
             else if (_analysis.ydataprofilling == "none")
             {
                 <MudTooltip Text="The advanced analysis is not available for this data set!">
