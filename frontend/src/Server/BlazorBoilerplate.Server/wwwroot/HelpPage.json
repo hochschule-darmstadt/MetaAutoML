@@ -1,6 +1,8 @@
 [
     {
         "PanelHeadline": "Introduction",
+        "Text": "OMA-ML makes effective machine learning (ML) easy! It supports you in the entire data science workflow, from uploading datasets, preprocessing, ML model selection, ML training, deploying ML models and making predictions.",
+        "Image": "_content/BlazorBoilerplate.Theme.MudBlazor/images/FlowChart.png",
         "Sections": [
             {
                 "Headline": "Dataset upload",

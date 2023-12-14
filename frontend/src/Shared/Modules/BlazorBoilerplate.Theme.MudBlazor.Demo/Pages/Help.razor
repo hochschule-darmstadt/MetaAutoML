@@ -19,31 +19,31 @@
             <MudText Style="padding-top:1.3rem;" Typo="Typo.h6">Contents</MudText>
         </MudDrawerHeader>
         <MudNavMenu>
-            <MudNavGroup Title="Introduction" @onclick="()=> ChangePanel(introduction)" Expanded="currentPanelIntroduction">
-                <AnchorLink TargetId="datasetUpload"><MudNavLink Match="NavLinkMatch.All" Style="color:#424242;text-decoration:none!important;">Dataset upload</MudNavLink></AnchorLink>
-                <AnchorLink TargetId="preprocessing"><MudNavLink Match="NavLinkMatch.All" Style="color:#424242;text-decoration:none!important;">Preprocessing</MudNavLink></AnchorLink>
-                <AnchorLink TargetId="modelselection"><MudNavLink Match="NavLinkMatch.All" Style="color:#424242;text-decoration:none!important;">Model selection</MudNavLink></AnchorLink>
-                <AnchorLink TargetId="training"><MudNavLink Match="NavLinkMatch.All" Style="color:#424242;text-decoration:none!important;">Training</MudNavLink></AnchorLink>
-                <AnchorLink TargetId="deployment"><MudNavLink Match="NavLinkMatch.All" Style="color:#424242;text-decoration:none!important;">Deployment</MudNavLink></AnchorLink>
-                <AnchorLink TargetId="prediction"><MudNavLink Match="NavLinkMatch.All" Style="color:#424242;text-decoration:none!important;">Prediction</MudNavLink></AnchorLink>
+            <MudNavGroup Title="Introduction" @onclick="()=> ChangePanel(introduction)" Expanded="true">
+                @foreach (Section section in this.introductionTab.Sections)
+                    {
+                    <AnchorLink TargetId="@(section.Anchor)">
+                        <MudNavLink Match="NavLinkMatch.All" Style="color:#424242;text-decoration:none!important;">
+                            @(section.Headline)
+                        </MudNavLink>
+                    </AnchorLink>
+                    }
+                </MudNavGroup>
+            <MudNavGroup Title="Pages" @onclick="()=> ChangePanel(pages)" Expanded="true">
+                @foreach (Section section in this.pagesTab.Sections)
+                {
+                    <AnchorLink TargetId="@(section.Anchor)">
+                        <MudNavLink Match="NavLinkMatch.All" Style="color:#424242;text-decoration:none!important;">
+                            @(section.Headline)
+                        </MudNavLink>
+                    </AnchorLink>
+                }
             </MudNavGroup>
-            <MudNavGroup Title="Pages" @onclick="()=> ChangePanel(pages)" Expanded="!currentPanelIntroduction">
-                <AnchorLink TargetId="home"><MudNavLink Match="NavLinkMatch.All" Style="color:#424242;text-decoration:none!important;">Home</MudNavLink></AnchorLink>
-                <AnchorLink TargetId="datasets"><MudNavLink Match="NavLinkMatch.All" Style="color:#424242;text-decoration:none!important;">Datasets</MudNavLink></AnchorLink>
-                <AnchorLink TargetId="datasetdetail"><MudNavLink Match="NavLinkMatch.All" Style="color:#424242;text-decoration:none!important;">Dataset Detail</MudNavLink></AnchorLink>
-                <AnchorLink TargetId="datasetconfigure"><MudNavLink Match="NavLinkMatch.All" Style="color:#424242;text-decoration:none!important;">Dataset Configure</MudNavLink></AnchorLink>
-                <AnchorLink TargetId="trainings"><MudNavLink Match="NavLinkMatch.All" Style="color:#424242;text-decoration:none!important;">Trainings</MudNavLink></AnchorLink>
-                <AnchorLink TargetId="traindatasetpreparation"><MudNavLink Match="NavLinkMatch.All" Style="color:#424242;text-decoration:none!important;">Train - Dataset preparation</MudNavLink></AnchorLink>
-                <AnchorLink TargetId="trainconfiguration"><MudNavLink Match="NavLinkMatch.All" Style="color:#424242;text-decoration:none!important;">Train - Configuration</MudNavLink></AnchorLink>
-                <AnchorLink TargetId="trainingdetail"><MudNavLink Match="NavLinkMatch.All" Style="color:#424242;text-decoration:none!important;">Training Detail</MudNavLink></AnchorLink>
-                <AnchorLink TargetId="models"><MudNavLink Match="NavLinkMatch.All" Style="color:#424242;text-decoration:none!important;">Models</MudNavLink></AnchorLink>
-                <AnchorLink TargetId="modeldetail"><MudNavLink Match="NavLinkMatch.All" Style="color:#424242;text-decoration:none!important;">Model Detail</MudNavLink></AnchorLink>
-            </MudNavGroup>
-        </MudNavMenu>
+            </MudNavMenu>
     </MudDrawer>
     <MudGrid Style="margin-top:0.14rem;">
         <MudItem xs="12" sm="12" md="12">
-            <MudCard Elevation="5" data-form-forthStep>
+            <MudCard Elevation="5" >
                 <MudGrid>
                     <MudItem xs="6">
                         <MudText Typo="Typo.subtitle1" Style="padding-top:10rem;padding-left:2rem;">Watch the video for a quick start of strat a guided tour</MudText>
@@ -72,20 +72,23 @@
                             </CardHeaderContent>
                         </MudCardHeader>
                         <MudCardContent>
-                            <MudImage Style="width:90%;margin-left:2rem;" Src="@($"_content/BlazorBoilerplate.Theme.MudBlazor/images/FlowChart.png")" />
+                            <MudText Style="margin-left:2rem;margin-top:1rem;">
+                                @introductionTab.Text
+                            </MudText>
+                            <MudImage Style="width:92%;margin-left:1rem;margin-top:1rem;" Src="@(@introductionTab.Image)" />
                             @foreach (Section section in this.introductionTab.Sections)
-                                {
+                            {
                                 <MudGrid id="@(section.Anchor)">
                                     <MudItem xs="6">
                                         <MudText Style="margin-left: 2rem; padding-top: 10rem; color: #5c78ef;" Typo="Typo.h6">
-                                        @(section.Headline)
+                                            @(section.Headline)
                                         </MudText>
                                         <MudText Style="margin-left:2rem;margin-top:1rem;" Typo="Typo.body2">
                                             @(section.Text)
                                         </MudText>
                                     </MudItem>
                                     <MudItem xs="6">
-                                        <img style=" width: 90%; margin: 3rem; padding-top: 5rem; padding-right: 2rem;" src="@(section.GIF)"/>
+                                        <img style=" width: 90%; margin: 3rem; padding-top: 5rem; padding-right: 2rem;" src="@(section.GIF)" />
                                     </MudItem>
                                 </MudGrid>
                             }
@@ -123,7 +126,7 @@
                                 }
                                 else
                                 {
-                                    <MudGrid Style="border-bottom-style: inset; border-bottom-width: 1px; padding-bottom: 2rem;" data-form-firstStep id="@(section.Anchor)">
+                                    <MudGrid Style="border-bottom-style: inset; border-bottom-width: 1px; padding-bottom: 2rem;" id="@(section.Anchor)">
                                         <MudItem xs="6">
                                             <MudText Style="margin-left: 2rem; padding-top: 4rem;" Typo="Typo.h6" Color="Color.Secondary">@(section.Headline)</MudText>
                                             <img style=" width: 90%; margin: 2rem; padding-right: 2rem;" src="@(section.GIF)" />
@@ -177,17 +180,18 @@
         _breadcrumbs.Add(new BreadcrumbItem(L["Home"], "/", false, Icons.Filled.Home));
         _breadcrumbs.Add(new BreadcrumbItem(L["Help"], "/help", false, Icons.Material.Filled.HelpOutline));
         //StateHasChanged();
-        TourService userTour = new TourService(GTourService);
-        await userTour.checkIfUserTourIsActivated(navigationManager.Uri);
+        TourService userTour = new TourService(GTourService, navigationManager);
+        await userTour.checkIfUserTourIsActivatedAndStartTour(navigationManager.Uri);
         StateHasChanged();
 
 
     }
 
 
-    private async Task StartTour()
+    private void StartTour()
     {
-        await GTourService.StartTour("FormGuidedTour");
+        TourService userTour = new TourService(GTourService, navigationManager);
+        userTour.navigateToNextPage("firstStep", navigationManager.ToAbsoluteUri(" ").AbsoluteUri);
     }
     private void PanelSwitch()
     {
@@ -203,6 +207,7 @@
         {
             tabs.ActivatePanel(tab);
         }
+        this.currentPanelIntroduction = !this.currentPanelIntroduction;
 
     }
 
