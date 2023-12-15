@@ -208,8 +208,7 @@
                            OnClick="@(() => context.NextStep())">Next</MudButton>
             </FooterContent>
         </GuidedTourStep>
-        <GuidedTourStep StepName="tenthStep" TourStepSequence="10" PopupPlacement="PopperPlacement.Top" PopupStrategy="PopperStrategy.Absolute"
-                        ElementSelector="[data-form-tenthStep]">
+        <GuidedTourStep StepName="tenthStep" TourStepSequence="10" ElementSelector="[data-form-tenthStep]" PopupPlacement="PopperPlacement.TopStart" PopupStrategy="PopperStrategy.Absolute">
             <ChildContent>
                 <MudGrid Style="width:min-content">
                     <MudItem xs="6">

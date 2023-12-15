@@ -22,7 +22,7 @@
             else
             {
                 <TrainingTimeline Training="@Training" />
-                <MudTable Items="@Training.Training.models" Context="models" Filter="new Func<ModelDto,bool>(FilterFunc)" CustomHeader="true">
+                <MudTable Items="@Training.Training.models" Context="models" Filter="new Func<ModelDto,bool>(FilterFunc)" CustomHeader="true" data-form-tenthStep>
                     <ToolBarContent>
                         <MudSpacer />
                             <MudTextField @bind-Value="searchString" Placeholder="@L["Search by AutoML solution, status, ML model or library"]" Adornment="Adornment.Start"
@@ -93,8 +93,8 @@
                         </MudTd>
                         @if (tourActivated)
                         {
-                            <MudTd data-form-tenthStep>
-                                <MudLink Href="@NavManager.ToAbsoluteUri("trainings/" + Training.Training.Id + "/models/" + @models.Id+"?TourStep=eleventhStep").AbsoluteUri" Style="cursor: pointer; display: flex;"><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.Lightbulb" Style="margin-right: 4px;" />@(models.GetMlModelString())</MudLink>
+                            <MudTd>
+                                <MudLink Href="@NavManager.ToAbsoluteUri("trainings/" + Training.Training.Id + "/models/" + @models.Id+"?TourStep=eleventhStep").AbsoluteUri" Style="cursor: pointer; display: flex;"><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.Lightbulb" Style="margin-right: 4px;"/>@(models.GetMlModelString())</MudLink>
                             </MudTd>
                         }
                         else
@@ -148,6 +148,7 @@
         </MudPaper>
     </MudCardContent>
 </MudCard>
+<UserTour></UserTour>
 
 @code {
     [Inject]
