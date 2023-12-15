@@ -88,6 +88,19 @@ class DataSetAnalysisManager(Thread):
     def run(self):
         analysis = {}
         schema = self.__dataset_schema_analysis()
+
+        # TODO: consider to add new flag for analysis instead of checking the path to report file every time 
+        # this code sinppet is used to update path file for the dataset in database, which are created with the old module
+        # this also trigger loading spin feature in frontend 
+        current_dateset = self.__data_storage.get_dataset(self.__user_id, self.__dataset_id)[1]
+        if current_dateset != None:
+            current_analysis_details = current_dateset["analysis"]
+            # check if current analysis already contain report html path
+            if (not current_analysis_details.__contains__("report_html_path") and not current_analysis_details.__contains__("report_json_path") ): 
+                current_analysis_details.update({"report_html_path": ""})
+                current_analysis_details.update({"report_json_path": ""})
+                self.__data_storage.update_dataset(self.__user_id, self.__dataset_id, {"analysis": current_analysis_details, "schema": schema})
+        
         if self.__basic_analysis:
             analysis.update(self.basic_analysis(schema))
         
