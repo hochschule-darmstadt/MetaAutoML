@@ -23,7 +23,7 @@
                 @foreach (Section section in this.introductionTab.Sections)
                     {
                     <AnchorLink TargetId="@(section.Anchor)">
-                        <MudNavLink Match="NavLinkMatch.All" Style="color:#424242;text-decoration:none!important;">
+                        <MudNavLink Match="NavLinkMatch.All" Style="color:#424242;text-decoration:none!important;" OnClick="()=> ChangePanel(introduction)">
                             @(section.Headline)
                         </MudNavLink>
                     </AnchorLink>
@@ -33,7 +33,7 @@
                 @foreach (Section section in this.pagesTab.Sections)
                 {
                     <AnchorLink TargetId="@(section.Anchor)">
-                        <MudNavLink Match="NavLinkMatch.All" Style="color:#424242;text-decoration:none!important;">
+                        <MudNavLink Match="NavLinkMatch.All" Style="color:#424242;text-decoration:none!important;" OnClick="()=> ChangePanel(pages)">
                             @(section.Headline)
                         </MudNavLink>
                     </AnchorLink>
