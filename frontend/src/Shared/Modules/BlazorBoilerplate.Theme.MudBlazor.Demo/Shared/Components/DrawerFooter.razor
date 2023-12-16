@@ -9,6 +9,8 @@
 @using Radzen
 @using BlazorBoilerplate.Shared.Models.Account
 @using Microsoft.AspNetCore.Components
+@using Microsoft.JSInterop
+@inject IJSRuntime JSRuntime
 
 @if (fileUploader.IsUploading == true)
 {
@@ -428,6 +430,7 @@
             if (_uploadSource == UploadSource.URL)
             {
                 string _downloadUrl = fileUploader.GetDownloadUrl(Url);
+                await JSRuntime.InvokeVoidAsync("console.log", _downloadUrl);
                 fileUploader.UploadDatasetFromURL(_downloadUrl, AcceptedFileType);
                 Url = "";
             }

@@ -163,11 +163,18 @@ namespace BlazorBoilerplate.Theme.Material.Services
             {
                 using (var client = new HttpClient())
                 {
-                    using (var s = client.GetStreamAsync(url))
+                    HttpResponseMessage response = await client.GetAsync(url);
+                    // string _fileNameFromHeader = response.Content.Headers.ContentDisposition?.FileName;
+                    // string _fileExtension = _fileNameFromHeader?.Trim('"');
+                    string _fileExtension = response.Content.Headers.ContentDisposition?.FileName?.Split('.').LastOrDefault().TrimEnd('"') ?? string.Empty;
+                    fileType = !string.IsNullOrEmpty(_fileExtension) ? $".{_fileExtension}" : fileType;
+
+                    using (var s = await response.Content.ReadAsStreamAsync())
+                    //using (var s = client.GetStreamAsync(url))
                     {
                         using (var fs = new FileStream("localfile" + fileType, FileMode.OpenOrCreate))
                         {
-                            s.Result.CopyTo(fs);
+                            s.CopyTo(fs);
                         }
                     }
                 }
