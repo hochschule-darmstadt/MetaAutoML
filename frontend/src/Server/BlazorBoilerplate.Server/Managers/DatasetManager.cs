@@ -69,6 +69,16 @@ namespace BlazorBoilerplate.Server.Managers
                 {
                     fs.Dispose();
 
+                    string fileExt = Path.GetExtension(filePath);
+                    if (!CheckSupportedFileType(fileExt))
+                    {
+                        return new ApiResponse(Status406NotAcceptable, "FileTypeNotSupportedErrorMessage");
+                    }
+                    if (fileExt == ".zip" && !CheckUploadStructure(filePath))
+                    {
+                        return new ApiResponse(Status406NotAcceptable, "FolderStructureNotCorrectErrorMessage");
+                    }
+
                     grpcRequest.DatasetType = request.DatasetType;
                     DetectionResult result;
                     if (grpcRequest.DatasetType == ":text" || grpcRequest.DatasetType == ":tabular" || grpcRequest.DatasetType == ":time_series" || grpcRequest.DatasetType == ":time_series_longitudinal")
@@ -89,28 +99,20 @@ namespace BlazorBoilerplate.Server.Managers
                     {
                         grpcRequest.Encoding = "";
                     }
-                    bool correctStrukture = CheckUploadStructure(filePath);
 
-                    if (correctStrukture == true)
-                        {
-                            grpcRequest.UserId = username;
-                            grpcRequest.FileName = trustedFileNameForDisplay;
-                            grpcRequest.DatasetName = request.DatasetName;
-                            grpcRequest.DatasetType = request.DatasetType;
-                            var reply = _client.CreateDataset(grpcRequest);
-                            return new ApiResponse(Status200OK, null, "");
-                    }
-                    else
-                    {
-                        return new ApiResponse(Status406NotAcceptable, "FolderStructureNotCorrectErrorMessage");
-                    }
+                    grpcRequest.UserId = username;
+                    grpcRequest.FileName = trustedFileNameForDisplay;
+                    grpcRequest.DatasetName = request.DatasetName;
+                    grpcRequest.DatasetType = request.DatasetType;
+                    var reply = _client.CreateDataset(grpcRequest);
+                    return new ApiResponse(Status200OK, null, "");
                 }
                 return new ApiResponse(Status200OK, null, "");
             }
             catch (Exception ex)
             {
                 return new ApiResponse(Status404NotFound, ex.Message);
-            }     
+            }
         }
         /// <summary>
         /// Get a list of all Datasets
@@ -217,7 +219,6 @@ namespace BlazorBoilerplate.Server.Managers
                 switch (reply.Dataset.Type)
                 {
                     case ":tabular":
-                     
                         response.DatasetPreview = datasetLocation;
 
                         break;
@@ -239,15 +240,12 @@ namespace BlazorBoilerplate.Server.Managers
                         }
                         break;
                     case ":text":
-
-                        response.DatasetPreview = datasetLocation; 
+                        response.DatasetPreview = datasetLocation;
                         break;
                     case ":time_series":
-                      
                         response.DatasetPreview = datasetLocation;
                         break;
                     case ":time_series_longitudinal":
-                       
                         response.DatasetPreview = datasetLocation;
                         break;
                     default:
@@ -367,34 +365,33 @@ namespace BlazorBoilerplate.Server.Managers
             }
         }
 
+        private bool CheckSupportedFileType(string fileExt)
+        {
+            if (fileExt == ".csv" || fileExt == ".arff" || fileExt == ".zip")
+            {
+                return true;
+            }
+            return false;
+        }
+
         private bool CheckUploadStructure(string filePath)
         {
-            string fileExt = filePath.Substring(filePath.Length - 4);
             List<string> zipEntries = new List<string>();
-
-            if (fileExt == ".csv")
+            using (ZipArchive archive = ZipFile.OpenRead(filePath))
             {
-                // .csv does not need validation at the moment
-                return true; 
-            }
-            else if (fileExt == ".zip")
-            {
-                using (ZipArchive archive = ZipFile.OpenRead(filePath))
+                foreach (ZipArchiveEntry entry in archive.Entries)
                 {
-                    foreach (ZipArchiveEntry entry in archive.Entries)
+                    // take only top level folders, look for test and train
+                    if (entry.FullName.EndsWith("/train/") || entry.FullName.EndsWith("/test/"))
                     {
-                        // take only top level folders, look for test and train
-                        if (entry.FullName.EndsWith("/train/") || entry.FullName.EndsWith("/test/"))
-                        {
-                            zipEntries.Add(entry.FullName);
-                        }
+                        zipEntries.Add(entry.FullName);
                     }
                 }
-                // if test and train are found, return true
-                if (zipEntries.Count == 2)
-                {
-                    return true;
-                }
+            }
+            // if test and train are found, return true
+            if (zipEntries.Count == 2)
+            {
+                return true;
             }
             return false;
         }
