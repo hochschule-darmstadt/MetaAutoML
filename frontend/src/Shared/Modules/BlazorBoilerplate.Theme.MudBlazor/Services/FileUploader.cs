@@ -158,7 +158,7 @@ namespace BlazorBoilerplate.Theme.Material.Services
         {
             int chunkSize = 1000000;
             long bytesRead = 0;
-
+            IsUploading = true;
             try
             {
                 using (var client = new HttpClient())
