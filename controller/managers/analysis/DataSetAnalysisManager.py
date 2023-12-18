@@ -17,7 +17,7 @@ from feature_engine.selection import DropConstantFeatures, DropDuplicateFeatures
 # these 2 lines help fix the multi threading problem
 import matplotlib
 matplotlib.use('Agg')
-import matplotlib.pyplot as plt 
+import matplotlib.pyplot as plt
 
 # Config for matplotlib plot sizing. These values are interpreted as pixels / 100.
 # So a Y value of 4 means that the plots will be 400px high.
@@ -89,22 +89,25 @@ class DataSetAnalysisManager(Thread):
         analysis = {}
         schema = self.__dataset_schema_analysis()
 
-        # TODO: consider to add new flag for analysis instead of checking the path to report file every time 
+        # TODO: consider to add new flag for analysis instead of checking the path to report file every time
         # this code sinppet is used to update path file for the dataset in database, which are created with the old module
-        # this also trigger loading spin feature in frontend 
-        current_dateset = self.__data_storage.get_dataset(self.__user_id, self.__dataset_id)[1]
-        if current_dateset != None:
-            current_analysis_details = current_dateset["analysis"]
+        # this also trigger loading spin feature in frontend
+        current_dataset = self.__data_storage.get_dataset(self.__user_id, self.__dataset_id)[1]
+        if current_dataset != None:
+            current_analysis_details = current_dataset["analysis"]
             # check if current analysis already contain report html path
-            if (not current_analysis_details.__contains__("report_html_path") and not current_analysis_details.__contains__("report_json_path") ): 
+            if (not current_analysis_details.__contains__("report_html_path") and not current_analysis_details.__contains__("report_json_path") ):
                 current_analysis_details.update({"report_html_path": ""})
                 current_analysis_details.update({"report_json_path": ""})
                 self.__data_storage.update_dataset(self.__user_id, self.__dataset_id, {"analysis": current_analysis_details, "schema": schema})
-        
-        if self.__basic_analysis:
-            analysis.update(self.basic_analysis(schema))
-        
-        # perform ydataprofilling 
+        else:
+            # dataset not found in mongodb, therefore we initialize the analysis with the basic components. We want to update
+            # the dataset immediately to see the basic analysis in the frontend
+            if self.__basic_analysis:
+                analysis.update(self.basic_analysis(schema))
+                self.__data_storage.update_dataset(self.__user_id, self.__dataset_id, {"analysis": analysis, "schema": schema})
+
+        # perform ydataprofiling
         if self.__ydataprofiling_analysis:
             if self.__dataset_df.shape[1] < 80:
                 #Perform YDataProfiling-Report without minimal option when dataset has less than 80 columns
@@ -121,7 +124,7 @@ class DataSetAnalysisManager(Thread):
             analysis.update({"report_json_path": "none"})
 
 
-        found, dataset = self.__data_storage.get_dataset(self.__user_id, self.__dataset_id)
+        dataset = self.__data_storage.get_dataset(self.__user_id, self.__dataset_id)[1]
         analysis_details = dataset["analysis"]
         analysis_details.update(analysis)
         self.__data_storage.update_dataset(self.__user_id, self.__dataset_id, {"analysis": analysis_details, "schema": schema})
