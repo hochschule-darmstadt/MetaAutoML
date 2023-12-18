@@ -16,7 +16,7 @@ using BlazorBoilerplate.Shared.Dto.Prediction;
 //using HtmlAgilityPack;
 using static Microsoft.AspNetCore.Http.StatusCodes;
 using System.Net;
-
+using System.Text.Json;
 
 namespace BlazorBoilerplate.Theme.Material.Services
 {
@@ -215,6 +215,10 @@ namespace BlazorBoilerplate.Theme.Material.Services
             {
                 return GetNextcloudDownloadLink(url);
             }
+            if (Regex.IsMatch(url, @"(?:openml\.org/search).*type=data"))
+            {
+                return GetOpenMLDownloadLink(url);
+            }
             return url;
         }
         private static string GetGoogleDriveDownloadLink(string googleDriveUrl)
@@ -267,6 +271,34 @@ namespace BlazorBoilerplate.Theme.Material.Services
                 return nextcloudUrl;
             }
             return nextcloudUrl + "/download";
+        }
+
+        private static string GetOpenMLDownloadLink(string openMLUrl)
+        {
+            var match = Regex.Match(openMLUrl, @"(?:\b|\?)id=(\d+)\b");
+            if (match.Success)
+            {
+                string datasetId = match.Groups[1].Value;
+                string apiUrl = $"https://www.openml.org/api/v1/json/data/{datasetId}";
+                try
+                {
+                    using (var client = new HttpClient())
+                    {
+                        HttpResponseMessage response = client.GetAsync(apiUrl).Result;
+                        if (response.IsSuccessStatusCode)
+                        {
+                            JsonDocument jsonDocument = JsonDocument.Parse(response.Content.ReadAsStringAsync().Result);
+                            JsonElement urlElement = jsonDocument.RootElement.GetProperty("data_set_description").GetProperty("url");
+                            openMLUrl = urlElement.GetString();
+                            return openMLUrl;
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                }
+            }
+            return openMLUrl;
         }
     }
 }
