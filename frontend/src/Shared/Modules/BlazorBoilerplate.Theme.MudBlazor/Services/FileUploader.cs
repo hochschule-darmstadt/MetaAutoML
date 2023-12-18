@@ -43,109 +43,12 @@ namespace BlazorBoilerplate.Theme.Material.Services
         public bool IsUploadPredictionDatasetDialogOpen { get; set; } = false;
         public async Task UploadDatasetFromLocal()
         {
-            int chunkSize = 1000000;
-            long bytesRead = 0;
-            byte[] data = new byte[chunkSize];
             IsUploading = true;
             try
             {
-                MemoryStream ms = new MemoryStream();
-                StreamReader reader = new StreamReader(UploadFileContent.OpenReadStream(long.MaxValue));
-                await reader.BaseStream.CopyToAsync(ms);
-                ms.Seek(0, SeekOrigin.Begin);
-                if ((ms.Length % chunkSize) == 0) //no extra chunk
+                using (StreamReader reader = new StreamReader(UploadFileContent.OpenReadStream(long.MaxValue)))
                 {
-                    if (IsPredictionDatasetToUpload == true)
-                    {
-                        UploadPredictionRequest.TotalChunkNumber = (int)(ms.Length / chunkSize);
-                    }
-                    else
-                    {
-                        UploadDatasetRequest.TotalChunkNumber = (int)(ms.Length / chunkSize);
-                    }
-                }
-                else
-                {
-                    if (IsPredictionDatasetToUpload == true)
-                    {
-                        UploadPredictionRequest.TotalChunkNumber = (int)(ms.Length / chunkSize) + 1; //append extra chunk
-                    }
-                    else
-                    {
-                        UploadDatasetRequest.TotalChunkNumber = (int)(ms.Length / chunkSize) + 1; //append extra chunk
-                    }
-                }
-                if (IsPredictionDatasetToUpload == true)
-                {
-                    UploadPredictionRequest.ChunkNumber = 1;
-                }
-                else
-                {
-                    UploadDatasetRequest.ChunkNumber = 1;
-                }
-
-                while (bytesRead < ms.Length)
-                {
-                    var bytesToRead = ms.Length - bytesRead;
-                    var bufferSize = Math.Min(chunkSize, bytesToRead);
-                    var buffer = new byte[bufferSize];
-                    var reallyRead = ms.Read(buffer, 0, buffer.Length);
-                    if (IsPredictionDatasetToUpload == true)
-                    {
-                        UploadPredictionRequest.Content = buffer;
-                    }
-                    else
-                    {
-                        UploadDatasetRequest.Content = buffer;
-                    }
-
-
-                    ApiResponseDto apiResponse = new ApiResponseDto();
-
-                    if (IsPredictionDatasetToUpload == true)
-                    {
-                        apiResponse = await _client.UploadPrediction(UploadPredictionRequest);
-                    }
-                    else
-                    {
-                        apiResponse = await _client.UploadDataset(UploadDatasetRequest);
-                    }
-
-                    if (!apiResponse.IsSuccessStatusCode)
-                    {
-                        _notifier.Show(_l[apiResponse.Message] + " : " + apiResponse.StatusCode, ViewNotifierType.Error, _l["Operation Failed"]);
-                    }
-
-                    if (apiResponse.StatusCode == Status406NotAcceptable)
-                    {
-                        // If the Dataset is not structured correctly, stop the upload and do not safe it
-                        break;
-                    }
-
-                    bytesRead += reallyRead;
-                    if (IsPredictionDatasetToUpload == true)
-                    {
-                        UploadPredictionRequest.ChunkNumber++;
-                    }
-                    else
-                    {
-                        UploadDatasetRequest.ChunkNumber++;
-                    }
-
-                    if (OnUploadChangedCallback != null)
-                    {
-                        OnUploadChangedCallback();
-                    }
-
-                }
-                IsUploading = false;
-                if (OnUploadChangedCallback != null)
-                {
-                    OnUploadChangedCallback();
-                }
-                if (OnUploadCompletedCallback != null)
-                {
-                    await OnUploadCompletedCallback();
+                    await UploadFileToServer(reader);
                 }
             }
             catch (Exception ex)
@@ -156,28 +59,27 @@ namespace BlazorBoilerplate.Theme.Material.Services
         }
         public async Task UploadDatasetFromURL(string url, string fileType)
         {
-            int chunkSize = 1000000;
-            long bytesRead = 0;
             IsUploading = true;
             try
             {
                 using (var client = new HttpClient())
                 {
                     HttpResponseMessage response = await client.GetAsync(url);
-                    // string _fileNameFromHeader = response.Content.Headers.ContentDisposition?.FileName;
-                    // string _fileExtension = _fileNameFromHeader?.Trim('"');
+                    response.EnsureSuccessStatusCode();
+
                     string _fileExtension = response.Content.Headers.ContentDisposition?.FileName?.Split('.').LastOrDefault().TrimEnd('"') ?? string.Empty;
                     fileType = !string.IsNullOrEmpty(_fileExtension) ? $".{_fileExtension}" : fileType;
+                    UploadDatasetRequest.FileNameOrURL = UploadDatasetRequest.DatasetName + fileType;
 
-                    using (var s = await response.Content.ReadAsStreamAsync())
-                    //using (var s = client.GetStreamAsync(url))
+                    using (Stream contentStream = await response.Content.ReadAsStreamAsync())
                     {
-                        using (var fs = new FileStream("localfile" + fileType, FileMode.OpenOrCreate))
+                        using (StreamReader reader = new StreamReader(contentStream))
                         {
-                            s.CopyTo(fs);
+                            await UploadFileToServer(reader);
                         }
                     }
                 }
+                return;
             }
             catch (Exception ex)
             {
@@ -185,13 +87,15 @@ namespace BlazorBoilerplate.Theme.Material.Services
                 _notifier.Show(ex.Message, ViewNotifierType.Error, _l["Operation Failed"]);
             }
 
+        }
+        private async Task UploadFileToServer(StreamReader reader)
+        {
+            int chunkSize = 1000000;
+            long bytesRead = 0;
+
             MemoryStream ms = new MemoryStream();
-            StreamReader reader = new StreamReader("localfile" + fileType);
             await reader.BaseStream.CopyToAsync(ms);
             ms.Seek(0, SeekOrigin.Begin);
-
-            UploadDatasetRequest.FileNameOrURL = UploadDatasetRequest.DatasetName + fileType;
-
             if ((ms.Length % chunkSize) == 0) //no extra chunk
             {
                 if (IsPredictionDatasetToUpload == true)
@@ -286,11 +190,9 @@ namespace BlazorBoilerplate.Theme.Material.Services
             {
                 await OnUploadCompletedCallback();
             }
-            if (File.Exists("localfile" + fileType))
-            {
-                File.Delete("localfile" + fileType);
-            }
+            return;
         }
+
         public string GetDownloadUrl(string url)
         {
             if (Regex.IsMatch(url, @"(?:drive\.google\.com)"))
