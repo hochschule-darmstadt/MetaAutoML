@@ -16,7 +16,6 @@ using BlazorBoilerplate.Shared.Dto.Prediction;
 //using HtmlAgilityPack;
 using static Microsoft.AspNetCore.Http.StatusCodes;
 using System.Net;
-using System.Text.Json;
 
 namespace BlazorBoilerplate.Theme.Material.Services
 {
@@ -276,27 +275,11 @@ namespace BlazorBoilerplate.Theme.Material.Services
         private static string GetOpenMLDownloadLink(string openMLUrl)
         {
             var match = Regex.Match(openMLUrl, @"(?:\b|\?)id=(\d+)\b");
-            if (match.Success)
+            if (match.Success && match.Groups.Count > 1)
             {
                 string datasetId = match.Groups[1].Value;
-                string apiUrl = $"https://www.openml.org/api/v1/json/data/{datasetId}";
-                try
-                {
-                    using (var client = new HttpClient())
-                    {
-                        HttpResponseMessage response = client.GetAsync(apiUrl).Result;
-                        if (response.IsSuccessStatusCode)
-                        {
-                            JsonDocument jsonDocument = JsonDocument.Parse(response.Content.ReadAsStringAsync().Result);
-                            JsonElement urlElement = jsonDocument.RootElement.GetProperty("data_set_description").GetProperty("url");
-                            openMLUrl = urlElement.GetString();
-                            return openMLUrl;
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                }
+                openMLUrl = $"https://api.openml.org/data/v1/download/{datasetId}";
+                return openMLUrl;
             }
             return openMLUrl;
         }
