@@ -12,7 +12,7 @@
             <MudStack Row="true" Class="align-content-center" Style="margin-top: 8px">
                 @*<UploadDataset OnUploadCompletedCallback="@OnUploadCompletedCallback"/>*@
                 <ButtonTooltip Text="Click here to upload a new dataset to OMA-ML from your disk or from the internet." Position="Placement.Top">
-                    <MudButton OnClick="OnOpenUpload"
+                    <MudButton data-form-firstStep OnClick="OnOpenUpload"
                                Variant="Variant.Filled"
                                Color="Color.Secondary"
                                StartIcon="@Icons.Material.Filled.Upload"
@@ -36,7 +36,7 @@
             }
             else
             {
-        <MudTable Items="@Datasets.Datasets" FixedHeader="true" Height="20rem" style="width:stretch" class="mat-elevation-z5" AllowSelection="false" Dense="true" RowStyleFunc="@RowStyleFunc">
+        <MudTable data-form-secondStep Items="@Datasets.Datasets" FixedHeader="true" Height="20rem" style="width:stretch" class="mat-elevation-z5" AllowSelection="false" Dense="true" RowStyleFunc="@RowStyleFunc">
             <HeaderContent>
                 <MudTh>@L["Name"]</MudTh>
                 <MudTh>@L["Type"]</MudTh>
@@ -46,9 +46,16 @@
             </HeaderContent>
 
             <RowTemplate>
-                <MudTd>
-                    <MudLink Href="@NavManager.ToAbsoluteUri("datasets/" + @context.Id).AbsoluteUri" Style="cursor: pointer; display: flex;"><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.ListAlt" Style="margin-right: 4px;" /> @context.Name</MudLink>
-                </MudTd>
+                @if (!tourActivated)
+                {
+                    <MudTd>
+                        <MudLink Href="@NavManager.ToAbsoluteUri("datasets/" + @context.Id).AbsoluteUri" Style="cursor: pointer; display: flex;"><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.ListAlt" Style="margin-right: 4px;" /> @context.Name</MudLink>
+                    </MudTd>
+                }
+                else
+                {
+            <MudLink Href="@NavManager.ToAbsoluteUri("datasets/" + @context.Id+"/?TourStep=thirdStep").AbsoluteUri" Style="cursor: pointer; display: flex;"><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.ListAlt" Style="margin-right: 4px;" /> @context.Name</MudLink>
+        }
                 <MudTd>@L[context.Type.Properties.ContainsKey("skos:prefLabel") ? context.Type.Properties["skos:prefLabel"] : ""]</MudTd>
                 <MudTd>@FormatBytes(context.Analysis["size_bytes"])</MudTd>
                 <MudTd style="white-space:nowrap;">@context.Analysis["creation_date"].ToString("dd-MM-yyyy")</MudTd>
@@ -63,6 +70,15 @@
 
 @code {
     //private DateTime NewestDate;
+    [Inject]
+    private GTour.Abstractions.IGTourService GTourService { get; set; }
+    private bool tourActivated = false;
+
+    protected override void OnInitialized()
+    {
+        TourService userTour = new TourService(GTourService, NavManager);
+        tourActivated = userTour.checkIfUserTourIsActivated(NavManager.Uri);
+    }
 
     [Parameter]
     public GetDatasetsResponseDto Datasets
@@ -100,7 +116,7 @@
             }
         }
 
-            return "background-color:transparent";
+        return "background-color:transparent";
 
 
     }

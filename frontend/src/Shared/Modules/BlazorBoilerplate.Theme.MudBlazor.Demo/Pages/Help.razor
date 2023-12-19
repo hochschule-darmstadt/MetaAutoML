@@ -1,0 +1,228 @@
+@page "/help"
+@inject IStringLocalizer<Global> L
+@attribute [Authorize]
+@inject NavigationManager navigationManager
+@inject IJSRuntime JS
+@using Newtonsoft.Json
+@inject IApiClient apiClient
+
+<TopSection>
+    <MudBreadcrumbs Items="_breadcrumbs" Class="mudbreadcrumbs"></MudBreadcrumbs>
+</TopSection>
+<MudStack AlignItems="AlignItems.Center" Row="true" Class="mb-2" style="padding-top:50px;padding-bottom:1rem;">
+    <MudIcon Size="Size.Large" Icon="@Icons.Material.Filled.HelpOutline" />
+    <LabelTooltip FontSize="Radzen.Blazor.TextStyle.H4" Label="Help" Text="Read how to solve different tasks with OMA-ML or start a guided tour." Position="Radzen.TooltipPosition.Bottom"></LabelTooltip>
+</MudStack>
+<MudStack>
+    <MudDrawer Style="padding-left: 1rem;" Open="true" Anchor="Anchor.End" Elevation="2" Variant="@DrawerVariant.Persistent">
+        <MudDrawerHeader>
+            <MudText Style="padding-top:1.3rem;" Typo="Typo.h6">Contents</MudText>
+        </MudDrawerHeader>
+        <MudNavMenu>
+            <MudNavGroup Title="Introduction" @onclick="()=> ChangePanel(introduction)" Expanded="true">
+                @foreach (Section section in this.introductionTab.Sections)
+                    {
+                    <AnchorLink TargetId="@(section.Anchor)">
+                        <MudNavLink Match="NavLinkMatch.All" Style="color:#424242;text-decoration:none!important;" OnClick="()=> ChangePanel(introduction)">
+                            @(section.Headline)
+                        </MudNavLink>
+                    </AnchorLink>
+                    }
+                </MudNavGroup>
+            <MudNavGroup Title="Pages" @onclick="()=> ChangePanel(pages)" Expanded="true">
+                @foreach (Section section in this.pagesTab.Sections)
+                {
+                    <AnchorLink TargetId="@(section.Anchor)">
+                        <MudNavLink Match="NavLinkMatch.All" Style="color:#424242;text-decoration:none!important;" OnClick="()=> ChangePanel(pages)">
+                            @(section.Headline)
+                        </MudNavLink>
+                    </AnchorLink>
+                }
+            </MudNavGroup>
+            </MudNavMenu>
+    </MudDrawer>
+    <MudGrid Style="margin-top:0.14rem;">
+        <MudItem xs="12" sm="12" md="12">
+            <MudCard Elevation="5" >
+                <MudGrid>
+                    <MudItem xs="6">
+                        <MudText Typo="Typo.subtitle1" Style="padding-top:10rem;padding-left:2rem;">Watch the video for a quick start of strat a guided tour</MudText>
+                        <MudButton Style="margin-left:2rem; margin-bottom:10rem;margin-top:1rem;"
+                                   Variant="Variant.Filled"
+                                   Color="Color.Secondary"
+                                   Size="Size.Medium"
+                                   OnClick="@StartTour">Start guided tour</MudButton>
+                    </MudItem>
+                    <MudItem xs="6">
+                        <iframe class="embed-responsive-item" style="padding:2rem; aspect-ratio:16/9;"
+                                src="@($"_content/BlazorBoilerplate.Theme.MudBlazor/images/TestVideo.mp4")"
+                                frameborder="1"
+                                allowfullscreen></iframe>
+                    </MudItem>
+                </MudGrid>
+            </MudCard>
+        </MudItem>
+        <MudItem xs="12" sm="12" md="12">
+            <MudCard Elevation="5">
+                <MudTabs Elevation="2" Rounded="true" ApplyEffectsToContainer="true" PanelClass="pa-2" @ref="tabs">
+                    <MudTabPanel OnClick="@PanelSwitch" Text="Introduction" @ref="introduction">
+                        <MudCardHeader Style="border-bottom-style: inset; border-bottom-width: 1px;">
+                            <CardHeaderContent>
+                                <MudText Style="margin-left:2rem;margin-top:2rem;" Typo="Typo.h6">@introductionTab.PanelHeadline</MudText>
+                            </CardHeaderContent>
+                        </MudCardHeader>
+                        <MudCardContent>
+                            <MudText Style="margin-left:2rem;margin-top:1rem;">
+                                @introductionTab.Text
+                            </MudText>
+                            <MudImage Style="width:92%;margin-left:1rem;margin-top:1rem;" Src="@(@introductionTab.Image)" />
+                            @foreach (Section section in this.introductionTab.Sections)
+                            {
+                                <MudGrid id="@(section.Anchor)">
+                                    <MudItem xs="6">
+                                        <MudText Style="margin-left: 2rem; padding-top: 10rem; color: #5c78ef;" Typo="Typo.h6">
+                                            @(section.Headline)
+                                        </MudText>
+                                        <MudText Style="margin-left:2rem;margin-top:1rem;" Typo="Typo.body2">
+                                            @(section.Text)
+                                        </MudText>
+                                    </MudItem>
+                                    <MudItem xs="6">
+                                        <img style=" width: 90%; margin: 3rem; padding-top: 5rem; padding-right: 2rem;" src="@(section.GIF)" />
+                                    </MudItem>
+                                </MudGrid>
+                            }
+                        </MudCardContent>
+                    </MudTabPanel>
+                    <MudTabPanel OnClick="@PanelSwitch" Text="Pages" @ref="pages">
+                        <MudCardHeader Style="border-bottom-style: inset; border-bottom-width: 1px;">
+                            <CardHeaderContent>
+                                <MudText Style="margin-left:2rem;margin-top:2rem;" Typo="Typo.h6">@pagesTab.PanelHeadline</MudText>
+                            </CardHeaderContent>
+                        </MudCardHeader>
+                        <MudCardContent>
+                            @foreach (Section section in this.pagesTab.Sections)
+                            {@if ((this.pagesTab.Sections.IndexOf(section) % 2) == 0)
+                                {
+                                    <MudGrid id="@(section.Anchor)">
+                                        <MudItem xs="6">
+                                            <MudText Style="margin-left: 2rem; padding-top: 2rem;" Color="Color.Secondary" Typo="Typo.h6">@(section.Headline)</MudText>
+                                            <MudText Style="margin-left:2rem;margin-top:0.5rem;" Typo="Typo.body2">
+                                                @(section.Text)
+                                                @foreach (Subsection subsection in section.Subsections)
+                                                {
+                                                    <br />
+                                                    <br />
+                                                    <b>@(subsection.SubHeadline)</b>
+                                                    <br />
+                                                    @(subsection.SubText)
+                                                }
+                                            </MudText>
+                                        </MudItem>
+                                        <MudItem xs="6">
+                                            <img style=" width: 90%; margin: 3rem; padding-right: 2rem;" src="@(section.GIF)" />
+                                        </MudItem>
+                                    </MudGrid>
+                                }
+                                else
+                                {
+                                    <MudGrid Style="border-bottom-style: inset; border-bottom-width: 1px; padding-bottom: 2rem;" id="@(section.Anchor)">
+                                        <MudItem xs="6">
+                                            <MudText Style="margin-left: 2rem; padding-top: 4rem;" Typo="Typo.h6" Color="Color.Secondary">@(section.Headline)</MudText>
+                                            <img style=" width: 90%; margin: 2rem; padding-right: 2rem;" src="@(section.GIF)" />
+                                        </MudItem>
+                                        <MudItem xs="6">
+                                            <MudText Style="margin-left:2rem;margin-top:8rem;" Typo="Typo.body2">
+                                                @(section.Text)
+                                                @foreach (Subsection subsection in section.Subsections)
+                                                {
+                                                    <br />
+                                                    <br />
+                                                    <b>@(subsection.SubHeadline)</b>
+                                                    <br />
+                                                    @(subsection.SubText)
+                                                }
+                                            </MudText>
+                                        </MudItem>
+                                    </MudGrid>
+                                }
+                        }
+                        </MudCardContent>
+                    </MudTabPanel>
+                </MudTabs>
+            </MudCard>
+        </MudItem>
+    </MudGrid>
+</MudStack>
+
+<UserTour></UserTour>
+
+
+
+@code {
+
+    private List<BreadcrumbItem> _breadcrumbs = new List<BreadcrumbItem>();
+    [Inject]
+    private GTour.Abstractions.IGTourService GTourService { get; set; }
+    private bool currentPanelIntroduction = true;
+    private MudTabs tabs;
+    private MudTabPanel introduction;
+    private MudTabPanel pages;
+    List<HelpPageDto> helpTabPanelList = new List<HelpPageDto>();
+    HelpPageDto introductionTab = new HelpPageDto();
+    HelpPageDto pagesTab = new HelpPageDto();
+
+    protected override async Task OnInitializedAsync()
+    {
+        this.helpTabPanelList = await apiClient.GetHelpPageJson();
+        this.helpTabPanelList.ForEach(tab => { if (tab.PanelHeadline.Equals("Introduction")) { this.introductionTab = tab; } else if (tab.PanelHeadline.Equals("Pages")) { this.pagesTab = tab; } });
+        StateHasChanged();
+        _breadcrumbs.Add(new BreadcrumbItem(L["Home"], "/", false, Icons.Filled.Home));
+        _breadcrumbs.Add(new BreadcrumbItem(L["Help"], "/help", false, Icons.Material.Filled.HelpOutline));
+        //StateHasChanged();
+        TourService userTour = new TourService(GTourService, navigationManager);
+        await userTour.checkIfUserTourIsActivatedAndStartTour(navigationManager.Uri);
+        StateHasChanged();
+
+
+    }
+
+
+    private void StartTour()
+    {
+        TourService userTour = new TourService(GTourService, navigationManager);
+        userTour.navigateToNextPage("firstStep", navigationManager.ToAbsoluteUri(" ").AbsoluteUri);
+    }
+    private void PanelSwitch()
+    {
+        this.currentPanelIntroduction = !this.currentPanelIntroduction;
+    }
+    private void ChangePanel(MudTabPanel tab)
+    {
+        if ((tab == introduction) && (!currentPanelIntroduction))
+        {
+            tabs.ActivatePanel(tab);
+        }
+        else if ((tab == pages) && (currentPanelIntroduction))
+        {
+            tabs.ActivatePanel(tab);
+        }
+        this.currentPanelIntroduction = !this.currentPanelIntroduction;
+
+    }
+
+
+
+
+
+
+}
+
+
+
+
+
+
+
+
+

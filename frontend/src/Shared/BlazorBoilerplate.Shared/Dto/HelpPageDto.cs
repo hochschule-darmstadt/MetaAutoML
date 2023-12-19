@@ -5,6 +5,8 @@ namespace BlazorBoilerplate.Shared.Dto
     public class HelpPageDto
     {
         public string PanelHeadline { get; set; }
+        public string Text { get; set; }
+        public string Image { get; set; }
         public List<Section> Sections { get; set; }
         public HelpPageDto()
         {
@@ -31,3 +33,4 @@ namespace BlazorBoilerplate.Shared.Dto
         public List<Section> IntroductionSections { get; set; }
     }
 }
+

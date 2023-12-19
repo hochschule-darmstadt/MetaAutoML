@@ -60,6 +60,7 @@ using static BlazorBoilerplate.Constants.PasswordPolicy;
 using static IdentityModel.JwtClaimTypes;
 using static IdentityServer4.IdentityServerConstants;
 using static Microsoft.AspNetCore.Http.StatusCodes;
+using GTour;
 
 namespace BlazorBoilerplate.Server
 {
@@ -80,6 +81,8 @@ namespace BlazorBoilerplate.Server
         }
         public void ConfigureServices(IServiceCollection services)
         {
+            services.UseGTour();
+            GTourService.Theme = new GTour.Themes.CustomTheme();
             services.AddSingleton<ILocalizationProvider, StorageLocalizationProvider>();
             services.AddTextLocalization(options =>
             {
