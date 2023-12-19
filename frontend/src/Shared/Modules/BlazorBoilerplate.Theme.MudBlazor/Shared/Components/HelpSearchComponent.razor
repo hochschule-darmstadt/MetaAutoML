@@ -5,22 +5,20 @@
 @inject IHelpSearch helpSearch
 @using MudBlazor
 
-<EditForm EditContext="editContext">
-	<DataAnnotationsValidator />
-	<MudAutocomplete Label="Help search ..." @bind-Value="choice.State" Required="false" @bind-Text="@searchInputText"
+	<MudAutocomplete Label="Help search ..." @bind-Value="State" Required="false" @bind-Text="@searchInputText"
 					 SearchFunc="@SearchAsync" Immediate="true" CoerceValue="@coerceValue" ResetValueOnEmptyText="true"
-					 AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Primary" T="HelpSearchOption"
-					 For="@(() => choice.State)">
+					 AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Primary" T="HelpSearchEntry"
+					 For="@(() => State)">
 		<ItemTemplate Context="e">
-			<MudIcon Class="d-inline" Icon="@GetIconOfOrigin(e.OriginType)" Title="Favorite" />
+			<MudIcon Class="d-inline" Icon="@GetIconOfOrigin(e.Type)" Title="Favorite" />
 			<MudText Class="d-inline">
-				<MudHighlighter Text="@e.Text" HighlightedText="@searchInputText" />
+				<MudHighlighter Text="@e.OptionText" HighlightedText="@searchInputText.Trim()" />
 			</MudText>
 		</ItemTemplate>
 	</MudAutocomplete>
-</EditForm>
 
-@if (!string.IsNullOrEmpty(choice.State.Text))
+
+@if (State != null && !string.IsNullOrWhiteSpace(State.Title))
 {
 	redirectOnSearch();
 }
@@ -44,16 +42,13 @@
     [CascadingParameter]
     Task<AuthenticationState> authenticationStateTask { get; set; }
 
-    private MudForm form;
     private bool coerceValue;
     private bool success;
-    private Choice choice = new();
-    private EditContext editContext;
+    private HelpSearchEntry State = new HelpSearchEntry("");
 
     protected override void OnInitialized()
     {
-        editContext = new EditContext(choice);
-        choice.State = new HelpSearchOption(HelpSearchResultType.HELP_ARTICLE, query);
+        State = new HelpSearchEntry(query);
     }
 
     protected override async Task OnInitializedAsync()
@@ -63,7 +58,6 @@
         if (user.Identity.IsAuthenticated)
         {
             await helpSearch.LoadSearchCache();
-            states = helpSearch.GetAllAutocompleteOptions().ToArray();
         }
     }
 
@@ -71,24 +65,27 @@
     {
         if (!navigationManager.Uri.Contains("search") & !HelpSite)
         {
-            query = choice.State.Text;
+            query = State.Title;
             navigationManager.NavigateTo($"search/{query}");
-            choice.State = new HelpSearchOption(HelpSearchResultType.HELP_ARTICLE, null);
+            State = new HelpSearchEntry(null);
         }
     }
 
-    public static HelpSearchOption[] states =
+    private async Task<IEnumerable<HelpSearchEntry>> SearchAsync(string value)
     {
-		new HelpSearchOption(HelpSearchResultType.HELP_ARTICLE, "Loading ...")
-	};
+        HelpSearchEntry[] searchEntry;
+        value = value.Trim();
 
-    private async Task<IEnumerable<HelpSearchOption>> SearchAsync(string value)
-    {
-		if (string.IsNullOrEmpty(value))
-		{
-			return states;
-		}
-		return states.Where(x => x.Text.Contains(value, StringComparison.InvariantCultureIgnoreCase));
+        if(string.IsNullOrWhiteSpace(value))
+        {
+            searchEntry = new HelpSearchEntry[]{};
+        }
+        else
+        {
+            searchEntry = new HelpSearchEntry[]{new HelpSearchEntry(value)};
+        }
+
+        return searchEntry.Concat(helpSearch.SearchTop10(value)).ToList();
 	}
 
     private string GetIconOfOrigin(HelpSearchResultType origin)
@@ -109,35 +106,4 @@
             }
         }
     }
-
-	public class Choice
-	{
-		[Required]
-		[State]
-		public HelpSearchOption State { get; set; }
-	}
-
-	[AttributeUsage(AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Parameter)]
-	public sealed class StateAttribute : ValidationAttribute
-	{
-		protected override ValidationResult IsValid(object value, System.ComponentModel.DataAnnotations.ValidationContext validationContext)
-		{
-            if(value == null)
-            {
-                return new ValidationResult("Value is null");
-            }
-
-			if (!states.Contains(value))
-			{
-				return new ValidationResult("This is an incorrect value", new[] { validationContext.MemberName });
-			}
-
-			if (validationContext is null)
-			{
-				throw new ArgumentNullException(nameof(validationContext));
-			}
-
-			return null;
-		}
-	}
 }

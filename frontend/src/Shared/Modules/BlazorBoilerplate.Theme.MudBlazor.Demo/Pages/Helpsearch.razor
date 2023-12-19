@@ -2,6 +2,7 @@
 @page "/search"
 @using System.ComponentModel.DataAnnotations
 @inject NavigationManager navigationManager
+@inject IHelpSearch helpSearch
 
 <MudGrid>
 	<MudCard Elevation="5" Style="margin: 24px">
@@ -15,7 +16,7 @@
 		<div Style="margin: 16px">
 		<MudText Color="Color.Dark" Typo="Typo.h6">Results</MudText>
 		<MudNavMenu Rounded="true" Margin="Margin.Normal" Color="Color.Secondary" Class="pa-2" Style="width:14.2rem">
-			@foreach (var state in HelpSearchComponent.states.Where(x => x.Text.Contains(query, StringComparison.InvariantCultureIgnoreCase)))
+			@foreach (var state in helpSearch.SearchEntries.Where(x => x.OptionText.Contains(query, StringComparison.InvariantCultureIgnoreCase)))
 			{
 				<MudNavLink>@state</MudNavLink>
 			}

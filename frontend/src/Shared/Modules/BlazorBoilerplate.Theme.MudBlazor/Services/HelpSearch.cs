@@ -4,6 +4,7 @@ using BlazorBoilerplate.Shared.Localizer;
 using Microsoft.Extensions.Localization;
 using BlazorBoilerplate.Shared.Dto.Ontology;
 using BlazorBoilerplate.Shared.Models;
+using Karambolo.Common;
 
 
 namespace BlazorBoilerplate.Theme.Material.Services
@@ -13,14 +14,22 @@ namespace BlazorBoilerplate.Theme.Material.Services
         private readonly IApiClient _client;
         private readonly IViewNotifier _notifier;
         private readonly IStringLocalizer<Global> _l;
-        private readonly List<HelpSearchEntry> _searchEntries;
+        private readonly List<HelpSearchEntry> _ontologieEntries;
+        private readonly List<HelpSearchEntry> _helpPageEntries;
+        public List<HelpSearchEntry> SearchEntries {
+            get
+            {
+                return _ontologieEntries.Concat(_helpPageEntries).ToList();
+            }
+        }
 
         public HelpSearch(IApiClient client, IViewNotifier notifier, IStringLocalizer<Global> L)
         {
             _client = client;
             _notifier = notifier;
             _l = L;
-            _searchEntries = new List<HelpSearchEntry>();
+            _ontologieEntries = new List<HelpSearchEntry>();
+            _helpPageEntries = new List<HelpSearchEntry>();
         }
 
         /// <summary>
@@ -30,7 +39,7 @@ namespace BlazorBoilerplate.Theme.Material.Services
         public bool IsCacheLoaded {
             get
             {
-            return _searchEntries.Any();
+                return _ontologieEntries.Any() && _helpPageEntries.Any();
             }
         }
 
@@ -48,13 +57,15 @@ namespace BlazorBoilerplate.Theme.Material.Services
         {
             try
             {
-                _searchEntries.Clear();
+                _ontologieEntries.Clear();
+                _helpPageEntries.Clear();
 
                 ApiResponseDto<GetSearchRelevantDataResponseDto> apiOntologieResponseDto = await _client.GetSearchRelevantData();
-                _searchEntries.AddRange(apiOntologieResponseDto.Result.SearchData.Select(e => new HelpSearchEntry(e)));
+                _ontologieEntries.AddRange(apiOntologieResponseDto.Result.SearchData.Select(HelpSearchEntry.ConvertToHelpSearchEntry));
 
                 List<HelpPageDto> apiHelpPageResponseDto = await _client.GetHelpPageJson();
-                _searchEntries.AddRange(apiHelpPageResponseDto.SelectMany(e => e.Sections).Select(e => new HelpSearchEntry(e)));
+                _helpPageEntries.AddRange(apiHelpPageResponseDto.SelectMany(e => e.Sections)
+                    .SelectMany(HelpSearchEntry.ConvertToHelpSearchEntries));
 
                 if(OnSearchCacheLoadedCallback != null)
                 {
@@ -67,39 +78,41 @@ namespace BlazorBoilerplate.Theme.Material.Services
             }
         }
 
-        /// <summary>
-        /// Get all available auto complete options from search data, may be empty if not loaded yet
-        /// </summary>
-        /// <returns>List of strings for autocompletion</returns>
-        public List<HelpSearchOption> GetAllAutocompleteOptions()
+        private List<HelpSearchEntry> SearchList(List<HelpSearchEntry> list, string search)
         {
-            return _searchEntries
-                .SelectMany(e => e.AutocompleteOptions)
-                .Distinct()
+            return list.Select(e => Tuple.Create(e.MatchScore(search), e))
+                .Where(e => e.Item1 > 0)
+                .OrderByDescending(e => e.Item1)
+                .Select(e => e.Item2)
+                .Take(10)
                 .ToList();
         }
 
         /// <summary>
-        /// Get all auto complete options filtered by search text
-        /// </summary>
-        /// <param name="search">text to search options</param>
-        /// <returns>List of options matching search</returns>
-        public List<HelpSearchOption> GetAutocompleteOptions(string search)
-        {
-            return GetAllAutocompleteOptions().FindAll(e => e.Text.Contains(search, StringComparison.InvariantCultureIgnoreCase)).ToList();
-        }
-
-        /// <summary>
-        /// Get all full text search result for search term
+        /// search top 10 result for search term
         /// </summary>
         /// <param name="search">search term</param>
-        /// <returns>List of matched search entries</returns>
-        public List<HelpSearchEntry> GetFulltextSearch(string search) {
-            return _searchEntries
-                .Where(entry => entry.FullSearchTexts
-                    .Where(text => !string.IsNullOrWhiteSpace(text))
-                    .Any(text => text.Contains(search)))
-                .ToList();
+        /// <returns>10 matched search entries</returns>
+        public List<HelpSearchEntry> SearchTop10(string search) {
+            if(search.IsNullOrEmpty())
+            {
+                return _helpPageEntries.Take(5).Concat(_ontologieEntries.Take(5)).ToList();
+            }
+
+            List<HelpSearchEntry> helpEntries = SearchList(_helpPageEntries, search);
+            List<HelpSearchEntry> ontologieEntries = SearchList(_ontologieEntries, search);
+
+            // Always return 10 entries from help entries and ontologie
+            return helpEntries.Take(5).Concat(ontologieEntries).Take(10).ToList();
+        }
+
+        /// <summary>
+        /// Get all search results for search term
+        /// </summary>
+        /// <param name="search">search term</param>
+        /// <returns>matched search entries</returns>
+        public List<HelpSearchEntry> SearchAll(string search) {
+            return SearchList(SearchEntries, search);
         }
     }
 }
