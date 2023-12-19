@@ -101,8 +101,14 @@ class DataSetAnalysisManager(Thread):
                 current_analysis_details.update({"report_json_path": ""})
                 self.__data_storage.update_dataset(self.__user_id, self.__dataset_id, {"analysis": current_analysis_details, "schema": schema})
         
+        found, dataset = self.__data_storage.get_dataset(self.__user_id, self.__dataset_id)
         if self.__basic_analysis:
+            # update current analysis detail
             analysis.update(self.basic_analysis(schema))
+            analysis_details = dataset["analysis"]
+            analysis_details.update(analysis)
+            # persist basic analysis data ealier so it does not block user-flow
+            self.__data_storage.update_dataset(self.__user_id, self.__dataset_id, {"analysis": analysis_details, "schema": schema})
         
         # perform ydataprofilling 
         if self.__ydataprofiling_analysis:
@@ -120,8 +126,6 @@ class DataSetAnalysisManager(Thread):
             analysis.update({"report_html_path": "none"})
             analysis.update({"report_json_path": "none"})
 
-
-        found, dataset = self.__data_storage.get_dataset(self.__user_id, self.__dataset_id)
         analysis_details = dataset["analysis"]
         analysis_details.update(analysis)
         self.__data_storage.update_dataset(self.__user_id, self.__dataset_id, {"analysis": analysis_details, "schema": schema})
