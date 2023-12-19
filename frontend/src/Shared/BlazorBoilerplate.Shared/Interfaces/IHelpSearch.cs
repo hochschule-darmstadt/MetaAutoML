@@ -6,6 +6,7 @@ namespace BlazorBoilerplate.Shared.Interfaces
     {
         bool IsCacheLoaded { get; }
         Task LoadSearchCache();
+        void InitWithCachedData(List<HelpSearchEntry> data);
         IEnumerable<HelpSearchEntry> SearchEntries { get; }
         IEnumerable<HelpSearchEntry> SearchTop10(string search);
         IEnumerable<HelpSearchEntry> SearchAll(string search);
