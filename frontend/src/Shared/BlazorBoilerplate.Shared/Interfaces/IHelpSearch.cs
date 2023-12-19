@@ -4,9 +4,10 @@ namespace BlazorBoilerplate.Shared.Interfaces
 {
     public interface IHelpSearch
     {
+        bool IsCacheLoaded { get; }
         Task LoadSearchCache();
-        List<HelpSearchEntry> SearchEntries { get; }
-        List<HelpSearchEntry> SearchTop10(string search);
-        List<HelpSearchEntry> SearchAll(string search);
+        IEnumerable<HelpSearchEntry> SearchEntries { get; }
+        IEnumerable<HelpSearchEntry> SearchTop10(string search);
+        IEnumerable<HelpSearchEntry> SearchAll(string search);
     }
 }
