@@ -2,6 +2,7 @@
 @page "/search"
 @using System.ComponentModel.DataAnnotations
 @inject NavigationManager navigationManager
+@inject IHelpSearch helpSearch
 
 <MudGrid>
 	<MudCard Elevation="5" Style="margin: 24px">
@@ -15,9 +16,9 @@
 		<div Style="margin: 16px">
 		<MudText Color="Color.Dark" Typo="Typo.h6">Results</MudText>
 		<MudNavMenu Rounded="true" Margin="Margin.Normal" Color="Color.Secondary" Class="pa-2" Style="width:14.2rem">
-			@foreach (var state in HelpSearchComponent.states.Where(x => x.Text.Contains(query, StringComparison.InvariantCultureIgnoreCase)))
+			@foreach (HelpSearchEntry entry in _searchResults)
 			{
-				<MudNavLink>@state</MudNavLink>
+				<MudNavLink>@entry.OptionText</MudNavLink>
 			}
 		</MudNavMenu>
 		</div>
@@ -39,8 +40,28 @@
 	[Parameter]
 	public string query { get; set; }
 
+    private IEnumerable<HelpSearchEntry> _searchResults = new List<HelpSearchEntry>();
+
+    [CascadingParameter]
+    Task<AuthenticationState> authenticationStateTask { get; set; }
+
 	private void HandleStatesChanged()
 	{
 		StateHasChanged();
 	}
+
+    protected override async Task OnInitializedAsync()
+    {
+        var user = (await authenticationStateTask).User;
+
+        if (user.Identity.IsAuthenticated)
+        {
+            if(!helpSearch.IsCacheLoaded)
+            {
+                await helpSearch.LoadSearchCache();
+            }
+
+            _searchResults = helpSearch.SearchAll(query.Trim());
+        }
+    }
 }
