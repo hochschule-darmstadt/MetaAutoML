@@ -60,6 +60,11 @@ class H2OAdapter:
 
         #df[target].asfactor()
         parameters = translate_parameters(":h2o_automl", self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), h2opc.parameters)
+
+        # remove XGBoost if its not in the Selected ML Libaries
+        if not(':xgboost_lib' in self._configuration["configuration"].get('selected_ml_libraries', {})) and 'include_algos' in parameters and ('XGBoost' in parameters['include_algos']):
+            parameters['include_algos'].remove('XGBoost')
+
         pandasJoineddf = pd.concat([features, targets], axis=1)
 
         aml = H2OAutoML(max_runtime_secs = self._time_limit, seed = 1, **parameters)
