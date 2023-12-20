@@ -75,6 +75,8 @@ class H2OAdapter:
         leaderboard.head(rows=leaderboard.nrows)  # Print all rows instead of default (10 rows)
         best_model = aml.get_best_model()
         #export
+        model_path = h2o.save_model(model=best_model, path=self._configuration["result_folder_location"])
+        os.rename(model_path, os.path.join(self._configuration["result_folder_location"], 'model_h2o.p'))
         #export_model(best_model, self._configuration["result_folder_location"], 'model_h2o.p')
         #export_model(H2OWrapper(best_model, self._configuration), self._configuration["dashboard_folder_location"], 'dashboard_model.p')
 
