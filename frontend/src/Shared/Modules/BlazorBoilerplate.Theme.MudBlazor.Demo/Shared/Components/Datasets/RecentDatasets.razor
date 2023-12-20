@@ -36,7 +36,7 @@
             }
             else
             {
-        <MudTable data-form-secondStep Items="@Datasets.Datasets" FixedHeader="true" Height="20rem" style="width:stretch" class="mat-elevation-z5" AllowSelection="false" Dense="true" RowStyleFunc="@RowStyleFunc">
+        <MudTable Items="@Datasets.Datasets" FixedHeader="true" Height="20rem" style="width:stretch" class="mat-elevation-z5" AllowSelection="false" Dense="true" RowStyleFunc="@RowStyleFunc" data-form-secondStep>
             <HeaderContent>
                 <MudTh>@L["Name"]</MudTh>
                 <MudTh>@L["Type"]</MudTh>
@@ -54,13 +54,15 @@
                 }
                 else
                 {
-            <MudLink Href="@NavManager.ToAbsoluteUri("datasets/" + @context.Id+"/?TourStep=thirdStep").AbsoluteUri" Style="cursor: pointer; display: flex;"><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.ListAlt" Style="margin-right: 4px;" /> @context.Name</MudLink>
-        }
-                <MudTd>@L[context.Type.Properties.ContainsKey("skos:prefLabel") ? context.Type.Properties["skos:prefLabel"] : ""]</MudTd>
-                <MudTd>@FormatBytes(context.Analysis["size_bytes"])</MudTd>
-                <MudTd style="white-space:nowrap;">@context.Analysis["creation_date"].ToString("dd-MM-yyyy")</MudTd>
-                <MudTd style="white-space:nowrap;">@context.Analysis["creation_date"].ToString("HH:mm:ss")</MudTd>
-            </RowTemplate>
+                    <MudTd>
+                        <MudLink Href="@NavManager.ToAbsoluteUri("datasets/" + @context.Id+"/?TourStep=thirdStep").AbsoluteUri" Style="cursor: pointer; display: flex;"><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.ListAlt" Style="margin-right: 4px;" /> @context.Name</MudLink>
+                    </MudTd>
+                }
+                        <MudTd>@L[context.Type.Properties.ContainsKey("skos:prefLabel") ? context.Type.Properties["skos:prefLabel"] : ""]</MudTd>
+                        <MudTd>@FormatBytes(context.Analysis["size_bytes"])</MudTd>
+                        <MudTd style="white-space:nowrap;">@context.Analysis["creation_date"].ToString("dd-MM-yyyy")</MudTd>
+                        <MudTd style="white-space:nowrap;">@context.Analysis["creation_date"].ToString("HH:mm:ss")</MudTd>
+                </RowTemplate>
 
         </MudTable>
             }
