@@ -1,5 +1,5 @@
 ### Ontology file generated from ML_Ontology.xlsx.
-### 2023-12-04 15:41:31.508405
+### 2023-12-20 11:33:13.555942
 
 
 # PREFIXES
@@ -849,6 +849,11 @@
     :performance :fast_training , :accurate ;
     rdfs:comment "Ensemble learning method for classification, regression and other tasks that operates by constructing a multitude of decision trees at training time" ;
     rdfs:seeAlso <https://www.wikidata.org/entity/Q245748> .
+:distributed_random_forest a :ML_approach ;
+    skos:prefLabel "distributed random forest" ;
+    skos:altLabel "DRF" ;
+    skos:broader :random_forest ;
+    :used_for :classification , :regression .
 :random_interval a :ML_approach ;
     skos:prefLabel "Random Interval" ;
     :used_for :time_series_classification ;
@@ -921,6 +926,9 @@
     :used_for :clustering ;
     rdfs:comment "Performing dimensionality reduction before clustering in fewer dimensions by making use of the spectrum (eigenvalues) of the similarity matrix of the data" ;
     rdfs:seeAlso <https://www.wikidata.org/entity/Q2976589> .
+:stacking_ensemble a :ML_approach ;
+    skos:prefLabel "stacking ensemble" ;
+    :used_for :classification .
 :stochastic_gradient_descent a :ML_approach ;
     skos:prefLabel "stochastic gradient descent" ;
     skos:altLabel "SGD" ;
@@ -1283,16 +1291,23 @@
     :used_for :image_segmentation .
 :mean_metric_wrapper a :Metric ;
     skos:prefLabel "mean metric wrapper" .
+:mean_per_class_error a :Metric ;
+    skos:prefLabel "mean per class error" ;
+    :used_for :classification ;
+    rdfs:comment "Average of the error rate for each class" .
 :mean_poisson_deviance a :Metric ;
     skos:prefLabel "mean poisson deviance" ;
     :used_for :regression .
 :mean_relative_error a :Metric ;
     skos:prefLabel "mean relative error" ;
     :used_for :regression .
+:mean_residual_deviance a :Metric ;
+    skos:prefLabel "mean residual deviance" ;
+    :used_for :regression .
 :mean_squared_error a :Metric ;
     skos:prefLabel "mean squared error" ;
     skos:altLabel "MSE" ;
-    :used_for :regression ;
+    :used_for :classification , :regression ;
     rdfs:comment "Average of the squares of the errors between estimated and actual values" ;
     rdfs:seeAlso <https://www.wikidata.org/entity/Q1940696> .
 :mean_squared_log_error a :Metric ;
@@ -2211,20 +2226,20 @@
     :parameter_value :loss_function_lama_tabular_regression , :metric_lama_tabular_regression ;
     rdfs:comment "Task configuration for tabular regression in LAMA" ;
     rdfs:seeAlso <https://openml-labs.github.io/gama/master/api/index.html> .
-:tabular_classification_in_h2o a :Configuration_item ;
-    skos:prefLabel "tabular classification in H2O" ;
+:tabular_classification_in_h2o_automl a :Configuration_item ;
+    skos:prefLabel "tabular classification in H2O AutoML" ;
     :category :task_configuration ;
     :automl_solution :h2o_automl ;
     :ml_task :tabular_classification ;
-    :parameter_value :metric_h2o_tabular_classification ;
-    rdfs:comment "Task configuration for tabular classification in H2O" .
-:tabular_regression_in_h2o a :Configuration_item ;
-    skos:prefLabel "tabular regression in H2O" ;
+    :parameter_value :metric_h2o_automl_tabular_classification , :include_approach_h2o_automl , :max_models_h2o_automl , :sort_metric_h2o_automl ;
+    rdfs:comment "Task configuration for tabular classification in H2O AutoML" .
+:tabular_regression_in_h2o_automl a :Configuration_item ;
+    skos:prefLabel "tabular regression in H2O AutoML" ;
     :category :task_configuration ;
     :automl_solution :h2o_automl ;
     :ml_task :tabular_regression ;
-    :parameter_value :metric_h2o_tabular_regression ;
-    rdfs:comment "Task configuration for tabular regression in H2O" .
+    :parameter_value :metric_h2o_automl_tabular_regression , :include_approach_h2o_automl , :max_models_h2o_automl , :sort_metric_h2o_automl ;
+    rdfs:comment "Task configuration for tabular regression in H2O AutoML" .
 :ensemble a :Configuration_item ;
     skos:prefLabel "ensemble" ;
     :category :parameter ;
@@ -2893,18 +2908,18 @@
     :parameter_value :mean_squared_error , :mean_absolute_error , :mean_absolute_percentage_error , :root_mean_squared_log_error ;
     rdfs:comment "Selecting the prediction performance metric for which AutoML is optimized" ;
     rdfs:seeAlso <https://lightautoml.readthedocs.io/en/latest/pages/modules/generated/lightautoml.tasks.base.Task.html#lightautoml.tasks.base.Task> .
-:metric_h2o_tabular_classification a :Configuration_item ;
-    skos:prefLabel "metric h2o tabular classification" ;
+:metric_h2o_automl_tabular_classification a :Configuration_item ;
+    skos:prefLabel "metric h2o AutoML tabular classification" ;
     :category :parameter ;
     skos:broader :metric ;
     :has_datatype :single_value ;
-    :parameter_value :area_under_precision_recall_curve , :log_loss , :area_under_roc_curve .
-:metric_h2o_tabular_regression a :Configuration_item ;
-    skos:prefLabel "metric h2o tabular regression" ;
+    :parameter_value :accuracy , :area_under_roc_curve , :area_under_precision_recall_curve , :log_loss , :mean_squared_error , :mean_per_class_error .
+:metric_h2o_automl_tabular_regression a :Configuration_item ;
+    skos:prefLabel "metric h2o AutoML tabular regression" ;
     :category :parameter ;
     skos:broader :metric ;
     :has_datatype :single_value ;
-    :parameter_value :mean_squared_error , :root_mean_squared_error , :mean_absolute_error , :root_mean_squared_log_error .
+    :parameter_value :mean_absolute_error , :mean_residual_deviance , :mean_squared_error , :root_mean_squared_error , :root_mean_squared_log_error .
 :time_limit a :Configuration_item ;
     skos:prefLabel "time limit" ;
     :category :parameter ;
@@ -3007,6 +3022,12 @@
     skos:broader :include_approach ;
     :has_datatype :list ;
     rdfs:seeAlso <https://automl.github.io/auto-sklearn/master/api.html#> .
+:include_approach_h2o_automl a :Configuration_item ;
+    skos:prefLabel "include approach h2o automl" ;
+    :category :parameter ;
+    skos:broader :include_approach ;
+    :has_datatype :list ;
+    :parameter_value :distributed_random_forest , :artificial_neural_network , :gradient_boosting_tree , :stacking_ensemble .
 :epochs a :Configuration_item ;
     skos:prefLabel "epochs" ;
     :category :parameter ;
@@ -3461,6 +3482,25 @@
     skos:broader :exclude_featurizers ;
     :has_datatype :list ;
     :parameter_value :datetime_featurizer , :email_featurizer , :url_featurizer , :natural_language_featurizer , :time_series_featurizer .
+:max_models a :Configuration_item ;
+    skos:prefLabel "max models" ;
+    :category :parameter ;
+    :has_datatype :integer .
+:max_models_h2o_automl a :Configuration_item ;
+    skos:prefLabel "max models h2o AutoML" ;
+    :category :parameter ;
+    skos:broader :max_models ;
+    :has_datatype :integer .
+:sort_metric a :Configuration_item ;
+    skos:prefLabel "sort metric" ;
+    :category :parameter ;
+    :has_datatype :single_value .
+:sort_metric_h2o_automl a :Configuration_item ;
+    skos:prefLabel "sort metric h2o AutoML" ;
+    :category :parameter ;
+    skos:broader :sort_metric ;
+    :has_datatype :single_value ;
+    :parameter_value :accuracy , :area_under_roc_curve , :area_under_precision_recall_curve , :log_loss , :mean_absolute_error , :mean_per_class_error , :mean_residual_deviance , :root_mean_squared_error , :root_mean_squared_log_error .
 
 
 # Enum
@@ -3766,8 +3806,8 @@
 
 :query_get_all_dataset_types a sp:Select ;
     skos:prefLabel "Query get all dataset types" ;
-    sp:text '''PREFIX : <http://h-da.de/ml-ontology/>
-SELECT ?t
+    sp:text '''PREFIX : <http://h-da.de/ml-ontology/> 
+SELECT ?t 
 WHERE {
         ?t a :Enum;
            :category :dataset_type .
@@ -3775,7 +3815,7 @@ WHERE {
     rdfs:comment "SPARQL query to get all dataset types" .
 :query_get_all_ml_tasks a sp:Select ;
     skos:prefLabel "Query get all ML tasks" ;
-    sp:text '''PREFIX : <http://h-da.de/ml-ontology/>
+    sp:text '''PREFIX : <http://h-da.de/ml-ontology/> 
 SELECT ?t ?a
 WHERE {
         ?t a :ML_task;
@@ -3784,7 +3824,7 @@ WHERE {
     rdfs:comment "SPARQL query to get all ML tasks an the ML areas they belong to" .
 :query_get_all_ml_approaches a sp:Select ;
     skos:prefLabel "Query get all ML approaches" ;
-    sp:text '''PREFIX : <http://h-da.de/ml-ontology/>
+    sp:text '''PREFIX : <http://h-da.de/ml-ontology/> 
 SELECT *
 WHERE {
         ?a a :ML_approach;
@@ -3793,7 +3833,7 @@ WHERE {
     rdfs:comment "SPARQL query to get all ML approaches and the ML tasks they can be used for" .
 :query_get_all_preprocessing_approaches a sp:Select ;
     skos:prefLabel "Query get all preprocessing approaches" ;
-    sp:text '''PREFIX : <http://h-da.de/ml-ontology/>
+    sp:text '''PREFIX : <http://h-da.de/ml-ontology/> 
 SELECT *
 WHERE {
         ?p a :Preprocessing_approach.
@@ -3802,7 +3842,7 @@ WHERE {
     rdfs:comment "SPARQL query to get all preprocessing approaches and the ML tasks they can be used for" .
 :query_get_all_metrics a sp:Select ;
     skos:prefLabel "Query get all metrics" ;
-    sp:text '''PREFIX : <http://h-da.de/ml-ontology/>
+    sp:text '''PREFIX : <http://h-da.de/ml-ontology/> 
 SELECT *
 WHERE {
         ?m a :Metric;
@@ -3811,7 +3851,7 @@ WHERE {
     rdfs:comment "SPARQL query to get all performance metrics the the ML tasks they can be used for" .
 :query_get_all_ml_libraries a sp:Select ;
     skos:prefLabel "Query get all ML libraries" ;
-    sp:text '''PREFIX : <http://h-da.de/ml-ontology/>
+    sp:text '''PREFIX : <http://h-da.de/ml-ontology/> 
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 SELECT *
 WHERE {
@@ -3821,7 +3861,7 @@ WHERE {
     rdfs:comment "SPARQL query to get all ML libraries with their names" .
 :query_get_all_automl_solutions a sp:Select ;
     skos:prefLabel "Query get all AutoML solutions" ;
-    sp:text '''PREFIX : <http://h-da.de/ml-ontology/>
+    sp:text '''PREFIX : <http://h-da.de/ml-ontology/> 
 SELECT *
 WHERE {
         ?a a :AutoML_solution ;
@@ -3830,7 +3870,7 @@ WHERE {
     rdfs:comment "SPARQL query to get AutoML solutions and the ML libraries they are used for" .
 :query_get_all_predefined_sparql_queries a sp:Select ;
     skos:prefLabel "Query get all predefined SPARQL queries" ;
-    sp:text '''PREFIX : <http://h-da.de/ml-ontology/>
+    sp:text '''PREFIX : <http://h-da.de/ml-ontology/> 
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 PREFIX sp: <http://spinrdf.org/sp#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
@@ -3843,7 +3883,7 @@ WHERE {
     rdfs:comment "SPARQL query to get all predefined SPARQL queries" .
 :query_get_all_predefined_sparql_insert_inference_rules a sp:Select ;
     skos:prefLabel "Query get all predefined SPARQL insert inference rules" ;
-    sp:text '''PREFIX : <http://h-da.de/ml-ontology/>
+    sp:text '''PREFIX : <http://h-da.de/ml-ontology/> 
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 PREFIX sp: <http://spinrdf.org/sp#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
@@ -3860,13 +3900,13 @@ WHERE {
 
 :inference_rule_broader_inheritance a sp:InsertData ;
     skos:prefLabel "Inference rule broader inheritance" ;
-    sp:text '''PREFIX : <http://h-da.de/ml-ontology/>
-PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
-INSERT {?s ?p ?o .}
+    sp:text '''PREFIX : <http://h-da.de/ml-ontology/> 
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#> 
+INSERT {?s ?p ?o .} 
 WHERE  {?p a rdf:Property ;
                         :inheritance :broader_inherited .
-        ?s skos:broader+ ?b .
+        ?s skos:broader+ ?b . 
         ?b ?p ?o .}''' ;
     rdfs:comment "SPARQL update statement to insert new triples with subjects that are in a (transitive) skos:broader relationship for existing triples with a predicate of inheritance type :broader_inherited" .
 
@@ -3875,8 +3915,8 @@ WHERE  {?p a rdf:Property ;
 
 :check_class_instance a sp:Select ;
     skos:prefLabel "Check class instance" ;
-    sp:text '''PREFIX : <http://h-da.de/ml-ontology/>
-SELECT ?class ?subject ?predicate ?object
+    sp:text '''PREFIX : <http://h-da.de/ml-ontology/> 
+SELECT ?class ?subject ?predicate ?object 
 WHERE {
         ?subject ?predicate ?object .
         OPTIONAL {?subject a ?class .}
@@ -3887,7 +3927,7 @@ WHERE {
     rdfs:comment "All objects should be instances of some class -> ok if query returns nothing; otherwise check ?object of triple in ?class" .
 :check_unique_class a sp:Select ;
     skos:prefLabel "Check unique class" ;
-    sp:text '''PREFIX : <http://h-da.de/ml-ontology/>
+    sp:text '''PREFIX : <http://h-da.de/ml-ontology/> 
 SELECT DISTINCT ?subject ?class1 ?class2
 WHERE {
         ?subject a ?class1 .
@@ -3897,8 +3937,8 @@ WHERE {
     rdfs:comment "No object should be instance of several classes -> ok if query retuns nothing; otherwise check redundant ?class1 and ?class2" .
 :check_predicate_declared a sp:Select ;
     skos:prefLabel "Check predicate declared" ;
-    sp:text '''PREFIX : <http://h-da.de/ml-ontology/>
-PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+    sp:text '''PREFIX : <http://h-da.de/ml-ontology/> 
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
 SELECT DISTINCT ?predicate
 WHERE {
         ?s ?predicate ?o .
@@ -3908,7 +3948,7 @@ WHERE {
     rdfs:comment "Predicates should be declared -> ok if query returns nothing; otherwise check ?predicate" .
 :check_predicates_with_domain_and_range_datatypes a sp:Select ;
     skos:prefLabel "Check predicates with domain and range datatypes" ;
-    sp:text '''PREFIX : <http://h-da.de/ml-ontology/>
+    sp:text '''PREFIX : <http://h-da.de/ml-ontology/> 
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>

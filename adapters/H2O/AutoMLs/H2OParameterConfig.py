@@ -32,10 +32,9 @@ h2o_metrics = {
 h2o_algorithms = {
     ":distributed_random_forest": "DRF",
     ":artificial_neural_network": "DeepLearning",
-    ":gradient_boosting_tree": "GBM",
-    #":gradient_boosting_tree": "XGBoost",
+    ":gradient_boosting_tree": ["GBM", "XGBoost"],
     ":stacking_ensemble": "StackedEnsemble",
-    #GLM - not implemented
+    #GLM - not implemented - regression algorithms
 }
 
 parameters = {

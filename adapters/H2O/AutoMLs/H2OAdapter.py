@@ -45,11 +45,11 @@ class H2OAdapter:
 
     def start(self):
         """Start the correct ML task functionality of H2O"""
-        if True:
-            if self._configuration["configuration"]["task"] == ":tabular_classification":
-                self.__tabular_classification()
-            elif self._configuration["configuration"]["task"] == ":tabular_regression":
-                self.__tabular_regression()
+        if self._configuration["configuration"]["task"] == ":tabular_classification":
+            print("test1")
+            self.__tabular_classification()
+        elif self._configuration["configuration"]["task"] == ":tabular_regression":
+            self.__tabular_regression()
 
 
     def __tabular_classification(self):
@@ -62,15 +62,16 @@ class H2OAdapter:
         parameters = translate_parameters(":h2o_automl", self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), h2opc.parameters)
         pandasJoineddf = pd.concat([features, targets], axis=1)
 
-        aml = H2OAutoML(max_runtime_secs = self._time_limit, seed = 1)
+        aml = H2OAutoML(max_runtime_secs = self._time_limit, seed = 1, **parameters)
         aml.train(y = targets.name, training_frame = h2o.H2OFrame(pandasJoineddf))
         # The leader model is stored here
         # View the AutoML Leaderboard
-        lb = aml.leaderboard
-        lb.head(rows=lb.nrows)  # Print all rows instead of default (10 rows)
+        leaderboard = aml.leaderboard
+        leaderboard.head(rows=leaderboard.nrows)  # Print all rows instead of default (10 rows)
+        best_model = aml.get_best_model()
         #export
-
-
+        #export_model(best_model, self._configuration["result_folder_location"], 'model_h2o.p')
+        #export_model(H2OWrapper(best_model, self._configuration), self._configuration["dashboard_folder_location"], 'dashboard_model.p')
 
     def __tabular_regression(self):
         """Execute the tabular regression task and export the found model"""
