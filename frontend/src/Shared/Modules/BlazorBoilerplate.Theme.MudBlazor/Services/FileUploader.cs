@@ -59,11 +59,12 @@ namespace BlazorBoilerplate.Theme.Material.Services
         public async Task UploadDatasetFromURL(string url, string fileType)
         {
             IsUploading = true;
+            string _downloadUrl = GetDownloadUrl(url);
             try
             {
                 using (var client = new HttpClient())
                 {
-                    HttpResponseMessage response = await client.GetAsync(url);
+                    HttpResponseMessage response = await client.GetAsync(_downloadUrl);
                     response.EnsureSuccessStatusCode();
 
                     string _fileExtension = response.Content.Headers.ContentDisposition?.FileName?.Split('.').LastOrDefault().TrimEnd('"') ?? string.Empty;
@@ -192,7 +193,7 @@ namespace BlazorBoilerplate.Theme.Material.Services
             return;
         }
 
-        public string GetDownloadUrl(string url)
+        private static string GetDownloadUrl(string url)
         {
             if (Regex.IsMatch(url, @"(?:drive\.google\.com)"))
             {
