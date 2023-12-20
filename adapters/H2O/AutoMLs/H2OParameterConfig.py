@@ -55,7 +55,6 @@ parameters = {
     },
     ":max_models_h2o_automl": {
         "parameter_name": "max_models",
-        "default": [1]
     },
     ":sort_metric_h2o_automl": {
         "parameter_name": "sort_metric",
