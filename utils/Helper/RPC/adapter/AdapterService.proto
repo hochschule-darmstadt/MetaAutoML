@@ -103,6 +103,15 @@ message StartAutoMlConfiguration {
     }
   */
   map<string, DynamicParameterValue> parameters = 4;
+  /*
+    List of activated ML libraries
+    example:
+    [
+      ":keras_lib",
+      ":h2o_lib"
+    ]
+  */
+  repeated string selected_ml_libraries = 5;
 }
 
 message StartAutoMlResponse {
