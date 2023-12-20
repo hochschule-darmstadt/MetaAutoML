@@ -3,9 +3,15 @@
 @using System.ComponentModel.DataAnnotations
 @inject NavigationManager navigationManager
 @inject IHelpSearch helpSearch
+@inject IStringLocalizer<Global> L
+@attribute [Authorize]
+@inject NavigationManager navigationManager
+@inject IJSRuntime JS
+@using Newtonsoft.Json
+@inject IApiClient apiClient
 
 <MudGrid>
-	<MudCard Elevation="5" Style="margin: 24px">
+	<MudCard Elevation="5" Style="margin: 24px; width: 100%">
 		<MudGrid>
 	<MudItem xs="12">
 		<div Style="margin: 16px">
@@ -15,53 +21,215 @@
 	<MudItem xs="3">
 		<div Style="margin: 16px">
 		<MudText Color="Color.Dark" Typo="Typo.h6">Results</MudText>
-		<MudNavMenu Rounded="true" Margin="Margin.Normal" Color="Color.Secondary" Class="pa-2" Style="width:14.2rem">
-			@foreach (HelpSearchEntry entry in _searchResults)
+					<MudNavMenu Rounded="true" Margin="Margin.Normal" Color="Color.Secondary" Class="pa-2" Style="width:14.2rem">
+						@{
+							bool isFirst = true;
+						}
+						@foreach (HelpSearchEntry entry in _searchResults)
+						{
+							if (isFirst)
+							{
+								displayResult(entry);
+								isFirst = false;
+								<MudNavLink OnClick="() => displayResult(entry)">@entry.OptionText</MudNavLink>
+							} else {
+								<MudNavLink OnClick="() => displayResult(entry)">@entry.OptionText</MudNavLink>
+							}
+						}
+					</MudNavMenu>
+		</div>
+	</MudItem>
+			@if (!isHelpPage)
 			{
-				<MudNavLink>@entry.OptionText</MudNavLink>
+				<MudItem xs="9">
+					<div Style="margin: 16px">
+						<MudText Color="Color.Dark" Typo="Typo.h6">@header</MudText>
+						<p>@kontent</p>
+					</div>
+				</MudItem>
+			} else {
+			<MudItem xs="9" sm="9" md="9">
+				<MudCard Elevation="5">
+					<MudTabs Elevation="2" Rounded="true" ApplyEffectsToContainer="true" PanelClass="pa-2" @ref="tabs">
+						<MudTabPanel OnClick="@PanelSwitch" Text="Introduction" @ref="introduction">
+							<MudCardHeader Style="border-bottom-style: inset; border-bottom-width: 1px;">
+								<CardHeaderContent>
+									<MudText Style="margin-left:2rem;margin-top:2rem;" Typo="Typo.h6">@introductionTab.PanelHeadline</MudText>
+								</CardHeaderContent>
+							</MudCardHeader>
+							<MudCardContent>
+								<MudText Style="margin-left:2rem;margin-top:1rem;">
+									@introductionTab.Text
+								</MudText>
+								<MudImage Style="width:92%;margin-left:1rem;margin-top:1rem;" Src="@(@introductionTab.Image)" />
+								@foreach (Section section in this.introductionTab.Sections)
+								{
+									<MudGrid id="@(section.Anchor)">
+										<MudItem xs="6">
+											<MudText Style="margin-left: 2rem; padding-top: 10rem; color: #5c78ef;" Typo="Typo.h6">
+												@(section.Headline)
+											</MudText>
+											<MudText Style="margin-left:2rem;margin-top:1rem;" Typo="Typo.body2">
+												@(section.Text)
+											</MudText>
+										</MudItem>
+										<MudItem xs="6">
+											<img style=" width: 90%; margin: 3rem; padding-top: 5rem; padding-right: 2rem;" src="@(section.GIF)" />
+										</MudItem>
+									</MudGrid>
+								}
+							</MudCardContent>
+						</MudTabPanel>
+						<MudTabPanel OnClick="@PanelSwitch" Text="Pages" @ref="pages">
+							<MudCardHeader Style="border-bottom-style: inset; border-bottom-width: 1px;">
+								<CardHeaderContent>
+									<MudText Style="margin-left:2rem;margin-top:2rem;" Typo="Typo.h6">@pagesTab.PanelHeadline</MudText>
+								</CardHeaderContent>
+							</MudCardHeader>
+							<MudCardContent>
+								@foreach (Section section in this.pagesTab.Sections)
+								{@if ((this.pagesTab.Sections.IndexOf(section) % 2) == 0)
+									{
+										<MudGrid id="@(section.Anchor)">
+											<MudItem xs="6">
+												<MudText Style="margin-left: 2rem; padding-top: 2rem;" Color="Color.Secondary" Typo="Typo.h6">@(section.Headline)</MudText>
+													<MudText Style="margin-left:2rem;margin-top:0.5rem;" Typo="Typo.body2">
+														@(section.Text)
+													@foreach (Subsection subsection in section.Subsections)
+													{
+														<br />
+														<br />
+														<b>@(subsection.SubHeadline)</b>
+														<br />
+														@(subsection.SubText)
+													}
+												</MudText>
+											</MudItem>
+											<MudItem xs="6">
+												<img style=" width: 90%; margin: 3rem; padding-right: 2rem;" src="@(section.GIF)" />
+											</MudItem>
+										</MudGrid>
+									}
+									else
+									{
+										<MudGrid Style="border-bottom-style: inset; border-bottom-width: 1px; padding-bottom: 2rem;" id="@(section.Anchor)">
+											<MudItem xs="6">
+												<MudText Style="margin-left: 2rem; padding-top: 4rem;" Typo="Typo.h6" Color="Color.Secondary">@(section.Headline)</MudText>
+													<img style=" width: 90%; margin: 2rem; padding-right: 2rem;" src="@(section.GIF)" />
+												</MudItem>
+												<MudItem xs="6">
+													<MudText Style="margin-left:2rem;margin-top:8rem;" Typo="Typo.body2">
+														@(section.Text)
+													@foreach (Subsection subsection in section.Subsections)
+													{
+														<br />
+														<br />
+														<b>@(subsection.SubHeadline)</b>
+														<br />
+														@(subsection.SubText)
+													}
+												</MudText>
+											</MudItem>
+										</MudGrid>
+									}
+								}
+							</MudCardContent>
+						</MudTabPanel>
+					</MudTabs>
+				</MudCard>
+			</MudItem>
 			}
-		</MudNavMenu>
-		</div>
-	</MudItem>
-	<MudItem xs="9">
-		<div Style="margin: 16px">
-			<MudText Color="Color.Dark" Typo="Typo.h6">Result</MudText>
-			<p>Kontent</p>
-		</div>
-	</MudItem>
 		</MudGrid>
 	</MudCard>
 </MudGrid>
 
 @code {
 	/*
-	 * query contains the search query that will be redirectet from the search bar in MainLayout to the searchbar in this Page
-	 */
+		* query contains the search query that will be redirectet from the search bar in MainLayout to the searchbar in this Page
+		*/
 	[Parameter]
 	public string query { get; set; }
+	public string kontent { get; set; }
+	public string header { get; set; }
+	public bool isHelpPage = false;
 
-    private IEnumerable<HelpSearchEntry> _searchResults = new List<HelpSearchEntry>();
+	private IEnumerable<HelpSearchEntry> _searchResults = new List<HelpSearchEntry>();
 
-    [CascadingParameter]
-    Task<AuthenticationState> authenticationStateTask { get; set; }
+	[CascadingParameter]
+	Task<AuthenticationState> authenticationStateTask { get; set; }
 
 	private void HandleStatesChanged()
 	{
 		StateHasChanged();
 	}
 
-    protected override async Task OnInitializedAsync()
-    {
+	public void displayResult(HelpSearchEntry entry)
+	{
+		kontent = entry.Description;
+		header = entry.Title;
+		if (entry.Type == HelpSearchResultType.HELP_ARTICLE)
+		{
+			isHelpPage = true;
+		} else {
+			isHelpPage = false;
+		}
+	}
+
+	private List<BreadcrumbItem> _breadcrumbs = new List<BreadcrumbItem>();
+	[Inject]
+	private GTour.Abstractions.IGTourService GTourService { get; set; }
+	private bool currentPanelIntroduction = true;
+	private MudTabs tabs;
+	private MudTabPanel introduction;
+	private MudTabPanel pages;
+	List<HelpPageDto> helpTabPanelList = new List<HelpPageDto>();
+	HelpPageDto introductionTab = new HelpPageDto();
+	HelpPageDto pagesTab = new HelpPageDto();
+
+	protected override async Task OnInitializedAsync()
+	{
+		this.helpTabPanelList = await apiClient.GetHelpPageJson();
+		this.helpTabPanelList.ForEach(tab => { if (tab.PanelHeadline.Equals("Introduction")) { this.introductionTab = tab; } else if (tab.PanelHeadline.Equals("Pages")) { this.pagesTab = tab; } });
+		StateHasChanged();
+		_breadcrumbs.Add(new BreadcrumbItem(L["Home"], "/", false, Icons.Material.Filled.Home));
+		_breadcrumbs.Add(new BreadcrumbItem(L["Help"], "/help", false, Icons.Material.Filled.HelpOutline));
+		TourService userTour = new TourService(GTourService, navigationManager);
+		await userTour.checkIfUserTourIsActivatedAndStartTour(navigationManager.Uri);
+		StateHasChanged();
+
         var user = (await authenticationStateTask).User;
 
-        if (user.Identity.IsAuthenticated)
-        {
-            if(!helpSearch.IsCacheLoaded)
-            {
-                await helpSearch.LoadSearchCache();
-            }
+		if (user.Identity.IsAuthenticated)
+		{
+			if(!helpSearch.IsCacheLoaded)
+			{
+				await helpSearch.LoadSearchCache();
+			}
 
-            _searchResults = helpSearch.SearchAll(query.Trim());
-        }
-    }
+			_searchResults = helpSearch.SearchAll(query.Trim());
+		}
+	}
+
+
+	private void StartTour()
+	{
+		TourService userTour = new TourService(GTourService, navigationManager);
+		userTour.navigateToNextPage("firstStep", navigationManager.ToAbsoluteUri(" ").AbsoluteUri);
+	}
+	private void PanelSwitch()
+	{
+		this.currentPanelIntroduction = !this.currentPanelIntroduction;
+	}
+	private void ChangePanel(MudTabPanel tab)
+	{
+		if ((tab == introduction) && (!currentPanelIntroduction))
+		{
+			tabs.ActivatePanel(tab);
+		}
+		else if ((tab == pages) && (currentPanelIntroduction))
+		{
+			tabs.ActivatePanel(tab);
+		}
+		this.currentPanelIntroduction = !this.currentPanelIntroduction;
+	}
 }

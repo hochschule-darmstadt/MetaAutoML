@@ -196,9 +196,11 @@ hr {
 .SearchBarList {
     width: max-content;
     overflow-x: hidden;
+    overflow-y: hidden;
 }
 
 .SearchBarOverlay {
     overflow-x: hidden;
+    overflow-y: hidden;
     max-width: 60%;
 }

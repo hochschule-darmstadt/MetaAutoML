@@ -5,21 +5,17 @@
 @inject IHelpSearch helpSearch
 @using MudBlazor
 
-<EditForm EditContext="editContext">
-	<DataAnnotationsValidator />
-	<MudAutocomplete Margin="Margin.Dense" Dense="true" Label="Help search ..." @bind-Value="choice.State" Required="false" @bind-Text="@searchInputText"
-					 SearchFunc="@SearchAsync" Immediate="true" CoerceValue="@coerceValue" ResetValueOnEmptyText="true"
-					 AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Primary" T="HelpSearchEntry"
-					 For="@(() => choice.State)" ListClass="SearchBarList" PopoverClass="SearchBarOverlay">
-		<ItemTemplate Context="e">
-			<MudIcon Style="font-size:15px" Class="d-inline" Icon="@GetIconOfOrigin(e.Type)" Title="Favorite" />
-			<MudText Style="font-size:15px" Class="d-inline">
-				<MudHighlighter Text="@e.OptionText" HighlightedText="@searchInputText.Trim()" />
-			</MudText>
-		</ItemTemplate>
-	</MudAutocomplete>
-</EditForm>
-
+<MudAutocomplete Margin="Margin.Dense" Dense="true" Label="Help search ..." @bind-Value="State" Required="false" @bind-Text="@searchInputText"
+				 SearchFunc="@SearchAsync" Immediate="true" CoerceValue="@coerceValue" ResetValueOnEmptyText="true"
+				 AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Primary" T="HelpSearchEntry"
+				 For="@(() => State)" ListClass="SearchBarList" PopoverClass="SearchBarOverlay">
+	<ItemTemplate Context="e">
+		<MudIcon Style="font-size:15px" Class="d-inline" Icon="@GetIconOfOrigin(e.Type)" Title="Favorite" />
+		<MudText Style="font-size:15px" Class="d-inline">
+			<MudHighlighter Text="@e.OptionText" HighlightedText="@searchInputText.Trim()" />
+		</MudText>
+	</ItemTemplate>
+</MudAutocomplete>
 
 @if (State != null && !string.IsNullOrWhiteSpace(State.Title))
 {
@@ -28,11 +24,11 @@
 
 @code {
 	private string searchInputText;
-    [Parameter]
-    public string query { get; set; }
+	[Parameter]
+	public string query { get; set; }
 
-    [Parameter]
-    public bool HelpSite { get; set; }
+	[Parameter]
+	public bool HelpSite { get; set; }
 
 	[Parameter]
 	public EventCallback OnStatesChanged { get; set; }
@@ -42,36 +38,36 @@
 		OnStatesChanged.InvokeAsync();
 	}
 
-    [CascadingParameter]
-    Task<AuthenticationState> authenticationStateTask { get; set; }
+	[CascadingParameter]
+	Task<AuthenticationState> authenticationStateTask { get; set; }
 
-    private bool coerceValue;
-    private bool success;
-    private HelpSearchEntry State = new HelpSearchEntry("");
+	private bool coerceValue;
+	private bool success;
+	private HelpSearchEntry State = new HelpSearchEntry("");
 
-    protected override void OnInitialized()
-    {
-        State = new HelpSearchEntry(query);
-    }
+	protected override void OnInitialized()
+	{
+		State = new HelpSearchEntry(query);
+	}
 
-    protected override async Task OnInitializedAsync()
-    {
-        var user = (await authenticationStateTask).User;
+	protected override async Task OnInitializedAsync()
+	{
+		var user = (await authenticationStateTask).User;
 
-        if (user.Identity.IsAuthenticated)
-        {
-            await helpSearch.LoadSearchCache();
-        }
-    }
+		if (user.Identity.IsAuthenticated)
+		{
+			await helpSearch.LoadSearchCache();
+		}
+	}
 
-    private void redirectOnSearch()
-    {
-        if (!navigationManager.Uri.Contains("search") & !HelpSite)
-        {
-            query = State.Title;
-            navigationManager.NavigateTo($"search/{query}");
-            State = new HelpSearchEntry(null);
-        }
+	private void redirectOnSearch()
+	{
+		if (!navigationManager.Uri.Contains("search") & !HelpSite)
+		{
+			query = State.Title;
+			navigationManager.NavigateTo($"search/{query}");
+			State = new HelpSearchEntry(null);
+		}
     }
 
     private async Task<IEnumerable<HelpSearchEntry>> SearchAsync(string value)
