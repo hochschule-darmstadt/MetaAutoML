@@ -5,20 +5,17 @@
 @inject IHelpSearch helpSearch
 @using MudBlazor
 
-<EditForm EditContext="editContext">
-	<DataAnnotationsValidator />
-	<MudAutocomplete Label="Help search ..." @bind-Value="choice.State" Required="false" @bind-Text="@searchInputText"
-					 SearchFunc="@SearchAsync" Immediate="true" CoerceValue="@coerceValue" ResetValueOnEmptyText="true"
-					 AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Primary" T="HelpSearchOption"
-					 For="@(() => choice.State)">
-		<ItemTemplate Context="e">
-			<MudIcon Class="d-inline" Icon="@GetIconOfOrigin(e.OriginType)" Title="Favorite" />
-			<MudText Class="d-inline">
-				<MudHighlighter Text="@e.Text" HighlightedText="@searchInputText" />
-			</MudText>
-		</ItemTemplate>
-	</MudAutocomplete>
-</EditForm>
+<MudAutocomplete Margin="Margin.Dense" Dense="true" Label="Help search ..." @bind-Value="choice.State" Required="false" @bind-Text="@searchInputText"
+				 SearchFunc="@SearchAsync" Immediate="true" CoerceValue="@coerceValue" ResetValueOnEmptyText="true"
+				 AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Primary" T="HelpSearchOption"
+				 For="@(() => choice.State)" ListClass="SearchBarList" PopoverClass="SearchBarOverlay">
+	<ItemTemplate Context="e">
+		<MudIcon Style="font-size:15px" Class="d-inline" Icon="@GetIconOfOrigin(e.OriginType)" Title="Favorite" />
+		<MudText Style="font-size:15px" Class="d-inline">
+			<MudHighlighter Text="@e.Text" HighlightedText="@searchInputText" />
+		</MudText>
+	</ItemTemplate>
+</MudAutocomplete>
 
 @if (!string.IsNullOrEmpty(choice.State.Text))
 {

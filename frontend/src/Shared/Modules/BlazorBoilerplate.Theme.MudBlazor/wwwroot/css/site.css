@@ -191,3 +191,14 @@ hr {
 /* Large devices (desktops, less than 1200px) */
 @media (max-width: 1199.98px) {
 }
+
+/*List class for search bar*/
+.SearchBarList {
+    width: max-content;
+    overflow-x: hidden;
+}
+
+.SearchBarOverlay {
+    overflow-x: hidden;
+    max-width: 60%;
+}
