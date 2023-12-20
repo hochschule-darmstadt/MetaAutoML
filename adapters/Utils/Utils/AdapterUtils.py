@@ -82,12 +82,17 @@ def translate_parameters(automl, task, parameter, config_items):
                 continue
             else:
                 values = val["default"]
-        if val["datatype"] == "list":
+        if val["datatype"] == ":list":
             final_value = list()
             for value in values:
                 if val.get("lookup_dict", None) != None:
                     translateList = val["lookup_dict"]
-                    final_value.append(translateList.get(value, None))
+                    translatedValue = translateList.get(value, None)
+                    if type(translatedValue) is list:
+                        for subValue in translatedValue:
+                            final_value.append(subValue)
+                    else:
+                        final_value.append(translatedValue)
                 else:
                     final_value.append(int(value))
         else:
