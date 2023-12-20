@@ -183,7 +183,11 @@ class DataStorage:
             self.__log.debug("create_dataset: dataset is of image type: unzipping, deleting zip archive and remove .zip suffix...")
             dataset_dir = os.path.join(self.__storage_dir, user_id, dataset_id)
             shutil.unpack_archive(filename_dest, dataset_dir)
+            # Cleanup: remove zip archive and __MACOSX folder on MacOS
             os.remove(filename_dest)
+            macosx_folder = os.path.join(dataset_dir, '__MACOSX')
+            if os.path.exists(macosx_folder) and os.path.isdir(macosx_folder):
+                shutil.rmtree(macosx_folder)
             extracted_items = os.listdir(dataset_dir)
             if len(extracted_items) == 1 and os.path.isdir(os.path.join(dataset_dir, extracted_items[0])):
                 filename_dest = os.path.join(dataset_dir, extracted_items[0])

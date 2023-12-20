@@ -227,11 +227,10 @@ namespace BlazorBoilerplate.Theme.Material.Services
             if (match.Success && match.Groups.Count > 1)
             {
                 string fileId = match.Groups[1].Value;
-                googleDriveUrl = $"https://drive.google.com/uc?id={fileId}&export=download";
+                googleDriveUrl = $"https://drive.google.com/uc?id={fileId}&export=download&confirm=t";
                 return googleDriveUrl;
             }
             return googleDriveUrl;
-            //throw new InvalidOperationException("Unable to extract Google Drive file ID from the URL");
         }
 
         private static string GetDropboxDownloadLink(string dropboxUrl)
