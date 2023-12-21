@@ -172,7 +172,7 @@
 	private void setURLUploadTrue()
 	{
         _uploadSource = UploadSource.URL;
-		if (String.IsNullOrEmpty(Url)){
+		if (String.IsNullOrEmpty(Url) && _uploadReady == false){
 			IsSelectFileDisabled = false;
 		}
 		else{
