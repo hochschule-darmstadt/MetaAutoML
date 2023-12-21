@@ -51,7 +51,7 @@
 
                                 </MudSelect>
                                 <MudStack Row="true">
-                                    <InputFile id="fileInput" OnChange="@FilesReady" hidden accept="@AcceptedFileType" />
+                                    <InputFile id="fileInput" OnChange="@FilesReady" hidden accept="@AcceptedFileType"/>
                                     <MudButton HtmlTag="label"
                                                Variant="MudBlazor.Variant.Outlined"
                                                StartIcon="@Icons.Material.Filled.Upload"
@@ -185,7 +185,6 @@
 	private void setLocalUploadTrue()
 	{
         _uploadSource = UploadSource.Local;
-		IsURLDisabled = true;
 		_uploadReady = true;
 	}
 
@@ -315,12 +314,12 @@
                     IsURLDisabled = false;
                     break;
                 case ":text":
-                    AcceptedFileType = ".csv";
+                    AcceptedFileType = ".csv, .arff";
                     IsSelectFileDisabled = false;
                     IsURLDisabled = false;
                     break;
                 case ":time_series":
-                    AcceptedFileType = ".csv";
+                    AcceptedFileType = ".csv, .arff";
                     IsSelectFileDisabled = false;
                     IsURLDisabled = false;
                     break;
@@ -348,6 +347,7 @@
     {
         try
         {
+            IsURLDisabled = true;
             _isLoaderClosed = false;
             StateHasChanged();
             fileUploader.UploadFileContent = e.File;
