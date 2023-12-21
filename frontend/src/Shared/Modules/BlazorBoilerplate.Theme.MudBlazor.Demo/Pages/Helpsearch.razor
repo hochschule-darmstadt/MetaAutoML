@@ -22,19 +22,12 @@
 		<div Style="margin: 16px">
 		<MudText Color="Color.Dark" Typo="Typo.h6">Results</MudText>
 					<MudNavMenu Rounded="true" Margin="Margin.Normal" Color="Color.Secondary" Class="pa-2" Style="width:14.2rem">
-						@{
-							bool isFirst = true;
-						}
 						@foreach (HelpSearchEntry entry in _searchResults)
 						{
-							if (isFirst)
-							{
-								displayResult(entry);
-								isFirst = false;
-								<MudNavLink OnClick="() => displayResult(entry)">@entry.OptionText</MudNavLink>
-							} else {
-								<MudNavLink OnClick="() => displayResult(entry)">@entry.OptionText</MudNavLink>
-							}
+							<MudNavLink OnClick="() => displayResult(entry)">
+								<MudIcon Style="font-size:15px" Class="d-inline" Icon="@GetIconOfOrigin(entry.Type)" Title="Favorite" />
+								@entry.OptionText
+								</MudNavLink>
 						}
 					</MudNavMenu>
 		</div>
@@ -197,7 +190,7 @@
 		await userTour.checkIfUserTourIsActivatedAndStartTour(navigationManager.Uri);
 		StateHasChanged();
 
-        var user = (await authenticationStateTask).User;
+		var user = (await authenticationStateTask).User;
 
 		if (user.Identity.IsAuthenticated)
 		{
@@ -206,7 +199,11 @@
 				await helpSearch.LoadSearchCache();
 			}
 
-			_searchResults = helpSearch.SearchAll(query.Trim());
+			_searchResults = helpSearch.SearchAll(query.Trim()).ToList();
+			if (_searchResults.First() != null)
+			{
+				displayResult(_searchResults.First());
+			}
 		}
 	}
 
@@ -231,5 +228,24 @@
 			tabs.ActivatePanel(tab);
 		}
 		this.currentPanelIntroduction = !this.currentPanelIntroduction;
+	}
+
+	private string GetIconOfOrigin(HelpSearchResultType origin)
+	{
+		switch (origin)
+		{
+			case HelpSearchResultType.ONTOLOGY:
+				{
+					return Icons.Material.Filled.Web;
+				}
+			case HelpSearchResultType.HELP_ARTICLE:
+				{
+					return Icons.Material.Filled.Article;
+				}
+			default:
+				{
+					return null;
+				}
+		}
 	}
 }
