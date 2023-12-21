@@ -53,11 +53,14 @@
                                    Size="Size.Medium"
                                    OnClick="@StartTour">Start guided tour</MudButton>
                     </MudItem>
-                    <MudItem xs="6">
-                        <iframe class="embed-responsive-item" style="padding:2rem; aspect-ratio:16/9;"
-                                src="@($"_content/BlazorBoilerplate.Theme.MudBlazor/images/TestVideo.mp4")"
-                                frameborder="1"
-                                allowfullscreen></iframe>
+                    <MudItem xs="6" Style="margin: auto; width: 50%;">
+                        <div style="position: relative; width: 90%; overflow: hidden; padding-top: 56.25%;">
+                            <iframe style=" position: absolute; top: 0; left: 0; bottom: 0; right: 0; width: 100%; height: 100%; border: none;"
+                                    src="@($"_content/BlazorBoilerplate.Theme.MudBlazor/images/TestVideo.mp4")"
+                                    frameborder="1"
+                                    allowfullscreen></iframe>
+                        </div>
+
                     </MudItem>
                 </MudGrid>
             </MudCard>
