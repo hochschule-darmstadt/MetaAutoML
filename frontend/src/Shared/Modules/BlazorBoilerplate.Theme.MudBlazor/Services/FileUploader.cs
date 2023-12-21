@@ -67,8 +67,12 @@ namespace BlazorBoilerplate.Theme.Material.Services
                     HttpResponseMessage response = await client.GetAsync(_downloadUrl);
                     response.EnsureSuccessStatusCode();
 
-                    string _fileExtension = response.Content.Headers.ContentDisposition?.FileName?.Split('.').LastOrDefault().TrimEnd('"') ?? string.Empty;
-                    fileType = !string.IsNullOrEmpty(_fileExtension) ? $".{_fileExtension}" : fileType;
+                    // Get the file extension from content disposition header
+                    string _fileExtension =
+                        (response.Content.Headers.ContentDisposition?.FileNameStar ??
+                        response.Content.Headers.ContentDisposition?.FileName)?
+                        .Split('.').LastOrDefault()?.TrimEnd('"') ?? string.Empty;
+                    fileType = !string.IsNullOrEmpty(_fileExtension) ? $".{_fileExtension}" : fileType.Split(',')[0];
                     UploadDatasetRequest.FileNameOrURL = UploadDatasetRequest.DatasetName + fileType;
 
                     using (Stream contentStream = await response.Content.ReadAsStreamAsync())
