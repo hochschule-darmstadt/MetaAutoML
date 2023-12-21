@@ -88,6 +88,11 @@
                                         </MudText>
                                         <MudText Style="margin-left:2rem;margin-top:1rem;" Typo="Typo.body2">
                                             @(section.Text)
+                                            @if (!String.IsNullOrEmpty(section.pageLink))
+                                            {
+                                                <br />
+                                                <MudLink Typo="Typo.body2" Href="@navigationManager.ToAbsoluteUri(section.pageLink).AbsoluteUri">@(section.linkHeadline)</MudLink>
+                                            }
                                         </MudText>
                                     </MudItem>
                                     <MudItem xs="6">
@@ -114,7 +119,7 @@
                                                 @(section.Text)
                                                 @if (!String.IsNullOrEmpty(section.pageLink))
                                                 {
-                                                        <br />
+                                                    <br />
                                                     <MudLink Typo="Typo.body2" Href="@navigationManager.ToAbsoluteUri(section.pageLink).AbsoluteUri">@(section.linkHeadline)</MudLink>
                                                 }
                                                 @foreach (Subsection subsection in section.Subsections)

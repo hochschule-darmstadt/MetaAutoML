@@ -8,7 +8,9 @@
                 "Headline": "Dataset upload",
                 "Text": "On the OMA-ML home screen, click the UPLOAD button to upload a new dataset to OMA-ML from your disk or from the internet. You can upload tabular data, texts, images or time series.",
                 "GIF": "_content/BlazorBoilerplate.Theme.MudBlazor/images/UploadDataset.gif",
-                "Anchor": "datasetUpload"
+                "Anchor": "datasetUpload",
+                "pageLink": " ",
+                "linkHeadline": "Direct link to home"
             },
             {
                 "Headline": "Preprocessing",
