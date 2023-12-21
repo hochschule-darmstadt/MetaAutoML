@@ -112,6 +112,11 @@
                                             <MudText Style="margin-left: 2rem; padding-top: 2rem;" Color="Color.Secondary" Typo="Typo.h6">@(section.Headline)</MudText>
                                             <MudText Style="margin-left:2rem;margin-top:0.5rem;" Typo="Typo.body2">
                                                 @(section.Text)
+                                                @if (!String.IsNullOrEmpty(section.pageLink))
+                                                {
+                                                        <br />
+                                                    <MudLink Typo="Typo.body2" Href="@navigationManager.ToAbsoluteUri(section.pageLink).AbsoluteUri">@(section.linkHeadline)</MudLink>
+                                                }
                                                 @foreach (Subsection subsection in section.Subsections)
                                                 {
                                                     <br />
@@ -137,6 +142,11 @@
                                         <MudItem xs="6">
                                             <MudText Style="margin-left:2rem;margin-top:8rem;" Typo="Typo.body2">
                                                 @(section.Text)
+                                                @if (!String.IsNullOrEmpty(section.pageLink))
+                                                {
+                                                    <br />
+                                                    <MudLink Typo="Typo.body2" Href="@navigationManager.ToAbsoluteUri(section.pageLink).AbsoluteUri">@(section.linkHeadline)</MudLink>
+                                                }
                                                 @foreach (Subsection subsection in section.Subsections)
                                                 {
                                                     <br />
