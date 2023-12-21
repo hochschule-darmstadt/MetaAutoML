@@ -82,8 +82,15 @@
         _breadcrumbs.Add(new BreadcrumbItem(L["Home"], null, true, Icons.Filled.Home));
         fileUploader.OnUploadCompletedCallback = LoadDatasetWithReRendering;
         StateHasChanged();
-        TourService userTour = new TourService(GTourService, navigationManager);
-        await userTour.checkIfUserTourIsActivatedAndStartTour(navigationManager.Uri);
+        if (false) //TODO: if User zum ersten Mal angemeldet 
+        {
+            await GTourService.StartTour("FormGuidedTour", "firstStep");
+        }
+        else
+        {
+            TourService userTour = new TourService(GTourService, navigationManager);
+            await userTour.checkIfUserTourIsActivatedAndStartTour(navigationManager.Uri);
+        }
     }
 
     private async Task LoadRecentTrainings()
