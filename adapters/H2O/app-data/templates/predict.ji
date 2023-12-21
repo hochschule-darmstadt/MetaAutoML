@@ -1,9 +1,6 @@
 import sys
-import json
-import dill
 import os
 
-import numpy as np
 import pandas as pd
 
 import h2o
@@ -28,14 +25,10 @@ if __name__ == '__main__':
     {% endif %}
 
     loaded_model = h2o.load_model(os.path.join(sys.path[0], 'model_h2o.p'))
-    #with open(os.path.join(sys.path[0], 'model_h2o.p'), 'rb') as file:
-    #    loaded_model = dill.load(file)
 
     predicted_y = loaded_model.predict(h2o.H2OFrame(X))
     predicted_y = predicted_y.as_data_frame()
     {% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression"] %}
-    predict_df = pd.DataFrame(predicted_y, columns=["predicted"])
+    predict_df = pd.DataFrame(predicted_y, columns=["predict"])
     post_process_result_dataframe(X_index_df, predict_df).to_csv(save_path)
-    {% else %}
-    pd.DataFrame(predicted_y, columns=["predicted"]).to_csv(save_path)
     {% endif %}
