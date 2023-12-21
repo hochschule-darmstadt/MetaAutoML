@@ -115,7 +115,9 @@ class DataStorage:
             "training_ids": [],
             "analysis": {
                 "creation_date": 0,
-                "size_bytes": 0
+                "size_bytes": 0,
+                "report_html_path": "",
+                "report_json_path": ""
             },
             "lifecycle_state": "active"
         }
