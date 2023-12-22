@@ -10,7 +10,7 @@
 @inject NavigationManager navigationManager
 @inject IDialogService dialogService
 @using BlazorBoilerplate.Shared.Models.Account
-
+<div data-form-zeroStep style="border: solid none; z-index: 999; position: relative; background-color: none; border-width: 0px;"></div>
 <TopSection>
     <MudBreadcrumbs Style="z-index:1!important;" Items="_breadcrumbs" Class="mudbreadcrumbs"></MudBreadcrumbs>
 </TopSection>
@@ -98,9 +98,9 @@
         {
             userViewModel.IsTutorialEnabled = false;
             await UpdateUser();
-           // await GTourService.StartTour("FormGuidedTour", "firstStep");
+            // await GTourService.StartTour("FormGuidedTour", "zeroStep");
             TourService userTour = new TourService(GTourService, navigationManager);
-            userTour.navigateToNextPage("firstStep", navigationManager.ToAbsoluteUri(" ").AbsoluteUri);
+            userTour.navigateToNextPage("zeroStep", navigationManager.ToAbsoluteUri(" ").AbsoluteUri);
         }
         else
         {

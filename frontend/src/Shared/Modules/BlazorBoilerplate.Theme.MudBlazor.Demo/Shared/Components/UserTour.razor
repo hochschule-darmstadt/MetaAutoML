@@ -4,6 +4,31 @@
 
 <GuidedTour TourId="FormGuidedTour" OverlayEnabled="true" CloseOnOverlayClick="true" OverlayClass="overlay-class">
     <ChildContent>
+        <GuidedTourStep StepName="zeroStep" TourStepSequence="0" PopupPlacement="PopperPlacement.BottomStart" PopupStrategy="PopperStrategy.Absolute"
+                        ElementSelector="[data-form-zeroStep]">
+            <ChildContent>
+                <MudGrid Style="width:min-content">
+                    <MudItem xs="6">
+                        <MudText Style="margin-top:1rem;margin-left:1rem;" Typo="Typo.h6">Welcome to OMA-ML!</MudText>
+                    </MudItem>
+                    <MudItem xs="1" Class="justify-end" Style="margin: auto 0 auto auto; margin-right:1rem;">
+                        <MudIconButton OnClick="@(() => context.CancelTour())" Icon="@Icons.Material.Filled.Close"></MudIconButton>
+                    </MudItem>
+                    <MudItem xs="6">
+                        <MudText Style="margin-left:1rem;margin-right:1rem;width: 40rem;" Typo="Typo.body2">
+                            Let us start with a guided tour first.
+                        </MudText>
+                    </MudItem>
+                </MudGrid>
+            </ChildContent>
+            <FooterContent>
+                <MudButton Style="margin-left:1rem; margin-top:1rem;"
+                           Variant="Variant.Filled"
+                           Color="Color.Secondary"
+                           Size="Size.Medium"
+                           OnClick="@(() => context.NextStep())">Start Tour</MudButton>
+            </FooterContent>
+        </GuidedTourStep>
         <GuidedTourStep StepName="firstStep" TourStepSequence="1" PopupPlacement="PopperPlacement.Top" PopupStrategy="PopperStrategy.Absolute"
                         ElementSelector="[data-form-firstStep]">
             <ChildContent>
@@ -333,11 +358,6 @@
         //await GTourService.StartTour("FormGuidedTour", "forthStep");
 
     }
-
-
-
-
-
 
 }
 
