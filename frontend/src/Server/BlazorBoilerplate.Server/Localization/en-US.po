@@ -2013,3 +2013,7 @@ msgstr "Perform model analysis"
 msgctxt "Global"
 msgid "{0} more entries available"
 msgstr "{0} more entries available"
+
+msgctxt "Global"
+msgid "Enable tutorial"
+msgstr "Enable tutorial"
