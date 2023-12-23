@@ -74,7 +74,7 @@ namespace BlazorBoilerplate.Server.Managers
                     {
                         return new ApiResponse(Status406NotAcceptable, "FileTypeNotSupportedErrorMessage");
                     }
-                    if (fileExt == ".zip" && !CheckUploadStructure(filePath))
+                    if (fileExt == ".zip" && !CheckZIPStructure(filePath))
                     {
                         return new ApiResponse(Status406NotAcceptable, "FolderStructureNotCorrectErrorMessage");
                     }
@@ -220,7 +220,6 @@ namespace BlazorBoilerplate.Server.Managers
                 {
                     case ":tabular":
                         response.DatasetPreview = datasetLocation;
-
                         break;
                     case ":image":
                         datasetLocation = datasetLocation.Replace(".zip", "");
@@ -317,42 +316,11 @@ namespace BlazorBoilerplate.Server.Managers
                 var analysis = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(reply.Dataset.Analysis);
                 int index = 0;
                 string graph_path = "";
+                // check if analysis for yprofilling exist, set to the bool in dto
                 if (analysis != null)
                 {
-                    if (analysis.Count != 0)
-                    {
-                        if (analysis["plots"] != null)
-                        {
-                            foreach (var category in analysis["plots"])
-                            {
-                                DatasetAnalysisCategory datasetAnalysisCategory = new DatasetAnalysisCategory()
-                                {
-                                    CategoryTitle = category.SelectToken("title")
-                                };
-                                foreach (var item in category["items"])
-                                {
-                                    if (request.GetShortPreview == true && index++ == 3)
-                                    {
-                                        break;
-                                    }
-                                    graph_path = item.SelectToken("path").ToString();
-                                    if (is_mutagen_setup == "YES")
-                                    {
-                                        graph_path = graph_path.Replace(mutagen_docker_ataset_folder_path, mutagen_dataset_folder_path);
-                                    }
-                                    DatasetAnalysis datasetAnalysis = new DatasetAnalysis()
-                                    {
-                                        Title = item.SelectToken("title").ToString(),
-                                        Type = item.SelectToken("type").ToString(),
-                                        Description = item.SelectToken("description").ToString(),
-                                        Content = GetImageAsBytes(graph_path)
-                                    };
-                                    datasetAnalysisCategory.Analyses.Add(datasetAnalysis);
-                                }
-                                response.AnalysisCategories.Add(datasetAnalysisCategory);
-                            }
-                        }
-                    }
+                    if (analysis.ContainsKey("report_html_path")) response.ydataprofilling = analysis["report_html_path"];
+                    else response.ydataprofilling = null;
                 }
                 return new ApiResponse(Status200OK, null, response);
 
@@ -374,7 +342,7 @@ namespace BlazorBoilerplate.Server.Managers
             return false;
         }
 
-        private bool CheckUploadStructure(string filePath)
+        private bool CheckZIPStructure(string filePath)
         {
             List<string> zipEntries = new List<string>();
             using (ZipArchive archive = ZipFile.OpenRead(filePath))
