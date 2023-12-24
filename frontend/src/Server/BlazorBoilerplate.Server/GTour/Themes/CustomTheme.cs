@@ -4,6 +4,9 @@ namespace GTour.Themes
 {
     internal class CustomTheme : ITheme
     {
+        /// <summary>
+        /// this class contains a custom theme for the guided tour
+        /// </summary>
         public string GTourOverlay { get; set; } 
         public string GTourWrapper { get; set; }
         public string GTourArrow { get; set; }
