@@ -1,8 +1,7 @@
 @using GTour.Components
 @inject NavigationManager navigationManager
 @using GTour.Abstractions.Common
-
-<GuidedTour TourId="FormGuidedTour" OverlayEnabled="true" CloseOnOverlayClick="true" OverlayClass="overlay-class">
+<GuidedTour TourId="FormGuidedTour" OverlayEnabled="true" CloseOnOverlayClick="false" OverlayClass="overlay-class">
     <ChildContent>
         <GuidedTourStep StepName="zeroStep" TourStepSequence="0" PopupPlacement="PopperPlacement.BottomStart" PopupStrategy="PopperStrategy.Absolute"
                         ElementSelector="[data-form-zeroStep]">
@@ -12,7 +11,7 @@
                         <MudText Style="margin-top:1rem;margin-left:1rem;" Typo="Typo.h6">Welcome to OMA-ML!</MudText>
                     </MudItem>
                     <MudItem xs="1" Class="justify-end" Style="margin: auto 0 auto auto; margin-right:1rem;">
-                        <MudIconButton OnClick="@(() => context.CancelTour())" Icon="@Icons.Material.Filled.Close"></MudIconButton>
+                        <MudIconButton OnClick="@(() => CloseTour(context))" Icon="@Icons.Material.Filled.Close"></MudIconButton>
                     </MudItem>
                     <MudItem xs="6">
                         <MudText Style="margin-left:1rem;margin-right:1rem;width: 40rem;" Typo="Typo.body2">
@@ -37,7 +36,7 @@
                         <MudText Style="margin-top:1rem;margin-left:1rem;" Typo="Typo.h6">Upload a dataset</MudText>
                     </MudItem>
                     <MudItem xs="1" Class="justify-end" Style="margin: auto 0 auto auto; margin-right:1rem;">
-                        <MudIconButton OnClick="@(() => context.CancelTour())" Icon="@Icons.Material.Filled.Close"></MudIconButton>
+                        <MudIconButton OnClick="@(() => CloseTour(context))" Icon="@Icons.Material.Filled.Close"></MudIconButton>
                     </MudItem>
                     <MudItem xs="6">
                         <MudText Style="margin-left:1rem;margin-right:1rem;width: 40rem;" Typo="Typo.body2">
@@ -62,7 +61,7 @@
                         <MudText Style="margin-top:1rem;margin-left:1rem;" Typo="Typo.h6">Choose a dataset for training</MudText>
                     </MudItem>
                     <MudItem xs="1" Class="justify-end" Style="margin: auto 0 auto auto; margin-right:1rem;">
-                        <MudIconButton OnClick="@(() => context.CancelTour())" Icon="@Icons.Material.Filled.Close"></MudIconButton>
+                        <MudIconButton OnClick="@(() => CloseTour(context))" Icon="@Icons.Material.Filled.Close"></MudIconButton>
                     </MudItem>
                     <MudItem xs="6">
                         <MudText Style="margin-left:1rem;margin-right:1rem;width: 40rem;" Typo="Typo.body2">
@@ -81,7 +80,7 @@
                         <MudText Style="margin-top:1rem;margin-left:1rem;" Typo="Typo.h6">Start a new training</MudText>
                     </MudItem>
                     <MudItem xs="1" Class="justify-end" Style="margin: auto 0 auto auto; margin-right:1rem;">
-                        <MudIconButton OnClick="@(() => context.CancelTour())" Icon="@Icons.Material.Filled.Close"></MudIconButton>
+                        <MudIconButton OnClick="@(() => CloseTour(context))" Icon="@Icons.Material.Filled.Close"></MudIconButton>
                     </MudItem>
                     <MudItem xs="6">
                         <MudText Style="margin-left:1rem;margin-right:1rem;width: 40rem;" Typo="Typo.body2">
@@ -100,7 +99,7 @@
                         <MudText Style="margin-top:1rem;margin-left:1rem;" Typo="Typo.h6">Dataset preparation</MudText>
                     </MudItem>
                     <MudItem xs="1" Class="justify-end" Style="margin: auto 0 auto auto; margin-right:1rem;">
-                        <MudIconButton OnClick="@(() => context.CancelTour())" Icon="@Icons.Material.Filled.Close"></MudIconButton>
+                        <MudIconButton OnClick="@(() => CloseTour(context))" Icon="@Icons.Material.Filled.Close"></MudIconButton>
                     </MudItem>
                     <MudItem xs="6">
                         <MudText Style="margin-left:1rem;margin-right:1rem;width: 40rem;" Typo="Typo.body2">
@@ -119,7 +118,7 @@
                         <MudText Style="margin-top:1rem;margin-left:1rem;" Typo="Typo.h6">Select an ML task</MudText>
                     </MudItem>
                     <MudItem xs="1" Class="justify-end" Style="margin: auto 0 auto auto; margin-right:1rem;">
-                        <MudIconButton OnClick="@(() => context.CancelTour())" Icon="@Icons.Material.Filled.Close"></MudIconButton>
+                        <MudIconButton OnClick="@(() => CloseTour(context))" Icon="@Icons.Material.Filled.Close"></MudIconButton>
                     </MudItem>
                     <MudItem xs="6">
                         <MudText Style="margin-left:1rem;margin-right:1rem;width: 40rem;" Typo="Typo.body2">
@@ -144,7 +143,7 @@
                         <MudText Style="margin-top:1rem;margin-left:1rem;" Typo="Typo.h6">Select a target</MudText>
                     </MudItem>
                     <MudItem xs="1" Class="justify-end" Style="margin: auto 0 auto auto; margin-right:1rem;">
-                        <MudIconButton OnClick="@(() => context.CancelTour())" Icon="@Icons.Material.Filled.Close"></MudIconButton>
+                        <MudIconButton OnClick="@(() => CloseTour(context))" Icon="@Icons.Material.Filled.Close"></MudIconButton>
                     </MudItem>
                     <MudItem xs="6">
                         <MudText Style="margin-left:1rem;margin-right:1rem;width: 40rem;" Typo="Typo.body2">
@@ -169,7 +168,7 @@
                         <MudText Style="margin-top:1rem;margin-left:1rem;" Typo="Typo.h6">Detail configuration options</MudText>
                     </MudItem>
                     <MudItem xs="1" Class="justify-end" Style="margin: auto 0 auto auto; margin-right:1rem;">
-                        <MudIconButton OnClick="@(() => context.CancelTour())" Icon="@Icons.Material.Filled.Close"></MudIconButton>
+                        <MudIconButton OnClick="@(() => CloseTour(context))" Icon="@Icons.Material.Filled.Close"></MudIconButton>
                     </MudItem>
                     <MudItem xs="6">
                         <MudText Style="margin-left:1rem;margin-right:1rem;width: 40rem;" Typo="Typo.body2">
@@ -197,7 +196,7 @@
                         <MudText Style="margin-top:1rem;margin-left:1rem;" Typo="Typo.h6">Start the training</MudText>
                     </MudItem>
                     <MudItem xs="1" Class="justify-end" Style="margin: auto 0 auto auto; margin-right:1rem;">
-                        <MudIconButton OnClick="@(() => context.CancelTour())" Icon="@Icons.Material.Filled.Close"></MudIconButton>
+                        <MudIconButton OnClick="@(() => CloseTour(context))" Icon="@Icons.Material.Filled.Close"></MudIconButton>
                     </MudItem>
                     <MudItem xs="6">
                         <MudText Style="margin-left:1rem;margin-right:1rem;width: 40rem;" Typo="Typo.body2">
@@ -216,7 +215,7 @@
                         <MudText Style="margin-top:1rem;margin-left:1rem;" Typo="Typo.h6">Leaderboard</MudText>
                     </MudItem>
                     <MudItem xs="1" Class="justify-end" Style="margin: auto 0 auto auto; margin-right:1rem;">
-                        <MudIconButton OnClick="@(() => context.CancelTour())" Icon="@Icons.Material.Filled.Close"></MudIconButton>
+                        <MudIconButton OnClick="@(() => CloseTour(context))" Icon="@Icons.Material.Filled.Close"></MudIconButton>
                     </MudItem>
                     <MudItem xs="6">
                         <MudText Style="margin-left:1rem;margin-right:1rem;width: 40rem;" Typo="Typo.body2">
@@ -240,7 +239,7 @@
                         <MudText Style="margin-top:1rem;margin-left:1rem;" Typo="Typo.h6">Get to Model Detail View</MudText>
                     </MudItem>
                     <MudItem xs="1" Class="justify-end" Style="margin: auto 0 auto auto; margin-right:1rem;">
-                        <MudIconButton OnClick="@(() => context.CancelTour())" Icon="@Icons.Material.Filled.Close"></MudIconButton>
+                        <MudIconButton OnClick="@(() => CloseTour(context))" Icon="@Icons.Material.Filled.Close"></MudIconButton>
                     </MudItem>
                     <MudItem xs="6">
                         <MudText Style="margin-left:1rem;margin-right:1rem;width: 40rem;" Typo="Typo.body2">
@@ -259,7 +258,7 @@
                         <MudText Style="margin-top:1rem;margin-left:1rem;" Typo="Typo.h6">Add Live Dataset</MudText>
                     </MudItem>
                     <MudItem xs="1" Class="justify-end" Style="margin: auto 0 auto auto; margin-right:1rem;">
-                        <MudIconButton OnClick="@(() => context.CancelTour())" Icon="@Icons.Material.Filled.Close"></MudIconButton>
+                        <MudIconButton OnClick="@(() => CloseTour(context))" Icon="@Icons.Material.Filled.Close"></MudIconButton>
                     </MudItem>
                     <MudItem xs="6">
                         <MudText Style="margin-left:1rem;margin-right:1rem;width: 40rem;" Typo="Typo.body2">
@@ -284,7 +283,7 @@
                         <MudText Style="margin-top:1rem;margin-left:1rem;" Typo="Typo.h6">Add Live Dataset</MudText>
                     </MudItem>
                     <MudItem xs="1" Class="justify-end" Style="margin: auto 0 auto auto; margin-right:1rem;">
-                        <MudIconButton OnClick="@(() => context.CancelTour())" Icon="@Icons.Material.Filled.Close"></MudIconButton>
+                        <MudIconButton OnClick="@(() => CloseTour(context))" Icon="@Icons.Material.Filled.Close"></MudIconButton>
                     </MudItem>
                     <MudItem xs="6">
                         <MudText Style="margin-left:1rem;margin-right:1rem;width: 40rem;" Typo="Typo.body2">
@@ -299,7 +298,7 @@
                            Variant="Variant.Filled"
                            Color="Color.Secondary"
                            Size="Size.Medium"
-                           OnClick="@(() => context.CompleteTour())">End Tour</MudButton>
+                           OnClick="@(() => CloseTour(context))">End Tour</MudButton>
             </FooterContent>
         </GuidedTourStep>
     </ChildContent>
@@ -358,6 +357,18 @@
         //await GTourService.StartTour("FormGuidedTour", "forthStep");
 
     }
+
+    private void CloseTour(GTour.Abstractions.IGTourStep context)
+    {
+        context.CancelTour();
+        var uri = navigationManager.Uri;
+        int beginOfQueryParam = uri.IndexOf("TourStep")-1;
+        uri = uri.Substring(0, beginOfQueryParam);
+
+        navigationManager.NavigateTo("/", true);
+        navigationManager.NavigateTo(uri, true);
+    }
+
 
 }
 
