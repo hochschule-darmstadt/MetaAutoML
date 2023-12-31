@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Grpc.Net.Client;
 using BlazorBoilerplate.Shared.Dto;
@@ -15,7 +16,7 @@ using BlazorBoilerplate.Shared.Dto.Prediction;
 //using HtmlAgilityPack;
 using static Microsoft.AspNetCore.Http.StatusCodes;
 using System.Net;
-
+using System.Text.Json;
 
 namespace BlazorBoilerplate.Theme.Material.Services
 {
@@ -42,109 +43,12 @@ namespace BlazorBoilerplate.Theme.Material.Services
         public bool IsUploadPredictionDatasetDialogOpen { get; set; } = false;
         public async Task UploadDatasetFromLocal()
         {
-            int chunkSize = 1000000;
-            long bytesRead = 0;
-            byte[] data = new byte[chunkSize];
             IsUploading = true;
             try
             {
-                MemoryStream ms = new MemoryStream();
-                StreamReader reader = new StreamReader(UploadFileContent.OpenReadStream(long.MaxValue));
-                await reader.BaseStream.CopyToAsync(ms);
-                ms.Seek(0, SeekOrigin.Begin);
-                if ((ms.Length % chunkSize) == 0) //no extra chunk
+                using (StreamReader reader = new StreamReader(UploadFileContent.OpenReadStream(long.MaxValue)))
                 {
-                    if (IsPredictionDatasetToUpload == true)
-                    {
-                        UploadPredictionRequest.TotalChunkNumber = (int)(ms.Length / chunkSize);
-                    }
-                    else
-                    {
-                        UploadDatasetRequest.TotalChunkNumber = (int)(ms.Length / chunkSize);
-                    }
-                }
-                else
-                {
-                    if (IsPredictionDatasetToUpload == true)
-                    {
-                        UploadPredictionRequest.TotalChunkNumber = (int)(ms.Length / chunkSize) + 1; //append extra chunk
-                    }
-                    else
-                    {
-                        UploadDatasetRequest.TotalChunkNumber = (int)(ms.Length / chunkSize) + 1; //append extra chunk
-                    }
-                }
-                if (IsPredictionDatasetToUpload == true)
-                {
-                    UploadPredictionRequest.ChunkNumber = 1;
-                }
-                else
-                {
-                    UploadDatasetRequest.ChunkNumber = 1;
-                }
-
-                while (bytesRead < ms.Length)
-                {
-                    var bytesToRead = ms.Length - bytesRead;
-                    var bufferSize = Math.Min(chunkSize, bytesToRead);
-                    var buffer = new byte[bufferSize];
-                    var reallyRead = ms.Read(buffer, 0, buffer.Length);
-                    if (IsPredictionDatasetToUpload == true)
-                    {
-                        UploadPredictionRequest.Content = buffer;
-                    }
-                    else
-                    {
-                        UploadDatasetRequest.Content = buffer;
-                    }
-
-
-                    ApiResponseDto apiResponse = new ApiResponseDto();
-
-                    if (IsPredictionDatasetToUpload == true)
-                    {
-                        apiResponse = await _client.UploadPrediction(UploadPredictionRequest);
-                    }
-                    else
-                    {
-                        apiResponse = await _client.UploadDataset(UploadDatasetRequest);
-                    }
-
-                    if (!apiResponse.IsSuccessStatusCode)
-                    {
-                        _notifier.Show(_l[apiResponse.Message] + " : " + apiResponse.StatusCode, ViewNotifierType.Error, _l["Operation Failed"]);
-                    }
-
-                    if (apiResponse.StatusCode == Status406NotAcceptable)
-                    {
-                        // If the Dataset is not structured correctly, stop the upload and do not safe it
-                        break;
-                    }
-
-                    bytesRead += reallyRead;
-                    if (IsPredictionDatasetToUpload == true)
-                    {
-                        UploadPredictionRequest.ChunkNumber++;
-                    }
-                    else
-                    {
-                        UploadDatasetRequest.ChunkNumber++;
-                    }
-
-                    if (OnUploadChangedCallback != null)
-                    {
-                        OnUploadChangedCallback();
-                    }
-
-                }
-                IsUploading = false;
-                if (OnUploadChangedCallback != null)
-                {
-                    OnUploadChangedCallback();
-                }
-                if (OnUploadCompletedCallback != null)
-                {
-                    await OnUploadCompletedCallback();
+                    await UploadFileToServer(reader);
                 }
             }
             catch (Exception ex)
@@ -155,35 +59,48 @@ namespace BlazorBoilerplate.Theme.Material.Services
         }
         public async Task UploadDatasetFromURL(string url, string fileType)
         {
-            int chunkSize = 1000000;
-            long bytesRead = 0;
-
+            IsUploading = true;
+            string _downloadUrl = GetDownloadUrl(url);
             try
             {
                 using (var client = new HttpClient())
                 {
-                    using (var s = client.GetStreamAsync(url))
+                    HttpResponseMessage response = await client.GetAsync(_downloadUrl);
+                    response.EnsureSuccessStatusCode();
+
+                    // Get the file extension from content disposition header
+                    string _fileExtension =
+                        (response.Content.Headers.ContentDisposition?.FileNameStar ??
+                        response.Content.Headers.ContentDisposition?.FileName)?
+                        .Split('.').LastOrDefault()?.TrimEnd('"') ?? string.Empty;
+                    fileType = !string.IsNullOrEmpty(_fileExtension) ? $".{_fileExtension}" : fileType.Split(',')[0];
+                    UploadDatasetRequest.FileNameOrURL = UploadDatasetRequest.DatasetName + fileType;
+
+                    using (Stream contentStream = await response.Content.ReadAsStreamAsync())
                     {
-                        using (var fs = new FileStream("localfile" + fileType, FileMode.OpenOrCreate))
+                        using (StreamReader reader = new StreamReader(contentStream))
                         {
-                            s.Result.CopyTo(fs);
-                            
+                            await UploadFileToServer(reader);
                         }
                     }
                 }
-            } catch (Exception ex)
+                return;
+            }
+            catch (Exception ex)
             {
                 _notifier.Show(_l["A file could not be downloaded from this URL!"], ViewNotifierType.Error, _l["Operation Failed"]);
                 _notifier.Show(ex.Message, ViewNotifierType.Error, _l["Operation Failed"]);
             }
 
+        }
+        private async Task UploadFileToServer(StreamReader reader)
+        {
+            int chunkSize = 1000000;
+            long bytesRead = 0;
+
             MemoryStream ms = new MemoryStream();
-            StreamReader reader = new StreamReader("localfile" + fileType);
             await reader.BaseStream.CopyToAsync(ms);
             ms.Seek(0, SeekOrigin.Begin);
-
-            UploadDatasetRequest.FileNameOrURL = UploadDatasetRequest.DatasetName + fileType;
-
             if ((ms.Length % chunkSize) == 0) //no extra chunk
             {
                 if (IsPredictionDatasetToUpload == true)
@@ -278,10 +195,114 @@ namespace BlazorBoilerplate.Theme.Material.Services
             {
                 await OnUploadCompletedCallback();
             }
-            if (File.Exists("localfile" + fileType))
+            return;
+        }
+
+        private static string GetDownloadUrl(string url)
+        {
+            if (Regex.IsMatch(url, @"(?:drive\.google\.com)"))
             {
-                File.Delete("localfile" + fileType);
+                return GetGoogleDriveDownloadLink(url);
             }
+            else if (Regex.IsMatch(url, @"(?:\.dropbox\.com)"))
+            {
+                return GetDropboxDownloadLink(url);
+            }
+            else if (Regex.IsMatch(url, @"(?:1drv\.ms|i\.s!)"))
+            {
+                return GetOnedriveDownloadLink(url);
+            }
+            else if (Regex.IsMatch(url, @"(?:sharepoint\.com)"))
+            {
+                return GetSharepointDownloadLink(url);
+            }
+            else if (Regex.IsMatch(url, @"(?:cloud\.h-da\.de)"))
+            {
+                return GetNextcloudDownloadLink(url);
+            }
+            if (Regex.IsMatch(url, @"(?:openml\.org/search).*type=data"))
+            {
+                return GetOpenMLDownloadLink(url);
+            }
+            return url;
+        }
+        private static string GetGoogleDriveDownloadLink(string googleDriveUrl)
+        {
+            var match = Regex.Match(googleDriveUrl, @"/d/([a-zA-Z0-9_-]+)");
+            if (match.Success && match.Groups.Count > 1)
+            {
+                string fileId = match.Groups[1].Value;
+                googleDriveUrl = $"https://drive.google.com/uc?id={fileId}&export=download&confirm=t";
+                return googleDriveUrl;
+            }
+            return googleDriveUrl;
+        }
+
+        private static string GetDropboxDownloadLink(string dropboxUrl)
+        {
+            if (dropboxUrl.EndsWith("&dl=0"))
+            {
+                return dropboxUrl.Replace("&dl=0", "&dl=1");
+            }
+            if (!dropboxUrl.EndsWith("&dl=1"))
+            {
+                return dropboxUrl + "&dl=1";
+            }
+            return dropboxUrl;
+        }
+
+        private static string GetOnedriveDownloadLink(string onedriveUrl)
+        {
+            string base64Value = System.Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(onedriveUrl));
+            string encodedUrl = base64Value.TrimEnd('=').Replace('/', '_').Replace('+', '-');
+            onedriveUrl = $"https://api.onedrive.com/v1.0/shares/u!{encodedUrl}/root/content";
+            return onedriveUrl;
+        }
+
+        private static string GetSharepointDownloadLink(string sharepointUrl)
+        {
+            if (sharepointUrl.Contains("&download=1"))
+            {
+                return sharepointUrl;
+            }
+            return sharepointUrl + "&download=1";
+        }
+
+        private static string GetNextcloudDownloadLink(string nextcloudUrl)
+        {
+            if (nextcloudUrl.EndsWith("/download"))
+            {
+                return nextcloudUrl;
+            }
+            return nextcloudUrl + "/download";
+        }
+
+        private static string GetOpenMLDownloadLink(string openMLUrl)
+        {
+            var match = Regex.Match(openMLUrl, @"(?:\b|\?)id=(\d+)\b");
+            if (match.Success)
+            {
+                string datasetId = match.Groups[1].Value;
+                string apiUrl = $"https://www.openml.org/api/v1/json/data/{datasetId}";
+                try
+                {
+                    using (var client = new HttpClient())
+                    {
+                        HttpResponseMessage response = client.GetAsync(apiUrl).Result;
+                        if (response.IsSuccessStatusCode)
+                        {
+                            JsonDocument jsonDocument = JsonDocument.Parse(response.Content.ReadAsStringAsync().Result);
+                            JsonElement urlElement = jsonDocument.RootElement.GetProperty("data_set_description").GetProperty("url");
+                            openMLUrl = urlElement.GetString();
+                            return openMLUrl;
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                }
+            }
+            return openMLUrl;
         }
     }
 }

@@ -1,5 +1,5 @@
-### Ontology file generated from ML_Ontology (1).xlsx.
-### 2023-08-11 15:53:16.996750
+### Ontology file generated from ML_Ontology (3).xlsx.
+### 2023-12-04 14:27:17.905647
 
 
 # PREFIXES
@@ -9,6 +9,7 @@
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix sp: <http://spinrdf.org/sp#> .
 
 
 # rdfsClass
@@ -59,7 +60,7 @@
     rdfs:comment "Categorizes entities via enums. Domain / range: {:Configuration_item, :Enum} -> :Enum" .
 :has_dataset_type a rdf:Property ;
     skos:prefLabel "has dataset type" ;
-    rdfs:comment "Assiggns a dataset type to an ML task. Domain / range: :ML_task -> :Enum" .
+    rdfs:comment "Assigns a dataset type to an ML task. Domain / range: :ML_task -> :Enum" .
 :has_datatype a rdf:Property ;
     skos:prefLabel "has datatype" ;
     rdfs:comment "Assigns a datatype to a parameter configuration. Domain / range: :Configuration_item -> :Enum" .
@@ -170,13 +171,6 @@
     :belongs_to :unsupervised_learning ;
     rdfs:comment "Grouping a set of objects in such a way that objects in the same group (called a cluster) are more similar (in some sense or another) to each other than to those in other groups" ;
     rdfs:seeAlso <https://www.wikidata.org/entity/Q622825> .
-:collaborative_filtering a :ML_task ;
-    skos:prefLabel "collaborative filtering" ;
-    skos:altLabel "collaborative graph filtering" ;
-    :belongs_to :supervised_learning ;
-    :has_dataset_type :graph ;
-    rdfs:comment "Making predictions (filtering) about the interests of a user" ;
-    rdfs:seeAlso <https://www.wikidata.org/entity/Q94702> .
 :community_detection a :ML_task ;
     skos:prefLabel "community detection" ;
     :belongs_to :supervised_learning ;
@@ -386,7 +380,7 @@
 :arsenal_ensemble a :ML_approach ;
     skos:prefLabel "Arsenal ensemble" ;
     skos:altLabel "Arsenal" ;
-    skos:broader :ensemble_classifier ;
+    skos:broader :ensemble ;
     :used_for :time_series_classification .
 :artificial_neural_network a :ML_approach ;
     skos:prefLabel "artificial neural network" ;
@@ -412,7 +406,7 @@
 :bag_of_sfa_symbols a :ML_approach ;
     skos:prefLabel "Bag-of-SFA-Symbols" ;
     skos:altLabel "BOSS" ;
-    skos:broader :ensemble_classifier ;
+    skos:broader :ensemble ;
     :used_for :time_series_classification ;
     rdfs:comment "Ensemble of bag of Symbolic Fourier Approximation Symbols" .
 :bayesian_linear_regression a :ML_approach ;
@@ -491,7 +485,7 @@
 :contractable_boss a :ML_approach ;
     skos:prefLabel "Contractable BOSS" ;
     skos:altLabel "cBOSS" ;
-    skos:broader :ensemble_classifier ;
+    skos:broader :ensemble ;
     :used_for :time_series_classification ;
     rdfs:comment "Contractable Bag of Symbolic Fourier Approximation Symbols" .
 :convolutional_neural_network a :ML_approach ;
@@ -532,7 +526,7 @@
 :elastic_ensemble a :ML_approach ;
     skos:prefLabel "Elastic Ensemble" ;
     skos:altLabel "EE" ;
-    skos:broader :ensemble_classifier ;
+    skos:broader :ensemble ;
     :used_for :time_series_classification ;
     :performance :long_training_time ;
     rdfs:comment "Ensemble of elastic nearest neighbor classifiers" .
@@ -546,7 +540,6 @@
     rdfs:seeAlso <https://www.wikidata.org/entity/Q1275153> .
 :exponential_smoothing a :ML_approach ;
     skos:prefLabel "exponential smoothing" ;
-    :used_for :time_series_regresion ;
     rdfs:comment "A rule of thumb technique for smoothing time series data using the exponential window function" .
 :extra_tree a :ML_approach ;
     skos:prefLabel "extra tree" ;
@@ -577,7 +570,6 @@
 :gaussian_naives_bayes a :ML_approach ;
     skos:prefLabel "Gaussian naives bayes" ;
     skos:altLabel "GNB" ;
-    skos:broader :naive_bayes ;
     rdfs:comment "Probabilistic machine learning algorithm used for many classification functions that is based on the Bayes theorem" .
 :gaussian_process a :ML_approach ;
     skos:prefLabel "Gaussian process" ;
@@ -626,14 +618,14 @@
 :hierarchical_vote_collective_of_transformation_based_ensembles_v1 a :ML_approach ;
     skos:prefLabel "Hierarchical Vote Collective of Transformation-based Ensembles V1" ;
     skos:altLabel "HIVE-COTE V1" ;
-    skos:broader :ensemble_classifier ;
+    skos:broader :ensemble ;
     :used_for :time_series_classification ;
     :performance :long_training_time , :accurate ;
     rdfs:comment "Hierarchical Vote Collective of Transformation-based Ensembles (HIVE-COTE) V1" .
 :hierarchical_vote_collective_of_transformation_based_ensembles_v2 a :ML_approach ;
     skos:prefLabel "Hierarchical Vote Collective of Transformation-based Ensembles V2" ;
     skos:altLabel "HIVE-COTE V2" ;
-    skos:broader :ensemble_classifier ;
+    skos:broader :ensemble ;
     :used_for :time_series_classification ;
     :performance :long_training_time , :accurate ;
     rdfs:comment "Hierarchical Vote Collective of Transformation-based Ensembles (HIVE-COTE) V2" .
@@ -659,13 +651,13 @@
 :individual_boss a :ML_approach ;
     skos:prefLabel "Individual BOSS" ;
     skos:altLabel "IndividualBOSS" ;
-    skos:broader :ensemble_classifier ;
+    skos:broader :ensemble ;
     :used_for :time_series_classification ;
     rdfs:comment "Single bag of Symbolic Fourier Approximation Symbols" .
 :individual_temporal_dictionary_ensemble a :ML_approach ;
     skos:prefLabel "Individual Temporal Dictionary Ensemble" ;
     skos:altLabel "IndividualTDE" ;
-    skos:broader :ensemble_classifier ;
+    skos:broader :ensemble ;
     :used_for :time_series_classification ;
     rdfs:comment "Single TDE classifier, an extension of the Bag of SFA Symbols (BOSS) model." .
 :k_means a :ML_approach ;
@@ -835,12 +827,11 @@
 :proximity_forest a :ML_approach ;
     skos:prefLabel "Proximity Forest" ;
     skos:altLabel "PF" ;
-    skos:broader :ensemble_classifier ;
+    skos:broader :ensemble ;
     :used_for :time_series_classification ;
     rdfs:comment "Models a decision tree forest which uses distance measures to partition data" .
-:proximity_stump a :ML_approach ;
-    skos:prefLabel "Proximity Stump" ;
-    skos:broader :decision_stump ;
+:decision_stump a :ML_approach ;
+    skos:prefLabel "decision stump" ;
     :used_for :time_series_classification ;
     rdfs:comment "Models a decision stump which uses a distance measure to partition data" .
 :proximity_tree a :ML_approach ;
@@ -961,7 +952,7 @@
 :temporal_dictionary_ensemble a :ML_approach ;
     skos:prefLabel "Temporal Dictionary Ensemble" ;
     skos:altLabel "TDE" ;
-    skos:broader :ensemble_classifier ;
+    skos:broader :ensemble ;
     :used_for :time_series_classification .
 :temporal_fusion_transformer a :ML_approach ;
     skos:prefLabel "temporal fusion transformer" ;
@@ -1062,6 +1053,11 @@
     skos:altLabel "ARI" , "Adjusted Rand Index" ;
     :used_for :classification ;
     rdfs:comment "measure of the similarity between two data clusterings" .
+:area_under_precision_recall_curve a :Metric ;
+    skos:prefLabel "area under precision recall curve" ;
+    skos:altLabel "AUCPR" , "AUPRC" , "AUC-PR" ;
+    :used_for :classification ;
+    rdfs:comment "AUC-PR stands for area under the (precision-recall) curve. Generally, the higher the AUC-PR score, the better a classifier performs for the given task. One way to calculate AUC-PR is to find the AP, or average precision." .
 :area_under_roc_curve a :Metric ;
     skos:prefLabel "area under roc curve" ;
     skos:altLabel "AUC" ;
@@ -1324,8 +1320,6 @@
     skos:prefLabel "median squared error" ;
     skos:altLabel "MSE" ;
     :used_for :regression , :time_series_forecasting .
-:metric a :Metric ;
-    skos:prefLabel "metric" .
 :neg_log_loss a :Metric ;
     skos:prefLabel "neg log loss" ;
     skos:altLabel "Neg Log loss" ;
@@ -1462,16 +1456,16 @@
     skos:prefLabel "receiver operating characteristic curve one vs rest weighted" ;
     skos:altLabel "ROC AUC OVR weighted" ;
     :used_for :classification .
-:rooted_mean_squared_error a :Metric ;
-    skos:prefLabel "rooted mean squared error" ;
+:root_mean_squared_error a :Metric ;
+    skos:prefLabel "root mean squared error" ;
     skos:altLabel "RMSE" ;
     :used_for :regression .
-:rooted_mean_squared_log_error a :Metric ;
-    skos:prefLabel "rooted mean squared log error" ;
+:root_mean_squared_log_error a :Metric ;
+    skos:prefLabel "root mean squared log error" ;
     skos:altLabel "RMSLE" ;
     :used_for :regression .
-:rooted_mean_squared_scaled_error a :Metric ;
-    skos:prefLabel "rooted mean squared scaled error" ;
+:root_mean_squared_scaled_error a :Metric ;
+    skos:prefLabel "root mean squared scaled error" ;
     skos:altLabel "RMSSE" ;
     :used_for :time_series_forecasting .
 :sensitifity_at_specificity a :Metric ;
@@ -1639,8 +1633,8 @@
     rdfs:seeAlso <https://github.com/tensorflow/adanet> .
 :alphad3m a :AutoML_solution ;
     skos:prefLabel "Alphad3m" ;
-    :used_for :scikit_learn_lib , :pywavelets_lib , :pytorch ;
-    :can_perform :tabular_classification , :tabular_regression , :clustering , :time_series_forecasting , :time_series_classification , :text_classification , :text_regression , :image_classification , :object_detection , :remote_sensing , :video_classification , :audio_classification , :audio_regression , :collaborative_graph_filtering , :graph_matching , :vertex_classification , :link_prediction , :community_detection ;
+    :used_for :scikit_learn_lib , :pywavelets_lib , :pytorch_lib ;
+    :can_perform :tabular_classification , :tabular_regression , :clustering , :time_series_forecasting , :time_series_classification , :text_classification , :text_regression , :image_classification , :object_detection , :video_classification , :audio_classification , :audio_regression , :graph_matching , :vertex_classification , :link_prediction , :community_detection ;
     rdfs:comment "AutoML system that automatically searches for models and derives end-to-end pipelines that read, pre-process the data, and train the model" ;
     rdfs:seeAlso <https://pypi.org/project/alphad3m> .
 :analytics_zoo_chronos a :AutoML_solution ;
@@ -1707,13 +1701,13 @@
     rdfs:seeAlso <https://pypi.org/project/autots> .
 :aws_sagemaker_autopilot a :AutoML_solution ;
     skos:prefLabel "AWS Sagemaker Autopilot" ;
-    :used_for :scikit_learn_lib , :tsfresh_lib , :gluon_ts , :xgboost_lib , :fastai_lib ;
+    :used_for :scikit_learn_lib , :tsfresh_lib , :gluonts_lib , :xgboost_lib , :fastai_lib ;
     :can_perform :tabular_classification , :tabular_regression , :time_series_classification ;
     rdfs:comment "AutoML solution for AWS Sagemaker" ;
     rdfs:seeAlso <https://aws.amazon.com/de/sagemaker/autopilot> .
 :azure_automl a :AutoML_solution ;
     skos:prefLabel "Azure AutoML" ;
-    :can_perform :tabular_classification , :tabular_regression , :time_series_forecasting , :text_classification , :image_classification , :object_detection , :instance_segmentation ;
+    :can_perform :tabular_classification , :tabular_regression , :time_series_forecasting , :text_classification , :image_classification , :object_detection ;
     rdfs:comment "AutoML solution for MS Azure" ;
     rdfs:seeAlso <https://azure.microsoft.com/en-us/products/machine-learning/automatedml> .
 :databricks a :AutoML_solution ;
@@ -1764,9 +1758,10 @@
 :h2o_automl a :AutoML_solution ;
     skos:prefLabel "H2O Automl" ;
     :used_for :h2o_lib , :xgboost_lib ;
-    :can_perform :tabular_classification , :tabular_regression , :time_series_forecasting , :text_classification , :sentiment_analysis , :entity_extraction , :translation , :image_classification , :image_object_tracking , :video_classification , :video_object_tracking , :action_recognition ;
+    :can_perform :tabular_classification , :tabular_regression ;
     rdfs:comment "H2O's AutoML automates the process of training and tuning a large selection of models, allowing the user to focus on other aspects of the data science and machine learning pipeline such as data pre-processing, feature engineering and model deployment." ;
-    rdfs:seeAlso <https://github.com/golamSaroar/h2o-autoML> .
+    rdfs:seeAlso <https://docs.h2o.ai/h2o/latest-stable/h2o-docs/automl.html> ;
+    :supported_by_oma_ml "true"^^xsd:boolean .
 :ibm_autoai a :AutoML_solution ;
     skos:prefLabel "IBM AutoAI" ;
     :used_for :ibm_snap_ml_lib , :scikit_learn_lib , :tensorflow_lib , :xgboost_lib ;
@@ -1808,7 +1803,7 @@
 :rapidminer a :AutoML_solution ;
     skos:prefLabel "Rapidminer" ;
     :used_for :weka_lib , :h2o_lib ;
-    :can_perform :tabular_classification , :tabular_regression , :clustering , :outlier_detection , :time_series_forecasting ;
+    :can_perform :tabular_classification , :tabular_regression , :clustering , :anomaly_detection , :time_series_forecasting ;
     rdfs:comment "Commercial data science platform with AutoModel feature" ;
     rdfs:seeAlso <https://rapidminer.com> .
 :remi_ai a :AutoML_solution ;
@@ -1825,7 +1820,7 @@
     :supported_by_oma_ml "true"^^xsd:boolean .
 :transmogrifai a :AutoML_solution ;
     skos:prefLabel "TransmogrifAI" ;
-    :used_for :spark_mllib ;
+    :used_for :mllib_lib ;
     :can_perform :tabular_classification , :tabular_regression ;
     rdfs:comment "End-to-end AutoML library for structured data written in Scala that runs on top of Apache Spark" ;
     rdfs:seeAlso <https://transmogrif.ai> .
@@ -1989,7 +1984,7 @@
     :category :task_configuration ;
     :automl_solution :evalml ;
     :ml_task :time_series_classification ;
-    :parameter_value :use_approach_evalml_time_series_classification , :metric_evalml_classification , :tuner_class_evalml , :optimize_thresholds_evalml , :ensembling_evalml , :max_batches_evalml , :allow_long_running_models_evalml , :pipelines_per_batch_evalml , :exclude_featurizers_evalml ;
+    :parameter_value :use_approach_evalml_time_series_classification , :tuner_class_evalml , :optimize_thresholds_evalml , :ensembling_evalml , :max_batches_evalml , :allow_long_running_models_evalml , :pipelines_per_batch_evalml , :exclude_featurizers_evalml ;
     rdfs:comment "Task configuration for time series classification in EvalML" ;
     rdfs:seeAlso <https://evalml.alteryx.com/en/stable/api_index.html> .
 :text_classification_in_evalml a :Configuration_item ;
@@ -2085,7 +2080,7 @@
     :category :task_configuration ;
     :automl_solution :autogluon ;
     :ml_task :named_entity_recognition ;
-    :parameter_value :use_approach_autogluon_named_entity_recognition , :metric_auto_gluon_named_entity_recognition ;
+    :parameter_value :use_approach_autogluon_named_entity_recognition , :metric_autogluon_named_entity_recognition ;
     rdfs:comment "Task configuration for named entity recognition in AutoGluon" ;
     rdfs:seeAlso <https://auto.gluon.ai> .
 :text_regression_in_autogluon a :Configuration_item ;
@@ -2216,6 +2211,20 @@
     :parameter_value :loss_function_lama_tabular_regression , :metric_lama_tabular_regression ;
     rdfs:comment "Task configuration for tabular regression in LAMA" ;
     rdfs:seeAlso <https://openml-labs.github.io/gama/master/api/index.html> .
+:tabular_classification_in_h2o a :Configuration_item ;
+    skos:prefLabel "tabular classification in H2O" ;
+    :category :task_configuration ;
+    :automl_solution :h2o_automl ;
+    :ml_task :tabular_classification ;
+    :parameter_value :metric_h2o_tabular_classification ;
+    rdfs:comment "Task configuration for tabular classification in H2O" .
+:tabular_regression_in_h2o a :Configuration_item ;
+    skos:prefLabel "tabular regression in H2O" ;
+    :category :task_configuration ;
+    :automl_solution :h2o_automl ;
+    :ml_task :tabular_regression ;
+    :parameter_value :metric_h2o_tabular_regression ;
+    rdfs:comment "Task configuration for tabular regression in H2O" .
 :ensemble a :Configuration_item ;
     skos:prefLabel "ensemble" ;
     :category :parameter ;
@@ -2329,7 +2338,7 @@
     :category :parameter ;
     skos:broader :use_approach ;
     :has_datatype :list ;
-    :parameter_value :light_gradient_boosting_machine , :xgboost , :random_forest , :extra_tree , :prophet , :auto_regressive_integrated_moving_average , :seasonal_autoregressive_integrated_moving_average_exogenous ;
+    :parameter_value :light_gradient_boosting_machine , :xgboost , :random_forest , :extra_tree , :prophet , :autoregressive_integrated_moving_average , :seasonal_autoregressive_integrated_moving_average_exogenous ;
     rdfs:comment "Selecting ML approaches to be used for AutoML" ;
     rdfs:seeAlso <https://microsoft.github.io/FLAML/docs/reference/automl/automl> .
 :use_approach_flaml_ranking a :Configuration_item ;
@@ -2392,7 +2401,7 @@
     :category :parameter ;
     skos:broader :use_approach ;
     :has_datatype :list ;
-    :parameter_value :auto_regressive_integrated_moving_average , :catboost , :decision_tree , :exponential_smoothing , :extra_tree , :k_nearest_neighbor , :linear_regression , :random_forest , :xgboost ;
+    :parameter_value :autoregressive_integrated_moving_average , :catboost , :decision_tree , :exponential_smoothing , :extra_tree , :k_nearest_neighbor , :linear_regression , :random_forest , :xgboost ;
     rdfs:comment "Selecting ML approaches to be used for AutoML" ;
     rdfs:seeAlso <https://evalml.alteryx.com/en/stable/api_index.html> .
 :use_approach_evalml_time_series_classification a :Configuration_item ;
@@ -2400,7 +2409,7 @@
     :category :parameter ;
     skos:broader :use_approach ;
     :has_datatype :list ;
-    :parameter_value :caboost , :decision_tree , :extra_tree , :k_nearest_neighbor , :linear_regression , :random_forest , :xgboost ;
+    :parameter_value :catboost , :decision_tree , :extra_tree , :k_nearest_neighbor , :linear_regression , :random_forest , :xgboost ;
     rdfs:comment "Selecting ML approaches to be used for AutoML" ;
     rdfs:seeAlso <https://evalml.alteryx.com/en/stable/api_index.html> .
 :use_approach_auto_pytorch_classification a :Configuration_item ;
@@ -2483,8 +2492,8 @@
     :parameter_value :multilayer_perceptron ;
     rdfs:comment "Selecting ML approaches to be used for AutoML" ;
     rdfs:seeAlso <https://auto.gluon.ai> .
-:use_approch_mcfly_time_series_classification a :Configuration_item ;
-    skos:prefLabel "use approch mcfly time series classification" ;
+:use_approach_mcfly_time_series_classification a :Configuration_item ;
+    skos:prefLabel "use approach mcfly time series classification" ;
     :category :parameter ;
     skos:broader :use_approach ;
     :has_datatype :list ;
@@ -2588,7 +2597,7 @@
     :category :parameter ;
     skos:broader :metric ;
     :has_datatype :single_value ;
-    :parameter_value :accuracy , :balanced_accuracy , :f_measure , :f1_macro , :f1_micro , :f1_samples , :f1_weighted , :receiver_operating_characteristic_curve , :precision , :precision_macro , :precision_micro , :precision_samples , :precision_weighted , :average_precision , :recall , :recall_macro , :recall_micro , :recall_samples , :recall_weighted , :log_loss ;
+    :parameter_value :accuracy , :balanced_accuracy , :f_measure , :f_measure_macro , :f_measure_micro , :f_measure_samples , :f_measure_weighted , :receiver_operating_characteristic_curve , :precision , :precision_macro , :precision_micro , :precision_samples , :precision_weighted , :average_precision , :recall , :recall_macro , :recall_micro , :recall_samples , :recall_weighted , :log_loss ;
     rdfs:comment "Selecting the prediction performance metric for which AutoML is optimized" ;
     rdfs:seeAlso <https://automl.github.io/auto-sklearn/master/api.html#classification> .
 :metric_autosklearn_tabular_regression a :Configuration_item ;
@@ -2604,7 +2613,7 @@
     :category :parameter ;
     skos:broader :metric ;
     :has_datatype :single_value ;
-    :parameter_value :accuracy , :receiver_operating_characteristic_curve , :receiver_operating_characteristic_curve_one_vs_rest , :log_loss , :receiver_operating_characteristic_curve_one_vs_one , :average_precision_score , :f_measure , :f_measure_micro , :f_measure_macro , :area_under_roc_curve_weighted , :receiver_operating_characteristic_curve_one_vs_rest_weighted , :receiver_operating_characteristic_curve_one_vs_one_weighted ;
+    :parameter_value :accuracy , :receiver_operating_characteristic_curve , :receiver_operating_characteristic_curve_one_vs_rest , :log_loss , :receiver_operating_characteristic_curve_one_vs_one , :average_precision , :f_measure , :f_measure_micro , :f_measure_macro , :area_under_roc_curve_weighted , :receiver_operating_characteristic_curve_one_vs_rest_weighted , :receiver_operating_characteristic_curve_one_vs_one_weighted ;
     rdfs:comment "Selecting the prediction performance metric for which AutoML is optimized" ;
     rdfs:seeAlso <https://microsoft.github.io/FLAML/docs/reference/automl/automl> .
 :metric_flaml_tabular_regression a :Configuration_item ;
@@ -2612,7 +2621,7 @@
     :category :parameter ;
     skos:broader :metric ;
     :has_datatype :single_value ;
-    :parameter_value :mean_squared_error , :rooted_mean_squared_error , :mean_absolute_error , :receiver_operating_characteristic_curve_one_vs_rest , :receiver_operating_characteristic_curve_one_vs_one , :receiver_operating_characteristic_curve , :mean_absolute_percentage_error , :r2 , :area_under_roc_curve_weighted , :receiver_operating_characteristic_curve_one_vs_rest_weighted , :receiver_operating_characteristic_curve_one_vs_one_weighted ;
+    :parameter_value :mean_squared_error , :root_mean_squared_error , :mean_absolute_error , :receiver_operating_characteristic_curve_one_vs_rest , :receiver_operating_characteristic_curve_one_vs_one , :receiver_operating_characteristic_curve , :mean_absolute_percentage_error , :r2 , :area_under_roc_curve_weighted , :receiver_operating_characteristic_curve_one_vs_rest_weighted , :receiver_operating_characteristic_curve_one_vs_one_weighted ;
     rdfs:comment "Selecting the prediction performance metric for which AutoML is optimized" ;
     rdfs:seeAlso <https://microsoft.github.io/FLAML/docs/reference/automl/automl> .
 :metric_flaml_text_classification a :Configuration_item ;
@@ -2620,7 +2629,7 @@
     :category :parameter ;
     skos:broader :metric ;
     :has_datatype :single_value ;
-    :parameter_value :accuracy , :receiver_operating_characteristic_curve , :receiver_operating_characteristic_curve_one_vs_rest , :log_loss , :receiver_operating_characteristic_curve_one_vs_one , :average_precision_score , :f_measure , :f_measure_micro , :f_measure_macro , :area_under_roc_curve_weighted , :receiver_operating_characteristic_curve_one_vs_rest_weighted , :receiver_operating_characteristic_curve_one_vs_one_weighted ;
+    :parameter_value :accuracy , :receiver_operating_characteristic_curve , :receiver_operating_characteristic_curve_one_vs_rest , :log_loss , :receiver_operating_characteristic_curve_one_vs_one , :average_precision , :f_measure , :f_measure_micro , :f_measure_macro , :area_under_roc_curve_weighted , :receiver_operating_characteristic_curve_one_vs_rest_weighted , :receiver_operating_characteristic_curve_one_vs_one_weighted ;
     rdfs:comment "Selecting the prediction performance metric for which AutoML is optimized" ;
     rdfs:seeAlso <https://microsoft.github.io/FLAML/docs/reference/automl/automl> .
 :metric_flaml_text_regression a :Configuration_item ;
@@ -2628,7 +2637,7 @@
     :category :parameter ;
     skos:broader :metric ;
     :has_datatype :single_value ;
-    :parameter_value :mean_squared_error , :rooted_mean_squared_error , :mean_absolute_error , :receiver_operating_characteristic_curve_one_vs_rest , :receiver_operating_characteristic_curve_one_vs_one , :receiver_operating_characteristic_curve , :mean_absolute_percentage_error , :r2 , :area_under_roc_curve_weighted , :receiver_operating_characteristic_curve_one_vs_rest_weighted , :receiver_operating_characteristic_curve_one_vs_one_weighted ;
+    :parameter_value :mean_squared_error , :root_mean_squared_error , :mean_absolute_error , :receiver_operating_characteristic_curve_one_vs_rest , :receiver_operating_characteristic_curve_one_vs_one , :receiver_operating_characteristic_curve , :mean_absolute_percentage_error , :r2 , :area_under_roc_curve_weighted , :receiver_operating_characteristic_curve_one_vs_rest_weighted , :receiver_operating_characteristic_curve_one_vs_one_weighted ;
     rdfs:comment "Selecting the prediction performance metric for which AutoML is optimized" ;
     rdfs:seeAlso <https://microsoft.github.io/FLAML/docs/reference/automl/automl> .
 :metric_flaml_ranking a :Configuration_item ;
@@ -2660,7 +2669,7 @@
     :category :parameter ;
     skos:broader :metric ;
     :has_datatype :single_value ;
-    :parameter_value :rooted_mean_squared_error , :mean_squared_log_error , :rooted_mean_squared_log_error , :r2 , :mean_absolute_error , :mean_squared_error , :median_absolute_error , :max_error , :explained_variance ;
+    :parameter_value :root_mean_squared_error , :mean_squared_log_error , :root_mean_squared_log_error , :r2 , :mean_absolute_error , :mean_squared_error , :median_absolute_error , :max_error , :explained_variance ;
     rdfs:comment "Selecting the prediction performance metric for which AutoML is optimized" ;
     rdfs:seeAlso <https://evalml.alteryx.com/en/stable/api_index.html> .
 :metric_evalml_text_classification a :Configuration_item ;
@@ -2676,7 +2685,7 @@
     :category :parameter ;
     skos:broader :metric ;
     :has_datatype :single_value ;
-    :parameter_value :rooted_mean_squared_error , :mean_squared_log_error , :rooted_mean_squared_log_error , :r2 , :mean_absolute_error , :mean_squared_error , :median_absolute_error , :max_error , :explained_variance ;
+    :parameter_value :root_mean_squared_error , :mean_squared_log_error , :root_mean_squared_log_error , :r2 , :mean_absolute_error , :mean_squared_error , :median_absolute_error , :max_error , :explained_variance ;
     rdfs:comment "Selecting the prediction performance metric for which AutoML is optimized" ;
     rdfs:seeAlso <https://evalml.alteryx.com/en/stable/api_index.html> .
 :metric_evalml_time_series_regression a :Configuration_item ;
@@ -2692,7 +2701,7 @@
     :category :parameter ;
     skos:broader :metric ;
     :has_datatype :single_value ;
-    :parameter_value :rooted_mean_squared_error , :mean_squared_error , :mean_absolute_error , :median_absolute_error , :mean_absolute_percentage_error , :r2 ;
+    :parameter_value :root_mean_squared_error , :mean_squared_error , :mean_absolute_error , :median_absolute_error , :mean_absolute_percentage_error , :r2 ;
     rdfs:comment "Selecting the prediction performance metric for which AutoML is optimized" ;
     rdfs:seeAlso <https://auto.gluon.ai> .
 :metric_autogluon_tabular_classification a :Configuration_item ;
@@ -2700,7 +2709,7 @@
     :category :parameter ;
     skos:broader :metric ;
     :has_datatype :single_value ;
-    :parameter_value :accuracy , :balanced_accuracy , :f_measure , :f_measure_macro , :f_measure_micro , :f_measure_weighted , :receiver_operating_characteristic_curve , :receiver_operating_characteristic_curve_one_vs_one , :average_precision_score , :precision , :precision_macro , :precision_micro , :precision_weighted , :recall , :recall_macro , :recall_micro , :recall_weighted , :log_loss , :pac_score ;
+    :parameter_value :accuracy , :balanced_accuracy , :f_measure , :f_measure_macro , :f_measure_micro , :f_measure_weighted , :receiver_operating_characteristic_curve , :receiver_operating_characteristic_curve_one_vs_one , :average_precision , :precision , :precision_macro , :precision_micro , :precision_weighted , :recall , :recall_macro , :recall_micro , :recall_weighted , :log_loss , :pac_score ;
     rdfs:comment "Selecting the prediction performance metric for which AutoML is optimized" ;
     rdfs:seeAlso <https://auto.gluon.ai> .
 :metric_autogluon_text_classification a :Configuration_item ;
@@ -2708,7 +2717,7 @@
     :category :parameter ;
     skos:broader :metric ;
     :has_datatype :single_value ;
-    :parameter_value :accuracy , :balanced_accuracy , :f_measure , :f_measure_macro , :f_measure_micro , :f_measure_weighted , :receiver_operating_characteristic_curve , :receiver_operating_characteristic_curve_one_vs_one , :average_precision_score , :precision , :precision_macro , :precision_micro , :precision_weighted , :recall , :recall_macro , :recall_micro , :recall_weighted , :log_loss , :pac_score ;
+    :parameter_value :accuracy , :balanced_accuracy , :f_measure , :f_measure_macro , :f_measure_micro , :f_measure_weighted , :receiver_operating_characteristic_curve , :receiver_operating_characteristic_curve_one_vs_one , :average_precision , :precision , :precision_macro , :precision_micro , :precision_weighted , :recall , :recall_macro , :recall_micro , :recall_weighted , :log_loss , :pac_score ;
     rdfs:comment "Selecting the prediction performance metric for which AutoML is optimized" ;
     rdfs:seeAlso <https://auto.gluon.ai> .
 :metric_autogluon_named_entity_recognition a :Configuration_item ;
@@ -2724,7 +2733,7 @@
     :category :parameter ;
     skos:broader :metric ;
     :has_datatype :single_value ;
-    :parameter_value :rooted_mean_squared_error , :mean_squared_error , :mean_absolute_error , :median_absolute_error , :r2 , :spearman_rank_correlation_coefficient , :pearson_correlation_coefficient ;
+    :parameter_value :root_mean_squared_error , :mean_squared_error , :mean_absolute_error , :median_absolute_error , :r2 , :spearman_rank_correlation_coefficient , :pearson_correlation_coefficient ;
     rdfs:comment "Selecting the prediction performance metric for which AutoML is optimized" ;
     rdfs:seeAlso <https://auto.gluon.ai> .
 :metric_autogluon_image_classification a :Configuration_item ;
@@ -2740,7 +2749,7 @@
     :category :parameter ;
     skos:broader :metric ;
     :has_datatype :single_value ;
-    :parameter_value :mean_absolute_percentage_error , :symmetric_mean_absolute_percentage_error , :mean_absolute_scaled_error , :mean_squared_error , :rooted_mean_squared_error ;
+    :parameter_value :mean_absolute_percentage_error , :symmetric_mean_absolute_percentage_error , :mean_absolute_scaled_error , :mean_squared_error , :root_mean_squared_error ;
     rdfs:comment "Selecting the prediction performance metric for which AutoML is optimized" ;
     rdfs:seeAlso <https://auto.gluon.ai> .
 :metric_autopytorch_tabular_classification a :Configuration_item ;
@@ -2748,7 +2757,7 @@
     :category :parameter ;
     skos:broader :metric ;
     :has_datatype :single_value ;
-    :parameter_value :accuracy , :balanced_accuracy , :f_measure , :receiver_operating_characteristic_curve , :average_precision_score , :precision , :recall , :log_loss ;
+    :parameter_value :accuracy , :balanced_accuracy , :f_measure , :receiver_operating_characteristic_curve , :average_precision , :precision , :recall , :log_loss ;
     rdfs:comment "Selecting the prediction performance metric for which AutoML is optimized" .
 :metric_autopytorch_time_series_forecasting a :Configuration_item ;
     skos:prefLabel "metric AutoPytorch time series forecasting" ;
@@ -2762,7 +2771,7 @@
     :category :parameter ;
     skos:broader :metric ;
     :has_datatype :single_value ;
-    :parameter_value :mean_absolute_error , :mean_squared_error , :rooted_mean_squared_error , :mean_squared_log_error , :median_absolute_error , :r2 ;
+    :parameter_value :mean_absolute_error , :mean_squared_error , :root_mean_squared_error , :mean_squared_log_error , :median_absolute_error , :r2 ;
     rdfs:comment "Selecting the prediction performance metric for which AutoML is optimized" .
 :metric_autocve_classification a :Configuration_item ;
     skos:prefLabel "metric AutoCVE classification" ;
@@ -2777,7 +2786,7 @@
     :category :parameter ;
     skos:broader :metric ;
     :has_datatype :list ;
-    :parameter_value :accuracy , :balanced_accuracy , :f_measure , :f_measure_macro , :f_measure_micro , :f_measure_weighted , :f_measure_samples , :receiver_operating_characteristic_curve , :average_precision_score , :log_loss , :precision , :precision_macro , :precision_micro , :precision_weighted , :precision_samples , :recall , :recall_macro , :recall_micro , :recall_weighted , :recall_samples ;
+    :parameter_value :accuracy , :balanced_accuracy , :f_measure , :f_measure_macro , :f_measure_micro , :f_measure_weighted , :f_measure_samples , :receiver_operating_characteristic_curve , :average_precision , :log_loss , :precision , :precision_macro , :precision_micro , :precision_weighted , :precision_samples , :recall , :recall_macro , :recall_micro , :recall_weighted , :recall_samples ;
     rdfs:comment "Selecting the prediction performance metric for which AutoML is optimized" ;
     rdfs:seeAlso <https://mcfly.readthedocs.io/en/latest/reference.html> .
 :metric_mljar_tabular_classification a :Configuration_item ;
@@ -2793,7 +2802,7 @@
     :category :parameter ;
     skos:broader :metric ;
     :has_datatype :single_value ;
-    :parameter_value :mean_absolute_error , :mean_squared_error , :rooted_mean_squared_error , :r2 , :mean_absolute_percentage_error ;
+    :parameter_value :mean_absolute_error , :mean_squared_error , :root_mean_squared_error , :r2 , :mean_absolute_percentage_error ;
     rdfs:comment "Selecting the prediction performance metric for which AutoML is optimized" ;
     rdfs:seeAlso <https://supervised.mljar.com/api> .
 :metric_pycaret_tabular_classification a :Configuration_item ;
@@ -2809,7 +2818,7 @@
     :category :parameter ;
     skos:broader :metric ;
     :has_datatype :single_value ;
-    :parameter_value :mean_absolute_error , :mean_squared_error , :rooted_mean_squared_error , :r2 , :rooted_mean_squared_log_error , :mean_absolute_percentage_error ;
+    :parameter_value :mean_absolute_error , :mean_squared_error , :root_mean_squared_error , :r2 , :root_mean_squared_log_error , :mean_absolute_percentage_error ;
     rdfs:comment "Selecting the prediction performance metric for which AutoML is optimized" ;
     rdfs:seeAlso <https://pycaret.readthedocs.io> .
 :metric_pycaret_time_series_forecasting a :Configuration_item ;
@@ -2817,7 +2826,7 @@
     :category :parameter ;
     skos:broader :metric ;
     :has_datatype :single_value ;
-    :parameter_value :mean_absolute_scaled_error , :rooted_mean_squared_scaled_error , :symmetric_mean_absolute_percentage_error , :coverage , :mean_absolute_error , :rooted_mean_squared_error , :mean_absolute_percentage_error , :r2 ;
+    :parameter_value :mean_absolute_scaled_error , :root_mean_squared_scaled_error , :symmetric_mean_absolute_percentage_error , :coverage , :mean_absolute_error , :root_mean_squared_error , :mean_absolute_percentage_error , :r2 ;
     rdfs:comment "Selecting the prediction performance metric for which AutoML is optimized" ;
     rdfs:seeAlso <https://pycaret.readthedocs.io> .
 :metric_tpot_tabular_classification a :Configuration_item ;
@@ -2857,7 +2866,7 @@
     :category :parameter ;
     skos:broader :metric ;
     :has_datatype :list ;
-    :parameter_value :explained_variance , :r2 , :mean_absolut_error , :median_absolute_error , :mean_squared_error , :mean_squared_log_error ;
+    :parameter_value :explained_variance , :r2 , :mean_absolute_error , :median_absolute_error , :mean_squared_error , :mean_squared_log_error ;
     rdfs:comment "Selecting the prediction performance metric for which AutoML is optimized" ;
     rdfs:seeAlso <https://openml-labs.github.io/gama/master/api/index.html> .
 :metric_lama_tabular_classification a :Configuration_item ;
@@ -2881,9 +2890,21 @@
     :category :parameter ;
     skos:broader :metric ;
     :has_datatype :single_value ;
-    :parameter_value :mean_squared_error , :mean_absolute_error , :mean_absolute_percentage_error , :rooted_mean_squared_log_error ;
+    :parameter_value :mean_squared_error , :mean_absolute_error , :mean_absolute_percentage_error , :root_mean_squared_log_error ;
     rdfs:comment "Selecting the prediction performance metric for which AutoML is optimized" ;
     rdfs:seeAlso <https://lightautoml.readthedocs.io/en/latest/pages/modules/generated/lightautoml.tasks.base.Task.html#lightautoml.tasks.base.Task> .
+:metric_h2o_tabular_classification a :Configuration_item ;
+    skos:prefLabel "metric h2o tabular classification" ;
+    :category :parameter ;
+    skos:broader :metric ;
+    :has_datatype :single_value ;
+    :parameter_value :area_under_precision_recall_curve , :log_loss , :area_under_roc_curve .
+:metric_h2o_tabular_regression a :Configuration_item ;
+    skos:prefLabel "metric h2o tabular regression" ;
+    :category :parameter ;
+    skos:broader :metric ;
+    :has_datatype :single_value ;
+    :parameter_value :mean_squared_error , :root_mean_squared_error , :mean_absolute_error , :root_mean_squared_log_error .
 :time_limit a :Configuration_item ;
     skos:prefLabel "time limit" ;
     :category :parameter ;
@@ -3212,7 +3233,7 @@
     :category :parameter ;
     skos:broader :loss_function ;
     :has_datatype :single_value ;
-    :parameter_value :mean_squared_error , :mean_absolute_error , :mean_absolute_percentage_error , :rooted_mean_squared_log_error ;
+    :parameter_value :mean_squared_error , :mean_absolute_error , :mean_absolute_percentage_error , :root_mean_squared_log_error ;
     rdfs:comment "Selecting the loss function according to which training is optimized" ;
     rdfs:seeAlso <https://lightautoml.readthedocs.io/en/latest/pages/modules/generated/lightautoml.tasks.base.Task.html#lightautoml.tasks.base.Task> .
 :loss_function_lama_binary_classification a :Configuration_item ;
@@ -3629,7 +3650,7 @@
 :image a :Enum ;
     skos:prefLabel "image" ;
     :category :dataset_type ;
-    rdfs:comment "A dataset containing images in some common format, e.g., *.jpg. Image files must be stored in a zipped folder structure with folders named according to the labels to be predicted [filetype: *.zip]" ;
+    rdfs:comment "A dataset containing images in some common format, e.g., *.jpg. Image files must be stored in a zipped folder structure with 'train' and 'test' subdirectories each containing folders named according to the labels to be predicted [filetype: *.zip]" ;
     :supported_by_oma_ml "true"^^xsd:boolean .
 :video a :Enum ;
     skos:prefLabel "video" ;
@@ -3739,3 +3760,163 @@
 :time_series_featurizer a :Enum ;
     skos:prefLabel "Time Series Featurizer" ;
     :category :featurizers .
+
+
+# spSelect Queries
+
+:query_get_all_dataset_types a sp:Select ;
+    skos:prefLabel "Query get all dataset types" ;
+    sp:text '''PREFIX : <http://h-da.de/ml-ontology/>
+SELECT ?t
+WHERE {
+        ?t a :Enum;
+           :category :dataset_type .
+}''' ;
+    rdfs:comment "SPARQL query to get all dataset types" .
+:query_get_all_ml_tasks a sp:Select ;
+    skos:prefLabel "Query get all ML tasks" ;
+    sp:text '''PREFIX : <http://h-da.de/ml-ontology/>
+SELECT ?t ?a
+WHERE {
+        ?t a :ML_task;
+           :belongs_to ?a .
+}''' ;
+    rdfs:comment "SPARQL query to get all ML tasks an the ML areas they belong to" .
+:query_get_all_ml_approaches a sp:Select ;
+    skos:prefLabel "Query get all ML approaches" ;
+    sp:text '''PREFIX : <http://h-da.de/ml-ontology/>
+SELECT *
+WHERE {
+        ?a a :ML_approach;
+           :used_for ?t .
+}''' ;
+    rdfs:comment "SPARQL query to get all ML approaches and the ML tasks they can be used for" .
+:query_get_all_preprocessing_approaches a sp:Select ;
+    skos:prefLabel "Query get all preprocessing approaches" ;
+    sp:text '''PREFIX : <http://h-da.de/ml-ontology/>
+SELECT *
+WHERE {
+        ?p a :Preprocessing_approach.
+                  OPTIONAL {?p :used_for ?t} .
+}''' ;
+    rdfs:comment "SPARQL query to get all preprocessing approaches and the ML tasks they can be used for" .
+:query_get_all_metrics a sp:Select ;
+    skos:prefLabel "Query get all metrics" ;
+    sp:text '''PREFIX : <http://h-da.de/ml-ontology/>
+SELECT *
+WHERE {
+        ?m a :Metric;
+           :used_for ?t .
+}''' ;
+    rdfs:comment "SPARQL query to get all performance metrics the the ML tasks they can be used for" .
+:query_get_all_ml_libraries a sp:Select ;
+    skos:prefLabel "Query get all ML libraries" ;
+    sp:text '''PREFIX : <http://h-da.de/ml-ontology/>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+SELECT *
+WHERE {
+        ?m a :ML_library ;
+           skos:prefLabel ?l.
+}''' ;
+    rdfs:comment "SPARQL query to get all ML libraries with their names" .
+:query_get_all_automl_solutions a sp:Select ;
+    skos:prefLabel "Query get all AutoML solutions" ;
+    sp:text '''PREFIX : <http://h-da.de/ml-ontology/>
+SELECT *
+WHERE {
+        ?a a :AutoML_solution ;
+           :used_for ?l.
+}''' ;
+    rdfs:comment "SPARQL query to get AutoML solutions and the ML libraries they are used for" .
+:query_get_all_predefined_sparql_queries a sp:Select ;
+    skos:prefLabel "Query get all predefined SPARQL queries" ;
+    sp:text '''PREFIX : <http://h-da.de/ml-ontology/>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX sp: <http://spinrdf.org/sp#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+SELECT *
+WHERE {
+        ?q a sp:Select ;
+           sp:text ?t;
+           rdfs:comment ?c .
+}''' ;
+    rdfs:comment "SPARQL query to get all predefined SPARQL queries" .
+:query_get_all_predefined_sparql_insert_inference_rules a sp:Select ;
+    skos:prefLabel "Query get all predefined SPARQL insert inference rules" ;
+    sp:text '''PREFIX : <http://h-da.de/ml-ontology/>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX sp: <http://spinrdf.org/sp#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+SELECT *
+WHERE {
+        ?q a sp:InsertData ;
+           sp:text ?t;
+           rdfs:comment ?c .
+}''' ;
+    rdfs:comment "SPARQL query to get all predefined SPARQL insert inference rules" .
+
+
+# spInsertData Inferencing
+
+:inference_rule_broader_inheritance a sp:InsertData ;
+    skos:prefLabel "Inference rule broader inheritance" ;
+    sp:text '''PREFIX : <http://h-da.de/ml-ontology/>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+INSERT {?s ?p ?o .}
+WHERE  {?p a rdf:Property ;
+                        :inheritance :broader_inherited .
+        ?s skos:broader+ ?b .
+        ?b ?p ?o .}''' ;
+    rdfs:comment "SPARQL update statement to insert new triples with subjects that are in a (transitive) skos:broader relationship for existing triples with a predicate of inheritance type :broader_inherited" .
+
+
+# spSelect Quality Checks
+
+:check_class_instance a sp:Select ;
+    skos:prefLabel "Check class instance" ;
+    sp:text '''PREFIX : <http://h-da.de/ml-ontology/>
+SELECT ?class ?subject ?predicate ?object
+WHERE {
+        ?subject ?predicate ?object .
+        OPTIONAL {?subject a ?class .}
+        FILTER isIRI(?object)
+        FILTER(STRSTARTS(str(?object), str(:)))
+        FILTER NOT EXISTS {?object a ?c}
+}''' ;
+    rdfs:comment "All objects should be instances of some class -> ok if query returns nothing; otherwise check ?object of triple in ?class" .
+:check_unique_class a sp:Select ;
+    skos:prefLabel "Check unique class" ;
+    sp:text '''PREFIX : <http://h-da.de/ml-ontology/>
+SELECT DISTINCT ?subject ?class1 ?class2
+WHERE {
+        ?subject a ?class1 .
+        ?subject a ?class2 .
+        FILTER(?class1 != ?class2)
+}''' ;
+    rdfs:comment "No object should be instance of several classes -> ok if query retuns nothing; otherwise check redundant ?class1 and ?class2" .
+:check_predicate_declared a sp:Select ;
+    skos:prefLabel "Check predicate declared" ;
+    sp:text '''PREFIX : <http://h-da.de/ml-ontology/>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+SELECT DISTINCT ?predicate
+WHERE {
+        ?s ?predicate ?o .
+        FILTER(STRSTARTS(str(?predicate), str(:)))
+        FILTER NOT EXISTS {?predicate a rdf:Property}
+}''' ;
+    rdfs:comment "Predicates should be declared -> ok if query returns nothing; otherwise check ?predicate" .
+:check_predicates_with_domain_and_range_datatypes a sp:Select ;
+    skos:prefLabel "Check predicates with domain and range datatypes" ;
+    sp:text '''PREFIX : <http://h-da.de/ml-ontology/>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+SELECT DISTINCT ?predicate ?domain ?range
+WHERE {
+        ?s ?predicate ?o .
+        ?s a ?domain .
+        ?o a ?range .
+}
+ORDER BY ?predicate''' ;
+    rdfs:comment "Lists all used predicates and their subject / object datatypes -> check whether subject datatypes (?domain) and object datatypes (?range) make sense" .

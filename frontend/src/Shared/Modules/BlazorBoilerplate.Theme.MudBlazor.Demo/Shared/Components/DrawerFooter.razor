@@ -51,10 +51,9 @@
 
                                 </MudSelect>
                                 <MudStack Row="true">
-                                    <InputFile id="fileInput" OnChange="@FilesReady" hidden accept="@AcceptedFileType" />
+                                    <InputFile id="fileInput" OnChange="@FilesReady" hidden accept="@AcceptedFileType"/>
                                     <MudButton HtmlTag="label"
                                                Variant="MudBlazor.Variant.Outlined"
-
                                                StartIcon="@Icons.Material.Filled.Upload"
                                                for="fileInput"
                                                Class="mt-1"
@@ -66,7 +65,6 @@
                                     <MudTextField Style=" font-weight: bold; font-size: 12pt;" Variant="MudBlazor.Variant.Outlined" TextChanged="setURLUploadTrue" Disabled="@IsURLDisabled" @bind-Value="@Url" Label="@L["ENTER URL"]" ></MudTextField>
                                 </MudStack>
                                 <MudTextField @bind-Value="@fileUploader.UploadDatasetRequest.DatasetName" Disabled="@(_uploadReady)" Label="@L["Dataset Name"]" Class="mt-1"></MudTextField>
-
                             @if (_isLoaderClosed == false)
                             {
                                 <MudProgressLinear Color="Color.Secondary" Indeterminate="true" />
@@ -133,7 +131,12 @@
 
 @code {
 	public string Url;
-	private bool _fileUpload = true;
+    private enum UploadSource
+    {
+        Local,
+        URL
+    }
+    UploadSource _uploadSource = UploadSource.Local;
 
 	[Parameter]
 	public EventCallback OnUploadCompletedCallback { get; set; }
@@ -168,8 +171,8 @@
 
 	private void setURLUploadTrue()
 	{
-		_fileUpload = false;
-		if (String.IsNullOrEmpty(Url)){
+        _uploadSource = UploadSource.URL;
+		if (String.IsNullOrEmpty(Url) && _uploadReady == false){
 			IsSelectFileDisabled = false;
 		}
 		else{
@@ -181,8 +184,7 @@
 
 	private void setLocalUploadTrue()
 	{
-		_fileUpload = true;
-		IsURLDisabled = true;
+        _uploadSource = UploadSource.Local;
 		_uploadReady = true;
 	}
 
@@ -302,7 +304,7 @@
             switch (value)
             {
                 case ":tabular":
-                    AcceptedFileType = ".csv";
+                    AcceptedFileType = ".csv, .arff";
                     IsSelectFileDisabled = false;
                     IsURLDisabled = false;
                     break;
@@ -312,12 +314,12 @@
                     IsURLDisabled = false;
                     break;
                 case ":text":
-                    AcceptedFileType = ".csv";
+                    AcceptedFileType = ".csv, .arff";
                     IsSelectFileDisabled = false;
                     IsURLDisabled = false;
                     break;
                 case ":time_series":
-                    AcceptedFileType = ".csv";
+                    AcceptedFileType = ".csv, .arff";
                     IsSelectFileDisabled = false;
                     IsURLDisabled = false;
                     break;
@@ -345,6 +347,7 @@
     {
         try
         {
+            IsURLDisabled = true;
             _isLoaderClosed = false;
             StateHasChanged();
             fileUploader.UploadFileContent = e.File;
@@ -369,7 +372,7 @@
     }
     private async Task Upload()
     {
-        if (!_fileUpload)
+        if (_uploadSource == UploadSource.URL)
         {
 
             fileUploader.UploadDatasetRequest.FileNameOrURL = Url;
@@ -381,7 +384,7 @@
 
         try
         {
-            if (_fileUpload){
+            if (_uploadSource == UploadSource.Local){
                 if (fileUploader.IsPredictionDatasetToUpload == true)
                 {
                     if (string.IsNullOrEmpty(fileUploader.UploadPredictionRequest.FileName))
@@ -408,7 +411,7 @@
                         return;
                     }
                 }
-            } else if (!_fileUpload)
+            } else if (_uploadSource == UploadSource.URL)
             {
                 if (string.IsNullOrEmpty(fileUploader.UploadDatasetRequest.DatasetName))
                 {
@@ -422,7 +425,7 @@
             UploadText = L["Preparing upload..."];
             StateHasChanged();
 
-            if (!_fileUpload)
+            if (_uploadSource == UploadSource.URL)
             {
                 fileUploader.UploadDatasetFromURL(Url, AcceptedFileType);
                 Url = "";

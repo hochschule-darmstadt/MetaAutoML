@@ -7,7 +7,7 @@ from bson.objectid import ObjectId
 from ControllerBGRPC import *
 from threading import Lock
 from datetime import datetime, timedelta
-
+from scipy.io import arff
 
 class DataStorage:
     """
@@ -89,6 +89,46 @@ class DataStorage:
     ####################################
 #region
 
+    def __convert_arff_to_csv(self, user_id: str, file_name: str) -> str:
+        arff_file = os.path.join(self.__storage_dir, user_id, "uploads", file_name)
+        file_name = file_name.replace(".arff", ".csv")
+        csv_file = os.path.join(self.__storage_dir, user_id, "uploads", file_name)
+        try:
+            data, _ = arff.loadarff(arff_file)
+            df = pd.DataFrame(data)
+            categories = [col for col in df.columns if df[col].dtype=="O"]
+            df[categories]=df[categories].apply(lambda x: x.str.decode('utf8'))
+            df.to_csv(csv_file, index=False)
+            os.remove(arff_file)
+            return file_name
+
+        # String attributes in arff are not supported by scipy, try to convert arff file to csv manually
+        except NotImplementedError:
+            in_data_section = False
+            header = ""
+            data_content = []
+            with open(arff_file, "r") as in_file:
+                content = in_file.readlines()
+                for line in content:
+                    if not in_data_section:
+                        # Check if the line contains attribute information
+                        if "@ATTRIBUTE" in line.upper():
+                            attributes = line.split()
+                            column_name = attributes[1]
+                            header += column_name.replace("'", "") + ","
+                        elif "@DATA" in line.upper():
+                            in_data_section = True
+                            header = header[:-1]
+                            header += '\n'
+                            data_content.append(header)
+                    else:
+                        data_content.append(line)
+            with open(csv_file, "w") as out_file:
+                out_file.writelines(data_content)
+            os.remove(arff_file)
+            return file_name
+
+
     def create_dataset(self, user_id: str, file_name: str, type: str, name: str, encoding: str) -> str:
         """Create new dataset record and move dataset from upload folder to final path
 
@@ -105,6 +145,9 @@ class DataStorage:
         if type == ":image":
             self.__log.debug(f"create_dataset: dataset type is image, removing .zip ending from {name} as not necessary after unzipping anymore...")
             name = name.replace(".zip", "")
+
+        if file_name.split(".")[-1] == "arff":
+            file_name = self.__convert_arff_to_csv(user_id, file_name)
 
         # build dictionary for database
         database_content = {
@@ -126,7 +169,6 @@ class DataStorage:
         dataset_id = self.__mongo.insert_dataset(user_id, database_content)
         self.__log.debug(f"create_dataset: new dataset inserted with id: {dataset_id}")
 
-
         upload_file = os.path.join(self.__storage_dir, user_id, "uploads", file_name)
         self.__log.debug(f"create_dataset: upload location is: {upload_file}")
 
@@ -141,10 +183,19 @@ class DataStorage:
 
         if type == ":image":
             self.__log.debug("create_dataset: dataset is of image type: unzipping, deleting zip archive and remove .zip suffix...")
-            shutil.unpack_archive(filename_dest, os.path.join(self.__storage_dir, user_id, dataset_id))
+            dataset_dir = os.path.join(self.__storage_dir, user_id, dataset_id)
+            shutil.unpack_archive(filename_dest, dataset_dir)
+            # Cleanup: remove zip archive and __MACOSX folder on MacOS
             os.remove(filename_dest)
-            filename_dest = filename_dest.replace(".zip", "")
-            fileName = file_name.replace(".zip", "")
+            macosx_folder = os.path.join(dataset_dir, '__MACOSX')
+            if os.path.exists(macosx_folder) and os.path.isdir(macosx_folder):
+                shutil.rmtree(macosx_folder)
+            extracted_items = os.listdir(dataset_dir)
+            if len(extracted_items) == 1 and os.path.isdir(os.path.join(dataset_dir, extracted_items[0])):
+                filename_dest = os.path.join(dataset_dir, extracted_items[0])
+            else:
+                filename_dest = filename_dest.replace(".zip", "")
+
         if type == ":tabular" or type == ":text" or type == ":time_series":
             #generate preview of tabular and text dataset
             #previewDf = pd.read_csv(filename_dest)
