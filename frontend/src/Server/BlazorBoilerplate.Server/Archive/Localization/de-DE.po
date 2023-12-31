@@ -1,0 +1,1049 @@
+#, fuzzy
+msgid ""
+msgstr ""
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: AdvaTel resgenEx 0.11\n"
+"Project-Id-Version: PACKAGE VERSION\n"
+"PO-Revision-Date: 2020-10-25 08:10+01:00\n"
+"Last-Translator: Giovanni <EMAIL@ADDRESS>\n"
+"Language-Team: English\n"
+"Language: de_DE\n"
+"Report-Msgid-Bugs-To: \n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "CreateApiResourcePermission"
+msgstr "Erstellen einer neuen API-Ressource"
+
+msgid "CreateClientPermission"
+msgstr "Erstellen eines neuen Clients"
+
+msgid "CreateRolePermission"
+msgstr "Erstellen einer neuen Rolle"
+
+msgid "CreateUserPermission"
+msgstr "Erstellen eines neuen Benutzers"
+
+msgid "DeleteApiResourcePermission"
+msgstr "Lösche alle API-Ressources"
+
+msgid "DeleteClientPermission"
+msgstr "Lösche alle Clients"
+
+msgid "DeleteRolePermission"
+msgstr "Lösche alle Rollen"
+
+msgid "DeleteUserPermission"
+msgstr "Lösche alle Benutzer"
+
+msgid "ReadApiResourcePermission"
+msgstr "Lese API Ressource-Daten"
+
+msgid "ReadClientPermission"
+msgstr "Lese Clients-Daten"
+
+msgid "ReadRolePermission"
+msgstr "Lese Rollen-Daten Berechtigungen etc.\")"
+
+msgid "ReadUserPermission"
+msgstr "Lese Benutzer-Daten (Namen, Emails, Telefonnummern, etc.)"
+
+msgid "UpdateApiResourcePermission"
+msgstr "Bearbeite existierende API-Ressourcen"
+
+msgid "UpdateClientPermission"
+msgstr "Bearbeite existierende Clients"
+
+msgid "UpdateRolePermission"
+msgstr "Bearbeite existierende Rollen"
+
+msgid "UpdateUserPermission"
+msgstr "Bearbeite existierende Benutzer"
+
+msgid "CreateIdentityResourcePermission"
+msgstr "Erstellen einer neuen Identity-Ressource"
+
+msgid "ReadIdentityResourcePermission"
+msgstr "Lese Identity-Ressource-Daten"
+
+msgid "UpdateIdentityResourcePermission"
+msgstr "Bearbeite existierende Identity-Ressourcen"
+
+msgid "DeleteIdentityResourcePermission"
+msgstr "Lösche alle Identity-Ressources"
+
+msgid "Delete"
+msgstr "Löschen"
+
+msgid "Cancel"
+msgstr "Abbrechen"
+
+msgid "Users"
+msgstr "Benutzer"
+
+msgid "Roles"
+msgstr "Rollen"
+
+msgid "ApiResources"
+msgstr "OpenID API Ressourcen"
+
+msgid "IdentityResources"
+msgstr "OpenID Identity Ressourcen"
+
+msgid "OpenIdClients"
+msgstr "OpenID Clients"
+
+msgid "Dashboard"
+msgstr "Dashboard"
+
+msgid "Loading"
+msgstr "Ladevorgang läuft..."
+
+msgid "New Client"
+msgstr "Neuer Client"
+
+msgid "New User"
+msgstr "Neuer Benutzer"
+
+msgid "New Role"
+msgstr "Neue Rolle"
+
+msgid "New API Resource"
+msgstr "Neue API Ressource"
+
+msgid "New Identity Resource"
+msgstr "Neue Identity Ressource"
+
+msgid "{0} users fetched"
+msgstr "{0} Benutzer abgerufen"
+
+msgid "Operation Successful"
+msgstr "Vorgang erfolgreich"
+
+msgid "Operation Failed"
+msgstr "Vorgang fehlgeschlagen"
+
+msgid "{0} roles fetched"
+msgstr "{0} Rollen abgerufen"
+
+msgid "{0} clients fetched"
+msgstr "{0} Clients abgerufen"
+
+msgid "{0} identity resources fetched"
+msgstr "{0} Identity-Ressourcen abgerufen"
+
+msgid "{0} API resources fetched"
+msgstr "{0} API-Ressourcen abgerufen"
+
+msgid "Create"
+msgstr "Erstellen"
+
+msgid "Update"
+msgstr "Aktualsieren"
+
+msgid "Edit {0}"
+msgstr "Bearbeiten '{0}'"
+
+msgid "Permissions list fetched"
+msgstr "Berechtigungsliste abgerufen"
+
+msgid "Role {0} created"
+msgstr "Rolle {0} erstellt"
+
+msgid "Role {0} already exists"
+msgstr "Rolle {0} existiert bereits"
+
+msgid "The role {0} doesn't exist"
+msgstr "Die Rolle {0} existiert nicht."
+
+msgid "Role {0} deleted"
+msgstr "Rolle {0} gelöscht"
+
+msgid "RoleInUseWarning"
+msgstr "Diese Rolle {0} wird noch durch einen Benutzer verwendet. Sie kann daher nicht gelöscht werden."
+
+msgid "Client {0} created"
+msgstr "Client {0} erstellt"
+
+msgid "The client {0} doesn't exist"
+msgstr "Der Client {0} existiert nicht."
+
+msgid "Client {0} updated"
+msgstr "Client {0} aktualisiert"
+
+msgid "Client {0} deleted"
+msgstr "Client {0} gelöscht"
+
+msgid "Role {0} updated"
+msgstr "Rolle {0} aktualisiert"
+
+msgid "Identity Resource {0} created"
+msgstr "Identity Ressource {0} erstellt"
+
+msgid "Identity Resource {0} updated"
+msgstr "Identity Ressource {0} aktualisiert"
+
+msgid "Identity Resource {0} deleted"
+msgstr "Identity Ressource {0} gelöscht"
+
+msgid "API Resource {0} created"
+msgstr "API Ressource {0} erstellt"
+
+msgid "API Resource {0} updated"
+msgstr "API Ressource {0} aktualisiert"
+
+msgid "API Resource {0} deleted"
+msgstr "API Ressource {0} gelöscht"
+
+msgid "The API resource {0} doesn't exist"
+msgstr "Die API-Ressource {0} existiert nicht."
+
+msgid "The Identity resource {0} doesn't exist"
+msgstr "Die Identity-Ressource {0} existiert nicht."
+
+msgid "UserName"
+msgstr "Benutzername"
+
+msgid "Login"
+msgstr "Login"
+
+msgid "Sign in with"
+msgstr "Anmelden mit"
+
+msgid "Sign up"
+msgstr "Registrieren"
+
+msgid "Keep me logged in"
+msgstr "Eingeloggt bleiben"
+
+msgid "Log in"
+msgstr "Log in"
+
+msgid "Forgot your password?"
+msgstr "Passwort vergessen?"
+
+msgid "Submit"
+msgstr "Absenden"
+
+msgid "LoginFailed"
+msgstr "Login-Versuch fehlgeschlagen"
+
+msgid "ResetPasswordFailed"
+msgstr "Versuch Passwort zurückzusetzen fehlgeschlagen"
+
+msgid "ForgotPasswordEmailSent"
+msgstr "Passwort-Vergessen Email gesendet"
+
+msgid "Confirm Email"
+msgstr "Bestätige Email"
+
+msgid "Send Confirmation"
+msgstr "Bestätigung senden"
+
+msgid "EmailVerificationFailed"
+msgstr "Email Verifizierung fehlgeschlagen"
+
+msgid "EmailVerificationSuccessful"
+msgstr "Email Verifizierung erfolgreich"
+
+msgid "ResetPasswordSuccessful"
+msgstr "Passwort erfolgreich zurückgesetzt"
+
+msgid "Password Reset"
+msgstr "Passwort zurücksetzen"
+
+msgid "Password Confirmation"
+msgstr "Passwort bestätigen"
+
+msgid "Reset Password"
+msgstr "Passwort zurücksetzen"
+
+msgid "UserCreationFailed"
+msgstr "Benutzer erstellen fehlgeschlagen"
+
+msgid "UserCreationSuccessful"
+msgstr "Benutzer erfolgreich erstellt"
+
+msgid "Registration"
+msgstr "Registrierung"
+
+msgid "PasswordConfirmationFailed"
+msgstr "Das Passwort und das Bestätigungspasswort stimmen nicht überein."
+
+msgid "ConfirmPassword"
+msgstr "Bestätige Passwort"
+
+msgid "ErrorInvalidLength"
+msgstr "{0} muss mindestens {2} und darf maximal {1} Zeichen lang sein."
+
+msgid "SpacesNotPermitted"
+msgstr "Leerzeichen sind nicht gestattet"
+
+msgid "Role"
+msgstr "Rolle"
+
+msgid "Name"
+msgstr "Name"
+
+msgid "AlreadyRegistered"
+msgstr "Bereits registriert?"
+
+msgid "Register"
+msgstr "Registrieren"
+
+msgid "InvalidData"
+msgstr "Eingegebene Daten sind nicht gültig"
+
+msgid "The user {0} doesn't exist"
+msgstr "Der Benutzer {0} existiert nicht."
+
+msgid "The user doesn't exist"
+msgstr "Der Benutzer existiert nicht."
+
+msgid "User {0} created"
+msgstr "Benutzer {0} erstellt"
+
+msgid "Confirm Delete"
+msgstr "Bestätige Löschen"
+
+msgid "Logout"
+msgstr "Logout"
+
+msgid "Tenants"
+msgstr "Mandanten"
+
+msgid "Tenant"
+msgstr "Mandant"
+
+msgid "MultiTenancy"
+msgstr "Mehrmandantenfähigkeit"
+
+msgid "{0} tenants fetched"
+msgstr "{0} Mandanten abgerufen"
+
+msgid "Tenant {0} created"
+msgstr "Mandant {0} erstellt"
+
+msgid "The tenant {0} doesn't exist"
+msgstr "Der Mandant {0} existiert nicht."
+
+msgid "Tenant {0} updated"
+msgstr "Mandant {0} aktualisiert"
+
+msgid "Tenant {0} deleted"
+msgstr "Mandant {0} gelöscht"
+
+msgid "Role {0} cannot be deleted"
+msgstr "Rolle{0} kann nicht gelöscht werden"
+
+msgid "Tenant {0} cannot be deleted"
+msgstr "Mandant {0} kann nicht gelöscht werden"
+
+msgid "Role {0} cannot be edited"
+msgstr "Rolle {0} kann nicht bearbeitet werden"
+
+msgid "AuthenticationRequired"
+msgstr "Authentifizierung erforderlich"
+
+msgid "LoginRequired"
+msgstr "Bitte zuerst einloggen"
+
+msgid "Operation not allowed"
+msgstr "Vorgang nicht erlaubt"
+
+msgid "NotAuthorizedTo"
+msgstr "Sie sind nicht authorisiert diesen Vorgang durchzuführen."
+
+msgid "PleaseWait"
+msgstr "Bitte warten..."
+
+msgid "Settings"
+msgstr "Einstellungen"
+
+msgid "EmailSettings"
+msgstr "Email Einstellungen"
+
+msgid "OutgoingEmail"
+msgstr "Ausgehende Email"
+
+msgid "IncomingEmail"
+msgstr "Eingehende Email"
+
+msgid "SmtpServer"
+msgstr "SMTP Server"
+
+msgid "PopServer"
+msgstr "POP3 Server"
+
+msgid "Save"
+msgstr "Speichern"
+
+msgid "Port"
+msgstr "Port"
+
+msgid "ImapServer"
+msgstr "IMAP Server"
+
+msgid "SenderEmail"
+msgstr "Absender E-Mail"
+
+msgid "SenderName"
+msgstr "Absender Name"
+
+msgid "MainSettings"
+msgstr "Einstellungen"
+
+msgctxt "TrainingTimeline"
+msgid "started"
+msgstr "Experiment gestartet"
+
+msgctxt "TrainingTimeline"
+msgid "preprocessing"
+msgstr "Vorverarbeitung"
+
+msgctxt "TrainingTimeline"
+msgid "running"
+msgstr "Ausführung der AutoMLs"
+
+msgctxt "TrainingTimeline"
+msgid "stopped"
+msgstr "Experiment beendet"
+
+msgctxt "TrainingTimeline"
+msgid "strategy_action"
+msgstr "Strategie-Aktion"
+
+msgctxt "TrainingTimeline"
+msgid "automl_run_finished"
+msgstr "AutoML beendet"
+
+msgctxt "TrainingTimeline"
+msgid "data_preparation.ignore_redundant_features"
+msgstr "Redundante Features ignoriert"
+
+msgctxt "TrainingTimeline"
+msgid "data_preparation.ignore_redundant_samples"
+msgstr "Redundante Samples ignoriert"
+
+msgctxt "TrainingTimeline"
+msgid "data_preparation.finish_preprocessing"
+msgstr "Datenvorbereitung abgeschlossen"
+
+msgctxt "TrainingTimeline"
+msgid "automl_run_finished_{0}"
+msgstr "AutoML abgeschlossen: {0}"
+
+msgid "Required"
+msgstr "Erforderlich"
+
+msgid "Email"
+msgstr "Email Adresse"
+
+msgid "Password"
+msgstr "Passwort"
+
+msgid "My datasets {0}"
+msgstr "Meine Datensets: {0}"
+
+msgid "My trainings {0}"
+msgstr "Meine Trainings: {0}"
+
+msgid "My models {0}"
+msgstr "Meine Modele: {0}"
+
+msgid "Executing trainings {0}"
+msgstr "Laufende Trainings: {0}"
+
+msgid "Home"
+msgstr "Home"
+
+msgid "Overview"
+msgstr "Übersicht"
+
+msgid "Recent datasets"
+msgstr "Aktuelle Datasets"
+
+msgid "Add"
+msgstr "Hinzufügen"
+
+msgid "More"
+msgstr "Mehr"
+
+msgid "Type"
+msgstr "Typ"
+
+msgid "Size"
+msgstr "Größe"
+
+msgid "Date"
+msgstr "Datum"
+
+msgid "Time"
+msgstr "Uhrzeit"
+
+msgid "tabular"
+msgstr "Tabellarisch"
+
+msgid "text"
+msgstr "Text"
+
+msgid "image"
+msgstr "Bilder"
+
+msgid "time series longitudinal"
+msgstr "Zeitreihen longitudinal"
+
+msgid "time series"
+msgstr "Zeitreihen"
+
+msgid "Select the data format of your dataset"
+msgstr "Datenset Datentyp auswählen"
+
+msgid "Select Dataset"
+msgstr "Datenset Auswählen"
+
+msgid "Dataset Name"
+msgstr "Datenset Name"
+
+msgid "Close"
+msgstr "Schließen"
+
+msgid "Upload"
+msgstr "Hochladen"
+
+msgid "Recent trainings"
+msgstr "Aktuelle Trainings"
+
+msgid "Start datetime"
+msgstr "Start Datum"
+
+msgid "Status"
+msgstr "Status"
+
+msgid "Dataset"
+msgstr "Datenset"
+
+msgid "Datasets"
+msgstr "Datensets"
+
+msgid "Search for name or type"
+msgstr "Nach Name oder Typ suchen"
+
+msgid "All datasets"
+msgstr "Alle Datensets"
+
+msgid "Name: {0}"
+msgstr "Name: {0}"
+
+msgid "Rows per page"
+msgstr "Zeilen pro Seite"
+
+msgid "Dataset type: {0}"
+msgstr "Datenset Typ: {0}"
+
+msgid "Date: {0}"
+msgstr "Datum: {0}"
+
+msgid "File Size: {0}"
+msgstr "Dateiengröße: {0}"
+
+msgid "Number of rows: {0}"
+msgstr "Reihenanzahl: {0}"
+
+msgid "Number of columns: {0}"
+msgstr "Spaltenanzahl: {0}"
+
+msgid "New Training"
+msgstr "Neues Training"
+
+msgid "Start Training"
+msgstr "Start Training"
+
+msgid "Dataset {0}"
+msgstr "Datenset {0}"
+
+msgid "Model"
+msgstr "Model"
+
+msgid "Library"
+msgstr "Bibliothek"
+
+msgid "Test score"
+msgstr "Test Ergebnis"
+
+msgid "Prediction time per sample"
+msgstr "Zeit pro Vorhersage"
+
+msgid "Total training time"
+msgstr "Gesamt Trainingszeit"
+
+msgid "Top 3 models"
+msgstr "Top 3 Modelle"
+
+msgid "Analysis"
+msgstr "Analyse"
+
+msgid "Preview"
+msgstr "Vorschau"
+
+msgid "Configure"
+msgstr "Konfigurieren"
+
+msgid "Dataset can not be read successfully, change file configuration."
+msgstr "Datenset konnte nicht erfolgreich gelesen werden, bitte die Datei Konfiguration ändern."
+
+msgid "Use header"
+msgstr "Header verwenden"
+
+msgid "Start row"
+msgstr "Start Reihe"
+
+msgid "Column seperator"
+msgstr "Spalten separator"
+
+msgid "Escape character"
+msgstr "Escapezeichen"
+
+msgid "Decimal character"
+msgstr "Dezimalzeichen"
+
+msgid "Train"
+msgstr "Trainieren"
+
+msgid "Trainings"
+msgstr "Trainings"
+
+msgid "Dataset preparation"
+msgstr "Datensetvorbereitung"
+
+msgid "Configuration"
+msgstr "Konfiguration"
+
+msgid "Details"
+msgstr "Details"
+
+msgid "ML task"
+msgstr "ML task"
+
+msgid "Machine Learning task"
+msgstr "ML Task"
+
+msgid "AutoML solutions"
+msgstr "AutoML Systeme"
+
+msgid "Machine Learning libraries"
+msgstr "Machine Learning Bibliothek"
+
+msgid "Enabled strategies"
+msgstr "Aktivierte Strategien"
+
+msgid "Runtime"
+msgstr "Laufzeit"
+
+msgid "Previous"
+msgstr "Zurück"
+
+msgid "Finish"
+msgstr "Starten"
+
+msgid "Next"
+msgstr "Nächste"
+
+msgid "Training {0}"
+msgstr "Training {0}"
+
+msgid "Leaderboard"
+msgstr "Leaderboard"
+
+msgid "AutoML solution"
+msgstr "AutoML System"
+
+msgid "completed"
+msgstr "Erfolgreich"
+
+msgid "ended"
+msgstr "Beendet"
+
+msgid "download"
+msgstr "Herunterladen"
+
+msgid "Add Live Dataset"
+msgstr "Live Dataset hinzufügen"
+
+msgid "busy"
+msgstr "Läuft"
+
+msgid "failed"
+msgstr "Fehlgeschlagen"
+
+msgid "Search by AutoML solution, Status, Model or Library"
+msgstr "Nach AutoML System, Status, Model oder Bibliothek suchen"
+
+msgid "Model {0}"
+msgstr "Model {0}"
+
+msgid "Dataset: "
+msgstr "Datenset: "
+
+msgid "Start {0}"
+msgstr "Start {0}"
+
+msgid "Status {0}"
+msgstr "Status {0}"
+
+msgid "Total training time: {0}"
+msgstr "Gesamte Trainingszeit: {0} s"
+
+msgid "AutoML solution: {0}"
+msgstr "AutoML System: {0}"
+
+msgid "Machine Learning library: {0}"
+msgstr "Machine Learning Bibliothek: {0}"
+
+msgid "Training: "
+msgstr "Training: "
+
+msgid "Metric score: {0}"
+msgstr "Metric Ergebnis: {0}"
+
+msgid "Metric"
+msgstr "Metric"
+
+msgid "Prediction time per sample: {0}"
+msgstr "Zeit pro Vorhersage: {0} ms"
+
+msgid "Predict online"
+msgstr "Online vorhersagen"
+
+msgid "Upload File"
+msgstr "Datei hochladen"
+
+msgid "Download result CSV"
+msgstr "CSV Ergebnis herunterladen"
+
+msgid "Download Machine Learning pipeline"
+msgstr "Machine Learning Pipeline herunterladen"
+
+msgid "Download model"
+msgstr "Model herunterladen"
+
+msgid "Dataset: {0}"
+msgstr "Datenset: {0}"
+
+msgid "Task: {0}"
+msgstr "Task: {0}"
+
+msgid "Target: {0}"
+msgstr "Target: {0}"
+
+msgid "Selected Machine learning libraries"
+msgstr "Ausgewählte Machine learning Bibliothek"
+
+msgid "Selected AutoMl solutions"
+msgstr "Ausgewählte AutoML Systeme"
+
+msgid "Dataset configuration"
+msgstr "Datenset Konfiguration"
+
+msgid "Runtime constrains"
+msgstr "Laufzeitbeschränkung"
+
+msgid "Explanation"
+msgstr "Explanation"
+
+msgid "Correlation Matrix"
+msgstr "Korrelationsmatrix"
+
+msgid "Correlation analysis"
+msgstr "Korrelationsanalyse"
+
+msgid "Column analysis"
+msgstr "Säulenanalyse"
+
+msgid "Models"
+msgstr "Modelle"
+
+msgid "Past training"
+msgstr "Vergangene Trainings"
+
+msgid "Search for status, task or dataset type"
+msgstr "Nach Status, Start Datum oder Datenset Typ suchen"
+
+msgid "Task"
+msgstr "Task"
+
+msgid "TwoFactorAuthentication"
+msgstr "Zwei Faktor Authentifizierung"
+
+msgid "Dataset not redable"
+msgstr "Datenset konnte nicht gelessen werden! Wenn das Datenset gerade hochgeladen wurde muss noch etwas gewartet werden bevor dieses bereitsteht. Ansonsten stimmt die Datenset Konfiguration nicht, diese kann durch die Vorschau Konfiguration neu konfiguriert werden"
+
+msgid "Start: {0}"
+msgstr "Start: {0}"
+
+msgid "Status: {0}"
+msgstr "Status: {0}"
+
+msgid "Model: {0}"
+msgstr "Modell: {0}"
+
+msgid "Please enter a dataset name first!"
+msgstr "Datenset Namen eingeben!"
+
+msgid "Please select a dataset type first!"
+msgstr "Datenset Typ auswählen!"
+
+msgid "Please select a file first!"
+msgstr "Datei auswählen!"
+
+msgid "Preparing upload..."
+msgstr "Upload wird vorbereitet..."
+
+msgid "Uploading {0} {1}"
+msgstr "Hochladen {0} {1}%"
+
+msgid "Comma \",\""
+msgstr "Komma \",\""
+
+msgid "Semicolon \";\""
+msgstr "Semikolon \";\""
+
+msgid "Space"
+msgstr "Leerzeichen"
+
+msgid "Tab"
+msgstr "Tabulator"
+
+msgid "tabular classification"
+msgstr "Tabellarische Klassifikation"
+
+msgid "tabular regression"
+msgstr "Tabellarische Regression"
+
+msgid "time series forecasting"
+msgstr "Zeitreihenvorhersage"
+
+msgid "image classification"
+msgstr "Bild Klassifikation"
+
+msgid "text classification"
+msgstr "Text Klassifikation"
+
+msgid "File configuration can not be saved, incompatible delimiter"
+msgstr "Datei Konfiguration konnte nicht gespeichert werden, Spaltenseparator inkompatibel."
+
+msgid "Could not read dataset successfully, change configuration"
+msgstr "Datenset konnte nicht gelessen werden, ändern Sie die Konfiguration."
+
+msgid "Change Password"
+msgstr "Passwort ändern"
+
+msgid "EnableAuthenticatorInstructions"
+msgstr ""
+"<p>"
+"Laden Sie eine Zwei-Faktor-Authentifizierungs-App wie Microsoft Authenticator oder Google Authenticator herunter."
+"</p>"
+"<p>Sannen Sie den QR Code oder den Schlüssel <kbd>{0}</kbd> in Ihrer Zwei-Faktor-Authentifizierungs-App. Leerzeichen sowie Groß- und Kleinschreibung sind nicht relevant.</p>"
+"<img src=\"{1}\" style=\"width: 200px\" />"
+"<p>"
+"Sobald Sie den QR Code gescannt oder den obigen Schlüssel eingegeben haben, bietet Ihnen die App zur Zwei-Faktor-Authentifizierung folgende Informationen "
+"mit einem einmaligen Code. Geben Sie den Code in das Bestätigungsfeld unten ein und bestätigen Sie."
+"</p>"
+
+msgid "Code"
+msgstr "Code"
+
+msgid "ENTER URL"
+msgstr "URL eingeben"
+
+msgid "LastName"
+msgstr "Nachname"
+
+msgid "FirstName"
+msgstr "Vorname"
+
+msgid "VerifyCode"
+msgstr "Code überprüfen"
+
+msgid "ResetAuthenticator"
+msgstr "Authentifikator zurücksetzen"
+
+msgid "Search by name, status, lib or AutoML system"
+msgstr "Nach Name, Status, Bibliothek oder AutoML System suchen"
+
+msgid "CookieName"
+msgstr "Name"
+
+msgid "CookieLifecycle"
+msgstr "Gültigkeit"
+
+msgid "CookieDescription"
+msgstr "Beschreibung"
+
+msgid "AntiforgeryCookieName"
+msgstr ".AspNetCore.Antiforgery"
+
+msgid "AntiforgeryCookieLifecycle"
+msgstr "Sitzung"
+
+msgid "AntiforgeryCookieDescription"
+msgstr "Dieses Cookie speichert den Anti Forgery Token ab, wird zum Schutz vor Cross-Site-Request-Forgery-Attack verwendet."
+
+msgid "CultureCookieName"
+msgstr ".AspNetCore.Culture"
+
+msgid "CultureCookieLifecycle"
+msgstr "1 Monat"
+
+msgid "CultureCookieDescription"
+msgstr "Dieses Cookie speichert die Sprachauswahl, wird zur Darstellung der richtigen Sprache verwendet."
+
+msgid "CookieConsentCookieName"
+msgstr ".AspNet.CookieConsent"
+
+msgid "CookieConsentCookieLifecycle"
+msgstr "6 Monate"
+
+msgid "CookieConsentCookieDescription"
+msgstr "Dieses Cookie speichert die vom User erlaubten Cookies ab."
+
+msgid "IdentityApplicationCookieName"
+msgstr ".AspNetCore.Identity.Application"
+
+msgid "IdentityApplicationCookieLifecycle"
+msgstr "Sitzung"
+
+msgid "IdentityApplicationCookieDescription"
+msgstr "Dieses Cookie ermöglicht die Cookie basierte Nutzerautorisierung, wird für das Nutzermanagement verwendet."
+
+msgid "IdsrvSessionCookieName"
+msgstr "idsrv.session"
+
+msgid "IdsrvSessionCookieLifecycle"
+msgstr "Sitzung"
+
+msgid "IdsrvSessionCookieDescription"
+msgstr "Dieses Cookie speichert die aktuelle Sitzungs id, wird für das Nutzermanagement verwendet."
+
+msgid "FolderStructureNotCorrectErrorMessage"
+msgstr "Die Ordnerstruktur der Zip-Datei entspricht nicht den Anforderungen."
+
+msgid "AffinityCookieName"
+msgstr "affinity"
+
+msgid "AffinityCookieLifecycle"
+msgstr "4 Stunden"
+
+msgid "AffinityCookieDescription"
+msgstr "Dieses Cookie speichert die aktuelle Sticky Sitzungs id, wird für das korrekte Routing verwendet."
+
+msgid "Encoding"
+msgstr "Codierung"
+
+msgid "ASCII"
+msgstr "ASCII"
+
+msgid "UTF-8"
+msgstr "UTF-8"
+
+msgid "latin-1"
+msgstr "latin-1"
+
+msgid "UTF-16"
+msgstr "UTF-16"
+
+msgid "UTF-32"
+msgstr "UTF-32"
+
+msgid "integer"
+msgstr "Integer"
+
+msgid "float"
+msgstr "Float"
+
+msgid "boolean"
+msgstr "Boolescher Wert"
+
+msgid "string"
+msgstr "String"
+
+msgid "categorical"
+msgstr "Kategorien"
+
+msgid "datetime"
+msgstr "Datetime"
+
+msgid "time_delta"
+msgstr "Time Delta"
+
+msgid "list"
+msgstr "Liste"
+
+msgid "single_value"
+msgstr "Single"
+
+msgid "index"
+msgstr "Index"
+
+msgid "target"
+msgstr "Target"
+
+msgid "ignore"
+msgstr "Ignorieren"
+
+msgid "none"
+msgstr "Keine"
+
+msgid "Datatype"
+msgstr "Datentyp"
+
+msgid "Datatype analysis incompatible with current dataset configuration, save current configuration to start new analysis"
+msgstr "Datentypenanalyse ist nicht mit der aktuellen Konfiguration kompatibel. Durch das Speichern der aktuellen Konfiguration wird eine neue Analyse gestartet."
+
+msgid "Roles analysis incompatible with current dataset configuration, save current configuration to start new analysis"
+msgstr "Rollenanalyse ist nicht mit der aktuellen Konfiguration kompatibel. Durch das Speichern der aktuellen Konfiguration wird eine neue Analyse gestartet."
+
+msgid "Thousand seperator"
+msgstr "Tausendertrennzeichen"
+
+msgid "Datetime format"
+msgstr "Datetime Format"
+
+msgid "Column {0} could not be casted to datetime"
+msgstr "Spalte {0} konnte nicht zum Datentypen Datetype konvertiert werden."
+
+msgid "Datetime columns could not be converted to new datetime format"
+msgstr "Datetime Spalten konnten nicht in das neue Datetime format konvertiert werden."
+
+msgid "File configuration can not be saved, datetime columns could not be converted to new datetime format"
+msgstr "Datenset-konfiguration konnte nicht gespeichert werden, Datetime Spalten konnten nicht in das neue Datetime Format konvertiert werden."
+
+msgid "Save Schema"
+msgstr "Schema speichern"
+
+msgid "More than one target selected"
+msgstr "Mehr als ein Target wurde ausgewählt."
+
+msgid "No target selected"
+msgstr "Kein Target wurde ausgewählt."
+
+msgid "No task selected"
+msgstr "Kein Machine Learning Task wurde ausgewählt."
+
+msgid "No index selected"
+msgstr "Keine Index Spalte wurde gesetzt."
+
+msgid "No datetime index selected"
+msgstr "Keine oder mehrere Index Spalte mit Datentyp Datetime wurde gesetzt. Es darf nur eine Index Spalte mit Datentyp Datetime im Datensatz existieren."
+
+
+msgid "Emissions kg/CO2-eq"
+msgstr "Emissionen in kg/CO2-eq"
+
+msgid "Emissions: {0} kg/CO2-eq"
+msgstr "Emissionen: {0} kg/CO2-eq"
+
+msgid "aborted"
+msgstr "Abgebrochen"
+
