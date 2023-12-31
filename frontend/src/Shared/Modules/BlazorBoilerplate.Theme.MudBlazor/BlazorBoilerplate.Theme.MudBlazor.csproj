@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
+<Project Sdk="Microsoft.NET.Sdk.Razor">
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
@@ -10,12 +10,13 @@
   <ItemGroup>
     <PackageReference Include="BytexDigital.Blazor.Components.CookieConsent" Version="1.0.15" />
     <PackageReference Include="CXuesong.MW.WikiClientLibrary" Version="0.7.5" />
-    <PackageReference Include="MudBlazor" Version="6.2.3" />
+    <PackageReference Include="MudBlazor" Version="6.11.2" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
     <PackageReference Include="System.Net.Http" Version="4.3.4" />
     <PackageReference Include="System.Net.Http.Json" Version="6.0.0" />
     <PackageReference Include="Toolbelt.Blazor.LoadingBar" Version="13.1.2" />
     <PackageReference Include="Wiki.Net" Version="4.1.0" />
+    <PackageReference Include="STGTour.GTour" Version="1.0.8" />
   </ItemGroup>
 
   <ItemGroup>
@@ -33,6 +34,9 @@
     </Content>
   </ItemGroup>
 
+  <ItemGroup>
+    <None Remove="STGTour.GTour" />
+  </ItemGroup>
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
     <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(SolutionDir)Server\BlazorBoilerplate.Server\Themes\MudBlazor\" />
   </Target>

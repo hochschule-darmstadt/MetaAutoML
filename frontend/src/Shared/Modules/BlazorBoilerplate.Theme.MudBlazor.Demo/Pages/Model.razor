@@ -106,6 +106,7 @@
         <ModelDetail Model="_model" />
     </MudItem>
 </MudGrid>
+<UserTour></UserTour>
 
 
 @code{
@@ -126,7 +127,10 @@
     private GetTrainingResponseDto _training;
     private GetDatasetResponseDto _dataset;
     private List<BreadcrumbItem> _breadcrumbs = new List<BreadcrumbItem>();
-	protected bool IsDisabled { get; set; }
+    protected bool IsDisabled { get; set; }
+    [Inject]
+    private GTour.Abstractions.IGTourService GTourService { get; set; }
+    private bool tourActivated = false;
 
     protected async override void OnInitialized()
     {
@@ -154,10 +158,12 @@
         _breadcrumbs.Add(new BreadcrumbItem(L["Model {0}", _model.Model.GetMlModelString()], null, true, Icons.Material.Filled.Lightbulb));
         fileUploader.OnUploadCompletedCallback = LoadModel;
         StateHasChanged();
+        TourService userTour = new TourService(GTourService, NavManager);
+        await userTour.checkIfUserTourIsActivatedAndStartTour(NavManager.Uri);
     }
     private async Task LoadModel()
     {
-		IsDisabled = true;
+        IsDisabled = true;
         try
         {
             ApiResponseDto apiResponse;
@@ -178,7 +184,7 @@
                 if (_model.Model.Metrics.Count > 0 && SelectedMetric == "")
                 {
                     SelectedMetric = _model.Model.Metrics[0].Name.ID;
-					IsDisabled = false;
+                    IsDisabled = false;
                 }
                 //Get Training infos
                 apiResponse = await apiClient.GetTraining(new GetTrainingRequestDto() { TrainingId = _model.Model.TrainingId });
