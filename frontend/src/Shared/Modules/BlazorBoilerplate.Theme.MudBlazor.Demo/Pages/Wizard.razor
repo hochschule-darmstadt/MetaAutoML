@@ -41,7 +41,7 @@ else
             </MuddyWizard>
             break;
         case ":image":
-            <MuddyWizard WizardFinished="@OnWizardFinished"DisplaySaveSchemaCheckbox="false">
+            <MuddyWizard WizardFinished="@OnWizardFinished" DisplaySaveSchemaCheckbox="false">
                 <MuddyWizardPanel Title="@L["Configuration"]">
                     <TaskConfiguration Dataset="@_dataset" @bind-StartTrainingDto="@_automlRequest" />
                 </MuddyWizardPanel>
@@ -50,9 +50,14 @@ else
     }
 }
 
+<UserTour></UserTour>
+
 @code {
     [Parameter]
     public string Id { get; set; }
+    [Inject]
+    private GTour.Abstractions.IGTourService GTourService { get; set; }
+    private bool tourActivated = false;
 
     private GetDatasetResponseDto _dataset;
     private string _datasetTitle = "";
@@ -73,6 +78,9 @@ else
         _breadcrumbs.Add(new BreadcrumbItem(_datasetTitle, "/datasets/" + _dataset.Dataset.Id, false, Icons.Filled.ListAlt));
         _breadcrumbs.Add(new BreadcrumbItem(L["Train"], null, true, Icons.Filled.ModelTraining));
         StateHasChanged();
+        TourService userTour = new TourService(GTourService, NavManager);
+        tourActivated = userTour.checkIfUserTourIsActivated(NavManager.Uri);
+        await userTour.checkIfUserTourIsActivatedAndStartTour(NavManager.Uri);
 
     }
     private async Task LoadDataset()
@@ -199,7 +207,15 @@ else
             if (apiResponse.IsSuccessStatusCode)
             {
                 automlResponse = Newtonsoft.Json.JsonConvert.DeserializeObject<CreateTrainingResponseDto>(apiResponse.Result.ToString());
-                NavManager.NavigateTo("/trainings/" + automlResponse.TrainingIdentifier);
+                if (tourActivated)
+                {
+                    TourService userTour = new TourService(GTourService, NavManager);
+                    userTour.navigateToNextPage("ninthStep", NavManager.ToAbsoluteUri("/trainings/" + automlResponse.TrainingIdentifier).AbsoluteUri);
+                }
+                else
+                {
+                    NavManager.NavigateTo("/trainings/" + automlResponse.TrainingIdentifier);
+                }
             }
             else
             {
