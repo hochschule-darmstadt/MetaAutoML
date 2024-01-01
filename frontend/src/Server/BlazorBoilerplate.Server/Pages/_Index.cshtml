@@ -34,6 +34,49 @@
     <link href="_content/BlazorBoilerplate.Theme.Material/BlazorBoilerplate.Theme.Material.bundle.scp.css" rel="stylesheet">
     <link rel="stylesheet" href="_content/STGTour.GTour/css/styles.css" />
     <link rel="stylesheet" href="_content/Radzen.Blazor/css/default.css">
+    <script src="https://cdn.jsdelivr.net/npm/shepherd.js@10.0.1/dist/js/shepherd.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/shepherd.js@10.0.1/dist/css/shepherd.css" />
+    <script type="text/javascript">
+        window.tour = {
+            start: name => {
+                // create a Shepherd tour
+                const tour = new Shepherd.Tour({
+                    useModalOverlay: true,
+                    defaultStepOptions: {
+                        classes: 'shadow-md bg-purple-dark',
+                        scrollTo: true
+                    }
+                });
+
+                // add the steps from our step container
+                const containerEl = document.querySelector(`[data-tour-name="${name}"]`);
+                const stepEls = containerEl.querySelectorAll('[data-tour-step]');
+                stepEls.forEach(stepEl => {
+                    const stepName = stepEl.getAttribute('data-target');
+                    const target = document.querySelector(`[data-tour-step="${stepName}"]`);
+
+                    // add the step to the Shepher tour
+                    tour.addStep({
+                        // id: 'example-step',
+                        text: stepEl.innerHTML,
+                        attachTo: {
+                            element: target,
+                            on: 'bottom'
+                        },
+                        classes: 'example-step-extra-class',
+                        buttons: [
+                            {
+                                text: 'Next',
+                                action: tour.next
+                            }
+                        ]
+                    });
+                });
+
+                tour.start();
+            }
+        };
+    </script>
     <script src="_content/Radzen.Blazor/Radzen.Blazor.js"></script>
     <style>
         body {
@@ -135,5 +178,6 @@
           anchorElement.remove();
         }
     </script>
+    <script src="shepherd.js/dist/js/shepherd.min.js"></script>
 </body>
 </html>

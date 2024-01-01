@@ -3,6 +3,7 @@
 @inject ISnackbar Snackbar
 @inject IViewNotifier viewNotifier
 @inject IApiClient apiClient
+@inject IJSRuntime JSRuntime
 @inject IFileUploader fileUploader
 @attribute [Authorize]
 @using Radzen
@@ -10,7 +11,7 @@
 @inject NavigationManager navigationManager
 @inject IDialogService dialogService
 @using BlazorBoilerplate.Shared.Models.Account
-<div data-form-zeroStep style="border: solid none; z-index: 999; position: relative; background-color: none; border-width: 0px;"></div>
+<div data-form-zeroStep data-tour-step="hello" style="border: solid none; z-index: 999; position: relative; background-color: none; border-width: 0px;"></div>
 <TopSection>
     <MudBreadcrumbs Style="z-index:1!important;" Items="_breadcrumbs" Class="mudbreadcrumbs"></MudBreadcrumbs>
 </TopSection>
@@ -20,8 +21,12 @@
     <LabelTooltip FontSize="TextStyle.H4" Label=@_pageTitle Text="A dataset contains data that can be used for machine learning. Different dataset types are distinguished, e.g., tabular data, texts or images. This page lists all datasets you have uploaded so far to the OMA-ML platform. By clicking on a dataset, the respective dataset page is opened to inspect the dataset and start new trainings." Position="Radzen.TooltipPosition.Bottom"></LabelTooltip>
 
 </MudStack>
-
-<MudGrid>
+    <TourContainer Name="home-page-tour">
+        <TourStep Target="hello">Let us start with a guided tour first.</TourStep>
+    <TourStep Target="step-1">Click here to upload a new dataset to OMA-ML from your disk or from the internet. As soon as you have uploaded a dataset, click on Next.</TourStep>
+        <TourStep Target="step-2">Let us start with a guided tour first.</TourStep>
+    </TourContainer>
+<MudGrid >
     <MudItem xs="12" sm="12" md="12">
         <MudCard Elevation="5">
             <MudCardHeader Style="border-bottom-style: inset; border-bottom-width: 1px;">
@@ -94,18 +99,20 @@
 
         userViewModel = await identityAuthenticationStateProvider.GetUserViewModel();
 
+        await JSRuntime.InvokeVoidAsync("tour.start", "home-page-tour");
         if (userViewModel.IsTutorialEnabled == true)
         {
             userViewModel.IsTutorialEnabled = false;
             await UpdateUser();
             // await GTourService.StartTour("FormGuidedTour", "zeroStep");
-            TourService userTour = new TourService(GTourService, navigationManager);
-            userTour.navigateToNextPage("zeroStep", navigationManager.ToAbsoluteUri(" ").AbsoluteUri);
+            // TourService userTour = new TourService(GTourService, navigationManager);
+            // userTour.navigateToNextPage("zeroStep", navigationManager.ToAbsoluteUri(" ").AbsoluteUri);
+            await JSRuntime.InvokeVoidAsync("tour.start", "home-page-tour");
         }
         else
         {
-            TourService userTour = new TourService(GTourService, navigationManager);
-            await userTour.checkIfUserTourIsActivatedAndStartTour(navigationManager.Uri);
+            // TourService userTour = new TourService(GTourService, navigationManager);
+            // await userTour.checkIfUserTourIsActivatedAndStartTour(navigationManager.Uri);
         }
     }
 
