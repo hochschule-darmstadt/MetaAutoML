@@ -1,10 +1,12 @@
 @page "/help"
+@page "/help/{AnchorPath}"
 @inject IStringLocalizer<Global> L
 @attribute [Authorize]
 @inject NavigationManager navigationManager
 @inject IJSRuntime JS
 @using Newtonsoft.Json
 @inject IApiClient apiClient
+@inject IJSRuntime JSRuntime
 
 <TopSection>
     <MudBreadcrumbs Items="_breadcrumbs" Class="mudbreadcrumbs"></MudBreadcrumbs>
@@ -176,12 +178,12 @@
 <UserTour></UserTour>
 
 
-
 @code {
-
+    [Parameter]
+    public string? AnchorPath { get; set; }
     private List<BreadcrumbItem> _breadcrumbs = new List<BreadcrumbItem>();
     [Inject]
-    private GTour.Abstractions.IGTourService GTourService { get; set; }
+    private ITourService TourService { get; set; }
     private bool currentPanelIntroduction = true;
     private MudTabs tabs;
     private MudTabPanel introduction;
@@ -189,27 +191,69 @@
     List<HelpPageDto> helpTabPanelList = new List<HelpPageDto>();
     HelpPageDto introductionTab = new HelpPageDto();
     HelpPageDto pagesTab = new HelpPageDto();
+    System.Threading.Timer timer;
 
     protected override async Task OnInitializedAsync()
     {
         this.helpTabPanelList = await apiClient.GetHelpPageJson();
         this.helpTabPanelList.ForEach(tab => { if (tab.PanelHeadline.Equals("Introduction")) { this.introductionTab = tab; } else if (tab.PanelHeadline.Equals("Pages")) { this.pagesTab = tab; } });
-        StateHasChanged();
         _breadcrumbs.Add(new BreadcrumbItem(L["Home"], "/", false, Icons.Filled.Home));
         _breadcrumbs.Add(new BreadcrumbItem(L["Help"], "/help", false, Icons.Material.Filled.HelpOutline));
         //StateHasChanged();
-        TourService userTour = new TourService(GTourService, navigationManager);
-        await userTour.checkIfUserTourIsActivatedAndStartTour(navigationManager.Uri);
-        StateHasChanged();
+        await TourService.checkIfUserTourIsActivatedAndStartTour(navigationManager.Uri);
+
+        if (navigationManager.Uri.Contains("#"))
+        {
+            // If no anchor is specified, check the current URL for an anchor
+            var anchor = GetAnchorFromUrl();
+            if (!string.IsNullOrEmpty(anchor))
+            {
+                var pageTwoanchors = new List<string>()
+                {
+                    "home",
+                    "datasets",
+                    "datasetdetail",
+                    "datasetconfigure",
+                    "trainings",
+                    "traindatasetpreparation",
+                    "trainconfiguration",
+                    "trainingdetail",
+                    "models",
+                    "modeldetail"
+                };
+                if (pageTwoanchors.Contains(anchor))
+                {
+                    tabs.ActivatePanel(1);
+                }
+                timer = new System.Threading.Timer(async _ =>  // async void
+                {
+                    var anchor = GetAnchorFromUrl();
+                    // Use JavaScript interop to scroll to the anchor from the URL
+                    try
+                    {
+                        await JSRuntime.InvokeVoidAsync("scrollToAnchor", anchor);
+                    }
+                    catch (Exception ex)
+                    {
+
+                    }
+                }, null, 300, Timeout.Infinite);
+            }
+        }
 
 
+    }
+
+    private string GetAnchorFromUrl()
+    {
+        var uri = new Uri(navigationManager.Uri);
+        return uri.Fragment.TrimStart('#');
     }
 
 
     private void StartTour()
     {
-        TourService userTour = new TourService(GTourService, navigationManager);
-        userTour.navigateToNextPage("firstStep", navigationManager.ToAbsoluteUri(" ").AbsoluteUri);
+        TourService.navigateToNextPage("firstStep", navigationManager.ToAbsoluteUri(" ").AbsoluteUri);
     }
     private void PanelSwitch()
     {

@@ -15,3 +15,10 @@ window.anchorLink = {
         }
     }
 };
+
+window.scrollToAnchor = function (anchorId) {
+    var element = document.getElementById(anchorId);
+    if (element) {
+        element.scrollIntoView();
+    }
+}

@@ -403,7 +403,7 @@ class DataStorage:
             found, dataset = self.get_dataset(user_id, dataset_id)
             filter = { "training_id": { '$in': dataset["training_ids"] }, "lifecycle_state": "active" }
         else:
-            filter = {}
+            filter = {"lifecycle_state": "active"}
         result = self.__mongo.get_models(user_id, filter)
 
         return [ds for ds in result]

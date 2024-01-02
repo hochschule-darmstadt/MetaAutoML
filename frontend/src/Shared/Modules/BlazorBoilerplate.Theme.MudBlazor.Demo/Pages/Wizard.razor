@@ -56,7 +56,7 @@ else
     [Parameter]
     public string Id { get; set; }
     [Inject]
-    private GTour.Abstractions.IGTourService GTourService { get; set; }
+    private ITourService TourService { get; set; }
     private bool tourActivated = false;
 
     private GetDatasetResponseDto _dataset;
@@ -78,9 +78,8 @@ else
         _breadcrumbs.Add(new BreadcrumbItem(_datasetTitle, "/datasets/" + _dataset.Dataset.Id, false, Icons.Filled.ListAlt));
         _breadcrumbs.Add(new BreadcrumbItem(L["Train"], null, true, Icons.Filled.ModelTraining));
         StateHasChanged();
-        TourService userTour = new TourService(GTourService, NavManager);
-        tourActivated = userTour.checkIfUserTourIsActivated(NavManager.Uri);
-        await userTour.checkIfUserTourIsActivatedAndStartTour(NavManager.Uri);
+        tourActivated = TourService.checkIfUserTourIsActivated(NavManager.Uri);
+        await TourService.checkIfUserTourIsActivatedAndStartTour(NavManager.Uri);
 
     }
     private async Task LoadDataset()
@@ -209,8 +208,7 @@ else
                 automlResponse = Newtonsoft.Json.JsonConvert.DeserializeObject<CreateTrainingResponseDto>(apiResponse.Result.ToString());
                 if (tourActivated)
                 {
-                    TourService userTour = new TourService(GTourService, NavManager);
-                    userTour.navigateToNextPage("ninthStep", NavManager.ToAbsoluteUri("/trainings/" + automlResponse.TrainingIdentifier).AbsoluteUri);
+                    TourService.navigateToNextPage("ninthStep", NavManager.ToAbsoluteUri("/trainings/" + automlResponse.TrainingIdentifier).AbsoluteUri);
                 }
                 else
                 {

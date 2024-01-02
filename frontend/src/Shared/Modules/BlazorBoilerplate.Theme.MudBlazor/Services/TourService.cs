@@ -1,13 +1,14 @@
 using System;
 using Microsoft.AspNetCore.Components;
 using System.Net.NetworkInformation;
-using GTour.Abstractions;
 using MudBlazor;
 using BlazorBoilerplate.Theme.Material.Shared.Components;
+using BlazorBoilerplate.Shared.Interfaces;
+using GTour.Abstractions;
 
 namespace BlazorBoilerplate.Theme.Material.Services
 {
-    public class TourService
+    public class TourService : ITourService
     {
         private readonly NavigationManager _navigationManager;
         private readonly IGTourService _gTourService;
@@ -54,9 +55,20 @@ namespace BlazorBoilerplate.Theme.Material.Services
         public async Task checkIfUserTourIsActivatedAndStartTour(string uri)
         {
             string queryParam = this.GetQueryParam("TourStep", uri);
+
             if (!string.IsNullOrEmpty(queryParam))
             {
-                await _gTourService.StartTour("FormGuidedTour", queryParam);
+                try
+                {
+                    if (queryParam == "firstStep" && _gTourService.CurrentTour != null)
+                    {
+                        await _gTourService.CompleteTour();
+                    }
+                    await _gTourService.StartTour("FormGuidedTour", queryParam);
+                }
+                catch (Exception ex)
+                {
+                }
             }
         }
         /// <summary>

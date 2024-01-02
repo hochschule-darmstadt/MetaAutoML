@@ -129,7 +129,7 @@
     private List<BreadcrumbItem> _breadcrumbs = new List<BreadcrumbItem>();
     protected bool IsDisabled { get; set; }
     [Inject]
-    private GTour.Abstractions.IGTourService GTourService { get; set; }
+    private ITourService GTourService { get; set; }
     private bool tourActivated = false;
 
     protected async override void OnInitialized()
@@ -158,8 +158,7 @@
         _breadcrumbs.Add(new BreadcrumbItem(L["Model {0}", _model.Model.GetMlModelString()], null, true, Icons.Material.Filled.Lightbulb));
         fileUploader.OnUploadCompletedCallback = LoadModel;
         StateHasChanged();
-        TourService userTour = new TourService(GTourService, NavManager);
-        await userTour.checkIfUserTourIsActivatedAndStartTour(NavManager.Uri);
+        await GTourService.checkIfUserTourIsActivatedAndStartTour(NavManager.Uri);
     }
     private async Task LoadModel()
     {

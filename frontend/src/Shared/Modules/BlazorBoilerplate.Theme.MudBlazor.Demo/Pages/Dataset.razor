@@ -102,7 +102,7 @@
     private GetDatasetResponseDto _dataset;
     private List<BreadcrumbItem> _breadcrumbs = new List<BreadcrumbItem>();
     [Inject]
-    private GTour.Abstractions.IGTourService GTourService { get; set; }
+    private ITourService TourService { get; set; }
     protected async override void OnInitialized()
     {
         await LoadDataset();
@@ -110,8 +110,7 @@
         _breadcrumbs.Add(new BreadcrumbItem(L["Datasets"], "/datasets", false, Icons.Filled.ListAlt));
         _breadcrumbs.Add(new BreadcrumbItem(_pageTitle, null, true, Icons.Filled.ListAlt));
         StateHasChanged();
-        TourService userTour = new TourService(GTourService, NavManager);
-        await userTour.checkIfUserTourIsActivatedAndStartTour(NavManager.Uri);
+        await TourService.checkIfUserTourIsActivatedAndStartTour(NavManager.Uri);
     }
     private async Task LoadDataset()
     {
