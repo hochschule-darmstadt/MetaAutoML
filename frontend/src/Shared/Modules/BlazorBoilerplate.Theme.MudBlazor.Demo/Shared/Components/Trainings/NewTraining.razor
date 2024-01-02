@@ -55,6 +55,7 @@
 
     protected override void OnInitialized()
     {
-        tourActivated = TourService.checkIfUserTourIsActivated(NavManager.Uri);
+        // tourActivated = TourService.checkIfUserTourIsActivated(NavManager.Uri);
+        tourActivated = TourService.checkIfUserTourIsActivated();
     }
 }

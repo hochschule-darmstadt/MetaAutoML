@@ -146,12 +146,15 @@
 
 @code{
     [Inject]
+    ITourService TourService { get; set; }
+    [Inject]
     private GTour.Abstractions.IGTourService GTourService { get; set; }
     private bool tourActivated = false;
 
     protected override void OnInitialized()
     {
-        TourService userTour = new TourService(GTourService, NavManager);
-        tourActivated = userTour.checkIfUserTourIsActivated(NavManager.Uri);
+        tourActivated = TourService.checkIfUserTourIsActivated();
+        // TourService userTour = new TourService(GTourService, NavManager);
+        // tourActivated = userTour.checkIfUserTourIsActivated(NavManager.Uri);
     }
 }

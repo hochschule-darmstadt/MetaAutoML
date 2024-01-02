@@ -8,7 +8,8 @@ namespace BlazorBoilerplate.Shared.Interfaces
 {
     public interface ITourService
     {
-        public bool checkIfUserTourIsActivated(string uri);
+        //public bool checkIfUserTourIsActivated(string uri);
+        public bool checkIfUserTourIsActivated();
         Task checkIfUserTourIsActivatedAndStartTour(string uri);
         void navigateToNextPage(string step, string uri);
     }

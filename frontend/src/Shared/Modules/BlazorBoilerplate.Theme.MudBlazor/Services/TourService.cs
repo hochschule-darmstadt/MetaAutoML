@@ -12,11 +12,32 @@ namespace BlazorBoilerplate.Theme.Material.Services
     {
         private readonly NavigationManager _navigationManager;
         private readonly IGTourService _gTourService;
+        public bool TourIsActivated { get; private set; } = false;
         public TourService(IGTourService gTourService, NavigationManager navigationManager)
         {
             _gTourService = gTourService;
             _navigationManager = navigationManager;
+            _gTourService.OnTourStarting += OnTourStarting;
+            _gTourService.OnTourCanceled += OnTourCanceled;
+            _gTourService.OnTourCompleted += OnTourCompleted;
 
+        }
+
+        private void OnTourStarting(GTour.Abstractions.IGTourService sender, GTour.Abstractions.IGTour tour)
+        {
+            Console.WriteLine($"Tour with name {tour.TourId} registered");
+            TourIsActivated = true;
+        }
+
+        private void OnTourCanceled(GTour.Abstractions.IGTourService sender, GTour.Abstractions.IGTour tour)
+        {
+            Console.WriteLine($"Tour with name {tour.TourId} registered");
+            TourIsActivated = false;
+        }
+        private void OnTourCompleted(GTour.Abstractions.IGTourService sender, GTour.Abstractions.IGTour tour)
+        {
+            Console.WriteLine($"Tour with name {tour.TourId} registered");
+            TourIsActivated = false;
         }
         /// <summary>
         /// Get the value of a query parameter of a uri
@@ -36,14 +57,16 @@ namespace BlazorBoilerplate.Theme.Material.Services
         /// </summary>
         /// <param name="uri"></param>current uri 
         /// <returns></returns>returns true in case the tour is activated
-        public bool checkIfUserTourIsActivated(string uri)
+        //public bool checkIfUserTourIsActivated(string uri)
+        public bool checkIfUserTourIsActivated()
         {
-            string queryParam = this.GetQueryParam("TourStep", uri);
-            if (!string.IsNullOrEmpty(queryParam))
-            {
-                return true;
-            }
-            else { return false; }
+            return TourIsActivated;
+            //string queryParam = this.GetQueryParam("TourStep", uri);
+            //if (!string.IsNullOrEmpty(queryParam))
+            //{
+            //    return true;
+            //}
+            //else { return false; }
         }
 
         /// <summary>
@@ -64,6 +87,7 @@ namespace BlazorBoilerplate.Theme.Material.Services
                     {
                         await _gTourService.CompleteTour();
                     }
+                    TourIsActivated = true;
                     await _gTourService.StartTour("FormGuidedTour", queryParam);
                 }
                 catch (Exception ex)

@@ -91,7 +91,6 @@
         _pageTitle = L["Home"];
         _breadcrumbs.Add(new BreadcrumbItem(L["Home"], null, true, Icons.Filled.Home));
         fileUploader.OnUploadCompletedCallback = LoadDatasetWithReRendering;
-        StateHasChanged();
         identityAuthenticationStateProvider = (IdentityAuthenticationStateProvider)authStateProvider;
 
         userViewModel = await identityAuthenticationStateProvider.GetUserViewModel();
@@ -107,7 +106,9 @@
         {
             await TourService.checkIfUserTourIsActivatedAndStartTour(navigationManager.Uri);
         }
+        StateHasChanged();
     }
+
 
     protected async Task UpdateUser()
     {

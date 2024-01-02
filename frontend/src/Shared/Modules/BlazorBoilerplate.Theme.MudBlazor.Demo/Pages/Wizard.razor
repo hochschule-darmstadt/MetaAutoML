@@ -78,8 +78,9 @@ else
         _breadcrumbs.Add(new BreadcrumbItem(_datasetTitle, "/datasets/" + _dataset.Dataset.Id, false, Icons.Filled.ListAlt));
         _breadcrumbs.Add(new BreadcrumbItem(L["Train"], null, true, Icons.Filled.ModelTraining));
         StateHasChanged();
-        tourActivated = TourService.checkIfUserTourIsActivated(NavManager.Uri);
+        // tourActivated = TourService.checkIfUserTourIsActivated(NavManager.Uri);
         await TourService.checkIfUserTourIsActivatedAndStartTour(NavManager.Uri);
+        tourActivated = TourService.checkIfUserTourIsActivated();
 
     }
     private async Task LoadDataset()
