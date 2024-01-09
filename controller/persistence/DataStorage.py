@@ -128,6 +128,15 @@ class DataStorage:
             os.remove(arff_file)
             return file_name
 
+    def __convert_excel_to_csv(self, user_id: str, file_name: str) -> str:
+        excel_file = os.path.join(self.__storage_dir, user_id, "uploads", file_name)
+        file_name = file_name.replace(".xlsx", ".csv")
+        csv_file = os.path.join(self.__storage_dir, user_id, "uploads", file_name)
+        df = pd.read_excel(excel_file)
+        df.to_csv(csv_file, index=False)
+        os.remove(excel_file)
+        return file_name
+
 
     def create_dataset(self, user_id: str, file_name: str, type: str, name: str, encoding: str) -> str:
         """Create new dataset record and move dataset from upload folder to final path
@@ -148,6 +157,8 @@ class DataStorage:
 
         if file_name.split(".")[-1] == "arff":
             file_name = self.__convert_arff_to_csv(user_id, file_name)
+        elif file_name.split(".")[-1] == "xlsx":
+            file_name = self.__convert_excel_to_csv(user_id, file_name)
 
         # build dictionary for database
         database_content = {

@@ -335,7 +335,7 @@ namespace BlazorBoilerplate.Server.Managers
 
         private bool CheckSupportedFileType(string fileExt)
         {
-            if (fileExt == ".csv" || fileExt == ".arff" || fileExt == ".zip")
+            if (fileExt == ".csv" || fileExt == ".arff" || fileExt == ".xlsx" || fileExt == ".zip")
             {
                 return true;
             }
