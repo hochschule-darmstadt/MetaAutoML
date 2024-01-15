@@ -30,6 +30,26 @@ message GetTrainingsRequest {
     example: '4a7af128-ac3d-4e3d-89fe-b70f7bfe0c3b'
   */
   string userId = 1;
+  /*
+    Should only the training objects without any dataset and model objects be retrieved
+    example: True //Only returns list without dataset and model objects
+  */
+  bool short = 2;
+  /*
+    Should only the most recent trainings be retrived
+    example: True //retrieve last 24 hours training
+  */
+  bool onlyLastDay = 3;
+  /*
+    Should results be paginated, combined with page parameter
+    example: True //return results by pagination
+  */
+  bool pagination = 4;
+  /*
+    The page to retrieve
+    example: 2 //return trainings from pagination page 2
+  */
+  int32 pageNumber = 5;
 }
 
 message GetTrainingsResponse {
@@ -38,6 +58,7 @@ message GetTrainingsResponse {
     example: [Training, Training]
   */
   repeated Training trainings = 1;
+
 }
 
 message GetTrainingRequest {

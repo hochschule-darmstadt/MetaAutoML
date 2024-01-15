@@ -113,7 +113,7 @@ class DatasetManager:
         """
         response = GetDatasetsResponse()
         self.__log.debug(f"get_datasets: get all datasets for user {get_datasets_request.user_id}")
-        all_datasets: list[dict[str, object]] = self.__data_storage.get_datasets(get_datasets_request.user_id)
+        all_datasets: list[dict[str, object]] = self.__data_storage.get_datasets(get_datasets_request.user_id, get_datasets_request.only_five_recent, get_datasets_request.pagination, get_datasets_request.page_number)
 
         self.__log.debug(f"get_datasets: found {all_datasets.count} datasets for user {get_datasets_request.user_id}")
         for dataset in all_datasets:

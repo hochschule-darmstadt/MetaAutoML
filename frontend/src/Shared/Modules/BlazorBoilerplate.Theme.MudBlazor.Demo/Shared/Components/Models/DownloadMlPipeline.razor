@@ -2,12 +2,13 @@
 @inject IViewNotifier viewNotifier
 @inject IJSRuntime JS
 @inject IStringLocalizer<Global> L
-
+@using Radzen
+@using Radzen.Blazor
 
 <MudCard Elevation="5">
     <MudCardHeader Style="border-bottom-style: inset; border-bottom-width: 1px;">
         <CardHeaderContent>
-            <LabelTooltip FontSize="Typo.h6" Label=@L["Download ML model pipeline"] Text="Here you may download a pipeline as Python source code including the generated ML model and pre-processing functions. You may include this code into a custom Python application." Position="Placement.Bottom"></LabelTooltip>
+            <LabelTooltip FontSize="TextStyle.H6" Label=@L["Download ML model pipeline"] Text="Here you may download a pipeline as Python source code including the generated ML model and pre-processing functions. You may include this code into a custom Python application." Position="Radzen.TooltipPosition.Bottom"></LabelTooltip>
             <MudText Typo="Typo.h6"></MudText>
         </CardHeaderContent>
     </MudCardHeader>
@@ -22,10 +23,10 @@
                 if (Model.Model.Status == "completed")
                 {
                     <MudStack>
-                        <MudButton OnClick="@DownloadModel" 
-                            Variant="Variant.Filled" 
-                            StartIcon="@Icons.Filled.CloudDownload"
-                            Color="Color.Secondary">
+                        <MudButton OnClick="@DownloadModel"
+                                   Variant="MudBlazor.Variant.Filled"
+                                   StartIcon="@Icons.Filled.CloudDownload"
+                                   Color="Color.Secondary">
                             @L["Download ML model pipeline"]
                         </MudButton>
                     </MudStack>
@@ -34,9 +35,9 @@
                 {
                     <MudStack>
                         <MudButton Disabled="true"
-                           Variant="Variant.Filled"
-                           StartIcon="@Icons.Filled.CloudDownload"
-                           Color="Color.Secondary">
+                                   Variant="MudBlazor.Variant.Filled"
+                                   StartIcon="@Icons.Filled.CloudDownload"
+                                   Color="Color.Secondary">
                             @L["Download ML model pipeline"]
                         </MudButton>
                     </MudStack>
@@ -49,16 +50,16 @@
 @code {
     [Parameter]
     public GetModelResponseDto Model
-    { 
+    {
         get
         {
             return _model;
-        } 
+        }
         set
         {
             _model = value;
             StateHasChanged();
-        } 
+        }
     }
     private GetModelResponseDto _model;
     private async void DownloadModel()

@@ -4,14 +4,17 @@
 @inject IViewNotifier viewNotifier
 @inject IApiClient apiClient
 @attribute [Authorize]
+@inject NavigationManager NavManager
+@using Radzen
+@using Radzen.Blazor
 
 <TopSection>
     <MudBreadcrumbs Items="_breadcrumbs" Class="mudbreadcrumbs"></MudBreadcrumbs>
 </TopSection>
 
-<MudStack AlignItems="AlignItems.Center" Row="true" Class="mb-2" style="padding-top:50px">
+<MudStack AlignItems="MudBlazor.AlignItems.Center" Row="true" Class="mb-2" style="padding-top:50px">
     <MudIcon Size="Size.Large" Icon="@Icons.Filled.ModelTraining" />
-    <LabelTooltip FontSize="Typo.h4" Label=@_pageTitle Text="This page shows the leaderboard for an ML training. During training, various AutoML solutions are executed in parallel. This is indicated by a spinning wheel. Whenever an AutoML solution has terminated, the result is displayed. The top performing models are shown first in the leaderboard." Position="Placement.Bottom"></LabelTooltip>
+    <LabelTooltip FontSize="TextStyle.H4" Label=@_pageTitle Text="This page shows the leaderboard for an ML training. During training, various AutoML solutions are executed in parallel. This is indicated by a spinning wheel. Whenever an AutoML solution has terminated, the result is displayed. The top performing models are shown first in the leaderboard." Position="Radzen.TooltipPosition.Bottom"></LabelTooltip>
 </MudStack>
 
 <MudGrid>
@@ -19,6 +22,7 @@
         <TrainingDetails Training="_training" />
     </MudItem>
 </MudGrid>
+<UserTour></UserTour>
 
 
 @code {
@@ -27,6 +31,9 @@
     private string _pageTitle = "";
     private GetTrainingResponseDto _training;
     private List<BreadcrumbItem> _breadcrumbs = new List<BreadcrumbItem>();
+    [Inject]
+    private GTour.Abstractions.IGTourService GTourService { get; set; }
+    private bool tourActivated = false;
 
     protected async override void OnInitialized()
     {
@@ -35,6 +42,8 @@
         _breadcrumbs.Add(new BreadcrumbItem(L["Trainings"], "/trainings", false, Icons.Filled.ModelTraining));
         _breadcrumbs.Add(new BreadcrumbItem(_pageTitle, null, true, Icons.Filled.ModelTraining));
         StateHasChanged();
+        TourService userTour = new TourService(GTourService, NavManager);
+        await userTour.checkIfUserTourIsActivatedAndStartTour(NavManager.Uri);
 
     }
 
@@ -42,13 +51,12 @@
     {
         try
         {
-            ApiResponseDto apiResponse = await apiClient.GetTraining(new GetTrainingRequestDto() { TrainingId = Id});
+            ApiResponseDto apiResponse = await apiClient.GetTraining(new GetTrainingRequestDto() { TrainingId = Id });
 
             if (apiResponse.IsSuccessStatusCode)
             {
                 _training = Newtonsoft.Json.JsonConvert.DeserializeObject<GetTrainingResponseDto>(apiResponse.Result.ToString());
                 _pageTitle = L["Training: {0}", _training.Training.RuntimeProfile.StartTime.ToString("dd/MM/yy HH:mm")];
-                viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
             }
             else
             {

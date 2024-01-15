@@ -175,7 +175,8 @@ class AdapterRuntimeManager:
         if model_details["status"] == "completed" and self.__multi_fidelity_level == 0 and self.__request.perform_model_analysis == True:
             if dataset["type"] in  [":tabular", ":text", ":time_series"]:
                 #Generate explainer dashboard
-                adapter_manager.generate_explainer_dashboard()
+                response = adapter_manager.generate_explainer_dashboard()
+                self.__data_storage.update_model(user_id, model_id, { "dashboard_path": response.path})
 
     def get_adapters(self) -> list[AdapterManager]:
         """get the __adapters object of this session

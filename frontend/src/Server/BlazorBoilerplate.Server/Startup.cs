@@ -50,6 +50,8 @@ using Newtonsoft.Json.Serialization;
 using NSwag;
 using NSwag.AspNetCore;
 using NSwag.Generation.Processors.Security;
+using Radzen;
+using Radzen.Blazor;
 using Serilog;
 using System.Reflection;
 using System.Security.Claims;
@@ -58,6 +60,7 @@ using static BlazorBoilerplate.Constants.PasswordPolicy;
 using static IdentityModel.JwtClaimTypes;
 using static IdentityServer4.IdentityServerConstants;
 using static Microsoft.AspNetCore.Http.StatusCodes;
+using GTour;
 
 namespace BlazorBoilerplate.Server
 {
@@ -78,6 +81,8 @@ namespace BlazorBoilerplate.Server
         }
         public void ConfigureServices(IServiceCollection services)
         {
+            services.UseGTour();
+            GTourService.Theme = new GTour.Themes.CustomTheme();
             services.AddSingleton<ILocalizationProvider, StorageLocalizationProvider>();
             services.AddTextLocalization(options =>
             {
@@ -91,6 +96,10 @@ namespace BlazorBoilerplate.Server
             });
 
             services.AddScoped<LazyAssemblyLoader>();
+            services.AddScoped<DialogService>();
+            services.AddScoped<NotificationService>();
+            services.AddScoped<TooltipService>();
+            services.AddScoped<ContextMenuService>();
 
             var dataProtectionBuilder = services.AddDataProtection().SetApplicationName(projectName);
 

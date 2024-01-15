@@ -3,13 +3,14 @@
 @using Microsoft.AspNetCore.Hosting
 @using Microsoft.Extensions.Logging
 @using System.Net.Http.Headers
+@using System.Timers
+@implements IDisposable
 @inject IApiClient apiClient
 @inject IViewNotifier viewNotifier
 @inject IJSRuntime JS
 @inject IStringLocalizer<Global> L
 @inject IHttpClientFactory ClientFactory
 @inject NavigationManager NavManager
-
 <MudCard Elevation="5">
     <MudCardHeader Style="border-bottom-style: inset; border-bottom-width: 1px;">
         <CardHeaderContent>
@@ -20,31 +21,42 @@
             {
                 <ButtonTooltip Text="Click here to to display all analysis diagrams available for this dataset." Position="Placement.Top">
                     <MudButton Href="@NavManager.ToAbsoluteUri("datasets/" + @Dataset.Dataset.Id + "/analysis").AbsoluteUri"
-                               Variant="Variant.Filled"
-                               EndIcon="@Icons.Material.Filled.ReadMore"
-                               Color="Color.Secondary"
-                               Size="Size.Small"
-                               Style="margin-top: 8px">@L["More"]</MudButton>
-                    </ButtonTooltip>
-                            }
-                    </CardHeaderActions>
+                        Variant="Variant.Filled"
+                        Disabled="@(_analysis == null || _analysis.ydataprofilling == "" || _analysis.ydataprofilling == "none")"
+                        StartIcon="@Icons.Material.Filled.ReadMore"
+                        Color="Color.Secondary"
+                        Size="Size.Small"
+                        Style="margin-top: 8px">@L["More"]</MudButton>
+                </ButtonTooltip>
+            }
+        </CardHeaderActions>
     </MudCardHeader>
-    <MudCardContent>
-        <MudPaper Height="250px" Elevation="0">
-            @if ((_analysis == null) || (_analysis.AnalysisCategories.Count == 0))
-            {
-                <DataLoaderSpinner />
+<MudCardContent>
+    <MudPaper Height="250px" Elevation="6" Class="d-flex align-items-center justify-content-center">
+            @if (_analysis == null || _analysis.ydataprofilling == ""){
+                <MudTooltip Text="The advanced analysis is running in the background, this might take a moment!">
+                    <MudProgressCircular Color="Color.Primary" Style="height:70px;width:70px;" Indeterminate="true" />
+                </MudTooltip>
             }
-            else
+            else if (_analysis.ydataprofilling == null)
             {
-        <MudButton Href="@NavManager.ToAbsoluteUri("datasets/" + @Dataset.Dataset.Id + "/analysis").AbsoluteUri">
-            <MudItem xs="12" Style="display: grid; justify-content: center;">
-                <MudImage Src="@GetImage(_analysis.AnalysisCategories[0].Analyses[0].Content)" Style="width:clamp(70px, 100%, 330px); margin-left: auto; margin-right: auto;;" />
-            </MudItem>
-        </MudButton>
+                <MudTooltip Text="The advanced analysis is not available for this data set!">
+                    <MudText>For the advance analysis you have to go to configuration page and click saving button</MudText>
+                </MudTooltip>
             }
-        </MudPaper>
-    </MudCardContent>
+            else if (_analysis.ydataprofilling == "none")
+            {
+                <MudTooltip Text="The advanced analysis is not available for this data set!">
+                    <MudText>The advanced analysis is not available for this data set!</MudText>
+                </MudTooltip>
+            }
+            else {
+                <MudButton Href="@NavManager.ToAbsoluteUri($"datasets/{_dataset.Dataset.Id}/analysis").AbsoluteUri" Class="d-flex align-items-center justify-content-center">
+                    <MudImage Src=@($"_content/BlazorBoilerplate.Theme.MudBlazor/images/data-analysis-preview.PNG") Height="200" Width="400" ObjectFit="ObjectFit.Fill"/>
+                </MudButton>
+            }
+    </MudPaper>
+</MudCardContent>
 </MudCard>
 
 
@@ -61,14 +73,46 @@
             _dataset = value;
             if (_dataset != null)
             {
+                InitializeTimer();
                 LoadDatasetAnalysis();
             }
             StateHasChanged();
         }
     }
+
+    public void Dispose()
+    {
+        _refreshTimer?.Stop();
+        _refreshTimer?.Dispose();
+    }
+
+    private Timer _refreshTimer;
     private GetDatasetResponseDto _dataset;
     private GetDatasetAnalysisResponseDto _analysis;
     private bool isPreviewRequestRunning = false;
+
+    private void InitializeTimer()
+    {
+        _refreshTimer?.Dispose();
+        _refreshTimer = new Timer(5000); // checks every 5 seconds
+        _refreshTimer.Elapsed += OnTimerElapsed;
+        _refreshTimer.AutoReset = true;
+        _refreshTimer.Start();
+    }
+
+    private void OnTimerElapsed(object sender, ElapsedEventArgs e)
+    {
+        InvokeAsync(async () =>
+        {
+            await LoadDatasetAnalysis();
+            if (_analysis?.ydataprofilling != "")
+            {
+                _refreshTimer.Stop();
+                _refreshTimer.Dispose();
+                StateHasChanged();
+            }
+        });
+    }
 
     private async Task LoadDatasetAnalysis()
     {
@@ -91,7 +135,6 @@
             {
                 _analysis = Newtonsoft.Json.JsonConvert.DeserializeObject<GetDatasetAnalysisResponseDto>(apiResponse.Result.ToString());
                 StateHasChanged();
-                viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
             }
             else
             {
@@ -104,9 +147,5 @@
         }
         isPreviewRequestRunning = false;
     }
-    string GetImage(byte[] image)
-    {
-        var imageSrc = Convert.ToBase64String(image);
-        return string.Format("data:image/svg+xml;base64,{0}", imageSrc);
-    }
+
 }

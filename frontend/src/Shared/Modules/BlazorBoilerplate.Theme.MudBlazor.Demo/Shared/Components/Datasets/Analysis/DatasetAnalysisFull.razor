@@ -1,4 +1,4 @@
-﻿@using System
+@using System
 @using System.IO
 @using Microsoft.AspNetCore.Hosting
 @using Microsoft.Extensions.Logging
@@ -10,59 +10,8 @@
 @inject IHttpClientFactory ClientFactory
 @inject NavigationManager NavManager
 
-<MudCard Elevation="5">
-    <MudCardHeader Style="border-bottom-style: inset; border-bottom-width: 1px;">
-        <CardHeaderContent>
-            <MudText Typo="Typo.h6">@L["Analysis"]</MudText>
-        </CardHeaderContent>
-    </MudCardHeader>
-    <MudCardContent>
-        <MudPaper Elevation="0">
-            @if (_analysis != null)
-            {
-                <MudGrid>
-                    @foreach (var category in _analysis.AnalysisCategories)
-                    {
 
-                        @if (@category.CategoryTitle == "Correlation Matrix")
-                        {   
-                            <MudItem xs="12" Style="display: grid; justify-content: center;">
-                                <MudText Typo="Typo.h5">@L[category.CategoryTitle]</MudText>
-                            </MudItem>
-                            <MudItem xs="12" Style="display: grid; justify-content: center;">
-                                <MudImage Src="@GetImage(category.Analyses[0].Content)" Style="height:440px;" />
-                            </MudItem>
-                            <MudItem xs="12" Style="display: grid; justify-content: center; padding: 0 20% 0 20%;">
-                                <MudText Typo="Typo.body2">@category.Analyses[0].Description</MudText>
-                            </MudItem>
-                         
-                        }
-                        else
-                        {   
-                            <MudDivider Class="mud-width-full" Style="margin-top: 40px;" />
-                            <MudItem xs="12" Style="display: grid; justify-content: center;">
-                                <MudText Typo="Typo.h5">@L[category.CategoryTitle]</MudText>
-                            </MudItem>
-                            <MudDivider Class="mud-width-full" Style="margin-bottom: 20px;" />
-                            <MudCarousel Class="mud-width-full" ItemsSource="@category.Analyses" Style="height:560px" AutoCycle="false">
-                                <ItemTemplate>
-                                    <MudGrid>
-                                        <MudItem xs="12" Style="display: grid; justify-content: center;">
-                                            <MudImage Src="@GetImage(context.Content)" Style="height:440px;" />
-                                        </MudItem>
-                                        <MudItem xs="12" Style="display: grid; justify-content: center; padding: 0 20% 0 20%;">
-                                            <MudText Typo="Typo.body2" >@context.Description</MudText>
-                                        </MudItem>
-                                    </MudGrid>
-                                </ItemTemplate>
-                            </MudCarousel>
-                        }
-                    }
-                </MudGrid>
-            }
-        </MudPaper>
-    </MudCardContent>
-</MudCard>
+<iframe srcdoc="@htmlContent" />
 
 @code {
     [Parameter]
@@ -86,6 +35,8 @@
     private bool isPreviewRequestRunning = false;
     private GetDatasetAnalysisResponseDto _analysis;
 
+    private MarkupString htmlContent;
+
     private async Task LoadDatasetAnalysis()
     {
         //Due to frontend refreshes it may occur that this is triggered twice, leading to an error while the first request is reading
@@ -106,8 +57,9 @@
             if (apiResponse.IsSuccessStatusCode)
             {
                 _analysis = Newtonsoft.Json.JsonConvert.DeserializeObject<GetDatasetAnalysisResponseDto>(apiResponse.Result.ToString());
+                var fileContent = System.IO.File.ReadAllText(_analysis.ydataprofilling);
+                htmlContent = new MarkupString(fileContent);
                 StateHasChanged();
-                viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
             }
             else
             {

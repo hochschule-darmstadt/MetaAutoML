@@ -5,15 +5,17 @@
 @inject IViewNotifier viewNotifier
 @inject NavigationManager NavManager
 @attribute [Authorize]
+@using Radzen
+@using Radzen.Blazor
 
 
 <TopSection>
     <MudBreadcrumbs Items="_breadcrumbs" Class="mudbreadcrumbs"></MudBreadcrumbs>
 </TopSection>
 
-<MudStack AlignItems="AlignItems.Center" Row="true" Class="mb-2" style="padding-top:50px">
-    <MudIcon Size="Size.Large" Icon="@Icons.Filled.ModelTraining" />
-    <LabelTooltip FontSize="Typo.h4" Label=@L["Train"] Text="ML training is the process of condensing implicit information in a dataset into a generated ML model. This is the first step of the training wizard. Here you can modify pre-configured datatypes of columns in tabular datasets. You can also assign roles, in particular whether a column is an ID (and hence be ignored for training) or is the training target." Position="Placement.Bottom"></LabelTooltip>
+<MudStack AlignItems="MudBlazor.AlignItems.Center" Row="true" Class="mb-2" style="padding-top:50px">
+    <MudIcon Size="MudBlazor.Size.Large" Icon="@Icons.Filled.ModelTraining" />
+    <LabelTooltip FontSize="TextStyle.H4" Label=@L["Train"] Text="ML training is the process of condensing implicit information in a dataset into a generated ML model. This is the first step of the training wizard. Here you can modify pre-configured datatypes of columns in tabular datasets. You can also assign roles, in particular whether a column is an ID (and hence be ignored for training) or is the training target." Position="Radzen.TooltipPosition.Bottom"></LabelTooltip>
 
 </MudStack>
 
@@ -39,7 +41,7 @@ else
             </MuddyWizard>
             break;
         case ":image":
-            <MuddyWizard WizardFinished="@OnWizardFinished"DisplaySaveSchemaCheckbox="false">
+            <MuddyWizard WizardFinished="@OnWizardFinished" DisplaySaveSchemaCheckbox="false">
                 <MuddyWizardPanel Title="@L["Configuration"]">
                     <TaskConfiguration Dataset="@_dataset" @bind-StartTrainingDto="@_automlRequest" />
                 </MuddyWizardPanel>
@@ -48,9 +50,14 @@ else
     }
 }
 
+<UserTour></UserTour>
+
 @code {
     [Parameter]
     public string Id { get; set; }
+    [Inject]
+    private GTour.Abstractions.IGTourService GTourService { get; set; }
+    private bool tourActivated = false;
 
     private GetDatasetResponseDto _dataset;
     private string _datasetTitle = "";
@@ -71,6 +78,9 @@ else
         _breadcrumbs.Add(new BreadcrumbItem(_datasetTitle, "/datasets/" + _dataset.Dataset.Id, false, Icons.Filled.ListAlt));
         _breadcrumbs.Add(new BreadcrumbItem(L["Train"], null, true, Icons.Filled.ModelTraining));
         StateHasChanged();
+        TourService userTour = new TourService(GTourService, NavManager);
+        tourActivated = userTour.checkIfUserTourIsActivated(NavManager.Uri);
+        await userTour.checkIfUserTourIsActivatedAndStartTour(NavManager.Uri);
 
     }
     private async Task LoadDataset()
@@ -88,7 +98,6 @@ else
                 _dataset = Newtonsoft.Json.JsonConvert.DeserializeObject<GetDatasetResponseDto>(apiResponse.Result.ToString());
                 _datasetTitle = L["Dataset {0}", _dataset.Dataset.Name];
                 _automlRequest.Schema = _dataset.Dataset.Schema;
-                viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
             }
             else
             {
@@ -198,8 +207,15 @@ else
             if (apiResponse.IsSuccessStatusCode)
             {
                 automlResponse = Newtonsoft.Json.JsonConvert.DeserializeObject<CreateTrainingResponseDto>(apiResponse.Result.ToString());
-                viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
-                NavManager.NavigateTo("/trainings/" + automlResponse.TrainingIdentifier);
+                if (tourActivated)
+                {
+                    TourService userTour = new TourService(GTourService, NavManager);
+                    userTour.navigateToNextPage("ninthStep", NavManager.ToAbsoluteUri("/trainings/" + automlResponse.TrainingIdentifier).AbsoluteUri);
+                }
+                else
+                {
+                    NavManager.NavigateTo("/trainings/" + automlResponse.TrainingIdentifier);
+                }
             }
             else
             {

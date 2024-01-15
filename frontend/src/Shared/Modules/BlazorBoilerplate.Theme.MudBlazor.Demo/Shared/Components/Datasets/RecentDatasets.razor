@@ -6,23 +6,23 @@
 <MudCard Elevation="5">
     <MudCardHeader Style="border-bottom-style: inset; border-bottom-width: 1px;">
         <CardHeaderContent>
-            <LabelTooltip Label="Recent datasets" Text="Datasets are files that you upload to the OMA-ML platform to perform machine learning." Position="Placement.Top"></LabelTooltip>
+            <LabelTooltip Label="Recent datasets" Text="Datasets are files that you upload to the OMA-ML platform to perform machine learning." Position="Radzen.TooltipPosition.Top"></LabelTooltip>
         </CardHeaderContent>
         <CardHeaderActions>
             <MudStack Row="true" Class="align-content-center" Style="margin-top: 8px">
                 @*<UploadDataset OnUploadCompletedCallback="@OnUploadCompletedCallback"/>*@
                 <ButtonTooltip Text="Click here to upload a new dataset to OMA-ML from your disk or from the internet." Position="Placement.Top">
-                    <MudButton OnClick="OnOpenUpload"
+                    <MudButton data-form-firstStep OnClick="OnOpenUpload"
                                Variant="Variant.Filled"
                                Color="Color.Secondary"
-                               EndIcon="@Icons.Material.Filled.Upload"
+                               StartIcon="@Icons.Material.Filled.Upload"
                                Size="Size.Small">@L["Upload"]</MudButton>
                         </ButtonTooltip>
-                        <ButtonTooltip Text="Click here to navigate to all datasets you have uploaded to the OMA-ML platform so far." Position="Placement.Top">                           
+                        <ButtonTooltip Text="Click here to navigate to all datasets you have uploaded to the OMA-ML platform so far." Position="Placement.Top">
                                 <MudButton Href="@("/datasets")"
                                            Variant="Variant.Filled"
                                            Color="Color.Secondary"
-                                           EndIcon="@Icons.Filled.ArrowForward"
+                                           StartIcon="@Icons.Filled.ArrowForward"
                                            Size="Size.Small">@L["More"]</MudButton>
                                  </ButtonTooltip>
                             </MudStack>
@@ -36,7 +36,7 @@
             }
             else
             {
-        <MudTable Items="@Datasets.Datasets" FixedHeader="true" Height="20rem" style="width:stretch" class="mat-elevation-z5" AllowSelection="false" Dense="true" RowStyleFunc="@RowStyleFunc">
+        <MudTable Items="@Datasets.Datasets" FixedHeader="true" Height="20rem" style="width:stretch" class="mat-elevation-z5" AllowSelection="false" Dense="true" RowStyleFunc="@RowStyleFunc" data-form-secondStep>
             <HeaderContent>
                 <MudTh>@L["Name"]</MudTh>
                 <MudTh>@L["Type"]</MudTh>
@@ -46,14 +46,23 @@
             </HeaderContent>
 
             <RowTemplate>
-                <MudTd>
-                    <MudLink Href="@NavManager.ToAbsoluteUri("datasets/" + @context.Id).AbsoluteUri" Style="cursor: pointer; display: flex;"><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.ListAlt" Style="margin-right: 4px;" /> @context.Name</MudLink>
-                </MudTd>
-                <MudTd>@L[context.Type.Properties.ContainsKey("skos:prefLabel") ? context.Type.Properties["skos:prefLabel"] : ""]</MudTd>
-                <MudTd>@FormatBytes(context.Analysis["size_bytes"])</MudTd>
-                <MudTd style="white-space:nowrap;">@context.Analysis["creation_date"].ToString("dd-MM-yyyy")</MudTd>
-                <MudTd style="white-space:nowrap;">@context.Analysis["creation_date"].ToString("HH:mm:ss")</MudTd>
-            </RowTemplate>
+                @if (!tourActivated)
+                {
+                    <MudTd>
+                        <MudLink Href="@NavManager.ToAbsoluteUri("datasets/" + @context.Id).AbsoluteUri" Style="cursor: pointer; display: flex;"><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.ListAlt" Style="margin-right: 4px;" /> @context.Name</MudLink>
+                    </MudTd>
+                }
+                else
+                {
+                    <MudTd>
+                        <MudLink Href="@NavManager.ToAbsoluteUri("datasets/" + @context.Id+"/?TourStep=thirdStep").AbsoluteUri" Style="cursor: pointer; display: flex;"><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.ListAlt" Style="margin-right: 4px;" /> @context.Name</MudLink>
+                    </MudTd>
+                }
+                        <MudTd>@L[context.Type.Properties.ContainsKey("skos:prefLabel") ? context.Type.Properties["skos:prefLabel"] : ""]</MudTd>
+                        <MudTd>@FormatBytes(context.Analysis["size_bytes"])</MudTd>
+                        <MudTd style="white-space:nowrap;">@context.Analysis["creation_date"].ToString("dd-MM-yyyy")</MudTd>
+                        <MudTd style="white-space:nowrap;">@context.Analysis["creation_date"].ToString("HH:mm:ss")</MudTd>
+                </RowTemplate>
 
         </MudTable>
             }
@@ -63,6 +72,15 @@
 
 @code {
     //private DateTime NewestDate;
+    [Inject]
+    private GTour.Abstractions.IGTourService GTourService { get; set; }
+    private bool tourActivated = false;
+
+    protected override void OnInitialized()
+    {
+        TourService userTour = new TourService(GTourService, NavManager);
+        tourActivated = userTour.checkIfUserTourIsActivated(NavManager.Uri);
+    }
 
     [Parameter]
     public GetDatasetsResponseDto Datasets
@@ -99,9 +117,9 @@
                 return "background-color:rgba(255,148,61,0.25)";
             }
         }
-        
-            return "background-color:transparent";
-        
+
+        return "background-color:transparent";
+
 
     }
     private GetDatasetsResponseDto _datasets;

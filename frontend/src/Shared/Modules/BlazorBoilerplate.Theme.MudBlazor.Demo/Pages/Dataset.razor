@@ -4,14 +4,16 @@
 @inject IViewNotifier viewNotifier
 @inject NavigationManager NavManager
 @attribute [Authorize]
+@using Radzen
+@using Radzen.Blazor
 
 <TopSection>
     <MudBreadcrumbs Items="_breadcrumbs" Class="mudbreadcrumbs"></MudBreadcrumbs>
 </TopSection>
 
-<MudStack AlignItems="AlignItems.Center" Row="true" Class="mb-2" style="padding-top:50px">
+<MudStack AlignItems="MudBlazor.AlignItems.Center" Row="true" Class="mb-2" style="padding-top:50px">
     <MudIcon Size="Size.Large" Icon="@Icons.Filled.ListAlt" />
-    <LabelTooltip FontSize="Typo.h4" Label=@_pageTitle Text="This is the page for a concrete dataset. In the ‘Overview’ panel you find metadata about the dataset. With ‘New Training’ you can start training new ML models for this dataset. ‘Preview’ shows the columns and first rows of a tabular dataset. ‘Analysis’ shows statistical insights into the dataset. ‘Top 3 models’ show the best performing models that have been trained so far on this dataset." Position="Placement.Bottom"></LabelTooltip>
+    <LabelTooltip FontSize="TextStyle.H4" Label=@_pageTitle Text="This is the page for a concrete dataset. In the ‘Overview’ panel you find metadata about the dataset. With ‘New Training’ you can start training new ML models for this dataset. ‘Preview’ shows the columns and first rows of a tabular dataset. ‘Analysis’ shows statistical insights into the dataset. ‘Top 3 models’ show the best performing models that have been trained so far on this dataset." Position="Radzen.TooltipPosition.Bottom"></LabelTooltip>
 </MudStack>
 
 <MudGrid>
@@ -67,32 +69,30 @@
     </MudItem>
     <MudItem xs="12" sm="3" md="3">
 
-            @if (_dataset != null)
+        @if (_dataset != null)
+        {
+            @if ((_readDatasetFailed == false) && (_dataset.Dataset.Analysis["size_bytes"] != 0))
             {
-                @if ((_readDatasetFailed == false) && (_dataset.Dataset.Analysis["size_bytes"] != 0))
-                {
-                    <NewTraining Dataset="@_dataset" />
-                }
-                else
-                {
-                    <NewTrainingDatasetNotReadable />
-                }
+                <NewTraining Dataset="@_dataset" />
             }
+            else
+            {
+                <NewTrainingDatasetNotReadable />
+            }
+        }
 
     </MudItem>
     <MudItem xs="12" sm="12" md="12">
-            <DatasetPreviewShort @bind-ReadDatasetFailed="@_readDatasetFailed" Dataset="@_dataset" />
+        <DatasetPreviewShort @bind-ReadDatasetFailed="@_readDatasetFailed" Dataset="@_dataset" />
     </MudItem>
     <MudItem xs="12" sm="6" md="4">
-        <DatasetAnalysisShort Dataset="_dataset"/>
+        <DatasetAnalysisShort Dataset="_dataset" />
     </MudItem>
     <MudItem xs="12" sm="6" md="8">
         <Top3Models Dataset="_dataset" />
     </MudItem>
-
-
 </MudGrid>
-
+<UserTour></UserTour>
 
 @code{
     [Parameter]
@@ -101,6 +101,8 @@
     private string _pageTitle;
     private GetDatasetResponseDto _dataset;
     private List<BreadcrumbItem> _breadcrumbs = new List<BreadcrumbItem>();
+    [Inject]
+    private GTour.Abstractions.IGTourService GTourService { get; set; }
     protected async override void OnInitialized()
     {
         await LoadDataset();
@@ -108,22 +110,23 @@
         _breadcrumbs.Add(new BreadcrumbItem(L["Datasets"], "/datasets", false, Icons.Filled.ListAlt));
         _breadcrumbs.Add(new BreadcrumbItem(_pageTitle, null, true, Icons.Filled.ListAlt));
         StateHasChanged();
+        TourService userTour = new TourService(GTourService, NavManager);
+        await userTour.checkIfUserTourIsActivatedAndStartTour(NavManager.Uri);
     }
     private async Task LoadDataset()
     {
         try
         {
             GetDatasetRequestDto datasetRequest = new GetDatasetRequestDto()
-                {
-                    DatasetId = Id
-                };
+            {
+                DatasetId = Id
+            };
             ApiResponseDto apiResponse = await apiClient.GetDataset(datasetRequest);
 
             if (apiResponse.IsSuccessStatusCode)
             {
                 _dataset = Newtonsoft.Json.JsonConvert.DeserializeObject<GetDatasetResponseDto>(apiResponse.Result.ToString());
                 _pageTitle = L["Dataset: {0}", _dataset.Dataset.Name];
-                viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
             }
             else
             {
@@ -137,18 +140,18 @@
     }
     public string FormatBytes(long bytes)
     {
-      const int scale = 1024;
-      string[] orders = new string[] { "GB", "MB", "KB", "Bytes" };
-      long max = (long)Math.Pow(scale, orders.Length - 1);
+        const int scale = 1024;
+        string[] orders = new string[] { "GB", "MB", "KB", "Bytes" };
+        long max = (long)Math.Pow(scale, orders.Length - 1);
 
-      foreach (string order in orders)
-      {
-        if ( bytes > max )
-          return string.Format("{0:##.##} {1}", decimal.Divide( bytes, max ), order);
+        foreach (string order in orders)
+        {
+            if (bytes > max)
+                return string.Format("{0:##.##} {1}", decimal.Divide(bytes, max), order);
 
-        max /= scale;
-      }
-      return "0 Bytes";
+            max /= scale;
+        }
+        return "0 Bytes";
     }
 }
 
