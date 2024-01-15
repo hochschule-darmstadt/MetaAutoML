@@ -257,7 +257,7 @@ class ControllerServiceManager(ControllerServiceBase):
         #)
         self.__log.warn("delete_model: executed")
         return response
-    
+
     @inject
     async def start_explainer_dashboard(
         self, start_dashboard_request: "StartDashboardRequest",
@@ -270,7 +270,7 @@ class ControllerServiceManager(ControllerServiceBase):
         #)
         self.__log.warn("start_explainer_dashboard: executed")
         return response
-    
+
     @inject
     async def stop_explainer_dashboard(
         self, stop_dashboard_request: "StopDashboardRequest",
@@ -353,7 +353,19 @@ class ControllerServiceManager(ControllerServiceBase):
 						'This strategy truncates the training data if the time limit is relatively short for the size of the dataset.'
 						)
 				    )
-                    
+                if  (not found or size_time_ratio > 20000 ):
+                     #or ('irrelevant_features' in dataset['analysis'] and len(dataset['analysis']['irrelevant_features']) != 0))
+                   # and 'preprocessing.ignore_redundant_samples' not in create_training_request.selected_strategies
+
+                    result.strategies.append(
+                        Strategy(
+                            'preprocessing.data_sampling',
+                            'Data Sampling',
+                            'This strategy adds or removes data samples for a better distribution of the class.'
+                        )
+                    )
+
+
                 if (not found) or ('irrelevant_features' in dataset['analysis'] and len(dataset['analysis']['irrelevant_features']) != 0):
                     result.strategies.append(
                         Strategy(
@@ -362,7 +374,7 @@ class ControllerServiceManager(ControllerServiceBase):
                         'This strategy will analyse the dataset for irrelevant dimensionality and reduces it to decrease complexity.'
                         )
                     )
-            
+
             result.strategies.append(
                 Strategy(
                 'pre_training.top_3_models',
@@ -378,7 +390,7 @@ class ControllerServiceManager(ControllerServiceBase):
                 'This strategy will run all adapters with only a small part of the data. Then it will train the best half solutions with more data again and so on, until one last adapter is trained with the full data.'
                 )
             )
-            
+
             result.strategies.append(
                 Strategy(
                 'preprocessing.pca_feature_extraction',

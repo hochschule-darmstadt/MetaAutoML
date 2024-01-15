@@ -11,7 +11,7 @@
   "result-folder-name": "result",
   "templates-path": "app-data/templates",
   "predict-time-sources-path": "AutoMLs/predict_time_sources.py",
-  "local_execution": "NO",
-  "running_in_wsl": "NO",
-  "wsl_metaautoml_path": "/mnt/c/Users/alex/Desktop/MetaAutoML"
+  "local_execution": "YES",
+  "running_in_wsl": "YES",
+  "wsl_metaautoml_path": "C:/Users/Lokaler_Nutzer/Documents/MscInformatik_SE/MPSE_Automated_Machine_Learning/MetaAutoML"
 }

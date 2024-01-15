@@ -5,6 +5,8 @@ from ControllerBGRPC import DataType as GrpcDataType
 from IAbstractStrategy import IAbstractStrategy
 from StrategyController import StrategyController
 from Blackboard import Blackboard
+from CsvManager import CsvManager
+import pandas as pd
 
 class PreprocessingStrategyController(IAbstractStrategy):
     global_multi_fidelity_level = 1
@@ -55,6 +57,12 @@ class PreprocessingStrategyController(IAbstractStrategy):
             Rule("phase == 'preprocessing' and not (dataset_type == ':image')", context=preprocessing_context),
             self.do_pca_feature_extraction
         )
+        self.register_rule(
+            'preprocessing.do_data_sampling',
+            Rule("phase == 'preprocessing' and not (dataset_type == ':image')", context=preprocessing_context),
+            self.do_data_sampling
+        )
+
 
         self.register_rule(
             'preprocessing.finish_preprocessing',
@@ -74,6 +82,13 @@ class PreprocessingStrategyController(IAbstractStrategy):
     def do_ignore_redundant_features(self, state: dict, blackboard: Blackboard, controller: StrategyController):
         duplicate_columns = state.get("dataset_analysis", {}).get("duplicate_columns", [])
         ignored_columns = []
+
+        # TODO: Re-implement the row omitting logic
+                # Preparation (maybe reusable utility function):
+                #   - Copy dataset from dataset folder to training folder
+                #   - Change adapter/session config dataset path
+                # Load dataset from (new) dataset path
+                # Remove rows that should be omitted
 
         agent: AdapterRuntimeManagerAgent = controller.get_blackboard().get_agent('training-runtime')
         if not agent or not agent.get_adapter_runtime_manager():
@@ -170,6 +185,12 @@ class PreprocessingStrategyController(IAbstractStrategy):
         training_request.dataset_configuration = json.dumps(dataset_configuration)
         agent.get_adapter_runtime_manager().set_training_request(training_request)
 
+
+        found, dataset = self.__data_storage.get_dataset(training_request.dataset_id)
+        self.__dataset_df = CsvManager.read_dataset(self.__dataset["path"], dataset["file_configuration"], dataset["schema"])
+
+
+
         # Finished action (should only run once, therefore disable the strategy rule)
         controller.disable_strategy('preprocessing.feature_selection')
 
@@ -178,4 +199,28 @@ class PreprocessingStrategyController(IAbstractStrategy):
             self._log.info(f'do_finish_preprocessing: Finished data preparation, advancing to phase "running"..')
             controller.set_phase('pre_training')
             controller.disable_strategy('preprocessing.finish_preprocessing')
+
+    def do_data_sampling(self, state: dict, blackboard: Blackboard, controller: StrategyController):
+        agent: AdapterRuntimeManagerAgent = controller.get_blackboard().get_agent('training-runtime')
+        if not agent or not agent.get_adapter_runtime_manager():
+            raise RuntimeError('Could not acess Adapter Runtime Manager Agent!')
+        dataset_configuration = json.loads(agent.get_adapter_runtime_manager().get_training_request().dataset_configuration)
+
+        print ("====Here is Data sampling======")
+        print(dataset_configuration)
+        print("===============================")
+        print(state.get("dataset_analysis",{}))
+
+        found, dataset = self.__data_storage.get_dataset(training_request.dataset_id)
+        print(found, dataset)
+        self.__dataset_df = CsvManager.read_dataset(self.__dataset["path"], dataset["file_configuration"], dataset["schema"])
+
+        training_request = agent.get_adapter_runtime_manager().get_training_request()
+        training_request.dataset_configuration = json.dumps(dataset_configuration)
+        agent.get_adapter_runtime_manager().set_training_request(training_request)
+
+
+
+        #Finishes action (should only run once, therefore disable the strategy rule)
+        controller.disable_strategy('preprocessing.data_sampling')
 

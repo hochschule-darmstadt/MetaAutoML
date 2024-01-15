@@ -30,15 +30,15 @@ class DataSetAnalysisManager(Thread):
         # Setup config
         self.__dataset_id = dataset_id
         self.__user_id = user_id
-        found, dataset = data_storage.get_dataset(user_id, dataset_id)
+        found, dataset = data_storage.get_dataset(user_id, dataset_id) # das hier ist ein Tupel, deswegen werden die Variablen so geschrieben
         file_config = dataset["file_configuration"]
         self.__dataset = dataset
-        #delimiters = {
-        #    "comma":        ",",
-        #    "semicolon":    ";",
-        #    "space":        " ",
-        #    "tab":          "\t",
-        #}
+        delimiters = {
+            "comma":        ",",
+            "semicolon":    ";",
+            "space":        " ",
+            "tab":          "\t",
+        }
         self.__data_storage = data_storage
         self.__dataset_analysis_lock = dataset_analysis_lock
         self.__basic_analysis = basic_analysis
@@ -49,25 +49,25 @@ class DataSetAnalysisManager(Thread):
         elif self.__dataset["type"] in [":tabular", ":text", ":time_series"]:
             try:
                 self.__dataset_df = CsvManager.read_dataset(self.__dataset["path"], dataset["file_configuration"], dataset["schema"])
-                #self.__dataset_df = pd.read_csv(self.__dataset["path"],
-                #                             delimiter=delimiters[file_config['delimiter']],
-                #                             skiprows=(file_config['start_row'] - 1),
-                #                             escapechar=file_config['escape_character'],
-                #                             decimal=file_config['decimal_character'],
-                #                             engine="python",
-                #                             index_col=False,
-                #                             encoding=file_config['encoding'],
-                #                             encoding_errors='ignore')
+                self.__dataset_df = pd.read_csv(self.__dataset["path"],
+                                             delimiter=delimiters[file_config['delimiter']],
+                                             skiprows=(file_config['start_row'] - 1),
+                                             escapechar=file_config['escape_character'],
+                                             decimal=file_config['decimal_character'],
+                                             engine="python",
+                                             index_col=False,
+                                             encoding=file_config['encoding'],
+                                             encoding_errors='ignore')
             except pd.errors.ParserError as e:
                 # As the pandas python parsing engine sometimes fails: Retry with standard (c) parser engine.
                 self.__dataset_df = CsvManager.read_dataset(self.__dataset["path"], dataset["file_configuration"], dataset["schema"])
                 #TODO still necessary. since we use frontend encoding detection
-                #pd.read_csv(self.__dataset["path"],
-                #                             delimiter=delimiters[file_config['delimiter']],
-                #                             skiprows=(file_config['start_row'] - 1),
-                #                             escapechar=file_config['escape_character'],
-                #                             decimal=file_config['decimal_character'],
-                #                             index_col=False)
+                pd.read_csv(self.__dataset["path"],
+                                             delimiter=delimiters[file_config['delimiter']],
+                                             skiprows=(file_config['start_row'] - 1),
+                                             escapechar=file_config['escape_character'],
+                                             decimal=file_config['decimal_character'],
+                                             index_col=False)
         else:
             pass
 
