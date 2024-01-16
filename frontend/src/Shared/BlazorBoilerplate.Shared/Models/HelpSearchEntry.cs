@@ -178,6 +178,11 @@ namespace BlazorBoilerplate.Shared.Models
 
             return entries.ToArray();
         }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Type, Title, AltTitle, Origin);
+        }
     }
 
     public enum HelpSearchResultType {

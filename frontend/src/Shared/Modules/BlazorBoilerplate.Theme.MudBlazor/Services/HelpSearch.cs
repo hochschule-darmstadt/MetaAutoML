@@ -19,7 +19,7 @@ namespace BlazorBoilerplate.Theme.Material.Services
         public IEnumerable<HelpSearchEntry> SearchEntries {
             get
             {
-                return _ontologieEntries.Concat(_helpPageEntries);
+                return _ontologieEntries.Union(_helpPageEntries);
             }
         }
 
@@ -103,14 +103,14 @@ namespace BlazorBoilerplate.Theme.Material.Services
         public IEnumerable<HelpSearchEntry> SearchTop10(string search) {
             if(search.IsNullOrEmpty())
             {
-                return _helpPageEntries.Take(5).Concat(_ontologieEntries.Take(5));
+                return _helpPageEntries.Take(5).Union(_ontologieEntries.Take(5));
             }
 
             IEnumerable<HelpSearchEntry> helpEntries = SearchList(_helpPageEntries, search);
             IEnumerable<HelpSearchEntry> ontologieEntries = SearchList(_ontologieEntries, search);
 
             // Always return 10 entries from help entries and ontologie
-            return helpEntries.Take(5).Concat(ontologieEntries).Take(10);
+            return helpEntries.Take(5).Union(ontologieEntries).Take(10);
         }
 
         /// <summary>
