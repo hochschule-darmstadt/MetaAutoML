@@ -20,12 +20,12 @@ class H2OAdapterManager(AdapterManager):
     """
 
     def __init__(self) -> None:
-        """Initialize a new AutokerasAdapterManager setting AutoML adapter specific variables
+        """Initialize a new H2OAdapterManager setting AutoML adapter specific variables
         """
         super(H2OAdapterManager, self).__init__()
         self.__automl = None
         self.__loaded_training_id = None
-        self._adapter_name = "autokeras"
+        self._adapter_name = "h2o_automl"
 
     def _get_ml_model_and_lib(self, config: "StartAutoMlRequest") -> Tuple[str, str]:
         """Get the ML model type and ml library used by the result model
@@ -36,7 +36,16 @@ class H2OAdapterManager(AdapterManager):
         Returns:
             tuple[str, str]: Tuple returning the ontology IRI of the Ml model type, and ontology IRI of the ML library
         """
-        return ([":keras_lib"], [":artificial_neural_network"])
+        return ([
+                    ":h2o_lib",
+                    #":xgboost_lib" not implemented yet, but possible
+                ],
+                [
+                    ":artificial_neural_network",
+                    ":distributed_random_forest",
+                    ":gradient_boosting_tree",
+                    ":stacking_ensemble",
+                ])
 
     def _load_model_and_make_probabilities(self, config: "StartAutoMlRequest", result_folder_location: str, dataframe: pd.DataFrame):
         """Must be overwriten! Load the found model, and execute a prediction using the provided data to calculate the probability metric used by the ExplanableAI module inside the controller

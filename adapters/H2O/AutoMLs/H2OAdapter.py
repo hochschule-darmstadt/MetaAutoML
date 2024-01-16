@@ -5,7 +5,7 @@ import pandas as pd
 import json
 import os
 from JsonUtil import get_config_property
-import H2OWrapper
+from H2OWrapper import H2OWrapper
 import H2OParameterConfig as h2opc
 import h2o
 from h2o.automl import H2OAutoML
@@ -72,13 +72,13 @@ class H2OAdapter:
         # The leader model is stored here
         # View the AutoML Leaderboard
         leaderboard = aml.leaderboard
-        leaderboard.head(rows=leaderboard.nrows)  # Print all rows instead of default (10 rows)
         best_model = aml.get_best_model()
         #export
         model_path = h2o.save_model(model=best_model, path=self._configuration["result_folder_location"])
         os.rename(model_path, os.path.join(self._configuration["result_folder_location"], 'model_h2o.p'))
         #export_model(best_model, self._configuration["result_folder_location"], 'model_h2o.p')
-        #export_model(H2OWrapper(best_model, self._configuration), self._configuration["dashboard_folder_location"], 'dashboard_model.p')
+        H2OWrapper(best_model, self._configuration)
+        export_model(H2OWrapper(best_model, self._configuration), self._configuration["dashboard_folder_location"], 'dashboard_model.p')
 
     def __tabular_regression(self):
         """Execute the tabular regression task and export the found model"""
