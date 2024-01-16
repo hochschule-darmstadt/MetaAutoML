@@ -21,13 +21,22 @@
 	<MudItem xs="3">
 		<div Style="margin: 16px">
 		<MudText Color="Color.Dark" Typo="Typo.h6">Results</MudText>
+					@code {
+						private string selectedEntry;
+
+						private string GetNavLinkClass(HelpSearchEntry entry)
+						{
+							return entry.OptionText == selectedEntry ? "active" : "";
+						}
+					}
+
 					<MudNavMenu Rounded="true" Margin="Margin.Normal" Color="Color.Secondary" Class="pa-2" Style="width:14.2rem">
 						@foreach (HelpSearchEntry entry in _searchResults)
 						{
-							<MudNavLink OnClick="() => displayResult(entry)">
+							<MudNavLink @onclick="() => displayResult(entry)" Class="@GetNavLinkClass(entry)">
 								<MudIcon Style="font-size:15px" Class="d-inline" Icon="@GetIconOfOrigin(entry.Type)" Title="Favorite" />
 								@entry.OptionText
-								</MudNavLink>
+							</MudNavLink>
 						}
 					</MudNavMenu>
 		</div>
@@ -94,7 +103,7 @@
 													{
 														content += $"<br /><br /><b>{subsection.SubHeadline}</b><br />{subsection.SubText}";
 													}
-													<MudHighlighter Markup="True" HighlightedText="@query" Text="@content" Style="margin-left:2rem;margin-top:0.5rem;" Typo="Typo.body2" />
+													<MudHighlighter Markup="true" HighlightedText="@query" Text="@content" Style="margin-left:2rem;margin-top:0.5rem;" Typo="Typo.body2" />
 											</MudItem>
 											<MudItem xs="6">
 												<img style=" width: 90%; margin: 3rem; padding-right: 2rem;" src="@(section.GIF)" />
@@ -108,7 +117,7 @@
 													@{
 														string content = section.Headline;
 													}
-													<MudHighlighter Markup="True" HighlightedText="@query" Text="@content" Style="margin-left: 2rem; padding-top: 4rem;" Typo="Typo.h6" Color="Color.Secondary" />
+													<MudHighlighter Markup="true" HighlightedText="@query" Text="@content" Style="margin-left: 2rem; padding-top: 4rem;" Typo="Typo.h6" Color="Color.Secondary" />
 													<img style=" width: 90%; margin: 2rem; padding-right: 2rem;" src="@(section.GIF)" />
 												</MudItem>
 												<MudItem xs="6">
@@ -167,7 +176,9 @@
 		if (entry.Type == HelpSearchResultType.HELP_ARTICLE)
 		{
 			isHelpPage = true;
-		} else {
+		}
+		else
+		{
 			isHelpPage = false;
 		}
 	}
