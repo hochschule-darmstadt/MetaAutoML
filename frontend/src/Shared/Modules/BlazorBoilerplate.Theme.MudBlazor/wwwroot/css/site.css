@@ -194,7 +194,7 @@ hr {
 
 /*List class for search bar*/
 .SearchBarList {
-    width: max-content;
+    width: 100%;
     overflow-x: hidden;
     overflow-y: hidden;
 }
@@ -203,4 +203,8 @@ hr {
     overflow-x: hidden;
     overflow-y: hidden;
     max-width: 60%;
+}
+
+.SearchBarOverlay div p {
+    white-space: nowrap; /* verhindert den Umbruch des Textes */
 }

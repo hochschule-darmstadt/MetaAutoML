@@ -10,8 +10,8 @@
 				 AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Primary" T="HelpSearchEntry"
 				 MaxLength=50 ListClass="SearchBarList" PopoverClass="SearchBarOverlay">
 	<ItemTemplate Context="e">
-        <MudIcon Style="font-size:15px" Class="d-inline" Icon="@GetIconOfOrigin(e.Type)" Title="Favorite" />
-		<MudText Style="font-size:15px" Class="d-inline">
+		<MudIcon Style="font-size:15px;" Class="d-inline" Icon="@GetIconOfOrigin(e.Type)" Title="Favorite" />
+		<MudText Style="font-size:15px;" Class="d-inline">
 			<MudHighlighter Text="@e.OptionText" HighlightedText="@searchInputText?.Trim()" />
 		</MudText>
 	</ItemTemplate>
