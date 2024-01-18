@@ -90,6 +90,15 @@ class DataStorage:
 #region
 
     def __convert_arff_to_csv(self, user_id: str, file_name: str) -> str:
+        """Convert arff file to csv file
+
+        Args:
+            user_id (str): Unique user id saved within the MS Sql database of the frontend
+            file_name (str): Uploaded file name within the users upload folder
+
+        Returns:
+            str: The converted csv file name
+        """
         arff_file = os.path.join(self.__storage_dir, user_id, "uploads", file_name)
         file_name = file_name.replace(".arff", ".csv")
         csv_file = os.path.join(self.__storage_dir, user_id, "uploads", file_name)
@@ -129,6 +138,15 @@ class DataStorage:
             return file_name
 
     def __convert_excel_to_csv(self, user_id: str, file_name: str) -> str:
+        """Convert excel file (.xlsx and .xls) to csv file
+
+        Args:
+            user_id (str): Unique user id saved within the MS Sql database of the frontend
+            file_name (str): Uploaded file name within the users upload folder
+
+        Returns:
+            str: The converted csv file name
+        """
         excel_file = os.path.join(self.__storage_dir, user_id, "uploads", file_name)
         file_name = file_name.replace(".xlsx", ".csv").replace(".xls", ".csv")
         csv_file = os.path.join(self.__storage_dir, user_id, "uploads", file_name)
