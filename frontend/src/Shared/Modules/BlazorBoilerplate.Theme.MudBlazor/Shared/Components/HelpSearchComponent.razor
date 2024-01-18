@@ -5,9 +5,10 @@
 @inject IHelpSearch helpSearch
 @using MudBlazor
 
-<MudAutocomplete Margin="Margin.Dense" Dense="true" Label="Help search ..." @bind-Value="State" Required="false" @bind-Text="@searchInputText"
+<MudAutocomplete @ref="autocompleteElement" T="HelpSearchEntry" @bind-Value="State" Required="false" @bind-Text="@searchInputText"
 				 SearchFunc="@SearchAsync" Immediate="true" ResetValueOnEmptyText="true"
-				 AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Primary" T="HelpSearchEntry"
+                 Margin="Margin.Dense" Dense="true" Label="Help search ..."
+				 AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Primary"
 				 MaxLength=50 ListClass="SearchBarList" PopoverClass="SearchBarOverlay">
 	<ItemTemplate Context="e">
 		<MudIcon Style="font-size:15px;" Class="d-inline" Icon="@GetIconOfOrigin(e.Type)" Title="Favorite" />
@@ -28,9 +29,12 @@
     [Parameter]
 	public string query { set; get; }
 
-    private string _query;
+    [Parameter]
+    public bool inHeader { set; get; }
 
 	private string searchInputText;
+
+    private MudAutocomplete<HelpSearchEntry> autocompleteElement;
 
 	protected override async Task OnInitializedAsync()
 	{
@@ -42,6 +46,16 @@
 		}
 	}
 
+    public void Focus()
+    {
+        autocompleteElement.FocusAsync();
+    }
+
+    public void SelectValue(HelpSearchEntry entry)
+    {
+        autocompleteElement.SelectOption(entry);
+    }
+
     private HelpSearchEntry State
     {
         set
@@ -51,13 +65,24 @@
                 return;
             }
 
-            OnStatesChanged.InvokeAsync(value.Title);
+            //Reset Search Element if in header on search
+            if(inHeader)
+            {
+                autocompleteElement.ResetAsync();
+            }
 
+            OnStatesChanged.InvokeAsync(value.Title);
             query = value.Title;
             navigationManager.NavigateTo($"search/{query}");
+
         }
         get
         {
+            if(inHeader)
+            {
+                return new HelpSearchEntry("");
+            }
+
             return new HelpSearchEntry(query);
         }
     }

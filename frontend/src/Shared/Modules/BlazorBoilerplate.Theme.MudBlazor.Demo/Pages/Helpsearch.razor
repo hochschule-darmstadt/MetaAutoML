@@ -18,7 +18,7 @@
 		<div Style="margin: 1rem">
 			<MudCard Elevation="3">
 				<div style="margin: 1rem; padding: 1rem">
-					<HelpSearchComponent query="@query" OnStatesChanged="SearchText"/>
+					<HelpSearchComponent @ref="searchComponent" query="@query" inHeader=false OnStatesChanged="SearchText"/>
 				</div>
 			</MudCard>
 		</div>
@@ -56,19 +56,34 @@
 						private void SetActiveLink(HelpSearchEntry entry)
 						{
 							activeEntry = entry;
-							displayResult(entry);
+							SelectEntry(entry);
 						}
 					}
 
 		</div>
 	</MudItem>
-			@if (!isHelpPage)
+			@if (shownEntry?.Type == HelpSearchResultType.ONTOLOGY)
 			{
 				// Search Result is not help page --> Display ontology
 				<MudItem xs="9">
 					<div Style="margin: 16px">
-						<MudText Color="Color.Dark" Typo="Typo.h6">@header</MudText>
-						<p>@kontent</p>
+						<MudText Color="Color.Dark" Typo="Typo.h6">@shownEntry?.OptionText</MudText>
+						<p>@shownEntry?.Description</p>
+                        @if(wikiData == null)
+                        {
+                            <MudSkeleton SkeletonType="SkeletonType.Rectangle" Width="100%" Height="10em" />
+                            <MudSkeleton Height="12em"/>
+                        } else {
+                            if(!string.IsNullOrEmpty(wikiData.ImageUrl))
+                            {
+                                <MudImage Src="@wikiData?.ImageUrl" Elevation="25" Style="margin-bottom:1em;"/>
+                            }
+                            <p>@wikiData?.Description</p>
+                            if(!string.IsNullOrEmpty(wikiData.WikiUrl))
+                            {
+                                <a href="@wikiData?.WikiUrl">Mehr Infos</a>
+                            }
+                        }
 					</div>
 				</MudItem>
 			} else {
@@ -174,7 +189,7 @@
 	</MudCard>
 </MudGrid>
 
-<script>
+<script suppress-error="BL9992">
 	// Scroll-to function with an offset
 	function scrollToAnchor(anchorId, additionalOffset = -150) {
 		const element = document.getElementById(anchorId);
@@ -262,9 +277,9 @@
 
 	private string _query;
 
-	public string kontent { get; set; }
-	public string header { get; set; }
-	public bool isHelpPage = false;
+    private HelpSearchComponent searchComponent;
+    private HelpSearchEntry shownEntry { get; set; }
+    private WikiDataResult wikiData;
 
 	private IEnumerable<HelpSearchEntry> _searchResults = new List<HelpSearchEntry>();
 
@@ -284,7 +299,6 @@
 	{
 		this.helpTabPanelList = await apiClient.GetHelpPageJson();
 		this.helpTabPanelList.ForEach(tab => { if (tab.PanelHeadline.Equals("Introduction")) { this.introductionTab = tab; } else if (tab.PanelHeadline.Equals("Pages")) { this.pagesTab = tab; } });
-		StateHasChanged();
 		_breadcrumbs.Add(new BreadcrumbItem(L["Home"], "/", false, Icons.Material.Filled.Home));
 		_breadcrumbs.Add(new BreadcrumbItem(L["Help"], "/help", false, Icons.Material.Filled.HelpOutline));
 		StateHasChanged();
@@ -305,16 +319,40 @@
 
 	private void SearchText(string text)
 	{
-		_searchResults = helpSearch.SearchAll(text?.Trim()).ToList();
-		if (_searchResults.Count() > 0 && _searchResults.First() != null)
 		{
-			displayResult(_searchResults.First());
-		}
-		StateHasChanged();
+        _searchResults = helpSearch.SearchAll(text?.Trim()).ToList();
+        if (_searchResults.Count() > 0 && _searchResults.First() != null)
+        {
+            SelectEntry(_searchResults.First());
+        }
+
+        if(searchComponent != null)
+        {
+            searchComponent.SelectValue(new HelpSearchEntry(text));
+            searchComponent.Focus();
+        }
+        StateHasChanged();
+    }
+
+    private async void SelectEntry(HelpSearchEntry entry)
+    {
+        if(shownEntry == entry)
+        {
+            return;
+        }
+
+        shownEntry = entry;
+        wikiData = null;
+
+        await Task.Run(() =>
+        {
+            wikiData = WikiDataGrabber.GetDataFrom(entry?.Link);
+        });
+        StateHasChanged();
 		SetFirstItemAsActive();
 	}
 
-	// Display the search results 
+	// Display the search results
 	public void displayResult(HelpSearchEntry entry)
 	{
 		kontent = entry.Description;
