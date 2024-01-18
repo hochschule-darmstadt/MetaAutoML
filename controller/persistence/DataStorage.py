@@ -130,7 +130,7 @@ class DataStorage:
 
     def __convert_excel_to_csv(self, user_id: str, file_name: str) -> str:
         excel_file = os.path.join(self.__storage_dir, user_id, "uploads", file_name)
-        file_name = file_name.replace(".xlsx", ".csv")
+        file_name = file_name.replace(".xlsx", ".csv").replace(".xls", ".csv")
         csv_file = os.path.join(self.__storage_dir, user_id, "uploads", file_name)
         df = pd.read_excel(excel_file)
         df.to_csv(csv_file, index=False)
@@ -155,9 +155,10 @@ class DataStorage:
             self.__log.debug(f"create_dataset: dataset type is image, removing .zip ending from {name} as not necessary after unzipping anymore...")
             name = name.replace(".zip", "")
 
-        if file_name.split(".")[-1] == "arff":
+        file_extension = file_name.split(".")[-1]
+        if file_extension == "arff":
             file_name = self.__convert_arff_to_csv(user_id, file_name)
-        elif file_name.split(".")[-1] == "xlsx":
+        elif file_extension in ["xlsx", "xls"]:
             file_name = self.__convert_excel_to_csv(user_id, file_name)
 
         # build dictionary for database

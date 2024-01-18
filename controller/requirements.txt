@@ -42,3 +42,4 @@ feature-engine==1.6.0
 kubernetes
 ydata_profiling==4.6.1
 openpyxl==3.1.2
+xlrd==2.0.1

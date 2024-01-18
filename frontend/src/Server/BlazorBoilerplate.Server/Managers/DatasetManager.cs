@@ -90,7 +90,7 @@ namespace BlazorBoilerplate.Server.Managers
                         }
                         if (result.Detected == null)
                         {
-                            if (fileExt != ".xlsx")
+                            if (fileExt != ".xlsx" && fileExt != ".xls")
                             {
                                 return new ApiResponse(Status406NotAcceptable, "EncodingNotSupportedErrorMessage");
                             }
@@ -346,7 +346,7 @@ namespace BlazorBoilerplate.Server.Managers
 
         private bool CheckSupportedFileType(string fileExt)
         {
-            if (fileExt == ".csv" || fileExt == ".arff" || fileExt == ".xlsx" || fileExt == ".zip")
+            if (fileExt == ".csv" || fileExt == ".arff" || fileExt == ".xlsx" || fileExt == ".xls" || fileExt == ".zip")
             {
                 return true;
             }
