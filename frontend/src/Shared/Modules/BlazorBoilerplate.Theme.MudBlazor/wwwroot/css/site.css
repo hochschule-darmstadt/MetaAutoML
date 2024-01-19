@@ -208,3 +208,13 @@ hr {
 .SearchBarOverlay div p {
     white-space: nowrap; /* verhindert den Umbruch des Textes */
 }
+
+.heading6 {
+    margin-left: 2rem;
+    color: #5c78ef;
+    display: block;
+    margin-inline-start: 0px;
+    margin-inline-end: 0px;
+    text-align: left;
+    margin-bottom: 0.5rem;
+}

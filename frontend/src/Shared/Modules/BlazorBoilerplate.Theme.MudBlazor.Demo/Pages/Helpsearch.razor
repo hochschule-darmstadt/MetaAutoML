@@ -7,6 +7,7 @@
 @attribute [Authorize]
 @inject NavigationManager navigationManager
 @inject IJSRuntime JS
+@inject IJSRuntime JSRuntime
 @using Newtonsoft.Json
 @inject IApiClient apiClient
 
@@ -21,24 +22,40 @@
 	<MudItem xs="3">
 		<div Style="margin: 16px">
 		<MudText Color="Color.Dark" Typo="Typo.h6">Results</MudText>
-					@code {
-						private string selectedEntry;
-
-						private string GetNavLinkClass(HelpSearchEntry entry)
-						{
-							return entry.OptionText == selectedEntry ? "active" : "";
-						}
-					}
-
 					<MudNavMenu Rounded="true" Margin="Margin.Normal" Color="Color.Secondary" Class="pa-2" Style="width:14.2rem">
 						@foreach (HelpSearchEntry entry in _searchResults)
 						{
-							<MudNavLink @onclick="() => displayResult(entry)" Class="@GetNavLinkClass(entry)">
+							<MudNavLink Class="@GetNavLinkClass(entry)" @onclick="() => SetActiveLink(entry)">
 								<MudIcon Style="font-size:15px" Class="d-inline" Icon="@GetIconOfOrigin(entry.Type)" Title="Favorite" />
 								@entry.OptionText
 							</MudNavLink>
 						}
 					</MudNavMenu>
+
+					@code {
+						private HelpSearchEntry activeEntry;
+
+						private void SetFirstItemAsActive()
+						{
+							if (_searchResults != null && _searchResults.Any())
+							{
+								activeEntry = _searchResults.First();
+								StateHasChanged();
+							}
+						}
+
+						private string GetNavLinkClass(HelpSearchEntry entry)
+						{
+							return entry == activeEntry ? "mud-nav-link active" : "mud-nav-link";
+						}
+
+						private void SetActiveLink(HelpSearchEntry entry)
+						{
+							activeEntry = entry;
+							displayResult(entry);
+						}
+					}
+
 		</div>
 	</MudItem>
 			@if (!isHelpPage)
@@ -53,25 +70,29 @@
 			<MudItem xs="9" sm="9" md="9">
 				<MudCard Elevation="5">
 					<MudTabs Elevation="2" Rounded="true" ApplyEffectsToContainer="true" PanelClass="pa-2" @ref="tabs">
-						<MudTabPanel OnClick="@PanelSwitch" Text="Introduction" @ref="introduction">
+							<MudTabPanel  OnClick="@PanelSwitch" Text="Introduction" @ref="introduction">
 							<MudCardHeader Style="border-bottom-style: inset; border-bottom-width: 1px;">
 								<CardHeaderContent>
-										<MudHighlighter HighlightedText="@query" Text="@introductionTab.PanelHeadline" Style="margin-left:2rem;margin-top:2rem;" Typo="Typo.h6" />
+									<h6 class="h6 mud-typography-h6 heading6" style="color: var(--rz-text-title-color);">
+										<MudHighlighter HighlightedText="@query" Text="@introductionTab.PanelHeadline" Class="h6 mud-typography-h6 heading6" />
+									</h6>
 								</CardHeaderContent>
 							</MudCardHeader>
 							<MudCardContent>
-									<MudHighlighter Style="margin-left:2rem;margin-top:1rem;" HighlightedText="@query" Text="@introductionTab.Text" />
-								<MudImage Style="width:92%;margin-left:1rem;margin-top:1rem;" Src="@(@introductionTab.Image)" />
+									<MudHighlighter Style="margin-top:1rem;" HighlightedText="@query" Text="@introductionTab.Text" />
+								<MudImage Style="width:92%;margin-top:1rem;" Src="@(@introductionTab.Image)" />
 								@foreach (Section section in this.introductionTab.Sections)
 								{
 									<MudGrid id="@(section.Anchor)">
-										<MudItem xs="6">
+										<MudItem xs="6" Style="padding-top: 10rem;">
 											@{string content = @section.Headline;}
-												<MudHighlighter HighlightedText="@query" Text="@content" Style="margin-left: 2rem; padding-top: 10rem; color: #5c78ef;" Typo="Typo.h6" />
+												<h6 class="h6 mud-typography-h6 heading6">
+													<MudHighlighter Markup="false" HighlightedText="@query" Text="@content" id="@content" Class="h6 mud-typography-h6 heading6" />
+												</h6>
 												@{
 													content = @section.Text;
 												}
-												<MudHighlighter HighlightedText="@query" Text="@content" Style="margin-left:2rem;margin-top:1rem;" Typo="Typo.body2" />
+												<MudHighlighter Markup="false" HighlightedText="@query" Text="@content" Style="margin-top:1rem;" />
 										</MudItem>
 										<MudItem xs="6">
 											<img style=" width: 90%; margin: 3rem; padding-top: 5rem; padding-right: 2rem;" src="@(section.GIF)" />
@@ -83,7 +104,9 @@
 						<MudTabPanel OnClick="@PanelSwitch" Text="Pages" @ref="pages">
 							<MudCardHeader Style="border-bottom-style: inset; border-bottom-width: 1px;">
 								<CardHeaderContent>
-										<MudHighlighter HighlightedText="@query" Text="@pagesTab.PanelHeadline" Style="margin-left:2rem;margin-top:2rem;" Typo="Typo.h6" />
+									<h6 class="h6 mud-typography-h6 heading6" style="color: var(--rz-text-title-color);">
+										<MudHighlighter HighlightedText="@query" Text="@pagesTab.PanelHeadline" Class="h6 mud-typography-h6 heading6" />
+									</h6>
 								</CardHeaderContent>
 							</MudCardHeader>
 							<MudCardContent>
@@ -95,7 +118,9 @@
 													@{
 														string content = @section.Headline;
 													}
-													<MudHighlighter HighlightedText="@query" Text="@content" Style="margin-left: 2rem; padding-top: 2rem;" Color="Color.Secondary" Typo="Typo.h6" />
+													<h6 class="h6 mud-typography-h6 heading6" style="color: var(--mud-palette-secondary) !important;">
+													<MudHighlighter Markup="false" HighlightedText="@query" Text="@content" Class="h6 mud-typography-h6 heading6"/>
+													</h6>
 													@{
 													    content = section.Text;
 													}
@@ -103,7 +128,7 @@
 													{
 														content += $"<br /><br /><b>{subsection.SubHeadline}</b><br />{subsection.SubText}";
 													}
-													<MudHighlighter Markup="true" HighlightedText="@query" Text="@content" Style="margin-left:2rem;margin-top:0.5rem;" Typo="Typo.body2" />
+													<MudHighlighter Markup="true" HighlightedText="@query" Text="@content" Style="margin-top:0.5rem;" Typo="Typo.body2" />
 											</MudItem>
 											<MudItem xs="6">
 												<img style=" width: 90%; margin: 3rem; padding-right: 2rem;" src="@(section.GIF)" />
@@ -113,11 +138,13 @@
 									else
 									{
 										<MudGrid Style="border-bottom-style: inset; border-bottom-width: 1px; padding-bottom: 2rem;" id="@(section.Anchor)">
-											<MudItem xs="6">
+												<MudItem xs="6">
 													@{
 														string content = section.Headline;
 													}
-													<MudHighlighter Markup="true" HighlightedText="@query" Text="@content" Style="margin-left: 2rem; padding-top: 4rem;" Typo="Typo.h6" Color="Color.Secondary" />
+													<h6 class="h6 mud-typography-h6 heading6" style="color: var(--mud-palette-secondary) !important;">
+													<MudHighlighter Markup="false" HighlightedText="@query" Text="@content" Class="h6 mud-typography-h6 heading6" />
+													</h6>
 													<img style=" width: 90%; margin: 2rem; padding-right: 2rem;" src="@(section.GIF)" />
 												</MudItem>
 												<MudItem xs="6">
@@ -128,7 +155,7 @@
 													{
 														content += $"<br /><br /><b>{subsection.SubHeadline}</b><br />{subsection.SubText}";
 													}
-													<MudHighlighter HighlightedText="@query" Text="@content" Style="margin-left:2rem;margin-top:8rem;" Typo="Typo.body2" />
+													<MudHighlighter Markup="true" HighlightedText="@query" Text="@content" Style="margin-top:8rem;" Typo="Typo.body2" />
 											</MudItem>
 										</MudGrid>
 									}
@@ -143,28 +170,57 @@
 	</MudCard>
 </MudGrid>
 
+<script>
+	function scrollToAnchor(anchorId) {
+		const element = document.getElementById(anchorId);
+		if (element) {
+			element.scrollIntoView({ behavior: 'smooth' });
+		}
+	}
+</script>
+
 @code {
+	private async Task ScrollToSection(string anchorId)
+	{
+		await JSRuntime.InvokeVoidAsync("scrollToAnchor", anchorId);
+	}
+
+	protected override async Task OnParametersSetAsync()
+	{
+		if (!string.IsNullOrEmpty(query))
+		{
+			foreach (var section in introductionTab.Sections)
+			{
+				if (section.Headline.Contains(query))
+				{
+					await ScrollToSection(section.Anchor);
+					break;
+				}
+			}
+		}
+	}
+
 	/*
 		* query contains the search query that will be redirectet from the search bar in MainLayout to the searchbar in this Page
 		*/
 	[Parameter]
 	public string query
-    {
-        get
-        {
-            return _query;
-        }
-        set
-        {
-            if(_query != value)
-            {
-                SearchText(value);
-            }
-            _query = value;
-        }
-    }
+	{
+		get
+		{
+			return _query;
+		}
+		set
+		{
+			if(_query != value)
+			{
+				SearchText(value);
+			}
+			_query = value;
+		}
+	}
 
-    private string _query;
+	private string _query;
 
 	public string kontent { get; set; }
 	public string header { get; set; }
@@ -202,19 +258,21 @@
 				await helpSearch.LoadSearchCache();
 			}
 
-            SearchText(query);
+			SearchText(query);
 		}
+		SetFirstItemAsActive();
 	}
 
-    private void SearchText(string text)
-    {
-        _searchResults = helpSearch.SearchAll(text?.Trim()).ToList();
-        if (_searchResults.Count() > 0 && _searchResults.First() != null)
-        {
-            displayResult(_searchResults.First());
-        }
-        StateHasChanged();
-    }
+	private void SearchText(string text)
+	{
+		_searchResults = helpSearch.SearchAll(text?.Trim()).ToList();
+		if (_searchResults.Count() > 0 && _searchResults.First() != null)
+		{
+			displayResult(_searchResults.First());
+		}
+		StateHasChanged();
+		SetFirstItemAsActive();
+	}
 
 	public void displayResult(HelpSearchEntry entry)
 	{
