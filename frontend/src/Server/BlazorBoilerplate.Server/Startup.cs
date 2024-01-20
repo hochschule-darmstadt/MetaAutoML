@@ -181,6 +181,11 @@ namespace BlazorBoilerplate.Server
             //OMA-ML SERVICES
             ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
+            services.UseGTour();
+            GTourService.Theme = new GTour.Themes.CustomTheme();
+
+            services.AddScoped<ITourService, TourService>();
+
             services.AddTransient<IDatasetManager, DatasetManager>();
             services.AddTransient<IOntologyManager, OntologyManager>();
             services.AddTransient<ITrainingManager, TrainingManager>();

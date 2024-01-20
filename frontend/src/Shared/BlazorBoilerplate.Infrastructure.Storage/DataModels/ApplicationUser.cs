@@ -1,4 +1,4 @@
-﻿using BlazorBoilerplate.Infrastructure.Storage.Permissions;
+using BlazorBoilerplate.Infrastructure.Storage.Permissions;
 using Finbuckle.MultiTenant;
 using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations;

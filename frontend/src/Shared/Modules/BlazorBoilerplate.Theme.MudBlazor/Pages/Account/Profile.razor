@@ -27,6 +27,8 @@
 
             <MudTextField @bind-Value="@userViewModel.LastName" Label=@L["LastName"] FullWidth="true"></MudTextField>
 
+            <MudSwitch @bind-Value="@userViewModel.IsTutorialEnabled" Label="@L["Enable tutorial"]" T="bool" Color="Color.Primary"></MudSwitch>
+
             <strong>@L["Roles"]</strong><br />
             <MudChipSet>
                 @foreach (var role in userViewModel.Roles)

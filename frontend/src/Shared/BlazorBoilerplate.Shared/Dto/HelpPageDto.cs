@@ -26,6 +26,8 @@ namespace BlazorBoilerplate.Shared.Dto
         public List<Subsection> Subsections { get; set; }
         public string GIF { get; set; }
         public string Anchor { get; set; }
+        public string pageLink { get; set; }
+        public string linkHeadline { get; set; }
     }
     public class HelpTabPanel
     {

@@ -6,6 +6,10 @@ EXPOSE 80
 FROM mcr.microsoft.com/dotnet/sdk:6.0.408-jammy-amd64 AS build
 WORKDIR /
 COPY . .
+RUN apt-get update \
+    && apt-get install -y nodejs \
+    && apt-get install -y npm \
+    && rm -rf /var/lib/apt/lists/*
 RUN dotnet restore "src/Server/BlazorBoilerplate.Server/BlazorBoilerplate.Server.csproj"
 WORKDIR "/src/Server/BlazorBoilerplate.Server"
 RUN dotnet build "BlazorBoilerplate.Server.csproj" -c Release -o /app/build --no-restore

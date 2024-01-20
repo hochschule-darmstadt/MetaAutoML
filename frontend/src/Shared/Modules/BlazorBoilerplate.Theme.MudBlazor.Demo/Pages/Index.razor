@@ -9,7 +9,10 @@
 @using Radzen.Blazor
 @inject NavigationManager navigationManager
 @inject IDialogService dialogService
+@using BlazorBoilerplate.Shared.Models.Account
 
+
+<div data-form-zeroStep style="border: solid none; z-index: 999; position: relative; background-color: none; border-width: 0px;"></div>
 <TopSection>
     <MudBreadcrumbs Style="z-index:1!important;" Items="_breadcrumbs" Class="mudbreadcrumbs"></MudBreadcrumbs>
 </TopSection>
@@ -67,7 +70,14 @@
 
 @code {
     [Inject]
-    private GTour.Abstractions.IGTourService GTourService { get; set; }
+    private ITourService TourService { get; set; }
+
+
+    [Inject]
+    AuthenticationStateProvider authStateProvider { get; set; }
+
+    protected UserViewModel userViewModel;
+    IdentityAuthenticationStateProvider identityAuthenticationStateProvider;
 
     private GetTrainingsResponseDto _trainings;
     private GetDatasetsResponseDto _datasets;
@@ -81,9 +91,42 @@
         _pageTitle = L["Home"];
         _breadcrumbs.Add(new BreadcrumbItem(L["Home"], null, true, Icons.Material.Filled.Home));
         fileUploader.OnUploadCompletedCallback = LoadDatasetWithReRendering;
+        identityAuthenticationStateProvider = (IdentityAuthenticationStateProvider)authStateProvider;
+
+        userViewModel = await identityAuthenticationStateProvider.GetUserViewModel();
+
+        if (userViewModel.IsTutorialEnabled == true)
+        {
+            userViewModel.IsTutorialEnabled = false;
+            await UpdateUser();
+            // await GTourService.StartTour("FormGuidedTour", "zeroStep");
+            TourService.navigateToNextPage("zeroStep", navigationManager.ToAbsoluteUri(" ").AbsoluteUri);
+        }
+        else
+        {
+            await TourService.checkIfUserTourIsActivatedAndStartTour(navigationManager.Uri);
+        }
         StateHasChanged();
         TourService userTour = new TourService(GTourService, navigationManager);
         await userTour.checkIfUserTourIsActivatedAndStartTour(navigationManager.Uri);
+    }
+
+
+    protected async Task UpdateUser()
+    {
+        try
+        {
+            var apiResponse = await identityAuthenticationStateProvider.UpdateUser(userViewModel);
+
+            if (apiResponse.IsSuccessStatusCode)
+                viewNotifier.Show(L["Operation Successful"], ViewNotifierType.Success);
+            else
+                viewNotifier.Show(apiResponse.Message, ViewNotifierType.Error, L["Operation Failed"]);
+        }
+        catch (Exception ex)
+        {
+            viewNotifier.Show(ex.Message, ViewNotifierType.Error, L["Operation Failed"]);
+        }
     }
 
     private async Task LoadRecentTrainings()

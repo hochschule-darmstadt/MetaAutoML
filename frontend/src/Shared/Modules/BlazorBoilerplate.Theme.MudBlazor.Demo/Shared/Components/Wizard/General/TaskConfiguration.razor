@@ -69,12 +69,12 @@
         @if (((Dataset.Dataset.Type.ID == ":tabular") || (Dataset.Dataset.Type.ID == ":text") || (Dataset.Dataset.Type.ID == ":time_series")) || (Dataset.Dataset.Type.ID == ":time_series_longitudinal") && (!string.IsNullOrEmpty(StartTrainingDto.Configuration.Task)))
 
         {
-            <MudItem xs="12">
+            <MudItem xs="12" data-form-sixthStep>
                 <MudGrid>
                     <MudItem xs="13">
                         <LabelTooltip FontSize="TextStyle.H4" Text="Select which column in a tabular dataset is to be predicted by the ML model." Position="Radzen.TooltipPosition.Top"></LabelTooltip>
                     </MudItem>
-                    <MudItem xs="11" data-form-sixthStep>
+                    <MudItem xs="11" >
                         <MudSelect Label="@L["target *"]" T="string" @bind-SelectedValues="SelectedTargets" MultiSelection="true">
                             @if (_columnNames != null)
                             {

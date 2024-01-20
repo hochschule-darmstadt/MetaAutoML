@@ -20,6 +20,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\GTour\src\GTour.Abstractions\GTour.Abstractions.csproj" />
+    <ProjectReference Include="..\..\..\GTour\src\GTour\GTour.csproj" />
     <ProjectReference Include="..\..\BlazorBoilerplate.Shared\BlazorBoilerplate.Shared.csproj" />
     <ProjectReference Include="..\..\BlazorBoilerplate.UI.Base\BlazorBoilerplate.UI.Base.csproj" />
   </ItemGroup>

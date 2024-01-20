@@ -488,7 +488,7 @@ namespace BlazorBoilerplate.Theme.Material.Demo.Shared.Components.Wizard
         {
             // Select the next panel.
             Select(SelectedIndex + 1);
-            TourService userTour = new TourService(GTourService, NavManager);
+            //TourService userTour = new TourService(GTourService, NavManager);
             await GTourService.StartTour("FormGuidedTour", "fifthStep");
         }
 

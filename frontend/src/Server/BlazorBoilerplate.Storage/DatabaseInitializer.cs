@@ -1,4 +1,4 @@
-﻿using BlazorBoilerplate.Constants;
+using BlazorBoilerplate.Constants;
 using BlazorBoilerplate.Infrastructure.AuthorizationDefinitions;
 using BlazorBoilerplate.Infrastructure.Storage;
 using BlazorBoilerplate.Infrastructure.Storage.DataModels;
@@ -285,7 +285,8 @@ namespace BlazorBoilerplate.Storage
                         FirstName = firstName,
                         LastName = lastName,
                         EmailConfirmed = true,
-                        OmaMlId = response.UserId
+                        OmaMlId = response.UserId,
+                        DoIntroductionTutorial = true
                     };
 
                     var result = _userManager.CreateAsync(applicationUser, password).Result;

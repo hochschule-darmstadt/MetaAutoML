@@ -1,10 +1,12 @@
 @page "/help"
+@page "/help/{AnchorPath}"
 @inject IStringLocalizer<Global> L
 @attribute [Authorize]
 @inject NavigationManager navigationManager
 @inject IJSRuntime JS
 @using Newtonsoft.Json
 @inject IApiClient apiClient
+@inject IJSRuntime JSRuntime
 
 <TopSection>
     <MudBreadcrumbs Items="_breadcrumbs" Class="mudbreadcrumbs"></MudBreadcrumbs>
@@ -14,7 +16,7 @@
     <LabelTooltip FontSize="Radzen.Blazor.TextStyle.H4" Label="Help" Text="Read how to solve different tasks with OMA-ML or start a guided tour." Position="Radzen.TooltipPosition.Bottom"></LabelTooltip>
 </MudStack>
 <MudStack>
-    <MudDrawer Style="padding-left: 1rem;" Open="true" Anchor="Anchor.End" Elevation="2" Variant="@DrawerVariant.Persistent">
+    <MudDrawer Style="padding-left: 1rem;" Open="true" Anchor="Anchor.End" Elevation="2" Variant="@DrawerVariant.Persistent" Height="75%">
         <MudDrawerHeader>
             <MudText Style="padding-top:1.3rem;" Typo="Typo.h6">Contents</MudText>
         </MudDrawerHeader>
@@ -53,11 +55,14 @@
                                    Size="Size.Medium"
                                    OnClick="@StartTour">Start guided tour</MudButton>
                     </MudItem>
-                    <MudItem xs="6">
-                        <iframe class="embed-responsive-item" style="padding:2rem; aspect-ratio:16/9;"
-                                src="@($"_content/BlazorBoilerplate.Theme.MudBlazor/images/TestVideo.mp4")"
-                                frameborder="1"
-                                allowfullscreen></iframe>
+                    <MudItem xs="6" Style="margin: auto; width: 50%;">
+                        <div style="position: relative; width: 90%; overflow: hidden; padding-top: 56.25%;">
+                            <iframe style=" position: absolute; top: 0; left: 0; bottom: 0; right: 0; width: 100%; height: 100%; border: none;"
+                                    src="@($"_content/BlazorBoilerplate.Theme.MudBlazor/images/HelpVideo.mp4")"
+                                    frameborder="1"
+                                    allowfullscreen></iframe>
+                        </div>
+
                     </MudItem>
                 </MudGrid>
             </MudCard>
@@ -85,6 +90,11 @@
                                         </MudText>
                                         <MudText Style="margin-left:2rem;margin-top:1rem;" Typo="Typo.body2">
                                             @(section.Text)
+                                            @if (!String.IsNullOrEmpty(section.pageLink))
+                                            {
+                                                <br />
+                                                <MudLink Typo="Typo.body2" Href="@navigationManager.ToAbsoluteUri(section.pageLink).AbsoluteUri">@(section.linkHeadline)</MudLink>
+                                            }
                                         </MudText>
                                     </MudItem>
                                     <MudItem xs="6">
@@ -109,6 +119,11 @@
                                             <MudText Style="margin-left: 2rem; padding-top: 2rem;" Color="Color.Secondary" Typo="Typo.h6">@(section.Headline)</MudText>
                                             <MudText Style="margin-left:2rem;margin-top:0.5rem;" Typo="Typo.body2">
                                                 @(section.Text)
+                                                @if (!String.IsNullOrEmpty(section.pageLink))
+                                                {
+                                                    <br />
+                                                    <MudLink Typo="Typo.body2" Href="@navigationManager.ToAbsoluteUri(section.pageLink).AbsoluteUri">@(section.linkHeadline)</MudLink>
+                                                }
                                                 @foreach (Subsection subsection in section.Subsections)
                                                 {
                                                     <br />
@@ -134,6 +149,11 @@
                                         <MudItem xs="6">
                                             <MudText Style="margin-left:2rem;margin-top:8rem;" Typo="Typo.body2">
                                                 @(section.Text)
+                                                @if (!String.IsNullOrEmpty(section.pageLink))
+                                                {
+                                                    <br />
+                                                    <MudLink Typo="Typo.body2" Href="@navigationManager.ToAbsoluteUri(section.pageLink).AbsoluteUri">@(section.linkHeadline)</MudLink>
+                                                }
                                                 @foreach (Subsection subsection in section.Subsections)
                                                 {
                                                     <br />
@@ -160,10 +180,11 @@
 
 
 @code {
-
+    [Parameter]
+    public string? AnchorPath { get; set; }
     private List<BreadcrumbItem> _breadcrumbs = new List<BreadcrumbItem>();
     [Inject]
-    private GTour.Abstractions.IGTourService GTourService { get; set; }
+    private ITourService TourService { get; set; }
     private bool currentPanelIntroduction = true;
     private MudTabs tabs;
     private MudTabPanel introduction;
@@ -171,24 +192,69 @@
     List<HelpPageDto> helpTabPanelList = new List<HelpPageDto>();
     HelpPageDto introductionTab = new HelpPageDto();
     HelpPageDto pagesTab = new HelpPageDto();
+    System.Threading.Timer timer;
 
     protected override async Task OnInitializedAsync()
     {
         this.helpTabPanelList = await apiClient.GetHelpPageJson();
         this.helpTabPanelList.ForEach(tab => { if (tab.PanelHeadline.Equals("Introduction")) { this.introductionTab = tab; } else if (tab.PanelHeadline.Equals("Pages")) { this.pagesTab = tab; } });
-        StateHasChanged();
-        _breadcrumbs.Add(new BreadcrumbItem(L["Home"], "/", false, Icons.Material.Filled.Home));
+        _breadcrumbs.Add(new BreadcrumbItem(L["Home"], "/", false, Icons.Filled.Home));
         _breadcrumbs.Add(new BreadcrumbItem(L["Help"], "/help", false, Icons.Material.Filled.HelpOutline));
-        TourService userTour = new TourService(GTourService, navigationManager);
-        await userTour.checkIfUserTourIsActivatedAndStartTour(navigationManager.Uri);
-        StateHasChanged();
+        //StateHasChanged();
+        await TourService.checkIfUserTourIsActivatedAndStartTour(navigationManager.Uri);
+
+        if (navigationManager.Uri.Contains("#"))
+        {
+            // If no anchor is specified, check the current URL for an anchor
+            var anchor = GetAnchorFromUrl();
+            if (!string.IsNullOrEmpty(anchor))
+            {
+                var pageTwoanchors = new List<string>()
+                {
+                    "home",
+                    "datasets",
+                    "datasetdetail",
+                    "datasetconfigure",
+                    "trainings",
+                    "traindatasetpreparation",
+                    "trainconfiguration",
+                    "trainingdetail",
+                    "models",
+                    "modeldetail"
+                };
+                if (pageTwoanchors.Contains(anchor))
+                {
+                    tabs.ActivatePanel(1);
+                }
+                timer = new System.Threading.Timer(async _ =>  // async void
+                {
+                    var anchor = GetAnchorFromUrl();
+                    // Use JavaScript interop to scroll to the anchor from the URL
+                    try
+                    {
+                        await JSRuntime.InvokeVoidAsync("scrollToAnchor", anchor);
+                    }
+                    catch (Exception ex)
+                    {
+
+                    }
+                }, null, 300, Timeout.Infinite);
+            }
+        }
+
+
+    }
+
+    private string GetAnchorFromUrl()
+    {
+        var uri = new Uri(navigationManager.Uri);
+        return uri.Fragment.TrimStart('#');
     }
 
 
     private void StartTour()
     {
-        TourService userTour = new TourService(GTourService, navigationManager);
-        userTour.navigateToNextPage("firstStep", navigationManager.ToAbsoluteUri(" ").AbsoluteUri);
+        TourService.navigateToNextPage("firstStep", navigationManager.ToAbsoluteUri(" ").AbsoluteUri);
     }
     private void PanelSwitch()
     {
@@ -205,7 +271,14 @@
             tabs.ActivatePanel(tab);
         }
         this.currentPanelIntroduction = !this.currentPanelIntroduction;
+
     }
+
+
+
+
+
+
 }
 
 
