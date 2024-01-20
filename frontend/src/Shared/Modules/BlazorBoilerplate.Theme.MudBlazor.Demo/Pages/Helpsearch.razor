@@ -15,8 +15,12 @@
 	<MudCard Elevation="5" Style="margin: 24px; width: 100%">
 		<MudGrid>
 	<MudItem xs="12">
-		<div Style="margin: 16px">
-			<HelpSearchComponent query="@query" OnStatesChanged="SearchText"/>
+		<div Style="margin: 1rem">
+			<MudCard Elevation="3">
+				<div style="margin: 1rem; padding: 1rem">
+					<HelpSearchComponent query="@query" OnStatesChanged="SearchText"/>
+				</div>
+			</MudCard>
 		</div>
 	</MudItem>
 	<MudItem xs="3">
@@ -70,7 +74,6 @@
 			} else {
 				// Display help page
 			<MudItem xs="9" sm="9" md="9">
-				<MudCard Elevation="5">
 					<MudTabs Elevation="2" Rounded="true" ApplyEffectsToContainer="true" PanelClass="pa-2" @ref="tabs">
 							<MudTabPanel  OnClick="@PanelSwitch" Text="Introduction" @ref="introduction">
 							<MudCardHeader Style="border-bottom-style: inset; border-bottom-width: 1px;">
@@ -165,7 +168,6 @@
 							</MudCardContent>
 						</MudTabPanel>
 					</MudTabs>
-				</MudCard>
 			</MudItem>
 			}
 		</MudGrid>
