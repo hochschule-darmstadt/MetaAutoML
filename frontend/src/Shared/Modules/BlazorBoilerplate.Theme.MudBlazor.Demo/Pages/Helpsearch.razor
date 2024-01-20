@@ -60,6 +60,7 @@
 	</MudItem>
 			@if (!isHelpPage)
 			{
+				// Search Result is not help page --> Display ontology
 				<MudItem xs="9">
 					<div Style="margin: 16px">
 						<MudText Color="Color.Dark" Typo="Typo.h6">@header</MudText>
@@ -67,6 +68,7 @@
 					</div>
 				</MudItem>
 			} else {
+				// Display help page
 			<MudItem xs="9" sm="9" md="9">
 				<MudCard Elevation="5">
 					<MudTabs Elevation="2" Rounded="true" ApplyEffectsToContainer="true" PanelClass="pa-2" @ref="tabs">
@@ -171,13 +173,22 @@
 </MudGrid>
 
 <script>
-	function scrollToAnchor(anchorId) {
+	// Scroll-to function with an offset
+	function scrollToAnchor(anchorId, additionalOffset = -150) {
 		const element = document.getElementById(anchorId);
 		if (element) {
-			element.scrollIntoView({ behavior: 'smooth' });
+			const elementPosition = element.getBoundingClientRect().top + window.pageYOffset;
+			// An offset is needed because of the second page. The heading elements have no margin or padding.
+			// The anchor would not be visible
+			const offsetPosition = elementPosition + additionalOffset;
+			window.scrollTo({
+				top: offsetPosition,
+				behavior: 'smooth'
+			});
 		}
 	}
 </script>
+
 
 @code {
 	private async Task ScrollToSection(string anchorId)
@@ -189,20 +200,47 @@
 	{
 		if (!string.IsNullOrEmpty(query))
 		{
+			// Determine which tab the anchor point is on
+			var tabIndex = -1;
+			Section targetSection = null;
+
 			foreach (var section in introductionTab.Sections)
 			{
 				if (section.Headline.Contains(query))
 				{
-					await ScrollToSection(section.Anchor);
+					tabIndex = 0; // Index for the Introduction tab
+					targetSection = section;
 					break;
 				}
+			}
+
+			if (tabIndex == -1)
+			{
+				foreach (var section in pagesTab.Sections)
+				{
+					if (section.Headline.Contains(query))
+					{
+						tabIndex = 1; // Index for the Pages tab
+						targetSection = section;
+						break;
+					}
+				}
+			}
+
+			// Switch to the correct tab and then scroll to the anchor point
+			if (tabIndex != -1 && targetSection != null)
+			{
+				tabs.ActivePanelIndex = tabIndex;
+				await Task.Delay(100); // Short delay to give the UI time to switch tabs
+				await ScrollToSection(targetSection.Anchor);
 			}
 		}
 	}
 
 	/*
-		* query contains the search query that will be redirectet from the search bar in MainLayout to the searchbar in this Page
-		*/
+	 * 'query' contains the search query that will be redirected from the
+	 * search bar in MainLayout to the search bar on this page.
+	*/
 	[Parameter]
 	public string query
 	{
@@ -274,6 +312,7 @@
 		SetFirstItemAsActive();
 	}
 
+	// Display the search results 
 	public void displayResult(HelpSearchEntry entry)
 	{
 		kontent = entry.Description;
@@ -281,6 +320,7 @@
         isHelpPage = (entry.Type == HelpSearchResultType.HELP_ARTICLE);
 	}
 
+	/* If a help site is displayed in search results, this function is needed to toggle between the Introduction and Pages tabs */
 	private void PanelSwitch()
 	{
 		this.currentPanelIntroduction = !this.currentPanelIntroduction;
@@ -298,6 +338,7 @@
 		this.currentPanelIntroduction = !this.currentPanelIntroduction;
 	}
 
+	/* Display icons in the navigation bar */
 	private string GetIconOfOrigin(HelpSearchResultType origin)
 	{
 		switch (origin)
