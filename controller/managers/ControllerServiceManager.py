@@ -355,6 +355,7 @@ class ControllerServiceManager(ControllerServiceBase):
 						'This strategy truncates the training data if the time limit is relatively short for the size of the dataset.'
 						)
 				    )
+
                 if  (not found or size_time_ratio > 20000 ):
                      #or ('irrelevant_features' in dataset['analysis'] and len(dataset['analysis']['irrelevant_features']) != 0))
                    # and 'preprocessing.ignore_redundant_samples' not in create_training_request.selected_strategies
@@ -366,7 +367,6 @@ class ControllerServiceManager(ControllerServiceBase):
                             'This strategy adds or removes data samples for a better distribution of the class.'
                         )
                     )
-
 
                 if (not found) or ('irrelevant_features' in dataset['analysis'] and len(dataset['analysis']['irrelevant_features']) != 0):
                     result.strategies.append(
