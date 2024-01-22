@@ -258,6 +258,7 @@ class ControllerServiceManager(ControllerServiceBase):
         self.__log.warn("delete_model: executed")
         return response
 
+
     @inject
     async def start_explainer_dashboard(
         self, start_dashboard_request: "StartDashboardRequest",
@@ -270,6 +271,7 @@ class ControllerServiceManager(ControllerServiceBase):
         #)
         self.__log.warn("start_explainer_dashboard: executed")
         return response
+
 
     @inject
     async def stop_explainer_dashboard(
@@ -390,6 +392,7 @@ class ControllerServiceManager(ControllerServiceBase):
                 'This strategy will run all adapters with only a small part of the data. Then it will train the best half solutions with more data again and so on, until one last adapter is trained with the full data.'
                 )
             )
+
 
             result.strategies.append(
                 Strategy(

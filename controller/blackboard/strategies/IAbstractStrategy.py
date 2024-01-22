@@ -2,13 +2,14 @@ import logging
 from rule_engine import Rule
 from typing import Callable, Dict
 from StrategyController import StrategyController
+from DataStorage import DataStorage
 
 class IAbstractStrategy():
     """
     Interface representing the functionality any controller strategy must provide.
     """
 
-    def __init__(self, controller: StrategyController) -> None:
+    def __init__(self, controller: StrategyController, data_storage: DataStorage) -> None:
         """
         Constructs a new controller strategy.
         ---
@@ -17,6 +18,7 @@ class IAbstractStrategy():
         """
         self._log = logging.getLogger(self.__class__.__name__)
         self.controller = controller
+        self.__data_storage: DataStorage = data_storage
         self.rules: Dict[str, set[Rule, Callable]] = {}
         self.register_rules()
 
@@ -28,7 +30,7 @@ class IAbstractStrategy():
         """
         if name in self.rules and not overwrite_existing:
             raise RuntimeError(f'A rule with the name {name} already exists.')
-        
+
         self.rules[name] = (rule, action)
 
         self._log.info(f'Registered rule: {name} ({rule})')

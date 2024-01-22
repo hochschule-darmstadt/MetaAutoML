@@ -83,6 +83,11 @@ class CsvManager:
         return dataset
 
     @staticmethod
+    def write_dataset(path: str, dataset: pd.DataFrame):
+        dataset.to_csv(path)
+
+
+    @staticmethod
     def __get_datatype_for_column(numpy_datatype: np.dtype, column: pd.Series):
         """
         Identify the np datatype and mark correct OMAML datatype

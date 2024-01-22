@@ -1,4 +1,5 @@
 import json, time
+import pandas as pd
 from rule_engine import Rule, Context, DataType, type_resolver_from_dict
 from AdapterRuntimeManagerAgent import AdapterRuntimeManagerAgent
 from ControllerBGRPC import DataType as GrpcDataType
@@ -57,12 +58,12 @@ class PreprocessingStrategyController(IAbstractStrategy):
             Rule("phase == 'preprocessing' and not (dataset_type == ':image')", context=preprocessing_context),
             self.do_pca_feature_extraction
         )
+
         self.register_rule(
-            'preprocessing.do_data_sampling',
+            'preprocessing.data_sampling',
             Rule("phase == 'preprocessing' and not (dataset_type == ':image')", context=preprocessing_context),
             self.do_data_sampling
         )
-
 
         self.register_rule(
             'preprocessing.finish_preprocessing',
@@ -193,6 +194,44 @@ class PreprocessingStrategyController(IAbstractStrategy):
 
         # Finished action (should only run once, therefore disable the strategy rule)
         controller.disable_strategy('preprocessing.feature_selection')
+
+    def do_data_sampling(self, state: dict, blackboard: Blackboard, controller: StrategyController):
+        sampling_dict = {}
+        print("========Data Sampling==========")
+        sampling_dict["duplicate_rows"] = state.get("dataset_analysis", {}).get("duplicate_rows")
+
+        agent: AdapterRuntimeManagerAgent = controller.get_blackboard().get_agent('training-runtime')
+        if not agent or not agent.get_adapter_runtime_manager():
+            raise RuntimeError('Could not access Adapter Runtime Manager Agent!')
+
+        sampling_dict["dataset_schema"] = json.loads(agent.get_adapter_runtime_manager().get_training_request().dataset_configuration)
+        sampling_dict["dataset_configuration"] = agent.get_adapter_runtime_manager().get_dataset().get("file_configuration")
+
+        sampling_dict["number_of_columns"] = agent.get_adapter_runtime_manager().get_dataset()["analysis"]["number_of_columns"]
+        sampling_dict["number_of_rows"] = agent.get_adapter_runtime_manager().get_dataset()["analysis"]["number_of_rows"]
+        sampling_dict["dataset_path"] = agent.get_adapter_runtime_manager().get_dataset().get("path")
+
+        dataset_df = CsvManager.read_dataset(sampling_dict['dataset_path'], sampling_dict["dataset_configuration"], sampling_dict["dataset_schema"])
+        print("========Dataset========")
+        print(dataset_df)
+        print("=================================")
+        print(sampling_dict)
+        print("=================================")
+
+        training_request = agent.get_adapter_runtime_manager().get_training_request()
+        training_request.sampled_dataset_path = sampling_dict["dataset_path"].split(".")[0] + "_sampled.csv"
+        sampling_dict["dataset_path_new"] = training_request.sampled_dataset_path
+
+        CsvManager.write_dataset(training_request.sampled_dataset_path, dataset_df)
+        training_request.dataset_configuration = json.dumps(sampling_dict["dataset_schema"])
+        agent.get_adapter_runtime_manager().set_training_request(training_request)
+
+        print(agent.get_adapter_runtime_manager().get_dataset())
+        print("=================================")
+        print(sampling_dict)
+
+        # Finished action (should only run once, therefore disable the strategy rule)
+        controller.disable_strategy('preprocessing.data_sampling')
 
     def do_finish_preprocessing(self, state: dict, blackboard: Blackboard, controller: StrategyController):
         if self.global_multi_fidelity_level != 0:
