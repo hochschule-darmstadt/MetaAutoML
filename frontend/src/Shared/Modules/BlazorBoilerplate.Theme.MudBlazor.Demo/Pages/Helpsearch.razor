@@ -319,7 +319,7 @@
 
 	private void SearchText(string text)
 	{
-		{
+
         _searchResults = helpSearch.SearchAll(text?.Trim()).ToList();
         if (_searchResults.Count() > 0 && _searchResults.First() != null)
         {
@@ -334,6 +334,7 @@
         StateHasChanged();
     }
 
+    // Display the search results
     private async void SelectEntry(HelpSearchEntry entry)
     {
         if(shownEntry == entry)
@@ -350,14 +351,6 @@
         });
         StateHasChanged();
 		SetFirstItemAsActive();
-	}
-
-	// Display the search results
-	public void displayResult(HelpSearchEntry entry)
-	{
-		kontent = entry.Description;
-		header = entry.Title;
-        isHelpPage = (entry.Type == HelpSearchResultType.HELP_ARTICLE);
 	}
 
 	/* If a help site is displayed in search results, this function is needed to toggle between the Introduction and Pages tabs */
