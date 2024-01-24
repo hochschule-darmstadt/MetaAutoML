@@ -18,21 +18,17 @@ class H2OWrapper(BaseWrapper):
     def predict_proba(self, X, **kwargs):
         X_predict = self._prepare_dataset(X.copy())
 
-        #self._check_data_format((X_predict, None), predict=True)
-        # dataset = self._adapt(X_predict, self._model.inputs, 32)
-        # pipeline = self._model.tuner.get_best_pipeline()
         model = self._model
-        # dataset = pipeline.transform_x(dataset)
-        # dataset = tf.data.Dataset.zip((dataset, dataset))
-        probabilities = model.predict(h2o.H2OFrame(X_predict), **kwargs)
-        # H2o does not provide a predict_proba() function to get the class probabilities.
-        # Instead, it returns these probabilities (in case there is a binary classification) when calling predict
-        # but only as a one dimensional array. Shap however requires the probabilities in the format
-        # [[prob class 0, prob class 1], [...]]. So to return the proper format we have to process the results of
-        # predict().
-        if probabilities.shape[1] == 1:
-            probabilities = np.array([np.array([1 - prob[0], prob[0]]) for prob in probabilities.tolist()])
-        return probabilities
+
+        h2o_probabilities = model.predict(h2o.H2OFrame(X_predict), **kwargs)
+
+        h2o_predictions_df = h2o_probabilities.as_data_frame(use_pandas=True)
+
+        if len(h2o_predictions_df.columns) > 2:
+                    # Wir ignorieren die erste Spalte, die die Klasse enthaelt
+                    probabilities_df = h2o_predictions_df.iloc[:, 1:]
+
+        return probabilities_df.to_numpy()
 
     def load_model(self) -> None:
         h2o.init()
