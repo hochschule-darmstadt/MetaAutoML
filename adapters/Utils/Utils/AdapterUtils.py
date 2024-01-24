@@ -241,7 +241,7 @@ def evaluate(config: "StartAutoMlRequest", config_path: str) -> Tuple[float, flo
 
     if config["configuration"]["task"] in [":tabular_classification", ":tabular_regression", ":text_regression", ":named_entity_recognition", ":text_classification"]:
 
-        subprocess.call([python_env, os.path.join(result_path, "predict.py"), file_path, os.path.join(result_path, "predictions.csv")])
+        subprocess.call([python_env, os.path.join(result_path, "predict.py"), file_path, os.path.join(result_path, "predictions.csv"),target])
 
 
             #The dashboard model wrapper offers the same functionallity and can be used for making timed predictions
@@ -267,6 +267,9 @@ def evaluate(config: "StartAutoMlRequest", config_path: str) -> Tuple[float, flo
 
     predictions = pd.read_csv(os.path.join(result_path, "predictions.csv"))
     os.remove(os.path.join(result_path, "predictions.csv"))
+
+    if target not in predictions.columns:
+        print("Fehler in der Prediction.csv (name)")
 
     if config["configuration"]["task"] in [":tabular_classification", ":text_classification", ":image_classification", ":time_series_classification"]:
         if config["configuration"]["task"] == ":image_classification":

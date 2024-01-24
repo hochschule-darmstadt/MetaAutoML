@@ -16,6 +16,7 @@ from postprocessing import post_process_result_dataframe
 if __name__ == '__main__':
     filepath = sys.argv[1]
     save_path = sys.argv[2]
+    target_name = sys.argv[3]
     X = None
     h2o.init()
 
@@ -29,6 +30,8 @@ if __name__ == '__main__':
     predicted_y = loaded_model.predict(h2o.H2OFrame(X))
     predicted_y = predicted_y.as_data_frame()
     {% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression"] %}
-    predict_df = pd.DataFrame(predicted_y, columns=["predict"])
+    predicted_y.rename(columns={'predict': target_name}, inplace=True)
+    predict_df = pd.DataFrame(predicted_y, columns=[target_name])
+
     post_process_result_dataframe(X_index_df, predict_df).to_csv(save_path)
     {% endif %}
