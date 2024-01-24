@@ -65,9 +65,7 @@ class H2OAdapter:
         #export
         model_path = h2o.save_model(model=best_model, path=self._configuration["result_folder_location"])
         os.rename(model_path, os.path.join(self._configuration["result_folder_location"], 'model_h2o.p'))
-
-        H2OWrapper(best_model, self._configuration)
-        export_model(H2OWrapper(best_model, self._configuration), self._configuration["dashboard_folder_location"], 'dashboard_model.p')
+        export_model(H2OWrapper(None, self._configuration), self._configuration["dashboard_folder_location"], 'dashboard_model.p')
 
     def __tabular_regression(self):
         """Execute the tabular regression task and export the found model"""
@@ -97,6 +95,4 @@ class H2OAdapter:
         #export
         model_path = h2o.save_model(model=best_model, path=self._configuration["result_folder_location"])
         os.rename(model_path, os.path.join(self._configuration["result_folder_location"], 'model_h2o.p'))
-
-        H2OWrapper(best_model, self._configuration)
-        export_model(H2OWrapper(best_model, self._configuration), self._configuration["dashboard_folder_location"], 'dashboard_model.p')
+        export_model(H2OWrapper(None, self._configuration), self._configuration["dashboard_folder_location"], 'dashboard_model.p')
