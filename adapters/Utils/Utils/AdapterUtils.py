@@ -245,8 +245,7 @@ def evaluate(config: "StartAutoMlRequest", config_path: str) -> Tuple[float, flo
 
 
             #The dashboard model wrapper offers the same functionallity and can be used for making timed predictions
-        with open(dashboard_folder_location + '/dashboard_model.p', 'rb') as file:
-            pipeline_model = dill.load(file)
+        pipeline_model = load_dashboard_model(dashboard_folder_location + '/dashboard_model.p')
 
         predict_start = time.time()
         pipeline_model.predict(test.drop(target, axis=1))
@@ -544,3 +543,10 @@ def setup_run_environment(request: "StartAutoMlRequest", adapter_name: str) -> "
     with open(os.path.join(job_folder_location, get_config_property("job-file-name")), "w+") as f:
         json.dump(request_dict, f)
     return request
+
+def load_dashboard_model(path):
+    with open(path, 'rb') as file:
+        pipeline_model = dill.load(file)
+        if(pipeline_model._model == None):
+            pipeline_model.load_model()
+        return pipeline_model
