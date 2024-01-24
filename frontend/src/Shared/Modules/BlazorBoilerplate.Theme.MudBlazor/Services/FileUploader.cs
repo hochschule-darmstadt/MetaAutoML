@@ -200,7 +200,7 @@ namespace BlazorBoilerplate.Theme.Material.Services
 
         private static string GetDownloadUrl(string url)
         {
-            if (Regex.IsMatch(url, @"(?:drive\.google\.com)"))
+            if (Regex.IsMatch(url, @"(?:drive\.google\.com|docs\.google\.com)"))
             {
                 return GetGoogleDriveDownloadLink(url);
             }

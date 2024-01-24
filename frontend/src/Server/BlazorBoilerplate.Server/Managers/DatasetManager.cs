@@ -88,11 +88,22 @@ namespace BlazorBoilerplate.Server.Managers
                             result = CharsetDetector.DetectFromStream(fs1);
 
                         }
-                        grpcRequest.Encoding = result.Detected.EncodingName.ToString();
-                        //ascii data encoding causes some issues with some automl, UTF-8 is a safe encoding that covers all ascii signs
-                        if (grpcRequest.Encoding == "ascii")
+                        if (result.Detected == null)
                         {
+                            if (fileExt != ".xlsx" && fileExt != ".xls")
+                            {
+                                return new ApiResponse(Status406NotAcceptable, "EncodingNotSupportedErrorMessage");
+                            }
                             grpcRequest.Encoding = "utf-8";
+                        }
+                        else
+                        {
+                            grpcRequest.Encoding = result.Detected.EncodingName.ToString();
+                            //ascii data encoding causes some issues with some automl, UTF-8 is a safe encoding that covers all ascii signs
+                            if (grpcRequest.Encoding == "ascii")
+                            {
+                                grpcRequest.Encoding = "utf-8";
+                            }
                         }
                     }
                     else
@@ -335,7 +346,7 @@ namespace BlazorBoilerplate.Server.Managers
 
         private bool CheckSupportedFileType(string fileExt)
         {
-            if (fileExt == ".csv" || fileExt == ".arff" || fileExt == ".zip")
+            if (fileExt == ".csv" || fileExt == ".arff" || fileExt == ".xlsx" || fileExt == ".xls" || fileExt == ".zip")
             {
                 return true;
             }
