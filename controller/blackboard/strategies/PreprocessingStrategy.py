@@ -1,5 +1,7 @@
 import json, time
 import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
 from rule_engine import Rule, Context, DataType, type_resolver_from_dict
 from AdapterRuntimeManagerAgent import AdapterRuntimeManagerAgent
 from ControllerBGRPC import DataType as GrpcDataType
@@ -7,7 +9,7 @@ from IAbstractStrategy import IAbstractStrategy
 from StrategyController import StrategyController
 from Blackboard import Blackboard
 from CsvManager import CsvManager
-import pandas as pd
+from sklearn.utils import resample
 
 class PreprocessingStrategyController(IAbstractStrategy):
     global_multi_fidelity_level = 1
@@ -212,26 +214,98 @@ class PreprocessingStrategyController(IAbstractStrategy):
         sampling_dict["dataset_path"] = agent.get_adapter_runtime_manager().get_dataset().get("path")
 
         dataset_df = CsvManager.read_dataset(sampling_dict['dataset_path'], sampling_dict["dataset_configuration"], sampling_dict["dataset_schema"])
-        print("========Dataset========")
-        print(dataset_df)
-        print("=================================")
-        print(sampling_dict)
+        # print("========Dataset========")
+        # print(dataset_df)
+        # print("=================================")
+        # print(sampling_dict)
+        # print("=================================")
+
+        target_column = ""
+        for key in list(sampling_dict["dataset_schema"].keys()):
+            if sampling_dict["dataset_schema"][key]['role_selected'] == ":target":
+                target_column = key
+                break
+
+        sns.countplot(data=dataset_df, x=target_column)
+        plt.savefig("target_distribution_before.png")
+
+        minority_class = dataset_df[target_column].value_counts().idxmin()
+
+        # Separate majority and minority classes
+        majority_class = dataset_df[dataset_df[target_column] != minority_class]
+        minority_class = dataset_df[dataset_df[target_column] == minority_class]
+
+        # Up-sample minority class
+        minority_class_upsampled = resample(minority_class,
+                                            replace=True,  # Sample with replacement
+                                            n_samples=len(majority_class),  # Match majority class size
+                                            random_state=42)  # Set a random seed for reproducibility
+
+        # sampled dataset: Combine majority class with up-sampled minority class
+        sampled_dataset_df = pd.concat([majority_class, minority_class_upsampled])
+
+        # Shuffle the DataFrame to mix the classes
+        sampled_dataset_df = sampled_dataset_df.sample(frac=1, random_state=42).reset_index(drop=True)
+
+        print("========Sampled Dataset========")
+        print(sampled_dataset_df)
         print("=================================")
 
         training_request = agent.get_adapter_runtime_manager().get_training_request()
         training_request.sampled_dataset_path = sampling_dict["dataset_path"].split(".")[0] + "_sampled.csv"
         sampling_dict["dataset_path_new"] = training_request.sampled_dataset_path
 
-        CsvManager.write_dataset(training_request.sampled_dataset_path, dataset_df)
+        CsvManager.write_dataset(training_request.sampled_dataset_path, sampled_dataset_df)
         training_request.dataset_configuration = json.dumps(sampling_dict["dataset_schema"])
-        agent.get_adapter_runtime_manager().set_training_request(training_request)
 
-        print(agent.get_adapter_runtime_manager().get_dataset())
-        print("=================================")
-        print(sampling_dict)
+        agent.get_adapter_runtime_manager().set_training_request(training_request)
 
         # Finished action (should only run once, therefore disable the strategy rule)
         controller.disable_strategy('preprocessing.data_sampling')
+
+    def do_data_sampling_callback(dataset_df):
+        should_upsample = True
+        # condition for up-sampling
+        if should_upsample:  # condition for up-sampling
+            # Identify the minority class
+            minority_class = dataset_df['Pclass'].value_counts().idxmin()
+
+            # Separate majority and minority classes
+            majority_class = dataset_df[dataset_df['Pclass'] != minority_class]
+            minority_class = dataset_df[dataset_df['Pclass'] == minority_class]
+
+            # Up-sample minority class
+            minority_class_upsampled = resample(minority_class,
+                                               replace=True,  # Sample with replacement
+                                               n_samples=len(majority_class),  # Match majority class size
+                                               random_state=42)  # Set a random seed for reproducibility
+
+            # sampled dataset: Combine majority class with up-sampled minority class
+            sampled_dataset_df = pd.concat([majority_class, minority_class_upsampled])
+
+        # condition for down-sampling
+        else:  # condition for down-sampling
+            # Identify the majority class
+            majority_class = dataset_df['target_column'].value_counts().idxmax()
+
+            # Separate majority and minority classes
+            majority_class = dataset_df[dataset_df['target_column'] != minority_class]
+            minority_class = dataset_df[dataset_df['target_column'] == minority_class]
+
+            # Down-sample majority class
+            majority_class_downsampled = resample(majority_class,
+                                                 replace=False,  # Sample without replacement
+                                                 n_samples=len(minority_class),  # Match minority class size
+                                                 random_state=42)  # Set a random seed for reproducibility
+
+            # sampled dataset: Combine down-sampled majority class with minority class
+            sampled_dataset_df = pd.concat([majority_class_downsampled, minority_class])
+
+        print("========Sampled Dataset========")
+        print(sampled_dataset_df)
+        print("=================================")
+        return sampled_dataset_df
+
 
     def do_finish_preprocessing(self, state: dict, blackboard: Blackboard, controller: StrategyController):
         if self.global_multi_fidelity_level != 0:
