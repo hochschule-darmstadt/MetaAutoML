@@ -37,16 +37,34 @@ class H2OAdapterManager(AdapterManager):
         Returns:
             tuple[str, str]: Tuple returning the ontology IRI of the Ml model type, and ontology IRI of the ML library
         """
-        return ([
+        # start h2o
+        h2o.init()
+
+        # load model
+        winnermodel = h2o.load_model(os.path.join(config.result_folder_location, 'model_h2o.p'))
+
+        # get Type
+        model_type = type(winnermodel).__name__
+
+        lib = [
                     ":h2o_lib",
                     #":xgboost_lib" not implemented yet, but possible
-                ],
-                [
-                    ":artificial_neural_network",
-                    ":distributed_random_forest",
-                    ":gradient_boosting_tree",
-                    ":stacking_ensemble",
-                ])
+                ]
+
+        # Map Type
+        if model_type == 'H2ODeepLearningEstimator':
+            model_name = ":artificial_neural_network"
+        elif model_type == 'H2ORandomForestEstimator':
+            model_name = ":distributed_random_forest"
+        elif model_type == 'H2OGradientBoostingEstimator':
+            model_name = ":gradient_boosting_tree"
+        elif model_type == 'H2OStackedEnsembleEstimator':
+            model_name = ":stacking_ensemble"
+        else:
+            raise Exception("H2O AdapterManager: Unbekannter Modelltyp: " + model_type)
+
+        # return name
+        return (lib,model_name)
 
     def _load_model_and_make_probabilities(self, config: "StartAutoMlRequest", result_folder_location: str, dataframe: pd.DataFrame):
         """Must be overwriten! Load the found model, and execute a prediction using the provided data to calculate the probability metric used by the ExplanableAI module inside the controller
@@ -60,7 +78,7 @@ class H2OAdapterManager(AdapterManager):
         if self._loaded_training_id != config["training_id"]:
             print(f"ExplainModel: Model not already loaded; Loading model")
             h2o.init()
-            self.__automl = h2o.load_model(os.path.join(sys.path[0], 'model_h2o.p'))
+            self.__automl = h2o.load_model(os.path.join(result_folder_location, 'model_h2o.p'))
 
             self._loaded_training_id = config["training_id"]
             # Get prediction probabilities and send them back.
