@@ -11,9 +11,7 @@ import h2o
 async def main():
     """The adapter main function starting the adapter GRPC server and waiting on incoming requests of the controller
     """
-    print("started")
     h2o.init()
-    #h2o.demo("glm")
     server = Server([AdapterService()])
     await server.start(get_config_property('grpc-server-address'), os.getenv('GRPC_SERVER_PORT'))
     await server.wait_closed()

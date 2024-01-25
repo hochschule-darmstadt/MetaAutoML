@@ -59,24 +59,12 @@ class H2OAdapterManager(AdapterManager):
         # Check if the requested training is already loaded. If not: Load model and load & prep dataset.
         if self._loaded_training_id != config["training_id"]:
             print(f"ExplainModel: Model not already loaded; Loading model")
-            # with open(result_folder_location + '/model_keras.p', 'rb') as file:
-            #     self.__automl = dill.load(file)
-            #     # Export model as AutoKeras does not provide the prediction probability.
-            #     self.__automl = self.__automl.export_model()
             h2o.init()
             self.__automl = h2o.load_model(os.path.join(sys.path[0], 'model_h2o.p'))
 
             self._loaded_training_id = config["training_id"]
             # Get prediction probabilities and send them back.
         probabilities = self.__automl.predict(np.array(dataframe.values.tolist()))
-        # Keras is strange as it does not provide a predict_proba() function to get the class probabilities.
-        # Instead, it returns these probabilities (in case there is a binary classification) when calling predict
-        # but only as a one dimensional array. Shap however requires the probabilities in the format
-        # [[prob class 0, prob class 1], [...]]. So to return the proper format we have to process the results of
-        # predict().
-        # #TODO multiclass shape missing
-        # if probabilities.shape[1] == 1:
-        #     probabilities = [[1 - prob[0], prob[0]] for prob in probabilities.tolist()]
-        # probabilities = json.dumps(probabilities)
+
         return probabilities
 
