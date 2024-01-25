@@ -206,9 +206,11 @@ hr {
 }
 
 .SearchBarOverlay div p {
-    white-space: nowrap; /* verhindert den Umbruch des Textes */
+    white-space: nowrap; 
 }
 
+
+/*Headings on helppage displayed in searchpage*/
 .heading6 {
     margin-left: 2rem;
     color: #5c78ef;
@@ -217,4 +219,15 @@ hr {
     margin-inline-end: 0px;
     text-align: left;
     margin-bottom: 0.5rem;
+}
+
+/*Custom highlighting for searchpage*/
+.custom-highlight {
+    background-color: yellow; 
+    color: inherit; 
+    padding: 0; 
+    margin: 0; 
+    display: inline; 
+    font-size: inherit; 
+    line-height: inherit; 
 }
