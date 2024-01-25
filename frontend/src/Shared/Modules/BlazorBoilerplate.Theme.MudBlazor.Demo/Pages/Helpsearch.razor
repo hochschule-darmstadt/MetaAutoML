@@ -69,12 +69,12 @@
                         <MudCardHeader Style="border-bottom-style: inset; border-bottom-width: 1px;">
                             <CardHeaderContent>
                                 <h6 class="h6 mud-typography-h6 heading6" style="color: var(--rz-text-title-color);">
-                                    <MudHighlighter HighlightedText="@query" Text="@introductionTab.PanelHeadline" Class="custom-highlight h6 mud-typography-h6 heading6" />
+                                    <MudHighlighter HighlightedText="@highlight" Text="@introductionTab.PanelHeadline" Class="custom-highlight h6 mud-typography-h6 heading6" />
                                 </h6>
                             </CardHeaderContent>
                         </MudCardHeader>
                         <MudCardContent>
-                            <MudHighlighter Style="margin-top:1rem;" HighlightedText="@query" Text="@introductionTab.Text" />
+                            <MudHighlighter Style="margin-top:1rem;" HighlightedText="@highlight" Text="@introductionTab.Text" />
                             <MudImage Style="width:92%;margin-top:1rem;" Src="@(@introductionTab.Image)" />
                             @foreach (Section section in this.introductionTab.Sections)
                             {
@@ -82,12 +82,12 @@
                                     <MudItem xs="6" Style="padding-top: 10rem;">
                                         @{string content = @section.Headline;}
                                         <h6 class="h6 mud-typography-h6 heading6">
-                                            <MudHighlighter Markup="false" HighlightedText="@query" Text="@content" id="@content" Class="custom-highlight h6 mud-typography-h6 heading6" />
+                                            <MudHighlighter Markup="false" HighlightedText="@highlight" Text="@content" id="@content" Class="custom-highlight h6 mud-typography-h6 heading6" />
                                         </h6>
                                         @{
                                             content = @section.Text;
                                         }
-                                        <MudHighlighter Markup="false" HighlightedText="@query" Text="@content" Style="margin-top:1rem;" />
+                                        <MudHighlighter Markup="false" HighlightedText="@highlight" Text="@content" Style="margin-top:1rem;" />
                                     </MudItem>
                                     <MudItem xs="6">
                                         <img style=" width: 90%; margin: 3rem; padding-top: 5rem; padding-right: 2rem;" src="@(section.GIF)" />
@@ -100,7 +100,7 @@
                         <MudCardHeader Style="border-bottom-style: inset; border-bottom-width: 1px;">
                             <CardHeaderContent>
                                 <h6 class="h6 mud-typography-h6 heading6" style="color: var(--rz-text-title-color);">
-                                    <MudHighlighter HighlightedText="@query" Text="@pagesTab.PanelHeadline" Class="custom-highlight h6 mud-typography-h6 heading6" />
+                                    <MudHighlighter HighlightedText="@highlight" Text="@pagesTab.PanelHeadline" Class="custom-highlight h6 mud-typography-h6 heading6" />
                                 </h6>
                             </CardHeaderContent>
                         </MudCardHeader>
@@ -115,7 +115,7 @@
                                             string content = @section.Headline;
                                         }
                                         <h6 class="h6 mud-typography-h6 heading6" style="color: var(--mud-palette-secondary) !important;">
-                                        <MudHighlighter Markup="false" HighlightedText="@query" Text="@content" Class="custom-highlight h6 mud-typography-h6 heading6"/>
+                                        <MudHighlighter Markup="false" HighlightedText="@highlight" Text="@content" Class="custom-highlight h6 mud-typography-h6 heading6"/>
                                         </h6>
                                         @{
                                             content = section.Text;
@@ -124,7 +124,7 @@
                                         {
                                             content += $"<br /><br /><b>{subsection.SubHeadline}</b><br />{subsection.SubText}";
                                         }
-                                        <MudHighlighter Markup="true" HighlightedText="@query" Text="@content" Style="margin-top:0.5rem;" Typo="Typo.body2" />
+                                        <MudHighlighter Markup="true" HighlightedText="@highlight" Text="@content" Style="margin-top:0.5rem;" Typo="Typo.body2" />
                                     </MudItem>
                                     <MudItem xs="6">
                                         <img style=" width: 90%; margin: 3rem; padding-right: 2rem;" src="@(section.GIF)" />
@@ -139,7 +139,7 @@
                                             string content = section.Headline;
                                         }
                                         <h6 class="h6 mud-typography-h6 heading6" style="color: var(--mud-palette-secondary) !important;">
-                                        <MudHighlighter Markup="false" HighlightedText="@query" Text="@content" Class="custom-highlight h6 mud-typography-h6 heading6" />
+                                        <MudHighlighter Markup="false" HighlightedText="@highlight" Text="@content" Class="custom-highlight h6 mud-typography-h6 heading6" />
                                         </h6>
                                         <img style=" width: 90%; margin: 2rem; padding-right: 2rem;" src="@(section.GIF)" />
                                     </MudItem>
@@ -151,7 +151,7 @@
                                         {
                                             content += $"<br /><br /><b>{subsection.SubHeadline}</b><br />{subsection.SubText}";
                                         }
-                                        <MudHighlighter Markup="true" HighlightedText="@query" Text="@content" Style="margin-top:8rem;" Typo="Typo.body2" />
+                                        <MudHighlighter Markup="true" HighlightedText="@highlight" Text="@content" Style="margin-top:8rem;" Typo="Typo.body2" />
                                     </MudItem>
                                 </MudGrid>
                                 }
@@ -208,6 +208,8 @@
 
 	private string _query;
 
+    private string highlight = "";
+
     private HelpSearchComponent searchComponent;
     private HelpSearchEntry shownEntry { get; set; }
     private WikiDataResult wikiData;
@@ -252,9 +254,10 @@
 		await JSRuntime.InvokeVoidAsync("scrollToAnchor", anchorId);
 	}
 
-	protected override async Task OnParametersSetAsync()
-	{
-		if (!string.IsNullOrEmpty(query))
+
+    private async void SelectSection(string text)
+    {
+        if (!string.IsNullOrEmpty(text))
 		{
 			// Determine which tab the anchor point is on
 			var tabIndex = -1;
@@ -262,7 +265,7 @@
 
 			foreach (var section in introductionTab.Sections)
 			{
-				if (section.Headline.Contains(query))
+				if (section.Headline.Contains(text))
 				{
 					tabIndex = 0; // Index for the Introduction tab
 					targetSection = section;
@@ -274,7 +277,7 @@
 			{
 				foreach (var section in pagesTab.Sections)
 				{
-					if (section.Headline.Contains(query))
+					if (section.Headline.Contains(text))
 					{
 						tabIndex = 1; // Index for the Pages tab
 						targetSection = section;
@@ -284,14 +287,17 @@
 			}
 
 			// Switch to the correct tab and then scroll to the anchor point
-			if (tabIndex != -1 && targetSection != null)
+			if (tabs != null && tabIndex != -1 && targetSection != null)
 			{
-				tabs.ActivePanelIndex = tabIndex;
-				await Task.Delay(100); // Short delay to give the UI time to switch tabs
-				await ScrollToSection(targetSection.Anchor);
+                Task.Run(() =>
+                    {
+                        tabs.ActivePanelIndex = tabIndex;
+				        Task.Delay(100).Wait(); // Short delay to give the UI time to switch tabs
+				        ScrollToSection(targetSection.Anchor);
+                    });
 			}
 		}
-	}
+    }
 
     private string GetNavLinkClass(HelpSearchEntry entry)
     {
@@ -305,6 +311,9 @@
         if (_searchResults.Count() > 0 && _searchResults.First() != null)
         {
             SelectEntry(_searchResults.First());
+        }else
+        {
+            highlight = text;
         }
 
         if(searchComponent != null)
@@ -323,6 +332,9 @@
             return;
         }
 
+        SelectSection(entry.Title);
+
+        highlight = entry.Title;
         shownEntry = entry;
         wikiData = null;
 
@@ -358,11 +370,11 @@
 		{
 			case HelpSearchResultType.ONTOLOGY:
 				{
-					return Icons.Material.Filled.Web;
+					return Icons.Material.Filled.Article;
 				}
 			case HelpSearchResultType.HELP_ARTICLE:
 				{
-					return Icons.Material.Filled.Article;
+                    return Icons.Material.Filled.Web;
 				}
 			default:
 				{

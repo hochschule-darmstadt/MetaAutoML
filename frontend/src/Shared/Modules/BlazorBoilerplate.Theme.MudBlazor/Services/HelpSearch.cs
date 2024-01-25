@@ -19,7 +19,7 @@ namespace BlazorBoilerplate.Theme.Material.Services
         public IEnumerable<HelpSearchEntry> SearchEntries {
             get
             {
-                return _ontologieEntries.Union(_helpPageEntries);
+                return _helpPageEntries.Union(_ontologieEntries);
             }
         }
 
