@@ -69,7 +69,7 @@
                         <MudCardHeader Style="border-bottom-style: inset; border-bottom-width: 1px;">
                             <CardHeaderContent>
                                 <h6 class="h6 mud-typography-h6 heading6" style="color: var(--rz-text-title-color);">
-                                    <MudHighlighter HighlightedText="@query" Text="@introductionTab.PanelHeadline" Class="h6 mud-typography-h6 heading6" />
+                                    <MudHighlighter HighlightedText="@query" Text="@introductionTab.PanelHeadline" Class="custom-highlight h6 mud-typography-h6 heading6" />
                                 </h6>
                             </CardHeaderContent>
                         </MudCardHeader>
@@ -100,7 +100,7 @@
                         <MudCardHeader Style="border-bottom-style: inset; border-bottom-width: 1px;">
                             <CardHeaderContent>
                                 <h6 class="h6 mud-typography-h6 heading6" style="color: var(--rz-text-title-color);">
-                                    <MudHighlighter HighlightedText="@query" Text="@pagesTab.PanelHeadline" Class="h6 mud-typography-h6 heading6" />
+                                    <MudHighlighter HighlightedText="@query" Text="@pagesTab.PanelHeadline" Class="custom-highlight h6 mud-typography-h6 heading6" />
                                 </h6>
                             </CardHeaderContent>
                         </MudCardHeader>
@@ -115,7 +115,7 @@
                                             string content = @section.Headline;
                                         }
                                         <h6 class="h6 mud-typography-h6 heading6" style="color: var(--mud-palette-secondary) !important;">
-                                        <MudHighlighter Markup="false" HighlightedText="@query" Text="@content" Class="h6 mud-typography-h6 heading6"/>
+                                        <MudHighlighter Markup="false" HighlightedText="@query" Text="@content" Class="custom-highlight h6 mud-typography-h6 heading6"/>
                                         </h6>
                                         @{
                                             content = section.Text;
@@ -139,7 +139,7 @@
                                             string content = section.Headline;
                                         }
                                         <h6 class="h6 mud-typography-h6 heading6" style="color: var(--mud-palette-secondary) !important;">
-                                        <MudHighlighter Markup="false" HighlightedText="@query" Text="@content" Class="h6 mud-typography-h6 heading6" />
+                                        <MudHighlighter Markup="false" HighlightedText="@query" Text="@content" Class="custom-highlight h6 mud-typography-h6 heading6" />
                                         </h6>
                                         <img style=" width: 90%; margin: 2rem; padding-right: 2rem;" src="@(section.GIF)" />
                                     </MudItem>
