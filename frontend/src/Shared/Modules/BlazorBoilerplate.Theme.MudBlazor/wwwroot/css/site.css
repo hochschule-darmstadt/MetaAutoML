@@ -231,3 +231,57 @@ hr {
     font-size: inherit; 
     line-height: inherit; 
 }
+
+/* Basic styling for the navigation menu with 'mud-nav-menu' class */
+.mud-nav-menu2 {
+    width: 100%;
+    overflow-y: auto;
+    padding-right: 0;
+    margin-right: 0;
+    margin-left: 0;
+    padding-left: 0;
+    direction: rtl; /* Set text direction to Right-to-Left to move scrollbar to the left side */
+    height: 53vh;
+    overflow-y: auto;
+}
+
+    .mud-nav-menu2 > * {
+        direction: ltr; /* Reset text direction to Left-to-Right for child elements */
+    }
+
+    /* Customizing the scrollbar */
+    .mud-nav-menu2::-webkit-scrollbar {
+        width: 10px;
+    }
+
+    .mud-nav-menu2::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px; /* Rounded corners for scrollbar track */
+    }
+
+    .mud-nav-menu2::-webkit-scrollbar-thumb {
+        background: #888;
+        border-radius: 10px; /* Rounded corners for scrollbar thumb */
+        min-height: 50px; /* Minimum height for scrollbar thumb */
+    }
+
+        .mud-nav-menu2::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+/* Height adjustment based on screen size */
+@media screen and (min-height: 800px) {
+    .mud-nav-menu2 {
+        height: 800px;
+    }
+}
+
+@media screen and (min-height: 1200px) {
+    .mud-nav-menu2 {
+        height: 1000px;
+    }
+}
+
+.mud-nav-menu2 > div > div {
+    padding-left: 0;
+}

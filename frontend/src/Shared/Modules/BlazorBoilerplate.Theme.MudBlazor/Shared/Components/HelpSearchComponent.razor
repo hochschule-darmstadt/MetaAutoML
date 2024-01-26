@@ -104,22 +104,23 @@
         return searchEntry.Concat(helpSearch.SearchTop10(value)).ToList();
 	}
 
-    private string GetIconOfOrigin(HelpSearchResultType origin)
-    {
-        switch (origin)
-        {
-            case HelpSearchResultType.ONTOLOGY:
-            {
-                return Icons.Material.Filled.Web;
-            }
-            case HelpSearchResultType.HELP_ARTICLE:
-            {
-                return Icons.Material.Filled.Article;
-            }
-            default:
-            {
-                return null;
-            }
-        }
-    }
+	/* Display icons in the navigation bar */
+	private string GetIconOfOrigin(HelpSearchResultType origin)
+	{
+		switch (origin)
+		{
+			case HelpSearchResultType.ONTOLOGY:
+				{
+					return Icons.Material.Filled.Article;
+				}
+			case HelpSearchResultType.HELP_ARTICLE:
+				{
+					return Icons.Material.Filled.Web;
+				}
+			default:
+				{
+					return null;
+				}
+		}
+	}
 }

@@ -26,10 +26,10 @@
 	        <MudItem xs="3">
 		        <div Style="margin: 16px">
 		            <MudText Color="Color.Dark" Typo="Typo.h6">Results</MudText>
-					<MudNavMenu Rounded="true" Margin="Margin.Normal" Color="Color.Secondary" Class="pa-2" Style="width:14.2rem">
+					<MudNavMenu Rounded="true" Margin="Margin.Normal" Color="Color.Secondary" Class="pa-2 mud-nav-menu2" Style="height: 53vh; overflow-y: auto;">
 					@foreach (HelpSearchEntry entry in _searchResults)
 					{
-						<MudNavLink Class="@GetNavLinkClass(entry)" @onclick="() => SelectEntry(entry)">
+						<MudNavLink Style="margin: 0; padding: 0; width: 100%; padding-left: 0;" Class="@GetNavLinkClass(entry)" @onclick="() => SelectEntry(entry)">
 							<MudIcon Style="font-size:15px" Class="d-inline" Icon="@GetIconOfOrigin(entry.Type)" Title="Favorite" />
 							@entry.OptionText
 						</MudNavLink>
@@ -78,7 +78,7 @@
                             <MudImage Style="width:92%;margin-top:1rem;" Src="@(@introductionTab.Image)" />
                             @foreach (Section section in this.introductionTab.Sections)
                             {
-                                <MudGrid id="@(section.Anchor)">
+                                <MudGrid id="@(section.Anchor.Replace(" ", "_"))">
                                     <MudItem xs="6" Style="padding-top: 10rem;">
                                         @{string content = @section.Headline;}
                                         <h6 class="h6 mud-typography-h6 heading6">
@@ -109,7 +109,7 @@
                             {
                                 @if ((this.pagesTab.Sections.IndexOf(section) % 2) == 0)
                                 {
-                                <MudGrid id="@(section.Anchor)">
+                                <MudGrid id="@(section.Anchor.Replace(" ", "_"))">
                                     <MudItem xs="6">
                                         @{
                                             string content = @section.Headline;
@@ -122,7 +122,7 @@
                                         }
                                         @foreach (Subsection subsection in section.Subsections)
                                         {
-                                            content += $"<br /><br /><b>{subsection.SubHeadline}</b><br />{subsection.SubText}";
+                                            content += $"<br /><br /><b id='{subsection.SubHeadline.Replace(" ", "_")}'>{subsection.SubHeadline}</b><br />{subsection.SubText}";
                                         }
                                         <MudHighlighter Markup="true" HighlightedText="@highlight" Text="@content" Style="margin-top:0.5rem;" Typo="Typo.body2" />
                                     </MudItem>
@@ -133,7 +133,7 @@
                                 }
                                 else
                                 {
-                                <MudGrid Style="border-bottom-style: inset; border-bottom-width: 1px; padding-bottom: 2rem;" id="@(section.Anchor)">
+                                <MudGrid Style="border-bottom-style: inset; border-bottom-width: 1px; padding-bottom: 2rem;" id="@(section.Anchor.Replace(" ", "_"))">
                                     <MudItem xs="6">
                                         @{
                                             string content = section.Headline;
@@ -149,7 +149,7 @@
                                         }
                                         @foreach (Subsection subsection in section.Subsections)
                                         {
-                                            content += $"<br /><br /><b>{subsection.SubHeadline}</b><br />{subsection.SubText}";
+													content += $"<br /><br /><b id='{subsection.SubHeadline.Replace(" ", "_")}'>{subsection.SubHeadline}</b><br />{subsection.SubText}";
                                         }
                                         <MudHighlighter Markup="true" HighlightedText="@highlight" Text="@content" Style="margin-top:8rem;" Typo="Typo.body2" />
                                     </MudItem>
@@ -255,49 +255,83 @@
 	}
 
 
-    private async void SelectSection(string text)
-    {
-        if (!string.IsNullOrEmpty(text))
+	private async void SelectSection(string text)
+	{
+		if (!string.IsNullOrEmpty(text) && tabs != null)
 		{
-			// Determine which tab the anchor point is on
 			var tabIndex = -1;
-			Section targetSection = null;
+			string targetAnchor = null;
 
-			foreach (var section in introductionTab.Sections)
+			// Check sections in the Introduction tab
+			if (introductionTab?.Sections != null)
 			{
-				if (section.Headline.Contains(text))
+				foreach (var section in introductionTab.Sections)
 				{
-					tabIndex = 0; // Index for the Introduction tab
-					targetSection = section;
-					break;
+					if (section.Headline.Contains(text))
+					{
+						tabIndex = 0; // Index for the Introduction tab
+						targetAnchor = section.Anchor.Replace(" ", "_");
+						break;
+					}
+
+					// Check subsections within the section
+					if (section.Subsections != null)
+					{
+						foreach (var subsection in section.Subsections)
+						{
+							if (subsection.SubHeadline.Contains(text))
+							{
+								tabIndex = 0; // Still within the Introduction tab
+								targetAnchor = subsection.SubHeadline.Replace(" ", "_");
+								break;
+							}
+						}
+					}
+
+					if (targetAnchor != null) break;
 				}
 			}
 
-			if (tabIndex == -1)
+			// Check sections in the Pages tab if not found in Introduction tab
+			if (tabIndex == -1 && pagesTab?.Sections != null)
 			{
 				foreach (var section in pagesTab.Sections)
 				{
 					if (section.Headline.Contains(text))
 					{
 						tabIndex = 1; // Index for the Pages tab
-						targetSection = section;
+						targetAnchor = section.Anchor.Replace(" ", "_");
 						break;
 					}
+
+					// Check subsections within the section
+					if (section.Subsections != null)
+					{
+						foreach (var subsection in section.Subsections)
+						{
+							if (subsection.SubHeadline.Contains(text))
+							{
+								tabIndex = 1; // Still within the Pages tab
+								targetAnchor = subsection.SubHeadline.Replace(" ", "_");
+								break;
+							}
+						}
+					}
+
+					if (targetAnchor != null) break;
 				}
 			}
 
 			// Switch to the correct tab and then scroll to the anchor point
-			if (tabs != null && tabIndex != -1 && targetSection != null)
+			if (tabIndex != -1 && targetAnchor != null)
 			{
-                Task.Run(() =>
-                    {
-                        tabs.ActivePanelIndex = tabIndex;
-				        Task.Delay(100).Wait(); // Short delay to give the UI time to switch tabs
-				        ScrollToSection(targetSection.Anchor);
-                    });
+				tabs.ActivePanelIndex = tabIndex;
+				await Task.Delay(100); // Short delay to give the UI time to switch tabs
+				await ScrollToSection(targetAnchor);
 			}
 		}
-    }
+	}
+
 
     private string GetNavLinkClass(HelpSearchEntry entry)
     {
