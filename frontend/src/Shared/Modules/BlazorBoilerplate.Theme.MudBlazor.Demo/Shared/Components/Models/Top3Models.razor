@@ -13,31 +13,56 @@
             {
                 <ButtonTooltip Text="Click here to to display all models that have been trained so far on this dataset." Position="Placement.Left">
                     <MudButton Href="@("/datasets/" + Dataset.Dataset.Id + "/models")"
-                               Variant="Variant.Filled"
-                               StartIcon="@Icons.Material.Filled.ReadMore"
-                               Color="Color.Secondary"
-                               Size="Size.Small"
-                               Style="margin-top: 8px">@L["More"]</MudButton>
-                    </ButtonTooltip>
-                            }
-                    </CardHeaderActions>
+                            Variant="Variant.Filled"
+                            StartIcon="@Icons.Material.Filled.ReadMore"
+                            Color="Color.Secondary"
+                            Size="Size.Small"
+                            Style="margin-top: 8px">@L["More"]</MudButton>
+                </ButtonTooltip>
+            }
+        </CardHeaderActions>
     </MudCardHeader>
     <MudCardContent>
         <MudPaper Height="250px" Elevation="0">
-            @if (_top3Models == null)
+            @if (_models == null)
             {
                 <DataLoaderSpinner />
             }
             else
             {
-                <MudTable Items="@_top3Models.Models" FixedHeader="true" style="width:stretch" class="mat-elevation-z5" AllowSelection="false" Dense="true" Height="245px">
+                <MudTable Items="@_models.Models" FixedHeader="true" style="width:stretch" class="mat-elevation-z5" AllowSelection="false" Dense="true" Height="245px" CustomHeader="true">
                     <HeaderContent>
-                        <MudTh>@L["Name"]</MudTh>
-                        <MudTh>@L["Model"]</MudTh>
-                        <MudTh>@L["ML Library"]</MudTh>
-                        <MudTh>@L["Metric"]</MudTh>
-                        <MudTh>@L["Prediction time"]</MudTh>
-                        <MudTh>@L["Training time"]</MudTh>
+                        <MudTHeadRow>
+                            <MudTh>@L["Name"]</MudTh>
+                            <MudTh>@L["Model"]</MudTh>
+                            <MudTh>@L["ML Library"]</MudTh>
+                            <MudTh>
+                                <MudTableSortLabel SortBy="@(new Func<ModelDto, object>(x=> SelectedMetric != "" ?
+                                                                                                        x.Metrics.Count() > 0 ?
+                                                                                                            x.Metrics.Where(y => y.Name.ID == SelectedMetric).First().Score.ToString()
+                                                                                                            : ""
+                                                                                                        : ""))">@L["Metric"]</MudTableSortLabel>
+                            </MudTh>
+                            <MudTh>@L["Prediction time"]</MudTh>
+                            <MudTh>@L["Training time"]</MudTh>
+                        </MudTHeadRow>
+                        <MudTHeadRow>
+                            <MudTh></MudTh>
+                            <MudTh></MudTh>
+                            <MudTh></MudTh>
+                            <MudTh>
+                                <MudSelect T="string" @bind-Value=SelectedMetric>
+                                    @foreach (var metric in _metrics)
+                                    {
+                                        <MudSelectItem Value="@metric.Name.ID">
+                                            <MudText Typo="Typo.body2">@metric.Name.Properties["skos:prefLabel"]</MudText>
+                                        </MudSelectItem>
+                                    }
+                                </MudSelect>
+                            </MudTh>
+                            <MudTh></MudTh>
+                            <MudTh></MudTh>
+                        </MudTHeadRow>
                     </HeaderContent>
                     <RowTemplate>
                         <MudTd>
@@ -55,9 +80,17 @@
                         <MudTd>
                              <MudText>@context.GetMlLibraryString()</MudText>
                         </MudTd>
-                        <MudTd >@String.Format("{0:0.00}", context.Metrics)</MudTd>
-                        <MudTd >@String.Format("{0:0}", context.PredictionTime) ms</MudTd>
-                        <MudTd>@(context.RuntimeProfile.EndTime.Subtract(context.RuntimeProfile.StartTime).TotalSeconds.ToString("0 s"))</MudTd>
+                        <MudTd >
+                            @if (!String.IsNullOrEmpty(SelectedMetric))
+                            {
+                                @if (context.Metrics.Where(x => x.Name.ID == SelectedMetric).Count() == 1)
+                                {
+                                    @(String.Format("{0:0.00}", context.Metrics.Where(x => x.Name.ID == SelectedMetric).First().Score))
+                                }
+                            }
+                        </MudTd>
+                        <MudTd>@(String.Format("{0:0}", context.PredictionTime * 1000)) µs</MudTd>
+                        <MudTd>@(context.RuntimeProfile.EndTime.Subtract(context.RuntimeProfile.StartTime).TotalMinutes.ToString("0 min"))</MudTd>
                     </RowTemplate>
                 </MudTable>
             }
@@ -67,8 +100,8 @@
 
 @code {
     [Parameter]
-    public GetDatasetResponseDto Dataset 
-    { 
+    public GetDatasetResponseDto Dataset
+    {
         get
         {
             return _dataset;
@@ -83,7 +116,9 @@
         }
     }
     private GetDatasetResponseDto _dataset;
-    private GetModelsResponseDto _top3Models;
+    private GetModelsResponseDto _models;
+    private List<Metric> _metrics = new List<Metric>();
+    private string SelectedMetric { get; set; } = "";
 
     private async Task LoadTrainings()
     {
@@ -93,9 +128,9 @@
 
             if (apiResponse.IsSuccessStatusCode)
             {
-                _top3Models = Newtonsoft.Json.JsonConvert.DeserializeObject<GetModelsResponseDto>(apiResponse.Result.ToString());
+                _models = Newtonsoft.Json.JsonConvert.DeserializeObject<GetModelsResponseDto>(apiResponse.Result.ToString());
+                UpdateMetricsList();
                 StateHasChanged();
-                viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
             }
             else
             {
@@ -105,6 +140,25 @@
         catch (Exception ex)
         {
             viewNotifier.Show(ex.GetBaseException().Message, ViewNotifierType.Error, L["Operation Failed"]);
+        }
+    }
+
+    private void UpdateMetricsList()
+    {
+        foreach (var model in _models.Models)
+        {
+            foreach (var metric in model.Metrics)
+            {
+                if (_metrics.Where(x => x.Name.Properties["skos:prefLabel"] == metric.Name.Properties["skos:prefLabel"]).Count() == 0)
+                {
+                    _metrics.Add(metric);
+                }
+            }
+        }
+        _metrics = _metrics.OrderBy(x => x.Name.Properties["skos:prefLabel"]).ToList();
+        if (_metrics.Count > 0 && SelectedMetric == "")
+        {
+            SelectedMetric = _metrics[0].Name.ID;
         }
     }
 }

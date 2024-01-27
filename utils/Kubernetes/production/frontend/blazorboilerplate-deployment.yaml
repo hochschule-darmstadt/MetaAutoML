@@ -84,7 +84,7 @@ spec:
         resources:
           limits:
             cpu: "2"
-            memory: "4094304e3"
+            memory: "6094304e3"
       restartPolicy: Always
       hostAliases:
       - ip: "127.0.0.1"

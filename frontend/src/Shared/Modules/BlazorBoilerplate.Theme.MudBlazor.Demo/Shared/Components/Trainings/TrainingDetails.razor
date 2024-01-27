@@ -7,7 +7,7 @@
 @using Radzen
 @using Radzen.Blazor
 
-<MudCard Elevation="5">
+<MudCard Elevation="5" >
     <MudCardHeader Style="border-bottom-style: inset; border-bottom-width: 1px;">
         <CardHeaderContent>
             <MudText Typo="Typo.h6">@L["Leaderboard"]</MudText>
@@ -22,7 +22,7 @@
             else
             {
                 <TrainingTimeline Training="@Training" />
-                <MudTable Items="@Training.Training.models" Context="models" Filter="new Func<ModelDto,bool>(FilterFunc)" CustomHeader="true">
+                <MudTable Items="@Training.Training.models" Context="models" Filter="new Func<ModelDto,bool>(FilterFunc)" CustomHeader="true" data-form-ninthStep data-form-tenthStep>
                     <ToolBarContent>
                         <MudSpacer />
                             <MudTextField @bind-Value="searchString" Placeholder="@L["Search by AutoML solution, status, ML model or library"]" Adornment="Adornment.Start"
@@ -41,15 +41,19 @@
                                                                                                         : ""
                                                                                                     : ""))">@L["Metric"]</MudTableSortLabel>
                             </MudTh>
-                            <MudTh><MudTableSortLabel SortBy="new Func<ModelDto, object>(x=>x.RuntimeProfile)">
-    <LabelTooltip Label=@L["Training time"] FontSize="TextStyle.Body1" Text="Runtime for training the entire dataset in minutes" Position="Radzen.TooltipPosition.Top"></LabelTooltip>
-</MudTableSortLabel></MudTh>
+                            <MudTh>
+								<MudTableSortLabel SortBy="new Func<ModelDto, object>(x=>x.Runtime)">
+									<LabelTooltip Label=@L["Training time"] FontSize="TextStyle.Body1" Text="Runtime for training the entire dataset in minutes" Position="Radzen.TooltipPosition.Top"></LabelTooltip>
+								</MudTableSortLabel>
+							</MudTh>
                             <MudTh><MudTableSortLabel SortBy="new Func<ModelDto, object>(x=>x.Emissions)">
                                        <LabelTooltip Label=@L["Training emissions"] FontSize="TextStyle.Body1" Text="Emissions for training the entire dataset in kg CO2 equivalents." Position="Radzen.TooltipPosition.Top"></LabelTooltip>
                                 </MudTableSortLabel></MudTh>
-                             <MudTh><MudTableSortLabel SortBy="new Func<ModelDto, object>(x=>x.PredictionTime)">
-    <LabelTooltip Label=@L["Prediction time"] FontSize="TextStyle.Body1" Text="Runtime for predicting one single sample in microseconds." Position="Radzen.TooltipPosition.Top"></LabelTooltip>
-                                </MudTableSortLabel></MudTh>
+                             <MudTh>
+								 <MudTableSortLabel SortBy="new Func<ModelDto, object>(x=>x.PredictionTime)">
+									<LabelTooltip Label=@L["Prediction time"] FontSize="TextStyle.Body1" Text="Runtime for predicting one single sample in microseconds." Position="Radzen.TooltipPosition.Top"></LabelTooltip>
+                                </MudTableSortLabel>
+							</MudTh>
                             <MudTh></MudTh>
                         </MudTHeadRow>
                         <MudTHeadRow>
@@ -58,7 +62,7 @@
                             <MudTh></MudTh>
                             <MudTh></MudTh>
                             <MudTh>
-                                <MudSelect T="string" @bind-Value=SelectedMetric>
+                                <MudSelect Disabled=@IsDisabled T="string" Label="@L["Metric"]" @bind-Value=SelectedMetric>
                                     @foreach (var metric in _metrics)
                                     {
                                         <MudSelectItem Value="@metric.Name.ID">
@@ -73,7 +77,7 @@
                             <MudTh></MudTh>
                         </MudTHeadRow>
                     </HeaderContent>
-                    <RowTemplate>
+                    <RowTemplate >
                         <MudTd>
                             @(models.AutoMlSolution.Properties.ContainsKey("skos:prefLabel") ? models.AutoMlSolution.Properties["skos:prefLabel"] : "")
                         </MudTd>
@@ -87,9 +91,18 @@
                                 @L[models.Status]
                             }
                         </MudTd>
-                        <MudTd>
-                            <MudLink Href="@NavManager.ToAbsoluteUri("trainings/" + Training.Training.Id + "/models/" + @models.Id).AbsoluteUri" Style="cursor: pointer; display: flex;"><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.Lightbulb" Style="margin-right: 4px;" />@(models.GetMlModelString())</MudLink>
-                        </MudTd>
+                        @if (tourActivated)
+                        {
+                            <MudTd>
+                                <MudLink Href="@NavManager.ToAbsoluteUri("trainings/" + Training.Training.Id + "/models/" + @models.Id+"?TourStep=eleventhStep").AbsoluteUri" Style="cursor: pointer; display: flex;"><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.Lightbulb" Style="margin-right: 4px;"/>@(models.GetMlModelString())</MudLink>
+                            </MudTd>
+                        }
+                        else
+                        {
+                            <MudTd>
+                                <MudLink Href="@NavManager.ToAbsoluteUri("trainings/" + Training.Training.Id + "/models/" + @models.Id).AbsoluteUri" Style="cursor: pointer; display: flex;"><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.Lightbulb" Style="margin-right: 4px;" />@(models.GetMlModelString())</MudLink>
+                            </MudTd>
+                        }
                         <MudTd>@(models.GetMlLibraryString())</MudTd>
                         <MudTd>
                             @if (!String.IsNullOrEmpty(SelectedMetric))
@@ -103,11 +116,12 @@
                         <MudTd>
                             @if (models.Status == "busy")
                             {
-                                @(DateTime.UtcNow.Subtract(models.RuntimeProfile.StartTime).TotalMinutes.ToString("0 min"))
+                                @(models.Runtime = DateTime.UtcNow.Subtract(models.RuntimeProfile.StartTime).TotalMinutes.ToString("0 min"))
+
                             }
                             else
                             {
-                                @(models.RuntimeProfile.EndTime.Subtract(models.RuntimeProfile.StartTime).TotalMinutes.ToString("0 min"))
+                                @(models.Runtime = models.RuntimeProfile.EndTime.Subtract(models.RuntimeProfile.StartTime).TotalMinutes.ToString("0 min"))
                             }
                         </MudTd>
                         <MudTd>
@@ -134,8 +148,19 @@
         </MudPaper>
     </MudCardContent>
 </MudCard>
+<UserTour></UserTour>
 
 @code {
+    [Inject]
+    private ITourService TourService { get; set; }
+    private bool tourActivated = false;
+    protected override void OnInitialized()
+    {
+        // tourActivated = TourService.checkIfUserTourIsActivated(NavManager.Uri);
+        tourActivated = TourService.checkIfUserTourIsActivated();
+
+    }
+
     [Parameter]
     public GetTrainingResponseDto Training
     {
@@ -166,6 +191,7 @@
     private GetTrainingResponseDto _training;
     private Timer _timer;
     private string searchString = "";
+    protected bool IsDisabled { get; set; }
 
     private bool FilterFunc(ModelDto element)
     {
@@ -181,6 +207,7 @@
             return true;
         return false;
     }
+
     public void Dispose()
     {
         DisposeTimer();
@@ -188,6 +215,7 @@
 
     private void UpdateMetricsList()
     {
+        IsDisabled = true;
         foreach (var model in _training.Training.models)
         {
             foreach (var metric in model.Metrics)
@@ -203,6 +231,7 @@
         {
             SelectedMetric = _metrics[0].Name.ID;
             StateHasChanged();
+            IsDisabled = false;
         }
     }
 
@@ -264,4 +293,4 @@
             _timer = null;
         }
     }
-}
+    }

@@ -60,6 +60,7 @@ using static BlazorBoilerplate.Constants.PasswordPolicy;
 using static IdentityModel.JwtClaimTypes;
 using static IdentityServer4.IdentityServerConstants;
 using static Microsoft.AspNetCore.Http.StatusCodes;
+using GTour;
 
 namespace BlazorBoilerplate.Server
 {
@@ -177,6 +178,11 @@ namespace BlazorBoilerplate.Server
             ////////////////////////////////////////////////////////////////////////////////////////////////////////
             //OMA-ML SERVICES
             ///////////////////////////////////////////////////////////////////////////////////////////////////////
+
+            services.UseGTour();
+            GTourService.Theme = new GTour.Themes.CustomTheme();
+
+            services.AddScoped<ITourService, TourService>();
 
             services.AddTransient<IDatasetManager, DatasetManager>();
             services.AddTransient<IOntologyManager, OntologyManager>();

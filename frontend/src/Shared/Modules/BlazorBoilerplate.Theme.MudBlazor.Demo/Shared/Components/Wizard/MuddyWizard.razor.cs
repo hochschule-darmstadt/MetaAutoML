@@ -1,3 +1,4 @@
+using BlazorBoilerplate.Theme.Material.Services;
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
 using MudBlazor.Utilities;
@@ -482,6 +483,13 @@ namespace BlazorBoilerplate.Theme.Material.Demo.Shared.Components.Wizard
         {
             // Select the next panel.
             Select(SelectedIndex + 1);
+        }
+        protected async void OnNextTourActivated()
+        {
+            // Select the next panel.
+            Select(SelectedIndex + 1);
+            //TourService userTour = new TourService(GTourService, NavManager);
+            await GTourService.StartTour("FormGuidedTour", "fifthStep");
         }
 
         // *******************************************************************

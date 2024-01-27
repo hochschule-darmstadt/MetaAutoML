@@ -43,7 +43,6 @@ namespace BlazorBoilerplate.UI.Base.Pages.Admin
 
                 if (identityResponse.IsSuccessStatusCode)
                 {
-                    viewNotifier.Show(identityResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
                     identityResources = identityResponse.Result;
                 }
                 else

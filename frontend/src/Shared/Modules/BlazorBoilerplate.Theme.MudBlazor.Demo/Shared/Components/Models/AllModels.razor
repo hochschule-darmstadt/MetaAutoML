@@ -59,7 +59,7 @@
                                                                                                 <MudTh></MudTh>
                                                                                                 <MudTh></MudTh>
                                                                                                 <MudTh>
-                                                                                                    <MudSelect T="string" @bind-Value=SelectedMetric>
+                                                                                                    <MudSelect Disabled=@IsDisabled Label="@L["Metric"]" T="string" @bind-Value=SelectedMetric>
                                                                                                         @foreach (var metric in _metrics)
                                                                                                         {
                                                                                                             <MudSelectItem Value="@metric.Name.ID">
@@ -138,50 +138,53 @@
 </MudCard>
 
 @code {
-    [Parameter]
-    public EventCallback OnDeleteModelCompleted { get; set; }
-    [Parameter]
-    public string DatasetId { get; set; }
-    [Parameter]
-    public GetModelsResponseDto Models
-    {
-        get
-        {
-            return _models;
-        }
-        set
-        {
-            _models = value;
-            if (_models != null)
-            {
-                UpdateMetricsList();
-                StateHasChanged();
-            }
-        }
-    }
-    private string searchString = "";
-    private GetModelsResponseDto _models;
-    private List<Metric> _metrics = new List<Metric>();
-    private string SelectedMetric { get; set; } = "";
+	[Parameter]
+	public EventCallback OnDeleteModelCompleted { get; set; }
+	[Parameter]
+	public string DatasetId { get; set; }
+	[Parameter]
+	public GetModelsResponseDto Models
+	{
+		get
+		{
+			return _models;
+		}
+		set
+		{
+			_models = value;
+			if (_models != null)
+			{
+				UpdateMetricsList();
+				StateHasChanged();
+			}
+		}
+	}
+	private string searchString = "";
+	private GetModelsResponseDto _models;
+	private List<Metric> _metrics = new List<Metric>();
+	private string SelectedMetric { get; set; } = "";
+	protected bool IsDisabled { get; set; }
 
-    private void UpdateMetricsList()
-    {
-        foreach (var model in _models.Models)
-        {
-            foreach (var metric in model.Metrics)
-            {
-                if (_metrics.Where(x => x.Name.Properties["skos:prefLabel"] == metric.Name.Properties["skos:prefLabel"]).Count() == 0)
-                {
-                    _metrics.Add(metric);
-                }
-            }
-        }
-        _metrics = _metrics.OrderBy(x => x.Name.Properties["skos:prefLabel"]).ToList();
-        if (_metrics.Count > 0 && SelectedMetric == "")
-        {
-            SelectedMetric = _metrics[0].Name.ID;
-            StateHasChanged();
-        }
+	private void UpdateMetricsList()
+	{
+		IsDisabled = true;
+		foreach (var model in _models.Models)
+		{
+			foreach (var metric in model.Metrics)
+			{
+				if (_metrics.Where(x => x.Name.Properties["skos:prefLabel"] == metric.Name.Properties["skos:prefLabel"]).Count() == 0)
+				{
+					_metrics.Add(metric);
+				}
+			}
+		}
+		_metrics = _metrics.OrderBy(x => x.Name.Properties["skos:prefLabel"]).ToList();
+		if (_metrics.Count > 0 && SelectedMetric == "")
+		{
+			SelectedMetric = _metrics[0].Name.ID;
+			StateHasChanged();
+			IsDisabled = false;
+		}
     }
     private bool FilterFunc(ModelDto element)
     {

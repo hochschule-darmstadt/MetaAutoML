@@ -16,7 +16,7 @@
 @using Radzen
 @using Radzen.Blazor
 
-<MudCard Elevation="5">
+<MudCard Elevation="5" data-form-twelfthStep>
     <MudCardHeader Style="border-bottom-style: inset; border-bottom-width: 1px;">
         <CardHeaderContent>
             <LabelTooltip FontSize="TextStyle.H6" Label=@L["Use model for predicting new cases"] Text="You may use the model for predicting new cases within the OMA-ML platform without having to install anything. Simply upload a file with the new cases." Position="Radzen.TooltipPosition.Bottom"></LabelTooltip>
@@ -24,7 +24,7 @@
         <CardHeaderActions>
             <MudStack Row="true" Class="align-content-center" Style="margin-top: 8px">
                 <ButtonTooltip Text="Click here to upload a file with new cases to be predicted. Please note: the file must have the identical format as the training dataset." Position="Placement.Bottom">
-                    <MudButton OnClick="OnOpenUpload"
+                    <MudButton OnClick="OnOpenUpload" data-form-eleventhStep
                                Variant="MudBlazor.Variant.Filled"
                                Color="Color.Secondary"
                                StartIcon="@Icons.Material.Filled.Upload"
@@ -68,14 +68,14 @@
                                 <MudTd>
                                     @if (context.Status == "completed")
                                     {
-                                        <MudButton StartIcon="@Icons.Filled.CloudDownload" OnClick="@(() => DownlaodPrediction(context))" Variant="MudBlazor.Variant.Filled" Color="Color.Secondary" Size="Size.Small">@L["Download predictions"]</MudButton>
+                                        <MudButton StartIcon="@Icons.Material.Filled.CloudDownload" OnClick="@(() => DownlaodPrediction(context))" Variant="MudBlazor.Variant.Filled" Color="Color.Secondary" Size="Size.Small">@L["Download predictions"]</MudButton>
                                         <MudButton StartIcon="@Icons.Material.Filled.ViewList" OnClick="@(() => OpenPredictionResults(context))" Variant="MudBlazor.Variant.Filled" Color="Color.Secondary" Size="Size.Small">
                                             @L["View predictions"]
                                         </MudButton>
                                     }
                                     else
                                     {
-                                        <MudButton StartIcon="@Icons.Filled.CloudDownload" Variant="MudBlazor.Variant.Filled" Color="Color.Secondary" Size="Size.Small" Disabled="true">@L["Download predictions"]</MudButton>
+                                        <MudButton StartIcon="@Icons.Material.Filled.CloudDownload" Variant="MudBlazor.Variant.Filled" Color="Color.Secondary" Size="Size.Small" Disabled="true">@L["Download predictions"]</MudButton>
                                     }
                                 </MudTd>
                             </RowTemplate>
@@ -205,13 +205,14 @@
                         if (!string.IsNullOrEmpty(jsonString))
                         {
                             string tableHeader = jsonString.Split("\n")[0];
-                            string[] tableContent = jsonString.Split("\n").Skip(1).ToArray();
+                            string[] tableContent = jsonString.Split("\n");
+                            long tableRowCount = tableContent.Length - 1;
+                            tableContent = tableContent.Skip(1).Take(20).ToArray();
                             parameters.Add("TableHeader", tableHeader);
                             parameters.Add("TableContent", tableContent);
+                            parameters.Add("TableRowCount", tableRowCount);
+                            parameters.Add("PredictionId", predictionDataset.Id);
                         }
-
-
-
 
                         DialogService.Show<PredictionResult>("Predictions", parameters, options);
 

@@ -1,35 +1,13 @@
-using Azure;
-using BlazorBoilerplate.Constants;
 using BlazorBoilerplate.Infrastructure.Server;
 using BlazorBoilerplate.Infrastructure.Server.Models;
 using BlazorBoilerplate.Shared.Dto.Dataset;
 using BlazorBoilerplate.Shared.Dto.Ontology;
 using BlazorBoilerplate.Storage;
-using Grpc.Core;
-using Grpc.Net.Client;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.Analysis;
-using Microsoft.Extensions.Logging;
-using MudBlazor.Charts;
 using Newtonsoft.Json;
-using Serilog.Core;
-using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.IO;
-using System.Linq;
 using System.Net;
-using System.Net.Http;
-using System.Text;
-using System.Threading.Tasks;
 using UtfUnknown;
 using static Microsoft.AspNetCore.Http.StatusCodes;
 using System.IO.Compression;
-using System.Runtime.CompilerServices;
-using Karambolo.Common;
-using System.Diagnostics;
-using static MudBlazor.CategoryTypes;
 
 namespace BlazorBoilerplate.Server.Managers
 {
@@ -91,6 +69,16 @@ namespace BlazorBoilerplate.Server.Managers
                 {
                     fs.Dispose();
 
+                    string fileExt = Path.GetExtension(filePath);
+                    if (!CheckSupportedFileType(fileExt))
+                    {
+                        return new ApiResponse(Status406NotAcceptable, "FileTypeNotSupportedErrorMessage");
+                    }
+                    if (fileExt == ".zip" && !CheckZIPStructure(filePath))
+                    {
+                        return new ApiResponse(Status406NotAcceptable, "FolderStructureNotCorrectErrorMessage");
+                    }
+
                     grpcRequest.DatasetType = request.DatasetType;
                     DetectionResult result;
                     if (grpcRequest.DatasetType == ":text" || grpcRequest.DatasetType == ":tabular" || grpcRequest.DatasetType == ":time_series" || grpcRequest.DatasetType == ":time_series_longitudinal")
@@ -100,39 +88,42 @@ namespace BlazorBoilerplate.Server.Managers
                             result = CharsetDetector.DetectFromStream(fs1);
 
                         }
-                        grpcRequest.Encoding = result.Detected.EncodingName.ToString();
-                        //ascii data encoding causes some issues with some automl, UTF-8 is a safe encoding that covers all ascii signs
-                        if (grpcRequest.Encoding == "ascii")
+                        if (result.Detected == null)
                         {
+                            if (fileExt != ".xlsx" && fileExt != ".xls")
+                            {
+                                return new ApiResponse(Status406NotAcceptable, "EncodingNotSupportedErrorMessage");
+                            }
                             grpcRequest.Encoding = "utf-8";
+                        }
+                        else
+                        {
+                            grpcRequest.Encoding = result.Detected.EncodingName.ToString();
+                            //ascii data encoding causes some issues with some automl, UTF-8 is a safe encoding that covers all ascii signs
+                            if (grpcRequest.Encoding == "ascii")
+                            {
+                                grpcRequest.Encoding = "utf-8";
+                            }
                         }
                     }
                     else
                     {
                         grpcRequest.Encoding = "";
                     }
-                    bool correctStrukture = CheckUploadStructure(filePath);
 
-                    if (correctStrukture == true)
-                        {
-                            grpcRequest.UserId = username;
-                            grpcRequest.FileName = trustedFileNameForDisplay;
-                            grpcRequest.DatasetName = request.DatasetName;
-                            grpcRequest.DatasetType = request.DatasetType;
-                            var reply = _client.CreateDataset(grpcRequest);
-                            return new ApiResponse(Status200OK, null, "");
-                    }
-                    else
-                    {
-                        return new ApiResponse(Status406NotAcceptable, "FolderStructureNotCorrectErrorMessage");
-                    }
+                    grpcRequest.UserId = username;
+                    grpcRequest.FileName = trustedFileNameForDisplay;
+                    grpcRequest.DatasetName = request.DatasetName;
+                    grpcRequest.DatasetType = request.DatasetType;
+                    var reply = _client.CreateDataset(grpcRequest);
+                    return new ApiResponse(Status200OK, null, "");
                 }
                 return new ApiResponse(Status200OK, null, "");
             }
             catch (Exception ex)
             {
                 return new ApiResponse(Status404NotFound, ex.Message);
-            }     
+            }
         }
         /// <summary>
         /// Get a list of all Datasets
@@ -239,9 +230,7 @@ namespace BlazorBoilerplate.Server.Managers
                 switch (reply.Dataset.Type)
                 {
                     case ":tabular":
-                     
                         response.DatasetPreview = datasetLocation;
-
                         break;
                     case ":image":
                         datasetLocation = datasetLocation.Replace(".zip", "");
@@ -261,15 +250,12 @@ namespace BlazorBoilerplate.Server.Managers
                         }
                         break;
                     case ":text":
-
-                        response.DatasetPreview = datasetLocation; 
+                        response.DatasetPreview = datasetLocation;
                         break;
                     case ":time_series":
-                      
                         response.DatasetPreview = datasetLocation;
                         break;
                     case ":time_series_longitudinal":
-                       
                         response.DatasetPreview = datasetLocation;
                         break;
                     default:
@@ -341,42 +327,11 @@ namespace BlazorBoilerplate.Server.Managers
                 var analysis = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(reply.Dataset.Analysis);
                 int index = 0;
                 string graph_path = "";
+                // check if analysis for yprofilling exist, set to the bool in dto
                 if (analysis != null)
                 {
-                    if (analysis.Count != 0)
-                    {
-                        if (analysis["plots"] != null)
-                        {
-                            foreach (var category in analysis["plots"])
-                            {
-                                DatasetAnalysisCategory datasetAnalysisCategory = new DatasetAnalysisCategory()
-                                {
-                                    CategoryTitle = category.SelectToken("title")
-                                };
-                                foreach (var item in category["items"])
-                                {
-                                    if (request.GetShortPreview == true && index++ == 3)
-                                    {
-                                        break;
-                                    }
-                                    graph_path = item.SelectToken("path").ToString();
-                                    if (is_mutagen_setup == "YES")
-                                    {
-                                        graph_path = graph_path.Replace(mutagen_docker_ataset_folder_path, mutagen_dataset_folder_path);
-                                    }
-                                    DatasetAnalysis datasetAnalysis = new DatasetAnalysis()
-                                    {
-                                        Title = item.SelectToken("title").ToString(),
-                                        Type = item.SelectToken("type").ToString(),
-                                        Description = item.SelectToken("description").ToString(),
-                                        Content = GetImageAsBytes(graph_path)
-                                    };
-                                    datasetAnalysisCategory.Analyses.Add(datasetAnalysis);
-                                }
-                                response.AnalysisCategories.Add(datasetAnalysisCategory);
-                            }
-                        }
-                    }
+                    if (analysis.ContainsKey("report_html_path")) response.ydataprofilling = analysis["report_html_path"];
+                    else response.ydataprofilling = null;
                 }
                 return new ApiResponse(Status200OK, null, response);
 
@@ -389,34 +344,33 @@ namespace BlazorBoilerplate.Server.Managers
             }
         }
 
-        private bool CheckUploadStructure(string filePath)
+        private bool CheckSupportedFileType(string fileExt)
         {
-            string fileExt = filePath.Substring(filePath.Length - 4);
-            List<string> zipEntries = new List<string>();
-
-            if (fileExt == ".csv")
+            if (fileExt == ".csv" || fileExt == ".arff" || fileExt == ".xlsx" || fileExt == ".xls" || fileExt == ".zip")
             {
-                // .csv does not need validation at the moment
-                return true; 
+                return true;
             }
-            else if (fileExt == ".zip")
+            return false;
+        }
+
+        private bool CheckZIPStructure(string filePath)
+        {
+            List<string> zipEntries = new List<string>();
+            using (ZipArchive archive = ZipFile.OpenRead(filePath))
             {
-                using (ZipArchive archive = ZipFile.OpenRead(filePath))
+                foreach (ZipArchiveEntry entry in archive.Entries)
                 {
-                    foreach (ZipArchiveEntry entry in archive.Entries)
+                    // take only top level folders, look for test and train
+                    if (entry.FullName.EndsWith("/train/") || entry.FullName.EndsWith("/test/"))
                     {
-                        // take only top level folders, look for test and train
-                        if (entry.FullName.EndsWith("/train/") || entry.FullName.EndsWith("/test/"))
-                        {
-                            zipEntries.Add(entry.FullName);
-                        }
+                        zipEntries.Add(entry.FullName);
                     }
                 }
-                // if test and train are found, return true
-                if (zipEntries.Count == 2)
-                {
-                    return true;
-                }
+            }
+            // if test and train are found, return true
+            if (zipEntries.Count == 2)
+            {
+                return true;
             }
             return false;
         }

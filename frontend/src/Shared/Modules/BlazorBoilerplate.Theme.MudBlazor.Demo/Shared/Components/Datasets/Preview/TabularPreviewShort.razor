@@ -1,4 +1,4 @@
-﻿
+
 @if (Dataset == null)
 {
         <DataLoaderSpinner />
@@ -25,5 +25,4 @@ else
 @code {
     [Parameter]
     public DataFrame Dataset { get; set; }
-    private string searchString = "";
 }

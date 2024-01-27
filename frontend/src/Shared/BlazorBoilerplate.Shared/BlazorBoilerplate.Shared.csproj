@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
     <Title>BlazorBoilerplate Shared</Title>
@@ -25,6 +25,8 @@
     <PackageReference Include="Radzen.Blazor" Version="4.17.1" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\GTour\src\GTour.Abstractions\GTour.Abstractions.csproj" />
+    <ProjectReference Include="..\..\GTour\src\GTour\GTour.csproj" />
     <ProjectReference Include="..\..\Utils\BlazorBoilerplate.SourceGenerator\BlazorBoilerplate.SourceGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
     <ProjectReference Include="..\BlazorBoilerplate.Constants\BlazorBoilerplate.Constants.csproj" />
     <ProjectReference Include="..\BlazorBoilerplate.Infrastructure.AuthorizationDefinitions\BlazorBoilerplate.Infrastructure.AuthorizationDefinitions.csproj" />
@@ -33,6 +35,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Remove="Radzen.Blazor" />
+    <None Remove="STGTour.GTour" />
   </ItemGroup>
   <ItemGroup>
     <None Update="Dto\Admin\ResourceDtoCustomUserClaims.tt">
