@@ -92,6 +92,7 @@ namespace BlazorBoilerplate.Theme.Material.Services
             return list.Select(e => Tuple.Create(e.MatchScore(search), e))
                 .Where(e => e.Item1 > 0)
                 .OrderByDescending(e => e.Item1)
+                .ThenByDescending(e => e.Item2.Type)
                 .Select(e => e.Item2);
         }
 
