@@ -25,12 +25,12 @@
 	        </MudItem>
 	        <MudItem xs="3">
 		        <div Style="margin: 16px">
-		            <MudText Color="Color.Dark" Typo="Typo.h6">Results</MudText>
+		            <MudText Color="Color.Dark" Typo="Typo.h6">@L["Results"]</MudText>
 					<MudNavMenu Rounded="true" Margin="Margin.Normal" Color="Color.Secondary" Class="pa-2 mud-nav-menu2" Style="height: 53vh; overflow-y: auto;">
 					@foreach (HelpSearchEntry entry in _searchResults)
 					{
 						<MudNavLink Style="margin: 0; padding: 0; width: 100%; padding-left: 0;" Class="@GetNavLinkClass(entry)" @onclick="() => SelectEntry(entry)">
-							<MudIcon Style="font-size:15px" Class="d-inline" Icon="@GetIconOfOrigin(entry.Type)" Title="Favorite" />
+							<MudIcon Style="font-size:15px" Class="d-inline" Icon="@GetIconOfOrigin(entry.Type)" />
 							@entry.OptionText
 						</MudNavLink>
 					}
@@ -56,7 +56,7 @@
                         <p>@wikiData?.Description</p>
                         if(!string.IsNullOrEmpty(wikiData.WikiUrl))
                         {
-                            <a href="@wikiData?.WikiUrl" target="_blank" referrerpolicy="no-referrer">Mehr Infos</a>
+                            <a href="@wikiData?.WikiUrl" target="_blank" referrerpolicy="no-referrer">@L["More Info"]</a>
                         }
                     }
                 </div>
@@ -348,6 +348,7 @@
         }else
         {
             highlight = text;
+            shownEntry = null;
         }
 
         if(searchComponent != null)

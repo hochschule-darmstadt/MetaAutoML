@@ -2017,3 +2017,15 @@ msgstr "{0} more entries available"
 msgctxt "Global"
 msgid "Enable tutorial"
 msgstr "Enable tutorial"
+
+msgctxt "Global"
+msgid "More Info"
+msgstr "More Info"
+
+msgctxt "Global"
+msgid "Results"
+msgstr "Results"
+
+msgctxt "Global"
+msgid "Help search ..."
+msgstr "Help search ..."

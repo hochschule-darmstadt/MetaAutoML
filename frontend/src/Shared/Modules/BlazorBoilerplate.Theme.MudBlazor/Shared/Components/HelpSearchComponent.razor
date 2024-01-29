@@ -3,15 +3,16 @@
 @namespace BlazorBoilerplate.Theme.Material.Demo.Shared.Components
 @inject NavigationManager navigationManager
 @inject IHelpSearch helpSearch
+@inject IStringLocalizer<Global> L
 @using MudBlazor
 
 <MudAutocomplete @ref="autocompleteElement" T="HelpSearchEntry" @bind-Value="State" Required="false" @bind-Text="@searchInputText"
 				 SearchFunc="@SearchAsync" Immediate="true" ResetValueOnEmptyText="true"
-                 Margin="Margin.Dense" Dense="true" Label="Help search ..."
+                 Margin="Margin.Dense" Dense="true" Label=@L["Help search ..."]
 				 AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Primary"
 				 MaxLength=50 ListClass="SearchBarList" PopoverClass="SearchBarOverlay">
 	<ItemTemplate Context="e">
-		<MudIcon Style="font-size:15px;" Class="d-inline" Icon="@GetIconOfOrigin(e.Type)" Title="Favorite" />
+		<MudIcon Style="font-size:15px;" Class="d-inline" Icon="@GetIconOfOrigin(e.Type)" />
 		<MudText Style="font-size:15px;" Class="d-inline">
 			<MudHighlighter Text="@e.OptionText" HighlightedText="@searchInputText?.Trim()" />
 		</MudText>
