@@ -51,6 +51,7 @@ namespace BlazorBoilerplate.Shared.Interfaces
         Task<ApiResponseDto> GetTrainings(GetTrainingsRequestDto request);
         Task<ApiResponseDto> GetTraining(GetTrainingRequestDto request);
         Task<ApiResponseDto> DeleteTraining(DeleteTrainingRequestDto request);
+        Task<ApiResponseDto> GetSuggestedTrainingRuntime(GetTrainingSuggestedRuntimeRequestDto request);
         #endregion
 
         #region OMA-ML MODEL MESSAGES

@@ -239,3 +239,24 @@ class TrainingManager:
         result = self.__data_storage.delete_training(delete_training_request.user_id, delete_training_request.training_id)
         self.__log.debug(f"delete_training: {str(result)} trainings deleted")
         return DeleteTrainingResponse()
+
+    def get_suggested_training_runtime(
+        self, get_suggested_training_runtime_request: "GetSuggestedTrainingRuntimeRequest"
+    ) -> "GetSuggestedTrainingRuntimeResponse":
+        """Delete a training from database and disc
+
+        Args:
+            get_suggested_training_runtime_request (GetSuggestedTrainingRuntimeRequest): The GRPC request containing the user id, dataset id
+
+        Returns:
+            DeleteTrainingResponse: The GRPC response containing the suggested runtime
+        """
+        response = GetSuggestedTrainingRuntimeResponse()
+        self.__log.debug(f"get_suggested_training_runtime: trying to get dataset {get_suggested_training_runtime_request.dataset_id} for user {get_suggested_training_runtime_request.user_id}")
+        found, dataset = self.__data_storage.get_dataset(get_suggested_training_runtime_request.user_id, get_suggested_training_runtime_request.dataset_id)
+        if not found:
+            self.__log.error(f"get_suggested_training_runtime: dataset {get_suggested_training_runtime_request.dataset_id} for user {get_suggested_training_runtime_request.user_id} not found")
+            raise grpclib.GRPCError(grpclib.Status.NOT_FOUND, f"Dataset {get_suggested_training_runtime_request.dataset_id} for user {get_suggested_training_runtime_request.user_id} not found, already deleted?")
+
+        #TODO runtime suggestion computation
+        return response

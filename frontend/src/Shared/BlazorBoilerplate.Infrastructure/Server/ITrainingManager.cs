@@ -15,5 +15,6 @@ namespace BlazorBoilerplate.Infrastructure.Server
         Task<ApiResponse> GetTrainings(GetTrainingsRequestDto request);
         Task<ApiResponse> GetTraining(GetTrainingRequestDto request);
         Task<ApiResponse> DeleteTraining(DeleteTrainingRequestDto request);
+        Task<ApiResponse> GetTrainingRuntimeSuggestion(GetTrainingSuggestedRuntimeRequestDto request);
     }
 }

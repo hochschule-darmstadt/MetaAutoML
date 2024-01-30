@@ -204,5 +204,30 @@ namespace BlazorBoilerplate.Server.Managers
                 return new ApiResponse(Status404NotFound, ex.Message);
             }
         }
+        /// <summary>
+        /// Get suggested training runtime
+        /// </summary>
+        /// <returns></returns>
+        public async Task<ApiResponse> GetTrainingRuntimeSuggestion(GetTrainingSuggestedRuntimeRequestDto request)
+        {
+            GetSuggestedTrainingRuntimeRequest getTrainingRuntimeRequest = new GetSuggestedTrainingRuntimeRequest();
+            var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
+            try
+            {
+                getTrainingRuntimeRequest.DatasetId = request.DatasetId;
+                getTrainingRuntimeRequest.UserId = username;
+                GetSuggestedTrainingRuntimeResponse reply = _client.GetSuggestedTrainingRuntime(getTrainingRuntimeRequest);
+                GetTrainingSuggestedRuntimeResponseDto response = new GetTrainingSuggestedRuntimeResponseDto();
+                response.SuggestedRuntime = reply.SuggestedRuntime;
+                return new ApiResponse(Status200OK, null, response);
+
+            }
+            catch (Exception ex)
+            {
+
+                Console.WriteLine(ex.Message);
+                return new ApiResponse(Status404NotFound, ex.Message);
+            }
+        }
     }
 }
