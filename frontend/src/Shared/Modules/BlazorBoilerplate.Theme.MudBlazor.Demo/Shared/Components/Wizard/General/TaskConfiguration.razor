@@ -568,9 +568,9 @@
                         .Select(ConvertObjectInfoToChip)),
             errorMessageKey: "SupportedMlLibraries Operation Failed");
 
-            apiResponse = await apiClient.GetSuggestedTrainingRuntime(new GetTrainingSuggestedRuntimeRequestDto() { DatasetId = Dataset.Dataset.Id });
+            var suggestedRuntimeResponse = await apiClient.GetSuggestedTrainingRuntime(new GetTrainingSuggestedRuntimeRequestDto() { DatasetId = Dataset.Dataset.Id });
 
-            if (apiResponse.IsSuccessStatusCode)
+            if (suggestedRuntimeResponse.IsSuccessStatusCode)
             {
                 GetTrainingSuggestedRuntimeResponseDto response = Newtonsoft.Json.JsonConvert.DeserializeObject<GetTrainingSuggestedRuntimeResponseDto>(apiResponse.Result.ToString());
 
@@ -578,7 +578,7 @@
             }
             else
             {
-                viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
+                viewNotifier.Show(suggestedRuntimeResponse.Message + " : " + suggestedRuntimeResponse.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
             }
         }
         catch (Exception ex)
