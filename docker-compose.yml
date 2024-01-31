@@ -47,6 +47,8 @@ services:
       - GAMA_SERVICE_PORT=50065
       - LAMA_SERVICE_HOST=lama
       - LAMA_SERVICE_PORT=50066
+      - H2O_SERVICE_HOST=h2o
+      - H2O_SERVICE_PORT=50067
       - PERSISTENCE_LOGGING_LEVEL=DEBUG
       - SERVER_LOGGING_LEVEL=DEBUG
       - ONTOLOGY_LOGGING_LEVEL=DEBUG
@@ -95,15 +97,15 @@ services:
       dockerfile: ./adapters/H2O/Dockerfile
     container_name: h2o
     environment:
-      - GRPC_SERVER_PORT=50052
-      - EXPLAINER_DASHBOARD_PORT_START=6000
-      - EXPLAINER_DASHBOARD_PORT_END=6009
+      - GRPC_SERVER_PORT=50067
+      - EXPLAINER_DASHBOARD_PORT_START=6110
+      - EXPLAINER_DASHBOARD_PORT_END=6119
       - DOCKER_COMPOSE=YES
     volumes:
       - datasets:/app/app-data/datasets
       - training-autokeras:/app/app-data/training
     ports:
-      - "6000-6009:6000-6009"
+      - "6110-6119:6110-6119"
 
 #   autokeras:
 #     build:
