@@ -81,8 +81,6 @@ namespace BlazorBoilerplate.Server
         }
         public void ConfigureServices(IServiceCollection services)
         {
-            services.UseGTour();
-            GTourService.Theme = new GTour.Themes.CustomTheme();
             services.AddSingleton<ILocalizationProvider, StorageLocalizationProvider>();
             services.AddTextLocalization(options =>
             {

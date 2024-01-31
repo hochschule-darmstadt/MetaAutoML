@@ -23,7 +23,6 @@
 	<PackageReference Include="System.Security.Cryptography.Xml" Version="6.0.1" />
     <PackageReference Include="System.Text.RegularExpressions" Version="4.3.1" />
     <PackageReference Include="Radzen.Blazor" Version="4.17.1" />
-    <PackageReference Include="STGTour.GTour" Version="1.0.8" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\GTour\src\GTour.Abstractions\GTour.Abstractions.csproj" />

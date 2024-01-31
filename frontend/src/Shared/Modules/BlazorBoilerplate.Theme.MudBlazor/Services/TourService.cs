@@ -1,9 +1,4 @@
-using System;
 using Microsoft.AspNetCore.Components;
-using System.Net.NetworkInformation;
-using GTour.Abstractions;
-using MudBlazor;
-using BlazorBoilerplate.Theme.Material.Shared.Components;
 using BlazorBoilerplate.Shared.Interfaces;
 using GTour.Abstractions;
 
