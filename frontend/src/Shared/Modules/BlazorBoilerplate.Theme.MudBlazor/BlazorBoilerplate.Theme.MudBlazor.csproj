@@ -16,7 +16,6 @@
     <PackageReference Include="System.Net.Http.Json" Version="6.0.0" />
     <PackageReference Include="Toolbelt.Blazor.LoadingBar" Version="13.1.2" />
     <PackageReference Include="Wiki.Net" Version="4.1.0" />
-    <PackageReference Include="STGTour.GTour" Version="1.0.8" />
   </ItemGroup>
 
   <ItemGroup>
