@@ -2,13 +2,14 @@
 @using Microsoft.AspNetCore.Components
 @using MudBlazor
 @inject IStringLocalizer<Global> L
+@inject NavigationManager NavManager
 
 @inherits MudComponentBase
 
 <CascadingValue Value="this" IsFixed="true">
-    <MudCard @attributes="UserAttributes" 
-             Class="@Classname" 
-             Style="@Style" 
+    <MudCard @attributes="UserAttributes"
+             Class="@Classname"
+             Style="@Style"
              Elevation="@Elevation"
              Outlined="@Outlined"
              Square="@Square">
@@ -24,20 +25,20 @@
                                 <MudItem>
                                     @if (panel == SelectedPanel)
                                     {
-                                        <MudChip Size="Size.Small" 
-                                                Color="@HeaderChipSelectedColor" 
-                                                Variant="@HeaderChipVariant"
-                                                Text="@panel.Title"/> 
+                                        <MudChip Size="Size.Small"
+                                                 Color="@HeaderChipSelectedColor"
+                                                 Variant="@HeaderChipVariant"
+                                                 Text="@panel.Title" />
                                     }
                                     else
                                     {
-                                        <MudChip Size="Size.Small" 
-                                                Text="@panel.Title"
-                                                Variant="@HeaderChipVariant"
-                                                Color="@HeaderChipColor"
-                                                OnClick="(() => ChipSelect(panel))" /> 
+                                        <MudChip Size="Size.Small"
+                                                 Text="@panel.Title"
+                                                 Variant="@HeaderChipVariant"
+                                                 Color="@HeaderChipColor"
+                                                 OnClick="(() => ChipSelect(panel))" />
                                     }
-                                </MudItem> 
+                                </MudItem>
                             }
                         </MudGrid>
                     }
@@ -45,17 +46,17 @@
                     {
                         if (!ShowChips)
                         {
-                            <MudText Class="mt-2 mx-2" 
+                            <MudText Class="mt-2 mx-2"
                                      Typo="@TitleTypo"
                                      Color="@TitleColor">
                                 @SelectedPanel?.Title
-                            </MudText> 
+                            </MudText>
                         }
-                        <MudText Class="mt-2 mx-2" 
+                        <MudText Class="mt-2 mx-2"
                                  Typo="@DescriptionTypo"
                                  Color="@DescriptionColor">
                             @SelectedPanel?.Description
-                        </MudText> 
+                        </MudText>
                     }
                 </CardHeaderContent>
                 <CardHeaderActions>
@@ -67,17 +68,17 @@
                                     <MudCheckBox Checked="@SaveSchema" T="bool" CheckedChanged="OnSaveSchemaCheckedChanged" Label="@L["Save Schema"]"></MudCheckBox>
                                 </ButtonTooltip>
                             }
-                        <MudStack Row="true">
-                            <ButtonTooltip Text="Click here to get back to the last step of the training configuration wizard." Position="Placement.Bottom" ShowOnHover="(!IsPreviousDisabled)">
-                                <MudButton OnClick="OnPrevious"
-                                           Disabled="@IsPreviousDisabled"
-                                           Color="Color.Secondary"
-                                           Variant="@ButtonVariant" Style="height:fit-content">
-                                    @L["Previous"]
-                                </MudButton>
+                            <MudStack Row="true">
+                                <ButtonTooltip Text="Click here to get back to the last step of the training configuration wizard." Position="Placement.Bottom" ShowOnHover="(!IsPreviousDisabled)">
+                                    <MudButton OnClick="OnPrevious"
+                                               Disabled="@IsPreviousDisabled"
+                                               Color="Color.Secondary"
+                                               Variant="@ButtonVariant" Style="height:fit-content">
+                                        @L["Previous"]
+                                    </MudButton>
                                 </ButtonTooltip>
 
-                                @if (@IsFinishVisible)
+                                @if (@IsFinishVisible && !tourActivated)
                                 {
 
                                     <ButtonTooltip Text="Click here to finish configuration and start training. This may take a while, depending on your maximum runtime configuration." Position="Placement.Bottom">
@@ -90,7 +91,32 @@
                                     </ButtonTooltip>
 
                                 }
-                                else
+                                else if (@IsFinishVisible && tourActivated)
+                                {
+                                    <ButtonTooltip Text="Click here to finish configuration and start training. This may take a while, depending on your maximum runtime configuration." Position="Placement.Bottom">
+                                        <MudButton OnClick="OnFinish" data-form-eighthStep
+                                                   Color="Color.Secondary"
+                                                   Disabled="@DisableNext"
+                                                   Variant="@ButtonVariant">
+                                            @L["Finish"]
+                                        </MudButton>
+                                    </ButtonTooltip>
+
+                                }
+                                else if (tourActivated)
+                                {
+
+                                    <ButtonTooltip Text="Click here to advance to the next step of the training wizard: configuring the training. You can always step back." Position="Placement.Top">
+                                        <MudButton OnClick="OnNextTourActivated" data-form-forthStep 
+                                                   Disabled="@IsNextDisabled"
+                                                   Color="Color.Secondary"
+                                                   Variant="@ButtonVariant">
+                                            @L["Next"]
+                                        </MudButton>
+                                    </ButtonTooltip>
+
+                                }
+                                else if (!tourActivated)
                                 {
 
                                     <ButtonTooltip Text="Click here to advance to the next step of the training wizard: configuring the training. You can always step back." Position="Placement.Top">
@@ -103,8 +129,8 @@
                                     </ButtonTooltip>
 
                                 }
-                        </MudStack>
                             </MudStack>
+                        </MudStack>
                     </span>
                 </CardHeaderActions>
             </MudCardHeader>
@@ -115,4 +141,20 @@
             @ChildContent
         </MudCardContent>
     </MudCard>
-</CascadingValue> 
+</CascadingValue>
+
+
+@code{
+    [Inject]
+    ITourService TourService { get; set; }
+    [Inject]
+    private GTour.Abstractions.IGTourService GTourService { get; set; }
+    private bool tourActivated = false;
+
+    protected override void OnInitialized()
+    {
+        tourActivated = TourService.checkIfUserTourIsActivated();
+        // TourService userTour = new TourService(GTourService, NavManager);
+        // tourActivated = userTour.checkIfUserTourIsActivated(NavManager.Uri);
+    }
+}

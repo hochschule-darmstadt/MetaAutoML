@@ -1,0 +1,48 @@
+@code {
+
+    public AnchorLink()
+    {
+        this.Attributes = new Dictionary<string, object>();
+    }
+
+    [Parameter(CaptureUnmatchedValues = true)]
+    public IDictionary<string, object> Attributes { get; set; }
+
+    [Parameter]
+    public RenderFragment ChildContent { get; set; }
+
+    [Parameter]
+    public string TargetId { get; set; }
+
+
+
+    [Inject]
+    protected IJSRuntime JsInterop { get; set; }
+
+
+    protected override void OnParametersSet()
+    {
+        if (!this.Attributes.ContainsKey("id"))
+        {
+            this.Attributes["id"] = Guid.NewGuid().ToString();
+        }
+
+        this.Attributes["href"] = $"#{this.TargetId}";
+
+        base.OnParametersSet();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await this.JsInterop.InvokeVoidAsync("anchorLink.init", this.Attributes["id"]);
+        await base.OnAfterRenderAsync(firstRender);
+    }
+
+    private async Task AnchorOnClickAsync()
+    {
+        await this.JsInterop.InvokeVoidAsync("anchorLink.scrollIntoView", this.TargetId);
+    }
+
+}
+
+<a @attributes="this.Attributes" @onclick="this.AnchorOnClickAsync">@this.ChildContent</a>

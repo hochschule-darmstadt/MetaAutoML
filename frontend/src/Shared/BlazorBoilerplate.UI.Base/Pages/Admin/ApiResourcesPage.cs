@@ -43,7 +43,6 @@ namespace BlazorBoilerplate.UI.Base.Pages.Admin
 
                 if (apiResponse.IsSuccessStatusCode)
                 {
-                    viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
                     apiResources = apiResponse.Result;
                 }
                 else

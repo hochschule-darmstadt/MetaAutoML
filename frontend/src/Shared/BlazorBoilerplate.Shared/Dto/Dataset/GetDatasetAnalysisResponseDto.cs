@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,6 +9,8 @@ namespace BlazorBoilerplate.Shared.Dto.Dataset
     public class GetDatasetAnalysisResponseDto
     {
         public List<DatasetAnalysisCategory> AnalysisCategories { get; set; } = new List<DatasetAnalysisCategory>();
+        // y data profilling path
+        public string ydataprofilling { get; set; }
     }
     public class DatasetAnalysisCategory
     {

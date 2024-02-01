@@ -4,7 +4,7 @@
 @implements IDynamicComponent
 
 <MudNavMenu Rounded="true" Margin="Margin.Normal" Color="Color.Secondary" Class="pa-2" Style="width:14.2rem">
-   
+
     <MudNavLink Href="@navigationManager.ToAbsoluteUri(" ").AbsoluteUri" Match="NavLinkMatch.All" Icon="@Icons.Filled.Home">
         <ButtonTooltip Text="OMA-ML makes effective Machine Learning (ML) easy! Simply upload a dataset, start ML training and use ML models.
 From the home page you can navigate to trainings of ML models you have performed so far or open a dataset to start a new ML training." Position="Placement.Right">
@@ -20,7 +20,12 @@ This page lists all datasets you have uploaded so far to the OMA-ML platform. By
     <MudNavLink Href="@navigationManager.ToAbsoluteUri("trainings").AbsoluteUri" Icon="@Icons.Filled.ModelTraining">
         <ButtonTooltip Text="Machine learning consists of two phases: training and prediction. During the training phase, a ML model is generated from a dataset. This page lists all trainings you have performed so far. You can open a past training, select an ML model and use it for predicting new cases." Position="Placement.Right">
             @L["Trainings"]
-            </ButtonTooltip>
+        </ButtonTooltip>
+    </MudNavLink>
+    <MudNavLink Href="@navigationManager.ToAbsoluteUri("help").AbsoluteUri" Icon="@Icons.Material.Filled.HelpOutline">
+        <ButtonTooltip Text="Read how to solve different tasks with OMA-ML or start a guided tour." Position="Placement.Right">
+            @L["Help"]
+        </ButtonTooltip>
     </MudNavLink>
 </MudNavMenu>
 

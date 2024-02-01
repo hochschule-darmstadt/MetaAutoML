@@ -1,11 +1,34 @@
-﻿@implements IDynamicComponent
+@implements IDynamicComponent
 @inject AppState appState
 @inject CookieConsentService cookieConsentService
-©&nbsp;@DateTime.Now.Year&nbsp;<a href="//oma-ml.ai">@appState.AppName</a>&nbsp;Version 0.1.0 - Developed by&nbsp;Hochschule Darmstadt&nbsp; <MudButton Size="Size.Small" OnClick="@OnCookiePreferenceClick">Cookie Preferences</MudButton>
+@inject AuthenticationStateProvider authStateProvider
+@using BlazorBoilerplate.Shared.Models.Account
+@using Microsoft.AspNetCore.Components
+
+©&nbsp;@DateTime.Now.Year&nbsp;<a href="//oma-ml.ai">@appState.AppName</a>&nbsp;Version 0.1.0 - Developed by&nbsp;Hochschule Darmstadt&nbsp;
+<MudButton Size="Size.Small" OnClick="@OnCookiePreferenceClick">Cookie Preferences</MudButton>
+@if (userViewModel == null)
+{
+	<MudButton Size="Size.Small" Href="/imprint">Imprint</MudButton>
+}
 
 @code {
     public int Order { get => 1; }
     public string IntoComponent { get => "Footer"; }
+
+	[CascadingParameter] Task<AuthenticationState> authenticationStateTask { get; set; }
+	UserViewModel userViewModel;
+
+	protected override async Task OnParametersSetAsync()
+	{
+		userViewModel = null;
+		var user = (await authenticationStateTask).User;
+
+		if (user.Identity.IsAuthenticated)
+		{
+			userViewModel = await ((IdentityAuthenticationStateProvider)authStateProvider).GetUserViewModel();
+		}
+	}
 
     private void OnCookiePreferenceClick()
     {

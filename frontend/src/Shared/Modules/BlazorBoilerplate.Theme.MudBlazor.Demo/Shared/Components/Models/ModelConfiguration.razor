@@ -1,22 +1,23 @@
 @using Newtonsoft.Json.Linq
 @inject IStringLocalizer<Global> L
-
+@using Radzen
+@using Radzen.Blazor
 <MudCard Elevation="5">
     <MudCardHeader Style="border-bottom-style: inset; border-bottom-width: 1px;">
         <CardHeaderContent>
-            <LabelTooltip FontSize="Typo.h6" Label=@L["Configuration"] Text="Here you can inspect the original configuration that lead to the ML model." Position="Placement.Bottom"></LabelTooltip>
+            <LabelTooltip FontSize="TextStyle.H6" Label=@L["Configuration"] Text="Here you can inspect the original configuration that lead to the ML model." Position="Radzen.TooltipPosition.Bottom"></LabelTooltip>
         </CardHeaderContent>
-@*        <CardHeaderActions>
-            @if (Model != null)
-            {
-                <MudButton Href="@("/models/" + Model.Model.ID + "/details")"
-                    Variant="Variant.Filled" 
-                    EndIcon="@Icons.Material.Filled.ReadMore" 
-                    Color="Color.Secondary"
-                    Size="Size.Small"
-                       Style="margin-top: 8px">@L["More"]</MudButton>
-            }
-        </CardHeaderActions>*@
+        @*        <CardHeaderActions>
+                @if (Model != null)
+                {
+                    <MudButton Href="@("/models/" + Model.Model.ID + "/details")"
+                        Variant="Variant.Filled"
+                        EndIcon="@Icons.Material.Filled.ReadMore"
+                        Color="Color.Secondary"
+                        Size="Size.Small"
+                           Style="margin-top: 8px">@L["More"]</MudButton>
+                }
+            </CardHeaderActions>*@
     </MudCardHeader>
     <MudCardContent>
         <MudPaper Height="250px" Elevation="0">
@@ -37,7 +38,7 @@
                                 <MudStack>
                                     @foreach (var item in Training.Training.Configuration.SelecctedMlLibraries)
                                     {
-                                        <MudText Typo="Typo.body1">@item.Properties.ContainsKey("skos:prefLabel") ? @item.Properties["skos:prefLabel"] : @("")</MudText>
+                                        <MudText Typo="Typo.body1">@(item.Properties.ContainsKey("skos:prefLabel") ? item.Properties["skos:prefLabel"] : "")</MudText>
                                     }
                                 </MudStack>
                             </MudExpansionPanel>
@@ -45,7 +46,7 @@
                                 <MudStack>
                                     @foreach (var item in Training.Training.Configuration.SelectedAutoMlSolutions)
                                     {
-                                        <MudText Typo="Typo.body1">@item.Properties.ContainsKey("skos:prefLabel") ? @item.Properties["skos:prefLabel"] : @("")</MudText>
+                                        <MudText Typo="Typo.body1">@(item.Properties.ContainsKey("skos:prefLabel") ? item.Properties["skos:prefLabel"] : "")</MudText>
                                     }
                                 </MudStack>
                             </MudExpansionPanel>
@@ -74,31 +75,31 @@
 @code {
     [Parameter]
     public GetTrainingResponseDto Training
-    { 
+    {
         get
         {
             return _training;
-        } 
+        }
         set
         {
             _training = value;
             StateHasChanged();
-        } 
+        }
     }
     private GetTrainingResponseDto _training;
 
     [Parameter]
     public GetModelResponseDto Model
-    { 
+    {
         get
         {
             return _model;
-        } 
+        }
         set
         {
             _model = value;
             StateHasChanged();
-        } 
+        }
     }
     private GetModelResponseDto _model;
 

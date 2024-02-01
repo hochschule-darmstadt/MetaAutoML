@@ -1679,8 +1679,16 @@ msgid "Status: {0}"
 msgstr "Status: {0}"
 
 msgctxt "Global"
+msgid "Help"
+msgstr "Help"
+
+msgctxt "Global"
 msgid "Model: {0}"
 msgstr "Model: {0}"
+
+msgctxt "Global"
+msgid "Training: {0}"
+msgstr "Training: {0}"
 
 msgctxt "Global"
 msgid "Please enter a dataset name first!"
@@ -2001,3 +2009,11 @@ msgstr "Parameters available for individual AutoML solution only"
 msgctxt "Global"
 msgid "Perform model analysis"
 msgstr "Perform model analysis"
+
+msgctxt "Global"
+msgid "{0} more entries available"
+msgstr "{0} more entries available"
+
+msgctxt "Global"
+msgid "Enable tutorial"
+msgstr "Enable tutorial"

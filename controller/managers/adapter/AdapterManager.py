@@ -302,6 +302,7 @@ class AdapterManager(Thread):
                         ))
             channel.close()
             print("explainer dashboard generation process ended")
+            return response
         except grpclib.GRPCError as rpc_error:
             print(f"Received unknown RPC error: code={rpc_error.message} message={rpc_error.details()}")
 

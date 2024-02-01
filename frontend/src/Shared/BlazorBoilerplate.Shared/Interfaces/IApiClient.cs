@@ -14,6 +14,7 @@ namespace BlazorBoilerplate.Shared.Interfaces
 {
     public interface IApiClient : IBaseApiClient
     {
+        Task<List<HelpPageDto>> GetHelpPageJson();
         Task<UserProfile> GetUserProfile();
 
         Task<QueryResult<TenantSetting>> GetTenantSettings();
@@ -36,7 +37,7 @@ namespace BlazorBoilerplate.Shared.Interfaces
 
         #region OMA-ML DATASET MESSAGES
         Task<ApiResponseDto> UploadDataset(UploadDatasetRequestDto request);
-        Task<ApiResponseDto> GetDatasets();
+        Task<ApiResponseDto> GetDatasets(GetDatasetsRequestDto reuest);
         Task<ApiResponseDto> GetDataset(GetDatasetRequestDto request);
         Task<ApiResponseDto> GetDatasetPreview(GetDatasetPreviewRequestDto request);
         Task<ApiResponseDto> SetDatasetFileConfiguration(SetDatasetFileConfigurationRequestDto request);
@@ -47,7 +48,7 @@ namespace BlazorBoilerplate.Shared.Interfaces
 
         #region OMA-ML TRAINING MESSAGES
         Task<ApiResponseDto> CreateTraining(CreateTrainingRequestDto request);
-        Task<ApiResponseDto> GetTrainings();
+        Task<ApiResponseDto> GetTrainings(GetTrainingsRequestDto request);
         Task<ApiResponseDto> GetTraining(GetTrainingRequestDto request);
         Task<ApiResponseDto> DeleteTraining(DeleteTrainingRequestDto request);
         #endregion

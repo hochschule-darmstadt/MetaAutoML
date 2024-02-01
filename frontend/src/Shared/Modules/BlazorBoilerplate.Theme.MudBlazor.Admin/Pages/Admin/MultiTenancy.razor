@@ -22,7 +22,7 @@ else
 {
     <MudTable Items="@tenants" Striped="true" Bordered="true" Dense="true" Hover="true" Elevation="2">
         <HeaderContent>
-            <MudTh><MudButton StartIcon="@Icons.Filled.Add" OnClick="@(() => OpenUpsertTenantDialog())" Variant="Variant.Filled" Color="Color.Primary">@L["New Tenant"]</MudButton></MudTh>
+            <MudTh><MudButton StartIcon="@Icons.Filled.Add" OnClick="@(() => OpenUpsertTenantDialog())" Variant="MudBlazor.Variant.Filled" Color="Color.Primary">@L["New Tenant"]</MudButton></MudTh>
             <MudTh>Id</MudTh>
             <MudTh>Identifier</MudTh>
             <MudTh>@L["Name"]</MudTh>
@@ -74,7 +74,7 @@ else
     </DialogContent>
     <DialogActions>
         <MudButton OnClick="@CancelChanges">@L["Cancel"]</MudButton>
-        <MudButton OnClick="@UpsertTenant" Variant="Variant.Filled" Color="Color.Primary">@labelUpsertDialogOkButton</MudButton>
+        <MudButton OnClick="@UpsertTenant" Variant="MudBlazor.Variant.Filled" Color="Color.Primary">@labelUpsertDialogOkButton</MudButton>
     </DialogActions>
 </MudDialog>
 
@@ -90,7 +90,7 @@ else
     </DialogContent>
     <DialogActions>
         <MudButton OnClick="@(e => { isDeleteTenantDialogOpen = false; })">@L["Cancel"]</MudButton>
-        <MudButton OnClick="@DeleteTenantAsync" Variant="Variant.Filled" Color="Color.Error">@L["Delete"]</MudButton>
+        <MudButton OnClick="@DeleteTenantAsync" Variant="MudBlazor.Variant.Filled" Color="Color.Error">@L["Delete"]</MudButton>
     </DialogActions>
 </MudDialog>
 
