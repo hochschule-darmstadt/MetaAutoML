@@ -64,7 +64,7 @@
                                     <MudText Style="padding:5%">or</MudText>
                                     <MudTextField Style=" font-weight: bold; font-size: 12pt;" Variant="MudBlazor.Variant.Outlined" TextChanged="setURLUploadTrue" Disabled="@IsURLDisabled" @bind-Value="@Url" Label="@L["ENTER URL"]">
                                     </MudTextField>
-                                    <LabelTooltip Label="" Text="Supported URLs: Direct download links, Google Drive, OneDrive, Dropbox, Sharepoint, h_da nextCloud" Position="TooltipPosition.Right"></LabelTooltip>
+                                    <LabelTooltip Label="" Text="Supported URLs: Direct download URLs, Google Drive, OneDrive, Dropbox, Sharepoint, h_da nextCloud" Position="TooltipPosition.Right"></LabelTooltip>
                                 </MudStack>
                                 <MudTextField @bind-Value="@fileUploader.UploadDatasetRequest.DatasetName" Disabled="@(_uploadReady)" Label="@L["Dataset Name"]" Class="mt-1"></MudTextField>
                             @if (_isLoaderClosed == false)
