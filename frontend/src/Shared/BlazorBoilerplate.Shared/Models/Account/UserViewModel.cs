@@ -1,4 +1,4 @@
-﻿using BlazorBoilerplate.Shared.Dto;
+using BlazorBoilerplate.Shared.Dto;
 
 namespace BlazorBoilerplate.Shared.Models.Account
 {
@@ -21,6 +21,7 @@ namespace BlazorBoilerplate.Shared.Models.Account
         public string AuthenticatorUri { get; set; }
         public string[] RecoveryCodes { get; set; }
         public int CountRecoveryCodes { get; set; }
+        public bool IsTutorialEnabled { get; set; }
         public List<string> Roles { get; set; }
         public List<KeyValuePair<string, string>> ExposedClaims { get; set; }
     }

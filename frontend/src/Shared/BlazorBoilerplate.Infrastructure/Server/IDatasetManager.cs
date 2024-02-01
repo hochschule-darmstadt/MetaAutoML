@@ -12,7 +12,7 @@ namespace BlazorBoilerplate.Infrastructure.Server
     public interface IDatasetManager
     {
         Task<ApiResponse> UploadDataset(UploadDatasetRequestDto file);
-        Task<ApiResponse> GetDatasets();
+        Task<ApiResponse> GetDatasets(GetDatasetsRequestDto request);
         Task<ApiResponse> GetDataset(GetDatasetRequestDto dataset);
         Task<ApiResponse> GetDatasetPreview(GetDatasetPreviewRequestDto dataset);
         Task<ApiResponse> SetDatasetFileConfiguration(SetDatasetFileConfigurationRequestDto dataset);

@@ -32,6 +32,15 @@
     <base href="~/" />
     <link href="manifest.json" rel="manifest" />
     <link href="_content/BlazorBoilerplate.Theme.Material/BlazorBoilerplate.Theme.Material.bundle.scp.css" rel="stylesheet">
+    <link rel="stylesheet" href="_content/Radzen.Blazor/css/default.css">
+    <script src="_content/Radzen.Blazor/Radzen.Blazor.js"></script>
+    <style>
+        body {
+            --rz-tooltip-color: white; /* text color */
+            --rz-tooltip-background-color: grey;
+            --rz-tooltip-background-opacity: 0.3;
+        }
+    </style>
 </head>
 <body>
     @{
@@ -84,6 +93,7 @@
         <script src="_framework/blazor.webassembly.js"></script>
     }
     <script src="~/js/iframeInterop.js"></script>
+    <script src="~/js/anchorlink.js"></script>
     <script>
 
         function downloadFromUrl(options) {

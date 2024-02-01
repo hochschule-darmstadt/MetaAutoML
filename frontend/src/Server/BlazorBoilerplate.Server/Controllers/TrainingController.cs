@@ -1,4 +1,4 @@
-﻿using BlazorBoilerplate.Infrastructure.Server;
+using BlazorBoilerplate.Infrastructure.Server;
 using BlazorBoilerplate.Infrastructure.Server.Models;
 using BlazorBoilerplate.Server.Aop;
 using BlazorBoilerplate.Server.Managers;
@@ -39,13 +39,13 @@ namespace BlazorBoilerplate.Server.Controllers
                 await _trainingManager.CreateTraining(request) :
                 new ApiResponse(Status400BadRequest, L["InvalidData"]);
 
-        [HttpGet]
+        [HttpPost]
         [ProducesResponseType(Status200OK)]
         [ProducesResponseType(Status400BadRequest)]
         [ProducesResponseType(Status404NotFound)]
-        public async Task<ApiResponse> GetTrainings()
+        public async Task<ApiResponse> GetTrainings(GetTrainingsRequestDto request)
             => ModelState.IsValid ?
-                await _trainingManager.GetTrainings() :
+                await _trainingManager.GetTrainings(request) :
                 new ApiResponse(Status400BadRequest, L["InvalidData"]);
 
         [HttpPost]

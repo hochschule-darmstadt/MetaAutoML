@@ -9,13 +9,13 @@
 <MudCard Elevation="5">
     <MudCardHeader Style="border-bottom-style: inset; border-bottom-width: 1px;">
         <CardHeaderContent>
-            <LabelTooltip Label="Recent trainings" Text="These are the ML training sessions you have started recently. By clicking on one training (indicated by date and time) you can inspect and use the ML models that have been trained." Position="Placement.Top"></LabelTooltip>
+            <LabelTooltip Label="Recent trainings" Text="These are the ML training sessions you have started recently. By clicking on one training (indicated by date and time) you can inspect and use the ML models that have been trained." Position="Radzen.TooltipPosition.Top"></LabelTooltip>
         </CardHeaderContent>
         <CardHeaderActions>
             <ButtonTooltip Text="Click here to navigate to all trainings that you have performed on the OMA-ML platform so far." Position="Placement.Top">
                     <MudButton Href="@("/trainings")"
                                Variant="Variant.Filled"
-                               EndIcon="@Icons.Filled.ArrowForward"
+                               StartIcon="@Icons.Filled.ArrowForward"
                                Color="Color.Secondary"
                                Size="Size.Small"
                                Style="margin-top: 8px">@L["More"]</MudButton>
@@ -31,7 +31,7 @@
             }
             else
             {
-        <MudTable Items="@_trainings.Trainings" FixedHeader="true" Height="250px" style="width:stretch" class="mat-elevation-z5" AllowSelection="false" Dense="true">
+        <MudTable Items="@Trainings.Trainings" FixedHeader="true" Height="20rem" style="width:stretch" class="mat-elevation-z5" AllowSelection="false" Dense="true">
             <HeaderContent>
                 <MudTh><MudTableSortLabel SortBy="new Func<TrainingDto, object>(x=>x.RuntimeProfile.StartTime)">@L["start"]</MudTableSortLabel></MudTh>
                 <MudTh><MudTableSortLabel SortBy="new Func<TrainingDto, object>(x=>x.Status)">@L["Status"]</MudTableSortLabel></MudTh>
@@ -74,7 +74,7 @@
             _trainings = value;
             if(_trainings != null)
             {
-                _trainings.Trainings = _trainings.Trainings.Where(x => x.RuntimeProfile.StartTime > DateTime.Now.AddDays(-1)).Take(6).ToList();
+                _trainings.Trainings = _trainings.Trainings.Take(6).ToList();
                 RefreshRecentTrainings(null, null);
                 _timer = new Timer()
                 {

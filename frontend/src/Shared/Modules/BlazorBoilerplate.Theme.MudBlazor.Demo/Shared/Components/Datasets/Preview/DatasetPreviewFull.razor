@@ -1,4 +1,4 @@
-@using System 
+@using System
 @using System.IO
 @using Microsoft.AspNetCore.Hosting
 @using Microsoft.Extensions.Logging
@@ -42,11 +42,11 @@
 @code {
     [Parameter]
     public GetDatasetResponseDto Dataset
-    { 
+    {
         get
         {
             return _dataset;
-        } 
+        }
         set
         {
             _dataset = value;
@@ -55,7 +55,7 @@
                 LoadDatasetPreview();
             }
             StateHasChanged();
-        } 
+        }
     }
     private GetDatasetResponseDto _dataset;
     private GetDatasetPreviewResponseDto _datasetPreview;
@@ -99,7 +99,6 @@
                         break;
                 }
                 StateHasChanged();
-                viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
             }
             else
             {

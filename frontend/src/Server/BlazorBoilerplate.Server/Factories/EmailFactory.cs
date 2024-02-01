@@ -1,4 +1,4 @@
-﻿using BlazorBoilerplate.Infrastructure.Server;
+using BlazorBoilerplate.Infrastructure.Server;
 using BlazorBoilerplate.Shared.Dto.Email;
 using FormatWith;
 using Microsoft.Extensions.Localization;
@@ -46,7 +46,7 @@ namespace BlazorBoilerplate.Server.Factories
             var emailMessage = new EmailMessageDto();
 
             emailMessage.Body = L["NewUserConfirmationEmail.template"].Value
-                .FormatWith(new { baseUrl, name = fullName, userName, callbackUrl });
+                .FormatWith(new { baseUrl, userName = fullName, userId = userName, callbackUrl = callbackUrl, token = "" });
 
             emailMessage.Subject = L["NewUserConfirmationEmail.subject", fullName];
 

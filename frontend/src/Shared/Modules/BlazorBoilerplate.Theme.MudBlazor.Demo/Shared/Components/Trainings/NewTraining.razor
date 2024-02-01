@@ -1,4 +1,4 @@
-﻿@inject IStringLocalizer<Global> L
+@inject IStringLocalizer<Global> L
 @inject IApiClient apiClient
 @inject IViewNotifier viewNotifier
 @inject NavigationManager NavManager
@@ -10,22 +10,34 @@
         </CardHeaderContent>
     </MudCardHeader>
     <MudCardContent>
-        <MudPaper Height="6.25rem" Elevation="0">
+        <MudPaper Height="6.25rem" Style="text-align:center" Elevation="0">
             @if (Dataset == null)
             {
                 <DataLoaderSpinner />
             }
             else
             {
-        <ButtonTooltip Text="Click here to initiate a new training sessions." Position="Placement.Top">
+        <ButtonTooltip Text="Click here to initiate a new training session." Position="Placement.Top">
             <MudContainer>
+                @if (!tourActivated)
+                {
+                    <MudButton OnClick="@(e => { NavManager.NavigateTo("/datasets/" + Dataset.Dataset.Id + "/train"); })"
+                               Variant="Variant.Filled"
+                               StartIcon="@Icons.Filled.ModelTraining"
+                               Color="Color.Secondary" Style="align-self:center">
+                        @L["Start Training"]
+                    </MudButton>
+                }
+                else
+                {
+                    <MudButton OnClick="@(e => { NavManager.NavigateTo("/datasets/" + Dataset.Dataset.Id + "/train?TourStep=forthStep"); })"
+                               Variant="Variant.Filled" data-form-thirdStep
+                               StartIcon="@Icons.Filled.ModelTraining"
+                               Color="Color.Secondary" Style="align-self:center">
+                        @L["Start Training"]
+                    </MudButton>
+                }
 
-                <MudButton OnClick="@(e => { NavManager.NavigateTo("/datasets/" + Dataset.Dataset.Id + "/train"); })"
-                           Variant="Variant.Filled"
-                           StartIcon="@Icons.Filled.ModelTraining"
-                           Color="Color.Secondary" Style="width:16.3rem; align-self:center">
-                    @L["Start Training"]
-                </MudButton>
 
             </MudContainer>
         </ButtonTooltip>
@@ -37,4 +49,13 @@
 @code {
     [Parameter]
     public GetDatasetResponseDto Dataset { get; set; }
+    [Inject]
+    private ITourService TourService { get; set; }
+    private bool tourActivated = false;
+
+    protected override void OnInitialized()
+    {
+        // tourActivated = TourService.checkIfUserTourIsActivated(NavManager.Uri);
+        tourActivated = TourService.checkIfUserTourIsActivated();
+    }
 }

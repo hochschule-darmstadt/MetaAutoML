@@ -1,4 +1,4 @@
-﻿@inherits UsersPage
+@inherits UsersPage
 @page "/admin/users"
 @attribute [Authorize(Policies.IsAdmin)]
 @layout AdminLayout
@@ -22,7 +22,7 @@ else
 {
     <MudTable ServerData="@(new Func<TableState, Task<TableData<ApplicationUser>>>(ServerReload))" Striped="true" Bordered="true" Dense="true" Hover="true" Elevation="2" @ref="table">
         <HeaderContent>
-            <MudTh><MudButton StartIcon="@Icons.Filled.PersonAdd" OnClick="@(e => { createUserDialogOpen = true; })" Variant="Variant.Filled" Color="Color.Primary">@L["New User"]</MudButton></MudTh>
+            <MudTh><MudButton StartIcon="@Icons.Material.Filled.PersonAdd" OnClick="@(e => { createUserDialogOpen = true; })" Variant="MudBlazor.Variant.Filled" Color="Color.Primary">@L["New User"]</MudButton></MudTh>
             <MudTh>@L["UserName"]</MudTh>
             <MudTh>@L["Email"]</MudTh>
             <MudTh>@L["Roles"]</MudTh>
@@ -30,15 +30,15 @@ else
         <RowTemplate Context="UserRow">
             <MudTd>
                 <div style="width:155px;">
-                    <MudIconButton Icon="@Icons.Filled.Edit" OnClick="@(() => OpenEditDialog(UserRow))"></MudIconButton>
-                    <MudIconButton Icon="@Icons.Filled.RotateRight" OnClick="@(() => OpenResetPasswordDialog(UserRow))" Disabled="@(UserRow.UserName == DefaultUserNames.Administrator)"></MudIconButton>
-                    <MudIconButton Icon="@Icons.Filled.Delete" OnClick="@(() => OpenDeleteDialog(UserRow))" Disabled="@(UserRow.UserName == DefaultUserNames.Administrator)"></MudIconButton>
+                    <MudIconButton Icon="@Icons.Material.Filled.Edit" OnClick="@(() => OpenEditDialog(UserRow))"></MudIconButton>
+                    <MudIconButton Icon="@Icons.Material.Filled.RotateRight" OnClick="@(() => OpenResetPasswordDialog(UserRow))" Disabled="@(UserRow.UserName == DefaultUserNames.Administrator)"></MudIconButton>
+                    <MudIconButton Icon="@Icons.Material.Filled.Delete" OnClick="@(() => OpenDeleteDialog(UserRow))" Disabled="@(UserRow.UserName == DefaultUserNames.Administrator)"></MudIconButton>
                 </div>
             </MudTd>
             <MudTd><div style="width:130px;">@UserRow.UserName</div></MudTd>
             <MudTd style="white-space: nowrap">
                 @UserRow.Email @if (UserRow.EmailConfirmed)
-                    {<MudIcon Style="vertical-align: text-bottom" Icon="@Icons.Filled.CheckCircle"></MudIcon>}
+                    {<MudIcon Style="vertical-align: text-bottom" Icon="@Icons.Material.Filled.CheckCircle"></MudIcon>}
             </MudTd>
             <MudTd>
                 @if (@UserRow.UserRoles != null)
@@ -67,18 +67,18 @@ else
         <EditForm id="createUserForm" Model="@newUserViewModel" OnValidSubmit="@CreateUserAsync">
             <FluentValidationValidator />
             <MudValidationSummary />
-            <MudTextField @bind-Value="@newUserViewModel.UserName" Label=@L["UserName"] AdornmentIcon="@Icons.Filled.Person" Adornment="Adornment.End" FullWidth="true" Required="true" RequiredError=@L["Required"]></MudTextField>
+            <MudTextField @bind-Value="@newUserViewModel.UserName" Label=@L["UserName"] AdornmentIcon="@Icons.Material.Filled.Person" Adornment="Adornment.End" FullWidth="true" Required="true" RequiredError=@L["Required"]></MudTextField>
 
-            <MudTextField @bind-Value="@newUserViewModel.Email" Label=@L["Email"] AdornmentIcon="@Icons.Outlined.Email" Adornment="Adornment.End" FullWidth="true" Required="true" RequiredError=@L["Required"] Type="mail"></MudTextField>
+            <MudTextField @bind-Value="@newUserViewModel.Email" Label=@L["Email"] AdornmentIcon="@Icons.Material.Outlined.Email" Adornment="Adornment.End" FullWidth="true" Required="true" RequiredError=@L["Required"] Type="mail"></MudTextField>
 
-            <MudTextField @bind-Value="@newUserViewModel.Password" Label=@L["Password"] AdornmentIcon="@Icons.Outlined.Lock" Adornment="Adornment.End" FullWidth="true" Required="true" RequiredError=@L["Required"] InputType="InputType.Password"></MudTextField>
+            <MudTextField @bind-Value="@newUserViewModel.Password" Label=@L["Password"] AdornmentIcon="@Icons.Material.Outlined.Lock" Adornment="Adornment.End" FullWidth="true" Required="true" RequiredError=@L["Required"] InputType="InputType.Password"></MudTextField>
 
-            <MudTextField @bind-Value="@newUserViewModel.PasswordConfirm" Label=@L["Password Confirmation"] AdornmentIcon="@Icons.Outlined.Lock" Adornment="Adornment.End" FullWidth="true" Required="true" RequiredError=@L["Required"] InputType="InputType.Password"></MudTextField>
+            <MudTextField @bind-Value="@newUserViewModel.PasswordConfirm" Label=@L["Password Confirmation"] AdornmentIcon="@Icons.Material.Outlined.Lock" Adornment="Adornment.End" FullWidth="true" Required="true" RequiredError=@L["Required"] InputType="InputType.Password"></MudTextField>
         </EditForm>
     </DialogContent>
     <DialogActions>
         <MudButton OnClick="@(e => { createUserDialogOpen = false; })">@L["Cancel"]</MudButton>
-        <MudButton ButtonType="ButtonType.Submit" form="createUserForm" Disabled="@disableCreateUserButton" Variant="Variant.Filled" Color="Color.Primary">@L["Create"]</MudButton>
+        <MudButton ButtonType="MudBlazor.ButtonType.Submit" form="createUserForm" Disabled="@disableCreateUserButton" Variant="MudBlazor.Variant.Filled" Color="Color.Primary">@L["Create"]</MudButton>
     </DialogActions>
 </MudDialog>
 
@@ -93,21 +93,21 @@ else
         <EditForm id="updateUserForm" Model="@currentUser" OnValidSubmit="@UpdateUserAsync">
             <FluentValidationValidator />
             <MudValidationSummary />
-            <MudTextField @bind-Value="@currentUser.UserName" Label=@L["UserName"] AdornmentIcon="@Icons.Filled.Person" Adornment="Adornment.End" FullWidth="true" Required="true" RequiredError=@L["Required"]></MudTextField>
+            <MudTextField @bind-Value="@currentUser.UserName" Label=@L["UserName"] AdornmentIcon="@Icons.Material.Filled.Person" Adornment="Adornment.End" FullWidth="true" Required="true" RequiredError=@L["Required"]></MudTextField>
 
-            <MudTextField @bind-Value="@currentUser.Email" Label=@L["Email"] AdornmentIcon="@Icons.Outlined.Email" Adornment="Adornment.End" FullWidth="true" Required="true" RequiredError=@L["Required"] Type="mail"></MudTextField>
+            <MudTextField @bind-Value="@currentUser.Email" Label=@L["Email"] AdornmentIcon="@Icons.Material.Outlined.Email" Adornment="Adornment.End" FullWidth="true" Required="true" RequiredError=@L["Required"] Type="mail"></MudTextField>
 
             <MudChipSet>
                 @foreach (var role in roleSelections.OrderBy(x => x.DisplayValue))
                 {
-                    <MudChip Text="@role.DisplayValue" Icon="@((role.Selected) ? Icons.Filled.Done : "")" @onclick="@(()=>UpdateUserRole(role))" />
+                    <MudChip Text="@role.DisplayValue" Icon="@((role.Selected) ? Icons.Material.Filled.Done : "")" @onclick="@(()=>UpdateUserRole(role))" />
                 }
             </MudChipSet>
         </EditForm>
     </DialogContent>
     <DialogActions>
         <MudButton OnClick="@CancelChanges">@L["Cancel"]</MudButton>
-        <MudButton ButtonType="ButtonType.Submit" form="updateUserForm" Disabled="@disableUpdateUserButton" Variant="Variant.Filled" Color="Color.Primary">@L["Update"]</MudButton>
+        <MudButton ButtonType="MudBlazor.ButtonType.Submit" form="updateUserForm" Disabled="@disableUpdateUserButton" Variant="MudBlazor.Variant.Filled" Color="Color.Primary">@L["Update"]</MudButton>
     </DialogActions>
 </MudDialog>
 
@@ -123,7 +123,7 @@ else
     </DialogContent>
     <DialogActions>
         <MudButton OnClick="@(e => { deleteUserDialogOpen = false; })">@L["Cancel"]</MudButton>
-        <MudButton OnClick="@DeleteUserAsync" Variant="Variant.Filled" Color="Color.Error">@L["Delete"]</MudButton>
+        <MudButton OnClick="@DeleteUserAsync" Variant="MudBlazor.Variant.Filled" Color="Color.Error">@L["Delete"]</MudButton>
     </DialogActions>
 </MudDialog>
 
@@ -138,14 +138,14 @@ else
         <EditForm id="changePasswordForm" Model="@changePasswordViewModel" OnValidSubmit="@ResetUserPasswordAsync">
             <FluentValidationValidator />
             <MudValidationSummary />
-            <MudTextField @bind-Value="@changePasswordViewModel.Password" Label=@L["Password"] AdornmentIcon="@Icons.Outlined.Lock" Adornment="Adornment.End" FullWidth="true" Required="true" RequiredError=@L["Required"] InputType="InputType.Password"></MudTextField>
+            <MudTextField @bind-Value="@changePasswordViewModel.Password" Label=@L["Password"] AdornmentIcon="@Icons.Material.Outlined.Lock" Adornment="Adornment.End" FullWidth="true" Required="true" RequiredError=@L["Required"] InputType="InputType.Password"></MudTextField>
 
-            <MudTextField @bind-Value="@changePasswordViewModel.PasswordConfirm" Label=@L["Password Confirmation"] AdornmentIcon="@Icons.Outlined.Lock" Adornment="Adornment.End" FullWidth="true" Required="true" RequiredError=@L["Required"] InputType="InputType.Password"></MudTextField>
+            <MudTextField @bind-Value="@changePasswordViewModel.PasswordConfirm" Label=@L["Password Confirmation"] AdornmentIcon="@Icons.Material.Outlined.Lock" Adornment="Adornment.End" FullWidth="true" Required="true" RequiredError=@L["Required"] InputType="InputType.Password"></MudTextField>
         </EditForm>
     </DialogContent>
     <DialogActions>
         <MudButton OnClick="@(e => { changePasswordDialogOpen = false; })">@L["Cancel"]</MudButton>
-        <MudButton ButtonType="ButtonType.Submit" form="changePasswordForm" Disabled="@disableChangePasswordButton" Variant="Variant.Filled" Color="Color.Primary">@L["Reset Password"]</MudButton>
+        <MudButton ButtonType="MudBlazor.ButtonType.Submit" form="changePasswordForm" Disabled="@disableChangePasswordButton" Variant="MudBlazor.Variant.Filled" Color="Color.Primary">@L["Reset Password"]</MudButton>
     </DialogActions>
 </MudDialog>
 

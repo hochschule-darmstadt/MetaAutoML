@@ -1,0 +1,43 @@
+@inject NavigationManager navigationManager
+@inject IDialogService dialogService
+@using BlazorBoilerplate.Theme.Material.Services
+<MudDialog>
+    <TitleContent>
+        <span>
+            <MudText Typo="Typo.h6">Welcome to <img class="logo-img" src=@($"{Module.ContentPath}/images/oma-logo.svg") title="OMA-ML"><span class="docs-brand-text" style="color:#5474fc;">OMA-ML</span></MudText>
+        </span>
+    </TitleContent>
+    <DialogContent>
+        <MudText>You are new to OMA-ML and want to start a tour first?</MudText>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Xy"
+                   Variant="Variant.Filled"
+                   Color="Color.Secondary"
+                   Size="Size.Small">Start with a tour</MudButton>
+        <MudButton OnClick="Cancel"
+                   Variant="Variant.Filled"
+                   Color="Color.Secondary"
+                   Size="Size.Small">No thanks</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    private GTour.Abstractions.IGTourService GTourService { get; set; }
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+    void Cancel() => MudDialog.Cancel();
+
+    private void Xy()
+    {
+        MudDialog.Cancel();
+        StartTour();
+    }
+
+    private void StartTour()
+    {
+        TourService userTour = new TourService(GTourService, navigationManager);
+        userTour.navigateToNextPage("firstStep", navigationManager.ToAbsoluteUri(" ").AbsoluteUri);
+        StateHasChanged();
+    }
+}

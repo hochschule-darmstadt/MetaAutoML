@@ -48,7 +48,6 @@ namespace BlazorBoilerplate.UI.Base.Pages.Admin
 
                 if (response.IsSuccessStatusCode)
                 {
-                    viewNotifier.Show(response.Message, ViewNotifierType.Success, L["Operation Successful"]);
                     tenants = response.Result;
                 }
                 else

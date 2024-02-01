@@ -3,7 +3,6 @@ import numpy as np
 from ControllerBGRPC import *
 from JsonUtil import get_config_property
 import sys
-
 import shutil
 import os
 import re
@@ -46,7 +45,9 @@ class CsvManager:
         if file_configuration['thousands_seperator'] != "":
            configuration["thousands"] = file_configuration['thousands_seperator']
 
+
         dataset = pd.read_csv(**configuration)
+
 
         #Rename untitled columns to correct name
         for column in dataset:

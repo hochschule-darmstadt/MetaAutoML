@@ -1,4 +1,4 @@
-﻿using BlazorBoilerplate.Constants;
+using BlazorBoilerplate.Constants;
 using BlazorBoilerplate.Infrastructure.AuthorizationDefinitions;
 using BlazorBoilerplate.Infrastructure.Server;
 using BlazorBoilerplate.Infrastructure.Server.Models;
@@ -658,6 +658,7 @@ namespace BlazorBoilerplate.Server.Managers
             user.FirstName = userViewModel.FirstName;
             user.LastName = userViewModel.LastName;
             user.Email = userViewModel.Email;
+            user.DoIntroductionTutorial = userViewModel.IsTutorialEnabled;
 
             var result = await _userManager.UpdateAsync(user);
 
@@ -673,10 +674,21 @@ namespace BlazorBoilerplate.Server.Managers
 
         public async Task<ApiResponse> Create(RegisterViewModel parameters)
         {
+            CreateNewUserResponse grpcResult;
+            try
+            {
+                grpcResult = _client.CreateNewUser(new CreateNewUserRequest());
+            }
+            catch (Exception)
+            {
+                return new ApiResponse(Status400BadRequest, $"Error while creating new user");
+            }
             var user = new ApplicationUser
             {
                 UserName = parameters.UserName,
-                Email = parameters.Email
+                Email = parameters.Email,
+                OmaMlId = grpcResult.UserId,
+                DoIntroductionTutorial = true
             };
 
             var result = await _userManager.CreateAsync(user, parameters.Password);
@@ -693,7 +705,8 @@ namespace BlazorBoilerplate.Server.Managers
                         new Claim(Policies.IsUser, string.Empty),
                         new Claim(JwtClaimTypes.Name, parameters.UserName),
                         new Claim(JwtClaimTypes.Email, parameters.Email),
-                        new Claim(JwtClaimTypes.EmailVerified, ClaimValues.falseString, ClaimValueTypes.Boolean)
+                        new Claim(JwtClaimTypes.EmailVerified, ClaimValues.falseString, ClaimValueTypes.Boolean),
+                        new Claim("omaml", user.OmaMlId)
                     }).Result;
             }
 
@@ -864,7 +877,8 @@ namespace BlazorBoilerplate.Server.Managers
             {
                 UserName = userName,
                 Email = email,
-                OmaMlId = omaMlId
+                OmaMlId = omaMlId,
+                DoIntroductionTutorial = true
             };
 
             return await RegisterNewUserAsync(user, password, requireConfirmEmail);
@@ -957,6 +971,7 @@ namespace BlazorBoilerplate.Server.Managers
                     HasAuthenticator = !string.IsNullOrEmpty(unformattedKey),
                     BrowserRemembered = await _signInManager.IsTwoFactorClientRememberedAsync(user),
                     CountRecoveryCodes = await _userManager.CountRecoveryCodesAsync(user),
+                    IsTutorialEnabled = user.DoIntroductionTutorial,
 
                     Logins = (await _userManager.GetLoginsAsync(user)).Select(i => new KeyValuePair<string, string>(i.LoginProvider, i.ProviderKey)).ToList(),
 

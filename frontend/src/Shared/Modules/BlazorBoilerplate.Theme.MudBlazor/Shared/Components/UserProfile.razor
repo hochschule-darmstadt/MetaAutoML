@@ -1,4 +1,4 @@
-﻿@using BlazorBoilerplate.Shared.Models.Account
+@using BlazorBoilerplate.Shared.Models.Account
 @using Microsoft.AspNetCore.Components
 @inject AuthenticationStateProvider authStateProvider
 
@@ -38,9 +38,9 @@
     <Authorized>
             @if (userViewModel != null)
             {
-                <MudMenu FullWidth="true">
+                <MudMenu>
                     <ActivatorContent>
-                        <MudButton Variant="Variant.Text" StartIcon="@Icons.Material.Filled.AccountCircle">@userViewModel.UserName</MudButton>
+                        <MudButton Variant="MudBlazor.Variant.Text" StartIcon="@Icons.Material.Filled.AccountCircle">@userViewModel.UserName</MudButton>
                     </ActivatorContent>
                     <ChildContent>
                         <MudMenuItem Href="/account/profile">Profile</MudMenuItem>

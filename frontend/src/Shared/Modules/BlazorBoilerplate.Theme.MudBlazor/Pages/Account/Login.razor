@@ -24,7 +24,7 @@
                                 <div class="logo">
                                     <img src=@($"{Module.ContentPath}/images/oma-logo.svg") style="width:100px;" title="@appState.AppName Home" alt="@appState.AppName" />
                                     <br />
-                                    <MudText Typo="Typo.h4" Color="Color.Primary" style="font-family: 'Noto Sans'" Class="docs-brand-text">@appState.AppName</MudText>
+                                    <MudText Typo="Typo.h4" Color="Color.Primary" Class="docs-brand-text">@appState.AppName</MudText>
                                     <br />
                                 </div>
                                 <MudText Typo="Typo.h5" Align="Align.Center">@L["Log in"]</MudText>
@@ -35,15 +35,15 @@
                             <MudValidationSummary />
                             <MudTextField AutoFocus="true" @bind-Value="@loginViewModel.UserName" Label=@L["UserName"] AdornmentIcon="@Icons.Material.Filled.Person" Adornment="Adornment.End" FullWidth="true" Required="true" RequiredError=@L["Required"]></MudTextField>
 
-                            <MudTextField @bind-Value="@loginViewModel.Password" Label=@L["Password"] Variant="Variant.Text" AdornmentIcon="@PasswordInputIcon" OnAdornmentClick="PasswordVisibility" AdornmentAriaLabel="Show Password" Adornment="Adornment.End" FullWidth="true" Required="true" RequiredError=@L["Required"] InputType="@PasswordInput"></MudTextField>
+                            <MudTextField @bind-Value="@loginViewModel.Password" Label=@L["Password"] Variant="MudBlazor.Variant.Text" AdornmentIcon="@PasswordInputIcon" OnAdornmentClick="PasswordVisibility" AdornmentAriaLabel="Show Password" Adornment="Adornment.End" FullWidth="true" Required="true" RequiredError=@L["Required"] InputType="@PasswordInput"></MudTextField>
 
                             @if (loginViewModel.AllowRememberLogin)
                             {<MudCheckBox @bind-Checked="@loginViewModel.RememberMe" Class="ml-n2">@L["Keep me logged in"]</MudCheckBox>}
                         </MudCardContent>
                         <MudCardActions Class="d-flex align-center flex-grow-1 gap-1">
-                            <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="d-flex flex-1">@L["Login"]</MudButton>
+                            <MudButton ButtonType="MudBlazor.ButtonType.Submit" Variant="MudBlazor.Variant.Filled" Color="Color.Primary" Class="d-flex flex-1">@L["Login"]</MudButton>
                                     @if (loginViewModel.EnableRegistration == true)
-                                    {<MudButton OnClick="@Register" Variant="Variant.Filled" Color="Color.Primary" Class="d-flex flex-1">@L["Sign up"]</MudButton>}
+                                    {<MudButton OnClick="@Register" Variant="MudBlazor.Variant.Filled" Color="Color.Primary" Class="d-flex flex-1">@L["Sign up"]</MudButton>}
                         </MudCardActions>
                     </MudCard>
                 </EditForm>
@@ -62,7 +62,7 @@
                                 <MudValidationSummary />
                                 <MudTextField @bind-Value="@forgotPasswordViewModel.Email" Label=@L["Email"] AdornmentIcon="@Icons.Material.Outlined.Mail" Adornment="Adornment.End" FullWidth="true" Required="true" RequiredError=@L["Required"]></MudTextField>
 
-                                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="my-4" Style="float: right">@L["Submit"]</MudButton>
+                                <MudButton ButtonType="MudBlazor.ButtonType.Submit" Variant="MudBlazor.Variant.Filled" Color="Color.Primary" Class="my-4" Style="float: right">@L["Submit"]</MudButton>
                             </EditForm>
                         </ChildContent>
                     </MudExpansionPanel>
@@ -92,15 +92,15 @@
                             {
                                 case "Google":
                                 case "Facebook":
-                                    <MudButton Class="signInWithButton" Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => SignInWith(provider))"><img height="18" src="/images/@(provider.AuthenticationScheme.ToLower()).svg" /></MudButton>
+                                    <MudButton Class="signInWithButton" Variant="MudBlazor.Variant.Filled" Color="Color.Primary" OnClick="@(() => SignInWith(provider))"><img height="18" src="/images/@(provider.AuthenticationScheme.ToLower()).svg" /></MudButton>
                                     break;
                                 case "Twitter":
                                 case "Microsoft":
                                 case "Apple":
-                                    <MudButton Class="signInWithButton" Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => SignInWith(provider))"><img height="18" src="/images/@(provider.AuthenticationScheme.ToLower()).svg" />&nbsp;@provider.DisplayName</MudButton>
+                                    <MudButton Class="signInWithButton" Variant="MudBlazor.Variant.Filled" Color="Color.Primary" OnClick="@(() => SignInWith(provider))"><img height="18" src="/images/@(provider.AuthenticationScheme.ToLower()).svg" />&nbsp;@provider.DisplayName</MudButton>
                                     break;
                                 default:
-                                    <MudButton Class="signInWithButton" Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => SignInWith(provider))">@provider.DisplayName</MudButton>
+                                    <MudButton Class="signInWithButton" Variant="MudBlazor.Variant.Filled" Color="Color.Primary" OnClick="@(() => SignInWith(provider))">@provider.DisplayName</MudButton>
                                     break;
                             }
                         }

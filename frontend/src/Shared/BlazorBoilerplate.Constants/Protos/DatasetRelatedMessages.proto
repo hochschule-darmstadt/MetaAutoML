@@ -36,6 +36,21 @@ message GetDatasetsRequest {
     example: ":tabular"
   */
   string type = 2;
+  /*
+    return only most recent datasets
+    example: True // returns only up to 5 most recent datasets
+  */
+  bool onlyFiveRecent = 3;
+  /*
+    Should results be paginated, combined with page parameter
+    example: True //return results by pagination
+  */
+  bool pagination = 4;
+  /*
+    The page to retrieve
+    example: 2 //return trainings from pagination page 2
+  */
+  int32 pageNumber = 5;
 }
 
 message GetDatasetsResponse {
@@ -211,7 +226,7 @@ message SetDatasetColumnSchemaConfigurationRequest {
   */
   string datatypeSelected = 4;
   /*
-  The selected role IRI by the user
+  The selected role IRI by the user. Valid options besides the ones defined in the ontology are ":none" and "" (empty string)
   ":index"
   */
   string roleSelected = 5;

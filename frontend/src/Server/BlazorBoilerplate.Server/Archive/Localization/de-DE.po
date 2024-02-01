@@ -929,6 +929,12 @@ msgstr "Dieses Cookie speichert die aktuelle Sitzungs id, wird für das Nutzerma
 msgid "FolderStructureNotCorrectErrorMessage"
 msgstr "Die Ordnerstruktur der Zip-Datei entspricht nicht den Anforderungen."
 
+msgid "FileTypeNotSupportedErrorMessage"
+msgstr "Der Dateityp entspricht nicht den Anforderungen."
+
+msgid "EncodingNotSupportedErrorMessage"
+msgstr "Das Encoding entspricht nicht den Anforderungen."
+
 msgid "AffinityCookieName"
 msgstr "affinity"
 
