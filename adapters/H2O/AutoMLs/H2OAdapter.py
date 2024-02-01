@@ -43,7 +43,6 @@ class H2OAdapter:
         self.df, test = data_loader(self._configuration)
         features, targets = prepare_tabular_dataset(self.df, self._configuration, apply_feature_extration=True)
 
-        #df[target].asfactor()
         parameters = translate_parameters(":h2o_automl", self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), h2opc.parameters)
 
         # remove XGBoost if its not in the Selected ML Libaries
@@ -73,7 +72,6 @@ class H2OAdapter:
         self.df, test = data_loader(self._configuration)
         features, targets = prepare_tabular_dataset(self.df, self._configuration, apply_feature_extration=True)
 
-        #df[target].asfactor()
         parameters = translate_parameters(":h2o_automl", self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), h2opc.parameters)
 
         # remove XGBoost if its not in the Selected ML Libaries
