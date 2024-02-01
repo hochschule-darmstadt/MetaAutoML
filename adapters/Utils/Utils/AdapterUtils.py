@@ -547,11 +547,22 @@ def setup_run_environment(request: "StartAutoMlRequest", adapter_name: str) -> "
         json.dump(request_dict, f)
     return request
 
+
 def load_dashboard_model(path):
+    """Load the automlWrapper
+    Most Wrapper are loaded as binary using dill
+    h2omodels can not be imported as binary, so the wrappers model is set to None
+    and the model is loaded separately
+
+    Args:
+        path (string): path to the binary exported wrapper
+    Returns:
+        pipeline_model (automlWrapper): returns the loaded Wrapper
+    """
     with open(path, 'rb') as file:
         pipeline_model = dill.load(file)
         # currently this is only implemented for h2o as h2o models can not be exported or loaded as binary
-        # therefore the model is loaded dynamically and not exported in the wrapper
+        # therefore the model is loaded after loading the wrapper and not exported in the wrapper
         if(pipeline_model._model == None):
             pipeline_model.load_model()
         return pipeline_model

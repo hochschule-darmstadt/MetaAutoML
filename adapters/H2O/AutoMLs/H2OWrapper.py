@@ -34,5 +34,8 @@ class H2OWrapper(BaseWrapper):
         return probabilities_df.to_numpy()
 
     def load_model(self) -> None:
+        """Load the model for the wrapper from disk
+        only implemented for h2o
+        """
         h2o.init()
         self._model = h2o.load_model(os.path.join(self._config["result_folder_location"], 'model_h2o.p'))
