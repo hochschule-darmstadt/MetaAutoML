@@ -28,7 +28,7 @@ h2o_metrics = {
     #lift_top_group - not implemented
 }
 
-# how can i implement 2 values for one parameter?
+# supported algorithms by h2o
 h2o_algorithms = {
     ":distributed_random_forest": "DRF",
     ":artificial_neural_network": "DeepLearning",
@@ -56,6 +56,7 @@ parameters = {
     ":max_models_h2o_automl": {
         "parameter_name": "max_models",
     },
+    #determines how the best model is selected
     ":sort_metric_h2o_automl": {
         "parameter_name": "sort_metric",
         "lookup_dict": h2o_metrics,

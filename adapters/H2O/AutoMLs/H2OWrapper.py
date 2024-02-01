@@ -6,7 +6,10 @@ import os
 from BaseWrapper import BaseWrapper
 
 class H2OWrapper(BaseWrapper):
-
+    """
+    h2o models can not be exported as a binary and it is set to None for export.
+    Therefore the model is loaded with self.load_model(). The path has to be in the configuration.
+    """
     def __init__(self, model, config) -> None:
         super().__init__(model, config)
 

@@ -14,6 +14,9 @@ from h2o.automl import H2OAutoML
 class H2OAdapter:
     """
     Implementation of the AutoML functionality for H2O
+    Note that h2o only works with h2o-dataframes so they have to be converted before running any jobs.
+    Additionally the default export using dill (object as binary) is not working. The h2o import and export functions
+    have to be used. They are not shippable across h2o-versions.
     """
     def __init__(self, configuration: dict):
         """Init a new instance of H2OAdapter
