@@ -246,17 +246,23 @@ class TrainingManager:
         """Delete a training from database and disc
 
         Args:
-            get_suggested_training_runtime_request (GetSuggestedTrainingRuntimeRequest): The GRPC request containing the user id, dataset id
+            get_suggested_training_runtime_request ( ): The GRPC request containing the user id, dataset id
 
         Returns:
             DeleteTrainingResponse: The GRPC response containing the suggested runtime
         """
         response = GetSuggestedTrainingRuntimeResponse()
-        self.__log.debug(f"get_suggested_training_runtime: trying to get dataset {get_suggested_training_runtime_request.dataset_id} for user {get_suggested_training_runtime_request.user_id}")
+        self.__log.debug(f"get_suggested_training_runtime: trying to get dataset {get_suggested_training_runtime_request.dataset_id} for user {get_suggested_training_runtime_request.user_id} and task {get_suggested_training_runtime_request.task}")
         found, dataset = self.__data_storage.get_dataset(get_suggested_training_runtime_request.user_id, get_suggested_training_runtime_request.dataset_id)
         if not found:
             self.__log.error(f"get_suggested_training_runtime: dataset {get_suggested_training_runtime_request.dataset_id} for user {get_suggested_training_runtime_request.user_id} not found")
             raise grpclib.GRPCError(grpclib.Status.NOT_FOUND, f"Dataset {get_suggested_training_runtime_request.dataset_id} for user {get_suggested_training_runtime_request.user_id} not found, already deleted?")
 
-        #TODO runtime suggestion computation
+        task = get_suggested_training_runtime_request.task
+        with open("./app-data/runtime-prediction-config/runtime_prediction_parameters.json") as file:
+            runtime_parameters = json.load(file)
+        runtime_parameter = runtime_parameters[task]
+        dataset_size = dataset["analysis"]["size_bytes"] / 1000  / 1000
+        suggested_runtime = runtime_parameter["m"] * dataset_size + runtime_parameter["b"]
+        response.suggested_runtime = round(suggested_runtime)
         return response

@@ -22,7 +22,7 @@ datasets = db["datasets"]
 models = db["models"]
 
 # Only edit when changing the folder structure
-file_path = os.path.join(os.getcwd(), "generated_files")
+file_path = os.path.join(os.getcwd(), "data")
 
 
 #Variables for the regared measures
@@ -37,3 +37,4 @@ CaluclateRuntimeConvergenz.caluclate_runtime_convergenz(file_path, measure_class
 
 #update runtime prediction parameters
 train_models.calculate_new_parameters(file_path)
+

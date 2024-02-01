@@ -2,9 +2,23 @@ import pandas as pd
 from bson.objectid import ObjectId
 import os
 import collection
-import utils.utils as utils
 
 
+def get_measure(task: str, measure_classification: str, measure_regression: str):
+    """look for the task and return the str with the measurement
+
+    Args:
+        task (str): the task
+        measure_classification (str): the string of the classification measurement
+        measure_regression (str): the string of the regression measurement
+
+    Returns:
+        str: the str of the measurement for the task
+    """
+    if task == ":tabular_classification":
+        return measure_classification
+    if task == ":tabular_regression":
+        return measure_regression
 
 def create_row(df: pd.DataFrame, auto_ml_solution: str, task : str, trainings_id: str, dataset_name: str, dataset_size_mb: float, measure: str,
                measure_value : float, dataset_rows: int, dataset_cols: int, runtime: float, runtime_limit : int, failed = 0):
@@ -69,7 +83,7 @@ def readDatabase(trainings: collection ,datasets: collection, models: collection
     print("Start")
     for training in trainings.find():
         task = training["configuration"]["task"]
-        measure = utils.get_measure(task, measure_classification, measure_regression)
+        measure = get_measure(task, measure_classification, measure_regression)
         if "runtime_limit" in training["configuration"]:
             runtime_limit = training["configuration"]["runtime_limit"]
             trainings_id = training["_id"]

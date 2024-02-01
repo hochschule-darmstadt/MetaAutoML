@@ -1,6 +1,7 @@
 import pandas as pd
 import json
 import os
+import shutil
 
 def calculate_parameter(dataframe: pd.DataFrame):
     """Calculates the parameter m in the formula y = m*x + b by using the runtime_limit as y and the dataset size as x values.
@@ -37,12 +38,21 @@ def calculate_new_parameters(file_path: str):
     parameter = {}
     for group in groups:
         m = calculate_parameter(group[1])
-        parameter[group[1]["task"].unique()[0]] = {}
-        parameter[group[1]["task"].unique()[0]]["m"] = m
-        parameter[group[1]["task"].unique()[0]]["b"] = b
+        task = group[1]["task"].unique()[0][2:-2]
+        parameter[task] = {}
+        parameter[task]["m"] = m
+        parameter[task]["b"] = b
 
 
     print(parameter)
-    with open(os.path.join(file_path,  "runtime_prediction_parameters.json"), "w") as f:
+    filename = "runtime_prediction_parameters.json"
+    with open(os.path.join(file_path, filename ), "w") as f:
         json.dump(parameter,f)
+    destination_folder_path = os.path.join(file_path, "../../..")
+    new_path = os.path.join(destination_folder_path, "controller/app-data/runtime-prediction-config")
+    print(new_path)
+    #copy file
+    shutil.copy2(os.path.join(file_path, filename), os.path.join(new_path, filename))
+
+calculate_new_parameters(os.path.join("C:/Users/pfriehe/Documents/Studium/WiSe2022/PSE/MetaAutoML/utils/MetaLearning", "data"))
 

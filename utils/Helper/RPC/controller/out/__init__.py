@@ -958,6 +958,7 @@ class GetSuggestedTrainingRuntimeRequest(betterproto.Message):
     Unique dataset id generated when inserting a new dataset document into
     MongoDBexample: '63515c86b10d04d230dc1482'
     """
+    task: str = betterproto.string_field(3)
 
 
 @dataclass(eq=False, repr=False)

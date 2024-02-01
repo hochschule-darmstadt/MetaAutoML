@@ -216,6 +216,7 @@ namespace BlazorBoilerplate.Server.Managers
             {
                 getTrainingRuntimeRequest.DatasetId = request.DatasetId;
                 getTrainingRuntimeRequest.UserId = username;
+                getTrainingRuntimeRequest.Task = request.Task;
                 GetSuggestedTrainingRuntimeResponse reply = _client.GetSuggestedTrainingRuntime(getTrainingRuntimeRequest);
                 GetTrainingSuggestedRuntimeResponseDto response = new GetTrainingSuggestedRuntimeResponseDto();
                 response.SuggestedRuntime = reply.SuggestedRuntime;

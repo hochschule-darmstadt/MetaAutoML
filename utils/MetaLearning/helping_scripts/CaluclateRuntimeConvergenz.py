@@ -1,6 +1,36 @@
 import pandas as pd
-import utils.utils as utils
 import os
+
+def get_measure(task: str, measure_classification: str, measure_regression: str):
+    """look for the task and return the str with the measurement
+
+    Args:
+        task (str): the task
+        measure_classification (str): the string of the classification measurement
+        measure_regression (str): the string of the regression measurement
+
+    Returns:
+        str: the str of the measurement for the task
+    """
+    if task == ":tabular_classification":
+        return measure_classification
+    if task == ":tabular_regression":
+        return measure_regression
+
+
+def divide(n: float, d: float):
+    """ devide n and d and returns 0 if the d is 0
+    Args:
+        n (float): the nominator
+        d (float): the devidator
+
+    Returns:
+        float: the value of the dividation
+    """
+    if d == 0:
+        return 0
+    else:
+        return n / d
 
 def caluclate_runtime_convergenz(file_path: str, measure_classification: str, measure_regression: str):
     """calculates the best runtime limit for each dataset and each automl solution by comparing the prediction measure from each runtime_limit
@@ -26,13 +56,13 @@ def caluclate_runtime_convergenz(file_path: str, measure_classification: str, me
                     #set to -1 in case they values are all 0
                     last_measure = -1
                     last_runtime_limit = 0
-                    mesaure_string = utils.get_measure(automl[1]["task"].unique(), measure_classification, measure_regression)
+                    mesaure_string = get_measure(automl[1]["task"].unique(), measure_classification, measure_regression)
                     max_value = sorted[sorted[mesaure_string] < 10000][mesaure_string].max()
                     for index, row in sorted.iterrows():
                         # all values should be between 0 and 10000
                         if row[mesaure_string] > 0 and row[mesaure_string] < 10000:
                             # Checks whether the distance between the value and the next value is less than 1% and also whether the distance to the largest value is less than 5%
-                            if abs(utils.divide(row[mesaure_string] - last_measure, last_measure)) < 0.01 and abs(utils.divide(max_value - row[mesaure_string], row[mesaure_string]) < 0.05):
+                            if abs(divide(row[mesaure_string] - last_measure, last_measure)) < 0.01 and abs(divide(max_value - row[mesaure_string], row[mesaure_string]) < 0.05):
                                 new_row = {"dataset_name": row["dataset_name"], "AutoML_solution": row["AutoML_solution"], "dataset_size_in_mb": row["dataset_size_in_mb"],
                                             "best_runtime_limit": last_runtime_limit, mesaure_string: last_measure, "task": automl[1]["task"].unique()}
                                 runtime_df = pd.concat([runtime_df, pd.DataFrame([new_row])], ignore_index=True )

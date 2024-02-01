@@ -9,5 +9,7 @@ namespace BlazorBoilerplate.Shared.Dto.Training
     public class GetTrainingSuggestedRuntimeRequestDto
     {
         public string DatasetId { get; set; }
+
+        public string Task {  get; set; }
     }
 }

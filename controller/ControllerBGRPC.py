@@ -959,6 +959,11 @@ class GetSuggestedTrainingRuntimeRequest(betterproto.Message):
     MongoDBexample: '63515c86b10d04d230dc1482'
     """
 
+    task: str = betterproto.string_field(3)
+    """
+    choosen task from the wizard
+    example: ':tabular_classification'
+    """
 
 @dataclass(eq=False, repr=False)
 class GetSuggestedTrainingRuntimeResponse(betterproto.Message):
