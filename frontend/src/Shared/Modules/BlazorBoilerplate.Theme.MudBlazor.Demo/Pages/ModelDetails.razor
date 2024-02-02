@@ -11,7 +11,7 @@
 </TopSection>
 
 <MudStack AlignItems="AlignItems.Center" Row="true" Class="mb-2" style="padding-top:50px">
-    <MudIcon Size="Size.Large" Icon="@Icons.Filled.Lightbulb" />
+    <MudIcon Size="Size.Large" Icon="@Icons.Material.Filled.Lightbulb" />
     <MudText Typo="Typo.h4">Details</MudText>
 </MudStack>
 
@@ -30,7 +30,6 @@
 
     protected override void OnInitialized()
     {
-        _breadcrumbs.Add(new BreadcrumbItem(L["Home"], "/", false, Icons.Filled.Home));
-
+        _breadcrumbs.Add(new BreadcrumbItem(L["Home"], "/", false, Icons.Material.Filled.Home));
     }
 }

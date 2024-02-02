@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Net;
@@ -10,42 +11,36 @@ namespace BlazorBoilerplate.Theme.Material.Services
     public class WikiDataGrabber
     {
         /// <summary>
-        /// Gets data from a Wikidata URL and extracts required data from there. Currently only gets the
-        /// description of an entry but in future it might do more/someting else. Eventually spltting it
+        /// Gets data from a Wikidata URL and extracts required data from there. Currently gets the
+        /// description, imageUrl and wiki link of an entry but in future it might do more/someting else. Eventually spltting it
         /// into separate methods might be advisable, like one for getting Wikidata description and another
         /// to get Wikipedia text.
         /// </summary>
         /// <param name="wikiDataUrl"></param> URL to Wikidata. If it's something else, the method immediately returns the content of url
         /// <param name="language"></param> Optional, as it defaults to english (en). You can choose which laguage your desired data should be returned in
-        /// <returns></returns> Either the Wikidata description (currently) or the content of url if it's a non-url-string
-        public List<string> GetDataFrom(string wikiDataUrl, string language = "en")
+        /// <returns>WikiDataResult with description, imageUrl and wikiLink, attributes can be null if not found</returns>
+        public static WikiDataResult GetDataFrom(string wikiDataUrl, string language = "en")
         {
-            List<string> toolTipContent = new List<string>();
-            if(!IsWikiDatalink(wikiDataUrl))
+            if(wikiDataUrl == null || !IsWikiDatalink(wikiDataUrl))
             {
-                return toolTipContent;
+                return new WikiDataResult();
             }
+
+            string description = null;
+            string imageUrl = null;
 
             wikiDataUrl = AdjustUrl(wikiDataUrl);
 
             dynamic wikiDataJsonFile = GetDataFromUrl(wikiDataUrl);
             string uri = ExtractUri(wikiDataUrl);
-            string description = GetWikidataDescription(wikiDataJsonFile, uri);
             // If there is no Wikipedia URL for given WikiData entry...
             string wikipediaLink = GetWikipediaUrl(wikiDataJsonFile, uri, language);
+            string wikiLink = wikipediaLink ?? wikiDataUrl;
+
             if(wikipediaLink==null)
             {
                 // ...try to get the description instead...
-                string descriptionFailsafe = GetWikidataDescription(wikiDataJsonFile, uri);
-                if(descriptionFailsafe==null)
-                {
-                    //...and if there isn't even a description, just enter an empty string.
-                    toolTipContent.Add("");
-                }
-                else
-                {
-                    toolTipContent.Add(descriptionFailsafe);
-                }
+                description = GetWikidataDescription(wikiDataJsonFile, uri);
             }
             else
             {
@@ -55,18 +50,21 @@ namespace BlazorBoilerplate.Theme.Material.Services
                     JObject wikipediaJsonFile = GetDataFromUrl(wikipediaLink)["query"]["pages"];
                     string pageId = wikipediaJsonFile.Properties().First().Name;
                     //Splitting the string, because it would show every section and we only want the first description
-                    string extract = wikipediaJsonFile[pageId]["extract"].ToString().Split("\n\n\n==")[0];
-                    toolTipContent.Add(extract);
-                    string imageUrl = GetPictureUrlFromWikipedia(wikipediaLink);
-                    toolTipContent.Add(imageUrl);
+                    description = wikipediaJsonFile[pageId]["extract"].ToString().Split("\n\n\n==")[0];
+                    imageUrl = GetPictureUrlFromWikipedia(wikipediaLink);
                 }
-                catch (System.Exception)
+                catch (Exception)
                 {
-
+                    //Ignore invalid json data
                 }
-
             }
-            return toolTipContent;
+
+            return new WikiDataResult()
+            {
+                Description = description,
+                ImageUrl = imageUrl,
+                WikiUrl = wikiLink
+            };
         }
 
         /// <summary>
@@ -74,7 +72,7 @@ namespace BlazorBoilerplate.Theme.Material.Services
         /// </summary>
         /// <param name="adjustedUrl"></param>
         /// <returns></returns>
-        public string GetPictureUrlFromWikipedia(string adjustedUrl)
+        public static string GetPictureUrlFromWikipedia(string adjustedUrl)
         {
             adjustedUrl += "&prop=pageimages&format=json&pithumbsize=200";
             JObject wikipediaJsonResponse = GetDataFromUrl(adjustedUrl)["query"]["pages"];
@@ -108,7 +106,7 @@ namespace BlazorBoilerplate.Theme.Material.Services
         /// </summary>
         /// <param name="url"></param> Wikidata URL as a String e.g. https://www.wikidata.org/wiki/Q47509047
         /// <returns></returns>The URI of the Entry e.g. Q47509047
-        public string ExtractUri(string url)
+        public static string ExtractUri(string url)
         {
             string uri = url.Split('/').Last();
             return uri;
@@ -121,7 +119,7 @@ namespace BlazorBoilerplate.Theme.Material.Services
         /// <param name="uri"></param> URI of the above mentioned Wikidata Entry
         /// <param name="language"></param> Optional, as it defaults to english (en). You can choose which laguage the description should be in
         /// <returns></returns> The description of the Wikidata Entry (directly from Wikidata, not Wikipedia), if none available - null
-        public string GetWikidataDescription(dynamic jsonObject, string uri, string language = "en")
+        public static string GetWikidataDescription(dynamic jsonObject, string uri, string language = "en")
         {
             string description;
             try
@@ -142,7 +140,7 @@ namespace BlazorBoilerplate.Theme.Material.Services
         /// <param name="uri"></param> URI of the previously mentioned Wikidata Entry
         /// <param name="language"></param> Optional, as it defaults to english (en). You can choose which laguage the Wikipedia Entry should be in
         /// <returns></returns> The Wikipedia URL, if none available - null
-        public string GetWikipediaUrl(dynamic jsonObject, string uri, string language = "en")
+        public static string GetWikipediaUrl(dynamic jsonObject, string uri, string language = "en")
         {
             string wikipediaUrl;
             try
@@ -156,7 +154,7 @@ namespace BlazorBoilerplate.Theme.Material.Services
             return wikipediaUrl;
         }
 
-        public string GetWikipediaUrlForMore(string wikiDataUrl, string language = "en")
+        public static string GetWikipediaUrlForMore(string wikiDataUrl, string language = "en")
         {
             if (!IsWikiDatalink(wikiDataUrl))
             {
@@ -167,7 +165,6 @@ namespace BlazorBoilerplate.Theme.Material.Services
 
             dynamic wikiDataJsonFile = GetDataFromUrl(wikiDataUrl);
             string uri = ExtractUri(wikiDataUrl);
-            string description = GetWikidataDescription(wikiDataJsonFile, uri);
             // If there is no Wikipedia URL for given WikiData entry...
             return GetWikipediaUrl(wikiDataJsonFile, uri, language);
         }
@@ -178,7 +175,7 @@ namespace BlazorBoilerplate.Theme.Material.Services
         /// </summary>
         /// <param name="url"></param> URL to the Wikidata Entry
         /// <returns></returns> Modified URL as described in summary
-        public string AdjustUrl(string url)
+        public static string AdjustUrl(string url)
         {
             string adjustedUrl = Regex.Replace(url, "/wiki/", "/entity/");
             return adjustedUrl;
@@ -194,7 +191,7 @@ namespace BlazorBoilerplate.Theme.Material.Services
         /// </summary>
         /// <param name="url"></param> Some string, not necessarily an URL to Wikidata (but hopefully)
         /// <returns></returns> True if it really is a Wikidata Link, otherwise false
-        public bool IsWikiDatalink(string url)
+        public static bool IsWikiDatalink(string url)
         {
             if(Regex.IsMatch(url, "https://www.wikidata.org/"))
             {
@@ -211,5 +208,11 @@ namespace BlazorBoilerplate.Theme.Material.Services
             string adjustedUrl = Regex.Replace(url, "/wiki/", "/w/api.php?format=json&action=query&prop=extracts&explaintext=1&titles=");
             return adjustedUrl;
         }
+    }
+
+    public class WikiDataResult {
+        public string Description { get; set; }
+        public string ImageUrl { get; set; }
+        public string WikiUrl { get; set; }
     }
 }

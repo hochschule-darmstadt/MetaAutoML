@@ -14,7 +14,7 @@
 </TopSection>
 
 <MudStack AlignItems="MudBlazor.AlignItems.Center" Row="true" Class="mb-2" style="padding-top:50px">
-    <MudIcon Size="Size.Large" Icon="@Icons.Filled.ListAlt" />
+    <MudIcon Size="Size.Large" Icon="@Icons.Material.Filled.ListAlt" />
     <LabelTooltip FontSize="TextStyle.H4" Label=@L["Datasets"] Text="A dataset contains data that can be used for machine learning. Different dataset types are distinguished, e.g., tabular data, texts or images.
 This page lists all datasets you have uploaded so far to the OMA-ML platform. By clicking on a dataset, the respective dataset page is opened to inspect the dataset and start new trainings." Position="Radzen.TooltipPosition.Bottom"></LabelTooltip>
 
@@ -36,8 +36,8 @@ This page lists all datasets you have uploaded so far to the OMA-ML platform. By
     {
         await LoadDatasets();
         fileUploader.OnUploadCompletedCallback = LoadDatasetsWithReRendering;
-        _breadcrumbs.Add(new BreadcrumbItem(L["Home"], "/", false, Icons.Filled.Home));
-        _breadcrumbs.Add(new BreadcrumbItem(L["Datasets"], null, true, Icons.Filled.ListAlt));
+        _breadcrumbs.Add(new BreadcrumbItem(L["Home"], "/", false, Icons.Material.Filled.Home));
+        _breadcrumbs.Add(new BreadcrumbItem(L["Datasets"], null, true, Icons.Material.Filled.ListAlt));
         StateHasChanged();
     }
 

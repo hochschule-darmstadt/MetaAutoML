@@ -196,6 +196,11 @@ namespace BlazorBoilerplate.Shared.Services
         {
             return httpClient.PostJsonAsync<ApiResponseDto<GetAutoMlParametersResponseDto>>("api/Ontology/GetAutoMlParameters", request);
         }
+
+        public Task<ApiResponseDto<GetSearchRelevantDataResponseDto>> GetSearchRelevantData()
+        {
+            return httpClient.GetJsonAsync<ApiResponseDto<GetSearchRelevantDataResponseDto>>("api/Ontology/GetSearchRelevantData");
+        }
         #endregion
 
         #region OMA-ML PREDICTION DATASET MESSAGES
