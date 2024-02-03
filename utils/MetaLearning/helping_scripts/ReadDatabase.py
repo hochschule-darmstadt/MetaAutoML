@@ -113,11 +113,12 @@ def readDatabase(trainings: collection ,datasets: collection, models: collection
     for group in groups:
         if group[1]["task"].unique()[0] == ":tabular_classification":
             max_value = group[1][measure_classification].max()
+
             if max_value >= 0:
                 for row in group[1].iterrows():
                     if max_value == 0:
                         relative_value = 0
-                    else:
+                    elif row[1][measure_classification] >= 0:
                         relative_value = row[1][measure_classification] / max_value
                     df.loc[row[0],"relative_"+ measure_classification] = relative_value
         elif group[1]["task"].unique()[0] == ":tabular_regression":
@@ -129,11 +130,7 @@ def readDatabase(trainings: collection ,datasets: collection, models: collection
                     elif max_value == 9999999 and row[1][measure_regression] == 9999999:
                         relative_value = 0
                     else:
-                        print("calculated")
-                        print(max_value)
-                        print(row[1][measure_regression])
                         relative_value =  max_value / row[1][measure_regression]
-                        print(relative_value)
                     df.loc[row[0],"relative_"+ measure_regression] = relative_value
 
     if not os.path.exists(file_path):
