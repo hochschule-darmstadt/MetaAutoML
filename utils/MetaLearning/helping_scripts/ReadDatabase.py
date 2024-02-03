@@ -77,7 +77,7 @@ def readDatabase(trainings: collection ,datasets: collection, models: collection
         measure_classification (str): string with the measurement for classification
         measure_regression (str): string with the measurement for regression
     """
-    header_row = ["df","auto_ml_solution", "task", "trainings_id", "dataset_name", "dataset_size_mb", measure_classification, measure_regression, "dataset_rows",
+    header_row = ["AutoML_solution", "task", "trainings_id", "dataset_name", "dataset_size_mb", measure_classification, measure_regression, "dataset_rows",
                   "dataset_cols", "runtime", "runtime_limit", "failed", "relative_" + measure_classification , "relative_" + measure_regression]
     df = pd.DataFrame(columns = header_row)
     print("Start")
