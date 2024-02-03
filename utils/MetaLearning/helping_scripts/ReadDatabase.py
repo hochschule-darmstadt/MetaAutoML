@@ -47,23 +47,6 @@ def create_row(df: pd.DataFrame, auto_ml_solution: str, task : str, trainings_id
     df = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True )
     return df
 
-def create_relative_value(metric: str, metric_relative: str, df: pd.DataFrame, group: pd.DataFrame):
-    """calcualtes the relative value for the task
-
-    Args:
-        metric (str): the metric that is used for the task
-        metric_relative (str): the name of column where the relative value should be saved
-        df (pd.DataFrame): the dataframe where the relative value should be saved
-        group (pd.DataFrame): the part of the dataframe grouped by the task
-    """
-    max_value = group[1][metric].max()
-    if max_value >= 0:
-        for row in group[1].iterrows():
-            if max_value == 0:
-                relative_value = 0
-            else:
-                relative_value = row[1][metric] / max_value
-            df.loc[row[0],metric_relative] = relative_value
 
 def readDatabase(trainings: collection ,datasets: collection, models: collection,file_path: str, measure_classification: str, measure_regression: str):
     """reads the important enttries from the database and saves them in a dataframe
@@ -106,7 +89,7 @@ def readDatabase(trainings: collection ,datasets: collection, models: collection
                     if task == ":tabular_classification":
                         measure_value = 0
                     if task == ":tabular_regression":
-                        measure_value = 100000
+                        measure_value = 9999999
                     df =  create_row(df,auto_ml_solution, task, trainings_id, dataset_name, dataset_size_mb, measure, measure_value, dataset_rows, dataset_cols, 0, runtime_limit,1)
 
             for id in training["model_ids"]:
@@ -129,9 +112,29 @@ def readDatabase(trainings: collection ,datasets: collection, models: collection
     groups = df.groupby(["trainings_id"])
     for group in groups:
         if group[1]["task"].unique()[0] == ":tabular_classification":
-            create_relative_value( measure_classification, "relative_" + measure_classification, df, group)
-        else:
-            create_relative_value( measure_regression, "relative_"+ measure_regression, df, group)
+            max_value = group[1][measure_classification].max()
+            if max_value >= 0:
+                for row in group[1].iterrows():
+                    if max_value == 0:
+                        relative_value = 0
+                    else:
+                        relative_value = row[1][measure_classification] / max_value
+                    df.loc[row[0],"relative_"+ measure_classification] = relative_value
+        elif group[1]["task"].unique()[0] == ":tabular_regression":
+            max_value = group[1][measure_regression].min()
+            if max_value >= 0:
+                for row in group[1].iterrows():
+                    if max_value == 0 and row[1][measure_regression] == 0:
+                        relative_value = 1
+                    elif max_value == 9999999 and row[1][measure_regression] == 9999999:
+                        relative_value = 0
+                    else:
+                        print("calculated")
+                        print(max_value)
+                        print(row[1][measure_regression])
+                        relative_value =  max_value / row[1][measure_regression]
+                        print(relative_value)
+                    df.loc[row[0],"relative_"+ measure_regression] = relative_value
 
     if not os.path.exists(file_path):
         os.makedirs(file_path)
