@@ -30,7 +30,7 @@ namespace BlazorBoilerplate.Server.Managers
             _cacheManager = cacheManager;
         }
         /// <summary>
-        /// Upload a new dataset, currently only CSV are supported
+        /// Upload a new dataset; currently CSV, XLSX, XLS and ARFF are supported
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
@@ -90,6 +90,7 @@ namespace BlazorBoilerplate.Server.Managers
                         }
                         if (result.Detected == null)
                         {
+                            // Ignore the encoding of XLSX and XLS files
                             if (fileExt != ".xlsx" && fileExt != ".xls")
                             {
                                 return new ApiResponse(Status406NotAcceptable, "EncodingNotSupportedErrorMessage");
@@ -344,6 +345,11 @@ namespace BlazorBoilerplate.Server.Managers
             }
         }
 
+        /// <summary>
+        /// Check if the file extension is supported
+        /// </summary>
+        /// <param name="fileExt"></param>
+        /// <returns></returns>
         private bool CheckSupportedFileType(string fileExt)
         {
             if (fileExt == ".csv" || fileExt == ".arff" || fileExt == ".xlsx" || fileExt == ".xls" || fileExt == ".zip")
@@ -353,6 +359,11 @@ namespace BlazorBoilerplate.Server.Managers
             return false;
         }
 
+        /// <summary>
+        /// Check if the ZIP archive has the correct structure
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <returns></returns>
         private bool CheckZIPStructure(string filePath)
         {
             List<string> zipEntries = new List<string>();
