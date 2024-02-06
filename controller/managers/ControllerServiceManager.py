@@ -198,6 +198,19 @@ class ControllerServiceManager(ControllerServiceBase):
         return response
 
     @inject
+    async def get_suggested_training_runtime(
+        self, get_suggested_training_runtime_request: "GetSuggestedTrainingRuntimeRequest",
+        training_manager: TrainingManager=Provide[Application.managers.training_manager]
+    ) -> "GetSuggestedTrainingRuntimeResponse":
+        with MeasureDuration() as m:
+            response = training_manager.get_suggested_training_runtime(get_suggested_training_runtime_request)
+        #response = await self.__loop.run_in_executor(
+        #    self.__executor, training_manager.delete_training, delete_training_request
+        #)
+        self.__log.warn("get_suggested_training_runtime: executed")
+        return response
+
+    @inject
     async def delete_training(
         self, delete_training_request: "DeleteTrainingRequest",
         training_manager: TrainingManager=Provide[Application.managers.training_manager]

@@ -388,7 +388,7 @@
             }
             SelectedTargets = new HashSet<string>(targets);
         }
-        StartTrainingDto.Configuration.RuntimeLimit = 3;
+        StartTrainingDto.Configuration.RuntimeLimit = 5;
         StartTrainingDto.Configuration.Metric = ":accuracy";
         await UpdateStartTrainingDto();
     }
@@ -567,6 +567,18 @@
                     apiResponse.Result.MlLibraries
                         .Select(ConvertObjectInfoToChip)),
             errorMessageKey: "SupportedMlLibraries Operation Failed");
+
+            var suggestedRuntimeResponse = await apiClient.GetSuggestedTrainingRuntime(new GetTrainingSuggestedRuntimeRequestDto() { DatasetId = Dataset.Dataset.Id, Task = StartTrainingDto.Configuration.Task });
+
+            if (suggestedRuntimeResponse.IsSuccessStatusCode)
+            {
+                GetTrainingSuggestedRuntimeResponseDto response = Newtonsoft.Json.JsonConvert.DeserializeObject<GetTrainingSuggestedRuntimeResponseDto>(suggestedRuntimeResponse.Result.ToString());
+                StartTrainingDto.Configuration.RuntimeLimit = response.SuggestedRuntime;
+            }
+            else
+            {
+                viewNotifier.Show(suggestedRuntimeResponse.Message + " : " + suggestedRuntimeResponse.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
+            }
         }
         catch (Exception ex)
         {

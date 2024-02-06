@@ -50,6 +50,9 @@ service ControllerService {
   /*delete a Training record and every related object inside MongoDB and files on disc (Models, Predictions)*/
   rpc DeleteTraining(DeleteTrainingRequest) returns (DeleteTrainingResponse) {}
 
+  /*get suggested training runtime*/
+  rpc GetSuggestedTrainingRuntime(GetSuggestedTrainingRuntimeRequest) returns (GetSuggestedTrainingRuntimeResponse) {}
+
 
   /*OMA-ML MODEL MESSAGES*/
   /*return a list of all Models records for a training id or dataset id and user id*/
