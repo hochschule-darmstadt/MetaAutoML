@@ -81,8 +81,6 @@ namespace BlazorBoilerplate.Server
         }
         public void ConfigureServices(IServiceCollection services)
         {
-            services.UseGTour();
-            GTourService.Theme = new GTour.Themes.CustomTheme();
             services.AddSingleton<ILocalizationProvider, StorageLocalizationProvider>();
             services.AddTextLocalization(options =>
             {
@@ -181,6 +179,11 @@ namespace BlazorBoilerplate.Server
             //OMA-ML SERVICES
             ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
+            services.UseGTour();
+            GTourService.Theme = new GTour.Themes.CustomTheme();
+
+            services.AddScoped<ITourService, TourService>();
+
             services.AddTransient<IDatasetManager, DatasetManager>();
             services.AddTransient<IOntologyManager, OntologyManager>();
             services.AddTransient<ITrainingManager, TrainingManager>();
@@ -191,6 +194,7 @@ namespace BlazorBoilerplate.Server
 
             services.AddScoped<IFileUploader, FileUploader>();
             services.AddScoped<IDatasetPreviewWorker, DatasetPreviewWorker>();
+            services.AddScoped<IHelpSearch, HelpSearch>();
 
             var authAuthority = Configuration[$"{projectName}:IS4ApplicationUrl"].TrimEnd('/');
 

@@ -1761,7 +1761,7 @@
     :can_perform :tabular_classification , :tabular_regression ;
     rdfs:comment "H2O's AutoML automates the process of training and tuning a large selection of models, allowing the user to focus on other aspects of the data science and machine learning pipeline such as data pre-processing, feature engineering and model deployment." ;
     rdfs:seeAlso <https://docs.h2o.ai/h2o/latest-stable/h2o-docs/automl.html> ;
-    :supported_by_oma_ml "true"^^xsd:boolean .
+    :supported_by_oma_ml "false"^^xsd:boolean .
 :ibm_autoai a :AutoML_solution ;
     skos:prefLabel "IBM AutoAI" ;
     :used_for :ibm_snap_ml_lib , :scikit_learn_lib , :tensorflow_lib , :xgboost_lib ;

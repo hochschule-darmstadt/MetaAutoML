@@ -64,6 +64,14 @@ namespace BlazorBoilerplate.Server.Controllers
             => ModelState.IsValid ?
                 await _trainingManager.DeleteTraining(request) :
                 new ApiResponse(Status400BadRequest, L["InvalidData"]);
+        [HttpPost]
+        [ProducesResponseType(Status200OK)]
+        [ProducesResponseType(Status400BadRequest)]
+        [ProducesResponseType(Status404NotFound)]
+        public async Task<ApiResponse> GetSuggestedTrainingRuntime(GetTrainingSuggestedRuntimeRequestDto request)
+            => ModelState.IsValid ?
+                await _trainingManager.GetTrainingRuntimeSuggestion(request) :
+                new ApiResponse(Status400BadRequest, L["InvalidData"]);
 
     }
 }

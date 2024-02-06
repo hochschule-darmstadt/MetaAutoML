@@ -10,6 +10,8 @@
 @inject NavigationManager navigationManager
 @inject IDialogService dialogService
 @using BlazorBoilerplate.Shared.Models.Account
+
+
 <div data-form-zeroStep style="border: solid none; z-index: 999; position: relative; background-color: none; border-width: 0px;"></div>
 <TopSection>
     <MudBreadcrumbs Style="z-index:1!important;" Items="_breadcrumbs" Class="mudbreadcrumbs"></MudBreadcrumbs>
@@ -68,7 +70,7 @@
 
 @code {
     [Inject]
-    private GTour.Abstractions.IGTourService GTourService { get; set; }
+    private ITourService TourService { get; set; }
 
 
     [Inject]
@@ -89,7 +91,6 @@
         _pageTitle = L["Home"];
         _breadcrumbs.Add(new BreadcrumbItem(L["Home"], null, true, Icons.Filled.Home));
         fileUploader.OnUploadCompletedCallback = LoadDatasetWithReRendering;
-        StateHasChanged();
         identityAuthenticationStateProvider = (IdentityAuthenticationStateProvider)authStateProvider;
 
         userViewModel = await identityAuthenticationStateProvider.GetUserViewModel();
@@ -99,15 +100,15 @@
             userViewModel.IsTutorialEnabled = false;
             await UpdateUser();
             // await GTourService.StartTour("FormGuidedTour", "zeroStep");
-            TourService userTour = new TourService(GTourService, navigationManager);
-            userTour.navigateToNextPage("zeroStep", navigationManager.ToAbsoluteUri(" ").AbsoluteUri);
+            TourService.navigateToNextPage("zeroStep", navigationManager.ToAbsoluteUri(" ").AbsoluteUri);
         }
         else
         {
-            TourService userTour = new TourService(GTourService, navigationManager);
-            await userTour.checkIfUserTourIsActivatedAndStartTour(navigationManager.Uri);
+            await TourService.checkIfUserTourIsActivatedAndStartTour(navigationManager.Uri);
         }
+        StateHasChanged();
     }
+
 
     protected async Task UpdateUser()
     {

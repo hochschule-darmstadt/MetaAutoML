@@ -41,6 +41,11 @@ namespace BlazorBoilerplate.Theme.Material.Services
         public bool IsUploadDatasetDialogOpen { get; set; } = false;
         public bool IsPredictionDatasetToUpload { get; set; } = false;
         public bool IsUploadPredictionDatasetDialogOpen { get; set; } = false;
+
+        /// <summary>
+        /// Upload a dataset from local storage
+        /// </summary>
+        /// <returns></returns>
         public async Task UploadDatasetFromLocal()
         {
             IsUploading = true;
@@ -57,6 +62,13 @@ namespace BlazorBoilerplate.Theme.Material.Services
             }
             return;
         }
+
+        /// <summary>
+        /// Upload a dataset from a given URL, also try to get the file extension from the HTTP header
+        /// </summary>
+        /// <param name="url">Direct download URL of a dataset.</param>
+        /// <param name="fileType">The file type of the dataset.</param>
+        /// <returns></returns>
         public async Task UploadDatasetFromURL(string url, string fileType)
         {
             IsUploading = true;
@@ -93,6 +105,11 @@ namespace BlazorBoilerplate.Theme.Material.Services
             }
 
         }
+
+        /// Uploads a file to the MongoDB server.
+        /// </summary>
+        /// <param name="reader">The StreamReader containing the file to upload.</param>
+        /// <returns></returns>
         private async Task UploadFileToServer(StreamReader reader)
         {
             int chunkSize = 1000000;
@@ -198,9 +215,14 @@ namespace BlazorBoilerplate.Theme.Material.Services
             return;
         }
 
+        /// <summary>
+        /// Get the download URL for a given URL of supported cloud storage services
+        /// </summary>
+        /// <param name="url">The URL entered by the user.</param>
+        /// <returns>direct download link</returns>
         private static string GetDownloadUrl(string url)
         {
-            if (Regex.IsMatch(url, @"(?:drive\.google\.com)"))
+            if (Regex.IsMatch(url, @"(?:drive\.google\.com|docs\.google\.com)"))
             {
                 return GetGoogleDriveDownloadLink(url);
             }
@@ -226,6 +248,11 @@ namespace BlazorBoilerplate.Theme.Material.Services
             }
             return url;
         }
+        /// <summary>
+        /// Get the direct download URL for Google Drive using the file id
+        /// </summary>
+        /// <param name="googleDriveUrl">Google Drive URL</param>
+        /// <returns>Direct download URL for Google Drive</returns>
         private static string GetGoogleDriveDownloadLink(string googleDriveUrl)
         {
             var match = Regex.Match(googleDriveUrl, @"/d/([a-zA-Z0-9_-]+)");
@@ -238,6 +265,11 @@ namespace BlazorBoilerplate.Theme.Material.Services
             return googleDriveUrl;
         }
 
+        /// <summary>
+        /// Get the direct download URL for Dropbox
+        /// </summary>
+        /// <param name="dropboxUrl">Dropbox URL</param>
+        /// <returns>Direct Download URL for Dropbox</returns>
         private static string GetDropboxDownloadLink(string dropboxUrl)
         {
             if (dropboxUrl.EndsWith("&dl=0"))
@@ -251,6 +283,11 @@ namespace BlazorBoilerplate.Theme.Material.Services
             return dropboxUrl;
         }
 
+        /// <summary>
+        /// Get the direct download URL for OneDrive by encoding the Base64 decoded URL
+        /// </summary>
+        /// <param name="onedriveUrl">OneDrive URL</param>
+        /// <returns>Direct download URL for Onedrive</returns>
         private static string GetOnedriveDownloadLink(string onedriveUrl)
         {
             string base64Value = System.Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(onedriveUrl));
@@ -259,6 +296,11 @@ namespace BlazorBoilerplate.Theme.Material.Services
             return onedriveUrl;
         }
 
+        /// <summary>
+        /// Get the direct download URL for Sharepoint
+        /// </summary>
+        /// <param name="sharepointUrl">Sharepoint URL</param>
+        /// <returns>Direct download URL for Sharepoint</returns>
         private static string GetSharepointDownloadLink(string sharepointUrl)
         {
             if (sharepointUrl.Contains("&download=1"))
@@ -268,6 +310,11 @@ namespace BlazorBoilerplate.Theme.Material.Services
             return sharepointUrl + "&download=1";
         }
 
+        /// <summary>
+        /// Get the direct download URL for h_da Nextcloud
+        /// </summary>
+        /// <param name="nextcloudUrl">h_da Nextcloud URL</param>
+        /// <returns>Direct download URL for h_da Nextcloud</returns>
         private static string GetNextcloudDownloadLink(string nextcloudUrl)
         {
             if (nextcloudUrl.EndsWith("/download"))
@@ -277,6 +324,11 @@ namespace BlazorBoilerplate.Theme.Material.Services
             return nextcloudUrl + "/download";
         }
 
+        /// <summary>
+        /// Get the direct download URL for OpenML datasets by using the OpenML API
+        /// </summary>
+        /// <param name="openMLUrl">OpenML URL</param>
+        /// <returns>Direct download URL for OpenML datasets</returns>
         private static string GetOpenMLDownloadLink(string openMLUrl)
         {
             var match = Regex.Match(openMLUrl, @"(?:\b|\?)id=(\d+)\b");

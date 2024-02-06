@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 namespace BlazorBoilerplate.Shared.Dto
 {
     public class HelpPageDto

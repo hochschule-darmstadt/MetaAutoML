@@ -30,7 +30,7 @@ namespace BlazorBoilerplate.Server.Managers
             _cacheManager = cacheManager;
         }
         /// <summary>
-        /// Upload a new dataset, currently only CSV are supported
+        /// Upload a new dataset; currently CSV, XLSX, XLS and ARFF are supported
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
@@ -88,11 +88,23 @@ namespace BlazorBoilerplate.Server.Managers
                             result = CharsetDetector.DetectFromStream(fs1);
 
                         }
-                        grpcRequest.Encoding = result.Detected.EncodingName.ToString();
-                        //ascii data encoding causes some issues with some automl, UTF-8 is a safe encoding that covers all ascii signs
-                        if (grpcRequest.Encoding == "ascii")
+                        if (result.Detected == null)
                         {
+                            // Ignore the encoding of XLSX and XLS files
+                            if (fileExt != ".xlsx" && fileExt != ".xls")
+                            {
+                                return new ApiResponse(Status406NotAcceptable, "EncodingNotSupportedErrorMessage");
+                            }
                             grpcRequest.Encoding = "utf-8";
+                        }
+                        else
+                        {
+                            grpcRequest.Encoding = result.Detected.EncodingName.ToString();
+                            //ascii data encoding causes some issues with some automl, UTF-8 is a safe encoding that covers all ascii signs
+                            if (grpcRequest.Encoding == "ascii")
+                            {
+                                grpcRequest.Encoding = "utf-8";
+                            }
                         }
                     }
                     else
@@ -333,15 +345,25 @@ namespace BlazorBoilerplate.Server.Managers
             }
         }
 
+        /// <summary>
+        /// Check if the file extension is supported
+        /// </summary>
+        /// <param name="fileExt"></param>
+        /// <returns></returns>
         private bool CheckSupportedFileType(string fileExt)
         {
-            if (fileExt == ".csv" || fileExt == ".arff" || fileExt == ".zip")
+            if (fileExt == ".csv" || fileExt == ".arff" || fileExt == ".xlsx" || fileExt == ".xls" || fileExt == ".zip")
             {
                 return true;
             }
             return false;
         }
 
+        /// <summary>
+        /// Check if the ZIP archive has the correct structure
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <returns></returns>
         private bool CheckZIPStructure(string filePath)
         {
             List<string> zipEntries = new List<string>();

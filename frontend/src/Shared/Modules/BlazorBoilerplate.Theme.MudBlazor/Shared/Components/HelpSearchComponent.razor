@@ -1,0 +1,127 @@
+@using System.ComponentModel.DataAnnotations
+@using BlazorBoilerplate.Shared.Models
+@namespace BlazorBoilerplate.Theme.Material.Demo.Shared.Components
+@inject NavigationManager navigationManager
+@inject IHelpSearch helpSearch
+@inject IStringLocalizer<Global> L
+@using MudBlazor
+
+<MudAutocomplete @ref="autocompleteElement" T="HelpSearchEntry" @bind-Value="State" Required="false" @bind-Text="@searchInputText"
+				 SearchFunc="@SearchAsync" Immediate="true" ResetValueOnEmptyText="true"
+                 Margin="Margin.Dense" Dense="true" Label=@L["Help search ..."]
+				 AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Primary"
+				 MaxLength=50 ListClass="SearchBarList" PopoverClass="SearchBarOverlay">
+	<ItemTemplate Context="e">
+		<MudIcon Style="font-size:15px;" Class="d-inline" Icon="@GetIconOfOrigin(e.Type)" />
+		<MudText Style="font-size:15px;" Class="d-inline">
+			<MudHighlighter Text="@e.OptionText" HighlightedText="@searchInputText?.Trim()" />
+		</MudText>
+	</ItemTemplate>
+</MudAutocomplete>
+
+@code {
+
+	[Parameter]
+	public EventCallback<string> OnStatesChanged { get; set; }
+
+	[CascadingParameter]
+	Task<AuthenticationState> authenticationStateTask { get; set; }
+
+    [Parameter]
+	public string query { set; get; }
+
+    [Parameter]
+    public bool inHeader { set; get; }
+
+	private string searchInputText;
+
+    private MudAutocomplete<HelpSearchEntry> autocompleteElement;
+
+	protected override async Task OnInitializedAsync()
+	{
+		var user = (await authenticationStateTask).User;
+
+		if (user.Identity.IsAuthenticated)
+		{
+			await helpSearch.LoadSearchCache();
+		}
+	}
+
+    public void Focus()
+    {
+        autocompleteElement.FocusAsync();
+    }
+
+    public void SelectValue(HelpSearchEntry entry)
+    {
+        autocompleteElement.SelectOption(entry);
+    }
+
+    private HelpSearchEntry State
+    {
+        set
+        {
+            if(value == null)
+            {
+                return;
+            }
+
+            //Reset Search Element if in header on search
+            if(inHeader)
+            {
+                autocompleteElement.ResetAsync();
+            }
+
+            OnStatesChanged.InvokeAsync(value.Title);
+            query = value.Title;
+            navigationManager.NavigateTo($"search/{query}");
+
+        }
+        get
+        {
+            if(inHeader)
+            {
+                return new HelpSearchEntry("");
+            }
+
+            return new HelpSearchEntry(query);
+        }
+    }
+
+    private async Task<IEnumerable<HelpSearchEntry>> SearchAsync(string value)
+    {
+        HelpSearchEntry[] searchEntry;
+        value = value?.Trim();
+
+        if(string.IsNullOrWhiteSpace(value))
+        {
+            searchEntry = new HelpSearchEntry[]{};
+        }
+        else
+        {
+            searchEntry = new HelpSearchEntry[]{new HelpSearchEntry(value)};
+        }
+
+        return searchEntry.Concat(helpSearch.SearchTop10(value)).ToList();
+	}
+
+	/* Display icons in the navigation bar */
+	private string GetIconOfOrigin(HelpSearchResultType origin)
+	{
+		switch (origin)
+		{
+			case HelpSearchResultType.ONTOLOGY:
+				{
+					return Icons.Material.Filled.Article;
+				}
+			case HelpSearchResultType.HELP_ARTICLE:
+				{
+					return Icons.Material.Filled.Web;
+				}
+			default:
+				{
+					return null;
+				}
+		}
+	}
+}

@@ -4,6 +4,8 @@
 @inject IStringLocalizer<Global> L
 @using Radzen
 @using Radzen.Blazor
+@using System.ComponentModel.DataAnnotations
+@inject IHelpSearch helpSearch
 
 <CascadingValue Value="this">
     <MudLayout>
@@ -12,6 +14,8 @@
             <MudSpacer />
             <MudText Color="Color.Dark" Typo="Typo.h6" Style="font-size: clamp(0.9rem, -0.425rem + 3.4vw, 1.5rem);">OMA-ML: Effective Machine Learning made easy!</MudText>
             <MudSpacer />
+			<BlazorBoilerplate.Theme.Material.Demo.Shared.Components.HelpSearchComponent inHeader=true></BlazorBoilerplate.Theme.Material.Demo.Shared.Components.HelpSearchComponent>
+			<MudSpacer />
             <TopRightBarSection />
         </MudAppBar>
         <MudDrawer @bind-Open="@_navMenuOpened" Elevation="2">
@@ -43,26 +47,26 @@
 <RadzenTooltip />
 
 @code {
-    bool _navMenuOpened = true;
+	bool _navMenuOpened = true;
 	string navMenuIcon = Icons.Material.Filled.Menu;
 
-    [CascadingParameter]
-    Task<AuthenticationState> authenticationStateTask { get; set; }
+	[CascadingParameter]
+	Task<AuthenticationState> authenticationStateTask { get; set; }
 
-    protected override async Task OnInitializedAsync()
-    {
-        var user = (await authenticationStateTask).User;
+	protected override async Task OnInitializedAsync()
+	{
+		var user = (await authenticationStateTask).User;
 
-        if (user.Identity.IsAuthenticated)
-        {
-            var profile = await appState.GetUserProfile();
+		if (user.Identity.IsAuthenticated)
+		{
+			var profile = await appState.GetUserProfile();
 
-            _navMenuOpened = profile.IsNavOpen;
+			_navMenuOpened = profile.IsNavOpen;
 		}
-    }
+	}
 
-    private void DrawerToggle()
-    {
-        _navMenuOpened = !_navMenuOpened;
-    }
+	private void DrawerToggle()
+	{
+		_navMenuOpened = !_navMenuOpened;
+	}
 }

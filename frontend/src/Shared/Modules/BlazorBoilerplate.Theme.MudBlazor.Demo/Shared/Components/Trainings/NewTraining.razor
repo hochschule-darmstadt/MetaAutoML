@@ -50,12 +50,12 @@
     [Parameter]
     public GetDatasetResponseDto Dataset { get; set; }
     [Inject]
-    private GTour.Abstractions.IGTourService GTourService { get; set; }
+    private ITourService TourService { get; set; }
     private bool tourActivated = false;
 
     protected override void OnInitialized()
     {
-        TourService userTour = new TourService(GTourService, NavManager);
-        tourActivated = userTour.checkIfUserTourIsActivated(NavManager.Uri);
+        // tourActivated = TourService.checkIfUserTourIsActivated(NavManager.Uri);
+        tourActivated = TourService.checkIfUserTourIsActivated();
     }
 }

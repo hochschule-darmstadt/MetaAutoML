@@ -1,2 +1,2 @@
-betterproto==1.2.5
+betterproto[compiler] @ git+https://github.com/danielgtaylor/python-betterproto.git@496eba27506a2fe18df409c4cd34a47d8ce04ffe
 grpclib==0.4.3

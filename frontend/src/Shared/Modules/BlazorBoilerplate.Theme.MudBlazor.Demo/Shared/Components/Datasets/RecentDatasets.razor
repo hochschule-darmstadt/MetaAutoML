@@ -73,13 +73,25 @@
 @code {
     //private DateTime NewestDate;
     [Inject]
-    private GTour.Abstractions.IGTourService GTourService { get; set; }
+    private ITourService TourService { get; set; }
     private bool tourActivated = false;
+
+    private bool wasTourActivated = false;
 
     protected override void OnInitialized()
     {
-        TourService userTour = new TourService(GTourService, NavManager);
-        tourActivated = userTour.checkIfUserTourIsActivated(NavManager.Uri);
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        // tourActivated = TourService.checkIfUserTourIsActivated(NavManager.Uri);
+        tourActivated = TourService.checkIfUserTourIsActivated();
+        if (wasTourActivated == false && tourActivated == true)
+        {
+            //is needed to avoid infinite refreshes
+            wasTourActivated = true;
+            StateHasChanged();
+        }
     }
 
     [Parameter]

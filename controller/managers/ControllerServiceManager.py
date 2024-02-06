@@ -198,6 +198,19 @@ class ControllerServiceManager(ControllerServiceBase):
         return response
 
     @inject
+    async def get_suggested_training_runtime(
+        self, get_suggested_training_runtime_request: "GetSuggestedTrainingRuntimeRequest",
+        training_manager: TrainingManager=Provide[Application.managers.training_manager]
+    ) -> "GetSuggestedTrainingRuntimeResponse":
+        with MeasureDuration() as m:
+            response = training_manager.get_suggested_training_runtime(get_suggested_training_runtime_request)
+        #response = await self.__loop.run_in_executor(
+        #    self.__executor, training_manager.delete_training, delete_training_request
+        #)
+        self.__log.warn("get_suggested_training_runtime: executed")
+        return response
+
+    @inject
     async def delete_training(
         self, delete_training_request: "DeleteTrainingRequest",
         training_manager: TrainingManager=Provide[Application.managers.training_manager]
@@ -258,7 +271,6 @@ class ControllerServiceManager(ControllerServiceBase):
         self.__log.warn("delete_model: executed")
         return response
 
-
     @inject
     async def start_explainer_dashboard(
         self, start_dashboard_request: "StartDashboardRequest",
@@ -271,7 +283,6 @@ class ControllerServiceManager(ControllerServiceBase):
         #)
         self.__log.warn("start_explainer_dashboard: executed")
         return response
-
 
     @inject
     async def stop_explainer_dashboard(
@@ -393,7 +404,6 @@ class ControllerServiceManager(ControllerServiceBase):
                 )
             )
 
-
             result.strategies.append(
                 Strategy(
                 'preprocessing.pca_feature_extraction',
@@ -467,6 +477,17 @@ class ControllerServiceManager(ControllerServiceBase):
         #    self.__executor, ontology_manager.get_tasks_for_dataset_type, get_tasks_for_dataset_type_request
         #)
         self.__log.warn("get_auto_ml_parameters: executed")
+        return response
+
+    @inject
+    async def get_search_relevant_data(
+        self, get_search_relevant_data_request: "GetSearchRelevantDataRequest",
+        ontology_manager: OntologyManager=Provide[Application.ressources.ontology_manager]
+    ) -> "GetSearchRelevantDataResponse":
+        with MeasureDuration() as m:
+            response = ontology_manager.get_search_relevant_data()
+
+        self.__log.warn("get_search_relevant_data: executed")
         return response
 
 #endregion

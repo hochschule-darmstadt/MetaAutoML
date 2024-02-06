@@ -32,7 +32,7 @@
     private GetTrainingResponseDto _training;
     private List<BreadcrumbItem> _breadcrumbs = new List<BreadcrumbItem>();
     [Inject]
-    private GTour.Abstractions.IGTourService GTourService { get; set; }
+    private ITourService TourService { get; set; }
     private bool tourActivated = false;
 
     protected async override void OnInitialized()
@@ -42,8 +42,7 @@
         _breadcrumbs.Add(new BreadcrumbItem(L["Trainings"], "/trainings", false, Icons.Filled.ModelTraining));
         _breadcrumbs.Add(new BreadcrumbItem(_pageTitle, null, true, Icons.Filled.ModelTraining));
         StateHasChanged();
-        TourService userTour = new TourService(GTourService, NavManager);
-        await userTour.checkIfUserTourIsActivatedAndStartTour(NavManager.Uri);
+        await TourService.checkIfUserTourIsActivatedAndStartTour(NavManager.Uri);
 
     }
 

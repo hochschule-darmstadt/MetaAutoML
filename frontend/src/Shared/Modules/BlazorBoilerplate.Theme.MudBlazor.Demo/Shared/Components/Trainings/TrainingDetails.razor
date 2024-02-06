@@ -7,7 +7,7 @@
 @using Radzen
 @using Radzen.Blazor
 
-<MudCard Elevation="5" data-form-ninthStep>
+<MudCard Elevation="5" >
     <MudCardHeader Style="border-bottom-style: inset; border-bottom-width: 1px;">
         <CardHeaderContent>
             <MudText Typo="Typo.h6">@L["Leaderboard"]</MudText>
@@ -22,7 +22,7 @@
             else
             {
                 <TrainingTimeline Training="@Training" />
-                <MudTable Items="@Training.Training.models" Context="models" Filter="new Func<ModelDto,bool>(FilterFunc)" CustomHeader="true" data-form-tenthStep>
+                <MudTable Items="@Training.Training.models" Context="models" Filter="new Func<ModelDto,bool>(FilterFunc)" CustomHeader="true" data-form-ninthStep data-form-tenthStep>
                     <ToolBarContent>
                         <MudSpacer />
                             <MudTextField @bind-Value="searchString" Placeholder="@L["Search by AutoML solution, status, ML model or library"]" Adornment="Adornment.Start"
@@ -77,7 +77,7 @@
                             <MudTh></MudTh>
                         </MudTHeadRow>
                     </HeaderContent>
-                    <RowTemplate>
+                    <RowTemplate >
                         <MudTd>
                             @(models.AutoMlSolution.Properties.ContainsKey("skos:prefLabel") ? models.AutoMlSolution.Properties["skos:prefLabel"] : "")
                         </MudTd>
@@ -152,12 +152,12 @@
 
 @code {
     [Inject]
-    private GTour.Abstractions.IGTourService GTourService { get; set; }
+    private ITourService TourService { get; set; }
     private bool tourActivated = false;
     protected override void OnInitialized()
     {
-        TourService userTour = new TourService(GTourService, NavManager);
-        tourActivated = userTour.checkIfUserTourIsActivated(NavManager.Uri);
+        // tourActivated = TourService.checkIfUserTourIsActivated(NavManager.Uri);
+        tourActivated = TourService.checkIfUserTourIsActivated();
 
     }
 
@@ -223,6 +223,7 @@
                 if (_metrics.Where(x => x.Name.Properties["skos:prefLabel"] == metric.Name.Properties["skos:prefLabel"]).Count() == 0)
                 {
                     _metrics.Add(metric);
+					IsDisabled = false;
                 }
             }
         }
@@ -293,4 +294,4 @@
             _timer = null;
         }
     }
-    }
+}

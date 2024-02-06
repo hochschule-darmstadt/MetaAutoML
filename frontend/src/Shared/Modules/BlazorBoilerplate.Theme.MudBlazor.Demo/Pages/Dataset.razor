@@ -12,7 +12,7 @@
 </TopSection>
 
 <MudStack AlignItems="MudBlazor.AlignItems.Center" Row="true" Class="mb-2" style="padding-top:50px">
-    <MudIcon Size="Size.Large" Icon="@Icons.Filled.ListAlt" />
+    <MudIcon Size="Size.Large" Icon="@Icons.Material.Filled.ListAlt" />
     <LabelTooltip FontSize="TextStyle.H4" Label=@_pageTitle Text="This is the page for a concrete dataset. In the ‘Overview’ panel you find metadata about the dataset. With ‘New Training’ you can start training new ML models for this dataset. ‘Preview’ shows the columns and first rows of a tabular dataset. ‘Analysis’ shows statistical insights into the dataset. ‘Top 3 models’ show the best performing models that have been trained so far on this dataset." Position="Radzen.TooltipPosition.Bottom"></LabelTooltip>
 </MudStack>
 
@@ -102,16 +102,15 @@
     private GetDatasetResponseDto _dataset;
     private List<BreadcrumbItem> _breadcrumbs = new List<BreadcrumbItem>();
     [Inject]
-    private GTour.Abstractions.IGTourService GTourService { get; set; }
+    private ITourService TourService { get; set; }
     protected async override void OnInitialized()
     {
         await LoadDataset();
-        _breadcrumbs.Add(new BreadcrumbItem(L["Home"], "/", false, Icons.Filled.Home));
-        _breadcrumbs.Add(new BreadcrumbItem(L["Datasets"], "/datasets", false, Icons.Filled.ListAlt));
-        _breadcrumbs.Add(new BreadcrumbItem(_pageTitle, null, true, Icons.Filled.ListAlt));
+        _breadcrumbs.Add(new BreadcrumbItem(L["Home"], "/", false, Icons.Material.Filled.Home));
+        _breadcrumbs.Add(new BreadcrumbItem(L["Datasets"], "/datasets", false, Icons.Material.Filled.ListAlt));
+        _breadcrumbs.Add(new BreadcrumbItem(_pageTitle, null, true, Icons.Material.Filled.ListAlt));
         StateHasChanged();
-        TourService userTour = new TourService(GTourService, NavManager);
-        await userTour.checkIfUserTourIsActivatedAndStartTour(NavManager.Uri);
+        await TourService.checkIfUserTourIsActivatedAndStartTour(NavManager.Uri);
     }
     private async Task LoadDataset()
     {
