@@ -191,3 +191,97 @@ hr {
 /* Large devices (desktops, less than 1200px) */
 @media (max-width: 1199.98px) {
 }
+
+/*List class for search bar*/
+.SearchBarList {
+    width: 100%;
+    overflow-x: hidden;
+    overflow-y: hidden;
+}
+
+.SearchBarOverlay {
+    overflow-x: hidden;
+    overflow-y: hidden;
+    max-width: 60%;
+}
+
+.SearchBarOverlay div p {
+    white-space: nowrap; 
+}
+
+
+/*Headings on helppage displayed in searchpage*/
+.heading6 {
+    margin-left: 2rem;
+    color: #5c78ef;
+    display: block;
+    margin-inline-start: 0px;
+    margin-inline-end: 0px;
+    text-align: left;
+    margin-bottom: 0.5rem;
+}
+
+/*Custom highlighting for searchpage*/
+.custom-highlight {
+    background-color: yellow; 
+    color: inherit; 
+    padding: 0; 
+    margin: 0; 
+    display: inline; 
+    font-size: inherit; 
+    line-height: inherit; 
+}
+
+/* Basic styling for the navigation menu with 'mud-nav-menu' class */
+.mud-nav-menu2 {
+    width: 100%;
+    overflow-y: auto;
+    padding-right: 0;
+    margin-right: 0;
+    margin-left: 0;
+    padding-left: 0;
+    direction: rtl; /* Set text direction to Right-to-Left to move scrollbar to the left side */
+    height: 53vh;
+    overflow-y: auto;
+}
+
+    .mud-nav-menu2 > * {
+        direction: ltr; /* Reset text direction to Left-to-Right for child elements */
+    }
+
+    /* Customizing the scrollbar */
+    .mud-nav-menu2::-webkit-scrollbar {
+        width: 10px;
+    }
+
+    .mud-nav-menu2::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px; /* Rounded corners for scrollbar track */
+    }
+
+    .mud-nav-menu2::-webkit-scrollbar-thumb {
+        background: #888;
+        border-radius: 10px; /* Rounded corners for scrollbar thumb */
+        min-height: 50px; /* Minimum height for scrollbar thumb */
+    }
+
+        .mud-nav-menu2::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+/* Height adjustment based on screen size */
+@media screen and (min-height: 800px) {
+    .mud-nav-menu2 {
+        height: 800px;
+    }
+}
+
+@media screen and (min-height: 1200px) {
+    .mud-nav-menu2 {
+        height: 1000px;
+    }
+}
+
+.mud-nav-menu2 > div > div {
+    padding-left: 0;
+}

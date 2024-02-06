@@ -186,3 +186,22 @@ message AutoMlParameter {
   string broaderIri = 4;
   optional string valueIri = 5;
 }
+
+message GetSearchRelevantDataRequest {
+}
+
+message GetSearchRelevantDataResponse {
+  /*
+    List of search relevant data
+  */
+    repeated SearchRelevantData searchEntities = 1;
+}
+
+message SearchRelevantData {
+  string entity = 1;
+  string class = 2;
+  string label = 3;
+  string comment = 4;
+  optional string altLabels = 5;
+  optional string link = 6;
+}

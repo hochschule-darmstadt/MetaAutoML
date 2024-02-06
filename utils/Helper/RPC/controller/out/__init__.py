@@ -1157,6 +1157,29 @@ class AutoMlParameter(betterproto.Message):
 
 
 @dataclass(eq=False, repr=False)
+class GetSearchRelevantDataRequest(betterproto.Message):
+    pass
+
+
+@dataclass(eq=False, repr=False)
+class GetSearchRelevantDataResponse(betterproto.Message):
+    search_entities: List["SearchRelevantData"] = betterproto.message_field(1)
+    """List of search relevant data"""
+
+
+@dataclass(eq=False, repr=False)
+class SearchRelevantData(betterproto.Message):
+    entity: str = betterproto.string_field(1)
+    class_: str = betterproto.string_field(2)
+    label: str = betterproto.string_field(3)
+    comment: str = betterproto.string_field(4)
+    alt_labels: Optional[str] = betterproto.string_field(
+        5, optional=True, group="_altLabels"
+    )
+    link: Optional[str] = betterproto.string_field(6, optional=True, group="_link")
+
+
+@dataclass(eq=False, repr=False)
 class GetHomeOverviewInformationRequest(betterproto.Message):
     user_id: str = betterproto.string_field(1)
     """
@@ -1622,6 +1645,23 @@ class ControllerServiceStub(betterproto.ServiceStub):
             metadata=metadata,
         )
 
+    async def get_search_relevant_data(
+        self,
+        get_search_relevant_data_request: "GetSearchRelevantDataRequest",
+        *,
+        timeout: Optional[float] = None,
+        deadline: Optional["Deadline"] = None,
+        metadata: Optional["MetadataLike"] = None
+    ) -> "GetSearchRelevantDataResponse":
+        return await self._unary_unary(
+            "/ControllerService/GetSearchRelevantData",
+            get_search_relevant_data_request,
+            GetSearchRelevantDataResponse,
+            timeout=timeout,
+            deadline=deadline,
+            metadata=metadata,
+        )
+
     async def create_prediction(
         self,
         create_prediction_request: "CreatePredictionRequest",
@@ -1818,6 +1858,11 @@ class ControllerServiceBase(ServiceBase):
     async def get_auto_ml_parameters(
         self, get_auto_ml_parameters_request: "GetAutoMlParametersRequest"
     ) -> "GetAutoMlParametersResponse":
+        raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
+
+    async def get_search_relevant_data(
+        self, get_search_relevant_data_request: "GetSearchRelevantDataRequest"
+    ) -> "GetSearchRelevantDataResponse":
         raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
 
     async def create_prediction(
@@ -2033,6 +2078,14 @@ class ControllerServiceBase(ServiceBase):
         response = await self.get_auto_ml_parameters(request)
         await stream.send_message(response)
 
+    async def __rpc_get_search_relevant_data(
+        self,
+        stream: "grpclib.server.Stream[GetSearchRelevantDataRequest, GetSearchRelevantDataResponse]",
+    ) -> None:
+        request = await stream.recv_message()
+        response = await self.get_search_relevant_data(request)
+        await stream.send_message(response)
+
     async def __rpc_create_prediction(
         self,
         stream: "grpclib.server.Stream[CreatePredictionRequest, CreatePredictionResponse]",
@@ -2220,6 +2273,12 @@ class ControllerServiceBase(ServiceBase):
                 grpclib.const.Cardinality.UNARY_UNARY,
                 GetAutoMlParametersRequest,
                 GetAutoMlParametersResponse,
+            ),
+            "/ControllerService/GetSearchRelevantData": grpclib.const.Handler(
+                self.__rpc_get_search_relevant_data,
+                grpclib.const.Cardinality.UNARY_UNARY,
+                GetSearchRelevantDataRequest,
+                GetSearchRelevantDataResponse,
             ),
             "/ControllerService/CreatePrediction": grpclib.const.Handler(
                 self.__rpc_create_prediction,

@@ -194,6 +194,7 @@ namespace BlazorBoilerplate.Server
 
             services.AddScoped<IFileUploader, FileUploader>();
             services.AddScoped<IDatasetPreviewWorker, DatasetPreviewWorker>();
+            services.AddScoped<IHelpSearch, HelpSearch>();
 
             var authAuthority = Configuration[$"{projectName}:IS4ApplicationUrl"].TrimEnd('/');
 
