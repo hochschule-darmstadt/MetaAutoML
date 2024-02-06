@@ -126,7 +126,7 @@ services:
   mljar:
     build:
       context: ./
-      dockerfile: ./adapters/mljar/dockerfile
+      dockerfile: ./adapters/mljar/Dockerfile
     container_name: mljar
     depends_on:
       - flaml
@@ -244,7 +244,7 @@ services:
   evalml:
     build:
       context: ./
-      dockerfile: ./adapters/evalml/dockerfile
+      dockerfile: ./adapters/evalml/Dockerfile
     container_name: evalml
     depends_on:
       - pycaret
