@@ -12,8 +12,8 @@
   "dashboard-folder-name": "dashboard",
   "templates-path": "app-data/templates",
   "predict-time-sources-path": "AutoMLs/predict_time_sources.py",
-  "local_execution": "YES",
+  "local_execution": "NO",
   "running_in_wsl": "NO",
-  "wsl_metaautoml_path": "/mnt/d/Uni/PSE/MetaAutoML",
+  "wsl_metaautoml_path": "/mnt/c/Users/alex/Desktop/MetaAutoML",
   "ontology_path": "ML_Ontology.ttl"
 }
