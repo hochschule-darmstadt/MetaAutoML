@@ -1,10 +1,15 @@
 import json, time
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
 from rule_engine import Rule, Context, DataType, type_resolver_from_dict
 from AdapterRuntimeManagerAgent import AdapterRuntimeManagerAgent
 from ControllerBGRPC import DataType as GrpcDataType
 from IAbstractStrategy import IAbstractStrategy
 from StrategyController import StrategyController
 from Blackboard import Blackboard
+from CsvManager import CsvManager
+from sklearn.utils import resample
 
 class PreprocessingStrategyController(IAbstractStrategy):
     global_multi_fidelity_level = 1
@@ -57,6 +62,12 @@ class PreprocessingStrategyController(IAbstractStrategy):
         )
 
         self.register_rule(
+            'preprocessing.data_sampling',
+            Rule("phase == 'preprocessing' and not (dataset_type == ':image')", context=preprocessing_context),
+            self.do_data_sampling
+        )
+
+        self.register_rule(
             'preprocessing.finish_preprocessing',
             Rule("""
                 phase == 'preprocessing' and
@@ -74,6 +85,13 @@ class PreprocessingStrategyController(IAbstractStrategy):
     def do_ignore_redundant_features(self, state: dict, blackboard: Blackboard, controller: StrategyController):
         duplicate_columns = state.get("dataset_analysis", {}).get("duplicate_columns", [])
         ignored_columns = []
+
+        # TODO: Re-implement the row omitting logic
+                # Preparation (maybe reusable utility function):
+                #   - Copy dataset from dataset folder to training folder
+                #   - Change adapter/session config dataset path
+                # Load dataset from (new) dataset path
+                # Remove rows that should be omitted
 
         agent: AdapterRuntimeManagerAgent = controller.get_blackboard().get_agent('training-runtime')
         if not agent or not agent.get_adapter_runtime_manager():
@@ -172,6 +190,87 @@ class PreprocessingStrategyController(IAbstractStrategy):
 
         # Finished action (should only run once, therefore disable the strategy rule)
         controller.disable_strategy('preprocessing.feature_selection')
+
+    def do_data_sampling_callback(self, dataset_df, sampling_dict):
+        class_distribution = dataset_df[sampling_dict["target_column"]].value_counts().describe()
+        sampled_dataset_df = pd.DataFrame()
+
+        # for every value in the target column...
+        for c in dataset_df[sampling_dict["target_column"]].value_counts().index.tolist():
+            sample_class = dataset_df[dataset_df[sampling_dict["target_column"]] == c]
+
+            # if the sample length is under / higher then one of these quantils, do the sampling and concat it to the rest of the dataset
+            if len(sample_class) < class_distribution["25%"]:
+                minority_class_upsampled = resample(sample_class,
+                                            replace=True,  # Sample with replacement
+                                            n_samples=int(class_distribution["25%"]),  # Match majority class size
+                                            random_state=42)  # Set a random seed for reproducibility
+                sampled_dataset_df = pd.concat([sampled_dataset_df, minority_class_upsampled])
+
+            if len(sample_class) >= class_distribution["25%"] and len(sample_class) < class_distribution["50%"]:
+                minority_class_upsampled = resample(sample_class, replace=True, n_samples=int(class_distribution["50%"]), random_state=42)
+                sampled_dataset_df = pd.concat([sampled_dataset_df, minority_class_upsampled])
+
+            if len(sample_class) >= class_distribution["50%"] and len(sample_class) < class_distribution["mean"]:
+                minority_class_downsampled = resample(sample_class, replace=False, n_samples=int(class_distribution["50%"]), random_state=42)
+                sampled_dataset_df = pd.concat([sampled_dataset_df, minority_class_downsampled])
+
+            if len(sample_class) >= class_distribution["mean"] and len(sample_class) < class_distribution["75%"]:
+                minority_class_downsampled = resample(sample_class, replace=False, n_samples=int(class_distribution["mean"]), random_state=42)
+                sampled_dataset_df = pd.concat([sampled_dataset_df, minority_class_downsampled])
+
+            if len(sample_class) >= class_distribution["75%"]:
+                minority_class_downsampled = resample(sample_class, replace=False, n_samples=int(class_distribution["75%"]), random_state=42)
+                sampled_dataset_df = pd.concat([sampled_dataset_df, minority_class_downsampled])
+
+        return sampled_dataset_df.sample(frac=1, random_state=42).reset_index()
+
+    def do_data_sampling(self, state: dict, blackboard: Blackboard, controller: StrategyController):
+        agent: AdapterRuntimeManagerAgent = controller.get_blackboard().get_agent('training-runtime')
+        if not agent or not agent.get_adapter_runtime_manager():
+            raise RuntimeError('Could not access Adapter Runtime Manager Agent!')
+
+        sampling_dict = {}
+        sampling_dict["duplicate_rows"] = state.get("dataset_analysis", {}).get("duplicate_rows")
+        sampling_dict["dataset_schema"] = json.loads(agent.get_adapter_runtime_manager().get_training_request().dataset_configuration)
+        sampling_dict["dataset_configuration"] = agent.get_adapter_runtime_manager().get_dataset().get("file_configuration")
+        sampling_dict["number_of_columns"] = agent.get_adapter_runtime_manager().get_dataset()["analysis"]["number_of_columns"]
+        sampling_dict["number_of_rows"] = agent.get_adapter_runtime_manager().get_dataset()["analysis"]["number_of_rows"]
+        sampling_dict["dataset_path"] = agent.get_adapter_runtime_manager().get_dataset().get("path")
+
+        # get the current dataset
+        dataset_df = CsvManager.read_dataset(sampling_dict['dataset_path'], sampling_dict["dataset_configuration"], sampling_dict["dataset_schema"])
+
+        # get the target feature for training classification
+        target_column = ""
+        for key in list(sampling_dict["dataset_schema"].keys()):
+            if sampling_dict["dataset_schema"][key]['role_selected'] == ":target":
+                target_column = key
+                break
+
+        # save the class distribution of the target feature
+        sampling_dict["target_column"] = target_column
+        # sns.countplot(data=dataset_df, x=target_column)
+        # plt.savefig("target_distribution_before.png")
+
+        # sample the dataset
+        sampled_dataset_df = self.do_data_sampling_callback(dataset_df, sampling_dict)
+        # sns.countplot(data=sampled_dataset_df, x=target_column)
+        # plt.savefig("target_distribution_before_new.png")
+
+        # set the new dataset path into the training_request
+        training_request = agent.get_adapter_runtime_manager().get_training_request()
+        training_request.sampled_dataset_path = sampling_dict["dataset_path"].split(".")[0] + "_sampled.csv"
+        sampling_dict["dataset_path_new"] = training_request.sampled_dataset_path
+
+        # save the new dataset for the training process and give the training_request the new dataset_schema
+        CsvManager.write_dataset(training_request.sampled_dataset_path, sampled_dataset_df)
+        training_request.dataset_configuration = json.dumps(sampling_dict["dataset_schema"])
+
+        agent.get_adapter_runtime_manager().set_training_request(training_request)
+
+        # Finished action (should only run once, therefore disable the strategy rule)
+        controller.disable_strategy('preprocessing.data_sampling')
 
     def do_finish_preprocessing(self, state: dict, blackboard: Blackboard, controller: StrategyController):
         if self.global_multi_fidelity_level != 0:

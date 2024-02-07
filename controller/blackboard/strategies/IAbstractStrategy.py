@@ -28,7 +28,7 @@ class IAbstractStrategy():
         """
         if name in self.rules and not overwrite_existing:
             raise RuntimeError(f'A rule with the name {name} already exists.')
-        
+
         self.rules[name] = (rule, action)
 
         self._log.info(f'Registered rule: {name} ({rule})')

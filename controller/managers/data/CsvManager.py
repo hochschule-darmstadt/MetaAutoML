@@ -67,6 +67,19 @@ class CsvManager:
                 print("datetime conversion failed!")#TODO logging
         return dataset
 
+    @staticmethod
+    def write_dataset(path: str, dataset: pd.DataFrame):
+        """Write a DataFrame to disk as a CSV file and return the DataFrame.
+
+        Args:
+            path (str): Disk path to save the dataset.
+            dataset (pd.DataFrame): DataFrame to be written to disk.
+
+        Returns:
+            pd.DataFrame: The input DataFrame.
+        """
+        dataset.to_csv(path)
+
 
     @staticmethod
     def __get_datatype_for_column(numpy_datatype: np.dtype, column: pd.Series):
