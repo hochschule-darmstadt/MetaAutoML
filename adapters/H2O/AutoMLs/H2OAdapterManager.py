@@ -58,6 +58,10 @@ class H2OAdapterManager(AdapterManager):
             model_name = ":distributed_random_forest"
         elif model_type == 'H2OGradientBoostingEstimator':
             model_name = ":gradient_boosting_tree"
+        elif model_type == 'H2OGeneralizedLinearEstimator':
+            model_name = ":generalized_linear_model"
+        elif model_type == 'H2OXGBoostEstimator':
+            model_name = ":xgboost"
         elif model_type == 'H2OStackedEnsembleEstimator':
             model_name = ":stacking_ensemble"
         else:
