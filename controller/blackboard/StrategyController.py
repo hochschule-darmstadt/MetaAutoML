@@ -61,8 +61,8 @@ class StrategyController(object):
 
         from PreprocessingStrategy import PreprocessingStrategyController
         from blackboard.strategies.PreTrainingStrategy import PreTrainingStrategyController
-        self.strategies.append(PreprocessingStrategyController(self, self.__data_storage))
-        self.strategies.append(PreTrainingStrategyController(self, self.__data_storage))
+        self.strategies.append(PreprocessingStrategyController(self))
+        self.strategies.append(PreTrainingStrategyController(self))
         self.on_event('phase_updated', self.__adapter_runtime_manager.blackboard_phase_update_handler)
         self.set_phase('preprocessing')
         self.start_timer()

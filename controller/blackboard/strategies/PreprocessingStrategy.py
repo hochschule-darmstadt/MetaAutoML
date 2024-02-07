@@ -188,10 +188,6 @@ class PreprocessingStrategyController(IAbstractStrategy):
         training_request.dataset_configuration = json.dumps(dataset_configuration)
         agent.get_adapter_runtime_manager().set_training_request(training_request)
 
-
-        found, dataset = self.__data_storage.get_dataset(training_request.dataset_id)
-        self.__dataset_df = CsvManager.read_dataset(self.__dataset["path"], dataset["file_configuration"], dataset["schema"])
-
         # Finished action (should only run once, therefore disable the strategy rule)
         controller.disable_strategy('preprocessing.feature_selection')
 
