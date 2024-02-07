@@ -68,22 +68,16 @@ class CsvManager:
         return dataset
 
     @staticmethod
-    def write_dataset(dataset: pd.DataFrame, path: str) -> pd.DataFrame:
+    def write_dataset(path: str, dataset: pd.DataFrame):
         """Write a DataFrame to disk as a CSV file and return the DataFrame.
 
         Args:
-            dataset (pd.DataFrame): DataFrame to be written to disk.
             path (str): Disk path to save the dataset.
+            dataset (pd.DataFrame): DataFrame to be written to disk.
 
         Returns:
             pd.DataFrame: The input DataFrame.
         """
-        dataset.to_csv(path, index=False)
-        # i would like to see the dataframe at the end
-        return dataset
-
-    @staticmethod
-    def write_dataset(path: str, dataset: pd.DataFrame):
         dataset.to_csv(path)
 
 
