@@ -367,7 +367,7 @@ class ControllerServiceManager(ControllerServiceBase):
 						)
 				    )
 
-                if  (not found or size_time_ratio > 20000 ):
+                if  (not found or size_time_ratio > 2000 ):
                      #or ('irrelevant_features' in dataset['analysis'] and len(dataset['analysis']['irrelevant_features']) != 0))
                    # and 'preprocessing.ignore_redundant_samples' not in create_training_request.selected_strategies
 
