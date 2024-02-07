@@ -82,9 +82,12 @@ spec:
         - containerPort: 80
         - containerPort: 443
         resources:
-          limits:
-            cpu: "2"
-            memory: "6094304e3"
+            requests:
+                memory: "15Gi"
+                cpu: "2"
+            limits:
+                memory: "15Gi"
+                cpu: "2"
       restartPolicy: Always
       hostAliases:
       - ip: "127.0.0.1"

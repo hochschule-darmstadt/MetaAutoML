@@ -40,10 +40,10 @@ spec:
         name: mljar
         resources:
             requests:
-                memory: "12Gi"
+                memory: "10Gi"
                 cpu: "6"
             limits:
-                memory: "12Gi"
+                memory: "10Gi"
                 cpu: "6"
         volumeMounts:
         - name: datasets

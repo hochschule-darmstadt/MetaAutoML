@@ -40,11 +40,11 @@ spec:
         name: evalml
         resources:
             requests:
-                memory: "12Gi"
-                cpu: "6"
+                memory: "10Gi"
+                cpu: "5"
             limits:
-                memory: "12Gi"
-                cpu: "6"
+                memory: "10Gi"
+                cpu: "5"
         volumeMounts:
         - name: datasets
           mountPath: /app/app-data/datasets
