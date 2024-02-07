@@ -130,6 +130,7 @@ class AdapterManager(Thread):
         configuration.runtime_limit = self.__request.configuration.runtime_limit
         configuration.metric = self.__request.configuration.metric
         configuration.parameters = self.__request.configuration.parameters
+        configuration.selected_ml_libraries = self.__request.configuration.selected_ml_libraries
 
         request.configuration = configuration
         found, training = self.__data_storage.get_training(self.__request.user_id, self.__training_id)
