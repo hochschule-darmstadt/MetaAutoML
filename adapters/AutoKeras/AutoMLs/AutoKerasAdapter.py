@@ -23,10 +23,7 @@ class AutoKerasAdapter:
             configuration (dict): Dictonary holding the training configuration
         """
         self._configuration = configuration
-        if self._configuration["configuration"]["runtime_limit"] > 0:
-            self._time_limit = self._configuration["configuration"]["runtime_limit"]
-        else:
-            self._time_limit = 30
+        self._time_limit = np.floor(self._configuration["configuration"]["runtime_limit"]*3.7)
 
     def start(self):
         """Start the correct ML task functionality of AutoKeras"""
@@ -52,7 +49,7 @@ class AutoKerasAdapter:
         self.df, test = data_loader(self._configuration)
         X, y = prepare_tabular_dataset(self.df, self._configuration, apply_feature_extration=True)
         parameters = translate_parameters(":autokeras", self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), akpc.parameters)
-        parameters.update({"max_trials": self._configuration["configuration"]["runtime_limit"]})
+        parameters.update({"max_trials": self._time_limit})
         clf = ak.StructuredDataClassifier(overwrite=True,
                                           **parameters,
                                           directory=self._configuration["model_folder_location"],
@@ -68,7 +65,7 @@ class AutoKerasAdapter:
         self.df, test = data_loader(self._configuration)
         X, y = prepare_tabular_dataset(self.df, self._configuration, apply_feature_extration=True)
         parameters = translate_parameters(":autokeras", self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), akpc.parameters)
-        parameters.update({"max_trials": self._configuration["configuration"]["runtime_limit"]})
+        parameters.update({"max_trials": self._time_limit})
         reg = ak.StructuredDataRegressor(overwrite=True,
                                           **parameters,
                                          directory=self._configuration["model_folder_location"],
@@ -83,7 +80,7 @@ class AutoKerasAdapter:
 
         X_train, y_train = data_loader(self._configuration)
         parameters = translate_parameters(":autokeras", self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), akpc.parameters)
-        parameters.update({"max_trials": self._configuration["configuration"]["runtime_limit"]})
+        parameters.update({"max_trials": self._time_limit})
         clf = ak.ImageClassifier(overwrite=True,
                                         **parameters,
                                         seed=42,
@@ -100,7 +97,7 @@ class AutoKerasAdapter:
 
         X_train, y_train = data_loader(self._configuration)
         parameters = translate_parameters(":autokeras", self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), akpc.parameters)
-        parameters.update({"max_trials": self._configuration["configuration"]["runtime_limit"]})
+        parameters.update({"max_trials": self._time_limit})
 
         reg = ak.ImageRegressor(overwrite=True,
                                           **parameters,
@@ -120,7 +117,7 @@ class AutoKerasAdapter:
         #reload dataset to load changed data
         X, y = prepare_tabular_dataset(train, self._configuration, apply_feature_extration=True)
         parameters = translate_parameters(":autokeras", self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), akpc.parameters)
-        parameters.update({"max_trials": self._configuration["configuration"]["runtime_limit"]})
+        parameters.update({"max_trials": self._time_limit})
         clf = ak.TextClassifier(overwrite=True,
                                 # NOTE: bert models will fail with out of memory errors
                                 #   even with 32GB GB RAM
@@ -144,7 +141,7 @@ class AutoKerasAdapter:
         #reload dataset to load changed data
         X, y = prepare_tabular_dataset(train, self._configuration, apply_feature_extration=True)
         parameters = translate_parameters(":autokeras", self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), akpc.parameters)
-        parameters.update({"max_trials": self._configuration["configuration"]["runtime_limit"]})
+        parameters.update({"max_trials": self._time_limit})
         reg = ak.TextRegressor(overwrite=True,
                                 **parameters,
                                 seed=42,
@@ -162,7 +159,7 @@ class AutoKerasAdapter:
         self._configuration = set_imputation_for_numerical_columns(self._configuration, X)
 
         parameters = translate_parameters(":autokeras", self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), akpc.parameters)
-        parameters.update({"max_trials": self._configuration["configuration"]["runtime_limit"]})
+        parameters.update({"max_trials": self._time_limit})
         #oma-ml uses gab as shared parameter which is similar to predict from but has an offset of -1
         # gap = 0 is equal to predict_from  = 1
         parameters["predict_from"] = parameters["predict_from"] + 1

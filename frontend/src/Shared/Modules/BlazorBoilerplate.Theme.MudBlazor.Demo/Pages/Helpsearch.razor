@@ -1,0 +1,420 @@
+@page "/search/{query}"
+@page "/search"
+@using System.ComponentModel.DataAnnotations
+@inject NavigationManager navigationManager
+@inject IHelpSearch helpSearch
+@inject IStringLocalizer<Global> L
+@attribute [Authorize]
+@inject NavigationManager navigationManager
+@inject IJSRuntime JS
+@inject IJSRuntime JSRuntime
+@using Newtonsoft.Json
+@inject IApiClient apiClient
+
+<MudGrid>
+	<MudCard Elevation="5" Style="margin: 24px; width: 100%">
+		<MudGrid>
+	        <MudItem xs="12">
+		        <div Style="margin: 1rem">
+			        <MudCard Elevation="3">
+				        <div style="margin: 1rem; padding: 1rem">
+					        <HelpSearchComponent @ref="searchComponent" query="@query" inHeader=false OnStatesChanged="SearchText"/>
+				        </div>
+			        </MudCard>
+		        </div>
+	        </MudItem>
+	        <MudItem xs="3">
+		        <div Style="margin: 16px">
+		            <MudText Color="Color.Dark" Typo="Typo.h6">@L["Results"]</MudText>
+					<MudNavMenu Rounded="true" Margin="Margin.Normal" Color="Color.Secondary" Class="pa-2 mud-nav-menu2" Style="height: 53vh; overflow-y: auto;">
+					@foreach (HelpSearchEntry entry in _searchResults)
+					{
+						<MudNavLink Style="margin: 0; padding: 0; width: 100%; padding-left: 0;" Class="@GetNavLinkClass(entry)" @onclick="() => SelectEntry(entry)">
+							<MudIcon Style="font-size:15px" Class="d-inline" Icon="@GetIconOfOrigin(entry.Type)" />
+							@entry.OptionText
+						</MudNavLink>
+					}
+					</MudNavMenu>
+		        </div>
+	</MudItem>
+        @if (shownEntry?.Type == HelpSearchResultType.ONTOLOGY)
+        {
+            // Search Result is not help page --> Display ontology
+            <MudItem xs="9">
+                <div Style="margin: 16px">
+                    <MudText Color="Color.Dark" Typo="Typo.h6">@shownEntry?.OptionText</MudText>
+                    <p>@shownEntry?.Description</p>
+                    @if(wikiData == null)
+                    {
+                        <MudSkeleton SkeletonType="SkeletonType.Rectangle" Width="100%" Height="10em" />
+                        <MudSkeleton Height="12em"/>
+                    } else {
+                        if(!string.IsNullOrEmpty(wikiData.ImageUrl))
+                        {
+                            <MudImage Src="@wikiData?.ImageUrl" Elevation="25" Style="margin-bottom:1em;"/>
+                        }
+                        <p>@wikiData?.Description</p>
+                        if(!string.IsNullOrEmpty(wikiData.WikiUrl))
+                        {
+                            <a href="@wikiData?.WikiUrl" target="_blank" referrerpolicy="no-referrer">@L["More Info"]</a>
+                        }
+                    }
+                </div>
+            </MudItem>
+        } else {
+            // Display help page
+            <MudItem xs="9" sm="9" md="9">
+                <MudTabs Elevation="2" Rounded="true" ApplyEffectsToContainer="true" PanelClass="pa-2" @ref="tabs">
+                    <MudTabPanel OnClick="@PanelSwitch" Text="Introduction" @ref="introduction">
+                        <MudCardHeader Style="border-bottom-style: inset; border-bottom-width: 1px;">
+                            <CardHeaderContent>
+                                <h6 class="h6 mud-typography-h6 heading6" style="color: var(--rz-text-title-color);">
+                                    <MudHighlighter HighlightedText="@highlight" Text="@introductionTab.PanelHeadline" Class="custom-highlight h6 mud-typography-h6 heading6" />
+                                </h6>
+                            </CardHeaderContent>
+                        </MudCardHeader>
+                        <MudCardContent>
+                            <MudHighlighter Style="margin-top:1rem;" HighlightedText="@highlight" Text="@introductionTab.Text" />
+                            <MudImage Style="width:92%;margin-top:1rem;" Src="@(@introductionTab.Image)" />
+                            @foreach (Section section in this.introductionTab.Sections)
+                            {
+                                <MudGrid id="@(section.Anchor.Replace(" ", "_"))">
+                                    <MudItem xs="6" Style="padding-top: 10rem;">
+                                        @{string content = @section.Headline;}
+                                        <h6 class="h6 mud-typography-h6 heading6">
+                                            <MudHighlighter Markup="false" HighlightedText="@highlight" Text="@content" id="@content" Class="custom-highlight h6 mud-typography-h6 heading6" />
+                                        </h6>
+                                        @{
+                                            content = @section.Text;
+                                        }
+                                        <MudHighlighter Markup="false" HighlightedText="@highlight" Text="@content" Style="margin-top:1rem;" />
+                                    </MudItem>
+                                    <MudItem xs="6">
+                                        <img style=" width: 90%; margin: 3rem; padding-top: 5rem; padding-right: 2rem;" src="@(section.GIF)" />
+                                    </MudItem>
+                                </MudGrid>
+                            }
+                        </MudCardContent>
+                    </MudTabPanel>
+                    <MudTabPanel OnClick="@PanelSwitch" Text="Pages" @ref="pages">
+                        <MudCardHeader Style="border-bottom-style: inset; border-bottom-width: 1px;">
+                            <CardHeaderContent>
+                                <h6 class="h6 mud-typography-h6 heading6" style="color: var(--rz-text-title-color);">
+                                    <MudHighlighter HighlightedText="@highlight" Text="@pagesTab.PanelHeadline" Class="custom-highlight h6 mud-typography-h6 heading6" />
+                                </h6>
+                            </CardHeaderContent>
+                        </MudCardHeader>
+                        <MudCardContent>
+                            @foreach (Section section in this.pagesTab.Sections)
+                            {
+                                @if ((this.pagesTab.Sections.IndexOf(section) % 2) == 0)
+                                {
+                                <MudGrid id="@(section.Anchor.Replace(" ", "_"))">
+                                    <MudItem xs="6">
+                                        @{
+                                            string content = @section.Headline;
+                                        }
+                                        <h6 class="h6 mud-typography-h6 heading6" style="color: var(--mud-palette-secondary) !important;">
+                                        <MudHighlighter Markup="false" HighlightedText="@highlight" Text="@content" Class="custom-highlight h6 mud-typography-h6 heading6"/>
+                                        </h6>
+                                        @{
+                                            content = section.Text;
+                                        }
+                                        @foreach (Subsection subsection in section.Subsections)
+                                        {
+                                            content += $"<br /><br /><b id='{subsection.SubHeadline.Replace(" ", "_")}'>{subsection.SubHeadline}</b><br />{subsection.SubText}";
+                                        }
+                                        <MudHighlighter Markup="true" HighlightedText="@highlight" Text="@content" Style="margin-top:0.5rem;" Typo="Typo.body2" />
+                                    </MudItem>
+                                    <MudItem xs="6">
+                                        <img style=" width: 90%; margin: 3rem; padding-right: 2rem;" src="@(section.GIF)" />
+                                    </MudItem>
+                                </MudGrid>
+                                }
+                                else
+                                {
+                                <MudGrid Style="border-bottom-style: inset; border-bottom-width: 1px; padding-bottom: 2rem;" id="@(section.Anchor.Replace(" ", "_"))">
+                                    <MudItem xs="6">
+                                        @{
+                                            string content = section.Headline;
+                                        }
+                                        <h6 class="h6 mud-typography-h6 heading6" style="color: var(--mud-palette-secondary) !important;">
+                                        <MudHighlighter Markup="false" HighlightedText="@highlight" Text="@content" Class="custom-highlight h6 mud-typography-h6 heading6" />
+                                        </h6>
+                                        <img style=" width: 90%; margin: 2rem; padding-right: 2rem;" src="@(section.GIF)" />
+                                    </MudItem>
+                                    <MudItem xs="6">
+                                        @{
+                                            string content = section.Text;
+                                        }
+                                        @foreach (Subsection subsection in section.Subsections)
+                                        {
+													content += $"<br /><br /><b id='{subsection.SubHeadline.Replace(" ", "_")}'>{subsection.SubHeadline}</b><br />{subsection.SubText}";
+                                        }
+                                        <MudHighlighter Markup="true" HighlightedText="@highlight" Text="@content" Style="margin-top:8rem;" Typo="Typo.body2" />
+                                    </MudItem>
+                                </MudGrid>
+                                }
+                            }
+                        </MudCardContent>
+                    </MudTabPanel>
+                </MudTabs>
+            </MudItem>
+        }
+		</MudGrid>
+	</MudCard>
+</MudGrid>
+
+<script suppress-error="BL9992">
+	// Scroll-to function with an offset
+	function scrollToAnchor(anchorId, additionalOffset = -150) {
+		const element = document.getElementById(anchorId);
+		if (element) {
+			const elementPosition = element.getBoundingClientRect().top + window.pageYOffset;
+			// An offset is needed because of the second page. The heading elements have no margin or padding.
+			// The anchor would not be visible
+			const offsetPosition = elementPosition + additionalOffset;
+			window.scrollTo({
+				top: offsetPosition,
+				behavior: 'smooth'
+			});
+		}
+	}
+</script>
+
+
+@code {
+
+	/*
+	 * 'query' contains the search query that will be redirected from the
+	 * search bar in MainLayout to the search bar on this page.
+	*/
+	[Parameter]
+	public string query
+	{
+		get
+		{
+			return _query;
+		}
+		set
+		{
+			if(_query != value)
+			{
+				SearchText(value);
+			}
+			_query = value;
+		}
+	}
+
+	private string _query;
+
+    private string highlight = "";
+
+    private HelpSearchComponent searchComponent;
+    private HelpSearchEntry shownEntry { get; set; }
+    private WikiDataResult wikiData;
+
+	private IEnumerable<HelpSearchEntry> _searchResults = new List<HelpSearchEntry>();
+
+
+	[CascadingParameter]
+	Task<AuthenticationState> authenticationStateTask { get; set; }
+	private List<BreadcrumbItem> _breadcrumbs = new List<BreadcrumbItem>();
+	private bool currentPanelIntroduction = true;
+	private MudTabs tabs;
+	private MudTabPanel introduction;
+	private MudTabPanel pages;
+	List<HelpPageDto> helpTabPanelList = new List<HelpPageDto>();
+	HelpPageDto introductionTab = new HelpPageDto();
+	HelpPageDto pagesTab = new HelpPageDto();
+
+	protected override async Task OnInitializedAsync()
+	{
+		this.helpTabPanelList = await apiClient.GetHelpPageJson();
+		this.helpTabPanelList.ForEach(tab => { if (tab.PanelHeadline.Equals("Introduction")) { this.introductionTab = tab; } else if (tab.PanelHeadline.Equals("Pages")) { this.pagesTab = tab; } });
+		_breadcrumbs.Add(new BreadcrumbItem(L["Home"], "/", false, Icons.Material.Filled.Home));
+		_breadcrumbs.Add(new BreadcrumbItem(L["Help"], "/help", false, Icons.Material.Filled.HelpOutline));
+		StateHasChanged();
+
+		var user = (await authenticationStateTask).User;
+
+		if (user.Identity.IsAuthenticated)
+		{
+			if(!helpSearch.IsCacheLoaded)
+			{
+				await helpSearch.LoadSearchCache();
+			}
+
+			SearchText(query);
+		}
+	}
+
+    private async Task ScrollToSection(string anchorId)
+	{
+		await JSRuntime.InvokeVoidAsync("scrollToAnchor", anchorId);
+	}
+
+
+	private async void SelectSection(string text)
+	{
+		if (!string.IsNullOrEmpty(text) && tabs != null)
+		{
+			var tabIndex = -1;
+			string targetAnchor = null;
+
+			// Check sections in the Introduction tab
+			if (introductionTab?.Sections != null)
+			{
+				foreach (var section in introductionTab.Sections)
+				{
+					if (section.Headline.Contains(text))
+					{
+						tabIndex = 0; // Index for the Introduction tab
+						targetAnchor = section.Anchor.Replace(" ", "_");
+						break;
+					}
+
+					// Check subsections within the section
+					if (section.Subsections != null)
+					{
+						foreach (var subsection in section.Subsections)
+						{
+							if (subsection.SubHeadline.Contains(text))
+							{
+								tabIndex = 0; // Still within the Introduction tab
+								targetAnchor = subsection.SubHeadline.Replace(" ", "_");
+								break;
+							}
+						}
+					}
+
+					if (targetAnchor != null) break;
+				}
+			}
+
+			// Check sections in the Pages tab if not found in Introduction tab
+			if (tabIndex == -1 && pagesTab?.Sections != null)
+			{
+				foreach (var section in pagesTab.Sections)
+				{
+					if (section.Headline.Contains(text))
+					{
+						tabIndex = 1; // Index for the Pages tab
+						targetAnchor = section.Anchor.Replace(" ", "_");
+						break;
+					}
+
+					// Check subsections within the section
+					if (section.Subsections != null)
+					{
+						foreach (var subsection in section.Subsections)
+						{
+							if (subsection.SubHeadline.Contains(text))
+							{
+								tabIndex = 1; // Still within the Pages tab
+								targetAnchor = subsection.SubHeadline.Replace(" ", "_");
+								break;
+							}
+						}
+					}
+
+					if (targetAnchor != null) break;
+				}
+			}
+
+			// Switch to the correct tab and then scroll to the anchor point
+			if (tabIndex != -1 && targetAnchor != null)
+			{
+				tabs.ActivePanelIndex = tabIndex;
+				await Task.Delay(100); // Short delay to give the UI time to switch tabs
+				await ScrollToSection(targetAnchor);
+			}
+		}
+	}
+
+
+    private string GetNavLinkClass(HelpSearchEntry entry)
+    {
+        return entry == shownEntry ? "mud-nav-link active" : "mud-nav-link";
+    }
+
+	private void SearchText(string text)
+	{
+
+        _searchResults = helpSearch.SearchAll(text?.Trim()).ToList();
+        if (_searchResults.Count() > 0 && _searchResults.First() != null)
+        {
+            SelectEntry(_searchResults.First());
+        }else
+        {
+            highlight = text;
+            shownEntry = null;
+        }
+
+        if(searchComponent != null)
+        {
+            searchComponent.SelectValue(new HelpSearchEntry(text));
+            searchComponent.Focus();
+        }
+        StateHasChanged();
+    }
+
+    // Display the search results
+    private async void SelectEntry(HelpSearchEntry entry)
+    {
+        if(shownEntry == entry)
+        {
+            return;
+        }
+
+        SelectSection(entry.Title);
+
+        highlight = entry.Title;
+        shownEntry = entry;
+        wikiData = null;
+
+        await Task.Run(() =>
+        {
+            wikiData = WikiDataGrabber.GetDataFrom(entry?.Link);
+        });
+        StateHasChanged();
+	}
+
+	/* If a help site is displayed in search results, this function is needed to toggle between the Introduction and Pages tabs */
+	private void PanelSwitch()
+	{
+		this.currentPanelIntroduction = !this.currentPanelIntroduction;
+	}
+	private void ChangePanel(MudTabPanel tab)
+	{
+		if ((tab == introduction) && (!currentPanelIntroduction))
+		{
+			tabs.ActivatePanel(tab);
+		}
+		else if ((tab == pages) && (currentPanelIntroduction))
+		{
+			tabs.ActivatePanel(tab);
+		}
+		this.currentPanelIntroduction = !this.currentPanelIntroduction;
+	}
+
+	/* Display icons in the navigation bar */
+	private string GetIconOfOrigin(HelpSearchResultType origin)
+	{
+		switch (origin)
+		{
+			case HelpSearchResultType.ONTOLOGY:
+				{
+					return Icons.Material.Filled.Article;
+				}
+			case HelpSearchResultType.HELP_ARTICLE:
+				{
+                    return Icons.Material.Filled.Web;
+				}
+			default:
+				{
+					return null;
+				}
+		}
+	}
+}

@@ -127,6 +127,10 @@ namespace BlazorBoilerplate.Shared.Services
         {
             return await httpClient.PostJsonAsync<ApiResponseDto>("api/Training/DeleteTraining", request);
         }
+        public async Task<ApiResponseDto> GetSuggestedTrainingRuntime(GetTrainingSuggestedRuntimeRequestDto request)
+        {
+            return await httpClient.PostJsonAsync<ApiResponseDto>("api/Training/GetSuggestedTrainingRuntime", request);
+        }
         #endregion
 
         #region OMA-ML MODEL MESSAGES
@@ -195,6 +199,11 @@ namespace BlazorBoilerplate.Shared.Services
         public Task<ApiResponseDto<GetAutoMlParametersResponseDto>> GetAutoMlParameters(GetAutoMlParametersRequestDto request)
         {
             return httpClient.PostJsonAsync<ApiResponseDto<GetAutoMlParametersResponseDto>>("api/Ontology/GetAutoMlParameters", request);
+        }
+
+        public Task<ApiResponseDto<GetSearchRelevantDataResponseDto>> GetSearchRelevantData()
+        {
+            return httpClient.GetJsonAsync<ApiResponseDto<GetSearchRelevantDataResponseDto>>("api/Ontology/GetSearchRelevantData");
         }
         #endregion
 

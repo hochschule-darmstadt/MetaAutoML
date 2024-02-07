@@ -13,7 +13,7 @@
 
 
 <MudStack AlignItems="MudBlazor.AlignItems.Center" Row="true" Class="mb-2" style="padding-top:50px">
-    <MudIcon Size="Size.Large" Icon="@Icons.Filled.Lightbulb" />
+    <MudIcon Size="Size.Large" Icon="@Icons.Material.Filled.Lightbulb" />
     <LabelTooltip FontSize="TextStyle.H4" Label="Models" Text="This page shows all models that have been trained for this dataset so far, potentially in several training sessions." Position="Radzen.TooltipPosition.Right"></LabelTooltip>
 </MudStack>
 
@@ -34,10 +34,10 @@
     protected override async Task OnInitializedAsync()
     {
         await LoadModels();
-        _breadcrumbs.Add(new BreadcrumbItem(L["Home"], "/", false, Icons.Filled.Home));
-        _breadcrumbs.Add(new BreadcrumbItem(L["Datasets"], "/datasets", false, Icons.Filled.ListAlt));
-        _breadcrumbs.Add(new BreadcrumbItem(_pageTitle, "/datasets/" + Id, false, Icons.Filled.ListAlt));
-        _breadcrumbs.Add(new BreadcrumbItem(L["Models"], null, true, Icons.Filled.Lightbulb));
+        _breadcrumbs.Add(new BreadcrumbItem(L["Home"], "/", false, Icons.Material.Filled.Home));
+        _breadcrumbs.Add(new BreadcrumbItem(L["Datasets"], "/datasets", false, Icons.Material.Filled.ListAlt));
+        _breadcrumbs.Add(new BreadcrumbItem(_pageTitle, "/datasets/" + Id, false, Icons.Material.Filled.ListAlt));
+        _breadcrumbs.Add(new BreadcrumbItem(L["Models"], null, true, Icons.Material.Filled.Lightbulb));
         StateHasChanged();
 
     }
