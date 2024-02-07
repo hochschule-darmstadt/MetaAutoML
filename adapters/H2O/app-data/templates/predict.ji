@@ -1,0 +1,37 @@
+import sys
+import os
+
+import pandas as pd
+
+import h2o
+
+{% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression"] %}
+from preprocessing import dataset_preparation
+from postprocessing import post_process_result_dataframe
+{% endif %}
+
+
+
+
+if __name__ == '__main__':
+    filepath = sys.argv[1]
+    save_path = sys.argv[2]
+    target_name = sys.argv[3]
+    X = None
+    h2o.init()
+
+    {% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression"] %}
+    X, y = dataset_preparation(filepath)
+    X_index_df = pd.DataFrame(X.index)        #Some AutoML manipulate the index, so we extract it before hands
+    {% endif %}
+
+    loaded_model = h2o.load_model(os.path.join(sys.path[0], 'model_h2o.p'))
+
+    predicted_y = loaded_model.predict(h2o.H2OFrame(X))
+    predicted_y = predicted_y.as_data_frame()
+    {% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression"] %}
+    predicted_y.rename(columns={'predict': target_name}, inplace=True)
+    predict_df = pd.DataFrame(predicted_y, columns=[target_name])
+
+    post_process_result_dataframe(X_index_df, predict_df).to_csv(save_path)
+    {% endif %}

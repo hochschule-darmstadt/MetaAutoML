@@ -82,12 +82,17 @@ def translate_parameters(automl, task, parameter, config_items):
                 continue
             else:
                 values = val["default"]
-        if val["datatype"] == "list":
+        if val["datatype"] == ":list":
             final_value = list()
             for value in values:
                 if val.get("lookup_dict", None) != None:
                     translateList = val["lookup_dict"]
-                    final_value.append(translateList.get(value, None))
+                    translatedValue = translateList.get(value, None)
+                    if type(translatedValue) is list:
+                        for subValue in translatedValue:
+                            final_value.append(subValue)
+                    else:
+                        final_value.append(translatedValue)
                 else:
                     final_value.append(int(value))
         else:
@@ -236,12 +241,11 @@ def evaluate(config: "StartAutoMlRequest", config_path: str) -> Tuple[float, flo
 
     if config["configuration"]["task"] in [":tabular_classification", ":tabular_regression", ":text_regression", ":named_entity_recognition", ":text_classification"]:
 
-        subprocess.call([python_env, os.path.join(result_path, "predict.py"), file_path, os.path.join(result_path, "predictions.csv")])
+        subprocess.call([python_env, os.path.join(result_path, "predict.py"), file_path, os.path.join(result_path, "predictions.csv"),target])
 
 
             #The dashboard model wrapper offers the same functionallity and can be used for making timed predictions
-        with open(dashboard_folder_location + '/dashboard_model.p', 'rb') as file:
-            pipeline_model = dill.load(file)
+        pipeline_model = load_dashboard_model(dashboard_folder_location + '/dashboard_model.p')
 
         predict_start = time.time()
         pipeline_model.predict(test.drop(target, axis=1))
@@ -263,6 +267,9 @@ def evaluate(config: "StartAutoMlRequest", config_path: str) -> Tuple[float, flo
 
     predictions = pd.read_csv(os.path.join(result_path, "predictions.csv"))
     os.remove(os.path.join(result_path, "predictions.csv"))
+
+    if target not in predictions.columns:
+        print("Fehler in der Prediction.csv (name)")
 
     if config["configuration"]["task"] in [":tabular_classification", ":text_classification", ":image_classification", ":time_series_classification"]:
         if config["configuration"]["task"] == ":image_classification":
@@ -539,3 +546,23 @@ def setup_run_environment(request: "StartAutoMlRequest", adapter_name: str) -> "
     with open(os.path.join(job_folder_location, get_config_property("job-file-name")), "w+") as f:
         json.dump(request_dict, f)
     return request
+
+
+def load_dashboard_model(path):
+    """Load the automlWrapper
+    Most Wrapper are loaded as binary using dill
+    h2omodels can not be imported as binary, so the wrappers model is set to None
+    and the model is loaded separately
+
+    Args:
+        path (string): path to the binary exported wrapper
+    Returns:
+        pipeline_model (automlWrapper): returns the loaded Wrapper
+    """
+    with open(path, 'rb') as file:
+        pipeline_model = dill.load(file)
+        # currently this is only implemented for h2o as h2o models can not be exported or loaded as binary
+        # therefore the model is loaded after loading the wrapper and not exported in the wrapper
+        if(pipeline_model._model == None):
+            pipeline_model.load_model()
+        return pipeline_model
