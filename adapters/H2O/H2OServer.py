@@ -1,4 +1,4 @@
-import logging, asyncio
+ import logging, asyncio
 import os
 from Container import *
 from JsonUtil import get_config_property
@@ -27,5 +27,3 @@ if __name__ == '__main__':
     logging.basicConfig()
     loop = asyncio.get_event_loop()
     loop.run_until_complete(main())
-    # serve()
-    print('done.')
