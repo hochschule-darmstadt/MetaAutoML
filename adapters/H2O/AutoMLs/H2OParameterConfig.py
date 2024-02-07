@@ -32,10 +32,13 @@ h2o_metrics = {
 h2o_algorithms = {
     ":distributed_random_forest": "DRF",
     ":artificial_neural_network": "DeepLearning",
-    ":gradient_boosting_tree": ["GBM", "XGBoost"],
+    ":gradient_boosting_tree": "GBM",  # XGBoost is considered separate in H2O AutoML
     ":stacking_ensemble": "StackedEnsemble",
-    #GLM - not implemented - regression algorithms
+    ":generalized_linear_model": "GLM",
+    ":xgboost": "XGBoost",
+    # Add any other models here if needed
 }
+
 
 parameters = {
     #tabular classification

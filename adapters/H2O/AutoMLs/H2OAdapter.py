@@ -34,7 +34,6 @@ class H2OAdapter:
     def start(self):
         """Start the correct ML task functionality of H2O"""
         if self._configuration["configuration"]["task"] == ":tabular_classification":
-            print("test1")
             self.__tabular_classification()
         elif self._configuration["configuration"]["task"] == ":tabular_regression":
             self.__tabular_regression()
