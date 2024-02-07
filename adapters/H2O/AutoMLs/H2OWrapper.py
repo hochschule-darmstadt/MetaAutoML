@@ -1,4 +1,5 @@
 
+
 import numpy as np
 import h2o
 import os
@@ -14,11 +15,15 @@ class H2OWrapper(BaseWrapper):
         super().__init__(model, config)
 
     def predict(self, X, **kwargs):
+        if self._model == None:
+            self.load_model()
         X_predict = self._prepare_dataset(X.copy())
 
         return self._model.predict(h2o.H2OFrame(X_predict))
 
     def predict_proba(self, X, **kwargs):
+        if self._model == None:
+            self.load_model()
         X_predict = self._prepare_dataset(X.copy())
 
         model = self._model

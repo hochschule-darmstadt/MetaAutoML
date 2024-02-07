@@ -563,6 +563,6 @@ def load_dashboard_model(path):
         pipeline_model = dill.load(file)
         # currently this is only implemented for h2o as h2o models can not be exported or loaded as binary
         # therefore the model is loaded after loading the wrapper and not exported in the wrapper
-        if(pipeline_model._model == None):
-            pipeline_model.load_model()
+        #if(pipeline_model._model == None):
+        #    pipeline_model.load_model()
         return pipeline_model

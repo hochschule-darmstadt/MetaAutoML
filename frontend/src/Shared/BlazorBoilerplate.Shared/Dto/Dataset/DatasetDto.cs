@@ -96,18 +96,20 @@ namespace BlazorBoilerplate.Shared.Dto.Dataset
     }
     public class ColumnSchemaDto
     {
-        public ColumnSchemaDto(ObjectInfomationDto datatypeDetected, List<ObjectInfomationDto> datatypesCompatible, ObjectInfomationDto datatypeSelected, List<ObjectInfomationDto> rolesCompatible, ObjectInfomationDto roleSelected)
+        public ColumnSchemaDto(ObjectInfomationDto datatypeDetected, List<ObjectInfomationDto> datatypesCompatible, ObjectInfomationDto datatypeSelected, List<ObjectInfomationDto> rolesCompatible, ObjectInfomationDto roleSelected, string preprocessing)
         {
             DatatypeDetected = datatypeDetected;
             DatatypesCompatible = datatypesCompatible;
             DatatypeSelected = datatypeSelected;
             RolesCompatible = rolesCompatible;
             RoleSelected = roleSelected;
+            Preprocessing = preprocessing;
         }
         public ObjectInfomationDto DatatypeDetected { get; set; }
         public List<ObjectInfomationDto> DatatypesCompatible { get; set; }
         public ObjectInfomationDto DatatypeSelected { get; set; }
         public List<ObjectInfomationDto> RolesCompatible { get; set; }
         public ObjectInfomationDto RoleSelected { get; set; }
+        public string Preprocessing { get; set; }
     }
 }

@@ -292,6 +292,9 @@ class ColumnSchema(betterproto.Message):
     role_selected: str = betterproto.string_field(5)
     """The selected role IRI by the user":index"""
 
+    preprocessing: str = betterproto.string_field(6)
+    """The set preprocessing workflow as a string JSON{}"""
+
 
 @dataclass(eq=False, repr=False)
 class CreatePredictionRequest(betterproto.Message):
@@ -958,7 +961,9 @@ class GetSuggestedTrainingRuntimeRequest(betterproto.Message):
     Unique dataset id generated when inserting a new dataset document into
     MongoDBexample: '63515c86b10d04d230dc1482'
     """
+
     task: str = betterproto.string_field(3)
+    """choosen task from the wizardexample: ':tabular_classification'"""
 
 
 @dataclass(eq=False, repr=False)

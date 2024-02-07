@@ -28,6 +28,7 @@ class ExplainerDashboardManager(Process):
         importlib.reload(sys.modules['explainerdashboard'])
         from explainerdashboard import ClassifierExplainer, ExplainerDashboard
         if get_config_property("local_execution") == "YES" or os.getenv("DOCKER_COMPOSE") == "YES":
+            print(self.__path)
             self.__dashboard = ExplainerDashboard(ClassifierExplainer.from_file(self.__path))
         else:
             self.__dashboard = ExplainerDashboard(ClassifierExplainer.from_file(self.__path), url_base_pathname=f"/{self.__session_id}/")
