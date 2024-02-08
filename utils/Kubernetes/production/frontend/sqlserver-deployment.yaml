@@ -23,7 +23,7 @@ spec:
               - key: kubernetes.io/hostname
                 operator: In
                 values:
-                - oma-ml-3
+                - oma-ml-2
       containers:
       - env:
         - name: "ACCEPT_EULA"
@@ -36,9 +36,12 @@ spec:
         ports:
         - containerPort: 1433
         resources:
-          limits:
-            cpu: "0.5"
-            memory: "2097152e3"
+            requests:
+                memory: "2Gi"
+                cpu: "0.5"
+            limits:
+                memory: "2Gi"
+                cpu: "0.5"
         volumeMounts:
         - mountPath: /var/opt/mssql
           name: dbdata

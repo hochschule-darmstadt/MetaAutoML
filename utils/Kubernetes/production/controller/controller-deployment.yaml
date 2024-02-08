@@ -26,7 +26,7 @@ spec:
               - key: kubernetes.io/hostname
                 operator: In
                 values:
-                - oma-ml-1
+                - oma-ml-2
       serviceAccountName: controller-pod-account
       containers:
       - env:
@@ -54,9 +54,12 @@ spec:
         imagePullPolicy: ""
         name: controller
         resources:
-          limits:
-            cpu: "2"
-            memory: "8097152e3"
+            requests:
+                memory: "8Gi"
+                cpu: "2"
+            limits:
+                memory: "8Gi"
+                cpu: "2"
         volumeMounts:
         - name: datasets
           mountPath: /app/app-data/datasets
