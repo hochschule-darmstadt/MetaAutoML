@@ -38,6 +38,8 @@ def calculate_new_parameters(file_path: str):
     parameter = {}
     for group in groups:
         m = calculate_parameter(group[1])
+        if m < 0:
+            m = 0
         task = group[1]["task"].unique()[0][2:-2]
         parameter[task] = {}
         parameter[task]["m"] = m

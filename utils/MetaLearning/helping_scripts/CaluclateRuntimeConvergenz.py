@@ -57,10 +57,13 @@ def caluclate_runtime_convergenz(file_path: str, measure_classification: str, me
                     last_measure = -1
                     last_runtime_limit = 0
                     mesaure_string = get_measure(automl[1]["task"].unique(), measure_classification, measure_regression)
-                    max_value = sorted[sorted[mesaure_string] < 10000][mesaure_string].max()
+                    if automl[1]["task"].unique() == ":tabular_classification":
+                        max_value = sorted[mesaure_string].max()
+                    else:
+                        max_value = sorted[sorted[mesaure_string] >= 0][mesaure_string].min()
                     for index, row in sorted.iterrows():
-                        # all values should be between 0 and 10000
-                        if row[mesaure_string] > 0 and row[mesaure_string] < 10000:
+                        # all values should be between 0 and 9999999
+                        if row[mesaure_string] > 0 and row[mesaure_string] < 9999999:
                             # Checks whether the distance between the value and the next value is less than 1% and also whether the distance to the largest value is less than 5%
                             if abs(divide(row[mesaure_string] - last_measure, last_measure)) < 0.01 and abs(divide(max_value - row[mesaure_string], row[mesaure_string]) < 0.05):
                                 new_row = {"dataset_name": row["dataset_name"], "AutoML_solution": row["AutoML_solution"], "dataset_size_in_mb": row["dataset_size_in_mb"],
