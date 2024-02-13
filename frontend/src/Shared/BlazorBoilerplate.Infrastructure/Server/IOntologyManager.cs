@@ -15,6 +15,7 @@ namespace BlazorBoilerplate.Infrastructure.Server
         Task<ApiResponse> GetTasksForDatasetType(GetTasksForDatasetTypeRequestDto request);
         Task<ApiResponse> GetDatasetTypes();
         Task<ApiResponse> GetMlLibrariesForTask(GetMlLibrariesForTaskRequestDto request);
+        Task<ApiResponse> GetSearchRelevantData();
         Task<ApiResponse> GetAvailableStrategies(GetAvailableStrategiesRequestDto request);
         Task<ApiResponse> GetAutoMlParameters(GetAutoMlParametersRequestDto request);
 
