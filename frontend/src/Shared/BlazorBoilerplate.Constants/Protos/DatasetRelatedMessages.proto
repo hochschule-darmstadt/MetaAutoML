@@ -263,4 +263,9 @@ message ColumnSchema {
   ":index"
   */
   string roleSelected = 5;
+  /*
+  The set preprocessing workflow as a string JSON
+  {}
+  */
+  string preprocessing = 6;
 }

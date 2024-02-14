@@ -4,7 +4,7 @@
   "env-varname-cluster": "RUNTIME",
   "grpc-server-address": "127.0.0.1",
   "export-zip-file-name": "autocve-export",
-  "training-path": "C:/Users/alex/Desktop/MetaAutoML/adapters/AutoCVE/app-data/training",
+  "training-path": "app-data/training",
   "job-folder-name": "job",
   "model-folder-name": "model",
   "export-folder-name": "export",

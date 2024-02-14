@@ -123,13 +123,17 @@ class AdapterManager(Thread):
         request.training_id = self.__training_id
         request.dataset_id = str(self.__dataset["_id"])
         request.user_id = self.__request.user_id
-        request.dataset_path =  self.__dataset["path"]
+        if hasattr(self.__request, 'sampled_dataset_path'):
+        #if self.__request.sampled_dataset_path != None:
+            request.dataset_path = self.__request.sampled_dataset_path
+        else: request.dataset_path =  self.__dataset["path"]
 
         configuration = StartAutoMlConfiguration()
         configuration.task = self.__request.configuration.task
         configuration.runtime_limit = self.__request.configuration.runtime_limit
         configuration.metric = self.__request.configuration.metric
         configuration.parameters = self.__request.configuration.parameters
+        configuration.selected_ml_libraries = self.__request.configuration.selected_ml_libraries
 
         request.configuration = configuration
         found, training = self.__data_storage.get_training(self.__request.user_id, self.__training_id)

@@ -179,4 +179,17 @@ spec:
     requests:
       storage: 15Gi
   storageClassName: longhorn-csi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: output-h2o-claim
+  namespace: omaml
+spec:
+  accessModes:
+  - ReadWriteMany
+  resources:
+    requests:
+      storage: 15Gi
+  storageClassName: longhorn-csi
 

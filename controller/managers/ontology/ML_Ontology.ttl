@@ -1,5 +1,5 @@
-### Ontology file generated from ML_Ontology (3).xlsx.
-### 2023-12-04 14:27:17.905647
+### Ontology file generated from ML_Ontology.xlsx.
+### 2023-12-20 11:33:13.555942
 
 
 # PREFIXES
@@ -849,6 +849,11 @@
     :performance :fast_training , :accurate ;
     rdfs:comment "Ensemble learning method for classification, regression and other tasks that operates by constructing a multitude of decision trees at training time" ;
     rdfs:seeAlso <https://www.wikidata.org/entity/Q245748> .
+:distributed_random_forest a :ML_approach ;
+    skos:prefLabel "distributed random forest" ;
+    skos:altLabel "DRF" ;
+    skos:broader :random_forest ;
+    :used_for :classification , :regression .
 :random_interval a :ML_approach ;
     skos:prefLabel "Random Interval" ;
     :used_for :time_series_classification ;
@@ -921,6 +926,9 @@
     :used_for :clustering ;
     rdfs:comment "Performing dimensionality reduction before clustering in fewer dimensions by making use of the spectrum (eigenvalues) of the similarity matrix of the data" ;
     rdfs:seeAlso <https://www.wikidata.org/entity/Q2976589> .
+:stacking_ensemble a :ML_approach ;
+    skos:prefLabel "stacking ensemble" ;
+    :used_for :classification .
 :stochastic_gradient_descent a :ML_approach ;
     skos:prefLabel "stochastic gradient descent" ;
     skos:altLabel "SGD" ;
@@ -1283,16 +1291,23 @@
     :used_for :image_segmentation .
 :mean_metric_wrapper a :Metric ;
     skos:prefLabel "mean metric wrapper" .
+:mean_per_class_error a :Metric ;
+    skos:prefLabel "mean per class error" ;
+    :used_for :classification ;
+    rdfs:comment "Average of the error rate for each class" .
 :mean_poisson_deviance a :Metric ;
     skos:prefLabel "mean poisson deviance" ;
     :used_for :regression .
 :mean_relative_error a :Metric ;
     skos:prefLabel "mean relative error" ;
     :used_for :regression .
+:mean_residual_deviance a :Metric ;
+    skos:prefLabel "mean residual deviance" ;
+    :used_for :regression .
 :mean_squared_error a :Metric ;
     skos:prefLabel "mean squared error" ;
     skos:altLabel "MSE" ;
-    :used_for :regression ;
+    :used_for :classification , :regression ;
     rdfs:comment "Average of the squares of the errors between estimated and actual values" ;
     rdfs:seeAlso <https://www.wikidata.org/entity/Q1940696> .
 :mean_squared_log_error a :Metric ;
@@ -1760,8 +1775,8 @@
     :used_for :h2o_lib , :xgboost_lib ;
     :can_perform :tabular_classification , :tabular_regression ;
     rdfs:comment "H2O's AutoML automates the process of training and tuning a large selection of models, allowing the user to focus on other aspects of the data science and machine learning pipeline such as data pre-processing, feature engineering and model deployment." ;
-    rdfs:seeAlso <https://docs.h2o.ai/h2o/latest-stable/h2o-docs/automl.html> ;
-    :supported_by_oma_ml "false"^^xsd:boolean .
+    rdfs:seeAlso <https://github.com/h2oai> ;
+    :supported_by_oma_ml "true"^^xsd:boolean .
 :ibm_autoai a :AutoML_solution ;
     skos:prefLabel "IBM AutoAI" ;
     :used_for :ibm_snap_ml_lib , :scikit_learn_lib , :tensorflow_lib , :xgboost_lib ;
@@ -2211,20 +2226,20 @@
     :parameter_value :loss_function_lama_tabular_regression , :metric_lama_tabular_regression ;
     rdfs:comment "Task configuration for tabular regression in LAMA" ;
     rdfs:seeAlso <https://openml-labs.github.io/gama/master/api/index.html> .
-:tabular_classification_in_h2o a :Configuration_item ;
-    skos:prefLabel "tabular classification in H2O" ;
+:tabular_classification_in_h2o_automl a :Configuration_item ;
+    skos:prefLabel "tabular classification in H2O AutoML" ;
     :category :task_configuration ;
     :automl_solution :h2o_automl ;
     :ml_task :tabular_classification ;
-    :parameter_value :metric_h2o_tabular_classification ;
-    rdfs:comment "Task configuration for tabular classification in H2O" .
-:tabular_regression_in_h2o a :Configuration_item ;
-    skos:prefLabel "tabular regression in H2O" ;
+    :parameter_value :metric_h2o_automl_tabular_classification , :include_approach_h2o_automl , :max_models_h2o_automl , :sort_metric_h2o_automl ;
+    rdfs:comment "Task configuration for tabular classification in H2O AutoML" .
+:tabular_regression_in_h2o_automl a :Configuration_item ;
+    skos:prefLabel "tabular regression in H2O AutoML" ;
     :category :task_configuration ;
     :automl_solution :h2o_automl ;
     :ml_task :tabular_regression ;
-    :parameter_value :metric_h2o_tabular_regression ;
-    rdfs:comment "Task configuration for tabular regression in H2O" .
+    :parameter_value :metric_h2o_automl_tabular_regression , :include_approach_h2o_automl , :max_models_h2o_automl , :sort_metric_h2o_automl ;
+    rdfs:comment "Task configuration for tabular regression in H2O AutoML" .
 :ensemble a :Configuration_item ;
     skos:prefLabel "ensemble" ;
     :category :parameter ;
@@ -2893,18 +2908,18 @@
     :parameter_value :mean_squared_error , :mean_absolute_error , :mean_absolute_percentage_error , :root_mean_squared_log_error ;
     rdfs:comment "Selecting the prediction performance metric for which AutoML is optimized" ;
     rdfs:seeAlso <https://lightautoml.readthedocs.io/en/latest/pages/modules/generated/lightautoml.tasks.base.Task.html#lightautoml.tasks.base.Task> .
-:metric_h2o_tabular_classification a :Configuration_item ;
-    skos:prefLabel "metric h2o tabular classification" ;
+:metric_h2o_automl_tabular_classification a :Configuration_item ;
+    skos:prefLabel "metric h2o AutoML tabular classification" ;
     :category :parameter ;
     skos:broader :metric ;
     :has_datatype :single_value ;
-    :parameter_value :area_under_precision_recall_curve , :log_loss , :area_under_roc_curve .
-:metric_h2o_tabular_regression a :Configuration_item ;
-    skos:prefLabel "metric h2o tabular regression" ;
+    :parameter_value :accuracy , :area_under_roc_curve , :area_under_precision_recall_curve , :log_loss , :mean_squared_error , :mean_per_class_error .
+:metric_h2o_automl_tabular_regression a :Configuration_item ;
+    skos:prefLabel "metric h2o AutoML tabular regression" ;
     :category :parameter ;
     skos:broader :metric ;
     :has_datatype :single_value ;
-    :parameter_value :mean_squared_error , :root_mean_squared_error , :mean_absolute_error , :root_mean_squared_log_error .
+    :parameter_value :mean_absolute_error , :mean_residual_deviance , :mean_squared_error , :root_mean_squared_error , :root_mean_squared_log_error .
 :time_limit a :Configuration_item ;
     skos:prefLabel "time limit" ;
     :category :parameter ;
@@ -3007,6 +3022,12 @@
     skos:broader :include_approach ;
     :has_datatype :list ;
     rdfs:seeAlso <https://automl.github.io/auto-sklearn/master/api.html#> .
+:include_approach_h2o_automl a :Configuration_item ;
+    skos:prefLabel "include approach h2o automl" ;
+    :category :parameter ;
+    skos:broader :include_approach ;
+    :has_datatype :list ;
+    :parameter_value :distributed_random_forest , :artificial_neural_network , :gradient_boosting_tree , :stacking_ensemble .
 :epochs a :Configuration_item ;
     skos:prefLabel "epochs" ;
     :category :parameter ;
@@ -3461,6 +3482,25 @@
     skos:broader :exclude_featurizers ;
     :has_datatype :list ;
     :parameter_value :datetime_featurizer , :email_featurizer , :url_featurizer , :natural_language_featurizer , :time_series_featurizer .
+:max_models a :Configuration_item ;
+    skos:prefLabel "max models" ;
+    :category :parameter ;
+    :has_datatype :integer .
+:max_models_h2o_automl a :Configuration_item ;
+    skos:prefLabel "max models h2o AutoML" ;
+    :category :parameter ;
+    skos:broader :max_models ;
+    :has_datatype :integer .
+:sort_metric a :Configuration_item ;
+    skos:prefLabel "sort metric" ;
+    :category :parameter ;
+    :has_datatype :single_value .
+:sort_metric_h2o_automl a :Configuration_item ;
+    skos:prefLabel "sort metric h2o AutoML" ;
+    :category :parameter ;
+    skos:broader :sort_metric ;
+    :has_datatype :single_value ;
+    :parameter_value :accuracy , :area_under_roc_curve , :area_under_precision_recall_curve , :log_loss , :mean_absolute_error , :mean_per_class_error , :mean_residual_deviance , :root_mean_squared_error , :root_mean_squared_log_error .
 
 
 # Enum

@@ -22,106 +22,109 @@ spec:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
             nodeSelectorTerms:
-            - matchExpressions:
-              - key: kubernetes.io/hostname
-                operator: In
-                values:
-                - oma-ml-3
+              - matchExpressions:
+                  - key: kubernetes.io/hostname
+                    operator: In
+                    values:
+                      - oma-ml-3
       containers:
-      - env:
-        - name: ASPNETCORE_ENVIRONMENT
-          value: Development
-        - name: ASPNETCORE_Kestrel__Certificates__Default__Password
-          value: Admin123
-        - name: ASPNETCORE_Kestrel__Certificates__Default__Path
-          value: aspnetapp.pfx
-        - name: ASPNETCORE_URLS
-          value: https://+:443;http://+80
-        - name: BlazorBoilerplate__ApplicationUrl
-          value: blazorboilerplate
-        - name: BlazorBoilerplate__IS4ApplicationUrl
-          value: blazorboilerplate
-        - name: BlazorBoilerplate__CertificatePassword
-          value: Admin123
-        - name: BlazorBoilerplate__UseSqlServer
-          value: "true"
-        - name: ConnectionStrings__DefaultConnection
-          value: "Server=sqlserver;Database=omaml;Trusted_Connection=True;MultipleActiveResultSets=true;User=sa;Password=yourVeryStrong(!)Password;Integrated Security=false;Encrypt=False;"
-        - name: Serilog__MinimumLevel__Default
-          value: Debug
-        - name: CONTROLLER_DATASET_FOLDER_PATH
-          value: /app/app-data/datasets
-        - name: REGISTRATION_ALLOWED
-          value: "false"
-        volumeMounts:
-        - name: datasets
-          mountPath: /app/app-data/datasets
-        - name: training
-          mountPath: /app/app-data/training
-        - name: autokeras-output
-          mountPath: /app/app-data/training/autokeras
-        - name: mljar-output
-          mountPath: /app/app-data/training/mljar
-        - name: autogluon-output
-          mountPath: /app/app-data/training/gluon
-        - name: flaml-output
-          mountPath: /app/app-data/training/flaml
-        - name: pycaret-output
-          mountPath: /app/app-data/training/pycaret
-        - name: evalml-output
-          mountPath: /app/app-data/training/evalml
-        - name: tpot-output
-          mountPath: /app/app-data/training/tpot
-        - name: gama-output
-          mountPath: /app/app-data/training/gama
-        - name: lama-output
-          mountPath: /app/app-data/training/lama
-        image: alexhda/omaml-frontend:latest
-        name: blazorboilerplate
-        ports:
-        - containerPort: 80
-        - containerPort: 443
-        resources:
-          limits:
-            cpu: "2"
-            memory: "6094304e3"
+        - env:
+            - name: ASPNETCORE_ENVIRONMENT
+              value: Development
+            - name: ASPNETCORE_Kestrel__Certificates__Default__Password
+              value: Admin123
+            - name: ASPNETCORE_Kestrel__Certificates__Default__Path
+              value: aspnetapp.pfx
+            - name: ASPNETCORE_URLS
+              value: https://+:443;http://+80
+            - name: BlazorBoilerplate__ApplicationUrl
+              value: blazorboilerplate
+            - name: BlazorBoilerplate__IS4ApplicationUrl
+              value: blazorboilerplate
+            - name: BlazorBoilerplate__CertificatePassword
+              value: Admin123
+            - name: BlazorBoilerplate__UseSqlServer
+              value: 'true'
+            - name: ConnectionStrings__DefaultConnection
+              value: Server=sqlserver;Database=omaml;Trusted_Connection=True;MultipleActiveResultSets=true;User=sa;Password=yourVeryStrong(!)Password;Integrated Security=false;Encrypt=False;
+            - name: Serilog__MinimumLevel__Default
+              value: Debug
+            - name: CONTROLLER_DATASET_FOLDER_PATH
+              value: /app/app-data/datasets
+            - name: REGISTRATION_ALLOWED
+              value: 'false'
+          volumeMounts:
+            - name: datasets
+              mountPath: /app/app-data/datasets
+            - name: training
+              mountPath: /app/app-data/training
+            - name: autokeras-output
+              mountPath: /app/app-data/training/autokeras
+            - name: mljar-output
+              mountPath: /app/app-data/training/mljar
+            - name: autogluon-output
+              mountPath: /app/app-data/training/gluon
+            - name: flaml-output
+              mountPath: /app/app-data/training/flaml
+            - name: pycaret-output
+              mountPath: /app/app-data/training/pycaret
+            - name: evalml-output
+              mountPath: /app/app-data/training/evalml
+            - name: tpot-output
+              mountPath: /app/app-data/training/tpot
+            - name: gama-output
+              mountPath: /app/app-data/training/gama
+            - name: lama-output
+              mountPath: /app/app-data/training/lama
+          image: alexhda/omaml-frontend:latest
+          name: blazorboilerplate
+          ports:
+            - containerPort: 80
+            - containerPort: 443
+          resources:
+            requests:
+              memory: 14Gi
+              cpu: '2'
+            limits:
+              memory: 14Gi
+              cpu: '2'
       restartPolicy: Always
       hostAliases:
-      - ip: "127.0.0.1"
-        hostnames:
-        - "dev.oma-ml.ai"
+        - ip: 127.0.0.1
+          hostnames:
+            - dev.oma-ml.ai
       volumes:
-      - name: datasets
-        persistentVolumeClaim:
-          claimName: datasets-claim
-      - name: training
-        persistentVolumeClaim:
-          claimName: training-claim
-      - name: autokeras-output
-        persistentVolumeClaim:
-          claimName: output-autokeras-claim
-      - name: mljar-output
-        persistentVolumeClaim:
-          claimName: output-mljar-claim
-      - name: autogluon-output
-        persistentVolumeClaim:
-          claimName: output-autogluon-claim
-      - name: flaml-output
-        persistentVolumeClaim:
-          claimName: output-flaml-claim
-      - name: evalml-output
-        persistentVolumeClaim:
-          claimName: output-evalml-claim
-      - name: pycaret-output
-        persistentVolumeClaim:
-          claimName: output-pycaret-claim
-      - name: tpot-output
-        persistentVolumeClaim:
-          claimName: output-tpot-claim
-      - name: gama-output
-        persistentVolumeClaim:
-          claimName: output-gama-claim
-      - name: lama-output
-        persistentVolumeClaim:
-          claimName: output-lama-claim
+        - name: datasets
+          persistentVolumeClaim:
+            claimName: datasets-claim
+        - name: training
+          persistentVolumeClaim:
+            claimName: training-claim
+        - name: autokeras-output
+          persistentVolumeClaim:
+            claimName: output-autokeras-claim
+        - name: mljar-output
+          persistentVolumeClaim:
+            claimName: output-mljar-claim
+        - name: autogluon-output
+          persistentVolumeClaim:
+            claimName: output-autogluon-claim
+        - name: flaml-output
+          persistentVolumeClaim:
+            claimName: output-flaml-claim
+        - name: evalml-output
+          persistentVolumeClaim:
+            claimName: output-evalml-claim
+        - name: pycaret-output
+          persistentVolumeClaim:
+            claimName: output-pycaret-claim
+        - name: tpot-output
+          persistentVolumeClaim:
+            claimName: output-tpot-claim
+        - name: gama-output
+          persistentVolumeClaim:
+            claimName: output-gama-claim
+        - name: lama-output
+          persistentVolumeClaim:
+            claimName: output-lama-claim
 status: {}

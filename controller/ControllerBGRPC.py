@@ -292,6 +292,9 @@ class ColumnSchema(betterproto.Message):
     role_selected: str = betterproto.string_field(5)
     """The selected role IRI by the user":index"""
 
+    preprocessing: str = betterproto.string_field(6)
+    """The set preprocessing workflow as a string JSON{}"""
+
 
 @dataclass(eq=False, repr=False)
 class CreatePredictionRequest(betterproto.Message):
@@ -960,10 +963,8 @@ class GetSuggestedTrainingRuntimeRequest(betterproto.Message):
     """
 
     task: str = betterproto.string_field(3)
-    """
-    choosen task from the wizard
-    example: ':tabular_classification'
-    """
+    """choosen task from the wizardexample: ':tabular_classification'"""
+
 
 @dataclass(eq=False, repr=False)
 class GetSuggestedTrainingRuntimeResponse(betterproto.Message):

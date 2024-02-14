@@ -191,7 +191,8 @@ namespace BlazorBoilerplate.Server.Managers
                         await _cacheManager.GetObjectInformationList(column.Value.DatatypesCompatible.ToList()),
                         column.Value.DatatypeSelected == "" ? new ObjectInfomationDto() : await _cacheManager.GetObjectInformation(column.Value.DatatypeSelected),
                         await _cacheManager.GetObjectInformationList(column.Value.RolesCompatible.ToList()),
-                        column.Value.RoleSelected == "" ? new ObjectInfomationDto() : await _cacheManager.GetObjectInformation(column.Value.RoleSelected)));
+                        column.Value.RoleSelected == "" ? new ObjectInfomationDto() : await _cacheManager.GetObjectInformation(column.Value.RoleSelected),
+                        column.Value.Preprocessing));
                 }
                 response = new GetDatasetResponseDto(new DatasetDto(reply, await _cacheManager.GetObjectInformation(reply.Dataset.Type), schema));
 

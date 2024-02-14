@@ -35,7 +35,7 @@ class DataSetAnalysisManager(Thread):
         # Setup config
         self.__dataset_id = dataset_id
         self.__user_id = user_id
-        found, dataset = data_storage.get_dataset(user_id, dataset_id)
+        found, dataset = data_storage.get_dataset(user_id, dataset_id) # das hier ist ein Tupel, deswegen werden die Variablen so geschrieben
         file_config = dataset["file_configuration"]
         self.__dataset = dataset
         #delimiters = {

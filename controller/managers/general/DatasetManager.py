@@ -93,7 +93,8 @@ class DatasetManager:
                                                                             dataset["schema"][column]["datatypes_compatible"],
                                                                             dataset["schema"][column].get("datatype_selected", ""),
                                                                             dataset["schema"][column]["roles_compatible"],
-                                                                            dataset["schema"][column].get("role_selected", ""))})
+                                                                            dataset["schema"][column].get("role_selected", ""),
+                                                                            dataset["schema"][column].get("preprocessing", "{}"))})
             return dataset_detail
         except Exception as e:
             self.__log.error(f"__dataset_object_to_rpc_object: Error while reading parameter for dataset {str(dataset['_id'])} for user {user_id}")
