@@ -103,7 +103,7 @@ services:
           - DOCKER_COMPOSE=YES
       volumes:
           - datasets:/app/app-data/datasets
-          - training-autokeras:/app/app-data/training
+          - training-h2o:/app/app-data/training
       ports:
           - "6110-6119:6110-6119"
 
@@ -338,6 +338,7 @@ volumes:
   training-sklearn:
   training-flaml:
   training-gluon:
+  training-h2o:
   training-pytorch:
   #training-autocve:
   training-mljar:
