@@ -44,6 +44,16 @@ def caluclate_runtime_convergenz(file_path: str, measure_classification: str, me
 
     df = pd.read_csv(os.path.join(file_path ,"datasetData.csv"))
 
+    filtered_groups = []
+
+
+    groups = df.groupby(["dataset_name"])
+    for name, group in groups:
+        runtime_set = group["runtime_limit"].unique()
+        if {3, 6, 12, 24, 48, 60, 240}.issubset(set(runtime_set)):
+            filtered_groups.append(group)
+
+    df = pd.concat(filtered_groups)
     dataset_groups = df.groupby(["dataset_name"])
 
     runtime_df = pd.DataFrame()
@@ -67,13 +77,11 @@ def caluclate_runtime_convergenz(file_path: str, measure_classification: str, me
                             # Checks whether the distance between the value and the next value is less than 1% and also whether the distance to the largest value is less than 5%
                             if abs(divide(row[mesaure_string] - last_measure, last_measure)) < 0.01 and abs(divide(max_value - row[mesaure_string], row[mesaure_string]) < 0.05):
                                 new_row = {"dataset_name": row["dataset_name"], "AutoML_solution": row["AutoML_solution"], "dataset_size_in_mb": row["dataset_size_in_mb"],
-                                            "best_runtime_limit": last_runtime_limit, mesaure_string: last_measure, "task": automl[1]["task"].unique()}
+                                            "best_runtime_limit": last_runtime_limit, mesaure_string: last_measure, "task": automl[1]["task"].unique(),
+                                            "dataset_rows": row["dataset_rows"], "dataset_cols": row["dataset_cols"], "missing_values": row["missing_values"], "duplicated_rows": row["duplicated_rows"], "duplicated_cols": row["duplicated_cols"], "outliers": row["outliers"],}
                                 runtime_df = pd.concat([runtime_df, pd.DataFrame([new_row])], ignore_index=True )
                                 break
                             last_measure = row[mesaure_string]
                             last_runtime_limit = row["runtime_limit"]
 
     runtime_df.to_csv(os.path.join(file_path, "runtimeDataset.csv"))
-
-
-

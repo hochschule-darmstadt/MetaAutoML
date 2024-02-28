@@ -22,7 +22,7 @@ def calculate_parameter(dataframe: pd.DataFrame):
     denominator = sum((x - x_mean) ** 2 for x in x_train)
     return numerator / denominator
 
-
+#suggested_runtime = runtime_parameter["m"] * dataset_size + runtime_parameter["b"]
 def calculate_new_parameters(file_path: str):
     """Reads the dataframe and calculate the parameter m
         Then saves the parameter and the intercept b for each task in one file
@@ -56,5 +56,5 @@ def calculate_new_parameters(file_path: str):
     #copy file
     shutil.copy2(os.path.join(file_path, filename), os.path.join(new_path, filename))
 
-calculate_new_parameters(os.path.join("C:/Users/pfriehe/Documents/Studium/WiSe2022/PSE/MetaAutoML/utils/MetaLearning", "data"))
+#calculate_new_parameters(os.path.join("./utils/MetaLearning", "data"))
 

@@ -13,7 +13,7 @@ For calculating the new runtime prediction parameters edit the following variabl
 client = pymongo.MongoClient("mongodb://localhost:27017/")
 
 # fill in the name of your database
-db = client["new_trainings"]
+db = client["cluster"]
 
 # Collection Name
 #ändere die Namen demenstrpchend nach den collection namen aus deiner Datenbank ab
