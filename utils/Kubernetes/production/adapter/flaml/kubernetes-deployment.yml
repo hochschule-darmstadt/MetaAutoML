@@ -40,11 +40,11 @@ spec:
         name: flaml
         resources:
             requests:
-                memory: "10Gi"
-                cpu: "5"
+                memory: "28Gi"
+                cpu: "12"
             limits:
-                memory: "10Gi"
-                cpu: "5"
+                memory: "28Gi"
+                cpu: "12"
         volumeMounts:
         - name: datasets
           mountPath: /app/app-data/datasets

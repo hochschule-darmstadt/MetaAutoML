@@ -1,9 +1,10 @@
 absl-py==0.13.0
 astunparse==1.6.3
-flaml==1.2.4
-flaml[ts_forecast]==1.2.4
-flaml[nlp]==1.2.4
-flaml[blendsearch]==1.2.4
+flaml==2.1.2
+flaml[automl]==2.1.2
+flaml[ts_forecast]==2.1.2
+flaml[nlp]==2.1.2
+flaml[blendsearch]==2.1.2
 pandas==1.4.1
 Jinja2==3.0.1
 dill
@@ -12,6 +13,6 @@ betterproto @ git+https://github.com/danielgtaylor/python-betterproto.git@496eba
 dependency-injector==4.40.0
 codecarbon==2.1.4
 scikit-learn
-explainerdashboard==0.4.3
+explainerdashboard==0.4.7
 rdflib==6.2.0
 xgboost==1.6.2

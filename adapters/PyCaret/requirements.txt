@@ -1,10 +1,14 @@
-Jinja2==3.0.1
+Jinja2==3.1.2
 dill
 pillow
 betterproto @ git+https://github.com/danielgtaylor/python-betterproto.git@496eba27506a2fe18df409c4cd34a47d8ce04ffe
 dependency-injector==4.40.0
 codecarbon==2.3.2
-pycaret[full]==3.2.0
+pycaret[full]==3.3.1
 scikit-learn
-explainerdashboard==0.4.5
+explainerdashboard==0.4.7
 rdflib==6.2.0
+#cython<3.0.0
+#pyyaml==5.4.1
+#Use the following line to install tricky requirements
+#pip install "cython<3.0.0" && pip install --no-build-isolation pyyaml==5.4.1

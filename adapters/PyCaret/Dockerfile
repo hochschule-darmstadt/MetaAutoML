@@ -6,6 +6,7 @@ RUN apt-get update && apt-get install -y libgomp1 \
 
 COPY ./adapters/PyCaret/requirements.txt .
 # Install dependencies
+RUN pip install "cython<3.0.0" && pip install --no-build-isolation pyyaml==5.4.1
 RUN pip install -r requirements.txt
 # put all files in a directory called app
 WORKDIR /app

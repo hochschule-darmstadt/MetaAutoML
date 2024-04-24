@@ -34,7 +34,7 @@ spec:
   - ReadWriteMany
   resources:
     requests:
-      storage: 15Gi
+      storage: 80Gi
   storageClassName: longhorn-csi
 ---
 apiVersion: v1
@@ -47,7 +47,7 @@ spec:
   - ReadWriteMany
   resources:
     requests:
-      storage: 15Gi
+      storage: 80Gi
   storageClassName: longhorn-csi
 ---
 apiVersion: v1
@@ -60,7 +60,7 @@ spec:
   - ReadWriteMany
   resources:
     requests:
-      storage: 15Gi
+      storage: 80Gi
   storageClassName: longhorn-csi
 ---
 apiVersion: v1
@@ -73,7 +73,7 @@ spec:
   - ReadWriteMany
   resources:
     requests:
-      storage: 15Gi
+      storage: 80Gi
   storageClassName: longhorn-csi
 ---
 apiVersion: v1
@@ -86,7 +86,7 @@ spec:
   - ReadWriteMany
   resources:
     requests:
-      storage: 15Gi
+      storage: 80Gi
   storageClassName: longhorn-csi
 ---
 apiVersion: v1
@@ -138,7 +138,7 @@ spec:
   - ReadWriteMany
   resources:
     requests:
-      storage: 15Gi
+      storage: 80Gi
   storageClassName: longhorn-csi
 ---
 apiVersion: v1
@@ -151,7 +151,7 @@ spec:
   - ReadWriteMany
   resources:
     requests:
-      storage: 15Gi
+      storage: 80Gi
   storageClassName: longhorn-csi
 ---
 apiVersion: v1
@@ -164,7 +164,7 @@ spec:
   - ReadWriteMany
   resources:
     requests:
-      storage: 15Gi
+      storage: 80Gi
   storageClassName: longhorn-csi
 ---
 apiVersion: v1
@@ -177,7 +177,7 @@ spec:
   - ReadWriteMany
   resources:
     requests:
-      storage: 15Gi
+      storage: 80Gi
   storageClassName: longhorn-csi
 ---
 apiVersion: v1
@@ -190,6 +190,6 @@ spec:
   - ReadWriteMany
   resources:
     requests:
-      storage: 15Gi
+      storage: 80Gi
   storageClassName: longhorn-csi
 

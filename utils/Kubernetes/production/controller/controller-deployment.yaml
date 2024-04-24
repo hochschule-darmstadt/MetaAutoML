@@ -26,7 +26,7 @@ spec:
               - key: kubernetes.io/hostname
                 operator: In
                 values:
-                - oma-ml-2
+                - oma-ml-1
       serviceAccountName: controller-pod-account
       containers:
       - env:
@@ -83,6 +83,8 @@ spec:
           mountPath: /app/app-data/training/gama
         - name: lama-output
           mountPath: /app/app-data/training/lama
+        - name: h2o-output
+          mountPath: /app/app-data/training/h2o
       restartPolicy: Always
       volumes:
       - name: datasets
@@ -118,3 +120,6 @@ spec:
       - name: lama-output
         persistentVolumeClaim:
           claimName: output-lama-claim
+      - name: h2o-output
+        persistentVolumeClaim:
+          claimName: output-h2o-claim

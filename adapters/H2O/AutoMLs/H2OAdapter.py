@@ -51,8 +51,9 @@ class H2OAdapter:
         if not(':xgboost_lib' in self._configuration["configuration"].get('selected_ml_libraries', {})) and 'include_algos' in parameters and ('XGBoost' in parameters['include_algos']):
             parameters['include_algos'].remove('XGBoost')
 
-
         pandasJoineddf = pd.concat([features, targets], axis=1)
+        counts = pandasJoineddf[targets.name].value_counts()
+        print(counts)
         h2oframe = h2o.H2OFrame(pandasJoineddf)
         h2oframe[targets.name] = h2oframe[targets.name].asfactor() # Stellt sicher, dass H2O Tabular Classification erkennt
 

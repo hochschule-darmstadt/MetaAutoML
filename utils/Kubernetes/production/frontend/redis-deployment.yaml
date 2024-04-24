@@ -23,7 +23,7 @@ spec:
               - key: kubernetes.io/hostname
                 operator: In
                 values:
-                - oma-ml-2
+                - oma-ml-3
       containers:
       - image: redis
         name: redis

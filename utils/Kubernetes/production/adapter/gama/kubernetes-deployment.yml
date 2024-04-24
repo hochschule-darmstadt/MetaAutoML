@@ -26,7 +26,7 @@ spec:
               - key: kubernetes.io/hostname
                 operator: In
                 values:
-                - oma-ml-1
+                - oma-ml-2
       containers:
       - env:
         - name: GRPC_SERVER_PORT
@@ -40,11 +40,11 @@ spec:
         name: gama
         resources:
             requests:
-                memory: "10Gi"
-                cpu: "5"
+                memory: "28Gi"
+                cpu: "12"
             limits:
-                memory: "10Gi"
-                cpu: "5"
+                memory: "28Gi"
+                cpu: "12"
         volumeMounts:
         - name: datasets
           mountPath: /app/app-data/datasets

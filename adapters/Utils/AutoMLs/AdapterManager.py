@@ -399,4 +399,3 @@ class AdapterManager(Thread):
 
     def get_start_auto_ml_request(self) -> StartAutoMlRequest:
         return self.__start_auto_ml_request
-

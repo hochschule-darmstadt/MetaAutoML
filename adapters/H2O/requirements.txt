@@ -1,5 +1,5 @@
 #h2o dependencies
-h2o == 3.44.0.1
+h2o == 3.46.0.1
 tabulate == 0.7.5
 requests == 2.10
 future
@@ -13,7 +13,7 @@ Jinja2
 betterproto @ git+https://github.com/danielgtaylor/python-betterproto.git@496eba27506a2fe18df409c4cd34a47d8ce04ffe
 Pillow
 rdflib==6.2.0
-explainerdashboard==0.4.3
+explainerdashboard==0.4.7
 
 
 # Needed for Newer Verisons of Python :
