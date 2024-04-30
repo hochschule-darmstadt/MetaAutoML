@@ -1,4 +1,5 @@
 {
+
   "profiles": {
     "IIS Express": {
       "commandName": "IISExpress",
@@ -6,7 +7,7 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "CONTROLLER_SERVICE_HOST": "localhost",
-        "CONTROLLER_DATASET_FOLDER_PATH": "C:\\Users\\alex\\Desktop\\MetaAutoML\\controller\\app-data\\datasets",
+        "CONTROLLER_DATASET_FOLDER_PATH": "C:\\Users\\alex\\MetaAutoML\\controller\\app-data\\datasets",
         "CONTROLLER_SERVICE_PORT": "5001",
         "no_proxy": "localhost",
         "REDIS_SERVICE_HOST": "localhost",
@@ -47,4 +48,8 @@
       "sslPort": 0
     }
   }
+<<<<<<< Updated upstream
+=======
+
+>>>>>>> Stashed changes
 }

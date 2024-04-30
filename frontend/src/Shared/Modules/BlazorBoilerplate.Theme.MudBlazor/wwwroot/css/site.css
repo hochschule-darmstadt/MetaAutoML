@@ -3,7 +3,8 @@
 }
 
 
-html, body {
+html,
+body {
     font-family: Roboto, Noto Sans, HelveticaNeue, "Helvetica Neue", Helvetica, Arial, sans-serif !important;
 }
 
@@ -49,13 +50,13 @@ html, body {
     text-align: center;
 }
 
-    .logo h4 {
-        margin: 20px auto;
-    }
+.logo h4 {
+    margin: 20px auto;
+}
 
 .loading-container {
     border-radius: 0 !important;
-    box-shadow: 0 8px 17px 0 rgba(0,0,0,.2), 0 6px 20px 0 rgba(0,0,0,.19) !important;
+    box-shadow: 0 8px 17px 0 rgba(0, 0, 0, .2), 0 6px 20px 0 rgba(0, 0, 0, .19) !important;
 }
 
 .logo-img {
@@ -66,7 +67,7 @@ html, body {
     background: #fff;
     color: #4d4d4d;
     padding: 9px 12px 9px 18px;
-    box-shadow: 0 0 5px 0 rgba(0,0,0,0.21);
+    box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.21);
     margin-top: 30px;
     font-size: 12px;
 }
@@ -94,9 +95,9 @@ html, body {
     color: #fff;
 }
 
-    .drawer-logo a {
-        color: #fff;
-    }
+.drawer-logo a {
+    color: #fff;
+}
 
 hr {
     clear: both;
@@ -107,9 +108,9 @@ hr {
     margin-top: -16px;
 }
 
-    .selectCulture .mud-input {
-        color: #fff;
-    }
+.selectCulture .mud-input {
+    color: #fff;
+}
 
 .signInWithButton {
     margin: 8px;
@@ -150,7 +151,7 @@ hr {
     top: 0;
     left: 50%;
     transform: translateX(-50%);
-    box-shadow: 0 8px 17px 0 rgba(0,0,0,.2), 0 6px 20px 0 rgba(0,0,0,.19) !important;
+    box-shadow: 0 8px 17px 0 rgba(0, 0, 0, .2), 0 6px 20px 0 rgba(0, 0, 0, .19) !important;
 }
 
 /* Extra small devices (portrait phones, less than 576px) */
@@ -185,12 +186,10 @@ hr {
 }
 
 /* Medium devices (tablets, less than 992px) */
-@media (max-width: 991.98px) {
-}
+@media (max-width: 991.98px) {}
 
 /* Large devices (desktops, less than 1200px) */
-@media (max-width: 1199.98px) {
-}
+@media (max-width: 1199.98px) {}
 
 /*List class for search bar*/
 .SearchBarList {
@@ -206,7 +205,7 @@ hr {
 }
 
 .SearchBarOverlay div p {
-    white-space: nowrap; 
+    white-space: nowrap;
 }
 
 
@@ -223,13 +222,13 @@ hr {
 
 /*Custom highlighting for searchpage*/
 .custom-highlight {
-    background-color: yellow; 
-    color: inherit; 
-    padding: 0; 
-    margin: 0; 
-    display: inline; 
-    font-size: inherit; 
-    line-height: inherit; 
+    background-color: yellow;
+    color: inherit;
+    padding: 0;
+    margin: 0;
+    display: inline;
+    font-size: inherit;
+    line-height: inherit;
 }
 
 /* Basic styling for the navigation menu with 'mud-nav-menu' class */
@@ -240,34 +239,39 @@ hr {
     margin-right: 0;
     margin-left: 0;
     padding-left: 0;
-    direction: rtl; /* Set text direction to Right-to-Left to move scrollbar to the left side */
+    direction: rtl;
+    /* Set text direction to Right-to-Left to move scrollbar to the left side */
     height: 53vh;
     overflow-y: auto;
 }
 
-    .mud-nav-menu2 > * {
-        direction: ltr; /* Reset text direction to Left-to-Right for child elements */
-    }
+.mud-nav-menu2>* {
+    direction: ltr;
+    /* Reset text direction to Left-to-Right for child elements */
+}
 
-    /* Customizing the scrollbar */
-    .mud-nav-menu2::-webkit-scrollbar {
-        width: 10px;
-    }
+/* Customizing the scrollbar */
+.mud-nav-menu2::-webkit-scrollbar {
+    width: 10px;
+}
 
-    .mud-nav-menu2::-webkit-scrollbar-track {
-        background: #f1f1f1;
-        border-radius: 10px; /* Rounded corners for scrollbar track */
-    }
+.mud-nav-menu2::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+    /* Rounded corners for scrollbar track */
+}
 
-    .mud-nav-menu2::-webkit-scrollbar-thumb {
-        background: #888;
-        border-radius: 10px; /* Rounded corners for scrollbar thumb */
-        min-height: 50px; /* Minimum height for scrollbar thumb */
-    }
+.mud-nav-menu2::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 10px;
+    /* Rounded corners for scrollbar thumb */
+    min-height: 50px;
+    /* Minimum height for scrollbar thumb */
+}
 
-        .mud-nav-menu2::-webkit-scrollbar-thumb:hover {
-            background: #555;
-        }
+.mud-nav-menu2::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
 
 /* Height adjustment based on screen size */
 @media screen and (min-height: 800px) {
@@ -282,6 +286,56 @@ hr {
     }
 }
 
-.mud-nav-menu2 > div > div {
+.mud-nav-menu2>div>div {
     padding-left: 0;
+}
+
+/*to put the close button X in right corne of the User profile */
+.Profile {
+    position: relative;
+}
+
+.close-button {
+    position: absolute;
+    top: 5px;
+    right: 2px;
+    background:none;
+    border: none;
+    color: #A9A9A9;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.close-button:hover {
+    color: #ff0000;
+}
+
+/*to style the User Profile*/
+.profile-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 5px;
+    border: none;
+    border-radius: 5px;
+    background-color: #fff;
+}
+
+.profile-section {
+    margin-bottom: 20px;
+}
+
+
+
+
+.profile-section .btn {
+    margin-right: 10px;
+}
+
+.profile-section h3 {
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+
+.form-group {
+    margin-bottom: 20px;
 }

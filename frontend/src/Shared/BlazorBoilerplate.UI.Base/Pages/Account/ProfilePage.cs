@@ -13,13 +13,15 @@ namespace BlazorBoilerplate.UI.Base.Pages.Account
         [Inject] AuthenticationStateProvider authStateProvider { get; set; }
         [Inject] protected IStringLocalizer<Global> L { get; set; }
         [Inject] IViewNotifier viewNotifier { get; set; }
-
         protected UserViewModel userViewModel;
         protected bool updatePasswordDialogOpen = false;
+
         protected UpdatePasswordViewModel updatePasswordViewModel { get; set; } = new UpdatePasswordViewModel();
         protected AuthenticatorVerificationCodeViewModel authenticatorVerificationCodeViewModel { get; set; } = new AuthenticatorVerificationCodeViewModel();
 
         IdentityAuthenticationStateProvider identityAuthenticationStateProvider;
+
+      [Inject] NavigationManager NavigationManager { get; set; }
 
         protected bool BrowserRemembered
         {
@@ -62,6 +64,13 @@ namespace BlazorBoilerplate.UI.Base.Pages.Account
             updatePasswordViewModel = new UpdatePasswordViewModel();
             updatePasswordDialogOpen = true;
         }
+        protected void CloseUserProfile()
+        {
+
+        NavigationManager.NavigateTo("/"); // Navigate to the
+        }
+
+
 
         protected async Task UpdatePassword()
         {
@@ -178,5 +187,6 @@ namespace BlazorBoilerplate.UI.Base.Pages.Account
                 viewNotifier.Show(apiResponse.Message, ViewNotifierType.Error, L["Operation Failed"]);
             }
         }
+
     }
 }

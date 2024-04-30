@@ -1,4 +1,4 @@
-﻿using BlazorBoilerplate.Infrastructure.Server;
+using BlazorBoilerplate.Infrastructure.Server;
 using BlazorBoilerplate.Shared.Dto.Ontology;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
@@ -85,7 +85,8 @@ namespace BlazorBoilerplate.Server.Managers
                     await _distributedCache.SetAsync(objectInformation.Id, rdfObject, options);
                 }
             }
-            catch (Exception ex)
+            //catch (Exception ex)
+            catch (Exception)
             {
                 //In case redis is not available we always query data from the ontology
                 //FALLBACK 
