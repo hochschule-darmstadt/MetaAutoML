@@ -1,20 +1,24 @@
 @using Radzen.Blazor
 @using Radzen
 @inject TooltipService tooltipService
+
 @if (@Icon)
 {
     <span style="display:flex">
-        <RadzenText Style="font-family:Arial, Helvetica, sans-serif; font-weight:150; " Text=@Label TextStyle=@FontSize />
-        <div style="padding-left:5pt; align-content:center; margin-top:auto; margin-bottom:auto">
-            <RadzenIcon Icon="info" IconColor="@Radzen.Colors.Black" Style="opacity:50%;" MouseEnter="@(args => ShowTooltipWithHtml(args, new TooltipOptions() { Position = @Position, Duration=5000}))" />
-        </div>
-    </span>
+    <RadzenText Style="font-family:Arial, Helvetica, sans-serif; font-weight:150; " Text=@Label TextStyle=@FontSize />
+    <div style="padding-left:5pt; align-content:center; margin-top:auto; margin-bottom:auto">
+        <RadzenIcon Icon="info" IconColor="@Radzen.Colors.Black" Style="opacity:50%;"
+            MouseEnter="@(args => ShowTooltipWithHtml(args, new TooltipOptions() { Position = @Position, Duration=5000}))" />
+    </div>
+</span>
 }
 else
 {
     <span style="display:flex">
-        <RadzenText MouseEnter="@(args => ShowTooltipWithHtml(args, new TooltipOptions() { Position = @Position, Duration=5000}))" Style="font-family:Arial, Helvetica, sans-serif; font-weight:150; " Text=@Label TextStyle=@FontSize />
-    </span>
+    <RadzenText
+        MouseEnter="@(args => ShowTooltipWithHtml(args, new TooltipOptions() { Position = @Position, Duration=5000 }))"
+        Style="font-family:Arial, Helvetica, sans-serif; font-weight:150; " Text=@Label TextStyle=@FontSize />
+</span>
 }
 
 @code {
@@ -31,15 +35,20 @@ else
     [Parameter]
     public bool Icon { get; set; } = true;
 
+    [Parameter]
+    public RenderFragment ChildContent { get; set; }
 
-    void ShowTooltipWithHtml(ElementReference elementReference, TooltipOptions options = null) => tooltipService.Open(elementReference, ds =>
-    @<div class="rz-text-wrap" style="max-width:20rem">
+    void ShowTooltipWithHtml(ElementReference elementReference, TooltipOptions options = null) =>
+        tooltipService.Open(elementReference, ds =>
+    @<div class="rz-text-wrap" style="word-wrap: break-word;max-width: 20rem;">
         @Text @if (!string.IsNullOrEmpty(URL))
     {
-        <a target="_blank" rel="noopener noreferrer" href=@URL style="color:white"><u> More...</u></a>
-}
+        @* <a target="_blank" rel="noopener noreferrer" href="@URL" class="mud-tooltip mud-tooltip-default tooltiptext"
+    style="text-decoration:underline opacity: 100% !important; color: white !important;"> More...</a> *@
+        <span> </span>
+        <a target="_blank" rel="noopener noreferrer" href="@URL"
+            style="text-decoration: underline; opacity: 100% !important; color: white !important;">More...</a>
+    }
+        @ChildContent
     </div>, options);
-
-
 }
-
