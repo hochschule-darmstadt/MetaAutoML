@@ -37,6 +37,12 @@ class PreTrainingStrategyController(IAbstractStrategy):
         )
 
         self.register_rule(
+            'pre_training.optimum_strategy',
+            Rule("phase == 'pre_training'", context=training_context),
+            self.do_optimum_strategy
+        )
+
+        self.register_rule(
             'pre_training.multi_fidelity',
             Rule("phase == 'pre_training'", context=training_context),
             self.do_multi_fidelity
@@ -171,3 +177,18 @@ class PreTrainingStrategyController(IAbstractStrategy):
             controller.set_phase('running')
             controller.disable_strategy('pre_training.finish_pre_training')
 
+    def do_optimum_strategy(self, state: dict, blackboard: Blackboard, controller: StrategyController):
+        #TO-DO
+        pass
+
+    def do_optimum_strategy_callback(self, model_list, _):
+        #TO-DO
+        pass
+
+    def run_iteration(self, controller: StrategyController, multi_fidelity_dataset_percentage: float):
+        #TO-DO
+        pass
+
+    def is_hold_out_present(self, strategy_controller: StrategyController) -> bool:
+        #TO-DO
+        pass
