@@ -137,11 +137,10 @@
         try
         {
             ApiResponseDto apiResponse = await apiClient.GetTrainings(new GetTrainingsRequestDto()
-                {
-                    Short = true,
-                    OnlyLastDay =
-                true
-                });
+            {
+                Short = true,
+                OnlyLastDay = true
+            });
 
             if (apiResponse.IsSuccessStatusCode)
             {
