@@ -21,7 +21,7 @@ namespace BlazorBoilerplate.UI.Base.Pages.Account
 
         IdentityAuthenticationStateProvider identityAuthenticationStateProvider;
 
-        [Inject] NavigationManager NavigationManager { get; set; }
+      [Inject] NavigationManager NavigationManager { get; set; }
 
         protected bool BrowserRemembered
         {
@@ -51,6 +51,7 @@ namespace BlazorBoilerplate.UI.Base.Pages.Account
             }
         }
 
+
         protected override async Task OnInitializedAsync()
         {
             identityAuthenticationStateProvider = (IdentityAuthenticationStateProvider)authStateProvider;
@@ -63,11 +64,13 @@ namespace BlazorBoilerplate.UI.Base.Pages.Account
             updatePasswordViewModel = new UpdatePasswordViewModel();
             updatePasswordDialogOpen = true;
         }
-
         protected void CloseUserProfile()
         {
-            NavigationManager.NavigateTo("/");
+
+        NavigationManager.NavigateTo("/"); // Navigate to the
         }
+
+
 
         protected async Task UpdatePassword()
         {
@@ -94,6 +97,7 @@ namespace BlazorBoilerplate.UI.Base.Pages.Account
                 updatePasswordDialogOpen = false;
             }
         }
+
         protected async Task UpdateUser()
         {
             try
