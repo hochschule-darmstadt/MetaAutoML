@@ -1,126 +1,66 @@
 @inherits ProfilePage
 @page "/account/profile"
 @attribute [Authorize]
-
 @layout MainLayout
-@inject IDialogService Dialog
+
 
 @if (userViewModel != null)
 {
-  <div class="Profile">
-    <div class="profile-container">
-        <PageTitle>@L["User Profile"]</PageTitle>
-        <div class="header">
-          @if (userViewModel.HasPassword)
-          {
-            <MudButton StartIcon="@Icons.Material.Filled.RotateRight" OnClick="@(() => OpenUpdatePasswordDialog())" Style="margin-left: 10px, ">@L["Change Password"]</MudButton>
-          }
-          @if (userViewModel.HasAuthenticator)
-          {
-            <MudButton StartIcon="@Icons.Material.Filled.RotateRight" OnClick="@(() => DisableAuthenticator())" Style="margin-left: 10px ">@L["ResetAuthenticator"]</MudButton>
-          }
-       </div>
-        <div class="profile-section">
-          <EditForm id="mainForm" Model="@userViewModel" OnValidSubmit="@UpdateUser">
-               <FluentValidationValidator />
-               <MudValidationSummary />
-
-               <div class="form-group">
-                   <MudTextField @bind-Value="@userViewModel.UserName" Label=@L["UserName"] AdornmentIcon="@Icons.Material.Filled.Person" Adornment="Adornment.End" FullWidth="true" Required="true" RequiredError=@L["Required"] ReadOnly="true"></MudTextField>
-               </div>
-
-               <div class="form-group">
-                   <MudTextField @bind-Value="@userViewModel.Email" Label="Email" AdornmentIcon="@Icons.Material.Outlined.Mail" Adornment="Adornment.End" FullWidth="true" Required="true" RequiredError=@L["Required"]></MudTextField>
-               </div>
-
-               <div class="form-group">
-                   <MudTextField @bind-Value="@userViewModel.FirstName" Label=@L["FirstName"] FullWidth="true"></MudTextField>
-               </div>
-
-               <div class="form-group">
-                   <MudTextField @bind-Value="@userViewModel.LastName" Label=@L["LastName"] FullWidth="true"></MudTextField>
-               </div>
-
-                <div class="form-group">
-                    <MudSwitch @bind-Value="@userViewModel.IsTutorialEnabled" Label="@L["Enable tutorial"]" T="bool" Color="Color.Primary"></MudSwitch>
-                </div>
-
-                 <div class="form-group">
-                     <strong>@L["Roles"]</strong><br />
-                     <MudChipSet>
-                        @foreach (var role in userViewModel.Roles)
+   <div class="Profile">
+        <MudButton Href="/" form="mainForm" class="close-button" Variant="MudBlazor.Variant.Filled" Color="Color.Secondary">X</MudButton>
+        <div class="profile-container">
+          <PageTitle>@L["User Profile"]</PageTitle>
+          <div class="profile-section">
+               <EditForm id="mainForm" Model="@userViewModel" OnValidSubmit="@UpdateUser">
+                    <FluentValidationValidator />
+                    <MudValidationSummary />
+                    <div class="form-group">
+                        <MudTextField @bind-Value="@userViewModel.UserName" Label=@L["UserName"] AdornmentIcon="@Icons.Material.Filled.Person" Adornment="Adornment.End" class="half-width" Required="true" RequiredError=@L["Required"] ReadOnly="true"></MudTextField>
+                    </div>
+                    <div class="form-group">
+                        <MudTextField @bind-Value="@userViewModel.Email" Label="Email" AdornmentIcon="@Icons.Material.Outlined.Mail" Adornment="Adornment.End" class="half-width" Required="true" RequiredError=@L["Required"]></MudTextField>
+                    </div>
+                    <div class="form-group">
+                        @if (userViewModel.HasPassword)
                         {
-                             <MudChip Text="@role"></MudChip>
+                            <MudButton  OnClick="@(() => OpenUpdatePasswordDialog())" Variant="MudBlazor.Variant.Filled" Color="Color.Secondary" >@L["Change Password"]</MudButton>
                         }
-                      </MudChipSet>
-                </div>
+                    </div>
+                    <div class="form-group">
+                        <MudButton ButtonType="MudBlazor.ButtonType.Submit" form="mainForm" Variant="MudBlazor.Variant.Filled" Color="Color.Secondary">@L["Save"]</MudButton>
+                        <MudButton Href="/" form="mainForm" class="form" Variant="MudBlazor.Variant.Filled" Color="Color.Secondary">Exit</MudButton>
+                    </div>
+               </EditForm>
+          </div>
 
-                <div class="form-group">
-                    <MudButton ButtonType="MudBlazor.ButtonType.Submit" form="mainForm" Variant="MudBlazor.Variant.Filled" Color="Color.Primary">@L["Save"]</MudButton>
-                     <MudButton Href="/" form="mainForm" Style=" margin-inline:30px," Variant="MudBlazor.Variant.Filled" Color="Color.Secondary">@L["Cancel"]</MudButton>
-                </div>
-           </EditForm>
-      </div>
-        @if (userViewModel.TwoFactorEnabled)
-        {
-            <MudSwitch @bind-Checked="@TwoFactorEnabled" Label=@L["TwoFactorAuthentication"] Color="Color.Primary" />
+          <MudDialog @bind-IsVisible="@updatePasswordDialogOpen">
+            <TitleContent>
+                <MudText Typo="Typo.h6">
+                    <MudIcon Icon="@Icons.Material.Filled.Lock" Class="mr-3 mb-n1" />
+                     Password Update for @userViewModel.UserName
+               </MudText>
+            </TitleContent>
+            <DialogContent>
+                 <EditForm Model="@updatePasswordViewModel" OnValidSubmit="@UpdatePassword">
+                    <FluentValidationValidator />
+                    <MudValidationSummary />
+                    <MudTextField @bind-Value="@updatePasswordViewModel.CurrentPassword" Label=@L["CurrentPassword"] AdornmentIcon="@Icons.Material.Outlined.Lock" Adornment="Adornment.End" FullWidth="true" Required="true" RequiredError=@L["Required"] InputType="InputType.Password"></MudTextField>
 
-            @if (userViewModel.BrowserRemembered)
-            {
-                <MudSwitch @bind-Checked="@BrowserRemembered" Label=@L["BrowserRemembered"] Color="Color.Primary" />
-            }
-            if (userViewModel.RecoveryCodes != null)
-            {
-                <MudChipSet>
-                    @foreach (var rcode in userViewModel.RecoveryCodes)
-                    {
-                        <MudChip Text="@rcode"></MudChip>
-                    }
-                </MudChipSet>
-            }
-            else
-            {
-                <span>@L["RecoveryCodesLeft"]</span> @userViewModel.CountRecoveryCodes
-            }
-        }
-        else
-        {
-            <h3>@L["TwoFactorAuthentication"]</h3>
-            @L["EnableAuthenticatorInstructions", userViewModel.SharedKey, $"https://chart.googleapis.com/chart?chs=200x200&chld=M|0&cht=qr&chl={userViewModel.AuthenticatorUri}"].ToMarkup()
-            <MudTextField @bind-Value="@authenticatorVerificationCodeViewModel.Code" Label=@L["Code"] FullWidth="true"></MudTextField>
-            <MudButton OnClick="@EnableAuthenticator" Style="margin-bottom:5%; margin-top:2%">@L["VerifyCode"]</MudButton>
-        }
+                    <MudTextField @bind-Value="@updatePasswordViewModel.NewPassword" Label=@L["NewPassword"] AdornmentIcon="@Icons.Material.Outlined.Lock" Adornment="Adornment.End" FullWidth="true" Required="true" RequiredError=@L["Required"] InputType="InputType.Password"></MudTextField>
 
-      <SelectCulture />
+                    <MudTextField @bind-Value="@updatePasswordViewModel.NewPasswordConfirm" Label=@L["Password Confirmation"] AdornmentIcon="@Icons.Material.Outlined.Lock" Adornment="Adornment.End" FullWidth="true" Required="true" RequiredError=@L["Required"] InputType="InputType.Password"></MudTextField>
 
-      <MudDialog @bind-IsVisible="@updatePasswordDialogOpen">
-         <TitleContent>
-            <MudText Typo="Typo.h6">
-                <MudIcon Icon="@Icons.Material.Filled.Lock" Class="mr-3 mb-n1" />
-                Password Update for @userViewModel.UserName
-            </MudText>
-         </TitleContent>
-         <DialogContent>
-            <EditForm Model="@updatePasswordViewModel" OnValidSubmit="@UpdatePassword">
-                <FluentValidationValidator />
-                <MudValidationSummary />
-                <MudTextField @bind-Value="@updatePasswordViewModel.CurrentPassword" Label=@L["CurrentPassword"] AdornmentIcon="@Icons.Material.Outlined.Lock" Adornment="Adornment.End" FullWidth="true" Required="true" RequiredError=@L["Required"] InputType="InputType.Password"></MudTextField>
+                 </EditForm>
+            </DialogContent>
+            <DialogActions>
+                <MudButton OnClick="@UpdatePassword" Variant="MudBlazor.Variant.Filled" Color="Color.Secondary">@L["Update"]</MudButton>
+                <MudButton OnClick="@(e => { updatePasswordDialogOpen = false; })" Variant="MudBlazor.Variant.Filled" Color="Color.Secondary">Exit</MudButton>
+            </DialogActions>
 
-                <MudTextField @bind-Value="@updatePasswordViewModel.NewPassword" Label=@L["NewPassword"] AdornmentIcon="@Icons.Material.Outlined.Lock" Adornment="Adornment.End" FullWidth="true" Required="true" RequiredError=@L["Required"] InputType="InputType.Password"></MudTextField>
+          </MudDialog>
 
-                <MudTextField @bind-Value="@updatePasswordViewModel.NewPasswordConfirm" Label=@L["Password Confirmation"] AdornmentIcon="@Icons.Material.Outlined.Lock" Adornment="Adornment.End" FullWidth="true" Required="true" RequiredError=@L["Required"] InputType="InputType.Password"></MudTextField>
 
-            </EditForm>
-          </DialogContent>
-          <DialogActions>
-              <MudButton OnClick="@(e => { updatePasswordDialogOpen = false; })">@L["Cancel"]</MudButton>
-              <MudButton OnClick="@UpdatePassword" Variant="MudBlazor.Variant.Filled" Color="Color.Primary">@L["Update Password"]</MudButton>
-          </DialogActions>
-      </MudDialog>
-
-      <button class="close-button" @onclick="CloseUserProfile" >x</button>
+       </div>
    </div>
- </div>
 }
-
 
