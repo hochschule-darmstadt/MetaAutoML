@@ -85,11 +85,10 @@ namespace BlazorBoilerplate.Server.Managers
                     await _distributedCache.SetAsync(objectInformation.Id, rdfObject, options);
                 }
             }
-            //catch (Exception ex)
-            catch (Exception)
+            catch (Exception ex)
             {
                 //In case redis is not available we always query data from the ontology
-                //FALLBACK 
+                //FALLBACK
                 request.Ids.Add(ids);
                 GetObjectsInformationResponse response = _client.GetObjectsInformation(request);
                 foreach (var objectInformation in response.ObjectInformations)

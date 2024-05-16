@@ -21,7 +21,7 @@ namespace BlazorBoilerplate.UI.Base.Pages.Account
 
         IdentityAuthenticationStateProvider identityAuthenticationStateProvider;
 
-      [Inject] NavigationManager NavigationManager { get; set; }
+        [Inject] NavigationManager NavigationManager { get; set; }
 
         protected bool BrowserRemembered
         {
@@ -51,7 +51,6 @@ namespace BlazorBoilerplate.UI.Base.Pages.Account
             }
         }
 
-
         protected override async Task OnInitializedAsync()
         {
             identityAuthenticationStateProvider = (IdentityAuthenticationStateProvider)authStateProvider;
@@ -67,7 +66,7 @@ namespace BlazorBoilerplate.UI.Base.Pages.Account
         protected void CloseUserProfile()
         {
 
-        NavigationManager.NavigateTo("/"); // Navigate to the
+            NavigationManager.NavigateTo("/");
         }
 
 
