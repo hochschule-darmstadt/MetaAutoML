@@ -1,1 +1,6 @@
-{":tabular_classification": {"m": 1.7807351774212148, "b": 5}}
+{
+    ":tabular_classification": {"m": 1.7807351774212148, "b": 5},
+    ":tabular_clustering": {"m": 1.7807351774212148, "b": 5},
+    ":tabular_regression": {"m": 1.7807351774212148, "b": 5}
+}
+//TODO: Adjust values clustering and regression, just copied from classification for now
