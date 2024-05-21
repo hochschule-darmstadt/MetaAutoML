@@ -88,6 +88,8 @@
                 "MCFLY_SERVICE_PORT": "50061",
                 "EVALML_SERVICE_HOST": "localhost",
                 "EVALML_SERVICE_PORT": "50062",
+                "PYCARET_SERVICE_HOST": "localhost",
+                "PYCARET_SERVICE_PORT": "56663",
                 "MONGO_DB_DEBUG": "NO",
                 "MONGO_DB_DOCKER_DEBUG": "YES",
                 "MONGO_CLUSTER": "NO",
