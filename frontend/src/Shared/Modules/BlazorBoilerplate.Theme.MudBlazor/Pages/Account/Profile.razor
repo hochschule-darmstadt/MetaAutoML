@@ -2,23 +2,33 @@
 @page "/account/profile"
 @attribute [Authorize]
 @layout MainLayout
-
+@inject NavigationManager NavigationManager
+@inject ISnackbar Snackbar
+@using System.Text.RegularExpressions
+@using MudBlazor
 
 @if (userViewModel != null)
 {
    <div class="Profile">
-        <MudButton Href="/" form="mainForm" class="close-button" Variant="MudBlazor.Variant.Filled" Color="Color.Secondary">X</MudButton>
         <div class="profile-container">
           <PageTitle>@L["User Profile"]</PageTitle>
           <div class="profile-section">
                <EditForm id="mainForm" Model="@userViewModel" OnValidSubmit="@UpdateUser">
                     <FluentValidationValidator />
                     <MudValidationSummary />
+                    <div class="container-fluid">
+                      <div class="row">
+                          <div class="col  text-right pr-0">
+                             <MudButton Href="/" form="mainForm" class="btn btn-primary float-right " Variant="MudBlazor.Variant.Filled" Color="Color.Secondary">X</MudButton>
+                           </div>
+                       </div>
+                    </div>
+
                     <div class="form-group">
                         <MudTextField @bind-Value="@userViewModel.UserName" Label=@L["UserName"] AdornmentIcon="@Icons.Material.Filled.Person" Adornment="Adornment.End" class="half-width" Required="true" RequiredError=@L["Required"] ReadOnly="true"></MudTextField>
                     </div>
                     <div class="form-group">
-                        <MudTextField @bind-Value="@userViewModel.Email" Label="Email" AdornmentIcon="@Icons.Material.Outlined.Mail" Adornment="Adornment.End" class="half-width" Required="true" RequiredError=@L["Required"]></MudTextField>
+                        <MudTextField @bind-Value="@userViewModel.Email" Label="Email"   AdornmentIcon="@Icons.Material.Outlined.Mail" Adornment="Adornment.End" class="half-width"  Required="true" RequiredError=@L["Required"]></MudTextField>
                     </div>
                     <div class="form-group">
                         @if (userViewModel.HasPassword)
@@ -27,12 +37,11 @@
                         }
                     </div>
                     <div class="form-group">
-                        <MudButton ButtonType="MudBlazor.ButtonType.Submit" form="mainForm" Variant="MudBlazor.Variant.Filled" Color="Color.Secondary">@L["Save"]</MudButton>
-                        <MudButton Href="/" form="mainForm" class="form" Variant="MudBlazor.Variant.Filled" Color="Color.Secondary">Exit</MudButton>
+                        <MudButton  ButtonType="MudBlazor.ButtonType.Submit" form="mainForm" Variant="MudBlazor.Variant.Filled" class="custom-button-width" Color="Color.Secondary" >@L["Save"]</MudButton>
+                        <MudButton OnClick="@(async () => await OnExitButtonClick())" class="custom-button-width" Variant="MudBlazor.Variant.Filled" Color="Color.Secondary">Exit</MudButton>
                     </div>
                </EditForm>
           </div>
-
           <MudDialog @bind-IsVisible="@updatePasswordDialogOpen">
             <TitleContent>
                 <MudText Typo="Typo.h6">
@@ -49,7 +58,6 @@
                     <MudTextField @bind-Value="@updatePasswordViewModel.NewPassword" Label=@L["NewPassword"] AdornmentIcon="@Icons.Material.Outlined.Lock" Adornment="Adornment.End" FullWidth="true" Required="true" RequiredError=@L["Required"] InputType="InputType.Password"></MudTextField>
 
                     <MudTextField @bind-Value="@updatePasswordViewModel.NewPasswordConfirm" Label=@L["Password Confirmation"] AdornmentIcon="@Icons.Material.Outlined.Lock" Adornment="Adornment.End" FullWidth="true" Required="true" RequiredError=@L["Required"] InputType="InputType.Password"></MudTextField>
-
                  </EditForm>
             </DialogContent>
             <DialogActions>
@@ -63,4 +71,42 @@
        </div>
    </div>
 }
+
+
+
+
+@code {
+
+
+    private async Task OnExitButtonClick()
+    {
+        // Validate the form manually
+        bool isValid = ValidateEmail();
+
+        if (isValid)
+        {
+            // Navigate to the home page
+            NavigationManager.NavigateTo("/");
+        }
+        else
+        {
+            // Show an error message
+            Snackbar.Add("Invalid email address. Please correct it before exiting.", Severity.Error);
+        }
+    }
+    private bool ValidateEmail()
+    {
+        // Perform your email validation logic here
+        // For example, you can use a simple regex or any other validation logic
+        if (string.IsNullOrEmpty(userViewModel.Email) || !Regex.IsMatch(userViewModel.Email, @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
+        {
+            return false;
+        }
+
+        return true;
+    }
+}
+
+
+
 

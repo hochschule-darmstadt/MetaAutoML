@@ -10,18 +10,15 @@ namespace BlazorBoilerplate.UI.Base.Pages.Account
 {
     public class ProfilePage : ComponentBase
     {
+
         [Inject] AuthenticationStateProvider authStateProvider { get; set; }
         [Inject] protected IStringLocalizer<Global> L { get; set; }
         [Inject] IViewNotifier viewNotifier { get; set; }
         protected UserViewModel userViewModel;
         protected bool updatePasswordDialogOpen = false;
-
         protected UpdatePasswordViewModel updatePasswordViewModel { get; set; } = new UpdatePasswordViewModel();
         protected AuthenticatorVerificationCodeViewModel authenticatorVerificationCodeViewModel { get; set; } = new AuthenticatorVerificationCodeViewModel();
-
         IdentityAuthenticationStateProvider identityAuthenticationStateProvider;
-
-        [Inject] NavigationManager NavigationManager { get; set; }
 
         protected bool BrowserRemembered
         {
@@ -30,20 +27,6 @@ namespace BlazorBoilerplate.UI.Base.Pages.Account
             {
                 if (userViewModel.BrowserRemembered != value)
                     ForgetTwoFactorClient().ContinueWith(t =>
-                    {
-                        if (t.IsFaulted)
-                            viewNotifier.Show(t.Exception.Message, ViewNotifierType.Error, L["Operation Failed"]);
-                    });
-            }
-        }
-
-        protected bool TwoFactorEnabled
-        {
-            get { return userViewModel.TwoFactorEnabled; }
-            set
-            {
-                if (userViewModel.TwoFactorEnabled != value)
-                    EnableDisable2fa().ContinueWith(t =>
                     {
                         if (t.IsFaulted)
                             viewNotifier.Show(t.Exception.Message, ViewNotifierType.Error, L["Operation Failed"]);
@@ -63,13 +46,6 @@ namespace BlazorBoilerplate.UI.Base.Pages.Account
             updatePasswordViewModel = new UpdatePasswordViewModel();
             updatePasswordDialogOpen = true;
         }
-        protected void CloseUserProfile()
-        {
-
-            NavigationManager.NavigateTo("/");
-        }
-
-
 
         protected async Task UpdatePassword()
         {
@@ -96,7 +72,6 @@ namespace BlazorBoilerplate.UI.Base.Pages.Account
                 updatePasswordDialogOpen = false;
             }
         }
-
         protected async Task UpdateUser()
         {
             try
@@ -187,5 +162,8 @@ namespace BlazorBoilerplate.UI.Base.Pages.Account
             }
         }
 
+
     }
+
+
 }

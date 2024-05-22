@@ -273,6 +273,8 @@ hr {
     background: #555;
 }
 
+/* Medium devices (tablets, less than 992px) */
+
 /* Height adjustment based on screen size */
 @media screen and (min-height: 800px) {
     .mud-nav-menu2 {
@@ -295,18 +297,26 @@ hr {
     position: relative;
 }
 
-.close-button {
-    margin-top: -15px;
-    left: 1208px;
-    background: none;
-    border: none;
-    color: #FFFFFF;
-    font-size: 20px;
-    cursor: pointer;
+
+.container-fluid {
+    padding-right: 0;
+    padding-left: 0;
 }
 
-.close-button:hover {
-    color: #FFFFFF;
+.text-right {
+    margin-right: 0;
+}
+
+.btn {
+    margin-right: 15px;
+    font-size: 20px;
+}
+
+@media (max-width: 576px) {
+    .btn {
+        width: 100%;
+
+     }
 }
 
 /*to style the User Profile*/
@@ -336,7 +346,6 @@ hr {
     width: none;
 }
 
-.form {
-    margin-inline-start: 35px;
-
+.custom-button-width {
+    width: 84px;
 }
