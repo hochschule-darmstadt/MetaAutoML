@@ -12,6 +12,9 @@ adapters/*/app-data/output/tmp
 adapters/AutoKeras/structured_data_classifier
 
 
+controller/.vscode/launch.json
+adapter/*/.vscode/launch.json
+
 mutagen_datasets/*
 
 #VS
