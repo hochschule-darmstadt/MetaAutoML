@@ -12,6 +12,10 @@ adapters/*/app-data/output/tmp
 adapters/AutoKeras/structured_data_classifier
 
 
+controller/.vscode/launch.json
+adapter/*/.vscode/launch.json
+frontend/src/Server/BlazorBoilerplate.Server/Properties/launchSettings.json
+
 mutagen_datasets/*
 
 #VS
