@@ -12,7 +12,7 @@
 
 <MudCard Elevation="5">
     <MudCardHeader Style="border-bottom-style: inset; border-bottom-width: 1px;">
-        <CardHeaderContent >
+        <CardHeaderContent>
             <MudText Typo="Typo.h6">@L["Preview"]</MudText>
         </CardHeaderContent>
     </MudCardHeader>
@@ -26,7 +26,7 @@
                     case ":time_series":
                     case ":text":
                     case ":tabular":
-                        <TabularPreviewFull DatasetData="@_tabularDataset" Dataset="@_dataset"/>
+                        <TabularPreviewFull DatasetData="@_tabularDataset" Dataset="@_dataset" />
                         break;
                     case ":image":
                         <ImagePreviewFull Dataset="_imageDataset" />
@@ -68,7 +68,7 @@
     private async Task LoadDatasetPreview()
     {
         //Due to frontend refreshes it may occur that this is triggered twice, leading to an error while the first request is reading
-        if (isPreviewRequestRunning == true)
+    if (isPreviewRequestRunning == true)
         {
             return;
         }
@@ -76,14 +76,15 @@
         {
             isPreviewRequestRunning = true;
             GetDatasetPreviewRequestDto datasetRequest = new GetDatasetPreviewRequestDto()
-            {
+                {
                     DatasetId = _dataset.Dataset.Id
-            };
+                };
             ApiResponseDto apiResponse = await apiClient.GetDatasetPreview(datasetRequest);
 
             if (apiResponse.IsSuccessStatusCode)
             {
-                _datasetPreview = Newtonsoft.Json.JsonConvert.DeserializeObject<GetDatasetPreviewResponseDto>(apiResponse.Result.ToString());
+                _datasetPreview =
+                Newtonsoft.Json.JsonConvert.DeserializeObject<GetDatasetPreviewResponseDto>(apiResponse.Result.ToString());
                 switch (_dataset.Dataset.Type.ID)
                 {
                     case ":time_series_longitudinal":
