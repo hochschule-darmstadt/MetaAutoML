@@ -4,19 +4,23 @@
 @inject IViewNotifier viewNotifier
 @inject NavigationManager NavManager
 @attribute [Authorize]
+@using Radzen
+@using Radzen.Blazor
 
 <TopSection>
     <MudBreadcrumbs Items="_breadcrumbs" Class="mudbreadcrumbs"></MudBreadcrumbs>
 </TopSection>
 
-<MudStack AlignItems="AlignItems.Center" Row="true" Class="mb-2" style="padding-top:50px">
+<MudStack AlignItems="MudBlazor.AlignItems.Center" Row="true" Class="mb-2" style="padding-top:50px">
     <MudIcon Size="Size.Large" Icon="@Icons.Material.Filled.ListAlt" />
-    <MudText Typo="Typo.h4">@_pageTitle</MudText>
+    <LabelTooltip FontSize="TextStyle.H4" Label=@_pageTitle
+        Text="Here various adjustments can be made to the dataset. For example, the use of a header row can be activated or deactivated. Rows can be ignored by changing the 'Start row' field. The separator can be defined, the encoding can be changed (default UTF-8), the datetime format can be changed and so on."
+        Position="Radzen.TooltipPosition.Bottom" URL="/help#datasetconfigure" />
 </MudStack>
 
 <MudGrid>
     <MudItem xs="12" sm="12" md="12">
-        <DatasetPreviewFull Dataset="_dataset"/>
+        <DatasetPreviewFull Dataset="_dataset" />
     </MudItem>
 </MudGrid>
 
