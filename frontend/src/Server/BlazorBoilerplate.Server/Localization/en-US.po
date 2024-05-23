@@ -1747,6 +1747,10 @@ msgid "text classification"
 msgstr "Text classification"
 
 msgctxt "Global"
+msgid "tabular clustering"
+msgstr "Tabular clustering"
+
+msgctxt "Global"
 msgid "File configuration can not be saved, incompatible delimiter"
 msgstr "File configuration can not be saved, incompatible delimiter."
 
