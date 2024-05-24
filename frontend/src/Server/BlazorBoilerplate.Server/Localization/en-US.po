@@ -2029,3 +2029,7 @@ msgstr "Results"
 msgctxt "Global"
 msgid "Help search ..."
 msgstr "Help search ..."
+
+msgctxt "Global"
+msgid "Details"
+msgstr "Details"
