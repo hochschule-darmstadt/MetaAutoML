@@ -64,7 +64,7 @@ class PyCaretAdapter:
 
     def __tabular_clustering(self):
         """Execute the tabular clustering task and export the found model"""
-        self.df, test = data_loader(self._configuration)
+        self.df, test = data_loader(self._configuration, perform_splitting= False)
         X, y = prepare_tabular_dataset(self.df, self._configuration, apply_feature_extration=True)
         X[y.name] = y
 
