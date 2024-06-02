@@ -181,12 +181,12 @@ else
                 viewNotifier.Show(L["No task selected"], ViewNotifierType.Error, L["Operation Failed"]);
                 return;
             }
-            if (((_dataset.Dataset.Type.ID == ":tabular") || (_dataset.Dataset.Type.ID == ":test") || (_dataset.Dataset.Type.ID == ":time_series") || (_dataset.Dataset.Type.ID == ":time_series_longitudinal")) && !IsTargetSet())
+            if (((_dataset.Dataset.Type.ID == ":tabular") || (_dataset.Dataset.Type.ID == ":test") || (_dataset.Dataset.Type.ID == ":time_series") || (_dataset.Dataset.Type.ID == ":time_series_longitudinal")) && _automlRequest.Configuration.Task != ":tabular_clustering" && !IsTargetSet())
             {
                 viewNotifier.Show(L["No target selected"], ViewNotifierType.Error, L["Operation Failed"]);
                 return;
             }
-            if (((_dataset.Dataset.Type.ID == ":tabular") || (_dataset.Dataset.Type.ID == ":test") || (_dataset.Dataset.Type.ID == ":time_series") || (_dataset.Dataset.Type.ID == ":time_series_longitudinal")) && !IsOnlyOneTargetSet())
+            if (((_dataset.Dataset.Type.ID == ":tabular") || (_dataset.Dataset.Type.ID == ":test") || (_dataset.Dataset.Type.ID == ":time_series") || (_dataset.Dataset.Type.ID == ":time_series_longitudinal")) && _automlRequest.Configuration.Task != ":tabular_clustering" && !IsOnlyOneTargetSet())
             {
                 viewNotifier.Show(L["More than one target selected"], ViewNotifierType.Error, L["Operation Failed"]);
                 return;
