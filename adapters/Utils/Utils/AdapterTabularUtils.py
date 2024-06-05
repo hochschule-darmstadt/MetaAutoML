@@ -215,8 +215,11 @@ def feature_preparation(X: pd.DataFrame, features: dict_items, datetime_format: 
     if is_prediction == True:
         y = pd.Series()
     else:
-        y = X[target]
-        X.drop(target, axis=1, inplace=True)
+        if is_target_found:
+            y = X[target]
+            X.drop(target, axis=1, inplace=True)
+        else:
+            y = None  # No target column found, useful for clustering
 
 
     return X, y

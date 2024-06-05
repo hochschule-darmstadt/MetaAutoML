@@ -66,27 +66,24 @@ class PyCaretAdapter:
         """Execute the tabular clustering task and export the found model"""
         self.df, test = data_loader(self._configuration, perform_splitting= False)
         X, y = prepare_tabular_dataset(self.df, self._configuration, apply_feature_extration=True)
-        X[y.name] = y
-
 
         parameters = translate_parameters(":pycaret", self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), ppc.parameters)
-        self._configuration["forecasting_horizon"] = parameters["fh"]
+
         save_configuration_in_json(self._configuration)
 
         exp_name = setup(data = X)
-        affinity_propagation = create_model('ap')  # Affinity Propagation
-        agglomerative = create_model('hclust')     # Agglomerative Clustering
-        birch = create_model('birch')              # Balanced Iterative Reducing and Clustering using Hierarchies
-        dbscan = create_model('dbscan')            # Density-Based Spatial Clustering of Applications with Noise
+        #affinity_propagation = create_model('ap')  # Affinity Propagation
+        #agglomerative = create_model('hclust')     # Agglomerative Clustering
+        #birch = create_model('birch')              # Balanced Iterative Reducing and Clustering using Hierarchies
+        #dbscan = create_model('dbscan')            # Density-Based Spatial Clustering of Applications with Noise
         kmeans = create_model('kmeans')            # K-Means
-        kmodes = create_model('kmodes')            # K-Modes
-        mean_shift = create_model('meanshift')     # Mean Shift Clustering
-        optics = create_model('optics')            # Ordering Points To Identify the Clustering Structure
-        spectral = create_model('sc')
-        kmeans_predictions = predict_model(model = kmeans, data = unseen_data)
+        #kmodes = create_model('kmodes')            # K-Modes
+        #mean_shift = create_model('meanshift')     # Mean Shift Clustering
+        #optics = create_model('optics')            # Ordering Points To Identify the Clustering Structure
+        #spectral = create_model('sc')
 
-        save_model(model, os.path.join(self._configuration["result_folder_location"], 'model_pycaret'))
-        export_model(PycaretWrapper(model, self._configuration), self._configuration["dashboard_folder_location"], 'dashboard_model.p')
+        save_model(kmeans, os.path.join(self._configuration["result_folder_location"], 'model_pycaret'))
+        export_model(PycaretWrapper(kmeans, self._configuration), self._configuration["dashboard_folder_location"], 'dashboard_model.p')
 
     def __tabular_regression(self):
         #most likely not working, looks like a copy of the flaml adapter
