@@ -1403,6 +1403,10 @@ msgid "Start Training"
 msgstr "Start Training"
 
 msgctxt "Global"
+msgid "Create a new Training"
+msgstr "Create a new Training"
+
+msgctxt "Global"
 msgid "Dataset {0}"
 msgstr "Dataset {0}"
 
@@ -2033,3 +2037,8 @@ msgstr "Help search ..."
 msgctxt "Global"
 msgid "Details"
 msgstr "Details"
+
+msgctxt "Global"
+msgid "There are no models yet because no training has been carried out."
+msgstr "There are no models yet because no training has been carried out."
+
