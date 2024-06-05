@@ -151,7 +151,7 @@ class PreTrainingStrategyController(IAbstractStrategy):
         if self.global_multi_fidelity_level == 1:
             self.global_multi_fidelity_level = 0
         #disable Multi-Fidelity-Strategy
-        controller.disable_strategy('pre_training.multi_fidelity')
+        controller.disable_strategy('pre_trxaining.multi_fidelity')
 
         configuration = self.controller.get_request().configuration
         amount_ml_solutions = len(configuration.selected_auto_ml_solutions)
@@ -177,18 +177,64 @@ class PreTrainingStrategyController(IAbstractStrategy):
             controller.set_phase('running')
             controller.disable_strategy('pre_training.finish_pre_training')
 
-    def do_optimum_strategy(self, state: dict, blackboard: Blackboard, controller: StrategyController):
-        #TO-DO
-        pass
-
     def do_optimum_strategy_callback(self, model_list, _):
-        #TO-DO
-        pass
+        # Funktion zum Verarbeiten der abgeschlossenen Modelle und Aktualisieren des Blackboards
+        for model in model_list:
+            if model.get('status') == 'completed':
+                self.blackboard.add_data({"completed_model": model})
+        return model_list
 
-    def run_iteration(self, controller: StrategyController, multi_fidelity_dataset_percentage: float):
-        #TO-DO
-        pass
+    def do_optimum_strategy(self, state: dict, blackboard: Blackboard, controller: StrategyController):
+        multi_fidelity_dataset_percentage = 0.8
+        initial_runtime_limit = controller.get_request().configuration.runtime_limit
 
-    def is_hold_out_present(self, strategy_controller: StrategyController) -> bool:
-        #TO-DO
-        pass
+        # Setze die globale Multi-Fidelity-Ebene zurück
+        self.global_multi_fidelity_level = 1
+
+        # Deaktiviere Multi-Fidelity-Strategie
+        controller.disable_strategy('pre_training.optimum_strategy')
+
+        # Starte die erste Iteration
+        self.run_iteration(controller, multi_fidelity_dataset_percentage, initial_runtime_limit)
+
+    def run_iteration(self, controller: StrategyController, multi_fidelity_dataset_percentage: float, runtime_limit: int):
+        accuracies = []
+        consecutive_no_improvement = 0
+
+        while consecutive_no_improvement < 3:
+            # Neue Trainingsdurchlaufkonfiguration definieren
+            request = controller.get_request()
+            request_copy = copy.deepcopy(request)
+            request_copy.configuration.runtime_limit = runtime_limit
+            request_copy.configuration.dataset_percentage = multi_fidelity_dataset_percentage
+
+            # Starte neuen Trainingsdurchlauf
+            strategy_controller = StrategyController(
+                controller.get_data_storage(), request_copy, controller.get_explainable_lock(),
+                multi_fidelity_callback=self.do_optimum_strategy_callback,
+                multi_fidelity_level=multi_fidelity_dataset_percentage
+            )
+
+            # Warte auf den Abschluss des Trainings und erhalte die Modelle
+            # TO-DO
+            model_list = controller.get_data_storage().get_model('user_id','model_id')
+            # Wie kann ich die model_list am besten holen hier ?
+            completed_models = [model for model in model_list if model.get('status') == 'completed']
+            if not completed_models:
+                break
+
+            # Berechne die Genauigkeit
+            accuracy = max(self.get_score(model) for model in completed_models)
+            accuracies.append(accuracy)
+
+            # Überprüfe, ob eine Verbesserung vorliegt
+            if len(accuracies) > 1 and accuracies[-1] <= accuracies[-2]:
+                consecutive_no_improvement += 1
+            else:
+                consecutive_no_improvement = 0
+
+            # Laufzeit verdoppeln für die nächste Iteration
+            runtime_limit *= 2
+
+        self._log.info('Optimum strategy completed.')
+        controller.set_phase('completed')
