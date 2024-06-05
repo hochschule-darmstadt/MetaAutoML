@@ -298,7 +298,7 @@ hr {
 }
 
 .eleva {
-    height: 330px;
+    height: 360px;
     border-radius: 5px;
 }
 
@@ -306,7 +306,6 @@ hr {
 .container-fluid {
     padding-right: 0;
     padding-left: 0;
-    margin-bottom: -40px;
 }
 
 .text-right {
@@ -314,7 +313,7 @@ hr {
 }
 
 .btn {
-    font-size: 18px;
+    font-size: 15px;
 }
 
 @media (max-width: 576px) {
