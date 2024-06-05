@@ -66,6 +66,7 @@ parameters = {
 
     ":number_clusters_pycaret_clustering": {
         "parameter_name": "n_clusters",
+        "default": [4]
     },
 
     #tabular regression

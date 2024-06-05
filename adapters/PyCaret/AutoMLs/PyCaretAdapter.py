@@ -72,18 +72,12 @@ class PyCaretAdapter:
         save_configuration_in_json(self._configuration)
 
         exp_name = setup(data = X)
-        #affinity_propagation = create_model('ap')  # Affinity Propagation
-        #agglomerative = create_model('hclust')     # Agglomerative Clustering
-        #birch = create_model('birch')              # Balanced Iterative Reducing and Clustering using Hierarchies
-        #dbscan = create_model('dbscan')            # Density-Based Spatial Clustering of Applications with Noise
-        kmeans = create_model('kmeans', num_clusters=4)            # K-Means
-        #kmodes = create_model('kmodes')            # K-Modes
-        #mean_shift = create_model('meanshift')     # Mean Shift Clustering
-        #optics = create_model('optics')            # Ordering Points To Identify the Clustering Structure
-        #spectral = create_model('sc')
 
-        save_model(kmeans, os.path.join(self._configuration["result_folder_location"], 'model_pycaret'))
-        export_model(PycaretWrapper(kmeans, self._configuration), self._configuration["dashboard_folder_location"], 'dashboard_model.p')
+        # for each clustering approach in parameters, create a model, save it and export it
+        for clustering_approach in parameters["include_approach"]:
+            model = create_model(clustering_approach, num_clusters=4)
+            save_model(model, os.path.join(self._configuration["result_folder_location"], f'model_pycaret'))
+            export_model(PycaretWrapper(model, self._configuration), self._configuration["dashboard_folder_location"], f'dashboard_model.p')
 
     def __tabular_regression(self):
         #most likely not working, looks like a copy of the flaml adapter

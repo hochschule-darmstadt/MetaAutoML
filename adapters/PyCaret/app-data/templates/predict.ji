@@ -9,6 +9,9 @@ from pycaret.classification import *
 from preprocessing import dataset_preparation
 from postprocessing import post_process_result_dataframe
 {% endif %}
+{% if configuration.configuration["task"] in [":tabular_clustering"] %}
+from pycaret.clustering import *
+{% endif %}
 {% if configuration.configuration["task"] in [":tabular_regression", ":text_regression"] %}
 from pycaret.regression import *
 from preprocessing import dataset_preparation
@@ -30,7 +33,9 @@ if __name__ == '__main__':
     X, y = dataset_preparation(filepath)
     X_index_df = pd.DataFrame(X.index)        #Some AutoML manipulate the index, so we extract it before hands
     {% endif %}
+
     model = load_model(os.path.join(os.path.dirname(__file__), "model_pycaret"))
+
     {% if configuration.configuration["task"] in [":time_series_forecasting"] %}
     #We need current observations
     X, y = dataset_preparation(filepath, is_prediction=False)

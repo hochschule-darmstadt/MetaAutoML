@@ -258,12 +258,19 @@ def evaluate(config: "StartAutoMlRequest", config_path: str) -> Tuple[float, flo
             except:
                 print("automl model does not support predict proba functionality")
                 prediction_probabilities = []
-    else:
 
+    elif config["configuration"]["task"] in [":tabular_clustering"]:
+        #TODO add clustering evaluation
+        pass
+
+    else:
         predict_start = time.time()
         subprocess.call([python_env, os.path.join(result_path, "predict.py"), file_path, os.path.join(result_path, "predictions.csv")])
         predict_time = time.time() - predict_start
 
+    if(config["configuration"]["task"] != ":tabular_clustering"):
+        #return empty metrics for clustering for now
+        return {}, 0
 
     predictions = pd.read_csv(os.path.join(result_path, "predictions.csv"))
     os.remove(os.path.join(result_path, "predictions.csv"))
