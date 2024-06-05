@@ -76,7 +76,7 @@ class PyCaretAdapter:
         #agglomerative = create_model('hclust')     # Agglomerative Clustering
         #birch = create_model('birch')              # Balanced Iterative Reducing and Clustering using Hierarchies
         #dbscan = create_model('dbscan')            # Density-Based Spatial Clustering of Applications with Noise
-        kmeans = create_model('kmeans')            # K-Means
+        kmeans = create_model('kmeans', num_clusters=4)            # K-Means
         #kmodes = create_model('kmodes')            # K-Modes
         #mean_shift = create_model('meanshift')     # Mean Shift Clustering
         #optics = create_model('optics')            # Ordering Points To Identify the Clustering Structure
