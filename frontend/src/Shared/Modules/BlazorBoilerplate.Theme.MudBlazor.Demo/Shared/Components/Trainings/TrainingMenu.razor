@@ -27,6 +27,7 @@
             {
                 await OnDeleteCompleted.InvokeAsync();
                 viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
+                NavManager.NavigateTo(NavManager.Uri, forceLoad: true);
             }
             else
             {

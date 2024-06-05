@@ -2035,5 +2035,10 @@ msgid "Help search ..."
 msgstr "Help search ..."
 
 msgctxt "Global"
+msgid "Details"
+msgstr "Details"
+
+msgctxt "Global"
 msgid "There are no models yet because no training has been carried out."
 msgstr "There are no models yet because no training has been carried out."
+
