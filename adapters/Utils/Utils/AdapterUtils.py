@@ -268,7 +268,7 @@ def evaluate(config: "StartAutoMlRequest", config_path: str) -> Tuple[float, flo
         subprocess.call([python_env, os.path.join(result_path, "predict.py"), file_path, os.path.join(result_path, "predictions.csv")])
         predict_time = time.time() - predict_start
 
-    if(config["configuration"]["task"] != ":tabular_clustering"):
+    if(config["configuration"]["task"] == ":tabular_clustering"):
         #return empty metrics for clustering for now
         return {}, 0
 
