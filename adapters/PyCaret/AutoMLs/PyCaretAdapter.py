@@ -73,11 +73,22 @@ class PyCaretAdapter:
 
         exp_name = setup(data = X)
 
+        best_score = 0
+        best_model = None
         # for each clustering approach in parameters, create a model, save it and export it
+        # TODO: decide which model is best
         for clustering_approach in parameters["include_approach"]:
             model = create_model(clustering_approach, num_clusters=4)
-            save_model(model, os.path.join(self._configuration["result_folder_location"], f'model_pycaret'))
-            export_model(PycaretWrapper(model, self._configuration), self._configuration["dashboard_folder_location"], f'dashboard_model.p')
+            metrics_df = pull()
+            silhouette_score = metrics_df['Silhouette'][0]
+            print(f"Silhouette Score {clustering_approach}: {silhouette_score}")
+
+            if silhouette_score > best_score:
+                best_score = silhouette_score
+                best_model = model
+
+        save_model(best_model, os.path.join(self._configuration["result_folder_location"], f'model_pycaret'))
+        export_model(PycaretWrapper(best_model, self._configuration), self._configuration["dashboard_folder_location"], f'dashboard_model.p')
 
     def __tabular_regression(self):
         #most likely not working, looks like a copy of the flaml adapter
