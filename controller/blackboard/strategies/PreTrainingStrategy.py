@@ -37,8 +37,8 @@ class PreTrainingStrategyController(IAbstractStrategy):
         )
 
         self.register_rule(
-            'pre_training.optimum_strategy',
-            Rule("phase == 'pre_training'", context=training_context),
+            'training.optimum_strategy',
+            Rule("phase == 'training'", context=training_context),
             self.do_optimum_strategy
         )
 
@@ -151,7 +151,7 @@ class PreTrainingStrategyController(IAbstractStrategy):
         if self.global_multi_fidelity_level == 1:
             self.global_multi_fidelity_level = 0
         #disable Multi-Fidelity-Strategy
-        controller.disable_strategy('pre_trxaining.multi_fidelity')
+        controller.disable_strategy('pre_training.multi_fidelity')
 
         configuration = self.controller.get_request().configuration
         amount_ml_solutions = len(configuration.selected_auto_ml_solutions)
@@ -196,6 +196,7 @@ class PreTrainingStrategyController(IAbstractStrategy):
 
         # Starte die erste Iteration
         self.run_iteration(controller, multi_fidelity_dataset_percentage, initial_runtime_limit)
+        return
 
     def run_iteration(self, controller: StrategyController, multi_fidelity_dataset_percentage: float, runtime_limit: int):
         accuracies = []
@@ -217,7 +218,11 @@ class PreTrainingStrategyController(IAbstractStrategy):
 
             # Warte auf den Abschluss des Trainings und erhalte die Modelle
             # TO-DO
-            model_list = controller.get_data_storage().get_model('user_id','model_id')
+            # user_id von dem training
+            user_id = controller.get_request()['user_id']
+            training_id = controller.get_training_id()
+            dataset_id = controller.get_request()['dataset_id']
+            model_list = controller.get_data_storage().get_models(user_id,training_id,dataset_id)
             # Wie kann ich die model_list am besten holen hier ?
             completed_models = [model for model in model_list if model.get('status') == 'completed']
             if not completed_models:

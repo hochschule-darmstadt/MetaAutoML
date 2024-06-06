@@ -398,7 +398,7 @@ class ControllerServiceManager(ControllerServiceBase):
 
             result.strategies.append(
                 Strategy(
-                'pre_training.optimum_strategy',
+                'training.optimum_strategy',
                 'Optimum Strategy',
                 'The "Optimum Strategy" iteratively explores various model or adapter combinations until no further improvement can be achieved, effectively maximizing the training process.'
                 )
