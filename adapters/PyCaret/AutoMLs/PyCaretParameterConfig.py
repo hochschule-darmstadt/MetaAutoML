@@ -41,6 +41,7 @@ clustering_approaches = {
     ":ordering_points_to_identify_the_clustering_structure": "optics",
     ":spectral_clustering": "sc"
 }
+default_clustering_approaches = [":k_means", ":density_based_spatial_clustering_of_applications_with_noise"]
 
 parameters = {
     #general
@@ -62,6 +63,7 @@ parameters = {
     ":include_approach_pycaret_clustering": {
         "parameter_name": "include_approach",
         "lookup_dict": clustering_approaches,
+        "default": default_clustering_approaches
     },
 
     ":number_clusters_pycaret_clustering": {
