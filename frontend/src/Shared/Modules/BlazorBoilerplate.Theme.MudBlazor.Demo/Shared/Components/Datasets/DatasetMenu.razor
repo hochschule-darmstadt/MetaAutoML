@@ -7,7 +7,8 @@
 <MudMenu Icon="@Icons.Material.Filled.MoreVert">
     @if (Dataset != null)
     {
-        <MudMenuItem OnClick="@(e => { NavManager.NavigateTo("/datasets/" + Dataset.Id + "/train"); })">@L["Train"]</MudMenuItem>
+        <MudMenuItem OnClick="@(e => { NavManager.NavigateTo("/datasets/" + Dataset.Id + "/train"); })">@L["Train"]
+        </MudMenuItem>
         <MudMenuItem OnClick="@DeleteDataset">@L["Delete"]</MudMenuItem>
     }
 </MudMenu>
@@ -23,15 +24,16 @@
         try
         {
             DeleteDatasetRequestDto datasetRequest = new DeleteDatasetRequestDto()
-            {
-                DatasetId = Dataset.Id
-            };
+                {
+                    DatasetId = Dataset.Id
+                };
             ApiResponseDto apiResponse = await apiClient.DeleteDataset(datasetRequest);
 
             if (apiResponse.IsSuccessStatusCode)
             {
                 await OnDeleteCompleted.InvokeAsync();
                 viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
+                NavManager.NavigateTo(NavManager.Uri, forceLoad: true);
             }
             else
             {

@@ -10,42 +10,47 @@
 }
 else
 {
-    <MudStack>
-        <MudGrid>
-            <MudItem xs="3" sm="3" md="3">
-                <MudCheckBox @bind-Checked="@UseHeader" Label="@L["Use header"]"></MudCheckBox>
-                <MudNumericField @bind-Value="@StartRow" Label="@L["Start row"]" Variant="Variant.Text" Min="1" />
-				<MudButton Variant="Variant.Filled" Color="Color.Secondary" Style="margin-top: 8px" OnClick="@SaveConfiguration">@L["Save"]</MudButton>
-            </MudItem>
-            <MudItem xs="3" sm="3" md="3">
-                <MudSelect T="string" Label="@L["Column seperator"]" AnchorOrigin="Origin.BottomCenter" @bind-Value="@Delimiter">
-                    <MudSelectItem Value="@("comma")" >@(L["Comma \",\""])</MudSelectItem>
-                    <MudSelectItem Value="@("semicolon")" >@(L["Semicolon \";\""])</MudSelectItem>
-                    <MudSelectItem Value="@("space")">@(L["Space"])</MudSelectItem>
-                    <MudSelectItem Value="@("tab")">@(L["Tab"])</MudSelectItem>
-                </MudSelect>
-                <MudSelect T="string" Label="@L["Encoding"]" AnchorOrigin="Origin.BottomCenter" @bind-Value="@DatasetEncoding">
-                    <MudSelectItem Value="@("utf-8")" >@(L["UTF-8"])</MudSelectItem>
-                    <MudSelectItem Value="@("latin-1")" >@(L["latin-1"])</MudSelectItem>
-                    <MudSelectItem Value="@("utf-16")" >@(L["UTF-16"])</MudSelectItem>
-                    <MudSelectItem Value="@("utf-32")" >@(L["UTF-32"])</MudSelectItem>
-                    </MudSelect>
-                    <MudTextField Label="@L["Datetime format"]" @bind-Value="@DatetimeFormat" Variant="@Variant.Text" />
-            </MudItem>
-            <MudItem xs="3" sm="3" md="3">
-                <MudTextField Mask="@(new RegexMask(@"^.{1,1}$"))" Label="@L["Escape character"]" @bind-Value="@EscapeCharacter"  Variant="@Variant.Text" />
-                <MudTextField Mask="@(new RegexMask(@"^.{1,1}$"))" Label="@L["Decimal character"]" @bind-Value="@DecimalCharacter" Variant="@Variant.Text" />
-                    <MudTextField Mask="@(new RegexMask(@"^.{0,1}$"))" Label="@L["Thousand seperator"]" @bind-Value="@ThousandsSeperator" Variant="@Variant.Text" />
-            </MudItem>
-        </MudGrid>
+    <MudStack >
+        <MudPaper Elevation="5" class=" conf-table">
+           <div class="container-fluid" >
+               <MudGrid  >
+                   <MudItem xs="12" sm="6" md="4">
+                        <MudCheckBox @bind-Checked="@UseHeader" Label="@L["Use header"]"></MudCheckBox>
+                        <MudNumericField @bind-Value="@StartRow" Label="@L["Start row"]" Variant="Variant.Text" Min="1" />
+				        <MudButton Variant="Variant.Filled" Color="Color.Secondary" Style="margin-top: 20px" OnClick="@SaveConfiguration">@L["Save"]</MudButton>
+                    </MudItem>
+                    <MudItem xs="12" sm="6" md="4">
+                        <MudSelect T="string" Label="@L["Column seperator"]" AnchorOrigin="Origin.BottomCenter" @bind-Value="@Delimiter">
+                            <MudSelectItem Value="@("comma")" >@(L["Comma \",\""])</MudSelectItem>
+                            <MudSelectItem Value="@("semicolon")" >@(L["Semicolon \";\""])</MudSelectItem>
+                            <MudSelectItem Value="@("space")">@(L["Space"])</MudSelectItem>
+                            <MudSelectItem Value="@("tab")">@(L["Tab"])</MudSelectItem>
+                        </MudSelect>
+                        <MudSelect T="string" Label="@L["Encoding"]" AnchorOrigin="Origin.BottomCenter" @bind-Value="@DatasetEncoding">
+                            <MudSelectItem Value="@("utf-8")" >@(L["UTF-8"])</MudSelectItem>
+                            <MudSelectItem Value="@("latin-1")" >@(L["latin-1"])</MudSelectItem>
+                            <MudSelectItem Value="@("utf-16")" >@(L["UTF-16"])</MudSelectItem>
+                            <MudSelectItem Value="@("utf-32")" >@(L["UTF-32"])</MudSelectItem>
+                            </MudSelect>
+                            <MudTextField Label="@L["Datetime format"]" @bind-Value="@DatetimeFormat" Variant="@Variant.Text" />
+                    </MudItem>
+                    <MudItem xs="12" sm="6" md="4">
+                        <MudTextField Mask="@(new RegexMask(@"^.{1,1}$"))" Label="@L["Escape character"]" @bind-Value="@EscapeCharacter"  Variant="@Variant.Text" />
+                        <MudTextField Mask="@(new RegexMask(@"^.{1,1}$"))" Label="@L["Decimal character"]" @bind-Value="@DecimalCharacter" Variant="@Variant.Text" />
+                        <MudTextField Mask="@(new RegexMask(@"^.{0,1}$"))" Label="@L["Thousand seperator"]" @bind-Value="@ThousandsSeperator" Variant="@Variant.Text" />
+                    </MudItem>
+
+                </MudGrid>
+            </div>
+        </MudPaper>
         @if (_datasetReadError == true)
         {
             <MudText Typo="Typo.body2">@L["Could not read dataset successfully, change configuration"]</MudText>
         }
         else
         {
-             <MudTable Items="@_datasetFrame.Rows" style="width:stretch" class="mat-elevation-z5" FixedHeader="true" Dense="true" CustomHeader="true">
-                <HeaderContent>
+             <MudTable Items="@_datasetFrame.Rows" Elevation="5" style="width:stretch " class="table-bordered mat-elevation-z5  " FixedHeader="true" Dense="true" CustomHeader="true">
+                <HeaderContent >
                     <MudTHeadRow>
                         <MudTh></MudTh>
                         @foreach (var item in _datasetFrame.Columns)
@@ -91,7 +96,7 @@ else
                             {
                                 <MudTh>
                                     <MudSelect T="string" Value="@(_dataset.Dataset.Schema[item.Name].RoleSelected.ID == null ? ":none" : _dataset.Dataset.Schema[item.Name].RoleSelected.ID)" ValueChanged="@((e) => { _dataset.Dataset.Schema[item.Name].RoleSelected.ID = e == ":none" ?  null : e; SaveColumnConfiguration(item.Name, e, _dataset.Dataset.Schema[item.Name].DatatypeSelected.ID); })">
-                                    
+
                                         <MudSelectItem Value="@(":none")">
                                             <MudText Typo="Typo.body2">@L["none"]</MudText>
                                         </MudSelectItem>
@@ -113,7 +118,7 @@ else
                 </HeaderContent>
                 <RowTemplate>
 
-                    @if (true) 
+                    @if (true)
                     {
                         <MudTd></MudTd>
                         @foreach (var item in context)
@@ -130,11 +135,11 @@ else
                         }
                         IncreaseIndex();
                     }
-   
+
                 </RowTemplate>
             </MudTable>
         }
-        
+
     </MudStack>
 }
 
@@ -166,25 +171,25 @@ else
 
     [Parameter]
     public GetDatasetResponseDto Dataset
-    { 
+    {
         get
         {
             return _dataset;
-        } 
+        }
         set
         {
             _dataset = value;
             ReloadDataFrame();
-        } 
+        }
     }
     private GetDatasetResponseDto _dataset;
 
     public bool UseHeader
-    { 
+    {
         get
         {
             return Dataset.Dataset.FileConfiguration["use_header"];
-        } 
+        }
         set
         {
             if (value != null)
@@ -192,15 +197,15 @@ else
                 Dataset.Dataset.FileConfiguration["use_header"] = value;
                 _index = 1;
             }
-        } 
+        }
     }
 
     public int StartRow
-    { 
+    {
         get
         {
             return (int)Dataset.Dataset.FileConfiguration["start_row"];
-        } 
+        }
         set
         {
             if (value != null)
@@ -210,15 +215,15 @@ else
             }
 
 
-        } 
+        }
     }
 
     public string Delimiter
-    { 
+    {
         get
         {
             return Dataset.Dataset.FileConfiguration["delimiter"];
-        } 
+        }
         set
         {
             if (value != null)
@@ -228,37 +233,37 @@ else
                 _index = 1;
                 ReloadDataFrame();
             }
-        } 
+        }
     }
     private string _delimiter;
     private int _rowIndex = 0;
     public string EscapeCharacter
-    { 
+    {
         get
         {
             return Dataset.Dataset.FileConfiguration["escape_character"];
-        } 
+        }
         set
         {
             if (value != null)
             {
                 Dataset.Dataset.FileConfiguration["escape_character"] = value;
             }
-        } 
+        }
     }
     public string ThousandsSeperator
-    { 
+    {
         get
         {
             return Dataset.Dataset.FileConfiguration["thousands_seperator"];
-        } 
+        }
         set
         {
             if (value != null)
             {
                 Dataset.Dataset.FileConfiguration["thousands_seperator"] = value;
             }
-        } 
+        }
     }
     public string DateTimeFormatHelperText { get; set; }
     public bool DatetimeFormatAccepted { get; set; } = true;
@@ -288,18 +293,18 @@ else
     }
 
     public string DecimalCharacter
-    { 
+    {
         get
         {
             return Dataset.Dataset.FileConfiguration["decimal_character"];
-        } 
+        }
         set
         {
             if (value != null)
             {
                 Dataset.Dataset.FileConfiguration["decimal_character"] = value;
             }
-        } 
+        }
     }
 
     public string DatasetEncoding
@@ -375,7 +380,7 @@ else
             _isSavingAllowed = false;
             StateHasChanged();
             viewNotifier.Show("Data can´t be read using column delimiter:" + ex.Message, ViewNotifierType.Error, L["Operation Failed"]);
-        }    
+        }
 
     }
 
