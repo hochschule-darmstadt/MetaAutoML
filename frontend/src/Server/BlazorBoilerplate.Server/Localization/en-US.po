@@ -1435,8 +1435,8 @@ msgid "Analysis"
 msgstr "Analysis"
 
 msgctxt "Global"
-msgid "Preview"
-msgstr "Preview"
+msgid "Preview of the first 20 samples"
+msgstr "Preview of the first 20 samples"
 
 msgctxt "Global"
 msgid "Configure"
