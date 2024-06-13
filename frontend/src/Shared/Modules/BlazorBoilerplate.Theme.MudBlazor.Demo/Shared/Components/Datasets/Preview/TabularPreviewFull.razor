@@ -13,11 +13,22 @@ else
     <MudStack >
         <MudPaper Elevation="5" class=" conf-table">
            <div class="container-fluid" >
+               <CardHeaderContent>
+                    <LabelTooltip Label="File configuration" Text="In this panel you can modify the default configuration for loading a file.
+                    Important: When you change the file configuration and press ‘Save & reload dataset’, the dataset is reloaded and all previous modifications in the dataset configuration below are discarded." Position="Radzen.TooltipPosition.Top"></LabelTooltip>
+               </CardHeaderContent>
                <MudGrid  >
                    <MudItem xs="12" sm="6" md="4">
                         <MudCheckBox @bind-Checked="@UseHeader" Label="@L["Use header"]"></MudCheckBox>
                         <MudNumericField @bind-Value="@StartRow" Label="@L["Start row"]" Variant="Variant.Text" Min="1" />
-				        <MudButton Variant="Variant.Filled" Color="Color.Secondary" Style="margin-top: 20px" OnClick="@SaveConfiguration">@L["Save"]</MudButton>
+                        <ButtonTooltip Text="Updates the file configuration and reloads the dataset.
+                             Important: When you change the file configuration and press ‘Save & reload dataset’, the dataset is reloaded and all previous modifications in the dataset configuration below are discarded." Position="Placement.Top">
+                            <MudButton Variant="Variant.Filled"
+                                       Color="Color.Secondary"
+                                       Style="margin-top: 20px"
+                                       OnClick="@SaveConfiguration">@L["Save & Reload dataset"]</MudButton>
+                        </ButtonTooltip>
+
                     </MudItem>
                     <MudItem xs="12" sm="6" md="4">
                         <MudSelect T="string" Label="@L["Column seperator"]" AnchorOrigin="Origin.BottomCenter" @bind-Value="@Delimiter">
@@ -43,6 +54,7 @@ else
                 </MudGrid>
             </div>
         </MudPaper>
+
         @if (_datasetReadError == true)
         {
             <MudText Typo="Typo.body2">@L["Could not read dataset successfully, change configuration"]</MudText>
@@ -51,6 +63,17 @@ else
         {
              <MudTable Items="@_datasetFrame.Rows" Elevation="5" style="width:stretch " class="table-bordered mat-elevation-z5  " FixedHeader="true" Dense="true" CustomHeader="true">
                 <HeaderContent >
+                     <MudTHeadRow>
+                        <MudTh colspan="@(_datasetFrame.Columns.Count + 1)" >
+                           <CardHeaderContent>
+                                <LabelTooltip Label="Dataset configuration (20 samples displayed) "    Text="In this panel you can modify the datatypes and roles of individual columns of the dataset.
+                                Important: When you change the file configuration and press ‘Save & reload dataset’ later, the dataset is reloaded and all previous modifications in the dataset configuration are discarded. "
+                                Position="Radzen.TooltipPosition.Top"  ></LabelTooltip>
+                           </CardHeaderContent>
+
+                       </MudTh>
+                    </MudTHeadRow>
+
                     <MudTHeadRow>
                         <MudTh></MudTh>
                         @foreach (var item in _datasetFrame.Columns)
@@ -66,7 +89,12 @@ else
                         }
                     </MudTHeadRow>
                     <MudTHeadRow>
-                        <MudTh>@L["Datatype"]</MudTh>
+                        <MudTh>
+                            <CardHeaderContent>
+                                <LabelTooltip Label="@L["Datatype"]" Text="Using the dropdown menus you can modify the default datatypes of individual columns of the dataset, e.g. from Integer to Categorical." Position="Radzen.TooltipPosition.Top"></LabelTooltip>
+                            </CardHeaderContent>
+                        </MudTh>
+
                         @if (_datasetFrame.Columns.Count == _dataset.Dataset.Schema.Count)
                         {
                             @foreach (var item in _datasetFrame.Columns)
@@ -89,16 +117,25 @@ else
                         }
                     </MudTHeadRow>
                     <MudTHeadRow>
-                        <MudTh>@L["Role"]</MudTh>
+                        <MudTh>
+                            <CardHeaderContent>
+                                <LabelTooltip Label="@L["Role"]" Text="Using the dropdown menus  you can specify individual roles  of columns of the dataset.
+                                 In the ‘default’ setting, a column is used as a feature for ML prediction.
+                                ‘Ignore’ means that a column is not used as a feature for ML prediction.
+                                 ‘target’ means that the column is to be predicted by the ML model.
+                                 Role ‘Index’ can be set if the column is used as a unique identifier of each row.
+                                  In this case, the column is is not used as a feature for ML prediction, like for role ‘Ignore’." Position="Radzen.TooltipPosition.Top"></LabelTooltip>
+                            </CardHeaderContent>
+                        </MudTh>
                         @if (_datasetFrame.Columns.Count == _dataset.Dataset.Schema.Count)
                         {
                             @foreach (var item in _datasetFrame.Columns)
                             {
                                 <MudTh>
-                                    <MudSelect T="string" Value="@(_dataset.Dataset.Schema[item.Name].RoleSelected.ID == null ? ":none" : _dataset.Dataset.Schema[item.Name].RoleSelected.ID)" ValueChanged="@((e) => { _dataset.Dataset.Schema[item.Name].RoleSelected.ID = e == ":none" ?  null : e; SaveColumnConfiguration(item.Name, e, _dataset.Dataset.Schema[item.Name].DatatypeSelected.ID); })">
+                                    <MudSelect T="string" Value="@(_dataset.Dataset.Schema[item.Name].RoleSelected.ID == null ? ":Default" : _dataset.Dataset.Schema[item.Name].RoleSelected.ID)" ValueChanged="@((e) => { _dataset.Dataset.Schema[item.Name].RoleSelected.ID = e == ":Default" ?  null : e; SaveColumnConfiguration(item.Name, e, _dataset.Dataset.Schema[item.Name].DatatypeSelected.ID); })">
 
-                                        <MudSelectItem Value="@(":none")">
-                                            <MudText Typo="Typo.body2">@L["none"]</MudText>
+                                        <MudSelectItem Value="@(":Default")">
+                                            <MudText Typo="Typo.body2">@L["Default"]</MudText>
                                         </MudSelectItem>
                                         @foreach (var role in _dataset.Dataset.Schema[item.Name].RolesCompatible)
                                         {
@@ -412,7 +449,7 @@ else
                             //Only string rows can be casted to datetime
                             if (format.Length == ((string)row).Length)
                             {
-                                //If last cast fails we will assume none worked
+                                //If last cast fails we will assume None worked
                                 DateTime dt;
                                 convertionSuccessfull = DateTime.TryParseExact((string)row, format, null, DateTimeStyles.None, out dt);
                             }
