@@ -84,7 +84,7 @@ class PreTrainingStrategyController(IAbstractStrategy):
 
 
         self._log.info(f'do_finish_pre_training: Finished data preparation, advancing to phase "running"..')
-        self.controller.set_phase('running')
+        self.controller.set_phase('training')
 
         return
 
@@ -128,8 +128,8 @@ class PreTrainingStrategyController(IAbstractStrategy):
             configuration.runtime_limit = int(self.total_runtime_limit * (new_dataset_size / self.sum_dataset_all)) + not_used_runtime
             request = self.controller.get_request()
             request.configuration = configuration
-            self._log.info(f'do_finish_pre_training: Finished data preparation, advancing to phase "running"..')
-            self.controller.set_phase('running')
+            self._log.info(f'do_finish_pre_training: Finished data preparation, advancing to phase "training"..')
+            self.controller.set_phase('training')
         else:
             #adjust request object for multi fidelity
             configuration = self.controller.get_request().configuration
@@ -173,15 +173,16 @@ class PreTrainingStrategyController(IAbstractStrategy):
 
     def do_finish_pre_training(self, state: dict, blackboard: Blackboard, controller: StrategyController):
         if self.global_multi_fidelity_level != 0:
-            self._log.info(f'do_finish_pre_training: Finished pre training, advancing to phase "running"..')
-            controller.set_phase('running')
+            self._log.info(f'do_finish_pre_training: Finished pre training, advancing to phase "training"..')
+            controller.set_phase('training')
             controller.disable_strategy('pre_training.finish_pre_training')
 
     def do_optimum_strategy_callback(self, model_list, _):
         # Funktion zum Verarbeiten der abgeschlossenen Modelle und Aktualisieren des Blackboards
+        blackboard=self.controller.get_blackboard()
         for model in model_list:
             if model.get('status') == 'completed':
-                self.blackboard.add_data({"completed_model": model})
+                blackboard.add_data({"completed_model": model})
         return model_list
 
     def do_optimum_strategy(self, state: dict, blackboard: Blackboard, controller: StrategyController):
@@ -192,7 +193,7 @@ class PreTrainingStrategyController(IAbstractStrategy):
         self.global_multi_fidelity_level = 1
 
         # Deaktiviere Multi-Fidelity-Strategie
-        controller.disable_strategy('pre_training.optimum_strategy')
+        controller.disable_strategy('training.optimum_strategy')
 
         # Starte die erste Iteration
         self.run_iteration(controller, multi_fidelity_dataset_percentage, initial_runtime_limit)
@@ -202,7 +203,7 @@ class PreTrainingStrategyController(IAbstractStrategy):
         accuracies = []
         consecutive_no_improvement = 0
 
-        while consecutive_no_improvement < 3:
+        while consecutive_no_improvement < 2:
             # Neue Trainingsdurchlaufkonfiguration definieren
             request = controller.get_request()
             request_copy = copy.deepcopy(request)
@@ -219,10 +220,14 @@ class PreTrainingStrategyController(IAbstractStrategy):
             # Warte auf den Abschluss des Trainings und erhalte die Modelle
             # TO-DO
             # user_id von dem training
-            user_id = controller.get_request()['user_id']
+            user_id = request.user_id
+            print("user_id: ", user_id)
             training_id = controller.get_training_id()
-            dataset_id = controller.get_request()['dataset_id']
+            print("training_id: ", user_id)
+            dataset_id = request.dataset_id
+            print("dataset_id: ", dataset_id)
             model_list = controller.get_data_storage().get_models(user_id,training_id,dataset_id)
+            print("model_list: ", model_list)
             # Wie kann ich die model_list am besten holen hier ?
             completed_models = [model for model in model_list if model.get('status') == 'completed']
             if not completed_models:
@@ -233,7 +238,8 @@ class PreTrainingStrategyController(IAbstractStrategy):
             accuracies.append(accuracy)
 
             # Überprüfe, ob eine Verbesserung vorliegt
-            if len(accuracies) > 1 and accuracies[-1] <= accuracies[-2]:
+            epsilon=0.005
+            if accuracies[1] > accuracies[0]+epsilon:
                 consecutive_no_improvement += 1
             else:
                 consecutive_no_improvement = 0
