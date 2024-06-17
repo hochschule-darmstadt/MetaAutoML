@@ -216,3 +216,4 @@ auth/*.json
 adapter/*/tests/**
 adapters/*/emissions.csv
 frontend/src/Server/BlazorBoilerplate.Server/appsettings.json
+frontend/src/Server/BlazorBoilerplate.Server/Properties/launchSettings.json
