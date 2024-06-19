@@ -62,6 +62,8 @@ class AdapterManager(Thread):
         Returns:
             str: The AutoML adapter name
         """
+        if(self.__automl == ':pycaret'):
+            return self.__automl + self.__request.configuration.parameters[':include_approach'].values[0]
         return self.__automl
 
     def get_training_id(self) -> str:

@@ -4,6 +4,7 @@ from ControllerBGRPC import *
 from AdapterManager import AdapterManager
 from ThreadLock import ThreadLock
 import json
+import copy
 
 
 class AdapterRuntimeManager:
@@ -52,8 +53,17 @@ class AdapterRuntimeManager:
             host, port = map(os.getenv, self.__automl_addresses[automl.lower()])
             port = int(port)
             self.__log.debug(f"start_new_training: creating new adapter manager and adapter manager agent")
-            adapter_training = AdapterManager(self.__data_storage, self.__request, automl, self.__training_id, self.__dataset, host, port, self.__adapter_finished_callback)
-            self.__adapters.append(adapter_training)
+            if self.__request.configuration.task == ':tabular_clustering':
+                approaches = self.__request.configuration.parameters[':include_approach'].values
+                for approach in approaches:
+                    print(approach)
+                    adjusted_request = copy.deepcopy(self.__request)
+                    adjusted_request .configuration.parameters[':include_approach'].values = [approach]
+                    adapter_training = AdapterManager(self.__data_storage, adjusted_request, automl, self.__training_id, self.__dataset, host, port, self.__adapter_finished_callback)
+                    self.__adapters.append(adapter_training)
+            else:
+                adapter_training = AdapterManager(self.__data_storage, self.__request, automl, self.__training_id, self.__dataset, host, port, self.__adapter_finished_callback)
+                self.__adapters.append(adapter_training)
         return
 
     def update_adapter_manager_list(self, adapter_manager_to_keep: list):
