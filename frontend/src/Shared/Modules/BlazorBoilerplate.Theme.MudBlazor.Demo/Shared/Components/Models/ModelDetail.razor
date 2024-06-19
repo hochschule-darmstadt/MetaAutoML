@@ -53,7 +53,7 @@
     </MudCardContent>
 </MudCard>
 
-<MudDialog Class="log-container" @bind-IsVisible="_dialogVisible" MaxWidth="MaxWidth.Large" FullWidth="true" CloseButton="true">
+<MudDialog Class="model-output-dialog" @bind-IsVisible="_dialogVisible" MaxWidth="MaxWidth.Large" FullWidth="true" CloseButton="true">
     <TitleContent>
         <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
             <RadzenText Style="font-family:Arial, Helvetica, sans-serif; font-weight:150; margin-right: 10rem;" Text=@L["Detail output of the AutoML solution"] TextStyle="TextStyle.H6" />
@@ -64,23 +64,21 @@
         @if (_logMessages != null)
         {
             <MudPaper Elevation="0">
-                <div id="logMessagesContainer" style="overflow-y: none;">
                     @{
                         int lineNumber = 1;
                         @foreach (var item in _logMessages.Where(m => m.Contains(searchQuery, StringComparison.OrdinalIgnoreCase)))
                         {
-                            <div @ref="lastElementRef" style="display: flex; align-items: flex-start;">
+                            <div style="display: flex; align-items: flex-start;">
                                 <MudText Style="font-family: 'Courier New', Courier, monospace; font-size: 1rem; color: gray; text-align: right; margin-right: 10px;">@(lineNumber++.ToString("D2"))</MudText>
                                 <MudText Style="font-family: 'Courier New', Courier, monospace; font-size: 1rem; overflow: auto;">@item</MudText>
                             </div>
                         }
                     }
-                </div>
             </MudPaper>
         }
     </DialogContent>
     <DialogActions>
-        <MudButton Color="Color.Primary" OnClick="CloseDialog">@L["Close"]</MudButton>
+        <MudButton Color="Color.Secondary" OnClick="CloseDialog">@L["Close"]</MudButton>
     </DialogActions>
 </MudDialog>
 
@@ -102,34 +100,15 @@
 
     private bool _dialogVisible;
     private List<string> _logMessages;
-    private bool _scrollToBottom;
     private string searchQuery = string.Empty;
 
     private void OpenLogDialog(List<string> logMessages)
     {
         _dialogVisible = true;
         _logMessages = logMessages;
-        _scrollToBottom = true;
         StateHasChanged();
     }
 
-    private ElementReference lastElementRef;
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (_scrollToBottom)
-        {
-            _scrollToBottom = false;
-            @* await ScrollToBottom(); *@
-        }
-    }
-    private async Task ScrollToBottom()
-    {
-        if (lastElementRef.Id != null)
-        {
-            await Task.Delay(100);
-            await JSRuntime.InvokeAsync<object>("scrollIntoView", lastElementRef, true);
-        }
-    }
 
     private void CloseDialog()
     {

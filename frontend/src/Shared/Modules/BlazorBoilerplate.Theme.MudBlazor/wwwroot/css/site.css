@@ -122,17 +122,9 @@ hr {
     color: red;
 }
 
-/* .mud-dialog {
-    width: 100vh;
-    max-width: 100vh;
-} */
-
-.log-container {
-    /* overflow-y: auto;
-    display: flex; */
+.model-output-dialog {
     width: 100vh!important;
     max-width: 100vh!important;
-    /* flex-direction: column-reverse; */
 }
 
 .mud-dialog .mud-tabs-panels {
