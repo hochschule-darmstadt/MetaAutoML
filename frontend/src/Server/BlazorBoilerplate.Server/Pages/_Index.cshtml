@@ -51,12 +51,12 @@
     @{
         if (HttpContext.Request.Cookies[CookieRequestCultureProvider.DefaultCookieName] == null)
             HttpContext.Response.Cookies.Append(
-            CookieRequestCultureProvider.DefaultCookieName,
-            CookieRequestCultureProvider.MakeCookieValue(
-            new RequestCulture(
-            CultureInfo.CurrentCulture,
-            CultureInfo.CurrentUICulture)),
-            new Microsoft.AspNetCore.Http.CookieOptions() { Expires = DateTimeOffset.Now.AddDays(30) });
+               CookieRequestCultureProvider.DefaultCookieName,
+               CookieRequestCultureProvider.MakeCookieValue(
+                 new RequestCulture(
+                     CultureInfo.CurrentCulture,
+                     CultureInfo.CurrentUICulture)),
+                 new Microsoft.AspNetCore.Http.CookieOptions() { Expires = DateTimeOffset.Now.AddDays(30) });
     }
 
     @if (mainConfiguration.Value.Runtime == Shared.Dto.Db.BlazorRuntime.Server)

@@ -1,10 +1,6 @@
 ﻿@inject IStringLocalizer<Global> L
 @using Radzen
 @using Radzen.Blazor
-@inject IJSRuntime JSRuntime
-@using Microsoft.AspNetCore.Components
-@using Microsoft.JSInterop;
-@using Microsoft.JSInterop.WebAssembly;
 
 <MudCard Elevation="5">
     <MudCardHeader Style="border-bottom-style: inset; border-bottom-width: 1px;">
@@ -108,7 +104,6 @@
         _logMessages = logMessages;
         StateHasChanged();
     }
-
 
     private void CloseDialog()
     {
