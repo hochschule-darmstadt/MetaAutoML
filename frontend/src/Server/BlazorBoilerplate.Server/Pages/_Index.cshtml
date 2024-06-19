@@ -114,24 +114,57 @@
         async function downloadFileFromStream(fileName, contentStreamReference) {
           const arrayBuffer = await contentStreamReference.arrayBuffer();
           const blob = new Blob([arrayBuffer]);
- 
+
           const url = URL.createObjectURL(blob);
- 
+
           triggerFileDownload(fileName, url);
- 
+
           URL.revokeObjectURL(url);
         }
- 
+
         function triggerFileDownload(fileName, url) {
           const anchorElement = document.createElement("a");
           anchorElement.href = url;
- 
+
           if (fileName) {
             anchorElement.download = fileName;
           }
- 
+
           anchorElement.click();
           anchorElement.remove();
+        }
+    </script>
+    <script>
+        @* function scrollIntoView(elementId, alignToBottom) {
+            console.log('elementID = ', elementId);
+            const element = waitForElement(`#${elementId}`);
+            console.log('Scrolling to bottom:', element);
+            if (element) {
+                element.scrollIntoView(alignToBottom);
+            }
+        }
+        function waitForElement(selector) {
+            return new Promise(resolve => {
+                if (document.querySelector(selector)) {
+                    return resolve(document.querySelector(selector));
+                }
+
+                const observer = new MutationObserver(mutations => {
+                    if (document.querySelector(selector)) {
+                        resolve(document.querySelector(selector));
+                        observer.disconnect();
+                    }
+                });
+
+                observer.observe(document.body, {
+                    childList: true,
+                    subtree: true
+                });
+            });
+        } *@
+        function scrollIntoView(element, alignToBottom) {
+            console.log('Scrolling to bottom:', element);
+            element.scrollIntoView(alignToBottom);
         }
     </script>
 </body>
