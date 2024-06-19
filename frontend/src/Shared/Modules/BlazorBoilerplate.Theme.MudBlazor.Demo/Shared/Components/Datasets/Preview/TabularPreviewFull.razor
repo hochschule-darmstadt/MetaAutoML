@@ -10,46 +10,47 @@
 }
 else
 {
-    <MudStack>
-        <MudGrid>
-            <MudItem xs="3" sm="3" md="3">
-                <MudCheckBox @bind-Checked="@UseHeader" Label="@L["Use header"]"></MudCheckBox>
-                <MudNumericField @bind-Value="@StartRow" Label="@L["Start row"]" Variant="Variant.Text" Min="1" />
-            </MudItem>
-            <MudItem xs="3" sm="3" md="3">
-                <MudSelect T="string" Label="@L["Column seperator"]" AnchorOrigin="Origin.BottomCenter" @bind-Value="@Delimiter">
-                    <MudSelectItem Value="@("comma")" >@(L["Comma \",\""])</MudSelectItem>
-                    <MudSelectItem Value="@("semicolon")" >@(L["Semicolon \";\""])</MudSelectItem>
-                    <MudSelectItem Value="@("space")">@(L["Space"])</MudSelectItem>
-                    <MudSelectItem Value="@("tab")">@(L["Tab"])</MudSelectItem>
-                </MudSelect>
-                <MudSelect T="string" Label="@L["Encoding"]" AnchorOrigin="Origin.BottomCenter" @bind-Value="@DatasetEncoding">
-                    <MudSelectItem Value="@("utf-8")" >@(L["UTF-8"])</MudSelectItem>
-                    <MudSelectItem Value="@("latin-1")" >@(L["latin-1"])</MudSelectItem>
-                    <MudSelectItem Value="@("utf-16")" >@(L["UTF-16"])</MudSelectItem>
-                    <MudSelectItem Value="@("utf-32")" >@(L["UTF-32"])</MudSelectItem>
-                </MudSelect>
-                <MudTextField Label="@L["Datetime format"]" @bind-Value="@DatetimeFormat" Variant="@Variant.Text" />
-            </MudItem>
-            <MudItem xs="3" sm="3" md="3">
-                <MudTextField Mask="@(new RegexMask(@"^.{1,1}$"))" Label="@L["Escape character"]" @bind-Value="@EscapeCharacter"  Variant="@Variant.Text" />
-                <MudTextField Mask="@(new RegexMask(@"^.{1,1}$"))" Label="@L["Decimal character"]" @bind-Value="@DecimalCharacter" Variant="@Variant.Text" />
-                <MudTextField Mask="@(new RegexMask(@"^.{0,1}$"))" Label="@L["Thousand seperator"]" @bind-Value="@ThousandsSeperator" Variant="@Variant.Text" />
-            </MudItem>
-            <MudItem xs="3" sm="3" md="3" class="text-right">
-                <ButtonTooltip Text="Save adjustments made to the dataset." Position="Placement.Left">
-                    <MudButton Variant="Variant.Filled" Color="Color.Secondary" StartIcon="@Icons.Filled.Save" Style="margin-top: 8px" OnClick="@SaveConfiguration">@L["Save"]</MudButton>
-                </ButtonTooltip>
-            </MudItem>
-        </MudGrid>
+    <MudStack >
+        <MudPaper Elevation="5" class=" conf-table">
+           <div class="container-fluid" >
+               <MudGrid  >
+                   <MudItem xs="12" sm="6" md="4">
+                        <MudCheckBox @bind-Checked="@UseHeader" Label="@L["Use header"]"></MudCheckBox>
+                        <MudNumericField @bind-Value="@StartRow" Label="@L["Start row"]" Variant="Variant.Text" Min="1" />
+				        <MudButton Variant="Variant.Filled" Color="Color.Secondary" Style="margin-top: 20px" OnClick="@SaveConfiguration">@L["Save"]</MudButton>
+                    </MudItem>
+                    <MudItem xs="12" sm="6" md="4">
+                        <MudSelect T="string" Label="@L["Column seperator"]" AnchorOrigin="Origin.BottomCenter" @bind-Value="@Delimiter">
+                            <MudSelectItem Value="@("comma")" >@(L["Comma \",\""])</MudSelectItem>
+                            <MudSelectItem Value="@("semicolon")" >@(L["Semicolon \";\""])</MudSelectItem>
+                            <MudSelectItem Value="@("space")">@(L["Space"])</MudSelectItem>
+                            <MudSelectItem Value="@("tab")">@(L["Tab"])</MudSelectItem>
+                        </MudSelect>
+                        <MudSelect T="string" Label="@L["Encoding"]" AnchorOrigin="Origin.BottomCenter" @bind-Value="@DatasetEncoding">
+                            <MudSelectItem Value="@("utf-8")" >@(L["UTF-8"])</MudSelectItem>
+                            <MudSelectItem Value="@("latin-1")" >@(L["latin-1"])</MudSelectItem>
+                            <MudSelectItem Value="@("utf-16")" >@(L["UTF-16"])</MudSelectItem>
+                            <MudSelectItem Value="@("utf-32")" >@(L["UTF-32"])</MudSelectItem>
+                            </MudSelect>
+                            <MudTextField Label="@L["Datetime format"]" @bind-Value="@DatetimeFormat" Variant="@Variant.Text" />
+                    </MudItem>
+                    <MudItem xs="12" sm="6" md="4">
+                        <MudTextField Mask="@(new RegexMask(@"^.{1,1}$"))" Label="@L["Escape character"]" @bind-Value="@EscapeCharacter"  Variant="@Variant.Text" />
+                        <MudTextField Mask="@(new RegexMask(@"^.{1,1}$"))" Label="@L["Decimal character"]" @bind-Value="@DecimalCharacter" Variant="@Variant.Text" />
+                        <MudTextField Mask="@(new RegexMask(@"^.{0,1}$"))" Label="@L["Thousand seperator"]" @bind-Value="@ThousandsSeperator" Variant="@Variant.Text" />
+                    </MudItem>
+
+                </MudGrid>
+            </div>
+        </MudPaper>
         @if (_datasetReadError == true)
         {
             <MudText Typo="Typo.body2">@L["Could not read dataset successfully, change configuration"]</MudText>
         }
         else
         {
-             <MudTable Items="@_datasetFrame.Rows" style="width:stretch" class="mat-elevation-z5" FixedHeader="true" Dense="true" CustomHeader="true">
-                <HeaderContent>
+             <MudTable Items="@_datasetFrame.Rows" Elevation="5" style="width:stretch " class="table-bordered mat-elevation-z5  " FixedHeader="true" Dense="true" CustomHeader="true">
+                <HeaderContent >
                     <MudTHeadRow>
                         <MudTh></MudTh>
                         @foreach (var item in _datasetFrame.Columns)

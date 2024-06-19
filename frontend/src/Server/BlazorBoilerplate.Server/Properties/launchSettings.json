@@ -1,50 +1,50 @@
 {
-  "profiles": {
-    "IIS Express": {
-      "commandName": "IISExpress",
-      "launchBrowser": true,
-      "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development",
-        "CONTROLLER_SERVICE_HOST": "localhost",
-        "CONTROLLER_DATASET_FOLDER_PATH": "C:\\Users\\alex\\Desktop\\MetaAutoML\\controller\\app-data\\datasets",
-        "CONTROLLER_SERVICE_PORT": "5001",
-        "no_proxy": "localhost",
-        "REDIS_SERVICE_HOST": "localhost",
-        "REDIS_SERVICE_PORT": "6379",
-        "REGISTRATION_ALLOWED": "false"
+    "profiles": {
+      "IIS Express": {
+        "commandName": "IISExpress",
+        "launchBrowser": true,
+        "environmentVariables": {
+          "ASPNETCORE_ENVIRONMENT": "Development",
+          "CONTROLLER_SERVICE_HOST": "localhost",
+          "CONTROLLER_DATASET_FOLDER_PATH": "C:\\Users\\alex\\Desktop\\MetaAutoML\\controller\\app-data\\datasets",
+          "CONTROLLER_SERVICE_PORT": "5001",
+          "no_proxy": "localhost",
+          "REDIS_SERVICE_HOST": "localhost",
+          "REDIS_SERVICE_PORT": "6379",
+          "REGISTRATION_ALLOWED": "false"
+        },
+        "inspectUri": "{wsProtocol}://{url.hostname}:{url.port}/_framework/debug/ws-proxy?browser={browserInspectUri}",
+        "sqlDebugging": false
       },
-      "inspectUri": "{wsProtocol}://{url.hostname}:{url.port}/_framework/debug/ws-proxy?browser={browserInspectUri}",
-      "sqlDebugging": false
-    },
-    "Kestrel": {
-      "commandName": "Project",
-      "launchBrowser": true,
-      "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development",
-        "CONTROLLER_SERVICE_HOST": "localhost",
-        "CONTROLLER_DATASET_FOLDER_PATH": "C:\\Users\\Anwender\\Desktop\\Projekt\\MetaAutoML\\controller\\app-data\\datasets",
-        "CONTROLLER_SERVICE_PORT": "5001",
-        "no_proxy": "localhost",
-        "REDIS_SERVICE_HOST": "localhost",
-        "REDIS_SERVICE_PORT": "6379",
-        "REGISTRATION_ALLOWED": "false"
+      "Kestrel": {
+        "commandName": "Project",
+        "launchBrowser": true,
+        "environmentVariables": {
+          "ASPNETCORE_ENVIRONMENT": "Development",
+          "CONTROLLER_SERVICE_HOST": "localhost",
+          "CONTROLLER_DATASET_FOLDER_PATH": "C:\\GitRepos\\MetaAutoML\\controller\\app-data\\datasets",
+          "CONTROLLER_SERVICE_PORT": "5001",
+          "no_proxy": "localhost",
+          "REDIS_SERVICE_HOST": "localhost",
+          "REDIS_SERVICE_PORT": "6379",
+          "REGISTRATION_ALLOWED": "false"
+        },
+        "inspectUri": "{wsProtocol}://{url.hostname}:{url.port}/_framework/debug/ws-proxy?browser={browserInspectUri}",
+        "applicationUrl": "http://localhost:53420/"
       },
-      "inspectUri": "{wsProtocol}://{url.hostname}:{url.port}/_framework/debug/ws-proxy?browser={browserInspectUri}",
-      "applicationUrl": "http://localhost:53420/"
+      "Docker": {
+        "commandName": "Docker",
+        "launchBrowser": true,
+        "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}",
+        "httpPort": 53415
+      }
     },
-    "Docker": {
-      "commandName": "Docker",
-      "launchBrowser": true,
-      "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}",
-      "httpPort": 53415
-    }
-  },
-  "iisSettings": {
-    "windowsAuthentication": false,
-    "anonymousAuthentication": true,
-    "iisExpress": {
-      "applicationUrl": "http://localhost:54464/",
-      "sslPort": 0
+    "iisSettings": {
+      "windowsAuthentication": false,
+      "anonymousAuthentication": true,
+      "iisExpress": {
+        "applicationUrl": "http://localhost:54464/",
+        "sslPort": 0
+      }
     }
   }
-}
