@@ -36,6 +36,8 @@ class PreTrainingStrategyController(IAbstractStrategy):
             self.do_top_3_models
         )
 
+
+
         self.register_rule(
             'pre_training.multi_fidelity',
             Rule("phase == 'pre_training'", context=training_context),
