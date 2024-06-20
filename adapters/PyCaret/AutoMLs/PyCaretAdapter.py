@@ -87,6 +87,65 @@ class PyCaretAdapter:
                 best_score = silhouette_score
                 best_model = model
 
+        save_directory = self._configuration["dashboard_folder_location"]
+
+        # Plot-Typen  https://pycaret.readthedocs.io/en/stable/api/clustering.html#pycaret.clustering.plot_model
+        plot_types = ['cluster', 'tsne', 'elbow', 'silhouette', 'distance', 'distribution']
+
+        # Plotly-Figuren
+        figures = []
+
+        # Zeige das aktuelle Arbeitsverzeichnis an
+        current_directory = os.getcwd()
+        print(f"Current working directory: {current_directory}")
+
+        # Definiere den Pfad zum Speichern der Plots
+        save_directory = self._configuration["dashboard_folder_location"]
+        if not os.path.exists(save_directory):
+            os.makedirs(save_directory)
+
+        # Plotly-Figuren sammeln
+        figures_html = ""
+
+        for plot_type in plot_types:
+            if plot_type == 'elbow' or 'silhouette':
+                pathtoplot = plot_model(best_model, plot=plot_type, save=True)
+                plot_filename = os.path.join(current_directory, f'{plot_type}.png')
+                dashboard_path = os.path.join(save_directory, f'{plot_type}.png')
+            else:
+                pathtoplot = plot_model(best_model, plot=plot_type, save=True, display_format='streamlit')
+                plot_filename = os.path.join(current_directory, f'{plot_type}.html')
+                dashboard_path = os.path.join(save_directory, f'{plot_type}.html')
+
+            os.rename(pathtoplot, plot_filename)
+            os.rename(plot_filename, dashboard_path)
+
+            print(f"Plot moved to: {dashboard_path}")
+            if plot_type != 'elbow' or 'silhouette':
+                with open(dashboard_path, 'r', encoding='utf-8') as file:
+                    plot_html = file.read()
+                    figures_html += plot_html
+
+        # Alle Plots in einer HTML-Datei speichern
+        result_path = os.path.join(save_directory, "clusterevaluate.html")
+        html_content = f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Cluster Visualization</title>
+            <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+        </head>
+        <body>
+            {figures_html}
+        </body>
+        </html>
+        """
+
+        with open(result_path, 'w', encoding='utf-8') as file:
+            file.write(html_content)
+
+        print(f"Visualization saved to {result_path}")
+
         save_model(best_model, os.path.join(self._configuration["result_folder_location"], f'model_pycaret'))
         export_model(PycaretWrapper(best_model, self._configuration), self._configuration["dashboard_folder_location"], f'dashboard_model.p')
 
