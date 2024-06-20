@@ -14,7 +14,7 @@ betterproto @ git+https://github.com/danielgtaylor/python-betterproto.git@496eba
 Pillow
 rdflib==6.2.0
 explainerdashboard==0.4.7
-
+numpy==1.26.4
 
 # Needed for Newer Verisons of Python :
 # urllib3
