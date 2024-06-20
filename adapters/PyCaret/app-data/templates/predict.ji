@@ -11,6 +11,9 @@ from postprocessing import post_process_result_dataframe
 {% endif %}
 {% if configuration.configuration["task"] in [":tabular_clustering"] %}
 from pycaret.clustering import *
+from pycaret.datasets import get_data
+from preprocessing import dataset_preparation
+from postprocessing import post_process_result_dataframe
 {% endif %}
 {% if configuration.configuration["task"] in [":tabular_regression", ":text_regression"] %}
 from pycaret.regression import *
@@ -29,7 +32,7 @@ if __name__ == '__main__':
     X = None
 
 
-    {% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression", ":text_classification", ":text_regression"] %}
+    {% if configuration.configuration["task"] in [":tabular_clustering", ":tabular_classification", ":tabular_regression", ":text_classification", ":text_regression"] %}
     X, y = dataset_preparation(filepath)
     X_index_df = pd.DataFrame(X.index)        #Some AutoML manipulate the index, so we extract it before hands
     {% endif %}
@@ -56,3 +59,9 @@ if __name__ == '__main__':
     post_process_result_dataframe(X_index_df, predict_df).to_csv(save_path)
     {% endif %}
 
+    {% if configuration.configuration["task"] in [":tabular_clustering"] %}
+    predicted_y = predict_model(model, data = X)
+    predicted_y["predicted"] = predicted_y["Cluster"]
+    predict_df = pd.DataFrame(data=predicted_y, columns=["predicted"])
+    post_process_result_dataframe(X_index_df, predict_df).to_csv(save_path)
+    {% endif %}
