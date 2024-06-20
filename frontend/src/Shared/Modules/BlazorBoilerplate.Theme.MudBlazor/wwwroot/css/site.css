@@ -124,6 +124,11 @@ hr {
     color: red;
 }
 
+.model-output-dialog {
+    width: 100vh!important;
+    max-width: 100vh!important;
+}
+
 .mud-dialog .mud-tabs-panels {
     max-height: 500px;
     overflow-y: auto;

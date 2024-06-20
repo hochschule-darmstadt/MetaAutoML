@@ -2035,6 +2035,10 @@ msgid "Help search ..."
 msgstr "Help search ..."
 
 msgctxt "Global"
+msgid "Search Output ..."
+msgstr "Search Output ..."
+
+msgctxt "Global"
 msgid "Details"
 msgstr "Details"
 
