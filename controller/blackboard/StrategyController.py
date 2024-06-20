@@ -61,10 +61,13 @@ class StrategyController(object):
 
         from PreprocessingStrategy import PreprocessingStrategyController
         from blackboard.strategies.PreTrainingStrategy import PreTrainingStrategyController
+        from EvaluationStrategy import EvaluationStrategy
         self.strategies.append(PreprocessingStrategyController(self))
         self.strategies.append(PreTrainingStrategyController(self))
+        self.strategies.append(EvaluationStrategy(self))
         self.on_event('phase_updated', self.__adapter_runtime_manager.blackboard_phase_update_handler)
         self.set_phase('preprocessing')
+        #self.set_phase('running')
         self.start_timer()
 
     def get_adapter_runtime_manager(self) -> AdapterRuntimeManager:
