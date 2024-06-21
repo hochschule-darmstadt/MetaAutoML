@@ -475,6 +475,7 @@ def setup_run_environment(request: "StartAutoMlRequest", adapter_name: str) -> "
                                         request.user_id,
                                         request.dataset_id,
                                         request.training_id,
+                                        request.model_id,
                                         get_config_property("job-folder-name"))
 
     #folder location for automl generated model files (not copied in ZIP)
@@ -482,24 +483,28 @@ def setup_run_environment(request: "StartAutoMlRequest", adapter_name: str) -> "
                                         request.user_id,
                                         request.dataset_id,
                                         request.training_id,
+                                        request.model_id,
                                         get_config_property("model-folder-name"))
 
     export_folder_location = os.path.join(get_config_property("training-path"),
                                         request.user_id,
                                         request.dataset_id,
                                         request.training_id,
+                                        request.model_id,
                                         get_config_property("export-folder-name"))
 
     result_folder_location = os.path.join(get_config_property("training-path"),
                                         request.user_id,
                                         request.dataset_id,
                                         request.training_id,
+                                        request.model_id,
                                         get_config_property("result-folder-name"))
 
     dashboard_folder_location = os.path.join(get_config_property("training-path"),
                                         request.user_id,
                                         request.dataset_id,
                                         request.training_id,
+                                        request.model_id,
                                         get_config_property("dashboard-folder-name"))
 
     controller_export_folder_location  = os.path.join(get_config_property("training-path"),
@@ -507,6 +512,7 @@ def setup_run_environment(request: "StartAutoMlRequest", adapter_name: str) -> "
                                         request.user_id,
                                         request.dataset_id,
                                         request.training_id,
+                                        request.model_id,
                                         get_config_property("export-folder-name"))
 
     request_dict = request.to_dict(casing=betterproto.Casing.SNAKE)

@@ -42,15 +42,20 @@ message StartAutoMlRequest {
     */
     string userId = 3;
     /*
+        Unique modle id generated when inserting a new model document into MongoDB
+        example: '63515c86b10d04d230dc1482'
+    */
+    string modelId = 43;
+    /*
         Absolute system path where the dataset is saved (single file dataset use the file name as ending of the path while multi file dataset will only have is root folder of the dataset)
         example: "app/app-data/datasets/....../titanic_train.csv"
     */
-    string DatasetPath = 4;
+    string DatasetPath = 5;
     /*
         StartAutoMlConfiguration object, the specific configuration for the training session (see StartAutoMlConfiguration for more detals)
         example: StartAutoMlConfiguration
     */
-    StartAutoMlConfiguration configuration = 5;
+    StartAutoMlConfiguration configuration = 6;
     /*
       The current dataset configuration used to open the dataset and column schema for tabular datasets as a JSON string
       example: '{
@@ -74,7 +79,7 @@ message StartAutoMlRequest {
 			}
     }'
     */
-    string datasetConfiguration = 6;
+    string datasetConfiguration = 7;
 }
 
 message StartAutoMlConfiguration {

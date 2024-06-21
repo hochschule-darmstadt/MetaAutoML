@@ -58,7 +58,7 @@ class AdapterRuntimeManager:
                 for approach in approaches:
                     print(approach)
                     adjusted_request = copy.deepcopy(self.__request)
-                    adjusted_request .configuration.parameters[':include_approach'].values = [approach]
+                    adjusted_request.configuration.parameters[':include_approach'].values = [approach]
                     adapter_training = AdapterManager(self.__data_storage, adjusted_request, automl, self.__training_id, self.__dataset, host, port, self.__adapter_finished_callback)
                     self.__adapters.append(adapter_training)
             else:
@@ -184,7 +184,7 @@ class AdapterRuntimeManager:
             if self.__multi_fidelity_level != 0:
                 self.__multi_fidelity_callback(model_list, self.__multi_fidelity_level)
         if model_details["status"] == "completed" and self.__multi_fidelity_level == 0 and self.__request.perform_model_analysis == True:
-            if dataset["type"] in  [":tabular", ":text", ":time_series"]:
+            if dataset["type"] in  [":tabular", ":text", ":time_series"] and training["configuration"]["task"] in [":tabular_classification"]:
                 #Generate explainer dashboard
                 response = adapter_manager.generate_explainer_dashboard()
                 self.__data_storage.update_model(user_id, model_id, { "dashboard_path": response.path})

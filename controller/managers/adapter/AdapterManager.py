@@ -125,6 +125,7 @@ class AdapterManager(Thread):
         request.training_id = self.__training_id
         request.dataset_id = str(self.__dataset["_id"])
         request.user_id = self.__request.user_id
+        request.model_id = self.__model_id
         if hasattr(self.__request, 'sampled_dataset_path'):
         #if self.__request.sampled_dataset_path != None:
             request.dataset_path = self.__request.sampled_dataset_path
