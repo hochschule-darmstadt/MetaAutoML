@@ -6,11 +6,11 @@ from AdapterUtils import *
 from AdapterBGRPC import *
 from threading import *
 from AutoKerasWrapper import AutoKerasWrapper
-from JsonUtil import get_config_property
 import pandas as pd
 from typing import Tuple
 from explainerdashboard import ClassifierExplainer, RegressionExplainer, ExplainerDashboard
 
+from ThreadLock import ThreadLock
 
 class AutoKerasAdapterManager(AdapterManager):
     """The AutoML solution specific functionality implementation of the AdapterManager class
@@ -19,10 +19,10 @@ class AutoKerasAdapterManager(AdapterManager):
         AdapterManager (AdapterManager): The base class providing the shared functionality for all adapters
     """
 
-    def __init__(self) -> None:
+    def __init__(self, lock: ThreadLock) -> None:
         """Initialize a new AutokerasAdapterManager setting AutoML adapter specific variables
         """
-        super(AutoKerasAdapterManager, self).__init__()
+        super(AutoKerasAdapterManager, self).__init__(lock)
         self.__automl = None
         self.__loaded_training_id = None
         self._adapter_name = "autokeras"

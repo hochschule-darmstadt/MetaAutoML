@@ -6,7 +6,6 @@ import time, asyncio
 from AdapterUtils import *
 from AdapterBGRPC import *
 from threading import *
-from JsonUtil import get_config_property
 from autogluon.tabular import TabularPredictor
 from autogluon.multimodal import MultiModalPredictor
 from autogluon.timeseries import TimeSeriesPredictor

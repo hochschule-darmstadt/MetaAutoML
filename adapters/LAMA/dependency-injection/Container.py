@@ -2,6 +2,13 @@ from dependency_injector import containers, providers
 from AdapterScheduler import *
 from LAMAAdapterManager import LAMAAdapterManager
 
+from ThreadLock import ThreadLock
+
+class Ressources(containers.DeclarativeContainer):
+    lock =  providers.ThreadSafeSingleton(
+        ThreadLock,
+    )
+
 
 class Managers(containers.DeclarativeContainer):
     """Dependency injection declarative container object, providing the different manager instances when injected.
@@ -10,11 +17,13 @@ class Managers(containers.DeclarativeContainer):
     Args:
         containers (containers.DeclarativeContainer): dependency-injector dependency providing functionality to inject dependencies
     """
+    ressources = providers.DependenciesContainer()
     adapter_scheduler = providers.ThreadSafeSingleton(
         AdapterScheduler,
     )
     adapter_manager = providers.Factory(
         LAMAAdapterManager,
+        lock=ressources.lock
     )
 
 class Application(containers.DeclarativeContainer):
@@ -23,6 +32,10 @@ class Application(containers.DeclarativeContainer):
     Args:
         containers (containers.DeclarativeContainer): dependency-injector dependency providing functionality to inject dependencies
     """
+    ressources = providers.Container(
+        Ressources,
+    )
     managers =  providers.Container(
         Managers,
+        ressources=ressources,
     )

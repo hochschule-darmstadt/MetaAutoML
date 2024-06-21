@@ -5,7 +5,6 @@ import autosklearn.regression
 import pandas as pd
 from AdapterUtils import *
 from AdapterTabularUtils import *
-from JsonUtil import get_config_property
 
 import AutoSklearnParameterConfig as aspc
 

@@ -8,7 +8,6 @@ from typing import Any
 import dill
 import pandas as pd
 from sklearn.metrics import *
-from JsonUtil import get_config_property
 from TemplateGenerator import TemplateGenerator
 from AdapterBGRPC import *
 from typing import Tuple
@@ -158,9 +157,9 @@ def zip_script(config: "StartAutoMlRequest"):
     Returns:
         StartAutoMlRequest: The StartAutoMlRequest request, extended with addition informations about the saved archive
     """
-    print(f"saving model zip file for {get_config_property('adapter-name')}")
+    print(f"saving model zip file for {os.getenv('ADAPTER_NAME')}")
 
-    zip_file_name = get_config_property("export-zip-file-name")
+    zip_file_name = os.getenv("EXPORT_ZIP_FILE_NAME")
     output_path = config.export_folder_location
     result_path = config.result_folder_location
     #shutil.copy(get_config_property("predict-time-sources-path"),
@@ -171,14 +170,14 @@ def zip_script(config: "StartAutoMlRequest"):
                         result_path,
                         base_dir=None)
 
-    if get_config_property("local_execution") == "YES":
+    if os.getenv("LOCAL_EXECUTION") == "YES":
         file_loc_on_controller = output_path
     else:
-        file_loc_on_controller = os.path.join(get_config_property("training-path"),
-                                            get_config_property('adapter-name'),
+        file_loc_on_controller = os.path.join(os.getenv("TRAINING_PATH"),
+                                        os.getenv("ADAPTER_NAME"),
                                         config.user_id,
                                         config.training_id,
-                                        get_config_property("export-folder-name"))
+                                        os.getenv("EXPORT_FOLDER_NAME"))
     config.file_name = f'{zip_file_name}.zip'
     config.file_location = file_loc_on_controller
     return config
@@ -194,11 +193,11 @@ def evaluate(config: "StartAutoMlRequest", config_path: str) -> Tuple[float, flo
         tuple[float, float]: tuple holding the test score, prediction time metrics
     """
     prediction_probabilities = []
-    dashboard_folder_location = os.path.join(get_config_property("training-path"),
+    dashboard_folder_location = os.path.join(os.getenv("TRAINING_PATH"),
                                         config.user_id,
                                         config.dataset_id,
                                         config.training_id,
-                                        get_config_property("dashboard-folder-name"))
+                                        os.getenv("DASHBOARD_FOLDER_NAME"))
     config = config.__dict__
     config["dataset_configuration"] = config["dataset_configuration"]
     file_path = config["dataset_path"]
@@ -433,11 +432,11 @@ def predict(config: dict, config_path: str, automl: str) -> Tuple[float, str]:
     Returns:
         tuple[float, str]: Result tuple with the prediction time metric and the path to the prediction.csv holding the prediction made by the model
     """
-    result_folder_location = os.path.join(get_config_property("training-path"),
+    result_folder_location = os.path.join(os.getenv("TRAINING_PATH"),
                                         config["user_id"],
                                         config["dataset_id"],
                                         config["training_id"],
-                                        get_config_property("result-folder-name"))
+                                        os.getenv("RESULT_FOLDER_NAME"))
 
     #if config["task"] == ":time_series_classification":
         # Time Series Classification Task
@@ -471,55 +470,55 @@ def setup_run_environment(request: "StartAutoMlRequest", adapter_name: str) -> "
         StartAutoMlRequest: The extended training request configuration holding the training paths
     """
     #folder location for job related files
-    job_folder_location = os.path.join(get_config_property("training-path"),
+    job_folder_location = os.path.join(os.getenv("TRAINING_PATH"),
                                         request.user_id,
                                         request.dataset_id,
                                         request.training_id,
                                         request.model_id,
-                                        get_config_property("job-folder-name"))
+                                        os.getenv("JOB_FOLDER_NAME"))
 
     #folder location for automl generated model files (not copied in ZIP)
-    model_folder_location = os.path.join(get_config_property("training-path"),
+    model_folder_location = os.path.join(os.getenv("TRAINING_PATH"),
                                         request.user_id,
                                         request.dataset_id,
                                         request.training_id,
                                         request.model_id,
-                                        get_config_property("model-folder-name"))
+                                        os.getenv("MODEL_FOLDER_NAME"))
 
-    export_folder_location = os.path.join(get_config_property("training-path"),
+    export_folder_location = os.path.join(os.getenv("TRAINING_PATH"),
                                         request.user_id,
                                         request.dataset_id,
                                         request.training_id,
                                         request.model_id,
-                                        get_config_property("export-folder-name"))
+                                        os.getenv("EXPORT_FOLDER_NAME"))
 
-    result_folder_location = os.path.join(get_config_property("training-path"),
+    result_folder_location = os.path.join(os.getenv("TRAINING_PATH"),
                                         request.user_id,
                                         request.dataset_id,
                                         request.training_id,
                                         request.model_id,
-                                        get_config_property("result-folder-name"))
+                                        os.getenv("RESULT_FOLDER_NAME"))
 
-    dashboard_folder_location = os.path.join(get_config_property("training-path"),
+    dashboard_folder_location = os.path.join(os.getenv("TRAINING_PATH"),
                                         request.user_id,
                                         request.dataset_id,
                                         request.training_id,
                                         request.model_id,
-                                        get_config_property("dashboard-folder-name"))
+                                        os.getenv("DASHBOARD_FOLDER_NAME"))
 
-    controller_export_folder_location  = os.path.join(get_config_property("training-path"),
+    controller_export_folder_location  = os.path.join(os.getenv("TRAINING_PATH"),
                                         adapter_name,
                                         request.user_id,
                                         request.dataset_id,
                                         request.training_id,
                                         request.model_id,
-                                        get_config_property("export-folder-name"))
+                                        os.getenv("EXPORT_FOLDER_NAME"))
 
     request_dict = request.to_dict(casing=betterproto.Casing.SNAKE)
     #For WSL users we need to adjust the path prefix for the dataset location to windows path
-    if get_config_property("local_execution") == "YES":
-        if get_config_property("running_in_wsl") == "YES":
-            request_dict["dataset_path"] = re.sub("[a-zA-Z]:\\\\([A-Za-z0-9_]+(\\\\[A-Za-z0-9_]+)+)\\\\MetaAutoML", get_config_property("wsl_metaautoml_path"), request_dict["dataset_path"])
+    if os.getenv("LOCAL_EXECUTION") == "YES":
+        if os.getenv("RUNNING_IN_WSL") == "YES":
+            request_dict["dataset_path"] = re.sub("[a-zA-Z]:\\\\([A-Za-z0-9_]+(\\\\[A-Za-z0-9_]+)+)\\\\MetaAutoML", os.getenv("WSL_METAAUTOML_PATH"), request_dict["dataset_path"])
             request_dict["dataset_path"] = request_dict["dataset_path"].replace("\\", "/")
             job_folder_location = job_folder_location.replace("\\", "/")
             model_folder_location = model_folder_location.replace("\\", "/")
@@ -556,7 +555,7 @@ def setup_run_environment(request: "StartAutoMlRequest", adapter_name: str) -> "
     os.makedirs(result_folder_location, exist_ok=True)
     os.makedirs(dashboard_folder_location, exist_ok=True)
     #Save job file
-    with open(os.path.join(job_folder_location, get_config_property("job-file-name")), "w+") as f:
+    with open(os.path.join(job_folder_location, os.getenv("JOB_FILE_NAME")), "w+") as f:
         json.dump(request_dict, f)
     return request
 

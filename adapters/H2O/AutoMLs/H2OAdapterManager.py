@@ -6,7 +6,6 @@ from AdapterUtils import *
 from AdapterBGRPC import *
 from threading import *
 # from H2OWrapper import H2OWrapper
-from JsonUtil import get_config_property
 import pandas as pd
 from typing import Tuple
 from explainerdashboard import ClassifierExplainer, RegressionExplainer, ExplainerDashboard

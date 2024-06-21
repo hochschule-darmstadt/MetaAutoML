@@ -9,6 +9,8 @@ from typing import Tuple
 import os
 from tpot import TPOTRegressor, TPOTClassifier
 
+from ThreadLock import ThreadLock
+
 class TPOTAdapterManager(AdapterManager):
     """The AutoML solution specific functionality implementation of the AdapterManager class
 
@@ -16,10 +18,10 @@ class TPOTAdapterManager(AdapterManager):
         AdapterManager (AdapterManager): The base class providing the shared functionality for all adapters
     """
 
-    def __init__(self) -> None:
+    def __init__(self, lock: ThreadLock) -> None:
         """Initialize a new TPOTAdapterManager setting AutoML adapter specific variables
         """
-        super(TPOTAdapterManager, self).__init__()
+        super(TPOTAdapterManager, self).__init__(lock)
         self.__automl = None
         self.__loaded_training_id = None
         self._adapter_name = "tpot"

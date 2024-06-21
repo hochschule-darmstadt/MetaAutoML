@@ -5,7 +5,6 @@ from AdapterTabularUtils import *
 import pandas as pd
 import json
 import os
-from JsonUtil import get_config_property
 import tensorflow as tf
 import keras_tuner
 import AutoKerasParameterConfig as akpc

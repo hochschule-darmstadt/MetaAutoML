@@ -5,7 +5,6 @@ import time, asyncio
 from AdapterUtils import *
 from AdapterBGRPC import *
 from threading import *
-from JsonUtil import get_config_property
 import pickle5 as pickle
 import pandas as pd
 from typing import Tuple
