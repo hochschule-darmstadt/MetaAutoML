@@ -35,6 +35,12 @@ class AdapterScheduler:
         response.session_id = new_session_id
         return response
 
+    def terminate_auto_ml(self, terminate_auto_ml_request: "TerminateAutoMlRequest") -> "TerminateAutoMlResponse":
+        self.__adapter_managers[terminate_auto_ml_request.session_id].terminate_auto_ml_process()
+        response = TerminateAutoMlRequest()
+        return response
+
+
     async def get_auto_ml_status(self, start_auto_ml_request: "GetAutoMlStatusRequest") -> "GetAutoMlStatusResponse":
         """Retrieve an available status messages about a specific training session
 

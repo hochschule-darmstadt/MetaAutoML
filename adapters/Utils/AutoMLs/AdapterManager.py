@@ -87,12 +87,12 @@ class AdapterManager(Thread):
 
             # start training process
             python_env = os.getenv("PYTHON_ENV", default="PYTHON_ENV_UNSET")
-            process = Popen([python_env, "AutoML.py", config.job_folder_location],
+            self.__process = Popen([python_env, "AutoML.py", config.job_folder_location],
                                     stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                                     universal_newlines=True, encoding=encoding)
 
             # read the processes output line by line and push them onto the event queue
-            for line in process.stdout:
+            for line in self.__process.stdout:
                 status_update = GetAutoMlStatusResponse()
                 # if return Code is ADAPTER_RETURN_CODE_STATUS_UPDATE we do not have score values yet
                 status_update.return_code = AdapterReturnCode.ADAPTER_RETURN_CODE_STATUS_UPDATE
@@ -104,8 +104,8 @@ class AdapterManager(Thread):
 
                 self.__auto_ml_status_messages.put(status_update)
 
-            process.stdout.close()
-            process.wait()
+            self.__process.stdout.close()
+            self.__process.wait()
             #End carbon recording
             carbon_tracker.stop()
             #Read config configuration again as it might have been changed during the subprocess
@@ -142,6 +142,12 @@ class AdapterManager(Thread):
                     print(e.message)
                 else:
                     print(e)
+
+    def terminate_auto_ml_process(self):
+        """Terminate on ongoing AutoML process
+        """
+        self.__process.terminate()
+        self.__process.wait()
 
     def get_response(self, config: "StartAutoMlRequest", test_score: float, prediction_time: float, library: str, model: str, emissions: EmissionsData) -> "GetAutoMlStatusResponse":
         """Generate the final GRPC AutoML status message

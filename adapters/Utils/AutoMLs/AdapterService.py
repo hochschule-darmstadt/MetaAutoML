@@ -57,3 +57,9 @@ class AdapterService(AdapterServiceBase):
     ) -> "PredictModelResponse":
         return await adapter_scheduler.predict_model(predict_model_request)
 
+    @inject
+    async def terminate_auto_ml(self, terminate_auto_ml_request: "TerminateAutoMlRequest",
+        adapter_scheduler: AdapterScheduler=Provide[Application.managers.adapter_scheduler]
+    ) -> "TerminateAutoMlResponse":
+        return await adapter_scheduler.terminate_auto_ml(terminate_auto_ml_request)
+

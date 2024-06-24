@@ -179,13 +179,18 @@ class AdapterManager(Thread):
             }
         return self.__data_storage.create_model(self.__request.user_id, model_details)
 
-    def cancel_adapter(self):
-        print("canceling me")
-        model_details = {
-            "status": "aborted"
-        }
-        self.__adapter_finished_callback(self.__training_id, self.__request.user_id, self.__model_id, model_details, self)
-        return
+    async def cancel_adapter(self):
+        channel = Channel(host=self.__host, port=self.__port)
+        service = AdapterServiceStub(channel=channel)
+        request = TerminateAutoMlRequest(self.__session_id)
+        response: TerminateAutoMlResponse = await service.terminate_auto_ml(request)
+
+        #print("canceling me")
+        #model_details = {
+        #    "status": "aborted"
+        #}
+        #self.__adapter_finished_callback(self.__training_id, self.__request.user_id, self.__model_id, model_details, self)
+        #return
 
     async def __read_grpc_connection(self):
         """Open a new connection to the AutoML adapter and start the training process and read all Status messages until the process concludes
