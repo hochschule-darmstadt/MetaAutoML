@@ -2,35 +2,66 @@
 @inject IViewNotifier viewNotifier
 @inject IJSRuntime JS
 @inject IStringLocalizer<Global> L
+@using Radzen
+@using Radzen.Blazor
+
 <MudDialog>
+    <TitleContent>
+        <LabelTooltip FontSize="TextStyle.H6" Label=@L["Predictions (20 sample rows)"]
+            Text="This table shows the predictions (20 sample rows) of this ML model for the uploaded new dataset."
+            Position="Radzen.TooltipPosition.Bottom"></LabelTooltip>
+    </TitleContent>
     <DialogContent>
         <MudPaper>
-            <MudTable Items="@TableContent" style="width:stretch; overflow-y: scroll" class="mat-elevation-z5" AllowSelection="false" Dense="true">
-
+            <MudTable Items="@TableContent" style="width:stretch; overflow-y: scroll" class="mat-elevation-z5"
+                AllowSelection="false" Dense="true">
                 <HeaderContent>
                     @foreach (var column in TableHeader.Split(","))
                     {
-                        <MudTh>@column</MudTh>
+                        <MudTh class="table-cell">@column</MudTh>
                     }
                 </HeaderContent>
                 <RowTemplate>
-                    @foreach (var column in @context.Split(","))
-                    {
-                        <MudTd>@column</MudTd>
+                    @{
+                        var cells = @context.Split(",");
+                        <MudTd class="table-cell">@cells[0]</MudTd>
+                        <MudTd class="table-cell">@cells[1]</MudTd>
                     }
                 </RowTemplate>
             </MudTable>
         </MudPaper>
     </DialogContent>
     <DialogActions>
-        @if(TableRowCount > 20)
+        @if (TableRowCount > 20)
         {
             <MudText>@L["{0} more entries available", (TableRowCount - 20)]</MudText>
         }
-        <MudButton StartIcon="@Icons.Filled.CloudDownload" OnClick="@(DownlaodPrediction)" Variant="MudBlazor.Variant.Filled" Color="Color.Secondary" Size="Size.Small">Download</MudButton>
-        <MudButton Variant="Variant.Filled" Color="Color.Secondary" Size="Size.Small" OnClick="Submit">Close</MudButton>
+        <ButtonTooltip
+            Text="Press here to download all predictions of this ML model for the uploaded new dataset as a CSV file."
+            Position="Placement.Bottom">
+            <MudButton StartIcon="@Icons.Filled.CloudDownload" OnClick="@(DownlaodPrediction)"
+                Variant="MudBlazor.Variant.Filled" Color="Color.Secondary" Size="Size.Small">@L["Download"]</MudButton>
+        </ButtonTooltip>
+        <MudButton Variant="MudBlazor.Variant.Filled" Color="Color.Secondary" Size="Size.Small" OnClick="Submit">
+            @L["Close"]</MudButton>
     </DialogActions>
 </MudDialog>
+
+<style>
+    .table-cell,
+    .table-header {
+        border-right: 1px solid #ddd;
+        padding: 8px;
+        text-align: center;
+        vertical-align: middle;
+    }
+
+    .table-cell:last-child,
+    .table-header:last-child {
+        border-right: none;
+    }
+</style>
+
 @code {
     [CascadingParameter] MudDialogInstance MudDialog { get; set; }
     [Parameter] public string TableHeader { get; set; }
@@ -44,10 +75,14 @@
     {
         try
         {
-            ApiResponseDto apiResponse = await apiClient.DownloadPrediction(new DownloadPredictionRequestDto() { PredictionId = PredictionId });
+            ApiResponseDto apiResponse = await apiClient.DownloadPrediction(new DownloadPredictionRequestDto()
+                {
+                    PredictionId = PredictionId
+                });
             if (apiResponse.IsSuccessStatusCode)
             {
-                DownloadPredictionResponseDto response = Newtonsoft.Json.JsonConvert.DeserializeObject<DownloadPredictionResponseDto>(apiResponse.Result.ToString());
+                DownloadPredictionResponseDto response =
+                Newtonsoft.Json.JsonConvert.DeserializeObject<DownloadPredictionResponseDto>(apiResponse.Result.ToString());
 
                 var stream = new MemoryStream(response.Content);
                 using var streamRef = new DotNetStreamReference(stream: stream);
