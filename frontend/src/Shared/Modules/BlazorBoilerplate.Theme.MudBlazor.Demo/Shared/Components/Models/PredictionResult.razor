@@ -22,10 +22,9 @@
                     }
                 </HeaderContent>
                 <RowTemplate>
-                    @{
-                        var cells = @context.Split(",");
-                        <MudTd class="table-cell">@cells[0]</MudTd>
-                        <MudTd class="table-cell">@cells[1]</MudTd>
+                    @foreach (var cells in @context.Split(","))
+                    {
+                        <MudTh class="table-cell">@cells</MudTh>
                     }
                 </RowTemplate>
             </MudTable>
