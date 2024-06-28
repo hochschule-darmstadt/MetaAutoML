@@ -324,7 +324,7 @@ class ControllerServiceManager(ControllerServiceBase):
     @inject
     async def get_available_strategies(
         self, get_available_strategies_request: "GetAvailableStrategiesRequest",
-        ontology_manager: OntologyManager=Provide[Application.ressources.ontology_manager],
+        #ontology_manager: OntologyManager=Provide[Application.ressources.ontology_manager],
         data_storage: DataStorage=Provide[Application.ressources.data_storage]
     ) -> "GetAvailableStrategiesResponse":
 
@@ -367,9 +367,9 @@ class ControllerServiceManager(ControllerServiceBase):
 						)
 				    )
 
-                if  (not found or size_time_ratio > 2000 ):
-                     #or ('irrelevant_features' in dataset['analysis'] and len(dataset['analysis']['irrelevant_features']) != 0))
-                   # and 'preprocessing.ignore_redundant_samples' not in create_training_request.selected_strategies
+                if (not found or size_time_ratio > 2000 ):
+                    # or ('irrelevant_features' in dataset['analysis'] and len(dataset['analysis']['irrelevant_features']) != 0))
+                    # and 'preprocessing.ignore_redundant_samples' not in create_training_request.selected_strategies
 
                     result.strategies.append(
                         Strategy(
@@ -388,13 +388,15 @@ class ControllerServiceManager(ControllerServiceBase):
                         )
                     )
 
-            result.strategies.append(
-                Strategy(
-                'pre_training.top_3_models',
-                'Top 3 Models',
-                'This strategy will run all adapters with only a small part of the data. Then it will train the 3 best solutions with the full data again.'
+            number_of_selected_automl_solutions = int(get_available_strategies_request.configuration['numberOfSelectedAutoMlSolutions'])
+            if number_of_selected_automl_solutions > 3:
+                result.strategies.append(
+                    Strategy(
+                    'pre_training.top_3_models',
+                    'Top 3 Models',
+                    'This strategy will run all adapters with only a small part of the data. Then it will train the 3 best solutions with the full data again.'
+                    )
                 )
-            )
 
             result.strategies.append(
                 Strategy(
