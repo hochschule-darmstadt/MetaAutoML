@@ -28,226 +28,227 @@
                                Variant="MudBlazor.Variant.Filled"
                                Color="Color.Secondary"
                                StartIcon="@Icons.Material.Filled.Upload"
-                               Size="Size.Small">@L["Add Live Dataset"]</MudButton>
-                        </ButtonTooltip>
-                    </MudStack>
-                </CardHeaderActions>
-            </MudCardHeader>
-            <MudCardContent>
-                <MudPaper Height="100px" Elevation="0">
-                    @if (_model == null)
-                    {
-                        <DataLoaderSpinner />
-                    }
-                    else
-                    {
-                        <MudTable Items="@_model.Model.Predictions" style="width:stretch" class="mat-elevation-z5" AllowSelection="false" Dense="true">
-                            <HeaderContent>
-                                <MudTh>@L["Name"]</MudTh>
-                                <MudTh>@L["Date"]</MudTh>
-                                <MudTh>@L["Status"]</MudTh>
-                                <MudTh></MudTh>
-                            </HeaderContent>
-                            <RowTemplate>
-                                <MudTd>
-                                    @context.LiveDatasetName
-                                </MudTd>
-                                <MudTd>
-                                    @context.RuntimeProfile.StartTime.ToString("dd/MM/yyyy")
-                                </MudTd>
-                                <MudTd>
-                                    @if (context.Status == "busy")
-                                    {
-                                        <MudProgressCircular Size="Size.Small" Color="Color.Secondary" Indeterminate="true" />
-                                    }
-                                    else
-                                    {
-                                        @L[context.Status];
-                                    }
-                                </MudTd>
-                                <MudTd>
-                                    @if (context.Status == "completed")
-                                    {
-                                        <MudButton StartIcon="@Icons.Material.Filled.CloudDownload" OnClick="@(() => DownlaodPrediction(context))" Variant="MudBlazor.Variant.Filled" Color="Color.Secondary" Size="Size.Small">@L["Download predictions"]</MudButton>
-                                        <MudButton StartIcon="@Icons.Material.Filled.ViewList" OnClick="@(() => OpenPredictionResults(context))" Variant="MudBlazor.Variant.Filled" Color="Color.Secondary" Size="Size.Small">
-                                            @L["View predictions"]
-                                        </MudButton>
-                                    }
-                                    else
-                                    {
-                                        <MudButton StartIcon="@Icons.Material.Filled.CloudDownload" Variant="MudBlazor.Variant.Filled" Color="Color.Secondary" Size="Size.Small" Disabled="true">@L["Download predictions"]</MudButton>
-                                    }
-                                </MudTd>
-                            </RowTemplate>
-                        </MudTable>
-                    }
-                </MudPaper>
-            </MudCardContent>
-        </MudCard>
-
-        @code {
-            [Parameter]
-            public GetModelResponseDto Model
+                               Size="Size.Small">@L["Add Test Dataset"]</MudButton>
+                </ButtonTooltip>
+            </MudStack>
+        </CardHeaderActions>
+    </MudCardHeader>
+    <MudCardContent>
+        <MudPaper Height="100px" Elevation="0">
+            @if (_model == null)
             {
-                get
-                {
-                    return _model;
-                }
-                set
-                {
-                    _model = value;
-                    if (_model != null)
-                    {
-                        _timer = new Timer()
-                        {
-                            AutoReset = true,
-                            Enabled = true,
-                            Interval = 5000
-                        };
-                        _timer.Elapsed += RefreshPredictions;
-                    }
-                    StateHasChanged();
-                }
+                <DataLoaderSpinner />
             }
-            private GetModelResponseDto _model;
-
-            private GetPredictionsResponseDto _predictions;
-            private ModelPredictResponseDto _modelPrediction;
-            private ModelPredictResponseDto _predictionResult;
-            private Timer _timer;
-
-
-            private void OnOpenUpload()
+            else
             {
-                fileUploader.UploadPredictionRequest.ModelId = _model.Model.Id;
-                fileUploader.IsPredictionDatasetToUpload = true;
-                fileUploader.IsUploadPredictionDatasetDialogOpen = true;
-                fileUploader.RefreshUploadComponentCallback();
-            }
-
-            public void Dispose()
-            {
-                DisposeTimer();
-            }
-            SemaphoreSlim timerSemaphore = new SemaphoreSlim(1);
-            private async void RefreshPredictions(object sender, ElapsedEventArgs e)
-            {
-                await InvokeAsync(async () =>
-                {
-                    var gotLock = timerSemaphore.Wait(0);
-                    if (!gotLock)
-                    {
-                        return;
-                    }
-                    try
-                    {
-                        for (int i = 0; i < _model.Model.Predictions.Count; i++)
-                        {
-                            if (_model.Model.Predictions[i].Status == "busy")
+                <MudTable Items="@_model.Model.Predictions" style="width:stretch" class="mat-elevation-z5" AllowSelection="false" Dense="true">
+                    <HeaderContent>
+                        <MudTh>@L["Name"]</MudTh>
+                        <MudTh>@L["Date"]</MudTh>
+                        <MudTh>@L["Status"]</MudTh>
+                        <MudTh></MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd>
+                            @context.LiveDatasetName
+                        </MudTd>
+                        <MudTd>
+                            @context.RuntimeProfile.StartTime.ToString("dd/MM/yyyy")
+                        </MudTd>
+                        <MudTd>
+                            @if (context.Status == "busy")
                             {
-                                ApiResponseDto apiResponse = await apiClient.GetPrediction(new GetPredictionRequestDto { PredictionId = _model.Model.Predictions[i].Id });
-                                if (apiResponse.IsSuccessStatusCode)
-                                {
-                                    _model.Model.Predictions[i] = Newtonsoft.Json.JsonConvert.DeserializeObject<GetPredictionResponseDto>(apiResponse.Result.ToString()).Prediction;
-                                    StateHasChanged();
-                                }
-                                //Prediction does not exist anymore
-                                else if (apiResponse.StatusCode == 404)
-                                {
-                                    _model.Model.Predictions.RemoveAt(i);
-                                    DisposeTimer();
-                                    return;
-                                }
-                                else
-                                {
-                                    viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
-                                }
+                                <MudProgressCircular Size="Size.Small" Color="Color.Secondary" Indeterminate="true" />
                             }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        viewNotifier.Show(ex.GetBaseException().Message, ViewNotifierType.Error, L["Operation Failed"]);
-                    }
-                    finally
-                    {
-                        timerSemaphore.Release();
-                    }
-                });
+                            else
+                            {
+                                @L[context.Status];
+                            }
+                        </MudTd>
+                        <MudTd>
+                            @if (context.Status == "completed")
+                            {
+                                <MudButton StartIcon="@Icons.Material.Filled.CloudDownload" OnClick="@(() => DownlaodPrediction(context))" Variant="MudBlazor.Variant.Filled" Color="Color.Secondary" Size="Size.Small">@L["Download predictions"]</MudButton>
+                                <MudButton StartIcon="@Icons.Material.Filled.ViewList" OnClick="@(() => OpenPredictionResults(context))" Variant="MudBlazor.Variant.Filled" Color="Color.Secondary" Size="Size.Small">
+                                    @L["View predictions"]
+                                </MudButton>
+                            }
+                            else
+                            {
+                                <MudButton StartIcon="@Icons.Material.Filled.CloudDownload" Variant="MudBlazor.Variant.Filled" Color="Color.Secondary" Size="Size.Small" Disabled="true">@L["Download predictions"]</MudButton>
+                            }
+                        </MudTd>
+                    </RowTemplate>
+                </MudTable>
             }
+        </MudPaper>
+    </MudCardContent>
+</MudCard>
 
-            public void DisposeTimer()
+@code {
+    [Parameter]
+    public GetModelResponseDto Model
+    {
+        get
+        {
+            return _model;
+        }
+        set
+        {
+            _model = value;
+            if (_model != null)
             {
-                if (_timer != null)
+                _timer = new Timer()
                 {
-                    _timer.Stop();
-                    _timer.Elapsed -= RefreshPredictions;
-                    _timer?.Dispose();
-                    _timer = null;
-                }
+                    AutoReset = true,
+                    Enabled = true,
+                    Interval = 5000
+                };
+                _timer.Elapsed += RefreshPredictions;
             }
+            StateHasChanged();
+        }
+    }
+    private GetModelResponseDto _model;
+    private GetPredictionsResponseDto _predictions;
+    private ModelPredictResponseDto _modelPrediction;
+    private ModelPredictResponseDto _predictionResult;
+    private Timer _timer;
 
-            private async void OpenPredictionResults(PredictionDto predictionDataset)
+    private void OnOpenUpload()
+    {
+        fileUploader.UploadPredictionRequest.ModelId = _model.Model.Id;
+        fileUploader.IsPredictionDatasetToUpload = true;
+        fileUploader.IsUploadPredictionDatasetDialogOpen = true;
+        fileUploader.RefreshUploadComponentCallback();
+    }
+
+    public void Dispose()
+    {
+        DisposeTimer();
+    }
+    SemaphoreSlim timerSemaphore = new SemaphoreSlim(1);
+    private async void RefreshPredictions(object sender, ElapsedEventArgs e)
+    {
+        await InvokeAsync(async () =>
+        {
+            var gotLock = timerSemaphore.Wait(0);
+            if (!gotLock)
             {
-                var options = new MudBlazor.DialogOptions { CloseOnEscapeKey = true };
-                var parameters = new DialogParameters();
-
-                try
+                return;
+            }
+            try
+            {
+                for (int i = 0; i < _model.Model.Predictions.Count; i++)
                 {
-                    ApiResponseDto apiResponse = await apiClient.DownloadPrediction(new DownloadPredictionRequestDto() { PredictionId = predictionDataset.Id });
-                    if (apiResponse.IsSuccessStatusCode)
+                    if (_model.Model.Predictions[i].Status == "busy")
                     {
-                        DownloadPredictionResponseDto response = Newtonsoft.Json.JsonConvert.DeserializeObject<DownloadPredictionResponseDto>(apiResponse.Result.ToString());
-
-                        var stream = new MemoryStream(response.Content);
-                        string jsonString = System.Text.Encoding.ASCII.GetString(stream.ToArray());
-
-                        if (!string.IsNullOrEmpty(jsonString))
+                        ApiResponseDto apiResponse = await apiClient.GetPrediction(new GetPredictionRequestDto { PredictionId = _model.Model.Predictions[i].Id });
+                        if (apiResponse.IsSuccessStatusCode)
                         {
-                            string tableHeader = jsonString.Split("\n")[0];
-                            string[] tableContent = jsonString.Split("\n");
-                            long tableRowCount = tableContent.Length - 1;
-                            tableContent = tableContent.Skip(1).Take(20).ToArray();
-                            parameters.Add("TableHeader", tableHeader);
-                            parameters.Add("TableContent", tableContent);
-                            parameters.Add("TableRowCount", tableRowCount);
-                            parameters.Add("PredictionId", predictionDataset.Id);
+                            _model.Model.Predictions[i] = Newtonsoft.Json.JsonConvert.DeserializeObject<GetPredictionResponseDto>(apiResponse.Result.ToString()).Prediction;
+                            StateHasChanged();
                         }
-
-                        DialogService.Show<PredictionResult>("Predictions", parameters, options);
-
+                        //Prediction does not exist anymore
+                        else if (apiResponse.StatusCode == 404)
+                        {
+                            _model.Model.Predictions.RemoveAt(i);
+                            DisposeTimer();
+                            return;
+                        }
+                        else
+                        {
+                            viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
+                        }
                     }
                 }
-                catch (Exception ex)
-                {
-                    viewNotifier.Show(ex.GetBaseException().Message, ViewNotifierType.Error, L["Operation Failed"]);
-                }
-
-
             }
-
-            private async void DownlaodPrediction(PredictionDto predictionDataset)
+            catch (Exception ex)
             {
-                try
-                {
-                    ApiResponseDto apiResponse = await apiClient.DownloadPrediction(new DownloadPredictionRequestDto() { PredictionId = predictionDataset.Id });
-                    if (apiResponse.IsSuccessStatusCode)
-                    {
-                        DownloadPredictionResponseDto response = Newtonsoft.Json.JsonConvert.DeserializeObject<DownloadPredictionResponseDto>(apiResponse.Result.ToString());
+                viewNotifier.Show(ex.GetBaseException().Message, ViewNotifierType.Error, L["Operation Failed"]);
+            }
+            finally
+            {
+                timerSemaphore.Release();
+            }
+        });
+    }
 
-                        var stream = new MemoryStream(response.Content);
-                        using var streamRef = new DotNetStreamReference(stream: stream);
-                        await JS.InvokeVoidAsync("downloadFileFromStream", "predictions.csv", streamRef);
-                        StateHasChanged();
-                    }
-                    else
-                    {
-                        viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
-                    }
-                }
-                catch (Exception ex)
+    public void DisposeTimer()
+    {
+        if (_timer != null)
+        {
+            _timer.Stop();
+            _timer.Elapsed -= RefreshPredictions;
+            _timer?.Dispose();
+            _timer = null;
+        }
+    }
+
+    private async void OpenPredictionResults(PredictionDto predictionDataset)
+    {
+        var options = new MudBlazor.DialogOptions { CloseOnEscapeKey = true };
+        var parameters = new DialogParameters();
+
+        try
+        {
+            ApiResponseDto apiResponse = await apiClient.DownloadPrediction(new DownloadPredictionRequestDto() { PredictionId = predictionDataset.Id });
+            if (apiResponse.IsSuccessStatusCode)
+            {
+                DownloadPredictionResponseDto response = Newtonsoft.Json.JsonConvert.DeserializeObject<DownloadPredictionResponseDto>(apiResponse.Result.ToString());
+
+                var stream = new MemoryStream(response.Content);
+                string jsonString = System.Text.Encoding.ASCII.GetString(stream.ToArray());
+
+                if (!string.IsNullOrEmpty(jsonString))
                 {
-                    viewNotifier.Show(ex.GetBaseException().Message, ViewNotifierType.Error, L["Operation Failed"]);
+                    string[] tableContent = jsonString.Split("\n");
+                    string tableHeader = tableContent[0];
+                    if (tableHeader.StartsWith(","))
+                    {
+                        tableHeader = "Index" + tableHeader;
+                    }
+
+                    long tableRowCount = tableContent.Length - 1;
+                    tableContent = tableContent.Skip(1).Take(20).ToArray();
+                    parameters.Add("TableHeader", tableHeader);
+                    parameters.Add("TableContent", tableContent);
+                    parameters.Add("TableRowCount", tableRowCount);
+                    parameters.Add("PredictionId", predictionDataset.Id);
                 }
+
+                DialogService.Show<PredictionResult>("Predictions (20 sample rows)", parameters, options);
+
             }
         }
+        catch (Exception ex)
+        {
+            viewNotifier.Show(ex.GetBaseException().Message, ViewNotifierType.Error, L["Operation Failed"]);
+        }
+    }
+
+    private async void DownlaodPrediction(PredictionDto predictionDataset)
+    {
+        try
+        {
+            ApiResponseDto apiResponse = await apiClient.DownloadPrediction(new DownloadPredictionRequestDto() { PredictionId = predictionDataset.Id });
+            if (apiResponse.IsSuccessStatusCode)
+            {
+                DownloadPredictionResponseDto response = Newtonsoft.Json.JsonConvert.DeserializeObject<DownloadPredictionResponseDto>(apiResponse.Result.ToString());
+
+                var stream = new MemoryStream(response.Content);
+                using var streamRef = new DotNetStreamReference(stream: stream);
+                await JS.InvokeVoidAsync("downloadFileFromStream", "predictions.csv", streamRef);
+                StateHasChanged();
+            }
+            else
+            {
+                viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
+            }
+        }
+        catch (Exception ex)
+        {
+            viewNotifier.Show(ex.GetBaseException().Message, ViewNotifierType.Error, L["Operation Failed"]);
+        }
+    }
+}

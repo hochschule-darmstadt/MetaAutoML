@@ -2046,3 +2046,10 @@ msgctxt "Global"
 msgid "There are no models yet because no training has been carried out."
 msgstr "There are no models yet because no training has been carried out."
 
+msgctxt "Global"
+msgid "Predictions (20 sample rows)"
+msgstr "Predictions (20 sample rows)"
+
+msgctxt "Global"
+msgid "Add Test Dataset"
+msgstr "Add Test Dataset"
