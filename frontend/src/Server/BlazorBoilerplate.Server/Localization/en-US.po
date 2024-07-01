@@ -615,9 +615,6 @@ msgctxt "Global"
 msgid "PopServer"
 msgstr "POP3 server"
 
-msgctxt "Global"
-msgid "Save"
-msgstr "Save"
 
 msgctxt "Global"
 msgid "Port"
@@ -1403,10 +1400,6 @@ msgid "Start Training"
 msgstr "Start Training"
 
 msgctxt "Global"
-msgid "Create a new Training"
-msgstr "Create a new Training"
-
-msgctxt "Global"
 msgid "Dataset {0}"
 msgstr "Dataset {0}"
 
@@ -1924,10 +1917,6 @@ msgid "ignore"
 msgstr "Ignore"
 
 msgctxt "Global"
-msgid "none"
-msgstr "None"
-
-msgctxt "Global"
 msgid "target *"
 msgstr "Target *"
 msgctxt "Global"
@@ -2041,6 +2030,14 @@ msgstr "Search Output ..."
 msgctxt "Global"
 msgid "Details"
 msgstr "Details"
+
+msgctxt "Global"
+msgid  "Save & Reload dataset"
+msgstr "Save & Reload dataset"
+
+msgctxt "Global"
+msgid "Default"
+msgstr "Default"
 
 msgctxt "Global"
 msgid "There are no models yet because no training has been carried out."
