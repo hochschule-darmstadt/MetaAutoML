@@ -16,3 +16,4 @@ scikit-learn
 explainerdashboard==0.4.7
 rdflib==6.2.0
 xgboost==1.6.2
+numpy==1.26.4

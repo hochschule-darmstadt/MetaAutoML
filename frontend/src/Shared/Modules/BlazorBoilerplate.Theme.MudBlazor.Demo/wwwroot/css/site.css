@@ -96,7 +96,32 @@ a {
     font-size: clamp(0.7rem, -0.875rem + 2.4vw, 1rem);
 }
 
+.container-fluid {
+    padding: 10px 25px 50px 20px;
+    border-radius: 5px;
+}
+
 .conf-table {
     margin-bottom: 25px;
+    height: 200px;
 
+}
+
+.table-bordered {
+    border-collapse: collapse;
+    border-radius: 5px;
+}
+
+.table-bordered th,
+.table-bordered td {
+    border: none;
+    /* Removes all internal borders */
+}
+
+.table-bordered th,
+.table-bordered td {
+    border-top: 1px solid lightgrey;
+    /* Top border for cells */
+    border-bottom: 0, 5px solid lightgrey;
+    /* Bottom border for cells */
 }

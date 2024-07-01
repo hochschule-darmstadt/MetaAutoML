@@ -70,7 +70,13 @@
                     </MudItem>
                 </MudGrid>
             </ChildContent>
-            <FooterContent></FooterContent>
+            <FooterContent>
+                <MudButton Style="margin-left:1rem; margin-top:1rem;"
+                           Variant="Variant.Filled"
+                           Color="Color.Secondary"
+                           Size="Size.Medium"
+                           OnClick="@(() => context.PreviousStep())">Previous</MudButton>
+            </FooterContent>
         </GuidedTourStep>
         <GuidedTourStep StepName="thirdStep" TourStepSequence="3" PopupPlacement="PopperPlacement.Left" PopupStrategy="PopperStrategy.Absolute"
                         ElementSelector="[data-form-thirdStep]">
@@ -157,6 +163,11 @@
                            Variant="Variant.Filled"
                            Color="Color.Secondary"
                            Size="Size.Medium"
+                           OnClick="@(() => context.PreviousStep())">Previous</MudButton>
+                <MudButton Style="margin-left:1rem; margin-top:1rem;"
+                           Variant="Variant.Filled"
+                           Color="Color.Secondary"
+                           Size="Size.Medium"
                            OnClick="@(() => context.NextStep())">Next</MudButton>
             </FooterContent>
         </GuidedTourStep>
@@ -185,6 +196,11 @@
                            Variant="Variant.Filled"
                            Color="Color.Secondary"
                            Size="Size.Medium"
+                           OnClick="@(() => context.PreviousStep())">Previous</MudButton>
+                <MudButton Style="margin-left:1rem; margin-top:1rem;"
+                           Variant="Variant.Filled"
+                           Color="Color.Secondary"
+                           Size="Size.Medium"
                            OnClick="@(() => context.NextStep())">Next</MudButton>
             </FooterContent>
         </GuidedTourStep>
@@ -205,7 +221,13 @@
                     </MudItem>
                 </MudGrid>
             </ChildContent>
-            <FooterContent></FooterContent>
+            <FooterContent>
+                <MudButton Style="margin-left:1rem; margin-top:1rem;"
+                           Variant="Variant.Filled"
+                           Color="Color.Secondary"
+                           Size="Size.Medium"
+                           OnClick="@(() => context.PreviousStep())">Previous</MudButton>
+            </FooterContent>
         </GuidedTourStep>
         <GuidedTourStep StepName="ninthStep" TourStepSequence="9" PopupPlacement="PopperPlacement.Top" PopupStrategy="PopperStrategy.Absolute"
                         ElementSelector="[data-form-ninthStep]">
@@ -248,7 +270,13 @@
                     </MudItem>
                 </MudGrid>
             </ChildContent>
-            <FooterContent></FooterContent>
+            <FooterContent>
+                <MudButton Style="margin-left:1rem; margin-top:1rem;"
+                           Variant="Variant.Filled"
+                           Color="Color.Secondary"
+                           Size="Size.Medium"
+                           OnClick="@(() => context.PreviousStep())">Previous</MudButton>
+            </FooterContent>
         </GuidedTourStep>
         <GuidedTourStep StepName="eleventhStep" TourStepSequence="11" PopupPlacement="PopperPlacement.TopStart" PopupStrategy="PopperStrategy.Absolute"
                         ElementSelector="[data-form-eleventhStep]">
@@ -294,6 +322,11 @@
                 </MudGrid>
             </ChildContent>
             <FooterContent>
+                <MudButton Style="margin-left:1rem; margin-top:1rem;"
+                           Variant="Variant.Filled"
+                           Color="Color.Secondary"
+                           Size="Size.Medium"
+                           OnClick="@(() => context.PreviousStep())">Previous</MudButton>
                 <MudButton Style="margin-left:1rem; margin-top:1rem;"
                            Variant="Variant.Filled"
                            Color="Color.Secondary"
