@@ -1,4 +1,3 @@
-
 @using System
 @using System.IO
 @using Microsoft.AspNetCore.Hosting
@@ -17,53 +16,90 @@
 <MudCard Elevation="5">
     <MudCardHeader Style="border-bottom-style: inset; border-bottom-width: 1px;">
         <CardHeaderContent>
-            <LabelTooltip FontSize="TextStyle.H6" Label=@L["Explainable AI"] Text="Here you get various detailed graphical analyses using Explainable AI (XAI)." Position="Radzen.TooltipPosition.Bottom"></LabelTooltip>
+            <LabelTooltip FontSize="TextStyle.H6" Label=@L["Explainable AI"] Text="Here you get detailed graphical analyses of this ML model using Explainable AI (XAI)." Position="Radzen.TooltipPosition.Bottom"></LabelTooltip>
         </CardHeaderContent>
-        <CardHeaderActions>
-            @if (ExplanationPagePath != null)
-            {
-                <MudButton Href="@NavManager.ToAbsoluteUri(ExplanationPagePath).AbsoluteUri"
-                           Disabled="IsModelBlacklisted"
-                           Variant="MudBlazor.Variant.Filled"
-                           StartIcon="@Icons.Material.Filled.ReadMore"
-                           Color="Color.Secondary"
-                           Size="Size.Small"
-                           Style="margin-top: 8px">@L["More"]</MudButton>
-                    }
-        </CardHeaderActions>
     </MudCardHeader>
+
     <MudCardContent>
         <MudPaper Height="250px" Elevation="0">
-            @*            @if (_explanation == null)
-                {
-                    <DataLoaderSpinner />
-                }
-                else if (_explanation.Status != "finished")
-                {
-                    <DataLoaderSpinner />
-                }
-                else
-                {
-                    <MudButton Href="@NavManager.ToAbsoluteUri(ExplanationPagePath).AbsoluteUri">
-                        <MudItem xs="12" Style="display: grid; justify-content: center;">
-                            <MudImage Src="@GetImage(_explanation.AnalysisCategories[0].Analyses[0].Content)" Style="height:250px;" />
-                        </MudItem>
-                    </MudButton>
-                }*@
-            <MudButton Href="@NavManager.ToAbsoluteUri(ExplanationPagePath).AbsoluteUri">
-                <MudItem xs="12" Style="display: grid; justify-content: center;">
-                    <MudImage Src="@($"_content/BlazorBoilerplate.Theme.MudBlazor/images/xai.png")" Style="height:250px;" />
-                </MudItem>
-            </MudButton>
+            @if (_explanation == null)
+            {
+                <DataLoaderSpinner />
+            }
+            else
+            {
+                <MudStack JustifyContent="center">
+                        @if (string.IsNullOrEmpty(ExplanationPagePath))
+                        {
+                            <ButtonTooltip Text="No URL available for the dashboard." Position="Placement.Top">
+                                <MudButton Disabled="true"
+                                           Variant="MudBlazor.Variant.Filled"
+                                           StartIcon="@Icons.Material.Outlined.Analytics"
+                                           Color="Color.Secondary"
+                                           Class="full-width">
+                                    @L["Open dashboard"]
+                                </MudButton>
+                            </ButtonTooltip>
+                        }
+                        else if (_explanation.Status == "dashboard_failed")
+                        {
+                            <ButtonTooltip Text="The dashboard failed to load." Position="Placement.Top">
+                                <MudButton Disabled="true"
+                                           Variant="MudBlazor.Variant.Filled"
+                                           StartIcon="@Icons.Material.Outlined.Analytics"
+                                           Color="Color.Secondary"
+                                           Class="full-width">
+                                    @L["Open dashboard"]
+                                </MudButton>
+                            </ButtonTooltip>
+                        }
+                        else if (_explanation.Status == "db_error")
+                        {
+                            <ButtonTooltip Text="There was an error with the database." Position="Placement.Top">
+                                <MudButton Disabled="true"
+                                           Variant="MudBlazor.Variant.Filled"
+                                           StartIcon="@Icons.Material.Outlined.Analytics"
+                                           Color="Color.Secondary"
+                                           Class="full-width">
+                                    @L["Open dashboard"]
+                                </MudButton>
+                            </ButtonTooltip>
+                            <MudButton Variant="MudBlazor.Variant.Filled"
+                                       StartIcon="@Icons.Material.Outlined.Refresh"
+                                       Color="Color.Primary"
+                                       OnClick="LoadModelExplanation"
+                                       Class="full-width">
+                                @L["Refresh"]
+                            </MudButton>
+                        }
+                        else if (_explanation.Status == "finished")
+                        {
+                            <ButtonTooltip Text="Opens the dashboard for analyzing this ML model (Explainable AI)." Position="Placement.Top">
+                                <MudButton Disabled="IsModelBlacklisted"
+                                           Variant="MudBlazor.Variant.Filled"
+                                           StartIcon="@Icons.Material.Outlined.Analytics"
+                                           Color="Color.Secondary"
+                                           Href="@NavManager.ToAbsoluteUri(ExplanationPagePath).AbsoluteUri"
+                                           Target="_blank"
+                                           Class="full-width">
+                                    @L["Open dashboard"]
+                                </MudButton>
+                            </ButtonTooltip>
+                        }
+                </MudStack>
+            }
         </MudPaper>
     </MudCardContent>
 </MudCard>
 
-
 @code {
-    public string AutoMlSolutionID = "";
     [Parameter]
     public string ExplanationPagePath { get; set; }
+    public string AutoMlSolutionID = "";
+    private GetModelResponseDto _model;
+    private GetModelExplanationResponseDto _explanation;
+    private bool isPreviewRequestRunning = false;
+
     [Parameter]
     public GetModelResponseDto Model
     {
@@ -81,21 +117,15 @@
             StateHasChanged();
         }
     }
-    private GetModelResponseDto _model;
-    private GetModelExplanationResponseDto _explanation;
-    private bool isPreviewRequestRunning = false;
-
-    private List<string> blacklistedModels = new List<string> { "Autogluon", "", "" };
-    //private string currentModel = this._model.Model.AutoMlSolution.ID;
-    //private string currModel = _model.Model.AutoMlSolution.ID;
-    //private bool IsModelBlacklisted => blacklistedModels.Contains(currentModel);
+    // TODO blacklist needs to be filled out with Model that dont generate Dashboard 
+    private List<string> blacklistedModels = new List<string> { "", "", "" };
     private bool IsModelBlacklisted => blacklistedModels.Contains(AutoMlSolutionID);
+
     private async Task LoadModelExplanation()
     {
         try
         {
-            //Due to frontend refreshes it may occur that this is triggered twice, leading to an error while the first request is reading
-            if (isPreviewRequestRunning == true)
+            if (isPreviewRequestRunning)
             {
                 return;
             }
@@ -107,39 +137,53 @@
                 if (counter == 2)
                 {
                     AutoMlSolutionID = el.Value.ToString();
-                    break; // Exit the loop once the second item is found
+                    break; 
                 }
             }
-            string test = "";
-            //GetModelExplanationRequestDto modelRequest = new GetModelExplanationRequestDto()
-            //{
-            //    ModelId = _model.Model.Id,
-            //    GetShortPreview = true
-            //};
-            //ApiResponseDto apiResponse = await apiClient.GetModelExplanation(modelRequest);
+            // Dummy data for explanation status for testing purposes
+            _explanation = new GetModelExplanationResponseDto
+                {
+                    Status = "finished" // Change this value for testing different scenarios: "dashboard_failed", "db_error", "finished"
+                };
 
-            //if (apiResponse.IsSuccessStatusCode)
-            //{
-            //    _explanation = Newtonsoft.Json.JsonConvert.DeserializeObject<GetModelExplanationResponseDto>(apiResponse.Result.ToString());
-            //    StateHasChanged();
-            //    viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
-            //}
-            //else
-            //{
-            //    viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
-            //}
+            // Uncomment and use actual API call for real implementation
+            /*
+            GetModelExplanationRequestDto modelRequest = new GetModelExplanationRequestDto()
+            {
+                ModelId = _model.Model.Id,
+                GetShortPreview = true
+            };
+            ApiResponseDto apiResponse = await apiClient.GetModelExplanation(modelRequest);
+
+            if (apiResponse.IsSuccessStatusCode)
+            {
+                _explanation = Newtonsoft.Json.JsonConvert.DeserializeObject<GetModelExplanationResponseDto>(apiResponse.Result.ToString());
+                viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
+            }
+            else
+            {
+                viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
+                // Set _explanation.Status based on the type of error
+                _explanation.Status = "dashboard_failed"; // or "db_error"
+            }
+            */
+
+            StateHasChanged();
         }
         catch (Exception ex)
         {
             viewNotifier.Show(ex.GetBaseException().Message, ViewNotifierType.Error, L["Operation Failed"]);
+            _explanation.Status = "db_error"; // Assume database error in case of exception
         }
         isPreviewRequestRunning = false;
     }
+
     string GetImage(byte[] image)
     {
         var imageSrc = Convert.ToBase64String(image);
-        return string.Format("data:image/svg+xml;base64,{0}", imageSrc);
+        return $"data:image/svg+xml;base64,{imageSrc}";
     }
+
     string GetHtml(byte[] text)
     {
         var html = Encoding.Default.GetString(text);
