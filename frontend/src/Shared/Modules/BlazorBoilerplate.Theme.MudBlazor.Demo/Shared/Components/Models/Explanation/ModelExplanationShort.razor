@@ -17,12 +17,13 @@
 <MudCard Elevation="5">
     <MudCardHeader Style="border-bottom-style: inset; border-bottom-width: 1px;">
         <CardHeaderContent>
-            <LabelTooltip FontSize="TextStyle.H6" Label=@L["Analysis"] Text="Here you get various detailed graphical analyses using Explainable AI (XAI)." Position="Radzen.TooltipPosition.Bottom"></LabelTooltip>
+            <LabelTooltip FontSize="TextStyle.H6" Label=@L["Explainable AI"] Text="Here you get various detailed graphical analyses using Explainable AI (XAI)." Position="Radzen.TooltipPosition.Bottom"></LabelTooltip>
         </CardHeaderContent>
         <CardHeaderActions>
             @if (ExplanationPagePath != null)
             {
                 <MudButton Href="@NavManager.ToAbsoluteUri(ExplanationPagePath).AbsoluteUri"
+                           Disabled="IsModelBlacklisted"
                            Variant="MudBlazor.Variant.Filled"
                            StartIcon="@Icons.Material.Filled.ReadMore"
                            Color="Color.Secondary"
@@ -60,6 +61,7 @@
 
 
 @code {
+    public string AutoMlSolutionID = "";
     [Parameter]
     public string ExplanationPagePath { get; set; }
     [Parameter]
@@ -83,6 +85,11 @@
     private GetModelExplanationResponseDto _explanation;
     private bool isPreviewRequestRunning = false;
 
+    private List<string> blacklistedModels = new List<string> { "Autogluon", "", "" };
+    //private string currentModel = this._model.Model.AutoMlSolution.ID;
+    //private string currModel = _model.Model.AutoMlSolution.ID;
+    //private bool IsModelBlacklisted => blacklistedModels.Contains(currentModel);
+    private bool IsModelBlacklisted => blacklistedModels.Contains(AutoMlSolutionID);
     private async Task LoadModelExplanation()
     {
         try
@@ -93,6 +100,17 @@
                 return;
             }
             isPreviewRequestRunning = true;
+            int counter = 0;
+            foreach(KeyValuePair<string, string> el in _model.Model.AutoMlSolution.Properties)
+            {
+                counter++;
+                if (counter == 2)
+                {
+                    AutoMlSolutionID = el.Value.ToString();
+                    break; // Exit the loop once the second item is found
+                }
+            }
+            string test = "";
             //GetModelExplanationRequestDto modelRequest = new GetModelExplanationRequestDto()
             //{
             //    ModelId = _model.Model.Id,

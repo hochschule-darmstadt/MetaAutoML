@@ -1794,7 +1794,6 @@ msgctxt "Global"
 msgid "Column analysis"
 msgstr "Column Analysis"
 
-
 msgctxt "Global"
 msgid "AntiforgeryCookieDescription"
 msgstr "This cookie saves the anti forgery token, used to prevent Cross-Site-Request-Forgery-Attack."
