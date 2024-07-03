@@ -10,6 +10,6 @@ namespace BlazorBoilerplate.Shared.Interfaces
     public interface IDatasetPreviewWorker
     {
         Task UpdateDatasetFileConfiguration(GetDatasetResponseDto dataset);
-        Task UpdateDatasetColumnSchemaConfiguration(SetDatasetColumnSchemaConfigurationRequestDto request);
+        Task<bool> UpdateDatasetColumnSchemaConfiguration(SetDatasetColumnSchemaConfigurationRequestDto request);
     }
 }

@@ -24,7 +24,7 @@ namespace BlazorBoilerplate.Theme.Material.Services
             L = l;
         }
 
-        public async Task UpdateDatasetColumnSchemaConfiguration(SetDatasetColumnSchemaConfigurationRequestDto request)
+        public async Task<bool> UpdateDatasetColumnSchemaConfiguration(SetDatasetColumnSchemaConfigurationRequestDto request)
         {
             try
             {
@@ -33,15 +33,18 @@ namespace BlazorBoilerplate.Theme.Material.Services
                 if (apiResponse.IsSuccessStatusCode)
                 {
                     _notifier.Show("Column updated", ViewNotifierType.Success, L["Operation Successful"]);
+                    return true;
                 }
                 else
                 {
                     _notifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
+                    return false;
                 }
             }
             catch (Exception ex)
             {
                 _notifier.Show(ex.GetBaseException().Message, ViewNotifierType.Error, L["Operation Failed"]);
+                return false;
             }
         }
 

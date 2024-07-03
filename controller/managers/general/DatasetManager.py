@@ -196,6 +196,9 @@ class DatasetManager:
         self.__log.debug(f"set_dataset_column_schema_configuration: setting new column selected datatype {set_dataset_column_schema_configuration_request.datatype_selected}, selected role {set_dataset_column_schema_configuration_request.role_selected} for column {set_dataset_column_schema_configuration_request.column}, of user {set_dataset_column_schema_configuration_request.user_id}")
         found, dataset = self.__data_storage.get_dataset(set_dataset_column_schema_configuration_request.user_id, set_dataset_column_schema_configuration_request.dataset_id)
         dataset_schema = dataset["schema"]
+        if set_dataset_column_schema_configuration_request.datatype_selected == ":integer" and dataset_schema[set_dataset_column_schema_configuration_request.column]["datatype_detected"] == ':float':
+            raise grpclib.GRPCError(grpclib.Status.INVALID_ARGUMENT, f"Cannot set {set_dataset_column_schema_configuration_request.column} to integer, because it contains float numbers.")
+
         if set_dataset_column_schema_configuration_request.datatype_selected  in [":none", ""]:
             try:
                 del dataset_schema[set_dataset_column_schema_configuration_request.column]["datatype_selected"]
