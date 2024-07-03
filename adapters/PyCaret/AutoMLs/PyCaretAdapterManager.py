@@ -5,7 +5,6 @@ import time, asyncio
 from AdapterUtils import *
 from AdapterBGRPC import *
 from threading import *
-from JsonUtil import get_config_property
 import pandas as pd
 from typing import Tuple
 from pycaret.classification import *
@@ -25,7 +24,9 @@ from sklearn.kernel_ridge import KernelRidge
 from sklearn.utils.extmath import softmax
 from lightgbm import LGBMClassifier
 
-def get_lib_model_names(instance):    
+from ThreadLock import ThreadLock
+
+def get_lib_model_names(instance):
     if isinstance(instance, LogisticRegression):
         return ":scikit_learn_lib", ":logistic_regression"
     if isinstance(instance, KNeighborsClassifier):
@@ -125,10 +126,10 @@ class PyCaretAdapterManager(AdapterManager):
         AdapterManager (AdapterManager): The base class providing the shared functionality for all adapters
     """
 
-    def __init__(self) -> None:
+    def __init__(self, lock: ThreadLock) -> None:
         """Initialize a new PyCaretAdapterManager setting AutoML adapter specific variables
         """
-        super(PyCaretAdapterManager, self).__init__()
+        super(PyCaretAdapterManager, self).__init__(lock)
         self.__automl = None
         self.__loaded_training_id = None
         self._adapter_name = "pycaret"
@@ -153,8 +154,8 @@ class PyCaretAdapterManager(AdapterManager):
             lib, model = get_lib_model_names(automl)
         libraries.append(lib)
         models.append(model)
-        return libraries, models        
-        
+        return libraries, models
+
 
     def _load_model_and_make_probabilities(self, config: "StartAutoMlRequest", result_folder_location: str, dataframe: pd.DataFrame):
         """Must be overwriten! Load the found model, and execute a prediction using the provided data to calculate the probability metric used by the ExplanableAI module inside the controller

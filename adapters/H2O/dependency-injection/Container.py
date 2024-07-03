@@ -1,6 +1,12 @@
 from dependency_injector import containers, providers
 from AdapterScheduler import *
 from H2OAdapterManager import H2OAdapterManager
+from ThreadLock import ThreadLock
+
+class Ressources(containers.DeclarativeContainer):
+    lock =  providers.ThreadSafeSingleton(
+        ThreadLock,
+    )
 
 
 class Managers(containers.DeclarativeContainer):
@@ -15,6 +21,7 @@ class Managers(containers.DeclarativeContainer):
     )
     adapter_manager = providers.Factory(
         H2OAdapterManager,
+        lock=ressources.lock
     )
 
 class Application(containers.DeclarativeContainer):
@@ -23,6 +30,10 @@ class Application(containers.DeclarativeContainer):
     Args:
         containers (containers.DeclarativeContainer): dependency-injector dependency providing functionality to inject dependencies
     """
+    ressources = providers.Container(
+        Ressources,
+    )
     managers =  providers.Container(
         Managers,
+        ressources=ressources,
     )

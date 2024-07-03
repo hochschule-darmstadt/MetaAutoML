@@ -4,7 +4,6 @@ import MLJARParameterConfig as mjpc
 
 from AdapterUtils import *
 from AdapterTabularUtils import *
-from JsonUtil import get_config_property
 from supervised.automl import AutoML
 from MLJARWrapper import MLJARWrapper
 

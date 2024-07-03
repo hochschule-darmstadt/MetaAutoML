@@ -2,7 +2,6 @@ from mcfly.find_architecture import train_models_on_samples
 from mcfly.modelgen import generate_models
 from sklearn.preprocessing import OneHotEncoder
 from AbstractAdapter import AbstractAdapter
-from JsonUtil import get_config_property
 import tensorflow as tf
 import numpy as np
 import os

@@ -3,10 +3,11 @@ import json
 import os
 from AdapterUtils import *
 from AdapterBGRPC import *
-from JsonUtil import get_config_property
 import pandas as pd
 from typing import Tuple
 from predict_time_sources import feature_preparation
+
+from ThreadLock import ThreadLock
 
 
 
@@ -17,10 +18,10 @@ class LAMAAdapterManager(AdapterManager):
         AdapterManager (AdapterManager): The base class providing the shared functionality for all adapters
     """
 
-    def __init__(self) -> None:
+    def __init__(self, lock: ThreadLock) -> None:
         """Initialize a new GAMAAdapterManager setting AutoML adapter specific variables
         """
-        super(LAMAAdapterManager, self).__init__()
+        super(LAMAAdapterManager, self).__init__(lock)
         self.__automl = None
         self.__loaded_training_id = None
         self._adapter_name = "lama"

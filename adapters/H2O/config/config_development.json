@@ -1,6 +1,6 @@
 {
   "adapter-name": "h2o",
-  "job-file-name": "h2o.json",
+  "job-file-name": "h2o.job.json",
   "env-varname-cluster": "RUNTIME",
   "grpc-server-address": "127.0.0.1",
   "export-zip-file-name": "h2o-export",
