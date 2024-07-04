@@ -74,6 +74,7 @@
                         }
                         else if (_explanation.Status == "finished")
                         {
+                            <div class="container">
                             <ButtonTooltip Text="Opens the dashboard for analyzing this ML model (Explainable AI)." Position="Placement.Top">
                                 <MudButton Disabled="IsModelBlacklisted"
                                            Variant="MudBlazor.Variant.Filled"
@@ -81,17 +82,30 @@
                                            Color="Color.Secondary"
                                            Href="@NavManager.ToAbsoluteUri(ExplanationPagePath).AbsoluteUri"
                                            Target="_blank"
-                                           Class="full-width">
+                                           Class="max-width">
                                     @L["Open dashboard"]
                                 </MudButton>
                             </ButtonTooltip>
+                            </div>
                         }
                 </MudStack>
             }
         </MudPaper>
     </MudCardContent>
 </MudCard>
-
+<style>
+    .container{
+  width: 100%;
+  height: 200px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+    .max-width{
+  justify-content: center;
+  align-items: center;
+    }
+</style>
 @code {
     [Parameter]
     public string ExplanationPagePath { get; set; }
@@ -118,7 +132,7 @@
         }
     }
     // TODO blacklist needs to be filled out with Model that dont generate Dashboard 
-    private List<string> blacklistedModels = new List<string> { "", "", "" };
+    private List<string> blacklistedModels = new List<string> { "Autogluon", "FLAML", "LAMA" , "Autokeras", "H2O Automl"};
     private bool IsModelBlacklisted => blacklistedModels.Contains(AutoMlSolutionID);
 
     private async Task LoadModelExplanation()
