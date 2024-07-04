@@ -16,7 +16,6 @@ namespace BlazorBoilerplate.Shared.Models.Account.Validators
                 .Matches("[a-z]").When(p => PasswordPolicy.RequireLowercase, ApplyConditionTo.CurrentValidator).WithMessage(l["PasswordRequiresLower"])
                 .Matches("[0-9]").When(p => PasswordPolicy.RequireDigit, ApplyConditionTo.CurrentValidator).WithMessage(l["PasswordRequiresDigit"])
                 .Matches("[^a-zA-Z0-9]").When(p => PasswordPolicy.RequireNonAlphanumeric, ApplyConditionTo.CurrentValidator).WithMessage(l["PasswordRequiresNonAlphanumeric"]);
-
             return options;
         }
     }

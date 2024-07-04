@@ -10,15 +10,14 @@ namespace BlazorBoilerplate.UI.Base.Pages.Account
 {
     public class ProfilePage : ComponentBase
     {
+
         [Inject] AuthenticationStateProvider authStateProvider { get; set; }
         [Inject] protected IStringLocalizer<Global> L { get; set; }
         [Inject] IViewNotifier viewNotifier { get; set; }
-
         protected UserViewModel userViewModel;
         protected bool updatePasswordDialogOpen = false;
         protected UpdatePasswordViewModel updatePasswordViewModel { get; set; } = new UpdatePasswordViewModel();
         protected AuthenticatorVerificationCodeViewModel authenticatorVerificationCodeViewModel { get; set; } = new AuthenticatorVerificationCodeViewModel();
-
         IdentityAuthenticationStateProvider identityAuthenticationStateProvider;
 
         protected bool BrowserRemembered
@@ -34,21 +33,6 @@ namespace BlazorBoilerplate.UI.Base.Pages.Account
                     });
             }
         }
-
-        protected bool TwoFactorEnabled
-        {
-            get { return userViewModel.TwoFactorEnabled; }
-            set
-            {
-                if (userViewModel.TwoFactorEnabled != value)
-                    EnableDisable2fa().ContinueWith(t =>
-                    {
-                        if (t.IsFaulted)
-                            viewNotifier.Show(t.Exception.Message, ViewNotifierType.Error, L["Operation Failed"]);
-                    });
-            }
-        }
-
 
         protected override async Task OnInitializedAsync()
         {
@@ -88,7 +72,6 @@ namespace BlazorBoilerplate.UI.Base.Pages.Account
                 updatePasswordDialogOpen = false;
             }
         }
-
         protected async Task UpdateUser()
         {
             try
@@ -178,5 +161,9 @@ namespace BlazorBoilerplate.UI.Base.Pages.Account
                 viewNotifier.Show(apiResponse.Message, ViewNotifierType.Error, L["Operation Failed"]);
             }
         }
+
+
     }
+
+
 }

@@ -601,9 +601,10 @@
         try
         {
             Dictionary<string, string> dictionary = new Dictionary<string, string>
-        {
+            {
                 { "task", StartTrainingDto.Configuration.Task },
-                { "runtimeLimit", StartTrainingDto.Configuration.RuntimeLimit.ToString() }
+                { "runtimeLimit", StartTrainingDto.Configuration.RuntimeLimit.ToString() },
+                { "numberOfSelectedAutoMlSolutions", StartTrainingDto.Configuration.SelectedAutoMlSolutions.Count.ToString() }
             };
 
             List<string> libraries = _mlLibsViewModel.SelectedIds.ToList();
@@ -669,6 +670,21 @@
 
         await UpdateStartTrainingDto();
         await RefreshParameters();
+
+        try
+        {
+            Dictionary<string, string> dictionary = new Dictionary<string, string>
+            {
+                    { "task", StartTrainingDto.Configuration.Task },
+                    { "runtimeLimit", StartTrainingDto.Configuration.RuntimeLimit.ToString() },
+                    { "numberOfSelectedAutoMlSolutions", StartTrainingDto.Configuration.SelectedAutoMlSolutions.Count.ToString() }
+                };
+            await UpdateAvailableStrategies(dictionary);
+        }
+        catch (Exception ex)
+        {
+            viewNotifier.Show(ex.GetBaseException().Message, ViewNotifierType.Error, L["Operation Failed"]);
+        }
     }
 
     /*

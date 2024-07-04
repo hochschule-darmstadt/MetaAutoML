@@ -1,4 +1,4 @@
-{% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression", ":text_classification", ":text_regression", ":named_entity_recognition", ":time_series_forecasting"] %}
+{% if configuration.configuration["task"] in [":tabular_clustering", ":tabular_classification", ":tabular_regression", ":text_classification", ":text_regression", ":named_entity_recognition", ":time_series_forecasting"] %}
 
 import pandas as pd
 from numpy import nan

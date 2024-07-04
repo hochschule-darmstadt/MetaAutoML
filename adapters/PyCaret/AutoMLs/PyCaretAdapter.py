@@ -120,7 +120,7 @@ class PyCaretAdapter:
             os.rename(plot_filename, dashboard_path)
 
             print(f"Plot moved to: {dashboard_path}")
-            if plot_type != 'elbow' or 'silhouette':
+            if plot_type != 'elbow' and plot_type != 'silhouette' and plot_type != 'distance':
                 with open(dashboard_path, 'r', encoding='utf-8') as file:
                     plot_html = file.read()
                     figures_html += plot_html

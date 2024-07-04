@@ -8,6 +8,7 @@ from threading import *
 import pandas as pd
 from typing import Tuple
 from pycaret.classification import *
+from sklearn.cluster import *
 from sklearn.linear_model import *
 from sklearn.discriminant_analysis import *
 from sklearn.naive_bayes import *
@@ -23,10 +24,25 @@ from pycaret.internal.tunable import TunableMLPRegressor
 from sklearn.kernel_ridge import KernelRidge
 from sklearn.utils.extmath import softmax
 from lightgbm import LGBMClassifier
-
 from ThreadLock import ThreadLock
 
 def get_lib_model_names(instance):
+    if isinstance(instance, AgglomerativeClustering):
+        return ":scikit_learn_lib", ":agglomerative_clustering"
+    if isinstance(instance, Birch):
+        return ":scikit_learn_lib", ":balanced_iterative_reducing_and_clustering_using_hierarchies"
+    if isinstance(instance, DBSCAN):
+        return ":scikit_learn_lib", ":density_based_spatial_clustering_of_applications_with_noise"
+    if isinstance(instance, KMeans):
+        return ":scikit_learn_lib", ":k_means"
+    if isinstance(instance, MeanShift):
+        return ":scikit_learn_lib", ":mean_shift_clustering"
+    if isinstance(instance, OPTICS):
+        return ":scikit_learn_lib", ":ordering_points_to_identify_the_clustering_structure"
+    if isinstance(instance, SpectralClustering):
+        return ":scikit_learn_lib", ":spectral_clustering"
+    if isinstance(instance, AffinityPropagation):
+        return ":scikit_learn_lib", ":affinity_propagation"
     if isinstance(instance, LogisticRegression):
         return ":scikit_learn_lib", ":logistic_regression"
     if isinstance(instance, KNeighborsClassifier):
