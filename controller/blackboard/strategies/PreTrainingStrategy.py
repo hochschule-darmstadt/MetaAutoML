@@ -79,7 +79,7 @@ class PreTrainingStrategyController(IAbstractStrategy):
 
 
         self._log.info(f'do_finish_pre_training: Finished data preparation, advancing to phase "training"..')
-        self.controller.set_phase('training')
+        self.controller.set_phase('evaluation')
 
         return
 
@@ -123,7 +123,7 @@ class PreTrainingStrategyController(IAbstractStrategy):
             request = self.controller.get_request()
             request.configuration = configuration
             self._log.info(f'do_finish_pre_training: Finished data preparation, advancing to phase "training"..')
-            self.controller.set_phase('training')
+            self.controller.set_phase('evaluation')
         else:
             #adjust request object for multi fidelity
             configuration = self.controller.get_request().configuration
@@ -168,6 +168,6 @@ class PreTrainingStrategyController(IAbstractStrategy):
     def do_finish_pre_training(self, state: dict, blackboard: Blackboard, controller: StrategyController):
         if self.global_multi_fidelity_level != 0:
             self._log.info(f'do_finish_pre_training: Finished pre training, advancing to phase "training"..')
-            controller.set_phase('training')
+            controller.set_phase('evaluation')
             controller.disable_strategy('pre_training.finish_pre_training')
             

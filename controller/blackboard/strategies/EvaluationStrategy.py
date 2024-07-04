@@ -132,6 +132,8 @@ class EvaluationStrategy(IAbstractStrategy):
                 multi_fidelity_callback=self.do_optimum_strategy_callback,
                 multi_fidelity_level=multi_fidelity_dataset_percentage
             )
+            strategy_controller.get_adapter_runtime_manager().get_training_request()
+            print(f"content of trainingRequest: {strategy_controller.get_adapter_runtime_manager().get_training_request()}\t")
 
             # Warte auf den Abschluss des Trainings und erhalte die Modelle
             # TO-DO
@@ -158,6 +160,7 @@ class EvaluationStrategy(IAbstractStrategy):
                 model_accuracies[completed_models] = []
 
             model_accuracies[completed_models].append(accuracy)
+            print("model_accuracies: ", model_accuracies)
            # model_accuracies[completed_models] = accuracy
             # Überprüfe, ob eine Verbesserung vorliegt
             epsilon=0.005
