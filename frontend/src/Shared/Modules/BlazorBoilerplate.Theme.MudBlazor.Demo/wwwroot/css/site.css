@@ -9,9 +9,9 @@
     width: 312px;
 }
 
-    .job-status ul {
-        flex: 1;
-    }
+.job-status ul {
+    flex: 1;
+}
 
 .dropzone {
     padding: 30px;
@@ -38,9 +38,9 @@
     width: 250px;
 }
 
-    .draggable:active {
-        cursor: grabbing;
-    }
+.draggable:active {
+    cursor: grabbing;
+}
 
 .dragging {
     cursor: grabbing;
@@ -57,18 +57,22 @@
     font-weight: bold;
 }
 
-    .last-updated small {
-        text-transform: uppercase;
-        color: #c4cbd4;
-        font-size: 11px;
-    }
+.last-updated small {
+    text-transform: uppercase;
+    color: #c4cbd4;
+    font-size: 11px;
+}
 
-h1, h2, h3 {
+h1,
+h2,
+h3 {
     color: var(--mud-palette-primary-darken);
 }
+
 p {
     margin-bottom: 12px;
 }
+
 a {
     color: var(--mud-palette-primary-lighten);
 }
@@ -92,3 +96,30 @@ a {
     font-size: clamp(0.7rem, -0.875rem + 2.4vw, 1rem);
 }
 
+.container-fluid {
+    padding: 10px 25px 50px 20px;
+    border-radius: 5px;
+}
+
+.conf-table {
+    margin-bottom: 15px;
+}
+
+.table-bordered {
+    border-collapse: collapse;
+    border-radius: 5px;
+}
+
+.table-bordered th,
+.table-bordered td {
+    border: none;
+    /* Removes all internal borders */
+}
+
+.table-bordered th,
+.table-bordered td {
+    border-top: 1px solid lightgrey;
+    /* Top border for cells */
+    border-bottom: 0, 5px solid lightgrey;
+    /* Bottom border for cells */
+}

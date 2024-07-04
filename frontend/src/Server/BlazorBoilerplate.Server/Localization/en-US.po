@@ -615,9 +615,6 @@ msgctxt "Global"
 msgid "PopServer"
 msgstr "POP3 server"
 
-msgctxt "Global"
-msgid "Save"
-msgstr "Save"
 
 msgctxt "Global"
 msgid "Port"
@@ -1435,8 +1432,8 @@ msgid "Analysis"
 msgstr "Analysis"
 
 msgctxt "Global"
-msgid "Preview"
-msgstr "Preview"
+msgid "Preview of the first 20 samples"
+msgstr "Preview of the first 20 samples"
 
 msgctxt "Global"
 msgid "Configure"
@@ -1924,10 +1921,6 @@ msgid "ignore"
 msgstr "Ignore"
 
 msgctxt "Global"
-msgid "none"
-msgstr "None"
-
-msgctxt "Global"
 msgid "target *"
 msgstr "Target *"
 msgctxt "Global"
@@ -2033,3 +2026,31 @@ msgstr "Results"
 msgctxt "Global"
 msgid "Help search ..."
 msgstr "Help search ..."
+
+msgctxt "Global"
+msgid "Search Output ..."
+msgstr "Search Output ..."
+
+msgctxt "Global"
+msgid "Details"
+msgstr "Details"
+
+msgctxt "Global"
+msgid  "Save & Reload dataset"
+msgstr "Save & Reload dataset"
+
+msgctxt "Global"
+msgid "Default"
+msgstr "Default"
+
+msgctxt "Global"
+msgid "There are no models yet because no training has been carried out."
+msgstr "There are no models yet because no training has been carried out."
+
+msgctxt "Global"
+msgid "Predictions (20 sample rows)"
+msgstr "Predictions (20 sample rows)"
+
+msgctxt "Global"
+msgid "Add Test Dataset"
+msgstr "Add Test Dataset"
