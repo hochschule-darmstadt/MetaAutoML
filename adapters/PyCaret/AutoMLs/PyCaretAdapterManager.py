@@ -6,6 +6,7 @@ from AdapterUtils import *
 from AdapterBGRPC import *
 from threading import *
 import pandas as pd
+from kmodes.kmodes import KModes
 from typing import Tuple
 from pycaret.classification import *
 from sklearn.cluster import *
@@ -35,6 +36,8 @@ def get_lib_model_names(instance):
         return ":scikit_learn_lib", ":density_based_spatial_clustering_of_applications_with_noise"
     if isinstance(instance, KMeans):
         return ":scikit_learn_lib", ":k_means"
+    if isinstance(instance, KModes):
+        return ":scikit_learn_lib", ":k_modes"
     if isinstance(instance, MeanShift):
         return ":scikit_learn_lib", ":mean_shift_clustering"
     if isinstance(instance, OPTICS):
