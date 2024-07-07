@@ -72,7 +72,7 @@ class PyCaretAdapter:
 
         exp_name = setup(data = X)
 
-        best_score = 0
+        best_score = -2
         best_model = None
         # for each clustering approach in parameters, create a model, save it and export it
         # TODO: decide which model is best
