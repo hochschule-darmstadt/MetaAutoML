@@ -353,6 +353,13 @@
             _isLoaderClosed = false;
             StateHasChanged();
             fileUploader.UploadFileContent = e.File;
+
+            //check if file type is csv or xlsx it not throw error
+            string fileExtension = Path.GetExtension(e.File.Name).ToLower();
+            if(fileExtension != ".csv" && fileExtension != ".xlsx"){
+                throw new InvalidOperationException("Extension is not .csv or .xlsx");
+            }
+
             if (fileUploader.IsPredictionDatasetToUpload == true)
             {
                 fileUploader.UploadPredictionRequest.FileName = e.File.Name;
