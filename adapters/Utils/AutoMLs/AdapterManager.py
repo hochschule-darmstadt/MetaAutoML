@@ -350,18 +350,20 @@ class AdapterManager(Thread):
         #try:
         config = json.loads(request.process_json)
         result_folder_location = os.path.join("app-data", "training",
-                            config["user_id"], config["dataset_id"], config["training_id"], "result")
+                            config["user_id"], config["dataset_id"], config["training_id"], config["model_id"], "result")
         #Read config configuration again as it might have been changed during the training
         job_folder_location = os.path.join(os.getenv("TRAINING_PATH"),
                                             config["user_id"],
                                             config["dataset_id"],
                                             config["training_id"],
+                                            config["model_id"],
                                             os.getenv("JOB_FOLDER_NAME"),
                                             os.getenv("JOB_FILE_NAME"))
         dashboard_folder_location = os.path.join(os.getenv("TRAINING_PATH"),
                                             config["user_id"],
                                             config["dataset_id"],
                                             config["training_id"],
+                                            config["model_id"],
                                             os.getenv("DASHBOARD_FOLDER_NAME"))
         with open(job_folder_location) as file:
             updated_process_configuration = json.load(file)
