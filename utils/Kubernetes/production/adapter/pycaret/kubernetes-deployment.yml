@@ -35,6 +35,38 @@ spec:
           value: "4000"
         - name: EXPLAINER_DASHBOARD_PORT_END
           value: "4010"
+        - name: ADAPTER_NAME
+          value: "pycaret"
+        - name: JOB_FILE_NAME
+          value: "pycaret-job.json"
+        - name: GRPC_SERVER_ADDRESS
+          value: "0.0.0.0"
+        - name: EXPORT_ZIP_FILE_NAME
+          value: "pycaret-export"
+        - name: TRAINING_PATH
+          value: "app-data/training"
+        - name: JOB_FOLDER_NAME
+          value: "job"
+        - name: MODEL_FOLDER_NAME
+          value: "model"
+        - name: EXPORT_FOLDER_NAME
+          value: "export"
+        - name: RESULT_FOLDER_NAME
+          value: "result"
+        - name: TEMPLATES_PATH
+          value: "app-data/templates"
+        - name: PREDICT_TIME_SOURCES_PATH
+          value: "AutoMLs/predict_time_sources.py"
+        - name: LOCAL_EXECUTION
+          value: "NO"
+        - name: RUNNING_IN_WSL
+          value: "NO"
+        - name: DASHBOARD_FOLDER_NAME
+          value: "dashboard"
+        - name: WSL_METAAUTOML_PATH
+          value: "/mnt/c/Users/alex/Desktop/MetaAutoML"
+        - name: ONTOLOGY_PATH
+          value: "ML_Ontology.ttl"
         image: alexhda/omaml-pycaret
         imagePullPolicy: ""
         name: pycaret

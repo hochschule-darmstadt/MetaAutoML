@@ -13,112 +13,132 @@
         </CardHeaderContent>
         <CardHeaderActions>
             <MudStack Row="true" Class="align-content-center" Style="margin-top: 8px">
-                <ButtonTooltip Text="Click here to upload a new dataset from your disk or a website to the OMA-ML platform." Position="Placement.Left">
-                    <MudButton OnClick="OnOpenUpload"
-                               Variant="MudBlazor.Variant.Filled"
-                               Color="Color.Secondary"
-                               StartIcon="@Icons.Filled.AddBox"
-                               Size="Size.Small">@L["Upload"]</MudButton>
-                        </ButtonTooltip>
+                <ButtonTooltip
+                    Text="Click here to upload a new dataset from your disk or a website to the OMA-ML platform."
+                    Position="Placement.Left">
+                    <MudButton OnClick="OnOpenUpload" Variant="MudBlazor.Variant.Filled" Color="Color.Secondary"
+                        StartIcon="@Icons.Filled.AddBox" Size="Size.Small">@L["Upload"]</MudButton>
+                </ButtonTooltip>
 
-                    </MudStack>
+            </MudStack>
         </CardHeaderActions>
     </MudCardHeader>
     <MudCardContent>
         @if (Datasets == null)
         {
-                <DataLoaderSpinner />
+            <DataLoaderSpinner />
         }
         else
         {
-            <MudTable Items="@Datasets.Datasets" style="width:stretch" class="mat-elevation-z5" AllowSelection="false" Dense="true" Filter="new Func<DatasetDto,bool>(FilterFunc)">
+            <MudTable Items="@Datasets.Datasets" style="width:stretch" class="mat-elevation-z5" AllowSelection="false"
+                Dense="true" Filter="new Func<DatasetDto,bool>(FilterFunc)">
                 <ToolBarContent>
                     <MudSpacer />
-                    <MudTextField @bind-Value="searchString" Placeholder="@L["Search for name or type"]" Adornment="Adornment.Start" Immediate="true"
-                                    AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0" Clearable="true"></MudTextField>
+                    <MudTextField @bind-Value="searchString" Placeholder="@L["Search for name or type"]"
+                        Adornment="Adornment.Start" Immediate="true" AdornmentIcon="@Icons.Material.Filled.Search"
+                        IconSize="Size.Medium" Class="mt-0" Clearable="true"></MudTextField>
                 </ToolBarContent>
                 <HeaderContent>
-                    <MudTh><MudTableSortLabel SortBy="new Func<DatasetDto, object>(x=>x.Name)">@L["Name"]</MudTableSortLabel></MudTh>
-                    <MudTh><MudTableSortLabel SortBy="@(new Func<DatasetDto, object>(x=>x.Type.Properties["skos:prefLabel"]))">@L["Type"]</MudTableSortLabel></MudTh>
-                    <MudTh><MudTableSortLabel SortBy="@(new Func<DatasetDto, object>(x=>x.Analysis["size_bytes"]))">@L["Size"]</MudTableSortLabel></MudTh>
-                    <MudTh><MudTableSortLabel SortBy="@(new Func<DatasetDto, object>(x=>x.Analysis["creation_date"]))">@L["Date"]</MudTableSortLabel></MudTh>
+                    <MudTh>
+                        <MudTableSortLabel SortBy="new Func<DatasetDto, object>(x=>x.Name)">@L["Name"]</MudTableSortLabel>
+                    </MudTh>
+                    <MudTh>
+                        <MudTableSortLabel SortBy="@(new Func<DatasetDto, object>(x=>x.Type.Properties["skos:prefLabel"]))">
+                            @L["Type"]</MudTableSortLabel>
+                    </MudTh>
+                    <MudTh>
+                        <MudTableSortLabel SortBy="@(new Func<DatasetDto, object>(x=>x.Analysis["size_bytes"]))">@L["Size"]
+                        </MudTableSortLabel>
+                    </MudTh>
+                    <MudTh>
+                        <MudTableSortLabel SortBy="@(new Func<DatasetDto, object>(x=>x.Analysis["creation_date"]))">
+                            @L["Date"]</MudTableSortLabel>
+                    </MudTh>
                     <MudTh></MudTh>
                 </HeaderContent>
                 <RowTemplate>
                     <MudTd>
-                        <MudLink Href="@NavManager.ToAbsoluteUri("datasets/" + @context.Id).AbsoluteUri" Style="cursor: pointer; display: flex;"><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.ListAlt" Style="margin-right: 4px;" />@context.Name</MudLink>
+                        <MudLink Href="@NavManager.ToAbsoluteUri("datasets/" + @context.Id).AbsoluteUri"
+                            Style="cursor: pointer; display: flex;">
+                            <MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.ListAlt" Style="margin-right: 4px;" />
+                            @context.Name
+                        </MudLink>
                     </MudTd>
-                    <MudTd>@L[context.Type.Properties.ContainsKey("skos:prefLabel") ? context.Type.Properties["skos:prefLabel"] : ""]</MudTd>
+                    <MudTd>@L[context.Type.Properties.ContainsKey("skos:prefLabel") ?
+                          context.Type.Properties["skos:prefLabel"] : ""]</MudTd>
                     <MudTd>@FormatBytes(context.Analysis["size_bytes"])</MudTd>
-                    <MudTd style="white-space:nowrap;">@context.Analysis["creation_date"].ToString("yyyy-MM-dd") @context.Analysis["creation_date"].ToString("HH:mm:ss")</MudTd>
-                    <MudTd><DatasetMenu Dataset="@context" OnDeleteCompleted="@OnDeleteDatasetCompleted" /></MudTd>
+                    <MudTd style="white-space:nowrap;">@context.Analysis["creation_date"].ToString("yyyy-MM-dd")
+                        @context.Analysis["creation_date"].ToString("HH:mm:ss")</MudTd>
+                    <MudTd>
+                        <DatasetMenu Dataset="@context" OnDeleteCompleted="@OnDeleteDatasetCompleted" />
+                    </MudTd>
                 </RowTemplate>
                 <PagerContent>
-                    <MudTablePager RowsPerPageString=@L["Rows per page"]/>
+                    <MudTablePager RowsPerPageString=@L["Rows per page"] />
                 </PagerContent>
             </MudTable>
         }
     </MudCardContent>
 </MudCard>
 
-        @code {
-            [Parameter]
-            public GetDatasetsResponseDto Datasets
-            {
-                get
-                {
-                    return _datasets;
-                }
-                set
-                {
-                    _datasets = value;
-
-                    if (_datasets != null)
-                    {
-                        _datasets.Datasets = _datasets.Datasets.OrderByDescending(x => x.Analysis["creation_date"]).ToList();
-                        StateHasChanged();
-
-                    }
-                }
-            }
-            private GetDatasetsResponseDto _datasets;
-            [Parameter]
-            public EventCallback OnUploadCompletedCallback { get; set; }
-            [Parameter]
-            public EventCallback OnDeleteDatasetCompleted { get; set; }
-            private string searchString = "";
-
-
-
-  private bool FilterFunc(DatasetDto element)
-  {
-      if (string.IsNullOrWhiteSpace(searchString))
-          return true;
-      if (element.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase))
-          return true;
-      if (element.Type.Properties["skos:prefLabel"].Contains(searchString, StringComparison.OrdinalIgnoreCase))
-          return true;
-      return false;
-  }
-  private void OnOpenUpload()
-  {
-      fileUploader.IsPredictionDatasetToUpload = false;
-      fileUploader.IsUploadDatasetDialogOpen = true;
-      fileUploader.RefreshUploadComponentCallback();
-  }
-  public string FormatBytes(long bytes)
-  {
-      const int scale = 1024;
-      string[] orders = new string[] { "GB", "MB", "KB", "Bytes" };
-      long max = (long)Math.Pow(scale, orders.Length - 1);
-
-      foreach (string order in orders)
-      {
-          if (bytes > max)
-              return string.Format("{0:##.##} {1}", decimal.Divide(bytes, max), order);
-
-          max /= scale;
-      }
-      return "0 Bytes";
-  }
+@code {
+    [Parameter]
+    public GetDatasetsResponseDto Datasets
+    {
+        get
+        {
+            return _datasets;
         }
+        set
+        {
+            _datasets = value;
+
+            if (_datasets != null)
+            {
+                _datasets.Datasets = _datasets.Datasets.OrderByDescending(x => x.Analysis["creation_date"]).ToList();
+                StateHasChanged();
+
+            }
+        }
+    }
+    private GetDatasetsResponseDto _datasets;
+    [Parameter]
+    public EventCallback OnUploadCompletedCallback { get; set; }
+    [Parameter]
+    public EventCallback OnDeleteDatasetCompleted { get; set; }
+    private string searchString = "";
+
+
+
+    private bool FilterFunc(DatasetDto element)
+    {
+        if (string.IsNullOrWhiteSpace(searchString))
+            return true;
+        if (element.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (element.Type.Properties["skos:prefLabel"].Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        return false;
+    }
+    private void OnOpenUpload()
+    {
+        fileUploader.IsPredictionDatasetToUpload = false;
+        fileUploader.IsUploadDatasetDialogOpen = true;
+        fileUploader.RefreshUploadComponentCallback();
+    }
+    public string FormatBytes(long bytes)
+    {
+        const int scale = 1024;
+        string[] orders = new string[] { "GB", "MB", "KB", "Bytes" };
+        long max = (long)Math.Pow(scale, orders.Length - 1);
+
+        foreach (string order in orders)
+        {
+            if (bytes > max)
+                return string.Format("{0:##.##} {1}", decimal.Divide(bytes, max), order);
+
+            max /= scale;
+        }
+        return "0 Bytes";
+    }
+}

@@ -11,3 +11,4 @@ rdflib==6.2.0
 pandas>=0.23.3
 regex
 explainerdashboard==0.4.7
+numpy==1.26.4

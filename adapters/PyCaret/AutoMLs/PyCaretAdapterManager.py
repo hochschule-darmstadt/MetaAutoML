@@ -5,8 +5,8 @@ import time, asyncio
 from AdapterUtils import *
 from AdapterBGRPC import *
 from threading import *
-from JsonUtil import get_config_property
 import pandas as pd
+from kmodes.kmodes import KModes
 from typing import Tuple
 from pycaret.classification import *
 from sklearn.cluster import *
@@ -25,6 +25,7 @@ from pycaret.internal.tunable import TunableMLPRegressor
 from sklearn.kernel_ridge import KernelRidge
 from sklearn.utils.extmath import softmax
 from lightgbm import LGBMClassifier
+from ThreadLock import ThreadLock
 
 def get_lib_model_names(instance):
     if isinstance(instance, AgglomerativeClustering):
@@ -35,6 +36,8 @@ def get_lib_model_names(instance):
         return ":scikit_learn_lib", ":density_based_spatial_clustering_of_applications_with_noise"
     if isinstance(instance, KMeans):
         return ":scikit_learn_lib", ":k_means"
+    if isinstance(instance, KModes):
+        return ":scikit_learn_lib", ":k_modes"
     if isinstance(instance, MeanShift):
         return ":scikit_learn_lib", ":mean_shift_clustering"
     if isinstance(instance, OPTICS):
@@ -43,7 +46,6 @@ def get_lib_model_names(instance):
         return ":scikit_learn_lib", ":spectral_clustering"
     if isinstance(instance, AffinityPropagation):
         return ":scikit_learn_lib", ":affinity_propagation"
-# TODO: k_modes
     if isinstance(instance, LogisticRegression):
         return ":scikit_learn_lib", ":logistic_regression"
     if isinstance(instance, KNeighborsClassifier):
@@ -143,10 +145,10 @@ class PyCaretAdapterManager(AdapterManager):
         AdapterManager (AdapterManager): The base class providing the shared functionality for all adapters
     """
 
-    def __init__(self) -> None:
+    def __init__(self, lock: ThreadLock) -> None:
         """Initialize a new PyCaretAdapterManager setting AutoML adapter specific variables
         """
-        super(PyCaretAdapterManager, self).__init__()
+        super(PyCaretAdapterManager, self).__init__(lock)
         self.__automl = None
         self.__loaded_training_id = None
         self._adapter_name = "pycaret"

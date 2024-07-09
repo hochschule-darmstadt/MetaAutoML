@@ -6,7 +6,6 @@ import numpy as np
 from sklearn.impute import SimpleImputer
 import pandas as pd
 import json
-from JsonUtil import get_config_property
 import PyCaretParameterConfig as ppc
 from PycaretWrapper import PycaretWrapper
 from pycaret.clustering import *
@@ -74,7 +73,7 @@ class PyCaretAdapter:
 
         exp_name = setup(data=X)
 
-        best_score = 0
+        best_score = -2
         best_model = None
         for clustering_approach in parameters["include_approach"]:
             model = create_model(clustering_approach, num_clusters=4)

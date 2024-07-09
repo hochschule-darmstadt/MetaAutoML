@@ -6,11 +6,12 @@ import time, asyncio
 from AdapterUtils import *
 from AdapterBGRPC import *
 from threading import *
-from JsonUtil import get_config_property
 from autogluon.tabular import TabularPredictor
 from autogluon.multimodal import MultiModalPredictor
 from autogluon.timeseries import TimeSeriesPredictor
 from typing import Tuple
+
+from ThreadLock import ThreadLock
 
 #TODO do all estimators https://github.com/autogluon/autogluon/tree/master/tabular/src/autogluon/tabular/models
 autogluon_estimators ={
@@ -45,10 +46,10 @@ class AutoGluonAdapterManager(AdapterManager):
     """
 
 
-    def __init__(self) -> None:
+    def __init__(self, lock: ThreadLock) -> None:
         """Initialize a new AutoGluonAdapterManager setting AutoML adapter specific variables
         """
-        super(AutoGluonAdapterManager, self).__init__()
+        super(AutoGluonAdapterManager, self).__init__(lock)
         self.__automl = None
         self.__loaded_training_id = None
         self._adapter_name = "gluon"

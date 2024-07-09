@@ -17,6 +17,7 @@
                             StartIcon="@Icons.Material.Filled.ReadMore"
                             Color="Color.Secondary"
                             Size="Size.Small"
+                            Disabled="@(_modelsCount == 0)"
                             Style="margin-top: 8px">@L["More"]</MudButton>
                 </ButtonTooltip>
             }
@@ -28,7 +29,7 @@
             {
                 <DataLoaderSpinner />
             }
-            else
+            else if (_modelsCount > 0)
             {
                 <MudTable Items="@_models.Models" FixedHeader="true" style="width:stretch" class="mat-elevation-z5" AllowSelection="false" Dense="true" Height="245px" CustomHeader="true">
                     <HeaderContent>
@@ -94,6 +95,10 @@
                     </RowTemplate>
                 </MudTable>
             }
+            else
+            {
+                <MudText Typo="Typo.body1" Class="text-card-content">@L["There are no models yet because no training has been carried out."]</MudText>
+            }
         </MudPaper>
     </MudCardContent>
 </MudCard>
@@ -119,6 +124,7 @@
     private GetModelsResponseDto _models;
     private List<Metric> _metrics = new List<Metric>();
     private string SelectedMetric { get; set; } = "";
+    private int _modelsCount = 0;
 
     private async Task LoadTrainings()
     {
@@ -129,6 +135,7 @@
             if (apiResponse.IsSuccessStatusCode)
             {
                 _models = Newtonsoft.Json.JsonConvert.DeserializeObject<GetModelsResponseDto>(apiResponse.Result.ToString());
+                _modelsCount = _models.Models.Count;
                 UpdateMetricsList();
                 StateHasChanged();
             }

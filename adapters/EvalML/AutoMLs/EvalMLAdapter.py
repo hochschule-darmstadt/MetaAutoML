@@ -2,7 +2,6 @@ import os
 
 from AdapterUtils import *
 from AdapterTabularUtils import *
-from JsonUtil import get_config_property
 
 import evalml
 from evalml import AutoMLSearch

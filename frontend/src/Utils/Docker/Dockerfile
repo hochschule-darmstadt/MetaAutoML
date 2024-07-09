@@ -6,10 +6,14 @@ EXPOSE 80
 FROM mcr.microsoft.com/dotnet/sdk:6.0.408-jammy-amd64 AS build
 WORKDIR /
 COPY . .
-RUN apt-get update \
-    && apt-get install -y nodejs \
-    && apt-get install -y npm \
-    && rm -rf /var/lib/apt/lists/*
+
+# Install Node.js 16.x
+RUN curl -fsSL https://deb.nodesource.com/setup_16.x | bash -
+RUN apt-get update && apt-get install -y nodejs
+
+# Install npm (included with Node.js)
+#RUN npm install -g npm@latest
+
 RUN dotnet restore "src/Server/BlazorBoilerplate.Server/BlazorBoilerplate.Server.csproj"
 WORKDIR "/src/Server/BlazorBoilerplate.Server"
 RUN dotnet build "BlazorBoilerplate.Server.csproj" -c Release -o /app/build --no-restore

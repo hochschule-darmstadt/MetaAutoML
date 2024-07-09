@@ -10,34 +10,23 @@
 @inject IHttpClientFactory ClientFactory
 @inject NavigationManager NavManager
 
-<MudCard Elevation="5">
-    <MudCardHeader Style="border-bottom-style: inset; border-bottom-width: 1px;">
-        <CardHeaderContent >
-            <MudText Typo="Typo.h6">@L["Preview"]</MudText>
-        </CardHeaderContent>
-    </MudCardHeader>
-    <MudCardContent>
-        <MudPaper Elevation="0">
-            @if (_dataset != null)
-            {
-                @switch (_dataset.Dataset.Type.ID)
-                {
-                    case ":time_series_longitudinal":
-                    case ":time_series":
-                    case ":text":
-                    case ":tabular":
-                        <TabularPreviewFull DatasetData="@_tabularDataset" Dataset="@_dataset"/>
-                        break;
-                    case ":image":
-                        <ImagePreviewFull Dataset="_imageDataset" />
-                        break;
-                    default:
-                        break;
-                }
-            }
-        </MudPaper>
-    </MudCardContent>
-</MudCard>
+@if (_dataset != null)
+{
+    @switch (_dataset.Dataset.Type.ID)
+    {
+        case ":time_series_longitudinal":
+        case ":time_series":
+        case ":text":
+        case ":tabular":
+            <TabularPreviewFull DatasetData="@_tabularDataset" Dataset="@_dataset" />
+            break;
+        case ":image":
+            <ImagePreviewFull Dataset="_imageDataset" />
+            break;
+        default:
+            break;
+    }
+}
 
 @code {
     [Parameter]
@@ -67,8 +56,7 @@
 
     private async Task LoadDatasetPreview()
     {
-        //Due to frontend refreshes it may occur that this is triggered twice, leading to an error while the first request is reading
-        if (isPreviewRequestRunning == true)
+        if (isPreviewRequestRunning)
         {
             return;
         }
@@ -76,9 +64,9 @@
         {
             isPreviewRequestRunning = true;
             GetDatasetPreviewRequestDto datasetRequest = new GetDatasetPreviewRequestDto()
-            {
+                {
                     DatasetId = _dataset.Dataset.Id
-            };
+                };
             ApiResponseDto apiResponse = await apiClient.GetDatasetPreview(datasetRequest);
 
             if (apiResponse.IsSuccessStatusCode)
