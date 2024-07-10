@@ -8,6 +8,7 @@ from IAbstractStrategy import IAbstractStrategy
 from StrategyController import StrategyController
 from Blackboard import Blackboard
 import copy
+from DataStorage import DataStorage 
 
 class EvaluationStrategy(IAbstractStrategy):
     global_multi_fidelity_level = 1
@@ -80,7 +81,7 @@ class EvaluationStrategy(IAbstractStrategy):
         Returns:
             list: The updated model list.
         """
-        blackboard = controller.get_blackboard()
+       # blackboard = controller.get_blackboard()
         for model in model_list:
             if model.get('status') == 'completed':
                 print(f"Completed Model:{model}")
@@ -117,47 +118,55 @@ class EvaluationStrategy(IAbstractStrategy):
         top_model={}
         model_accuracies = {}
         accuracies = []
-        consecutive_no_improvement = 0
+       # consecutive_no_improvement = 0
 
-        while consecutive_no_improvement < 2:
+        #while consecutive_no_improvement < 2:
             # Neue Trainingsdurchlaufkonfiguration definieren
-            request = controller.get_request()
-            request_copy = copy.deepcopy(request)
-            request_copy.configuration.runtime_limit = runtime_limit
-            request_copy.configuration.dataset_percentage = multi_fidelity_dataset_percentage
+        request = controller.get_request()
+        request_copy = copy.deepcopy(request)
+        request_copy.configuration.runtime_limit = runtime_limit
+        request_copy.configuration.dataset_percentage = multi_fidelity_dataset_percentage
 
-            # Starte neuen Trainingsdurchlauf
-            strategy_controller = StrategyController(
+        # Starte neuen Trainingsdurchlauf
+        strategy_controller = StrategyController(
                 controller.get_data_storage(), request_copy, controller.get_explainable_lock(),
                 multi_fidelity_callback=self.do_optimum_strategy_callback,
                 multi_fidelity_level=multi_fidelity_dataset_percentage
-            )
-            strategy_controller.get_adapter_runtime_manager().get_training_request()
-            print(f"content of trainingRequest: {strategy_controller.get_adapter_runtime_manager().get_training_request()}\t")
+    )
+        data_storage = controller.get_data_storage()
+        user_id = request.user_id
+        training_id = controller.get_training_id()
+        dataset_id = request.dataset_id
+        training_after_id=strategy_controller.get_training_id()
+        model_list = controller.get_data_storage().get_models(user_id,training_id,dataset_id)
+        model_count = len(model_list)
+            #Child
+        data_storage.update_training(user_id, training_id, {"child_training_id": strategy_controller.get_training_id()})
+           #parent
+        data_storage.update_training(user_id,  strategy_controller.get_training_id(), {"parent_training_id": training_id})
+
+        strategy_controller.get_adapter_runtime_manager().get_training_request()
+        print(f"content of trainingRequest: {strategy_controller.get_adapter_runtime_manager().get_training_request()}\t")
 
             # Warte auf den Abschluss des Trainings und erhalte die Modelle
             # TO-DO
             # user_id von dem training
-            user_id = request.user_id
-            training_id = controller.get_training_id()
-            dataset_id = request.dataset_id
-            model_list = controller.get_data_storage().get_models(user_id,training_id,dataset_id)
-            model_count = len(model_list)
+       
             # Wie kann ich die model_list am besten holen hier ?
-            completed_models = []
-            while model_count!=len(completed_models):
+        completed_models = []
+        while model_count!=len(completed_models):
                 model_list = controller.get_data_storage().get_models(user_id,training_id,dataset_id)
                 #model.get('status') == ('completed' or "failed") it might not work
                 completed_models += [model.get('auto_ml_solution') for model in model_list if model.get('status') in ('completed', 'failed') and model.get('auto_ml_solution') not in completed_models]
                 #time.sleep(5)
 
-            model_list = controller.get_data_storage().get_models(user_id,training_id,dataset_id)
-            accuracy = [self.get_score(model) for model in model_list]
-            print("accuracy: ", accuracy)
-            accuracies.append(accuracy)
+        model_list = controller.get_data_storage().get_models(user_id,training_id,dataset_id)
+        accuracy = [self.get_score(model) for model in model_list]
+        print("accuracy: ", accuracy)
+        accuracies.append(accuracy)
             #creating key pair value to know which model has which accuracy
-            #if completed_models not in model_accuracies:
-            #    model_accuracies[completed_models] = []
+        """ if completed_models not in model_accuracies:
+                model_accuracies[completed_models] = []
 
         #     model_accuracies[completed_models].append(accuracy)
         #     print("model_accuracies: ", model_accuracies)
@@ -180,23 +189,12 @@ class EvaluationStrategy(IAbstractStrategy):
         #                         consecutive_no_improvement = 0
         #                         break  # Stop checking as soon as one mismatch is found
 
-        #                 # Output the result of the comparison for each pair of mini-arrays
-        #                     if all_smaller_or_equal:
-        #                         consecutive_no_improvement += 1
-        #                         print(f"Accuracies at index {i} are all smaller or equal to those at index {i-1} + 0.005")
-        #                     else:
-        #                         print(f"Accuracies at index {i} are NOT all smaller or equal to those at index {i-1} + 0.005")
-        #         else:
-        #             print("Not enough data to compare accuracies.")
-        #         print("accuracies: ", accuracies)
+            # Laufzeit verdoppeln für die nächste Iteration
+            runtime_limit *= 2
 
-
-        #     # Laufzeit verdoppeln für die nächste Iteration
-        #     runtime_limit *= 2
-
-        #     if consecutive_no_improvement == 2:
-        #         top_model= max(model_accuracies, key=model_accuracies.get)
-
+            if consecutive_no_improvement == 2:
+                top_model= max(model_accuracies, key=model_accuracies.get)
+ """
         self._log.info('Optimum strategy completed.')
         controller.set_phase('completed')
 
