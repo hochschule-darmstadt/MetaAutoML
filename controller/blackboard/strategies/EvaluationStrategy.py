@@ -156,7 +156,7 @@ class EvaluationStrategy(IAbstractStrategy):
             print("accuracy: ", accuracy)
             accuracies.append(accuracy)
             #creating key pair value to know which model has which accuracy
-            if completed_models not in model_accuracies:
+            """ if completed_models not in model_accuracies:
                 model_accuracies[completed_models] = []
 
             model_accuracies[completed_models].append(accuracy)
@@ -196,7 +196,7 @@ class EvaluationStrategy(IAbstractStrategy):
             
             if consecutive_no_improvement == 2:
                 top_model= max(model_accuracies, key=model_accuracies.get)
-
+ """
         self._log.info('Optimum strategy completed.')
         controller.set_phase('completed')
 
