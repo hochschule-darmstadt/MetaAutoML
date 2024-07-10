@@ -55,6 +55,8 @@ class AdapterRuntimeManager:
             self.__log.debug(f"start_new_training: creating new adapter manager and adapter manager agent")
             if self.__request.configuration.task == ':tabular_clustering':
                 approaches = self.__request.configuration.parameters[':include_approach'].values
+                if len(approaches) == 0:
+                    approaches = self.__get_clustering_approaches(automl)
                 for approach in approaches:
                     print(approach)
                     adjusted_request = copy.deepcopy(self.__request)
@@ -65,6 +67,25 @@ class AdapterRuntimeManager:
                 adapter_training = AdapterManager(self.__data_storage, self.__request, automl, self.__training_id, self.__dataset, host, port, self.__adapter_finished_callback)
                 self.__adapters.append(adapter_training)
         return
+
+    def __get_clustering_approaches(self, automl):
+        clustering_approaches = {
+            ":pycaret": {
+                ":affinity_propagation": "ap",
+                ":agglomerative_clustering": "hclust",
+                ":balanced_iterative_reducing_and_clustering_using_hierarchies": "birch",
+                ":density_based_spatial_clustering_of_applications_with_noise": "dbscan",
+                ":k_means": "kmeans",
+                ":k_modes": "kmodes",
+                ":mean_shift_clustering": "meanshift",
+                ":ordering_points_to_identify_the_clustering_structure": "optics",
+                ":spectral_clustering": "sc"
+            }
+        }
+        approaches = []
+        for approach in clustering_approaches[automl]:
+            approaches.append(approach)
+        return approaches
 
     def update_adapter_manager_list(self, adapter_manager_to_keep: list):
         new_adapter_list = []
