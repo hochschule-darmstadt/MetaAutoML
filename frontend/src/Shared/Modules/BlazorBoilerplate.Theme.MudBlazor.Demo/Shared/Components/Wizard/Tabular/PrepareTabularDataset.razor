@@ -15,7 +15,7 @@
                 <MudText Align="Align.Center" Typo="Typo.body2">@L["Configuration"]</MudText>
             </MudTimelineItem>
         </MudTimeline>
-        <MudTable Items="@_datasetFrame.Rows" style="width:stretch" class="mat-elevation-z5" FixedHeader="true" CustomHeader="true">
+        <MudTable Items="@_datasetFrame.Rows" style="width: stretch" class="mat-elevation-z5" FixedHeader="true" CustomHeader="true" >
             <HeaderContent>
                 <MudTHeadRow>
                         <MudTh></MudTh>
@@ -26,20 +26,31 @@
                     }
                 </MudTHeadRow>
                 <MudTHeadRow>
-                    <MudTh>@L["Datatype"]</MudTh>
+                    <MudTh>
+                          <CardHeaderContent>
+
+                              <div style="display: flex; align-items: center;">
+                                  <span>@L["Datatype"]</span>
+                                  <LabelTooltip Text="Using the dropdown menus you can modify the default datatypes of individual columns of the dataset, e.g. from Integer to Categorical." Position="Radzen.TooltipPosition.Top"></LabelTooltip>
+                              </div>
+                          </CardHeaderContent>
+                    </MudTh>
+
                     @if (_datasetFrame.Columns.Count == StartAutoMlRequest.Schema.Count)
                     {
                         @foreach (var item in _datasetFrame.Columns)
                         {
                             <MudTh>
-                                <MudSelect T="string" Value="@(StartAutoMlRequest.Schema[item.Name].DatatypeSelected.ID == null ? StartAutoMlRequest.Schema[item.Name].DatatypeDetected.ID : StartAutoMlRequest.Schema[item.Name].DatatypeSelected.ID)" ValueChanged="@((e) => {  OnSelectedDatetypeChanged(item.Name, e); })">
+                                <MudSelect T="string" Value="@(StartAutoMlRequest.Schema[item.Name].DatatypeSelected.ID == null ? StartAutoMlRequest.Schema[item.Name].DatatypeDetected.ID : StartAutoMlRequest.Schema[item.Name].DatatypeSelected.ID)" ValueChanged="@((e) => { OnSelectedDatetypeChanged(item.Name, e); })"
+                                    Class="mud-select-item-auto-width">
                                     @foreach (var datatype in StartAutoMlRequest.Schema[item.Name].DatatypesCompatible)
                                     {
-                                        <MudSelectItem Value="@datatype.ID">
+                                        <MudSelectItem Value="@datatype.ID" Class="mud-select-item-auto-width">
                                             <MudText Typo="Typo.body2">@L[datatype.Properties.ContainsKey("skos:prefLabel") ? datatype.Properties["skos:prefLabel"] : ""]</MudText>
                                         </MudSelectItem>
                                     }
                                 </MudSelect>
+
                             </MudTh>
                         }
                     }
@@ -49,16 +60,29 @@
                     }
                 </MudTHeadRow>
                 <MudTHeadRow>
-                    <MudTh>@L["Role"]</MudTh>
+                    <MudTh>
+                        <CardHeaderContent>
+                            <div style="display: flex; align-items: center;">
+                                <span>@L["Role"]</span>
+                                <LabelTooltip Text="Using the dropdown menus  you can specify individual roles  of columns of the dataset.
+                                             In the ‘default’ setting, a column is used as a feature for ML prediction.
+                                            ‘Ignore’ means that a column is not used as a feature for ML prediction.
+                                             ‘target’ means that the column is to be predicted by the ML model.
+                                             Role ‘Index’ can be set if the column is used as a unique identifier of each row.
+                                              In this case, the column is is not used as a feature for ML prediction, like for role ‘Ignore’." Position="Radzen.TooltipPosition.Top">
+                                </LabelTooltip>
+                            </div>
+                        </CardHeaderContent>
+                    </MudTh>
                     @if (_datasetFrame.Columns.Count == StartAutoMlRequest.Schema.Count)
                     {
                         @foreach (var item in _datasetFrame.Columns)
                         {
                             <MudTh>
-                                <MudSelect T="string" Value="@(StartAutoMlRequest.Schema[item.Name].RoleSelected.ID == null ? ":none" : StartAutoMlRequest.Schema[item.Name].RoleSelected.ID)" ValueChanged="@((e) => { OnSelectedRoleChanged(item.Name, e);  })">
+                                <MudSelect T="string" Value="@(StartAutoMlRequest.Schema[item.Name].RoleSelected.ID == null ? ":Default" : StartAutoMlRequest.Schema[item.Name].RoleSelected.ID)" ValueChanged="@((e) => { OnSelectedRoleChanged(item.Name, e);  })">
 
-                                    <MudSelectItem Value="@(":none")">
-                                        <MudText Typo="Typo.body2">@L["none"]</MudText>
+                                    <MudSelectItem Value="@(":Default")">
+                                        <MudText Typo="Typo.body2">@L["Default"]</MudText>
                                     </MudSelectItem>
                                     @foreach (var role in StartAutoMlRequest.Schema[item.Name].RolesCompatible)
                                     {
@@ -143,7 +167,7 @@
                 {
                     stringArray[i] = typeof(String);
                 }
-                _datasetFrame = DataFrame.LoadCsv(_datasetPreview.DatasetPreview, dataTypes: stringArray, separator: Dataset.Dataset.GetDelimiter(), encoding: Dataset.Dataset.GetEncoding(), numRows: 20);
+                _datasetFrame = DataFrame.LoadCsv(_datasetPreview.DatasetPreview, dataTypes: stringArray, separator: Dataset.Dataset.GetDelimiter(), encoding: Dataset.Dataset.GetEncoding(), numRows: 10);
                 foreach (var item in _datasetFrame.Columns)
                 {
                     switch (item.DataType.Name)
@@ -249,7 +273,7 @@
     }
     private async void OnSelectedRoleChanged(string columnName, string role)
     {
-        StartAutoMlRequest.Schema[columnName].RoleSelected.ID = role == ":none" ? null : role;
+        StartAutoMlRequest.Schema[columnName].RoleSelected.ID = role == ":Default" ? null : role;
         await UpdateStartAutoMlRequest();
     }
 }
