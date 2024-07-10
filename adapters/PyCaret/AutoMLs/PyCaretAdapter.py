@@ -89,7 +89,10 @@ class PyCaretAdapter:
         # Create Dashbord for Clustering (with Streamlit (https://streamlit.io))
         save_directory = self._configuration["dashboard_folder_location"]
 
-        plot_types = ['cluster', 'tsne', 'elbow', 'silhouette', 'distance', 'distribution']
+        if clustering_approach == "dbscan":
+            plot_types = ['cluster', 'tsne', 'silhouette', 'distance', 'distribution']
+        else:
+            plot_types = ['cluster', 'tsne', 'elbow', 'silhouette', 'distance', 'distribution']
         figures = []
         current_directory = os.getcwd()
         print(f"Current working directory: {current_directory}")
