@@ -73,21 +73,16 @@ class PyCaretAdapter:
 
         exp_name = setup(data=X)
 
-        best_score = -2
-        best_model = None
-        for clustering_approach in parameters["include_approach"]:
-            model = create_model(clustering_approach, num_clusters=parameters["n_clusters"])
-            metrics_df = pull()
-            silhouette_score = metrics_df['Silhouette'][0]
-            print(f"Silhouette Score {clustering_approach}: {silhouette_score}")
+        clustering_approach = parameters["include_approach"][0]
+        best_model = create_model(clustering_approach, num_clusters=parameters["n_clusters"])
+        metrics_df = pull()
+        silhouette_score = metrics_df["Silhouette"]
+        davies_bouldin_score = metrics_df["Davies-Bouldin"]
+        calinski_harabasz_score = metrics_df["Calinski-Harabasz"]
 
-            if silhouette_score > best_score:
-                best_score = silhouette_score
-                best_model = model
-
+        print(f"Silhouette Score {clustering_approach}: {silhouette_score}")
 
         # Create Dashbord for Clustering (with Streamlit (https://streamlit.io))
-        save_directory = self._configuration["dashboard_folder_location"]
 
         if clustering_approach == "dbscan":
             plot_types = ['cluster', 'tsne', 'silhouette', 'distance', 'distribution']
