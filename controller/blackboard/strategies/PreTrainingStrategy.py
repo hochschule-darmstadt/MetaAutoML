@@ -168,6 +168,5 @@ class PreTrainingStrategyController(IAbstractStrategy):
     def do_finish_pre_training(self, state: dict, blackboard: Blackboard, controller: StrategyController):
         if self.global_multi_fidelity_level != 0:
             self._log.info(f'do_finish_pre_training: Finished pre training, advancing to phase "training"..')
-            controller.set_phase('evaluation')
+            controller.set_phase('training')
             controller.disable_strategy('pre_training.finish_pre_training')
-            

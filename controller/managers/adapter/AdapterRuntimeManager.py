@@ -10,7 +10,7 @@ class AdapterRuntimeManager:
     """The AdapterRuntimeManager represent a single training session started by a user and manages it
     """
 
-    def __init__(self, data_storage: DataStorage, request: "CreateTrainingRequest", explainable_lock: ThreadLock, multi_fidelity_callback = None, multi_fidelity_level = 0) -> None:
+    def __init__(self, data_storage: DataStorage, request: "CreateTrainingRequest", explainable_lock: ThreadLock, multi_fidelity_callback = None, multi_fidelity_level = 0, strategy_controller = None) -> None:
         """Initialize a new AdapterRuntimeManager instance
 
         Args:
@@ -25,6 +25,7 @@ class AdapterRuntimeManager:
         self.__explainable_lock = explainable_lock
         self.__multi_fidelity_callback = multi_fidelity_callback
         self.__multi_fidelity_level = multi_fidelity_level
+        self.__strategy_controller = strategy_controller
         self.__log = logging.getLogger('AdapterRuntimeManager')
         self.__log.setLevel(logging.getLevelName(os.getenv("SERVER_LOGGING_LEVEL")))
         self.__training_id = self.__create_training_record()
@@ -173,6 +174,8 @@ class AdapterRuntimeManager:
         if len(training["model_ids"]) == len(model_list)-1:
             if self.__multi_fidelity_level != 0:
                 self.__multi_fidelity_callback(model_list, self.__multi_fidelity_level)
+            self.__strategy_controller.set_phase("evaluation", True)
+
         if model_details["status"] == "completed" and self.__multi_fidelity_level == 0 and self.__request.perform_model_analysis == True:
             if dataset["type"] in  [":tabular", ":text", ":time_series"]:
                 #Generate explainer dashboard
@@ -273,7 +276,7 @@ class AdapterRuntimeManager:
             meta (_type_): The event meta (contains a dict holding the "old_phase" and "new_phase")
             controller (_type_): The strategy controller instance that caused the event
         """
-        if meta.get('old_phase') == 'pre_training' and meta.get('new_phase') == 'evaluation':
+        if meta.get('old_phase') == 'pre_training' and meta.get('new_phase') == 'training':
             # Preprocessing finished, start the AutoML training
             self.__phase_start_automl_training()
 

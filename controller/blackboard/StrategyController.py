@@ -32,7 +32,7 @@ class StrategyController(object):
         self.__request: "CreateTrainingRequest" = request
         self.__explainable_lock = explainable_lock
         #Init training session
-        self.__adapter_runtime_manager = AdapterRuntimeManager(self.__data_storage, self.__request, self.__explainable_lock, multi_fidelity_callback = multi_fidelity_callback, multi_fidelity_level = multi_fidelity_level)
+        self.__adapter_runtime_manager = AdapterRuntimeManager(self.__data_storage, self.__request, self.__explainable_lock, multi_fidelity_callback = multi_fidelity_callback, multi_fidelity_level = multi_fidelity_level, strategy_controller=self)
         #Init Agents
         for adapter_manager in self.__adapter_runtime_manager.get_adapter_managers():
             AdapterManagerAgent(self.__blackboard, self, adapter_manager)

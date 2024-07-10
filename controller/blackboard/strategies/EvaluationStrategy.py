@@ -146,57 +146,71 @@ class EvaluationStrategy(IAbstractStrategy):
             # Wie kann ich die model_list am besten holen hier ?
             completed_models = []
             while model_count!=len(completed_models):
-                model_list = controller.get_data_storage().get_models(user_id,training_id,dataset_id)  
+                model_list = controller.get_data_storage().get_models(user_id,training_id,dataset_id)
                 #model.get('status') == ('completed' or "failed") it might not work
                 completed_models += [model.get('auto_ml_solution') for model in model_list if model.get('status') in ('completed', 'failed') and model.get('auto_ml_solution') not in completed_models]
                 #time.sleep(5)
-                
-            model_list = controller.get_data_storage().get_models(user_id,training_id,dataset_id)  
+
+            model_list = controller.get_data_storage().get_models(user_id,training_id,dataset_id)
             accuracy = [self.get_score(model) for model in model_list]
             print("accuracy: ", accuracy)
             accuracies.append(accuracy)
             #creating key pair value to know which model has which accuracy
+<<<<<<< Updated upstream
             """ if completed_models not in model_accuracies:
                 model_accuracies[completed_models] = []
+=======
+            #if completed_models not in model_accuracies:
+            #    model_accuracies[completed_models] = []
+>>>>>>> Stashed changes
 
-            model_accuracies[completed_models].append(accuracy)
-            print("model_accuracies: ", model_accuracies)
-           # model_accuracies[completed_models] = accuracy
-            # Überprüfe, ob eine Verbesserung vorliegt
-            epsilon=0.005
-            length = len(accuracies)
-            if len(accuracies) >= 2: 
-                # Loop through each pair of consecutive accuracy arrays starting from the second one
-                for i in range(1, len(accuracies)):
-                      previous_accuracies = accuracies[i - 1]
-                      current_accuracies = accuracies[i]
-                      all_smaller_or_equal = True  # Assume they match the condition until proven otherwise
-                    # Check corresponding elements in the two lists
-                    
-                    # Check if each accuracy in the current list is smaller or equal to the previous list's accuracies
-                      for j in range(len(current_accuracies)):
-                            if current_accuracies[j] >= previous_accuracies[j] + epsilon:
-                                all_smaller_or_equal = False
-                                consecutive_no_improvement = 0
-                                break  # Stop checking as soon as one mismatch is found
+        #     model_accuracies[completed_models].append(accuracy)
+        #     print("model_accuracies: ", model_accuracies)
+        #    # model_accuracies[completed_models] = accuracy
+        #     # Überprüfe, ob eine Verbesserung vorliegt
+        #     epsilon=0.005
+        #     length = len(accuracies)
+        #     if len(accuracies) >= 2:
+        #         # Loop through each pair of consecutive accuracy arrays starting from the second one
+        #         for i in range(1, len(accuracies)):
+        #               previous_accuracies = accuracies[i - 1]
+        #               current_accuracies = accuracies[i]
+        #               all_smaller_or_equal = True  # Assume they match the condition until proven otherwise
+        #             # Check corresponding elements in the two lists
 
-                        # Output the result of the comparison for each pair of mini-arrays
-                            if all_smaller_or_equal:
-                                consecutive_no_improvement += 1
-                                print(f"Accuracies at index {i} are all smaller or equal to those at index {i-1} + 0.005")
-                            else:
-                                print(f"Accuracies at index {i} are NOT all smaller or equal to those at index {i-1} + 0.005")
-                else:
-                    print("Not enough data to compare accuracies.")
-                print("accuracies: ", accuracies)            
-            
+        #             # Check if each accuracy in the current list is smaller or equal to the previous list's accuracies
+        #               for j in range(len(current_accuracies)):
+        #                     if current_accuracies[j] >= previous_accuracies[j] + epsilon:
+        #                         all_smaller_or_equal = False
+        #                         consecutive_no_improvement = 0
+        #                         break  # Stop checking as soon as one mismatch is found
 
+<<<<<<< Updated upstream
             # Laufzeit verdoppeln für die nächste Iteration
             runtime_limit *= 2
             
             if consecutive_no_improvement == 2:
                 top_model= max(model_accuracies, key=model_accuracies.get)
  """
+=======
+        #                 # Output the result of the comparison for each pair of mini-arrays
+        #                     if all_smaller_or_equal:
+        #                         consecutive_no_improvement += 1
+        #                         print(f"Accuracies at index {i} are all smaller or equal to those at index {i-1} + 0.005")
+        #                     else:
+        #                         print(f"Accuracies at index {i} are NOT all smaller or equal to those at index {i-1} + 0.005")
+        #         else:
+        #             print("Not enough data to compare accuracies.")
+        #         print("accuracies: ", accuracies)
+
+
+        #     # Laufzeit verdoppeln für die nächste Iteration
+        #     runtime_limit *= 2
+
+        #     if consecutive_no_improvement == 2:
+        #         top_model= max(model_accuracies, key=model_accuracies.get)
+
+>>>>>>> Stashed changes
         self._log.info('Optimum strategy completed.')
         controller.set_phase('completed')
 
@@ -211,5 +225,5 @@ class EvaluationStrategy(IAbstractStrategy):
         """
         if self.global_multi_fidelity_level != 0:
             self._log.info('Finished training, advancing to phase "evaluation"')
-            controller.set_phase('evaluation')
+            controller.set_phase('end')
             controller.disable_strategy('evaluation.finish_training')
