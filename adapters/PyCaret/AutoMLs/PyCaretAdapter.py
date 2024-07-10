@@ -76,7 +76,7 @@ class PyCaretAdapter:
         best_score = -2
         best_model = None
         for clustering_approach in parameters["include_approach"]:
-            model = create_model(clustering_approach, num_clusters=4)
+            model = create_model(clustering_approach, num_clusters=parameters["n_clusters"])
             metrics_df = pull()
             silhouette_score = metrics_df['Silhouette'][0]
             print(f"Silhouette Score {clustering_approach}: {silhouette_score}")
