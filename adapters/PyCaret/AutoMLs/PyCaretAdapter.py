@@ -9,6 +9,7 @@ import json
 import PyCaretParameterConfig as ppc
 from PycaretWrapper import PycaretWrapper
 from pycaret.clustering import *
+import subprocess # to start Dashboard
 
 class PyCaretAdapter:
     """
@@ -63,21 +64,19 @@ class PyCaretAdapter:
 
     def __tabular_clustering(self):
         """Execute the tabular clustering task and export the found model"""
-        self.df, test = data_loader(self._configuration, perform_splitting= False)
+        self.df, test = data_loader(self._configuration, perform_splitting=False)
         X, y = prepare_tabular_dataset(self.df, self._configuration, apply_feature_extration=True)
 
         parameters = translate_parameters(":pycaret", self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), ppc.parameters)
 
         save_configuration_in_json(self._configuration)
 
-        exp_name = setup(data = X)
+        exp_name = setup(data=X)
 
         best_score = -2
         best_model = None
-        # for each clustering approach in parameters, create a model, save it and export it
-        # TODO: decide which model is best
         for clustering_approach in parameters["include_approach"]:
-            model = create_model(clustering_approach, num_clusters=4)
+            model = create_model(clustering_approach, num_clusters=parameters["n_clusters"])
             metrics_df = pull()
             silhouette_score = metrics_df['Silhouette'][0]
             print(f"Silhouette Score {clustering_approach}: {silhouette_score}")
@@ -86,67 +85,50 @@ class PyCaretAdapter:
                 best_score = silhouette_score
                 best_model = model
 
+
+        # Create Dashbord for Clustering (with Streamlit (https://streamlit.io))
         save_directory = self._configuration["dashboard_folder_location"]
 
-        # Plot-Typen  https://pycaret.readthedocs.io/en/stable/api/clustering.html#pycaret.clustering.plot_model
         plot_types = ['cluster', 'tsne', 'elbow', 'silhouette', 'distance', 'distribution']
-
-        # Plotly-Figuren
         figures = []
-
-        # Zeige das aktuelle Arbeitsverzeichnis an
         current_directory = os.getcwd()
         print(f"Current working directory: {current_directory}")
 
-        # Definiere den Pfad zum Speichern der Plots
         save_directory = self._configuration["dashboard_folder_location"]
         if not os.path.exists(save_directory):
             os.makedirs(save_directory)
 
-        # Plotly-Figuren sammeln
-        figures_html = ""
-
         for plot_type in plot_types:
-            if plot_type == 'elbow' or 'silhouette':
+            if plot_type in ['elbow', 'silhouette', 'distance']:
                 pathtoplot = plot_model(best_model, plot=plot_type, save=True)
                 plot_filename = os.path.join(current_directory, f'{plot_type}.png')
                 dashboard_path = os.path.join(save_directory, f'{plot_type}.png')
+                os.rename(pathtoplot, plot_filename)
+                os.rename(plot_filename, dashboard_path)
             else:
-                pathtoplot = plot_model(best_model, plot=plot_type, save=True, display_format='streamlit')
+                pathtoplot = plot_model(best_model, plot=plot_type, save=True)
                 plot_filename = os.path.join(current_directory, f'{plot_type}.html')
                 dashboard_path = os.path.join(save_directory, f'{plot_type}.html')
+                os.rename(pathtoplot, plot_filename)
+                os.rename(plot_filename, dashboard_path)
 
-            os.rename(pathtoplot, plot_filename)
-            os.rename(plot_filename, dashboard_path)
-
-            print(f"Plot moved to: {dashboard_path}")
-            if plot_type != 'elbow' and plot_type != 'silhouette' and plot_type != 'distance':
-                with open(dashboard_path, 'r', encoding='utf-8') as file:
-                    plot_html = file.read()
-                    figures_html += plot_html
-
-        # Alle Plots in einer HTML-Datei speichern
-        result_path = os.path.join(save_directory, "clusterevaluate.html")
-        html_content = f"""
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <title>Cluster Visualization</title>
-            <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-        </head>
-        <body>
-            {figures_html}
-        </body>
-        </html>
-        """
-
-        with open(result_path, 'w', encoding='utf-8') as file:
-            file.write(html_content)
-
-        print(f"Visualization saved to {result_path}")
+        # print(f"Plots saved to {save_directory}")
 
         save_model(best_model, os.path.join(self._configuration["result_folder_location"], f'model_pycaret'))
-        export_model(PycaretWrapper(best_model, self._configuration), self._configuration["dashboard_folder_location"], f'dashboard_model.p')
+        # Create Clustering Dashboard
+        os.environ['BROWSER'] = 'none' # prevents the browser from being launched.
+
+        # Set the relative path to the configuration file.
+        relative_config_path = os.path.join(os.getcwd(), 'config')
+        # Set the environment variable STREAMLIT_CONFIG_DIR (settings for Streamlit).TODO: Does not work (or gets cached?).
+        os.environ['STREAMLIT_CONFIG_DIR'] = relative_config_path
+
+        process = subprocess.Popen(
+            ['streamlit', 'run', 'AutoMLs/cluster_dashboard.py', save_directory],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            start_new_session=True
+        )
 
     def __tabular_regression(self):
         #most likely not working, looks like a copy of the flaml adapter
