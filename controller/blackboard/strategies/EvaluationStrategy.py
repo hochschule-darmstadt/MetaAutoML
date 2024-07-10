@@ -156,13 +156,8 @@ class EvaluationStrategy(IAbstractStrategy):
             print("accuracy: ", accuracy)
             accuracies.append(accuracy)
             #creating key pair value to know which model has which accuracy
-<<<<<<< Updated upstream
-            """ if completed_models not in model_accuracies:
-                model_accuracies[completed_models] = []
-=======
             #if completed_models not in model_accuracies:
             #    model_accuracies[completed_models] = []
->>>>>>> Stashed changes
 
         #     model_accuracies[completed_models].append(accuracy)
         #     print("model_accuracies: ", model_accuracies)
@@ -185,14 +180,6 @@ class EvaluationStrategy(IAbstractStrategy):
         #                         consecutive_no_improvement = 0
         #                         break  # Stop checking as soon as one mismatch is found
 
-<<<<<<< Updated upstream
-            # Laufzeit verdoppeln für die nächste Iteration
-            runtime_limit *= 2
-            
-            if consecutive_no_improvement == 2:
-                top_model= max(model_accuracies, key=model_accuracies.get)
- """
-=======
         #                 # Output the result of the comparison for each pair of mini-arrays
         #                     if all_smaller_or_equal:
         #                         consecutive_no_improvement += 1
@@ -210,7 +197,6 @@ class EvaluationStrategy(IAbstractStrategy):
         #     if consecutive_no_improvement == 2:
         #         top_model= max(model_accuracies, key=model_accuracies.get)
 
->>>>>>> Stashed changes
         self._log.info('Optimum strategy completed.')
         controller.set_phase('completed')
 
