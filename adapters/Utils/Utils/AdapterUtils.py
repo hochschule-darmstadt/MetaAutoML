@@ -437,6 +437,7 @@ def predict(config: dict, config_path: str, automl: str) -> Tuple[float, str]:
                                         config["user_id"],
                                         config["dataset_id"],
                                         config["training_id"],
+                                        config["model_id"],
                                         os.getenv("RESULT_FOLDER_NAME"))
 
     #if config["task"] == ":time_series_classification":

@@ -54,6 +54,7 @@ class AdapterRuntimePredictionManager:
             "user_id": self.__user_id,
             "dataset_id": training["dataset_id"],
             "training_id": str(training["_id"]),
+            "model_id": str(model["_id"]),
             "prediction_id": self.__prediction_id,
             "configuration": training["configuration"],
             "dataset_configuration": json.dumps(training["dataset_configuration"]),

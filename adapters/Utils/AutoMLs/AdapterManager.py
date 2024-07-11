@@ -248,11 +248,13 @@ class AdapterManager(Thread):
                                                   config_json["user_id"],
                                                   config_json["dataset_id"],
                                                   config_json["training_id"],
+                                                  config_json["model_id"],
                                                   os.getenv("RESULT_FOLDER_NAME"))
             job_file_location = os.path.join(os.getenv("TRAINING_PATH"),
                                                   config_json["user_id"],
                                                   config_json["dataset_id"],
                                                   config_json["training_id"],
+                                                  config_json["model_id"],
                                                   os.getenv("JOB_FOLDER_NAME"),
                                                   os.getenv("JOB_FILE_NAME"))
             #Read dataset configuration
@@ -295,6 +297,7 @@ class AdapterManager(Thread):
                                         config_json["user_id"],
                                         config_json["dataset_id"],
                                         config_json["training_id"],
+                                        config_json["model_id"],
                                         os.getenv("JOB_FOLDER_NAME"),
                                         os.getenv("JOB_FILE_NAME"))
 
