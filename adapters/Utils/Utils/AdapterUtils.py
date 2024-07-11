@@ -197,6 +197,7 @@ def evaluate(config: "StartAutoMlRequest", config_path: str) -> Tuple[float, flo
                                         config.user_id,
                                         config.dataset_id,
                                         config.training_id,
+                                        config.model_id,
                                         os.getenv("DASHBOARD_FOLDER_NAME"))
     config = config.__dict__
     config["dataset_configuration"] = config["dataset_configuration"]

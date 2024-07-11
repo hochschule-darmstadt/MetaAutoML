@@ -1,5 +1,5 @@
 ### Ontology file generated from ML_Ontology.xlsx.
-### 2024-06-12 23:34:59.600878
+### 2024-07-10 18:02:19.760379
 
 
 # PREFIXES
@@ -1133,6 +1133,11 @@
 :brier a :Metric ;
     skos:prefLabel "brier" ;
     :used_for :classification .
+:calinski_harabasz_index a :Metric ;
+    skos:prefLabel "Calinski Harabasz Index" ;
+    :used_for :clustering ;
+    rdfs:comment "The Calinski-Harabasz Index, or Variance Ratio Criterion, measures the sum of between-cluster dispersion against the sum of within-cluster dispersion, where dispersion is the sum of distance squared. The higher the better." ;
+    rdfs:seeAlso <https://www.wikidata.org/wiki/Q94983169> .
 :categorical_accuracy a :Metric ;
     skos:prefLabel "categorical accuracy" ;
     :used_for :classification ;
@@ -1172,6 +1177,10 @@
 :d2_tweedie_score a :Metric ;
     skos:prefLabel "d2 tweedie score" ;
     :used_for :regression .
+:davies_bouldin_index a :Metric ;
+    skos:prefLabel "Davies Bouldin Index" ;
+    :used_for :clustering ;
+    rdfs:comment "The Davies-Bouldin Index measures the average similarity between clusters, where similarity compares the size of clusters against the between-cluster distance. Good value is near 0" .
 :explained_variance a :Metric ;
     skos:prefLabel "explained variance" ;
     skos:altLabel "Max Error" ;
@@ -1339,14 +1348,14 @@
     :used_for :regression .
 :mean_tensor a :Metric ;
     skos:prefLabel "mean tensor" .
+:median_absolute_error_duplicated a :Metric ;
+    skos:prefLabel "median absolute error duplicated" ;
+    skos:altLabel "Median AE" ;
+    :used_for :regression .
 :median_absolute_error a :Metric ;
     skos:prefLabel "median absolute error" ;
     skos:altLabel "MAE" ;
     :used_for :regression , :time_series_forecasting .
-:median_absolute_error a :Metric ;
-    skos:prefLabel "median absolute error" ;
-    skos:altLabel "Median AE" ;
-    :used_for :regression .
 :median_absolute_percentage_error a :Metric ;
     skos:prefLabel "median absolute percentage error" ;
     skos:altLabel "MAPE" ;
@@ -1459,14 +1468,6 @@
     skos:prefLabel "receiver operating characteristic curve" ;
     skos:altLabel "ROC AUC" ;
     :used_for :classification .
-:receiver_operating_characteristic_curve_weighted a :Metric ;
-    skos:prefLabel "receiver operating characteristic curve weighted" ;
-    skos:altLabel "ROC AUC weighted" ;
-    :used_for :classification .
-:receiver_operating_characteristic_curve_samples a :Metric ;
-    skos:prefLabel "receiver operating characteristic curve samples" ;
-    skos:altLabel "ROC AUC samples" ;
-    :used_for :classification .
 :receiver_operating_characteristic_curve_one_vs_one a :Metric ;
     skos:prefLabel "receiver operating characteristic curve one vs one" ;
     skos:altLabel "ROC AUC OVO" ;
@@ -1483,17 +1484,25 @@
     skos:prefLabel "receiver operating characteristic curve one vs rest" ;
     skos:altLabel "ROC AUC OVR" ;
     :used_for :classification .
-:receiver_operating_characteristic_curve_one_vs_rest_micro a :Metric ;
-    skos:prefLabel "receiver operating characteristic curve one vs rest micro" ;
-    skos:altLabel "ROC AUC OVR micro" ;
-    :used_for :classification .
 :receiver_operating_characteristic_curve_one_vs_rest_macro a :Metric ;
     skos:prefLabel "receiver operating characteristic curve one vs rest macro" ;
     skos:altLabel "ROC AUC OVR macro" ;
     :used_for :classification .
+:receiver_operating_characteristic_curve_one_vs_rest_micro a :Metric ;
+    skos:prefLabel "receiver operating characteristic curve one vs rest micro" ;
+    skos:altLabel "ROC AUC OVR micro" ;
+    :used_for :classification .
 :receiver_operating_characteristic_curve_one_vs_rest_weighted a :Metric ;
     skos:prefLabel "receiver operating characteristic curve one vs rest weighted" ;
     skos:altLabel "ROC AUC OVR weighted" ;
+    :used_for :classification .
+:receiver_operating_characteristic_curve_samples a :Metric ;
+    skos:prefLabel "receiver operating characteristic curve samples" ;
+    skos:altLabel "ROC AUC samples" ;
+    :used_for :classification .
+:receiver_operating_characteristic_curve_weighted a :Metric ;
+    skos:prefLabel "receiver operating characteristic curve weighted" ;
+    skos:altLabel "ROC AUC weighted" ;
     :used_for :classification .
 :root_mean_squared_error a :Metric ;
     skos:prefLabel "root mean squared error" ;
@@ -1510,6 +1519,10 @@
 :sensitifity_at_specificity a :Metric ;
     skos:prefLabel "sensitifity at specificity" ;
     :used_for :classification .
+:silhouette_score a :Metric ;
+    skos:prefLabel "Silhouette Score" ;
+    :used_for :clustering ;
+    rdfs:comment "It compares intra cluster and inter cluster similarity. optimal value 1, not distinguishable 0, -1 no clustering at all" .
 :sparse_categorical_accuracy a :Metric ;
     skos:prefLabel "sparse categorical accuracy" ;
     :used_for :classification ;

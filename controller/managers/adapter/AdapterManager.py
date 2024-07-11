@@ -62,7 +62,7 @@ class AdapterManager(Thread):
         Returns:
             str: The AutoML adapter name
         """
-        if(self.__automl == ':pycaret'):
+        if(self.__request.configuration.task == ':tabular_clustering'):
             return self.__automl + self.__request.configuration.parameters[':include_approach'].values[0]
         return self.__automl
 

@@ -25,8 +25,6 @@ pycaret_metrics = {
     ":rooted_mean_squared_scaled_error": "RMSSE",
     ":symmetric_mean_absolute_percentage_error": "SMAPE",
     ":coverage": "COVERAGE"
-
-    #clustering TODO
 }
 
 # supported clustering approaches in PyCaret
@@ -50,12 +48,6 @@ parameters = {
                                                 },
     #tabular classification
     ":metric_pycaret_tabular_classification": {
-                                                    "parameter_name": "optimize",
-                                                    "lookup_dict": pycaret_metrics
-                                                },
-
-    #tabular clustering
-    ":metric_pycaret_tabular_clustering": {
                                                     "parameter_name": "optimize",
                                                     "lookup_dict": pycaret_metrics
                                                 },

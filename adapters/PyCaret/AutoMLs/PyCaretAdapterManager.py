@@ -168,7 +168,12 @@ class PyCaretAdapterManager(AdapterManager):
         # extract additional information from automl
         automl = load_model(os.path.join(working_dir, 'model_pycaret'))
         try:
-            lib, model = get_lib_model_names(automl.named_steps.trained_model)
+            if hasattr(automl.named_steps, 'trained_model'):
+                lib, model = get_lib_model_names(automl.named_steps.trained_model)
+            elif hasattr(automl.named_steps, 'actual_estimator'):
+                lib, model = get_lib_model_names(automl.named_steps.actual_estimator)
+            else:
+                lib, model = get_lib_model_names(automl.named_steps.trained_model)
         except:
             lib, model = get_lib_model_names(automl)
         libraries.append(lib)
