@@ -16,7 +16,15 @@
 
 <MudGrid Style="min-height: 70vh">
     <MudItem xs="12" sm="12" md="12">
-        <DatasetAnalysisFull Dataset="_dataset" />
+        @if (_dataset == null)
+        {
+            <DataLoaderSpinner/>
+        }
+        else
+        {
+            <DatasetAnalysisFull Dataset="_dataset" />
+        }
+
     </MudItem>
 </MudGrid>
 
@@ -32,6 +40,10 @@
     protected async override void OnInitialized()
     {
         await LoadDataset();
+        _breadcrumbs.Add(new BreadcrumbItem(L["Home"], "/", false, Icons.Material.Filled.Home));
+        _breadcrumbs.Add(new BreadcrumbItem(L["Datasets"], "/datasets", false, Icons.Material.Filled.ListAlt));
+        _breadcrumbs.Add(new BreadcrumbItem(_pageTitle, "/datasets/" + Id, false, Icons.Material.Filled.ListAlt));
+        _breadcrumbs.Add(new BreadcrumbItem(L["Analysis"], null, true, Icons.Material.Filled.ListAlt));
         StateHasChanged();
     }
 

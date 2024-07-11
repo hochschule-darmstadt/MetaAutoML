@@ -29,16 +29,6 @@
     {
         try
         {
-            @* ApiResponseDto apiResponseModel = await apiClient.GetModels(new GetModelsRequestDto() { DatasetId = Dataset.Id });
-            if (apiResponseModel.IsSuccessStatusCode)
-            {
-                int _modelsCount = Newtonsoft.Json.JsonConvert.DeserializeObject<GetModelsResponseDto>(apiResponseModel.Result.ToString()).Models.Count;
-                if (_modelsCount > 0)
-                {
-                    viewNotifier.Show(L["Dataset has models."], ViewNotifierType.Error, L["Operation Failed"]);
-                    return;
-                }
-            } *@
             ApiResponseDto apiResponseModel = await apiClient.GetModels(new GetModelsRequestDto() { DatasetId = Dataset.Id });
             if (apiResponseModel.IsSuccessStatusCode)
             {
@@ -47,7 +37,7 @@
                 {
                     bool? confirmDelete = await DialogService.ShowMessageBox(
                         title: "Confirm Deletion",
-                        message: $"This dataset has {modelsCount} model(s) associated with it. Are you sure you want to delete it?",
+                        message: $"The dataset '{Dataset.Name}' has {modelsCount} model(s) associated with it. Are you sure you want to delete it?",
                         yesText: "Delete",
                         cancelText: "Cancel",
                         options: new DialogOptions {
