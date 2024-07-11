@@ -89,10 +89,24 @@ class PyCaretAdapter:
         # Create Dashbord for Clustering (with Streamlit (https://streamlit.io))
         save_directory = self._configuration["dashboard_folder_location"]
 
-        plot_types = ['cluster', 'tsne', 'elbow', 'silhouette', 'distance', 'distribution']
+        support_dict = {
+            'kmeans': ['cluster', 'tsne', 'elbow', 'silhouette', 'distance', 'distribution'],
+            'kmodes': ['cluster', 'tsne', 'distribution'],
+            'ap': ['cluster', 'tsne', 'distance', 'distribution'],
+            'hclust': ['cluster', 'tsne', 'distribution'],
+            'birch': ['cluster', 'tsne', 'elbow', 'silhouette', 'distribution'],
+            'dbscan': ['cluster', 'tsne', 'distribution'],
+            'meanshift': ['cluster', 'tsne', 'distance', 'distribution'],
+            'optics': ['cluster', 'tsne', 'distribution'],
+            'sc': ['cluster', 'tsne', 'distribution']
+        }
+
+        # Erhalte die Plot-Typen basierend auf dem gewählten Clustering-Ansatz
+        plot_types = support_dict[clustering_approach]
+
         figures = []
         current_directory = os.getcwd()
-        print(f"Current working directory: {current_directory}")
+        # print(f"Current working directory: {current_directory}")
 
         save_directory = self._configuration["dashboard_folder_location"]
         if not os.path.exists(save_directory):
@@ -123,6 +137,7 @@ class PyCaretAdapter:
         # Set the environment variable STREAMLIT_CONFIG_DIR (settings for Streamlit).TODO: Does not work (or gets cached?).
         os.environ['STREAMLIT_CONFIG_DIR'] = relative_config_path
 
+        # Runs on Port 8501
         process = subprocess.Popen(
             ['streamlit', 'run', 'AutoMLs/cluster_dashboard.py', save_directory],
             stdout=subprocess.PIPE,
