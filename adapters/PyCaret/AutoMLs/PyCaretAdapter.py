@@ -76,11 +76,14 @@ class PyCaretAdapter:
         clustering_approach = parameters["include_approach"][0]
         best_model = create_model(clustering_approach, num_clusters=parameters["n_clusters"])
         metrics_df = pull()
-        silhouette_score = metrics_df["Silhouette"]
-        davies_bouldin_score = metrics_df["Davies-Bouldin"]
-        calinski_harabasz_score = metrics_df["Calinski-Harabasz"]
-
-        print(f"Silhouette Score {clustering_approach}: {silhouette_score}")
+        silhouette_score = metrics_df["Silhouette"][0]
+        davies_bouldin_score = metrics_df["Davies-Bouldin"][0]
+        calinski_harabasz_score = metrics_df["Calinski-Harabasz"][0]
+        metrics = {
+            ":silhouette_score": silhouette_score,
+            ":davies_bouldin_index": davies_bouldin_score,
+            ":calinski_harabasz_index": calinski_harabasz_score
+        }
 
         # Create Dashbord for Clustering (with Streamlit (https://streamlit.io))
 
@@ -96,7 +99,7 @@ class PyCaretAdapter:
             'sc': ['cluster', 'tsne', 'distribution']
         }
 
-        # Erhalte die Plot-Typen basierend auf dem gewählten Clustering-Ansatz
+        # Erhalte die Plot-Typen basierend auf dem gewï¿½hlten Clustering-Ansatz
         plot_types = support_dict[clustering_approach]
 
         figures = []
@@ -123,6 +126,8 @@ class PyCaretAdapter:
 
         # print(f"Plots saved to {save_directory}")
 
+        with open(os.path.join(self._configuration["result_folder_location"], f'metrics'), "wb") as dill_file:
+            dill.dump(metrics, dill_file)
         save_model(best_model, os.path.join(self._configuration["result_folder_location"], f'model_pycaret'))
         # Create Clustering Dashboard
         os.environ['BROWSER'] = 'none' # prevents the browser from being launched.
