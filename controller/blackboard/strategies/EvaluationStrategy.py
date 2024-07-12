@@ -139,7 +139,7 @@ class EvaluationStrategy(IAbstractStrategy):
         if not all_meet_condition:               
             request = controller.get_request()  
             request_copy = copy.deepcopy(request)
-            request_copy.configuration.runtime_limit = initial_runtime_limit*1.5
+            request_copy.configuration.runtime_limit = initial_runtime_limit*2
 
             # start a new training run 
             strategy_controller = StrategyController(
