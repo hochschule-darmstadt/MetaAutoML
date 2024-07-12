@@ -8,7 +8,7 @@ from IAbstractStrategy import IAbstractStrategy
 from StrategyController import StrategyController
 from Blackboard import Blackboard
 import copy
-from DataStorage import DataStorage 
+from DataStorage import DataStorage
 
 class EvaluationStrategy(IAbstractStrategy):
     global_multi_fidelity_level = 1
@@ -18,8 +18,8 @@ class EvaluationStrategy(IAbstractStrategy):
         Registers the rules for the training strategy.
 
         This method sets up the context for the rules and registers the rules
-        for the `training.optimum_strategy` and `training.finish_training` actions.
-        It also forces the enabling of the `training.finish_training` strategy.
+        for the `evaluation.optimum_strategy` and `evaluation.finish_training` actions.
+        It also forces the enabling of the `evaluation.finish_training` strategy.
         """
         training_context = Context(
             type_resolver=type_resolver_from_dict({
@@ -63,9 +63,12 @@ class EvaluationStrategy(IAbstractStrategy):
         Returns:
             float: The accuracy score of the model. If no accuracy score is found, returns 0.0.
         """
+        self._log.info('Retrieving the Accuracy of each model...')
+
         if model.get('test_score') and model.get('test_score').get(':accuracy') is not None:
             return model.get('test_score').get(':accuracy')
         else:
+            self._log.warning("No accuracy was found")
             return 0.0
 
     def do_optimum_strategy_callback(self, model_list, controller: StrategyController):
@@ -79,12 +82,15 @@ class EvaluationStrategy(IAbstractStrategy):
         Returns:
             list: The updated model list.
         """
+
+        self._log.info('Starting the Optimum Strategy Callback...')
         for model in model_list:
             if model.get('status') == 'completed':
-                print(f"Completed Model:{model}")      
+                print(f"Completed Model:{model}")
+       # controller.set_phase('completed')
         self._log.info('Optimum strategy completed.')
         return model_list
-        
+
     def do_optimum_strategy(self, state: dict, blackboard: Blackboard, controller: StrategyController):
         """
         Executes the optimum strategy.
@@ -94,21 +100,23 @@ class EvaluationStrategy(IAbstractStrategy):
             blackboard (Blackboard): The blackboard instance.
             controller (StrategyController): The strategy controller instance.
         """
-        
-        self._log.info("Starting optimum strategy")
-      
+
+        self._log.info("Starting optimum strategy...")
+
         initial_runtime_limit = controller.get_request().configuration.runtime_limit
-        
+
         self.global_multi_fidelity_level = 1
+        multi_fidelity_dataset_percentage_alldata=1
         multi_fidelity_dataset_percentage = 0.8
-        
+
         epsilon=0.005
+        top_model=[]
         all_meet_condition = False
-        
-        request = controller.get_request()  
+
+        request = controller.get_request()
         dataset_id = request.dataset_id
         training_id= controller.get_training_id()
-        
+
         user_id= request.user_id
         model_list = controller.get_data_storage().get_models(user_id, training_id, dataset_id)
         models_accuracy = {entry['auto_ml_solution']: entry['test_score'].get(':accuracy', 0) for entry in model_list}
@@ -116,9 +124,12 @@ class EvaluationStrategy(IAbstractStrategy):
         try:
             parent = data_store[1]['parent_training_id']
         except KeyError:
+            self._log.error('No Parent id was found!')
             parent = "none"
-            
+
         if parent != "none":
+                self._log.info('Parent Id is not None!')
+
                 parent_training_id = parent
                 parent_model_list = controller.get_data_storage().get_models(user_id, parent_training_id, dataset_id)
                 models_accuracy_parent = {entry['auto_ml_solution']: entry['test_score'].get(':accuracy', 0) for entry in parent_model_list}
@@ -130,32 +141,63 @@ class EvaluationStrategy(IAbstractStrategy):
                     # Iterate through each key-value pair in acc_1
                     for key in models_accuracy:
                     # Compare the accuracy of each Model(key) in both the current and parent model list
-                        if  ((models_accuracy_parent[key]!=0) & (models_accuracy[key]!=0) & (models_accuracy_parent[key] + epsilon < models_accuracy[key])):
+                        x=models_accuracy[key] + 0.4
+                        y=models_accuracy_parent[key]
+                        if  (models_accuracy_parent[key] + epsilon < models_accuracy[key]):
                              all_meet_condition = False
                     if all_meet_condition:
                         controller.disable_strategy('evaluation.optimum_strategy')
-                        
-        # start a new a training run with 80% of the data and double the runtime limit if the condition is not met             
-        if not all_meet_condition:               
-            request = controller.get_request()  
-            request_copy = copy.deepcopy(request)
-            request_copy.configuration.runtime_limit = initial_runtime_limit*1.5
+                        top_model[0]= max(models_accuracy, key=models_accuracy.get)
+                        max_accuracy = models_accuracy[top_model[0]]
+                        print(f"Top Model: {top_model[0]}")
+                        print(f"Max Accuracy: {max_accuracy}")
 
-            # start a new training run 
+        # start a new a training run with 80% of the data and double the runtime limit if the condition is not met
+        if not all_meet_condition:
+            request = controller.get_request()
+            request_copy = copy.deepcopy(request)
+            request_copy.configuration.runtime_limit = initial_runtime_limit*2
+
+            # start a new training run
+            self._log.info('Starting a new Training...')
             strategy_controller = StrategyController(
                     controller.get_data_storage(), request_copy, controller.get_explainable_lock(),
                     multi_fidelity_callback=self.do_optimum_strategy_callback,
                     multi_fidelity_level=multi_fidelity_dataset_percentage
             )
             data_storage = controller.get_data_storage()
-            
+
+            self._log.info('Saving Children and Parent Id in the database ...')
             #Create child_training_id and parent_training_id
             data_storage.update_training(user_id, training_id, {"child_training_id": strategy_controller.get_training_id()})
             data_storage.update_training(user_id,  strategy_controller.get_training_id(), {"parent_training_id": training_id})
 
             strategy_controller.get_adapter_runtime_manager().get_training_request()
             print(f"content of trainingRequest: {strategy_controller.get_adapter_runtime_manager().get_training_request()}\t")
-            
+
+        # train the best model with all data and double the runtime limit if the condition is met
+        if all_meet_condition:
+            request = controller.get_request()
+            request_copy = copy.deepcopy(request)
+            request_copy.configuration.runtime_limit = initial_runtime_limit*2
+            request_copy.configuration.selected_auto_ml_solutions = top_model
+
+            # Starte neuen Trainingsdurchlauf
+            self._log.info('Starting a new Training...')
+            strategy_controller = StrategyController(
+                    controller.get_data_storage(), request_copy, controller.get_explainable_lock(),
+                    multi_fidelity_callback=self.do_optimum_strategy_callback,
+                    multi_fidelity_level=multi_fidelity_dataset_percentage_alldata
+            )
+            data_storage = controller.get_data_storage()
+            #Create child_training_id and parent_training_id
+            self._log.info('Saving Children and Parent Id in the database ...')
+            data_storage.update_training(user_id, training_id, {"child_training_id": strategy_controller.get_training_id()})
+            data_storage.update_training(user_id,  strategy_controller.get_training_id(), {"parent_training_id": training_id})
+
+            strategy_controller.get_adapter_runtime_manager().get_training_request()
+            print(f"content of trainingRequest: {strategy_controller.get_adapter_runtime_manager().get_training_request()}\t")
+
         controller.set_phase('completed')
 
     def do_finish_training(self, state: dict, blackboard: Blackboard, controller: StrategyController):
@@ -167,6 +209,8 @@ class EvaluationStrategy(IAbstractStrategy):
             blackboard (Blackboard): The blackboard instance.
             controller (StrategyController): The strategy controller instance.
         """
+        self._log.info("Finishing Evaluation and switching to the end phase.....")
+
         if self.global_multi_fidelity_level != 0:
             self._log.info('Finished evaluation phase')
             controller.set_phase('end')
