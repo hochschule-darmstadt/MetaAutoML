@@ -15,12 +15,20 @@ class EvaluationStrategy(IAbstractStrategy):
 
     def register_rules(self):
         """
-        Registers the rules for the training strategy.
+    Registers the rules for the evaluation strategy.
 
-        This method sets up the context for the rules and registers the rules
-        for the `training.optimum_strategy` and `training.finish_training` actions.
-        It also forces the enabling of the `training.finish_training` strategy.
-        """
+    This method sets up the context for the rules and registers the rules
+    for the `evaluation.optimum_strategy` and `evaluation.finish_training` actions.
+    It also forces the enabling of the `evaluation.finish_training` strategy to
+    ensure that the training process always concludes properly.
+
+    Context includes:
+        - phase: The current phase of the evaluation (string).
+        - dataset_type: The type of the dataset being used (string).
+        - enabled_strategies: List of enabled strategies (array of strings).
+        - dataset_analysis: Analysis results of the dataset (mapping of string to undefined).
+        - training_runtime: Runtime information for the training process (mapping of string to undefined).
+    """
         training_context = Context(
             type_resolver=type_resolver_from_dict({
                 'phase': DataType.STRING,
@@ -72,15 +80,15 @@ class EvaluationStrategy(IAbstractStrategy):
 
     def do_optimum_strategy_callback(self, model_list, controller: StrategyController):
         """
-        Callback function for handling completed models in the optimum strategy.
+    Callback function for handling completed models in the optimum strategy.
 
-        Args:
-            model_list (list): List of models.
-            controller (StrategyController): The strategy controller instance.
+    Args:
+        model_list (list): List of models to be processed.
+        controller (StrategyController): Instance of the strategy controller managing the process.
 
-        Returns:
-            list: The updated model list.
-        """
+    Returns:
+        list: The updated list of models after processing completed ones.
+    """
 
         self._log.info('Calling the Optimum strategy Callback....')
 
@@ -91,15 +99,28 @@ class EvaluationStrategy(IAbstractStrategy):
         return model_list
 
     def do_optimum_strategy(self, state: dict, blackboard: Blackboard, controller: StrategyController):
-        """
-        Executes the optimum strategy.
 
-        Args:
-            state (dict): The current state.
-            blackboard (Blackboard): The blackboard instance.
-            controller (StrategyController): The strategy controller instance.
         """
+		    Executes the optimum strategy based on evaluation of model accuracy.
 
+		    This method evaluates the accuracy of models trained on a dataset against those trained on a parent dataset
+		    to determine if a condition is met. If the condition is not met, it initiates a new training run with adjusted
+		    parameters and updates database records accordingly.
+
+		    Args:
+		        state (dict): The current state.
+		        blackboard (Blackboard): The blackboard instance.
+		        controller (StrategyController): The strategy controller instance.
+
+		    Notes:
+		        - Uses model accuracy metrics to compare current and parent training results.
+		        - Adjusts runtime limit for subsequent training runs based on initial settings.
+		        - Updates database records with parent-child relationships for training instances.
+
+		    Raises:
+		        KeyError: If the parent training ID is not found in the database.
+
+    """
         self._log.info("Starting optimum strategy...")
 
         initial_runtime_limit = controller.get_request().configuration.runtime_limit
