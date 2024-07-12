@@ -81,8 +81,7 @@ class EvaluationStrategy(IAbstractStrategy):
         """
         for model in model_list:
             if model.get('status') == 'completed':
-                print(f"Completed Model:{model}")
-       # controller.set_phase('completed')        
+                print(f"Completed Model:{model}")      
         self._log.info('Optimum strategy completed.')
         return model_list
         
@@ -101,11 +100,9 @@ class EvaluationStrategy(IAbstractStrategy):
         initial_runtime_limit = controller.get_request().configuration.runtime_limit
         
         self.global_multi_fidelity_level = 1
-        multi_fidelity_dataset_percentage_alldata=1
         multi_fidelity_dataset_percentage = 0.8
         
         epsilon=0.005
-        top_model=[]
         all_meet_condition = False
         
         request = controller.get_request()  
@@ -133,22 +130,16 @@ class EvaluationStrategy(IAbstractStrategy):
                     # Iterate through each key-value pair in acc_1
                     for key in models_accuracy:
                     # Compare the accuracy of each Model(key) in both the current and parent model list
-                        x=models_accuracy[key] + 0.4
-                        y=models_accuracy_parent[key]
-                        if  (models_accuracy_parent[key] + epsilon < models_accuracy[key]):
+                        if  ((models_accuracy_parent[key]!=0) & (models_accuracy[key]!=0) & (models_accuracy_parent[key] + epsilon < models_accuracy[key])):
                              all_meet_condition = False
                     if all_meet_condition:
                         controller.disable_strategy('evaluation.optimum_strategy')
-                        top_model[0]= max(models_accuracy, key=models_accuracy.get)
-                        max_accuracy = models_accuracy[top_model[0]]
-                        print(f"Top Model: {top_model[0]}") 
-                        print(f"Max Accuracy: {max_accuracy}")
                         
         # start a new a training run with 80% of the data and double the runtime limit if the condition is not met             
         if not all_meet_condition:               
             request = controller.get_request()  
             request_copy = copy.deepcopy(request)
-            request_copy.configuration.runtime_limit = initial_runtime_limit*2
+            request_copy.configuration.runtime_limit = initial_runtime_limit*1.5
 
             # start a new training run 
             strategy_controller = StrategyController(
@@ -158,27 +149,6 @@ class EvaluationStrategy(IAbstractStrategy):
             )
             data_storage = controller.get_data_storage()
             
-            #Create child_training_id and parent_training_id
-            data_storage.update_training(user_id, training_id, {"child_training_id": strategy_controller.get_training_id()})
-            data_storage.update_training(user_id,  strategy_controller.get_training_id(), {"parent_training_id": training_id})
-
-            strategy_controller.get_adapter_runtime_manager().get_training_request()
-            print(f"content of trainingRequest: {strategy_controller.get_adapter_runtime_manager().get_training_request()}\t")
-            
-        # train the best model with all data and double the runtime limit if the condition is met
-        if all_meet_condition:               
-            request = controller.get_request()  
-            request_copy = copy.deepcopy(request)
-            request_copy.configuration.runtime_limit = initial_runtime_limit*2
-            request_copy.configuration.selected_auto_ml_solutions = top_model
-
-            # Starte neuen Trainingsdurchlauf
-            strategy_controller = StrategyController(
-                    controller.get_data_storage(), request_copy, controller.get_explainable_lock(),
-                    multi_fidelity_callback=self.do_optimum_strategy_callback,
-                    multi_fidelity_level=multi_fidelity_dataset_percentage_alldata
-            )
-            data_storage = controller.get_data_storage()
             #Create child_training_id and parent_training_id
             data_storage.update_training(user_id, training_id, {"child_training_id": strategy_controller.get_training_id()})
             data_storage.update_training(user_id,  strategy_controller.get_training_id(), {"parent_training_id": training_id})
