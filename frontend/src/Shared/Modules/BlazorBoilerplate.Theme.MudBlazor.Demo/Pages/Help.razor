@@ -99,7 +99,14 @@
                                         </MudText>
                                     </MudItem>
                                     <MudItem xs="6">
-                                        <img style=" width: 90%; margin: 3rem; padding-top: 5rem; padding-right: 2rem; cursor: pointer;" src="@(section.GIF)" @onclick="() => OpenImageDialog(section.GIF)" />
+                                        @* <img style=" width: 90%; margin: 3rem; padding-top: 5rem; padding-right: 2rem; cursor: pointer;" src="@(section.Video)" @onclick="() => OpenImageDialog(section.Video)" /> *@
+                                        <video style="width: 90%; margin: 3rem; padding-top: 5rem; padding-right: 2rem; cursor: pointer;"
+                                            controls
+                                            loop
+                                            autoplay>
+                                            <source src="@(section.Video)">
+                                            Your browser does not support the video tag.
+                                        </video>
                                     </MudItem>
                                 </MudGrid>
                             }
@@ -136,7 +143,14 @@
                                             </MudText>
                                         </MudItem>
                                         <MudItem xs="6">
-                                            <img style=" width: 90%; margin: 3rem; padding-right: 2rem; cursor: pointer;" src="@(section.GIF)" @onclick="() => OpenImageDialog(section.GIF)" />
+                                            @* <img style=" width: 90%; margin: 3rem; padding-right: 2rem; cursor: pointer;" src="@(section.Video)" @onclick="() => OpenImageDialog(section.Video)" /> *@
+                                            <video style="width: 90%; margin: 3rem; padding-right: 2rem; cursor: pointer;"
+                                            controls
+                                            loop
+                                            autoplay>
+                                            <source src="@(section.Video)">
+                                            Your browser does not support the video tag.
+                                        </video>
                                         </MudItem>
                                     </MudGrid>
                                 }
@@ -145,7 +159,14 @@
                                     <MudGrid Style="border-bottom-style: inset; border-bottom-width: 1px; padding-bottom: 2rem;" id="@(section.Anchor)">
                                         <MudItem xs="6">
                                             <MudText Style="margin-left: 2rem; padding-top: 4rem;" Typo="Typo.h6" Color="Color.Secondary">@(section.Headline)</MudText>
-                                            <img style=" width: 90%; margin: 2rem; padding-right: 2rem; cursor: pointer;" src="@(section.GIF)" @onclick="() => OpenImageDialog(section.GIF)" />
+                                            @* <img style=" width: 90%; margin: 2rem; padding-right: 2rem; cursor: pointer;" src="@(section.Video)" @onclick="() => OpenImageDialog(section.Video)" /> *@
+                                            <video style="width: 90%; margin: 2rem; padding-right: 2rem; cursor: pointer;"
+                                            controls
+                                            loop
+                                            autoplay>
+                                            <source src="@(section.Video)">
+                                            Your browser does not support the video tag.
+                                        </video>
                                         </MudItem>
                                         <MudItem xs="6">
                                             <MudText Style="margin-left:2rem;margin-top:8rem;" Typo="Typo.body2">
