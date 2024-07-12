@@ -154,17 +154,7 @@ class DataStorage:
         df.to_csv(csv_file, index=False)
         os.remove(excel_file)
         return file_name
-    
-    """ def create_training(self, user_id: str, training_details: 'dict[str, object]') -> str:
-        # Insert the new training record into the database
-        new_training_id = self.__mongo.insert_training(user_id, training_details)
-
-        # If this training has a parent training ID, update the parent training record with the new child training ID
-        parent_training_id = training_details.get("training_id")
-        if parent_training_id:
-            self.__mongo.update_training(user_id, parent_training_id, {"child_training_id": new_training_id})
-
-        return new_training_id """
+  
 
     def create_dataset(self, user_id: str, file_name: str, type: str, name: str, encoding: str) -> str:
         """Create new dataset record and move dataset from upload folder to final path
