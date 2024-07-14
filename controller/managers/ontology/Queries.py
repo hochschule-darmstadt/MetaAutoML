@@ -129,3 +129,23 @@ WHERE {
 
 GROUP BY ?entity ?class ?label ?comment ?link
 """
+
+"""
+SPARQL query to retrieve all clustering approaches for one automl solution
+"""
+ONTOLOGY_QUERY_GET_ALL_CLUSTERING_APPROACHES_AUTOML = """
+        PREFIX : <http://h-da.de/ml-ontology/>
+        PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+
+SELECT DISTINCT ?approach
+WHERE {
+  ?entity a :Configuration_item ;
+    :automl_solution ?automl_iri;
+    :parameter_value ?parameter;
+    :ml_task ?ml_task.
+  ?parameter a :Configuration_item ;
+    skos:broader :include_approach ;
+    :parameter_value ?approach.
+  FILTER(?ml_task IN (:tabular_clustering)).
+}
+"""

@@ -3,6 +3,9 @@ import logging, os, json, datetime
 from ControllerBGRPC import *
 from AdapterManager import AdapterManager
 from ThreadLock import ThreadLock
+from OntologyManager import OntologyManager
+from dependency_injector.wiring import Provide
+
 import json
 import copy
 
@@ -74,23 +77,9 @@ class AdapterRuntimeManager:
         return
 
     def __get_clustering_approaches(self, automl):
-        clustering_approaches = {
-            ":pycaret": {
-                ":affinity_propagation": "ap",
-                ":agglomerative_clustering": "hclust",
-                ":balanced_iterative_reducing_and_clustering_using_hierarchies": "birch",
-                ":density_based_spatial_clustering_of_applications_with_noise": "dbscan",
-                ":k_means": "kmeans",
-                ":k_modes": "kmodes",
-                ":mean_shift_clustering": "meanshift",
-                ":ordering_points_to_identify_the_clustering_structure": "optics",
-                ":spectral_clustering": "sc"
-            }
-        }
-        approaches = []
-        for approach in clustering_approaches[automl]:
-            approaches.append(approach)
-        return approaches
+        ontologyManager = OntologyManager()
+        clustering_approaches = ontologyManager.get_clustering_approaches(automl)
+        return clustering_approaches
 
     def update_adapter_manager_list(self, adapter_manager_to_keep: list):
         new_adapter_list = []
