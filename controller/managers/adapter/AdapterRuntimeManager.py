@@ -54,9 +54,14 @@ class AdapterRuntimeManager:
             port = int(port)
             self.__log.debug(f"start_new_training: creating new adapter manager and adapter manager agent")
             if self.__request.configuration.task == ':tabular_clustering':
-                approaches = self.__request.configuration.parameters[':include_approach'].values
+                if ':include_approach' in self.__request.configuration.parameters:
+                    approaches = self.__request.configuration.parameters[':include_approach'].values
+                else:
+                    approaches = []
+
                 if len(approaches) == 0:
                     approaches = self.__get_clustering_approaches(automl)
+
                 for approach in approaches:
                     print(approach)
                     adjusted_request = copy.deepcopy(self.__request)
