@@ -124,7 +124,7 @@ WHERE {
     rdfs:comment ?comment .
   OPTIONAL {?entity rdfs:seeAlso ?link} .
   OPTIONAL {?entity skos:altLabel ?altLabel} .
-  FILTER (?class IN (:ML_area , :ML_task , :ML_appraoch , :Preprocessing_approach , :Metric ,:ML_library , :AutoML_solution))
+  FILTER (?class IN (:ML_area , :ML_task , :ML_approach , :Preprocessing_approach , :Metric ,:ML_library , :AutoML_solution))
 }
 
 GROUP BY ?entity ?class ?label ?comment ?link
