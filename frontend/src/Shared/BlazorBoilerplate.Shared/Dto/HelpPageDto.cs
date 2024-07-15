@@ -24,7 +24,7 @@ namespace BlazorBoilerplate.Shared.Dto
         public string Headline { get; set; }
         public string Text { get; set; }
         public List<Subsection> Subsections { get; set; }
-        public string GIF { get; set; }
+        public string Video { get; set; }
         public string Anchor { get; set; }
         public string pageLink { get; set; }
         public string linkHeadline { get; set; }

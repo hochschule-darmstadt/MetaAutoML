@@ -7,7 +7,7 @@
             {
                 "Headline": "Dataset upload",
                 "Text": "On the OMA-ML home screen, click the UPLOAD button to upload a new dataset to OMA-ML from your disk or from the internet. You can upload tabular data, texts, images or time series.",
-                "GIF": "_content/BlazorBoilerplate.Theme.MudBlazor/images/UploadDataset.gif",
+                "Video": "_content/BlazorBoilerplate.Theme.MudBlazor/images/UploadDataset.mp4",
                 "Anchor": "datasetUpload",
                 "pageLink": " ",
                 "linkHeadline": "Direct link to home"
@@ -15,31 +15,31 @@
             {
                 "Headline": "Preprocessing",
                 "Text": "Preprocessing is a crucial part of data preparation that aims to clean and organize raw data into a suitable format for the training. In this step, you can choose column separator, encoding, datetime format, etc. if necessary. You can also manually choose the datatype and role of individual columns.",
-                "GIF": "_content/BlazorBoilerplate.Theme.MudBlazor/images/Preprocessing.gif",
+                "Video": "_content/BlazorBoilerplate.Theme.MudBlazor/images/Preprocessing.mp4",
                 "Anchor": "preprocessing"
             },
             {
                 "Headline": "Model selection",
                 "Text": "An ML model generalizes patterns and relationships within the training dataset to make predictions. During the Model selection process, the built-in AutoML solutions will evaluate different approaches to determine which ML model is the most suitable for a given dataset.",
-                "GIF": "_content/BlazorBoilerplate.Theme.MudBlazor/images/ModelSelection.gif",
+                "Video": "_content/BlazorBoilerplate.Theme.MudBlazor/images/ModelSelection.mp4",
                 "Anchor": "modelselection"
             },
             {
                 "Headline": "Training",
                 "Text": "In the ML training step, an ML task must first be selected, e.g., classification, regression, etc. You can then select the ML libraries for which ML models shall be generated. After starting training, various AutoML solutions are executed in parallel that generate ML models. In the leaderboard, you can compare all generated ML models regarding different performance criteria, e.g., accuracy.",
-                "GIF": "_content/BlazorBoilerplate.Theme.MudBlazor/images/Training.gif",
+                "Video": "_content/BlazorBoilerplate.Theme.MudBlazor/images/Training.mp4",
                 "Anchor": "training"
             },
             {
                 "Headline": "Deployment",
                 "Text": "All ML models generated are automtically deployed on the OMA-ML platform. Alternatively, you may download a pipeline as Python source code including the generated ML model as well as pre-processing functions and include this code in a custom Python application that can be deployed anywhere.",
-                "GIF": "_content/BlazorBoilerplate.Theme.MudBlazor/images/Deployment.gif",
+                "Video": "_content/BlazorBoilerplate.Theme.MudBlazor/images/Deployment.mp4",
                 "Anchor": "deployment"
             },
             {
                 "Headline": "Prediction",
-                "Text": "On the Model page, you can inspect and use the trained ML model. You may use the model to predict new cases within the OMA-ML platform without having to install anything else. For this, you simply upload a new dataset and start the prediction process. <br> There are various ways of getting additional information about ML models: An overview, detailed graphical analyses using Explainable AI, the configuration that leads to the model, and more. ",
-                "GIF": "_content/BlazorBoilerplate.Theme.MudBlazor/images/Prediction.gif",
+                "Text": "On the Model page, you can inspect and use the trained ML model. You may use the model to predict new cases within the OMA-ML platform without having to install anything else. For this, you simply upload a new dataset and start the prediction process. There are various ways of getting additional information about ML models: An overview, detailed graphical analyses using Explainable AI, the configuration that leads to the model, and more.",
+                "Video": "_content/BlazorBoilerplate.Theme.MudBlazor/images/Prediction.mp4",
                 "Anchor": "prediction"
             }
         ]
@@ -64,7 +64,7 @@
                         "SubText": "The 'Details' button leads you to the training page. Below this button you can see a table which displays the most recently started trainings."
                     }
                 ],
-                "GIF": "_content/BlazorBoilerplate.Theme.MudBlazor/images/UploadDataset.gif",
+                "Video": "_content/BlazorBoilerplate.Theme.MudBlazor/images/UploadDataset.mp4",
                 "Anchor": "home",
                 "pageLink": " ",
                 "linkHeadline": "Direct link to home"
@@ -73,7 +73,7 @@
                 "Headline": "Datasets",
                 "Text": "All datasets that have been uploaded so far are listed on the 'Datasets' page. Moreover, you have the option to upload further datasets.",
                 "Subsections": [],
-                "GIF": "_content/BlazorBoilerplate.Theme.MudBlazor/images/Preprocessing.gif",
+                "Video": "_content/BlazorBoilerplate.Theme.MudBlazor/images/Preprocessing.mp4",
                 "Anchor": "datasets",
                 "pageLink": "datasets",
                 "linkHeadline": "Direct link to datasets page"
@@ -103,21 +103,21 @@
                         "SubText": "Under Top 3 models, you will find the top 3 models that have been trained so far."
                     }
                 ],
-                "GIF": "_content/BlazorBoilerplate.Theme.MudBlazor/images/DatasetDetail.gif",
+                "Video": "_content/BlazorBoilerplate.Theme.MudBlazor/images/DatasetDetail.mp4",
                 "Anchor": "datasetdetail"
             },
             {
                 "Headline": "Dataset configuration",
                 "Text": "Various adjustments can be made to the dataset in the 'Dataset Configuration' page. For example, the use of a header row can be activated or deactivated. Rows can be ignored by changing the number in the 'Start row' field. The column separator can be set as a semicolon, space or tab in addition to a comma. The encoding is UTF-8 by default and can also be changed to latin-1, UTF-16 or UTF-32. The datetime format can be adjusted in the corresponding text field. Furthermore, the escape character, decimal character and thousand separator can be customized. The data type and role for the individual columns can be set in the table directly below the header. The following role options are available: None, Target, Ignore and Index.",
                 "Subsections": [],
-                "GIF": "_content/BlazorBoilerplate.Theme.MudBlazor/images/Preprocessing.gif",
+                "Video": "_content/BlazorBoilerplate.Theme.MudBlazor/images/Preprocessing.mp4",
                 "Anchor": "datasetconfigure"
             },
             {
                 "Headline": "Trainings",
                 "Text": "The 'Trainings' page lists all trainings that have been started so far. If you click on the start time of a training, you will be taken to the details page of this training.",
                 "Subsections": [],
-                "GIF": "_content/BlazorBoilerplate.Theme.MudBlazor/images/Trainings.gif",
+                "Video": "_content/BlazorBoilerplate.Theme.MudBlazor/images/Trainings.mp4",
                 "Anchor": "trainings",
                 "pageLink": "trainings",
                 "linkHeadline": "Direct link to trainings page"
@@ -126,7 +126,7 @@
                 "Headline": "Train - Dataset preparation",
                 "Text": "ML training is the process of condensing implicit information in a dataset into a generated ML model. This is the first step of the training wizard. Here you can modify pre-configured datatypes of columns in tabular datasets. You can also assign roles, in particular whether a column is an ID (and hence will be ignored for training) or is the training target.",
                 "Subsections": [],
-                "GIF": "_content/BlazorBoilerplate.Theme.MudBlazor/images/Train-DatasetPreparation.gif",
+                "Video": "_content/BlazorBoilerplate.Theme.MudBlazor/images/Train-DatasetPreparation.mp4",
                 "Anchor": "traindatasetpreparation"
             },
             {
@@ -146,21 +146,21 @@
                         "SubText": "Training strategies are intelligent helpers that automatically perform best practices in data science. Select the strategies that you would like to enable for this training. For example, the top-3 strategy reduces energy consumption by first performing a training with a reduced time limit and afterwards only using the top 3 AutoML solutions for the full training time. All strategies are explained in the interactive help."
                     }
                 ],
-                "GIF": "_content/BlazorBoilerplate.Theme.MudBlazor/images/Train-Configuration.gif",
+                "Video": "_content/BlazorBoilerplate.Theme.MudBlazor/images/Train-Configuration.mp4",
                 "Anchor": "trainconfiguration"
             },
             {
                 "Headline": "Training Detail",
                 "Text": "This page shows the leaderboard for an ML training. During training, various AutoML solutions are executed in parallel. This is indicated by a spinning wheel. Whenever an AutoML solution has terminated, the result is displayed. The top performing models are shown first in the leaderboard. Clicking on the light bulb in the Model column takes you to the respective model detail view.",
                 "Subsections": [],
-                "GIF": "_content/BlazorBoilerplate.Theme.MudBlazor/images/TrainingDetail.gif",
+                "Video": "_content/BlazorBoilerplate.Theme.MudBlazor/images/TrainingDetail.mp4",
                 "Anchor": "trainingdetail"
             },
             {
                 "Headline": "Models",
                 "Text": "This page shows all models that have been trained for this dataset so far, potentially in several training sessions.",
                 "Subsections": [],
-                "GIF": "_content/BlazorBoilerplate.Theme.MudBlazor/images/Models.gif",
+                "Video": "_content/BlazorBoilerplate.Theme.MudBlazor/images/Models.mp4",
                 "Anchor": "models"
             },
             {
@@ -192,7 +192,7 @@
                         "SubText": "Here you can inspect the detailed output of the AutoML solution that has been used for training this ML model."
                     }
                 ],
-                "GIF": "_content/BlazorBoilerplate.Theme.MudBlazor/images/ModelDetail.gif",
+                "Video": "_content/BlazorBoilerplate.Theme.MudBlazor/images/ModelDetail.mp4",
                 "Anchor": "modeldetail"
             }
         ]
