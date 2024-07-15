@@ -2,25 +2,22 @@
 @inject NavigationManager NavManager
 @inject IApiClient apiClient
 @inject IViewNotifier viewNotifier
+@inject IDialogService DialogService
 
+@if (Dataset != null)
+{
+    <MudStack Row="true" >
+        <MudButton Variant="Variant.Filled"
+                    Color="Color.Secondary"
+                    Size="Size.Small"
+                    OnClick="@(e => { NavManager.NavigateTo("/datasets/" + Dataset.Id + "/train"); })">@L["Train"]</MudButton>
 
-
-    @if (Dataset != null)
-    {
-       <MudStack Row="true" >
-            <MudButton Variant="Variant.Filled"
-                       Color="Color.Secondary"
-                       Size="Size.Small"
-                       OnClick="@(e => { NavManager.NavigateTo("/datasets/" + Dataset.Id + "/train"); })">@L["Train"]</MudButton>
-
-            <MudButton Variant="Variant.Filled"
-                       Color="Color.Secondary"
-                       Size="Size.Small"
-                       OnClick="@DeleteDataset">@L["Delete"]</MudButton>
-
-        </MudStack>
-    }
-
+        <MudButton Variant="Variant.Filled"
+                    Color="Color.Secondary"
+                    Size="Size.Small"
+                    OnClick="@DeleteDataset">@L["Delete"]</MudButton>
+    </MudStack>
+}
 
 @code {
     [Parameter]
@@ -32,6 +29,30 @@
     {
         try
         {
+            ApiResponseDto apiResponseModel = await apiClient.GetModels(new GetModelsRequestDto() { DatasetId = Dataset.Id });
+            if (apiResponseModel.IsSuccessStatusCode)
+            {
+                int modelsCount = Newtonsoft.Json.JsonConvert.DeserializeObject<GetModelsResponseDto>(apiResponseModel.Result.ToString()).Models.Count;
+                if (modelsCount > 0)
+                {
+                    bool? confirmDelete = await DialogService.ShowMessageBox(
+                        title: "Confirm Deletion",
+                        message: $"The dataset '{Dataset.Name}' has {modelsCount} model(s) associated with it. Are you sure you want to delete it?",
+                        yesText: "Delete",
+                        cancelText: "Cancel",
+                        options: new DialogOptions {
+                            CloseOnEscapeKey = true,
+                            DisableBackdropClick = true
+                        }
+                    );
+
+                    if (confirmDelete != true)
+                    {
+                        return;
+                    }
+                }
+            }
+
             DeleteDatasetRequestDto datasetRequest = new DeleteDatasetRequestDto()
                 {
                     DatasetId = Dataset.Id
