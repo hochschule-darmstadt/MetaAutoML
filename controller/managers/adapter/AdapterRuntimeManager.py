@@ -8,6 +8,7 @@ from dependency_injector.wiring import Provide
 
 import json
 import copy
+from ControllerBGRPC import DynamicParameterValue
 
 
 class AdapterRuntimeManager:
@@ -68,6 +69,11 @@ class AdapterRuntimeManager:
                 for approach in approaches:
                     print(approach)
                     adjusted_request = copy.deepcopy(self.__request)
+                    if ':include_approach' not in self.__request.configuration.parameters:
+                        parameterValue = DynamicParameterValue()
+                        adjusted_request.configuration.parameters = {':include_approach': parameterValue}
+                        adjusted_request.configuration.parameters[':include_approach'].values = [];
+
                     adjusted_request.configuration.parameters[':include_approach'].values = [approach]
                     adapter_training = AdapterManager(self.__data_storage, adjusted_request, automl, self.__training_id, self.__dataset, host, port, self.__adapter_finished_callback)
                     self.__adapters.append(adapter_training)
