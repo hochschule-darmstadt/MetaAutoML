@@ -30,11 +30,7 @@ namespace BlazorBoilerplate.Theme.Material.Services
             {
                 ApiResponseDto apiResponse = await _client.SetDatasetColumnSchemaConfiguration(request);
 
-                if (apiResponse.IsSuccessStatusCode)
-                {
-                    _notifier.Show("Column updated", ViewNotifierType.Success, L["Operation Successful"]);
-                }
-                else
+                if (!apiResponse.IsSuccessStatusCode)
                 {
                     _notifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
                 }

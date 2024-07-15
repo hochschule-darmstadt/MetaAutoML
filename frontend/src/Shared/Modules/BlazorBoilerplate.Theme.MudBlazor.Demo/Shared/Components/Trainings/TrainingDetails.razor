@@ -47,7 +47,7 @@
 								</MudTableSortLabel>
 							</MudTh>
                             <MudTh><MudTableSortLabel SortBy="new Func<ModelDto, object>(x=>x.Emissions)">
-                                       <LabelTooltip Label=@L["Training emissions"] FontSize="TextStyle.Body1" Text="Emissions for training the entire dataset in kg CO2 equivalents." Position="Radzen.TooltipPosition.Top"></LabelTooltip>
+                                       <LabelTooltip Label=@L["Training emissions"] FontSize="TextStyle.Body1" Text="Emissions for training the entire dataset in mg CO2 equivalents." Position="Radzen.TooltipPosition.Top"></LabelTooltip>
                                 </MudTableSortLabel></MudTh>
                              <MudTh>
 								 <MudTableSortLabel SortBy="new Func<ModelDto, object>(x=>x.PredictionTime)">
@@ -128,13 +128,13 @@
                             @if (models.Status == "busy")
                             {
                                 <span>
-                                    @("0") g CO2-eq
+                                    @("0") mg CO2-eq
                                 </span>
                             }
                             else
                             {
                                 <span>
-                                    @(String.Format("{0:0.00}", models.Emissions)) g CO2-eq
+                                    @(String.Format("{0:0.00}", models.Emissions * 1000)) mg CO2-eq
                                 </span>
                             }
                         </MudTd>

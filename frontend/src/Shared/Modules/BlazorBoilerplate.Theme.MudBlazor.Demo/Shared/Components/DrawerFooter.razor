@@ -34,54 +34,53 @@
             }
             else
             {
-        <MudCardHeader Style="margin-left:-16px;">
-            <CardHeaderContent>
-                <MudText Typo="Typo.h6">@L["Upload"]</MudText>
-            </CardHeaderContent>
-        </MudCardHeader>
-        <MudStack>
-                                <MudSelect Label="@L["Select the data format of your dataset"]" T="string" ValueChanged="@OnDatasetTypeSelectChanged" Style="width: 150px">
-                                    @foreach (var item in _datasetTypes.DatasetTypes)
-                                    {
+                <MudCardHeader Style="margin-left:-16px;">
+                    <CardHeaderContent>
+                        <MudText Typo="Typo.h6">@L["Upload"]</MudText>
+                    </CardHeaderContent>
+                </MudCardHeader>
+                <MudStack>
+                    <MudSelect Label="@L["Select the data format of your dataset"]" T="string" ValueChanged="@OnDatasetTypeSelectChanged" Style="width: 150px">
+                        @foreach (var item in _datasetTypes.DatasetTypes)
+                        {
 
-                                        <MudSelectItem Value="@item.ID">
-                                            <LabelTooltip Position="TooltipPosition.Right" FontSize="Radzen.Blazor.TextStyle.Body1" Icon="false" Label="@L[item.Properties.ContainsKey("skos:prefLabel") ? item.Properties["skos:prefLabel"] : ""]" Text="@item.Properties["rdfs:comment"]"></LabelTooltip>
-                                        </MudSelectItem>
-                                    }
-
-                                </MudSelect>
-                                <MudStack Row="true">
-                                    <InputFile id="fileInput" OnChange="@FilesReady" hidden accept="@AcceptedFileType"/>
-                                    <MudButton HtmlTag="label"
-                                               Variant="MudBlazor.Variant.Outlined"
-                                               StartIcon="@Icons.Material.Filled.Upload"
-                                               for="fileInput"
-                                               Class="mt-1"
-                                               Disabled="@IsSelectFileDisabled"
-                                               OnClick="setLocalUploadTrue">
-                                        @L["Select Dataset"]
-                                    </MudButton>
-                                    <MudText Style="padding:5%">or</MudText>
-                                    <MudTextField Style=" font-weight: bold; font-size: 12pt;" Variant="MudBlazor.Variant.Outlined" TextChanged="setURLUploadTrue" Disabled="@IsURLDisabled" @bind-Value="@Url" Label="@L["ENTER URL"]">
-                                    </MudTextField>
-                                    <LabelTooltip Label="" Text="Supported URLs: Direct download URLs, Google Drive, OneDrive, Dropbox, Sharepoint, h_da nextCloud" Position="TooltipPosition.Right"></LabelTooltip>
-                                </MudStack>
-                                <MudTextField @bind-Value="@fileUploader.UploadDatasetRequest.DatasetName" Disabled="@(_uploadReady)" Label="@L["Dataset Name"]" Class="mt-1"></MudTextField>
-                            @if (_isLoaderClosed == false)
-                            {
-                                <MudProgressLinear Color="Color.Secondary" Indeterminate="true" />
-                            }
-                        </MudStack>
-                            }
+                            <MudSelectItem Value="@item.ID">
+                                <LabelTooltip Position="TooltipPosition.Right" FontSize="Radzen.Blazor.TextStyle.Body1" Icon="false" Label="@L[item.Properties.ContainsKey("skos:prefLabel") ? item.Properties["skos:prefLabel"] : ""]" Text="@item.Properties["rdfs:comment"]"></LabelTooltip>
+                            </MudSelectItem>
+                        }
+                    </MudSelect>
+                    <MudStack Row="true">
+                        <InputFile id="fileInput" OnChange="@FilesReady" hidden accept="@AcceptedFileType"/>
+                        <MudButton HtmlTag="label"
+                                    Variant="MudBlazor.Variant.Outlined"
+                                    StartIcon="@Icons.Material.Filled.Upload"
+                                    for="fileInput"
+                                    Class="mt-1"
+                                    Disabled="@IsSelectFileDisabled"
+                                    OnClick="setLocalUploadTrue">
+                            @L["Select Dataset"]
+                        </MudButton>
+                        <MudText Style="padding:5%">or</MudText>
+                        <MudTextField Style=" font-weight: bold; font-size: 12pt;" Variant="MudBlazor.Variant.Outlined" TextChanged="setURLUploadTrue" Disabled="@IsURLDisabled" @bind-Value="@Url" Label="@L["ENTER URL"]">
+                        </MudTextField>
+                        <LabelTooltip Label="" Text="Supported URLs: Direct download URLs, Google Drive, OneDrive, Dropbox, Sharepoint, h_da nextCloud" Position="TooltipPosition.Right"></LabelTooltip>
+                    </MudStack>
+                    <MudTextField @bind-Value="@fileUploader.UploadDatasetRequest.DatasetName" Disabled="@(_uploadReady)" Label="@L["Dataset Name"]" Class="mt-1"></MudTextField>
+                    @if (_isLoaderClosed == false)
+                    {
+                        <MudProgressLinear Color="Color.Secondary" Indeterminate="true" />
+                    }
+                </MudStack>
+            }
         </MudCard>
     </DialogContent>
     <DialogActions>
         <MudButton Color="Color.Secondary" OnClick="@Close">@L["Close"]</MudButton>
         @if (fileUploader.IsUploading == false)
         {
-                <MudTooltip Text="Click here to upload a new dataset to OMA-ML." Placement="Placement.Top" Arrow="true">
-                    <MudButton StartIcon="@Icons.Material.Filled.Upload" Color="Color.Secondary" Disabled="@_uploadReady" OnClick="@Upload">@L["Upload"]</MudButton>
-                </MudTooltip>
+            <MudTooltip Text="Click here to upload a new dataset to OMA-ML." Placement="Placement.Top" Arrow="true">
+                <MudButton StartIcon="@Icons.Material.Filled.Upload" Color="Color.Secondary" Disabled="@_uploadReady" OnClick="@Upload">@L["Upload"]</MudButton>
+            </MudTooltip>
         }
     </DialogActions>
 </MudDialog>
