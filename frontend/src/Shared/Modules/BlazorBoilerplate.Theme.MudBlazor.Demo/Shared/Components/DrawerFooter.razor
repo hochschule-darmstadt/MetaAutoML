@@ -43,7 +43,6 @@
                     <MudSelect Label="@L["Select the data format of your dataset"]" T="string" ValueChanged="@OnDatasetTypeSelectChanged" Style="width: 150px">
                         @foreach (var item in _datasetTypes.DatasetTypes)
                         {
-
                             <MudSelectItem Value="@item.ID">
                                 <LabelTooltip Position="TooltipPosition.Right" FontSize="Radzen.Blazor.TextStyle.Body1" Icon="false" Label="@L[item.Properties.ContainsKey("skos:prefLabel") ? item.Properties["skos:prefLabel"] : ""]" Text="@item.Properties["rdfs:comment"]"></LabelTooltip>
                             </MudSelectItem>
@@ -66,10 +65,10 @@
                         <LabelTooltip Label="" Text="Supported URLs: Direct download URLs, Google Drive, OneDrive, Dropbox, Sharepoint, h_da nextCloud" Position="TooltipPosition.Right"></LabelTooltip>
                     </MudStack>
                     <MudTextField @bind-Value="@fileUploader.UploadDatasetRequest.DatasetName" Disabled="@(_uploadReady)" Label="@L["Dataset Name"]" Class="mt-1"></MudTextField>
-                    @if (_isLoaderClosed == false)
-                    {
-                        <MudProgressLinear Color="Color.Secondary" Indeterminate="true" />
-                    }
+                        @if (_isLoaderClosed == false)
+                        {
+                            <MudProgressLinear Color="Color.Secondary" Indeterminate="true" />
+                        }
                 </MudStack>
             }
         </MudCard>
@@ -85,37 +84,35 @@
     </DialogActions>
 </MudDialog>
 
-
-
-<MudDialog @bind-IsVisible="fileUploader.IsUploadPredictionDatasetDialogOpen">
+<MudDialog @bind-IsVisible="IsUploadPredictionDatasetDialogOpen">
     <DialogContent>
         @if (fileUploader.IsUploading == true)
         {
-        <MudStack Class="mt-4">
-            <MudText Typo="Typo.body2">@UploadText</MudText>
-            <MudProgressLinear Color="Color.Secondary" Value="@Progress" Class="my-7" />
-        </MudStack>
+            <MudStack Class="mt-4">
+                <MudText Typo="Typo.body2">@UploadText</MudText>
+                <MudProgressLinear Color="Color.Secondary" Value="@Progress" Class="my-7" />
+            </MudStack>
         }
         else
         {
-        <MudPaper Height="180px" Width="300px"  Elevation="0">
-            <MudStack>
-                <InputFile id="fileInput" OnChange="@FilesReady" hidden accept="@AcceptedFileType" />
-                <MudButton HtmlTag="label"
-                            Variant="MudBlazor.Variant.Filled"
-                            Color="Color.Secondary"
-                            StartIcon="@Icons.Material.Filled.Upload"
-                            for="fileInput"
-                            Class="mt-1">
-                    @L["Select Dataset"]
-                </MudButton>
-                <MudTextField @bind-Value="@fileUploader.UploadPredictionRequest.FileName" Label="@L["Dataset Name"]" Class="mt-1" Disabled="true"></MudTextField>
-                @if (_isLoaderClosed == false)
-                {
-                    <MudProgressLinear Color="Color.Secondary" Indeterminate="true"/>
-                }
-            </MudStack>
-        </MudPaper>
+            <MudPaper Height="180px" Width="300px"  Elevation="0">
+                <MudStack>
+                    <InputFile id="fileInput" OnChange="@FilesReady" hidden accept="@AcceptedFileType" />
+                    <MudButton HtmlTag="label"
+                                Variant="MudBlazor.Variant.Filled"
+                                Color="Color.Secondary"
+                                StartIcon="@Icons.Material.Filled.Upload"
+                                for="fileInput"
+                                Class="mt-1">
+                        @L["Select Dataset"]
+                    </MudButton>
+                    <MudTextField @bind-Value="@fileUploader.UploadPredictionRequest.FileName" Label="@L["Dataset Name"]" Class="mt-1" Disabled="true"></MudTextField>
+                    @if (_isLoaderClosed == false)
+                    {
+                        <MudProgressLinear Color="Color.Secondary" Indeterminate="true"/>
+                    }
+                </MudStack>
+            </MudPaper>
         }
     </DialogContent>
     <DialogActions>
@@ -144,6 +141,19 @@
 	public bool IsSelectFileDisabled { get; set; } = true;
 	public bool IsURLDisabled { get; set; } = true;
 	public string AcceptedFileType { get; set; } = "";
+    public bool IsUploadPredictionDatasetDialogOpen
+    {
+        get => fileUploader.IsUploadPredictionDatasetDialogOpen;
+        set
+        {
+            if (fileUploader.IsUploadPredictionDatasetDialogOpen)
+            {
+                // Set accepted file type for prediction dataset upload
+                AcceptedFileType = ".csv";
+            }
+        }
+    }
+
 	public int Progress { get; set; }
 	public string UploadText { get; set; } = "";
 
@@ -164,22 +174,29 @@
 		userViewModel = null;
 		var user = (await authenticationStateTask).User;
 
-		if (user.Identity.IsAuthenticated){
+		if (user.Identity.IsAuthenticated)
+        {
 			userViewModel = await ((IdentityAuthenticationStateProvider)authStateProvider).GetUserViewModel();
 			LoadData();
 		}
 	}
 
+    protected override void OnParametersSet()
+    {
+        IsUploadPredictionDatasetDialogOpen = fileUploader.IsUploadPredictionDatasetDialogOpen;
+    }
+
 	private void setURLUploadTrue()
 	{
         _uploadSource = UploadSource.URL;
-		if (String.IsNullOrEmpty(Url) && _uploadReady == false){
+		if (String.IsNullOrEmpty(Url) && _uploadReady == false)
+        {
 			IsSelectFileDisabled = false;
 		}
-		else{
+		else
+        {
 			IsSelectFileDisabled = true;
 		}
-
 		DisableUpload();
 	}
 
@@ -192,19 +209,20 @@
 	private void DisableUpload()
 	{
 	//TODO validate URL and then set _uploadReady false
-		if(Url.Length!=0){
+		if (Url.Length!=0)
+        {
 			_uploadReady = false;
 		}
-		else {
+		else
+        {
 			_uploadReady = true;
 		}
 	}
 
 	private void UpdateProgress()
 	{
-		if(fileUploader.IsPredictionDatasetToUpload == true)
+		if (fileUploader.IsPredictionDatasetToUpload == true)
 		{
-
 		//Reset FileUploader after completing upload, (+1 to total to compensate to loop offset)
 			if ((fileUploader.UploadPredictionRequest.ChunkNumber == (fileUploader.UploadPredictionRequest.TotalChunkNumber + 1)) && (fileUploader.IsUploading == false))
 			{
@@ -253,7 +271,6 @@
 				}
 			}
 		}
-
 		RefreshComponent();
 	}
 
@@ -344,6 +361,7 @@
         Url = "";
         RefreshComponent();
     }
+
     private async Task FilesReady(InputFileChangeEventArgs e)
     {
         try
@@ -352,12 +370,6 @@
             _isLoaderClosed = false;
             StateHasChanged();
             fileUploader.UploadFileContent = e.File;
-
-            //check if file type is csv or xlsx it not throw error
-            string fileExtension = Path.GetExtension(e.File.Name).ToLower();
-            if(fileExtension != ".csv" && fileExtension != ".xlsx"){
-                throw new InvalidOperationException("Extension is not .csv or .xlsx");
-            }
 
             if (fileUploader.IsPredictionDatasetToUpload == true)
             {
@@ -378,6 +390,7 @@
             viewNotifier.Show(ex.GetBaseException().Message, ViewNotifierType.Error, L["Operation Failed"]);
         }
     }
+
     private async Task Upload()
     {
         if (_uploadSource == UploadSource.URL)
@@ -452,7 +465,4 @@
             viewNotifier.Show(ex.GetBaseException().Message, ViewNotifierType.Error, L["Operation Failed"]);
         }
     }
-
-
-
 }
