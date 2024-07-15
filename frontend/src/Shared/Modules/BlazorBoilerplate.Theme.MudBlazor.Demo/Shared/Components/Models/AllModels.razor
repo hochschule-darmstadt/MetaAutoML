@@ -37,7 +37,7 @@
 
 						<MudTh>
 							<MudTableSortLabel SortBy="new Func<ModelDto, object>(x=>x.RuntimeProfile)">
-								<LabelTooltip Label=@L["Training time"] FontSize="TextStyle.Body1" Text="Runtime for training the entire dataset in minutes" Position="Radzen.TooltipPosition.Top"></LabelTooltip>
+								<LabelTooltip Label=@L["Training time"] FontSize="TextStyle.Body1" Text="Runtime for training the entire dataset in minutes." Position="Radzen.TooltipPosition.Top"></LabelTooltip>
 							</MudTableSortLabel>
 						</MudTh>
 						<MudTh>
@@ -167,26 +167,39 @@
 
 	private void UpdateMetricsList()
 	{
-		IsDisabled = true;
+        bool hasNewMetric = false;
 		foreach (var model in _models.Models)
 		{
 			foreach (var metric in model.Metrics)
 			{
-				if (_metrics.Where(x => x.Name.Properties["skos:prefLabel"] == metric.Name.Properties["skos:prefLabel"]).Count() == 0)
-				{
+				if (!_metrics.Any(x => x.Name.Properties["skos:prefLabel"] == metric.Name.Properties["skos:prefLabel"]))
+                {
 					_metrics.Add(metric);
-					IsDisabled = false;
+                    hasNewMetric = true;
 				}
 			}
 		}
 		_metrics = _metrics.OrderBy(x => x.Name.Properties["skos:prefLabel"]).ToList();
-		if (_metrics.Count > 0 && SelectedMetric == "")
-		{
-			SelectedMetric = _metrics[0].Name.ID;
-			StateHasChanged();
-			IsDisabled = false;
-		}
+
+        if (_metrics.Count > 0)
+        {
+            if (string.IsNullOrEmpty(SelectedMetric))
+            {
+                SelectedMetric = _metrics[0].Name.ID;
+            }
+            IsDisabled = false;
+        }
+        else
+        {
+            IsDisabled = true;
+        }
+
+        if (hasNewMetric || string.IsNullOrEmpty(SelectedMetric))
+        {
+            StateHasChanged();
+        }
     }
+
     private bool FilterFunc(ModelDto element)
     {
         if (string.IsNullOrWhiteSpace(searchString))
