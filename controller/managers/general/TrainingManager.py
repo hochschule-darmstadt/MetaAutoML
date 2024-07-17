@@ -71,6 +71,15 @@ class TrainingManager:
                     dataset_configuration[column][item[1]] = dataset_configuration[column][item[0]]
                     del dataset_configuration[column][item[0]]
 
+
+        #ensure that target was not previously selected in another training and exists from the dataset configuration
+        #For clustering only
+        if create_training_request.configuration.task == ":tabular_clustering":
+            for column in dataset_configuration:
+                if  dataset_configuration[column]["role_selected"] != "":
+                        self.__log.warning(f"For clustering task the column: {column} was selected as target in the dataset configuration, resetting column.")
+                        dataset_configuration[column]["role_selected"] = ""
+
         create_training_request.dataset_configuration = json.dumps(dataset_configuration)
 
         # TODO: rework file access in AutoMLSession

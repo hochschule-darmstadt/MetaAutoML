@@ -10,6 +10,7 @@ import PyCaretParameterConfig as ppc
 from PycaretWrapper import PycaretWrapper
 from pycaret.clustering import *
 import subprocess # to start Dashboard
+import shutil
 
 class PyCaretAdapter:
     """
@@ -66,7 +67,7 @@ class PyCaretAdapter:
         """Execute the tabular clustering task and export the found model"""
         self.df, test = data_loader(self._configuration, perform_splitting=False)
         X, y = prepare_tabular_dataset(self.df, self._configuration, apply_feature_extration=True)
-
+        
         parameters = translate_parameters(":pycaret", self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), ppc.parameters)
 
         save_configuration_in_json(self._configuration)
@@ -75,75 +76,81 @@ class PyCaretAdapter:
 
         clustering_approach = parameters["include_approach"][0]
         best_model = create_model(clustering_approach, num_clusters=parameters["n_clusters"])
-        metrics_df = pull()
-        silhouette_score = metrics_df["Silhouette"][0]
-        davies_bouldin_score = metrics_df["Davies-Bouldin"][0]
-        calinski_harabasz_score = metrics_df["Calinski-Harabasz"][0]
-        metrics = {
-            ":silhouette_score": silhouette_score,
-            ":davies_bouldin_index": davies_bouldin_score,
-            ":calinski_harabasz_index": calinski_harabasz_score
-        }
 
-        # Create Dashbord for Clustering (with Streamlit (https://streamlit.io))
-
-        support_dict = {
-            'kmeans': ['cluster', 'tsne', 'elbow', 'silhouette', 'distance', 'distribution'],
-            'kmodes': ['cluster', 'tsne', 'distribution'],
-            'ap': ['cluster', 'tsne', 'distance', 'distribution'],
-            'hclust': ['cluster', 'tsne', 'distribution'],
-            'birch': ['cluster', 'tsne', 'elbow', 'silhouette', 'distribution'],
-            'dbscan': ['cluster', 'tsne', 'distribution'],
-            'meanshift': ['cluster', 'tsne', 'distance', 'distribution'],
-            'optics': ['cluster', 'tsne', 'distribution'],
-            'sc': ['cluster', 'tsne', 'distribution']
-        }
-
-        # Erhalte die Plot-Typen basierend auf dem gew�hlten Clustering-Ansatz
-        plot_types = support_dict[clustering_approach]
-
-        figures = []
-        current_directory = os.getcwd()
-        # print(f"Current working directory: {current_directory}")
-
-        save_directory = self._configuration["dashboard_folder_location"]
-        if not os.path.exists(save_directory):
-            os.makedirs(save_directory)
-
-        for plot_type in plot_types:
-            if plot_type in ['elbow', 'silhouette', 'distance']:
-                pathtoplot = plot_model(best_model, plot=plot_type, save=True)
-                plot_filename = os.path.join(current_directory, f'{plot_type}.png')
-                dashboard_path = os.path.join(save_directory, f'{plot_type}.png')
-                os.rename(pathtoplot, plot_filename)
-                os.rename(plot_filename, dashboard_path)
-            else:
-                pathtoplot = plot_model(best_model, plot=plot_type, save=True)
-                plot_filename = os.path.join(current_directory, f'{plot_type}.html')
-                dashboard_path = os.path.join(save_directory, f'{plot_type}.html')
-                os.rename(pathtoplot, plot_filename)
-                os.rename(plot_filename, dashboard_path)
-
-        # print(f"Plots saved to {save_directory}")
-
-        with open(os.path.join(self._configuration["result_folder_location"], f'metrics'), "wb") as dill_file:
-            dill.dump(metrics, dill_file)
         save_model(best_model, os.path.join(self._configuration["result_folder_location"], f'model_pycaret'))
+        export_model(PycaretWrapper(best_model, self._configuration), self._configuration["dashboard_folder_location"], 'dashboard_model.p')
+
+
+
+        # metrics_df = pull()
+        # silhouette_score = metrics_df["Silhouette"][0]
+        # davies_bouldin_score = metrics_df["Davies-Bouldin"][0]
+        # calinski_harabasz_score = metrics_df["Calinski-Harabasz"][0]
+        # metrics = {
+        #     ":silhouette_score": silhouette_score,
+        #     ":davies_bouldin_index": davies_bouldin_score,
+        #     ":calinski_harabasz_index": calinski_harabasz_score
+        # }
+
+        # # Create Dashbord for Clustering (with Streamlit (https://streamlit.io))
+
+        # support_dict = {
+        #     'kmeans': ['cluster', 'tsne', 'elbow', 'silhouette', 'distance', 'distribution'],
+        #     'kmodes': ['cluster', 'tsne', 'distribution'],
+        #     'ap': ['cluster', 'tsne', 'distance', 'distribution'],
+        #     'hclust': ['cluster', 'tsne', 'distribution'],
+        #     'birch': ['cluster', 'tsne', 'elbow', 'silhouette', 'distribution'],
+        #     'dbscan': ['cluster', 'tsne', 'distribution'],
+        #     'meanshift': ['cluster', 'tsne', 'distance', 'distribution'],
+        #     'optics': ['cluster', 'tsne', 'distribution'],
+        #     'sc': ['cluster', 'tsne', 'distribution']
+        # }
+
+        # # Erhalte die Plot-Typen basierend auf dem gew�hlten Clustering-Ansatz
+        # plot_types = support_dict[clustering_approach]
+
+        # figures = []
+        # current_directory = os.getcwd()
+        # # print(f"Current working directory: {current_directory}")
+
+        # save_directory = self._configuration["dashboard_folder_location"]
+        # if not os.path.exists(save_directory):
+        #     os.makedirs(save_directory)
+
+        # for plot_type in plot_types:
+        #     if plot_type in ['elbow', 'silhouette', 'distance']:
+        #         pathtoplot = plot_model(best_model, plot=plot_type, save=True)
+        #         plot_filename = os.path.join(current_directory, f'{plot_type}.png')
+        #         dashboard_path = os.path.join(save_directory, f'{plot_type}.png')
+        #         shutil.copy(pathtoplot, plot_filename)
+        #         shutil.copy(plot_filename, dashboard_path)
+        #     else:
+        #         pathtoplot = plot_model(best_model, plot=plot_type, save=True)
+        #         plot_filename = os.path.join(current_directory, f'{plot_type}.html')
+        #         dashboard_path = os.path.join(save_directory, f'{plot_type}.html')
+        #         shutil.copy(pathtoplot, plot_filename)
+        #         shutil.copy(plot_filename, dashboard_path)
+
+        # # print(f"Plots saved to {save_directory}")
+
+        # with open(os.path.join(self._configuration["result_folder_location"], f'metrics'), "wb") as dill_file:
+        #     dill.dump(metrics, dill_file)
         # Create Clustering Dashboard
-        os.environ['BROWSER'] = 'none' # prevents the browser from being launched.
+        # os.environ['BROWSER'] = 'none' # prevents the browser from being launched.
 
-        # Set the relative path to the configuration file.
-        relative_config_path = os.path.join(os.getcwd(), 'config')
-        # Set the environment variable STREAMLIT_CONFIG_DIR (settings for Streamlit).TODO: Does not work (or gets cached?).
-        os.environ['STREAMLIT_CONFIG_DIR'] = relative_config_path
+        # # Set the relative path to the configuration file.
+        # relative_config_path = os.path.join(os.getcwd(), 'config')
+        # # Set the environment variable STREAMLIT_CONFIG_DIR (settings for Streamlit).TODO: Does not work (or gets cached?).
+        # os.environ['STREAMLIT_CONFIG_DIR'] = relative_config_path
 
-        # Runs on Port 8501
-        process = subprocess.Popen(
-            ['streamlit', 'run', 'AutoMLs/cluster_dashboard.py', save_directory],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            start_new_session=True
-        )
+        # # Runs on Port 8501
+        # process = subprocess.Popen(
+        #     ['streamlit', 'run', 'AutoMLs/cluster_dashboard.py', save_directory],
+        #     stdout=subprocess.PIPE,
+        #     stderr=subprocess.PIPE,
+        #     start_new_session=True
+        # )
+
 
     def __tabular_regression(self):
         #most likely not working, looks like a copy of the flaml adapter

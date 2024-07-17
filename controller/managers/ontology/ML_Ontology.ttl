@@ -3078,7 +3078,7 @@
     :category :parameter ;
     skos:broader :include_approach ;
     :has_datatype :list ;
-    :parameter_value :affinity_propagation , :agglomerative_clustering , :balanced_iterative_reducing_and_clustering_using_hierarchies , :density_based_spatial_clustering_of_applications_with_noise , :k_means , :k_modes , :mean_shift_clustering , :ordering_points_to_identify_the_clustering_structure , :spectral_clustering ;
+    :parameter_value :affinity_propagation , :balanced_iterative_reducing_and_clustering_using_hierarchies , :k_means , :k_modes , :mean_shift_clustering ;
     rdfs:seeAlso <https://pycaret.readthedocs.io/en/latest/api/clustering.html#pycaret.clustering.create_model> .
 :epochs a :Configuration_item ;
     skos:prefLabel "epochs" ;

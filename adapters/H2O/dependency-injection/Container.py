@@ -16,6 +16,7 @@ class Managers(containers.DeclarativeContainer):
     Args:
         containers (containers.DeclarativeContainer): dependency-injector dependency providing functionality to inject dependencies
     """
+    ressources = providers.DependenciesContainer()
     adapter_scheduler = providers.ThreadSafeSingleton(
         AdapterScheduler,
     )

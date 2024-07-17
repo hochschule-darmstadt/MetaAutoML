@@ -96,30 +96,43 @@ a {
     font-size: clamp(0.7rem, -0.875rem + 2.4vw, 1rem);
 }
 
-.container-fluid {
-    padding: 10px 25px 50px 20px;
-    border-radius: 5px;
-}
-
 .conf-table {
-    margin-bottom: 15px;
+    margin-bottom: 25px;
+
 }
 
-.table-bordered {
-    border-collapse: collapse;
-    border-radius: 5px;
+
+
+.full-width {
+    display: flex;
+    justify-content: center;
+    margin-top: 40px;
 }
 
-.table-bordered th,
-.table-bordered td {
-    border: none;
-    /* Removes all internal borders */
+.full-width .mud-button {
+    width: 500px;
+    margin-left: 240px;
 }
 
-.table-bordered th,
-.table-bordered td {
-    border-top: 1px solid lightgrey;
-    /* Top border for cells */
-    border-bottom: 0, 5px solid lightgrey;
-    /* Bottom border for cells */
+@media (max-width: 600px) {
+    .full-width {
+        padding: 10px;
+    }
+}
+
+@media (min-width: 601px) and (max-width: 960px) {
+    .full-width .mud-button {
+        max-width: 300px;
+    }
+}
+
+@media (min-width: 961px) {
+    .full-width .mud-button {
+        max-width: 350px;
+    }
+}
+
+.mud-select-item-auto-width {
+    min-width: 150px;
+    width: auto;
 }

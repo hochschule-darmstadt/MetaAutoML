@@ -85,10 +85,10 @@ spec:
             - containerPort: 443
           resources:
             requests:
-              memory: 14Gi
+              memory: 24Gi
               cpu: '2'
             limits:
-              memory: 14Gi
+              memory: 24Gi
               cpu: '2'
       restartPolicy: Always
       hostAliases:
