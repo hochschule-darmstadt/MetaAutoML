@@ -275,10 +275,6 @@ def evaluate(config: "StartAutoMlRequest", config_path: str) -> Tuple[float, flo
         subprocess.call([python_env, os.path.join(result_path, "predict.py"), file_path, os.path.join(result_path, "predictions.csv")])
         predict_time = time.time() - predict_start
 
-    #if(config["configuration"]["task"] == ":tabular_clustering"):
-    #    with open(os.path.join(config["result_folder_location"], f'metrics'), "rb") as dill_file:
-    #        return dill.load(dill_file), 0
-
     predictions = pd.read_csv(os.path.join(result_path, "predictions.csv"))
     os.remove(os.path.join(result_path, "predictions.csv"))
 

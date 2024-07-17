@@ -3,7 +3,8 @@ dill
 pillow
 betterproto @ git+https://github.com/danielgtaylor/python-betterproto.git@496eba27506a2fe18df409c4cd34a47d8ce04ffe
 dependency-injector==4.40.0
-codecarbon==2.3.2
+codecarbon==2.1.4
+streamlit
 pycaret[full]==3.3.1
 scikit-learn
 explainerdashboard==0.4.7

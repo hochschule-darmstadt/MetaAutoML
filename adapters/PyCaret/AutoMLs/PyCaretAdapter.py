@@ -67,6 +67,7 @@ class PyCaretAdapter:
         """Execute the tabular clustering task and export the found model"""
         self.df, test = data_loader(self._configuration, perform_splitting=False)
         X, y = prepare_tabular_dataset(self.df, self._configuration, apply_feature_extration=True)
+        
         parameters = translate_parameters(":pycaret", self._configuration["configuration"]["task"], self._configuration["configuration"].get('parameters', {}), ppc.parameters)
 
         save_configuration_in_json(self._configuration)
@@ -75,6 +76,7 @@ class PyCaretAdapter:
 
         clustering_approach = parameters["include_approach"][0]
         best_model = create_model(clustering_approach, num_clusters=parameters["n_clusters"])
+
         save_model(best_model, os.path.join(self._configuration["result_folder_location"], f'model_pycaret'))
         export_model(PycaretWrapper(best_model, self._configuration), self._configuration["dashboard_folder_location"], 'dashboard_model.p')
 
@@ -148,6 +150,7 @@ class PyCaretAdapter:
         #     stderr=subprocess.PIPE,
         #     start_new_session=True
         # )
+
 
     def __tabular_regression(self):
         #most likely not working, looks like a copy of the flaml adapter
