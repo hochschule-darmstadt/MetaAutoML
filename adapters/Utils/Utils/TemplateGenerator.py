@@ -1,7 +1,6 @@
 from jinja2 import Template
 
 import os
-from JsonUtil import get_config_property
 import json
 
 class TemplateGenerator(object):
@@ -13,7 +12,7 @@ class TemplateGenerator(object):
         """
         Init a new instance of TemplateGenerator
         """
-        self.__TEMPLATES_PATH = get_config_property("templates-path")
+        self.__TEMPLATES_PATH = os.getenv("TEMPLATES_PATH")
         self.__OUTPUT_PATH = config.result_folder_location
         self._configuration = config
         self._configuration.dataset_configuration = json.loads(self._configuration.dataset_configuration)
@@ -39,7 +38,7 @@ class TemplateGenerator(object):
         with open(os.path.join(self.__OUTPUT_PATH, 'requirements.txt'), "w") as script_file:
             script_file.write(template.render(configuration=self._configuration))
 
-        if get_config_property("local_execution") == "YES":
+        if os.getenv("LOCAL_EXECUTION") == "YES":
             #During development the shared template files are saved centralized
             self.__TEMPLATES_PATH = "../Utils/Templates"
 

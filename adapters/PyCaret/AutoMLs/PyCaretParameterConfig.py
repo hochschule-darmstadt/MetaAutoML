@@ -27,6 +27,20 @@ pycaret_metrics = {
     ":coverage": "COVERAGE"
 }
 
+# supported clustering approaches in PyCaret
+clustering_approaches = {
+    ":affinity_propagation": "ap",
+    ":agglomerative_clustering": "hclust",
+    ":balanced_iterative_reducing_and_clustering_using_hierarchies": "birch",
+    ":density_based_spatial_clustering_of_applications_with_noise": "dbscan",
+    ":k_means": "kmeans",
+    ":k_modes": "kmodes",
+    ":mean_shift_clustering": "meanshift",
+    ":ordering_points_to_identify_the_clustering_structure": "optics",
+    ":spectral_clustering": "sc"
+}
+default_clustering_approaches = [":k_means", ":density_based_spatial_clustering_of_applications_with_noise"]
+
 parameters = {
     #general
     ":cross_validation_fold_pycaret": {
@@ -37,6 +51,18 @@ parameters = {
                                                     "parameter_name": "optimize",
                                                     "lookup_dict": pycaret_metrics
                                                 },
+
+    ":include_approach_pycaret_clustering": {
+        "parameter_name": "include_approach",
+        "lookup_dict": clustering_approaches,
+        "default": default_clustering_approaches
+    },
+
+    ":number_clusters_pycaret_clustering": {
+        "parameter_name": "n_clusters",
+        "default": [4]
+    },
+
     #tabular regression
     ":metric_pycaret_tabular_regression": {
                                                     "parameter_name": "optimize",

@@ -6,7 +6,6 @@ import numpy as np
 from sklearn.impute import SimpleImputer
 import pandas as pd
 import json
-from JsonUtil import get_config_property
 import FLAMLParameterConfig as fpc
 from FLAMLWrapper import FLAMLWrapper
 

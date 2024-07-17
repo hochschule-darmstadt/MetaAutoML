@@ -219,3 +219,6 @@ auth/*.json
 
 adapter/*/tests/**
 adapters/*/emissions.csv
+
+# Mac system files
+.DS_Store

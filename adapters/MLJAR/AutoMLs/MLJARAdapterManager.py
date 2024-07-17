@@ -5,10 +5,11 @@ import time, asyncio
 from AdapterUtils import *
 from AdapterBGRPC import *
 from threading import *
-from JsonUtil import get_config_property
 from supervised.automl import AutoML
 import pandas as pd
 from typing import Tuple
+
+from ThreadLock import ThreadLock
 
 class MLJARAdapterManager(AdapterManager):
     """The AutoML solution specific functionality implementation of the AdapterManager class
@@ -17,10 +18,10 @@ class MLJARAdapterManager(AdapterManager):
         AdapterManager (AdapterManager): The base class providing the shared functionality for all adapters
     """
 
-    def __init__(self) -> None:
+    def __init__(self, lock: ThreadLock) -> None:
         """Initialize a new MLJARAdapterManager setting AutoML adapter specific variables
         """
-        super(MLJARAdapterManager, self).__init__()
+        super(MLJARAdapterManager, self).__init__(lock)
         self._adapter_name = "mljar"
 
     def _get_ml_model_and_lib(self, config: "StartAutoMlRequest") -> Tuple[str, str]:

@@ -101,6 +101,21 @@ services:
           - EXPLAINER_DASHBOARD_PORT_START=6110
           - EXPLAINER_DASHBOARD_PORT_END=6119
           - DOCKER_COMPOSE=YES
+          - ADAPTER_NAME=h2o
+          - JOB_FILE_NAME=h2o-job.json
+          - EXPORT_ZIP_FILE_NAME=h2o-export
+          - GRPC_SERVER_ADDRESS=0.0.0.0
+          - TRAINING_PATH=app-data/training
+          - JOB_FOLDER_NAME=job
+          - MODEL_FOLDER_NAME=model
+          - EXPORT_FOLDER_NAME=export
+          - RESULT_FOLDER_NAME=result
+          - TEMPLATES_PATH=app-data/templates
+          - LOCAL_EXECUTION=NO
+          - RUNNING_IN_WSL=NO
+          - DASHBOARD_FOLDER_NAME=dashboard
+          - WSL_METAAUTOML_PATH=/mnt/c/Users/alex/Desktop/MetaAutoML
+          - ONTOLOGY_PATH=ML_Ontology.ttl
       volumes:
           - datasets:/app/app-data/datasets
           - training-h2o:/app/app-data/training
@@ -115,10 +130,25 @@ services:
     depends_on:
       - mljar
     environment:
-      - GRPC_SERVER_PORT=50052
-      - EXPLAINER_DASHBOARD_PORT_START=6000
-      - EXPLAINER_DASHBOARD_PORT_END=6009
-      - DOCKER_COMPOSE=YES
+        - GRPC_SERVER_PORT=50052
+        - EXPLAINER_DASHBOARD_PORT_START=6000
+        - EXPLAINER_DASHBOARD_PORT_END=6009
+        - DOCKER_COMPOSE=YES
+        - ADAPTER_NAME=autokeras
+        - JOB_FILE_NAME=autokeras-job.json
+        - EXPORT_ZIP_FILE_NAME=autokeras-export
+        - GRPC_SERVER_ADDRESS=0.0.0.0
+        - TRAINING_PATH=app-data/training
+        - JOB_FOLDER_NAME=job
+        - MODEL_FOLDER_NAME=model
+        - EXPORT_FOLDER_NAME=export
+        - RESULT_FOLDER_NAME=result
+        - TEMPLATES_PATH=app-data/templates
+        - LOCAL_EXECUTION=NO
+        - RUNNING_IN_WSL=NO
+        - DASHBOARD_FOLDER_NAME=dashboard
+        - WSL_METAAUTOML_PATH=/mnt/c/Users/alex/Desktop/MetaAutoML
+        - ONTOLOGY_PATH=ML_Ontology.ttl
     volumes:
       - datasets:/app/app-data/datasets
       - training-autokeras:/app/app-data/training
@@ -133,10 +163,25 @@ services:
     depends_on:
       - flaml
     environment:
-      - GRPC_SERVER_PORT=50053
-      - EXPLAINER_DASHBOARD_PORT_START=6010
-      - EXPLAINER_DASHBOARD_PORT_END=6019
-      - DOCKER_COMPOSE=YES
+        - GRPC_SERVER_PORT=50053
+        - EXPLAINER_DASHBOARD_PORT_START=6010
+        - EXPLAINER_DASHBOARD_PORT_END=6019
+        - DOCKER_COMPOSE=YES
+        - ADAPTER_NAME=mljar
+        - JOB_FILE_NAME=mljar-job.json
+        - EXPORT_ZIP_FILE_NAME=mljar-export
+        - GRPC_SERVER_ADDRESS=0.0.0.0
+        - TRAINING_PATH=app-data/training
+        - JOB_FOLDER_NAME=job
+        - MODEL_FOLDER_NAME=model
+        - EXPORT_FOLDER_NAME=export
+        - RESULT_FOLDER_NAME=result
+        - TEMPLATES_PATH=app-data/templates
+        - LOCAL_EXECUTION=NO
+        - RUNNING_IN_WSL=NO
+        - DASHBOARD_FOLDER_NAME=dashboard
+        - WSL_METAAUTOML_PATH=/mnt/c/Users/alex/Desktop/MetaAutoML
+        - ONTOLOGY_PATH=ML_Ontology.ttl
     volumes:
       - datasets:/app/app-data/datasets
       - training-mljar:/app/app-data/training
@@ -177,10 +222,25 @@ services:
     depends_on:
       - gluon
     environment:
-      - GRPC_SERVER_PORT=50056
-      - EXPLAINER_DASHBOARD_PORT_START=6030
-      - EXPLAINER_DASHBOARD_PORT_END=6039
-      - DOCKER_COMPOSE=YES
+        - GRPC_SERVER_PORT=50056
+        - EXPLAINER_DASHBOARD_PORT_START=6030
+        - EXPLAINER_DASHBOARD_PORT_END=6039
+        - DOCKER_COMPOSE=YES
+        - ADAPTER_NAME=flaml
+        - JOB_FILE_NAME=flaml-job.json
+        - EXPORT_ZIP_FILE_NAME=flaml-export
+        - GRPC_SERVER_ADDRESS=0.0.0.0
+        - TRAINING_PATH=app-data/training
+        - JOB_FOLDER_NAME=job
+        - MODEL_FOLDER_NAME=model
+        - EXPORT_FOLDER_NAME=export
+        - RESULT_FOLDER_NAME=result
+        - TEMPLATES_PATH=app-data/templates
+        - LOCAL_EXECUTION=NO
+        - RUNNING_IN_WSL=NO
+        - DASHBOARD_FOLDER_NAME=dashboard
+        - WSL_METAAUTOML_PATH=/mnt/c/Users/alex/Desktop/MetaAutoML
+        - ONTOLOGY_PATH=ML_Ontology.ttl
     volumes:
       - datasets:/app/app-data/datasets
       - training-flaml:/app/app-data/training
@@ -195,10 +255,25 @@ services:
     depends_on:
       - evalml
     environment:
-      - GRPC_SERVER_PORT=50057
-      - EXPLAINER_DASHBOARD_PORT_START=6040
-      - EXPLAINER_DASHBOARD_PORT_END=6049
-      - DOCKER_COMPOSE=YES
+        - GRPC_SERVER_PORT=50057
+        - EXPLAINER_DASHBOARD_PORT_START=6040
+        - EXPLAINER_DASHBOARD_PORT_END=6049
+        - DOCKER_COMPOSE=YES
+        - ADAPTER_NAME=autogluon
+        - JOB_FILE_NAME=autogluon-job.json
+        - EXPORT_ZIP_FILE_NAME=autogluon-export
+        - GRPC_SERVER_ADDRESS=0.0.0.0
+        - TRAINING_PATH=app-data/training
+        - JOB_FOLDER_NAME=job
+        - MODEL_FOLDER_NAME=model
+        - EXPORT_FOLDER_NAME=export
+        - RESULT_FOLDER_NAME=result
+        - TEMPLATES_PATH=app-data/templates
+        - LOCAL_EXECUTION=NO
+        - RUNNING_IN_WSL=NO
+        - DASHBOARD_FOLDER_NAME=dashboard
+        - WSL_METAAUTOML_PATH=/mnt/c/Users/alex/Desktop/MetaAutoML
+        - ONTOLOGY_PATH=ML_Ontology.ttl
     volumes:
       - datasets:/app/app-data/datasets
       - training-gluon:/app/app-data/training
@@ -251,10 +326,25 @@ services:
     depends_on:
       - pycaret
     environment:
-      - GRPC_SERVER_PORT=50062
-      - EXPLAINER_DASHBOARD_PORT_START=6060
-      - EXPLAINER_DASHBOARD_PORT_END=6069
-      - DOCKER_COMPOSE=YES
+        - GRPC_SERVER_PORT=50062
+        - EXPLAINER_DASHBOARD_PORT_START=6060
+        - EXPLAINER_DASHBOARD_PORT_END=6069
+        - DOCKER_COMPOSE=YES
+        - ADAPTER_NAME=evalml
+        - JOB_FILE_NAME=evalml-job.json
+        - EXPORT_ZIP_FILE_NAME=evalml-export
+        - GRPC_SERVER_ADDRESS=0.0.0.0
+        - TRAINING_PATH=app-data/training
+        - JOB_FOLDER_NAME=job
+        - MODEL_FOLDER_NAME=model
+        - EXPORT_FOLDER_NAME=export
+        - RESULT_FOLDER_NAME=result
+        - TEMPLATES_PATH=app-data/templates
+        - LOCAL_EXECUTION=NO
+        - RUNNING_IN_WSL=NO
+        - DASHBOARD_FOLDER_NAME=dashboard
+        - WSL_METAAUTOML_PATH=/mnt/c/Users/alex/Desktop/MetaAutoML
+        - ONTOLOGY_PATH=ML_Ontology.ttl
     volumes:
       - datasets:/app/app-data/datasets
       - training-evalml:/app/app-data/training
@@ -269,10 +359,25 @@ services:
     depends_on:
       - tpot
     environment:
-      - GRPC_SERVER_PORT=50063
-      - EXPLAINER_DASHBOARD_PORT_START=6070
-      - EXPLAINER_DASHBOARD_PORT_END=6079
-      - DOCKER_COMPOSE=YES
+        - GRPC_SERVER_PORT=50063
+        - EXPLAINER_DASHBOARD_PORT_START=6070
+        - EXPLAINER_DASHBOARD_PORT_END=6079
+        - DOCKER_COMPOSE=YES
+        - ADAPTER_NAME=pycaret
+        - JOB_FILE_NAME=pycaret-job.json
+        - EXPORT_ZIP_FILE_NAME=pycaret-export
+        - GRPC_SERVER_ADDRESS=0.0.0.0
+        - TRAINING_PATH=app-data/training
+        - JOB_FOLDER_NAME=job
+        - MODEL_FOLDER_NAME=model
+        - EXPORT_FOLDER_NAME=export
+        - RESULT_FOLDER_NAME=result
+        - TEMPLATES_PATH=app-data/templates
+        - LOCAL_EXECUTION=NO
+        - RUNNING_IN_WSL=NO
+        - DASHBOARD_FOLDER_NAME=dashboard
+        - WSL_METAAUTOML_PATH=/mnt/c/Users/alex/Desktop/MetaAutoML
+        - ONTOLOGY_PATH=ML_Ontology.ttl
     volumes:
       - datasets:/app/app-data/datasets
       - training-pycaret:/app/app-data/training
@@ -287,10 +392,25 @@ services:
     depends_on:
       - gama
     environment:
-      - GRPC_SERVER_PORT=50064
-      - EXPLAINER_DASHBOARD_PORT_START=6080
-      - EXPLAINER_DASHBOARD_PORT_END=6089
-      - DOCKER_COMPOSE=YES
+        - GRPC_SERVER_PORT=50064
+        - EXPLAINER_DASHBOARD_PORT_START=6080
+        - EXPLAINER_DASHBOARD_PORT_END=6089
+        - DOCKER_COMPOSE=YES
+        - ADAPTER_NAME=tpot
+        - JOB_FILE_NAME=tpot-job.json
+        - EXPORT_ZIP_FILE_NAME=tpot-export
+        - GRPC_SERVER_ADDRESS=0.0.0.0
+        - TRAINING_PATH=app-data/training
+        - JOB_FOLDER_NAME=job
+        - MODEL_FOLDER_NAME=model
+        - EXPORT_FOLDER_NAME=export
+        - RESULT_FOLDER_NAME=result
+        - TEMPLATES_PATH=app-data/templates
+        - LOCAL_EXECUTION=NO
+        - RUNNING_IN_WSL=NO
+        - DASHBOARD_FOLDER_NAME=dashboard
+        - WSL_METAAUTOML_PATH=/mnt/c/Users/alex/Desktop/MetaAutoML
+        - ONTOLOGY_PATH=ML_Ontology.ttl
     volumes:
       - datasets:/app/app-data/datasets
       - training-tpot:/app/app-data/training
@@ -305,10 +425,25 @@ services:
     depends_on:
       - lama
     environment:
-      - GRPC_SERVER_PORT=50065
-      - EXPLAINER_DASHBOARD_PORT_START=6090
-      - EXPLAINER_DASHBOARD_PORT_END=6099
-      - DOCKER_COMPOSE=YES
+        - GRPC_SERVER_PORT=50065
+        - EXPLAINER_DASHBOARD_PORT_START=6090
+        - EXPLAINER_DASHBOARD_PORT_END=6099
+        - DOCKER_COMPOSE=YES
+        - ADAPTER_NAME=gama
+        - JOB_FILE_NAME=gama-job.json
+        - EXPORT_ZIP_FILE_NAME=gama-export
+        - GRPC_SERVER_ADDRESS=0.0.0.0
+        - TRAINING_PATH=app-data/training
+        - JOB_FOLDER_NAME=job
+        - MODEL_FOLDER_NAME=model
+        - EXPORT_FOLDER_NAME=export
+        - RESULT_FOLDER_NAME=result
+        - TEMPLATES_PATH=app-data/templates
+        - LOCAL_EXECUTION=NO
+        - RUNNING_IN_WSL=NO
+        - DASHBOARD_FOLDER_NAME=dashboard
+        - WSL_METAAUTOML_PATH=/mnt/c/Users/alex/Desktop/MetaAutoML
+        - ONTOLOGY_PATH=ML_Ontology.ttl
     volumes:
       - datasets:/app/app-data/datasets
       - training-gama:/app/app-data/training
@@ -321,10 +456,25 @@ services:
       dockerfile: ./adapters/LAMA/Dockerfile
     container_name: lama
     environment:
-      - GRPC_SERVER_PORT=50066
-      - EXPLAINER_DASHBOARD_PORT_START=6100
-      - EXPLAINER_DASHBOARD_PORT_END=6109
-      - DOCKER_COMPOSE=YES
+        - GRPC_SERVER_PORT=50066
+        - EXPLAINER_DASHBOARD_PORT_START=6100
+        - EXPLAINER_DASHBOARD_PORT_END=6109
+        - DOCKER_COMPOSE=YES
+        - ADAPTER_NAME=lama
+        - JOB_FILE_NAME=lama-job.json
+        - EXPORT_ZIP_FILE_NAME=lama-export
+        - GRPC_SERVER_ADDRESS=0.0.0.0
+        - TRAINING_PATH=app-data/training
+        - JOB_FOLDER_NAME=job
+        - MODEL_FOLDER_NAME=model
+        - EXPORT_FOLDER_NAME=export
+        - RESULT_FOLDER_NAME=result
+        - TEMPLATES_PATH=app-data/templates
+        - LOCAL_EXECUTION=NO
+        - RUNNING_IN_WSL=NO
+        - DASHBOARD_FOLDER_NAME=dashboard
+        - WSL_METAAUTOML_PATH=/mnt/c/Users/alex/Desktop/MetaAutoML
+        - ONTOLOGY_PATH=ML_Ontology.ttl
     volumes:
       - datasets:/app/app-data/datasets
       - training-lama:/app/app-data/training

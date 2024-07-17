@@ -4,7 +4,6 @@ from AdapterTabularUtils import *
 import pandas as pd
 import json
 import os
-from JsonUtil import get_config_property
 from H2OWrapper import H2OWrapper
 import H2OParameterConfig as h2opc
 import h2o

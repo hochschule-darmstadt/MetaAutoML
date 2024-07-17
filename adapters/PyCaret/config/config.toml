@@ -1,0 +1,14 @@
+[general]
+email = ""
+
+[server]
+headless = true
+
+[theme]
+base = "light"
+
+[global]
+wideMode = true
+
+[browser]
+gatherUsageStats = false

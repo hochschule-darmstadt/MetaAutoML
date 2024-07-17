@@ -8,7 +8,6 @@ from concurrent import futures
 
 import dill
 from AdapterUtils import *
-from JsonUtil import get_config_property
 from grpclib.server import Server
 from AdapterService import AdapterService
 
@@ -16,7 +15,7 @@ async def main():
     """The adapter main function starting the adapter GRPC server and waiting on incoming requests of the controller
     """
     server = Server([AdapterService()])
-    await server.start(get_config_property('grpc-server-address'), os.getenv('GRPC_SERVER_PORT'))
+    await server.start(os.getenv("GRPC_SERVER_ADDRESS"), os.getenv('GRPC_SERVER_PORT'))
     await server.wait_closed()
 
 if __name__ == '__main__':

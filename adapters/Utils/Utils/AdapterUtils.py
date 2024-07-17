@@ -8,7 +8,6 @@ from typing import Any
 import dill
 import pandas as pd
 from sklearn.metrics import *
-from JsonUtil import get_config_property
 from TemplateGenerator import TemplateGenerator
 from AdapterBGRPC import *
 from typing import Tuple
@@ -158,9 +157,9 @@ def zip_script(config: "StartAutoMlRequest"):
     Returns:
         StartAutoMlRequest: The StartAutoMlRequest request, extended with addition informations about the saved archive
     """
-    print(f"saving model zip file for {get_config_property('adapter-name')}")
+    print(f"saving model zip file for {os.getenv('ADAPTER_NAME')}")
 
-    zip_file_name = get_config_property("export-zip-file-name")
+    zip_file_name = os.getenv("EXPORT_ZIP_FILE_NAME")
     output_path = config.export_folder_location
     result_path = config.result_folder_location
     #shutil.copy(get_config_property("predict-time-sources-path"),
@@ -171,14 +170,14 @@ def zip_script(config: "StartAutoMlRequest"):
                         result_path,
                         base_dir=None)
 
-    if get_config_property("local_execution") == "YES":
+    if os.getenv("LOCAL_EXECUTION") == "YES":
         file_loc_on_controller = output_path
     else:
-        file_loc_on_controller = os.path.join(get_config_property("training-path"),
-                                            get_config_property('adapter-name'),
+        file_loc_on_controller = os.path.join(os.getenv("TRAINING_PATH"),
+                                        os.getenv("ADAPTER_NAME"),
                                         config.user_id,
                                         config.training_id,
-                                        get_config_property("export-folder-name"))
+                                        os.getenv("EXPORT_FOLDER_NAME"))
     config.file_name = f'{zip_file_name}.zip'
     config.file_location = file_loc_on_controller
     return config
@@ -194,11 +193,12 @@ def evaluate(config: "StartAutoMlRequest", config_path: str) -> Tuple[float, flo
         tuple[float, float]: tuple holding the test score, prediction time metrics
     """
     prediction_probabilities = []
-    dashboard_folder_location = os.path.join(get_config_property("training-path"),
+    dashboard_folder_location = os.path.join(os.getenv("TRAINING_PATH"),
                                         config.user_id,
                                         config.dataset_id,
                                         config.training_id,
-                                        get_config_property("dashboard-folder-name"))
+                                        config.model_id,
+                                        os.getenv("DASHBOARD_FOLDER_NAME"))
     config = config.__dict__
     config["dataset_configuration"] = config["dataset_configuration"]
     file_path = config["dataset_path"]
@@ -238,18 +238,25 @@ def evaluate(config: "StartAutoMlRequest", config_path: str) -> Tuple[float, flo
     elif(config["configuration"]["task"] in [":image_classification", ":image_regression"]):
         X_test, y_test = data_loader(config, image_test_folder=True)
 
+    elif(config["configuration"]["task"] in [":tabular_clustering"]):
+        X_test, y_test = data_loader(config, perform_splitting=False)
+        target = ""
 
-    if config["configuration"]["task"] in [":tabular_classification", ":tabular_regression", ":text_regression", ":named_entity_recognition", ":text_classification"]:
+    if config["configuration"]["task"] in [":tabular_classification", ":tabular_regression", ":text_regression", ":named_entity_recognition", ":text_classification", ":tabular_clustering"]:
 
-        subprocess.call([python_env, os.path.join(result_path, "predict.py"), file_path, os.path.join(result_path, "predictions.csv"),target])
+        subprocess.call([python_env, os.path.join(result_path, "predict.py"), file_path, os.path.join(result_path, "predictions.csv"), target])
 
 
             #The dashboard model wrapper offers the same functionallity and can be used for making timed predictions
         pipeline_model = load_dashboard_model(dashboard_folder_location + '/dashboard_model.p')
 
         predict_start = time.time()
-        pipeline_model.predict(test.drop(target, axis=1))
-        predict_time = (time.time() - predict_start) / test.shape[0]
+        if config["configuration"]["task"] in [":tabular_classification", ":tabular_regression", ":text_regression", ":named_entity_recognition", ":text_classification"]:
+            pipeline_model.predict(test.drop(target, axis=1))
+            predict_time = (time.time() - predict_start) / test.shape[0]
+        elif config["configuration"]["task"] in [":tabular_clustering"]:
+            pipeline_model.predict(X_test)
+            predict_time = (time.time() - predict_start) / X_test.shape[0]
         if config["configuration"]["task"] in [":tabular_classification", ":text_classification"]:
             try:
                 #sometimes the model uses ml approaches that do not support predict proba functions.
@@ -258,12 +265,19 @@ def evaluate(config: "StartAutoMlRequest", config_path: str) -> Tuple[float, flo
             except:
                 print("automl model does not support predict proba functionality")
                 prediction_probabilities = []
-    else:
 
+    elif config["configuration"]["task"] in [":tabular_clustering"]:
+        #TODO add clustering evaluation
+        pass
+
+    else:
         predict_start = time.time()
         subprocess.call([python_env, os.path.join(result_path, "predict.py"), file_path, os.path.join(result_path, "predictions.csv")])
         predict_time = time.time() - predict_start
 
+    #if(config["configuration"]["task"] == ":tabular_clustering"):
+    #    with open(os.path.join(config["result_folder_location"], f'metrics'), "rb") as dill_file:
+    #        return dill.load(dill_file), 0
 
     predictions = pd.read_csv(os.path.join(result_path, "predictions.csv"))
     os.remove(os.path.join(result_path, "predictions.csv"))
@@ -286,6 +300,8 @@ def evaluate(config: "StartAutoMlRequest", config_path: str) -> Tuple[float, flo
             return compute_regression_metrics(pd.Series(test[target]), predictions[target]), (predict_time * 1000) / test.shape[0]
     elif config["configuration"]["task"] == ":named_entity_recognition":
         return compute_named_entity_recognition_metrics(pd.Series(test[target]), predictions[target]), (predict_time * 1000) / pd.Series(test[target]).shape[0]
+    elif(config["configuration"]["task"] in [":tabular_clustering"]):
+        return compute_clustering_metrics(X_test, predictions["predicted"]), (predict_time * 1000) / X_test.shape[0]
 
 def compute_classification_metrics(y_should: pd.Series, y_is: pd.Series, prediction_probabilities) -> dict:
     """Compute the metrics collection for classification tasks
@@ -397,6 +413,23 @@ def compute_regression_metrics(y_should: pd.Series, y_is: pd.Series) -> dict:
         })
     return score
 
+def compute_clustering_metrics(x: pd.DataFrame, pred_labels: pd.Series) -> dict:
+    """Compute the metrics collection for clustering task
+
+    Args:
+        x (pd.Dataframe): the input x dataframe
+        pred_labels (pd.Series): the predicted labels
+
+    Returns:
+        dict: Dictionary containing the computed metrics, key is ontology IRI for the metric and value is the value
+    """
+    score = {
+        ":silhouette_score": silhouette_score(x, pred_labels),
+        ":davies_bouldin_index": davies_bouldin_score(x, pred_labels),
+        ":calinski_harabasz_index": calinski_harabasz_score(x, pred_labels)
+    }
+    return score
+
 def compute_named_entity_recognition_metrics(y_should: pd.Series, y_is: pd.Series) -> dict:
     """Compute the metrics collection for named entity recognition tasks
 
@@ -426,11 +459,12 @@ def predict(config: dict, config_path: str, automl: str) -> Tuple[float, str]:
     Returns:
         tuple[float, str]: Result tuple with the prediction time metric and the path to the prediction.csv holding the prediction made by the model
     """
-    result_folder_location = os.path.join(get_config_property("training-path"),
+    result_folder_location = os.path.join(os.getenv("TRAINING_PATH"),
                                         config["user_id"],
                                         config["dataset_id"],
                                         config["training_id"],
-                                        get_config_property("result-folder-name"))
+                                        config["model_id"],
+                                        os.getenv("RESULT_FOLDER_NAME"))
 
     #if config["task"] == ":time_series_classification":
         # Time Series Classification Task
@@ -464,49 +498,55 @@ def setup_run_environment(request: "StartAutoMlRequest", adapter_name: str) -> "
         StartAutoMlRequest: The extended training request configuration holding the training paths
     """
     #folder location for job related files
-    job_folder_location = os.path.join(get_config_property("training-path"),
+    job_folder_location = os.path.join(os.getenv("TRAINING_PATH"),
                                         request.user_id,
                                         request.dataset_id,
                                         request.training_id,
-                                        get_config_property("job-folder-name"))
+                                        request.model_id,
+                                        os.getenv("JOB_FOLDER_NAME"))
 
     #folder location for automl generated model files (not copied in ZIP)
-    model_folder_location = os.path.join(get_config_property("training-path"),
+    model_folder_location = os.path.join(os.getenv("TRAINING_PATH"),
                                         request.user_id,
                                         request.dataset_id,
                                         request.training_id,
-                                        get_config_property("model-folder-name"))
+                                        request.model_id,
+                                        os.getenv("MODEL_FOLDER_NAME"))
 
-    export_folder_location = os.path.join(get_config_property("training-path"),
+    export_folder_location = os.path.join(os.getenv("TRAINING_PATH"),
                                         request.user_id,
                                         request.dataset_id,
                                         request.training_id,
-                                        get_config_property("export-folder-name"))
+                                        request.model_id,
+                                        os.getenv("EXPORT_FOLDER_NAME"))
 
-    result_folder_location = os.path.join(get_config_property("training-path"),
+    result_folder_location = os.path.join(os.getenv("TRAINING_PATH"),
                                         request.user_id,
                                         request.dataset_id,
                                         request.training_id,
-                                        get_config_property("result-folder-name"))
+                                        request.model_id,
+                                        os.getenv("RESULT_FOLDER_NAME"))
 
-    dashboard_folder_location = os.path.join(get_config_property("training-path"),
+    dashboard_folder_location = os.path.join(os.getenv("TRAINING_PATH"),
                                         request.user_id,
                                         request.dataset_id,
                                         request.training_id,
-                                        get_config_property("dashboard-folder-name"))
+                                        request.model_id,
+                                        os.getenv("DASHBOARD_FOLDER_NAME"))
 
-    controller_export_folder_location  = os.path.join(get_config_property("training-path"),
+    controller_export_folder_location  = os.path.join(os.getenv("TRAINING_PATH"),
                                         adapter_name,
                                         request.user_id,
                                         request.dataset_id,
                                         request.training_id,
-                                        get_config_property("export-folder-name"))
+                                        request.model_id,
+                                        os.getenv("EXPORT_FOLDER_NAME"))
 
     request_dict = request.to_dict(casing=betterproto.Casing.SNAKE)
     #For WSL users we need to adjust the path prefix for the dataset location to windows path
-    if get_config_property("local_execution") == "YES":
-        if get_config_property("running_in_wsl") == "YES":
-            request_dict["dataset_path"] = re.sub("[a-zA-Z]:\\\\([A-Za-z0-9_]+(\\\\[A-Za-z0-9_]+)+)\\\\MetaAutoML", get_config_property("wsl_metaautoml_path"), request_dict["dataset_path"])
+    if os.getenv("LOCAL_EXECUTION") == "YES":
+        if os.getenv("RUNNING_IN_WSL") == "YES":
+            request_dict["dataset_path"] = re.sub("[a-zA-Z]:\\\\([A-Za-z0-9_]+(\\\\[A-Za-z0-9_]+)+)\\\\MetaAutoML", os.getenv("WSL_METAAUTOML_PATH"), request_dict["dataset_path"])
             request_dict["dataset_path"] = request_dict["dataset_path"].replace("\\", "/")
             job_folder_location = job_folder_location.replace("\\", "/")
             model_folder_location = model_folder_location.replace("\\", "/")
@@ -543,7 +583,7 @@ def setup_run_environment(request: "StartAutoMlRequest", adapter_name: str) -> "
     os.makedirs(result_folder_location, exist_ok=True)
     os.makedirs(dashboard_folder_location, exist_ok=True)
     #Save job file
-    with open(os.path.join(job_folder_location, get_config_property("job-file-name")), "w+") as f:
+    with open(os.path.join(job_folder_location, os.getenv("JOB_FILE_NAME")), "w+") as f:
         json.dump(request_dict, f)
     return request
 

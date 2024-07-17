@@ -830,6 +830,9 @@ msgstr "Bild Klassifikation"
 msgid "text classification"
 msgstr "Text Klassifikation"
 
+msgid "tabular clustering"
+msgstr "Tabellarisches Clustering"
+
 msgid "File configuration can not be saved, incompatible delimiter"
 msgstr "Datei Konfiguration konnte nicht gespeichert werden, Spaltenseparator inkompatibel."
 

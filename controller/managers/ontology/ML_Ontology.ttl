@@ -1,5 +1,5 @@
 ### Ontology file generated from ML_Ontology.xlsx.
-### 2023-12-20 11:33:13.555942
+### 2024-07-10 18:02:19.760379
 
 
 # PREFIXES
@@ -289,6 +289,13 @@
     :has_dataset_type :tabular ;
     rdfs:comment "Predicting numeric values for rows of a data table" ;
     :supported_by_oma_ml "true"^^xsd:boolean .
+:tabular_clustering a :ML_task ;
+    skos:prefLabel "tabular clustering" ;
+    skos:broader :clustering ;
+    :belongs_to :unsupervised_learning ;
+    :has_dataset_type :tabular ;
+    rdfs:comment "Grouping a set of objects in such a way that objects in the same group (called a cluster) are more similar (in some sense or another) to each other than to those in other groups" ;
+    :supported_by_oma_ml "true"^^xsd:boolean .
 :text_analytics a :ML_task ;
     skos:prefLabel "text analytics" ;
     :belongs_to :supervised_learning , :unsupervised_learning ;
@@ -372,6 +379,11 @@
     :used_for :classification , :regression ;
     rdfs:comment "AdaBoost, short for Adaptive Boosting, is a statistical classification meta-algorithm" ;
     rdfs:seeAlso <https://www.wikidata.org/entity/Q2823869> .
+:affinity_propagation a :ML_approach ;
+    skos:prefLabel "affinity propagation" ;
+    :used_for :clustering ;
+    rdfs:comment "Exemplar clustering Algorithm" ;
+    rdfs:seeAlso <https://www.wikidata.org/wiki/Q3407504> .
 :agglomerative_clustering a :ML_approach ;
     skos:prefLabel "agglomerative clustering" ;
     skos:broader :hierarchical_clustering ;
@@ -425,6 +437,13 @@
     skos:prefLabel "Bernoulli naive bayes" ;
     :used_for :classification ;
     rdfs:comment "Naive Bayes classifier for multivariate Bernoulli models." .
+:balanced_iterative_reducing_and_clustering_using_hierarchies a :ML_approach ;
+    skos:prefLabel "balanced iterative reducing and clustering using hierarchies" ;
+    skos:altLabel "BIRCH" ;
+    skos:broader :hierarchical_clustering ;
+    :used_for :clustering ;
+    rdfs:comment "An efficient hierarchical clustering method optimized for large datasets, which builds a clustering feature tree incrementally" ;
+    rdfs:seeAlso <https://www.wikidata.org/entity/Q4835721> .
 :boltzman_machine a :ML_approach ;
     skos:prefLabel "Boltzman machine" ;
     skos:broader :artificial_neural_network ;
@@ -768,6 +787,11 @@
     skos:broader :markov_model ;
     rdfs:comment "Graphical model for sequence labeling that combines features of hidden Markov models (HMMs) and maximum entropy (MaxEnt) models" ;
     rdfs:seeAlso <https://www.wikidata.org/entity/Q6795829> .
+:mean_shift_clustering a :ML_approach ;
+    skos:prefLabel "Mean shift Clustering" ;
+    :used_for :clustering ;
+    rdfs:comment "Mean shift clustering iteratively moves data points uphill in a density landscape to discover clusters." ;
+    rdfs:seeAlso <https://www.wikidata.org/wiki/Q6803557> .
 :multi_scale_convolutional_neural_networks a :ML_approach ;
     skos:prefLabel "Multi-Scale Convolutional Neural Networks" ;
     skos:altLabel "MCNN" ;
@@ -1109,6 +1133,11 @@
 :brier a :Metric ;
     skos:prefLabel "brier" ;
     :used_for :classification .
+:calinski_harabasz_index a :Metric ;
+    skos:prefLabel "Calinski Harabasz Index" ;
+    :used_for :clustering ;
+    rdfs:comment "The Calinski-Harabasz Index, or Variance Ratio Criterion, measures the sum of between-cluster dispersion against the sum of within-cluster dispersion, where dispersion is the sum of distance squared. The higher the better." ;
+    rdfs:seeAlso <https://www.wikidata.org/wiki/Q94983169> .
 :categorical_accuracy a :Metric ;
     skos:prefLabel "categorical accuracy" ;
     :used_for :classification ;
@@ -1148,6 +1177,10 @@
 :d2_tweedie_score a :Metric ;
     skos:prefLabel "d2 tweedie score" ;
     :used_for :regression .
+:davies_bouldin_index a :Metric ;
+    skos:prefLabel "Davies Bouldin Index" ;
+    :used_for :clustering ;
+    rdfs:comment "The Davies-Bouldin Index measures the average similarity between clusters, where similarity compares the size of clusters against the between-cluster distance. Good value is near 0" .
 :explained_variance a :Metric ;
     skos:prefLabel "explained variance" ;
     skos:altLabel "Max Error" ;
@@ -1315,14 +1348,14 @@
     :used_for :regression .
 :mean_tensor a :Metric ;
     skos:prefLabel "mean tensor" .
+:median_absolute_error_duplicated a :Metric ;
+    skos:prefLabel "median absolute error duplicated" ;
+    skos:altLabel "Median AE" ;
+    :used_for :regression .
 :median_absolute_error a :Metric ;
     skos:prefLabel "median absolute error" ;
     skos:altLabel "MAE" ;
     :used_for :regression , :time_series_forecasting .
-:median_absolute_error a :Metric ;
-    skos:prefLabel "median absolute error" ;
-    skos:altLabel "Median AE" ;
-    :used_for :regression .
 :median_absolute_percentage_error a :Metric ;
     skos:prefLabel "median absolute percentage error" ;
     skos:altLabel "MAPE" ;
@@ -1435,14 +1468,6 @@
     skos:prefLabel "receiver operating characteristic curve" ;
     skos:altLabel "ROC AUC" ;
     :used_for :classification .
-:receiver_operating_characteristic_curve_weighted a :Metric ;
-    skos:prefLabel "receiver operating characteristic curve weighted" ;
-    skos:altLabel "ROC AUC weighted" ;
-    :used_for :classification .
-:receiver_operating_characteristic_curve_samples a :Metric ;
-    skos:prefLabel "receiver operating characteristic curve samples" ;
-    skos:altLabel "ROC AUC samples" ;
-    :used_for :classification .
 :receiver_operating_characteristic_curve_one_vs_one a :Metric ;
     skos:prefLabel "receiver operating characteristic curve one vs one" ;
     skos:altLabel "ROC AUC OVO" ;
@@ -1459,17 +1484,25 @@
     skos:prefLabel "receiver operating characteristic curve one vs rest" ;
     skos:altLabel "ROC AUC OVR" ;
     :used_for :classification .
-:receiver_operating_characteristic_curve_one_vs_rest_micro a :Metric ;
-    skos:prefLabel "receiver operating characteristic curve one vs rest micro" ;
-    skos:altLabel "ROC AUC OVR micro" ;
-    :used_for :classification .
 :receiver_operating_characteristic_curve_one_vs_rest_macro a :Metric ;
     skos:prefLabel "receiver operating characteristic curve one vs rest macro" ;
     skos:altLabel "ROC AUC OVR macro" ;
     :used_for :classification .
+:receiver_operating_characteristic_curve_one_vs_rest_micro a :Metric ;
+    skos:prefLabel "receiver operating characteristic curve one vs rest micro" ;
+    skos:altLabel "ROC AUC OVR micro" ;
+    :used_for :classification .
 :receiver_operating_characteristic_curve_one_vs_rest_weighted a :Metric ;
     skos:prefLabel "receiver operating characteristic curve one vs rest weighted" ;
     skos:altLabel "ROC AUC OVR weighted" ;
+    :used_for :classification .
+:receiver_operating_characteristic_curve_samples a :Metric ;
+    skos:prefLabel "receiver operating characteristic curve samples" ;
+    skos:altLabel "ROC AUC samples" ;
+    :used_for :classification .
+:receiver_operating_characteristic_curve_weighted a :Metric ;
+    skos:prefLabel "receiver operating characteristic curve weighted" ;
+    skos:altLabel "ROC AUC weighted" ;
     :used_for :classification .
 :root_mean_squared_error a :Metric ;
     skos:prefLabel "root mean squared error" ;
@@ -1486,6 +1519,10 @@
 :sensitifity_at_specificity a :Metric ;
     skos:prefLabel "sensitifity at specificity" ;
     :used_for :classification .
+:silhouette_score a :Metric ;
+    skos:prefLabel "Silhouette Score" ;
+    :used_for :clustering ;
+    rdfs:comment "It compares intra cluster and inter cluster similarity. optimal value 1, not distinguishable 0, -1 no clustering at all" .
 :sparse_categorical_accuracy a :Metric ;
     skos:prefLabel "sparse categorical accuracy" ;
     :used_for :classification ;
@@ -1811,7 +1848,7 @@
 :pycaret a :AutoML_solution ;
     skos:prefLabel "Pycaret" ;
     :used_for :scikit_learn_lib , :catboost_lib , :lightgbm_lib , :xgboost_lib ;
-    :can_perform :tabular_classification , :tabular_regression , :clustering , :anomaly_detection , :time_series_forecasting ;
+    :can_perform :tabular_classification , :tabular_regression , :tabular_clustering , :anomaly_detection , :time_series_forecasting ;
     rdfs:comment "Open-source, low-code machine learning library in Python" ;
     rdfs:seeAlso <https://github.com/pycaret/pycaret> ;
     :supported_by_oma_ml "true"^^xsd:boolean .
@@ -2041,6 +2078,14 @@
     :ml_task :time_series_forecasting ;
     :parameter_value :metric_pycaret_time_series_forecasting , :forecasting_horizon_pycaret_time_series_forcasting , :cross_validation_fold_pycaret ;
     rdfs:comment "Task configuration for time series forecasting  PyCaret" ;
+    rdfs:seeAlso <https://pycaret.readthedocs.io> .
+:clustering_pycaret a :Configuration_item ;
+    skos:prefLabel "clustering PyCaret" ;
+    :category :task_configuration ;
+    :automl_solution :pycaret ;
+    :ml_task :tabular_clustering ;
+    :parameter_value :include_approach_pycaret_clustering , :number_clusters_pycaret_clustering ;
+    rdfs:comment "Task configuration for clustering" ;
     rdfs:seeAlso <https://pycaret.readthedocs.io> .
 :tabular_classification_in_autogluon a :Configuration_item ;
     skos:prefLabel "tabular classification in AutoGluon" ;
@@ -3028,6 +3073,13 @@
     skos:broader :include_approach ;
     :has_datatype :list ;
     :parameter_value :distributed_random_forest , :artificial_neural_network , :gradient_boosting_tree , :stacking_ensemble .
+:include_approach_pycaret_clustering a :Configuration_item ;
+    skos:prefLabel "include approach pycaret Clustering" ;
+    :category :parameter ;
+    skos:broader :include_approach ;
+    :has_datatype :list ;
+    :parameter_value :affinity_propagation , :balanced_iterative_reducing_and_clustering_using_hierarchies , :k_means , :k_modes , :mean_shift_clustering ;
+    rdfs:seeAlso <https://pycaret.readthedocs.io/en/latest/api/clustering.html#pycaret.clustering.create_model> .
 :epochs a :Configuration_item ;
     skos:prefLabel "epochs" ;
     :category :parameter ;
@@ -3501,6 +3553,15 @@
     skos:broader :sort_metric ;
     :has_datatype :single_value ;
     :parameter_value :accuracy , :area_under_roc_curve , :area_under_precision_recall_curve , :log_loss , :mean_absolute_error , :mean_per_class_error , :mean_residual_deviance , :root_mean_squared_error , :root_mean_squared_log_error .
+:number_clusters a :Configuration_item ;
+    skos:prefLabel "number clusters" ;
+    :category :parameter ;
+    :has_datatype :integer .
+:number_clusters_pycaret_clustering a :Configuration_item ;
+    skos:prefLabel "number clusters pycaret clustering" ;
+    :category :parameter ;
+    skos:broader :number_clusters ;
+    :has_datatype :integer .
 
 
 # Enum
@@ -3680,12 +3741,12 @@
 :tabular a :Enum ;
     skos:prefLabel "tabular" ;
     :category :dataset_type ;
-    rdfs:comment "A dataset presented in a tabular form, i.e., a table with rows and columns in comma-separated value format [filetype: *.csv]" ;
+    rdfs:comment "A dataset presented in a tabular form, i.e., a table with rows and columns in comma-separated value format [filetype: *.csv, *.xlsx, *.xls, *.arff]" ;
     :supported_by_oma_ml "true"^^xsd:boolean .
 :text a :Enum ;
     skos:prefLabel "text" ;
     :category :dataset_type ;
-    rdfs:comment "A dataset containing texts. The dataset must be represented as a table with rows and one or more text columns  [filetype: *.csv]" ;
+    rdfs:comment "A dataset containing texts. The dataset must be represented as a table with rows and one or more text columns [filetype: *.csv, *.xlsx, *.xls, *.arff]" ;
     :supported_by_oma_ml "true"^^xsd:boolean .
 :image a :Enum ;
     skos:prefLabel "image" ;
@@ -3712,7 +3773,7 @@
 :time_series a :Enum ;
     skos:prefLabel "time series" ;
     :category :dataset_type ;
-    rdfs:comment "A dataset for time series data, represented as a table with rows and columns ordered according to a timestamp column [filetype: *.csv]" ;
+    rdfs:comment "A dataset for time series data, represented as a table with rows and columns ordered according to a timestamp column [filetype: *.csv, *.xlsx, *.xls, *.arff]" ;
     rdfs:seeAlso <https://auto.gluon.ai/stable/tutorials/timeseries/forecasting-quick-start.html#loading-time-series-data-as-a-timeseriesdataframe> ;
     :supported_by_oma_ml "true"^^xsd:boolean .
 :greedy a :Enum ;

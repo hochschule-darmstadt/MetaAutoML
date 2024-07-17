@@ -66,7 +66,7 @@
             <DataLoaderSpinner />
         }
 
-        @if (((Dataset.Dataset.Type.ID == ":tabular") || (Dataset.Dataset.Type.ID == ":text") || (Dataset.Dataset.Type.ID == ":time_series")) || (Dataset.Dataset.Type.ID == ":time_series_longitudinal") && (!string.IsNullOrEmpty(StartTrainingDto.Configuration.Task)))
+        @if (((Dataset.Dataset.Type.ID == ":tabular") || (Dataset.Dataset.Type.ID == ":text") || (Dataset.Dataset.Type.ID == ":time_series") || (Dataset.Dataset.Type.ID == ":time_series_longitudinal")) && (!string.IsNullOrEmpty(StartTrainingDto.Configuration.Task)) && (StartTrainingDto.Configuration.Task != ":tabular_clustering"))
 
         {
             <MudItem xs="12" data-form-sixthStep>
@@ -539,7 +539,7 @@
         try
         {
             Dictionary<string, string> dictionary = new Dictionary<string, string>
-        {
+            {
                 { "task", StartTrainingDto.Configuration.Task }
             };
             await UpdateStartTrainingDto();
