@@ -31,7 +31,10 @@ def post_process_result_dataframe(X_index: pd.DataFrame, y_predicted: pd.DataFra
         final_y_predicted = X_index[index_columns].join(y_predicted[["predicted"]])
     else:
         final_y_predicted = y_predicted
+
+    {% if configuration.configuration["task"] in [":tabular_classification", ":tabular_regression", ":text_classification", ":text_regression"] %}
     final_y_predicted.rename(columns={"predicted": target}, inplace=True)
+    {% endif %}
     return final_y_predicted
 
 

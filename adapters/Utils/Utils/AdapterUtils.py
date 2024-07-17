@@ -238,18 +238,25 @@ def evaluate(config: "StartAutoMlRequest", config_path: str) -> Tuple[float, flo
     elif(config["configuration"]["task"] in [":image_classification", ":image_regression"]):
         X_test, y_test = data_loader(config, image_test_folder=True)
 
+    elif(config["configuration"]["task"] in [":tabular_clustering"]):
+        X_test, y_test = data_loader(config, perform_splitting=False)
+        target = ""
 
-    if config["configuration"]["task"] in [":tabular_classification", ":tabular_regression", ":text_regression", ":named_entity_recognition", ":text_classification"]:
+    if config["configuration"]["task"] in [":tabular_classification", ":tabular_regression", ":text_regression", ":named_entity_recognition", ":text_classification", ":tabular_clustering"]:
 
-        subprocess.call([python_env, os.path.join(result_path, "predict.py"), file_path, os.path.join(result_path, "predictions.csv"),target])
+        subprocess.call([python_env, os.path.join(result_path, "predict.py"), file_path, os.path.join(result_path, "predictions.csv"), target])
 
 
             #The dashboard model wrapper offers the same functionallity and can be used for making timed predictions
         pipeline_model = load_dashboard_model(dashboard_folder_location + '/dashboard_model.p')
 
         predict_start = time.time()
-        pipeline_model.predict(test.drop(target, axis=1))
-        predict_time = (time.time() - predict_start) / test.shape[0]
+        if config["configuration"]["task"] in [":tabular_classification", ":tabular_regression", ":text_regression", ":named_entity_recognition", ":text_classification"]:
+            pipeline_model.predict(test.drop(target, axis=1))
+            predict_time = (time.time() - predict_start) / test.shape[0]
+        elif config["configuration"]["task"] in [":tabular_clustering"]:
+            pipeline_model.predict(X_test)
+            predict_time = (time.time() - predict_start) / X_test.shape[0]
         if config["configuration"]["task"] in [":tabular_classification", ":text_classification"]:
             try:
                 #sometimes the model uses ml approaches that do not support predict proba functions.
@@ -268,9 +275,9 @@ def evaluate(config: "StartAutoMlRequest", config_path: str) -> Tuple[float, flo
         subprocess.call([python_env, os.path.join(result_path, "predict.py"), file_path, os.path.join(result_path, "predictions.csv")])
         predict_time = time.time() - predict_start
 
-    if(config["configuration"]["task"] == ":tabular_clustering"):
-        with open(os.path.join(config["result_folder_location"], f'metrics'), "rb") as dill_file:
-            return dill.load(dill_file), 0
+    #if(config["configuration"]["task"] == ":tabular_clustering"):
+    #    with open(os.path.join(config["result_folder_location"], f'metrics'), "rb") as dill_file:
+    #        return dill.load(dill_file), 0
 
     predictions = pd.read_csv(os.path.join(result_path, "predictions.csv"))
     os.remove(os.path.join(result_path, "predictions.csv"))
@@ -293,6 +300,8 @@ def evaluate(config: "StartAutoMlRequest", config_path: str) -> Tuple[float, flo
             return compute_regression_metrics(pd.Series(test[target]), predictions[target]), (predict_time * 1000) / test.shape[0]
     elif config["configuration"]["task"] == ":named_entity_recognition":
         return compute_named_entity_recognition_metrics(pd.Series(test[target]), predictions[target]), (predict_time * 1000) / pd.Series(test[target]).shape[0]
+    elif(config["configuration"]["task"] in [":tabular_clustering"]):
+        return compute_clustering_metrics(X_test, predictions["predicted"]), (predict_time * 1000) / X_test.shape[0]
 
 def compute_classification_metrics(y_should: pd.Series, y_is: pd.Series, prediction_probabilities) -> dict:
     """Compute the metrics collection for classification tasks
@@ -402,6 +411,23 @@ def compute_regression_metrics(y_should: pd.Series, y_is: pd.Series) -> dict:
         ":mean_poisson_deviance": float(mean_poisson_deviance(y_should, y_is)),
         ":mean_gamma_deviance": float(mean_gamma_deviance(y_should, y_is))
         })
+    return score
+
+def compute_clustering_metrics(x: pd.DataFrame, pred_labels: pd.Series) -> dict:
+    """Compute the metrics collection for clustering task
+
+    Args:
+        x (pd.Dataframe): the input x dataframe
+        pred_labels (pd.Series): the predicted labels
+
+    Returns:
+        dict: Dictionary containing the computed metrics, key is ontology IRI for the metric and value is the value
+    """
+    score = {
+        ":silhouette_score": silhouette_score(x, pred_labels),
+        ":davies_bouldin_index": davies_bouldin_score(x, pred_labels),
+        ":calinski_harabasz_index": calinski_harabasz_score(x, pred_labels)
+    }
     return score
 
 def compute_named_entity_recognition_metrics(y_should: pd.Series, y_is: pd.Series) -> dict:
