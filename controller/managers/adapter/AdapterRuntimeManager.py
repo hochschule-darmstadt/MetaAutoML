@@ -5,13 +5,13 @@ from AdapterManager import AdapterManager
 from ThreadLock import ThreadLock
 import json
 import copy
-
+from OntologyManager import OntologyManager
 
 class AdapterRuntimeManager:
     """The AdapterRuntimeManager represent a single training session started by a user and manages it
     """
 
-    def __init__(self, data_storage: DataStorage, request: "CreateTrainingRequest", explainable_lock: ThreadLock, multi_fidelity_callback = None, multi_fidelity_level = 0) -> None:
+    def __init__(self, data_storage: DataStorage, request: "CreateTrainingRequest", explainable_lock: ThreadLock, ontology_client: OntologyManager, multi_fidelity_callback = None, multi_fidelity_level = 0) -> None:
         """Initialize a new AdapterRuntimeManager instance
 
         Args:
@@ -24,6 +24,7 @@ class AdapterRuntimeManager:
         self.__data_storage: DataStorage = data_storage
         self.__request: CreateTrainingRequest = request
         self.__explainable_lock = explainable_lock
+        self.__ontology_client = ontology_client
         self.__multi_fidelity_callback = multi_fidelity_callback
         self.__multi_fidelity_level = multi_fidelity_level
         self.__log = logging.getLogger('AdapterRuntimeManager')
@@ -53,13 +54,24 @@ class AdapterRuntimeManager:
             host, port = map(os.getenv, self.__automl_addresses[automl.lower()])
             port = int(port)
             self.__log.debug(f"start_new_training: creating new adapter manager and adapter manager agent")
+
             if self.__request.configuration.task == ':tabular_clustering':
-                approaches = self.__request.configuration.parameters[':include_approach'].values
+                if ':include_approach' in self.__request.configuration.parameters:
+                    approaches = self.__request.configuration.parameters[':include_approach'].values
+                else:
+                    approaches = []
+
                 if len(approaches) == 0:
                     approaches = self.__get_clustering_approaches(automl)
+
                 for approach in approaches:
                     print(approach)
                     adjusted_request = copy.deepcopy(self.__request)
+                    if ':include_approach' not in self.__request.configuration.parameters:
+                        parameterValue = DynamicParameterValue()
+                        adjusted_request.configuration.parameters = {':include_approach': parameterValue}
+                        adjusted_request.configuration.parameters[':include_approach'].values = []
+
                     adjusted_request.configuration.parameters[':include_approach'].values = [approach]
                     adapter_training = AdapterManager(self.__data_storage, adjusted_request, automl, self.__training_id, self.__dataset, host, port, self.__adapter_finished_callback)
                     self.__adapters.append(adapter_training)
@@ -69,23 +81,8 @@ class AdapterRuntimeManager:
         return
 
     def __get_clustering_approaches(self, automl):
-        clustering_approaches = {
-            ":pycaret": {
-                ":affinity_propagation": "ap",
-                ":agglomerative_clustering": "hclust",
-                ":balanced_iterative_reducing_and_clustering_using_hierarchies": "birch",
-                ":density_based_spatial_clustering_of_applications_with_noise": "dbscan",
-                ":k_means": "kmeans",
-                ":k_modes": "kmodes",
-                ":mean_shift_clustering": "meanshift",
-                ":ordering_points_to_identify_the_clustering_structure": "optics",
-                ":spectral_clustering": "sc"
-            }
-        }
-        approaches = []
-        for approach in clustering_approaches[automl]:
-            approaches.append(approach)
-        return approaches
+        clustering_approaches = self.__ontology_client.get_clustering_approaches(automl)
+        return clustering_approaches
 
     def update_adapter_manager_list(self, adapter_manager_to_keep: list):
         new_adapter_list = []

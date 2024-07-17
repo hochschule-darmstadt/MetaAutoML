@@ -8,12 +8,13 @@ from AdapterRuntimeExplainerDashboardManager import AdapterRuntimeExplainerDashb
 from ThreadLock import ThreadLock
 import uuid
 from KubernetesClient import KubernetesClient
+from OntologyManager import OntologyManager
 
 class AdapterRuntimeScheduler:
     """The AdapterRuntimeScheduler is a singleton object holding the running training and prediction sessions
     """
 
-    def __init__(self, data_storage: DataStorage, explainable_lock: ThreadLock, kubernetes_client: KubernetesClient) -> None:
+    def __init__(self, data_storage: DataStorage, explainable_lock: ThreadLock, kubernetes_client: KubernetesClient, ontology_client: OntologyManager) -> None:
         """Initialize a new AdapterRuntimeScheduler instance
 
         Args:
@@ -28,6 +29,7 @@ class AdapterRuntimeScheduler:
         self.__running_explainer_dashboards: dict[str, AdapterRuntimeExplainerDashboardManager] = {}
         self.__explainable_lock = explainable_lock
         self.__kubernetes_client = kubernetes_client
+        self.__ontology_client = ontology_client
         return
 
     def create_new_training(self, request: CreateTrainingRequest) -> str:
@@ -38,7 +40,7 @@ class AdapterRuntimeScheduler:
         Returns:
             str: The training id which identify the new training session
         """
-        strategy_controller = StrategyController(self.__data_storage, request, self.__explainable_lock)
+        strategy_controller = StrategyController(self.__data_storage, request, self.__explainable_lock, self.__ontology_client)
         training_id = strategy_controller.get_training_id()
         self.__running_trainings[training_id] = strategy_controller
         return training_id
