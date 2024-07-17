@@ -5,10 +5,11 @@ import time, asyncio
 from AdapterUtils import *
 from AdapterBGRPC import *
 from threading import *
-from JsonUtil import get_config_property
 import pandas as pd
+from kmodes.kmodes import KModes
 from typing import Tuple
 from pycaret.classification import *
+from sklearn.cluster import *
 from sklearn.linear_model import *
 from sklearn.discriminant_analysis import *
 from sklearn.naive_bayes import *
@@ -24,8 +25,27 @@ from pycaret.internal.tunable import TunableMLPRegressor
 from sklearn.kernel_ridge import KernelRidge
 from sklearn.utils.extmath import softmax
 from lightgbm import LGBMClassifier
+from ThreadLock import ThreadLock
 
-def get_lib_model_names(instance):    
+def get_lib_model_names(instance):
+    if isinstance(instance, AgglomerativeClustering):
+        return ":scikit_learn_lib", ":agglomerative_clustering"
+    if isinstance(instance, Birch):
+        return ":scikit_learn_lib", ":balanced_iterative_reducing_and_clustering_using_hierarchies"
+    if isinstance(instance, DBSCAN):
+        return ":scikit_learn_lib", ":density_based_spatial_clustering_of_applications_with_noise"
+    if isinstance(instance, KMeans):
+        return ":scikit_learn_lib", ":k_means"
+    if isinstance(instance, KModes):
+        return ":scikit_learn_lib", ":k_modes"
+    if isinstance(instance, MeanShift):
+        return ":scikit_learn_lib", ":mean_shift_clustering"
+    if isinstance(instance, OPTICS):
+        return ":scikit_learn_lib", ":ordering_points_to_identify_the_clustering_structure"
+    if isinstance(instance, SpectralClustering):
+        return ":scikit_learn_lib", ":spectral_clustering"
+    if isinstance(instance, AffinityPropagation):
+        return ":scikit_learn_lib", ":affinity_propagation"
     if isinstance(instance, LogisticRegression):
         return ":scikit_learn_lib", ":logistic_regression"
     if isinstance(instance, KNeighborsClassifier):
@@ -125,10 +145,10 @@ class PyCaretAdapterManager(AdapterManager):
         AdapterManager (AdapterManager): The base class providing the shared functionality for all adapters
     """
 
-    def __init__(self) -> None:
+    def __init__(self, lock: ThreadLock) -> None:
         """Initialize a new PyCaretAdapterManager setting AutoML adapter specific variables
         """
-        super(PyCaretAdapterManager, self).__init__()
+        super(PyCaretAdapterManager, self).__init__(lock)
         self.__automl = None
         self.__loaded_training_id = None
         self._adapter_name = "pycaret"
@@ -148,13 +168,18 @@ class PyCaretAdapterManager(AdapterManager):
         # extract additional information from automl
         automl = load_model(os.path.join(working_dir, 'model_pycaret'))
         try:
-            lib, model = get_lib_model_names(automl.named_steps.trained_model)
+            if hasattr(automl.named_steps, 'trained_model'):
+                lib, model = get_lib_model_names(automl.named_steps.trained_model)
+            elif hasattr(automl.named_steps, 'actual_estimator'):
+                lib, model = get_lib_model_names(automl.named_steps.actual_estimator)
+            else:
+                lib, model = get_lib_model_names(automl.named_steps.trained_model)
         except:
             lib, model = get_lib_model_names(automl)
         libraries.append(lib)
         models.append(model)
-        return libraries, models        
-        
+        return libraries, models
+
 
     def _load_model_and_make_probabilities(self, config: "StartAutoMlRequest", result_folder_location: str, dataframe: pd.DataFrame):
         """Must be overwriten! Load the found model, and execute a prediction using the provided data to calculate the probability metric used by the ExplanableAI module inside the controller

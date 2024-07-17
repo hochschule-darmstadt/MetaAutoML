@@ -5,9 +5,11 @@ dill
 Jinja2
 Pillow
 scikit-learn
-codecarbon==2.1.4
+codecarbon==2.5.0
 tensorflow==2.10.1
 rdflib==6.2.0
 pandas>=0.23.3
 regex
 explainerdashboard==0.4.7
+numpy==1.26.4
+keras-nlp==0.12.1

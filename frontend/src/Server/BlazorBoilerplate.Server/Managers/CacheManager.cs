@@ -1,4 +1,4 @@
-﻿using BlazorBoilerplate.Infrastructure.Server;
+using BlazorBoilerplate.Infrastructure.Server;
 using BlazorBoilerplate.Shared.Dto.Ontology;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
@@ -88,7 +88,7 @@ namespace BlazorBoilerplate.Server.Managers
             catch (Exception ex)
             {
                 //In case redis is not available we always query data from the ontology
-                //FALLBACK 
+                //FALLBACK
                 request.Ids.Add(ids);
                 GetObjectsInformationResponse response = _client.GetObjectsInformation(request);
                 foreach (var objectInformation in response.ObjectInformations)

@@ -11,7 +11,6 @@ from AdapterLongitudinalUtils import *
 from AdapterTabularUtils import *
 from AdapterBGRPC import *
 from threading import *
-from JsonUtil import get_config_property
 import pandas as pd
 from typing import Tuple
 import re
@@ -25,7 +24,7 @@ class AdapterManager(Thread):
     Args:
         Thread (Thread): Allowing the AdapterManager to start a background thread
     """
-    def __init__(self) -> None:
+    def __init__(self, lock) -> None:
         """Initialize a new AdapterManager instance
         """
         super(AdapterManager, self).__init__()
@@ -37,6 +36,7 @@ class AdapterManager(Thread):
         self.__on_prediction_finished_callback = ""
         self._automl = None
         self._loaded_training_id = None
+        self.__lock = lock
 
     def run(self):
         """Start the AutoML solution as a background process
@@ -108,28 +108,29 @@ class AdapterManager(Thread):
             process.wait()
             #End carbon recording
             carbon_tracker.stop()
-            #Read config configuration again as it might have been changed during the subprocess
-            with open(os.path.join(config.job_folder_location, get_config_property("job-file-name"))) as file:
-                updated_process_configuration = json.load(file)
-            config.dataset_configuration = updated_process_configuration["dataset_configuration"]
-            #incase of timeseries forcasting we need to extract the forecast horizon
-            if config.configuration["task"] == ":time_series_forecasting":
-                config.forecasting_horizon = updated_process_configuration["forecasting_horizon"]
 
-            generate_script(config)
-            output_json = zip_script(config)
-            #AutoKeras only produces keras based ANN
-            library, model = self._get_ml_model_and_lib(config)
-            # TODO: fix evaluation (does not work with image datasets)
-            test_score, prediction_time = evaluate(config, os.path.join(config.job_folder_location, get_config_property("job-file-name")))
-            self.__auto_ml_status_messages.put(self.get_response(output_json, json.dumps(test_score), prediction_time, library, model, carbon_tracker.final_emissions_data))
+            with self.__lock.lock():
+                #Read config configuration again as it might have been changed during the subprocess
+                with open(os.path.join(config.job_folder_location, os.getenv("JOB_FILE_NAME"))) as file:
+                    updated_process_configuration = json.load(file)
+                config.dataset_configuration = updated_process_configuration["dataset_configuration"]
+                #incase of timeseries forcasting we need to extract the forecast horizon
+                if config.configuration["task"] == ":time_series_forecasting":
+                    config.forecasting_horizon = updated_process_configuration["forecasting_horizon"]
+                generate_script(config)
+                output_json = zip_script(config)
+                #AutoKeras only produces keras based ANN
+                library, model = self._get_ml_model_and_lib(config)
+                # TODO: fix evaluation (does not work with image datasets)
+                test_score, prediction_time = evaluate(config, os.path.join(config.job_folder_location, os.getenv("JOB_FILE_NAME")))
+                self.__auto_ml_status_messages.put(self.get_response(output_json, json.dumps(test_score), prediction_time, library, model, carbon_tracker.final_emissions_data))
 
-            print(f'{get_config_property("adapter-name")} job finished')
-            self.__start_auto_ml_running = False
+                print(f'{os.getenv("ADAPTER_NAME")} job finished')
+                self.__start_auto_ml_running = False
 
         except Exception as e:
             # always crash if we are not running in production environment
-            if get_config_property("local_execution") == "YES":
+            if os.getenv("LOCAL_EXECUTION") == "YES":
                 # reraise exception above to crash
                 raise e
             else:
@@ -158,7 +159,7 @@ class AdapterManager(Thread):
         """
         response = GetAutoMlStatusResponse()
         response.return_code = AdapterReturnCode.ADAPTER_RETURN_CODE_SUCCESS
-        if get_config_property("local_execution") == "NO":
+        if os.getenv("LOCAL_EXECUTION") == "NO":
             response.path = os.path.join(config.controller_export_folder_location, config.file_name)
         else:
             response.path = os.path.abspath(os.path.join(config.file_location, config.file_name))
@@ -243,17 +244,19 @@ class AdapterManager(Thread):
             print("adapatermanager explain")
             config_json = json.loads(explain_auto_ml_request.process_json)
             config_json["dataset_configuration"] = json.loads(config_json["dataset_configuration"])
-            result_folder_location = os.path.join(get_config_property("training-path"),
+            result_folder_location = os.path.join(os.getenv("TRAINING_PATH"),
                                                   config_json["user_id"],
                                                   config_json["dataset_id"],
                                                   config_json["training_id"],
-                                                  get_config_property("result-folder-name"))
-            job_file_location = os.path.join(get_config_property("training-path"),
+                                                  config_json["model_id"],
+                                                  os.getenv("RESULT_FOLDER_NAME"))
+            job_file_location = os.path.join(os.getenv("TRAINING_PATH"),
                                                   config_json["user_id"],
                                                   config_json["dataset_id"],
                                                   config_json["training_id"],
-                                                  get_config_property("job-folder-name"),
-                                                  get_config_property("job-file-name"))
+                                                  config_json["model_id"],
+                                                  os.getenv("JOB_FOLDER_NAME"),
+                                                  os.getenv("JOB_FILE_NAME"))
             #Read dataset configuration
             with open(job_file_location) as file:
                 updated_process_configuration = json.load(file)
@@ -290,19 +293,20 @@ class AdapterManager(Thread):
         """
         try:
             config_json = json.loads(predict_model_request.process_json)
-            job_file_location = os.path.join(get_config_property("training-path"),
+            job_file_location = os.path.join(os.getenv("TRAINING_PATH"),
                                         config_json["user_id"],
                                         config_json["dataset_id"],
                                         config_json["training_id"],
-                                        get_config_property("job-folder-name"),
-                                        get_config_property("job-file-name"))
+                                        config_json["model_id"],
+                                        os.getenv("JOB_FOLDER_NAME"),
+                                        os.getenv("JOB_FILE_NAME"))
 
             #load old dataset_configuration and save it to config json in case the dataset types have been changed in the
             #AutoKeras adapter for TextClassification
             #For WSL users we need to adjust the path prefix for the dataset location to windows path
-            if get_config_property("local_execution") == "YES":
-                if get_config_property("running_in_wsl") == "YES":
-                    config_json["live_dataset_path"] = re.sub("[a-zA-Z]:/([A-Za-z0-9]+(/[A-Za-z0-9]+)+)/MetaAutoML", get_config_property("wsl_metaautoml_path"), config_json["live_dataset_path"])
+            if os.getenv("LOCAL_EXECUTION") == "YES":
+                if os.getenv("RUNNING_IN_WSL") == "YES":
+                    config_json["live_dataset_path"] = re.sub("[a-zA-Z]:/([A-Za-z0-9]+(/[A-Za-z0-9]+)+)/MetaAutoML", os.getenv("WSL_METAAUTOML_PATH"), config_json["live_dataset_path"])
                     config_json["live_dataset_path"] = config_json["live_dataset_path"].replace("\\", "/")
 
             with open(job_file_location) as file:
@@ -314,7 +318,7 @@ class AdapterManager(Thread):
             with open(job_file_location, "w+") as f:
                 json.dump(config_json, f)
 
-            prediction_time, result_path = predict(config_json, job_file_location, get_config_property("adapter-name"))
+            prediction_time, result_path = predict(config_json, job_file_location, os.getenv("ADAPTER_NAME"))
             response = PredictModelResponse()
             response.result_path = result_path
             return response
@@ -349,19 +353,21 @@ class AdapterManager(Thread):
         #try:
         config = json.loads(request.process_json)
         result_folder_location = os.path.join("app-data", "training",
-                            config["user_id"], config["dataset_id"], config["training_id"], "result")
+                            config["user_id"], config["dataset_id"], config["training_id"], config["model_id"], "result")
         #Read config configuration again as it might have been changed during the training
-        job_folder_location = os.path.join(get_config_property("training-path"),
+        job_folder_location = os.path.join(os.getenv("TRAINING_PATH"),
                                             config["user_id"],
                                             config["dataset_id"],
                                             config["training_id"],
-                                            get_config_property("job-folder-name"),
-                                            get_config_property("job-file-name"))
-        dashboard_folder_location = os.path.join(get_config_property("training-path"),
+                                            config["model_id"],
+                                            os.getenv("JOB_FOLDER_NAME"),
+                                            os.getenv("JOB_FILE_NAME"))
+        dashboard_folder_location = os.path.join(os.getenv("TRAINING_PATH"),
                                             config["user_id"],
                                             config["dataset_id"],
                                             config["training_id"],
-                                            get_config_property("dashboard-folder-name"))
+                                            config["model_id"],
+                                            os.getenv("DASHBOARD_FOLDER_NAME"))
         with open(job_folder_location) as file:
             updated_process_configuration = json.load(file)
 

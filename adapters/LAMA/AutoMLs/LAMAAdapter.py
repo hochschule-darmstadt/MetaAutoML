@@ -1,7 +1,6 @@
 import os
 from AdapterUtils import *
 from AdapterTabularUtils import *
-from JsonUtil import get_config_property
 # LightAutoML presets, task and report generation
 from lightautoml.automl.presets.tabular_presets import TabularAutoML
 from lightautoml.tasks import Task

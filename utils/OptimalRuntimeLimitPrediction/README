@@ -1,0 +1,13 @@
+# Python Scripts for the paper: Predicting the Optimal Runtime Limit for Meta AutoML
+
+0. Download the raw mongodb data: https://drive.google.com/file/d/1TIJ7H3NPF9G1-cyWQz_pGNiwNKMaBQf2/view?usp=sharing
+1. Download or use an existing MongoDB server: https://www.mongodb.com/try/download/community
+2. Download MongoDB compase or any other interface tool for MongoDB: https://www.mongodb.com/try/download/compass
+3. Connect to your MongoDB
+4. Create 3 collections: "datasets", "trainings", "models"
+5. Import the exported raw MongoDB collections from the downloaded .zip (step 0) into your new collections, the exported .json files are found in the data folder
+6. Create a new Python virtual environment (option)
+7. Install the python requirements: pip install requirements.txt
+8. Adjust the MongoDB connection in the scripts 1 and 3:
+client = pymongo.MongoClient("mongodb://localhost:5050/") <- change to your port / url or ip
+8. Run the scripts in order: 1 -> (2_1, 2_2, 2_3) -> 3

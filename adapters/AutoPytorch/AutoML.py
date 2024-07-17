@@ -4,7 +4,6 @@ import logging
 import sys
 
 from AutoPytorchAdapter import AutoPytorchAdapter
-from JsonUtil import get_config_property
 
 if __name__ == '__main__':
     """
@@ -14,7 +13,7 @@ if __name__ == '__main__':
     logging.basicConfig(stream=sys.stdout, level=logging.DEBUG, format=FORMAT)
 
     job_file_location = os.path.join(sys.argv[1],
-                                        get_config_property("job-file-name"))
+                                        os.getenv("JOB_FILE_NAME"))
     with open(job_file_location) as file:
         process_json = json.load(file)
 

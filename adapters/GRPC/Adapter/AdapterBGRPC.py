@@ -84,7 +84,13 @@ class StartAutoMlRequest(betterproto.Message):
     of the frontendexample: '4a7af128-ac3d-4e3d-89fe-b70f7bfe0c3b'
     """
 
-    dataset_path: str = betterproto.string_field(4)
+    model_id: str = betterproto.string_field(43)
+    """
+    Unique modle id generated when inserting a new model document into
+    MongoDBexample: '63515c86b10d04d230dc1482'
+    """
+
+    dataset_path: str = betterproto.string_field(5)
     """
     Absolute system path where the dataset is saved (single file dataset use
     the file name as ending of the path while multi file dataset will only have
@@ -92,14 +98,14 @@ class StartAutoMlRequest(betterproto.Message):
     data/datasets/....../titanic_train.csv"
     """
 
-    configuration: "StartAutoMlConfiguration" = betterproto.message_field(5)
+    configuration: "StartAutoMlConfiguration" = betterproto.message_field(6)
     """
     StartAutoMlConfiguration object, the specific configuration for the
     training session (see StartAutoMlConfiguration for more detals)example:
     StartAutoMlConfiguration
     """
 
-    dataset_configuration: str = betterproto.string_field(6)
+    dataset_configuration: str = betterproto.string_field(7)
     """
     The current dataset configuration used to open the dataset and column
     schema for tabular datasets as a JSON stringexample:
@@ -528,6 +534,7 @@ class AdapterServiceStub(betterproto.ServiceStub):
 
 
 class AdapterServiceBase(ServiceBase):
+
     async def start_auto_ml(
         self, start_auto_ml_request: "StartAutoMlRequest"
     ) -> "StartAutoMlResponse":

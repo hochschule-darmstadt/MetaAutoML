@@ -279,6 +279,18 @@ class OntologyManager(object):
             result.search_entities.append(rowInstance)
         return result
 
+    def get_clustering_approaches(self, automl):
+        automl_iri = self.__iri_to_uri_ref(automl)
+        q = prepareQuery(Queries.ONTOLOGY_QUERY_GET_ALL_CLUSTERING_APPROACHES_AUTOML,
+                        initNs={"skos": SKOS})
+
+        queryResult = self.__execute_query(q, {"automl_iri": automl_iri})
+
+        approaches = []
+        for row in queryResult:
+            approach = self.__normalize_iri_to_colon(row.approach)
+            approaches.append(approach)
+        return approaches
 
     def __normalize_iri_to_colon(self, iri: str) -> str:
         if iri is not None:

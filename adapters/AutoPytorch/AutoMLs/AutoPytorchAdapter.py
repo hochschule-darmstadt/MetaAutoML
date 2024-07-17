@@ -20,7 +20,6 @@ from autoPyTorch.api.tabular_classification import TabularClassificationTask
 from autoPyTorch.api.tabular_regression import TabularRegressionTask
 from autoPyTorch.api.time_series_forecasting import TimeSeriesForecastingTask
 
-from JsonUtil import get_config_property
 from predict_time_sources import feature_preparation
 
 import AutoPytorchParameterConfig as appc

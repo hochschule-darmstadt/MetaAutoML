@@ -5,11 +5,12 @@ import time, asyncio
 from AdapterUtils import *
 from AdapterBGRPC import *
 from threading import *
-from JsonUtil import get_config_property
 import pandas as pd
 from typing import Tuple
 from predict_time_sources import feature_preparation
 import evalml
+
+from ThreadLock import ThreadLock
 
 #TODO evalml estimators
 evalml_estimators = {
@@ -23,10 +24,10 @@ class EvalMLAdapterManager(AdapterManager):
         AdapterManager (AdapterManager): The base class providing the shared functionality for all adapters
     """
 
-    def __init__(self) -> None:
+    def __init__(self, lock: ThreadLock) -> None:
         """Initialize a new FLAMLAdapterManager setting AutoML adapter specific variables
         """
-        super(EvalMLAdapterManager, self).__init__()
+        super(EvalMLAdapterManager, self).__init__(lock)
         self.__automl = None
         self.__loaded_training_id = None
         self._adapter_name = "evalml"
@@ -62,11 +63,11 @@ class EvalMLAdapterManager(AdapterManager):
         """
         try:
             config_json = json.loads(explain_auto_ml_request.process_json)
-            result_folder_location = os.path.join(get_config_property("training-path"),
+            result_folder_location = os.path.join(os.getenv("TRAINING_PATH"),
                                                   config_json["user_id"],
                                                   config_json["dataset_id"],
                                                   config_json["training_id"],
-                                                  get_config_property("result-folder-name"))
+                                                  os.getenv("RESULT_FOLDER_NAME"))
 
             if self._loaded_training_id != config_json["training_id"]:
                 df, test = data_loader(config_json)
@@ -98,18 +99,18 @@ class EvalMLAdapterManager(AdapterManager):
         try:
             config_json = json.loads(explain_auto_ml_request.process_json)
             config_json["dataset_configuration"] = json.loads(config_json["dataset_configuration"])
-            result_folder_location = os.path.join(get_config_property("training-path"),
+            result_folder_location = os.path.join(os.getenv("TRAINING_PATH"),
                                                   config_json["user_id"],
                                                   config_json["dataset_id"],
                                                   config_json["training_id"],
-                                                  get_config_property("result-folder-name"))
+                                                  os.getenv("RESULT_FOLDER_NAME"))
 
             if self._loaded_training_id != config_json["training_id"]:
-                
+
                 #For WSL users we need to adjust the path prefix for the dataset location to windows path
-                if get_config_property("local_execution") == "YES":
-                    if get_config_property("running_in_wsl") == "YES":
-                        config_json["dataset_path"] = re.sub("[a-zA-Z]:\\\\([A-Za-z0-9_]+(\\\\[A-Za-z0-9_]+)+)\\\\MetaAutoML", get_config_property("wsl_metaautoml_path"), config_json["dataset_path"])
+                if os.getenv("LOCAL_EXECUTION") == "YES":
+                    if os.getenv("RUNNING_IN_WSL") == "YES":
+                        config_json["dataset_path"] = re.sub("[a-zA-Z]:\\\\([A-Za-z0-9_]+(\\\\[A-Za-z0-9_]+)+)\\\\MetaAutoML", os.getenv("WSL_METAAUTOML_PATH"), config_json["dataset_path"])
                         config_json["dataset_path"] = config_json["dataset_path"].replace("\\", "/")
 
                 df, test = data_loader(config_json)

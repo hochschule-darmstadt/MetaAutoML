@@ -5,10 +5,10 @@ import time, asyncio
 from AdapterUtils import *
 from AdapterBGRPC import *
 from threading import *
-from JsonUtil import get_config_property
 import pandas as pd
 from typing import Tuple
 
+from ThreadLock import ThreadLock
 
 
 class GAMAAdapterManager(AdapterManager):
@@ -18,10 +18,10 @@ class GAMAAdapterManager(AdapterManager):
         AdapterManager (AdapterManager): The base class providing the shared functionality for all adapters
     """
 
-    def __init__(self) -> None:
+    def __init__(self, lock: ThreadLock) -> None:
         """Initialize a new GAMAAdapterManager setting AutoML adapter specific variables
         """
-        super(GAMAAdapterManager, self).__init__()
+        super(GAMAAdapterManager, self).__init__(lock)
         self.__automl = None
         self.__loaded_training_id = None
         self._adapter_name = "gama"

@@ -10,6 +10,7 @@ from AdapterRuntimeManagerAgent import AdapterRuntimeManagerAgent
 from DataAnalysisAgent import DataAnalysisAgent
 from AdapterRuntimeManager import AdapterRuntimeManager
 from AdapterManagerAgent import AdapterManagerAgent
+from OntologyManager import OntologyManager
 
 class RepeatTimer(Timer):
     def run(self):
@@ -20,7 +21,7 @@ class StrategyController(object):
     """
     Strategy controller which supervises the blackboard.
     """,
-    def __init__(self, data_storage:DataStorage, request: "CreateTrainingRequest", explainable_lock: ThreadLock, timer_interval: int = 1, multi_fidelity_callback = None, multi_fidelity_level = 0) -> None:
+    def __init__(self, data_storage:DataStorage, request: "CreateTrainingRequest", explainable_lock: ThreadLock, ontology_client: OntologyManager,  timer_interval: int = 1, multi_fidelity_callback = None, multi_fidelity_level = 0) -> None:
         self._log = logging.getLogger('StrategyController')
         self._log.setLevel(logging.getLevelName(os.getenv("BLACKBOARD_LOGGING_LEVEL")))
         self.__is_running = False
@@ -31,8 +32,9 @@ class StrategyController(object):
         self.__data_storage: DataStorage = data_storage
         self.__request: "CreateTrainingRequest" = request
         self.__explainable_lock = explainable_lock
+        self.__ontology_client = ontology_client
         #Init training session
-        self.__adapter_runtime_manager = AdapterRuntimeManager(self.__data_storage, self.__request, self.__explainable_lock, multi_fidelity_callback = multi_fidelity_callback, multi_fidelity_level = multi_fidelity_level, strategy_controller=self)
+        self.__adapter_runtime_manager = AdapterRuntimeManager(self.__data_storage, self.__request, self.__explainable_lock, self.__ontology_client, multi_fidelity_callback = multi_fidelity_callback, multi_fidelity_level = multi_fidelity_level, strategy_controller=self)
         #Init Agents
         for adapter_manager in self.__adapter_runtime_manager.get_adapter_managers():
             AdapterManagerAgent(self.__blackboard, self, adapter_manager)

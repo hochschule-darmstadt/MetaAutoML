@@ -2,15 +2,22 @@
 @inject NavigationManager NavManager
 @inject IApiClient apiClient
 @inject IViewNotifier viewNotifier
+@inject IDialogService DialogService
 
+@if (Dataset != null)
+{
+    <MudStack Row="true" >
+        <MudButton Variant="Variant.Filled"
+                    Color="Color.Secondary"
+                    Size="Size.Small"
+                    OnClick="@(e => { NavManager.NavigateTo("/datasets/" + Dataset.Id + "/train"); })">@L["Train"]</MudButton>
 
-<MudMenu Icon="@Icons.Material.Filled.MoreVert">
-    @if (Dataset != null)
-    {
-        <MudMenuItem OnClick="@(e => { NavManager.NavigateTo("/datasets/" + Dataset.Id + "/train"); })">@L["Train"]</MudMenuItem>
-        <MudMenuItem OnClick="@DeleteDataset">@L["Delete"]</MudMenuItem>
-    }
-</MudMenu>
+        <MudButton Variant="Variant.Filled"
+                    Color="Color.Secondary"
+                    Size="Size.Small"
+                    OnClick="@DeleteDataset">@L["Delete"]</MudButton>
+    </MudStack>
+}
 
 @code {
     [Parameter]
@@ -22,16 +29,41 @@
     {
         try
         {
-            DeleteDatasetRequestDto datasetRequest = new DeleteDatasetRequestDto()
+            ApiResponseDto apiResponseModel = await apiClient.GetModels(new GetModelsRequestDto() { DatasetId = Dataset.Id });
+            if (apiResponseModel.IsSuccessStatusCode)
             {
-                DatasetId = Dataset.Id
-            };
+                int modelsCount = Newtonsoft.Json.JsonConvert.DeserializeObject<GetModelsResponseDto>(apiResponseModel.Result.ToString()).Models.Count;
+                if (modelsCount > 0)
+                {
+                    bool? confirmDelete = await DialogService.ShowMessageBox(
+                        title: "Confirm Deletion",
+                        message: $"The dataset '{Dataset.Name}' has {modelsCount} model(s) associated with it. Are you sure you want to delete it?",
+                        yesText: "Delete",
+                        cancelText: "Cancel",
+                        options: new DialogOptions {
+                            CloseOnEscapeKey = true,
+                            DisableBackdropClick = true
+                        }
+                    );
+
+                    if (confirmDelete != true)
+                    {
+                        return;
+                    }
+                }
+            }
+
+            DeleteDatasetRequestDto datasetRequest = new DeleteDatasetRequestDto()
+                {
+                    DatasetId = Dataset.Id
+                };
             ApiResponseDto apiResponse = await apiClient.DeleteDataset(datasetRequest);
 
             if (apiResponse.IsSuccessStatusCode)
             {
                 await OnDeleteCompleted.InvokeAsync();
                 viewNotifier.Show(apiResponse.Message, ViewNotifierType.Success, L["Operation Successful"]);
+                NavManager.NavigateTo(NavManager.Uri, forceLoad: true);
             }
             else
             {

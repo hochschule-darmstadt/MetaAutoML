@@ -58,7 +58,8 @@ class Managers(containers.DeclarativeContainer):
         AdapterRuntimeScheduler,
         data_storage=ressources.data_storage,
         explainable_lock=ressources.explainable_lock,
-        kubernetes_client=ressources.kubernetes_client
+        kubernetes_client=ressources.kubernetes_client,
+        ontology_client=ressources.ontology_manager
     )
     dataset_manager = providers.Factory(
         DatasetManager,

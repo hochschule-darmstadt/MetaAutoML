@@ -9,9 +9,9 @@
     width: 312px;
 }
 
-    .job-status ul {
-        flex: 1;
-    }
+.job-status ul {
+    flex: 1;
+}
 
 .dropzone {
     padding: 30px;
@@ -38,9 +38,9 @@
     width: 250px;
 }
 
-    .draggable:active {
-        cursor: grabbing;
-    }
+.draggable:active {
+    cursor: grabbing;
+}
 
 .dragging {
     cursor: grabbing;
@@ -57,18 +57,22 @@
     font-weight: bold;
 }
 
-    .last-updated small {
-        text-transform: uppercase;
-        color: #c4cbd4;
-        font-size: 11px;
-    }
+.last-updated small {
+    text-transform: uppercase;
+    color: #c4cbd4;
+    font-size: 11px;
+}
 
-h1, h2, h3 {
+h1,
+h2,
+h3 {
     color: var(--mud-palette-primary-darken);
 }
+
 p {
     margin-bottom: 12px;
 }
+
 a {
     color: var(--mud-palette-primary-lighten);
 }
@@ -92,3 +96,43 @@ a {
     font-size: clamp(0.7rem, -0.875rem + 2.4vw, 1rem);
 }
 
+.conf-table {
+    margin-bottom: 25px;
+
+}
+
+
+
+.full-width {
+    display: flex;
+    justify-content: center;
+    margin-top: 40px;
+}
+
+.full-width .mud-button {
+    width: 500px;
+    margin-left: 240px;
+}
+
+@media (max-width: 600px) {
+    .full-width {
+        padding: 10px;
+    }
+}
+
+@media (min-width: 601px) and (max-width: 960px) {
+    .full-width .mud-button {
+        max-width: 300px;
+    }
+}
+
+@media (min-width: 961px) {
+    .full-width .mud-button {
+        max-width: 350px;
+    }
+}
+
+.mud-select-item-auto-width {
+    min-width: 150px;
+    width: auto;
+}

@@ -62,6 +62,8 @@ class AdapterManager(Thread):
         Returns:
             str: The AutoML adapter name
         """
+        if(self.__request.configuration.task == ':tabular_clustering'):
+            return self.__automl + self.__request.configuration.parameters[':include_approach'].values[0]
         return self.__automl
 
     def get_training_id(self) -> str:
@@ -123,6 +125,7 @@ class AdapterManager(Thread):
         request.training_id = self.__training_id
         request.dataset_id = str(self.__dataset["_id"])
         request.user_id = self.__request.user_id
+        request.model_id = self.__model_id
         if hasattr(self.__request, 'sampled_dataset_path'):
         #if self.__request.sampled_dataset_path != None:
             request.dataset_path = self.__request.sampled_dataset_path

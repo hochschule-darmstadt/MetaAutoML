@@ -8,7 +8,6 @@ from rdflib.plugins.sparql import prepareQuery
 from rdflib.namespace import SKOS
 
 import json
-from JsonUtil import get_config_property
 
 ML_ONTOLOGY_NAMESPACE = "http://h-da.de/ml-ontology/"
 RDF_NAMESPACE = "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
@@ -30,7 +29,7 @@ class OntologyManager(object):
         """
         self.__log = logging.getLogger('OntologyManager')
         #self.__log.setLevel(logging.getLevelName(os.getenv("ONTOLOGY_LOGGING_LEVEL")))
-        ontologyPath = get_config_property('ontology_path')
+        ontologyPath = os.getenv("ONTOLOGY_PATH")
         self.__ontologyGraph = rdflib.Graph()
         self.__ontologyGraph.parse(ontologyPath, format='turtle')
         self.__log.info("__init__: new Ontology Manager created...")

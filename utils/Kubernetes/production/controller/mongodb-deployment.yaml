@@ -25,7 +25,7 @@ spec:
                 values:
                 - oma-ml-1
       containers:
-      - image: mongo
+      - image: mongo:7.0.12-jammy
         name: mongodb
         command: ['mongod', '--bind_ip', '0.0.0.0']
         ports:

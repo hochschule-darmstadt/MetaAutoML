@@ -7,6 +7,7 @@
 @using Newtonsoft.Json
 @inject IApiClient apiClient
 @inject IJSRuntime JSRuntime
+@inject IDialogService DialogService
 
 <TopSection>
     <MudBreadcrumbs Items="_breadcrumbs" Class="mudbreadcrumbs"></MudBreadcrumbs>
@@ -57,12 +58,12 @@
                     </MudItem>
                     <MudItem xs="6" Style="margin: auto; width: 50%;">
                         <div style="position: relative; width: 90%; overflow: hidden; padding-top: 56.25%;">
-                            <iframe style=" position: absolute; top: 0; left: 0; bottom: 0; right: 0; width: 100%; height: 100%; border: none;"
-                                    src="@($"_content/BlazorBoilerplate.Theme.MudBlazor/images/HelpVideo.mp4")"
-                                    frameborder="1"
-                                    allowfullscreen></iframe>
+                            <video style="position: absolute; top: 0; left: 0; bottom: 0; right: 0; width: 100%; height: 100%; border: none;"
+                                controls>
+                                <source src="_content/BlazorBoilerplate.Theme.MudBlazor/images/HelpVideo.mp4" type="video/mp4">
+                                Your browser does not support the video tag.
+                            </video>
                         </div>
-
                     </MudItem>
                 </MudGrid>
             </MudCard>
@@ -98,7 +99,13 @@
                                         </MudText>
                                     </MudItem>
                                     <MudItem xs="6">
-                                        <img style=" width: 90%; margin: 3rem; padding-top: 5rem; padding-right: 2rem;" src="@(section.GIF)" />
+                                        <video style="width: 90%; margin: 3rem; padding-top: 5rem; padding-right: 2rem; cursor: pointer;"
+                                            controls
+                                            loop
+                                            autoplay>
+                                            <source src="@(section.Video)">
+                                            Your browser does not support the video tag.
+                                        </video>
                                     </MudItem>
                                 </MudGrid>
                             }
@@ -135,7 +142,13 @@
                                             </MudText>
                                         </MudItem>
                                         <MudItem xs="6">
-                                            <img style=" width: 90%; margin: 3rem; padding-right: 2rem;" src="@(section.GIF)" />
+                                            <video style="width: 90%; margin: 3rem; padding-right: 2rem; cursor: pointer;"
+                                            controls
+                                            loop
+                                            autoplay>
+                                            <source src="@(section.Video)">
+                                            Your browser does not support the video tag.
+                                        </video>
                                         </MudItem>
                                     </MudGrid>
                                 }
@@ -144,7 +157,13 @@
                                     <MudGrid Style="border-bottom-style: inset; border-bottom-width: 1px; padding-bottom: 2rem;" id="@(section.Anchor)">
                                         <MudItem xs="6">
                                             <MudText Style="margin-left: 2rem; padding-top: 4rem;" Typo="Typo.h6" Color="Color.Secondary">@(section.Headline)</MudText>
-                                            <img style=" width: 90%; margin: 2rem; padding-right: 2rem;" src="@(section.GIF)" />
+                                            <video style="width: 90%; margin: 2rem; padding-right: 2rem; cursor: pointer;"
+                                            controls
+                                            loop
+                                            autoplay>
+                                            <source src="@(section.Video)">
+                                            Your browser does not support the video tag.
+                                        </video>
                                         </MudItem>
                                         <MudItem xs="6">
                                             <MudText Style="margin-left:2rem;margin-top:8rem;" Typo="Typo.body2">
@@ -176,8 +195,6 @@
 </MudStack>
 
 <UserTour></UserTour>
-
-
 
 @code {
     [Parameter]
@@ -244,14 +261,11 @@
 
 
     }
-
     private string GetAnchorFromUrl()
     {
         var uri = new Uri(navigationManager.Uri);
         return uri.Fragment.TrimStart('#');
     }
-
-
     private void StartTour()
     {
         TourService.navigateToNextPage("firstStep", navigationManager.ToAbsoluteUri(" ").AbsoluteUri);
@@ -273,19 +287,4 @@
         this.currentPanelIntroduction = !this.currentPanelIntroduction;
 
     }
-
-
-
-
-
-
 }
-
-
-
-
-
-
-
-
-

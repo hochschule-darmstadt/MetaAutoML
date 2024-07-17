@@ -7,7 +7,6 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
 from sklearn.impute import SimpleImputer
 from _collections_abc import dict_items
-from JsonUtil import get_config_property
 from AdapterBGRPC import *
 from sklearn.model_selection import train_test_split
 import os
@@ -215,8 +214,11 @@ def feature_preparation(X: pd.DataFrame, features: dict_items, datetime_format: 
     if is_prediction == True:
         y = pd.Series()
     else:
-        y = X[target]
-        X.drop(target, axis=1, inplace=True)
+        if is_target_found:
+            y = X[target]
+            X.drop(target, axis=1, inplace=True)
+        else:
+            y = None  # No target column found, useful for clustering
 
 
     return X, y
@@ -517,6 +519,6 @@ def save_configuration_in_json(configuration: dict):
         configuration (dict): The current adapter process configuration
     """
     configuration['dataset_configuration'] = json.dumps(configuration['dataset_configuration'])
-    with open(os.path.join(configuration['job_folder_location'], get_config_property("job-file-name")), "w+") as f:
+    with open(os.path.join(configuration['job_folder_location'], os.getenv("JOB_FILE_NAME")), "w+") as f:
         json.dump(configuration, f)
     configuration["dataset_configuration"] = json.loads(configuration["dataset_configuration"])
