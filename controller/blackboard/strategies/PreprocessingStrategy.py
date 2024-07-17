@@ -274,7 +274,7 @@ class PreprocessingStrategyController(IAbstractStrategy):
 
     def do_finish_preprocessing(self, state: dict, blackboard: Blackboard, controller: StrategyController):
         if self.global_multi_fidelity_level != 0:
-            self._log.info(f'do_finish_preprocessing: Finished data preparation, advancing to phase "running"..')
+            self._log.info(f'do_finish_preprocessing: Finished data preparation, advancing to phase "training"..')
             controller.set_phase('pre_training')
             controller.disable_strategy('preprocessing.finish_preprocessing')
 

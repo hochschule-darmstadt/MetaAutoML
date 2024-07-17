@@ -400,6 +400,14 @@ class ControllerServiceManager(ControllerServiceBase):
 
             result.strategies.append(
                 Strategy(
+                'evaluation.optimum_strategy',
+                'Optimum Strategy',
+                'The "Optimum Strategy" iteratively explores various model or adapter combinations until no further improvement can be achieved, effectively maximizing the training process.'
+                )
+            )
+
+            result.strategies.append(
+                Strategy(
                 'pre_training.multi_fidelity',
                 'Multi Fidelity',
                 'This strategy will run all adapters with only a small part of the data. Then it will train the best half solutions with more data again and so on, until one last adapter is trained with the full data.'

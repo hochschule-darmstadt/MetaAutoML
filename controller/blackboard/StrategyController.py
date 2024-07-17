@@ -34,7 +34,7 @@ class StrategyController(object):
         self.__explainable_lock = explainable_lock
         self.__ontology_client = ontology_client
         #Init training session
-        self.__adapter_runtime_manager = AdapterRuntimeManager(self.__data_storage, self.__request, self.__explainable_lock, self.__ontology_client, multi_fidelity_callback = multi_fidelity_callback, multi_fidelity_level = multi_fidelity_level)
+        self.__adapter_runtime_manager = AdapterRuntimeManager(self.__data_storage, self.__request, self.__explainable_lock, self.__ontology_client, multi_fidelity_callback = multi_fidelity_callback, multi_fidelity_level = multi_fidelity_level, strategy_controller=self)
         #Init Agents
         for adapter_manager in self.__adapter_runtime_manager.get_adapter_managers():
             AdapterManagerAgent(self.__blackboard, self, adapter_manager)
@@ -63,10 +63,13 @@ class StrategyController(object):
 
         from PreprocessingStrategy import PreprocessingStrategyController
         from blackboard.strategies.PreTrainingStrategy import PreTrainingStrategyController
+        from EvaluationStrategy import EvaluationStrategy
         self.strategies.append(PreprocessingStrategyController(self))
         self.strategies.append(PreTrainingStrategyController(self))
+        self.strategies.append(EvaluationStrategy(self))
         self.on_event('phase_updated', self.__adapter_runtime_manager.blackboard_phase_update_handler)
         self.set_phase('preprocessing')
+        #self.set_phase('running')
         self.start_timer()
 
     def get_adapter_runtime_manager(self) -> AdapterRuntimeManager:

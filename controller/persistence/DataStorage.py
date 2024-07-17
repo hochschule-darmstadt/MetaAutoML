@@ -154,7 +154,7 @@ class DataStorage:
         df.to_csv(csv_file, index=False)
         os.remove(excel_file)
         return file_name
-
+  
 
     def create_dataset(self, user_id: str, file_name: str, type: str, name: str, encoding: str) -> str:
         """Create new dataset record and move dataset from upload folder to final path
@@ -535,8 +535,9 @@ class DataStorage:
 #region
 
     def create_training(self, user_id: str, training_details: 'dict[str, object]') -> str:
-        """Create new training record inside MongoDB
-
+        """
+        Create new training record inside MongoDB
+        
         Args:
             user_id (str): Unique user id saved within the MS Sql database of the frontend
             training_details (dict[str, object]): Dictonary of training record fields (see data schema in WIKI for more information)
