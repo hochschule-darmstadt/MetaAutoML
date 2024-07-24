@@ -8,6 +8,7 @@ using BlazorBoilerplate.Shared.Dto.Prediction;
 using BlazorBoilerplate.Shared.Dto.Training;
 using BlazorBoilerplate.Shared.Models;
 using Breeze.Sharp;
+using Microsoft.AspNetCore.Mvc;
 using System.Linq.Expressions;
 
 namespace BlazorBoilerplate.Shared.Interfaces
@@ -37,6 +38,8 @@ namespace BlazorBoilerplate.Shared.Interfaces
 
         #region OMA-ML DATASET MESSAGES
         Task<ApiResponseDto> UploadDataset(UploadDatasetRequestDto request);
+        Task<ApiResponseDto> UploadFromDisk(MultipartFormDataContent request);
+        Task<ApiResponseDto> UploadFromUrl(UploadDatasetRequestDto request);
         Task<ApiResponseDto> GetDatasets(GetDatasetsRequestDto reuest);
         Task<ApiResponseDto> GetDataset(GetDatasetRequestDto request);
         Task<ApiResponseDto> GetDatasetPreview(GetDatasetPreviewRequestDto request);

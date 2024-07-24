@@ -1,4 +1,4 @@
-﻿using BlazorBoilerplate.Server.Services;
+using BlazorBoilerplate.Server.Services;
 using Serilog;
 
 namespace BlazorBoilerplate.Server
@@ -45,8 +45,13 @@ namespace BlazorBoilerplate.Server
             {
                 webBuilder.UseConfiguration(new ConfigurationBuilder()
                     .AddCommandLine(args)
-                    .Build());
-                webBuilder.UseStartup<Startup>();
+                    .Build())
+                .ConfigureKestrel(options =>
+                {
+                    // Configure Kestrel server to handle large file uploads
+                    options.Limits.MaxRequestBodySize = 500 * 1024 * 1024; // 500 MB
+                })
+                .UseStartup<Startup>();
             })
             .UseSerilog();
     }

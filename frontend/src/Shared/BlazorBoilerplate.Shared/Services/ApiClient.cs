@@ -10,8 +10,10 @@ using BlazorBoilerplate.Shared.Extensions;
 using BlazorBoilerplate.Shared.Interfaces;
 using BlazorBoilerplate.Shared.Models;
 using Breeze.Sharp;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System.Linq.Expressions;
+using System.Text.Json;
 
 namespace BlazorBoilerplate.Shared.Services
 {
@@ -79,6 +81,21 @@ namespace BlazorBoilerplate.Shared.Services
         {
             return await httpClient.PostJsonAsync<ApiResponseDto>("api/Dataset/UploadDataset", request);
         }
+
+
+        public async Task<ApiResponseDto> UploadFromDisk(MultipartFormDataContent request)
+        {
+            var response = await httpClient.PostAsync("api/Dataset/UploadFromDisk", request);
+            var responseString = await response.Content.ReadAsStringAsync();
+            return JsonSerializer.Deserialize<ApiResponseDto>(responseString, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+        }
+        public async Task<ApiResponseDto> UploadFromUrl(UploadDatasetRequestDto request)
+        {
+            return await httpClient.PostJsonAsync<ApiResponseDto>("api/Dataset/UploadFromUrl", request);
+        }
+
+
         public async Task<ApiResponseDto> GetDatasets(GetDatasetsRequestDto request)
         {
             return await httpClient.PostJsonAsync<ApiResponseDto>("api/Dataset/GetDatasets", request);

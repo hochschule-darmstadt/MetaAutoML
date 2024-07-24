@@ -67,7 +67,6 @@ namespace BlazorBoilerplate.Server.Managers
             GetDatasetTypesResponseDto response = new GetDatasetTypesResponseDto();
             try
             {
-                GetSearchRelevantData();
                 var reply = _client.GetDatasetTypes(new GetDatasetTypesRequest());
                 response.DatasetTypes = await _cacheManager.GetObjectInformationList(reply.DatasetTypes.ToList());
                 return new ApiResponse(Status200OK, null, response);

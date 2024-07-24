@@ -7,6 +7,9 @@ from CsvManager import CsvManager
 from DataSetAnalysisManager import DataSetAnalysisManager
 from ThreadLock import ThreadLock
 
+from concurrent.futures import ThreadPoolExecutor
+import asyncio
+
 class UserManager:
     """The UserManager provides all functionality related to a User and not a specific data schema objects
     """
@@ -22,6 +25,12 @@ class UserManager:
         self.__dataset_analysis_lock = dataset_analysis_lock
         self.__log = logging.getLogger('UserManager')
         self.__log.setLevel(logging.getLevelName(os.getenv("SERVER_LOGGING_LEVEL")))
+
+    async def run_dataset_analysis(self, dataset_id, user_id):
+        dataset_analysis = DataSetAnalysisManager(dataset_id, user_id, self.__data_storage)
+        loop = asyncio.get_event_loop()
+        with ThreadPoolExecutor() as executor:
+            await loop.run_in_executor(executor, dataset_analysis.run_analysis)
 
     def create_new_user(
         self, create_new_user_request: "CreateNewUserRequest"
@@ -47,8 +56,7 @@ class UserManager:
             CsvManager.copy_default_dataset(user_id)
             dataset_id: str = self.__data_storage.create_dataset(user_id, "titanic_train.csv", ":tabular", "Titanic", "utf-8")
             self.__log.debug("create_dataset: executing dataset analysis...")
-            dataset_analysis = DataSetAnalysisManager(dataset_id, user_id, self.__data_storage, self.__dataset_analysis_lock)
-            dataset_analysis.start()
+            asyncio.create_task(self.run_dataset_analysis(dataset_id, user_id))
             return CreateNewUserResponse(user_id)
 
     def get_home_overview_information(

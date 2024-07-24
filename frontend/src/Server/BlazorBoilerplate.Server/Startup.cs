@@ -61,6 +61,8 @@ using static IdentityModel.JwtClaimTypes;
 using static IdentityServer4.IdentityServerConstants;
 using static Microsoft.AspNetCore.Http.StatusCodes;
 using GTour;
+using BlazorBoilerplate.Server.Hubs;
+using Microsoft.AspNetCore.Http.Features;
 
 namespace BlazorBoilerplate.Server
 {
@@ -750,6 +752,12 @@ namespace BlazorBoilerplate.Server
                 foreach (var service in services)
                     Log.Logger.Debug($"\n\tService: {service.ServiceType.FullName}\n\tLifetime: {service.Lifetime}\n\tInstance: {service.ImplementationType?.FullName}");
             }
+
+            services.Configure<FormOptions>(options =>
+            {
+                options.MultipartBodyLengthLimit = 500 * 1024 * 1024; // 500 MB
+            });
+
         }
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
@@ -846,6 +854,7 @@ namespace BlazorBoilerplate.Server
 
                 // new SignalR endpoint routing setup
                 endpoints.MapHub<Hubs.ChatHub>(Constants.HubPaths.Chat);
+                endpoints.MapHub<UploadHub>(Constants.HubPaths.Upload);
             });
 
             Program.Sync.Release();

@@ -388,17 +388,21 @@ class AdapterManager(Thread):
             if config["configuration"]["task"] == ":tabular_classification" or config["configuration"]["task"] == ":text_classification" :
                 explainer = ClassifierExplainer(pipeline_model, test.drop(target, axis=1), test[target])
                 dashboard = ExplainerDashboard(explainer)
-                dashboard.save_html(os.path.join(dashboard_folder_location, "binary_dashboard.html"))
-                dashboard.explainer.dump(os.path.join(dashboard_folder_location, "binary_dashboard.dill"))
+                # dashboard.save_html(os.path.join(dashboard_folder_location, "binary_dashboard.html"))
+                # dashboard.explainer.dump(os.path.join(dashboard_folder_location, "binary_dashboard.dill"))
+
+                dashboard.to_yaml(os.path.join(dashboard_folder_location, "dashboard.yaml"), dump_explainer=True, explainerfile_absolute_path=os.path.join(dashboard_folder_location, "dashboard.joblib"))
 
             else :
                 dashboard = ExplainerDashboard(RegressionExplainer(pipeline_model, test.drop(target, axis=1), test[target]))
-                dashboard.save_html(os.path.join(dashboard_folder_location, "binary_dashboard.html"))
-                dashboard.explainer.dump(os.path.join(dashboard_folder_location, "binary_dashboard.dill"))
+                # dashboard.save_html(os.path.join(dashboard_folder_location, "binary_dashboard.html"))
+                # dashboard.explainer.dump(os.path.join(dashboard_folder_location, "binary_dashboard.dill"))
+                dashboard.to_yaml(os.path.join(dashboard_folder_location, "dashboard.yaml"), dump_explainer=True, explainerfile_absolute_path=os.path.join(dashboard_folder_location, "dashboard.joblib"))
         except Exception as e:
             print(f"error: {e}")
         print(f"created dashboard")
-        dashboard_response.path = os.path.join(dashboard_folder_location, "binary_dashboard.dill")
+        # dashboard_response.path = os.path.join(dashboard_folder_location, "binary_dashboard.dill")
+        dashboard_response.path = dashboard_folder_location
         dashboard_response.compatible = True
 
         return dashboard_response

@@ -1212,8 +1212,17 @@ msgid "started"
 msgstr "Training started"
 
 msgctxt "TrainingTimeline"
-msgid "preprocessing"
-msgstr "Preprocessing"
+msgid "pre_training"
+msgstr "pre-training"
+
+msgctxt "TrainingTimeline"
+msgid "training"
+msgstr "training"
+
+msgctxt "TrainingTimeline"
+msgid "evaluation"
+msgstr "evaluation"
+
 
 msgctxt "TrainingTimeline"
 msgid "running"
@@ -1756,7 +1765,7 @@ msgid "Could not read dataset successfully, change configuration"
 msgstr "Could not read dataset successfully, change configuration."
 
 msgctxt "Global"
-msgid "Search by name, status, lib or AutoML system"
+msgid "Search by name, status, lib, AutoML system"
 msgstr "Search by name, status, lib, AutoML system"
 
 msgctxt "Global"
@@ -2053,3 +2062,27 @@ msgstr "Predictions (20 sample rows)"
 msgctxt "Global"
 msgid "Add Test Dataset"
 msgstr "Add Test Dataset"
+
+msgctxt "Global"
+msgid "Create a new Training"
+msgstr "Create a new Training"
+
+msgctxt "Global"
+msgid "Open dashboard"
+msgstr "Open dashboard"
+
+msgctxt "Global"
+msgid "Explainable AI"
+msgstr "Explainable AI"
+
+msgctxt "Global"
+msgid "Detail output of the AutoML solution"
+msgstr "Detail output of the AutoML solution"
+
+msgctxt "Global"
+msgid "Save"
+msgstr "Save"
+
+msgctxt "Global"
+msgid "File is too large. Please use a URL for files larger than 500MB"
+msgstr "File is too large. Please use a URL for files larger than 500MB"

@@ -1,6 +1,7 @@
 using BlazorBoilerplate.Infrastructure.Server.Models;
 using BlazorBoilerplate.Shared.Dto.Dataset;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +12,10 @@ namespace BlazorBoilerplate.Infrastructure.Server
 {
     public interface IDatasetManager
     {
-        Task<ApiResponse> UploadDataset(UploadDatasetRequestDto file);
+        //Task<ApiResponse> UploadDataset(UploadDatasetRequestDto file);
+
+        Task<ApiResponse> UploadFromDisk(UploadDatasetRequestDto request);
+        Task<ApiResponse> UploadFromUrl(UploadDatasetRequestDto request);
         Task<ApiResponse> GetDatasets(GetDatasetsRequestDto request);
         Task<ApiResponse> GetDataset(GetDatasetRequestDto dataset);
         Task<ApiResponse> GetDatasetPreview(GetDatasetPreviewRequestDto dataset);

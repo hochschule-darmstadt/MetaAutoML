@@ -92,12 +92,16 @@ class AdapterScheduler:
         for port in range(int(self.__explainer_dashboard_port_start), int(self.__explainer_dashboard_port_end)):
             if self.__explainer_dashboard_managers.get(port, "") == "":
                 dashboard_port = port
+                break
+
         if dashboard_port == "":
             print("no free port")
             return StartExplainerDashboardResponse()
+
         explainer_dashboard_manager = ExplainerDashboardManager(int(dashboard_port), start_explainer_dashboard_request.session_id)
+
         result = explainer_dashboard_manager.start_explainer_dashboard(start_explainer_dashboard_request)
-        explainer_dashboard_manager.start()
+        #explainer_dashboard_manager.start()
         self.__explainer_dashboard_managers[dashboard_port] = explainer_dashboard_manager
         return result
 
@@ -105,8 +109,9 @@ class AdapterScheduler:
         print(f"Requesting stop for XAI dashboard {stop_explainer_dashboard_request.session_id}")
         for key, val in self.__explainer_dashboard_managers.items():
             if val.get_session_id() == stop_explainer_dashboard_request.session_id:
-                self.__explainer_dashboard_managers[key].terminate()
-                self.__explainer_dashboard_managers[key].join()
+                self.__explainer_dashboard_managers[key].stop_explainer_dashboard()
+                #self.__explainer_dashboard_managers[key].terminate()
+                #self.__explainer_dashboard_managers[key].join()
                 del self.__explainer_dashboard_managers[key]
                 return StopExplainerDashboardResponse()
         return StopExplainerDashboardResponse()

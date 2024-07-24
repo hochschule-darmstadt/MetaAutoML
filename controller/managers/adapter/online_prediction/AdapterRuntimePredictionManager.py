@@ -38,6 +38,7 @@ class AdapterRuntimePredictionManager:
             ":tpot":          ["TPOT_SERVICE_HOST", "TPOT_SERVICE_PORT"],
             ":gama":            ["GAMA_SERVICE_HOST", "GAMA_SERVICE_PORT"],
             ":lama":            ["LAMA_SERVICE_HOST", "LAMA_SERVICE_PORT"],
+            ":h2o_automl":      ["H2O_SERVICE_HOST", "H2O_SERVICE_PORT"],
         }
         self.__adapters: list[AdapterPredictionManager] = []
         return

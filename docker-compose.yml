@@ -101,6 +101,7 @@ services:
           - EXPLAINER_DASHBOARD_PORT_START=6110
           - EXPLAINER_DASHBOARD_PORT_END=6119
           - DOCKER_COMPOSE=YES
+          - DOCKER_OR_DEBUG_XAI_DASHBOARD_IP=172.17.208.1
           - ADAPTER_NAME=h2o
           - JOB_FILE_NAME=h2o-job.json
           - EXPORT_ZIP_FILE_NAME=h2o-export
@@ -134,6 +135,7 @@ services:
         - EXPLAINER_DASHBOARD_PORT_START=6000
         - EXPLAINER_DASHBOARD_PORT_END=6009
         - DOCKER_COMPOSE=YES
+        - DOCKER_OR_DEBUG_XAI_DASHBOARD_IP=172.17.208.1
         - ADAPTER_NAME=autokeras
         - JOB_FILE_NAME=autokeras-job.json
         - EXPORT_ZIP_FILE_NAME=autokeras-export
@@ -167,6 +169,7 @@ services:
         - EXPLAINER_DASHBOARD_PORT_START=6010
         - EXPLAINER_DASHBOARD_PORT_END=6019
         - DOCKER_COMPOSE=YES
+        - DOCKER_OR_DEBUG_XAI_DASHBOARD_IP=172.17.208.1
         - ADAPTER_NAME=mljar
         - JOB_FILE_NAME=mljar-job.json
         - EXPORT_ZIP_FILE_NAME=mljar-export
@@ -226,6 +229,7 @@ services:
         - EXPLAINER_DASHBOARD_PORT_START=6030
         - EXPLAINER_DASHBOARD_PORT_END=6039
         - DOCKER_COMPOSE=YES
+        - DOCKER_OR_DEBUG_XAI_DASHBOARD_IP=172.17.208.1
         - ADAPTER_NAME=flaml
         - JOB_FILE_NAME=flaml-job.json
         - EXPORT_ZIP_FILE_NAME=flaml-export
@@ -259,6 +263,7 @@ services:
         - EXPLAINER_DASHBOARD_PORT_START=6040
         - EXPLAINER_DASHBOARD_PORT_END=6049
         - DOCKER_COMPOSE=YES
+        - DOCKER_OR_DEBUG_XAI_DASHBOARD_IP=172.17.208.1
         - ADAPTER_NAME=autogluon
         - JOB_FILE_NAME=autogluon-job.json
         - EXPORT_ZIP_FILE_NAME=autogluon-export
@@ -330,6 +335,7 @@ services:
         - EXPLAINER_DASHBOARD_PORT_START=6060
         - EXPLAINER_DASHBOARD_PORT_END=6069
         - DOCKER_COMPOSE=YES
+        - DOCKER_OR_DEBUG_XAI_DASHBOARD_IP=172.17.208.1
         - ADAPTER_NAME=evalml
         - JOB_FILE_NAME=evalml-job.json
         - EXPORT_ZIP_FILE_NAME=evalml-export
@@ -363,6 +369,7 @@ services:
         - EXPLAINER_DASHBOARD_PORT_START=6070
         - EXPLAINER_DASHBOARD_PORT_END=6079
         - DOCKER_COMPOSE=YES
+        - DOCKER_OR_DEBUG_XAI_DASHBOARD_IP=172.17.208.1
         - ADAPTER_NAME=pycaret
         - JOB_FILE_NAME=pycaret-job.json
         - EXPORT_ZIP_FILE_NAME=pycaret-export
@@ -396,6 +403,7 @@ services:
         - EXPLAINER_DASHBOARD_PORT_START=6080
         - EXPLAINER_DASHBOARD_PORT_END=6089
         - DOCKER_COMPOSE=YES
+        - DOCKER_OR_DEBUG_XAI_DASHBOARD_IP=172.17.208.1
         - ADAPTER_NAME=tpot
         - JOB_FILE_NAME=tpot-job.json
         - EXPORT_ZIP_FILE_NAME=tpot-export
@@ -429,6 +437,7 @@ services:
         - EXPLAINER_DASHBOARD_PORT_START=6090
         - EXPLAINER_DASHBOARD_PORT_END=6099
         - DOCKER_COMPOSE=YES
+        - DOCKER_OR_DEBUG_XAI_DASHBOARD_IP=172.17.208.1
         - ADAPTER_NAME=gama
         - JOB_FILE_NAME=gama-job.json
         - EXPORT_ZIP_FILE_NAME=gama-export
@@ -460,6 +469,7 @@ services:
         - EXPLAINER_DASHBOARD_PORT_START=6100
         - EXPLAINER_DASHBOARD_PORT_END=6109
         - DOCKER_COMPOSE=YES
+        - DOCKER_OR_DEBUG_XAI_DASHBOARD_IP=172.17.208.1
         - ADAPTER_NAME=lama
         - JOB_FILE_NAME=lama-job.json
         - EXPORT_ZIP_FILE_NAME=lama-export

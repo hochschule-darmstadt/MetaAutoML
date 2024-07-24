@@ -6,6 +6,8 @@ from LongitudinalDataManager import LongitudinalDataManager
 from DataSetAnalysisManager import DataSetAnalysisManager
 from ThreadLock import ThreadLock
 
+from concurrent.futures import ThreadPoolExecutor
+import asyncio
 
 
 class DatasetManager:
@@ -24,6 +26,13 @@ class DatasetManager:
         self.__log = logging.getLogger('DatasetManager')
         self.__log.setLevel(logging.getLevelName(os.getenv("SERVER_LOGGING_LEVEL")))
 
+
+    async def run_dataset_analysis(self, dataset_id, user_id):
+        dataset_analysis = DataSetAnalysisManager(dataset_id, user_id, self.__data_storage)
+        loop = asyncio.get_event_loop()
+        with ThreadPoolExecutor() as executor:
+            await loop.run_in_executor(executor, dataset_analysis.run_analysis)
+
     def create_dataset(
         self, create_dataset_request: "CreateDatasetRequest"
     ) -> "CreateDatasetResponse":
@@ -40,8 +49,8 @@ class DatasetManager:
         self.__log.debug(f"create_dataset: new dataset saved id: {dataset_id}")
         # If the dataset is a certain type the dataset can be analyzed.
         self.__log.debug("create_dataset: executing dataset analysis...")
-        dataset_analysis = DataSetAnalysisManager(dataset_id, create_dataset_request.user_id, self.__data_storage, self.__dataset_analysis_lock)
-        dataset_analysis.start()
+
+        asyncio.create_task(self.run_dataset_analysis(dataset_id, create_dataset_request.user_id))
         response = CreateDatasetResponse()
         return response
 
