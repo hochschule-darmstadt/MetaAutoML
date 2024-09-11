@@ -187,7 +187,7 @@ class DatasetManager:
         self.__data_storage.update_dataset(set_dataset_configuration_request.user_id, set_dataset_configuration_request.dataset_id, { "file_configuration": json.loads(set_dataset_configuration_request.file_configuration) })
         self.__log.debug(f"set_dataset_file_configuration: executing dataset analysis for dataset: {set_dataset_configuration_request.dataset_id} for user {set_dataset_configuration_request.user_id}")
         dataset_analysis = DataSetAnalysisManager(set_dataset_configuration_request.dataset_id, set_dataset_configuration_request.user_id, self.__data_storage, self.__dataset_analysis_lock)
-        dataset_analysis.start()
+        dataset_analysis.run_analysis()
         return SetDatasetConfigurationResponse()
 
     def set_dataset_column_schema_configuration(

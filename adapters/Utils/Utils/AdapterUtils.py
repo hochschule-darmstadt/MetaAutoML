@@ -391,7 +391,7 @@ def compute_regression_metrics(y_should: pd.Series, y_is: pd.Series) -> dict:
         ":max_error": float(max_error(y_should, y_is)),
         ":mean_absolute_error": float(mean_absolute_error(y_should, y_is)),
         ":mean_squared_error": float(mean_squared_error(y_should, y_is, squared=True)),
-        ":rooted_mean_squared_error": float(mean_squared_error(y_should, y_is, squared=False)),
+        ":root_mean_squared_error": float(mean_squared_error(y_should, y_is, squared=False)),
         ":median_absolute_error": float(median_absolute_error(y_should, y_is)),
         ":r2": float(r2_score(y_should, y_is)),
         ":mean_absolute_percentage_error": float(mean_absolute_percentage_error(y_should, y_is)),
@@ -402,7 +402,7 @@ def compute_regression_metrics(y_should: pd.Series, y_is: pd.Series) -> dict:
         ":d2_pinball_score": float(d2_pinball_score(y_should, y_is)),
         ":d2_tweedie_score": float(d2_tweedie_score(y_should, y_is)),
         ":mean_squared_log_error": float(mean_squared_log_error(y_should, y_is, squared=True)),
-        ":rooted_mean_squared_log_error": float(mean_squared_log_error(y_should, y_is, squared=False))
+        ":root_mean_squared_log_error": float(mean_squared_log_error(y_should, y_is, squared=False))
         })
     except Exception as e:
         print("computing D2 scores failed")

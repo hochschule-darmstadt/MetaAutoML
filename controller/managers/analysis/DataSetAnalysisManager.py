@@ -125,11 +125,16 @@ class DataSetAnalysisManager:
         #duplicate_features = DropDuplicateFeatures()
         #dataframe = duplicate_features.fit_transform(dataframe)
         numerical_columns = dataframe.select_dtypes(include=['number']).columns
-        if len(numerical_columns) >= 1:
-            correlated_features = SmartCorrelatedSelection()
-            dataframe = correlated_features.fit_transform(dataframe)
-        new_columns = dataframe.columns.tolist()
-        return [col for col in old_columns if col not in new_columns]
+        try:
+            if len(numerical_columns) >= 1:
+                correlated_features = SmartCorrelatedSelection()
+                dataframe = correlated_features.fit_transform(dataframe)
+        except Exception:
+            #TODO some dataset have features but then the corrlatedsection doesnt have any and crashes
+            pass
+        finally:
+            new_columns = dataframe.columns.tolist()
+            return [col for col in old_columns if col not in new_columns]
 
     @staticmethod
     def __detect_outliers(dataset, schema) -> dict:
