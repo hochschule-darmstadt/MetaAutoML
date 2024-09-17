@@ -8,16 +8,6 @@ using System.Net;
 using UtfUnknown;
 using static Microsoft.AspNetCore.Http.StatusCodes;
 using System.IO.Compression;
-using Microsoft.AspNetCore.SignalR;
-using System.Net.Http;
-using System.Security.Policy;
-using BlazorBoilerplate.Server.Hubs;
-using Microsoft.AspNetCore.Mvc;
-using System.Text;
-using System;
-using NuGet.Protocol.Plugins;
-using System.Text.Json;
-using System.Text.RegularExpressions;
 
 namespace BlazorBoilerplate.Server.Managers
 {
@@ -31,305 +21,104 @@ namespace BlazorBoilerplate.Server.Managers
         private readonly ControllerService.ControllerServiceClient _client;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ICacheManager _cacheManager;
-        private readonly IHttpClientFactory _httpClientFactory;
-        private readonly IHubContext<UploadHub> _uploadHubContext;
-        public DatasetManager(ApplicationDbContext dbContext, ILogger<EmailManager> logger, ControllerService.ControllerServiceClient client, IHttpContextAccessor httpContextAccessor, ICacheManager cacheManager, IHubContext<UploadHub> uploadHubContext, IHttpClientFactory httpClientFactory)
+        public DatasetManager(ApplicationDbContext dbContext, ILogger<EmailManager> logger, ControllerService.ControllerServiceClient client, IHttpContextAccessor httpContextAccessor, ICacheManager cacheManager)
         {
             _dbContext = dbContext;
             _logger = logger;
             _client = client;
             _httpContextAccessor = httpContextAccessor;
             _cacheManager = cacheManager;
-            _httpClientFactory = httpClientFactory;
-            _uploadHubContext = uploadHubContext;
         }
         /// <summary>
         /// Upload a new dataset; currently CSV, XLSX, XLS and ARFF are supported
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
-        //public async Task<ApiResponse> UploadDataset(UploadDatasetRequestDto request)
-        //{
-        //    CreateDatasetRequest grpcRequest = new CreateDatasetRequest();
-        //    try
-        //    {
-        //        var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
-        //        string trustedFileNameForDisplay = WebUtility.HtmlEncode(request.FileNameOrURL);
-        //        string controllerDatasetPath = Environment.GetEnvironmentVariable("CONTROLLER_DATASET_FOLDER_PATH");
-        //        var path = Path.Combine(controllerDatasetPath, username, "uploads");
-
-        //        if (request.ChunkNumber == 1)
-        //        {
-        //            var dir = new DirectoryInfo(path);
-
-        //            foreach (var info in dir.GetFiles())
-        //            {
-        //                info.Delete();
-        //            }
-        //        }
-
-        //        if (!Directory.Exists(path))
-        //        {
-        //            Directory.CreateDirectory(path);
-        //        }
-
-        //        await using FileStream fs = new(Path.Combine(path, trustedFileNameForDisplay), FileMode.Append);
-        //        fs.Write(request.Content, 0, request.Content.Length);
-
-        //        // get the complete file path before fs is released
-        //        string filePath = path + "/" + Path.GetFileName(fs.Name);
-
-        //        if (request.ChunkNumber == request.TotalChunkNumber)
-        //        {
-        //            fs.Dispose();
-
-        //            string fileExt = Path.GetExtension(filePath);
-        //            if (!CheckSupportedFileType(fileExt))
-        //            {
-        //                return new ApiResponse(Status406NotAcceptable, "FileTypeNotSupportedErrorMessage");
-        //            }
-        //            if (fileExt == ".zip" && !CheckZIPStructure(filePath))
-        //            {
-        //                return new ApiResponse(Status406NotAcceptable, "FolderStructureNotCorrectErrorMessage");
-        //            }
-
-        //            grpcRequest.DatasetType = request.DatasetType;
-        //            DetectionResult result;
-        //            if (grpcRequest.DatasetType == ":text" || grpcRequest.DatasetType == ":tabular" || grpcRequest.DatasetType == ":time_series" || grpcRequest.DatasetType == ":time_series_longitudinal")
-        //            {
-        //                using (FileStream fs1 = new FileStream(Path.Combine(path, trustedFileNameForDisplay), FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-        //                {
-        //                    result = CharsetDetector.DetectFromStream(fs1);
-
-        //                }
-        //                if (result.Detected == null)
-        //                {
-        //                    // Ignore the encoding of XLSX and XLS files
-        //                    if (fileExt != ".xlsx" && fileExt != ".xls")
-        //                    {
-        //                        return new ApiResponse(Status406NotAcceptable, "EncodingNotSupportedErrorMessage");
-        //                    }
-        //                    grpcRequest.Encoding = "utf-8";
-        //                }
-        //                else
-        //                {
-        //                    grpcRequest.Encoding = result.Detected.EncodingName.ToString();
-        //                    //ascii data encoding causes some issues with some automl, UTF-8 is a safe encoding that covers all ascii signs
-        //                    if (grpcRequest.Encoding == "ascii")
-        //                    {
-        //                        grpcRequest.Encoding = "utf-8";
-        //                    }
-        //                }
-        //            }
-        //            else
-        //            {
-        //                grpcRequest.Encoding = "";
-        //            }
-
-        //            grpcRequest.UserId = username;
-        //            grpcRequest.FileName = trustedFileNameForDisplay;
-        //            grpcRequest.DatasetName = request.DatasetName;
-        //            grpcRequest.DatasetType = request.DatasetType;
-        //            var reply = _client.CreateDataset(grpcRequest);
-        //            return new ApiResponse(Status200OK, null, "");
-        //        }
-        //        return new ApiResponse(Status200OK, null, "");
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return new ApiResponse(Status404NotFound, ex.Message);
-        //    }
-        //}
-
-        private string GetDatasetEncoding(string datasetType, string filePath, string fileExt)
+        public async Task<ApiResponse> UploadDataset(UploadDatasetRequestDto request)
         {
-            DetectionResult result;
-
-            if (datasetType == ":text" || datasetType == ":tabular" || datasetType == ":time_series" || datasetType == ":time_series_longitudinal")
-            {
-                using (FileStream fs1 = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-                {
-                    result = CharsetDetector.DetectFromStream(fs1);
-
-                }
-                if (result.Detected == null)
-                {
-                    // Ignore the encoding of XLSX and XLS files
-                    if (fileExt != ".xlsx" && fileExt != ".xls")
-                    {
-                        return null;
-                    }
-                    return "utf-8";
-                }
-                else
-                {
-                    var encoding = result.Detected.EncodingName.ToString();
-                    //ascii data encoding causes some issues with some automl, UTF-8 is a safe encoding that covers all ascii signs
-                    if (encoding == "ascii")
-                    {
-                        return "utf-8";
-                    }
-                }
-            }
-            else
-            {
-                return null;
-            }
-            return null;
-        }
-
-        public async Task<ApiResponse> UploadFromDisk(UploadDatasetRequestDto request)
-        {
+            CreateDatasetRequest grpcRequest = new CreateDatasetRequest();
             try
             {
-                CreateDatasetRequest grpcRequest = new CreateDatasetRequest();
                 var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
-                string trustedFileNameForDisplay = WebUtility.HtmlEncode(request.File.FileName);
+                string trustedFileNameForDisplay = WebUtility.HtmlEncode(request.FileNameOrURL);
                 string controllerDatasetPath = Environment.GetEnvironmentVariable("CONTROLLER_DATASET_FOLDER_PATH");
                 var path = Path.Combine(controllerDatasetPath, username, "uploads");
 
-                var filePath = Path.Combine("uploads", username, WebUtility.HtmlEncode(request.File.FileName) + Path.GetExtension(request.File.FileName));
-                Directory.CreateDirectory(Path.GetDirectoryName(filePath));
-
-                await using var fileStream = new FileStream(Path.Combine(path, trustedFileNameForDisplay), FileMode.Create, FileAccess.Write, FileShare.None, 8192, true);
-
-                var totalBytes = request.File.Length;
-                var buffer = new byte[81920]; // 80KB buffer
-                long totalBytesRead = 0;
-                double progress = 0;
-                using (var inputStream = request.File.OpenReadStream())
+                if (request.ChunkNumber == 1)
                 {
-                    int bytesRead;
-                    while ((bytesRead = await inputStream.ReadAsync(buffer, 0, buffer.Length)) > 0)
-                    {
-                        await fileStream.WriteAsync(buffer, 0, bytesRead);
-                        totalBytesRead += bytesRead;
+                    var dir = new DirectoryInfo(path);
 
-                        // Calculate progress
-                        var newProgress = (int)((double)totalBytesRead / totalBytes * 100);
-                        if (newProgress != progress)
+                    foreach (var info in dir.GetFiles())
+                    {
+                        info.Delete();
+                    }
+                }
+
+                if (!Directory.Exists(path))
+                {
+                    Directory.CreateDirectory(path);
+                }
+
+                await using FileStream fs = new(Path.Combine(path, trustedFileNameForDisplay), FileMode.Append);
+                fs.Write(request.Content, 0, request.Content.Length);
+
+                // get the complete file path before fs is released
+                string filePath = path + "/" + Path.GetFileName(fs.Name);
+
+                if (request.ChunkNumber == request.TotalChunkNumber)
+                {
+                    fs.Dispose();
+
+                    string fileExt = Path.GetExtension(filePath);
+                    if (!CheckSupportedFileType(fileExt))
+                    {
+                        return new ApiResponse(Status406NotAcceptable, "FileTypeNotSupportedErrorMessage");
+                    }
+                    if (fileExt == ".zip" && !CheckZIPStructure(filePath))
+                    {
+                        return new ApiResponse(Status406NotAcceptable, "FolderStructureNotCorrectErrorMessage");
+                    }
+
+                    grpcRequest.DatasetType = request.DatasetType;
+                    DetectionResult result;
+                    if (grpcRequest.DatasetType == ":text" || grpcRequest.DatasetType == ":tabular" || grpcRequest.DatasetType == ":time_series" || grpcRequest.DatasetType == ":time_series_longitudinal")
+                    {
+                        using (FileStream fs1 = new FileStream(Path.Combine(path, trustedFileNameForDisplay), FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
                         {
-                            progress = newProgress;
-                            await _uploadHubContext.Clients.Client(request.SignalrConnectionId).SendAsync("UploadDatasetProgress", progress);
+                            result = CharsetDetector.DetectFromStream(fs1);
+
+                        }
+                        if (result.Detected == null)
+                        {
+                            // Ignore the encoding of XLSX and XLS files
+                            if (fileExt != ".xlsx" && fileExt != ".xls")
+                            {
+                                return new ApiResponse(Status406NotAcceptable, "EncodingNotSupportedErrorMessage");
+                            }
+                            grpcRequest.Encoding = "utf-8";
+                        }
+                        else
+                        {
+                            grpcRequest.Encoding = result.Detected.EncodingName.ToString();
+                            //ascii data encoding causes some issues with some automl, UTF-8 is a safe encoding that covers all ascii signs
+                            if (grpcRequest.Encoding == "ascii")
+                            {
+                                grpcRequest.Encoding = "utf-8";
+                            }
                         }
                     }
-                }
-                fileStream.Close();
-                await _uploadHubContext.Clients.Client(request.SignalrConnectionId).SendAsync("UploadDatasetComplete", "ok");
-
-
-                grpcRequest.DatasetType = request.DatasetType;
-                string fileExt = Path.GetExtension(filePath);
-                if (!CheckSupportedFileType(fileExt))
-                {
-                    return new ApiResponse(Status406NotAcceptable, "FileTypeNotSupportedErrorMessage");
-                }
-                if (fileExt == ".zip" && !CheckZIPStructure(filePath))
-                {
-                    return new ApiResponse(Status406NotAcceptable, "FolderStructureNotCorrectErrorMessage");
-                }
-                grpcRequest.Encoding = GetDatasetEncoding(request.DatasetType, Path.Combine(path, trustedFileNameForDisplay), fileExt);
-                grpcRequest.UserId = username;
-                grpcRequest.FileName = trustedFileNameForDisplay;
-                grpcRequest.DatasetName = request.DatasetName;
-                grpcRequest.DatasetType = request.DatasetType;
-                var reply = _client.CreateDataset(grpcRequest);
-
-
-                return new ApiResponse(Status200OK, null, "");
-            }
-            catch (Exception ex)
-            {
-                return new ApiResponse(Status404NotFound, ex.Message);
-            }
-
-        }
-
-        public async Task<ApiResponse> UploadFromUrl(UploadDatasetRequestDto request)
-        {
-            try
-            {
-                CreateDatasetRequest grpcRequest = new CreateDatasetRequest();
-                var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
-                string trustedFileNameForDisplay = WebUtility.HtmlEncode(request.DatasetName);
-                string controllerDatasetPath = Environment.GetEnvironmentVariable("CONTROLLER_DATASET_FOLDER_PATH");
-                var path = Path.Combine(controllerDatasetPath, username, "uploads");
-
-                string fileType = "";
-                string downloadUrl = GetDownloadUrl(request.Url);
-                var httpClient = _httpClientFactory.CreateClient();
-                var response = await httpClient.GetAsync(downloadUrl, HttpCompletionOption.ResponseHeadersRead);
-
-                response.EnsureSuccessStatusCode();
-
-                string _fileExtension =
-                        (response.Content.Headers.ContentDisposition?.FileNameStar ??
-                        response.Content.Headers.ContentDisposition?.FileName)?
-                        .Split('.').LastOrDefault()?.TrimEnd('"') ?? string.Empty;
-                switch (request.DatasetType)
-                {
-                    case ":tabular":
-                        fileType = ".csv, .arff, .xlsx, .xls";
-                        break;
-                    case ":image":
-                        fileType = ".zip";
-                        break;
-                    case ":text":
-                        fileType = ".csv, .arff, .xlsx, .xls";
-                        break;
-                    case ":time_series":
-                        fileType = ".csv, .arff, .xlsx, .xls";
-                        break;
-                    case ":time_series_longitudinal":
-                        fileType = ".ts";
-                        break;
-                }
-                fileType = !string.IsNullOrEmpty(_fileExtension) ? $".{_fileExtension}" : fileType.Split(',')[0];
-
-                var totalBytes = response.Content.Headers.ContentLength ?? -1L;
-                var canReportProgress = totalBytes != -1;
-
-                var filePath = Path.Combine("uploads", username, WebUtility.HtmlEncode(request.DatasetName) + fileType);
-                Directory.CreateDirectory(Path.GetDirectoryName(filePath));
-
-                await using var contentStream = await response.Content.ReadAsStreamAsync();
-                await using var fileStream = new FileStream(Path.Combine(path, trustedFileNameForDisplay + fileType), FileMode.Create, FileAccess.Write, FileShare.None, 8192, true);
-
-                var buffer = new byte[8192];
-                long totalReadBytes = 0;
-                int readBytes;
-
-                while ((readBytes = await contentStream.ReadAsync(buffer)) > 0)
-                {
-                    await fileStream.WriteAsync(buffer.AsMemory(0, readBytes));
-                    totalReadBytes += readBytes;
-
-                    if (canReportProgress)
+                    else
                     {
-                        var progress = (double)totalReadBytes / totalBytes * 100;
-                        await _uploadHubContext.Clients.Client(request.SignalrConnectionId).SendAsync("UploadDatasetProgress", progress);
+                        grpcRequest.Encoding = "";
                     }
-                }
-                fileStream.Close();
 
-                await _uploadHubContext.Clients.Client(request.SignalrConnectionId).SendAsync("UploadDatasetComplete", "ok");
-                grpcRequest.DatasetType = request.DatasetType;
-                string fileExt = Path.GetExtension(filePath);
-                if (!CheckSupportedFileType(fileExt))
-                {
-                    return new ApiResponse(Status406NotAcceptable, "FileTypeNotSupportedErrorMessage");
+                    grpcRequest.UserId = username;
+                    grpcRequest.FileName = trustedFileNameForDisplay;
+                    grpcRequest.DatasetName = request.DatasetName;
+                    grpcRequest.DatasetType = request.DatasetType;
+                    var reply = _client.CreateDataset(grpcRequest);
+                    return new ApiResponse(Status200OK, null, "");
                 }
-                if (fileExt == ".zip" && !CheckZIPStructure(filePath))
-                {
-                    return new ApiResponse(Status406NotAcceptable, "FolderStructureNotCorrectErrorMessage");
-                }
-                grpcRequest.Encoding = GetDatasetEncoding(request.DatasetType, Path.Combine(path, trustedFileNameForDisplay + fileType), fileExt);
-                grpcRequest.UserId = username;
-                grpcRequest.FileName = trustedFileNameForDisplay + fileType;
-                grpcRequest.DatasetName = request.DatasetName;
-                grpcRequest.DatasetType = request.DatasetType;
-                var reply = _client.CreateDataset(grpcRequest);
-
                 return new ApiResponse(Status200OK, null, "");
             }
             catch (Exception ex)
@@ -337,7 +126,6 @@ namespace BlazorBoilerplate.Server.Managers
                 return new ApiResponse(Status404NotFound, ex.Message);
             }
         }
-
         /// <summary>
         /// Get a list of all Datasets
         /// </summary>
@@ -658,149 +446,5 @@ namespace BlazorBoilerplate.Server.Managers
                 return new ApiResponse(Status404NotFound, ex.Message);
             }
         }
-
-
-        /// <summary>
-        /// Get the download URL for a given URL of supported cloud storage services
-        /// </summary>
-        /// <param name="url">The URL entered by the user.</param>
-        /// <returns>direct download link</returns>
-        private static string GetDownloadUrl(string url)
-        {
-            if (Regex.IsMatch(url, @"(?:drive\.google\.com|docs\.google\.com)"))
-            {
-                return GetGoogleDriveDownloadLink(url);
-            }
-            else if (Regex.IsMatch(url, @"(?:\.dropbox\.com)"))
-            {
-                return GetDropboxDownloadLink(url);
-            }
-            else if (Regex.IsMatch(url, @"(?:1drv\.ms|i\.s!)"))
-            {
-                return GetOnedriveDownloadLink(url);
-            }
-            else if (Regex.IsMatch(url, @"(?:sharepoint\.com)"))
-            {
-                return GetSharepointDownloadLink(url);
-            }
-            else if (Regex.IsMatch(url, @"(?:cloud\.h-da\.de)"))
-            {
-                return GetNextcloudDownloadLink(url);
-            }
-            if (Regex.IsMatch(url, @"(?:openml\.org/search).*type=data"))
-            {
-                return GetOpenMLDownloadLink(url);
-            }
-            return url;
-        }
-        /// <summary>
-        /// Get the direct download URL for Google Drive using the file id
-        /// </summary>
-        /// <param name="googleDriveUrl">Google Drive URL</param>
-        /// <returns>Direct download URL for Google Drive</returns>
-        private static string GetGoogleDriveDownloadLink(string googleDriveUrl)
-        {
-            var match = Regex.Match(googleDriveUrl, @"/d/([a-zA-Z0-9_-]+)");
-            if (match.Success && match.Groups.Count > 1)
-            {
-                string fileId = match.Groups[1].Value;
-                googleDriveUrl = $"https://drive.google.com/uc?id={fileId}&export=download&confirm=t";
-                return googleDriveUrl;
-            }
-            return googleDriveUrl;
-        }
-
-        /// <summary>
-        /// Get the direct download URL for Dropbox
-        /// </summary>
-        /// <param name="dropboxUrl">Dropbox URL</param>
-        /// <returns>Direct Download URL for Dropbox</returns>
-        private static string GetDropboxDownloadLink(string dropboxUrl)
-        {
-            if (dropboxUrl.EndsWith("&dl=0"))
-            {
-                return dropboxUrl.Replace("&dl=0", "&dl=1");
-            }
-            if (!dropboxUrl.EndsWith("&dl=1"))
-            {
-                return dropboxUrl + "&dl=1";
-            }
-            return dropboxUrl;
-        }
-
-        /// <summary>
-        /// Get the direct download URL for OneDrive by encoding the Base64 decoded URL
-        /// </summary>
-        /// <param name="onedriveUrl">OneDrive URL</param>
-        /// <returns>Direct download URL for Onedrive</returns>
-        private static string GetOnedriveDownloadLink(string onedriveUrl)
-        {
-            string base64Value = System.Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(onedriveUrl));
-            string encodedUrl = base64Value.TrimEnd('=').Replace('/', '_').Replace('+', '-');
-            onedriveUrl = $"https://api.onedrive.com/v1.0/shares/u!{encodedUrl}/root/content";
-            return onedriveUrl;
-        }
-
-        /// <summary>
-        /// Get the direct download URL for Sharepoint
-        /// </summary>
-        /// <param name="sharepointUrl">Sharepoint URL</param>
-        /// <returns>Direct download URL for Sharepoint</returns>
-        private static string GetSharepointDownloadLink(string sharepointUrl)
-        {
-            if (sharepointUrl.Contains("&download=1"))
-            {
-                return sharepointUrl;
-            }
-            return sharepointUrl + "&download=1";
-        }
-
-        /// <summary>
-        /// Get the direct download URL for h_da Nextcloud
-        /// </summary>
-        /// <param name="nextcloudUrl">h_da Nextcloud URL</param>
-        /// <returns>Direct download URL for h_da Nextcloud</returns>
-        private static string GetNextcloudDownloadLink(string nextcloudUrl)
-        {
-            if (nextcloudUrl.EndsWith("/download"))
-            {
-                return nextcloudUrl;
-            }
-            return nextcloudUrl + "/download";
-        }
-
-        /// <summary>
-        /// Get the direct download URL for OpenML datasets by using the OpenML API
-        /// </summary>
-        /// <param name="openMLUrl">OpenML URL</param>
-        /// <returns>Direct download URL for OpenML datasets</returns>
-        private static string GetOpenMLDownloadLink(string openMLUrl)
-        {
-            var match = Regex.Match(openMLUrl, @"(?:\b|\?)id=(\d+)\b");
-            if (match.Success)
-            {
-                string datasetId = match.Groups[1].Value;
-                string apiUrl = $"https://www.openml.org/api/v1/json/data/{datasetId}";
-                try
-                {
-                    using (var client = new HttpClient())
-                    {
-                        HttpResponseMessage response = client.GetAsync(apiUrl).Result;
-                        if (response.IsSuccessStatusCode)
-                        {
-                            JsonDocument jsonDocument = JsonDocument.Parse(response.Content.ReadAsStringAsync().Result);
-                            JsonElement urlElement = jsonDocument.RootElement.GetProperty("data_set_description").GetProperty("url");
-                            openMLUrl = urlElement.GetString();
-                            return openMLUrl;
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                }
-            }
-            return openMLUrl;
-        }
-
     }
 }

@@ -854,7 +854,6 @@ namespace BlazorBoilerplate.Server
 
                 // new SignalR endpoint routing setup
                 endpoints.MapHub<Hubs.ChatHub>(Constants.HubPaths.Chat);
-                endpoints.MapHub<UploadHub>(Constants.HubPaths.Upload);
             });
 
             Program.Sync.Release();

@@ -12,11 +12,12 @@ namespace BlazorBoilerplate.Shared.Dto.Dataset
 {
     public class UploadDatasetRequestDto
     {
-        public string SignalrConnectionId { get; set; }
-        public IFormFile File { get; set; }
-        public string Url { get; set; }
+        public string FileNameOrURL { get; set; }
         public string DatasetName { get; set; }
         public string DatasetType { get; set; }
-
+        public string FileSource { get; set; }
+        public byte[] Content { get; set; }
+        public int ChunkNumber { get; set; }
+        public int TotalChunkNumber { get; set; }
     }
 }

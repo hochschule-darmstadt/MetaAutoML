@@ -32,34 +32,14 @@ namespace BlazorBoilerplate.Server.Controllers
             _logger = logger;
         }
 
-        //[HttpPost]
-        //[ProducesResponseType(Status200OK)]
-        //[ProducesResponseType(Status400BadRequest)]
-        //[ProducesResponseType(Status404NotFound)]
-        //[ProducesResponseType(Status406NotAcceptable)]
-        //public async Task<ApiResponse> UploadDataset(UploadDatasetRequestDto request)
-        //    => ModelState.IsValid ?
-        //        await _datasetManager.UploadDataset(request) :
-        //        new ApiResponse(Status400BadRequest, L["InvalidData"]);
-
         [HttpPost]
         [ProducesResponseType(Status200OK)]
         [ProducesResponseType(Status400BadRequest)]
         [ProducesResponseType(Status404NotFound)]
         [ProducesResponseType(Status406NotAcceptable)]
-        public async Task<ApiResponse> UploadFromDisk([FromForm] UploadDatasetRequestDto request)
+        public async Task<ApiResponse> UploadDataset(UploadDatasetRequestDto request)
             => ModelState.IsValid ?
-                await _datasetManager.UploadFromDisk(request) :
-                new ApiResponse(Status400BadRequest, L["InvalidData"]);
-
-        [HttpPost]
-        [ProducesResponseType(Status200OK)]
-        [ProducesResponseType(Status400BadRequest)]
-        [ProducesResponseType(Status404NotFound)]
-        [ProducesResponseType(Status406NotAcceptable)]
-        public async Task<ApiResponse> UploadFromUrl(UploadDatasetRequestDto request)
-            => ModelState.IsValid ?
-                await _datasetManager.UploadFromUrl(request) :
+                await _datasetManager.UploadDataset(request) :
                 new ApiResponse(Status400BadRequest, L["InvalidData"]);
 
         [HttpPost]
