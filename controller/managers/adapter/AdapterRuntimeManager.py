@@ -204,7 +204,7 @@ class AdapterRuntimeManager:
             self.__strategy_controller.set_phase("evaluation", True)
 
         if model_details["status"] == "completed" and self.__multi_fidelity_level == 0 and self.__request.perform_model_analysis == True:
-            if dataset["type"] in  [":tabular", ":text", ":time_series"] and training["configuration"]["task"] in [":tabular_classification"]:
+            if dataset["type"] in  [":tabular", ":text", ":time_series"] and training["configuration"]["task"] in [":tabular_classification", ":tabular_regression"]:
                 #Generate explainer dashboard
                 response = adapter_manager.generate_explainer_dashboard()
                 self.__data_storage.update_model(user_id, model_id, { "dashboard_path": response.path})
