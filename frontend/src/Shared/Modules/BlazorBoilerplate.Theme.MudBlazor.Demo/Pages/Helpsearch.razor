@@ -340,7 +340,7 @@
 	private void SearchText(string text)
 	{
 
-        _searchResults = helpSearch.SearchAll(text?.Trim()).ToList();  // This is the Bug 
+        _searchResults = helpSearch.SearchAll(text?.Trim()).ToList(); 
         if (_searchResults.Count() > 0 && _searchResults.First() != null)
         {
             SelectEntry(_searchResults.First());
