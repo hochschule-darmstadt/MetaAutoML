@@ -1289,6 +1289,12 @@ msgid "Overview"
 msgstr "Overview"
 
 msgctxt "Global"
+msgid "Navigation_Help_Tooltip"
+msgstr "Read how to solve different tasks with OMA-ML or start a guided tour."
+
+msgid "Tooltip_Home_RecentUploads_Uploadbutton"
+
+msgctxt "Global"
 msgid "Recent datasets"
 msgstr "Recent datasets"
 
