@@ -388,12 +388,13 @@ hr {
     align-items: center;
     justify-content: space-between;
     padding: 10px;
+    color: white;
 }
 
 /* Chat content area */
 .chat-content {
     max-height: 400px;
-    overflow-y: auto;
+    overflow-y: hidden;
     padding: 8px;
     background-color: #ffffff;
 }

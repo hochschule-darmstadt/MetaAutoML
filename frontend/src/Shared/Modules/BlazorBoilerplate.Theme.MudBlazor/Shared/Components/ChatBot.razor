@@ -1,10 +1,10 @@
 @inherits DynamicComponentContainer
 
 <MudFab 
-    Icon="@(isChatOpen ? Icons.Material.Filled.Close : Icons.Material.Filled.Chat)" 
-    Color="Color.Secondary" 
-    @onclick="ToggleChat"
-    Style="position:fixed; bottom: 20px; right: 20px; z-index: 100;" 
+Icon="@(isChatOpen ? Icons.Material.Filled.Close : Icons.Material.Filled.Chat)" 
+Color="Color.Secondary" 
+@onclick="ToggleChat"
+Style="position:fixed; bottom: 20px; right: 20px; z-index: 100;" 
 />
 
 <MudPopover Open="@isChatOpen" AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.BottomRight">
@@ -15,7 +15,7 @@
                 <MudText Typo="Typo.h5" Class="header-title">OMA-ML Assistant</MudText>
                 <MudSpacer/>
                 <MudIcon Icon="@Icons.Material.Filled.Minimize"
-                     Style="cursor: pointer; margin-left: auto;"/>
+                Style="cursor: pointer; margin-left: auto;"/>
             </div>
         </MudCard>
 
@@ -35,8 +35,8 @@
 
         <!-- Chat Input Area -->
         <MudCardActions Class="chat-input">
-            <MudTextField @bind-Value="currentMessage" Placeholder="Message Hint" FullWidth="true" Class="input-field"
-                          OnKeyPress="HandleEnterKey" />
+            <MudTextField @bind-Value="currentMessage" @ref="inputField" Placeholder="Message Hint" FullWidth="true" Class="input-field"
+            OnKeyUp="HandleEnterKey" />
             <MudIconButton Icon="@Icons.Material.Filled.Send" @onclick="SendMessage" />
         </MudCardActions>
     </MudPaper>
@@ -44,6 +44,7 @@
 
 @code {
     private bool isChatOpen = false;
+    private MudTextField<string> inputField;
     private string currentMessage = string.Empty;
 
     private List<Message> messages = new List<Message>
@@ -62,7 +63,7 @@
     }
 
     // Method to handle sending messages
-    private void SendMessage()
+    private async void SendMessage()
     {
         if (!string.IsNullOrWhiteSpace(currentMessage))
         {
@@ -70,6 +71,8 @@
             // Simulate assistant response
             messages.Add(new Message { Text = "Got it! Let me assist you with that.", IsUser = false });
             currentMessage = string.Empty;
+            await inputField.Clear();
+            await inputField.FocusAsync();
         }
     }
 
@@ -90,53 +93,3 @@
     }
 }
 
-
-<!--
-<MudPopover Open="@isChatOpen" AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.BottomRight">
-    <MudPaper Class="chat-box">
-        <MudCard>
-            <MudCardHeader>
-                <MudText Typo="Typo.h6">Chat with Us</MudText>
-                <MudIconButton Icon="@Icons.Material.Filled.Close" @onclick="CloseChat" />
-            </MudCardHeader>
-            <MudCardContent Class="chat-content">
-                <MudList>
-                    @foreach (var message in messages)
-                    {
-                        <MudListItem>
-
-                            <MudText>@message</MudText>
-
-                        </MudListItem>
-                    }
-                </MudList>
-            </MudCardContent>
-            <MudCardActions Class="chat-input">
-                <MudTextField @bind-Value="currentMessage" Placeholder="Type a message..." FullWidth="true" />
-                <MudIconButton Icon="@Icons.Material.Filled.Send" @onclick="SendMessage" />
-            </MudCardActions>
-        </MudCard>
-    </MudPaper>
-</MudPopover>
-
-
-@code {
-    private bool isChatOpen = false;
-    private List<string> messages = new();
-    private string currentMessage;
-
-    private void ToggleChat() => isChatOpen = !isChatOpen;
-
-    private void CloseChat() => isChatOpen = false;
-
-    private void SendMessage()
-    {
-        if (!string.IsNullOrWhiteSpace(currentMessage))
-        {
-            messages.Add(currentMessage);
-            currentMessage = string.Empty;
-        }
-    }
-}
-
--->
