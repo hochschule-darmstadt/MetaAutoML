@@ -4,6 +4,7 @@ from pymongo.collection import Collection
 from mongomock import MongoClient as MongoMockClient
 from bson.objectid import ObjectId
 import logging
+from ControllerBGRPC import GetHomeOverviewInformationResponse
 from MeasureDuration import MeasureDuration
 import pymongo
 
@@ -86,6 +87,23 @@ class MongoDbClient:
         else:
             self.__log.debug(f"check_if_user_exists: database {user_id} does not exists")
             return False
+
+    def get_home_overview_information(self, user_id: str) -> 'GetHomeOverviewInformationResponse':
+        """Get information for the home overview page of a user (# datasets, trainings, models, active trainings)
+
+        Args:
+            user_id (str): Unique user id saved within the MS Sql database of the frontend
+
+        Returns:
+            GetHomeOverviewInformationResponse: The GRPC response message holding the infos for the home overview
+        """
+        response = GetHomeOverviewInformationResponse()
+        response.dataset_amount = self.__mongo[user_id]["datasets"].count_documents({"lifecycle_state": "active"})
+        response.model_amount = self.__mongo[user_id]["models"].count_documents({"lifecycle_state": "active"})
+        response.training_amount = self.__mongo[user_id]["trainings"].count_documents({"lifecycle_state": "active"})
+        response.running_training_amount = self.__mongo[user_id]["trainings"].count_documents({"lifecycle_state": "active", "status": "busy"})
+        return response
+
 #endregion
 
     ####################################

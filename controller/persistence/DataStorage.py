@@ -45,6 +45,17 @@ class DataStorage:
     ## MISC DATASTORAGE OPERATIONS
     ####################################
 #region
+    def get_home_overview_information(self, user_id: str) -> 'GetHomeOverviewInformationResponse':
+        """Get information for the home overview page of a user (# datasets, trainings, models, active trainings)
+
+        Args:
+            user_id (str): Unique user id saved within the MS Sql database of the frontend
+
+        Returns:
+            GetHomeOverviewInformationResponse: The GRPC response message holding the infos for the home overview
+        """
+        return self.__mongo.get_home_overview_information(user_id)
+
 
     def check_if_user_exists(self, user_id: bool) -> bool:
         """Check if user already exists by checking if a database with his user id exists.
@@ -154,7 +165,7 @@ class DataStorage:
         df.to_csv(csv_file, index=False)
         os.remove(excel_file)
         return file_name
-  
+
 
     def create_dataset(self, user_id: str, file_name: str, type: str, name: str, encoding: str) -> str:
         """Create new dataset record and move dataset from upload folder to final path
@@ -537,7 +548,7 @@ class DataStorage:
     def create_training(self, user_id: str, training_details: 'dict[str, object]') -> str:
         """
         Create new training record inside MongoDB
-        
+
         Args:
             user_id (str): Unique user id saved within the MS Sql database of the frontend
             training_details (dict[str, object]): Dictonary of training record fields (see data schema in WIKI for more information)
