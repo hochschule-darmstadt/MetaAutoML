@@ -40,6 +40,15 @@ def get_search_relevant_data(
     print(response)
 
 @inject
+def get_dataset_types(
+    ontology_manager: OntologyManager=Provide[Application.ressources.ontology_manager]
+) -> "GetDatasetTypesResponse":
+    with Profiling():
+        response = ontology_manager.get_dataset_types()
+
+    print(response)
+
+@inject
 def get_datasets(
     get_datasets_request: "GetDatasetsRequest",
     dataset_manager: DatasetManager=Provide[Application.managers.dataset_manager]
@@ -51,8 +60,9 @@ def get_datasets(
 
 def main():
     get_home_overview_information(get_home_overview_information_request=GetHomeOverviewInformationRequest(user_id="d6e5f211-b5a8-420e-a473-962a60a1e50d"))
-    get_search_relevant_data()
     get_datasets(get_datasets_request=GetDatasetsRequest(user_id="d6e5f211-b5a8-420e-a473-962a60a1e50d", pagination=True, page_number=1))
+    get_search_relevant_data()
+    get_dataset_types()
 
 if __name__ == '__main__':
     """Python entry point setting up the dependency injection and starting main
