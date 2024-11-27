@@ -45,7 +45,7 @@
                         <LabelTooltip FontSize="TextStyle.H4" Text="Select the ML task, i.e., what the ML model shall predict, e.g., classes (classification) or values (regression)." Position="Radzen.TooltipPosition.Top"></LabelTooltip>
                     </MudItem>
                     <MudItem xs="11" data-form-fifthStep>
-                        <MudSelect Label="@L["ML task"]" T="string" ValueChanged="@OnMlTaskSelectionChanged" Class="mud-width-full">
+                        <MudSelect Label="@L["ML task"]" T="string"  ValueChanged="@OnMlTaskSelectionChanged" Class="mud-width-full">
 
                             @foreach (var task in _compatibleTasks.Tasks)
                             {
@@ -72,13 +72,13 @@
             <MudItem xs="12" data-form-sixthStep>
                 <MudGrid>
                     <MudItem xs="13">
-                        <LabelTooltip FontSize="TextStyle.H4" Text="Select which column in a tabular dataset is to be predicted by the ML model." Position="Radzen.TooltipPosition.Top"></LabelTooltip>
+                        <LabelTooltip FontSize="TextStyle.H4" Text="Select the ML task, i.e., what the ML model shall predict, e.g., classes (classification) or values (regression)." Position="Radzen.TooltipPosition.Top"></LabelTooltip>
                     </MudItem>
                     <MudItem xs="11" >
-                        <MudSelect Label="@L["target *"]" T="string" @bind-SelectedValues="SelectedTargets" MultiSelection="true">
+                        <MudSelect Label="@L["target *"]" T="string" @bind-SelectedValues="SelectedTargets" MultiSelection="false">
                             @if (_columnNames != null)
                             {
-                                @foreach (var column in _columnNames)
+                                @foreach (var column in _columnNames.OrderBy(c => c))
                                 {
                                     <div style="display:block; height:fit-content">
                                         <MudSelectItem Value="@column">@column</MudSelectItem>
@@ -87,6 +87,7 @@
                             }
                         </MudSelect>
                     </MudItem>
+
                 </MudGrid>
             </MudItem>
         }
