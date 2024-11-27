@@ -47,7 +47,7 @@
                 "MONGO_DB_DOCKER_DEBUG": "YES",
                 "MONGO_CLUSTER": "NO",
                 "KUBERNETES_CLUSTER": "NO",
-                "DEFAULT_GATEWAY_IP": "172.17.208.1",
+                "DEFAULT_GATEWAY_IP": "172.29.64.1",
                 "USE_DEV_CONFIG": "YES",
                 "WIN_DEV_MACHINE": "YES",
                 "PERSISTENCE_LOGGING_LEVEL": "DEBUG",
@@ -212,7 +212,7 @@
             "name": "WIN Profiling Test",
             "type": "debugpy",
             "request": "launch",
-            "program": "profiling/profiling_user_manager.py",
+            "program": "profiling/profiling.py",
             "console": "integratedTerminal",
             "justMyCode": true,
             "env": {
