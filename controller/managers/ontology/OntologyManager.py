@@ -29,13 +29,15 @@ class OntologyManager(object):
     def __init__(self):
         """Initiate a new OntologyManager instance
         """
-        with MeasureDuration() as m:
+        with MeasureDuration():
             self.__log = logging.getLogger('OntologyManager')
             self.__log.setLevel(logging.getLevelName(os.getenv("ONTOLOGY_LOGGING_LEVEL")))
             ontologyPath = os.path.join(os.path.dirname(__file__), 'ML_Ontology.ttl')
             self.__ontologyGraph = rdflib.Graph()
             self.__ontologyGraph.parse(ontologyPath, format='turtle')
             self.__log.info("__init__: new Ontology Manager created...")
+            self.__search_relevant_data = self.__get_search_relevant_data()
+            self.__dataset_types = self.__get_dataset_types()
 
     def __execute_query(self, query: str, binding: dict=None) -> list:
         """Execute the SPARQL query on the ML Ontology
@@ -100,7 +102,7 @@ class OntologyManager(object):
         # TODO add more parameter to query
         # task = rdflib.Literal(u'binary classification')
 
-    def get_dataset_types(self) -> GetDatasetTypesResponse:
+    def __get_dataset_types(self) -> GetDatasetTypesResponse:
         """Get dataset types available within the ML Ontology
 
         Returns:
@@ -115,6 +117,15 @@ class OntologyManager(object):
         for row in queryResult:
             result.dataset_types.append(row.type.replace(ML_ONTOLOGY_NAMESPACE, ":"))
         return result
+
+
+    def get_dataset_types(self) -> GetDatasetTypesResponse:
+        """Get dataset types available within the ML Ontology cached in the OntologyManager
+
+        Returns:
+            GetDatasetTypesResponse: The GRPC response message holding the list of dataset type IRIs
+        """
+        return self.__dataset_types
 
 
     def get_ml_libraries_for_task(self, request: GetMlLibrariesForTaskRequest) -> GetMlLibrariesForTaskResponse:
@@ -256,7 +267,7 @@ class OntologyManager(object):
 
         return result
 
-    def get_search_relevant_data(self) -> GetSearchRelevantDataResponse:
+    def __get_search_relevant_data(self) -> GetSearchRelevantDataResponse:
         """Get search relevant data available within the ML Ontology
 
         Returns:
@@ -278,6 +289,16 @@ class OntologyManager(object):
             rowInstance.link = self.__normalize_iri_to_colon(row.link)
             result.search_entities.append(rowInstance)
         return result
+
+
+    def get_search_relevant_data(self) -> GetSearchRelevantDataResponse:
+        """Get search relevant data available within the ML Ontology cached in the OntologyManager
+
+        Returns:
+            GetSearchRelevantDataResponse: data used for frontend search
+        """
+        return self.__search_relevant_data
+
 
     def get_clustering_approaches(self, automl):
         automl_iri = self.__iri_to_uri_ref(automl)
