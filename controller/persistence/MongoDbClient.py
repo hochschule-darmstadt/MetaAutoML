@@ -155,13 +155,13 @@ class MongoDbClient:
         if only_five_recent == True:
             page_size = 5
         if pagination == True:
-            return self.__mongo[user_id]["datasets"].find(filter).sort("analysis.creation_date", pymongo.DESCENDING).skip(offset).limit(page_size)
+            return self.__mongo[user_id]["datasets"].find(filter, {"schema": 0, "analysis": {"duplicate_columns": 0, "duplicate_rows": 0, "irrelevant_features": 0, "missings_per_column": 0, "missings_per_row": 0, "outlier": 0}}).sort("analysis.creation_date", pymongo.DESCENDING).skip(offset).limit(page_size)
         else:
             if page_size != 5:
                 page_size = 0
             datasets: Collection = self.__mongo[user_id]["datasets"]
             self.__log.debug(f"get_datasets: documents within dataset: {datasets.count_documents}, filter {filter}")
-            return datasets.find(filter).sort("analysis.creation_date", pymongo.DESCENDING).limit(page_size)
+            return datasets.find(filter, {"schema": 0, "analysis": {"duplicate_columns": 0, "duplicate_rows": 0, "irrelevant_features": 0, "missings_per_column": 0, "missings_per_row": 0, "outlier": 0}}).sort("analysis.creation_date", pymongo.DESCENDING).limit(page_size)
 
     def update_dataset(self, user_id: str, dataset_id: str, new_values: 'dict[str, object]') -> bool:
         """Update a single dataset record from a user database
