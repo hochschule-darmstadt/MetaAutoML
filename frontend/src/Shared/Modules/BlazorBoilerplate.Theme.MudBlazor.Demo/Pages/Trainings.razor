@@ -51,7 +51,7 @@
             ApiResponseDto apiResponse;
             while (_stopTask == false)
             {
-                apiResponse = await apiClient.GetTrainings(new GetTrainingsRequestDto() { Short = false, Pagination = true, PageNumber = _pageNumber });
+                apiResponse = await apiClient.GetTrainings(new GetTrainingsRequestDto() { Short = true, Pagination = true, PageNumber = _pageNumber });
 
                 if (apiResponse.IsSuccessStatusCode)
                 {
