@@ -89,7 +89,6 @@ class ControllerServiceManager(ControllerServiceBase):
         self, get_datasets_request: "GetDatasetsRequest",
         dataset_manager: DatasetManager=Provide[Application.managers.dataset_manager]
     ) -> "GetDatasetsResponse":
-        print(get_datasets_request)
         with MeasureDuration() as m:
             response = dataset_manager.get_datasets(get_datasets_request)
         #response = await self.__loop.run_in_executor(
