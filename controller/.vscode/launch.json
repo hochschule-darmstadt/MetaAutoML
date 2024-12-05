@@ -4,7 +4,6 @@
     // Weitere Informationen finden Sie unter https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
-        
         {
             "name": "WIN Controller Debug",
             "type": "python",
@@ -48,7 +47,8 @@
                 "MONGO_DB_DOCKER_DEBUG": "YES",
                 "MONGO_CLUSTER": "NO",
                 "KUBERNETES_CLUSTER": "NO",
-                "DEFAULT_GATEWAY_IP": "192.168.32.1",
+               // "DEFAULT_GATEWAY_IP": "192.168.32.1",
+                "DEFAULT_GATEWAY_IP": "172.20.32.1",
                 "USE_DEV_CONFIG": "YES",
                 "WIN_DEV_MACHINE": "YES",
                 "PERSISTENCE_LOGGING_LEVEL": "DEBUG",
