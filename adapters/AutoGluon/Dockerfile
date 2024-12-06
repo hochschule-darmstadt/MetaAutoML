@@ -4,8 +4,6 @@ EXPOSE 50057
 RUN apt-get update && apt-get install -y \
     libgomp1 \
     libquadmath0 \
-    cmake \
-    protobuf-compiler \
     ffmpeg \
     libsm6 \
     libxext6  \
