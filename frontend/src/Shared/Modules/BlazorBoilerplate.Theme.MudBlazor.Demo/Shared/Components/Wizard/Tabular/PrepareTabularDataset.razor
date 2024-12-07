@@ -22,7 +22,7 @@
                     @foreach (var item in _datasetFrame.Columns)
                     {
 
-                        <MudTh>@item.Name</MudTh>
+                        <MudTh>@ShortenColumnName(item.Name)</MudTh>
                     }
                 </MudTHeadRow>
                 <MudTHeadRow>
@@ -104,7 +104,7 @@
                 <MudTd></MudTd>
                 @foreach (var item in context)
                 {
-                        <MudTd>@item</MudTd>
+                         <MudTd>@ShortenColumnName(item.ToString())</MudTd>
                 }
             </RowTemplate>
             <PagerContent>
@@ -115,6 +115,14 @@
 }
 
 @code {
+
+    private string ShortenColumnName(string name)
+    {
+        if (string.IsNullOrEmpty(name))
+            return string.Empty;
+
+        return name.Length > 10 ? name.Substring(0, 10) + "..." : name;
+    }
     private GetDatasetResponseDto _dataset;
 	[Parameter] public GetDatasetResponseDto Dataset { get; set; }
     [Parameter] public CreateTrainingRequestDto StartAutoMlRequest { get; set; }

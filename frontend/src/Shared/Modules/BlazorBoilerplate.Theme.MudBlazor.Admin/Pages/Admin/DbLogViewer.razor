@@ -33,7 +33,7 @@ else
                 }
             </MudSelect></MudItem>
     </MudGrid>
-    
+
     <MudTable ServerData="@(new Func<TableState, Task<TableData<DbLog>>>(ServerReload))" Striped="true" Bordered="true" Dense="true" Hover="true" Elevation="2" @ref="table">
         <HeaderContent>
             <MudTh>Timestamp</MudTh>
