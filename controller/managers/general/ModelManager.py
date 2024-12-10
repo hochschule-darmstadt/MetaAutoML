@@ -71,7 +71,10 @@ class ModelManager:
 
             model_info.status_messages[:] =  model["status_messages"]
             #model_info.explanation = json.dumps(model["explanation"])
-
+            if not model.get("dashboard_path"):  # Returns None if key is missing
+                model_info.dashboard_status = " "
+            else:
+                model_info.dashboard_status = model["dashboard_path"]
             if not "carbon_footprint" in model:
                         model["carbon_footprint"] = {"emissions": 0}
             model_info.emission = model["carbon_footprint"].get("emissions", 0)
