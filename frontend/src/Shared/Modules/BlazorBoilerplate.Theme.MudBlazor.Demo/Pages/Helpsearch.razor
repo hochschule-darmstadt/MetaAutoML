@@ -244,7 +244,8 @@
 			{
 				helpSearch.LoadSearchCache();
 			}
-			query = query; // This will trigger the query setter
+
+			SearchText(query);
 		}
 	}
 
@@ -256,7 +257,7 @@
 
 	private async void SelectSection(string text)
 	{
-		if (!string.IsNullOrEmpty(text) && tabs != null) 
+		if (!string.IsNullOrEmpty(text) && tabs != null)
 		{
 			var tabIndex = -1;
 			string targetAnchor = null;
@@ -340,7 +341,7 @@
 	private void SearchText(string text)
 	{
 
-        _searchResults = helpSearch.SearchAll(text?.Trim()).ToList(); 
+        _searchResults = helpSearch.SearchAll(text?.Trim()).ToList();
         if (_searchResults.Count() > 0 && _searchResults.First() != null)
         {
             SelectEntry(_searchResults.First());
