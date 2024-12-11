@@ -2185,3 +2185,11 @@ msgstr "Here various adjustments can be made to the dataset. For example, the us
 msgctxt "Global"
 msgid "Datasets.Dataset.Top3Models.More.tooltip"
 msgstr "Click here to display all models that have been trained so far on this dataset."
+
+msgctxt "Global"
+msgid "Datasets.Dataset.FileConfiguration.Save&ReloadDataset.tooltip"
+msgstr "Updates the file configuration and reloads the dataset. Important: When you change the file configuration and press ‘Save & reload dataset’, the dataset is reloaded and all previous modifications in the dataset configuration below are discarded."
+
+msgctxt "Global"
+msgid "Datasets.Dataset.FileConfiguration.Label.tooltip"
+msgstr "In this panel you can modify the datatypes and roles of individual columns of the dataset. Important: When you change the file configuration and press ‘Save & reload dataset’ later, the dataset is reloaded and all previous modifications in the dataset configuration are discarded."
