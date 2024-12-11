@@ -45,6 +45,17 @@ class DataStorage:
     ## MISC DATASTORAGE OPERATIONS
     ####################################
 #region
+    def get_home_overview_information(self, user_id: str) -> 'GetHomeOverviewInformationResponse':
+        """Get information for the home overview page of a user (# datasets, trainings, models, active trainings)
+
+        Args:
+            user_id (str): Unique user id saved within the MS Sql database of the frontend
+
+        Returns:
+            GetHomeOverviewInformationResponse: The GRPC response message holding the infos for the home overview
+        """
+        return self.__mongo.get_home_overview_information(user_id)
+
 
     def check_if_user_exists(self, user_id: bool) -> bool:
         """Check if user already exists by checking if a database with his user id exists.

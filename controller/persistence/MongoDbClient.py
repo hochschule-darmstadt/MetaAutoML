@@ -4,6 +4,7 @@ from pymongo.collection import Collection
 from mongomock import MongoClient as MongoMockClient
 from bson.objectid import ObjectId
 import logging
+from ControllerBGRPC import GetHomeOverviewInformationResponse
 from MeasureDuration import MeasureDuration
 import pymongo
 from MongoDbDocuments import MongoDbDocuments
@@ -99,6 +100,23 @@ class MongoDbClient:
         else:
             self.__log.debug(f"check_if_user_exists: database {user_id} does not exists")
             return False
+
+    def get_home_overview_information(self, user_id: str) -> 'GetHomeOverviewInformationResponse':
+        """Get information for the home overview page of a user (# datasets, trainings, models, active trainings)
+
+        Args:
+            user_id (str): Unique user id saved within the MS Sql database of the frontend
+
+        Returns:
+            GetHomeOverviewInformationResponse: The GRPC response message holding the infos for the home overview
+        """
+        response = GetHomeOverviewInformationResponse()
+        response.dataset_amount = self.__mongo[user_id]["datasets"].count_documents({"lifecycle_state": "active"})
+        response.model_amount = self.__mongo[user_id]["models"].count_documents({"lifecycle_state": "active"})
+        response.training_amount = self.__mongo[user_id]["trainings"].count_documents({"lifecycle_state": "active"})
+        response.running_training_amount = self.__mongo[user_id]["trainings"].count_documents({"lifecycle_state": "active", "status": "busy"})
+        return response
+
 #endregion
 
     ####################################
@@ -146,17 +164,18 @@ class MongoDbClient:
             list[dict[str, object]]: List of dictonaries representing dataset records
         """
         page_size = 20
+        ignore_unnecessary_fields_filter = {"schema": 0, "analysis": {"duplicate_columns": 0, "duplicate_rows": 0, "irrelevant_features": 0, "missings_per_column": 0, "missings_per_row": 0, "outlier": 0}}
         offset = (page_number - 1) * page_size
         if only_five_recent == True:
             page_size = 5
         if pagination == True:
-            return self.__mongo[user_id]["datasets"].find(filter).sort("analysis.creation_date", pymongo.DESCENDING).skip(offset).limit(page_size)
+            return self.__mongo[user_id]["datasets"].find(filter, ignore_unnecessary_fields_filter).sort("analysis.creation_date", pymongo.DESCENDING).skip(offset).limit(page_size)
         else:
             if page_size != 5:
                 page_size = 0
             datasets: Collection = self.__mongo[user_id]["datasets"]
             self.__log.debug(f"get_datasets: documents within dataset: {datasets.count_documents}, filter {filter}")
-            return datasets.find(filter).sort("analysis.creation_date", pymongo.DESCENDING).limit(page_size)
+            return datasets.find(filter, ignore_unnecessary_fields_filter).sort("analysis.creation_date", pymongo.DESCENDING).limit(page_size)
 
     def update_dataset(self, user_id: str, dataset_id: str, new_values: 'dict[str, object]') -> bool:
         """Update a single dataset record from a user database

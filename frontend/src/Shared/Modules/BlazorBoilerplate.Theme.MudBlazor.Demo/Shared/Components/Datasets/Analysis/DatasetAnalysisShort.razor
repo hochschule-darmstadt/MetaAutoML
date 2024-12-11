@@ -19,7 +19,7 @@
         <CardHeaderActions>
             @if (_dataset != null)
             {
-                <ButtonTooltip Text="Click here to display all analysis diagrams available for this dataset." Position="Placement.Top">
+                <ButtonTooltip Text="@L["Datasets.Dataset.Analysis.More.tooltip"]" Position="Placement.Top">
                     <MudButton Href="@NavManager.ToAbsoluteUri("datasets/" + @Dataset.Dataset.Id + "/analysis").AbsoluteUri"
                         Variant="Variant.Filled"
                         Disabled="@(_analysis == null || _analysis.ydataprofilling == "" || _analysis.ydataprofilling == "none")"
