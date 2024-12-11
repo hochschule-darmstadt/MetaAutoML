@@ -37,18 +37,18 @@
 
 						<MudTh>
 							<MudTableSortLabel SortBy="new Func<ModelDto, object>(x=>x.RuntimeProfile)">
-								<LabelTooltip Label=@L["Training time"] FontSize="TextStyle.Body1" Text="Runtime for training the entire dataset in minutes." Position="Radzen.TooltipPosition.Top"></LabelTooltip>
+								<LabelTooltip Label=@L["Training time"] FontSize="TextStyle.Body1" Text="@L["Trainings.Training.TrainingTime.Label.tooltip"]" Position="Radzen.TooltipPosition.Top"></LabelTooltip>
 							</MudTableSortLabel>
 						</MudTh>
 						<MudTh>
 							<MudTableSortLabel SortBy="new Func<ModelDto, object>(x=>x.Emissions)">
-								<LabelTooltip Label=@L["Training emissions"] FontSize="TextStyle.Body1" Text="Emissions for training the entire dataset in mg CO2 equivalents." Position="Radzen.TooltipPosition.Top"></LabelTooltip>
+								<LabelTooltip Label=@L["Training emissions"] FontSize="TextStyle.Body1" Text="@L["Trainings.Training.Emissions.Label.tooltip"]" Position="Radzen.TooltipPosition.Top"></LabelTooltip>
 
 							</MudTableSortLabel>
 						</MudTh>
 						<MudTh>
 							<MudTableSortLabel SortBy="new Func<ModelDto, object>(x=>x.PredictionTime)">
-								<LabelTooltip Label=@L["Prediction time"] FontSize="TextStyle.Body1" Text="Runtime for predicting one single sample in microseconds." Position="Radzen.TooltipPosition.Top"></LabelTooltip>
+								<LabelTooltip Label=@L["Prediction time"] FontSize="TextStyle.Body1" Text="@L["Trainings.Training.PredictionTime.Label.tooltip"]" Position="Radzen.TooltipPosition.Top"></LabelTooltip>
 							</MudTableSortLabel>
 						</MudTh>
 						<MudTh></MudTh>
