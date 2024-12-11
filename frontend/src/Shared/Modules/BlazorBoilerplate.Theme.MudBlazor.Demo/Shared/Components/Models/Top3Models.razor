@@ -11,7 +11,7 @@
         <CardHeaderActions>
             @if (Dataset != null)
             {
-                <ButtonTooltip Text="Click here to display all models that have been trained so far on this dataset." Position="Placement.Left">
+                <ButtonTooltip Text="@L["Datasets.Dataset.Top3Models.More.tooltip"]" Position="Placement.Left">
                     <MudButton Href="@("/datasets/" + Dataset.Dataset.Id + "/models")"
                             Variant="Variant.Filled"
                             StartIcon="@Icons.Material.Filled.ReadMore"

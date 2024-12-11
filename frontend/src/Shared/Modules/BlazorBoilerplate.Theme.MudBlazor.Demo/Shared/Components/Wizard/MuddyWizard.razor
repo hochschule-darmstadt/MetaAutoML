@@ -69,7 +69,7 @@
                                 </ButtonTooltip>
                             }
                             <MudStack Row="true">
-                                <ButtonTooltip Text="Click here to get back to the last step of the training configuration wizard." Position="Placement.Bottom" ShowOnHover="(!IsPreviousDisabled)">
+                                <ButtonTooltip Text="@L["Home.Datasets.Dataset.Train.Previous.tooltip"]" Position="Placement.Bottom" ShowOnHover="(!IsPreviousDisabled)">
                                     <MudButton OnClick="OnPrevious"
                                                Disabled="@IsPreviousDisabled"
                                                Color="Color.Secondary"
@@ -81,7 +81,7 @@
                                 @if (@IsFinishVisible && !tourActivated)
                                 {
 
-                                    <ButtonTooltip Text="Click here to finish configuration and start training. This may take a while, depending on your maximum runtime configuration." Position="Placement.Bottom">
+                                    <ButtonTooltip Text="@L["Home.Datasets.Dataset.Train.Finish.tooltip"]" Position="Placement.Bottom">
                                         <MudButton OnClick="OnFinish"
                                                    Color="Color.Secondary"
                                                    Disabled="@DisableNext"
@@ -93,7 +93,7 @@
                                 }
                                 else if (@IsFinishVisible && tourActivated)
                                 {
-                                    <ButtonTooltip Text="Click here to finish configuration and start training. This may take a while, depending on your maximum runtime configuration." Position="Placement.Bottom">
+                                    <ButtonTooltip Text="@L["Home.Datasets.Dataset.Train.Finish.tooltip"]" Position="Placement.Bottom">
                                         <MudButton OnClick="OnFinish" data-form-eighthStep
                                                    Color="Color.Secondary"
                                                    Disabled="@DisableNext"
@@ -106,8 +106,8 @@
                                 else if (tourActivated)
                                 {
 
-                                    <ButtonTooltip Text="Click here to advance to the next step of the training wizard: configuring the training. You can always step back." Position="Placement.Top">
-                                        <MudButton OnClick="OnNextTourActivated" data-form-forthStep 
+                                    <ButtonTooltip Text="@L["Home.Datasets.Dataset.Train.Next.tooltip"]" Position="Placement.Top">
+                                        <MudButton OnClick="OnNextTourActivated" data-form-forthStep
                                                    Disabled="@IsNextDisabled"
                                                    Color="Color.Secondary"
                                                    Variant="@ButtonVariant">
@@ -119,7 +119,7 @@
                                 else if (!tourActivated)
                                 {
 
-                                    <ButtonTooltip Text="Click here to advance to the next step of the training wizard: configuring the training. You can always step back." Position="Placement.Top">
+                                    <ButtonTooltip Text="@L["Home.Datasets.Dataset.Train.Next.tooltip"]" Position="Placement.Top">
                                         <MudButton OnClick="OnNext"
                                                    Disabled="@IsNextDisabled"
                                                    Color="Color.Secondary"

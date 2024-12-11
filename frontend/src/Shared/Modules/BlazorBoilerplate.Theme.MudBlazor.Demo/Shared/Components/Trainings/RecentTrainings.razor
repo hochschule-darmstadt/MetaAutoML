@@ -9,10 +9,10 @@
 <MudCard Elevation="5">
     <MudCardHeader Style="border-bottom-style: inset; border-bottom-width: 1px;">
         <CardHeaderContent>
-            <LabelTooltip Label="Recent trainings" Text="These are the ML training sessions you have started recently. By clicking on one training (indicated by date and time) you can inspect and use the ML models that have been trained." Position="Radzen.TooltipPosition.Top"></LabelTooltip>
+            <LabelTooltip Label="Recent trainings" Text="@L["Home.RecentTrainings.Label.tooltip"]" Position="Radzen.TooltipPosition.Top"></LabelTooltip>
         </CardHeaderContent>
         <CardHeaderActions>
-            <ButtonTooltip Text="Click here to navigate to all trainings that you have performed on the OMA-ML platform so far." Position="Placement.Top">
+            <ButtonTooltip Text="@L["Home.RecentTrainings.More.tooltip"]" Position="Placement.Top">
                     <MudButton Href="@("/trainings")"
                                Variant="Variant.Filled"
                                StartIcon="@Icons.Filled.ArrowForward"
@@ -20,7 +20,7 @@
                                Size="Size.Small"
                                Style="margin-top: 8px">@L["More"]</MudButton>
                     </ButtonTooltip>
-                  
+
                 </CardHeaderActions>
     </MudCardHeader>
     <MudCardContent>
@@ -63,12 +63,12 @@
 
 @code {
     [Parameter]
-    public GetTrainingsResponseDto Trainings 
-    { 
+    public GetTrainingsResponseDto Trainings
+    {
         get
         {
             return _trainings;
-        } 
+        }
         set
         {
             _trainings = value;
@@ -85,7 +85,7 @@
                 _timer.Elapsed += RefreshRecentTrainings;
                 StateHasChanged();
             }
-        } 
+        }
     }
     private GetTrainingsResponseDto _trainings;
     private Timer _timer;
@@ -103,7 +103,7 @@
         if (element.DatasetName.Contains(searchString, StringComparison.OrdinalIgnoreCase))
             return true;
         return false;
-    } 
+    }
 
     public void Dispose()
     {

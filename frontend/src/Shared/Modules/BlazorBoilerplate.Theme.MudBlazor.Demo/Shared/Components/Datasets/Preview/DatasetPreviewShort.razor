@@ -32,7 +32,7 @@
                         }
                         else
                         {
-                            <ButtonTooltip Text="Click here to to configure datatypes and roles of the dataset columns. " Position="Placement.Left">
+                            <ButtonTooltip Text="@L["Datasets.Dataset.Configure.tooltip"]" Position="Placement.Left">
                                 <MudButton Href="@NavManager.ToAbsoluteUri("datasets/" + @Dataset.Dataset.Id + "/preview").AbsoluteUri"
                                            Variant="Variant.Filled"
                                            StartIcon="@Icons.Material.Filled.ReadMore"
