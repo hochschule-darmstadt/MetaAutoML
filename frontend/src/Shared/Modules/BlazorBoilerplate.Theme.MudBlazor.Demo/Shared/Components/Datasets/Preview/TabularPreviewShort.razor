@@ -1,28 +1,36 @@
-
 @if (Dataset == null)
 {
-        <DataLoaderSpinner />
+    <DataLoaderSpinner />
 }
 else
 {
-    <MudTable Items="@Dataset.Rows" style="width:stretch" class="mat-elevation-z5" FixedHeader="true" Height="250px" Dense="true">
+    <MudTable Items="@Dataset.Rows" style="width:stretch" class="mat-elevation-z5" FixedHeader="true" Height="250px"
+        Dense="true">
         <HeaderContent>
             @foreach (var item in Dataset.Columns)
             {
-                <MudTh>@item.Name</MudTh>
-               
+                <MudTh>@ShortenColumnName(item.Name)</MudTh>
+
             }
         </HeaderContent>
         <RowTemplate>
             @foreach (var item in context)
             {
-                <MudTd>@item</MudTd>
+                <MudTd>@ShortenColumnName(item.ToString())</MudTd>
             }
         </RowTemplate>
     </MudTable>
 }
 
 @code {
+    private string ShortenColumnName(string name)
+    {
+        if (string.IsNullOrEmpty(name))
+            return string.Empty;
+
+        return name.Length > 10 ? name.Substring(0, 10) + "..." : name;
+    }
+
     [Parameter]
     public DataFrame Dataset { get; set; }
 }
