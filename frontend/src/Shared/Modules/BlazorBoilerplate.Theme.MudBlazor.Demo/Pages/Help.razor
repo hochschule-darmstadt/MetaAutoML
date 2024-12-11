@@ -216,7 +216,7 @@
         this.helpTabPanelList = await apiClient.GetHelpPageJson();
         this.helpTabPanelList.ForEach(tab => { if (tab.PanelHeadline.Equals("Introduction")) { this.introductionTab = tab; } else if (tab.PanelHeadline.Equals("Pages")) { this.pagesTab = tab; } });
         _breadcrumbs.Add(new BreadcrumbItem(L["Home"], "/", false, Icons.Filled.Home));
-        _breadcrumbs.Add(new BreadcrumbItem(L["Help"], "/help", false, Icons.Material.Filled.HelpOutline));
+        _breadcrumbs.Add(new BreadcrumbItem(L["Help"], null, true, Icons.Material.Filled.HelpOutline));
         //StateHasChanged();
         await TourService.checkIfUserTourIsActivatedAndStartTour(navigationManager.Uri);
 

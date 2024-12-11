@@ -7,12 +7,8 @@
 @inherits MudComponentBase
 
 <CascadingValue Value="this" IsFixed="true">
-    <MudCard @attributes="UserAttributes"
-             Class="@Classname"
-             Style="@Style"
-             Elevation="@Elevation"
-             Outlined="@Outlined"
-             Square="@Square">
+    <MudCard @attributes="UserAttributes" Class="@Classname" Style="@Style" Elevation="@Elevation" Outlined="@Outlined"
+        Square="@Square">
         @if (null != SelectedIndex)
         {
             <MudCardHeader Style=@(ShowHeaderBorder ? "border-bottom: 1px solid grey;" : "")>
@@ -25,18 +21,13 @@
                                 <MudItem>
                                     @if (panel == SelectedPanel)
                                     {
-                                        <MudChip Size="Size.Small"
-                                                 Color="@HeaderChipSelectedColor"
-                                                 Variant="@HeaderChipVariant"
-                                                 Text="@panel.Title" />
+                                        <MudChip Size="Size.Small" Color="@HeaderChipSelectedColor" Variant="@HeaderChipVariant"
+                                            Text="@panel.Title" />
                                     }
                                     else
                                     {
-                                        <MudChip Size="Size.Small"
-                                                 Text="@panel.Title"
-                                                 Variant="@HeaderChipVariant"
-                                                 Color="@HeaderChipColor"
-                                                 OnClick="(() => ChipSelect(panel))" />
+                                        <MudChip Size="Size.Small" Text="@panel.Title" Variant="@HeaderChipVariant"
+                                            Color="@HeaderChipColor" OnClick="(() => ChipSelect(panel))" />
                                     }
                                 </MudItem>
                             }
@@ -46,15 +37,11 @@
                     {
                         if (!ShowChips)
                         {
-                            <MudText Class="mt-2 mx-2"
-                                     Typo="@TitleTypo"
-                                     Color="@TitleColor">
+                            <MudText Class="mt-2 mx-2" Typo="@TitleTypo" Color="@TitleColor">
                                 @SelectedPanel?.Title
                             </MudText>
                         }
-                        <MudText Class="mt-2 mx-2"
-                                 Typo="@DescriptionTypo"
-                                 Color="@DescriptionColor">
+                        <MudText Class="mt-2 mx-2" Typo="@DescriptionTypo" Color="@DescriptionColor">
                             @SelectedPanel?.Description
                         </MudText>
                     }
@@ -64,8 +51,11 @@
                         <MudStack Row="true">
                             @if (@DisplaySaveSchemaCheckbox)
                             {
-                                <ButtonTooltip Text="Select this box if you want your configuration to be saved with the dataset and be re-used for the next training." Position="Placement.Bottom">
-                                    <MudCheckBox Checked="@SaveSchema" T="bool" CheckedChanged="OnSaveSchemaCheckedChanged" Label="@L["Save Schema"]"></MudCheckBox>
+                                <ButtonTooltip
+                                    Text="Select this box if you want your configuration to be saved with the dataset and be re-used for the next training."
+                                    Position="Placement.Bottom">
+                                    <MudCheckBox Checked="@SaveSchema" T="bool" CheckedChanged="OnSaveSchemaCheckedChanged"
+                                        Label="@L["Save Schema"]"></MudCheckBox>
                                 </ButtonTooltip>
                             }
                             <MudStack Row="true">
@@ -118,7 +108,6 @@
                                 }
                                 else if (!tourActivated)
                                 {
-
                                     <ButtonTooltip Text="@L["Home.Datasets.Dataset.Train.Next.tooltip"]" Position="Placement.Top">
                                         <MudButton OnClick="OnNext"
                                                    Disabled="@IsNextDisabled"
@@ -144,7 +133,7 @@
 </CascadingValue>
 
 
-@code{
+@code {
     [Inject]
     ITourService TourService { get; set; }
     [Inject]

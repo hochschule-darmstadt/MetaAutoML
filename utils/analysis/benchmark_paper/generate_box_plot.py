@@ -4,7 +4,7 @@
 #           Additionally uncomment the appropriate metric at line 38-40 and correct label at line 60 -62
 
 import openml
-openml.config.apikey = 'ADD MY OPENML API KEY HERE'
+openml.config.apikey = 'cfa10e8e9b677cb8f8a1a716a97fde3d'
 from matplotlib import pyplot as plt
 import numpy as np
 import pandas as pd

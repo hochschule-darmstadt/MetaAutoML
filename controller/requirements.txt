@@ -21,6 +21,7 @@ patsy==0.5.2
 Pillow==9.2.0
 ply==3.11
 protobuf==4.21.7
+pyinstrument==5.0.0
 pymongo==4.2.0
 pyparsing==3.0.9
 python-dateutil==2.8.2

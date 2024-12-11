@@ -34,7 +34,7 @@
     protected override async Task OnInitializedAsync()
     {
         await LoadTrainings();
-        _breadcrumbs.Add(new BreadcrumbItem(L["Home"], null, false, Icons.Filled.Home));
+        _breadcrumbs.Add(new BreadcrumbItem(L["Home"], "/", false, Icons.Material.Filled.Home));
         _breadcrumbs.Add(new BreadcrumbItem(L["Trainings"], null, true, Icons.Filled.ModelTraining));
         StateHasChanged();
 
