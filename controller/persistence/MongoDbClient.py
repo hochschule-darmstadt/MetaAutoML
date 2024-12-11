@@ -6,6 +6,7 @@ from bson.objectid import ObjectId
 import logging
 from MeasureDuration import MeasureDuration
 import pymongo
+from MongoDbDocuments import MongoDbDocuments
 
 class MongoDbClient:
     """
@@ -23,9 +24,11 @@ class MongoDbClient:
             self.__log.setLevel(logging.getLevelName(os.getenv("PERSISTENCE_LOGGING_LEVEL")))
             if server_url is not None:
                 self.__mongo = self.__use_real_database(server_url)
+                self.__db_documents = MongoDbDocuments(self.__mongo)
             else:
                 self.__mongo = MongoMockClient()
-            self.__log.info("New mongo db client intialized.")
+                self.__db_documents = MongoDbDocuments(self.__mongo)
+            self.__log.info("New mongo db client initialized.")
 
 
     def __use_real_database(self, server_url: str) -> MongoClient:
@@ -62,6 +65,16 @@ class MongoDbClient:
     ## MISC MONGO DB OPERATIONS
     ####################################
 #region
+    def create_database(self, user_id: str):
+        """Create a new user database in MongoDB
+
+        Args:
+            user_id (str): Unique user id saved within the MS Sql database of the frontend
+        """
+        self.__db_documents.setup_collections(user_id)
+        self.__log.debug(f"create_database: database {user_id} created")
+
+
     def drop_database(self, user_id: str):
         """Drop a user database from MongoDB
 

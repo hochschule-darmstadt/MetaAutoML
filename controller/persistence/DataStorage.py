@@ -154,7 +154,7 @@ class DataStorage:
         df.to_csv(csv_file, index=False)
         os.remove(excel_file)
         return file_name
-  
+
 
     def create_dataset(self, user_id: str, file_name: str, type: str, name: str, encoding: str) -> str:
         """Create new dataset record and move dataset from upload folder to final path
@@ -194,6 +194,10 @@ class DataStorage:
             },
             "lifecycle_state": "active"
         }
+
+        self.__log.debug("create_database: creating a new database...")
+        self.__mongo.create_database(user_id)
+        self.__log.debug(f"create_database: new database created for user with id: {user_id}")
 
         self.__log.debug("create_dataset: inserting new dataset into database...")
         dataset_id = self.__mongo.insert_dataset(user_id, database_content)
@@ -537,7 +541,7 @@ class DataStorage:
     def create_training(self, user_id: str, training_details: 'dict[str, object]') -> str:
         """
         Create new training record inside MongoDB
-        
+
         Args:
             user_id (str): Unique user id saved within the MS Sql database of the frontend
             training_details (dict[str, object]): Dictonary of training record fields (see data schema in WIKI for more information)
