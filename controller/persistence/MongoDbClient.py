@@ -328,7 +328,7 @@ class MongoDbClient:
         self.__log.debug(f"get_training: documents within trainings: {trainings.count_documents}, filter {filter}")
         return trainings.find_one(filter)
 
-    def get_trainings(self, user_id: str, filter: 'dict[str, object]'={}, pagination:bool=False, page_number:int=1) -> 'list[dict[str, object]]':
+    def get_trainings(self, user_id: str, filter: 'dict[str, object]'={}, pagination:bool=False, page_number:int=1, page_size:int=20) -> 'list[dict[str, object]]':
         """Retrieve all training records from a user database
 
         Args:
@@ -336,12 +336,13 @@ class MongoDbClient:
             filter (dict[str, object], optional): Dictionary of record fields to filter the training records from. Defaults to {}.
             pagination (bool): If pagination is used
             page_number (int): the pagination page to retrieve
+            page_size (int): the number of records per page
+
         Returns:
-            list[dict[str, object]]: List of dictonaries representing training records
+            list[dict[str, object]]: List of dictionaries representing training records
         """
-        page_size = 20
         offset = (page_number - 1) * page_size
-        if pagination == True:
+        if pagination:
             return self.__mongo[user_id]["trainings"].find(filter).sort("runtime_profile.start_time", pymongo.DESCENDING).skip(offset).limit(page_size)
         else:
             trainings: Collection = self.__mongo[user_id]["trainings"]
@@ -380,6 +381,18 @@ class MongoDbClient:
         result = trainings.update_one({ "_id": ObjectId(training_id) }, { "$set": { "lifecycle_state": "deleted"} })
         self.__log.debug(f"delete_training: soft delete for {result.matched_count} documents")
         return result.matched_count
+
+    def get_trainings_count(self, user_id: str) -> int:
+        """Get the total number of training records for a user
+
+        Args:
+            user_id (str): Unique user id saved within the MS Sql database of the frontend
+
+        Returns:
+            int: The total number of training records
+        """
+        trainings: Collection = self.__mongo[user_id]["trainings"]
+        return trainings.count_documents({"lifecycle_state": "active"})
 
 #endregion
     ####################################

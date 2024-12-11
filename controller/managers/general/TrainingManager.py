@@ -204,11 +204,39 @@ class TrainingManager:
         """
         response = GetTrainingsResponse()
         self.__log.debug(f"get_trainings: get all trainings for user {get_trainings_request.user_id}")
-        all_trainings: list[dict[str, object]] = self.__data_storage.get_trainings(get_trainings_request.user_id, only_last_day=get_trainings_request.only_last_day, pagination=get_trainings_request.pagination, page_number=get_trainings_request.page_number)
-        self.__log.debug(f"get_trainings: found {all_trainings.count} trainings for user {get_trainings_request.user_id}")
+
+        # Calculate pagination parameters
+        pagination = get_trainings_request.pagination
+        page_number = get_trainings_request.page_number
+        page_size = get_trainings_request.page_size or 20
+
+        all_trainings_cursor = self.__data_storage.get_trainings(
+            get_trainings_request.user_id,
+            only_last_day=get_trainings_request.only_last_day,
+            pagination=pagination,
+            page_number=page_number,
+            page_size=page_size
+        )
+
+        all_trainings = list(all_trainings_cursor)
+        total_trainings = self.__data_storage.get_trainings_count(get_trainings_request.user_id)
+
+        self.__log.debug(f"get_trainings: found {len(all_trainings)} trainings for user {get_trainings_request.user_id}")
 
         for training in all_trainings:
-            response.trainings.append(self.__training_object_rpc_object(get_trainings_request.user_id, training, get_trainings_request.short, get_trainings_request.only_last_day))
+            response.trainings.append(self.__training_object_rpc_object(
+                get_trainings_request.user_id,
+                training,
+                get_trainings_request.short,
+                get_trainings_request.only_last_day
+            ))
+
+        # Add pagination metadata to the response
+        response.pagination_metadata.total_items = total_trainings
+        response.pagination_metadata.page_number = page_number
+        response.pagination_metadata.pagination = pagination
+        response.pagination_metadata.total_pages = (total_trainings + page_size - 1) // page_size
+
         return response
 
     def get_training(

@@ -101,12 +101,20 @@ namespace BlazorBoilerplate.Server.Managers
                 getTrainings.Pagination = request.Pagination;
                 getTrainings.PageNumber = request.PageNumber;
                 getTrainings.OnlyLastDay = request.OnlyLastDay;
+                getTrainings.PageSize = request.PageSize;
                 var reply = _client.GetTrainings(getTrainings);
                 foreach (var training in reply.Trainings)
                 {
                     TrainingDto trainingDto = await CreateTrainingDtoFromTraining(username, training);
                     response.Trainings.Add(trainingDto);
                 }
+                response.PaginationMetadata = new PaginationMetadataDto
+                {
+                    TotalItems = reply.PaginationMetadata.TotalItems,
+                    PageNumber = reply.PaginationMetadata.PageNumber,
+                    PageSize = reply.PaginationMetadata.PageSize,
+                    TotalPages = reply.PaginationMetadata.TotalPages
+                };
                 return new ApiResponse(Status200OK, null, response);
 
             }

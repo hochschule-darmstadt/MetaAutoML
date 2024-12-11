@@ -50,6 +50,11 @@ message GetTrainingsRequest {
     example: 2 //return trainings from pagination page 2
   */
   int32 pageNumber = 5;
+  /*
+    The number of items per page
+    example: 10 //10 items per page
+  */
+  int32 pageSize = 6;
 }
 
 message GetTrainingsResponse {
@@ -58,7 +63,11 @@ message GetTrainingsResponse {
     example: [Training, Training]
   */
   repeated Training trainings = 1;
-
+  /*
+    Pagination metadata
+    example: PaginationMetadata
+  */
+  PaginationMetadata paginationMetadata = 2;
 }
 
 message GetTrainingRequest {
@@ -309,4 +318,27 @@ message GetSuggestedTrainingRuntimeResponse {
     The suggested runtime for this da
   */
   int32 suggested_runtime = 1;
+}
+
+message PaginationMetadata {
+  /*
+    The total number of items available
+    example: 50 //total 50 items available
+  */
+  int32 totalItems = 1;
+  /*
+    The current page number
+    example: 2 //current page number is 2
+  */
+  int32 pageNumber = 2;
+  /*
+    The number of items per page
+    example: 10 //10 items per page
+  */
+  int32 pageSize = 3;
+  /*
+    The total number of pages available
+    example: 5 //total 5 pages available
+  */
+  int32 totalPages = 4;
 }

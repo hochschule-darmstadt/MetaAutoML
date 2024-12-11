@@ -592,7 +592,7 @@ class DataStorage:
 
         return result is not None, result
 
-    def get_trainings(self, user_id: str, dataset_id:str=None, only_last_day:bool=False, pagination:bool=False, page_number:int=1) -> 'list[dict[str, object]]':
+    def get_trainings(self, user_id: str, dataset_id:str=None, only_last_day:bool=False, pagination:bool=False, page_number:int=1, page_size:int=20) -> 'list[dict[str, object]]':
         """Get all training records from a specific user database
 
         Args:
@@ -600,6 +600,8 @@ class DataStorage:
             dataset_id (str, optional): Set a filter to get training records by dataset id. Defaults to None.
             pagination (bool): If pagination is used
             page_number (int): the pagination page to retrieve
+            page_size (int): the number of records per page
+
         Returns:
             list[dict[str, object]]: List of all available training records
         """
@@ -609,17 +611,13 @@ class DataStorage:
         if only_last_day == True:
             now = datetime.now()
             yesteday = now - timedelta(hours=24)
-
             search_filter.update({
-                #"runtime_profile.start_time.$date.$numberLong": {
-                #    "$gte": f"{yesteday.timestamp() * 1000}"  # Convert to milliseconds
-                #}
                 "runtime_profile.start_time": {
                     "$gte": yesteday,
                     "$lt": now
                 }
             })
-        return [sess for sess in self.__mongo.get_trainings(user_id, search_filter, pagination, page_number)]
+        return [sess for sess in self.__mongo.get_trainings(user_id, search_filter, pagination, page_number, page_size)]
 
     def delete_training(self, user_id: bool, training_id: str) -> int:
         """Delete a training record by id from a user databse. (all related record and files will also be deleted (Models, Predictions))
@@ -652,6 +650,17 @@ class DataStorage:
         amount_deleted_trainings_result = self.__mongo.delete_training(user_id, training_id)
         self.__log.debug(f"delete_training: documents deleted within training: {amount_deleted_trainings_result}")
         return amount_deleted_trainings_result
+
+    def get_trainings_count(self, user_id: str) -> int:
+        """Get the total number of training records for a user
+
+        Args:
+            user_id (str): Unique user id saved within the MS Sql database of the frontend
+
+        Returns:
+            int: The total number of training records
+        """
+        return self.__mongo.get_trainings_count(user_id)
 
 #endregion
 
