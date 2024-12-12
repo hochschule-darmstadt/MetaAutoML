@@ -21,7 +21,7 @@
         {
 
 
-    <MudTable Items="@_trainings.Trainings" style="width:stretch" class="mat-elevation-z5" AllowSelection="false" Filter="new Func<TrainingDto,bool>(FilterFunc)">
+    <MudTable ServerData="ServerReload" style="width:stretch" class="mat-elevation-z5" Filter="new Func<TrainingDto,bool>(FilterFunc)">
         <ToolBarContent>
             <MudSpacer />
             <MudTextField @bind-Value="searchString" Placeholder="@L["Search for status, task or dataset type"]" Adornment="Adornment.Start" Immediate="true"
@@ -53,7 +53,7 @@
             <MudTd><TrainingMenu Training="@context" OnDeleteCompleted="@OnDeleteTrainingCompleted" /></MudTd>
         </RowTemplate>
         <PagerContent>
-            <MudTablePager RowsPerPageString=@L["Rows per page"] @bind-PageSize="_pageSize" @bind-PageIndex="_pageNumber" PageSizeOptions="new int[] { 5, 10, 20 }" OnPageChanged="OnPageChanged" />
+            <MudTablePager RowsPerPageString=@L["Rows per page"] PageSizeOptions="new int[] { 10, 25, 50, 100 }" />
         </PagerContent>
     </MudTable>
         }
@@ -93,6 +93,8 @@
     private int _pageSize = 10; // Default page size
     private int _pageNumber = 0; // Default page number
 
+    private int totalItems;
+
     private bool FilterFunc(TrainingDto element)
     {
         if (string.IsNullOrWhiteSpace(searchString))
@@ -105,6 +107,7 @@
             return true;
         return false;
     }
+
     public void Dispose()
     {
         DisposeTimer();
@@ -169,9 +172,9 @@
         }
     }
 
-    private async Task OnPageChanged(int pageNumber)
+    private async Task OnPageChanged(int pageNumber, int pageSize)
     {
-        var apiResponse = await apiClient.GetTrainings(new GetTrainingsRequestDto() { Short = true, Pagination = true, PageNumber = pageNumber });
+        var apiResponse = await apiClient.GetTrainings(new GetTrainingsRequestDto() { Short = true, Pagination = true, PageNumber = pageNumber, PageSize = pageSize });
         if (apiResponse.IsSuccessStatusCode)
         {
             _trainings = Newtonsoft.Json.JsonConvert.DeserializeObject<GetTrainingsResponseDto>(apiResponse.Result.ToString());
@@ -183,10 +186,18 @@
         }
     }
 
-    private async Task OnPageChanged(int pageNumber, int pageSize)
+    private async Task<TableData<TrainingDto>> ServerReload(TableState state)
     {
-        _pageNumber = pageNumber;
-        _pageSize = pageSize;
-        await OnPageChanged.InvokeAsync(pageNumber + 1, pageSize); // Page number is 1-based
+        var apiResponse = await apiClient.GetTrainings(new GetTrainingsRequestDto() { Short = true, Pagination = true, PageNumber = state.Page + 1, PageSize = state.PageSize });
+        if (apiResponse.IsSuccessStatusCode)
+        {
+            var data = Newtonsoft.Json.JsonConvert.DeserializeObject<GetTrainingsResponseDto>(apiResponse.Result.ToString());
+            return new TableData<TrainingDto>() { TotalItems = data.PaginationMetadata.TotalItems, Items = data.Trainings };
+        }
+        else
+        {
+            viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
+            return new TableData<TrainingDto>() { TotalItems = 0, Items = new List<TrainingDto>() };
+        }
     }
 }
