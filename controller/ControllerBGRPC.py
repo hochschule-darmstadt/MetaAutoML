@@ -1223,7 +1223,7 @@ class CreateNewUserResponse(betterproto.Message):
 
 
 @dataclass(eq=False, repr=False)
-class UserMessageRequest(betterproto.Message):
+class SendChatMessageRequest(betterproto.Message):
     text: str = betterproto.string_field(1)
     """Message from the User to the Chatbotexample:"What is OMA-ML?"""
 
@@ -1232,7 +1232,7 @@ class UserMessageRequest(betterproto.Message):
 
 
 @dataclass(eq=False, repr=False)
-class ChatbotResponse(betterproto.Message):
+class SendChatMessageResponse(betterproto.Message):
     response_chunk: str = betterproto.string_field(3)
     """
     Response chunk from the chatbotChunks should enable the "word-for-word"
@@ -1756,16 +1756,16 @@ class ControllerServiceStub(betterproto.ServiceStub):
 
     async def send_chat_message(
         self,
-        user_message_request: "UserMessageRequest",
+        send_chat_message_request: "SendChatMessageRequest",
         *,
         timeout: Optional[float] = None,
         deadline: Optional["Deadline"] = None,
         metadata: Optional["MetadataLike"] = None
-    ) -> "ChatbotResponse":
+    ) -> "SendChatMessageResponse":
         return await self._unary_unary(
             "/ControllerService/SendChatMessage",
-            user_message_request,
-            ChatbotResponse,
+            send_chat_message_request,
+            SendChatMessageResponse,
             timeout=timeout,
             deadline=deadline,
             metadata=metadata,
@@ -1928,8 +1928,8 @@ class ControllerServiceBase(ServiceBase):
         raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
 
     async def send_chat_message(
-        self, user_message_request: "UserMessageRequest"
-    ) -> "ChatbotResponse":
+        self, send_chat_message_request: "SendChatMessageRequest"
+    ) -> "SendChatMessageResponse":
         raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
 
     async def __rpc_create_new_user(
@@ -2166,7 +2166,8 @@ class ControllerServiceBase(ServiceBase):
         await stream.send_message(response)
 
     async def __rpc_send_chat_message(
-        self, stream: "grpclib.server.Stream[UserMessageRequest, ChatbotResponse]"
+        self,
+        stream: "grpclib.server.Stream[SendChatMessageRequest, SendChatMessageResponse]",
     ) -> None:
         request = await stream.recv_message()
         response = await self.send_chat_message(request)
@@ -2357,7 +2358,7 @@ class ControllerServiceBase(ServiceBase):
             "/ControllerService/SendChatMessage": grpclib.const.Handler(
                 self.__rpc_send_chat_message,
                 grpclib.const.Cardinality.UNARY_UNARY,
-                UserMessageRequest,
-                ChatbotResponse,
+                SendChatMessageRequest,
+                SendChatMessageResponse,
             ),
         }

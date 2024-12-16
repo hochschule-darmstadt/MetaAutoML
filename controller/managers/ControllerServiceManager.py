@@ -559,9 +559,9 @@ class ControllerServiceManager(ControllerServiceBase):
     @inject
     async def send_chat_message(
         self,
-        user_message_request: "UserMessageRequest",
+        user_message_request: "SendChatMessageRequest",
         chatbotManager:ChatbotManager #=Provide[Application.managers.stream_message]
-        )-> "ChatbotResponse":
+        )-> "SendChatMessageResponse":
         with MeasureDuration() as m:
             response = chatbotManager.send_chat_message(user_message_request)
         self.__log.log("Testing ControllerServiceManager.py")
