@@ -2,6 +2,7 @@ from urllib import response
 from Container import Application
 from DatasetManager import DatasetManager
 from PredictionManager import PredictionManager
+from ChatbotManager import ChatbotManager
 from ThreadLock import ThreadLock
 from TrainingManager import TrainingManager
 from ModelManager import ModelManager
@@ -548,4 +549,21 @@ class ControllerServiceManager(ControllerServiceBase):
         self.__log.warn("delete_prediction: executed")
         return response
 
+#endregion
+
+    ####################################
+    ## CHATBOT RELATED OPERATIONS
+    ####################################
+#region
+
+    @inject
+    async def send_chat_message(
+        self,
+        user_message_request: "UserMessageRequest",
+        chatbotManager:ChatbotManager #=Provide[Application.managers.stream_message]
+        )-> "ChatbotResponse":
+        with MeasureDuration() as m:
+            response = chatbotManager.send_chat_message(user_message_request)
+        self.__log.log("Testing ControllerServiceManager.py")
+        return response
 #endregion

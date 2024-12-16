@@ -7,6 +7,7 @@ import "ModelRelatedMessages.proto";
 import "TrainingRelatedMessages.proto";
 import "OntologyRelatedMessages.proto";
 import "UserRelatedMessages.proto";
+import "ChatbotRelatedMessages.proto";
 
 /*includes all gRPC functions available for the client frontend*/
 service ControllerService {
@@ -107,16 +108,10 @@ service ControllerService {
 
   /*delete a Prediction and every related object inside MongoDB and files on disc*/
   rpc DeletePrediction(DeletePredictionRequest) returns (DeletePredictionResponse) {}
+
+  /*OMA-ML CHATBOT MESSAGES*/
+  /*send user message and the chatbot's response*/
+  rpc SendChatMessage(SendChatMessageRequest) returns(SendChatMessageResponse) {}
 }
-
-
-
-
-
-
-
-
-
-
 
 

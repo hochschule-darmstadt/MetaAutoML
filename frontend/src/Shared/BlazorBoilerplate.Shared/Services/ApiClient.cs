@@ -1,4 +1,5 @@
 using BlazorBoilerplate.Shared.Dto;
+using BlazorBoilerplate.Shared.Dto.Chat;
 using BlazorBoilerplate.Shared.Dto.Dataset;
 using BlazorBoilerplate.Shared.Dto.Db;
 using BlazorBoilerplate.Shared.Dto.Email;
@@ -231,6 +232,15 @@ namespace BlazorBoilerplate.Shared.Services
         {
             return await httpClient.PostJsonAsync<ApiResponseDto>("api/Prediction/DeletePrediction", request);
         }
+        #endregion
+
+        #region OMA-ML CHATBOT MESSAGES
+
+        async public Task<ApiResponseDto> SendChatMessage(SendChatMessageRequestDto request)
+        {
+            return await httpClient.PostJsonAsync<ApiResponseDto>("api/Chatbot/SendChatMessage", request);
+        }
+
         #endregion
 
     }
