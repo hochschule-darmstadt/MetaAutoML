@@ -68,11 +68,10 @@ Style="position:fixed; bottom: 20px; right: 20px; z-index: 100;"
     {
         if (!string.IsNullOrWhiteSpace(currentMessage))
         {
-            messages.Add(new Message { Text = "Got it! Let me assist you with that.", IsUser = false });
             ApiResponseDto apiResponse = await apiClient.SendChatMessage(new BlazorBoilerplate.Shared.Dto.Chat.SendChatMessageRequestDto {Text=currentMessage, ChatHistory="ToDo History"});
             messages.Add(new Message { Text = currentMessage, IsUser = true });
             // Simulate assistant response
-
+            messages.Add(new Message { Text = apiResponse.ToString() , IsUser = false });
             currentMessage = string.Empty;
             await inputField.Clear();
             await inputField.FocusAsync();

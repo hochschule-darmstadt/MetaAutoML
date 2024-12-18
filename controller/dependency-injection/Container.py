@@ -13,6 +13,7 @@ from DataStorage import DataStorage
 from AdapterRuntimeScheduler import AdapterRuntimeScheduler
 from ThreadLock import ThreadLock
 from KubernetesClient import KubernetesClient
+from ChatbotManager import ChatbotManager
 
 class Ressources(containers.DeclarativeContainer):
     if os.getenv("MONGO_DB_DEBUG") == "YES":
@@ -85,6 +86,10 @@ class Managers(containers.DeclarativeContainer):
         PredictionManager,
         data_storage=ressources.data_storage,
         adapter_runtime_scheduler=adapter_runtime_scheduler
+    )
+    chatbot_manager = providers.Factory(
+        ChatbotManager,
+
     )
 
 class Application(containers.DeclarativeContainer):

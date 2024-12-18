@@ -559,11 +559,11 @@ class ControllerServiceManager(ControllerServiceBase):
     @inject
     async def send_chat_message(
         self,
-        user_message_request: "SendChatMessageRequest",
-        chatbotManager:ChatbotManager #=Provide[Application.managers.stream_message]
+        send_chat_message_request: "SendChatMessageRequest",
+        chatbotManager:ChatbotManager=Provide[Application.managers.chatbot_manager]
         )-> "SendChatMessageResponse":
         with MeasureDuration() as m:
-            response = chatbotManager.send_chat_message(user_message_request)
-        self.__log.log("Testing ControllerServiceManager.py")
+            response = chatbotManager.send_chat_message(send_chat_message_request)
+        self.__log.warn("send_chat_message: executed")
         return response
 #endregion
