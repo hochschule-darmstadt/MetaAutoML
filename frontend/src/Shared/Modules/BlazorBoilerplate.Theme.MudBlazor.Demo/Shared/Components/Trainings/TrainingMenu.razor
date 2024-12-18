@@ -6,15 +6,11 @@
 
 @if (Training != null)
 {
-    <MudStack Row="true" >
-        <MudButton Variant="Variant.Filled"
-                    Color="Color.Secondary"
-                    Size="Size.Small"
-                    OnClick="@(e => { NavManager.NavigateTo("trainings/" + Training.Id); })">@L["Details"]</MudButton>
-        <MudButton Variant="Variant.Filled"
-                    Color="Color.Secondary"
-                    Size="Size.Small"
-                    OnClick="@DeleteTraining">@L["Delete"]</MudButton>
+    <MudStack Row="true">
+        <MudButton Variant="Variant.Filled" Color="Color.Secondary" Size="Size.Small"
+            OnClick="@(e => { NavManager.NavigateTo("trainings/" + Training.Id); })">@L["Details"]</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Secondary" Size="Size.Small" OnClick="@DeleteTraining">@L["Delete"]
+        </MudButton>
     </MudStack>
 }
 
@@ -22,7 +18,7 @@
     [Parameter]
     public EventCallback OnDeleteCompleted { get; set; }
     [Parameter]
-    public TrainingDto Training { get; set; }
+    public TrainingMetaDataDto Training { get; set; }
     private async Task DeleteTraining()
     {
         try

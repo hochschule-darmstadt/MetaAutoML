@@ -341,13 +341,81 @@ class MongoDbClient:
         Returns:
             list[dict[str, object]]: List of dictionaries representing training records
         """
-        offset = (page_number - 1) * page_size
-        if pagination:
-            return self.__mongo[user_id]["trainings"].find(filter).sort("runtime_profile.start_time", pymongo.DESCENDING).skip(offset).limit(page_size)
-        else:
-            trainings: Collection = self.__mongo[user_id]["trainings"]
-            self.__log.debug(f"get_trainings: documents within trainings: {trainings.count_documents}, filter {filter}")
-            return trainings.find(filter).sort("runtime_profile.start_time", pymongo.DESCENDING)
+
+        # Aggregation pipeline
+        pipeline = [
+            # Stage 1: Filter documents based on provided conditions
+            # This stage reduces the number of documents early in the pipeline
+            {
+                '$match': filter
+            },
+
+            # Stage 2: Join with datasets collection
+            # Adds dataset information to each training document
+            # Creates an array field 'dataset' containing matching dataset documents
+            {
+                "$lookup": {
+                "from": "datasets",
+                "let": { "dataset_id_str": "$dataset_id" },
+                "pipeline": [       # Sub-pipeline to filter datasets based on dataset_id as dataset_id is string in trainings collection
+                    {
+                    "$match": {
+                        "$expr": {
+                        "$eq": [
+                            { "$toString": "$_id" },
+                            "$$dataset_id_str"
+                        ]
+                        }
+                    }
+                    }
+                ],
+                "as": "dataset"
+                }
+            },
+
+            # Stage 3: Unwind the dataset array
+            # Deconstructs the dataset array created by $lookup
+            # Creates a separate document for each array element
+            # In this case, should only be one dataset per training
+            {
+                '$unwind': '$dataset'
+            },
+
+            # Stage 4: Project only the required fields
+            # Reshapes each document to include only needed fields
+            # Renames and restructures fields as needed
+            {
+                '$project': {
+                    '_id': 1,
+                    'dataset_id': 1,
+                    'task': '$configuration.task',
+                    'status': 1,
+                    'start_time': '$runtime_profile.start_time',
+                    'dataset_name': '$dataset.name'
+                }
+            },
+
+            # Stage 5: Sort the results
+            # Orders documents by start_time in descending order
+            # -1 means descending order, 1 would mean ascending
+            {
+                '$sort': {
+                    'start_time': -1
+                }
+            },
+        ]
+
+        # Add pagination stages only if both page and page_size are provided
+        if pagination and page_number is not None and page_size is not None:
+            offset = (page_number - 1) * page_size
+            pipeline.extend([
+                {'$skip': offset},
+                {'$limit': page_size}
+            ])
+
+        # Execute the query
+        return self.__mongo[user_id]["trainings"].aggregate(pipeline)
+
 
     def update_training(self, user_id: str, training_id: str, new_values: 'dict[str, str]') -> bool:
         """Update a single training record from a user database

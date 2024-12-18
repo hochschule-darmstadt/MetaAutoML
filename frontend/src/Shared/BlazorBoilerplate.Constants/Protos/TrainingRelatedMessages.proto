@@ -62,7 +62,7 @@ message GetTrainingsResponse {
     List of training records from MongoDB (see Training for more detals)
     example: [Training, Training]
   */
-  repeated Training trainings = 1;
+  repeated TrainingMetaData trainings = 1;
   /*
     Pagination metadata
     example: PaginationMetadata
@@ -138,6 +138,38 @@ message Training {
     example: TrainingRuntimeProfile
   */
   TrainingRuntimeProfile RuntimeProfile = 8;
+}
+
+message TrainingMetaData {
+  /*
+    Unique training id generated when inserting a new training document into MongoDB
+    example: '63515c86b10d04d230dc1482'
+  */
+  string id = 1;
+  /*
+    Unique dataset id generated when inserting a new dataset document into MongoDB
+    example: '63515c86b10d04d230dc1482'
+  */
+  string datasetId = 2;
+  /*
+    Dataset name used for this training
+    example: 'Titanic'
+  */
+  string datasetName = 3;
+  /*
+    Type of the training task (e.g. tabular_classification)
+  */
+  string task = 4;
+  /*
+    Current training activity status (busy, ended)
+    example: "busy"
+  */
+  string status = 5;
+  /*
+    The timestamp when the training process started
+    example: 1666283732325
+  */
+  google.protobuf.Timestamp startTime = 6;
 }
 
 message Configuration {

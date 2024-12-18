@@ -105,8 +105,15 @@ namespace BlazorBoilerplate.Server.Managers
                 var reply = _client.GetTrainings(getTrainings);
                 foreach (var training in reply.Trainings)
                 {
-                    TrainingDto trainingDto = await CreateTrainingDtoFromTraining(username, training);
-                    response.Trainings.Add(trainingDto);
+                    TrainingMetaDataDto trainingMetaDataDto = new TrainingMetaDataDto();
+                    trainingMetaDataDto.Id = training.Id;
+                    trainingMetaDataDto.DatasetId = training.DatasetId;
+                    trainingMetaDataDto.DatasetName = training.DatasetName;
+                    trainingMetaDataDto.Task = training.Task;
+                    trainingMetaDataDto.Status = training.Status;
+                    trainingMetaDataDto.StartTime = training.StartTime.ToDateTime();
+
+                    response.Trainings.Add(trainingMetaDataDto);
                 }
                 response.PaginationMetadata = new PaginationMetadataDto
                 {

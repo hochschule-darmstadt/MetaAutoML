@@ -224,11 +224,13 @@ class TrainingManager:
         self.__log.debug(f"get_trainings: found {len(all_trainings)} trainings for user {get_trainings_request.user_id}")
 
         for training in all_trainings:
-            response.trainings.append(self.__training_object_rpc_object(
-                get_trainings_request.user_id,
-                training,
-                get_trainings_request.short,
-                get_trainings_request.only_last_day
+            response.trainings.append(TrainingMetaData(
+                id=str(training["_id"]),
+                dataset_id=training["dataset_id"],
+                dataset_name=training["dataset_name"],
+                task=training["task"],
+                status=training["status"],
+                start_time=training["start_time"],
             ))
 
         # Add pagination metadata to the response
