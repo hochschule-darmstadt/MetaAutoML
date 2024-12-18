@@ -4,8 +4,8 @@
     // Weitere Informationen finden Sie unter https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
-        {                "PYTHONPATH": "kubernetes;blackboard;blackboard/agents;blackboard/strategies;dependency-injection;utils;interfaces;managers;managers/adapter/explainer_dashboard;managers/adapter/online_prediction;managers/adapter;managers/analysis;managers/data;managers/general;managers/ontology;persistence;utils;../adapters/GRPC/Controller;../adapters/Utils/Utils;../adapters/GRPC/Adapter;",
-
+        {
+            "PYTHONPATH": "kubernetes;blackboard;blackboard/agents;blackboard/strategies;dependency-injection;utils;interfaces;managers;managers/adapter/explainer_dashboard;managers/adapter/online_prediction;managers/adapter;managers/analysis;managers/data;managers/general;managers/ontology;persistence;utils;../adapters/GRPC/Controller;../adapters/Utils/Utils;../adapters/GRPC/Adapter;",
             "name": "WIN Controller Debug",
             "type": "python",
             "request": "launch",
@@ -220,10 +220,11 @@
             "name": "WIN Profiling Test",
             "type": "debugpy",
             "request": "launch",
-            "program": "profiling/profiling_user_manager.py",
+            "program": "profiling/profiling.py",
             "console": "integratedTerminal",
             "justMyCode": true,
             "env": {
+                "PYTHONPATH": "profiling;kubernetes;blackboard;blackboard/agents;blackboard/strategies;dependency-injection;utils;interfaces;managers;managers/adapter/explainer_dashboard;managers/adapter/online_prediction;managers/adapter;managers/analysis;managers/data;managers/general;managers/ontology;persistence;utils;../adapters/GRPC/Controller;../adapters/Utils/Utils;../adapters/GRPC/Adapter;",
                 "H2O_SERVICE_PORT": "50067",
                 "H2O_SERVICE_HOST": "localhost",
                 "AUTOKERAS_SERVICE_PORT": "50052",
@@ -258,7 +259,7 @@
                 "MONGO_DB_DOCKER_DEBUG": "YES",
                 "MONGO_CLUSTER": "NO",
                 "KUBERNETES_CLUSTER": "NO",
-                "DEFAULT_GATEWAY_IP": "172.29.64.1",
+                "DEFAULT_GATEWAY_IP": "172.20.32.1",
                 "USE_DEV_CONFIG": "YES",
                 "WIN_DEV_MACHINE": "YES",
                 "PERSISTENCE_LOGGING_LEVEL": "DEBUG",
