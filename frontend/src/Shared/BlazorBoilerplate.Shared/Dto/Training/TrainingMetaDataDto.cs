@@ -16,7 +16,7 @@ namespace BlazorBoilerplate.Shared.Dto.Training
         public string Id { get; set; }
         public string DatasetId { get; set; }
         public string DatasetName { get; set; }
-        public string Task { get; set; }
+        public ObjectInfomationDto Task { get; set; }
         public string Status { get; set; }
         public DateTime StartTime { get; set; }
         public TrainingMetaDataDto()
@@ -28,7 +28,6 @@ namespace BlazorBoilerplate.Shared.Dto.Training
             Id = grpcResponse.Id;
             DatasetId = grpcResponse.DatasetId;
             DatasetName = datasetName;
-            Task = grpcResponse.Task;
             Status = grpcResponse.Status;
             StartTime = grpcResponse.StartTime.ToDateTime();
         }

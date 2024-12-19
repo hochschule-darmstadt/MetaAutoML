@@ -109,7 +109,7 @@ namespace BlazorBoilerplate.Server.Managers
                     trainingMetaDataDto.Id = training.Id;
                     trainingMetaDataDto.DatasetId = training.DatasetId;
                     trainingMetaDataDto.DatasetName = training.DatasetName;
-                    trainingMetaDataDto.Task = training.Task;
+                    trainingMetaDataDto.Task = await _cacheManager.GetObjectInformation(training.Task);
                     trainingMetaDataDto.Status = training.Status;
                     trainingMetaDataDto.StartTime = training.StartTime.ToDateTime();
 

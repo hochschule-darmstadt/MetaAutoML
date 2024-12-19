@@ -62,7 +62,7 @@
                         }
                     </MudTd>
                     <MudTd>@context.DatasetName</MudTd>
-                    <MudTd>@L[context.Task]</MudTd>
+                    <MudTd>@L[context.Task.Properties["skos:prefLabel"]]</MudTd>
                     <MudTd>
                         <TrainingMenu Training="@context" OnDeleteCompleted="@OnDeleteTrainingCompleted" />
                     </MudTd>
@@ -116,7 +116,7 @@
             return true;
         if (element.Status.Contains(searchString, StringComparison.OrdinalIgnoreCase))
             return true;
-        if (element.Task.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+        if (element.Task.Properties["skos:prefLabel"].Contains(searchString, StringComparison.OrdinalIgnoreCase))
             return true;
         if (element.DatasetName.Contains(searchString, StringComparison.OrdinalIgnoreCase))
             return true;
@@ -164,8 +164,7 @@
                             trainingMetaDataDto.Id = trainingDto.Id;
                             trainingMetaDataDto.DatasetId = trainingDto.DatasetId;
                             trainingMetaDataDto.DatasetName = trainingDto.DatasetName;
-                            trainingMetaDataDto.Task = trainingDto.Configuration.Task.Properties.ContainsKey("skos:prefLabel") ?
-                trainingDto.Configuration.Task.Properties["skos:prefLabel"] : "";
+                            trainingMetaDataDto.Task = trainingDto.Configuration.Task;
                             trainingMetaDataDto.Status = trainingDto.Status;
                             trainingMetaDataDto.StartTime = trainingDto.RuntimeProfile.StartTime;
 
