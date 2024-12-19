@@ -5,6 +5,7 @@ from ControllerBGRPC import *
 from DatasetManager import DatasetManager
 from OntologyManager import OntologyManager
 from UserManager import UserManager
+from TrainingManager import TrainingManager
 
 class Profiling:
     def __init__(self):
@@ -19,6 +20,8 @@ class Profiling:
         self.profiler.print()
         self.profiler.open_in_browser()
 
+
+USER_ID = "0ba2fb0e-6eec-4225-a95f-7d5900afa56f"
 
 @inject
 def get_home_overview_information(
@@ -58,11 +61,18 @@ def get_datasets(
 
     print(response)
 
+@inject
+def get_trainings(
+    get_trainings_request: "GetTrainingsRequest",
+    training_manager: TrainingManager=Provide[Application.managers.training_manager]
+) -> "GetTrainingsResponse":
+    with Profiling():
+        response = training_manager.get_trainings(get_trainings_request)
+
+    print(response.trainings.count)
+
 def main():
-    get_home_overview_information(get_home_overview_information_request=GetHomeOverviewInformationRequest(user_id="d6e5f211-b5a8-420e-a473-962a60a1e50d"))
-    get_datasets(get_datasets_request=GetDatasetsRequest(user_id="d6e5f211-b5a8-420e-a473-962a60a1e50d", pagination=True, page_number=1))
-    get_search_relevant_data()
-    get_dataset_types()
+    get_trainings(get_trainings_request=GetTrainingsRequest(user_id=USER_ID, pagination=True, page_number=1))
 
 if __name__ == '__main__':
     """Python entry point setting up the dependency injection and starting main
