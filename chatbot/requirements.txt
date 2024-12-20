@@ -1,0 +1,11 @@
+betterproto @ git+https://github.com/danielgtaylor/python-betterproto.git@496eba27506a2fe18df409c4cd34a47d8ce04ffe
+protobuf==4.21.7
+grpclib==0.4.3
+streamlit
+grpcio
+grpcio-tools
+langchain
+langchain-community
+langchain_ollama
+sentence-transformers
+chromadb

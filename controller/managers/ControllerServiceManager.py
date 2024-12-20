@@ -567,3 +567,60 @@ class ControllerServiceManager(ControllerServiceBase):
         self.__log.warn("send_chat_message: executed")
         return response
 #endregion
+
+    ####################################
+    ## CHATBOT SERVICE RELATED OPERATIONS
+    ####################################
+#region
+
+"""     @inject
+    async def chat_with_backend(
+        self, user_message_request: "UserMessageRequest"
+    ) -> "ChatReply":
+        with MeasureDuration() as m:
+            try:
+                user_message = user_message_request.message
+                self.__log.info(f"Received user message: {user_message}")
+
+                # Call the RAG pipeline backend
+                response_text = await self.chatbot_service_manager.send_message(user_message)
+
+                # Prepare the response
+                response = ChatReply(reply=response_text)
+                self.__log.info(f"RAG pipeline responded: {response_text}")
+                return response
+            except Exception as e:
+                self.__log.error(f"Error in chat_with_backend: {e}")
+                return ChatReply(reply=f"An error occurred: {e}") """
+
+#endregion
+
+""" from ChatbotBGRPC import ChatReply
+from ChatbotManager import ChatbotServiceManager
+from dependency_injector.wiring import inject, Provide
+from Container import Application  # Assuming the Container provides the needed application contexts
+import logging
+
+class ControllerServiceManager(ControllerServiceBase):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.chatbot_service_manager = Provide[Application.managers.chatbot_manager]  # Dependency injected Chatbot Service Manager
+        logging.basicConfig(level=logging.INFO)
+        self.__log = logging.getLogger('ControllerServiceManager')
+
+    @inject
+    async def chat_with_backend(self, user_message_request: "UserMessageRequest") -> "ChatReply":
+        try:
+            user_message = user_message_request.message
+            self.__log.info(f"Received user message: {user_message}")
+
+            # Call the RAG pipeline backend, note: send_message no longer takes a parameter
+            response_text = await self.chatbot_service_manager.send_message()
+
+            # Prepare the response
+            response = ChatReply(reply=response_text)
+            self.__log.info(f"RAG pipeline responded: {response_text}")
+            return response
+        except Exception as e:
+            self.__log.error(f"Error in chat_with_backend: {e}")
+            return ChatReply(reply=f"An error occurred: {e}") """

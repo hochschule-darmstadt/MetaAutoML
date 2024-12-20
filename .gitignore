@@ -224,3 +224,6 @@ frontend/src/Server/BlazorBoilerplate.Server/Properties/launchSettings.json
 
 .DS_Store
 frontend/src/Server/BlazorBoilerplate.Server/Properties/launchSettings.json
+
+#chatbot
+chatbot/chroma_data

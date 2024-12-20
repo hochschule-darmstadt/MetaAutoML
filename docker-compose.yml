@@ -19,6 +19,8 @@ services:
       # The environment variables are set manually here in docker-compose.
       # But in kubernetes the environment variables are set as <SERVICE_NAME>_SERVICE_HOST and <SERVICE_NAME>_SERVICE_PORT
       # Therefore the services must be named accordingly in the kubernetes files.
+      - Chatbot_SERVICE_HOST=chatbot
+      - Chatbot_SERVICE_PORT=50051
       - AUTOKERAS_SERVICE_HOST=autokeras
       - AUTOKERAS_SERVICE_PORT=50052
       - MLJAR_SERVICE_HOST=mljar
@@ -88,6 +90,12 @@ services:
     volumes:
       - mongodata:/data/configdb
       - mongodata:/data/db
+  chatbot:
+    build:
+      context: ./chatbot
+    container_name: chatbot-container
+    ports:
+      - "50051:50051"
 
 #     adapters do not need to be available from the host machine -> no port mappings
 
