@@ -1,25 +1,3 @@
-from ControllerBGRPC import *
-import json, logging, os, datetime
-from threading import *
-import asyncio
-from grpclib.client import Channel
-from AdapterBGRPC import *
-from traceback import print_exc
-import dataclasses
-from ChatbotBGRPC import *
-
-""" class ChatbotServiceManager:
-    async def send_message(self, message: str) -> str:
-        async with Channel(self.host, self.port) as channel:
-            stub = ChatbotStub(channel)
-            request = ChatRequest(message=message)
-            response = await stub.chat(request)
-
-            reply_text = ""
-            async for reply in response:
-                reply_text += reply.reply
-
-            return reply_text """
 import asyncio
 from grpclib.client import Channel
 from ChatbotBGRPC import ChatRequest, ChatReply, ChatbotStub
@@ -34,16 +12,15 @@ class ChatbotServiceManager:
 
     async def send_message(self) -> str:
         """
-        Sends a predefined message to the gRPC service and returns the concatenated responses.
+        Sends a predefined message to the gRPC service and collects responses.
         """
         message = "can u spell OMAML"  # Fixed message for testing purposes
         async with Channel(self.host, self.port) as channel:
             stub = ChatbotStub(channel)
             request = ChatRequest(message=message)
-            response = await stub.chat(request)
 
             reply_text = ""
-            async for reply in response:
+            async for reply in stub.chat(request):  # Correct usage of async generator
                 reply_text += reply.reply
                 self.__log.info(f"Received reply: {reply.reply}")
 
@@ -53,4 +30,3 @@ if __name__ == "__main__":
     manager = ChatbotServiceManager()
     response = asyncio.run(manager.send_message())
     print("Response from gRPC service:", response)
-

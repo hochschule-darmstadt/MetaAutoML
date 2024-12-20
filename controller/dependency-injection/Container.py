@@ -14,6 +14,7 @@ from AdapterRuntimeScheduler import AdapterRuntimeScheduler
 from ThreadLock import ThreadLock
 from KubernetesClient import KubernetesClient
 from ChatbotManager import ChatbotManager
+from ChatbotServiceManager import ChatbotServiceManager
 
 class Ressources(containers.DeclarativeContainer):
     if os.getenv("MONGO_DB_DEBUG") == "YES":
@@ -90,6 +91,9 @@ class Managers(containers.DeclarativeContainer):
     chatbot_manager = providers.Factory(
         ChatbotManager,
 
+    )
+    chatbot_service_manager = providers.Factory(
+    ChatbotServiceManager,
     )
 
 class Application(containers.DeclarativeContainer):

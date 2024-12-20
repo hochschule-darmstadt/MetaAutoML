@@ -1,4 +1,5 @@
 from urllib import response
+import multiprocessing, os, logging, asyncio
 from Container import Application
 from DatasetManager import DatasetManager
 from PredictionManager import PredictionManager
@@ -9,12 +10,15 @@ from ModelManager import ModelManager
 from UserManager import UserManager
 from OntologyManager import OntologyManager
 from ControllerBGRPC import *
-import multiprocessing, os, logging, asyncio
+from ChatbotServiceManager import ChatbotServiceManager
 from JsonUtil import get_config_property
 from concurrent.futures.process import ProcessPoolExecutor
 from dependency_injector.wiring import inject, Provide
 from MeasureDuration import MeasureDuration
 from DataStorage import DataStorage
+from grpclib.client import Channel
+from ChatbotBGRPC import ChatRequest, ChatReply
+
 
 ROOT_PATH = os.path.dirname(os.path.abspath(__file__))
 
@@ -555,23 +559,73 @@ class ControllerServiceManager(ControllerServiceBase):
     ## CHATBOT RELATED OPERATIONS
     ####################################
 #region
-
     @inject
     async def send_chat_message(
         self,
         send_chat_message_request: "SendChatMessageRequest",
-        chatbotManager:ChatbotManager=Provide[Application.managers.chatbot_manager]
-        )-> "SendChatMessageResponse":
-        with MeasureDuration() as m:
-            response = chatbotManager.send_chat_message(send_chat_message_request)
-        self.__log.warn("send_chat_message: executed")
-        return response
+        chatbotManager: ChatbotManager = Provide[Application.managers.chatbot_manager]
+    ) -> "SendChatMessageResponse":
+        """
+        Handles incoming messages from the frontend, forwards them to chat_with_backend for processing,
+        and returns the final response to the frontend.
+
+        Args:
+            send_chat_message_request (SendChatMessageRequest): The request object containing the user's message.
+            chatbotManager (ChatbotManager): The manager responsible for frontend communication.
+
+        Returns:
+            SendChatMessageResponse: The processed response to be sent back to the frontend.
+        """
+        try:
+            # Forward the request to the backend (RAG pipeline) via chat_with_backend
+            response_from_backend = await self.chat_with_backend(send_chat_message_request)
+
+            # Use ChatbotManager to format and finalize the response for the frontend
+            response = chatbotManager.send_chat_message(send_chat_message_request, response_from_backend.response_chunk)
+
+            self.__log.info("send_chat_message: Successfully processed and returned response to the frontend.")
+            return response
+
+        except Exception as e:
+            self.__log.error(f"Error in send_chat_message: {e}")
+            return SendChatMessageResponse(response_chunk=f"An error occurred: {e}", final_msg=True)
 #endregion
 
     ####################################
     ## CHATBOT SERVICE RELATED OPERATIONS
     ####################################
 #region
+    @inject
+    async def chat_with_backend(
+        self,
+        send_chat_message_request: SendChatMessageRequest,
+        chatbot_service_manager: ChatbotServiceManager = Provide[Application.managers.chatbot_service_manager]
+    ) -> SendChatMessageResponse:
+        """
+        Forwards the user message to the backend RAG pipeline via ChatbotServiceManager and returns the response.
+
+        Args:
+            send_chat_message_request (SendChatMessageRequest): The request object containing the user's message.
+            chatbot_service_manager (ChatbotServiceManager): The service manager responsible for backend communication.
+
+        Returns:
+            SendChatMessageResponse: The processed response from the backend RAG pipeline.
+        """
+        try:
+            # Extract the user message from the request
+
+            user_message="How to spell TREE"
+            #user_message = send_chat_message_request.text
+
+            # Use ChatbotServiceManager to send the message and get the response
+            response_text = await chatbot_service_manager.send_message(user_message)
+
+            # Wrap the response text into a SendChatMessageResponse
+            return SendChatMessageResponse(response_chunk=response_text, final_msg=True)
+
+        except Exception as e:
+            self.__log.error(f"Error in chat_with_backend: {e}")
+            return SendChatMessageResponse(response_chunk=f"An error occurred: {e}", final_msg=True)
 
 """     @inject
     async def chat_with_backend(
@@ -624,3 +678,15 @@ class ControllerServiceManager(ControllerServiceBase):
         except Exception as e:
             self.__log.error(f"Error in chat_with_backend: {e}")
             return ChatReply(reply=f"An error occurred: {e}") """
+
+"""
+    @inject
+    async def send_chat_message(
+        self,
+        send_chat_message_request: "SendChatMessageRequest",
+        chatbotManager:ChatbotManager=Provide[Application.managers.chatbot_manager]
+        )-> "SendChatMessageResponse":
+        with MeasureDuration() as m:
+            response = chatbotManager.send_chat_message(send_chat_message_request)
+        self.__log.warn("send_chat_message: executed")
+        return response """
