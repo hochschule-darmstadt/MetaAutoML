@@ -32,7 +32,7 @@ namespace BlazorBoilerplate.Server.Managers
             try
             {
                 var reply = _client.SendChatMessage(requestGrpc);
-                response = new SendChatMessageResponseDto();
+                response = new SendChatMessageResponseDto(reply.ResponseChunk, reply.FinalMsg);
                 return new ApiResponse(Status200OK, null, response);
             }
             catch (Exception ex)
