@@ -1,3 +1,5 @@
+@using BlazorBoilerplate.Shared.Dto.Chat
+@using System.Text.Json
 @inherits DynamicComponentContainer
 @inject IApiClient apiClient
 
@@ -53,7 +55,9 @@ Style="position:fixed; bottom: 20px; right: 20px; z-index: 100;"
         new Message { Text = "Hello, I'm your digital assistant. I'm glad you're using our service! How can I assist you today?", IsUser = false }
     };
 
-    private void ToggleChat() => isChatOpen = !isChatOpen;
+    private void ToggleChat() {
+        isChatOpen = !isChatOpen;
+    }
 
     private void HandleEnterKey(KeyboardEventArgs e)
     {
@@ -68,10 +72,19 @@ Style="position:fixed; bottom: 20px; right: 20px; z-index: 100;"
     {
         if (!string.IsNullOrWhiteSpace(currentMessage))
         {
-            ApiResponseDto apiResponse = await apiClient.SendChatMessage(new BlazorBoilerplate.Shared.Dto.Chat.SendChatMessageRequestDto {Text=currentMessage, ChatHistory="ToDo History"});
+            //Add message to Chat
             messages.Add(new Message { Text = currentMessage, IsUser = true });
-            // Simulate assistant response
-            messages.Add(new Message { Text = apiResponse.ToString() , IsUser = false });
+
+            //Send request
+            ApiResponseDto apiResponse = await apiClient.SendChatMessage(new BlazorBoilerplate.Shared.Dto.Chat.SendChatMessageRequestDto {Text=currentMessage, ChatHistory="ToDo History"});
+
+            //ToDo Check Validity of response
+            //ToDo handle "Stream" of response
+            SendChatMessageResponseDto responseDto = JsonSerializer.Deserialize<SendChatMessageResponseDto>(apiResponse.Result.ToString());
+            //For now: Simulate assistant response
+            messages.Add(new Message { Text = responseDto.ResponseChunk , IsUser = false });
+
+            //Reset variable and inputField
             currentMessage = string.Empty;
             await inputField.Clear();
             await inputField.FocusAsync();
@@ -82,6 +95,8 @@ Style="position:fixed; bottom: 20px; right: 20px; z-index: 100;"
     private void OpenChat()
     {
         isChatOpen = true;
+
+        inputField.FocusAsync();
     }
 
     private void CloseChat()
