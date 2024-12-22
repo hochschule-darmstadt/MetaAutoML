@@ -21,6 +21,7 @@ services:
       - "6379:6379"
 
   mongo:
+  
     image: mongo
     container_name: mongo
     ports:
@@ -36,6 +37,12 @@ services:
       - dev-mongodata:/data/configdb
       - dev-mongodata:/data/db
 
+  chatbot:
+    build:
+      context: ./chatbot
+    container_name: chatbot-container
+    ports:
+      - "50051:50051"
 volumes:
   dev-dbdata:
   dev-redisdata:
