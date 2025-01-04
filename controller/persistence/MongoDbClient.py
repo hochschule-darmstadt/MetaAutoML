@@ -410,6 +410,7 @@ class MongoDbClient:
             },
             # Stage 6: Sort the results
             # Orders documents by start_time in descending order
+            # -1 means descending, 1 means ascending
             {
                 '$sort': {
                     'start_time': -1
