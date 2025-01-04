@@ -20,7 +20,7 @@
         else
         {
             <MudTable ServerData="ServerReload" style="width:stretch" class="mat-elevation-z5"
-                Filter="new Func<TrainingMetaDataDto,bool>(FilterFunc)">
+                Filter="new Func<TrainingMetadataDto,bool>(FilterFunc)">
                 <ToolBarContent>
                     <MudSpacer />
                     <MudTextField @bind-Value="searchString" Placeholder="@L["Search for status, task or dataset type"]"
@@ -29,15 +29,15 @@
                 </ToolBarContent>
                 <HeaderContent>
                     <MudTh>
-                        <MudTableSortLabel SortBy="@(new Func<TrainingMetaDataDto, object>(x=>x.StartTime))">
+                        <MudTableSortLabel SortBy="@(new Func<TrainingMetadataDto, object>(x=>x.StartTime))">
                             @L["Start datetime"]</MudTableSortLabel>
                     </MudTh>
                     <MudTh>
-                        <MudTableSortLabel SortBy="new Func<TrainingMetaDataDto, object>(x=>x.Status)">@L["Status"]
+                        <MudTableSortLabel SortBy="new Func<TrainingMetadataDto, object>(x=>x.Status)">@L["Status"]
                         </MudTableSortLabel>
                     </MudTh>
                     <MudTh>
-                        <MudTableSortLabel SortBy="@(new Func<TrainingMetaDataDto, object>(x=>x.DatasetName))">@L["Dataset"]
+                        <MudTableSortLabel SortBy="@(new Func<TrainingMetadataDto, object>(x=>x.DatasetName))">@L["Dataset"]
                         </MudTableSortLabel>
                     </MudTh>
                     <MudTh>@L["Task"]</MudTh>
@@ -68,7 +68,8 @@
                     </MudTd>
                 </RowTemplate>
                 <PagerContent>
-                    <MudTablePager RowsPerPageString=@L["Rows per page"] PageSizeOptions="new int[] { 10, 25, 50, 100 }" />
+                    <MudTablePager RowsPerPageString="@L["Rows per page"]"
+                        PageSizeOptions="new int[] { 10, 25, 50, 100 }" />
                 </PagerContent>
             </MudTable>
         }
@@ -110,7 +111,7 @@
 
     private int totalItems;
 
-    private bool FilterFunc(TrainingMetaDataDto element)
+    private bool FilterFunc(TrainingMetadataDto element)
     {
         if (string.IsNullOrWhiteSpace(searchString))
             return true;
@@ -150,7 +151,7 @@
                 {
                     if (_trainings.Trainings[i].Status == "busy")
                     {
-                        ApiResponseDto apiResponse = await apiClient.GetTraining(new GetTrainingRequestDto
+                        ApiResponseDto apiResponse = await apiClient.GetTrainingMetadata(new GetTrainingMetadataRequestDto
                             {
                                 TrainingId =
                 _trainings.Trainings[i].Id
@@ -158,17 +159,10 @@
 
                         if (apiResponse.IsSuccessStatusCode)
                         {
-                            TrainingDto trainingDto =
-                Newtonsoft.Json.JsonConvert.DeserializeObject<GetTrainingResponseDto>(apiResponse.Result.ToString()).Training;
-                            TrainingMetaDataDto trainingMetaDataDto = new TrainingMetaDataDto();
-                            trainingMetaDataDto.Id = trainingDto.Id;
-                            trainingMetaDataDto.DatasetId = trainingDto.DatasetId;
-                            trainingMetaDataDto.DatasetName = trainingDto.DatasetName;
-                            trainingMetaDataDto.Task = trainingDto.Configuration.Task;
-                            trainingMetaDataDto.Status = trainingDto.Status;
-                            trainingMetaDataDto.StartTime = trainingDto.RuntimeProfile.StartTime;
+                            TrainingMetadataDto trainingMetadataDto =
+                Newtonsoft.Json.JsonConvert.DeserializeObject<GetTrainingMetadataResponseDto>(apiResponse.Result.ToString()).Training;
 
-                            _trainings.Trainings[i] = trainingMetaDataDto;
+                            _trainings.Trainings[i] = trainingMetadataDto;
                             StateHasChanged();
                         }
                         //Training does not exist anymore
@@ -205,9 +199,8 @@
 
     private async Task OnPageChanged(int pageNumber, int pageSize)
     {
-        var apiResponse = await apiClient.GetTrainings(new GetTrainingsRequestDto()
+        var apiResponse = await apiClient.GetTrainingsMetadata(new GetTrainingsMetadataRequestDto()
             {
-                Short = true,
                 Pagination = true,
                 PageNumber = pageNumber,
                 PageSize = pageSize
@@ -223,11 +216,10 @@
         }
     }
 
-    private async Task<TableData<TrainingMetaDataDto>> ServerReload(TableState state)
+    private async Task<TableData<TrainingMetadataDto>> ServerReload(TableState state)
     {
-        var apiResponse = await apiClient.GetTrainings(new GetTrainingsRequestDto()
+        var apiResponse = await apiClient.GetTrainingsMetadata(new GetTrainingsMetadataRequestDto()
             {
-                Short = true,
                 Pagination = true,
                 PageNumber = state.Page + 1,
                 PageSize = state.PageSize
@@ -235,12 +227,12 @@
         if (apiResponse.IsSuccessStatusCode)
         {
             var data = Newtonsoft.Json.JsonConvert.DeserializeObject<GetTrainingsResponseDto>(apiResponse.Result.ToString());
-            return new TableData<TrainingMetaDataDto>() { TotalItems = data.PaginationMetadata.TotalItems, Items = data.Trainings };
+            return new TableData<TrainingMetadataDto>() { TotalItems = data.PaginationMetadata.TotalItems, Items = data.Trainings };
         }
         else
         {
             viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
-            return new TableData<TrainingMetaDataDto>() { TotalItems = 0, Items = new List<TrainingMetaDataDto>() };
+            return new TableData<TrainingMetadataDto>() { TotalItems = 0, Items = new List<TrainingMetadataDto>() };
         }
     }
 }

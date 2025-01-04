@@ -1,5 +1,7 @@
 from subprocess import call
 import threading
+
+from bson import ObjectId
 from DataStorage import DataStorage
 from ControllerBGRPC import *
 import json, logging, os, datetime
@@ -191,9 +193,9 @@ class TrainingManager:
             raise grpclib.GRPCError(grpclib.Status.UNAVAILABLE, f"Error while retrieving Training")
 
 
-    def get_trainings(
-        self, get_trainings_request: "GetTrainingsRequest"
-    ) -> "GetTrainingsResponse":
+    def get_trainings_metadata(
+        self, get_trainings_metadata_request: "GetTrainingsMetadataRequest"
+    ) -> "GetTrainingsMetadataResponse":
         """Get all trainings or get all trainings using an optional filter
 
         Args:
@@ -202,42 +204,61 @@ class TrainingManager:
         Returns:
             GetTrainingsResponse: The GRPC response holding the list of found trainings
         """
-        response = GetTrainingsResponse()
-        self.__log.debug(f"get_trainings: get all trainings for user {get_trainings_request.user_id}")
+        response = GetTrainingsMetadataResponse()
+        self.__log.debug(f"get_trainings_metadata: get all trainings for user {get_trainings_metadata_request.user_id}")
 
         # Calculate pagination parameters
-        pagination = get_trainings_request.pagination
-        page_number = get_trainings_request.page_number
-        page_size = get_trainings_request.page_size or 20
+        pagination = get_trainings_metadata_request.pagination
+        page_number = get_trainings_metadata_request.page_number
+        page_size = get_trainings_metadata_request.page_size or 20
 
-        all_trainings_cursor = self.__data_storage.get_trainings(
-            get_trainings_request.user_id,
-            only_last_day=get_trainings_request.only_last_day,
+        all_trainings_cursor = self.__data_storage.get_trainings_metadata(
+            get_trainings_metadata_request.user_id,
+            only_last_day=get_trainings_metadata_request.only_last_day,
             pagination=pagination,
             page_number=page_number,
             page_size=page_size
         )
 
         all_trainings = list(all_trainings_cursor)
-        total_trainings = self.__data_storage.get_trainings_count(get_trainings_request.user_id)
+        total_trainings = self.__data_storage.get_trainings_count(get_trainings_metadata_request.user_id)
 
-        self.__log.debug(f"get_trainings: found {len(all_trainings)} trainings for user {get_trainings_request.user_id}")
+        self.__log.debug(f"get_trainings_metadata: found {len(all_trainings)} trainings for user {get_trainings_metadata_request.user_id}")
 
-        for training in all_trainings:
-            response.trainings.append(TrainingMetaData(
-                id=str(training["_id"]),
-                dataset_id=training["dataset_id"],
-                dataset_name=training["dataset_name"],
-                task=training["task"],
-                status=training["status"],
-                start_time=training["start_time"],
-            ))
+        response.trainings = [
+            TrainingMetadata(**training) for training in all_trainings
+        ]
 
         # Add pagination metadata to the response
         response.pagination_metadata.total_items = total_trainings
         response.pagination_metadata.page_number = page_number
         response.pagination_metadata.pagination = pagination
         response.pagination_metadata.total_pages = (total_trainings + page_size - 1) // page_size
+
+        return response
+
+    def get_training_metadata(
+        self, get_training_metadata_request: "GetTrainingMetadataRequest"
+    ) -> "GetTrainingMetadataResponse":
+        """Get all trainings or get all trainings using an optional filter
+
+        Args:
+            get_trainings_request (GetTrainingsRequest): The GRPC request holding the user id and filters
+
+        Returns:
+            GetTrainingsResponse: The GRPC response holding the list of found trainings
+        """
+        response = GetTrainingMetadataResponse()
+        self.__log.debug(f"get_training_metadata: get all training with id {get_training_metadata_request.training_id} for user {get_training_metadata_request.user_id}")
+
+        training_cursor = self.__data_storage.get_trainings_metadata(
+            get_training_metadata_request.user_id,
+            filter={"_id": ObjectId(get_training_metadata_request.training_id)}
+        )
+
+        training = list(training_cursor)
+
+        response.training = TrainingMetadata(**training[0])
 
         return response
 

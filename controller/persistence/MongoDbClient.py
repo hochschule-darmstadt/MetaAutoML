@@ -328,7 +328,7 @@ class MongoDbClient:
         self.__log.debug(f"get_training: documents within trainings: {trainings.count_documents}, filter {filter}")
         return trainings.find_one(filter)
 
-    def get_trainings(self, user_id: str, filter: 'dict[str, object]'={}, pagination:bool=False, page_number:int=1, page_size:int=20) -> 'list[dict[str, object]]':
+    def get_trainings_metadata(self, user_id: str, filter: 'dict[str, object]'={}, pagination:bool=False, page_number:int=1, page_size:int=20) -> 'list[dict[str, object]]':
         """Retrieve all training records from a user database
 
         Args:
@@ -349,60 +349,72 @@ class MongoDbClient:
             {
                 '$match': filter
             },
-
-            # Stage 2: Join with datasets collection
-            # Adds dataset information to each training document
-            # Creates an array field 'dataset' containing matching dataset documents
-            {
-                "$lookup": {
-                "from": "datasets",
-                "let": { "dataset_id_str": "$dataset_id" },
-                "pipeline": [       # Sub-pipeline to filter datasets based on dataset_id as dataset_id is string in trainings collection
-                    {
-                    "$match": {
-                        "$expr": {
-                        "$eq": [
-                            { "$toString": "$_id" },
-                            "$$dataset_id_str"
-                        ]
-                        }
-                    }
-                    }
-                ],
-                "as": "dataset"
-                }
-            },
-
-            # Stage 3: Unwind the dataset array
-            # Deconstructs the dataset array created by $lookup
-            # Creates a separate document for each array element
-            # In this case, should only be one dataset per training
-            {
-                '$unwind': '$dataset'
-            },
-
-            # Stage 4: Project only the required fields
-            # Reshapes each document to include only needed fields
-            # Renames and restructures fields as needed
+            # Stage 2: Project only needed fields and rename _id to id
+            # Reduces document size early and transforms _id field
             {
                 '$project': {
-                    '_id': 1,
+                    '_id': 0,  # Exclude original _id
+                    'id': { '$toString': '$_id' },  # Convert _id to string and rename
                     'dataset_id': 1,
                     'task': '$configuration.task',
                     'status': 1,
                     'start_time': '$runtime_profile.start_time',
+                }
+            },
+            # Stage 3: Join with datasets collection
+            # Adds dataset information to each training document
+            {
+                "$lookup": {
+                    "from": "datasets",
+                    "let": { "dataset_id_str": "$dataset_id" },
+                    "pipeline": [
+                        # Sub-pipeline to filter datasets based on dataset_id
+                        {
+                            "$match": {
+                                "$expr": {
+                                    "$eq": [
+                                        { "$toString": "$_id" },
+                                        "$$dataset_id_str"
+                                    ]
+                                }
+                            }
+                        },
+                        # Only get the name field from datasets
+                        {
+                            "$project": {
+                                "_id": 0,
+                                "name": 1
+                            }
+                        }
+                    ],
+                    "as": "dataset"
+                }
+            },
+            # Stage 4: Unwind the dataset array
+            # Deconstructs the dataset array created by $lookup
+            # Creates a separate document for each array element
+            {
+                '$unwind': '$dataset'
+            },
+            # Stage 5: Final projection to get exact shape needed
+            # Removes temporary fields and finalizes structure
+            {
+                '$project': {
+                    'id': 1,
+                    'dataset_id': 1,
+                    'task': 1,
+                    'status': 1,
+                    'start_time': 1,
                     'dataset_name': '$dataset.name'
                 }
             },
-
-            # Stage 5: Sort the results
+            # Stage 6: Sort the results
             # Orders documents by start_time in descending order
-            # -1 means descending order, 1 would mean ascending
             {
                 '$sort': {
                     'start_time': -1
                 }
-            },
+            }
         ]
 
         # Add pagination stages only if both page and page_size are provided

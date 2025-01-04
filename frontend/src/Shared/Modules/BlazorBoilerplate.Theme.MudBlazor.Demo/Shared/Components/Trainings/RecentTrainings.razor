@@ -152,15 +152,15 @@
                         {
                             TrainingDto trainingDto =
                 Newtonsoft.Json.JsonConvert.DeserializeObject<GetTrainingResponseDto>(apiResponse.Result.ToString()).Training;
-                            TrainingMetaDataDto trainingMetaDataDto = new TrainingMetaDataDto();
-                            trainingMetaDataDto.Id = trainingDto.Id;
-                            trainingMetaDataDto.DatasetId = trainingDto.DatasetId;
-                            trainingMetaDataDto.DatasetName = trainingDto.DatasetName;
-                            trainingMetaDataDto.Task = trainingDto.Configuration.Task;
-                            trainingMetaDataDto.Status = trainingDto.Status;
-                            trainingMetaDataDto.StartTime = trainingDto.RuntimeProfile.StartTime;
+                            TrainingMetadataDto trainingMetadataDto = new TrainingMetadataDto();
+                            trainingMetadataDto.Id = trainingDto.Id;
+                            trainingMetadataDto.DatasetId = trainingDto.DatasetId;
+                            trainingMetadataDto.DatasetName = trainingDto.DatasetName;
+                            trainingMetadataDto.Task = trainingDto.Configuration.Task;
+                            trainingMetadataDto.Status = trainingDto.Status;
+                            trainingMetadataDto.StartTime = trainingDto.RuntimeProfile.StartTime;
 
-                            _trainings.Trainings[i] = trainingMetaDataDto;
+                            _trainings.Trainings[i] = trainingMetadataDto;
                             StateHasChanged();
                         }
                         //Training does not exist anymore

@@ -21,7 +21,8 @@ class Profiling:
         self.profiler.open_in_browser()
 
 
-USER_ID = "080a6480-bf52-4c30-9224-3f2b882fd5bb"
+# USER_ID = "080a6480-bf52-4c30-9224-3f2b882fd5bb"
+USER_ID = "d6e5f211-b5a8-420e-a473-962a60a1e50d"
 
 @inject
 def get_home_overview_information(
@@ -63,19 +64,31 @@ def get_datasets(
 
 @inject
 def get_trainings(
-    get_trainings_request: "GetTrainingsRequest",
+    get_trainings_request: "GetTrainingsMetadataRequest",
     training_manager: TrainingManager=Provide[Application.managers.training_manager]
-) -> "GetTrainingsResponse":
+) -> "GetTrainingsMetadataResponse":
     with Profiling():
-        response = training_manager.get_trainings(get_trainings_request)
+        response = training_manager.get_trainings_metadata(get_trainings_request)
 
     print(response.trainings.count)
 
+@inject
+def get_training(
+    get_training_request: "GetTrainingMetadataRequest",
+    training_manager: TrainingManager=Provide[Application.managers.training_manager]
+) -> "GetTrainingMetadataResponse":
+    with Profiling():
+        response = training_manager.get_training_metadata(get_training_request)
+
+    print(response)
+
 def main():
-    get_trainings(get_trainings_request=GetTrainingsRequest(user_id=USER_ID, pagination=True, page_number=1, page_size=10))
-    get_trainings(get_trainings_request=GetTrainingsRequest(user_id=USER_ID, pagination=True, page_number=1, page_size=25))
-    get_trainings(get_trainings_request=GetTrainingsRequest(user_id=USER_ID, pagination=True, page_number=1, page_size=50))
-    get_trainings(get_trainings_request=GetTrainingsRequest(user_id=USER_ID, pagination=True, page_number=1, page_size=100))
+    # get_trainings(get_trainings_request=GetTrainingsMetadataRequest(user_id=USER_ID, pagination=True, page_number=1, page_size=10))
+    # get_trainings(get_trainings_request=GetTrainingsMetadataRequest(user_id=USER_ID, pagination=True, page_number=1, page_size=25))
+    # get_trainings(get_trainings_request=GetTrainingsMetadataRequest(user_id=USER_ID, pagination=True, page_number=1, page_size=50))
+    # get_trainings(get_trainings_request=GetTrainingsMetadataRequest(user_id=USER_ID, pagination=True, page_number=1, page_size=100))
+    # get_trainings(get_trainings_request=GetTrainingsMetadataRequest(user_id=USER_ID, pagination=True, page_number=1, page_size=200))
+    get_training(get_training_request=GetTrainingMetadataRequest(user_id=USER_ID, training_id="6722a7ab015fc5e2f632aaa7"))
 
 if __name__ == '__main__':
     """Python entry point setting up the dependency injection and starting main
