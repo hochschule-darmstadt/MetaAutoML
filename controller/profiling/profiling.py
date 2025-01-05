@@ -21,7 +21,7 @@ class Profiling:
         self.profiler.open_in_browser()
 
 
-USER_ID = "0ba2fb0e-6eec-4225-a95f-7d5900afa56f"
+USER_ID = "d6e5f211-b5a8-420e-a473-962a60a1e50d"
 
 @inject
 def get_home_overview_information(
@@ -71,8 +71,19 @@ def get_trainings(
 
     print(response.trainings.count)
 
+@inject
+def get_training(
+    get_training_request: "GetTrainingRequest",
+    training_manager: TrainingManager=Provide[Application.managers.training_manager]
+) -> "GetTrainingResponse":
+    with Profiling():
+        response = training_manager.get_training(get_training_request)
+
+    print(response.training)
+
 def main():
     get_trainings(get_trainings_request=GetTrainingsRequest(user_id=USER_ID, pagination=True, page_number=1))
+    get_training(get_training_request=GetTrainingRequest(user_id=USER_ID, training_id="6673475e6852060fb7c85502"))
 
 if __name__ == '__main__':
     """Python entry point setting up the dependency injection and starting main
