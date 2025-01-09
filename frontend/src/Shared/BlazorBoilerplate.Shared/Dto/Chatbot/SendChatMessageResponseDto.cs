@@ -3,13 +3,11 @@ namespace BlazorBoilerplate.Shared.Dto.Chat
 
     public class SendChatMessageResponseDto
     {
-        public string ResponseChunk { get; set; }
-        public bool IsFinalMessage { get; set; }
+        public string ResponseMessage { get; set; }
 
-        public SendChatMessageResponseDto(string responseChunk, bool isFinalMessage)
+        public SendChatMessageResponseDto(string response)
         {
-            ResponseChunk = responseChunk;
-            IsFinalMessage = isFinalMessage;
+            ResponseMessage = response;
         }
     }
 }

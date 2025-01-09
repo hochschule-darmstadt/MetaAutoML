@@ -2,19 +2,14 @@ syntax = "proto3";
 
 option csharp_namespace = "BlazorBoilerplate.Server";
 
-
 message SendChatMessageRequest{
   /*
   Message from the User to the Chatbot
+  includes the chat history
   example:"What is OMA-ML?"
   */
-  string text = 1;
+  repeated Chat_message chat_list = 1;
 
-  /*
-  String containing the chat history for context
-  example:"ToDo"
-  */
-  string chatHistory = 2;
 }
 
 message SendChatMessageResponse{
@@ -24,10 +19,21 @@ message SendChatMessageResponse{
   Chunks should enable the "word-for-word" response
   example:""
   */
-  string response_chunk = 3;
+  string controller_response = 1;
 
+}
+
+message Chat_message{
+
+  string message_string
   /*
-  Boolean to determine if the chunk is the last of the message
+  String that contains the a chatmessage
+  example: "What is OMA-ML?"
   */
-  bool final_msg = 4;
+
+  bool isUser
+  /*
+  Flag that shows if the message was written by the User
+  example: True //message was writen by the User
+  */
 }

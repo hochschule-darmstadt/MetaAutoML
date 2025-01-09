@@ -1224,23 +1224,20 @@ class CreateNewUserResponse(betterproto.Message):
 
 @dataclass(eq=False, repr=False)
 class SendChatMessageRequest(betterproto.Message):
-    text: str = betterproto.string_field(1)
-    """Message from the User to the Chatbotexample:"What is OMA-ML?"""
-
-    chat_history: str = betterproto.string_field(2)
-    """String containing the chat history for contextexample:"ToDo"""
+    chat_message: str = betterproto.string_field(1)
+    """
+    Message from the User to the Chatbotincludes the chat historyexample:"What
+    is OMA-ML?"
+    """
 
 
 @dataclass(eq=False, repr=False)
 class SendChatMessageResponse(betterproto.Message):
-    response_chunk: str = betterproto.string_field(3)
+    controller_response: str = betterproto.string_field(1)
     """
     Response chunk from the chatbotChunks should enable the "word-for-word"
     responseexample:""
     """
-
-    final_msg: bool = betterproto.bool_field(4)
-    """Boolean to determine if the chunk is the last of the message"""
 
 
 class ControllerServiceStub(betterproto.ServiceStub):

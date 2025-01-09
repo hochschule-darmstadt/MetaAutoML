@@ -9,5 +9,5 @@ message ChatRequest {
 }
 
 message ChatReply {
-    string reply = 1;
+    string chatbot_reply = 1;
 }

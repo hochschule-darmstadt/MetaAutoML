@@ -76,13 +76,13 @@ Style="position:fixed; bottom: 20px; right: 20px; z-index: 100;"
             messages.Add(new Message { Text = currentMessage, IsUser = true });
 
             //Send request
-            ApiResponseDto apiResponse = await apiClient.SendChatMessage(new BlazorBoilerplate.Shared.Dto.Chat.SendChatMessageRequestDto {Text=currentMessage, ChatHistory=getChatHistory()});
+            ApiResponseDto apiResponse = await apiClient.SendChatMessage(new BlazorBoilerplate.Shared.Dto.Chat.SendChatMessageRequestDto { ChatMessage = getChatHistory() });
 
             //ToDo Check Validity of response
             //ToDo handle "Stream" of response
-            SendChatMessageResponseDto responseDto = JsonSerializer.Deserialize<SendChatMessageResponseDto>(apiResponse.Result.ToString());
+            SendChatMessageResponseDto responseDto = Newtonsoft.Json.JsonConvert.DeserializeObject<SendChatMessageResponseDto>(apiResponse.Result.ToString());
             //For now: Simulate assistant response
-            messages.Add(new Message { Text = responseDto.ResponseChunk , IsUser = false });
+            messages.Add(new Message { Text = responseDto.ResponseMessage , IsUser = false });
 
             //Reset variable and inputField
             currentMessage = string.Empty;

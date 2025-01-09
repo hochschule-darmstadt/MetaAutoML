@@ -578,17 +578,18 @@ class ControllerServiceManager(ControllerServiceBase):
         """
         try:
             # Forward the request to the backend (RAG pipeline) via chat_with_backend
-            response_from_backend = await self.chat_with_backend(send_chat_message_request)
+            response_from_backend = await self.chat_with_backend(send_chat_message_request) #TODO revert
 
             # Use ChatbotManager to format and finalize the response for the frontend
-            response = chatbotManager.send_chat_message(send_chat_message_request, response_from_backend.response_chunk)
+            #response = chatbotManager.send_chat_message(send_chat_message_request, response_from_backend)
+            response = SendChatMessageResponse(controller_response=response_from_backend)
 
             self.__log.info("send_chat_message: Successfully processed and returned response to the frontend.")
             return response
 
         except Exception as e:
             self.__log.error(f"Error in send_chat_message: {e}")
-            return SendChatMessageResponse(response_chunk=f"An error occurred: {e}", final_msg=True)
+            return SendChatMessageResponse(controller_response=f"An error occurred: {e}")
 #endregion
 
     ####################################
@@ -621,11 +622,11 @@ class ControllerServiceManager(ControllerServiceBase):
             response_text = await chatbot_service_manager.send_message(user_message)
 
             # Wrap the response text into a SendChatMessageResponse
-            return SendChatMessageResponse(response_chunk=response_text, final_msg=True)
+            return SendChatMessageResponse(controller_response=response_text)
 
         except Exception as e:
             self.__log.error(f"Error in chat_with_backend: {e}")
-            return SendChatMessageResponse(response_chunk=f"An error occurred: {e}", final_msg=True)
+            return SendChatMessageResponse(controller_response=f"An error occurred: {e}")
 
 """     @inject
     async def chat_with_backend(

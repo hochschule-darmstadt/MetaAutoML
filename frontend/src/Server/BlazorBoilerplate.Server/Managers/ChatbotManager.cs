@@ -31,10 +31,9 @@ namespace BlazorBoilerplate.Server.Managers
             SendChatMessageResponseDto response;
             try
             {
-                requestGrpc.Text = request.Text;
-                requestGrpc.ChatHistory = request.ChatHistory;
+                requestGrpc.ChatMessage = request.ChatMessage;
                 var reply = _client.SendChatMessage(requestGrpc);
-                response = new SendChatMessageResponseDto(reply.ResponseChunk, reply.FinalMsg);
+                response = new SendChatMessageResponseDto(reply.ControllerResponse);
                 return new ApiResponse(Status200OK, null, response);
             }
             catch (Exception ex)
