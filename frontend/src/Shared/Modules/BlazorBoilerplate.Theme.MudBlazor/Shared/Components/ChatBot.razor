@@ -106,7 +106,9 @@ Style="position:fixed; bottom: 20px; right: 20px; z-index: 100;"
 
     private string getChatHistory()
     {
-        string history = "";
+        List<Message> history_messages = messages.Skip(1).ToList();
+        string history = Newtonsoft.Json.JsonConvert.SerializeObject(history_messages);
+        /*string history = "";
         foreach (var message in messages){
             if (message.IsUser){
                 history += "User: " + message.Text + "\n";
@@ -115,7 +117,7 @@ Style="position:fixed; bottom: 20px; right: 20px; z-index: 100;"
                 history += "Chatbot: " + message.Text + "\n";
             }
         }
-
+        */
 
         return history;
     }

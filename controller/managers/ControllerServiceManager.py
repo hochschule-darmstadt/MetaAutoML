@@ -1,5 +1,5 @@
 from urllib import response
-import multiprocessing, os, logging, asyncio
+import multiprocessing, os, logging, asyncio, json
 from Container import Application
 from DatasetManager import DatasetManager
 from PredictionManager import PredictionManager
@@ -18,7 +18,6 @@ from MeasureDuration import MeasureDuration
 from DataStorage import DataStorage
 from grpclib.client import Channel
 from ChatbotBGRPC import ChatRequest, ChatReply
-
 
 ROOT_PATH = os.path.dirname(os.path.abspath(__file__))
 
@@ -578,7 +577,14 @@ class ControllerServiceManager(ControllerServiceBase):
         """
         try:
             # Forward the request to the backend (RAG pipeline) via chat_with_backend
-            response_from_backend = await self.chat_with_backend(send_chat_message_request) #TODO revert
+
+            response_from_backend = await self.chat_with_backend(send_chat_message_request)
+
+            #Load the message history to a dict
+            messages = json.loads(send_chat_message_request.chat_message)
+
+            #Pseudo answer for testing
+            response_from_backend = "TREE"
 
             # Use ChatbotManager to format and finalize the response for the frontend
             #response = chatbotManager.send_chat_message(send_chat_message_request, response_from_backend)
