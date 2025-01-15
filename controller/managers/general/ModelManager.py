@@ -110,7 +110,7 @@ class ModelManager:
         all_models: list[dict[str, object]] = self.__data_storage.get_models(get_models_request.user_id, dataset_id=get_models_request.dataset_id)
         self.__log.debug(f"get_models: found {all_models.count} models for dataset {get_models_request.dataset_id} for user {get_models_request.user_id}")
 
-        all_models.sort(key=GetScore, reverse=True)
+        # all_models.sort(key=GetScore, reverse=True)
 
         for model in all_models:
             response.models.append(self.__model_object_to_rpc_object(get_models_request.user_id, model))

@@ -442,14 +442,12 @@ class DataStorage:
         Returns:
             list[dict[str, object]]: List of all available model records
         """
+        filter = {"lifecycle_state": "active"}
+
         if training_id is not None:
-            filter = { "training_id": training_id, "lifecycle_state": "active" }
-        elif dataset_id is not None:
-            found, dataset = self.get_dataset(user_id, dataset_id)
-            filter = { "training_id": { '$in': dataset["training_ids"] }, "lifecycle_state": "active" }
-        else:
-            filter = {"lifecycle_state": "active"}
-        result = self.__mongo.get_models(user_id, filter)
+            filter.update({"training_id": training_id})
+
+        result = self.__mongo.get_models(user_id, dataset_id, filter)
 
         return [ds for ds in result]
 

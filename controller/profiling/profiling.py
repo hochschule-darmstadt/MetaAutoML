@@ -3,6 +3,7 @@ from Container import Application
 from dependency_injector.wiring import inject, Provide
 from ControllerBGRPC import *
 from DatasetManager import DatasetManager
+from ModelManager import ModelManager
 from OntologyManager import OntologyManager
 from UserManager import UserManager
 from TrainingManager import TrainingManager
@@ -63,7 +64,7 @@ def get_datasets(
     print(response)
 
 @inject
-def get_trainings(
+def get_trainings_metadata(
     get_trainings_request: "GetTrainingsMetadataRequest",
     training_manager: TrainingManager=Provide[Application.managers.training_manager]
 ) -> "GetTrainingsMetadataResponse":
@@ -73,7 +74,7 @@ def get_trainings(
     print(response.trainings.count)
 
 @inject
-def get_training(
+def get_training_metadata(
     get_training_request: "GetTrainingMetadataRequest",
     training_manager: TrainingManager=Provide[Application.managers.training_manager]
 ) -> "GetTrainingMetadataResponse":
@@ -82,13 +83,39 @@ def get_training(
 
     print(response)
 
+@inject
+def get_training(
+    get_training_request: "GetTrainingRequest",
+    training_manager: TrainingManager=Provide[Application.managers.training_manager]
+) -> "GetTrainingResponse":
+    with Profiling():
+        response = training_manager.get_training(get_training_request)
+
+    training = response.training
+
+    print(training)
+
+@inject
+def get_models(
+    get_models_request: "GetModelsRequest",
+    models_manager: ModelManager=Provide[Application.managers.model_manager]
+) -> "GetModelsResponse":
+    with Profiling():
+        response = models_manager.get_models(get_models_request)
+
+    print(len(response.models))
+
+
 def main():
     # get_trainings(get_trainings_request=GetTrainingsMetadataRequest(user_id=USER_ID, pagination=True, page_number=1, page_size=10))
     # get_trainings(get_trainings_request=GetTrainingsMetadataRequest(user_id=USER_ID, pagination=True, page_number=1, page_size=25))
     # get_trainings(get_trainings_request=GetTrainingsMetadataRequest(user_id=USER_ID, pagination=True, page_number=1, page_size=50))
     # get_trainings(get_trainings_request=GetTrainingsMetadataRequest(user_id=USER_ID, pagination=True, page_number=1, page_size=100))
     # get_trainings(get_trainings_request=GetTrainingsMetadataRequest(user_id=USER_ID, pagination=True, page_number=1, page_size=200))
-    get_training(get_training_request=GetTrainingMetadataRequest(user_id=USER_ID, training_id="6722a7ab015fc5e2f632aaa7"))
+    # get_training_metadata(get_training_request=GetTrainingMetadataRequest(user_id=USER_ID, training_id="6722a7ab015fc5e2f632aaa7"))
+    # get_training(get_training_request=GetTrainingRequest(user_id=USER_ID, training_id="6673475e6852060fb7c85502"))
+    get_models(get_models_request=GetModelsRequest(user_id=USER_ID, dataset_id="662254f59125e4518f9a68dd"))
+
 
 if __name__ == '__main__':
     """Python entry point setting up the dependency injection and starting main

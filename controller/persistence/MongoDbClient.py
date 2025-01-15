@@ -245,7 +245,7 @@ class MongoDbClient:
         self.__log.debug(f"get_model: documents within model: {models.count_documents}, filter {filter}")
         return models.find_one(filter)
 
-    def get_models(self, user_id: str, filter: 'dict[str, object]'={}) -> 'list[dict[str, object]]':
+    def get_models(self, user_id: str, dataset_id: None, filter: 'dict[str, object]'={}) -> 'list[dict[str, object]]':
         """Retrieve all model records from a user database
 
         Args:
@@ -256,8 +256,76 @@ class MongoDbClient:
             list[dict[str, object]]: List of dictonaries representing model records
         """
         models: Collection = self.__mongo[user_id]["models"]
+
+        pipeline = [
+            {
+                '$match': filter
+            }
+        ]
+
+        dataset_pipeline = [
+                {
+                    '$lookup': {
+                        'from': 'datasets',
+                        'pipeline': [
+                            {
+                                '$match': {
+                                    '_id': ObjectId(dataset_id)
+                                }
+                            },
+                            {
+                                '$project': {
+                                    '_id': 0,
+                                    'training_ids': 1
+                                }
+                            }
+                        ],
+                        'as': 'dataset'
+                    }
+                },
+                {
+                    '$match': {
+                        '$expr': {
+                            '$in': [
+                                '$training_id', {
+                                    '$arrayElemAt': ['$dataset.training_ids', 0]
+                                }
+                            ]
+                        }
+                    }
+                }
+            ] if dataset_id else []
+
+        scoring_pipeline = [{
+                '$addFields': {
+                    'firstTestScore': {
+                        '$ifNull': [
+                            {
+                                '$first': {
+                                    '$map': {
+                                        'input': {
+                                            '$objectToArray': '$test_score'
+                                        },
+                                        'as': 'score',
+                                        'in': '$$score.v'
+                                    }
+                                }
+                            }, 0
+                        ]
+                    }
+                }
+            }, {
+                '$sort': {
+                    'firstTestScore': -1
+                }
+            }
+        ]
+
+        pipeline.extend(dataset_pipeline)
+        pipeline.extend(scoring_pipeline)
+
         self.__log.debug(f"get_models: documents within models: {models.count_documents}, filter {filter}")
-        return models.find(filter)
+        return models.aggregate(pipeline)
 
     def update_model(self, user_id: str, model_id: str, new_values: 'dict[str, str]') -> bool:
         """Update a single model record from a user database
