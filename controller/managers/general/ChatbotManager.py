@@ -16,8 +16,7 @@ class ChatbotManager:
         Returns:
             SendChatMessageResponse: The response to be sent back to the frontend.
         """
-
-        response = SendChatMessageResponse(
+        response_str = SendChatMessageResponse(
             controller_response=response
         )
-        return response
+        return response_str

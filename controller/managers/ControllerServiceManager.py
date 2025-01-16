@@ -576,22 +576,24 @@ class ControllerServiceManager(ControllerServiceBase):
             SendChatMessageResponse: The processed response to be sent back to the frontend.
         """
         try:
-            # Forward the request to the backend (RAG pipeline) via chat_with_backend
-
-            response_from_backend = await self.chat_with_backend(send_chat_message_request)
-
             #Load the message history to a dict
-            messages = json.loads(send_chat_message_request.chat_message)
+            #messages = json.loads(send_chat_message_request.chat_message)
+            #newest_message = messages[-1]["Text"]
+            # Forward the request to the backend (RAG pipeline) via chat_with_backend
+            response_from_backend = await self.chat_with_backend(send_chat_message_request.chat_message, send_chat_message_request.new_chat)
+
+
+
 
             #Pseudo answer for testing
-            response_from_backend = "TREE"
+            #response_from_backend = "TREE"
 
             # Use ChatbotManager to format and finalize the response for the frontend
             #response = chatbotManager.send_chat_message(send_chat_message_request, response_from_backend)
-            response = SendChatMessageResponse(controller_response=response_from_backend)
+            #response = SendChatMessageResponse(controller_response=response_from_backend)
 
             self.__log.info("send_chat_message: Successfully processed and returned response to the frontend.")
-            return response
+            return response_from_backend
 
         except Exception as e:
             self.__log.error(f"Error in send_chat_message: {e}")
@@ -605,7 +607,8 @@ class ControllerServiceManager(ControllerServiceBase):
     @inject
     async def chat_with_backend(
         self,
-        send_chat_message_request: SendChatMessageRequest,
+        user_message: str,
+        is_new_chat: bool,
         chatbot_service_manager: ChatbotServiceManager = Provide[Application.managers.chatbot_service_manager]
     ) -> SendChatMessageResponse:
         """
@@ -621,11 +624,10 @@ class ControllerServiceManager(ControllerServiceBase):
         try:
             # Extract the user message from the request
 
-            user_message="How to spell TREE"
-            #user_message = send_chat_message_request.text
-
+            #user_message="How to spell TREE"
+            self.__log.info(f"Received Chat Reqeust from Frontend")
             # Use ChatbotServiceManager to send the message and get the response
-            response_text = await chatbot_service_manager.send_message(user_message)
+            response_text = await chatbot_service_manager.send_message(user_message,is_new_chat)
 
             # Wrap the response text into a SendChatMessageResponse
             return SendChatMessageResponse(controller_response=response_text)
