@@ -24,10 +24,9 @@ class ChatbotServiceManager:
         async with Channel(self.host, self.port) as channel:
             stub = ChatbotStub(channel)
             request = ChatRequest(message=message, new_chat=new_chat)
-
             reply_text = ""
             async for reply in stub.chat(request):  # Correct usage of async generator
-                reply_text += reply.reply
-                # self.__log.info(f"Received reply chunk: {reply.reply}")
+                reply_text += reply.chatbot_reply
+                # self.__log.info(f"Received reply chunk: {reply.chatbot_reply}")
             self.__log.info(f"Received Reply: {reply_text}")
             return reply_text

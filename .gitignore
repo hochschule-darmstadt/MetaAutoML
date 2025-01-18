@@ -227,3 +227,7 @@ frontend/src/Server/BlazorBoilerplate.Server/Properties/launchSettings.json
 
 #chatbot
 chatbot/chroma_data
+controller/.vscode/launch.json
+frontend/src/GTour/src/GTour/wwwroot/js/JsInteropCommon.js
+frontend/src/GTour/src/GTour/wwwroot/js/JsInteropPopper.js
+frontend/src/Server/BlazorBoilerplate.Server/Properties/launchSettings.json
