@@ -28,7 +28,7 @@
                           AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0" Clearable="true"></MudTextField>
         </ToolBarContent>
         <HeaderContent>
-            <MudTh><MudTableSortLabel SortBy="@(new Func<TrainingDto, object>(x=>x.RuntimeProfile.StartTime))">@L["Start datetime"]</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="@(new Func<TrainingDto, object>(x=>x.RuntimeProfile.StartTime))">@L["Date"]</MudTableSortLabel></MudTh>
             <MudTh><MudTableSortLabel SortBy="new Func<TrainingDto, object>(x=>x.Status)">@L["Status"]</MudTableSortLabel></MudTh>
             <MudTh><MudTableSortLabel SortBy="@(new Func<TrainingDto, object>(x=>x.DatasetName))">@L["Dataset"]</MudTableSortLabel></MudTh>
             <MudTh>@L["Task"]</MudTh>
@@ -65,11 +65,11 @@
     public EventCallback OnDeleteTrainingCompleted { get; set; }
     [Parameter]
     public GetTrainingsResponseDto Trainings
-    { 
+    {
         get
         {
             return _trainings;
-        } 
+        }
         set
         {
             _trainings = value;
@@ -85,12 +85,12 @@
                 _timer.Elapsed += RefreshAllTrainings;
                 StateHasChanged();
             }
-        } 
+        }
     }
     private GetTrainingsResponseDto _trainings;
     private string searchString = "";
     private Timer _timer;
-    
+
     private bool FilterFunc(TrainingDto element)
     {
         if (string.IsNullOrWhiteSpace(searchString))
@@ -102,7 +102,7 @@
         if (element.DatasetName.Contains(searchString, StringComparison.OrdinalIgnoreCase))
             return true;
         return false;
-    } 
+    }
     public void Dispose()
     {
         DisposeTimer();
