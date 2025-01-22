@@ -431,7 +431,7 @@ class DataStorage:
 
         return result is not None, result
 
-    def get_models(self, user_id: str, training_id: str = None, dataset_id: str = None) -> 'list[dict[str, object]]':
+    def get_models(self, user_id: str, training_id: str = None, extended_pipeline: List = None, dataset_id: str = None) -> 'list[dict[str, object]]':
         """Get all model records from a specific user database
 
         Args:
@@ -447,9 +447,12 @@ class DataStorage:
         if training_id is not None:
             filter.update({"training_id": training_id})
 
-        result = self.__mongo.get_models(user_id, dataset_id, filter)
+        if dataset_id is not None:
+            filter.update({"dataset_id": ObjectId(dataset_id)})
 
-        return [ds for ds in result]
+        result = self.__mongo.get_models(user_id, filter, extended_pipeline)
+
+        return list(result)
 
     def delete_model(self, user_id: bool, model_id: str) -> int:
         """Delete a model record by id from a user databse. (all related record and files will also be deleted (Predictions))
@@ -775,7 +778,8 @@ class DataStorage:
         Returns:
             list[dict[str, object]]: List of all available prediction records
         """
-        return [ds for ds in self.__mongo.get_predictions(user_id, {"model_id": model_id, "lifecycle_state": "active"})]
+        result = self.__mongo.get_predictions(user_id, {"model_id": model_id, "lifecycle_state": "active"})
+        return list(result)
 
     def delete_prediction(self, user_id: str, prediction_id: str) -> int:
         """Delete a prediction record by id from a user databse.

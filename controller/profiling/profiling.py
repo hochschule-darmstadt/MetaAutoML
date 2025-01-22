@@ -5,6 +5,7 @@ from ControllerBGRPC import *
 from DatasetManager import DatasetManager
 from ModelManager import ModelManager
 from OntologyManager import OntologyManager
+import PredictionManager
 from UserManager import UserManager
 from TrainingManager import TrainingManager
 
@@ -22,8 +23,8 @@ class Profiling:
         self.profiler.open_in_browser()
 
 
-# USER_ID = "080a6480-bf52-4c30-9224-3f2b882fd5bb"
-USER_ID = "d6e5f211-b5a8-420e-a473-962a60a1e50d"
+USER_ID = "080a6480-bf52-4c30-9224-3f2b882fd5bb"
+# USER_ID = "d6e5f211-b5a8-420e-a473-962a60a1e50d"
 
 @inject
 def get_home_overview_information(
@@ -105,6 +106,16 @@ def get_models(
 
     print(len(response.models))
 
+@inject
+def get_predictions(
+    get_predictions_request: "GetPredictionsRequest",
+    predictions_manager: PredictionManager=Provide[Application.managers.prediction_manager]
+) -> "GetPredictionsResponse":
+    with Profiling():
+        response = predictions_manager.get_predictions(get_predictions_request)
+
+    print(len(response))
+
 
 def main():
     # get_trainings(get_trainings_request=GetTrainingsMetadataRequest(user_id=USER_ID, pagination=True, page_number=1, page_size=10))
@@ -115,6 +126,7 @@ def main():
     # get_training_metadata(get_training_request=GetTrainingMetadataRequest(user_id=USER_ID, training_id="6722a7ab015fc5e2f632aaa7"))
     # get_training(get_training_request=GetTrainingRequest(user_id=USER_ID, training_id="6673475e6852060fb7c85502"))
     get_models(get_models_request=GetModelsRequest(user_id=USER_ID, dataset_id="662254f59125e4518f9a68dd"))
+    # get_predictions(get_predictions_request=GetPredictionsRequest(user_id=USER_ID, model_id="662253d39125e4518f9a68d3"))
 
 
 if __name__ == '__main__':

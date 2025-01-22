@@ -1,4 +1,5 @@
 import os
+from typing import List
 from pymongo import MongoClient
 from pymongo.collection import Collection
 from mongomock import MongoClient as MongoMockClient
@@ -245,7 +246,7 @@ class MongoDbClient:
         self.__log.debug(f"get_model: documents within model: {models.count_documents}, filter {filter}")
         return models.find_one(filter)
 
-    def get_models(self, user_id: str, dataset_id: None, filter: 'dict[str, object]'={}) -> 'list[dict[str, object]]':
+    def get_models(self, user_id: str, filter: 'dict[str, object]'={}, extended_pipeline: List = None) -> 'list[dict[str, object]]':
         """Retrieve all model records from a user database
 
         Args:
@@ -263,66 +264,8 @@ class MongoDbClient:
             }
         ]
 
-        dataset_pipeline = [
-                {
-                    '$lookup': {
-                        'from': 'datasets',
-                        'pipeline': [
-                            {
-                                '$match': {
-                                    '_id': ObjectId(dataset_id)
-                                }
-                            },
-                            {
-                                '$project': {
-                                    '_id': 0,
-                                    'training_ids': 1
-                                }
-                            }
-                        ],
-                        'as': 'dataset'
-                    }
-                },
-                {
-                    '$match': {
-                        '$expr': {
-                            '$in': [
-                                '$training_id', {
-                                    '$arrayElemAt': ['$dataset.training_ids', 0]
-                                }
-                            ]
-                        }
-                    }
-                }
-            ] if dataset_id else []
-
-        scoring_pipeline = [{
-                '$addFields': {
-                    'firstTestScore': {
-                        '$ifNull': [
-                            {
-                                '$first': {
-                                    '$map': {
-                                        'input': {
-                                            '$objectToArray': '$test_score'
-                                        },
-                                        'as': 'score',
-                                        'in': '$$score.v'
-                                    }
-                                }
-                            }, 0
-                        ]
-                    }
-                }
-            }, {
-                '$sort': {
-                    'firstTestScore': -1
-                }
-            }
-        ]
-
-        pipeline.extend(dataset_pipeline)
-        pipeline.extend(scoring_pipeline)
+        if extended_pipeline is not None:
+            pipeline.extend(extended_pipeline)
 
         self.__log.debug(f"get_models: documents within models: {models.count_documents}, filter {filter}")
         return models.aggregate(pipeline)
@@ -589,8 +532,14 @@ class MongoDbClient:
             list[dict[str, object]]: List of dictonaries representing prediction records
         """
         predictions: Collection = self.__mongo[user_id]["predictions"]
+        pipeline = [
+            {
+                '$match': filter
+            }
+        ]
         self.__log.debug(f"get_predictions: documents within dataset: {predictions.count_documents}, filter {filter}")
-        return predictions.find(filter)
+
+        return predictions.aggregate(pipeline)
 
     def update_prediction(self, user_id: str, prediction_id: str, new_values: 'dict[str, object]') -> bool:
         """Update a single prediction record from a user database
