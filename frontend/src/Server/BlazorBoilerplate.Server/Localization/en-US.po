@@ -1353,8 +1353,8 @@ msgid "Recent trainings"
 msgstr "Recent trainings"
 
 msgctxt "Global"
-msgid "Start datetime"
-msgstr "Start datetime"
+msgid "Date"
+msgstr "Date"
 
 msgctxt "Global"
 msgid "Status"
@@ -2086,110 +2086,3 @@ msgstr "Save"
 msgctxt "Global"
 msgid "File is too large. Please use a URL for files larger than 500MB"
 msgstr "File is too large. Please use a URL for files larger than 500MB"
-
-msgid "Home.Sidebar.tooltip"
-msgstr "OMA-ML makes effective Machine Learning (ML) easy! Simply upload a dataset, start ML training and use ML models.\r From the home page you can navigate to trainings of ML models you have performed so far or open a dataset to start a new ML training."
-
-msgctxt "Global"
-msgid "Datasets.Sidebar.tooltip"
-msgstr "A dataset contains data that can be used for machine learning. Different dataset types are distinguished, e.g., tabular data, texts or images.\r This page lists all datasets you have uploaded so far to the OMA-ML platform. By clicking on a dataset, the respective dataset page is opened to inspect the dataset and start new trainings."
-
-msgctxt "Global"
-msgid "Trainings.Sidebar.tooltip"
-msgstr "Machine learning consists of two phases: training and prediction. During the training phase, a ML model is generated from a dataset. This page lists all trainings you have performed so far. You can open a past training, select an ML model and use it for predicting new cases."
-
-msgctxt "Global"
-msgid "Help.Sidebar.tooltip"
-msgstr "Read how to solve different tasks with OMA-ML or start a guided tour."
-
-msgctxt "Global"
-msgid "Datasets.AllDatasets.Upload.tooltip"
-msgstr "Click here to upload a new dataset from your disk or a website to the OMA-ML platform."
-
-msgctxt "Global"
-msgid "Home.RecentDatasets.Upload.tooltip"
-msgstr "Click here to upload a new dataset to OMA-ML from your disk or from the internet."
-
-msgctxt "Global"
-msgid "Home.RecentDatasets.More.tooltip"
-msgstr "Click here to navigate to all datasets you have uploaded to the OMA-ML platform so far."
-
-msgctxt "Global"
-msgid "Home.RecentTrainings.More.tooltip"
-msgstr "Click here to navigate to all trainings that you have performed on the OMA-ML platform so far."
-
-msgctxt "Global"
-msgid "Home.Datasets.Dataset.Train.Next.tooltip"
-msgstr "Click here to advance to the next step of the training wizard: configuring the training. You can always step back."
-
-msgctxt "Global"
-msgid "Home.Datasets.Dataset.Train.Previous.tooltip"
-msgstr "Click here to get back to the last step of the training configuration wizard."
-
-msgctxt "Global"
-msgid "Home.Datasets.Dataset.Train.Finish.tooltip"
-msgstr "Click here to finish configuration and start training. This may take a while, depending on your maximum runtime configuration."
-
-msgctxt "Global"
-msgid "Home.Datasets.Dataset.CreateNewTraining.tooltip"
-msgstr "Click here to initiate a new training session."
-
-msgctxt "Global"
-msgid "Home.RecentTrainings.Label.tooltip"
-msgstr "These are the ML training sessions you have started recently. By clicking on one training (indicated by date and time) you can inspect and use the ML models that have been trained."
-
-msgctxt "Global"
-msgid "Home.RecentDatasets.Label.tooltip"
-msgstr "Datasets are files that you upload to the OMA-ML platform to perform machine learning."
-
-msgctxt "Global"
-msgid "Datasets.DatasetOverview.Label.tooltip"
-msgstr "This is the page for a concrete dataset. In the ‘Overview’ panel you find metadata about the dataset. With ‘New Training’ you can start training new ML models for this dataset. ‘Preview’ shows the columns and first rows of a tabular dataset. ‘Analysis’ shows statistical insights into the dataset. ‘Top 3 models’ show the best performing models that have been trained so far on this dataset."
-
-msgctxt "Global"
-msgid "Datasets.Dataset.Configure.tooltip"
-msgstr "Click here to configure datatypes and roles of the dataset columns."
-
-msgctxt "Global"
-msgid "Datasets.Dataset.Analysis.More.tooltip"
-msgstr "Click here to display all analysis diagrams available for this dataset."
-
-msgctxt "Global"
-msgid "Trainings.Training.TrainingTime.Label.tooltip"
-msgstr "Runtime for training the entire dataset in minutes."
-
-msgctxt "Global"
-msgid "Trainings.Training.PredictionTime.Label.tooltip"
-msgstr "Runtime for predicting one single sample in microseconds."
-
-msgctxt "Global"
-msgid "Trainings.Training.Emissions.Label.tooltip"
-msgstr "Emissions for training the entire dataset in mg CO2 equivalents."
-
-msgctxt "Global"
-msgid "Trainings.Training.Duration.Label.tooltip"
-msgstr "This page shows the leaderboard for an ML training. During training, various AutoML solutions are executed in parallel. This is indicated by a spinning wheel. Whenever an AutoML solution has terminated, the result is displayed. The top performing models are shown first in the leaderboard."
-
-msgctxt "Global"
-msgid "Datasets.Dataset.Configure.FileConfiguration.Save&ReloadDataset.tooltip"
-msgstr "Updates the file configuration and reloads the dataset. Important: When you change the file configuration and press ‘Save & reload dataset’, the dataset is reloaded and all previous modifications in the dataset configuration below are discarded."
-
-msgctxt "Global"
-msgid "Datasets.Dataset.Configure.FileConfiguration.Label.tooltip"
-msgstr "In this panel you can modify the datatypes and roles of individual columns of the dataset. Important: When you change the file configuration and press ‘Save & reload dataset’ later, the dataset is reloaded and all previous modifications in the dataset configuration are discarded."
-
-msgctxt "Global"
-msgid "Datasets.Dataset.Configure.Dataset:Dataset.Label.tooltip"
-msgstr "Here various adjustments can be made to the dataset. For example, the use of a header row can be activated or deactivated. Rows can be ignored by changing the 'Start row' field. The separator can be defined, the encoding can be changed (default UTF-8), the datetime format can be changed and so on."
-
-msgctxt "Global"
-msgid "Datasets.Dataset.Top3Models.More.tooltip"
-msgstr "Click here to display all models that have been trained so far on this dataset."
-
-msgctxt "Global"
-msgid "Datasets.Dataset.FileConfiguration.Save&ReloadDataset.tooltip"
-msgstr "Updates the file configuration and reloads the dataset. Important: When you change the file configuration and press ‘Save & reload dataset’, the dataset is reloaded and all previous modifications in the dataset configuration below are discarded."
-
-msgctxt "Global"
-msgid "Datasets.Dataset.FileConfiguration.Label.tooltip"
-msgstr "In this panel you can modify the datatypes and roles of individual columns of the dataset. Important: When you change the file configuration and press ‘Save & reload dataset’ later, the dataset is reloaded and all previous modifications in the dataset configuration are discarded."
