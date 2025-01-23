@@ -719,6 +719,21 @@ class GetTrainingsRequest(betterproto.Message):
     page_size: int = betterproto.int32_field(6)
     """The number of items per pageexample: 10 //10 items per page"""
 
+    search_string: str = betterproto.string_field(7)
+    """
+    The searchString to filter the dataexample: 'ended' //Only entities
+    containing 'ended' are returned
+    """
+
+    sort_label: str = betterproto.string_field(8)
+    """
+    The column name to sort the results byexample: tasks //Sort by the column
+    tasks
+    """
+
+    sort_direction: str = betterproto.string_field(9)
+    """The direction to sort byexample: ascending //Sorting ascending"""
+
 
 @dataclass(eq=False, repr=False)
 class GetTrainingsResponse(betterproto.Message):

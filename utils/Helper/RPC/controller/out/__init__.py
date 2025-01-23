@@ -719,10 +719,25 @@ class GetTrainingsRequest(betterproto.Message):
     page_size: int = betterproto.int32_field(6)
     """The number of items per pageexample: 10 //10 items per page"""
 
+    search_string: str = betterproto.string_field(7)
+    """
+    The searchString to filter the dataexample: 'ended' //Only entities
+    containing 'ended' are returned
+    """
+
+    sort_label: str = betterproto.string_field(8)
+    """
+    The column name to sort the results byexample: tasks //Sort by the column
+    tasks
+    """
+
+    sort_direction: str = betterproto.string_field(9)
+    """The direction to sort byexample: ascending //Sorting ascending"""
+
 
 @dataclass(eq=False, repr=False)
 class GetTrainingsResponse(betterproto.Message):
-    trainings: List["Training"] = betterproto.message_field(1)
+    trainings: List["TrainingMetaData"] = betterproto.message_field(1)
     """
     List of training records from MongoDB (see Training for more
     detals)example: [Training, Training]
@@ -800,6 +815,35 @@ class Training(betterproto.Message):
     """
     The Training runtime profile object (see TrainingRuntimeProfile for more
     details)example: TrainingRuntimeProfile
+    """
+
+
+@dataclass(eq=False, repr=False)
+class TrainingMetaData(betterproto.Message):
+    id: str = betterproto.string_field(1)
+    """
+    Unique training id generated when inserting a new training document into
+    MongoDBexample: '63515c86b10d04d230dc1482'
+    """
+
+    dataset_id: str = betterproto.string_field(2)
+    """
+    Unique dataset id generated when inserting a new dataset document into
+    MongoDBexample: '63515c86b10d04d230dc1482'
+    """
+
+    dataset_name: str = betterproto.string_field(3)
+    """Dataset name used for this trainingexample: 'Titanic'"""
+
+    task: str = betterproto.string_field(4)
+    """Type of the training task (e.g. tabular_classification)"""
+
+    status: str = betterproto.string_field(5)
+    """Current training activity status (busy, ended)example: "busy"""
+
+    start_time: datetime = betterproto.message_field(6)
+    """
+    The timestamp when the training process startedexample: 1666283732325
     """
 
 

@@ -18,7 +18,7 @@ def get_training(
     print(response)
 
 def main():
-    get_training(get_trainings_request=GetTrainingsRequest(user_id="e763ec28-90ab-4621-9227-87c229be09fd", short=True))
+    get_training(get_trainings_request=GetTrainingsRequest(user_id="28a5e888-82db-4413-a8e3-6d78ea33bdc3", short=True, pagination=True, page_number=1, page_size=100))
 
 if __name__ == '__main__':
     """Python entry point setting up the dependency injection and starting main

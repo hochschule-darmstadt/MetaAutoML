@@ -328,7 +328,7 @@ class MongoDbClient:
         self.__log.debug(f"get_training: documents within trainings: {trainings.count_documents}, filter {filter}")
         return trainings.find_one(filter)
 
-    def get_trainings(self, user_id: str, filter: 'dict[str, object]'={}, pagination:bool=False, page_number:int=1, page_size:int=20) -> 'list[dict[str, object]]':
+    def get_trainings(self, user_id: str, filter: 'dict[str, object]'={}, pagination:bool=False, page_number:int=1, page_size:int=20, search_string:str=None, sort_label:str=None, sort_direction:str=None) -> 'list[dict[str, object]]':
         """Retrieve all training records from a user database
 
         Args:
@@ -337,10 +337,20 @@ class MongoDbClient:
             pagination (bool): If pagination is used
             page_number (int): the pagination page to retrieve
             page_size (int): the number of records per page
+            search_string (str, optional): The search string to filter the records. Defaults to None.
+            sort_label (str, optional): The label to sort the records. Defaults to None.
+            sort_direction (str, optional): The direction to sort the records. Defaults to None.
 
         Returns:
             list[dict[str, object]]: List of dictionaries representing training records
         """
+        # Add search string filter
+        if search_string:
+            filter["$or"] = [
+                {"status": {"$regex": search_string, "$options": "i"}},
+                {"runtime_profile.start_time": {"$regex": search_string, "$options": "i"}},
+                {"configuration.dataset_type": {"$regex": search_string, "$options": "i"}}
+            ]
 
         # Aggregation pipeline
         pipeline = [
@@ -404,6 +414,11 @@ class MongoDbClient:
                 }
             },
         ]
+
+        # Add sorting stage
+        if sort_label and sort_direction:
+            sort_order = pymongo.ASCENDING if sort_direction.lower() == "asc" else pymongo.DESCENDING
+            pipeline.append({"$sort": {sort_label: sort_order}})
 
         # Add pagination stages only if both page and page_size are provided
         if pagination and page_number is not None and page_size is not None:

@@ -215,7 +215,10 @@ class TrainingManager:
             only_last_day=get_trainings_request.only_last_day,
             pagination=pagination,
             page_number=page_number,
-            page_size=page_size
+            page_size=page_size,
+            search_string=get_trainings_request.search_string,
+            sort_label=get_trainings_request.sort_label,
+            sort_direction=get_trainings_request.sort_direction
         )
 
         all_trainings = list(all_trainings_cursor)

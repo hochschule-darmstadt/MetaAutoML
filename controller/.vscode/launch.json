@@ -101,7 +101,7 @@
                 "MONGO_DB_DEBUG": "NO",
                 "MONGO_DB_DOCKER_DEBUG": "YES",
                 "MONGO_CLUSTER": "NO",
-                "DEFAULT_GATEWAY_IP": "172.17.0.1",
+                "DEFAULT_GATEWAY_IP": "localhost",
                 "USE_DEV_CONFIG": "YES",
                 "WIN_DEV_MACHINE": "YES",
                 "KUBERNETES_CLUSTER": "NO",

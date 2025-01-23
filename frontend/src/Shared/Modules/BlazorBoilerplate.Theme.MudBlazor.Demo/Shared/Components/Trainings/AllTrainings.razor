@@ -19,11 +19,10 @@
         }
         else
         {
-            <MudTable ServerData="ServerReload" style="width:stretch" class="mat-elevation-z5"
-                Filter="new Func<TrainingMetaDataDto,bool>(FilterFunc)">
+            <MudTable ServerData="ServerReload" style="width:stretch" class="mat-elevation-z5" @ref="table">
                 <ToolBarContent>
                     <MudSpacer />
-                    <MudTextField @bind-Value="searchString" Placeholder="@L["Search for status, task or dataset type"]"
+                    <MudTextField T="string" ValueChanged="@(s=>OnSearch(s))" Placeholder="@L["Search for status, task or dataset type"]"
                         Adornment="Adornment.Start" Immediate="true" AdornmentIcon="@Icons.Material.Filled.Search"
                         IconSize="Size.Medium" Class="mt-0" Clearable="true"></MudTextField>
                 </ToolBarContent>
@@ -107,7 +106,8 @@
     private Timer _timer;
     private int _pageSize = 10; // Default page size
     private int _pageNumber = 0; // Default page number
-
+    private IEnumerable<TrainingMetaDataDto> pagedData;
+    private MudTable<TrainingMetaDataDto> table;
     private int totalItems;
 
     private bool FilterFunc(TrainingMetaDataDto element)
@@ -225,12 +225,16 @@
 
     private async Task<TableData<TrainingMetaDataDto>> ServerReload(TableState state)
     {
+
         var apiResponse = await apiClient.GetTrainings(new GetTrainingsRequestDto()
             {
                 Short = true,
                 Pagination = true,
                 PageNumber = state.Page + 1,
-                PageSize = state.PageSize
+                PageSize = state.PageSize,
+                SearchString = searchString,
+                SortLabel = state.SortLabel,
+                SortDirection = state.SortDirection.ToString()
             });
         if (apiResponse.IsSuccessStatusCode)
         {
@@ -242,5 +246,11 @@
             viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
             return new TableData<TrainingMetaDataDto>() { TotalItems = 0, Items = new List<TrainingMetaDataDto>() };
         }
+    }
+
+    private void OnSearch(string text)
+    {
+        searchString = text;
+        table.ReloadServerData();
     }
 }

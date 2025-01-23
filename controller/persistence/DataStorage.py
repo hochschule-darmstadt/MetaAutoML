@@ -592,7 +592,7 @@ class DataStorage:
 
         return result is not None, result
 
-    def get_trainings(self, user_id: str, dataset_id:str=None, only_last_day:bool=False, pagination:bool=False, page_number:int=1, page_size:int=20) -> 'list[dict[str, object]]':
+    def get_trainings(self, user_id: str, dataset_id:str=None, only_last_day:bool=False, pagination:bool=False, page_number:int=1, page_size:int=20, search_string:str=None, sort_label:str=None, sort_direction:str=None) -> 'list[dict[str, object]]':
         """Get all training records from a specific user database
 
         Args:
@@ -601,6 +601,9 @@ class DataStorage:
             pagination (bool): If pagination is used
             page_number (int): the pagination page to retrieve
             page_size (int): the number of records per page
+            search_string (str, optional): The search string to filter the records. Defaults to None.
+            sort_label (str, optional): The label to sort the records. Defaults to None.
+            sort_direction (str, optional): The direction to sort the records. Defaults to None.
 
         Returns:
             list[dict[str, object]]: List of all available training records
@@ -608,16 +611,16 @@ class DataStorage:
         search_filter = {"lifecycle_state": "active"}
         if dataset_id is not None:
             search_filter.update({"dataset_id": dataset_id})
-        if only_last_day == True:
+        if only_last_day:
             now = datetime.now()
-            yesteday = now - timedelta(hours=24)
+            yesterday = now - timedelta(hours=24)
             search_filter.update({
                 "runtime_profile.start_time": {
-                    "$gte": yesteday,
+                    "$gte": yesterday,
                     "$lt": now
                 }
             })
-        return [sess for sess in self.__mongo.get_trainings(user_id, search_filter, pagination, page_number, page_size)]
+        return [sess for sess in self.__mongo.get_trainings(user_id, search_filter, pagination, page_number, page_size, search_string, sort_label, sort_direction)]
 
     def delete_training(self, user_id: bool, training_id: str) -> int:
         """Delete a training record by id from a user databse. (all related record and files will also be deleted (Models, Predictions))

@@ -55,6 +55,21 @@ message GetTrainingsRequest {
     example: 10 //10 items per page
   */
   int32 pageSize = 6;
+  /*
+    The searchString to filter the data
+    example: 'ended' //Only entities containing 'ended' are returned
+  */
+  string searchString = 7;
+  /*
+    The column name to sort the results by
+    example: tasks //Sort by the column tasks
+  */
+  string sortLabel = 8;
+  /*
+    The direction to sort by
+    example: ascending //Sorting ascending
+  */
+  string sortDirection = 9;
 }
 
 message GetTrainingsResponse {
