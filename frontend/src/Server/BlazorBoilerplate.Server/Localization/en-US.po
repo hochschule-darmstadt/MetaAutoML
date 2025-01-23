@@ -2155,6 +2155,26 @@ msgid "Datasets.Dataset.Analysis.More.tooltip"
 msgstr "Click here to display all analysis diagrams available for this dataset."
 
 msgctxt "Global"
+msgid "Trainings.Training.AutoML_Solution.Label.tooltip"
+msgstr "Tool which automatically optimizes the ML model."
+
+msgctxt "Global"
+msgid "Trainings.Training.ML_Library.Label.tooltip"
+msgstr "ML Library for using the generated ML model."
+
+msgctxt "Global"
+msgid "Trainings.Training.Model.Label.tooltip"
+msgstr "ML model that can be ussed for predicting new cases."
+
+msgctxt "Global"
+msgid "Trainings.Training.Status.Label.tooltip"
+msgstr "executing(spinning wheel), completed, failed."
+
+msgctxt "Global"
+msgid "Trainings.Training.Metric.Label.tooltip"
+msgstr "Measures the quality of the generated ML model, e.g., accuracy (for classification) or mean absolute error (MAE, for regression)."
+
+msgctxt "Global"
 msgid "Trainings.Training.TrainingTime.Label.tooltip"
 msgstr "Runtime for training the entire dataset in minutes."
 
