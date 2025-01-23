@@ -592,7 +592,7 @@ class DataStorage:
 
         return result is not None, result
 
-    def get_trainings_metadata(self, user_id: str, dataset_id:str=None, only_last_day:bool=False, pagination:bool=False, page_number:int=1, page_size:int=20, filter:object={}) -> 'list[dict[str, object]]':
+    def get_trainings_metadata(self, user_id: str, dataset_id:str=None, only_last_day:bool=False, pagination:bool=False, page_number:int=1, page_size:int=20, search_string:str=None, sort_label:str=None, sort_direction:str=None, filter:object={}) -> 'list[dict[str, object]]':
         """Get all training records from a specific user database
 
         Args:
@@ -621,7 +621,7 @@ class DataStorage:
                     "$lt": now
                 }
             })
-        return [sess for sess in self.__mongo.get_trainings_metadata(user_id, search_filter, pagination, page_number, page_size)]
+        return [sess for sess in self.__mongo.get_trainings_metadata(user_id, search_filter, pagination, page_number, page_size, search_string, sort_label, sort_direction)]
 
     def delete_training(self, user_id: bool, training_id: str) -> int:
         """Delete a training record by id from a user databse. (all related record and files will also be deleted (Models, Predictions))

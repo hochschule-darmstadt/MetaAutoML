@@ -107,8 +107,8 @@
     private Timer _timer;
     private int _pageSize = 10; // Default page size
     private int _pageNumber = 0; // Default page number
-    private IEnumerable<TrainingMetaDataDto> pagedData;
-    private MudTable<TrainingMetaDataDto> table;
+    private IEnumerable<TrainingMetadataDto> pagedData;
+    private MudTable<TrainingMetadataDto> table;
     private int totalItems;
 
     private bool FilterFunc(TrainingMetadataDto element)
@@ -238,12 +238,6 @@
             viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
             return new TableData<TrainingMetadataDto>() { TotalItems = 0, Items = new List<TrainingMetadataDto>() };
         }
-    }
-
-    private void OnSearch(string text)
-    {
-        searchString = text;
-        table.ReloadServerData();
     }
 
     private void OnSearch(string text)
