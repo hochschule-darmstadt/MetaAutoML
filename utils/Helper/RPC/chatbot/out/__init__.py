@@ -23,7 +23,7 @@ if TYPE_CHECKING:
 @dataclass(eq=False, repr=False)
 class ChatRequest(betterproto.Message):
     message: str = betterproto.string_field(1)
-    new_chat: bool = betterproto.bool_field(2)
+    history: str = betterproto.string_field(2)
 
 
 @dataclass(eq=False, repr=False)

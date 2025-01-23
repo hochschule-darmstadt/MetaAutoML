@@ -1230,7 +1230,7 @@ class SendChatMessageRequest(betterproto.Message):
     is OMA-ML?"
     """
 
-    new_chat: bool = betterproto.bool_field(2)
+    chat_history: str = betterproto.string_field(2)
 
 
 @dataclass(eq=False, repr=False)

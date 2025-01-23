@@ -11,7 +11,7 @@ class ChatbotServiceManager:
         logging.basicConfig(level=logging.INFO)
         self.__log = logging.getLogger('ChatbotServiceManager')
 
-    async def send_message(self, message: str, new_chat: bool) -> str:
+    async def send_message(self, message: str, history: str) -> str:
         """
         Sends a user-defined message to the RAG pipeline gRPC service and collects responses.
 
@@ -23,7 +23,7 @@ class ChatbotServiceManager:
         """
         async with Channel(self.host, self.port) as channel:
             stub = ChatbotStub(channel)
-            request = ChatRequest(message=message, new_chat=new_chat)
+            request = ChatRequest(message=message, history=history)
             reply_text = ""
             async for reply in stub.chat(request):  # Correct usage of async generator
                 reply_text += reply.chatbot_reply

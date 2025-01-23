@@ -10,7 +10,7 @@ message SendChatMessageRequest{
   example:"What is OMA-ML?"
   */
   string chat_message = 1;
-  bool new_chat = 2;
+  string chat_history = 2;
 
 }
 

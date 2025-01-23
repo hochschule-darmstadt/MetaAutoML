@@ -72,6 +72,7 @@ Style="position:fixed; bottom: 20px; right: 20px; z-index: 100;"
     {
         if (!string.IsNullOrWhiteSpace(currentMessage))
         {
+            string history = getChatHistory();
             string newMessage = currentMessage;
             bool isNewMessage = true;
             //Add message to Chat
@@ -87,7 +88,7 @@ Style="position:fixed; bottom: 20px; right: 20px; z-index: 100;"
             ApiResponseDto apiResponse = await apiClient.SendChatMessage(
                 new BlazorBoilerplate.Shared.Dto.Chat.SendChatMessageRequestDto {
                     ChatMessage = newMessage,
-                    NewChat = isNewMessage
+                    ChatHistory = history
                 }
             );
 
@@ -125,9 +126,9 @@ Style="position:fixed; bottom: 20px; right: 20px; z-index: 100;"
 
     private string getChatHistory()
     {
-        List<Message> history_messages = messages.Skip(1).ToList();
-        string history = Newtonsoft.Json.JsonConvert.SerializeObject(history_messages);
-        /*string history = "";
+        //List<Message> history_messages = messages.Skip(1).ToList();
+        //string history = Newtonsoft.Json.JsonConvert.SerializeObject(history_messages);
+        string history = "";
         foreach (var message in messages){
             if (message.IsUser){
                 history += "User: " + message.Text + "\n";
@@ -136,7 +137,7 @@ Style="position:fixed; bottom: 20px; right: 20px; z-index: 100;"
                 history += "Chatbot: " + message.Text + "\n";
             }
         }
-        */
+        
 
         return history;
     }

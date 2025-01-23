@@ -32,7 +32,7 @@ namespace BlazorBoilerplate.Server.Managers
             try
             {
                 requestGrpc.ChatMessage = request.ChatMessage;
-                requestGrpc.NewChat = request.NewChat;
+                requestGrpc.ChatHistory = request.ChatHistory;
                 var reply = _client.SendChatMessage(requestGrpc);
                 response = new SendChatMessageResponseDto(reply.ControllerResponse);
                 return new ApiResponse(Status200OK, null, response);

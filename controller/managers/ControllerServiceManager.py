@@ -580,7 +580,9 @@ class ControllerServiceManager(ControllerServiceBase):
             #messages = json.loads(send_chat_message_request.chat_message)
             #newest_message = messages[-1]["Text"]
             # Forward the request to the backend (RAG pipeline) via chat_with_backend
-            response_from_backend = await self.chat_with_backend(send_chat_message_request.chat_message, send_chat_message_request.new_chat)
+            self.__log.info(send_chat_message_request.chat_message)
+            self.__log.info(send_chat_message_request.chat_history)
+            response_from_backend = await self.chat_with_backend(send_chat_message_request.chat_message, send_chat_message_request.chat_history)
 
 
 
@@ -608,7 +610,7 @@ class ControllerServiceManager(ControllerServiceBase):
     async def chat_with_backend(
         self,
         user_message: str,
-        is_new_chat: bool,
+        hirstory: str,
         chatbot_service_manager: ChatbotServiceManager = Provide[Application.managers.chatbot_service_manager]
     ) -> SendChatMessageResponse:
         """
@@ -627,7 +629,7 @@ class ControllerServiceManager(ControllerServiceBase):
             #user_message="How to spell TREE"
             self.__log.info(f"Received Chat Reqeust from Frontend")
             # Use ChatbotServiceManager to send the message and get the response
-            response_text = await chatbot_service_manager.send_message(user_message,is_new_chat)
+            response_text = await chatbot_service_manager.send_message(user_message,hirstory)
 
             # Wrap the response text into a SendChatMessageResponse
             return SendChatMessageResponse(controller_response=response_text)

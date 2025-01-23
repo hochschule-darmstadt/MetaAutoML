@@ -110,7 +110,7 @@ service ControllerService {
   rpc DeletePrediction(DeletePredictionRequest) returns (DeletePredictionResponse) {}
 
   /*OMA-ML CHATBOT MESSAGES*/
-  /*send user message and the chatbot's response*/
+  /*send user message and returns the chatbot's response*/
   rpc SendChatMessage(SendChatMessageRequest) returns(SendChatMessageResponse) {}
 }
 
