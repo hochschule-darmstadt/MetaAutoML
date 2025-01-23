@@ -367,11 +367,11 @@ class DataStorage:
         else:
             path = path.replace( "/"+ os.path.basename(dataset["path"]), "")
         #Before deleting the dataset, delete all related documents
-        existing_trainings = self.get_trainings(user_id, dataset_id)
+        existing_trainings = self.get_trainings_metadata(user_id, dataset_id)
         self.__log.debug(f"delete_dataset: deleting {existing_trainings.count} trainings")
         for training in existing_trainings:
             try:
-                self.delete_training(user_id, str(training["_id"]))
+                self.delete_training(user_id, str(training["id"]))
             except:
                 self.__log.debug(f"delete_dataset: deleting training failed, already deleted. Skipping...")
         self.__log.debug(f"delete_dataset: deleting files within path: {path}")
@@ -592,7 +592,7 @@ class DataStorage:
 
         return result is not None, result
 
-    def get_trainings(self, user_id: str, dataset_id:str=None, only_last_day:bool=False, pagination:bool=False, page_number:int=1, page_size:int=20, search_string:str=None, sort_label:str=None, sort_direction:str=None) -> 'list[dict[str, object]]':
+    def get_trainings_metadata(self, user_id: str, dataset_id:str=None, only_last_day:bool=False, pagination:bool=False, page_number:int=1, page_size:int=20, filter:object={}) -> 'list[dict[str, object]]':
         """Get all training records from a specific user database
 
         Args:
@@ -609,6 +609,7 @@ class DataStorage:
             list[dict[str, object]]: List of all available training records
         """
         search_filter = {"lifecycle_state": "active"}
+        search_filter.update(filter)
         if dataset_id is not None:
             search_filter.update({"dataset_id": dataset_id})
         if only_last_day:
@@ -620,7 +621,7 @@ class DataStorage:
                     "$lt": now
                 }
             })
-        return [sess for sess in self.__mongo.get_trainings(user_id, search_filter, pagination, page_number, page_size, search_string, sort_label, sort_direction)]
+        return [sess for sess in self.__mongo.get_trainings_metadata(user_id, search_filter, pagination, page_number, page_size)]
 
     def delete_training(self, user_id: bool, training_id: str) -> int:
         """Delete a training record by id from a user databse. (all related record and files will also be deleted (Models, Predictions))

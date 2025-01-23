@@ -172,16 +172,27 @@ class ControllerServiceManager(ControllerServiceBase):
         return response
 
     @inject
-    async def get_trainings(
-        self, get_trainings_request: "GetTrainingsRequest",
+    async def get_trainings_metadata(
+        self, get_trainings_metadata_request: "GetTrainingsMetadataRequest",
         training_manager: TrainingManager=Provide[Application.managers.training_manager]
-    ) -> "GetTrainingsResponse":
+    ) -> "GetTrainingsMetadataResponse":
         with MeasureDuration() as m:
-            response = training_manager.get_trainings(get_trainings_request)
+            response = training_manager.get_trainings_metadata(get_trainings_metadata_request)
         #response = await self.__loop.run_in_executor(
         #    self.__executor, training_manager.get_trainings, get_trainings_request
         #)
-        self.__log.warn("get_trainings: executed")
+        self.__log.warn("get_trainings_metadata: executed")
+        return response
+
+    @inject
+    async def get_training_metadata(
+        self, get_training_metadata_request: "GetTrainingMetadataRequest",
+        training_manager: TrainingManager=Provide[Application.managers.training_manager]
+    ) -> "GetTrainingMetadataResponse":
+        with MeasureDuration() as m:
+            response = training_manager.get_training_metadata(get_training_metadata_request)
+
+        self.__log.warn("get_training_metadata: executed")
         return response
 
     @inject

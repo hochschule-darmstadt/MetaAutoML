@@ -8,11 +8,11 @@ namespace BlazorBoilerplate.Shared.Dto.Training
 {
     public class GetTrainingsResponseDto
     {
-        public List<TrainingMetaDataDto> Trainings { get; set; }
+        public List<TrainingMetadataDto> Trainings { get; set; }
         public PaginationMetadataDto PaginationMetadata { get; set; }
         public GetTrainingsResponseDto()
         {
-            Trainings = new List<TrainingMetaDataDto>();
+            Trainings = new List<TrainingMetadataDto>();
         }
     }
 

@@ -15,7 +15,8 @@
 
 <MudStack AlignItems="MudBlazor.AlignItems.Center" Row="true" Class="mb-2" style="padding-top:50px">
     <MudIcon Size="Size.Large" Icon="@Icons.Filled.ModelTraining" />
-    <LabelTooltip FontSize="TextStyle.H4" Label="Trainings" Text="@L["Trainings.Sidebar.tooltip"]" Position="Radzen.TooltipPosition.Bottom" URL="/help#trainings" ></LabelTooltip>
+    <LabelTooltip FontSize="TextStyle.H4" Label="Trainings" Text="@L["Trainings.Sidebar.tooltip"]"
+        Position="Radzen.TooltipPosition.Bottom" URL="/help#trainings"></LabelTooltip>
 </MudStack>
 
 
@@ -25,7 +26,7 @@
     </MudItem>
 </MudGrid>
 
-@code{
+@code {
     private GetTrainingsResponseDto _trainings;
     private List<BreadcrumbItem> _breadcrumbs = new List<BreadcrumbItem>();
     private int _pageNumber = 1; //Pagination is 1 based
@@ -56,7 +57,12 @@
     {
         try
         {
-            var apiResponse = await apiClient.GetTrainings(new GetTrainingsRequestDto() { Short = true, Pagination = true, PageNumber = pageNumber, PageSize = pageSize });
+            var apiResponse = await apiClient.GetTrainingsMetadata(new GetTrainingsMetadataRequestDto()
+                {
+                    Pagination = true,
+                    PageNumber = pageNumber,
+                    PageSize = pageSize
+                });
             if (apiResponse.IsSuccessStatusCode)
             {
                 _trainings = Newtonsoft.Json.JsonConvert.DeserializeObject<GetTrainingsResponseDto>(apiResponse.Result.ToString());

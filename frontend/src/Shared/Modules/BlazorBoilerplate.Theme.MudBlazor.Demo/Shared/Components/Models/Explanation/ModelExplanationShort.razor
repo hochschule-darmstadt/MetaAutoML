@@ -76,7 +76,7 @@
                         {
                             <div class="container">
                             <ButtonTooltip Text="Opens the dashboard for analyzing this ML model (Explainable AI)." Position="Placement.Top">
-                                <MudButton Disabled="IsModelBlacklisted"
+                                <MudButton Disabled="ModelEmpty"
                                            Variant="MudBlazor.Variant.Filled"
                                            StartIcon="@Icons.Material.Outlined.Analytics"
                                            Color="Color.Secondary"
@@ -130,10 +130,7 @@
             StateHasChanged();
         }
     }
-    // TODO blacklist needs to be filled out with Model that dont generate Dashboard
-   // private List<string> blacklistedModels = new List<string> { "Autogluon", "FLAML", "LAMA" , "Autokeras", "H2O Automl"};
-    private List<string> blacklistedModels = new List<string> { };
-    private bool IsModelBlacklisted => blacklistedModels.Contains(AutoMlSolutionID);
+    private bool ModelEmpty = true;
 
     private async Task LoadModelExplanation()
     {
@@ -160,6 +157,9 @@
                     Status = "finished" // Change this value for testing different scenarios: "dashboard_failed", "db_error", "finished"
                 };
 
+            if(_model.Model.DashboardStatus != "inactive"){
+                ModelEmpty=false;
+            }
             // Uncomment and use actual API call for real implementation
             /*
             GetModelExplanationRequestDto modelRequest = new GetModelExplanationRequestDto()

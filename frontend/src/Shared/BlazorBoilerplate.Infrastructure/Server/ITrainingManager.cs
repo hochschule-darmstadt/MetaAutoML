@@ -1,4 +1,5 @@
 using BlazorBoilerplate.Infrastructure.Server.Models;
+using BlazorBoilerplate.Server;
 using BlazorBoilerplate.Shared.Dto.Dataset;
 using BlazorBoilerplate.Shared.Dto.Training;
 using System;
@@ -12,7 +13,8 @@ namespace BlazorBoilerplate.Infrastructure.Server
     public interface ITrainingManager
     {
         Task<ApiResponse> CreateTraining(CreateTrainingRequestDto request);
-        Task<ApiResponse> GetTrainings(GetTrainingsRequestDto request);
+        Task<ApiResponse> GetTrainingsMetadata(GetTrainingsMetadataRequestDto request);
+        Task<ApiResponse> GetTrainingMetadata(GetTrainingMetadataRequestDto request);
         Task<ApiResponse> GetTraining(GetTrainingRequestDto request);
         Task<ApiResponse> DeleteTraining(DeleteTrainingRequestDto request);
         Task<ApiResponse> GetTrainingRuntimeSuggestion(GetTrainingSuggestedRuntimeRequestDto request);

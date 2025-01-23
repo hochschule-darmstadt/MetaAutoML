@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace BlazorBoilerplate.Shared.Dto.Training
 {
-    public class TrainingMetaDataDto
+    public class TrainingMetadataDto
     {
         public string Id { get; set; }
         public string DatasetId { get; set; }
@@ -19,11 +19,11 @@ namespace BlazorBoilerplate.Shared.Dto.Training
         public ObjectInfomationDto Task { get; set; }
         public string Status { get; set; }
         public DateTime StartTime { get; set; }
-        public TrainingMetaDataDto()
+        public TrainingMetadataDto()
         {
 
         }
-        public TrainingMetaDataDto(Server.TrainingMetaData grpcResponse, string datasetName)
+        public TrainingMetadataDto(Server.TrainingMetadata grpcResponse, string datasetName)
         {
             Id = grpcResponse.Id;
             DatasetId = grpcResponse.DatasetId;
