@@ -116,6 +116,16 @@ def get_predictions(
 
     print(len(response))
 
+@inject
+def get_dataset(
+    get_dataset_request: "GetDatasetRequest",
+    dataset_manager: DatasetManager=Provide[Application.managers.dataset_manager]
+) -> "GetDatasetResponse":
+    with Profiling():
+        response = dataset_manager.get_dataset(get_dataset_request)
+
+    print(response)
+
 
 def main():
     # get_trainings(get_trainings_request=GetTrainingsMetadataRequest(user_id=USER_ID, pagination=True, page_number=1, page_size=10))
@@ -125,8 +135,12 @@ def main():
     # get_trainings(get_trainings_request=GetTrainingsMetadataRequest(user_id=USER_ID, pagination=True, page_number=1, page_size=200))
     # get_training_metadata(get_training_request=GetTrainingMetadataRequest(user_id=USER_ID, training_id="6722a7ab015fc5e2f632aaa7"))
     # get_training(get_training_request=GetTrainingRequest(user_id=USER_ID, training_id="6673475e6852060fb7c85502"))
-    get_models(get_models_request=GetModelsRequest(user_id=USER_ID, dataset_id="662254f59125e4518f9a68dd"))
     # get_predictions(get_predictions_request=GetPredictionsRequest(user_id=USER_ID, model_id="662253d39125e4518f9a68d3"))
+    # get_models(get_models_request=GetModelsRequest(user_id=USER_ID, dataset_id="662254f59125e4518f9a68dd")) # airlines
+    # get_models(get_models_request=GetModelsRequest(user_id=USER_ID, dataset_id="6667d4dc6852060fb7c853ed")) # led
+    get_dataset(get_dataset_request=GetDatasetRequest(user_id=USER_ID, dataset_id="662254f59125e4518f9a68dd", short=True)) # airlines
+    # get_dataset(get_dataset_request=GetDatasetRequest(user_id=USER_ID, dataset_id="662253c29125e4518f9a68d1")) # diabetes
+    # get_dataset(get_dataset_request=GetDatasetRequest(user_id=USER_ID, dataset_id="6623ef3597eb741cec4b2569")) # KDDCup99
 
 
 if __name__ == '__main__':

@@ -181,7 +181,7 @@ class ModelManager:
                     'test_score': 1,
                     'prediction_time': 1,
                     'runtime_profile': 1,
-                    'status_messages': 1,
+                    # 'status_messages': 1, # Might take too long due to the amount of messages --> skip for now
                     'explanation': 1,
 
                     # Check if the dashboard_path exists, if not set the dashboard_status to inactive else active

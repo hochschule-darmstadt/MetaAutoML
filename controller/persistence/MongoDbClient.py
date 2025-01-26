@@ -140,7 +140,7 @@ class MongoDbClient:
         self.__log.debug(f"insert_dataset: new dataset inserted: {result.inserted_id}")
         return str(result.inserted_id)
 
-    def get_dataset(self, user_id: str, filter: 'dict[str, object]') -> 'dict[str, object]':
+    def get_dataset(self, user_id: str, filter: 'dict[str, object]', extended_pipeline: List = None) -> 'dict[str, object]':
         """Retrieve a single dataset record from a user database
 
         Args:
@@ -151,8 +151,18 @@ class MongoDbClient:
             dict[str, object]: Dictonary representing a dataset record
         """
         datasets: Collection = self.__mongo[user_id]["datasets"]
-        self.__log.debug(f"get_dataset: documents within dataset: {datasets.count_documents}, filter {filter}")
-        return datasets.find_one(filter)
+
+        pipeline = [
+            {
+                '$match': filter
+            }
+        ]
+
+        if extended_pipeline is not None:
+            pipeline.extend(extended_pipeline)
+
+        # self.__log.debug(f"get_dataset: documents within dataset: {datasets.count_documents}, filter {filter}")
+        return datasets.aggregate(pipeline).next()
 
     def get_datasets(self, user_id: str, filter: 'dict[str, object]'={}, only_five_recent:bool=False, pagination:bool=False, page_number:int=1) -> 'list[dict[str, object]]':
         """Retrieve all dataset records from a user database
@@ -246,7 +256,7 @@ class MongoDbClient:
         self.__log.debug(f"get_model: documents within model: {models.count_documents}, filter {filter}")
         return models.find_one(filter)
 
-    def get_models(self, user_id: str, filter: 'dict[str, object]'={}, extended_pipeline: List = None) -> 'list[dict[str, object]]':
+    def get_models(self, user_id: str, filter: 'dict[str, object]'={}, extended_pipeline: list[dict[str, object]] = None) -> 'list[dict[str, object]]':
         """Retrieve all model records from a user database
 
         Args:

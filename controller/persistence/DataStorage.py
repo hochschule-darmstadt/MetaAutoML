@@ -314,7 +314,7 @@ class DataStorage:
         self.__log.debug(f"update_dataset: updating: {dataset_id} for user {user_id}, new values {new_values}")
         return self.__mongo.update_dataset(user_id, dataset_id, new_values)
 
-    def get_dataset(self, user_id: str, dataset_id: str) -> 'tuple[bool, dict[str, object]]':
+    def get_dataset(self, user_id: str, dataset_id: str, extended_pipeline: List = None) -> 'tuple[bool, dict[str, object]]':
         """Get a dataset record by id from a specific user database
 
         Args:
@@ -327,7 +327,7 @@ class DataStorage:
         result = self.__mongo.get_dataset(user_id, {
             "_id": ObjectId(dataset_id),
             "lifecycle_state": "active"
-        })
+        }, extended_pipeline)
 
         return result is not None, result
 
@@ -431,7 +431,7 @@ class DataStorage:
 
         return result is not None, result
 
-    def get_models(self, user_id: str, training_id: str = None, extended_pipeline: List = None, dataset_id: str = None) -> 'list[dict[str, object]]':
+    def get_models(self, user_id: str, training_id: str = None, extended_pipeline: list[dict[str, object]] = None, dataset_id: str = None) -> 'list[dict[str, object]]':
         """Get all model records from a specific user database
 
         Args:

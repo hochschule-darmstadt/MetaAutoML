@@ -49,6 +49,12 @@ class GetDatasetRequest(betterproto.Message):
     MongoDBexample: '63515c86b10d04d230dc1482'
     """
 
+    short: bool = betterproto.bool_field(3)
+    """
+    Skips large parts of the dataset analysis and schema
+    example: True
+    """
+
 
 @dataclass(eq=False, repr=False)
 class GetDatasetResponse(betterproto.Message):
