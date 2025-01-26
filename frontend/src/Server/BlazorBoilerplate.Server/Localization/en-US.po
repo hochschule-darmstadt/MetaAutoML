@@ -1208,20 +1208,24 @@ msgid "You are not authorized to access this page"
 msgstr "You are not authorized to access this page"
 
 msgctxt "TrainingTimeline"
-msgid "started"
+msgid "Started"
 msgstr "Training started"
 
 msgctxt "TrainingTimeline"
-msgid "pre_training"
-msgstr "pre-training"
+msgid "Pre-Training"
+msgstr "Pre-Training"
 
 msgctxt "TrainingTimeline"
-msgid "training"
-msgstr "training"
+msgid "Pre-Processing"
+msgstr "Pre-Processing"
 
 msgctxt "TrainingTimeline"
-msgid "evaluation"
-msgstr "evaluation"
+msgid "Training"
+msgstr "Training"
+
+msgctxt "TrainingTimeline"
+msgid "Evaluation"
+msgstr "Evaluation"
 
 
 msgctxt "TrainingTimeline"
@@ -1229,7 +1233,7 @@ msgid "running"
 msgstr "AutoML executing"
 
 msgctxt "TrainingTimeline"
-msgid "stopped"
+msgid "Stopped"
 msgstr "Training finished"
 
 msgctxt "TrainingTimeline"
