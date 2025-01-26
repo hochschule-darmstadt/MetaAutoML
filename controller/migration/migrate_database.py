@@ -2,8 +2,21 @@ from pymongo import MongoClient, UpdateOne
 from pymongo.collection import Collection
 from pymongo import ASCENDING, DESCENDING
 
+####################################################
+# WARNING: This script will modify the database!   #
+# Make sure to backup your data before running it. #
+# The backup created by this script is a best      #
+# effort backup, it may not be complete.           #
+####################################################
+
+
+# Configuration
+
+# MongoDB connection string
 SERVER_URL = "mongodb://root:example@localhost/"
+# User ID (used as a database name)
 USER_ID = "080a6480-bf52-4c30-9224-3f2b882fd5bb"
+# PROD or TEST mode (PROD will apply changes to the original database, TEST apply changes to the backup database)
 MODE = "TEST" # PROD or TEST
 
 mongo = MongoClient(SERVER_URL, 27017, serverSelectionTimeoutMS=30000)
@@ -11,7 +24,7 @@ mongo = MongoClient(SERVER_URL, 27017, serverSelectionTimeoutMS=30000)
 mongo.list_databases()
 
 source_db = mongo[USER_ID]
-target_db = mongo[USER_ID + "_test"]
+target_db = mongo[USER_ID + "_backup"]
 
 for collection_name in source_db.list_collection_names(filter={"type": "collection"}):
     if not collection_name.startswith('system.'):
@@ -55,7 +68,7 @@ for view_name in source_db.list_collection_names(filter={"type": "view"}):
 
 print("Database and indexes cloned successfully!")
 print("\nVerification:")
-if USER_ID + '_test' in mongo.list_database_names():
+if USER_ID + "_backup" in mongo.list_database_names():
     print("Target database collections:", target_db.list_collection_names())
 else:
     print("Target database was not created!")
