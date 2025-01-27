@@ -36,8 +36,14 @@ Style="position:fixed; bottom: 20px; right: 20px; z-index: 100;"
                             </MudText>
                         </MudListItem>
                     }
+                    <MudListItem Class="assistant-message" style="@(isTyping ? "" : "display: none;")">
+                        <MudText Class="assistant-bubble typing-indicator">
+                            <span>.</span><span>.</span><span>.</span>
+                        </MudText>
+                    </MudListItem>
                 </div>
             </MudList>
+
         </MudCardContent>
 
         <!-- Chat Input Area -->
@@ -54,6 +60,7 @@ Style="position:fixed; bottom: 20px; right: 20px; z-index: 100;"
     private MudTextField<string> inputField;
     private string currentMessage = string.Empty;
     private bool isInputDisabled = false;
+    private bool isTyping = false;
 
     private ElementReference chatContentRef;
 
@@ -91,27 +98,36 @@ Style="position:fixed; bottom: 20px; right: 20px; z-index: 100;"
 
             await inputField.Clear();
 
-            //Deactivate input for user
+            isTyping = true;
+
+            // Scroll to bottom after new messages are added
+            await JSRuntime.InvokeVoidAsync("scrollChatToBottom", chatContentRef);
+
+            StateHasChanged();
+            try{
+                //Send request
+                ApiResponseDto apiResponse = await apiClient.SendChatMessage(
+                    new BlazorBoilerplate.Shared.Dto.Chat.SendChatMessageRequestDto {
+                        ChatMessage = newMessage,
+                        ChatHistory = history
+                    }
+                );
+                SendChatMessageResponseDto responseDto = Newtonsoft.Json.JsonConvert.DeserializeObject<SendChatMessageResponseDto>(apiResponse.Result.ToString());
+
+                //Add ChatbotMessage to Chat
+                messages.Add(new Message { Text = responseDto.ResponseMessage , IsUser = false });
+            }catch(OperationCanceledException){
+                messages.Add(new Message { Text = "The server is taking too long to respond. Please try again later.", IsUser = false });
+            }
+            
 
 
-            //Send request
-            ApiResponseDto apiResponse = await apiClient.SendChatMessage(
-                new BlazorBoilerplate.Shared.Dto.Chat.SendChatMessageRequestDto {
-                    ChatMessage = newMessage,
-                    ChatHistory = history
-                }
-            );
-
-            SendChatMessageResponseDto responseDto = Newtonsoft.Json.JsonConvert.DeserializeObject<SendChatMessageResponseDto>(apiResponse.Result.ToString());
-
-            //Add ChatbotMessage to Chat
-            messages.Add(new Message { Text = responseDto.ResponseMessage , IsUser = false });
 
 
             // Scroll to bottom after new messages are added
             await JSRuntime.InvokeVoidAsync("scrollChatToBottom", chatContentRef);
 
-
+            isTyping = false;
             isInputDisabled = false;
 
             //Update UI after receiving Messages
