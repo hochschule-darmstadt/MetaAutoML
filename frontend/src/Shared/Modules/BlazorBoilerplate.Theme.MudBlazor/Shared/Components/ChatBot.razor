@@ -11,9 +11,6 @@ Color="Color.Secondary"
 Style="position:fixed; bottom: 20px; right: 20px; z-index: 100;" 
 />
 
-<HeadContent>
-    <script src="_content/BlazorBoilerplate.Theme.MudBlazor/js/chat.js"></script>
-</HeadContent>
 
 <MudPopover Open="@isChatOpen" AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.BottomRight">
     <MudPaper Class="chat-box">
@@ -39,13 +36,13 @@ Style="position:fixed; bottom: 20px; right: 20px; z-index: 100;"
                             </MudText>
                         </MudListItem>
                     }
-            </div>
+                </div>
             </MudList>
         </MudCardContent>
 
         <!-- Chat Input Area -->
         <MudCardActions Class="chat-input">
-            <MudTextField @bind-Value="currentMessage" @ref="inputField" Placeholder="Message" FullWidth="true" Class="input-field"
+            <MudTextField @bind-Value="currentMessage" @ref="inputField" Placeholder="Message" FullWidth="true" Class="input-field" Disabled="isInputDisabled"
             OnKeyUp="HandleEnterKey" />
             <MudIconButton Icon="@Icons.Material.Filled.Send" @onclick="SendMessage" />
         </MudCardActions>
@@ -56,6 +53,7 @@ Style="position:fixed; bottom: 20px; right: 20px; z-index: 100;"
     private bool isChatOpen = false;
     private MudTextField<string> inputField;
     private string currentMessage = string.Empty;
+    private bool isInputDisabled = false;
 
     private ElementReference chatContentRef;
 
@@ -81,21 +79,20 @@ Style="position:fixed; bottom: 20px; right: 20px; z-index: 100;"
     {
         if (!string.IsNullOrWhiteSpace(currentMessage))
         {
+            isInputDisabled = true;
             string history = getChatHistory();
             string newMessage = currentMessage;
-            bool isNewMessage = true;
+
             //Add message to Chat
             messages.Add(new Message { Text = currentMessage, IsUser = true });
-
-            if(messages.Count > 2){
-                isNewMessage = false;
-            }
 
             // Scroll to bottom after new messages are added
             await JSRuntime.InvokeVoidAsync("scrollChatToBottom", chatContentRef);
 
-
             await inputField.Clear();
+
+            //Deactivate input for user
+
 
             //Send request
             ApiResponseDto apiResponse = await apiClient.SendChatMessage(
@@ -105,9 +102,6 @@ Style="position:fixed; bottom: 20px; right: 20px; z-index: 100;"
                 }
             );
 
-            //ToDo Check Validity of response
-            //ToDo handle "Stream" of response
-
             SendChatMessageResponseDto responseDto = Newtonsoft.Json.JsonConvert.DeserializeObject<SendChatMessageResponseDto>(apiResponse.Result.ToString());
 
             //Add ChatbotMessage to Chat
@@ -116,6 +110,9 @@ Style="position:fixed; bottom: 20px; right: 20px; z-index: 100;"
 
             // Scroll to bottom after new messages are added
             await JSRuntime.InvokeVoidAsync("scrollChatToBottom", chatContentRef);
+
+
+            isInputDisabled = false;
 
             //Update UI after receiving Messages
             StateHasChanged();
