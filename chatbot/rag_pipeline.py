@@ -48,34 +48,25 @@ prompt = PromptTemplate(template=prompt_template, input_variables=["history", "c
 # Define the gRPC Service using BetterProto
 class ChatbotService(ChatbotBase):
     def __init__(self):
-        self.chat_history: List[str] = []  # Global chat history
+        pass  # No need for a global history anymore
 
     async def chat(self, chat_request: ChatRequest) -> AsyncIterable[ChatReply]:
-        print("we are in")
+        print("Incoming request")
         user_query = chat_request.message
-
-        # Check if the new_chat flag is True and reset the history
-        if chat_request.new_chat:
-            self.chat_history = []
-        # Append user query to global chat history
-        print(self.chat_history)
+        chat_history = chat_request.history  # Get the history from the request
 
         # Retrieve relevant documents
         docs = retriever.invoke({"query": user_query})
         context_text = "\n".join([doc.page_content for doc in docs])
 
         # Prepare LLM input with history and retrieved context
-        history_text = "\n".join(self.chat_history)
+        history_text = chat_history
         llm_input = prompt.format(history=history_text, context=context_text, question=user_query)
         print("Tokens count:", len(llm_input.split()))
         print(llm_input)
 
         # Get response from the LLM
         response = llm.invoke(llm_input)
-
-        # Append LLM response to global chat history
-        self.chat_history.append(f"User: {user_query}")
-        self.chat_history.append(f"Assistant: {response}")
 
         # Stream the response character by character
         for char in response:
