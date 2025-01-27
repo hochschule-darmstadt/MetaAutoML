@@ -582,11 +582,7 @@ class ControllerServiceManager(ControllerServiceBase):
             # Forward the request to the backend (RAG pipeline) via chat_with_backend
             self.__log.info(send_chat_message_request.chat_message)
             self.__log.info(send_chat_message_request.chat_history)
-            time.sleep(1)
-            #response_from_backend = await self.chat_with_backend(send_chat_message_request.chat_message, send_chat_message_request.chat_history)
-            response_from_backend = SendChatMessageResponse("No!")
-
-
+            response_from_backend = await self.chat_with_backend(send_chat_message_request.chat_message, send_chat_message_request.chat_history)
 
             #Pseudo answer for testing
             #response_from_backend = "TREE"
