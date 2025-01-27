@@ -395,6 +395,7 @@ hr {
 .chat-content {
     max-height: 400px;
     overflow-y: hidden;
+    padding: 0px;
     background-color: #ffffff;
 }
 

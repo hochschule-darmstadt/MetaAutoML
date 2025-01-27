@@ -26,7 +26,7 @@ Style="position:fixed; bottom: 20px; right: 20px; z-index: 100;"
         <!-- Chat Content Area -->
         <MudCardContent Class="chat-content" style="overflow: hidden">
             <MudList style="overflow: hidden">
-                <div @ref="chatContentRef" style="overflow-y: auto; max-height: 400px;">
+                <div @ref="chatContentRef" style="overflow-y: auto; max-height: 392px;">
                     @foreach (var message in messages)
                     {
                         <MudListItem Class="@(message.IsUser ? "user-message" : "assistant-message")">
