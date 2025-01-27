@@ -30,16 +30,32 @@
                     </ToolBarContent>
                     <HeaderContent>
                         <MudTHeadRow>
-                            <MudTh><MudTableSortLabel SortBy="@(new Func<ModelDto, object>(x=>x.AutoMlSolution.Properties["skos:prefLabel"]))">@L["AutoML solution"]</MudTableSortLabel></MudTh>
-                            <MudTh><MudTableSortLabel SortBy="new Func<ModelDto, object>(x=>x.Status)">@L["Status"]</MudTableSortLabel></MudTh>
-                            <MudTh><MudTableSortLabel SortBy="@(new Func<ModelDto, object>(x=>x.GetMlModelString()))">@L["Model"]</MudTableSortLabel></MudTh>
-                            <MudTh><MudTableSortLabel SortBy="@(new Func<ModelDto, object>(x=>x.GetMlLibraryString()))">@L["ML Library"]</MudTableSortLabel></MudTh>
+                            <MudTh>
+                                <MudTableSortLabel SortBy="@(new Func<ModelDto, object>(x=>x.AutoMlSolution.Properties["skos:prefLabel"]))">
+                                    <LabelTooltip Label=@L["AutoML solution"] FontSize="TextStyle.Body1" Text="@L["Trainings.Training.AutoML_Solution.Label.tooltip"]" Position="Radzen.TooltipPosition.Top"></LabelTooltip>
+                                </MudTableSortLabel>
+                            </MudTh>
+                            <MudTh>
+                                <MudTableSortLabel SortBy="new Func<ModelDto, object>(x=>x.Status)">
+                                <LabelTooltip Label=@L["Status"] FontSize="TextStyle.Body1" Text="@L["Trainings.Training.Status.Label.tooltip"]" Position="Radzen.TooltipPosition.Top"></LabelTooltip>
+                                </MudTableSortLabel>
+                            </MudTh>
+                            <MudTh>
+                                <MudTableSortLabel SortBy="@(new Func<ModelDto, object>(x=>x.GetMlModelString()))">
+                                     <LabelTooltip Label=@L["Model"] FontSize="TextStyle.Body1" Text="@L["Trainings.Training.Model.Label.tooltip"]" Position="Radzen.TooltipPosition.Top"></LabelTooltip>
+                                </MudTableSortLabel>
+                            </MudTh>
+                            <MudTh>
+                                <MudTableSortLabel SortBy="@(new Func<ModelDto, object>(x=>x.GetMlLibraryString()))">
+                                     <LabelTooltip Label=@L["ML Library"] FontSize="TextStyle.Body1" Text="@L["Trainings.Training.ML_Library.Label.tooltip"]" Position="Radzen.TooltipPosition.Top"></LabelTooltip>
+                                </MudTableSortLabel>
+                            </MudTh>
                             <MudTh>
                                 <MudTableSortLabel SortBy="@(new Func<ModelDto, object>(x=> SelectedMetric != "" ?
                                                                                                     x.Metrics.Count() > 0 ?
                                                                                                         x.Metrics.Where(y => y.Name.ID == SelectedMetric).First().Score.ToString()
                                                                                                         : ""
-                                                                                                    : ""))">@L["Metric"]</MudTableSortLabel>
+                                                                                                    : ""))"><LabelTooltip Label=@L["Metric"] FontSize="TextStyle.Body1" Text="@L["Trainings.Training.Metric.Label.tooltip"]" Position="Radzen.TooltipPosition.Top"></LabelTooltip></MudTableSortLabel>
                             </MudTh>
                             <MudTh>
 								<MudTableSortLabel SortBy="new Func<ModelDto, object>(x=>x.Runtime)">
