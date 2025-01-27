@@ -4,6 +4,11 @@
 @inject IStringLocalizer<Global> L
 @attribute [Authorize(Policies.IsAdmin)]
 
+
+<HeadContent>
+    <script src="_content/BlazorBoilerplate.Theme.MudBlazor/js/chat.js" defer></script>
+</HeadContent>
+
 <CascadingValue Value="this">
     <MudLayout>
         <MudAppBar Elevation="2">

@@ -2,6 +2,7 @@
 @using System.Text.Json
 @inherits DynamicComponentContainer
 @inject IApiClient apiClient
+@inject IJSRuntime JSRuntime
 
 <MudFab 
 Icon="@(isChatOpen ? Icons.Material.Filled.Close : Icons.Material.Filled.Chat)" 
@@ -23,22 +24,24 @@ Style="position:fixed; bottom: 20px; right: 20px; z-index: 100;"
         </MudCard>
 
         <!-- Chat Content Area -->
-        <MudCardContent Class="chat-content">
-            <MudList>
-                @foreach (var message in messages)
-                {
-                    <MudListItem Class="@(message.IsUser ? "user-message" : "assistant-message")">
-                        <MudText Class="@(message.IsUser ? "user-bubble" : "assistant-bubble")">
-                            @message.Text
-                        </MudText>
-                    </MudListItem>
-                }
+        <MudCardContent Class="chat-content" style="overflow: hidden">
+            <MudList style="overflow: hidden">
+                <div @ref="chatContentRef" style="overflow-y: auto; max-height: 400px;">
+                    @foreach (var message in messages)
+                    {
+                        <MudListItem Class="@(message.IsUser ? "user-message" : "assistant-message")">
+                            <MudText Class="@(message.IsUser ? "user-bubble" : "assistant-bubble")">
+                                @message.Text
+                            </MudText>
+                        </MudListItem>
+                    }
+            </div>
             </MudList>
         </MudCardContent>
 
         <!-- Chat Input Area -->
         <MudCardActions Class="chat-input">
-            <MudTextField @bind-Value="currentMessage" @ref="inputField" Placeholder="Message Hint" FullWidth="true" Class="input-field"
+            <MudTextField @bind-Value="currentMessage" @ref="inputField" Placeholder="Message" FullWidth="true" Class="input-field"
             OnKeyUp="HandleEnterKey" />
             <MudIconButton Icon="@Icons.Material.Filled.Send" @onclick="SendMessage" />
         </MudCardActions>
@@ -49,6 +52,8 @@ Style="position:fixed; bottom: 20px; right: 20px; z-index: 100;"
     private bool isChatOpen = false;
     private MudTextField<string> inputField;
     private string currentMessage = string.Empty;
+
+    private ElementReference chatContentRef;
 
     private List<Message> messages = new List<Message>
     {
@@ -82,6 +87,10 @@ Style="position:fixed; bottom: 20px; right: 20px; z-index: 100;"
                 isNewMessage = false;
             }
 
+            // Scroll to bottom after new messages are added
+            await JSRuntime.InvokeVoidAsync("scrollChatToBottom", chatContentRef);
+
+
             await inputField.Clear();
 
             //Send request
@@ -100,8 +109,13 @@ Style="position:fixed; bottom: 20px; right: 20px; z-index: 100;"
             //Add ChatbotMessage to Chat
             messages.Add(new Message { Text = responseDto.ResponseMessage , IsUser = false });
 
+
+            // Scroll to bottom after new messages are added
+            await JSRuntime.InvokeVoidAsync("scrollChatToBottom", chatContentRef);
+
             //Update UI after receiving Messages
             StateHasChanged();
+
 
             //Reset variable and inputField
             currentMessage = string.Empty;

@@ -1,5 +1,5 @@
 from urllib import response
-import multiprocessing, os, logging, asyncio, json
+import multiprocessing, os, logging, asyncio, json, time
 from Container import Application
 from DatasetManager import DatasetManager
 from PredictionManager import PredictionManager
@@ -582,8 +582,9 @@ class ControllerServiceManager(ControllerServiceBase):
             # Forward the request to the backend (RAG pipeline) via chat_with_backend
             self.__log.info(send_chat_message_request.chat_message)
             self.__log.info(send_chat_message_request.chat_history)
-            response_from_backend = await self.chat_with_backend(send_chat_message_request.chat_message, send_chat_message_request.chat_history)
-
+            time.sleep(1)
+            #response_from_backend = await self.chat_with_backend(send_chat_message_request.chat_message, send_chat_message_request.chat_history)
+            response_from_backend = SendChatMessageResponse("No!")
 
 
 
