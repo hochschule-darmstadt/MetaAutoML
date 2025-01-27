@@ -576,20 +576,10 @@ class ControllerServiceManager(ControllerServiceBase):
             SendChatMessageResponse: The processed response to be sent back to the frontend.
         """
         try:
-            #Load the message history to a dict
-            #messages = json.loads(send_chat_message_request.chat_message)
-            #newest_message = messages[-1]["Text"]
             # Forward the request to the backend (RAG pipeline) via chat_with_backend
             self.__log.info(send_chat_message_request.chat_message)
             self.__log.info(send_chat_message_request.chat_history)
             response_from_backend = await self.chat_with_backend(send_chat_message_request.chat_message, send_chat_message_request.chat_history)
-
-            #Pseudo answer for testing
-            #response_from_backend = "TREE"
-
-            # Use ChatbotManager to format and finalize the response for the frontend
-            #response = chatbotManager.send_chat_message(send_chat_message_request, response_from_backend)
-            #response = SendChatMessageResponse(controller_response=response_from_backend)
 
             self.__log.info("send_chat_message: Successfully processed and returned response to the frontend.")
             return response_from_backend
