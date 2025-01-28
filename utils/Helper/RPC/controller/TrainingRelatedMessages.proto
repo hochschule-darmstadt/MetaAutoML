@@ -34,37 +34,37 @@ message GetTrainingsMetadataRequest {
     Should only the most recent trainings be retrived
     example: True //retrieve last 24 hours training
   */
-  bool onlyLastDay = 3;
+  bool onlyLastDay = 2;
   /*
     Should results be paginated, combined with page parameter
     example: True //return results by pagination
   */
-  bool pagination = 4;
+  bool pagination = 3;
   /*
     The page to retrieve
     example: 2 //return trainings from pagination page 2
   */
-  int32 pageNumber = 5;
+  int32 pageNumber = 4;
   /*
     The number of items per page
     example: 10 //10 items per page
   */
-  int32 pageSize = 6;
+  int32 pageSize = 5;
   /*
     The searchString to filter the data
     example: 'ended' //Only entities containing 'ended' are returned
   */
-  string searchString = 7;
+  string searchString = 6;
   /*
     The column name to sort the results by
     example: tasks //Sort by the column tasks
   */
-  string sortLabel = 8;
+  string sortLabel = 7;
   /*
     The direction to sort by
     example: ascending //Sorting ascending
   */
-  string sortDirection = 9;
+  string sortDirection = 8;
 }
 
 message GetTrainingsMetadataResponse {

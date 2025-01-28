@@ -1,3 +1,4 @@
+@using MudBlazor
 @inject IStringLocalizer<Global> L
 @inject NavigationManager NavManager
 @using System.Linq
@@ -115,19 +116,6 @@
     private MudTable<TrainingMetadataDto> table;
     private int totalItems;
 
-    private bool FilterFunc(TrainingMetadataDto element)
-    {
-        if (string.IsNullOrWhiteSpace(searchString))
-            return true;
-        if (element.Status.Contains(searchString, StringComparison.OrdinalIgnoreCase))
-            return true;
-        if (element.Task.Properties["skos:prefLabel"].Contains(searchString, StringComparison.OrdinalIgnoreCase))
-            return true;
-        if (element.DatasetName.Contains(searchString, StringComparison.OrdinalIgnoreCase))
-            return true;
-        return false;
-    }
-
     public void Dispose()
     {
         DisposeTimer();
@@ -223,14 +211,15 @@
     private async Task<TableData<TrainingMetadataDto>> ServerReload(TableState state)
     {
         var apiResponse = await apiClient.GetTrainingsMetadata(new GetTrainingsMetadataRequestDto()
-            {
-                Pagination = true,
-                PageNumber = state.Page + 1,
-                PageSize = state.PageSize,
-                SearchString = searchString,
-                SortLabel = state.SortLabel,
-                SortDirection = state.SortDirection.ToString()
-            });
+        {
+            Pagination = true,
+            PageNumber = state.Page + 1,
+            PageSize = state.PageSize,
+            SearchString = searchString,
+            SortLabel = state.SortLabel,
+            SortDirection = state.SortDirection == MudBlazor.SortDirection.None ? string.Empty : state.SortDirection.ToString()
+        });
+
         if (apiResponse.IsSuccessStatusCode)
         {
             var data = Newtonsoft.Json.JsonConvert.DeserializeObject<GetTrainingsResponseDto>(apiResponse.Result.ToString());

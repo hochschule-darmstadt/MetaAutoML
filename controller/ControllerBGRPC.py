@@ -692,39 +692,39 @@ class GetTrainingsMetadataRequest(betterproto.Message):
     of the frontendexample: '4a7af128-ac3d-4e3d-89fe-b70f7bfe0c3b'
     """
 
-    only_last_day: bool = betterproto.bool_field(3)
+    only_last_day: bool = betterproto.bool_field(2)
     """
     Should only the most recent trainings be retrivedexample: True //retrieve
     last 24 hours training
     """
 
-    pagination: bool = betterproto.bool_field(4)
+    pagination: bool = betterproto.bool_field(3)
     """
     Should results be paginated, combined with page parameterexample: True
     //return results by pagination
     """
 
-    page_number: int = betterproto.int32_field(5)
+    page_number: int = betterproto.int32_field(4)
     """
     The page to retrieveexample: 2 //return trainings from pagination page 2
     """
 
-    page_size: int = betterproto.int32_field(6)
+    page_size: int = betterproto.int32_field(5)
     """The number of items per pageexample: 10 //10 items per page"""
 
-    search_string: str = betterproto.string_field(7)
+    search_string: str = betterproto.string_field(6)
     """
     The searchString to filter the dataexample: 'ended' //Only entities
     containing 'ended' are returned
     """
 
-    sort_label: str = betterproto.string_field(8)
+    sort_label: str = betterproto.string_field(7)
     """
     The column name to sort the results byexample: tasks //Sort by the column
     tasks
     """
 
-    sort_direction: str = betterproto.string_field(9)
+    sort_direction: str = betterproto.string_field(8)
     """The direction to sort byexample: ascending //Sorting ascending"""
 
 
