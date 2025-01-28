@@ -8,6 +8,7 @@ from ControllerBGRPC import GetHomeOverviewInformationResponse
 from MeasureDuration import MeasureDuration
 import pymongo
 from MongoDbDocuments import MongoDbDocuments
+import re
 
 class MongoDbClient:
     """
@@ -346,11 +347,27 @@ class MongoDbClient:
         """
         # Add search string filter
         if search_string:
+            search_string = re.escape(search_string)
             filter["$or"] = [
                 {"status": {"$regex": search_string, "$options": "i"}},
-                {"runtime_profile.start_time": {"$regex": search_string, "$options": "i"}},
-                {"configuration.dataset_type": {"$regex": search_string, "$options": "i"}}
+                {
+                    '$expr': {
+                        '$regexMatch': {
+                            'input': {
+                                '$dateToString': {
+                                    'format': '%d/%m/%Y %H:%M',
+                                    'date': '$runtime_profile.start_time'
+                                }
+                            },
+                            'regex': search_string,
+                            'options': 'i'
+                        }
+                    }
+                },
+                {"configuration.task": {"$regex": search_string, "$options": "i"}}
             ]
+
+        print("Filter", filter)
 
         # Aggregation pipeline
         pipeline = [
@@ -417,21 +434,17 @@ class MongoDbClient:
                     'start_time': 1,
                     'dataset_name': '$dataset.name'
                 }
-            },
-            # Stage 6: Sort the results
-            # Orders documents by start_time in descending order
-            # -1 means descending, 1 means ascending
-            {
-                '$sort': {
-                    'start_time': -1
-                }
             }
         ]
 
         # Add sorting stage
-        if sort_label and sort_direction:
-            sort_order = pymongo.ASCENDING if sort_direction.lower() == "asc" else pymongo.DESCENDING
+        if sort_label and sort_direction and sort_direction != "None":
+            print("Sorting by", sort_label, sort_direction)
+            sort_order = pymongo.ASCENDING if sort_direction == "Ascending" else pymongo.DESCENDING
+            print("Sorting by", sort_label, sort_order)
             pipeline.append({"$sort": {sort_label: sort_order}})
+        else :
+            pipeline.append({"$sort": {"start_time": pymongo.DESCENDING}})
 
         # Add pagination stages only if both page and page_size are provided
         if pagination and page_number is not None and page_size is not None:

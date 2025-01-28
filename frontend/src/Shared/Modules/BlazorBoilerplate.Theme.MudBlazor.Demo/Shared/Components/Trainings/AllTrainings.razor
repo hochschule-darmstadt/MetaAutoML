@@ -22,21 +22,25 @@
             <MudTable ServerData="ServerReload" style="width:stretch" class="mat-elevation-z5" @ref="table">
                 <ToolBarContent>
                     <MudSpacer />
-                    <MudTextField T="string" ValueChanged="@(s=>OnSearch(s))" Placeholder="@L["Search for status, task or dataset type"]"
-                        Adornment="Adornment.Start" Immediate="true" AdornmentIcon="@Icons.Material.Filled.Search"
-                        IconSize="Size.Medium" Class="mt-0" Clearable="true"></MudTextField>
+                    <MudTextField T="string" ValueChanged="@(s=>OnSearch(s))"
+                        Placeholder="@L["Search for status, task or dataset type"]" Adornment="Adornment.Start"
+                        Immediate="true" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"
+                        Clearable="true"></MudTextField>
                 </ToolBarContent>
                 <HeaderContent>
                     <MudTh>
-                        <MudTableSortLabel SortBy="@(new Func<TrainingMetadataDto, object>(x=>x.StartTime))">
+                        <MudTableSortLabel SortLabel="start_time"
+                            SortBy="@(new Func<TrainingMetadataDto, object>(x=>x.StartTime))">
                             @L["Start datetime"]</MudTableSortLabel>
                     </MudTh>
                     <MudTh>
-                        <MudTableSortLabel SortBy="new Func<TrainingMetadataDto, object>(x=>x.Status)">@L["Status"]
+                        <MudTableSortLabel SortLabel="status" SortBy="new Func<TrainingMetadataDto, object>(x=>x.Status)">
+                            @L["Status"]
                         </MudTableSortLabel>
                     </MudTh>
                     <MudTh>
-                        <MudTableSortLabel SortBy="@(new Func<TrainingMetadataDto, object>(x=>x.DatasetName))">@L["Dataset"]
+                        <MudTableSortLabel SortLabel="dataset_name"
+                            SortBy="@(new Func<TrainingMetadataDto, object>(x=>x.DatasetName))">@L["Dataset"]
                         </MudTableSortLabel>
                     </MudTh>
                     <MudTh>@L["Task"]</MudTh>
@@ -218,7 +222,6 @@
 
     private async Task<TableData<TrainingMetadataDto>> ServerReload(TableState state)
     {
-
         var apiResponse = await apiClient.GetTrainingsMetadata(new GetTrainingsMetadataRequestDto()
             {
                 Pagination = true,

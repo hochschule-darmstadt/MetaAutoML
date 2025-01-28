@@ -101,6 +101,9 @@ namespace BlazorBoilerplate.Server.Managers
                 getTrainings.PageNumber = request.PageNumber;
                 getTrainings.OnlyLastDay = request.OnlyLastDay;
                 getTrainings.PageSize = request.PageSize;
+                getTrainings.SearchString = request.SearchString == null ? "" : request.SearchString;
+                getTrainings.SortDirection = request.SortDirection == null ? "" : request.SortDirection;
+                getTrainings.SortLabel = request.SortLabel == null ? "" : request.SortLabel;
                 var reply = _client.GetTrainingsMetadata(getTrainings);
                 foreach (var training in reply.Trainings)
                 {
