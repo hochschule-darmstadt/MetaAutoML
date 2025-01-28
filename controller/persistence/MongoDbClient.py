@@ -345,28 +345,6 @@ class MongoDbClient:
         Returns:
             list[dict[str, object]]: List of dictionaries representing training records
         """
-        # Add search string filter
-        if search_string:
-            search_string = re.escape(search_string)
-            filter["$or"] = [
-                {"status": {"$regex": search_string, "$options": "i"}},
-                {
-                    '$expr': {
-                        '$regexMatch': {
-                            'input': {
-                                '$dateToString': {
-                                    'format': '%d/%m/%Y %H:%M',
-                                    'date': '$runtime_profile.start_time'
-                                }
-                            },
-                            'regex': search_string,
-                            'options': 'i'
-                        }
-                    }
-                },
-                {"configuration.task": {"$regex": search_string, "$options": "i"}}
-            ]
-
         print("Filter", filter)
 
         # Aggregation pipeline
@@ -437,8 +415,39 @@ class MongoDbClient:
             }
         ]
 
+        # Add search string filter
+        if search_string:
+            search_string = re.escape(search_string)
+            # Add match stage for search filter after initial projection
+            search_filter = {
+                "$match": {
+                    "$or": [
+                        {"status": {"$regex": search_string}},
+                        {"task": {"$regex": search_string}},
+                        {"dataset_name": {"$regex": search_string}},
+                        {
+                            '$expr': {
+                                '$regexMatch': {
+                                    'input': {
+                                    '$dateToString': {
+                                        'format': '%d.%m.%Y %H:%M',
+                                        'date': '$start_time',
+                                        'timezone': 'UTC'
+                                    }
+                                    },
+                                    'regex': search_string,
+                                    'options': 'i'
+                                }
+                            }
+                        }
+                    ]
+                }
+            }
+            pipeline.append(search_filter)
+
+
         # Add sorting stage
-        if sort_label and sort_direction and sort_direction != "None":
+        if sort_label and sort_direction != "None":
             print("Sorting by", sort_label, sort_direction)
             sort_order = pymongo.ASCENDING if sort_direction == "Ascending" else pymongo.DESCENDING
             print("Sorting by", sort_label, sort_order)
