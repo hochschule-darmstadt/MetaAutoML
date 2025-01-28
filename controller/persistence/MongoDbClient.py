@@ -329,7 +329,7 @@ class MongoDbClient:
         self.__log.debug(f"get_training: documents within trainings: {trainings.count_documents}, filter {filter}")
         return trainings.find_one(filter)
 
-    def get_trainings_metadata(self, user_id: str, filter: 'dict[str, object]'={}, pagination:bool=False, page_number:int=1, page_size:int=20, search_string:str=None, sort_label:str=None, sort_direction:str=None) -> 'list[dict[str, object]]':
+    def get_trainings_metadata(self, user_id: str, filter: 'dict[str, object]'={}, pagination:bool=False, page_number:int=1, page_size:int=20, search_string:str=None, sort_label:str=None, sort_direction:str=None) -> 'tuple[list[dict[str, object]], int]':
         """Retrieve all training records from a user database
 
         Args:
@@ -343,7 +343,7 @@ class MongoDbClient:
             sort_direction (str, optional): The direction to sort the records. Defaults to None.
 
         Returns:
-            list[dict[str, object]]: List of dictionaries representing training records
+            tuple[list[dict[str, object]], int]: List of dictionaries representing training records and the total count of the filtered subset
         """
         print("Filter", filter)
 
@@ -445,15 +445,20 @@ class MongoDbClient:
             }
             pipeline.append(search_filter)
 
-
         # Add sorting stage
         if sort_label and sort_direction != "None":
             print("Sorting by", sort_label, sort_direction)
             sort_order = pymongo.ASCENDING if sort_direction == "Ascending" else pymongo.DESCENDING
             print("Sorting by", sort_label, sort_order)
             pipeline.append({"$sort": {sort_label: sort_order}})
-        else :
+        else:
             pipeline.append({"$sort": {"start_time": pymongo.DESCENDING}})
+
+        # Get the total count of the filtered subset before pagination
+        total_count_pipeline = pipeline.copy()
+        total_count_pipeline.append({"$count": "total_count"})
+        total_count_result = list(self.__mongo[user_id]["trainings"].aggregate(total_count_pipeline))
+        total_count = total_count_result[0]["total_count"] if total_count_result else 0
 
         # Add pagination stages only if both page and page_size are provided
         if pagination and page_number is not None and page_size is not None:
@@ -464,8 +469,9 @@ class MongoDbClient:
             ])
 
         # Execute the query
-        return self.__mongo[user_id]["trainings"].aggregate(pipeline)
+        trainings = list(self.__mongo[user_id]["trainings"].aggregate(pipeline))
 
+        return trainings, total_count
 
     def update_training(self, user_id: str, training_id: str, new_values: 'dict[str, str]') -> bool:
         """Update a single training record from a user database

@@ -212,7 +212,7 @@ class TrainingManager:
         page_number = get_trainings_metadata_request.page_number
         page_size = get_trainings_metadata_request.page_size or 20
 
-        all_trainings_cursor = self.__data_storage.get_trainings_metadata(
+        all_trainings, total_trainings = self.__data_storage.get_trainings_metadata(
             get_trainings_metadata_request.user_id,
             only_last_day=get_trainings_metadata_request.only_last_day,
             pagination=pagination,
@@ -222,9 +222,6 @@ class TrainingManager:
             sort_label=get_trainings_metadata_request.sort_label,
             sort_direction=get_trainings_metadata_request.sort_direction
         )
-
-        all_trainings = list(all_trainings_cursor)
-        total_trainings = self.__data_storage.get_trainings_count(get_trainings_metadata_request.user_id)
 
         self.__log.debug(f"get_trainings_metadata: found {len(all_trainings)} trainings for user {get_trainings_metadata_request.user_id}")
 
