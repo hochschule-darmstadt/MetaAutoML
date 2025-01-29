@@ -92,7 +92,7 @@ class DataSetAnalysisManager:
         print("[DatasetAnalysisManager]: Starting ydata-profiling dataset analysis")
         report_filename = "YData_Profile_Report.html"
         report_filepath = os.path.join(self.ydata_filepath, report_filename)
-        profile = ProfileReport(self.__dataset_df, title="Advance Analysis", html={'style': {'full_width': True}}, minimal=True)
+        profile = ProfileReport(self.__dataset_df, title="Advance Analysis", html={'style': {'full_width': True}}, minimal=False)
         profile.to_file(report_filepath, silent=True)
         report_filename_json = "YData_Profile_Report.json"
         report_filepath_json = os.path.join(self.ydata_filepath, report_filename_json)

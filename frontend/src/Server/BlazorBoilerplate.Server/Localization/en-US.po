@@ -1208,20 +1208,24 @@ msgid "You are not authorized to access this page"
 msgstr "You are not authorized to access this page"
 
 msgctxt "TrainingTimeline"
-msgid "started"
+msgid "Started"
 msgstr "Training started"
 
 msgctxt "TrainingTimeline"
-msgid "pre_training"
-msgstr "pre-training"
+msgid "Pre-Training"
+msgstr "Pre-Training"
 
 msgctxt "TrainingTimeline"
-msgid "training"
-msgstr "training"
+msgid "Pre-Processing"
+msgstr "Pre-Processing"
 
 msgctxt "TrainingTimeline"
-msgid "evaluation"
-msgstr "evaluation"
+msgid "Training"
+msgstr "Training"
+
+msgctxt "TrainingTimeline"
+msgid "Evaluation"
+msgstr "Evaluation"
 
 
 msgctxt "TrainingTimeline"
@@ -1229,7 +1233,7 @@ msgid "running"
 msgstr "AutoML executing"
 
 msgctxt "TrainingTimeline"
-msgid "stopped"
+msgid "Stopped"
 msgstr "Training finished"
 
 msgctxt "TrainingTimeline"
@@ -2153,6 +2157,26 @@ msgstr "Click here to configure datatypes and roles of the dataset columns."
 msgctxt "Global"
 msgid "Datasets.Dataset.Analysis.More.tooltip"
 msgstr "Click here to display all analysis diagrams available for this dataset."
+
+msgctxt "Global"
+msgid "Trainings.Training.AutoML_Solution.Label.tooltip"
+msgstr "Tool which automatically optimizes the ML model."
+
+msgctxt "Global"
+msgid "Trainings.Training.ML_Library.Label.tooltip"
+msgstr "ML Library for using the generated ML model."
+
+msgctxt "Global"
+msgid "Trainings.Training.Model.Label.tooltip"
+msgstr "ML model that can be ussed for predicting new cases."
+
+msgctxt "Global"
+msgid "Trainings.Training.Status.Label.tooltip"
+msgstr "executing(spinning wheel), completed, failed."
+
+msgctxt "Global"
+msgid "Trainings.Training.Metric.Label.tooltip"
+msgstr "Measures the quality of the generated ML model, e.g., accuracy (for classification) or mean absolute error (MAE, for regression)."
 
 msgctxt "Global"
 msgid "Trainings.Training.TrainingTime.Label.tooltip"
