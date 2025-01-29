@@ -367,7 +367,7 @@ class DataStorage:
         else:
             path = path.replace( "/"+ os.path.basename(dataset["path"]), "")
         #Before deleting the dataset, delete all related documents
-        existing_trainings = self.get_trainings_metadata(user_id, dataset_id)
+        existing_trainings, _ = self.get_trainings_metadata(user_id, dataset_id)
         self.__log.debug(f"delete_dataset: deleting {existing_trainings.count} trainings")
         for training in existing_trainings:
             try:
