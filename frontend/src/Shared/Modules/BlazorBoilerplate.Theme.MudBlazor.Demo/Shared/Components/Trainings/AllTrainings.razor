@@ -21,43 +21,6 @@
         {
 
 
-<<<<<<< HEAD
-    <MudTable Items="@_trainings.Trainings" style="width:stretch" class="mat-elevation-z5" AllowSelection="false" Filter="new Func<TrainingDto,bool>(FilterFunc)">
-        <ToolBarContent>
-            <MudSpacer />
-            <MudTextField @bind-Value="searchString" Placeholder="@L["Search for status, task or dataset type"]" Adornment="Adornment.Start" Immediate="true"
-                          AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0" Clearable="true"></MudTextField>
-        </ToolBarContent>
-        <HeaderContent>
-            <MudTh><MudTableSortLabel SortBy="@(new Func<TrainingDto, object>(x=>x.RuntimeProfile.StartTime))">@L["Date"]</MudTableSortLabel></MudTh>
-            <MudTh><MudTableSortLabel SortBy="new Func<TrainingDto, object>(x=>x.Status)">@L["Status"]</MudTableSortLabel></MudTh>
-            <MudTh><MudTableSortLabel SortBy="@(new Func<TrainingDto, object>(x=>x.DatasetName))">@L["Dataset"]</MudTableSortLabel></MudTh>
-            <MudTh>@L["Task"]</MudTh>
-            <MudTh></MudTh>
-        </HeaderContent>
-        <RowTemplate>
-            <MudTd>
-                <MudLink Href="@NavManager.ToAbsoluteUri("trainings/" + @context.Id).AbsoluteUri" Style="cursor: pointer; display: flex;"><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.ModelTraining" Style="margin-right: 4px;" /> @context.RuntimeProfile.StartTime.ToString("dd/MM/yy HH:mm")</MudLink>
-            </MudTd>
-            <MudTd>
-                @if (context.Status == "busy")
-                {
-                    <MudProgressCircular Size="Size.Small" Color="Color.Secondary" Indeterminate="true" />
-                }
-                else
-                {
-                    @L[context.Status]
-                }
-            </MudTd>
-            <MudTd>@context.DatasetName</MudTd>
-            <MudTd>@L[context.Configuration.Task.Properties.ContainsKey("skos:prefLabel") ? context.Configuration.Task.Properties["skos:prefLabel"] : ""]</MudTd>
-            <MudTd><TrainingMenu Training="@context" OnDeleteCompleted="@OnDeleteTrainingCompleted" /></MudTd>
-        </RowTemplate>
-        <PagerContent>
-            <MudTablePager RowsPerPageString=@L["Rows per page"] />
-        </PagerContent>
-    </MudTable>
-=======
             <MudTable Items="@_trainings.Trainings" style="width:stretch" class="mat-elevation-z5" AllowSelection="false"
                 Filter="new Func<TrainingDto,bool>(FilterFunc)">
                 <ToolBarContent>
@@ -68,8 +31,7 @@
                 </ToolBarContent>
                 <HeaderContent>
                     <MudTh>
-                        <MudTableSortLabel SortBy="@(new Func<TrainingDto, object>(x=>x.RuntimeProfile.StartTime))">
-                            @L["Date"]</MudTableSortLabel>
+                        <MudTableSortLabel SortBy="@(new Func<TrainingDto, object>(x=>x.RuntimeProfile.StartTime))">@L["Date"]</MudTableSortLabel>
                     </MudTh>
                     <MudTh>
                         <MudTableSortLabel SortBy="new Func<TrainingDto, object>(x=>x.Status)">@L["Status"]
@@ -111,7 +73,6 @@
                     <MudTablePager RowsPerPageString=@L["Rows per page"] />
                 </PagerContent>
             </MudTable>
->>>>>>> 5401377e5144413f86233e8be315c3667e1d4fc3
         }
     </MudCardContent>
 </MudCard>
