@@ -71,10 +71,6 @@ class ModelManager:
 
             model_info.status_messages[:] =  model["status_messages"]
 
-            if not model.get("dashboard_path"):  # Returns None if key is missing
-                model_info.dashboard_status = "inactive"
-            else:
-                model_info.dashboard_status = "active"
             #model_info.explanation = json.dumps(model["explanation"])
             if not model.get("dashboard_path"):  # Returns None if key is missing
                 model_info.dashboard_status = "inactive"
