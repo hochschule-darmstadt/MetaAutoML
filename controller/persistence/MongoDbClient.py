@@ -345,7 +345,6 @@ class MongoDbClient:
         Returns:
             tuple[list[dict[str, object]], int]: List of dictionaries representing training records and the total count of the filtered subset
         """
-        print("Filter", filter)
 
         # Aggregation pipeline
         pipeline = [
@@ -447,9 +446,7 @@ class MongoDbClient:
 
         # Add sorting stage
         if sort_label and sort_direction != "None":
-            print("Sorting by", sort_label, sort_direction)
             sort_order = pymongo.ASCENDING if sort_direction == "Ascending" else pymongo.DESCENDING
-            print("Sorting by", sort_label, sort_order)
             pipeline.append({"$sort": {sort_label: sort_order}})
         else:
             pipeline.append({"$sort": {"start_time": pymongo.DESCENDING}})

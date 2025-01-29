@@ -251,12 +251,13 @@ class TrainingManager:
         response = GetTrainingMetadataResponse()
         self.__log.debug(f"get_training_metadata: get all training with id {get_training_metadata_request.training_id} for user {get_training_metadata_request.user_id}")
 
-        training_cursor = self.__data_storage.get_trainings_metadata(
+        training, _ = self.__data_storage.get_trainings_metadata(
             get_training_metadata_request.user_id,
             filter={"_id": ObjectId(get_training_metadata_request.training_id)}
         )
 
-        training = list(training_cursor)
+        if len(training) == 0:
+            raise grpclib.GRPCError(grpclib.Status.NOT_FOUND, f"Training {get_training_metadata_request.training_id} for user {get_training_metadata_request.user_id} not found")
 
         response.training = TrainingMetadata(**training[0])
 
