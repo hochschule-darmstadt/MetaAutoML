@@ -81,6 +81,9 @@
     private Timer _timer;
     private MudTable<TrainingMetadataDto> table = new MudTable<TrainingMetadataDto>();
     private bool isLoading = true;
+    private bool isDisposed;
+    private CancellationTokenSource _cts = new();
+    private SemaphoreSlim _refreshSemaphore = new(1, 1);
 
     protected override async Task OnInitializedAsync()
     {
@@ -90,11 +93,17 @@
 
     private async Task LoadInitialData()
     {
-        isLoading = true;
-        StateHasChanged();
-        await table.ReloadServerData();
-        isLoading = false;
-        StateHasChanged();
+        try
+        {
+            isLoading = true;
+            StateHasChanged();
+            await table.ReloadServerData();
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
     }
 
     private void StartRefreshTimer()
@@ -107,20 +116,35 @@
 
     private async void CheckAndRefreshData(object sender, ElapsedEventArgs e)
     {
+        if (isDisposed) return;
+
+        // Prevent multiple simultaneous refreshes
+        if (!await _refreshSemaphore.WaitAsync(0))
+            return;
+
         try
         {
             await InvokeAsync(async () =>
             {
+                if (isDisposed) return;
+
                 var data = table.FilteredItems;
-                if (data.Any(x => x.Status == "busy"))
+                if (data != null && data.Any(x => x.Status == "busy"))
                 {
                     await table.ReloadServerData();
                 }
             });
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
-            viewNotifier.Show(ex.GetBaseException().Message, ViewNotifierType.Error, L["Operation Failed"]);
+            if (!isDisposed)
+            {
+                viewNotifier.Show(ex.GetBaseException().Message, ViewNotifierType.Error, L["Operation Failed"]);
+            }
+        }
+        finally
+        {
+            _refreshSemaphore.Release();
         }
     }
 
@@ -137,34 +161,45 @@
 
     public void Dispose()
     {
+        isDisposed = true;
         DisposeTimer();
+        _cts.Cancel();
+        _cts.Dispose();
+        _refreshSemaphore.Dispose();
     }
 
     private async Task<TableData<TrainingMetadataDto>> ServerReload(TableState state)
     {
-        var apiResponse = await apiClient.GetTrainingsMetadata(new GetTrainingsMetadataRequestDto
+        try
         {
-            Pagination = true,
-            PageNumber = state.Page + 1,
-            PageSize = state.PageSize,
-            SearchString = searchString,
-            SortLabel = state.SortLabel,
-            SortDirection = state.SortDirection == SortDirection.None ? string.Empty : state.SortDirection.ToString()
-        });
+            var apiResponse = await apiClient.GetTrainingsMetadata(new GetTrainingsMetadataRequestDto
+            {
+                Pagination = true,
+                PageNumber = state.Page + 1,
+                PageSize = state.PageSize,
+                SearchString = searchString,
+                SortLabel = state.SortLabel,
+                SortDirection = state.SortDirection == SortDirection.None ? string.Empty : state.SortDirection.ToString()
+            }).WaitAsync(_cts.Token);
 
-        if (!apiResponse.IsSuccessStatusCode)
+            if (!apiResponse.IsSuccessStatusCode)
+            {
+                viewNotifier.Show($"{apiResponse.Message} : {apiResponse.StatusCode}", ViewNotifierType.Error, L["Operation Failed"]);
+                return new TableData<TrainingMetadataDto>();
+            }
+
+            var data = Newtonsoft.Json.JsonConvert.DeserializeObject<GetTrainingsResponseDto>(apiResponse.Result.ToString());
+            StartRefreshTimer();
+            return new TableData<TrainingMetadataDto>
+            {
+                TotalItems = data.PaginationMetadata.TotalItems,
+                Items = data.Trainings
+            };
+        }
+        catch (OperationCanceledException)
         {
-            viewNotifier.Show($"{apiResponse.Message} : {apiResponse.StatusCode}", ViewNotifierType.Error, L["Operation Failed"]);
             return new TableData<TrainingMetadataDto>();
         }
-
-        var data = Newtonsoft.Json.JsonConvert.DeserializeObject<GetTrainingsResponseDto>(apiResponse.Result.ToString());
-        StartRefreshTimer(); // Start refresh timer when new data is loaded
-        return new TableData<TrainingMetadataDto>
-        {
-            TotalItems = data.PaginationMetadata.TotalItems,
-            Items = data.Trainings
-        };
     }
 
     private void OnSearch(string text)
