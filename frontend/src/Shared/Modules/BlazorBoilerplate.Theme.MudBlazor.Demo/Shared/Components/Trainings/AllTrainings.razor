@@ -111,7 +111,11 @@
         {
             await InvokeAsync(async () =>
             {
-                await table.ReloadServerData();
+                var data = table.FilteredItems;
+                if (data.Any(x => x.Status == "busy"))
+                {
+                    await table.ReloadServerData();
+                }
             });
         }
         catch (Exception ex)
