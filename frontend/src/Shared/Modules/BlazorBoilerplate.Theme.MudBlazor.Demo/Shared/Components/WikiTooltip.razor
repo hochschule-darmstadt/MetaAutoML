@@ -7,11 +7,13 @@
 {
     @if (Selected)
     {
-        <RadzenText MouseEnter="@(args => ShowTooltipWithHtml(args, new TooltipOptions() {Position=TooltipPosition.Top}))" Style="color:white;padding-top:0.5rem;" Text="@Label" />
+        <RadzenText MouseEnter="@(args => ShowTooltipWithHtml(args, new TooltipOptions() {Position=TooltipPosition.Top ,Duration=null}))" Style="color:white;padding-top:0.5rem;" Text="@Label" 
+                    MouseLeave="@(args => HideTooltipWithDelay())"/>
     }
     else
     {
-        <RadzenText MouseEnter="@(args => ShowTooltipWithHtml(args, new TooltipOptions() {Position=TooltipPosition.Top}))" Style="color: #ff9c04; padding-top: 0.5rem;" Text="@Label" />
+        <RadzenText MouseEnter="@(args => ShowTooltipWithHtml(args, new TooltipOptions() {Position=TooltipPosition.Top ,Duration=null}))" Style="color: #ff9c04; padding-top: 0.5rem;" Text="@Label" 
+                    MouseLeave="@(args => HideTooltipWithDelay())"/>
     }
 }
 else
@@ -35,6 +37,9 @@ else
     public string Label { get; set; }
 
     [Parameter]
+    public bool NotOnText { get; set; } = true;
+
+    [Parameter]
     public RenderFragment ChildContent { get; set; }
 
     public string ImageUrl;
@@ -42,7 +47,8 @@ else
     public string WikipediaURL;
 
     void ShowTooltipWithHtml(ElementReference elementReference, TooltipOptions options = null) => tooltipService.Open(elementReference, ds =>
-        @<div class="rz-text-wrap" style="max-width:20rem">
+        @<div class="rz-text-wrap" style="max-width:20rem"
+        @onmouseover="@(args => NotOnText = false)" @onmouseout="@(args => { NotOnText = true; HideTooltipWithDelay(); })">
             @if (!string.IsNullOrEmpty(ImageUrl))
             {
                 <MudItem xs="12">
@@ -73,6 +79,18 @@ else
             StateHasChanged();
         }
     }
+
+    async void HideTooltipWithDelay()
+    {
+        if(NotOnText){
+            await Task.Delay(200);
+            if(NotOnText){
+                tooltipService.Close();
+            }
+        }
+    }
+
+
     public class WikipediaTooltip
     {
         public string Text { get; set; }
