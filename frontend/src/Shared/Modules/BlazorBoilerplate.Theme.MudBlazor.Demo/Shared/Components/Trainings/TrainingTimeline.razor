@@ -119,7 +119,7 @@
         try
         {
             var events = Training.Training.RuntimeProfile.Events;
-            var phases = new List<string>() { "started", "preprocessing", "pre_training", "training", "evaluation", "stopped" };
+            var phases = new List<string>() { "Started", "Pre-Processing", "Pre-Training", "Training", "Evaluation", "Stopped" };
             _timeline = new List<TimelineItem>();
             for (int i = 0; i < phases.Count; i++)
             {
