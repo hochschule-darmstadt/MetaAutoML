@@ -64,15 +64,25 @@ Style="position:fixed; bottom: 20px; right: 20px; z-index: 100;"
 
     private ElementReference chatContentRef;
 
+    // List of Messages that represent the current conversation
     private List<Message> messages = new List<Message>
     {
         new Message { Text = "Hello, I'm your digital assistant. I'm glad you're using our service! How can I assist you today?", IsUser = false }
     };
 
+
+    /// <summary>
+    /// Toggles the isChatOpen Flag
+    /// </summary>
     private void ToggleChat() {
         isChatOpen = !isChatOpen;
     }
 
+
+    /// <summary>
+    /// Calls "SendMessage()" when Enter is pressed
+    /// </summary>
+    /// <param name="e">KeyboardEvent which is used to check if the key that was pressed was the "Enter" key</param>
     private void HandleEnterKey(KeyboardEventArgs e)
     {
         if (e.Key == "Enter")
@@ -81,13 +91,21 @@ Style="position:fixed; bottom: 20px; right: 20px; z-index: 100;"
         }
     }
 
-    // Method to handle sending messages
+    /// <summary>
+    /// Sends Message to Backend and awaits the response of the Chatbot.
+    /// Handles updating the list of current messages.
+    /// Handles UI/UX stuff:
+    ///     - disable Textinput when waiting on message from chat
+    ///     - showing "typing" animation when waiting on message
+    ///     - focusing cursor back on the textinput when message from backend is received
+    ///     - scrolling the chat to the bottom, when a new message is added
+    /// </summary>
     private async void SendMessage()
     {
         if (!string.IsNullOrWhiteSpace(currentMessage))
         {
             isInputDisabled = true;
-            string history = getChatHistory();
+            string history = GetChatHistory();
             string newMessage = currentMessage;
 
             //Add message to Chat
@@ -119,10 +137,6 @@ Style="position:fixed; bottom: 20px; right: 20px; z-index: 100;"
             }catch(OperationCanceledException){
                 messages.Add(new Message { Text = "The server is taking too long to respond. Please try again later.", IsUser = false });
             }
-            
-
-
-
 
             // Scroll to bottom after new messages are added
             await JSRuntime.InvokeVoidAsync("scrollChatToBottom", chatContentRef);
@@ -143,6 +157,10 @@ Style="position:fixed; bottom: 20px; right: 20px; z-index: 100;"
         }
     }
 
+
+    /// <summary>
+    /// Open the Chatwindow.
+    /// </summary>
     private void OpenChat()
     {
         isChatOpen = true;
@@ -150,15 +168,22 @@ Style="position:fixed; bottom: 20px; right: 20px; z-index: 100;"
         inputField.FocusAsync();
     }
 
+
+    /// <summary>
+    /// Close the Chatwindow.
+    /// </summary>
     private void CloseChat()
     {
         isChatOpen = false;
     }
 
-    private string getChatHistory()
+
+    /// <summary>
+    /// Writes all current Chat messages into one string including the autohr of the message
+    /// </summary>
+    /// <returns>Returns the Chathistory as a single string object</returns>
+    private string GetChatHistory()
     {
-        //List<Message> history_messages = messages.Skip(1).ToList();
-        //string history = Newtonsoft.Json.JsonConvert.SerializeObject(history_messages);
         string history = "";
         foreach (var message in messages){
             if (message.IsUser){
@@ -168,11 +193,16 @@ Style="position:fixed; bottom: 20px; right: 20px; z-index: 100;"
                 history += "Chatbot: " + message.Text + "\n";
             }
         }
-        
+
 
         return history;
     }
 
+
+    /// <summary>
+    /// Represents a message from either user or "Chatbot"
+    /// If "IsUser" is True, the message was written by the User. Otherwise it was written by the Chatbot
+    /// </summary>
     public class Message
     {
         public string Text { get; set; }

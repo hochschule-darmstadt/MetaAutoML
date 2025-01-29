@@ -24,6 +24,11 @@ namespace BlazorBoilerplate.Server.Managers
             _cacheManager = cacheManager;
         }
 
+        /// <summary>
+        /// Send a Chat Message to the Backend
+        /// </summary>
+        /// <param name="request">Request, containing the Message from the User and the Chathistory of the current conversation.</param>
+        /// <returns></returns>
         public async Task<ApiResponse> SendChatMessage(SendChatMessageRequestDto request)
         {
             // call grpc method

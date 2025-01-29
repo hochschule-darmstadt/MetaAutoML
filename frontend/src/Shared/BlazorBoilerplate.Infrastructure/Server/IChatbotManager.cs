@@ -9,9 +9,11 @@ using System.Threading.Tasks;
 
 namespace BlazorBoilerplate.Infrastructure.Server
 {
+    /// <summary>
+    /// Manages all RPC calls related to the Chatbot
+    /// </summary>
     public interface IChatbotManager
     {
-
         Task<ApiResponse> SendChatMessage(SendChatMessageRequestDto request);
 
     }

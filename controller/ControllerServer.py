@@ -52,7 +52,8 @@ SERVER_CERTIFICATE_KEY = _load_credential_from_file('certificate/server.key')
 
 
 async def main():
-    """The controller main function starting the controller GRPC server and waiting on incoming requests of the frontend
+    """
+    The controller main function starting the controller GRPC server and waiting on incoming requests of the frontend
     """
     #with ProcessPoolExecutor(max_workers=40) as executor:
     config = Configuration(
