@@ -615,14 +615,17 @@ class DataStorage:
         if only_last_day:
             now = datetime.now()
             yesterday = now - timedelta(hours=24)
-            search_filter.update({
-                "runtime_profile.start_time": {
-                    "$gte": yesterday,
-                    "$lt": now
+            search_filter.update(
+                {
+                    "runtime_profile.start_time": {
+                        "$gte": yesterday,
+                        "$lt": now
+                    }
                 }
-            })
+            )
+
         trainings, total_count = self.__mongo.get_trainings_metadata(user_id, search_filter, pagination, page_number, page_size, search_string, sort_label, sort_direction)
-        return [sess for sess in trainings], total_count
+        return [{k: v for k, v in training.items() if k != 'total_documents'} for training in trainings], total_count
 
     def delete_training(self, user_id: bool, training_id: str) -> int:
         """Delete a training record by id from a user databse. (all related record and files will also be deleted (Models, Predictions))

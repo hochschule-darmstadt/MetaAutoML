@@ -428,11 +428,11 @@ class MongoDbClient:
                             '$expr': {
                                 '$regexMatch': {
                                     'input': {
-                                    '$dateToString': {
-                                        'format': '%d.%m.%Y %H:%M',
-                                        'date': '$start_time',
-                                        'timezone': 'UTC'
-                                    }
+                                        '$dateToString': {
+                                            'format': '%d.%m.%Y %H:%M',
+                                            'date': '$start_time',
+                                            'timezone': 'UTC'
+                                        }
                                     },
                                     'regex': search_string,
                                     'options': 'i'
@@ -451,11 +451,22 @@ class MongoDbClient:
         else:
             pipeline.append({"$sort": {"start_time": pymongo.DESCENDING}})
 
-        # Get the total count of the filtered subset before pagination
-        total_count_pipeline = pipeline.copy()
-        total_count_pipeline.append({"$count": "total_count"})
-        total_count_result = list(self.__mongo[user_id]["trainings"].aggregate(total_count_pipeline))
-        total_count = total_count_result[0]["total_count"] if total_count_result else 0
+        pipeline.append(
+            {
+                '$setWindowFields': {
+                    'output': {
+                        'total_documents': {
+                            '$count': {},
+                            'window': {
+                                'documents': [
+                                    'unbounded', 'unbounded'
+                                ]
+                            }
+                        }
+                    }
+                }
+            }
+        )
 
         # Add pagination stages only if both page and page_size are provided
         if pagination and page_number is not None and page_size is not None:
@@ -467,6 +478,8 @@ class MongoDbClient:
 
         # Execute the query
         trainings = list(self.__mongo[user_id]["trainings"].aggregate(pipeline))
+
+        total_count = trainings[0]["total_documents"] if len(trainings) != 0 else 0
 
         return trainings, total_count
 

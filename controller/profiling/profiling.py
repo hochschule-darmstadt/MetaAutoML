@@ -70,7 +70,7 @@ def get_trainings(
     with Profiling():
         response = training_manager.get_trainings_metadata(get_trainings_request)
 
-    print(response.trainings.count)
+    print(len(response.trainings))
 
 @inject
 def get_training(
@@ -83,10 +83,10 @@ def get_training(
     print(response)
 
 def main():
-    # get_trainings(get_trainings_request=GetTrainingsMetadataRequest(user_id=USER_ID, pagination=True, page_number=1, page_size=10))
+    get_trainings(get_trainings_request=GetTrainingsMetadataRequest(user_id=USER_ID, pagination=True, page_number=1, page_size=10))
     # get_trainings(get_trainings_request=GetTrainingsMetadataRequest(user_id=USER_ID, pagination=True, page_number=1, page_size=25))
     # get_trainings(get_trainings_request=GetTrainingsMetadataRequest(user_id=USER_ID, pagination=True, page_number=1, page_size=50))
-    get_trainings(get_trainings_request=GetTrainingsMetadataRequest(user_id=USER_ID, pagination=True, page_number=1, page_size=100))
+    # get_trainings(get_trainings_request=GetTrainingsMetadataRequest(user_id=USER_ID, pagination=True, page_number=1, page_size=100))
     # get_trainings(get_trainings_request=GetTrainingsMetadataRequest(user_id=USER_ID, pagination=True, page_number=1, page_size=200))
     # get_training(get_training_request=GetTrainingMetadataRequest(user_id=USER_ID, training_id="662253d29125e4518f9a68d2"))
 
