@@ -14,7 +14,7 @@
 </TopSection>
 <MudStack AlignItems="AlignItems.Center" Row="true" Class="mb-2" style="padding-top:50px;padding-bottom:1rem;">
     <MudIcon Size="Size.Large" Icon="@Icons.Material.Filled.HelpOutline" />
-    <LabelTooltip FontSize="Radzen.Blazor.TextStyle.H4" Label="Help" Text="Read how to solve different tasks with OMA-ML or start a guided tour." Position="Radzen.TooltipPosition.Bottom"></LabelTooltip>
+    <LabelTooltip FontSize="Radzen.Blazor.TextStyle.H4" Label="Help" Text="@L["Help.Sidebar.tooltip"]" Position="Radzen.TooltipPosition.Bottom"></LabelTooltip>
 </MudStack>
 <MudStack>
     <MudDrawer Style="padding-left: 1rem;" Open="true" Anchor="Anchor.End" Elevation="2" Variant="@DrawerVariant.Persistent" Height="75%">
@@ -216,7 +216,7 @@
         this.helpTabPanelList = await apiClient.GetHelpPageJson();
         this.helpTabPanelList.ForEach(tab => { if (tab.PanelHeadline.Equals("Introduction")) { this.introductionTab = tab; } else if (tab.PanelHeadline.Equals("Pages")) { this.pagesTab = tab; } });
         _breadcrumbs.Add(new BreadcrumbItem(L["Home"], "/", false, Icons.Filled.Home));
-        _breadcrumbs.Add(new BreadcrumbItem(L["Help"], "/help", false, Icons.Material.Filled.HelpOutline));
+        _breadcrumbs.Add(new BreadcrumbItem(L["Help"], null, true, Icons.Material.Filled.HelpOutline));
         //StateHasChanged();
         await TourService.checkIfUserTourIsActivatedAndStartTour(navigationManager.Uri);
 

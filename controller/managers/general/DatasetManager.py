@@ -96,14 +96,17 @@ class DatasetManager:
                 dataset["file_configuration"]["encoding"] = backend_frontend_encoding_conversion_table[dataset["file_configuration"]["encoding"]]
             dataset_detail.file_configuration = json.dumps(dataset["file_configuration"])
             dataset_detail.training_ids = dataset['training_ids']
+
             dataset_detail.analysis = json.dumps(dataset['analysis'])
-            for column in dataset["schema"]:
-                dataset_detail.schema.update({column: ColumnSchema(dataset["schema"][column]["datatype_detected"],
-                                                                            dataset["schema"][column]["datatypes_compatible"],
-                                                                            dataset["schema"][column].get("datatype_selected", ""),
-                                                                            dataset["schema"][column]["roles_compatible"],
-                                                                            dataset["schema"][column].get("role_selected", ""),
-                                                                            dataset["schema"][column].get("preprocessing", "{}"))})
+
+            if 'schema' in dataset:
+                for column in dataset["schema"]:
+                    dataset_detail.schema.update({column: ColumnSchema(dataset["schema"][column]["datatype_detected"],
+                                                                                dataset["schema"][column]["datatypes_compatible"],
+                                                                                dataset["schema"][column].get("datatype_selected", ""),
+                                                                                dataset["schema"][column]["roles_compatible"],
+                                                                                dataset["schema"][column].get("role_selected", ""),
+                                                                                dataset["schema"][column].get("preprocessing", "{}"))})
             return dataset_detail
         except Exception as e:
             self.__log.error(f"__dataset_object_to_rpc_object: Error while reading parameter for dataset {str(dataset['_id'])} for user {user_id}")

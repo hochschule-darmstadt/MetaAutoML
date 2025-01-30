@@ -23,8 +23,7 @@ else
                        <MudItem xs="12" sm="6" md="4">
                             <MudCheckBox @bind-Checked="@UseHeader" Label="@L["Use header"]"></MudCheckBox>
                             <MudNumericField @bind-Value="@StartRow" Label="@L["Start row"]" Variant="Variant.Text" Min="1" />
-                            <ButtonTooltip Text="Updates the file configuration and reloads the dataset.
-                                 Important: When you change the file configuration and press ‘Save & reload dataset’, the dataset is reloaded and all previous modifications in the dataset configuration below are discarded." Position="Placement.Top">
+                            <ButtonTooltip Text="@L["Datasets.Dataset.FileConfiguration.Save&ReloadDataset.tooltip"]" Position="Placement.Top">
                                 <MudButton Variant="Variant.Filled"
                                            Color="Color.Secondary"
                                            Style="margin-top: 30px"
@@ -66,32 +65,32 @@ else
     else
     {
       <MudCard Elevation="5">
-            <MudCardHeader Style="border-bottom-style: inset; border-bottom-width: 1px;">
+            <MudCardHeader>
                 <CardHeaderContent>
                     <LabelTooltip Label="Dataset configuration (20 samples displayed)"
-                                  Text="In this panel you can modify the datatypes and roles of individual columns of the dataset. Important: When you change the file configuration and press ‘Save & reload dataset’ later, the dataset is reloaded and all previous modifications in the dataset configuration are discarded."
+                                  Text="@L["Datasets.Dataset.FileConfiguration.Label.tooltip"]"
                                   Position="Radzen.TooltipPosition.Top">
                     </LabelTooltip>
                 </CardHeaderContent>
             </MudCardHeader>
             <MudCardContent>
-               <MudTable Items="@_datasetFrame.Rows" style="width:stretch " class=" mat-elevation-z5  " FixedHeader="true" Dense="true" CustomHeader="true">
+                <MudTable Items="@_datasetFrame.Rows" FixedHeader="true" style="width:stretch" class="mat-elevation-z5" AllowSelection="false" Dense="true" CustomHeader="true">
                      <HeaderContent >
-                            <MudTHeadRow>
+                        <MudTHeadRow>
                                 <MudTh></MudTh>
                                 @foreach (var item in _datasetFrame.Columns)
                                 {
                                     @if (UseHeader == true)
                                     {
-                                        <MudTh>@item.Name</MudTh>
+                                        <MudTh>@ShortenColumnName(item.Name)</MudTh>
                                     }
                                     else
                                     {
-                                        <MudTh Style="background-color: gray">@item.Name</MudTh>
+                                        <MudTh Style="background-color: gray">@ShortenColumnName(item.Name)</MudTh>
                                     }
                                 }
-                            </MudTHeadRow>
-                            <MudTHeadRow>
+                        </MudTHeadRow>
+                        <MudTHeadRow>
                                 <MudTh>
                                     <CardHeaderContent>
 
@@ -109,7 +108,7 @@ else
                                     @foreach (var item in _datasetFrame.Columns)
                                         {
                                             <MudTh>
-                                            <MudSelect T="string" Value="@(_dataset.Dataset.Schema[item.Name].DatatypeSelected.ID == null ? _dataset.Dataset.Schema[item.Name].DatatypeDetected.ID : _dataset.Dataset.Schema[item.Name].DatatypeSelected.ID)" ValueChanged="@((e) => {  OnSelectedDatetypeChanged(item.Name, _dataset.Dataset.Schema[item.Name].RoleSelected.ID, e); })">
+                                             <MudSelect T="string" Value="@(_dataset.Dataset.Schema[item.Name].DatatypeSelected.ID == null ? _dataset.Dataset.Schema[item.Name].DatatypeDetected.ID : _dataset.Dataset.Schema[item.Name].DatatypeSelected.ID)" ValueChanged="@((e) => {  OnSelectedDatetypeChanged(item.Name, _dataset.Dataset.Schema[item.Name].RoleSelected.ID, e); })">
                                                     @foreach (var datatype in _dataset.Dataset.Schema[item.Name].DatatypesCompatible)
                                                     {
                                                         <MudSelectItem Value="@datatype.ID">
@@ -124,8 +123,8 @@ else
                                 {
                                     <MudText Typo="Typo.body2">@L["Datatype analysis incompatible with current dataset configuration, save current configuration to start new analysis"]</MudText>
                                 }
-                            </MudTHeadRow>
-                            <MudTHeadRow>
+                        </MudTHeadRow>
+                        <MudTHeadRow>
                                 <MudTh>
                                     <CardHeaderContent>
                                         <div style="display: flex; align-items: center;">
@@ -163,7 +162,7 @@ else
                                 {
                                     <MudText Typo="Typo.body2">@L["Roles analysis incompatible with current dataset configuration, save current configuration to start new analysis"]</MudText>
                                 }
-                            </MudTHeadRow>
+                        </MudTHeadRow>
 
                      </HeaderContent>
                     <RowTemplate>
@@ -175,11 +174,11 @@ else
                             {
                                 @if (_index < StartRow)
                                 {
-                                    <MudTd Style="background-color: gray"> @item </MudTd>
+                                    <MudTd Style="background-color: gray"> @ShortenColumnName(item.ToString()) </MudTd>
                                 }
                                 else
                                 {
-                                    <MudTd>@item</MudTd>
+                                    <MudTd>@ShortenColumnName(item.ToString())</MudTd>
                                 }
 
                             }
@@ -196,6 +195,13 @@ else
 }
 
 @code {
+    private string ShortenColumnName(string name)
+    {
+        if (string.IsNullOrEmpty(name))
+            return string.Empty;
+
+        return name.Length > 10 ? name.Substring(0, 10) + "..." : name;
+    }
 
     public void IncreaseIndex()
     {

@@ -70,8 +70,12 @@ class ModelManager:
             model_info.runtime_profile = model_runtime_profile
 
             model_info.status_messages[:] =  model["status_messages"]
-            #model_info.explanation = json.dumps(model["explanation"])
 
+            #model_info.explanation = json.dumps(model["explanation"])
+            if not model.get("dashboard_path"):  # Returns None if key is missing
+                model_info.dashboard_status = "inactive"
+            else:
+                model_info.dashboard_status = "active"
             if not "carbon_footprint" in model:
                         model["carbon_footprint"] = {"emissions": 0}
             model_info.emission = model["carbon_footprint"].get("emissions", 0)

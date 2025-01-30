@@ -70,15 +70,4 @@ class UserManager:
         Returns:
             GetHomeOverviewInformationResponse: The GRPC response message holding the infos for the home overview
         """
-        response = GetHomeOverviewInformationResponse()
-        self.__log.debug(f"get_home_overview_information: retriving users home overview page infos {get_home_overview_information_request.user_id}")
-        response.dataset_amount = len(self.__data_storage.get_datasets(get_home_overview_information_request.user_id))
-        self.__log.debug(f"get_home_overview_information: total dataset amount {response.dataset_amount}")
-        response.model_amount = len(self.__data_storage.get_models(get_home_overview_information_request.user_id))
-        self.__log.debug(f"get_home_overview_information: total model amount {response.model_amount}")
-        total_trainings = self.__data_storage.get_trainings(get_home_overview_information_request.user_id)
-        response.training_amount = len(total_trainings)
-        self.__log.debug(f"get_home_overview_information: total training amount {response.training_amount}")
-        response.running_training_amount = len([t for t in total_trainings if t["status"] == "busy"])
-        self.__log.debug(f"get_home_overview_information: total running training amount {response.running_training_amount}")
-        return response
+        return self.__data_storage.get_home_overview_information(get_home_overview_information_request.user_id)

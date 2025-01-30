@@ -25,10 +25,10 @@ services:
       - AUTOKERAS_SERVICE_PORT=50052
       - MLJAR_SERVICE_HOST=mljar
       - MLJAR_SERVICE_PORT=50053
-      - MCFLY_SERVICE_HOST=mcfly
-      - MCFLY_SERVICE_PORT=50054
-      - SKLEARN_SERVICE_HOST=sklearn
-      - SKLEARN_SERVICE_PORT=50055
+      #- MCFLY_SERVICE_HOST=mcfly
+      #- MCFLY_SERVICE_PORT=50054
+      #- SKLEARN_SERVICE_HOST=sklearn
+      #- SKLEARN_SERVICE_PORT=50055
       - FLAML_SERVICE_HOST=flaml
       - FLAML_SERVICE_PORT=50056
       - AUTOGLUON_SERVICE_HOST=gluon
@@ -62,13 +62,13 @@ services:
       - training:/app/app-data/training
       - training-autokeras:/app/app-data/training/autokeras
       - training-mljar:/app/app-data/training/mljar
-      - training-sklearn:/app/app-data/training/sklearn
+      #- training-sklearn:/app/app-data/training/sklearn
       - training-flaml:/app/app-data/training/flaml
       - training-gluon:/app/app-data/training/gluon
       #- training-autocve:/app/app-data/training/autocve
-      - training-pytorch:/app/app-data/training/pytorch
+      #- training-pytorch:/app/app-data/training/pytorch
       #- training-alphad3m:/app/app-data/training/alphad3m
-      - training-mcfly:/app/app-data/training/mcfly
+      #- training-mcfly:/app/app-data/training/mcfly
       - training-evalml:/app/app-data/training/evalml
       - training-pycaret:/app/app-data/training/pycaret
       - training-tpot:/app/app-data/training/tpot
@@ -199,31 +199,31 @@ services:
     ports:
       - "6010-6019:6010-6019"
 
-#   mcfly:
-#     build:
-#       context: ./
-#       dockerfile: ./adapters/Mcfly/Dockerfile
-#     container_name: mcfly
-#     environment:
-#       - GRPC_SERVER_PORT=50054
-#     volumes:
-#       - datasets:/app/app-data/datasets
-#       - training-mcfly:/app/app-data/training
+# #   mcfly:
+# #     build:
+# #       context: ./
+# #       dockerfile: ./adapters/Mcfly/Dockerfile
+# #     container_name: mcfly
+# #     environment:
+# #       - GRPC_SERVER_PORT=50054
+# #     volumes:
+# #       - datasets:/app/app-data/datasets
+# #       - training-mcfly:/app/app-data/training
 
-#   sklearn:
-#     build:
-#       context: ./
-#       dockerfile: ./adapters/AutoSklearn/Dockerfile
-#     container_name: sklearn
-#     environment:
-#       - GRPC_SERVER_PORT=50055
-#       - EXPLAINER_DASHBOARD_PORT_START=6020
-#       - EXPLAINER_DASHBOARD_PORT_END=6029
-#     volumes:
-#       - datasets:/app/app-data/datasets
-#       - training-sklearn:/app/app-data/training
-#     ports:
-#       - "6020-6029:6020-6029"
+# #   sklearn:
+# #     build:
+# #       context: ./
+# #       dockerfile: ./adapters/AutoSklearn/Dockerfile
+# #     container_name: sklearn
+# #     environment:
+# #       - GRPC_SERVER_PORT=50055
+# #       - EXPLAINER_DASHBOARD_PORT_START=6020
+# #       - EXPLAINER_DASHBOARD_PORT_END=6029
+# #     volumes:
+# #       - datasets:/app/app-data/datasets
+# #       - training-sklearn:/app/app-data/training
+# #     ports:
+# #       - "6020-6029:6020-6029"
 
   flaml:
     build:
@@ -293,42 +293,42 @@ services:
     ports:
       - "6040-6049:6040-6049"
 
-#   #autocve:
-#   #  build:
-#   #    context: ./
-#   #    dockerfile: ./adapters/AutoCVE/Dockerfile
-#   #  container_name: autocve
-#   #  environment:
-#   #    - GRPC_SERVER_PORT=50058
-#   #  volumes:
-#   #    - datasets:/app/app-data/datasets
-#   #    - training-autocve:/app/app-data/training
+# #   #autocve:
+# #   #  build:
+# #   #    context: ./
+# #   #    dockerfile: ./adapters/AutoCVE/Dockerfile
+# #   #  container_name: autocve
+# #   #  environment:
+# #   #    - GRPC_SERVER_PORT=50058
+# #   #  volumes:
+# #   #    - datasets:/app/app-data/datasets
+# #   #    - training-autocve:/app/app-data/training
 
-#   pytorch:
-#     build:
-#       context: ./
-#       dockerfile: ./adapters/AutoPytorch/Dockerfile
-#     container_name: pytorch
-#     environment:
-#       - GRPC_SERVER_PORT=50059
-#       - EXPLAINER_DASHBOARD_PORT_START=6050
-#       - EXPLAINER_DASHBOARD_PORT_END=6059
-#     volumes:
-#       - datasets:/app/app-data/datasets
-#       - training-pytorch:/app/app-data/training
-#     ports:
-#       - "6050-6059:6050-6059"
+# #   pytorch:
+# #     build:
+# #       context: ./
+# #       dockerfile: ./adapters/AutoPytorch/Dockerfile
+# #     container_name: pytorch
+# #     environment:
+# #       - GRPC_SERVER_PORT=50059
+# #       - EXPLAINER_DASHBOARD_PORT_START=6050
+# #       - EXPLAINER_DASHBOARD_PORT_END=6059
+# #     volumes:
+# #       - datasets:/app/app-data/datasets
+# #       - training-pytorch:/app/app-data/training
+# #     ports:
+# #       - "6050-6059:6050-6059"
 
-#   #alphad3m:
-#   #  build:
-#   #    context: ./
-#   #    dockerfile: ./adapters/AlphaD3M/Dockerfile
-#   #  container_name: alphad3m
-#   #  environment:
-#   #    - GRPC_SERVER_PORT=50060
-#   #  volumes:
-#   #    - datasets:/app/app-data/datasets
-#   #    - training-alphad3m:/app/app-data/training
+# #   #alphad3m:
+# #   #  build:
+# #   #    context: ./
+# #   #    dockerfile: ./adapters/AlphaD3M/Dockerfile
+# #   #  container_name: alphad3m
+# #   #  environment:
+# #   #    - GRPC_SERVER_PORT=50060
+# #   #  volumes:
+# #   #    - datasets:/app/app-data/datasets
+# #   #    - training-alphad3m:/app/app-data/training
 
 
   evalml:
@@ -503,15 +503,15 @@ volumes:
   datasets: # shared volume between controller, adapters and frontend/dummy to transfer datasets
    # shared volumes between controller and adapters to transfer training files e.g. *.zip file
   training-autokeras:
-  training-sklearn:
+  #training-sklearn:
   training-flaml:
   training-gluon:
   training-h2o:
-  training-pytorch:
+  #training-pytorch:
   #training-autocve:
   training-mljar:
   #training-alphad3m:
-  training-mcfly:
+  #training-mcfly:
   training-evalml:
   training-pycaret:
   training-tpot:
