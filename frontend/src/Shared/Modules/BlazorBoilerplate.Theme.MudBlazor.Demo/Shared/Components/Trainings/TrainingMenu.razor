@@ -6,12 +6,13 @@
 
 @if (Training != null)
 {
-    <MudStack Row="true">
-        <MudButton Variant="Variant.Filled" Color="Color.Secondary" Size="Size.Small"
-            OnClick="@(e => { NavManager.NavigateTo("trainings/" + Training.Id); })">@L["Details"]</MudButton>
-        <MudButton Variant="Variant.Filled" Color="Color.Secondary" Size="Size.Small" OnClick="@DeleteTraining">@L["Delete"]
-        </MudButton>
-    </MudStack>
+
+     <MudMenu Icon="@Icons.Material.Filled.MoreVert">
+        <MudStack colunm="true" >
+            <MudMenuItem  OnClick="@(e => { NavManager.NavigateTo("trainings/" + Training.Id); })">@L["Details"]</MudMenuItem>
+            <MudMenuItem  OnClick="@DeleteTraining">@L["Delete"]</MudMenuItem>
+        </MudStack>
+    </MudMenu>
 }
 
 @code {
