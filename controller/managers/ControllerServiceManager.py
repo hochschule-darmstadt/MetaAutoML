@@ -579,7 +579,8 @@ class ControllerServiceManager(ControllerServiceBase):
             # Forward the request to the backend (RAG pipeline) via chat_with_backend
             self.__log.info(send_chat_message_request.chat_message)
             self.__log.info(send_chat_message_request.chat_history)
-            response_from_backend = await self.chat_with_backend(send_chat_message_request.chat_message, send_chat_message_request.chat_history)
+            #response_from_backend = await self.chat_with_backend(send_chat_message_request.chat_message, send_chat_message_request.chat_history)
+            response_from_backend = SendChatMessageResponse("Here's a Link: https://dev.oma-ml.ai/_content/BlazorBoilerplate.Theme.MudBlazor/images/Preprocessing.mp4")
 
             self.__log.info("send_chat_message: Successfully processed and returned response to the frontend.")
             return response_from_backend

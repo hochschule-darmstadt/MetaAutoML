@@ -1,5 +1,6 @@
 @using BlazorBoilerplate.Shared.Dto.Chat
 @using System.Text.Json
+@using System.Text.RegularExpressions;
 @inherits DynamicComponentContainer
 @inject IApiClient apiClient
 @inject IJSRuntime JSRuntime
@@ -32,7 +33,17 @@ Style="position:fixed; bottom: 20px; right: 20px; z-index: 100;"
                     {
                         <MudListItem Class="@(message.IsUser ? "user-message" : "assistant-message")">
                             <MudText Class="@(message.IsUser ? "user-bubble" : "assistant-bubble")">
-                                @message.Text
+                                @foreach (var part in SplitMessageIntoParts(message.Text))
+                                {
+                                    if (part.IsLink)
+                                    {
+                                        <MudLink Href="@part.Text" Target="_blank">@ExtractLinkText(part.Text)</MudLink>
+                                    }
+                                    else
+                                    {
+                                        @part.Text
+                                    }
+                                }
                             </MudText>
                         </MudListItem>
                     }
@@ -107,6 +118,7 @@ Style="position:fixed; bottom: 20px; right: 20px; z-index: 100;"
             isInputDisabled = true;
             string history = GetChatHistory();
             string newMessage = currentMessage;
+            string response_string = "";
 
             //Add message to Chat
             messages.Add(new Message { Text = currentMessage, IsUser = true });
@@ -131,6 +143,8 @@ Style="position:fixed; bottom: 20px; right: 20px; z-index: 100;"
                     }
                 );
                 SendChatMessageResponseDto responseDto = Newtonsoft.Json.JsonConvert.DeserializeObject<SendChatMessageResponseDto>(apiResponse.Result.ToString());
+
+                //TODO check message for links
 
                 //Add ChatbotMessage to Chat
                 messages.Add(new Message { Text = responseDto.ResponseMessage , IsUser = false });
@@ -198,6 +212,67 @@ Style="position:fixed; bottom: 20px; right: 20px; z-index: 100;"
         return history;
     }
 
+    /// <summary>
+    /// Checks the message for links and formats them to be shown in the chat.
+    /// </summary>
+    /// <param name="message">message received from the chatbot</param>
+    /// <returns></returns>
+    private string CheckResponseForLinks(string message){
+
+        message = Regex.Replace(message,
+                @"((http|ftp|https):\/\/[\w\-_]+(\.[\w\-_]+)+([\w\-\.,@?^=%&amp;:/~\+#]*[\w\-\@?^=%&amp;/~\+#])?)",
+                "<a target='_blank' href='$1'>$1</a>");
+                /*
+        Regex regx = new Regex("http://([\\w+?\\.\\w+])+([a-zA-Z0-9\\~\\!\\@\\#\\$\\%\\^\\&amp;\\*\\(\\)_\\-\\=\\+\\\\\\/\\?\\.\\:\\;\\'\\,]*)?", RegexOptions.IgnoreCase);
+        MatchCollection mactches = regx.Matches(message);
+        foreach (Match match in mactches)
+        {
+    message = message.Replace(match.Value, "<a href='" + match.Value + "'>" + match.Value + "</a>");
+        }
+        */
+        return message;
+    }
+
+
+    private List<MessagePart> SplitMessageIntoParts(string text)
+    {
+        var parts = new List<MessagePart>();
+        if (string.IsNullOrEmpty(text))
+            return parts;
+
+        string pattern = @"(http[s]?://\S+)";  // Matches URLs
+        var matches = Regex.Split(text, pattern);
+
+        foreach (var part in matches)
+        {
+            if (string.IsNullOrWhiteSpace(part)) continue;
+
+            parts.Add(new MessagePart
+                {
+                    Text = part,
+                    IsLink = Regex.IsMatch(part, pattern)
+                });
+        }
+
+        return parts;
+    }
+
+    private string ExtractLinkText(string url)
+    {
+        try
+        {
+            Uri uri = new Uri(url);
+            string lastSegment = uri.AbsolutePath.TrimEnd('/').Split('/').LastOrDefault();
+
+            // If there's no meaningful last segment, return domain name
+            return string.IsNullOrEmpty(lastSegment) ? uri.Host.Replace("www.", "") : lastSegment;
+        }
+        catch
+        {
+            return url; // Fallback in case of parsing errors
+        }
+    }
+
 
     /// <summary>
     /// Represents a message from either user or "Chatbot"
@@ -208,6 +283,12 @@ Style="position:fixed; bottom: 20px; right: 20px; z-index: 100;"
         public string Text { get; set; }
         public bool IsUser { get; set; }
 
+    }
+
+    private class MessagePart
+    {
+        public string Text { get; set; }
+        public bool IsLink { get; set; }
     }
 }
 
