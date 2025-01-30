@@ -38,5 +38,6 @@ EXPOSE 50051
 # Start Ollama and the gRPC server
 ENTRYPOINT ["/bin/bash", "-c", \
     "ollama serve & \
-    sleep 2 && python3 ingest_data.py && \
+    sleep 2 && python3 datasource_preprocessor.py && \
+    python3 python3 ingest_data.py\
     python3 rag_pipeline.py && wait"]
