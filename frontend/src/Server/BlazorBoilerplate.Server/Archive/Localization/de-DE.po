@@ -515,7 +515,7 @@ msgstr "Hochladen"
 msgid "Recent trainings"
 msgstr "Aktuelle Trainings"
 
-msgid "Start datetime"
+msgid "Date"
 msgstr "Start Datum"
 
 msgid "Status"
