@@ -314,7 +314,7 @@ class DataStorage:
         self.__log.debug(f"update_dataset: updating: {dataset_id} for user {user_id}, new values {new_values}")
         return self.__mongo.update_dataset(user_id, dataset_id, new_values)
 
-    def get_dataset(self, user_id: str, dataset_id: str) -> 'tuple[bool, dict[str, object]]':
+    def get_dataset(self, user_id: str, dataset_id: str, extended_pipeline: List = None) -> 'tuple[bool, dict[str, object]]':
         """Get a dataset record by id from a specific user database
 
         Args:
@@ -327,7 +327,7 @@ class DataStorage:
         result = self.__mongo.get_dataset(user_id, {
             "_id": ObjectId(dataset_id),
             "lifecycle_state": "active"
-        })
+        }, extended_pipeline)
 
         return result is not None, result
 
@@ -431,7 +431,7 @@ class DataStorage:
 
         return result is not None, result
 
-    def get_models(self, user_id: str, training_id: str = None, dataset_id: str = None) -> 'list[dict[str, object]]':
+    def get_models(self, user_id: str, training_id: str = None, extended_pipeline: list[dict[str, object]] = None, dataset_id: str = None) -> 'list[dict[str, object]]':
         """Get all model records from a specific user database
 
         Args:
@@ -442,16 +442,17 @@ class DataStorage:
         Returns:
             list[dict[str, object]]: List of all available model records
         """
-        if training_id is not None:
-            filter = { "training_id": training_id, "lifecycle_state": "active" }
-        elif dataset_id is not None:
-            found, dataset = self.get_dataset(user_id, dataset_id)
-            filter = { "training_id": { '$in': dataset["training_ids"] }, "lifecycle_state": "active" }
-        else:
-            filter = {"lifecycle_state": "active"}
-        result = self.__mongo.get_models(user_id, filter)
+        filter = {"lifecycle_state": "active"}
 
-        return [ds for ds in result]
+        if training_id is not None:
+            filter.update({"training_id": training_id})
+
+        if dataset_id is not None:
+            filter.update({"dataset_id": ObjectId(dataset_id)})
+
+        result = self.__mongo.get_models(user_id, filter, extended_pipeline)
+
+        return list(result)
 
     def delete_model(self, user_id: bool, model_id: str) -> int:
         """Delete a model record by id from a user databse. (all related record and files will also be deleted (Predictions))
@@ -784,7 +785,8 @@ class DataStorage:
         Returns:
             list[dict[str, object]]: List of all available prediction records
         """
-        return [ds for ds in self.__mongo.get_predictions(user_id, {"model_id": model_id, "lifecycle_state": "active"})]
+        result = self.__mongo.get_predictions(user_id, {"model_id": model_id, "lifecycle_state": "active"})
+        return list(result)
 
     def delete_prediction(self, user_id: str, prediction_id: str) -> int:
         """Delete a prediction record by id from a user databse.

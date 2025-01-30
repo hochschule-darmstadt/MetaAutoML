@@ -102,6 +102,7 @@ class ControllerServiceManager(ControllerServiceBase):
         self, get_dataset_request: "GetDatasetRequest",
         dataset_manager: DatasetManager=Provide[Application.managers.dataset_manager]
     ) -> "GetDatasetResponse":
+        print("get_dataset_request", get_dataset_request)
         with MeasureDuration() as m:
             response = dataset_manager.get_dataset(get_dataset_request)
         #response = await self.__loop.run_in_executor(
@@ -248,6 +249,8 @@ class ControllerServiceManager(ControllerServiceBase):
         self, get_models_request: "GetModelsRequest",
         model_manager: ModelManager=Provide[Application.managers.model_manager]
     ) -> "GetModelsResponse":
+
+        print("get_models_request", get_models_request)
         with MeasureDuration() as m:
             response = model_manager.get_models(get_models_request)
         #response = await self.__loop.run_in_executor(
