@@ -37,19 +37,19 @@ services:
       - datasets:/app/app-data/datasets
       - training:/app/app-data/training
       - training-autokeras:/app/app-data/training/autokeras
-      - training-mljar:/app/app-data/training/mljar
+      #- training-mljar:/app/app-data/training/mljar
       #- training-sklearn:/app/app-data/training/sklearn
-      - training-flaml:/app/app-data/training/flaml
-      - training-gluon:/app/app-data/training/gluon
+      #- training-flaml:/app/app-data/training/flaml
+      #- training-gluon:/app/app-data/training/gluon
       #- training-autocve:/app/app-data/training/autocve
       #- training-pytorch:/app/app-data/training/pytorch
       #- training-alphad3m:/app/app-data/training/alphad3m
       #- training-mcfly:/app/app-data/training/mcfly
-      - training-evalml:/app/app-data/training/evalml
-      - training-pycaret:/app/app-data/training/pycaret
-      - training-tpot:/app/app-data/training/tpot
-      - training-gama:/app/app-data/training/gama
-      - training-lama:/app/app-data/training/lama
+      #- training-evalml:/app/app-data/training/evalml
+      #- training-pycaret:/app/app-data/training/pycaret
+      #- training-tpot:/app/app-data/training/tpot
+      #- training-gama:/app/app-data/training/gama
+      #- training-lama:/app/app-data/training/lama
     extra_hosts:
       - "docker.host.internal:host-gateway"
 
