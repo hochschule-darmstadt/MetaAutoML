@@ -220,7 +220,7 @@ Style="position:fixed; bottom: 20px; right: 20px; z-index: 100;"
     private string CheckResponseForLinks(string message){
 
         message = Regex.Replace(message,
-                @"((http|ftp|https):\/\/[\w\-_]+(\.[\w\-_]+)+([\w\-\.,@?^=%&amp;:/~\+#]*[\w\-\@?^=%&amp;/~\+#])?)",
+                @"(http.*(\.mp4|\/))",
                 "<a target='_blank' href='$1'>$1</a>");
                 /*
         Regex regx = new Regex("http://([\\w+?\\.\\w+])+([a-zA-Z0-9\\~\\!\\@\\#\\$\\%\\^\\&amp;\\*\\(\\)_\\-\\=\\+\\\\\\/\\?\\.\\:\\;\\'\\,]*)?", RegexOptions.IgnoreCase);
@@ -240,7 +240,7 @@ Style="position:fixed; bottom: 20px; right: 20px; z-index: 100;"
         if (string.IsNullOrEmpty(text))
             return parts;
 
-        string pattern = @"(http[s]?://\S+)";  // Matches URLs
+        string pattern = @"http.*\/(.*(\.mp4|\/))";  // Matches URLs
         var matches = Regex.Split(text, pattern);
 
         foreach (var part in matches)
