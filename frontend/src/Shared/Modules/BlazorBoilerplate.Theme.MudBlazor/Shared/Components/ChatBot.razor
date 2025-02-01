@@ -220,7 +220,7 @@ Style="position:fixed; bottom: 20px; right: 20px; z-index: 100;"
     private string CheckResponseForLinks(string message){
 
         message = Regex.Replace(message,
-                @"(http.*(\.mp4|\/))",
+                @"(https?:\/\/[^\s)]+(?<![\.,]))",
                 "<a target='_blank' href='$1'>$1</a>");
                 /*
         Regex regx = new Regex("http://([\\w+?\\.\\w+])+([a-zA-Z0-9\\~\\!\\@\\#\\$\\%\\^\\&amp;\\*\\(\\)_\\-\\=\\+\\\\\\/\\?\\.\\:\\;\\'\\,]*)?", RegexOptions.IgnoreCase);
@@ -240,7 +240,7 @@ Style="position:fixed; bottom: 20px; right: 20px; z-index: 100;"
         if (string.IsNullOrEmpty(text))
             return parts;
 
-        string pattern = @"http.*\/(.*(\.mp4|\/))";  // Matches URLs
+        string pattern = @"(https?:\/\/[^\s)]+(?<![\.,]))";  // Matches URLs
         var matches = Regex.Split(text, pattern);
 
         foreach (var part in matches)
@@ -262,7 +262,7 @@ Style="position:fixed; bottom: 20px; right: 20px; z-index: 100;"
         try
         {
             Uri uri = new Uri(url);
-            string lastSegment = uri.AbsolutePath.TrimEnd('/').Split('/').LastOrDefault();
+            string lastSegment = uri.AbsolutePath.TrimEnd('/').Split('/').Where(segment => segment.Length >= 2).LastOrDefault();
 
             // If there's no meaningful last segment, return domain name
             return string.IsNullOrEmpty(lastSegment) ? uri.Host.Replace("www.", "") : lastSegment;
