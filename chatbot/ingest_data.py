@@ -37,8 +37,8 @@ def format_content(title: str, text: str, section: str = None) -> str:
 	Formats document content appropriately based on provided title, text, and section.
 	"""
 	if section:
-		return f"{section}.{title}: {text}" if text else f"{section}.{title}"
-	return f"{title}: {text}" if text else title
+		return f"{section}.{title} {text}" if text else f"{section}.{title}"
+	return f"{title} {text}" if text else title
 
 def parse_json_to_documents(json_data):
     """
@@ -80,7 +80,7 @@ def parse_json_to_documents(json_data):
             for tooltip in section.get("Tooltips", []):
                 ui_component = tooltip.get("Button", "Unknown UI Element")
                 tooltip_text = tooltip.get("Tooltip-text", "").strip()
-                tooltip_title = f"Tooltip location-text: {ui_component}"  # Standardized title
+                tooltip_title = f"Tooltip location and text: {ui_component}"  # Standardized title
 
                 if tooltip_text:
                     tooltip_doc = Document(
@@ -90,6 +90,8 @@ def parse_json_to_documents(json_data):
                             "type": "UI Tooltip",
                             "help_category": help_category,
                             "help_section": section_title,
+                            "video_url": section_video,  # Inherit video from section
+                            "page_url": section_link,  # Inherit page link from section
                             "parent_section_text": format_content(section_title, section_text)  # Store section text inside tooltip
                         })
                     )
@@ -118,6 +120,8 @@ def parse_json_to_documents(json_data):
                                 "help_category": help_category,
                                 "help_section": section_title,
                                 "help_subsection": subsection_title,
+                                "video_url": section_video,  # Inherit video from section
+                                "page_url": section_link,  # Inherit page link from section
                                 "parent_section_text": format_content(section_title, section_text),  # Store section text inside tooltip
                                 "parent_subsection_text": format_content(subsection_title, subsection_text)  # Store subsection text inside tooltip
                             })
@@ -171,38 +175,40 @@ def delete_existing_database(directory: str) -> None:
 		logger.info(f"Existing database at '{directory}' has been deleted.")
 
 def ingest_data() -> None:
-	"""
-	Loads JSON data, parses it into LangChain Documents, and stores it in ChromaDB.
-	"""
-	database_directory = "./chroma_data"
-	json_file = "./data/rag_processed_data.json"
+    """Loads JSON data, parses it into LangChain Documents, and stores it in ChromaDB."""
+    database_directory = "./chroma_data"
+    json_file = "./data/rag_processed_data.json"
 
-	if not os.path.exists(json_file):
-		logger.error("JSON file not found. Exiting.")
-		return
+    if not os.path.exists(json_file):
+        logger.error("JSON file not found. Exiting.")
+        return
 
-	delete_existing_database(database_directory)
+    delete_existing_database(database_directory)
 
-	with open(json_file, "r", encoding="utf-8") as f:
-		json_data = json.load(f)
+    with open(json_file, "r", encoding="utf-8") as f:
+        json_data = json.load(f)
 
-	documents = parse_json_to_documents(json_data)
-	if not documents:
-		logger.error("No documents found in the JSON file. Exiting.")
-		return
+    documents = parse_json_to_documents(json_data)
+    if not documents:
+        logger.error("No documents found in the JSON file. Exiting.")
+        return
 
-	embeddings = SentenceTransformersEmbeddings(model_name="all-MiniLM-L6-v2")
-	vectorstore = Chroma(persist_directory=database_directory, embedding_function=embeddings,collection_metadata={"hnsw:space": "l2"})
-	vectorstore.add_documents(documents)
-	vectorstore.persist()
-	logger.info(f"{len(documents)} documents have been successfully ingested into ChromaDB.")
+    embeddings = SentenceTransformersEmbeddings(model_name="all-MiniLM-L6-v2")
+    vectorstore = Chroma(
+        persist_directory=database_directory,
+        embedding_function=embeddings,
+        collection_metadata={"hnsw:space": "l2"}
+    )
+    vectorstore.add_documents(documents)
+    vectorstore.persist()
+    logger.info(f"{len(documents)} documents have been successfully ingested into ChromaDB.")
 
-    # Print each document after processing (fix Unicode)
-""" print("\n--- Processed Documents ---")
+    # ✅ Corrected Print Statements (Proper Indentation)
+    print("\n--- Processed Documents ---")
     for i, doc in enumerate(documents):
         print(f"\nDocument {i + 1}:")
-        print("Content:", doc.page_content)  # Now formatted as "Title: Text"
-        print("Metadata:", json.dumps(doc.metadata, indent=4, ensure_ascii=False))  # Ensures correct Unicode display """
+        print("Content:", doc.page_content)
+        print("Metadata:", json.dumps(doc.metadata, indent=4, ensure_ascii=False))
 
 if __name__ == "__main__":
-	ingest_data()
+    ingest_data()

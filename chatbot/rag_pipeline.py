@@ -1,4 +1,5 @@
 import asyncio
+import time
 from typing import AsyncIterable, List
 from grpclib.server import Server
 from langchain_chroma import Chroma
@@ -36,7 +37,7 @@ embeddings = SentenceTransformersEmbeddings(model_name="all-MiniLM-L6-v2")
 retriever = Chroma(persist_directory=database_directory, embedding_function=embeddings,collection_metadata={"hnsw:space": "l2"})
 
 # Initialize LLM
-llm = OllamaLLM(model="gemma2:2b")
+llm = OllamaLLM(model="llama2:7b-chat")
 #llama2:7b-chat
 #gemma2:2b
 #mistral:7b-instruct
@@ -44,10 +45,10 @@ llm = OllamaLLM(model="gemma2:2b")
 # Prompt template
 
 prompt_template = (
-    "Answer the following question based on the context provided and the Additional Metadata provided"
-    "If there any related video URl or Page URL send it automaticly after answering the question"
-    "If the context does not have sufficient information to answer the question, but the question is relevant to machine learning areas, then you can answer based on your own knowledge, if not,just respond with: 'Its not my speciality field."
-    "If you cannot answer the question at all, just respond with this sentense: 'I am not sure of the result.'\n\n"
+    "Answer the following question based on the context and the Additional Metadata provided"
+    "If there any related Videos, video link or URl or Page URL send it automaticly after answering the question even if the user didnt specificly asked"
+    "If the context does not have sufficient information to answer the question or if there is no context retrieved, but the question is relevant to machine learning areas, then you can answer based on your own knowledge, if not,just respond with: 'Its not my speciality field."
+    "If the answer is not related to Machine learning or OMA-ML, just respond with this sentense: 'I am not sure of the result:please create a support ticket'\n\n"
     "Context:\n{context}\n\n"
     "Additional Metadata:{metadata}\n\n"
     "Chat History:{history}\n\n"
@@ -63,8 +64,8 @@ def query_vector_store_with_metadata(query, retriever, top_k=3):
     results = retriever.similarity_search_with_relevance_scores(query, k=top_k, score_threshold=0.3)
     docs = []
 
-    video_links = []  # Store all video links with their respective titles
-    all_video_metadata = []  # Store video links separately for metadata inclusion
+    video_links = set()  # Store all video links with their respective titles
+    all_video_metadata = set() # Store video links separately for metadata inclusion
     first_page_link = None   # Store only the first available page link
     related_tooltips = set()
     related_sections = set()
@@ -87,10 +88,10 @@ def query_vector_store_with_metadata(query, retriever, top_k=3):
                 video_title = metadata["parent_subsection_text"]
             elif "parent_section_text" in metadata and metadata["parent_section_text"]:
                 video_title = metadata["parent_section_text"]
-
-            video_entry = f"🎥 **{video_title}:** {video_url}"
-            video_links.append(video_entry)
-            all_video_metadata.append(video_entry)  # Include in metadata separately
+            if video_url not in video_links:
+                video_links.add(video_url)
+                video_entry = f"🎥 **{video_title}:** {video_url}"
+                all_video_metadata.add(video_entry)  # Include in metadata separately
 
         # Store first available page link from the highest-scoring document
         if first_page_link is None and "page_url" in metadata and metadata["page_url"]:
@@ -114,18 +115,13 @@ def query_vector_store_with_metadata(query, retriever, top_k=3):
     # Handling metadata formatting
     additional_metadata = "".join(
         [
-            f"\n📚 **Related Sections/Subsections:** {' '.join(related_sections)}" if related_sections else "",
-            f"\n💡 **Helpful Tooltips:** {' '.join(related_tooltips)}" if related_tooltips else "",
-            f"\n" + "\n".join(all_video_metadata) if all_video_metadata else "",  # ✅ Include all video links separately in metadata
+            f"\n📚 **Related Sections and Subsections to the topic:** {' '.join(related_sections)}" if related_sections else "",
+            f"\n💡 **Helpful Tooltips with their button location in a format of page.subpage.button and its usage as text:** {' '.join(related_tooltips)}" if related_tooltips else "",
+            f"\n""🎥 **usefull videos to guide thorugh the process" + "\n".join(all_video_metadata) if all_video_metadata else "",  # ✅ Include all video links separately in metadata
             f"\n📄 **Helpful Page:** {first_page_link}" if first_page_link else ""  # ✅ Page link remains first retrieved one
         ]
     )
-
-    # Separate video and page links for independent display
-    video_links_text = "\n".join(video_links) if video_links else ""
-    page_links_text = first_page_link if first_page_link else ""
-
-    return docs, additional_metadata, video_links_text, page_links_text
+    return docs, additional_metadata
 
 
 # Define the gRPC Service
@@ -134,15 +130,22 @@ class ChatbotService(ChatbotBase):
         user_query = chat_request.message
         chat_history = chat_request.history
         print(chat_history)
-        docs, additional_metadata, video_links, page_links = query_vector_store_with_metadata(user_query, retriever, top_k=3)
+        retrieval_start = time.time()
+        docs, additional_metadata= query_vector_store_with_metadata(user_query, retriever, top_k=3)
+        retrieval_time = time.time() - retrieval_start
+
+        generation_start = time.time()
         context_text = "\n".join(docs)
         metadata_info = additional_metadata
         print("context",context_text)
         print("Meta",additional_metadata)
         llm_input = prompt.format(history=chat_history,context=context_text, metadata=metadata_info, question=user_query)
+        print(f"Query Token Count: {len(llm_input.split())}")
         response = llm.invoke(llm_input)
-        #response += video_links if video_links else ""
-        #response += page_links if page_links else ""
+        generation_time = time.time() - generation_start
+        print(f"Total Retrieval Time: {retrieval_time:.4f} seconds")
+        print(f"Total Generation Time: {generation_time:.4f} seconds")
+        print(f"Overall Processing Time: {retrieval_time + generation_time:.4f} seconds")
 
         for char in response:
             yield ChatReply(chatbot_reply=char)
