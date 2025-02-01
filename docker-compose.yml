@@ -93,7 +93,7 @@ services:
   chatbot:
     build:
       context: ./chatbot
-    container_name: chatbot-container
+    container_name: chatbot
     ports:
       - "50051:50051"
 
