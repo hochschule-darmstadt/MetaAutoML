@@ -10,7 +10,7 @@ from ModelManager import ModelManager
 from UserManager import UserManager
 from OntologyManager import OntologyManager
 from ControllerBGRPC import *
-from ChatbotServiceManager import ChatbotServiceManager
+from chatbot.ChatbotServiceManager import ChatbotServiceManager
 from JsonUtil import get_config_property
 from concurrent.futures.process import ProcessPoolExecutor
 from dependency_injector.wiring import inject, Provide
