@@ -37,7 +37,7 @@ embeddings = SentenceTransformersEmbeddings(model_name="all-MiniLM-L6-v2")
 retriever = Chroma(persist_directory=database_directory, embedding_function=embeddings,collection_metadata={"hnsw:space": "l2"})
 
 # Initialize LLM
-llm = OllamaLLM(model="llama2:7b-chat")
+llm = OllamaLLM(model="mistral:7b-instruct")
 #llama2:7b-chat
 #gemma2:2b
 #mistral:7b-instruct
