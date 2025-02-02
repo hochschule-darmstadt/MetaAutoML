@@ -2,7 +2,7 @@
 FROM ollama/ollama:latest
 
 
-# Force Python to print logs immediately and run the gRPC server
+# Force Python to print logs
 ENV PYTHONUNBUFFERED=1
 
 

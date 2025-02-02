@@ -109,7 +109,7 @@ def parse_json_to_documents(json_data):
                 for tooltip in subsection.get("Tooltips", []):
                     ui_component = tooltip.get("Button", "Unknown UI Element")
                     tooltip_text = tooltip.get("Tooltip-text", "").strip()
-                    tooltip_title = f"Tooltip location-text: {ui_component}"  # Standardized title
+                    tooltip_title = f"Tooltip navigation_path : {ui_component}"  # Standardized title
 
                     if tooltip_text:
                         tooltip_doc = Document(
@@ -204,11 +204,11 @@ def ingest_data() -> None:
     logger.info(f"{len(documents)} documents have been successfully ingested into ChromaDB.")
 
     # ✅ Corrected Print Statements (Proper Indentation)
-    print("\n--- Processed Documents ---")
-    for i, doc in enumerate(documents):
-        print(f"\nDocument {i + 1}:")
-        print("Content:", doc.page_content)
-        print("Metadata:", json.dumps(doc.metadata, indent=4, ensure_ascii=False))
+    # print("\n--- Processed Documents ---")
+    # for i, doc in enumerate(documents):
+    #     print(f"\nDocument {i + 1}:")
+    #     print("Content:", doc.page_content)
+    #     print("Metadata:", json.dumps(doc.metadata, indent=4, ensure_ascii=False))
 
 if __name__ == "__main__":
     ingest_data()
