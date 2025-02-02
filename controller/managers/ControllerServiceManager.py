@@ -565,7 +565,7 @@ class ControllerServiceManager(ControllerServiceBase):
         chatbotManager: ChatbotManager = Provide[Application.managers.chatbot_manager]
     ) -> "SendChatMessageResponse":
         """
-        Handles incoming messages from the frontend, forwards them to chat_with_backend for processing,
+        Handles incoming messages from the frontend, forwards them to send_message_to_rag for processing,
         and returns the final response to the frontend.
 
         Args:
@@ -576,10 +576,10 @@ class ControllerServiceManager(ControllerServiceBase):
             SendChatMessageResponse: The processed response to be sent back to the frontend.
         """
         try:
-            # Forward the request to the backend (RAG pipeline) via chat_with_backend
+            # Forward the request to the backend (RAG pipeline) via send_message_to_rag
             self.__log.info(send_chat_message_request.chat_message)
             self.__log.info(send_chat_message_request.chat_history)
-            response_from_backend = await self.chat_with_backend(send_chat_message_request.chat_message, send_chat_message_request.chat_history)
+            response_from_backend = await self.send_message_to_rag(send_chat_message_request.chat_message, send_chat_message_request.chat_history)
             #response_from_backend = SendChatMessageResponse()
             self.__log.info("send_chat_message: Successfully processed and returned response to the frontend.")
             return response_from_backend
@@ -594,35 +594,32 @@ class ControllerServiceManager(ControllerServiceBase):
     ####################################
 #region
     @inject
-    async def chat_with_backend(
+    async def send_message_to_rag(
         self,
         user_message: str,
         hirstory: str,
         chatbot_service_manager: ChatbotServiceManager = Provide[Application.managers.chatbot_service_manager]
     ) -> SendChatMessageResponse:
         """
-        Forwards the user message to the backend RAG pipeline via ChatbotServiceManager and returns the response.
+		Forwards the user message to the backend RAG pipeline via ChatbotServiceManager and returns the response.
 
-        Args:
-            send_chat_message_request (SendChatMessageRequest): The request object containing the user's message.
-            chatbot_service_manager (ChatbotServiceManager): The service manager responsible for backend communication.
+		Args:
+			user_message (str): The user's message.
+			history (str): The conversation history.
+			chatbot_service_manager (ChatbotServiceManager): The service manager responsible for backend communication.
 
-        Returns:
-            SendChatMessageResponse: The processed response from the backend RAG pipeline.
+		Returns:
+			SendChatMessageResponse: The processed response from the backend RAG pipeline.
         """
         try:
-            # Extract the user message from the request
-
-            #user_message="How to spell TREE"
             self.__log.info(f"Received Chat Reqeust from Frontend")
             # Use ChatbotServiceManager to send the message and get the response
             response_text = await chatbot_service_manager.send_message(user_message,hirstory)
-
             # Wrap the response text into a SendChatMessageResponse
             return SendChatMessageResponse(controller_response=response_text)
 
         except Exception as e:
-            self.__log.error(f"Error in chat_with_backend: {e}")
+            self.__log.error(f"Error in send_message_to_rag: {e}")
             return SendChatMessageResponse(controller_response=f"An error occurred: {e}")
 
 #endregion
