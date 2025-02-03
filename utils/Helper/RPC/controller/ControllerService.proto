@@ -42,8 +42,11 @@ service ControllerService {
   /*create a new Training record in MongoDB and start the a new training session*/
   rpc CreateTraining(CreateTrainingRequest) returns (CreateTrainingResponse) {}
 
-  /*return a list of all Trainings records for a user id*/
-  rpc GetTrainings(GetTrainingsRequest) returns (GetTrainingsResponse) {}
+  /*return a list of all TrainingMetadata records for a user id*/
+  rpc GetTrainingsMetadata(GetTrainingsMetadataRequest) returns (GetTrainingsMetadataResponse) {}
+
+  /*return a TrainingMetadata record by user id and training id*/
+  rpc GetTrainingMetadata(GetTrainingMetadataRequest) returns (GetTrainingMetadataResponse) {}
 
   /*return a Training record by user id and training id*/
   rpc GetTraining(GetTrainingRequest) returns (GetTrainingResponse) {}

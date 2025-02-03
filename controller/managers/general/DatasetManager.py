@@ -149,7 +149,27 @@ class DatasetManager:
         """
         response = GetDatasetResponse()
         self.__log.debug(f"get_datasets: trying to get dataset {get_dataset_request.dataset_id} for user {get_dataset_request.user_id}")
-        found, dataset = self.__data_storage.get_dataset(get_dataset_request.user_id, get_dataset_request.dataset_id)
+
+        if get_dataset_request.short:
+            extended_pipeline = [
+                {
+                    '$project': {
+                        'schema': 0,
+                        'analysis': {
+                            'duplicate_columns': 0,
+                            'duplicate_rows': 0,
+                            'irrelevant_features': 0,
+                            'missings_per_column': 0,
+                            'missings_per_row': 0,
+                            'outlier': 0
+                        }
+                    }
+                }
+            ]
+        else:
+            extended_pipeline = None
+
+        found, dataset = self.__data_storage.get_dataset(get_dataset_request.user_id, get_dataset_request.dataset_id, extended_pipeline)
         if not found:
             self.__log.error(f"get_datasets: dataset {get_dataset_request.dataset_id} for user {get_dataset_request.user_id} not found")
             raise grpclib.GRPCError(grpclib.Status.NOT_FOUND, f"Dataset {get_dataset_request.dataset_id} for user {get_dataset_request.user_id} not found, already deleted?")

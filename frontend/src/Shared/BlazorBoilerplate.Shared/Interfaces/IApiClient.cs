@@ -1,3 +1,4 @@
+using BlazorBoilerplate.Server;
 using BlazorBoilerplate.Shared.Dto;
 using BlazorBoilerplate.Shared.Dto.Chat;
 using BlazorBoilerplate.Shared.Dto.Dataset;
@@ -50,7 +51,8 @@ namespace BlazorBoilerplate.Shared.Interfaces
 
         #region OMA-ML TRAINING MESSAGES
         Task<ApiResponseDto> CreateTraining(CreateTrainingRequestDto request);
-        Task<ApiResponseDto> GetTrainings(GetTrainingsRequestDto request);
+        Task<ApiResponseDto> GetTrainingsMetadata(GetTrainingsMetadataRequestDto request);
+        Task<ApiResponseDto> GetTrainingMetadata(GetTrainingMetadataRequestDto request);
         Task<ApiResponseDto> GetTraining(GetTrainingRequestDto request);
         Task<ApiResponseDto> DeleteTraining(DeleteTrainingRequestDto request);
         Task<ApiResponseDto> GetSuggestedTrainingRuntime(GetTrainingSuggestedRuntimeRequestDto request);

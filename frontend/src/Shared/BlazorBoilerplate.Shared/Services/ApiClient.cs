@@ -116,9 +116,13 @@ namespace BlazorBoilerplate.Shared.Services
         {
             return await httpClient.PostJsonAsync<ApiResponseDto>("api/Training/CreateTraining", request);
         }
-        public async Task<ApiResponseDto> GetTrainings(GetTrainingsRequestDto request)
+        public async Task<ApiResponseDto> GetTrainingsMetadata(GetTrainingsMetadataRequestDto request)
         {
-            return await httpClient.PostJsonAsync<ApiResponseDto>("api/Training/GetTrainings", request);
+            return await httpClient.PostJsonAsync<ApiResponseDto>("api/Training/GetTrainingsMetadata", request);
+        }
+        public async Task<ApiResponseDto> GetTrainingMetadata(GetTrainingMetadataRequestDto request)
+        {
+            return await httpClient.PostJsonAsync<ApiResponseDto>("api/Training/GetTrainingMetadata", request);
         }
         public async Task<ApiResponseDto> GetTraining(GetTrainingRequestDto request)
         {

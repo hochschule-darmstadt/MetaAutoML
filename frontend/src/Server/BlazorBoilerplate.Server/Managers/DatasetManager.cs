@@ -182,6 +182,7 @@ namespace BlazorBoilerplate.Server.Managers
             {
                 getDatasetRequest.UserId = username;
                 getDatasetRequest.DatasetId = request.DatasetId;
+                getDatasetRequest.Short = request.Short;
                 var reply = _client.GetDataset(getDatasetRequest);
                 Dictionary<string, Shared.Dto.Dataset.ColumnSchemaDto> schema = new Dictionary<string, Shared.Dto.Dataset.ColumnSchemaDto>();
                 foreach (var column in reply.Dataset.Schema)
