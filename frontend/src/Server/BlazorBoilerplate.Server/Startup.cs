@@ -192,7 +192,9 @@ namespace BlazorBoilerplate.Server
             services.AddTransient<ICacheManager, CacheManager>();
             services.AddTransient<IModelManager, ModelManager>();
             services.AddTransient<IPredictionManager, PredictionManager>();
+            services.AddTransient<IChatbotManager, ChatbotManager>();
             services.AddScoped<IUserInformation, GeneralInformationManager>();
+
 
             services.AddScoped<IFileUploader, FileUploader>();
             services.AddScoped<IDatasetPreviewWorker, DatasetPreviewWorker>();

@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+service Chatbot {
+    rpc Chat (ChatRequest) returns (stream ChatReply);
+}
+
+message ChatRequest {
+    string message = 1;
+    string history = 2;
+}
+
+message ChatReply {
+    string chatbot_reply = 1;
+}

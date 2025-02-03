@@ -117,6 +117,13 @@
   <ItemGroup>
     <Folder Include="Themes\" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="wwwroot\js\chat.js">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+  </ItemGroup>
   <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(BuildingInsideVisualStudio)' == 'true'">
     <!-- <Exec Command="if exist &quot;$(ProjectDir)Logs\*.*&quot; del &quot;$(ProjectDir)Logs\*.*&quot; /q" /> -->
   </Target>

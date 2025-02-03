@@ -26,6 +26,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Update="Shared\Components\NavMenu - Copy.razor">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+    </Content>
     <Content Update="wwwroot\css\fonts.googleapis.com\Roboto.css">
       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>

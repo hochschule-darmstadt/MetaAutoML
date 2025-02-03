@@ -29,6 +29,7 @@
 		<Protobuf Include="Protos/OntologyRelatedMessages.proto" GrpcServices="Client" ProtoRoot="Protos\" />
 		<Protobuf Include="Protos/TrainingRelatedMessages.proto" GrpcServices="Client" ProtoRoot="Protos\" />
 		<Protobuf Include="Protos/UserRelatedMessages.proto" GrpcServices="Client" ProtoRoot="Protos\" />
-		<Protobuf Include="Protos\PredictionRelatedMessages.proto" GrpcServices="Client" ProtoRoot="Protos\" />
+        <Protobuf Include="Protos\PredictionRelatedMessages.proto" GrpcServices="Client" ProtoRoot="Protos\" />
+        <Protobuf Include="Protos\ChatbotRelatedMessages.proto" GrpcServices="Client" ProtoRoot="Protos\" />
 	</ItemGroup>
 </Project>

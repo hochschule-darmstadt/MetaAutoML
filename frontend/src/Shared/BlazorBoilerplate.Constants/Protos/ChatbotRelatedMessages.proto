@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+option csharp_namespace = "BlazorBoilerplate.Server";
+
+
+message SendChatMessageRequest{
+  /*
+  Message from the User to the Chatbot
+  includes the chat history
+  example:"What is OMA-ML?"
+  */
+  string chat_message = 1;
+  string chat_history = 2;
+
+}
+
+message SendChatMessageResponse{
+
+  /*
+  Response chunk from the chatbot
+  Chunks should enable the "word-for-word" response
+  example:""
+  */
+  string controller_response = 1;
+
+}

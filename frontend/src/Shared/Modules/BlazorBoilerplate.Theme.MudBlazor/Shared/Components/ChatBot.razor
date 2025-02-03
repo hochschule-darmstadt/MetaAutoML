@@ -1,0 +1,294 @@
+@using BlazorBoilerplate.Shared.Dto.Chat
+@using System.Text.Json
+@using System.Text.RegularExpressions;
+@inherits DynamicComponentContainer
+@inject IApiClient apiClient
+@inject IJSRuntime JSRuntime
+
+<MudFab 
+Icon="@(isChatOpen ? Icons.Material.Filled.Close : Icons.Material.Filled.Chat)" 
+Color="Color.Secondary" 
+@onclick="ToggleChat"
+Style="position:fixed; bottom: 20px; right: 20px; z-index: 100;" 
+/>
+
+
+<MudPopover Open="@isChatOpen" AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.BottomRight">
+    <MudPaper Class="chat-box">
+        <!-- Chat Header -->
+        <MudCard Class="chat-header" @onclick="CloseChat">
+            <div class="chat-header-content">
+                <MudText Typo="Typo.h5" Class="header-title">OMA-ML Assistant</MudText>
+                <MudSpacer/>
+                <MudIcon Icon="@Icons.Material.Filled.Minimize"
+                Style="cursor: pointer; margin-left: auto;"/>
+            </div>
+        </MudCard>
+
+        <!-- Chat Content Area -->
+        <MudCardContent Class="chat-content" style="overflow: hidden">
+            <MudList style="overflow: hidden">
+                <div @ref="chatContentRef" style="overflow-y: auto; max-height: 392px;">
+                    @foreach (var message in messages)
+                    {
+                        <MudListItem Class="@(message.IsUser ? "user-message" : "assistant-message")">
+                            <MudText Class="@(message.IsUser ? "user-bubble" : "assistant-bubble")">
+                                @foreach (var part in SplitMessageIntoParts(message.Text))
+                                {
+                                    if (part.IsLink)
+                                    {
+                                        <MudLink Href="@part.Text" Target="_blank">@ExtractLinkText(part.Text)</MudLink>
+                                    }
+                                    else
+                                    {
+                                        @part.Text
+                                    }
+                                }
+                            </MudText>
+                        </MudListItem>
+                    }
+                    <MudListItem Class="assistant-message" style="@(isTyping ? "" : "display: none;")">
+                        <MudText Class="assistant-bubble typing-indicator">
+                            <span>.</span><span>.</span><span>.</span>
+                        </MudText>
+                    </MudListItem>
+                </div>
+            </MudList>
+
+        </MudCardContent>
+
+        <!-- Chat Input Area -->
+        <MudCardActions Class="chat-input">
+            <MudTextField @bind-Value="currentMessage" @ref="inputField" Placeholder="Message" FullWidth="true" Class="input-field" Disabled="isInputDisabled"
+            OnKeyUp="HandleEnterKey" />
+            <MudIconButton Icon="@Icons.Material.Filled.Send" @onclick="SendMessage" />
+        </MudCardActions>
+    </MudPaper>
+</MudPopover>
+
+@code {
+    private bool isChatOpen = false;
+    private MudTextField<string> inputField;
+    private string currentMessage = string.Empty;
+    private bool isInputDisabled = false;
+    private bool isTyping = false;
+
+    private ElementReference chatContentRef;
+
+    // List of Messages that represent the current conversation
+    private List<Message> messages = new List<Message>
+    {
+        new Message { Text = "Hello, I'm your digital assistant. I'm glad you're using our service! How can I assist you today?", IsUser = false }
+    };
+
+
+    /// <summary>
+    /// Toggles the isChatOpen Flag
+    /// </summary>
+    private void ToggleChat() {
+        isChatOpen = !isChatOpen;
+    }
+
+
+    /// <summary>
+    /// Calls "SendMessage()" when Enter is pressed
+    /// </summary>
+    /// <param name="e">KeyboardEvent which is used to check if the key that was pressed was the "Enter" key</param>
+    private void HandleEnterKey(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            SendMessage();
+        }
+    }
+
+    /// <summary>
+    /// Sends Message to Backend and awaits the response of the Chatbot.
+    /// Handles updating the list of current messages.
+    /// Handles UI/UX stuff:
+    ///     - disable Textinput when waiting on message from chat
+    ///     - showing "typing" animation when waiting on message
+    ///     - focusing cursor back on the textinput when message from backend is received
+    ///     - scrolling the chat to the bottom, when a new message is added
+    /// </summary>
+    private async void SendMessage()
+    {
+        if (!string.IsNullOrWhiteSpace(currentMessage))
+        {
+            isInputDisabled = true;
+            string history = GetChatHistory();
+            string newMessage = currentMessage;
+            string response_string = "";
+
+            //Add message to Chat
+            messages.Add(new Message { Text = currentMessage, IsUser = true });
+
+            // Scroll to bottom after new messages are added
+            await JSRuntime.InvokeVoidAsync("scrollChatToBottom", chatContentRef);
+
+            await inputField.Clear();
+
+            isTyping = true;
+
+            // Scroll to bottom after new messages are added
+            await JSRuntime.InvokeVoidAsync("scrollChatToBottom", chatContentRef);
+
+            StateHasChanged();
+            try{
+                //Send request
+                ApiResponseDto apiResponse = await apiClient.SendChatMessage(
+                    new BlazorBoilerplate.Shared.Dto.Chat.SendChatMessageRequestDto {
+                        ChatMessage = newMessage,
+                        ChatHistory = history
+                    }
+                );
+                SendChatMessageResponseDto responseDto = Newtonsoft.Json.JsonConvert.DeserializeObject<SendChatMessageResponseDto>(apiResponse.Result.ToString());
+
+                //TODO check message for links
+
+                //Add ChatbotMessage to Chat
+                messages.Add(new Message { Text = responseDto.ResponseMessage , IsUser = false });
+            }catch(OperationCanceledException){
+                messages.Add(new Message { Text = "The server is taking too long to respond. Please try again later.", IsUser = false });
+            }
+
+            // Scroll to bottom after new messages are added
+            await JSRuntime.InvokeVoidAsync("scrollChatToBottom", chatContentRef);
+
+            isTyping = false;
+            isInputDisabled = false;
+
+            //Update UI after receiving Messages
+            StateHasChanged();
+
+
+            //Reset variable and inputField
+            currentMessage = string.Empty;
+
+            //Focus the inputfield to keep typing
+            await inputField.FocusAsync();
+
+        }
+    }
+
+
+    /// <summary>
+    /// Open the Chatwindow.
+    /// </summary>
+    private void OpenChat()
+    {
+        isChatOpen = true;
+
+        inputField.FocusAsync();
+    }
+
+
+    /// <summary>
+    /// Close the Chatwindow.
+    /// </summary>
+    private void CloseChat()
+    {
+        isChatOpen = false;
+    }
+
+
+    /// <summary>
+    /// Writes all current Chat messages into one string including the autohr of the message
+    /// </summary>
+    /// <returns>Returns the Chathistory as a single string object</returns>
+    private string GetChatHistory()
+    {
+        string history = "";
+        foreach (var message in messages){
+            if (message.IsUser){
+                history += "User: " + message.Text + "\n";
+            }
+            else{
+                history += "Chatbot: " + message.Text + "\n";
+            }
+        }
+
+
+        return history;
+    }
+
+    /// <summary>
+    /// Checks the message for links and formats them to be shown in the chat.
+    /// </summary>
+    /// <param name="message">message received from the chatbot</param>
+    /// <returns></returns>
+    private string CheckResponseForLinks(string message){
+
+        message = Regex.Replace(message,
+                @"(https?:\/\/[^\s)]+(?<![\.,]))",
+                "<a target='_blank' href='$1'>$1</a>");
+                /*
+        Regex regx = new Regex("http://([\\w+?\\.\\w+])+([a-zA-Z0-9\\~\\!\\@\\#\\$\\%\\^\\&amp;\\*\\(\\)_\\-\\=\\+\\\\\\/\\?\\.\\:\\;\\'\\,]*)?", RegexOptions.IgnoreCase);
+        MatchCollection mactches = regx.Matches(message);
+        foreach (Match match in mactches)
+        {
+    message = message.Replace(match.Value, "<a href='" + match.Value + "'>" + match.Value + "</a>");
+        }
+        */
+        return message;
+    }
+
+
+    private List<MessagePart> SplitMessageIntoParts(string text)
+    {
+        var parts = new List<MessagePart>();
+        if (string.IsNullOrEmpty(text))
+            return parts;
+
+        string pattern = @"(https?:\/\/[^\s)]+(?<![\.,]))";  // Matches URLs
+        var matches = Regex.Split(text, pattern);
+
+        foreach (var part in matches)
+        {
+            if (string.IsNullOrWhiteSpace(part)) continue;
+
+            parts.Add(new MessagePart
+                {
+                    Text = part,
+                    IsLink = Regex.IsMatch(part, pattern)
+                });
+        }
+
+        return parts;
+    }
+
+    private string ExtractLinkText(string url)
+    {
+        try
+        {
+            Uri uri = new Uri(url);
+            string lastSegment = uri.AbsolutePath.TrimEnd('/').Split('/').Where(segment => segment.Length >= 2).LastOrDefault();
+
+            // If there's no meaningful last segment, return domain name
+            return string.IsNullOrEmpty(lastSegment) ? uri.Host.Replace("www.", "") : lastSegment;
+        }
+        catch
+        {
+            return url; // Fallback in case of parsing errors
+        }
+    }
+
+
+    /// <summary>
+    /// Represents a message from either user or "Chatbot"
+    /// If "IsUser" is True, the message was written by the User. Otherwise it was written by the Chatbot
+    /// </summary>
+    public class Message
+    {
+        public string Text { get; set; }
+        public bool IsUser { get; set; }
+
+    }
+
+    private class MessagePart
+    {
+        public string Text { get; set; }
+        public bool IsLink { get; set; }
+    }
+}
+

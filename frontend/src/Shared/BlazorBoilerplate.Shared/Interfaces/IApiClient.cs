@@ -1,5 +1,6 @@
 using BlazorBoilerplate.Server;
 using BlazorBoilerplate.Shared.Dto;
+using BlazorBoilerplate.Shared.Dto.Chat;
 using BlazorBoilerplate.Shared.Dto.Dataset;
 using BlazorBoilerplate.Shared.Dto.Db;
 using BlazorBoilerplate.Shared.Dto.Email;
@@ -10,6 +11,7 @@ using BlazorBoilerplate.Shared.Dto.Training;
 using BlazorBoilerplate.Shared.Models;
 using Breeze.Sharp;
 using System.Linq.Expressions;
+using System.Net.Http;
 
 namespace BlazorBoilerplate.Shared.Interfaces
 {
@@ -85,6 +87,12 @@ namespace BlazorBoilerplate.Shared.Interfaces
         Task<ApiResponseDto> GetPredictions(GetPredictionsRequestDto request);
         Task<ApiResponseDto> DownloadPrediction(DownloadPredictionRequestDto request);
         Task<ApiResponseDto> DeletePrediction(DeletePredictionRequestDto request);
+        #endregion
+
+        #region OMA-ML CHATBOT MESSAGES
+
+        Task<ApiResponseDto> SendChatMessage(SendChatMessageRequestDto request);
+
         #endregion
 
     }
