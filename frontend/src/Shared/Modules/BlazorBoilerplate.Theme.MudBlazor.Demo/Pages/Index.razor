@@ -13,15 +13,14 @@
 
 
 <div data-form-zeroStep
-     style="border: solid none; z-index: 999; position: relative; background-color: none; border-width: 0px;"></div>
+    style="border: solid none; z-index: 999; position: relative; background-color: none; border-width: 0px;"></div>
 <TopSection>
     <MudBreadcrumbs Style="z-index:1!important;" Items="_breadcrumbs" Class="mudbreadcrumbs"></MudBreadcrumbs>
 </TopSection>
 
 <MudStack AlignItems="MudBlazor.AlignItems.Center" Row="true" Class="mb-2" style="padding-top:50px">
     <MudIcon Size="Size.Large" Icon="@Icons.Filled.Home" />
-    <LabelTooltip FontSize="TextStyle.H4" Label=@_pageTitle
-        Text="A dataset contains data that can be used for machine learning. Different dataset types are distinguished, e.g., tabular data, texts or images. This page lists all datasets you have uploaded so far to the OMA-ML platform. By clicking on a dataset, the respective dataset page is opened to inspect the dataset and start new trainings."
+    <LabelTooltip FontSize="TextStyle.H4" Label=@_pageTitle Text="@L["Datasets.Sidebar.tooltip"]"
         Position="Radzen.TooltipPosition.Bottom" URL="/help#home"></LabelTooltip>
 </MudStack>
 
@@ -136,11 +135,10 @@
     {
         try
         {
-            ApiResponseDto apiResponse = await apiClient.GetTrainings(new GetTrainingsRequestDto()
-            {
-                Short = true,
-                OnlyLastDay = true
-            });
+            ApiResponseDto apiResponse = await apiClient.GetTrainingsMetadata(new GetTrainingsMetadataRequestDto()
+                {
+                    OnlyLastDay = true
+                });
 
             if (apiResponse.IsSuccessStatusCode)
             {

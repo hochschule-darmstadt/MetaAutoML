@@ -85,34 +85,89 @@ namespace BlazorBoilerplate.Server.Managers
             }
         }
         /// <summary>
-        /// retrieve all trainings
+        /// retrieve all trainings metadata
         /// </summary>
         /// <param name="dataset"></param>
         /// <returns></returns>
-        public async Task<ApiResponse> GetTrainings(GetTrainingsRequestDto request)
+        public async Task<ApiResponse> GetTrainingsMetadata(GetTrainingsMetadataRequestDto request)
         {
-            GetTrainingsRequest getTrainings = new GetTrainingsRequest();
+            GetTrainingsMetadataRequest getTrainings = new GetTrainingsMetadataRequest();
             GetTrainingsResponseDto response = new GetTrainingsResponseDto();
             var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
             try
             {
                 getTrainings.UserId = username;
-                getTrainings.Short = request.Short;
                 getTrainings.Pagination = request.Pagination;
                 getTrainings.PageNumber = request.PageNumber;
                 getTrainings.OnlyLastDay = request.OnlyLastDay;
-                var reply = _client.GetTrainings(getTrainings);
+                getTrainings.PageSize = request.PageSize;
+                getTrainings.SearchString = request.SearchString == null ? "" : request.SearchString;
+                getTrainings.SortDirection = request.SortDirection == null ? "" : request.SortDirection;
+                getTrainings.SortLabel = request.SortLabel == null ? "" : request.SortLabel;
+                var reply = _client.GetTrainingsMetadata(getTrainings);
                 foreach (var training in reply.Trainings)
                 {
-                    TrainingDto trainingDto = await CreateTrainingDtoFromTraining(username, training);
-                    response.Trainings.Add(trainingDto);
+                    TrainingMetadataDto trainingMetadataDto = new()
+                    {
+                        Id = training.Id,
+                        DatasetId = training.DatasetId,
+                        DatasetName = training.DatasetName,
+                        Task = await _cacheManager.GetObjectInformation(training.Task),
+                        Status = training.Status,
+                        StartTime = training.StartTime.ToDateTime()
+                    };
+
+                    response.Trainings.Add(trainingMetadataDto);
                 }
+                response.PaginationMetadata = new PaginationMetadataDto
+                {
+                    TotalItems = reply.PaginationMetadata.TotalItems,
+                    PageNumber = reply.PaginationMetadata.PageNumber,
+                    PageSize = reply.PaginationMetadata.PageSize,
+                    TotalPages = reply.PaginationMetadata.TotalPages
+                };
                 return new ApiResponse(Status200OK, null, response);
 
             }
             catch (Exception ex)
             {
+                return new ApiResponse(Status404NotFound, ex.Message);
+            }
+        }
 
+        /// <summary>
+        /// retrieve all trainings
+        /// </summary>
+        /// <param name="dataset"></param>
+        /// <returns></returns>
+        public async Task<ApiResponse> GetTrainingMetadata(GetTrainingMetadataRequestDto request)
+        {
+            GetTrainingMetadataRequest getTraining = new GetTrainingMetadataRequest();
+            GetTrainingMetadataResponseDto response;
+            var username = _httpContextAccessor.HttpContext.User.FindFirst("omaml").Value;
+            try
+            {
+                getTraining.UserId = username;
+                getTraining.TrainingId = request.TrainingId;
+                var reply = _client.GetTrainingMetadata(getTraining);
+
+                TrainingMetadataDto trainingMetadataDto = new()
+                {
+                    Id = reply.Training.Id,
+                    DatasetId = reply.Training.DatasetId,
+                    DatasetName = reply.Training.DatasetName,
+                    Task = await _cacheManager.GetObjectInformation(reply.Training.Task),
+                    Status = reply.Training.Status,
+                    StartTime = reply.Training.StartTime.ToDateTime()
+                };
+
+                response = new GetTrainingMetadataResponseDto(trainingMetadataDto);
+
+                return new ApiResponse(Status200OK, null, response);
+
+            }
+            catch (Exception ex)
+            {
                 return new ApiResponse(Status404NotFound, ex.Message);
             }
         }

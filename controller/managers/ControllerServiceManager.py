@@ -102,6 +102,7 @@ class ControllerServiceManager(ControllerServiceBase):
         self, get_dataset_request: "GetDatasetRequest",
         dataset_manager: DatasetManager=Provide[Application.managers.dataset_manager]
     ) -> "GetDatasetResponse":
+        print("get_dataset_request", get_dataset_request)
         with MeasureDuration() as m:
             response = dataset_manager.get_dataset(get_dataset_request)
         #response = await self.__loop.run_in_executor(
@@ -172,16 +173,27 @@ class ControllerServiceManager(ControllerServiceBase):
         return response
 
     @inject
-    async def get_trainings(
-        self, get_trainings_request: "GetTrainingsRequest",
+    async def get_trainings_metadata(
+        self, get_trainings_metadata_request: "GetTrainingsMetadataRequest",
         training_manager: TrainingManager=Provide[Application.managers.training_manager]
-    ) -> "GetTrainingsResponse":
+    ) -> "GetTrainingsMetadataResponse":
         with MeasureDuration() as m:
-            response = training_manager.get_trainings(get_trainings_request)
+            response = training_manager.get_trainings_metadata(get_trainings_metadata_request)
         #response = await self.__loop.run_in_executor(
         #    self.__executor, training_manager.get_trainings, get_trainings_request
         #)
-        self.__log.warn("get_trainings: executed")
+        self.__log.warn("get_trainings_metadata: executed")
+        return response
+
+    @inject
+    async def get_training_metadata(
+        self, get_training_metadata_request: "GetTrainingMetadataRequest",
+        training_manager: TrainingManager=Provide[Application.managers.training_manager]
+    ) -> "GetTrainingMetadataResponse":
+        with MeasureDuration() as m:
+            response = training_manager.get_training_metadata(get_training_metadata_request)
+
+        self.__log.warn("get_training_metadata: executed")
         return response
 
     @inject
@@ -237,6 +249,8 @@ class ControllerServiceManager(ControllerServiceBase):
         self, get_models_request: "GetModelsRequest",
         model_manager: ModelManager=Provide[Application.managers.model_manager]
     ) -> "GetModelsResponse":
+
+        print("get_models_request", get_models_request)
         with MeasureDuration() as m:
             response = model_manager.get_models(get_models_request)
         #response = await self.__loop.run_in_executor(

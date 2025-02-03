@@ -43,9 +43,18 @@ namespace BlazorBoilerplate.Server.Controllers
         [ProducesResponseType(Status200OK)]
         [ProducesResponseType(Status400BadRequest)]
         [ProducesResponseType(Status404NotFound)]
-        public async Task<ApiResponse> GetTrainings(GetTrainingsRequestDto request)
+        public async Task<ApiResponse> GetTrainingsMetadata(GetTrainingsMetadataRequestDto request)
             => ModelState.IsValid ?
-                await _trainingManager.GetTrainings(request) :
+                await _trainingManager.GetTrainingsMetadata(request) :
+                new ApiResponse(Status400BadRequest, L["InvalidData"]);
+
+        [HttpPost]
+        [ProducesResponseType(Status200OK)]
+        [ProducesResponseType(Status400BadRequest)]
+        [ProducesResponseType(Status404NotFound)]
+        public async Task<ApiResponse> GetTrainingMetadata(GetTrainingMetadataRequestDto request)
+            => ModelState.IsValid ?
+                await _trainingManager.GetTrainingMetadata(request) :
                 new ApiResponse(Status400BadRequest, L["InvalidData"]);
 
         [HttpPost]
@@ -56,6 +65,7 @@ namespace BlazorBoilerplate.Server.Controllers
             => ModelState.IsValid ?
                 await _trainingManager.GetTraining(request) :
                 new ApiResponse(Status400BadRequest, L["InvalidData"]);
+
         [HttpPost]
         [ProducesResponseType(Status200OK)]
         [ProducesResponseType(Status400BadRequest)]
@@ -64,6 +74,7 @@ namespace BlazorBoilerplate.Server.Controllers
             => ModelState.IsValid ?
                 await _trainingManager.DeleteTraining(request) :
                 new ApiResponse(Status400BadRequest, L["InvalidData"]);
+
         [HttpPost]
         [ProducesResponseType(Status200OK)]
         [ProducesResponseType(Status400BadRequest)]

@@ -70,8 +70,12 @@ class ModelManager:
             model_info.runtime_profile = model_runtime_profile
 
             model_info.status_messages[:] =  model["status_messages"]
-            #model_info.explanation = json.dumps(model["explanation"])
 
+            #model_info.explanation = json.dumps(model["explanation"])
+            if not model.get("dashboard_path"):  # Returns None if key is missing
+                model_info.dashboard_status = "inactive"
+            else:
+                model_info.dashboard_status = "active"
             if not "carbon_footprint" in model:
                         model["carbon_footprint"] = {"emissions": 0}
             model_info.emission = model["carbon_footprint"].get("emissions", 0)
@@ -94,21 +98,137 @@ class ModelManager:
             GetModelsResponse: The GRPC response holding the list of found models
         """
         response = GetModelsResponse()
-        def GetScore(e):
-            score_list = list(e["test_score"].values())
-            if len(score_list) == 0:
-                return 0
-            #we will always use the first score for comparision
-            return score_list[0]
+
+        extended_pipeline = [
+            # Stage 1: Add a field firstTestScore to the document, which is the first test score of the model
+            {
+                '$addFields': {
+                    'firstTestScore': {
+                        '$ifNull': [
+                            {
+                                '$first': {
+                                    '$map': {
+                                        'input': {
+                                            '$objectToArray': '$test_score'
+                                        },
+                                        'as': 'score',
+                                        'in': '$$score.v'
+                                    }
+                                }
+                            }, 0
+                        ]
+                    }
+                }
+            },
+            # Stage 2: Sort the models by the first test score
+            {
+                '$sort': {
+                    'firstTestScore': -1
+                }
+            },
+            # Stage 3: Lookup the predictions for each model
+            {
+                '$lookup': {
+                    'from': 'predictions',
+                    'let': {
+                        'model_id': '$_id'
+                    },
+                    'pipeline': [
+                        {
+                            '$match': {
+                                '$expr': {
+                                    '$eq': [
+                                        {
+                                            '$toObjectId': '$model_id'
+                                        }, '$$model_id'
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            '$project': {
+                                '_id': 0,
+                                'id': {
+                                    '$toString': '$_id'
+                                },
+                                'model_id': 1,
+                                'live_dataset_path': 1,
+                                'prediction_path': 1,
+                                'status': 1,
+                                'runtime_profile': 1
+                            }
+                        }
+                    ],
+                    'as': 'predictions'
+                }
+            },
+            # Stage 4: Project the fields we want to return to match the gRPC Model object
+            {
+                '$project': {
+                    # Convert the _id to a string
+                    '_id': 0,
+                    'id': {
+                        '$toString': '$_id'
+                    },
+                    'training_id': 1,
+                    'predictions': 1,
+                    'status': 1,
+                    'auto_ml_solution': 1,
+                    'ml_model_type': 1,
+                    'ml_library': 1,
+                    'path': 1,
+                    'test_score': 1,
+                    'prediction_time': 1,
+                    'runtime_profile': 1,
+                    # 'status_messages': 1, # Might take too long due to the amount of messages --> skip for now
+                    'explanation': 1,
+
+                    # Check if the dashboard_path exists, if not set the dashboard_status to inactive else active
+                    'dashboard_status': {
+                        '$cond': [
+                            {
+                                '$ne': [
+                                    {
+                                        '$type': '$dashboard_path'
+                                    }, 'missing'
+                                ]
+                            }, 'active', 'inactive'
+                        ]
+                    },
+                    # Get the emissions from the carbon_footprint object, if it does not exist, set it to 0
+                    'emission': {
+                        '$ifNull': [
+                            {
+                                '$getField': {
+                                    'field': 'emissions',
+                                    'input': '$carbon_footprint'
+                                }
+                            },
+                            0
+                        ]
+                    }
+                }
+            }
+        ]
 
         self.__log.debug(f"get_models: get all models for dataset {get_models_request.dataset_id} for user {get_models_request.user_id}")
-        all_models: list[dict[str, object]] = self.__data_storage.get_models(get_models_request.user_id, dataset_id=get_models_request.dataset_id)
+        all_models: list[dict[str, object]] = self.__data_storage.get_models(get_models_request.user_id, dataset_id=get_models_request.dataset_id, extended_pipeline=extended_pipeline)
         self.__log.debug(f"get_models: found {all_models.count} models for dataset {get_models_request.dataset_id} for user {get_models_request.user_id}")
 
-        all_models.sort(key=GetScore, reverse=True)
-
-        for model in all_models:
-            response.models.append(self.__model_object_to_rpc_object(get_models_request.user_id, model))
+        response.models = [
+            Model(
+                **{key: value for key, value in model.items() if key not in ['test_score', 'explanation', 'predictions', 'runtime_profile']},
+                test_score=json.dumps(model.get("test_score", {})),
+                explanation=json.dumps(model.get("explanation", {})),
+                predictions=[
+                    Prediction(
+                        **{key: value for key, value in prediction.items() if key != 'runtime_profile'},
+                        runtime_profile=PredictionRuntimeProfile(**prediction["runtime_profile"])
+                    ) for prediction in model["predictions"]
+                ],
+                runtime_profile=ModelruntimeProfile(**model["runtime_profile"])
+            ) for model in all_models
+        ]
 
         return response
 

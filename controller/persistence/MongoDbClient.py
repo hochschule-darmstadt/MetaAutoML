@@ -1,4 +1,5 @@
 import os
+from typing import List
 from pymongo import MongoClient
 from pymongo.collection import Collection
 from mongomock import MongoClient as MongoMockClient
@@ -7,6 +8,8 @@ import logging
 from ControllerBGRPC import GetHomeOverviewInformationResponse
 from MeasureDuration import MeasureDuration
 import pymongo
+from MongoDbDocuments import MongoDbDocuments
+import re
 
 class MongoDbClient:
     """
@@ -24,9 +27,11 @@ class MongoDbClient:
             self.__log.setLevel(logging.getLevelName(os.getenv("PERSISTENCE_LOGGING_LEVEL")))
             if server_url is not None:
                 self.__mongo = self.__use_real_database(server_url)
+                self.__db_documents = MongoDbDocuments(self.__mongo)
             else:
                 self.__mongo = MongoMockClient()
-            self.__log.info("New mongo db client intialized.")
+                self.__db_documents = MongoDbDocuments(self.__mongo)
+            self.__log.info("New mongo db client initialized.")
 
 
     def __use_real_database(self, server_url: str) -> MongoClient:
@@ -63,6 +68,16 @@ class MongoDbClient:
     ## MISC MONGO DB OPERATIONS
     ####################################
 #region
+    def create_database(self, user_id: str):
+        """Create a new user database in MongoDB
+
+        Args:
+            user_id (str): Unique user id saved within the MS Sql database of the frontend
+        """
+        self.__db_documents.setup_collections(user_id)
+        self.__log.debug(f"create_database: database {user_id} created")
+
+
     def drop_database(self, user_id: str):
         """Drop a user database from MongoDB
 
@@ -126,7 +141,7 @@ class MongoDbClient:
         self.__log.debug(f"insert_dataset: new dataset inserted: {result.inserted_id}")
         return str(result.inserted_id)
 
-    def get_dataset(self, user_id: str, filter: 'dict[str, object]') -> 'dict[str, object]':
+    def get_dataset(self, user_id: str, filter: 'dict[str, object]', extended_pipeline: List = None) -> 'dict[str, object]':
         """Retrieve a single dataset record from a user database
 
         Args:
@@ -137,8 +152,18 @@ class MongoDbClient:
             dict[str, object]: Dictonary representing a dataset record
         """
         datasets: Collection = self.__mongo[user_id]["datasets"]
-        self.__log.debug(f"get_dataset: documents within dataset: {datasets.count_documents}, filter {filter}")
-        return datasets.find_one(filter)
+
+        pipeline = [
+            {
+                '$match': filter
+            }
+        ]
+
+        if extended_pipeline is not None:
+            pipeline.extend(extended_pipeline)
+
+        # self.__log.debug(f"get_dataset: documents within dataset: {datasets.count_documents}, filter {filter}")
+        return datasets.aggregate(pipeline).next()
 
     def get_datasets(self, user_id: str, filter: 'dict[str, object]'={}, only_five_recent:bool=False, pagination:bool=False, page_number:int=1) -> 'list[dict[str, object]]':
         """Retrieve all dataset records from a user database
@@ -232,7 +257,7 @@ class MongoDbClient:
         self.__log.debug(f"get_model: documents within model: {models.count_documents}, filter {filter}")
         return models.find_one(filter)
 
-    def get_models(self, user_id: str, filter: 'dict[str, object]'={}) -> 'list[dict[str, object]]':
+    def get_models(self, user_id: str, filter: 'dict[str, object]'={}, extended_pipeline: list[dict[str, object]] = None) -> 'list[dict[str, object]]':
         """Retrieve all model records from a user database
 
         Args:
@@ -243,8 +268,18 @@ class MongoDbClient:
             list[dict[str, object]]: List of dictonaries representing model records
         """
         models: Collection = self.__mongo[user_id]["models"]
+
+        pipeline = [
+            {
+                '$match': filter
+            }
+        ]
+
+        if extended_pipeline is not None:
+            pipeline.extend(extended_pipeline)
+
         self.__log.debug(f"get_models: documents within models: {models.count_documents}, filter {filter}")
-        return models.find(filter)
+        return models.aggregate(pipeline)
 
     def update_model(self, user_id: str, model_id: str, new_values: 'dict[str, str]') -> bool:
         """Update a single model record from a user database
@@ -315,7 +350,7 @@ class MongoDbClient:
         self.__log.debug(f"get_training: documents within trainings: {trainings.count_documents}, filter {filter}")
         return trainings.find_one(filter)
 
-    def get_trainings(self, user_id: str, filter: 'dict[str, object]'={}, pagination:bool=False, page_number:int=1) -> 'list[dict[str, object]]':
+    def get_trainings_metadata(self, user_id: str, filter: 'dict[str, object]'={}, pagination:bool=False, page_number:int=1, page_size:int=20, search_string:str=None, sort_label:str=None, sort_direction:str=None) -> 'tuple[list[dict[str, object]], int]':
         """Retrieve all training records from a user database
 
         Args:
@@ -323,17 +358,151 @@ class MongoDbClient:
             filter (dict[str, object], optional): Dictionary of record fields to filter the training records from. Defaults to {}.
             pagination (bool): If pagination is used
             page_number (int): the pagination page to retrieve
+            page_size (int): the number of records per page
+            search_string (str, optional): The search string to filter the records. Defaults to None.
+            sort_label (str, optional): The label to sort the records. Defaults to None.
+            sort_direction (str, optional): The direction to sort the records. Defaults to None.
+
         Returns:
-            list[dict[str, object]]: List of dictonaries representing training records
+            tuple[list[dict[str, object]], int]: List of dictionaries representing training records and the total count of the filtered subset
         """
-        page_size = 20
-        offset = (page_number - 1) * page_size
-        if pagination == True:
-            return self.__mongo[user_id]["trainings"].find(filter).sort("runtime_profile.start_time", pymongo.DESCENDING).skip(offset).limit(page_size)
+
+        # Aggregation pipeline
+        pipeline = [
+            # Stage 1: Filter documents based on provided conditions
+            # This stage reduces the number of documents early in the pipeline
+            {
+                '$match': filter
+            },
+            # Stage 2: Project only needed fields and rename _id to id
+            # Reduces document size early and transforms _id field
+            {
+                '$project': {
+                    '_id': 0,  # Exclude original _id
+                    'id': { '$toString': '$_id' },  # Convert _id to string and rename
+                    'dataset_id': 1,
+                    'task': '$configuration.task',
+                    'status': 1,
+                    'start_time': '$runtime_profile.start_time',
+                }
+            },
+            # Stage 3: Join with datasets collection
+            # Adds dataset information to each training document
+            {
+                "$lookup": {
+                    "from": "datasets",
+                    "let": { "dataset_id_str": "$dataset_id" },
+                    "pipeline": [
+                        # Sub-pipeline to filter datasets based on dataset_id
+                        {
+                            "$match": {
+                                "$expr": {
+                                    "$eq": [
+                                        { "$toString": "$_id" },
+                                        "$$dataset_id_str"
+                                    ]
+                                }
+                            }
+                        },
+                        # Only get the name field from datasets
+                        {
+                            "$project": {
+                                "_id": 0,
+                                "name": 1
+                            }
+                        }
+                    ],
+                    "as": "dataset"
+                }
+            },
+            # Stage 4: Unwind the dataset array
+            # Deconstructs the dataset array created by $lookup
+            # Creates a separate document for each array element
+            {
+                '$unwind': '$dataset'
+            },
+            # Stage 5: Final projection to get exact shape needed
+            # Removes temporary fields and finalizes structure
+            {
+                '$project': {
+                    'id': 1,
+                    'dataset_id': 1,
+                    'task': 1,
+                    'status': 1,
+                    'start_time': 1,
+                    'dataset_name': '$dataset.name'
+                }
+            }
+        ]
+
+        # Add search string filter
+        if search_string:
+            search_string = re.escape(search_string)
+            # Add match stage for search filter after initial projection
+            search_filter = {
+                "$match": {
+                    "$or": [
+                        {"status": {"$regex": search_string}},
+                        {"task": {"$regex": search_string}},
+                        {"dataset_name": {"$regex": search_string}},
+                        {
+                            '$expr': {
+                                '$regexMatch': {
+                                    'input': {
+                                        '$dateToString': {
+                                            'format': '%d.%m.%Y %H:%M',
+                                            'date': '$start_time',
+                                            'timezone': 'UTC'
+                                        }
+                                    },
+                                    'regex': search_string,
+                                    'options': 'i'
+                                }
+                            }
+                        }
+                    ]
+                }
+            }
+            pipeline.append(search_filter)
+
+        # Add sorting stage
+        if sort_label and sort_direction != "None":
+            sort_order = pymongo.ASCENDING if sort_direction == "Ascending" else pymongo.DESCENDING
+            pipeline.append({"$sort": {sort_label: sort_order}})
         else:
-            trainings: Collection = self.__mongo[user_id]["trainings"]
-            self.__log.debug(f"get_trainings: documents within trainings: {trainings.count_documents}, filter {filter}")
-            return trainings.find(filter).sort("runtime_profile.start_time", pymongo.DESCENDING)
+            pipeline.append({"$sort": {"start_time": pymongo.DESCENDING}})
+
+        pipeline.append(
+            {
+                '$setWindowFields': {
+                    'output': {
+                        'total_documents': {
+                            '$count': {},
+                            'window': {
+                                'documents': [
+                                    'unbounded', 'unbounded'
+                                ]
+                            }
+                        }
+                    }
+                }
+            }
+        )
+
+        # Add pagination stages only if both page and page_size are provided
+        if pagination and page_number is not None and page_size is not None:
+            offset = (page_number - 1) * page_size
+            pipeline.extend([
+                {'$skip': offset},
+                {'$limit': page_size}
+            ])
+
+        # Execute the query
+        trainings = list(self.__mongo[user_id]["trainings"].aggregate(pipeline))
+
+        total_count = trainings[0]["total_documents"] if len(trainings) != 0 else 0
+
+        return trainings, total_count
 
     def update_training(self, user_id: str, training_id: str, new_values: 'dict[str, str]') -> bool:
         """Update a single training record from a user database
@@ -367,6 +536,18 @@ class MongoDbClient:
         result = trainings.update_one({ "_id": ObjectId(training_id) }, { "$set": { "lifecycle_state": "deleted"} })
         self.__log.debug(f"delete_training: soft delete for {result.matched_count} documents")
         return result.matched_count
+
+    def get_trainings_count(self, user_id: str) -> int:
+        """Get the total number of training records for a user
+
+        Args:
+            user_id (str): Unique user id saved within the MS Sql database of the frontend
+
+        Returns:
+            int: The total number of training records
+        """
+        trainings: Collection = self.__mongo[user_id]["trainings"]
+        return trainings.count_documents({"lifecycle_state": "active"})
 
 #endregion
     ####################################
@@ -414,8 +595,14 @@ class MongoDbClient:
             list[dict[str, object]]: List of dictonaries representing prediction records
         """
         predictions: Collection = self.__mongo[user_id]["predictions"]
+        pipeline = [
+            {
+                '$match': filter
+            }
+        ]
         self.__log.debug(f"get_predictions: documents within dataset: {predictions.count_documents}, filter {filter}")
-        return predictions.find(filter)
+
+        return predictions.aggregate(pipeline)
 
     def update_prediction(self, user_id: str, prediction_id: str, new_values: 'dict[str, object]') -> bool:
         """Update a single prediction record from a user database

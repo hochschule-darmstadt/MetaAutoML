@@ -9,5 +9,6 @@ namespace BlazorBoilerplate.Shared.Dto.Dataset
     public class GetDatasetRequestDto
     {
         public string DatasetId { get; set; }
+        public bool Short { get; set; } = true;
     }
 }

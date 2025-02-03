@@ -15,6 +15,12 @@ message GetDatasetRequest {
     example: '63515c86b10d04d230dc1482'
   */
   string datasetId = 2;
+
+  /*
+    return skip large parts of the dataset analysis and schema
+    example: True // returns only the dataset record without the analysis and schema
+  */
+  bool short = 3;
 }
 
 message GetDatasetResponse {
