@@ -163,6 +163,7 @@ class AdapterManager(Thread):
         """
         model_details = {
             "training_id": self.__training_id,
+            "dataset_id": self.__dataset["_id"],
             "prediction_ids": [],
             "status": self.__status,
             "auto_ml_solution": self.__automl,

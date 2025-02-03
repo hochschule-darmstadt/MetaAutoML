@@ -206,6 +206,10 @@ class DataStorage:
             "lifecycle_state": "active"
         }
 
+        self.__log.debug("create_database: creating a new database...")
+        self.__mongo.create_database(user_id)
+        self.__log.debug(f"create_database: new database created for user with id: {user_id}")
+
         self.__log.debug("create_dataset: inserting new dataset into database...")
         dataset_id = self.__mongo.insert_dataset(user_id, database_content)
         self.__log.debug(f"create_dataset: new dataset inserted with id: {dataset_id}")
@@ -310,7 +314,7 @@ class DataStorage:
         self.__log.debug(f"update_dataset: updating: {dataset_id} for user {user_id}, new values {new_values}")
         return self.__mongo.update_dataset(user_id, dataset_id, new_values)
 
-    def get_dataset(self, user_id: str, dataset_id: str) -> 'tuple[bool, dict[str, object]]':
+    def get_dataset(self, user_id: str, dataset_id: str, extended_pipeline: List = None) -> 'tuple[bool, dict[str, object]]':
         """Get a dataset record by id from a specific user database
 
         Args:
@@ -323,7 +327,7 @@ class DataStorage:
         result = self.__mongo.get_dataset(user_id, {
             "_id": ObjectId(dataset_id),
             "lifecycle_state": "active"
-        })
+        }, extended_pipeline)
 
         return result is not None, result
 
@@ -363,11 +367,11 @@ class DataStorage:
         else:
             path = path.replace( "/"+ os.path.basename(dataset["path"]), "")
         #Before deleting the dataset, delete all related documents
-        existing_trainings = self.get_trainings(user_id, dataset_id)
+        existing_trainings, _ = self.get_trainings_metadata(user_id, dataset_id)
         self.__log.debug(f"delete_dataset: deleting {existing_trainings.count} trainings")
         for training in existing_trainings:
             try:
-                self.delete_training(user_id, str(training["_id"]))
+                self.delete_training(user_id, str(training["id"]))
             except:
                 self.__log.debug(f"delete_dataset: deleting training failed, already deleted. Skipping...")
         self.__log.debug(f"delete_dataset: deleting files within path: {path}")
@@ -427,7 +431,7 @@ class DataStorage:
 
         return result is not None, result
 
-    def get_models(self, user_id: str, training_id: str = None, dataset_id: str = None) -> 'list[dict[str, object]]':
+    def get_models(self, user_id: str, training_id: str = None, extended_pipeline: list[dict[str, object]] = None, dataset_id: str = None) -> 'list[dict[str, object]]':
         """Get all model records from a specific user database
 
         Args:
@@ -438,16 +442,17 @@ class DataStorage:
         Returns:
             list[dict[str, object]]: List of all available model records
         """
-        if training_id is not None:
-            filter = { "training_id": training_id, "lifecycle_state": "active" }
-        elif dataset_id is not None:
-            found, dataset = self.get_dataset(user_id, dataset_id)
-            filter = { "training_id": { '$in': dataset["training_ids"] }, "lifecycle_state": "active" }
-        else:
-            filter = {"lifecycle_state": "active"}
-        result = self.__mongo.get_models(user_id, filter)
+        filter = {"lifecycle_state": "active"}
 
-        return [ds for ds in result]
+        if training_id is not None:
+            filter.update({"training_id": training_id})
+
+        if dataset_id is not None:
+            filter.update({"dataset_id": ObjectId(dataset_id)})
+
+        result = self.__mongo.get_models(user_id, filter, extended_pipeline)
+
+        return list(result)
 
     def delete_model(self, user_id: bool, model_id: str) -> int:
         """Delete a model record by id from a user databse. (all related record and files will also be deleted (Predictions))
@@ -588,7 +593,7 @@ class DataStorage:
 
         return result is not None, result
 
-    def get_trainings(self, user_id: str, dataset_id:str=None, only_last_day:bool=False, pagination:bool=False, page_number:int=1) -> 'list[dict[str, object]]':
+    def get_trainings_metadata(self, user_id: str, dataset_id:str=None, only_last_day:bool=False, pagination:bool=False, page_number:int=1, page_size:int=20, search_string:str=None, sort_label:str=None, sort_direction:str=None, filter:object={}) -> 'tuple[list[dict[str, object]], int]':
         """Get all training records from a specific user database
 
         Args:
@@ -596,26 +601,32 @@ class DataStorage:
             dataset_id (str, optional): Set a filter to get training records by dataset id. Defaults to None.
             pagination (bool): If pagination is used
             page_number (int): the pagination page to retrieve
+            page_size (int): the number of records per page
+            search_string (str, optional): The search string to filter the records. Defaults to None.
+            sort_label (str, optional): The label to sort the records. Defaults to None.
+            sort_direction (str, optional): The direction to sort the records. Defaults to None.
+
         Returns:
-            list[dict[str, object]]: List of all available training records
+            tuple[list[dict[str, object]], int]: List of all available training records and the total count of the filtered subset
         """
         search_filter = {"lifecycle_state": "active"}
+        search_filter.update(filter)
         if dataset_id is not None:
             search_filter.update({"dataset_id": dataset_id})
-        if only_last_day == True:
+        if only_last_day:
             now = datetime.now()
-            yesteday = now - timedelta(hours=24)
-
-            search_filter.update({
-                #"runtime_profile.start_time.$date.$numberLong": {
-                #    "$gte": f"{yesteday.timestamp() * 1000}"  # Convert to milliseconds
-                #}
-                "runtime_profile.start_time": {
-                    "$gte": yesteday,
-                    "$lt": now
+            yesterday = now - timedelta(hours=24)
+            search_filter.update(
+                {
+                    "runtime_profile.start_time": {
+                        "$gte": yesterday,
+                        "$lt": now
+                    }
                 }
-            })
-        return [sess for sess in self.__mongo.get_trainings(user_id, search_filter, pagination, page_number)]
+            )
+
+        trainings, total_count = self.__mongo.get_trainings_metadata(user_id, search_filter, pagination, page_number, page_size, search_string, sort_label, sort_direction)
+        return [{k: v for k, v in training.items() if k != 'total_documents'} for training in trainings], total_count
 
     def delete_training(self, user_id: bool, training_id: str) -> int:
         """Delete a training record by id from a user databse. (all related record and files will also be deleted (Models, Predictions))
@@ -648,6 +659,17 @@ class DataStorage:
         amount_deleted_trainings_result = self.__mongo.delete_training(user_id, training_id)
         self.__log.debug(f"delete_training: documents deleted within training: {amount_deleted_trainings_result}")
         return amount_deleted_trainings_result
+
+    def get_trainings_count(self, user_id: str) -> int:
+        """Get the total number of training records for a user
+
+        Args:
+            user_id (str): Unique user id saved within the MS Sql database of the frontend
+
+        Returns:
+            int: The total number of training records
+        """
+        return self.__mongo.get_trainings_count(user_id)
 
 #endregion
 
@@ -763,7 +785,8 @@ class DataStorage:
         Returns:
             list[dict[str, object]]: List of all available prediction records
         """
-        return [ds for ds in self.__mongo.get_predictions(user_id, {"model_id": model_id, "lifecycle_state": "active"})]
+        result = self.__mongo.get_predictions(user_id, {"model_id": model_id, "lifecycle_state": "active"})
+        return list(result)
 
     def delete_prediction(self, user_id: str, prediction_id: str) -> int:
         """Delete a prediction record by id from a user databse.

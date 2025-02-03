@@ -1,8 +1,8 @@
+@using MudBlazor
 @inject IStringLocalizer<Global> L
 @inject NavigationManager NavManager
 @using System.Linq
 @using System.Timers
-@implements IDisposable
 @inject IViewNotifier viewNotifier
 @inject IApiClient apiClient
 
@@ -13,35 +13,33 @@
         </CardHeaderContent>
     </MudCardHeader>
     <MudCardContent>
-        @if (Trainings == null)
+        @if (isLoading)
         {
             <DataLoaderSpinner />
         }
         else
         {
-
-
-            <MudTable Items="@_trainings.Trainings" style="width:stretch" class="mat-elevation-z5" AllowSelection="false"
-                Filter="new Func<TrainingDto,bool>(FilterFunc)">
+            <MudTable ServerData="ServerReload" style="width:stretch" class="mat-elevation-z5" @ref="table">
                 <ToolBarContent>
                     <MudSpacer />
-                    <MudTextField @bind-Value="searchString" Placeholder="@L["Search for status, task or dataset type"]"
-                        Adornment="Adornment.Start" Immediate="true" AdornmentIcon="@Icons.Material.Filled.Search"
-                        IconSize="Size.Medium" Class="mt-0" Clearable="true"></MudTextField>
+                    <MudTextField T="string" ValueChanged="@(s=>OnSearch(s))"
+                        Placeholder="@L["Search for status, task or dataset type"]" Adornment="Adornment.Start"
+                        Immediate="true" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"
+                        Clearable="true"></MudTextField>
                 </ToolBarContent>
                 <HeaderContent>
                     <MudTh>
-                        <MudTableSortLabel SortBy="@(new Func<TrainingDto, object>(x=>x.RuntimeProfile.StartTime))">@L["Date"]</MudTableSortLabel>
+                        <MudTableSortLabel SortLabel="start_time" T="TrainingMetadataDto">@L["Date"]</MudTableSortLabel>
                     </MudTh>
                     <MudTh>
-                        <MudTableSortLabel SortBy="new Func<TrainingDto, object>(x=>x.Status)">@L["Status"]
-                        </MudTableSortLabel>
+                        <MudTableSortLabel SortLabel="status" T="TrainingMetadataDto">@L["Status"]</MudTableSortLabel>
                     </MudTh>
                     <MudTh>
-                        <MudTableSortLabel SortBy="@(new Func<TrainingDto, object>(x=>x.DatasetName))">@L["Dataset"]
-                        </MudTableSortLabel>
+                        <MudTableSortLabel SortLabel="dataset_name" T="TrainingMetadataDto">@L["Dataset"]</MudTableSortLabel>
                     </MudTh>
-                    <MudTh>@L["Task"]</MudTh>
+                    <MudTh>
+                        <MudTableSortLabel SortLabel="task" T="TrainingMetadataDto">@L["Task"]</MudTableSortLabel>
+                    </MudTh>
                     <MudTh></MudTh>
                 </HeaderContent>
                 <RowTemplate>
@@ -49,7 +47,7 @@
                         <MudLink Href="@NavManager.ToAbsoluteUri("trainings/" + @context.Id).AbsoluteUri"
                             Style="cursor: pointer; display: flex;">
                             <MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.ModelTraining"
-                                Style="margin-right: 4px;" /> @context.RuntimeProfile.StartTime.ToString("dd/MM/yy HH:mm")
+                                Style="margin-right: 4px;" /> @context.StartTime.ToString("dd/MM/yyyy HH:mm")
                         </MudLink>
                     </MudTd>
                     <MudTd>
@@ -63,131 +61,150 @@
                         }
                     </MudTd>
                     <MudTd>@context.DatasetName</MudTd>
-                    <MudTd>@L[context.Configuration.Task.Properties.ContainsKey("skos:prefLabel") ?
-                              context.Configuration.Task.Properties["skos:prefLabel"] : ""]</MudTd>
+                    <MudTd>@L[context.Task.Properties["skos:prefLabel"]]</MudTd>
                     <MudTd>
-                        <TrainingMenu Training="@context" OnDeleteCompleted="@OnDeleteTrainingCompleted" />
+                        <TrainingMenu Training="@context" />
                     </MudTd>
                 </RowTemplate>
                 <PagerContent>
-                    <MudTablePager RowsPerPageString=@L["Rows per page"] />
+                    <MudTablePager RowsPerPageString="@L["Rows per page"]"
+                        PageSizeOptions="new int[] { 10, 25, 50, 100 }" />
                 </PagerContent>
             </MudTable>
         }
     </MudCardContent>
 </MudCard>
 
+@implements IDisposable
 @code {
-    [Parameter]
-    public EventCallback OnDeleteTrainingCompleted { get; set; }
-    [Parameter]
-    public GetTrainingsResponseDto Trainings
-    {
-        get
-        {
-            return _trainings;
-        }
-        set
-        {
-            _trainings = value;
-            if (_trainings != null)
-            {
-                RefreshAllTrainings(null, null);
-                _timer = new Timer()
-                    {
-                        AutoReset = true,
-                        Enabled = true,
-                        Interval = 5000
-                    };
-                _timer.Elapsed += RefreshAllTrainings;
-                StateHasChanged();
-            }
-        }
-    }
-    private GetTrainingsResponseDto _trainings;
     private string searchString = "";
     private Timer _timer;
+    private MudTable<TrainingMetadataDto> table = new MudTable<TrainingMetadataDto>();
+    private bool isLoading = true;
+    private bool isDisposed;
+    private CancellationTokenSource _cts = new();
+    private SemaphoreSlim _refreshSemaphore = new(1, 1);
 
-    private bool FilterFunc(TrainingDto element)
+    protected override async Task OnInitializedAsync()
     {
-        if (string.IsNullOrWhiteSpace(searchString))
-            return true;
-        if (element.Status.Contains(searchString, StringComparison.OrdinalIgnoreCase))
-            return true;
-        if (element.Configuration.Task.Properties["skos:prefLabel"].Contains(searchString, StringComparison.OrdinalIgnoreCase))
-            return true;
-        if (element.DatasetName.Contains(searchString, StringComparison.OrdinalIgnoreCase))
-            return true;
-        return false;
+        StartRefreshTimer();
+        await LoadInitialData();
     }
-    public void Dispose()
+
+    private async Task LoadInitialData()
+    {
+        try
+        {
+            isLoading = true;
+            StateHasChanged();
+            await table.ReloadServerData();
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private void StartRefreshTimer()
     {
         DisposeTimer();
+        _timer = new Timer(5000); // 5 second interval
+        _timer.Elapsed += CheckAndRefreshData;
+        _timer.Start();
     }
 
-    SemaphoreSlim timerSemaphore = new SemaphoreSlim(1);
-    private async void RefreshAllTrainings(object sender, ElapsedEventArgs e)
+    private async void CheckAndRefreshData(object sender, ElapsedEventArgs e)
     {
-        await InvokeAsync(async () =>
+        if (isDisposed) return;
+
+        // Prevent multiple simultaneous refreshes
+        if (!await _refreshSemaphore.WaitAsync(0))
+            return;
+
+        try
         {
-            try
+            await InvokeAsync(async () =>
             {
-                var gotLock = timerSemaphore.Wait(0);
-                if (!gotLock)
-                {
-                    return;
-                }
-                if (_trainings.Trainings.Where(x => x.Status == "busy").ToList().Count == 0)
-                {
-                    DisposeTimer();
-                    return;
-                }
+                if (isDisposed) return;
 
-                for (int i = 0; i < _trainings.Trainings.Count; i++)
+                var data = table.FilteredItems;
+                if (data != null && data.Any(x => x.Status == "busy"))
                 {
-                    if (_trainings.Trainings[i].Status == "busy")
-                    {
-                        ApiResponseDto apiResponse = await apiClient.GetTraining(new GetTrainingRequestDto
-                            {
-                                TrainingId =
-                _trainings.Trainings[i].Id
-                            });
-
-                        if (apiResponse.IsSuccessStatusCode)
-                        {
-                            _trainings.Trainings[i] =
-                Newtonsoft.Json.JsonConvert.DeserializeObject<GetTrainingResponseDto>(apiResponse.Result.ToString()).Training;
-                            StateHasChanged();
-                        }
-                        //Training does not exist anymore
-                        else if (apiResponse.StatusCode == 404)
-                        {
-                            _trainings.Trainings.RemoveAt(i);
-                            DisposeTimer();
-                            return;
-                        }
-                        else
-                        {
-                            viewNotifier.Show(apiResponse.Message + " : " + apiResponse.StatusCode, ViewNotifierType.Error, L["Operation Failed"]);
-                        }
-                    }
+                    await table.ReloadServerData();
                 }
-            }
-            catch (Exception ex)
+            });
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            if (!isDisposed)
             {
                 viewNotifier.Show(ex.GetBaseException().Message, ViewNotifierType.Error, L["Operation Failed"]);
-                _timer.Elapsed -= RefreshAllTrainings;
             }
-        });
+        }
+        finally
+        {
+            _refreshSemaphore.Release();
+        }
     }
 
-    public void DisposeTimer()
+    private void DisposeTimer()
     {
         if (_timer != null)
         {
-            _timer.Elapsed -= RefreshAllTrainings;
-            _timer?.Dispose();
+            _timer.Stop();
+            _timer.Elapsed -= CheckAndRefreshData;
+            _timer.Dispose();
             _timer = null;
         }
+    }
+
+    public void Dispose()
+    {
+        isDisposed = true;
+        DisposeTimer();
+        _cts.Cancel();
+        _cts.Dispose();
+        _refreshSemaphore.Dispose();
+    }
+
+    private async Task<TableData<TrainingMetadataDto>> ServerReload(TableState state)
+    {
+        try
+        {
+            var apiResponse = await apiClient.GetTrainingsMetadata(new GetTrainingsMetadataRequestDto
+            {
+                Pagination = true,
+                PageNumber = state.Page + 1,
+                PageSize = state.PageSize,
+                SearchString = searchString,
+                SortLabel = state.SortLabel,
+                SortDirection = state.SortDirection == SortDirection.None ? string.Empty : state.SortDirection.ToString()
+            }).WaitAsync(_cts.Token);
+
+            if (!apiResponse.IsSuccessStatusCode)
+            {
+                viewNotifier.Show($"{apiResponse.Message} : {apiResponse.StatusCode}", ViewNotifierType.Error, L["Operation Failed"]);
+                return new TableData<TrainingMetadataDto>();
+            }
+
+            var data = Newtonsoft.Json.JsonConvert.DeserializeObject<GetTrainingsResponseDto>(apiResponse.Result.ToString());
+            StartRefreshTimer();
+            return new TableData<TrainingMetadataDto>
+            {
+                TotalItems = data.PaginationMetadata.TotalItems,
+                Items = data.Trainings
+            };
+        }
+        catch (OperationCanceledException)
+        {
+            return new TableData<TrainingMetadataDto>();
+        }
+    }
+
+    private void OnSearch(string text)
+    {
+        searchString = text;
+        table.ReloadServerData();
     }
 }

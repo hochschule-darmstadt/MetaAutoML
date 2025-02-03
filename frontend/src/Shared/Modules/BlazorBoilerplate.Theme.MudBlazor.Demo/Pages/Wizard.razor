@@ -15,7 +15,9 @@
 
 <MudStack AlignItems="MudBlazor.AlignItems.Center" Row="true" Class="mb-2" style="padding-top:50px">
     <MudIcon Size="MudBlazor.Size.Large" Icon="@Icons.Filled.ModelTraining" />
-    <LabelTooltip FontSize="TextStyle.H4" Label=@L["Train"] Text="ML training is the process of condensing implicit information in a dataset into a generated ML model. This is the first step of the training wizard. Here you can modify pre-configured datatypes of columns in tabular datasets. You can also assign roles, in particular whether a column is an ID (and hence be ignored for training) or is the training target." Position="Radzen.TooltipPosition.Bottom" URL="/help#trainconfiguration" ></LabelTooltip>
+    <LabelTooltip FontSize="TextStyle.H4" Label=@L["Train"]
+        Text="ML training is the process of condensing implicit information in a dataset into a generated ML model. This is the first step of the training wizard. Here you can modify pre-configured datatypes of columns in tabular datasets. You can also assign roles, in particular whether a column is an ID (and hence be ignored for training) or is the training target."
+        Position="Radzen.TooltipPosition.Bottom" URL="/help#trainconfiguration"></LabelTooltip>
 
 </MudStack>
 
@@ -31,7 +33,8 @@ else
         case ":text":
         case ":tabular":
         case ":time_series_longitudinal":
-            <MuddyWizard WizardFinished="@OnWizardFinished" DisplaySaveSchemaCheckbox="true" @bind-SaveSchema="_automlRequest.SaveSchema">
+            <MuddyWizard WizardFinished="@OnWizardFinished" DisplaySaveSchemaCheckbox="true"
+                @bind-SaveSchema="_automlRequest.SaveSchema">
                 <MuddyWizardPanel Title="@L["Dataset preparation"]">
                     <PrepareTabularDataset Dataset="@_dataset" @bind-StartAutoMlRequest="@_automlRequest" />
                 </MuddyWizardPanel>
@@ -88,9 +91,10 @@ else
         try
         {
             GetDatasetRequestDto datasetRequest = new GetDatasetRequestDto()
-            {
-                DatasetId = Id
-            };
+                {
+                    DatasetId = Id,
+                    Short = false
+                };
             ApiResponseDto apiResponse = await apiClient.GetDataset(datasetRequest);
 
             if (apiResponse.IsSuccessStatusCode)
@@ -181,22 +185,28 @@ else
                 viewNotifier.Show(L["No task selected"], ViewNotifierType.Error, L["Operation Failed"]);
                 return;
             }
-            if (((_dataset.Dataset.Type.ID == ":tabular") || (_dataset.Dataset.Type.ID == ":test") || (_dataset.Dataset.Type.ID == ":time_series") || (_dataset.Dataset.Type.ID == ":time_series_longitudinal")) && _automlRequest.Configuration.Task != ":tabular_clustering" && !IsTargetSet())
+            if (((_dataset.Dataset.Type.ID == ":tabular") || (_dataset.Dataset.Type.ID == ":test") || (_dataset.Dataset.Type.ID ==
+            ":time_series") || (_dataset.Dataset.Type.ID == ":time_series_longitudinal")) && _automlRequest.Configuration.Task !=
+            ":tabular_clustering" && !IsTargetSet())
             {
                 viewNotifier.Show(L["No target selected"], ViewNotifierType.Error, L["Operation Failed"]);
                 return;
             }
-            if (((_dataset.Dataset.Type.ID == ":tabular") || (_dataset.Dataset.Type.ID == ":test") || (_dataset.Dataset.Type.ID == ":time_series") || (_dataset.Dataset.Type.ID == ":time_series_longitudinal")) && _automlRequest.Configuration.Task != ":tabular_clustering" && !IsOnlyOneTargetSet())
+            if (((_dataset.Dataset.Type.ID == ":tabular") || (_dataset.Dataset.Type.ID == ":test") || (_dataset.Dataset.Type.ID ==
+            ":time_series") || (_dataset.Dataset.Type.ID == ":time_series_longitudinal")) && _automlRequest.Configuration.Task !=
+            ":tabular_clustering" && !IsOnlyOneTargetSet())
             {
                 viewNotifier.Show(L["More than one target selected"], ViewNotifierType.Error, L["Operation Failed"]);
                 return;
             }
-            if ((_automlRequest.Configuration.Task == ":time_series_forecasting") && (_dataset.Dataset.Type.ID == ":time_series") && !IsIndexSet())
+            if ((_automlRequest.Configuration.Task == ":time_series_forecasting") && (_dataset.Dataset.Type.ID == ":time_series") &&
+            !IsIndexSet())
             {
                 viewNotifier.Show(L["No index selected"], ViewNotifierType.Error, L["Operation Failed"]);
                 return;
             }
-            if ((_automlRequest.Configuration.Task == ":time_series_forecasting") && (_dataset.Dataset.Type.ID == ":time_series") && !IsDatetimeIndexSet())
+            if ((_automlRequest.Configuration.Task == ":time_series_forecasting") && (_dataset.Dataset.Type.ID == ":time_series") &&
+            !IsDatetimeIndexSet())
             {
                 viewNotifier.Show(L["No datetime index selected"], ViewNotifierType.Error, L["Operation Failed"]);
                 return;
@@ -206,10 +216,12 @@ else
 
             if (apiResponse.IsSuccessStatusCode)
             {
-                automlResponse = Newtonsoft.Json.JsonConvert.DeserializeObject<CreateTrainingResponseDto>(apiResponse.Result.ToString());
+                automlResponse =
+                Newtonsoft.Json.JsonConvert.DeserializeObject<CreateTrainingResponseDto>(apiResponse.Result.ToString());
                 if (tourActivated)
                 {
-                    TourService.navigateToNextPage("ninthStep", NavManager.ToAbsoluteUri("/trainings/" + automlResponse.TrainingIdentifier).AbsoluteUri);
+                    TourService.navigateToNextPage("ninthStep", NavManager.ToAbsoluteUri("/trainings/" +
+                    automlResponse.TrainingIdentifier).AbsoluteUri);
                 }
                 else
                 {
