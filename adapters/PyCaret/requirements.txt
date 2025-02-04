@@ -13,3 +13,4 @@ streamlit==1.36.0 # Cluster Dashborad
 #pyyaml==5.4.1
 #Use the following line to install tricky requirements
 #pip install "cython<3.0.0" && pip install --no-build-isolation pyyaml==5.4.1
+plotly==5.22.0

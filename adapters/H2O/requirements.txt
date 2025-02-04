@@ -15,6 +15,7 @@ Pillow
 rdflib==6.2.0
 explainerdashboard==0.4.7
 numpy==1.26.4
+plotly==5.22.0
 
 # Needed for Newer Verisons of Python :
 # urllib3

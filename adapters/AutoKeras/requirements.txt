@@ -13,3 +13,4 @@ regex
 explainerdashboard==0.4.7
 numpy==1.26.4
 keras-nlp==0.12.1
+plotly==5.22.0
