@@ -1,8 +1,30 @@
-The MIT License (MIT)
-Copyright © 2022 Hochschule Darmstadt - University of Applied Sciences
+1. General Licensing Terms
+The software (Name of software) of the University of Applied Sciences Darmstadt, h_da is released under the MIT License. Additionally, the use of the software is permitted under the terms of these additional license terms, provided that the following usage restrictions are met.
 
+2. Scope of Use
+This software is provided as an open-source prototype and is intended solely for testing and evaluation purposes. It is not suitable for productive use.
+
+3. Prohibited Uses - Restrictions
+The use of the software is prohibited for:
+a) AI or other Systems Performing Medical or Physical Procedures on Humans: The software may not be integrated into AI-driven systems that perform medical procedures, surgeries, or any other physical operations on humans, where the failure of the AI could result in harm, injury, or loss of life of a person.
+b) Military Applications: The software may not be used for military purposes or the development of weapon systems.
+c) Surveillance Purposes: The software may not be used for mass surveillance, illegal data monitoring, or unauthorized data collection.
+d) Human Rights Violations: The software may not be used by governments, organizations, or individuals that are known to be involved in human rights violations.
+e) Discrimination and Oppression: The use of the software to support discrimination, oppression, or the spread of hate is prohibited.
+f) Harmful or Fraudulent Activities: The software may not be used for fraudulent, illegal, or harmful activities, including cybercrime.
+
+4. Amendments to the Usage Restrictions
+Licensor reserves the right to update these provisions as necessary. Any changes will be published in the official documentation of the software.
+
+5. Enforcement of Restrictions
+Licensor reserves the right to take action against violations of these restrictions where legally enforceable. Users who violate these provisions automatically forfeit their licensing rights under the terms of the MIT.
+
+6. Disclaimer of Liability
+The software is provided "as is," without any warranty for a specific use other than its original use. Licensor assumes no liability for any damages resulting from prohibited usage.
+
+MIT License
+https://opensource.org/license/mit
+Copyright 2025, University of Applied Sciences, Darmstadt, Germany
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
 THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.

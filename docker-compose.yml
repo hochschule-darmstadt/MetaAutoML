@@ -74,6 +74,7 @@ services:
       - training-tpot:/app/app-data/training/tpot
       - training-gama:/app/app-data/training/gama
       - training-lama:/app/app-data/training/lama
+      - training-h2o:/app/app-data/training/h2o
 
   mongo:
     image: mongo
