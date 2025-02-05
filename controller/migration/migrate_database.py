@@ -13,13 +13,13 @@ from pymongo import ASCENDING, DESCENDING
 # Configuration
 
 # MongoDB connection string
-SERVER_URL = "mongodb://root:example@localhost/"
+SERVER_URL = "mongodb://localhost"
 # User ID (used as a database name)
-USER_ID = "080a6480-bf52-4c30-9224-3f2b882fd5bb"
+USER_ID = "744e63b1-56f6-4fa8-bae4-be31ff8ee100"
 # PROD or TEST mode (PROD will apply changes to the original database, TEST apply changes to the backup database)
-MODE = "TEST" # PROD or TEST
+MODE = "PROD" # PROD or TEST
 
-mongo = MongoClient(SERVER_URL, 27017, serverSelectionTimeoutMS=30000)
+mongo = MongoClient(SERVER_URL, 5050, serverSelectionTimeoutMS=30000)
 
 mongo.list_databases()
 

@@ -23,8 +23,8 @@ RUN pip3 install --upgrade pip
 #RUN ollama serve & sleep 2 && ollama pull llama2:7b-chat && pkill -f ollama
 
 # alternative possible LLM Models:
-#RUN ollama serve & sleep 2 && ollama pull gemma2:2b && pkill -f ollama
-RUN ollama serve & sleep 2 && ollama pull mistral:7b-instruct && pkill -f ollama
+RUN ollama serve & sleep 2 && ollama pull gemma2:2b && pkill -f ollama
+#RUN ollama serve & sleep 2 && ollama pull mistral:7b-instruct && pkill -f ollama
 
 # Set the working directory
 WORKDIR /app
