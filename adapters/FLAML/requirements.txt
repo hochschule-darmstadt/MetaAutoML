@@ -13,7 +13,7 @@ betterproto @ git+https://github.com/danielgtaylor/python-betterproto.git@496eba
 dependency-injector==4.40.0
 codecarbon==2.1.4
 scikit-learn
-explainerdashboard==0.4.7
+explainerdashboard==0.5.1
 rdflib==6.2.0
 xgboost==1.6.2
 numpy==1.26.4

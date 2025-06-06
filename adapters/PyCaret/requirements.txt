@@ -6,7 +6,7 @@ dependency-injector==4.40.0
 codecarbon==2.3.2
 pycaret[full]==3.3.1
 scikit-learn
-explainerdashboard==0.4.7
+explainerdashboard==0.5.1
 rdflib==6.2.0
 streamlit==1.36.0 # Cluster Dashborad
 #cython<3.0.0

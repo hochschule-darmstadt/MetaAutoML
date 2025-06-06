@@ -5,6 +5,8 @@ EXPOSE 6000-6099
 RUN apt-get update && apt-get install -y libgomp1 \
     && apt-get install -y git
 
+RUN apt-get install -y build-essential gcc
+
 COPY ./adapters/FLAML/requirements.txt .
 # Install dependencies
 RUN pip install -r requirements.txt

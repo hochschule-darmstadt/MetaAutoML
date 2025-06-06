@@ -5,6 +5,9 @@ RUN apt-get update \
     && apt-get install -y git \
     && apt-get install libgomp1
 
+RUN apt-get install -y build-essential gcc
+
+
 COPY ./adapters/LAMA/requirements.txt .
 # Install dependencies
 RUN pip install -r requirements.txt

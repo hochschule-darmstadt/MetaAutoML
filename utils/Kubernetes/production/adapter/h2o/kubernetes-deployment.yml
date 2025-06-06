@@ -36,7 +36,7 @@ spec:
         - name: EXPLAINER_DASHBOARD_PORT_END
           value: "4010"
         - name: ADAPTER_NAME
-          value: "h2o_automl"
+          value: "h2o"
         - name: JOB_FILE_NAME
           value: "h2o_automl-job.json"
         - name: GRPC_SERVER_ADDRESS

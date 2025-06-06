@@ -6,6 +6,9 @@ RUN apt update && \
     apt install -y build-essential \
     && apt-get install -y git
 
+
+RUN apt-get install -y build-essential gcc
+
 RUN apt install -y font-manager
 
 COPY ./adapters/MLJAR/requirements.txt .

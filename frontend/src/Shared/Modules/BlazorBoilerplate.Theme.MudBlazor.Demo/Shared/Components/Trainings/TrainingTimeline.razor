@@ -119,7 +119,8 @@
         try
         {
             var events = Training.Training.RuntimeProfile.Events;
-            var phases = new List<string>() { "Started", "Pre-Processing", "Pre-Training", "Training", "Evaluation", "Stopped" };
+            var phases_display = new List<string>() { "Started", "Pre-Processing", "Pre-Training", "Training", "Evaluation", "Stopped" };
+            var phases = new List<string>() { "started", "preprocessing", "pretraining", "training", "evaluation", "stopped" };
             _timeline = new List<TimelineItem>();
             for (int i = 0; i < phases.Count; i++)
             {
@@ -134,7 +135,7 @@
                 TrainingEventDto phaseStartedEvent = (phaseStartedEventIdx != -1 ? events[phaseStartedEventIdx] : null);
                 var timelineItem = new TimelineItem
                 {
-                    Title = L[phase],
+                        Title = L[phases_display[i]],
                     Type = TimelineItemType.Major,
                     Status = (phaseCompletedEventIdx != -1 ? TimelineItemStatus.Success : (phaseStartedEventIdx != -1 ? TimelineItemStatus.Active : TimelineItemStatus.Pending)),
                     Timestamp = (phaseStartedEventIdx != -1 ? phaseStartedEvent.Timestamp : null)

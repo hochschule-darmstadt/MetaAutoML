@@ -51,7 +51,7 @@
                 "MONGO_DB_DOCKER_DEBUG": "YES",
                 "MONGO_CLUSTER": "NO",
                 "KUBERNETES_CLUSTER": "NO",
-                "DEFAULT_GATEWAY_IP": "172.21.16.1",
+                "DEFAULT_GATEWAY_IP": "172.17.208.1",
                 // "DEFAULT_GATEWAY_IP": "192.168.32.1",
                 //"DEFAULT_GATEWAY_IP": "172.20.32.1",
                 "USE_DEV_CONFIG": "YES",

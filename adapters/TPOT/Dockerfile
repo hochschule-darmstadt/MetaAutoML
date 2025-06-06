@@ -4,6 +4,8 @@ EXPOSE 50064
 RUN apt-get update \
     && apt-get install -y git
 
+RUN apt-get install -y build-essential gcc
+
 COPY ./adapters/TPOT/requirements.txt .
 # Install dependencies
 RUN pip install -r requirements.txt

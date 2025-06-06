@@ -4,6 +4,8 @@ EXPOSE 50056
 RUN apt-get update && apt-get install -y libgomp1 \
     && apt-get install -y git && apt-get install -y gcc
 
+RUN apt-get install -y build-essential gcc
+
 COPY ./adapters/PyCaret/requirements.txt .
 # Install dependencies
 RUN pip install "cython<3.0.0" && pip install --no-build-isolation pyyaml==5.4.1

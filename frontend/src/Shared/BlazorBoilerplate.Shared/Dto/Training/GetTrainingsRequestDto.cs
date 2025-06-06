@@ -12,8 +12,8 @@ namespace BlazorBoilerplate.Shared.Dto.Training
         public bool Pagination { get; set; } = false;
         public int PageNumber { get; set; } = 1; //Pagination page always 1 based
         public int PageSize { get; set; } = 10;
-        public string SearchString { get; set; } = "test";
-        public string SortLabel { get; set; } = "test";
-        public string SortDirection { get; set; } = "test";
+        public string SearchString { get; set; } = "";
+        public string SortLabel { get; set; } = "";
+        public string SortDirection { get; set; } = "";
     }
 }

@@ -10,6 +10,8 @@ RUN apt-get update && apt-get install -y \
     gcc \
     && apt-get install -y git
 
+RUN apt-get install -y build-essential gcc
+
 RUN python3 -m pip install --upgrade "mxnet<2.0.0"
 
 COPY ./adapters/AutoGluon/requirements.txt .

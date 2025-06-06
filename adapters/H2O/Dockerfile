@@ -6,6 +6,8 @@ RUN apt-get update \
     && apt-get install -y git \
     && apt-get install -y openjdk-11-jre
 
+RUN apt-get install -y build-essential gcc
+
 COPY ./adapters/H2O/requirements.txt .
 # Install dependencies
 RUN pip install -r requirements.txt
