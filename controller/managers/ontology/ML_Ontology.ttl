@@ -1,5 +1,5 @@
 ### Ontology file generated from ML_Ontology.xlsx.
-### 2024-07-10 18:02:19.760379
+### 2025-10-16 13:46:38.658445
 
 
 # PREFIXES
@@ -19,25 +19,32 @@
     rdfs:comment "Broad category of ML, depending on the nature of the feedback available to the learning system; e.g., feedback by supervisor (supervised learning), without feedback (unsupervised learning), feedback by software application (reinforcement learning)." .
 :ML_task a rdfs:Class ;
     skos:prefLabel "ML task" ;
-    rdfs:comment "Problem that is to be solved by ML, e.g., assign categories to data records (classification), predict numeric values (regression), group data records (clustering), etc." .
+    rdfs:comment "Problem that is to be solved by ML, e.g., assign categories to data records (classification), predict numeric values (regression), group data records (clustering), etc." ;
+    rdfs:seeAlso <https://www.w3.org/ns/mls#Task> .
 :ML_approach a rdfs:Class ;
     skos:prefLabel "ML approach" ;
-    rdfs:comment "A set of technologies suitable for solving ML tasks, e.g., artificial neural networks (including gradient descent, backpropagation, etc.)" .
+    rdfs:comment "A set of technologies suitable for solving ML tasks, e.g., artificial neural networks (including gradient descent, backpropagation, etc.)" ;
+    rdfs:seeAlso <https://www.w3.org/ns/mls#Algorithm> .
 :Preprocessing_approach a rdfs:Class ;
     skos:prefLabel "Preprocessing approach" ;
-    rdfs:comment "A set of technologies suited for preprossing ML datasets" .
+    rdfs:comment "A set of technologies suited for preprossing ML datasets" ;
+    rdfs:seeAlso <https://www.w3.org/ns/mls#Algorithm> .
 :Metric a rdfs:Class ;
     skos:prefLabel "Metric" ;
-    rdfs:comment "Metric for assessing the prediction quality of a ML system based on a dataset, e.g., for classification tasks measures on values in a confusion matrix like accuracy, F1 score etc." .
+    rdfs:comment "Metric for assessing the prediction quality of a ML system based on a dataset, e.g., for classification tasks measures on values in a confusion matrix like accuracy, F1 score etc." ;
+    rdfs:seeAlso <https://www.w3.org/ns/mls#EvaluationMeasure> .
 :ML_library a rdfs:Class ;
     skos:prefLabel "ML library" ;
-    rdfs:comment "Examples: scikit-learn, Tensorflow, Keras" .
+    rdfs:comment "Examples: scikit-learn, Tensorflow, Keras" ;
+    rdfs:seeAlso <https://www.w3.org/ns/mls#Implementation> .
 :AutoML_solution a rdfs:Class ;
     skos:prefLabel "AutoML solution" ;
-    rdfs:comment "Examples: Autosklearn for Scikit-learn, Auto-Keras for Keras, and Google AutoML for Tensorﬂow" .
+    rdfs:comment "Examples: Autosklearn for Scikit-learn, Auto-Keras for Keras, and Google AutoML for Tensorﬂow" ;
+    rdfs:seeAlso <https://www.w3.org/ns/mls#Implementation> .
 :Configuration_item a rdfs:Class ;
     skos:prefLabel "Configuration item" ;
-    rdfs:comment "Example configuration items for AutoML solutions: metric, time limit, memory limit etc." .
+    rdfs:comment "Example configuration items for AutoML solutions: metric, time limit, memory limit etc." ;
+    rdfs:seeAlso <https://www.w3.org/ns/mls#HyperParameter> .
 :Enum a rdfs:Class ;
     skos:prefLabel "Enum" ;
     rdfs:comment "Enumeration values for different categories" .
@@ -165,7 +172,8 @@
 :classification a :ML_task ;
     skos:prefLabel "classification" ;
     :belongs_to :supervised_learning ;
-    rdfs:comment "Prediction of discrete categorical values (classes)" .
+    rdfs:comment "Prediction of discrete categorical values (classes)" ;
+    rdfs:seeAlso <https://www.wikidata.org/entity/Q13582682> .
 :clustering a :ML_task ;
     skos:prefLabel "clustering" ;
     :belongs_to :unsupervised_learning ;
@@ -2366,7 +2374,7 @@
     :category :parameter ;
     skos:broader :use_approach ;
     :has_datatype :list ;
-    :parameter_value :adaboost , :decision_tree , :extra_tree , :gradient_boosting_tree , :k_nearest_neighbor , :linear_svm , :multilayer_perceptron , :random_forest , :gaussian_naives_bayes ;
+    :parameter_value  ;
     rdfs:comment "Selecting ML approaches to be used for AutoML" ;
     rdfs:seeAlso <https://automl.github.io/auto-sklearn/master/api.html#classification> .
 :use_approach_autosklearn_tabular_regression a :Configuration_item ;
@@ -3078,7 +3086,7 @@
     :category :parameter ;
     skos:broader :include_approach ;
     :has_datatype :list ;
-    :parameter_value :affinity_propagation , :balanced_iterative_reducing_and_clustering_using_hierarchies , :k_means , :k_modes , :mean_shift_clustering ;
+    :parameter_value :affinity_propagation , :balanced_iterative_reducing_and_clustering_using_hierarchies , :k_means , :k_modes , :mean_shift_clustering ,  ;
     rdfs:seeAlso <https://pycaret.readthedocs.io/en/latest/api/clustering.html#pycaret.clustering.create_model> .
 :epochs a :Configuration_item ;
     skos:prefLabel "epochs" ;
@@ -3867,8 +3875,8 @@
 
 :query_get_all_dataset_types a sp:Select ;
     skos:prefLabel "Query get all dataset types" ;
-    sp:text '''PREFIX : <http://h-da.de/ml-ontology/>
-SELECT ?t
+    sp:text '''PREFIX : <http://h-da.de/ml-ontology/> 
+SELECT ?t 
 WHERE {
         ?t a :Enum;
            :category :dataset_type .
@@ -3876,7 +3884,7 @@ WHERE {
     rdfs:comment "SPARQL query to get all dataset types" .
 :query_get_all_ml_tasks a sp:Select ;
     skos:prefLabel "Query get all ML tasks" ;
-    sp:text '''PREFIX : <http://h-da.de/ml-ontology/>
+    sp:text '''PREFIX : <http://h-da.de/ml-ontology/> 
 SELECT ?t ?a
 WHERE {
         ?t a :ML_task;
@@ -3885,7 +3893,7 @@ WHERE {
     rdfs:comment "SPARQL query to get all ML tasks an the ML areas they belong to" .
 :query_get_all_ml_approaches a sp:Select ;
     skos:prefLabel "Query get all ML approaches" ;
-    sp:text '''PREFIX : <http://h-da.de/ml-ontology/>
+    sp:text '''PREFIX : <http://h-da.de/ml-ontology/> 
 SELECT *
 WHERE {
         ?a a :ML_approach;
@@ -3894,7 +3902,7 @@ WHERE {
     rdfs:comment "SPARQL query to get all ML approaches and the ML tasks they can be used for" .
 :query_get_all_preprocessing_approaches a sp:Select ;
     skos:prefLabel "Query get all preprocessing approaches" ;
-    sp:text '''PREFIX : <http://h-da.de/ml-ontology/>
+    sp:text '''PREFIX : <http://h-da.de/ml-ontology/> 
 SELECT *
 WHERE {
         ?p a :Preprocessing_approach.
@@ -3903,7 +3911,7 @@ WHERE {
     rdfs:comment "SPARQL query to get all preprocessing approaches and the ML tasks they can be used for" .
 :query_get_all_metrics a sp:Select ;
     skos:prefLabel "Query get all metrics" ;
-    sp:text '''PREFIX : <http://h-da.de/ml-ontology/>
+    sp:text '''PREFIX : <http://h-da.de/ml-ontology/> 
 SELECT *
 WHERE {
         ?m a :Metric;
@@ -3912,7 +3920,7 @@ WHERE {
     rdfs:comment "SPARQL query to get all performance metrics the the ML tasks they can be used for" .
 :query_get_all_ml_libraries a sp:Select ;
     skos:prefLabel "Query get all ML libraries" ;
-    sp:text '''PREFIX : <http://h-da.de/ml-ontology/>
+    sp:text '''PREFIX : <http://h-da.de/ml-ontology/> 
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 SELECT *
 WHERE {
@@ -3922,7 +3930,7 @@ WHERE {
     rdfs:comment "SPARQL query to get all ML libraries with their names" .
 :query_get_all_automl_solutions a sp:Select ;
     skos:prefLabel "Query get all AutoML solutions" ;
-    sp:text '''PREFIX : <http://h-da.de/ml-ontology/>
+    sp:text '''PREFIX : <http://h-da.de/ml-ontology/> 
 SELECT *
 WHERE {
         ?a a :AutoML_solution ;
@@ -3931,7 +3939,7 @@ WHERE {
     rdfs:comment "SPARQL query to get AutoML solutions and the ML libraries they are used for" .
 :query_get_all_predefined_sparql_queries a sp:Select ;
     skos:prefLabel "Query get all predefined SPARQL queries" ;
-    sp:text '''PREFIX : <http://h-da.de/ml-ontology/>
+    sp:text '''PREFIX : <http://h-da.de/ml-ontology/> 
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 PREFIX sp: <http://spinrdf.org/sp#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
@@ -3944,7 +3952,7 @@ WHERE {
     rdfs:comment "SPARQL query to get all predefined SPARQL queries" .
 :query_get_all_predefined_sparql_insert_inference_rules a sp:Select ;
     skos:prefLabel "Query get all predefined SPARQL insert inference rules" ;
-    sp:text '''PREFIX : <http://h-da.de/ml-ontology/>
+    sp:text '''PREFIX : <http://h-da.de/ml-ontology/> 
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 PREFIX sp: <http://spinrdf.org/sp#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
@@ -3955,19 +3963,51 @@ WHERE {
            rdfs:comment ?c .
 }''' ;
     rdfs:comment "SPARQL query to get all predefined SPARQL insert inference rules" .
+:query_list_all_classes_and_their_number_of_instances a sp:Select ;
+    skos:prefLabel "Query list all classes and their number of instances" ;
+    sp:text '''SELECT ?class (COUNT(?instance) AS ?count)
+WHERE {
+  ?instance a ?class .
+}
+GROUP BY ?class
+ORDER BY DESC(?count)''' ;
+    rdfs:comment "SPARQL query to list all classes and their number of instances" .
+:query_get_all_broader_inherited_properties a sp:Select ;
+    skos:prefLabel "Query get all broader_inherited properties" ;
+    sp:text '''PREFIX : <http://h-da.de/ml-ontology/> 
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
+SELECT ?p
+WHERE  {?p a rdf:Property ;
+           :inheritance :broader_inherited .}''' ;
+    rdfs:comment "SPARQL query to get all broader_inherited properties" .
+:query_list_ml_tasks_in_broader_relationship a sp:Select ;
+    skos:prefLabel "Query list ML_tasks in broader relationship" ;
+    sp:text '''PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX : <http://h-da.de/ml-ontology/> 
+SELECT ?t1 ?t2
+WHERE  {?t1 a :ML_task ;
+            skos:broader ?t2 .}''' ;
+    rdfs:comment "SPARQL query to list all :ML_tasks which are in a skos:broader relationship" .
+:query_list_ml_tasks_that_belong_to__ml_area a sp:Select ;
+    skos:prefLabel "Query list ML_tasks that belong_to  ML_area" ;
+    sp:text '''PREFIX : <http://h-da.de/ml-ontology/> 
+SELECT ?t ?a
+WHERE  {?t a :ML_task ;
+            :belongs_to ?a .}''' ;
+    rdfs:comment "SPARQL query to list :ML_tasks with the :ML_area they :belong_to" .
 
 
 # spInsertData Inferencing
 
 :inference_rule_broader_inheritance a sp:InsertData ;
     skos:prefLabel "Inference rule broader inheritance" ;
-    sp:text '''PREFIX : <http://h-da.de/ml-ontology/>
-PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
-INSERT {?s ?p ?o .}
+    sp:text '''PREFIX : <http://h-da.de/ml-ontology/> 
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#> 
+INSERT {?s ?p ?o .} 
 WHERE  {?p a rdf:Property ;
                         :inheritance :broader_inherited .
-        ?s skos:broader+ ?b .
+        ?s skos:broader+ ?b . 
         ?b ?p ?o .}''' ;
     rdfs:comment "SPARQL update statement to insert new triples with subjects that are in a (transitive) skos:broader relationship for existing triples with a predicate of inheritance type :broader_inherited" .
 
@@ -3976,8 +4016,8 @@ WHERE  {?p a rdf:Property ;
 
 :check_class_instance a sp:Select ;
     skos:prefLabel "Check class instance" ;
-    sp:text '''PREFIX : <http://h-da.de/ml-ontology/>
-SELECT ?class ?subject ?predicate ?object
+    sp:text '''PREFIX : <http://h-da.de/ml-ontology/> 
+SELECT ?class ?subject ?predicate ?object 
 WHERE {
         ?subject ?predicate ?object .
         OPTIONAL {?subject a ?class .}
@@ -3988,7 +4028,7 @@ WHERE {
     rdfs:comment "All objects should be instances of some class -> ok if query returns nothing; otherwise check ?object of triple in ?class" .
 :check_unique_class a sp:Select ;
     skos:prefLabel "Check unique class" ;
-    sp:text '''PREFIX : <http://h-da.de/ml-ontology/>
+    sp:text '''PREFIX : <http://h-da.de/ml-ontology/> 
 SELECT DISTINCT ?subject ?class1 ?class2
 WHERE {
         ?subject a ?class1 .
@@ -3998,8 +4038,8 @@ WHERE {
     rdfs:comment "No object should be instance of several classes -> ok if query retuns nothing; otherwise check redundant ?class1 and ?class2" .
 :check_predicate_declared a sp:Select ;
     skos:prefLabel "Check predicate declared" ;
-    sp:text '''PREFIX : <http://h-da.de/ml-ontology/>
-PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+    sp:text '''PREFIX : <http://h-da.de/ml-ontology/> 
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
 SELECT DISTINCT ?predicate
 WHERE {
         ?s ?predicate ?o .
@@ -4009,7 +4049,7 @@ WHERE {
     rdfs:comment "Predicates should be declared -> ok if query returns nothing; otherwise check ?predicate" .
 :check_predicates_with_domain_and_range_datatypes a sp:Select ;
     skos:prefLabel "Check predicates with domain and range datatypes" ;
-    sp:text '''PREFIX : <http://h-da.de/ml-ontology/>
+    sp:text '''PREFIX : <http://h-da.de/ml-ontology/> 
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
