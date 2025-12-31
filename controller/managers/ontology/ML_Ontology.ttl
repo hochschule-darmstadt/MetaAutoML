@@ -1,5 +1,5 @@
 ### Ontology file generated from ML_Ontology.xlsx.
-### 2025-10-16 13:46:38.658445
+
 
 
 # PREFIXES
@@ -9,7 +9,7 @@
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
-@prefix sp: <http://spinrdf.org/sp#> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
 
 
 # rdfsClass
@@ -2374,7 +2374,7 @@
     :category :parameter ;
     skos:broader :use_approach ;
     :has_datatype :list ;
-    :parameter_value  ;
+    :parameter_value  :decision_tree , :extra_tree;
     rdfs:comment "Selecting ML approaches to be used for AutoML" ;
     rdfs:seeAlso <https://automl.github.io/auto-sklearn/master/api.html#classification> .
 :use_approach_autosklearn_tabular_regression a :Configuration_item ;
@@ -3086,7 +3086,7 @@
     :category :parameter ;
     skos:broader :include_approach ;
     :has_datatype :list ;
-    :parameter_value :affinity_propagation , :balanced_iterative_reducing_and_clustering_using_hierarchies , :k_means , :k_modes , :mean_shift_clustering ,  ;
+    :parameter_value :affinity_propagation , :balanced_iterative_reducing_and_clustering_using_hierarchies , :k_means , :k_modes , :mean_shift_clustering ;
     rdfs:seeAlso <https://pycaret.readthedocs.io/en/latest/api/clustering.html#pycaret.clustering.create_model> .
 :epochs a :Configuration_item ;
     skos:prefLabel "epochs" ;
@@ -3871,193 +3871,259 @@
     :category :featurizers .
 
 
-# spSelect Queries
+# Sample Queries
 
-:query_get_all_dataset_types a sp:Select ;
+
+:query_get_all_dataset_types a sh:SPARQLExecutable ;
     skos:prefLabel "Query get all dataset types" ;
-    sp:text '''PREFIX : <http://h-da.de/ml-ontology/> 
-SELECT ?t 
-WHERE {
-        ?t a :Enum;
-           :category :dataset_type .
-}''' ;
+    sh:select """
+        PREFIX : <http://h-da.de/ml-ontology/>
+        SELECT ?t
+        WHERE {
+            ?t a :Enum ;
+               :category :dataset_type .
+        }
+    """ ;
     rdfs:comment "SPARQL query to get all dataset types" .
-:query_get_all_ml_tasks a sp:Select ;
+
+:query_get_all_ml_tasks a sh:SPARQLExecutable ;
     skos:prefLabel "Query get all ML tasks" ;
-    sp:text '''PREFIX : <http://h-da.de/ml-ontology/> 
-SELECT ?t ?a
-WHERE {
-        ?t a :ML_task;
-           :belongs_to ?a .
-}''' ;
-    rdfs:comment "SPARQL query to get all ML tasks an the ML areas they belong to" .
-:query_get_all_ml_approaches a sp:Select ;
+    sh:select """
+        PREFIX : <http://h-da.de/ml-ontology/>
+        SELECT ?t ?a
+        WHERE {
+            ?t a :ML_task ;
+               :belongs_to ?a .
+        }
+    """ ;
+    rdfs:comment "SPARQL query to get all ML tasks and the ML areas they belong to" .
+
+:query_get_all_ml_approaches a sh:SPARQLExecutable ;
     skos:prefLabel "Query get all ML approaches" ;
-    sp:text '''PREFIX : <http://h-da.de/ml-ontology/> 
-SELECT *
-WHERE {
-        ?a a :ML_approach;
-           :used_for ?t .
-}''' ;
+    sh:select """
+        PREFIX : <http://h-da.de/ml-ontology/>
+        SELECT *
+        WHERE {
+            ?a a :ML_approach ;
+               :used_for ?t .
+        }
+    """ ;
     rdfs:comment "SPARQL query to get all ML approaches and the ML tasks they can be used for" .
-:query_get_all_preprocessing_approaches a sp:Select ;
+
+:query_get_all_preprocessing_approaches a sh:SPARQLExecutable ;
     skos:prefLabel "Query get all preprocessing approaches" ;
-    sp:text '''PREFIX : <http://h-da.de/ml-ontology/> 
-SELECT *
-WHERE {
-        ?p a :Preprocessing_approach.
-                  OPTIONAL {?p :used_for ?t} .
-}''' ;
+    sh:select """
+        PREFIX : <http://h-da.de/ml-ontology/>
+        SELECT *
+        WHERE {
+            ?p a :Preprocessing_approach .
+            OPTIONAL { ?p :used_for ?t }
+        }
+    """ ;
     rdfs:comment "SPARQL query to get all preprocessing approaches and the ML tasks they can be used for" .
-:query_get_all_metrics a sp:Select ;
+
+:query_get_all_metrics a sh:SPARQLExecutable ;
     skos:prefLabel "Query get all metrics" ;
-    sp:text '''PREFIX : <http://h-da.de/ml-ontology/> 
-SELECT *
-WHERE {
-        ?m a :Metric;
-           :used_for ?t .
-}''' ;
-    rdfs:comment "SPARQL query to get all performance metrics the the ML tasks they can be used for" .
-:query_get_all_ml_libraries a sp:Select ;
+    sh:select """
+        PREFIX : <http://h-da.de/ml-ontology/>
+        SELECT *
+        WHERE {
+            ?m a :Metric ;
+               :used_for ?t .
+        }
+    """ ;
+    rdfs:comment "SPARQL query to get all performance metrics and the ML tasks they can be used for" .
+
+:query_get_all_ml_libraries a sh:SPARQLExecutable ;
     skos:prefLabel "Query get all ML libraries" ;
-    sp:text '''PREFIX : <http://h-da.de/ml-ontology/> 
-PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
-SELECT *
-WHERE {
-        ?m a :ML_library ;
-           skos:prefLabel ?l.
-}''' ;
+    sh:select """
+        PREFIX : <http://h-da.de/ml-ontology/>
+        PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+        SELECT *
+        WHERE {
+            ?m a :ML_library ;
+               skos:prefLabel ?l .
+        }
+    """ ;
     rdfs:comment "SPARQL query to get all ML libraries with their names" .
-:query_get_all_automl_solutions a sp:Select ;
+
+:query_get_all_automl_solutions a sh:SPARQLExecutable ;
     skos:prefLabel "Query get all AutoML solutions" ;
-    sp:text '''PREFIX : <http://h-da.de/ml-ontology/> 
-SELECT *
-WHERE {
-        ?a a :AutoML_solution ;
-           :used_for ?l.
-}''' ;
+    sh:select """
+        PREFIX : <http://h-da.de/ml-ontology/>
+        SELECT *
+        WHERE {
+            ?a a :AutoML_solution ;
+               :used_for ?l .
+        }
+    """ ;
     rdfs:comment "SPARQL query to get AutoML solutions and the ML libraries they are used for" .
-:query_get_all_predefined_sparql_queries a sp:Select ;
+
+:query_get_all_predefined_sparql_queries a sh:SPARQLExecutable ;
     skos:prefLabel "Query get all predefined SPARQL queries" ;
-    sp:text '''PREFIX : <http://h-da.de/ml-ontology/> 
-PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
-PREFIX sp: <http://spinrdf.org/sp#>
-PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-SELECT *
-WHERE {
-        ?q a sp:Select ;
-           sp:text ?t;
-           rdfs:comment ?c .
-}''' ;
+    sh:select """
+        PREFIX : <http://h-da.de/ml-ontology/>
+        PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+        PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+        SELECT *
+        WHERE {
+            ?q a sh:SPARQLExecutable ;
+               sh:select ?t ;
+               rdfs:comment ?c .
+        }
+    """ ;
     rdfs:comment "SPARQL query to get all predefined SPARQL queries" .
-:query_get_all_predefined_sparql_insert_inference_rules a sp:Select ;
+
+:query_get_all_predefined_sparql_insert_inference_rules a sh:SPARQLExecutable ;
     skos:prefLabel "Query get all predefined SPARQL insert inference rules" ;
-    sp:text '''PREFIX : <http://h-da.de/ml-ontology/> 
-PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
-PREFIX sp: <http://spinrdf.org/sp#>
-PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-SELECT *
-WHERE {
-        ?q a sp:InsertData ;
-           sp:text ?t;
-           rdfs:comment ?c .
-}''' ;
+    sh:select """
+        PREFIX : <http://h-da.de/ml-ontology/>
+        PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+        PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+        SELECT *
+        WHERE {
+            ?q a sh:SPARQLRule ;
+               sh:construct ?t ;
+               rdfs:comment ?c .
+        }
+    """ ;
     rdfs:comment "SPARQL query to get all predefined SPARQL insert inference rules" .
-:query_list_all_classes_and_their_number_of_instances a sp:Select ;
+
+:query_list_all_classes_and_their_number_of_instances a sh:SPARQLExecutable ;
     skos:prefLabel "Query list all classes and their number of instances" ;
-    sp:text '''SELECT ?class (COUNT(?instance) AS ?count)
-WHERE {
-  ?instance a ?class .
-}
-GROUP BY ?class
-ORDER BY DESC(?count)''' ;
+    sh:select """
+        SELECT ?class (COUNT(?instance) AS ?count)
+        WHERE {
+          ?instance a ?class .
+        }
+        GROUP BY ?class
+        ORDER BY DESC(?count)
+    """ ;
     rdfs:comment "SPARQL query to list all classes and their number of instances" .
-:query_get_all_broader_inherited_properties a sp:Select ;
+
+:query_get_all_broader_inherited_properties a sh:SPARQLExecutable ;
     skos:prefLabel "Query get all broader_inherited properties" ;
-    sp:text '''PREFIX : <http://h-da.de/ml-ontology/> 
-PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
-SELECT ?p
-WHERE  {?p a rdf:Property ;
-           :inheritance :broader_inherited .}''' ;
+    sh:select """
+        PREFIX : <http://h-da.de/ml-ontology/>
+        PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+        SELECT ?p
+        WHERE {
+            ?p a rdf:Property ;
+               :inheritance :broader_inherited .
+        }
+    """ ;
     rdfs:comment "SPARQL query to get all broader_inherited properties" .
-:query_list_ml_tasks_in_broader_relationship a sp:Select ;
+
+:query_list_ml_tasks_in_broader_relationship a sh:SPARQLExecutable ;
     skos:prefLabel "Query list ML_tasks in broader relationship" ;
-    sp:text '''PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
-PREFIX : <http://h-da.de/ml-ontology/> 
-SELECT ?t1 ?t2
-WHERE  {?t1 a :ML_task ;
-            skos:broader ?t2 .}''' ;
+    sh:select """
+        PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+        PREFIX : <http://h-da.de/ml-ontology/>
+        SELECT ?t1 ?t2
+        WHERE {
+            ?t1 a :ML_task ;
+                skos:broader ?t2 .
+        }
+    """ ;
     rdfs:comment "SPARQL query to list all :ML_tasks which are in a skos:broader relationship" .
-:query_list_ml_tasks_that_belong_to__ml_area a sp:Select ;
-    skos:prefLabel "Query list ML_tasks that belong_to  ML_area" ;
-    sp:text '''PREFIX : <http://h-da.de/ml-ontology/> 
-SELECT ?t ?a
-WHERE  {?t a :ML_task ;
-            :belongs_to ?a .}''' ;
+
+:query_list_ml_tasks_that_belong_to__ml_area a sh:SPARQLExecutable ;
+    skos:prefLabel "Query list ML_tasks that belong_to ML_area" ;
+    sh:select """
+        PREFIX : <http://h-da.de/ml-ontology/>
+        SELECT ?t ?a
+        WHERE {
+            ?t a :ML_task ;
+                :belongs_to ?a .
+        }
+    """ ;
     rdfs:comment "SPARQL query to list :ML_tasks with the :ML_area they :belong_to" .
 
 
-# spInsertData Inferencing
 
-:inference_rule_broader_inheritance a sp:InsertData ;
+# Inferencing
+
+
+
+:inference_rule_broader_inheritance a sh:SPARQLRule ;
     skos:prefLabel "Inference rule broader inheritance" ;
-    sp:text '''PREFIX : <http://h-da.de/ml-ontology/> 
-PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
-PREFIX skos: <http://www.w3.org/2004/02/skos/core#> 
-INSERT {?s ?p ?o .} 
-WHERE  {?p a rdf:Property ;
-                        :inheritance :broader_inherited .
-        ?s skos:broader+ ?b . 
-        ?b ?p ?o .}''' ;
-    rdfs:comment "SPARQL update statement to insert new triples with subjects that are in a (transitive) skos:broader relationship for existing triples with a predicate of inheritance type :broader_inherited" .
+    sh:construct """
+        PREFIX : <http://h-da.de/ml-ontology/>
+        PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+        PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+        CONSTRUCT {
+            ?s ?p ?o .
+        }
+        WHERE {
+            ?p a rdf:Property ;
+               :inheritance :broader_inherited .
+            ?s skos:broader+ ?b .
+            ?b ?p ?o .
+        }
+    """ ;
+    rdfs:comment "SPARQL rule to infer new triples with subjects that are in a (transitive) skos:broader relationship for existing triples with a predicate of inheritance type :broader_inherited" .
 
 
-# spSelect Quality Checks
+#  Quality Checks
 
-:check_class_instance a sp:Select ;
+
+
+
+:check_class_instance a sh:SPARQLConstraint ;
     skos:prefLabel "Check class instance" ;
-    sp:text '''PREFIX : <http://h-da.de/ml-ontology/> 
-SELECT ?class ?subject ?predicate ?object 
-WHERE {
-        ?subject ?predicate ?object .
-        OPTIONAL {?subject a ?class .}
-        FILTER isIRI(?object)
-        FILTER(STRSTARTS(str(?object), str(:)))
-        FILTER NOT EXISTS {?object a ?c}
-}''' ;
+    sh:select """
+        PREFIX : <http://h-da.de/ml-ontology/>
+        SELECT ?class ?subject ?predicate ?object
+        WHERE {
+            ?subject ?predicate ?object .
+            OPTIONAL { ?subject a ?class . }
+            FILTER isIRI(?object)
+            FILTER(STRSTARTS(str(?object), str(:)))
+            FILTER NOT EXISTS { ?object a ?c }
+        }
+    """ ;
     rdfs:comment "All objects should be instances of some class -> ok if query returns nothing; otherwise check ?object of triple in ?class" .
-:check_unique_class a sp:Select ;
+
+:check_unique_class a sh:SPARQLConstraint ;
     skos:prefLabel "Check unique class" ;
-    sp:text '''PREFIX : <http://h-da.de/ml-ontology/> 
-SELECT DISTINCT ?subject ?class1 ?class2
-WHERE {
-        ?subject a ?class1 .
-        ?subject a ?class2 .
-        FILTER(?class1 != ?class2)
-}''' ;
-    rdfs:comment "No object should be instance of several classes -> ok if query retuns nothing; otherwise check redundant ?class1 and ?class2" .
-:check_predicate_declared a sp:Select ;
+    sh:select """
+        PREFIX : <http://h-da.de/ml-ontology/>
+        SELECT DISTINCT ?subject ?class1 ?class2
+        WHERE {
+            ?subject a ?class1 .
+            ?subject a ?class2 .
+            FILTER(?class1 != ?class2)
+        }
+    """ ;
+    rdfs:comment "No object should be instance of several classes -> ok if query returns nothing; otherwise check redundant ?class1 and ?class2" .
+
+:check_predicate_declared a sh:SPARQLConstraint ;
     skos:prefLabel "Check predicate declared" ;
-    sp:text '''PREFIX : <http://h-da.de/ml-ontology/> 
-PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
-SELECT DISTINCT ?predicate
-WHERE {
-        ?s ?predicate ?o .
-        FILTER(STRSTARTS(str(?predicate), str(:)))
-        FILTER NOT EXISTS {?predicate a rdf:Property}
-}''' ;
+    sh:select """
+        PREFIX : <http://h-da.de/ml-ontology/>
+        PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+        SELECT DISTINCT ?predicate
+        WHERE {
+            ?s ?predicate ?o .
+            FILTER(STRSTARTS(str(?predicate), str(:)))
+            FILTER NOT EXISTS { ?predicate a rdf:Property }
+        }
+    """ ;
     rdfs:comment "Predicates should be declared -> ok if query returns nothing; otherwise check ?predicate" .
-:check_predicates_with_domain_and_range_datatypes a sp:Select ;
+
+:check_predicates_with_domain_and_range_datatypes a sh:SPARQLConstraint ;
     skos:prefLabel "Check predicates with domain and range datatypes" ;
-    sp:text '''PREFIX : <http://h-da.de/ml-ontology/> 
-PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
-SELECT DISTINCT ?predicate ?domain ?range
-WHERE {
-        ?s ?predicate ?o .
-        ?s a ?domain .
-        ?o a ?range .
-}
-ORDER BY ?predicate''' ;
+    sh:select """
+        PREFIX : <http://h-da.de/ml-ontology/>
+        PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+        PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+        PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+        SELECT DISTINCT ?predicate ?domain ?range
+        WHERE {
+            ?s ?predicate ?o .
+            ?s a ?domain .
+            ?o a ?range .
+        }
+        ORDER BY ?predicate
+    """ ;
     rdfs:comment "Lists all used predicates and their subject / object datatypes -> check whether subject datatypes (?domain) and object datatypes (?range) make sense" .
